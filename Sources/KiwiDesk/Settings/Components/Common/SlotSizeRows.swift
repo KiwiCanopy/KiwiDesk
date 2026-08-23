@@ -193,7 +193,11 @@ struct SlotSizeRows: View {
                 options: unitOptions
             )
         case .menu:
-            DropdownRow(label: L("slot_size.unit", "Size unit")) {
+            DropdownRow(
+                label: L("slot_size.unit", "Size unit"),
+                spokenValue: unitOptions.first { $0.1 == sizeUnit }?.0
+                    ?? ""
+            ) {
                 Picker(
                     L("slot_size.unit", "Size unit"),
                     selection: sizeUnitBinding

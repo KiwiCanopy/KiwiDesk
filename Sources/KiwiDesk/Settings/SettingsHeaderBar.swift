@@ -158,6 +158,7 @@ struct SettingsHeaderBar: View {
                         .font(.title2.weight(.bold))
                         .foregroundStyle(SettingsTheme.ink)
                         .lineLimit(1)
+                        .accessibilityAddTraits(.isHeader)
                 }
             } else if !titleYields {
                 identity

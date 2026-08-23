@@ -67,7 +67,15 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// picker tabs) would override the group's inferred name.
     @ViewBuilder private var labeledTrack: some View {
         if let label {
-            track.accessibilityLabel(label)
+            track
+                .accessibilityLabel(label)
+                // The group's choice as its value, so arriving
+                // on the track hears "Position, Top" the way a
+                // native segmented control says it, before the
+                // segments are walked (#812).
+                .accessibilityValue(
+                    selectedIndex.map { options[$0].title } ?? ""
+                )
         } else {
             track
         }

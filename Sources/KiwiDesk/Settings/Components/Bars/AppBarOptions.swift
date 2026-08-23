@@ -101,6 +101,13 @@ enum AppBarOptions {
             L("app_bar.icon_source.app_font", "Glyphs")
         ),
     ]
+    /// The icon-source entry's title, for a row to speak as its
+    /// value — the same strings the picker draws.
+    @MainActor
+    static func iconSourceTitle(_ source: BarAppIconSource) -> String {
+        iconSource.first { $0.0 == source }?.1 ?? ""
+    }
+
     @MainActor
     static let content: [(AppBarStyle.Content, String)] = [
         (.icon, L("app_bar.content.icon", "Icon")),

@@ -46,6 +46,9 @@ struct LoginItemCard: View {
                 // Card heading is the noun "Login"; the row
                 // carries the verb.
                 label: startLabel,
+                // A toggle's on/off is its value and survives
+                // the row's label; nothing to give back.
+                spokenValue: nil,
                 help: startHelp
             ) {
                 // A Toggle, not the #576 Picker: this row now
@@ -55,11 +58,6 @@ struct LoginItemCard: View {
                 // toggle the binary case.
                 Toggle("", isOn: loginBinding)
                     .labelsHidden()
-                    // The row's label is `DropdownRow`'s sibling
-                    // text, which names nothing; a toggle's
-                    // state is its VALUE, so naming it here
-                    // displaces nothing (#812).
-                    .accessibilityLabel(startLabel)
                     // Grey the control only, never the row —
                     // the label's `?` stays live because that
                     // help is useful whether or not the

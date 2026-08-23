@@ -62,6 +62,14 @@ struct SettingsFooter: View {
             || model.hasLayoutDrift
     }
 
+    /// What the pill would say right now, or nil while there is
+    /// no pill: the draft's row count under `hasWork`. One key
+    /// so that the pill appearing and the count moving are the
+    /// same change and announce ONCE, never a pair.
+    private var announcementKey: Int? {
+        hasWork ? SettingsDiffRowSource.rows(for: model).count : nil
+    }
+
     var body: some View {
         Group {
             if hasWork {
@@ -72,6 +80,20 @@ struct SettingsFooter: View {
                         )
                     )
             }
+        }
+        // The pill is last in reading order on both mounts — an
+        // overlay after the content, or the sibling below it —
+        // so a VoiceOver user editing a row never reaches it and
+        // hears nothing when the draft gains a change. Announce
+        // the pill's own sentence when a change joins the draft
+        // or the count moves (#812). Silent on the way to nil:
+        // Save and Discard say their own outcome.
+        .onChange(of: announcementKey) { _, now in
+            guard let now else { return }
+            AccessibilityNotification.Announcement(
+                countLine(count: now)
+            )
+            .post()
         }
         .alert(
             L(

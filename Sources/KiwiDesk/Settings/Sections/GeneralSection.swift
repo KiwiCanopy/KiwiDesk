@@ -71,7 +71,8 @@ struct GeneralSection: View {
                 label: L(
                     "general.language.display",
                     "Display language"
-                )
+                ),
+                spokenValue: selectedLanguageName
             ) {
                 Picker(
                     L(
@@ -146,6 +147,19 @@ struct GeneralSection: View {
             get: { localization.selection },
             set: { model.setLanguage($0) }
         )
+    }
+
+    /// The picker's choice as VoiceOver hears it — the native
+    /// name, or the "System default" entry when nothing is set.
+    private var selectedLanguageName: String {
+        guard let code = localization.selection else {
+            return L(
+                "general.language.system_default",
+                "System default"
+            )
+        }
+        return sortedLocales.first { $0.code == code }?.nativeName
+            ?? code
     }
 
     /// The picker's concrete languages: every shipped locale file

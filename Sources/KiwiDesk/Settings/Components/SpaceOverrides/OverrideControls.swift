@@ -320,7 +320,11 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
             help: help,
             subject: label
         ) {
-            DropdownRow(label: label) {
+            DropdownRow(
+                label: label,
+                spokenValue: options.first { $0.0 == value ?? global }?
+                    .1 ?? ""
+            ) {
                 Picker(
                     label,
                     selection: overrideValue($value, global: global)

@@ -88,6 +88,7 @@ struct SettingsDetailPanel: View {
             .kerning(1.4)
             .textCase(.uppercase)
             .foregroundStyle(SettingsTheme.ink3)
+            .accessibilityAddTraits(.isHeader)
             Spacer()
         }
     }
@@ -153,6 +154,7 @@ struct SettingsDetailPanel: View {
             .kerning(1.4)
             .textCase(.uppercase)
             .foregroundStyle(SettingsTheme.ink3)
+            .accessibilityAddTraits(.isHeader)
             if !rows.isEmpty {
                 SettingsDiffRowsView(rows: rows) { row in
                     jump(to: row)

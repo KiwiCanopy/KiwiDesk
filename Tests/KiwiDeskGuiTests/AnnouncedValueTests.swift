@@ -110,6 +110,25 @@ struct AnnouncedValueTests {
         )
     }
 
+    /// `DropdownRow` names its picker and gives the choice back:
+    /// `labelsHidden` drops the pop-up's AX title on device
+    /// (General ▸ Language said "menu, 12 items, Deutsch" and
+    /// never "Display language" — owner, #812), and a label alone
+    /// would take the choice away. The walker above cannot see
+    /// this one — the label lands on the `picker` parameter, not
+    /// on a `Picker(` spelling — so it is pinned by needle.
+    @Test("the dropdown row names its picker and states the choice")
+    func dropdownRowAnnouncesBoth() throws {
+        let source = try Self.source(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "DropdownRow.swift"
+        )
+        let row = try #require(source.range(of: "struct DropdownRow"))
+        let body = source[row.lowerBound...]
+        #expect(body.contains(".accessibilityLabel(label)"))
+        #expect(body.contains(".accessibilityValue(spokenValue)"))
+    }
+
     /// A custom-drawn slider holds no keyboard focus of its own;
     /// Tab skipped every one in the tree (owner, #812). The seam
     /// re-earns the Tab stop and the arrow keys — pinned here

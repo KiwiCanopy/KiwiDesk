@@ -82,6 +82,9 @@ extension SpaceBarCard {
                 "space_bar.icon_source.label",
                 "App symbol style"
             ),
+            spokenValue: AppBarOptions.iconSourceTitle(
+                style.iconSource.wrappedValue
+            ),
             // Two labels INTERPOLATED from their own keys, not
             // re-typed (#818): the picker entry, and the page
             // the item colours this sentence names are edited

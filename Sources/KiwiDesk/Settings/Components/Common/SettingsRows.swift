@@ -184,38 +184,6 @@ extension View {
     }
 }
 
-/// A dropdown row on the shared label axis: the visible label
-/// sits in the label column and the menu button starts on the
-/// control line, like every slider and segmented picker. The
-/// picker keeps its own title for accessibility —
-/// `labelsHidden` hides it visually only, which is the
-/// documented contract of the modifier. Nothing headless can
-/// hear whether it holds; the #812 device session listens for
-/// it, and should a macOS release break it the fix is an
-/// `.accessibilityLabel` AND an `.accessibilityValue` here,
-/// never the label alone (a label REPLACES the announcement,
-/// selection included — gui.md ▸ the keyboard path).
-struct DropdownRow<P: View>: View {
-    let label: String
-    /// Optional `?` popover (#94), label-adjacent.
-    var help: String? = nil
-    @ViewBuilder let picker: P
-
-    var body: some View {
-        SettingsRowShape {
-            SettingsRowLabel(label: label, help: help)
-        } control: {
-            HStack {
-                picker
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .controlSize(.large)
-                Spacer()
-            }
-        }
-    }
-}
-
 /// A labeled toggle carrying an optional #94 `?`. A plain
 /// `Toggle` has no help slot, so the switches that want one (wrap
 /// focus, the App Bar group-adjacent toggle) route through this.
