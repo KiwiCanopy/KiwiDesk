@@ -8,12 +8,15 @@ import Testing
 /// itself rather than about the seams, and the combined file was
 /// closing on the 350-line ceiling.
 ///
-/// 1. **Its body still writes.** Nothing else in the tree looks
-///    at what `CoreLog.write` *does*: every other seam guard
-///    assigns `core.onLog` itself, so none of them ever runs the
-///    default. Gut the `NSLog` and the tree returns to its
-///    pre-#624 behaviour with every seam still naming
-///    `CoreLog.write` and every other guard green.
+/// 1. **Its body still writes, publicly.** Nothing else in the
+///    tree looks at what `CoreLog.write` *does*: every other
+///    seam guard assigns `core.onLog` itself, so none of them
+///    ever runs the default. Gut the `logger.log` and the tree
+///    returns to its pre-#624 behaviour with every seam still
+///    naming `CoreLog.write` and every other guard green — and
+///    an interpolation that loses `privacy: .public` redacts
+///    every line to `<private>`, which blinds the capture
+///    procedure just as completely (2026-08-23).
 /// 2. **Core reaches it only through a seam declaration.** It is
 ///    `internal`, but internal is the whole of `KiwiDeskCore`. A
 ///    direct `CoreLog.write("…")` call site would put a
@@ -75,16 +78,28 @@ struct LogSeamSinkTests {
             in: stripped
         )
         #expect(
-            body?.contains("NSLog(") == true,
+            body?.contains("logger.log(") == true,
             Comment(
                 rawValue: "`CoreLog.write` no longer calls "
-                    + "`NSLog`. Nothing else in the tree asserts "
-                    + "what this body does, so gutting it "
-                    + "restores the pre-#624 silence with every "
-                    + "seam still naming `CoreLog.write`. If the "
-                    + "write is deliberately moving to `os_log` "
-                    + "or similar, change this guard in the same "
-                    + "commit rather than around it."
+                    + "`logger.log`. Nothing else in the tree "
+                    + "asserts what this body does, so gutting "
+                    + "it restores the pre-#624 silence with "
+                    + "every seam still naming `CoreLog.write`. "
+                    + "If the write is deliberately moving to "
+                    + "another sink, change this guard in the "
+                    + "same commit rather than around it."
+            )
+        )
+        #expect(
+            body?.contains("privacy: .public") == true,
+            Comment(
+                rawValue: "`CoreLog.write` interpolates without "
+                    + "`privacy: .public` — macOS then redacts "
+                    + "every line to `<private>` in `log show`, "
+                    + "which blinds the documented device-QA "
+                    + "capture while the diagnostics keep "
+                    + "firing (the failure that moved this off "
+                    + "`NSLog`, 2026-08-23)."
             )
         )
         #expect(

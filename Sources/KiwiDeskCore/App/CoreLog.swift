@@ -1,6 +1,18 @@
 import Foundation
+import os
 
-/// The syslog write under every `var onLog` seam in Core, and
+/// The unified-log subsystem every KiwiDesk `Logger` uses — one
+/// public constant so Core's loggers and the GUI's cannot drift
+/// from the documented capture predicate
+/// (`subsystem == "com.kiwicanopy.kiwidesk"`). Public because
+/// the GUI target's loggers read it. `scripts/build-app.sh`
+/// bakes the same string as the bundle id and cannot read
+/// Swift — that copy carries its own change-both burden.
+public enum KiwiLog {
+    public static let subsystem = "com.kiwicanopy.kiwidesk"
+}
+
+/// The unified-log write under every `var onLog` seam in Core, and
 /// under `KiwiCore.onLog` itself.
 ///
 /// **Where the default is actually operative.** Not, as it is
@@ -30,8 +42,23 @@ import Foundation
 /// does freely (`BorderManager.readWindowBounds` defaults to
 /// `SkyLight.windowBounds`).
 enum CoreLog {
-    /// Writes one diagnostic line to syslog, under the same
-    /// `KiwiDesk:` prefix the seams' lines already carried.
+    /// The unified-log destination. `Logger` with an explicitly
+    /// PUBLIC interpolation, not `NSLog`: macOS redacts every
+    /// `NSLog` line's content to `(Foundation) <private>` in
+    /// `log show` / `log stream` (observed 2026-08-23, macOS
+    /// 26.6.2), which silently blinded the whole device-QA
+    /// capture procedure — the diagnostics fired and read as
+    /// nothing. The messages carry window ids and app names,
+    /// never user content, so public is the correct privacy.
+    private static let logger = Logger(
+        subsystem: KiwiLog.subsystem,
+        category: "core"
+    )
+
+    /// Writes one diagnostic line to the unified log, under the
+    /// same `KiwiDesk:` prefix the seams' lines already carried
+    /// — the documented capture predicate
+    /// (`eventMessage CONTAINS[c] "KiwiDesk"`) matches on it.
     ///
     /// `write`, not `emit`: this codebase spends `emit` on
     /// publishing to the `EventBus` (`EventBus.emit`, and the
@@ -44,15 +71,17 @@ enum CoreLog {
     /// without pinning the write itself to the main actor.
     ///
     /// Not `public`, and `LogSeamSinkTests` keeps it a default
-    /// rather than a bypass — it asserts this body still writes,
-    /// and that Core reaches this symbol only through a seam
-    /// declaration. Both matter: gutting the body would restore
-    /// the pre-#624 behaviour with every seam still naming it,
-    /// and a direct call would put a diagnostic in syslog that
-    /// `KiwiCore.onLog` never sees. `LogSeamDefaultTests` is the
-    /// other half — that every seam names this in the first
-    /// place.
+    /// rather than a bypass — it asserts this body still writes
+    /// (publicly), and that Core reaches this symbol only
+    /// through a seam declaration. Both matter: gutting the
+    /// body would restore the pre-#624 behaviour with every
+    /// seam still naming it, and a direct call would put a
+    /// diagnostic in the log that `KiwiCore.onLog` never sees.
+    /// `LogSeamDefaultTests` is the other half — that every
+    /// seam names this in the first place.
     static func write(_ message: String) {
-        NSLog("KiwiDesk: %@", message)
+        logger.log(
+            "KiwiDesk: \(message, privacy: .public)"
+        )
     }
 }

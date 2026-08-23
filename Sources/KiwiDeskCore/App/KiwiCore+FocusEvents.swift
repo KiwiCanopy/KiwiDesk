@@ -11,6 +11,7 @@ extension KiwiCore {
         _ id: WindowID,
         effects: AppliedEffects
     ) {
+        let now = Date()
         // Dismissing an ignored panel (Ghostty's quick
         // terminal) leaves the app frontmost and makes AX
         // re-report its managed main window — which may live
@@ -20,32 +21,44 @@ extension KiwiCore {
         // active space. The panel was flagged active while
         // it held focus (#21); consume the flag here and
         // restore the pre-panel focus instead of acting on
-        // the report (#244). A focus landing on any other
-        // app means the panel's app resigned frontmost, so
-        // drop stale flags to keep a later genuine focus of
-        // that app from being suppressed.
-        if let pid = state.windows[id]?.pid {
-            if ignoredPanelActive.remove(pid) != nil {
-                // The report is spurious, but the id could
-                // still be an outstanding self-raise; drop
-                // it so a later genuine focus of this window
-                // is not misread as our own echo (cf. the
-                // .windowDestroyed cleanup in
-                // KiwiCore+Events.swift).
-                outstandingSelfRaises.remove(id)
-                if let before = effects.focusBefore,
-                    let space = state.workspaces.space(
-                        of: before
-                    )
-                {
-                    state.workspaces.focus(
-                        before,
-                        in: space
-                    )
-                }
-                return
+        // the report (#244). The flag survives a short
+        // dismissal GRACE against a same-app-resigned focus
+        // report, rather than clearing synchronously, because
+        // live capture showed the panel app's stale re-report
+        // winning that race by 125-200 ms (#951) —
+        // `shouldConsumeIgnoredPanelReport` owns the state
+        // machine and the click-provenance escape.
+        if let pid = state.windows[id]?.pid,
+            shouldConsumeIgnoredPanelReport(
+                pid: pid,
+                id: id,
+                now: now
+            )
+        {
+            onLog(
+                "focus: w\(id.raw) re-report consumed "
+                    + "(ignored-panel dismiss, pid "
+                    + "\(pid)); restoring "
+                    + describe(effects.focusBefore)
+            )
+            // The report is spurious, but the id could
+            // still be an outstanding self-raise; drop
+            // it so a later genuine focus of this window
+            // is not misread as our own echo (cf. the
+            // .windowDestroyed cleanup in
+            // KiwiCore+Events.swift).
+            outstandingSelfRaises.remove(id)
+            if let before = effects.focusBefore,
+                let space = state.workspaces.space(
+                    of: before
+                )
+            {
+                state.workspaces.focus(
+                    before,
+                    in: space
+                )
             }
-            ignoredPanelActive.removeAll()
+            return
         }
         // A focus echo from our own z-order raise (#418/#425):
         // AX couples the raise with app activation, so raising a
@@ -103,7 +116,6 @@ extension KiwiCore {
         // the ledger here, and the age bound below rightly says
         // it is no self-echo — honored, and the ring, pan and
         // pointer snap back (#689 device trace, 2026-08-03).
-        let now = Date()
         if let stamp = zOrderRaiseEchoes[id],
             now.timeIntervalSince(stamp)
                 < Self.zOrderRaiseEchoWindow,
@@ -111,6 +123,10 @@ extension KiwiCore {
             !freshSelfRaise(id, now: now),
             !recentClickReached(id, now: now)
         {
+            onLog(
+                "focus: w\(id.raw) z-order echo reverted "
+                    + "to w\(intended.raw)"
+            )
             if let space = state.workspaces.space(of: intended) {
                 state.workspaces.focus(intended, in: space)
             }
@@ -158,6 +174,11 @@ extension KiwiCore {
             distrustsSiblingSpace(of: id),
             !recentClickInside(id, now: now)
         {
+            onLog(
+                "focus: w\(id.raw) sibling re-report "
+                    + "distrusted; re-asserting "
+                    + describe(effects.focusBefore)
+            )
             if let intended = effects.focusBefore,
                 intended != id,
                 let space = state.workspaces.space(
@@ -220,6 +241,10 @@ extension KiwiCore {
                 == state.workspaces.activeSpace,
             !recentClickReached(id, now: now)
         {
+            onLog(
+                "focus: w\(id.raw) self-echo dropped; "
+                    + "keeping w\(intended.raw)"
+            )
             if let space = state.workspaces.space(
                 of: intended
             ) {
@@ -233,6 +258,16 @@ extension KiwiCore {
         // the user reached, and a stale raise firing after the
         // pan would steal focus back.
         pendingFocusRaise = nil
+        let honoredApp: String =
+            state.windows[id]?.appName ?? "?"
+        let honoredBefore: String = describe(
+            effects.focusBefore
+        )
+        onLog(
+            "focus: w\(id.raw) (\(honoredApp)) honored; "
+                + "before \(honoredBefore), "
+                + "selfEcho=\(selfEcho)"
+        )
         emitFocusChange(id)
         // Move the focus ring to the newly focused window.
         // Static layouts don't retile on focus (below), so
@@ -297,47 +332,5 @@ extension KiwiCore {
         if !selfEcho {
             raiseFloatsAbove(afterFocusing: id)
         }
-    }
-
-    /// Whether a same-app sibling report for `id` is inherently
-    /// suspect by WHERE the window lives (#465/#496): a hidden
-    /// space always is; a space shown on a display OTHER than
-    /// the active space's is too (the cross-display steal — a
-    /// forced activation keys the app's MRU window over there).
-    /// The active space's own display stays trusted so in-app
-    /// window cycling is never fought.
-    private func distrustsSiblingSpace(
-        of id: WindowID
-    ) -> Bool {
-        guard
-            let echoSpace = state.workspaces.space(of: id)
-        else { return false }
-        guard
-            state.workspaces.visibleSpaces.contains(echoSpace)
-        else { return true }
-        guard
-            let active = state.workspaces.activeSpace,
-            echoSpace != active
-        else { return false }
-        let activeDisplay = state.workspaces.display(of: active)
-        let echoDisplay = state.workspaces.display(of: echoSpace)
-        return echoDisplay != activeDisplay
-    }
-
-    /// Whether a left click landed inside `id`'s frame within
-    /// the sibling-distrust window — the discriminator that
-    /// tells a genuine cross-display click from an activation
-    /// re-report (#496). Frames and the stamp are both AX
-    /// coordinates.
-    private func recentClickInside(
-        _ id: WindowID,
-        now: Date
-    ) -> Bool {
-        guard let click = lastLeftClick,
-            now.timeIntervalSince(click.at)
-                < Self.selfRaiseSiblingWindow,
-            let frame = state.windows[id]?.frame
-        else { return false }
-        return frame.contains(click.point)
     }
 }

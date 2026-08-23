@@ -1263,6 +1263,49 @@ let a bar click forge the escape for a stamped window under the
 strip. The painted strips (`shownStrips`, the #242 authority)
 are the mask.
 
+### An ignored panel's dismissal is a race; provenance ends it
+
+**[Rationale]**
+
+An auto-ignored panel — Ghostty's quick terminal, the #448
+launcher class — dismisses itself on focus-out, and its app
+then re-reports its main window as focused. That report is a
+visibility artifact, not a user intention, and the dismiss
+distrust (#21/#244) exists to consume it: honoring it moves
+focus, ring, warp and the scrolling pan onto a window nobody
+chose, possibly on another space.
+
+The distrust originally disarmed on the first focus report for
+any OTHER app, reading it as "the panel's app resigned
+frontmost". That treats arrival ORDER as ground truth, and the
+order is a race KiwiDesk does not control: the user's click on
+window B and the panel app's stale re-report come from two
+apps' AX streams, and live capture (#951) measured the stale
+re-report landing 125–200 ms AFTER the click that should have
+settled the question — so disarm-then-honor handed focus back
+to the panel's app at the exact moment the user clicked away
+from it.
+
+So the flags survive a short dismissal grace instead, and what
+ends the distrust early is provenance, never order: a report
+carrying click provenance (#687's press-time resolution) is
+the user's own choice — it escapes and clears every flag —
+while a clickless same-app re-report inside the grace is
+consumed exactly as before. The accepted trade has its
+[accepted-limitations](accepted-limitations.md) row: a genuine
+clickless focus of the panel app's main window (cmd-tab)
+inside the grace, right after focusing elsewhere, is eaten
+once — the same single-shot, recoverable class as the
+echo-window trades above, and strictly narrower than the race
+it closes. The grace length is derived from the measured race
+margin and argued at its constant
+(`KiwiCore+IgnoredPanel.swift`); `IgnoredPanelGraceTests` pins
+the state machine, the escape and the expiry. The same grace
+also covers KiwiDesk's own summon chrome: closing the ⌃⌥K
+panel blip-keys another own window, whose clickless AX
+re-report trails the close's activation yield (#952 — the
+yield itself is a Shortcuts-section ruling). (#951)
+
 ### Layout and resize behavior
 
 **[Rationale]**
@@ -4014,6 +4057,31 @@ already carry discovery. Consequence to keep: a fresh layer
 bound" placeholder while the footer teaches ⌃⌥K.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing
 it re-leaks the seed into Custom. (#602, PR #638)
+
+**The summoned reference yields the activation it stole — and
+only where the user chose nothing else.** The ⌃⌥K panel is
+borderless chrome, so `show()` must activate KiwiDesk for the
+panel to receive Escape at all: an activation the user asked
+to *borrow*, not to keep. On a keyboard-commanded close
+(Escape, the ⌃⌥K toggle, the layer-switch auto-close) the
+summon re-activates the app that was frontmost when it opened
+— left to macOS, the still-active app's next window takes key,
+which is the Settings window whenever it happens to be open,
+landing the user in a window they were not using (#952). Three
+deliberate boundaries. The yield lives in the GUI summon that
+stole the activation, never in a Core focus stand-down: at OS
+level the post-close handoff is a genuine focus event, and
+Core refusing to follow one would split state focus from real
+key focus. A click-away dismissal never yields: the click
+already activated the app the user chose, and re-activating
+the remembered one would fight the click. And a summon from
+KiwiDesk's own Settings window remembers nothing — closing
+back to Settings there IS the user's previous context. The
+residue — the clickless AX re-report of Settings trailing the
+yield — is consumed by the same dismissal grace the
+ignored-panel family uses, armed at close for KiwiDesk's own
+pid. `ShortcutsPanelReturnTests` pins the yield gate's arms
+and the double-close consume. (#952)
 
 **Open-or-Focus cycles in canonical order, never
 most-recently-used.** A repeat press of the shortcut walks the

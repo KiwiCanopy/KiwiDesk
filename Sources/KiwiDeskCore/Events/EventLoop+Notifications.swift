@@ -115,13 +115,13 @@ extension EventLoop {
             // the panel gaining focus so KiwiCore can distrust
             // the app's stale focus report on dismiss (#244).
             guard elements[pid]?[id] != nil else {
-                if FloatDetection.isBuiltInIgnoredPanel(
-                    bundleID: app.bundleID,
+                classifyUntrackedFocus(
                     id: id,
-                    isAccessory: classifiesAsOverlay(pid: pid)
-                ) {
-                    onIgnoredPanelFocus(pid)
-                }
+                    pid: pid,
+                    bundleID: app.bundleID,
+                    isAccessory: classifiesAsOverlay(pid: pid),
+                    channel: "focus"
+                )
                 return
             }
             onEvent(.windowFocused(id))

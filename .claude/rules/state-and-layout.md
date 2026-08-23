@@ -68,6 +68,20 @@ editing here:
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
   argument lives in `docs/design-decisions.md`.
+- **The ignored-panel distrust mutates through its ONE state
+  machine** (#21/#244/#951): `armIgnoredPanel` and
+  `shouldConsumeIgnoredPanelReport` in
+  `KiwiCore+IgnoredPanel.swift` are the only writers of
+  `KiwiCore.ignoredPanel`, and `handleWindowFocused` the one
+  consulting site — the #292 command guard is a read-only
+  consumer. An inline `.insert` / `.removeAll` beside a focus
+  call site is exactly the shape #951's disarm race grew from,
+  and nothing scans for a new one, so each new focus-path
+  author owes the routing deliberately.
+  `IgnoredPanelGraceTests` pins the machine's transitions (the
+  dismissal grace, the click-provenance escape, expiry, the
+  re-arm reset); the trade the grace accepts is argued in
+  `docs/design-decisions.md`.
 - A **native-fullscreen window keeps its `space.windows` slot
   but leaves both tiled-member derivations** (#670) — a layout,
   navigation or z-order consumer of the tiled members routes

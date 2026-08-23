@@ -393,7 +393,10 @@ never remembers a position. Your shortcuts keep working while it is
 open — it is a live cheat sheet, so closing a window, switching focus
 or moving one behaves exactly as it does without the panel. Press
 **Esc**, click anywhere outside it, or
-choose **View Shortcuts…** again to close it. Empty sections are hidden;
+choose **View Shortcuts…** again to close it — closing lands you
+back in the window you were using before you opened it, and a
+click outside leaves you in whatever you clicked.
+Empty sections are hidden;
 a layer with nothing bound shows a short placeholder. The panel never
 lists its own ⌃⌥K shortcut as a row — the close hint in the footer
 already shows it — so a fresh layer, which starts with only that
