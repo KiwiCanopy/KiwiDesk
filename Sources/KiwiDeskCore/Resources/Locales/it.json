@@ -514,7 +514,7 @@
   "keyboard.ax.bound": "Assegnati: %1$@.",
   "keyboard.ax.bound_none": "Nessun tasto assegnato.",
   "keyboard.ax.conflict": "Conflitto: %1$@.",
-  "keyboard.ax.reserved": "Riservati da macOS: %1$@.",
+  "keyboard.ax.reserved": "Riservati a macOS: %1$@.",
   "keyboard.key.delete": "Cancella",
   "keyboard.key.down": "Giù",
   "keyboard.key.escape": "Esc",

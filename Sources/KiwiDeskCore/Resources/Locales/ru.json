@@ -514,7 +514,7 @@
   "keyboard.ax.bound": "Назначено: %1$@.",
   "keyboard.ax.bound_none": "Нет назначенных клавиш.",
   "keyboard.ax.conflict": "Конфликт: %1$@.",
-  "keyboard.ax.reserved": "Зарезервировано macOS: %1$@.",
+  "keyboard.ax.reserved": "Занято macOS: %1$@.",
   "keyboard.key.delete": "Delete",
   "keyboard.key.down": "Вниз",
   "keyboard.key.escape": "Escape",

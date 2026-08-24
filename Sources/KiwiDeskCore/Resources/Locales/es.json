@@ -515,7 +515,7 @@
   "keyboard.ax.bound_none": "Ninguna tecla asignada.",
   "keyboard.ax.conflict": "Conflicto: %1$@.",
   "keyboard.ax.reserved": "macOS reserva: %1$@.",
-  "keyboard.key.delete": "Eliminar",
+  "keyboard.key.delete": "Suprimir",
   "keyboard.key.down": "Abajo",
   "keyboard.key.escape": "Escape",
   "keyboard.key.left": "Izquierda",

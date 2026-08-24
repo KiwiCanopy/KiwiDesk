@@ -514,7 +514,7 @@
   "keyboard.ax.bound": "할당됨: %1$@.",
   "keyboard.ax.bound_none": "할당된 키가 없습니다.",
   "keyboard.ax.conflict": "충돌: %1$@.",
-  "keyboard.ax.reserved": "macOS 예약: %1$@.",
+  "keyboard.ax.reserved": "macOS 사용 중: %1$@.",
   "keyboard.key.delete": "Delete",
   "keyboard.key.down": "아래쪽",
   "keyboard.key.escape": "Escape",
