@@ -7,6 +7,7 @@
       "date": "2026-08-24",
       "prerelease": true,
       "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v0.9.10",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v0.9.10/KiwiDesk-0.9.10.dmg",
       "summary": "A large accessibility release: Settings is now fully usable with VoiceOver and the keyboard. Plus steadier window resizing and several focus fixes.",
       "sections": [
         {
@@ -86,12 +87,6 @@
             "**New versions arrive on their own.** KiwiDesk checks quietly in the background and tells you when there is something newer, so you no longer have to go looking for it. Nothing installs without you saying yes.",
             "**Ask whenever you like.** There is a **Check for Updates…** item in the menu for when you would rather not wait to be told.",
             "**See what changed before you take it.** The update window shows you the notes for the new version, and the same notes now live on the KiwiDesk site."
-          ]
-        },
-        {
-          "title": "If you installed with Homebrew, do this once",
-          "items": [
-            "**Run `brew upgrade --cask kiwidesk` to move onto this version.** After that KiwiDesk keeps itself current and Homebrew steps aside for it — which also means a plain `brew upgrade` will pass KiwiDesk by from now on. Naming the cask still works whenever you want Homebrew to do it instead."
           ]
         }
       ]

@@ -216,6 +216,26 @@ SHAPE and never a vocabulary. What the entries must SAY is
 person installing*, which is a review-time rule by its own ruling
 and has no guard.
 
+**A promoted download link is read off the release's own asset
+list, never composed from a version (#904).** `changelog-sync`
+records a `download` field only where a published release
+actually carries a notarized `.dmg`, and every download
+affordance renders only where that field is present. The reason
+is not tidiness: the site deploys independently of any tag, so a
+composed `…/download/<tag>/KiwiDesk-<version>.dmg` is correct
+only while the release workflow keeps passing `--dmg` — one edit
+away from a first-class button that 404s, on a page nothing
+re-publishes. This is also the one place *grey, don't hide* does
+not apply. A dimmed button still makes a download's promise, and
+the fallback here is Homebrew alone, which is a complete install
+path rather than a degraded one — so the affordance is omitted
+outright. `ChangelogDownloadTests` holds all of it, including
+that an `-unnotarized.dmg` is REFUSED rather than ranked below
+the plain name: `release.yml` renames the good image onto that
+plain name, so the sibling exists only when something went
+wrong, and ranking would publish it the first time it stood
+alone.
+
 **A path joins `sitemap.xml.ts`'s `paths` only once its `/de/` and
 `/ja/` routes exist.** Every entry there is emitted for all three
 locales with `hreflang` alternates, so a single-locale route

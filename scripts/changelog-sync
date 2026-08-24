@@ -150,14 +150,24 @@ def _gh_json(args: list[str]) -> object:
         sys.exit(1)
 
 
-def fetch_releases() -> list[dict]:
+def fetch_releases(fixture: str | None = None) -> list[dict]:
     """Every PUBLISHED release. Drafts are excluded on purpose:
     `release.yml` creates a draft and the curation happens on it,
     so a draft is by definition not yet the thing this page
-    describes."""
-    data = _gh_json(
-        ["api", "repos/{owner}/{repo}/releases", "--paginate"]
-    )
+    describes.
+
+    `fixture` reads the releases from a JSON file instead of
+    `gh` — the seam the guard suite needs, mirroring
+    `appcast-sync --releases`. The two generators sit on one
+    shelf and are exercised the same way; a source that only one
+    of them offers is a suite that can only be written for
+    one."""
+    if fixture is not None:
+        data = _read_fixture(fixture)
+    else:
+        data = _gh_json(
+            ["api", "repos/{owner}/{repo}/releases", "--paginate"]
+        )
     if not isinstance(data, list):
         print(
             "changelog-sync: the releases endpoint did not "
@@ -166,6 +176,20 @@ def fetch_releases() -> list[dict]:
         )
         sys.exit(1)
     return [r for r in data if not r.get("draft")]
+
+
+def _read_fixture(path: str) -> object:
+    try:
+        return json.loads(
+            Path(path).read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as error:
+        print(
+            f"changelog-sync: could not read the releases "
+            f"fixture {path} ({error}).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 def fetch_release(tag: str) -> dict:
@@ -436,6 +460,44 @@ def parse_release_body(
 # Entries
 
 
+def download_url(release: dict) -> str | None:
+    """The release's OWN disk-image URL, read off the API's asset
+    list rather than composed from the version.
+
+    The site renders a download button only where this is
+    present, so a release published without a disk image
+    degrades to the Homebrew-only shape instead of offering a
+    first-class button that 404s. Composing
+    `…/download/<tag>/KiwiDesk-<version>.dmg` from the version
+    would be one release-workflow edit away from silently wrong,
+    and the site deploys independently of any tag — a stranded
+    downloader cannot be recovered
+    (`docs/design-decisions.md` ▸ *No distribution channel
+    without an update path*).
+
+    `-unnotarized.dmg` is REFUSED rather than ranked below the
+    plain name. `release.yml` renames the notarized image ONTO
+    the plain name, so that sibling exists only when something
+    went wrong; ranking would quietly publish an unnotarized
+    download the first time both are present, and Gatekeeper
+    tells the downloader the app is damaged."""
+    assets = release.get("assets")
+    if not isinstance(assets, list):
+        return None
+    for asset in assets:
+        if not isinstance(asset, dict):
+            continue
+        name = asset.get("name") or ""
+        url = asset.get("browser_download_url")
+        if not name.endswith(".dmg"):
+            continue
+        if name.endswith("-unnotarized.dmg"):
+            continue
+        if isinstance(url, str) and url:
+            return url
+    return None
+
+
 def build_entry(
     release: dict, strict: bool
 ) -> tuple[dict, str]:
@@ -461,6 +523,13 @@ def build_entry(
         "prerelease": bool(release.get("prerelease")),
         "url": url,
     }
+    # Absent, never empty: the site tests for the key, and a
+    # falsy value that still EXISTS is the shape a truthiness
+    # check reads correctly but a `"download" in entry` check
+    # does not. One shape, so both read alike.
+    download = download_url(release)
+    if download:
+        entry["download"] = download
     try:
         summary, sections = parse_release_body(
             tag, release.get("body") or ""
@@ -496,10 +565,14 @@ def _sort_key(entry: dict) -> tuple:
     return (entry.get("date", ""), version)
 
 
-def write(entries: list[dict]) -> None:
+def write(entries: list[dict], output: str | None = None) -> None:
+    """Writes the generated file. `output` redirects it — a path,
+    or `-` for stdout, in which case stdout carries the document
+    and NOTHING else so a caller can parse it (diagnostics keep
+    going to stderr). The guard suite's other half; see
+    `fetch_releases`."""
     entries = sorted(entries, key=_sort_key, reverse=True)
-    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-    DATA_FILE.write_text(
+    document = (
         json.dumps(
             {
                 "generated_by": "scripts/changelog-sync",
@@ -508,12 +581,26 @@ def write(entries: list[dict]) -> None:
             indent=2,
             ensure_ascii=False,
         )
-        + "\n",
-        encoding="utf-8",
+        + "\n"
     )
+    if output == "-":
+        sys.stdout.write(document)
+        print(
+            f"changelog-sync: wrote {len(entries)} release(s) to "
+            "stdout",
+            file=sys.stderr,
+        )
+        return
+    target = Path(output) if output else DATA_FILE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(document, encoding="utf-8")
+    try:
+        shown = target.relative_to(ROOT)
+    except ValueError:
+        shown = target
     print(
         f"changelog-sync: wrote {len(entries)} release(s) to "
-        f"{DATA_FILE.relative_to(ROOT)}"
+        f"{shown}"
     )
 
 
@@ -597,10 +684,14 @@ def run_body(path: str) -> int:
     return 0
 
 
-def run_all(check: bool) -> int:
+def run_all(
+    check: bool,
+    releases: str | None = None,
+    output: str | None = None,
+) -> int:
     entries: list[dict] = []
     warnings: list[str] = []
-    for release in fetch_releases():
+    for release in fetch_releases(releases):
         try:
             entry, warning = build_entry(release, strict=False)
         except NotesError as error:
@@ -625,7 +716,7 @@ def run_all(check: bool) -> int:
             "release(s) read."
         )
         return 0
-    write(entries)
+    write(entries, output)
     return 0
 
 
@@ -678,12 +769,29 @@ def main(argv: list[str]) -> int:
         action="store_true",
         help="parse and report, writing nothing",
     )
+    # Source and output seams — the guard suite drives `--all`
+    # through these so it needs neither a network nor the repo's
+    # own generated file. `appcast-sync` carries the same pair,
+    # deliberately: one shelf, one way to exercise it.
+    parser.add_argument(
+        "--releases",
+        metavar="FILE",
+        help="with --all: read the releases from a JSON fixture "
+        "instead of `gh`",
+    )
+    parser.add_argument(
+        "--output",
+        metavar="PATH",
+        help="with --all: write here instead of "
+        "site/src/data/changelog.json; `-` is stdout, and then "
+        "stdout carries the document and nothing else",
+    )
     args = parser.parse_args(argv[1:])
 
     if args.body:
         return run_body(args.body)
     if args.all:
-        return run_all(args.check)
+        return run_all(args.check, args.releases, args.output)
     return run_release(args.release, args.check)
 
 
