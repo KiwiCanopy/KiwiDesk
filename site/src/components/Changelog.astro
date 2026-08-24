@@ -34,6 +34,7 @@ import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 import changelog from "../data/changelog.json";
+import { downloadHref } from "../lib/download";
 import ogBannerEn from "../assets/brand/og-banner.jpg";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
@@ -159,13 +160,22 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
           <p class="rel__summary">{release.summary}</p>
         )}
 
-        {/* This page lists the releases and, until #904, was the
-             one surface that could name a version without
-             offering any way to get it. The link is per release
-             and comes from that release's own recorded asset, so
-             an older entry published without a disk image simply
-             has none — never a composed URL. */}
-        {release.download && (
+        {/* Only the CURRENT release is offered. This page lists
+             what changed and, until #904, was the one surface
+             that could name a version without offering any way
+             to get it — but that gap is closed by one link, not
+             by one per entry. An older build is not something to
+             hand a stranger: they would install a version behind
+             the one everything else on the site promotes, and a
+             list of identical download links reads as an archive
+             rather than as a changelog.
+
+             The test is identity with `downloadHref`, the same
+             selection the rest of the site uses, so this page can
+             never offer a different build from the landing page
+             — and an entry whose release shipped no disk image
+             simply has none. */}
+        {release.download && release.download === downloadHref && (
           <a class="rel__download" href={release.download}>
             <Icon name="lucide:download" width={15} height={15}
               aria-hidden="true" />
@@ -210,7 +220,17 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
 </PageShell>
 
 <style>
-  .clog {
+  /* `:global` is required, not stylistic. `<main class="clog">`
+     is rendered by PageShell, so it carries PageShell's scope id
+     and never this component's — a plain `.clog` rule here
+     compiles to `.clog.astro-<this component>` and matches
+     nothing. The page then had no max-width and no horizontal
+     padding at all, while every other rule in this block worked,
+     because their elements ARE in this template. That is what
+     made it read as "missing padding" rather than "missing
+     container". Any rule here targeting an element PageShell
+     owns needs the same treatment. */
+  :global(main.clog) {
     /* Above landing.css's fixed `body::before`
        wash, which `.rel` clears only by inheriting
        the global `section` rule. */
@@ -231,7 +251,7 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
   .back:hover {
     color: var(--text);
   }
-  .clog h1 {
+  :global(main.clog) h1 {
     margin: 0 0 0.4rem;
     font-size: clamp(1.9rem, 5vw, 2.6rem);
     line-height: 1.15;

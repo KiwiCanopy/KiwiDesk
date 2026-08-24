@@ -1428,7 +1428,12 @@ section {
 /* Footer Ko-fi link — deliberately quiet, matching the weight of
    the plain text links beside it (.footer__links) rather than
    standing out as a filled button. A soft tint only appears on
-   hover/focus, so support stays discoverable, not shouty. */
+   hover/focus, so support stays discoverable, not shouty.
+   Rendered by Guide.astro's footer, NOT the landing's: the
+   landing closes on a Ko-fi button in its CTA band, so a third
+   ask a screen later read as pestering. The guide's closing
+   container is a download, so its footer ask is the second and
+   only other one on that page. */
 .footer__kofi {
   display: inline-flex;
   align-items: center;

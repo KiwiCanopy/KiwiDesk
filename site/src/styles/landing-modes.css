@@ -490,11 +490,17 @@
   background: var(--tile-fill);
   border: 1px solid var(--tile-stroke);
 }
-/* Messy: overlapping, offset panes. */
-.what__win--messy span:nth-child(1) { left: 8%; top: 10%; width: 55%; height: 50%; }
-.what__win--messy span:nth-child(2) { left: 30%; top: 26%; width: 55%; height: 48%; }
-.what__win--messy span:nth-child(3) { left: 16%; top: 44%; width: 45%; height: 42%; }
-.what__win--messy span:nth-child(4) { left: 45%; top: 12%; width: 40%; height: 40%; }
+/* Ill-fitting: placed by hand, so close but never right —
+   mismatched sizes, a gap nobody asked for, one pane lapping
+   over its neighbour. NOT scattered confetti: "your screen is a
+   mess" is the argument #971 retired, and this drawing sits one
+   section above `.ba__art--before`, which makes the same point
+   the same way. Two illustrations arguing different things is
+   how a reader learns to believe neither. */
+.what__win--messy span:nth-child(1) { left: 6%; top: 10%; width: 44%; height: 52%; }
+.what__win--messy span:nth-child(2) { left: 46%; top: 16%; width: 34%; height: 44%; }
+.what__win--messy span:nth-child(3) { left: 10%; top: 66%; width: 32%; height: 24%; }
+.what__win--messy span:nth-child(4) { left: 47%; top: 64%; width: 45%; height: 28%; }
 /* Tidy: an even quadrant grid. */
 .what__win--tidy span {
   background: var(--tile-fill-accent);
@@ -619,10 +625,21 @@
   padding: clamp(1.4rem, 3vw, 1.85rem);
   background: var(--bg-3);
 }
-.ba__card--after {
-  background: var(--card-bg);
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow);
+/* The answer side is NOT a card. It used to be, and a second
+   bordered box invited a second illustration inside it — which is
+   how the page ended up drawing the tidy outcome three times.
+   Bare, it reads as the reply to the card beside it rather than
+   as its twin. */
+.ba__answer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: clamp(0.25rem, 1.5vw, 1rem);
+}
+.perks--stacked {
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+  margin-top: 1.1rem;
 }
 .ba__label {
   display: inline-block;
@@ -780,9 +797,17 @@
                    its slot with .opening-note above.
      .quote-card   a warmer, boxed quote with a byline, used once
                    per mode further down the page
-     .quote-aside  a small unattributed aside dropped into an
-                   existing section (demo, CLI, CTA, footer) —
-                   quieter than .quote-card, no box, no byline
+     .quote-aside  a small aside dropped into an existing section
+                   (demo, CLI, CTA, footer) — quieter than
+                   .quote-card, no box. It carries a byline only
+                   when it speaks in the FIRST PERSON: an
+                   unattributed "I haven't dragged a window since"
+                   reads as a testimonial from a user who does not
+                   exist, which a public beta with no public users
+                   cannot back. A line in the product's own voice
+                   (quote_tagline, quote_cta) stays unnamed —
+                   naming it would make a claim about the maker
+                   rather than about the app.
    ========================================================= */
 
 /* NOTE: Simple mode's opening quote (quote_opening) now renders
@@ -924,6 +949,16 @@ a.quote-card__byline-main:hover {
   font-style: italic;
   line-height: 1.5;
 }
+/* The speaker, where the aside is first-person. Quieter than
+   .quote-card__byline: this is a signature on a passing remark,
+   not the attribution of a set-piece quote. */
+.quote-aside__byline {
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  font-style: normal;
+  color: var(--text-faint);
+}
+
 /* Centered under a video, CTA or footer element. */
 .quote-aside--center {
   margin-inline: auto;

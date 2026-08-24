@@ -483,6 +483,8 @@ const jsonLd = [
             {downloadHref ? (
               <a class="btn btn--primary" href={downloadHref}
                 aria-describedby="heroReq">
+                <Icon name="lucide:download" width={16} height={16}
+                  aria-hidden="true" />
                 {t.download_cta}
               </a>
             ) : (
@@ -520,9 +522,30 @@ const jsonLd = [
           <h2 class="hero__title">{t.hero_dev_title}</h2>
           <p class="hero__sub" set:html={t.hero_dev_sub}></p>
           <div class="hero__cta">
-            <a class="btn btn--primary" href="#start" data-install-bridge>
-              {t.hero_cta_primary}
-            </a>
+            {/* Nerd's primary ACTS rather than bridges (#904). It
+                 used to scroll to the install section, which asked
+                 a curious visitor to read a terminal command before
+                 they could have the app; the same disk image Simple
+                 mode offers is the faster answer, and the Homebrew
+                 block — which is what most of this audience
+                 actually wants, for the CLI — is one scroll below
+                 with the GitHub link beside it here.
+
+                 Without a published image the bridge returns, and
+                 with it the `data-install-bridge` handler's only
+                 remaining consumer. */}
+            {downloadHref ? (
+              <a class="btn btn--primary" href={downloadHref}
+                aria-describedby="devHeroReq">
+                <Icon name="lucide:download" width={16} height={16}
+                  aria-hidden="true" />
+                {t.download_cta}
+              </a>
+            ) : (
+              <a class="btn btn--primary" href="#start" data-install-bridge>
+                {t.hero_cta_primary}
+              </a>
+            )}
             <a class="btn btn--ghost btn--ghost-light" href={repo}
               target="_blank" rel="noopener">
               <svg width="18" height="18" viewBox="0 0 24 24"
@@ -532,6 +555,13 @@ const jsonLd = [
               {t.hero_dev_cta_github}
             </a>
           </div>
+          {downloadHref && (
+            <p class="req req--center" id="devHeroReq">
+              <Icon name="lucide:shield" width={15} height={15}
+                aria-hidden="true" />
+              {t.download_req}
+            </p>
+          )}
           <span class="pill pill--light">
             <span class="pill__dot" aria-hidden="true"></span>
             {t.hero_pill}
@@ -553,12 +583,14 @@ const jsonLd = [
         <blockquote class="quote-band__mark reveal">
           <p class="simple-only">{oq}{t.quote_opening}{cq}</p>
           <p class="dev-only">{oq}{t.quote_tagline}{cq}</p>
-          {/* Simple only: the opening note is a first-person
-              statement and needs a name on it. The Nerd tagline
-              in the same slot is a product line, not a quote —
-              attributing it would read as a claim about the maker
-              rather than about the app. */}
-          <footer class="quote-card__byline simple-only">
+          {/* ONE byline for both modes. Each line in this slot is
+              a first-person statement of what the maker wanted, so
+              each takes a speaker — the Nerd tagline used to be a
+              quoted line with nobody behind it. They share the
+              slot, so they share the signature: mode-splitting it
+              would have said the same person is worth naming in
+              full to one reader and not the other. */}
+          <footer class="quote-card__byline">
             {t.quote_byline_name}
           </footer>
         </blockquote>
@@ -622,6 +654,9 @@ const jsonLd = [
         <p class="demo__caption">{t.demo_caption}</p>
         <blockquote class="quote-aside quote-aside--demo">
           <p>{oq}{t.quote_demo}{cq}</p>
+          <footer class="quote-aside__byline">
+            {t.quote_byline_demo}
+          </footer>
         </blockquote>
       </div>
     </section>
@@ -653,7 +688,21 @@ const jsonLd = [
           <span class="eyebrow">{t.calm_eyebrow}</span>
           <h2>{t.calm_title}</h2>
         </div>
-        <div class="ba reveal">
+        {/* A pivot, not a before/after pair. The "With KiwiDesk"
+             card used to hold a second drawing of the tidy
+             outcome — which the page has already shown three
+             times by this point (#what's art, the demo video, and
+             how_2_body) — and a sentence that restated the first
+             perk four lines above it. Its label survives as the
+             heading the perks answer under, so the section still
+             pivots from problem to relief; what is gone is the
+             third picture of the same thing.
+
+             The "Without" card stays because it is the ONLY place
+             on the Simple page that names the problem in the
+             reader's own words. Drop it too and the page explains
+             what KiwiDesk is and how it works, and never why. */}
+        <div class="ba ba--pivot reveal">
           <div class="ba__card ba__card--before">
             <span class="ba__label">{t.calm_before_label}</span>
             <div class="ba__art ba__art--before" aria-hidden="true">
@@ -662,32 +711,23 @@ const jsonLd = [
             </div>
             <p>{t.calm_before_body}</p>
           </div>
-          <div class="ba__card ba__card--after">
+          <div class="ba__answer">
             <span class="ba__label ba__label--good">
               {t.calm_after_label}
             </span>
-            {/* Five, matching the before card: the eye has to read
-                 the SAME windows on both sides, because what changes
-                 between them is where the other four are — not how
-                 many there are. */}
-            <div class="ba__art ba__art--after" aria-hidden="true">
-              <span></span><span></span><span></span><span></span>
-              <span></span>
-            </div>
-            <p>{t.calm_after_body}</p>
+            <ul class="perks perks--stacked">
+              {perks.map((point) => (
+                <li>
+                  <span class="perks__check" aria-hidden="true">
+                    <Icon name="lucide:check" width={14} height={14}
+                      aria-hidden="true" />
+                  </span>
+                  {point}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-        <ul class="perks reveal">
-          {perks.map((point) => (
-            <li>
-              <span class="perks__check" aria-hidden="true">
-                <Icon name="lucide:check" width={14} height={14}
-                  aria-hidden="true" />
-              </span>
-              {point}
-            </li>
-          ))}
-        </ul>
       </div>
     </section>
 
@@ -782,8 +822,16 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <span class="eyebrow">{t.cli_eyebrow}</span>
           <h2>{t.cli_title}</h2>
           <p>{t.cli_body}</p>
+          {/* Named, because it speaks in the first person. An
+               unattributed "I haven't dragged a window since"
+               reads as a testimonial from a user who does not
+               exist — KiwiDesk is in public beta and has no
+               public ones to quote. */}
           <blockquote class="quote-aside quote-aside--left">
             <p>{oq}{t.quote_cli}{cq}</p>
+            <footer class="quote-aside__byline">
+              {t.quote_byline_cli}
+            </footer>
           </blockquote>
         </div>
         <div class="code" aria-label={t.cli_code_aria}>
@@ -961,18 +1009,12 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                  they are. Without a published disk image the guide
                  takes the primary slot back. */}
             {downloadHref ? (
-              <>
-                <a class="btn btn--primary simple-only" href={downloadHref}
-                  aria-describedby="ctaReq">
-                  {t.download_cta}
-                </a>
-                <a class="btn btn--ghost simple-only"
-                  href={`${homeHref}guide/#getting-started`}>
-                  {t.cta_primary}
-                  <Icon name="lucide:arrow-right" width={16} height={16}
-                    aria-hidden="true" />
-                </a>
-              </>
+              <a class="btn btn--primary simple-only" href={downloadHref}
+                aria-describedby="ctaReq">
+                <Icon name="lucide:download" width={16} height={16}
+                  aria-hidden="true" />
+                {t.download_cta}
+              </a>
             ) : (
               <a class="btn btn--primary simple-only" href={`${homeHref}guide/#getting-started`}>
                 {t.cta_primary}
@@ -1023,12 +1065,12 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <p class="footer__name">{t.footer_org}</p>
           <p class="footer__tag">{t.footer_tag}</p>
         </div>
-        <a class="footer__kofi" href={kofi} target="_blank"
-          rel="noopener">
-          <img class="kofi-icon" src={kofiIcon.src} alt=""
-            aria-hidden="true" width="20" height="16" />
-          {t.footer_kofi}
-        </a>
+        {/* No Ko-fi here. It is offered twice already — quietly
+             in the header nav, and as a real button in the
+             closing CTA directly above this footer — and a third
+             ask within one screen of the second reads as
+             pestering rather than as an invitation. The key
+             itself stays; the two live call sites use it. */}
         <nav class="footer__links" aria-label={t.footer_nav_aria}>
           <a class="dev-only" href="/docs/">{t.footer_docs}</a>
           <a class="dev-only" href={repo} target="_blank"

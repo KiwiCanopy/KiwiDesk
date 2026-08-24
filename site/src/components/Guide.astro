@@ -526,7 +526,7 @@ const jsonLd = [
                     <p class="learn-install__lead"
                       >{s.guide_gs_download_lead}</p>
                     <a class="btn btn--primary learn-install__download"
-                      href={downloadHref}>
+                      href={downloadHref} aria-describedby="guideReq">
                       <Icon name="lucide:download" width={16}
                         height={16} aria-hidden="true" />
                       {s.download_cta}
@@ -605,7 +605,8 @@ const jsonLd = [
                 <p class="learn-install__later">{s.guide_gs_a11y}</p>
               </div>
 
-              <p class="learn__store-note">{s.guide_gs_store_note}</p>
+              <p class="learn__store-note" id="guideReq"
+                >{s.guide_gs_store_note}</p>
 
               <p class="learn-sub">{s.guide_gs_perm_sub}</p>
               <p set:html={s.guide_gs_perm_p}></p>
@@ -784,17 +785,29 @@ const jsonLd = [
               <div class="learn-close">
                 <h2>{s.guide_close_title}</h2>
                 <p>{s.guide_close_p}</p>
-                {/* Points back up to THIS page's install block.
-                     It used to be `${homeHref}#getting-started` —
-                     an id the landing has never had, so the jump
-                     died at the top of the home page. Now that the
-                     command lives here, the closing CTA has no
-                     reason to leave the guide at all. */}
-                <a class="btn btn--primary" href="#getting-started">
-                  {s.guide_close_cta}
-                  <Icon name="lucide:arrow-right" width={16} height={16}
-                    aria-hidden="true" />
-                </a>
+                {/* A reader who has finished the guide should not
+                     be sent back to the top to look for a button.
+                     Where there is a download, this IS the button;
+                     the requirement it carries is the one stated
+                     once above, referenced rather than repeated.
+
+                     Without one it falls back to the in-page jump
+                     to the install block. That used to point at
+                     `${homeHref}#getting-started` — an id the
+                     landing has never had, so the jump died at the
+                     top of the home page. */}
+                {downloadHref ? (
+                  <a class="btn btn--primary" href={downloadHref}
+                    aria-describedby="guideReq">
+                    {s.download_cta}
+                  </a>
+                ) : (
+                  <a class="btn btn--primary" href="#getting-started">
+                    {s.guide_close_cta}
+                    <Icon name="lucide:arrow-right" width={16} height={16}
+                      aria-hidden="true" />
+                  </a>
+                )}
               </div>
             </section>
           </div>
