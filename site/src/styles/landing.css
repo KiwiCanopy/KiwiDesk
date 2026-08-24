@@ -1643,19 +1643,11 @@ section {
   word-break: keep-all;
 }
 
-/* A release entry's own disk image (#904). Quiet — the page is a
-   list of what changed, and the download is an offer beside each
-   entry rather than the page's purpose. */
-.rel__download {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0 0 0.9rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--accent);
-  text-decoration: none;
-}
-.rel__download:hover {
-  text-decoration: underline;
+/* The changelog's own download (#904), at the page head rather
+   than on an entry — one build is offered, so it belongs to the
+   page and not to a row. Spacing only: the control itself is
+   `.btn .btn--primary`, the same one the landing and guide use,
+   because one action should not wear a fifth button style. */
+.clog__download {
+  margin-bottom: 2.4rem;
 }

@@ -120,6 +120,24 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
   <h1>{t("changelog_title")}</h1>
   <p class="intro">{t("changelog_intro")}</p>
 
+  {/* ONE download, at the page level, not on an entry.
+       Only the current release is offered — an older build is
+       not something to hand a stranger, since they would install
+       a version behind the one everything else on the site
+       promotes. Attaching that single button to the newest ENTRY
+       made the asymmetry visible without explaining it: one row
+       with a button and three without reads as though something
+       is missing from the older ones. At the head it is simply
+       the page's own action — here is the current build, and
+       below is what changed in each release. */}
+  {downloadHref && (
+    <a class="btn btn--primary clog__download" href={downloadHref}>
+      <Icon name="lucide:download" width={16} height={16}
+        aria-hidden="true" />
+      {t("download_cta")}
+    </a>
+  )}
+
   {
     releases.length === 0 && (
       <p class="empty">{t("changelog_empty")}</p>
@@ -160,28 +178,6 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
           <p class="rel__summary">{release.summary}</p>
         )}
 
-        {/* Only the CURRENT release is offered. This page lists
-             what changed and, until #904, was the one surface
-             that could name a version without offering any way
-             to get it — but that gap is closed by one link, not
-             by one per entry. An older build is not something to
-             hand a stranger: they would install a version behind
-             the one everything else on the site promotes, and a
-             list of identical download links reads as an archive
-             rather than as a changelog.
-
-             The test is identity with `downloadHref`, the same
-             selection the rest of the site uses, so this page can
-             never offer a different build from the landing page
-             — and an entry whose release shipped no disk image
-             simply has none. */}
-        {release.download && release.download === downloadHref && (
-          <a class="rel__download" href={release.download}>
-            <Icon name="lucide:download" width={15} height={15}
-              aria-hidden="true" />
-            {t("download_cta")}
-          </a>
-        )}
 
         {(release.sections ?? []).map((section) => (
           <div class="grp">
