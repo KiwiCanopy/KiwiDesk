@@ -202,15 +202,31 @@ public final class MouseTracker {
         onLeftMouseDown?(location)
     }
 
-    /// Closes the open press, if this arm is the one that
-    /// opened it. A mismatch is not an error — it is the other
-    /// arm's release arriving while this arm's press stands —
-    /// and dropping it is the safe direction: `isResizeGesture`
+    /// Closes the OPEN press, if this arm is the one that
+    /// opened it. Both clauses guard the same thing from
+    /// different sides, and a release that satisfies neither is
+    /// not an error — it is a release with nothing of its own
+    /// to close.
+    ///
+    /// Dropping it is the safe direction: `isResizeGesture`
     /// reads the press only through `guard let up = press.upAt`,
     /// so a press left open is inert while one closed by the
-    /// wrong arm is read as a gesture that just ended.
+    /// wrong release is read as a gesture that just ended.
+    ///
+    /// **Openness is not implied by provenance.** `press`
+    /// outlives its gesture — only `stop()` clears it — so a
+    /// press stays there CLOSED after a real resize, and
+    /// re-stamping it would push its stale location back inside
+    /// `isResizeGesture`'s one-second freshness window. Without
+    /// this clause every later release of the same origin does
+    /// exactly that: a click on a bar item records no press
+    /// (the down arm is gated on the mark) and still reopens the
+    /// Settings window's own last one — and a Space Bar click is
+    /// itself a retile, which is the resize the pipeline would
+    /// then believe in.
     func recordUp(from origin: Press.Origin) {
-        guard press?.origin == origin else { return }
+        guard press?.origin == origin, press?.upAt == nil
+        else { return }
         press?.upAt = Date()
     }
 

@@ -148,4 +148,23 @@ struct OwnWindowGestureDeliveryTests {
         tracker.recordUp(from: .ownWindow)
         #expect(tracker.press?.upAt != nil)
     }
+
+    @Test("A closed press is never reopened by a later release")
+    func aClosedPressStaysClosed() {
+        let tracker = MouseTracker()
+        tracker.recordDown(at: .zero, from: .ownWindow)
+        tracker.recordUp(from: .ownWindow)
+        let closed = tracker.press?.upAt
+        #expect(closed != nil)
+        // The gesture is over, but `press` outlives it. Every
+        // later release — a click on a bar item, the tour, a
+        // panel — must leave the stamp alone: re-stamping pushes
+        // this stale location back inside `isResizeGesture`'s
+        // one-second window, and a Space Bar click is itself a
+        // retile (review, 2026-08-24).
+        tracker.recordUp(from: .ownWindow)
+        #expect(tracker.press?.upAt == closed)
+        tracker.recordUp(from: .otherApp)
+        #expect(tracker.press?.upAt == closed)
+    }
 }

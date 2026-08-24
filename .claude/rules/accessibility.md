@@ -30,6 +30,14 @@ editing AX code:
   process, for exactly the seconds the gesture exists, so the
   tiled Settings window resized with no `windowResized` ever
   reaching the drag pipeline and its neighbours never moved.
+  That AppKit runs a live frame resize in
+  `NSEventTrackingRunLoopMode` is a macOS observation no guard
+  can hold — seen working on macOS 26.6.2, 2026-08-24, on the
+  narrowed two-mode shape. It is what stands between this and a
+  silent return to #953: a source added to the common modes
+  would join any mode AppKit tracks in later, and the named
+  pair would not, with only the symptom to say so. Re-verify a
+  drag on device when this registration changes.
   Two obligations, one guard each:
   - The widening stays the own process's alone
     (`OwnWindowGestureDeliveryTests`) — every other observer
