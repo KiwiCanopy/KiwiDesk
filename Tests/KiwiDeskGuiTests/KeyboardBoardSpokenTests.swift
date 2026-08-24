@@ -106,6 +106,48 @@ struct KeyboardBoardSpokenTests {
         #expect(full.hasSuffix("Conflict: W."))
     }
 
+    /// The two locale seams of the spoken form, pinned by
+    /// needle because nothing else can hold them yet: the
+    /// en-pinned fixtures cannot tell the localized functional
+    /// word from its English wire-name fallback (they are
+    /// byte-identical until the `keyboard.key.*` keys are
+    /// translated), and no assertion may contain a joiner word
+    /// without reading the host's locale (guard-prover,
+    /// 2026-08-24 — both mutations were INERT against the
+    /// behavioural tests). The needles red when either routing
+    /// line is deleted; whether the words arrive localized is
+    /// the translation round's to prove on device.
+    @Test("the spoken form keeps its two locale seams")
+    func localeSeamsAreWired() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Keybindings/KeyboardBoardSpoken.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        // The localized word is consulted before the glyph.
+        #expect(
+            source.contains(
+                "if let word = functionalWord(code) { return word }"
+            )
+        )
+        // The joiner reads the APP's locale, never the class
+        // method's `Locale.current`.
+        #expect(source.contains("formatter.locale = Locale("))
+        #expect(
+            source.contains(
+                "LocalizationManager.shared.effectiveLocale"
+            )
+        )
+        #expect(
+            !source.contains("ListFormatter.localizedString")
+        )
+    }
+
     /// The panel mounts the SPOKEN board and silences the legend
     /// the sentence replaces — pinned by needle, since the
     /// mounting is the only thing that makes the sentence reach
