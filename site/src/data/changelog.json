@@ -2,6 +2,45 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "0.9.10",
+      "tag": "v0.9.10",
+      "date": "2026-08-24",
+      "prerelease": true,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v0.9.10",
+      "summary": "A large accessibility release: Settings is now fully usable with VoiceOver and the keyboard. Plus steadier window resizing and several focus fixes.",
+      "sections": [
+        {
+          "title": "Accessibility",
+          "items": [
+            "**Settings works with VoiceOver.** Every control announces its name and its current value, sections are proper headings, and the keyboard shortcut board is read out as one description instead of a grid of loose cells.",
+            "**The App Bar names its buttons.** Bar controls that show only an icon now announce what they do.",
+            "**Right-click reaches the keyboard.** Press ⌃. to open the same menu the mouse opens on the focused row."
+          ]
+        },
+        {
+          "title": "Windows and layout",
+          "items": [
+            "**Resizing stops where it should, and says why.** A window that cannot shrink any further shows a cue on the first attempt instead of silently refusing, and growing a window is now limited by what its neighbours can give up.",
+            "**The Settings window resizes like any other tile.** Dragging its edge moves the neighbouring windows, which it previously did not.",
+            "**Track columns keep their proportions.** Column widths no longer drift when windows join or leave a track."
+          ]
+        },
+        {
+          "title": "Fixes",
+          "items": [
+            "**Focus stays where you put it.** Dismissing a quick terminal or summoning KiwiDesk no longer steals focus from the window you were working in.",
+            "**Hidden apps leave no ghosts.** Hiding an app now reports a hide rather than a close, so its windows do not linger in the layout."
+          ]
+        },
+        {
+          "title": "Also",
+          "items": [
+            "Settings drawer headers are clickable across their full width, the count badge no longer wears an alert colour, and the German, Japanese, French and seven other catalogs carry the new VoiceOver strings."
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.9.9",
       "tag": "v0.9.9",
       "date": "2026-08-22",
