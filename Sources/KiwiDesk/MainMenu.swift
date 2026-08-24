@@ -11,10 +11,17 @@ import KiwiDeskCore
 /// dispatches menu key equivalents through `NSApp.mainMenu` for
 /// the key window whatever the activation policy, so this is what
 /// gives the Settings text fields their standard Edit shortcuts
-/// (Cut/Copy/Paste/Undo) — without it they have none. It
-/// originally also fixed an auto-hide menu bar with nothing to
-/// reveal on a top-edge hover (#329), which the permanent
-/// `.accessory` policy now prevents outright.
+/// (Cut/Copy/Paste/Undo) — without it they have none.
+///
+/// It was originally installed to fix #329, an auto-hidden menu
+/// bar with nothing to reveal on a top-edge hover: KiwiDesk was
+/// `.regular` then and owned the menu bar with `mainMenu` nil.
+/// **Do not read that as #329 being unreachable now.** The
+/// permanent `.accessory` policy removed the promotion instead,
+/// so the process owns no menu bar at all and the symptom is
+/// back by a second route — accepted, and written up in
+/// `docs/accepted-limitations.md`. What this menu fixed was the
+/// nil-`mainMenu` cause, which cannot recur while it is built.
 ///
 /// Titles route through `L(_:_:)` like every GUI string (#9);
 /// the items use AppKit's standard first-responder selectors so

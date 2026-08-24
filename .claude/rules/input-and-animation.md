@@ -184,6 +184,56 @@ editing here:
   lifecycle event ever does want it, wire it deliberately and give
   it a test — an untested escape hatch is discovered not to work
   at exactly the moment it is needed.
+- **A press on one of our own windows is recorded per WINDOW,
+  and records the press only (#953).** A **global** monitor
+  never sees an event routed to our own windows, which left the
+  one tiled own window with no recorded press to classify its
+  gesture by — so `isResizeGesture`'s trailing-event branch and
+  the resize-vs-move ghost gate both went blind on it while
+  working for every other app. `MouseTracker`'s local arm closes
+  that, under two obligations:
+  - **Gate the recorded press on `OwnWindowTiling.identifier`**,
+    read from the pressed window
+    (`OwnPressMonitorSeamTests`, and
+    `OwnWindowGestureDeliveryTests` for the decision itself).
+    This is #678 item 18's per-window discrimination, not an
+    exemption from it: the bars' item views take `mouseDown`, so
+    do the tour, Config Issues and every `NSOpenPanel`, and only
+    the marked window can be in a TILED gesture — an ungated arm
+    lets a click aimed at chrome overwrite the one press slot
+    the classifiers read.
+  - **Close a press only from the arm that opened it**, which is
+    `Press.Origin`, never the release event's own window
+    (`OwnWindowGestureDeliveryTests`). `press` outlives every
+    gesture — only `stop()` clears it — so an ungated release
+    re-stamps `upAt` on whatever press is still sitting there,
+    and once the down half discriminates that means a click on
+    chrome refreshing a third-party press recorded minutes
+    earlier, which `isResizeGesture` then reads as a gesture
+    that just ended. Fail-closed is the safe direction here and
+    the reasoning is easy to invert: the classifier reads the
+    press only through `guard let up = press.upAt`, so a press
+    left open is INERT while one closed by the wrong arm is
+    acted on. Provenance also survives an up delivered with no
+    window at the end of a frame-resize tracking loop, which a
+    mark-gated release would drop.
+  - **Fire `onLeftMouseDown` for a `.otherApp` press alone**
+    (`OwnWindowGestureDeliveryTests`; `OwnPressMonitorSeamTests`
+    is the net beside it, holding the gate to one call site).
+    Argue the stand-down from the press's own origin rather
+    than from which arm called — that fan-out's consumers are
+    built ON the blindness — `followDisplayUnderClick` takes its
+    bar-overlay exemption from it (#446), and `lastLeftClick` is
+    the click provenance the sibling distrust and the
+    ignored-panel escape read (#496, #687, #951). Widening the
+    fan-out is a ruling of its own, not a side effect of making
+    a gesture classifiable.
+
+  The delivery half of the same defect — why our own window's
+  gesture was not observed at all — is
+  [accessibility.md](accessibility.md)'s, because it constrains
+  a file under `AX/` that this rule's `paths:` do not reach.
+
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

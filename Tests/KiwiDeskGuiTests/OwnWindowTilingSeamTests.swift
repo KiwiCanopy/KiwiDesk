@@ -46,6 +46,12 @@ struct OwnWindowTilingSeamTests {
         // stand-down — a read of the mark, never a stamp.
         "Sources/KiwiDeskCore/Events/EventLoop+RaiseStandDown.swift":
             1,
+        // The third read side (#953): the local press monitor
+        // records a press only when it landed in the marked
+        // window, so a click on the bars, the tour or a panel
+        // cannot overwrite the press the gesture classifiers
+        // read. A read of the mark, never a stamp.
+        "Sources/KiwiDeskCore/Events/MouseTracker.swift": 1,
     ]
 
     /// BOTH source trees: Core builds its own `NSWindow`s (the
