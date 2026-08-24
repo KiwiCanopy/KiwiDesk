@@ -172,14 +172,29 @@ struct SettingsDisclosureHeaderTests {
     @Test("the accessory sits beside the button, not inside it")
     func accessoryIsNotNestedInTheButton() throws {
         let style = try squashed(Self.styleFile)
-        // Called after the button's modifier chain closes, in
-        // the enclosing HStack.
+        // The button's label run, taken by BRACE MATCHING
+        // rather than by a substring near it. The first draft
+        // of this test asked for `)accessory()}`, which
+        // re-nesting the accessory after the `Spacer` also
+        // satisfies — the guard was green with the blocker back
+        // (code review, 2026-08-24). What has to be true is
+        // positional, so the assertion has to be positional.
+        let label = try buttonLabelRun(style)
+        // Non-vacuity: this really is the label's run.
+        #expect(label.contains("configuration.label"))
+        #expect(label.contains("Spacer(minLength:0)"))
         #expect(
-            style.contains(
-                ".accessibilityValue(configuration.isExpanded"
+            !label.contains("accessory()"),
+            Comment(
+                rawValue:
+                    "the accessory is inside the header "
+                    + "button's label — a control nested in a "
+                    + "control loses its own hit target and its "
+                    + "own announcement (#956)"
             )
         )
-        #expect(style.contains(")accessory()}"))
+        // And it is still drawn at all, beside the button.
+        #expect(style.contains("accessory()"))
         // And the wrapper must not put it back in the label.
         let wrapper = try squashed(
             "Sources/KiwiDesk/Settings/Components/Common/"
@@ -201,6 +216,35 @@ struct SettingsDisclosureHeaderTests {
                     + "DisclosureGroup label, which the style "
                     + "wraps in a Button"
             )
+        )
+    }
+
+    /// The content of the header `Button`'s `label:` closure,
+    /// by brace matching over the squashed source.
+    private func buttonLabelRun(_ style: String) throws -> String {
+        let text = Array(style)
+        let marker = Array("label:")
+        var start: Int? = nil
+        for i in 0...(max(text.count - marker.count, 0))
+        where Array(text[i..<min(i + marker.count, text.count)])
+            == marker
+        {
+            start = i
+            break
+        }
+        var cursor =
+            try #require(
+                start,
+                "the style has no `label:` closure any more"
+            ) + marker.count
+        return try #require(
+            SourceScan.balanced(
+                text,
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ),
+            "the `label:` closure does not close"
         )
     }
 

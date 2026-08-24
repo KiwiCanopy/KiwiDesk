@@ -52,6 +52,22 @@
 ///
 /// Two blank screens stay blank in every case: there the
 /// unpinned spaces fit on either, and that IS the refusal above.
+///
+/// **This is the static shadow of `SpacePlacement`, not a
+/// second opinion.** That enum owns the one space→display
+/// precedence — pin → Main role → the positional plan → main —
+/// and this accessor answers the first two legs, in the same
+/// order, from the same two stored fields. It cannot answer the
+/// third: the plan is `ProfileComposition`'s, composed from the
+/// displays connected right now, and a saved profile stores no
+/// plan. That costs nothing on a profile any save produced,
+/// where every declared space is pinned or follows Main and the
+/// two legs are total (`adoptComposedPlacement` writes exactly
+/// those two sets). It is why a hand-edited profile carrying a
+/// space that is neither draws a bare outline rather than a
+/// guess: that space's screen is decided by hardware this file
+/// cannot see. A change to the precedence belongs in
+/// `SpacePlacement` first, and here second.
 extension Profile {
     /// One entry per screen this profile covers, in the stored
     /// set's canonical monitor order — the mode that screen's

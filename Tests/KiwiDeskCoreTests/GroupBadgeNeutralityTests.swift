@@ -28,13 +28,50 @@ struct GroupBadgeNeutralityTests {
     /// it is. A membership list whose complement lives only in a
     /// comment fails open, which is the one thing a guard about
     /// agreement may not do (architect review, 2026-08-24).
+    /// No hexes here on purpose: restating a value the resource
+    /// owns makes the comment a second copy to forget. The
+    /// reason is the part a file cannot state about itself.
     private static let choosers: [String: String] = [
-        "Monochrome": "picked #636366 for this role first — "
-            + "the default followed IT, not the other way round",
-        "Sunset": "warm #995C00, echoing the palette temperature",
-        "Ultraviolet": "cool #157A9E, same reason",
-        "Kiwi Neon": "#F91F9E, the neon showcase's own accent",
+        "Monochrome": "picked this grey for the role FIRST — "
+            + "the default followed it, not the other way round",
+        "Sunset": "a warm badge echoing the palette temperature",
+        "Ultraviolet": "a cool badge, same reason",
+        "Kiwi Neon": "the neon showcase's own accent",
     ]
+
+    /// Being LISTED as a chooser is a claim about the palette,
+    /// so it is checked: one whose badge quietly drifted back to
+    /// the default would otherwise keep its exemption and its
+    /// reason string while the claim went false (code review,
+    /// 2026-08-24). Monochrome is the interesting member — it
+    /// picked this grey before the default did, so it agrees on
+    /// the FILL and is a chooser by its INK, which is why the
+    /// pair is read rather than the fill alone.
+    @Test("A palette listed as a chooser really chose one")
+    func choosersDifferFromTheDefault() throws {
+        let app = AppBarStyle()
+        let authored = PaletteCatalog.authored()
+        for (name, reason) in Self.choosers {
+            let palette = try #require(
+                authored.first { $0.name == name },
+                Comment(rawValue: "missing palette \(name)")
+            )
+            let fill = palette.colors["app_bar.group_badge_color"]
+            let ink =
+                palette.colors["app_bar.group_badge_text_color"]
+            #expect(
+                fill != app.groupBadgeColor
+                    || ink != app.groupBadgeTextColor,
+                Comment(
+                    rawValue:
+                        "\(name) is listed as choosing its own "
+                        + "badge (\(reason)) but now carries the "
+                        + "shipped default pair — move it to "
+                        + "`inheritors` or restore its choice"
+                )
+            )
+        }
+    }
 
     @Test("Every bundled palette is an inheritor or a chooser")
     func theTwoListsPartitionTheCatalog() {

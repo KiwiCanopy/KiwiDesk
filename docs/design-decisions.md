@@ -3378,7 +3378,15 @@ button (the `?` toggled the drawer instead of explaining it)
 and the inner name and hint collapse into the outer element's
 single announcement. So the row's hit shape stops where the
 accessory begins, which is also what makes the drawer's
-disclosure label still usable as a live help anchor. The
+disclosure label still usable as a live help anchor. **That
+puts the accessory at the row's TRAILING edge**, where it sat
+beside the title before: the button keeps the `Spacer`, and
+the only way to return the accessory to the title's side is to
+end the button at the title — which gives back the full-row
+hit target that is this whole ruling's point. Trailing is also
+where macOS puts a row's accessory, so the pair of "click
+anywhere" and "the accessory is on the right" is one idiom
+rather than two compromises. The
 general rule this instance serves is already written down —
 two controls in one strip are two accessibility elements —
 and the lesson is that wrapping a slot whose contents you do
