@@ -4796,15 +4796,21 @@ don't assume from tone.
   rather than as a choice (Kiwi Gold, Clean Light, Slate, True
   Dark) moved with it while the four that chose their own
   (Monochrome, Sunset, Ultraviolet, Kiwi Neon) did not. **A
-  default retune reaches only what has not stored an answer.**
-  The bar styles encode every colour field, so an existing
-  `gui.json` or profile already carries the old hex explicitly
-  and keeps it — the change lands on fresh installs, on a reset,
-  and on re-applying one of the four palettes. That is the right
-  behaviour rather than a gap to close: once a colour is in a
-  user's file, nothing can tell "they chose this" from "this was
-  the default the day it was written", and silently rewriting
-  the first would be worse than leaving the second.
+  default retune reaches only what has not stored an answer,
+  and the two stores answer differently.** `gui.json` is sparse
+  — it records what was changed — so a machine that never
+  touched the badge takes the new grey at once. A **profile**
+  snapshots `TilingSettings` whole, so every profile saved
+  before this carries `#B00020` explicitly and keeps it on load.
+  That asymmetry is worth stating rather than smoothing over,
+  because the two are not the same kind of fact: a sparse entry
+  IS a choice, while a snapshot field is only "the default on
+  the day it was written", and a user cannot tell from the file
+  which they have. Left as is deliberately — a value retune is
+  not a schema change and owes no migration — but a retune that
+  users report as "nothing happened" is one where the profiles
+  are the reason, and rewriting them is then a ruling to make
+  openly, not a silent repair.
 - **Drag ghost / drop-zone:** a deliberate two-hue split
   (border opaque + fill ~15–25 %) so origin reads apart from
   target — and since #511 it is held to the **same CVD
