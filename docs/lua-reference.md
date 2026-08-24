@@ -1963,7 +1963,7 @@ app_bar.set_hover_item_color("#EAF3EE")
 **Example:**
 
 ```lua
-app_bar.set_group_badge_color("#B00020")
+app_bar.set_group_badge_color("#636366")
 ```
 
 ### app_bar.set_group_badge_text_color

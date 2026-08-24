@@ -4720,9 +4720,31 @@ don't assume from tone.
 - **`hover_fill_color` ~50 % alpha** (`0x80`) of a hue *a
   shade off* the accent — legible feedback that never reads as
   the active state.
-- **`group_badge_color` defaults to the universal `#B00020` /
+- **`group_badge_color` defaults to a neutral grey `#636366` /
   white**; a bespoke badge echoes the palette temperature and
   pairs a text color chosen for contrast against *that* badge.
+  The default was `#B00020`/white until #955 — the macOS
+  notification badge, byte for byte — and that was the wrong
+  idiom to borrow. A notification badge counts things that
+  *arrived* and want an answer; a group badge counts windows
+  that are simply *there*. An alert hue on every grouped item,
+  at rest, before any interaction, spends urgency the state does
+  not carry, and urgency spent on nothing is not available when
+  something needs it. Contrast was never the argument on either
+  side — white clears 7.3:1 on the red and 6.0:1 on the grey —
+  and it is the reason the *lighter* neutral is not the answer:
+  systemGray `#8E8E93` cannot hold white at disc size (≈3.3:1).
+  Grey is also the bars' own vocabulary rather than an import,
+  Monochrome having picked `#636366` for exactly this role
+  before the default did, and a grey this near-neutral (three
+  points of blue and nothing else) is all but protan/deutan
+  invariant, so the colour-vision posture improves for free.
+  What is neutral is the **default**, not the knob: a theme that
+  wants a hue here still picks one, which is why the four
+  bundled palettes carrying the red as an inherited default
+  rather than as a choice (Kiwi Gold, Clean Light, Slate, True
+  Dark) moved with it while the four that chose their own
+  (Monochrome, Sunset, Ultraviolet, Kiwi Neon) did not.
 - **Drag ghost / drop-zone:** a deliberate two-hue split
   (border opaque + fill ~15–25 %) so origin reads apart from
   target — and since #511 it is held to the **same CVD
@@ -5542,7 +5564,10 @@ ever held against the one badge fill it was eyeballed against —
 at full alpha, beside a glyph that *is* tinted. It also restores
 the grain the App Bar's own count badge and the sticky/floating
 state marks already had, and matches the platform — the system
-badge is white-on-red unconditionally, with no focused variant.
+badge pairs one ink with one fill unconditionally, with no
+focused variant. (That fill is red and ours has been neutral
+grey since #955: what generalizes is the invariance, not the
+hue.)
 The corollary for a *bespoke* badge still stands: choose its
 text colour for contrast against that badge, not from the
 accents. In Settings the `Focused window`
