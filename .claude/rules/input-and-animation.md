@@ -184,6 +184,42 @@ editing here:
   lifecycle event ever does want it, wire it deliberately and give
   it a test — an untested escape hatch is discovered not to work
   at exactly the moment it is needed.
+- **Our own window's gesture is one this process cannot watch
+  the way it watches everyone else's — keep both halves of the
+  crossing open (#953).** KiwiDesk observes other apps from
+  outside; the Settings window is inside the observer, and two
+  platform facts follow that nothing here chose:
+  - AX notifications for EVERY observed app are delivered on
+    **our** run loop, so a source registered in `.defaultMode`
+    alone is deaf while that run loop runs a tracking loop.
+    Another app's drag runs a tracking loop in ITS process; our
+    own window's live resize or move runs one in THIS one — for
+    exactly the seconds the drag pipeline needed to see. So
+    **never narrow `AXApplicationObserver`'s own-process source
+    back to the default mode alone, and keep its add and its
+    remove reading one stored mode** — an add and a remove
+    naming different modes strands the source in the run loop
+    past `invalidate()`, which no test can see.
+    `OwnWindowGestureDeliveryTests` pins the choice, and the
+    narrowness is the point: widening every observer to the
+    common modes would also let a third-party AX storm re-enter
+    our own menu and slider tracking loops.
+  - A **global** monitor never sees an event routed to our own
+    windows, which left the one tiled own window with no
+    recorded press to classify its gesture by. `MouseTracker`'s
+    local arm closes that, and **records the press only —
+    never fire `onLeftMouseDown` from it**
+    (`OwnPressMonitorSeamTests`): that fan-out's consumers are
+    built ON the blindness, `followDisplayUnderClick` taking
+    its bar-overlay exemption from it, so widening the fan-out
+    is a ruling of its own rather than a side effect of making
+    a gesture classifiable.
+
+  Reading `isOwnProcess` for either is not the widening the
+  per-window discrimination rule above (#678 item 18) bans: that rule governs which own WINDOW tiles,
+  and neither a run loop mode nor a monitor kind has a window
+  to discriminate by. What a delivered notification then means
+  is still decided per window, by the mark.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and
