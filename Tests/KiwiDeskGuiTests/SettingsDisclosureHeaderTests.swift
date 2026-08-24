@@ -7,6 +7,17 @@ import Testing
 /// resting affordance, and the announcement the native triangle
 /// used to make.
 ///
+/// **What this holds is composition, not behaviour.** Every
+/// assertion is a token match over one squashed file, so a
+/// modifier moved onto the wrong subview — `.contentShape` on
+/// the chevron, the value on a descendant — keeps the suite
+/// green while the row stops being one hit target
+/// (guard-prover, 2026-08-24). That is the standing limit of a
+/// source scan, and the reason #956's eye-confirm on device
+/// with keyboard navigation on is part of the change rather
+/// than a nicety: read a green here as "the pieces are still
+/// declared", never as "the row is clickable end to end".
+///
 /// Each half is here because losing it silently is exactly the
 /// failure #956 fixed. A header that keeps the chevron and loses
 /// `.contentShape` still LOOKS clickable and answers only its
