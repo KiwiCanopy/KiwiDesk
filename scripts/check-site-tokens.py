@@ -453,13 +453,26 @@ def check_promoted_download(dist: pathlib.Path) -> None:
         if isinstance(r.get("download"), str) and r["download"]
     ]
     recorded = {r["download"] for r in carriers}
-    # Newest by date, independently of the order the file is in.
+
+    def newest(entry: dict) -> tuple:
+        """Sort key: date, then version numerically.
+
+        The version tiebreak is not decoration. `max` returns the
+        FIRST maximal element, so keying on date alone would fall
+        back to the file's own order the moment two releases
+        shared a date — which is the newest-first assumption this
+        derivation exists to avoid, coming back through a side
+        door. A same-day patch release is the ordinary case that
+        would trigger it.
+        """
+        parts = str(entry.get("version", "")).split(".")
+        number = tuple(
+            int(part) if part.isdigit() else 0 for part in parts
+        )
+        return (str(entry.get("date", "")), number)
+
     promoted = (
-        max(carriers, key=lambda r: str(r.get("date", "")))[
-            "download"
-        ]
-        if carriers
-        else None
+        max(carriers, key=newest)["download"] if carriers else None
     )
 
     # Landing and guide pages are found by markers only their own
