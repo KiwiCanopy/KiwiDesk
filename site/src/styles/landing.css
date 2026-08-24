@@ -209,13 +209,13 @@
 
   /* Pill on the hero band — ink is the same text-safe accent
      links/eyebrows use (never the warm tertiary, see AGENTS.md);
-     warm stays confined to the fill/border/dot, given a bit more
-     presence here (elevated from sparse, issue #439 follow-up). */
+     warm stays confined to the fill/border/dot, given a rich
+     glow to stay present on the light ground. */
   --pill-ink: var(--accent);
   --pill-bg: rgba(139, 94, 60, 0.12);
   --pill-border: rgba(139, 94, 60, 0.34);
   --pill-dot: var(--kiwi-shell);
-  --pill-dot-glow: rgba(139, 94, 60, 0.55);
+  --pill-dot-glow: rgba(139, 94, 60, 0.65);
 
   /* Terminal / code block (kept dark for legibility + contrast
      against the light page — a familiar terminal look) */
@@ -762,7 +762,7 @@ body::before {
   height: 7px;
   border-radius: 50%;
   background: var(--pill-dot);
-  box-shadow: 0 0 10px var(--pill-dot-glow);
+  box-shadow: 0 0 8px var(--pill-dot-glow);
 }
 
 /* =========================================================
