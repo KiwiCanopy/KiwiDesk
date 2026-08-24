@@ -26,6 +26,9 @@ extension ApplicationsGroup {
             }
             Spacer()
             KeyRecorderField(
+                name: binding.wrappedValue.label.isEmpty
+                    ? L("shortcuts.choose_app", "Choose app…")
+                    : binding.wrappedValue.label,
                 combo: binding.wrappedValue.combo,
                 conflict: ConflictText.tooltip(
                     for: binding.wrappedValue,

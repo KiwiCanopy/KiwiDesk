@@ -725,6 +725,35 @@ claim; the obligations a change here takes on:
   control announces a bare value — a percentage, for the window
   count sliders. Name the control and hide the decorative twin,
   rather than leaving one value spoken as three elements.
+  **And a control that is NAMED is VALUED in the same change
+  (#812):** `.accessibilityLabel` replaces what SwiftUI derived,
+  which for a `Picker` or `Menu` is the selection, so the label
+  that names it is the modifier that silences its choice —
+  `AnnouncedValueTests` scans every labelled `Picker`/`Menu`
+  chain for the value beside it, against an exact census of who
+  is labelled. A `.menu` picker under `labelsHidden` keeps no
+  AX title (the dated observation is the design decision cited
+  below), so `DropdownRow` takes the selected option's title
+  from its site, its `spokenValue: nil` escape enumerated by
+  the same suite; `SettingsSlider` takes
+  `label` and `spokenValue` as required arguments and re-earns
+  the Tab stop and arrow keys a custom-drawn view has no claim
+  to; `SettingsRowLabel`'s text is drawn, not spoken, since every
+  control in the shape names itself. The argument is
+  `docs/design-decisions.md` ▸ a name replaces the announcement.
+- **A picture speaks as ONE description, read from the
+  drawing's own predicates.** A schematic's `axLabel`, the
+  keyboard board's `KeyboardBoardSpoken` sentence — one element
+  whose label is the picture's meaning, never an element per
+  mark and never a caption read beside it a second time; the
+  spoken form consumes the same predicates the marks do
+  (`KeyboardCensus.state`, `overwrittenReserved`), so it cannot
+  disagree with them (`KeyboardBoardSpokenTests`).
+- **A title component carries `.isHeader`.** A reader who
+  cannot glance moves card to card by the headings rotor, so a
+  new section, group, panel or area title joins the ones that
+  declare it (`AnnouncedValueTests` counts them per site); nothing
+  headless proves the rotor lists it — verify on device.
 - **A dim is not a sentence.** A greyed row that announces only
   "dimmed" is a dead end: the dimming says an answer exists and
   withholds it. **Which channel carries the reason is derived,
@@ -786,13 +815,12 @@ claim; the obligations a change here takes on:
   `KeyboardActionParityTests` are keyed on their use sites.
   The shell states two of these itself (push focuses the back
   chip, return restores `nav.homeReturnFocus`); a sub-view the
-  shell cannot see states its own. Owed and NOT yet done:
-  deleting a rule, a profile, a layer or a palette names no
-  destination at all, so it drops focus to the top however the
-  machine is configured (#816). Deleting a space names one —
-  which by the bullet above is a different claim from focus
-  arriving there, and on a machine without keyboard navigation
-  the two outcomes look identical.
+  shell cannot see states its own, and a deletion reads its
+  neighbour through the one `DeletionFocus.neighbour` rule
+  (#816, PR #842) — BEFORE the mutation, or it names whichever
+  row slid into the gap. Naming a destination is a different
+  claim from focus arriving there, and on a machine without
+  keyboard navigation the two outcomes look identical.
 
 ## Colour (#678 turn 16b)
 

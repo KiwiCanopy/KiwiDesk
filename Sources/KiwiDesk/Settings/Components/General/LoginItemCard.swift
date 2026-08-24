@@ -46,6 +46,9 @@ struct LoginItemCard: View {
                 // Card heading is the noun "Login"; the row
                 // carries the verb.
                 label: startLabel,
+                // A toggle's on/off is its value and survives
+                // the row's label; nothing to give back.
+                spokenValue: nil,
                 help: startHelp
             ) {
                 // A Toggle, not the #576 Picker: this row now

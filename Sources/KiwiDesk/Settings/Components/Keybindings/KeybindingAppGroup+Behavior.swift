@@ -45,6 +45,12 @@ extension ApplicationsGroup {
             .menuStyle(.borderlessButton)
             .neutralMenuLabel()
             .fixedSize()
+            // Value-as-label otherwise (#812): the noun is the
+            // `?`'s subject, and the control owes it too.
+            .accessibilityLabel(
+                L("shortcuts.app_behavior", "Launch behavior")
+            )
+            .accessibilityValue(behaviorLabel(current))
             HelpButton(
                 explanation: behaviorHelp,
                 subject: L(

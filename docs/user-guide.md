@@ -199,7 +199,12 @@ Monitors, and of every other place this guide says a control
 takes focus.
 
 VoiceOver is not affected — it navigates every control either
-way, because its cursor is its own.
+way, because its cursor is its own. Every card and panel title
+is a heading, so the headings rotor moves card to card.
+
+With it on, a slider takes focus like any other control and the
+arrow keys step it: ← / ↓ down one step, → / ↑ up one — the same
+step the readout beside it counts in.
 
 Where a row carries extra moves behind a right-click (renaming a
 palette, exporting it, deleting it, or reordering spaces), press
@@ -2117,7 +2122,8 @@ unsaved it sits at the bottom of the content, names the
 count and the edit target ("3 unsaved changes to Desk"), and
 holds the same three verbs everywhere — **Revert**, **Save a
 copy…**, and **Save**; with nothing to act on there is no pill
-at all. Only the primary **Save**'s label and target change
+at all. VoiceOver announces the pill once, as it appears, and
+not again per change — the count is in the pill itself. Only the primary **Save**'s label and target change
 with context; there is no separate fourth button:
 
 - **Revert** — discards pending edits and reloads the target's
@@ -2680,6 +2686,12 @@ board shows `-`), so the picture matches the keys in front of
 you, but a shortcut stays on its physical key — switching input
 sources changes the characters on the caps, not which key fires
 your bindings.
+
+With VoiceOver, the board is one element that describes itself
+in words rather than a key at a time: which
+combination it is showing, then the bound keys, the keys macOS
+owns under that combination, and any conflicts — the same facts
+the fills and rings draw, read from the same census.
 
 ### Keyboard Modifiers & Keys
 

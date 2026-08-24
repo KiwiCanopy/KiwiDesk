@@ -56,6 +56,14 @@ struct ProfileEditTargetMenu: View {
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
+        // The closed menu shows only its VALUE (the profile's
+        // name), so VoiceOver heard a name with no noun; the
+        // pair below names the control and keeps the value
+        // (#812, the App Rules facet shape).
+        .accessibilityLabel(
+            L("profile_header.menu.ax", "Profile to edit")
+        )
+        .accessibilityValue(title)
     }
 
     private func requestSelect(_ name: String?) {

@@ -30,6 +30,12 @@ extension SpacesSection {
             // hover hint names it (#94).
             .help(modeHint)
             .accessibilityLabel(modeHint)
+            // A label REPLACES what the picker announced, the
+            // selected mode included; the value puts it back
+            // (#812 — "pop up button" with no mode spoken).
+            .accessibilityValue(
+                modeBinding(space).wrappedValue.displayName
+            )
             // The row's focus representative (#678 Phase 4 pass
             // 10, turn 20a rule 4): where a deletion lands, and
             // where leaving the pushed override editor returns.

@@ -97,10 +97,23 @@ struct LayoutSchematicPlacementScanTests {
             // relative case reds here until someone looks. That
             // is the deliberate disposition, not an oversight
             // (`.claude/rules/rule-authoring.md`).
-            #expect(hits.count == 2)
-            for line in hits {
-                #expect(line.contains(".tag(SpawnPlacement."))
+            // Two shapes are admitted, and only two: the picker's
+            // entries, and the spoken TITLE of the choice
+            // (`placementTitle`, #812) — a label naming a case is
+            // not the splice rule, and VoiceOver has no other way
+            // to hear which entry is selected. Each is counted on
+            // its own so the entries cannot be lost to the titles.
+            let entries = hits.filter {
+                $0.contains(".tag(SpawnPlacement.")
             }
+            let titles = hits.filter {
+                $0.trimmingCharacters(in: .whitespaces)
+                    .hasPrefix("case .")
+            }
+            #expect(entries.count == 2)
+            #expect(titles.count == 2)
+            #expect(hits.count == entries.count + titles.count)
+            #expect(source.contains("private var placementTitle"))
         }
         var seen = 0
         var read = 0

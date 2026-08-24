@@ -22,6 +22,10 @@ import SwiftUI
 /// in the environment (`.environmentObject`) — rendering it
 /// outside that tree is a programmer error and will crash.
 struct KeyRecorderField: View {
+    /// What VoiceOver calls the field — the command it binds.
+    /// The visible text is the COMBO, i.e. its value, so without
+    /// this every row announced its value as its name (#812).
+    let name: String
     let combo: String
     /// Conflict tooltip; nil when the combo is unique + valid.
     var conflict: String?
@@ -161,6 +165,9 @@ struct KeyRecorderField: View {
         .foregroundStyle(buttonTint)
         .modifier(RecorderButtonChrome(recording: recording))
         .help(Self.recordHelp)
+        .accessibilityLabel(name)
+        // The combo; "Record" / "Press keys…" are states.
+        .accessibilityValue(label)
     }
 
     // A meaning change replaced the old `help` key (#212 —

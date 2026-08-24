@@ -46,6 +46,12 @@ struct AdvancedLuaGroup: View {
             .textFieldStyle(.roundedBorder)
             .font(.system(.body, design: .monospaced))
             KeyRecorderField(
+                name: binding.wrappedValue.lua.isEmpty
+                    ? L(
+                        "shortcuts.lua_placeholder",
+                        "Lua, e.g. KiwiDesk.reload_config()"
+                    )
+                    : binding.wrappedValue.lua,
                 combo: binding.wrappedValue.combo,
                 conflict: ConflictText.tooltip(
                     for: binding.wrappedValue,

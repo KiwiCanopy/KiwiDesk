@@ -77,8 +77,14 @@ struct IconPicker: View {
         // though what it opens is a popover browser, not a
         // menu.
         .controlSize(.large)
-        .help(L("icon_picker.choose.help", "Choose an icon"))
+        .help(chooseHelp)
+        // A glyph-only label names nothing (#812).
+        .accessibilityLabel(chooseHelp)
         .popover(isPresented: $showing) { popover }
+    }
+
+    private var chooseHelp: String {
+        L("icon_picker.choose.help", "Choose an icon")
     }
 
     // MARK: - Popover
@@ -101,6 +107,11 @@ struct IconPicker: View {
                         options: IconTab.allCases.map {
                             ($0.title, $0)
                         }
+                    )
+                    // Named outside the track, as the header's
+                    // mode segment is (#812).
+                    .accessibilityLabel(
+                        L("icon_picker.tabs_ax", "Icon source")
                     )
                     clearButton
                 }
@@ -281,13 +292,16 @@ struct IconPicker: View {
                 .foregroundStyle(.secondary)
         }
         .settingsActionButton()
-        .help(
-            L(
-                "icon_picker.clear.help",
-                "Remove icon (use the default)"
-            )
-        )
+        .help(clearHelp)
+        .accessibilityLabel(clearHelp)
         .disabled(icon.isEmpty)
+    }
+
+    private var clearHelp: String {
+        L(
+            "icon_picker.clear.help",
+            "Remove icon (use the default)"
+        )
     }
 
     private func cell(_ glyph: String) -> some View {
@@ -300,6 +314,10 @@ struct IconPicker: View {
         }
         .settingsActionButton()
         .help(glyph)
+        // The glyph's own name (an emoji, or an SF Symbol's
+        // dotted name): a picture button says nothing
+        // otherwise (#812).
+        .accessibilityLabel(glyph)
     }
 
     // MARK: - Data

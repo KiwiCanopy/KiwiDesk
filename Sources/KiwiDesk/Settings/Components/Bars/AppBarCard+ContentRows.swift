@@ -67,6 +67,9 @@ extension AppBarCard {
     var iconSourceRow: some View {
         DropdownRow(
             label: L("app_bar.icon_source.label", "App symbol style"),
+            spokenValue: AppBarOptions.iconSourceTitle(
+                style.iconSource.wrappedValue
+            ),
             // Five labels INTERPOLATED from their own keys, not
             // re-typed (#818): the mode, the three colour rows
             // this sentence sends the reader to, and the page

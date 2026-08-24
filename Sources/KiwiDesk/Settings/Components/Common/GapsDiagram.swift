@@ -43,6 +43,11 @@ struct GapsDiagram: View {
     var body: some View {
         HStack(spacing: 12) {
             miniScreen
+                // A picture of the sliders' values; the legend
+                // beside it and the sliders themselves speak
+                // them, so the shapes say nothing (#812, as
+                // `BarsPanelPreview` is treated).
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 legend(
                     L("gaps.outer_term", "Outer"),

@@ -52,36 +52,41 @@ struct PtSlider: View {
                         set: { value = CGFloat($0) }
                     ),
                     range: range,
-                    step: 1
+                    step: 1,
+                    label: label,
+                    spokenValue: readoutText
                 )
                 readout
             }
         }
     }
 
+    private var readoutText: String {
+        autoAtZero && value == 0
+            ? L("settings.readout.auto", "Automatic")
+            : "\(Int(value)) \(unit)"
+    }
+
     private var readout: some View {
-        Text(
-            autoAtZero && value == 0
-                ? L("settings.readout.auto", "Automatic")
-                : "\(Int(value)) \(unit)"
-        )
-        .frame(
-            width: SettingsMetrics.readoutColumn,
-            alignment: .trailing
-        )
-        .foregroundStyle(.secondary)
-        .font(.body.monospacedDigit())
-        // A locale whose word for "Automatic" runs longer
-        // than the column shrinks rather than truncating —
-        // a clipped readout reads as a rendering bug, a
-        // slightly smaller one does not. Load-bearing: the
-        // word ONLY renders on an `AutoGatedGroup`-gated
-        // row, so it is always dimmed and disabled beside
-        // full-size numbers — a slightly smaller word there
-        // reads as "inert", not "broken". Don't "fix" the
-        // scale factor away.
-        .lineLimit(1)
-        .minimumScaleFactor(0.75)
+        Text(readoutText)
+            .settingsReadout()
+            .frame(
+                width: SettingsMetrics.readoutColumn,
+                alignment: .trailing
+            )
+            .foregroundStyle(.secondary)
+            .font(.body.monospacedDigit())
+            // A locale whose word for "Automatic" runs longer
+            // than the column shrinks rather than truncating —
+            // a clipped readout reads as a rendering bug, a
+            // slightly smaller one does not. Load-bearing: the
+            // word ONLY renders on an `AutoGatedGroup`-gated
+            // row, so it is always dimmed and disabled beside
+            // full-size numbers — a slightly smaller word there
+            // reads as "inert", not "broken". Don't "fix" the
+            // scale factor away.
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
     }
 }
 
@@ -107,19 +112,24 @@ struct SecondsRow: View {
                         set: { ms = Int(($0 * 1000).rounded()) }
                     ),
                     range: range,
-                    step: 0.1
+                    step: 0.1,
+                    label: label,
+                    spokenValue: readoutText
                 )
-                Text(
-                    String(format: "%.1f s", Double(ms) / 1000)
-                )
-                .frame(
-                    width: SettingsMetrics.readoutColumn,
-                    alignment: .trailing
-                )
-                .foregroundStyle(.secondary)
-                .font(.body.monospacedDigit())
+                Text(readoutText)
+                    .settingsReadout()
+                    .frame(
+                        width: SettingsMetrics.readoutColumn,
+                        alignment: .trailing
+                    )
+                    .foregroundStyle(.secondary)
+                    .font(.body.monospacedDigit())
             }
         }
+    }
+
+    private var readoutText: String {
+        String(format: "%.1f s", Double(ms) / 1000)
     }
 }
 
@@ -140,11 +150,12 @@ struct RatioRow: View {
                 SettingsSlider(
                     value: $value,
                     range: 0.1...0.9,
-                    step: 0.01
+                    step: 0.01,
+                    label: label,
+                    spokenValue: readoutText
                 )
-                // Rounded, not truncated: a stored exact 0.29
-                // (Lua/profile) must read "29%", not "28%".
-                Text("\(Int((value * 100).rounded()))%")
+                Text(readoutText)
+                    .settingsReadout()
                     .frame(
                         width: SettingsMetrics.readoutColumn,
                         alignment: .trailing
@@ -154,31 +165,22 @@ struct RatioRow: View {
             }
         }
     }
+
+    /// Rounded, not truncated: a stored exact 0.29
+    /// (Lua/profile) must read "29%", not "28%".
+    private var readoutText: String {
+        "\(Int((value * 100).rounded()))%"
+    }
 }
 
-/// A dropdown row on the shared label axis: the visible label
-/// sits in the label column and the menu button starts on the
-/// control line, like every slider and segmented picker. The
-/// picker keeps its own title for accessibility
-/// (`labelsHidden` hides it visually only).
-struct DropdownRow<P: View>: View {
-    let label: String
-    /// Optional `?` popover (#94), label-adjacent.
-    var help: String? = nil
-    @ViewBuilder let picker: P
-
-    var body: some View {
-        SettingsRowShape {
-            SettingsRowLabel(label: label, help: help)
-        } control: {
-            HStack {
-                picker
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .controlSize(.large)
-                Spacer()
-            }
-        }
+extension View {
+    /// A slider row's numeric readout is the control's value
+    /// drawn again for the eye; the slider already speaks it
+    /// (`SettingsSlider.spokenValue`), so read aloud as well it
+    /// is the same number twice, in a third element. Every
+    /// readout beside a `SettingsSlider` takes this.
+    func settingsReadout() -> some View {
+        accessibilityHidden(true)
     }
 }
 
