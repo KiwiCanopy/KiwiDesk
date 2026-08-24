@@ -93,6 +93,12 @@ extension SpaceOverrideRows {
             }
             .padding(.top, 4)
         }
+        // The one drawer outside `SettingsDisclosure` (it opens
+        // from a popover row, so no reveal can target it) still
+        // takes the house header — otherwise it is the odd
+        // header out, the only one that answers its triangle
+        // alone (#956).
+        .disclosureGroupStyle(SettingsDisclosureStyle())
         .font(.caption)
         .foregroundStyle(.secondary)
     }

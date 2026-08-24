@@ -3341,6 +3341,30 @@ whatever follows it without promoting the drawer to a card.
 And what a drawer reveals sits in ONE sunken well, never one
 well per row of its contents.
 
+**A drawer header is a whole clickable row, not a triangle.**
+(#956, owner 2026-08-23; the second round on the same
+complaint.) The rule above says "different kind of row" and
+does not say *openable*, and the native disclosure header
+answers only its own small triangle — so the header
+under-signalled and then under-delivered when a reader
+clicked the label it does signal with. Both halves are one
+seam, `SettingsDisclosureStyle`: the header becomes one
+full-width `.plain` `Button` over the whole row, and it wears
+the house ambiguous-control cue (the adaptive hover chip)
+plus a chevron with real weight that rotates on expand. The
+button is preferred over a tap gesture on the label
+specifically because it is a control — it takes one focus
+stop, Space and Return work on it, and macOS keyboard
+navigation can reach it, none of which a gesture offers. The
+cost is what every custom control here costs and must be paid
+back in the same change: a `Button` is not a disclosure
+triangle, so VoiceOver stops saying whether the drawer is
+open, and `.accessibilityValue` gives expanded / collapsed
+back (the `LinkedCaptionHitTests` rule, generalised). One
+style, both chromes and the one drawer outside the wrapper:
+a header that reads as openable in a card and not inline
+would be the same defect wearing a different frame.
+
 **Census labels render at runtime from the English
 manifest.** (#678 Phase 4.) A surface that renders a
 census-labelled key AWAY from its owning row — the diff

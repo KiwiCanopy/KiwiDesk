@@ -224,6 +224,11 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             // whole-group wash would tint the expanded interior.
             .modeRevealWash(modeGated)
         }
+        // The header is a full-row button with a resting cue
+        // and its own expanded/collapsed announcement (#956) —
+        // `SettingsDisclosureStyle` carries the argument. Every
+        // drawer takes it, in both chromes.
+        .disclosureGroupStyle(SettingsDisclosureStyle())
         // Reads only — the reveal fields keep one writer and
         // one clearer (`SettingsView`); an observer that also
         // cleared could blank a request before the scroll

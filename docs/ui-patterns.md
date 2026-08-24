@@ -349,6 +349,18 @@ card, and whatever the drawer reveals sits in a single well —
 never one well per child. `SettingsDisclosure` draws both; the
 ruling is in `docs/design-decisions.md`.
 
+**A drawer header is the whole row: one button, a resting
+cue, and its state in words.** Every accordion header — both
+chromes, and the one drawer built outside the wrapper — takes
+`SettingsDisclosureStyle`, which makes the row a full-width
+`.plain` `Button`, gives it the adaptive hover chip and a
+weighted chevron that rotates on expand, and carries
+expanded / collapsed on `.accessibilityValue` because the
+button replaced the triangle that used to announce it. Click
+anywhere on the row, Space or Return on the focused one; the
+cursor stays an arrow (the hand is link-only). The ruling is
+in `docs/design-decisions.md`.
+
 **Weigh every title edit against the search index.** Search
 indexes destination titles, every census-labelled setting row
 (`SettingsSearchIndex`, one row per `SettingKey`) and the
