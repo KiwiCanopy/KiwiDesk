@@ -205,6 +205,31 @@ rather than before it, and why a `--zip` run that cannot find a
 stapled bundle names its output `-unnotarized.zip` instead of
 producing something an upload would reach for.
 
+**Attach every artifact the release builds (#968).**
+`release.yml` asks `build-app.sh` for both — the archive the
+cask installs and Sparkle downloads, and the disk image a
+promoted download points at — and an artifact built and not
+attached is invisible: the run is green, the notarization
+succeeded, and the draft simply lacks a download nobody misses
+until a link points at it. `ReleaseArtifactWorkflowTests`
+derives the list from the build step's own argument array rather
+than restating it, so a further artifact type reds the suite
+until it is routed into the upload set. Route it through the
+superseded-asset cleanup as well: every artifact carries the
+`-unnotarized` rename, so one added to the upload set and not to
+that cleanup leaves a draft offering both names — and the one a
+person clicks is a coin flip.
+
+**A release carries three assets, and that is the shape rather
+than a condition to relax.** `scripts/appcast-sync` filters to
+`.zip` before it counts, so a disk image never reaches its
+"carries N distributable archives" refusal — do not widen that
+filter to count every distributable file, which would refuse
+exactly the shape a promoted download requires.
+`AppcastParserTests` holds both halves: the ambiguity refusal it
+must keep, and the image-beside-the-archive case it must never
+fire on.
+
 ## Cutting a release (#32)
 
 **Cut every release with `scripts/release.sh <version>`.** The

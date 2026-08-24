@@ -305,9 +305,11 @@ the one after it and not on a number.
 
 A promoted `.dmg` then owes
 `.claude/rules/packaging-and-release.md` ▸ *Every distributable
-artifact needs its OWN ticket*. `scripts/build-app.sh` already
-implements it; the change that promotes one carries it into the
-release workflow, which asks for `--zip` alone.
+artifact needs its OWN ticket*. `scripts/build-app.sh`
+implements it and `release.yml` asks for it, so the artifact a
+promoted download can point at is drafted with a ticket of its
+own beside the cask's archive
+([#968](https://github.com/KiwiCanopy/KiwiDesk/issues/968)).
 
 ### Background update checks are on, and there is no switch
 

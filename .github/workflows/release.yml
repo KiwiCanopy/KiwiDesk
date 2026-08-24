@@ -420,11 +420,19 @@ jobs:
             exit 1
           fi
 
+      # Both artifacts come out of one build (#968). The
+      # archive is what the Homebrew cask installs and what
+      # Sparkle downloads; the disk image is the promoted
+      # website download, and it is a SEPARATE piece of signed
+      # code — the app's ticket does not travel with the image
+      # carrying it, so `--notarize --dmg` submits twice and
+      # staples each. build-app.sh owns all of that; this step
+      # only has to ask for it.
       - name: Build the app
         env:
           NOTARIZE: ${{ steps.creds.outputs.notarize }}
         run: |
-          ARGS=(--zip --output "$RUNNER_TEMP/app")
+          ARGS=(--zip --dmg --output "$RUNNER_TEMP/app")
           if [ "$NOTARIZE" = "true" ]; then
             ARGS+=(--notarize kiwidesk-ci)
           fi
@@ -458,6 +466,40 @@ jobs:
           # upload-artifact zips whatever it is given, so a name
           # ending in .zip downloads as `….zip.zip`.
           echo "artifact=${name%.zip}" >> "$GITHUB_OUTPUT"
+
+      # The image, read off disk for the same reason the archive
+      # is: build-app.sh names an unstapled one
+      # `-unnotarized.dmg` precisely so it cannot be mistaken for
+      # a shippable one, and reconstructing the name here is how
+      # a ticketless artifact would get attached under a clean
+      # one.
+      #
+      # A second copy of the block above rather than a shared
+      # helper: steps do not share a shell, so a function defined
+      # in one is gone by the next. Locating both in a single
+      # step would remove the duplication and hand the rest of
+      # the job four outputs out of one loop — the readable
+      # duplication AGENTS.md §2.4 prefers.
+      - name: Locate the disk image
+        id: image
+        run: |
+          images=()
+          while IFS= read -r line; do
+            [ -n "$line" ] && images+=("$line")
+          done < <(find "$RUNNER_TEMP/app" -maxdepth 1 -name '*.dmg')
+          # Exactly one, asserted rather than assumed. The image
+          # is assembled under a `-partial.dmg` name and RENAMED
+          # once stapled, so two here means that rename regressed
+          # — and picking either silently would be a coin flip
+          # between the stapled image and the one that never
+          # reached the staple.
+          if [ "${#images[@]}" -ne 1 ]; then
+            echo "::error::expected 1 disk image, found" \
+                 "${#images[@]} in $RUNNER_TEMP/app"
+            exit 1
+          fi
+          echo "path=${images[0]}" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "${images[0]}")" >> "$GITHUB_OUTPUT"
 
       # Sparkle's signature over the archive (#874), produced
       # HERE because this is the one place that holds both the
@@ -618,6 +660,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.tag.outputs.version }}
           ARCHIVE: ${{ steps.archive.outputs.path }}
+          IMAGE: ${{ steps.image.outputs.path }}
           SIDECAR: ${{ steps.edsig.outputs.path }}
         run: |
           # The archive, plus its Sparkle signature when the key
@@ -630,7 +673,12 @@ jobs:
           # exactly the kind of rule this file has been bitten by
           # before. Nothing about this step can be exercised
           # locally, so it is written to be obvious.
-          UPLOADS=("$ARCHIVE")
+          # Archive and image are both built on every run, so
+          # both are unconditional — the signature is the one
+          # that depends on a secret being present. An artifact
+          # this job built and did not attach is invisible: the
+          # run is green, the draft simply lacks it.
+          UPLOADS=("$ARCHIVE" "$IMAGE")
           if [ -n "$SIDECAR" ]; then
             UPLOADS+=("$SIDECAR")
           fi
@@ -653,6 +701,7 @@ jobs:
             # clean one, and a rebuilt list here would silently
             # match nothing the day build-app.sh's scheme changes.
             KEEP="$(basename "$ARCHIVE")"
+            KEEP_DMG="$(basename "$IMAGE")"
             # Captured, never read through a pipe. The default
             # shell here is `bash -e` WITHOUT pipefail, so a
             # failed `gh` on the left of a pipe yields empty
@@ -682,6 +731,19 @@ jobs:
               *.zip)
                 SIBLING="${KEEP%.zip}-unnotarized.zip" ;;
               *) SIBLING="" ;;
+            esac
+            # The image takes the SAME rename across that
+            # sequence, and it is the artifact a person clicks —
+            # so a draft left carrying both would offer a
+            # download named `-unnotarized.dmg` beside the good
+            # one, which Gatekeeper refuses after a real
+            # download and nothing here can see.
+            case "$KEEP_DMG" in
+              *-unnotarized.dmg)
+                SIBLING_DMG="${KEEP_DMG%-unnotarized.dmg}.dmg" ;;
+              *.dmg)
+                SIBLING_DMG="${KEEP_DMG%.dmg}-unnotarized.dmg" ;;
+              *) SIBLING_DMG="" ;;
             esac
             # The signature is named after the archive it signs,
             # so the rename that supersedes one supersedes the
@@ -724,7 +786,9 @@ jobs:
                 || { [ -n "$SIBLING_SIG" ] \
                      && [ "$asset" = "$SIBLING_SIG" ]; } \
                 || { [ -n "$STALE_SIG" ] \
-                     && [ "$asset" = "$STALE_SIG" ]; }; then
+                     && [ "$asset" = "$STALE_SIG" ]; } \
+                || { [ -n "$SIBLING_DMG" ] \
+                     && [ "$asset" = "$SIBLING_DMG" ]; }; then
                 echo "dropping superseded asset: $asset"
                 if ! gh release delete-asset "$TAG" "$asset" \
                   --yes; then
@@ -732,11 +796,12 @@ jobs:
                        "may still be attached to the draft"
                 fi
               elif [ "$asset" != "$KEEP" ] \
-                && [ "$asset" != "$KEEP_SIG" ]; then
+                && [ "$asset" != "$KEEP_SIG" ] \
+                && [ "$asset" != "$KEEP_DMG" ]; then
                 case "$asset" in
-                  *.zip|*.edsig)
-                    echo "::warning::unexpected archive or" \
-                         "signature on the draft, left in" \
+                  *.zip|*.edsig|*.dmg)
+                    echo "::warning::unexpected archive, image" \
+                         "or signature on the draft, left in" \
                          "place: $asset" ;;
                 esac
               fi
