@@ -23,6 +23,34 @@ kiwidesk list_commands        # every command (app running)
 > global, the config directory, or the product name — none of
 > those change.
 
+**Installed from the `.dmg`?** The app bundle carries the same
+executable — the CLI is not a separate program — so all the cask
+does is link it onto your `PATH`. Do that once yourself:
+
+```sh
+sudo mkdir -p /usr/local/bin
+sudo ln -sf /Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk \
+  /usr/local/bin/kiwidesk
+```
+
+The `mkdir` is not redundant: `/usr/local/bin` does not exist on a
+clean macOS that has never had Homebrew — which is exactly this
+paragraph's reader — and `ln` fails with *No such file or
+directory* without it.
+
+A symlink rather than a copy, deliberately. It resolves through to
+whatever is inside the bundle, so the CLI stays the version of the
+app you are running after KiwiDesk updates itself. A copy would
+not work at all: the executable's signature is sealed to its
+bundle and macOS kills it the moment it runs from anywhere else,
+and it would no longer find the Sparkle framework it loads from
+alongside the app.
+
+Another directory works if you would rather not use `sudo`, as
+long as it is one your shell already searches — note that
+`~/.local/bin` is **not** on the macOS default `PATH`, so it needs
+adding first.
+
 Commands are sent over a UNIX domain socket at
 `~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on
 success, 1 on error (message on stderr, data on stdout).

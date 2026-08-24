@@ -150,14 +150,24 @@ def _gh_json(args: list[str]) -> object:
         sys.exit(1)
 
 
-def fetch_releases() -> list[dict]:
+def fetch_releases(fixture: str | None = None) -> list[dict]:
     """Every PUBLISHED release. Drafts are excluded on purpose:
     `release.yml` creates a draft and the curation happens on it,
     so a draft is by definition not yet the thing this page
-    describes."""
-    data = _gh_json(
-        ["api", "repos/{owner}/{repo}/releases", "--paginate"]
-    )
+    describes.
+
+    `fixture` reads the releases from a JSON file instead of
+    `gh` — the seam the guard suite needs, mirroring
+    `appcast-sync --releases`. The two generators sit on one
+    shelf and are exercised the same way; a source that only one
+    of them offers is a suite that can only be written for
+    one."""
+    if fixture is not None:
+        data = _read_fixture(fixture)
+    else:
+        data = _gh_json(
+            ["api", "repos/{owner}/{repo}/releases", "--paginate"]
+        )
     if not isinstance(data, list):
         print(
             "changelog-sync: the releases endpoint did not "
@@ -168,10 +178,52 @@ def fetch_releases() -> list[dict]:
     return [r for r in data if not r.get("draft")]
 
 
-def fetch_release(tag: str) -> dict:
-    data = _gh_json(
-        ["api", f"repos/{{owner}}/{{repo}}/releases/tags/{tag}"]
-    )
+def _read_fixture(path: str) -> object:
+    try:
+        return json.loads(
+            Path(path).read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as error:
+        print(
+            f"changelog-sync: could not read the releases "
+            f"fixture {path} ({error}).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
+def fetch_release(tag: str, fixture: str | None = None) -> dict:
+    """One published release. `fixture` reads it from a JSON file
+    instead of `gh` — a list, from which the entry carrying `tag`
+    is taken, so ONE fixture shape serves both modes."""
+    if fixture is not None:
+        entries = _read_fixture(fixture)
+        if not isinstance(entries, list):
+            print(
+                "changelog-sync: the releases fixture is not a "
+                "list.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        matches = [
+            item
+            for item in entries
+            if isinstance(item, dict)
+            and item.get("tag_name") == tag
+        ]
+        if len(matches) != 1:
+            print(
+                f"changelog-sync: the releases fixture carries "
+                f"{len(matches)} release(s) tagged {tag}; expected "
+                "exactly one.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        data: object = matches[0]
+    else:
+        data = _gh_json(
+            ["api", f"repos/{{owner}}/{{repo}}/releases/tags/{tag}"]
+        )
     if not isinstance(data, dict):
         print(
             f"changelog-sync: no release found for {tag}.",
@@ -436,6 +488,77 @@ def parse_release_body(
 # Entries
 
 
+# The suffix `scripts/build-app.sh` gives a disk image whose
+# notarization ticket did not staple. Named rather than inline so
+# `UnnotarizedSuffixParityTests` can hold this reader against the
+# packager, the way it already holds `appcast-sync`'s
+# `_UNNOTARIZED` — that suite is the one authority on the
+# convention, and a bare literal here is a reader it cannot see.
+_UNNOTARIZED = "-unnotarized.dmg"
+
+
+def download_url(release: dict) -> str | None:
+    """The release's OWN disk-image URL, read off the API's asset
+    list rather than composed from the version.
+
+    The site renders a download button only where this is
+    present, so a release published without a disk image
+    degrades to the Homebrew-only shape instead of offering a
+    first-class button that 404s. Composing
+    `…/download/<tag>/KiwiDesk-<version>.dmg` from the version
+    would be one release-workflow edit away from silently wrong,
+    and the site deploys independently of any tag — a stranded
+    downloader cannot be recovered
+    (`docs/design-decisions.md` ▸ *No distribution channel
+    without an update path*).
+
+    An `-unnotarized.dmg` is REFUSED rather than ranked below the
+    plain name. `scripts/build-app.sh` decides which of the two
+    names a finished image gets (`require_stapled_or_rename`), so
+    the suffixed one exists ONLY when stapling failed; ranking
+    would quietly promote it the first time it stood alone, and
+    Gatekeeper then tells the downloader the app is damaged.
+    `.claude/rules/packaging-and-release.md` owns that convention
+    and `UnnotarizedSuffixParityTests` guards the spelling."""
+    assets = release.get("assets")
+    if not isinstance(assets, list):
+        return None
+    found: list[str] = []
+    for asset in assets:
+        if not isinstance(asset, dict):
+            continue
+        name = asset.get("name") or ""
+        url = asset.get("browser_download_url")
+        if not name.endswith(".dmg"):
+            continue
+        if name.endswith(_UNNOTARIZED):
+            continue
+        if isinstance(url, str) and url:
+            found.append(url)
+    # Exactly one, or none — the sibling generator's
+    # `archive_asset` refuses ambiguity for the same reason.
+    # `release.yml` already anticipates a legitimate second
+    # artifact ("per-arch zips are plausible"), and a per-arch
+    # image pair is that shape: promoting whichever GitHub happened
+    # to list first would make the front-page download a coin flip
+    # between architectures, with nothing failing anywhere.
+    # Offering none is recoverable; offering the wrong one is not.
+    if len(found) != 1:
+        if found:
+            print(
+                "changelog-sync: WARNING — this release carries "
+                f"{len(found)} candidate disk images "
+                f"({sorted(found)}); promoting none of them, "
+                "because a front-page download picked from an "
+                "ambiguous set is a coin flip nothing reports. "
+                "Publish one image per release, or teach "
+                "`download_url` which to prefer.",
+                file=sys.stderr,
+            )
+        return None
+    return found[0]
+
+
 def build_entry(
     release: dict, strict: bool
 ) -> tuple[dict, str]:
@@ -461,6 +584,13 @@ def build_entry(
         "prerelease": bool(release.get("prerelease")),
         "url": url,
     }
+    # Absent, never empty: the site tests for the key, and a
+    # falsy value that still EXISTS is the shape a truthiness
+    # check reads correctly but a `"download" in entry` check
+    # does not. One shape, so both read alike.
+    download = download_url(release)
+    if download:
+        entry["download"] = download
     try:
         summary, sections = parse_release_body(
             tag, release.get("body") or ""
@@ -496,10 +626,14 @@ def _sort_key(entry: dict) -> tuple:
     return (entry.get("date", ""), version)
 
 
-def write(entries: list[dict]) -> None:
+def write(entries: list[dict], output: str | None = None) -> None:
+    """Writes the generated file. `output` redirects it — a path,
+    or `-` for stdout, in which case stdout carries the document
+    and NOTHING else so a caller can parse it (diagnostics keep
+    going to stderr). The guard suite's other half; see
+    `fetch_releases`."""
     entries = sorted(entries, key=_sort_key, reverse=True)
-    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-    DATA_FILE.write_text(
+    document = (
         json.dumps(
             {
                 "generated_by": "scripts/changelog-sync",
@@ -508,12 +642,26 @@ def write(entries: list[dict]) -> None:
             indent=2,
             ensure_ascii=False,
         )
-        + "\n",
-        encoding="utf-8",
+        + "\n"
     )
+    if output == "-":
+        sys.stdout.write(document)
+        print(
+            f"changelog-sync: wrote {len(entries)} release(s) to "
+            "stdout",
+            file=sys.stderr,
+        )
+        return
+    target = Path(output) if output else DATA_FILE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(document, encoding="utf-8")
+    try:
+        shown = target.relative_to(ROOT)
+    except ValueError:
+        shown = target
     print(
         f"changelog-sync: wrote {len(entries)} release(s) to "
-        f"{DATA_FILE.relative_to(ROOT)}"
+        f"{shown}"
     )
 
 
@@ -597,10 +745,14 @@ def run_body(path: str) -> int:
     return 0
 
 
-def run_all(check: bool) -> int:
+def run_all(
+    check: bool,
+    releases: str | None = None,
+    output: str | None = None,
+) -> int:
     entries: list[dict] = []
     warnings: list[str] = []
-    for release in fetch_releases():
+    for release in fetch_releases(releases):
         try:
             entry, warning = build_entry(release, strict=False)
         except NotesError as error:
@@ -625,13 +777,31 @@ def run_all(check: bool) -> int:
             "release(s) read."
         )
         return 0
-    write(entries)
+    write(entries, output)
     return 0
 
 
-def run_release(tag: str, check: bool) -> int:
+def run_release(
+    tag: str,
+    check: bool,
+    releases: str | None = None,
+    output: str | None = None,
+) -> int:
+    """One published release, merged into the committed file.
+
+    `releases` and `output` are the same seams `--all` takes, so
+    this mode is hermetic on the WRITE. It is not on the read:
+    the merge base is always `site/src/data/changelog.json`, with
+    no seam of its own, so a fixture-driven run emits the fixture
+    entry ALONGSIDE whatever the committed file holds, and it
+    refuses outright in a tree where that file is absent. Give it
+    a `--notes`-style seam before writing a suite that drives
+    this mode; asserting on its stdout today would be asserting
+    on the repository's own release history."""
     try:
-        entry, _ = build_entry(fetch_release(tag), strict=True)
+        entry, _ = build_entry(
+            fetch_release(tag, releases), strict=True
+        )
     except NotesError as error:
         return _report(error)
     if check:
@@ -643,7 +813,7 @@ def run_release(tag: str, check: bool) -> int:
         if existing["tag"] != entry["tag"]
     ]
     entries.append(entry)
-    write(entries)
+    write(entries, output)
     return 0
 
 
@@ -678,13 +848,46 @@ def main(argv: list[str]) -> int:
         action="store_true",
         help="parse and report, writing nothing",
     )
+    # Source and output seams — the guard suite drives `--all`
+    # through these so it needs neither a network nor the repo's
+    # own generated file. `appcast-sync` carries the same pair,
+    # deliberately: one shelf, one way to exercise it.
+    parser.add_argument(
+        "--releases",
+        metavar="FILE",
+        help="read the releases from a JSON fixture instead of "
+        "`gh` (both --all and --release)",
+    )
+    parser.add_argument(
+        "--output",
+        metavar="PATH",
+        help="write here instead of "
+        "site/src/data/changelog.json; `-` is stdout, and then "
+        "stdout carries the document and nothing else",
+    )
     args = parser.parse_args(argv[1:])
+
+    # `--release` merges into the committed file, and that read
+    # has no seam of its own, so a fixture-driven run without an
+    # output redirect would rewrite the real corpus from test
+    # data. Refuse the combination rather than documenting it:
+    # `run_release`'s docstring explains the asymmetry, but a
+    # docstring is not what should stand between a caller and
+    # that outcome.
+    if args.release and args.releases and not args.output:
+        parser.error(
+            "--releases needs --output in --release mode: the "
+            "merge base is the committed changelog.json, so a "
+            "fixture run would rewrite it from test data"
+        )
 
     if args.body:
         return run_body(args.body)
     if args.all:
-        return run_all(args.check)
-    return run_release(args.release, args.check)
+        return run_all(args.check, args.releases, args.output)
+    return run_release(
+        args.release, args.check, args.releases, args.output
+    )
 
 
 if __name__ == "__main__":

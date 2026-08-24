@@ -216,6 +216,49 @@ SHAPE and never a vocabulary. What the entries must SAY is
 person installing*, which is a review-time rule by its own ruling
 and has no guard.
 
+**A promoted download link is read off the release's own asset
+list, never composed from a version (#904).** `changelog-sync`
+records a `download` field only where a published release
+actually carries a notarized `.dmg`. The reason is not tidiness:
+the site deploys independently of any tag, so a composed
+`…/download/<tag>/KiwiDesk-<version>.dmg` is correct
+only while the release workflow keeps passing `--dmg` — one edit
+away from a first-class button that 404s, on a page nothing
+re-publishes.
+
+**Omit a download affordance rather than dimming one**, which is
+where *grey, don't hide* stops: a dimmed button still makes a
+download's promise, and the fallback is Homebrew alone — a
+complete install path rather than a degraded one. That reaches
+the PROSE too. A sentence naming a download the page does not
+carry promises exactly what the button would, so copy pointing
+at one is gated with it or written to stand without it.
+
+Two guards, each holding its own half, because neither can hold
+the other's. `ChangelogDownloadTests` holds what
+`changelog-sync` writes — the URL is the asset's own, an
+`-unnotarized.dmg` is refused rather than ranked, two candidate
+images promote neither, and the field is absent rather than
+empty. `scripts/check-site-tokens.py` ▸ `check_promoted_download`
+holds what the BUILT pages then do with it, in both directions:
+every landing AND guide page links the promoted download, and no
+built page anywhere names a disk image the data does not record.
+Those two are deliberately different tests — the changelog page
+offers each release its OWN image, so the stray rule is
+membership in what the data records and only the promoting pages
+owe the newest one. It also picks the newest release by DATE
+rather than by position, so it does not inherit the ordering
+assumption the site's own selection makes; agreeing for the same
+reason would make the agreement worthless. That one lives on the
+site gate for the reason the feed check does — `site/**` is on
+`.github/ci-ignore.txt`, so a Swift suite could not fire for the
+edit it watches, and `CiPathFilterTests` refuses that placement.
+
+The refusal's spelling is not this file's to state: the packager
+decides which of the two names a finished image gets, and
+`UnnotarizedSuffixParityTests` is the one authority holding every
+reader to it.
+
 **A path joins `sitemap.xml.ts`'s `paths` only once its `/de/` and
 `/ja/` routes exist.** Every entry there is emitted for all three
 locales with `hreflang` alternates, so a single-locale route

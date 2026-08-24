@@ -41,7 +41,8 @@ your monitor setup, and integration with macOS Desktops.
 
 ## Install (public beta)
 
-KiwiDesk is in public beta and installs through Homebrew:
+KiwiDesk is in public beta. Requirements: macOS 14 or later on
+Apple silicon. Install it with Homebrew:
 
 ```sh
 brew install --cask kiwicanopy/tap/kiwidesk
@@ -52,9 +53,21 @@ That installs the app and puts the `kiwidesk` CLI on your
 start`. The [User Guide](user-guide.md) covers the Accessibility
 permission and first-run setup.
 
-Later builds arrive with `brew upgrade --cask kiwidesk`. Releases
-are signed with a stable Developer ID and notarized. If windows
-stop being managed after an upgrade, re-approve KiwiDesk in
+Or download the signed, notarized `.dmg` from
+[kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com/) and
+drag KiwiDesk into your Applications folder. It is the same app;
+what Homebrew adds is the `kiwidesk` CLI on your `PATH`, which
+[the CLI page](cli.md) explains how to link after a `.dmg`
+install.
+
+Later builds install themselves — KiwiDesk checks in the
+background and offers you the update. Upgrade an older copy
+through Homebrew once to reach a version that can do that; the
+[User Guide](user-guide.md#the-status-bar-quick-menu) covers the
+rest.
+
+Releases are signed with a stable Developer ID and notarized. If
+windows stop being managed after an upgrade, re-approve KiwiDesk in
 **System Settings › Privacy & Security › Accessibility**.
 
 Prefer to build it yourself? `swift build -c release` produces

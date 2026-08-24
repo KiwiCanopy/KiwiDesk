@@ -484,6 +484,94 @@ following release. Whether 0.9.7 turned out to be the last beta
 was not knowable on the day it shipped, and the notes did not
 need to answer it.
 
+### The landing page argues from the papercut, not from the mess
+
+**[Principle]**
+
+The Simple-mode landing copy argues for KiwiDesk from **specific
+macOS frustrations a stranger recognises instantly**, never from
+"your windows are messy". Tidiness is a cleanup pitch, and nobody
+goes looking for a window manager because their screen looks
+untidy — they go looking because something cost them time today.
+
+Four constraints fall out, and they are the durable part:
+
+- **The papercut has to be one KiwiDesk actually solves.** This
+  is the trap, and the first draft fell straight into it: the
+  green button is a real grievance and KiwiDesk does *not* fix
+  it — `docs/user-guide.md` ▸ native fullscreen says it stands
+  down around such a window entirely, and macOS still gives it a
+  Mission Control slot of its own. Arranging windows by hand IS
+  solved, by default, for everyone, which is why the section
+  argues that instead. Check the relief before writing the
+  grievance.
+
+- **The picture argues too.** The before/after art carried the
+  retired claim as scattered rectangles, and re-lettering the
+  cards while that stayed would have shipped the ruling half
+  applied — a reader believes the picture first. Both frames now
+  draw the same windows; what differs is only how well they fit.
+  `site/src/styles/landing-modes.css` owns how many and where.
+- **The honest before is not chaos.** It is *doing it by hand
+  and not realising there was another way*. Copy that tells
+  readers their desk is a mess describes someone else.
+- **A papercut is translated, not pasted.** `README.md` ▸
+  *Solving macOS Papercuts* writes them for people who already
+  know "monocle", "spaces" and `pull_or_spawn`. Simple mode gets
+  the symptom and the relief, never the mechanism — and never a
+  claim the app does not make. Two the first draft got wrong:
+  KiwiDesk does not change what ⌘Tab does, and nothing seeds a
+  keystroke that makes a window big — so anything reached through
+  a binding is written as an offer, never as behavior.
+
+Not every papercut survives the translation. macOS reshuffling
+your Desktops was dropped rather than reworded: the honest
+version needs a qualification the section cannot carry, since
+what KiwiDesk offers is *its own* spaces in fixed slots and no
+doc claims it stops macOS reordering anything.
+
+Trade-off: the section speaks to people who have hit these
+specific things rather than listing everything. Accepted — a
+stranger who recognises one papercut instantly is worth more than
+four they have to qualify for, and a page that lists grievances in
+a row reads as a complaint.
+
+### Two install paths, one recommended per mode — never a chooser
+
+**[Principle]**
+
+The site offers both a direct `.dmg` and the Homebrew cask, and
+it **never asks the reader to pick between them**. Each mode
+leads with one and keeps the other quietly available: Simple mode
+leads with the download, Nerd mode keeps Homebrew first where it
+already was, and the guide leads with the download while keeping
+a full, uncollapsed brew block for returning cask users.
+
+The reason a chooser is wrong here is that the page already asked
+this question once. The Simple/Nerd toggle *is* the "which of
+these two people are you" control, and a side-by-side install
+card asks it a second time in a place where the reader has no
+basis to answer: a stranger does not know what Homebrew is, and
+someone who uses it does not need the comparison.
+
+What removes the residual anxiety — *does it matter which one I
+pick?* — is one sentence rather than a badge or a "recommended"
+ribbon: **it is the same signed build either way, and it keeps
+itself up to date from there.** That is true, and it is the whole
+mechanism.
+
+One real difference survives, and it is stated once, on
+Homebrew's side in Nerd mode only: the cask links the `kiwidesk`
+CLI onto `$PATH` for you. State it as what Homebrew *adds*, never
+as the disk image lacking the CLI — that is false, since the CLI
+is the app's own executable and ships inside every copy. It is not
+surfaced in Simple mode or in the guide, because a reader with no
+use for the fact would meet it as a decision — the precise
+failure this entry exists to avoid. `docs/cli.md` owns what a
+`.dmg` user does about it, and that answer has to exist before
+the difference may be named: a caveat with no resolution is a
+dead end rather than a difference.
+
 ### A restore replaces; it never merges
 
 **[Principle]**

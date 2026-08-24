@@ -1182,15 +1182,36 @@ section {
   min-width: 0;
 }
 
-/* The right-hand track holds two blocks now — the Homebrew
-   install (always open, it is how the beta ships) and the
-   build-from-source disclosure beneath it. `min-width: 0` has to
-   repeat here because this wrapper is the grid child now. */
+/* The install ladder, top to bottom: the Homebrew block (always
+   open — it is how the beta ships), the direct download, the
+   build-from-source disclosure, and the requirement line under
+   all three. Descending deliberately, so the column reads as
+   "there is a way, and there are other ways" rather than as a
+   choice to make. `min-width: 0` has to repeat here because this
+   wrapper is the grid child now. */
 .quickstart__codes {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
   min-width: 0;
+}
+
+/* The disk-image note, sitting under the left column's copy. */
+.quickstart__note {
+  margin: 0.9rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+/* Rung 2 of the install ladder (#904): the direct download, sitting
+   between Homebrew's open block above and the collapsed source
+   build below. `align-self: start` keeps it button-sized rather
+   than stretching to the code block's width — a full-bleed button
+   would outweigh the recommended path it sits under, which is the
+   opposite of what a second rung is for. */
+.quickstart__download {
+  align-self: start;
 }
 
 /* Source build: collapsed by default. Newcomers arriving on the
@@ -1407,7 +1428,12 @@ section {
 /* Footer Ko-fi link — deliberately quiet, matching the weight of
    the plain text links beside it (.footer__links) rather than
    standing out as a filled button. A soft tint only appears on
-   hover/focus, so support stays discoverable, not shouty. */
+   hover/focus, so support stays discoverable, not shouty.
+   Rendered by Guide.astro's footer, NOT the landing's: the
+   landing closes on a Ko-fi button in its CTA band, so a third
+   ask a screen later read as pestering. The guide's closing
+   container is a download, so its footer ask is the second and
+   only other one on that page. */
 .footer__kofi {
   display: inline-flex;
   align-items: center;
@@ -1615,4 +1641,13 @@ section {
 :root[lang="ja"] .mode-toggle__seg,
 :root[lang="ja"] .lang-switch__opt {
   word-break: keep-all;
+}
+
+/* The changelog's own download (#904), at the page head rather
+   than on an entry — one build is offered, so it belongs to the
+   page and not to a row. Spacing only: the control itself is
+   `.btn .btn--primary`, the same one the landing and guide use,
+   because one action should not wear a fifth button style. */
+.clog__download {
+  margin-bottom: 2.4rem;
 }

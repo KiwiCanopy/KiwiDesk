@@ -59,6 +59,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
 import pathlib
 import re
 import sys
@@ -387,6 +388,146 @@ def check_appcast(dist: pathlib.Path) -> None:
     )
 
 
+def check_promoted_download(dist: pathlib.Path) -> None:
+    """The download the site promotes is the one the data names,
+    and nothing offers a download the data does not carry (#904).
+
+    This lives on the SITE gate rather than in a Swift suite for
+    the reason `check_appcast` does: `site/**` is on
+    `.github/ci-ignore.txt`, so a change confined to the site
+    skips the macOS jobs — and a change confined to the site is
+    exactly the one that could drop the button or point it
+    somewhere else. `CiPathFilterTests` refuses the other
+    placement outright.
+
+    It reads the BUILT pages, not the components: a guard over
+    rendered output that greps the source proves the source says
+    something, never that a visitor receives it.
+
+    Two directions, asserted over different things on purpose:
+
+    - **Offered.** Every landing and guide page must carry the
+      promoted URL as an anchor `href`. Asserting it merely
+      APPEARS on the page is vacuous — the JSON-LD graph embeds
+      the same URL as metadata, so a page that had lost every
+      button would still contain the string and pass. The first
+      draft of this check did exactly that.
+    - **No strays.** Every `.dmg` URL anywhere in any built page
+      — anchors, JSON-LD, inline scripts, data attributes — must
+      be one the data RECORDS. Not the promoted one: the
+      changelog page offers each release its own image, so the
+      second release to ship one would otherwise fail this check
+      inside `changelog.yml`'s own build step and strand the
+      notes and the appcast on the release that just published.
+      Membership is the rule; equality belongs only to the pages
+      that promote.
+
+    **The promoted release is chosen by DATE here, deliberately
+    not by position.** `download.ts` takes the first entry with a
+    download because `changelog-sync` emits newest-first; if this
+    guard re-derived it the same way, both would pick the same
+    wrong release the day that ordering changed and stay green.
+    Picking independently is what makes the agreement evidence.
+
+    What it does not see, stated rather than implied: presence is
+    per PAGE, not per affordance. A page carrying three download
+    buttons still passes with two removed. The page-level
+    question — did this locale stop offering the download at all
+    — is the one whose failure is silent and total; a single
+    button lost among several is a visible layout change that
+    review catches. A per-site count would pin a number that
+    legitimately moves.
+    """
+    data = REPO / "site" / "src" / "data" / "changelog.json"
+    try:
+        releases = json.loads(
+            data.read_text(encoding="utf-8")
+        )["releases"]
+    except (OSError, KeyError, json.JSONDecodeError) as error:
+        fail(f"cannot read {data} ({error})")
+        return
+
+    carriers = [
+        r
+        for r in releases
+        if isinstance(r.get("download"), str) and r["download"]
+    ]
+    recorded = {r["download"] for r in carriers}
+
+    def newest(entry: dict) -> tuple:
+        """Sort key: date, then version numerically.
+
+        The version tiebreak is not decoration. `max` returns the
+        FIRST maximal element, so keying on date alone would fall
+        back to the file's own order the moment two releases
+        shared a date — which is the newest-first assumption this
+        derivation exists to avoid, coming back through a side
+        door. A same-day patch release is the ordinary case that
+        would trigger it.
+        """
+        parts = str(entry.get("version", "")).split(".")
+        number = tuple(
+            int(part) if part.isdigit() else 0 for part in parts
+        )
+        return (str(entry.get("date", "")), number)
+
+    promoted = (
+        max(carriers, key=newest)["download"] if carriers else None
+    )
+
+    # Landing and guide pages are found by markers only their own
+    # components emit, never by enumerating locales: `site/**`
+    # already hand-lists the locale set in about a dozen places
+    # (`docs/translating.md` owns that grep), and a thirteenth
+    # would let a new locale ship an unchecked page silently.
+    every = sorted(dist.rglob("*.html"))
+    html = {p: p.read_text(encoding="utf-8") for p in every}
+    landing = [p for p in every if 'id="modeToggle"' in html[p]]
+    guides = [p for p in every if "learn-install" in html[p]]
+    for label, pages in (("landing", landing), ("guide", guides)):
+        if not pages:
+            fail(
+                f"no built {label} pages found — the marker this "
+                "check finds them by has moved"
+            )
+            return
+
+    anchor = re.compile(r'href="([^"]*\.dmg)"')
+    anywhere = re.compile(r'https?://[^\s"\'<>\\]+\.dmg')
+
+    for page in every:
+        strays = {
+            url
+            for url in anywhere.findall(html[page])
+            if url not in recorded
+        }
+        if strays:
+            fail(
+                f"{page.relative_to(dist)} names a disk image the "
+                f"data does not record: {sorted(strays)}"
+            )
+
+    if promoted is None:
+        print("no promoted download recorded; no page offers one")
+        return
+
+    missing = [
+        str(p.relative_to(dist))
+        for p in landing + guides
+        if promoted not in set(anchor.findall(html[p]))
+    ]
+    if missing:
+        fail(
+            "these pages do not link the promoted download: "
+            f"{missing}"
+        )
+    print(
+        f"promoted download {promoted} linked from "
+        f"{len(landing)} landing and {len(guides)} guide page(s); "
+        f"{len(recorded)} recorded image(s) allowed elsewhere"
+    )
+
+
 def check_sitemaps_disjoint(dist: pathlib.Path) -> None:
     """The site ships two sitemaps, and they must not overlap.
 
@@ -551,6 +692,7 @@ def main() -> None:
     dist = pathlib.Path(args.dist).resolve()
     check_branded_404(dist)
     check_appcast(dist)
+    check_promoted_download(dist)
     check_sitemaps_disjoint(dist)
     check_var_references(dist)
 

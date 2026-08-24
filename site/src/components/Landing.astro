@@ -26,6 +26,7 @@ import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import { layoutDiagram } from "../lib/layoutDiagram";
+import { downloadHref, downloadVersion } from "../lib/download";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
 
@@ -69,6 +70,7 @@ const buildCmd =
 // `brew install --cask kiwidesk` — a one-line edit here.
 const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
 
+
 // A crisp kiwi-slice glyph (green skin, pale flesh ring, small
 // core, a ring of seed dots) for the mode toggle — drawn rather
 // than the 🥝 emoji so it renders identically and cleanly at these
@@ -92,6 +94,7 @@ const features = [
   { title: t.feat_5_title, body: t.feat_5_body, icon: "lucide:gauge" },
   { title: t.feat_6_title, body: t.feat_6_body, icon: "lucide:shield-check" },
   { title: t.feat_7_title, body: t.feat_7_body, icon: "lucide:pin" },
+  { title: t.feat_8_title, body: t.feat_8_body, icon: "lucide:accessibility" },
 ];
 
 const layouts = [
@@ -102,6 +105,21 @@ const layouts = [
   { name: "grid", label: "Grid", desc: t.layout_grid },
   { name: "track", label: "Track", desc: t.layout_track },
   { name: "floating", label: "Floating", desc: t.layout_floating },
+];
+
+// The Simple-mode perks under the before/after pair. Two
+// papercuts KiwiDesk actually solves, then the trust claims —
+// "will it fight my Mac", "will I have to configure it", "can I
+// use it without a mouse" — which answer a different question
+// from "does it fix something" and are the reason the list is not
+// four grievances in a row.
+const perks = [
+  t.calm_point_1,
+  t.calm_point_2,
+  t.calm_point_3,
+  t.calm_point_4,
+  t.calm_point_5,
+  t.calm_point_6,
 ];
 
 // The three friendly "how it works" steps (Simple mode).
@@ -137,6 +155,16 @@ const jsonLd = [
     image: ogImageURL,
     inLanguage: lang,
     isAccessibleForFree: true,
+    softwareRequirements: "macOS 14 or later, Apple silicon",
+    // Spread rather than set: a release published without a disk
+    // image must leave these OUT of the graph entirely, the same
+    // rule the page's own affordances follow. A `downloadUrl`
+    // pointing at bytes that were never published is the machine
+    // -readable version of the button that 404s.
+    ...(downloadHref
+      ? { downloadUrl: downloadHref, installUrl: downloadHref }
+      : {}),
+    ...(downloadVersion ? { softwareVersion: downloadVersion } : {}),
     offers: {
       "@type": "Offer",
       price: "0",
@@ -444,9 +472,28 @@ const jsonLd = [
           <h1 class="hero__title">{t.hero_title}</h1>
           <p class="hero__sub">{t.hero_sub}</p>
           <div class="hero__cta">
-            <a class="btn btn--primary" href={`${homeHref}guide/#getting-started`}>
-              {t.hero_cta_primary}
-            </a>
+            {/* The download leads in Simple mode (#904). The guide
+                 detour this replaces existed only because there was
+                 nothing to click; the app's own onboarding wizard
+                 teaches the Accessibility permission the detour was
+                 implicitly protecting, and the guide keeps a
+                 first-class entrance in the closing band. Without a
+                 published disk image the guide link returns — the
+                 fallback is a whole install path, not a stub. */}
+            {downloadHref ? (
+              <a class="btn btn--primary" href={downloadHref}
+                aria-describedby="heroReq">
+                <Icon name="lucide:download" width={16} height={16}
+                  aria-hidden="true" />
+                {t.download_cta}
+              </a>
+            ) : (
+              <a class="btn btn--primary" href={`${homeHref}guide/#getting-started`}>
+                {t.hero_cta_primary}
+              </a>
+            )}
+            {/* "Show me first" stays — the hero is not a pure
+                 conversion ask and the demo is doing work. */}
             <a class="btn btn--ghost btn--ghost-light" href="#demo">
               <svg width="17" height="17" viewBox="0 0 24 24"
                 fill="currentColor" aria-hidden="true">
@@ -455,6 +502,13 @@ const jsonLd = [
               {t.hero_cta_secondary}
             </a>
           </div>
+          {downloadHref && (
+            <p class="req req--center" id="heroReq">
+              <Icon name="lucide:shield" width={15} height={15}
+                aria-hidden="true" />
+              {t.download_req}
+            </p>
+          )}
           <span class="pill pill--light">
             <span class="pill__dot" aria-hidden="true"></span>
             {t.hero_pill}
@@ -468,9 +522,30 @@ const jsonLd = [
           <h2 class="hero__title">{t.hero_dev_title}</h2>
           <p class="hero__sub" set:html={t.hero_dev_sub}></p>
           <div class="hero__cta">
-            <a class="btn btn--primary" href="#start" data-install-bridge>
-              {t.hero_cta_primary}
-            </a>
+            {/* Nerd's primary ACTS rather than bridges (#904). It
+                 used to scroll to the install section, which asked
+                 a curious visitor to read a terminal command before
+                 they could have the app; the same disk image Simple
+                 mode offers is the faster answer, and the Homebrew
+                 block — which is what most of this audience
+                 actually wants, for the CLI — is one scroll below
+                 with the GitHub link beside it here.
+
+                 Without a published image the bridge returns, and
+                 with it the `data-install-bridge` handler's only
+                 remaining consumer. */}
+            {downloadHref ? (
+              <a class="btn btn--primary" href={downloadHref}
+                aria-describedby="devHeroReq">
+                <Icon name="lucide:download" width={16} height={16}
+                  aria-hidden="true" />
+                {t.download_cta}
+              </a>
+            ) : (
+              <a class="btn btn--primary" href="#start" data-install-bridge>
+                {t.hero_cta_primary}
+              </a>
+            )}
             <a class="btn btn--ghost btn--ghost-light" href={repo}
               target="_blank" rel="noopener">
               <svg width="18" height="18" viewBox="0 0 24 24"
@@ -480,6 +555,13 @@ const jsonLd = [
               {t.hero_dev_cta_github}
             </a>
           </div>
+          {downloadHref && (
+            <p class="req req--center" id="devHeroReq">
+              <Icon name="lucide:shield" width={15} height={15}
+                aria-hidden="true" />
+              {t.download_req}
+            </p>
+          )}
           <span class="pill pill--light">
             <span class="pill__dot" aria-hidden="true"></span>
             {t.hero_pill}
@@ -501,12 +583,14 @@ const jsonLd = [
         <blockquote class="quote-band__mark reveal">
           <p class="simple-only">{oq}{t.quote_opening}{cq}</p>
           <p class="dev-only">{oq}{t.quote_tagline}{cq}</p>
-          {/* Simple only: the opening note is a first-person
-              statement and needs a name on it. The Nerd tagline
-              in the same slot is a product line, not a quote —
-              attributing it would read as a claim about the maker
-              rather than about the app. */}
-          <footer class="quote-card__byline simple-only">
+          {/* ONE byline for both modes. Each line in this slot is
+              a first-person statement of what the maker wanted, so
+              each takes a speaker — the Nerd tagline used to be a
+              quoted line with nobody behind it. They share the
+              slot, so they share the signature: mode-splitting it
+              would have said the same person is worth naming in
+              full to one reader and not the other. */}
+          <footer class="quote-card__byline">
             {t.quote_byline_name}
           </footer>
         </blockquote>
@@ -570,6 +654,9 @@ const jsonLd = [
         <p class="demo__caption">{t.demo_caption}</p>
         <blockquote class="quote-aside quote-aside--demo">
           <p>{oq}{t.quote_demo}{cq}</p>
+          <footer class="quote-aside__byline">
+            {t.quote_byline_demo}
+          </footer>
         </blockquote>
       </div>
     </section>
@@ -601,7 +688,21 @@ const jsonLd = [
           <span class="eyebrow">{t.calm_eyebrow}</span>
           <h2>{t.calm_title}</h2>
         </div>
-        <div class="ba reveal">
+        {/* A pivot, not a before/after pair. The "With KiwiDesk"
+             card used to hold a second drawing of the tidy
+             outcome — which the page has already shown three
+             times by this point (#what's art, the demo video, and
+             how_2_body) — and a sentence that restated the first
+             perk four lines above it. Its label survives as the
+             heading the perks answer under, so the section still
+             pivots from problem to relief; what is gone is the
+             third picture of the same thing.
+
+             The "Without" card stays because it is the ONLY place
+             on the Simple page that names the problem in the
+             reader's own words. Drop it too and the page explains
+             what KiwiDesk is and how it works, and never why. */}
+        <div class="ba ba--pivot reveal">
           <div class="ba__card ba__card--before">
             <span class="ba__label">{t.calm_before_label}</span>
             <div class="ba__art ba__art--before" aria-hidden="true">
@@ -610,46 +711,23 @@ const jsonLd = [
             </div>
             <p>{t.calm_before_body}</p>
           </div>
-          <div class="ba__card ba__card--after">
+          <div class="ba__answer">
             <span class="ba__label ba__label--good">
               {t.calm_after_label}
             </span>
-            <div class="ba__art ba__art--after" aria-hidden="true">
-              <span></span><span></span><span></span><span></span>
-            </div>
-            <p>{t.calm_after_body}</p>
+            <ul class="perks perks--stacked">
+              {perks.map((point) => (
+                <li>
+                  <span class="perks__check" aria-hidden="true">
+                    <Icon name="lucide:check" width={14} height={14}
+                      aria-hidden="true" />
+                  </span>
+                  {point}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-        <ul class="perks reveal">
-          <li>
-            <span class="perks__check" aria-hidden="true">
-              <Icon name="lucide:check" width={14} height={14}
-                aria-hidden="true" />
-            </span>
-            {t.calm_point_1}
-          </li>
-          <li>
-            <span class="perks__check" aria-hidden="true">
-              <Icon name="lucide:check" width={14} height={14}
-                aria-hidden="true" />
-            </span>
-            {t.calm_point_2}
-          </li>
-          <li>
-            <span class="perks__check" aria-hidden="true">
-              <Icon name="lucide:check" width={14} height={14}
-                aria-hidden="true" />
-            </span>
-            {t.calm_point_3}
-          </li>
-          <li>
-            <span class="perks__check" aria-hidden="true">
-              <Icon name="lucide:check" width={14} height={14}
-                aria-hidden="true" />
-            </span>
-            {t.calm_point_4}
-          </li>
-        </ul>
       </div>
     </section>
 
@@ -744,8 +822,16 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <span class="eyebrow">{t.cli_eyebrow}</span>
           <h2>{t.cli_title}</h2>
           <p>{t.cli_body}</p>
+          {/* Named, because it speaks in the first person. An
+               unattributed "I haven't dragged a window since"
+               reads as a testimonial from a user who does not
+               exist — KiwiDesk is in public beta and has no
+               public ones to quote. */}
           <blockquote class="quote-aside quote-aside--left">
             <p>{oq}{t.quote_cli}{cq}</p>
+            <footer class="quote-aside__byline">
+              {t.quote_byline_cli}
+            </footer>
           </blockquote>
         </div>
         <div class="code" aria-label={t.cli_code_aria}>
@@ -804,11 +890,14 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <Icon name="lucide:arrow-right" width={16} height={16}
               aria-hidden="true" />
           </a>
-          <p class="req">
-            <Icon name="lucide:clock" width={15} height={15}
-              aria-hidden="true" />
-            {t.build_req}
-          </p>
+          {/* The note describes the disk image, so it is gated
+               with it: a sentence makes a download's promise
+               exactly as a dimmed button would — see
+               .claude/rules/site.md ▸ a promoted download link.
+               The REQUIREMENT line is not here at all; it belongs
+               beside the install affordances in the other column,
+               not beside "Read the Docs". */}
+          {downloadHref && <p class="quickstart__note">{t.build_download_note}</p>}
         </div>
         <div class="quickstart__codes">
           <div class="code" aria-label={t.install_code_aria}>
@@ -830,6 +919,37 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <pre><code><span class="prompt">$</span> {installCmd}
 <span class="cmt">{t.install_cmt}</span></code></pre>
           </div>
+
+          {/* Rung 2 of a descending ladder (#904): Homebrew's block
+               above stays open and first because it is how the beta
+               ships and it carries the CLI; the disk image sits
+               directly under it as a quiet second path; building
+               from source stays collapsed at the bottom. A ladder
+               says "there is a way, and there are other ways" —
+               a side-by-side chooser would ask a reader to compare
+               two things most of them have no basis to compare,
+               which is the decision problem the Simple/Nerd toggle
+               already removed once. */}
+          {downloadHref && (
+            <a class="btn btn--ghost quickstart__download"
+              href={downloadHref} aria-describedby="startReq">
+              <Icon name="lucide:download" width={16} height={16}
+                aria-hidden="true" />
+              {t.download_cta}
+            </a>
+          )}
+
+          {/* Exactly one of the two renders. With a disk image the
+               line also carries the notarization fact, which is
+               about that artifact; without one only the
+               requirement remains, which is true of Homebrew
+               too — so the section never states it twice and
+               never drops it. */}
+          <p class="req" id="startReq">
+            <Icon name="lucide:shield" width={15} height={15}
+              aria-hidden="true" />
+            {downloadHref ? t.download_req : t.build_req}
+          </p>
 
           <details class="quickstart__alt">
             <summary>
@@ -870,7 +990,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         <div class="cta-band__inner reveal">
           <span class="eyebrow">{t.cta_eyebrow}</span>
           <h2>{t.cta_title}</h2>
-          <p>{t.cta_body}</p>
+          <p>{downloadHref ? t.cta_body_download : t.cta_body}</p>
           <div class="hero__cta">
             {/* The install bridge, shown in BOTH modes. In Nerd
                  mode #start is already visible and this is a plain
@@ -882,11 +1002,26 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                  middle-click, "copy link"); the mode toggle is
                  JS-driven anyway, so a JS-off visitor has no Nerd
                  view to be sent to in the first place. */}
-            <a class="btn btn--primary simple-only" href={`${homeHref}guide/#getting-started`}>
-              {t.cta_primary}
-              <Icon name="lucide:arrow-right" width={16} height={16}
-                aria-hidden="true" />
-            </a>
+            {/* Simple mode closes on the download (#904), with the
+                 guide demoted to the ghost slot beside it — a reader
+                 who scrolled the whole page and still wants context
+                 is exactly who the guide is for, and this is where
+                 they are. Without a published disk image the guide
+                 takes the primary slot back. */}
+            {downloadHref ? (
+              <a class="btn btn--primary simple-only" href={downloadHref}
+                aria-describedby="ctaReq">
+                <Icon name="lucide:download" width={16} height={16}
+                  aria-hidden="true" />
+                {t.download_cta}
+              </a>
+            ) : (
+              <a class="btn btn--primary simple-only" href={`${homeHref}guide/#getting-started`}>
+                {t.cta_primary}
+                <Icon name="lucide:arrow-right" width={16} height={16}
+                  aria-hidden="true" />
+              </a>
+            )}
             {/* Nerd readers have already seen the install command above,
                  so the closing CTA points at the repo instead. */}
             <a class="btn btn--primary dev-only" href={repo}
@@ -904,14 +1039,16 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
               {t.footer_kofi}
             </a>
           </div>
+          {downloadHref && (
+            <p class="req req--center" id="ctaReq">
+              <Icon name="lucide:shield" width={15} height={15}
+                aria-hidden="true" />
+              {t.download_req}
+            </p>
+          )}
           <blockquote class="quote-aside quote-aside--center">
             <p>{oq}{t.quote_cta}{cq}</p>
           </blockquote>
-          <p class="req req--center">
-            <Icon name="lucide:shield" width={15} height={15}
-              aria-hidden="true" />
-            {t.cta_req}
-          </p>
         </div>
       </div>
     </section>
@@ -928,12 +1065,12 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <p class="footer__name">{t.footer_org}</p>
           <p class="footer__tag">{t.footer_tag}</p>
         </div>
-        <a class="footer__kofi" href={kofi} target="_blank"
-          rel="noopener">
-          <img class="kofi-icon" src={kofiIcon.src} alt=""
-            aria-hidden="true" width="20" height="16" />
-          {t.footer_kofi}
-        </a>
+        {/* No Ko-fi here. It is offered twice already — quietly
+             in the header nav, and as a real button in the
+             closing CTA directly above this footer — and a third
+             ask within one screen of the second reads as
+             pestering rather than as an invitation. The key
+             itself stays; the two live call sites use it. */}
         <nav class="footer__links" aria-label={t.footer_nav_aria}>
           <a class="dev-only" href="/docs/">{t.footer_docs}</a>
           <a class="dev-only" href={repo} target="_blank"
