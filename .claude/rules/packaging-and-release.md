@@ -1,6 +1,8 @@
 ---
 paths:
   - "scripts/build-app.sh"
+  - "scripts/appcast-sync"
+  - "scripts/changelog-sync"
   - "scripts/protect-main.sh"
   - "scripts/release.sh"
   - "scripts/bump-version.sh"
@@ -117,7 +119,22 @@ published`, alongside the notes it shares a corpus with.
 `scripts/appcast-sync` names the one that failed:** it is
 published; it carries exactly one distributable `.zip`, never a
 `-unnotarized.zip` that Sparkle downloads in full and then
-refuses; and that archive has a `.edsig` sidecar. No version
+refuses; and that archive has a `.edsig` sidecar.
+
+**Those clauses count `.zip` assets, and widening them is what
+must not happen.** `archive_asset` filters to `.zip` before it
+counts, so an artifact of any other type — the promoted disk
+image first — never reaches the ambiguity refusal, and a release
+carrying one is the ordinary shape rather than a condition to
+relax. `AppcastParserTests` holds both halves: the refusal it
+must keep, and the image-beside-the-archive case it must never
+fire on. The feed is also not the only reader of a release's
+asset list, so an artifact added to a release answers to every
+one of them — `.github/workflows/homebrew.yml` selects the
+cask's archive by exact name, which is what makes a third asset
+harmless there.
+
+No version
 cutoff is written anywhere and none should be — the releases
 that predate the updater have no sidecar and fall out of the feed
 as a consequence of the data rather than of a number someone has
@@ -212,23 +229,17 @@ promoted download points at — and an artifact built and not
 attached is invisible: the run is green, the notarization
 succeeded, and the draft simply lacks a download nobody misses
 until a link points at it. `ReleaseArtifactWorkflowTests`
-derives the list from the build step's own argument array rather
-than restating it, so a further artifact type reds the suite
-until it is routed into the upload set. Route it through the
-superseded-asset cleanup as well: every artifact carries the
-`-unnotarized` rename, so one added to the upload set and not to
-that cleanup leaves a draft offering both names — and the one a
-person clicks is a coin flip.
-
-**A release carries three assets, and that is the shape rather
-than a condition to relax.** `scripts/appcast-sync` filters to
-`.zip` before it counts, so a disk image never reaches its
-"carries N distributable archives" refusal — do not widen that
-filter to count every distributable file, which would refuse
-exactly the shape a promoted download requires.
-`AppcastParserTests` holds both halves: the ambiguity refusal it
-must keep, and the image-beside-the-archive case it must never
-fire on.
+reads the list off the build step's own argument array rather
+than restating it, and holds each flag it finds to four things:
+a step locates it, the draft step is handed that step's path,
+the upload set carries it, and the superseded-asset cleanup
+routes it. That last one is not a nicety — every artifact
+carries the `-unnotarized` rename, so one attached and not
+cleaned up leaves a draft offering both names, with the one a
+person clicks decided by which sorts first. **Read the
+consuming side's rename once**, per artifact rather than per
+copy: the workflow's `sibling_of` is that one reading, and the
+per-artifact `case` block it replaced was already the second.
 
 ## Cutting a release (#32)
 

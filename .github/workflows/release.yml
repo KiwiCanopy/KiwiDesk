@@ -474,32 +474,40 @@ jobs:
       # a ticketless artifact would get attached under a clean
       # one.
       #
-      # A second copy of the block above rather than a shared
-      # helper: steps do not share a shell, so a function defined
-      # in one is gone by the next. Locating both in a single
-      # step would remove the duplication and hand the rest of
-      # the job four outputs out of one loop — the readable
-      # duplication AGENTS.md §2.4 prefers.
+      # A second copy of the block above, because a GitHub step
+      # is its own shell — a function defined in one is gone by
+      # the next, so the shared helper this would otherwise be
+      # cannot exist across steps. (Where extraction IS possible,
+      # it is taken: `sibling_of` in the draft step below is one
+      # copy of the rename convention for every artifact.) The
+      # alternative is one step looping over both globs, which
+      # trades a readable copy for dynamic output names on a path
+      # that cannot be exercised before it runs for real — and
+      # this file's standing choice there is obvious over clever.
       - name: Locate the disk image
         id: image
         run: |
           images=()
           while IFS= read -r line; do
             [ -n "$line" ] && images+=("$line")
-          done < <(find "$RUNNER_TEMP/app" -maxdepth 1 -name '*.dmg')
-          # Exactly one, asserted rather than assumed. The image
-          # is assembled under a `-partial.dmg` name and RENAMED
-          # once stapled, so two here means that rename regressed
-          # — and picking either silently would be a coin flip
-          # between the stapled image and the one that never
-          # reached the staple.
+          done < <(find "$RUNNER_TEMP/app" -maxdepth 1 \
+            -name '*.dmg' ! -name '*-partial.dmg')
+          # Exactly one, asserted rather than assumed — the point
+          # is that a NAMED image exists at all, not that two
+          # could race. build-app.sh removes both names before
+          # `hdiutil` and renames under `set -e`, so the partial
+          # and the finished image never coexist; what a bare
+          # count would miss is the partial surviving ALONE,
+          # after a staple that failed and an EXIT trap that
+          # could not unlink it. That one is excluded by name
+          # above rather than counted, so this step fails instead
+          # of attaching a half-built image under a clean name.
           if [ "${#images[@]}" -ne 1 ]; then
             echo "::error::expected 1 disk image, found" \
                  "${#images[@]} in $RUNNER_TEMP/app"
             exit 1
           fi
           echo "path=${images[0]}" >> "$GITHUB_OUTPUT"
-          echo "name=$(basename "${images[0]}")" >> "$GITHUB_OUTPUT"
 
       # Sparkle's signature over the archive (#874), produced
       # HERE because this is the one place that holds both the
@@ -632,6 +640,12 @@ jobs:
             exit 1
           fi
 
+      # The archive only, and that is ruled rather than
+      # forgotten: this channel is a 90-day retention convenience
+      # for the artifact a cask or a re-run reaches for, while
+      # the disk image's delivery IS the release asset — the one
+      # place a person downloads it from. A second copy here
+      # would be a second thing to keep in step with the draft.
       - uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.archive.outputs.artifact }}
@@ -725,26 +739,33 @@ jobs:
             # archive (per-arch zips are plausible once Sparkle
             # lands). Anything else unexpected is reported, not
             # removed.
-            case "$KEEP" in
-              *-unnotarized.zip)
-                SIBLING="${KEEP%-unnotarized.zip}.zip" ;;
-              *.zip)
-                SIBLING="${KEEP%.zip}-unnotarized.zip" ;;
-              *) SIBLING="" ;;
-            esac
+            # ONE copy of that rename, applied per artifact.
+            # `-unnotarized` is build-app.sh's convention and
+            # this is the consuming side's single reading of it;
+            # a per-artifact `case` block was the second, and a
+            # third artifact would have made the forgotten arm
+            # the silent failure — the clean name and the
+            # unnotarized one both left on the draft, with the
+            # one a person clicks decided by which sorts first.
+            # Both artifacts reach here named by `find`, so the
+            # extension is guaranteed present.
+            sibling_of() {
+              local name="$1"
+              local ext="${name##*.}"
+              local stem="${name%."$ext"}"
+              case "$stem" in
+                *-unnotarized) echo "${stem%-unnotarized}.$ext" ;;
+                *) echo "$stem-unnotarized.$ext" ;;
+              esac
+            }
+            SIBLING="$(sibling_of "$KEEP")"
             # The image takes the SAME rename across that
             # sequence, and it is the artifact a person clicks —
             # so a draft left carrying both would offer a
             # download named `-unnotarized.dmg` beside the good
-            # one, which Gatekeeper refuses after a real
-            # download and nothing here can see.
-            case "$KEEP_DMG" in
-              *-unnotarized.dmg)
-                SIBLING_DMG="${KEEP_DMG%-unnotarized.dmg}.dmg" ;;
-              *.dmg)
-                SIBLING_DMG="${KEEP_DMG%.dmg}-unnotarized.dmg" ;;
-              *) SIBLING_DMG="" ;;
-            esac
+            # one, which Gatekeeper refuses after a real download
+            # and nothing here can see.
+            SIBLING_DMG="$(sibling_of "$KEEP_DMG")"
             # The signature is named after the archive it signs,
             # so the rename that supersedes one supersedes the
             # other. Left behind, the stale sidecar still matches
@@ -752,11 +773,7 @@ jobs:
             # BY name, so a draft re-run that dropped only the
             # zip would leave a signature that verifies nothing
             # sitting beside the good one.
-            if [ -n "$SIBLING" ]; then
-              SIBLING_SIG="$SIBLING.edsig"
-            else
-              SIBLING_SIG=""
-            fi
+            SIBLING_SIG="$SIBLING.edsig"
             # When THIS run produced no signature, any
             # `$KEEP.edsig` on the release is a previous run's,
             # and `gh release upload --clobber` has just
@@ -782,7 +799,8 @@ jobs:
             fi
             while IFS= read -r asset; do
               [ -n "$asset" ] || continue
-              if [ "$asset" = "$SIBLING" ] \
+              if { [ -n "$SIBLING" ] \
+                   && [ "$asset" = "$SIBLING" ]; } \
                 || { [ -n "$SIBLING_SIG" ] \
                      && [ "$asset" = "$SIBLING_SIG" ]; } \
                 || { [ -n "$STALE_SIG" ] \

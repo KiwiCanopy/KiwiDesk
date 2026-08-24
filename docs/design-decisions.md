@@ -303,13 +303,34 @@ updating. The first Sparkle-carrying release meets the first and
 cannot meet the second, which is why a promoted download opens on
 the one after it and not on a number.
 
-A promoted `.dmg` then owes
+**Both conditions were met on 2026-08-23, and what the gate
+guards is spent.** v0.9.9 published 2026-08-22 carrying Sparkle,
+and a real 0.9.8 → 0.9.9 update installed on a physical machine
+— not a "you're up to date" channel check — confirmed by the
+owner and recorded on
+[#904](https://github.com/KiwiCanopy/KiwiDesk/issues/904);
+`site/public/appcast.xml` carries both releases. That is a
+past-tense fact and cannot come untrue, so nothing above is
+still a question. Read the paragraphs before this one as the
+argument for the gate, not as a description of a shut channel.
+
+**What that licenses is the channel, not a free pass on the
+artifact.** The release page and the site link are one channel,
+so a promoted `.dmg` reaches people the moment a release
+carrying it is *published* — before any site copy changes. Open
+it in that order deliberately: the release page first, on a
+release cut to be verified (quarantine-stamped, mounted,
+`stapler validate`d) on a clean machine, and the site only
+afterwards. The reverse strands the one group this whole entry
+exists to protect, and a stranded downloader cannot be
+recovered.
+
+And a promoted `.dmg` owes
 `.claude/rules/packaging-and-release.md` ▸ *Every distributable
-artifact needs its OWN ticket*. `scripts/build-app.sh`
-implements it and `release.yml` asks for it, so the artifact a
-promoted download can point at is drafted with a ticket of its
-own beside the cask's archive
-([#968](https://github.com/KiwiCanopy/KiwiDesk/issues/968)).
+artifact needs its OWN ticket* — a disk image is a separate
+piece of signed code from the app inside it, so notarizing the
+app does not cover it, and the machine that built it is the one
+place that failure is invisible.
 
 ### Background update checks are on, and there is no switch
 

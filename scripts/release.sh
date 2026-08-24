@@ -11,7 +11,8 @@
 # The same command drives both; the script picks the phase from
 # whether the tree already declares the version. Pushing the tag
 # is what triggers .github/workflows/release.yml, which
-# re-verifies the tag, builds the artifact and drafts the release.
+# re-verifies the tag, builds every distributable artifact and
+# drafts the release with all of them attached.
 #
 # Usage: scripts/release.sh <semantic-version> [options]
 #   e.g. scripts/release.sh 0.9.0

@@ -125,7 +125,15 @@ struct AppcastParserTests {
                 Self.asset("\(base).zip.edsig", size: 89),
             ])
         ])
-        #expect(run.status == 0)
+        // NOT `run.status == 0`: under `--all` the script
+        // TOLERATES a refusal, so the exit code stays 0 with the
+        // release skipped and nothing rendered — the assertion
+        // passed happily with the filter widened and the item
+        // gone. Read the refusal itself instead.
+        #expect(
+            !run.stderr.contains("distributable archives"),
+            "the image must not be counted as a second archive"
+        )
         #expect(run.stdout.contains("<item>"))
         #expect(
             run.stdout.contains("/\(base).zip\""),
