@@ -5,9 +5,9 @@ import SwiftUI
 /// one description — the picture's meaning, not its pixels.
 ///
 /// Drawn, the board is a glance: which keys are green under this
-/// chip. Read key by key it was seventy bare glyphs ("A", "S",
-/// "space") with no state at all, since every state lives in a
-/// fill or a ring. And seventy stops are not the fix — a
+/// chip. Read key by key it was one bare glyph per key ("A",
+/// "S", "space") with no state at all, since every state lives
+/// in a fill or a ring. And a stop per key is not the fix — a
 /// picture's native spoken form is one description (an image's
 /// description, a chart's summary), and the question a reader
 /// brings here, "what is taken before I record?", is answered by

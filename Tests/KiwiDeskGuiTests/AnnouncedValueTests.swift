@@ -129,6 +129,34 @@ struct AnnouncedValueTests {
         #expect(body.contains(".accessibilityValue(spokenValue)"))
     }
 
+    /// A title component carries `.isHeader`, so the headings
+    /// rotor walks an area card by card. Each site's count is
+    /// its own: a needle over the file would be satisfied by one
+    /// surviving title while the other went quiet.
+    @Test("title components are rotor headings")
+    func titleComponentsAreHeadings() throws {
+        let sites: [(String, Int)] = [
+            ("Components/Common/SettingsSection.swift", 2),
+            ("SettingsDetailPanel.swift", 2),
+            ("SettingsHeaderBar.swift", 1),
+            ("HomeScreen.swift", 1),
+        ]
+        for (file, expected) in sites {
+            let source = try Self.source(
+                "Sources/KiwiDesk/Settings/" + file
+            )
+            #expect(
+                source.occurrences(of: ".accessibilityAddTraits(.isHeader)")
+                    == expected,
+                Comment(
+                    rawValue:
+                        "\(file): a title lost its heading trait — "
+                        + "the rotor no longer lists it"
+                )
+            )
+        }
+    }
+
     /// A custom-drawn slider holds no keyboard focus of its own;
     /// Tab skipped every one in the tree (owner, #812). The seam
     /// re-earns the Tab stop and the arrow keys — pinned here

@@ -747,11 +747,11 @@ claim; the obligations a change here takes on:
   spoken form consumes the same predicates the marks do
   (`KeyboardCensus.state`, `overwrittenReserved`), so it cannot
   disagree with them (`KeyboardBoardSpokenTests`).
-- **Section titles are rotor headings.** `SettingsSection`,
-  `SettingsGroupHeader`, the detail panel's two headers and the
-  area title carry `.isHeader`; a new title component joins them
-  — a reader who cannot glance moves card to card by the
-  headings rotor, and Home's group labels were once the only two.
+- **A title component carries `.isHeader`.** A reader who
+  cannot glance moves card to card by the headings rotor, so a
+  new section, group, panel or area title joins the ones that
+  declare it (`AnnouncedValueTests` counts them per site); nothing
+  headless proves the rotor lists it — verify on device.
 - **A dim is not a sentence.** A greyed row that announces only
   "dimmed" is a dead end: the dimming says an answer exists and
   withholds it. **Which channel carries the reason is derived,

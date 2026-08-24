@@ -2144,29 +2144,21 @@ destination is verified with that ON. (#678 turn 20a, #815,
 **[Principle]**
 
 **Every accessibility guard in the suite pins a DECLARATION;
-none can hear what VoiceOver ANNOUNCES, and the two came apart
-in four classes at once** (#812, device sessions 2026-08-24).
-Each was green under every guard and wrong on the device:
-
-- A `Picker` or `Menu` given an `.accessibilityLabel` announced
-  its name and never its choice — the modifier REPLACES what
-  SwiftUI derived, and for a menu the derived announcement IS
-  the selection. The Spaces mode picker said "Layout mode for
-  this Space, pop up button" for its whole shipped life.
-- A `.menu` `Picker` under `labelsHidden()` announced no name at
-  all. The tree's dropdown row said in its docstring that the
-  modifier "hides the label visually only", and General ▸
-  Language announced "menu, 12 items, Deutsch" — so a claim
-  about what a modifier keeps is a device fact, never a
-  docstring's.
-- A custom-drawn slider delegated to a native `Slider`
-  representation with no label, and announced a percentage of
-  its range — "six percent" for a 6 pt gap — because every row
-  draws its label and its readout as SIBLINGS, and a sibling
-  `Text` names nothing. The same view held no keyboard focus
-  either, so Tab skipped every slider in the app.
-- The keyboard preview board announced seventy bare glyphs and
-  no state, every state being a fill or a ring.
+none can hear what VoiceOver ANNOUNCES, and the two come apart
+by three mechanisms** (#812). An `.accessibilityLabel` REPLACES
+what SwiftUI derived — and for a `Picker` or `Menu` the derived
+announcement IS the selection, so the modifier that names the
+control is the one that silences its choice. A modifier's
+side-promise is a device fact, not a docstring's: `labelsHidden()`
+on a `.menu` picker drops the AX title too (macOS 26,
+2026-08-24), against a docstring that said "visually only". And
+a custom-drawn control has nothing free — a slider delegating to
+an unlabelled native representation announced a percentage of
+range for a 6 pt gap, because a row's label and readout are
+SIBLINGS and a sibling `Text` names nothing, and it held no
+keyboard focus either. A picture read per mark is the same
+failure at a larger size: the keyboard board was a bare glyph
+per key, every state living in a fill or a ring.
 
 The rule that comes out is one sentence: **a control that is
 named is valued in the same change, and a picture speaks as one
@@ -2182,7 +2174,7 @@ picture — a schematic, the keyboard board — is ONE element whose
 label is its meaning, read from the same predicates the drawing
 reads (`KeyboardBoardSpoken` reads `KeyboardCensus.state` and
 `overwrittenReserved`, exactly as the caps do), never one
-element per mark: seventy stops are the picture's pixels
+element per mark: a stop per key is the picture's pixels
 transcribed, not its sense.
 
 Two rulings ride along. **The save pill announces once, as it
