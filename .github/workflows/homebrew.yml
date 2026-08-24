@@ -61,7 +61,8 @@ jobs:
           # Selected BY NAME, never by counting and indexing.
           # A release carries more than the cask's archive since
           # #874: `release.yml` attaches `<archive>.zip.edsig`,
-          # Sparkle's signature over those bytes. The old
+          # Sparkle's signature over those bytes, and since #968
+          # the promoted `.dmg` as well. The old
           # `.assets | length -ne 1` refused every such release
           # outright, and `.assets[0]` would then have been a
           # coin flip between the archive and the signature.

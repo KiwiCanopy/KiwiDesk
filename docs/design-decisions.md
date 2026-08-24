@@ -235,8 +235,8 @@ publishing rather than on remembering to fix it afterwards.
 `brew upgrade` is a real update path, so a Sparkle-less build
 may ship as a cask. The cask's public GitHub Release ZIP is its
 backing artifact, not a standalone channel KiwiDesk promotes:
-until Sparkle lands, do not link that ZIP from the product site
-or advertise it as a direct download. Someone who deliberately
+while Sparkle had not landed, that ZIP was not to be linked from
+the product site nor advertised as a direct download. Someone who deliberately
 installs from the repository instead of Homebrew has chosen a
 manual update path.
 
@@ -256,9 +256,10 @@ the cask users are the stranded ones. It is an obligation on the cask
 ([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
 a property that exists for free.
 
-Until Sparkle lands, the two together mean: a Homebrew cask
+Until Sparkle landed, the two together meant: a Homebrew cask
 backed by one public Release ZIP yes; a promoted standalone ZIP
-or `.dmg` download no.
+or `.dmg` download no. It has landed — the gate below records
+when, and what that spends.
 
 Trade-off: the first release reaches fewer people. Accepted, and
 it buys something back — Sparkle's update path is first
@@ -282,9 +283,8 @@ parse, the version compare and the install-on-quit; it cannot
 rehearse signed, notarized, stapled bytes fetched over the
 network from the production URL, or the cask and the in-app
 updater not fighting over one install. Which release this binds
-is whichever one opens the channel — 1.0 on the current plan
-([#874](https://github.com/KiwiCanopy/KiwiDesk/issues/874)) — and
-the obligation holds wherever that lands.
+is whichever one opens the channel, and the obligation holds
+wherever that lands.
 
 **Corollary: the gate is Sparkle-in-the-build, never a version
 number.** The rule above says "until Sparkle lands" and names no
@@ -303,11 +303,30 @@ updating. The first Sparkle-carrying release meets the first and
 cannot meet the second, which is why a promoted download opens on
 the one after it and not on a number.
 
-A promoted `.dmg` then owes
+**Both conditions have been met, and what the gate guards is
+spent.** A Sparkle-carrying release was published, and a real
+update from the one before it installed on a physical machine.
+That is a past-tense fact and cannot come untrue, so nothing
+above is still a question — read the paragraphs before this one
+as the argument for the gate, never as a description of a shut
+channel.
+[#904](https://github.com/KiwiCanopy/KiwiDesk/issues/904) is
+where the confirmation is recorded; it does not belong here.
+
+**What that licenses is the channel, not a free pass on the
+artifact.** The release page and the site link are one channel,
+so a promoted artifact reaches people the moment a release
+carrying it is *published* — before any site copy changes. Open
+the channel in that order deliberately: the release page first,
+on a release cut to be verified on a clean machine, and the site
+only afterwards. The reverse strands the one group this whole
+entry exists to protect, and a stranded downloader cannot be
+recovered.
+
+What the artifact itself then owes is
 `.claude/rules/packaging-and-release.md` ▸ *Every distributable
-artifact needs its OWN ticket*. `scripts/build-app.sh` already
-implements it; the change that promotes one carries it into the
-release workflow, which asks for `--zip` alone.
+artifact needs its OWN ticket*, which owns both the obligation
+and how to verify it.
 
 ### Background update checks are on, and there is no switch
 

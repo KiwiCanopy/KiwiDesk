@@ -106,6 +106,45 @@ struct AppcastParserTests {
         #expect(!run.stdout.contains("api.github.com"))
     }
 
+    /// The promoted download rides ALONGSIDE the update payload
+    /// (#968): from 0.9.10 a release carries the disk image a
+    /// person clicks and the archive Sparkle installs, and that
+    /// is the correct shape rather than a condition to relax.
+    /// `archive_asset` filters to `.zip` BEFORE it counts, so
+    /// the image never reaches the "carries N distributable
+    /// archives" refusal — and this is the case that must red if
+    /// that filter is ever widened to count every distributable
+    /// file, which would refuse every release from 0.9.10 on.
+    @Test("a disk image beside the archive is not a second archive")
+    func diskImageDoesNotAmbiguateTheArchive() throws {
+        let base = "KiwiDesk-\(Self.fixtureVersion)"
+        let run = try render([
+            Self.release(assets: [
+                Self.asset("\(base).dmg"),
+                Self.asset("\(base).zip"),
+                Self.asset("\(base).zip.edsig", size: 89),
+            ])
+        ])
+        // NOT `run.status == 0`: under `--all` the script
+        // TOLERATES a refusal, so the exit code stays 0 with the
+        // release skipped and nothing rendered — the assertion
+        // passed happily with the filter widened and the item
+        // gone. Read the refusal itself instead.
+        #expect(
+            !run.stderr.contains("distributable archives"),
+            "the image must not be counted as a second archive"
+        )
+        #expect(run.stdout.contains("<item>"))
+        #expect(
+            run.stdout.contains("/\(base).zip\""),
+            "the enclosure must be the archive, never the image"
+        )
+        #expect(
+            !run.stdout.contains(".dmg"),
+            "Sparkle is never offered the disk image"
+        )
+    }
+
     /// No version cutoff exists in the script and none should:
     /// the releases that predate the updater drop out because
     /// they have no sidecar, which is a property of their DATA.
