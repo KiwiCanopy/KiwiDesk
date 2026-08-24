@@ -167,6 +167,9 @@ struct AnnouncedValuePinTests {
                 ".focusable(isEnabled, interactions: .edit)"
             )
         )
+        // The click-focus refusal (#812 session 3): focus
+        // arriving with a mouse button down is handed back.
+        #expect(source.contains("NSEvent.pressedMouseButtons"))
         for key in ["leftArrow", "rightArrow", "upArrow", "downArrow"] {
             #expect(
                 source.contains(".onKeyPress(.\(key))"),

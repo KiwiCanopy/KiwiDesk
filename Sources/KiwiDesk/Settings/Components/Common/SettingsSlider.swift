@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// The slider counterpart to `SegmentedPicker` (#68): the
@@ -30,6 +31,7 @@ struct SettingsSlider: View {
     let spokenValue: String
 
     @Environment(\.isEnabled) private var isEnabled
+    @FocusState private var focused: Bool
 
     private static let knobWidth: CGFloat = 26
     private static let height: CGFloat = 20
@@ -53,6 +55,20 @@ struct SettingsSlider: View {
         // (owner, #812 session 3) — Tab reaches it, the
         // pointer never moves the ring.
         .focusable(isEnabled, interactions: .edit)
+        .focused($focused)
+        // `.edit` should already refuse click-focus and on
+        // macOS 26 does not (device, 2026-08-24): focus that
+        // arrives while a mouse button is down is click-born
+        // and is handed back, so only Tab moves the ring here.
+        // The live `NSEvent` read has precedent
+        // (`MouseFollowsFocusTests`' seam) and is the one
+        // deterministic discriminator between the two roads.
+        .onChange(of: focused) { _, now in
+            guard now, NSEvent.pressedMouseButtons != 0 else {
+                return
+            }
+            focused = false
+        }
         .onKeyPress(.leftArrow) { nudge(-1) }
         .onKeyPress(.downArrow) { nudge(-1) }
         .onKeyPress(.rightArrow) { nudge(1) }
