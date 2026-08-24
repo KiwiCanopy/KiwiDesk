@@ -494,21 +494,24 @@ macOS frustrations a stranger recognises instantly**, never from
 goes looking for a window manager because their screen looks
 untidy — they go looking because something cost them time today.
 
-The page argued the tidiness version until this ruling. What
-replaced it is the green button: press it for a bit of room and
-the window *leaves*, taking a whole Desktop with it while
-everything you were using sits a swipe behind. Then ⌘Tab landing
-on an app rather than the window you pictured, and a window you
-move somewhere else needing to be re-arranged by hand.
+Four constraints fall out, and they are the durable part:
 
-Three constraints fall out, and they are the part worth keeping:
+- **The papercut has to be one KiwiDesk actually solves.** This
+  is the trap, and the first draft fell straight into it: the
+  green button is a real grievance and KiwiDesk does *not* fix
+  it — `docs/user-guide.md` ▸ native fullscreen says it stands
+  down around such a window entirely, and macOS still gives it a
+  Mission Control slot of its own. Arranging windows by hand IS
+  solved, by default, for everyone, which is why the section
+  argues that instead. Check the relief before writing the
+  grievance.
 
-- **The picture argues too.** The before/after art was five
-  scattered rectangles — the retired claim, drawn. Re-lettering
-  the cards while that stayed would have shipped the ruling half
-  applied, because a reader believes the picture first. Both
-  frames now draw the **same five windows** and both are tidy;
-  what differs is whether four of them are still on screen.
+- **The picture argues too.** The before/after art carried the
+  retired claim as scattered rectangles, and re-lettering the
+  cards while that stayed would have shipped the ruling half
+  applied — a reader believes the picture first. Both frames now
+  draw the same windows; what differs is only how well they fit.
+  `site/src/styles/landing-modes.css` owns how many and where.
 - **The honest before is not chaos.** It is *doing it by hand
   and not realising there was another way*. Copy that tells
   readers their desk is a mess describes someone else.
@@ -516,9 +519,10 @@ Three constraints fall out, and they are the part worth keeping:
   *Solving macOS Papercuts* writes them for people who already
   know "monocle", "spaces" and `pull_or_spawn`. Simple mode gets
   the symptom and the relief, never the mechanism — and never a
-  claim the app does not make: KiwiDesk does not change what
-  ⌘Tab does, and nothing seeds a keystroke that makes a window
-  big.
+  claim the app does not make. Two the first draft got wrong:
+  KiwiDesk does not change what ⌘Tab does, and nothing seeds a
+  keystroke that makes a window big — so anything reached through
+  a binding is written as an offer, never as behavior.
 
 Not every papercut survives the translation. macOS reshuffling
 your Desktops was dropped rather than reworded: the honest
@@ -526,11 +530,11 @@ version needs a qualification the section cannot carry, since
 what KiwiDesk offers is *its own* spaces in fixed slots and no
 doc claims it stops macOS reordering anything.
 
-Trade-off: the section is narrower than the four-item README list
-and speaks to people who have hit these specific things. Accepted
-— a stranger who recognises one papercut instantly is worth more
-than four they have to qualify for, and a page that lists four
-grievances in a row reads as a complaint.
+Trade-off: the section speaks to people who have hit these
+specific things rather than listing everything. Accepted — a
+stranger who recognises one papercut instantly is worth more than
+four they have to qualify for, and a page that lists grievances in
+a row reads as a complaint.
 
 ### Two install paths, one recommended per mode — never a chooser
 
@@ -556,9 +560,11 @@ ribbon: **it is the same signed build either way, and it keeps
 itself up to date from there.** That is true, and it is the whole
 mechanism.
 
-One real difference survives, and it is stated once, positively,
-on Homebrew's side in Nerd mode only: the cask puts the
-`kiwidesk` CLI on `$PATH` and the `.dmg` does not. It is not
+One real difference survives, and it is stated once, on
+Homebrew's side in Nerd mode only: the cask links the `kiwidesk`
+CLI onto `$PATH` for you. State it as what Homebrew *adds*, never
+as the disk image lacking the CLI — that is false, since the CLI
+is the app's own executable and ships inside every copy. It is not
 surfaced in Simple mode or in the guide, because a reader with no
 use for the fact would meet it as a decision — the precise
 failure this entry exists to avoid. `docs/cli.md` owns what a

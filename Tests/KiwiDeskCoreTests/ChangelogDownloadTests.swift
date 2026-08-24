@@ -131,16 +131,38 @@ struct ChangelogDownloadTests {
 
     @Test("an unnotarized image is refused, not ranked")
     func refusesUnnotarized() throws {
-        // `release.yml` renames the notarized image ONTO the
-        // plain name, so this sibling exists only when something
-        // went wrong. Ranking it below the plain name would
-        // publish it the first time it stood alone, and
-        // Gatekeeper tells that downloader the app is damaged.
+        // `scripts/build-app.sh` decides which name a finished
+        // image gets, so this sibling exists only when stapling
+        // failed. Ranking it below the plain name would publish
+        // it the first time it stood alone, and Gatekeeper tells
+        // that downloader the app is damaged.
         let found = try entry(assets: [
             asset(
                 "KiwiDesk-9999.0.1-unnotarized.dmg",
                 url: "https://example.invalid/bad.dmg"
             )
+        ])
+        #expect(found["download"] == nil)
+    }
+
+    @Test("two candidate images promote neither")
+    func refusesAmbiguity() throws {
+        // `release.yml` already anticipates a legitimate second
+        // artifact ("per-arch zips are plausible once Sparkle
+        // lands"), and a per-arch image pair is that shape.
+        // Taking whichever GitHub listed first would make the
+        // front-page download a coin flip between architectures,
+        // with nothing failing anywhere. Offering none is
+        // recoverable; offering the wrong one is not.
+        let found = try entry(assets: [
+            asset(
+                "KiwiDesk-9999.0.1-arm64.dmg",
+                url: "https://example.invalid/arm64.dmg"
+            ),
+            asset(
+                "KiwiDesk-9999.0.1-x86_64.dmg",
+                url: "https://example.invalid/x86_64.dmg"
+            ),
         ])
         #expect(found["download"] == nil)
     }

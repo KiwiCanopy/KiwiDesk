@@ -192,10 +192,38 @@ def _read_fixture(path: str) -> object:
         sys.exit(1)
 
 
-def fetch_release(tag: str) -> dict:
-    data = _gh_json(
-        ["api", f"repos/{{owner}}/{{repo}}/releases/tags/{tag}"]
-    )
+def fetch_release(tag: str, fixture: str | None = None) -> dict:
+    """One published release. `fixture` reads it from a JSON file
+    instead of `gh` — a list, from which the entry carrying `tag`
+    is taken, so ONE fixture shape serves both modes."""
+    if fixture is not None:
+        entries = _read_fixture(fixture)
+        if not isinstance(entries, list):
+            print(
+                "changelog-sync: the releases fixture is not a "
+                "list.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        matches = [
+            item
+            for item in entries
+            if isinstance(item, dict)
+            and item.get("tag_name") == tag
+        ]
+        if len(matches) != 1:
+            print(
+                f"changelog-sync: the releases fixture carries "
+                f"{len(matches)} release(s) tagged {tag}; expected "
+                "exactly one.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        data: object = matches[0]
+    else:
+        data = _gh_json(
+            ["api", f"repos/{{owner}}/{{repo}}/releases/tags/{tag}"]
+        )
     if not isinstance(data, dict):
         print(
             f"changelog-sync: no release found for {tag}.",
@@ -460,6 +488,15 @@ def parse_release_body(
 # Entries
 
 
+# The suffix `scripts/build-app.sh` gives a disk image whose
+# notarization ticket did not staple. Named rather than inline so
+# `UnnotarizedSuffixParityTests` can hold this reader against the
+# packager, the way it already holds `appcast-sync`'s
+# `_UNNOTARIZED` — that suite is the one authority on the
+# convention, and a bare literal here is a reader it cannot see.
+_UNNOTARIZED = "-unnotarized.dmg"
+
+
 def download_url(release: dict) -> str | None:
     """The release's OWN disk-image URL, read off the API's asset
     list rather than composed from the version.
@@ -475,15 +512,18 @@ def download_url(release: dict) -> str | None:
     (`docs/design-decisions.md` ▸ *No distribution channel
     without an update path*).
 
-    `-unnotarized.dmg` is REFUSED rather than ranked below the
-    plain name. `release.yml` renames the notarized image ONTO
-    the plain name, so that sibling exists only when something
-    went wrong; ranking would quietly publish an unnotarized
-    download the first time both are present, and Gatekeeper
-    tells the downloader the app is damaged."""
+    An `-unnotarized.dmg` is REFUSED rather than ranked below the
+    plain name. `scripts/build-app.sh` decides which of the two
+    names a finished image gets (`require_stapled_or_rename`), so
+    the suffixed one exists ONLY when stapling failed; ranking
+    would quietly promote it the first time it stood alone, and
+    Gatekeeper then tells the downloader the app is damaged.
+    `.claude/rules/packaging-and-release.md` owns that convention
+    and `UnnotarizedSuffixParityTests` guards the spelling."""
     assets = release.get("assets")
     if not isinstance(assets, list):
         return None
+    found: list[str] = []
     for asset in assets:
         if not isinstance(asset, dict):
             continue
@@ -491,11 +531,21 @@ def download_url(release: dict) -> str | None:
         url = asset.get("browser_download_url")
         if not name.endswith(".dmg"):
             continue
-        if name.endswith("-unnotarized.dmg"):
+        if name.endswith(_UNNOTARIZED):
             continue
         if isinstance(url, str) and url:
-            return url
-    return None
+            found.append(url)
+    # Exactly one, or none — the sibling generator's
+    # `archive_asset` refuses ambiguity for the same reason.
+    # `release.yml` already anticipates a legitimate second
+    # artifact ("per-arch zips are plausible"), and a per-arch
+    # image pair is that shape: promoting whichever GitHub happened
+    # to list first would make the front-page download a coin flip
+    # between architectures, with nothing failing anywhere.
+    # Offering none is recoverable; offering the wrong one is not.
+    if len(found) != 1:
+        return None
+    return found[0]
 
 
 def build_entry(
@@ -720,9 +770,16 @@ def run_all(
     return 0
 
 
-def run_release(tag: str, check: bool) -> int:
+def run_release(
+    tag: str,
+    check: bool,
+    releases: str | None = None,
+    output: str | None = None,
+) -> int:
     try:
-        entry, _ = build_entry(fetch_release(tag), strict=True)
+        entry, _ = build_entry(
+            fetch_release(tag, releases), strict=True
+        )
     except NotesError as error:
         return _report(error)
     if check:
@@ -734,7 +791,7 @@ def run_release(tag: str, check: bool) -> int:
         if existing["tag"] != entry["tag"]
     ]
     entries.append(entry)
-    write(entries)
+    write(entries, output)
     return 0
 
 
@@ -776,13 +833,13 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--releases",
         metavar="FILE",
-        help="with --all: read the releases from a JSON fixture "
-        "instead of `gh`",
+        help="read the releases from a JSON fixture instead of "
+        "`gh` (both --all and --release)",
     )
     parser.add_argument(
         "--output",
         metavar="PATH",
-        help="with --all: write here instead of "
+        help="write here instead of "
         "site/src/data/changelog.json; `-` is stdout, and then "
         "stdout carries the document and nothing else",
     )
@@ -792,7 +849,9 @@ def main(argv: list[str]) -> int:
         return run_body(args.body)
     if args.all:
         return run_all(args.check, args.releases, args.output)
-    return run_release(args.release, args.check)
+    return run_release(
+        args.release, args.check, args.releases, args.output
+    )
 
 
 if __name__ == "__main__":

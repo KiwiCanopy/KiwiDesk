@@ -1,16 +1,21 @@
 import Foundation
 import Testing
 
-/// One naming convention, three programs (#968).
+/// One naming convention, four programs (#968, #904).
 ///
 /// `-unnotarized` is what `scripts/build-app.sh` renames an
 /// artifact to when it cannot prove the bundle was stapled, and
 /// two other programs read that name back:
 /// `.github/workflows/release.yml` derives the superseded
 /// sibling from it so a re-run's draft carries one artifact
-/// rather than two, and `scripts/appcast-sync` refuses an
+/// rather than two, `scripts/appcast-sync` refuses an
 /// archive wearing it so Sparkle is never offered an update it
-/// would download in full and then reject.
+/// would download in full and then reject, and
+/// `scripts/changelog-sync` refuses a disk image wearing it so
+/// the site never promotes one as its front-page download
+/// (#904) — the reader with the worst failure, because a
+/// stranger who downloads it is told by Gatekeeper that the app
+/// is damaged, and the site deploys independently of any tag.
 ///
 /// Past two mirrors of one string,
 /// `.claude/rules/parity-tests.md` asks for a forget-proof test
@@ -123,6 +128,20 @@ struct UnnotarizedSuffixParityTests {
         #expect(
             sync.contains(#"_UNNOTARIZED = "\#(suffix).zip""#),
             "appcast-sync refuses a suffix the packager does not write"
+        )
+
+        // The site's promoted download refuses a disk image
+        // wearing it. `.dmg` rather than `.zip`: this reader
+        // watches the image, not the Sparkle archive.
+        let changelog = try String(
+            contentsOf: scriptFixtureRepoRoot()
+                .appendingPathComponent("scripts")
+                .appendingPathComponent("changelog-sync"),
+            encoding: .utf8
+        )
+        #expect(
+            changelog.contains(#"_UNNOTARIZED = "\#(suffix).dmg""#),
+            "changelog-sync refuses a suffix the packager does not write"
         )
     }
 }

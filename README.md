@@ -22,7 +22,7 @@ Powerful when you reach for it, never in your way.
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
 [![License MIT](https://img.shields.io/badge/License-MIT-8DB354)](LICENSE)
-[![Public beta](https://img.shields.io/badge/Public_beta-Homebrew-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
+[![Homebrew](https://img.shields.io/badge/Homebrew-cask-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
 [![Direct download](https://img.shields.io/badge/Direct_download-.dmg-8DB354)](https://kiwidesk.kiwicanopy.com/)
 
 <br>
@@ -37,7 +37,7 @@ Powerful when you reach for it, never in your way.
 <!-- Add a screenshot or demo GIF here once one is captured. -->
 <!-- Add a short demo video here once one is recorded. -->
 
-> **Status: public beta, on Homebrew.** The core (layouts, Lua
+> **Status: public beta.** The core (layouts, Lua
 > config, CLI, profiles, per-Desktop profiles, per-space window
 > hiding) and the SwiftUI Settings app are functional.
 > Install it with the Homebrew cask below, or download the
@@ -118,7 +118,7 @@ different formula — no tree surgery, no lost state.
 
 ## Installation
 
-Requirements: macOS 14 or later.
+Requirements: macOS 14 or later, on Apple silicon.
 
 ```sh
 brew install --cask kiwicanopy/tap/kiwidesk
@@ -126,9 +126,9 @@ brew install --cask kiwicanopy/tap/kiwidesk
 
 Or **[download the `.dmg`](https://kiwidesk.kiwicanopy.com/)** and
 drag KiwiDesk into your Applications folder. It is the same
-signed, notarized build; what the cask adds is the `kiwidesk` CLI
-on your `PATH` — see [the CLI guide](docs/cli.md) for putting it
-there after a `.dmg` install.
+signed, notarized app; what the cask adds is a link putting the
+`kiwidesk` CLI on your `PATH` — see [the CLI guide](docs/cli.md)
+for making that link yourself after a `.dmg` install.
 
 The cask installs the app and puts the `kiwidesk` CLI on your
 `PATH`. It ships from this project's own tap

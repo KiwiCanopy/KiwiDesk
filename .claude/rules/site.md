@@ -225,16 +225,33 @@ is not tidiness: the site deploys independently of any tag, so a
 composed `…/download/<tag>/KiwiDesk-<version>.dmg` is correct
 only while the release workflow keeps passing `--dmg` — one edit
 away from a first-class button that 404s, on a page nothing
-re-publishes. This is also the one place *grey, don't hide* does
-not apply. A dimmed button still makes a download's promise, and
-the fallback here is Homebrew alone, which is a complete install
-path rather than a degraded one — so the affordance is omitted
-outright. `ChangelogDownloadTests` holds all of it, including
-that an `-unnotarized.dmg` is REFUSED rather than ranked below
-the plain name: `release.yml` renames the good image onto that
-plain name, so the sibling exists only when something went
-wrong, and ranking would publish it the first time it stood
-alone.
+re-publishes.
+
+**Omit a download affordance rather than dimming one**, which is
+where *grey, don't hide* stops: a dimmed button still makes a
+download's promise, and the fallback is Homebrew alone — a
+complete install path rather than a degraded one. That reaches
+the PROSE too. A sentence naming a download the page does not
+carry promises exactly what the button would, so copy pointing
+at one is gated with it or written to stand without it.
+
+Two guards, each holding its own half, because neither can hold
+the other's. `ChangelogDownloadTests` holds what
+`changelog-sync` writes — the URL is the asset's own, an
+`-unnotarized.dmg` is refused rather than ranked, two candidate
+images promote neither, and the field is absent rather than
+empty. `scripts/check-site-tokens.py` ▸ `check_promoted_download`
+holds what the BUILT pages then do with it, in both directions:
+every landing page offers the recorded download, and no page
+links a disk image the data does not name. That one lives on the
+site gate for the reason the feed check does — `site/**` is on
+`.github/ci-ignore.txt`, so a Swift suite could not fire for the
+edit it watches, and `CiPathFilterTests` refuses that placement.
+
+The refusal's spelling is not this file's to state: the packager
+decides which of the two names a finished image gets, and
+`UnnotarizedSuffixParityTests` is the one authority holding every
+reader to it.
 
 **A path joins `sitemap.xml.ts`'s `paths` only once its `/de/` and
 `/ja/` routes exist.** Every entry there is emitted for all three

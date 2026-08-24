@@ -26,7 +26,7 @@ import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import { layoutDiagram } from "../lib/layoutDiagram";
-import changelog from "../data/changelog.json";
+import { downloadHref, downloadVersion } from "../lib/download";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
 
@@ -70,24 +70,6 @@ const buildCmd =
 // `brew install --cask kiwidesk` — a one-line edit here.
 const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
 
-// The promoted direct download (#904). The URL is the newest
-// published release's OWN `.dmg` asset, recorded by
-// `scripts/changelog-sync` off the releases API — never composed
-// here from a version string. A composed filename is one
-// release-workflow edit away from pointing at bytes that do not
-// exist, and the site deploys independently of any tag, so the
-// button would 404 on a page nothing re-publishes.
-//
-// `null` where no published release carries a disk image, and
-// every download affordance below is then omitted ENTIRELY rather
-// than disabled. This is the one place "grey, don't hide" does
-// not apply: a dimmed button still makes a download's promise,
-// and the fallback — Homebrew alone — is a complete install path
-// rather than a degraded one.
-const downloadHref: string | null =
-  (changelog.releases as { download?: string }[]).find(
-    (release) => typeof release.download === "string" && release.download,
-  )?.download ?? null;
 
 // A crisp kiwi-slice glyph (green skin, pale flesh ring, small
 // core, a ring of seed dots) for the mode toggle — drawn rather
@@ -125,6 +107,21 @@ const layouts = [
   { name: "floating", label: "Floating", desc: t.layout_floating },
 ];
 
+// The Simple-mode perks under the before/after pair. Two
+// papercuts KiwiDesk actually solves, then the trust claims —
+// "will it fight my Mac", "will I have to configure it", "can I
+// use it without a mouse" — which answer a different question
+// from "does it fix something" and are the reason the list is not
+// four grievances in a row.
+const perks = [
+  t.calm_point_1,
+  t.calm_point_2,
+  t.calm_point_3,
+  t.calm_point_4,
+  t.calm_point_5,
+  t.calm_point_6,
+];
+
 // The three friendly "how it works" steps (Simple mode).
 const steps = [
   { n: "1", title: t.how_1_title, body: t.how_1_body },
@@ -158,6 +155,16 @@ const jsonLd = [
     image: ogImageURL,
     inLanguage: lang,
     isAccessibleForFree: true,
+    softwareRequirements: "macOS 14 or later, Apple silicon",
+    // Spread rather than set: a release published without a disk
+    // image must leave these OUT of the graph entirely, the same
+    // rule the page's own affordances follow. A `downloadUrl`
+    // pointing at bytes that were never published is the machine
+    // -readable version of the button that 404s.
+    ...(downloadHref
+      ? { downloadUrl: downloadHref, installUrl: downloadHref }
+      : {}),
+    ...(downloadVersion ? { softwareVersion: downloadVersion } : {}),
     offers: {
       "@type": "Offer",
       price: "0",
@@ -474,7 +481,8 @@ const jsonLd = [
                  published disk image the guide link returns — the
                  fallback is a whole install path, not a stub. */}
             {downloadHref ? (
-              <a class="btn btn--primary" href={downloadHref}>
+              <a class="btn btn--primary" href={downloadHref}
+                aria-describedby="heroReq">
                 {t.download_cta}
               </a>
             ) : (
@@ -493,7 +501,7 @@ const jsonLd = [
             </a>
           </div>
           {downloadHref && (
-            <p class="req req--center">
+            <p class="req req--center" id="heroReq">
               <Icon name="lucide:shield" width={15} height={15}
                 aria-hidden="true" />
               {t.download_req}
@@ -670,34 +678,15 @@ const jsonLd = [
           </div>
         </div>
         <ul class="perks reveal">
-          <li>
-            <span class="perks__check" aria-hidden="true">
-              <Icon name="lucide:check" width={14} height={14}
-                aria-hidden="true" />
-            </span>
-            {t.calm_point_1}
-          </li>
-          <li>
-            <span class="perks__check" aria-hidden="true">
-              <Icon name="lucide:check" width={14} height={14}
-                aria-hidden="true" />
-            </span>
-            {t.calm_point_2}
-          </li>
-          <li>
-            <span class="perks__check" aria-hidden="true">
-              <Icon name="lucide:check" width={14} height={14}
-                aria-hidden="true" />
-            </span>
-            {t.calm_point_3}
-          </li>
-          <li>
-            <span class="perks__check" aria-hidden="true">
-              <Icon name="lucide:check" width={14} height={14}
-                aria-hidden="true" />
-            </span>
-            {t.calm_point_4}
-          </li>
+          {perks.map((point) => (
+            <li>
+              <span class="perks__check" aria-hidden="true">
+                <Icon name="lucide:check" width={14} height={14}
+                  aria-hidden="true" />
+              </span>
+              {point}
+            </li>
+          ))}
         </ul>
       </div>
     </section>
@@ -853,11 +842,14 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <Icon name="lucide:arrow-right" width={16} height={16}
               aria-hidden="true" />
           </a>
-          <p class="req">
-            <Icon name="lucide:shield" width={15} height={15}
-              aria-hidden="true" />
-            {t.download_req}
-          </p>
+          {/* The note describes the disk image, so it is gated
+               with it: a sentence makes a download's promise
+               exactly as a dimmed button would — see
+               .claude/rules/site.md ▸ a promoted download link.
+               The REQUIREMENT line is not here at all; it belongs
+               beside the install affordances in the other column,
+               not beside "Read the Docs". */}
+          {downloadHref && <p class="quickstart__note">{t.build_download_note}</p>}
         </div>
         <div class="quickstart__codes">
           <div class="code" aria-label={t.install_code_aria}>
@@ -892,12 +884,24 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                already removed once. */}
           {downloadHref && (
             <a class="btn btn--ghost quickstart__download"
-              href={downloadHref}>
+              href={downloadHref} aria-describedby="startReq">
               <Icon name="lucide:download" width={16} height={16}
                 aria-hidden="true" />
               {t.download_cta}
             </a>
           )}
+
+          {/* Exactly one of the two renders. With a disk image the
+               line also carries the notarization fact, which is
+               about that artifact; without one only the
+               requirement remains, which is true of Homebrew
+               too — so the section never states it twice and
+               never drops it. */}
+          <p class="req" id="startReq">
+            <Icon name="lucide:shield" width={15} height={15}
+              aria-hidden="true" />
+            {downloadHref ? t.download_req : t.build_req}
+          </p>
 
           <details class="quickstart__alt">
             <summary>
@@ -938,7 +942,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         <div class="cta-band__inner reveal">
           <span class="eyebrow">{t.cta_eyebrow}</span>
           <h2>{t.cta_title}</h2>
-          <p>{t.cta_body}</p>
+          <p>{downloadHref ? t.cta_body_download : t.cta_body}</p>
           <div class="hero__cta">
             {/* The install bridge, shown in BOTH modes. In Nerd
                  mode #start is already visible and this is a plain
@@ -958,7 +962,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                  takes the primary slot back. */}
             {downloadHref ? (
               <>
-                <a class="btn btn--primary simple-only" href={downloadHref}>
+                <a class="btn btn--primary simple-only" href={downloadHref}
+                  aria-describedby="ctaReq">
                   {t.download_cta}
                 </a>
                 <a class="btn btn--ghost simple-only"
@@ -992,14 +997,16 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
               {t.footer_kofi}
             </a>
           </div>
+          {downloadHref && (
+            <p class="req req--center" id="ctaReq">
+              <Icon name="lucide:shield" width={15} height={15}
+                aria-hidden="true" />
+              {t.download_req}
+            </p>
+          )}
           <blockquote class="quote-aside quote-aside--center">
             <p>{oq}{t.quote_cta}{cq}</p>
           </blockquote>
-          <p class="req req--center">
-            <Icon name="lucide:shield" width={15} height={15}
-              aria-hidden="true" />
-            {t.download_req}
-          </p>
         </div>
       </div>
     </section>

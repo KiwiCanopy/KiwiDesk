@@ -37,7 +37,7 @@ import ogBannerEn from "../assets/brand/og-banner.jpg";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import { layoutDiagram } from "../lib/layoutDiagram";
-import changelog from "../data/changelog.json";
+import { downloadHref } from "../lib/download";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
 import "../styles/learn.css";
@@ -74,16 +74,6 @@ const makerProfile = "https://github.com/hajiboy95";
 // long form", never to a broken command.
 const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
 
-// The promoted direct download (#904) — the newest published
-// release's OWN `.dmg` asset, recorded by `scripts/changelog-sync`
-// off the releases API rather than composed from a version here.
-// `null` where no published release carries one, and the download
-// is then omitted entirely; Landing.astro derives it the same way
-// and carries the full argument.
-const downloadHref: string | null =
-  (changelog.releases as { download?: string }[]).find(
-    (release) => typeof release.download === "string" && release.download,
-  )?.download ?? null;
 // Homebrew's own installer, for the "don't have brew yet?" case.
 const brewCmd =
   '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com' +
@@ -541,8 +531,6 @@ const jsonLd = [
                         height={16} aria-hidden="true" />
                       {s.download_cta}
                     </a>
-                    <p class="learn-install__source"
-                      >{s.download_req}</p>
                   </>
                 )}
 

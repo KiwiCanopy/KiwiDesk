@@ -654,49 +654,44 @@
   border-radius: 5px;
   border: 1px solid var(--tile-stroke);
 }
-/* Both sides draw the SAME five windows, and BOTH sides are tidy.
-   These blocks used to be scattered-vs-tidy rectangles, which is
-   the "your screen is messy" argument drawn — retired, because a
-   papercut is the better before and tidiness was never why anyone
-   wants this. The reader's real before is not chaos, it is doing
-   it by hand without knowing there was another way.
+/* Both sides draw the SAME five windows, and neither side is a
+   mess. These blocks used to be scattered-vs-tidy rectangles,
+   which is the "your screen is untidy" argument drawn — retired,
+   because tidiness is an aesthetic complaint and nobody goes
+   looking for a window manager over one.
 
-   So the story the two frames tell is the green button: press it
-   and the window LEAVES, taking the screen with it while the rest
-   of your day sits a swipe away. Before = one window alone on an
-   empty plane, the other four exiled past the right edge and
-   clipped by the frame's own `overflow: hidden`. After = the same
-   five, sharing one screen.
+   What the pair argues now is LABOUR. Before: you placed these
+   yourself, so they are close but never right — mismatched
+   heights, a gap you did not ask for, one window lapping over
+   its neighbour. After: the same five, sized to fit, edge to
+   edge. The reader's real "before" is not chaos, it is doing it
+   by hand and not realising there was another way, and that is
+   what a not-quite-right arrangement looks like.
 
-   The exiled four are told apart by POSITION, CLIPPING and
-   OPACITY, never by hue alone — a colour-only distinction is the
-   one a colour-vision deficiency erases, and it is carrying real
-   meaning here. */
+   The difference is FIT, never neatness — so keep the before
+   card's windows large and deliberate. Shrinking them back into
+   scattered confetti restates the retired claim. */
 .ba__art--before span {
   background: var(--tile-fill);
 }
-/* The window you pressed the button on: alone, and filling the
-   Desktop it was just given. */
-.ba__art--before span:nth-child(1) { left: 12%; top: 10%; width: 76%; height: 80%; }
-/* Everything you were using a moment ago — off the edge, half
-   drawn, still open. */
-.ba__art--before span:nth-child(2) { left: 92%; top: 10%; width: 22%; height: 36%; opacity: 0.5; }
-.ba__art--before span:nth-child(3) { left: 92%; top: 52%; width: 22%; height: 38%; opacity: 0.5; }
-.ba__art--before span:nth-child(4) { left: 99%; top: 22%; width: 20%; height: 30%; opacity: 0.32; }
-.ba__art--before span:nth-child(5) { left: 99%; top: 60%; width: 20%; height: 26%; opacity: 0.32; }
+.ba__art--before span:nth-child(1) { left: 4%; top: 10%; width: 40%; height: 52%; }
+.ba__art--before span:nth-child(2) { left: 40%; top: 16%; width: 34%; height: 44%; }
+.ba__art--before span:nth-child(3) { left: 76%; top: 10%; width: 20%; height: 34%; }
+.ba__art--before span:nth-child(4) { left: 8%; top: 66%; width: 30%; height: 26%; }
+.ba__art--before span:nth-child(5) { left: 44%; top: 64%; width: 46%; height: 30%; }
 .ba__art--after span {
   background: var(--tile-fill-accent);
 }
-/* The same window, still the big one — but the other four never
-   went anywhere, and all five are inside the frame. Every one is
-   fully drawn: an invisible or clipped tile here would quietly
-   restate the before, which is the whole thing this pair exists
-   to contrast. */
-.ba__art--after span:nth-child(1) { left: 5%; top: 12%; width: 58%; height: 76%; }
-.ba__art--after span:nth-child(2) { left: 67%; top: 12%; width: 28%; height: 17%; }
-.ba__art--after span:nth-child(3) { left: 67%; top: 32%; width: 28%; height: 17%; }
-.ba__art--after span:nth-child(4) { left: 67%; top: 52%; width: 28%; height: 17%; }
-.ba__art--after span:nth-child(5) { left: 67%; top: 72%; width: 28%; height: 16%; }
+/* Edge to edge, no gaps, no overlap — the same five windows the
+   before card draws, each one simply the size it should be.
+   All five are fully drawn and inside the frame; the gutters are
+   equal (3% between the columns, 4% between the rows) because
+   an uneven one here reads as the before card's defect. */
+.ba__art--after span:nth-child(1) { left: 4%; top: 10%; width: 44%; height: 52%; }
+.ba__art--after span:nth-child(2) { left: 4%; top: 66%; width: 44%; height: 24%; }
+.ba__art--after span:nth-child(3) { left: 51%; top: 10%; width: 45%; height: 24%; }
+.ba__art--after span:nth-child(4) { left: 51%; top: 38%; width: 45%; height: 24%; }
+.ba__art--after span:nth-child(5) { left: 51%; top: 66%; width: 45%; height: 24%; }
 
 .perks {
   list-style: none;

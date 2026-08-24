@@ -59,6 +59,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
 import pathlib
 import re
 import sys
@@ -387,6 +388,107 @@ def check_appcast(dist: pathlib.Path) -> None:
     )
 
 
+def check_promoted_download(dist: pathlib.Path) -> None:
+    """The download the site promotes is the one the data names,
+    and nothing promotes a download the data does not carry
+    (#904).
+
+    This lives on the SITE gate rather than in a Swift suite for
+    the reason `check_appcast` does: `site/**` is on
+    `.github/ci-ignore.txt`, so a change confined to the site
+    skips the macOS jobs — and a change confined to the site is
+    exactly the one that could drop the button or point it
+    somewhere else. `CiPathFilterTests` refuses the other
+    placement outright.
+
+    It reads the BUILT pages, not the components: a guard over
+    rendered output that greps the source proves the source says
+    something, never that a visitor receives it.
+
+    Both directions matter, and the second is the one that
+    cannot be recovered from. With a `download` recorded, every
+    locale's landing page must actually offer it — a silent drop
+    is a site that went back to Homebrew-only with nothing
+    reporting it. Without one, NO page may show a download
+    affordance, because a link composed or hard-coded anywhere
+    would be pointing at bytes that were never published.
+    """
+    data = REPO / "site" / "src" / "data" / "changelog.json"
+    try:
+        releases = json.loads(
+            data.read_text(encoding="utf-8")
+        )["releases"]
+    except (OSError, KeyError, json.JSONDecodeError) as error:
+        fail(f"cannot read {data} ({error})")
+        return
+    promoted = next(
+        (
+            r["download"]
+            for r in releases
+            if isinstance(r.get("download"), str) and r["download"]
+        ),
+        None,
+    )
+
+    # Landing pages are found by a marker only `Landing.astro`
+    # emits, never by enumerating locales: `site/**` already
+    # hand-lists the locale set in about a dozen places
+    # (`docs/translating.md` owns that grep), and a thirteenth
+    # would let a new locale ship an unchecked page silently.
+    every = sorted(dist.rglob("index.html"))
+    html = {p: p.read_text(encoding="utf-8") for p in every}
+    landing = [p for p in every if 'id="modeToggle"' in html[p]]
+    guides = [p for p in every if 'class="learn-install"' in html[p]]
+    pages = landing + [p for p in guides if p not in landing]
+    if not landing:
+        fail(
+            "no built landing pages found — the marker this "
+            "check finds them by has moved"
+        )
+        return
+
+    # Any .dmg link at all — so a hard-coded or composed one is
+    # caught, not only the recorded URL.
+    dmg = re.compile(r'href="([^"]+\.dmg)"')
+    for page in pages:
+        found = set(dmg.findall(html[page]))
+        rel = page.relative_to(dist)
+        if promoted is None:
+            if found:
+                fail(
+                    f"{rel} offers a download ({sorted(found)}) "
+                    "while changelog.json records none — a "
+                    "promoted link must come from the release's "
+                    "own asset list"
+                )
+            continue
+        stray = found - {promoted}
+        if stray:
+            fail(
+                f"{rel} links a disk image the data does not "
+                f"name: {sorted(stray)}"
+            )
+    if promoted is not None:
+        missing = [
+            str(p.relative_to(dist))
+            for p in landing
+            if promoted not in html[p]
+        ]
+        if missing:
+            fail(
+                "these landing pages do not offer the promoted "
+                f"download: {missing}"
+            )
+        print(
+            f"promoted download {promoted} offered on "
+            f"{len(landing)} landing page(s)"
+        )
+    else:
+        print(
+            "no promoted download recorded; no page offers one"
+        )
+
+
 def check_sitemaps_disjoint(dist: pathlib.Path) -> None:
     """The site ships two sitemaps, and they must not overlap.
 
@@ -551,6 +653,7 @@ def main() -> None:
     dist = pathlib.Path(args.dist).resolve()
     check_branded_404(dist)
     check_appcast(dist)
+    check_promoted_download(dist)
     check_sitemaps_disjoint(dist)
     check_var_references(dist)
 
