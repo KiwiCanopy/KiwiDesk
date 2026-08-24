@@ -390,8 +390,7 @@ def check_appcast(dist: pathlib.Path) -> None:
 
 def check_promoted_download(dist: pathlib.Path) -> None:
     """The download the site promotes is the one the data names,
-    and nothing promotes a download the data does not carry
-    (#904).
+    and nothing offers a download the data does not carry (#904).
 
     This lives on the SITE gate rather than in a Swift suite for
     the reason `check_appcast` does: `site/**` is on
@@ -405,32 +404,39 @@ def check_promoted_download(dist: pathlib.Path) -> None:
     rendered output that greps the source proves the source says
     something, never that a visitor receives it.
 
-    Two directions, and they are asserted over different things
-    on purpose:
+    Two directions, asserted over different things on purpose:
 
-    - **Offered.** Every landing page must carry the recorded URL
-      as an anchor `href`. Asserting it merely APPEARS on the
-      page is vacuous — the JSON-LD graph embeds the same URL as
-      metadata, so a page that had lost every button would still
-      contain the string and pass. The first draft of this check
-      did exactly that.
-    - **No strays.** Every `.dmg` URL anywhere in the page —
-      anchors, JSON-LD, inline scripts, data attributes — must be
-      the recorded one, and where nothing is recorded there must
-      be none at all. That direction is the unrecoverable one: a
-      composed or hard-coded link points at bytes that were never
-      published, and it is checked on EVERY built page rather
-      than on the two kinds found by marker, because a page that
-      grows a download later would otherwise be unwatched.
+    - **Offered.** Every landing and guide page must carry the
+      promoted URL as an anchor `href`. Asserting it merely
+      APPEARS on the page is vacuous — the JSON-LD graph embeds
+      the same URL as metadata, so a page that had lost every
+      button would still contain the string and pass. The first
+      draft of this check did exactly that.
+    - **No strays.** Every `.dmg` URL anywhere in any built page
+      — anchors, JSON-LD, inline scripts, data attributes — must
+      be one the data RECORDS. Not the promoted one: the
+      changelog page offers each release its own image, so the
+      second release to ship one would otherwise fail this check
+      inside `changelog.yml`'s own build step and strand the
+      notes and the appcast on the release that just published.
+      Membership is the rule; equality belongs only to the pages
+      that promote.
+
+    **The promoted release is chosen by DATE here, deliberately
+    not by position.** `download.ts` takes the first entry with a
+    download because `changelog-sync` emits newest-first; if this
+    guard re-derived it the same way, both would pick the same
+    wrong release the day that ordering changed and stay green.
+    Picking independently is what makes the agreement evidence.
 
     What it does not see, stated rather than implied: presence is
-    per PAGE, not per affordance. A landing page carrying three
-    download buttons still passes with two of them removed. The
-    page-level question — did this locale stop offering the
-    download at all — is the one whose failure is silent and
-    total; a single button lost among several is a visible layout
-    change that review catches. Widening to a per-site count
-    would pin a number that legitimately moves.
+    per PAGE, not per affordance. A page carrying three download
+    buttons still passes with two removed. The page-level
+    question — did this locale stop offering the download at all
+    — is the one whose failure is silent and total; a single
+    button lost among several is a visible layout change that
+    review catches. A per-site count would pin a number that
+    legitimately moves.
     """
     data = REPO / "site" / "src" / "data" / "changelog.json"
     try:
@@ -440,13 +446,20 @@ def check_promoted_download(dist: pathlib.Path) -> None:
     except (OSError, KeyError, json.JSONDecodeError) as error:
         fail(f"cannot read {data} ({error})")
         return
-    promoted = next(
-        (
-            r["download"]
-            for r in releases
-            if isinstance(r.get("download"), str) and r["download"]
-        ),
-        None,
+
+    carriers = [
+        r
+        for r in releases
+        if isinstance(r.get("download"), str) and r["download"]
+    ]
+    recorded = {r["download"] for r in carriers}
+    # Newest by date, independently of the order the file is in.
+    promoted = (
+        max(carriers, key=lambda r: str(r.get("date", "")))[
+            "download"
+        ]
+        if carriers
+        else None
     )
 
     # Landing and guide pages are found by markers only their own
@@ -458,36 +471,27 @@ def check_promoted_download(dist: pathlib.Path) -> None:
     html = {p: p.read_text(encoding="utf-8") for p in every}
     landing = [p for p in every if 'id="modeToggle"' in html[p]]
     guides = [p for p in every if "learn-install" in html[p]]
-    if not landing:
-        fail(
-            "no built landing pages found — the marker this "
-            "check finds them by has moved"
-        )
-        return
-    if not guides:
-        fail(
-            "no built guide pages found — the marker this check "
-            "finds them by has moved"
-        )
-        return
+    for label, pages in (("landing", landing), ("guide", guides)):
+        if not pages:
+            fail(
+                f"no built {label} pages found — the marker this "
+                "check finds them by has moved"
+            )
+            return
 
-    # Anchors, for "is it actually offered".
     anchor = re.compile(r'href="([^"]*\.dmg)"')
-    # Anything at all, for "is anything else offered" — this one
-    # deliberately sees JSON-LD and scripts too.
     anywhere = re.compile(r'https?://[^\s"\'<>\\]+\.dmg')
 
     for page in every:
-        rel = page.relative_to(dist)
         strays = {
             url
             for url in anywhere.findall(html[page])
-            if url != promoted
+            if url not in recorded
         }
         if strays:
             fail(
-                f"{rel} names a disk image the data does not "
-                f"record: {sorted(strays)}"
+                f"{page.relative_to(dist)} names a disk image the "
+                f"data does not record: {sorted(strays)}"
             )
 
     if promoted is None:
@@ -496,18 +500,18 @@ def check_promoted_download(dist: pathlib.Path) -> None:
 
     missing = [
         str(p.relative_to(dist))
-        for p in landing
+        for p in landing + guides
         if promoted not in set(anchor.findall(html[p]))
     ]
     if missing:
         fail(
-            "these landing pages do not link the promoted "
-            f"download: {missing}"
+            "these pages do not link the promoted download: "
+            f"{missing}"
         )
     print(
         f"promoted download {promoted} linked from "
-        f"{len(landing)} landing page(s), "
-        f"{len(guides)} guide page(s) checked"
+        f"{len(landing)} landing and {len(guides)} guide page(s); "
+        f"{len(recorded)} recorded image(s) allowed elsewhere"
     )
 
 

@@ -17,6 +17,31 @@ paths:
 
 Canonical for this subsystem (AGENTS.md §5 indexes it).
 
+
+## The architecture claim travels with the build
+
+**A published requirement naming an architecture is a claim about
+the artifact, so it moves in the same change set as anything that
+could change what the artifact runs on.** As of #904 the site,
+`README.md`, `docs/index.md` and the landing page's JSON-LD all
+say *Apple silicon*, and they say it because `build-app.sh`
+passes no arch flag while the release workflow builds on an
+arm64 runner — two facts with nothing connecting them and no
+guard over either.
+
+The asymmetry is what earns the rule. While the cask was the only
+install path its `depends_on arch: :arm64` refused an Intel
+machine outright; a promoted download has no such gate, so the
+sentence on the page IS the gate. Ship a universal binary and six
+places quietly under-promise; move to an Intel runner and they
+lie, in the direction that hands a stranger an app that will not
+launch.
+
+So: changing the arch the release builds for is not done until
+those readers are changed with it. `docs/design-decisions.md` ▸
+*Two install paths* owns why the download exists; this owns what
+it must keep telling the truth about.
+
 ## Building the `.app`
 
 `./scripts/build-app.sh` (#89). SwiftPM cannot emit a bundle, so

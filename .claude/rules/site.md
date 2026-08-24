@@ -219,9 +219,7 @@ and has no guard.
 **A promoted download link is read off the release's own asset
 list, never composed from a version (#904).** `changelog-sync`
 records a `download` field only where a published release
-actually carries a notarized `.dmg`, and every download
-affordance renders only where that field is present. The reason
-is not tidiness: the site deploys independently of any tag, so a
+actually carries a notarized `.dmg`. The reason is not tidiness: the site deploys independently of any tag, so a
 composed `…/download/<tag>/KiwiDesk-<version>.dmg` is correct
 only while the release workflow keeps passing `--dmg` — one edit
 away from a first-class button that 404s, on a page nothing
@@ -242,8 +240,15 @@ the other's. `ChangelogDownloadTests` holds what
 images promote neither, and the field is absent rather than
 empty. `scripts/check-site-tokens.py` ▸ `check_promoted_download`
 holds what the BUILT pages then do with it, in both directions:
-every landing page offers the recorded download, and no page
-links a disk image the data does not name. That one lives on the
+every landing AND guide page links the promoted download, and no
+built page anywhere names a disk image the data does not record.
+Those two are deliberately different tests — the changelog page
+offers each release its OWN image, so the stray rule is
+membership in what the data records and only the promoting pages
+owe the newest one. It also picks the newest release by DATE
+rather than by position, so it does not inherit the ordering
+assumption the site's own selection makes; agreeing for the same
+reason would make the agreement worthless. That one lives on the
 site gate for the reason the feed check does — `site/**` is on
 `.github/ci-ignore.txt`, so a Swift suite could not fire for the
 edit it watches, and `CiPathFilterTests` refuses that placement.

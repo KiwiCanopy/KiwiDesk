@@ -544,6 +544,17 @@ def download_url(release: dict) -> str | None:
     # between architectures, with nothing failing anywhere.
     # Offering none is recoverable; offering the wrong one is not.
     if len(found) != 1:
+        if found:
+            print(
+                "changelog-sync: WARNING — this release carries "
+                f"{len(found)} candidate disk images "
+                f"({sorted(found)}); promoting none of them, "
+                "because a front-page download picked from an "
+                "ambiguous set is a coin flip nothing reports. "
+                "Publish one image per release, or teach "
+                "`download_url` which to prefer.",
+                file=sys.stderr,
+            )
         return None
     return found[0]
 
@@ -855,6 +866,20 @@ def main(argv: list[str]) -> int:
         "stdout carries the document and nothing else",
     )
     args = parser.parse_args(argv[1:])
+
+    # `--release` merges into the committed file, and that read
+    # has no seam of its own, so a fixture-driven run without an
+    # output redirect would rewrite the real corpus from test
+    # data. Refuse the combination rather than documenting it:
+    # `run_release`'s docstring explains the asymmetry, but a
+    # docstring is not what should stand between a caller and
+    # that outcome.
+    if args.release and args.releases and not args.output:
+        parser.error(
+            "--releases needs --output in --release mode: the "
+            "merge base is the committed changelog.json, so a "
+            "fixture run would rewrite it from test data"
+        )
 
     if args.body:
         return run_body(args.body)
