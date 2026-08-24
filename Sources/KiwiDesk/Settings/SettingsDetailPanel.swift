@@ -62,6 +62,12 @@ struct SettingsDetailPanel: View {
                 .padding(.bottom, 18)
             }
             .scrollIndicators(.hidden)
+            // VoiceOver lands on the scroll view as a bare
+            // "scroll area" before interacting into it (owner,
+            // #812 session 2, German "Rollbereich"); the header
+            // sentence names it so the reader knows what they
+            // are about to enter.
+            .accessibilityLabel(headerSentence)
         }
         .padding(.horizontal, 22)
         .padding(.top, 18)
@@ -72,23 +78,25 @@ struct SettingsDetailPanel: View {
         .background(SettingsTheme.panel)
     }
 
+    private var headerSentence: String {
+        L(
+            "panel.live_preview",
+            "Live preview · %1$@",
+            destination.title
+        )
+    }
+
     private var header: some View {
         HStack(spacing: 10) {
-            Text(
-                L(
-                    "panel.live_preview",
-                    "Live preview · %1$@",
-                    destination.title
+            Text(headerSentence)
+                .font(
+                    .system(size: 10, weight: .semibold)
+                        .monospaced()
                 )
-            )
-            .font(
-                .system(size: 10, weight: .semibold)
-                    .monospaced()
-            )
-            .kerning(1.4)
-            .textCase(.uppercase)
-            .foregroundStyle(SettingsTheme.ink3)
-            .accessibilityAddTraits(.isHeader)
+                .kerning(1.4)
+                .textCase(.uppercase)
+                .foregroundStyle(SettingsTheme.ink3)
+                .accessibilityAddTraits(.isHeader)
             Spacer()
         }
     }
