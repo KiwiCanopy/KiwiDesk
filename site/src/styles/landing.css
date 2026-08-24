@@ -1182,10 +1182,13 @@ section {
   min-width: 0;
 }
 
-/* The right-hand track holds three blocks now — the Homebrew
-   install (always open, it is how the beta ships) and the
-   build-from-source disclosure beneath it. `min-width: 0` has to
-   repeat here because this wrapper is the grid child now. */
+/* The install ladder, top to bottom: the Homebrew block (always
+   open — it is how the beta ships), the direct download, the
+   build-from-source disclosure, and the requirement line under
+   all three. Descending deliberately, so the column reads as
+   "there is a way, and there are other ways" rather than as a
+   choice to make. `min-width: 0` has to repeat here because this
+   wrapper is the grid child now. */
 .quickstart__codes {
   display: flex;
   flex-direction: column;

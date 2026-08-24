@@ -776,6 +776,17 @@ def run_release(
     releases: str | None = None,
     output: str | None = None,
 ) -> int:
+    """One published release, merged into the committed file.
+
+    `releases` and `output` are the same seams `--all` takes, so
+    this mode is hermetic on the WRITE. It is not on the read:
+    the merge base is always `site/src/data/changelog.json`, with
+    no seam of its own, so a fixture-driven run emits the fixture
+    entry ALONGSIDE whatever the committed file holds, and it
+    refuses outright in a tree where that file is absent. Give it
+    a `--notes`-style seam before writing a suite that drives
+    this mode; asserting on its stdout today would be asserting
+    on the repository's own release history."""
     try:
         entry, _ = build_entry(
             fetch_release(tag, releases), strict=True

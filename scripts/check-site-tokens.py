@@ -405,13 +405,21 @@ def check_promoted_download(dist: pathlib.Path) -> None:
     rendered output that greps the source proves the source says
     something, never that a visitor receives it.
 
-    Both directions matter, and the second is the one that
-    cannot be recovered from. With a `download` recorded, every
-    locale's landing page must actually offer it — a silent drop
-    is a site that went back to Homebrew-only with nothing
-    reporting it. Without one, NO page may show a download
-    affordance, because a link composed or hard-coded anywhere
-    would be pointing at bytes that were never published.
+    Two directions, and they are asserted over different things
+    on purpose:
+
+    - **Offered.** Every landing page must carry the recorded URL
+      as an anchor `href`. Asserting it merely APPEARS on the
+      page is vacuous — the JSON-LD graph embeds the same URL as
+      metadata, so a page that had lost every button would still
+      contain the string and pass. The first draft of this check
+      did exactly that.
+    - **No strays.** Every `.dmg` URL anywhere in the page —
+      anchors, JSON-LD, inline scripts, data attributes — must be
+      the recorded one, and where nothing is recorded there must
+      be none at all. That direction is the unrecoverable one: a
+      composed or hard-coded link points at bytes that were never
+      published.
     """
     data = REPO / "site" / "src" / "data" / "changelog.json"
     try:
@@ -430,63 +438,66 @@ def check_promoted_download(dist: pathlib.Path) -> None:
         None,
     )
 
-    # Landing pages are found by a marker only `Landing.astro`
-    # emits, never by enumerating locales: `site/**` already
-    # hand-lists the locale set in about a dozen places
+    # Landing and guide pages are found by markers only their own
+    # components emit, never by enumerating locales: `site/**`
+    # already hand-lists the locale set in about a dozen places
     # (`docs/translating.md` owns that grep), and a thirteenth
     # would let a new locale ship an unchecked page silently.
-    every = sorted(dist.rglob("index.html"))
+    every = sorted(dist.rglob("*.html"))
     html = {p: p.read_text(encoding="utf-8") for p in every}
     landing = [p for p in every if 'id="modeToggle"' in html[p]]
-    guides = [p for p in every if 'class="learn-install"' in html[p]]
-    pages = landing + [p for p in guides if p not in landing]
+    guides = [p for p in every if "learn-install" in html[p]]
     if not landing:
         fail(
             "no built landing pages found — the marker this "
             "check finds them by has moved"
         )
         return
+    if not guides:
+        fail(
+            "no built guide pages found — the marker this check "
+            "finds them by has moved"
+        )
+        return
 
-    # Any .dmg link at all — so a hard-coded or composed one is
-    # caught, not only the recorded URL.
-    dmg = re.compile(r'href="([^"]+\.dmg)"')
-    for page in pages:
-        found = set(dmg.findall(html[page]))
+    # Anchors, for "is it actually offered".
+    anchor = re.compile(r'href="([^"]*\.dmg)"')
+    # Anything at all, for "is anything else offered" — this one
+    # deliberately sees JSON-LD and scripts too.
+    anywhere = re.compile(r'https?://[^\s"\'<>\\]+\.dmg')
+
+    for page in every:
         rel = page.relative_to(dist)
-        if promoted is None:
-            if found:
-                fail(
-                    f"{rel} offers a download ({sorted(found)}) "
-                    "while changelog.json records none — a "
-                    "promoted link must come from the release's "
-                    "own asset list"
-                )
-            continue
-        stray = found - {promoted}
-        if stray:
+        strays = {
+            url
+            for url in anywhere.findall(html[page])
+            if url != promoted
+        }
+        if strays:
             fail(
-                f"{rel} links a disk image the data does not "
-                f"name: {sorted(stray)}"
+                f"{rel} names a disk image the data does not "
+                f"record: {sorted(strays)}"
             )
-    if promoted is not None:
-        missing = [
-            str(p.relative_to(dist))
-            for p in landing
-            if promoted not in html[p]
-        ]
-        if missing:
-            fail(
-                "these landing pages do not offer the promoted "
-                f"download: {missing}"
-            )
-        print(
-            f"promoted download {promoted} offered on "
-            f"{len(landing)} landing page(s)"
+
+    if promoted is None:
+        print("no promoted download recorded; no page offers one")
+        return
+
+    missing = [
+        str(p.relative_to(dist))
+        for p in landing
+        if promoted not in set(anchor.findall(html[p]))
+    ]
+    if missing:
+        fail(
+            "these landing pages do not link the promoted "
+            f"download: {missing}"
         )
-    else:
-        print(
-            "no promoted download recorded; no page offers one"
-        )
+    print(
+        f"promoted download {promoted} linked from "
+        f"{len(landing)} landing page(s), "
+        f"{len(guides)} guide page(s) checked"
+    )
 
 
 def check_sitemaps_disjoint(dist: pathlib.Path) -> None:

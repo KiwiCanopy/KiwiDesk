@@ -7,7 +7,7 @@
   "build_copy_aria": "Build-Befehle kopieren",
   "build_copy_done": "Kopiert",
   "build_cta": "Zur Doku",
-  "build_download_note": "Das .dmg-Image darunter ist dieselbe signierte, notarisierte App — installierst du sie so, verlinkst du die kiwidesk-CLI danach selbst in deinen PATH, wie es die CLI-Doku beschreibt.",
+  "build_download_note": "Das signierte, notarisierte Image ist dieselbe App — installierst du sie so, verlinkst du die kiwidesk-CLI danach selbst in deinen PATH, wie es die CLI-Doku beschreibt.",
   "build_eyebrow": "Schnellstart",
   "build_req": "Erfordert macOS 14 oder neuer, auf Apple Silicon.",
   "build_source_summary": "Oder aus dem Quellcode bauen",

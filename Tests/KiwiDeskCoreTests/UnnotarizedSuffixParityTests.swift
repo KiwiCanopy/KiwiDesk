@@ -5,7 +5,7 @@ import Testing
 ///
 /// `-unnotarized` is what `scripts/build-app.sh` renames an
 /// artifact to when it cannot prove the bundle was stapled, and
-/// two other programs read that name back:
+/// three other programs read that name back:
 /// `.github/workflows/release.yml` derives the superseded
 /// sibling from it so a re-run's draft carries one artifact
 /// rather than two, `scripts/appcast-sync` refuses an

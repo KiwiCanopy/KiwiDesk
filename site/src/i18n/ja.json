@@ -7,7 +7,7 @@
   "build_copy_aria": "ビルドコマンドをコピー",
   "build_copy_done": "コピーしました",
   "build_cta": "ドキュメントを読む",
-  "build_download_note": "下にあるディスクイメージは、同じ署名・公証済みの App です。そちらで入れた場合は、kiwidesk CLI を PATH に通すリンクをご自分で作ってください。CLI のドキュメントで手順を案内しています。",
+  "build_download_note": "署名・公証済みのディスクイメージは、同じ App です。そちらで入れた場合は、kiwidesk CLI を PATH に通すリンクをご自分で作ってください。CLI のドキュメントで手順を案内しています。",
   "build_eyebrow": "クイックスタート",
   "build_req": "Apple シリコン搭載の macOS 14 以降が必要です。",
   "build_source_summary": "ソースからビルドする場合",

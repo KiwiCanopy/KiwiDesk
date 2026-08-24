@@ -7,7 +7,7 @@
   "build_copy_aria": "Copy build commands",
   "build_copy_done": "Copied",
   "build_cta": "Read the Docs",
-  "build_download_note": "The disk image below is the same signed, notarized app — after installing it that way you link the kiwidesk CLI onto your PATH yourself, which the CLI guide covers.",
+  "build_download_note": "The signed, notarized disk image is the same app — after installing it that way you link the kiwidesk CLI onto your PATH yourself, which the CLI guide covers.",
   "build_eyebrow": "Quick start",
   "build_req": "Requires macOS 14 or later, on Apple silicon.",
   "build_source_summary": "Or build it from source",
