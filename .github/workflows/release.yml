@@ -764,7 +764,8 @@ jobs:
             # so a draft left carrying both would offer a
             # download named `-unnotarized.dmg` beside the good
             # one, which Gatekeeper refuses after a real download
-            # and nothing here can see.
+            # and nothing here can see. Which of the two a person
+            # reaches for is not something to find out.
             SIBLING_DMG="$(sibling_of "$KEEP_DMG")"
             # The signature is named after the archive it signs,
             # so the rename that supersedes one supersedes the
@@ -799,14 +800,18 @@ jobs:
             fi
             while IFS= read -r asset; do
               [ -n "$asset" ] || continue
-              if { [ -n "$SIBLING" ] \
-                   && [ "$asset" = "$SIBLING" ]; } \
-                || { [ -n "$SIBLING_SIG" ] \
-                     && [ "$asset" = "$SIBLING_SIG" ]; } \
+              # No `-n` short-circuit on the three sibling
+              # names: `sibling_of` always answers, so a guard
+              # there could never be false and would read as a
+              # protection that is not one. STALE_SIG is the one
+              # genuinely empty half the time — it is set only
+              # when THIS run produced no signature — so it
+              # keeps its guard.
+              if [ "$asset" = "$SIBLING" ] \
+                || [ "$asset" = "$SIBLING_SIG" ] \
                 || { [ -n "$STALE_SIG" ] \
                      && [ "$asset" = "$STALE_SIG" ]; } \
-                || { [ -n "$SIBLING_DMG" ] \
-                     && [ "$asset" = "$SIBLING_DMG" ]; }; then
+                || [ "$asset" = "$SIBLING_DMG" ]; then
                 echo "dropping superseded asset: $asset"
                 if ! gh release delete-asset "$TAG" "$asset" \
                   --yes; then

@@ -75,7 +75,12 @@ bite large test PRs:
     that stripped less would leave one suite silently weaker
     than the other while both stayed green. Extracted at the
     **second** caller (#874), when the signing and publishing
-    guards split.
+    guards split. It also owns **step scoping**
+    (`workflowStep`), on the same ground one level in: a needle
+    read against the whole file can be satisfied by a step that
+    is not the one under test, which #968 shipped and
+    `guard-prover` caught — so where a needle is read is as
+    load-bearing as what was stripped from it.
   - *colour-vision maths* in `ColorVision.swift` — the
     Viénot protanopia transform and the measures the CVD guards
     assert on. **Which suites share it is that file's own doc

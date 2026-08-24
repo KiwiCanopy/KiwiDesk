@@ -131,11 +131,11 @@ must keep, and the image-beside-the-archive case it must never
 fire on. The feed is also not the only reader of a release's
 asset list, so an artifact added to a release answers to every
 one of them — `.github/workflows/homebrew.yml` selects the
-cask's archive by exact name, which is what makes a third asset
-harmless there.
+cask's archive by exact name (`HomebrewCaskUpdateTests`), which
+is what makes a third asset harmless there.
 
-No version
-cutoff is written anywhere and none should be — the releases
+No version cutoff is written anywhere and none should be — the
+releases
 that predate the updater have no sidecar and fall out of the feed
 as a consequence of the data rather than of a number someone has
 to remember. `AppcastParserTests` pins each refusal.
@@ -235,8 +235,8 @@ a step locates it, the draft step is handed that step's path,
 the upload set carries it, and the superseded-asset cleanup
 routes it. That last one is not a nicety — every artifact
 carries the `-unnotarized` rename, so one attached and not
-cleaned up leaves a draft offering both names, with the one a
-person clicks decided by which sorts first. **Read the
+cleaned up leaves a draft offering both names — and which of the
+two a person reaches for is not something to find out. **Read the
 consuming side's rename once**, per artifact rather than per
 copy: the workflow's `sibling_of` is that one reading, and the
 per-artifact `case` block it replaced was already the second.

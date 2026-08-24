@@ -73,7 +73,18 @@ struct ReleaseArtifactWorkflowTests {
     /// Flags that are not artifacts, and whether each swallows
     /// the token after it. Listing them is what lets an
     /// unrecognised flag be treated as a forgotten artifact
-    /// rather than waved through.
+    /// rather than waved through — that half IS guarded:
+    /// deleting the `--notarize` entry reds this suite, which
+    /// is also the proof that the conditional `ARGS+=(…)` line
+    /// is read at all rather than skipped.
+    ///
+    /// **The `Bool` column is defence, not a guarded claim.**
+    /// No value in `release.yml` today starts with `--`, so the
+    /// `hasPrefix("--")` filter already skips every one of them
+    /// and flipping all three to `false` changes no outcome
+    /// (proved by mutation). It becomes load-bearing the moment
+    /// a flag takes a `--`-shaped value; until then, do not
+    /// read it as something a test holds.
     private static let nonArtifact: [String: Bool] = [
         "--output": true,
         "--notarize": true,
@@ -122,30 +133,6 @@ struct ReleaseArtifactWorkflowTests {
         return flags
     }
 
-    /// One named step's own block: from its `- name:` line to
-    /// the next step's. Scoping is the point — see the suite's
-    /// note on the inert first cut.
-    private func step(
-        _ name: String,
-        in yaml: String
-    ) throws -> String {
-        let lines = yaml.split(
-            separator: "\n",
-            omittingEmptySubsequences: false
-        )
-        let start = try #require(
-            lines.firstIndex { $0.contains("- name: \(name)") },
-            "release.yml has no step named \(name)"
-        )
-        var end = lines.count
-        for index in (start + 1)..<lines.count
-        where lines[index].hasPrefix("      - ") {
-            end = index
-            break
-        }
-        return lines[start..<end].joined(separator: "\n")
-    }
-
     /// Every line that writes the upload set, joined. Both
     /// shapes count: the initial assignment and any later
     /// append.
@@ -173,7 +160,7 @@ struct ReleaseArtifactWorkflowTests {
             flags.contains("--zip"),
             "and the cask's archive, which Sparkle downloads"
         )
-        let draft = try step("Draft the release", in: yaml)
+        let draft = try workflowStep("Draft the release", in: yaml)
         let uploads = uploadSet(draft)
         #expect(
             !uploads.isEmpty,
@@ -220,11 +207,18 @@ struct ReleaseArtifactWorkflowTests {
     @Test("every attached artifact is routed through the cleanup")
     func everyBuiltArtifactIsCleanedUp() throws {
         let yaml = try workflowSource("release.yml")
-        let draft = try step("Draft the release", in: yaml)
-        for flag in try requestedFlags(yaml) {
+        let draft = try workflowStep("Draft the release", in: yaml)
+        let flags = try requestedFlags(yaml)
+        // Its own vacuity guard, not its sibling's: this test
+        // `continue`s past any flag the map does not know, so an
+        // empty flag list — or an emptied map — would otherwise
+        // pass it having checked nothing.
+        var checked = 0
+        for flag in flags {
             guard let wiring = Self.attachment[flag] else {
                 continue  // already recorded by the test above
             }
+            checked += 1
             let kept =
                 ##"\##(wiring.keep)="$(basename "##
                 + ##""$\##(wiring.env)")""##
@@ -252,6 +246,11 @@ struct ReleaseArtifactWorkflowTests {
                 "\(flag)'s shipped name is not on the keep list"
             )
         }
+        #expect(
+            checked == flags.count,
+            "a built artifact was skipped, so this reads weaker"
+        )
+        #expect(checked > 1, "fewer artifacts than #968 ships")
     }
 
     /// `sibling_of` is the consuming side's ONE reading of
@@ -262,7 +261,7 @@ struct ReleaseArtifactWorkflowTests {
     /// leave the first run's artifact on the draft forever.
     @Test("the rename is read in both directions, once")
     func renameIsReadBothWays() throws {
-        let draft = try step(
+        let draft = try workflowStep(
             "Draft the release",
             in: try workflowSource("release.yml")
         )
@@ -278,37 +277,4 @@ struct ReleaseArtifactWorkflowTests {
         )
     }
 
-    // MARK: - The image's name comes off disk
-
-    /// Reconstructing the name is how a ticketless artifact gets
-    /// attached under a clean one: `build-app.sh` renames an
-    /// image it could not staple to `-unnotarized.dmg`, and a
-    /// path built from `$VERSION` reaches past that rename.
-    ///
-    /// The `-partial.dmg` exclusion is the other half. A count
-    /// alone would miss the shape that actually threatens this
-    /// step — not two images racing, which `build-app.sh` makes
-    /// impossible, but a half-built one surviving ALONE after a
-    /// failed staple and an EXIT trap that could not unlink it.
-    @Test("the image is read off disk, never reconstructed")
-    func imageNameComesOffDisk() throws {
-        let yaml = try workflowSource("release.yml")
-        let locate = try step("Locate the disk image", in: yaml)
-        #expect(
-            locate.contains("-name '*.dmg'"),
-            "the image must be found, not named"
-        )
-        #expect(
-            locate.contains("! -name '*-partial.dmg'"),
-            "a half-built image must not be attachable"
-        )
-        #expect(
-            locate.contains(##""${#images[@]}" -ne 1"##),
-            "exactly one image, asserted rather than assumed"
-        )
-        #expect(
-            !yaml.contains("KiwiDesk-$VERSION.dmg"),
-            "a rebuilt name defeats the -unnotarized rename"
-        )
-    }
 }

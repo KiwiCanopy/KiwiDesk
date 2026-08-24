@@ -3,6 +3,12 @@ paths:
   - "site/**"
   # The Node version would be restated here, not in site/.
   - ".github/workflows/site.yml"
+  # The two generators this file constrains hardest — the
+  # published body as an input contract, the appcast written
+  # from released bytes. They live in scripts/, so nothing under
+  # site/** loads for whoever edits them.
+  - "scripts/changelog-sync"
+  - "scripts/appcast-sync"
 ---
 
 # Marketing / docs site (`site/`)

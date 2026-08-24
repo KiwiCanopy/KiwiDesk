@@ -78,3 +78,46 @@ private func strippingComment(_ line: Substring) -> String {
     }
     return kept
 }
+
+/// One named step's own block: from its `- name:` line to the
+/// next step's.
+///
+/// Scoping is the whole point, and it was learned the expensive
+/// way. A needle asserted against the WHOLE workflow can be
+/// satisfied by a step that is not the one under test:
+/// `ARCHIVE: ${{ steps.archive.outputs.path }}` occurs in both
+/// the draft step and the Sparkle signing step, so a guard
+/// meaning "the draft step is handed the archive" stayed green
+/// with the draft step's own copy deleted. Read the step that
+/// must carry the mechanism, not the file that happens to.
+func workflowStep(
+    _ name: String,
+    in yaml: String
+) throws -> String {
+    let lines = yaml.split(
+        separator: "\n",
+        omittingEmptySubsequences: false
+    )
+    let start = try #require(
+        lines.firstIndex { $0.contains("- name: \(name)") },
+        "release.yml has no step named \(name)"
+    )
+    var end = lines.count
+    for index in (start + 1)..<lines.count {
+        let line = lines[index]
+        if line.trimmingCharacters(in: .whitespaces).isEmpty {
+            continue
+        }
+        // The next step, OR anything shallower than a step:
+        // the next job, or a job-level key. Stopping only on
+        // the next step fails OPEN for the LAST step in the
+        // file, whose slice would then run to EOF and let a
+        // job appended below satisfy one of its needles.
+        let indent = line.prefix { $0 == " " }.count
+        if line.hasPrefix("      - ") || indent <= 6 {
+            end = index
+            break
+        }
+    }
+    return lines[start..<end].joined(separator: "\n")
+}

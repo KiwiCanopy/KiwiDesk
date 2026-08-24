@@ -235,8 +235,8 @@ publishing rather than on remembering to fix it afterwards.
 `brew upgrade` is a real update path, so a Sparkle-less build
 may ship as a cask. The cask's public GitHub Release ZIP is its
 backing artifact, not a standalone channel KiwiDesk promotes:
-until Sparkle lands, do not link that ZIP from the product site
-or advertise it as a direct download. Someone who deliberately
+while Sparkle had not landed, that ZIP was not to be linked from
+the product site nor advertised as a direct download. Someone who deliberately
 installs from the repository instead of Homebrew has chosen a
 manual update path.
 
@@ -256,9 +256,10 @@ the cask users are the stranded ones. It is an obligation on the cask
 ([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
 a property that exists for free.
 
-Until Sparkle lands, the two together mean: a Homebrew cask
+Until Sparkle landed, the two together meant: a Homebrew cask
 backed by one public Release ZIP yes; a promoted standalone ZIP
-or `.dmg` download no.
+or `.dmg` download no. It has landed — the gate below records
+when, and what that spends.
 
 Trade-off: the first release reaches fewer people. Accepted, and
 it buys something back — Sparkle's update path is first
@@ -282,9 +283,8 @@ parse, the version compare and the install-on-quit; it cannot
 rehearse signed, notarized, stapled bytes fetched over the
 network from the production URL, or the cask and the in-app
 updater not fighting over one install. Which release this binds
-is whichever one opens the channel — 1.0 on the current plan
-([#874](https://github.com/KiwiCanopy/KiwiDesk/issues/874)) — and
-the obligation holds wherever that lands.
+is whichever one opens the channel, and the obligation holds
+wherever that lands.
 
 **Corollary: the gate is Sparkle-in-the-build, never a version
 number.** The rule above says "until Sparkle lands" and names no
@@ -316,21 +316,18 @@ argument for the gate, not as a description of a shut channel.
 
 **What that licenses is the channel, not a free pass on the
 artifact.** The release page and the site link are one channel,
-so a promoted `.dmg` reaches people the moment a release
+so a promoted artifact reaches people the moment a release
 carrying it is *published* — before any site copy changes. Open
-it in that order deliberately: the release page first, on a
-release cut to be verified (quarantine-stamped, mounted,
-`stapler validate`d) on a clean machine, and the site only
-afterwards. The reverse strands the one group this whole entry
-exists to protect, and a stranded downloader cannot be
+the channel in that order deliberately: the release page first,
+on a release cut to be verified on a clean machine, and the site
+only afterwards. The reverse strands the one group this whole
+entry exists to protect, and a stranded downloader cannot be
 recovered.
 
-And a promoted `.dmg` owes
+What the artifact itself then owes is
 `.claude/rules/packaging-and-release.md` ▸ *Every distributable
-artifact needs its OWN ticket* — a disk image is a separate
-piece of signed code from the app inside it, so notarizing the
-app does not cover it, and the machine that built it is the one
-place that failure is invisible.
+artifact needs its OWN ticket*, which owns both the obligation
+and how to verify it.
 
 ### Background update checks are on, and there is no switch
 
