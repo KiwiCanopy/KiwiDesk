@@ -22,12 +22,14 @@ Canonical for this subsystem (AGENTS.md §5 indexes it).
 
 **A published requirement naming an architecture is a claim about
 the artifact, so it moves in the same change set as anything that
-could change what the artifact runs on.** As of #904 the site,
-`README.md`, `docs/index.md` and the landing page's JSON-LD all
-say *Apple silicon*, and they say it because `build-app.sh`
-passes no arch flag while the release workflow builds on an
-arm64 runner — two facts with nothing connecting them and no
-guard over either.
+could change what the artifact runs on.** Since #904 several
+surfaces say *Apple silicon* — find them with
+`grep -rn "Apple silicon" README.md docs/ site/src/`, rather
+than trusting a list here that drifts the moment a seventh
+surface says it. They say it because `build-app.sh` passes no
+arch flag while the release workflow builds on an arm64 runner —
+two facts with nothing connecting them and no guard over
+either.
 
 The asymmetry is what earns the rule. While the cask was the only
 install path its `depends_on arch: :arm64` refused an Intel

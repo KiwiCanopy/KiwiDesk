@@ -219,8 +219,9 @@ and has no guard.
 **A promoted download link is read off the release's own asset
 list, never composed from a version (#904).** `changelog-sync`
 records a `download` field only where a published release
-actually carries a notarized `.dmg`. The reason is not tidiness: the site deploys independently of any tag, so a
-composed `…/download/<tag>/KiwiDesk-<version>.dmg` is correct
+actually carries a notarized `.dmg`. The reason is not tidiness:
+the site deploys independently of any tag, so a composed
+`…/download/<tag>/KiwiDesk-<version>.dmg` is correct
 only while the release workflow keeps passing `--dmg` — one edit
 away from a first-class button that 404s, on a page nothing
 re-publishes.
