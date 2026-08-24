@@ -261,6 +261,12 @@
         ]
     },
     {
+        "iconName": ":ausweisapp:",
+        "appNames": [
+            "AusweisApp"
+        ]
+    },
+    {
         "iconName": ":automator:",
         "appNames": [
             "Automator"
@@ -1650,6 +1656,13 @@
         ]
     },
     {
+        "iconName": ":kensington_works:",
+        "appNames": [
+            "KensingtonWorks",
+            "KensingtonWorks2"
+        ]
+    },
+    {
         "iconName": ":keyboard_maestro:",
         "appNames": [
             "Keyboard Maestro"
@@ -1678,6 +1691,12 @@
         "iconName": ":kiro:",
         "appNames": [
             "Kiro"
+        ]
+    },
+    {
+        "iconName": ":kiro_crew:",
+        "appNames": [
+            "Kiro Crew"
         ]
     },
     {
@@ -1903,6 +1922,13 @@
         "iconName": ":marked_2:",
         "appNames": [
             "Marked 2"
+        ]
+    },
+    {
+        "iconName": ":marktext:",
+        "appNames": [
+            "MarkText",
+            "MarkText+"
         ]
     },
     {
@@ -2135,6 +2161,12 @@
         ]
     },
     {
+        "iconName": ":muxy:",
+        "appNames": [
+            "Muxy"
+        ]
+    },
+    {
         "iconName": ":native_instruments:",
         "appNames": [
             "Native Access"
@@ -2144,6 +2176,12 @@
         "iconName": ":navicat:",
         "appNames": [
             "Navicat Premium"
+        ]
+    },
+    {
+        "iconName": ":neohtop:",
+        "appNames": [
+            "NeoHtop"
         ]
     },
     {
@@ -2340,6 +2378,12 @@
         ]
     },
     {
+        "iconName": ":open_knowledge:",
+        "appNames": [
+            "OpenKnowledge"
+        ]
+    },
+    {
         "iconName": ":open_video_downloader:",
         "appNames": [
             "Open Video Downloader"
@@ -2421,6 +2465,12 @@
         ]
     },
     {
+        "iconName": ":otty:",
+        "appNames": [
+            "Otty"
+        ]
+    },
+    {
         "iconName": ":overcast:",
         "appNames": [
             "Overcast"
@@ -2463,6 +2513,12 @@
         "iconName": ":parsec:",
         "appNames": [
             "Parsec"
+        ]
+    },
+    {
+        "iconName": ":paseo:",
+        "appNames": [
+            "Paseo"
         ]
     },
     {
@@ -2723,6 +2779,12 @@
         "iconName": ":ps_remote_play:",
         "appNames": [
             "PS Remote Play"
+        ]
+    },
+    {
+        "iconName": ":puremac:",
+        "appNames": [
+            "PureMac"
         ]
     },
     {
@@ -3467,6 +3529,13 @@
         "iconName": ":trello:",
         "appNames": [
             "Trello"
+        ]
+    },
+    {
+        "iconName": ":tuna:",
+        "appNames": [
+            "Tuna",
+            "Tuna (beta)"
         ]
     },
     {
