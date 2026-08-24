@@ -935,6 +935,8 @@
   "search.result_ax": "%2$@의 %1$@",
   "search.result_mode_ax": "%1$@, %2$@ 모드",
   "search.result_value_ax": "%1$@, %2$@",
+  "settings.disclosure.ax_collapsed": "축소됨",
+  "settings.disclosure.ax_expanded": "확장됨",
   "settings.globals_save_failed": "설정 저장 실패: %1$@",
   "settings.layout.drift": "실행 중: %1$@ — 프로필은 %2$@(저장되지 않음)",
   "settings.permission_paused": "윈도우 관리가 일시 정지되었습니다 — KiwiDesk에는 손쉬운 사용 권한이 필요합니다.",

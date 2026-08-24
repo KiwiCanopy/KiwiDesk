@@ -141,8 +141,10 @@ extension SpaceBarItemView {
     /// ink alone and let alpha carry focus. Nothing is lost —
     /// `untintedAppAlpha` already puts the focused app's badge
     /// uniquely at full alpha, beside a glyph that *is* tinted.
-    /// It is also what macOS does: the system badge is
-    /// white-on-red unconditionally, with no focused variant.
+    /// It is also what macOS does: the system badge pairs one
+    /// ink with one fill unconditionally, with no focused
+    /// variant. (That fill is red; ours has been neutral grey
+    /// since #955 — the invariance generalizes, not the hue.)
     private func applyBadge(_ badge: NSTextField, appFocused: Bool) {
         badge.layer?.backgroundColor =
             NSColor(kiwiHex: style.groupBadgeColor).cgColor

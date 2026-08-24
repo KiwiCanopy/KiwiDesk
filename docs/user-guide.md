@@ -2019,10 +2019,15 @@ saved for two screens but for *different* monitors does not match
 your displays, and without that step it would sort behind every
 one-screen profile, since one comes before two.
 
-Each row opens with a small picture of how many screens the
-profile is for — one mini-screen each, and a **+N** once there are
-more than the row draws. Then the name (double-click or use the
-pencil to rename), an **active** badge on the loaded one, a
+Each row opens with a small picture of the profile's screens —
+one mini-screen each, and a **+N** once there are more than the
+row draws. It is the preset cards' picture one size down, so each
+mini-screen carries the glyph of the layout that screen's first
+Space opens in. A screen the saved file does not answer for is
+left a bare outline rather than given a guess; where only one
+screen is unnamed it is answered by elimination, so an ordinary
+two-screen profile shows both. Then the name (double-click or use
+the pencil to rename), an **active** badge on the loaded one, a
 **default** badge, a **make default** link on every profile that
 isn't already its screen count's default, **Load**, and a delete
 button.

@@ -24,6 +24,50 @@
 /// That is the same rule `PresetScreenCard.outlineView` already
 /// draws by: a screen with no answer gets its outline and no
 /// glyph.
+///
+/// **But "no fingerprint names Main" is not the same as "the
+/// profile does not say" (#959)**, so a sole unpinned screen is
+/// answered by elimination. The ruling and its argument are in
+/// `docs/design-decisions.md` ▸ Profiles; what this file owes is
+/// the seam and the two things elimination is NOT sure of.
+///
+/// **Residue 1 — a space pinned to the MAIN display.** The
+/// GUI's Monitors editor can pin a space onto the main display's
+/// own card (`SpaceAssignmentChip`, `DisplayCard`), and Lua's
+/// `pin_space_to_display` does the same. Then main carries a pin
+/// AND the follows-main spaces, so the sole blank screen is a
+/// SECONDARY one that holds nothing — and it borrows Main's
+/// glyph. Accepted rather than fixed: nothing stored tells the
+/// two apart (which fingerprint was Main is resolved live), and
+/// refusing the whole arm to avoid it would cost every ordinary
+/// two-screen profile the glyph #959 was filed about. The case
+/// is pinned by `ProfileOpeningModesTests` so it is a chosen
+/// answer rather than an accident.
+///
+/// **Residue 2 — a profile covering several arrangements**
+/// answers from `monitorSets.first`. That was harmless while the
+/// answer was a refusal; elimination makes it a positive claim
+/// about one arrangement, and the row carries no per-set label.
+/// A screen blank in the first set may be pinned in another.
+///
+/// Two blank screens stay blank in every case: there the
+/// unpinned spaces fit on either, and that IS the refusal above.
+///
+/// **This is the static shadow of `SpacePlacement`, not a
+/// second opinion.** That enum owns the one space→display
+/// precedence — pin → Main role → the positional plan → main —
+/// and this accessor answers the first two legs, in the same
+/// order, from the same two stored fields. It cannot answer the
+/// third: the plan is `ProfileComposition`'s, composed from the
+/// displays connected right now, and a saved profile stores no
+/// plan. That costs nothing on a profile any save produced,
+/// where every declared space is pinned or follows Main and the
+/// two legs are total (`adoptComposedPlacement` writes exactly
+/// those two sets). It is why a hand-edited profile carrying a
+/// space that is neither draws a bare outline rather than a
+/// guess: that space's screen is decided by hardware this file
+/// cannot see. A change to the precedence belongs in
+/// `SpacePlacement` first, and here second.
 extension Profile {
     /// One entry per screen this profile covers, in the stored
     /// set's canonical monitor order — the mode that screen's
@@ -43,9 +87,49 @@ extension Profile {
         guard let set = monitorSets.first else {
             return Array(repeating: nil, count: screens)
         }
-        return set.monitors.prefix(screens).map { fingerprint in
-            firstSpace(pinnedTo: fingerprint, in: set)
-                .flatMap { spaceModes[$0] }
+        var firsts = set.monitors.prefix(screens).map {
+            firstSpace(pinnedTo: $0, in: set)
+        }
+        if let main = soleUnpinnedScreen(in: firsts),
+            let space = firstMainSpace(in: set)
+        {
+            firsts[main] = space
+        }
+        return firsts.map { $0.flatMap { spaceModes[$0] } }
+    }
+
+    /// The index of the one covered monitor carrying no pin —
+    /// nil unless there is exactly one.
+    ///
+    /// Exactly one is the whole condition: with two unpinned
+    /// monitors the follows-main spaces fit on either, so
+    /// attributing them to one would be the guess this accessor
+    /// exists to refuse.
+    private func soleUnpinnedScreen(
+        in firsts: [SpaceID?]
+    ) -> Int? {
+        let blank = firsts.indices.filter { firsts[$0] == nil }
+        return blank.count == 1 ? blank.first : nil
+    }
+
+    /// The profile's first ordered follows-main space.
+    ///
+    /// The profile's own order again, for the reason
+    /// `firstSpace(pinnedTo:in:)` states — `mainSpaces` is a
+    /// stored list, but it is a list of MEMBERS, and which of
+    /// them comes first is `orderedSpaces`' answer, not its own.
+    ///
+    /// A space carrying a pin is not a candidate even when
+    /// `main_spaces` also lists it: `SpacePlacement.resolve`
+    /// gives the pin precedence over the Main role, so such a
+    /// space opens on the pinned screen, and painting the blank
+    /// one with its mode would name a screen it never reaches.
+    /// The GUI writers clear one when they set the other; a
+    /// hand-edited profile is what can carry both.
+    private func firstMainSpace(in set: MonitorSet) -> SpaceID? {
+        let main = Set(mainSpaces)
+        return orderedSpaces.first {
+            main.contains($0) && set.spaceMonitorMap[$0] == nil
         }
     }
 

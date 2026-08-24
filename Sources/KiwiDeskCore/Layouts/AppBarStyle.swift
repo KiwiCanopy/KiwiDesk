@@ -132,8 +132,12 @@ public struct AppBarStyle: Sendable, Equatable {
     /// stays readable through it) — the knob exists for themes
     /// whose hover tint needs darker text.
     public var hoverItemColor = "#EAF3EE"
-    /// The count badge on grouped items.
-    public var groupBadgeColor = "#B00020"
+    /// The count badge on grouped items. Neutral grey, not the
+    /// notification red it shipped as until #955: a count of
+    /// windows is state, not news, and an alert hue on every
+    /// grouped item at rest reads as urgency that is not there.
+    /// A theme is free to pick a hue; the DEFAULT is not.
+    public var groupBadgeColor = "#636366"
     public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}

@@ -3341,6 +3341,92 @@ whatever follows it without promoting the drawer to a card.
 And what a drawer reveals sits in ONE sunken well, never one
 well per row of its contents.
 
+**A drawer header is a whole clickable row, not a triangle.**
+(#956, owner 2026-08-23; the second round on the same
+complaint.) The rule above says "different kind of row" and
+does not say *openable*, and the native disclosure header
+answers only its own small triangle — so the header
+under-signalled and then under-delivered when a reader
+clicked the label it does signal with. Both halves are one
+seam, `SettingsDisclosureStyle`: the header becomes one
+full-width `.plain` `Button` over the whole row, and it rests
+on a chevron with real weight that rotates on expand,
+confirming on hover. The
+button is preferred over a tap gesture on the label
+specifically because it is a control — it takes one focus
+stop, Space activates it, and macOS keyboard navigation can
+reach it, none of which a gesture offers. (Space, not Return:
+Return belongs to the window's default button, so a ruling
+that promised it would be promising the platform's behaviour
+rather than ours.) The
+cost is what every custom control here costs and must be paid
+back in the same change: a `Button` is not a disclosure
+triangle, so VoiceOver stops saying whether the drawer is
+open, and `.accessibilityValue` gives expanded / collapsed
+back (the `LinkedCaptionHitTests` rule, generalised). One
+style, both chromes and the one drawer outside the wrapper:
+a header that reads as openable in a card and not inline
+would be the same defect wearing a different frame.
+
+**The cue is the chevron and the hover, never a resting
+fill.** The first build wore the house *icon-chip* cue — a
+0.06 rest fill — and the owner read it on device as "the grey
+doesn't fit the kiwi design" (2026-08-24). They were right,
+and the arithmetic says why it is a HUE fault rather than a
+strength one: that fill is `Color.primary`, so on a light
+card it composites to `#F0F0F0`, R=G=B exactly — the one
+achromatic surface in a window whose every other surface and
+border is green-tinted. It measures 1.14:1 against its card,
+faint enough that pure lightness at that step would be
+invisible; it was seen anyway. Beside a `sunken` well of
+almost the same lightness, a hue difference at equal value is
+maximally salient, and the collapsed header even sat *darker*
+than the interior it opens onto.
+
+The fix is not a better-coloured fill, because **no fixed
+surface token can be a rest cue for this style at all**: it
+draws on three grounds, and the obvious candidate — `sunken`,
+which is green-tinted and would answer the nested-well
+objection, a fill without a hairline being no well — is
+invisible on the third drawer, whose card already IS `sunken`.
+A cue that works everywhere has to be ground-relative, which
+leaves `Color.primary` (achromatic — the objection) or the
+accent, and a resting accent wash on *every* drawer says
+"selected" about nothing while spending the one channel a
+green primary cannot carry under colour-vision deficiency. So
+the rest state paints nothing, hover confirms at the full-row
+ladder, and the resting "I open" signal is the chevron — at
+`ink2`, since with no fill the chevron IS the affordance and
+`ink3` is the caption tier. **The general rule: an
+affordance's recipe is chosen by AREA.** The icon-chip cue and
+the full-row cue are two ladders for two sizes, and taking the
+smaller one to a full row is how a token nobody notices
+becomes the most visible thing on the page.
+
+**The header's accessory is a SIBLING of that button, never
+its child.** A drawer's `accessory:` slot may hold a control —
+the Profiles-per-Desktop drawer puts its `?` there — and the
+first draft of the style wrapped the whole label, accessory
+included, in the header button. A control inside a control
+loses both halves of being one: the click lands on the outer
+button (the `?` toggled the drawer instead of explaining it)
+and the inner name and hint collapse into the outer element's
+single announcement. So the row's hit shape stops where the
+accessory begins, which is also what makes the drawer's
+disclosure label still usable as a live help anchor. **That
+puts the accessory at the row's TRAILING edge**, where it sat
+beside the title before: the button keeps the `Spacer`, and
+the only way to return the accessory to the title's side is to
+end the button at the title — which gives back the full-row
+hit target that is this whole ruling's point. Trailing is also
+where macOS puts a row's accessory, so the pair of "click
+anywhere" and "the accessory is on the right" is one idiom
+rather than two compromises. The
+general rule this instance serves is already written down —
+two controls in one strip are two accessibility elements —
+and the lesson is that wrapping a slot whose contents you do
+not own silently breaks it.
+
 **Census labels render at runtime from the English
 manifest.** (#678 Phase 4.) A surface that renders a
 census-labelled key AWAY from its owning row — the diff
@@ -4720,9 +4806,53 @@ don't assume from tone.
 - **`hover_fill_color` ~50 % alpha** (`0x80`) of a hue *a
   shade off* the accent — legible feedback that never reads as
   the active state.
-- **`group_badge_color` defaults to the universal `#B00020` /
+- **`group_badge_color` defaults to a neutral grey `#636366` /
   white**; a bespoke badge echoes the palette temperature and
   pairs a text color chosen for contrast against *that* badge.
+  The default was `#B00020`/white until #955 — the macOS
+  notification badge, byte for byte — and that was the wrong
+  idiom to borrow. A notification badge counts things that
+  *arrived* and want an answer; a group badge counts windows
+  that are simply *there*. An alert hue on every grouped item,
+  at rest, before any interaction, spends urgency the state does
+  not carry, and urgency spent on nothing is not available when
+  something needs it. Contrast was never the argument on either
+  side — white clears 7.3:1 on the red and 6.0:1 on the grey —
+  and it is the reason the *lighter* neutral is not the answer:
+  systemGray `#8E8E93` cannot hold white at disc size (≈3.3:1).
+  Grey is also the bars' own vocabulary rather than an import,
+  Monochrome having picked `#636366` for exactly this role
+  before the default did, and a grey this near-neutral (three
+  points of blue and nothing else) is all but protan/deutan
+  invariant, so the colour-vision posture improves for free.
+  What is neutral is the **default**, not the knob: a theme that
+  wants a hue here still picks one, which is why the four
+  bundled palettes carrying the red as an inherited default
+  rather than as a choice (Kiwi Gold, Clean Light, Slate, True
+  Dark) moved with it while the four that chose their own
+  (Monochrome, Sunset, Ultraviolet, Kiwi Neon) did not. **A
+  default retune reaches only what has not stored an answer,
+  and the two stores answer differently.** `gui.json` is sparse
+  — it records what was changed — so a machine that never
+  touched the badge takes the new grey at once. A **profile**
+  snapshots `TilingSettings` whole, so every profile saved
+  before this carries `#B00020` explicitly and keeps it on load.
+  That asymmetry is worth stating rather than smoothing over,
+  because the two are not the same kind of fact: a sparse entry
+  IS a choice, while a snapshot field is only "the default on
+  the day it was written", and a user cannot tell from the file
+  which they have. **Ruled: left as is — the retune is for fresh
+  installs, and a saved profile keeps what it saved.** A one-shot
+  migration over the retired pair was considered and declined,
+  and the reason generalizes past this colour: a migration that
+  chases a *default* has to rewrite a value it cannot read the
+  intent of, and the file does not record intent. Getting the
+  new default is one deliberate action away — re-apply a palette
+  or reset the colours — and that action is visible and
+  reversible, which a migration on next launch is neither. It
+  also means a retune can look like nothing happened to anyone
+  with saved profiles; that is the cost, and it is named here so
+  the next report of it is diagnosed rather than re-litigated.
 - **Drag ghost / drop-zone:** a deliberate two-hue split
   (border opaque + fill ~15–25 %) so origin reads apart from
   target — and since #511 it is held to the **same CVD
@@ -5542,7 +5672,10 @@ ever held against the one badge fill it was eyeballed against —
 at full alpha, beside a glyph that *is* tinted. It also restores
 the grain the App Bar's own count badge and the sticky/floating
 state marks already had, and matches the platform — the system
-badge is white-on-red unconditionally, with no focused variant.
+badge pairs one ink with one fill unconditionally, with no
+focused variant. (That fill is red and ours has been neutral
+grey since #955: what generalizes is the invariance, not the
+hue.)
 The corollary for a *bespoke* badge still stands: choose its
 text colour for contrast against that badge, not from the
 accents. In Settings the `Focused window`
@@ -6029,6 +6162,28 @@ the DRAFT" above); the Spaces page still owns it once the preset
 is applied. Read the thumbnail's job as identifying a preset
 rather than describing one: the moment a card is asked to
 describe, the answer is a surface of its own.
+
+**A saved profile's screens answer by ELIMINATION where they
+can, and stay blank where they cannot.** A saved profile says
+less than a preset: a preset plans positionally, while a
+profile pins spaces to monitor fingerprints and leaves the
+rest to the Main role — which is resolved live, not stored.
+So a screen the profile does not name draws its outline and
+no glyph, the same refusal the preset card already makes, and
+inventing a glyph there would put a claim about behaviour on
+screen that loading the profile might not produce. But
+refusing too much is its own defect (#959): saving pins only
+the spaces that are NOT on the main display, so on an
+ordinary two-screen profile the main monitor is *precisely*
+the covered screen carrying no pin, and its outline drew
+blank beside a caption announcing six Spaces. Where exactly
+one covered screen carries no pin, the follows-main spaces
+have nowhere else to be — that is elimination over stored
+facts, not a guess about hardware, and it is as reliable as
+any pin. Two blank screens stay blank, because then the
+unpinned spaces genuinely fit on either. Read the general
+rule as: refuse where the file is silent, never where it
+merely declines to repeat itself.
 
 **[Principle]**
 

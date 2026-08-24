@@ -935,6 +935,8 @@
   "search.result_ax": "%2$@ 内の %1$@",
   "search.result_mode_ax": "%1$@、%2$@モード",
   "search.result_value_ax": "%1$@、%2$@",
+  "settings.disclosure.ax_collapsed": "折りたたみ済み",
+  "settings.disclosure.ax_expanded": "展開済み",
   "settings.globals_save_failed": "設定の保存に失敗しました: %1$@",
   "settings.layout.drift": "実行中: %1$@ — プロファイルは%2$@（未保存）",
   "settings.permission_paused": "ウインドウ管理は一時停止しています — KiwiDeskにはアクセシビリティの許可が必要です。",

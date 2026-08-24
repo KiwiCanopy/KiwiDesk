@@ -293,14 +293,33 @@ extension View {
     }
 
     /// Hover confirmation for a custom full-row button whose
-    /// list context is its rest affordance. Unlike icon chips,
-    /// it adds no fill until the pointer enters the hit area.
-    func rowHoverHighlight() -> some View {
+    /// own resting signal is its context — a list row's
+    /// neighbours, a drawer header's chevron and hairline.
+    /// Unlike icon chips, it adds no fill until the pointer
+    /// enters the hit area.
+    ///
+    /// **That is the whole difference between the two recipes,
+    /// and it is a difference of AREA, not of taste** (#956,
+    /// owner on device 2026-08-24). `hoverHighlight()`'s 0.06
+    /// rest fill is an icon-chip cue: at a glyph's size nobody
+    /// reads its hue. Stretched across a full row it composites
+    /// to an exactly-neutral band — R=G=B — which is the only
+    /// achromatic surface in a green-tinted window, and it
+    /// reads as wrong beside a `sunken` well of nearly the same
+    /// lightness. A full-row control takes this one.
+    ///
+    /// The geometry is a parameter so the next full-row control
+    /// that needs a different inset does not re-coin the
+    /// ladder; the LADDER itself is not a parameter.
+    func rowHoverHighlight(
+        cornerRadius: CGFloat = 5,
+        padding: CGFloat = 0
+    ) -> some View {
         hoverHighlight(
             restOpacity: 0,
             hoverOpacity: 0.06,
-            cornerRadius: 5,
-            padding: 0
+            cornerRadius: cornerRadius,
+            padding: padding
         )
     }
 }

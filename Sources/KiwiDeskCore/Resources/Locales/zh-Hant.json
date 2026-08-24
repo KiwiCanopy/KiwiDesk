@@ -935,6 +935,8 @@
   "search.result_ax": "%2$@ 中的 %1$@",
   "search.result_mode_ax": "%1$@，%2$@模式",
   "search.result_value_ax": "%1$@，%2$@",
+  "settings.disclosure.ax_collapsed": "已收合",
+  "settings.disclosure.ax_expanded": "已展開",
   "settings.globals_save_failed": "儲存設定失敗：%1$@",
   "settings.layout.drift": "即時：%1$@ — 描述檔為 %2$@（未儲存）",
   "settings.permission_paused": "視窗管理已暫停 — KiwiDesk 需要「輔助使用」權限。",
