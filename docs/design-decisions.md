@@ -4806,11 +4806,18 @@ don't assume from tone.
   because the two are not the same kind of fact: a sparse entry
   IS a choice, while a snapshot field is only "the default on
   the day it was written", and a user cannot tell from the file
-  which they have. Left as is deliberately — a value retune is
-  not a schema change and owes no migration — but a retune that
-  users report as "nothing happened" is one where the profiles
-  are the reason, and rewriting them is then a ruling to make
-  openly, not a silent repair.
+  which they have. **Ruled: left as is — the retune is for fresh
+  installs, and a saved profile keeps what it saved.** A one-shot
+  migration over the retired pair was considered and declined,
+  and the reason generalizes past this colour: a migration that
+  chases a *default* has to rewrite a value it cannot read the
+  intent of, and the file does not record intent. Getting the
+  new default is one deliberate action away — re-apply a palette
+  or reset the colours — and that action is visible and
+  reversible, which a migration on next launch is neither. It
+  also means a retune can look like nothing happened to anyone
+  with saved profiles; that is the cost, and it is named here so
+  the next report of it is diagnosed rather than re-litigated.
 - **Drag ghost / drop-zone:** a deliberate two-hue split
   (border opaque + fill ~15–25 %) so origin reads apart from
   target — and since #511 it is held to the **same CVD
