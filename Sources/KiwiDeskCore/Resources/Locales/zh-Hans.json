@@ -935,6 +935,8 @@
   "search.result_ax": "%2$@ 中的 %1$@",
   "search.result_mode_ax": "%1$@，%2$@模式",
   "search.result_value_ax": "%1$@，%2$@",
+  "settings.disclosure.collapsed": "已折叠",
+  "settings.disclosure.expanded": "已展开",
   "settings.globals_save_failed": "设置存储失败：%1$@",
   "settings.layout.drift": "运行中：%1$@ — 描述文件为%2$@（未存储）",
   "settings.permission_paused": "窗口管理已暂停 — KiwiDesk 需要“辅助功能”权限。",

@@ -935,6 +935,8 @@
   "search.result_ax": "%1$@, in %2$@",
   "search.result_mode_ax": "%1$@, %2$@-Modus",
   "search.result_value_ax": "%1$@, %2$@",
+  "settings.disclosure.collapsed": "reduziert",
+  "settings.disclosure.expanded": "erweitert",
   "settings.globals_save_failed": "Sichern der Einstellungen fehlgeschlagen: %1$@",
   "settings.layout.drift": "Live: %1$@ — Profil hat %2$@ (nicht gesichert)",
   "settings.permission_paused": "Fensterverwaltung ist pausiert — KiwiDesk benötigt die Berechtigung für Bedienungshilfen.",

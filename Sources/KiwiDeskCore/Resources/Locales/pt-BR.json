@@ -935,6 +935,8 @@
   "search.result_ax": "%1$@, em %2$@",
   "search.result_mode_ax": "%1$@, modo %2$@",
   "search.result_value_ax": "%1$@, %2$@",
+  "settings.disclosure.collapsed": "contraído",
+  "settings.disclosure.expanded": "expandido",
   "settings.globals_save_failed": "Falha ao salvar os ajustes: %1$@",
   "settings.layout.drift": "Em uso: %1$@ — o perfil tem %2$@ (não salvo)",
   "settings.permission_paused": "Gerenciamento de janelas pausado — o KiwiDesk precisa da permissão de Acessibilidade.",
