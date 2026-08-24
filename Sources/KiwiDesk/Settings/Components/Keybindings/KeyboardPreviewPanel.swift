@@ -55,13 +55,15 @@ struct KeyboardPreviewPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             chips
-            KeyboardBoard(
+            SpokenKeyboardBoard(
                 type: KeyboardMatrix.PhysicalType.current(),
                 claims: claims,
                 scope: liveScope,
                 conflicted: collisions
             )
-            fillLegend
+            // Drawn, not spoken: the board's sentence names
+            // every state in words (#812).
+            fillLegend.accessibilityHidden(true)
             tallySentence
             layoutRow
             Text(

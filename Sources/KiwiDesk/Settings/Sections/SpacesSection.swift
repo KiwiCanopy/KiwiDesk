@@ -293,8 +293,10 @@ struct SpacesSection: View {
             }
             .disabled(!canAdd)
             .settingsActionButton()
-            // Icon-only, like its sibling icon buttons (#94).
+            // Icon-only, like its sibling icon buttons (#94) —
+            // and named for VoiceOver, which `.help` is not.
             .help(L("spaces.add.help", "Add Space"))
+            .accessibilityLabel(L("spaces.add.help", "Add Space"))
         }
     }
 

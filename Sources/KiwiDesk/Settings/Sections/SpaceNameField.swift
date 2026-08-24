@@ -29,6 +29,14 @@ struct SpaceNameField: View {
         // align in a column across rows.
         TextField("", text: $draft)
             .textFieldStyle(.roundedBorder)
+            // Nameless otherwise — an empty title, and the row
+            // draws no label beside it (#812). The DIFF ROW's
+            // label key, not a twin: both name the same setting,
+            // and one key cannot disagree with itself across ten
+            // locales (localization audit, 2026-08-24).
+            .accessibilityLabel(
+                L("diff.label.space_name", "Space name")
+            )
             .fontWeight(.medium)
             .focused($focused)
             .frame(width: 180, alignment: .leading)

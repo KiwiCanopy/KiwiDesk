@@ -9,9 +9,14 @@ import SwiftUI
 /// earlier — which is what left Save disabled over a valid name
 /// on the first open of every visit.
 extension PaletteShelf {
+    @MainActor static var namePlaceholder: String {
+        L("palettes.name_placeholder", "Palette name")
+    }
+
     func savePopover(_ request: NameEditRequest) -> some View {
         NameEditPopover(
             seed: request.seed,
+            placeholder: Self.namePlaceholder,
             confirmLabel: saveLabel,
             isValid: canSave,
             notice: saveNotice
@@ -26,6 +31,7 @@ extension PaletteShelf {
         let old = request.subject ?? request.seed
         return NameEditPopover(
             seed: request.seed,
+            placeholder: Self.namePlaceholder,
             width: 160,
             confirmLabel: { _ in
                 L("palettes.rename_confirm", "Rename")

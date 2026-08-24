@@ -66,13 +66,24 @@ struct SettingsRowShape<Label: View, Control: View>: View {
 /// `HStack(spacing: 4)` — and because the help button's
 /// placement rule ("label-adjacent, inside the shared column")
 /// is one decision, not six copies of one.
+///
+/// The text is drawn, not spoken. Every control that sits in
+/// this shape names ITSELF — a slider through
+/// `SettingsSlider.label`, a dropdown through its own title, a
+/// segmented picker through its track — so read aloud as well
+/// the label is the same words twice, once standing alone and
+/// once as the control's name (the `LayoutPreviewPanel` ruling,
+/// code review 2026-08-11, applied at the seam). The `?` stays
+/// a rotor stop of its own; it is not the label's twin.
 struct SettingsRowLabel: View {
     let label: String
     var help: String? = nil
 
     var body: some View {
         HStack(spacing: 4) {
-            Text(label).lineLimit(1)
+            Text(label)
+                .lineLimit(1)
+                .accessibilityHidden(true)
             if let help {
                 HelpButton(explanation: help, subject: label)
             }

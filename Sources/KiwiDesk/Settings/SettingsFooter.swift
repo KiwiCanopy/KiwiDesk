@@ -52,6 +52,16 @@ struct SettingsFooter: View {
     /// state: closing the window closes it, and nothing else
     /// needs to open it.
     @State var unsavedPopoverShown = false
+    /// The pill's pending appearance announcement (#812) — held
+    /// so leaving the dirty state inside the delay cancels it:
+    /// a Save right after the edit must not hear "Unsaved
+    /// changes" over a clean tree, and a re-flip inside the
+    /// window must not stack a second post.
+    @State private var pendingAnnouncement: DispatchWorkItem?
+
+    /// How long the pill's appearance announcement waits for the
+    /// changed control's own value to be spoken first.
+    static let announceDelay: TimeInterval = 1.2
 
     /// Anything that gives a verb meaning. The
     /// `.saveAsNewProfile` creation offer on a fully clean
@@ -72,6 +82,34 @@ struct SettingsFooter: View {
                         )
                     )
             }
+        }
+        // The pill is last in reading order on both mounts — an
+        // overlay after the content, or the sibling below it —
+        // so a VoiceOver user editing a row never reaches it and
+        // would never learn a Save is pending. Announce ONCE, as
+        // the pill appears, and never the count (owner ruling,
+        // #812 session 2: native macOS narrates no dirty state,
+        // and a count per change is noise — it is one VO-cursor
+        // move to the pill away). Delayed, because posted in the
+        // same instant as the control's own value ("7 pt") the
+        // announcement was dropped on device under keyboard
+        // stepping; the delay lets the value finish first.
+        // Silent on the way out: Save and Discard say their own
+        // outcome, so the flip to false cancels the pending
+        // post rather than letting it land on a clean tree.
+        .onChange(of: hasWork) { _, now in
+            pendingAnnouncement?.cancel()
+            guard now else { return }
+            let sentence = appearanceSentence
+            let work = DispatchWorkItem {
+                AccessibilityNotification.Announcement(sentence)
+                    .post()
+            }
+            pendingAnnouncement = work
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + Self.announceDelay,
+                execute: work
+            )
         }
         .alert(
             L(

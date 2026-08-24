@@ -18,6 +18,7 @@ struct PlacementPicker: View {
         let rowLabel = label ?? newWindowLabel
         return DropdownRow(
             label: rowLabel,
+            spokenValue: placementTitle,
             help: help ?? LayoutHelp.newWindowPlacement
         ) {
             Picker(rowLabel, selection: $placement) {
@@ -40,6 +41,18 @@ struct PlacementPicker: View {
                 )
                 .tag(SpawnPlacement.afterFocused)
             }
+        }
+    }
+
+    /// The picker's choice, by the same keys the entries use.
+    private var placementTitle: String {
+        switch placement {
+        case .first: return L("placement.first", "First")
+        case .last: return L("placement.last", "Last")
+        case .beforeFocused:
+            return L("placement.before_focused", "Before focused")
+        case .afterFocused:
+            return L("placement.after_focused", "After focused")
         }
     }
 

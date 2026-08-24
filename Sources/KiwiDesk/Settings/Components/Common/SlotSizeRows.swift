@@ -193,7 +193,11 @@ struct SlotSizeRows: View {
                 options: unitOptions
             )
         case .menu:
-            DropdownRow(label: L("slot_size.unit", "Size unit")) {
+            DropdownRow(
+                label: L("slot_size.unit", "Size unit"),
+                spokenValue: unitOptions.first { $0.1 == sizeUnit }?.0
+                    ?? ""
+            ) {
                 Picker(
                     L("slot_size.unit", "Size unit"),
                     selection: sizeUnitBinding
@@ -221,9 +225,11 @@ struct SlotSizeRows: View {
                         // shouldn't offer below it.
                         value: pointsBinding,
                         range: minPointsFloor...2000,
-                        step: 10
+                        step: 10,
+                        label: sizeLabel,
+                        spokenValue: pointsReadout
                     )
-                    readout("\(Int(currentPoints)) pt")
+                    readout(pointsReadout)
                 }
             }
         case .percent:
@@ -234,16 +240,27 @@ struct SlotSizeRows: View {
                     SettingsSlider(
                         value: percentBinding,
                         range: Self.percentRange,
-                        step: Self.percentStep
+                        step: Self.percentStep,
+                        label: sizeLabel,
+                        spokenValue: percentReadout
                     )
-                    readout("\(Int(currentFraction * 100)) %")
+                    readout(percentReadout)
                 }
             }
         }
     }
 
+    private var pointsReadout: String {
+        "\(Int(currentPoints)) pt"
+    }
+
+    private var percentReadout: String {
+        "\(Int(currentFraction * 100)) %"
+    }
+
     private func readout(_ text: String) -> some View {
         Text(text)
+            .settingsReadout()
             .frame(
                 width: SettingsMetrics.readoutColumn,
                 alignment: .trailing

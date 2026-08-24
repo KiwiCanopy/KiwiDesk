@@ -168,6 +168,19 @@ extension SettingsFooter {
             )
     }
 
+    /// What the pill says as it appears (#812): the countless
+    /// form, with the edit target where there is one.
+    var appearanceSentence: String {
+        guard let target = editTargetName else {
+            return countLine(count: 0)
+        }
+        return L(
+            "footer.unsaved.to",
+            "Unsaved changes to %1$@",
+            target
+        )
+    }
+
     /// The banner above stays the authoritative naming of the
     /// edit target; this is the pill's short echo of it.
     private var editTargetName: String? {

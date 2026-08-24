@@ -93,6 +93,12 @@ extension SettingsView {
             // wrappers would buy nothing and drift.
             ScrollViewReader { proxy in
                 detail(model.destination)
+                    // Every section's root is its own scroll
+                    // view, which VoiceOver lands on as a bare
+                    // "scroll area" (owner, #812 session 2);
+                    // the area's title names it, as the panel's
+                    // header names the panel's.
+                    .accessibilityLabel(model.destination?.title ?? "")
                     // The wide-window cap (owner 2026-08-10):
                     // rows never stretch past the widest column
                     // the prototype drew; the surplus becomes

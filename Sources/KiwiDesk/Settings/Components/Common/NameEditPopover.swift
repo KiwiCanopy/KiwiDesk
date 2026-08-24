@@ -40,6 +40,11 @@ import SwiftUI
 /// a function of the typed name and never re-derives it.
 struct NameEditPopover: View {
     let seed: String
+    /// The field's title — what VoiceOver calls it and what an
+    /// empty field shows. The caller's, because the popover is
+    /// shared: seeded with the palette key it announced
+    /// "Palette name" over a profile rename (#812).
+    let placeholder: String
     let confirmLabel: (String) -> String
     let isValid: (String) -> Bool
     /// The caption under the field — a reserved name, a duplicate
@@ -51,6 +56,7 @@ struct NameEditPopover: View {
 
     init(
         seed: String,
+        placeholder: String,
         width: CGFloat = 220,
         confirmLabel: @escaping (String) -> String,
         isValid: @escaping (String) -> Bool,
@@ -58,6 +64,7 @@ struct NameEditPopover: View {
         onConfirm: @escaping (String) -> Void
     ) {
         self.seed = seed
+        self.placeholder = placeholder
         self.width = width
         self.confirmLabel = confirmLabel
         self.isValid = isValid
@@ -68,13 +75,10 @@ struct NameEditPopover: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            TextField(
-                L("palettes.name_placeholder", "Palette name"),
-                text: $name
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(width: width)
-            .onSubmit(confirm)
+            TextField(placeholder, text: $name)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: width)
+                .onSubmit(confirm)
             if let notice = notice(name) {
                 Text(notice)
                     .font(.caption)

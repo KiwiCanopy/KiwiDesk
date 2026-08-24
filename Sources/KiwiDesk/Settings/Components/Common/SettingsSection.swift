@@ -13,6 +13,7 @@ struct SettingsGroupHeader: View {
         Text(title)
             .font(.title3)
             .fontWeight(.semibold)
+            .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -217,6 +218,13 @@ struct SettingsSection<Content: View>: View {
                     }
                     Text(title)
                         .foregroundStyle(SettingsTheme.ink)
+                        // A heading for the rotor (#812): every
+                        // section title in every area, so a
+                        // VoiceOver user jumps card to card
+                        // instead of walking every row. Home's
+                        // group labels were the only headings
+                        // the app had.
+                        .accessibilityAddTraits(.isHeader)
                 }
                 .font(
                     subsection

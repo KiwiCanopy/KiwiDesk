@@ -40,6 +40,7 @@ extension ProfilesSection {
             // relaxed gate would make it visible.
             NameEditPopover(
                 seed: request.seed,
+                placeholder: L("footer.profile_name", "Profile name"),
                 width: 160,
                 confirmLabel: { _ in
                     L("profiles.rename", "Rename")

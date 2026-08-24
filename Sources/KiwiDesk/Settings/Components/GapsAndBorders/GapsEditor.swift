@@ -99,6 +99,15 @@ struct GapsEditor: View {
 
     // MARK: - Master rows
 
+    private func masterReadout(
+        _ unified: Binding<CGFloat>,
+        _ mixed: Bool
+    ) -> String {
+        mixed
+            ? L("gaps.mixed", "mixed")
+            : "\(Int(unified.wrappedValue)) pt"
+    }
+
     private func masterRow(
         label: String,
         unified: Binding<CGFloat>,
@@ -116,32 +125,31 @@ struct GapsEditor: View {
                         }
                     ),
                     range: 0...100,
-                    step: 1
+                    step: 1,
+                    label: label,
+                    spokenValue: masterReadout(unified, mixed)
                 )
                 .disabled(mixed)
-                Text(
-                    mixed
-                        ? L("gaps.mixed", "mixed")
-                        : "\(Int(unified.wrappedValue)) pt"
-                )
-                .frame(
-                    width: SettingsMetrics.readoutColumn,
-                    alignment: .trailing
-                )
-                .foregroundStyle(.secondary)
-                .font(.body.monospacedDigit())
-                // The other word-valued readout (see
-                // `PtSlider`): a longer locale shrinks rather
-                // than wrapping and growing the row's height.
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-                .help(
-                    mixed
-                        ? GapsBordersGateHelp.sentence(
-                            for: .gapsDiffer
-                        )
-                        : ""
-                )
+                Text(masterReadout(unified, mixed))
+                    .settingsReadout()
+                    .frame(
+                        width: SettingsMetrics.readoutColumn,
+                        alignment: .trailing
+                    )
+                    .foregroundStyle(.secondary)
+                    .font(.body.monospacedDigit())
+                    // The other word-valued readout (see
+                    // `PtSlider`): a longer locale shrinks rather
+                    // than wrapping and growing the row's height.
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .help(
+                        mixed
+                            ? GapsBordersGateHelp.sentence(
+                                for: .gapsDiffer
+                            )
+                            : ""
+                    )
             }
         }
     }
@@ -244,9 +252,12 @@ private struct GapRow: View {
                         set: { value = CGFloat($0) }
                     ),
                     range: 0...100,
-                    step: 1
+                    step: 1,
+                    label: control.text,
+                    spokenValue: "\(Int(value)) pt"
                 )
                 Text("\(Int(value)) pt")
+                    .settingsReadout()
                     .frame(
                         width: SettingsMetrics.readoutColumn,
                         alignment: .trailing

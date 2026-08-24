@@ -43,6 +43,10 @@ struct SchematicCanvas<Content: View>: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    // `axLabel` is the spoken form of this
+                    // drawing; the caption read as well was the
+                    // same fact twice at `.panel` (#812).
+                    .accessibilityHidden(true)
             }
         }
         .frame(maxWidth: .infinity)

@@ -103,6 +103,9 @@ struct LayerStripEditor: View {
         .buttonStyle(.plain)
         .onHover { addLayerHovered = isEnabled && $0 }
         .help(L("shortcuts.add_layer.help", "Add a layer"))
+        .accessibilityLabel(
+            L("shortcuts.add_layer.help", "Add a layer")
+        )
         .popover(isPresented: $addingLayer) {
             HStack {
                 TextField(layerNamePlaceholder, text: $newLayer)
@@ -205,6 +208,7 @@ struct LayerStripEditor: View {
         .popover(item: $renameRequest) { request in
             NameEditPopover(
                 seed: request.seed,
+                placeholder: layerNamePlaceholder,
                 width: 140,
                 confirmLabel: { _ in
                     L("shortcuts.rename", "Rename")

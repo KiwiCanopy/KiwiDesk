@@ -95,6 +95,13 @@ different formula — no tree surgery, no lost state.
   overlays, and UNIX socket JSON event streams (`kiwidesk subscribe`).
 - **Smooth & Lightweight**: 60/120 Hz DisplayLink spring animations, zero
   SIP modifications, and localized out of the box.
+- **Accessible**: The Settings app is built to be driven entirely by
+  keyboard and narrates itself fully under VoiceOver — every control
+  announces its name *and* its value, areas expose rotor headings, and
+  even the keyboard-shortcut preview describes itself in words. Full
+  keyboard reach needs macOS's own **Keyboard navigation** setting; the
+  [user guide](docs/user-guide.md#using-settings-from-the-keyboard)
+  has the details.
 
 ## Solving macOS Papercuts
 

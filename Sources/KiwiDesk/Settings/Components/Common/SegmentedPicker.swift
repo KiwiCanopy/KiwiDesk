@@ -105,6 +105,16 @@ struct SegmentedPicker<Value: Hashable>: View {
             )
         )
         .accessibilityElement(children: .contain)
+        // The group's choice as its value, so arriving on the
+        // track hears "Position, Top" the way a native
+        // segmented control says it, before the segments are
+        // walked (#812). On the TRACK, not the labelled branch:
+        // an unnamed instance labelled at its call site (the
+        // header's mode segment, the icon tabs) must ride the
+        // same value (code review, 2026-08-24).
+        .accessibilityValue(
+            selectedIndex.map { options[$0].title } ?? ""
+        )
         .onChange(of: isEnabled) { _, now in
             if !now { hoveredIndex = nil }
         }
