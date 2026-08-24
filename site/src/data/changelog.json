@@ -2,6 +2,36 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.0.0",
+      "tag": "v1.0.0",
+      "date": "2026-08-24",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.0.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.0.0/KiwiDesk-1.0.0.dmg",
+      "summary": "The kiwi is ripe. KiwiDesk is 1.0. 🥝",
+      "sections": [
+        {
+          "title": "Ready is the headline",
+          "items": [
+            "**1.0 is not a feature dump, it is a verdict.** Seven layouts, Lua configuration, profiles, per-Desktop setups, the App and Space Bars, and a Settings window you can drive end to end from the keyboard — all of it has been carrying real desks through the beta. Nothing about how your windows behave changes today, and that is exactly what a 1.0 should feel like: the boring release, arrived at on purpose."
+          ]
+        },
+        {
+          "title": "Just download it already",
+          "items": [
+            "**Homebrew is no longer the price of entry.** Take the signed, notarized disk image from the KiwiDesk site, drag the kiwi into your Applications folder, and you are done. No terminal, no tap, no incantation.",
+            "**Same app whichever way you get it.** Homebrew keeps one perk — it puts the `kiwidesk` command on your PATH — and from then on KiwiDesk quietly keeps itself up to date either way."
+          ]
+        },
+        {
+          "title": "Also",
+          "items": [
+            "The site now argues for KiwiDesk the way the people using it do, by naming the everyday Mac annoyances it takes off your hands. It also says out loud that Settings can be driven entirely by VoiceOver and the keyboard, and the release-notes page no longer sprawls to the window edge."
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.9.10",
       "tag": "v0.9.10",
       "date": "2026-08-24",
