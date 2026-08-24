@@ -2685,6 +2685,12 @@ you, but a shortcut stays on its physical key — switching input
 sources changes the characters on the caps, not which key fires
 your bindings.
 
+With VoiceOver, the board is one element that describes itself
+in words rather than seventy keys to step through: which
+combination it is showing, then the bound keys, the keys macOS
+owns under that combination, and any conflicts — the same facts
+the fills and rings draw, read from the same census.
+
 ### Keyboard Modifiers & Keys
 
 **Modifiers**: `cmd`/`command`, `alt`/`opt`/`option`,
