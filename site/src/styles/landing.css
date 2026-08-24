@@ -1649,5 +1649,13 @@ section {
    `.btn .btn--primary`, the same one the landing and guide use,
    because one action should not wear a fifth button style. */
 .clog__download {
-  margin-bottom: 2.4rem;
+  /* Centred, because it belongs to the PAGE rather than to the
+     column of prose it sits under — the entries below are
+     left-aligned reading, and a left-aligned button reads as
+     another line of that rather than as the page's own action.
+     `display: flex` overrides `.btn`'s `inline-flex` so the
+     auto margins have a block box to centre. */
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 2.6rem;
 }
