@@ -3354,8 +3354,11 @@ the house ambiguous-control cue (the adaptive hover chip)
 plus a chevron with real weight that rotates on expand. The
 button is preferred over a tap gesture on the label
 specifically because it is a control — it takes one focus
-stop, Space and Return work on it, and macOS keyboard
-navigation can reach it, none of which a gesture offers. The
+stop, Space activates it, and macOS keyboard navigation can
+reach it, none of which a gesture offers. (Space, not Return:
+Return belongs to the window's default button, so a ruling
+that promised it would be promising the platform's behaviour
+rather than ours.) The
 cost is what every custom control here costs and must be paid
 back in the same change: a `Button` is not a disclosure
 triangle, so VoiceOver stops saying whether the drawer is
@@ -3364,6 +3367,22 @@ back (the `LinkedCaptionHitTests` rule, generalised). One
 style, both chromes and the one drawer outside the wrapper:
 a header that reads as openable in a card and not inline
 would be the same defect wearing a different frame.
+
+**The header's accessory is a SIBLING of that button, never
+its child.** A drawer's `accessory:` slot may hold a control —
+the Profiles-per-Desktop drawer puts its `?` there — and the
+first draft of the style wrapped the whole label, accessory
+included, in the header button. A control inside a control
+loses both halves of being one: the click lands on the outer
+button (the `?` toggled the drawer instead of explaining it)
+and the inner name and hint collapse into the outer element's
+single announcement. So the row's hit shape stops where the
+accessory begins, which is also what makes the drawer's
+disclosure label still usable as a live help anchor. The
+general rule this instance serves is already written down —
+two controls in one strip are two accessibility elements —
+and the lesson is that wrapping a slot whose contents you do
+not own silently breaks it.
 
 **Census labels render at runtime from the English
 manifest.** (#678 Phase 4.) A surface that renders a
@@ -4768,7 +4787,16 @@ don't assume from tone.
   bundled palettes carrying the red as an inherited default
   rather than as a choice (Kiwi Gold, Clean Light, Slate, True
   Dark) moved with it while the four that chose their own
-  (Monochrome, Sunset, Ultraviolet, Kiwi Neon) did not.
+  (Monochrome, Sunset, Ultraviolet, Kiwi Neon) did not. **A
+  default retune reaches only what has not stored an answer.**
+  The bar styles encode every colour field, so an existing
+  `gui.json` or profile already carries the old hex explicitly
+  and keeps it — the change lands on fresh installs, on a reset,
+  and on re-applying one of the four palettes. That is the right
+  behaviour rather than a gap to close: once a colour is in a
+  user's file, nothing can tell "they chose this" from "this was
+  the default the day it was written", and silently rewriting
+  the first would be worse than leaving the second.
 - **Drag ghost / drop-zone:** a deliberate two-hue split
   (border opaque + fill ~15–25 %) so origin reads apart from
   target — and since #511 it is held to the **same CVD

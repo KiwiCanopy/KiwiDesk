@@ -357,9 +357,12 @@ chromes, and the one drawer built outside the wrapper — takes
 weighted chevron that rotates on expand, and carries
 expanded / collapsed on `.accessibilityValue` because the
 button replaced the triangle that used to announce it. Click
-anywhere on the row, Space or Return on the focused one; the
-cursor stays an arrow (the hand is link-only). The ruling is
-in `docs/design-decisions.md`.
+anywhere on the row, Space on the focused one; the cursor
+stays an arrow (the hand is link-only). A drawer's
+`accessory:` may hold a control, so it is drawn BESIDE that
+button rather than inside it — the row's hit shape stops
+where the accessory begins. The ruling is in
+`docs/design-decisions.md`.
 
 **Weigh every title edit against the search index.** Search
 indexes destination titles, every census-labelled setting row

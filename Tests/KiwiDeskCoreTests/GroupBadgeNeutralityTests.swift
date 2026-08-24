@@ -15,13 +15,47 @@ import Testing
 /// holds the ink against the chip, and it held on the red too.
 @Suite("Group badge neutrality")
 struct GroupBadgeNeutralityTests {
-    /// The four bundled palettes that carried the old default
-    /// because nobody chose it for them. The other four
-    /// (Monochrome, Sunset, Ultraviolet, Kiwi Neon) picked their
-    /// own badge and are deliberately absent.
-    private static let inheritors = [
+    /// The bundled palettes that carried the old default
+    /// because nobody chose it for them.
+    private static let inheritors: Set<String> = [
         "Kiwi Gold", "Clean Light", "Slate", "True Dark",
     ]
+
+    /// The ones that picked a badge of their own, each with the
+    /// reason it is exempt. Listed rather than implied: the two
+    /// lists PARTITION the catalog below, so a ninth bundled
+    /// palette cannot join without its author saying which kind
+    /// it is. A membership list whose complement lives only in a
+    /// comment fails open, which is the one thing a guard about
+    /// agreement may not do (architect review, 2026-08-24).
+    private static let choosers: [String: String] = [
+        "Monochrome": "picked #636366 for this role first — "
+            + "the default followed IT, not the other way round",
+        "Sunset": "warm #995C00, echoing the palette temperature",
+        "Ultraviolet": "cool #157A9E, same reason",
+        "Kiwi Neon": "#F91F9E, the neon showcase's own accent",
+    ]
+
+    @Test("Every bundled palette is an inheritor or a chooser")
+    func theTwoListsPartitionTheCatalog() {
+        let authored = Set(PaletteCatalog.authored().map(\.name))
+        let classified = Self.inheritors.union(
+            Self.choosers.keys
+        )
+        let stray = authored.symmetricDifference(classified)
+            .sorted()
+            .joined(separator: ", ")
+        #expect(
+            classified == authored,
+            Comment(
+                rawValue:
+                    "a bundled palette is unclassified: \(stray)"
+                    + " — say whether its badge inherits the "
+                    + "default or chooses a hue, in the same "
+                    + "change that adds it"
+            )
+        )
+    }
 
     /// Near-neutral, not byte-identical channels: Apple's greys
     /// carry a few points of blue (`#636366` is three above its

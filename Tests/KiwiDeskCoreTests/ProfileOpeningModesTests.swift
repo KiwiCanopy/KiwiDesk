@@ -216,4 +216,43 @@ struct ProfileOpeningModesTests {
         )
         #expect(p.openingModes() == [.stack, .grid])
     }
+
+    /// Residue 1, pinned so it is a CHOSEN answer rather than an
+    /// accident (code + architect review, 2026-08-24). The
+    /// Monitors editor can pin a space onto the MAIN display's
+    /// own card, so main carries a pin and the follows-main
+    /// spaces both — and the sole blank screen is then a
+    /// secondary one holding nothing, which borrows Main's
+    /// glyph. Nothing stored tells the two apart. If this is
+    /// ever ruled the wrong trade, THIS is the test that changes.
+    @Test("a space pinned to Main leaves the blank screen wrong")
+    func pinnedMainScreenIsTheAcceptedResidue() {
+        let p = profile(
+            monitors: ["A:1920x1080", "B:1920x1080"],
+            pins: [SpaceID("a"): "A:1920x1080"],
+            mainSpaces: [SpaceID("m")],
+            spaces: [SpaceID("a"), SpaceID("m")],
+            modes: [SpaceID("a"): .stack, SpaceID("m"): .monocle]
+        )
+        // B holds nothing, and wears Main's glyph anyway.
+        #expect(p.openingModes() == [.stack, .monocle])
+    }
+
+    /// A pin OUTRANKS the Main role (`SpacePlacement.resolve`),
+    /// so a space listed in both opens on its pinned screen and
+    /// may not be named as the blank screen's opener. The GUI
+    /// writers clear one when they set the other; a hand-edited
+    /// profile is what carries both.
+    @Test("a pinned space is no candidate for the blank screen")
+    func pinnedSpaceIsNotAMainCandidate() {
+        let p = profile(
+            monitors: ["A:1920x1080", "B:1920x1080"],
+            pins: [SpaceID("m"): "B:1920x1080"],
+            mainSpaces: [SpaceID("m"), SpaceID("n")],
+            spaces: [SpaceID("m"), SpaceID("n")],
+            modes: [SpaceID("m"): .grid, SpaceID("n"): .bsp]
+        )
+        // "m" is pinned to B, so A takes the next main space.
+        #expect(p.openingModes() == [.bsp, .grid])
+    }
 }

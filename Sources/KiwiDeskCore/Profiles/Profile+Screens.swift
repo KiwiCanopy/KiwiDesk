@@ -26,17 +26,32 @@
 /// glyph.
 ///
 /// **But "no fingerprint names Main" is not the same as "the
-/// profile does not say" (#959).** Every ordinary two-screen
-/// profile hits that gap: saving pins only the spaces that are
-/// NOT on the main display (`adoptComposedPlacement`), so the
-/// main monitor is precisely the covered one carrying no pin,
-/// and its pip drew blank beside a caption announcing six
-/// Spaces. Where exactly ONE covered monitor has no pin, the
-/// follows-main spaces have nowhere else to be — the answer
-/// comes out by elimination, not by a guess about hardware, and
-/// it is as stored as any pin. Two blank monitors stay blank:
-/// then the unpinned spaces could be on either, and that IS the
-/// refusal above.
+/// profile does not say" (#959)**, so a sole unpinned screen is
+/// answered by elimination. The ruling and its argument are in
+/// `docs/design-decisions.md` ▸ Profiles; what this file owes is
+/// the seam and the two things elimination is NOT sure of.
+///
+/// **Residue 1 — a space pinned to the MAIN display.** The
+/// GUI's Monitors editor can pin a space onto the main display's
+/// own card (`SpaceAssignmentChip`, `DisplayCard`), and Lua's
+/// `pin_space_to_display` does the same. Then main carries a pin
+/// AND the follows-main spaces, so the sole blank screen is a
+/// SECONDARY one that holds nothing — and it borrows Main's
+/// glyph. Accepted rather than fixed: nothing stored tells the
+/// two apart (which fingerprint was Main is resolved live), and
+/// refusing the whole arm to avoid it would cost every ordinary
+/// two-screen profile the glyph #959 was filed about. The case
+/// is pinned by `ProfileOpeningModesTests` so it is a chosen
+/// answer rather than an accident.
+///
+/// **Residue 2 — a profile covering several arrangements**
+/// answers from `monitorSets.first`. That was harmless while the
+/// answer was a refusal; elimination makes it a positive claim
+/// about one arrangement, and the row carries no per-set label.
+/// A screen blank in the first set may be pinned in another.
+///
+/// Two blank screens stay blank in every case: there the
+/// unpinned spaces fit on either, and that IS the refusal above.
 extension Profile {
     /// One entry per screen this profile covers, in the stored
     /// set's canonical monitor order — the mode that screen's
@@ -60,7 +75,7 @@ extension Profile {
             firstSpace(pinnedTo: $0, in: set)
         }
         if let main = soleUnpinnedScreen(in: firsts),
-            let space = firstMainSpace()
+            let space = firstMainSpace(in: set)
         {
             firsts[main] = space
         }
@@ -87,9 +102,19 @@ extension Profile {
     /// `firstSpace(pinnedTo:in:)` states — `mainSpaces` is a
     /// stored list, but it is a list of MEMBERS, and which of
     /// them comes first is `orderedSpaces`' answer, not its own.
-    private func firstMainSpace() -> SpaceID? {
+    ///
+    /// A space carrying a pin is not a candidate even when
+    /// `main_spaces` also lists it: `SpacePlacement.resolve`
+    /// gives the pin precedence over the Main role, so such a
+    /// space opens on the pinned screen, and painting the blank
+    /// one with its mode would name a screen it never reaches.
+    /// The GUI writers clear one when they set the other; a
+    /// hand-edited profile is what can carry both.
+    private func firstMainSpace(in set: MonitorSet) -> SpaceID? {
         let main = Set(mainSpaces)
-        return orderedSpaces.first { main.contains($0) }
+        return orderedSpaces.first {
+            main.contains($0) && set.spaceMonitorMap[$0] == nil
+        }
     }
 
     /// The profile's own order decides which space is "first" on

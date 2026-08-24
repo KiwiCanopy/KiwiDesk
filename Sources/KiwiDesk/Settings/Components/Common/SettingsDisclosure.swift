@@ -213,22 +213,27 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             // The wash goes on the label alone; flashing the
             // group would tint the expanded contents too — the
             // whole-card wash the treatment exists to avoid.
-            HStack(spacing: 6) {
-                Text(control.text)
-                    .font(labelFont)
-                accessory()
-            }
-            .searchFlashHeader(control)
-            // The mode-reveal wash shares the label band the
-            // search wash uses (#760), for the same reason: a
-            // whole-group wash would tint the expanded interior.
-            .modeRevealWash(modeGated)
+            //
+            // The accessory is NOT in here (#956): the style
+            // makes this label the content of the header's
+            // button, and an accessory may be a control —
+            // `NativeSpacesGroup`'s `?` is. It travels to the
+            // style separately and is drawn beside the button.
+            Text(control.text)
+                .font(labelFont)
+                .searchFlashHeader(control)
+                // The mode-reveal wash shares the label band the
+                // search wash uses (#760), for the same reason:
+                // a whole-group wash would tint the interior.
+                .modeRevealWash(modeGated)
         }
         // The header is a full-row button with a resting cue
         // and its own expanded/collapsed announcement (#956) —
         // `SettingsDisclosureStyle` carries the argument. Every
         // drawer takes it, in both chromes.
-        .disclosureGroupStyle(SettingsDisclosureStyle())
+        .disclosureGroupStyle(
+            SettingsDisclosureStyle(accessory: accessory)
+        )
         // Reads only — the reveal fields keep one writer and
         // one clearer (`SettingsView`); an observer that also
         // cleared could blank a request before the scroll

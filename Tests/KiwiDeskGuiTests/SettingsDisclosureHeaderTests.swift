@@ -4,19 +4,18 @@ import Testing
 @testable import KiwiDesk
 
 /// The Settings drawer header (#956): one full-row button, a
-/// resting affordance, and the announcement the native triangle
-/// used to make.
+/// resting affordance, the announcement the native triangle used
+/// to make, and an accessory that stays a control of its own.
 ///
 /// **What this holds is composition, not behaviour.** Every
 /// assertion is a token match over one squashed file, so a
-/// modifier moved onto the wrong subview — `.contentShape` on
-/// the chevron, the value on a descendant — keeps the suite
-/// green while the row stops being one hit target
-/// (guard-prover, 2026-08-24). That is the standing limit of a
-/// source scan, and the reason #956's eye-confirm on device
-/// with keyboard navigation on is part of the change rather
-/// than a nicety: read a green here as "the pieces are still
-/// declared", never as "the row is clickable end to end".
+/// modifier moved onto the wrong subview keeps the suite green
+/// while the row stops being one hit target (guard-prover,
+/// 2026-08-24). That is the standing limit of a source scan, and
+/// the reason #956's eye-confirm on device with keyboard
+/// navigation on is part of the change rather than a nicety:
+/// read a green here as "the pieces are still declared", never
+/// as "the row is clickable end to end".
 ///
 /// Each half is here because losing it silently is exactly the
 /// failure #956 fixed. A header that keeps the chevron and loses
@@ -24,8 +23,8 @@ import Testing
 /// glyph; one that keeps the button and loses
 /// `.accessibilityValue` reads perfectly on screen and stops
 /// telling a VoiceOver reader whether the drawer is open — the
-/// `LinkedCaptionHitTests` lesson, that a custom control re-earns
-/// what its native twin gave free.
+/// `LinkedCaptionHitTests` lesson, that a custom control
+/// re-earns what its native twin gave free.
 @Suite("Settings disclosure header")
 struct SettingsDisclosureHeaderTests {
     private static let root = SourceScan.repoRoot(
@@ -48,6 +47,22 @@ struct SettingsDisclosureHeaderTests {
         "Sources/KiwiDesk/Settings/Components/Common/"
         + "SettingsDisclosureStyle.swift"
 
+    /// The whole GUI target, not the chrome roots.
+    ///
+    /// "Who builds a `DisclosureGroup`" is not the chrome
+    /// question `ChromeScanRoots` answers, and borrowing its two
+    /// roots left `Shortcuts`, `Updates` and the `KiwiDesk` root
+    /// files silently exempt — the Onboarding lesson exactly
+    /// (architect review, 2026-08-24). A native header can
+    /// appear anywhere a view can.
+    private static var guiRoot: URL {
+        root.appendingPathComponent("Sources/KiwiDesk")
+    }
+
+    private func guiSources() throws -> [URL] {
+        try SourceScan.swiftSources(under: Self.guiRoot)
+    }
+
     private func squashed(_ repoRelative: String) throws -> String {
         let url = Self.root
             .appendingPathComponent(repoRelative)
@@ -58,30 +73,64 @@ struct SettingsDisclosureHeaderTests {
             .joined()
     }
 
+    /// Root coverage: the scan must read a real tree, and one
+    /// wider than the chrome roots — otherwise the widening
+    /// could be reverted and every clause stay green.
+    @Test("the scan reads the whole GUI target")
+    func theScanReadsTheWholeTarget() throws {
+        let files = try guiSources()
+        #expect(files.count > 100)
+        for outside in ["/Shortcuts/", "/Updates/"] {
+            #expect(
+                files.contains { $0.path.contains(outside) },
+                Comment(
+                    rawValue:
+                        "\(outside) is not scanned — a native "
+                        + "disclosure header there would not be "
+                        + "seen"
+                )
+            )
+        }
+    }
+
     @Test("every disclosure in the tree takes the house style")
     func everyDisclosureTakesTheStyle() throws {
         var found: Set<String> = []
-        for url in try ChromeScanRoots.sources(from: #filePath) {
+        for url in try guiSources() {
+            // Squashed, so a call broken across lines by the
+            // formatter still reads as one token.
             let source = SourceScan.stripComments(
                 try String(contentsOf: url, encoding: .utf8)
             )
-            guard source.contains("DisclosureGroup(") else {
-                continue
-            }
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+            let built =
+                source.components(
+                    separatedBy: "DisclosureGroup("
+                ).count - 1
+            guard built > 0 else { continue }
             let name = url.lastPathComponent
             found.insert(name)
+            // Counted, never a per-file `contains`: a SECOND
+            // disclosure in a file that already applies the
+            // style would ship the native triangle while a
+            // file-total scan stayed green — the shape gui.md
+            // forbids after a guard-prover round forged it on
+            // `LayoutMenuEnablementScanTests`.
+            let styled =
+                source.components(
+                    separatedBy: ".disclosureGroupStyle("
+                        + "SettingsDisclosureStyle("
+                ).count - 1
             #expect(
-                source.contains(
-                    ".disclosureGroupStyle("
-                        + "SettingsDisclosureStyle())"
-                ),
+                styled == built,
                 Comment(
                     rawValue:
-                        "\(name) builds a DisclosureGroup that "
-                        + "keeps the native header — the "
-                        + "triangle is its only hit target "
-                        + "(#956); apply "
-                        + "SettingsDisclosureStyle()"
+                        "\(name) builds \(built) "
+                        + "DisclosureGroup(s) but styles "
+                        + "\(styled) — an unstyled one keeps "
+                        + "the native header, whose triangle is "
+                        + "its only hit target (#956)"
                 )
             )
         }
@@ -102,14 +151,57 @@ struct SettingsDisclosureHeaderTests {
     func headerIsOneFullRowButton() throws {
         let style = try squashed(Self.styleFile)
         // `.plain` is what brings it under the style guards, and
-        // what makes Space and Return toggle a focused header.
+        // what makes Space toggle a focused header.
         #expect(style.contains(".buttonStyle(.plain)"))
         // Without these two the row is a button whose hit area
         // is still just its glyph — the defect, wearing a
         // button's clothes.
         #expect(style.contains(".contentShape(Rectangle())"))
         #expect(style.contains("Spacer(minLength:0)"))
-        #expect(style.contains("configuration.isExpanded.toggle()"))
+        #expect(
+            style.contains("configuration.isExpanded.toggle()")
+        )
+    }
+
+    /// The accessory slot may hold a CONTROL — `NativeSpacesGroup`
+    /// puts a `HelpButton` there — so it must be a sibling of the
+    /// header button, never inside its label. Nested, its click
+    /// toggled the drawer and its name and hint collapsed into
+    /// the header's one element (code + architect review,
+    /// 2026-08-24).
+    @Test("the accessory sits beside the button, not inside it")
+    func accessoryIsNotNestedInTheButton() throws {
+        let style = try squashed(Self.styleFile)
+        // Called after the button's modifier chain closes, in
+        // the enclosing HStack.
+        #expect(
+            style.contains(
+                ".accessibilityValue(configuration.isExpanded"
+            )
+        )
+        #expect(style.contains(")accessory()}"))
+        // And the wrapper must not put it back in the label.
+        let wrapper = try squashed(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "SettingsDisclosure.swift"
+        )
+        #expect(
+            wrapper.contains(
+                ".disclosureGroupStyle(SettingsDisclosureStyle("
+                    + "accessory:accessory))"
+            )
+        )
+        #expect(
+            !wrapper.contains(
+                "Text(control.text).font(labelFont)accessory()"
+            ),
+            Comment(
+                rawValue:
+                    "the accessory is back inside the "
+                    + "DisclosureGroup label, which the style "
+                    + "wraps in a Button"
+            )
+        )
     }
 
     @Test("the header carries a resting affordance")
@@ -126,6 +218,13 @@ struct SettingsDisclosureHeaderTests {
             style.contains(".footnote.weight(.semibold)"),
             "the chevron's weight is the visible half of the cue"
         )
+        // A concrete ink, not `.secondary`: hierarchical styles
+        // compound under the Overrides footer's own `.secondary`.
+        #expect(
+            style.contains(
+                ".foregroundStyle(SettingsTheme.ink3)"
+            )
+        )
         #expect(
             style.contains(
                 ".rotationEffect(.degrees(expanded?90:0))"
@@ -137,14 +236,18 @@ struct SettingsDisclosureHeaderTests {
     func headerAnnouncesItsState() throws {
         let style = try squashed(Self.styleFile)
         #expect(style.contains(".accessibilityValue("))
+        // `ax_` marks these spoken-only, which is what tells a
+        // translator they are value words rather than labels
+        // (localization audit, 2026-08-24).
         #expect(
             style.contains(
-                "L(\"settings.disclosure.expanded\",\"expanded\")"
+                "L(\"settings.disclosure.ax_expanded\","
+                    + "\"expanded\")"
             )
         )
         #expect(
             style.contains(
-                "L(\"settings.disclosure.collapsed\","
+                "L(\"settings.disclosure.ax_collapsed\","
                     + "\"collapsed\")"
             )
         )
