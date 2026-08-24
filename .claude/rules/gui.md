@@ -731,9 +731,11 @@ claim; the obligations a change here takes on:
   that names it is the modifier that silences its choice —
   `AnnouncedValueTests` scans every labelled `Picker`/`Menu`
   chain for the value beside it, against an exact census of who
-  is labelled. `labelsHidden()` on a `.menu` picker drops the
-  AX title too (device, macOS 26), so `DropdownRow` takes the
-  selected option's title from its site; `SettingsSlider` takes
+  is labelled. A `.menu` picker under `labelsHidden` keeps no
+  AX title (the dated observation is the design decision cited
+  below), so `DropdownRow` takes the selected option's title
+  from its site, its `spokenValue: nil` escape enumerated by
+  the same suite; `SettingsSlider` takes
   `label` and `spokenValue` as required arguments and re-earns
   the Tab stop and arrow keys a custom-drawn view has no claim
   to; `SettingsRowLabel`'s text is drawn, not spoken, since every

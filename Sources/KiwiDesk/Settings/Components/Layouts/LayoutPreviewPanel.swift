@@ -103,10 +103,8 @@ struct LayoutPreviewPanel: View {
                 .foregroundStyle(SettingsTheme.ink2)
                 .font(.body.monospacedDigit())
                 // The readout is the slider's value drawn again
-                // for the eye; spoken twice it is just noise, and
-                // the value above is the copy that travels with
-                // the control.
-                .accessibilityHidden(true)
+                // for the eye (`settingsReadout`).
+                .settingsReadout()
         }
     }
 }

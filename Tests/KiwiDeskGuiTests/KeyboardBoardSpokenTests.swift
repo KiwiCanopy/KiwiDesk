@@ -21,6 +21,18 @@ struct KeyboardBoardSpokenTests {
         [.init(49, 4), .init(nil, legend: "⌘")],
     ]
 
+    /// Injected glyphs, so no assertion reaches the host's
+    /// input source: a letter resolved through `UCKeyTranslate`
+    /// is "A" on AZERTY where this fixture says "Q", and the
+    /// suite would red with no defect (tests.md ▸ injected
+    /// seams; code review 2026-08-24). 49 is absent so Space
+    /// takes the localized functional word, as on device.
+    private let glyphs: [UInt32: String] = [
+        12: "q", 13: "w", 14: "e",
+    ]
+
+    private func glyph(_ code: UInt32) -> String? { glyphs[code] }
+
     @Test("keys land in the bucket the cap draws them in")
     func bucketsFollowTheCaps() {
         LocalizationManager.shared.select("en")
@@ -32,7 +44,8 @@ struct KeyboardBoardSpokenTests {
             rows: rows,
             claims: claims,
             scope: .one(pair),
-            conflicted: [12]
+            conflicted: [12],
+            glyph: glyph
         )
         #expect(buckets.bound == ["W", "space"])
         #expect(buckets.conflict == ["Q"])
@@ -49,7 +62,8 @@ struct KeyboardBoardSpokenTests {
             rows: rows,
             claims: [49: [command]],
             scope: .one(command),
-            conflicted: []
+            conflicted: [],
+            glyph: glyph
         )
         #expect(buckets.bound == ["space"])
         #expect(buckets.conflict == ["space"])
@@ -63,7 +77,8 @@ struct KeyboardBoardSpokenTests {
             rows: rows,
             claims: [:],
             scope: .all,
-            conflicted: []
+            conflicted: [],
+            glyph: glyph
         )
         #expect(buckets == .init())
     }

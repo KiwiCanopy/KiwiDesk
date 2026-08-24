@@ -52,6 +52,12 @@ struct SettingsFooter: View {
     /// state: closing the window closes it, and nothing else
     /// needs to open it.
     @State var unsavedPopoverShown = false
+    /// The pill's pending appearance announcement (#812) — held
+    /// so leaving the dirty state inside the delay cancels it:
+    /// a Save right after the edit must not hear "Unsaved
+    /// changes" over a clean tree, and a re-flip inside the
+    /// window must not stack a second post.
+    @State private var pendingAnnouncement: DispatchWorkItem?
 
     /// How long the pill's appearance announcement waits for the
     /// changed control's own value to be spoken first.
@@ -89,16 +95,21 @@ struct SettingsFooter: View {
         // announcement was dropped on device under keyboard
         // stepping; the delay lets the value finish first.
         // Silent on the way out: Save and Discard say their own
-        // outcome.
+        // outcome, so the flip to false cancels the pending
+        // post rather than letting it land on a clean tree.
         .onChange(of: hasWork) { _, now in
+            pendingAnnouncement?.cancel()
             guard now else { return }
             let sentence = appearanceSentence
-            DispatchQueue.main.asyncAfter(
-                deadline: .now() + Self.announceDelay
-            ) {
+            let work = DispatchWorkItem {
                 AccessibilityNotification.Announcement(sentence)
                     .post()
             }
+            pendingAnnouncement = work
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + Self.announceDelay,
+                execute: work
+            )
         }
         .alert(
             L(

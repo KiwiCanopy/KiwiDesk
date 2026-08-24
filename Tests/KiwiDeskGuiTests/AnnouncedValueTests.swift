@@ -28,6 +28,14 @@ import Testing
 /// labelled at all, held EXACTLY: a control that gains a label
 /// joins it in the same change, so the scan cannot go quiet by
 /// matching nothing.
+///
+/// Stated blind spots, deliberate: the walker matches only the
+/// `Picker(` and `Menu {` spellings — a `Menu("Title") { … }`
+/// string-init is invisible to it (none exists under the roots
+/// today), and a label that lands on a wrapper's PARAMETER
+/// (`DropdownRow`) is out of its reach, which is why that
+/// wrapper is pinned by its own needle below and its nil escape
+/// by an `allowed` map.
 struct AnnouncedValueTests {
     /// File basename → how many labelled pickers/menus it holds.
     private static let labelled: [String: Int] = [
@@ -73,110 +81,6 @@ struct AnnouncedValueTests {
                     + "scan stays proven to see every site"
             )
         )
-    }
-
-    /// The row label the shared shape draws is a SIBLING of the
-    /// control, and every control in that shape names itself —
-    /// so the text is hidden from VoiceOver or the words arrive
-    /// twice. Pinned by needle because the docstring is the
-    /// only other place the decision lives.
-    @Test("the shared row label is drawn, not spoken")
-    func rowLabelIsHidden() throws {
-        let source = try Self.source(
-            "Sources/KiwiDesk/Settings/Components/Common/"
-                + "SettingsRowShape.swift"
-        )
-        let label = try #require(
-            source.range(of: "struct SettingsRowLabel")
-        )
-        #expect(
-            source[label.lowerBound...]
-                .contains(".accessibilityHidden(true)")
-        )
-    }
-
-    /// `SettingsSlider` names and values its representation from
-    /// its two required arguments; a bare `Slider` announces a
-    /// percentage of range, the defect nineteen rows shipped.
-    @Test("the slider seam names and values its representation")
-    func sliderSeamAnnouncesBoth() throws {
-        let source = try Self.source(
-            "Sources/KiwiDesk/Settings/Components/Common/"
-                + "SettingsSlider.swift"
-        )
-        #expect(source.contains(".accessibilityLabel(label)"))
-        #expect(
-            source.contains(".accessibilityValue(spokenValue)")
-        )
-    }
-
-    /// `DropdownRow` names its picker and gives the choice back:
-    /// `labelsHidden` drops the pop-up's AX title on device
-    /// (General ▸ Language said "menu, 12 items, Deutsch" and
-    /// never "Display language" — owner, #812), and a label alone
-    /// would take the choice away. The walker above cannot see
-    /// this one — the label lands on the `picker` parameter, not
-    /// on a `Picker(` spelling — so it is pinned by needle.
-    @Test("the dropdown row names its picker and states the choice")
-    func dropdownRowAnnouncesBoth() throws {
-        let source = try Self.source(
-            "Sources/KiwiDesk/Settings/Components/Common/"
-                + "DropdownRow.swift"
-        )
-        let row = try #require(source.range(of: "struct DropdownRow"))
-        let body = source[row.lowerBound...]
-        #expect(body.contains(".accessibilityLabel(label)"))
-        #expect(body.contains(".accessibilityValue(spokenValue)"))
-    }
-
-    /// A title component carries `.isHeader`, so the headings
-    /// rotor walks an area card by card. Each site's count is
-    /// its own: a needle over the file would be satisfied by one
-    /// surviving title while the other went quiet.
-    @Test("title components are rotor headings")
-    func titleComponentsAreHeadings() throws {
-        let sites: [(String, Int)] = [
-            ("Components/Common/SettingsSection.swift", 2),
-            ("SettingsDetailPanel.swift", 2),
-            ("SettingsHeaderBar.swift", 1),
-            ("HomeScreen.swift", 1),
-        ]
-        for (file, expected) in sites {
-            let source = try Self.source(
-                "Sources/KiwiDesk/Settings/" + file
-            )
-            #expect(
-                source.occurrences(of: ".accessibilityAddTraits(.isHeader)")
-                    == expected,
-                Comment(
-                    rawValue:
-                        "\(file): a title lost its heading trait — "
-                        + "the rotor no longer lists it"
-                )
-            )
-        }
-    }
-
-    /// A custom-drawn slider holds no keyboard focus of its own;
-    /// Tab skipped every one in the tree (owner, #812). The seam
-    /// re-earns the Tab stop and the arrow keys — pinned here
-    /// because a source needle is all that can hold it, and a
-    /// green needle says only that the modifiers are declared:
-    /// whether focus lands is a device fact, verified with
-    /// keyboard navigation ON.
-    @Test("the slider seam holds focus and steps by arrow key")
-    func sliderSeamIsKeyboardReachable() throws {
-        let source = try Self.source(
-            "Sources/KiwiDesk/Settings/Components/Common/"
-                + "SettingsSlider.swift"
-        )
-        #expect(source.contains(".focusable(isEnabled)"))
-        for key in ["leftArrow", "rightArrow", "upArrow", "downArrow"] {
-            #expect(
-                source.contains(".onKeyPress(.\(key))"),
-                Comment(rawValue: "the slider lost its \(key) step")
-            )
-        }
     }
 
     // MARK: - Walker

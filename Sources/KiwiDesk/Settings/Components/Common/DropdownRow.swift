@@ -6,16 +6,14 @@ import SwiftUI
 /// control line, like every slider and segmented picker.
 ///
 /// The row NAMES the control and gives its choice back as the
-/// VALUE. This used to say the picker "keeps its own title for
-/// accessibility — `labelsHidden` hides it visually only", and
-/// on device it does not: General ▸ Language announced "menu,
-/// 12 items, Deutsch" and never "Display language" (owner,
-/// #812 device session 1, macOS 26). A label alone would then
-/// take the choice away (it REPLACES the announcement — gui.md
-/// ▸ the keyboard path), so `spokenValue` is required: the
-/// selected option's title, as the site knows it. `nil` is for
-/// a control whose state IS its value and survives a label —
-/// the login row's `Toggle` — and nothing else.
+/// VALUE: `labelsHidden` drops a `.menu` picker's AX title (the
+/// observation is `docs/design-decisions.md` ▸ a name replaces
+/// the announcement), and a label alone would take the choice
+/// away. So `spokenValue` is required — the selected option's
+/// title, as the site knows it — and `nil` is for a control
+/// whose state IS its value and survives a label — the login
+/// row's `Toggle` — and nothing else, held by
+/// `AnnouncedValueTests`' `nilSpokenValue` map.
 struct DropdownRow<P: View>: View {
     let label: String
     /// The selected option's title, spoken as the control's

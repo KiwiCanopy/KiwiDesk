@@ -334,7 +334,7 @@ struct SpacesPanelPreview: View {
                 .frame(width: 24, alignment: .trailing)
                 .foregroundStyle(.secondary)
                 .font(.caption.monospacedDigit())
-                .accessibilityHidden(true)
+                .settingsReadout()
         }
     }
 }

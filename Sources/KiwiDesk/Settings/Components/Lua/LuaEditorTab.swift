@@ -202,11 +202,13 @@ struct LuaSourceEditor: NSViewRepresentable {
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.string = text
         // An AppKit view re-earns what a SwiftUI control gives
-        // free (gui.md); a bare `NSTextView` is an unnamed
-        // text area (#812).
-        textView.setAccessibilityLabel(
-            L("lua_editor.ax", "Lua configuration")
-        )
+        // free (gui.md); a bare `NSTextView` is an unnamed text
+        // area (#812). The FILENAME, verbatim, not a new noun:
+        // the surrounding copy already calls this "init.lua"
+        // throughout, and a translatable third name for the
+        // config file is Family C drift (localization audit,
+        // 2026-08-24).
+        textView.setAccessibilityLabel("init.lua")
         return scroll
     }
 
@@ -215,9 +217,10 @@ struct LuaSourceEditor: NSViewRepresentable {
         context: Context
     ) {
         guard
-            let textView = scroll.documentView as? NSTextView,
-            textView.string != text
+            let textView = scroll.documentView as? NSTextView
         else { return }
+        textView.setAccessibilityLabel("init.lua")
+        guard textView.string != text else { return }
         textView.string = text
     }
 

@@ -47,8 +47,12 @@ struct SettingsSlider: View {
         // it either — VoiceOver's cursor is its own — so the view
         // re-earns the two things a native `Slider` gave free:
         // a Tab stop with the platform's ring, and arrow keys
-        // stepping by `step`.
-        .focusable(isEnabled)
+        // stepping by `step`. `.edit` interactions only: bare
+        // `.focusable` also took focus on CLICK, which no
+        // native macOS control does outside text fields
+        // (owner, #812 session 3) — Tab reaches it, the
+        // pointer never moves the ring.
+        .focusable(isEnabled, interactions: .edit)
         .onKeyPress(.leftArrow) { nudge(-1) }
         .onKeyPress(.downArrow) { nudge(-1) }
         .onKeyPress(.rightArrow) { nudge(1) }
@@ -66,11 +70,26 @@ struct SettingsSlider: View {
         guard isEnabled else { return .ignored }
         let span = range.upperBound - range.lowerBound
         let increment = step > 0 ? step : span / 100
-        value = min(
-            max(value + direction * increment, range.lowerBound),
+        // Through the same snap the drag applies: an off-grid
+        // stored value (hand-edited config) must land on the
+        // grid on the first arrow press, not stay offset
+        // forever (code review, 2026-08-24).
+        value = snapped(value + direction * increment)
+        return .handled
+    }
+
+    /// The lowerBound-anchored grid both input paths share.
+    private func snapped(_ raw: Double) -> Double {
+        let snapped =
+            step > 0
+            ? range.lowerBound
+                + ((raw - range.lowerBound) / step).rounded()
+                * step
+            : raw
+        return min(
+            max(snapped, range.lowerBound),
             range.upperBound
         )
-        return .handled
     }
 
     /// Disabled sliders gray the fill itself — the dimming
@@ -142,17 +161,7 @@ struct SettingsSlider: View {
         let usable = max(width - Self.knobWidth, 1)
         let t = min(max((x - Self.knobWidth / 2) / usable, 0), 1)
         let span = range.upperBound - range.lowerBound
-        let raw = range.lowerBound + Double(t) * span
-        let snapped =
-            step > 0
-            ? range.lowerBound
-                + ((raw - range.lowerBound) / step).rounded()
-                * step
-            : raw
-        value = min(
-            max(snapped, range.lowerBound),
-            range.upperBound
-        )
+        value = snapped(range.lowerBound + Double(t) * span)
     }
 
     /// The native white thumb, on every macOS and in BOTH

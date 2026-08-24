@@ -74,11 +74,13 @@ enum KeyboardBoardSpoken {
         var conflict: [String] = []
     }
 
+    @MainActor
     static func buckets(
         rows: [[KeyboardMatrix.Key]],
         claims: [UInt32: [KeyboardCensus.ModifierLayer]],
         scope: KeyboardCensus.Scope,
-        conflicted: Set<UInt32>
+        conflicted: Set<UInt32>,
+        glyph: (UInt32) -> String? = LayoutKeyGlyph.char(for:)
     ) -> Buckets {
         let overwritten = KeyboardCensus.overwrittenReserved(
             claims: claims,
@@ -89,7 +91,7 @@ enum KeyboardBoardSpoken {
             // A code-less cap (⇧, ⌘) has no state and is never
             // listed.
             guard let code = key.code else { continue }
-            let name = spokenName(for: code)
+            let name = spokenName(for: code, glyph: glyph)
             switch KeyboardCensus.state(
                 of: code,
                 claims: claims,
@@ -149,13 +151,22 @@ enum KeyboardBoardSpoken {
     }
 
     /// The key as the board prints it where that is a letter or
-    /// sign, and as a WORD where the board prints a symbol —
-    /// VoiceOver reads "←" as "leftwards arrow" and "⎋" however
-    /// it likes, so a functional key takes its `KeyCombo` name
-    /// ("left", "return", "space"): drawn and spoken agree on
-    /// WHICH key and differ only in rendering.
-    static func spokenName(for code: UInt32) -> String {
-        if let char = LayoutKeyGlyph.char(for: code),
+    /// sign, and as a localized WORD where the board prints a
+    /// symbol — VoiceOver reads "←" as "leftwards arrow" and
+    /// "⎋" however it likes, and the wire names ("left") are
+    /// English (owner, #812 session 3: "left, up, down" inside
+    /// a German sentence). Drawn and spoken agree on WHICH key
+    /// and differ only in rendering. `glyph` is injected so the
+    /// tests never reach the host's input source — a letter
+    /// asserted through `UCKeyTranslate` reds on AZERTY with no
+    /// defect (tests.md ▸ injected seams).
+    @MainActor
+    static func spokenName(
+        for code: UInt32,
+        glyph: (UInt32) -> String? = LayoutKeyGlyph.char(for:)
+    ) -> String {
+        if let word = functionalWord(code) { return word }
+        if let char = glyph(code),
             KeyboardKeyLabel.isPrintable(char)
         {
             return KeyboardKeyLabel.capped(char)
@@ -164,9 +175,41 @@ enum KeyboardBoardSpoken {
             ?? KeyboardKeyLabel.fallback(for: code)
     }
 
+    /// The spoken word for a key the board prints as a symbol.
+    /// Localized, unlike the `KeyCombo` wire names, and keyed by
+    /// the same codes `KeyboardKeyLabel.functional` draws.
+    @MainActor
+    private static func functionalWord(_ code: UInt32) -> String? {
+        switch code {
+        case 36: return L("keyboard.key.return", "return")
+        case 48: return L("keyboard.key.tab", "tab")
+        case 49: return L("keyboard.key.space", "space")
+        case 51: return L("keyboard.key.delete", "delete")
+        case 53: return L("keyboard.key.escape", "escape")
+        case 123: return L("keyboard.key.left", "left")
+        case 124: return L("keyboard.key.right", "right")
+        case 125: return L("keyboard.key.down", "down")
+        case 126: return L("keyboard.key.up", "up")
+        default: return nil
+        }
+    }
+
     /// The list is not a grammatical clause, so no locale has
-    /// to agree with it; the platform's own joiner.
+    /// to agree with it — but the joiner word is a locale's,
+    /// and it must be the APP's locale, not the system's: the
+    /// class method joins in `Locale.current`, which put a
+    /// German "und" inside an English sentence on a German Mac
+    /// (owner, #812 session 3). The space joining the SENTENCES
+    /// is Swift-owned punctuation; spoken-only today, so a
+    /// visual reuse of `sentence` re-opens that question.
+    @MainActor
     private static func join(_ names: [String]) -> String {
-        ListFormatter.localizedString(byJoining: names)
+        let formatter = ListFormatter()
+        formatter.locale = Locale(
+            identifier:
+                LocalizationManager.shared.effectiveLocale ?? "en"
+        )
+        return formatter.string(from: names)
+            ?? names.joined(separator: ", ")
     }
 }
