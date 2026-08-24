@@ -53,6 +53,10 @@ struct SettingsFooter: View {
     /// needs to open it.
     @State var unsavedPopoverShown = false
 
+    /// How long the pill's appearance announcement waits for the
+    /// changed control's own value to be spoken first.
+    static let announceDelay: TimeInterval = 1.2
+
     /// Anything that gives a verb meaning. The
     /// `.saveAsNewProfile` creation offer on a fully clean
     /// setup deliberately does NOT summon the pill — creation
@@ -60,14 +64,6 @@ struct SettingsFooter: View {
     private var hasWork: Bool {
         model.isDirty || model.profileDirty
             || model.hasLayoutDrift
-    }
-
-    /// What the pill would say right now, or nil while there is
-    /// no pill: the draft's row count under `hasWork`. One key
-    /// so that the pill appearing and the count moving are the
-    /// same change and announce ONCE, never a pair.
-    private var announcementKey: Int? {
-        hasWork ? SettingsDiffRowSource.rows(for: model).count : nil
     }
 
     var body: some View {
@@ -84,16 +80,25 @@ struct SettingsFooter: View {
         // The pill is last in reading order on both mounts — an
         // overlay after the content, or the sibling below it —
         // so a VoiceOver user editing a row never reaches it and
-        // hears nothing when the draft gains a change. Announce
-        // the pill's own sentence when a change joins the draft
-        // or the count moves (#812). Silent on the way to nil:
-        // Save and Discard say their own outcome.
-        .onChange(of: announcementKey) { _, now in
-            guard let now else { return }
-            AccessibilityNotification.Announcement(
-                countLine(count: now)
-            )
-            .post()
+        // would never learn a Save is pending. Announce ONCE, as
+        // the pill appears, and never the count (owner ruling,
+        // #812 session 2: native macOS narrates no dirty state,
+        // and a count per change is noise — it is one VO-cursor
+        // move to the pill away). Delayed, because posted in the
+        // same instant as the control's own value ("7 pt") the
+        // announcement was dropped on device under keyboard
+        // stepping; the delay lets the value finish first.
+        // Silent on the way out: Save and Discard say their own
+        // outcome.
+        .onChange(of: hasWork) { _, now in
+            guard now else { return }
+            let sentence = appearanceSentence
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + Self.announceDelay
+            ) {
+                AccessibilityNotification.Announcement(sentence)
+                    .post()
+            }
         }
         .alert(
             L(

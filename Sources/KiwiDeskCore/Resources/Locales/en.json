@@ -324,6 +324,7 @@
   "footer.unsaved.count_one_to": "%1$d unsaved change to %2$@",
   "footer.unsaved.count_to": "%1$d unsaved changes to %2$@",
   "footer.unsaved.help": "Click for the list of changes.",
+  "footer.unsaved.to": "Unsaved changes to %1$@",
   "footer.unsaved_changes": "Unsaved changes",
   "gaps.bottom": "Bottom",
   "gaps.horizontal": "Horizontal",

@@ -30,16 +30,21 @@ struct DropdownRow<P: View>: View {
             SettingsRowLabel(label: label, help: help)
         } control: {
             HStack {
-                named(picker)
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .controlSize(.large)
+                named(
+                    picker
+                        .labelsHidden()
+                        .pickerStyle(.menu)
+                        .controlSize(.large)
+                )
                 Spacer()
             }
         }
     }
 
-    @ViewBuilder private func named(_ picker: P) -> some View {
+    // Applied AFTER `labelsHidden` — the order the Spaces mode
+    // picker uses; before it, the name never reached the pop-up
+    // on device (owner, #812 session 2).
+    @ViewBuilder private func named<V: View>(_ picker: V) -> some View {
         if let spokenValue {
             picker
                 .accessibilityLabel(label)
