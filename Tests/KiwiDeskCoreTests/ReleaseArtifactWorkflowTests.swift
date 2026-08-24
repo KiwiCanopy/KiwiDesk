@@ -34,8 +34,15 @@ import Testing
 /// the Sparkle signing step's. A guard that reads the file where
 /// it means to read one step is one mutation away from inert.
 ///
-/// **What this cannot see**: whether the image Apple ticketed is
-/// the one attached, or whether the ticket is physically on it.
+/// **What this cannot see**, largest first: that the names it
+/// finds sit in the BRANCHES they belong to. A scan proves the
+/// kept name and the sibling both appear in the draft step and
+/// that each is compared the right way round (`=` for the drop,
+/// `!=` for the keep list); it cannot prove the drop test is
+/// inside the delete arm rather than beside it, so a `continue`
+/// added above that arm passes here. Nor whether the image
+/// Apple ticketed is the one attached, or whether the ticket is
+/// physically on it.
 /// `scripts/build-app.sh` owns the staple and the rename
 /// (`SparklePackagingTests` holds its ordering), and only a
 /// machine that downloaded the artifact can prove the rest —

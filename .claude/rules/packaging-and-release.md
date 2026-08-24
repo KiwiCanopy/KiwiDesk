@@ -396,6 +396,14 @@ before/after that produced the rule are
 person installing* — which also records why this one has no
 guard.
 
+**Nor is the ORDER a download channel opens in.**
+`docs/design-decisions.md` ▸ *No distribution channel without an
+update path* rules it — release page first, on a release cut to
+be verified on a clean machine, and the site only afterwards —
+and the person about to get it wrong is reading a release
+procedure rather than a product decision, which is why it is
+pointed at from here.
+
 **Publishing is not this file's call.** The workflow drafts the
 release rather than publishing it, and "No distribution channel
 without an update path" in `docs/design-decisions.md` owns both

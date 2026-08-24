@@ -303,16 +303,15 @@ updating. The first Sparkle-carrying release meets the first and
 cannot meet the second, which is why a promoted download opens on
 the one after it and not on a number.
 
-**Both conditions were met on 2026-08-23, and what the gate
-guards is spent.** v0.9.9 published 2026-08-22 carrying Sparkle,
-and a real 0.9.8 → 0.9.9 update installed on a physical machine
-— not a "you're up to date" channel check — confirmed by the
-owner and recorded on
-[#904](https://github.com/KiwiCanopy/KiwiDesk/issues/904);
-`site/public/appcast.xml` carries both releases. That is a
-past-tense fact and cannot come untrue, so nothing above is
-still a question. Read the paragraphs before this one as the
-argument for the gate, not as a description of a shut channel.
+**Both conditions have been met, and what the gate guards is
+spent.** A Sparkle-carrying release was published, and a real
+update from the one before it installed on a physical machine.
+That is a past-tense fact and cannot come untrue, so nothing
+above is still a question — read the paragraphs before this one
+as the argument for the gate, never as a description of a shut
+channel.
+[#904](https://github.com/KiwiCanopy/KiwiDesk/issues/904) is
+where the confirmation is recorded; it does not belong here.
 
 **What that licenses is the channel, not a free pass on the
 artifact.** The release page and the site link are one channel,

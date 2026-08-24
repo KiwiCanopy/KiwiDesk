@@ -455,6 +455,15 @@ jobs:
           # deletes it — so two here means that cleanup regressed,
           # and picking either one silently would be a coin flip
           # between the stapled archive and the pre-staple one.
+          #
+          # A COUNT is the right instrument here and a name
+          # exclusion is right for the image below, and the
+          # asymmetry is the strays, not a preference: this
+          # one is built BESIDE the good archive, so it can
+          # only ever show up as a second file and the count
+          # sees it. The image's partial replaces the good
+          # image, so it can be the only file present — which
+          # a count of one reads as success.
           if [ "${#zips[@]}" -ne 1 ]; then
             echo "::error::expected 1 archive, found" \
                  "${#zips[@]} in $RUNNER_TEMP/app"
