@@ -419,7 +419,18 @@ def check_promoted_download(dist: pathlib.Path) -> None:
       the recorded one, and where nothing is recorded there must
       be none at all. That direction is the unrecoverable one: a
       composed or hard-coded link points at bytes that were never
-      published.
+      published, and it is checked on EVERY built page rather
+      than on the two kinds found by marker, because a page that
+      grows a download later would otherwise be unwatched.
+
+    What it does not see, stated rather than implied: presence is
+    per PAGE, not per affordance. A landing page carrying three
+    download buttons still passes with two of them removed. The
+    page-level question — did this locale stop offering the
+    download at all — is the one whose failure is silent and
+    total; a single button lost among several is a visible layout
+    change that review catches. Widening to a per-site count
+    would pin a number that legitimately moves.
     """
     data = REPO / "site" / "src" / "data" / "changelog.json"
     try:
