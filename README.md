@@ -23,7 +23,7 @@ Powerful when you reach for it, never in your way.
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
 [![License MIT](https://img.shields.io/badge/License-MIT-8DB354)](LICENSE)
 [![Public beta](https://img.shields.io/badge/Public_beta-Homebrew-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
-![Direct download — coming soon](https://img.shields.io/badge/Direct_download-coming_soon-inactive)
+[![Direct download](https://img.shields.io/badge/Direct_download-.dmg-8DB354)](https://kiwidesk.kiwicanopy.com/)
 
 <br>
 
@@ -40,10 +40,12 @@ Powerful when you reach for it, never in your way.
 > **Status: public beta, on Homebrew.** The core (layouts, Lua
 > config, CLI, profiles, per-Desktop profiles, per-space window
 > hiding) and the SwiftUI Settings app are functional.
-> Install it with the Homebrew cask below, which keeps itself
-> current via `brew upgrade`; a signed, notarized `.dmg` follows
-> once the app can update itself, so that a direct download is
-> never a dead end — see
+> Install it with the Homebrew cask below, or download the
+> signed, notarized `.dmg` from
+> [kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com/) —
+> it is the same build either way, and KiwiDesk keeps itself up
+> to date from there. That the download waited for a build which
+> could update itself is
 > [No distribution channel without an update path](https://kiwidesk.kiwicanopy.com/docs/design-decisions/#no-distribution-channel-without-an-update-path).
 > KiwiDesk is
 > distributed directly and **not** through the Mac App Store —
@@ -122,6 +124,12 @@ Requirements: macOS 14 or later.
 brew install --cask kiwicanopy/tap/kiwidesk
 ```
 
+Or **[download the `.dmg`](https://kiwidesk.kiwicanopy.com/)** and
+drag KiwiDesk into your Applications folder. It is the same
+signed, notarized build; what the cask adds is the `kiwidesk` CLI
+on your `PATH` — see [the CLI guide](docs/cli.md) for putting it
+there after a `.dmg` install.
+
 The cask installs the app and puts the `kiwidesk` CLI on your
 `PATH`. It ships from this project's own tap
 ([`KiwiCanopy/homebrew-tap`](https://github.com/KiwiCanopy/homebrew-tap));
@@ -130,11 +138,12 @@ separate `brew tap` step. The shorter `brew install --cask
 kiwidesk` would need acceptance into homebrew-cask itself, which
 is a post-beta step.
 
-Later builds arrive the same way:
-
-```sh
-brew upgrade --cask kiwidesk
-```
+Later builds install themselves. KiwiDesk checks for new releases
+in the background and offers you the update, so there is nothing
+to run. Upgrade an older copy through Homebrew once to reach a
+version that can do this, and it takes over from there — the
+[user guide](docs/user-guide.md#the-status-bar-quick-menu) has the
+detail.
 
 > Releases are signed with a stable Developer ID and notarized. If
 > windows stop being managed after an upgrade, re-approve KiwiDesk

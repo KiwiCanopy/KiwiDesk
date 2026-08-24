@@ -37,6 +37,7 @@ import ogBannerEn from "../assets/brand/og-banner.jpg";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import { layoutDiagram } from "../lib/layoutDiagram";
+import changelog from "../data/changelog.json";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
 import "../styles/learn.css";
@@ -72,6 +73,17 @@ const makerProfile = "https://github.com/hajiboy95";
 // acceptance), so a missed copy degrades to "one page shows the
 // long form", never to a broken command.
 const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
+
+// The promoted direct download (#904) — the newest published
+// release's OWN `.dmg` asset, recorded by `scripts/changelog-sync`
+// off the releases API rather than composed from a version here.
+// `null` where no published release carries one, and the download
+// is then omitted entirely; Landing.astro derives it the same way
+// and carries the full argument.
+const downloadHref: string | null =
+  (changelog.releases as { download?: string }[]).find(
+    (release) => typeof release.download === "string" && release.download,
+  )?.download ?? null;
 // Homebrew's own installer, for the "don't have brew yet?" case.
 const brewCmd =
   '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com' +
@@ -510,6 +522,30 @@ const jsonLd = [
                   <span class="pill__dot" aria-hidden="true"></span>
                   {s.beta_badge}
                 </span>
+                {/* The download leads (#904). The Homebrew lead
+                     below teaches how to open Terminal, which is
+                     written for someone who never has — and telling
+                     that person to open one when a double-clickable
+                     disk image exists is the wrong first move.
+                     Homebrew keeps a FULL block rather than a
+                     collapsed one: this is the page people read,
+                     and it is where a returning cask user comes for
+                     the command. */}
+                {downloadHref && (
+                  <>
+                    <p class="learn-install__lead"
+                      >{s.guide_gs_download_lead}</p>
+                    <a class="btn btn--primary learn-install__download"
+                      href={downloadHref}>
+                      <Icon name="lucide:download" width={16}
+                        height={16} aria-hidden="true" />
+                      {s.download_cta}
+                    </a>
+                    <p class="learn-install__source"
+                      >{s.download_req}</p>
+                  </>
+                )}
+
                 <p class="learn-install__lead"
                   >{s.guide_gs_install_lead}</p>
 
@@ -574,10 +610,11 @@ const jsonLd = [
                   </div>
                 </details>
 
-                {/* A promise, not a control: plain text, never
-                     styled as something tappable. */}
+                {/* A statement of fact, not a control: plain
+                     text, never styled as something tappable. */}
                 <p class="learn-install__later"
-                  >{s.guide_gs_install_later}</p>
+                  >{s.guide_gs_install_updates}</p>
+                <p class="learn-install__later">{s.guide_gs_a11y}</p>
               </div>
 
               <p class="learn__store-note">{s.guide_gs_store_note}</p>

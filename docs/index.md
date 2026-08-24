@@ -52,9 +52,14 @@ That installs the app and puts the `kiwidesk` CLI on your
 start`. The [User Guide](user-guide.md) covers the Accessibility
 permission and first-run setup.
 
-Later builds arrive with `brew upgrade --cask kiwidesk`. Releases
-are signed with a stable Developer ID and notarized. If windows
-stop being managed after an upgrade, re-approve KiwiDesk in
+Later builds install themselves — KiwiDesk checks in the
+background and offers you the update. Upgrade an older copy
+through Homebrew once to reach a version that can do that; the
+[User Guide](user-guide.md#the-status-bar-quick-menu) covers the
+rest.
+
+Releases are signed with a stable Developer ID and notarized. If
+windows stop being managed after an upgrade, re-approve KiwiDesk in
 **System Settings › Privacy & Security › Accessibility**.
 
 Prefer to build it yourself? `swift build -c release` produces

@@ -1193,6 +1193,16 @@ section {
   min-width: 0;
 }
 
+/* Rung 2 of the install ladder (#904): the direct download, sitting
+   between Homebrew's open block above and the collapsed source
+   build below. `align-self: start` keeps it button-sized rather
+   than stretching to the code block's width — a full-bleed button
+   would outweigh the recommended path it sits under, which is the
+   opposite of what a second rung is for. */
+.quickstart__download {
+  align-self: start;
+}
+
 /* Source build: collapsed by default. Newcomers arriving on the
    install bridge meet Homebrew first; contributors are one click
    from the clone commands. */

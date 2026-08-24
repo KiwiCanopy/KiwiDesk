@@ -26,6 +26,7 @@ import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import { layoutDiagram } from "../lib/layoutDiagram";
+import changelog from "../data/changelog.json";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
 
@@ -69,6 +70,25 @@ const buildCmd =
 // `brew install --cask kiwidesk` — a one-line edit here.
 const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
 
+// The promoted direct download (#904). The URL is the newest
+// published release's OWN `.dmg` asset, recorded by
+// `scripts/changelog-sync` off the releases API — never composed
+// here from a version string. A composed filename is one
+// release-workflow edit away from pointing at bytes that do not
+// exist, and the site deploys independently of any tag, so the
+// button would 404 on a page nothing re-publishes.
+//
+// `null` where no published release carries a disk image, and
+// every download affordance below is then omitted ENTIRELY rather
+// than disabled. This is the one place "grey, don't hide" does
+// not apply: a dimmed button still makes a download's promise,
+// and the fallback — Homebrew alone — is a complete install path
+// rather than a degraded one.
+const downloadHref: string | null =
+  (changelog.releases as { download?: string }[]).find(
+    (release) => typeof release.download === "string" && release.download,
+  )?.download ?? null;
+
 // A crisp kiwi-slice glyph (green skin, pale flesh ring, small
 // core, a ring of seed dots) for the mode toggle — drawn rather
 // than the 🥝 emoji so it renders identically and cleanly at these
@@ -92,6 +112,7 @@ const features = [
   { title: t.feat_5_title, body: t.feat_5_body, icon: "lucide:gauge" },
   { title: t.feat_6_title, body: t.feat_6_body, icon: "lucide:shield-check" },
   { title: t.feat_7_title, body: t.feat_7_body, icon: "lucide:pin" },
+  { title: t.feat_8_title, body: t.feat_8_body, icon: "lucide:accessibility" },
 ];
 
 const layouts = [
@@ -444,9 +465,25 @@ const jsonLd = [
           <h1 class="hero__title">{t.hero_title}</h1>
           <p class="hero__sub">{t.hero_sub}</p>
           <div class="hero__cta">
-            <a class="btn btn--primary" href={`${homeHref}guide/#getting-started`}>
-              {t.hero_cta_primary}
-            </a>
+            {/* The download leads in Simple mode (#904). The guide
+                 detour this replaces existed only because there was
+                 nothing to click; the app's own onboarding wizard
+                 teaches the Accessibility permission the detour was
+                 implicitly protecting, and the guide keeps a
+                 first-class entrance in the closing band. Without a
+                 published disk image the guide link returns — the
+                 fallback is a whole install path, not a stub. */}
+            {downloadHref ? (
+              <a class="btn btn--primary" href={downloadHref}>
+                {t.download_cta}
+              </a>
+            ) : (
+              <a class="btn btn--primary" href={`${homeHref}guide/#getting-started`}>
+                {t.hero_cta_primary}
+              </a>
+            )}
+            {/* "Show me first" stays — the hero is not a pure
+                 conversion ask and the demo is doing work. */}
             <a class="btn btn--ghost btn--ghost-light" href="#demo">
               <svg width="17" height="17" viewBox="0 0 24 24"
                 fill="currentColor" aria-hidden="true">
@@ -455,6 +492,13 @@ const jsonLd = [
               {t.hero_cta_secondary}
             </a>
           </div>
+          {downloadHref && (
+            <p class="req req--center">
+              <Icon name="lucide:shield" width={15} height={15}
+                aria-hidden="true" />
+              {t.download_req}
+            </p>
+          )}
           <span class="pill pill--light">
             <span class="pill__dot" aria-hidden="true"></span>
             {t.hero_pill}
@@ -614,8 +658,13 @@ const jsonLd = [
             <span class="ba__label ba__label--good">
               {t.calm_after_label}
             </span>
+            {/* Five, matching the before card: the eye has to read
+                 the SAME windows on both sides, because what changes
+                 between them is where the other four are — not how
+                 many there are. */}
             <div class="ba__art ba__art--after" aria-hidden="true">
               <span></span><span></span><span></span><span></span>
+              <span></span>
             </div>
             <p>{t.calm_after_body}</p>
           </div>
@@ -805,9 +854,9 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
               aria-hidden="true" />
           </a>
           <p class="req">
-            <Icon name="lucide:clock" width={15} height={15}
+            <Icon name="lucide:shield" width={15} height={15}
               aria-hidden="true" />
-            {t.build_req}
+            {t.download_req}
           </p>
         </div>
         <div class="quickstart__codes">
@@ -830,6 +879,25 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <pre><code><span class="prompt">$</span> {installCmd}
 <span class="cmt">{t.install_cmt}</span></code></pre>
           </div>
+
+          {/* Rung 2 of a descending ladder (#904): Homebrew's block
+               above stays open and first because it is how the beta
+               ships and it carries the CLI; the disk image sits
+               directly under it as a quiet second path; building
+               from source stays collapsed at the bottom. A ladder
+               says "there is a way, and there are other ways" —
+               a side-by-side chooser would ask a reader to compare
+               two things most of them have no basis to compare,
+               which is the decision problem the Simple/Nerd toggle
+               already removed once. */}
+          {downloadHref && (
+            <a class="btn btn--ghost quickstart__download"
+              href={downloadHref}>
+              <Icon name="lucide:download" width={16} height={16}
+                aria-hidden="true" />
+              {t.download_cta}
+            </a>
+          )}
 
           <details class="quickstart__alt">
             <summary>
@@ -882,11 +950,31 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                  middle-click, "copy link"); the mode toggle is
                  JS-driven anyway, so a JS-off visitor has no Nerd
                  view to be sent to in the first place. */}
-            <a class="btn btn--primary simple-only" href={`${homeHref}guide/#getting-started`}>
-              {t.cta_primary}
-              <Icon name="lucide:arrow-right" width={16} height={16}
-                aria-hidden="true" />
-            </a>
+            {/* Simple mode closes on the download (#904), with the
+                 guide demoted to the ghost slot beside it — a reader
+                 who scrolled the whole page and still wants context
+                 is exactly who the guide is for, and this is where
+                 they are. Without a published disk image the guide
+                 takes the primary slot back. */}
+            {downloadHref ? (
+              <>
+                <a class="btn btn--primary simple-only" href={downloadHref}>
+                  {t.download_cta}
+                </a>
+                <a class="btn btn--ghost simple-only"
+                  href={`${homeHref}guide/#getting-started`}>
+                  {t.cta_primary}
+                  <Icon name="lucide:arrow-right" width={16} height={16}
+                    aria-hidden="true" />
+                </a>
+              </>
+            ) : (
+              <a class="btn btn--primary simple-only" href={`${homeHref}guide/#getting-started`}>
+                {t.cta_primary}
+                <Icon name="lucide:arrow-right" width={16} height={16}
+                  aria-hidden="true" />
+              </a>
+            )}
             {/* Nerd readers have already seen the install command above,
                  so the closing CTA points at the repo instead. */}
             <a class="btn btn--primary dev-only" href={repo}
@@ -910,7 +998,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <p class="req req--center">
             <Icon name="lucide:shield" width={15} height={15}
               aria-hidden="true" />
-            {t.cta_req}
+            {t.download_req}
           </p>
         </div>
       </div>
