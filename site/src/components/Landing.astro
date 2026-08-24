@@ -26,7 +26,11 @@ import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import { layoutDiagram } from "../lib/layoutDiagram";
-import { downloadHref, downloadVersion } from "../lib/download";
+import {
+  downloadHref,
+  downloadVersion,
+  downloadIsPrerelease,
+} from "../lib/download";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
 
@@ -509,10 +513,20 @@ const jsonLd = [
               {t.download_req}
             </p>
           )}
-          <span class="pill pill--light">
-            <span class="pill__dot" aria-hidden="true"></span>
-            {t.hero_pill}
-          </span>
+          {/* The badge states the version, read from the release
+               the download actually points at. It used to read
+               "Public beta — available now" — a hand-maintained
+               claim, true when written and wrong from the moment
+               1.0 shipped until somebody remembered it. Now the
+               beta half appears only while the promoted release
+               is flagged one, so it retires itself. */}
+          {downloadVersion && (
+            <span class="pill pill--light">
+              <span class="pill__dot" aria-hidden="true"></span>
+              {t.version_pill} {downloadVersion}
+              {downloadIsPrerelease && ` · ${t.beta_suffix}`}
+            </span>
+          )}
         </div>
 
         {/* Nerd-mode hero copy */}
@@ -562,10 +576,20 @@ const jsonLd = [
               {t.download_req}
             </p>
           )}
-          <span class="pill pill--light">
-            <span class="pill__dot" aria-hidden="true"></span>
-            {t.hero_pill}
-          </span>
+          {/* The badge states the version, read from the release
+               the download actually points at. It used to read
+               "Public beta — available now" — a hand-maintained
+               claim, true when written and wrong from the moment
+               1.0 shipped until somebody remembered it. Now the
+               beta half appears only while the promoted release
+               is flagged one, so it retires itself. */}
+          {downloadVersion && (
+            <span class="pill pill--light">
+              <span class="pill__dot" aria-hidden="true"></span>
+              {t.version_pill} {downloadVersion}
+              {downloadIsPrerelease && ` · ${t.beta_suffix}`}
+            </span>
+          )}
         </div>
       </div>
       <div class="hero__seam" aria-hidden="true"></div>
