@@ -353,8 +353,10 @@ ruling is in `docs/design-decisions.md`.
 cue, and its state in words.** Every accordion header — both
 chromes, and the one drawer built outside the wrapper — takes
 `SettingsDisclosureStyle`, which makes the row a full-width
-`.plain` `Button`, gives it the adaptive hover chip and a
-weighted chevron that rotates on expand, and carries
+`.plain` `Button`, rests it on a weighted chevron that
+rotates on expand (no resting fill — hover confirms at
+`rowHoverHighlight`'s full-row ladder, never the icon chip's,
+whose rest state is achromatic at row width), and carries
 expanded / collapsed on `.accessibilityValue` because the
 button replaced the triangle that used to announce it. Click
 anywhere on the row, Space on the focused one; the cursor

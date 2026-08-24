@@ -269,10 +269,26 @@ struct SettingsDisclosureHeaderTests {
     @Test("the header carries a resting affordance")
     func headerCuesAtRest() throws {
         let style = try squashed(Self.styleFile)
-        // The house ambiguous-control cue, not a bespoke fill —
-        // `hoverHighlight()` owns the 0.06 → 0.12 ladder, so a
-        // retune moves every ambiguous control together.
-        #expect(style.contains(".hoverHighlight()"))
+        // The FULL-ROW ladder, by its named seam — not the
+        // icon-chip recipe this first took. `rowHoverHighlight`
+        // owns 0 → 0.06, so a retune moves every full-row
+        // control together, and no resting fill paints: at row
+        // width the chip's rest state is the one achromatic
+        // band in a green-tinted window (#956, owner on device).
+        #expect(
+            style.contains(
+                ".rowHoverHighlight(cornerRadius:6,padding:4)"
+            )
+        )
+        #expect(
+            !style.contains(".hoverHighlight("),
+            Comment(
+                rawValue:
+                    "the header is back on the icon-chip cue, "
+                    + "whose 0.06 REST fill is what the owner "
+                    + "saw as grey at full-row area"
+            )
+        )
         #expect(
             style.contains("Image(systemName:\"chevron.right\")")
         )
@@ -281,10 +297,13 @@ struct SettingsDisclosureHeaderTests {
             "the chevron's weight is the visible half of the cue"
         )
         // A concrete ink, not `.secondary`: hierarchical styles
-        // compound under the Overrides footer's own `.secondary`.
+        // compound under the Overrides footer's own
+        // `.secondary`. `ink2` rather than the caption-tier
+        // `ink3`, because with no resting fill the chevron IS
+        // the resting affordance.
         #expect(
             style.contains(
-                ".foregroundStyle(SettingsTheme.ink3)"
+                ".foregroundStyle(SettingsTheme.ink2)"
             )
         )
         #expect(

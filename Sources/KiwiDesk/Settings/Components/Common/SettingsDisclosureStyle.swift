@@ -70,7 +70,15 @@ struct SettingsDisclosureStyle<Accessory: View>:
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .hoverHighlight()
+            // The FULL-ROW ladder (0 → 0.06), not the icon
+            // chip's (0.06 → 0.12). A resting fill that works
+            // on all three of this style's grounds has to be
+            // `Color.primary`-based, and that is achromatic —
+            // invisible at a glyph's size, and at row width the
+            // one exactly-neutral band in a green-tinted
+            // window. The header rests on its chevron and, in
+            // `.inline`, on the hairline rule.
+            .rowHoverHighlight(cornerRadius: 6, padding: 4)
             .accessibilityValue(
                 configuration.isExpanded
                     ? L("settings.disclosure.ax_expanded", "expanded")
@@ -92,10 +100,16 @@ struct SettingsDisclosureStyle<Accessory: View>:
     /// group, and hierarchical styles compound — that one
     /// header drew its cue at secondary-of-secondary (code
     /// review, 2026-08-24).
+    ///
+    /// `ink2`, not the quieter `ink3` it first took: with no
+    /// resting fill the chevron IS the row's resting
+    /// affordance, and `ink3` is the caption tier — body copy,
+    /// by its own docstring. Row detail outranks a caption
+    /// (ui-designer, 2026-08-24).
     private func chevron(expanded: Bool) -> some View {
         Image(systemName: "chevron.right")
             .font(.footnote.weight(.semibold))
-            .foregroundStyle(SettingsTheme.ink3)
+            .foregroundStyle(SettingsTheme.ink2)
             .rotationEffect(.degrees(expanded ? 90 : 0))
             // The state it encodes is on the button's value, in
             // words; a second reading of the same fact as

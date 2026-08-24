@@ -3349,9 +3349,9 @@ answers only its own small triangle — so the header
 under-signalled and then under-delivered when a reader
 clicked the label it does signal with. Both halves are one
 seam, `SettingsDisclosureStyle`: the header becomes one
-full-width `.plain` `Button` over the whole row, and it wears
-the house ambiguous-control cue (the adaptive hover chip)
-plus a chevron with real weight that rotates on expand. The
+full-width `.plain` `Button` over the whole row, and it rests
+on a chevron with real weight that rotates on expand,
+confirming on hover. The
 button is preferred over a tap gesture on the label
 specifically because it is a control — it takes one focus
 stop, Space activates it, and macOS keyboard navigation can
@@ -3367,6 +3367,41 @@ back (the `LinkedCaptionHitTests` rule, generalised). One
 style, both chromes and the one drawer outside the wrapper:
 a header that reads as openable in a card and not inline
 would be the same defect wearing a different frame.
+
+**The cue is the chevron and the hover, never a resting
+fill.** The first build wore the house *icon-chip* cue — a
+0.06 rest fill — and the owner read it on device as "the grey
+doesn't fit the kiwi design" (2026-08-24). They were right,
+and the arithmetic says why it is a HUE fault rather than a
+strength one: that fill is `Color.primary`, so on a light
+card it composites to `#F0F0F0`, R=G=B exactly — the one
+achromatic surface in a window whose every other surface and
+border is green-tinted. It measures 1.14:1 against its card,
+faint enough that pure lightness at that step would be
+invisible; it was seen anyway. Beside a `sunken` well of
+almost the same lightness, a hue difference at equal value is
+maximally salient, and the collapsed header even sat *darker*
+than the interior it opens onto.
+
+The fix is not a better-coloured fill, because **no fixed
+surface token can be a rest cue for this style at all**: it
+draws on three grounds, and the obvious candidate — `sunken`,
+which is green-tinted and would answer the nested-well
+objection, a fill without a hairline being no well — is
+invisible on the third drawer, whose card already IS `sunken`.
+A cue that works everywhere has to be ground-relative, which
+leaves `Color.primary` (achromatic — the objection) or the
+accent, and a resting accent wash on *every* drawer says
+"selected" about nothing while spending the one channel a
+green primary cannot carry under colour-vision deficiency. So
+the rest state paints nothing, hover confirms at the full-row
+ladder, and the resting "I open" signal is the chevron — at
+`ink2`, since with no fill the chevron IS the affordance and
+`ink3` is the caption tier. **The general rule: an
+affordance's recipe is chosen by AREA.** The icon-chip cue and
+the full-row cue are two ladders for two sizes, and taking the
+smaller one to a full row is how a token nobody notices
+becomes the most visible thing on the page.
 
 **The header's accessory is a SIBLING of that button, never
 its child.** A drawer's `accessory:` slot may hold a control —
