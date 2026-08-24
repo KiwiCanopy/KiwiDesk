@@ -18,6 +18,7 @@ struct ProfileOpeningModesTests {
     private func profile(
         monitors: [String],
         pins: [SpaceID: String] = [:],
+        mainSpaces: [SpaceID] = [],
         spaces: [SpaceID],
         modes: [SpaceID: LayoutMode]
     ) -> Profile {
@@ -26,6 +27,7 @@ struct ProfileOpeningModesTests {
             monitorSets: [
                 MonitorSet(monitors: monitors, spaceMonitorMap: pins)
             ],
+            mainSpaces: mainSpaces,
             spaces: spaces,
             spaceModes: modes,
             settings: TilingSettings()
@@ -132,5 +134,86 @@ struct ProfileOpeningModesTests {
             settings: TilingSettings()
         )
         #expect(p.openingModes().isEmpty)
+    }
+
+    /// #959: an ordinary two-screen profile drew ONE glyph and
+    /// one blank pip. Saving pins only the spaces that are not
+    /// on the main display, so the main monitor is exactly the
+    /// covered one with no pin — and the follows-main spaces
+    /// have nowhere else to be. The answer is elimination, not a
+    /// guess about which monitor is Main.
+    @Test("the sole unpinned screen answers from Main")
+    func soleUnpinnedScreenAnswersFromMain() {
+        let p = profile(
+            monitors: ["A:1920x1080", "B:1920x1080"],
+            pins: [SpaceID("b"): "B:1920x1080"],
+            mainSpaces: [SpaceID("a")],
+            spaces: [SpaceID("a"), SpaceID("b")],
+            modes: [SpaceID("a"): .stack, SpaceID("b"): .grid]
+        )
+        #expect(p.openingModes() == [.stack, .grid])
+    }
+
+    /// The refusal survives the fix: with TWO monitors carrying
+    /// no pin the follows-main spaces fit on either, so naming
+    /// one would be the guess this accessor exists to refuse.
+    @Test("two unpinned screens stay blank even with Main")
+    func twoUnpinnedScreensStayBlank() {
+        let p = profile(
+            monitors: [
+                "A:1920x1080", "B:1920x1080", "C:1920x1080",
+            ],
+            pins: [SpaceID("c"): "C:1920x1080"],
+            mainSpaces: [SpaceID("a")],
+            spaces: [SpaceID("a"), SpaceID("b"), SpaceID("c")],
+            modes: [
+                SpaceID("a"): .stack,
+                SpaceID("b"): .monocle,
+                SpaceID("c"): .grid,
+            ]
+        )
+        #expect(p.openingModes() == [nil, nil, .grid])
+    }
+
+    /// Which follows-main space is FIRST is the profile's own
+    /// order, never `mainSpaces`' — that list is stored sorted
+    /// by raw id, so reading it directly would name "s1" on a
+    /// profile whose list opens with "s2".
+    @Test("Main's first space is the profile's order, not sorted")
+    func mainFirstSpaceFollowsTheProfilesOrder() {
+        let p = profile(
+            monitors: ["A:1920x1080", "B:1920x1080"],
+            pins: [SpaceID("z"): "B:1920x1080"],
+            mainSpaces: [SpaceID("s1"), SpaceID("s2")],
+            spaces: [SpaceID("s2"), SpaceID("s1"), SpaceID("z")],
+            modes: [
+                SpaceID("s1"): .bsp,
+                SpaceID("s2"): .monocle,
+                SpaceID("z"): .grid,
+            ]
+        )
+        #expect(p.openingModes() == [.monocle, .grid])
+    }
+
+    /// A pinned monitor keeps answering from its own pin — the
+    /// elimination arm may only fill a screen that had NO answer,
+    /// never overwrite one.
+    @Test("elimination never overwrites a pinned screen")
+    func eliminationOnlyFillsTheBlank() {
+        let p = profile(
+            monitors: ["A:1920x1080", "B:1920x1080"],
+            pins: [
+                SpaceID("a"): "A:1920x1080",
+                SpaceID("b"): "B:1920x1080",
+            ],
+            mainSpaces: [SpaceID("m")],
+            spaces: [SpaceID("m"), SpaceID("a"), SpaceID("b")],
+            modes: [
+                SpaceID("m"): .scrolling,
+                SpaceID("a"): .stack,
+                SpaceID("b"): .grid,
+            ]
+        )
+        #expect(p.openingModes() == [.stack, .grid])
     }
 }

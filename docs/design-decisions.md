@@ -6055,6 +6055,28 @@ is applied. Read the thumbnail's job as identifying a preset
 rather than describing one: the moment a card is asked to
 describe, the answer is a surface of its own.
 
+**A saved profile's screens answer by ELIMINATION where they
+can, and stay blank where they cannot.** A saved profile says
+less than a preset: a preset plans positionally, while a
+profile pins spaces to monitor fingerprints and leaves the
+rest to the Main role — which is resolved live, not stored.
+So a screen the profile does not name draws its outline and
+no glyph, the same refusal the preset card already makes, and
+inventing a glyph there would put a claim about behaviour on
+screen that loading the profile might not produce. But
+refusing too much is its own defect (#959): saving pins only
+the spaces that are NOT on the main display, so on an
+ordinary two-screen profile the main monitor is *precisely*
+the covered screen carrying no pin, and its outline drew
+blank beside a caption announcing six Spaces. Where exactly
+one covered screen carries no pin, the follows-main spaces
+have nowhere else to be — that is elimination over stored
+facts, not a guess about hardware, and it is as reliable as
+any pin. Two blank screens stay blank, because then the
+unpinned spaces genuinely fit on either. Read the general
+rule as: refuse where the file is silent, never where it
+merely declines to repeat itself.
+
 **[Principle]**
 
 **The rule that picks a profile is written down, not inferred

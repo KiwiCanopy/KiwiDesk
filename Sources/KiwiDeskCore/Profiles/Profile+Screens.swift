@@ -24,6 +24,19 @@
 /// That is the same rule `PresetScreenCard.outlineView` already
 /// draws by: a screen with no answer gets its outline and no
 /// glyph.
+///
+/// **But "no fingerprint names Main" is not the same as "the
+/// profile does not say" (#959).** Every ordinary two-screen
+/// profile hits that gap: saving pins only the spaces that are
+/// NOT on the main display (`adoptComposedPlacement`), so the
+/// main monitor is precisely the covered one carrying no pin,
+/// and its pip drew blank beside a caption announcing six
+/// Spaces. Where exactly ONE covered monitor has no pin, the
+/// follows-main spaces have nowhere else to be — the answer
+/// comes out by elimination, not by a guess about hardware, and
+/// it is as stored as any pin. Two blank monitors stay blank:
+/// then the unpinned spaces could be on either, and that IS the
+/// refusal above.
 extension Profile {
     /// One entry per screen this profile covers, in the stored
     /// set's canonical monitor order — the mode that screen's
@@ -43,10 +56,40 @@ extension Profile {
         guard let set = monitorSets.first else {
             return Array(repeating: nil, count: screens)
         }
-        return set.monitors.prefix(screens).map { fingerprint in
-            firstSpace(pinnedTo: fingerprint, in: set)
-                .flatMap { spaceModes[$0] }
+        var firsts = set.monitors.prefix(screens).map {
+            firstSpace(pinnedTo: $0, in: set)
         }
+        if let main = soleUnpinnedScreen(in: firsts),
+            let space = firstMainSpace()
+        {
+            firsts[main] = space
+        }
+        return firsts.map { $0.flatMap { spaceModes[$0] } }
+    }
+
+    /// The index of the one covered monitor carrying no pin —
+    /// nil unless there is exactly one.
+    ///
+    /// Exactly one is the whole condition: with two unpinned
+    /// monitors the follows-main spaces fit on either, so
+    /// attributing them to one would be the guess this accessor
+    /// exists to refuse.
+    private func soleUnpinnedScreen(
+        in firsts: [SpaceID?]
+    ) -> Int? {
+        let blank = firsts.indices.filter { firsts[$0] == nil }
+        return blank.count == 1 ? blank.first : nil
+    }
+
+    /// The profile's first ordered follows-main space.
+    ///
+    /// The profile's own order again, for the reason
+    /// `firstSpace(pinnedTo:in:)` states — `mainSpaces` is a
+    /// stored list, but it is a list of MEMBERS, and which of
+    /// them comes first is `orderedSpaces`' answer, not its own.
+    private func firstMainSpace() -> SpaceID? {
+        let main = Set(mainSpaces)
+        return orderedSpaces.first { main.contains($0) }
     }
 
     /// The profile's own order decides which space is "first" on
