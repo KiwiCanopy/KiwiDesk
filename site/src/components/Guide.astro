@@ -37,7 +37,11 @@ import ogBannerEn from "../assets/brand/og-banner.jpg";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import { layoutDiagram } from "../lib/layoutDiagram";
-import { downloadHref } from "../lib/download";
+import {
+  downloadHref,
+  downloadVersion,
+  downloadIsPrerelease,
+} from "../lib/download";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
 import "../styles/learn.css";
@@ -508,10 +512,17 @@ const jsonLd = [
                    newcomer path no longer depends on the mode
                    system at all. */}
               <div class="learn-install">
-                <span class="pill">
-                  <span class="pill__dot" aria-hidden="true"></span>
-                  {s.beta_badge}
-                </span>
+                {/* Same badge as the landing hero, same reason:
+                     it names the version the download gives you,
+                     and says "beta" only while that release is
+                     flagged one. */}
+                {downloadVersion && (
+                  <span class="pill">
+                    <span class="pill__dot" aria-hidden="true"></span>
+                    {s.version_pill} {downloadVersion}
+                    {downloadIsPrerelease && ` · ${s.beta_suffix}`}
+                  </span>
+                )}
                 {/* The download leads (#904). The Homebrew lead
                      below teaches how to open Terminal, which is
                      written for someone who never has — and telling

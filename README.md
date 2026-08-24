@@ -23,6 +23,7 @@ Powerful when you reach for it, never in your way.
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
 [![License MIT](https://img.shields.io/badge/License-MIT-8DB354)](LICENSE)
 [![Homebrew](https://img.shields.io/badge/Homebrew-cask-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
+[![Release](https://img.shields.io/github/v/release/KiwiCanopy/KiwiDesk?color=8DB354&label=Release)](https://github.com/KiwiCanopy/KiwiDesk/releases/latest)
 [![Direct download](https://img.shields.io/badge/Direct_download-.dmg-8DB354)](https://kiwidesk.kiwicanopy.com/)
 
 <br>
@@ -37,9 +38,10 @@ Powerful when you reach for it, never in your way.
 <!-- Add a screenshot or demo GIF here once one is captured. -->
 <!-- Add a short demo video here once one is recorded. -->
 
-> **Status: public beta.** The core (layouts, Lua
+> **Status: 1.0, released.** The core (layouts, Lua
 > config, CLI, profiles, per-Desktop profiles, per-space window
-> hiding) and the SwiftUI Settings app are functional.
+> hiding) and the SwiftUI Settings app are complete and in daily
+> use.
 > Install it with the Homebrew cask below, or download the
 > signed, notarized `.dmg` from
 > [kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com/) —
@@ -136,7 +138,7 @@ The cask installs the app and puts the `kiwidesk` CLI on your
 the fully-qualified token above taps it for you, so there is no
 separate `brew tap` step. The shorter `brew install --cask
 kiwidesk` would need acceptance into homebrew-cask itself, which
-is a post-beta step.
+has not been applied for.
 
 Later builds install themselves. KiwiDesk checks for new releases
 in the background and offers you the update, so there is nothing

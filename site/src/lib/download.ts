@@ -3,6 +3,7 @@ import changelog from "../data/changelog.json";
 interface ReleaseEntry {
   version?: string;
   download?: string;
+  prerelease?: boolean;
 }
 
 /**
@@ -44,3 +45,17 @@ export const downloadHref: string | null = promoted?.download ?? null;
 /** The version those bytes are of, or `null`. */
 export const downloadVersion: string | null =
   promoted?.version ?? null;
+
+/**
+ * Whether the promoted build is flagged a prerelease, straight
+ * from the release GitHub published.
+ *
+ * The pill that used to read "Public beta — available now" was a
+ * hand-maintained claim: true when written, and wrong from the
+ * moment 1.0 shipped until someone remembered to edit it. Reading
+ * the flag means the badge cannot fall out of step with what the
+ * download actually is — it says beta while a beta is what you
+ * would get, and stops on its own when that stops being true.
+ */
+export const downloadIsPrerelease: boolean =
+  promoted?.prerelease === true;

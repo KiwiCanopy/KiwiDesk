@@ -39,10 +39,10 @@ your monitor setup, and integration with macOS Desktops.
 - **[Translating](translating.md)** — the localization
   workflow and how to add a language.
 
-## Install (public beta)
+## Install
 
-KiwiDesk is in public beta. Requirements: macOS 14 or later on
-Apple silicon. Install it with Homebrew:
+Requirements: macOS 14 or later on Apple silicon. Install it with
+Homebrew:
 
 ```sh
 brew install --cask kiwicanopy/tap/kiwidesk
