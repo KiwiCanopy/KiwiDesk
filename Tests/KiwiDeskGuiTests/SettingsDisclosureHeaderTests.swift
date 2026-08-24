@@ -79,7 +79,25 @@ struct SettingsDisclosureHeaderTests {
     @Test("the scan reads the whole GUI target")
     func theScanReadsTheWholeTarget() throws {
         let files = try guiSources()
-        #expect(files.count > 100)
+        // DERIVED, not a round number: `Settings` alone is the
+        // overwhelming majority of the target, so a flat
+        // `count > 100` stayed green with the root narrowed back
+        // to it (guard-prover, 2026-08-24). Comparing the two is
+        // what actually says "wider than the old root".
+        let settingsOnly = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings"
+            )
+        )
+        #expect(
+            files.count > settingsOnly.count,
+            Comment(
+                rawValue:
+                    "the scan is no wider than Settings — the "
+                    + "roots this question needs are the whole "
+                    + "GUI target"
+            )
+        )
         for outside in ["/Shortcuts/", "/Updates/"] {
             #expect(
                 files.contains { $0.path.contains(outside) },

@@ -223,8 +223,19 @@ struct ProfileOpeningModesTests {
     /// own card, so main carries a pin and the follows-main
     /// spaces both — and the sole blank screen is then a
     /// secondary one holding nothing, which borrows Main's
-    /// glyph. Nothing stored tells the two apart. If this is
-    /// ever ruled the wrong trade, THIS is the test that changes.
+    /// glyph. Nothing stored tells the two apart.
+    ///
+    /// What it actually earns is narrower than "the test that
+    /// changes if the trade is re-ruled", which it cannot be:
+    /// its fixture and `soleUnpinnedScreenAnswersFromMain`'s are
+    /// isomorphic over the accessor's inputs, so no predicate
+    /// over stored data can red one without redding the other —
+    /// which IS the accessor's claim that nothing distinguishes
+    /// them, holding. Retiring the residue means retiring the
+    /// whole arm. What it uniquely guards is the blank screen's
+    /// INDEX: this is the only elimination fixture whose blank
+    /// monitor is the second one, so it alone reds if the arm
+    /// ever fills a fixed slot (guard-prover, 2026-08-24).
     @Test("a space pinned to Main leaves the blank screen wrong")
     func pinnedMainScreenIsTheAcceptedResidue() {
         let p = profile(
