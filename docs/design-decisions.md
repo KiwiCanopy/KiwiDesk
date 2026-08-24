@@ -2139,6 +2139,70 @@ navigation, which no app may set for the user — so a focus
 destination is verified with that ON. (#678 turn 20a, #815,
 #816.)
 
+### A name replaces the announcement, so the value comes back with it
+
+**[Principle]**
+
+**Every accessibility guard in the suite pins a DECLARATION;
+none can hear what VoiceOver ANNOUNCES, and the two came apart
+in four classes at once** (#812, device sessions 2026-08-24).
+Each was green under every guard and wrong on the device:
+
+- A `Picker` or `Menu` given an `.accessibilityLabel` announced
+  its name and never its choice — the modifier REPLACES what
+  SwiftUI derived, and for a menu the derived announcement IS
+  the selection. The Spaces mode picker said "Layout mode for
+  this Space, pop up button" for its whole shipped life.
+- A `.menu` `Picker` under `labelsHidden()` announced no name at
+  all. The tree's dropdown row said in its docstring that the
+  modifier "hides the label visually only", and General ▸
+  Language announced "menu, 12 items, Deutsch" — so a claim
+  about what a modifier keeps is a device fact, never a
+  docstring's.
+- A custom-drawn slider delegated to a native `Slider`
+  representation with no label, and announced a percentage of
+  its range — "six percent" for a 6 pt gap — because every row
+  draws its label and its readout as SIBLINGS, and a sibling
+  `Text` names nothing. The same view held no keyboard focus
+  either, so Tab skipped every slider in the app.
+- The keyboard preview board announced seventy bare glyphs and
+  no state, every state being a fill or a ring.
+
+The rule that comes out is one sentence: **a control that is
+named is valued in the same change, and a picture speaks as one
+description.** Naming and valuing is the control's own — a
+`SettingsSlider` takes both as required arguments so the
+compiler holds it, a `DropdownRow` takes the selected option's
+title from the site that knows it, and `AnnouncedValueTests`
+scans every `Picker`/`Menu` chain that carries a label for the
+value beside it, with an exact census of who is labelled so the
+scan cannot go quiet. The label a row draws beside a
+self-naming control is hidden, or the words arrive twice. And a
+picture — a schematic, the keyboard board — is ONE element whose
+label is its meaning, read from the same predicates the drawing
+reads (`KeyboardBoardSpoken` reads `KeyboardCensus.state` and
+`overwrittenReserved`, exactly as the caps do), never one
+element per mark: seventy stops are the picture's pixels
+transcribed, not its sense.
+
+Two rulings ride along. **The save pill announces once, as it
+appears, and never a count** — native macOS narrates no dirty
+state, so a sentence per change is noise, and the count is one
+cursor move to the pill away; the announcement is delayed so it
+is not dropped behind the changed control's own value, which is
+what happened under keyboard stepping. And **a headings rotor
+is structure, not decoration**: every section title, group
+header and panel header carries `.isHeader`, because a reader
+who cannot glance navigates card to card, and Home's two group
+labels had been the only headings in the app.
+
+What breaks if this is ignored: the next control is named for
+search or for a census guard, passes every scan, and takes its
+own value away from exactly the reader the name was for. The
+residue, stated: nothing headless can hear an announcement, so a
+change here is verified on a device with VoiceOver on, and the
+guards say only that the declarations are present.
+
 ### The row menu's keyboard route is a chord on the focused row
 
 **[Trade-off]**
