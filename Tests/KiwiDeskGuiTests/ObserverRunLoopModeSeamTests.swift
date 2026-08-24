@@ -6,7 +6,7 @@ import Testing
 /// run loop, and that the add and the remove name the same mode.
 ///
 /// `OwnWindowGestureDeliveryTests` pins the chooser
-/// (`AXApplicationObserver.runLoopMode(pid:)`) and nothing else,
+/// (`AXApplicationObserver.runLoopModes(pid:)`) and nothing else,
 /// which a guard-prover run showed is not enough: leaving the
 /// chooser correct and hardcoding `.defaultMode` back at the
 /// registration site restores bug #953 in full — our own
@@ -18,9 +18,9 @@ import Testing
 /// never used leaves it installed in the run loop afterwards,
 /// which no test can see and no user reports.
 ///
-/// So both `CFRunLoop{Add,Remove}Source` sites must pass the
-/// stored `runLoopMode`, and the mode literals may appear only
-/// inside the chooser that owns the decision.
+/// So both `CFRunLoop{Add,Remove}Source` sites must iterate
+/// the one stored `runLoopModes` list, and a mode literal may
+/// appear only inside the chooser that owns the decision.
 @Suite("Observer run loop mode wiring (#953)")
 struct ObserverRunLoopModeSeamTests {
     private let calls = [

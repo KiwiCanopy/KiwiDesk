@@ -89,6 +89,11 @@ struct OwnPressMonitorSeamTests {
         return pairs
     }
 
+    /// How many times `kind` is installed in `body`.
+    private func sites(of kind: String, in body: String) -> Int {
+        body.occurrences(of: kind + "(")
+    }
+
     @Test("Every monitor kind watches every button event")
     func bothMonitorKindsInstalled() throws {
         let body = try SourceScan.functionBody(
@@ -99,6 +104,19 @@ struct OwnPressMonitorSeamTests {
         #expect(!body.isEmpty, "start() body not found")
         let found = installed(in: body)
         for kind in kinds {
+            // One installation per event, derived from the
+            // events themselves: a single monitor declared
+            // `matching: [.leftMouseDown, .leftMouseUp]` covers
+            // the cross product while being exactly the shape
+            // that cannot carry the arms' asymmetry.
+            #expect(
+                sites(of: kind, in: body) == events.count,
+                Comment(
+                    rawValue: "\(kind) is installed "
+                        + "\(sites(of: kind, in: body)) times, "
+                        + "not once per button event"
+                )
+            )
             for event in events {
                 let pair = "\(kind) \(event)"
                 #expect(

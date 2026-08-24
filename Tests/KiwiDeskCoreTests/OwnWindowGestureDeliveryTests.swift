@@ -103,4 +103,49 @@ struct OwnWindowGestureDeliveryTests {
             ) == nil
         )
     }
+
+    @Test("Only another app's press reaches the click fan-out")
+    func fanOutHearsOtherAppsAlone() {
+        let tracker = MouseTracker()
+        var seen: [CGPoint] = []
+        tracker.onLeftMouseDown = { seen.append($0) }
+        tracker.recordDown(
+            at: CGPoint(x: 1, y: 2),
+            from: .otherApp
+        )
+        #expect(seen.count == 1)
+        // #446's bar-overlay exemption, and the #496/#687/#951
+        // click provenance, are all built on this fan-out never
+        // hearing a click on one of our own windows.
+        tracker.recordDown(
+            at: CGPoint(x: 3, y: 4),
+            from: .ownWindow
+        )
+        #expect(seen.count == 1)
+    }
+
+    @Test("A release closes only the press its own arm opened")
+    func releaseFollowsProvenance() {
+        let tracker = MouseTracker()
+        tracker.recordDown(at: .zero, from: .otherApp)
+        // The own-window arm's release must not close a
+        // third-party press: `press` outlives every gesture, so
+        // this is how a click on chrome came to refresh a stale
+        // press and hand `isResizeGesture` a location it read
+        // as fresh (review, 2026-08-24).
+        tracker.recordUp(from: .ownWindow)
+        #expect(tracker.press?.upAt == nil)
+        tracker.recordUp(from: .otherApp)
+        #expect(tracker.press?.upAt != nil)
+    }
+
+    @Test("The own arm closes its own press")
+    func ownReleaseClosesOwnPress() {
+        let tracker = MouseTracker()
+        tracker.recordDown(at: .zero, from: .ownWindow)
+        tracker.recordUp(from: .otherApp)
+        #expect(tracker.press?.upAt == nil)
+        tracker.recordUp(from: .ownWindow)
+        #expect(tracker.press?.upAt != nil)
+    }
 }

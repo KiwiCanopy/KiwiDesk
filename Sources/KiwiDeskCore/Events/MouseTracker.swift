@@ -24,9 +24,24 @@ import AppKit
 @MainActor
 public final class MouseTracker {
     public struct Press {
+        /// Which monitor arm opened this press. The two
+        /// arms answer disjoint worlds — a global monitor
+        /// never sees an event routed to our own windows —
+        /// so the arm IS the provenance, and it is what the
+        /// release and the click fan-out both reason from
+        /// rather than re-deriving anything from the event.
+        public enum Origin: Sendable {
+            /// Any other application's window.
+            case otherApp
+            /// The one own window that tiles (#953). Every
+            /// other own window records no press at all.
+            case ownWindow
+        }
+
         /// Where the button went down, in AX coordinates.
         public let location: CGPoint
         public let downAt: Date
+        public let origin: Origin
         public var upAt: Date?
     }
 
@@ -39,6 +54,12 @@ public final class MouseTracker {
     /// display-focus follow (#446): a bare click on another
     /// monitor's empty desktop moves the "focused display". Only
     /// clicks reach here (never mouse movement), so it is cheap.
+    ///
+    /// **Only a `.otherApp` press reaches it** — the consumers
+    /// are built on a global monitor's blindness to our own
+    /// windows (#446, #496, #687, #951), so the stand-down is
+    /// argued from the press's own provenance rather than from
+    /// which closure happened to call `recordDown`.
     public var onLeftMouseDown: ((CGPoint) -> Void)?
 
     public init() {}
@@ -50,15 +71,14 @@ public final class MouseTracker {
         ) { [weak self] event in
             let location = event.locationInWindow
             Task { @MainActor in
-                self?.recordDown(at: location)
-                self?.onLeftMouseDown?(location)
+                self?.recordDown(at: location, from: .otherApp)
             }
         }
         let up = NSEvent.addGlobalMonitorForEvents(
             matching: .leftMouseUp
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.recordUp()
+                self?.recordUp(from: .otherApp)
             }
         }
         // Our own windows' presses, which the global pair
@@ -78,22 +98,31 @@ public final class MouseTracker {
             }
             if let location {
                 Task { @MainActor in
-                    self?.recordDown(at: location)
+                    self?.recordDown(
+                        at: location,
+                        from: .ownWindow
+                    )
                 }
             }
             return event
         }
-        // The release is NOT gated on the mark, and the
-        // asymmetry is deliberate: a down decides WHICH press
-        // to remember, so it discriminates; an up only closes
-        // whichever press is already open, and refusing to
-        // close one is the harmful direction — it leaves
-        // `isResizeGesture`'s "released moments ago" branch
-        // reading a press the user is no longer holding.
+        // The release closes a press its OWN arm opened, and
+        // that is provenance, not the mark: `press` outlives
+        // every gesture (only `stop()` clears it), so an
+        // ungated release re-stamps `upAt` on whatever press
+        // is still sitting there — after the down half started
+        // discriminating, a click on a bar item would refresh
+        // a third-party press recorded minutes earlier and
+        // hand `isResizeGesture` a stale location it reads as
+        // fresh. Provenance also survives an up delivered with
+        // no window at the end of a frame-resize tracking
+        // loop, which a mark-gated release would drop.
         let localUp = NSEvent.addLocalMonitorForEvents(
             matching: .leftMouseUp
         ) { [weak self] event in
-            Task { @MainActor in self?.recordUp() }
+            Task { @MainActor in
+                self?.recordUp(from: .ownWindow)
+            }
             return event
         }
         monitors = [down, up, localDown, localUp]
@@ -160,14 +189,28 @@ public final class MouseTracker {
     /// global arm's events carry them directly (no window), and
     /// the local arm's are converted by `ownPressLocation`.
     /// Flip into AX space.
-    private func recordDown(at location: CGPoint) {
+    func recordDown(
+        at location: CGPoint,
+        from origin: Press.Origin
+    ) {
         press = Press(
             location: GeometryUtils.axPoint(location),
-            downAt: Date()
+            downAt: Date(),
+            origin: origin
         )
+        guard origin == .otherApp else { return }
+        onLeftMouseDown?(location)
     }
 
-    private func recordUp() {
+    /// Closes the open press, if this arm is the one that
+    /// opened it. A mismatch is not an error — it is the other
+    /// arm's release arriving while this arm's press stands —
+    /// and dropping it is the safe direction: `isResizeGesture`
+    /// reads the press only through `guard let up = press.upAt`,
+    /// so a press left open is inert while one closed by the
+    /// wrong arm is read as a gesture that just ended.
+    func recordUp(from origin: Press.Origin) {
+        guard press?.origin == origin else { return }
         press?.upAt = Date()
     }
 
@@ -175,6 +218,10 @@ public final class MouseTracker {
     /// coordinates), standing in for either mouse-down
     /// monitor — neither fires under unit tests.
     func seedPress(at location: CGPoint) {
-        press = Press(location: location, downAt: Date())
+        press = Press(
+            location: location,
+            downAt: Date(),
+            origin: .otherApp
+        )
     }
 }

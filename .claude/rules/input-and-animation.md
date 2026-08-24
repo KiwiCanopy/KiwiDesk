@@ -201,10 +201,22 @@ editing here:
     do the tour, Config Issues and every `NSOpenPanel`, and only
     the marked window can be in a TILED gesture — an ungated arm
     lets a click aimed at chrome overwrite the one press slot
-    the classifiers read. The **release** is deliberately
-    ungated: a down decides which press to remember, an up only
-    closes whichever is open, and refusing to close one is the
-    harmful direction.
+    the classifiers read.
+  - **Close a press only from the arm that opened it**, which is
+    `Press.Origin`, never the release event's own window
+    (`OwnWindowGestureDeliveryTests`). `press` outlives every
+    gesture — only `stop()` clears it — so an ungated release
+    re-stamps `upAt` on whatever press is still sitting there,
+    and once the down half discriminates that means a click on
+    chrome refreshing a third-party press recorded minutes
+    earlier, which `isResizeGesture` then reads as a gesture
+    that just ended. Fail-closed is the safe direction here and
+    the reasoning is easy to invert: the classifier reads the
+    press only through `guard let up = press.upAt`, so a press
+    left open is INERT while one closed by the wrong arm is
+    acted on. Provenance also survives an up delivered with no
+    window at the end of a frame-resize tracking loop, which a
+    mark-gated release would drop.
   - **Never fire `onLeftMouseDown` from it**
     (`OwnPressMonitorSeamTests`). That fan-out's consumers are
     built ON the blindness — `followDisplayUnderClick` takes its
