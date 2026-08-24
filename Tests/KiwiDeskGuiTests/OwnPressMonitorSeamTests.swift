@@ -14,15 +14,20 @@ import Testing
 /// branch nor the live resize-vs-move gate could classify its
 /// gesture.
 ///
-/// The local arm must stay press bookkeeping ONLY. Firing
-/// `onLeftMouseDown` from it would silently re-aim three
-/// consumers built on the global monitor's blindness:
-/// `followDisplayUnderClick` takes its bar-overlay exemption
-/// from that blindness (#446), and `lastLeftClick` is the click
+/// The local arm must stay press bookkeeping ONLY, and since
+/// the fan-out moved inside `recordDown` that is a property of
+/// the press's own `Origin` — held behaviourally by
+/// `OwnWindowGestureDeliveryTests.fanOutHearsOtherAppsAlone`,
+/// which is the primary guard. What survives here is the net
+/// beside it: exactly one `onLeftMouseDown` call site, so a
+/// SECOND one added anywhere — under no gate, or under an
+/// inverted one — cannot slip past the behavioural test by
+/// living somewhere it never looks. The consumers that stand
+/// down are built on a global monitor's blindness to our own
+/// windows: `followDisplayUnderClick` takes its bar-overlay
+/// exemption from it (#446), and `lastLeftClick` is the click
 /// provenance the cross-display sibling distrust (#496, #687)
-/// and the ignored-panel escape (#951) read. Widening the
-/// fan-out is a ruling those issues own, not a side effect of
-/// making a gesture classifiable.
+/// and the ignored-panel escape (#951) read.
 @Suite("Own-window press monitor seam (#953)")
 struct OwnPressMonitorSeamTests {
     /// The two axes a monitor installation sits on. Every pair
@@ -154,7 +159,7 @@ struct OwnPressMonitorSeamTests {
         )
     }
 
-    @Test("Only one arm feeds the click fan-out")
+    @Test("The click fan-out has one call site")
     func oneFanOutCallSite() throws {
         let text = try source()
         let calls =
@@ -162,10 +167,11 @@ struct OwnPressMonitorSeamTests {
                 separatedBy: "onLeftMouseDown?("
             ).count - 1
         let why =
-            "`onLeftMouseDown` is fired from the GLOBAL arm "
-            + "alone: #446, #496, #687 and #951 read "
-            + "consumers built on that monitor never seeing "
-            + "our own windows' clicks. Found \(calls)."
+            "`onLeftMouseDown` has \(calls) call sites. One, "
+            + "so the origin gate inside `recordDown` cannot "
+            + "be bypassed by a second site — "
+            + "`fanOutHearsOtherAppsAlone` guards the gate "
+            + "itself, never a site it never looks at."
         #expect(calls == 1, Comment(rawValue: why))
     }
 }

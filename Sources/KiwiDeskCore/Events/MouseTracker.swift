@@ -217,6 +217,12 @@ public final class MouseTracker {
     /// Test seam: seeds the last press directly (already in AX
     /// coordinates), standing in for either mouse-down
     /// monitor — neither fires under unit tests.
+    ///
+    /// Deliberately NOT `recordDown`: it skips the flip (the
+    /// point is already AX) and so also skips the fan-out. It
+    /// seeds `.otherApp`, which is the arm a `recordUp` must
+    /// then name to close it — seed here and release with
+    /// `.ownWindow` and nothing closes, correctly.
     func seedPress(at location: CGPoint) {
         press = Press(
             location: location,

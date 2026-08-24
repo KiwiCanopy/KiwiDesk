@@ -217,8 +217,11 @@ editing here:
     acted on. Provenance also survives an up delivered with no
     window at the end of a frame-resize tracking loop, which a
     mark-gated release would drop.
-  - **Never fire `onLeftMouseDown` from it**
-    (`OwnPressMonitorSeamTests`). That fan-out's consumers are
+  - **Fire `onLeftMouseDown` for a `.otherApp` press alone**
+    (`OwnWindowGestureDeliveryTests`; `OwnPressMonitorSeamTests`
+    is the net beside it, holding the gate to one call site).
+    Argue the stand-down from the press's own origin rather
+    than from which arm called — that fan-out's consumers are
     built ON the blindness — `followDisplayUnderClick` takes its
     bar-overlay exemption from it (#446), and `lastLeftClick` is
     the click provenance the sibling distrust and the
