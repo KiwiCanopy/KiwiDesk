@@ -66,10 +66,10 @@ public final class AXApplicationObserver {
     public var onNotification: Handler = { _, _ in }
 
     private var observer: AXObserver?
-    /// The run loop mode this observer's source is registered
+    /// The run loop modes this observer's source is registered
     /// in — read by both the add and the remove, so the two can
     /// never name different modes and strand the source.
-    private let runLoopMode: CFRunLoopMode
+    private let runLoopModes: [CFRunLoopMode]
     /// App-level names whose `AXObserverAddNotification` did not
     /// succeed (#675). A fresh-launch app whose AX tree is not
     /// ready yet refuses the add; discarding that result left the
@@ -96,43 +96,38 @@ public final class AXApplicationObserver {
         kAXTitleChangedNotification,
     ]
 
-    /// Which run loop mode an app's notification source belongs
-    /// in. AX notifications for EVERY observed app are delivered
-    /// on OUR run loop, and a source registered only in
-    /// `.defaultMode` is deaf while that run loop runs a
-    /// tracking loop.
+    /// Which run loop modes an app's notification source
+    /// belongs in. AX notifications for EVERY observed app are
+    /// delivered on OUR run loop, and a source registered only
+    /// in `.defaultMode` is deaf while that run loop runs a
+    /// tracking loop — which our own window's live resize is,
+    /// in THIS process, for exactly its duration (#953).
     ///
-    /// For a third-party app that costs nothing: its user
-    /// gestures run a tracking loop in ITS process while ours
-    /// sits in default mode. Our OWN window's live resize or
-    /// move IS a tracking loop in THIS process (#953) — the main
-    /// run loop is in `NSEventTrackingRunLoopMode` for exactly
-    /// the duration of the gesture, so a default-mode-only
-    /// source misses every `moved`/`resized` notification the
-    /// drag pipeline needs and the tiled Settings window
-    /// resizes without its neighbours ever hearing about it.
+    /// So the own process, and only it, also registers in the
+    /// event-tracking mode — those two by name, never
+    /// `.commonModes`, which carries a third nobody asked for.
     ///
-    /// Narrow on purpose — the own process only. Widening every
-    /// observer to the common modes would also let a
-    /// third-party AX storm re-enter our menu and slider
-    /// tracking loops, which nothing asks for.
-    ///
-    /// Reading `isOwnProcess` here is not the widening
-    /// `input-and-animation.md` bans: that rule governs which
-    /// own WINDOW tiles, and a run loop mode has no window to
-    /// discriminate by — it is a property of this process's
-    /// main run loop, which every own window shares. What each
-    /// of those windows then does with a delivered notification
-    /// is still decided per window, by the mark.
-    static func runLoopMode(pid: pid_t) -> CFRunLoopMode {
-        EventLoop.isOwnProcess(pid)
-            ? .commonModes : .defaultMode
+    /// Why only the own process, why not the common set, and
+    /// what the two registration sites owe this list: once, in
+    /// `.claude/rules/accessibility.md` under #953. Do not
+    /// reproduce it here.
+    static func runLoopModes(pid: pid_t) -> [CFRunLoopMode] {
+        guard EventLoop.isOwnProcess(pid) else {
+            return [.defaultMode]
+        }
+        return [.defaultMode, eventTracking]
     }
+
+    /// `NSEventTrackingRunLoopMode` as a `CFRunLoopMode` —
+    /// AppKit spells it only as a `RunLoop.Mode`.
+    static let eventTracking = CFRunLoopMode(
+        RunLoop.Mode.eventTracking.rawValue as CFString
+    )
 
     public init?(pid: pid_t) {
         self.pid = pid
         self.appElement = AXHelper.appElement(pid: pid)
-        self.runLoopMode = Self.runLoopMode(pid: pid)
+        self.runLoopModes = Self.runLoopModes(pid: pid)
 
         var created: AXObserver?
         guard
@@ -154,11 +149,13 @@ public final class AXApplicationObserver {
                 failedAppNotifications.insert(name)
             }
         }
-        CFRunLoopAddSource(
-            CFRunLoopGetMain(),
-            AXObserverGetRunLoopSource(created),
-            runLoopMode
-        )
+        for mode in runLoopModes {
+            CFRunLoopAddSource(
+                CFRunLoopGetMain(),
+                AXObserverGetRunLoopSource(created),
+                mode
+            )
+        }
     }
 
     private static func registered(_ result: AXError) -> Bool {
@@ -214,11 +211,13 @@ public final class AXApplicationObserver {
                 name as CFString
             )
         }
-        CFRunLoopRemoveSource(
-            CFRunLoopGetMain(),
-            AXObserverGetRunLoopSource(observer),
-            runLoopMode
-        )
+        for mode in runLoopModes {
+            CFRunLoopRemoveSource(
+                CFRunLoopGetMain(),
+                AXObserverGetRunLoopSource(observer),
+                mode
+            )
+        }
         self.observer = nil
     }
 }

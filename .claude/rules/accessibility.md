@@ -19,6 +19,44 @@ editing AX code:
   keep their AX tree warm; do not remove it without a replacement.
 - `AXObserver` callbacks arrive on the run loop of the thread that
   registered them; keep observer registration on the main thread.
+- **Register the OWN process's observer in the event-tracking
+  mode as well as the default one, and never widen it to
+  `.commonModes` (#953).** Those callbacks arrive on OUR run
+  loop whichever app they are about, so a source registered in
+  `.defaultMode` alone is deaf while that run loop runs a
+  tracking loop. For a third-party app that costs nothing — its
+  gestures run a tracking loop in ITS process while ours is
+  idle. Our own window's live resize or move runs one in THIS
+  process, for exactly the seconds the gesture exists, so the
+  tiled Settings window resized with no `windowResized` ever
+  reaching the drag pipeline and its neighbours never moved.
+  Two obligations, one guard each:
+  - The widening stays the own process's alone
+    (`OwnWindowGestureDeliveryTests`) — every other observer
+    keeps the default mode, or a third-party AX storm re-enters
+    our own menu and slider tracking loops.
+  - **The add and the remove iterate one stored list, and no
+    registration site names a mode of its own**
+    (`ObserverRunLoopModeSeamTests`). Getting the CHOICE right
+    guards nothing on its own: hardcoding the default mode back
+    at the `CFRunLoopAddSource` call restores the whole defect
+    with the chooser still correct (guard-prover, 2026-08-24),
+    and an add and a remove covering different modes leave the
+    source installed past `invalidate()`, which nothing
+    observes.
+
+  Name the two modes rather than taking `.commonModes`: the
+  common set additionally carries `NSModalPanelRunLoopMode`,
+  which delivers own-pid callbacks — the create fold included —
+  inside every `runModal()` session, with the action that
+  opened the panel still suspended on the stack. Reading
+  `isOwnProcess` here is not the per-window widening
+  [input-and-animation.md](input-and-animation.md) bans: a run
+  loop mode is a property of this process's main run loop,
+  which every own window shares, and what each of them then
+  does with a delivered notification is still decided per
+  window, by the mark. The press half of the same defect is
+  that file's.
 - **Keep the boot's process-global AX messaging timeout.**
   `EventLoop.beginScan()` bounds every AX message at ~1 s
   (`AXHelper.setGlobalMessagingTimeout`) before its first

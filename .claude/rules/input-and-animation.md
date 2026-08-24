@@ -184,42 +184,41 @@ editing here:
   lifecycle event ever does want it, wire it deliberately and give
   it a test — an untested escape hatch is discovered not to work
   at exactly the moment it is needed.
-- **Our own window's gesture is one this process cannot watch
-  the way it watches everyone else's — keep both halves of the
-  crossing open (#953).** KiwiDesk observes other apps from
-  outside; the Settings window is inside the observer, and two
-  platform facts follow that nothing here chose:
-  - AX notifications for EVERY observed app are delivered on
-    **our** run loop, so a source registered in `.defaultMode`
-    alone is deaf while that run loop runs a tracking loop.
-    Another app's drag runs a tracking loop in ITS process; our
-    own window's live resize or move runs one in THIS one — for
-    exactly the seconds the drag pipeline needed to see. So
-    **never narrow `AXApplicationObserver`'s own-process source
-    back to the default mode alone, and keep its add and its
-    remove reading one stored mode** — an add and a remove
-    naming different modes strands the source in the run loop
-    past `invalidate()`, which no test can see.
-    `OwnWindowGestureDeliveryTests` pins the choice, and the
-    narrowness is the point: widening every observer to the
-    common modes would also let a third-party AX storm re-enter
-    our own menu and slider tracking loops.
-  - A **global** monitor never sees an event routed to our own
-    windows, which left the one tiled own window with no
-    recorded press to classify its gesture by. `MouseTracker`'s
-    local arm closes that, and **records the press only —
-    never fire `onLeftMouseDown` from it**
-    (`OwnPressMonitorSeamTests`): that fan-out's consumers are
-    built ON the blindness, `followDisplayUnderClick` taking
-    its bar-overlay exemption from it, so widening the fan-out
-    is a ruling of its own rather than a side effect of making
+- **A press on one of our own windows is recorded per WINDOW,
+  and records the press only (#953).** A **global** monitor
+  never sees an event routed to our own windows, which left the
+  one tiled own window with no recorded press to classify its
+  gesture by — so `isResizeGesture`'s trailing-event branch and
+  the resize-vs-move ghost gate both went blind on it while
+  working for every other app. `MouseTracker`'s local arm closes
+  that, under two obligations:
+  - **Gate the recorded press on `OwnWindowTiling.identifier`**,
+    read from the pressed window
+    (`OwnPressMonitorSeamTests`, and
+    `OwnWindowGestureDeliveryTests` for the decision itself).
+    This is #678 item 18's per-window discrimination, not an
+    exemption from it: the bars' item views take `mouseDown`, so
+    do the tour, Config Issues and every `NSOpenPanel`, and only
+    the marked window can be in a TILED gesture — an ungated arm
+    lets a click aimed at chrome overwrite the one press slot
+    the classifiers read. The **release** is deliberately
+    ungated: a down decides which press to remember, an up only
+    closes whichever is open, and refusing to close one is the
+    harmful direction.
+  - **Never fire `onLeftMouseDown` from it**
+    (`OwnPressMonitorSeamTests`). That fan-out's consumers are
+    built ON the blindness — `followDisplayUnderClick` takes its
+    bar-overlay exemption from it (#446), and `lastLeftClick` is
+    the click provenance the sibling distrust and the
+    ignored-panel escape read (#496, #687, #951). Widening the
+    fan-out is a ruling of its own, not a side effect of making
     a gesture classifiable.
 
-  Reading `isOwnProcess` for either is not the widening the
-  per-window discrimination rule above (#678 item 18) bans: that rule governs which own WINDOW tiles,
-  and neither a run loop mode nor a monitor kind has a window
-  to discriminate by. What a delivered notification then means
-  is still decided per window, by the mark.
+  The delivery half of the same defect — why our own window's
+  gesture was not observed at all — is
+  [accessibility.md](accessibility.md)'s, because it constrains
+  a file under `AX/` that this rule's `paths:` do not reach.
+
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

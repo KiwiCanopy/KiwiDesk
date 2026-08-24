@@ -54,6 +54,12 @@ struct KeyboardBoardSpokenTests {
 
     @Test("a bound key over a macOS reservation is a conflict")
     func overwriteIsConflict() {
+        // #740: the first line of the BODY, never `init` — the
+        // bucket words are localized, so on a German host this
+        // read "Leertaste" and the suite reddened for the
+        // host's language rather than for a defect (observed
+        // 2026-08-24, `AppleLanguages` = de-DE).
+        LocalizationManager.shared.select("en")
         let command = Layer(modifiers: [.command])
         // ⌘Space is Spotlight's; binding it is the solid red
         // ring, the same word as an own-row collision. ⌘W stays
@@ -73,6 +79,7 @@ struct KeyboardBoardSpokenTests {
 
     @Test("under All, reservations are not asserted")
     func allScopeReservesNothing() {
+        LocalizationManager.shared.select("en")
         let buckets = KeyboardBoardSpoken.buckets(
             rows: rows,
             claims: [:],

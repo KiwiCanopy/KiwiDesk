@@ -25,6 +25,19 @@ import Testing
 /// making a gesture classifiable.
 @Suite("Own-window press monitor seam (#953)")
 struct OwnPressMonitorSeamTests {
+    /// The two axes a monitor installation sits on. Every pair
+    /// of them must exist in `start()` — the assertion is the
+    /// CROSS PRODUCT, never a hand-written count of monitors: a
+    /// count of four is satisfied by four of the wrong ones,
+    /// which is how the first draft of this guard stayed green
+    /// while the local `.leftMouseDown` arm — the absence that
+    /// IS #953 — was deleted (guard-prover, 2026-08-24).
+    private let kinds = [
+        "addGlobalMonitorForEvents",
+        "addLocalMonitorForEvents",
+    ]
+    private let events = [".leftMouseDown", ".leftMouseUp"]
+
     private var tracker: URL {
         SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
@@ -36,16 +49,90 @@ struct OwnPressMonitorSeamTests {
         try SourceScan.strippedSource(at: tracker)
     }
 
-    @Test("Both monitor kinds are installed")
+    /// Which events each monitor kind is installed for, read
+    /// from the argument group of every installation in
+    /// `start()`.
+    private func installed(
+        in body: String
+    ) -> Set<String> {
+        let characters = Array(body)
+        var pairs: Set<String> = []
+        for kind in kinds {
+            let marker = Array(kind)
+            var index = 0
+            while index + marker.count <= characters.count {
+                guard
+                    Array(
+                        characters[index..<(index + marker.count)]
+                    ) == marker
+                else {
+                    index += 1
+                    continue
+                }
+                var cursor = index + marker.count
+                let arguments =
+                    SourceScan.balanced(
+                        characters,
+                        from: &cursor,
+                        open: "(",
+                        close: ")"
+                    ) ?? ""
+                for event in events
+                where
+                    arguments.contains(event)
+                {
+                    pairs.insert("\(kind) \(event)")
+                }
+                index = max(cursor, index + marker.count)
+            }
+        }
+        return pairs
+    }
+
+    @Test("Every monitor kind watches every button event")
     func bothMonitorKindsInstalled() throws {
-        let text = try source()
-        #expect(
-            text.contains("addGlobalMonitorForEvents"),
-            "the global arm watches every other app's presses"
+        let body = try SourceScan.functionBody(
+            of: "start",
+            in: "MouseTracker.swift",
+            under: "Events"
         )
+        #expect(!body.isEmpty, "start() body not found")
+        let found = installed(in: body)
+        for kind in kinds {
+            for event in events {
+                let pair = "\(kind) \(event)"
+                #expect(
+                    found.contains(pair),
+                    Comment(
+                        rawValue: "start() installs no \(pair) "
+                            + "monitor. The local arm is what "
+                            + "records our own windows' presses "
+                            + "(#953); the global arm is every "
+                            + "other app's."
+                    )
+                )
+            }
+        }
+    }
+
+    @Test("The local arm records only the marked window")
+    func localArmGatesOnTheTilingMark() throws {
+        let body = try SourceScan.functionBody(
+            of: "start",
+            in: "MouseTracker.swift",
+            under: "Events"
+        )
+        #expect(!body.isEmpty, "start() body not found")
         #expect(
-            text.contains("addLocalMonitorForEvents"),
-            "the local arm watches our own windows' presses"
+            body.contains("tilingWindowPress"),
+            Comment(
+                rawValue: "the local arm must record a "
+                    + "press only when it landed in the "
+                    + "one own window carrying "
+                    + "OwnWindowTiling.identifier — per "
+                    + "WINDOW, never per process (#678 "
+                    + "item 18)"
+            )
         )
     }
 

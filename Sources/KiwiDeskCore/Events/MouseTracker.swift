@@ -12,18 +12,15 @@ import AppKit
 /// mouse movement — so the cost is negligible.
 ///
 /// **Two monitors, deliberately asymmetric (#953).** A global
-/// monitor never sees events routed to our OWN windows, so a
+/// monitor never sees an event routed to our OWN windows, so a
 /// press on the tiled Settings window's resize border went
-/// unrecorded and its gesture could not be classified — the
-/// own window was the one tiled window whose drags had no
-/// press. The local monitor closes that, and records the press
-/// ONLY: `onLeftMouseDown` stays global-fed on purpose,
-/// because its consumers are built on that blindness —
-/// `followDisplayUnderClick` gets its bar-overlay exemption
-/// for free from it (#446), and `lastLeftClick` is the click
-/// provenance the sibling distrust and the ignored-panel
-/// escape read (#496, #687, #951). Widening the fan-out is a
-/// separate ruling from making a gesture classifiable.
+/// unrecorded and its gesture could not be classified. The
+/// local arm closes that, gated on the tiling mark and
+/// recording the press only — it never fires
+/// `onLeftMouseDown`. The argument for both halves of that
+/// sentence lives once, in
+/// `.claude/rules/input-and-animation.md` under #953; do not
+/// reproduce it here.
 @MainActor
 public final class MouseTracker {
     public struct Press {
@@ -64,52 +61,90 @@ public final class MouseTracker {
                 self?.recordUp()
             }
         }
-        // Our own windows' presses, which the global pair never
-        // sees (#953). Press bookkeeping only — see the type
-        // doc for why `onLeftMouseDown` is not fired here — and
-        // the event is always passed through untouched, so the
-        // click still reaches the control the user aimed at.
-        //
-        // A local monitor runs inside the app's own event
-        // dispatch, which is the main thread by AppKit's
-        // contract — the same argument `axCallback` makes — so
-        // the press is recorded inline rather than hopped
-        // through a `Task`: the handler must hand the event
-        // back synchronously anyway, and the conversion below
-        // reads main-actor AppKit state.
+        // Our own windows' presses, which the global pair
+        // never sees (#953). AppKit dispatches a local monitor
+        // from the main thread's own event dispatch and wants
+        // the event handed back synchronously, so the AppKit
+        // read happens inline under `assumeIsolated` — but the
+        // STORE is enqueued exactly like the global arms', so
+        // one scheduling discipline orders all four writes and
+        // a queued `up` can never stamp a press recorded after
+        // it.
         let localDown = NSEvent.addLocalMonitorForEvents(
             matching: .leftMouseDown
         ) { [weak self] event in
-            MainActor.assumeIsolated {
-                self?.recordDown(
-                    at: Self.screenLocation(of: event)
-                )
+            let location = MainActor.assumeIsolated {
+                Self.tilingWindowPress(of: event)
+            }
+            if let location {
+                Task { @MainActor in
+                    self?.recordDown(at: location)
+                }
             }
             return event
         }
+        // The release is NOT gated on the mark, and the
+        // asymmetry is deliberate: a down decides WHICH press
+        // to remember, so it discriminates; an up only closes
+        // whichever press is already open, and refusing to
+        // close one is the harmful direction — it leaves
+        // `isResizeGesture`'s "released moments ago" branch
+        // reading a press the user is no longer holding.
         let localUp = NSEvent.addLocalMonitorForEvents(
             matching: .leftMouseUp
         ) { [weak self] event in
-            MainActor.assumeIsolated { self?.recordUp() }
+            Task { @MainActor in self?.recordUp() }
             return event
         }
         monitors = [down, up, localDown, localUp]
             .compactMap { $0 }
     }
 
+    /// The press location to record for a local event, or nil
+    /// when it is not one this tracker remembers. The AppKit
+    /// read; `ownPressLocation` is the decision.
+    private static func tilingWindowPress(
+        of event: NSEvent
+    ) -> CGPoint? {
+        ownPressLocation(
+            identifier: event.window?.identifier?.rawValue,
+            locationInWindow: event.locationInWindow,
+            windowFrame: event.window?.frame
+        )
+    }
+
+    /// Whether a press on one of our own windows is one the
+    /// gesture classifiers may reason from, and where it
+    /// landed in Cocoa screen space — the pure half, so both
+    /// answers are testable without a real `NSEvent`.
+    ///
+    /// **Per WINDOW, never per process (#678 item 18).** Only
+    /// the one own window carrying `OwnWindowTiling.identifier`
+    /// takes a layout slot, so only its presses can belong to a
+    /// tiled gesture. Every other own window — the bars' item
+    /// views take `mouseDown`, and so do the tour, Config
+    /// Issues and each `NSOpenPanel` — would otherwise
+    /// overwrite the single press slot that `isResizeGesture`
+    /// and the resize-vs-move ghost gate read, with a click the
+    /// user aimed at chrome.
+    ///
     /// A local monitor's event carries WINDOW coordinates when
     /// it has a window (a global monitor's never does, which is
-    /// why the global pair can read `locationInWindow` as a
-    /// screen point). Convert, so both paths hand `recordDown`
-    /// the same Cocoa screen space.
-    private static func screenLocation(
-        of event: NSEvent
-    ) -> CGPoint {
-        guard let window = event.window else {
-            return event.locationInWindow
-        }
-        return window.convertPoint(
-            toScreen: event.locationInWindow
+    /// why the global pair reads `locationInWindow` as a screen
+    /// point). Converting through the window's own frame origin
+    /// is `NSWindow.convertPoint(toScreen:)`'s definition and
+    /// keeps this half free of AppKit.
+    static func ownPressLocation(
+        identifier: String?,
+        locationInWindow: CGPoint,
+        windowFrame: CGRect?
+    ) -> CGPoint? {
+        guard identifier == OwnWindowTiling.identifier,
+            let windowFrame
+        else { return nil }
+        return CGPoint(
+            x: windowFrame.origin.x + locationInWindow.x,
+            y: windowFrame.origin.y + locationInWindow.y
         )
     }
 
@@ -121,8 +156,10 @@ public final class MouseTracker {
         press = nil
     }
 
-    /// Global monitor events carry screen coordinates in
-    /// Cocoa space (no window); flip into AX space.
+    /// Both feeders hand this Cocoa screen coordinates — the
+    /// global arm's events carry them directly (no window), and
+    /// the local arm's are converted by `ownPressLocation`.
+    /// Flip into AX space.
     private func recordDown(at location: CGPoint) {
         press = Press(
             location: GeometryUtils.axPoint(location),
@@ -135,8 +172,8 @@ public final class MouseTracker {
     }
 
     /// Test seam: seeds the last press directly (already in AX
-    /// coordinates), standing in for the global mouse-down
-    /// monitor, which does not fire under unit tests.
+    /// coordinates), standing in for either mouse-down
+    /// monitor — neither fires under unit tests.
     func seedPress(at location: CGPoint) {
         press = Press(location: location, downAt: Date())
     }
