@@ -25,10 +25,17 @@ struct GroupBadgeNeutralityTests {
 
     /// Near-neutral, not byte-identical channels: Apple's greys
     /// carry a few points of blue (`#636366` is three above its
-    /// red and green), and a badge that reads as grey on screen
-    /// is the claim. Eight points is a wide enough door for that
-    /// and nowhere near wide enough for a hue — the red this
-    /// replaced spanned 176.
+    /// red and green).
+    ///
+    /// Eight points is the door, and it is worth being exact
+    /// about what that claims: it admits every Apple system grey
+    /// with room (`#8E8E93` and `#F2F2F7` span 5, `#1C1C1E` 2)
+    /// and nothing anyone would call a hue — the red this
+    /// replaced spans 176. It does NOT admit a *tinted* brand
+    /// grey: a warm `#8A8A80` spans 10 and reds here despite
+    /// reading grey to the eye. That is the intended trade for a
+    /// DEFAULT — retuning it toward a temperature should be a
+    /// deliberate edit that trips a guard, not a drift.
     private func isGrey(_ hex: String) -> Bool {
         guard let c = ColorVision.components(hex) else {
             return false
@@ -54,15 +61,31 @@ struct GroupBadgeNeutralityTests {
 
     @Test("The palettes that inherited the default still do")
     func inheritingPalettesCarryTheDefaultPair() throws {
-        let fill = AppBarStyle().groupBadgeColor
-        let ink = AppBarStyle().groupBadgeTextColor
+        // Each bar's keys are read against THAT bar's struct.
+        // Reading both against the App Bar would have left the
+        // Space Bar default with one net — the cross-bar
+        // equality above — and a guard with one net is one
+        // careless edit from watching nothing (guard-prover,
+        // 2026-08-24).
+        let app = AppBarStyle()
+        let space = SpaceBarStyle()
+        let pairs = [
+            (
+                "app_bar", app.groupBadgeColor,
+                app.groupBadgeTextColor
+            ),
+            (
+                "space_bar", space.groupBadgeColor,
+                space.groupBadgeTextColor
+            ),
+        ]
         let authored = PaletteCatalog.authored()
         for name in Self.inheritors {
             let palette = try #require(
                 authored.first { $0.name == name },
                 Comment(rawValue: "missing palette \(name)")
             )
-            for bar in ["app_bar", "space_bar"] {
+            for (bar, fill, ink) in pairs {
                 #expect(
                     palette.colors["\(bar).group_badge_color"]
                         == fill,
