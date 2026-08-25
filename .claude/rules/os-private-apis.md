@@ -31,3 +31,45 @@ editing here:
 - **Every** private fast path must have a public-API fallback
   (`AXUIElement`). No fallback = not acceptable.
 - Never disable SIP, and never ask the user to.
+
+## The WMBridge operation classes (macOS 26+, #884/#889)
+
+SkyLight's `SLSBridged*Operation` classes are an ObjC surface,
+not C symbols, so the `dlsym` discipline extends to them as
+class lookup — and every one of the following is an obligation
+on whoever touches them:
+
+- Resolve a class by name at runtime, `NSClassFromString`
+  after the framework's `dlopen`, and treat a nil lookup as
+  **the capability being absent** — every entry point answers
+  nil or false, none traps (#889 item 8 proved the nil against
+  three fake names with the real class as the control). Never
+  declare the class in Swift or ObjC to link against it.
+- Reach the bridge ONLY through `WMBridge`
+  (`OS/WMBridge*.swift`). The `SLSBridged` prefix, the
+  `performWithWMBridgeDelegate` selector and `NSClassFromString`
+  itself are each spelled once, in its core file, which
+  `WMBridgeSeamTests` pins by exact count across both source
+  trees — a full class name anywhere else is a hit, because the
+  wrapper joins the prefix to short operation names at lookup.
+- **Performed is not applied.** An asynchronous operation
+  returns void; a synchronous one returns a result object even
+  when the WindowServer silently declined (edge reservation
+  performed under every mask and moved nothing;
+  `CopyManagedDisplaysOperation` performs and answers nil). A
+  caller verifies a write by a re-query or by state it owns —
+  sticky membership in particular, because
+  `CopySpacesForWindows` never reports a second Desktop
+  (#889 item 5) — and never by the wrapper's return value.
+- The bridge dispatches only while **AppKit is genuinely
+  loaded** (#884's bisection): free in the app, binding on
+  every harness. A test reaches `WMBridge` through
+  `classResolverOverride` and never the live bridge
+  (`WMBridgeTests`); a device check compiles the wrapper's
+  files into a standalone binary that touches AppKit first.
+- A GUI surface offering a bridge feature gates on
+  `WMBridge.isAvailable` — which requires a synchronous read to
+  ANSWER, not merely the class to resolve — and greys with a
+  reason when it is false (gui.md's grey-don't-hide).
+- No Accessibility trust is needed for any bridge operation
+  (#889 item 2); do not add a permission prompt for one.

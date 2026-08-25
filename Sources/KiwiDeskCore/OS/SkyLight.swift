@@ -19,6 +19,11 @@ public enum SkyLight {
             RTLD_LAZY
         )
 
+    /// Whether the framework loaded — the precondition for
+    /// resolving anything in it, `WMBridge`'s ObjC classes
+    /// included.
+    static var isLoaded: Bool { handle != nil }
+
     /// Resolves one C function pointer, or nil if unavailable.
     static func symbol<T>(_ name: String, as type: T.Type) -> T? {
         guard let handle, let sym = dlsym(handle, name) else {
