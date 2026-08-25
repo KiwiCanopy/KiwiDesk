@@ -194,6 +194,33 @@ argument, and why the rule is phrased as an obligation on
 controllers rather than as a claim about the process, is
 "Permanent accessory mode" in `docs/design-decisions.md`.
 
+## A window that finishes something already begun comes forward
+
+**It activates at the moment it appears, a window a framework
+opened included — and it refuses any affordance that parks it out
+of that activation's reach.** `.accessory` earns no Dock tile, so
+`requestUserAttention` and every other Dock-borne nudge is inert
+here, and activating a process deminiaturizes nothing. The
+corollary under "Permanent accessory mode" in
+`docs/design-decisions.md` argues why, and scopes it — an
+unsolicited OFFER is governed by the opposite rule and must not
+take the screen.
+
+Take the seam that NAMES the moment the window appears; a
+callback that merely fires near it is a race, not a fix. #1011 is
+the worked case (Sparkle 2.9.6, the version `Package.resolved`
+pins — a bump re-checks it): `UpdatePromptDriver` overrides
+`showReadyToInstallAndRelaunch`, and `UpdatePromptPolicy` refuses
+the status window's minimize button.
+
+**A guard on such an override pins the WIRING beside the body**
+— `UpdatePromptWiringTests` holds that the framework is shown
+through that driver and not a stock one, because an override
+left in place and no longer reached is how the defect returns
+with every count still at one. It is a suite of its own for
+that reason: `UpdatePromptFocusTests` reads what the override
+DECLARES and structurally cannot see what it is wired to.
+
 ## A window that must clear the bars derives its level
 
 The bars render at `BarPanel.level`. **A window that must not be

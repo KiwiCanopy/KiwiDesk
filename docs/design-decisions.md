@@ -2687,6 +2687,56 @@ AppKit routes key equivalents through `NSApp.mainMenu` whatever
 the policy, and it is what gives the Settings text fields
 Cut/Copy/Paste/Undo.
 
+**Corollary: nothing arrives in front for free, and that reaches
+windows KiwiDesk did not open.** A `.regular` app has a Dock tile
+and everything macOS builds on it — the icon bouncing for
+`requestUserAttention`, the user clicking it to come back. An
+`.accessory` process has none of that, so a window that finishes
+something **already begun** activates at the moment it appears —
+and so does one the user's own click just cost them, because an
+accessory process with no windows left is deactivated by macOS
+and the next window it opens lands behind whatever took over.
+KiwiDesk's own take `NSApp.forceFront`; a window a framework opens
+takes the seam that names its moment, and where the framework
+offers none, that seam is worth building rather than approximating
+with a nearby hook — the neighbouring callback fires while the
+framework is still preparing the window, which is a race dressed
+as a fix. Coming forward is not enough by itself either: an
+affordance that lets the user park such a window out of reach is
+refused, because activating a process deminiaturizes nothing.
+
+**The scope is deliberate and the other half is the opposite
+rule.** An *unsolicited offer* must NOT take the screen — that is
+the same argument [Background update checks are on, and there is
+no switch](#background-update-checks-are-on-and-there-is-no-switch)
+makes about a modal at the worst moment, and it is why Sparkle
+showing a SCHEDULED update alert behind other windows is left
+alone here. The obligation is on the interaction the user is
+already inside, never on the one being proposed to them. What that
+scoping costs — a background app's scheduled alert being easy to
+miss entirely, which Sparkle answers with *gentle reminders*
+KiwiDesk does not yet implement — is
+[#1013](https://github.com/KiwiCanopy/KiwiDesk/issues/1013), not
+something this entry rules acceptable.
+
+Sparkle is the worked case
+([#1011](https://github.com/KiwiCanopy/KiwiDesk/issues/1011)). It
+activates for the windows it opens on a check the *user* asked
+for, then marks the later install-and-restart prompt with
+`requestUserAttention` alone — right for a Dock app, inert
+here. The prompt arrived
+behind everything the user had open with nothing saying the update
+was waiting, which makes the in-app update path read as broken:
+the exact trust the section
+[above](#no-distribution-channel-without-an-update-path) exists to
+keep. `UpdatePromptDriver` overrides
+`showReadyToInstallAndRelaunch` — the one moment neither Sparkle
+delegate protocol reaches — while `UpdatePromptFocusTests` holds
+the activation inside that override and `UpdatePromptWiringTests`
+that Sparkle is shown through that driver rather than a stock
+one, which is the way an
+override goes dead without anything noticing.
+
 ### Settings is miniaturizable; modal chrome is not
 
 **[Rationale]**
