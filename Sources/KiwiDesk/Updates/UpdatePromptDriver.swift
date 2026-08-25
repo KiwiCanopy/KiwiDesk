@@ -26,8 +26,16 @@ final class UpdatePromptPolicy: NSObject,
     /// becomes the install-and-restart prompt, and activating a
     /// process does not deminiaturize anything — so a minimized
     /// prompt would sit in a Dock KiwiDesk has no icon in.
-    /// Refusing the affordance is what keeps the driver's
-    /// activation below sufficient on its own.
+    /// Refusing the affordance is what closes the PARKING
+    /// route, and only that one. Activation preserves intra-app
+    /// window order, and `super` reuses a status controller it
+    /// already has rather than re-ordering it — so a Settings or
+    /// Config Issues window opened during the download still
+    /// sits above the prompt after the activation. Closing that
+    /// too would need the status window itself, which Sparkle
+    /// hands out to nobody; it is a rarer shape than the one
+    /// #1011 was reported as, and it is named here rather than
+    /// left to be rediscovered.
     func standardUserDriverAllowsMinimizableStatusWindow() -> Bool {
         false
     }
