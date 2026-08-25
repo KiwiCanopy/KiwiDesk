@@ -13,6 +13,19 @@
     <description>Updates for KiwiDesk, a tiling window manager for macOS.</description>
     <language>en</language>
     <item>
+      <title>1.0.1</title>
+      <pubDate>Tue, 25 Aug 2026 11:26:50 +0000</pubDate>
+      <sparkle:version>1.0.1</sparkle:version>
+      <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<style>:root{color-scheme:light dark;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;}body{margin:0;padding:2px 4px 16px 4px;}h3{font-size:13px;font-weight:600;margin:12px 0 6px 0;}p{margin:0 0 8px 0;}ul{margin:0 0 10px 0;padding-left:18px;}li{margin-bottom:5px;}code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:11.5px;padding:1px 4px;border-radius:4px;background:rgba(128,128,128,0.15);}::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.65);}</style><p>A small release with one thing to know if you script KiwiDesk. Nothing about how your windows behave changes.</p><h3>One word for macOS Desktops, everywhere</h3><ul><li><strong><code>native_space</code> is now <code>desktop</code> on the wire.</strong> The copy has said <em>Desktop</em> for macOS's desktops and <em>Space</em> for KiwiDesk's own since 0.9.7; the commands and events now say the same. If your <code>init.lua</code> binds profiles to Desktops, or a script listens for the switch event, update the spelling — the old names are gone, not aliased: <code>KiwiDesk.bind_profile_to_native_space(n, profile)</code> is now <code>KiwiDesk.bind_profile_to_desktop(n, profile)</code>, the <code>native_space_change</code> event is now <code>desktop_change</code>, and <code>kiwidesk get_state</code> reports <code>desktop</code> instead of <code>native_space</code>.</li><li><strong>Bindings made in the Settings window need nothing from you.</strong> They live in KiwiDesk's own settings file, not in <code>init.lua</code>, and keep working as they are.</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.0.1/KiwiDesk-1.0.1.zip"
+        length="8156687"
+        type="application/octet-stream"
+        sparkle:edSignature="x33GMykSLdbEl4suNMpvn+735X9ls8s7rHEOe1elYj6v5r19lGR9cugz5lY4UrpUXs6LZyJ+rhQR4diwIQXhBg==" />
+    </item>
+    <item>
       <title>1.0.0</title>
       <pubDate>Mon, 24 Aug 2026 21:25:21 +0000</pubDate>
       <sparkle:version>1.0.0</sparkle:version>
