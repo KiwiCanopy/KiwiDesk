@@ -79,7 +79,7 @@ jobs:
       # Read from site/.nvmrc, never a literal — that file is the
       # one Node pin (.claude/rules/site.md), shared with site.yml
       # and a local `nvm use`, and Astro refuses anything older.
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: site/.nvmrc
           cache: npm
