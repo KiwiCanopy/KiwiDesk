@@ -261,8 +261,26 @@ view: a moment later the Desktop you stayed on re-tiles without
 it, and the window is reported gone with `reason: vanished`, the
 same value a Desktop swipe produces — it was not closed. When
 that Desktop is next shown the window rejoins the **KiwiDesk
-Space it was in**, which KiwiDesk remembered as it left. Same
-requirement as `focus_desktop`.
+Space it was in**, which KiwiDesk remembered as it left.
+
+With more than one screen there is one exception, and it is the
+Desktop you chose winning: when that Desktop lives on **another
+screen**, the window also joins the KiwiDesk Space that screen
+is showing — the one it shows when the window actually lands
+there, which for a hidden Desktop is decided at the moment you
+reveal it. It has to. A window still filed under a Space that
+lays out on the screen it just left is laid out *there* on the
+next retile, and macOS then re-assigns it to a Desktop of that
+monitor — so without this the move undoes itself about a second
+later, whether the Desktop was hidden or already on screen
+([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
+
+A Desktop on the same screen changes nothing: the Space you
+left is the Space you come back to. Neither does a **floating**
+or a **sticky** window change Space — a float has no layout to
+carry it anywhere, and a sticky window's home is deliberately
+left where it is (`move_to_space` guards it the same way).
+Same requirement as `focus_desktop`.
 
 **Example:**
 
@@ -284,8 +302,10 @@ because macOS moves keyboard focus with a *window*, never with a
 screen, a follow onto another screen changes what that screen
 shows without carrying your typing to it; you land there by
 clicking, as you would after any other switch
-([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)). Same requirement
-as `focus_desktop`.
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+The window itself is placed by the cross-screen rule above — on
+another screen it joins the Space that screen shows. Same
+requirement as `focus_desktop`.
 
 **Example:**
 

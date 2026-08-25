@@ -54,6 +54,22 @@ extension KiwiCore {
     /// verdict and needs no reason enum beside it.
     public var canDriveDesktops: Bool { WMBridge.isAvailable }
 
+    /// The KiwiDesk display a SkyLight display UUID names, or
+    /// nil when no attached display matches (the topology moved
+    /// under a snapshot, or the UUID symbol is unavailable).
+    ///
+    /// One copy of the match: the Desktop verbs name a screen by
+    /// the UUID a `DesktopSnapshot` carries, and the switch
+    /// emit's monitor numbering resolves main the same way.
+    /// Both go through `NativeSpaces.displayUUID(for:)`, which
+    /// is the seam a topology fixture pins.
+    func display(forUUID uuid: String?) -> DisplayID? {
+        guard let uuid else { return nil }
+        return state.workspaces.allDisplays.first {
+            NativeSpaces.displayUUID(for: $0.id) == uuid
+        }?.id
+    }
+
     public var focusedWindow: ManagedWindow? {
         focusedWindowID.flatMap { state.windows[$0] }
     }

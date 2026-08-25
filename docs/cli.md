@@ -376,8 +376,12 @@ must also refresh their state on `desktop_change`.
 moved to another space (`move_to_space`,
 with or without follow, or a drag onto another display — the
 live crossing emits as the membership moves, so a drag pulled
-back before release emits once per crossing); bulk
-reassignments (profile load, session restore) stay silent:
+back before release emits once per crossing). A
+`move_to_desktop` onto a Desktop that lives on **another
+screen** emits it too: the window joins the space that screen
+shows, or the layout would carry it back to the screen it left
+([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
+Bulk reassignments (profile load, session restore) stay silent:
 
 ```json
 {"event": "window_moved_to_space",
