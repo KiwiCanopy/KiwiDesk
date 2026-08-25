@@ -58,6 +58,15 @@ public struct StateCoordinator: Sendable {
     /// traveler takes.
     public var trackCapacities: [SpaceID: Int] = [:]
 
+    /// The display an ARRIVING window's frame physically sits on
+    /// (#1010), mirrored in by KiwiCore before each
+    /// `.windowCreated` like `trackCapacities` above: resolving a
+    /// frame to a screen needs `NSScreen` and the AX/AppKit
+    /// y-flip, neither of which may enter this pure core (§2.6).
+    /// Nil when no screen backs the frame — the arrival then
+    /// resolves exactly as it did before this input existed.
+    public var arrivalDisplay: DisplayID?
+
     /// Last known space per window. Window ids are stable OS
     /// ids, so a "created" window with a remembered space is
     /// one coming back from another native macOS Space (or a

@@ -68,6 +68,33 @@ editing here:
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
   argument lives in `docs/design-decisions.md`.
+- **A cross-screen arrival's home is decided ABOVE the create
+  fold** (#1010). A window that comes back (`hadRememberedSpace`)
+  on a display OTHER than the one its remembered space lays out
+  on takes the space that display shows — the Desktop the user
+  just chose beats the space memory, and the product argument is
+  `docs/design-decisions.md`'s. The fold reads that display from
+  `StateCoordinator.arrivalDisplay`, mirrored in by
+  `KiwiCore.handle` like `trackCapacities`, and a new consumer of
+  "which screen is this window on" resolves it the same way:
+  a window frame is AX coordinates (y grows DOWN) while
+  `Display.frame` is AppKit's (y grows UP), so comparing them
+  inside this actor-free core is silently wrong on exactly the
+  topology that needs the rule — a second screen at a negative
+  y — and `TilingEngine.screen(containing:)` is the one seam
+  that owns the flip. Re-home through the fold's own
+  `workspaces.add`, never `moveWindow(_:to:follow:)`: an
+  arrival is not a command, and that path fires a focus
+  hand-off, the move latch and a Desktop yield that no arrival
+  asked for. Only the window's MEMBERSHIP moves — a space is
+  never re-assigned, so a `pin_space_to_display` pin survives an
+  arrival by construction (#890 owns the wider per-screen
+  questions), a `.display` sticky keeps #445's derived home
+  display, and nothing is owed the #444 float re-anchor, whose
+  translation exists for a membership move that crosses screens
+  in the other direction. `ArrivalScreenHomeTests` pins the rule
+  and every stand-down (fresh window, app rule, same display,
+  unresolvable screen).
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

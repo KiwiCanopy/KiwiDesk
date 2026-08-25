@@ -261,8 +261,19 @@ view: a moment later the Desktop you stayed on re-tiles without
 it, and the window is reported gone with `reason: vanished`, the
 same value a Desktop swipe produces — it was not closed. When
 that Desktop is next shown the window rejoins the **KiwiDesk
-Space it was in**, which KiwiDesk remembered as it left. Same
-requirement as `focus_desktop`.
+Space it was in**, which KiwiDesk remembered as it left.
+
+With more than one screen there is one exception, and it is the
+Desktop you chose winning: when that Desktop lives on **another
+screen**, the window joins the Space that screen is showing
+instead. Rejoining the remembered Space would lay the window out
+on the monitor that Space belongs to, and macOS then moves the
+window onto a Desktop of *that* monitor — the move undoing
+itself a second after you reveal it
+([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
+A Desktop on the same screen changes nothing: the Space you left
+is the Space you come back to. Same requirement as
+`focus_desktop`.
 
 **Example:**
 
@@ -284,8 +295,10 @@ because macOS moves keyboard focus with a *window*, never with a
 screen, a follow onto another screen changes what that screen
 shows without carrying your typing to it; you land there by
 clicking, as you would after any other switch
-([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)). Same requirement
-as `focus_desktop`.
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+The window itself is placed by the cross-screen rule above — on
+another screen it joins the Space that screen shows. Same
+requirement as `focus_desktop`.
 
 **Example:**
 

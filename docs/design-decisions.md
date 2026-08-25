@@ -2102,6 +2102,44 @@ home space no longer reserves a phantom tiled slot when it has
 traveled away, which is what let the same window fight for two
 frames across monitors before. (#445)
 
+**A window that comes back on another screen joins that
+screen's Space, not the one it remembers.** KiwiDesk notes the
+Space a window was in when it vanishes from Accessibility — a
+Desktop switch, a wake, an app relaunch — and files it back
+there when it returns, which is what makes a Desktop swipe
+non-destructive. Across screens that memory can be out of date
+by one deliberate gesture: `move_to_desktop` onto another
+screen's Desktop (or the same drag in Mission Control) carries
+the window physically to that monitor, while the Space it
+remembers is laid out on the one it left. Something has to
+lose, because the two answers put the window on different
+monitors. The Desktop the user just chose wins — it is the more
+recent intent, and it is the one they can see. Filing the
+window back into the remembered Space instead means the retile
+carries it home and macOS re-assigns its Desktop to match the
+frame, so the move undoes itself about a second after the
+Desktop is revealed.
+
+Two alternatives lost. *Keep the membership but suppress the
+cross-screen retile* leaves the window unmanaged exactly where
+it landed — the beat reported as "it moved but it didn't tile"
+made permanent. *Refuse cross-screen moves outright* removes
+the half of the verb multi-monitor users want it for. Both
+answer "which of KiwiDesk's two models is right"; only the
+ruling above answers "what did the user just ask for".
+
+The rule is narrow on purpose. It needs a window that CAME
+BACK — a fresh window, or one an app rule files, is a placement
+nobody contradicted — and it moves that window's membership
+only. No Space is re-assigned, so an arrival can never break a
+`pin_space_to_display` pin: the pinned Space stays on its
+screen and the window simply does not join it (the wider
+per-screen questions are #890's). A display sticky keeps its
+invariant for free, its home display being derived from its
+home Space (#445). And on a single screen the remembered Space
+and the arrival's screen always agree, so nothing changes
+there at all. (#1010)
+
 **The starter setup is chosen from the screens, not demonstrated
 on them.** The first version of it (#466) gave every display the
 same five spaces — one per layout mode — so a newcomer met the
