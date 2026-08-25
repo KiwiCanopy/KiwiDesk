@@ -161,12 +161,22 @@ struct UpdatePromptFocusTests {
     /// protocol member is compiler-checked, so a Sparkle upgrade
     /// that renames the requirement reds here too.
     ///
-    /// It reaches nothing: `UpdatePromptPolicy()` is a bare
+    /// It reaches nothing today: `UpdatePromptPolicy()` is a bare
     /// `NSObject` and the minimize answer is a pure predicate.
     /// `standardUserDriverWillShowModalAlert` is deliberately NOT
     /// called — its body is `NSApp.activate`, and `NSApp` is nil
     /// in a test process — so the scan above is what holds its
     /// body and this holds that Sparkle can find it.
+    ///
+    /// **That binds what may be ADDED to the minimize answer,
+    /// not only what is called from here.** This test runs
+    /// production code in a process with no `NSApplication`, so
+    /// an ordinary-looking `NSApp.isActive` inside that predicate
+    /// does not fail one test — it crashes the runner and takes
+    /// the whole suite with it, naming the production line rather
+    /// than the guard (`guard-prover`, 2026-08-25). Keep the
+    /// predicate pure, or stop calling it and go back to reading
+    /// it — which is the weaker guard this replaced.
     @MainActor
     @Test("the policy answers the selectors Sparkle asks for")
     func policyAnswersSparkle() {
