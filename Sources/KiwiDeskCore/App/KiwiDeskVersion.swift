@@ -25,7 +25,7 @@
 /// guard against the real file.
 public enum KiwiDeskVersion {
     /// Semantic version, bumped per release.
-    public static let semantic = "1.0.0"
+    public static let semantic = "1.0.1"
 
     /// Short commit SHA of the build, stamped by the release
     /// workflow; `"unknown"` in every other build.
