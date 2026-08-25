@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           # Read from site/.nvmrc so CI and a local `nvm use`
           # cannot drift apart — a literal here would silently
