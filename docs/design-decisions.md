@@ -91,21 +91,37 @@ planned escape hatch; it is not a wontfix dumping ground.
 
 A separate class: capabilities macOS forbids without disabling
 **System Integrity Protection**. KiwiDesk drives macOS Desktops
-through private SkyLight/CGS symbols resolved at runtime, and the
-few operations that *write* the Desktop arrangement are
-gated by SIP. KiwiDesk **never disables SIP or asks a user to** —
-a disabled-SIP requirement is a non-starter for a window manager
-(`AGENTS.md` §5), so these stay unimplemented rather than shipping
-a fragile fast path with no safe fallback. Unlike the
-[Accepted limitations](accepted-limitations.md) trades,
-the root is the OS, not our architecture, and there is no in-app
-escape hatch — only Apple exposing a supported API. They are
-tracked, not abandoned:
+through private SkyLight/CGS symbols resolved at runtime, and
+some operations that *write* the Desktop arrangement are gated by
+SIP. KiwiDesk **never disables SIP or asks a user to** — a
+disabled-SIP requirement is a non-starter for a window manager
+(`AGENTS.md` §5), so these stay unimplemented rather than
+shipping a fragile fast path with no safe fallback. Unlike the
+[Accepted limitations](accepted-limitations.md) trades, the root
+is the OS, not our architecture, and there is no in-app escape
+hatch — only Apple exposing an API. They are tracked, not
+abandoned:
 
-- **Move the focused window to another Desktop**
-  ([#25](https://github.com/KiwiCanopy/KiwiDesk/issues/25)).
-- **Switch the visible Desktop programmatically**
-  ([#26](https://github.com/KiwiCanopy/KiwiDesk/issues/26)).
+- ~~**Move the focused window to another Desktop**~~ and
+  ~~**switch the visible Desktop programmatically**~~ — **left
+  this list in 1.1** ([#25](https://github.com/KiwiCanopy/KiwiDesk/issues/25),
+  [#26](https://github.com/KiwiCanopy/KiwiDesk/issues/26)).
+  The C symbol that did the move was SIP-gated from macOS 15 on;
+  macOS 26 registers a window-management *bridge* — ObjC
+  operation classes SkyLight dispatches through AppKit's own
+  delegate — that performs both on stock settings with SIP on,
+  needing no Accessibility trust
+  ([#884](https://github.com/KiwiCanopy/KiwiDesk/issues/884)
+  found it, [#889](https://github.com/KiwiCanopy/KiwiDesk/issues/889)
+  probed it on device). `focus_desktop` and
+  `move_to_desktop(_and_follow)` ride it, through one
+  runtime-resolved wrapper that reports the capability absent
+  where the classes do not exist — so on an earlier macOS the
+  verbs refuse with an error rather than falling back to
+  anything, since there is nothing SIP-clean to fall back to.
+  Private in clothing, then, but an API Apple built for
+  cross-process dispatch, versioned and encoded; the rows that
+  follow are what is still gated.
 - **Restore windows across all Desktops on quit**
   ([#70](https://github.com/KiwiCanopy/KiwiDesk/issues/70)).
 - **Place a window above the top screen border** — the

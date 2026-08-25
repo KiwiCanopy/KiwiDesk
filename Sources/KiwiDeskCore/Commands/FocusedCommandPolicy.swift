@@ -39,6 +39,8 @@ public enum FocusedCommandPolicy {
         "resize",
         "move_to_space",
         "move_to_space_and_follow",
+        "move_to_desktop",
+        "move_to_desktop_and_follow",
         "make_floating",
         "make_tiled",
         "make_auto",

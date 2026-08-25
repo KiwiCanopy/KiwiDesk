@@ -27,6 +27,12 @@ extension KiwiCore {
             return moveToSpace(args, follow: false)
         case "move_to_space_and_follow":
             return moveToSpace(args, follow: true)
+        case "focus_desktop":
+            return focusDesktop(args)
+        case "move_to_desktop":
+            return moveToDesktop(args, follow: false)
+        case "move_to_desktop_and_follow":
+            return moveToDesktop(args, follow: true)
         case "move_space_to_display":
             return moveSpaceToDisplay(args)
         case "pin_space_to_display":

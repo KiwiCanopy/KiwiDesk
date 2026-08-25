@@ -61,7 +61,11 @@ struct WMBridgeSeamTests {
             "KiwiDeskCore/OS/WMBridge.swift": 1
         ],
         "NSClassFromString": ["KiwiDeskCore/OS/WMBridge.swift": 1],
-        "WMBridge.": [:],
+        // The verbs (#884) are the first consumer: one file,
+        // reading the bridge at its three call sites.
+        "WMBridge.": [
+            "KiwiDeskCore/Commands/KiwiCore+DesktopCommands.swift": 3
+        ],
     ]
 
     @Test(

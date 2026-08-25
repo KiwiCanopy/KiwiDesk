@@ -17,6 +17,11 @@ public enum APIReference {
             ("focus_space", "focus_space"),
             ("move_to_space", "move_to_space"),
             ("move_to_space_and_follow", "move_to_space_and_follow"),
+            // The Desktop twins (#884): `desktop` is macOS's,
+            // matching the event namespace and the bind verb.
+            ("focus_desktop", "focus_desktop"),
+            ("move_to_desktop", "move_to_desktop"),
+            ("move_to_desktop_and_follow", "move_to_desktop_and_follow"),
             ("move_space_to_display", "move_space_to_display"),
             ("pin_space_to_display", "pin_space_to_display"),
             ("create_space", "create_space"),

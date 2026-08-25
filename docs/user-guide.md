@@ -2878,6 +2878,16 @@ on — return to it and you land on the same space. (If the profile
 changed in between and that space no longer exists, you land on
 the first space instead.)
 
+On macOS 26.6 and later KiwiDesk can also **drive** Desktops, not
+only react to them: `focus_desktop(n)` switches to a Desktop the
+way a swipe does, and `move_to_desktop(n)` /
+`move_to_desktop_and_follow(n)` send the focused window there —
+bind them in `init.lua` like any other command (the
+[Lua reference](lua-reference.md#focus_desktop) has the
+details). On an earlier macOS these commands refuse with an
+error and nothing else changes; KiwiDesk never asks you to turn
+System Integrity Protection off for them.
+
 ## Getting Help
 
 For a complete reference on Lua configuration, see

@@ -121,6 +121,9 @@ item's only appearance in CLI output.
 | | `focus_space` | space id |
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
+| | `focus_desktop` | Desktop number (Mission Control's; macOS 26.6+, else refused) |
+| | `move_to_desktop` | Desktop number — moves the focused window, you stay |
+| | `move_to_desktop_and_follow` | Desktop number — moves it and switches there |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] |

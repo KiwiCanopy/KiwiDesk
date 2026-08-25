@@ -223,6 +223,61 @@ KiwiDesk.move_to_space_and_follow("mail")
 KiwiDesk.move_to_space_and_follow(3)
 ```
 
+### focus_desktop
+
+**Expects:** a macOS Desktop number — the number Mission Control
+shows, the same one `bind_profile_to_desktop` keys on.
+
+**Does:** switches to that Desktop — the *macOS* Desktop, not a
+KiwiDesk Space — exactly as a swipe would: the display that
+Desktop belongs to switches, and the bound profile, the
+remembered Space and the `desktop_change` event all follow as
+they do for a swipe. A Desktop its display already shows is a
+no-op.
+
+Needs macOS 26.6 or later: the switch rides a window-management
+bridge macOS added there, on stock settings with SIP on. On an
+earlier macOS the command is refused with an error naming that,
+and nothing else changes — KiwiDesk never asks you to disable
+SIP.
+
+**Example:**
+
+```lua
+KiwiDesk.focus_desktop(2)
+```
+
+### move_to_desktop
+
+**Expects:** a macOS Desktop number.
+
+**Does:** moves the focused window to that Desktop **without
+following** it — you stay where you are. The window leaves the
+current Desktop and, with it, KiwiDesk's view of it: macOS shows
+another Desktop's windows to nobody, so the window rejoins
+KiwiDesk's layout the next time that Desktop is shown, placed the
+way any newly arrived window is (app rules, then the active
+Space). Same requirement as `focus_desktop`.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_desktop(3)
+```
+
+### move_to_desktop_and_follow
+
+**Expects:** a macOS Desktop number.
+
+**Does:** moves the focused window to that Desktop **and**
+switches you there with it. Same requirement as `focus_desktop`.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_desktop_and_follow(3)
+```
+
 ### move_space_to_display
 
 **Expects:** a space identifier, then a display reference — a
