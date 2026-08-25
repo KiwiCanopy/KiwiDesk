@@ -35,10 +35,9 @@ struct MachineTouchTests {
         root.appendingPathComponent("Sources/KiwiDeskCore"),
         root.appendingPathComponent("Sources/KiwiDesk"),
     ]
-    private static let testTrees = [
-        root.appendingPathComponent("Tests/KiwiDeskCoreTests"),
-        root.appendingPathComponent("Tests/KiwiDeskGuiTests"),
-    ]
+    private static let testTrees = SourceScan.targetTrees(
+        under: root.appendingPathComponent("Tests")
+    )
 
     private static func sites(
         of needle: String,
@@ -95,7 +94,9 @@ struct MachineTouchTests {
             of: "KiwiCore" + "(",
             under: Self.testTrees
         )
-        // Both twins must be alive and constructing.
+        // Both twins must be alive and constructing. (An empty
+        // tree list would make this loop vacuous;
+        // `TargetTreeParityTests` holds the list non-empty.)
         for tree in Self.testTrees {
             let name = tree.lastPathComponent
             #expect(

@@ -34,17 +34,10 @@ struct ResourceBundleRoutingTests {
     /// otherwise be scanned by nothing, and the guard's whole
     /// argument is about the code not yet written.
     private var sourceRoots: [URL] {
-        let sources = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources")
-        let entries = try? FileManager.default
-            .contentsOfDirectory(
-                at: sources,
-                includingPropertiesForKeys: [.isDirectoryKey]
-            )
-        return (entries ?? []).filter {
-            (try? $0.resourceValues(forKeys: [.isDirectoryKey]))?
-                .isDirectory == true
-        }
+        SourceScan.targetTrees(
+            under: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources")
+        )
     }
 
     /// Every file allowed to name `Bundle.module`, by path under

@@ -28,10 +28,9 @@ struct LaunchSeamGuardTests {
     private static let coreTree = [
         root.appendingPathComponent("Sources/KiwiDeskCore")
     ]
-    private static let testTrees = [
-        root.appendingPathComponent("Tests/KiwiDeskCoreTests"),
-        root.appendingPathComponent("Tests/KiwiDeskGuiTests"),
-    ]
+    private static let testTrees = SourceScan.targetTrees(
+        under: root.appendingPathComponent("Tests")
+    )
 
     private static func sites(
         of needle: String,
