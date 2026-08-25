@@ -3,15 +3,15 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// `native_space_change`'s #888 display dimension: which display
+/// `desktop_change`'s #888 display dimension: which display
 /// switched, and to which Desktop — both read from the handler's
 /// one topology snapshot.
 ///
 /// Serialized, synchronous bodies: see `DesktopAuthorityTests`;
 /// the fixture is `DesktopAuthorityFixture.swift`.
-@Suite("native_space_change display dimension (#888)", .serialized)
+@Suite("desktop_change display dimension (#888)", .serialized)
 @MainActor
-struct NativeSpaceEventTests {
+struct DesktopEventTests {
     private func makeEventCore() -> (
         core: KiwiCore,
         events: () -> [(KiwiNotification, JSONValue)]
@@ -38,7 +38,7 @@ struct NativeSpaceEventTests {
     ) -> [String: JSONValue]? {
         guard
             let (_, data) = events.last(where: {
-                $0.0 == .nativeSpaceChange
+                $0.0 == .desktopChange
             }),
             case .object(let payload) = data
         else { return nil }
@@ -50,7 +50,7 @@ struct NativeSpaceEventTests {
     /// stamped reading.
     private func emit(_ core: KiwiCore) {
         let snapshot = NativeSpaces.desktopSnapshot()
-        core.emitNativeSpaceChange(
+        core.emitDesktopChange(
             snapshot,
             changed: core.switchedDisplays(in: snapshot)
         )
@@ -67,7 +67,7 @@ struct NativeSpaceEventTests {
         emit(core)
         let payload = data(in: events())
         #expect(payload?["monitor"] == .number(2))
-        #expect(payload?["native_space"] == .number(4))
+        #expect(payload?["desktop"] == .number(4))
     }
 
     @Test("A main switch is monitor 1")
@@ -81,7 +81,7 @@ struct NativeSpaceEventTests {
         emit(core)
         let payload = data(in: events())
         #expect(payload?["monitor"] == .number(1))
-        #expect(payload?["native_space"] == .number(2))
+        #expect(payload?["desktop"] == .number(2))
     }
 
     @Test("A repeated notification reports the main display")
@@ -95,7 +95,7 @@ struct NativeSpaceEventTests {
         emit(core)
         let payload = data(in: events())
         #expect(payload?["monitor"] == .number(1))
-        #expect(payload?["native_space"] == .number(1))
+        #expect(payload?["desktop"] == .number(1))
     }
 
     /// A display arriving on a fullscreen space emits NOTHING —
@@ -104,7 +104,7 @@ struct NativeSpaceEventTests {
     /// The fallback used to substitute the MAIN display's Desktop
     /// here while `monitor` still named the switched one, so the
     /// event described a switch that never happened: e.g.
-    /// `native_space: 1, monitor: 2`.
+    /// `desktop: 1, monitor: 2`.
     @Test("A fullscreen arrival emits nothing, never a mixed pair")
     func fullscreenArrivalIsSilent() {
         defer { resetAuthorityOverrides() }

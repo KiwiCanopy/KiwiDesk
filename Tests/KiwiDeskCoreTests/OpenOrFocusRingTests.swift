@@ -105,7 +105,7 @@ struct OpenOrFocusRingTests {
         core.handle(.windowFocused(WindowID(30)))
 
         // Leave for desktop 1: both vanish, its window appears.
-        core.handle(.nativeSpaceChanged)
+        core.handle(.desktopChanged)
         core.handle(
             .windowDestroyed(WindowID(20), wasMinimized: false)
         )
@@ -118,7 +118,7 @@ struct OpenOrFocusRingTests {
         // Shortcut: macOS switches back. Activation notification
         // first — the aimed window is re-tracked and reported
         // focused — then the bulk reconcile re-tracks the rest.
-        core.handle(.nativeSpaceChanged)
+        core.handle(.desktopChanged)
         core.handle(.windowCreated(window(20, pid: 100)))
         core.handle(.windowFocused(WindowID(20)))
         core.handle(.windowCreated(window(30, pid: 300)))
@@ -146,14 +146,14 @@ struct OpenOrFocusRingTests {
         core.state.workspaces.activate("1")
         core.handle(.windowCreated(window(20, pid: 100)))
         core.handle(.windowCreated(window(30, pid: 300)))
-        core.handle(.nativeSpaceChanged)
+        core.handle(.desktopChanged)
         core.handle(
             .windowDestroyed(WindowID(20), wasMinimized: false)
         )
         core.handle(
             .windowDestroyed(WindowID(30), wasMinimized: false)
         )
-        core.handle(.nativeSpaceChanged)
+        core.handle(.desktopChanged)
         core.handle(.windowCreated(window(20, pid: 100)))
         // No focus report replay: the seed alone must land.
         #expect(

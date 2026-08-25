@@ -33,7 +33,7 @@ extension KiwiCore {
         // binding that fails to load falls through to matching.
         // The Desktop that counts is the main display's (#888).
         if let number = NativeSpaces.activeDesktopNumber(),
-            let boundName = nativeSpaceBindings[number]
+            let boundName = desktopBindings[number]
         {
             do {
                 let bound = try profiles.load(name: boundName)

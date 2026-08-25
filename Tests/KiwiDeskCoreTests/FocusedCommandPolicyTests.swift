@@ -37,7 +37,7 @@ struct FocusedCommandPolicyTests {
         "delete_profile",
         "list_profiles",
         "get_profile_status",
-        "bind_profile_to_native_space",
+        "bind_profile_to_desktop",
         "enable_wake_restore",
         "subscribe",
         "border.fit_gaps",

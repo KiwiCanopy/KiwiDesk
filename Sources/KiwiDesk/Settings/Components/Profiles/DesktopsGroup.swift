@@ -4,7 +4,7 @@ import SwiftUI
 /// Whole App ▸ Profiles ▸ **Profiles per macOS Desktop** (#7,
 /// rebuilt in #678 turn 13a): bind a saved profile to each macOS
 /// Desktop, picked from the row's dropdown; the binding emits
-/// `bind_profile_to_native_space` — a wire name #768 deliberately
+/// `bind_profile_to_desktop` — a wire name #768 deliberately
 /// froze — and loads that profile when the Desktop activates on
 /// the main display (#888, the definition that made the rows
 /// well-defined under "Displays have separate Spaces" and
@@ -27,7 +27,7 @@ import SwiftUI
 /// is also why the gate is not wrapped around the whole card
 /// (#527): the drawer keeps its header and its `?` anchor
 /// clickable.
-struct NativeSpacesGroup: View {
+struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
     /// Drawn open (#678 turn 13a). View state, like every other
     /// drawer in the tree — per-container disclosure memory
@@ -46,7 +46,7 @@ struct NativeSpacesGroup: View {
             for: .profiles(.profileBindings)
         )
         SettingsDisclosure(
-            SettingsCatalog.profiles.nativeSpaces,
+            SettingsCatalog.profiles.desktops,
             chrome: .card,
             isExpanded: $expanded
         ) {
@@ -63,7 +63,7 @@ struct NativeSpacesGroup: View {
             HelpButton(
                 explanation: helpText,
                 subject: L(
-                    "native_spaces.title",
+                    "desktops.title",
                     "Profiles per macOS Desktop"
                 )
             )
@@ -89,7 +89,7 @@ struct NativeSpacesGroup: View {
     /// shape in miniature.
     private var helpText: String {
         L(
-            "native_spaces.help",
+            "desktops.help",
             "Only Desktops on your main screen can be bound, "
                 + "because macOS's \"Displays have separate "
                 + "Spaces\" gives every screen its own Desktops "
@@ -104,7 +104,7 @@ struct NativeSpacesGroup: View {
 
     private var intro: String {
         L(
-            "native_spaces.intro",
+            "desktops.intro",
             "These are your Mac's own Desktops, from Mission "
                 + "Control — not KiwiDesk's Spaces. Pick a "
                 + "profile to load automatically when a "
@@ -147,7 +147,7 @@ struct NativeSpacesGroup: View {
     private var emptyHint: some View {
         Text(
             L(
-                "native_spaces.empty",
+                "desktops.empty",
                 "No native macOS Desktops detected. Add "
                     + "Desktops in Mission Control to bind "
                     + "profiles."
@@ -165,15 +165,15 @@ struct NativeSpacesGroup: View {
                 .foregroundStyle(.secondary)
             Text(
                 L(
-                    "native_spaces.desktop",
+                    "desktops.desktop",
                     "Desktop %1$d",
                     number
                 )
             )
             .fontWeight(.medium)
-            if number == model.currentNativeSpace {
+            if number == model.currentDesktop {
                 BadgeChip(
-                    label: L("native_spaces.current", "current")
+                    label: L("desktops.current", "current")
                 )
             }
             // A Desktop that is bound but does NOT live on the
@@ -192,7 +192,7 @@ struct NativeSpacesGroup: View {
             if !model.mainDesktops.contains(number) {
                 BadgeChip(
                     label: L(
-                        "native_spaces.not_on_main",
+                        "desktops.not_on_main",
                         "not on main screen"
                     )
                 )
@@ -204,7 +204,7 @@ struct NativeSpacesGroup: View {
 
     private func profileMenu(_ number: Int) -> some View {
         Picker("", selection: binding(number)) {
-            Text(L("native_spaces.none", "None"))
+            Text(L("desktops.none", "None"))
                 .tag(String?.none)
             ForEach(options(number), id: \.self) { name in
                 Text(name).tag(String?.some(name))
@@ -218,19 +218,19 @@ struct NativeSpacesGroup: View {
         // value (#812).
         .accessibilityLabel(
             L(
-                "native_spaces.profile_ax",
+                "desktops.profile_ax",
                 "Profile for this Desktop"
             )
         )
         .accessibilityValue(
             binding(number).wrappedValue
-                ?? L("native_spaces.none", "None")
+                ?? L("desktops.none", "None")
         )
     }
 
     // MARK: - Data
 
-    /// Native Spaces to list — from the family seam that records
+    /// Desktops to list — from the family seam that records
     /// what this census key expands to, so the guard over that
     /// expansion watches the rows the card actually draws.
     private var spaceNumbers: [Int] {

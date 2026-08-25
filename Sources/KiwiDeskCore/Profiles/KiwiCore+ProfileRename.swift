@@ -32,9 +32,9 @@ extension KiwiCore {
     ) throws {
         try profiles.rename(from: old, to: new)
         var chased = false
-        for (number, name) in nativeSpaceBindings
+        for (number, name) in desktopBindings
         where name == old {
-            nativeSpaceBindings[number] = new
+            desktopBindings[number] = new
             chased = true
         }
         guard chased, guiConfigStore.load() != nil else {

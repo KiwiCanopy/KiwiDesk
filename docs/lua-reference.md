@@ -74,7 +74,7 @@ Settings app offers **Adopt into the GUI** instead. Settings are:
   `border.fit_gaps`.
 - Window-rule tables — `app_rules`, `float_rules`, `ignore_rules`.
 - Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
-  `KiwiDesk.bind_profile_to_native_space`.
+  `KiwiDesk.bind_profile_to_desktop`.
 
 ```lua
 -- Any one of these makes init.lua the config owner:
@@ -3790,7 +3790,7 @@ end)
 | `layout_change` | `space_id`, `mode` |
 | `focus_change` | `window_id`, `app`, `bundle_id` |
 | `monitor_change` | `monitor_count` |
-| `native_space_change` | `native_space` (Desktop number now current on the screen that switched), `monitor` (that screen's positional number; 1 is the main screen) |
+| `desktop_change` | `desktop` (Desktop number now current on the screen that switched), `monitor` (that screen's positional number; 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
@@ -3851,7 +3851,7 @@ KiwiDesk.on("window_destroyed",
 One caveat: a window closed *while its macOS Desktop is
 off-screen* already emitted `"vanished"` at switch time and never
 gets a corrective `"closed"`. If you filter on reasons, also
-refresh on `native_space_change` — the re-query pattern in the
+refresh on `desktop_change` — the re-query pattern in the
 sketchybar recipe does this already.
 
 ## External Commands
@@ -4105,7 +4105,7 @@ KiwiDesk.set_space_icon("web", "🌐")
 KiwiDesk.set_space_icon("chat", "")  -- clear
 ```
 
-### bind_profile_to_native_space
+### bind_profile_to_desktop
 
 **Expects:**
 
@@ -4128,8 +4128,8 @@ section instead.
 **Example:**
 
 ```lua
-KiwiDesk.bind_profile_to_native_space(1, "Developer Rig")
-KiwiDesk.bind_profile_to_native_space(2, "Creator Studio")
+KiwiDesk.bind_profile_to_desktop(1, "Developer Rig")
+KiwiDesk.bind_profile_to_desktop(2, "Creator Studio")
 ```
 
 ### Space Reconciliation
@@ -4274,14 +4274,14 @@ stripped, grouped by namespace — `set_gap_override` becomes
 KiwiDesk's spaces above are its own, independent of
 Mission Control. On top of that, each macOS Desktop — what
 Mission Control labels "Desktop 1", "Desktop 2", … —
-can carry its own profile via `bind_profile_to_native_space` (see
+can carry its own profile via `bind_profile_to_desktop` (see
 above).
 
 When you switch Desktops (Ctrl+arrow, Mission Control, …), KiwiDesk
 loads the bound profile — its spaces, layouts, and
 settings. Unsure which number you're on? Check
-`kiwidesk get_state` (field `native_space`), or subscribe to the
-`native_space_change` event.
+`kiwidesk get_state` (field `desktop`), or subscribe to the
+`desktop_change` event.
 
 KiwiDesk resolves one active profile across the whole display
 setup, so one screen holds the binding authority: **"Desktop N
@@ -4289,7 +4289,7 @@ activates" means Desktop N became current on the main screen**
 (the screen with the menu bar). With macOS's "Displays have
 separate Spaces" on, each screen switches Desktops on its own —
 a swipe on a secondary screen retiles that screen's arrived
-windows and reports itself on `native_space_change`
+windows and reports itself on `desktop_change`
 (`monitor` ≥ 2), but never selects a profile. A Desktop that
 lives on a secondary screen can carry a binding, and it fires
 if a display change ever makes that Desktop the main screen's.
@@ -4523,7 +4523,7 @@ KiwiDesk.set_wake_restore_delay(1500)
 **Profiles own all animation settings.** Like every other tiling
 setting, `animations.*` — including the duration knobs — is saved in a
 profile. When a profile is bound to a macOS Desktop
-(`bind_profile_to_native_space`), switching to that Desktop loads the
+(`bind_profile_to_desktop`), switching to that Desktop loads the
 profile and **replaces** the live settings — so `animations.*` calls in
 `init.lua` apply only until a bound profile activates. To make a value
 stick on a bound Desktop, set it and re-save that profile (or edit the
@@ -4662,7 +4662,7 @@ KiwiDesk.debug_log("hello from init.lua")
 **Does:** returns a table with the current window and space state.
 Fields: `active_space` (current space id or `nil`), `spaces` (array of
 space objects), `windows` (array of window objects), `monitor_count`,
-`native_space` (the main screen's current Desktop — the number
+`desktop` (the main screen's current Desktop — the number
 bindings fire on), `exec_running` (count of `KiwiDesk.exec`
 children still running).
 
@@ -4681,7 +4681,7 @@ Each window object has: `id`, `app`, `title`, `floating` (boolean).
 ```lua
 local state = KiwiDesk.get_state()
 print(state.active_space)
-print(state.native_space)
+print(state.desktop)
 
 for _, window in ipairs(state.windows) do
     if window.floating then

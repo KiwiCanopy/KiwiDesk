@@ -292,7 +292,7 @@ public struct StateCoordinator: Sendable {
         case .displaysChanged(let displays):
             reconcile(displays: displays)
 
-        case .nativeSpaceChanged:
+        case .desktopChanged:
             // Handled by KiwiCore (profile binding); the
             // internal state keys off the AX reconcile that
             // follows the switch.

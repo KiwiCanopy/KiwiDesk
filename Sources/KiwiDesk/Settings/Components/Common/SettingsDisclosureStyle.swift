@@ -16,7 +16,7 @@ import SwiftUI
 /// and the one that broke. `SettingsDisclosure` used to hand
 /// the accessory to the `DisclosureGroup` label, which the
 /// first draft of this style then wrapped whole in the header
-/// button: `NativeSpacesGroup`'s `?` became a control inside a
+/// button: `DesktopsGroup`'s `?` became a control inside a
 /// control, so its click toggled the drawer and its name and
 /// hint collapsed into the header's one element (code +
 /// architect review, 2026-08-24). An accessory slot that may

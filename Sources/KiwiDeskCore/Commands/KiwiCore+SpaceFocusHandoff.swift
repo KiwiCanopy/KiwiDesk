@@ -68,7 +68,7 @@ extension KiwiCore {
     /// the space comes up missing windows until another switch
     /// re-issues the frames. Re-assert the layout once, shortly
     /// after the switch, so the stragglers land without a manual
-    /// second focus. Mirrors `settleAfterNativeSwitch` (#22).
+    /// second focus. Mirrors `settleAfterDesktopSwitch` (#22).
     ///
     /// Besides frames, the settle also verifies the switch's
     /// FOCUS handoff (#463): `AXHelper.raise` ends in a
@@ -96,8 +96,8 @@ extension KiwiCore {
                 // A native desktop switch in this window runs its
                 // own retile + settle and is still re-tracking
                 // windows; don't collide (cf. scheduleFocusFollow).
-                Date().timeIntervalSince(self.lastNativeSwitch)
-                    > NativeSwitch.settle
+                Date().timeIntervalSince(self.lastDesktopSwitch)
+                    > DesktopSwitch.settle
             else { return }
             // Deliberately NOT `spaceSwitchRetile()` (#207):
             // the re-issue keeps the instant park so a dropped
@@ -141,8 +141,8 @@ extension KiwiCore {
         ) { [weak self] in
             guard let self,
                 self.state.workspaces.activeSpace == origin,
-                Date().timeIntervalSince(self.lastNativeSwitch)
-                    > NativeSwitch.settle
+                Date().timeIntervalSince(self.lastDesktopSwitch)
+                    > DesktopSwitch.settle
             else { return }
             self.reassertSwitchFocus(
                 priorFrontmost: priorFrontmost,

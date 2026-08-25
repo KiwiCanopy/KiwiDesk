@@ -32,11 +32,11 @@ struct SecondarySwitchTests {
         core.execute("save_profile", args: [.string("Bound")])
         core.execute("save_profile", args: [.string("Loaded")])
         core.execute(
-            "bind_profile_to_native_space",
+            "bind_profile_to_desktop",
             args: [.number(1), .string("Bound")]
         )
         core.execute("load_profile", args: [.string("Loaded")])
-        core.lastNativeSpace = 1
+        core.lastDesktop = 1
         core.desktopMemory.lastDisplaySpaces = [
             "UUID-A": 10, "UUID-B": 20,
         ]
@@ -53,8 +53,8 @@ struct SecondarySwitchTests {
             mainCurrent: 10,
             secondaryCurrent: 21
         )
-        core.handleNativeSpaceChange()
-        // Without the #888 arm, applyNativeSpaceBinding would
+        core.handleDesktopChange()
+        // Without the #888 arm, applyDesktopBinding would
         // snap the manually-loaded profile back to "Bound".
         #expect(core.profiles.currentName == "Loaded")
         #expect(core.desktopMemory.virtualSpaces.isEmpty)
@@ -65,7 +65,7 @@ struct SecondarySwitchTests {
         defer { resetAuthorityOverrides() }
         let core = makeSeparateCore()
         core.execute(
-            "bind_profile_to_native_space",
+            "bind_profile_to_desktop",
             args: [.number(2), .string("Bound")]
         )
         // Main swipes Desktop 1 → 2.
@@ -73,7 +73,7 @@ struct SecondarySwitchTests {
             mainCurrent: 11,
             secondaryCurrent: 20
         )
-        core.handleNativeSpaceChange()
+        core.handleDesktopChange()
         #expect(core.profiles.currentName == "Bound")
         // And the outgoing Desktop remembered its Space, keyed
         // under the main display.
@@ -89,10 +89,10 @@ struct SecondarySwitchTests {
     ///
     /// **The `nil` case is the defect this closes** (review,
     /// 2026-08-18). A main display on a fullscreen space answers
-    /// nil, and `nil == lastNativeSpace` was satisfied by the
+    /// nil, and `nil == lastDesktop` was satisfied by the
     /// previous nil — so the arm claimed a secondary switch it
     /// had no evidence for and force-retiled where the pre-#888
-    /// handler and `nativeSpaceSettle` stand down. Same shape
+    /// handler and `desktopSettle` stand down. Same shape
     /// without SkyLight, where every switch answers nil. That is
     /// the #670 conflation: the fullscreen verdict is `isUser`,
     /// never the nil Mission Control number.

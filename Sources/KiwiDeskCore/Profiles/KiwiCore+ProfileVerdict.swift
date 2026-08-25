@@ -89,7 +89,7 @@ extension KiwiCore {
         // verdict must not name a profile that would fail to
         // load.
         if let desktop = activeDesktop,
-            let bound = nativeSpaceBindings[desktop],
+            let bound = desktopBindings[desktop],
             (try? profiles.read(name: bound)) != nil
         {
             return .boundToDesktop(name: bound, desktop: desktop)

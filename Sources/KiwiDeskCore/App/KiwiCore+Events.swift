@@ -193,14 +193,14 @@ extension KiwiCore {
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id)
             // The switch timestamp is set by the
-            // .nativeSpaceChanged event, which the event loop
+            // .desktopChanged event, which the event loop
             // emits BEFORE the reconcile burst on the same
             // run-loop turn — so vanish classification is
             // ordering, not a race (#40).
             let reason = WindowGoneReason.classify(
                 wasMinimized: wasMinimized,
-                sinceNativeSwitch: Date()
-                    .timeIntervalSince(lastNativeSwitch)
+                sinceDesktopSwitch: Date()
+                    .timeIntervalSince(lastDesktopSwitch)
             )
             emitWindowDestroyed(
                 id,
@@ -243,8 +243,8 @@ extension KiwiCore {
             // display, so a ring would show only at the
             // corners — drop it now, restore on exit).
             break
-        case .nativeSpaceChanged:
-            handleNativeSpaceChange()
+        case .desktopChanged:
+            handleDesktopChange()
         case .windowRekeyed(let old, let new):
             // The whole id-retarget lives in
             // `KiwiCore+RekeyEvent.swift` (#308).

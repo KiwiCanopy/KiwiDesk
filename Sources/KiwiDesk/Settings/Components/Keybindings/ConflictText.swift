@@ -101,7 +101,7 @@ extension SystemShortcut {
         // is not on screen, and oblige ten translators to coin a
         // name for a control Apple has already named for them.
         // The same carve-out covers the "Displays have separate
-        // Spaces" checkbox quoted in `native_spaces` copy; it is
+        // Spaces" checkbox quoted in `desktops` copy; it is
         // written down in `.claude/rules/config-vocabulary.md`.
         case .missionControlSpaceLeft:
             return L(

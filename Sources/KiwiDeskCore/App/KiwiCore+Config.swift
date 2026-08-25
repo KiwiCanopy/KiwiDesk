@@ -8,7 +8,7 @@ extension KiwiCore {
         bus.resetLuaCallbacks()
         appliedStructuredLayers = nil
         keys.reset()
-        nativeSpaceBindings = [:]
+        desktopBindings = [:]
         resetDeclarativeState()
         defersWindowRuleReconcile = true
         defer { defersWindowRuleReconcile = false }
@@ -102,7 +102,7 @@ extension KiwiCore {
         // the structured reset makes them inert (O6).
         // Keybindings resolve against the profile active NOW;
         // a profile applied later (reapplyActiveProfileState /
-        // applyNativeSpaceBinding below) re-registers with its
+        // applyDesktopBinding below) re-registers with its
         // own override via apply(profile:) (#55 phase 6).
         if isGuiManaged {
             applyStructuredConfig()
@@ -119,12 +119,12 @@ extension KiwiCore {
         // back on top before the native-Space binding gets the
         // final say below.
         reapplyActiveProfileState()
-        // The current native space may carry a binding that
+        // The current Desktop may carry a binding that
         // the config just (re)declared. Window-rule reconcile
         // stays deferred until this final profile wins. A
         // config load holds no switch snapshot, so it reads the
         // authority live (#888).
-        applyNativeSpaceBinding(
+        applyDesktopBinding(
             desktop: NativeSpaces.activeDesktopNumber()
         )
         defersWindowRuleReconcile = false
@@ -274,7 +274,7 @@ extension KiwiCore {
 
             -- Load a saved profile per macOS Desktop
             -- (the Mission Control number):
-            -- KiwiDesk.bind_profile_to_native_space(
+            -- KiwiDesk.bind_profile_to_desktop(
             --     2, "Creator Studio")
 
             -- Keybindings:

@@ -50,11 +50,11 @@ struct ProfilesSection: View {
                     PresetsSection(model: model)
                     profileSection
                     whichProfileLoads
-                    NativeSpacesGroup(model: model)
+                    DesktopsGroup(model: model)
                 } else {
                     profileSection
                     whichProfileLoads
-                    NativeSpacesGroup(model: model)
+                    DesktopsGroup(model: model)
                     PresetsSection(model: model)
                 }
             }
