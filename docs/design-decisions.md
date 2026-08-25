@@ -99,29 +99,12 @@ disabled-SIP requirement is a non-starter for a window manager
 shipping a fragile fast path with no safe fallback. Unlike the
 [Accepted limitations](accepted-limitations.md) trades, the root
 is the OS, not our architecture, and there is no in-app escape
-hatch — only Apple exposing an API. They are tracked, not
-abandoned:
+hatch — only Apple exposing a supported API.
 
-- ~~**Move the focused window to another Desktop**~~ and
-  ~~**switch the visible Desktop programmatically**~~ — **left
-  this list in 1.1** ([#25](https://github.com/KiwiCanopy/KiwiDesk/issues/25),
-  [#26](https://github.com/KiwiCanopy/KiwiDesk/issues/26)).
-  The C symbol that did the move was SIP-gated from macOS 15 on;
-  macOS 26 registers a window-management *bridge* — ObjC
-  operation classes SkyLight dispatches through AppKit's own
-  delegate — that performs both on stock settings with SIP on,
-  needing no Accessibility trust
-  ([#884](https://github.com/KiwiCanopy/KiwiDesk/issues/884)
-  found it, [#889](https://github.com/KiwiCanopy/KiwiDesk/issues/889)
-  probed it on device). `focus_desktop` and
-  `move_to_desktop(_and_follow)` ride it, through one
-  runtime-resolved wrapper that reports the capability absent
-  where the classes do not exist — so on an earlier macOS the
-  verbs refuse with an error rather than falling back to
-  anything, since there is nothing SIP-clean to fall back to.
-  Private in clothing, then, but an API Apple built for
-  cross-process dispatch, versioned and encoded; the rows that
-  follow are what is still gated.
+**An item leaves this class when a SIP-clean path to it exists**,
+and the entry below on the window-management bridge rules what
+counts as one. What remains here is tracked, not abandoned:
+
 - **Restore windows across all Desktops on quit**
   ([#70](https://github.com/KiwiCanopy/KiwiDesk/issues/70)).
 - **Place a window above the top screen border** — the
@@ -163,7 +146,46 @@ abandoned:
   ([#424](https://github.com/KiwiCanopy/KiwiDesk/issues/424)).
 
 All of these are collected in
-[#140](https://github.com/KiwiCanopy/KiwiDesk/issues/140).
+[#140](https://github.com/KiwiCanopy/KiwiDesk/issues/140), which
+is the list to keep in step with this one.
+
+### The window-management bridge is not a SIP escape hatch
+
+**[Rationale]**
+
+Moving a window to another Desktop and switching the visible
+Desktop sat in *Blocked by macOS (SIP)* above for KiwiDesk's whole
+pre-1.0 life. They are shipped now, and the rule that let them
+ship is worth stating, because the next private surface will ask
+for the same exemption.
+
+The C symbol that moved a window between Desktops was SIP-gated
+from macOS 15 on; reaching it needs an injected scripting
+addition, which needs SIP off, which KiwiDesk will not ask for.
+What changed is not that rule but the OS: macOS now registers a
+window-management **bridge** — ObjC operation classes SkyLight
+dispatches through AppKit's own delegate — that performs both
+operations on stock settings with SIP on and without
+Accessibility trust.
+
+So the test an item must pass to leave that class is **a
+SIP-clean path**, not a *public* one. Private-but-designed is
+admissible where injection is not, and the difference is not
+taste: an injected addition rewrites another process on a system
+whose integrity guarantees the user disabled, while the bridge is
+a versioned, `NSCoding`-encoded dispatch surface Apple built for
+cross-process use, reached through the same runtime resolution
+every other private path here uses.
+
+What that admission costs, accepted deliberately: **there is no
+fallback to write.** The public API for these operations does not
+exist, so where the bridge is absent the verbs refuse and say so
+— never a synthesized substitute (keystroke-faking Mission
+Control shortcuts, which depend on shortcuts the user may have
+changed or turned off). A capability that only the private
+surface can deliver is allowed to be absent; it is not allowed to
+be faked. `.claude/rules/os-private-apis.md` carries that as an
+obligation on the code.
 
 ### Distribution: direct download, not the Mac App Store
 

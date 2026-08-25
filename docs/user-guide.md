@@ -2878,15 +2878,23 @@ on — return to it and you land on the same space. (If the profile
 changed in between and that space no longer exists, you land on
 the first space instead.)
 
-On macOS 26.6 and later KiwiDesk can also **drive** Desktops, not
-only react to them: `focus_desktop(n)` switches to a Desktop the
-way a swipe does, and `move_to_desktop(n)` /
-`move_to_desktop_and_follow(n)` send the focused window there —
-bind them in `init.lua` like any other command (the
+Where macOS exposes its window-management bridge — present on
+macOS 26.6.1, checked 2026-08-18; KiwiDesk looks for it at
+runtime rather than reading a version — KiwiDesk can also
+**drive** Desktops, not only react to them: `focus_desktop(n)`
+switches to a Desktop the way a swipe does, and
+`move_to_desktop(n)` / `move_to_desktop_and_follow(n)` send the
+focused window there (the
 [Lua reference](lua-reference.md#focus_desktop) has the
-details). On an earlier macOS these commands refuse with an
-error and nothing else changes; KiwiDesk never asks you to turn
-System Integrity Protection off for them.
+details). Where it is absent the commands do nothing and log
+why; KiwiDesk never asks you to turn System Integrity Protection
+off for them.
+
+The Keybindings editor does not offer these three yet, so a
+shortcut for them goes in `init.lua` — and note what that costs
+if you configure KiwiDesk from Settings: adding a `KiwiDesk.bind`
+hands ownership of your keybindings to `init.lua`, which is the
+trade the *Settings app vs. init.lua* section above describes.
 
 ## Getting Help
 

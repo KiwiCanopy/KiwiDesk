@@ -41,6 +41,19 @@ extension KiwiCore {
         activeSpace.flatMap { state.focusAnchor(of: $0) }
     }
 
+    /// Whether this macOS can drive native Desktops — the
+    /// capability behind `focus_desktop` and
+    /// `move_to_desktop(_and_follow)` (#884).
+    ///
+    /// The ONE reader of the bridge's availability outside the
+    /// verbs themselves, and the structure a GUI gate consumes:
+    /// Core answers the fact, the GUI writes the sentence it
+    /// greys a row with (#96, gui.md's grey-don't-hide). False
+    /// has exactly one cause — this macOS does not expose the
+    /// window-management bridge — so a Bool carries the whole
+    /// verdict and needs no reason enum beside it.
+    public var canDriveDesktops: Bool { WMBridge.isAvailable }
+
     public var focusedWindow: ManagedWindow? {
         focusedWindowID.flatMap { state.windows[$0] }
     }

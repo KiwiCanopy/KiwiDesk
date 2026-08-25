@@ -229,17 +229,20 @@ KiwiDesk.move_to_space_and_follow(3)
 shows, the same one `bind_profile_to_desktop` keys on.
 
 **Does:** switches to that Desktop — the *macOS* Desktop, not a
-KiwiDesk Space — exactly as a swipe would: the display that
+KiwiDesk Space — exactly as a swipe would: the screen that
 Desktop belongs to switches, and the bound profile, the
 remembered Space and the `desktop_change` event all follow as
-they do for a swipe. A Desktop its display already shows is a
-no-op.
+they do for a swipe (macOS reports the switch to KiwiDesk the
+same way either way — device-checked 2026-08-25). A Desktop its
+screen already shows is a no-op.
 
-Needs macOS 26.6 or later: the switch rides a window-management
-bridge macOS added there, on stock settings with SIP on. On an
-earlier macOS the command is refused with an error naming that,
-and nothing else changes — KiwiDesk never asks you to disable
-SIP.
+Needs macOS's own window-management bridge, which KiwiDesk looks
+up at runtime: present on macOS 26.6.1 (observed 2026-08-18); no
+earlier build has been checked, so no version is promised here —
+the lookup itself is the gate. It rides stock settings with SIP
+on. Where the bridge is absent the command does nothing and logs
+why; run from the CLI it prints the error instead. KiwiDesk never
+asks you to disable SIP.
 
 **Example:**
 
@@ -252,12 +255,14 @@ KiwiDesk.focus_desktop(2)
 **Expects:** a macOS Desktop number.
 
 **Does:** moves the focused window to that Desktop **without
-following** it — you stay where you are. The window leaves the
-current Desktop and, with it, KiwiDesk's view of it: macOS shows
-another Desktop's windows to nobody, so the window rejoins
-KiwiDesk's layout the next time that Desktop is shown, placed the
-way any newly arrived window is (app rules, then the active
-Space). Same requirement as `focus_desktop`.
+following** it — you stay where you are. macOS shows another
+Desktop's windows to nobody, so the window also leaves KiwiDesk's
+view: a moment later the Desktop you stayed on re-tiles without
+it, and the window is reported gone with `reason: vanished`, the
+same value a Desktop swipe produces — it was not closed. When
+that Desktop is next shown the window rejoins the **KiwiDesk
+Space it was in**, which KiwiDesk remembered as it left. Same
+requirement as `focus_desktop`.
 
 **Example:**
 
@@ -270,7 +275,9 @@ KiwiDesk.move_to_desktop(3)
 **Expects:** a macOS Desktop number.
 
 **Does:** moves the focused window to that Desktop **and**
-switches you there with it. Same requirement as `focus_desktop`.
+switches you there with it. With more than one screen, nothing
+switches if that Desktop is already the one its screen shows —
+the window still moves. Same requirement as `focus_desktop`.
 
 **Example:**
 
@@ -4332,7 +4339,7 @@ Mission Control labels "Desktop 1", "Desktop 2", … —
 can carry its own profile via `bind_profile_to_desktop` (see
 above).
 
-When you switch Desktops (Ctrl+arrow, Mission Control, …), KiwiDesk
+When the visible Desktop changes — a swipe, Ctrl+arrow, Mission Control, or a `focus_desktop` / `move_to_desktop_and_follow` command, KiwiDesk
 loads the bound profile — its spaces, layouts, and
 settings. Unsure which number you're on? Check
 `kiwidesk get_state` (field `desktop`), or subscribe to the

@@ -121,9 +121,9 @@ item's only appearance in CLI output.
 | | `focus_space` | space id |
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
-| | `focus_desktop` | Desktop number (Mission Control's; macOS 26.6+, else refused) |
+| | `focus_desktop` | Desktop number (Mission Control's) |
 | | `move_to_desktop` | Desktop number — moves the focused window, you stay |
-| | `move_to_desktop_and_follow` | Desktop number — moves it and switches there |
+| | `move_to_desktop_and_follow` | Desktop number — moves the focused window and switches there |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] |
@@ -386,8 +386,9 @@ reassignments (profile load, session restore) stay silent:
           "bundle_id": "com.spotify.client"}}
 ```
 
-`desktop_change` fires when the user switches macOS
-Desktops (Mission Control); its data carries the 1-based
+`desktop_change` fires when the visible Desktop changes on any
+screen — a swipe, Mission Control, or a `focus_desktop` /
+`move_to_desktop_and_follow` command; its data carries the 1-based
 Desktop number now current on the screen that switched, that
 screen's positional number (`monitor`: 1 is the main screen,
 secondaries follow left to right — the same 1-based positional

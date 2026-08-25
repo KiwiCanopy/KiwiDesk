@@ -30,20 +30,38 @@ private final class FakeCopyManagedDisplaySpaces: NSObject {
     }
 }
 
+/// Captures its arguments on `init` but records the call only
+/// when the operation is DISPATCHED — "performed is not applied"
+/// cuts both ways, and an assertion over a merely-constructed
+/// operation would stay green if a verb dropped its perform.
 private final class FakeSetCurrentSpace: NSObject {
+    private let space: UInt64
+    private let display: String
+
     @objc(initWithDisplayIdentifier:spaceID:)
     init(displayIdentifier: String, spaceID: UInt64) {
-        Bridge.switches.append((spaceID, displayIdentifier))
+        space = spaceID
+        display = displayIdentifier
     }
-    @objc func performWithWMBridgeDelegate() {}
+
+    @objc func performWithWMBridgeDelegate() {
+        Bridge.switches.append((space, display))
+    }
 }
 
 private final class FakeMoveWindows: NSObject {
+    private let windows: [NSNumber]
+    private let space: UInt64
+
     @objc(initWithWindows:spaceID:)
     init(windows: [NSNumber], spaceID: UInt64) {
-        Bridge.moves.append((windows, spaceID))
+        self.windows = windows
+        space = spaceID
     }
-    @objc func performWithWMBridgeDelegate() {}
+
+    @objc func performWithWMBridgeDelegate() {
+        Bridge.moves.append((windows, space))
+    }
 }
 
 private let bridgeClasses: [String: AnyClass] = [
@@ -60,7 +78,16 @@ private let bridgeClasses: [String: AnyClass] = [
 /// resolves in ONE topology reading to the Desktop's WindowServer
 /// id and its display, the bridge is asked exactly once per verb,
 /// an absent bridge refuses every verb, and a target already
-/// current is a no-op. The topology is the #888 fixture: Desktops
+/// current is a no-op.
+///
+/// `WMBridge.classResolverOverride` is process-global and
+/// `WMBridgeTests` writes it too, but neither suite can observe
+/// the other's window: both are `@MainActor` and every body
+/// between the set and the `defer` restore is synchronous, so
+/// there is no suspension point at which they could interleave.
+/// A future async body here owes a different arrangement.
+///
+/// The topology is the #888 fixture: Desktops
 /// 1–2 on the main display `UUID-A` (ids 10, 11), 3–4 on `UUID-B`
 /// (ids 20, 21).
 @Suite("Desktop verbs (#884)", .serialized)
@@ -68,7 +95,8 @@ private let bridgeClasses: [String: AnyClass] = [
 struct DesktopCommandTests {
     private func makeCore(
         bridge: Bool = true,
-        focused: Bool = true
+        focused: Bool = true,
+        switching: Bool = true
     ) -> KiwiCore {
         Bridge.reset()
         NativeSpaces.spacesOverride = authorityTopology(
@@ -78,7 +106,15 @@ struct DesktopCommandTests {
         NativeSpaces.activeSpaceIDOverride = 10
         pinTwoDisplays()
         WMBridge.classResolverOverride = { name in
-            bridge ? bridgeClasses[name] : nil
+            guard bridge else { return nil }
+            if !switching,
+                name == "ManagedDisplaySetCurrentSpaceOperation"
+            {
+                // The class resolves; the bridge declines to
+                // dispatch — "performed is not applied".
+                return nil
+            }
+            return bridgeClasses[name]
         }
         let core = makeTestCore()
         if focused {
@@ -206,5 +242,62 @@ struct DesktopCommandTests {
             )
             #expect(Bridge.moves.isEmpty)
         }
+    }
+
+    @Test("A no-follow move arms the reap, the latch and the vanish")
+    func noFollowMoveArmsItsBookkeeping() {
+        let core = makeCore()
+        defer { teardown() }
+        let before = core.lastDesktopSwitch
+        #expect(core.execute("move_to_desktop", args: [.number(2)]).isSuccess)
+        // The reap: nothing else notices a window that left for
+        // another Desktop, so the verb arms its own reconcile.
+        #expect(core.deferred.isScheduled(.desktopMoveReap))
+        // The latch: the moved window can keep OS key focus.
+        #expect(core.moveLatch.isLatched(WindowID(7)))
+        // The switch window: the removal reads as `vanished`.
+        #expect(core.lastDesktopSwitch > before)
+        #expect(
+            WindowGoneReason.classify(
+                wasMinimized: false,
+                sinceDesktopSwitch: Date()
+                    .timeIntervalSince(core.lastDesktopSwitch)
+            ) == .vanished
+        )
+    }
+
+    @Test("A follow arms no reap — the switch reconciles instead")
+    func followLeavesTheReapToTheSwitch() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(
+            core.execute("move_to_desktop_and_follow", args: [.number(4)])
+                .isSuccess
+        )
+        #expect(!core.deferred.isScheduled(.desktopMoveReap))
+    }
+
+    @Test("A refused switch fails, and stamps nothing")
+    func refusedSwitchFailsAndStampsNothing() {
+        let core = makeCore(bridge: true, switching: false)
+        defer { teardown() }
+        let before = core.lastDesktopSwitch
+        let response = core.execute("focus_desktop", args: [.number(2)])
+        #expect(!response.isSuccess)
+        #expect(core.lastDesktopSwitch == before)
+    }
+
+    @Test("The capability is answered before any argument")
+    func capabilityOutranksEveryOtherPrecondition() {
+        let core = makeCore(bridge: false, focused: false)
+        defer { teardown() }
+        // No bridge AND no focused window AND a bad argument:
+        // the answer names the capability, always the same one.
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.string("nonsense")]
+        )
+        #expect(!response.isSuccess)
+        #expect(response.error?.contains("bridge") == true)
     }
 }
