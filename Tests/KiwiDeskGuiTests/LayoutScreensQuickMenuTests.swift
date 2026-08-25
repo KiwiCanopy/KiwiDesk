@@ -22,9 +22,9 @@ private final class FakeStatusItem: StatusItemHandle {
 /// does on the main actor**: it builds menus and reads their
 /// items. No source scan, no filesystem walk, no layout pass. The
 /// main actor is a budget shared with the heavy synchronous
-/// scanning suites — `SettingsModeRevealTests`' hang guard is
-/// sized at 120 s because of them — so a new `@MainActor` suite
-/// says what it spends.
+/// scanning suites — they back it up past 30 s in a full run
+/// (`tests.md` ▸ Async tests) — so a new `@MainActor` suite says
+/// what it spends.
 ///
 /// `.serialized` because titles are matched in English and
 /// `LocalizationManager` is a process-wide singleton.

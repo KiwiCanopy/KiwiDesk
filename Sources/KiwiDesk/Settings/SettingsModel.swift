@@ -110,6 +110,14 @@ final class SettingsModel: ObservableObject {
     /// Cancels a running reveal timeline when a newer flip
     /// supersedes it, so a rapid Simple→Power-User→Simple→…
     /// cannot clear the latest wash early.
+    ///
+    /// Production must not read this as state, and a test
+    /// awaiting it (`SettingsModeRevealTests`, #979) must read
+    /// it straight after a flip that reveals: it is not an
+    /// in-flight predicate — never cleared when the timeline
+    /// finishes, and left in place by a flip that does not
+    /// reveal — so anywhere else it is a finished predecessor,
+    /// and awaiting it asserts nothing.
     var modeRevealTask: Task<Void, Never>?
     /// Distinct settings the draft changes — the header's
     /// "N unsaved changes" count, recomputed beside `isDirty`

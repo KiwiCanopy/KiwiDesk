@@ -432,6 +432,23 @@ early-returned awaits the *previous* cycle's finished task and
 asserts nothing. A handle whose staleness goes undocumented is a
 vacuous await waiting to be written.
 
+**The main actor is a budget shared across suites, and a new
+`@MainActor` suite says what it spends.** Heavy synchronous
+`@MainActor` work — a source scan, a filesystem walk, an AppKit
+measurement per row — backs the main actor up past 30 s in a full
+run, which is where the starvation above comes from. Measured
+twice: the mode-reveal timeline's 0.3 s clear missed a 30 s
+deadline (2026-08-09), and `PresetGridFloorTests` went
+`@MainActor` wholesale and timed a suite out against a 120 s
+guard while passing in 1.3 s alone (2026-08-17). Two
+obligations: keep off the main actor everything that does not
+need it — the fix in that second case was to run the catalog
+reads and the source scans off it and memoize the AppKit
+measurement — and state the spend in the new suite's own
+docstring, the shape `LayoutScreensQuickMenuTests` uses. Sizing
+a deadline against the backlog instead is what the clause above
+forbids; #979 is where that was paid on the mode reveal.
+
 The tell that a suite is on the wrong side of this: a green that
 takes the *whole* hang guard. `SleepWakeManagerTests` was
 reported as failing only while KiwiDesk itself ran, which read as
