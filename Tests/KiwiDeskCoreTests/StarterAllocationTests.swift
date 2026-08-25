@@ -251,12 +251,14 @@ struct StarterAllocationTests {
         // other's layouts and asserted the wider one kept its
         // head. That is now unreachable: every screen spends its
         // first slot on a lead, so a screen draws ONE item from
-        // its own list unless its share is three — and the only
-        // screen that can hold three is never the one being
-        // starved, because the widest is always the Floating
-        // host and spends one of its three on Floating. With one
+        // its own list unless its share is three. A screen CAN
+        // hold three without being the widest — [1728, 1920,
+        // 1024] apportions [3, 3, 1] — so the reason is not that
+        // the Floating host monopolises it: it is that with one
         // draw each, the four shapes' first picks (grid, track,
-        // stack, monocle) are all distinct and cannot collide.
+        // stack, monocle) are all distinct and cannot collide,
+        // and a screen drawing two is drawing them from a list
+        // no other screen of a different shape shares.
         //
         // `fillOrder`'s DIRECTION is still guarded, one rule
         // over: `smallestScreen` reads its far end, so reversing

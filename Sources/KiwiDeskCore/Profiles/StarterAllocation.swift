@@ -261,13 +261,25 @@ public enum StarterAllocation {
     /// the same list — still this shape's best-first order.
     ///
     /// `beside` is what this screen has ALREADY been given — its
-    /// lead — and the refill prefers anything it does not hold
-    /// yet. Without that, a screen whose short list is wholly
-    /// spoken for refills with its own lead and opens two
-    /// identical spaces: three laptops drew `[scrolling,
-    /// scrolling]` on the middle one (#1018). Repeating across
-    /// SCREENS is the budget forcing a hand; repeating within one
-    /// is just a wasted space.
+    /// lead — and the refill prefers an entry the screen does not
+    /// hold yet, then rotates PAST it rather than restarting at
+    /// the top.
+    ///
+    /// Two different things are going on and only one of them is
+    /// avoidable. A screen with more spaces than its list has
+    /// entries must repeat something — a laptop list holds two
+    /// layouts, and three spaces cannot be three distinct ones.
+    /// What the rotation fixes is WHICH repeat: restarting the
+    /// cursor at `list[0]` handed the middle of three laptops
+    /// `[scrolling, monocle, monocle]`, two identical spaces
+    /// side by side, where rotating gives `[scrolling, monocle,
+    /// scrolling]` — the same unavoidable duplicate, spread.
+    ///
+    /// So the obligation is: **never repeat while this screen
+    /// still has an unheld entry, and when a repeat is forced,
+    /// do not put it adjacent to its twin.** Repeating across
+    /// SCREENS is a separate thing entirely — that is the budget
+    /// forcing a hand, and `used` is what governs it.
     private static func take(
         _ quota: Int,
         from list: [LayoutMode],
@@ -284,9 +296,15 @@ public enum StarterAllocation {
         var cursor = 0
         while picked.count < quota {
             let held = Set(picked + beside)
-            let fresh = list.first { !held.contains($0) }
-            picked.append(fresh ?? list[cursor % list.count])
-            cursor += 1
+            if let fresh = list.firstIndex(where: {
+                !held.contains($0)
+            }) {
+                picked.append(list[fresh])
+                cursor = fresh + 1
+            } else {
+                picked.append(list[cursor % list.count])
+                cursor += 1
+            }
         }
         return picked
     }

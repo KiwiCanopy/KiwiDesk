@@ -18,6 +18,7 @@ struct StarterLeadTests {
     private let screen27 = CGSize(width: 2560, height: 1440)
     private let ultrawide = CGSize(width: 3440, height: 1440)
     private let pivoted = CGSize(width: 1440, height: 2560)
+    private let small = CGSize(width: 1024, height: 768)
 
     @Test("#1018's worked example lands exactly")
     func workedExample() {
@@ -97,24 +98,47 @@ struct StarterLeadTests {
         #expect(!ScreenClass.of(screen27).layouts.contains(.monocle))
     }
 
-    @Test("no screen opens two identical spaces")
-    func noScreenRepeatsWithinItself() {
-        // Three laptops: the middle one's whole list — Scrolling
-        // and Monocle — is spoken for by the time it fills, and
-        // the refill used to hand it back its own lead.
-        let modes = StarterAllocation.modes(
-            sizes: [laptop, laptop, laptop]
-        )
-        // Floor first: `Set([]).count == [].count` holds, so a
-        // fill that produced nothing at all would walk this loop
-        // and pass (guard-prover, 2026-08-26).
-        #expect(modes.count == 3)
-        #expect(modes.allSatisfy { !$0.isEmpty })
-        for block in modes {
-            #expect(
-                Set(block).count == block.count,
-                "a screen drew a layout twice: \(block)"
-            )
+    @Test("a screen repeats only when its list cannot fill it")
+    func repeatsOnlyWhenForced() {
+        // Two things are tangled here and only one is avoidable.
+        // A laptop's list holds two layouts, so a laptop granted
+        // three spaces MUST repeat one — no fill can help. What
+        // can be got wrong is which repeat and where it lands:
+        // the refill used to restart at the top of the list and
+        // put the duplicate next to its twin.
+        //
+        // Both fixtures give a two-entry list a post-lead quota
+        // of two, which is the only shape that reaches the
+        // second refill pass. Three identical laptops do NOT —
+        // their shares are [3, 2, 2] and every post-lead quota
+        // is one — so a fixture that looks like the obvious one
+        // cannot observe this at all (code review, 2026-08-26).
+        let fixtures: [[CGSize]] = [
+            [laptop, CGSize(width: 1920, height: 1080), small],
+            [laptop, laptop, small],
+        ]
+        for sizes in fixtures {
+            let modes = StarterAllocation.modes(sizes: sizes)
+            #expect(modes.count == sizes.count)
+            #expect(modes.allSatisfy { !$0.isEmpty })
+            for (index, block) in modes.enumerated() {
+                // Distinctness up to capacity, derived from the
+                // screen's own list rather than restated: what a
+                // screen CAN draw is its list plus its lead, and
+                // it must be as distinct as that allows.
+                let list = ScreenClass.of(sizes[index]).layouts
+                let tiled = block.filter { $0 != .floating }
+                let reachable = Set(list).union(tiled.prefix(1))
+                #expect(
+                    Set(tiled).count
+                        == min(tiled.count, reachable.count),
+                    "\(sizes[index]) drew \(block)"
+                )
+                // And a forced duplicate is spread, not stacked.
+                for pair in zip(tiled, tiled.dropFirst()) {
+                    #expect(pair.0 != pair.1, "adjacent: \(block)")
+                }
+            }
         }
     }
 }

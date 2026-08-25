@@ -2232,9 +2232,10 @@ the workflow layouts alone.
 
 **1 Screen:**
 
-- **Starter** — The spaces chosen for your screen, each with its
-  own layout (see [Your first run](#your-first-run)). A good way
-  back to a known-good starting point.
+- **Starter** — The spaces chosen for your screen: it opens in
+  scrolling, with the other layouts your screen suits behind it
+  (see [Your first run](#your-first-run)). A good way back to a
+  known-good starting point.
 - **Developer** *(Standard)* — grid (space 1), IDE in stack (space 2),
   docs in scrolling (space 3), preview in monocle (space 4). Best for
   software dev.
