@@ -1,5 +1,20 @@
+import AppKit
 import Foundation
+import KiwiDeskCore
 import Sparkle
+import os
+
+/// The update channel's diagnosis line. `Logger` +
+/// `privacy: .public`, never `NSLog` — macOS redacts NSLog
+/// content to `<private>` in `log show`, which blinds a capture.
+private let updaterLog = Logger(
+    subsystem: KiwiLog.subsystem,
+    category: "gui"
+)
+
+private func logUpdater(_ message: String) {
+    updaterLog.log("KiwiDesk: \(message, privacy: .public)")
+}
 
 /// KiwiDesk's in-app update channel (#874).
 ///
@@ -9,10 +24,10 @@ import Sparkle
 /// installs, and this file is where it gets there.
 ///
 /// **The seam is a protocol because the live implementation
-/// reaches the machine.** Constructing an
-/// `SPUStandardUpdaterController` starts a scheduled updater that
-/// hits the network and, on an install, spawns Sparkle's XPC
-/// services. That is a production default no test may inherit
+/// reaches the machine.** Constructing `SparkleUpdater` starts a
+/// scheduled updater that hits the network and, on an install,
+/// spawns Sparkle's XPC services. That is a production default
+/// no test may inherit
 /// (`.claude/rules/tests.md` ▸ "a test reaches the machine only
 /// through a seam it injects"), and the menu builder is
 /// constructed by GUI suites that have no business talking to an
@@ -41,43 +56,115 @@ protocol AppUpdating: AnyObject {
     func checkForUpdates()
 }
 
-/// The live updater. Owns the Sparkle controller for the process
-/// lifetime, because Sparkle's scheduled background check needs
-/// it to outlive the call that started it.
+/// Sparkle's stock user driver plus one thing: the prompt that
+/// asks to install and restart brings KiwiDesk to the front
+/// before it appears (#1011).
+///
+/// **Why a subclass, when the seam next door is a delegate.**
+/// Sparkle activates the app itself for the windows it opens at
+/// CHECK time — the update alert, the permission prompt — and
+/// `StatusItemController+Updates` activates once more before
+/// the check, so the first window a user meets is in front. The
+/// install-and-restart prompt is not another window: it is a
+/// later state of the status window the DOWNLOAD opened, and
+/// Sparkle announces it with `NSApp.requestUserAttention`,
+/// which bounces a Dock icon. KiwiDesk has none
+/// (`docs/design-decisions.md` ▸ *Permanent accessory mode*),
+/// so on the ordinary path — start the download, go back to
+/// work while it runs — the app is no longer active when the
+/// prompt arrives and the prompt is behind everything the user
+/// has open, with nothing saying the update is waiting.
+///
+/// Neither `SPUUpdaterDelegate` nor
+/// `SPUStandardUserDriverDelegate` carries a hook at that
+/// moment: the user-driver delegate's alert hooks fire for
+/// modal `NSAlert`s, which this is not, and the updater
+/// delegate's nearest neighbour (`didExtractUpdate`) fires
+/// before the installer has finished preparing. Overriding
+/// `showReadyToInstallAndRelaunch` is the only seam that names
+/// the moment rather than approximating it.
+@MainActor
+final class UpdatePromptDriver: SPUStandardUserDriver {
+    /// Come forward, then let Sparkle put up the prompt.
+    ///
+    /// Unconditional rather than gated on `!NSApp.isActive`:
+    /// activating an already-active app does nothing, so the
+    /// branch would only add a second thing to keep true. Before
+    /// `super` rather than after, so the window is already in
+    /// front when it turns into the prompt — the order Sparkle's
+    /// own activations use.
+    override func showReadyToInstallAndRelaunch() async
+        -> SPUUserUpdateChoice
+    {
+        NSApp.activate(ignoringOtherApps: true)
+        return await super.showReadyToInstallAndRelaunch()
+    }
+}
+
+/// The live updater. Owns Sparkle's updater and its user driver
+/// for the process lifetime, because Sparkle's scheduled
+/// background check needs them to outlive the call that started
+/// it.
 @MainActor
 final class SparkleUpdater: AppUpdating {
-    private let controller: SPUStandardUpdaterController
+    private let driver: UpdatePromptDriver
+    private let updater: SPUUpdater
 
-    /// `startingUpdater: true` begins the scheduled check cycle
-    /// immediately — the feed URL and the public key both come
-    /// from `Info.plist`, which `scripts/build-app.sh` writes, so
+    /// Assembled from `SPUUpdater` and a driver of our own
+    /// rather than from `SPUStandardUpdaterController`, which is
+    /// those same two objects with the driver fixed to Sparkle's
+    /// stock one. #1011 needs that driver overridden, and the
+    /// controller exposes no seam for it — it builds the driver
+    /// inside its own initializer and offers only the two
+    /// delegates, neither of which reaches the moment
+    /// `UpdatePromptDriver` overrides.
+    ///
+    /// The feed URL and the public key both come from
+    /// `Info.plist`, which `scripts/build-app.sh` writes, so
     /// there is nothing to configure here and nothing that can
     /// disagree with the shipped bundle.
     ///
-    /// **Only construct this when `make()` says to.** Sparkle's
-    /// `-startUpdater` does not fail quietly on a misconfigured
-    /// host: it logs, waits a few seconds, and then shows the
-    /// user a modal telling them to contact the developer. A bare
+    /// **Only construct this when `make()` says to.** Starting
+    /// the updater does not fail quietly on a misconfigured
+    /// host: it needs a bundle identifier and a feed, and a bare
     /// `.build/release/KiwiDesk` — the device-QA launch
     /// `.claude/rules/tests.md` documents — has no `Info.plist`
-    /// and therefore no bundle identifier, so constructing this
-    /// unconditionally puts an "Update Error!" alert on the
-    /// screen of an accessory app with no Dock tile to explain
-    /// where it came from.
+    /// and therefore neither. The failure is logged and nothing
+    /// is shown, which is where this differs from the standard
+    /// controller: that one puts up a modal `NSAlert`, and an
+    /// alert from a process with no Dock tile to explain where
+    /// it came from is the same defect #1011 is. The alert is
+    /// developer-facing by Sparkle's own description, and
+    /// `make()`'s gate is what keeps the case off a user's
+    /// machine.
     init() {
-        controller = SPUStandardUpdaterController(
-            startingUpdater: true,
-            updaterDelegate: nil,
-            userDriverDelegate: nil
+        let host = Bundle.main
+        driver = UpdatePromptDriver(
+            hostBundle: host,
+            delegate: nil
         )
+        updater = SPUUpdater(
+            hostBundle: host,
+            applicationBundle: host,
+            userDriver: driver,
+            delegate: nil
+        )
+        do {
+            try updater.start()
+        } catch {
+            logUpdater(
+                "updater failed to start: "
+                    + error.localizedDescription
+            )
+        }
     }
 
     var canCheckForUpdates: Bool {
-        controller.updater.canCheckForUpdates
+        updater.canCheckForUpdates
     }
 
     func checkForUpdates() {
-        controller.updater.checkForUpdates()
+        updater.checkForUpdates()
     }
 }
 
@@ -104,10 +191,11 @@ enum AppUpdaterFactory {
     /// which is what a future consumer (a Settings section, a
     /// Lua verb) would create by reaching for `SparkleUpdater()`
     /// of its own. It borrows the status item's instead.
-    /// `UpdaterSeamGuardTests` pins all three sites — this
-    /// factory's call, `SparkleUpdater(` itself, and Sparkle's
-    /// own controller — by exact count, so deleting the wiring
-    /// reds as loudly as duplicating it. That symmetry is the
+    /// `UpdaterSeamGuardTests` pins all four sites — this
+    /// factory's call, `SparkleUpdater(` itself, and the
+    /// `SPUUpdater` / `UpdatePromptDriver` pair it assembles —
+    /// by exact count, so deleting the wiring reds as loudly as
+    /// duplicating it. That symmetry is the
     /// point: a missing wiring greys one menu row, which is
     /// visible, while the scheduled channel never starting is
     /// not — and an update path that silently never runs is the
