@@ -62,7 +62,17 @@ public enum ScreenClass: String, Sendable, CaseIterable, Codable {
     }
 
     /// The layouts this shape benefits from, **best first**, so a
-    /// screen granted a share of *n* takes the first *n*.
+    /// screen granted a share of *n* takes the first *n* behind
+    /// its lead.
+    ///
+    /// **The first space is not drawn from this list**, in the
+    /// same way and for the same reason `floating` is not in it
+    /// (below): what a screen OPENS in depends on the other
+    /// screens — the narrowest leads Monocle and the rest lead
+    /// Scrolling — which is a rule about the SETUP that no single
+    /// shape can answer. `StarterAllocation.lead(_:of:)` owns it
+    /// end to end, and it can hand Monocle to a shape this list
+    /// leaves it out of.
     ///
     /// Absences are as deliberate as the entries. `track` is out
     /// of `desktop` — a layout no one uses is worse than one they

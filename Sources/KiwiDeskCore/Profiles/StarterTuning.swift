@@ -43,12 +43,33 @@ public enum StarterTuning {
     /// the user has to understand before changing the first, and
     /// `StarterTuning`'s whole premise is that the main screen
     /// names the tuning — see this type's doc comment.
+    ///
+    /// On a laptop this resolves to about 830 pt, which is close
+    /// to the 864 pt half `ScreenClass.laptopWidth` calls "tiling
+    /// that fights you" — and that is not a contradiction: a
+    /// tiled half is all the room that window will ever get,
+    /// while a scrolling slot is a comfortable column with its
+    /// neighbour visible beside it and the rest one keystroke
+    /// away. The threshold is about permanence, not width.
     static let standardSlot = 0.48
     /// …and the ultrawide answer, where 48 % of 3440 pt is a
     /// 1650 pt column: wider than anything wants to be. Three
     /// readable columns instead. `ScrollSize.auto`'s own doc
     /// names this screen as the case that should set an explicit
     /// size, which is what this is.
+    ///
+    /// **Read from the MAIN screen, so the two mixed setups are
+    /// ruled here rather than left to fall out** (#1018). An
+    /// ultrawide SECONDARY keeps `standardSlot` and so does get
+    /// that 1650 pt column; an ultrawide MAIN imposes 30 % on a
+    /// laptop secondary, about 518 pt — above the 420 pt
+    /// `minWindowSize` this same branch sets, so it is tight
+    /// rather than infeasible. Both are the profile-wide
+    /// constraint doing exactly what it says: `TilingSettings`
+    /// has ONE `slotSize` to give, one screen has to name it, and
+    /// a per-space override is where a user who wants the other
+    /// answer goes. Making this per-display is the seam this
+    /// type's doc comment forbids.
     static let ultrawideSlot = 0.3
 
     /// The base, tuned for the main screen's shape.

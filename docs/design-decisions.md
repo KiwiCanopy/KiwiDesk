@@ -2171,8 +2171,8 @@ you KEEP. So the layouts now come from each screen's shape, in
 points (`ScreenClass`): a laptop under 1900 pt gets Scrolling and
 Monocle and never Track, which has no width to work in; a screen
 at or past 3000 pt — or past a 2.1 aspect, which catches a short
-ultrawide the width test misses — leads with Track, and BSP
-exists only in the middle class, producing absurd windows above
+ultrawide the width test misses — wants Track first among its
+tiled layouts, and BSP exists only in the middle class, producing absurd windows above
 it and unusable ones below. Points and not pixels, because a 5K
 27" and a 1440p 27" both report 2560 pt and want the same
 answer, while a Retina laptop reports 1728 and wants laptop

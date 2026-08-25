@@ -202,8 +202,8 @@ public enum StarterAllocation {
     /// a screen whose own class would not have asked for it — a
     /// 27" beside an ultrawide is "the smallest" and leads
     /// Monocle, though `ScreenClass.desktop` lists none.
-    /// `StarterAllocationTests` pins that case so it stays a
-    /// decision rather than a surprise.
+    /// `StarterLeadTests` pins that case so it stays a decision
+    /// rather than a surprise.
     static func lead(_ index: Int, of smallest: Int?) -> LayoutMode {
         index == smallest ? .monocle : .scrolling
     }
@@ -272,7 +272,7 @@ public enum StarterAllocation {
         _ quota: Int,
         from list: [LayoutMode],
         used: inout Set<LayoutMode>,
-        beside: [LayoutMode] = []
+        beside: [LayoutMode]
     ) -> [LayoutMode] {
         var picked: [LayoutMode] = []
         for mode in list where picked.count < quota {

@@ -2495,10 +2495,15 @@ neighbours wait one keystroke away. If you have only one screen,
 it opens in scrolling whatever its size.
 
 The slot is just under half the screen, so two windows sit side
-by side with the gap between them visible. On an ultrawide it is
-30% — three readable columns rather than one very wide one. That
-is a single setting for the profile, and you can change it once
-rather than per space.
+by side with the gap between them visible. **If your main screen
+is an ultrawide** it is 30% instead — three readable columns
+rather than one very wide one.
+
+That is one setting for the whole profile, read from your main
+screen, so it applies to your other screens too: an ultrawide
+*second* screen keeps the just-under-half slot, and a laptop
+beside an ultrawide main gets the 30% one. Change it once in
+settings, or per space if you want them to differ.
 
 **Which layouts come next.** Behind that first space, each screen
 draws from a list chosen for its shape. Every screen is measured
