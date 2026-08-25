@@ -696,6 +696,27 @@ believing it shipped both. The argument is in
 `docs/design-decisions.md` ▸ usable without a mouse is a second
 claim; the obligations a change here takes on:
 
+- **A Settings animation moves what takes no layout.** Animated
+  layout inside the detail pane is not free to a VoiceOver
+  reader: inserting, removing or reordering views rebuilds the
+  accessibility element list, and animating it stretches that
+  rebuild across every frame, so every element below has a
+  moving accessibility frame for the animation's whole duration
+  — and VoiceOver answers by re-resolving its cursor and
+  re-speaking what it had just announced (#961, the drawer
+  case). So before animating an insertion, removal or reorder
+  here, move the easing onto something layout-free: an opacity,
+  a `rotationEffect`, a colour. If nothing layout-free can carry
+  the meaning, the reflow may still be right — #760's mode flip
+  is the ruled case, where seeing WHICH surfaces the toggle
+  added is the question the flip asks — but then it is a trade
+  taken deliberately, argued where the ruling lives, and
+  `docs/design-decisions.md` ▸ *when a Settings animation
+  reflows the pane, what is the reflow buying?* is the form the
+  answer takes. `SettingsDisclosureMotionTests` pins the drawer;
+  no guard can pin the question, which is why it is stated here
+  rather than only in a suite.
+
 - **A `.contextMenu` is right-click and nothing else**, macOS
   having no default key that opens a focused control's
   contextual menu. So a row offering one routes it through the

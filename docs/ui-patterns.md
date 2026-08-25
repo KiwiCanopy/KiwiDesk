@@ -363,7 +363,10 @@ anywhere on the row, Space on the focused one; the cursor
 stays an arrow (the hand is link-only). A drawer's
 `accessory:` may hold a control, so it is drawn BESIDE that
 button rather than inside it, at the row's trailing edge —
-the row's hit shape stops where the accessory begins. The ruling is in
+the row's hit shape stops where the accessory begins. The
+chevron's rotation is the drawer's whole motion — the body
+appears rather than fading in, because animating the
+expansion makes VoiceOver re-speak its cursor. The ruling is in
 `docs/design-decisions.md`.
 
 **Weigh every title edit against the search index.** Search

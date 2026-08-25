@@ -61,6 +61,14 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     /// Call-site expansion state, for a drawer with its own
     /// rules (Gaps force-expands while its values are mixed);
     /// nil means this view owns it.
+    ///
+    /// **Write it outside any transaction.** The style animates
+    /// the chevron and never the expansion, because animated
+    /// layout here makes VoiceOver re-speak its cursor (#961,
+    /// gui.md ▸ the keyboard path). A call site that wraps its
+    /// own write in `withAnimation` puts the defect back from
+    /// outside — `SettingsDisclosureMotionTests` reads the
+    /// style file and cannot see it.
     private let externalExpansion: Binding<Bool>?
     @State private var internalExpansion = false
     @ViewBuilder private let content: () -> Content

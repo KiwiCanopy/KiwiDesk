@@ -3510,6 +3510,56 @@ the full-row cue are two ladders for two sizes, and taking the
 smaller one to a full row is how a token nobody notices
 becomes the most visible thing on the page.
 
+**A drawer opens without animating the opening, and the
+motion lives on the chevron.** The obvious build wraps the
+expansion toggle in a transaction, so the revealed content
+fades and the rows below slide down over 0.18 s. That is the
+prettier build and it is the wrong one, because of what an
+expansion *is* to the accessibility tree: inserting the
+drawer's content rebuilds the element list under the window,
+and animating the toggle stretches that rebuild across every
+frame of the animation rather than landing it in one. For
+0.18 s, every element below the drawer has a moving
+accessibility frame — and VoiceOver answers a moving tree by
+re-resolving the element under its cursor and speaking it
+again. Opening an accordion therefore made VoiceOver repeat
+whatever it had last said, anywhere on the page (#961).
+
+The motion is not the price of fixing that; only the
+*animated layout* is. A `rotationEffect` takes no layout and
+the chevron is hidden from accessibility, so scoping the same
+easing to the chevron alone keeps the cue the ruling above
+promises while the tree changes exactly once. The cost is
+honest and small: the drawer's contents appear rather than
+arrive.
+
+**The rule this generalises to is a question, not a ban:
+when a Settings animation reflows the pane, what is the
+reflow BUYING?** Animated layout inside the detail pane has a
+price that is now measured — a repeated announcement for
+every VoiceOver reader, every time — so it has to be bought,
+and a drawer cannot afford it: the fade says nothing the
+chevron does not already say, and the same easing was
+available on a view that takes no layout. **Where the reflow
+IS the message, it is bought and it stays.** The mode flip's
+insertion is the ruled case above: "the pane the user is
+standing in animates the insertion" is how a reader sees
+*which* surfaces the toggle just added, which is the one
+question that flip asks — no chevron carries that. That
+ruling stands, and this entry does not reopen it. What it
+adds is the honest label on its cost, which was unpriced when
+it was made: the mode flip is animating an insertion into the
+same pane, so it very likely carries the same repeat, and
+that is a defect to measure against the ruling rather than a
+reason to revert it.
+
+So: before animating an insertion, removal or reorder in the
+Settings detail pane, move the easing to something that takes
+no layout. If nothing layout-free can carry the meaning, the
+animation has earned its place — say so where the ruling
+lives, so the next reader inherits the trade rather than the
+conclusion.
+
 **The header's accessory is a SIBLING of that button, never
 its child.** A drawer's `accessory:` slot may hold a control —
 the Profiles-per-Desktop drawer puts its `?` there — and the

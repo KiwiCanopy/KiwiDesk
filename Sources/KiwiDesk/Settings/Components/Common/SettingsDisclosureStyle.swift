@@ -52,13 +52,13 @@ struct SettingsDisclosureStyle<Accessory: View>:
         _ configuration: Configuration
     ) -> some View {
         HStack(spacing: 6) {
+            // No transaction here, deliberately (#961): an
+            // animated insert moves every accessibility frame
+            // below the drawer for its whole duration, and the
+            // motion goes to the chevron instead. The argument
+            // is `docs/design-decisions.md`'s, with the rest.
             Button {
-                withAnimation(
-                    reduceMotion
-                        ? nil : .easeOut(duration: 0.18)
-                ) {
-                    configuration.isExpanded.toggle()
-                }
+                configuration.isExpanded.toggle()
             } label: {
                 HStack(spacing: 6) {
                     chevron(expanded: configuration.isExpanded)
@@ -111,6 +111,13 @@ struct SettingsDisclosureStyle<Accessory: View>:
             .font(.footnote.weight(.semibold))
             .foregroundStyle(SettingsTheme.ink2)
             .rotationEffect(.degrees(expanded ? 90 : 0))
+            // The drawer's whole motion (#961) — scoped with
+            // `value:` so it moves this glyph and nothing
+            // else, on a modifier that takes no layout.
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.18),
+                value: expanded
+            )
             // The state it encodes is on the button's value, in
             // words; a second reading of the same fact as
             // "chevron.right" is noise.
