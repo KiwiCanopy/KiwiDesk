@@ -2120,16 +2120,20 @@ its Desktop to match the frame, so the move undoes itself about
 a second later.
 
 **One ruling, asked at two altitudes, because there are two
-routes to that same undo.** A Desktop the target screen is not
-showing takes the window out of KiwiDesk's view entirely, so
-the answer is owed when it comes back — the create fold's. A
+routes to that same undo — and each altitude answers only its
+own.** A Desktop the target screen is not showing takes the
+window out of KiwiDesk's view entirely, so the answer is owed
+when it comes back, against the space that screen really shows
+by then; revealing a Desktop can activate a different space
+than the one showing when the move was issued, so answering
+early would file the window somewhere it cannot be seen. A
 Desktop that screen IS showing produces no departure at all,
-and the answer is owed at once — the verb's, before the retile
-it schedules. Measured both ways on two screens (2026-08-25):
-with only the arrival half, moving a window onto a Desktop the
-other screen already showed still snapped it back inside 0.6 s.
-So the predicate is one shared function and each caller adds
-only its own gate.
+and there the answer is owed at once, by the verb. Measured
+both ways on two screens (2026-08-25): with only the arrival
+half, moving a window onto a Desktop the other screen already
+showed still snapped it back inside 0.6 s. So the predicate is
+one shared function and each caller gates itself to the route
+it owns.
 
 Two alternatives lost. *Keep the membership but suppress the
 cross-screen retile* leaves the window unmanaged exactly where

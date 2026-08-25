@@ -40,7 +40,7 @@ extension StateCoordinator {
         arrivalDisplay = nil
         let remembered = rememberedSpaces[window.id]
         let preferred = arrivalScreenHome(
-            of: windows[window.id] ?? window,
+            of: windows[window.id],
             remembered: remembered,
             arrival: arrival
         )
@@ -154,13 +154,17 @@ extension StateCoordinator {
     /// an `app_rules` target — is a placement nobody
     /// contradicted, and is likewise left alone.
     private func arrivalScreenHome(
-        of window: ManagedWindow,
+        of window: ManagedWindow?,
         remembered: SpaceMemory?,
         arrival: DisplayID?
     ) -> SpaceID? {
-        guard case .departed(let home)? = remembered else {
-            return nil
-        }
+        // STATE's record, never the incoming snapshot (#671):
+        // the float and sticky restores above may just have
+        // changed the answer, and the optional is the state read
+        // itself — an untracked window is re-homed by nothing.
+        guard let window,
+            case .departed(let home)? = remembered
+        else { return nil }
         return screenHome(
             of: window,
             leaving: home,

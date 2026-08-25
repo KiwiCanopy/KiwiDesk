@@ -92,9 +92,7 @@ extension KiwiCore {
         mainUUID: String?
     ) -> Int? {
         let displays = state.workspaces.allDisplays
-        let mainID = displays.first {
-            NativeSpaces.displayUUID(for: $0.id) == mainUUID
-        }?.id
+        let mainID = display(forUUID: mainUUID)
         return
             PositionalDisplays
             .ordered(displays, mainID: mainID)

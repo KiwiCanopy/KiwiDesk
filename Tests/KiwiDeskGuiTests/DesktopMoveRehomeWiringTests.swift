@@ -79,23 +79,59 @@ struct DesktopMoveRehomeWiringTests {
         #expect(call.upperBound < follow.lowerBound)
     }
 
+    /// The re-home's own body, bounded by the declaration that
+    /// follows it rather than by a character count: a negative
+    /// needle read against a fixed window silently stops
+    /// watching the moment the body grows past it (fail-open),
+    /// and one of the assertions below is negative.
+    private func rehomeBody(in text: String) throws -> Substring {
+        let open = try #require(
+            text.range(of: "private func rehomeAcrossScreens")
+        )
+        let rest = text[open.upperBound...]
+        let end =
+            rest.range(of: "\n    private func ")?.lowerBound
+            ?? rest.range(of: "\n    func ")?.lowerBound
+            ?? rest.endIndex
+        return rest[..<end]
+    }
+
+    @Test("the re-home fires only for a Desktop already shown")
+    func theRehomeIsGatedOnTheCurrentDesktop() throws {
+        let text = try desktopCommandsSource()
+        let scope = try rehomeBody(in: text)
+        // The gate is the whole reason the two routes do not
+        // overlap. Without it the destination is the space that
+        // screen shows NOW, while revealing a hidden Desktop can
+        // activate a different one — the membership lands in a
+        // space that is not shown, and the reap then remembers
+        // it on the arrival's own display, standing the create
+        // fold's rule down.
+        #expect(scope.contains("guard target.isCurrent else"))
+    }
+
     @Test("the destination comes from the shared predicate")
     func theDestinationIsTheSharedPredicate() throws {
         let text = try desktopCommandsSource()
-        let body = try #require(
-            text.range(of: "private func rehomeAcrossScreens")
-        )
-        let scope = text[body.lowerBound...].prefix(1200)
+        let scope = try rehomeBody(in: text)
         // The one copy of the ruling, never a second reading of
         // "which space does that screen show" beside it.
         #expect(scope.contains("state.screenHome("))
         // The target screen is named the way the verbs already
-        // name one: by the Desktop's own display UUID.
-        #expect(scope.contains("NativeSpaces.displayUUID(for:"))
+        // name one — by the Desktop's own display UUID, through
+        // the shared accessor rather than a fourth hand copy of
+        // the match (§2.4).
+        #expect(scope.contains("display(forUUID:"))
         #expect(scope.contains("target.displayIdentifier"))
         // Membership only: the verb owns its own focus policy,
         // so the full `moveWindow` command must not appear here.
         #expect(scope.contains("addFocusedToSpace("))
         #expect(!scope.contains("moveWindow("))
+        // …plus the destination focus stamp `moveWindow` makes
+        // for the #22 reason, and the retile: with `isCurrent`
+        // the follow's `switchDesktop` stands down, so nothing
+        // else reflows the destination screen.
+        #expect(scope.contains("state.workspaces.focus("))
+        #expect(scope.contains("retile("))
     }
 }

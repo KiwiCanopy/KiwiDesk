@@ -266,7 +266,9 @@ Space it was in**, which KiwiDesk remembered as it left.
 With more than one screen there is one exception, and it is the
 Desktop you chose winning: when that Desktop lives on **another
 screen**, the window also joins the KiwiDesk Space that screen
-is showing. It has to. A window still filed under a Space that
+is showing — the one it shows when the window actually lands
+there, which for a hidden Desktop is decided at the moment you
+reveal it. It has to. A window still filed under a Space that
 lays out on the screen it just left is laid out *there* on the
 next retile, and macOS then re-assigns it to a Desktop of that
 monitor — so without this the move undoes itself about a second
