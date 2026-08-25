@@ -57,19 +57,21 @@ public enum WMBridge {
     /// carries this prefix — the store is Apple's own dictionary
     /// (`type`, `id64`, `WindowManagerInfo`, …) and a bare key
     /// would sit beside theirs (#889 item 3). The wrapper owns
-    /// it: `setValues` and `createSpace` prefix what a caller
-    /// hands them, so a bare key cannot reach the WindowServer.
+    /// it: a caller passes BARE keys, `setValues` and
+    /// `createSpace` prefix them, `stamps(of:)` strips them — one
+    /// shape each way, so a caller never spells the prefix.
+    ///
+    /// A STORED value (AGENTS.md §5): the WindowServer persists
+    /// these keys across logout and mode flips, so a change to
+    /// this string owes a re-stamp crossing for every Desktop
+    /// carrying the old one — never a reader lenient to both.
     public static let valueKeyPrefix = "kiwidesk."
 
-    /// `values` with every key under `valueKeyPrefix`; a key
-    /// already carrying it is left alone.
+    /// `values` with every key under `valueKeyPrefix`.
     static func namespaced(_ values: [String: Any]) -> NSDictionary {
         var out: [String: Any] = [:]
         for (key, value) in values {
-            let namespacedKey =
-                key.hasPrefix(valueKeyPrefix)
-                ? key : valueKeyPrefix + key
-            out[namespacedKey] = value
+            out[valueKeyPrefix + key] = value
         }
         return out as NSDictionary
     }

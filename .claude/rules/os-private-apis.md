@@ -71,12 +71,17 @@ Every one of the following binds whoever touches them:
   `NativeSpaces`' — one reader of the display/spaces model.
 - The bridge dispatches only while **AppKit is genuinely
   loaded** (#884's bisection): free in the app, binding on
-  every harness. A test reaches `WMBridge` only through
-  `classResolverOverride` — `WMBridgeSeamTests` ▸
+  every harness — under `swift test` every bare read answers
+  the deaf false and `isAvailable` caches it for the process.
+  So a test reaches `WMBridge` only through
+  `classResolverOverride` (`WMBridgeSeamTests` ▸
   `testsReachTheBridgeThroughTheSeam` refuses a test file that
-  spells `WMBridge.` without it, because the default path is a
-  live WindowServer read cached for the whole process. Proving
-  the bridge on a device means a standalone binary with AppKit
+  spells `WMBridge.` without it), and a CONSUMER in `Sources/`
+  reads the bridge at a wiring site listed in that suite's
+  `allowed` map — a stored value the GUI consumes, never a read
+  inside a view `body` — so a GUI suite rendering the view
+  cannot reach the live bridge through it unseen. Proving the
+  bridge on a device means a standalone binary with AppKit
   genuinely linked (#889's recipe); the repo carries no script
   for it.
 - `WMBridge.isAvailable` is the capability predicate a GUI
@@ -86,7 +91,12 @@ Every one of the following binds whoever touches them:
   does with a false is `gui.md`'s.
 - A custom key written into a Desktop's store leaves under
   `WMBridge.valueKeyPrefix`, which the wrapper applies itself
-  (`WMBridgeTests` ▸ `storeKeysAreNamespaced`) — the store is
-  Apple's own dictionary (#889 item 3).
+  to the BARE key a caller passes and strips again in
+  `stamps(of:)` (`WMBridgeTests` ▸ `storeKeysAreNamespaced`,
+  `stampsRoundTrip`) — the store is Apple's own dictionary
+  (#889 item 3). The prefix is a STORED value the WindowServer
+  persists (item 3 again), so §5's crossing rule binds it: a
+  change to the string owes a one-shot re-stamp of every
+  Desktop carrying the old one, never a reader lenient to both.
 - No Accessibility trust is needed for any bridge operation
   (#889 item 2); do not add a permission prompt for one.

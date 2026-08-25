@@ -275,14 +275,14 @@ struct WMBridgeTests {
     func storeKeysAreNamespaced() {
         resolving(["SpaceSetValuesOperation": FakeSetValues.self]) {
             let written = WMBridge.setValues(
-                ["stamp": 1, "kiwidesk.already": 2],
+                ["stamp": 1, "nested.key": 2],
                 of: 5
             )
             #expect(written)
             #expect(Seen.spaceID == 5)
             #expect(
                 Seen.values.keys.sorted()
-                    == ["kiwidesk.already", "kiwidesk.stamp"]
+                    == ["kiwidesk.nested.key", "kiwidesk.stamp"]
             )
             #expect(Seen.values["kiwidesk.stamp"] as? Int == 1)
         }

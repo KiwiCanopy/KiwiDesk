@@ -46,8 +46,11 @@ extension SourceScan {
     /// discovered rather than listed — a third target added to
     /// `Package.swift` is otherwise scanned by nothing, and a
     /// guard's whole argument is about the code not yet written
-    /// (`ResourceBundleRoutingTests`; the test-tree twins used
-    /// to hand-list the two test targets three times over).
+    /// (the test-tree twins used to hand-list the two test
+    /// targets three times over). `TargetTreeParityTests` holds
+    /// the answer against `Package.swift`'s own `path:` lines, so
+    /// an empty or partial walk reds there rather than passing
+    /// every adopter as "no strays".
     static func targetTrees(
         under parent: URL
     ) -> [URL] {

@@ -21,12 +21,20 @@ import Testing
 /// exact per-file counts, so an unlisted use fails on arrival
 /// and a removed listed one fails too.
 ///
+/// The fourth needle, `WMBridge.`, pins every READER of the
+/// wrapper in `Sources/` — none today; step 2's one wiring site
+/// joins the map when it exists — so a consumer that reads the
+/// bridge inside a view `body` or a second model is a hit, and a
+/// GUI suite rendering that view cannot reach the live bridge
+/// through it unseen.
+///
 /// The second test looks the other way, at the test trees: a
 /// suite reaches `WMBridge` only through `classResolverOverride`
-/// (`tests.md`, #565), because the wrapper's default path is a
-/// live WindowServer read and `isAvailable` caches it for the
-/// process — one bare read in any suite would make the harness
-/// answer differently per host macOS. This file is excluded from
+/// (`tests.md`, #565). Under `swift test` the harness is
+/// AppKit-deaf, so a bare read answers a uniform false and
+/// `isAvailable` caches it for the process — the available
+/// branch is unreachable without the seam, and a suite that
+/// believes it tested it has tested the deaf one. This file is excluded from
 /// that scan by path — its `allowed` map spells the wrapper's
 /// file name, which carries the needle — and the exclusion is
 /// asserted, so a checkout where the path comparison stopped
@@ -53,13 +61,14 @@ struct WMBridgeSeamTests {
             "KiwiDeskCore/OS/WMBridge.swift": 1
         ],
         "NSClassFromString": ["KiwiDeskCore/OS/WMBridge.swift": 1],
+        "WMBridge.": [:],
     ]
 
     @Test(
         "The bridge's strings live only in the wrapper",
         arguments: [
             "SLSBridged", "performWithWMBridgeDelegate",
-            "NSClassFromString",
+            "NSClassFromString", "WMBridge.",
         ]
     )
     func bridgeStringsStayInsideTheWrapper(needle: String) throws {
