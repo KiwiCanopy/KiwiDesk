@@ -4,13 +4,6 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Generous hang-guard for waits on the dwell Task's `onCross`
-/// (#344): swift-testing runs suites concurrently, so the main
-/// actor can be starved for seconds under full-suite load. The
-/// polls exit the instant the condition holds, so a passing run
-/// never slows — the deadline only bounds a genuine hang.
-private let crossingHangGuard: Duration = .seconds(30)
-
 @Suite("DragCrossingCoordinator", .serialized)
 @MainActor
 struct DragCrossingCoordinatorTests {
@@ -38,17 +31,23 @@ struct DragCrossingCoordinatorTests {
             cursor: onForeign,
             homeDisplay: DisplayID(1)
         )
-        let deadline = ContinuousClock.now + crossingHangGuard
-        while fired.isEmpty, ContinuousClock.now < deadline {
-            // Same-display moves must keep the armed dwell
-            // running, not restart it.
-            crossing.moved(
-                id,
-                cursor: onForeign,
-                homeDisplay: DisplayID(1)
-            )
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        let dwell = crossing.dwellTask
+        #expect(dwell != nil, "the move armed no dwell")
+        // Same-display moves must keep the armed dwell running,
+        // not restart it — which is the identity of the handle,
+        // asserted rather than hoped for the way re-arming
+        // inside a poll loop had to (#994).
+        crossing.moved(
+            id,
+            cursor: onForeign,
+            homeDisplay: DisplayID(1)
+        )
+        #expect(crossing.dwellTask == dwell)
+        // Await the dwell's own timeline rather than poll a wall
+        // clock for `fired` (`tests.md` ▸ Async tests): the fire
+        // lands on the main actor, so a deadline measured the
+        // other suites' occupancy of it and not this dwell.
+        await dwell?.value
         // Grace window so a wrong second fire would show up.
         try await Task.sleep(nanoseconds: 100_000_000)
         #expect(fired == [DisplayID(2)])

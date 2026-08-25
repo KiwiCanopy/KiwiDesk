@@ -135,6 +135,23 @@ public final class DragCoordinator {
         }
     }
 
+    /// The settle timeline pending for `id`, exposed so a test
+    /// can await the settle instead of polling a clock for its
+    /// effect (#994; `.claude/rules/tests.md` ▸ Async tests).
+    /// Production must not read it — it is `schedule`'s
+    /// bookkeeping, never a drag-in-flight predicate.
+    ///
+    /// What awaiting it does **not** mean: that the drag ENDED.
+    /// A settle finding the button still down reschedules itself
+    /// on `releasePollDelay`, so a handle read mid-gesture
+    /// completes its own poll leg having fired nothing; and after
+    /// the drop it is nil, whose `await` returns at once and
+    /// asserts nothing. Read it while the gesture under test is
+    /// the one in flight, and assert on `onDragEnd`.
+    func settleTask(for id: WindowID) -> Task<Void, Never>? {
+        pending[id]
+    }
+
     /// Drops any pending drag for a window (it closed).
     public func cancel(_ id: WindowID) {
         pending[id]?.cancel()

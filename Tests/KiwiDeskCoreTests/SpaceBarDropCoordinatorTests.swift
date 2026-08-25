@@ -4,11 +4,6 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The dwell wait's hang-guard, named and shared the way
-/// `execHangGuard` / `dragSettleHangGuard` are (AGENTS.md §5), so
-/// the next wait added here cannot pick its own tighter number.
-private let springHangGuard: TimeInterval = 120
-
 /// The Space Bar drag-drop state machine (#372): the two-speed
 /// gesture (fast drop relocates, dwell springs then places),
 /// hover arming, and cancellation. Injected closures keep the
@@ -110,33 +105,29 @@ struct SpaceBarDropCoordinatorTests {
     @Test(
         "Dwell springs the space, then the drop places in it"
     )
-    func dwellSpringsThenPlaces() async throws {
+    func dwellSpringsThenPlaces() async {
         let (coord, rec) = make(
             current: SpaceID("A"),
             hit: SpaceID("B"),
             dwell: 0.05
         )
         coord.moved(win, cursor: cursor)
-        // Generous hang-guard (AGENTS.md §5): the wait exits the
-        // instant the spring fires, so a passing run is never
-        // slowed — the deadline only bounds a genuine hang.
+        // Await the dwell's own timeline rather than poll a wall
+        // clock for its effect (#994; `tests.md` ▸ Async tests).
+        // The spring fires from a `@MainActor` Task, so a deadline
+        // here measured how long the *other* suites held the main
+        // actor and not this coordinator at all: a 50 ms dwell was
+        // measured taking 29.7 s of wall clock in a full run, and
+        // raising the bound 30 → 120 s only chose the number the
+        // next grown suite would cross.
         //
-        // Raised 30 → 120 when #95 landed the last three locales.
-        // Nothing here regressed: this suite is `@MainActor`, the
-        // dwell fires through an unstructured `Task`, and the wait
-        // needs the main actor back. A bigger suite starves it for
-        // longer, and the measurement is what forced the number —
-        // one run had it *pass* at 29.7s against the 30s bound,
-        // and neighbouring runs crossed it. A 50 ms dwell taking
-        // 30 s of wall clock is a scheduling fact about a
-        // concurrently-run suite, not a latency this test asserts;
-        // pinning it tight only re-reddens the suite the next time
-        // the suite grows. The starvation itself is a test-runner
-        // property, not app behaviour — nothing a user of the
-        // tiling can observe.
-        try await untilTrue(timeout: springHangGuard) {
-            !rec.sprang.isEmpty
-        }
+        // Read the handle before awaiting it — `fire` clears it —
+        // and keep the non-nil check load-bearing: `await
+        // nil?.value` returns at once, so an arm that scheduled no
+        // dwell would otherwise sail through green.
+        let dwell = coord.dwellTask
+        #expect(dwell != nil, "arming scheduled no dwell")
+        await dwell?.value
         #expect(rec.sprang.map(\.0) == [SpaceID("B")])
         #expect(rec.sprang.first?.1 == win)
         #expect(coord.sprungSpace == SpaceID("B"))
@@ -167,7 +158,7 @@ struct SpaceBarDropCoordinatorTests {
     }
 
     @Test("reset cancels a pending spring (abandoned drag)")
-    func resetCancelsSpring() async throws {
+    func resetCancelsSpring() async {
         let (coord, rec) = make(
             current: SpaceID("A"),
             hit: SpaceID("B"),
@@ -176,28 +167,17 @@ struct SpaceBarDropCoordinatorTests {
         coord.moved(win, cursor: cursor)
         #expect(coord.isArmed)
         #expect(coord.draggingWindow == win)
+        let dwell = coord.dwellTask
+        #expect(dwell != nil, "arming scheduled no dwell")
         coord.reset()
         #expect(!coord.isArmed)
         #expect(coord.draggingWindow == nil)
-        // Wait well past the (tiny) dwell: the spring must never
-        // fire — proven by the gap (200ms vs the 50ms dwell).
-        try await Task.sleep(nanoseconds: 200_000_000)
+        // Read the cancelled timeline rather than sleep past the
+        // dwell and hope: `isCancelled` is the fact itself, and
+        // awaiting the handle afterwards says the spring never
+        // fired instead of that it had not fired *yet*.
+        #expect(dwell?.isCancelled == true)
+        await dwell?.value
         #expect(rec.sprang.isEmpty)
-    }
-
-    /// Polls `condition` until true or `timeout` seconds elapse,
-    /// yielding between checks. Passing runs exit at once.
-    private func untilTrue(
-        timeout: TimeInterval,
-        _ condition: @MainActor () -> Bool
-    ) async throws {
-        let start = Date()
-        while !condition() {
-            if Date().timeIntervalSince(start) > timeout {
-                Issue.record("condition never became true")
-                return
-            }
-            try await Task.sleep(nanoseconds: 5_000_000)
-        }
     }
 }

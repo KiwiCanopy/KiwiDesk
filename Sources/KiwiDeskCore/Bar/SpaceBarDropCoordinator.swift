@@ -82,7 +82,19 @@ final class SpaceBarDropCoordinator {
     /// gestures. Lets an abnormal drag end (window closed / tab
     /// rekeyed mid-drag) scope its teardown to the right window.
     private(set) var draggingWindow: WindowID?
-    private var dwellTask: Task<Void, Never>?
+    /// The pending spring's timeline, exposed so a test can await
+    /// the dwell instead of polling a clock for its effect (#994;
+    /// `.claude/rules/tests.md` ▸ Async tests). Production must
+    /// not read it — `isArmed` is the in-flight predicate.
+    ///
+    /// What awaiting it does **not** mean. It is cleared the
+    /// instant the dwell fires or is disarmed, so it is only
+    /// readable while a spring is pending: read it afterwards and
+    /// it is nil, whose `await` returns at once and asserts
+    /// nothing. It also completes for a *cancelled* dwell, so it
+    /// says the dwell ended, never that it sprang — that fact is
+    /// `sprungSpace`.
+    private(set) var dwellTask: Task<Void, Never>?
 
     /// True while a bar target is armed pre-spring — the caller
     /// hides its own drag ghost/drop-zone then.

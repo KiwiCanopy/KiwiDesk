@@ -398,20 +398,19 @@ notice it breaking.
 
 ## Async tests: a generous hang-guard, never a tight deadline (#344)
 
-A test that spawns a real subprocess (`ExecTests`) or schedules an
-unstructured `Task` (`DragCoordinatorTests`) and then awaits its
-**main-actor callback** cannot use a sub-second or few-second poll
-deadline. swift-testing runs suites concurrently, so under
+A test that spawns a real subprocess (`ExecTests`) and then awaits
+its **main-actor callback** cannot use a sub-second or few-second
+poll deadline. swift-testing runs suites concurrently, so under
 full-suite load the shared main actor is starved for seconds and
 the tight deadline trips spuriously (the callback landed, just
 late) while the suite passes in isolation.
 
 Each such wait uses one shared generous hang-guard
-(`execHangGuard` / `dragSettleHangGuard`, 30 s): the poll exits
-the instant the condition holds, so a passing run is never slowed
-— the deadline only bounds a genuine hang. Prove the *behavior* by
-the gap (a short watchdog against a much longer sleep), never by a
-tight wait. New async tests here follow suit.
+(`execHangGuard`, 30 s): the poll exits the instant the condition
+holds, so a passing run is never slowed — the deadline only bounds
+a genuine hang. Prove the *behavior* by the gap (a short watchdog
+against a much longer sleep), never by a tight wait. New async
+tests here follow suit.
 
 **Where the thing waited on IS an awaitable handle, await it
 rather than polling for its effect.** A wall-clock deadline
@@ -421,8 +420,8 @@ a full concurrent run one 10 ms `Task.sleep` resumption measured
 without giving the pending continuation a turn, and the result
 comes down to which continuation drains first. Reach for a poll
 only when there is nothing to await — a real subprocess
-(`ExecTests`), a `DisplayLink` callback (`DragCoordinatorTests`).
-When a `Task` or a `DeferredTasks` slot exists, take it:
+(`ExecTests`), a `DisplayLink` callback. When a `Task` or a
+`DeferredTasks` slot exists, take it:
 `await core.deferred.task(for: .startupSweep)?.value`,
 `await manager.pendingReplay?.value`. **Expose such a handle with
 a doc comment barring production from reading it, and say what it
@@ -431,6 +430,20 @@ the task is never cleared — so awaiting it after a leg that
 early-returned awaits the *previous* cycle's finished task and
 asserts nothing. A handle whose staleness goes undocumented is a
 vacuous await waiting to be written.
+
+**Two more ways such an await goes vacuous**, both paid for in
+#994 when the drag and Space Bar dwells traded their deadlines
+for handles. A handle that its own callback CLEARS
+(`SpaceBarDropCoordinator.dwellTask`,
+`DragCoordinator.settleTask(for:)`) is nil by the time the effect
+has landed, so it is read BEFORE the await, and the `!= nil`
+assertion beside it is load-bearing rather than decorative —
+`await nil?.value` returns at once, so a scheduler that stopped
+scheduling sails through green. And a handle that RESCHEDULES
+itself says less than it looks: `settleTask(for:)` awaited while
+the mouse button is down completes each release-poll leg having
+fired no drop at all. Both facts belong in the seam's own doc
+comment, which is where those two carry them.
 
 **The main actor is a budget shared across suites, and a new
 `@MainActor` suite says what it spends.** Heavy synchronous
