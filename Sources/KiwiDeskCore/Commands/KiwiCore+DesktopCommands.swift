@@ -42,7 +42,10 @@ extension KiwiCore {
         in snapshot: DesktopSnapshot
     ) -> DesktopTarget? {
         let users = snapshot.spaces.filter(\.isUser)
-        guard number >= 1, number <= users.count else { return nil }
+        // Bound the INDEX, not a count beside it: guard-prover
+        // showed an off-by-one in the subscript reds the last
+        // Desktop by a crash rather than an assertion.
+        guard users.indices.contains(number - 1) else { return nil }
         let space = users[number - 1]
         return DesktopTarget(
             space: space.id,
