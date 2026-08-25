@@ -655,7 +655,7 @@ jobs:
       # the disk image's delivery IS the release asset — the one
       # place a person downloads it from. A second copy here
       # would be a second thing to keep in step with the draft.
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.archive.outputs.artifact }}
           path: ${{ steps.archive.outputs.path }}
