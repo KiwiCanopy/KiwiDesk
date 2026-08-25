@@ -1,0 +1,74 @@
+# Dependency update PRs, so the site's npm tree does not drift the
+# way it did before #978 — four high-severity advisories and seven
+# packages behind, all inside their declared `^` ranges, found only
+# because someone thought to look.
+#
+# Grouping is the whole design here. A patch/minor group opens ONE
+# PR the site gate can validate as a unit; a major opens its own,
+# because a major is a change to read rather than a change to
+# merge. Listing only `minor` and `patch` in a group's
+# `update-types` is what excludes majors from it — they are not
+# suppressed, they arrive separately.
+#
+# Security updates are NOT configured here: they are a repository
+# setting (Settings ▸ Code security ▸ Dependabot security updates)
+# and they ignore this schedule, so this file only governs the
+# routine sweep. That setting was on when this file was added
+# (checked 2026-08-25); nothing in the repo can hold it there, so
+# re-check it rather than reading this line as current.
+version: 2
+
+updates:
+  # The site. Its gate (.github/workflows/site.yml) runs the build,
+  # `check-site-tokens.py` and `extract-keys --site --check` on
+  # every `site/**` PR, so a dependabot PR arrives already checked
+  # against the three things that would catch a broken bump.
+  #
+  # It is still merged by hand. #978's refresh is the argument: the
+  # gates all passed on PR #987 too, and what actually needed
+  # reading was the built output — 23 pages whose markup moved and
+  # two whose text did. No status check sees that.
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(site)
+    groups:
+      site-patch-and-minor:
+        update-types:
+          - minor
+          - patch
+
+  # The workflows' own actions. Cheap to keep current and the one
+  # ecosystem where being behind is a supply-chain question rather
+  # than a feature question.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: ci
+    groups:
+      actions-patch-and-minor:
+        update-types:
+          - minor
+          - patch
+
+# Swift/SPM is deliberately absent, on one dependency's argument:
+# Sparkle is the update channel itself, so a bump moves the signing
+# nest scripts/build-app.sh walks and sits under the permanent
+# `SUFeedURL`/`SUPublicEDKey` contract (#874,
+# packaging-and-release.md). That is a change to make deliberately,
+# with a device check, not one to find waiting on a Monday. A
+# second SPM dependency in `Package.swift` therefore re-opens this
+# exclusion rather than inheriting it — that argument is Sparkle's
+# alone.
