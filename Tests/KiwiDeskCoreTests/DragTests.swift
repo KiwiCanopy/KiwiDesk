@@ -5,15 +5,6 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Generous hang-guard for waits on the settle Task's `onDragEnd`
-/// (#344). The drag settle fires from an unstructured `Task` on the
-/// main actor; because swift-testing runs suites concurrently, that
-/// actor can be starved for seconds under full-suite load, so the old
-/// 5s deadline tripped spuriously (the `ended` still empty flake).
-/// The loops exit the instant `ended` fills, so a large value never
-/// slows a passing run — it only bounds a genuine hang.
-private let dragSettleHangGuard: Duration = .seconds(30)
-
 @MainActor
 private final class MouseButtonState {
     var isPressed: Bool
@@ -49,12 +40,16 @@ struct DragCoordinatorTests {
             )
         }
         mouse.isPressed = false
-        // Poll instead of a fixed sleep: under full-suite
-        // load the settle task can get main-actor time late.
-        let deadline = ContinuousClock.now + dragSettleHangGuard
-        while ended.isEmpty, ContinuousClock.now < deadline {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        // Await the settle's own timeline instead of polling a
+        // clock for `ended` (#994; `tests.md` ▸ Async tests).
+        // The settle fires from an unstructured `Task` on the
+        // main actor, so a deadline here measured how long the
+        // *other* suites held that actor — the `ended` still
+        // empty flake — and never this coordinator. The handle
+        // is the LAST move's: each move cancels its predecessor.
+        let settle = drag.settleTask(for: id)
+        #expect(settle != nil, "the move scheduled no settle")
+        await settle?.value
         // Grace window so a wrong second fire would show up.
         try await Task.sleep(nanoseconds: 100_000_000)
         #expect(ended.count == 1)
@@ -98,17 +93,16 @@ struct DragCoordinatorTests {
             frame: frame,
             validated: true
         )
-        let deadline = ContinuousClock.now + dragSettleHangGuard
-        while ended.isEmpty, ContinuousClock.now < deadline {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        let settle = drag.settleTask(for: WindowID(1))
+        #expect(settle != nil, "the move scheduled no settle")
+        await settle?.value
         // Grace window so a wrong second fire would show up.
         try await Task.sleep(nanoseconds: 100_000_000)
         #expect(ended == [frame])
     }
 
     @Test("A gesture's start comes from the pre-event frame")
-    func startAnchorsOnPreEventFrame() async throws {
+    func startAnchorsOnPreEventFrame() async {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
         let mouse = MouseButtonState(isPressed: true)
@@ -134,16 +128,15 @@ struct DragCoordinatorTests {
             )
         )
         mouse.isPressed = false
-        let deadline = ContinuousClock.now + dragSettleHangGuard
-        while ended.isEmpty, ContinuousClock.now < deadline {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        let settle = drag.settleTask(for: WindowID(1))
+        #expect(settle != nil, "the move scheduled no settle")
+        await settle?.value
         #expect(ended.first?.0.width == 400)
         #expect(ended.first?.1.width == 700)
     }
 
     @Test("Trailing moves after release join the gesture")
-    func trailingMovesJoinGesture() async throws {
+    func trailingMovesJoinGesture() async {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
         let mouse = MouseButtonState(isPressed: true)
@@ -159,10 +152,11 @@ struct DragCoordinatorTests {
         mouse.isPressed = false
         let trailing = CGRect(x: 400, y: 0, width: 10, height: 10)
         drag.windowMoved(WindowID(1), frame: trailing)
-        let deadline = ContinuousClock.now + dragSettleHangGuard
-        while ended.isEmpty, ContinuousClock.now < deadline {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        // The trailing move rescheduled the settle, so this is
+        // its handle rather than the released gesture's first.
+        let settle = drag.settleTask(for: WindowID(1))
+        #expect(settle != nil, "the move scheduled no settle")
+        await settle?.value
         #expect(ended.count == 1)
         #expect(ended.first?.start == first)
         #expect(ended.first?.end == trailing)
@@ -241,10 +235,15 @@ struct DragCoordinatorTests {
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(ended.isEmpty)
         mouse.isPressed = false
-        let deadline = ContinuousClock.now + dragSettleHangGuard
-        while ended.isEmpty, ContinuousClock.now < deadline {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        // Read the handle AFTER the release, and only because
+        // this test is `@MainActor` throughout: the release and
+        // this read share one synchronous stretch, so the leg
+        // read here cannot already have run its settle. Awaiting
+        // a leg read while the button was still down would prove
+        // nothing — that leg reschedules and fires no drop.
+        let settle = drag.settleTask(for: WindowID(1))
+        #expect(settle != nil, "the release poll stopped early")
+        await settle?.value
         #expect(ended == [frame])
     }
 }

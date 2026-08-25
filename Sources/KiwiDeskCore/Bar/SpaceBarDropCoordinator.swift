@@ -82,7 +82,24 @@ final class SpaceBarDropCoordinator {
     /// gestures. Lets an abnormal drag end (window closed / tab
     /// rekeyed mid-drag) scope its teardown to the right window.
     private(set) var draggingWindow: WindowID?
-    private var dwellTask: Task<Void, Never>?
+    private var pendingDwell: Task<Void, Never>?
+
+    #if DEBUG
+        /// The pending spring's timeline, so a test can await the
+        /// dwell instead of polling a clock for its effect (#994;
+        /// `.claude/rules/tests.md` ▸ Async tests). Debug-only so
+        /// a production read fails the release build rather than
+        /// a review — `isArmed` is the in-flight predicate.
+        ///
+        /// What awaiting it does **not** mean. It is cleared the
+        /// instant the dwell fires or is disarmed, so it is only
+        /// readable while a spring is pending: read it afterwards
+        /// and it is nil, whose `await` returns at once and
+        /// asserts nothing. It also completes for a *cancelled*
+        /// dwell, so it says the dwell ended, never that it
+        /// sprang — that fact is `sprungSpace`.
+        var dwellTask: Task<Void, Never>? { pendingDwell }
+    #endif
 
     /// True while a bar target is armed pre-spring — the caller
     /// hides its own drag ghost/drop-zone then.
@@ -141,8 +158,8 @@ final class SpaceBarDropCoordinator {
         let delay = min(Self.springPreDelay, dwell)
         setHover(target)
         beginSweep(target, dwell - delay, delay)
-        dwellTask?.cancel()
-        dwellTask = Task { [weak self] in
+        pendingDwell?.cancel()
+        pendingDwell = Task { [weak self] in
             let ns = UInt64(dwell * 1_000_000_000)
             try? await Task.sleep(nanoseconds: ns)
             guard !Task.isCancelled else { return }
@@ -151,14 +168,14 @@ final class SpaceBarDropCoordinator {
     }
 
     private func disarm() {
-        dwellTask?.cancel()
-        dwellTask = nil
+        pendingDwell?.cancel()
+        pendingDwell = nil
         armedSpace = nil
         clearFeedback()
     }
 
     private func fire(_ target: SpaceID, _ id: WindowID) {
-        dwellTask = nil
+        pendingDwell = nil
         armedSpace = nil
         clearFeedback()
         // Record the spring only if it actually switched: a refused
