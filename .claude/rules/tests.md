@@ -399,7 +399,7 @@ notice it breaking.
 ## Async tests: a generous hang-guard, never a tight deadline (#344)
 
 A test that waits on something it holds no handle to — a real
-subprocess (`ExecTests`), a socket connect (`SocketServerTests`) —
+subprocess (`ExecTests`), a socket connect (`SocketTests`) —
 and then awaits its **main-actor callback** cannot use a
 sub-second or few-second poll deadline. swift-testing runs suites
 concurrently, so under full-suite load the shared main actor is
@@ -464,10 +464,10 @@ this rule were not wrapped; a new one takes it.
 recorded an `Issue` and returned, so a genuinely stuck condition
 failed one test at its deadline; an await on a timeline that
 never completes stalls the run until the job's own timeout,
-because `Tests/` sets no `.timeLimit`. That is the same trade
-`SocketServerTests` documents, and it is the right way round
-here: the deadline it replaces was failing runs that were not
-stuck at all.
+because `Tests/` sets no `.timeLimit`. Accept it knowingly: the
+deadline it replaces was not failing runs that were stuck, it was
+failing runs that were merely slow, and no mutation can red the
+hang class — so a green suite here does not cover it.
 
 **The main actor is a budget shared across suites, and a new
 `@MainActor` suite says what it spends.** Heavy synchronous
