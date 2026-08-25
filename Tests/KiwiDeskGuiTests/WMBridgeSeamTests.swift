@@ -26,8 +26,10 @@ import Testing
 /// (`tests.md`, #565), because the wrapper's default path is a
 /// live WindowServer read and `isAvailable` caches it for the
 /// process — one bare read in any suite would make the harness
-/// answer differently per host macOS. The needle is spelled in
-/// two pieces so this file never matches its own scan.
+/// answer differently per host macOS. This file is excluded from
+/// that scan by path — its `allowed` map spells the wrapper's
+/// file name, which carries the needle — rather than by any
+/// spelling trick.
 @Suite("WMBridge seam")
 struct WMBridgeSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -113,7 +115,8 @@ struct WMBridgeSeamTests {
         var reached: [String] = []
         var strays: [String] = []
         for tree in Self.testTrees {
-            for file in try SourceScan.swiftSources(under: tree) {
+            for file in try SourceScan.swiftSources(under: tree)
+            where file.path != #filePath {
                 let source = SourceScan.stripComments(
                     try String(contentsOf: file, encoding: .utf8)
                 )
