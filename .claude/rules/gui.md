@@ -194,23 +194,30 @@ argument, and why the rule is phrased as an obligation on
 controllers rather than as a claim about the process, is
 "Permanent accessory mode" in `docs/design-decisions.md`.
 
-**The other half of that policy: a window the user must ANSWER
-activates at the moment it appears, and a window a framework
-opened is not exempt.** `.accessory` earns no Dock tile, so
+## A window that finishes something already begun comes forward
+
+**It activates at the moment it appears, a window a framework
+opened included — and it refuses any affordance that parks it out
+of that activation's reach.** `.accessory` earns no Dock tile, so
 `requestUserAttention` and every other Dock-borne nudge is inert
-here — a prompt nobody activated is simply behind whatever the
-user was doing. KiwiDesk's own windows take `NSApp.forceFront`; a
-framework's takes the seam that names the moment it appears, and
-approximating with a nearby callback is what this forbids —
-Sparkle's nearest neighbour to the install-and-restart prompt
-fires before the installer has finished preparing it. #1011 is
-the worked case: `UpdatePromptDriver` overrides
-`showReadyToInstallAndRelaunch`. **A guard on such an override
-pins the WIRING beside the body** — `UpdatePromptFocusTests`
-holds that the framework is shown through that driver and not a
-stock one, because an override left in place and no longer
-reached is how the defect returns with every count still at one. The argument is "Permanent accessory mode"
-in `docs/design-decisions.md`.
+here, and activating a process deminiaturizes nothing. The
+corollary under "Permanent accessory mode" in
+`docs/design-decisions.md` argues why, and scopes it — an
+unsolicited OFFER is governed by the opposite rule and must not
+take the screen.
+
+Take the seam that NAMES the moment the window appears; a
+callback that merely fires near it is a race, not a fix. #1011 is
+the worked case (Sparkle 2.9.6, the version `Package.resolved`
+pins — a bump re-checks it): `UpdatePromptDriver` overrides
+`showReadyToInstallAndRelaunch`, and `UpdatePromptPolicy` refuses
+the status window's minimize button.
+
+**A guard on such an override pins the WIRING beside the body**
+— `UpdatePromptFocusTests` holds that the framework is shown
+through that driver and not a stock one, because an override
+left in place and no longer reached is how the defect returns
+with every count still at one.
 
 ## A window that must clear the bars derives its level
 

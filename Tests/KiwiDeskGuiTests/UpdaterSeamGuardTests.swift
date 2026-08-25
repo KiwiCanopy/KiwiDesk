@@ -44,18 +44,32 @@ struct UpdaterSeamGuardTests {
 
     @Test("the live updater is built once, in one place")
     func updaterBuiltOnce() throws {
-        // Sparkle's own two objects: constructed only inside
-        // the seam's live conformer. Each needle carries the
-        // open paren so it matches the CONSTRUCTION and not a
-        // stored property's type annotation a line above it —
-        // without it this counts two and reads as a duplicate.
+        // The sites this seam is assembled from. Each needle
+        // carries the open paren so it matches the CONSTRUCTION
+        // and not a stored property's type annotation a line
+        // above it — without it this counts two and reads as a
+        // duplicate.
         //
-        // Two needles rather than one because #1011 split what
+        // Three objects rather than the one
         // `SPUStandardUpdaterController` used to hold: the
-        // updater, and the user driver it shows its UI through.
-        // A second `SPUUpdater` is a second scheduler; a second
-        // `UpdatePromptDriver` is a driver nothing is wired to.
-        for needle in ["SPUUpdater(", "UpdatePromptDriver("] {
+        // updater, the driver Sparkle shows its UI through, and
+        // the policy that driver answers from (#1011). A second
+        // of any of them is a second scheduler, or an object
+        // nothing is wired to.
+        //
+        // `updater.start(` is here for the OPPOSITE reason and
+        // is the one that matters most. The controller used to
+        // carry the start INSIDE the construction this suite
+        // already counted (`startingUpdater: true`); assembling
+        // the updater by hand moved it out to a free-standing
+        // statement, and a statement no needle names can be
+        // deleted with every count still at one — leaving the
+        // scheduled channel silently never running, which is the
+        // failure the docstring above calls unrecoverable.
+        for needle in [
+            "SPUUpdater(", "UpdatePromptDriver(",
+            "UpdatePromptPolicy(", "updater.start(",
+        ] {
             let built = try Self.sites(
                 of: needle,
                 under: Self.productionTrees
@@ -63,8 +77,8 @@ struct UpdaterSeamGuardTests {
             #expect(
                 built.count == 1,
                 """
-                expected exactly one \(needle) construction, \
-                found \(built.count): \
+                expected exactly one \(needle) site, found \
+                \(built.count): \
                 \(built.map(\.site).joined(separator: ", "))
                 """
             )

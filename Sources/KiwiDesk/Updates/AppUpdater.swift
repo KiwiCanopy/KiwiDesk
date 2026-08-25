@@ -56,15 +56,58 @@ protocol AppUpdating: AnyObject {
     func checkForUpdates()
 }
 
+/// What Sparkle's stock UI must do differently for an app with
+/// no Dock tile (#1011). Separate from the driver below only
+/// because Sparkle captures a user driver's delegate in its
+/// initializer, so the driver cannot be its own.
+///
+/// Held for the process lifetime by `SparkleUpdater`: the
+/// standard driver references its delegate WEAKLY, so a policy
+/// nobody retains is a policy Sparkle stops asking.
+/// The conformance is isolated rather than `nonisolated` +
+/// `assumeIsolated`: Sparkle calls every user-driver method from
+/// the main thread and asserts on it, so the isolation is the
+/// truth rather than a promise this file makes.
+@MainActor
+final class UpdatePromptPolicy: NSObject,
+    @MainActor SPUStandardUserDriverDelegate
+{
+    /// Refuse the minimize button on the status window.
+    ///
+    /// Sparkle offers it because a regular app update is usually
+    /// quick, and parking the progress window is reasonable when
+    /// a Dock tile can bring it back. Here it cannot: the window
+    /// the user parked during the download is the same one that
+    /// becomes the install-and-restart prompt, and activating a
+    /// process does not deminiaturize anything — so a minimized
+    /// prompt would sit in a Dock KiwiDesk has no icon in.
+    /// Refusing the affordance is what keeps the driver's
+    /// activation below sufficient on its own.
+    func standardUserDriverAllowsMinimizableStatusWindow() -> Bool {
+        false
+    }
+
+    /// Come forward for Sparkle's modal alerts too — an updater
+    /// error, or the acknowledgement after an install. Each is a
+    /// window the user must answer, and `.accessory` puts none of
+    /// them in front by itself.
+    func standardUserDriverWillShowModalAlert() {
+        NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
 /// Sparkle's stock user driver plus one thing: the prompt that
 /// asks to install and restart brings KiwiDesk to the front
 /// before it appears (#1011).
 ///
 /// **Why a subclass, when the seam next door is a delegate.**
-/// Sparkle activates the app itself for the windows it opens at
-/// CHECK time — the update alert, the permission prompt — and
-/// `StatusItemController+Updates` activates once more before
-/// the check, so the first window a user meets is in front. The
+/// Sparkle activates the app itself for the windows it opens on
+/// a check the USER asked for — the update alert, the permission
+/// prompt — and `StatusItemController+Updates` activates once
+/// more before that check, so the window a user asked for is in
+/// front. (A SCHEDULED check is deliberately gentler and stays
+/// behind; `docs/design-decisions.md` ▸ *Permanent accessory
+/// mode* scopes what this rule does and does not promise.) The
 /// install-and-restart prompt is not another window: it is a
 /// later state of the status window the DOWNLOAD opened, and
 /// Sparkle announces it with `NSApp.requestUserAttention`,
@@ -89,10 +132,14 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     ///
     /// Unconditional rather than gated on `!NSApp.isActive`:
     /// activating an already-active app does nothing, so the
-    /// branch would only add a second thing to keep true. Before
-    /// `super` rather than after, so the window is already in
-    /// front when it turns into the prompt — the order Sparkle's
-    /// own activations use.
+    /// branch would only add a second thing to keep true.
+    ///
+    /// The two statements are not ordered against each other and
+    /// the guard does not pin an order: `super` shows the window
+    /// synchronously, so both land in one main-actor stretch
+    /// before anything redraws. What the activation depends on is
+    /// `UpdatePromptPolicy` refusing the minimize button — a
+    /// parked window is the one state activation cannot recover.
     override func showReadyToInstallAndRelaunch() async
         -> SPUUserUpdateChoice
     {
@@ -101,12 +148,21 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     }
 }
 
-/// The live updater. Owns Sparkle's updater and its user driver
-/// for the process lifetime, because Sparkle's scheduled
-/// background check needs them to outlive the call that started
-/// it.
+/// The live updater. Held for the process lifetime because
+/// Sparkle's scheduled background check has to outlive the call
+/// that started it.
+///
+/// It stores three objects and they are stored for three
+/// different reasons, none of them symmetry: `policy` because
+/// the driver references its delegate WEAKLY and an unretained
+/// one stops being asked; `updater` because it is what
+/// `canCheckForUpdates` and `checkForUpdates()` read; `driver`
+/// for neither — `SPUUpdater` retains it — but because
+/// `UpdatePromptFocusTests` reads the property to hold that the
+/// object Sparkle shows its UI through is the overriding one.
 @MainActor
 final class SparkleUpdater: AppUpdating {
+    private let policy: UpdatePromptPolicy
     private let driver: UpdatePromptDriver
     private let updater: SPUUpdater
 
@@ -124,24 +180,34 @@ final class SparkleUpdater: AppUpdating {
     /// there is nothing to configure here and nothing that can
     /// disagree with the shipped bundle.
     ///
-    /// **Only construct this when `make()` says to.** Starting
-    /// the updater does not fail quietly on a misconfigured
-    /// host: it needs a bundle identifier and a feed, and a bare
-    /// `.build/release/KiwiDesk` — the device-QA launch
-    /// `.claude/rules/tests.md` documents — has no `Info.plist`
-    /// and therefore neither. The failure is logged and nothing
-    /// is shown, which is where this differs from the standard
-    /// controller: that one puts up a modal `NSAlert`, and an
-    /// alert from a process with no Dock tile to explain where
-    /// it came from is the same defect #1011 is. The alert is
-    /// developer-facing by Sparkle's own description, and
-    /// `make()`'s gate is what keeps the case off a user's
-    /// machine.
+    /// **Only construct this behind `make()`.** An unconfigured
+    /// host otherwise starts a scheduled network channel that
+    /// answers nothing — a bare `.build/release/KiwiDesk`, the
+    /// device-QA launch `.claude/rules/tests.md` documents, has
+    /// no `Info.plist` and so neither a bundle identifier nor a
+    /// feed. Only the first of those makes `start()` refuse
+    /// (`checkIfConfiguredProperlyAndRequireFeedURL:NO`, Sparkle
+    /// 2.9.6); the feed half of the gate is `make()`'s own
+    /// choice, and nothing but that gate would catch it.
+    ///
+    /// **A refused start is logged and shows nothing, and that
+    /// is the ruling rather than an omission.** The standard
+    /// controller put up a modal `NSAlert` here — developer-facing
+    /// by Sparkle's own description, and from a process with no
+    /// Dock tile to explain where it came from, which is the
+    /// defect #1011 is. What the user sees instead is the greyed
+    /// *Check for Updates…* row, because `canCheckForUpdates`
+    /// only turns true inside a successful start. The Config
+    /// Issues window is not the channel for it either: that
+    /// model's list is REPLACED wholesale by
+    /// `KiwiCore.onConfigIssuesChange`, so a GUI-side entry would
+    /// be wiped on the next Core update.
     init() {
         let host = Bundle.main
+        policy = UpdatePromptPolicy()
         driver = UpdatePromptDriver(
             hostBundle: host,
-            delegate: nil
+            delegate: policy
         )
         updater = SPUUpdater(
             hostBundle: host,
@@ -191,13 +257,15 @@ enum AppUpdaterFactory {
     /// which is what a future consumer (a Settings section, a
     /// Lua verb) would create by reaching for `SparkleUpdater()`
     /// of its own. It borrows the status item's instead.
-    /// `UpdaterSeamGuardTests` pins all four sites — this
-    /// factory's call, `SparkleUpdater(` itself, and the
-    /// `SPUUpdater` / `UpdatePromptDriver` pair it assembles —
-    /// by exact count, so deleting the wiring reds as loudly as
-    /// duplicating it. Counting them is not enough on its own:
-    /// `UpdatePromptFocusTests` is what holds that the driver
-    /// built here is the one Sparkle is shown through. That symmetry is the
+    /// `UpdaterSeamGuardTests` is the census of the sites this
+    /// seam is assembled from, each by exact count, so deleting
+    /// the wiring reds as loudly as duplicating it — the start
+    /// call included, since a channel that never starts is the
+    /// silent half of that pair. Counting is not enough on its
+    /// own: `UpdatePromptFocusTests` is what holds that the
+    /// driver built here is the one Sparkle is shown through.
+    ///
+    /// The symmetry is the
     /// point: a missing wiring greys one menu row, which is
     /// visible, while the scheduled channel never starting is
     /// not — and an update path that silently never runs is the
