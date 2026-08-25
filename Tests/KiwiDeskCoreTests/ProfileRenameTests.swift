@@ -80,10 +80,10 @@ struct ProfileRenameTests {
     func bindingChase() throws {
         let core = makeCore()
         save(core, "desk")
-        core.nativeSpaceBindings = [2: "desk", 3: "other"]
+        core.desktopBindings = [2: "desk", 3: "other"]
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
-            core.nativeSpaceBindings
+            core.desktopBindings
                 == [2: "studio", 3: "other"]
         )
     }
@@ -95,7 +95,7 @@ struct ProfileRenameTests {
         var config = GuiConfig()
         config.profileBindings = [2: "desk"]
         try core.guiConfigStore.save(config)
-        core.nativeSpaceBindings = [2: "desk"]
+        core.desktopBindings = [2: "desk"]
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.guiConfigStore.load()?.profileBindings
@@ -107,7 +107,7 @@ struct ProfileRenameTests {
     func noSidecarCreated() throws {
         let core = makeCore()
         save(core, "desk")
-        core.nativeSpaceBindings = [2: "desk"]
+        core.desktopBindings = [2: "desk"]
         try core.renameProfile(from: "desk", to: "studio")
         #expect(!core.guiConfigStore.exists)
     }
@@ -122,7 +122,7 @@ struct ProfileRenameTests {
         // Space 3 exists only in the runtime map, as if
         // init.lua registered it — the follow must not
         // materialize it into gui.json.
-        core.nativeSpaceBindings = [2: "desk", 3: "luaOnly"]
+        core.desktopBindings = [2: "desk", 3: "luaOnly"]
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.guiConfigStore.load()?.profileBindings
@@ -166,7 +166,7 @@ struct ProfileRenameTests {
         // stored spaces with the live list.
         config.spaces = [SpaceID("zed")]
         try core.guiConfigStore.save(config)
-        core.nativeSpaceBindings = [2: "other"]
+        core.desktopBindings = [2: "other"]
         try core.renameProfile(from: "desk", to: "studio")
         let sidecar = core.guiConfigStore.load()
         #expect(sidecar?.profileBindings == [2: "other"])

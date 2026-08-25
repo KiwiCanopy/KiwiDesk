@@ -77,7 +77,7 @@ extension KiwiCore {
         // first left the session's opening switch diffing against
         // an empty snapshot.
         let desktops = NativeSpaces.desktopSnapshot()
-        lastNativeSpace = desktops.authority
+        lastDesktop = desktops.authority
         desktopMemory.seed(desktops)
         // Cheap and off-main; kicked here so the first glyph bar
         // never renders an image-fallback frame.

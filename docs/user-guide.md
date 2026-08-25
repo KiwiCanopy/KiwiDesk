@@ -2872,7 +2872,7 @@ flowchart TD
 
 Bindings edited here are stored in `gui.json`
 (`profile_bindings`); a hand-written config declares them in
-`init.lua` with `bind_profile_to_native_space` instead. Each
+`init.lua` with `bind_profile_to_desktop` instead. Each
 Desktop your main screen shows also remembers which space it was
 on — return to it and you land on the same space. (If the profile
 changed in between and that space no longer exists, you land on

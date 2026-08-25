@@ -25,8 +25,8 @@ extension KiwiCore {
         // clicks against windows being re-tracked; don't flip the
         // focused display mid-restore (cf. scheduleFocusFollow).
         guard
-            Date().timeIntervalSince(lastNativeSwitch)
-                > NativeSwitch.settle
+            Date().timeIntervalSince(lastDesktopSwitch)
+                > DesktopSwitch.settle
         else { return }
         // Only a click inside a screen's VISIBLE frame re-homes:
         // that area excludes the menu bar and Dock, so clicking

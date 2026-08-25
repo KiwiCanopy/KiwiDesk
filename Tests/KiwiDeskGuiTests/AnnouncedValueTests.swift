@@ -41,7 +41,7 @@ struct AnnouncedValueTests {
     private static let labelled: [String: Int] = [
         "AppRuleRow+Facets.swift": 2,
         "SpacesSection+ModePicker.swift": 1,
-        "NativeSpacesGroup.swift": 1,
+        "DesktopsGroup.swift": 1,
         "ProfileHeader.swift": 1,
         "KeybindingAppGroup+Behavior.swift": 1,
     ]

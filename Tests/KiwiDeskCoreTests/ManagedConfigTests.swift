@@ -68,10 +68,10 @@ struct ManagedConfigTests {
         #expect(ManagedConfig.hasForeignCode(source))
     }
 
-    @Test("bind_profile_to_native_space is foreign")
+    @Test("bind_profile_to_desktop is foreign")
     func profileBindingIsForeign() {
         let source =
-            #"KiwiDesk.bind_profile_to_native_space(1, "Desk")"#
+            #"KiwiDesk.bind_profile_to_desktop(1, "Desk")"#
         #expect(ManagedConfig.hasForeignCode(source))
     }
 

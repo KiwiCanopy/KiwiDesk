@@ -226,7 +226,7 @@ extension EventLoop {
         // change, covering targeted reconciles that race the bulk
         // `reconcileAll` (#308 review).
         let recentSpaceSwitch =
-            Date().timeIntervalSince(lastNativeSpaceChange)
+            Date().timeIntervalSince(lastDesktopChange)
             < Self.spaceSwitchCoalesceGrace
         reconcileTabsAndSweep(
             pid: pid,

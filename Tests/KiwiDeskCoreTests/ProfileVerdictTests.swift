@@ -145,7 +145,7 @@ struct ProfileVerdictTests {
         try core.profiles.save(
             profile("Bound", monitors: ["Absent:1x1"])
         )
-        core.nativeSpaceBindings = [2: "Bound"]
+        core.desktopBindings = [2: "Bound"]
         #expect(
             core.profileVerdict(activeDesktop: 2).verdict
                 == .boundToDesktop(name: "Bound", desktop: 2)
@@ -161,7 +161,7 @@ struct ProfileVerdictTests {
         try core.profiles.save(
             profile("Bound", monitors: ["Absent:1x1"])
         )
-        core.nativeSpaceBindings = [2: "Bound"]
+        core.desktopBindings = [2: "Bound"]
         #expect(
             core.profileVerdict(activeDesktop: 1).verdict
                 == .exactMonitors(name: "Desk")
@@ -177,7 +177,7 @@ struct ProfileVerdictTests {
         let core = core()
         let live = liveFingerprints(core)
         try core.profiles.save(profile("Desk", monitors: live))
-        core.nativeSpaceBindings = [2: "Deleted"]
+        core.desktopBindings = [2: "Deleted"]
         #expect(
             core.profileVerdict(activeDesktop: 2).verdict
                 == .exactMonitors(name: "Desk")

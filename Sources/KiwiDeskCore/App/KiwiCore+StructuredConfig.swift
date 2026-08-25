@@ -120,7 +120,7 @@ extension KiwiCore {
             floatRules: floatRules,
             ignoreRules: ignoreRules
         )
-        nativeSpaceBindings = config.profileBindings
+        desktopBindings = config.profileBindings
     }
 
     func captureGlobalWindowRuleBase(from config: GuiConfig) {

@@ -185,7 +185,7 @@ extension KiwiCore {
             config.spaces = starterSpaces()
         }
         var bindings: [Int: String] = [:]
-        for (number, name) in nativeSpaceBindings {
+        for (number, name) in desktopBindings {
             bindings[number] = name
         }
         config.profileBindings = bindings

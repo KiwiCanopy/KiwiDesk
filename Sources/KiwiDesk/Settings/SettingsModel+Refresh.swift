@@ -59,9 +59,9 @@ extension SettingsModel {
         // verdict with a later reading of the arrangement (#888).
         let desktops = NativeSpaces.desktopSnapshot()
         mainDesktops = desktops.mainDisplayDesktops
-        currentNativeSpace = desktops.authority
+        currentDesktop = desktops.authority
         let resolved = core.profileVerdict(
-            activeDesktop: currentNativeSpace
+            activeDesktop: currentDesktop
         )
         profileResolution = ProfileResolution(
             verdict: resolved.verdict,

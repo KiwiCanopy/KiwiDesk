@@ -747,13 +747,30 @@ both says both words. "It is clear from context" is not a
 defence: a sentence readable either way is the defect this rule
 exists to remove.
 
-**Nothing on the wire moves.** No Lua verb, no JSON key, no
-Swift type, no event name — `focus_space`, `SpaceID`,
-`space_modes` and `space_bar.*` all stay, so no user's
-`init.lua` breaks and there is no migration to write.
-`bind_profile_to_native_space` keeps its name, since "native"
-already disambiguates it; the Space Bar keeps its name, being
-KiwiDesk's own bar showing KiwiDesk's own spaces.
+**KiwiDesk's side of the wire never moved.** No Lua verb, no
+JSON key, no Swift type, no event name naming KiwiDesk's spaces
+— `focus_space`, `SpaceID`, `space_modes` and `space_bar.*` all
+stay; the Space Bar keeps its name, being KiwiDesk's own bar
+showing KiwiDesk's own spaces.
+
+**macOS's side of the wire moved once, after 1.0.** The ruling
+above originally froze it too — `bind_profile_to_native_space`
+kept its name "since *native* already disambiguates it" — as a
+cost call made pre-release, when no migration and no broken
+`init.lua` was the whole argument. It was lifted on 2026-08-25,
+before the native Desktop verbs (#884) landed beside it: a wire
+reading `…native_space` in three places and `…desktop` in the
+new verbs would have carried the one-word-two-senses defect
+this ruling exists to remove, and the cheapest day to unify it
+was the day before it hardened under a userbase. So the verb is
+`bind_profile_to_desktop`, the event `desktop_change`, the
+`get_state` field `desktop`, and the Settings copy keys
+`desktops.*` — with no alias (`AGENTS.md` §5: a renamed verb
+gets no compatibility layer; the 1.1.0 notes say what changed).
+What did NOT move, deliberately: Core's `NativeSpace` /
+`NativeSpaces` types, which model WindowServer spaces —
+fullscreen and system spaces included — of which a Desktop is
+only the user-type kind.
 
 **Why the macOS sense is the one that moves — and what does NOT
 decide it.** It is tempting to say "Desktop is Apple's word", and
@@ -770,7 +787,7 @@ right; they should read the next paragraph rather than this one.
 What the instance label does buy is that "Desktop n" is the word
 on screen at the moment a user is *looking* at the things, which
 is what a binding row names. KiwiDesk's own copy had already
-reached for it: `native_spaces.intro` read "Each Desktop is a
+reached for it: `desktops.intro` (then `native_spaces.intro`) read "Each Desktop is a
 native macOS Space from Mission Control." until #768 — one
 sentence stating as an identity the very thing this ruling
 splits.

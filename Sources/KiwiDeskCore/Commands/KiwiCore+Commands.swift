@@ -120,8 +120,8 @@ extension KiwiCore {
             "delete_profile", "set_default_profile",
             "list_profiles", "get_profile_status":
             return profileCommand(command, args)
-        case "bind_profile_to_native_space":
-            return bindProfileToNativeSpace(args)
+        case "bind_profile_to_desktop":
+            return bindProfileToDesktop(args)
         case let quit where quit.hasPrefix("quit."):
             // A teardown-only setting: dispatched here (not
             // via layoutCommand's forced-retile trailer)

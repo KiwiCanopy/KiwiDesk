@@ -189,7 +189,7 @@ struct MonitorChangeTests {
             args: [.string("Desk Two")]
         )
         core.execute(
-            "bind_profile_to_native_space",
+            "bind_profile_to_desktop",
             args: [.number(2), .string("Desk Two")]
         )
         NativeSpaces.activeDesktopNumberOverride = 2

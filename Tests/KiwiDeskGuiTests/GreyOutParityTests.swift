@@ -103,7 +103,7 @@ struct GreyOutParityTests {
         // the disclosure label and the "Open Desktop & Dock"
         // button stay live under it (#527).
         (
-            "NativeSpacesGroup.swift",
+            "DesktopsGroup.swift",
             "GreyOut(active: reason != nil",
             1
         ),

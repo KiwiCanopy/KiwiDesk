@@ -155,7 +155,7 @@ extension InterpolatedLabelTests {
         "border.fit_gaps.updated": 1,
         "border.fit_gaps.updated_inactive": 1,
         "footer.save.globals_only": 1,
-        // native_spaces.clear_all.help left the register with
+        // desktops.clear_all.help left the register with
         // #888 — the "Clear all bindings" escape hatch retired
         // along with the separate-Spaces grey it existed for.
         "shortcuts.imported_note": 1,

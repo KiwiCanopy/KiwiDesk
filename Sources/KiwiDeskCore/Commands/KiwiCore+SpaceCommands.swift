@@ -16,8 +16,8 @@ extension KiwiCore {
         // reference windows that are being re-tracked; they
         // must not flip the Space mid-restore.
         guard
-            Date().timeIntervalSince(lastNativeSwitch)
-                > NativeSwitch.settle,
+            Date().timeIntervalSince(lastDesktopSwitch)
+                > DesktopSwitch.settle,
             // A re-report for a window just moved WITHOUT follow
             // is the dropped origin-refocus raise talking, not
             // the user (#482/#483) — following it would teleport

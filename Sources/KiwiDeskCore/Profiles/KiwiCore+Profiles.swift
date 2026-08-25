@@ -222,7 +222,7 @@ extension KiwiCore {
         if profiles.currentName == name { return true }
         guard let active = NativeSpaces.activeDesktopNumber()
         else { return false }
-        return nativeSpaceBindings[active] == name
+        return desktopBindings[active] == name
     }
 
     /// Re-applies `name` to the live layout after an in-effect

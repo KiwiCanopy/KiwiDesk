@@ -217,7 +217,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             // The accessory is NOT in here (#956): the style
             // makes this label the content of the header's
             // button, and an accessory may be a control —
-            // `NativeSpacesGroup`'s `?` is. It travels to the
+            // `DesktopsGroup`'s `?` is. It travels to the
             // style separately and is drawn beside the button.
             Text(control.text)
                 .font(labelFont)

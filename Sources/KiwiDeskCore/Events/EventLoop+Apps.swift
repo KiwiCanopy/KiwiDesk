@@ -85,7 +85,7 @@ extension EventLoop {
             queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated {
-                self?.nativeSpaceChanged()
+                self?.desktopChanged()
             }
         }
         workspaceTokens = [
@@ -222,17 +222,17 @@ extension EventLoop {
     /// of the new space are picked up. The event goes out
     /// first so a bound profile is in place before the new
     /// space's windows are tiled.
-    private func nativeSpaceChanged() {
+    private func desktopChanged() {
         // Stamp before the resync so both the bulk reconcileAll and
         // any targeted reconcile racing it suppress tab coalescing
         // (departed/arrived windows tile to identical frames, #308).
-        lastNativeSpaceChange = Date()
-        onEvent(.nativeSpaceChanged)
+        lastDesktopChange = Date()
+        onEvent(.desktopChanged)
         reconcileAll()
     }
 
     /// Re-syncs every attached app against its live AX window
-    /// list. Used after native space switches and once shortly
+    /// list. Used after Desktop switches and once shortly
     /// after startup: the startup scan runs against cold AX
     /// trees, and slow responders (Electron/WebKit, see
     /// AGENTS.md) list windows late or mis-report subroles.

@@ -58,7 +58,7 @@ public enum KiwiEvent: Sendable {
     case displaysChanged([Display])
     /// The user switched native macOS Spaces (Mission
     /// Control). Consumers query `NativeSpaces` for details.
-    case nativeSpaceChanged
+    case desktopChanged
 
     /// True when this event removes a window because its APP
     /// hid, rather than because the window went away (#913).

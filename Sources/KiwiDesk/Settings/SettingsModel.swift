@@ -232,7 +232,7 @@ final class SettingsModel: ObservableObject {
     @Published var mainDesktops: [Int] = []
     /// Mission Control number of the active native Space, for the
     /// "current" badge; nil without SkyLight.
-    @Published var currentNativeSpace: Int?
+    @Published var currentDesktop: Int?
 
     /// A dismissible in-app warning shown when a keybinding
     /// conflict was just introduced — nil hides the banner. Set

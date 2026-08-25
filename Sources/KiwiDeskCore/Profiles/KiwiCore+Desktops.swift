@@ -6,16 +6,16 @@ import Foundation
 extension KiwiCore {
     // MARK: - Commands
 
-    /// `bind_profile_to_native_space(native_space, profile)`.
+    /// `bind_profile_to_desktop(desktop, profile)`.
     /// The binding applies immediately when the bound space is
     /// the current one, and on every future switch to it.
-    func bindProfileToNativeSpace(
+    func bindProfileToDesktop(
         _ args: [JSONValue]
     ) -> CommandResponse {
         guard let number = args.first?.intValue, number >= 1
         else {
             return .fail(
-                "expected native space number (1-based)"
+                "expected Desktop number (1-based)"
             )
         }
         guard
@@ -24,16 +24,16 @@ extension KiwiCore {
         else {
             return .fail("expected profile name")
         }
-        nativeSpaceBindings[number] = profile
+        desktopBindings[number] = profile
         if !profiles.list().contains(profile) {
             onLog(
-                "bind_profile_to_native_space: profile "
+                "bind_profile_to_desktop: profile "
                     + "'\(profile)' does not exist (yet)"
             )
         }
         // A verb, not a switch: no snapshot in hand, so this is
         // the one live read of the authority on this path.
-        applyNativeSpaceBinding(
+        applyDesktopBinding(
             desktop: NativeSpaces.activeDesktopNumber()
         )
         return .ok()
@@ -53,10 +53,10 @@ extension KiwiCore {
     /// active Space. Shared mode and a single display never
     /// reach that arm, so their flow is exactly the pre-#888
     /// one.
-    func handleNativeSpaceChange() {
+    func handleDesktopChange() {
         let snapshot = NativeSpaces.desktopSnapshot()
         let number = snapshot.authority
-        lastNativeSwitch = Date()
+        lastDesktopSwitch = Date()
         // A secondary display switched: the authority is a live
         // number that did not move, and some OTHER display's
         // current Space did. Both halves are read from the ONE
@@ -76,7 +76,7 @@ extension KiwiCore {
         let changed = switchedDisplays(in: snapshot)
         let secondarySwitch = Self.isSecondarySwitch(
             authority: number,
-            lastAuthority: lastNativeSpace,
+            lastAuthority: lastDesktop,
             changed: changed,
             mainUUID: snapshot.mainUUID
         )
@@ -87,7 +87,7 @@ extension KiwiCore {
         let memoryKey = Self.virtualSpaceMemoryKey(
             mainUUID: snapshot.mainUUID
         )
-        if let last = lastNativeSpace, last != number,
+        if let last = lastDesktop, last != number,
             let active = state.workspaces.activeSpace
         {
             rememberVirtualSpace(
@@ -96,7 +96,7 @@ extension KiwiCore {
                 key: memoryKey
             )
         }
-        lastNativeSpace = number
+        lastDesktop = number
         if secondarySwitch {
             // A secondary display's Desktop switched: the
             // binding authority is unmoved, so the profile and
@@ -110,7 +110,7 @@ extension KiwiCore {
             updateAppBar()
             updateSpaceBar()
         } else {
-            applyNativeSpaceBinding(desktop: number)
+            applyDesktopBinding(desktop: number)
             if let number,
                 let target = virtualSpaceTarget(
                     for: number,
@@ -145,8 +145,8 @@ extension KiwiCore {
                 updateSpaceBar()
             }
         }
-        emitNativeSpaceChange(snapshot, changed: changed)
-        settleAfterNativeSwitch(number)
+        emitDesktopChange(snapshot, changed: changed)
+        settleAfterDesktopSwitch(number)
     }
 
     /// Whether this switch belongs to a secondary display: the
@@ -165,7 +165,7 @@ extension KiwiCore {
     /// (state-and-layout.md: the fullscreen verdict is `isUser`,
     /// never the nil Mission Control number). Without it, a
     /// fullscreen main display took this arm and force-retiled
-    /// where the pre-#888 handler — and `nativeSpaceSettle` —
+    /// where the pre-#888 handler — and `desktopSettle` —
     /// deliberately stand down, and a host without SkyLight
     /// force-retiled on every switch (review, 2026-08-18).
     static func isSecondarySwitch(
@@ -204,22 +204,22 @@ extension KiwiCore {
     /// focus to the restored space — the OS may have focused
     /// a stashed window during the transition. Keyed (#49):
     /// rapid switches keep only the latest settle — a stale
-    /// task either no-op'd on the `lastNativeSpace` guard or
+    /// task either no-op'd on the `lastDesktop` guard or
     /// (switch away and back inside the delay) fired an early
     /// settle mid-reconcile — and `stop()` can now cancel it.
-    private func settleAfterNativeSwitch(_ number: Int?) {
+    private func settleAfterDesktopSwitch(_ number: Int?) {
         deferred.schedule(
-            .nativeSpaceSettle,
+            .desktopSettle,
             after: .milliseconds(600)
         ) { [weak self] in
-            self?.nativeSpaceSettle(ifStill: number)
+            self?.desktopSettle(ifStill: number)
         }
     }
 
     /// The settle body, split out so tests can fire it without
     /// waiting out the 600 ms schedule.
-    func nativeSpaceSettle(ifStill number: Int?) {
-        guard lastNativeSpace == number else { return }
+    func desktopSettle(ifStill number: Int?) {
+        guard lastDesktop == number else { return }
         // A fullscreen/system space: the retile, z-order
         // restore and refocus stand down (#670) — the refocus
         // would AX-raise the desktop's focused window behind
@@ -268,21 +268,21 @@ extension KiwiCore {
     /// caller means "no authoritative Desktop", which no-ops, so
     /// the live read belongs to the no-argument convenience
     /// alone.
-    func applyNativeSpaceBinding(desktop: Int?) {
+    func applyDesktopBinding(desktop: Int?) {
         guard let number = desktop,
-            let name = nativeSpaceBindings[number],
+            let name = desktopBindings[number],
             name != profiles.currentName
         else { return }
         do {
             let profile = try profiles.load(name: name)
             apply(profile: profile, forceRetile: false)
             onLog(
-                "native space \(number): loaded profile "
+                "Desktop \(number): loaded profile "
                     + "'\(name)'"
             )
         } catch {
             onLog(
-                "native space \(number): cannot load "
+                "Desktop \(number): cannot load "
                     + "profile '\(name)': \(error)"
             )
         }

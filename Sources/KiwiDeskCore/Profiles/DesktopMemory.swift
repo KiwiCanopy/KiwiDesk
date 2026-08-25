@@ -27,7 +27,7 @@ final class DesktopMemory {
     /// Desktop switched.
     ///
     /// **Seeded at boot** (`KiwiCore+BootSeams`), beside
-    /// `lastNativeSpace`. Left empty, the session's first switch
+    /// `lastDesktop`. Left empty, the session's first switch
     /// diffs against nothing, reads every display as changed, and
     /// the main-outranks tiebreak then attributes a secondary
     /// swipe to `monitor: 1` — the field `docs/cli.md` tells

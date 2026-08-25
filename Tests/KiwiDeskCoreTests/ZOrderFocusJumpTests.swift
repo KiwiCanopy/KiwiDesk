@@ -6,7 +6,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// #674: the scrolling edge-pile restore was armed only by swaps,
-/// window drags and native space switches — never by a plain
+/// window drags and Desktop switches — never by a plain
 /// focus change or an App Bar drop. A ±1 focus step masked the
 /// gap (the lone target raise is the whole visible change), but
 /// an App Bar item carries an absolute `WindowID`, so a click can
