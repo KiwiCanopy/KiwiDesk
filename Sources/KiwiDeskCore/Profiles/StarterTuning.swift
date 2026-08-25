@@ -22,8 +22,34 @@ public enum StarterTuning {
         settings.gapsGlobal = .uniform(8)
         settings.stack.masterRatio = 0.8
         settings.track.newWindow = .ownTrack
+        settings.scrolling.slotSize = .fraction(
+            clamping: standardSlot
+        )
         return settings
     }
+
+    /// The Scrolling slot a starter setup opens with, as a
+    /// fraction of the scroll axis (#1018).
+    ///
+    /// Explicit rather than `.auto`, which resolves near-full and
+    /// shows one window with a sliver of the next — the shape
+    /// that reads as "my windows were squashed into one" instead
+    /// of "the neighbours are one keystroke away". Just under a
+    /// half puts two side by side with the gap between them
+    /// visible, which is the picture that teaches the mode.
+    ///
+    /// **One profile-wide value, not a per-space override.**
+    /// A first-run profile full of overrides is a second config
+    /// the user has to understand before changing the first, and
+    /// `StarterTuning`'s whole premise is that the main screen
+    /// names the tuning — see this type's doc comment.
+    static let standardSlot = 0.48
+    /// …and the ultrawide answer, where 48 % of 3440 pt is a
+    /// 1650 pt column: wider than anything wants to be. Three
+    /// readable columns instead. `ScrollSize.auto`'s own doc
+    /// names this screen as the case that should set an explicit
+    /// size, which is what this is.
+    static let ultrawideSlot = 0.3
 
     /// The base, tuned for the main screen's shape.
     public static func settings(
@@ -59,6 +85,9 @@ public enum StarterTuning {
             settings.stack.masterCount = 2
             settings.track.autoTracks = true
             settings.minWindowSize = 420
+            settings.scrolling.slotSize = .fraction(
+                clamping: ultrawideSlot
+            )
         case .pivoted:
             // Everything that assumes width has to flip. The
             // Space Bar needs no move — its default edge is

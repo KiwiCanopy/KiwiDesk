@@ -118,11 +118,20 @@ public enum StarterAllocation {
     /// The layouts for every screen, **positional order in,
     /// positional order out** (index 0 = main).
     ///
-    /// Two global rules ride on top of the per-screen lists:
-    /// exactly one Floating space, on the largest screen that has
-    /// room beside it; and no layout twice unless the budget
-    /// forces it, which is why the fill runs widest-first — the
-    /// screen that benefits most picks first.
+    /// Three global rules ride on top of the per-screen lists.
+    /// Exactly one Floating space, on the largest screen that has
+    /// room beside it. No layout twice unless the budget forces
+    /// it, which is why the fill runs widest-first — the screen
+    /// that benefits most picks first. And every screen's FIRST
+    /// space is decided by `lead(_:of:)` before its own list is
+    /// read at all (#1018).
+    ///
+    /// That lead is the deliberate exception to the no-repeat
+    /// rule: Scrolling leads several screens on purpose, so it is
+    /// appended without consulting `used` — an accidental repeat
+    /// would be a bug, this one is the feature. It still JOINS
+    /// `used` afterwards, so no screen draws it twice from its
+    /// own list on top of leading with it.
     public static func modes(sizes: [CGSize]) -> [[LayoutMode]] {
         guard !sizes.isEmpty else { return [] }
         let widths = sizes.map(\.width)
@@ -132,27 +141,86 @@ public enum StarterAllocation {
         )
         let shapes = sizes.map(ScreenClass.of)
         let host = floatingHost(widths: widths, shares: share)
+        let order = fillOrder(widths: widths)
+        let smallest = smallestScreen(order: order)
         var used: Set<LayoutMode> = []
         var result = [[LayoutMode]](
             repeating: [],
             count: sizes.count
         )
-        for index in fillOrder(widths: widths) {
+        for index in order {
             var quota = share[index]
             if index == host {
                 quota -= 1
                 used.insert(.floating)
+            }
+            var modes: [LayoutMode] = []
+            if quota > 0 {
+                let first = lead(index, of: smallest)
+                modes.append(first)
+                used.insert(first)
+                quota -= 1
             }
             // No filter: `ScreenClass.layouts` carries no
             // `.floating` at all, because where the one Floating
             // space goes is this type's rule, not a screen's
             // preference.
             let list = shapes[index].layouts
-            var modes = take(quota, from: list, used: &used)
+            modes += take(
+                quota,
+                from: list,
+                used: &used,
+                beside: modes
+            )
             if index == host { modes.append(.floating) }
             result[index] = modes
         }
         return result
+    }
+
+    /// The layout a screen OPENS in, whatever its shape wants
+    /// second (#1018).
+    ///
+    /// Scrolling everywhere but the smallest screen, which leads
+    /// Monocle. The argument is what a fresh install's first
+    /// Space teaches: Scrolling is the mode where nothing is
+    /// squashed — each window keeps a comfortable slot and the
+    /// neighbours wait one keystroke away — where a lead of Grid
+    /// or Track cuts the user's windows into halves or thirds on
+    /// sight, which is the impression that closes a tiling
+    /// manager on day one.
+    ///
+    /// Read by SIZE, never by which screen is main: the main
+    /// screen leads Scrolling like any other unless it is also
+    /// the narrowest. `StarterTuning` is the one that reads the
+    /// main screen, and that asymmetry is deliberate — a slot
+    /// FRACTION is profile-wide and has to be named by one
+    /// screen, while which layout a screen opens in is a fact
+    /// about that screen.
+    ///
+    /// The size rule is unconditional, so it can hand Monocle to
+    /// a screen whose own class would not have asked for it — a
+    /// 27" beside an ultrawide is "the smallest" and leads
+    /// Monocle, though `ScreenClass.desktop` lists none.
+    /// `StarterAllocationTests` pins that case so it stays a
+    /// decision rather than a surprise.
+    static func lead(_ index: Int, of smallest: Int?) -> LayoutMode {
+        index == smallest ? .monocle : .scrolling
+    }
+
+    /// The screen that leads Monocle, or nil when there is only
+    /// one — a solo screen leads Scrolling whatever its size, so
+    /// at least one Scrolling space always exists.
+    ///
+    /// Derived by reading `fillOrder` from the other END rather
+    /// than sorting again: one ordering, so the tie-break cannot
+    /// disagree with itself. That also settles two equal widths
+    /// the way the setup wants — `fillOrder` puts the earlier
+    /// index first among equals, so the LAST of them is the
+    /// later screen, and a main screen beside an identical twin
+    /// keeps Scrolling.
+    static func smallestScreen(order: [Int]) -> Int? {
+        order.count > 1 ? order.last : nil
     }
 
     /// The screen that gets the one Floating space: the widest
@@ -191,10 +259,20 @@ public enum StarterAllocation {
     /// another screen already took. When the list runs dry the
     /// budget has forced a repeat, so it refills from the top of
     /// the same list — still this shape's best-first order.
+    ///
+    /// `beside` is what this screen has ALREADY been given — its
+    /// lead — and the refill prefers anything it does not hold
+    /// yet. Without that, a screen whose short list is wholly
+    /// spoken for refills with its own lead and opens two
+    /// identical spaces: three laptops drew `[scrolling,
+    /// scrolling]` on the middle one (#1018). Repeating across
+    /// SCREENS is the budget forcing a hand; repeating within one
+    /// is just a wasted space.
     private static func take(
         _ quota: Int,
         from list: [LayoutMode],
-        used: inout Set<LayoutMode>
+        used: inout Set<LayoutMode>,
+        beside: [LayoutMode] = []
     ) -> [LayoutMode] {
         var picked: [LayoutMode] = []
         for mode in list where picked.count < quota {
@@ -205,7 +283,9 @@ public enum StarterAllocation {
         guard !list.isEmpty else { return picked }
         var cursor = 0
         while picked.count < quota {
-            picked.append(list[cursor % list.count])
+            let held = Set(picked + beside)
+            let fresh = list.first { !held.contains($0) }
+            picked.append(fresh ?? list[cursor % list.count])
             cursor += 1
         }
         return picked

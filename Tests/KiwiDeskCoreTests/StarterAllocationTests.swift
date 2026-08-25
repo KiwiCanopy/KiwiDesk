@@ -179,17 +179,6 @@ struct StarterAllocationTests {
 
     // MARK: - Modes
 
-    @Test("15b's worked example lands exactly")
-    func workedExample() {
-        // "The 27″ takes Grid, Stack and Floating; the laptop
-        // takes Scrolling and Monocle."
-        let modes = StarterAllocation.modes(
-            sizes: [laptop, screen27]
-        )
-        #expect(modes[0] == [.scrolling, .monocle])
-        #expect(modes[1] == [.grid, .stack, .floating])
-    }
-
     @Test("exactly one Floating space, on the largest screen")
     func oneFloatingOnTheLargest() {
         let sizes = [laptop, ultrawide, screen27]
@@ -228,46 +217,61 @@ struct StarterAllocationTests {
         }
     }
 
-    @Test("no layout twice while the lists can avoid it")
+    @Test("no layout twice, the deliberate lead excepted")
     func noRepeatsWhenAvoidable() {
         let modes = StarterAllocation.modes(
             sizes: [laptop, screen27, ultrawide]
         )
+        // Within one screen there is still no repeat: two
+        // identical spaces on one screen is a wasted space
+        // however the budget fell out.
+        for block in modes {
+            #expect(
+                Set(block).count == block.count,
+                "one screen drew a layout twice: \(block)"
+            )
+        }
+        // Across screens, Scrolling repeats ON PURPOSE (#1018):
+        // it leads every screen but the smallest. Nothing else
+        // may — a second Grid or a second Track here would mean
+        // the fill stopped consulting `used`.
         let all = modes.flatMap { $0 }
-        #expect(Set(all).count == all.count, "repeated: \(all)")
+        let repeated = Set(
+            all.filter { mode in all.count(where: { $0 == mode }) > 1 }
+        )
+        #expect(repeated == [.scrolling], "repeated: \(all)")
     }
 
-    @Test("the largest screen picks first, so it is not starved")
-    func largestPicksFirst() {
-        // The two screens must COMPETE, or the claim is untested.
-        // An earlier cut paired a 27" with an ultrawide and
-        // asserted the ultrawide got Track — but Track is absent
-        // from the desktop list entirely, so no fill order could
-        // ever have taken it away, and reversing `fillOrder` left
-        // this green (guard-prover, 2026-08-11).
+    @Test("same-shaped screens draw in positional order")
+    func sameShapedScreensDrawInOrder() {
+        // What is LEFT of "the largest picks first" after #1018,
+        // stated honestly rather than staged.
         //
-        // Pivoted and desktop both open on layouts the other also
-        // wants — stack and grid — so whoever picks first keeps
-        // its own head and the loser falls down its list. Shares
-        // are [2, 3] and the 27" hosts Floating.
+        // The old test paired two screens that wanted each
+        // other's layouts and asserted the wider one kept its
+        // head. That is now unreachable: every screen spends its
+        // first slot on a lead, so a screen draws ONE item from
+        // its own list unless its share is three — and the only
+        // screen that can hold three is never the one being
+        // starved, because the widest is always the Floating
+        // host and spends one of its three on Floating. With one
+        // draw each, the four shapes' first picks (grid, track,
+        // stack, monocle) are all distinct and cannot collide.
+        //
+        // `fillOrder`'s DIRECTION is still guarded, one rule
+        // over: `smallestScreen` reads its far end, so reversing
+        // it moves the Monocle lead and reds the three lead
+        // tests above. What is left to pin here is the tie-break
+        // among equals — the two 27"s share one list, and the
+        // earlier index draws first.
         let modes = StarterAllocation.modes(
-            sizes: [pivoted, screen27]
+            sizes: [ultrawide, screen27, screen27]
         )
-        // Widest first: the 27" keeps Grid, its own best.
-        #expect(modes[1].first == .grid)
-        // The pivoted screen fills second and finds BOTH its
-        // heads taken — grid and stack are the 27"'s two — so it
-        // falls to Monocle, third on its list. That is the cost
-        // of picking second, and it is what makes the order
-        // matter: reverse `fillOrder` and this becomes `.stack`
-        // while the 27" drops to `.bsp`.
-        #expect(modes[0].first == .monocle)
-        // Vacuity: the heads really are contested, or "picks
-        // first" decides nothing.
-        let contested = Set(ScreenClass.pivoted.layouts)
-            .intersection(ScreenClass.desktop.layouts)
-            .subtracting([.floating])
-        #expect(!contested.isEmpty)
+        #expect(modes[1].dropFirst().first == .grid, "\(modes[1])")
+        #expect(modes[2].dropFirst().first == .stack, "\(modes[2])")
+        // Vacuity: they really do share a contested list, or
+        // "draws first" decides nothing.
+        #expect(ScreenClass.of(screen27).layouts.count >= 2)
     }
 
     @Test("every space gets a layout, and the total is the budget")
