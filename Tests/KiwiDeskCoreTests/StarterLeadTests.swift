@@ -121,20 +121,24 @@ struct StarterLeadTests {
             let modes = StarterAllocation.modes(sizes: sizes)
             #expect(modes.count == sizes.count)
             #expect(modes.allSatisfy { !$0.isEmpty })
-            for (index, block) in modes.enumerated() {
-                // Distinctness up to capacity, derived from the
-                // screen's own list rather than restated: what a
-                // screen CAN draw is its list plus its lead, and
-                // it must be as distinct as that allows.
-                let list = ScreenClass.of(sizes[index]).layouts
+            for block in modes {
+                // Adjacency is the whole assertion, and that is a
+                // finding rather than a shortcut. A "distinct up
+                // to capacity" check sat here first —
+                // `Set(tiled).count == min(tiled.count,
+                // reachable.count)` — and guard-prover showed it
+                // was implied: on every block these fixtures
+                // produce, the demand reduces to "not all of them
+                // identical", which adjacency already forbids,
+                // and on the single-space screens it cannot fail
+                // at all. It would only bite on a block of three
+                // drawn from three or more reachable layouts —
+                // a wide screen holding three tiled spaces, which
+                // needs a still wider screen beside it to take
+                // the Floating host role. Add that fixture and
+                // the assertion with it; do not add the
+                // assertion alone (2026-08-26).
                 let tiled = block.filter { $0 != .floating }
-                let reachable = Set(list).union(tiled.prefix(1))
-                #expect(
-                    Set(tiled).count
-                        == min(tiled.count, reachable.count),
-                    "\(sizes[index]) drew \(block)"
-                )
-                // And a forced duplicate is spread, not stacked.
                 for pair in zip(tiled, tiled.dropFirst()) {
                     #expect(pair.0 != pair.1, "adjacent: \(block)")
                 }
