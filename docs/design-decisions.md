@@ -2185,15 +2185,55 @@ count and then one more each, soft-capped at ten, with each
 screen's share proportional to its width and clamped to 1...3.
 The cap is on *spaces*, so min-one-per-screen outranks it:
 eleven displays gets eleven spaces, because a screen with none
-has nowhere for a window to resolve to. Two rules ride on top —
+has nowhere for a window to resolve to. Three rules ride on top —
 exactly one Floating space, on the largest screen that has room
-beside it, and no layout twice unless the budget forces it. The
+beside it; the lead ruled below; and no layout twice unless the
+budget forces it or the lead repeats it deliberately. The
 count tails off because screens four and five are almost always
 glanceable (logs, chat, a stream) and want one space that is
 always the same; the cost of a space is a key to bind and a name
 to recall, not screen area. And we run out of keys before we run
 out of spaces: past ⌥1–9 and ⌥0 there are no default go-to keys
 left.
+
+**Every screen opens in Scrolling but the smallest, which opens
+in Monocle.** The shape rule above decides what a screen is good
+for; it does not decide what the user should be shown FIRST, and
+for a while it did both. Best-first meant a 2560 pt desktop led
+with Grid and an ultrawide with Track, so the first thing most
+new users saw was their windows cut into halves or thirds — the
+impression that makes people close a tiling manager on day one.
+Scrolling is the one mode where nothing is squashed: each window
+keeps a comfortable slot and the neighbours wait one keystroke
+away. So it leads, and the rest of each screen's list follows
+behind it unchanged.
+
+The exception is by SIZE, not by class and not by which screen is
+main: rank the screens by width and the narrowest leads Monocle,
+which is what a small screen is best at. A solo screen leads
+Scrolling whatever its size, so at least one Scrolling space
+always exists. Two consequences are deliberate and worth stating,
+because both look like bugs from close up. The rule is
+unconditional, so a 27" beside an ultrawide is "the smallest" and
+leads Monocle although its own class lists none — being smallest
+is a fact about the setup, and a per-class qualification would
+make the answer depend on two things instead of one. And
+Scrolling now leads several screens at once, which the
+no-layout-twice rule had to be carved out for explicitly: an
+accidental repeat is still a bug, this one is the feature.
+
+**A starter Scrolling slot is set, not left on `auto`.** `auto`
+resolves near-full — one window with a sliver of the next — which
+reads as "my windows were squashed into one" rather than "the
+neighbours are one keystroke away", and the mode's whole argument
+is the second reading. Just under half the axis puts two windows
+side by side with the gap visible, which is the picture that
+teaches the mode; an ultrawide takes 30% for three readable
+columns, the case `ScrollSize.auto` already documented as wanting
+an explicit size. One profile-wide value and no per-space
+overrides: a first-run profile full of overrides is a second
+config the user has to understand before changing the first.
+(Owner ruling, 2026-08-25.)
 
 **One tuning per profile, and it is the main screen's.** This is
 not a preference — `TilingSettings` is profile-wide, so a laptop
