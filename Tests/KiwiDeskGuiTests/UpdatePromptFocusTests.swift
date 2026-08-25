@@ -22,6 +22,10 @@ import Testing
 /// asserted through the ObjC runtime rather than through a
 /// spelling.
 ///
+/// The identity-versus-spelling limit on the WIRING is
+/// `UpdatePromptWiringTests`' to state, and is stated there
+/// rather than restated here. What follows is this suite's own.
+///
 /// **A source needle reads a spelling, never a value or a
 /// control path**, and the limit is stated rather than left to
 /// be discovered. Two shapes pass while the behaviour is gone:

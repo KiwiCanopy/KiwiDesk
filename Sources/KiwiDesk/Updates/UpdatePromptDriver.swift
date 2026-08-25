@@ -40,10 +40,23 @@ final class UpdatePromptPolicy: NSObject,
         false
     }
 
-    /// Come forward for Sparkle's modal alerts too — an updater
-    /// error, or the acknowledgement after an install. Each is a
-    /// window the user must answer, and `.accessory` puts none of
-    /// them in front by itself.
+    /// Come forward for Sparkle's modal alerts too. There are
+    /// three: an updater error, "you're up to date", and the
+    /// acknowledgement after an install. Each is a window the
+    /// user must answer, and `.accessory` puts none of them in
+    /// front by itself.
+    ///
+    /// **Unconditional only because Sparkle gates them already**
+    /// — a scheduled check passes `showErrorToUser:_showedUpdate`
+    /// (`SPUScheduledUpdateDriver.m`, Sparkle 2.9.6), so an alert
+    /// reaches here only once the user was engaged, where a
+    /// user-initiated check passes `YES`. That is what keeps this
+    /// on the right side of the scoping in
+    /// `docs/design-decisions.md` ▸ *Permanent accessory mode*:
+    /// none of these is an unsolicited offer. If a Sparkle
+    /// upgrade ever routes one through `showAlert:` unprompted,
+    /// this site would activate for it and no guard would say
+    /// so — check that gate when the version moves.
     func standardUserDriverWillShowModalAlert() {
         NSApp.activate(ignoringOtherApps: true)
     }

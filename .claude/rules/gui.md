@@ -214,10 +214,12 @@ pins — a bump re-checks it): `UpdatePromptDriver` overrides
 the status window's minimize button.
 
 **A guard on such an override pins the WIRING beside the body**
-— `UpdatePromptFocusTests` holds that the framework is shown
+— `UpdatePromptWiringTests` holds that the framework is shown
 through that driver and not a stock one, because an override
 left in place and no longer reached is how the defect returns
-with every count still at one.
+with every count still at one. It is a suite of its own for
+that reason: `UpdatePromptFocusTests` reads what the override
+DECLARES and structurally cannot see what it is wired to.
 
 ## A window that must clear the bars derives its level
 
