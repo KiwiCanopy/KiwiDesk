@@ -105,6 +105,11 @@ struct StarterLeadTests {
         let modes = StarterAllocation.modes(
             sizes: [laptop, laptop, laptop]
         )
+        // Floor first: `Set([]).count == [].count` holds, so a
+        // fill that produced nothing at all would walk this loop
+        // and pass (guard-prover, 2026-08-26).
+        #expect(modes.count == 3)
+        #expect(modes.allSatisfy { !$0.isEmpty })
         for block in modes {
             #expect(
                 Set(block).count == block.count,
