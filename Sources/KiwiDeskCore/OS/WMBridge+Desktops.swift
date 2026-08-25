@@ -38,10 +38,24 @@ extension WMBridge {
         return field("string", of: performSync(op))
     }
 
-    /// The Desktop's key/value store — the WindowServer's own
-    /// dictionary (`type`, `id64`, `uuid`, Apple's
-    /// `WindowManagerInfo`, …) with KiwiDesk's
-    /// `valueKeyPrefix` keys beside them.
+    /// KiwiDesk's own entries in the Desktop's store, keys as the
+    /// caller wrote them — the read half of `setValues(_:of:)`,
+    /// which prefixes on the way in, so this strips on the way
+    /// out. Apple's entries are `values(of:)`'s.
+    public static func stamps(of space: SpaceID) -> [String: Any]? {
+        guard let values = values(of: space) else { return nil }
+        var out: [String: Any] = [:]
+        for (key, value) in values where key.hasPrefix(valueKeyPrefix) {
+            out[String(key.dropFirst(valueKeyPrefix.count))] = value
+        }
+        return out
+    }
+
+    /// The Desktop's whole store as the WindowServer holds it —
+    /// Apple's own dictionary (`type`, `id64`, `uuid`,
+    /// `WindowManagerInfo`, …) with KiwiDesk's `valueKeyPrefix`
+    /// keys beside them, prefixed. A caller reading its own
+    /// entries takes `stamps(of:)`.
     public static func values(of space: SpaceID) -> [String: Any]? {
         let op = make(
             "SpaceCopyValuesOperation",

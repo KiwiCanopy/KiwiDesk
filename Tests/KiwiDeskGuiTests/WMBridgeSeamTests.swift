@@ -28,28 +28,20 @@ import Testing
 /// process — one bare read in any suite would make the harness
 /// answer differently per host macOS. This file is excluded from
 /// that scan by path — its `allowed` map spells the wrapper's
-/// file name, which carries the needle — rather than by any
-/// spelling trick.
+/// file name, which carries the needle — and the exclusion is
+/// asserted, so a checkout where the path comparison stopped
+/// matching reds rather than counting this file as compliant.
 @Suite("WMBridge seam")
 struct WMBridgeSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
-    private static let testTrees = [
-        root.appendingPathComponent("Tests/KiwiDeskCoreTests"),
-        root.appendingPathComponent("Tests/KiwiDeskGuiTests"),
-    ]
+    private static let testTrees = SourceScan.targetTrees(
+        under: root.appendingPathComponent("Tests")
+    )
 
     private var sourceRoots: [URL] {
-        let sources = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources")
-        let entries = try? FileManager.default
-            .contentsOfDirectory(
-                at: sources,
-                includingPropertiesForKeys: [.isDirectoryKey]
-            )
-        return (entries ?? []).filter {
-            (try? $0.resourceValues(forKeys: [.isDirectoryKey]))?
-                .isDirectory == true
-        }
+        SourceScan.targetTrees(
+            under: Self.root.appendingPathComponent("Sources")
+        )
     }
 
     /// The needles and, per needle, every file allowed to carry
@@ -110,8 +102,8 @@ struct WMBridgeSeamTests {
 
     @Test("Tests reach the bridge only through the resolver seam")
     func testsReachTheBridgeThroughTheSeam() throws {
-        let needle = "WMBridge" + "."
-        let seam = "classResolver" + "Override"
+        let needle = "WMBridge."
+        let seam = "classResolverOverride"
         var reached: [String] = []
         var strays: [String] = []
         for tree in Self.testTrees {
@@ -127,8 +119,10 @@ struct WMBridgeSeamTests {
                 }
             }
         }
-        // Non-vacuous: the plumbing suite itself must be seen.
+        // Non-vacuous: the plumbing suite itself must be seen —
+        // and this file must not be, or the exclusion is dead.
         #expect(reached.contains("WMBridgeTests.swift"))
+        #expect(!reached.contains("WMBridgeSeamTests.swift"))
         #expect(
             strays.isEmpty,
             """

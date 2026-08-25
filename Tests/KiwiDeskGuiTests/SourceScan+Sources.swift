@@ -42,6 +42,28 @@ extension SourceScan {
         return stripped
     }
 
+    /// Every target directory under `Sources/` or `Tests/`,
+    /// discovered rather than listed — a third target added to
+    /// `Package.swift` is otherwise scanned by nothing, and a
+    /// guard's whole argument is about the code not yet written
+    /// (`ResourceBundleRoutingTests`; the test-tree twins used
+    /// to hand-list the two test targets three times over).
+    static func targetTrees(
+        under parent: URL
+    ) -> [URL] {
+        let entries = try? FileManager.default
+            .contentsOfDirectory(
+                at: parent,
+                includingPropertiesForKeys: [.isDirectoryKey]
+            )
+        return (entries ?? [])
+            .filter {
+                (try? $0.resourceValues(forKeys: [.isDirectoryKey]))?
+                    .isDirectory == true
+            }
+            .sorted { $0.path < $1.path }
+    }
+
     /// Enumerates all `.swift` files under `directory`, cached in-memory.
     static func swiftSources(
         under directory: URL

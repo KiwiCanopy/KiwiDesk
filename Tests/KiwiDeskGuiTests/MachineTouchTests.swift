@@ -35,10 +35,9 @@ struct MachineTouchTests {
         root.appendingPathComponent("Sources/KiwiDeskCore"),
         root.appendingPathComponent("Sources/KiwiDesk"),
     ]
-    private static let testTrees = [
-        root.appendingPathComponent("Tests/KiwiDeskCoreTests"),
-        root.appendingPathComponent("Tests/KiwiDeskGuiTests"),
-    ]
+    private static let testTrees = SourceScan.targetTrees(
+        under: root.appendingPathComponent("Tests")
+    )
 
     private static func sites(
         of needle: String,

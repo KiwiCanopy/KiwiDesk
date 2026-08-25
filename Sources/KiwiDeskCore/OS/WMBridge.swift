@@ -6,10 +6,9 @@ import ObjectiveC
 /// and #889 probed: moving windows between Desktops, switching
 /// the visible Desktop, Desktop lifecycle, sticky membership and
 /// the per-Desktop key/value store, all on stock macOS with SIP
-/// on. Present on macOS 26.6.1 (25G76, observed 2026-08-18); no
-/// earlier build has been probed, so nothing here names a
-/// cutoff — the nil class lookup IS the version gate (#889
-/// item 8).
+/// on. Which builds carry the classes is os-private-apis.md's
+/// dated fact; nothing here names a cutoff — the nil class
+/// lookup IS the version gate (#889 item 8).
 ///
 /// The discipline is `SkyLight`'s, extended from C symbols to
 /// ObjC classes: every class is looked up by name at runtime
@@ -81,8 +80,7 @@ public enum WMBridge {
         /// operation classes — or nil, to prove the absent
         /// capability degrades rather than traps — without
         /// touching the machine's WindowServer.
-        public static nonisolated(unsafe) var classResolverOverride:
-            ((String) -> AnyClass?)?
+        public static var classResolverOverride: ((String) -> AnyClass?)?
     #endif
 
     /// Whether the bridge is usable in THIS process: the

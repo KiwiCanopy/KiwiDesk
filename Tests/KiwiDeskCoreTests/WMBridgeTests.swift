@@ -37,6 +37,24 @@ private final class FakeNumbersResult: NSObject {
     init(numbers: [NSNumber]) { self.numbers = numbers }
 }
 
+private final class FakePlistDictionaryResult: NSObject {
+    @objc let propertyListDictionary: [String: Any]
+    init(propertyListDictionary: [String: Any]) {
+        self.propertyListDictionary = propertyListDictionary
+    }
+}
+
+private final class FakeCopyValues: NSObject {
+    @objc(initWithSpaceID:)
+    init(spaceID: UInt64) { Seen.spaceID = spaceID }
+
+    @objc func performWithWMBridgeDelegate() -> AnyObject? {
+        FakePlistDictionaryResult(propertyListDictionary: [
+            "type": 0, "id64": 5, "kiwidesk.stamp": 1,
+        ])
+    }
+}
+
 private final class FakePlistArrayResult: NSObject {
     @objc let propertyListArray: [[String: Any]]
     init(propertyListArray: [[String: Any]]) {
@@ -157,6 +175,7 @@ struct WMBridgeTests {
             #expect(WMBridge.managedDisplaySpaces() == nil)
             #expect(WMBridge.name(of: 1) == nil)
             #expect(WMBridge.values(of: 1) == nil)
+            #expect(WMBridge.stamps(of: 1) == nil)
             #expect(WMBridge.spaces(for: [WindowID(1)]) == nil)
             #expect(
                 WMBridge.setCurrentSpace(1, displayIdentifier: "M")
@@ -266,6 +285,20 @@ struct WMBridgeTests {
                     == ["kiwidesk.already", "kiwidesk.stamp"]
             )
             #expect(Seen.values["kiwidesk.stamp"] as? Int == 1)
+        }
+    }
+
+    @Test("A stamp reads back under the key it was written with")
+    func stampsRoundTrip() {
+        resolving(["SpaceCopyValuesOperation": FakeCopyValues.self]) {
+            let stamps = WMBridge.stamps(of: 5)
+            #expect(Seen.spaceID == 5)
+            #expect(stamps?.keys.sorted() == ["stamp"])
+            #expect(stamps?["stamp"] as? Int == 1)
+            // The whole store stays Apple's shape, prefixed.
+            let values = WMBridge.values(of: 5)
+            #expect(values?["kiwidesk.stamp"] as? Int == 1)
+            #expect(values?["type"] as? Int == 0)
         }
     }
 }
