@@ -47,7 +47,7 @@ jobs:
       tag: ${{ steps.upstream.outputs.tag }}
       run: ${{ steps.upstream.outputs.run }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Resolve the upstream tag
         id: upstream
@@ -97,7 +97,7 @@ jobs:
     env:
       TAG: ${{ needs.check.outputs.tag }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Select Xcode
         run: |
