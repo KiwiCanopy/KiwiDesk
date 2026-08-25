@@ -94,7 +94,10 @@ struct MachineTouchTests {
             of: "KiwiCore" + "(",
             under: Self.testTrees
         )
-        // Both twins must be alive and constructing.
+        // Both twins must be alive and constructing — and the
+        // tree list itself non-empty, or this loop asserts
+        // nothing and an empty walk passes as "no strays".
+        #expect(!Self.testTrees.isEmpty, "no test trees under Tests/")
         for tree in Self.testTrees {
             let name = tree.lastPathComponent
             #expect(
