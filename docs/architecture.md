@@ -90,11 +90,10 @@ flowchart TD
    path resolves private SkyLight/CGS symbols at runtime via `dlsym`;
    every private call **falls back** to the public Accessibility API
    when the lookup returns nil (never link private symbols; never
-   disable SIP — §5). SkyLight's window-management operation
-   classes (macOS 26+) are reached the same way through one
-   wrapper, `WMBridge`, which looks each class up by name at
-   runtime and reports the capability absent when it does not
-   resolve.
+   disable SIP — §5). The same runtime-resolution discipline
+   covers SkyLight's ObjC window-management operation classes
+   through one wrapper, `WMBridge`: a class that does not
+   resolve reads as the capability absent.
 
 Event-driven retiles run **un-forced**, so the engine's ±2 pt "already
 there" tolerance can absorb AX-echo lag without wobbling windows.

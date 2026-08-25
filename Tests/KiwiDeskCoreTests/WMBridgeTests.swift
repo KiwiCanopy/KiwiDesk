@@ -10,26 +10,26 @@ import Testing
 /// test; the suite is serialized because this and the resolver
 /// seam are process-global.
 private enum Seen {
-    nonisolated(unsafe) static var displayIdentifier: String?
-    nonisolated(unsafe) static var windows: [NSNumber] = []
     nonisolated(unsafe) static var spaceID: UInt64 = 0
+    nonisolated(unsafe) static var windows: [NSNumber] = []
+    nonisolated(unsafe) static var values: [String: Any] = [:]
     nonisolated(unsafe) static var performed = 0
     nonisolated(unsafe) static var requested: [String] = []
 
     static func reset() {
-        displayIdentifier = nil
-        windows = []
         spaceID = 0
+        windows = []
+        values = [:]
         performed = 0
         requested = []
     }
 }
 
-/// A result object shaped like the bridge's own: one declared
+/// Result objects shaped like the bridge's own: one declared
 /// property, read by key.
-private final class FakeSpaceIDResult: NSObject {
-    @objc let spaceID: UInt64
-    init(spaceID: UInt64) { self.spaceID = spaceID }
+private final class FakeStringResult: NSObject {
+    @objc let string: String
+    init(string: String) { self.string = string }
 }
 
 private final class FakeNumbersResult: NSObject {
@@ -45,26 +45,26 @@ private final class FakePlistArrayResult: NSObject {
 }
 
 /// A SYNCHRONOUS operation: `perform…` returns a result object.
-private final class FakeGetCurrentSpace: NSObject {
-    @objc(initWithDisplayIdentifier:)
-    init(displayIdentifier: String) {
-        Seen.displayIdentifier = displayIdentifier
-    }
+private final class FakeCopyName: NSObject {
+    @objc(initWithSpaceID:)
+    init(spaceID: UInt64) { Seen.spaceID = spaceID }
 
     @objc func performWithWMBridgeDelegate() -> AnyObject? {
         Seen.performed += 1
-        return FakeSpaceIDResult(spaceID: 42)
+        return FakeStringResult(string: "Work")
     }
 }
 
-/// A synchronous operation whose delegate is ABSENT — the
-/// AppKit-not-loaded shape: the class resolves, the operation
-/// initialises, and `perform…` answers nil.
-private final class FakeDeafGetCurrentSpace: NSObject {
-    @objc(initWithDisplayIdentifier:)
-    init(displayIdentifier: String) {}
+/// A synchronous operation whose result no longer DECLARES the
+/// key the wrapper reads — the release-churn shape one level
+/// below the class vanishing.
+private final class FakeCopyNameWithoutKey: NSObject {
+    @objc(initWithSpaceID:)
+    init(spaceID: UInt64) {}
 
-    @objc func performWithWMBridgeDelegate() -> AnyObject? { nil }
+    @objc func performWithWMBridgeDelegate() -> AnyObject? {
+        NSObject()
+    }
 }
 
 private final class FakeCopyManagedDisplaySpaces: NSObject {
@@ -75,6 +75,15 @@ private final class FakeCopyManagedDisplaySpaces: NSObject {
             ["Display Identifier": "Main", "Spaces": []]
         ])
     }
+}
+
+/// The availability probe with its delegate ABSENT — the
+/// AppKit-not-loaded shape: the class resolves, the operation
+/// initialises, and `perform…` answers nil.
+private final class FakeDeafCopyManagedDisplaySpaces: NSObject {
+    @objc override init() {}
+
+    @objc func performWithWMBridgeDelegate() -> AnyObject? { nil }
 }
 
 private final class FakeCopySpacesForWindows: NSObject {
@@ -104,14 +113,28 @@ private final class FakeMoveWindows: NSObject {
     }
 }
 
+private final class FakeSetValues: NSObject {
+    @objc(initWithSpaceID:values:)
+    init(spaceID: UInt64, values: [String: Any]) {
+        Seen.spaceID = spaceID
+        Seen.values = values
+    }
+
+    @objc func performWithWMBridgeDelegate() {
+        Seen.performed += 1
+    }
+}
+
 // MARK: - Suite
 
 /// The wrapper's contract, proven through its resolver seam and
 /// never against the machine (`tests.md`): an absent class
-/// degrades to nil/false without a trap, a synchronous result is
-/// read by key, an asynchronous dispatch passes its C scalars
-/// through, and a resolving class whose delegate is deaf reads
-/// as unavailable.
+/// degrades to nil/false without a trap, so does a result that
+/// lost its key, a synchronous result is read by key, an
+/// asynchronous dispatch passes its C scalars through, a
+/// resolving class whose delegate is deaf reads as unavailable,
+/// and every custom store key leaves under the wrapper's prefix.
+@MainActor
 @Suite("WMBridge plumbing", .serialized)
 struct WMBridgeTests {
     private func resolving(
@@ -131,11 +154,7 @@ struct WMBridgeTests {
     func absentCapabilityDegrades() {
         resolving([:]) {
             #expect(WMBridge.isAvailable == false)
-            #expect(WMBridge.managedDisplays() == nil)
             #expect(WMBridge.managedDisplaySpaces() == nil)
-            #expect(
-                WMBridge.currentSpace(displayIdentifier: "M") == nil
-            )
             #expect(WMBridge.name(of: 1) == nil)
             #expect(WMBridge.values(of: 1) == nil)
             #expect(WMBridge.spaces(for: [WindowID(1)]) == nil)
@@ -170,16 +189,19 @@ struct WMBridgeTests {
 
     @Test("A synchronous result is read by its declared key")
     func synchronousResultIsReadByKey() {
-        resolving([
-            "ManagedDisplayGetCurrentSpaceOperation":
-                FakeGetCurrentSpace.self
-        ]) {
-            let space = WMBridge.currentSpace(
-                displayIdentifier: "D-1"
-            )
-            #expect(space == 42)
-            #expect(Seen.displayIdentifier == "D-1")
+        resolving(["SpaceCopyNameOperation": FakeCopyName.self]) {
+            #expect(WMBridge.name(of: 9) == "Work")
+            #expect(Seen.spaceID == 9)
             #expect(Seen.performed == 1)
+        }
+    }
+
+    @Test("A result that lost its key answers nil, never traps")
+    func missingKeyDegrades() {
+        resolving([
+            "SpaceCopyNameOperation": FakeCopyNameWithoutKey.self
+        ]) {
+            #expect(WMBridge.name(of: 9) == nil)
         }
     }
 
@@ -205,10 +227,7 @@ struct WMBridgeTests {
             "CopySpacesForWindowsOperation":
                 FakeCopySpacesForWindows.self
         ]) {
-            let spaces = WMBridge.spaces(
-                for: [WindowID(4)],
-                options: 7
-            )
+            let spaces = WMBridge.spaces(for: [WindowID(4)])
             #expect(spaces == [1, 5])
             #expect(Seen.windows == [4])
             #expect(Seen.spaceID == 7)
@@ -222,16 +241,31 @@ struct WMBridgeTests {
                 FakeCopyManagedDisplaySpaces.self
         ]) {
             #expect(WMBridge.isAvailable)
-            #expect(WMBridge.managedDisplays() == ["Main"])
+            #expect(WMBridge.managedDisplaySpaces()?.count == 1)
         }
         resolving([
-            "ManagedDisplayGetCurrentSpaceOperation":
-                FakeDeafGetCurrentSpace.self
+            "CopyManagedDisplaySpacesOperation":
+                FakeDeafCopyManagedDisplaySpaces.self
         ]) {
-            #expect(
-                WMBridge.currentSpace(displayIdentifier: "M") == nil
-            )
+            #expect(WMBridge.managedDisplaySpaces() == nil)
             #expect(WMBridge.isAvailable == false)
+        }
+    }
+
+    @Test("Custom store keys leave under the wrapper's prefix")
+    func storeKeysAreNamespaced() {
+        resolving(["SpaceSetValuesOperation": FakeSetValues.self]) {
+            let written = WMBridge.setValues(
+                ["stamp": 1, "kiwidesk.already": 2],
+                of: 5
+            )
+            #expect(written)
+            #expect(Seen.spaceID == 5)
+            #expect(
+                Seen.values.keys.sorted()
+                    == ["kiwidesk.already", "kiwidesk.stamp"]
+            )
+            #expect(Seen.values["kiwidesk.stamp"] as? Int == 1)
         }
     }
 }

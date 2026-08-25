@@ -2,11 +2,14 @@ import Foundation
 import ObjectiveC
 
 /// Runtime bridge to SkyLight's window-management operation
-/// classes (`SLSBridged*Operation`, macOS 26+) — the surface
-/// #884 found and #889 probed: moving windows between Desktops,
-/// switching the visible Desktop, Desktop lifecycle, sticky
-/// membership and the per-Desktop key/value store, all on stock
-/// macOS with SIP on.
+/// classes (`SLSBridged*Operation`) — the surface #884 found
+/// and #889 probed: moving windows between Desktops, switching
+/// the visible Desktop, Desktop lifecycle, sticky membership and
+/// the per-Desktop key/value store, all on stock macOS with SIP
+/// on. Present on macOS 26.6.1 (25G76, observed 2026-08-18); no
+/// earlier build has been probed, so nothing here names a
+/// cutoff — the nil class lookup IS the version gate (#889
+/// item 8).
 ///
 /// The discipline is `SkyLight`'s, extended from C symbols to
 /// ObjC classes: every class is looked up by name at runtime
@@ -36,12 +39,41 @@ import ObjectiveC
 /// operation names are joined to it at lookup — so every
 /// bridge call in the tree goes through this file, which
 /// `WMBridgeSeamTests` pins by scanning for the prefix.
+///
+/// Main-actor, like every AppKit interaction (AGENTS.md §2.6):
+/// the operations dispatch through AppKit's registered delegate,
+/// #889 probed them on the main thread only, and the first
+/// `isAvailable` read is a live WindowServer round trip inside
+/// a once-initialiser — a hop to main from inside that lock
+/// while main waited on the same lock would deadlock.
+@MainActor
 public enum WMBridge {
     public typealias SpaceID = SkyLight.SpaceID
 
     /// The one spelling of the class-name prefix (see the type
     /// doc). Joined to an operation's short name at lookup.
     static let classPrefix = "SLSBridged"
+
+    /// Every custom key KiwiDesk writes into a Desktop's store
+    /// carries this prefix — the store is Apple's own dictionary
+    /// (`type`, `id64`, `WindowManagerInfo`, …) and a bare key
+    /// would sit beside theirs (#889 item 3). The wrapper owns
+    /// it: `setValues` and `createSpace` prefix what a caller
+    /// hands them, so a bare key cannot reach the WindowServer.
+    public static let valueKeyPrefix = "kiwidesk."
+
+    /// `values` with every key under `valueKeyPrefix`; a key
+    /// already carrying it is left alone.
+    static func namespaced(_ values: [String: Any]) -> NSDictionary {
+        var out: [String: Any] = [:]
+        for (key, value) in values {
+            let namespacedKey =
+                key.hasPrefix(valueKeyPrefix)
+                ? key : valueKeyPrefix + key
+            out[namespacedKey] = value
+        }
+        return out as NSDictionary
+    }
 
     #if DEBUG
         /// Test seam: answers every class lookup instead of the
@@ -179,8 +211,15 @@ public enum WMBridge {
     }
 
     /// One typed field of a result object, by its declared
-    /// property name (`spaceID`, `numbers`, `string`, …).
+    /// property name (`spaceID`, `numbers`, `string`, …). A
+    /// result that no longer declares the key answers nil — the
+    /// key is the same release-churn surface as the class, and
+    /// `value(forKey:)` on an unknown key raises an ObjC
+    /// exception Swift cannot catch, which is a trap.
     static func field<T>(_ key: String, of result: NSObject?) -> T? {
-        result?.value(forKey: key) as? T
+        guard let result,
+            result.responds(to: NSSelectorFromString(key))
+        else { return nil }
+        return result.value(forKey: key) as? T
     }
 }

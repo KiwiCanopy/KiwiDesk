@@ -9,27 +9,14 @@ import Foundation
 extension WMBridge {
     // MARK: - Reads
 
-    /// Every managed display's identifier — a per-display UUID
-    /// with "Displays have separate Spaces" on, the synthetic
-    /// `"Main"` in shared mode. The representation changes with
-    /// the mode (#889); never assume one shape.
-    ///
-    /// Read off the display/spaces model rather than through
-    /// `CopyManagedDisplaysOperation`, which performs and answers
-    /// nil on 26.6.1 (observed 2026-08-25) — the same
-    /// success-shaped decline as edge reservation, on a read.
-    public static func managedDisplays() -> [String]? {
-        managedDisplaySpaces()?.compactMap {
-            $0["Display Identifier"] as? String
-        }
-    }
-
     /// The full display/spaces model as the WindowServer holds
-    /// it — the same plist `SLSCopyManagedDisplaySpaces` returns,
-    /// through the bridge. `NativeSpaces.allSpaces()` keeps the
-    /// C symbol; this read exists so a consumer of the bridge can
-    /// verify its own writes against ONE source.
-    public static func managedDisplaySpaces() -> [[String: Any]]? {
+    /// it — the same plist `SLSCopyManagedDisplaySpaces` returns.
+    /// Internal on purpose: it is the availability probe (a
+    /// synchronous read that must ANSWER), and the census stays
+    /// `NativeSpaces.allSpaces()`'s — one reader of
+    /// `"Display Identifier"`, `"Current Space"` and the space
+    /// list, which a caller verifying a bridge write reads too.
+    static func managedDisplaySpaces() -> [[String: Any]]? {
         let op = make(
             "CopyManagedDisplaySpacesOperation",
             initializer: "init"
@@ -37,23 +24,6 @@ extension WMBridge {
             sender(as: InitFn.self)?(instance, selector)
         }
         return field("propertyListArray", of: performSync(op))
-    }
-
-    /// The space `displayIdentifier` currently shows.
-    public static func currentSpace(
-        displayIdentifier: String
-    ) -> SpaceID? {
-        let op = make(
-            "ManagedDisplayGetCurrentSpaceOperation",
-            initializer: "initWithDisplayIdentifier:"
-        ) { instance, selector in
-            sender(as: InitObjectFn.self)?(
-                instance,
-                selector,
-                displayIdentifier as NSString
-            )
-        }
-        return field("spaceID", of: performSync(op))
     }
 
     /// The Desktop's name (empty for an unnamed one), or nil
@@ -70,7 +40,8 @@ extension WMBridge {
 
     /// The Desktop's key/value store — the WindowServer's own
     /// dictionary (`type`, `id64`, `uuid`, Apple's
-    /// `WindowManagerInfo`, …) with any custom keys beside them.
+    /// `WindowManagerInfo`, …) with KiwiDesk's
+    /// `valueKeyPrefix` keys beside them.
     public static func values(of space: SpaceID) -> [String: Any]? {
         let op = make(
             "SpaceCopyValuesOperation",
@@ -84,7 +55,7 @@ extension WMBridge {
     // MARK: - Writes (dispatched, never confirmed — see WMBridge)
 
     /// Switches `displayIdentifier` to `space` (#26). Verify by
-    /// `currentSpace(displayIdentifier:)`.
+    /// `NativeSpaces.currentSpace(displayUUID:)`.
     public static func setCurrentSpace(
         _ space: SpaceID,
         displayIdentifier: String
@@ -105,9 +76,8 @@ extension WMBridge {
 
     /// Creates a real managed Desktop — it joins Mission
     /// Control's user list (#889 item 1) — and returns its id.
-    /// `values` seeds its key/value store; custom keys are
-    /// namespaced (`kiwidesk.*`) because they land in Apple's
-    /// own dictionary.
+    /// `values` seeds its key/value store under
+    /// `valueKeyPrefix`.
     public static func createSpace(
         values: [String: Any] = [:]
     ) -> SpaceID? {
@@ -119,7 +89,7 @@ extension WMBridge {
                 instance,
                 selector,
                 0,
-                values as NSDictionary
+                namespaced(values)
             )
         }
         return field("spaceID", of: performSync(op))
@@ -159,7 +129,8 @@ extension WMBridge {
         return performAsync(op)
     }
 
-    /// Merges `values` into the Desktop's store. Survives
+    /// Merges `values` into the Desktop's store, every key under
+    /// `valueKeyPrefix`. Survives
     /// logout, the separate-Spaces mode flip and cable cycles on
     /// the MAIN display's Desktops (#889 item 3) — but a
     /// secondary display's Desktop is discarded with its display
@@ -177,7 +148,7 @@ extension WMBridge {
                 instance,
                 selector,
                 space,
-                values as NSDictionary
+                namespaced(values)
             )
         }
         return performAsync(op)

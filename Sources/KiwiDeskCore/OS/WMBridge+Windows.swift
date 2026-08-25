@@ -59,16 +59,18 @@ extension WMBridge {
         )
     }
 
+    /// The option mask `spaces(for:)` queries with — the one
+    /// that answers at all. #889 item 5 tried 0–3 (empty) and 5
+    /// and 7 (one id); the mask is not a knob a caller re-opens
+    /// at a call site.
+    private static let membershipOptions: UInt32 = 7
+
     /// The spaces `windows` belong to, as the bridge reports
-    /// them. **Single membership only**: under every option mask
-    /// tried (0–3 empty, 5 and 7 one id) this never lists a
+    /// them. **Single membership only**: this never lists a
     /// second Desktop a sticky add put the window on (#889
     /// item 5). Use it for the primary Desktop; keep sticky
     /// bookkeeping in KiwiDesk's own state.
-    public static func spaces(
-        for windows: [WindowID],
-        options: UInt32 = 7
-    ) -> [SpaceID]? {
+    public static func spaces(for windows: [WindowID]) -> [SpaceID]? {
         let op = make(
             "CopySpacesForWindowsOperation",
             initializer: "initWithOptions:windows:"
@@ -76,7 +78,7 @@ extension WMBridge {
             sender(as: InitOptionsObjectFn.self)?(
                 instance,
                 selector,
-                options,
+                membershipOptions,
                 numbers(windows)
             )
         }

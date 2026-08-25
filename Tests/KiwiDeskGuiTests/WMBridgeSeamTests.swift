@@ -20,8 +20,22 @@ import Testing
 /// **The lens, not the list** (`ResourceBundleRoutingTests`):
 /// exact per-file counts, so an unlisted use fails on arrival
 /// and a removed listed one fails too.
+///
+/// The second test looks the other way, at the test trees: a
+/// suite reaches `WMBridge` only through `classResolverOverride`
+/// (`tests.md`, #565), because the wrapper's default path is a
+/// live WindowServer read and `isAvailable` caches it for the
+/// process — one bare read in any suite would make the harness
+/// answer differently per host macOS. The needle is spelled in
+/// two pieces so this file never matches its own scan.
 @Suite("WMBridge seam")
 struct WMBridgeSeamTests {
+    private static let root = SourceScan.repoRoot(from: #filePath)
+    private static let testTrees = [
+        root.appendingPathComponent("Tests/KiwiDeskCoreTests"),
+        root.appendingPathComponent("Tests/KiwiDeskGuiTests"),
+    ]
+
     private var sourceRoots: [URL] {
         let sources = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources")
@@ -90,5 +104,36 @@ struct WMBridgeSeamTests {
                 """
             )
         }
+    }
+
+    @Test("Tests reach the bridge only through the resolver seam")
+    func testsReachTheBridgeThroughTheSeam() throws {
+        let needle = "WMBridge" + "."
+        let seam = "classResolver" + "Override"
+        var reached: [String] = []
+        var strays: [String] = []
+        for tree in Self.testTrees {
+            for file in try SourceScan.swiftSources(under: tree) {
+                let source = SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                guard source.contains(needle) else { continue }
+                reached.append(file.lastPathComponent)
+                if !source.contains(seam) {
+                    strays.append(file.lastPathComponent)
+                }
+            }
+        }
+        // Non-vacuous: the plumbing suite itself must be seen.
+        #expect(reached.contains("WMBridgeTests.swift"))
+        #expect(
+            strays.isEmpty,
+            """
+            \(strays.joined(separator: ", ")) reaches WMBridge \
+            without setting classResolverOverride — the default \
+            path is a live WindowServer read, cached for the \
+            whole process.
+            """
+        )
     }
 }
