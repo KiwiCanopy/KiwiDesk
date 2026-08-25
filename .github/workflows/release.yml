@@ -858,7 +858,6 @@ jobs:
             # tag intact the flag is ignored.
             gh release create "$TAG" "${UPLOADS[@]}" \
               --draft \
-              --prerelease \
               --title "KiwiDesk $VERSION" \
               --target "$(git rev-parse HEAD)" \
               --generate-notes
