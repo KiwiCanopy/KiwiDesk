@@ -29,15 +29,29 @@ struct UpdatePromptFocusTests {
     private static let root = SourceScan.repoRoot(
         from: #filePath
     )
+    /// Two files, because the change split them: the driver and
+    /// its policy DECLARE what Sparkle's UI must do, and the seam
+    /// is where they are wired to Sparkle. A needle asking what a
+    /// class says reads `promptSource`; one asking what a call was
+    /// handed reads `seamSource`.
+    private static let prompt = "UpdatePromptDriver.swift"
     private static let seam = "AppUpdater.swift"
 
-    private static func seamSource() throws -> String {
+    private static func source(of file: String) throws -> String {
         try SourceScan.strippedSource(
             at:
                 root
                 .appendingPathComponent("Sources/KiwiDesk/Updates")
-                .appendingPathComponent(seam)
+                .appendingPathComponent(file)
         )
+    }
+
+    private static func promptSource() throws -> String {
+        try source(of: prompt)
+    }
+
+    private static func seamSource() throws -> String {
+        try source(of: seam)
     }
 
     /// The balanced `{ … }` that follows the first `declaration`
@@ -97,14 +111,16 @@ struct UpdatePromptFocusTests {
 
     @Test("the override activates before Sparkle shows the prompt")
     func overrideComesForward() throws {
-        let text = try Self.seamSource()
+        let text = try Self.promptSource()
         guard
             let driver = Self.body(
                 after: "final class UpdatePromptDriver",
                 in: text
             )
         else {
-            Issue.record("no UpdatePromptDriver class in \(Self.seam)")
+            Issue.record(
+                "no UpdatePromptDriver class in \(Self.prompt)"
+            )
             return
         }
         guard
@@ -211,14 +227,16 @@ struct UpdatePromptFocusTests {
     /// acknowledgement alerts too, not only for the prompt.
     @Test("the prompt cannot be parked out of the activation's reach")
     func promptStaysReachable() throws {
-        let text = try Self.seamSource()
+        let declared = try Self.promptSource()
         guard
             let policy = Self.body(
                 after: "final class UpdatePromptPolicy",
-                in: text
+                in: declared
             )
         else {
-            Issue.record("no UpdatePromptPolicy class in \(Self.seam)")
+            Issue.record(
+                "no UpdatePromptPolicy class in \(Self.prompt)"
+            )
             return
         }
         guard
@@ -247,6 +265,7 @@ struct UpdatePromptFocusTests {
             alert.contains("NSApp.activate(ignoringOtherApps: true)"),
             "Sparkle's modal alerts must come forward too"
         )
+        let text = try Self.seamSource()
         guard
             let built = Self.arguments(
                 of: "UpdatePromptDriver(",
