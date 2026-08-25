@@ -68,6 +68,49 @@ editing here:
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
   argument lives in `docs/design-decisions.md`.
+- **A window that lands on another screen takes THAT screen's
+  space, through the one shared predicate** (#1010):
+  `StateCoordinator.screenHome(of:leaving:landingOn:)`. Two
+  call sites ask it about the same defect, and **each must gate
+  itself so that exactly one answers a given move**: the create
+  fold answers only for a departure it WATCHED (never a
+  `.restored` filing), and `moveToDesktop` only for a Desktop
+  its screen is ALREADY showing (`target.isCurrent`), which is
+  the case that produces no departure at all. Answering a hidden
+  target in the verb as well is not redundant but WRONG — the
+  destination would be the space that screen shows now, while
+  the reveal can activate a different one, and the reap would
+  then remember the window on the arrival's own display and
+  stand the fold's rule down. A third site that needs "which
+  space does that screen show for a window landing on it" joins
+  the predicate rather than re-deriving it; the stand-downs —
+  float, sticky, same display, nothing shown — live on it,
+  once. The product ruling is `docs/design-decisions.md`'s.
+- **Resolve the arriving frame's screen ABOVE the pure core,
+  and let the fold decide from it** (#1010). `KiwiCore.handle`
+  writes `StateCoordinator.arrivalDisplay` inside the
+  `.windowCreated` arm and BEFORE `state.apply`, which consumes
+  it; the decision itself stays in the fold, on pure state. A
+  frame is AX coordinates (y grows DOWN) while `Display.frame`
+  is AppKit's (y grows UP), so comparing them inside this
+  actor-free core is silently wrong on exactly the topology
+  that needs the rule — a second screen at a negative y.
+  `TilingEngine.screen(containing:)` resolves the pair
+  correctly, over `GeometryUtils.axVisibleFrame(of:)`, which
+  owns the flip. Re-home through `workspaces.add` — the fold's
+  own, or `addFocusedToSpace` at the command altitude — never
+  `moveWindow(_:to:follow:)`: it fires a focus hand-off, the
+  move latch and the #446 wallpaper focus yield, and both
+  callers have already chosen their own focus policy.
+  A command-altitude re-home also owes what `moveWindow` owes:
+  the destination's focus stamp (#22 — `workspaces.add` nils
+  `lastFocused` and hands the origin's `focused` to a
+  successor) and a retile of its own, since the branch it rides
+  may stand down without one. `ArrivalScreenHomeTests` and
+  `ScreenHomePredicateTests` pin the rule and each stand-down;
+  the two production wirings reach no unit test and are pinned
+  by `ArrivalDisplayWiringTests` and
+  `DesktopMoveRehomeWiringTests`.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

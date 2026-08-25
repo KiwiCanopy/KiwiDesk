@@ -29,7 +29,16 @@ editing here:
   it as licence for a second linked symbol, and do not "fix" this
   one to `dlsym`.
 - **Every** private fast path must have a public-API fallback
-  (`AXUIElement`). No fallback = not acceptable.
+  (`AXUIElement`). No fallback = not acceptable — with one
+  carve-out, which is not a loophole: where macOS exposes a
+  capability ONLY through the private surface, there is no
+  fallback to write, and the code **refuses** rather than
+  synthesizing a substitute (`KiwiCore+DesktopCommands.swift`
+  refuses when `canDriveDesktops` is false; faking Mission
+  Control keystrokes was the rejected substitute). Absent is
+  allowed; faked is not. `docs/design-decisions.md` ▸ *The
+  window-management bridge is not a SIP escape hatch* argues
+  which private surfaces may be adopted at all.
 - Never disable SIP, and never ask the user to.
 
 ## The WMBridge operation classes (#884/#889)
@@ -69,6 +78,15 @@ Every one of the following binds whoever touches them:
   second Desktop (#889 item 5) — and never by the wrapper's
   return value. The census the re-query reads stays
   `NativeSpaces`' — one reader of the display/spaces model.
+- A bridge-driven Desktop switch reaches KiwiDesk through the
+  SAME `NSWorkspace` notification a swipe does — observed on
+  device 2026-08-25, `focus_desktop` producing the target
+  Desktop's window census — so a caller arms no confirmation of
+  its own. A caller with NO such signal owns its own
+  bookkeeping: the no-follow `move_to_desktop` reaps the window
+  it sent away, stamps the switch window so the removal reads
+  as `vanished`, and stamps the move latch
+  (`DesktopCommandTests`).
 - The bridge dispatches only while **AppKit is genuinely
   loaded** (#884's bisection): free in the app, binding on
   every harness — under `swift test` every bare read answers

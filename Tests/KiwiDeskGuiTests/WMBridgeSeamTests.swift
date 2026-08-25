@@ -22,11 +22,14 @@ import Testing
 /// and a removed listed one fails too.
 ///
 /// The fourth needle, `WMBridge.`, pins every READER of the
-/// wrapper in `Sources/` — none today; step 2's one wiring site
-/// joins the map when it exists — so a consumer that reads the
-/// bridge inside a view `body` or a second model is a hit, and a
-/// GUI suite rendering that view cannot reach the live bridge
-/// through it unseen.
+/// wrapper in `Sources/` by exact count, so a consumer that
+/// reads the bridge inside a view `body` or a second model is a
+/// hit and a GUI suite rendering that view cannot reach the live
+/// bridge through it unseen. The map's SHAPE is the rule it
+/// enforces: availability is read once, by
+/// `KiwiCore.canDriveDesktops`, which is what a GUI gate
+/// consumes; any other entry may name only the operations it
+/// dispatches.
 ///
 /// The second test looks the other way, at the test trees: a
 /// suite reaches `WMBridge` only through `classResolverOverride`
@@ -61,7 +64,15 @@ struct WMBridgeSeamTests {
             "KiwiDeskCore/OS/WMBridge.swift": 1
         ],
         "NSClassFromString": ["KiwiDeskCore/OS/WMBridge.swift": 1],
-        "WMBridge.": [:],
+        // The bridge's consumers (#884), by role: the
+        // capability predicate `canDriveDesktops` is the ONE
+        // reader of availability — a GUI gate consumes that,
+        // never the bridge — and a verb reads only the
+        // operations it dispatches.
+        "WMBridge.": [
+            "KiwiDeskCore/App/KiwiCore+Accessors.swift": 1,
+            "KiwiDeskCore/Commands/KiwiCore+DesktopCommands.swift": 2,
+        ],
     ]
 
     @Test(

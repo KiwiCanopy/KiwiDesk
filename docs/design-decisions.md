@@ -91,21 +91,20 @@ planned escape hatch; it is not a wontfix dumping ground.
 
 A separate class: capabilities macOS forbids without disabling
 **System Integrity Protection**. KiwiDesk drives macOS Desktops
-through private SkyLight/CGS symbols resolved at runtime, and the
-few operations that *write* the Desktop arrangement are
-gated by SIP. KiwiDesk **never disables SIP or asks a user to** —
-a disabled-SIP requirement is a non-starter for a window manager
-(`AGENTS.md` §5), so these stay unimplemented rather than shipping
-a fragile fast path with no safe fallback. Unlike the
-[Accepted limitations](accepted-limitations.md) trades,
-the root is the OS, not our architecture, and there is no in-app
-escape hatch — only Apple exposing a supported API. They are
-tracked, not abandoned:
+through private SkyLight/CGS symbols resolved at runtime, and
+some operations that *write* the Desktop arrangement are gated by
+SIP. KiwiDesk **never disables SIP or asks a user to** — a
+disabled-SIP requirement is a non-starter for a window manager
+(`AGENTS.md` §5), so these stay unimplemented rather than
+shipping a fragile fast path with no safe fallback. Unlike the
+[Accepted limitations](accepted-limitations.md) trades, the root
+is the OS, not our architecture, and there is no in-app escape
+hatch — only Apple exposing a supported API.
 
-- **Move the focused window to another Desktop**
-  ([#25](https://github.com/KiwiCanopy/KiwiDesk/issues/25)).
-- **Switch the visible Desktop programmatically**
-  ([#26](https://github.com/KiwiCanopy/KiwiDesk/issues/26)).
+**An item leaves this class when a SIP-clean path to it exists**,
+and the entry below on the window-management bridge rules what
+counts as one. What remains here is tracked, not abandoned:
+
 - **Restore windows across all Desktops on quit**
   ([#70](https://github.com/KiwiCanopy/KiwiDesk/issues/70)).
 - **Place a window above the top screen border** — the
@@ -147,7 +146,55 @@ tracked, not abandoned:
   ([#424](https://github.com/KiwiCanopy/KiwiDesk/issues/424)).
 
 All of these are collected in
-[#140](https://github.com/KiwiCanopy/KiwiDesk/issues/140).
+[#140](https://github.com/KiwiCanopy/KiwiDesk/issues/140), which
+is the list to keep in step with this one.
+
+### The window-management bridge is not a SIP escape hatch
+
+**[Rationale]**
+
+Moving a window to another Desktop and switching the visible
+Desktop sat in *Blocked by macOS (SIP)* above for KiwiDesk's whole
+pre-1.0 life. They are shipped now, and the rule that let them
+ship is worth stating, because the next private surface will ask
+for the same exemption.
+
+The C symbol that moved a window between Desktops was SIP-gated
+from macOS 15 on; reaching it needs an injected scripting
+addition, which needs SIP off, which KiwiDesk will not ask for.
+What changed is not that rule but the OS: macOS now registers a
+window-management **bridge** — ObjC operation classes SkyLight
+dispatches through AppKit's own delegate — that performs both
+operations on stock settings with SIP on and without
+Accessibility trust.
+
+So the test an item must pass to leave that class is **a
+SIP-clean path**, not a *public* one. Private-but-designed is
+admissible where injection is not, and the difference is not
+taste: an injected addition rewrites another process on a system
+whose integrity guarantees the user disabled, while the bridge is
+a versioned, `NSCoding`-encoded dispatch surface Apple built for
+cross-process use, reached through the same runtime resolution
+every other private path here uses.
+
+Where a Desktop lives on another screen, the verbs act on THAT
+screen — `focus_desktop 3` switches the screen holding Desktop 3,
+whichever it is. Keyboard focus does not travel with it, because
+macOS attaches focus to a window and not to a screen; carrying
+the user across would mean focusing the moved window once its
+Desktop reveals it, which is the pending-assignment work #890
+still holds
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+
+What that admission costs, accepted deliberately: **there is no
+fallback to write.** The public API for these operations does not
+exist, so where the bridge is absent the verbs refuse and say so
+— never a synthesized substitute (keystroke-faking Mission
+Control shortcuts, which depend on shortcuts the user may have
+changed or turned off). A capability that only the private
+surface can deliver is allowed to be absent; it is not allowed to
+be faked. `.claude/rules/os-private-apis.md` carries that as an
+obligation on the code.
 
 ### Distribution: direct download, not the Mac App Store
 
@@ -2055,6 +2102,66 @@ home space no longer reserves a phantom tiled slot when it has
 traveled away, which is what let the same window fight for two
 frames across monitors before. (#445)
 
+**A window on another screen belongs to that screen's space,
+not to the one it came from.** KiwiDesk notes the space a
+window was in when it vanishes from Accessibility — a Desktop
+switch, an app hidden with ⌘H — and files it back there when it
+returns, which is what makes a Desktop swipe non-destructive.
+Across screens that memory can be out of date by one deliberate
+gesture: `move_to_desktop` onto another screen's Desktop (or the
+same drag in Mission Control) carries the window physically to
+that monitor, while the space it remembers is laid out on the
+one it left. Something has to lose, because the two answers put
+the window on different monitors. The Desktop the user just
+chose wins — it is the more recent intent, and it is the one
+they can see. Leaving the window filed under the old space
+means the next retile lays it out there and macOS re-assigns
+its Desktop to match the frame, so the move undoes itself about
+a second later.
+
+**One ruling, asked at two altitudes, because there are two
+routes to that same undo — and each altitude answers only its
+own.** A Desktop the target screen is not showing takes the
+window out of KiwiDesk's view entirely, so the answer is owed
+when it comes back, against the space that screen really shows
+by then; revealing a Desktop can activate a different space
+than the one showing when the move was issued, so answering
+early would file the window somewhere it cannot be seen. A
+Desktop that screen IS showing produces no departure at all,
+and there the answer is owed at once, by the verb. Measured
+both ways on two screens (2026-08-25): with only the arrival
+half, moving a window onto a Desktop the other screen already
+showed still snapped it back inside 0.6 s. So the predicate is
+one shared function and each caller gates itself to the route
+it owns.
+
+Two alternatives lost. *Keep the membership but suppress the
+cross-screen retile* leaves the window unmanaged exactly where
+it landed — the beat reported as "it moved but it didn't tile"
+made permanent. *Refuse cross-screen moves outright* removes
+the half of the verb multi-monitor users want it for. Both
+answer "which of KiwiDesk's two models is right"; only the
+ruling above answers "what did the user just ask for".
+
+**What it does not reach, each for its own reason.** A window
+KiwiDesk never watched leave is untouched: a snapshot restore
+files windows it is not tracking yet, and that filing IS the
+layout the restore exists to put back — after an undock macOS
+piles windows onto the built-in screen, and following that
+frame would discard it. A **floating** window is untouched
+because the defect is the layout carrying a window home and a
+float is never laid out; its cross-display anchoring stays
+#444's and #412's. A **sticky** window of either scope is
+untouched because re-homing one is precisely the move
+`stickyMoveRefused` gates at every command choke point (#445),
+and neither a pure state fold nor a Desktop verb may make it
+quietly; sticky reach across Desktops is #890's own item. And
+only the window's membership ever moves — no space is
+re-assigned to another display — so an arrival or a Desktop
+move can never break a `pin_space_to_display` pin. On a single
+screen every one of these questions has the same answer it
+always had. (#1010)
+
 **The starter setup is chosen from the screens, not demonstrated
 on them.** The first version of it (#466) gave every display the
 same five spaces — one per layout mode — so a newcomer met the
@@ -2579,6 +2686,56 @@ The menu bar this policy hides is still built (`MainMenu`) —
 AppKit routes key equivalents through `NSApp.mainMenu` whatever
 the policy, and it is what gives the Settings text fields
 Cut/Copy/Paste/Undo.
+
+**Corollary: nothing arrives in front for free, and that reaches
+windows KiwiDesk did not open.** A `.regular` app has a Dock tile
+and everything macOS builds on it — the icon bouncing for
+`requestUserAttention`, the user clicking it to come back. An
+`.accessory` process has none of that, so a window that finishes
+something **already begun** activates at the moment it appears —
+and so does one the user's own click just cost them, because an
+accessory process with no windows left is deactivated by macOS
+and the next window it opens lands behind whatever took over.
+KiwiDesk's own take `NSApp.forceFront`; a window a framework opens
+takes the seam that names its moment, and where the framework
+offers none, that seam is worth building rather than approximating
+with a nearby hook — the neighbouring callback fires while the
+framework is still preparing the window, which is a race dressed
+as a fix. Coming forward is not enough by itself either: an
+affordance that lets the user park such a window out of reach is
+refused, because activating a process deminiaturizes nothing.
+
+**The scope is deliberate and the other half is the opposite
+rule.** An *unsolicited offer* must NOT take the screen — that is
+the same argument [Background update checks are on, and there is
+no switch](#background-update-checks-are-on-and-there-is-no-switch)
+makes about a modal at the worst moment, and it is why Sparkle
+showing a SCHEDULED update alert behind other windows is left
+alone here. The obligation is on the interaction the user is
+already inside, never on the one being proposed to them. What that
+scoping costs — a background app's scheduled alert being easy to
+miss entirely, which Sparkle answers with *gentle reminders*
+KiwiDesk does not yet implement — is
+[#1013](https://github.com/KiwiCanopy/KiwiDesk/issues/1013), not
+something this entry rules acceptable.
+
+Sparkle is the worked case
+([#1011](https://github.com/KiwiCanopy/KiwiDesk/issues/1011)). It
+activates for the windows it opens on a check the *user* asked
+for, then marks the later install-and-restart prompt with
+`requestUserAttention` alone — right for a Dock app, inert
+here. The prompt arrived
+behind everything the user had open with nothing saying the update
+was waiting, which makes the in-app update path read as broken:
+the exact trust the section
+[above](#no-distribution-channel-without-an-update-path) exists to
+keep. `UpdatePromptDriver` overrides
+`showReadyToInstallAndRelaunch` — the one moment neither Sparkle
+delegate protocol reaches — while `UpdatePromptFocusTests` holds
+the activation inside that override and `UpdatePromptWiringTests`
+that Sparkle is shown through that driver rather than a stock
+one, which is the way an
+override goes dead without anything noticing.
 
 ### Settings is miniaturizable; modal chrome is not
 

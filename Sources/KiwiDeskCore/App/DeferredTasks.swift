@@ -42,6 +42,11 @@ final class DeferredTasks {
         /// Layout + focus re-assert after a native desktop
         /// switch (`settleAfterDesktopSwitch`).
         case desktopSettle
+        /// Reaps the window a no-follow `move_to_desktop` sent
+        /// to another Desktop (`scheduleDesktopMoveReap`): no OS
+        /// switch follows such a move, so nothing else is
+        /// guaranteed to notice the window left.
+        case desktopMoveReap
         /// Re-asserts every desired focus ring's VISIBILITY and
         /// stacking after a drag/drop or animated transition
         /// (`scheduleBorderDropReconcile`) — early on purpose, and
@@ -124,6 +129,11 @@ final class DeferredTasks {
             body()
         }
     }
+
+    /// Whether `key` has work pending — the seam a test reads to
+    /// prove a path ARMED its deferred work, without waiting the
+    /// delay out or letting the body reach the machine.
+    func isScheduled(_ key: Key) -> Bool { tasks[key] != nil }
 
     func cancel(_ key: Key) {
         tasks[key]?.cancel()

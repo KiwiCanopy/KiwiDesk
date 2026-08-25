@@ -60,12 +60,6 @@ const de: LegalStrings = {
         body: `<p>E-Mail: ${MAILTO}</p>`,
       },
       {
-        title: "Umsatzsteuer",
-        body:
-          `<p>Umsatzsteuer-Identifikationsnummer: derzeit beantragt (wird nach Erhalt nachgereicht).</p>` +
-          `<p>Als Kleinunternehmer im Sinne von § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet.</p>`,
-      },
-      {
         title: "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV",
         body: `<p>${OPERATOR.name} (Anschrift wie oben).</p>`,
       },
@@ -243,12 +237,6 @@ const en: LegalStrings = {
         body: `<p>Email: ${MAILTO}</p>`,
       },
       {
-        title: "VAT",
-        body:
-          `<p>VAT identification number: currently applied for (will be added once received).</p>` +
-          `<p>As a small business under § 19 (1) of the German VAT Act (UStG), no VAT is charged.</p>`,
-      },
-      {
         title: "Responsible for content pursuant to § 18 (2) MStV",
         body: `<p>${OPERATOR.name} (address as above).</p>`,
       },
@@ -413,12 +401,6 @@ const ja: LegalStrings = {
       {
         title: "連絡先",
         body: `<p>メール: ${MAILTO}</p>`,
-      },
-      {
-        title: "付加価値税（VAT）",
-        body:
-          `<p>付加価値税登録番号: 現在申請中です（取得後に記載します）。</p>` +
-          `<p>ドイツ付加価値税法（UStG）第19条第1項に定める小規模事業者として、付加価値税は請求されません。</p>`,
       },
       {
         title: "MStV 第18条第2項に基づくコンテンツ責任者",

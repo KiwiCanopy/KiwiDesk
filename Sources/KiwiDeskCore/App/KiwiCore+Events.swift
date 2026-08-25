@@ -29,10 +29,22 @@ extension KiwiCore {
         // plain Int and the state core stays geometry-free. Only a
         // window creation consumes it, so skip the per-space context
         // builds on every other (higher-frequency) event.
-        if case .windowCreated = event {
+        if case .windowCreated(let window) = event {
             state.trackCapacities = tiler.trackCapacities(
                 state: state
             )
+            // The screen the arriving window's frame physically
+            // sits on (#1010), mirrored in like the capacities
+            // above: the fold prefers the space THAT display
+            // shows over the one the window remembered on
+            // another screen, and resolving a frame to a screen
+            // needs `NSScreen` plus the AX/AppKit y-flip —
+            // neither of which the pure state core may read
+            // (§2.6). `screen(containing:)` owns the flip.
+            state.arrivalDisplay =
+                TilingEngine.screen(
+                    containing: window.frame
+                )?.kiwiDisplay?.id
         }
         // The frame BEFORE this event folds in — the drag
         // coordinator anchors a gesture's start on it (#933);
@@ -68,6 +80,16 @@ extension KiwiCore {
                     hadRememberedSpace: effects.hadRememberedSpace
                 )
             )
+            // #1010: narrate the cross-screen arrival, the
+            // one resolution a device trace cannot read off
+            // the membership alone.
+            if let rehomed = effects.rehomedToScreenSpace {
+                onLog(
+                    "arrival: w\(window.id.raw) came back on "
+                        + "another screen — homed to space "
+                        + "\(rehomed.raw)"
+                )
+            }
         case .windowMoved(let id, let frame):
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already

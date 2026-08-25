@@ -223,6 +223,96 @@ KiwiDesk.move_to_space_and_follow("mail")
 KiwiDesk.move_to_space_and_follow(3)
 ```
 
+### focus_desktop
+
+**Expects:** a macOS Desktop number — the number Mission Control
+shows, the same one `bind_profile_to_desktop` keys on.
+
+**Does:** switches to that Desktop — the *macOS* Desktop, not a
+KiwiDesk Space — exactly as a swipe would: the screen that
+Desktop belongs to switches, and the bound profile, the
+remembered Space and the `desktop_change` event all follow as
+they do for a swipe (macOS reports the switch to KiwiDesk the
+same way either way — device-checked 2026-08-25). A Desktop its
+screen already shows is a no-op.
+
+Needs macOS's own window-management bridge, which KiwiDesk looks
+up at runtime: present on macOS 26.6.1 (observed 2026-08-18); no
+earlier build has been checked, so no version is promised here —
+the lookup itself is the gate. It rides stock settings with SIP
+on. Where the bridge is absent the command does nothing and logs
+why; run from the CLI it prints the error instead. KiwiDesk never
+asks you to disable SIP.
+
+**Example:**
+
+```lua
+KiwiDesk.focus_desktop(2)
+```
+
+### move_to_desktop
+
+**Expects:** a macOS Desktop number.
+
+**Does:** moves the focused window to that Desktop **without
+following** it — you stay where you are. macOS shows another
+Desktop's windows to nobody, so the window also leaves KiwiDesk's
+view: a moment later the Desktop you stayed on re-tiles without
+it, and the window is reported gone with `reason: vanished`, the
+same value a Desktop swipe produces — it was not closed. When
+that Desktop is next shown the window rejoins the **KiwiDesk
+Space it was in**, which KiwiDesk remembered as it left.
+
+With more than one screen there is one exception, and it is the
+Desktop you chose winning: when that Desktop lives on **another
+screen**, the window also joins the KiwiDesk Space that screen
+is showing — the one it shows when the window actually lands
+there, which for a hidden Desktop is decided at the moment you
+reveal it. It has to. A window still filed under a Space that
+lays out on the screen it just left is laid out *there* on the
+next retile, and macOS then re-assigns it to a Desktop of that
+monitor — so without this the move undoes itself about a second
+later, whether the Desktop was hidden or already on screen
+([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
+
+A Desktop on the same screen changes nothing: the Space you
+left is the Space you come back to. Neither does a **floating**
+or a **sticky** window change Space — a float has no layout to
+carry it anywhere, and a sticky window's home is deliberately
+left where it is (`move_to_space` guards it the same way).
+Same requirement as `focus_desktop`.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_desktop(3)
+```
+
+### move_to_desktop_and_follow
+
+**Expects:** a macOS Desktop number.
+
+**Does:** moves the focused window to that Desktop **and**
+switches you there with it.
+
+With more than one screen, "there" is that Desktop's own screen,
+and two things follow. If the Desktop is already the one its
+screen shows, nothing switches — the window still moves. And
+because macOS moves keyboard focus with a *window*, never with a
+screen, a follow onto another screen changes what that screen
+shows without carrying your typing to it; you land there by
+clicking, as you would after any other switch
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+The window itself is placed by the cross-screen rule above — on
+another screen it joins the Space that screen shows. Same
+requirement as `focus_desktop`.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_desktop_and_follow(3)
+```
+
 ### move_space_to_display
 
 **Expects:** a space identifier, then a display reference — a
@@ -4277,7 +4367,7 @@ Mission Control labels "Desktop 1", "Desktop 2", … —
 can carry its own profile via `bind_profile_to_desktop` (see
 above).
 
-When you switch Desktops (Ctrl+arrow, Mission Control, …), KiwiDesk
+When the visible Desktop changes — a swipe, Ctrl+arrow, Mission Control, or a `focus_desktop` / `move_to_desktop_and_follow` command, KiwiDesk
 loads the bound profile — its spaces, layouts, and
 settings. Unsure which number you're on? Check
 `kiwidesk get_state` (field `desktop`), or subscribe to the
