@@ -2,6 +2,24 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.0.1",
+      "tag": "v1.0.1",
+      "date": "2026-08-25",
+      "prerelease": true,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.0.1",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.0.1/KiwiDesk-1.0.1.dmg",
+      "summary": "A small release with one thing to know if you script KiwiDesk. Nothing about how your windows behave changes.",
+      "sections": [
+        {
+          "title": "One word for macOS Desktops, everywhere",
+          "items": [
+            "**`native_space` is now `desktop` on the wire.** The copy has said *Desktop* for macOS's desktops and *Space* for KiwiDesk's own since 0.9.7; the commands and events now say the same. If your `init.lua` binds profiles to Desktops, or a script listens for the switch event, update the spelling — the old names are gone, not aliased: `KiwiDesk.bind_profile_to_native_space(n, profile)` is now `KiwiDesk.bind_profile_to_desktop(n, profile)`, the `native_space_change` event is now `desktop_change`, and `kiwidesk get_state` reports `desktop` instead of `native_space`.",
+            "**Bindings made in the Settings window need nothing from you.** They live in KiwiDesk's own settings file, not in `init.lua`, and keep working as they are."
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.0",
       "tag": "v1.0.0",
       "date": "2026-08-24",
