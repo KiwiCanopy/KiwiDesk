@@ -138,23 +138,28 @@ struct SettingsSearchPlacesTests {
 
     /// The self-clear half, previously unguarded: guard-prover
     /// (2026-08-10) showed the clear task could be deleted with
-    /// this suite green. A generous hang-guard poll, never a
-    /// tight deadline (#344): the notice clears at ~5 s, the
-    /// poll exits the moment it does, and the 30 s bound only
-    /// catches a genuine never-clears.
+    /// this suite green.
+    ///
+    /// Awaits the timeline rather than polling for its effect —
+    /// the same fix as #979 on this same model, made in the same
+    /// change because it is the same defect: the clear runs on
+    /// the main actor, so a wall clock measured how long the
+    /// scanning suites held it (`tests.md` ▸ Async tests). The
+    /// handle is read straight after the switch that schedules
+    /// it and asserted non-nil, because `await nil?.value`
+    /// returns instantly and would pass on a clear that was
+    /// never scheduled — which is precisely what guard-prover
+    /// caught here once already.
     @Test("the mode-switch notice clears itself")
-    func modeNoticeSelfClears() async throws {
+    func modeNoticeSelfClears() async {
         pinEnglish()
         defer { reset() }
         let model = makeTestModel()
         model.noteSearchModeSwitch(.advancedColors)
         #expect(model.searchModeNotice != nil)
-        let deadline = ContinuousClock.now + .seconds(30)
-        while model.searchModeNotice != nil,
-            ContinuousClock.now < deadline
-        {
-            try await Task.sleep(for: .milliseconds(100))
-        }
+        let timeline = model.searchNoticeTask
+        #expect(timeline != nil, "no self-clear was scheduled")
+        await timeline?.value
         #expect(model.searchModeNotice == nil)
     }
 }

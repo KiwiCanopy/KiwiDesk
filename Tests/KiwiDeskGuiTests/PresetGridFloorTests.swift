@@ -41,14 +41,13 @@ import Testing
 /// **Main-actor load is deliberately minimal here.** Only the
 /// AppKit measurement is `@MainActor`, and it memoizes by title;
 /// the catalog reads and the two source scans run off it. That is
-/// not tidiness — `SettingsModeRevealTests`' hang guard is sized
-/// against heavy synchronous `@MainActor` suites backing the main
-/// actor up "past 30 s in a full run", and the first cut of this
-/// suite was one of them: it went `@MainActor` wholesale, and CI
-/// timed that suite out against its 120 s guard while the whole
-/// thing passes in 1.3 s locally (2026-08-17). A guard sized for
-/// a starved main actor is a shared budget, and a new suite
-/// spends it.
+/// not tidiness — `tests.md` ▸ Async tests carries the
+/// measurement and the obligation: heavy synchronous `@MainActor`
+/// work backs the main actor up past 30 s in a full run, and the
+/// first cut of this suite was one of them. It went `@MainActor`
+/// wholesale, and CI timed a suite out against its 120 s guard
+/// while the whole thing passes in 1.3 s locally (2026-08-17).
+/// The main actor is a shared budget, and a new suite spends it.
 ///
 /// **And it cannot see ADDITIVE drift**, which `guard-prover`
 /// demonstrated: keep `.padding(Self.padding)` and add a second
@@ -99,10 +98,9 @@ struct PresetGridFloorTests {
     /// constants, not the size. Stated rather than asserted
     /// because pinning it would mean rendering the real card.
     /// Memoized, and the memo is not a micro-optimisation.
-    /// `SettingsModeRevealTests`' hang guard is sized against
-    /// "heavy synchronous `@MainActor` suites back the main actor
-    /// up past 30 s in a full run" — its own docstring — and this
-    /// suite is one. Distinct titles are far fewer than catalogs
+    /// Heavy synchronous `@MainActor` suites back the main actor
+    /// up past 30 s in a full run (`tests.md` ▸ Async tests), and
+    /// this suite is one. Distinct titles are far fewer than catalogs
     /// times keys, so measuring each once is most of the load
     /// gone for free.
     @MainActor private static var widths: [String: CGFloat] = [:]
