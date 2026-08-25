@@ -40,21 +40,6 @@ struct SpaceSwitchFocusHandoffTests {
         )
     }
 
-    /// One shared generous hang-guard (#344): the poll below
-    /// exits the moment its condition holds, so a passing run
-    /// never waits this out — it only bounds a genuine hang.
-    private let handoffHangGuardMS = 30_000
-
-    private func pollUntil(
-        _ condition: () -> Bool
-    ) async {
-        var waited = 0
-        while !condition(), waited < handoffHangGuardMS {
-            try? await Task.sleep(for: .milliseconds(20))
-            waited += 20
-        }
-    }
-
     private func makeStickyFloat(
         _ raw: UInt32,
         pid: pid_t
@@ -231,9 +216,16 @@ struct SpaceSwitchFocusHandoffTests {
             follow: false
         )
         core.execute("focus_space", args: [.string("2")])
-        await pollUntil {
-            logs.contains { $0.contains("re-raising") }
-        }
+        // Await the settle's own `DeferredTasks` slot instead of
+        // polling a 30 s clock for the line it logs (#994;
+        // `tests.md` ▸ Async tests) — the canonical awaitable
+        // case that section already names. The slot is read
+        // after the call that schedules it: it is never cleared,
+        // so a read before one would await a previous cycle's
+        // finished task and assert nothing.
+        let settle = core.deferred.task(for: .spaceSettle)
+        #expect(settle != nil, "the switch scheduled no space settle")
+        await settle?.value
         #expect(
             logs.contains {
                 $0.contains("space settle")

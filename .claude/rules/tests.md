@@ -398,19 +398,20 @@ notice it breaking.
 
 ## Async tests: a generous hang-guard, never a tight deadline (#344)
 
-A test that spawns a real subprocess (`ExecTests`) and then awaits
-its **main-actor callback** cannot use a sub-second or few-second
-poll deadline. swift-testing runs suites concurrently, so under
-full-suite load the shared main actor is starved for seconds and
-the tight deadline trips spuriously (the callback landed, just
-late) while the suite passes in isolation.
+A test that waits on something it holds no handle to — a real
+subprocess (`ExecTests`), a socket connect (`SocketServerTests`) —
+and then awaits its **main-actor callback** cannot use a
+sub-second or few-second poll deadline. swift-testing runs suites
+concurrently, so under full-suite load the shared main actor is
+starved for seconds and the tight deadline trips spuriously (the
+callback landed, just late) while the suite passes in isolation.
 
-Each such wait uses one shared generous hang-guard
-(`execHangGuard`, 30 s): the poll exits the instant the condition
-holds, so a passing run is never slowed — the deadline only bounds
-a genuine hang. Prove the *behavior* by the gap (a short watchdog
-against a much longer sleep), never by a tight wait. New async
-tests here follow suit.
+Each such wait takes one generous hang-guard named in its own
+suite (`execHangGuard`, `socketConnectHangGuard`, 30 s): the poll
+exits the instant the condition holds, so a passing run is never
+slowed — the deadline only bounds a genuine hang. Prove the
+*behavior* by the gap (a short watchdog against a much longer
+sleep), never by a tight wait. New async tests here follow suit.
 
 **Where the thing waited on IS an awaitable handle, await it
 rather than polling for its effect.** A wall-clock deadline
@@ -431,19 +432,42 @@ early-returned awaits the *previous* cycle's finished task and
 asserts nothing. A handle whose staleness goes undocumented is a
 vacuous await waiting to be written.
 
-**Two more ways such an await goes vacuous**, both paid for in
+**Three more ways such an await goes vacuous**, all paid for in
 #994 when the drag and Space Bar dwells traded their deadlines
-for handles. A handle that its own callback CLEARS
-(`SpaceBarDropCoordinator.dwellTask`,
-`DragCoordinator.settleTask(for:)`) is nil by the time the effect
-has landed, so it is read BEFORE the await, and the `!= nil`
-assertion beside it is load-bearing rather than decorative —
-`await nil?.value` returns at once, so a scheduler that stopped
-scheduling sails through green. And a handle that RESCHEDULES
-itself says less than it looks: `settleTask(for:)` awaited while
-the mouse button is down completes each release-poll leg having
-fired no drop at all. Both facts belong in the seam's own doc
-comment, which is where those two carry them.
+for handles. Each is a property of the handle, so each belongs in
+the seam's own doc comment beside what awaiting it does NOT mean.
+
+- A handle its own callback **clears** is nil by the time the
+  effect has landed, so read it BEFORE the await — and the
+  `!= nil` assertion beside it is load-bearing rather than
+  decorative. `await nil?.value` returns at once, so a scheduler
+  that stopped scheduling sails through green, and any *further*
+  assertion reading that handle (an identity check, say) goes
+  vacuously true beside it. Keep the pair a pair.
+- A handle that **reschedules** itself says less than it looks:
+  awaited from a leg that is not the last one, it completes
+  having fired nothing at all.
+- A **cancelled** handle completes immediately, so an await on
+  one bounds nothing. It proves that timeline unwound, never that
+  no other one is still pending — prove that negative by the gap
+  (tests.md's rule above), and read `isCancelled` synchronously
+  for the cancel itself.
+
+**A handle exposed only for a test is wrapped in `#if DEBUG`**,
+the idiom `NativeSpaces`' overrides already use, so a production
+read reds the release build rather than waiting for a reviewer to
+notice — a doc comment saying "production must not read this" is
+not greppable and does not fail anything. Handles exposed before
+this rule were not wrapped; a new one takes it.
+
+**A hang is now a hang, and that is the accepted trade.** A poll
+recorded an `Issue` and returned, so a genuinely stuck condition
+failed one test at its deadline; an await on a timeline that
+never completes stalls the run until the job's own timeout,
+because `Tests/` sets no `.timeLimit`. That is the same trade
+`SocketServerTests` documents, and it is the right way round
+here: the deadline it replaces was failing runs that were not
+stuck at all.
 
 **The main actor is a budget shared across suites, and a new
 `@MainActor` suite says what it spends.** Heavy synchronous

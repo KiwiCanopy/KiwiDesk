@@ -158,7 +158,7 @@ struct SpaceBarDropCoordinatorTests {
     }
 
     @Test("reset cancels a pending spring (abandoned drag)")
-    func resetCancelsSpring() async {
+    func resetCancelsSpring() async throws {
         let (coord, rec) = make(
             current: SpaceID("A"),
             hit: SpaceID("B"),
@@ -178,6 +178,13 @@ struct SpaceBarDropCoordinatorTests {
         // fired instead of that it had not fired *yet*.
         #expect(dwell?.isCancelled == true)
         await dwell?.value
+        // That await returns at once on a cancelled handle, so
+        // it proves only that THIS dwell unwound. Proving the
+        // negative still takes the gap (200 ms against the 50 ms
+        // dwell): a second, uncancelled task — the shape `arm`'s
+        // own `cancel()` exists to prevent — would fire inside
+        // it and no handle here would see it.
+        try await Task.sleep(nanoseconds: 200_000_000)
         #expect(rec.sprang.isEmpty)
     }
 }

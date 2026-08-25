@@ -62,19 +62,22 @@ public final class DragCrossingCoordinator {
     private var pending:
         (window: WindowID, display: DisplayID, task: Task<Void, Never>)?
 
-    /// The armed dwell's timeline, exposed so a test can await
-    /// the crossing instead of polling a clock for its effect
-    /// (#994; `.claude/rules/tests.md` ▸ Async tests).
-    /// Production must not read it — `pending` is the
-    /// bookkeeping it belongs to.
-    ///
-    /// What awaiting it does **not** mean: that a crossing
-    /// FIRED. The handle also completes for a dwell that was
-    /// disarmed (the cursor came home, `cancelPending`,
-    /// `rekey`), and it is nil whenever none is armed — whose
-    /// `await` returns at once and asserts nothing. `onCross`
-    /// is the fact.
-    var dwellTask: Task<Void, Never>? { pending?.task }
+    #if DEBUG
+        /// The armed dwell's timeline, so a test can await the
+        /// crossing instead of polling a clock for its effect
+        /// (#994; `.claude/rules/tests.md` ▸ Async tests).
+        /// Debug-only so a production read fails the release
+        /// build rather than a review — `pending` is the
+        /// bookkeeping it belongs to.
+        ///
+        /// What awaiting it does **not** mean: that a crossing
+        /// FIRED. `fire` clears the slot, the handle also
+        /// completes for a dwell that was disarmed (the cursor
+        /// came home, `cancelPending`, `rekey`), and it is nil
+        /// whenever none is armed — whose `await` returns at
+        /// once and asserts nothing. `onCross` is the fact.
+        var dwellTask: Task<Void, Never>? { pending?.task }
+    #endif
 
     public init() {}
 
