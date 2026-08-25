@@ -94,6 +94,33 @@ final class UpdatePromptPolicy: NSObject,
 /// the moment rather than approximating it.
 @MainActor
 final class UpdatePromptDriver: SPUStandardUserDriver {
+    /// Keep the focus the user just gave us (#1011).
+    ///
+    /// Clicking **Install Update** closes Sparkle's update alert
+    /// — `SUUpdateAlert.m` closes the window BEFORE it invokes
+    /// the completion block that starts the download — and at
+    /// that instant an accessory process has no windows left, so
+    /// macOS deactivates it and hands focus to whatever was
+    /// behind. The status window is then created into an app that
+    /// is already inactive, and opens behind it. No switching
+    /// away is needed; it is the click itself that buries it.
+    ///
+    /// This is NOT the "unsolicited offer" the scoping in
+    /// `docs/design-decisions.md` ▸ *Permanent accessory mode*
+    /// leaves alone. The user pressed a button one runloop ago:
+    /// the focus being restored is the focus they just gave, not
+    /// focus taken from them. A later deliberate switch away is
+    /// untouched — nothing here fires again until the prompt.
+    ///
+    /// After `super`, so the window Sparkle is about to create
+    /// exists when the app is raised.
+    override func showDownloadInitiated(
+        cancellation: @escaping () -> Void
+    ) {
+        super.showDownloadInitiated(cancellation: cancellation)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
     /// Come forward, then let Sparkle put up the prompt.
     ///
     /// Unconditional rather than gated on `!NSApp.isActive`:

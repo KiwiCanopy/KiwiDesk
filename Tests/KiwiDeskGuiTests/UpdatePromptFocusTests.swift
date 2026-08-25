@@ -58,6 +58,53 @@ struct UpdatePromptFocusTests {
         )
     }
 
+    /// The click's own focus is kept (#1011).
+    ///
+    /// A separate override from the prompt's, because they close
+    /// different halves of the same defect and either can be
+    /// deleted alone: this one restores the focus lost when
+    /// Sparkle closes the update alert before starting the
+    /// download, leaving an accessory process with no windows;
+    /// the prompt's covers the user legitimately going elsewhere
+    /// while the download runs. Neither makes the other
+    /// redundant, so both are pinned.
+    @Test("the download start keeps the focus the click gave")
+    func downloadStartKeepsFocus() throws {
+        let text = try Self.promptSource()
+        guard
+            let driver = SourceScan.declarationBody(
+                after: "final class UpdatePromptDriver",
+                in: text
+            ),
+            let override = SourceScan.declarationBody(
+                after: "override func showDownloadInitiated",
+                in: driver
+            )
+        else {
+            Issue.record(
+                """
+                UpdatePromptDriver no longer overrides \
+                showDownloadInitiated
+                """
+            )
+            return
+        }
+        #expect(
+            override.contains(
+                "NSApp.activate(ignoringOtherApps: true)"
+            ),
+            .init(
+                rawValue: "closing the update alert deactivates "
+                    + "an accessory process, so the download's "
+                    + "own window opens behind. Body: " + override
+            )
+        )
+        #expect(
+            override.contains("super.showDownloadInitiated("),
+            "the override must still let Sparkle start it"
+        )
+    }
+
     @Test("the override brings the app forward and defers to Sparkle")
     func overrideComesForward() throws {
         let text = try Self.promptSource()

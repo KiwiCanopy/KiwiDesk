@@ -2692,7 +2692,10 @@ windows KiwiDesk did not open.** A `.regular` app has a Dock tile
 and everything macOS builds on it — the icon bouncing for
 `requestUserAttention`, the user clicking it to come back. An
 `.accessory` process has none of that, so a window that finishes
-something **already begun** activates at the moment it appears.
+something **already begun** activates at the moment it appears —
+and so does one the user's own click just cost them, because an
+accessory process with no windows left is deactivated by macOS
+and the next window it opens lands behind whatever took over.
 KiwiDesk's own take `NSApp.forceFront`; a window a framework opens
 takes the seam that names its moment, and where the framework
 offers none, that seam is worth building rather than approximating
