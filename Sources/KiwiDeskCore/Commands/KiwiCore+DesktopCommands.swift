@@ -23,10 +23,15 @@ import Foundation
 /// "Desktop 3" across bindings, the Profiles card and these
 /// verbs; the per-screen reading would give the same number two
 /// meanings in one app, which is the defect the Desktop/Space
-/// vocabulary ruling exists to remove. Recorded on #890 for the
-/// owner to overturn; the open device question is whether
-/// Mission Control labels Desktops per screen with "Displays
-/// have separate Spaces" on, which no probe has answered.
+/// vocabulary ruling exists to remove.
+///
+/// The device question that decided it, answered 2026-08-25 on
+/// two screens with "Displays have separate Spaces" ON: **Mission
+/// Control numbers Desktops globally** — the main screen's were
+/// labelled 1–2 and the second screen's 3–5, continuing the
+/// count rather than restarting it. So the global number IS the
+/// number on screen, and a verb, a binding and the Profiles card
+/// all name a Desktop the same way. Recorded on #890.
 ///
 /// **Performed is not applied** (os-private-apis.md): the bridge
 /// returns nothing a caller can trust. A switch is confirmed by
