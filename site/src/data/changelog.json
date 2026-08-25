@@ -5,7 +5,7 @@
       "version": "1.0.1",
       "tag": "v1.0.1",
       "date": "2026-08-25",
-      "prerelease": true,
+      "prerelease": false,
       "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.0.1",
       "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.0.1/KiwiDesk-1.0.1.dmg",
       "summary": "A small release with one thing to know if you script KiwiDesk. Nothing about how your windows behave changes.",
