@@ -275,9 +275,17 @@ KiwiDesk.move_to_desktop(3)
 **Expects:** a macOS Desktop number.
 
 **Does:** moves the focused window to that Desktop **and**
-switches you there with it. With more than one screen, nothing
-switches if that Desktop is already the one its screen shows —
-the window still moves. Same requirement as `focus_desktop`.
+switches you there with it.
+
+With more than one screen, "there" is that Desktop's own screen,
+and two things follow. If the Desktop is already the one its
+screen shows, nothing switches — the window still moves. And
+because macOS moves keyboard focus with a *window*, never with a
+screen, a follow onto another screen changes what that screen
+shows without carrying your typing to it; you land there by
+clicking, as you would after any other switch
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)). Same requirement
+as `focus_desktop`.
 
 **Example:**
 

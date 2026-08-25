@@ -177,6 +177,15 @@ a versioned, `NSCoding`-encoded dispatch surface Apple built for
 cross-process use, reached through the same runtime resolution
 every other private path here uses.
 
+Where a Desktop lives on another screen, the verbs act on THAT
+screen — `focus_desktop 3` switches the screen holding Desktop 3,
+whichever it is. Keyboard focus does not travel with it, because
+macOS attaches focus to a window and not to a screen; carrying
+the user across would mean focusing the moved window once its
+Desktop reveals it, which is the pending-assignment work #890
+still holds
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+
 What that admission costs, accepted deliberately: **there is no
 fallback to write.** The public API for these operations does not
 exist, so where the bridge is absent the verbs refuse and say so
