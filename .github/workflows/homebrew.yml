@@ -33,7 +33,7 @@ jobs:
     name: Update cask
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # This supplies the updater, not release bytes. Use today's
           # protected main so a manual retry can repair an older release.
@@ -126,7 +126,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: KiwiCanopy/homebrew-tap
           ref: main
