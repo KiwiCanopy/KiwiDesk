@@ -113,7 +113,7 @@ struct ProfilesGates {
 /// Every key is reused verbatim from the hand-wired gate this
 /// conversion replaced, so their English is unchanged and no
 /// translation of them is dropped. (The conversion's fourth key,
-/// `native_spaces.separate_warning`, retired with #888 — the
+/// `desktops.separate_warning`, retired with #888 — the
 /// separate-Spaces state no longer greys the rows at all.)
 @MainActor
 enum ProfilesGateHelp {
@@ -123,7 +123,7 @@ enum ProfilesGateHelp {
         switch reason {
         case .bindingsAreGlobal:
             return L(
-                "profiles.native_spaces.live_only",
+                "profiles.desktops.live_only",
                 "Desktop bindings are global — switch to "
                     + "Live to change them."
             )

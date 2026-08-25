@@ -183,11 +183,11 @@ struct TransientOverlayFocusTests {
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
         core.handle(.windowCreated(window(1)))
-        core.handle(.nativeSpaceChanged)
+        core.handle(.desktopChanged)
         core.handle(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
-        core.handle(.nativeSpaceChanged)
+        core.handle(.desktopChanged)
         core.handle(.windowCreated(window(1)))
         #expect(
             core.state.workspaces["1"]?.focused == WindowID(1)

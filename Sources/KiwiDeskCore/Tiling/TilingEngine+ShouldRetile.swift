@@ -33,7 +33,7 @@ extension TilingEngine {
             return true
         case .appLaunched, .windowFocused, .windowMoved,
             .windowResized, .windowTitleChanged,
-            .nativeSpaceChanged:
+            .desktopChanged:
             return false
         }
     }

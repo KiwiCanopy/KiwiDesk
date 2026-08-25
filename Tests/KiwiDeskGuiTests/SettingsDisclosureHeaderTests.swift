@@ -181,7 +181,7 @@ struct SettingsDisclosureHeaderTests {
         )
     }
 
-    /// The accessory slot may hold a CONTROL — `NativeSpacesGroup`
+    /// The accessory slot may hold a CONTROL — `DesktopsGroup`
     /// puts a `HelpButton` there — so it must be a sibling of the
     /// header button, never inside its label. Nested, its click
     /// toggled the drawer and its name and hint collapsed into

@@ -118,7 +118,7 @@ current Space is a user desktop, which key the Space memory
 writes under — because two readings taken moments apart can
 disagree about which display switched. That means **threading
 the value, not re-reading the seam**: a helper the handler calls
-takes the answer as a parameter (`applyNativeSpaceBinding(desktop:)`,
+takes the answer as a parameter (`applyDesktopBinding(desktop:)`,
 `virtualSpaceTarget(for:key:)`, the emit's `mainUUID`), and the
 no-argument conveniences beside them exist for callers that hold
 no snapshot — a Lua/CLI verb, a config load. Nothing scans for

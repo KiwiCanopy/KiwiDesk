@@ -176,7 +176,7 @@ struct StashCornerTests {
 
 @Suite("Native space profile binding", .serialized)
 @MainActor
-struct NativeSpaceBindingTests {
+struct DesktopBindingTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
             configDirectory: FileManager.default
@@ -187,7 +187,7 @@ struct NativeSpaceBindingTests {
         )
     }
 
-    @Test("bind_profile_to_native_space records the binding")
+    @Test("bind_profile_to_desktop records the binding")
     func bind() {
         let core = makeCore()
         core.execute(
@@ -195,36 +195,36 @@ struct NativeSpaceBindingTests {
             args: [.string("Coding")]
         )
         let response = core.execute(
-            "bind_profile_to_native_space",
+            "bind_profile_to_desktop",
             args: [.number(2), .string("Coding")]
         )
         #expect(response.isSuccess)
-        #expect(core.nativeSpaceBindings == [2: "Coding"])
+        #expect(core.desktopBindings == [2: "Coding"])
     }
 
     @Test("CLI-style string arguments are accepted")
     func stringArgs() {
         let core = makeCore()
         let response = core.execute(
-            "bind_profile_to_native_space",
+            "bind_profile_to_desktop",
             args: [.string("3"), .string("Studio")]
         )
         #expect(response.isSuccess)
-        #expect(core.nativeSpaceBindings[3] == "Studio")
+        #expect(core.desktopBindings[3] == "Studio")
     }
 
     @Test("Rebinding a space replaces the previous profile")
     func rebind() {
         let core = makeCore()
         core.execute(
-            "bind_profile_to_native_space",
+            "bind_profile_to_desktop",
             args: [.number(1), .string("Old")]
         )
         core.execute(
-            "bind_profile_to_native_space",
+            "bind_profile_to_desktop",
             args: [.number(1), .string("New")]
         )
-        #expect(core.nativeSpaceBindings == [1: "New"])
+        #expect(core.desktopBindings == [1: "New"])
     }
 
     @Test("Desktops restore their last virtual space")
@@ -248,22 +248,22 @@ struct NativeSpaceBindingTests {
         let core = makeCore()
         #expect(
             !core.execute(
-                "bind_profile_to_native_space",
+                "bind_profile_to_desktop",
                 args: [.string("zero"), .string("x")]
             ).isSuccess
         )
         #expect(
             !core.execute(
-                "bind_profile_to_native_space",
+                "bind_profile_to_desktop",
                 args: [.number(0), .string("x")]
             ).isSuccess
         )
         #expect(
             !core.execute(
-                "bind_profile_to_native_space",
+                "bind_profile_to_desktop",
                 args: [.number(1)]
             ).isSuccess
         )
-        #expect(core.nativeSpaceBindings.isEmpty)
+        #expect(core.desktopBindings.isEmpty)
     }
 }

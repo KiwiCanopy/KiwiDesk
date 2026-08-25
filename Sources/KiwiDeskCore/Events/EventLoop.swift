@@ -144,7 +144,7 @@ public final class EventLoop {
     /// tab carrier across spaces (identical tiled frames) into a bogus
     /// re-key. `reconcileAll` itself passes `coalesceTabs: false`;
     /// this closes the stray-targeted-reconcile residual (#308 review).
-    var lastNativeSpaceChange: Date = .distantPast
+    var lastDesktopChange: Date = .distantPast
     /// Grace window after a native-Space change during which no
     /// reconcile coalesces tabs. A genuine tab switch within it
     /// falls back to destroy + create (self-healing), which is rare.

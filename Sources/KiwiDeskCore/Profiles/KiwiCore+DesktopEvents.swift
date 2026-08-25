@@ -1,12 +1,12 @@
 import Foundation
 
-/// The `native_space_change` emission, with its #888 display
-/// dimension — split from `KiwiCore+NativeSpaces.swift` for the
+/// The `desktop_change` emission, with its #888 display
+/// dimension — split from `KiwiCore+Desktops.swift` for the
 /// file ceiling.
 extension KiwiCore {
-    /// Emits one `native_space_change` per switch notification.
+    /// Emits one `desktop_change` per switch notification.
     ///
-    /// Payload: `native_space` (the Desktop now current on the
+    /// Payload: `desktop` (the Desktop now current on the
     /// display that switched), `monitor` (that display's 1-based
     /// positional number — 1 is the main display, the same
     /// numbering a Lua display argument takes), `profile`.
@@ -28,9 +28,9 @@ extension KiwiCore {
     /// fullscreen/system space, the pre-#888 silence. The number
     /// is never back-filled from another display: a payload
     /// pairing one display's `monitor` with another's
-    /// `native_space` describes a switch that never happened
+    /// `desktop` describes a switch that never happened
     /// (review, 2026-08-18).
-    func emitNativeSpaceChange(
+    func emitDesktopChange(
         _ snapshot: DesktopSnapshot,
         changed: [String]
     ) {
@@ -61,9 +61,9 @@ extension KiwiCore {
                 )
             } ?? 1
         bus.emit(
-            .nativeSpaceChange,
+            .desktopChange,
             data: .object([
-                "native_space": .number(Double(number)),
+                "desktop": .number(Double(number)),
                 "monitor": .number(Double(monitor)),
                 "profile": profiles.currentName.map {
                     .string($0)

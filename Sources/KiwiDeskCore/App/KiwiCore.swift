@@ -265,11 +265,11 @@ public final class KiwiCore {
     /// The MAIN display's current native Desktop (Mission
     /// Control number, #888) — the binding authority — and the
     /// per-display Space memory restored on returning to one.
-    var lastNativeSpace: Int?
+    var lastDesktop: Int?
     let desktopMemory = DesktopMemory()
     /// When the last native desktop switch happened; focus
     /// events during the transition must not change spaces.
-    var lastNativeSwitch: Date = .distantPast
+    var lastDesktopSwitch: Date = .distantPast
 
     /// The live arrangement's space→monitor fingerprint pins,
     /// adopted from the active profile's matching monitor set
@@ -287,8 +287,8 @@ public final class KiwiCore {
     var fallbackSpace: SpaceID?
     /// Profile bound per native macOS Space, keyed by the
     /// Mission Control number (1-based). Populated by
-    /// `bind_profile_to_native_space`.
-    public internal(set) var nativeSpaceBindings: [Int: String] = [:]
+    /// `bind_profile_to_desktop`.
+    public internal(set) var desktopBindings: [Int: String] = [:]
 
     /// Log line consumer (GUI console later; syslog now) — the
     /// sink every Core seam is wired to forward *into*.

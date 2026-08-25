@@ -62,7 +62,7 @@ any of them to keep sketchybar in sync:
 | `layout_change` | `space_id`, `mode` | Layout mode changes on a space |
 | `focus_change` | `window_id`, `app`, `bundle_id` | Focused window changes |
 | `monitor_change` | `monitor_count` | Monitors connect or disconnect |
-| `native_space_change` | `native_space`, `monitor` | A macOS Desktop switches on some screen (`monitor` 1 is the main screen) |
+| `desktop_change` | `desktop`, `monitor` | A macOS Desktop switches on some screen (`monitor` 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears (`new`/`returned`/`restored`) |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window disappears (`closed`/`minimized`/`hidden`/`vanished`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` | See caveats |
@@ -74,7 +74,7 @@ any of them to keep sketchybar in sync:
   Desktop switches also fire them. Filter on the `reason`
   argument to ignore the artifacts (`vanished`/`returned`
   bursts on every Mission Control round-trip). If you do
-  filter, keep a `native_space_change` handler that re-queries
+  filter, keep a `desktop_change` handler that re-queries
   state: a window closed while its Desktop was off-screen was
   already emitted as `vanished` and never gets a corrective
   `closed`.
@@ -108,7 +108,7 @@ end)
 -- "Displays have separate Spaces" on, secondary screens report
 -- their own switches too — filter on the main screen so the
 -- indicator tracks the Desktop that selects profiles:
-KiwiDesk.on("native_space_change", function(desktop, monitor)
+KiwiDesk.on("desktop_change", function(desktop, monitor)
     if monitor ~= 1 then return end
     KiwiDesk.exec(
         "sketchybar --trigger kiwi_desktop DESKTOP="
@@ -117,7 +117,7 @@ end)
 
 -- Window icons stay fresh even when focus doesn't change.
 -- Reason-filtered: Desktop-switch bursts (vanished/returned)
--- spawn no processes; the native_space_change handler above
+-- spawn no processes; the desktop_change handler above
 -- already refreshes on the round-trip.
 for _, event in ipairs({
     "window_created", "window_destroyed",
@@ -418,7 +418,7 @@ Wire up the events to trigger sketchybar updates:
 
 ```lua
 -- Fire kiwidesk_update on all relevant events.
--- native_space_change is not optional: a window closed while
+-- desktop_change is not optional: a window closed while
 -- its Desktop was off-screen never gets a corrective event,
 -- so the Mission Control round-trip must re-query (see the
 -- caveats above).
@@ -426,7 +426,7 @@ for _, event in ipairs({
     "space_change",
     "layout_change",
     "focus_change",
-    "native_space_change",
+    "desktop_change",
     "window_created",
     "window_destroyed",
     "window_moved_to_space",

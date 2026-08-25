@@ -72,7 +72,7 @@ commands without duplicating logic.
 
 > **Native support exists now:** A profile can carry a sparse
 > `"layers"` override that shadows individual base shortcuts.
-> Combined with `bind_profile_to_native_space`, each Desktop
+> Combined with `bind_profile_to_desktop`, each Desktop
 > gets its own layouts and its own keybinds with no Lua code.
 > See *Config cascade* under
 > [Keybindings](../lua-reference.md). This recipe remains for
@@ -80,7 +80,7 @@ commands without duplicating logic.
 > keybindings.
 
 For a hand-written config, combine shortcut layers with the
-`native_space_change` event. Only the active layer's bindings
+`desktop_change` event. Only the active layer's bindings
 fire, so build each Desktop's layer by merging shared binds with
 per-Desktop overrides:
 
@@ -127,7 +127,7 @@ KiwiDesk.define_layer("desk2", layer({
 -- Switch layer when the macOS Desktop changes. Only the main
 -- display's Desktop counts ("Displays have separate Spaces"
 -- makes secondary screens report their own switches too):
-KiwiDesk.on("native_space_change", function(n, monitor)
+KiwiDesk.on("desktop_change", function(n, monitor)
     if monitor ~= 1 then return end
     KiwiDesk.switch_layer(n == 2 and "desk2" or "desk1")
 end)
@@ -136,6 +136,6 @@ end)
 KiwiDesk.switch_layer("desk1")
 ```
 
-Pair this with `bind_profile_to_native_space` (see
+Pair this with `bind_profile_to_desktop` (see
 [configuration](../lua-reference.md)) and each Desktop gets
 its own layouts *and* its own keybinds.

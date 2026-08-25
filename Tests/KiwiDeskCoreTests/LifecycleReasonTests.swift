@@ -11,7 +11,7 @@ struct LifecycleReasonTests {
         #expect(
             WindowGoneReason.classify(
                 wasMinimized: true,
-                sinceNativeSwitch: 0.1
+                sinceDesktopSwitch: 0.1
             ) == .minimized
         )
     }
@@ -21,7 +21,7 @@ struct LifecycleReasonTests {
         #expect(
             WindowGoneReason.classify(
                 wasMinimized: false,
-                sinceNativeSwitch: 0.5
+                sinceDesktopSwitch: 0.5
             ) == .vanished
         )
     }
@@ -31,7 +31,7 @@ struct LifecycleReasonTests {
         #expect(
             WindowGoneReason.classify(
                 wasMinimized: false,
-                sinceNativeSwitch: 1.5
+                sinceDesktopSwitch: 1.5
             ) == .closed
         )
     }

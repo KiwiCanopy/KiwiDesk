@@ -9,7 +9,7 @@ public enum KiwiNotification: String, CaseIterable, Sendable,
     case layoutChange = "layout_change"
     case focusChange = "focus_change"
     case monitorChange = "monitor_change"
-    case nativeSpaceChange = "native_space_change"
+    case desktopChange = "desktop_change"
     // Lifecycle events carry a `reason` (#40), spelled by
     // `WindowAppearReason` / `WindowGoneReason` — the one copy
     // of that vocabulary, so a value added there (`.hidden`,

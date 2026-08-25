@@ -152,7 +152,7 @@ item's only appearance in CLI output.
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `quit.set_layout` | `grid` (default) — how windows are spread on quit |
 | | `quit.set_grid_target_depth` | 1–20 (default 5) — quit-grid density target (windows per cell before the grid grows) |
-| | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`; `native_space` is the main screen's current Desktop) |
+| | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, desktop, exec_running}`; `desktop` is the main screen's current Desktop) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
 | Profiles | `save_profile` | name (updates in place when it exists) |
@@ -161,7 +161,7 @@ item's only appearance in CLI output.
 | | `set_default_profile` | name (its screen count's fallback) |
 | | `list_profiles` | — |
 | | `get_profile_status` | — (returns `{name, standard, isDirty}`) |
-| | `bind_profile_to_native_space` | Desktop number, profile (fires when that Desktop becomes current on the main screen) |
+| | `bind_profile_to_desktop` | Desktop number, profile (fires when that Desktop becomes current on the main screen) |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | message |
@@ -290,7 +290,7 @@ Each event is one JSON line:
 ```
 
 Events: `space_change`, `layout_change`, `focus_change`,
-`monitor_change`, `native_space_change`, `window_created`,
+`monitor_change`, `desktop_change`, `window_created`,
 `window_destroyed`, `window_moved_to_space`.
 
 Give no arguments and you get every event; give arguments and
@@ -367,7 +367,7 @@ destroys and a burst of `returned` creates — filter on
 `reason` to ignore them. Caveat: a window closed *while its
 Desktop is off-screen* already emitted `vanished` and never
 gets a corrective `closed`; consumers that filter `vanished`
-must also refresh their state on `native_space_change`.
+must also refresh their state on `desktop_change`.
 
 `window_moved_to_space` fires when a window is explicitly
 moved to another space (`move_to_space`,
@@ -383,7 +383,7 @@ reassignments (profile load, session restore) stay silent:
           "bundle_id": "com.spotify.client"}}
 ```
 
-`native_space_change` fires when the user switches macOS
+`desktop_change` fires when the user switches macOS
 Desktops (Mission Control); its data carries the 1-based
 Desktop number now current on the screen that switched, that
 screen's positional number (`monitor`: 1 is the main screen,
@@ -391,8 +391,8 @@ secondaries follow left to right — the same 1-based positional
 numbering a display argument takes), and the active profile:
 
 ```json
-{"event": "native_space_change",
- "data": {"native_space": 2, "monitor": 1,
+{"event": "desktop_change",
+ "data": {"desktop": 2, "monitor": 1,
           "profile": "Creator Studio"}}
 ```
 

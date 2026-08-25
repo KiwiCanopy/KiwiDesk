@@ -126,7 +126,7 @@ struct ConfigWriteTests {
                 == .floating
         )
         #expect(core.state.appRules["spotify"] == SpaceID("music"))
-        #expect(core.nativeSpaceBindings[2] == "Studio")
+        #expect(core.desktopBindings[2] == "Studio")
         #expect(core.keys.icon(for: "resize") == "📐")
         let combo = KeyCombo.parse("alt+h")
         #expect(combo != nil)
@@ -170,7 +170,7 @@ struct ConfigWriteTests {
         #expect(core.eventLoop.ignoreRules.rawRules.isEmpty)
         #expect(core.tiler.settings.gapsOverride.isEmpty)
         #expect(core.tiler.settings.placementOverride.isEmpty)
-        #expect(core.nativeSpaceBindings.isEmpty)
+        #expect(core.desktopBindings.isEmpty)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .bsp
         )

@@ -51,7 +51,7 @@ public enum ManagedConfig {
         "ignore_rules",
         "KiwiDesk.bind(",
         "KiwiDesk.define_layer(",
-        "KiwiDesk.bind_profile_to_native_space(",
+        "KiwiDesk.bind_profile_to_desktop(",
     ]
 
     // `adopt` and its selective-comment machinery live in

@@ -1,7 +1,7 @@
 import Foundation
 
 /// The per-Desktop Space memory's reads and writes (#888) —
-/// split from `KiwiCore+NativeSpaces.swift` for the file
+/// split from `KiwiCore+Desktops.swift` for the file
 /// ceiling, the way the event emit already was.
 ///
 /// **Every entry point takes the memory KEY rather than reading

@@ -14,7 +14,7 @@ import Testing
 /// wiring half — the behaviour half is `ProfilesGateTests`.
 ///
 /// SCOPE: by explicit path, one entry per GATE rather than per
-/// file. `NativeSpacesGroup` resolves one gate that has two
+/// file. `DesktopsGroup` resolves one gate that has two
 /// reasons, and a file-level "touches the resolver somewhere"
 /// check would pass while one of them went hand-rolled — the very
 /// drift this guard exists to catch. A future gated row in this
@@ -50,7 +50,7 @@ struct ProfilesGateWiringTests {
                 .joined()
         }
         let consults: [String: [String]] = [
-            "Components/Profiles/NativeSpacesGroup.swift": [
+            "Components/Profiles/DesktopsGroup.swift": [
                 "inertReason(for:.profiles(.profileBindings))"
             ],
             // Apply's gate moved to the card widget in #859,
@@ -115,7 +115,7 @@ struct ProfilesGateWiringTests {
             "Sections/ProfilesSection.swift": [
                 "ProfilesFamilyRows.orderedProfiles("
             ],
-            "Components/Profiles/NativeSpacesGroup.swift": [
+            "Components/Profiles/DesktopsGroup.swift": [
                 "ProfilesFamilyRows.desktops("
             ],
             "Sections/PresetsSection.swift": [
@@ -304,7 +304,7 @@ struct ProfilesGateWiringTests {
                 "Sections/ProfilesSection+Subtitle.swift",
             ]
         for key in [
-            "profiles.native_spaces.live_only",
+            "profiles.desktops.live_only",
             "presets.editing_stored",
             "presets.needs_screens",
         ] {

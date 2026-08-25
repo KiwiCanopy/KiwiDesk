@@ -5,7 +5,7 @@ import Foundation
 /// rule): destroys inside it classify as vanished, and focus
 /// events inside it must not flip Spaces
 /// (`KiwiCore+SpaceCommands`).
-public enum NativeSwitch {
+public enum DesktopSwitch {
     public static let settle: TimeInterval = 1
 }
 
@@ -39,10 +39,10 @@ public enum WindowGoneReason: String, Sendable {
     /// dirty-flag + re-query consumer pattern self-heals.
     public static func classify(
         wasMinimized: Bool,
-        sinceNativeSwitch: TimeInterval
+        sinceDesktopSwitch: TimeInterval
     ) -> WindowGoneReason {
         if wasMinimized { return .minimized }
-        return sinceNativeSwitch <= NativeSwitch.settle
+        return sinceDesktopSwitch <= DesktopSwitch.settle
             ? .vanished : .closed
     }
 }

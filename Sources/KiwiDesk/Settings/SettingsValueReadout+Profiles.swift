@@ -46,7 +46,7 @@ extension SettingsValueReadout {
             // diff names a native Space exactly the way the
             // Profiles rows do (#768: macOS's are Desktops).
             let desktop = L(
-                "native_spaces.desktop",
+                "desktops.desktop",
                 "Desktop %1$d",
                 number
             )

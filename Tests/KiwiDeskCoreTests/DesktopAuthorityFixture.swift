@@ -11,7 +11,7 @@ import Foundation
 // divergence ground). No assertions live here.
 //
 // **Every suite built on this pins the whole machine surface.**
-// A `handleNativeSpaceChange` fixture reaches `CGMainDisplayID`,
+// A `handleDesktopChange` fixture reaches `CGMainDisplayID`,
 // `CGDisplayCreateUUIDFromDisplayID` and SkyLight's per-display
 // reads on top of the space topology, so `pinTwoDisplays()` sets
 // all of them: a fixture that pinned only the spaces was

@@ -126,7 +126,7 @@ struct LifecycleEventTests {
     func vanished() {
         let core = makeCore()
         core.eventLoop.onEvent(.windowCreated(window(4)))
-        core.lastNativeSwitch = Date()
+        core.lastDesktopSwitch = Date()
         var events: [(KiwiNotification, JSONValue)] = []
         core.bus.addSink { event, data in
             events.append((event, data))
@@ -163,7 +163,7 @@ struct LifecycleEventTests {
         let core = makeCore()
         core.eventLoop.onEvent(.windowCreated(window(6)))
         // Native-switch vanish: the space stays remembered.
-        core.lastNativeSwitch = Date()
+        core.lastDesktopSwitch = Date()
         core.eventLoop.onEvent(
             .windowDestroyed(WindowID(6), wasMinimized: false)
         )

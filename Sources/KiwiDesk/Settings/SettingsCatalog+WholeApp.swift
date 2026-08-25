@@ -24,8 +24,8 @@ struct ProfilesControls: Sendable {
     /// A drawer since #678 turn 13a: the census tiers
     /// `profileBindings` `.showMore`, and a Show-more row lives
     /// behind its container's disclosure.
-    let nativeSpaces = SettingsDrawer(
-        "native_spaces.title",
+    let desktops = SettingsDrawer(
+        "desktops.title",
         "Profiles per macOS Desktop"
     )
     let presetsCard = SettingsControl(

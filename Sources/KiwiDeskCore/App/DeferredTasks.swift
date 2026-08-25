@@ -40,8 +40,8 @@ final class DeferredTasks {
         /// `move_to_space` (`scheduleMoveSettle`, #482/#483).
         case moveSettle
         /// Layout + focus re-assert after a native desktop
-        /// switch (`settleAfterNativeSwitch`).
-        case nativeSpaceSettle
+        /// switch (`settleAfterDesktopSwitch`).
+        case desktopSettle
         /// Re-asserts every desired focus ring's VISIBILITY and
         /// stacking after a drag/drop or animated transition
         /// (`scheduleBorderDropReconcile`) — early on purpose, and
