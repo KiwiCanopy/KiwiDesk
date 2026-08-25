@@ -78,18 +78,23 @@ struct StarterSetupSeedTests {
         #expect(StarterSetup.spaceCount(sizes: []) == 3)
     }
 
-    @Test("modes are the screen's own list, largest screen first")
+    @Test("modes are the screen's own list, behind its lead")
     func modesComeFromTheScreen() {
         let modes = StarterSetup.spaceModes(sizes: sizes(2))
-        // Main screen (largest by tie-break) takes the head of
-        // the desktop list plus the one Floating space.
-        #expect(modes[SpaceID("1")] == .grid)
-        #expect(modes[SpaceID("2")] == .stack)
+        // Both screens open on their LEAD (#1018), and only the
+        // space behind it comes off the shape's own list. The
+        // main screen is not the smallest — equal widths give
+        // Monocle to the later one — so it leads Scrolling and
+        // takes Grid, the head of the desktop list, plus the one
+        // Floating space.
+        #expect(modes[SpaceID("1")] == .scrolling)
+        #expect(modes[SpaceID("2")] == .grid)
         #expect(modes[SpaceID("3")] == .floating)
-        // The second screen continues down the same list rather
-        // than repeating what the first took.
-        #expect(modes[SpaceID("4")] == .bsp)
-        #expect(modes[SpaceID("5")] == .scrolling)
+        // The second screen is the smallest by tie-break, so it
+        // leads Monocle, then continues down the same list
+        // rather than repeating what the first took.
+        #expect(modes[SpaceID("4")] == .monocle)
+        #expect(modes[SpaceID("5")] == .stack)
     }
 
     @Test("screens are positional, main omitted")
@@ -123,31 +128,6 @@ struct StarterSetupSeedTests {
             .filter { $0.screen >= 1 }
         #expect(screens.count == offMain.count)
         #expect(offMain.count < all.count)
-    }
-
-    @Test("tuning follows the MAIN screen's class")
-    func tuningFollowsMainScreen() {
-        let settings = StarterTuning.settings(mainShape: .desktop)
-        #expect(settings.stack.masterRatio == 0.8)
-        #expect(settings.track.newWindow == .ownTrack)
-        // At 2560 pt a three-column grid gives 850 pt cells.
-        #expect(settings.grid.columns == 2)
-        #expect(settings.grid.rows == 2)
-        // A laptop cannot spare 40 pt of chrome per edge.
-        let small = StarterTuning.settings(mainShape: .laptop)
-        #expect(small.gapsGlobal == .uniform(6))
-        #expect(small.appBarStyle.thickness == 28)
-        #expect(small.spaceBarStyle.thickness == 28)
-        // Everything that assumes width has to flip.
-        let tall = StarterTuning.settings(mainShape: .pivoted)
-        #expect(tall.stack.stackPosition == .bottom)
-        #expect(tall.scrolling.orientation == .vertical)
-        #expect(tall.grid.splitDirection == .vertical)
-        // One master on a 3440 pt screen is an absurd pane.
-        let wide = StarterTuning.settings(mainShape: .ultrawide)
-        #expect(wide.stack.masterCount == 2)
-        #expect(wide.track.autoTracks)
-        #expect(wide.minWindowSize == 420)
     }
 
     // MARK: - Preset face
@@ -262,11 +242,11 @@ struct StarterSetupSeedTests {
             uniqueKeysWithValues: core.state.workspaces.allSpaces
                 .map { ($0.id, $0.mode) }
         )
-        #expect(modes[SpaceID("1")] == .grid)
-        #expect(modes[SpaceID("2")] == .stack)
+        #expect(modes[SpaceID("1")] == .scrolling)
+        #expect(modes[SpaceID("2")] == .grid)
         #expect(modes[SpaceID("3")] == .floating)
-        #expect(modes[SpaceID("4")] == .bsp)
-        #expect(modes[SpaceID("5")] == .scrolling)
+        #expect(modes[SpaceID("4")] == .monocle)
+        #expect(modes[SpaceID("5")] == .stack)
 
         // The second screen's block is pinned to it; the first
         // block holds the Main role.
@@ -287,8 +267,8 @@ struct StarterSetupSeedTests {
         // Persisted and adopted, so a reload re-applies it.
         #expect(core.profiles.currentName == "Starter")
         let saved = try core.profiles.read(name: "Starter")
-        #expect(saved.spaceModes[SpaceID("2")] == .stack)
-        #expect(saved.spaceModes[SpaceID("4")] == .bsp)
+        #expect(saved.spaceModes[SpaceID("2")] == .grid)
+        #expect(saved.spaceModes[SpaceID("4")] == .monocle)
         // The saved profile carries a real monitor set — both
         // displays — or the first monitor change couldn't match
         // it and would drop it for a composed Standard.

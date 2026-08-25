@@ -80,6 +80,18 @@ change here:
   genuinely is not knowable, and the historic `bsp` stands there;
   a caller that CAN know and passes nil makes the preview and the
   apply disagree. `SparseModeFallbackTests` holds both arms.
+- **A screen's FIRST space is the lead, and the lead may
+  repeat.** `StarterAllocation.lead(_:of:)` decides it before the
+  screen's own list is read — Scrolling everywhere but the
+  narrowest screen, which leads Monocle — so it is appended
+  WITHOUT consulting `used` and joins it afterwards. A change
+  that folds the lead back into the ordinary fill silently
+  restores best-first opening, and a change that makes the
+  no-repeat rule absolute breaks the lead; `StarterLeadTests`
+  holds both, including the tie-break that keeps a main screen
+  beside an identical twin on Scrolling. Read "smallest" off
+  `fillOrder`'s far end rather than sorting again — a second
+  ordering is a second tie-break to disagree with.
 - **`StarterSetup.slots` is the one walk.** Space numbering, the
   mode map and the screen pins all derive from it; a second walk
   is how a space takes its mode from one screen and its pin from

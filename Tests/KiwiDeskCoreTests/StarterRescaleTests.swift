@@ -145,8 +145,10 @@ struct StarterRescaleTests {
         core.handleMonitorChange()
         #expect(core.profiles.currentStandard == "Starter")
         #expect(core.state.workspaces.allSpaces.count == 7)
+        // Space 6 opens the third display's block, so it is that
+        // screen's LEAD (#1018) rather than the head of its list.
         #expect(
-            core.state.workspaces[SpaceID(6)]?.mode == .scrolling
+            core.state.workspaces[SpaceID(6)]?.mode == .monocle
         )
         // Three whole blocks, one per display — 3 · 2 · 2, the
         // widest screen taking the larger share.

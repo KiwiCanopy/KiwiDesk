@@ -2232,9 +2232,10 @@ the workflow layouts alone.
 
 **1 Screen:**
 
-- **Starter** — The spaces chosen for your screen, each with its
-  own layout (see [Your first run](#your-first-run)). A good way
-  back to a known-good starting point.
+- **Starter** — The spaces chosen for your screen: it opens in
+  scrolling, with the other layouts your screen suits behind it
+  (see [Your first run](#your-first-run)). A good way back to a
+  known-good starting point.
 - **Developer** *(Standard)* — grid (space 1), IDE in stack (space 2),
   docs in scrolling (space 3), preview in monocle (space 4). Best for
   software dev.
@@ -2247,9 +2248,10 @@ the workflow layouts alone.
 **2 Screens:**
 
 - **Starter** — Five spaces split across the two screens by
-  width, each screen taking the tiled layouts its shape suits —
-  plus the one Floating space, which goes to the largest screen
-  rather than being chosen for it.
+  width. Each screen opens in scrolling except the smaller,
+  which opens in monocle, and takes the tiled layouts its shape
+  suits behind that — plus the one Floating space, which goes to
+  the largest screen rather than being chosen for it.
 - **Dual Developer** *(Standard)* — Main screen: IDE/docs/preview.
   Secondary: mail/chat/media. Tight gaps (8 pt).
 - **Coder & Monitor** — Main screen: editor/terminals. Secondary:
@@ -2259,9 +2261,10 @@ the workflow layouts alone.
 **3 Screens:**
 
 - **Starter** — Seven spaces split across the three screens by
-  width, each screen taking the tiled layouts its shape suits —
-  plus the one Floating space, which goes to the largest screen
-  rather than being chosen for it.
+  width. Each screen opens in scrolling except the smallest,
+  which opens in monocle, and takes the tiled layouts its shape
+  suits behind that — plus the one Floating space, which goes to
+  the largest screen rather than being chosen for it.
 - **Command Center** *(Standard)* — Left: communication (stack).
   Center: work (IDE/docs/preview). Right: logs/monitoring.
 - **Visual Creative & Developer** — Left: design canvas. Center:
@@ -2485,10 +2488,29 @@ setup **chosen for the screens you actually have** — the layouts
 come from each screen's shape, and the number of spaces from how
 many screens there are.
 
-**Which layouts.** Every screen is measured in points, not
-pixels, so a 5K 27" and a 1440p 27" get the same answer while a
-Retina laptop gets laptop layouts despite having more pixels than
-either:
+**Every screen opens in scrolling** — except the smallest, which
+opens in monocle. That first space is the one you meet before you
+have configured anything, and scrolling is the mode where nothing
+gets squashed: each window keeps a comfortable slot and the
+neighbours wait one keystroke away. If you have only one screen,
+it opens in scrolling whatever its size.
+
+The slot is just under half the screen, so two windows sit side
+by side with the gap between them visible. **If your main screen
+is an ultrawide** it is 30% instead — three readable columns
+rather than one very wide one.
+
+That is one setting for the whole profile, read from your main
+screen, so it applies to your other screens too: an ultrawide
+*second* screen keeps the just-under-half slot, and a laptop
+beside an ultrawide main gets the 30% one. Change it once in
+settings, or per space if you want them to differ.
+
+**Which layouts come next.** Behind that first space, each screen
+draws from a list chosen for its shape. Every screen is measured
+in points, not pixels, so a 5K 27" and a 1440p 27" get the same
+answer while a Retina laptop gets laptop layouts despite having
+more pixels than either:
 
 | Your screen | Gets, best first |
 | --- | --- |
@@ -2517,8 +2539,14 @@ gets eleven spaces. Exactly one Floating space is created, on
 your largest screen.
 
 So a 14" laptop on its own starts with three spaces — scrolling,
-monocle, floating. Add a 27" and you have five: the laptop keeps
-scrolling and monocle, the 27" takes grid, stack and floating.
+monocle, floating. Add a 27" and you have five: the 27" opens in
+scrolling and takes grid beside it, plus the floating space,
+while the laptop — now the smaller screen — opens in monocle with
+a scrolling space behind it.
+
+Note that "smallest" is read from the widths alone, so a 27"
+beside an ultrawide is the smaller of the two and opens in
+monocle even though a 27" on its own would not.
 
 **The tuning follows your main screen**, since gaps and ratios
 belong to the profile rather than to a monitor: a laptop main

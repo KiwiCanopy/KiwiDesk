@@ -14,9 +14,9 @@ import Foundation
 ///
 /// Three collaborators, one each: `ScreenClass` says what a screen
 /// is and which layouts it wants, `StarterAllocation` says how
-/// many each gets, and `StarterTuning` says how the layouts are
-/// tuned. This assembles them into the space list, the mode map
-/// and the pins.
+/// many each gets, WHICH ONE IT OPENS IN and who hosts Floating,
+/// and `StarterTuning` says how the layouts are tuned. This
+/// assembles them into the space list, the mode map and the pins.
 ///
 /// One generator behind BOTH callers — the first-run seed and the
 /// `Starter` presets — so the two cannot drift
