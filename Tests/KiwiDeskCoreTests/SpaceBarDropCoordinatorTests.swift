@@ -158,7 +158,7 @@ struct SpaceBarDropCoordinatorTests {
     }
 
     @Test("reset cancels a pending spring (abandoned drag)")
-    func resetCancelsSpring() async throws {
+    func resetCancelsSpring() async {
         let (coord, rec) = make(
             current: SpaceID("A"),
             hit: SpaceID("B"),
@@ -178,12 +178,40 @@ struct SpaceBarDropCoordinatorTests {
         // fired instead of that it had not fired *yet*.
         #expect(dwell?.isCancelled == true)
         await dwell?.value
-        // That await returns at once on a cancelled handle, so
-        // it proves only that THIS dwell unwound. Proving the
-        // negative still takes the gap (200 ms against the 50 ms
-        // dwell): a second, uncancelled task — the shape `arm`'s
-        // own `cancel()` exists to prevent — would fire inside
-        // it and no handle here would see it.
+        // No gap sleep here, deliberately: this gesture arms
+        // ONCE, so its one timeline is the only thing that could
+        // spring and the await above has already run it out. The
+        // negative that does need a gap is a *surviving
+        // predecessor*, which needs a second arm to exist at all
+        // — `rearmCancelsPreviousDwell` below owns it.
+        #expect(rec.sprang.isEmpty)
+    }
+
+    @Test("Re-arming cancels the previous item's dwell")
+    func rearmCancelsPreviousDwell() async throws {
+        let (coord, rec) = make(
+            current: SpaceID("A"),
+            hit: SpaceID("B"),
+            dwell: 0.05
+        )
+        coord.moved(win, cursor: cursor)
+        let first = coord.dwellTask
+        #expect(first != nil, "arming scheduled no dwell")
+        // Straight onto another item without leaving the bar.
+        // B's dwell has to die with the arm, or it springs a
+        // space the drag moved off seconds ago.
+        coord.hitTest = { _ in SpaceID("C") }
+        coord.moved(win, cursor: cursor)
+        #expect(first?.isCancelled == true)
+        #expect(coord.dwellTask != first)
+        coord.reset()
+        // The gap belongs here rather than beside the other
+        // cancellation tests: a surviving predecessor is the one
+        // spring no handle in this test is holding, so only
+        // elapsed time past the dwell can show it (200 ms
+        // against 50 ms). Awaiting proves the timelines this
+        // test knows about ended; the sleep covers the one it
+        // would not know about.
         try await Task.sleep(nanoseconds: 200_000_000)
         #expect(rec.sprang.isEmpty)
     }
