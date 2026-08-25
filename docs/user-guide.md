@@ -344,6 +344,12 @@ the KiwiDesk icon opens the quick menu where you can:
   to know immediately. It is greyed while a check is already
   running or an update is part-way through installing.
 
+  The download runs in the background, so there is no need to
+  watch it — go back to what you were doing. KiwiDesk brings the
+  *Install and Relaunch* prompt to the front when it is ready for
+  your answer, since a menu-bar app has no Dock icon to bounce
+  for your attention.
+
   **If you installed with Homebrew**, KiwiDesk now keeps itself
   up to date and `brew upgrade` steps aside for it. To move an
   older copy onto a version that can do this, run

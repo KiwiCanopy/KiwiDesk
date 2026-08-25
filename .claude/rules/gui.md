@@ -194,6 +194,22 @@ argument, and why the rule is phrased as an obligation on
 controllers rather than as a claim about the process, is
 "Permanent accessory mode" in `docs/design-decisions.md`.
 
+**The other half of that policy: a window the user must ANSWER
+activates at the moment it appears, and a window a framework
+opened is not exempt.** `.accessory` earns no Dock tile, so
+`requestUserAttention` and every other Dock-borne nudge is inert
+here — a prompt nobody activated is simply behind whatever the
+user was doing. KiwiDesk's own windows take `NSApp.forceFront`; a
+framework's takes the seam that names the moment it appears, and
+approximating with a nearby callback is what this forbids —
+Sparkle's nearest neighbour to the install-and-restart prompt
+fires before the installer has finished preparing it. #1011 is
+the worked case: `UpdatePromptDriver` overrides
+`showReadyToInstallAndRelaunch`, and `UpdaterSeamGuardTests` pins
+both the override and the activation inside it, because neither
+reaches a unit test. The argument is "Permanent accessory mode"
+in `docs/design-decisions.md`.
+
 ## A window that must clear the bars derives its level
 
 The bars render at `BarPanel.level`. **A window that must not be

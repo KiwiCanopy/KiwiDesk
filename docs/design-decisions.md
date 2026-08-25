@@ -2687,6 +2687,32 @@ AppKit routes key equivalents through `NSApp.mainMenu` whatever
 the policy, and it is what gives the Settings text fields
 Cut/Copy/Paste/Undo.
 
+**Corollary: nothing arrives in front for free, and that reaches
+windows KiwiDesk did not open.** A `.regular` app has a Dock tile
+and everything macOS builds on it — the icon bouncing for
+`requestUserAttention`, the user clicking it to come back. An
+`.accessory` process has none of that, so a window the user *must*
+answer activates at the moment it appears. KiwiDesk's own take
+`NSApp.forceFront`; a window a framework opens takes the seam that
+names its moment, and where the framework offers none, that seam
+is worth building rather than approximating with a nearby hook —
+the neighbouring callback fires before the window exists, which is
+a race dressed as a fix.
+
+Sparkle is the worked case
+([#1011](https://github.com/KiwiCanopy/KiwiDesk/issues/1011)). It
+activates for the windows it opens at check time, then marks the
+later install-and-restart prompt with `requestUserAttention`
+alone — right for a Dock app, inert here. The prompt arrived
+behind everything the user had open with nothing saying the update
+was waiting, which makes the in-app update path read as broken:
+the exact trust the section
+[above](#no-distribution-channel-without-an-update-path) exists to
+keep. `UpdatePromptDriver` overrides
+`showReadyToInstallAndRelaunch` — the one moment neither Sparkle
+delegate protocol reaches — and `UpdaterSeamGuardTests` holds both
+the override and the activation inside it.
+
 ### Settings is miniaturizable; modal chrome is not
 
 **[Rationale]**
