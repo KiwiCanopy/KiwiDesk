@@ -17,6 +17,7 @@ struct FocusedCommandPolicyTests {
     /// below, so this list stays small.
     private let allowedNonSetters: Set<String> = [
         "focus_space",
+        "focus_desktop",
         // Act on a named space + display, not the focused window,
         // so they skip the foreground preflight (like focus_space).
         "move_space_to_display",

@@ -33,6 +33,20 @@ public struct DesktopSnapshot: Sendable {
         NativeSpaces.number(of: space, in: spaces)
     }
 
+    /// The Desktop carrying Mission Control `number`, or nil
+    /// when no user Desktop has it.
+    ///
+    /// The INVERSE of `number(of:)`, and derived from it rather
+    /// than re-deriving the rule: #25's own note asks that bind
+    /// targets and move targets agree, and a second copy of
+    /// "filter `isUser`, take position n" is what would shift
+    /// which Desktop a number means when the numbering changes
+    /// (the collector's KV-identity item is queued to change
+    /// it). One authority, read both ways.
+    public func space(numbered wanted: Int) -> NativeSpace? {
+        spaces.first { number(of: $0.id) == wanted }
+    }
+
     /// The Mission Control numbers of the MAIN screen's user
     /// Desktops, ascending — the Desktops a binding can fire on
     /// in this arrangement (#888).
