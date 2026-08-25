@@ -42,6 +42,14 @@ public struct AppliedEffects: Sendable {
     /// lays out on another screen (#1010) — the space it went
     /// to. Nil whenever the two agreed, which is every
     /// single-screen arrival.
+    ///
+    /// A DECISION rather than an erased fact, unlike its
+    /// neighbours here, and it earns the field twice over: it
+    /// is what `handle` narrates the cross-screen arrival from
+    /// (a device trace cannot read the reason off the
+    /// membership alone), and it is the seam
+    /// `ArrivalScreenHomeTests` observes the ruling through —
+    /// several of its stand-downs are visible in nothing else.
     var rehomedToScreenSpace: SpaceID?
 
     /// Facts a `.windowDestroyed` erases when it removes the

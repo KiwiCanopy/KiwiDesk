@@ -20,7 +20,7 @@ extension StateCoordinator {
         windows.upsert(window)
         restoreFloatOverride(of: window)
         restoreStickyIntent(of: window)
-        // SCREEN WINS (#1010). A window that comes back on a
+        // SCREEN WINS (#1010). A window that came back on a
         // display OTHER than the one its remembered space lays
         // out on was carried across screens while it was away —
         // `move_to_desktop` onto another screen's Desktop, or the
@@ -30,22 +30,24 @@ extension StateCoordinator {
         // retile carries the window back to the remembered
         // space's screen and macOS re-assigns its Desktop to
         // match the frame, undoing the move a second after the
-        // Desktop is revealed. The ruling — and why the two
-        // alternatives lost — is `docs/design-decisions.md`'s.
+        // Desktop is revealed. The ruling — what it covers, and
+        // why the two alternatives lost — is
+        // `docs/design-decisions.md`'s.
         //
-        // Only the window's MEMBERSHIP moves; no space is
-        // re-assigned, so a `pin_space_to_display` pin is never
-        // violated (#890 owns the wider per-screen questions),
-        // a `.display` sticky keeps #445's derived home display,
-        // and nothing is owed the float re-anchor (#444) — the
-        // membership follows the frame here, so there is no
-        // cross-display translation to make.
+        // The screen input is CONSUMED here (see
+        // `arrivalDisplay`): it belongs to this arrival alone.
+        let arrival = arrivalDisplay
+        arrivalDisplay = nil
         let remembered = rememberedSpaces[window.id]
-        let preferred = screenHome(for: remembered)
+        let preferred = arrivalScreenHome(
+            of: windows[window.id] ?? window,
+            remembered: remembered,
+            arrival: arrival
+        )
         effects.rehomedToScreenSpace = preferred
         let target =
             preferred
-            ?? remembered
+            ?? remembered?.space
             ?? window.appBundleID.flatMap { appRules[$0] }
             ?? workspaces.activeSpace
         guard let target else { return }
@@ -135,22 +137,34 @@ extension StateCoordinator {
     }
 
     /// The space an arrival prefers over the one it remembered,
-    /// when its own screen disagrees with that space's (#1010):
-    /// the space the arrival's display currently shows.
+    /// when its own screen disagrees with that space's (#1010).
+    /// The verdict is `screenHome(of:leaving:landingOn:)`'s —
+    /// one copy, shared with the Desktop verb that asks the same
+    /// question before the window leaves; this adds only the
+    /// gate that is the ARRIVAL's own.
     ///
-    /// Nil — leaving the resolution exactly as it was — when the
-    /// window did not come back (no remembered space, the fold's
-    /// `hadRememberedSpace` gate), when no screen backs its
-    /// frame, when the remembered space is assigned to no display
-    /// yet (early boot, unit fixtures), when the two sit on the
-    /// SAME display, which is every single-screen arrival, and
-    /// when the arrival's display shows nothing.
-    private func screenHome(for remembered: SpaceID?) -> SpaceID? {
-        guard let remembered,
-            let arrival = arrivalDisplay,
-            let home = workspaces.display(of: remembered),
-            home != arrival
-        else { return nil }
-        return workspaces.activeSpace(on: arrival)
+    /// That gate is a **watched departure**. A `.restored`
+    /// memory is KiwiDesk's own filing for a window it was not
+    /// tracking (`StateSnapshot.adopt`), never an observation of
+    /// one moving: the ruling rests on the user's recent intent,
+    /// and a restore carries none. After an undock macOS piles
+    /// windows onto the built-in screen, and following THAT
+    /// frame would discard the very layout the snapshot exists
+    /// to put back. No remembered space at all — a fresh spawn,
+    /// an `app_rules` target — is a placement nobody
+    /// contradicted, and is likewise left alone.
+    private func arrivalScreenHome(
+        of window: ManagedWindow,
+        remembered: SpaceMemory?,
+        arrival: DisplayID?
+    ) -> SpaceID? {
+        guard case .departed(let home)? = remembered else {
+            return nil
+        }
+        return screenHome(
+            of: window,
+            leaving: home,
+            landingOn: arrival
+        )
     }
 }

@@ -18,7 +18,9 @@ extension StateCoordinator {
             // needs the snapshot's pid and bundle id (#673).
             rememberMinimized(id)
         } else if let space = workspaces.space(of: id) {
-            rememberedSpaces[id] = space
+            // `.departed`: this fold WATCHED it go, which is
+            // what the #1010 arrival rule asks for.
+            rememberedSpaces[id] = .departed(space)
         }
         // Float intent is remembered even for minimized
         // windows: deminiaturize re-tracks from detection

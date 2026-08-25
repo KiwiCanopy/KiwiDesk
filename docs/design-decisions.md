@@ -2102,23 +2102,34 @@ home space no longer reserves a phantom tiled slot when it has
 traveled away, which is what let the same window fight for two
 frames across monitors before. (#445)
 
-**A window that comes back on another screen joins that
-screen's Space, not the one it remembers.** KiwiDesk notes the
-Space a window was in when it vanishes from Accessibility — a
-Desktop switch, a wake, an app relaunch — and files it back
-there when it returns, which is what makes a Desktop swipe
-non-destructive. Across screens that memory can be out of date
-by one deliberate gesture: `move_to_desktop` onto another
-screen's Desktop (or the same drag in Mission Control) carries
-the window physically to that monitor, while the Space it
-remembers is laid out on the one it left. Something has to
-lose, because the two answers put the window on different
-monitors. The Desktop the user just chose wins — it is the more
-recent intent, and it is the one they can see. Filing the
-window back into the remembered Space instead means the retile
-carries it home and macOS re-assigns its Desktop to match the
-frame, so the move undoes itself about a second after the
-Desktop is revealed.
+**A window on another screen belongs to that screen's space,
+not to the one it came from.** KiwiDesk notes the space a
+window was in when it vanishes from Accessibility — a Desktop
+switch, an app hidden with ⌘H — and files it back there when it
+returns, which is what makes a Desktop swipe non-destructive.
+Across screens that memory can be out of date by one deliberate
+gesture: `move_to_desktop` onto another screen's Desktop (or the
+same drag in Mission Control) carries the window physically to
+that monitor, while the space it remembers is laid out on the
+one it left. Something has to lose, because the two answers put
+the window on different monitors. The Desktop the user just
+chose wins — it is the more recent intent, and it is the one
+they can see. Leaving the window filed under the old space
+means the next retile lays it out there and macOS re-assigns
+its Desktop to match the frame, so the move undoes itself about
+a second later.
+
+**One ruling, asked at two altitudes, because there are two
+routes to that same undo.** A Desktop the target screen is not
+showing takes the window out of KiwiDesk's view entirely, so
+the answer is owed when it comes back — the create fold's. A
+Desktop that screen IS showing produces no departure at all,
+and the answer is owed at once — the verb's, before the retile
+it schedules. Measured both ways on two screens (2026-08-25):
+with only the arrival half, moving a window onto a Desktop the
+other screen already showed still snapped it back inside 0.6 s.
+So the predicate is one shared function and each caller adds
+only its own gate.
 
 Two alternatives lost. *Keep the membership but suppress the
 cross-screen retile* leaves the window unmanaged exactly where
@@ -2128,17 +2139,24 @@ the half of the verb multi-monitor users want it for. Both
 answer "which of KiwiDesk's two models is right"; only the
 ruling above answers "what did the user just ask for".
 
-The rule is narrow on purpose. It needs a window that CAME
-BACK — a fresh window, or one an app rule files, is a placement
-nobody contradicted — and it moves that window's membership
-only. No Space is re-assigned, so an arrival can never break a
-`pin_space_to_display` pin: the pinned Space stays on its
-screen and the window simply does not join it (the wider
-per-screen questions are #890's). A display sticky keeps its
-invariant for free, its home display being derived from its
-home Space (#445). And on a single screen the remembered Space
-and the arrival's screen always agree, so nothing changes
-there at all. (#1010)
+**What it does not reach, each for its own reason.** A window
+KiwiDesk never watched leave is untouched: a snapshot restore
+files windows it is not tracking yet, and that filing IS the
+layout the restore exists to put back — after an undock macOS
+piles windows onto the built-in screen, and following that
+frame would discard it. A **floating** window is untouched
+because the defect is the layout carrying a window home and a
+float is never laid out; its cross-display anchoring stays
+#444's and #412's. A **sticky** window of either scope is
+untouched because re-homing one is precisely the move
+`stickyMoveRefused` gates at every command choke point (#445),
+and neither a pure state fold nor a Desktop verb may make it
+quietly; sticky reach across Desktops is #890's own item. And
+only the window's membership ever moves — no space is
+re-assigned to another display — so an arrival or a Desktop
+move can never break a `pin_space_to_display` pin. On a single
+screen every one of these questions has the same answer it
+always had. (#1010)
 
 **The starter setup is chosen from the screens, not demonstrated
 on them.** The first version of it (#466) gave every display the

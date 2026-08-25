@@ -59,12 +59,21 @@ public struct StateCoordinator: Sendable {
     public var trackCapacities: [SpaceID: Int] = [:]
 
     /// The display an ARRIVING window's frame physically sits on
-    /// (#1010), mirrored in by KiwiCore before each
-    /// `.windowCreated` like `trackCapacities` above: resolving a
-    /// frame to a screen needs `NSScreen` and the AX/AppKit
-    /// y-flip, neither of which may enter this pure core (§2.6).
-    /// Nil when no screen backs the frame — the arrival then
-    /// resolves exactly as it did before this input existed.
+    /// (#1010), written by KiwiCore before each `.windowCreated`
+    /// because resolving a frame to a screen needs `NSScreen`
+    /// and the AX/AppKit y-flip, neither of which may enter this
+    /// pure core (§2.6). Nil when no screen backs the frame —
+    /// the arrival then resolves exactly as it did before this
+    /// input existed.
+    ///
+    /// Unlike `trackCapacities` and the settings mirrors above,
+    /// this is a **single-event payload**, not a standing mirror:
+    /// it is meaningless outside the one arrival it was resolved
+    /// for, and a stale value would re-home an unrelated window
+    /// across monitors. So the create fold CONSUMES it — reads
+    /// it and clears it — and a producer that forgets to write
+    /// it makes the fold resolve as it always did rather than
+    /// inheriting the last arrival's screen.
     public var arrivalDisplay: DisplayID?
 
     /// Last known space per window. Window ids are stable OS
@@ -76,7 +85,7 @@ public struct StateCoordinator: Sendable {
     /// Internal, not private: the create fold lives in
     /// `StateCoordinator+WindowCreated.swift` (file-ceiling
     /// split).
-    var rememberedSpaces: [WindowID: SpaceID] = [:]
+    var rememberedSpaces: [WindowID: SpaceMemory] = [:]
 
     /// Windows currently minimized, newest last, each with the
     /// app that owned it — so a deminiaturize classifies as
@@ -137,31 +146,6 @@ public struct StateCoordinator: Sendable {
 
     public init(defaultSpace: SpaceID = SpaceID(1)) {
         workspaces.ensureSpace(defaultSpace)
-    }
-
-    /// Notes where a currently-untracked window belongs (see
-    /// rememberedSpaces; used by session restore).
-    mutating func remember(_ id: WindowID, in space: SpaceID) {
-        rememberedSpaces[id] = space
-    }
-
-    /// Drops every remembered window→space association — the
-    /// tier-1 escape hatch's in-memory half (#634): entries for
-    /// windows that no longer exist are the ids a recycled
-    /// `CGWindowID` can inherit, teleporting an unrelated new
-    /// window into an old space. Live windows are unaffected;
-    /// one that leaves and returns lands in the active space
-    /// once, like any new window.
-    public mutating func forgetRememberedSpaces() {
-        rememberedSpaces = [:]
-    }
-
-    /// Where an untracked window will be filed once tracked.
-    /// Session restore fills this before slow-AX apps list
-    /// their windows, so startup can land on the right space
-    /// even when the window itself is not tracked yet.
-    func rememberedSpace(of id: WindowID) -> SpaceID? {
-        rememberedSpaces[id]
     }
 
     /// Swaps a window's tracked id in place across every id-keyed

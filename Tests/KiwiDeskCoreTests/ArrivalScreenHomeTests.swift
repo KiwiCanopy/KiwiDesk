@@ -22,12 +22,19 @@ struct ArrivalScreenHomeTests {
     private let displayB = DisplayID(2)
     private let mover = WindowID(11)
 
-    /// Spaces 1–2 on the main screen, space 5 on the second one,
+    /// Spaces 1–2 on the main screen, 5–6 on the second one,
     /// with the main screen focused and showing space 1 — the
     /// reported two-screen layout. The second screen sits at a
     /// negative y like the verifying machine's, which no pure
     /// state read touches: it is the flip that would have made a
     /// frame comparison silently wrong here.
+    ///
+    /// The second screen deliberately SHOWS its second-assigned
+    /// space (6, not 5). "The space that display shows" and "the
+    /// first space assigned to it" are different questions, and
+    /// on a screen with one space they cannot be told apart — a
+    /// re-home reading `spaces(on:).first` passed the whole
+    /// suite before this (guard-prover, 2026-08-25).
     private func twoScreens() -> StateCoordinator {
         var state = StateCoordinator(defaultSpace: SpaceID("1"))
         state.workspaces.upsertDisplay(
@@ -56,23 +63,32 @@ struct ArrivalScreenHomeTests {
         )
         state.workspaces.ensureSpace(SpaceID("2"))
         state.workspaces.ensureSpace(SpaceID("5"))
+        state.workspaces.ensureSpace(SpaceID("6"))
         state.workspaces.assign(SpaceID("1"), to: displayA)
         state.workspaces.assign(SpaceID("2"), to: displayA)
         state.workspaces.assign(SpaceID("5"), to: displayB)
+        state.workspaces.assign(SpaceID("6"), to: displayB)
+        // Show 6 on the second screen, then hand focus back to
+        // the main one — which parks 6 as B's shown space.
+        state.workspaces.activate(SpaceID("6"))
         state.workspaces.activate(SpaceID("1"))
         return state
     }
 
     private func window(
         _ id: WindowID = WindowID(11),
-        bundleID: String? = nil
+        bundleID: String? = nil,
+        isFloating: Bool = false,
+        sticky: StickyScope = .none
     ) -> ManagedWindow {
         ManagedWindow(
             id: id,
             pid: 100,
             appName: "TextEdit",
             appBundleID: bundleID,
-            title: "Doc"
+            title: "Doc",
+            isFloating: isFloating,
+            stickyScope: sticky
         )
     }
 
@@ -81,10 +97,12 @@ struct ArrivalScreenHomeTests {
     /// what writes the remembered space.
     private func depart(
         _ state: inout StateCoordinator,
-        from space: SpaceID
+        from space: SpaceID,
+        _ departing: ManagedWindow? = nil
     ) {
+        let departing = departing ?? window()
         state.workspaces.activate(space)
-        state.apply(.windowCreated(window()))
+        state.apply(.windowCreated(departing))
         #expect(state.workspaces.space(of: mover) == space)
         state.apply(
             .windowDestroyed(mover, wasMinimized: false)
@@ -99,8 +117,10 @@ struct ArrivalScreenHomeTests {
         // display B, its remembered space 1 lays out on A.
         state.arrivalDisplay = displayB
         let effects = state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("5"))
-        #expect(effects.rehomedToScreenSpace == SpaceID("5"))
+        // 6 — the space that screen SHOWS — and not 5, the
+        // first one assigned to it.
+        #expect(state.workspaces.space(of: mover) == SpaceID("6"))
+        #expect(effects.rehomedToScreenSpace == SpaceID("6"))
         // Homed, not duplicated: the flat array of the space it
         // remembered keeps no slot for it.
         #expect(
@@ -237,14 +257,14 @@ struct ArrivalScreenHomeTests {
         // A window already focused in the space the second screen
         // shows: the returner joins without taking the ring
         // (#636) — being re-homed does not make it a fresh spawn.
-        state.workspaces.activate(SpaceID("5"))
+        state.workspaces.activate(SpaceID("6"))
         state.apply(.windowCreated(window(WindowID(22))))
         state.workspaces.activate(SpaceID("1"))
         state.arrivalDisplay = displayB
         state.apply(.windowCreated(window()))
-        #expect(state.workspaces.space(of: mover) == SpaceID("5"))
+        #expect(state.workspaces.space(of: mover) == SpaceID("6"))
         #expect(
-            state.workspaces[SpaceID("5")]?.focused
+            state.workspaces[SpaceID("6")]?.focused
                 == WindowID(22)
         )
     }

@@ -265,15 +265,20 @@ Space it was in**, which KiwiDesk remembered as it left.
 
 With more than one screen there is one exception, and it is the
 Desktop you chose winning: when that Desktop lives on **another
-screen**, the window joins the Space that screen is showing
-instead. Rejoining the remembered Space would lay the window out
-on the monitor that Space belongs to, and macOS then moves the
-window onto a Desktop of *that* monitor — the move undoing
-itself a second after you reveal it
+screen**, the window also joins the KiwiDesk Space that screen
+is showing. It has to. A window still filed under a Space that
+lays out on the screen it just left is laid out *there* on the
+next retile, and macOS then re-assigns it to a Desktop of that
+monitor — so without this the move undoes itself about a second
+later, whether the Desktop was hidden or already on screen
 ([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
-A Desktop on the same screen changes nothing: the Space you left
-is the Space you come back to. Same requirement as
-`focus_desktop`.
+
+A Desktop on the same screen changes nothing: the Space you
+left is the Space you come back to. Neither does a **floating**
+or a **sticky** window change Space — a float has no layout to
+carry it anywhere, and a sticky window's home is deliberately
+left where it is (`move_to_space` guards it the same way).
+Same requirement as `focus_desktop`.
 
 **Example:**
 

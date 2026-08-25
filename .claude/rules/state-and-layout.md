@@ -68,33 +68,41 @@ editing here:
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
   argument lives in `docs/design-decisions.md`.
-- **A cross-screen arrival's home is decided ABOVE the create
-  fold** (#1010). A window that comes back (`hadRememberedSpace`)
-  on a display OTHER than the one its remembered space lays out
-  on takes the space that display shows — the Desktop the user
-  just chose beats the space memory, and the product argument is
-  `docs/design-decisions.md`'s. The fold reads that display from
-  `StateCoordinator.arrivalDisplay`, mirrored in by
-  `KiwiCore.handle` like `trackCapacities`, and a new consumer of
-  "which screen is this window on" resolves it the same way:
-  a window frame is AX coordinates (y grows DOWN) while
-  `Display.frame` is AppKit's (y grows UP), so comparing them
-  inside this actor-free core is silently wrong on exactly the
-  topology that needs the rule — a second screen at a negative
-  y — and `TilingEngine.screen(containing:)` is the one seam
-  that owns the flip. Re-home through the fold's own
-  `workspaces.add`, never `moveWindow(_:to:follow:)`: an
-  arrival is not a command, and that path fires a focus
-  hand-off, the move latch and a Desktop yield that no arrival
-  asked for. Only the window's MEMBERSHIP moves — a space is
-  never re-assigned, so a `pin_space_to_display` pin survives an
-  arrival by construction (#890 owns the wider per-screen
-  questions), a `.display` sticky keeps #445's derived home
-  display, and nothing is owed the #444 float re-anchor, whose
-  translation exists for a membership move that crosses screens
-  in the other direction. `ArrivalScreenHomeTests` pins the rule
-  and every stand-down (fresh window, app rule, same display,
-  unresolvable screen).
+- **A window that lands on another screen takes THAT screen's
+  space, through the one shared predicate** (#1010):
+  `StateCoordinator.screenHome(of:leaving:landingOn:)`. Two
+  call sites ask it about the same defect, and only one fires
+  per move — the create fold, for a window coming back from a
+  Desktop the screen was not showing, and `moveToDesktop`,
+  before a move onto a Desktop it IS showing, which produces no
+  departure to answer on. A third site that needs "which space
+  does that screen show for a window landing on it" joins them
+  rather than re-deriving it: each caller adds only its own
+  gate (the fold: a departure it WATCHED, never a
+  `.restored` filing), and the stand-downs — float, sticky,
+  same display, nothing shown — live on the predicate, once.
+  The product ruling is `docs/design-decisions.md`'s.
+- **Resolve the arriving frame's screen ABOVE the pure core,
+  and let the fold decide from it** (#1010). `KiwiCore.handle`
+  writes `StateCoordinator.arrivalDisplay` inside the
+  `.windowCreated` arm and BEFORE `state.apply`, which consumes
+  it; the decision itself stays in the fold, on pure state. A
+  frame is AX coordinates (y grows DOWN) while `Display.frame`
+  is AppKit's (y grows UP), so comparing them inside this
+  actor-free core is silently wrong on exactly the topology
+  that needs the rule — a second screen at a negative y.
+  `TilingEngine.screen(containing:)` resolves the pair
+  correctly, over `GeometryUtils.axVisibleFrame(of:)`, which
+  owns the flip. Re-home through `workspaces.add` — the fold's
+  own, or `addFocusedToSpace` at the command altitude — never
+  `moveWindow(_:to:follow:)`: it fires a focus hand-off, the
+  move latch and the #446 wallpaper focus yield, and both
+  callers have already chosen their own focus policy.
+  `ArrivalScreenHomeTests` and `ScreenHomePredicateTests` pin
+  the rule and each stand-down; the two production wirings
+  reach no unit test and are pinned by
+  `ArrivalDisplayWiringTests` and
+  `DesktopMoveRehomeWiringTests`.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

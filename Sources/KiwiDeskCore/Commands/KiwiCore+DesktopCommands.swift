@@ -130,12 +130,23 @@ extension KiwiCore {
     /// Only the follow stands down when the screen already shows
     /// the target.
     ///
+    /// A Desktop on ANOTHER screen also moves the window's
+    /// KiwiDesk-space membership (#1010): the layout is what
+    /// carries a window home, so a window left in a space that
+    /// lays out on the screen it just left is dragged back
+    /// within a second — and macOS then re-assigns its Desktop
+    /// to match the frame, undoing the move. The destination is
+    /// `StateCoordinator.screenHome`, the same predicate the
+    /// arrival path asks on the way back; `docs/design-decisions.md`
+    /// carries the ruling.
+    ///
     /// A **sticky** window is not refused (`stickyMoveRefused`
     /// gates KiwiDesk-space membership, which a Desktop move
-    /// does not touch): it physically leaves, and its scope
-    /// keeps meaning "every Space of the Desktop it is on".
-    /// Sticky reach ACROSS Desktops is the collector's own item
-    /// (#890), unimplemented either way.
+    /// does not touch — the re-home above stands down for a
+    /// sticky window on exactly that ground): it physically
+    /// leaves, and its scope keeps meaning "every Space of the
+    /// Desktop it is on". Sticky reach ACROSS Desktops is the
+    /// collector's own item (#890), unimplemented either way.
     func moveToDesktop(
         _ args: [JSONValue],
         follow: Bool
@@ -151,6 +162,7 @@ extension KiwiCore {
             else {
                 return .fail("the Desktop bridge refused the move")
             }
+            rehomeAcrossScreens(focused, to: target)
             if follow {
                 return switchDesktop(
                     to: target,
@@ -160,6 +172,70 @@ extension KiwiCore {
             departWithoutFollowing(focused)
             return .ok()
         }
+    }
+
+    /// The KiwiDesk-space half of a move onto ANOTHER screen's
+    /// Desktop (#1010): the window joins the space that screen
+    /// shows, so the retile that follows lays it out where the
+    /// user just sent it instead of carrying it home.
+    ///
+    /// Both routes need this, and only one fires per move. When
+    /// the target Desktop is HIDDEN the window leaves KiwiDesk's
+    /// view and the arrival path would answer on its return —
+    /// but answering here too costs nothing and makes the
+    /// remembered space right before it departs. When the target
+    /// Desktop is the one that screen is SHOWING, no departure
+    /// happens at all and this is the only answer there is
+    /// (device-measured, 2026-08-25: without it the window
+    /// snapped back inside 0.6 s, both directions).
+    ///
+    /// `addFocusedToSpace`, not `moveWindow(_:to:follow:)`: the
+    /// verb owns its own focus policy — `departWithoutFollowing`
+    /// latches the no-follow hazard and `switchDesktop` the
+    /// follow — so the full command's focus hand-off and yield
+    /// would fight the one already chosen. This moves
+    /// membership and nothing else; the retile each branch
+    /// already runs does the rest.
+    ///
+    /// The display is resolved by matching KiwiDesk's own
+    /// displays against the target's UUID through
+    /// `NativeSpaces.displayUUID(for:)` — the same seam the
+    /// Desktop verbs already name a screen by — so an
+    /// unresolvable display simply stands the re-home down.
+    private func rehomeAcrossScreens(
+        _ window: WindowID,
+        to target: DesktopTarget
+    ) {
+        let from = state.workspaces.space(of: window)
+        guard let managed = state.windows[window],
+            let display = state.workspaces.allDisplays.first(
+                where: {
+                    NativeSpaces.displayUUID(for: $0.id)
+                        == target.displayIdentifier
+                }
+            )?.id,
+            let destination = state.screenHome(
+                of: managed,
+                leaving: from,
+                landingOn: display
+            )
+        else { return }
+        onLog(
+            "move_to_desktop: crossing screens — homing "
+                + "w\(window.raw) to space \(destination.raw)"
+        )
+        addFocusedToSpace(window, to: destination)
+        // The membership change is a `window_moved_to_space`
+        // like any other — `from` read BEFORE the move, or
+        // subscribers are told the window came from where it
+        // just went.
+        emitWindowMovedToSpace(
+            window,
+            app: managed.appName,
+            bundleID: managed.appBundleID,
+            from: from,
+            to: destination
+        )
     }
 
     /// The bookkeeping a no-follow Desktop move owes, because no
