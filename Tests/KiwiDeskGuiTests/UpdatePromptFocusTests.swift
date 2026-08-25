@@ -6,11 +6,12 @@ import Testing
 
 /// The install-and-restart prompt comes forward (#1011).
 ///
-/// Split from `UpdaterSeamGuardTests` rather than added to it —
-/// that suite pins how many of each object exist, this one pins
-/// what the one driver DOES and that Sparkle is actually shown
-/// through it. Two facts, and the file was one addition from
-/// §2.1's sweet spot either way.
+/// One of three suites over this seam, cut where the production
+/// code is: `UpdaterSeamGuardTests` counts how many of each
+/// object exist, `UpdatePromptWiringTests` holds what the seam
+/// HANDS Sparkle, and this one holds what the driver and its
+/// policy DECLARE. It reads `UpdatePromptDriver.swift` only, so
+/// no needle here can be satisfied by the seam file.
 ///
 /// Source scans for the parts that cannot reach a unit test:
 /// the override puts a real window on screen out of
@@ -21,17 +22,18 @@ import Testing
 /// asserted through the ObjC runtime rather than through a
 /// spelling.
 ///
-/// **What these needles hold is the SPELLING of the wiring, not
-/// the identity of the object**, and that limit is stated rather
-/// than left to be discovered. A `guard-prover` round closed the
-/// two natural escapes — a stock driver at `userDriver:`, and a
-/// decoy class carrying the body — but a `typealias` plus a
-/// local shadowing the stored property still passes while
-/// Sparkle gets a stock driver. Closing that needs a type-level
-/// check (an `SPUUpdater` built in a test against a fake driver),
-/// which is a design change rather than a needle. Read a red here
-/// as "the wiring stopped saying what it said", which a legal
-/// rename can also mean.
+/// **A source needle reads a spelling, never a value or a
+/// control path**, and the limit is stated rather than left to
+/// be discovered. Two shapes pass while the behaviour is gone:
+/// a call placed behind a never-true condition keeps every
+/// needle's string, and a body whose words include the answer
+/// need not return it. `guard-prover` found the second one for
+/// real — `contains("false")` over a body returning `!allows` —
+/// which is why the policy's answer is no longer scanned at all
+/// but CALLED. The first has no answer inside a scan: closing it
+/// would mean running Sparkle. Where a fact can be asserted by
+/// calling it, prefer that over adding a needle here.
+///
 @Suite("The install prompt comes forward (#1011)")
 struct UpdatePromptFocusTests {
     private static let root = SourceScan.repoRoot(
