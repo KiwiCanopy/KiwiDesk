@@ -195,7 +195,9 @@ enum AppUpdaterFactory {
     /// factory's call, `SparkleUpdater(` itself, and the
     /// `SPUUpdater` / `UpdatePromptDriver` pair it assembles —
     /// by exact count, so deleting the wiring reds as loudly as
-    /// duplicating it. That symmetry is the
+    /// duplicating it. Counting them is not enough on its own:
+    /// `UpdatePromptFocusTests` is what holds that the driver
+    /// built here is the one Sparkle is shown through. That symmetry is the
     /// point: a missing wiring greys one menu row, which is
     /// visible, while the scheduled channel never starting is
     /// not — and an update path that silently never runs is the

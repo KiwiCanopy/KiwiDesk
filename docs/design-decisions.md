@@ -2710,8 +2710,10 @@ the exact trust the section
 [above](#no-distribution-channel-without-an-update-path) exists to
 keep. `UpdatePromptDriver` overrides
 `showReadyToInstallAndRelaunch` — the one moment neither Sparkle
-delegate protocol reaches — and `UpdaterSeamGuardTests` holds both
-the override and the activation inside it.
+delegate protocol reaches — and `UpdatePromptFocusTests` holds
+the activation inside that override AND that Sparkle is shown
+through that driver rather than a stock one, which is the way an
+override goes dead without anything noticing.
 
 ### Settings is miniaturizable; modal chrome is not
 

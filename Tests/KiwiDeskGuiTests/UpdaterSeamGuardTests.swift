@@ -1,8 +1,8 @@
 import Foundation
 import Testing
 
-/// The updater seam's construction sites (#874), and the one
-/// override that keeps its prompt visible (#1011).
+/// The updater seam's construction sites (#874). What the one
+/// driver DOES with them is `UpdatePromptFocusTests` (#1011).
 ///
 /// Its own file rather than a section of `MachineTouchTests`,
 /// which was already at §2.1's ceiling — same family and the
@@ -122,73 +122,6 @@ struct UpdaterSeamGuardTests {
             wirings.allSatisfy {
                 $0.file.lastPathComponent == Self.updaterWiring
             }
-        )
-    }
-
-    /// The install-and-restart prompt comes forward (#1011).
-    ///
-    /// A source scan because neither half of it reaches a unit
-    /// test: the override puts a real window on screen out of
-    /// `Sparkle.framework`, and `NSApp.activate` is the machine.
-    /// What can be held is that the override still exists and
-    /// still brings the app forward before handing the prompt
-    /// back to Sparkle — drop either line and the prompt goes
-    /// back to arriving behind every window the user has open,
-    /// with `requestUserAttention` bouncing a Dock tile a
-    /// menu-bar app does not have. Nothing else in this tree
-    /// would red.
-    @Test("the install prompt activates before Sparkle shows it")
-    func installPromptComesForward() throws {
-        let file = Self.root
-            .appendingPathComponent("Sources/KiwiDesk/Updates")
-            .appendingPathComponent(Self.updaterAllowed)
-        let text = try SourceScan.strippedSource(at: file)
-        let declaration =
-            "override func showReadyToInstallAndRelaunch"
-        guard let declared = text.range(of: declaration) else {
-            Issue.record(
-                .init(
-                    rawValue: "no \(declaration) override in "
-                        + Self.updaterAllowed
-                )
-            )
-            return
-        }
-        let characters = Array(text)
-        let offset = text.distance(
-            from: text.startIndex,
-            to: declared.lowerBound
-        )
-        guard
-            var cursor = characters[offset...]
-                .firstIndex(of: "{")
-        else {
-            Issue.record("the override has no body")
-            return
-        }
-        guard
-            let body = SourceScan.balanced(
-                characters,
-                from: &cursor,
-                open: "{",
-                close: "}"
-            )
-        else {
-            Issue.record("the override body is unbalanced")
-            return
-        }
-        #expect(
-            body.contains(
-                "NSApp.activate(ignoringOtherApps: true)"
-            ),
-            .init(
-                rawValue: "the ready-to-install override must "
-                    + "bring the app forward. Body: \(body)"
-            )
-        )
-        #expect(
-            body.contains("super.showReadyToInstallAndRelaunch("),
-            "the override must still let Sparkle show the prompt"
         )
     }
 }

@@ -205,9 +205,11 @@ approximating with a nearby callback is what this forbids —
 Sparkle's nearest neighbour to the install-and-restart prompt
 fires before the installer has finished preparing it. #1011 is
 the worked case: `UpdatePromptDriver` overrides
-`showReadyToInstallAndRelaunch`, and `UpdaterSeamGuardTests` pins
-both the override and the activation inside it, because neither
-reaches a unit test. The argument is "Permanent accessory mode"
+`showReadyToInstallAndRelaunch`. **A guard on such an override
+pins the WIRING beside the body** — `UpdatePromptFocusTests`
+holds that the framework is shown through that driver and not a
+stock one, because an override left in place and no longer
+reached is how the defect returns with every count still at one. The argument is "Permanent accessory mode"
 in `docs/design-decisions.md`.
 
 ## A window that must clear the bars derives its level
