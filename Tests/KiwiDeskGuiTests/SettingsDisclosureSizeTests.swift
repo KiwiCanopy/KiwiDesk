@@ -41,12 +41,18 @@ struct SettingsDisclosureSizeTests {
         let style = try squashed(Self.styleFile)
         // PROPORTIONAL, not a size of its own (#1021). The
         // chevron takes no `.font`, so it inherits the header's
-        // and scales with it — which is what #956 claimed and
-        // did not do: it replaced the native triangle for being
-        // drawn at the system's small size, then pinned the
-        // replacement at `.footnote`, the smallest step on the
-        // ramp. A `.font(` anywhere in the chevron's run is that
-        // regression, whatever size it names.
+        // — which is what #956 claimed and did not do: it
+        // replaced the native triangle for being drawn at the
+        // system's small size, then pinned the replacement at
+        // `.footnote`, the smallest step on the ramp. A `.font(`
+        // anywhere in the chevron's run is that regression,
+        // whatever size it names.
+        //
+        // A SCALE STEP is the other half, and the one that
+        // shipped: `.imageScale(.large)` on top of the
+        // inheritance drew the indicator larger than the title
+        // it marks, which is the heavy header the owner read
+        // back (2026-08-26). Weight is the only step it takes.
         let chevronRun = try run(
             in: style,
             from: "Image(systemName:\"chevron.right\")",
@@ -61,7 +67,15 @@ struct SettingsDisclosureSizeTests {
             )
         )
         #expect(chevronRun.contains(".fontWeight(.bold)"))
-        #expect(chevronRun.contains(".imageScale(.large)"))
+        #expect(
+            !chevronRun.contains(".imageScale("),
+            Comment(
+                rawValue:
+                    "the chevron takes a scale step again; it "
+                    + "must be the header's own size — "
+                    + "\(chevronRun)"
+            )
+        )
     }
 
     /// The modifier run of one expression, so a needle cannot be
@@ -101,7 +115,7 @@ struct SettingsDisclosureSizeTests {
             "the per-chrome label font is back"
         )
         #expect(
-            file.contains(".font(.headline)"),
+            file.contains(".font(.callout.weight(.semibold))"),
             "both chromes draw the one header tier"
         )
     }

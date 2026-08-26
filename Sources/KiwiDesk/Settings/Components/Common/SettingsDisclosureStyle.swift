@@ -100,12 +100,22 @@ struct SettingsDisclosureStyle<Accessory: View>:
     }
 
     /// **Sized by the header it marks, never by a number of its
-    /// own** (#1021). It takes no `.font`, so it inherits the
-    /// header's, and scales with it: bold and one step up gives
-    /// about 15.6 pt against a 13 pt title, and shrinks to about
-    /// 12 pt on the one deliberately-quiet drawer — proportional
-    /// by construction rather than by a constant that has to be
-    /// re-tuned every time a header moves.
+    /// own** (#1021). It takes no `.font` and no scale step, so
+    /// it inherits the header's size outright and moves whenever
+    /// the header does: about 12 pt against a 12 pt title, and
+    /// about 10 pt on the one deliberately-quiet drawer, which
+    /// stays quiet. Proportional by construction rather than a
+    /// constant that has to be re-tuned every time a header
+    /// moves.
+    ///
+    /// **Weight is the only step it takes.** It wore
+    /// `.imageScale(.large)` on top of the inheritance for one
+    /// round, which drew the indicator LARGER than the title it
+    /// marks — the biggest thing in the row — and that is what
+    /// the owner then read as a heavy header (owner,
+    /// 2026-08-26). A scale step here is that regression;
+    /// `SettingsDisclosureSizeTests` reds on either it or a
+    /// `.font(`.
     ///
     /// That is what #956 claimed and did not do. It replaced the
     /// native triangle *because* the system drew it small, then
@@ -129,7 +139,6 @@ struct SettingsDisclosureStyle<Accessory: View>:
     private func chevron(expanded: Bool) -> some View {
         Image(systemName: "chevron.right")
             .fontWeight(.bold)
-            .imageScale(.large)
             .foregroundStyle(SettingsTheme.ink2)
             .rotationEffect(.degrees(expanded ? 90 : 0))
             // The state it encodes is on the button's value, in

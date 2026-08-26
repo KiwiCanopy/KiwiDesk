@@ -41,15 +41,22 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     /// SMALLER than the rows they head. A header quieter than
     /// its own contents is an inverted hierarchy, and pushing
     /// the choice out to each call site is what let it drift
-    /// that far. Both chromes now draw `.headline`, so the tier
-    /// is not a call-site decision at all.
+    /// that far. Both chromes now draw ONE tier, which is the
+    /// part that must not drift back —
+    /// `SettingsDisclosureSizeTests` holds it.
     ///
-    /// Note there is no "bigger" available above it: macOS's
-    /// ramp goes body 13 → headline 13 at weight 0.4 → title3
-    /// 15, so a larger step means `title3`, which is
-    /// `SettingsGroupHeader`'s tier and would outrank the
-    /// section title an inline drawer sits INSIDE
-    /// (ui-designer, 2026-08-26).
+    /// That tier is `.callout` at semibold: 12 pt, a point
+    /// UNDER the `.body` rows it heads, carrying the header on
+    /// weight rather than on size. It went to `.headline` (13
+    /// pt semibold) first, and the owner read the result as
+    /// heavy on the two pages that carry seven of the fifteen
+    /// drawers between them. Note there is no "bigger"
+    /// available above either: macOS's ramp goes body 13 →
+    /// headline 13 at weight 0.4 → title3 15, so below 15
+    /// "bigger" and "weightier" are the SAME edit, and the only
+    /// genuine size step is `title3` — `SettingsGroupHeader`'s
+    /// tier, which would outrank the section title an inline
+    /// drawer sits INSIDE (owner, 2026-08-26).
     enum Chrome {
         /// Inside a section card, under a hairline rule.
         case inline
@@ -235,7 +242,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             // `DesktopsGroup`'s `?` is. It travels to the
             // style separately and is drawn beside the button.
             Text(control.text)
-                .font(.headline)
+                .font(.callout.weight(.semibold))
                 .searchFlashHeader(control)
                 // The mode-reveal wash shares the label band the
                 // search wash uses (#760), for the same reason:

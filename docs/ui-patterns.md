@@ -264,7 +264,7 @@ rule instead of re-deciding it.
 Three boundaries, because System Settings itself draws them:
 
 - **The rule is scoped to headers** — `SettingsSection` titles
-  and the `.headline` labels of an "Advanced" disclosure. The
+  and the labels of an "Advanced" disclosure. The
   **`SettingsDestination` titles (Home cards, back-chip
   headings) stay Title Case**
   ("Layout Defaults", "App Rules"): they name a destination, as
@@ -353,12 +353,14 @@ ruling is in `docs/design-decisions.md`.
 cue, and its state in words.** Every accordion header — both
 chromes, and the one drawer built outside the wrapper — takes
 `SettingsDisclosureStyle`, which makes the row a full-width
-`.plain` `Button`, draws its title at `.headline` in BOTH
-chromes — the tier is not a call-site choice, and a header
-drawn smaller than the rows it heads is what #1021 was —
-rests it on a chevron sized by that title rather than by a
-number of its own (no `.font`: it inherits the header's, bold
-and one scale step up, so it moves when the header does), and
+`.plain` `Button`, draws its title at ONE tier in both
+chromes — `.callout` at semibold, carried on weight rather
+than size; the tier is not a call-site choice, and a header
+drawn smaller *and lighter* than the rows it heads is what
+#1021 was — rests it on a chevron sized by that title rather
+than by a number of its own (no `.font` and no scale step: it
+inherits the header's size outright, bold, so it moves when
+the header does and never outgrows it), and
 marks the row `.isHeader` for the headings rotor. It rotates
 on expand (no resting fill — hover confirms at
 `rowHoverHighlight`'s full-row ladder, never the icon chip's,

@@ -3744,21 +3744,40 @@ is an inverted hierarchy.
 Two changes, and they are a pair because each reaches a half
 of the surface the other cannot. **The tier stops being a
 call-site decision**: `Chrome` loses its payload, both chromes
-draw `.headline`, and nine call sites lose an argument. There
-is deliberately no "bigger" above that — macOS's ramp runs
-body 13 → headline 13 at weight 0.4 → title3 15, so below 15
-"bigger" and "weightier" are the *same edit*, and the only
-genuine size step is `title3`, which is `SettingsGroupHeader`'s
-tier and would outrank the section title an inline drawer sits
-inside. **And the indicator is sized by the header it marks**,
-taking no font of its own: bold at one scale step up, which
-resolves to about 15.6 pt against a 13 pt title and shrinks to
-about 12 pt on the one deliberately-quiet drawer. Proportional
-by construction, so a future header move carries its chevron
-along instead of stranding a constant. The five `.card`
-drawers, whose labels were already at the ceiling, are reached
-by the second change alone — which is why the owner's "bigger
-text **or** a better indicator" was a false choice.
+draw one tier, and seven call sites lose an argument. Which
+tier it is was always the tunable half; *that there is one* is
+the half that must not drift back, and
+`SettingsDisclosureSizeTests` is what holds it. It is
+`.callout` at semibold — 12 pt, a point *under* the `.body`
+rows it heads, carrying the header on weight rather than on
+size. It stood at `.headline` (13 pt semibold) for a round and
+the owner read the result as heavy, most of all on the two
+pages that carry seven of the fifteen drawers between them.
+There is deliberately no "bigger" available either way —
+macOS's ramp runs body 13 → headline 13 at weight 0.4 → title3
+15, so below 15 "bigger" and "weightier" are the *same edit*,
+and the only genuine size step is `title3`, which is
+`SettingsGroupHeader`'s tier and would outrank the section
+title an inline drawer sits inside. **And the indicator is
+sized by the header it marks**, taking no font *and no scale
+step* of its own: bold at the title's own size, about 12 pt,
+shrinking to about 10 pt on the one deliberately-quiet drawer.
+Proportional by construction, so a future header move carries
+its chevron along instead of stranding a constant.
+
+**Weight is the only step the indicator takes**, and that is
+the second half of what read back as heavy. It wore
+`.imageScale(.large)` on top of the inheritance for a round,
+which made the chevron larger than the title it marks — the
+biggest thing in the row, on a row whose job is to be found
+without shouting. An indicator that outgrows its own label has
+overshot the same way a header quieter than its rows
+undershoots. The five `.card` drawers are the reason the pair
+was needed at all: their labels already sat at the tier the
+other ten have only now joined, so the tier change alone
+reached nothing in them and the indicator is the only thing
+that ever moved there — which is why the owner's "bigger text
+**or** a better indicator" was a false choice.
 
 One clause of the ruling above is narrowed rather than
 inherited, since it was argued absolutely from a single
