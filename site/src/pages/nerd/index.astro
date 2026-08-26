@@ -1,0 +1,13 @@
+---
+// KiwiDesk — English NERD landing page at /nerd/.
+//
+// The dev-audience half of the 2026-08-26 mode split: same shared
+// <Landing> component, `mode="dev"` — its own title, h1 and
+// hreflang cluster (/nerd/ ↔ /de/nerd/ ↔ /ja/nerd/), so the dev
+// keywords no longer hide inside the consumer page. The Simple
+// counterpart stays at /.
+import Landing from "../../components/Landing.astro";
+import en from "../../i18n/en.json";
+---
+
+<Landing t={en} lang="en" mode="dev" />

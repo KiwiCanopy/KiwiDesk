@@ -1,18 +1,28 @@
 ---
 // KiwiDesk — shared marketing landing component.
 //
-// Rendered by both /src/pages/index.astro (English, `lang="en"`)
-// and /src/pages/de/index.astro (German, `lang="de"`). All
-// user-facing copy arrives via the `t` prop (a per-locale strings
-// object loaded from src/i18n/<lang>.json); this file owns only
-// the structure, assets, and behavior — never inline copy.
+// Rendered by SIX routes: / , /de/ , /ja/ (Simple mode) and
+// /nerd/ , /de/nerd/ , /ja/nerd/ (Nerd mode). All user-facing
+// copy arrives via the `t` prop (a per-locale strings object
+// loaded from src/i18n/<lang>.json); this file owns only the
+// structure, assets, and behavior — never inline copy.
 //
-// Three independent client states coexist, each with its own
-// localStorage key and none interfering with the others:
+// The mode IS the URL (owner + SEO consult, 2026-08-26): each
+// mode gets its own page with its own title, h1, description and
+// hreflang cluster, because one page can only rank for one
+// audience — the dev keywords used to sit in display:none
+// sections under a consumer title. The toggle is two prefetched
+// links now, `kiwidesk-site-mode` is retired, and only the
+// active mode's sections render, so nothing meaningful ships
+// hidden. Cross-mode links are plain links — never hreflang
+// alternates, which must stay within a mode.
+//
+// Two independent client states remain, each with its own
+// localStorage key:
 //   • theme  — `starlight-theme` (shared with the docs)
-//   • mode   — `kiwidesk-site-mode`  ("simple" | "dev")
-//   • lang   — `kiwidesk-site-lang`  ("en" | "de"), paired with
-//              the route (/ ↔ /de/); resolved anti-FOUC in <head>.
+//   • lang   — `kiwidesk-site-lang` ("en" | "de" | "ja"), paired
+//              with the route; resolved anti-FOUC in <head>,
+//              staying WITHIN the current mode's cluster.
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
 import ThemeHead from "./ThemeHead.astro";
@@ -37,8 +47,11 @@ import "../styles/landing.css";
 interface Props {
   t: Record<string, string>;
   lang: "en" | "de" | "ja";
+  mode?: "simple" | "dev";
 }
-const { t: locale, lang } = Astro.props;
+const { t: locale, lang, mode = "simple" } = Astro.props;
+const isDev = mode === "dev";
+const isSimple = !isDev;
 
 // One banner per locale — the card carries the tagline, so it has to speak
 // the same language as the title and description beside it.
@@ -52,6 +65,24 @@ const t = { ...en, ...locale } as Record<string, string>;
 // with its counterpart. English lives at /, German at /de/.
 const homeHref =
   lang === "de" ? "/de/" : lang === "ja" ? "/ja/" : "/";
+
+// Same-locale path for each mode: the Simple page is the locale
+// home, the Nerd page its `nerd/` sibling. `pageHref` is THIS
+// page; the toggle links to both. `/nerd/`, not `/dev/`: the
+// slug says what the toggle says (owner, 2026-08-26) — one word
+// across UI, URL and all three locales — and cannot be confused
+// with /docs/.
+const simpleHref = homeHref;
+const devHref = `${homeHref}nerd/`;
+const pageHref = isDev ? devHref : simpleHref;
+
+// The same-mode home path per locale — the language switcher and
+// the anti-redirect resolver both stay INSIDE the active mode's
+// cluster, so switching language never also switches audience.
+const langHref = (l: "en" | "de" | "ja"): string => {
+  const home = l === "de" ? "/de/" : l === "ja" ? "/ja/" : "/";
+  return isDev ? `${home}nerd/` : home;
+};
 
 // Locale-aware quotation marks: German opens low and closes high
 // („…“); English opens and closes high (“…”). Applied to every
@@ -135,11 +166,18 @@ const steps = [
 
 // SEO/head: absolute URLs derived from Astro.site so they survive
 // the pages.dev → custom-domain switch. `canonical` is this
-// locale's own page; `ogImageURL` is the shared social card.
-const canonical = new URL(homeHref, Astro.site).href;
-const enURL = new URL("/", Astro.site).href;
-const deURL = new URL("/de/", Astro.site).href;
-const jaURL = new URL("/ja/", Astro.site).href;
+// locale's own page IN THIS MODE — each of the six pages is
+// self-canonical, never canonicalized across modes — and the
+// hreflang alternates stay within the mode's own cluster.
+// Per-mode title/description: the whole point of the split is
+// that the Nerd page may say "tiling window manager" in the one
+// place a consumer page could not.
+const canonical = new URL(pageHref, Astro.site).href;
+const enURL = new URL(langHref("en"), Astro.site).href;
+const deURL = new URL(langHref("de"), Astro.site).href;
+const jaURL = new URL(langHref("ja"), Astro.site).href;
+const metaTitle = isDev ? t.meta_title_nerd : t.meta_title;
+const metaDesc = isDev ? t.meta_desc_nerd : t.meta_desc;
 const ogImageURL = new URL(ogImage.src, Astro.site).href;
 const ogLocale =
   lang === "de" ? "de_DE" : lang === "ja" ? "ja_JP" : "en_US";
@@ -154,7 +192,7 @@ const jsonLd = [
     name: "KiwiDesk",
     applicationCategory: "UtilitiesApplication",
     operatingSystem: "macOS",
-    description: t.meta_desc,
+    description: metaDesc,
     url: canonical,
     image: ogImageURL,
     inLanguage: lang,
@@ -186,21 +224,24 @@ const jsonLd = [
     name: "KiwiDesk",
     url: canonical,
     inLanguage: lang,
-    description: t.meta_desc,
+    description: metaDesc,
   },
 ];
 ---
 
 <!doctype html>
-<html lang={lang}>
+{/* data-mode is SERVER-rendered now — the mode is the page, so
+     the CSS that keys on :root[data-mode] needs no script and
+     cannot flash. */}
+<html lang={lang} data-mode={mode}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{t.meta_title}</title>
-    <meta name="description" content={t.meta_desc} />
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDesc} />
     <link rel="canonical" href={canonical} />
-    <meta property="og:title" content={t.meta_title} />
-    <meta property="og:description" content={t.meta_desc} />
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={metaDesc} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="KiwiDesk" />
@@ -208,8 +249,8 @@ const jsonLd = [
     <meta property="og:locale:alternate" content={ogLocaleAlt} />
     <meta property="og:image" content={ogImageURL} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={t.meta_title} />
-    <meta name="twitter:description" content={t.meta_desc} />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={metaDesc} />
     <meta name="twitter:image" content={ogImageURL} />
     <ThemeHead />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -219,38 +260,21 @@ const jsonLd = [
     <link rel="alternate" hreflang="x-default" href={enURL} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
-    {/* Anti-FOUC mode resolve — the theme half is <ThemeHead />
-         above, and this page's own `kiwidesk-site-mode` key is
-         resolved here so no dev section is ever revealed on the
-         first paint (default = simple). */}
-    <script is:inline>
-      (function () {
-        var root = document.documentElement;
-        // Arriving on #start is the install bridge. Resolve Nerd
-        // BEFORE first paint — the section is .dev-only
-        // (display:none), so a hash landing on a hidden element
-        // would scroll nowhere.
-        //
-        // TRANSIENT, not persisted, and the asymmetry is the
-        // point: the in-page bridge click (below) DOES persist,
-        // because that visitor chose it here, knowingly. A bare
-        // /#start arrival did not — it is equally a link someone
-        // was sent, a bookmark, or a search result. Writing the
-        // stored mode there would silently rewrite a stranger's
-        // preference for every future visit, before they have
-        // seen a single pixel, on a choice they never made.
-        // Reverting to the default on their next visit is the
-        // correct behavior for them, not a shortcoming.
-        var bridged = location.hash === "#start";
-        try {
-          var m = localStorage.getItem("kiwidesk-site-mode");
-          root.dataset.mode =
-            bridged || m === "dev" ? "dev" : "simple";
-        } catch (e) {
-          root.dataset.mode = bridged ? "dev" : "simple";
+    {/* The mode script is GONE — data-mode is server-rendered on
+         <html>, so there is nothing to resolve and nothing to
+         flash. One legacy case survives it: pre-split links to
+         /#start (the install bridge's old shareable URL) point at
+         a section that now lives only on the Nerd page. Forward
+         that hash arrival, Simple pages only, before paint, via
+         replace() so the back button works. One direction only —
+         the Nerd page forwards nothing — so no loop is possible. */}
+    {isSimple && (
+      <script is:inline define:vars={{ devHref }}>
+        if (location.hash === "#start") {
+          location.replace(devHref + "#start");
         }
-      })();
-    </script>
+      </script>
+    )}
     {/* Language resolve (anti-redirect-loop). Runs before paint,
          at most once per load, and only ever redirects between the
          two known paths (/ ↔ /de/) via replace() so the back
@@ -261,20 +285,23 @@ const jsonLd = [
               ONLY nudge an English URL toward German (never the
               reverse), so the English root stays the canonical
               default and there is no path we could bounce back on.
-         The `!== here` guard makes every branch a no-op when we are
-         already on the target, which is what makes loops impossible.
-         `data-lang` on <html> mirrors the active locale so the
-         switcher can render its active state without a round-trip. */}
-    <script is:inline>
+         The `!== current` guard makes every branch a no-op when we
+         are already on the target, which is what makes loops
+         impossible. `paths` and `current` arrive from the server
+         via define:vars — this page statically knows its own
+         locale AND mode, so the resolver stays inside the active
+         mode's cluster (switching language must never also switch
+         audience) with no URL parsing to drift out of date. */}
+    <script is:inline
+      define:vars={{
+        paths: {
+          en: langHref("en"),
+          de: langHref("de"),
+          ja: langHref("ja"),
+        },
+        current: lang,
+      }}>
       (function () {
-        var here = location.pathname;
-        // Which locale this URL already is. Trailing slash optional
-        // so /de and /de/ both count as "already there".
-        function on(prefix) {
-          return here === prefix + "/" || here === prefix;
-        }
-        var paths = { en: "/", de: "/de/", ja: "/ja/" };
-        var current = on("/de") ? "de" : on("/ja") ? "ja" : "en";
         function go(lang) {
           // Carry the fragment across the locale redirect. Without
           // it a shared /#start (the install bridge's own URL)
@@ -350,28 +377,27 @@ const jsonLd = [
           <a class="nav__link dev-only" href={repo} target="_blank"
             rel="noopener">{t.nav_github}</a>
 
-          {/* Signature mode toggle: a two-segment control, a
-               deliberate sibling of the EN | DE language switcher
-               beside it. BOTH modes are labeled at all times —
-               [ 🥝 Simple | Nerd ] — so a first-time visitor
-               instantly sees there's a Nerd view to switch TO,
-               and which one they're on (the active segment fills in,
-               like the language switcher's active locale). A sliding
-               kiwi-bearing indicator glides between the two segments;
-               reaching Nerd, extra kiwi dots spring in behind
-               the lead kiwi so the indicator visibly "fills" — the
-               "add more kiwis toward Nerd" personality, kept.
+          {/* Signature mode toggle — now two LINKS, since the
+               mode is the URL (owner + SEO consult, 2026-08-26).
+               The look survives whole: BOTH modes stay labeled —
+               [ 🥝 Simple | Nerd ] — the active segment fills in
+               (data-mode on <html> still drives the CSS, it is
+               just server-rendered now), and the kiwi indicator
+               renders in its resting place per page. What the
+               split retires is only the in-page glide/flourish;
+               prefetch-on-hover keeps the switch near-instant.
 
-               ARIA: a radiogroup — the two segments are mutually
-               exclusive options, one always active — with a
-               descriptive group label and aria-checked on each. This
-               is the correct semantics for "pick one of two" and is
-               keyboard operable (arrow keys wired in the script). */}
-          <div class="mode-toggle" id="modeToggle" role="radiogroup"
+               ARIA: a plain navigation group. Radio semantics
+               died with the buttons — a link that navigates is
+               not a radio, and aria-current="page" is the truth
+               a screen reader needs here. Keyboard operation is
+               native link behavior, so the roving-tabindex
+               script went with the radios. */}
+          <div class="mode-toggle" id="modeToggle" role="group"
             aria-label={t.mode_toggle_aria}>
-            {/* Sliding kiwi indicator behind the segments. In Simple
-                 it holds one kiwi; sliding to Nerd, two smaller
-                 kiwi dots pop in behind the lead so it fills out. */}
+            {/* Kiwi indicator behind the segments — one kiwi on
+                 Simple, the extra dots filled in on Nerd, exactly
+                 as before, positioned by the same CSS. */}
             <span class="mode-toggle__slider" aria-hidden="true">
               <span class="mode-toggle__extra mode-toggle__extra--2">
                 <Fragment set:html={kiwiSvg(11)} />
@@ -383,16 +409,18 @@ const jsonLd = [
                 <Fragment set:html={kiwiSvg(15)} />
               </span>
             </span>
-            <button class="mode-toggle__seg mode-toggle__seg--simple"
-              type="button" role="radio" data-mode="simple"
-              aria-checked="true" tabindex="0">
+            <a class="mode-toggle__seg mode-toggle__seg--simple"
+              href={simpleHref} data-mode="simple"
+              data-astro-prefetch="hover"
+              aria-current={isSimple ? "page" : undefined}>
               <span class="mode-toggle__seg-text">{t.mode_simple}</span>
-            </button>
-            <button class="mode-toggle__seg mode-toggle__seg--dev"
-              type="button" role="radio" data-mode="dev"
-              aria-checked="false" tabindex="-1">
+            </a>
+            <a class="mode-toggle__seg mode-toggle__seg--dev"
+              href={devHref} data-mode="dev"
+              data-astro-prefetch="hover"
+              aria-current={isDev ? "page" : undefined}>
               <span class="mode-toggle__seg-text">{t.mode_dev}</span>
-            </button>
+            </a>
             <span class="mode-toggle__tip" role="tooltip">
               <span class="mode-toggle__tip--simple"
                 >{t.mode_tooltip_simple}</span>
@@ -412,16 +440,19 @@ const jsonLd = [
                language rather than spelling it out in English. */}
           <div class="lang-switch" role="group"
             aria-label={t.nav_lang_label}>
-            <a class="lang-switch__opt" data-lang="en" href="/"
-              lang="en"
+            {/* hrefs via langHref: language switching stays inside
+                 the active mode's cluster — /de/nerd/ pairs with
+                 /nerd/, never with /. */}
+            <a class="lang-switch__opt" data-lang="en"
+              href={langHref("en")} lang="en"
               aria-current={lang === "en" ? "true" : undefined}>EN</a>
             <span class="lang-switch__sep" aria-hidden="true"></span>
-            <a class="lang-switch__opt" data-lang="de" href="/de/"
-              lang="de"
+            <a class="lang-switch__opt" data-lang="de"
+              href={langHref("de")} lang="de"
               aria-current={lang === "de" ? "true" : undefined}>DE</a>
             <span class="lang-switch__sep" aria-hidden="true"></span>
-            <a class="lang-switch__opt" data-lang="ja" href="/ja/"
-              lang="ja"
+            <a class="lang-switch__opt" data-lang="ja"
+              href={langHref("ja")} lang="ja"
               aria-current={lang === "ja" ? "true" : undefined}>JA</a>
           </div>
 
@@ -464,15 +495,14 @@ const jsonLd = [
           height="273" />
 
         {/* Simple-mode hero copy */}
+        {/* Only the active mode's hero renders — the split's
+             whole point is that neither audience's content ships
+             hidden on the other's page. Each page therefore has
+             exactly ONE <h1>, its own (#868's rule, now satisfied
+             per page rather than by demoting the Nerd hero). */}
+        {isSimple && (
         <div class="hero__mode hero__mode--simple">
           <span class="hero__kicker">{t.hero_kicker}</span>
-          {/* The page's ONE <h1>. Both modes' heroes ship in the
-               DOM and CSS hides the inactive one, so a second <h1>
-               here would be a second top-level heading on every
-               crawl — the Nerd hero below is an <h2> for exactly
-               that reason (#868). Both take .hero__title, which
-               carries the whole look, so the demotion is
-               semantic only. */}
           <h1 class="hero__title">{t.hero_title}</h1>
           <p class="hero__sub">{t.hero_sub}</p>
           <div class="hero__cta">
@@ -528,12 +558,15 @@ const jsonLd = [
             </span>
           )}
         </div>
+        )}
 
         {/* Nerd-mode hero copy */}
+        {isDev && (
         <div class="hero__mode hero__mode--dev">
           <span class="hero__kicker">{t.hero_dev_kicker}</span>
-          {/* <h2>, not <h1> — see the Simple hero above (#868). */}
-          <h2 class="hero__title">{t.hero_dev_title}</h2>
+          {/* <h1> now — this hero only renders on the Nerd page,
+               where it IS the page's one top heading (#868). */}
+          <h1 class="hero__title">{t.hero_dev_title}</h1>
           <p class="hero__sub" set:html={t.hero_dev_sub}></p>
           <div class="hero__cta">
             {/* Nerd's primary ACTS rather than bridges (#904). It
@@ -545,9 +578,10 @@ const jsonLd = [
                  actually wants, for the CLI — is one scroll below
                  with the GitHub link beside it here.
 
-                 Without a published image the bridge returns, and
-                 with it the `data-install-bridge` handler's only
-                 remaining consumer. */}
+                 Without a published image the fallback returns —
+                 a plain hash jump now: #start lives on THIS page,
+                 so the mode-switching bridge handler it used to
+                 need retired with the split. */}
             {downloadHref ? (
               <a class="btn btn--primary" href={downloadHref}
                 aria-describedby="devHeroReq">
@@ -556,7 +590,7 @@ const jsonLd = [
                 {t.download_cta}
               </a>
             ) : (
-              <a class="btn btn--primary" href="#start" data-install-bridge>
+              <a class="btn btn--primary" href="#start">
                 {t.hero_cta_primary}
               </a>
             )}
@@ -596,6 +630,7 @@ const jsonLd = [
             </span>
           )}
         </div>
+        )}
       </div>
       <div class="hero__seam" aria-hidden="true"></div>
     </header>
@@ -627,6 +662,7 @@ const jsonLd = [
     </section>
 
     {/* ============ What is this? (Simple only) ============ */}
+    {isSimple && (
     <section class="simple-only" id="what">
       <div class="wrap">
         <div class="what reveal">
@@ -655,6 +691,7 @@ const jsonLd = [
         </div>
       </div>
     </section>
+    )}
 
     {/* ============ Demo video (both modes) ============ */}
     <section class="tint" id="demo">
@@ -691,6 +728,7 @@ const jsonLd = [
     </section>
 
     {/* ============ How it works (Simple only) ============ */}
+    {isSimple && (
     <section class="simple-only" id="how">
       <div class="wrap">
         <div class="section-head reveal">
@@ -709,8 +747,10 @@ const jsonLd = [
         </ol>
       </div>
     </section>
+    )}
 
     {/* ============ Why it's calmer (Simple only) ============ */}
+    {isSimple && (
     <section class="tint simple-only" id="calm">
       <div class="wrap">
         <div class="section-head reveal">
@@ -759,8 +799,10 @@ const jsonLd = [
         </div>
       </div>
     </section>
+    )}
 
     {/* ============ Maker quote (Simple only) ============ */}
+    {isSimple && (
     <section class="simple-only" id="maker-quote-simple">
       <div class="wrap">
         <blockquote class="quote-card reveal">
@@ -771,8 +813,10 @@ const jsonLd = [
         </blockquote>
       </div>
     </section>
+    )}
 
     {/* ============ Features (Nerd only) ============ */}
+    {isDev && (
     <section class="dev-only dev-reveal" id="features">
       <div class="wrap">
         <div class="section-head">
@@ -793,8 +837,10 @@ const jsonLd = [
         </div>
       </div>
     </section>
+    )}
 
     {/* ============ Layouts (Nerd only) ============ */}
+    {isDev && (
     <section class="tint dev-only dev-reveal" id="layouts">
       <div class="wrap">
         <div class="section-head">
@@ -815,8 +861,10 @@ const jsonLd = [
         </div>
       </div>
     </section>
+    )}
 
     {/* ============ Lua config (Nerd only) ============ */}
+    {isDev && (
     <section class="split dev-only dev-reveal" id="config">
       <div class="wrap">
         <div class="split__copy">
@@ -842,8 +890,10 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         </div>
       </div>
     </section>
+    )}
 
     {/* ============ CLI (Nerd only) ============ */}
+    {isDev && (
     <section class="split split--reverse tint dev-only dev-reveal"
       id="cli">
       <div class="wrap">
@@ -878,6 +928,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         </div>
       </div>
     </section>
+    )}
 
     {/* ============ Maker quote (Nerd only) ==============
          Sits AFTER the Lua and CLI sections rather than between
@@ -886,6 +937,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
          a personal note is what lands once they have seen the
          thing itself, not what should interrupt the run up to
          it. */}
+    {isDev && (
     <section class="dev-only dev-reveal" id="maker-quote-dev">
       <div class="wrap">
         <blockquote class="quote-card quote-card--dev">
@@ -899,6 +951,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         </blockquote>
       </div>
     </section>
+    )}
 
     {/* ============ Install (Nerd only) ==================
          The install bridge target. Simple-mode readers and the
@@ -908,6 +961,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
          actually ships; building from source stays directly
          beneath it — contributors still need it, newcomers
          landing from the bridge should not meet it first. */}
+    {isDev && (
     <section class="quickstart dev-only dev-reveal" id="start">
       <div class="wrap">
         <div>
@@ -1012,6 +1066,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         </div>
       </div>
     </section>
+    )}
 
     {/* ============ Final CTA (both modes) ============ */}
     <section class="cta-band" id="cta">
@@ -1159,6 +1214,9 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         }
         syncTheme();
       });
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
       window.addEventListener("storage", (e) => {
         if (e.key === "starlight-theme") {
           if (e.newValue === "light" || e.newValue === "dark") {
@@ -1166,141 +1224,15 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             syncTheme();
           }
         }
-        if (e.key === "kiwidesk-site-mode") {
-          html.dataset.mode = e.newValue === "dev" ? "dev" : "simple";
-          syncMode();
-        }
       });
 
-      // ---- Mode toggle (own `kiwidesk-site-mode` key) ----
-      // Both modes' content lives in the DOM; `data-mode` on <html>
-      // shows/hides via CSS, so switching never reloads and the
-      // reveal can be a pure CSS transition. The control is a
-      // radiogroup of two segments (Simple / Nerd).
-      const modeToggle = document.getElementById("modeToggle");
-      const modeSegs = modeToggle
-        ? Array.from(
-            modeToggle.querySelectorAll(".mode-toggle__seg")
-          )
-        : [];
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      // Reflect the active mode onto the segments: aria-checked marks
-      // the current option, and a roving tabindex keeps exactly one
-      // segment in the tab order (arrow keys move between them).
-      const syncMode = () => {
-        const active = html.dataset.mode === "dev" ? "dev" : "simple";
-        modeSegs.forEach((seg) => {
-          const on = seg.getAttribute("data-mode") === active;
-          seg.setAttribute("aria-checked", String(on));
-          seg.tabIndex = on ? 0 : -1;
-        });
-      };
-      syncMode();
-
-      // Apply a mode, persist it, and REPLAY the switch flourish. The
-      // flourish is a one-shot @keyframes on <html>; a one-shot
-      // animation only re-runs if the class is removed and re-added
-      // with a reflow between (the browser otherwise sees no change
-      // and won't restart it) — that reflow-restart is what makes the
-      // animation play on EVERY toggle, not just the first. Runs in
-      // both directions so switching back to Simple animates too.
-      const applyMode = (next) => {
-        if (html.dataset.mode === next) return;
-        html.dataset.mode = next;
-        try {
-          localStorage.setItem("kiwidesk-site-mode", next);
-        } catch (e) {
-          /* storage unavailable — mode still applies in-page */
-        }
-        syncMode();
-        if (!reduce) {
-          html.classList.remove("mode-flourish");
-          // Force reflow so the removed class "sticks" before we
-          // re-add it — without this the remove+add collapses into a
-          // no-op and the keyframe never restarts (the animate-once
-          // bug). void reading offsetWidth flushes pending style.
-          void html.offsetWidth;
-          html.classList.add("mode-flourish");
-          window.setTimeout(
-            () => html.classList.remove("mode-flourish"),
-            900
-          );
-        }
-        // Sections hidden while the OTHER mode was active never had
-        // their scroll-reveal fire (IntersectionObserver can't see a
-        // display:none element). After a switch, reveal any that are
-        // now on screen so they aren't stuck invisible.
-        window.requestAnimationFrame(revealVisible);
-      };
-
-      // Click either segment to select that mode.
-      modeSegs.forEach((seg) => {
-        seg.addEventListener("click", (e) => {
-          const m = seg.getAttribute("data-mode");
-          if (m === "simple" || m === "dev") applyMode(m);
-          // Mouse click (detail > 0): drop focus so the hover
-          // tooltip doesn't linger after the pointer leaves. A
-          // keyboard activation (detail === 0) keeps focus, so the
-          // tip still shows for keyboard users via :focus-within.
-          if ((e as MouseEvent).detail > 0) (seg as HTMLElement).blur();
-        });
-      });
-      // Keyboard: arrows / Home / End move between the two segments
-      // (radiogroup convention) and select as they move.
-      modeToggle?.addEventListener("keydown", (e) => {
-        const ev = e as KeyboardEvent;
-        let next = null;
-        if (ev.key === "ArrowRight" || ev.key === "ArrowDown") {
-          next = "dev";
-        } else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") {
-          next = "simple";
-        } else if (ev.key === "Home") {
-          next = "simple";
-        } else if (ev.key === "End") {
-          next = "dev";
-        }
-        if (!next) return;
-        ev.preventDefault();
-        applyMode(next);
-        modeSegs
-          .find((s) => s.getAttribute("data-mode") === next)
-          ?.focus();
-      });
-
-      // ---- Install bridge (Simple mode -> Nerd, then #start) ----
-      // The #cta button is the one install path a Simple-mode
-      // reader is offered. #start lives in a .dev-only section, so
-      // a bare hash jump would land on a display:none element and
-      // scroll nowhere. Switch modes through applyMode(), which
-      // PERSISTS the choice exactly as clicking the toggle does —
-      // this visitor clicked the bridge on this page, so it is a
-      // real choice, unlike a bare /#start arrival (see the head
-      // script, which resolves that case transiently instead).
-      // Scroll in the same tick: applyMode sets `data-mode`
-      // synchronously, so scrollIntoView's own forced reflow
-      // already sees the revealed section at its real offset.
-      // Deliberately NOT deferred to requestAnimationFrame — rAF
-      // does not fire in a backgrounded tab, which would leave a
-      // click that switched the mode but never scrolled.
-      document
-        .querySelectorAll("[data-install-bridge]")
-        .forEach((link) => {
-          link.addEventListener("click", (e) => {
-            if (html.dataset.mode === "dev") return; // plain jump
-            e.preventDefault();
-            applyMode("dev");
-            document.getElementById("start")?.scrollIntoView({
-              behavior: reduce ? "auto" : "smooth",
-              block: "start",
-            });
-            // Keep the URL shareable — /#start re-enters Nerd
-            // mode via the <head> resolver, for this visit only.
-            history.replaceState(null, "", "#start");
-          });
-        });
-
+      // ---- Mode machinery: GONE (2026-08-26 split) ----
+      // The mode is the URL now. applyMode, the mode radiogroup
+      // wiring, the flourish replay, the cross-tab storage sync
+      // and the install-bridge handler all retired with it; the
+      // toggle is two prefetched links and `data-mode` arrives
+      // server-rendered. `reduce` stays: the scroll-reveal below
+      // still honors it.
       // ---- Language switcher (own `kiwidesk-site-lang` key) ----
       // Each segment is an <a> that already navigates to the target
       // route; here we only persist the explicit choice so the

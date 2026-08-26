@@ -212,7 +212,10 @@
 :root[data-mode="dev"] .mode-toggle__seg--dev {
   color: #10210b;
 }
-.mode-toggle__seg:not([aria-checked="true"]):hover {
+/* [aria-current], not [aria-checked]: the segments became links
+   when the mode became the URL (2026-08-26), and aria-current is
+   the truth a link carries. */
+.mode-toggle__seg:not([aria-current="page"]):hover {
   color: var(--nav-ink);
 }
 .mode-toggle__seg:focus-visible {
