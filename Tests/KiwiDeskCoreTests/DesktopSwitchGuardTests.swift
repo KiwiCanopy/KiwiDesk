@@ -1,3 +1,4 @@
+import ApplicationServices
 import Foundation
 import Testing
 
@@ -185,6 +186,13 @@ struct DesktopSwitchGuardTests {
         // adoption pass (#1023's third half). Desktop 4 is
         // hidden on UUID-B in the fixture; Desktop 1 is current
         // on UUID-A, so the same verb there arms nothing.
+        // The event loop knows the window too — the fold must
+        // release this registration or every later reconcile
+        // treats the window as already known and never re-adopts
+        // it (the "ignored until minimized" trace).
+        core.eventLoop.elements[1] = [
+            WindowID(7): AXUIElementCreateApplication(1)
+        ]
         #expect(
             core.execute(
                 "move_to_desktop_and_follow",
@@ -192,6 +200,7 @@ struct DesktopSwitchGuardTests {
             ).isSuccess
         )
         #expect(core.deferred.isScheduled(.desktopMoveReap))
+        #expect(core.eventLoop.elements[1]?[WindowID(7)] == nil)
         core.deferred.cancel(.desktopMoveReap)
         core.state.apply(
             .windowCreated(
