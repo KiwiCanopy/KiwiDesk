@@ -122,13 +122,13 @@ struct ShortcutsFamilyRowsTests {
         ] {
             #expect(
                 expander.rows(for: key)?.count
-                    == expander.desktops.focus.count,
+                    == expander.desktops.desktops.count,
                 "\(key.id) should expand once per Desktop"
             )
         }
         #expect(expander.spaces.count > 1)
-        #expect(expander.desktops.focus.count > 1)
-        #expect(expander.spaces.count != expander.desktops.focus.count)
+        #expect(expander.desktops.desktops.count > 1)
+        #expect(expander.spaces.count != expander.desktops.desktops.count)
         // Two layers defined, one of them current, so exactly
         // one switch row.
         #expect(
@@ -268,10 +268,7 @@ struct ShortcutsFamilyRowsTests {
         let one = ShortcutsFamilyRows(
             spaces: ["1"],
             icons: [:],
-            desktops: KeybindingCatalog.DesktopOffer(
-                focus: [1, 2],
-                move: [1, 2]
-            ),
+            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -279,10 +276,7 @@ struct ShortcutsFamilyRowsTests {
         let two = ShortcutsFamilyRows(
             spaces: ["1", "2"],
             icons: [:],
-            desktops: KeybindingCatalog.DesktopOffer(
-                focus: [1, 2],
-                move: [1, 2]
-            ),
+            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -321,10 +315,7 @@ struct ShortcutsFamilyRowsTests {
         ShortcutsFamilyRows(
             spaces: ["1", "2", "mail"],
             icons: [:],
-            desktops: KeybindingCatalog.DesktopOffer(
-                focus: [1, 2],
-                move: [1, 2]
-            ),
+            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName, "resize"],
             currentLayer: KeyLayer.defaultName

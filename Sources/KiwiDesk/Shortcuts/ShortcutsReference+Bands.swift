@@ -40,7 +40,7 @@ extension ShortcutsReferenceBuilder {
             KeybindingCatalog.focusDirections
             + KeybindingCatalog.goToSpace(spaces, icons: spaceIcons)
             + KeybindingCatalog.goToDesktop(
-                desktops.focus,
+                desktops.desktops,
                 absent: desktops.absent
             )
         let move =
@@ -52,7 +52,7 @@ extension ShortcutsReferenceBuilder {
                 icons: spaceIcons
             )
             + KeybindingCatalog.moveToDesktop(
-                desktops.move,
+                desktops.desktops,
                 absent: desktops.absent
             )
         // Exclude the active layer: you never switch to the layer

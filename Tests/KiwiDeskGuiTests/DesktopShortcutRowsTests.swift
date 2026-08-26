@@ -104,7 +104,7 @@ struct DesktopShortcutRowsTests {
         let rendered = expander.renderedRows(
             for: .shortcuts(.moveToDesktop)
         )
-        #expect(rendered.count == expander.desktops.focus.count * 2)
+        #expect(rendered.count == expander.desktops.desktops.count * 2)
         for (offset, command) in rendered.enumerated() {
             let isFollow = command.lua.contains(
                 "move_to_desktop_and_follow"
@@ -136,10 +136,7 @@ struct DesktopShortcutRowsTests {
         ShortcutsFamilyRows(
             spaces: ["1", "2", "mail"],
             icons: [:],
-            desktops: KeybindingCatalog.DesktopOffer(
-                focus: [1, 2],
-                move: [1, 2]
-            ),
+            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName

@@ -60,7 +60,7 @@ struct DesktopShortcutOfferTests {
             live: [1, 2],
             bindings: [focusBinding]
         )
-        #expect(offer.focus == [1, 2, 5])
+        #expect(offer.desktops == [1, 2, 5])
         #expect(offer.absent == [5])
         // And with the bridge absent entirely, the bound one is
         // still the only thing offered — an empty live list is
@@ -70,7 +70,7 @@ struct DesktopShortcutOfferTests {
             KeybindingCatalog.desktopOffer(
                 live: [],
                 bindings: [focusBinding]
-            ).focus == [5]
+            ).desktops == [5]
         )
         // A live Desktop the bindings also name is offered once,
         // and is not away.
@@ -78,48 +78,59 @@ struct DesktopShortcutOfferTests {
             live: [1, 5],
             bindings: [focusBinding]
         )
-        #expect(live.focus == [1, 5])
+        #expect(live.desktops == [1, 5])
         #expect(live.absent.isEmpty)
     }
 
-    /// **A binding keeps its OWN row alive, and nothing more.**
+    /// **A binding keeps the WHOLE Desktop's rows, not just its
+    /// own.**
     ///
-    /// The offer was one shared list for a while, so binding
-    /// `move_to_desktop(5)` put an unbound "Go to Desktop 5" row
-    /// in the Focus card — offering a verb the user never asked
-    /// for, on a Desktop that does not exist. Owner found it on
-    /// device, 2026-08-26.
+    /// One rule the user can state: a Desktop stays in the list
+    /// for as long as any shortcut names it. The alternative —
+    /// each family widened only by bindings for its own verb —
+    /// was built and withdrawn: it makes the three rows for one
+    /// Desktop appear and vanish independently, so binding
+    /// "move & follow" drops the plain move row from under it
+    /// (owner, on device, 2026-08-26).
     ///
-    /// Both directions, because the failure is asymmetric: a
-    /// move binding must not reach the focus family, and a focus
-    /// binding must not reach the move pair.
-    @Test("a binding widens only its own family")
-    func aBindingWidensOnlyItsOwnFamily() {
-        let moveOnly = KeybindingCatalog.desktopOffer(
-            live: [1, 2],
-            bindings: [
-                KeyBinding(
-                    combo: "ctrl+alt+cmd+5",
-                    lua: "KiwiDesk.move_to_desktop(5)",
-                    kind: .navigation
-                )
-            ]
-        )
-        #expect(moveOnly.move == [1, 2, 5])
-        #expect(moveOnly.focus == [1, 2])
-
-        let focusOnly = KeybindingCatalog.desktopOffer(
-            live: [1, 2],
-            bindings: [
-                KeyBinding(
-                    combo: "ctrl+alt+5",
-                    lua: "KiwiDesk.focus_desktop(5)",
-                    kind: .navigation
-                )
-            ]
-        )
-        #expect(focusOnly.focus == [1, 2, 5])
-        #expect(focusOnly.move == [1, 2])
+    /// Asserted from EACH of the three verbs, because the rule
+    /// is only worth anything if it holds whichever one the
+    /// binding happens to be.
+    @Test("any one binding keeps the whole Desktop's rows")
+    func aBindingKeepsTheWholeDesktop() {
+        for lua in [
+            "KiwiDesk.focus_desktop(5)",
+            "KiwiDesk.move_to_desktop(5)",
+            "KiwiDesk.move_to_desktop_and_follow(5)",
+        ] {
+            let offer = KeybindingCatalog.desktopOffer(
+                live: [1, 2],
+                bindings: [
+                    KeyBinding(
+                        combo: "ctrl+alt+cmd+5",
+                        lua: lua,
+                        kind: .navigation
+                    )
+                ]
+            )
+            #expect(
+                offer.desktops == [1, 2, 5],
+                Comment(rawValue: "\(lua) dropped a row")
+            )
+            #expect(offer.absent == [5])
+            // And every family draws it, not just the bound one.
+            let expander = ShortcutsFamilyRows(
+                spaces: ["1"],
+                icons: [:],
+                desktops: offer,
+                resizeStep: 42,
+                layerNames: [KeyLayer.defaultName],
+                currentLayer: KeyLayer.defaultName
+            )
+            for key in Self.desktopFamilies {
+                #expect(expander.rows(for: key)?.count == 3)
+            }
+        }
     }
 
     /// The move PAIR shares one list, whichever half is bound.
@@ -182,10 +193,7 @@ struct DesktopShortcutOfferTests {
         ShortcutsFamilyRows(
             spaces: ["1", "2", "mail"],
             icons: [:],
-            desktops: KeybindingCatalog.DesktopOffer(
-                focus: [1, 2],
-                move: [1, 2]
-            ),
+            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName

@@ -91,17 +91,17 @@ struct ShortcutsFamilyRows {
             )
         case .focusDesktop:
             return KeybindingCatalog.goToDesktop(
-                desktops.focus,
+                desktops.desktops,
                 absent: desktops.absent
             )
         case .moveToDesktop:
             return KeybindingCatalog.moveToDesktopRows(
-                desktops.move,
+                desktops.desktops,
                 absent: desktops.absent
             )
         case .moveToDesktopFollow:
             return KeybindingCatalog.moveToDesktopFollowRows(
-                desktops.move,
+                desktops.desktops,
                 absent: desktops.absent
             )
         case .growWidth:

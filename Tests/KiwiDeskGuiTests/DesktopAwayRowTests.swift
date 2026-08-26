@@ -37,8 +37,7 @@ struct DesktopAwayRowTests {
             spaces: ["1"],
             icons: [:],
             desktops: KeybindingCatalog.DesktopOffer(
-                focus: [1, 2, 5],
-                move: [1, 2, 5],
+                desktops: [1, 2, 5],
                 absent: [5]
             ),
             resizeStep: 42,
@@ -230,10 +229,7 @@ struct DesktopAwayRowTests {
         ShortcutsFamilyRows(
             spaces: ["1", "2", "mail"],
             icons: [:],
-            desktops: KeybindingCatalog.DesktopOffer(
-                focus: [1, 2],
-                move: [1, 2]
-            ),
+            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName

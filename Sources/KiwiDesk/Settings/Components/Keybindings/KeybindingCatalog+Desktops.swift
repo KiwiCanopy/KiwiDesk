@@ -136,29 +136,34 @@ extension KeybindingCatalog {
         }
     }
 
-    /// Which Desktops each family offers a row for, and which
-    /// of those are not attached right now.
+    /// Which Desktops get a row, and which of those are not
+    /// attached right now.
     ///
-    /// **Per family, not one shared list.** The offer is
-    /// `live ∪ bound-to-THIS-family's-verb`, because a binding
-    /// keeps its OWN row alive and nothing more: sharing one
-    /// list meant binding `move_to_desktop(5)` conjured an
-    /// unbound "Go to Desktop 5" row in the Focus card for a
-    /// Desktop that does not exist — offering a verb the user
-    /// never asked for, on hardware that cannot run it (owner,
-    /// on device, 2026-08-26).
+    /// **A Desktop keeps its rows for as long as ANY shortcut
+    /// names it** — all three families, together, dimmed. One
+    /// rule, and the alternative was tried and withdrawn: a
+    /// per-family offer (each family widened only by bindings
+    /// for its OWN verb) is defensible in the abstract and reads
+    /// as broken on screen, because the three rows for one
+    /// Desktop then appear and vanish independently — you bind
+    /// "move & follow" and the plain move row disappears from
+    /// under it (owner, on device, 2026-08-26).
     ///
-    /// The move PAIR shares one list on purpose. Its two
-    /// families render interleaved, and `renderedRows` zips the
-    /// columns and truncates to the shorter one — so a Desktop
-    /// present in one and not the other would silently drop
-    /// rows off the end of both.
+    /// It also keeps the interleaved move pair honest for free.
+    /// Its two families render zipped by index and truncated to
+    /// the shorter column, so halves offering different Desktops
+    /// would drop rows off the end of BOTH — including rows for
+    /// Desktops that are perfectly fine.
+    ///
+    /// And it is the more useful rule: a Desktop you still have
+    /// shortcuts for stays fully editable while its screen is
+    /// away, so you can finish or rearrange that set before you
+    /// plug back in.
     struct DesktopOffer: Equatable {
-        /// What `focusDesktop` expands over.
-        var focus: [Int] = []
-        /// What BOTH move families expand over — see above.
-        var move: [Int] = []
-        /// Of either list, the ones not on any screen now.
+        /// Every Desktop drawing a row — live, or named by a
+        /// binding.
+        var desktops: [Int] = []
+        /// Of those, the ones not on any screen now.
         var absent: Set<Int> = []
 
         /// The empty offer: no Desktop draws a row.
@@ -176,7 +181,7 @@ extension KeybindingCatalog {
     /// argument, and the per-Space families answer it with a
     /// whole Inactive card because a Space is user data that can
     /// be re-created by name. A Desktop cannot, so the cheaper
-    /// answer is right here: keep offering the row, dimmed.
+    /// answer is right here: keep offering the rows, dimmed.
     ///
     /// Deliberately NOT routed through
     /// `OrphanedShortcuts.perSpaceFamilies` — that list means
@@ -193,24 +198,13 @@ extension KeybindingCatalog {
         live: [Int],
         bindings: [KeyBinding]
     ) -> DesktopOffer {
-        var focusBound: Set<Int> = []
-        var moveBound: Set<Int> = []
-        for binding in bindings {
-            guard
-                let number = desktopNumber(from: binding.lua)
-            else { continue }
-            if binding.lua.hasPrefix(focusVerbPrefix) {
-                focusBound.insert(number)
-            } else {
-                moveBound.insert(number)
-            }
-        }
+        let bound = Set(
+            bindings.compactMap { desktopNumber(from: $0.lua) }
+        )
         let liveSet = Set(live)
         return DesktopOffer(
-            focus: liveSet.union(focusBound).sorted(),
-            move: liveSet.union(moveBound).sorted(),
-            absent: focusBound.union(moveBound)
-                .subtracting(liveSet)
+            desktops: liveSet.union(bound).sorted(),
+            absent: bound.subtracting(liveSet)
         )
     }
 
@@ -278,15 +272,6 @@ extension KeybindingCatalog {
             + moveToDesktopRows([sentinel])
             + moveToDesktopFollowRows([sentinel]))
             .map { String($0.lua.prefix { $0 != "(" }) + "(" }
-    }()
-
-    /// `KiwiDesk.focus_desktop(` alone — which family a binding
-    /// belongs to, derived for the same reason `verbPrefixes` is.
-    /// Anything parsing as a Desktop verb and NOT carrying this
-    /// prefix is one of the move pair.
-    private static let focusVerbPrefix: String = {
-        let lua = goToDesktop([0]).first?.lua ?? ""
-        return String(lua.prefix { $0 != "(" }) + "("
     }()
 
     /// A Desktop number as the Lua argument the verbs parse: a

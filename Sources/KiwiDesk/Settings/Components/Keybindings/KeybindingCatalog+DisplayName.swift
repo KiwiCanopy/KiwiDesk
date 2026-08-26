@@ -43,8 +43,8 @@ extension KeybindingCatalog {
             live: [],
             bindings: config.layers.flatMap(\.bindings)
         )
-        commands += goToDesktop(desktops.focus)
-        commands += moveToDesktop(desktops.move)
+        commands += goToDesktop(desktops.desktops)
+        commands += moveToDesktop(desktops.desktops)
         guard
             let match = commands.first(where: {
                 $0.label == label

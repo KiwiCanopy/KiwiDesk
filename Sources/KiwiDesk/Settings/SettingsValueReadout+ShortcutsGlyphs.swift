@@ -76,8 +76,8 @@ extension SettingsValueReadout {
             live: [],
             bindings: bindings
         )
-        return KeybindingCatalog.goToDesktop(desktops.focus)
-            + KeybindingCatalog.moveToDesktop(desktops.move)
+        return KeybindingCatalog.goToDesktop(desktops.desktops)
+            + KeybindingCatalog.moveToDesktop(desktops.desktops)
     }
 
     /// The binding's row label as the Shortcuts area shows it:
