@@ -40,13 +40,12 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_size_policy": APIRecord(
-            "Sets whether window sizes animate smoothly or "
-                + "mid-slide.",
-            .text("policy")
+            "Sets how window sizes animate.",
+            .choice("policy", SizePolicy.self)
         ),
         "set_size_rate": APIRecord(
             "Caps the update rate for smooth size changes in "
-                + "Hertz.",
+                + "Hertz; 0 restores the per-tick default.",
             .integer("hertz")
         ),
     ]
@@ -75,7 +74,7 @@ extension APIReference {
             .choice("orientation", StackParams.Orientation.self)
         ),
         "set_stack_position": APIRecord(
-            "Sets which side of the space the stack zone "
+            "Sets which side of the Space the stack zone "
                 + "occupies.",
             .choice("position", StackParams.StackPosition.self)
         ),
@@ -203,8 +202,8 @@ extension APIReference {
 
     static let trackRecords: [String: APIRecord] = [
         "swap": APIRecord(
-            "Swaps the focused window's track with the adjacent "
-                + "one.",
+            "Swaps the focused window's track with the next one "
+                + "along; takes prev or next.",
             .text("direction")
         ),
         "set_axis": APIRecord(

@@ -168,10 +168,6 @@ I send".
 Bare `kiwidesk help` (and `--help` / `-h`) still prints the short
 usage block. Add a name, or `--json`, to get the API instead.
 
-> Not every summary is written yet. A command whose prose is
-> still pending prints `(summary pending)`; its name, group and
-> arguments are already correct.
-
 ## Service Control
 
 ```sh

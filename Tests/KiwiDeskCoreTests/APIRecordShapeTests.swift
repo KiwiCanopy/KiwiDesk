@@ -77,11 +77,12 @@ struct APIRecordShapeTests {
         }
     }
 
-    @Test("a pending summary is the shared placeholder")
-    func pendingSummariesAreIdentical() {
-        // Phase 2 replaces `.todo()` wholesale. A hand-written
-        // near-miss ("TODO", "") would slip past the count in
-        // `APIRecordFilledTests`, which asks `isPending`.
+    @Test("no summary is a placeholder wearing prose")
+    func summariesAreRealProse() {
+        // `APIRecordFilledTests` asks `isPending`, which matches
+        // the shared placeholder exactly — a hand-written
+        // near-miss ("TODO: write this", "") is a record nobody
+        // wrote that no completeness check can see.
         for entry in APIReference.entries {
             let summary = entry.record.summary
             #expect(
@@ -90,7 +91,7 @@ struct APIRecordShapeTests {
             )
             #expect(
                 !summary.lowercased().contains("todo"),
-                "\(entry.qualifiedName): use .todo(), not prose"
+                "\(entry.qualifiedName): write the summary"
             )
         }
     }

@@ -115,16 +115,10 @@ extension KiwiCore {
             // Experimental (#47), engine-only — not persisted to a
             // profile. Flip live to compare the throttled-smooth
             // grow against the shipping mid-slide on device.
-            guard let raw = args.first?.stringValue else {
-                return .fail("expected \"mid_slide\" or \"smooth\"")
-            }
-            switch raw {
-            case "mid_slide": tiler.animation.sizePolicy = .midSlide
-            case "smooth":
-                tiler.animation.sizePolicy = .throttledSmooth
-            default:
-                return .fail("expected \"mid_slide\" or \"smooth\"")
-            }
+            guard let raw = args.first?.stringValue,
+                let policy = SizePolicy(rawValue: raw)
+            else { return .expected(SizePolicy.self) }
+            tiler.animation.sizePolicy = policy
             return .ok()
         case "animations.set_size_rate":
             // Size-set cap in Hz for `smooth` (#47), clamped 1–120.

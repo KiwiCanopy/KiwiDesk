@@ -79,8 +79,7 @@ extension APIReference {
                 command: command,
                 aliases: spellings.filter { $0 != canonical },
                 channel: .both,
-                record: records[command]
-                    ?? APIRecord(APIRecord.pendingSummary)
+                record: records[command] ?? Self.pendingRecord
             )
         }
         result.append(
@@ -91,7 +90,7 @@ extension APIReference {
                 aliases: [],
                 channel: .cli,
                 record: records[socketOnlyCommand]
-                    ?? APIRecord(APIRecord.pendingSummary)
+                    ?? Self.pendingRecord
             )
         )
         result += luaOnly.map { name in
@@ -101,8 +100,7 @@ extension APIReference {
                 command: nil,
                 aliases: [],
                 channel: .lua,
-                record: luaOnlyRecords[name]
-                    ?? APIRecord(APIRecord.pendingSummary)
+                record: luaOnlyRecords[name] ?? Self.pendingRecord
             )
         }
         return result
@@ -118,11 +116,22 @@ extension APIReference {
                 command: "\(table).\(function)",
                 aliases: [],
                 channel: .both,
-                record: records[function]
-                    ?? APIRecord(APIRecord.pendingSummary)
+                record: records[function] ?? Self.pendingRecord
             )
         }
     }
+
+    /// The record a name falls back to when its table has none.
+    ///
+    /// One home rather than four spellings of the construction:
+    /// it is deliberately NOT a factory on `APIRecord`, which is
+    /// what `.todo()` was and what invited a record table to
+    /// call it. Nothing can legitimately reach this — the census
+    /// is what keeps it unreachable, not the compiler — and a
+    /// command dropped from the listing is the worse failure.
+    private static let pendingRecord = APIRecord(
+        APIRecord.pendingSummary
+    )
 
     /// The one command reachable over the socket that has no
     /// `KiwiDesk` table function — `dispatchable` inserts it by

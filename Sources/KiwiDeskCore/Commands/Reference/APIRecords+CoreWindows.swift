@@ -3,13 +3,11 @@ import Foundation
 /// The dispatcher verbs that move windows, Spaces and Desktops
 /// (#1033) — the `KiwiDesk.*` half a keybinding usually names.
 ///
-/// **The three Desktop verbs are exemplars and are written**;
-/// they are the `.desktop` argument's only home, and the reason
-/// that kind exists rather than a bare integer: a Desktop number
-/// is Mission Control's, counted globally across every screen,
-/// while a Space id is KiwiDesk's own string (#884/#888).
-/// `create_space` is written too, as the surface's one optional
-/// argument.
+/// The three Desktop verbs are the `.desktop` argument's only
+/// home, and the reason that kind exists rather than a bare
+/// integer: a Desktop number is Mission Control's, counted
+/// globally across every screen, while a Space id is KiwiDesk's
+/// own string (#884/#888).
 extension APIReference {
     static let coreWindowRecords: [String: APIRecord] = [
         "focus": APIRecord(
@@ -52,12 +50,14 @@ extension APIReference {
             .desktop("desktop")
         ),
         "move_space_to_display": APIRecord(
-            "Moves a Space to another monitor and shows it there.",
+            "Moves a Space to another screen, named by number, "
+                + "fingerprint or name, and shows it there.",
             .space("space"),
             .text("display")
         ),
         "pin_space_to_display": APIRecord(
-            "Pins a Space to a monitor by fingerprint or name.",
+            "Pins a Space to a screen, named by number, "
+                + "fingerprint or name.",
             .space("space"),
             .text("display")
         ),
@@ -76,7 +76,7 @@ extension APIReference {
                 + "tiles."
         ),
         "make_tiled": APIRecord(
-            "Returns the focused window to its space's tiling "
+            "Returns the focused window to its Space's tiling "
                 + "layout."
         ),
         "make_auto": APIRecord(
@@ -91,7 +91,7 @@ extension APIReference {
         ),
         "make_display_sticky": APIRecord(
             "Marks the focused window sticky to its current "
-                + "monitor."
+                + "screen."
         ),
         "make_unsticky": APIRecord(
             "Clears the focused window's sticky state."
@@ -110,7 +110,8 @@ extension APIReference {
             .number("delta")
         ),
         "move_to_track": APIRecord(
-            "Moves the focused window into the adjacent track.",
+            "Moves the focused window one track along; takes "
+                + "prev or next.",
             .text("direction")
         ),
         "pull_or_spawn": APIRecord(
@@ -123,17 +124,19 @@ extension APIReference {
             .text("bundle_id")
         ),
         "set_mode": APIRecord(
-            "Sets a Space's layout mode.",
+            "Sets a Space's layout mode; omit the Space to set "
+                + "the active one.",
             .space("space"),
             .choice("mode", LayoutMode.self)
         ),
         "set_fallback_space": APIRecord(
             "Sets where windows land when a profile drops their "
-                + "space.",
+                + "Space.",
             .space("space")
         ),
         "set_space_icon": APIRecord(
-            "Sets the recognition icon for a Space in the GUI.",
+            "Sets a Space's recognition icon; an empty string "
+                + "clears it.",
             .space("space"),
             .text("icon")
         ),

@@ -10,11 +10,13 @@ import Foundation
 extension APIReference {
     static let coreSettingRecords: [String: APIRecord] = [
         "set_gap_global": APIRecord(
-            "Sets the layout gaps across all spaces in points.",
+            "Sets the layout gaps in points, or a table of "
+                + "per-edge gaps, across all Spaces.",
             .number("size")
         ),
         "set_gap_override": APIRecord(
-            "Overrides the layout gaps for one Space.",
+            "Overrides the layout gaps for one Space; a number "
+                + "or a table of per-edge gaps.",
             .space("space"),
             .number("size")
         ),
@@ -63,18 +65,18 @@ extension APIReference {
             .integer("milliseconds")
         ),
         "get_state": APIRecord(
-            "Returns a snapshot of spaces, windows, and "
-                + "monitors."
+            "Returns a snapshot of Spaces, windows, and "
+                + "screens."
         ),
         "get_layout_info": APIRecord(
             "Returns diagnostic info for the active Space."
         ),
         "list_monitors": APIRecord(
-            "Lists connected monitors with IDs and geometry."
+            "Lists connected screens with IDs and geometry."
         ),
         "debug_log": APIRecord(
             "Writes a message to the unified log.",
-            .text("message")
+            .text("message", optional: true)
         ),
         "reload_config": APIRecord(
             "Reloads the configuration file from disk."
@@ -97,7 +99,8 @@ extension APIReference {
             .text("name")
         ),
         "load_profile": APIRecord(
-            "Loads a profile and applies its spaces and settings.",
+            "Loads a profile and applies its Spaces and "
+                + "settings.",
             .text("name")
         ),
         "delete_profile": APIRecord(

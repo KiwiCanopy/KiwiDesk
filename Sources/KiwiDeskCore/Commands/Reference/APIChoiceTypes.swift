@@ -23,6 +23,7 @@ extension Direction: APIChoiceType {}
 extension LayoutMode: APIChoiceType {}
 extension SpawnPlacement: APIChoiceType {}
 extension MouseResizeMode: APIChoiceType {}
+extension SizePolicy: APIChoiceType {}
 extension QuitLayoutStyle: APIChoiceType {}
 
 // MARK: - Layout parameters

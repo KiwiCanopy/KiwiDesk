@@ -90,6 +90,19 @@ itself when a sixth is added.
     are derived from the records, so its reach is the records
     that are filled, which that suite states.
 
+  **A record's argument list and its summary are REVIEW's.** No
+  guard can read them: the census pins command names, `APIChoice`
+  pins an enum's values, and `APIRecordShapeTests` pins the shape
+  a summary has — none of them can see a list that disagrees with
+  the decoder it mirrors, because a decoder reads `args[0]`
+  positionally with no signature to reflect over. So a record is
+  written against the parser rather than the docs, and a value
+  shape none of the argument kinds covers takes the closest kind
+  and **explains itself in the summary** — the escape `subscribe`
+  (variadic), `set_mode` (a leading optional) and the gap setters
+  (a number or a per-edge table) each take. `APIRecord.arguments`
+  carries the argument, and the residue it cannot close.
+
   A record's `summary` is English prose authored in Core, and it
   rides the **CLI/IPC exception above rather than widening the
   #96 seam**: `list_commands` is a machine-readable description

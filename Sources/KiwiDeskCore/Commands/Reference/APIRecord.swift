@@ -38,6 +38,20 @@ public struct APIRecord: Sendable, Equatable {
     /// declaring their signature and parsing FROM the record,
     /// which is a much larger change than #1033 and is where
     /// this data wants to go next.
+    ///
+    /// **Two shapes this fixed positional list cannot state, and
+    /// both take the closed-kind escape — the closest kind, and
+    /// a summary that says the rest.** `subscribe` is VARIADIC
+    /// (`SocketServer.subscribe` loops over every argument), so
+    /// its one optional `event` stands for a list. `set_mode`
+    /// takes a LEADING optional (one argument means the active
+    /// Space), which cannot be encoded at all while optionals
+    /// must trail. Adding a `repeats` flag or a leading-optional
+    /// case for one command each would buy a truer list for two
+    /// records and a second way to describe an argument for all
+    /// 262; the summary already carries it. Weigh a third such
+    /// command as evidence the shape, not the summary, is what
+    /// needs to change.
     public let arguments: [APIArgument]
 
     public init(_ summary: String, _ arguments: APIArgument...) {
