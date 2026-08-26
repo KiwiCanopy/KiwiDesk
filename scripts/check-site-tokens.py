@@ -528,6 +528,67 @@ def check_promoted_download(dist: pathlib.Path) -> None:
     )
 
 
+def check_guide_routes(dist: pathlib.Path) -> None:
+    """Every guide route the APP links is one the site serves
+    (#1019).
+
+    The tour's closing card and Home's first-run banner point at
+    `/guide/`, in the reader's own language where the site has
+    that route. `SupportLinks.guideRoutes` is the app's copy of
+    which locales those are — a list in one tree naming pages in
+    another, which is where a hand-kept claim rots.
+
+    On the SITE gate for `check_promoted_download`'s reason:
+    `site/**` is on `.github/ci-ignore.txt`, so a change confined
+    to the site skips the macOS jobs — and a site restructure
+    that drops `/de/guide/` is exactly the change that would
+    otherwise land with the app still linking it, silently, into
+    a 404 reached from the first window every user sees.
+    `CiPathFilterTests` refuses the Swift placement outright.
+
+    ONE direction, deliberately. A locale the site GAINS does not
+    fail: the app keeps sending that reader to a live English
+    page until someone widens the Swift list, which is the safe
+    way to be stale. Only claiming a route that does not exist
+    costs the reader anything.
+
+    Reads the BUILT pages rather than `src/pages/`, for
+    `check_promoted_download`'s reason again: a route can exist
+    in the tree and not be emitted.
+    """
+    source = (REPO / "Sources/KiwiDesk/SupportLinks.swift").read_text(
+        encoding="utf-8"
+    )
+    match = re.search(
+        r"guideRoutes:\s*Set<String>\s*=\s*\[([^\]]*)\]", source
+    )
+    if match is None:
+        raise SystemExit(
+            "check-site-tokens: could not read "
+            "SupportLinks.guideRoutes — the app's guide link is "
+            "unguarded until this parser is fixed"
+        )
+    routes = re.findall(r'"([^"]+)"', match.group(1))
+
+    # English is the fallback every other catalog lands on, so it
+    # is checked whether or not the list names it.
+    for route in ["", *routes]:
+        page = dist / route / "guide" / "index.html" if route else (
+            dist / "guide" / "index.html"
+        )
+        if not page.is_file():
+            raise SystemExit(
+                "check-site-tokens: the app links "
+                f"/{route + '/' if route else ''}guide/, which "
+                f"this build does not serve ({page.relative_to(dist)} "
+                "is missing)"
+            )
+    print(
+        f"guide routes: the app's {len(routes) + 1} linked "
+        "page(s) are all served"
+    )
+
+
 def check_sitemaps_disjoint(dist: pathlib.Path) -> None:
     """The site ships two sitemaps, and they must not overlap.
 
@@ -693,6 +754,7 @@ def main() -> None:
     check_branded_404(dist)
     check_appcast(dist)
     check_promoted_download(dist)
+    check_guide_routes(dist)
     check_sitemaps_disjoint(dist)
     check_var_references(dist)
 

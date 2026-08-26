@@ -70,7 +70,10 @@ struct SettingsCatalogTests {
         // 67 since #794: Spaces & Layouts gains its panel's
         // per-Space preview.
         // 67 since #875: deleted the install inventory card.
-        #expect(allEntries.count == 67)
+        // 68 since #1019: General ▸ About gains the Guide
+        // link as a declaration, so a search for it reaches
+        // the app's one permanent route to the guide.
+        #expect(allEntries.count == 68)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

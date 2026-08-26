@@ -2947,6 +2947,176 @@ a constant, or from a count that ignores which screen the tour
 opened on is the banned counter wearing a new name, and the
 repair is to delete it rather than patch it.
 
+### The tour teaches the tier, and names the keys it teaches
+
+**[Principle]**
+
+**A chord the reader cannot press is not taught.** The tour's
+keys step draws the shortcuts KiwiDesk seeds, and for its first
+several months it drew them as native glyphs alone — `⌃⌥ ←↓↑→`,
+`⌃⌥ 1–5`. That is a perfectly good reminder for someone who
+already knows the symbols, and it is illegible to the reader the
+screen exists for: `⌃ ⌥ ⇧` are exactly the three glyphs a person
+who has never pressed a Mac keyboard shortcut cannot name, and on
+a German keyboard the caps print "ctrl" and "alt" rather than the
+symbols at all.
+
+Two obligations follow, and they are one screen's worth of work.
+
+**Each modifier is its own key, drawn as one.** The chord is a
+row of chips with `+` between them, not one chip with a glyph run
+inside it: separating them is what makes `⌃⌥⇧` read as three keys
+to press rather than one symbol to recognise. The `+` sits
+BETWEEN chips and never inside one, which is what keeps
+`ComboSymbols`' rule intact — that library drops the separator
+precisely so a `+` appearing inside a chord is the KEY (`⌃⌥+` on
+a German layout), and a chip boundary separates two keys where a
+loose `+` would be ambiguous.
+
+**The word under a glyph is an abbreviation, and it is not
+localized.** `ctrl`, `opt`, `cmd` — read the same way in every
+language KiwiDesk ships, and two of the three are what a non-US
+Apple keyboard prints on the cap. They are language-neutral
+tokens like the glyphs above them, so they carry no catalog keys:
+four fewer strings to mistranslate and one fewer line on every
+locale round, for nothing given up.
+
+Two rejected answers are worth recording, because both look right
+until they are checked. **Writing what the CAP prints, per
+locale** — German "alt" — uses the UI language as a proxy for the
+physical keyboard, which is wrong for anyone running German on a
+US layout; and it coins a second name for a key the app already
+names one screen away, in `key_recorder.help_press`, which is the
+Shortcuts editor's own help and where the reader goes to change
+these very chords. **Using that screen's full words** (Control /
+Option / Command) is right about the vocabulary and does not fit:
+measured against the 560 pt window, the widest seeded row leaves
+the German label 270 pt of the 281 pt it needs, so every long row
+wraps — the binding constraint being Italian's "Controllo" and
+"Opzione", not German's own words. The abbreviations leave
+318 pt. An abbreviation of the app's own word is not a second
+word; the reader who wants the full name meets it in the editor.
+
+**Every glyph carries a word, including the ones "everybody
+knows".** ⇧ shipped bare for exactly one build, on the reasonable
+argument that it is on every keyboard ever made and needs no
+gloss. It looked broken — a gap under one chip in a row of four,
+which a reader takes for a rendering fault rather than a
+judgement about which symbols are obvious. The gloss is also
+free: measured, every abbreviation is narrower than the 25.4 pt
+chip above it, so the columns are chip-bound and no word here
+costs a pixel. There is nothing to buy by withholding one.
+
+**And the rule outranks the rows.** The seeded keymap is a tier
+system — `⌃⌥` moves the focus, `⌃⌥⇧` moves the window, `⌃⌥⌘`
+moves it and follows — so a list of five unrelated rows asks the
+reader to memorise five chords when there is one scheme to learn.
+The step states the scheme. But it states it **derived from the
+live chords, never asserted**: every glyph on that screen is
+looked up rather than written, and a sentence claiming a tier is
+a claim about two modifier sets, so a user who rebound the second
+tier is told nothing at all. Silence is the correct failure here
+— the screen without the sentence is exactly the screen that
+shipped before it, while the sentence with a rebound keymap
+behind it teaches someone else's keyboard.
+
+### The app links the guide, in a language the site actually serves
+
+**[Rationale]**
+
+For a long time nothing in KiwiDesk named the written guide at
+all. A user who finished the tour and later wanted to make the
+setup theirs had to find the site on their own.
+
+**What the tour's closing card gave up to make room for it is the
+more interesting half.** That card used to end on a quiet
+paragraph — "Settings is where you change any of this — different
+keys, more Spaces, other colours. If this is your first tiling
+manager, you do not need it today" — above a footer offering
+"Tiled before? Open Settings". Both are gone, and the card is
+better for it.
+
+The first clause was the menu-bar card directly above it saying
+the same thing a second time, and that card says it beside a
+PICTURE, which is the version that teaches. The second clause
+sorted the reader before it reassured them: it made
+beginner-against-experienced the organizing idea of the last
+thing the tour says, and it carries a false converse — a reader
+who is NOT a beginner is told by implication that they DO need
+Settings today. The footer then asked the same question again in
+the other direction. Nothing on that screen needs to know which
+reader it has.
+
+**A closing screen ends with one action and one destination.**
+Before this the card offered four affordances across three
+destinations, two of which argued in the reader's field of view:
+Settings is where you change everything, you do not need
+Settings, open Settings, start using it. Removing the fork beats
+re-wording it. What remains is the button and one link.
+
+**Dropping the tour's Open Settings link EXTENDS the #678 Phase 4
+pass 11 ruling rather than contradicting it.** That pass moved
+the default action off Open Settings because this app's position
+is that Settings is for people who want to dig deeper; a bottom
+line still offering Settings was that same ruling being argued
+with in a quieter voice. Nobody is stranded: the picture above
+names Settings and where it lives — the durable route, the icon
+they will still be using on day 30, against a one-time button in
+a window that never returns — the tour reopens FROM Settings, and
+`KiwiDesk.open_settings()` is bindable.
+
+**The pointer is in three places, and the third is the one that
+matters most.** The tour's closing card reaches someone who has
+just run the tour; Home's first-run banner reaches someone who
+skipped it, or finished it months ago and is in Settings for the
+first time. Both are ONE-SHOT — the tour does not come back on
+its own, and the banner retires permanently on dismiss or on the
+first save — so a user who dismissed the welcome, or simply saved
+one change, had no route to the guide anywhere in the app. That
+is the gap this entry is about, not a nicety on top of it, and
+only a permanent pointer closes it: General ▸ About, beside the
+links already there.
+
+The two sentence-shaped surfaces share ONE frame and one label,
+because the same English names the same action at both. About
+draws the bare destination name instead: a sentence there would
+be prose in a card of one-word links.
+
+**It links `/guide/`, not `/docs/user-guide/`.** They are
+different documents for different readers: `/guide/` is the
+single-page newcomer guide, the docs tree is the canonical
+reference for someone who already knows what a tiling manager is.
+The sentence is read by the former.
+
+**The language follows the app only where the route exists.**
+KiwiDesk ships eleven catalogs; the site has three locales. A
+link composed from the app's language would send seven of them to
+a 404 — so the app narrows its own locale to the routes the site
+serves and falls back to English otherwise, because a live
+English page beats a missing page in the reader's own language.
+That is the same rule the site's own sitemap already keeps for
+the same reason: a path is only treated as localized once its
+`/de/` and `/ja/` routes genuinely exist.
+
+**The guard is deliberately one-directional, and it lives on the
+site's gate rather than in a Swift suite.** `site/**` is on
+`.github/ci-ignore.txt`, so a change confined to the site skips
+the app's jobs — and a site restructure dropping `/de/guide/` is
+precisely the change that would otherwise land with the app still
+linking it. So the check that every linked route is served runs
+in `scripts/check-site-tokens.py`, on the site build, over the
+built pages; the workflow takes `SupportLinks.swift` as an input
+so the check runs when either side moves. A locale the site
+GAINS does not fail: the app keeps sending that reader to a live
+English page until someone widens the list, which is the safe
+direction to be stale in.
+
+**Nothing preflights the network.** The URL goes to the browser
+and the browser reports its own failure. An app-side reachability
+check cannot tell a down site from a captive portal from a
+machine that is simply offline, and a wrong "you are offline"
+beside a working link is worse than the browser's own error page.
+
 ### Open at login
 
 **[Principle]**

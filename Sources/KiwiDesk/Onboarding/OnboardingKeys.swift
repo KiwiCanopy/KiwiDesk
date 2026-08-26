@@ -1,27 +1,6 @@
 import Foundation
 import KiwiDeskCore
 
-/// One line of the tour's keys step: what it does, and the chord
-/// that does it.
-struct OnboardingKeyFamily: Identifiable, Equatable {
-    let id: String
-    /// Localized, spoken and drawn from this one string.
-    let label: String
-    /// Native glyphs — `⌃⌥ ← ↓ ↑ →`, `⌃⌥ 1–5`.
-    let glyphs: String
-    /// Whether this row is the WAY OUT of the list: the chord
-    /// that opens the shortcuts panel, where every other row is
-    /// one thing the user can do.
-    ///
-    /// The tour draws it in the accent (#828, the prototype's
-    /// filled chip) — it is the row that keeps mattering after
-    /// the tour closes, and a list of five identical rows gives
-    /// the reader nothing to take away. A FLAG rather than the
-    /// view testing `id == "shortcuts"`: the id is a lookup key
-    /// and a renamed one would silently un-mark the row.
-    var isGateway = false
-}
-
 /// The chord families the tour teaches, read from the LIVE key
 /// layer (#678 Phase 4 pass 11, turn 15a).
 ///
@@ -44,9 +23,6 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
 /// a row with an empty chord: the tour teaches what is bound.
 @MainActor
 enum OnboardingKeys {
-    /// Turn 15's reading order, which is also the arrow row's.
-    private static let directions = ["left", "down", "up", "right"]
-
     static func families(
         layer: KeyLayer,
         spaces: [SpaceID]
@@ -63,7 +39,7 @@ enum OnboardingKeys {
                         "onboarding.keys.focus",
                         "Move focus"
                     ),
-                    glyphs: focus
+                    chord: focus
                 )
             )
         }
@@ -75,7 +51,7 @@ enum OnboardingKeys {
                         "onboarding.keys.swap",
                         "Swap the window"
                     ),
-                    glyphs: swap
+                    chord: swap
                 )
             )
         }
@@ -91,7 +67,7 @@ enum OnboardingKeys {
                         "onboarding.keys.go_to_space",
                         "Go to a Space"
                     ),
-                    glyphs: go
+                    chord: go
                 )
             )
         }
@@ -114,7 +90,7 @@ enum OnboardingKeys {
                         // (localization audit, 2026-08-11).
                         "Move the window to a Space"
                     ),
-                    glyphs: move
+                    chord: move
                 )
             )
         }
@@ -156,11 +132,11 @@ enum OnboardingKeys {
                         // the milder form of that.
                         "Move the window to a Space and follow it"
                     ),
-                    glyphs: follow
+                    chord: follow
                 )
             )
         }
-        if let panel = spaced(
+        if let panel = single(
             combo: layer.bindings.first {
                 $0.lua == ShortcutsOpenBinding.lua
             }?.combo
@@ -172,7 +148,7 @@ enum OnboardingKeys {
                         "onboarding.keys.all",
                         "See every shortcut"
                     ),
-                    glyphs: panel,
+                    chord: panel,
                     isGateway: true
                 )
             )
@@ -180,167 +156,74 @@ enum OnboardingKeys {
         return families
     }
 
-    /// `⌃⌥ ← ↓ ↑ →` when all four directions share a modifier
-    /// set; otherwise each chord in full, which is the honest
-    /// rendering of a keymap that has been edited apart.
-    private static func directional(
-        layer: KeyLayer,
-        command: String
-    ) -> String? {
-        let combos = directions.compactMap { direction in
-            layer.bindings.first {
-                $0.lua == "KiwiDesk.\(command)(\"\(direction)\")"
-                    && !$0.combo.isEmpty
-            }?.combo
-        }
-        guard combos.count == directions.count else {
-            return listed(combos)
-        }
-        return collapsed(combos) ?? listed(combos)
-    }
-
-    /// `⌃⌥ 1–5`: the shared modifiers, then the first and last
-    /// bound digit. A single space renders as one digit, never a
-    /// range of one.
+    /// The mental anchor: the tier RULE the rows are instances
+    /// of (#1016).
     ///
-    /// A keymap that cannot be written as a range falls back the
-    /// way the arrows path already does — `collapsed` first, so
-    /// ten spaces render `⌃⌥ 1 2 4 5 …` rather than ten full
-    /// chords stacked in a 520 pt window.
-    private static func digits(
-        layer: KeyLayer,
-        command: String,
-        spaces: [SpaceID]
-    ) -> String? {
-        let combos = spaces.compactMap { space in
-            layer.bindings.first {
-                $0.lua
-                    == "KiwiDesk.\(command)"
-                    + "(\(SpaceLuaArg.quote(space.raw)))"
-                    && !$0.combo.isEmpty
-            }?.combo
-        }
-        guard let first = combos.first,
-            let parsed = KeyCombo.parse(first),
-            let head = rendered(combo: first)
-        else { return nil }
-        let modifiers = ComboSymbols.modifierSymbols(
-            parsed.modifiers
-        )
-        guard combos.count > 1 else { return head }
-        // A range may only be written where the digits ACTUALLY
-        // run unbroken from the first to the last. `combos` is
-        // compacted, so an unbound space in the middle vanishes
-        // and "1–5" would name a chord the user does not have —
-        // the same lie the arrows path refuses (code review,
-        // 2026-08-11). It also catches the tenth space, which
-        // `DefaultKeybindings` maps to `0`: "1–0" runs backwards
-        // and is not a range at all.
-        //
-        // Contiguity is the WHOLE test. An earlier cut also
-        // required a chord per live space, which suppressed a
-        // range that was true — five spaces with only 1…3 bound
-        // renders "⌃⌥ 1–3", an honest statement about the chords
-        // the user has. Nothing watched that clause, and removing
-        // it reds nothing, because it forbade nothing the
-        // invariant forbids (guard-prover, 2026-08-11).
-        guard sameModifiers(combos),
-            let run = contiguousDigits(combos)
-        else { return collapsed(combos) ?? listed(combos) ?? head }
-        return modifiers + " " + run.first + "–" + run.last
-    }
-
-    /// The first and last key glyph, but only when every chord in
-    /// between is a single digit stepping up by one.
-    private static func contiguousDigits(
-        _ combos: [String]
-    ) -> (first: String, last: String)? {
-        let keys = combos.compactMap { keyOnly(combo: $0) }
-        guard keys.count == combos.count else { return nil }
-        let values = keys.compactMap { key -> Int? in
-            guard key.count == 1 else { return nil }
-            return Int(key)
-        }
-        guard values.count == keys.count, let start = values.first
-        else { return nil }
-        for (offset, value) in values.enumerated()
-        where value != start + offset {
-            return nil
-        }
-        guard let firstKey = keys.first, let lastKey = keys.last
-        else { return nil }
-        return (firstKey, lastKey)
-    }
-
-    /// The shared modifiers once, then each chord's key glyph.
-    private static func collapsed(_ combos: [String]) -> String? {
-        guard sameModifiers(combos),
-            let first = combos.first,
-            let parsed = KeyCombo.parse(first)
-        else { return nil }
-        let keys = combos.compactMap { keyOnly(combo: $0) }
-        guard keys.count == combos.count else { return nil }
-        return ComboSymbols.modifierSymbols(parsed.modifiers)
-            + " " + keys.joined(separator: " ")
-    }
-
-    private static func listed(_ combos: [String]) -> String? {
-        let each = combos.compactMap { rendered(combo: $0) }
-        return each.isEmpty ? nil : each.joined(separator: "  ")
-    }
-
-    private static func sameModifiers(
-        _ combos: [String]
-    ) -> Bool {
-        let sets = combos.compactMap { KeyCombo.parse($0)?.modifiers }
-        guard sets.count == combos.count, let first = sets.first
-        else { return false }
-        return sets.allSatisfy { $0 == first }
-    }
-
-    /// A chord's key glyph alone — the full render minus the
-    /// modifier symbols it starts with.
-    private static func keyOnly(combo: String) -> String? {
-        guard let parsed = KeyCombo.parse(combo),
-            let full = rendered(combo: combo)
-        else { return nil }
-        let modifiers = ComboSymbols.modifierSymbols(
-            parsed.modifiers
-        )
-        guard full.hasPrefix(modifiers) else { return full }
-        return String(full.dropFirst(modifiers.count))
-    }
-
-    /// One chord, written the way the multi-key families write
-    /// theirs: modifiers, a space, then the key.
+    /// The seeded keymap is a tier system — `⌃⌥` moves the
+    /// focus, `⌃⌥⇧` moves the window, `⌃⌥⌘` moves it and follows
+    /// — but the step drew five unrelated rows, so a reader
+    /// memorised five chords instead of learning one rule. The
+    /// rule is the part that survives the tour.
     ///
-    /// `ComboSymbols.render` packs them tight (`⌃⌥K`), which is
-    /// right in a recorder field and wrong in a list where every
-    /// other row reads `⌃⌥ 1–5` — the odd one out looked like a
-    /// different kind of chord (owner, on device, 2026-08-12).
-    private static func spaced(combo: String?) -> String? {
-        guard let combo,
-            let parsed = KeyCombo.parse(combo),
-            let key = keyOnly(combo: combo)
-        else { return rendered(combo: combo) }
-        let modifiers = ComboSymbols.modifierSymbols(
-            parsed.modifiers
+    /// **DERIVED from the live chords, never asserted.** Every
+    /// glyph in this step is looked up (`OnboardingKeys`), and a
+    /// sentence claiming a tier is a claim about two modifier
+    /// SETS — so a user who rebound swap off `⌃⌥⇧` is told
+    /// nothing rather than told a lie. Suppressed, the step is
+    /// exactly what it was before this lane, which is the safe
+    /// side to fail to.
+    ///
+    /// The `⌘` tier is deliberately not named. It is a third
+    /// clause for a chord the reader has not needed yet, and an
+    /// anchor that lists everything is a sixth row rather than a
+    /// rule.
+    static func tierAnchor(
+        _ rows: [OnboardingKeyFamily]
+    ) -> String? {
+        guard let base = sharedModifiers(rows, of: Self.moveFocus),
+            let moves = sharedModifiers(rows, of: Self.moveWindow),
+            !base.contains(.shift),
+            moves == base.union(.shift)
+        else { return nil }
+        return L(
+            "onboarding.keys.tier",
+            "%1$@ moves your focus. Add %2$@ to move the window.",
+            ComboSymbols.modifierSymbols(base),
+            ComboSymbols.modifierSymbols(.shift)
         )
-        guard !modifiers.isEmpty else { return key }
-        return modifiers + " " + key
     }
 
-    /// The same `ComboSymbols` + layout path the editor and the
-    /// shortcuts panel use, so a chord is pixel-identical
-    /// wherever the app draws it.
-    private static func rendered(combo: String?) -> String? {
-        guard let combo, !combo.isEmpty else { return nil }
-        guard let parsed = KeyCombo.parse(combo) else {
-            return combo
-        }
-        return ComboSymbols.render(
-            parsed,
-            layoutChar: LayoutKeyGlyph.char
-        )
+    /// The one modifier set every named family shares, or nil
+    /// where none of them is bound or they disagree.
+    ///
+    /// A `mixed` family answers nil by construction: it HAS no
+    /// shared set, which is the case the sentence must not
+    /// speak over.
+    private static func sharedModifiers(
+        _ rows: [OnboardingKeyFamily],
+        of ids: Set<String>
+    ) -> HotkeyModifiers? {
+        let sets = rows.filter { ids.contains($0.id) }
+            .compactMap { row -> HotkeyModifiers? in
+                guard case .shared(let modifiers, _) = row.chord
+                else { return nil }
+                return modifiers
+            }
+        guard let first = sets.first,
+            sets.count == rows.filter({ ids.contains($0.id) }).count,
+            sets.allSatisfy({ $0 == first })
+        else { return nil }
+        return first
     }
+
+    /// The two families the sentence's first clause is about, and
+    /// the two its second is. Ids rather than the seeded combos:
+    /// the tiers are read off whatever the user has, and #1008
+    /// showed how readily a verb list goes stale beside one.
+    private static let moveFocus: Set<String> = [
+        "focus", "focus_space",
+    ]
+    private static let moveWindow: Set<String> = [
+        "swap", "move_to_space",
+    ]
 }

@@ -21,28 +21,43 @@ extension OnboardingView {
                 "You're ready to go"
             ),
             body1: doneBody,
-            // The link rides INSIDE the sentence, at its own
-            // specifier, so a translation places it (#828, owner
-            // ruled it a link rather than a button above the
-            // fold) — and the frame arrives RAW, slot intact:
+            // The bottom line is the GUIDE, and it is the
+            // card's only link (owner + `ui-designer`,
+            // 2026-08-26).
+            //
+            // It replaced "Tiled before? Open Settings", which
+            // cost the card more than it bought. That hint
+            // sorted the reader by experience — and its false
+            // converse told anyone who is NOT a beginner that
+            // they DO need Settings today — while offering a
+            // third destination on a screen whose menu-bar card
+            // already teaches the durable route to Settings (the
+            // icon they will still be using on day 30, against a
+            // one-time button in a window that never comes
+            // back). It also argued with the paragraph above it,
+            // which said Settings could wait.
+            //
+            // Dropping it EXTENDS #678 Phase 4 pass 11 rather
+            // than contradicting it: that pass moved Return off
+            // Open Settings because this app's position is that
+            // Settings is for people who want to dig deeper, and
+            // a bottom line still offering Settings was that
+            // ruling being argued with in a quieter voice.
+            // Nobody is stranded — the picture above names
+            // Settings and where it lives, the tour reopens FROM
+            // Settings, and `KiwiDesk.open_settings()` is
+            // bindable.
+            //
+            // The frame arrives RAW, slot intact:
             // `LinkedCaption` draws the label AT `%1$@`, so
             // formatting it in first leaves the sentence with
             // nothing to draw at, which is how the first cut
             // shipped the words with no link under them.
-            hint: L(
-                "onboarding.ready.hint",
-                "Tiled before? %1$@"
-            ),
+            hint: GuideLink.prose,
+            hintLeads: true,
             hintLink: .init(
-                label: L(
-                    "onboarding.ready.open_settings",
-                    "Open Settings"
-                ),
-                action: {
-                    model.commitLoginItemThen {
-                        model.onExploreSettings()
-                    }
-                }
+                label: GuideLink.label,
+                action: GuideLink.open
             )
         ) {
             menuBarIdentity
@@ -55,14 +70,6 @@ extension OnboardingView {
             )
             .toggleStyle(.checkbox)
             .onboardingCard()
-            // Under the login card, at body size rather than as
-            // the page's quiet footnote (owner, 2026-08-12): it
-            // is the last thing the tour says, and the prototype
-            // gives it the same weight as the copy above.
-            Text(onboardingEmphasis(doneClosingNote))
-                .font(.system(size: 13))
-                .foregroundStyle(SettingsTheme.ink3)
-                .fixedSize(horizontal: false, vertical: true)
         } action: {
             Button(L("onboarding.ready.start", "Start using it")) {
                 model.commitLoginItemThen { model.onFinish() }
@@ -72,22 +79,36 @@ extension OnboardingView {
         }
     }
 
-    /// The reassurance, at the quiet tier where it belongs: it is
-    /// the honest version of this app — Settings is for people
-    /// who want to dig deeper, not a prerequisite for using the
-    /// thing.
-    private var doneClosingNote: String {
-        L(
-            "onboarding.ready.footnote",
-            // The clause the prototype sets in the strong ink:
-            // the sentence is quiet, the permission to ignore
-            // Settings is the part that has to land.
-            "Settings is where you change any of this — different "
-                + "keys, more Spaces, other colours. **If this is "
-                + "your first tiling manager, you do not need it "
-                + "today.**"
-        )
-    }
+    // The quiet paragraph under the login card is GONE (owner +
+    // `ui-designer`, 2026-08-26), and both halves of it went for
+    // reasons worth keeping.
+    //
+    // Its opener named Settings and what it holds, which is the
+    // menu-bar card directly above saying the same thing a second
+    // time — and that card says it beside a PICTURE, which is the
+    // version that teaches.
+    //
+    // What was left after that clause went — "If this is your
+    // first tiling manager, you do not need Settings today" —
+    // sorted the reader before it reassured them. It made
+    // beginner-against-experienced the organizing idea of the
+    // last thing the tour says, and it has a false converse: a
+    // reader who is NOT a beginner is told by implication that
+    // they DO need Settings today. Nothing on this screen needs
+    // to know which reader it has.
+    //
+    // The promise it carried is not lost, it is just no longer
+    // spoken: the card says the app is already managing windows
+    // with a setup chosen for the screens, and the default action
+    // says "Start using it". A reader who is told to start is not
+    // also wondering whether there is homework.
+    //
+    // This also OVERTURNS the 2026-08-12 ruling that the guide
+    // line sits at body size because it is the last thing the
+    // tour says. It is now the footer's 12.5 pt `ink3` — a
+    // deliberate demotion of tier, bought with the removal of the
+    // fork between two exits. The line the eye reaches last is
+    // the one beside the button either way.
 
     /// Where the app lives, shown INSIDE the window (#828, owner
     /// ruled 2026-08-12).

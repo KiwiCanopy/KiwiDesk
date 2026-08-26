@@ -4,6 +4,11 @@ name: Site
 # in the PR gate, not on Cloudflare after merge. Path-filtered to
 # the site and the content it renders (docs/ and assets/ are
 # symlinked into the site, so a docs edit can break the build).
+#
+# SupportLinks.swift is here because check-site-tokens.py reads it
+# (#1019): it names the guide routes the APP links, and the check
+# that the site serves them is only sound if it runs when either
+# side moves. It is an input to the gate, not to the build.
 # pull_request has no branch filter so it also validates the
 # stacked docs → site PR chain before either reaches main.
 on:
@@ -13,12 +18,14 @@ on:
       - "site/**"
       - "docs/**"
       - "assets/**"
+      - "Sources/KiwiDesk/SupportLinks.swift"
       - ".github/workflows/site.yml"
   pull_request:
     paths:
       - "site/**"
       - "docs/**"
       - "assets/**"
+      - "Sources/KiwiDesk/SupportLinks.swift"
       - ".github/workflows/site.yml"
 
 concurrency:

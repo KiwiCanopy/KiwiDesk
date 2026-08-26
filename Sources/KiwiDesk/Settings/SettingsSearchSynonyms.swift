@@ -13,6 +13,36 @@
 /// near-miss) — not by restating the label, which already
 /// matches.
 enum SettingsSearchSynonyms {
+    /// The same widening for a CATALOG-only row — one the census
+    /// does not model as a setting, so it has no `SettingKey` to
+    /// key on (#1019).
+    ///
+    /// Keyed on the declaration's own `id` rather than on a
+    /// string literal, so renaming the catalog property is a
+    /// compile error and re-keying it follows automatically —
+    /// as close to the census switch's compile-time safety as a
+    /// keyless row can get. `SettingsSearchIndexTests` holds the
+    /// rest: an entry naming a control the catalog does not
+    /// declare is dead vocabulary nothing can match.
+    ///
+    /// **English only, like the census half, and that is a real
+    /// limit rather than an oversight.** A synonym is match-only
+    /// code data, never a displayed or translated string — so a
+    /// German reader finds this row by its LABEL ("Handbuch"),
+    /// which is the word on screen, and typing "Hilfe" matches
+    /// nothing. Localized synonyms would be a different
+    /// mechanism and its own decision.
+    static func catalogTerms(for id: String) -> [String] {
+        // Every Mac app has a Help menu and this app, being
+        // `.accessory`, has none — so "help" is the word a stuck
+        // reader types, and the guide is what they are reaching
+        // for. "docs" is the site's other tree by name.
+        guard id == SettingsCatalog.general.guideLink.id else {
+            return []
+        }
+        return ["help", "docs", "documentation", "manual"]
+    }
+
     static func terms(for key: SettingKey) -> [String] {
         switch key {
         // Gaps: CSS/System-Settings vocabulary.

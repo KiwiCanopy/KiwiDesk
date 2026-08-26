@@ -35,7 +35,13 @@ struct OnboardingPage<Content: View, Action: View>: View {
     /// the footnote is by definition the part that can wait.
     var footnoteAtBottom = false
     /// The bottom-left hint: what happens if the user does
-    /// nothing, or what the action does not commit them to.
+    /// nothing, what the action does not commit them to, or
+    /// where to go next.
+    ///
+    /// That third job is the closing screen's (#1019) and the
+    /// doc was already narrower than the use before it — the
+    /// retired "Tiled before? Open Settings" was a destination
+    /// too.
     ///
     /// A **markdown** string: `**bold**` promotes a clause to
     /// `ink` inside the quiet grey, which is how the prototype
@@ -52,6 +58,25 @@ struct OnboardingPage<Content: View, Action: View>: View {
     /// as a report (owner, 2026-08-12). Neutral ink, not the
     /// attention token — there is nothing to attend to.
     var hintPulses = false
+    /// Draws the hint a tier up — 13 pt on `ink2` rather than
+    /// 12.5 pt on `ink3`.
+    ///
+    /// One screen takes it: the closing card, whose hint is the
+    /// only route the tour offers to anything (#1019, on
+    /// `ui-designer`'s reading 2026-08-26). Louder than the other
+    /// four hints is the honest signal — those say what happens
+    /// if you do nothing, this one says where to go — and it
+    /// keeps the 2026-08-12 ruling that the pointer draws at body
+    /// weight, honouring it INSIDE the footer slot rather than
+    /// reversing it.
+    ///
+    /// A tier, never a shape: promoting it to a BUTTON would put
+    /// a second control in a row the primitive deliberately draws
+    /// as one action plus context, and would promise an in-app
+    /// step for a link that opens a browser. #828's own ruling on
+    /// this exact affordance is that it is a link in the
+    /// sentence.
+    var hintLeads = false
     /// A control drawn INSIDE the hint, at its own positional
     /// specifier (#828, owner ruled the closing screen's "Open
     /// Settings" is a link in the sentence, not a button above
@@ -137,38 +162,21 @@ struct OnboardingPage<Content: View, Action: View>: View {
     @ViewBuilder
     private func hintView(_ text: String) -> some View {
         if let hintLink {
-            let parts = splitAtSlot(text)
+            let parts = LinkedCaption.split(frame: text)
             LinkedCaption(
                 leading: parts.0,
                 linkTitle: hintLink.label,
                 trailing: parts.1,
                 navigate: hintLink.action,
-                // The hint tier, so the one screen with a link in
-                // its footer reads like the four without one.
-                pointSize: 12.5,
-                ink: NSColor(SettingsTheme.ink3)
+                pointSize: hintLeads ? 13 : 12.5,
+                ink: NSColor(
+                    hintLeads
+                        ? SettingsTheme.ink2 : SettingsTheme.ink3
+                )
             )
         } else {
             hintText(text)
         }
-    }
-
-    /// The prose either side of the link's slot.
-    ///
-    /// A frame with no slot is a programming error rather than a
-    /// shape to support — `CrossReferenceRow.split` makes the
-    /// same call for the same reason — so this asserts in debug
-    /// and still renders a followable sentence in release rather
-    /// than dropping the link on a user.
-    private func splitAtSlot(_ text: String) -> (String, String) {
-        guard let slot = text.range(of: "%1$@") else {
-            assertionFailure("hint frame has no link slot")
-            return (text + " ", "")
-        }
-        return (
-            String(text[..<slot.lowerBound]),
-            String(text[slot.upperBound...])
-        )
     }
 
     private func hintText(_ text: String) -> some View {

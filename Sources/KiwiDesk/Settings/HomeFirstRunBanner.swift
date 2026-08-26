@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import KiwiDeskCore
 import SwiftUI
@@ -58,6 +59,19 @@ struct HomeFirstRunBanner: View {
                 Text(lede)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
+                // The same pointer the tour's closing card ends
+                // on (#1019), here because a user who skipped
+                // the tour — or finished it months ago — meets
+                // that card never. It follows the lede's "this
+                // is where you come when you want something
+                // different" the way it follows the tour's
+                // "you do not need Settings today".
+                GuideLink(
+                    pointSize: NSFont.preferredFont(
+                        forTextStyle: .caption1
+                    ).pointSize,
+                    ink: SettingsTheme.ink2
+                )
             }
             Spacer()
             Button(

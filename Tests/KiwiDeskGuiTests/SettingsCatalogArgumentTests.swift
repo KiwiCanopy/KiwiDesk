@@ -144,7 +144,10 @@ struct SettingsCatalogArgumentTests {
         // 51 since #794: the Spaces panel's preview, likewise
         // mounted in the panel and not in the section.
         // 51 since #875: deleted the install inventory card.
-        #expect(direct.values.reduce(0, +) == 51)
+        // 52 since #1019: About's Guide link self-anchors, so
+        // a search hit lands ON the link rather than on the
+        // card around it.
+        #expect(direct.values.reduce(0, +) == 52)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

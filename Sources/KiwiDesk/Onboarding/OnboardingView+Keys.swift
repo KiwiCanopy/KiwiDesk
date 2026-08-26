@@ -15,15 +15,23 @@ extension OnboardingView {
     /// the shortcuts from everyone who had already finished once
     /// (`OnboardingModel.continueAfterSpaces`).
     var keys: some View {
-        OnboardingPage(
+        let rows = model.keyFamilies()
+        return OnboardingPage(
             title: keysTitle,
             body1: keysLead,
+            // Under the body rather than at the bottom: it is the
+            // RULE the five rows below are instances of, and a
+            // reader who meets it first reads the list as one
+            // scheme instead of five chords. At the bottom it
+            // would also sit directly above the footer hint, two
+            // quiet greys deep.
+            footnote: OnboardingKeys.tierAnchor(rows),
             hint: L(
                 "onboarding.keys.hint",
                 "Try one now — nothing will break."
             )
         ) {
-            families
+            families(rows)
         } action: {
             // No "View Shortcuts…" button (owner ruling,
             // 2026-08-11, on the device): the panel it opens is
@@ -61,8 +69,9 @@ extension OnboardingView {
         )
     }
 
-    @ViewBuilder private var families: some View {
-        let rows = model.keyFamilies()
+    @ViewBuilder private func families(
+        _ rows: [OnboardingKeyFamily]
+    ) -> some View {
         if rows.isEmpty {
             // Every chord is looked up, so a keymap with none of
             // these bound draws no rows at all. Say why, rather
@@ -111,21 +120,94 @@ extension OnboardingView {
         .accessibilityElement(children: .combine)
     }
 
-    /// A key on a keyboard, drawn as one: the chord in a chip
-    /// rather than as loose monospace, which is what makes the
-    /// list scannable at a glance.
+    /// The chord, drawn as the keys it is: one chip per
+    /// modifier with the word printed on that key under it, `+`
+    /// between them, then the keys that differ (#1016).
     ///
-    /// The gateway row's chip is FILLED with the accent, with
-    /// `accentInk` on it — the one place in this tour the accent
-    /// marks something the user is meant to remember rather than
-    /// a control they are meant to press. It is not a button:
-    /// the panel it names is an overlay that would land on top of
-    /// the tour, which is why the step teaches the chord instead
-    /// (owner ruling, 2026-08-11, unchanged).
-    private func keycap(
+    /// Before this it was one chip reading `⌃⌥ ← ↓ ↑ →`, which
+    /// taught a chord to everyone who could already decode
+    /// `⌃ ⌥ ⇧` and nothing at all to the reader this step is
+    /// for. Separating the caps is what makes it three keys
+    /// rather than one symbol, and the legend is what lets them
+    /// find each one.
+    ///
+    /// **The `+` is drawn BETWEEN chips, never inside one.**
+    /// `ComboSymbols` drops the separator precisely so that a
+    /// `+` inside a chord is the KEY (`⌃⌥+` on a German layout,
+    /// #23), and that stays true here — a chip boundary is what
+    /// separates two keys, so the loose `+` cannot be mistaken
+    /// for one.
+    ///
+    /// The gateway row's chips are FILLED with the accent, with
+    /// `accentInk` on them — the one place in this tour the
+    /// accent marks something the user is meant to remember
+    /// rather than a control they are meant to press. It is not
+    /// a button: the panel it names is an overlay that would
+    /// land on top of the tour, which is why the step teaches
+    /// the chord instead (owner ruling, 2026-08-11, unchanged).
+    @ViewBuilder private func keycap(
         _ family: OnboardingKeyFamily
     ) -> some View {
-        Text(family.glyphs)
+        // `.top`, so the glyph line stays level across chips
+        // whose legends wrap differently — a legend hangs BELOW
+        // its glyph and must not push the glyph down.
+        HStack(alignment: .top, spacing: 5) {
+            switch family.chord {
+            case .shared(let modifiers, let keys):
+                ForEach(
+                    OnboardingModifierNames.named(modifiers)
+                ) { modifier in
+                    namedChip(modifier, family: family)
+                    plus
+                }
+                chip(keys, family: family)
+            case .mixed(let text):
+                // Nothing shared to name: each chord is written
+                // in full, which is the honest rendering of a
+                // keymap edited apart (`OnboardingChord`).
+                chip(text, family: family)
+            }
+        }
+    }
+
+    /// One modifier: its glyph in a chip, the key's name under
+    /// it.
+    private func namedChip(
+        _ modifier: OnboardingModifierName,
+        family: OnboardingKeyFamily
+    ) -> some View {
+        VStack(spacing: 3) {
+            chip(modifier.glyph, family: family)
+            Text(modifier.name)
+                .font(.system(size: 9.5))
+                .foregroundStyle(SettingsTheme.ink3)
+                // Silent. Each row is ONE accessibility element,
+                // and VoiceOver already reads `⌃` as "control" —
+                // announced, the name would say every modifier
+                // of every chord twice (#1016).
+                .accessibilityHidden(true)
+        }
+        .fixedSize()
+    }
+
+    /// The combinator between two keys. Padded like a chip's own
+    /// text so it sits on the glyph line rather than at the top
+    /// edge the `.top` alignment measures from.
+    private var plus: some View {
+        Text(verbatim: "+")
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(SettingsTheme.ink3)
+            .padding(.vertical, 4)
+    }
+
+    /// A key on a keyboard, drawn as one: a chip rather than
+    /// loose monospace, which is what makes the list scannable
+    /// at a glance.
+    private func chip(
+        _ text: String,
+        family: OnboardingKeyFamily
+    ) -> some View {
+        Text(text)
             .font(.system(size: 12, weight: .semibold).monospaced())
             .foregroundStyle(
                 family.isGateway

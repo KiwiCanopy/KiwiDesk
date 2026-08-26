@@ -41,7 +41,11 @@ struct SettingsCatalogSiteTests {
         // 60 since #793: Advanced Colours' panel scene.
         // 61 since #794: the Spaces panel's per-Space preview.
         // 61 since #875: deleted the install inventory card.
-        #expect(names.count == 61)
+        // 62 since #1019: About's Guide link, declared so the
+        // search index can reach it — a bare `Link` is
+        // invisible to an index derived from the census plus
+        // the catalog.
+        #expect(names.count == 62)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

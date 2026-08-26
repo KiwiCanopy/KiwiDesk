@@ -87,9 +87,6 @@ extension AppDelegate {
         onboardingModel.onSetLoginItem = { enabled in
             LoginItemManager.setEnabled(enabled)
         }
-        onboardingModel.onExploreSettings = { [weak self] in
-            self?.openSettingsFromOnboarding()
-        }
         // The spaces step draws the setup that was actually
         // seeded, from live state — never a description of it.
         onboardingModel.starterSpaces = { [weak self] in
@@ -184,24 +181,6 @@ extension AppDelegate {
         // teardown (and covers the red-button close, which the
         // "finish" button used to bypass).
         onboardingWindow?.close()
-    }
-
-    /// The closing card's "Open Settings": open the dashboard on
-    /// Layout (its schematic preview is the most persuasive first
-    /// impression) *before* closing onboarding.
-    ///
-    /// The order used to be about the activation policy — keeping
-    /// a content window on screen so the close could not demote
-    /// the app. That reason is gone with the promotion, and the
-    /// order stays for the one below it: onboarding may be at
-    /// `.floating` (`floatOnboardingAboveManagedWindows`), so
-    /// showing Settings second would put it *under* a window that
-    /// is about to disappear, and the user would watch the
-    /// dashboard surface after the wizard vanished rather than
-    /// behind it.
-    func openSettingsFromOnboarding() {
-        dashboard.show(navigatingTo: .layoutDefaults)
-        closeOnboarding()
     }
 
     /// The discovery panel's Edit bridge must not leave the
