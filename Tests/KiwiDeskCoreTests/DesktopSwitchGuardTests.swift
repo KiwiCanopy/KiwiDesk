@@ -250,6 +250,17 @@ struct DesktopSwitchGuardTests {
             ).isSuccess
         )
         #expect(core.state.windows[WindowID(7)] == nil)
+        // The WITNESS is the narration, which fires for every
+        // focus-lost removal and prints the predicate's own
+        // verdict — located by what the fixture cannot lose
+        // (guard-prover round 3: the raise site itself sits
+        // behind a live-AX gate no unit fixture reaches, so an
+        // absence-of-raise clause is vacuous here).
+        #expect(
+            box.lines.contains { $0.contains("standsDown=true") }
+        )
+        // Belt only — vacuously green in this fixture; the
+        // clause above is what discriminates.
         #expect(
             !box.lines.contains { $0.contains("close-return: raising") }
         )
