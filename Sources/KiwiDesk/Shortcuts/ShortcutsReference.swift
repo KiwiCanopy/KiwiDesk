@@ -78,24 +78,30 @@ enum ShortcutsReferenceBuilder {
                     id: cmd.lua,
                     label: cmd.resolvedLabel,
                     combo: glyphs(binding.combo),
-                    icon: icon
+                    icon: icon,
+                    // Read off the command the catalog built, so
+                    // the panel and the editor cannot disagree
+                    // about which rows are dead right now.
+                    unavailable: cmd.unavailable != nil
                 )
             }
         }
 
+        // Widened by the layer's own bindings, so a bound
+        // Desktop row keeps its name here instead of falling
+        // through to Custom as raw Lua — the band that means
+        // "user-authored" (the General band's #678 item 18 note
+        // is the same defect). What the widening adds is exactly
+        // what is NOT attached, so it is also the dim set.
+        let offer = KeybindingCatalog.desktopOffer(
+            live: desktops,
+            bindings: layer.bindings
+        )
         let controls = buildControls(
             activeLayer: layer.name,
             spaces: spaces,
             spaceIcons: spaceIcons,
-            // Widened by the layer's own bindings, so a bound
-            // Desktop row keeps its name here instead of
-            // falling through to Custom as raw Lua — the band
-            // that means "user-authored" (the General band's
-            // #678 item 18 note is the same defect).
-            desktops: KeybindingCatalog.offeredDesktops(
-                live: desktops,
-                bindings: layer.bindings
-            ),
+            desktops: offer,
             resizeStep: resizeStep,
             layerNames: layerNames,
             rows: rows

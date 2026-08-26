@@ -3,7 +3,7 @@ import Testing
 
 /// Every surface that draws or names a macOS **Desktop** row
 /// widens its Desktop list through the one union,
-/// `KeybindingCatalog.offeredDesktops` — the register of who
+/// `KeybindingCatalog.desktopOffer` — the register of who
 /// consumes it, by exact count.
 ///
 /// Why a scan rather than a type. The union is what keeps a
@@ -27,6 +27,11 @@ import Testing
 /// explains why the Space net deliberately does not use it, and
 /// `ShortcutsFamilyRows` — are correctly absent from the map. A
 /// citation is not a consumer.
+///
+/// The needle is the BUILDER's name, not the type's: every
+/// consumer has to call it to get an offer, and a surface
+/// handed one it did not build is exactly the editor's expander
+/// — which is threaded from the section listed below.
 @Suite("Desktop offer seam")
 struct DesktopOfferSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -58,7 +63,7 @@ struct DesktopOfferSeamTests {
 
     @Test("every Desktop-row surface widens through the union")
     func consumersArePinned() throws {
-        let needle = "offeredDesktops("
+        let needle = "desktopOffer("
         var counts: [String: Int] = [:]
         for root in sourceRoots {
             let prefix = root.deletingLastPathComponent().path + "/"

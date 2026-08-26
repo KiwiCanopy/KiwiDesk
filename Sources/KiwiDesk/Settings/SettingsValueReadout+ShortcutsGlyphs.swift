@@ -72,12 +72,12 @@ extension SettingsValueReadout {
         let bindings = (old.layers + new.layers).flatMap(
             \.bindings
         )
-        let desktops = KeybindingCatalog.offeredDesktops(
+        let desktops = KeybindingCatalog.desktopOffer(
             live: [],
             bindings: bindings
         )
-        return KeybindingCatalog.goToDesktop(desktops)
-            + KeybindingCatalog.moveToDesktop(desktops)
+        return KeybindingCatalog.goToDesktop(desktops.desktops)
+            + KeybindingCatalog.moveToDesktop(desktops.desktops)
     }
 
     /// The binding's row label as the Shortcuts area shows it:
