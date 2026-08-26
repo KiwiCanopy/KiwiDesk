@@ -371,7 +371,7 @@ KiwiDesk.pin_space_to_display("mail", 2)
 
 **Expects:** a space identifier, and optionally a layout mode
 (`"bsp"`, `"stack"`, `"scrolling"`, `"grid"`, `"monocle"`,
-`"track"`).
+`"track"`, `"floating"`).
 
 **Does:** brings a space into existence and resolves it onto a
 display. Spaces otherwise appear implicitly the first time you
