@@ -225,4 +225,20 @@ extension SettingsModel {
             keybindingWarning: nil
         )
     }
+
+    /// The stored profile being edited, or nil while live —
+    /// derived from `target` (#64).
+    var editingProfile: String? {
+        if case .storedProfile(let name) = target {
+            return name
+        }
+        return nil
+    }
+
+    /// Whether the dashboard is editing a stored profile rather
+    /// than the live config (#18) — hides App Rules, renders
+    /// the Shortcuts tab in override mode (#55 phase 7), and
+    /// swaps the footer's save action. The editing surface
+    /// lives in `SettingsModel+ProfileOverrides.swift`.
+    var editingStoredProfile: Bool { target != .live }
 }
