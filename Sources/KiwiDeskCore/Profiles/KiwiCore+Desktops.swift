@@ -220,6 +220,12 @@ extension KiwiCore {
     /// waiting out the 600 ms schedule.
     func desktopSettle(ifStill number: Int?) {
         guard lastDesktop == number else { return }
+        // The switch's `reconcileAll` is census-gated (#1037),
+        // and that census can beat the compositor: a window
+        // still landing when the notification fired was on no
+        // list, so its app was skipped. Sweep the arrivals now
+        // — before the retile below, which then places them.
+        eventLoop.reconcileOnScreenArrivals()
         // A fullscreen/system space: the retile, z-order
         // restore and refocus stand down (#670) — the refocus
         // would AX-raise the desktop's focused window behind

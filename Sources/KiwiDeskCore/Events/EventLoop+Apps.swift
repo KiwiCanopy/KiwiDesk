@@ -231,35 +231,6 @@ extension EventLoop {
         reconcileAll()
     }
 
-    /// Re-syncs every attached app against its live AX window
-    /// list. Used after Desktop switches and once shortly
-    /// after startup: the startup scan runs against cold AX
-    /// trees, and slow responders (Electron/WebKit, see
-    /// AGENTS.md) list windows late or mis-report subroles.
-    public func reconcileAll() {
-        let signposter = BootSignpost.signposter
-        let span = signposter.beginInterval("reconcileAll")
-        defer { signposter.endInterval("reconcileAll", span) }
-        // Rules can detach an already-observed app or make a
-        // formerly ignored app observable. Synchronize that
-        // app-level boundary without reading ignored AX trees.
-        // The reconcile loop below snapshots every attached
-        // app's windows, so a fresh attach defers its scan to
-        // it rather than reading the list twice (#672).
-        for app in runningApplications() {
-            syncObservation(for: app, scanWindowsAtAttach: false)
-        }
-        // Suppress native-tab coalescing here: a native-space switch
-        // presents the departed space's windows as vanished and the
-        // arrived space's as appeared in one pass, and same-app
-        // windows tile to identical frames — they would false-merge
-        // into a re-key (#308 review). Genuine switches coalesce via
-        // the per-window reconciles the AX notifications drive.
-        for pid in Array(observers.keys) {
-            reconcile(pid: pid, app: AppRef(pid: pid), coalesceTabs: false)
-        }
-    }
-
     // MARK: - Displays
 
     func publishDisplays() {

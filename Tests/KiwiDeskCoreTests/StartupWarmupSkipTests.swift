@@ -172,6 +172,9 @@ struct StartupWarmupSkipTests {
             ref: ref
         )
         loop.runningApplications = { [app] }
+        // Showing a window, or the census gate (#1037) would
+        // skip the app before the scan this pins.
+        loop.onScreenNormalWindowIDs = { [self.pid: [WindowID(1)]] }
         loop.reconcileAll()
         #expect(loop.observes(pid: pid))
         #expect(windowQueries() == 1)
