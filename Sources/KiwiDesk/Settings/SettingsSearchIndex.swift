@@ -176,7 +176,9 @@ enum SettingsSearchIndex {
                 return SettingsSearchIndexRow(
                     key: nil,
                     label: entry.control.text,
-                    synonyms: [],
+                    synonyms: SettingsSearchSynonyms.catalogTerms(
+                        for: entry.control.id
+                    ),
                     destination: destination,
                     anchor: SettingsAnchor(
                         destination: destination,

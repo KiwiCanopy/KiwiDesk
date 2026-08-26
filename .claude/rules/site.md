@@ -9,6 +9,7 @@ paths:
   # site/** loads for whoever edits them.
   - "scripts/changelog-sync"
   - "scripts/appcast-sync"
+  - "scripts/check-site-tokens.py"
 ---
 
 # Marketing / docs site (`site/`)
@@ -263,6 +264,24 @@ reader to it.
 `/ja/` routes exist.** Every entry there is emitted for all three
 locales with `hreflang` alternates, so a single-locale route
 advertises two URLs that 404.
+
+**The app links `/guide/`, so those routes are not the site's
+alone to move (#1019).** `SupportLinks.guideRoutes` names the
+locales KiwiDesk sends a reader to in their own language, and an
+installed copy links whatever it was built with — so dropping or
+renaming `/de/guide/` strands that link instead of breaking a
+build. Narrow the Swift list in the same change set, never the
+route alone. `scripts/check-site-tokens.py` ▸
+`check_guide_routes` holds it against the BUILT pages, on this
+gate for the reason the feed check below is, and reads that Swift
+list rather than restating it; `site.yml` takes
+`SupportLinks.swift` as a path input so the check fires when
+either side moves. It holds the HOST beside the routes, against
+the `site` value `astro.config.mjs` publishes — a domain change
+moves every route at once, and it is the appcast's permanence
+below reached through a different door. One-directional on purpose: a
+locale the site GAINS does not red, the app keeping that reader
+on a live English page until someone widens the list.
 
 **Every site catalog carries every key `en.json` has**, enforced
 by `scripts/extract-keys --site --check`, which `site.yml` runs on

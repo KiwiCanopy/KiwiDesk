@@ -83,6 +83,13 @@ struct OnboardingKeysTests {
         #expect(go?.glyphs == "⌃⌥ 1–5")
     }
 
+    /// Spaced like every other row since #1016: the modifiers
+    /// and the keys are two things in the model now
+    /// (`OnboardingChord`), so `glyphs` writes one separator
+    /// rather than each family remembering its own. `⌃⌥1` packed
+    /// tight read as a different KIND of chord from `⌃⌥ 1–5`
+    /// beside it, which is the finding `single` already carried
+    /// for the gateway row (owner, on device, 2026-08-12).
     @Test("one space is a digit, never a range of one")
     func singleSpaceIsNotARange() {
         let families = OnboardingKeys.families(
@@ -95,7 +102,7 @@ struct OnboardingKeysTests {
             spaces: spaces(1)
         )
         let go = families.first { $0.id == "focus_space" }
-        #expect(go?.glyphs == "⌃⌥1")
+        #expect(go?.glyphs == "⌃⌥ 1")
         #expect(go?.glyphs.contains("–") == false)
     }
 

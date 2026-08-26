@@ -157,8 +157,6 @@ final class OnboardingModel {
     var onSetLoginItem: (Bool) -> Void = { _ in }
     var onOpenSettings: () -> Void = {}
     var onFinish: () -> Void = {}
-    /// Closes onboarding and opens the dashboard (#331).
-    var onExploreSettings: () -> Void = {}
     /// The seeded spaces, in order, each with its layout and the
     /// screen it landed on.
     var starterSpaces: () -> [OnboardingSpaceCard] = { [] }

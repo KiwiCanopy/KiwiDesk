@@ -107,6 +107,32 @@ struct LinkedCaption: NSViewRepresentable {
         )
     }
 
+    /// The prose either side of a frame's link slot.
+    ///
+    /// Splits the RAW frame at `%1$@` — the label is drawn AT
+    /// the specifier rather than formatted into it, so a frame
+    /// that has already been through `String(format:)` has
+    /// nothing left to draw at, which is how the tour's closing
+    /// card first shipped the words with no link under them.
+    /// (`CrossReferenceRow` splits at U+FFFC instead, its prose
+    /// arriving already formatted; the two sentinels are the two
+    /// shapes, not a duplication to merge.)
+    ///
+    /// A frame with no slot is a programming error rather than a
+    /// shape to support, so this asserts in debug and still
+    /// renders a followable sentence in release rather than
+    /// dropping the link on a user.
+    static func split(frame: String) -> (String, String) {
+        guard let slot = frame.range(of: "%1$@") else {
+            assertionFailure("frame has no link slot")
+            return (frame + " ", "")
+        }
+        return (
+            String(frame[..<slot.lowerBound]),
+            String(frame[slot.upperBound...])
+        )
+    }
+
     /// The link's characters within ``sentence``.
     private var linkRange: NSRange {
         NSRange(

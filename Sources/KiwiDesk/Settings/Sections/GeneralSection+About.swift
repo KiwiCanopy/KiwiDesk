@@ -30,6 +30,7 @@ extension GeneralSection {
                         .textSelection(.enabled)
                     releaseNotesLink
                 }
+                guideLink
                 supportLink
             }
             .frame(maxWidth: .infinity)
@@ -68,6 +69,53 @@ extension GeneralSection {
         .buttonStyle(.plain)
         .font(.caption)
         .linkHover()
+    }
+
+    /// The app's PERMANENT route to the written guide (#1019).
+    ///
+    /// The tour's closing card and Home's first-run banner both
+    /// point at it, and both are one-shot: the tour never comes
+    /// back on its own, and the banner retires for good on
+    /// dismiss or on the first save. So a user who dismissed the
+    /// welcome — or simply saved one change — had no route to the
+    /// guide anywhere in the app, which is the gap #1019 is
+    /// titled after rather than a nicety on top of it
+    /// (`ui-designer`, 2026-08-26). This is the half that still
+    /// works on day 30.
+    ///
+    /// Drawn as `releaseNotesLink` is, not as `supportLink` is:
+    /// that link's heart and `.callout` are this card's one ask,
+    /// and the asymmetry is deliberate (`supportLink`'s own doc).
+    /// A third informational link takes the plain treatment.
+    ///
+    /// Its own line rather than inside the version group above:
+    /// that group is "what you have" and "what arrived", and the
+    /// guide is neither.
+    ///
+    /// **It carries a catalog declaration, which is the half that
+    /// makes it reachable.** About is two clicks and a scroll
+    /// from Home; the guide is the one thing in this window a
+    /// stuck reader looks for BY NAME, and `SettingsSearchIndex`
+    /// derives its rows from the census plus the catalog — so
+    /// without the declaration, searching "Guide" (or "Handbuch")
+    /// found nothing at all. Placement was never the problem
+    /// (`ui-designer`, 2026-08-26): Home's grid is destinations
+    /// resolved through one offer predicate and has no
+    /// representation for a URL, so a card here would have to
+    /// invent a second navigation model.
+    @ViewBuilder var guideLink: some View {
+        Link(destination: SupportLinks.guide) {
+            Text(SettingsCatalog.general.guideLink.text)
+                .underline()
+        }
+        .buttonStyle(.plain)
+        .font(.caption)
+        .linkHover()
+        // Its own scroll target and wash: a search for "guide"
+        // has to land ON the link, not merely on the card that
+        // contains it. Self-anchoring, because there is no
+        // header/card split here to place the two halves across.
+        .searchAnchored(SettingsCatalog.general.guideLink)
     }
 
     /// The card's last word: the one ask, and the only link here

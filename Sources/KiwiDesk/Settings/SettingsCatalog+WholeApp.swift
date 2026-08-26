@@ -128,6 +128,16 @@ struct GeneralControls: Sendable {
         "general.about.title",
         "About"
     )
+    /// Declared so SEARCH can find it (#1019). The guide is the
+    /// one thing in this window a stuck reader is most likely to
+    /// look for by name, and a link with no catalog declaration
+    /// is invisible to the index — `SettingsSearchIndex` derives
+    /// its rows from the census plus the catalog, so a bare
+    /// `Link` is reachable only by knowing it lives under About.
+    let guideLink = SettingsControl(
+        "general.about.guide",
+        "Guide"
+    )
     let generalAdvanced = SettingsDrawer(
         "general.advanced.title",
         "Advanced"

@@ -72,19 +72,21 @@ extension SettingsButtonStyleConventionTests {
 
     var stylesOnNonButtons: [String: StyleNote] {
         [
-            // Two now, since #570 put the Release Notes link beside
-            // the support ask. Both are `Link`s, which is why they
-            // are exempt at all rather than owing
-            // `settingsActionButton()`: a `Link` is not a `Button`
-            // and cannot take the seal. They are deliberately NOT
-            // styled alike beyond this — the support link keeps the
-            // heart and `.callout`, the notes link takes the plainer
-            // caption treatment, so the card's one ask stays
-            // distinguishable from an informational pointer.
+            // Three since #1019 gave the guide a PERMANENT route
+            // here — the tour's card and Home's banner both being
+            // one-shot — beside the Release Notes link #570 added.
+            // All three are `Link`s, which is why they are exempt
+            // at all rather than owing `settingsActionButton()`: a
+            // `Link` is not a `Button` and cannot take the seal.
+            // They are deliberately NOT styled alike beyond this —
+            // the support link keeps the heart and `.callout`, the
+            // two informational pointers take the plainer caption
+            // treatment, so the card's one ask stays
+            // distinguishable from a pointer.
             "GeneralSection+About.swift": (
-                2, ".buttonStyle(.plain)",
-                "Two Links taking plain style — the Release Notes "
-                    + "pointer and the support ask"
+                3, ".buttonStyle(.plain)",
+                "Three Links taking plain style — the Guide and "
+                    + "Release Notes pointers, and the support ask"
             ),
             "ContextShortcut.swift": (
                 1, ".buttonStyle(.plain)",

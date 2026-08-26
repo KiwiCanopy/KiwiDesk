@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// External support/branding links (#68 §3.9).
 enum SupportLinks {
@@ -33,4 +34,70 @@ enum SupportLinks {
         string:
             "https://github.com/KiwiCanopy/KiwiDesk/releases"
     )!
+
+    /// The written guide, in the app's own language where the
+    /// site has that route (#1019).
+    ///
+    /// **`/guide/`, not `/docs/user-guide/`** — the two are
+    /// different documents for different readers, and the
+    /// sentence pointing here is read by someone who has just
+    /// finished the tour. `/guide/` is the site's single-page
+    /// newcomer guide; the docs tree is the canonical reference,
+    /// reachable from it and written for a reader who already
+    /// knows what a tiling manager is.
+    ///
+    /// **Only `de` and `ja` are localized, and that list is the
+    /// SITE's fact, not the app's.** KiwiDesk ships eleven
+    /// catalogs; the site has three locales. A path may only be
+    /// treated as localized once its route genuinely exists
+    /// (`site/src/pages/sitemap.xml.ts` carries the same rule for
+    /// the same reason), so everything else falls back to
+    /// English — a live English page beats a 404 in the reader's
+    /// own language. The guard that holds this list against the
+    /// site is `scripts/check-site-tokens.py` ▸
+    /// `check_guide_routes`, on the SITE gate: `site/**` is
+    /// CI-ignored, so a Swift assertion about a site path would
+    /// go stale on exactly the change that falsifies it.
+    /// `GuideLinkRouteTests` holds the app's own half — the
+    /// narrowing, and that `site.yml` still watches this file.
+    ///
+    /// A locale gaining a site route does NOT red: the app keeps
+    /// sending that reader to English until someone adds it here,
+    /// which is the safe direction to be stale in.
+    @MainActor static var guide: URL {
+        guide(for: localizedRoute)
+    }
+
+    /// Split from ``guide`` so the routing is assertable without
+    /// a live `LocalizationManager` selection.
+    static func guide(for route: String?) -> URL {
+        guard let route, guideRoutes.contains(route) else {
+            return site.appendingPathComponent(
+                "guide",
+                isDirectory: true
+            )
+        }
+        return
+            site
+            .appendingPathComponent(route, isDirectory: true)
+            .appendingPathComponent("guide", isDirectory: true)
+    }
+
+    /// The site locales, which is a shorter list than the app's.
+    static let guideRoutes: Set<String> = ["de", "ja"]
+
+    private static let site = URL(
+        string: "https://kiwidesk.kiwicanopy.com/"
+    )!
+
+    /// The effective GUI locale narrowed to what the site
+    /// serves — `nil` meaning English, as it does everywhere else
+    /// in this app.
+    ///
+    /// `LocalizationManager.effectiveLocale` already answers
+    /// "which catalog is in effect", explicit pick and system
+    /// language alike, so nothing here re-derives the language.
+    @MainActor private static var localizedRoute: String? {
+        LocalizationManager.shared.effectiveLocale
+    }
 }
