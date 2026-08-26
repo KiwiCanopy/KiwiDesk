@@ -136,8 +136,41 @@ extension KeybindingCatalog {
         }
     }
 
-    /// The Desktops the families expand over: the ones that
-    /// exist, PLUS every Desktop these bindings already name.
+    /// Which Desktops get a row, and which of those are not
+    /// attached right now.
+    ///
+    /// **A Desktop keeps its rows for as long as ANY shortcut
+    /// names it** — all three families, together, dimmed. One
+    /// rule, and the alternative was tried and withdrawn: a
+    /// per-family offer (each family widened only by bindings
+    /// for its OWN verb) is defensible in the abstract and reads
+    /// as broken on screen, because the three rows for one
+    /// Desktop then appear and vanish independently — you bind
+    /// "move & follow" and the plain move row disappears from
+    /// under it (owner, on device, 2026-08-26).
+    ///
+    /// It also keeps the interleaved move pair honest for free.
+    /// Its two families render zipped by index and truncated to
+    /// the shorter column, so halves offering different Desktops
+    /// would drop rows off the end of BOTH — including rows for
+    /// Desktops that are perfectly fine.
+    ///
+    /// And it is the more useful rule: a Desktop you still have
+    /// shortcuts for stays fully editable while its screen is
+    /// away, so you can finish or rearrange that set before you
+    /// plug back in.
+    struct DesktopOffer: Equatable {
+        /// Every Desktop drawing a row — live, or named by a
+        /// binding.
+        var desktops: [Int] = []
+        /// Of those, the ones not on any screen now.
+        var absent: Set<Int> = []
+
+        /// The empty offer: no Desktop draws a row.
+        static let none = DesktopOffer()
+    }
+
+    /// Builds the offer from what exists and what is bound.
     ///
     /// The union is what keeps a bound row visible. A Desktop
     /// number is macOS topology, not user data — unplug a screen
@@ -148,26 +181,31 @@ extension KeybindingCatalog {
     /// argument, and the per-Space families answer it with a
     /// whole Inactive card because a Space is user data that can
     /// be re-created by name. A Desktop cannot, so the cheaper
-    /// answer is right here: keep offering the row.
+    /// answer is right here: keep offering the rows, dimmed.
     ///
     /// Deliberately NOT routed through
     /// `OrphanedShortcuts.perSpaceFamilies` — that list means
     /// "the argument is a `SpaceID`" and drives the space-rename
     /// rewriter, which must never see a Desktop number.
+    ///
     /// An EMPTY `live` is a legitimate call, not the degenerate
     /// one: it means the caller has no machine in its question —
     /// the settings diff narrates two saved configs and has no
     /// business asking what is plugged in — and it reads the
     /// same as "the bridge is absent", which is also correct,
     /// since neither may drop a row the user authored.
-    static func offeredDesktops(
+    static func desktopOffer(
         live: [Int],
         bindings: [KeyBinding]
-    ) -> [Int] {
-        let bound = bindings.compactMap {
-            desktopNumber(from: $0.lua)
-        }
-        return Set(live).union(bound).sorted()
+    ) -> DesktopOffer {
+        let bound = Set(
+            bindings.compactMap { desktopNumber(from: $0.lua) }
+        )
+        let liveSet = Set(live)
+        return DesktopOffer(
+            desktops: liveSet.union(bound).sorted(),
+            absent: bound.subtracting(liveSet)
+        )
     }
 
     /// The catalog row a Desktop-targeting Lua body names, or
