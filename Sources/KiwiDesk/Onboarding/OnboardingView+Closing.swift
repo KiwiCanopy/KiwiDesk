@@ -22,8 +22,13 @@ extension OnboardingView {
             ),
             body1: doneBody,
             // The bottom line is the GUIDE, and it is the
-            // card's only link (owner + `ui-designer`,
-            // 2026-08-26).
+            // card's only DESTINATION (owner + `ui-designer`,
+            // 2026-08-26 — originally "only link", amended the
+            // same day when the owner ruled the star ask in:
+            // `starLine` is not a destination the reader needs,
+            // it is the one thing the tour may ask for, and it
+            // lives in the content's quiet tier rather than in
+            // this footer slot).
             //
             // It replaced "Tiled before? Open Settings", which
             // cost the card more than it bought. That hint
@@ -70,6 +75,7 @@ extension OnboardingView {
             )
             .toggleStyle(.checkbox)
             .onboardingCard()
+            starLine
         } action: {
             Button(L("onboarding.ready.start", "Start using it")) {
                 model.commitLoginItemThen { model.onFinish() }
@@ -112,6 +118,58 @@ extension OnboardingView {
     // reversing it, and it makes this screen's hint deliberately
     // louder than the four that only say what happens if you do
     // nothing.
+
+    /// The star ask, once, at the moment the app has just
+    /// delivered its first win (owner, 2026-08-26 — the 1.1
+    /// launch decision).
+    ///
+    /// This is the ONE place the running app asks for a star,
+    /// and its one-shot shape is the argument: the tour never
+    /// comes back on its own, so the ask cannot become a nag —
+    /// which the brand's "no annoying notifications" promise
+    /// forbids. The permanent, quiet copy lives in General ▸
+    /// About's ask row; recurring surfaces (menu bar, banners)
+    /// stay closed to it.
+    ///
+    /// The quiet tier (12.5 pt, `ink3`), not the footer's: the
+    /// footer hint is the card's one DESTINATION (the guide, its
+    /// own comment above), and this line must not compete with
+    /// it — a reader who skips every caption loses nothing they
+    /// need. `LinkedCaption` for the same reasons the footer
+    /// uses it: cursor affordance, and the link rides inside the
+    /// one localized frame at its own specifier so a translation
+    /// places it.
+    private var starLine: some View {
+        let parts = LinkedCaption.split(frame: starProse)
+        return LinkedCaption(
+            leading: parts.0,
+            linkTitle: starLabel,
+            trailing: parts.1,
+            navigate: {
+                NSWorkspace.shared.open(SupportLinks.gitHub)
+            },
+            pointSize: 12.5,
+            ink: NSColor(SettingsTheme.ink3)
+        )
+    }
+
+    /// The sentence, carrying `%1$@` where the link's name goes.
+    /// "Other people", not "users" — the reader is being asked a
+    /// favor for people like themselves, not for a metric.
+    private var starProse: String {
+        L(
+            "onboarding.ready.star_hint",
+            "KiwiDesk is free and open source — %1$@ helps "
+                + "other people find it."
+        )
+    }
+
+    /// A NOUN, as `GuideLink.label` is — the sentence around it
+    /// carries the verb, so a translation can put the
+    /// destination wherever its word order wants it.
+    private var starLabel: String {
+        L("onboarding.ready.star_link", "a star on GitHub")
+    }
 
     /// Where the app lives, shown INSIDE the window (#828, owner
     /// ruled 2026-08-12).

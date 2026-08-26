@@ -31,7 +31,7 @@ extension GeneralSection {
                     releaseNotesLink
                 }
                 guideLink
-                supportLink
+                askRow
             }
             .frame(maxWidth: .infinity)
         }
@@ -39,14 +39,15 @@ extension GeneralSection {
 
     /// What changed in the version above it (#570).
     ///
-    /// Deliberately NOT the support link's shape: that link's
-    /// heart and `.callout` are this card's one ask, and a second
+    /// Deliberately NOT the ask row's shape: its symbols and
+    /// `.callout` mark this card's ask, and an informational
     /// link drawn to match turns a personal plea into a links
-    /// row, after which nothing on screen says which one the
-    /// maker actually wants. So this one takes the plainer
+    /// row, after which nothing on screen says what the maker
+    /// actually wants. So this one takes the plainer
     /// informational treatment — the caption's size, no symbol —
     /// and the asymmetry is the point rather than an oversight
-    /// (ui-designer, 2026-08-17).
+    /// (ui-designer, 2026-08-17; the ask widened to a pair
+    /// 2026-08-26 without touching this rule).
     ///
     /// No `.foregroundStyle` here on purpose: `linkHover()`
     /// already renders secondary at rest and lifts to primary on
@@ -83,9 +84,9 @@ extension GeneralSection {
     /// (`ui-designer`, 2026-08-26). This is the half that still
     /// works on day 30.
     ///
-    /// Drawn as `releaseNotesLink` is, not as `supportLink` is:
-    /// that link's heart and `.callout` are this card's one ask,
-    /// and the asymmetry is deliberate (`supportLink`'s own doc).
+    /// Drawn as `releaseNotesLink` is, not as the ask row is:
+    /// that row's symbols and `.callout` are this card's ask,
+    /// and the asymmetry is deliberate (`askRow`'s own doc).
     /// A third informational link takes the plain treatment.
     ///
     /// Its own line rather than inside the version group above:
@@ -118,8 +119,45 @@ extension GeneralSection {
         .searchAnchored(SettingsCatalog.general.guideLink)
     }
 
-    /// The card's last word: the one ask, and the only link here
-    /// carrying a symbol.
+    /// The card's last word: the ask, a PAIR since the 1.1
+    /// launch (owner, 2026-08-26). The star is the ask a free
+    /// MIT tool lives on and costs the reader nothing; Ko-fi
+    /// stays beside it for the reader who wants to give more.
+    /// One row at one weight rather than two stacked pleas —
+    /// stacked they would read as a fundraising block, and the
+    /// informational links above keep the plain treatment for
+    /// exactly that contrast (the 2026-08-17 asymmetry ruling,
+    /// carried by `releaseNotesLink`'s doc, is about ask versus
+    /// information, not about the ask's arity).
+    @ViewBuilder var askRow: some View {
+        HStack(spacing: 14) {
+            starLink
+            supportLink
+        }
+    }
+
+    /// The star half of the ask. A bare SwiftUI `Link` at the
+    /// URL, as `guideLink` is — its label IS the destination, so
+    /// no sentence frame is owed.
+    @ViewBuilder var starLink: some View {
+        Link(destination: SupportLinks.gitHub) {
+            HStack(spacing: 4) {
+                Image(systemName: "star")
+                Text(
+                    L(
+                        "general.about.star",
+                        "Star on GitHub"
+                    )
+                )
+                .underline()
+            }
+        }
+        .buttonStyle(.plain)
+        .font(.callout)
+        .linkHover()
+    }
+
+    /// The sponsor half of the ask.
     @ViewBuilder var supportLink: some View {
         Link(destination: SupportLinks.koFi) {
             HStack(spacing: 4) {

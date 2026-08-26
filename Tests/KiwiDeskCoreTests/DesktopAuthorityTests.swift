@@ -172,6 +172,59 @@ struct DesktopAuthorityTests {
         )
     }
 
+    /// A Desktop VERB reaches every screen, so the list a
+    /// keybinding is offered is every user Desktop — not the
+    /// main display's, which is the narrower answer a profile
+    /// binding takes (#888).
+    ///
+    /// Pinned against the same secondary-listed-first topology
+    /// as `mainDesktopsKeepGlobalNumbers`, so the two answers
+    /// are visibly different over ONE arrangement: the narrow
+    /// one is [3, 4] there and this one is all four. A change
+    /// that pointed the shortcut rows at the narrow list would
+    /// otherwise look right on every single-screen machine.
+    @Test("Every user Desktop is bindable, not the main one's")
+    func userDesktopsSpanEveryScreen() {
+        defer { resetAuthorityOverrides() }
+        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
+        NativeSpaces.spacesOverride = [
+            authoritySpace(20, display: "UUID-B", current: true),
+            authoritySpace(21, display: "UUID-B"),
+            authoritySpace(10, display: "UUID-A", current: true),
+            authoritySpace(11, display: "UUID-A"),
+        ]
+        let snapshot = NativeSpaces.desktopSnapshot()
+        #expect(snapshot.userDesktops == [1, 2, 3, 4])
+        #expect(snapshot.mainDisplayDesktops == [3, 4])
+    }
+
+    /// A fullscreen space carries no Mission Control number, so
+    /// it is not bindable and does not shift the ones that are.
+    ///
+    /// **Stated limitation**, the same one
+    /// `fullscreenIsNotOffered` records one accessor over:
+    /// deleting `userDesktops`' own `.filter(\.isUser)` does NOT
+    /// red this, because `NativeSpaces.number(of:in:)` filters
+    /// to user spaces itself and the `compactMap` drops the nil
+    /// it returns. That clause is defence in depth. What this
+    /// DOES catch is a change to how the numbers are derived —
+    /// positional numbering, or a bypass of `number(of:)` —
+    /// which is the failure that actually shifts which Desktops
+    /// a shortcut offers.
+    @Test("A fullscreen space is not a bindable Desktop")
+    func fullscreenIsNotBindable() {
+        defer { resetAuthorityOverrides() }
+        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
+        NativeSpaces.spacesOverride = [
+            authoritySpace(10, display: "UUID-A", current: true),
+            authoritySpace(99, display: "UUID-B", isUser: false),
+            authoritySpace(20, display: "UUID-B", current: true),
+        ]
+        #expect(
+            NativeSpaces.desktopSnapshot().userDesktops == [1, 2]
+        )
+    }
+
     /// The #670 verdict, per display and inside the snapshot: the
     /// bar-sync arm asks about the MAIN display, not about
     /// whatever holds focus.

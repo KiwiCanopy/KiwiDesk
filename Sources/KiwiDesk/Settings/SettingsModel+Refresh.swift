@@ -51,14 +51,16 @@ extension SettingsModel {
         brokenProfiles = core.profiles.brokenProfiles().map {
             BrokenProfile(name: $0.name, cause: $0.cause)
         }
-        // ONE topology reading for all three: the Desktops the
-        // card offers, the one it badges as current, and the
+        // ONE topology reading for all four: the Desktops the
+        // card offers, the wider list a Desktop shortcut may
+        // target, the one it badges as current, and the
         // verdict below — which needs the Desktop this pass just
         // read, since a Desktop binding outranks monitor
         // matching. Read apart, the card's sentence could pair a
         // verdict with a later reading of the arrangement (#888).
         let desktops = NativeSpaces.desktopSnapshot()
         mainDesktops = desktops.mainDisplayDesktops
+        bindableDesktops = core.bindableDesktops(in: desktops)
         currentDesktop = desktops.authority
         let resolved = core.profileVerdict(
             activeDesktop: currentDesktop

@@ -288,13 +288,26 @@ struct ShortcutsSection: View {
     }
 
     /// The family→rows expansion every group reads. Built once
-    /// per render from live state, so the per-space and
-    /// per-layer families expand against what is actually
-    /// configured right now.
+    /// per render from live state, so the per-space,
+    /// per-Desktop and per-layer families expand against what is
+    /// actually configured right now.
+    ///
+    /// The Desktop list is read across EVERY layer's bindings,
+    /// not the selected one's: a row that exists only while its
+    /// layer is selected would vanish from under the
+    /// duplicate-combo block's "Go to", which is free to point
+    /// at a row in another layer.
     private var expander: ShortcutsFamilyRows {
-        ShortcutsFamilyRows(
+        let offered = KeybindingCatalog.offeredDesktops(
+            live: model.bindableDesktops,
+            bindings: model.config.layers.flatMap(\.bindings)
+        )
+        return ShortcutsFamilyRows(
             spaces: model.config.spaces,
             icons: model.config.settings.spaceIcons,
+            desktops: offered,
+            absentDesktops: Set(offered)
+                .subtracting(model.bindableDesktops),
             resizeStep: Int(model.config.settings.resizeStep),
             layerNames: model.config.layers.map(\.name),
             currentLayer: selected

@@ -50,7 +50,10 @@ struct NavRow: View {
                 onClear: clear
             )
         }
-        .keybindingRowStyle(inherited: isInherited)
+        .keybindingRowStyle(
+            inherited: isInherited,
+            unavailable: command.unavailable?()
+        )
         .id(command.lua)
     }
 

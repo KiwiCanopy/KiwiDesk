@@ -92,16 +92,31 @@ extension View {
     /// control the reader can see (#818). When the control's
     /// label is not on screen, the fix is not a better
     /// interpolation — it is to stop naming it.
-    func keybindingRowStyle(inherited: Bool) -> some View {
-        opacity(inherited ? 0.55 : 1)
+    /// A row dims for one of two reasons, and says which.
+    ///
+    /// Both leave the row EDITABLE — that is the whole point of
+    /// dimming rather than disabling: an inherited row is
+    /// waiting to be overridden, and a row whose Desktop is
+    /// away is waiting for the screen to come back. Neither is
+    /// a control the user may not touch.
+    ///
+    /// `unavailable` is the short spoken mark; the block
+    /// sentence under the family carries the explanation, so a
+    /// reader who cannot see the dimming gets both.
+    func keybindingRowStyle(
+        inherited: Bool,
+        unavailable: String? = nil
+    ) -> some View {
+        opacity(inherited || unavailable != nil ? 0.55 : 1)
             .accessibilityHint(
-                inherited
-                    ? L(
-                        "shortcuts.row.inherited.axhint",
-                        "Inherited from the base shortcuts. "
-                            + "Set a key here to override it."
-                    )
-                    : ""
+                unavailable
+                    ?? (inherited
+                        ? L(
+                            "shortcuts.row.inherited.axhint",
+                            "Inherited from the base shortcuts. "
+                                + "Set a key here to override it."
+                        )
+                        : "")
             )
     }
 }

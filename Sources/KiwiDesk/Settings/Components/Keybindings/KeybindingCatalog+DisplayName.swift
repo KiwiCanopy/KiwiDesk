@@ -11,8 +11,17 @@ extension KeybindingCatalog {
     /// piece: the navigation groups, the per-layer switches,
     /// the current-step resize rows (their labels are
     /// step-independent — "Grow width" — so retired-step rows
-    /// resolve too), and `stepFreeCommands`, the one shared
-    /// copy of the float/sticky bracket. A label outside it —
+    /// resolve too), `stepFreeCommands`, the one shared copy of
+    /// the float/sticky bracket, and the Desktop rows.
+    ///
+    /// The Desktop half is read off the BINDINGS rather than
+    /// the config, which records no Desktops — and never off a
+    /// live list, because the banner must still name a row
+    /// whose screen is unplugged. Whatever the classifier can
+    /// assign, this roster must translate back (the invariant
+    /// `KeybindingImportClassifier.navigationLabels` states),
+    /// and the classifier assigns Desktop rows by shape, which
+    /// no live list bounds. A label outside it —
     /// an app name, a custom row, a deleted space's or layer's
     /// row — returns unchanged: an app name needs no
     /// translation and a custom label is the user's own text.
@@ -30,6 +39,12 @@ extension KeybindingCatalog {
             step: Int(config.settings.resizeStep)
         )
         commands += stepFreeCommands
+        let desktops = offeredDesktops(
+            live: [],
+            bindings: config.layers.flatMap(\.bindings)
+        )
+        commands += goToDesktop(desktops)
+        commands += moveToDesktop(desktops)
         guard
             let match = commands.first(where: {
                 $0.label == label

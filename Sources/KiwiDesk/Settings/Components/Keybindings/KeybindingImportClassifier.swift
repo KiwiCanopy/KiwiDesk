@@ -61,6 +61,13 @@ enum KeybindingImportClassifier {
             let command = KeybindingCatalog.switchLayerCommand(name)
             map[command.lua] = command.label
         }
+        // The Desktop rows are absent here on purpose and are
+        // matched by shape in `reclassify`, exactly as a resize
+        // of any step is: this map is built from the config,
+        // which records no Desktops, so a live list would be
+        // the only source — and a binding naming a Desktop that
+        // is not attached right now would then stay `.custom`
+        // and read as raw Lua until the screen came back.
         // Step-independent Size & float rows: not in any
         // navigation group and matched by no shape rule, so each
         // needs its own entry or an imported binding stays Custom
@@ -96,7 +103,12 @@ enum KeybindingImportClassifier {
             binding.label = shape.label
             return shape.step
         }
-        if let label = navigation[binding.lua] {
+        if let command = KeybindingCatalog.desktopCommand(
+            from: binding.lua
+        ) {
+            binding.kind = .navigation
+            binding.label = command.label
+        } else if let label = navigation[binding.lua] {
             binding.kind = .navigation
             binding.label = label
         } else if let bundleID = KeybindingCatalog.appBundleID(

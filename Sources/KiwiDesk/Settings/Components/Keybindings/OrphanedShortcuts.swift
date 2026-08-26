@@ -73,8 +73,15 @@ enum OrphanedShortcuts {
         let expander = ShortcutsFamilyRows(
             spaces: [space],
             icons: icons,
-            // Neither field reaches a per-space family; both are
-            // required by the type and irrelevant here.
+            // None of these reaches a per-space family; all are
+            // required by the type and irrelevant here. The
+            // empty Desktop list is deliberate rather than
+            // incidental: this card is the SPACE net, and a
+            // Desktop number is not a `SpaceID` — see
+            // `KeybindingCatalog.offeredDesktops`, which is how
+            // a Desktop row stays reachable instead.
+            desktops: [],
+            absentDesktops: [],
             resizeStep: 0,
             layerNames: [],
             currentLayer: ""

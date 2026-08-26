@@ -4503,6 +4503,42 @@ recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
 ⚠ unrecognized.
 
+**An absent capability is not a greyed one, and an absent
+Desktop is.** Two states look alike from a distance and get
+opposite treatments, so the line is drawn here rather than
+re-argued at each surface.
+
+Where macOS does not expose the window-management bridge, the
+three Desktop rows are **not drawn at all**. Grey-don't-hide
+exists for a control that *would* work — switch that setting on
+and I act — and for that promise to be honest there has to be a
+switch. Here there is none: no setting, no mode and no future
+release of KiwiDesk reaches the capability, because it is the
+OS's to expose. A dimmed "Go to Desktop 3" on such a Mac invites
+an action with no path at all, and the sentence explaining it
+could only say *your Mac cannot do this*, which is a fact about
+the machine rather than a state of the control. Absent is right;
+faked is not, and greyed is faked.
+
+Where the bridge IS present and a bound Desktop's screen is
+merely unplugged, the row **dims and stays**. That is the
+ordinary case the rule was written for: plug the screen back in
+and it works. It stays editable, too — recording a key for a
+Desktop that is away is exactly what someone who docks and
+undocks is doing — so it is dimmed rather than disabled.
+
+And it dims **in place** rather than moving to the Inactive
+shortcuts card, which is where the same question was asked for
+Spaces and answered the other way. Two reasons. An inactive
+Space shortcut still *fires*: pressing it recreates the Space,
+which is what that card's caption promises, and the promise is
+false about a Desktop, since only Mission Control can make one.
+And a Space leaves the list because the user changed their
+config — deliberate, rare, lasting — where a Desktop leaves
+because a laptop was undocked, which is routine and temporary;
+reshuffling rows to the bottom of the page on every undock
+reports a normal state as debris.
+
 **Config presence expands the Simple surface.** The simple
 mode is not a smaller product, it is a smaller *offer*. Anything
 already in the user's config — a shortcut layer, an imported Lua

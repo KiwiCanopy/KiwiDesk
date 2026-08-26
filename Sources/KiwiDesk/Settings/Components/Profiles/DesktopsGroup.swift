@@ -161,7 +161,7 @@ struct DesktopsGroup: View {
 
     private func spaceRow(_ number: Int) -> some View {
         HStack {
-            Image(systemName: "square.on.square")
+            Image(systemName: DesktopGlyph.symbol)
                 .foregroundStyle(.secondary)
             Text(
                 L(

@@ -47,12 +47,54 @@ extension KiwiCore {
     ///
     /// The ONE reader of the bridge's availability outside the
     /// verbs themselves, and the structure a GUI gate consumes:
-    /// Core answers the fact, the GUI writes the sentence it
-    /// greys a row with (#96, gui.md's grey-don't-hide). False
-    /// has exactly one cause — this macOS does not expose the
-    /// window-management bridge — so a Bool carries the whole
-    /// verdict and needs no reason enum beside it.
+    /// Core answers the fact, the GUI writes the sentence (#96).
+    /// False has exactly one cause — this macOS does not expose
+    /// the window-management bridge — so a Bool carries the
+    /// whole verdict and needs no reason enum beside it.
+    ///
+    /// **A false HIDES rather than greys, and that is a third
+    /// case gui.md does not cover.** Its two are a control that
+    /// would work in another mode (grey — switch that on and I
+    /// act) and an affordance for a channel that does not exist
+    /// yet (remove — the shape makes a promise dimming cannot
+    /// revoke). This is neither: the capability is absent on
+    /// THIS Mac and no setting, mode or future release reaches
+    /// it, so a greyed row would invite an action that has no
+    /// path at all. Do not read this as licence to grey the
+    /// Desktop surfaces — a row DIMS for a different reason one
+    /// level down, when the bridge is present and that Desktop's
+    /// screen is merely unplugged, which is the ordinary
+    /// grey-don't-hide case. `docs/design-decisions.md` ▸ *an
+    /// absent capability is not a greyed one* owns the ruling.
     public var canDriveDesktops: Bool { WMBridge.isAvailable }
+
+    /// The Desktops a keybinding may target, in one reading:
+    /// every user Desktop's Mission Control number, or NONE
+    /// when this macOS does not expose the bridge that drives
+    /// them.
+    ///
+    /// One accessor rather than a capability Bool and a list
+    /// beside it, because two surfaces render Desktop rows (the
+    /// Shortcuts editor and the ⌃⌥K panel) and each combining
+    /// the pair for itself is how they come to disagree about
+    /// whether to offer any. Every user Desktop, not the main
+    /// screen's: a verb acts on the screen the Desktop lives on
+    /// (`userDesktops` argues the split).
+    ///
+    /// A FUNC taking the snapshot, deliberately, and there is
+    /// no no-argument twin: the convenience form would be a
+    /// property performing a whole `allSpaces()` enumeration
+    /// plus the bridge probe, callable from a SwiftUI `body`
+    /// with nothing scanning for it — the shape
+    /// `os-private-apis.md` bans for a bridge consumer, and the
+    /// reason `NativeSpaces.activeDesktopNumber()` is a func
+    /// too. A caller holding no snapshot takes one by name, so
+    /// the cost is written where it is paid.
+    public func bindableDesktops(
+        in snapshot: DesktopSnapshot
+    ) -> [Int] {
+        canDriveDesktops ? snapshot.userDesktops : []
+    }
 
     /// The KiwiDesk display a SkyLight display UUID names, or
     /// nil when no attached display matches (the topology moved

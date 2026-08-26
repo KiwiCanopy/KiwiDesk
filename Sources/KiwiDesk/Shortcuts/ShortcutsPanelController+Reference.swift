@@ -58,6 +58,9 @@ extension ShortcutsPanelController {
             layer: layer,
             spaces: config.spaces,
             spaceIcons: config.settings.spaceIcons,
+            desktops: core.bindableDesktops(
+                in: NativeSpaces.desktopSnapshot()
+            ),
             resizeStep: Int(config.settings.resizeStep),
             layerNames: layers.map(\.name)
         )

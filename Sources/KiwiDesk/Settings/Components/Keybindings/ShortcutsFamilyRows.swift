@@ -36,6 +36,19 @@ struct ShortcutsFamilyRows {
     let spaces: [SpaceID]
     /// Space icons, recognition sugar on the per-space rows.
     let icons: [SpaceID: String]
+    /// The macOS Desktops the per-Desktop families expand over
+    /// (#884's verbs) — the offer AND the capability in one
+    /// list, so a macOS without the Desktop bridge draws no
+    /// Desktop rows rather than rows that would refuse.
+    /// `KiwiCore.bindableDesktops` is where the two are joined;
+    /// `KeybindingCatalog.offeredDesktops` widens it to the
+    /// Desktops these bindings already name.
+    let desktops: [Int]
+    /// Of those, the ones NOT on any screen right now — offered
+    /// because a binding names them, dimmed because pressing
+    /// one would do nothing until its screen comes back.
+    /// Always a subset of `desktops`.
+    let absentDesktops: Set<Int>
     /// The configurable resize step (#58) baked into the resize
     /// rows' Lua, so the recorded binding matches the catalog
     /// byte-for-byte.
@@ -79,6 +92,21 @@ struct ShortcutsFamilyRows {
             return KeybindingCatalog.moveToSpaceFollowRows(
                 spaces,
                 icons: icons
+            )
+        case .focusDesktop:
+            return KeybindingCatalog.goToDesktop(
+                desktops,
+                absent: absentDesktops
+            )
+        case .moveToDesktop:
+            return KeybindingCatalog.moveToDesktopRows(
+                desktops,
+                absent: absentDesktops
+            )
+        case .moveToDesktopFollow:
+            return KeybindingCatalog.moveToDesktopFollowRows(
+                desktops,
+                absent: absentDesktops
             )
         case .growWidth:
             return [resizeRow(.growWidth)]

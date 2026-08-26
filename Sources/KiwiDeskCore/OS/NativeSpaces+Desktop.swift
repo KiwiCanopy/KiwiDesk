@@ -62,15 +62,50 @@ public struct DesktopSnapshot: Sendable {
     /// identifier) — in shared mode every Desktop IS the main
     /// screen's, so the degenerate case answers exactly as it
     /// did before this existed.
+    ///
+    /// **Not the only answer, and not the default one.** This
+    /// is what a *binding* can fire on; `userDesktops` is what
+    /// a Desktop *verb* can reach, which is every screen's. A
+    /// consumer picks by what it offers — the pair is stated on
+    /// both accessors because this is the one a caller already
+    /// reaches for, and the names do not contrast on the axis
+    /// that separates them.
     public var mainDisplayDesktops: [Int] {
         guard let mainUUID,
             spaces.contains(where: { $0.displayUUID == mainUUID })
         else {
-            return spaces.filter(\.isUser).indices.map { $0 + 1 }
+            // The degenerate answer IS every user Desktop, so
+            // it routes through the accessor that computes them
+            // rather than re-deriving the numbering beside it.
+            return userDesktops
         }
         return
             spaces
             .filter { $0.displayUUID == mainUUID && $0.isUser }
+            .compactMap { number(of: $0.id) }
+            .sorted()
+    }
+
+    /// The Mission Control numbers of EVERY user Desktop in
+    /// this snapshot, ascending — every screen's, not one
+    /// screen's.
+    ///
+    /// The peer of `mainDisplayDesktops`, and the two are not
+    /// interchangeable: that one narrows to the screen a
+    /// *binding* fires on (#888), while a Desktop VERB acts on
+    /// the screen the Desktop lives on, so a consumer offering
+    /// the verbs must offer them all — narrowing to the main
+    /// screen would put a second screen's Desktops out of reach
+    /// of every surface but hand-written Lua. Which of the two
+    /// a consumer takes is a statement about what it offers,
+    /// which is why both exist rather than one with a flag.
+    ///
+    /// Numbered through `number(of:)`, so a Desktop reads the
+    /// same here, in a binding and in `space(numbered:)` — the
+    /// one numbering authority, read a third way.
+    public var userDesktops: [Int] {
+        spaces
+            .filter(\.isUser)
             .compactMap { number(of: $0.id) }
             .sorted()
     }

@@ -1275,6 +1275,22 @@ section {
   margin-top: 1.25rem;
 }
 
+/* The closing band's quiet star ask — the req line's voice with
+   the whole sentence as the link, kept in the same faint ink so
+   it reads as a caption that happens to be followable rather
+   than as another button. */
+.star-hint {
+  margin-top: 0.6rem;
+}
+.star-hint a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.star-hint a:hover {
+  color: var(--text-dim);
+}
+
 /* The terminal block stays dark in both themes — a familiar
    terminal look, and it self-contains its own light-on-dark
    text tokens (below) so it needs no per-theme text vars. */

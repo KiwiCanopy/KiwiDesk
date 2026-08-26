@@ -39,6 +39,7 @@ struct ShortcutsInactiveBandTests {
             ),
             spaces: spaces,
             spaceIcons: [:],
+            desktops: [1, 2],
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName]
         )

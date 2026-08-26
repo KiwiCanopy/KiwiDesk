@@ -2789,10 +2789,36 @@ like `cmd+j+k` are not supported — use extra layers instead.
 
 Each row has an action. Built-in actions live under headings:
 
-- **Focus** — move focus (left, right, up, down).
-- **Move windows** — swap windows, send to space, and the
-  Move-to-track and Swap-with-track rows (always shown; a
-  caption notes they only matter in the track layout).
+- **Focus** — move focus (left, right, up, down), go to a
+  space, and go to a macOS **Desktop**.
+- **Move windows** — swap windows, send to space, send to a
+  macOS **Desktop**, and the Move-to-track and Swap-with-track
+  rows (always shown; a caption notes they only matter in the
+  track layout).
+
+  The Desktop rows are Mission Control's Desktops rather than
+  KiwiDesk's spaces, and there is one per Desktop you actually
+  have — on every screen, since these act on whichever screen
+  the Desktop lives on. They ship **unbound**: all four digit
+  tiers (`⌃⌥`, `⌃⌥⇧`, `⌃⌥⌘` and the arrows) are already spent,
+  so KiwiDesk offers the rows and leaves the keys to you. They
+  appear only where macOS exposes the window-management bridge
+  they need — see [macOS Desktops](#macos-desktops-mission-control) —
+  and a row you bound keeps its place if that Desktop later
+  goes away with its screen — dimmed, with a line saying why,
+  rather than vanishing or moving to *Inactive shortcuts*.
+  Undocking is routine and temporary, so the row stays where
+  you left it and stays editable; the shortcut is still
+  recorded and works again the moment that screen is back.
+  Clearing it removes the row too, since nothing then points
+  at a Desktop that isn't there.
+
+  This is deliberately unlike the Space rows below: an
+  *inactive* Space shortcut still **works** — pressing it
+  recreates the Space — which is why those move to their own
+  card and say so. A Desktop shortcut for a Desktop that isn't
+  there does nothing at all, because only Mission Control can
+  make a Desktop.
 - **Size & float** — the per-axis Grow/Shrink rows, Make
   floating, the resize step, and **Alert sound when resize
   can't apply** (default on, behind the card's **Resize
@@ -2953,11 +2979,11 @@ details). Where it is absent the commands do nothing and log
 why; KiwiDesk never asks you to turn System Integrity Protection
 off for them.
 
-The Keybindings editor does not offer these three yet, so a
-shortcut for them goes in `init.lua` — and note what that costs
-if you configure KiwiDesk from Settings: adding a `KiwiDesk.bind`
-hands ownership of your keybindings to `init.lua`, which is the
-trade the *Settings app vs. init.lua* section above describes.
+All three have rows in the Shortcuts editor — under **Focus**
+and **Move windows**, one per Desktop — and in the ⌃⌥K
+reference once bound. They arrive with no default combo,
+because every digit tier is already spent; pick your own. See
+[Actions](#actions) for what the rows do and when they appear.
 
 ## Getting Help
 

@@ -28,6 +28,7 @@ struct ShortcutsSelfRowTests {
             ),
             spaces: [SpaceID("1")],
             spaceIcons: [:],
+            desktops: [1, 2],
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName]
         )
