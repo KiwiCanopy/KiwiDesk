@@ -47,6 +47,21 @@ final class DeferredTasks {
         /// switch follows such a move, so nothing else is
         /// guaranteed to notice the window left.
         case desktopMoveReap
+        /// Adopts the window a FOLLOW sent to a hidden Desktop
+        /// once the reveal has composited it (`departEagerly`,
+        /// #1023). A separate slot from `desktopMoveReap`
+        /// deliberately: the keys are cancel-and-replace, the
+        /// two verbs are one keystroke apart, and whichever
+        /// fired second would silently drop the other's reap —
+        /// a stale slot for the no-follow, a permanently
+        /// unadopted window for the follow.
+        case desktopFollowReap
+        /// Re-queries the display's current space a beat after a
+        /// Desktop-switch dispatch and logs a pointer that never
+        /// moved (`scheduleDesktopSwitchVerify`, #1023) — the
+        /// write applies asynchronously, so the honest re-query
+        /// cannot be synchronous.
+        case desktopSwitchVerify
         /// Re-asserts every desired focus ring's VISIBILITY and
         /// stacking after a drag/drop or animated transition
         /// (`scheduleBorderDropReconcile`) — early on purpose, and

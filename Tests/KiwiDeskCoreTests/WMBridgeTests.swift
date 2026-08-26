@@ -131,6 +131,17 @@ private final class FakeMoveWindows: NSObject {
     }
 }
 
+private final class FakeHideSpaces: NSObject {
+    @objc(initWithSpaces:)
+    init(spaces: [NSNumber]) {
+        Seen.windows = spaces
+    }
+
+    @objc func performWithWMBridgeDelegate() {
+        Seen.performed += 1
+    }
+}
+
 private final class FakeSetValues: NSObject {
     @objc(initWithSpaceID:values:)
     init(spaceID: UInt64, values: [String: Any]) {
@@ -195,6 +206,7 @@ struct WMBridgeTests {
                 WMBridge.removeWindows([WindowID(1)], from: [1])
                     == false
             )
+            #expect(WMBridge.hideSpaces([1]) == false)
         }
     }
 
@@ -236,6 +248,15 @@ struct WMBridgeTests {
             #expect(moved)
             #expect(Seen.windows == [7, 9])
             #expect(Seen.spaceID == 3)
+            #expect(Seen.performed == 1)
+        }
+    }
+
+    @Test("A hide passes its space ids and dispatches once")
+    func hideSpacesPassesIds() {
+        resolving(["HideSpacesOperation": FakeHideSpaces.self]) {
+            #expect(WMBridge.hideSpaces([3, 9]))
+            #expect(Seen.windows == [3, 9])
             #expect(Seen.performed == 1)
         }
     }

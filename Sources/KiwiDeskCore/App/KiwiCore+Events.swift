@@ -285,9 +285,10 @@ extension KiwiCore {
         // makes it real). Only raise windows the app still lists:
         // after a native Space switch the fallback may live on
         // the previous desktop, and raising it would switch back.
-        // A hide, or an active own dialog, stands the raise
-        // down — `closeReturnRaiseStandsDown` owns both arms'
-        // arguments (#913/#929/#935). The fold's focus pick
+        // A hide, an active own dialog, or a Desktop follow's
+        // eager departure stands the raise down —
+        // `closeReturnRaiseStandsDown` owns every arm's
+        // arguments (#913/#929/#935/#1023). The fold's focus pick
         // still stands: state names the survivor, and the OS's
         // own activation reports it. Guarded on the focus loss
         // so only a removal that would raise pays the seam's

@@ -78,15 +78,43 @@ Every one of the following binds whoever touches them:
   second Desktop (#889 item 5) — and never by the wrapper's
   return value. The census the re-query reads stays
   `NativeSpaces`' — one reader of the display/spaces model.
+- **The space-pointer write performs no transition (#1023).**
+  `ManagedDisplaySetCurrentSpaceOperation` moves the pointer and
+  composites the target's windows, but never hides the origin's
+  — both Desktops render at once until a genuine gesture
+  completes the swap, while EVERY pointer read
+  (`SLSGetActiveSpace`, `SLSManagedDisplayGetCurrentSpace`, the
+  managed-display plist) reports the switch landed within
+  ~120 ms, so no re-query on this surface can see the difference
+  (device-measured 2026-08-26, macOS 26.6.2, both displays, both
+  a Dock-hidden and a bridge-hidden target). A switching caller
+  therefore pairs an ACCEPTED set with
+  `WMBridge.hideSpaces([origin])`, origin read from the same
+  snapshot that resolved the target — set-then-hide measured as
+  a complete switch — and the deferred pointer re-query verifies
+  only that the set was not dropped (`DesktopCommandTests`,
+  `DesktopSwitchGuardTests`).
+  The bare C `SLSShowSpaces`/`SLSHideSpaces` are silent no-ops
+  from a foreign process; the bridged operations are not.
 - A bridge-driven Desktop switch reaches KiwiDesk through the
   SAME `NSWorkspace` notification a swipe does — observed on
   device 2026-08-25, `focus_desktop` producing the target
-  Desktop's window census — so a caller arms no confirmation of
-  its own. A caller with NO such signal owns its own
-  bookkeeping: the no-follow `move_to_desktop` reaps the window
-  it sent away, stamps the switch window so the removal reads
-  as `vanished`, and stamps the move latch
-  (`DesktopCommandTests`).
+  Desktop's window census — but that notification fires on the
+  POINTER moving, which can precede the moved window's
+  composite, so its reconcile may run before the window is
+  listable (device-traced 2026-08-26, the "ignored until
+  minimized" report: the adoption heal then quiets the id as a
+  permanent mismatch). A verb that moved a window somewhere
+  hidden therefore owns its own bookkeeping either way: the
+  no-follow `move_to_desktop` reaps the window it sent away,
+  stamps the switch window so the removal reads as `vanished`,
+  and stamps the move latch (`DesktopCommandTests`); the FOLLOW
+  folds the departure eagerly — state AND the event loop's
+  element registration, or every later reconcile treats the
+  window as already known — and arms a reveal reap the heal's
+  quieting cannot gate (`DesktopSwitchGuardTests`). The #1023
+  bullet's deferred re-query stays a drop diagnostic that only
+  logs.
 - The bridge dispatches only while **AppKit is genuinely
   loaded** (#884's bisection): free in the app, binding on
   every harness — under `swift test` every bare read answers

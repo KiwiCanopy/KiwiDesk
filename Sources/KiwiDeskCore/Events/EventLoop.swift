@@ -156,6 +156,16 @@ public final class EventLoop {
     /// census id still opens the gate (#675). Pruned to the
     /// live census each pass.
     var healQuiet: [pid_t: Set<WindowID>] = [:]
+
+    /// Set for exactly the synchronous span of a Desktop
+    /// follow's eager departure fold (#1023): the third
+    /// close-return stand-down arm reads it, because a
+    /// synthetic removal at t=0 of a switch must not raise the
+    /// origin's successor — the origin is still composited, so
+    /// the isListed guard passes on timing a real swipe-away
+    /// destroy never has. Nothing can interleave within the
+    /// span: the fold is synchronous main-actor code.
+    var eagerDepartureInFlight: WindowID?
     /// Windows the transient filters dropped that already spent
     /// their one re-track, per pid (cleared on detach) — bounds
     /// the retry so a permanent invisible helper (#309) cannot

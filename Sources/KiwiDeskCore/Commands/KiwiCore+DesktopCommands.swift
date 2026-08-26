@@ -47,9 +47,18 @@ extension KiwiCore {
     struct DesktopTarget: Equatable {
         let space: SkyLight.SpaceID
         let displayIdentifier: String
+        /// The space that screen shows NOW, from the same
+        /// snapshot the target resolved in (#888: one reading,
+        /// every question) — the space a switch must hide,
+        /// because the pointer write performs no transition of
+        /// its own (#1023). Nil when the snapshot cannot say.
+        let originSpace: SkyLight.SpaceID?
+
         /// Whether the Desktop is already the one its screen
-        /// shows — a switch to it is a no-op.
-        let isCurrent: Bool
+        /// shows — a switch to it is a no-op. Derived, so a
+        /// hand-built target cannot carry origin and verdict in
+        /// disagreement.
+        var isCurrent: Bool { originSpace == space }
     }
 
     /// Resolves a 1-based Mission Control number against one
@@ -67,8 +76,7 @@ extension KiwiCore {
         return DesktopTarget(
             space: space.id,
             displayIdentifier: space.displayUUID,
-            isCurrent: snapshot.currentSpaces[space.displayUUID]
-                == space.id
+            originSpace: snapshot.currentSpaces[space.displayUUID]
         )
     }
 
@@ -164,10 +172,14 @@ extension KiwiCore {
             }
             rehomeAcrossScreens(focused, to: target)
             if follow {
-                return switchDesktop(
+                let response = switchDesktop(
                     to: target,
                     verb: "move_to_desktop_and_follow"
                 )
+                if response.isSuccess, !target.isCurrent {
+                    departEagerly(focused)
+                }
+                return response
             }
             departWithoutFollowing(focused)
             return .ok()
@@ -295,27 +307,5 @@ extension KiwiCore {
             self.eventLoop.reconcile(pid: pid, app: AppRef(pid: pid))
             self.retile(animated: true)
         }
-    }
-
-    /// The one copy of the switch dispatch, for both verbs that
-    /// switch. Stamps the switch at INTENT time — but only once
-    /// the bridge has accepted it, so a refusal does not
-    /// suppress a second of focus-follow that no switch earned.
-    private func switchDesktop(
-        to target: DesktopTarget,
-        verb: String
-    ) -> CommandResponse {
-        guard !target.isCurrent else { return .ok() }
-        guard
-            WMBridge.setCurrentSpace(
-                target.space,
-                displayIdentifier: target.displayIdentifier
-            )
-        else {
-            onLog("\(verb): the Desktop bridge refused the switch")
-            return .fail("the Desktop bridge refused the switch")
-        }
-        lastDesktopSwitch = Date()
-        return .ok()
     }
 }
