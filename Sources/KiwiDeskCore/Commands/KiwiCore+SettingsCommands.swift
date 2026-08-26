@@ -14,7 +14,7 @@ extension KiwiCore {
             guard let raw = args.first?.stringValue,
                 let mode = MouseResizeMode(rawValue: raw)
             else {
-                return .fail("expected layout|snap_back")
+                return .expected(MouseResizeMode.self)
             }
             tiler.settings.mouseResize = mode
         case "enable_wake_restore":
@@ -191,10 +191,7 @@ extension KiwiCore {
                 let raw = args.first?.stringValue,
                 let style = QuitLayoutStyle(rawValue: raw)
             else {
-                let expected = QuitLayoutStyle.allCases
-                    .map(\.rawValue)
-                    .joined(separator: "|")
-                return .fail("expected \(expected)")
+                return .expected(QuitLayoutStyle.self)
             }
             tiler.settings.quitLayout = style
         case "quit.set_grid_target_depth":

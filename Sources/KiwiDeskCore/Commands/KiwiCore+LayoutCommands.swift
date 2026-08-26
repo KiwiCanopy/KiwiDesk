@@ -98,9 +98,6 @@ extension KiwiCore {
     }
 
     var placementError: CommandResponse {
-        .fail(
-            "expected first | last | before_focused"
-                + " | after_focused"
-        )
+        .expected(SpawnPlacement.self)
     }
 }

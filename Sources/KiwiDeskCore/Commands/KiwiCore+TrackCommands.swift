@@ -47,9 +47,7 @@ extension KiwiCore {
                     rawValue: raw
                 )
             else {
-                return .fail(
-                    "expected own_track | focused_track"
-                )
+                return .expected(TrackParams.NewWindowTrack.self)
             }
             tiler.settings.track.newWindow = rule
         case "track.set_new_window_position":
@@ -160,11 +158,11 @@ extension KiwiCore {
         raw.flatMap(StackParams.OverflowStyle.init(rawValue:))
     }
 
-    private static let trackAxisError = CommandResponse.fail(
-        "expected vertical|horizontal"
+    private static let trackAxisError = CommandResponse.expected(
+        TrackParams.Axis.self
     )
 
-    private static let trackOverflowError = CommandResponse.fail(
-        "expected cascade_overflow|cascade_all"
+    private static let trackOverflowError = CommandResponse.expected(
+        StackParams.OverflowStyle.self
     )
 }

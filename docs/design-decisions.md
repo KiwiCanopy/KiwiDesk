@@ -552,6 +552,73 @@ following release. Whether 0.9.7 turned out to be the last beta
 was not knowable on the day it shipped, and the notes did not
 need to answer it.
 
+### The API describes itself, and its enums are read not typed
+
+**[Principle]**
+
+The signature of every Lua/CLI command — its group, its
+arguments, the legal values of an enum argument, and a one-line
+summary — lives in `APIReference` as data, beside the names that
+were already there. It does **not** live only in
+`docs/lua-reference.md`.
+
+The pull toward prose is real, and it is what shipped first: the
+names were a Swift table that "can never drift from the real
+API", while the *signatures* were 4,800 lines of hand-written
+Markdown that could, and did. `list_commands` therefore answered
+"what can I call" with 262 bare names on one line — no groups, no
+arguments, no summaries — and `list_commands focus` answered the
+same 6.9 KB, because the argument was read and dropped (#1033).
+The doc could not fix that: a running binary cannot consult a
+Markdown file, and a user in a terminal should not have to.
+
+Two rules fall out, and both are guarded.
+
+**An enum argument's legal values are READ off the decoder.**
+`APIArgument.choice` takes a *metatype*, and `APIChoice` has
+exactly one initializer, which reads `allCases`. There is
+deliberately no way to hand it a list. This is not tidiness: the
+error message the bar setters print already disagreed with their
+own decoder — the code said `ring|edge_mark|gap` while the enum
+had renamed that case `outline` — and a listing hand-typed the
+same way would have inherited the same class of lie, with more
+readers. The compiler enforces the derivation today;
+`APIChoiceDerivationTests` scans the declaration, because adding
+a second, list-taking initializer is a two-line change that
+compiles and reads harmlessly.
+
+**A record carries neither its own name nor its group.** Both are
+the key it is filed under, so the names stay one list rather than
+two, and `APIRecordCensusTests` holds the key sets against
+`commands` / `namespaces` / `luaOnly` in both directions —
+`parity-tests.md`'s forget-proof shape, and the reason the
+remaining records can be filled in bulk by someone who did not
+design any of this.
+
+**`help` is answered by the CLI itself, not over the socket.**
+The listing describes the API a binary was *built* with; no app
+state enters it, and `APIReference` is compiled into the same
+binary the CLI is. Round-tripping it would buy nothing and would
+make `kiwidesk help focus` fail exactly when a user reaches for
+it — while the app is not running, which is when you are most
+likely to be reading about a command rather than issuing one.
+`--version` is answered locally for the same reason. The cost is
+named rather than hidden: an older app running under a newer
+`kiwidesk` on `$PATH` is described by the newer one, which is a
+half-finished install rather than a mode of operation. To keep
+"local" from becoming "second", both answers come from one
+function — `APIReference.helpResponse`, which the dispatcher's
+`help` case also returns — and `CLIHelpSeamTests` refuses the CLI
+tree any reading of the name tables.
+
+What this deliberately does **not** do is generate
+`docs/lua-reference.md`. That doc carries argument ranges,
+defaults, worked examples and the macOS caveats behind them; a
+one-line summary is not a substitute, and pretending otherwise
+would trade a drift problem for a much worse documentation one.
+Generating its *signature tables* from this data is a genuine
+follow-up, and it is the reason the data is shaped this way.
+
 ### The landing page argues from the papercut, not from the mess
 
 **[Principle]**

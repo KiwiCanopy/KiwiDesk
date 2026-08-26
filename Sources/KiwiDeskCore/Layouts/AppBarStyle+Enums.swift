@@ -27,7 +27,7 @@ extension AppBarStyle {
     /// the `liquidGlass` finish (a colorless glass material laid
     /// over either shape on macOS 26). Boxed = a box per item
     /// (honors `cornerRoundness`); Plain = one shared strip.
-    public enum BackgroundStyle: String, Sendable, Codable {
+    public enum BackgroundStyle: String, Sendable, Codable, CaseIterable {
         /// A box per item, honoring `cornerRoundness`
         /// (roundness 0 = square).
         case boxed
@@ -41,7 +41,7 @@ extension AppBarStyle {
     /// vs "how far does it reach": `plain` draws one shared plate
     /// and honors this; `boxed` draws no shared plate, so the
     /// setting is inert there (the GUI greys it).
-    public enum BackgroundFit: String, Sendable, Codable {
+    public enum BackgroundFit: String, Sendable, Codable, CaseIterable {
         /// The plate spans the whole strip edge-to-edge.
         case full
         /// The plate wraps the content run plus one item gap of
@@ -53,7 +53,7 @@ extension AppBarStyle {
 
     /// How the active item is marked. Orthogonal to
     /// `backgroundStyle`: works on any background.
-    public enum ActiveIndicator: String, Sendable, Codable {
+    public enum ActiveIndicator: String, Sendable, Codable, CaseIterable {
         /// An outline around the active item, tracing its shape at
         /// the bar's roundness (a capsule at max, square at 0).
         case outline

@@ -107,20 +107,35 @@ struct CommandTests {
         )
     }
 
-    @Test("help lists every command")
+    @Test("help lists every command, in its group")
     func helpCommand() {
+        // Grouped since #1033; the flat array of names this
+        // used to read is what the issue was filed about.
         let core = makeCore()
         let response = core.execute("help")
-        guard case .array(let names)? = response.data else {
-            Issue.record("expected command list")
+        guard case .object(let payload)? = response.data,
+            case .array(let groups)? = payload["groups"]
+        else {
+            Issue.record("expected grouped command list")
             return
         }
-        #expect(names.contains(.string("focus")))
-        #expect(
-            names.contains(.string("stack.set_master_count"))
-        )
-        #expect(names.contains(.string("subscribe")))
-        #expect(names.contains(.string("version")))
+        var listed: [String: String] = [:]
+        for case .object(let group) in groups {
+            guard case .array(let commands)? = group["commands"]
+            else { continue }
+            for case .object(let entry) in commands {
+                guard
+                    let name = entry["qualified_name"]?
+                        .stringValue,
+                    let table = group["name"]?.stringValue
+                else { continue }
+                listed[name] = table
+            }
+        }
+        #expect(listed["focus"] == "KiwiDesk")
+        #expect(listed["stack.set_master_count"] == "stack")
+        #expect(listed["subscribe"] == "KiwiDesk")
+        #expect(listed["version"] == "KiwiDesk")
     }
 
     @Test("version reports the semantic version and commit")

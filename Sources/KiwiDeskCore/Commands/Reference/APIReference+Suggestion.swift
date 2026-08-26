@@ -10,10 +10,25 @@ extension APIReference {
     public static func suggestion(
         for unknown: String
     ) -> String? {
+        closest(to: unknown, among: dispatchable)
+    }
+
+    /// The nearest of `candidates` within a typo's worth of
+    /// edits, or nil.
+    ///
+    /// Shared with `helpSuggestion`, which searches a wider set
+    /// for a different reason (#1033): the two differ in WHAT
+    /// they may point at, never in how near counts as near, and
+    /// two copies of that threshold would drift into two
+    /// different ideas of a typo.
+    static func closest<C: Sequence<String>>(
+        to unknown: String,
+        among candidates: C
+    ) -> String? {
+        let limit = max(2, unknown.count / 3)
         var best: (name: String, distance: Int)?
-        for name in dispatchable {
+        for name in candidates {
             let distance = editDistance(unknown, name)
-            let limit = max(2, unknown.count / 3)
             guard distance <= limit else { continue }
             if best == nil || distance < best!.distance {
                 best = (name, distance)

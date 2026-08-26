@@ -11,7 +11,7 @@ extension KiwiCore {
         guard let raw = args.first?.stringValue,
             let direction = Direction(rawValue: raw)
         else {
-            return .fail("expected left|right|up|down")
+            return .expected(Direction.self)
         }
         guard let space = activeSpace else {
             return .fail("no focused window")

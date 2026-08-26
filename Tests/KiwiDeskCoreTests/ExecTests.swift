@@ -285,19 +285,6 @@ struct ExecTests {
         #expect(d["exec_running"] == .number(1))
     }
 
-    @Test("Lua-only functions appear in help() output")
-    func luaOnlyInHelp() throws {
-        let core = makeCore()
-        let response = core.execute("help")
-        guard case .array(let names)? = response.data else {
-            Issue.record("expected command list")
-            return
-        }
-        for name in APIReference.luaOnly {
-            #expect(names.contains(.string(name)))
-        }
-    }
-
     @Test("Every luaOnly name is a real KiwiDesk function")
     func luaOnlyNamesAreRegistered() throws {
         let core = makeCore()

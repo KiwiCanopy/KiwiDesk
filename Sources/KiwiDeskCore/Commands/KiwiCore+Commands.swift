@@ -90,12 +90,12 @@ extension KiwiCore {
         case "set_resize_feedback":
             return setResizeFeedback(args)
         case "help", "list_commands":
-            return .ok(
-                .array(
-                    APIReference.allCommands.map {
-                        .string($0)
-                    }
-                )
+            // With a name, one record; without, the whole
+            // surface grouped (#1033). The argument used to be
+            // ignored, which is why `list_commands focus`
+            // answered with all 262 names.
+            return APIReference.helpResponse(
+                for: args.first?.stringValue
             )
         case "version":
             return .ok(

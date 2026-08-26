@@ -74,22 +74,19 @@ enum AppBarCommandSetting {
     ) -> Result<AppBarCommandSetting, AppBarSettingError>? {
         switch field {
         case "edge":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                AppBarEdge.self,
-                "top|bottom|left|right"
+                AppBarEdge.self
             ).map(Self.edge)
         case "alignment":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                AppBarStyle.BarAlignment.self,
-                "start|center|end"
+                AppBarStyle.BarAlignment.self
             ).map(Self.alignment)
         case "background_style":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                AppBarStyle.BackgroundStyle.self,
-                "boxed|plain"
+                AppBarStyle.BackgroundStyle.self
             ).map(Self.backgroundStyle)
         case "liquid_glass":
             guard let flag = args.first?.boolValue else {
@@ -97,30 +94,26 @@ enum AppBarCommandSetting {
             }
             return .success(.liquidGlass(flag))
         case "background_fit":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                AppBarStyle.BackgroundFit.self,
-                "full|hug"
+                AppBarStyle.BackgroundFit.self
             ).map(Self.backgroundFit)
         case "active_indicator":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                AppBarStyle.ActiveIndicator.self,
-                "ring|edge_mark|gap"
+                AppBarStyle.ActiveIndicator.self
             ).map(Self.activeIndicator)
         case "content":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                AppBarStyle.Content.self,
-                "icon|title|icon_and_title"
+                AppBarStyle.Content.self
             ).map(Self.content)
         case "title_cap":
             return titleCap(args)
         case "icon_source":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                BarAppIconSource.self,
-                "app_image|app_font"
+                BarAppIconSource.self
             ).map(Self.iconSource)
         case "group_adjacent_windows":
             guard let flag = args.first?.boolValue else {
@@ -181,19 +174,6 @@ enum AppBarCommandSetting {
             return .failure("expected #RRGGBB or #RRGGBBAA")
         }
         return .success(hex)
-    }
-
-    private static func choice<T: RawRepresentable>(
-        _ args: [JSONValue],
-        _ type: T.Type,
-        _ expected: String
-    ) -> Result<T, AppBarSettingError> where T.RawValue == String {
-        guard let raw = args.first?.stringValue,
-            let value = T(rawValue: raw)
-        else {
-            return .failure("expected \(expected)")
-        }
-        return .success(value)
     }
 
     /// Mirrors `SpaceBarCommandSetting.glyphCap` — including the
