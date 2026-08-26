@@ -99,14 +99,22 @@ Every one of the following binds whoever touches them:
 - A bridge-driven Desktop switch reaches KiwiDesk through the
   SAME `NSWorkspace` notification a swipe does — observed on
   device 2026-08-25, `focus_desktop` producing the target
-  Desktop's window census — so a caller arms no BOOKKEEPING
-  confirmation of its own (the #1023 bullet's deferred re-query
-  is a drop diagnostic that only logs, not bookkeeping — the
-  two rules do not conflict). A caller with NO such signal owns its own
-  bookkeeping: the no-follow `move_to_desktop` reaps the window
-  it sent away, stamps the switch window so the removal reads
-  as `vanished`, and stamps the move latch
-  (`DesktopCommandTests`).
+  Desktop's window census — but that notification fires on the
+  POINTER moving, which can precede the moved window's
+  composite, so its reconcile may run before the window is
+  listable (device-traced 2026-08-26, the "ignored until
+  minimized" report: the adoption heal then quiets the id as a
+  permanent mismatch). A verb that moved a window somewhere
+  hidden therefore owns its own bookkeeping either way: the
+  no-follow `move_to_desktop` reaps the window it sent away,
+  stamps the switch window so the removal reads as `vanished`,
+  and stamps the move latch (`DesktopCommandTests`); the FOLLOW
+  folds the departure eagerly — state AND the event loop's
+  element registration, or every later reconcile treats the
+  window as already known — and arms a reveal reap the heal's
+  quieting cannot gate (`DesktopSwitchGuardTests`). The #1023
+  bullet's deferred re-query stays a drop diagnostic that only
+  logs.
 - The bridge dispatches only while **AppKit is genuinely
   loaded** (#884's bisection): free in the app, binding on
   every harness — under `swift test` every bare read answers

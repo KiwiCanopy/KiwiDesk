@@ -113,7 +113,13 @@ extension KiwiCore {
     /// because the window is then still where the user sees it.
     func departEagerly(_ window: WindowID) {
         let pid = state.windows[window]?.pid
+        // The latch is the close-return stand-down's third arm
+        // (#936: the ONE predicate governs the raise and the
+        // restore arm alike) — held for exactly this synchronous
+        // span, see its doc on `EventLoop`.
+        eventLoop.eagerDepartureInFlight = window
         handle(.windowDestroyed(window, wasMinimized: false))
+        eventLoop.eagerDepartureInFlight = nil
         // The state fold alone is a half-state: the event loop's
         // element registry would keep the window "already known"
         // to every later reconcile and to the heal's census
@@ -136,7 +142,7 @@ extension KiwiCore {
         // adopted window instead of racing the settle's.
         guard let pid else { return }
         deferred.schedule(
-            .desktopMoveReap,
+            .desktopFollowReap,
             after: .milliseconds(700)
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning else { return }

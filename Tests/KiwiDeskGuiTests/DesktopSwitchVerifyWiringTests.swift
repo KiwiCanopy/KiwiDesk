@@ -23,15 +23,33 @@ struct DesktopSwitchVerifyWiringTests {
         let source = SourceScan.stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
-        // Non-vacuous: the schedule exists…
-        #expect(source.occurrences(of: ".desktopSwitchVerify") == 1)
-        // …and its closure hands off to the body. The needle is
-        // the call, located by what it cannot lose — the body's
-        // own signature.
+        // ONE contiguous needle from the key through the call
+        // (the KeyboardConflictWiringTests idiom): two disjoint
+        // needles pass with the call moved OUT of the closure,
+        // which is the exact gap this suite names. The delay
+        // value inside it is glue holding the needle contiguous,
+        // not an assertion — a retune edits this test knowingly.
+        let needle = """
+            deferred.schedule(
+                        .desktopSwitchVerify,
+                        after: .milliseconds(600)
+                    ) { [weak self] in
+                        guard let self, self.eventLoop.isRunning else {
+                            return
+                        }
+                        self.verifyDesktopSwitch(to: target, verb: verb)
+                    }
+            """
         #expect(
-            source.occurrences(
-                of: "self.verifyDesktopSwitch(to: target, verb: verb)"
-            ) == 1
+            normalized(source).occurrences(of: normalized(needle))
+                == 1
         )
+    }
+
+    /// Whitespace-insensitive form, so the needle pins the token
+    /// SEQUENCE (key → closure → call) rather than the
+    /// formatter's current line breaks.
+    private func normalized(_ s: String) -> String {
+        s.split(whereSeparator: \.isWhitespace).joined(separator: " ")
     }
 }

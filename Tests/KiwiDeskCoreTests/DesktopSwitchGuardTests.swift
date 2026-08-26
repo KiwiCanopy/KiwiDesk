@@ -199,9 +199,9 @@ struct DesktopSwitchGuardTests {
                 args: [.number(4)]
             ).isSuccess
         )
-        #expect(core.deferred.isScheduled(.desktopMoveReap))
+        #expect(core.deferred.isScheduled(.desktopFollowReap))
         #expect(core.eventLoop.elements[1]?[WindowID(7)] == nil)
-        core.deferred.cancel(.desktopMoveReap)
+        core.deferred.cancel(.desktopFollowReap)
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: WindowID(8), pid: 1, appName: "App")
@@ -213,7 +213,50 @@ struct DesktopSwitchGuardTests {
                 args: [.number(1)]
             ).isSuccess
         )
-        #expect(!core.deferred.isScheduled(.desktopMoveReap))
+        #expect(!core.deferred.isScheduled(.desktopFollowReap))
+    }
+
+    @Test("The eager departure raises no origin successor")
+    func eagerDepartureRaisesNoSuccessor() {
+        final class Box {
+            var lines: [String] = []
+        }
+        let core = makeCore()
+        defer { teardown() }
+        let box = Box()
+        core.onLog = { box.lines.append($0) }
+        // Successor first, mover second — the spawn grant gives
+        // the LAST created window the focus, so removing w7
+        // hands the space's focus back to w9, which is the
+        // close-return raise's exact trigger. At t=0 of the
+        // switch the origin is still composited, so the raise
+        // would fight the follow the user just asked for; the
+        // stand-down's third arm refuses it (#1023, and #936's
+        // one-predicate rule covers the restore arm with it).
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(9), pid: 1, appName: "App")
+            )
+        )
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(7), pid: 1, appName: "App")
+            )
+        )
+        #expect(
+            core.execute(
+                "move_to_desktop_and_follow",
+                args: [.number(4)]
+            ).isSuccess
+        )
+        #expect(core.state.windows[WindowID(7)] == nil)
+        #expect(
+            !box.lines.contains { $0.contains("close-return: raising") }
+        )
+        // And the latch is a SPAN, not a state: it must not
+        // outlive the fold, or every later genuine close would
+        // stand its raise down too.
+        #expect(core.eventLoop.eagerDepartureInFlight == nil)
     }
 
     @Test("A missing hide capability degrades to the pointer-only switch")

@@ -24,7 +24,7 @@ extension EventLoop {
     /// lands here, behavior-testable, rather than as a third
     /// inline condition pinned by its own source needle.
     ///
-    /// Two arms. A HIDE stands the raise down (#913): macOS
+    /// Three arms. A HIDE stands the raise down (#913): macOS
     /// picks the next frontmost app itself when an app hides,
     /// and a raise racing that choice lands the user somewhere
     /// neither chose — with `warp: true` dragging the pointer
@@ -34,10 +34,18 @@ extension EventLoop {
     /// alert (Sparkle's update dialog), raising the background
     /// window submerges the own alert. Dialog, not any own key
     /// window (#935) — the class is `classifiesAsOwnDialog`'s.
+    /// And a Desktop follow's EAGER DEPARTURE stands it down
+    /// (#1023): that synthetic removal runs at t=0 of the
+    /// switch, while the origin is still composited, so the
+    /// isListed guard passes on timing a real swipe-away
+    /// destroy never has — and the raise would fight the very
+    /// follow the user just asked for, warp included.
     func closeReturnRaiseStandsDown(after event: KiwiEvent)
         -> Bool
     {
-        event.isHideDrop || ownKeyWindow()?.isDialog == true
+        event.isHideDrop
+            || eagerDepartureInFlight != nil
+            || ownKeyWindow()?.isDialog == true
     }
 
     /// Whether an own key window is in the DIALOG class the

@@ -80,11 +80,7 @@ extension EventLoop {
                 {
                     // Deferred to reconcile.
                 } else {
-                    elements[pid]?[id] = nil
-                    detectedFloating[id] = nil
-                    detectedFullscreen[id] = nil
-                    trackedFrames[id] = nil
-                    tabCarriers.remove(id)
+                    releaseWindowRegistration(id, pid: pid)
                     onEvent(
                         .windowDestroyed(
                             id,
@@ -231,15 +227,18 @@ extension EventLoop {
         }
     }
 
-    /// Releases one window's registration — the same cleanup the
-    /// destroy arm above performs, callable by a path that KNOWS
-    /// the window left rather than observing it leave (#1023's
-    /// eager departure: a follow onto a hidden Desktop). A
-    /// state-only removal is not enough there: the element left
-    /// registered makes the window "already known" to every
-    /// later reconcile and to the heal's census diff, so nothing
-    /// ever re-adopts it — the exact half-state this exists to
-    /// prevent. Emits no event: the caller owns the state fold,
+    /// Releases one window's registration — the ONE copy of the
+    /// destroy cleanup, called by the destroy arm above and by a
+    /// path that KNOWS the window left rather than observing it
+    /// leave (#1023's eager departure: a follow onto a hidden
+    /// Desktop). A state-only removal is not enough there: the
+    /// element left registered makes the window "already known"
+    /// to every later reconcile and to the heal's census diff,
+    /// so nothing ever re-adopts it — the exact half-state this
+    /// exists to prevent. One copy on purpose (parity-tests.md's
+    /// drift warning): a second hand-list of these maps would
+    /// let one caller stop clearing what the other clears.
+    /// Emits no event: each caller owns its own fold or emit,
     /// so the registry and the fold cannot double-report.
     func releaseWindowRegistration(_ id: WindowID, pid: pid_t) {
         elements[pid]?[id] = nil
