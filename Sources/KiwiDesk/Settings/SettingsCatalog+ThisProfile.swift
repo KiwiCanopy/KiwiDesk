@@ -2,7 +2,7 @@ import KiwiDeskCore
 
 // The declaration structs behind the sidebar's **This Profile**
 // group (`SettingsDestination.thisProfile`): Spaces, Layout
-// Defaults, Monitors, Colors & Motion, Advanced Colors, Gaps &
+// Defaults, Monitors, Colors & Animations, Advanced Colors, Gaps &
 // Borders, Bars, Behavior. Split from
 // `SettingsCatalog.swift` on the seam the sidebar already
 // draws, so a destination's declarations sit where its
@@ -79,7 +79,7 @@ struct GapAxisControls: Sendable {
     let axisVertical = SettingsControl("gaps.vertical", "Vertical")
 }
 
-/// Colours & Motion (#678 Phase 3): the palette shelf, the
+/// Colours & Animations (#678 Phase 3): the palette shelf, the
 /// live-colours scene, and the Motion card that moved here whole
 /// from Behavior.
 struct ColorsControls: Sendable {
@@ -147,7 +147,7 @@ struct AdvancedColorsControls: Sendable {
         instance: "app_bar"
     )
     /// The detail panel's scene (#793). Its own key rather than
-    /// `colors.scene.title`: that one names Colours & Motion's
+    /// `colors.scene.title`: that one names Colours & Animations's
     /// "Current colors", a sample of a palette, while this names
     /// the whole set drawn at once — one concept, one word, and
     /// two different concepts here.

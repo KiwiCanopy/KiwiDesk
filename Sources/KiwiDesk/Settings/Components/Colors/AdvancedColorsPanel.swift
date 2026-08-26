@@ -13,7 +13,7 @@ import SwiftUI
 /// pair are judged against each other.
 ///
 /// The scene is `PaletteSceneThumbnail` at `.panel`, which is
-/// also what the palette shelf and Colours & Motion draw — one
+/// also what the palette shelf and Colours & Animations draw — one
 /// renderer, three mounts, so the shelf and the page can never
 /// disagree about what a palette paints. `PaletteSceneRoles` is
 /// the census of what it shows.

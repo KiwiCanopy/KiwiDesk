@@ -193,7 +193,7 @@ extension KiwiCore {
     /// snap-back has settled: the relayout animation duration (the
     /// snap-back is an `onRelayout` reflow) plus a small buffer, or
     /// nearly instant when relayout animation is off. Tracks the
-    /// live animation-speed setting, so a slow or long snap-back no
+    /// live animation-duration setting, so a slow or long snap-back no
     /// longer spawns the pill early.
     private var snapBackSettleDelay: TimeInterval {
         guard tiler.settings.animations.onRelayout else {

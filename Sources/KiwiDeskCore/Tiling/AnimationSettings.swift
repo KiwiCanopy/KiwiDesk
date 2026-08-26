@@ -11,7 +11,7 @@ import Foundation
 /// JSON shape follows the one-vocabulary rule (AGENTS.md §5):
 /// `animations.set_on_space_change` → `animations.on_space_change`
 /// `animations.set_duration` → `animations.duration`
-/// `animations.set_scroll_speed` → `animations.scroll_speed`
+/// `animations.set_scroll_duration` → `animations.scroll_duration`
 public struct AnimationSettings: Sendable, Equatable, Codable {
     /// Animate windows flying in from / out to the stash corner
     /// on a KiwiDesk **virtual** space switch. Off by default:
@@ -52,12 +52,19 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         didSet { durationMS = Self.clampMS(durationMS) }
     }
 
-    /// Scrolling-layout focus-shift animation speed (ms),
+    /// Scrolling-layout focus-shift animation duration (ms),
     /// clamped 50–1000. Separate from `durationMS` so each
     /// knob tunes its own trigger. Synced on profile apply.
-    /// Lua: `animations.set_scroll_speed` (issue #51).
-    public var scrollSpeedMS = 150 {
-        didSet { scrollSpeedMS = Self.clampMS(scrollSpeedMS) }
+    /// Lua: `animations.set_scroll_duration` (issue #51).
+    ///
+    /// Called a *duration* rather than a speed since #1020:
+    /// it is the time the shift takes, so raising it makes the
+    /// scroll slower. The stored key moved with the name and
+    /// owes `ConfigMigration` a crossing (AGENTS.md §5).
+    public var scrollDurationMS = 150 {
+        didSet {
+            scrollDurationMS = Self.clampMS(scrollDurationMS)
+        }
     }
 
     /// The supported animation-duration range (ms). Kept in
@@ -74,7 +81,7 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case onWindowSwap = "on_window_swap"
         case onRelayout = "on_relayout"
         case durationMS = "duration"
-        case scrollSpeedMS = "scroll_speed"
+        case scrollDurationMS = "scroll_duration"
     }
 
     public init() {}
@@ -119,10 +126,10 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 forKey: .durationMS
             ) ?? 150
         )
-        scrollSpeedMS = Self.clampMS(
+        scrollDurationMS = Self.clampMS(
             try container.decodeIfPresent(
                 Int.self,
-                forKey: .scrollSpeedMS
+                forKey: .scrollDurationMS
             ) ?? 150
         )
     }

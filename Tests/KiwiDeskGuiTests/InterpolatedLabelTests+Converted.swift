@@ -147,7 +147,7 @@ extension InterpolatedLabelTests {
         //    fixing it.
         "border.controls.disabled": 1,
         "space_bar.disabled.help": 1,
-        "scroll_grid.scroll_speed.animation_off": 1,
+        "scroll_grid.scroll_duration.animation_off": 1,
         "track.auto_tracks.limit_inert": 1,
         "monitors.not_connected.caption": 1,
         "menu.status.config_error.tooltip": 1,

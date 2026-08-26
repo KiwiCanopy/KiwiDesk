@@ -209,13 +209,21 @@ struct ConfigMigrationTests {
         )
     }
 
-    /// A config carrying format 1 (current) skips migration
-    /// immediately without scanning payload.
-    @Test("Format 1 config skips migration")
-    func format1SkipsMigration() {
+    /// A config already carrying the CURRENT format skips
+    /// migration immediately without scanning payload.
+    ///
+    /// The number is derived, not spelled: the claim is about a
+    /// file at whatever this build writes, which stays true across
+    /// every bump, while a literal reds on each one and guards
+    /// nothing (tests.md, #1021). This fixture has no
+    /// `monitor_sets`, so `targetFormat` routes it as a
+    /// `GuiConfig` — the shape whose current format it must carry.
+    @Test("A current-format config skips migration")
+    func currentFormatSkipsMigration() {
         let data = json(
             """
-            {"format":1,"settings":{"app_bar":{"content":"icon_and_title"}}}
+            {"format":\(GuiConfig.currentFormat),"settings":\
+            {"app_bar":{"content":"icon_and_title"}}}
             """
         )
         #expect(ConfigMigration.migrated(data) == nil)

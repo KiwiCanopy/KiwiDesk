@@ -45,8 +45,8 @@ enum LayoutDefaultsRowOrder {
     ]
 
     /// The scrolling animation pair (`animationsOnScrolling` and
-    /// its speed) lives in this area rather than in Colours &
-    /// Motion: it is the scroll's own magnitude, not a global
+    /// its duration) lives in this area rather than in Colours &
+    /// Animations: it is the scroll's own timing, not a global
     /// animation, and the census places it here.
     static let scrolling: [SettingKey] = [
         .layout(.scrollingOrientation),
@@ -56,7 +56,7 @@ enum LayoutDefaultsRowOrder {
         .layout(.scrollingNewWindowPlacement),
         .layout(.scrollingWrapFocus),
         .colours(.animationsOnScrolling),
-        .colours(.animationsScrollSpeedMS),
+        .colours(.animationsScrollDurationMS),
     ]
 
     static let grid: [SettingKey] = [

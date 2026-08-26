@@ -157,7 +157,18 @@ struct PresetsSection: View {
     }
 
     /// Every preset for a count that is NOT connected, behind one
-    /// disclosure that says how many are in there.
+    /// disclosure.
+    ///
+    /// **No summary (#1028).** Since #1021 a summary renders
+    /// INSIDE the header button, so its text composes into the
+    /// button's accessibility name and its headings-rotor entry.
+    /// A bare `others.count` therefore announced as an unlabelled
+    /// digit — "Other setups 12, collapsed, heading" — where the
+    /// four sibling drawers announce a phrase saying what is
+    /// inside. The placement is right and is not what changed;
+    /// the owner ruled the label alone, so the header says one
+    /// thing on both channels and the screen counts stay where
+    /// they are already spoken, on the groups inside.
     @ViewBuilder private var otherSetups: some View {
         let others = ProfilesFamilyRows.presets(
             excludingScreens: liveCount
@@ -166,8 +177,7 @@ struct PresetsSection: View {
             SettingsDisclosure(
                 SettingsCatalog.profiles.presetsOther,
                 isExpanded: $otherSetupsExpanded,
-                scrollHoisted: true,
-                summary: "\(others.count)"
+                scrollHoisted: true
             ) {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(otherCounts(others), id: \.self) {

@@ -13,7 +13,7 @@ extension APIReference {
             "Sets the general animation duration in milliseconds.",
             .integer("milliseconds")
         ),
-        "set_scroll_speed": APIRecord(
+        "set_scroll_duration": APIRecord(
             "Sets the scrolling focus-shift duration in "
                 + "milliseconds.",
             .integer("milliseconds")

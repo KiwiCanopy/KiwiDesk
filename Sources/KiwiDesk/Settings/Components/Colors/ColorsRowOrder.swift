@@ -10,7 +10,7 @@
 /// or retiered without a renderer update is a red test, not a
 /// silently missing control.
 enum ColorsRowOrder {
-    // MARK: - Colours & Motion (the Simple area)
+    // MARK: - Colours & Animations (the Simple area)
 
     /// The per-palette context menu, in menu order (Delete last
     /// and separated, being the destructive one).

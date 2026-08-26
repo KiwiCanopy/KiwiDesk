@@ -93,10 +93,10 @@ public final class AnimationEngine {
         set { storedDurationMS = min(max(newValue, 50), 1000) }
     }
 
-    /// Scrolling-layout focus-shift speed in ms, clamped
-    /// 50–1000. Independent knob so scroll speed and general
-    /// animation speed can be tuned separately. Synced from
-    /// `AnimationSettings.scrollSpeedMS` on profile apply.
+    /// Scrolling-layout focus-shift duration in ms, clamped
+    /// 50–1000. Independent knob so the scroll and the general
+    /// animation can be tuned separately. Synced from
+    /// `AnimationSettings.scrollDurationMS` on profile apply.
     public var scrollDurationMS: Int {
         get { storedScrollDurationMS }
         set {

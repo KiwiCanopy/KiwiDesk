@@ -100,8 +100,8 @@ struct LayoutCard: View {
             layoutRow(k)
         case .colours(.animationsOnScrolling):
             animateFocusShiftsRow
-        case .colours(.animationsScrollSpeedMS):
-            scrollSpeedRow
+        case .colours(.animationsScrollDurationMS):
+            scrollDurationRow
         default:
             // The render-parity guard forces every census row of
             // these containers into the order lists, so a

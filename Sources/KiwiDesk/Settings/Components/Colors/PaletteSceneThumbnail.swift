@@ -7,7 +7,7 @@ import SwiftUI
 /// Takes the palette by value; sparse palettes fall back to the
 /// shipped defaults for any color they omit, so a thumbnail always
 /// reads as a complete scene.
-/// The Colours & Motion page reuses it at a larger `height` as
+/// The Colours & Animations page reuses it at a larger `height` as
 /// its live "current colours" scene, fed
 /// `ColorPaletteKeys.extract(from:)` over the staged config —
 /// same drawing, so the shelf and the page can never disagree

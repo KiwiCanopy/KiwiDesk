@@ -69,6 +69,7 @@ public enum ConfigMigration {
     private static let steps: [@Sendable (Data) -> Data?] = [
         migratingLegacyPalettesArray,
         migratingRetiredBarContent,
+        migratingRetiredScrollSpeed,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939).

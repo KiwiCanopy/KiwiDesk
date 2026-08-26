@@ -118,6 +118,81 @@ struct ConfigMigrationRoutingTests {
         }
     }
 
+    /// `scroll_duration` is an animation key and nothing else,
+    /// and `scroll_speed` is a key nowhere at all.
+    ///
+    /// Same argument as the `content` guard below, for the same
+    /// reason: the #1020 walk rewrites by KEY at any depth and
+    /// `readBackup` runs it across a whole `SetupBundle`, so a
+    /// second `scroll_speed` JSON key anywhere in the config
+    /// would put a value the walk was never scoped to inside its
+    /// reach. The retired half matters just as much as the live
+    /// one — re-declaring `scroll_speed` as a *different*
+    /// setting's key would have this migration silently rename
+    /// that setting instead.
+    @Test("The scroll-duration rename stays scoped to one key")
+    func scrollDurationKeyStaysUnique() throws {
+        let root = coreRoot
+        let prefix = root.path + "/"
+        // The live key. Two entries, and they are different
+        // kinds: the first is the CodingKey the walk must land
+        // on, the second is the migration's own rename TARGET,
+        // which is not a key declaration and cannot be reached by
+        // the walk. A third entry of the first kind is the defect
+        // this guards.
+        let allowedLive: Set<String> = [
+            "Tiling/AnimationSettings.swift",
+            "Config/ConfigMigration+ScrollDuration.swift",
+        ]
+        // The retired key: only the migration that retires it may
+        // still name it, and only as its own retired-key
+        // constant.
+        let allowedRetired: Set<String> = [
+            "Config/ConfigMigration+ScrollDuration.swift"
+        ]
+        var live: Set<String> = []
+        var retired: Set<String> = []
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let key =
+                file.path.hasPrefix(prefix)
+                ? String(file.path.dropFirst(prefix.count))
+                : file.path
+            if source.contains("\"scroll_duration\"") {
+                live.insert(key)
+            }
+            if source.contains("\"scroll_speed\"") {
+                retired.insert(key)
+            }
+        }
+        // Assert the scan found its subject before asserting
+        // anything about it: a needle that matches nothing passes
+        // for having found no violations rather than for there
+        // being none (rule-authoring.md).
+        #expect(!live.isEmpty)
+        #expect(
+            live == allowedLive,
+            Comment(
+                rawValue:
+                    "`scroll_duration` declarations: "
+                    + "\(live.sorted()) — a second one owes "
+                    + "ConfigMigration's walk a path, or this map "
+                    + "a narrower home"
+            )
+        )
+        #expect(
+            retired == allowedRetired,
+            Comment(
+                rawValue:
+                    "`scroll_speed` still named in: "
+                    + "\(retired.sorted()) — the key is retired; "
+                    + "only the migration may name it"
+            )
+        )
+    }
+
     /// `content` is a bar-content key and nothing else.
     ///
     /// `ConfigMigration`'s walk rewrites by KEY at any depth, and

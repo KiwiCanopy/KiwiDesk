@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Colours & Motion ▸ Animations (#678 Phase 3, turn 12a). Moved
+/// Colours & Animations ▸ Animations (#678 Phase 3, turn 12a). Moved
 /// here whole from Behavior: the census places every one of its
 /// rows in `.coloursAndMotion`, and a card split across two
 /// destinations is a half-rendered area the parity guard cannot
@@ -144,7 +144,7 @@ struct MotionCard: View {
         L(
             "behavior.animations.scrolling_xref",
             "Scrolling-layout focus shifts have their own "
-                + "toggle and speed in %1$@.",
+                + "toggle and duration in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }

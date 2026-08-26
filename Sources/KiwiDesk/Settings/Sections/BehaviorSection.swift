@@ -7,7 +7,7 @@ import SwiftUI
 /// any scope cue).
 ///
 /// The animation toggles left in #678 Phase 3: the census places
-/// every one of them in Colours & Motion, and half a card on each
+/// every one of them in Colours & Animations, and half a card on each
 /// page is an area the render-parity guard cannot see whole.
 struct BehaviorSection: View {
     @ObservedObject var model: SettingsModel

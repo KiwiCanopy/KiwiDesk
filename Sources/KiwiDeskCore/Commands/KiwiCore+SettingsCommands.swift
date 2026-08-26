@@ -103,13 +103,13 @@ extension KiwiCore {
             // Engine syncs via TilingEngine.settings.didSet.
             tiler.settings.animations.durationMS = ms
             return .ok()
-        case "animations.set_scroll_speed":
+        case "animations.set_scroll_duration":
             // The scroll-specific duration knob, split from
             // `animations.set_duration` (issue #51).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            tiler.settings.animations.scrollSpeedMS = ms
+            tiler.settings.animations.scrollDurationMS = ms
             return .ok()
         case "animations.set_size_policy":
             // Experimental (#47), engine-only — not persisted to a

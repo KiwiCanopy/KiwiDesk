@@ -8,7 +8,8 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case animationsOnRelayout = "settings.animations.onRelayout"
     case animationsDurationMS = "settings.animations.durationMS"
     case animationsOnScrolling = "settings.animations.onScrolling"
-    case animationsScrollSpeedMS = "settings.animations.scrollSpeedMS"
+    case animationsScrollDurationMS =
+        "settings.animations.scrollDurationMS"
     case paletteApply = "(action) palette.apply"
     case paletteSave = "(action) palette.save"
     case paletteRename = "(action) palette.rename"
@@ -37,7 +38,7 @@ extension ColoursKey {
             )
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)
-        case .animationsScrollSpeedMS:
+        case .animationsScrollDurationMS:
             return .row(
                 .layoutDefaults,
                 .scrolling,
@@ -97,8 +98,8 @@ extension ColoursKey {
                 "scroll_grid.animate_focus_shifts",
                 help: "scroll_grid.animate_focus_shifts.help"
             )
-        case .animationsScrollSpeedMS:
-            return .text("scroll_grid.scroll_speed")
+        case .animationsScrollDurationMS:
+            return .text("scroll_grid.scroll_duration")
         case .paletteApply:
             return .dynamic
         case .paletteSave:

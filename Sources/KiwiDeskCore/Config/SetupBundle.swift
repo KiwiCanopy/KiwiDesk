@@ -61,7 +61,13 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// read; the other direction — a format-1 bundle read here —
     /// stays readable and is migrated on the way in
     /// (`KiwiCore+Backup.readBackup`).
-    public static let currentFormat = 2
+    ///
+    /// **3** since the scroll-duration rename (#1020): a bundle
+    /// carries `[Profile]` AND a `GuiConfig` inline, and both
+    /// changed decoded shape, which is the same
+    /// "breaks the decoded shape of anything the bundle carries"
+    /// case as the bump above.
+    public static let currentFormat = 3
 
     public let format: Int
 
