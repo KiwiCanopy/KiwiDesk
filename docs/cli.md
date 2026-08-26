@@ -55,6 +55,13 @@ Commands are sent over a UNIX domain socket at
 `~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on
 success, 1 on error (message on stderr, data on stdout).
 
+Data on stdout is JSON with its object keys **sorted**, so two
+captures of the same response can be diffed. It is indented when
+stdout is a terminal and compact — one line — when it is piped or
+redirected, which keeps it exactly what a script or `jq` already
+expects. `subscribe` is unaffected either way: its stream is
+newline-delimited JSON, one event per line, whatever stdout is.
+
 ## Version
 
 ```sh
