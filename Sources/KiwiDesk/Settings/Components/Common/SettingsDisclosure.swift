@@ -85,6 +85,11 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     /// nil means this view owns it.
     private let externalExpansion: Binding<Bool>?
     @State private var internalExpansion = false
+    /// What the drawer hides, drawn beside the header while it
+    /// is shut. `SettingsDisclosureStyle.summaryText` owns the
+    /// tier and the shut-only rule; a call site hands it the
+    /// words and nothing else.
+    private let summary: String?
     @ViewBuilder private let content: () -> Content
     @ViewBuilder private let accessory: () -> Accessory
     @Environment(\.settingsRevealTarget)
@@ -96,6 +101,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
         modeGated: Bool = false,
+        summary: String? = nil,
         @ViewBuilder content: @escaping () -> Content,
         @ViewBuilder accessory: @escaping () -> Accessory
     ) {
@@ -104,6 +110,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         self.chrome = chrome
         self.scrollHoisted = scrollHoisted
         self.modeGated = modeGated
+        self.summary = summary
         self.externalExpansion = isExpanded
         self.content = content
         self.accessory = accessory
@@ -115,6 +122,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
         modeGated: Bool = false,
+        summary: String? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) where Accessory == EmptyView {
         self.init(
@@ -123,6 +131,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             isExpanded: isExpanded,
             scrollHoisted: scrollHoisted,
             modeGated: modeGated,
+            summary: summary,
             content: content,
             accessory: { EmptyView() }
         )
@@ -254,7 +263,10 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         // `SettingsDisclosureStyle` carries the argument. Every
         // drawer takes it, in both chromes.
         .disclosureGroupStyle(
-            SettingsDisclosureStyle(accessory: accessory)
+            SettingsDisclosureStyle(
+                summary: summary,
+                accessory: accessory
+            )
         )
         // Reads only — the reveal fields keep one writer and
         // one clearer (`SettingsView`); an observer that also

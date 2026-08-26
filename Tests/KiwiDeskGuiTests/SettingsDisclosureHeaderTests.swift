@@ -218,10 +218,23 @@ struct SettingsDisclosureHeaderTests {
             "Sources/KiwiDesk/Settings/Components/Common/"
                 + "SettingsDisclosure.swift"
         )
+        // Two clauses rather than one pin of the whole
+        // argument list. What this guards is that the accessory
+        // travels to the STYLE as an argument of its own — the
+        // exact call spelling is not the invariant, and pinning
+        // it redded the day the style grew a `summary:`
+        // parameter that has nothing to do with this ruling.
         #expect(
             wrapper.contains(
                 ".disclosureGroupStyle(SettingsDisclosureStyle("
-                    + "accessory:accessory))"
+            )
+        )
+        #expect(
+            wrapper.contains("accessory:accessory)"),
+            Comment(
+                rawValue:
+                    "the accessory no longer reaches the style "
+                    + "as its own argument"
             )
         )
         #expect(

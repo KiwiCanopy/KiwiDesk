@@ -166,7 +166,8 @@ struct PresetsSection: View {
             SettingsDisclosure(
                 SettingsCatalog.profiles.presetsOther,
                 isExpanded: $otherSetupsExpanded,
-                scrollHoisted: true
+                scrollHoisted: true,
+                summary: "\(others.count)"
             ) {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(otherCounts(others), id: \.self) {
@@ -175,10 +176,6 @@ struct PresetsSection: View {
                     }
                 }
                 .padding(.top, 6)
-            } accessory: {
-                Text("\(others.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
     }

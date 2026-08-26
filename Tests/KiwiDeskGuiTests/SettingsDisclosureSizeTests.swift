@@ -53,10 +53,19 @@ struct SettingsDisclosureSizeTests {
         // inheritance drew the indicator larger than the title
         // it marks, which is the heavy header the owner read
         // back (2026-08-26). Weight is the only step it takes.
+        // The run ends at the FUNCTION's closing brace, never
+        // at a modifier name. An anchor like
+        // `.accessibilityHidden(true)` bounds the run above
+        // itself, so a scale step appended on the next line is
+        // still the chevron's own chain, still the defect this
+        // clause names, and invisible — proven green
+        // (guard-prover, 2026-08-26). The body carries no
+        // closure, so the first `}` after the image IS the
+        // function's.
         let chevronRun = try run(
             in: style,
             from: "Image(systemName:\"chevron.right\")",
-            to: ".accessibilityHidden(true)"
+            to: "}"
         )
         #expect(
             !chevronRun.contains(".font("),
@@ -105,7 +114,11 @@ struct SettingsDisclosureSizeTests {
             "Sources/KiwiDesk/Settings/Components/Common/"
                 + "SettingsDisclosure.swift"
         )
-        #expect(file.contains("caseinline\n") || file.contains("caseinline"))
+        // One shape, not two: `squashed` joins every newline
+        // away, so the `caseinline\n` disjunct this carried
+        // could never match and read as coverage it did not
+        // have. It stays as the non-empty-input check.
+        #expect(file.contains("caseinline"))
         #expect(
             !file.contains("caseinline(font:"),
             "the chrome carries a font payload again"
@@ -114,9 +127,114 @@ struct SettingsDisclosureSizeTests {
             !file.contains("labelFont"),
             "the per-chrome label font is back"
         )
+        // Scoped to the LABEL's own run, for the reason the
+        // sibling clause is: read against the whole file, this
+        // passed green when the `.font` was deleted from the
+        // header label and the identical literal parked on the
+        // drawer's interior `VStack` — the header then draws at
+        // whatever it inherits, which IS the call-site-decision
+        // state this test is named for (guard-prover,
+        // 2026-08-26).
+        let labelRun = try run(
+            in: file,
+            from: "Text(control.text)",
+            to: "}"
+        )
         #expect(
-            file.contains(".font(.callout.weight(.semibold))"),
-            "both chromes draw the one header tier"
+            labelRun.contains(".font(.callout.weight(.semibold))"),
+            Comment(
+                rawValue:
+                    "the header label lost the one tier — "
+                    + "\(labelRun)"
+            )
+        )
+    }
+
+    /// The drawer's SUMMARY — what it hides, stated beside the
+    /// header while it is shut — is the header tier's own drift
+    /// wearing a different slot (owner, 2026-08-26). Five call
+    /// sites drew it by hand at `.font(.caption)`, 10 pt against
+    /// a 12 pt header, and the fifth had also decided the
+    /// shut-only rule differently from the other four. The slot
+    /// now owns both, so a `.font(` inside an `accessory:`
+    /// closure is the drift coming back.
+    ///
+    /// It scans the whole Settings tree rather than the five
+    /// known files: the harm is a NEW call site re-deciding the
+    /// tier, which a list of today's callers cannot see.
+    @Test("no call site sizes what sits beside a header")
+    func accessoryClosuresCarryNoFont() throws {
+        let settings =
+            root
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+        let files =
+            FileManager.default
+            .enumerator(at: settings, includingPropertiesForKeys: nil)?
+            .compactMap { $0 as? URL }
+            .filter { $0.pathExtension == "swift" } ?? []
+        #expect(!files.isEmpty, "the scan root moved")
+        var offenders: [String] = []
+        for file in files {
+            let text = try String(contentsOf: file, encoding: .utf8)
+            for closure in accessoryClosures(in: text)
+            where closure.contains(".font(") {
+                offenders.append(file.lastPathComponent)
+            }
+        }
+        #expect(
+            offenders.isEmpty,
+            Comment(
+                rawValue:
+                    "an accessory closure sizes its own text; "
+                    + "pass `summary:` instead — "
+                    + offenders.joined(separator: ", ")
+            )
+        )
+    }
+
+    /// Every `accessory: {` body in one file, brace-balanced so
+    /// the scan stops at the closure's own end rather than at
+    /// the first `}` it meets.
+    private func accessoryClosures(in text: String) -> [String] {
+        var bodies: [String] = []
+        var search = text.startIndex..<text.endIndex
+        while let open = text.range(
+            of: "accessory: {",
+            range: search
+        ) {
+            var depth = 1
+            var index = open.upperBound
+            while index < text.endIndex, depth > 0 {
+                if text[index] == "{" { depth += 1 }
+                if text[index] == "}" { depth -= 1 }
+                index = text.index(after: index)
+            }
+            bodies.append(String(text[open.upperBound..<index]))
+            search = index..<text.endIndex
+        }
+        return bodies
+    }
+
+    @Test("the summary is drawn once, and only while shut")
+    func theSummaryTierLivesInTheStyle() throws {
+        let style = try squashed(Self.styleFile)
+        let summaryRun = try run(
+            in: style,
+            from: "Text(summary)",
+            to: "}"
+        )
+        #expect(summaryRun.contains(".font(.callout)"))
+        #expect(
+            summaryRun.contains(
+                ".foregroundStyle(SettingsTheme.ink2)"
+            ),
+            "the summary is row detail, at the chevron's ink"
+        )
+        // Shut-only, in the style rather than at a call site —
+        // expanded, the rows below say it in full.
+        #expect(
+            style.contains("if!configuration.isExpanded{"),
+            "the summary shows while the drawer is open"
         )
     }
 }

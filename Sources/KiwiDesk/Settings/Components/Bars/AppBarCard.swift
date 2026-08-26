@@ -88,16 +88,11 @@ struct AppBarCard: View {
         SettingsDisclosure(
             SettingsCatalog.bars.appBarStyle,
             isExpanded: $styleExpanded,
-            scrollHoisted: true
+            scrollHoisted: true,
+            summary: styleSummary
         ) {
             rows(BarsRowOrder.appBarStyle)
                 .padding(.top, 8)
-        } accessory: {
-            if !styleExpanded {
-                Text(styleSummary)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
         }
     }
 

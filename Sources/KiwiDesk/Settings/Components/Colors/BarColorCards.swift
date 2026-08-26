@@ -43,7 +43,8 @@ struct SpaceBarColorCard: View {
             SettingsDisclosure(
                 SettingsCatalog.advancedColors.spaceBarMore,
                 isExpanded: $moreExpanded,
-                scrollHoisted: true
+                scrollHoisted: true,
+                summary: summary
             ) {
                 ColorGrid {
                     AdvancedColorRows(
@@ -54,12 +55,6 @@ struct SpaceBarColorCard: View {
                     )
                 }
                 .padding(.top, 8)
-            } accessory: {
-                if !moreExpanded {
-                    Text(summary)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
         }
     }
@@ -99,7 +94,8 @@ struct AppBarColorCard: View {
             SettingsDisclosure(
                 SettingsCatalog.advancedColors.appBarMore,
                 isExpanded: $moreExpanded,
-                scrollHoisted: true
+                scrollHoisted: true,
+                summary: summary
             ) {
                 ColorGrid {
                     AdvancedColorRows(
@@ -110,12 +106,6 @@ struct AppBarColorCard: View {
                     )
                 }
                 .padding(.top, 8)
-            } accessory: {
-                if !moreExpanded {
-                    Text(summary)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
         }
     }

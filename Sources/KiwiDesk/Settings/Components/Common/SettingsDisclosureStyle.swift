@@ -33,9 +33,16 @@ struct SettingsDisclosureStyle<Accessory: View>:
 {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    /// What the drawer hides, stated on the row while it is
+    /// SHUT — see `summaryText`.
+    private let summary: String?
     @ViewBuilder private let accessory: () -> Accessory
 
-    init(@ViewBuilder accessory: @escaping () -> Accessory) {
+    init(
+        summary: String? = nil,
+        @ViewBuilder accessory: @escaping () -> Accessory
+    ) {
+        self.summary = summary
         self.accessory = accessory
     }
 
@@ -66,6 +73,17 @@ struct SettingsDisclosureStyle<Accessory: View>:
                     // The row is the hit target, so it claims
                     // the width the accessory does not.
                     Spacer(minLength: 0)
+                    // INSIDE the button, unlike the accessory
+                    // beside it. The #956 ruling puts that slot
+                    // outside because it may hold a CONTROL, and
+                    // a control inside a control loses its click
+                    // and its name — a summary is plain text, so
+                    // that reason does not reach it. Drawn
+                    // outside, the hover pill stopped where the
+                    // summary began and those words did not
+                    // toggle the drawer they describe (owner,
+                    // 2026-08-26).
+                    if !configuration.isExpanded { summaryText }
                 }
                 .contentShape(Rectangle())
             }
@@ -96,6 +114,58 @@ struct SettingsDisclosureStyle<Accessory: View>:
                     )
             )
             accessory()
+        }
+    }
+
+    /// **What the drawer hides, at the size of the header it
+    /// sits beside.** Five call sites drew this by hand at
+    /// `.font(.caption)` — 10 pt, two steps under a 12 pt
+    /// header — which is the same drift the header's own tier
+    /// came out of in #1021, and it read as an afterthought
+    /// rather than as the row's value (owner, 2026-08-26).
+    ///
+    /// **It stays BESIDE the header rather than becoming a
+    /// caption under it**, and that is the ruling rather than
+    /// the layout that fell out: this states the drawer's
+    /// current VALUE and is gone the moment the drawer opens,
+    /// where a caption explains what a thing IS and stays.
+    /// Under the header it would add and remove a line on every
+    /// toggle, shoving the rows below it, and it would sit
+    /// exactly where the drawer's own contents go — reading as
+    /// content that failed to hide. macOS states a shut row's
+    /// value trailing on the row, which is where it already
+    /// was; only the size was wrong.
+    ///
+    /// SHUT only, here rather than at each call site: four of
+    /// the five wrapped their own `if`, and the fifth
+    /// (Presets' count) did not, so the rule was a call-site
+    /// decision too. Expanded, the summary restates what the
+    /// rows below it now say in full.
+    ///
+    /// `ink2`, the chevron's ink, on the chevron's argument:
+    /// this is row detail, and `ink3` is the caption tier.
+    /// Nothing new is drawn on this ground, so
+    /// `SettingsThemeContrastTests`' pairings are unchanged.
+    ///
+    /// **Not `.accessibilityHidden`.** It rides inside the
+    /// button, so its words compose into the header's NAME —
+    /// "Style, Background, Content …" — where before they were
+    /// a static text stop of their own. Read aloud the
+    /// information survives the move; hidden it would not, and
+    /// the button's `.accessibilityValue` is already spent on
+    /// expanded/collapsed.
+    ///
+    /// **No `layoutPriority`.** The label's `Spacer` is greedy,
+    /// so a lower priority here starves the summary to zero
+    /// width at every size rather than only at narrow ones.
+    /// Sharing the squeeze is what `lineLimit(1)` is for: the
+    /// summary loses its tail, the title keeps wrapping.
+    @ViewBuilder private var summaryText: some View {
+        if let summary {
+            Text(summary)
+                .font(.callout)
+                .foregroundStyle(SettingsTheme.ink2)
+                .lineLimit(1)
         }
     }
 
