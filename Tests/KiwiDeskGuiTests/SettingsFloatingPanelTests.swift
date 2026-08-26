@@ -133,11 +133,27 @@ struct SettingsFloatingPanelTests {
         )
         // And the row holding them both names nothing — the
         // container label is the defect, so its absence is the
-        // assertion.
+        // assertion. Counted, never located by the container's
+        // padding chain: that spelling named `.horizontal,12`,
+        // `.top,8` and `.bottom,2` only to find the row, so
+        // retuning any one of them innocently stopped the
+        // needle matching and the clause passed with the
+        // regression free to land — fail-open, not merely a tax
+        // (#1021's sweep).
+        //
+        // One label in this file, and the clause above says
+        // which: the grip's. The button takes its name through
+        // `.iconButtonAffordance`, so a second
+        // `.accessibilityLabel(` anywhere here is the re-hoist.
         #expect(
-            !source.contains(
-                "}.padding(.horizontal,12).padding(.top,8)"
-                    + ".padding(.bottom,2).accessibilityLabel("
+            source.components(
+                separatedBy: ".accessibilityLabel("
+            ).count - 1 == 1,
+            Comment(
+                rawValue:
+                    "the panel names something besides the "
+                    + "grip; the container label is the #841 "
+                    + "regression"
             )
         )
     }

@@ -192,7 +192,7 @@ struct SettingsDisclosureHeaderTests {
         // band in a green-tinted window (#956, owner on device).
         #expect(
             style.contains(
-                ".rowHoverHighlight(cornerRadius:6,padding:4)"
+                ".rowHoverHighlight("
             )
         )
         #expect(
@@ -207,14 +207,16 @@ struct SettingsDisclosureHeaderTests {
         #expect(
             style.contains("Image(systemName:\"chevron.right\")")
         )
-        // A concrete ink, not `.secondary`: hierarchical styles
+        // A THEME ink, not `.secondary`: hierarchical styles
         // compound under the Overrides footer's own
-        // `.secondary`. `ink2` rather than the caption-tier
-        // `ink3`, because with no resting fill the chevron IS
-        // the resting affordance.
+        // `.secondary`, so the chevron drew its cue at
+        // secondary-of-secondary. That is the invariant — WHICH
+        // ink it takes is a tuning, argued where it is chosen
+        // (`SettingsDisclosureStyle`'s docstring) rather than
+        // pinned here, so retuning it costs no test edit.
         #expect(
             style.contains(
-                ".foregroundStyle(SettingsTheme.ink2)"
+                ".foregroundStyle(SettingsTheme."
             )
         )
         #expect(
