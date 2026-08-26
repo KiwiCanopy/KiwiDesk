@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 
 /// Learns app-enforced size bounds from the engine's own asks
 /// (#677). `retile` records every size it issues
@@ -78,14 +79,36 @@ struct SizeBoundLearner {
     /// single post-settle probe (~the probe grace after the
     /// dance settles) instead of a second full cycle (device
     /// QA, 2026-08-18: "could we make it immediate?").
+    ///
+    /// The `echoComplied*` flags carry the OTHER single-cycle
+    /// shortcut (#1049): an echo-channel compliance for this
+    /// ask's axis. They exist so a comply-then-revoke pair can
+    /// promote directly — see `observeAxis`. Reset by
+    /// `recordAsk`, since a new ask is a new question.
     struct Ask {
         var size: CGSize
         var settledFrom: CGSize?
+        var echoCompliedWidth = false
+        var echoCompliedHeight = false
+    }
+
+    /// The parked ledgers of gone windows (#1049): a slow AX
+    /// app (the Android emulator, ~700 ms reconciles) flaps —
+    /// its window is briefly dropped and re-added under the
+    /// SAME id — and the destroy-forgets rule (#152/#158) made
+    /// every re-add re-run the whole learn dance on screen.
+    /// The revive half, its pid check and the grace live in
+    /// `SizeBoundLearner+Invalidation.swift`.
+    struct Tombstone {
+        var bounds: Ledger
+        var pid: pid_t
+        var at: Date
     }
 
     var lastAsks: [WindowID: Ask] = [:]
     var candidates: [WindowID: Ledger] = [:]
     var bounds: [WindowID: Ledger] = [:]
+    var tombstones: [WindowID: Tombstone] = [:]
 
     /// The size `retile` just issued for a window. Only the
     /// layout loop records — a stash park or float restore is
@@ -151,7 +174,8 @@ struct SizeBoundLearner {
             current: currentSize.width,
             baseline: ask.settledFrom?.width,
             settledRead: settledRead,
-            axis: \.width
+            axis: \.width,
+            echoComplied: \.echoCompliedWidth
         )
         let heightConfirmed = observeAxis(
             id,
@@ -159,68 +183,10 @@ struct SizeBoundLearner {
             current: currentSize.height,
             baseline: ask.settledFrom?.height,
             settledRead: settledRead,
-            axis: \.height
+            axis: \.height,
+            echoComplied: \.echoCompliedHeight
         )
         return widthConfirmed || heightConfirmed
-    }
-
-    /// The confirmed bound for a window, nil while unproven.
-    /// The only view GEOMETRY may consume — the layouts'
-    /// re-pack and centering, and the retile skip.
-    func bound(for id: WindowID) -> EffectiveSizeBound? {
-        bounds[id].map {
-            EffectiveSizeBound(
-                width: $0.width,
-                height: $0.height
-            )
-        }
-    }
-
-    /// Whether a post-settle probe is worth an AX read
-    /// (#677): the last ask exists, some axis of it is off the
-    /// window's current state frame (a refusal, or an echo not
-    /// yet landed), and that axis is not already believed. The
-    /// common settle — a complying window whose echo landed —
-    /// answers false, so probing costs nothing there.
-    func wantsProbe(
-        _ id: WindowID,
-        currentSize: CGSize
-    ) -> Bool {
-        guard let ask = lastAsks[id] else { return false }
-        let asked = ask.size
-        let believed = bound(for: id)
-        let widthDone =
-            EffectiveSizeBound.matches(
-                currentSize.width,
-                asked.width
-            )
-            || believed?.consumedWidth(asking: asked.width)
-                != nil
-        let heightDone =
-            EffectiveSizeBound.matches(
-                currentSize.height,
-                asked.height
-            )
-            || believed?.consumedHeight(asking: asked.height)
-                != nil
-        return !(widthDone && heightDone)
-    }
-
-    /// The unconfirmed candidates, in the same shape — for the
-    /// overlay pin ONLY (#677 device QA): rendering may trust a
-    /// single refusal because a wrong render self-corrects at
-    /// settle, so the ring stops riding out on the second probe
-    /// instead of the third. Geometry must not consume this — a
-    /// wrong candidate would misplace real windows.
-    func candidateBound(
-        for id: WindowID
-    ) -> EffectiveSizeBound? {
-        candidates[id].map {
-            EffectiveSizeBound(
-                width: $0.width,
-                height: $0.height
-            )
-        }
     }
 
     private mutating func observeAxis(
@@ -229,7 +195,8 @@ struct SizeBoundLearner {
         current: CGFloat,
         baseline: CGFloat?,
         settledRead: Bool,
-        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>,
+        echoComplied: WritableKeyPath<Ask, Bool>
     ) -> Bool {
         var confirmed = false
         if EffectiveSizeBound.matches(current, asked) {
@@ -237,10 +204,37 @@ struct SizeBoundLearner {
             // constraint lifted (#1049) — a transient one is
             // the emulator mid-snap-back, and clearing on it
             // wiped the ladder every cycle. See `observe`.
+            // An echo-channel compliance is REMEMBERED instead:
+            // if this same ask is next observed OFF its size,
+            // the pair promotes below.
             if settledRead {
                 complied(id, asked: asked, axis: axis)
+            } else {
+                lastAsks[id]?[keyPath: echoComplied] = true
             }
             return false
+        }
+        // The comply-then-revoke pair confirms in ONE cycle
+        // (#1049): the ladder needs "the same answer twice"
+        // because a single refusal can be a stale pre-ask frame
+        // reading as an answer — but a compliance echo proves
+        // the window truly held the asked size moments ago, so
+        // an off-ask reading that follows within the same ask
+        // is the app actively revoking our size: one answer,
+        // definitively attributed, no second dance needed. The
+        // narrow trade: a USER resize landing inside the ask's
+        // echo grace right after the compliance confirms a
+        // false entry — it pins the window at the size the user
+        // themselves chose, and the next genuine resize or
+        // settled compliance clears it.
+        if lastAsks[id]?[keyPath: echoComplied] == true {
+            lastAsks[id]?[keyPath: echoComplied] = false
+            return promote(
+                id,
+                asked: asked,
+                answered: current,
+                axis: axis
+            )
         }
         var candidateEntries =
             candidates[id]?[keyPath: axis] ?? []

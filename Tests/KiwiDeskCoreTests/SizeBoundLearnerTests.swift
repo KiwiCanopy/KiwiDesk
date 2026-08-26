@@ -278,6 +278,49 @@ struct SizeBoundLearnerTests {
         #expect(!learner.wantsProbe(w, currentSize: answered))
     }
 
+    @Test("A comply-then-revoke pair confirms in one cycle")
+    func complyThenRevokePairConfirms() {
+        // The #1049 single-dance shortcut: the ladder needs the
+        // same answer twice because one refusal can be a stale
+        // pre-ask frame — but an echo-channel compliance proves
+        // the window truly held the asked size, so the off-ask
+        // echo that follows within the same ask is the app
+        // actively revoking: one answer, definitively
+        // attributed.
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 1626, height: 1005)
+        let snapped = CGSize(width: 439, height: 1005)
+        learner.recordAsk(w, size: asked)
+        learner.observe(
+            w,
+            currentSize: asked,
+            settledRead: false
+        )
+        #expect(
+            learner.observe(
+                w,
+                currentSize: snapped,
+                settledRead: false
+            ) == true
+        )
+        #expect(
+            learner.bound(for: w)?
+                .consumedWidth(asking: 1626) == 439
+        )
+        // A fresh ask resets the pair — the flag must not
+        // carry a stale compliance into the next question.
+        learner.recordAsk(w, size: asked)
+        learner.forget(w)
+        learner.recordAsk(w, size: asked)
+        #expect(
+            learner.observe(
+                w,
+                currentSize: snapped,
+                settledRead: false
+            ) == false
+        )
+    }
+
     @Test("A zero-size frame is no answer")
     func zeroSizeFrameIsNoAnswer() {
         // A window created and never echoed keeps a .zero

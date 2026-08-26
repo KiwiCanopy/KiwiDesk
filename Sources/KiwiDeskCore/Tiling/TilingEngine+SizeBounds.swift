@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 
 // MARK: - App-enforced size bounds (#677)
 
@@ -206,12 +207,34 @@ extension TilingEngine {
         return pin.isEmpty ? nil : pin
     }
 
-    /// Drops everything learned about a window. Called on a
-    /// genuine (non-echo) resize — the user or the app itself
-    /// changed the size, so the ledger is stale — and on
-    /// destroy, because WindowIDs are reused (#152/#158).
+    /// Drops everything learned about a window on a genuine
+    /// (non-echo) resize — the user or the app itself changed
+    /// the size, so the ledger is stale. The GONE paths take
+    /// `stashSizeBoundOnGone` instead.
     public func forgetSizeBound(_ id: WindowID) {
         boundLearner.forget(id)
+    }
+
+    /// The gone-window forget (#152/#158), parking the believed
+    /// ledger for a possible flap re-add (#1049) — see
+    /// `SizeBoundLearner.stashOnGone`.
+    public func stashSizeBoundOnGone(
+        _ id: WindowID,
+        pid: pid_t
+    ) {
+        boundLearner.stashOnGone(id, pid: pid, now: Date())
+    }
+
+    /// Restores a parked ledger for a re-added window — same
+    /// id, same pid, within the grace (#1049). Called from the
+    /// `.windowCreated` arm before the arrival retile, so the
+    /// re-add tiles straight to the learned answer.
+    @discardableResult
+    public func reviveSizeBound(
+        _ id: WindowID,
+        pid: pid_t
+    ) -> Bool {
+        boundLearner.revive(id, pid: pid, now: Date())
     }
 
     /// Migrates the ledger across a native-tab rekey (#308),

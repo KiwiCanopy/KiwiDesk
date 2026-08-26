@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 
 /// The ledger's invalidation half, split at the file ceiling:
 /// what UNLEARNS — the compliance sweep and its cross-ask
@@ -15,6 +16,64 @@ extension SizeBoundLearner {
         lastAsks[id] = nil
         candidates[id] = nil
         bounds[id] = nil
+    }
+
+    /// How long a gone window's parked ledger may wait for the
+    /// same window to come back. Sized generously past the
+    /// observed flap period (~5-10 s between the emulator's
+    /// drop and re-add, #1049 capture): the cost of a stale
+    /// tombstone is one wrongly-revived ledger for a genuinely
+    /// NEW window that reused the id within the grace — which
+    /// the pid check below already makes unlikely, and which
+    /// the compliance sweep heals at the first settled read.
+    static let reviveGraceSeconds: TimeInterval = 30
+
+    /// The destroy-path forget (#152/#158), with the believed
+    /// ledger PARKED first (#1049): a slow AX app flaps — its
+    /// window is briefly dropped and re-added under the same
+    /// id — and a plain forget made every re-add re-run the
+    /// whole learn dance on screen, resize provocation and
+    /// all. Only believed bounds park; asks and candidates
+    /// describe an in-flight conversation that died with the
+    /// tracking. A genuine RESIZE keeps calling `forget`
+    /// directly — there the ledger is stale, not orphaned.
+    mutating func stashOnGone(
+        _ id: WindowID,
+        pid: pid_t,
+        now: Date
+    ) {
+        tombstones = tombstones.filter {
+            now.timeIntervalSince($0.value.at)
+                < Self.reviveGraceSeconds
+        }
+        if let ledger = bounds[id] {
+            tombstones[id] = Tombstone(
+                bounds: ledger,
+                pid: pid,
+                at: now
+            )
+        }
+        forget(id)
+    }
+
+    /// Restores a parked ledger for a window that came back:
+    /// same id, same pid, within the grace — the flapped
+    /// window itself, not a new tenant of a reused id. The
+    /// re-add then tiles straight to the learned answer
+    /// instead of dancing. Returns whether anything revived.
+    @discardableResult
+    mutating func revive(
+        _ id: WindowID,
+        pid: pid_t,
+        now: Date
+    ) -> Bool {
+        guard let tomb = tombstones.removeValue(forKey: id),
+            tomb.pid == pid,
+            now.timeIntervalSince(tomb.at)
+                < Self.reviveGraceSeconds
+        else { return false }
+        bounds[id] = tomb.bounds
+        return true
     }
 
     /// Migrates the ledger across a native-tab rekey (#308) —

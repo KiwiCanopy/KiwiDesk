@@ -59,16 +59,14 @@ struct SizeBoundTransientComplianceTests {
             origin: target.origin,
             size: CGSize(width: 439, height: target.height)
         )
-        // Cycle 1: ask, the transient compliance echo, then the
-        // snap-back. The compliance must not wipe the fresh
+        // ONE cycle: ask, the transient compliance echo, then
+        // the snap-back. The compliance must not wipe the fresh
         // ladder — pre-#1049 it did, and the candidate re-seeded
-        // here every ~0.85 s forever.
+        // here every ~0.85 s forever — and the comply-then-
+        // revoke pair confirms right here, so the user sees a
+        // single dance (owner QA, 2026-08-27: "can't we make
+        // it one time?").
         core.retile()
-        core.handle(.windowResized(w, target))
-        core.handle(.windowResized(w, snapped))
-        // The first refusal's probe re-asked by itself
-        // (`observeSizeAnswer`); cycle 2 answers it the same
-        // way and must confirm.
         core.handle(.windowResized(w, target))
         core.handle(.windowResized(w, snapped))
         #expect(

@@ -62,10 +62,21 @@ extension KiwiCore {
     /// whether the close-return raise runs, never in what they
     /// forget — and a copy that fell behind would leak exactly
     /// the stale state these lines exist to drop.
-    func forgetGoneWindow(_ id: WindowID) {
+    ///
+    /// `pid` is the gone window's owner, captured BEFORE the
+    /// state fold removed it: the size-bound forget parks the
+    /// believed ledger under it (#1049), so a slow AX app's
+    /// flap — the same window dropped and re-added seconds
+    /// apart — revives its learning instead of re-running the
+    /// whole dance. Nil (owner unknowable) forgets outright.
+    func forgetGoneWindow(_ id: WindowID, pid: pid_t?) {
         outstandingSelfRaises.remove(id)
         zOrderRaiseEchoes[id] = nil
-        tiler.forgetSizeBound(id)
+        if let pid {
+            tiler.stashSizeBoundOnGone(id, pid: pid)
+        } else {
+            tiler.forgetSizeBound(id)
+        }
         tiler.forgetMonocleShown(id)
         tiler.clearInstantTarget(id)
         cancelDrag(id)
