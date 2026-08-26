@@ -353,8 +353,14 @@ ruling is in `docs/design-decisions.md`.
 cue, and its state in words.** Every accordion header — both
 chromes, and the one drawer built outside the wrapper — takes
 `SettingsDisclosureStyle`, which makes the row a full-width
-`.plain` `Button`, rests it on a weighted chevron that
-rotates on expand (no resting fill — hover confirms at
+`.plain` `Button`, draws its title at `.headline` in BOTH
+chromes — the tier is not a call-site choice, and a header
+drawn smaller than the rows it heads is what #1021 was —
+rests it on a chevron sized by that title rather than by a
+number of its own (no `.font`: it inherits the header's, bold
+and one scale step up, so it moves when the header does), and
+marks the row `.isHeader` for the headings rotor. It rotates
+on expand (no resting fill — hover confirms at
 `rowHoverHighlight`'s full-row ladder, never the icon chip's,
 whose rest state is achromatic at row width), and carries
 expanded / collapsed on `.accessibilityValue` because the

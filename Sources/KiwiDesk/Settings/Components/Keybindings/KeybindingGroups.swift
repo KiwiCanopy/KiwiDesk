@@ -176,7 +176,6 @@ struct SizeFloatGroup: View {
     private var moreDisclosure: some View {
         SettingsDisclosure(
             SettingsCatalog.shortcuts.sizeFloatMore,
-            chrome: .inline(font: .subheadline),
             isExpanded: $moreExpanded,
             scrollHoisted: true
         ) {

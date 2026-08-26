@@ -165,7 +165,6 @@ struct PresetsSection: View {
         if !others.isEmpty {
             SettingsDisclosure(
                 SettingsCatalog.profiles.presetsOther,
-                chrome: .inline(font: .subheadline),
                 isExpanded: $otherSetupsExpanded,
                 scrollHoisted: true
             ) {

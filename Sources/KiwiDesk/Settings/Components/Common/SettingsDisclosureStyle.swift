@@ -79,6 +79,14 @@ struct SettingsDisclosureStyle<Accessory: View>:
             // window. The header rests on its chevron and, in
             // `.inline`, on the hairline rule.
             .rowHoverHighlight(cornerRadius: 6, padding: 4)
+            // On the BUTTON, not on the `Text` inside it: the
+            // button swallows its label's traits, and putting it
+            // here is also what reaches the one drawer whose
+            // title is not a plain `Text`. Every drawer was
+            // absent from the headings rotor until #1021 — the
+            // same "too small to find as one" complaint, on the
+            // channel no amount of points can answer.
+            .accessibilityAddTraits(.isHeader)
             .accessibilityValue(
                 configuration.isExpanded
                     ? L("settings.disclosure.ax_expanded", "expanded")
@@ -91,9 +99,21 @@ struct SettingsDisclosureStyle<Accessory: View>:
         }
     }
 
-    /// Weight is the point: the native triangle is drawn at the
-    /// system's own small size, which is what made it easy to
-    /// miss beside a column of plain rows.
+    /// **Sized by the header it marks, never by a number of its
+    /// own** (#1021). It takes no `.font`, so it inherits the
+    /// header's, and scales with it: bold and one step up gives
+    /// about 15.6 pt against a 13 pt title, and shrinks to about
+    /// 12 pt on the one deliberately-quiet drawer — proportional
+    /// by construction rather than by a constant that has to be
+    /// re-tuned every time a header moves.
+    ///
+    /// That is what #956 claimed and did not do. It replaced the
+    /// native triangle *because* the system drew it small, then
+    /// pinned the replacement at `.footnote` — the smallest step
+    /// on the ramp. It bought a hit target, an announcement and
+    /// one notch of weight; it never made the indicator bigger,
+    /// which is why the complaint came back (ui-designer,
+    /// 2026-08-26).
     ///
     /// A concrete ink rather than `.secondary`: the Overrides
     /// footer sets `.foregroundStyle(.secondary)` on the whole
@@ -108,7 +128,8 @@ struct SettingsDisclosureStyle<Accessory: View>:
     /// (ui-designer, 2026-08-24).
     private func chevron(expanded: Bool) -> some View {
         Image(systemName: "chevron.right")
-            .font(.footnote.weight(.semibold))
+            .fontWeight(.bold)
+            .imageScale(.large)
             .foregroundStyle(SettingsTheme.ink2)
             .rotationEffect(.degrees(expanded ? 90 : 0))
             // The state it encodes is on the button's value, in

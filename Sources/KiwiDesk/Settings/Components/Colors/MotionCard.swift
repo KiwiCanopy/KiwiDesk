@@ -63,7 +63,6 @@ struct MotionCard: View {
     private var disclosure: some View {
         SettingsDisclosure(
             SettingsCatalog.colors.motionMore,
-            chrome: .inline(font: .subheadline),
             isExpanded: $moreExpanded,
             scrollHoisted: true
         ) {

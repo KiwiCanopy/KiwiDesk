@@ -87,7 +87,6 @@ struct AppBarCard: View {
     private var styleDisclosure: some View {
         SettingsDisclosure(
             SettingsCatalog.bars.appBarStyle,
-            chrome: .inline(font: .subheadline),
             isExpanded: $styleExpanded,
             scrollHoisted: true
         ) {

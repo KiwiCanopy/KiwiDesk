@@ -33,13 +33,28 @@ import SwiftUI
 /// reveal lands the section — heading first — while the drawer
 /// keeps its own wash.
 struct SettingsDisclosure<Content: View, Accessory: View>: View {
+    /// What SURROUNDS the header — never how it is drawn (#1021).
+    ///
+    /// It used to carry a `font:` payload, and that is what the
+    /// owner was looking at: one component drew its title at
+    /// four tiers, and SEVEN of the fifteen drawers were drawn
+    /// SMALLER than the rows they head. A header quieter than
+    /// its own contents is an inverted hierarchy, and pushing
+    /// the choice out to each call site is what let it drift
+    /// that far. Both chromes now draw `.headline`, so the tier
+    /// is not a call-site decision at all.
+    ///
+    /// Note there is no "bigger" available above it: macOS's
+    /// ramp goes body 13 → headline 13 at weight 0.4 → title3
+    /// 15, so a larger step means `title3`, which is
+    /// `SettingsGroupHeader`'s tier and would outrank the
+    /// section title an inline drawer sits INSIDE
+    /// (ui-designer, 2026-08-26).
     enum Chrome {
-        /// Inside a section card; `font` styles the label
-        /// (`.subheadline` for the bar colour drawers, nil for
-        /// the plain Gaps labels).
-        case inline(font: Font?)
-        /// Standalone: headline label, 12 pt padding, its own
-        /// card background.
+        /// Inside a section card, under a hairline rule.
+        case inline
+        /// Standalone: 12 pt padding and its own card
+        /// background.
         case card
     }
 
@@ -70,7 +85,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
 
     init<Children>(
         _ drawer: SettingsDrawer<Children>,
-        chrome: Chrome = .inline(font: nil),
+        chrome: Chrome = .inline,
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
         modeGated: Bool = false,
@@ -89,7 +104,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
 
     init<Children>(
         _ drawer: SettingsDrawer<Children>,
-        chrome: Chrome = .inline(font: nil),
+        chrome: Chrome = .inline,
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
         modeGated: Bool = false,
@@ -220,7 +235,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             // `DesktopsGroup`'s `?` is. It travels to the
             // style separately and is drawn beside the button.
             Text(control.text)
-                .font(labelFont)
+                .font(.headline)
                 .searchFlashHeader(control)
                 // The mode-reveal wash shares the label band the
                 // search wash uses (#760), for the same reason:
@@ -242,13 +257,6 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             expand(revealing: target)
         }
         .onAppear { expand(revealing: revealTarget) }
-    }
-
-    private var labelFont: Font? {
-        switch chrome {
-        case .inline(let font): return font
-        case .card: return .headline
-        }
     }
 
     private var expansion: Binding<Bool> {

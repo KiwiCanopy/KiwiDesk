@@ -3725,6 +3725,62 @@ the full-row cue are two ladders for two sizes, and taking the
 smaller one to a full row is how a token nobody notices
 becomes the most visible thing on the page.
 
+**The third round, and what the first two actually bought.**
+(#1021, owner 2026-08-25: *"in some menus the accordion is way
+too small"* and, asked which, *all of them*.) The complaint
+came back because #956 fixed the hit target and the
+announcement while leaving the two things a reader sees. The
+chevron it introduced "with real weight" was pinned at
+`.footnote` — the *smallest* step on the ramp — so the
+argument above ("the native triangle is drawn at the system's
+own small size, which is what made it easy to miss") applied
+verbatim to its own replacement. And the header's SIZE was a
+call-site decision: `Chrome` carried a `font:` payload, so one
+component drew its title at four tiers and seven of the
+fifteen drawers were drawn smaller than the rows they head. A
+header quieter than its own contents is not a subtle cue, it
+is an inverted hierarchy.
+
+Two changes, and they are a pair because each reaches a half
+of the surface the other cannot. **The tier stops being a
+call-site decision**: `Chrome` loses its payload, both chromes
+draw `.headline`, and nine call sites lose an argument. There
+is deliberately no "bigger" above that — macOS's ramp runs
+body 13 → headline 13 at weight 0.4 → title3 15, so below 15
+"bigger" and "weightier" are the *same edit*, and the only
+genuine size step is `title3`, which is `SettingsGroupHeader`'s
+tier and would outrank the section title an inline drawer sits
+inside. **And the indicator is sized by the header it marks**,
+taking no font of its own: bold at one scale step up, which
+resolves to about 15.6 pt against a 13 pt title and shrinks to
+about 12 pt on the one deliberately-quiet drawer. Proportional
+by construction, so a future header move carries its chevron
+along instead of stranding a constant. The five `.card`
+drawers, whose labels were already at the ceiling, are reached
+by the second change alone — which is why the owner's "bigger
+text **or** a better indicator" was a false choice.
+
+One clause of the ruling above is narrowed rather than
+inherited, since it was argued absolutely from a single
+candidate. "No fixed surface token can be a rest cue at all"
+was tested on `sunken`; the untested one is `hairline`, which
+is green-tinted and so answers the achromatic objection
+outright. It fails for a different, measured reason —
+about 1.05:1 against `sunken`, invisible on precisely the
+drawer whose card already is `sunken`. Same verdict, honest
+premise. And a resting fill is refused on a second ground the
+first round did not state: fifteen headers wearing a band
+would make the drawers the most-filled things on pages whose
+real controls carry no fill at all.
+
+**Every drawer is a heading.** All fifteen were absent from
+the VoiceOver headings rotor until this round — the same
+"cannot find it as one" complaint on the channel no number of
+points can answer — so `.isHeader` goes on the style's button,
+where it reaches the one drawer built outside the wrapper too.
+(gui.md already required it of a title component; nothing had
+noticed that a drawer title is one.)
+
 **The header's accessory is a SIBLING of that button, never
 its child.** A drawer's `accessory:` slot may hold a control —
 the Profiles-per-Desktop drawer puts its `?` there — and the

@@ -292,10 +292,6 @@ struct SettingsDisclosureHeaderTests {
         #expect(
             style.contains("Image(systemName:\"chevron.right\")")
         )
-        #expect(
-            style.contains(".footnote.weight(.semibold)"),
-            "the chevron's weight is the visible half of the cue"
-        )
         // A concrete ink, not `.secondary`: hierarchical styles
         // compound under the Overrides footer's own
         // `.secondary`. `ink2` rather than the caption-tier

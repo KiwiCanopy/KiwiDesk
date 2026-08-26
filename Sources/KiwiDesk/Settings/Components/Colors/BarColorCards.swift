@@ -42,7 +42,6 @@ struct SpaceBarColorCard: View {
             }
             SettingsDisclosure(
                 SettingsCatalog.advancedColors.spaceBarMore,
-                chrome: .inline(font: .subheadline),
                 isExpanded: $moreExpanded,
                 scrollHoisted: true
             ) {
@@ -99,7 +98,6 @@ struct AppBarColorCard: View {
             }
             SettingsDisclosure(
                 SettingsCatalog.advancedColors.appBarMore,
-                chrome: .inline(font: .subheadline),
                 isExpanded: $moreExpanded,
                 scrollHoisted: true
             ) {
