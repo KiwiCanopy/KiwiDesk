@@ -218,6 +218,18 @@ struct ConfigMigrationTests {
     /// nothing (tests.md, #1021). This fixture has no
     /// `monitor_sets`, so `targetFormat` routes it as a
     /// `GuiConfig` — the shape whose current format it must carry.
+    ///
+    /// **`needsMigration` is asserted directly, and that is the
+    /// whole point of the test.** Asserting only
+    /// `migrated(…) == nil` cannot tell "short-circuited at the
+    /// format check" — the perf claim in this test's name — from
+    /// "ran every step and found nothing to change": the two have
+    /// the same outcome, so the assertion stayed green with
+    /// `needsMigration` mutated to always-true, rescued by the
+    /// never-rewrite-untouched contract on a second route
+    /// (`guard-prover`, 2026-08-27). Three sibling tests below
+    /// assert that same outcome and are the second net; this one
+    /// names the gate.
     @Test("A current-format config skips migration")
     func currentFormatSkipsMigration() {
         let data = json(
@@ -225,6 +237,15 @@ struct ConfigMigrationTests {
             {"format":\(GuiConfig.currentFormat),"settings":\
             {"app_bar":{"content":"icon_and_title"}}}
             """
+        )
+        #expect(
+            !ConfigMigration.needsMigration(data),
+            Comment(
+                rawValue:
+                    "a config already at the current format is "
+                    + "being scanned — the short-circuit is gone, "
+                    + "so every read parses and walks the payload"
+            )
         )
         #expect(ConfigMigration.migrated(data) == nil)
     }

@@ -100,15 +100,35 @@ struct ScrollDurationMigrationTests {
 
     /// A bundle carries `[Profile]` inline and is never rewritten
     /// on disk, so a refusal there is permanent — the #945 class.
-    @Test("The key is renamed inside a bundle's profiles too")
+    ///
+    /// **The `2` is the format v1.0.1 SHIPPED and must not be
+    /// derived**, for the reason spelled out on the profile twin
+    /// above. Written `SetupBundle.currentFormat - 1` this
+    /// followed the bump down, and reverting the bundle bump left
+    /// the FULL 4057-test suite green — the bundle half of the
+    /// crossing was guarded by nothing at all (`guard-prover`,
+    /// 2026-08-27, which ran the whole suite where the filtered
+    /// run had hidden it).
+    @Test("A bundle at the format 1.0.1 shipped is migrated")
     func bundleProfilesMigrate() throws {
         let data = json(
             """
-            {"format":\(SetupBundle.currentFormat - 1),\
+            {"format":2,\
             "writtenBy":"1.0.1","profiles":[{"settings":\
             {"animations":{"scroll_speed":420}}}],\
             "palettes":[]}
             """
+        )
+        #expect(
+            ConfigMigration.needsMigration(data),
+            Comment(
+                rawValue:
+                    "a bundle at format 2 no longer needs "
+                    + "migration — SetupBundle.currentFormat must "
+                    + "exceed the format 1.0.1 wrote, or a backup "
+                    + "written by the build this crossing exists "
+                    + "to rescue is never reached, permanently"
+            )
         )
         let out = try #require(ConfigMigration.migrated(data))
         let root =

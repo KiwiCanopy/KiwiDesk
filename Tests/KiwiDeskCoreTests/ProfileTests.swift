@@ -219,6 +219,27 @@ struct ProfileModelTests {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let decoded = try decoder.decode(Profile.self, from: data)
-        #expect(decoded.format == current)
+        // Decoding an OLDER stamp, not the one just encoded:
+        // `init(from:)` assigns `format = Self.currentFormat`
+        // unconditionally, so re-decoding what we wrote asserts
+        // nothing — it cannot fail (`guard-prover`, 2026-08-27).
+        // What has content is that a file stamped below current
+        // comes back UPGRADED, which is what lets a migrated file
+        // be written back at the new format.
+        let older = String(decoding: data, as: UTF8.self)
+            .replacingOccurrences(
+                of: "\"format\":\(current)",
+                with: "\"format\":0"
+            )
+            .replacingOccurrences(
+                of: "\"format\" : \(current)",
+                with: "\"format\" : 0"
+            )
+        #expect(older != String(decoding: data, as: UTF8.self))
+        let upgraded = try decoder.decode(
+            Profile.self,
+            from: Data(older.utf8)
+        )
+        #expect(upgraded.format == current)
     }
 }
