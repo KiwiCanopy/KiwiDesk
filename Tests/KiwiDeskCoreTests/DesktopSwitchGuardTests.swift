@@ -169,6 +169,44 @@ struct DesktopSwitchGuardTests {
         #expect(core.state.windows[WindowID(7)] != nil)
     }
 
+    @Test("A hidden-target follow arms the reveal reap")
+    func followToHiddenArmsTheRevealReap() {
+        let core = makeCore()
+        defer { teardown() }
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(7), pid: 1, appName: "App")
+            )
+        )
+        // The switch's own reconcile can fire before the moved
+        // window composites on the destination; the adoption
+        // heal then quiets the id and nothing ever adopts it.
+        // The reap's direct per-pid reconcile is the guaranteed
+        // adoption pass (#1023's third half). Desktop 4 is
+        // hidden on UUID-B in the fixture; Desktop 1 is current
+        // on UUID-A, so the same verb there arms nothing.
+        #expect(
+            core.execute(
+                "move_to_desktop_and_follow",
+                args: [.number(4)]
+            ).isSuccess
+        )
+        #expect(core.deferred.isScheduled(.desktopMoveReap))
+        core.deferred.cancel(.desktopMoveReap)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(8), pid: 1, appName: "App")
+            )
+        )
+        #expect(
+            core.execute(
+                "move_to_desktop_and_follow",
+                args: [.number(1)]
+            ).isSuccess
+        )
+        #expect(!core.deferred.isScheduled(.desktopMoveReap))
+    }
+
     @Test("A missing hide capability degrades to the pointer-only switch")
     func missingHideDegradesToPointerOnly() {
         let core = makeCore(hiding: false)

@@ -310,17 +310,6 @@ struct DesktopCommandTests {
         )
     }
 
-    @Test("A follow arms no reap — the switch reconciles instead")
-    func followLeavesTheReapToTheSwitch() {
-        let core = makeCore()
-        defer { teardown() }
-        #expect(
-            core.execute("move_to_desktop_and_follow", args: [.number(4)])
-                .isSuccess
-        )
-        #expect(!core.deferred.isScheduled(.desktopMoveReap))
-    }
-
     @Test("The capability is answered before any argument")
     func capabilityOutranksEveryOtherPrecondition() {
         let core = makeCore(bridge: false, focused: false)

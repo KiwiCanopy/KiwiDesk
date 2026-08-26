@@ -93,4 +93,55 @@ extension KiwiCore {
                 + "\(target.space)"
         )
     }
+
+    /// The eager departure fold of a follow onto a HIDDEN
+    /// Desktop — #1023's second half, device-traced 2026-08-26:
+    /// the moved window has physically left for a Desktop
+    /// nobody shows yet, but nothing removes it from its origin
+    /// space until some reconcile happens to notice, and the
+    /// switch's own retile still holds it as an origin member,
+    /// re-places it on the origin screen — and macOS re-assigns
+    /// its Desktop to match the frame, undoing the move.
+    /// Whether the removal or that retile wins the race decided
+    /// each attempt; folding the departure NOW decides it. The
+    /// fold files `.departed`, which is exactly what the #1010
+    /// arrival rule needs to re-home the window when the
+    /// reveal's reconcile lists it again — the same path a
+    /// swipe-away takes. Runs only after an ACCEPTED switch, so
+    /// the removal classifies as `vanished` against the stamp
+    /// the switch just wrote; a refused switch folds nothing,
+    /// because the window is then still where the user sees it.
+    func departEagerly(_ window: WindowID) {
+        let pid = state.windows[window]?.pid
+        handle(.windowDestroyed(window, wasMinimized: false))
+        // The state fold alone is a half-state: the event loop's
+        // element registry would keep the window "already known"
+        // to every later reconcile and to the heal's census
+        // diff, so nothing would ever re-adopt it (device-traced
+        // 2026-08-26 — the "ignored until minimized" report).
+        if let pid {
+            eventLoop.releaseWindowRegistration(window, pid: pid)
+        }
+        // And the reveal reap: the switch's own reconcile fires
+        // on the pointer-move notification, ~100 ms after the
+        // set — often BEFORE the moved window composites on the
+        // destination — so it can miss the window, after which
+        // the adoption heal quiets the id as a permanent
+        // mismatch and nothing ever adopts it (#1023, owner
+        // trace 2026-08-26: "ignored until I minimize and
+        // respawn"). A direct per-pid reconcile past the reveal
+        // is not gated by that quieting. 700 ms: past the
+        // measured ~130–300 ms composite and past the 600 ms
+        // desktop settle, so the retile that follows places the
+        // adopted window instead of racing the settle's.
+        guard let pid else { return }
+        deferred.schedule(
+            .desktopMoveReap,
+            after: .milliseconds(700)
+        ) { [weak self] in
+            guard let self, self.eventLoop.isRunning else { return }
+            self.eventLoop.reconcile(pid: pid, app: AppRef(pid: pid))
+            self.retile(animated: true)
+        }
+    }
 }

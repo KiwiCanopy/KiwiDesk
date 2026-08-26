@@ -230,4 +230,22 @@ extension EventLoop {
             }
         }
     }
+
+    /// Releases one window's registration — the same cleanup the
+    /// destroy arm above performs, callable by a path that KNOWS
+    /// the window left rather than observing it leave (#1023's
+    /// eager departure: a follow onto a hidden Desktop). A
+    /// state-only removal is not enough there: the element left
+    /// registered makes the window "already known" to every
+    /// later reconcile and to the heal's census diff, so nothing
+    /// ever re-adopts it — the exact half-state this exists to
+    /// prevent. Emits no event: the caller owns the state fold,
+    /// so the registry and the fold cannot double-report.
+    func releaseWindowRegistration(_ id: WindowID, pid: pid_t) {
+        elements[pid]?[id] = nil
+        detectedFloating[id] = nil
+        detectedFullscreen[id] = nil
+        trackedFrames[id] = nil
+        tabCarriers.remove(id)
+    }
 }
