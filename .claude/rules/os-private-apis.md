@@ -78,6 +78,23 @@ Every one of the following binds whoever touches them:
   second Desktop (#889 item 5) — and never by the wrapper's
   return value. The census the re-query reads stays
   `NativeSpaces`' — one reader of the display/spaces model.
+- **The space-pointer write performs no transition (#1023).**
+  `ManagedDisplaySetCurrentSpaceOperation` moves the pointer and
+  composites the target's windows, but never hides the origin's
+  — both Desktops render at once until a genuine gesture
+  completes the swap, while EVERY pointer read
+  (`SLSGetActiveSpace`, `SLSManagedDisplayGetCurrentSpace`, the
+  managed-display plist) reports the switch landed within
+  ~120 ms, so no re-query on this surface can see the difference
+  (device-measured 2026-08-26, macOS 26.6.2, both displays, both
+  a Dock-hidden and a bridge-hidden target). A switching caller
+  therefore pairs an ACCEPTED set with
+  `WMBridge.hideSpaces([origin])`, origin read from the same
+  snapshot that resolved the target — set-then-hide measured as
+  a complete switch — and the deferred pointer re-query verifies
+  only that the set was not dropped (`DesktopCommandTests`).
+  The bare C `SLSShowSpaces`/`SLSHideSpaces` are silent no-ops
+  from a foreign process; the bridged operations are not.
 - A bridge-driven Desktop switch reaches KiwiDesk through the
   SAME `NSWorkspace` notification a swipe does — observed on
   device 2026-08-25, `focus_desktop` producing the target

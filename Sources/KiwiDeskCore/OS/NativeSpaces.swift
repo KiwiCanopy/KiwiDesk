@@ -44,9 +44,20 @@ public enum NativeSpaces {
     }
 
     /// The current space of one display (by display UUID).
+    ///
+    /// A POINTER read (`SLSManagedDisplayGetCurrentSpace`): it
+    /// answers the new space ~100 ms after a bridge switch
+    /// whether or not the visual transition was performed, so it
+    /// verifies that a set was accepted — never that the screen
+    /// swapped (#1023's first measurement, 2026-08-26).
     public static func currentSpace(
         displayUUID: String
     ) -> SkyLight.SpaceID? {
+        #if DEBUG
+            if let override = currentSpaceOverride {
+                return override(displayUUID)
+            }
+        #endif
         guard let cid = SkyLight.connection,
             let currentSpace = SkyLight.displayCurrentSpace
         else { return nil }
@@ -176,6 +187,11 @@ public enum NativeSpaces {
         /// 2026-08-18).
         public static nonisolated(unsafe) var activeDesktopNumberOverride: Int?
         public static nonisolated(unsafe) var activeSpaceIsUserOverride: Bool?
+        /// Pins the per-display POINTER read for the #1023
+        /// switch-verify — a test firing that deferred check
+        /// would otherwise read the host's WindowServer.
+        public static nonisolated(unsafe) var currentSpaceOverride:
+            ((String) -> SkyLight.SpaceID?)?
         public static nonisolated(unsafe) var currentSpaceIsUserOverride:
             ((DisplayID) -> Bool)?
         public static nonisolated(unsafe) var spacesOverride: [NativeSpace]?

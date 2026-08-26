@@ -113,6 +113,7 @@ func resetAuthorityOverrides() {
     NativeSpaces.activeSpaceIDOverride = nil
     NativeSpaces.activeSpaceIsUserOverride = nil
     NativeSpaces.currentSpaceIsUserOverride = nil
+    NativeSpaces.currentSpaceOverride = nil
     NativeSpaces.spacesOverride = nil
     NativeSpaces.mainDisplayUUIDOverride = nil
     NativeSpaces.displayUUIDOverride = nil

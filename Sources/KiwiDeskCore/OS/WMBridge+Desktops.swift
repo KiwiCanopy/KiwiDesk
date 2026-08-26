@@ -68,8 +68,19 @@ extension WMBridge {
 
     // MARK: - Writes (dispatched, never confirmed — see WMBridge)
 
-    /// Switches `displayIdentifier` to `space` (#26). Verify by
-    /// `NativeSpaces.currentSpace(displayUUID:)`.
+    /// Points `displayIdentifier` at `space` (#26) — and that is
+    /// ALL it does (#1023): the WindowServer moves the
+    /// current-space pointer and composites the new space's
+    /// windows, but never hides the old space's, so on its own
+    /// this leaves both Desktops rendering at once while every
+    /// pointer read — `SLSGetActiveSpace`,
+    /// `SLSManagedDisplayGetCurrentSpace`, the managed-display
+    /// plist — reports the switch as landed (device-measured
+    /// 2026-08-26, macOS 26.6.2, both displays). A switching
+    /// caller therefore pairs an accepted dispatch with
+    /// `hideSpaces` of the space that display showed, which is
+    /// the half of the transition the Dock performs and this
+    /// write does not.
     public static func setCurrentSpace(
         _ space: SpaceID,
         displayIdentifier: String
@@ -83,6 +94,30 @@ extension WMBridge {
                 selector,
                 displayIdentifier as NSString,
                 space
+            )
+        }
+        return performAsync(op)
+    }
+
+    /// Removes `spaces`' windows from the compositor — the half
+    /// of a Desktop switch `setCurrentSpace` leaves unperformed
+    /// (#1023). The bare C symbol is a silent no-op from a
+    /// foreign process; this operation is not, and set-then-hide
+    /// measured as a complete switch — pointer moved AND the
+    /// destination's windows composited within ~130 ms — on
+    /// device 2026-08-26 (macOS 26.6.2). No `showSpaces` twin is
+    /// wrapped on purpose: the set itself composites the target,
+    /// measured against both a Dock-hidden and a bridge-hidden
+    /// space, so a show would be a write nothing needs.
+    public static func hideSpaces(_ spaces: [SpaceID]) -> Bool {
+        let op = make(
+            "HideSpacesOperation",
+            initializer: "initWithSpaces:"
+        ) { instance, selector in
+            sender(as: InitObjectFn.self)?(
+                instance,
+                selector,
+                spaces.map { NSNumber(value: $0) } as NSArray
             )
         }
         return performAsync(op)

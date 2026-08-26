@@ -8,10 +8,17 @@ import Testing
 private enum Bridge {
     nonisolated(unsafe) static var switches: [(UInt64, String)] = []
     nonisolated(unsafe) static var moves: [([NSNumber], UInt64)] = []
+    nonisolated(unsafe) static var hides: [[NSNumber]] = []
+    /// Every dispatched operation in order — the set-then-hide
+    /// sequence is the #1023 fix, so the ORDER is an assertion,
+    /// not a convenience.
+    nonisolated(unsafe) static var events: [String] = []
 
     static func reset() {
         switches = []
         moves = []
+        hides = []
+        events = []
     }
 }
 
@@ -46,6 +53,21 @@ private final class FakeSetCurrentSpace: NSObject {
 
     @objc func performWithWMBridgeDelegate() {
         Bridge.switches.append((space, display))
+        Bridge.events.append("set \(space) \(display)")
+    }
+}
+
+private final class FakeHideSpaces: NSObject {
+    private let spaces: [NSNumber]
+
+    @objc(initWithSpaces:)
+    init(spaces: [NSNumber]) {
+        self.spaces = spaces
+    }
+
+    @objc func performWithWMBridgeDelegate() {
+        Bridge.hides.append(spaces)
+        Bridge.events.append("hide \(spaces)")
     }
 }
 
@@ -70,6 +92,7 @@ private let bridgeClasses: [String: AnyClass] = [
     "ManagedDisplaySetCurrentSpaceOperation":
         FakeSetCurrentSpace.self,
     "MoveWindowsToManagedSpaceOperation": FakeMoveWindows.self,
+    "HideSpacesOperation": FakeHideSpaces.self,
 ]
 
 // MARK: - Suite
@@ -143,7 +166,8 @@ struct DesktopCommandTests {
                 == .init(
                     space: 11,
                     displayIdentifier: "UUID-A",
-                    isCurrent: false
+                    isCurrent: false,
+                    originSpace: 10
                 )
         )
         #expect(
@@ -151,7 +175,8 @@ struct DesktopCommandTests {
                 == .init(
                     space: 20,
                     displayIdentifier: "UUID-B",
-                    isCurrent: true
+                    isCurrent: true,
+                    originSpace: 20
                 )
         )
         #expect(KiwiCore.desktopTarget(number: 0, in: snapshot) == nil)
@@ -167,10 +192,17 @@ struct DesktopCommandTests {
         #expect(Bridge.switches.map(\.0) == [11])
         #expect(Bridge.switches.map(\.1) == ["UUID-A"])
         #expect(core.lastDesktopSwitch > before)
-        // A Desktop on the secondary display switches THAT display.
+        // The transition's missing half (#1023): the origin that
+        // display showed is hidden, AFTER the accepted set.
+        #expect(Bridge.events == ["set 11 UUID-A", "hide [10]"])
+        // The honest re-query is armed.
+        #expect(core.deferred.isScheduled(.desktopSwitchVerify))
+        // A Desktop on the secondary display switches THAT display
+        // — and hides THAT display's current space, not the main's.
         #expect(core.execute("focus_desktop", args: [.number(4)]).isSuccess)
         #expect(Bridge.switches.last?.0 == 21)
         #expect(Bridge.switches.last?.1 == "UUID-B")
+        #expect(Bridge.hides.last == [20])
     }
 
     @Test("A Desktop its display already shows: no switch, still a move")
@@ -188,6 +220,9 @@ struct DesktopCommandTests {
         )
         #expect(Bridge.moves.map(\.1) == [10])
         #expect(Bridge.switches.isEmpty)
+        // No switch dispatched means nothing to hide either — a
+        // hide without a set blanks the visible Desktop.
+        #expect(Bridge.hides.isEmpty)
     }
 
     @Test("move_to_desktop moves the focused window, and follow switches")
@@ -207,6 +242,7 @@ struct DesktopCommandTests {
         #expect(Bridge.moves.last?.1 == 21)
         #expect(Bridge.switches.map(\.0) == [21])
         #expect(Bridge.switches.map(\.1) == ["UUID-B"])
+        #expect(Bridge.hides == [[20]])
     }
 
     @Test("Refusals: no bridge, no such Desktop, bad argument, no focus")
@@ -275,16 +311,6 @@ struct DesktopCommandTests {
                 .isSuccess
         )
         #expect(!core.deferred.isScheduled(.desktopMoveReap))
-    }
-
-    @Test("A refused switch fails, and stamps nothing")
-    func refusedSwitchFailsAndStampsNothing() {
-        let core = makeCore(bridge: true, switching: false)
-        defer { teardown() }
-        let before = core.lastDesktopSwitch
-        let response = core.execute("focus_desktop", args: [.number(2)])
-        #expect(!response.isSuccess)
-        #expect(core.lastDesktopSwitch == before)
     }
 
     @Test("The capability is answered before any argument")

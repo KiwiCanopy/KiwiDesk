@@ -47,6 +47,12 @@ final class DeferredTasks {
         /// switch follows such a move, so nothing else is
         /// guaranteed to notice the window left.
         case desktopMoveReap
+        /// Re-queries the display's current space a beat after a
+        /// Desktop-switch dispatch and logs a pointer that never
+        /// moved (`scheduleDesktopSwitchVerify`, #1023) — the
+        /// write applies asynchronously, so the honest re-query
+        /// cannot be synchronous.
+        case desktopSwitchVerify
         /// Re-asserts every desired focus ring's VISIBILITY and
         /// stacking after a drag/drop or animated transition
         /// (`scheduleBorderDropReconcile`) — early on purpose, and

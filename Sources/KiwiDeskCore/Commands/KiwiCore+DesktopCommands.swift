@@ -50,6 +50,13 @@ extension KiwiCore {
         /// Whether the Desktop is already the one its screen
         /// shows — a switch to it is a no-op.
         let isCurrent: Bool
+        /// The space that screen shows NOW, from the same
+        /// snapshot the target resolved in (#888: one reading,
+        /// every question) — the space a switch must hide,
+        /// because the pointer write performs no transition of
+        /// its own (#1023). Nil when the snapshot cannot say;
+        /// equal to `space` exactly when `isCurrent`.
+        let originSpace: SkyLight.SpaceID?
     }
 
     /// Resolves a 1-based Mission Control number against one
@@ -64,11 +71,12 @@ extension KiwiCore {
         guard let space = snapshot.space(numbered: number),
             !space.displayUUID.isEmpty
         else { return nil }
+        let origin = snapshot.currentSpaces[space.displayUUID]
         return DesktopTarget(
             space: space.id,
             displayIdentifier: space.displayUUID,
-            isCurrent: snapshot.currentSpaces[space.displayUUID]
-                == space.id
+            isCurrent: origin == space.id,
+            originSpace: origin
         )
     }
 
@@ -295,27 +303,5 @@ extension KiwiCore {
             self.eventLoop.reconcile(pid: pid, app: AppRef(pid: pid))
             self.retile(animated: true)
         }
-    }
-
-    /// The one copy of the switch dispatch, for both verbs that
-    /// switch. Stamps the switch at INTENT time — but only once
-    /// the bridge has accepted it, so a refusal does not
-    /// suppress a second of focus-follow that no switch earned.
-    private func switchDesktop(
-        to target: DesktopTarget,
-        verb: String
-    ) -> CommandResponse {
-        guard !target.isCurrent else { return .ok() }
-        guard
-            WMBridge.setCurrentSpace(
-                target.space,
-                displayIdentifier: target.displayIdentifier
-            )
-        else {
-            onLog("\(verb): the Desktop bridge refused the switch")
-            return .fail("the Desktop bridge refused the switch")
-        }
-        lastDesktopSwitch = Date()
-        return .ok()
     }
 }
