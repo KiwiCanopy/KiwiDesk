@@ -77,40 +77,34 @@ enum SpaceBarCommandSetting {
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError>? {
         switch field {
         case "edge":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                AppBarEdge.self,
-                "top|bottom|left|right"
+                AppBarEdge.self
             ).map(Self.edge)
         case "alignment":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                SpaceBarStyle.Alignment.self,
-                "start|center|end"
+                SpaceBarStyle.Alignment.self
             ).map(Self.alignment)
         case "icon_source":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                BarAppIconSource.self,
-                "app_image|app_font"
+                BarAppIconSource.self
             ).map(Self.iconSource)
         case "background_style":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                SpaceBarStyle.BackgroundStyle.self,
-                "boxed|plain"
+                SpaceBarStyle.BackgroundStyle.self
             ).map(Self.backgroundStyle)
         case "background_fit":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                SpaceBarStyle.BackgroundFit.self,
-                "full|hug"
+                SpaceBarStyle.BackgroundFit.self
             ).map(Self.backgroundFit)
         case "active_indicator":
-            return choice(
+            return BarSettingChoice.value(
                 args,
-                SpaceBarStyle.ActiveIndicator.self,
-                "ring|edge_mark|gap"
+                SpaceBarStyle.ActiveIndicator.self
             ).map(Self.activeIndicator)
         default:
             return nil
@@ -238,20 +232,6 @@ enum SpaceBarCommandSetting {
             return .failure("expected #RRGGBB or #RRGGBBAA")
         }
         return .success(hex)
-    }
-
-    private static func choice<T: RawRepresentable>(
-        _ args: [JSONValue],
-        _ type: T.Type,
-        _ expected: String
-    ) -> Result<T, AppBarSettingError>
-    where T.RawValue == String {
-        guard let raw = args.first?.stringValue,
-            let value = T(rawValue: raw)
-        else {
-            return .failure("expected \(expected)")
-        }
-        return .success(value)
     }
 
     /// Writes the value into the global style — the only apply
