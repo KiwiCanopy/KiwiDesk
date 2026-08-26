@@ -6,7 +6,7 @@ import Foundation
 /// `new_window_placement`: where a new window lands in a
 /// space's flat window array. Every layout shares the same
 /// vocabulary; only the default differs per layout.
-public enum SpawnPlacement: String, Sendable, Codable {
+public enum SpawnPlacement: String, Sendable, Codable, CaseIterable {
     /// Index 0 (stack mode: the new window becomes master).
     case first
     /// End of the array.
@@ -19,7 +19,7 @@ public enum SpawnPlacement: String, Sendable, Codable {
 }
 
 public struct BspParams: Sendable, Equatable, Codable {
-    public enum Strategy: String, Sendable, Codable {
+    public enum Strategy: String, Sendable, Codable, CaseIterable {
         /// Split the longer side (keeps windows square-ish).
         case longestSide = "longest_side"
         /// Alternate horizontal / vertical by depth.
@@ -131,7 +131,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
     /// Which axis the columns scroll along — the scrolling
     /// analogue of monocle's orientation, and what decides
     /// which edges the indicator bar may sit on.
-    public enum Orientation: String, Sendable, Codable {
+    public enum Orientation: String, Sendable, Codable, CaseIterable {
         /// Columns side by side, scrolling left/right; bar on
         /// top/bottom.
         case horizontal

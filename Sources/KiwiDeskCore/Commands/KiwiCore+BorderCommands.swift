@@ -108,7 +108,7 @@ extension KiwiCore {
             guard let raw = args.first?.stringValue,
                 let style = BorderStyle.CornerStyle(rawValue: raw)
             else {
-                return .fail("expected 'rounded' or 'square'")
+                return .expected(BorderStyle.CornerStyle.self)
             }
             tiler.settings.borderStyle.cornerStyle = style
             return .ok()
@@ -116,7 +116,7 @@ extension KiwiCore {
             guard let raw = args.first?.stringValue,
                 let order = BorderStyle.DrawOrder(rawValue: raw)
             else {
-                return .fail("expected 'behind' or 'front'")
+                return .expected(BorderStyle.DrawOrder.self)
             }
             tiler.settings.borderStyle.drawOrder = order
             return .ok()

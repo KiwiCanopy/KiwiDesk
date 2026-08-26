@@ -26,7 +26,7 @@ extension KiwiCore {
                 let style = MonocleParams.HideStyle(
                     rawValue: raw
                 )
-            else { return .fail("expected stack|park") }
+            else { return .expected(MonocleParams.HideStyle.self) }
             tiler.settings.monocle.hideStyle = style
             return .ok()
         }
@@ -89,8 +89,8 @@ extension KiwiCore {
         raw.flatMap(MonocleParams.Orientation.init(rawValue:))
     }
 
-    private static let orientationError = CommandResponse.fail(
-        "expected horizontal|vertical"
+    private static let orientationError = CommandResponse.expected(
+        MonocleParams.Orientation.self
     )
 
     /// Cycles or reorders along the monocle orientation axis.

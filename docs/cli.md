@@ -12,7 +12,8 @@ kiwidesk                      # run the window manager
 kiwidesk <command> [args...]  # send a command to the app
 kiwidesk help                 # local usage
 kiwidesk --version            # local version (no app needed)
-kiwidesk list_commands        # every command (app running)
+kiwidesk list_commands        # every command, grouped
+kiwidesk help <name>          # one command's arguments
 ```
 
 > The Homebrew cask puts it on your `PATH` as lower-case
@@ -76,6 +77,100 @@ tree cannot name the one it becomes, and any build you make
 yourself prints the bare version. The same information is
 available over IPC/Lua as the `version` command — see the table
 below.
+
+## Discovering Commands
+
+```sh
+kiwidesk list_commands              # every command, grouped
+kiwidesk help scroll.set_anchor     # one command in full
+kiwidesk list_commands --json       # the same, machine-readable
+```
+
+Both work **without the app running**. The listing describes the
+API the binary was built with — no app state goes into it — and
+that binary is the CLI, so nothing is asked over the socket. If
+an older KiwiDesk is running while a newer `kiwidesk` is first on
+your `PATH`, the listing describes the newer one; they ship as a
+single binary, so that is a half-finished install rather than
+something to reason about.
+
+`list_commands` prints one block per group: the `KiwiDesk` table
+first (the commands a keybinding usually names), then each layout
+and bar namespace. Every line carries the command's arguments and
+a one-line summary:
+
+```
+scroll
+  set_anchor <anchor>                Sets where the focused …
+  set_orientation <orientation>      Sets whether columns scroll …
+  set_slot_size_override <space> <size>   Overrides the slot …
+```
+
+Required arguments are in `<angle brackets>`, optional ones in
+`[square brackets]`. A command the CLI cannot reach is marked:
+`(lua only)` for the entry points that live on the Lua table
+alone (`bind`, `on`, `exec`, …), `(cli only)` for `subscribe`.
+
+Naming one command prints its full signature, including the legal
+values of an enum argument and the Swift type they come from:
+
+```
+$ kiwidesk help scroll.set_anchor
+scroll.set_anchor <anchor>
+
+  Sets where the focused window comes to rest in the viewport.
+
+arguments:
+  anchor        choice
+                  center | start | end | follow
+                  (ScrollingParams.Anchor)
+
+  lua: scroll.set_anchor(anchor)
+  cli: kiwidesk scroll.set_anchor <anchor>
+```
+
+Those values are **read from the decoder that accepts them**, so
+the listing cannot fall behind the code — that is the whole point
+of keeping this data in `APIReference` rather than in prose.
+
+A misspelled name fails with a suggestion and exit code 1:
+
+```
+$ kiwidesk help focsu
+error: unknown command: focsu (did you mean focus?)
+```
+
+Unlike the did-you-mean hint on an unknown *command*, this one
+will point at a Lua-only name: you are looking a name up, not
+invoking it.
+
+**Text or JSON.** A terminal gets the text above; a pipe or a
+redirect gets JSON. `--json` forces JSON either way. An
+unrecognised option is an error, not a silent no-op.
+
+**The JSON shape changed, and nothing preserves the old one.**
+`list_commands` used to return a flat array of 262 name strings;
+it now returns `{"commands": <count>, "groups": [...]}`, each
+group carrying one object per command — `name`,
+`qualified_name`, `group`, `command`, `channel`, `summary`,
+`aliases`, and an `arguments` array whose enum entries add
+`values`. A script that read the old array needs updating; a
+command's output is not a stored value, so no compatibility
+shape is owed for one.
+
+The Swift type an enum's values were read from is deliberately
+**not** a JSON field. It is printed in the terminal rendering,
+where it helps a person find the decoder, but publishing it
+would make an internal symbol part of this command's output —
+and those get renamed freely. `values` is what answers "what may
+I send".
+
+Bare `kiwidesk help` (and `--help` / `-h`) still prints the short
+usage block. Add a name, or `--json`, to get the API instead.
+
+> Not every summary is written yet. A command whose prose is
+> still pending prints `(summary pending)`; its name, group and
+> arguments are already correct.
 
 ## Service Control
 

@@ -4,12 +4,12 @@ import Foundation
 /// direction, and the rigid grid's dimensions. Split out of
 /// `LayoutParams` for file size.
 public struct GridParams: Sendable, Equatable, Codable {
-    public enum GridType: String, Sendable, Codable {
+    public enum GridType: String, Sendable, Codable, CaseIterable {
         case dynamic
         case rigid
     }
 
-    public enum SplitDirection: String, Sendable, Codable {
+    public enum SplitDirection: String, Sendable, Codable, CaseIterable {
         /// Column-first progression / horizontal filling.
         case horizontal
         /// Row-first progression / vertical filling.

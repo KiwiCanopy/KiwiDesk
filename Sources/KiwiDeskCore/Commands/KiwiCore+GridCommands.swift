@@ -143,8 +143,8 @@ extension KiwiCore {
         return (max(1, cols), max(1, rows))
     }
 
-    private static let typeError = CommandResponse.fail(
-        "expected dynamic|rigid"
+    private static let typeError = CommandResponse.expected(
+        GridParams.GridType.self
     )
     private static let fillError = CommandResponse.fail(
         "expected boolean"
@@ -152,8 +152,8 @@ extension KiwiCore {
     private static let autoSizeError = CommandResponse.fail(
         "expected boolean"
     )
-    private static let splitDirectionError = CommandResponse.fail(
-        "expected horizontal|vertical"
+    private static let splitDirectionError = CommandResponse.expected(
+        GridParams.SplitDirection.self
     )
     private static let dimensionsError = CommandResponse.fail(
         "expected columns and rows"

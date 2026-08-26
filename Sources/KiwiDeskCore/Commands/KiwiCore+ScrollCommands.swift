@@ -154,10 +154,10 @@ extension KiwiCore {
     private static let slotSizeError = CommandResponse.fail(
         "expected points, \"NN%\", or 0 for auto"
     )
-    private static let anchorError = CommandResponse.fail(
-        "expected center|start|end|follow"
+    private static let anchorError = CommandResponse.expected(
+        ScrollingParams.Anchor.self
     )
-    private static let orientationError = CommandResponse.fail(
-        "expected horizontal|vertical"
+    private static let orientationError = CommandResponse.expected(
+        ScrollingParams.Orientation.self
     )
 }

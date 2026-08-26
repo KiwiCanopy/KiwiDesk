@@ -19,7 +19,7 @@ public struct BorderStyle: Sendable, Equatable {
     /// strokes with sharp corners (radius 0). Square is seamless
     /// on already-square windows (Electron/utility) and shows an
     /// intentional corner reveal on rounded ones.
-    public enum CornerStyle: String, Sendable, Codable {
+    public enum CornerStyle: String, Sendable, Codable, CaseIterable {
         case rounded
         case square
     }
@@ -30,7 +30,7 @@ public struct BorderStyle: Sendable, Equatable {
     /// SkyLight path — a power-user opt-in that can flicker under
     /// the per-keystroke compositor churn Firefox/Zen emit, so it
     /// stays a Lua-only setting with no GUI toggle (#367).
-    public enum DrawOrder: String, Sendable, Codable {
+    public enum DrawOrder: String, Sendable, Codable, CaseIterable {
         case behind
         case front
     }

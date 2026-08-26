@@ -299,7 +299,7 @@ public enum APIReference {
                 names.insert("\(table).\(function)")
             }
         }
-        names.insert("subscribe")
+        names.insert(socketOnlyCommand)
         return names.sorted()
     }
 
@@ -307,6 +307,15 @@ public enum APIReference {
     /// sorted — the full Lua-visible surface: everything
     /// dispatchable plus the Lua-only entry points that bypass
     /// the dispatcher (`exec`, `bind`, …).
+    ///
+    /// **Not a live door onto the listing.** Since #1033 the
+    /// listing is `APIReference.groups`, and nothing in
+    /// production calls this — `CLIHelpSeamTests` bans the CLI
+    /// from naming it precisely so a second answer to "what
+    /// commands exist" cannot appear. It survives as
+    /// `APIRecordCensusTests`' independent cross-check: computed
+    /// the old way, from the name tables alone, it is what the
+    /// grouped listing is held against.
     public static var allCommands: [String] {
         Set(dispatchable).union(luaOnly).sorted()
     }

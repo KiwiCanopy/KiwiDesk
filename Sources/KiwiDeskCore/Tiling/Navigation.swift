@@ -1,7 +1,7 @@
 import CoreGraphics
 
 /// Cardinal directions in AX coordinates (y grows downward).
-public enum Direction: String, Sendable, Codable {
+public enum Direction: String, Sendable, Codable, CaseIterable {
     case left
     case right
     case up

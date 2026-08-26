@@ -1,7 +1,7 @@
 import CoreGraphics
 
 /// What a mouse resize of a tiled window does.
-public enum MouseResizeMode: String, Sendable, Codable {
+public enum MouseResizeMode: String, Sendable, Codable, CaseIterable {
     /// Adjust the layout like the `resize` command: neighbors
     /// give or take space (default).
     case layout

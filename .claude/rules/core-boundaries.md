@@ -5,10 +5,10 @@ paths:
 
 # Core boundaries
 
-Deliberately short — it loads on every `KiwiDeskCore` edit. Four
+Deliberately short — it loads on every `KiwiDeskCore` edit. Five
 seams, each violated *outside* the directory that owns them — the
-count is the four bullets immediately below, so it corrects
-itself when a fifth is added.
+count is the five bullets immediately below, so it corrects
+itself when a sixth is added.
 
 - **Core names, the GUI narrates (#96).** A user-facing
   condition detected in Core returns **structure** (a case, an
@@ -64,6 +64,40 @@ itself when a fifth is added.
   a late wire is that rule's violation by its own terms — and
   again in the probe, which reads the sink before any lifecycle
   runs.
+- **The API surface describes itself, and an enum's values are
+  READ rather than typed (#1033).** Three obligations, all on
+  `Commands/`:
+  - **A new command owes a record** in the matching
+    `Commands/Reference/APIRecords+*` table — group, arguments,
+    one-line summary. `APIRecordCensusTests` holds the record
+    keys against `commands` / `namespaces` / `luaOnly` in both
+    directions, so a command with no record reds, as does a
+    record for a command that does not exist.
+  - **An enum-valued argument names the TYPE, never the values**
+    — `.choice("anchor", ScrollingParams.Anchor.self)`.
+    `APIChoice` has exactly one initializer and it reads
+    `allCases`; `APIChoiceDerivationTests` scans that
+    declaration, because adding a second, list-taking one is a
+    two-line change that compiles and reads harmlessly.
+  - **A decoder rejecting an enum value answers with
+    `CommandResponse.expected(_:)`**, which builds the message
+    from the same `allCases`. A hand-typed list is right the day
+    it is written and silent after: both bar setters told users
+    to send `ring|edge_mark|gap` for as long as they shipped,
+    the case having been renamed `outline`.
+    `CommandRejectionDerivationTests` scans for a rejection
+    naming two or more cases of a decoder enum — its vocabularies
+    are derived from the records, so its reach is the records
+    that are filled, which that suite states.
+
+  A record's `summary` is English prose authored in Core, and it
+  rides the **CLI/IPC exception above rather than widening the
+  #96 seam**: `list_commands` is a machine-readable description
+  of a machine contract, delivered on the channel that bullet
+  already rules English, and no GUI surface renders it. A summary
+  that ever needs to reach the Settings window is a different
+  feature and takes structure across the seam like everything
+  else.
 - **Never `Bundle.module`** in code that runs from the `.app` —
   go through `ResourceBundle.locate` (`Bundle.kiwiDeskCore` /
   `Bundle.kiwiDeskGui`). It resolves on the machine that built it

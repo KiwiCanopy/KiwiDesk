@@ -20,7 +20,9 @@ import Foundation
 /// none of. Both shipped defaults below are `.inside`, pinned
 /// by `SettingsCodingTests`; the argument is in
 /// docs/design-decisions.md.
-public enum BorderAlignment: String, Sendable, Codable, Equatable {
+public enum BorderAlignment: String, Sendable, Codable,
+    Equatable, CaseIterable
+{
     case inside
     case outside
 }
