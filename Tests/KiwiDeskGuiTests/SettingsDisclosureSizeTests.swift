@@ -127,6 +127,15 @@ struct SettingsDisclosureSizeTests {
         )
     }
 
+    /// How many fonts a run applies. The count IS the
+    /// invariant behind "one tier, one home": SwiftUI draws the
+    /// last `.font` in a chain, so a positive needle for the
+    /// shared tier stays green beside a literal appended after
+    /// it (guard-prover, 2026-08-26).
+    private func fonts(in run: String) -> Int {
+        run.components(separatedBy: ".font(").count - 1
+    }
+
     /// The modifier run of one expression, so a needle cannot be
     /// satisfied by one belonging to another view in the file.
     /// Only for POSITIVE clauses: it stops at the first `}`, so
@@ -162,18 +171,14 @@ struct SettingsDisclosureSizeTests {
             !file.contains("labelFont"),
             "the per-chrome label font is back"
         )
-        // Scoped to the LABEL's own run: read against the whole
-        // file this passed green when the `.font` was deleted
-        // from the header label and the identical literal parked
-        // on the drawer's interior `VStack` — the header then
-        // draws at whatever it inherits, which IS the
-        // call-site-decision state this test is named for
-        // (guard-prover, 2026-08-26).
-        let labelRun = try run(
-            in: file,
-            from: "Text(control.text)",
-            to: "}"
-        )
+        // Scoped to the LABEL's own BRACE-BALANCED run. Read
+        // against the whole file this passed green when the
+        // `.font` was deleted from the header label and the
+        // identical literal parked on the drawer's interior
+        // `VStack`; read to a `to:` bound it passed green again
+        // with one `.overlay { }` truncating the run before the
+        // literal it watches (guard-prover, 2026-08-26).
+        let labelRun = try body(of: "}label:", in: file)
         #expect(
             labelRun.contains(
                 ".font(SettingsDrawerHeader.tier.weight(.semibold))"
@@ -184,29 +189,46 @@ struct SettingsDisclosureSizeTests {
                     + "\(labelRun)"
             )
         )
-        // ONE tier, not two literals that happen to agree. The
-        // title and the summary beside it were both `.callout`
-        // in two different types with nothing tying them, so
-        // retuning the header would have left the summary
-        // behind — the drift #1021 ended at fifteen call sites,
-        // back at two (architect review, 2026-08-26).
+        // ONE tier, and it is the ONLY font here. A positive
+        // needle for the tier proves nothing on its own: keeping
+        // it and APPENDING `.font(.title3…)` passed green with
+        // the header drawing 15 pt and the summary 10 — maximal
+        // divergence, under a guard whose commit message said
+        // the two could no longer drift apart (guard-prover,
+        // 2026-08-26). SwiftUI draws the last one, so counting
+        // is the invariant; a needle is not.
         #expect(
-            !labelRun.contains(".font(.callout"),
-            "the header spells a size instead of the tier"
+            fonts(in: labelRun) == 1,
+            Comment(
+                rawValue:
+                    "the header label carries "
+                    + "\(fonts(in: labelRun)) fonts; the tier "
+                    + "must be its only one — \(labelRun)"
+            )
         )
     }
 
     @Test("the summary is drawn once, and only while shut")
     func theSummaryTierLivesInTheStyle() throws {
         let style = try squashed(Self.styleFile)
-        let summaryRun = try run(
-            in: style,
-            from: "Text(summary)",
-            to: "}"
+        let summaryRun = try body(
+            of: "privatevarsummaryText:someView",
+            in: style
         )
         #expect(
             summaryRun.contains(".font(SettingsDrawerHeader.tier)"),
             "the summary spells a size instead of the tier"
+        )
+        // The other half of the anti-drift pair — see the
+        // header's clause for why a needle alone is not it.
+        #expect(
+            fonts(in: summaryRun) == 1,
+            Comment(
+                rawValue:
+                    "the summary carries \(fonts(in: summaryRun))"
+                    + " fonts; the tier must be its only one — "
+                    + "\(summaryRun)"
+            )
         )
         #expect(
             summaryRun.contains(
@@ -239,89 +261,4 @@ struct SettingsDisclosureSizeTests {
         )
     }
 
-    /// The drawer's SUMMARY is the header tier's own drift
-    /// wearing a different slot (owner, 2026-08-26). Five call
-    /// sites drew it by hand, and four of the five wrapped their
-    /// own shut-only `if` while the fifth did not — so the rule
-    /// was a call-site decision too. The slot now owns both.
-    ///
-    /// **It watches `Text(`, not `.font(`.** Sizing was one
-    /// spelling of the violation and not the worst:
-    /// `accessory: { Text(x).foregroundStyle(.secondary) }`
-    /// carries no font, and because the accessory is a SIBLING
-    /// of the button it then inherits body 13 pt — LARGER than
-    /// the 12 pt header beside it, which is worse than the five
-    /// sites this replaced (architect review, 2026-08-26). That
-    /// slot's purpose is a control; `DesktopsGroup`'s
-    /// `HelpButton` is the only legitimate shape in the tree.
-    ///
-    /// **What it does not reach**, so nobody reads its green as
-    /// more than it is (guard-prover, 2026-08-26): a font
-    /// applied to the enclosing `SettingsDisclosure(…)`
-    /// expression, which propagates into the accessory through
-    /// the environment; an accessory body extracted to a
-    /// computed property, which the 350-line ceiling makes an
-    /// ordinary move; and a hand-drawn summary beside a
-    /// `SettingsDisclosure(` that simply took no `summary:`.
-    @Test("no call site draws what sits beside a header")
-    func accessoryClosuresCarryNoText() throws {
-        let files = try SourceScan.swiftSources(under: settingsRoot)
-        #expect(!files.isEmpty, "the scan root moved")
-        var offenders: [String] = []
-        var closures = 0
-        for file in files {
-            let text = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            for body in accessoryClosures(in: text) {
-                closures += 1
-                if body.contains("Text(") {
-                    offenders.append(file.lastPathComponent)
-                }
-            }
-        }
-        // The collection that MATTERS is the closures, not the
-        // files: a rename of the `accessory:` label would leave
-        // this scanning hundreds of files for zero closures and
-        // passing — matched nothing, and therefore green
-        // (guard-prover, 2026-08-26).
-        #expect(closures >= 2, "no accessory closure was found")
-        #expect(
-            offenders.isEmpty,
-            Comment(
-                rawValue:
-                    "an accessory closure draws its own text; "
-                    + "pass `summary:` instead — "
-                    + offenders.joined(separator: ", ")
-            )
-        )
-    }
-
-    /// Every `accessory:` closure body in one file, through
-    /// `SourceScan.balanced` — which also skips string literals,
-    /// where a hand-rolled counter would miscount braces.
-    private func accessoryClosures(in text: String) -> [String] {
-        let characters = Array(text)
-        var bodies: [String] = []
-        var searched = text.startIndex
-        while let label = text.range(
-            of: "accessory:",
-            range: searched..<text.endIndex
-        ) {
-            var cursor = text.distance(
-                from: text.startIndex,
-                to: label.upperBound
-            )
-            if let body = SourceScan.balanced(
-                characters,
-                from: &cursor,
-                open: "{",
-                close: "}"
-            ) {
-                bodies.append(body)
-            }
-            searched = label.upperBound
-        }
-        return bodies
-    }
 }

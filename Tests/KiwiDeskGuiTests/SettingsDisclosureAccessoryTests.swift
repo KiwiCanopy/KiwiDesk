@@ -173,4 +173,110 @@ struct SettingsDisclosureAccessoryTests {
             "the `label:` closure does not close"
         )
     }
+
+    private var settingsRoot: URL {
+        Self.root.appendingPathComponent(
+            "Sources/KiwiDesk/Settings"
+        )
+    }
+
+    /// The drawer's SUMMARY is the header tier's own drift
+    /// wearing a different slot (owner, 2026-08-26). Five call
+    /// sites drew it by hand, and four of the five wrapped their
+    /// own shut-only `if` while the fifth did not — so the rule
+    /// was a call-site decision too. The slot now owns both.
+    ///
+    /// **It watches `Text(`, not `.font(`.** Sizing was one
+    /// spelling of the violation and not the worst:
+    /// `accessory: { Text(x).foregroundStyle(.secondary) }`
+    /// carries no font, and because the accessory is a SIBLING
+    /// of the button it then inherits body 13 pt — LARGER than
+    /// the 12 pt header beside it, which is worse than the five
+    /// sites this replaced (architect review, 2026-08-26). That
+    /// slot's purpose is a control; `DesktopsGroup`'s
+    /// `HelpButton` is the only legitimate shape in the tree.
+    ///
+    /// **What it does not reach**, so nobody reads its green as
+    /// more than it is (guard-prover, 2026-08-26): a font
+    /// applied to the enclosing `SettingsDisclosure(…)`
+    /// expression, which propagates into the accessory through
+    /// the environment; an accessory body extracted to a
+    /// computed property, which the 350-line ceiling makes an
+    /// ordinary move; and a hand-drawn summary beside a
+    /// `SettingsDisclosure(` that simply took no `summary:`.
+    @Test("no call site draws what sits beside a header")
+    func accessoryClosuresCarryNoText() throws {
+        let files = try SourceScan.swiftSources(under: settingsRoot)
+        #expect(!files.isEmpty, "the scan root moved")
+        var offenders: [String] = []
+        var closures = 0
+        for file in files {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            // The wrapper's own `accessory: { EmptyView() }`
+            // forwardings live in `Components/Common` and are
+            // not call sites — counting them let the floor pass
+            // on a tree whose only real closure had been
+            // deleted (guard-prover, 2026-08-26).
+            let isCallSite = !file.path.contains(
+                "Settings/Components/Common/"
+            )
+            for body in accessoryClosures(in: text) {
+                if isCallSite { closures += 1 }
+                if body.contains("Text(") {
+                    offenders.append(file.lastPathComponent)
+                }
+            }
+        }
+        // The collection that MATTERS is the call sites, not
+        // the files and not every match: a rename of the
+        // `accessory:` label left this scanning hundreds of
+        // files for zero closures and passing, and a floor that
+        // counted the wrapper's own forwardings stayed green
+        // with the tree's ONLY real closure deleted — matched
+        // nothing, and therefore green (guard-prover,
+        // 2026-08-26).
+        #expect(
+            closures >= 1,
+            "no accessory CALL SITE was scanned"
+        )
+        #expect(
+            offenders.isEmpty,
+            Comment(
+                rawValue:
+                    "an accessory closure draws its own text; "
+                    + "pass `summary:` instead — "
+                    + offenders.joined(separator: ", ")
+            )
+        )
+    }
+
+    /// Every `accessory:` closure body in one file, through
+    /// `SourceScan.balanced` — which also skips string literals,
+    /// where a hand-rolled counter would miscount braces.
+    private func accessoryClosures(in text: String) -> [String] {
+        let characters = Array(text)
+        var bodies: [String] = []
+        var searched = text.startIndex
+        while let label = text.range(
+            of: "accessory:",
+            range: searched..<text.endIndex
+        ) {
+            var cursor = text.distance(
+                from: text.startIndex,
+                to: label.upperBound
+            )
+            if let body = SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ) {
+                bodies.append(body)
+            }
+            searched = label.upperBound
+        }
+        return bodies
+    }
 }
