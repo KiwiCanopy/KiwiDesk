@@ -219,36 +219,3 @@ public enum APIArgumentKind: Sendable, Equatable {
         }
     }
 }
-
-/// The legal values of an enum-typed argument, read off the
-/// Swift type that decodes it.
-public struct APIChoice: Sendable, Equatable {
-    /// The Swift type the values came from, module prefix
-    /// stripped (`ScrollingParams.Anchor`). Printed so a reader
-    /// of the listing can find the decoder.
-    public let type: String
-
-    /// Every case's wire spelling, in declaration order.
-    public let values: [String]
-
-    /// **The one initializer.** It takes a metatype and reads
-    /// the cases; there is deliberately no way to hand it a
-    /// list, because a hand-written list is the drift #1033 was
-    /// filed about.
-    public init<T: APIChoiceType>(_ type: T.Type) {
-        let qualified = String(reflecting: type)
-        let module = "KiwiDeskCore."
-        self.type =
-            qualified.hasPrefix(module)
-            ? String(qualified.dropFirst(module.count))
-            : qualified
-        values = T.allCases.map(\.rawValue)
-    }
-}
-
-/// A decoder enum whose cases are an argument's legal values.
-///
-/// Conformances are declared once, in `APIChoiceTypes.swift`,
-/// which is the census of every enum the API surface exposes.
-public protocol APIChoiceType: CaseIterable, RawRepresentable
-where RawValue == String {}

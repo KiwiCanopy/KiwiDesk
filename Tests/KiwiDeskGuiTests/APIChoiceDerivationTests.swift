@@ -4,87 +4,93 @@ import Testing
 /// An enum argument's legal values are READ off the decoder,
 /// never typed beside it (#1033).
 ///
-/// The compiler enforces this today, because `APIChoice` has
-/// exactly one initializer and it takes a metatype. That is not
-/// something a reviewer would notice being undone: adding a
-/// second, list-taking initializer is a two-line change that
-/// compiles, reads harmlessly, and quietly reopens the drift
-/// class #1033 was filed about — the CLI would then be free to
-/// answer `top|bottom|left|right` while the decoder had grown a
-/// fifth case.
+/// The compiler carries most of this: `APIChoice` keeps its
+/// storage `private`, so an initializer in any other file could
+/// not set it and would not compile. What the compiler cannot
+/// see is a second initializer added *in that file*, which is
+/// exactly what a `guard-prover` round used to defeat the first
+/// version of this suite — it appended an extension after the
+/// protocol declaration, outside the slice the scan was reading,
+/// and shipped `diag` as a legal `AppBarEdge` with all 33 tests
+/// green.
 ///
-/// So this scans the declaration rather than the behaviour. It
-/// lives in the GUI test target because `SourceScan` does, and
-/// it scans `Sources/KiwiDeskCore` (AGENTS.md: `SourceScan`
-/// guards scan both trees).
+/// So the scan reads the WHOLE of `APIChoice.swift` rather than
+/// a slice of a larger file, which is why that type has a file
+/// to itself. The question "how many initializers are there"
+/// then has a total answer.
 @Suite("API choice derivation")
 struct APIChoiceDerivationTests {
-    static let recordFile =
-        "Sources/KiwiDeskCore/Commands/Reference/APIRecord.swift"
+    static let choiceFile =
+        "Sources/KiwiDeskCore/Commands/Reference/APIChoice.swift"
 
-    static var source: String {
-        get throws {
-            let root = SourceScan.repoRoot(from: #filePath)
-            return try SourceScan.strippedSource(
-                at: root.appendingPathComponent(recordFile)
-            )
-        }
+    static let recordDirectory =
+        "Sources/KiwiDeskCore/Commands/Reference"
+
+    static func source(_ path: String) throws -> String {
+        let root = SourceScan.repoRoot(from: #filePath)
+        return try SourceScan.strippedSource(
+            at: root.appendingPathComponent(path)
+        )
     }
 
     @Test("APIChoice declares exactly one initializer")
     func oneInitializer() throws {
-        let text = try Self.source
-        guard
-            let declaration = text.range(
-                of: "public struct APIChoice"
-            )
-        else {
-            Issue.record("APIChoice moved out of \(Self.recordFile)")
-            return
-        }
-        let body = String(text[declaration.lowerBound...])
-        // The struct is the file's last declaration bar the
-        // protocol; count initializers to the end of it.
-        let scope =
-            body.range(of: "public protocol APIChoiceType")
-            .map { String(body[..<$0.lowerBound]) } ?? body
+        let text = try Self.source(Self.choiceFile)
+        let owned =
+            "APIChoice moved out of its own file; this scan is "
+            + "only total while it has one"
+        #expect(text.contains("public struct APIChoice"), "\(owned)")
+        // The whole file, not a slice: an extension anywhere in
+        // it — before or after the protocol — is counted.
         let one =
             "APIChoice must keep exactly one initializer — the "
             + "generic one that reads a decoder's cases. A "
-            + "second one is how hand-typed values return."
-        #expect(scope.occurrences(of: "init") == 1, "\(one)")
+            + "second one is how hand-typed values return, and "
+            + "it compiles."
+        #expect(text.occurrences(of: "init") == 1, "\(one)")
         let takesType =
-            "the one initializer must take the TYPE, so the "
+            "the one initializer must take a METATYPE, so the "
             + "values cannot be handed in"
         #expect(
-            scope.contains(
-                "init<T: APIChoiceType>(_ type: T.Type)"
-            ),
+            text.contains("init<T: APIChoiceType>(_ type: T.Type)"),
             "\(takesType)"
         )
         #expect(
-            scope.contains("T.allCases.map(\\.rawValue)"),
+            text.contains("T.allCases.map(\\.rawValue)"),
             "the values must be read off the type's own cases"
         )
+        // The storage is what makes an initializer in another
+        // file impossible. Without it the count above is the
+        // only thing standing.
+        let stored =
+            "APIChoice's storage must stay private, or another "
+            + "file can write a second initializer"
+        #expect(text.contains("private let derived"), "\(stored)")
     }
 
-    @Test("no record file spells an enum's values by hand")
-    func recordsBuildChoicesFromTypes() throws {
+    @Test("every choice argument names a type, not a list")
+    func choicesNameTheirType() throws {
+        // The call-site half, and the one that states the
+        // invariant directly: `.choice(name, X.self)`. A
+        // `values:`-taking factory added beside `APIArgument`
+        // would keep `APIChoice(` out of the record files
+        // entirely, which is how the prover's mutation hid.
         let root = SourceScan.repoRoot(from: #filePath)
         let directory = root.appendingPathComponent(
-            "Sources/KiwiDeskCore/Commands/Reference"
+            Self.recordDirectory
         )
         let files = try SourceScan.swiftSources(under: directory)
             .filter {
                 $0.lastPathComponent.hasPrefix("APIRecords+")
             }
-        // The FILTERED set, not the directory: a rename that
-        // took the record files out of the `APIRecords+` family
-        // would leave this loop iterating nothing and passing.
+        // The FILTERED set: a rename taking the record files out
+        // of the `APIRecords+` family would otherwise leave this
+        // iterating nothing and passing.
         #expect(
             files.count >= 8,
             "only \(files.count) record files reached the scan"
         )
+        var seen = 0
         for file in files {
             let text = try SourceScan.strippedSource(at: file)
             let message =
@@ -92,6 +98,42 @@ struct APIChoiceDerivationTests {
                 + ".choice(name, Type.self), never by "
                 + "constructing APIChoice beside the record"
             #expect(!text.contains("APIChoice("), "\(message)")
+            for argument in Self.choiceArguments(in: text) {
+                seen += 1
+                let call =
+                    "\(file.lastPathComponent): .choice(…, "
+                    + "\(argument)) must name a Swift type — a "
+                    + "list of values is the drift #1033 removed"
+                #expect(argument.hasSuffix(".self"), "\(call)")
+            }
         }
+        let reach =
+            "only \(seen) choice call sites found; the scan is "
+            + "not reading the records"
+        #expect(seen >= 15, "\(reach)")
+    }
+
+    /// The second argument of each `.choice(` call — everything
+    /// between the first comma and the matching close paren,
+    /// trimmed, with a trailing `optional:` clause dropped.
+    static func choiceArguments(in text: String) -> [String] {
+        var found: [String] = []
+        var cursor = text.startIndex
+        while let call = text.range(
+            of: ".choice(",
+            range: cursor..<text.endIndex
+        ) {
+            cursor = call.upperBound
+            guard
+                let close = text[cursor...].firstIndex(of: ")")
+            else { break }
+            let inside = text[cursor..<close]
+            let parts = inside.split(separator: ",")
+            guard parts.count >= 2 else { continue }
+            let second = parts[1]
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            found.append(second)
+        }
+        return found
     }
 }

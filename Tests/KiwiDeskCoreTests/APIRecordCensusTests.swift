@@ -114,7 +114,33 @@ struct APIRecordCensusTests {
         // `allCommands` is the pre-#1033 answer to "what does
         // help list": everything dispatchable plus the Lua-only
         // entry points. The grouped listing must still be it.
-        #expect(Set(names) == Set(APIReference.allCommands))
+        // The difference both ways, not the two sets — printing
+        // them dumps 8 KB of unsorted noise on a failure.
+        let listed = Set(names)
+        let expected = Set(APIReference.allCommands)
+        let message = difference(
+            listed,
+            "listed but not a command",
+            expected,
+            "a command but not listed"
+        )
+        #expect(listed == expected, "\(message)")
+    }
+
+    @Test("the census is reading a populated surface")
+    func censusHasInput() {
+        // Every clause above iterates a derived collection. Run
+        // under a filter, an empty one would pass all of them
+        // for having looked at nothing — `guard-prover` named
+        // this as the suite's standing vacuity risk.
+        #expect(APIReference.entries.count > 200)
+        #expect(APIReference.namespaces.count == 15)
+        #expect(APIReference.coreRecords.count > 50)
+        #expect(!APIReference.luaOnlyRecords.isEmpty)
+        #expect(
+            APIReference.entries.contains { !$0.aliases.isEmpty },
+            "no alias exists, so the alias clause proves nothing"
+        )
     }
 
     @Test("an alias resolves to the command it spells")

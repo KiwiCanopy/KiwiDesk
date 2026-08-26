@@ -63,6 +63,45 @@ struct BarSettingChoiceTests {
         #expect(!error.message.contains("ring"))
     }
 
+    @Test("two fields with different enums both name their own")
+    func twoFieldsCannotShareOneLiteral() {
+        // The clause that catches a hardcoded message that
+        // happens to be RIGHT today: `guard-prover` replaced the
+        // whole derivation with a literal spelling
+        // `active_indicator`'s cases, and every other assertion
+        // here passed. No single literal can be correct for two
+        // different enums, so asserting a second field is what
+        // makes the derivation itself the only way to be green.
+        let fields: [(String, String)] = [
+            (
+                "edge",
+                expectedMessage(AppBarEdge.self)
+            ),
+            (
+                "content",
+                expectedMessage(AppBarStyle.Content.self)
+            ),
+            (
+                "active_indicator",
+                expectedMessage(AppBarStyle.ActiveIndicator.self)
+            ),
+        ]
+        for (field, expected) in fields {
+            let result = AppBarCommandSetting.parse(
+                field: field,
+                args: [.string("nonsense")]
+            )
+            guard case .failure(let error) = result else {
+                Issue.record("\(field): expected a rejection")
+                continue
+            }
+            #expect(
+                error.message == expected,
+                "\(field): said \"\(error.message)\""
+            )
+        }
+    }
+
     @Test("a legal value still decodes")
     func legalValueDecodes() {
         let result = AppBarCommandSetting.parse(

@@ -18,6 +18,32 @@ struct APIRecordShapeTests {
     /// column and a summary still fit a wide terminal line.
     static let summaryLimit = 96
 
+    @Test("the shape net is reading a populated surface")
+    func netHasInput() {
+        // Every clause below iterates `entries` and skips what
+        // does not apply, so an empty surface passes all of
+        // them. `guard-prover` named this the suite's vacuity
+        // risk; the counts are floors, not pins, so filling a
+        // record never reds them.
+        let entries = APIReference.entries
+        #expect(entries.count > 200)
+        #expect(entries.contains { !$0.record.isPending })
+        let choices = entries.flatMap(\.record.arguments)
+            .filter {
+                if case .choice = $0.kind { return true }
+                return false
+            }
+        #expect(choices.count >= 15)
+        let trailing =
+            "no optional argument exists, so the trailing rule "
+            + "proves nothing"
+        let hasOptional =
+            entries
+            .flatMap(\.record.arguments)
+            .contains { $0.isOptional }
+        #expect(hasOptional, "\(trailing)")
+    }
+
     @Test("a written summary is one capitalized sentence")
     func summaries() {
         for entry in APIReference.entries
