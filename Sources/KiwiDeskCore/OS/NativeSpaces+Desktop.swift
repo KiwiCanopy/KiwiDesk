@@ -62,11 +62,22 @@ public struct DesktopSnapshot: Sendable {
     /// identifier) — in shared mode every Desktop IS the main
     /// screen's, so the degenerate case answers exactly as it
     /// did before this existed.
+    ///
+    /// **Not the only answer, and not the default one.** This
+    /// is what a *binding* can fire on; `userDesktops` is what
+    /// a Desktop *verb* can reach, which is every screen's. A
+    /// consumer picks by what it offers — the pair is stated on
+    /// both accessors because this is the one a caller already
+    /// reaches for, and the names do not contrast on the axis
+    /// that separates them.
     public var mainDisplayDesktops: [Int] {
         guard let mainUUID,
             spaces.contains(where: { $0.displayUUID == mainUUID })
         else {
-            return spaces.filter(\.isUser).indices.map { $0 + 1 }
+            // The degenerate answer IS every user Desktop, so
+            // it routes through the accessor that computes them
+            // rather than re-deriving the numbering beside it.
+            return userDesktops
         }
         return
             spaces

@@ -123,6 +123,22 @@ the state the rule exists for and the state a dev machine
 usually is not in. That is why this is a guard rather than a
 convention.
 
+**A Desktop VERB is the counterpart, and takes the wider
+list.** `focus_desktop` / `move_to_desktop(_and_follow)`
+resolve a Mission Control number globally and act on the
+screen that Desktop lives on, so a surface OFFERING those
+verbs offers every user Desktop — `DesktopSnapshot.userDesktops`,
+never `mainDisplayDesktops`, which would put a second screen's
+Desktops out of reach of every surface but hand-written Lua.
+The rule above is about which Desktop is AUTHORITATIVE; this is
+about which Desktops are REACHABLE, and reading the first as
+settling the second is the mistake this clause exists to stop —
+a single-screen machine cannot tell the two lists apart.
+`DesktopAuthorityTests` ▸ `userDesktopsSpanEveryScreen` holds
+them against one two-screen arrangement where they differ, and
+`KiwiCore.bindableDesktops(in:)` is where the list meets the
+capability.
+
 Two obligations fall out for a **switch handler**. Take ONE
 snapshot and answer every question from it — which Desktop is
 authoritative, which displays changed, whether a display's
