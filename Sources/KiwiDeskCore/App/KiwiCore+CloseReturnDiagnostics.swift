@@ -28,6 +28,13 @@ extension KiwiCore {
             own.map {
                 "#\($0.number) dialog=\($0.isDialog)"
             } ?? "none"
+        // #1007's diagnosis round: which window LEFT.
+        // `standsDown` alone cannot say why it holds, and on
+        // device it was false for a departure the recorder had
+        // just logged — a question the trace could not answer
+        // and a rebuild had to.
+        let goneText =
+            event.goneWindowID.map { "w\($0.raw)" } ?? "unnamed"
         let next = activeSpace?.focused
         let nextText =
             next.map { id -> String in
@@ -40,6 +47,7 @@ extension KiwiCore {
             "close-return: removed focused window of "
                 + "\(removed.app ?? "?") "
                 + "(\(removed.bundleID ?? "?")), "
+                + "gone=\(goneText), "
                 + "hide=\(event.isHideDrop), "
                 + "ownKey=\(ownText), "
                 + "standsDown=\(standsDown), "

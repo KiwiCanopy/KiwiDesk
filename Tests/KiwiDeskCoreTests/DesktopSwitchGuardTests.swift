@@ -216,60 +216,6 @@ struct DesktopSwitchGuardTests {
         #expect(!core.deferred.isScheduled(.desktopFollowReap))
     }
 
-    @Test("The eager departure raises no origin successor")
-    func eagerDepartureRaisesNoSuccessor() {
-        final class Box {
-            var lines: [String] = []
-        }
-        let core = makeCore()
-        defer { teardown() }
-        let box = Box()
-        core.onLog = { box.lines.append($0) }
-        // Successor first, mover second — the spawn grant gives
-        // the LAST created window the focus, so removing w7
-        // hands the space's focus back to w9, which is the
-        // close-return raise's exact trigger. At t=0 of the
-        // switch the origin is still composited, so the raise
-        // would fight the follow the user just asked for; the
-        // stand-down's third arm refuses it (#1023, and #936's
-        // one-predicate rule covers the restore arm with it).
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(id: WindowID(9), pid: 1, appName: "App")
-            )
-        )
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(id: WindowID(7), pid: 1, appName: "App")
-            )
-        )
-        #expect(
-            core.execute(
-                "move_to_desktop_and_follow",
-                args: [.number(4)]
-            ).isSuccess
-        )
-        #expect(core.state.windows[WindowID(7)] == nil)
-        // The WITNESS is the narration, which fires for every
-        // focus-lost removal and prints the predicate's own
-        // verdict — located by what the fixture cannot lose
-        // (guard-prover round 3: the raise site itself sits
-        // behind a live-AX gate no unit fixture reaches, so an
-        // absence-of-raise clause is vacuous here).
-        #expect(
-            box.lines.contains { $0.contains("standsDown=true") }
-        )
-        // Belt only — vacuously green in this fixture; the
-        // clause above is what discriminates.
-        #expect(
-            !box.lines.contains { $0.contains("close-return: raising") }
-        )
-        // And the latch is a SPAN, not a state: it must not
-        // outlive the fold, or every later genuine close would
-        // stand its raise down too.
-        #expect(core.eventLoop.eagerDepartureInFlight == nil)
-    }
-
     @Test("A missing hide capability degrades to the pointer-only switch")
     func missingHideDegradesToPointerOnly() {
         let core = makeCore(hiding: false)

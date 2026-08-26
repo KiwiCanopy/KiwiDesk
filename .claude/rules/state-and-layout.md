@@ -111,6 +111,29 @@ editing here:
   the two production wirings reach no unit test and are pinned
   by `ArrivalDisplayWiringTests` and
   `DesktopMoveRehomeWiringTests`.
+- **A follow owes the window it sent away a focus, and pays it
+  at the ARRIVAL** (#1007). `move_to_desktop_and_follow` onto a
+  Desktop nobody is showing cannot focus the window at the moment
+  of the move — AX does not list a window on an unshown Desktop —
+  so `FollowFocusIntent` records the debt and the `.windowCreated`
+  arm pays it, that being the moment the window is addressable
+  again. Three obligations, none of which a behavioural test can
+  see: the debt is recorded **only** for a switch that HAPPENED
+  (a Desktop already shown produces no vanish and no reveal, so a
+  debt recorded there is never drained); paying it is a space
+  SWITCH — activate, focus, emit — because a bare focus leaves
+  `focusedWindowID` naming the space the user left, so their next
+  command acts there; and the departure stands the close-return
+  raise down through the predicate above rather than beside it.
+  Key the drain to the arriving WINDOW, never to the reveal: a
+  reveal is not scoped to the window that owes, so an unrelated
+  switch inside the drain window would pay the debt and yank
+  focus mid-swipe.
+  `FollowFocusSeamTests` is the register of the production
+  wirings — add a site there in the same change, since deleting
+  any one of them leaves `FollowFocusIntentTests` fully green
+  while the follow silently stops carrying focus. The ruling is
+  `docs/design-decisions.md`'s.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in
@@ -166,12 +189,17 @@ editing here:
   order" is not an argument for arming on a mutation that
   scrambled nothing.
   And the close-return stand-down governs the ARM, not only the
-  direct raise (#936): a removal whose return raise stood down —
-  a hide, an active own dialog
-  (`EventLoop.closeReturnRaiseStandsDown(after:)`) — arms no
-  track restore either, because the drain ends in a focus
+  direct raise (#936): a removal whose return raise stood down
+  arms no track restore either, because the drain ends in a focus
   re-raise of the very anchor the stand-down refused, one settle
-  later; the next genuine mutation's arm heals the pile.
+  later; the next genuine mutation's arm heals the pile. **Which
+  removals those are is
+  `EventLoop.closeReturnRaiseStandsDown(after:)` and not a list
+  here** — this row carried one, a third arm landed under it
+  (#1007), and a rule file that reads as instructions was
+  carrying a false census until review caught it. A new arm goes
+  in that predicate rather than beside it, so the raise and the
+  arm can never disagree about which removals are exempt.
   Command-driven arms are exempt by ruling — an explicit user
   command is not an event-driven return raise; the product
   ruling (and which arms that covers) is

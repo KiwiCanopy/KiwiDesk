@@ -179,12 +179,33 @@ every other private path here uses.
 
 Where a Desktop lives on another screen, the verbs act on THAT
 screen — `focus_desktop 3` switches the screen holding Desktop 3,
-whichever it is. Keyboard focus does not travel with it, because
-macOS attaches focus to a window and not to a screen; carrying
-the user across would mean focusing the moved window once its
-Desktop reveals it, which is the pending-assignment work #890
-still holds
+whichever it is.
+
+**A follow carries keyboard focus; a plain switch does not, and
+the asymmetry is the point.** macOS attaches focus to a window
+and never to a screen, so switching a screen's Desktop is the
+whole of what `focus_desktop` can do — there is no window it was
+asked to take you to. `move_to_desktop_and_follow` names one, and
+its own word is *follow*, so it owes you the window rather than
+the view of it; `move_to_space_and_follow` had already settled
+that for KiwiDesk's own Spaces, and two verbs spelled alike
+answering differently is the worse outcome.
+
+Onto a hidden Desktop that focus cannot be handed over at the
+moment of the move — the window is not addressable until the
+reveal lists it — so the follow records the debt and pays it at
+the reveal, bounded so a follow macOS declined cannot fire
+minutes later. The departure itself is the eager fold the
+transition fix introduced, and it stands KiwiDesk's own
+close-return raise down through the one stand-down predicate —
+handing focus to a sibling of the space being LEFT is the exact
+opposite of what the verb was asked for
 ([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+
+The **pointer** is not a second decision. It follows focus only
+where *mouse follows focus* is on, through the same predicate
+every other focus change uses — the setting is the answer, and a
+follow does not earn an exception to it.
 
 What that admission costs, accepted deliberately: **there is no
 fallback to write.** The public API for these operations does not

@@ -123,6 +123,7 @@ extension KiwiCore {
             return response
         case .target(let target):
             return switchDesktop(to: target, verb: "focus_desktop")
+                .response
         }
     }
 
@@ -172,14 +173,34 @@ extension KiwiCore {
             }
             rehomeAcrossScreens(focused, to: target)
             if follow {
-                let response = switchDesktop(
+                let outcome = switchDesktop(
                     to: target,
                     verb: "move_to_desktop_and_follow"
                 )
-                if response.isSuccess, !target.isCurrent {
+                // `.switched` is the one case with a reveal
+                // coming: it owes the window a focus (#1007,
+                // recorded before the fold so the debt exists
+                // whatever the fold's own focus picks do) AND
+                // folds the eager departure (#1023).
+                // `.alreadyShown` owes nothing — no vanish, no
+                // reveal, focus simply stays with the window
+                // (device-measured 2026-08-25) — and `.refused`
+                // never took the user anywhere.
+                if case .switched = outcome {
+                    followFocus.record(focused)
+                    // Narrated at the RECORD, because the
+                    // payment narrates too: a trace showing this
+                    // line with no "focus handed to" after it is
+                    // a window that never came back, which is
+                    // otherwise indistinguishable from the bug
+                    // this fixes.
+                    onLog(
+                        "follow: owing focus to w\(focused.raw) "
+                            + "when its Desktop reveals it"
+                    )
                     departEagerly(focused)
                 }
-                return response
+                return outcome.response
             }
             departWithoutFollowing(focused)
             return .ok()

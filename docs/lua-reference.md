@@ -295,14 +295,25 @@ KiwiDesk.move_to_desktop(3)
 **Does:** moves the focused window to that Desktop **and**
 switches you there with it.
 
+"There" means **on the window**, not merely looking at it:
+keyboard focus ends on the window you sent, so you can carry on
+typing into it. Your pointer only moves if you have turned
+*mouse follows focus* on, which governs this the way it governs
+every other focus change.
+
+If the target Desktop is **hidden**, KiwiDesk hands focus over
+the moment the window reappears there — a beat after the switch,
+because macOS attaches focus to a *window*, never to a screen,
+and a window on an unshown Desktop is not one Accessibility will
+list
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)). If
+it is already **shown**, focus simply stays with the window and
+there is nothing to hand over.
+
 With more than one screen, "there" is that Desktop's own screen,
-and two things follow. If the Desktop is already the one its
-screen shows, nothing switches — the window still moves. And
-because macOS moves keyboard focus with a *window*, never with a
-screen, a follow onto another screen changes what that screen
-shows without carrying your typing to it; you land there by
-clicking, as you would after any other switch
-([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+and a Desktop that screen already shows switches nothing — the
+window still moves, and focus still goes with it.
+
 The window itself is placed by the cross-screen rule above — on
 another screen it joins the Space that screen shows. Same
 requirement as `focus_desktop`.

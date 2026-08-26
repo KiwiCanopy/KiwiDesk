@@ -90,6 +90,12 @@ extension KiwiCore {
                         + "\(rehomed.raw)"
                 )
             }
+            // #1007: a follow sent this window to a Desktop
+            // nobody was showing, and THIS is when it becomes
+            // addressable again. After the re-home above, so the
+            // space it activates is the one the arrival settled
+            // on. A no-op unless this window is the one owed.
+            payFollowedFocus(arrived: window.id)
         case .windowMoved(let id, let frame):
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already

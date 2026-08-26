@@ -96,6 +96,49 @@ extension KiwiCore {
         spaceSwitchRetile()
     }
 
+    /// Pay the focus a `move_to_desktop_and_follow` owes the
+    /// window it sent to a Desktop nobody was showing (#1007),
+    /// at the moment that window re-materializes — which is the
+    /// definition of when it becomes addressable again.
+    ///
+    /// The claim is keyed to the ARRIVING window rather than to
+    /// the reveal, so an unrelated switch inside the drain window
+    /// cannot pay the debt and yank focus mid-swipe (review).
+    /// A no-op when nothing is owed, which is every other
+    /// arrival.
+    ///
+    /// **A follow is a space switch, not a focus call.** An
+    /// earlier draft focused the window without activating its
+    /// space, which left `focusedWindowID` — the implicit target
+    /// of nearly every command — naming the anchor of the space
+    /// the user had just left, and emitted no `space_change` for
+    /// anything subscribed to one (review, #1007).
+    ///
+    /// Three of `followSwitch`'s five above, deliberately: the
+    /// retile and the space settle belong to the caller, and the
+    /// caller here is the event fold, which retiles for the
+    /// arrival itself.
+    func payFollowedFocus(arrived window: WindowID) {
+        guard
+            followFocus.claim(if: { $0 == window }) != nil
+        else { return }
+        guard let destination = state.workspaces.space(of: window)
+        else {
+            onLog(
+                "follow: w\(window.raw) arrived in no space — "
+                    + "focus debt dropped"
+            )
+            return
+        }
+        state.workspaces.activate(destination)
+        focusWindow(window, refocusRetile: false, warp: true)
+        emitSpaceChange()
+        onLog(
+            "follow: focus handed to w\(window.raw) in space "
+                + "\(destination.raw)"
+        )
+    }
+
     /// Hands key focus to the desktop when a move empties the
     /// focused display's space (#446). macOS exposes no "focus the
     /// empty desktop" API, so we activate Finder (the desktop's
