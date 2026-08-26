@@ -73,6 +73,13 @@ enum ShortcutsFamilyHeading {
             return L("shortcuts.move_to_track", "Move to track")
         case .shortcuts(.moveToSpace):
             return L("shortcuts.move_to_space", "Move to Space")
+        case .shortcuts(.focusDesktop):
+            return L("shortcuts.go_to_desktop", "Go to Desktop")
+        case .shortcuts(.moveToDesktop):
+            return L(
+                "shortcuts.move_to_desktop",
+                "Move to Desktop"
+            )
         default:
             return nil
         }

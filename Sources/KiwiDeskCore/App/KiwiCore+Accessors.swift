@@ -54,6 +54,32 @@ extension KiwiCore {
     /// verdict and needs no reason enum beside it.
     public var canDriveDesktops: Bool { WMBridge.isAvailable }
 
+    /// The Desktops a keybinding may target, in one reading:
+    /// every user Desktop's Mission Control number, or NONE
+    /// when this macOS does not expose the bridge that drives
+    /// them.
+    ///
+    /// One accessor rather than a capability Bool and a list
+    /// beside it, because two surfaces render Desktop rows (the
+    /// Shortcuts editor and the ⌃⌥K panel) and each combining
+    /// the pair for itself is how they come to disagree about
+    /// whether to offer any. Every user Desktop, not the main
+    /// screen's: a verb acts on the screen the Desktop lives on
+    /// (`userDesktops` argues the split).
+    ///
+    /// The snapshot form is for a caller that already holds one
+    /// — #888's "one reading, every question" — and the
+    /// no-argument form for a caller that holds none.
+    public func bindableDesktops(
+        in snapshot: DesktopSnapshot
+    ) -> [Int] {
+        canDriveDesktops ? snapshot.userDesktops : []
+    }
+
+    public var bindableDesktops: [Int] {
+        bindableDesktops(in: NativeSpaces.desktopSnapshot())
+    }
+
     /// The KiwiDesk display a SkyLight display UUID names, or
     /// nil when no attached display matches (the topology moved
     /// under a snapshot, or the UUID symbol is unavailable).

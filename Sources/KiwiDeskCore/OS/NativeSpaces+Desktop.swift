@@ -75,6 +75,30 @@ public struct DesktopSnapshot: Sendable {
             .sorted()
     }
 
+    /// The Mission Control numbers of EVERY user Desktop in
+    /// this snapshot, ascending — every screen's, not one
+    /// screen's.
+    ///
+    /// The peer of `mainDisplayDesktops`, and the two are not
+    /// interchangeable: that one narrows to the screen a
+    /// *binding* fires on (#888), while a Desktop VERB acts on
+    /// the screen the Desktop lives on, so a consumer offering
+    /// the verbs must offer them all — narrowing to the main
+    /// screen would put a second screen's Desktops out of reach
+    /// of every surface but hand-written Lua. Which of the two
+    /// a consumer takes is a statement about what it offers,
+    /// which is why both exist rather than one with a flag.
+    ///
+    /// Numbered through `number(of:)`, so a Desktop reads the
+    /// same here, in a binding and in `space(numbered:)` — the
+    /// one numbering authority, read a third way.
+    public var userDesktops: [Int] {
+        spaces
+            .filter(\.isUser)
+            .compactMap { number(of: $0.id) }
+            .sorted()
+    }
+
     /// Whether the space now current on `uuid` is a user desktop
     /// — the #670 verdict, per screen and inside this snapshot,
     /// rather than a second live read. True for an unknown

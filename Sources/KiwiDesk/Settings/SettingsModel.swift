@@ -234,6 +234,22 @@ final class SettingsModel: ObservableObject {
     /// "current" badge; nil without SkyLight.
     @Published var currentDesktop: Int?
 
+    /// The Desktops a keybinding may target — every user
+    /// Desktop, or none where this macOS has no Desktop bridge
+    /// (`KiwiCore.bindableDesktops` joins the two facts).
+    ///
+    /// A stored snapshot rather than a read per render, for the
+    /// two reasons the properties above are: the read scans the
+    /// window server's whole space model, and the capability
+    /// half caches a process-wide answer the first time anything
+    /// asks — a `body` that asked would pin that answer to
+    /// whichever render happened first.
+    ///
+    /// The WIDER list of the two Desktop reads: `mainDesktops`
+    /// is what a profile binding can fire on (#888), this is
+    /// what a verb can reach.
+    @Published var bindableDesktops: [Int] = []
+
     /// A dismissible in-app warning shown when a keybinding
     /// conflict was just introduced — nil hides the banner. Set
     /// by `noteRecordedCombo` (recording a conflicting shortcut)
@@ -311,9 +327,6 @@ final class SettingsModel: ObservableObject {
         reload()
     }
 
-    var configURL: URL { core.configURL }
-    var displays: [Display] { core.state.workspaces.allDisplays }
-
     /// The global color-palette library (#375). Stateless and
     /// file-backed, keyed off the config directory — built once
     /// since the directory never changes for a session. Apply is
@@ -321,23 +334,4 @@ final class SettingsModel: ObservableObject {
     /// What the last restore could not take, nil when it took
     /// everything (#606).
     @Published var lastRestoreOutcome: RestoreOutcome?
-
-    /// Whether the raw Lua editor is currently shown.
-    var editingLua: Bool { forcedLuaEditor || showLuaEditor }
-
-    /// The stored profile being edited, or nil while live —
-    /// derived from `target` (#64).
-    var editingProfile: String? {
-        if case .storedProfile(let name) = target {
-            return name
-        }
-        return nil
-    }
-
-    /// Whether the dashboard is editing a stored profile rather
-    /// than the live config (#18) — hides App Rules, renders
-    /// the Shortcuts tab in override mode (#55 phase 7), and
-    /// swaps the footer's save action. The editing surface
-    /// lives in `SettingsModel+ProfileOverrides.swift`.
-    var editingStoredProfile: Bool { target != .live }
 }

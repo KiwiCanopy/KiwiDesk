@@ -36,6 +36,7 @@ extension SettingsValueReadout {
             + KeybindingCatalog.moveToTrackRows
             + KeybindingCatalog.trackSwapRows
             + KeybindingCatalog.moveToSpace(spaces)
+            + desktopCommands(old: old, new: new)
             + [
                 KeybindingCatalog.showShortcuts,
                 KeybindingCatalog.openSettings,
@@ -58,6 +59,25 @@ extension SettingsValueReadout {
             labels[command.lua] = command.resolvedLabel
         }
         return labels
+    }
+
+    /// Every Desktop row either side of the diff names, built
+    /// from the BINDINGS rather than from a live Desktop list:
+    /// a config records no Desktops, and a diff must name a row
+    /// whatever is plugged in while it is read.
+    private static func desktopCommands(
+        old: GuiConfig,
+        new: GuiConfig
+    ) -> [NavCommand] {
+        let bindings = (old.layers + new.layers).flatMap(
+            \.bindings
+        )
+        let desktops = KeybindingCatalog.offeredDesktops(
+            live: [],
+            bindings: bindings
+        )
+        return KeybindingCatalog.goToDesktop(desktops)
+            + KeybindingCatalog.moveToDesktop(desktops)
     }
 
     /// The binding's row label as the Shortcuts area shows it:

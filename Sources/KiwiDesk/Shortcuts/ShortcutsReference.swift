@@ -22,6 +22,7 @@ enum ShortcutsReferenceBuilder {
         layer: KeyLayer,
         spaces: [SpaceID],
         spaceIcons: [SpaceID: String],
+        desktops: [Int],
         resizeStep: Int,
         layerNames: [String]
     ) -> ShortcutsReference {
@@ -86,6 +87,15 @@ enum ShortcutsReferenceBuilder {
             activeLayer: layer.name,
             spaces: spaces,
             spaceIcons: spaceIcons,
+            // Widened by the layer's own bindings, so a bound
+            // Desktop row keeps its name here instead of
+            // falling through to Custom as raw Lua — the band
+            // that means "user-authored" (the General band's
+            // #678 item 18 note is the same defect).
+            desktops: KeybindingCatalog.offeredDesktops(
+                live: desktops,
+                bindings: layer.bindings
+            ),
             resizeStep: resizeStep,
             layerNames: layerNames,
             rows: rows

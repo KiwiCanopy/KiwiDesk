@@ -34,22 +34,28 @@ enum ShortcutsRowOrder {
         .luaBindings,
     ]
 
-    /// Focus: the four directions, then one row per live space.
+    /// Focus: the four directions, one row per live space, then
+    /// one per macOS Desktop. KiwiDesk's own Spaces lead — they
+    /// are what the rest of the app is about, and a Desktop row
+    /// is the escape into macOS's own arrangement.
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
         .shortcuts(.goToSpace),
+        .shortcuts(.focusDesktop),
     ]
 
     /// Move windows: the directional swaps, the track verbs
     /// (authoring rows, always rendered — only meaningful in the
     /// track layout, which the caption says), then the per-space
-    /// move pair.
+    /// move pair and the per-Desktop one.
     static let moveWindowsAtRest: [SettingKey] = [
         .shortcuts(.swapDir),
         .shortcuts(.moveWindowToTrack),
         .shortcuts(.swapWithTrack),
         .shortcuts(.moveToSpace),
         .shortcuts(.moveToSpaceFollow),
+        .shortcuts(.moveToDesktop),
+        .shortcuts(.moveToDesktopFollow),
     ]
 
     /// Families whose INSTANCES interleave instead of stacking.
@@ -59,7 +65,8 @@ enum ShortcutsRowOrder {
     /// & follow" are one decision about one space, and drawing
     /// every plain row and then every follow row makes the user
     /// cross-reference two lists to make it. So the per-space
-    /// pair renders per space: plain, follow, plain, follow.
+    /// pair renders per space: plain, follow, plain, follow. The
+    /// per-Desktop pair is the same decision one noun over.
     ///
     /// Data rather than a special case inside the renderer,
     /// because it is a design decision about instance order and
@@ -73,7 +80,11 @@ enum ShortcutsRowOrder {
     /// short by construction — a run is a row shape, not a
     /// grouping mechanism.
     static let interleavedRuns: [[SettingKey]] = [
-        [.shortcuts(.moveToSpace), .shortcuts(.moveToSpaceFollow)]
+        [.shortcuts(.moveToSpace), .shortcuts(.moveToSpaceFollow)],
+        [
+            .shortcuts(.moveToDesktop),
+            .shortcuts(.moveToDesktopFollow),
+        ],
     ]
 
     /// The run `key` leads, if it leads one. A non-leading member

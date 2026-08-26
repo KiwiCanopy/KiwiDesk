@@ -7,11 +7,15 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case layersIcon = "config.layers[].icon"
     case focusDir = "keybinding.focus_dir (x4)"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
+    case focusDesktop = "keybinding.focus_desktop (x N desktops)"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack = "keybinding.move_window_to_track (x2)"
     case swapWithTrack = "keybinding.swap_with_track (x2)"
     case moveToSpace = "keybinding.move_to_space (x N)"
     case moveToSpaceFollow = "keybinding.move_to_space_follow (x N)"
+    case moveToDesktop = "keybinding.move_to_desktop (x N desktops)"
+    case moveToDesktopFollow =
+        "keybinding.move_to_desktop_follow (x N)"
     case growWidth = "keybinding.grow_width"
     case shrinkWidth = "keybinding.shrink_width"
     case growHeight = "keybinding.grow_height"
@@ -41,10 +45,10 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.layersExist)
             )
-        case .focusDir, .goToSpace:
+        case .focusDir, .goToSpace, .focusDesktop:
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveWindowToTrack, .swapWithTrack, .moveToSpace,
-            .moveToSpaceFollow:
+            .moveToSpaceFollow, .moveToDesktop, .moveToDesktopFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleSticky, .toggleDisplaySticky:
@@ -83,7 +87,8 @@ extension ShortcutsKey {
         // template key.
         case .layers, .openApplications, .advanced, .focusDir,
             .goToSpace, .swapDir, .moveWindowToTrack, .swapWithTrack,
-            .moveToSpace, .moveToSpaceFollow, .switchToLayer:
+            .moveToSpace, .moveToSpaceFollow, .focusDesktop,
+            .moveToDesktop, .moveToDesktopFollow, .switchToLayer:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

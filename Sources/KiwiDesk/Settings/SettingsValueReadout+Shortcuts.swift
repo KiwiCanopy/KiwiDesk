@@ -23,7 +23,8 @@ extension SettingsValueReadout {
             return shortcutsIconRows(census, old: old, new: new)
         case .focusDir, .goToSpace, .swapDir,
             .moveWindowToTrack, .swapWithTrack, .moveToSpace,
-            .moveToSpaceFollow, .growWidth, .shrinkWidth,
+            .moveToSpaceFollow, .focusDesktop, .moveToDesktop,
+            .moveToDesktopFollow, .growWidth, .shrinkWidth,
             .growHeight, .shrinkHeight, .toggleFloating,
             .toggleSticky, .toggleDisplaySticky, .showShortcuts,
             .openSettings, .switchToLayer, .openApplications,

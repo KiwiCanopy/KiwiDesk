@@ -30,6 +30,7 @@ struct ShortcutsReferenceTests {
     private func build(
         _ bindings: [KeyBinding],
         spaces: [SpaceID] = [SpaceID("1")],
+        desktops: [Int] = [1, 2],
         layerNames: [String] = [KeyLayer.defaultName]
     ) -> ShortcutsReference {
         ShortcutsReferenceBuilder.build(
@@ -39,6 +40,7 @@ struct ShortcutsReferenceTests {
             ),
             spaces: spaces,
             spaceIcons: [:],
+            desktops: desktops,
             resizeStep: 50,
             layerNames: layerNames
         )

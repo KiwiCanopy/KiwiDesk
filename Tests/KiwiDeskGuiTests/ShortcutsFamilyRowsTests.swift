@@ -88,11 +88,19 @@ struct ShortcutsFamilyRowsTests {
         }
     }
 
-    /// The per-space families expand once per space, and the
-    /// switch family once per OTHER layer. A fixture pins both
-    /// counts: an expansion that silently collapsed to one row
-    /// would still satisfy `familiesExpand`.
-    @Test("per-space and per-layer families expand per instance")
+    /// The per-space families expand once per space, the
+    /// per-Desktop ones once per Desktop, and the switch family
+    /// once per OTHER layer. A fixture pins the counts: an
+    /// expansion that silently collapsed to one row would still
+    /// satisfy `familiesExpand`.
+    ///
+    /// The fixture's two lists are deliberately DIFFERENT
+    /// lengths — three spaces, two Desktops — so a Desktop
+    /// family wired to the space list (or the reverse) reds
+    /// here. Equal lengths would make that swap invisible,
+    /// which is the same blindness `moveFamiliesAreDistinct`
+    /// exists for one axis over.
+    @Test("per-instance families expand per instance")
     @MainActor
     func instanceCounts() {
         let expander = fixture()
@@ -107,7 +115,20 @@ struct ShortcutsFamilyRowsTests {
                 "\(key.id) should expand once per space"
             )
         }
+        for key in [
+            SettingKey.shortcuts(.focusDesktop),
+            .shortcuts(.moveToDesktop),
+            .shortcuts(.moveToDesktopFollow),
+        ] {
+            #expect(
+                expander.rows(for: key)?.count
+                    == expander.desktops.count,
+                "\(key.id) should expand once per Desktop"
+            )
+        }
         #expect(expander.spaces.count > 1)
+        #expect(expander.desktops.count > 1)
+        #expect(expander.spaces.count != expander.desktops.count)
         // Two layers defined, one of them current, so exactly
         // one switch row.
         #expect(
@@ -247,6 +268,7 @@ struct ShortcutsFamilyRowsTests {
         let one = ShortcutsFamilyRows(
             spaces: ["1"],
             icons: [:],
+            desktops: [1, 2],
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -254,6 +276,7 @@ struct ShortcutsFamilyRowsTests {
         let two = ShortcutsFamilyRows(
             spaces: ["1", "2"],
             icons: [:],
+            desktops: [1, 2],
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -292,6 +315,7 @@ struct ShortcutsFamilyRowsTests {
         ShortcutsFamilyRows(
             spaces: ["1", "2", "mail"],
             icons: [:],
+            desktops: [1, 2],
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName, "resize"],
             currentLayer: KeyLayer.defaultName
