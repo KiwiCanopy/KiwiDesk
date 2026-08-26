@@ -193,9 +193,9 @@ answering differently is the worse outcome.
 
 Onto a hidden Desktop that focus cannot be handed over at the
 moment of the move — the window is not addressable until the
-reveal lists it — so the follow records the debt and pays it at
-the reveal, bounded so a follow macOS declined cannot fire
-minutes later. The departure itself is the eager fold the
+reveal lists it — so the follow records the debt and pays it the
+moment the revealed Desktop lists the window again, bounded so a
+follow macOS declined cannot fire minutes later. The departure itself is the eager fold the
 transition fix introduced, and it stands KiwiDesk's own
 close-return raise down through the one stand-down predicate —
 handing focus to a sibling of the space being LEFT is the exact

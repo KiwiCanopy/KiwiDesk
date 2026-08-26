@@ -33,10 +33,13 @@ import Foundation
 ///
 /// **A third per-window, time-bounded, re-key-following ledger
 /// is already planned** — #890's pending assignment for the
-/// no-follow Desktop move, which records "window W belongs to
-/// space S of Desktop D" and drains when D is shown. If that
-/// lands, extend this rather than minting a third beside it: the
-/// shape is identical and only the payload differs.
+/// no-follow Desktop move. If that lands, weigh extending this
+/// rather than minting a third beside it — but know what
+/// transfers and what does not: the per-window record, the time
+/// bound and the rekey-following transfer; the drain key does
+/// NOT (this drains at the owed window's own arrival, #890's at
+/// a DESKTOP's reveal) and neither does the cardinality (focus
+/// is singular; assignments are not).
 @MainActor
 final class FollowFocusIntent {
     /// How long the focus debt stays claimable: long enough for

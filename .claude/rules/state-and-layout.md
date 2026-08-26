@@ -117,14 +117,18 @@ editing here:
   of the move — AX does not list a window on an unshown Desktop —
   so `FollowFocusIntent` records the debt and the `.windowCreated`
   arm pays it, that being the moment the window is addressable
-  again. Three obligations, none of which a behavioural test can
-  see: the debt is recorded **only** for a switch that HAPPENED
+  again. Three obligations, and violating any of them leaves
+  the behavioural suites green — `DesktopFollowTests` drives the
+  paid path end-to-end and stays green through all three
+  (guard-prover, #1007): the debt is recorded **only** for a
+  switch that HAPPENED
   (a Desktop already shown produces no vanish and no reveal, so a
   debt recorded there is never drained); paying it is a space
   SWITCH — activate, focus, emit — because a bare focus leaves
   `focusedWindowID` naming the space the user left, so their next
   command acts there; and the departure stands the close-return
-  raise down through the predicate above rather than beside it.
+  raise down through the one `closeReturnRaiseStandsDown`
+  predicate (the #936 clause below) rather than beside it.
   Key the drain to the arriving WINDOW, never to the reveal: a
   reveal is not scoped to the window that owes, so an unrelated
   switch inside the drain window would pay the debt and yank

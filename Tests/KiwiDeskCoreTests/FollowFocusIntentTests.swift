@@ -17,7 +17,7 @@ import Testing
 /// the right window over at the right time. The production
 /// wirings are `FollowFocusSeamTests`' register, and the
 /// record→pay path is exercised end-to-end (through the real
-/// dispatch and fold) by `DesktopSwitchGuardTests`.
+/// dispatch and fold) by `DesktopFollowTests`.
 @MainActor
 @Suite("A followed departure owes a focus (#1007)")
 struct FollowFocusIntentTests {

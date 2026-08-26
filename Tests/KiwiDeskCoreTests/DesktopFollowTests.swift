@@ -110,6 +110,10 @@ struct DesktopFollowTests {
                 args: [.number(4)]
             ).isSuccess
         )
+        // Pins the NARRATION only — guard-prover: deleting the
+        // record itself leaves this green (the log is its
+        // neighbour statement); the record is held by the seam
+        // scans and the "focus handed" clause below.
         #expect(
             box.lines.contains { $0.contains("owing focus to w7") }
         )

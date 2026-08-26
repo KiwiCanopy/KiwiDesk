@@ -71,7 +71,7 @@ struct WMBridgeSeamTests {
         // operations it dispatches.
         "WMBridge.": [
             "KiwiDeskCore/App/KiwiCore+Accessors.swift": 1,
-            "KiwiDeskCore/Commands/KiwiCore+DesktopCommands.swift": 1,
+            "KiwiDeskCore/Commands/KiwiCore+DesktopMove.swift": 1,
             "KiwiDeskCore/Commands/KiwiCore+DesktopSwitch.swift": 2,
         ],
     ]

@@ -5,14 +5,13 @@ import Testing
 /// (#1007) that no unit test reaches.
 ///
 /// `FollowFocusIntentTests` holds what the record DOES against
-/// an injected clock, and `DesktopSwitchGuardTests` drives the
+/// an injected clock, and `DesktopFollowTests` drives the
 /// record→pay path end-to-end through the dispatch and the
 /// fold. What neither can see is the SHAPE each wiring must
-/// keep: the payer sits behind live AX and a real `focusWindow`,
-/// the re-key behind a native-tab flow no unit fixture builds —
-/// delete one and the suites stay green while the follow
-/// silently goes back to landing focus on a window of the space
-/// the user asked to leave.
+/// keep — a violated obligation that leaves the behavior suites
+/// green: the recorder moved out of its gate, the payer reduced
+/// to a bare focus (the narration line survives), the re-key
+/// deleted (a native-tab flow no unit fixture builds).
 ///
 /// Each needle is pinned by EXACT COUNT and to its file, because
 /// this seam fails in both directions: a second recorder would
@@ -37,7 +36,7 @@ struct FollowFocusSeamTests {
         // The recorder: only a follow whose switch HAPPENED owes
         // a focus, so this is inside `moveToDesktop`'s follow
         // branch behind its `.switched` gate.
-        ("followFocus.record(", "KiwiCore+DesktopCommands.swift"),
+        ("followFocus.record(", "KiwiCore+DesktopMove.swift"),
         // The drain, at the ARRIVAL — the moment the window
         // re-materializes, which is when it becomes addressable
         // again. Keyed to that window rather than to the reveal,
@@ -90,8 +89,10 @@ struct FollowFocusSeamTests {
     /// command — naming the anchor of the space the user just
     /// left, and emits no `space_change`. That shipped in the
     /// parked branch's first draft and review caught it; the
-    /// three calls are pinned together because any one of them
-    /// alone is the half-fix.
+    /// three calls are pinned together in the ONE hand-off both
+    /// follow arms route through, because any one of them alone
+    /// is the half-fix and a second hand copy is where the trio
+    /// would drift apart (review round 1).
     @Test("paying the debt activates the space, not just the window")
     func payingIsASpaceSwitch() throws {
         let source = try SourceScan.strippedSource(
@@ -103,9 +104,15 @@ struct FollowFocusSeamTests {
             let payer = SourceScan.declarationBody(
                 after: "func payFollowedFocus",
                 in: source
+            ),
+            let handOff = SourceScan.declarationBody(
+                after: "func handFollowFocus",
+                in: source
             )
         else {
-            Issue.record("no payFollowedFocus in KiwiCore+DisplayFocus")
+            Issue.record(
+                "payFollowedFocus/handFollowFocus missing"
+            )
             return
         }
         #expect(
@@ -115,21 +122,55 @@ struct FollowFocusSeamTests {
             place a debt can be paid
             """
         )
+        #expect(
+            payer.contains("handFollowFocus("),
+            "the payer routes through the one hand-off"
+        )
         for call in [
             "state.workspaces.activate(",
             "focusWindow(",
             "emitSpaceChange()",
         ] {
             #expect(
-                payer.contains(call),
+                handOff.contains(call),
                 .init(
-                    rawValue: "paying a follow's debt owes "
+                    rawValue: "the follow hand-off owes "
                         + "\(call) — without it the user types "
                         + "on one screen while commands act on "
                         + "the space they left"
                 )
             )
         }
+        // The already-shown arm routes through the SAME hand-off
+        // (review round 1: the re-home stamps the destination's
+        // focused member but never activates it, so a follow
+        // onto a visible cross-screen Desktop left
+        // `focusedWindowID` naming the space the user left).
+        let commands = try SourceScan.strippedSource(
+            at: Self.core
+                .appendingPathComponent("Commands")
+                .appendingPathComponent(
+                    "KiwiCore+DesktopMove.swift"
+                )
+        )
+        guard
+            let shown = SourceScan.declarationBody(
+                after: "case .alreadyShown",
+                in: commands
+            )
+        else {
+            Issue.record(
+                "moveToDesktop no longer rules .alreadyShown"
+            )
+            return
+        }
+        #expect(
+            shown.contains("handFollowFocus("),
+            """
+            the already-shown follow owes the state half of the \
+            switch through the one hand-off
+            """
+        )
     }
 
     /// Only a switch that actually happened owes a focus.
@@ -146,30 +187,47 @@ struct FollowFocusSeamTests {
             at: Self.core
                 .appendingPathComponent("Commands")
                 .appendingPathComponent(
-                    "KiwiCore+DesktopCommands.swift"
+                    "KiwiCore+DesktopMove.swift"
                 )
         )
+        // The switched ARM is the span from its case label to
+        // the next arm's — the case order is part of the needle
+        // (glue holding it contiguous, not an assertion).
         guard
-            let gated = SourceScan.declarationBody(
-                after: "if case .switched = outcome",
+            let dispatch = SourceScan.declarationBody(
+                after: "switch outcome",
                 in: source
-            )
+            ),
+            let armStart = dispatch.range(of: "case .switched:"),
+            let armEnd = dispatch.range(of: "case .alreadyShown:")
         else {
             Issue.record(
                 """
-                moveToDesktop no longer gates the recorder on \
-                the switch outcome
+                moveToDesktop no longer rules the switch \
+                outcome arms
                 """
             )
             return
         }
+        let arm = dispatch[armStart.upperBound..<armEnd.lowerBound]
         #expect(
-            gated.contains("followFocus.record("),
+            arm.contains("followFocus.record("),
             """
-            the recorder belongs INSIDE the switched gate: a \
+            the recorder belongs INSIDE the switched arm: a \
             Desktop already shown produces no reveal, so a debt \
             recorded there is never drained.
             """
+        )
+        // …and nowhere else in the dispatch: a second recorder
+        // outside the arm is the ungated shape this guard exists
+        // to refuse.
+        let rest = dispatch.replacingOccurrences(
+            of: String(arm),
+            with: ""
+        )
+        #expect(
+            !rest.contains("followFocus.record("),
+            "the recorder may exist only inside the switched arm"
         )
     }
 

@@ -168,6 +168,12 @@ struct DesktopSwitchGuardTests {
             ).isSuccess
         )
         #expect(core.state.windows[WindowID(7)] != nil)
+        // But the MOVE already happened — the window left for
+        // the hidden Desktop — so the refused follow degrades to
+        // the no-follow bookkeeping: latch, vanish stamp, reap
+        // (review round 1).
+        #expect(core.moveLatch.isLatched(WindowID(7)))
+        #expect(core.deferred.isScheduled(.desktopMoveReap))
     }
 
     @Test("A hidden-target follow arms the reveal reap")

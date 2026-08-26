@@ -84,6 +84,9 @@ extension KiwiCore {
     /// stash-corner frames (#11); and the settle is armed after
     /// the emit so subscribers see the switch before its
     /// re-assert.
+    /// (`handFollowFocus` below is this sequence's deliberate
+    /// partial twin, #1007 — a step added or reordered here
+    /// likely belongs there too.)
     func followSwitch(to target: SpaceID, focusing id: WindowID) {
         let priorFrontmost = frontmostPIDProvider?()
         state.workspaces.activate(target)
@@ -130,6 +133,28 @@ extension KiwiCore {
             )
             return
         }
+        handFollowFocus(to: window, in: destination)
+    }
+
+    /// The hand-off both follow arms share (#1007): a follow is
+    /// a space SWITCH, not a bare focus — activate, focus, emit
+    /// — because a bare focus leaves `focusedWindowID`, the
+    /// implicit target of nearly every command, naming the space
+    /// the user just left. A deliberate partial twin of
+    /// `followSwitch` (three of its five steps): the retile
+    /// belongs to the callers, which retile for their own
+    /// reasons — the arrival's fold, or the re-home that ran
+    /// before the already-shown arm. The #463 dropped-activate
+    /// SETTLE is deliberately absent on both: the paid arrival
+    /// rides a native switch whose own desktop settle re-asserts
+    /// the active space's focus 600 ms later, and the
+    /// already-shown hand-off runs with the OS half already
+    /// right (the window kept key focus through the move), so
+    /// there is no cooperative activate to drop.
+    func handFollowFocus(
+        to window: WindowID,
+        in destination: SpaceID
+    ) {
         state.workspaces.activate(destination)
         focusWindow(window, refocusRetile: false, warp: true)
         emitSpaceChange()
