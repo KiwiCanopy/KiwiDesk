@@ -269,6 +269,7 @@ struct ShortcutsFamilyRowsTests {
             spaces: ["1"],
             icons: [:],
             desktops: [1, 2],
+            absentDesktops: [],
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -277,6 +278,7 @@ struct ShortcutsFamilyRowsTests {
             spaces: ["1", "2"],
             icons: [:],
             desktops: [1, 2],
+            absentDesktops: [],
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -316,6 +318,7 @@ struct ShortcutsFamilyRowsTests {
             spaces: ["1", "2", "mail"],
             icons: [:],
             desktops: [1, 2],
+            absentDesktops: [],
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName, "resize"],
             currentLayer: KeyLayer.defaultName

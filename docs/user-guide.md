@@ -2805,7 +2805,20 @@ Each row has an action. Built-in actions live under headings:
   appear only where macOS exposes the window-management bridge
   they need — see [macOS Desktops](#macos-desktops-mission-control) —
   and a row you bound keeps its place if that Desktop later
-  goes away with its screen.
+  goes away with its screen — dimmed, with a line saying why,
+  rather than vanishing or moving to *Inactive shortcuts*.
+  Undocking is routine and temporary, so the row stays where
+  you left it and stays editable; the shortcut is still
+  recorded and works again the moment that screen is back.
+  Clearing it removes the row too, since nothing then points
+  at a Desktop that isn't there.
+
+  This is deliberately unlike the Space rows below: an
+  *inactive* Space shortcut still **works** — pressing it
+  recreates the Space — which is why those move to their own
+  card and say so. A Desktop shortcut for a Desktop that isn't
+  there does nothing at all, because only Mission Control can
+  make a Desktop.
 - **Size & float** — the per-axis Grow/Shrink rows, Make
   floating, the resize step, and **Alert sound when resize
   can't apply** (default on, behind the card's **Resize

@@ -298,13 +298,16 @@ struct ShortcutsSection: View {
     /// duplicate-combo block's "Go to", which is free to point
     /// at a row in another layer.
     private var expander: ShortcutsFamilyRows {
-        ShortcutsFamilyRows(
+        let offered = KeybindingCatalog.offeredDesktops(
+            live: model.bindableDesktops,
+            bindings: model.config.layers.flatMap(\.bindings)
+        )
+        return ShortcutsFamilyRows(
             spaces: model.config.spaces,
             icons: model.config.settings.spaceIcons,
-            desktops: KeybindingCatalog.offeredDesktops(
-                live: model.bindableDesktops,
-                bindings: model.config.layers.flatMap(\.bindings)
-            ),
+            desktops: offered,
+            absentDesktops: Set(offered)
+                .subtracting(model.bindableDesktops),
             resizeStep: Int(model.config.settings.resizeStep),
             layerNames: model.config.layers.map(\.name),
             currentLayer: selected

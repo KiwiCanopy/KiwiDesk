@@ -200,6 +200,17 @@ struct DesktopAuthorityTests {
 
     /// A fullscreen space carries no Mission Control number, so
     /// it is not bindable and does not shift the ones that are.
+    ///
+    /// **Stated limitation**, the same one
+    /// `fullscreenIsNotOffered` records one accessor over:
+    /// deleting `userDesktops`' own `.filter(\.isUser)` does NOT
+    /// red this, because `NativeSpaces.number(of:in:)` filters
+    /// to user spaces itself and the `compactMap` drops the nil
+    /// it returns. That clause is defence in depth. What this
+    /// DOES catch is a change to how the numbers are derived —
+    /// positional numbering, or a bypass of `number(of:)` —
+    /// which is the failure that actually shifts which Desktops
+    /// a shortcut offers.
     @Test("A fullscreen space is not a bindable Desktop")
     func fullscreenIsNotBindable() {
         defer { resetAuthorityOverrides() }

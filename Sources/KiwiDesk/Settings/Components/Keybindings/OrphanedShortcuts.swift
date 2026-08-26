@@ -81,6 +81,7 @@ enum OrphanedShortcuts {
             // `KeybindingCatalog.offeredDesktops`, which is how
             // a Desktop row stays reachable instead.
             desktops: [],
+            absentDesktops: [],
             resizeStep: 0,
             layerNames: [],
             currentLayer: ""

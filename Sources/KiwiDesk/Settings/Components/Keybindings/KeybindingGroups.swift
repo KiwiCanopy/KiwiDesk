@@ -44,6 +44,13 @@ struct KeybindingFamilyRows: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            if commands.contains(where: {
+                $0.unavailable != nil
+            }) {
+                Text(unavailableNote)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             ForEach(commands) { command in
                 NavRow(
                     model: model,
@@ -56,6 +63,30 @@ struct KeybindingFamilyRows: View {
 
     private var renderedRows: [NavCommand] {
         expander.renderedRows(for: key)
+    }
+
+    /// The block sentence for a family holding rows whose action
+    /// cannot run right now — drawn ONCE, above the rows.
+    ///
+    /// Once rather than per row, which is the trap gui.md names:
+    /// a reason stamped inside the `ForEach` repeats under every
+    /// child. The rows carry the short spoken mark
+    /// (`NavCommand.unavailable`) and this carries the
+    /// explanation, so the dimming is a sentence on both
+    /// channels rather than a grey with nothing to read.
+    ///
+    /// Generic in the view and Desktop-shaped only in its words,
+    /// because a Desktop is the one thing a row can target that
+    /// the user's HARDWARE can take away — a space, a track and
+    /// a layer are all config, and are never absent while their
+    /// row is drawn.
+    private var unavailableNote: String {
+        L(
+            "shortcuts.desktop_away",
+            "Dimmed rows target a Desktop that isn't on any "
+                + "screen right now. Their shortcuts stay "
+                + "recorded and work again when it comes back."
+        )
     }
 }
 

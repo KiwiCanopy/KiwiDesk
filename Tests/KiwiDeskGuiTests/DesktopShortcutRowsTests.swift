@@ -3,30 +3,21 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The macOS **Desktop** keybinding rows (#884's verbs, GUI
-/// half). `ShortcutsFamilyRowsTests` holds that the three
-/// families expand once per Desktop; this holds what those rows
-/// actually SAY and where they reach — the facts that are wrong
-/// silently.
+/// What a macOS **Desktop** keybinding row SAYS (#884's verbs,
+/// GUI half): the Lua it authors, the verb that Lua names, and
+/// the order the rows render in.
 ///
-/// Its own suite rather than more arms on that one: every
-/// assertion here is about the Desktop rows specifically, and
-/// three of them (the argument form, the classifier arm, the
-/// panel band) are about surfaces that suite does not touch.
+/// `DesktopShortcutOfferTests` holds the other half — WHICH
+/// Desktops are offered a row at all, and how one whose screen
+/// is away is marked. Split at the §2.1 ceiling, at a seam the
+/// two halves already had: nothing here reads a live machine,
+/// and nothing there reads a Lua body.
+///
+/// `ShortcutsFamilyRowsTests` holds the per-instance counts.
 @Suite("Desktop shortcut rows")
 @MainActor
 struct DesktopShortcutRowsTests {
 
-    /// **The Lua argument is a bare number.** The verbs read it
-    /// through `intValue`, which answers nil for a string, so a
-    /// quoted argument would produce a row that looks right,
-    /// records fine, and refuses every time it fires — with the
-    /// refusal reaching only the log. Nothing else in this tree
-    /// can see that: the row renders, the classifier matches it,
-    /// the panel names it.
-    ///
-    /// Asserted as the whole body rather than by "contains a
-    /// digit", because the defect is the quoting.
     @Test("the rows author a bare-number Lua argument")
     func luaArgumentIsANumber() {
         #expect(
@@ -132,164 +123,6 @@ struct DesktopShortcutRowsTests {
             .isEmpty
         )
     }
-
-    /// A macOS with no Desktop bridge draws NO Desktop rows —
-    /// `KiwiCore.bindableDesktops` answers an empty list there,
-    /// and an empty list is what makes the three families draw
-    /// nothing. Offering them would offer three verbs that
-    /// refuse on this machine and can never do otherwise.
-    @Test("no Desktops means no Desktop rows")
-    func withoutDesktopsNothingIsOffered() {
-        let expander = ShortcutsFamilyRows(
-            spaces: ["1"],
-            icons: [:],
-            desktops: [],
-            resizeStep: 42,
-            layerNames: [KeyLayer.defaultName],
-            currentLayer: KeyLayer.defaultName
-        )
-        for key in Self.desktopFamilies {
-            #expect(expander.rows(for: key)?.isEmpty == true)
-        }
-    }
-
-    /// A binding keeps its row when its Desktop stops existing.
-    ///
-    /// This is the Desktop answer to #92. A Desktop number is
-    /// macOS topology, not user data: unplug a screen and
-    /// Desktops 3–5 are gone, while the binding that named one
-    /// is still Carbon-registered, still blocks the recorder,
-    /// and would have no row for the duplicate-combo block's
-    /// "Go to" to reach. `offeredDesktops` is the union that
-    /// keeps it, and both surfaces consume it.
-    @Test("a bound Desktop is offered even when it is gone")
-    func aBoundDesktopSurvivesItsScreen() {
-        let bindings = [
-            KeyBinding(
-                combo: "ctrl+alt+5",
-                lua: "KiwiDesk.focus_desktop(5)",
-                kind: .navigation
-            )
-        ]
-        #expect(
-            KeybindingCatalog.offeredDesktops(
-                live: [1, 2],
-                bindings: bindings
-            ) == [1, 2, 5]
-        )
-        // And with the bridge absent entirely, the bound one is
-        // still the only thing offered — an empty live list is
-        // the capability answer, not a reason to drop a row the
-        // user authored.
-        #expect(
-            KeybindingCatalog.offeredDesktops(
-                live: [],
-                bindings: bindings
-            ) == [5]
-        )
-        // A live Desktop the bindings also name is offered once.
-        #expect(
-            KeybindingCatalog.offeredDesktops(
-                live: [1, 5],
-                bindings: bindings
-            ) == [1, 5]
-        )
-    }
-
-    /// A Desktop binding recovered from `init.lua` classifies as
-    /// `.navigation` and takes the catalog's own English label —
-    /// by SHAPE, so it works for a Desktop that is not attached
-    /// right now. Left `.custom` it would render as raw Lua in
-    /// the Advanced drawer and in the panel's Custom band.
-    @Test("an imported Desktop binding leaves Custom")
-    func importClassifiesADesktopRow() {
-        var config = GuiConfig()
-        config.layers = [
-            KeyLayer(
-                name: KeyLayer.defaultName,
-                bindings: [
-                    KeyBinding(
-                        combo: "ctrl+alt+7",
-                        lua: "KiwiDesk.move_to_desktop(7)",
-                        kind: .custom
-                    )
-                ]
-            )
-        ]
-        KeybindingImportClassifier.classify(&config)
-        let row = config.layers[0].bindings[0]
-        #expect(row.kind == .navigation)
-        #expect(row.label == "Move to Desktop 7")
-    }
-
-    /// Anything that is not one of the three verbs parses to
-    /// nil, so a future `…_desktop` verb taking something else
-    /// cannot be swept into these rows, and a Space verb never
-    /// is.
-    @Test("only the three Desktop verbs parse")
-    func onlyTheThreeVerbsParse() {
-        #expect(
-            KeybindingCatalog.desktopNumber(
-                from: "KiwiDesk.focus_space(\"3\")"
-            ) == nil
-        )
-        #expect(
-            KeybindingCatalog.desktopNumber(
-                from: "KiwiDesk.rename_desktop(3)"
-            ) == nil
-        )
-        #expect(
-            KeybindingCatalog.desktopNumber(
-                from: "KiwiDesk.focus_desktop(\"3\")"
-            ) == nil
-        )
-        #expect(
-            KeybindingCatalog.desktopNumber(
-                from: "KiwiDesk.move_to_desktop_and_follow(3)"
-            ) == 3
-        )
-    }
-
-    /// A bound Desktop row reaches the ⌃⌥K panel under its real
-    /// name, in the band its family is censused in — never the
-    /// Custom band, which means "user-authored" and renders raw
-    /// Lua untranslated in every locale (#678 item 18 is the
-    /// same defect, one family over).
-    @Test("a bound Desktop row is a named panel row")
-    func panelNamesADesktopRow() {
-        LocalizationManager.shared.select("en")
-        defer { LocalizationManager.shared.select(nil) }
-        let reference = ShortcutsReferenceBuilder.build(
-            layer: KeyLayer(
-                name: KeyLayer.defaultName,
-                bindings: [
-                    KeyBinding(
-                        combo: "ctrl+alt+shift+2",
-                        lua: "KiwiDesk.focus_desktop(2)",
-                        kind: .navigation
-                    ),
-                    KeyBinding(
-                        combo: "ctrl+alt+cmd+2",
-                        lua:
-                            "KiwiDesk.move_to_desktop_and_follow(2)",
-                        kind: .navigation
-                    ),
-                ]
-            ),
-            spaces: [SpaceID("1")],
-            spaceIcons: [:],
-            desktops: [1, 2],
-            resizeStep: 50,
-            layerNames: [KeyLayer.defaultName]
-        )
-        #expect(reference.custom.isEmpty)
-        let labels = reference.controls.flatMap(\.rows).map(
-            \.label
-        )
-        #expect(labels.contains("Go to Desktop 2"))
-        #expect(labels.contains("Move to Desktop 2 & follow"))
-    }
-
     private static let desktopFamilies: [SettingKey] = [
         .shortcuts(.focusDesktop),
         .shortcuts(.moveToDesktop),
@@ -304,6 +137,7 @@ struct DesktopShortcutRowsTests {
             spaces: ["1", "2", "mail"],
             icons: [:],
             desktops: [1, 2],
+            absentDesktops: [],
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
