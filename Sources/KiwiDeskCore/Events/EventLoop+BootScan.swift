@@ -177,11 +177,18 @@ extension EventLoop {
     /// 5285 ms of it in one blocking block, so an unchunked sweep
     /// re-breaks the menu right after the scan freed it.
     ///
-    /// Mirrors `reconcileAll`'s two loops per app instead of
+    /// Takes `reconcileAll`'s two loops per app instead of
     /// across all apps (a reconcile of one app never depends on
     /// another's attach), and carries the orphan observers that
     /// loop reaches — an app that has since exited is detached by
-    /// its own reconcile.
+    /// its own reconcile. It does NOT take that pass's census
+    /// gate (#1037), and must not: the gate skips an app showing
+    /// nothing on screen, and the apps this sweep exists to warm
+    /// are exactly those — the ones the boot prefilter (which
+    /// counts windows on EVERY Desktop) called windowless, whose
+    /// warm-on-reconcile is the #662 promise
+    /// `StartupWarmupSkipTests` pins. Their AX cost is paid
+    /// chunked and budgeted here, once, not on every switch.
     func beginSweep() -> Bool {
         guard isRunning else { return false }
         let apps = runningApplications()

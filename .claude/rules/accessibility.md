@@ -4,6 +4,8 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+BootScan.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+AppObservation.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
 ---
 
@@ -128,6 +130,35 @@ editing AX code:
   takes the same shape: a needle anchored to `finishBoot`'s own
   closing brace, since the tail is not test-drivable but a call
   MOVED out of it heals nothing.
+- **A bulk pass asks the WindowServer before it asks AX
+  (#1037).** `reconcileAll` — the Desktop-switch re-sync and the
+  config reload's — reads one on-screen census and skips an
+  observed app that tracks no window and shows none: it has
+  nothing to remove and nothing to adopt, and if it is not
+  servicing AX (App-Napped with its windows on other Desktops, a
+  headless agent) the list read costs the whole messaging
+  timeout. Device-traced 2026-08-26: eight such apps × ~1 s, in
+  series, on EVERY switch — an empty target Desktop included —
+  with the arrived window's ring, retile and raise queued behind
+  them. The gate skips whole apps and never cuts a reconcile
+  short, so the abort-before-sweep obligation above is
+  untouched. What the census cannot see at the notification is a
+  window still compositing (the #1023 measurement), so the
+  Desktop settle sweeps arrivals — `reconcileOnScreenArrivals`,
+  the heal's gate WITHOUT its quieting ledger, because quieting a
+  window whose app has not re-listed it yet is what left the
+  #1023 window unmanaged. A bulk pass reads the gate through
+  `EventLoop.reconcileAllTargets` rather than re-deriving it,
+  and `ReconcileAllPrefilterTests` pins the gate's verdicts,
+  `reconcileAll`'s reading of it, the sweep's three arms and
+  the settle's call — not who calls `reconcileAll`, which the
+  suite enters directly. A new bulk pass over every observed
+  app takes the gate too, or argues on its own doc why it must
+  read a silent app: `beginSweep` is the one that does, because
+  its warm is the #662 promise and the boot prefilter it
+  answers counts windows on EVERY Desktop. The follow's own
+  700 ms reap (`departEagerly`) and this sweep both adopt the
+  followed window ungated; each doc names the other.
 - **A hidden app contributes NO live windows, and the read is
   `appIsHidden` rather than anything in the AX list (#913).**
   ⌘H — and an app hiding itself as its last window closes,

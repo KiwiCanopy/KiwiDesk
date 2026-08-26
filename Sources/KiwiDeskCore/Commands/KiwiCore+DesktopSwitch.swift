@@ -160,7 +160,11 @@ extension KiwiCore {
         // is not gated by that quieting. 700 ms: past the
         // measured ~130–300 ms composite and past the 600 ms
         // desktop settle, so the retile that follows places the
-        // adopted window instead of racing the settle's.
+        // adopted window instead of racing the settle's. That
+        // settle's own arrival sweep (#1037) usually adopts it
+        // first; this reap stays for a window that composites
+        // after that sweep's census, and for a switch accepted
+        // but never notified — no notification, no settle.
         guard let pid else { return }
         deferred.schedule(
             .desktopFollowReap,
