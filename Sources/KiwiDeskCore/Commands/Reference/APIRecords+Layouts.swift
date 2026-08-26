@@ -45,8 +45,8 @@ extension APIReference {
             .text("policy")
         ),
         "set_size_rate": APIRecord(
-            "Caps how often smooth sizing updates; 0 is "
-                + "per-tick.",
+            "Caps the update rate for smooth size changes in "
+                + "Hertz.",
             .integer("hertz")
         ),
     ]

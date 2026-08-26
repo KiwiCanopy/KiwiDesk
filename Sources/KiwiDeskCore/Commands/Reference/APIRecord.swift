@@ -56,21 +56,7 @@ public struct APIRecord: Sendable, Equatable {
     /// exempts it by identity rather than by pattern.
     public static let pendingSummary = "(summary pending)"
 
-    /// A record #1033 phase 2 has still to fill in.
-    ///
-    /// **`APIRecordFilledTests` counts these and reds when the
-    /// count moves in either direction**, so filling a group is
-    /// a deliberate step and un-filling one is caught. That
-    /// guard stays until phase 2 has driven the count to zero,
-    /// at which point it pins `== 0` and this factory goes with
-    /// its last caller.
-    public static func todo(
-        _ arguments: APIArgument...
-    ) -> APIRecord {
-        APIRecord(pendingSummary, arguments)
-    }
-
-    /// Whether phase 2 still owes this record its prose.
+    /// Whether this record still owes its prose.
     public var isPending: Bool { summary == Self.pendingSummary }
 }
 

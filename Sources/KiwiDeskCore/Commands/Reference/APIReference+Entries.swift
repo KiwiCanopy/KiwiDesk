@@ -53,11 +53,11 @@ extension APIReference {
     /// order, then `subscribe` (socket-only), then the Lua-only
     /// entry points.
     ///
-    /// A record missing for a name falls back to `.todo()`
+    /// A record missing for a name falls back to a pending record
     /// rather than dropping the command from the listing — the
     /// listing must never be shorter than the API. Both guards
     /// see it: `APIRecordCensusTests` names the missing key, and
-    /// the pending count `APIRecordFilledTests` pins moves.
+    /// `APIRecordFilledTests` asserts that no record is pending.
     static var coreEntries: [APIEntry] {
         var aliases: [String: [String]] = [:]
         var order: [String] = []
@@ -79,7 +79,8 @@ extension APIReference {
                 command: command,
                 aliases: spellings.filter { $0 != canonical },
                 channel: .both,
-                record: records[command] ?? .todo()
+                record: records[command]
+                    ?? APIRecord(APIRecord.pendingSummary)
             )
         }
         result.append(
@@ -89,7 +90,8 @@ extension APIReference {
                 command: socketOnlyCommand,
                 aliases: [],
                 channel: .cli,
-                record: records[socketOnlyCommand] ?? .todo()
+                record: records[socketOnlyCommand]
+                    ?? APIRecord(APIRecord.pendingSummary)
             )
         )
         result += luaOnly.map { name in
@@ -99,7 +101,8 @@ extension APIReference {
                 command: nil,
                 aliases: [],
                 channel: .lua,
-                record: luaOnlyRecords[name] ?? .todo()
+                record: luaOnlyRecords[name]
+                    ?? APIRecord(APIRecord.pendingSummary)
             )
         }
         return result
@@ -115,7 +118,8 @@ extension APIReference {
                 command: "\(table).\(function)",
                 aliases: [],
                 channel: .both,
-                record: records[function] ?? .todo()
+                record: records[function]
+                    ?? APIRecord(APIRecord.pendingSummary)
             )
         }
     }
