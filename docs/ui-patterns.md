@@ -264,7 +264,7 @@ rule instead of re-deciding it.
 Three boundaries, because System Settings itself draws them:
 
 - **The rule is scoped to headers** — `SettingsSection` titles
-  and the `.headline` labels of an "Advanced" disclosure. The
+  and the labels of an "Advanced" disclosure. The
   **`SettingsDestination` titles (Home cards, back-chip
   headings) stay Title Case**
   ("Layout Defaults", "App Rules"): they name a destination, as
@@ -353,8 +353,29 @@ ruling is in `docs/design-decisions.md`.
 cue, and its state in words.** Every accordion header — both
 chromes, and the one drawer built outside the wrapper — takes
 `SettingsDisclosureStyle`, which makes the row a full-width
-`.plain` `Button`, rests it on a weighted chevron that
-rotates on expand (no resting fill — hover confirms at
+`.plain` `Button`, rests it on a chevron sized by the title
+rather than by a number of its own (no `.font` and no scale
+step: it inherits the header's size outright, bold, so it
+moves when the header does and never outgrows it), and
+marks the row `.isHeader` for the headings rotor.
+
+**The TITLE's tier is the wrapper's, not the style's**, and
+the distinction is load-bearing rather than pedantic: a
+drawer that goes through `SettingsDisclosure` draws its title
+at `SettingsDrawerHeader.tier` — `.callout` at semibold,
+carried on weight rather than size, and a header drawn
+smaller *and lighter* than the rows it heads is what #1021
+was. The one drawer built outside the wrapper takes the
+style, so it gets the button, the chevron and the heading
+trait, but keeps a deliberately quiet title of its own.
+"The tier is not a call-site choice" is therefore a claim
+about wrapper users, which is exactly the scope
+`SettingsDisclosureSizeTests` reads. The summary beside the
+title takes that same tier without the weight, so the two
+cannot drift apart.
+
+It rotates
+on expand (no resting fill — hover confirms at
 `rowHoverHighlight`'s full-row ladder, never the icon chip's,
 whose rest state is achromatic at row width), and carries
 expanded / collapsed on `.accessibilityValue` because the
@@ -363,7 +384,24 @@ anywhere on the row, Space on the focused one; the cursor
 stays an arrow (the hand is link-only). A drawer's
 `accessory:` may hold a control, so it is drawn BESIDE that
 button rather than inside it, at the row's trailing edge —
-the row's hit shape stops where the accessory begins. The ruling is in
+the row's hit shape stops where the accessory begins.
+
+**What the drawer hides is stated on the row while it is
+shut, and it is not an accessory.** A drawer takes
+`summary:` — words only — and the style owns the tier
+(`.callout` at `ink3`: description, where the chevron's
+`ink2` is the row's affordance) and the shut-only rule, so
+neither is a call-site choice. It renders INSIDE the header
+button, unlike the accessory beside it: the accessory sits
+outside because it may hold a control, and a summary is
+plain text, so drawn outside it only cost the row the two
+things it is — the hover highlight ended before it and
+clicking the words that describe the drawer did not open it.
+It stays beside the title rather than moving under it
+because it states a VALUE and disappears on expand, where a
+caption explains what a thing IS and stays; under the header
+it would add and remove a line on every toggle, in the space
+the drawer's own contents occupy. The ruling is in
 `docs/design-decisions.md`.
 
 **Weigh every title edit against the search index.** Search

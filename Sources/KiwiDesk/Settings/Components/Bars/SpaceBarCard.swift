@@ -86,18 +86,12 @@ struct SpaceBarCard: View {
     private var styleDisclosure: some View {
         SettingsDisclosure(
             SettingsCatalog.bars.spaceBarStyle,
-            chrome: .inline(font: .subheadline),
             isExpanded: $styleExpanded,
-            scrollHoisted: true
+            scrollHoisted: true,
+            summary: styleSummary
         ) {
             rows(BarsRowOrder.spaceBarStyle)
                 .padding(.top, 8)
-        } accessory: {
-            if !styleExpanded {
-                Text(styleSummary)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
         }
     }
 

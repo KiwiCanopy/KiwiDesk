@@ -87,18 +87,12 @@ struct AppBarCard: View {
     private var styleDisclosure: some View {
         SettingsDisclosure(
             SettingsCatalog.bars.appBarStyle,
-            chrome: .inline(font: .subheadline),
             isExpanded: $styleExpanded,
-            scrollHoisted: true
+            scrollHoisted: true,
+            summary: styleSummary
         ) {
             rows(BarsRowOrder.appBarStyle)
                 .padding(.top, 8)
-        } accessory: {
-            if !styleExpanded {
-                Text(styleSummary)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
         }
     }
 

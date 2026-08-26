@@ -33,13 +33,35 @@ import SwiftUI
 /// reveal lands the section — heading first — while the drawer
 /// keeps its own wash.
 struct SettingsDisclosure<Content: View, Accessory: View>: View {
+    /// What SURROUNDS the header — never how it is drawn (#1021).
+    ///
+    /// It used to carry a `font:` payload, and that is what the
+    /// owner was looking at: one component drew its title at
+    /// four tiers, and SEVEN of the fifteen drawers were drawn
+    /// SMALLER than the rows they head. A header quieter than
+    /// its own contents is an inverted hierarchy, and pushing
+    /// the choice out to each call site is what let it drift
+    /// that far. Both chromes now draw ONE tier, which is the
+    /// part that must not drift back —
+    /// `SettingsDisclosureSizeTests` holds it.
+    ///
+    /// That tier is `.callout` at semibold: 12 pt, a point
+    /// UNDER the `.body` rows it heads, carrying the header on
+    /// weight rather than on size. It went to `.headline` (13
+    /// pt semibold) first, and the owner read the result as
+    /// heavy on the two pages that carry seven of the fifteen
+    /// drawers between them. Note there is no "bigger"
+    /// available above either: macOS's ramp goes body 13 →
+    /// headline 13 at weight 0.4 → title3 15, so below 15
+    /// "bigger" and "weightier" are the SAME edit, and the only
+    /// genuine size step is `title3` — `SettingsGroupHeader`'s
+    /// tier, which would outrank the section title an inline
+    /// drawer sits INSIDE (owner, 2026-08-26).
     enum Chrome {
-        /// Inside a section card; `font` styles the label
-        /// (`.subheadline` for the bar colour drawers, nil for
-        /// the plain Gaps labels).
-        case inline(font: Font?)
-        /// Standalone: headline label, 12 pt padding, its own
-        /// card background.
+        /// Inside a section card, under a hairline rule.
+        case inline
+        /// Standalone: 12 pt padding and its own card
+        /// background.
         case card
     }
 
@@ -63,6 +85,19 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     /// nil means this view owns it.
     private let externalExpansion: Binding<Bool>?
     @State private var internalExpansion = false
+    /// What the drawer hides, drawn beside the header while it
+    /// is shut. `SettingsDisclosureStyle.summaryText` owns the
+    /// tier and the shut-only rule; a call site hands it the
+    /// words and nothing else.
+    ///
+    /// **Those words are user-facing**, so a call site passes an
+    /// `L()` result — four of the five do. The exception is a
+    /// bare COUNT (`PresetsSection`), which needs no catalog
+    /// key and is legal for the reason localization.md gives a
+    /// count the last position in a frame: standing alone,
+    /// behind the header's own localized label, there is no
+    /// frame for a locale to disagree with.
+    private let summary: String?
     @ViewBuilder private let content: () -> Content
     @ViewBuilder private let accessory: () -> Accessory
     @Environment(\.settingsRevealTarget)
@@ -70,10 +105,11 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
 
     init<Children>(
         _ drawer: SettingsDrawer<Children>,
-        chrome: Chrome = .inline(font: nil),
+        chrome: Chrome = .inline,
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
         modeGated: Bool = false,
+        summary: String? = nil,
         @ViewBuilder content: @escaping () -> Content,
         @ViewBuilder accessory: @escaping () -> Accessory
     ) {
@@ -82,6 +118,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         self.chrome = chrome
         self.scrollHoisted = scrollHoisted
         self.modeGated = modeGated
+        self.summary = summary
         self.externalExpansion = isExpanded
         self.content = content
         self.accessory = accessory
@@ -89,10 +126,11 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
 
     init<Children>(
         _ drawer: SettingsDrawer<Children>,
-        chrome: Chrome = .inline(font: nil),
+        chrome: Chrome = .inline,
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
         modeGated: Bool = false,
+        summary: String? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) where Accessory == EmptyView {
         self.init(
@@ -101,6 +139,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             isExpanded: isExpanded,
             scrollHoisted: scrollHoisted,
             modeGated: modeGated,
+            summary: summary,
             content: content,
             accessory: { EmptyView() }
         )
@@ -220,7 +259,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             // `DesktopsGroup`'s `?` is. It travels to the
             // style separately and is drawn beside the button.
             Text(control.text)
-                .font(labelFont)
+                .font(SettingsDrawerHeader.tier.weight(.semibold))
                 .searchFlashHeader(control)
                 // The mode-reveal wash shares the label band the
                 // search wash uses (#760), for the same reason:
@@ -232,7 +271,10 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         // `SettingsDisclosureStyle` carries the argument. Every
         // drawer takes it, in both chromes.
         .disclosureGroupStyle(
-            SettingsDisclosureStyle(accessory: accessory)
+            SettingsDisclosureStyle(
+                summary: summary,
+                accessory: accessory
+            )
         )
         // Reads only — the reveal fields keep one writer and
         // one clearer (`SettingsView`); an observer that also
@@ -242,13 +284,6 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             expand(revealing: target)
         }
         .onAppear { expand(revealing: revealTarget) }
-    }
-
-    private var labelFont: Font? {
-        switch chrome {
-        case .inline(let font): return font
-        case .card: return .headline
-        }
     }
 
     private var expansion: Binding<Bool> {

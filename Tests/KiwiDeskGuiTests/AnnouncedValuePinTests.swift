@@ -74,6 +74,11 @@ struct AnnouncedValuePinTests {
     private static let headings: [String: Int] = [
         "SettingsSection.swift": 2,
         "SettingsDetailPanel.swift": 2,
+        // Every drawer header, through the one style (#1021).
+        // Fifteen of them were absent from the headings rotor —
+        // the owner's "too small to read as one", on the channel
+        // no number of points can answer.
+        "SettingsDisclosureStyle.swift": 1,
         "SettingsHeaderBar.swift": 1,
         "HomeScreen.swift": 1,
     ]
