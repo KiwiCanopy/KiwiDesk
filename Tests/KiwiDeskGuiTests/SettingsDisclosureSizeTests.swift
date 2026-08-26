@@ -226,9 +226,9 @@ struct SettingsDisclosureSizeTests {
         #expect(summaryRun.contains(".font(.callout)"))
         #expect(
             summaryRun.contains(
-                ".foregroundStyle(SettingsTheme.ink2)"
+                ".foregroundStyle(SettingsTheme.ink3)"
             ),
-            "the summary is row detail, at the chevron's ink"
+            "the summary is description, not an affordance"
         )
         // Shut-only, in the style rather than at a call site —
         // expanded, the rows below say it in full.

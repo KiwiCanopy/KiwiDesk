@@ -142,10 +142,17 @@ struct SettingsDisclosureStyle<Accessory: View>:
     /// decision too. Expanded, the summary restates what the
     /// rows below it now say in full.
     ///
-    /// `ink2`, the chevron's ink, on the chevron's argument:
-    /// this is row detail, and `ink3` is the caption tier.
-    /// Nothing new is drawn on this ground, so
-    /// `SettingsThemeContrastTests`' pairings are unchanged.
+    /// `ink3`, NOT the chevron's `ink2` beside it, and the
+    /// distinction is the chevron's own argument read the right
+    /// way round. That one takes `ink2` because with no resting
+    /// fill the chevron IS the row's affordance, and an
+    /// affordance outranks the caption tier. This is not an
+    /// affordance — it is description, which is exactly what
+    /// `ink3` is for, and a whole phrase of it at the chevron's
+    /// darkness competes with the title it supports (owner,
+    /// 2026-08-26: "too strong"). Nothing new is drawn on this
+    /// ground either way, so `SettingsThemeContrastTests`'
+    /// pairings are unchanged.
     ///
     /// **Not `.accessibilityHidden`.** It rides inside the
     /// button, so its words compose into the header's NAME —
@@ -164,7 +171,7 @@ struct SettingsDisclosureStyle<Accessory: View>:
         if let summary {
             Text(summary)
                 .font(.callout)
-                .foregroundStyle(SettingsTheme.ink2)
+                .foregroundStyle(SettingsTheme.ink3)
                 .lineLimit(1)
         }
     }
