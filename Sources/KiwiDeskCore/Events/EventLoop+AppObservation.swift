@@ -13,7 +13,10 @@ extension EventLoop {
     /// attach too would read every window list twice (#672).
     /// Safe by the same promise as the boot prefilter — the
     /// following reconcile warms and tracks whatever attach
-    /// skipped (StartupWarmupSkipTests, #662).
+    /// skipped (StartupWarmupSkipTests, #662). Under
+    /// `reconcileAll`'s census gate (#1037) that reconcile is
+    /// the first pass to REACH the app, which for one showing
+    /// nothing is not this turn's.
     func syncObservation(
         for app: RunningApp,
         scanWindowsAtAttach: Bool

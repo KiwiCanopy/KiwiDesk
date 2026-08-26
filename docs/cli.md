@@ -130,7 +130,7 @@ item's only appearance in CLI output.
 | | `move_to_space_and_follow` | space id |
 | | `focus_desktop` | Desktop number (Mission Control's) |
 | | `move_to_desktop` | Desktop number — moves the focused window, you stay |
-| | `move_to_desktop_and_follow` | Desktop number — moves the focused window and switches there |
+| | `move_to_desktop_and_follow` | Desktop number — moves the focused window, switches there, and leaves keyboard focus on the window |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] |

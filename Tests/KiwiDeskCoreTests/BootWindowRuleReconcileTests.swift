@@ -70,6 +70,9 @@ struct BootWindowRuleReconcileTests {
         loop.applyAXMessagingTimeout = { _ in }
         loop.makeObserver = { _ in FakeObserver() }
         loop.activationPolicy = { _ in .regular }
+        // The app shows a window, or the census gate (#1037)
+        // would skip it before the reconcile these tests count.
+        loop.onScreenNormalWindowIDs = { [836_001: [WindowID(1)]] }
         loop.readEnhancedUI = { _ in false }
         loop.writeEnhancedUI = { _, _ in }
         loop.writeManualAX = { _, _ in }

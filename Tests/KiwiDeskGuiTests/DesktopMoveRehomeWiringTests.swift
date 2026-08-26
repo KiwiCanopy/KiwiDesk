@@ -41,10 +41,12 @@ import Testing
 @Suite("Desktop move re-home wiring (#1010)")
 struct DesktopMoveRehomeWiringTests {
     private func desktopCommandsSource() throws -> String {
+        // The move verbs' own file — split out of
+        // `KiwiCore+DesktopCommands.swift` in the #1007 round.
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDeskCore/Commands/"
-                    + "KiwiCore+DesktopCommands.swift"
+                    + "KiwiCore+DesktopMove.swift"
             )
         let text = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)

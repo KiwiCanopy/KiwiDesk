@@ -179,12 +179,33 @@ every other private path here uses.
 
 Where a Desktop lives on another screen, the verbs act on THAT
 screen — `focus_desktop 3` switches the screen holding Desktop 3,
-whichever it is. Keyboard focus does not travel with it, because
-macOS attaches focus to a window and not to a screen; carrying
-the user across would mean focusing the moved window once its
-Desktop reveals it, which is the pending-assignment work #890
-still holds
+whichever it is.
+
+**A follow carries keyboard focus; a plain switch does not, and
+the asymmetry is the point.** macOS attaches focus to a window
+and never to a screen, so switching a screen's Desktop is the
+whole of what `focus_desktop` can do — there is no window it was
+asked to take you to. `move_to_desktop_and_follow` names one, and
+its own word is *follow*, so it owes you the window rather than
+the view of it; `move_to_space_and_follow` had already settled
+that for KiwiDesk's own Spaces, and two verbs spelled alike
+answering differently is the worse outcome.
+
+Onto a hidden Desktop that focus cannot be handed over at the
+moment of the move — the window is not addressable until the
+reveal lists it — so the follow records the debt and pays it the
+moment the revealed Desktop lists the window again, bounded so a
+follow macOS declined cannot fire minutes later. The departure itself is the eager fold the
+transition fix introduced, and it stands KiwiDesk's own
+close-return raise down through the one stand-down predicate —
+handing focus to a sibling of the space being LEFT is the exact
+opposite of what the verb was asked for
 ([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+
+The **pointer** is not a second decision. It follows focus only
+where *mouse follows focus* is on, through the same predicate
+every other focus change uses — the setting is the answer, and a
+follow does not earn an exception to it.
 
 What that admission costs, accepted deliberately: **there is no
 fallback to write.** The public API for these operations does not
@@ -7168,6 +7189,51 @@ stragglers: an unadopted app's windows must eventually be
 managed, which is what the census-gated heal
 ([#675](https://github.com/KiwiCanopy/KiwiDesk/issues/675))
 exists to guarantee and what this spares it.
+
+### A bulk reconcile asks the WindowServer before it asks Accessibility
+
+**[Principle]**
+
+**An app that tracks nothing and shows nothing is never asked.**
+Accessibility is the only reader that can say what a window *is*,
+and the only one that can block: a message to an app not
+servicing AX — one App-Napped with every window on another
+Desktop, or a headless agent — returns when the messaging
+timeout fires, not before. The bulk re-sync a Desktop switch
+runs used to send that message to every observed app, and on a
+session with a handful of such apps every switch stalled the
+main actor for ~1 s per app, in series, with the arrived
+window's ring, retile and raise queued behind — an empty target
+Desktop cost exactly as much, because the price was never the
+windows that arrived but the apps that did not answer
+([#1037](https://github.com/KiwiCanopy/KiwiDesk/issues/1037)).
+The WindowServer census answers the one question a bulk pass
+needs *before* reading — is there anything here to change — in
+~1 ms and cannot block, the same trade the boot prefilter
+([#662](https://github.com/KiwiCanopy/KiwiDesk/issues/662)) and
+the adoption heal
+([#675](https://github.com/KiwiCanopy/KiwiDesk/issues/675))
+already made. An app tracking a window has a departure to remove
+or a verdict to re-check; one showing a window has an arrival to
+adopt; one doing neither has nothing the pass could change, and
+is skipped whole — never read partway, since the sweep that
+derives destroys from a live list must see all of it.
+
+The price is a beat, taken deliberately. The switch notification
+can fire before the arriving window composites (the
+[#1023](https://github.com/KiwiCanopy/KiwiDesk/issues/1023)
+measurement), and a census taken then does not show it, so the
+pass at the notification may skip its app. The Desktop settle
+takes a fresh census and reconciles every app showing
+a window the loop does not track — the heal's gate without the
+heal's ledger, because quieting an id that failed to adopt is
+right for a permanent mismatch and wrong for a window whose app
+simply has not re-listed it yet. One switch, one such sweep,
+each app it reads showing a window and so not napping — a hung
+app still costs its timeout, once per settle. A follow onto a
+hidden Desktop keeps its own per-pid reap beside the sweep, for
+the window that composites after the sweep's census and for a
+switch macOS accepted but never announced.
 
 ### Recovery escape hatches
 

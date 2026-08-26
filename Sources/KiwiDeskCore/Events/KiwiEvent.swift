@@ -73,4 +73,20 @@ public enum KiwiEvent: Sendable {
         if case .windowHidden = self { return true }
         return false
     }
+
+    /// The window a destroy removes, by id — nil for every other
+    /// event, a hide included.
+    ///
+    /// A named accessor rather than an inline `if case` for the
+    /// same reason `isHideDrop` is one: its single consumer is
+    /// the close-return NARRATION (#1007's diagnosis round — on
+    /// device, "which window left?" was the question the trace
+    /// could not answer and a rebuild had to). A hide answers
+    /// nil deliberately: the hide arm of the stand-down already
+    /// covers that case, and a hidden app's windows were never
+    /// sent anywhere.
+    public var goneWindowID: WindowID? {
+        if case .windowDestroyed(let id, _) = self { return id }
+        return nil
+    }
 }

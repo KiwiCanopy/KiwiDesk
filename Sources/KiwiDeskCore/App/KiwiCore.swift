@@ -262,6 +262,10 @@ public final class KiwiCore {
     /// must not space-follow (#482/#483) — see the type doc.
     let moveLatch = MoveIntentLatch()
 
+    /// The focus a `move_to_desktop_and_follow` owes the window
+    /// it sent away (#1007) — the type doc carries the argument.
+    let followFocus = FollowFocusIntent()
+
     /// The MAIN display's current native Desktop (Mission
     /// Control number, #888) — the binding authority — and the
     /// per-display Space memory restored on returning to one.
