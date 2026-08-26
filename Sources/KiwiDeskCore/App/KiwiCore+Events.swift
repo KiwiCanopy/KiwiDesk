@@ -137,7 +137,8 @@ extension KiwiCore {
                 observeSizeAnswer(
                     id,
                     size: frame.size,
-                    channel: "move echo"
+                    channel: "move echo",
+                    settledRead: false
                 )
                 // Reality reported — state beats stamp (#881).
                 tiler.clearInstantTarget(id)
@@ -178,7 +179,8 @@ extension KiwiCore {
                 observeSizeAnswer(
                     id,
                     size: frame.size,
-                    channel: "resize echo"
+                    channel: "resize echo",
+                    settledRead: false
                 )
                 tiler.clearInstantTarget(id)  // as :104, #881
             } else if !tiler.ledgerExplainsResize(

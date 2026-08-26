@@ -59,7 +59,8 @@ extension KiwiCore {
             self?.observeSizeAnswer(
                 id,
                 size: frame.size,
-                channel: "settle probe"
+                channel: "settle probe",
+                settledRead: true
             )
         }
     }
@@ -73,14 +74,23 @@ extension KiwiCore {
     /// waiting for the user to cause another retile; an updated
     /// candidate does NOT re-ask, which is what keeps a slow
     /// complying app's catch-up from looping probes.
+    /// `settledRead` is true only for the settle probe — it
+    /// reads after the grace, past the app's chance to revert —
+    /// so only it may clear learning on a compliance (#1049;
+    /// the argument is `SizeBoundLearner.observe`'s).
     func observeSizeAnswer(
         _ id: WindowID,
         size: CGSize,
-        channel: String
+        channel: String,
+        settledRead: Bool
     ) {
         let hadCandidate =
             tiler.candidateSizeBound(for: id) != nil
-        if tiler.observeEchoAnswer(id, size: size) {
+        if tiler.observeEchoAnswer(
+            id,
+            size: size,
+            settledRead: settledRead
+        ) {
             onLog(
                 "size bound confirmed for window \(id.raw) at "
                     + "\(Int(size.width))x\(Int(size.height)) "

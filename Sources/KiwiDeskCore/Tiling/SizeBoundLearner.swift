@@ -117,10 +117,24 @@ struct SizeBoundLearner {
     /// next unrelated event (device QA, 2026-08-18: the
     /// re-pack "taking many visits" was this placement waiting
     /// for a retile that had no reason to come).
+    ///
+    /// `settledRead` says whether this reading is past the
+    /// app's chance to revert it — the retile-time gate and the
+    /// settle probe are; a raw echo is not. Only a settled
+    /// compliance runs the `complied` sweep (#1049): the
+    /// Android emulator ANIMATES to the full asked size, holds
+    /// it ~0.4 s, then snaps back to its aspect ratio — and the
+    /// transient compliance echo cleared the candidate every
+    /// cycle, so "twice in a row" never accumulated and the
+    /// probe retile re-issued the dance forever. An echo-channel
+    /// compliance now learns nothing and clears nothing; the
+    /// constraint-lifted heal still runs, one settled read
+    /// later (every retile makes one, before its skip check).
     @discardableResult
     mutating func observe(
         _ id: WindowID,
-        currentSize: CGSize
+        currentSize: CGSize,
+        settledRead: Bool
     ) -> Bool {
         guard let ask = lastAsks[id] else { return false }
         let asked = ask.size
@@ -136,6 +150,7 @@ struct SizeBoundLearner {
             asked: asked.width,
             current: currentSize.width,
             baseline: ask.settledFrom?.width,
+            settledRead: settledRead,
             axis: \.width
         )
         let heightConfirmed = observeAxis(
@@ -143,6 +158,7 @@ struct SizeBoundLearner {
             asked: asked.height,
             current: currentSize.height,
             baseline: ask.settledFrom?.height,
+            settledRead: settledRead,
             axis: \.height
         )
         return widthConfirmed || heightConfirmed
@@ -207,42 +223,23 @@ struct SizeBoundLearner {
         }
     }
 
-    /// Drops everything learned about a window: it resized for
-    /// a reason that was not our ask (user, or the app
-    /// re-bounding itself), so the ledger describes a window
-    /// that no longer exists. Also the destroy path — WindowIDs
-    /// are reused (#152/#158).
-    mutating func forget(_ id: WindowID) {
-        lastAsks[id] = nil
-        candidates[id] = nil
-        bounds[id] = nil
-    }
-
-    /// Migrates the ledger across a native-tab rekey (#308) —
-    /// the `rekeyStash` precedent: same on-screen window, new
-    /// id, same app-side constraints.
-    mutating func rekey(old: WindowID, new: WindowID) {
-        if let asks = lastAsks.removeValue(forKey: old) {
-            lastAsks[new] = asks
-        }
-        if let cands = candidates.removeValue(forKey: old) {
-            candidates[new] = cands
-        }
-        if let bound = bounds.removeValue(forKey: old) {
-            bounds[new] = bound
-        }
-    }
-
     private mutating func observeAxis(
         _ id: WindowID,
         asked: CGFloat,
         current: CGFloat,
         baseline: CGFloat?,
+        settledRead: Bool,
         axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
     ) -> Bool {
         var confirmed = false
         if EffectiveSizeBound.matches(current, asked) {
-            complied(id, asked: asked, axis: axis)
+            // Only a settled compliance is evidence the
+            // constraint lifted (#1049) — a transient one is
+            // the emulator mid-snap-back, and clearing on it
+            // wiped the ladder every cycle. See `observe`.
+            if settledRead {
+                complied(id, asked: asked, axis: axis)
+            }
             return false
         }
         var candidateEntries =

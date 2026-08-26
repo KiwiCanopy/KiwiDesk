@@ -77,7 +77,8 @@ struct ResizeSizeLimitFeedbackTests {
                 )
                 core.tiler.boundLearner.observe(
                     WindowID(1),
-                    currentSize: CGSize(width: 500, height: 800)
+                    currentSize: CGSize(width: 500, height: 800),
+                    settledRead: true
                 )
             }
         }
@@ -137,7 +138,8 @@ struct ResizeSizeLimitFeedbackTests {
                 )
                 core.tiler.boundLearner.observe(
                     WindowID(1),
-                    currentSize: CGSize(width: 500, height: 800)
+                    currentSize: CGSize(width: 500, height: 800),
+                    settledRead: true
                 )
             }
         }
@@ -191,7 +193,8 @@ struct ResizeSizeLimitFeedbackTests {
                 )
                 core.tiler.boundLearner.observe(
                     WindowID(1),
-                    currentSize: CGSize(width: 500, height: 800)
+                    currentSize: CGSize(width: 500, height: 800),
+                    settledRead: true
                 )
             }
         }
@@ -236,7 +239,8 @@ struct ResizeSizeLimitFeedbackTests {
                 )
                 core.tiler.boundLearner.observe(
                     WindowID(1),
-                    currentSize: CGSize(width: 480, height: 400)
+                    currentSize: CGSize(width: 480, height: 400),
+                    settledRead: true
                 )
             }
         }

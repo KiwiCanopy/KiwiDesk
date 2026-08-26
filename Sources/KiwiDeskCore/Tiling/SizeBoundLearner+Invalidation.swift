@@ -2,10 +2,36 @@ import CoreGraphics
 
 /// The ledger's invalidation half, split at the file ceiling:
 /// what UNLEARNS — the compliance sweep and its cross-ask
-/// trade, and the late-echo classifier the forget gate
-/// consults. The learning ladder stays in
-/// `SizeBoundLearner.swift`.
+/// trade, the late-echo classifier the forget gate consults,
+/// and the forget/rekey lifecycle. The learning ladder stays
+/// in `SizeBoundLearner.swift`.
 extension SizeBoundLearner {
+    /// Drops everything learned about a window: it resized for
+    /// a reason that was not our ask (user, or the app
+    /// re-bounding itself), so the ledger describes a window
+    /// that no longer exists. Also the destroy path — WindowIDs
+    /// are reused (#152/#158).
+    mutating func forget(_ id: WindowID) {
+        lastAsks[id] = nil
+        candidates[id] = nil
+        bounds[id] = nil
+    }
+
+    /// Migrates the ledger across a native-tab rekey (#308) —
+    /// the `rekeyStash` precedent: same on-screen window, new
+    /// id, same app-side constraints.
+    mutating func rekey(old: WindowID, new: WindowID) {
+        if let asks = lastAsks.removeValue(forKey: old) {
+            lastAsks[new] = asks
+        }
+        if let cands = candidates.removeValue(forKey: old) {
+            candidates[new] = cands
+        }
+        if let bound = bounds.removeValue(forKey: old) {
+            bounds[new] = bound
+        }
+    }
+
     /// Whether a reported size is one this ledger already
     /// explains — the late-delivered echo of our own ask (the
     /// answer we learned, or the ask itself complied late),

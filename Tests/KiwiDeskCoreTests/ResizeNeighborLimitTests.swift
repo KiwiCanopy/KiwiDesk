@@ -56,7 +56,11 @@ struct ResizeNeighborLimitTests {
                 )
                 core.tiler.boundLearner.observe(
                     window,
-                    currentSize: CGSize(width: min, height: 780)
+                    currentSize: CGSize(
+                        width: min,
+                        height: 780
+                    ),
+                    settledRead: true
                 )
             }
         }

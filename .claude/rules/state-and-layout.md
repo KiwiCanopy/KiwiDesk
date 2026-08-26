@@ -298,7 +298,16 @@ editing here:
   un-forced skip treats the refused target as "already there"
   (ends the endless re-issue) and the layouts place the residue
   (scrolling re-packs, monocle and a lone scrolling window
-  center). Three obligations follow. A frame-producing context
+  center). And only a SETTLED read — the retile-time gate, the
+  settle probe — may clear learning on a compliance (#1049): a
+  raw echo's compliance can be the transient half of an app's
+  comply-then-snap-back (the Android emulator animates to the
+  full ask, holds it ~0.4 s, snaps back), and clearing on it
+  wiped the ladder every probe cycle, so "twice in a row" never
+  accumulated and the dance re-issued forever
+  (`SizeBoundInvalidationTests`,
+  `SizeBoundTransientComplianceTests`). Three obligations
+  follow. A frame-producing context
   build **threads `sizeBounds`** the way it threads
   `screenNeighbors` — `layoutInput` is the site, probes and
   previews rightly omit it (`SizeBoundPlumbingTests`). A path

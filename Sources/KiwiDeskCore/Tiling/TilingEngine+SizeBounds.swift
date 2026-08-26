@@ -39,7 +39,11 @@ extension TilingEngine {
         guard !animation.isAnimating(window: id),
             !askEchoLikely(id)
         else { return false }
-        if boundLearner.observe(id, currentSize: current.size) {
+        if boundLearner.observe(
+            id,
+            currentSize: current.size,
+            settledRead: true
+        ) {
             pendingBoundPlacement = true
         }
         return true
@@ -57,13 +61,25 @@ extension TilingEngine {
     /// the settled gate closes. Returns the confirmation edge;
     /// the caller answers it with an immediate retile so the
     /// residue (re-pack / centering) is placed right then.
+    ///
+    /// `settledRead` threads the #1049 distinction: the settle
+    /// probe reads past the app's chance to revert (true), a
+    /// raw move/resize echo does not (false) — and only a
+    /// settled compliance may clear learning, or the Android
+    /// emulator's comply-then-snap-back wipes the ladder every
+    /// cycle. The argument lives on `SizeBoundLearner.observe`.
     func observeEchoAnswer(
         _ id: WindowID,
-        size: CGSize
+        size: CGSize,
+        settledRead: Bool
     ) -> Bool {
         guard !animation.isAnimating(window: id)
         else { return false }
-        return boundLearner.observe(id, currentSize: size)
+        return boundLearner.observe(
+            id,
+            currentSize: size,
+            settledRead: settledRead
+        )
     }
 
     /// The settle probe's gate — see

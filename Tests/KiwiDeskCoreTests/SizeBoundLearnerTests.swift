@@ -18,7 +18,11 @@ struct SizeBoundLearnerTests {
         answered: CGSize
     ) {
         learner.recordAsk(w, size: asked)
-        learner.observe(w, currentSize: answered)
+        learner.observe(
+            w,
+            currentSize: answered,
+            settledRead: true
+        )
     }
 
     @Test("Twice in a row confirms; once does not")
@@ -215,24 +219,44 @@ struct SizeBoundLearnerTests {
         let answered = CGSize(width: 715, height: 800)
         learner.recordAsk(w, size: asked)
         #expect(
-            learner.observe(w, currentSize: answered) == false
+            learner.observe(
+                w,
+                currentSize: answered,
+                settledRead: true
+            ) == false
         )
         learner.recordAsk(w, size: asked)
         #expect(
-            learner.observe(w, currentSize: answered) == true
+            learner.observe(
+                w,
+                currentSize: answered,
+                settledRead: true
+            ) == true
         )
         learner.recordAsk(w, size: asked)
         #expect(
-            learner.observe(w, currentSize: answered) == false
+            learner.observe(
+                w,
+                currentSize: answered,
+                settledRead: true
+            ) == false
         )
         // A CHANGED answer that re-confirms is a new edge — the
         // geometry it implies moved.
         let changed = CGSize(width: 640, height: 800)
         learner.recordAsk(w, size: asked)
-        learner.observe(w, currentSize: changed)
+        learner.observe(
+            w,
+            currentSize: changed,
+            settledRead: true
+        )
         learner.recordAsk(w, size: asked)
         #expect(
-            learner.observe(w, currentSize: changed) == true
+            learner.observe(
+                w,
+                currentSize: changed,
+                settledRead: true
+            ) == true
         )
     }
 
