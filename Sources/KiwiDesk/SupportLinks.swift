@@ -53,9 +53,13 @@ enum SupportLinks {
     /// (`site/src/pages/sitemap.xml.ts` carries the same rule for
     /// the same reason), so everything else falls back to
     /// English — a live English page beats a 404 in the reader's
-    /// own language. `GuideLinkRouteTests` reads the routes off
-    /// disk and reds when this list claims one the site does not
-    /// serve.
+    /// own language. The guard that holds this list against the
+    /// site is `scripts/check-site-tokens.py` ▸
+    /// `check_guide_routes`, on the SITE gate: `site/**` is
+    /// CI-ignored, so a Swift assertion about a site path would
+    /// go stale on exactly the change that falsifies it.
+    /// `GuideLinkRouteTests` holds the app's own half — the
+    /// narrowing, and that `site.yml` still watches this file.
     ///
     /// A locale gaining a site route does NOT red: the app keeps
     /// sending that reader to English until someone adds it here,

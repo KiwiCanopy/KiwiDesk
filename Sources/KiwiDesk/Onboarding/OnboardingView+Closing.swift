@@ -103,12 +103,15 @@ extension OnboardingView {
     // says "Start using it". A reader who is told to start is not
     // also wondering whether there is homework.
     //
-    // This also OVERTURNS the 2026-08-12 ruling that the guide
-    // line sits at body size because it is the last thing the
-    // tour says. It is now the footer's 12.5 pt `ink3` — a
-    // deliberate demotion of tier, bought with the removal of the
-    // fork between two exits. The line the eye reaches last is
-    // the one beside the button either way.
+    // The pointer moved INTO the footer, and keeps its weight
+    // there: this page passes `hintLeads`, which draws the hint
+    // at 13 pt on `ink2` rather than the other four screens'
+    // 12.5 pt `ink3`. That honours the 2026-08-12 ruling — the
+    // guide line draws at body weight because it is the last
+    // thing the tour says — inside the footer slot rather than
+    // reversing it, and it makes this screen's hint deliberately
+    // louder than the four that only say what happens if you do
+    // nothing.
 
     /// Where the app lives, shown INSIDE the window (#828, owner
     /// ruled 2026-08-12).
@@ -132,7 +135,7 @@ extension OnboardingView {
                 .font(.system(size: 13.5))
                 .foregroundStyle(SettingsTheme.ink2)
                 // The sentence WRAPS. It shipped clipped at one
-                // line in the fixed 520 pt window (owner, on
+                // line in the fixed 560 pt window (owner, on
                 // device, 2026-08-12) — a picture with half a
                 // caption teaches nothing.
                 .fixedSize(horizontal: false, vertical: true)

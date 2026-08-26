@@ -197,7 +197,7 @@
   "colors.scene.title": "Текущие цвета",
   "colors.space_bar_off.help": "Space Bar выключена, поэтому её цвета не рисуются. Включи её в разделе «%1$@».",
   "colors.unfocused_off.help": "У окон вне фокуса нет рамки, поэтому этот цвет не рисуется. Включи её в разделе «%1$@».",
-  "common.guide_hint": "Хочешь узнать больше? Прочти %1$@.",
+  "common.guide_hint": "Хочешь выжать больше? Прочти %1$@.",
   "common.off": "выкл.",
   "common.on": "вкл.",
   "common.open_system_settings": "Открыть Системные настройки",

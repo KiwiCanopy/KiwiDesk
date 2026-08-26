@@ -197,7 +197,7 @@
   "colors.scene.title": "Cores atuais",
   "colors.space_bar_off.help": "A Space Bar está desativada, então suas cores não são desenhadas. Ative-a em %1$@.",
   "colors.unfocused_off.help": "Janelas fora de foco não recebem borda, então esta cor não é desenhada. Ative-a em %1$@.",
-  "common.guide_hint": "Quer saber mais? Leia %1$@.",
+  "common.guide_hint": "Quer aproveitar melhor? Leia %1$@.",
   "common.off": "desativado",
   "common.on": "ativado",
   "common.open_system_settings": "Abrir Ajustes do Sistema",

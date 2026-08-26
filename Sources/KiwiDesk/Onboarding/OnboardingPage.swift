@@ -70,6 +70,12 @@ struct OnboardingPage<Content: View, Action: View>: View {
     /// weight, honouring it INSIDE the footer slot rather than
     /// reversing it.
     ///
+    /// **Only a hint with a `hintLink` reads it** — a plain
+    /// `hintText` keeps the quiet tier, since the tier exists to
+    /// mark a hint that is a DESTINATION rather than a note about
+    /// doing nothing, and a hint with nowhere to go is the
+    /// latter. Setting it without a link is silently inert.
+    ///
     /// A tier, never a shape: promoting it to a BUTTON would put
     /// a second control in a row the primitive deliberately draws
     /// as one action plus context, and would promise an in-app

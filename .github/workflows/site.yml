@@ -8,7 +8,10 @@ name: Site
 # SupportLinks.swift is here because check-site-tokens.py reads it
 # (#1019): it names the guide routes the APP links, and the check
 # that the site serves them is only sound if it runs when either
-# side moves. It is an input to the gate, not to the build.
+# side moves. The script itself is here for the same reason one
+# level up — editing a check did not previously run it, and three
+# of its checks now read inputs from outside site/. Both are
+# inputs to the GATE, not to the build.
 # pull_request has no branch filter so it also validates the
 # stacked docs → site PR chain before either reaches main.
 on:
@@ -19,6 +22,7 @@ on:
       - "docs/**"
       - "assets/**"
       - "Sources/KiwiDesk/SupportLinks.swift"
+      - "scripts/check-site-tokens.py"
       - ".github/workflows/site.yml"
   pull_request:
     paths:
@@ -26,6 +30,7 @@ on:
       - "docs/**"
       - "assets/**"
       - "Sources/KiwiDesk/SupportLinks.swift"
+      - "scripts/check-site-tokens.py"
       - ".github/workflows/site.yml"
 
 concurrency:

@@ -501,10 +501,10 @@ that page argues — so it is yours to hold.
 ### The tour's modifier abbreviations are not translated
 
 The tour's shortcuts screen draws `ctrl`, `opt`, `shift` and
-`cmd` under `⌃ ⌥ ⇧ ⌘`. Those four are **not catalog keys** and you will not
-meet them in a worksheet — they are language-neutral tokens like
-the glyphs above them, read the same way in every language this
-app ships.
+`cmd` under `⌃ ⌥ ⇧ ⌘`. Those four are **not catalog keys** and
+you will not meet them in a worksheet — they are
+language-neutral tokens like the glyphs above them, read the
+same way in every language this app ships.
 
 It is mentioned here only so their appearing in English is not
 mistaken for a missed translation. The full names *are*
@@ -513,7 +513,7 @@ who wants the word rather than the abbreviation meets it — so
 that key is the one that carries your language's answer for these
 four keys, and anything else naming a modifier should match it.
 
-## Tone & voice## Tone & voice
+## Tone & voice
 
 Keep translations concise and match the register of the
 English source (plain, direct, no marketing voice). For

@@ -2952,14 +2952,14 @@ repair is to delete it rather than patch it.
 **[Principle]**
 
 **A chord the reader cannot press is not taught.** The tour's
-keys step draws the shortcuts KiwiDesk seeds, and for its first
-several months it drew them as native glyphs alone — `⌃⌥ ←↓↑→`,
-`⌃⌥ 1–5`. That is a perfectly good reminder for someone who
-already knows the symbols, and it is illegible to the reader the
-screen exists for: `⌃ ⌥ ⇧` are exactly the three glyphs a person
-who has never pressed a Mac keyboard shortcut cannot name, and on
-a German keyboard the caps print "ctrl" and "alt" rather than the
-symbols at all.
+keys step draws the shortcuts KiwiDesk seeds, and it shipped
+drawing them as native glyphs alone — `⌃⌥ ← ↓ ↑ →`, `⌃⌥ 1–5`.
+That is a perfectly good reminder for someone who already knows
+the symbols, and it is illegible to the reader the screen exists
+for: `⌃ ⌥ ⇧` are exactly the three glyphs a person who has never
+pressed a Mac keyboard shortcut cannot name, and on a German
+keyboard the caps print "ctrl" and "alt" rather than the symbols
+at all.
 
 Two obligations follow, and they are one screen's worth of work.
 
@@ -2974,9 +2974,8 @@ a German layout), and a chip boundary separates two keys where a
 loose `+` would be ambiguous.
 
 **The word under a glyph is an abbreviation, and it is not
-localized.** `ctrl`, `opt`, `cmd` — read the same way in every
-language KiwiDesk ships, and two of the three are what a non-US
-Apple keyboard prints on the cap. They are language-neutral
+localized.** `ctrl`, `opt`, `shift`, `cmd` — read the same way
+in every language KiwiDesk ships. They are language-neutral
 tokens like the glyphs above them, so they carry no catalog keys:
 four fewer strings to mistranslate and one fewer line on every
 locale round, for nothing given up.
@@ -2989,13 +2988,27 @@ US layout; and it coins a second name for a key the app already
 names one screen away, in `key_recorder.help_press`, which is the
 Shortcuts editor's own help and where the reader goes to change
 these very chords. **Using that screen's full words** (Control /
-Option / Command) is right about the vocabulary and does not fit:
-measured against the 560 pt window, the widest seeded row leaves
-the German label 270 pt of the 281 pt it needs, so every long row
-wraps — the binding constraint being Italian's "Controllo" and
-"Opzione", not German's own words. The abbreviations leave
-318 pt. An abbreviation of the app's own word is not a second
-word; the reader who wants the full name meets it in the editor.
+Option / Command) is right about the vocabulary, and loses on
+MARGIN rather than on fit: measured against the 560 pt window,
+the widest seeded row with full names fits in every locale — but
+German fits by about two points, one longer label or one wider
+translation from wrapping, where the abbreviations leave it
+tens. `OnboardingModifierNameTests` holds the numbers; they are
+deliberately not repeated here, all three copies of them having
+been wrong at once (one had measured Italian's modifier names
+against a German label, a pairing that cannot occur).
+
+An abbreviation of the app's own word is not a second word; the
+reader who wants the full name meets it in the editor. That is
+exactly true in the seven catalogs that keep the English modifier
+names, and it is a **known split** in the three that do not —
+`es`, `it` and `pt-BR` render `key_recorder.help_press` as
+"Opción", "Controllo", "Comando", so those readers meet `opt` in
+the tour and a translated word in the editor. Accepted rather
+than overlooked: the alternative is either a per-locale
+abbreviation, which is the cap-printing draft rejected above, or
+localizing four tokens whose whole value is that they do not
+vary.
 
 **Every glyph carries a word, including the ones "everybody
 knows".** ⇧ shipped bare for exactly one build, on the reasonable
@@ -3009,16 +3022,16 @@ costs a pixel. There is nothing to buy by withholding one.
 
 **And the rule outranks the rows.** The seeded keymap is a tier
 system — `⌃⌥` moves the focus, `⌃⌥⇧` moves the window, `⌃⌥⌘`
-moves it and follows — so a list of five unrelated rows asks the
-reader to memorise five chords when there is one scheme to learn.
-The step states the scheme. But it states it **derived from the
-live chords, never asserted**: every glyph on that screen is
-looked up rather than written, and a sentence claiming a tier is
-a claim about two modifier sets, so a user who rebound the second
-tier is told nothing at all. Silence is the correct failure here
-— the screen without the sentence is exactly the screen that
-shipped before it, while the sentence with a rebound keymap
-behind it teaches someone else's keyboard.
+moves it and follows — so a list of unrelated rows asks the
+reader to memorise every chord separately when there is one
+scheme to learn. The step states the scheme. But it states it
+**derived from the live chords, never asserted**: every glyph on
+that screen is looked up rather than written, and a sentence
+claiming a tier is a claim about two modifier sets, so a user who
+rebound the second tier is told nothing at all. Silence is the
+correct failure here — the screen without the sentence is exactly
+the screen that shipped before it, while the sentence with a
+rebound keymap behind it teaches someone else's keyboard.
 
 ### The app links the guide, in a language the site actually serves
 
@@ -3048,8 +3061,8 @@ the other direction. Nothing on that screen needs to know which
 reader it has.
 
 **A closing screen ends with one action and one destination.**
-Before this the card offered four affordances across three
-destinations, two of which argued in the reader's field of view:
+Before this the card said four things about where to go next, and
+two of them argued with each other in the reader's field of view:
 Settings is where you change everything, you do not need
 Settings, open Settings, start using it. Removing the fork beats
 re-wording it. What remains is the button and one link.
@@ -3068,8 +3081,9 @@ a window that never returns — the tour reopens FROM Settings, and
 **The pointer is in three places, and the third is the one that
 matters most.** The tour's closing card reaches someone who has
 just run the tour; Home's first-run banner reaches someone who
-skipped it, or finished it months ago and is in Settings for the
-first time. Both are ONE-SHOT — the tour does not come back on
+closed the tour after its shortcuts screen without reaching that
+card, or finished it months ago and is in Settings for the first
+time. Both are ONE-SHOT — the tour does not come back on
 its own, and the banner retires permanently on dismiss or on the
 first save — so a user who dismissed the welcome, or simply saved
 one change, had no route to the guide anywhere in the app. That
@@ -3090,8 +3104,8 @@ The sentence is read by the former.
 
 **The language follows the app only where the route exists.**
 KiwiDesk ships eleven catalogs; the site has three locales. A
-link composed from the app's language would send seven of them to
-a 404 — so the app narrows its own locale to the routes the site
+link composed from the app's language would send the other eight
+to a 404 — so the app narrows its own locale to the routes the site
 serves and falls back to English otherwise, because a live
 English page beats a missing page in the reader's own language.
 That is the same rule the site's own sitemap already keeps for

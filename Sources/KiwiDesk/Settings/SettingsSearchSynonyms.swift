@@ -80,6 +80,43 @@ enum SettingsSearchSynonyms {
             return ["dark mode", "light mode", "theme"]
         case .general(.startAtLogin):
             return ["login item", "autostart", "launch"]
+        // Sticky: the one family in the census with no
+        // alternate vocabulary at all, which is why nobody who
+        // does not already know KiwiDesk's word finds it
+        // (`ui-designer`, 2026-08-26).
+        //
+        // **`pin` leads because it travels.** These terms are
+        // match-only ENGLISH and never translated, so a phrase
+        // reaches only the reader typing English — and "pin" is
+        // the one candidate that is also the word a German,
+        // French or Italian speaker reaches for, being a UI
+        // loanword in all three. "always on top" and "all
+        // desktops" are kept beside it because they are what the
+        // OTHER platforms call this (Windows, and the GNOME/KDE
+        // window menus), which is exactly the alternate
+        // vocabulary this table is for — they simply help fewer
+        // people, and cost nothing.
+        //
+        // What none of them reaches is a German typing
+        // "anheften". That is the mechanism's own limit, not
+        // this entry's.
+        // **The SHORTCUTS carry it, not the appearance rows**
+        // (owner, 2026-08-26). Someone typing "pin" wants to pin
+        // a window — the action — and would be badly served by
+        // landing on the colour of the mark that says one is
+        // pinned. They reach the styling by searching "sticky"
+        // once the app has taught them the word, which the mark
+        // itself does.
+        //
+        // The Space Bar's sticky badge is absent for a harder
+        // reason: `synonymsAreLive` reds on it, the index not
+        // carrying that key, so a term there would be vocabulary
+        // nothing can ever match.
+        case .shortcuts(.toggleSticky),
+            .shortcuts(.toggleDisplaySticky):
+            return [
+                "pin", "pinned", "always on top", "all desktops",
+            ]
         // Behaviour near-misses.
         case .behaviour(.mouseFollowsFocus):
             return ["focus follows mouse", "hover focus"]

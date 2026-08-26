@@ -39,7 +39,8 @@ enum OnboardingKeys {
                         "onboarding.keys.focus",
                         "Move focus"
                     ),
-                    chord: focus
+                    chord: focus,
+                    tier: .movesFocus
                 )
             )
         }
@@ -51,7 +52,8 @@ enum OnboardingKeys {
                         "onboarding.keys.swap",
                         "Swap the window"
                     ),
-                    chord: swap
+                    chord: swap,
+                    tier: .movesWindow
                 )
             )
         }
@@ -67,7 +69,8 @@ enum OnboardingKeys {
                         "onboarding.keys.go_to_space",
                         "Go to a Space"
                     ),
-                    chord: go
+                    chord: go,
+                    tier: .movesFocus
                 )
             )
         }
@@ -90,7 +93,8 @@ enum OnboardingKeys {
                         // (localization audit, 2026-08-11).
                         "Move the window to a Space"
                     ),
-                    chord: move
+                    chord: move,
+                    tier: .movesWindow
                 )
             )
         }
@@ -161,7 +165,7 @@ enum OnboardingKeys {
     ///
     /// The seeded keymap is a tier system — `⌃⌥` moves the
     /// focus, `⌃⌥⇧` moves the window, `⌃⌥⌘` moves it and follows
-    /// — but the step drew five unrelated rows, so a reader
+    /// — but the step drew six unrelated rows, so a reader
     /// memorised five chords instead of learning one rule. The
     /// rule is the part that survives the tour.
     ///
@@ -180,8 +184,14 @@ enum OnboardingKeys {
     static func tierAnchor(
         _ rows: [OnboardingKeyFamily]
     ) -> String? {
-        guard let base = sharedModifiers(rows, of: Self.moveFocus),
-            let moves = sharedModifiers(rows, of: Self.moveWindow),
+        guard let base = sharedModifiers(rows, of: .movesFocus),
+            let moves = sharedModifiers(rows, of: .movesWindow),
+            // A bare-key tier 1 has no glyphs to name, and every
+            // other clause waves it through: an empty set holds
+            // no shift, and `[] ∪ ⇧ == [⇧]`. Unasked, the
+            // sentence renders with no subject and a leading
+            // space (`OnboardingTierAnchorTests`).
+            !base.isEmpty,
             !base.contains(.shift),
             moves == base.union(.shift)
         else { return nil }
@@ -193,37 +203,26 @@ enum OnboardingKeys {
         )
     }
 
-    /// The one modifier set every named family shares, or nil
-    /// where none of them is bound or they disagree.
+    /// The one modifier set every family of `tier` shares, or
+    /// nil where none is bound or they disagree.
     ///
     /// A `mixed` family answers nil by construction: it HAS no
-    /// shared set, which is the case the sentence must not
-    /// speak over.
+    /// shared set, which is the case the sentence must not speak
+    /// over.
     private static func sharedModifiers(
         _ rows: [OnboardingKeyFamily],
-        of ids: Set<String>
+        of tier: OnboardingKeyTier
     ) -> HotkeyModifiers? {
-        let sets = rows.filter { ids.contains($0.id) }
-            .compactMap { row -> HotkeyModifiers? in
-                guard case .shared(let modifiers, _) = row.chord
-                else { return nil }
-                return modifiers
-            }
+        let members = rows.filter { $0.tier == tier }
+        let sets = members.compactMap { row -> HotkeyModifiers? in
+            guard case .shared(let modifiers, _) = row.chord
+            else { return nil }
+            return modifiers
+        }
         guard let first = sets.first,
-            sets.count == rows.filter({ ids.contains($0.id) }).count,
+            sets.count == members.count,
             sets.allSatisfy({ $0 == first })
         else { return nil }
         return first
     }
-
-    /// The two families the sentence's first clause is about, and
-    /// the two its second is. Ids rather than the seeded combos:
-    /// the tiers are read off whatever the user has, and #1008
-    /// showed how readily a verb list goes stale beside one.
-    private static let moveFocus: Set<String> = [
-        "focus", "focus_space",
-    ]
-    private static let moveWindow: Set<String> = [
-        "swap", "move_to_space",
-    ]
 }

@@ -570,6 +570,37 @@ def check_guide_routes(dist: pathlib.Path) -> None:
         )
     routes = re.findall(r'"([^"]+)"', match.group(1))
 
+    # The HOST first, because a wrong one fails every route at
+    # once and no route check can see it: this walks `dist`, so a
+    # link to another domain passes with all three pages present.
+    # It is also the most typo-prone half — the routes are two
+    # short words, the host is a whole domain, and an installed
+    # copy keeps whatever it was built with.
+    host = re.search(
+        r'site\s*=\s*URL\(\s*\n?\s*string:\s*"https://([^/"]+)',
+        source,
+    )
+    if host is None:
+        raise SystemExit(
+            "check-site-tokens: could not read SupportLinks' own "
+            "host — the app's guide link is unguarded until this "
+            "parser is fixed"
+        )
+    canonical = (REPO / "site/astro.config.mjs").read_text(
+        encoding="utf-8"
+    )
+    # The SOURCE default, which is `process.env.SITE_URL ?? "…"` —
+    # so a build overriding SITE_URL serves a host this does not
+    # check. Stated rather than chased: the override exists for
+    # preview deploys, where a mismatched app link is expected,
+    # and the shipped build is the one whose default this is.
+    if f"https://{host.group(1)}" not in canonical:
+        raise SystemExit(
+            f"check-site-tokens: the app links {host.group(1)}, "
+            "which astro.config.mjs does not publish — every "
+            "guide link in every shipped copy is dead"
+        )
+
     # English is the fallback every other catalog lands on, so it
     # is checked whether or not the list names it.
     for route in ["", *routes]:
@@ -584,8 +615,8 @@ def check_guide_routes(dist: pathlib.Path) -> None:
                 "is missing)"
             )
     print(
-        f"guide routes: the app's {len(routes) + 1} linked "
-        "page(s) are all served"
+        f"guide routes: {host.group(1)} serves the app's "
+        f"{len(routes) + 1} linked page(s)"
     )
 
 

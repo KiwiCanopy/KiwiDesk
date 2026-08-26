@@ -1035,6 +1035,27 @@ authoring rules apply here even though the catalogs live in Core:
 - Every user-facing string goes through `L("key", "English")`
   (issue #9). English is the source of truth, inlined at the call
   site.
+- **One carve-out, and it is CLOSED: the four modifier
+  abbreviations the tour draws.** `OnboardingModifierNames` draws
+  `ctrl` / `opt` / `shift` / `cmd` under `⌃ ⌥ ⇧ ⌘` with no catalog
+  keys at all. Treat that list as exhaustive — **a new verbatim
+  user-facing string is a ruling, not a judgement an author makes
+  at the call site**, and there is no test to apply: the obvious
+  one is false. (An earlier draft of this bullet offered
+  "is the token the same in every catalog, checkable against
+  `key_recorder.help_press`" — and that key, which carries each
+  locale's FULL modifier names, is translated in `es`, `it` and
+  `pt-BR` ("Opción", "Controllo", "Comando"). The check returns
+  *this is narration, it takes a key*, which is the opposite of
+  what it was written to establish.)
+  So the honest scope, stated rather than derived: the four are
+  drawn verbatim because an abbreviation of a modifier reads
+  alike across the languages KiwiDesk ships, and in the three
+  catalogs that DO localize the full name the app therefore names
+  one key two ways — the tour's `opt` against the editor's
+  "Opción". That split is known and accepted, not overlooked.
+  The argument is `docs/design-decisions.md` ▸ the tour teaches
+  the tier; the translator-facing half is `docs/translating.md`.
 - A value interpolated into a sentence (a name, a count) MUST use
   the `L(key, english, args...)` overload with **positional**
   `%1$@` / `%1$d` specifiers — never `+`-concatenated fragments.

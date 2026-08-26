@@ -197,7 +197,7 @@
   "colors.scene.title": "目前的顏色",
   "colors.space_bar_off.help": "Space Bar 已關閉，因此不會繪製它的顏色。請在「%1$@」中開啟它。",
   "colors.unfocused_off.help": "非焦點視窗沒有邊框，因此不會繪製這個顏色。請在「%1$@」中開啟它。",
-  "common.guide_hint": "想了解更多？讀一讀%1$@。",
+  "common.guide_hint": "想更好地用起來？讀一讀%1$@。",
   "common.off": "關閉",
   "common.on": "開啟",
   "common.open_system_settings": "打開系統設定",

@@ -36,13 +36,15 @@ struct OnboardingModifierName: Identifiable, Equatable {
 /// layout — and coined a second name for a key
 /// `key_recorder.help_press` already names one screen away. The
 /// second used that screen's full words (Control / Option /
-/// Command), which is right about the vocabulary and does not
-/// FIT: measured against the 560 pt window, the widest seeded row
-/// left the German label 270 pt of the 281 pt it needs — in
-/// Italian, whose "Controllo" and "Opzione" are the binding
-/// constraint. Abbreviated, every name is narrower than the chip
-/// above it, so the columns are chip-bound and the words are
-/// free.
+/// Command), which is right about the vocabulary.
+///
+/// **The width argument is about MARGIN, not about fitting.**
+/// Measured against the 560 pt window (`OnboardingView`), the
+/// widest seeded row with full names fits in every locale — but
+/// German fits by 2.3 pt, one longer label or one wider
+/// translation from wrapping, where the abbreviations leave
+/// 37 pt. `OnboardingModifierNameTests` ▸ `namesStayShort` is
+/// the one home for those numbers; do not restate them.
 ///
 /// An abbreviation of the app's own word is not a second word:
 /// the reader who wants the full name meets it in the Shortcuts

@@ -20,9 +20,28 @@ import Testing
 /// What is left here is the app's own half: that the narrowing
 /// happens at all, and that it narrows to something this app can
 /// actually be in.
-@Suite("Guide link routes")
+@Suite("Guide link routes", .serialized)
 @MainActor
 struct GuideLinkRouteTests {
+    /// The declaration lives where the site gate's parser looks
+    /// for it. The WORKFLOW half of this — that `site.yml` still
+    /// takes the file as a path input — is
+    /// `GuideRouteGateInputTests` in the Core target, which has
+    /// the comment-stripping workflow reader (`tests.md`; a raw
+    /// YAML needle is satisfied by the comment arguing for the
+    /// mechanism it watches, which is what this clause did).
+    @Test("the routes are declared where the gate parses them")
+    func theRouteDeclarationIsWhereTheGateParses() throws {
+        let declared = try String(
+            contentsOf: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/SupportLinks.swift"
+                ),
+            encoding: .utf8
+        )
+        #expect(declared.contains("guideRoutes"))
+    }
+
     /// The app ships eleven catalogs and the site three locales,
     /// so the narrowing is the whole point of the seam — without
     /// it a `pt-BR` reader is sent to a page that does not exist.
@@ -39,6 +58,11 @@ struct GuideLinkRouteTests {
 
     @Test("a served locale takes its own route")
     func servedLocaleTakesItsRoute() {
+        // Asserted before the loop: an emptied set passes every
+        // clause below it vacuously, and the site gate would then
+        // only ever check the English fallback
+        // (`rule-authoring.md` ▸ prove a new guard reds).
+        #expect(!SupportLinks.guideRoutes.isEmpty)
         for locale in SupportLinks.guideRoutes {
             #expect(
                 SupportLinks.guide(for: locale).absoluteString
@@ -57,6 +81,7 @@ struct GuideLinkRouteTests {
         let shipped = Set(
             LocalizationManager.shared.available
         )
+        #expect(!SupportLinks.guideRoutes.isEmpty)
         for locale in SupportLinks.guideRoutes {
             #expect(
                 shipped.contains(locale),

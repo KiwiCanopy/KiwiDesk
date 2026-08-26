@@ -20,7 +20,7 @@ extension OnboardingView {
             title: keysTitle,
             body1: keysLead,
             // Under the body rather than at the bottom: it is the
-            // RULE the five rows below are instances of, and a
+            // RULE the six rows below are instances of, and a
             // reader who meets it first reads the list as one
             // scheme instead of five chords. At the bottom it
             // would also sit directly above the footer hint, two
@@ -96,7 +96,7 @@ extension OnboardingView {
         } else {
             // No card around the list (the prototype draws none):
             // a keycap already reads as its own object, and a
-            // container around five of them makes the screen a
+            // container around six of them makes the screen a
             // form rather than a reference card.
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(rows) { row(for: $0) }
@@ -168,6 +168,18 @@ extension OnboardingView {
                 chip(text, family: family)
             }
         }
+        // **The chord speaks as ONE thing, from the model the
+        // chips are drawn from.** Combined, VoiceOver read the
+        // chips as written — every `+` separator as the word
+        // "plus", and a name under each cap — which is a
+        // rendering detail spoken aloud. `glyphs` is the same
+        // chord `ComboSymbols` writes everywhere else in the app,
+        // and taking it from the model rather than from a second
+        // string is what stops the drawn and the spoken chord
+        // disagreeing: the one failure a step that exists to
+        // teach a chord cannot afford.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(family.glyphs)
     }
 
     /// One modifier: its glyph in a chip, the key's name under

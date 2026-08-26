@@ -16,20 +16,49 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
     ///
     /// The tour draws it in the accent (#828, the prototype's
     /// filled chip) — it is the row that keeps mattering after
-    /// the tour closes, and a list of five identical rows gives
+    /// the tour closes, and a list of six identical rows gives
     /// the reader nothing to take away. A FLAG rather than the
     /// view testing `id == "shortcuts"`: the id is a lookup key
     /// and a renamed one would silently un-mark the row.
     var isGateway = false
+    /// Which half of the seeded tier scheme this family is, for
+    /// the derived tier sentence — or nil where it is neither.
+    ///
+    /// A FIELD rather than the derivation matching on `id`, and
+    /// for `isGateway`'s reason one line up: an id is a LOOKUP
+    /// KEY, so a renamed one would drop the family out of the
+    /// tier derivation silently — and invisibly to the tests,
+    /// since every fixture goes through `families()` and a rename
+    /// moves both sides of an id comparison at once. Declared
+    /// beside the id it belongs to, the two cannot drift.
+    var tier: OnboardingKeyTier?
 
     /// The chord as one native glyph string — what VoiceOver
-    /// announces, and the only rendering a `mixed` family has.
+    /// announces (`OnboardingView.keycap`'s
+    /// `accessibilityLabel`), and the only rendering a `mixed`
+    /// family has.
     ///
     /// DERIVED, never stored beside ``chord``: a second copy is a
     /// second thing to keep true, and the drawn caps and the
     /// spoken chord disagreeing is the one failure this step
-    /// cannot afford (it exists to teach the chord).
+    /// cannot afford (it exists to teach the chord). That is also
+    /// why the spoken form comes from HERE rather than from the
+    /// drawn chips — read as drawn, VoiceOver announced each `+`
+    /// separator and each key name aloud, which is layout spoken
+    /// as content.
     var glyphs: String { chord.glyphs }
+}
+
+/// Which half of the seeded scheme a family belongs to.
+///
+/// `⌃⌥` moves the focus, `⌃⌥⇧` moves the window, and `⌃⌥⌘`
+/// moves it and follows. The tour states the first two as a RULE, so it
+/// needs to know which families are instances of which — and the
+/// third tier is deliberately unnamed here, an anchor that lists
+/// everything being a sixth row rather than a rule.
+enum OnboardingKeyTier {
+    case movesFocus
+    case movesWindow
 }
 
 /// A family's chord(s) with its modifier SET intact.

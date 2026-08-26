@@ -197,7 +197,7 @@
   "colors.scene.title": "当前颜色",
   "colors.space_bar_off.help": "Space Bar 已关闭，因此不会绘制其颜色。请在“%1$@”中打开它。",
   "colors.unfocused_off.help": "非焦点窗口没有边框，因此不会绘制此颜色。请在“%1$@”中打开它。",
-  "common.guide_hint": "想了解更多？读一读%1$@。",
+  "common.guide_hint": "想更好地用起来？读一读%1$@。",
   "common.off": "关闭",
   "common.on": "打开",
   "common.open_system_settings": "打开系统设置",

@@ -238,18 +238,28 @@ it is done.
 The tour then shows the spaces it chose for your screens, and
 after that the shortcuts it bound — the chords themselves, laid
 out in the window, including the one that opens the shortcut
-panel. Teaching them here rather than pointing at the menu bar
-is deliberate: it works when the menu bar is auto-hidden, and
-nothing opens on top of the tour while you are reading it.
+panel. Each modifier is drawn as its own key, with its short
+name under it — `ctrl`, `opt`, `shift`, `cmd` — so you can find
+the keys without already knowing the symbols. Above the list,
+one line states the rule the chords share: ⌃⌥ moves your focus,
+and adding ⇧ moves the window. That line is read off the
+shortcuts you actually have, so if you have rebound either group
+it is simply not drawn rather than teaching you a keyboard that
+is not yours. Teaching all of this here rather
+than pointing at the menu bar is deliberate: it works when the
+menu bar is auto-hidden, and nothing opens on top of the tour
+while you are reading it.
 
 The closing card confirms KiwiDesk is managing your windows and
 shows you where it lives: a small picture of a menu bar with the
 KiwiDesk mark in it, so you can find the app once the window
 closes. **Start KiwiDesk at login** is there, ticked, to
 untick if you would rather start it yourself. **Start using it**
-is the only button, and that is the point — Settings is a link
-in the quiet line beside it, landing on Layout, and a first-time
-tiler does not need it today.
+is the only button, and that is the point. The one quiet line
+beside it points at **the guide**, which opens KiwiDesk's
+written guide in your browser. Settings is not offered on this
+card: the picture above is how you reach it, and it is how you
+will keep reaching it.
 
 If you grant Accessibility but close the tour before those last
 screens, KiwiDesk reopens on the shortcuts screen at the next
@@ -524,6 +534,23 @@ build.
 It opens in a browser rather than in a window of KiwiDesk's own
 because the notes live on GitHub, which renders them with
 formatting and pictures that an in-app reader would only flatten.
+
+## The Written Guide
+
+**General ▸ About** also carries a **Guide** link, between the
+version group above it and the support link below. It opens
+KiwiDesk's written guide — the same one the tour's last card
+points at — in your browser.
+
+This row is the permanent route to it. The tour is shown once
+and does not come back on its own, so once it is behind you,
+About is where the guide stays. Searching Settings for "guide",
+"help", "docs" or "manual" lands on this row.
+
+The page opens in German or Japanese when KiwiDesk is running in
+one of those languages, and in English otherwise — those are the
+languages the site itself is written in, and a live English page
+beats a missing one.
 
 ## GUI Language
 

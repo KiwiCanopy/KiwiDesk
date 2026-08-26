@@ -197,7 +197,7 @@
   "colors.scene.title": "Current colors",
   "colors.space_bar_off.help": "The Space Bar is off, so its colors aren't drawn. Turn it on in %1$@.",
   "colors.unfocused_off.help": "Unfocused windows get no border, so this color isn't drawn. Turn it on in %1$@.",
-  "common.guide_hint": "Want to learn more? Read %1$@.",
+  "common.guide_hint": "Want to get more out of it? Read %1$@.",
   "common.off": "off",
   "common.on": "on",
   "common.open_system_settings": "Open System Settings",

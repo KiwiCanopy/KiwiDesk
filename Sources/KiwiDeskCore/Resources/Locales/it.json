@@ -197,7 +197,7 @@
   "colors.scene.title": "Colori attuali",
   "colors.space_bar_off.help": "La Space Bar è disattivata, quindi i suoi colori non vengono disegnati. Attivala in %1$@.",
   "colors.unfocused_off.help": "Le finestre senza focus non hanno bordo, quindi questo colore non viene disegnato. Attivalo in %1$@.",
-  "common.guide_hint": "Vuoi saperne di più? Leggi %1$@.",
+  "common.guide_hint": "Vuoi trarne di più? Leggi %1$@.",
   "common.off": "disattivato",
   "common.on": "attivato",
   "common.open_system_settings": "Apri Impostazioni di Sistema",

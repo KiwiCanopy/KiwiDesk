@@ -73,16 +73,44 @@ struct OnboardingTierAnchorTests {
         )
     }
 
-    @Test("the seeded tiers are stated with their own glyphs")
-    func seededTiersAreStated() {
+    /// **On a NON-seeded keymap, deliberately.** With the seeded
+    /// chords a hardcoded `"⌃⌥"` in the copy is byte-identical to
+    /// the derived one, so the old fixture could not tell the
+    /// derivation from the literal — and a literal is precisely
+    /// what `OnboardingKeys`' header forbids ("every glyph here
+    /// is looked up, never written"; turn 15's mock-up taught
+    /// `⌥1–5`, a chord the app does not bind). Rebinding both
+    /// tiers onto ⌃⌘ / ⌃⌘⇧ makes the two answers differ, so the
+    /// clause has something to distinguish (`guard-prover`,
+    /// 2026-08-26).
+    @Test("the tiers are stated with the keymap's own glyphs")
+    func tiersAreReadFromTheLiveKeymap() {
         LocalizationManager.shared.select("en")
         defer { LocalizationManager.shared.select(nil) }
-        let sentence = anchor(seeded())
+        let sentence = anchor(
+            seeded(
+                focus: "control+command",
+                move: "control+command+shift"
+            )
+        )
         #expect(sentence != nil)
-        // Both halves are the LOOKED-UP glyphs, not literals in
-        // the copy — the whole obligation of this step.
-        #expect(sentence?.contains("⌃⌥") == true)
-        #expect(sentence?.contains("⇧") == true)
+        #expect(sentence?.contains("⌃⌘") == true)
+        // The seeded modifier must NOT appear: it would mean the
+        // copy carries a literal rather than a lookup.
+        #expect(sentence?.contains("⌥") == false)
+        // And the second clause names ⇧ ALONE — rendering the
+        // whole tier-2 set there teaches a chord as an addition,
+        // which is a different instruction.
+        //
+        // DERIVED through `ComboSymbols` rather than typed: the
+        // canonical order is ⌃⌥⇧⌘, so the hand-written form
+        // this replaced named a string the app never produces,
+        // and the clause passed under the very mutation it was
+        // written for.
+        let wholeTier = ComboSymbols.modifierSymbols([
+            .control, .command, .shift,
+        ])
+        #expect(sentence?.contains(wholeTier) == false)
     }
 
     /// The defect the sentence could ship: a rebound tier 2 and a
@@ -145,6 +173,40 @@ struct OnboardingTierAnchorTests {
         #expect(anchor(bindings) == nil)
     }
 
+    /// **Each `movesWindow` family, separately.** Dropping
+    /// `tier: .movesWindow` from `swap` or from `move_to_space`
+    /// left the whole lane green, because no fixture ever
+    /// rebound one of the pair alone (`guard-prover`,
+    /// 2026-08-26) — so the field introduced to stop a rename
+    /// desyncing the derivation could itself be deleted
+    /// silently. The `movesFocus` pair is covered by
+    /// `splitTierSaysNothing` and `mixedFamilySaysNothing`.
+    @Test("one rebound window family alone says nothing")
+    func splitWindowTierSaysNothing() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        for moved in ["swap", "move_to_space"] {
+            let bindings = seeded().map { combo, lua in
+                lua.contains(moved)
+                    ? (
+                        combo.replacingOccurrences(
+                            of: "control+option+shift",
+                            with: "control+option+command"
+                        ), lua
+                    )
+                    : (combo, lua)
+            }
+            #expect(
+                anchor(bindings) == nil,
+                Comment(
+                    rawValue:
+                        "\(moved) moved to its own tier and "
+                        + "the sentence still claimed one"
+                )
+            )
+        }
+    }
+
     /// A family edited apart has no shared set at all, so there
     /// is no tier to name — the `mixed` case, which the
     /// derivation must read as absence rather than as a default.
@@ -156,6 +218,36 @@ struct OnboardingTierAnchorTests {
         bindings[2] = (
             "control+command+up", "KiwiDesk.focus(\"up\")"
         )
+        #expect(anchor(bindings) == nil)
+    }
+
+    /// **A bare-key tier 1 renders the sentence with no subject**
+    /// — " moves your focus. Add ⇧ to move the window.", leading
+    /// space and all, on the one screen whose whole premise is
+    /// that nothing is asserted (`code-reviewer`, 2026-08-26).
+    ///
+    /// Bare-key bindings are a modelled case, not a hypothetical:
+    /// `KeyCombo.parse("left")` succeeds with an empty modifier
+    /// set, and `KeyboardCensus.ModifierLayer.label` documents
+    /// the empty layer. Every other clause waves it through — an
+    /// empty set contains no shift, and `[] ∪ ⇧ == [⇧]` — so
+    /// emptiness is its own question.
+    ///
+    /// It is also why the frame needs no `WITHHELD_ARGUMENTS`
+    /// entry: `%1$@` is first rather than last, and the fix is to
+    /// never render it empty rather than to legalise doing so.
+    @Test("a bare-key focus tier says nothing")
+    func bareKeyTierSaysNothing() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let directions = ["left", "down", "up", "right"]
+        let bindings =
+            directions.map {
+                ($0, "KiwiDesk.focus(\"\($0)\")")
+            }
+            + directions.map {
+                ("shift+\($0)", "KiwiDesk.swap(\"\($0)\")")
+            }
         #expect(anchor(bindings) == nil)
     }
 

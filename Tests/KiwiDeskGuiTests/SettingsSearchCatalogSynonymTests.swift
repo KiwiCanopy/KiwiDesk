@@ -32,36 +32,40 @@ struct SettingsSearchCatalogSynonymTests {
         LocalizationManager.shared.select(nil)
     }
 
-    /// The catalog half of the same invariant (#1019). A
-    /// catalog-only row has no `SettingKey`, so its synonyms are
-    /// keyed on the declaration's `id` — and an entry naming an
-    /// id the catalog does not declare is dead vocabulary
-    /// nothing can ever match, exactly as above.
+    /// **Exactly one catalog control carries alternate
+    /// vocabulary, and it is the guide.**
     ///
-    /// Derived rather than restated: the check walks every
-    /// declared control and asserts that the only ids carrying
-    /// terms are ones the walk found, so a re-keyed or deleted
-    /// declaration reds instead of going quiet.
-    @Test("catalog synonyms only decorate declared controls")
-    func catalogSynonymsAreLive() {
+    /// The first cut of this asserted `declared.contains(id)`
+    /// over a set built by filtering `declared` — true by
+    /// construction, so only its non-empty check could ever fail
+    /// (`code-reviewer`, 2026-08-26). That is #1021's lesson in
+    /// miniature: a clause that cannot distinguish the defect
+    /// from the fix.
+    ///
+    /// What CAN fail, and is worth failing on: terms attached to
+    /// a second catalog control. `catalogTerms` is a `guard id ==`
+    /// against one declaration, so a widening is a deliberate
+    /// edit — and one that silently gives another row the guide's
+    /// vocabulary would send "help" somewhere else.
+    @Test("only the guide carries catalog synonyms")
+    func theGuideIsTheOnlyDecoratedControl() {
         pinEnglish()
         defer { reset() }
-        let declared = SettingsDestination.allCases
+        let decorated = SettingsDestination.allCases
             .flatMap { SettingsCatalog.entries(of: $0) }
             .map { $0.control.id }
-        let decorated = declared.filter {
-            !SettingsSearchSynonyms.catalogTerms(for: $0).isEmpty
-        }
-        // The guide is the one catalog row carrying alternate
-        // vocabulary today; the assertion is that it IS declared,
-        // not how many there are.
-        #expect(!decorated.isEmpty)
-        for id in decorated {
-            #expect(
-                declared.contains(id),
-                Comment(rawValue: id)
+            .filter {
+                !SettingsSearchSynonyms.catalogTerms(for: $0)
+                    .isEmpty
+            }
+        #expect(
+            decorated == [SettingsCatalog.general.guideLink.id],
+            Comment(
+                rawValue:
+                    "catalog synonyms decorate \(decorated); the "
+                    + "guide is meant to be the only one"
             )
-        }
+        )
     }
 
     /// "help" is the query this exists for: the app is

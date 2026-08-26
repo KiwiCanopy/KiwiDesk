@@ -197,7 +197,7 @@
   "colors.scene.title": "Colores actuales",
   "colors.space_bar_off.help": "La Space Bar está desactivada, así que sus colores no se dibujan. Actívala en %1$@.",
   "colors.unfocused_off.help": "Las ventanas sin foco no llevan borde, así que este color no se dibuja. Actívalo en %1$@.",
-  "common.guide_hint": "¿Quieres saber más? Lee %1$@.",
+  "common.guide_hint": "¿Quieres sacarle más partido? Lee %1$@.",
   "common.off": "desactivado",
   "common.on": "activado",
   "common.open_system_settings": "Abrir Ajustes del Sistema",

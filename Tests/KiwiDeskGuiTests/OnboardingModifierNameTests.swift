@@ -1,3 +1,4 @@
+import AppKit
 import KiwiDeskCore
 import Testing
 
@@ -82,22 +83,57 @@ struct OnboardingModifierNameTests {
     /// repeats up to three times across one row of a 560 pt
     /// window.
     ///
-    /// The measurement that settled this: with the Shortcuts
-    /// editor's full words (Control / Option / Command) the
-    /// widest seeded row left the German label 270 pt of the
-    /// 281 pt it needs — in Italian, whose "Controllo" and
-    /// "Opzione" are the binding constraint. Abbreviated, every
-    /// name is narrower than the 25.4 pt chip above it, so the
-    /// columns are chip-bound and the words cost nothing. The
-    /// bound is real, and one short token is the shape of it.
-    @Test("a name is one short token")
-    func namesStayShort() {
+    /// The measurement that settled this, and the ONE home for
+    /// these numbers — the source and `docs/design-decisions.md`
+    /// cite this suite rather than repeating them, all three
+    /// having carried a wrong version of it (2026-08-26).
+    ///
+    /// Against the 560 pt window's 500 pt of content, the widest
+    /// seeded row with the Shortcuts editor's FULL words fits in
+    /// every locale — but German fits by about two points, where
+    /// abbreviated it fits by tens. The bound is a MARGIN, not a
+    /// failure. (An earlier version said full names did not fit
+    /// at all: it had measured Italian's modifier names against
+    /// a German label, a pairing that cannot occur, and the
+    /// wrong number reached two other files and a ruling.)
+    ///
+    /// **The clause DERIVES the bound rather than restating it.**
+    /// It was `name.count <= 5`, which is the length of the
+    /// longest shipped token written down — a tautology that
+    /// reds on a deliberate retune and catches no regression
+    /// (`guard-prover`, 2026-08-26; `rule-authoring.md` ▸ a
+    /// number-pin must derive the number). What actually matters
+    /// is that a name is narrower than the chip above it, which
+    /// is what keeps each column chip-bound and the words free.
+    @Test("a name is narrower than the chip above it")
+    func namesStayInsideTheirChip() {
+        let nameFont = NSFont.systemFont(ofSize: 9.5)
+        let glyphFont = NSFont.monospacedSystemFont(
+            ofSize: 12,
+            weight: .semibold
+        )
+        // The chip's own padding, from `OnboardingView.chip`.
+        let horizontalPadding: CGFloat = 18
         let all: HotkeyModifiers = [
             .control, .option, .shift, .command,
         ]
         for modifier in OnboardingModifierNames.named(all) {
-            #expect(!modifier.name.contains(" "))
-            #expect(modifier.name.count <= 5)
+            let chip =
+                (modifier.glyph as NSString)
+                .size(withAttributes: [.font: glyphFont])
+                .width + horizontalPadding
+            let name =
+                (modifier.name as NSString)
+                .size(withAttributes: [.font: nameFont]).width
+            #expect(
+                name <= chip,
+                Comment(
+                    rawValue:
+                        "\(modifier.name) is \(name) pt under a "
+                        + "\(chip) pt chip — the column stops "
+                        + "being chip-bound and the row grows"
+                )
+            )
         }
     }
 

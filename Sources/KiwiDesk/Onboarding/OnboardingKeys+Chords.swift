@@ -43,7 +43,7 @@ extension OnboardingKeys {
     /// A keymap that cannot be written as a range falls back the
     /// way the arrows path already does — `collapsed` first, so
     /// ten spaces render `⌃⌥ 1 2 4 5 …` rather than ten full
-    /// chords stacked in a 520 pt window.
+    /// chords stacked in a 560 pt window.
     static func digits(
         layer: KeyLayer,
         command: String,
