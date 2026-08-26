@@ -62,12 +62,21 @@ private final class FakeHideSpaces: NSObject {
     }
 }
 
+/// Accepts the move so the refusal under test is the SWITCH's.
+private final class FakeMoveWindows: NSObject {
+    @objc(initWithWindows:spaceID:)
+    init(windows: [NSNumber], spaceID: UInt64) {}
+
+    @objc func performWithWMBridgeDelegate() {}
+}
+
 private let bridgeClasses: [String: AnyClass] = [
     "CopyManagedDisplaySpacesOperation":
         FakeCopyManagedDisplaySpaces.self,
     "ManagedDisplaySetCurrentSpaceOperation":
         FakeSetCurrentSpace.self,
     "HideSpacesOperation": FakeHideSpaces.self,
+    "MoveWindowsToManagedSpaceOperation": FakeMoveWindows.self,
 ]
 
 // MARK: - Suite
@@ -103,8 +112,9 @@ struct DesktopSwitchGuardTests {
             if !switching,
                 name == "ManagedDisplaySetCurrentSpaceOperation"
             {
-                // The class resolves; the bridge declines to
-                // dispatch — "performed is not applied".
+                // Capability absent: the class does not resolve,
+                // so the dispatch answers false and the verb
+                // refuses (os-private-apis.md's nil ⇒ absent).
                 return nil
             }
             if !hiding, name == "HideSpacesOperation" {
@@ -138,6 +148,27 @@ struct DesktopSwitchGuardTests {
         #expect(!core.deferred.isScheduled(.desktopSwitchVerify))
     }
 
+    @Test("A refused switch folds no departure")
+    func refusedSwitchFoldsNoDeparture() {
+        let core = makeCore(switching: false)
+        defer { teardown() }
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(7), pid: 1, appName: "App")
+            )
+        )
+        // The move dispatches; the switch refuses — the window
+        // is still where the user sees it, so the eager
+        // departure fold (#1023's second half) must stand down.
+        #expect(
+            !core.execute(
+                "move_to_desktop_and_follow",
+                args: [.number(2)]
+            ).isSuccess
+        )
+        #expect(core.state.windows[WindowID(7)] != nil)
+    }
+
     @Test("A missing hide capability degrades to the pointer-only switch")
     func missingHideDegradesToPointerOnly() {
         let core = makeCore(hiding: false)
@@ -162,7 +193,6 @@ struct DesktopSwitchGuardTests {
         let target = KiwiCore.DesktopTarget(
             space: 11,
             displayIdentifier: "UUID-A",
-            isCurrent: false,
             originSpace: 10
         )
         // The display never left space 10 — the set was dropped

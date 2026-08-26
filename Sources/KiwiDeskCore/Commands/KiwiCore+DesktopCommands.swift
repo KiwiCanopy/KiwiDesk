@@ -47,16 +47,18 @@ extension KiwiCore {
     struct DesktopTarget: Equatable {
         let space: SkyLight.SpaceID
         let displayIdentifier: String
-        /// Whether the Desktop is already the one its screen
-        /// shows — a switch to it is a no-op.
-        let isCurrent: Bool
         /// The space that screen shows NOW, from the same
         /// snapshot the target resolved in (#888: one reading,
         /// every question) — the space a switch must hide,
         /// because the pointer write performs no transition of
-        /// its own (#1023). Nil when the snapshot cannot say;
-        /// equal to `space` exactly when `isCurrent`.
+        /// its own (#1023). Nil when the snapshot cannot say.
         let originSpace: SkyLight.SpaceID?
+
+        /// Whether the Desktop is already the one its screen
+        /// shows — a switch to it is a no-op. Derived, so a
+        /// hand-built target cannot carry origin and verdict in
+        /// disagreement.
+        var isCurrent: Bool { originSpace == space }
     }
 
     /// Resolves a 1-based Mission Control number against one
@@ -71,12 +73,10 @@ extension KiwiCore {
         guard let space = snapshot.space(numbered: number),
             !space.displayUUID.isEmpty
         else { return nil }
-        let origin = snapshot.currentSpaces[space.displayUUID]
         return DesktopTarget(
             space: space.id,
             displayIdentifier: space.displayUUID,
-            isCurrent: origin == space.id,
-            originSpace: origin
+            originSpace: snapshot.currentSpaces[space.displayUUID]
         )
     }
 
@@ -172,10 +172,14 @@ extension KiwiCore {
             }
             rehomeAcrossScreens(focused, to: target)
             if follow {
-                return switchDesktop(
+                let response = switchDesktop(
                     to: target,
                     verb: "move_to_desktop_and_follow"
                 )
+                if response.isSuccess, !target.isCurrent {
+                    departEagerly(focused)
+                }
+                return response
             }
             departWithoutFollowing(focused)
             return .ok()
@@ -271,6 +275,27 @@ extension KiwiCore {
             to: destination
         )
         retile(animated: true)
+    }
+
+    /// The eager departure fold of a follow onto a HIDDEN
+    /// Desktop — #1023's second half, device-traced 2026-08-26:
+    /// the moved window has physically left for a Desktop
+    /// nobody shows yet, but nothing removes it from its origin
+    /// space until some reconcile happens to notice, and the
+    /// switch's own retile still holds it as an origin member,
+    /// re-places it on the origin screen — and macOS re-assigns
+    /// its Desktop to match the frame, undoing the move.
+    /// Whether the removal or that retile wins the race decided
+    /// each attempt; folding the departure NOW decides it. The
+    /// fold files `.departed`, which is exactly what the #1010
+    /// arrival rule needs to re-home the window when the
+    /// reveal's reconcile lists it again — the same path a
+    /// swipe-away takes. Runs only after an ACCEPTED switch, so
+    /// the removal classifies as `vanished` against the stamp
+    /// the switch just wrote; a refused switch folds nothing,
+    /// because the window is then still where the user sees it.
+    private func departEagerly(_ window: WindowID) {
+        handle(.windowDestroyed(window, wasMinimized: false))
     }
 
     /// The bookkeeping a no-follow Desktop move owes, because no

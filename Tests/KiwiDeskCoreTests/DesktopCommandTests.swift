@@ -118,8 +118,7 @@ private let bridgeClasses: [String: AnyClass] = [
 struct DesktopCommandTests {
     private func makeCore(
         bridge: Bool = true,
-        focused: Bool = true,
-        switching: Bool = true
+        focused: Bool = true
     ) -> KiwiCore {
         Bridge.reset()
         NativeSpaces.spacesOverride = authorityTopology(
@@ -129,15 +128,7 @@ struct DesktopCommandTests {
         NativeSpaces.activeSpaceIDOverride = 10
         pinTwoDisplays()
         WMBridge.classResolverOverride = { name in
-            guard bridge else { return nil }
-            if !switching,
-                name == "ManagedDisplaySetCurrentSpaceOperation"
-            {
-                // The class resolves; the bridge declines to
-                // dispatch — "performed is not applied".
-                return nil
-            }
-            return bridgeClasses[name]
+            bridge ? bridgeClasses[name] : nil
         }
         let core = makeTestCore()
         if focused {
@@ -166,18 +157,26 @@ struct DesktopCommandTests {
                 == .init(
                     space: 11,
                     displayIdentifier: "UUID-A",
-                    isCurrent: false,
                     originSpace: 10
                 )
+        )
+        // isCurrent is DERIVED (origin == space), so the two
+        // targets also pin the verdict both ways.
+        #expect(
+            KiwiCore.desktopTarget(number: 2, in: snapshot)?
+                .isCurrent == false
         )
         #expect(
             KiwiCore.desktopTarget(number: 3, in: snapshot)
                 == .init(
                     space: 20,
                     displayIdentifier: "UUID-B",
-                    isCurrent: true,
                     originSpace: 20
                 )
+        )
+        #expect(
+            KiwiCore.desktopTarget(number: 3, in: snapshot)?
+                .isCurrent == true
         )
         #expect(KiwiCore.desktopTarget(number: 0, in: snapshot) == nil)
         #expect(KiwiCore.desktopTarget(number: 5, in: snapshot) == nil)
@@ -223,6 +222,9 @@ struct DesktopCommandTests {
         // No switch dispatched means nothing to hide either — a
         // hide without a set blanks the visible Desktop.
         #expect(Bridge.hides.isEmpty)
+        // And a VISIBLE target folds no departure: the window
+        // stays tracked, re-homed by `rehomeAcrossScreens`.
+        #expect(core.state.windows[WindowID(7)] != nil)
     }
 
     @Test("move_to_desktop moves the focused window, and follow switches")
@@ -243,6 +245,12 @@ struct DesktopCommandTests {
         #expect(Bridge.switches.map(\.0) == [21])
         #expect(Bridge.switches.map(\.1) == ["UUID-B"])
         #expect(Bridge.hides == [[20]])
+        // A follow onto a HIDDEN Desktop folds the departure
+        // eagerly (#1023's second half): the window must be OUT
+        // of state before the switch's retile can re-place it
+        // on the origin screen and undo the move. The reveal's
+        // reconcile re-homes it through the #1010 arrival rule.
+        #expect(core.state.windows[WindowID(7)] == nil)
     }
 
     @Test("Refusals: no bridge, no such Desktop, bad argument, no focus")

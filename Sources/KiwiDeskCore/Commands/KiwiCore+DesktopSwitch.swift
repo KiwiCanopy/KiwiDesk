@@ -45,7 +45,9 @@ extension KiwiCore {
             onLog("\(verb): the Desktop bridge refused the switch")
             return .fail("the Desktop bridge refused the switch")
         }
-        if let origin = target.originSpace, origin != target.space {
+        // origin == space would mean isCurrent, which the guard
+        // above already stood down on.
+        if let origin = target.originSpace {
             _ = WMBridge.hideSpaces([origin])
         }
         lastDesktopSwitch = Date()
@@ -53,6 +55,11 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// 600 ms: a wide margin over the ~120 ms a dispatched set
+    /// needs before every pointer read answers the new space
+    /// (device-measured 2026-08-26) — late enough that a landed
+    /// switch can never read as dropped, early enough that the
+    /// log still sits beside the command in a capture.
     private func scheduleDesktopSwitchVerify(
         _ target: DesktopTarget,
         verb: String
@@ -61,7 +68,8 @@ extension KiwiCore {
             .desktopSwitchVerify,
             after: .milliseconds(600)
         ) { [weak self] in
-            self?.verifyDesktopSwitch(to: target, verb: verb)
+            guard let self, self.eventLoop.isRunning else { return }
+            self.verifyDesktopSwitch(to: target, verb: verb)
         }
     }
 

@@ -92,14 +92,17 @@ Every one of the following binds whoever touches them:
   `WMBridge.hideSpaces([origin])`, origin read from the same
   snapshot that resolved the target — set-then-hide measured as
   a complete switch — and the deferred pointer re-query verifies
-  only that the set was not dropped (`DesktopCommandTests`).
+  only that the set was not dropped (`DesktopCommandTests`,
+  `DesktopSwitchGuardTests`).
   The bare C `SLSShowSpaces`/`SLSHideSpaces` are silent no-ops
   from a foreign process; the bridged operations are not.
 - A bridge-driven Desktop switch reaches KiwiDesk through the
   SAME `NSWorkspace` notification a swipe does — observed on
   device 2026-08-25, `focus_desktop` producing the target
-  Desktop's window census — so a caller arms no confirmation of
-  its own. A caller with NO such signal owns its own
+  Desktop's window census — so a caller arms no BOOKKEEPING
+  confirmation of its own (the #1023 bullet's deferred re-query
+  is a drop diagnostic that only logs, not bookkeeping — the
+  two rules do not conflict). A caller with NO such signal owns its own
   bookkeeping: the no-follow `move_to_desktop` reaps the window
   it sent away, stamps the switch window so the removal reads
   as `vanished`, and stamps the move latch
