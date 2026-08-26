@@ -139,7 +139,11 @@ struct ShortcutsInactiveBandTests {
             "inactive(reference.inactive)",
             // The dim, keyed past the rows' closing braces: the
             // Custom band draws the same `ForEach`, undimmed.
-            "ShortcutRowView(row:$0)}}.opacity(0.6)",
+            // THAT it dims is the invariant; how much is a
+            // tuning, so the needle stops at the paren — the
+            // contiguity is what distinguishes the two bands,
+            // and it survives without the value.
+            "ShortcutRowView(row:$0)}}.opacity(",
             "Text(inactiveCaption)",
         ] {
             #expect(

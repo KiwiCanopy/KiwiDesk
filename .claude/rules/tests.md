@@ -361,6 +361,52 @@ bite large test PRs:
   the font separately because a map can name a ligature the font
   lacks — the suite name is its own span so
   `RuleCitationTests` resolves it).
+- **A drawn VALUE.** A source-scanning clause pins the SHAPE a
+  decision has, never the number or token it currently resolves
+  to: *no `.font(` anywhere in this run* is a guard, `.font(
+  .footnote)` is a tax. The two are told apart by asking what a
+  deliberate retune does — a shape clause stays green through
+  every retune and reds on the regression, a value clause reds
+  on the retune and catches no regression at all, because
+  nobody changes a chevron's weight by accident and the author
+  who changes it on purpose simply edits the test to agree with
+  themselves. It is not free to keep: every such clause bills a
+  `guard-prover` run (the row above) each time the value moves,
+  which is how #1021 spent three of them on one afternoon's
+  tuning.
+
+  What that leaves worth pinning, all of them shapes: that a
+  decision has ONE home (`Chrome` carries no `font:` payload);
+  that a call site ROUTES through the seam rather than
+  re-deciding (`SettingsTheme.` — the token family, never which
+  token; `SettingsDrawerHeader.tier`); that a chain applies the
+  seam EXACTLY ONCE, since a positive needle stays green beside
+  a literal appended after it and SwiftUI draws the last one;
+  and that a slot is not drawn at all (no `Text(` in an
+  `accessory:` closure).
+
+  **A value swept up by a CONTIGUOUS needle is not a value
+  pin** — `KeyboardConflictWiringTests` runs one needle from
+  `if isConflicted || isOverwritten {` through the stroke,
+  because a cut ending at the `{` passed on a branch that kept
+  its condition and stopped drawing. The geometry inside it is
+  glue holding the needle contiguous, not an assertion; say so
+  in the needle's own comment, and do not split it out.
+
+  **In a NEGATIVE clause a value pin is fail-open, not a
+  tax.** `SettingsFloatingPanelTests` spelled a container's
+  whole padding chain to locate the row it then asserted was
+  unnamed; retuning any one of those paddings innocently stops
+  the needle matching, so the clause passes while the
+  regression it names lands. A negative clause therefore
+  locates its subject by something the subject cannot lose —
+  a brace-balanced run, or a count over the file — never by a
+  value that a later tuning is free to move.
+
+  **And the argument still gets written down** — in the source
+  docstring where the value is chosen, which is where a reader
+  retuning it will be. Deleting the clause deletes the tax, not
+  the reasoning.
 
 ### Removal
 

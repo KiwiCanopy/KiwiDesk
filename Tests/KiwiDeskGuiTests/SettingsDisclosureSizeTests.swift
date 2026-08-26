@@ -89,7 +89,13 @@ struct SettingsDisclosureSizeTests {
                     + "inherit the header's — \(chevronRun)"
             )
         )
-        #expect(chevronRun.contains(".fontWeight(.bold)"))
+        // Non-vacuity, on the run's IDENTITY rather than on a
+        // weight. `.fontWeight(.bold)` stood here and pinned an
+        // aesthetic: nobody changes a chevron's weight by
+        // accident, and changing it on purpose only made the
+        // author edit a test to agree with themselves — while
+        // billing a `guard-prover` run for the privilege.
+        #expect(chevronRun.contains("chevron.right"))
         #expect(
             !chevronRun.contains(".imageScale("),
             Comment(
@@ -230,11 +236,14 @@ struct SettingsDisclosureSizeTests {
                     + "\(summaryRun)"
             )
         )
+        // Through a THEME token, never which one. That it
+        // takes an ink from `SettingsTheme` is the rule
+        // (gui.md); that the ink is `ink3` is a tuning the
+        // owner moved twice in one afternoon, and a guard that
+        // reds on tuning is a tax rather than a net.
         #expect(
-            summaryRun.contains(
-                ".foregroundStyle(SettingsTheme.ink3)"
-            ),
-            "the summary is description, not an affordance"
+            summaryRun.contains(".foregroundStyle(SettingsTheme."),
+            "the summary paints outside the theme"
         )
         // Shut-only AND inside the button, in ONE clause bound
         // to its subject and its position. Read file-wide this
