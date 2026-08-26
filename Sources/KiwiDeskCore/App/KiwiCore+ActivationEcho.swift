@@ -19,9 +19,18 @@ extension KiwiCore {
     /// capture, 2026-08-27).
     ///
     /// The discriminators, each load-bearing:
-    /// - a fresh stamp on a SAME-PID sibling is the evidence
-    ///   our raise provoked this — without one, an app keying
-    ///   its own window is the user's business;
+    /// - the provocation evidence, either of two: a fresh stamp
+    ///   on a SAME-PID sibling (our raise provoked this —
+    ///   without one, an app keying its own window is the
+    ///   user's business), or OUR OWN recent frame-set on the
+    ///   reported window itself while it carries a learned
+    ///   size bound — a known size-fighter (the emulator)
+    ///   also activates itself in answer to a resize, which
+    ///   is how the flap re-add's placement stole focus with
+    ///   no raise anywhere (#1049 QA round 2). The bound term
+    ///   keeps that arm off ordinary windows: after any big
+    ///   retile many windows sit inside their set grace, and
+    ///   a cmd-tab onto one must stay honored;
     /// - `intended` in ANOTHER app: the steal yanks focus
     ///   cross-app, while an in-app report within the stamp
     ///   window is the user cycling windows (cmd-`) — a float
@@ -53,13 +62,19 @@ extension KiwiCore {
             intendedWindow.pid != pid,
             let space = state.workspaces.space(of: intended),
             !freshSelfRaise(id, now: now),
-            !recentClickReached(id, now: now),
-            zOrderRaiseEchoes.contains(where: { entry in
-                entry.key != id
-                    && now.timeIntervalSince(entry.value)
-                        < Self.zOrderRaiseEchoWindow
-                    && state.windows[entry.key]?.pid == pid
-            })
+            !recentClickReached(id, now: now)
+        else { return false }
+        let siblingRaised = zOrderRaiseEchoes.contains {
+            entry in
+            entry.key != id
+                && now.timeIntervalSince(entry.value)
+                    < Self.zOrderRaiseEchoWindow
+                && state.windows[entry.key]?.pid == pid
+        }
+        let resizeProvoked =
+            tiler.askEchoLikely(id)
+            && tiler.sizeBound(for: id) != nil
+        guard siblingRaised || resizeProvoked
         else { return false }
         onLog(
             "focus: w\(id.raw) sibling activation echo "

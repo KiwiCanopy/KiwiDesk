@@ -102,8 +102,13 @@ struct SiblingActivationEchoTests {
         // follows every focus change, so an in-app arm would
         // eat the second press of every quick cycle. The steal
         // this branch exists for is cross-app by nature.
+        // Ordering is load-bearing (guard-prover, 2026-08-27):
+        // the window is created FIRST and the sibling focused
+        // AFTER, so the fold reports `focusBefore` as a
+        // same-pid sibling distinct from the reported window —
+        // created last, the spawn grant makes focusBefore==id
+        // and the predicate exits before the pid term is read.
         let core = makeCore()
-        core.state.workspaces.focus(emulatorMain, in: space)
         let second = WindowID(22)
         core.state.apply(
             .windowCreated(
@@ -114,8 +119,72 @@ struct SiblingActivationEchoTests {
                 )
             )
         )
+        core.state.workspaces.focus(emulatorMain, in: space)
         core.handle(.windowFocused(second))
         #expect(core.activeSpace?.focused == second)
+    }
+
+    @Test("A resize-provoked steal by a bound holder reverts")
+    func resizeProvokedStealIsReverted() {
+        // The second evidence arm (#1049 QA round 2): no raise
+        // anywhere, but WE just set the reported window's frame
+        // and it carries a learned bound — a known size-fighter
+        // activating itself in answer to the resize.
+        let core = makeCore()
+        core.zOrderRaiseEchoes = [:]
+        core.tiler.echoGraceOverride = { _ in true }
+        let asked = CGSize(width: 1626, height: 1005)
+        let snapped = CGSize(width: 439, height: 1005)
+        for _ in 0..<2 {
+            core.tiler.boundLearner.recordAsk(
+                emulatorMain,
+                size: asked
+            )
+            core.tiler.boundLearner.observe(
+                emulatorMain,
+                currentSize: snapped,
+                settledRead: true
+            )
+        }
+        core.handle(.windowFocused(emulatorMain))
+        #expect(core.activeSpace?.focused == claude)
+    }
+
+    @Test("A recent set alone does not revert")
+    func recentSetWithoutABoundIsHonored() {
+        // The bound term keeps the resize arm off ordinary
+        // windows: after any big retile many windows sit
+        // inside their set grace, and a cmd-tab onto one must
+        // stay honored.
+        let core = makeCore()
+        core.zOrderRaiseEchoes = [:]
+        core.tiler.echoGraceOverride = { _ in true }
+        core.handle(.windowFocused(emulatorMain))
+        #expect(core.activeSpace?.focused == emulatorMain)
+    }
+
+    @Test("A bound alone does not revert")
+    func boundWithoutARecentSetIsHonored() {
+        // The recency term is the provocation half: a
+        // size-fighter the engine has not touched lately that
+        // gets a clickless focus is the user's cmd-tab.
+        let core = makeCore()
+        core.zOrderRaiseEchoes = [:]
+        let asked = CGSize(width: 1626, height: 1005)
+        let snapped = CGSize(width: 439, height: 1005)
+        for _ in 0..<2 {
+            core.tiler.boundLearner.recordAsk(
+                emulatorMain,
+                size: asked
+            )
+            core.tiler.boundLearner.observe(
+                emulatorMain,
+                currentSize: snapped,
+                settledRead: true
+            )
+        }
+        core.handle(.windowFocused(emulatorMain))
+        #expect(core.activeSpace?.focused == emulatorMain)
     }
 
     @Test("A clicked window is honored")
