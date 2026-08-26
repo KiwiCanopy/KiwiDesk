@@ -89,6 +89,14 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     /// is shut. `SettingsDisclosureStyle.summaryText` owns the
     /// tier and the shut-only rule; a call site hands it the
     /// words and nothing else.
+    ///
+    /// **Those words are user-facing**, so a call site passes an
+    /// `L()` result — four of the five do. The exception is a
+    /// bare COUNT (`PresetsSection`), which needs no catalog
+    /// key and is legal for the reason localization.md gives a
+    /// count the last position in a frame: standing alone,
+    /// behind the header's own localized label, there is no
+    /// frame for a locale to disagree with.
     private let summary: String?
     @ViewBuilder private let content: () -> Content
     @ViewBuilder private let accessory: () -> Accessory
@@ -251,7 +259,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             // `DesktopsGroup`'s `?` is. It travels to the
             // style separately and is drawn beside the button.
             Text(control.text)
-                .font(.callout.weight(.semibold))
+                .font(SettingsDrawerHeader.tier.weight(.semibold))
                 .searchFlashHeader(control)
                 // The mode-reveal wash shares the label band the
                 // search wash uses (#760), for the same reason:

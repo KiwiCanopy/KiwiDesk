@@ -1,6 +1,26 @@
 import KiwiDeskCore
 import SwiftUI
 
+/// **The one tier a drawer header row draws at**, so the
+/// title and the summary beside it cannot drift apart
+/// (architect review, 2026-08-26). #1021 took the tier out
+/// of fifteen call sites and the summary out of five, and
+/// then left the two literals in two types — retune the
+/// header and the summary silently stays behind, which is
+/// the same drift one level up. The title takes this at
+/// semibold, the summary takes it plain; neither spells a
+/// size of its own, and `SettingsDisclosureSizeTests`
+/// reds on either doing so.
+///
+/// `.callout` is 12 pt: a point UNDER the `.body` rows a
+/// drawer heads, carrying the header on weight rather than
+/// on size. The argument for that number, and for there
+/// being nothing bigger available, is
+/// `SettingsDisclosure.Chrome`'s.
+enum SettingsDrawerHeader {
+    static let tier: Font = .callout
+}
+
 /// How every Settings drawer's header renders (#956).
 ///
 /// One full-width `.plain` `Button` over the row — chevron,
@@ -28,6 +48,7 @@ import SwiftUI
 /// and `.card` differ in what surrounds the header, never in
 /// how the header behaves, and a drawer that reads as openable
 /// in one chrome and not the other is the defect this fixes.
+
 struct SettingsDisclosureStyle<Accessory: View>:
     DisclosureGroupStyle
 {
@@ -170,7 +191,7 @@ struct SettingsDisclosureStyle<Accessory: View>:
     @ViewBuilder private var summaryText: some View {
         if let summary {
             Text(summary)
-                .font(.callout)
+                .font(SettingsDrawerHeader.tier)
                 .foregroundStyle(SettingsTheme.ink3)
                 .lineLimit(1)
         }

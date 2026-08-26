@@ -353,15 +353,28 @@ ruling is in `docs/design-decisions.md`.
 cue, and its state in words.** Every accordion header — both
 chromes, and the one drawer built outside the wrapper — takes
 `SettingsDisclosureStyle`, which makes the row a full-width
-`.plain` `Button`, draws its title at ONE tier in both
-chromes — `.callout` at semibold, carried on weight rather
-than size; the tier is not a call-site choice, and a header
-drawn smaller *and lighter* than the rows it heads is what
-#1021 was — rests it on a chevron sized by that title rather
-than by a number of its own (no `.font` and no scale step: it
-inherits the header's size outright, bold, so it moves when
-the header does and never outgrows it), and
-marks the row `.isHeader` for the headings rotor. It rotates
+`.plain` `Button`, rests it on a chevron sized by the title
+rather than by a number of its own (no `.font` and no scale
+step: it inherits the header's size outright, bold, so it
+moves when the header does and never outgrows it), and
+marks the row `.isHeader` for the headings rotor.
+
+**The TITLE's tier is the wrapper's, not the style's**, and
+the distinction is load-bearing rather than pedantic: a
+drawer that goes through `SettingsDisclosure` draws its title
+at `SettingsDrawerHeader.tier` — `.callout` at semibold,
+carried on weight rather than size, and a header drawn
+smaller *and lighter* than the rows it heads is what #1021
+was. The one drawer built outside the wrapper takes the
+style, so it gets the button, the chevron and the heading
+trait, but keeps a deliberately quiet title of its own.
+"The tier is not a call-site choice" is therefore a claim
+about wrapper users, which is exactly the scope
+`SettingsDisclosureSizeTests` reads. The summary beside the
+title takes that same tier without the weight, so the two
+cannot drift apart.
+
+It rotates
 on expand (no resting fill — hover confirms at
 `rowHoverHighlight`'s full-row ladder, never the icon chip's,
 whose rest state is achromatic at row width), and carries

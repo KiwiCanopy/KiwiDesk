@@ -3744,10 +3744,14 @@ is an inverted hierarchy.
 Two changes, and they are a pair because each reaches a half
 of the surface the other cannot. **The tier stops being a
 call-site decision**: `Chrome` loses its payload, both chromes
-draw one tier, and seven call sites lose an argument. Which
-tier it is was always the tunable half; *that there is one* is
-the half that must not drift back, and
-`SettingsDisclosureSizeTests` is what holds it. It is
+draw one tier — `SettingsDrawerHeader.tier`, named so the
+title and the summary beside it cannot drift apart — and seven
+call sites lose an argument. Which tier it is was always the
+tunable half; *that there is one* is the half that must not
+drift back, and `SettingsDisclosureSizeTests` is what holds
+it, for wrapper users: the drawer built outside the wrapper
+takes the style's row without the wrapper's tier, and keeps
+its own quiet title deliberately. It is
 `.callout` at semibold — 12 pt, a point *under* the `.body`
 rows it heads, carrying the header on weight rather than on
 size. It stood at `.headline` (13 pt semibold) for a round and
