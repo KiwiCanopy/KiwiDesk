@@ -136,8 +136,36 @@ extension KeybindingCatalog {
         }
     }
 
-    /// The Desktops the families expand over: the ones that
-    /// exist, PLUS every Desktop these bindings already name.
+    /// Which Desktops each family offers a row for, and which
+    /// of those are not attached right now.
+    ///
+    /// **Per family, not one shared list.** The offer is
+    /// `live ∪ bound-to-THIS-family's-verb`, because a binding
+    /// keeps its OWN row alive and nothing more: sharing one
+    /// list meant binding `move_to_desktop(5)` conjured an
+    /// unbound "Go to Desktop 5" row in the Focus card for a
+    /// Desktop that does not exist — offering a verb the user
+    /// never asked for, on hardware that cannot run it (owner,
+    /// on device, 2026-08-26).
+    ///
+    /// The move PAIR shares one list on purpose. Its two
+    /// families render interleaved, and `renderedRows` zips the
+    /// columns and truncates to the shorter one — so a Desktop
+    /// present in one and not the other would silently drop
+    /// rows off the end of both.
+    struct DesktopOffer: Equatable {
+        /// What `focusDesktop` expands over.
+        var focus: [Int] = []
+        /// What BOTH move families expand over — see above.
+        var move: [Int] = []
+        /// Of either list, the ones not on any screen now.
+        var absent: Set<Int> = []
+
+        /// The empty offer: no Desktop draws a row.
+        static let none = DesktopOffer()
+    }
+
+    /// Builds the offer from what exists and what is bound.
     ///
     /// The union is what keeps a bound row visible. A Desktop
     /// number is macOS topology, not user data — unplug a screen
@@ -148,26 +176,42 @@ extension KeybindingCatalog {
     /// argument, and the per-Space families answer it with a
     /// whole Inactive card because a Space is user data that can
     /// be re-created by name. A Desktop cannot, so the cheaper
-    /// answer is right here: keep offering the row.
+    /// answer is right here: keep offering the row, dimmed.
     ///
     /// Deliberately NOT routed through
     /// `OrphanedShortcuts.perSpaceFamilies` — that list means
     /// "the argument is a `SpaceID`" and drives the space-rename
     /// rewriter, which must never see a Desktop number.
+    ///
     /// An EMPTY `live` is a legitimate call, not the degenerate
     /// one: it means the caller has no machine in its question —
     /// the settings diff narrates two saved configs and has no
     /// business asking what is plugged in — and it reads the
     /// same as "the bridge is absent", which is also correct,
     /// since neither may drop a row the user authored.
-    static func offeredDesktops(
+    static func desktopOffer(
         live: [Int],
         bindings: [KeyBinding]
-    ) -> [Int] {
-        let bound = bindings.compactMap {
-            desktopNumber(from: $0.lua)
+    ) -> DesktopOffer {
+        var focusBound: Set<Int> = []
+        var moveBound: Set<Int> = []
+        for binding in bindings {
+            guard
+                let number = desktopNumber(from: binding.lua)
+            else { continue }
+            if binding.lua.hasPrefix(focusVerbPrefix) {
+                focusBound.insert(number)
+            } else {
+                moveBound.insert(number)
+            }
         }
-        return Set(live).union(bound).sorted()
+        let liveSet = Set(live)
+        return DesktopOffer(
+            focus: liveSet.union(focusBound).sorted(),
+            move: liveSet.union(moveBound).sorted(),
+            absent: focusBound.union(moveBound)
+                .subtracting(liveSet)
+        )
     }
 
     /// The catalog row a Desktop-targeting Lua body names, or
@@ -234,6 +278,15 @@ extension KeybindingCatalog {
             + moveToDesktopRows([sentinel])
             + moveToDesktopFollowRows([sentinel]))
             .map { String($0.lua.prefix { $0 != "(" }) + "(" }
+    }()
+
+    /// `KiwiDesk.focus_desktop(` alone — which family a binding
+    /// belongs to, derived for the same reason `verbPrefixes` is.
+    /// Anything parsing as a Desktop verb and NOT carrying this
+    /// prefix is one of the move pair.
+    private static let focusVerbPrefix: String = {
+        let lua = goToDesktop([0]).first?.lua ?? ""
+        return String(lua.prefix { $0 != "(" }) + "("
     }()
 
     /// A Desktop number as the Lua argument the verbs parse: a

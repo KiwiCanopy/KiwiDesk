@@ -961,7 +961,7 @@
   "shortcuts.base_layer_protected": "Basis-Ebenen können hier nicht entfernt werden",
   "shortcuts.choose_app": "App wählen…",
   "shortcuts.delete_layer": "Ebene löschen",
-  "shortcuts.desktop_away": "Abgeblendete Zeilen zielen auf einen Schreibtisch, der zurzeit auf keinem Bildschirm liegt. Ihre Kurzbefehle bleiben gespeichert und funktionieren wieder, sobald er zurück ist.",
+  "shortcuts.desktop_away": "Ausgegraute Zeilen zielen auf einen Schreibtisch, der zurzeit auf keinem Bildschirm liegt. Ihre Kurzbefehle bleiben gespeichert und funktionieren wieder, sobald er zurück ist.",
   "shortcuts.editing_layer": "Ebene „%1$@“ wird bearbeitet",
   "shortcuts.go_to_desktop": "Gehe zu Schreibtisch",
   "shortcuts.go_to_space": "Gehe zu Space",

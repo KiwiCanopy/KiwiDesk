@@ -31,7 +31,7 @@ extension ShortcutsReferenceBuilder {
         activeLayer: String,
         spaces: [SpaceID],
         spaceIcons: [SpaceID: String],
-        desktops: [Int],
+        desktops: KeybindingCatalog.DesktopOffer = .none,
         resizeStep: Int,
         layerNames: [String],
         rows: ([NavCommand]) -> [ShortcutRow]
@@ -39,7 +39,10 @@ extension ShortcutsReferenceBuilder {
         let focus =
             KeybindingCatalog.focusDirections
             + KeybindingCatalog.goToSpace(spaces, icons: spaceIcons)
-            + KeybindingCatalog.goToDesktop(desktops)
+            + KeybindingCatalog.goToDesktop(
+                desktops.focus,
+                absent: desktops.absent
+            )
         let move =
             KeybindingCatalog.swapDirections
             + KeybindingCatalog.moveToTrackRows
@@ -48,7 +51,10 @@ extension ShortcutsReferenceBuilder {
                 spaces,
                 icons: spaceIcons
             )
-            + KeybindingCatalog.moveToDesktop(desktops)
+            + KeybindingCatalog.moveToDesktop(
+                desktops.move,
+                absent: desktops.absent
+            )
         // Exclude the active layer: you never switch to the layer
         // you're already in, and the editor's SwitchLayersGroup
         // filters it out the same way — keep the two in parity.

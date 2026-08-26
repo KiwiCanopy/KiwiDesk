@@ -3,27 +3,20 @@ import Testing
 
 @testable import KiwiDesk
 
-/// WHICH macOS Desktops get a keybinding row, and what a row
-/// whose Desktop is away looks like (#884's verbs, GUI half).
+/// WHICH macOS Desktops get a keybinding row (#884's verbs, GUI
+/// half).
 ///
-/// The offer is `live ∪ bound`: every Desktop that exists, plus
-/// every Desktop an existing binding names — so a shortcut
-/// survives its screen being unplugged instead of going
-/// invisible, which is #92's argument one noun over. What keeps
-/// that honest is the MARK: an offered-but-absent row dims and
-/// says why, rather than looking exactly like a working one and
-/// silently doing nothing.
+/// The offer is `live ∪ bound`, **per family**: every Desktop
+/// that exists, plus every Desktop a binding for THAT family's
+/// verb names — so a shortcut survives its screen being
+/// unplugged instead of going invisible (#92's argument one noun
+/// over), while a binding never conjures a row for a verb the
+/// user did not bind.
 ///
-/// `DesktopShortcutRowsTests` holds what a row says; this holds
-/// when it appears. Split from that suite at the §2.1 ceiling.
-///
-/// `.serialized`, and the locale reset is to `"en"` rather than
-/// `nil`: `panelNamesADesktopRow` compares English, so it moves
-/// the process-wide `LocalizationManager`, and `nil` means
-/// "System default" — the HOST's language — which would hand
-/// whatever suite is mid-body a locale nobody chose (tests.md,
-/// #740).
-@Suite("Desktop shortcut offers", .serialized)
+/// `DesktopAwayRowTests` holds what an offered-but-absent row
+/// LOOKS like; this holds which Desktops are in the list at all.
+/// Split at the §2.1 ceiling.
+@Suite("Desktop shortcut offers")
 @MainActor
 struct DesktopShortcutOfferTests {
 
@@ -37,8 +30,7 @@ struct DesktopShortcutOfferTests {
         let expander = ShortcutsFamilyRows(
             spaces: ["1"],
             icons: [:],
-            desktops: [],
-            absentDesktops: [],
+            desktops: KeybindingCatalog.DesktopOffer.none,
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -59,184 +51,123 @@ struct DesktopShortcutOfferTests {
     /// keeps it, and both surfaces consume it.
     @Test("a bound Desktop is offered even when it is gone")
     func aBoundDesktopSurvivesItsScreen() {
-        let bindings = [
-            KeyBinding(
-                combo: "ctrl+alt+5",
-                lua: "KiwiDesk.focus_desktop(5)",
-                kind: .navigation
-            )
-        ]
-        #expect(
-            KeybindingCatalog.offeredDesktops(
-                live: [1, 2],
-                bindings: bindings
-            ) == [1, 2, 5]
+        let focusBinding = KeyBinding(
+            combo: "ctrl+alt+5",
+            lua: "KiwiDesk.focus_desktop(5)",
+            kind: .navigation
         )
+        let offer = KeybindingCatalog.desktopOffer(
+            live: [1, 2],
+            bindings: [focusBinding]
+        )
+        #expect(offer.focus == [1, 2, 5])
+        #expect(offer.absent == [5])
         // And with the bridge absent entirely, the bound one is
         // still the only thing offered — an empty live list is
         // the capability answer, not a reason to drop a row the
         // user authored.
         #expect(
-            KeybindingCatalog.offeredDesktops(
+            KeybindingCatalog.desktopOffer(
                 live: [],
-                bindings: bindings
-            ) == [5]
+                bindings: [focusBinding]
+            ).focus == [5]
         )
-        // A live Desktop the bindings also name is offered once.
-        #expect(
-            KeybindingCatalog.offeredDesktops(
-                live: [1, 5],
-                bindings: bindings
-            ) == [1, 5]
+        // A live Desktop the bindings also name is offered once,
+        // and is not away.
+        let live = KeybindingCatalog.desktopOffer(
+            live: [1, 5],
+            bindings: [focusBinding]
         )
+        #expect(live.focus == [1, 5])
+        #expect(live.absent.isEmpty)
     }
 
-    /// A row whose Desktop is away is MARKED, and one whose
-    /// Desktop is live is not.
+    /// **A binding keeps its OWN row alive, and nothing more.**
     ///
-    /// The mark is what makes the union honest: `offeredDesktops`
-    /// keeps the row reachable, and without this the row for an
-    /// unplugged screen renders identically to a working one and
-    /// silently does nothing when pressed. Both directions are
-    /// asserted — a mark on every row says as little as a mark
-    /// on none.
-    @Test("a row whose Desktop is away carries the mark")
-    func anAwayRowIsMarked() {
-        LocalizationManager.shared.select("en")
-        let expander = ShortcutsFamilyRows(
-            spaces: ["1"],
-            icons: [:],
-            desktops: [1, 2, 5],
-            absentDesktops: [5],
-            resizeStep: 42,
-            layerNames: [KeyLayer.defaultName],
-            currentLayer: KeyLayer.defaultName
+    /// The offer was one shared list for a while, so binding
+    /// `move_to_desktop(5)` put an unbound "Go to Desktop 5" row
+    /// in the Focus card — offering a verb the user never asked
+    /// for, on a Desktop that does not exist. Owner found it on
+    /// device, 2026-08-26.
+    ///
+    /// Both directions, because the failure is asymmetric: a
+    /// move binding must not reach the focus family, and a focus
+    /// binding must not reach the move pair.
+    @Test("a binding widens only its own family")
+    func aBindingWidensOnlyItsOwnFamily() {
+        let moveOnly = KeybindingCatalog.desktopOffer(
+            live: [1, 2],
+            bindings: [
+                KeyBinding(
+                    combo: "ctrl+alt+cmd+5",
+                    lua: "KiwiDesk.move_to_desktop(5)",
+                    kind: .navigation
+                )
+            ]
         )
-        for key in Self.desktopFamilies {
-            let rows = expander.rows(for: key) ?? []
-            #expect(rows.count == 3)
-            let marked = rows.filter { $0.unavailable != nil }
-            #expect(
-                marked.count == 1,
-                Comment(rawValue: "\(key.id) marked \(marked.count)")
-            )
-            #expect(marked.first?.lua.contains("(5)") == true)
-            #expect(marked.first?.unavailable?().isEmpty == false)
-        }
+        #expect(moveOnly.move == [1, 2, 5])
+        #expect(moveOnly.focus == [1, 2])
+
+        let focusOnly = KeybindingCatalog.desktopOffer(
+            live: [1, 2],
+            bindings: [
+                KeyBinding(
+                    combo: "ctrl+alt+5",
+                    lua: "KiwiDesk.focus_desktop(5)",
+                    kind: .navigation
+                )
+            ]
+        )
+        #expect(focusOnly.focus == [1, 2, 5])
+        #expect(focusOnly.move == [1, 2])
     }
 
-    /// The mark never rides a row the user can still use. Every
-    /// caller with no machine in its question — the diff
-    /// readout, the conflict roster, the import classifier —
-    /// passes no absent set at all, and must get clean rows.
-    @Test("with nothing away, no row is marked")
-    func nothingAwayMarksNothing() {
-        let rows =
-            KeybindingCatalog.goToDesktop([1, 2])
-            + KeybindingCatalog.moveToDesktop([1, 2])
-        #expect(!rows.isEmpty)
-        #expect(rows.allSatisfy { $0.unavailable == nil })
-    }
-
-    /// A Desktop binding recovered from `init.lua` classifies as
-    /// `.navigation` and takes the catalog's own English label —
-    /// by SHAPE, so it works for a Desktop that is not attached
-    /// right now. Left `.custom` it would render as raw Lua in
-    /// the Advanced drawer and in the panel's Custom band.
-    @Test("an imported Desktop binding leaves Custom")
-    func importClassifiesADesktopRow() {
-        var config = GuiConfig()
-        config.layers = [
-            KeyLayer(
-                name: KeyLayer.defaultName,
+    /// The move PAIR shares one list, whichever half is bound.
+    ///
+    /// `renderedRows` zips the plain and follow columns and
+    /// truncates to the shorter, so a Desktop offered to one and
+    /// not the other silently drops rows off the end of BOTH —
+    /// including rows for Desktops that are perfectly fine.
+    @Test("the move pair always offers the same Desktops")
+    func theMovePairStaysInStep() {
+        for lua in [
+            "KiwiDesk.move_to_desktop(5)",
+            "KiwiDesk.move_to_desktop_and_follow(5)",
+        ] {
+            let offer = KeybindingCatalog.desktopOffer(
+                live: [1, 2],
                 bindings: [
                     KeyBinding(
-                        combo: "ctrl+alt+7",
-                        lua: "KiwiDesk.move_to_desktop(7)",
-                        kind: .custom
+                        combo: "ctrl+alt+cmd+5",
+                        lua: lua,
+                        kind: .navigation
                     )
                 ]
             )
-        ]
-        KeybindingImportClassifier.classify(&config)
-        let row = config.layers[0].bindings[0]
-        #expect(row.kind == .navigation)
-        #expect(row.label == "Move to Desktop 7")
-    }
-
-    /// Anything that is not one of the three verbs parses to
-    /// nil, so a future `…_desktop` verb taking something else
-    /// cannot be swept into these rows, and a Space verb never
-    /// is.
-    @Test("only the three Desktop verbs parse")
-    func onlyTheThreeVerbsParse() {
-        #expect(
-            KeybindingCatalog.desktopNumber(
-                from: "KiwiDesk.focus_space(\"3\")"
-            ) == nil
-        )
-        #expect(
-            KeybindingCatalog.desktopNumber(
-                from: "KiwiDesk.rename_desktop(3)"
-            ) == nil
-        )
-        #expect(
-            KeybindingCatalog.desktopNumber(
-                from: "KiwiDesk.focus_desktop(\"3\")"
-            ) == nil
-        )
-        #expect(
-            KeybindingCatalog.desktopNumber(
-                from: "KiwiDesk.move_to_desktop_and_follow(3)"
-            ) == 3
-        )
-    }
-
-    /// A bound Desktop row reaches the ⌃⌥K panel under its real
-    /// name, in the band its family is censused in — never the
-    /// Custom band, which means "user-authored" and renders raw
-    /// Lua untranslated in every locale (#678 item 18 is the
-    /// same defect, one family over).
-    @Test("a bound Desktop row is a named panel row")
-    func panelNamesADesktopRow() {
-        LocalizationManager.shared.select("en")
-        defer { LocalizationManager.shared.select("en") }
-        let reference = ShortcutsReferenceBuilder.build(
-            layer: KeyLayer(
-                name: KeyLayer.defaultName,
-                bindings: [
-                    KeyBinding(
-                        combo: "ctrl+alt+shift+2",
-                        lua: "KiwiDesk.focus_desktop(2)",
-                        kind: .navigation
-                    ),
-                    // Desktop 5 is NOT in the live list below.
-                    // That is the whole point of the fixture:
-                    // with every bound Desktop already live, the
-                    // builder's `offeredDesktops` widening adds
-                    // nothing, and deleting that call outright
-                    // left all 86 shortcut tests green
-                    // (guard-prover, 2026-08-26).
-                    KeyBinding(
-                        combo: "ctrl+alt+cmd+5",
-                        lua:
-                            "KiwiDesk.move_to_desktop_and_follow(5)",
-                        kind: .navigation
-                    ),
-                ]
-            ),
-            spaces: [SpaceID("1")],
-            spaceIcons: [:],
-            desktops: [1, 2],
-            resizeStep: 50,
-            layerNames: [KeyLayer.defaultName]
-        )
-        #expect(reference.custom.isEmpty)
-        let labels = reference.controls.flatMap(\.rows).map(
-            \.label
-        )
-        #expect(labels.contains("Go to Desktop 2"))
-        #expect(labels.contains("Move to Desktop 5 & follow"))
+            let expander = ShortcutsFamilyRows(
+                spaces: ["1"],
+                icons: [:],
+                desktops: offer,
+                resizeStep: 42,
+                layerNames: [KeyLayer.defaultName],
+                currentLayer: KeyLayer.defaultName
+            )
+            let plain =
+                expander.rows(for: .shortcuts(.moveToDesktop))
+                ?? []
+            let follow =
+                expander.rows(
+                    for: .shortcuts(.moveToDesktopFollow)
+                ) ?? []
+            #expect(plain.count == follow.count)
+            #expect(plain.count == 3)
+            // And the interleave keeps every one of them.
+            #expect(
+                expander.renderedRows(
+                    for: .shortcuts(.moveToDesktop)
+                ).count == 6
+            )
+        }
     }
     private static let desktopFamilies: [SettingKey] = [
         .shortcuts(.focusDesktop),
@@ -251,8 +182,10 @@ struct DesktopShortcutOfferTests {
         ShortcutsFamilyRows(
             spaces: ["1", "2", "mail"],
             icons: [:],
-            desktops: [1, 2],
-            absentDesktops: [],
+            desktops: KeybindingCatalog.DesktopOffer(
+                focus: [1, 2],
+                move: [1, 2]
+            ),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName

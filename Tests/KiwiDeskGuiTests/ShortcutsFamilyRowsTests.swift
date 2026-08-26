@@ -122,13 +122,13 @@ struct ShortcutsFamilyRowsTests {
         ] {
             #expect(
                 expander.rows(for: key)?.count
-                    == expander.desktops.count,
+                    == expander.desktops.focus.count,
                 "\(key.id) should expand once per Desktop"
             )
         }
         #expect(expander.spaces.count > 1)
-        #expect(expander.desktops.count > 1)
-        #expect(expander.spaces.count != expander.desktops.count)
+        #expect(expander.desktops.focus.count > 1)
+        #expect(expander.spaces.count != expander.desktops.focus.count)
         // Two layers defined, one of them current, so exactly
         // one switch row.
         #expect(
@@ -268,8 +268,10 @@ struct ShortcutsFamilyRowsTests {
         let one = ShortcutsFamilyRows(
             spaces: ["1"],
             icons: [:],
-            desktops: [1, 2],
-            absentDesktops: [],
+            desktops: KeybindingCatalog.DesktopOffer(
+                focus: [1, 2],
+                move: [1, 2]
+            ),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -277,8 +279,10 @@ struct ShortcutsFamilyRowsTests {
         let two = ShortcutsFamilyRows(
             spaces: ["1", "2"],
             icons: [:],
-            desktops: [1, 2],
-            absentDesktops: [],
+            desktops: KeybindingCatalog.DesktopOffer(
+                focus: [1, 2],
+                move: [1, 2]
+            ),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName],
             currentLayer: KeyLayer.defaultName
@@ -317,8 +321,10 @@ struct ShortcutsFamilyRowsTests {
         ShortcutsFamilyRows(
             spaces: ["1", "2", "mail"],
             icons: [:],
-            desktops: [1, 2],
-            absentDesktops: [],
+            desktops: KeybindingCatalog.DesktopOffer(
+                focus: [1, 2],
+                move: [1, 2]
+            ),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName, "resize"],
             currentLayer: KeyLayer.defaultName

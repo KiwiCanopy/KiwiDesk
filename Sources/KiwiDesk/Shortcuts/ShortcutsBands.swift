@@ -34,6 +34,20 @@ struct ShortcutRowView: View {
         // Custom rows carry the full Lua as a tooltip since the
         // label truncates.
         .help(row.monospaced ? row.label : "")
+        // A row whose Desktop is not attached reads at the same
+        // strength as a working one otherwise, which is the
+        // panel implying a key that does nothing. Same 0.55 the
+        // editor's rows dim to, so one concept looks like itself
+        // on both surfaces.
+        .opacity(row.unavailable ? 0.55 : 1)
+        .accessibilityHint(
+            row.unavailable
+                ? L(
+                    "keybinding.desktop_away.axhint",
+                    "Not connected right now."
+                )
+                : ""
+        )
     }
 
     @ViewBuilder private var leadingGlyph: some View {
