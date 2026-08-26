@@ -8,7 +8,7 @@ import Foundation
 public struct MonocleParams: Sendable, Equatable, AppBarHosting {
     /// Which focus axis cycles through the monocle windows —
     /// and, with it, which edges the indicator bar may sit on.
-    public enum Orientation: String, Sendable, Codable {
+    public enum Orientation: String, Sendable, Codable, CaseIterable {
         /// `focus("left"/"right")` cycles; bar on top/bottom.
         case horizontal
         /// `focus("up"/"down")` cycles; bar on left/right.
@@ -23,7 +23,7 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
     /// no transparency involved. `park` closes both by moving
     /// the unfocused members out from behind instead of
     /// ordering them.
-    public enum HideStyle: String, Sendable, Codable {
+    public enum HideStyle: String, Sendable, Codable, CaseIterable {
         /// Every member shares the full frame; only z-order
         /// hides the unfocused ones. The default.
         case stack

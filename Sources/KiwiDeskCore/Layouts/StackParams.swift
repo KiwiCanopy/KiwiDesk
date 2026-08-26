@@ -6,7 +6,7 @@ import Foundation
 public struct StackParams: Sendable, Equatable, Codable {
     /// What happens when a zone can't give every window
     /// `minWindowSize`.
-    public enum OverflowStyle: String, Sendable, Codable {
+    public enum OverflowStyle: String, Sendable, Codable, CaseIterable {
         /// Only the windows that don't fit cascade at the
         /// bottom; the rest stay fully tiled.
         case cascadeOverflow = "cascade_overflow"
@@ -17,7 +17,7 @@ public struct StackParams: Sendable, Equatable, Codable {
     /// How a zone lines up its windows (#222). The overflow
     /// cascade is NOT affected: piles always offset downward
     /// so title bars stay visible (`OverlapStack`).
-    public enum Orientation: String, Sendable, Codable {
+    public enum Orientation: String, Sendable, Codable, CaseIterable {
         /// Windows stacked top-to-bottom (a column).
         case vertical
         /// Windows side by side (a row).
@@ -27,7 +27,7 @@ public struct StackParams: Sendable, Equatable, Codable {
     /// Where the stack zone sits relative to the master
     /// (#222). Decides the split axis: `left`/`right` split
     /// the width, `top`/`bottom` split the height.
-    public enum StackPosition: String, Sendable, Codable {
+    public enum StackPosition: String, Sendable, Codable, CaseIterable {
         case top
         case right
         case bottom

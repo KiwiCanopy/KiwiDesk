@@ -14,7 +14,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// side by side (windows stack vertically inside one);
     /// horizontal tracks are rows (scrolling's axis
     /// precedent).
-    public enum Axis: String, Sendable, Codable {
+    public enum Axis: String, Sendable, Codable, CaseIterable {
         case vertical
         case horizontal
     }
@@ -23,7 +23,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// a new one when it is full) or opens its own track (#128,
     /// redefined #437). Where within that choice it lands is the
     /// orthogonal `newWindowPosition`.
-    public enum NewWindowTrack: String, Sendable, Codable {
+    public enum NewWindowTrack: String, Sendable, Codable, CaseIterable {
         /// The window opens its own new track; `newWindowPosition`
         /// places that track among the others. Falls back to
         /// joining once the track cap is reached. The "one

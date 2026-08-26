@@ -7,7 +7,7 @@ import Foundation
 /// widget style already covers that want, and true styled
 /// variants are unreachable via public API (#362 tracks the
 /// private-path probe).
-public enum BarAppIconSource: String, Sendable, Codable {
+public enum BarAppIconSource: String, Sendable, Codable, CaseIterable {
     /// The app's native image as macOS provides it (default).
     case appImage = "app_image"
     /// A monochrome ligature glyph from the vendored SketchyBar

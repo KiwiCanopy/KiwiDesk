@@ -299,7 +299,7 @@ public enum APIReference {
                 names.insert("\(table).\(function)")
             }
         }
-        names.insert("subscribe")
+        names.insert(socketOnlyCommand)
         return names.sorted()
     }
 
