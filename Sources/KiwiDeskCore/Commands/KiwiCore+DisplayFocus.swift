@@ -84,6 +84,9 @@ extension KiwiCore {
     /// stash-corner frames (#11); and the settle is armed after
     /// the emit so subscribers see the switch before its
     /// re-assert.
+    /// (`handFollowFocus` below is this sequence's deliberate
+    /// partial twin, #1007 — a step added or reordered here
+    /// likely belongs there too.)
     func followSwitch(to target: SpaceID, focusing id: WindowID) {
         let priorFrontmost = frontmostPIDProvider?()
         state.workspaces.activate(target)
@@ -94,6 +97,71 @@ extension KiwiCore {
             priorFrontmost: priorFrontmost
         )
         spaceSwitchRetile()
+    }
+
+    /// Pay the focus a `move_to_desktop_and_follow` owes the
+    /// window it sent to a Desktop nobody was showing (#1007),
+    /// at the moment that window re-materializes — which is the
+    /// definition of when it becomes addressable again.
+    ///
+    /// The claim is keyed to the ARRIVING window rather than to
+    /// the reveal, so an unrelated switch inside the drain window
+    /// cannot pay the debt and yank focus mid-swipe (review).
+    /// A no-op when nothing is owed, which is every other
+    /// arrival.
+    ///
+    /// **A follow is a space switch, not a focus call.** An
+    /// earlier draft focused the window without activating its
+    /// space, which left `focusedWindowID` — the implicit target
+    /// of nearly every command — naming the anchor of the space
+    /// the user had just left, and emitted no `space_change` for
+    /// anything subscribed to one (review, #1007).
+    ///
+    /// Three of `followSwitch`'s five above, deliberately: the
+    /// retile and the space settle belong to the caller, and the
+    /// caller here is the event fold, which retiles for the
+    /// arrival itself.
+    func payFollowedFocus(arrived window: WindowID) {
+        guard
+            followFocus.claim(if: { $0 == window }) != nil
+        else { return }
+        guard let destination = state.workspaces.space(of: window)
+        else {
+            onLog(
+                "follow: w\(window.raw) arrived in no space — "
+                    + "focus debt dropped"
+            )
+            return
+        }
+        handFollowFocus(to: window, in: destination)
+    }
+
+    /// The hand-off both follow arms share (#1007): a follow is
+    /// a space SWITCH, not a bare focus — activate, focus, emit
+    /// — because a bare focus leaves `focusedWindowID`, the
+    /// implicit target of nearly every command, naming the space
+    /// the user just left. A deliberate partial twin of
+    /// `followSwitch` (three of its five steps): the retile
+    /// belongs to the callers, which retile for their own
+    /// reasons — the arrival's fold, or the re-home that ran
+    /// before the already-shown arm. The #463 dropped-activate
+    /// SETTLE is deliberately absent on both: the paid arrival
+    /// rides a native switch whose own desktop settle re-asserts
+    /// the active space's focus 600 ms later, and the
+    /// already-shown hand-off runs with the OS half already
+    /// right (the window kept key focus through the move), so
+    /// there is no cooperative activate to drop.
+    func handFollowFocus(
+        to window: WindowID,
+        in destination: SpaceID
+    ) {
+        state.workspaces.activate(destination)
+        focusWindow(window, refocusRetile: false, warp: true)
+        emitSpaceChange()
+        onLog(
+            "follow: focus handed to w\(window.raw) in space "
+                + "\(destination.raw)"
+        )
     }
 
     /// Hands key focus to the desktop when a move empties the

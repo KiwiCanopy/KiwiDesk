@@ -5,6 +5,25 @@ import Foundation
 /// `KiwiCore+DesktopCommands` at the §2.1 ceiling when the
 /// #1023 transition discipline joined it.
 extension KiwiCore {
+    /// What a switch dispatch did, so a caller can tell the
+    /// three apart. `focus_desktop` only needs the response; a
+    /// follow needs to know whether a reveal is coming, because
+    /// that is what owes the moved window a focus (#1007) — and
+    /// `.switched` is also exactly the case that folds the
+    /// eager departure (#1023): the two are one question.
+    enum DesktopSwitchOutcome {
+        case alreadyShown
+        case switched
+        case refused(CommandResponse)
+
+        var response: CommandResponse {
+            switch self {
+            case .alreadyShown, .switched: .ok()
+            case .refused(let response): response
+            }
+        }
+    }
+
     /// The one copy of the switch dispatch, for both verbs that
     /// switch. Stamps the switch at INTENT time — but only once
     /// the bridge has accepted it, so a refusal does not
@@ -34,8 +53,8 @@ extension KiwiCore {
     func switchDesktop(
         to target: DesktopTarget,
         verb: String
-    ) -> CommandResponse {
-        guard !target.isCurrent else { return .ok() }
+    ) -> DesktopSwitchOutcome {
+        guard !target.isCurrent else { return .alreadyShown }
         guard
             WMBridge.setCurrentSpace(
                 target.space,
@@ -43,7 +62,9 @@ extension KiwiCore {
             )
         else {
             onLog("\(verb): the Desktop bridge refused the switch")
-            return .fail("the Desktop bridge refused the switch")
+            return .refused(
+                .fail("the Desktop bridge refused the switch")
+            )
         }
         // origin == space would mean isCurrent, which the guard
         // above already stood down on.
@@ -52,7 +73,7 @@ extension KiwiCore {
         }
         lastDesktopSwitch = Date()
         scheduleDesktopSwitchVerify(target, verb: verb)
-        return .ok()
+        return .switched
     }
 
     /// 600 ms: a wide margin over the ~120 ms a dispatched set
