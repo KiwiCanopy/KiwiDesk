@@ -75,12 +75,17 @@ struct APIChoiceDerivationTests {
             "Sources/KiwiDeskCore/Commands/Reference"
         )
         let files = try SourceScan.swiftSources(under: directory)
+            .filter {
+                $0.lastPathComponent.hasPrefix("APIRecords+")
+            }
+        // The FILTERED set, not the directory: a rename that
+        // took the record files out of the `APIRecords+` family
+        // would leave this loop iterating nothing and passing.
         #expect(
-            !files.isEmpty,
-            "the record directory moved; this guard scans nothing"
+            files.count >= 8,
+            "only \(files.count) record files reached the scan"
         )
-        for file in files
-        where file.lastPathComponent.hasPrefix("APIRecords+") {
+        for file in files {
             let text = try SourceScan.strippedSource(at: file)
             let message =
                 "\(file.lastPathComponent): build a choice with "

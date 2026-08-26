@@ -159,14 +159,14 @@ extension KiwiCore {
     private static let masterRatioError = CommandResponse.fail(
         "expected ratio"
     )
-    static let overflowStyleError = CommandResponse.fail(
-        "expected cascade_overflow | cascade_all"
+    static let overflowStyleError = CommandResponse.expected(
+        StackParams.OverflowStyle.self
     )
-    static let stackOrientationError = CommandResponse.fail(
-        "expected vertical | horizontal"
+    static let stackOrientationError = CommandResponse.expected(
+        StackParams.Orientation.self
     )
-    static let stackPositionError = CommandResponse.fail(
-        "expected top | right | bottom | left"
+    static let stackPositionError = CommandResponse.expected(
+        StackParams.StackPosition.self
     )
 
     private func promoteDemote(

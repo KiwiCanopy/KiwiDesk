@@ -4801,7 +4801,7 @@ arguments and a one-line summary:
 
 ```lua
 {
-  commands = 262,
+  commands = <how many there are>,
   groups = {
     { name = "KiwiDesk", commands = { … } },
     { name = "app_bar",  commands = { … } },

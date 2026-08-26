@@ -65,7 +65,7 @@ extension KiwiCore {
             guard let val = args.first?.stringValue,
                 let alignment = BorderAlignment(rawValue: val)
             else {
-                return .fail("expected 'inside' or 'outside'")
+                return .expected(BorderAlignment.self)
             }
             tiler.settings[keyPath: visual].borderAlignment =
                 alignment

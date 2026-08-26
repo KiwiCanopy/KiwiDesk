@@ -77,9 +77,20 @@ extension APIReference {
         return .object(object)
     }
 
-    /// One argument as JSON. `values` and `value_type` appear
-    /// only on an enum-typed argument, and both are read off the
-    /// Swift type — never typed here.
+    /// One argument as JSON. `values` appears only on an
+    /// enum-typed argument, read off the Swift type rather than
+    /// typed here.
+    ///
+    /// **The Swift type's NAME is deliberately not on the wire.**
+    /// `APIChoice.type` carries it and the terminal rendering
+    /// prints it, because a human reading `help` is helped by
+    /// knowing which decoder to go and read. Publishing it as a
+    /// JSON field would make a Swift symbol part of the CLI's
+    /// output contract, and AGENTS.md §5 actively encourages
+    /// renaming those — a rename would then change documented
+    /// output with nothing to notice. `values` is what answers
+    /// "what may I send", and it is stable in the way the wire
+    /// needs.
     static func json(for argument: APIArgument) -> JSONValue {
         var object: [String: JSONValue] = [
             "name": .string(argument.name),
@@ -90,7 +101,6 @@ extension APIReference {
             object["values"] = .array(
                 choice.values.map(JSONValue.string)
             )
-            object["value_type"] = .string(choice.type)
         }
         return .object(object)
     }

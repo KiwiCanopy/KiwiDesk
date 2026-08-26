@@ -111,8 +111,8 @@ extension KiwiCore {
         value?.numberValue.map { min(max($0, 0.1), 0.9) }
     }
 
-    private static let strategyError = CommandResponse.fail(
-        "expected longest_side|alternating"
+    private static let strategyError = CommandResponse.expected(
+        BspParams.Strategy.self
     )
     private static let ratioError = CommandResponse.fail(
         "expected ratio"

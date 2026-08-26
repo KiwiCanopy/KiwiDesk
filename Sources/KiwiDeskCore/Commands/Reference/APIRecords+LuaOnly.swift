@@ -11,10 +11,12 @@ import Foundation
 extension APIReference {
     static let luaOnlyRecords: [String: APIRecord] = [
         "exec": APIRecord(
-            "Runs a shell command in the background, optionally "
-                + "calling back when it exits.",
+            "Runs a shell command in the background, calling "
+                + "back when it exits.",
             .text("command"),
-            .callback("callback", optional: true)
+            .callback("callback", optional: true),
+            .number("timeout", optional: true),
+            .boolean("dedup", optional: true)
         ),
         "bind": APIRecord(
             "Binds a key combination in the base layer to a "

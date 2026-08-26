@@ -71,10 +71,24 @@ struct APIHelpResponseTests {
             values.compactMap(\.stringValue)
                 == ScrollingParams.Anchor.allCases.map(\.rawValue)
         )
-        #expect(
-            anchor["value_type"]?.stringValue
-                == "ScrollingParams.Anchor"
-        )
+        // The Swift type's name is NOT on the wire — a rename
+        // must not change documented CLI output (§5).
+        #expect(anchor["value_type"] == nil)
+    }
+
+    @Test("the choice still knows the type it read")
+    func choiceCarriesItsType() {
+        // Kept on the model even though the wire drops it: the
+        // terminal rendering prints it, and it is the evidence
+        // the values were derived rather than typed.
+        let entry = APIReference.entry(named: "scroll.set_anchor")
+        guard let argument = entry?.record.arguments.first,
+            case .choice(let choice) = argument.kind
+        else {
+            Issue.record("expected one enum argument")
+            return
+        }
+        #expect(choice.type == "ScrollingParams.Anchor")
     }
 
     @Test("an unknown name fails with a suggestion")
@@ -91,6 +105,24 @@ struct APIHelpResponseTests {
         // at `bind` is the useful answer.
         #expect(APIReference.helpSuggestion(for: "bnid") == "bind")
         #expect(APIReference.suggestion(for: "bnid") != "bind")
+    }
+
+    @Test("a Lua-only entry point is listed, marked lua")
+    func luaOnlyIsListedAndMarked() {
+        // A CLI reader must be told it cannot call these, which
+        // the flat name list this replaced never said. Lived in
+        // `ExecTests` before #1033 — it is about the help
+        // payload, and that suite was at the size ceiling.
+        var channels: [String: String] = [:]
+        for entry in APIReference.entries {
+            channels[entry.name] = entry.channel.rawValue
+        }
+        for name in APIReference.luaOnly {
+            #expect(
+                channels[name] == "lua",
+                "\(name) is not listed as Lua-only"
+            )
+        }
     }
 
     @Test("an alias is a name help answers to")

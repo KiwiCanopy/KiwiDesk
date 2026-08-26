@@ -145,11 +145,25 @@ will point at a Lua-only name: you are looking a name up, not
 invoking it.
 
 **Text or JSON.** A terminal gets the text above; a pipe or a
-redirect gets JSON, so anything already parsing `list_commands`
-keeps working. `--json` forces JSON either way. The JSON carries
-one object per command — `name`, `qualified_name`, `group`,
-`command`, `channel`, `summary`, `aliases`, and an `arguments`
-array whose enum entries add `values` and `value_type`.
+redirect gets JSON. `--json` forces JSON either way. An
+unrecognised option is an error, not a silent no-op.
+
+**The JSON shape changed, and nothing preserves the old one.**
+`list_commands` used to return a flat array of 262 name strings;
+it now returns `{"commands": <count>, "groups": [...]}`, each
+group carrying one object per command — `name`,
+`qualified_name`, `group`, `command`, `channel`, `summary`,
+`aliases`, and an `arguments` array whose enum entries add
+`values`. A script that read the old array needs updating; a
+command's output is not a stored value, so no compatibility
+shape is owed for one.
+
+The Swift type an enum's values were read from is deliberately
+**not** a JSON field. It is printed in the terminal rendering,
+where it helps a person find the decoder, but publishing it
+would make an internal symbol part of this command's output —
+and those get renamed freely. `values` is what answers "what may
+I send".
 
 Bare `kiwidesk help` (and `--help` / `-h`) still prints the short
 usage block. Add a name, or `--json`, to get the API instead.

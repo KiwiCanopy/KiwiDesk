@@ -19,11 +19,6 @@ import Testing
 struct CLIHelpSeamTests {
     static let cliDirectory = "Sources/KiwiDesk"
 
-    /// The CLI files allowed to name the reference at all, and
-    /// what each may say. Anything else in the CLI tree building
-    /// a listing is the failure this guard exists for.
-    static let helpFiles = ["CLIHelp.swift", "CLIHelpText.swift"]
-
     /// Re-derivation: the name tables `APIReference` exposes for
     /// Lua registration and the typo guard. The CLI has no
     /// business reading them — `helpResponse` and `groups` are

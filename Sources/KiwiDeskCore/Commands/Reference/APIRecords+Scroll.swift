@@ -38,7 +38,8 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_slot_size_override": APIRecord(
-            "Overrides the slot size for one Space.",
+            "Overrides the slot size for one Space; same value "
+                + "shape as the global setter.",
             .space("space"),
             .number("size")
         ),

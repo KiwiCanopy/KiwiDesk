@@ -20,6 +20,24 @@ public struct APIRecord: Sendable, Equatable {
     /// Positional arguments, in the order the command reads
     /// them. Optional arguments come last — a positional list
     /// cannot skip one (`APIRecordShapeTests`).
+    ///
+    /// **Stated residue: this list is a hand-kept mirror of the
+    /// decoder, and only its enum VALUES are derived.** A
+    /// decoder reads `args[0]` / `args[1]` positionally with no
+    /// declared signature to reflect over, so nothing can check
+    /// that a record's argument names, count or optionality
+    /// match what the command actually parses — `APIChoice`
+    /// covers the values an argument may carry, and the census
+    /// covers command names, but neither sees the argument that
+    /// carries them. `APIRecordShapeTests` holds the shape a
+    /// list must have, never that it is the right list.
+    ///
+    /// So an argument list is review's, and a wrong one is
+    /// worse than a pending one — it describes a call that will
+    /// be rejected. Closing this properly means the decoders
+    /// declaring their signature and parsing FROM the record,
+    /// which is a much larger change than #1033 and is where
+    /// this data wants to go next.
     public let arguments: [APIArgument]
 
     public init(_ summary: String, _ arguments: APIArgument...) {

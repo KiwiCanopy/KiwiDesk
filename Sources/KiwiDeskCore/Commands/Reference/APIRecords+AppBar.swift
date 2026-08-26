@@ -61,7 +61,7 @@ extension APIReference {
         ),
         "set_title_cap": APIRecord(
             "Sets how many characters of a window title an item "
-                + "shows, clamped to 8-80.",
+                + "shows, longer ones ending in an ellipsis.",
             .integer("characters")
         ),
         "set_icon_source": APIRecord(
@@ -75,13 +75,13 @@ extension APIReference {
             .number("size")
         ),
         "set_corner_roundness": APIRecord(
-            "Sets the corner rounding of boxed items, 0 square "
-                + "to 100 capsule.",
+            "Sets the corner rounding of boxed items, as a "
+                + "percentage of the maximum.",
             .number("percent")
         ),
         "set_dim_factor": APIRecord(
             "Sets the opacity of an inactive item's untinted "
-                + "icon, 0.05 to 1.",
+                + "icon.",
             .number("factor")
         ),
         "set_group_adjacent_windows": APIRecord(

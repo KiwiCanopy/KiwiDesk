@@ -285,35 +285,6 @@ struct ExecTests {
         #expect(d["exec_running"] == .number(1))
     }
 
-    @Test("Lua-only functions appear in help() output")
-    func luaOnlyInHelp() throws {
-        // Grouped since #1033, and each one marked `lua` on the
-        // channel field — a CLI reader must be told it cannot
-        // call these, which the old flat name list never said.
-        let core = makeCore()
-        let response = core.execute("help")
-        guard case .object(let payload)? = response.data,
-            case .array(let groups)? = payload["groups"]
-        else {
-            Issue.record("expected grouped command list")
-            return
-        }
-        var channels: [String: String] = [:]
-        for case .object(let group) in groups {
-            guard case .array(let commands)? = group["commands"]
-            else { continue }
-            for case .object(let entry) in commands {
-                guard let name = entry["name"]?.stringValue,
-                    let channel = entry["channel"]?.stringValue
-                else { continue }
-                channels[name] = channel
-            }
-        }
-        for name in APIReference.luaOnly {
-            #expect(channels[name] == "lua")
-        }
-    }
-
     @Test("Every luaOnly name is a real KiwiDesk function")
     func luaOnlyNamesAreRegistered() throws {
         let core = makeCore()

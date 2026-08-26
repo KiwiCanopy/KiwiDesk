@@ -125,29 +125,27 @@ struct APIRecordShapeTests {
         in entry: APIEntry
     ) {
         let site = "\(entry.qualifiedName).\(argument.name)"
+        // One case is legal: `QuitLayoutStyle` has exactly one
+        // today and is a real choice — the value is constrained,
+        // and the enum is where a second case will land. What
+        // must never happen is NONE, which would mean the
+        // listing offers a caller nothing to send.
         #expect(
-            choice.values.count >= 2,
-            "\(site): an enum under two cases is no choice"
+            !choice.values.isEmpty,
+            "\(site): a choice with no legal value"
         )
         #expect(
             choice.values.allSatisfy { !$0.isEmpty },
             "\(site): empty case spelling"
         )
-        #expect(
-            Set(choice.values).count == choice.values.count,
-            "\(site): repeated case spelling"
-        )
-        // `String(reflecting:)` on a real metatype gives a
-        // dotted type path; a hand-written label would not have
-        // to. This is the runtime half of
-        // `APIChoiceDerivationTests`, which holds that no second
-        // initializer exists to write one.
-        let named =
-            !choice.type.isEmpty && !choice.type.contains(" ")
-            && choice.type.first?.isUppercase == true
-        let message =
-            "\(site): '\(choice.type)' is not a Swift type name"
-        #expect(named, "\(message)")
+        // Deliberately no clause on duplicate spellings or on
+        // the shape of `choice.type`: duplicate raw values do
+        // not compile, and `type` is always `String(reflecting:)`
+        // output because `APIChoice` has exactly one
+        // metatype-taking initializer. Asserting either restates
+        // the type system (`tests.md` ▸ Not owed).
+        // `APIChoiceDerivationTests` is what keeps that
+        // initializer the only one.
     }
 
     @Test("a socket-reachable command takes no Lua-only value")

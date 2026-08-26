@@ -28,13 +28,29 @@ enum CLIHelp {
         "help", "--help", "-h", "list_commands",
     ]
 
+    /// The one option these verbs take.
+    static let jsonFlag = "--json"
+
     /// Runs a help invocation. `arguments` is the full process
     /// argument list.
     static func run(_ arguments: [String]) -> Int32 {
         let verb = arguments[1]
         let rest = arguments.dropFirst(2).map { $0 }
-        let wantsJSON = rest.contains("--json")
+        let wantsJSON = rest.contains(jsonFlag)
         let topic = rest.first { !$0.hasPrefix("-") }
+
+        // Say so rather than ignoring it: silently dropping
+        // `--jsn` printed the usage block and exited 0, which
+        // reads as "that worked" to a script.
+        let unknown = rest.filter {
+            $0.hasPrefix("-") && $0 != jsonFlag
+        }
+        if let flag = unknown.first {
+            FileHandle.standardError.write(
+                Data("unknown option: \(flag)\n".utf8)
+            )
+            return 1
+        }
 
         // No topic and no `--json` on the front-door spelling:
         // the usage block, which is what a bare `kiwidesk help`
