@@ -14,6 +14,11 @@ const site =
 
 export default defineConfig({
   site,
+  // Opt-in link prefetching (`data-astro-prefetch` on the link).
+  // Added for the Simple↔Nerd mode links (2026-08-26 split): the
+  // toggle became navigation, and prefetch-on-hover is what keeps
+  // it feeling like the instant switch it replaced.
+  prefetch: true,
   // Rewrite the canonical docs' GitHub-style `.md` links to
   // Starlight routes and drop their duplicate H1 (see the plugin).
   markdown: { remarkPlugins: [remarkDocsLinks] },
