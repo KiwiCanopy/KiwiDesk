@@ -117,8 +117,10 @@ private func runSocketCommand(
         }
         let response = try client.roundTrip(request)
         if let data = response.data,
-            let encoded = try? JSONEncoder().encode(data),
-            let text = String(data: encoded, encoding: .utf8)
+            let text = CLIOutput.render(
+                data,
+                pretty: CLIOutput.stdoutIsTerminal
+            )
         {
             print(text)
         }
