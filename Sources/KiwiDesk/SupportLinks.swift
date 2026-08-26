@@ -14,6 +14,15 @@ enum SupportLinks {
         string: "https://ko-fi.com/kiwicanopy"
     )!
 
+    /// The repository itself — the star ask's destination
+    /// (owner, 2026-08-26, the 1.1 launch decision). Distinct
+    /// from ``releases``, which is linked for the notes: this one
+    /// is linked for the ask, and the ask needs the page the
+    /// star button is on.
+    static let gitHub = URL(
+        string: "https://github.com/KiwiCanopy/KiwiDesk"
+    )!
+
     /// The GitHub Releases page — KiwiDesk's changelog (#570).
     ///
     /// The releases ARE the changelog: this repo ships no

@@ -229,6 +229,11 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 
 [MIT](LICENSE). Bundles Lua 5.5 ([MIT](Vendor/CLua/LICENSE)).
 
+---
+
+KiwiDesk is free and always will be. If it saves you time, a
+⭐ on this repo is the one thing that helps other people find it.
+
 <div align="center">
 <br>
 <sub>A <a href="https://kiwicanopy.com"><strong>KiwiCanopy</strong></a> project — Because our time

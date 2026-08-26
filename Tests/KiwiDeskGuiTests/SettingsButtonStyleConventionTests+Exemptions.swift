@@ -72,21 +72,24 @@ extension SettingsButtonStyleConventionTests {
 
     var stylesOnNonButtons: [String: StyleNote] {
         [
-            // Three since #1019 gave the guide a PERMANENT route
-            // here — the tour's card and Home's banner both being
-            // one-shot — beside the Release Notes link #570 added.
-            // All three are `Link`s, which is why they are exempt
-            // at all rather than owing `settingsActionButton()`: a
-            // `Link` is not a `Button` and cannot take the seal.
-            // They are deliberately NOT styled alike beyond this —
-            // the support link keeps the heart and `.callout`, the
-            // two informational pointers take the plainer caption
-            // treatment, so the card's one ask stays
-            // distinguishable from a pointer.
+            // Four since the ask widened to a pair for the 1.1
+            // launch (owner, 2026-08-26): the star Link joined
+            // the Ko-fi one, beside the Guide route #1019 gave a
+            // PERMANENT home here and the Release Notes link
+            // #570 added. All four are `Link`s, which is why they
+            // are exempt at all rather than owing
+            // `settingsActionButton()`: a `Link` is not a
+            // `Button` and cannot take the seal. They are
+            // deliberately NOT styled alike beyond this — the ask
+            // pair keeps its symbols and `.callout`, the two
+            // informational pointers take the plainer caption
+            // treatment, so the card's ask stays distinguishable
+            // from a pointer.
             "GeneralSection+About.swift": (
-                3, ".buttonStyle(.plain)",
-                "Three Links taking plain style — the Guide and "
-                    + "Release Notes pointers, and the support ask"
+                4, ".buttonStyle(.plain)",
+                "Four Links taking plain style — the Guide and "
+                    + "Release Notes pointers, and the star + "
+                    + "support ask pair"
             ),
             "ContextShortcut.swift": (
                 1, ".buttonStyle(.plain)",
