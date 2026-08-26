@@ -903,6 +903,35 @@
   font-family: var(--font);
 }
 
+/* The maker quote straddles the seam (owner, 2026-08-26): both
+   modes place it right after a .tint section, and pulling the
+   card up over that section's bottom border restores the
+   "lying on the separator" look — half on tint, half on plain —
+   instead of two stacked full-width blocks closing the page.
+   Works because sections are position:relative + z-index:1 (the
+   later section paints over the earlier) and the card carries
+   its own themed background, border and shadow on both grounds.
+   The pull's 3.25rem max stays under the tint section's 3.5rem
+   MINIMUM bottom padding, so the card cannot touch the content
+   above it at any width. clamp() then negate — clamping a
+   negative range directly inverts the responsive scaling. The
+   reveal animations move opacity/transform, never margin, so
+   they are unaffected. */
+#maker-quote-simple,
+#maker-quote-dev {
+  padding-block: 0 clamp(2.5rem, 6vw, 4rem);
+}
+#maker-quote-simple .quote-card,
+#maker-quote-dev .quote-card {
+  margin-top: calc(-1 * clamp(2rem, 6vw, 3.25rem));
+}
+@media (max-width: 640px) {
+  #maker-quote-simple .quote-card,
+  #maker-quote-dev .quote-card {
+    margin-top: -1.25rem;
+  }
+}
+
 /* Two-line byline (Nerd quote): a normal-weight main line and
    a smaller, lighter, playful sub-line underneath. */
 .quote-card__byline--two {
