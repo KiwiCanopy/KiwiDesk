@@ -78,10 +78,9 @@ enum OrphanedShortcuts {
             // empty Desktop list is deliberate rather than
             // incidental: this card is the SPACE net, and a
             // Desktop number is not a `SpaceID` — see
-            // `KeybindingCatalog.offeredDesktops`, which is how
+            // `KeybindingCatalog.desktopOffer`, which is how
             // a Desktop row stays reachable instead.
-            desktops: [],
-            absentDesktops: [],
+            desktops: .none,
             resizeStep: 0,
             layerNames: [],
             currentLayer: ""

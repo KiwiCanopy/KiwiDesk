@@ -39,12 +39,12 @@ extension KeybindingCatalog {
             step: Int(config.settings.resizeStep)
         )
         commands += stepFreeCommands
-        let desktops = offeredDesktops(
+        let desktops = desktopOffer(
             live: [],
             bindings: config.layers.flatMap(\.bindings)
         )
-        commands += goToDesktop(desktops)
-        commands += moveToDesktop(desktops)
+        commands += goToDesktop(desktops.desktops)
+        commands += moveToDesktop(desktops.desktops)
         guard
             let match = commands.first(where: {
                 $0.label == label

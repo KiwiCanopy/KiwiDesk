@@ -27,6 +27,24 @@ struct ShortcutRow: Identifiable {
     /// as before. `accessoryHelp` is its hover tooltip.
     var accessoryIcon: String? = nil
     var accessoryHelp: String = ""
+    /// The row's action cannot run right now, for a reason the
+    /// user's HARDWARE owns — today only a Desktop whose screen
+    /// is not attached.
+    ///
+    /// The panel dims such a row rather than dropping it: the
+    /// combo is still registered and still blocks that chord, so
+    /// hiding it would break the band's own promise that no
+    /// bound shortcut is ever invisible. It is NOT the Inactive
+    /// band's case — an inactive Space shortcut still fires and
+    /// recreates its Space, which this cannot do (only Mission
+    /// Control makes a Desktop), and that band's caption says so
+    /// in every locale.
+    ///
+    /// Pure data, like every other field here: `ShortcutRowView`
+    /// owns what dimming looks like, and the Settings editor
+    /// makes the same statement through
+    /// `NavCommand.unavailable`.
+    var unavailable: Bool = false
 }
 
 /// A named group of rows inside the Controls band (Focus / Move
