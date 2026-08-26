@@ -4793,15 +4793,42 @@ end
 
 ### help
 
-**Expects:** nothing.
+**Expects:** nothing, or one command name.
 
-**Does:** logs all available KiwiDesk commands (for debugging a
-typo'd function name).
+**Does:** returns the API surface as a table. With no argument
+you get every command grouped by its Lua table, each carrying its
+arguments and a one-line summary:
+
+```lua
+{
+  commands = 262,
+  groups = {
+    { name = "KiwiDesk", commands = { … } },
+    { name = "app_bar",  commands = { … } },
+    …
+  }
+}
+```
+
+Naming one command returns just its record — `name`,
+`qualified_name`, `group`, `command`, `channel`, `summary`,
+`aliases`, and an `arguments` list. An enum-valued argument also
+carries `values` (its legal spellings) and `value_type` (the
+Swift type they are read from), so the answer cannot drift from
+what the command will actually accept.
+
+An unknown name is an error carrying a did-you-mean suggestion.
+
+`KiwiDesk.list_commands` is the same command under another name.
+The terminal equivalents are `kiwidesk list_commands` and
+`kiwidesk help <name>`, which render this for a human — see the
+[CLI reference](cli.md#discovering-commands).
 
 **Example:**
 
 ```lua
-KiwiDesk.help()
+KiwiDesk.help()                     -- the whole surface
+KiwiDesk.help("scroll.set_anchor")  -- one command
 ```
 
 ## Recipes

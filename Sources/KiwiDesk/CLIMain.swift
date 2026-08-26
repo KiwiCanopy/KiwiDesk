@@ -7,9 +7,11 @@ func runCLI(_ arguments: [String]) -> Int32 {
     let command = arguments[1]
 
     switch command {
-    case "help", "--help", "-h":
-        print(cliUsage)
-        return 0
+    case let help where CLIHelp.verbs.contains(help):
+        // Answered from this binary's own `APIReference`, so
+        // `kiwidesk help focus` works whether or not the app is
+        // running (#1033) — `CLIHelp` argues the ruling.
+        return CLIHelp.run(arguments)
     case "--version", "-v":
         print(KiwiDeskVersion.displayString)
         return 0
@@ -138,7 +140,7 @@ private func runSocketCommand(
     }
 }
 
-private let cliUsage = """
+let cliUsage = """
     KiwiDesk — tiling window manager for macOS
 
     usage:
@@ -148,13 +150,16 @@ private let cliUsage = """
       kiwidesk service start|stop|restart|status
       kiwidesk subscribe [events...]  stream events (NDJSON)
 
+    the API, from this binary (no running app needed):
+      kiwidesk list_commands          every command, grouped
+      kiwidesk help <name>            one command's arguments
+      add --json to either for machine-readable output
+
     examples:
       kiwidesk focus left
       kiwidesk set_mode 1 bsp
       kiwidesk set_gap_global 12
       kiwidesk get_state
+      kiwidesk help scroll.set_anchor
       kiwidesk subscribe space_change layout_change
-
-    run 'kiwidesk list_commands' (app must be running) for
-    the full command list.
     """
