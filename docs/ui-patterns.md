@@ -371,7 +371,24 @@ anywhere on the row, Space on the focused one; the cursor
 stays an arrow (the hand is link-only). A drawer's
 `accessory:` may hold a control, so it is drawn BESIDE that
 button rather than inside it, at the row's trailing edge —
-the row's hit shape stops where the accessory begins. The ruling is in
+the row's hit shape stops where the accessory begins.
+
+**What the drawer hides is stated on the row while it is
+shut, and it is not an accessory.** A drawer takes
+`summary:` — words only — and the style owns the tier
+(`.callout` at `ink3`: description, where the chevron's
+`ink2` is the row's affordance) and the shut-only rule, so
+neither is a call-site choice. It renders INSIDE the header
+button, unlike the accessory beside it: the accessory sits
+outside because it may hold a control, and a summary is
+plain text, so drawn outside it only cost the row the two
+things it is — the hover highlight ended before it and
+clicking the words that describe the drawer did not open it.
+It stays beside the title rather than moving under it
+because it states a VALUE and disappears on expand, where a
+caption explains what a thing IS and stays; under the header
+it would add and remove a line on every toggle, in the space
+the drawer's own contents occupy. The ruling is in
 `docs/design-decisions.md`.
 
 **Weigh every title edit against the search index.** Search

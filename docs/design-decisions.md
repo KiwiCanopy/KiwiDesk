@@ -3792,6 +3792,38 @@ first round did not state: fifteen headers wearing a band
 would make the drawers the most-filled things on pages whose
 real controls carry no fill at all.
 
+**A drawer's summary belongs to the row, not beside it.** The
+same round's third complaint was the text that states what a
+shut drawer hides: five call sites drew it by hand at
+`.font(.caption)`, 10 pt against a 12 pt header, and four of
+the five wrapped their own shut-only `if` while the fifth did
+not — the header tier's drift wearing a different slot. One
+`summary:` slot now owns the words, the tier and the rule.
+
+Two placement rulings fall out, and each is the interesting
+one. **It renders inside the header button**: the ruling below
+puts the `accessory:` slot outside because that slot may hold
+a control, and a control inside a control loses its click and
+its name — a summary is plain text, so the argument does not
+reach it, and drawn outside it cost the row the two things it
+is, the hover highlight ending before it and the words that
+describe the drawer not opening the drawer. **And it stays
+beside the title rather than moving under it**: it states the
+drawer's current VALUE and is gone the moment the drawer
+opens, where a caption explains what a thing IS and stays.
+Under the header it would add and remove a line on every
+toggle, in the space the drawer's own contents occupy — and
+made persistent to avoid that flicker it would simply be a
+second caption on a card that already has one.
+
+Its ink is `ink3`, and that is the chevron's own argument read
+the right way round rather than an exception to it. The
+chevron takes `ink2` because with no resting fill it IS the
+row's affordance, and an affordance outranks the caption tier.
+A summary is description, which is what `ink3` is for; a whole
+phrase of it at the chevron's darkness competes with the title
+it supports.
+
 **Every drawer is a heading.** All fifteen were absent from
 the VoiceOver headings rotor until this round — the same
 "cannot find it as one" complaint on the channel no number of
