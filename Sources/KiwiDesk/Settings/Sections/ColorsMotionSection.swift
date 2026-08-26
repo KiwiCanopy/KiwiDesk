@@ -4,7 +4,7 @@ import SwiftUI
 /// This Profile ▸ Colours & Animations (#678 Phase 3, turn 12a): the
 /// whole of the Simple colour story. A shelf of palettes applied
 /// as a one-time paint, one scene showing what the current colours
-/// actually look like, and the Motion card.
+/// actually look like, and the Animations card.
 ///
 /// A Simple user meets six colour roles here, not twenty-five —
 /// the per-element page is its own area, and "Save current colors

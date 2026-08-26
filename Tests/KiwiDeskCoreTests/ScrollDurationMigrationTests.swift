@@ -62,18 +62,35 @@ struct ScrollDurationMigrationTests {
         #expect(settings.animations.scrollDurationMS == 420)
     }
 
-    /// The bump is what RUNS the crossing, so a profile stamped
-    /// with the PREVIOUS format must still be reached. Pinned as
-    /// "one below current" rather than as the literal 1, so it
-    /// keeps meaning that after the next bump.
-    @Test("A previous-format profile is still migrated")
-    func previousFormatIsReached() throws {
+    /// The bump is what RUNS the crossing.
+    ///
+    /// **The `1` is deliberate and must not be derived.** It is
+    /// the format v1.0.1 SHIPPED — a past-tense fact, which
+    /// rule-authoring.md exempts from the pin-the-shape rule —
+    /// and it is the whole subject: written as
+    /// `currentFormat - 1` this test followed the bump down and
+    /// stayed green when the bump was reverted, guarding nothing
+    /// on exactly the revert the change exists to prevent
+    /// (`code-reviewer`, 2026-08-27). `needsMigration` is
+    /// asserted directly, because that is the gate that decides.
+    @Test("A profile at the format 1.0.1 shipped is migrated")
+    func shippedFormatIsReached() throws {
         let data = json(
             """
-            {"format":\(Profile.currentFormat - 1),\
-            "monitor_sets":[],"settings":\
+            {"format":1,"monitor_sets":[],"settings":\
             {"animations":{"scroll_speed":420}}}
             """
+        )
+        #expect(
+            ConfigMigration.needsMigration(data),
+            Comment(
+                rawValue:
+                    "a profile at format 1 no longer needs "
+                    + "migration — Profile.currentFormat must "
+                    + "exceed the format 1.0.1 wrote, or this "
+                    + "crossing never runs on the files it "
+                    + "exists to rescue"
+            )
         )
         let out = try #require(ConfigMigration.migrated(data))
         #expect(
@@ -110,20 +127,29 @@ struct ScrollDurationMigrationTests {
 
     /// The rename is keyed on a KEY, so a string VALUE that reads
     /// the same — a Space someone named `scroll_speed` — is not
-    /// touched. The surgical edit requires the trailing colon
-    /// precisely so this holds.
+    /// touched, while a real key beside it still is.
+    ///
+    /// **Two claims, and they are guarded by different things**
+    /// (`code-reviewer`, 2026-08-27). That the VALUE survives is
+    /// the envelope's doing: drop the colon from the regex and
+    /// the edit also rewrites the space name, the re-parse
+    /// disagrees with the walk's tree, and the tree fallback is
+    /// serialized instead — correct output either way. What the
+    /// colon actually buys is that the SURGICAL path stays
+    /// usable, which is visible only in the bytes: the float
+    /// below survives un-re-encoded exactly when the edit was
+    /// used. Asserting only the value would pass with the colon
+    /// deleted, which is what the first draft of this test did.
     @Test("A value reading `scroll_speed` is left alone")
     func valueSpellingIsNotAKey() throws {
         let data = json(
             """
             {"monitor_sets":[],"spaces":["scroll_speed"],\
-            "settings":{"animations":{"scroll_duration":420}}}
+            "settings":{"gap":0.4,"animations":\
+            {"scroll_speed":420}}}
             """
         )
-        // Nothing to rename, so the file is not rewritten at all
-        // beyond a format stamp; the space name survives either
-        // way, which is what is asserted.
-        let out = ConfigMigration.migrated(data) ?? data
+        let out = try #require(ConfigMigration.migrated(data))
         let root =
             try JSONSerialization.jsonObject(with: out)
             as? [String: Any]
@@ -131,6 +157,10 @@ struct ScrollDurationMigrationTests {
         #expect(
             try animations(out)["scroll_duration"] as? Int == 420
         )
+        // The surgical path was taken, not the tree fallback.
+        let text = String(decoding: out, as: UTF8.self)
+        #expect(text.contains("0.4"))
+        #expect(!text.contains("0.40000000000000002"))
     }
 
     /// Both spellings present means the file was written by a
@@ -148,6 +178,48 @@ struct ScrollDurationMigrationTests {
         let knobs = try animations(out)
         #expect(knobs["scroll_duration"] as? Int == 420)
         #expect(knobs["scroll_speed"] == nil)
+    }
+
+    /// The same node in the order `.sortedKeys` actually
+    /// produces — which is the order on disk, since
+    /// `ProfileManager` writes with it.
+    ///
+    /// This is the arm that shipped broken: a textual rename
+    /// cannot see a sibling, so it produced `scroll_duration`
+    /// TWICE in one object, and the envelope's value-compare
+    /// could not see it because `JSONSerialization` keeps the
+    /// first occurrence and `.sortedKeys` puts the correct value
+    /// there. Foundation read 420 out of those bytes and
+    /// `jq`/Python read the stale 50 — one file, two answers.
+    /// The other ordering (above) takes the tree fallback and so
+    /// never exercised this (`code-reviewer`, 2026-08-27).
+    @Test("Both spellings, sorted order, yield no duplicate key")
+    func bothSpellingsSortedOrderIsNotDuplicated() throws {
+        let data = json(
+            """
+            {"monitor_sets":[],"settings":{"animations":\
+            {"scroll_duration":420,"scroll_speed":50}}}
+            """
+        )
+        let out = try #require(ConfigMigration.migrated(data))
+        let text = String(decoding: out, as: UTF8.self)
+        // The defect is visible in the BYTES, which is the only
+        // place it is visible: every value-level assertion below
+        // passed while the file was corrupt.
+        #expect(
+            text.components(
+                separatedBy: "\"scroll_duration\""
+            ).count - 1 == 1,
+            Comment(
+                rawValue:
+                    "`scroll_duration` appears more than once — "
+                    + "the surgical rename duplicated a key: "
+                    + text
+            )
+        )
+        #expect(!text.contains("\"scroll_speed\""))
+        let knobs = try animations(out)
+        #expect(knobs["scroll_duration"] as? Int == 420)
     }
 
     /// The surgical edit exists so a one-key migration does not

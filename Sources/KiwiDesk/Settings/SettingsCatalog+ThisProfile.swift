@@ -80,7 +80,8 @@ struct GapAxisControls: Sendable {
 }
 
 /// Colours & Animations (#678 Phase 3): the palette shelf, the
-/// live-colours scene, and the Motion card that moved here whole
+/// live-colours scene, and the Animations card that moved here
+/// whole
 /// from Behavior.
 struct ColorsControls: Sendable {
     let paletteShelf = SettingsControl(

@@ -35,7 +35,15 @@ extension ConfigMigration {
         )
     }
 
-    /// Stamps the target format into `data` if not already current (#938).
+    /// Stamps the target format into `data` if not already
+    /// current (#938).
+    ///
+    /// Shares the envelope with the two rewriting steps
+    /// (`surgicallyApplying`) but differs at the edges in one
+    /// way worth naming: it returns `Data`, never nil, because a
+    /// caller stamps unconditionally and wants the bytes back
+    /// either way. "Nothing changed" therefore reads as
+    /// `?? data` here rather than as a nil the caller inspects.
     static func stamped(_ data: Data) -> Data {
         guard
             let root = try? JSONSerialization.jsonObject(
@@ -43,27 +51,20 @@ extension ConfigMigration {
             ) as? [String: Any]
         else { return data }
         let target = targetFormat(for: root)
-        if root["format"] as? Int == target {
-            return data
-        }
-        var expected = root
-        expected["format"] = target
-        if let text = String(data: data, encoding: .utf8),
-            let edited = surgicallyStamped(text, format: target),
-            let reparsed = try? JSONSerialization.jsonObject(
-                with: edited
-            ),
-            canonical(reparsed) == canonical(expected)
-        {
-            return edited
-        }
-        if let fallback = try? JSONSerialization.data(
-            withJSONObject: expected,
-            options: [.prettyPrinted, .sortedKeys]
-        ) {
-            return fallback
-        }
-        return data
+        return surgicallyApplying(
+            data,
+            rewriting: { node in
+                guard var dict = node as? [String: Any] else {
+                    return (node, false)
+                }
+                if dict["format"] as? Int == target {
+                    return (node, false)
+                }
+                dict["format"] = target
+                return (dict, true)
+            },
+            editing: { surgicallyStamped($0, format: target) }
+        ) ?? data
     }
 
     /// Surgically inserts or updates the `"format"` key in `text`.

@@ -41,60 +41,71 @@ extension ConfigMigration {
     /// `ConfigMigrationRoutingTests.scrollDurationKeyStaysUnique`
     /// is what says so on arrival — the same shape as the
     /// `content` guard beside it.
+    ///
+    /// The TARGET is spelled here rather than read off
+    /// `AnimationSettings.CodingKeys`, and that is deliberate:
+    /// a historical step must keep emitting the name it was
+    /// written to emit, so that a LATER step can rename that
+    /// name again and the two compose. Derive it and this step
+    /// silently starts writing whatever the live key is today,
+    /// skipping every intermediate crossing. It cannot rot
+    /// unnoticed — the routing guard's set EQUALITY reds if
+    /// `AnimationSettings` stops declaring it.
     static let retiredScrollSpeedKey = "scroll_speed"
     static let scrollDurationKey = "scroll_duration"
 
     /// `data` with the retired key renamed wherever it appears,
     /// or nil when there was nothing to rename.
+    ///
+    /// The envelope — gate, parse, surgical edit, verify, fall
+    /// back — is `surgicallyApplying`, which owns the argument
+    /// for all three steps. What is local here is the walk and
+    /// its both-spellings rule.
     @Sendable
     static func migratingRetiredScrollSpeed(
         _ data: Data
     ) -> Data? {
-        // Cheap gate first, matching the bar-content step: a
-        // config that never tuned the scroll — the common case,
-        // since every field is sparse — costs one substring scan
-        // rather than a parse.
         let needle = Data("\"\(retiredScrollSpeedKey)\"".utf8)
-        guard data.range(of: needle) != nil else { return nil }
-        guard
-            let root = try? JSONSerialization.jsonObject(with: data)
-        else { return nil }
-        let (expected, changed) = renamed(root)
-        guard changed else { return nil }
-        // The parse decides; a TEXTUAL edit applies — the same
-        // division the bar-content step documents, and for the
-        // same measured reason: re-serializing the tree rewrites
-        // every `Double` in the file (`0.4` →
-        // `0.40000000000000002`), so a one-key migration would
-        // show up as a diff across a config kept in a dotfiles
-        // repo. Correctness does not rest on the edit: the
-        // result is re-parsed and compared against the tree the
-        // walk produced, and anything but an exact match falls
-        // back to serializing that tree.
-        if let text = String(data: data, encoding: .utf8),
-            let edited = surgicallyRenamed(text),
-            let reparsed = try? JSONSerialization.jsonObject(
-                with: edited
-            ),
-            canonical(reparsed) == canonical(expected)
-        {
-            return edited
-        }
-        return try? JSONSerialization.data(
-            withJSONObject: expected,
-            options: [.prettyPrinted, .sortedKeys]
+        return surgicallyApplying(
+            data,
+            gate: { $0.range(of: needle) != nil },
+            rewriting: renamed,
+            editing: surgicallyRenamed
         )
     }
 
     /// `text` with the retired KEY renamed, leaving every other
-    /// byte exactly as it was.
+    /// byte exactly as it was — or nil to hand the job to the
+    /// tree.
     ///
     /// The trailing `:` is required, so a string VALUE that
     /// happens to read `"scroll_speed"` — a space named that, a
     /// palette named that — is never touched. Only a key is.
-    private static func surgicallyRenamed(
+    ///
+    /// **It stands down when the target key is already present,
+    /// and that is not caution — it is the one case this cannot
+    /// do correctly** (`code-reviewer`, 2026-08-27). A textual
+    /// rename cannot see a sibling, so a node carrying both
+    /// spellings becomes a node carrying the SAME key twice.
+    /// The envelope's re-parse/compare net structurally cannot
+    /// catch it: `JSONSerialization` silently keeps the FIRST
+    /// occurrence, and `.sortedKeys` — which `ProfileManager`
+    /// writes with — puts `scroll_duration` first, so the
+    /// duplicate decodes to the RIGHT value and compares equal.
+    /// The bytes would then be written to disk and stamped
+    /// current, with Foundation reading 420 and `jq`/Python
+    /// reading the stale 50 out of one file (measured, both
+    /// ways). The walk handles this case exactly; the edit hands
+    /// it over.
+    static func surgicallyRenamed(
         _ text: String
     ) -> Data? {
+        guard
+            text.range(
+                of: "\"\(scrollDurationKey)\"\\s*:",
+                options: .regularExpression
+            ) == nil
+        else { return nil }
         let out = text.replacingOccurrences(
             of: "\"\(retiredScrollSpeedKey)\"(\\s*:)",
             with: "\"\(scrollDurationKey)\"$1",
@@ -109,7 +120,7 @@ extension ConfigMigration {
     /// A node carrying BOTH spellings keeps the new one: the
     /// file was written by a build that already had the rename,
     /// so the retired sibling is stale rather than authoritative.
-    private static func renamed(_ node: Any) -> (Any, Bool) {
+    static func renamed(_ node: Any) -> (Any, Bool) {
         if let dict = node as? [String: Any] {
             var out: [String: Any] = [:]
             var changed = false
