@@ -27,7 +27,7 @@ import Testing
 struct APIRecordFilledTests {
     /// Records still carrying `APIRecord.pendingSummary`.
     /// Lower this as part 2 fills groups; never raise it.
-    static let pendingRecords = 194
+    static let pendingRecords = 164
 
     /// The groups part 1 filled as worked examples. Part 2 reads
     /// these for the pattern, so a regression here would take
