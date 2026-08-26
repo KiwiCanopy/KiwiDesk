@@ -4,7 +4,9 @@ import Foundation
 /// Which policy drives the *size* channel of an animation
 /// (issue #47). Position is always spring-interpolated
 /// regardless.
-public enum SizePolicy: Sendable, Equatable {
+public enum SizePolicy: String, Sendable, Equatable,
+    CaseIterable
+{
     /// Legacy fallback (pre-#47). A growing axis holds its start
     /// size until halfway, then grows in a single frame where the
     /// ongoing slide masks the jump. One size-set lands mid-flight,
@@ -13,7 +15,7 @@ public enum SizePolicy: Sendable, Equatable {
     /// pace with the smooth default. Deaf to `BatchSizing` by
     /// definition: its whole contract is that single size-set, in
     /// whichever direction the axis moves.
-    case midSlide
+    case midSlide = "mid_slide"
     /// Shipping default (#47). A growing axis follows the spring
     /// continuously — and so does a shrinking one, once the
     /// pass promises it (`BatchSizing.allSpringSized`, #593).
@@ -22,7 +24,7 @@ public enum SizePolicy: Sendable, Equatable {
     /// 120), matching the position channel. Slow-AX apps reflow at
     /// that rate rather than once; lower the rate, or drop to
     /// `.midSlide`, if one falls behind.
-    case throttledSmooth
+    case throttledSmooth = "smooth"
 }
 
 /// Result of one size step: the size to render this frame plus the

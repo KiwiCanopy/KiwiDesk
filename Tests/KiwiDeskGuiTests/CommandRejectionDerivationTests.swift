@@ -19,12 +19,14 @@ import Testing
 /// hand-typed vocabulary — with the enum vocabularies themselves
 /// DERIVED from the API records rather than listed here.
 ///
-/// **Its reach is the records that are filled**, which is 68 of
-/// 262 while #1033 phase 2 is outstanding: an enum reaches this
-/// net once some record names it. That is a stated limitation,
-/// not a claim of completeness — the durable obligation is the
-/// rule file's, and this catches what a scan can catch. Coverage
-/// grows on its own as phase 2 lands, with no edit here.
+/// **Its reach is the enums the records NAME**, which is every
+/// enum an argument is declared as — an enum a decoder accepts
+/// while its record records `.text` is invisible here, because
+/// the vocabulary it would match never enters the net. That is
+/// the stated limitation, not a claim of completeness: it is
+/// how `animations.set_size_policy` hand-typed its two spellings
+/// unseen until review, and why the fix was to give that enum
+/// raw values so the record could name it.
 @Suite("command rejection derivation")
 struct CommandRejectionDerivationTests {
     static let commandTree = "Sources/KiwiDeskCore/Commands"

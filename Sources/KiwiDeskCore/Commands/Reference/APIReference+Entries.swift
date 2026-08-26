@@ -53,11 +53,11 @@ extension APIReference {
     /// order, then `subscribe` (socket-only), then the Lua-only
     /// entry points.
     ///
-    /// A record missing for a name falls back to `.todo()`
+    /// A record missing for a name falls back to a pending record
     /// rather than dropping the command from the listing — the
     /// listing must never be shorter than the API. Both guards
     /// see it: `APIRecordCensusTests` names the missing key, and
-    /// the pending count `APIRecordFilledTests` pins moves.
+    /// `APIRecordFilledTests` asserts that no record is pending.
     static var coreEntries: [APIEntry] {
         var aliases: [String: [String]] = [:]
         var order: [String] = []
@@ -79,7 +79,7 @@ extension APIReference {
                 command: command,
                 aliases: spellings.filter { $0 != canonical },
                 channel: .both,
-                record: records[command] ?? .todo()
+                record: records[command] ?? Self.pendingRecord
             )
         }
         result.append(
@@ -89,7 +89,8 @@ extension APIReference {
                 command: socketOnlyCommand,
                 aliases: [],
                 channel: .cli,
-                record: records[socketOnlyCommand] ?? .todo()
+                record: records[socketOnlyCommand]
+                    ?? Self.pendingRecord
             )
         )
         result += luaOnly.map { name in
@@ -99,7 +100,7 @@ extension APIReference {
                 command: nil,
                 aliases: [],
                 channel: .lua,
-                record: luaOnlyRecords[name] ?? .todo()
+                record: luaOnlyRecords[name] ?? Self.pendingRecord
             )
         }
         return result
@@ -115,10 +116,22 @@ extension APIReference {
                 command: "\(table).\(function)",
                 aliases: [],
                 channel: .both,
-                record: records[function] ?? .todo()
+                record: records[function] ?? Self.pendingRecord
             )
         }
     }
+
+    /// The record a name falls back to when its table has none.
+    ///
+    /// One home rather than four spellings of the construction:
+    /// it is deliberately NOT a factory on `APIRecord`, which is
+    /// what `.todo()` was and what invited a record table to
+    /// call it. Nothing can legitimately reach this — the census
+    /// is what keeps it unreachable, not the compiler — and a
+    /// command dropped from the listing is the worse failure.
+    private static let pendingRecord = APIRecord(
+        APIRecord.pendingSummary
+    )
 
     /// The one command reachable over the socket that has no
     /// `KiwiDesk` table function — `dispatchable` inserts it by
