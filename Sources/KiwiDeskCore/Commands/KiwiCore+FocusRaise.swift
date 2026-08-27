@@ -329,7 +329,7 @@ extension KiwiCore {
     /// Retiles for a focus-driven layout, honouring
     /// `scrollDurationMS` when the active mode is scrolling and
     /// `onScrolling` is true — so scroll focus shifts animate at
-    /// their own speed without touching the general duration.
+    /// their own duration without touching the general one.
     ///
     /// Safe to call on MainActor: `retile()` is synchronous and
     /// reads `durationMS` at call time, so the transient swap

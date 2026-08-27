@@ -87,7 +87,7 @@ struct GreyOutAnchorTests {
         // `GateReasonPlacementTests`.)
         // Reduce Motion greys the whole Animations card; the
         // explanation rides the header `?` so it survives the
-        // dim. The card moved to Colours & Motion in #678
+        // dim. The card moved to Colours & Animations in #678
         // Phase 3, gate and anchor together.
         (
             "MotionCard.swift",

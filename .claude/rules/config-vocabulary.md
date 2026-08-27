@@ -173,6 +173,25 @@ synonym:
   the one copy of how that is decided). The argument, and the
   counts it was decided on, are `docs/design-decisions.md` ▸
   Vocabulary: a screen is a screen.
+- **duration** vs **speed** vs **rate** vs **delay** — name the
+  quantity you STORE. A time a thing takes is a **duration**
+  (`animations.set_duration`,
+  `animations.set_scroll_duration`); raising it makes the thing
+  slower, which is why "speed" ran backwards and was retired
+  from that knob (#1020). A genuine per-second quantity is a
+  **rate** (`animations.set_size_rate`, in Hz) and keeps that
+  name — the rule is not that "speed" is banned. Time spent
+  waiting BEFORE something starts is a **delay**
+  (`core.set_wake_restore_delay`), a third quantity again.
+  *Speed* survives only as a search synonym, because it is the
+  word a user reaches for (`SettingsSearchSynonyms`).
+- **animation** vs **motion** — KiwiDesk's own word for its
+  window movement is **animation**, in every catalog and in the
+  destination that holds it (#1017). *Motion* is reserved for
+  quoting Apple's "Reduce Motion", which the same card's help
+  text does — using it for our own feature made the destination
+  read as the accessibility setting, worst of all in German
+  where *Bewegung* is macOS's own word for it.
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
   thickness (`app_bar.set_thickness`).

@@ -4425,17 +4425,18 @@ layout reflowing. **Persisted per-profile** since issue #51.
 animations.set_duration(150)
 ```
 
-### animations.set_scroll_speed
+### animations.set_scroll_duration
 
 **Expects:** a number (milliseconds, clamped 50–1000).
 
-**Does:** sets the scrolling-layout focus-shift speed (independent
-knob, also persisted per-profile).
+**Does:** sets the scrolling-layout focus-shift duration
+(independent knob, also persisted per-profile). It is a
+duration, so a larger value makes the shift take longer.
 
 **Example:**
 
 ```lua
-animations.set_scroll_speed(150)
+animations.set_scroll_duration(150)
 ```
 
 ### animations.set_size_policy

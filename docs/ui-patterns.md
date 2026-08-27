@@ -311,7 +311,7 @@ what it meant — and the same drawers on the new page do not,
 because the adjective now reads as the page's own name rather
 than as a tier inside it. And a row tier and a mode depth must never
 be spelled with one word: Advanced Colors is the deep-mode twin
-of Colours & Motion (`SettingsArea.minimumMode` is `.powerUser`
+of Colours & Animations (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
 hidden*. They are **"More
@@ -740,7 +740,7 @@ of where previews are today.
 **The areas that watch their draft do it in a fixed detail
 panel; the rest keep full width.** Which ones is
 `SettingsDetailPanelOffer.offering` and nothing else — Gaps &
-Borders, Bars, Colours & Motion, Layout Defaults, Shortcuts (its
+Borders, Bars, Colours & Animations, Layout Defaults, Shortcuts (its
 keyboard board, pass 5), Advanced Colours and Spaces (#793,
 #794) as this is written. They
 open as two columns: the controls, then a
@@ -1054,7 +1054,7 @@ state, and a recognizable rest treatment or list context —
 setting makes another control inert — Auto-size grid overrides
 the Columns/Rows steppers (#171), Auto track limit overrides the
 Track limit stepper (#178), Fill empty cells does nothing in a
-rigid grid, the scroll-speed row is dead when Animate focus
+rigid grid, the scroll-duration row is dead when Animate focus
 shifts is off, the bars' Content picker is inert on a vertical
 edge and their Background color inert under Plain — the
 dependent control stays

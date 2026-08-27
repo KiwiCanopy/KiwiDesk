@@ -15,6 +15,16 @@ import Foundation
 public struct GuiConfig: Codable, Equatable, Sendable {
     /// Format version of the gui.json schema (#902).
     /// Format 0 = unversioned legacy.
+    ///
+    /// **Deliberately NOT bumped by the scroll-duration rename
+    /// (#1020)**, though `settings` sits on this type and looks
+    /// like it would carry the renamed key. It does not reach the
+    /// file: `settings` is absent from `CodingKeys`, so it is
+    /// neither encoded nor decoded, and the class doc above says
+    /// why — tiling settings are profile-scoped and persist into
+    /// the active profile's JSON, never into the sidecar. A bump
+    /// here would rewrite every existing `gui.json` for nothing
+    /// and make the previous release refuse one this build wrote.
     public static let currentFormat = 1
 
     public var format: Int = GuiConfig.currentFormat

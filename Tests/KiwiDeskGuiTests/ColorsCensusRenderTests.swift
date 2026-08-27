@@ -44,7 +44,7 @@ struct ColorsCensusRenderTests {
         #expect(rendered.count == Set(rendered).count, what)
     }
 
-    // MARK: - Colours & Motion
+    // MARK: - Colours & Animations
 
     /// The shelf's at-rest half, hand-listed on purpose. Its
     /// four affordances are four different shapes — a tile grid,
@@ -108,7 +108,7 @@ struct ColorsCensusRenderTests {
     /// The area's render knows exactly two containers; a third
     /// would mount nowhere, so it must fail loud here rather than
     /// ship an unreachable row.
-    @Test("Colours & Motion holds only palettes and motion")
+    @Test("Colours & Animations holds only palettes and motion")
     func coloursAndMotionContainers() {
         #expect(
             containers(of: .coloursAndMotion) == [.palettes, .motion]

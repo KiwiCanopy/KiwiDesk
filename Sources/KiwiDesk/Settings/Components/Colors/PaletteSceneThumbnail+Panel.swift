@@ -17,7 +17,7 @@ import SwiftUI
 /// `border.focused_color` the user has made illegible must READ
 /// as illegible. So the renderer is the one that already speaks
 /// raw palette paths, and it now serves three mounts — the shelf
-/// tile, this panel, and the Colours & Motion panel, which gets
+/// tile, this panel, and the Colours & Animations panel, which gets
 /// the richer scene for free.
 ///
 /// Which roles are on the frame is `PaletteSceneRoles`, not this

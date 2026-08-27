@@ -270,4 +270,77 @@ struct SettingsDisclosureSizeTests {
         )
     }
 
+    /// **A summary is a localized PHRASE, never a literal built
+    /// at the call site (#1028).**
+    ///
+    /// Since #1021 the summary renders INSIDE the header button,
+    /// so its text composes into that button's accessibility
+    /// name and its headings-rotor entry. `PresetsSection`
+    /// passed `"\(others.count)"` and the drawer announced an
+    /// unlabelled digit — "Other setups 12, collapsed, heading"
+    /// — where its siblings announce a phrase saying what is
+    /// inside. The placement was correct; the string was not.
+    ///
+    /// Guarded as a SHAPE rather than by naming the one site
+    /// that had it: any `summary:` handed a string literal is
+    /// either an unlocalized string or a value with no label,
+    /// and both are the defect. A call site passes an `L()`
+    /// result or a property holding one, which is what every
+    /// surviving site does.
+    @Test("no call site hands the summary slot a literal")
+    func summaryIsNeverACallSiteLiteral() throws {
+        let files = try SourceScan.swiftSources(
+            under: settingsRoot
+        )
+        let prefix = settingsRoot.path + "/"
+        var passing = 0
+        var literal: [String] = []
+        for file in files {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+            guard source.contains("summary:") else { continue }
+            // The declarations themselves, not call sites.
+            let name =
+                file.path.hasPrefix(prefix)
+                ? String(file.path.dropFirst(prefix.count))
+                : file.path
+            if name.hasSuffix("SettingsDisclosure.swift")
+                || name.hasSuffix("SettingsDisclosureStyle.swift")
+            {
+                continue
+            }
+            passing += 1
+            if source.contains("summary:\"") {
+                literal.append(name)
+            }
+        }
+        // Assert the scan found its subject before asserting
+        // anything about it: a needle matching nothing passes for
+        // having found no violations rather than for there being
+        // none (rule-authoring.md).
+        #expect(
+            passing > 0,
+            Comment(
+                rawValue:
+                    "no call site passes `summary:` at all — the "
+                    + "needle has rotted, so this guard is "
+                    + "fail-open"
+            )
+        )
+        #expect(
+            literal.isEmpty,
+            Comment(
+                rawValue:
+                    "`summary:` handed a literal in "
+                    + "\(literal.sorted()) — it must be a "
+                    + "localized phrase saying what the drawer "
+                    + "holds, never a bare value: since #1021 it "
+                    + "composes into the header button's "
+                    + "accessibility name (#1028)"
+            )
+        )
+    }
 }

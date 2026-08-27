@@ -4,7 +4,7 @@ import SwiftUI
 /// The one sentence describing the panel-scale palette scene.
 ///
 /// Two destinations mount `PaletteSceneThumbnail` at `.panel` —
-/// Colours & Motion's "Current colors" and Advanced Colours'
+/// Colours & Animations's "Current colors" and Advanced Colours'
 /// "Every color at once" — and they draw the identical picture.
 /// They shipped two different English captions of it, into ten
 /// catalogs each, with nothing checking the two agreed

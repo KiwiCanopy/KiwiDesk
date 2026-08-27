@@ -52,7 +52,10 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .layoutDefaults: return L("destination.layout", "Layout Defaults")
         case .monitors: return L("destination.monitors", "Monitors")
         case .colors:
-            return L("destination.colors", "Colors & Motion")
+            return L(
+                "destination.colors",
+                "Colors & Animations"
+            )
         case .advancedColors:
             return L(
                 "destination.advanced_colors",
@@ -105,7 +108,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             // Settings style), not a brand hue.
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
-        // Colours & Motion inherits Appearance's purple with its
+        // Colours & Animations inherits Appearance's purple with its
         // meaning; its Power-User twin takes a deeper violet, so the
         // pairing is legible by hue before either label is read.
         case .colors: return .purple

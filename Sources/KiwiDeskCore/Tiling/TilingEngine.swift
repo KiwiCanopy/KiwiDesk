@@ -23,7 +23,7 @@ public final class TilingEngine {
             animation.durationMS =
                 settings.animations.durationMS
             animation.scrollDurationMS =
-                settings.animations.scrollSpeedMS
+                settings.animations.scrollDurationMS
         }
     }
 

@@ -44,7 +44,7 @@ The window opens on **Home** — a grid of cards, one per
 settings area, in two groups:
 
 - **This Profile** — areas scoped to the profile being edited
-  (Spaces, Gaps & Borders, Bars, Colors & Motion,
+  (Spaces, Gaps & Borders, Bars, Colors & Animations,
   and in Power User mode Layout Defaults, Monitors, Behavior,
   Advanced Colors).
 - **Whole App** — settings that apply everywhere (Shortcuts,
@@ -81,7 +81,7 @@ straight to the control that changed. It is not permanent
 chrome: it appears with your first edit and disappears once
 everything is saved (the verbs are detailed under
 [Saving](#saving)). And five areas —
-Gaps & Borders, Bars, Colors & Motion, Layout Defaults, and
+Gaps & Borders, Bars, Colors & Animations, Layout Defaults, and
 Shortcuts — open as two columns: their controls on the left, and a **Live
 preview** panel on the right that redraws from your draft as
 you edit, with a **Changed in this draft** list underneath —
@@ -974,10 +974,10 @@ Adjust each mode's defaults:
   from the last window back to the first (and vice versa). Swap
   never wraps. This card also owns the layout's own motion:
   **Animate focus shifts** (on by default) and the **Scroll
-  speed** it uses (50–1000 ms, default 150; greys out while the
-  toggle is off). They sit here rather than on Colors & Motion
-  because they are this layout's parameters — Colors & Motion
-  links across to them.
+  duration** it uses (50–1000 ms, default 150; greys out while
+  the toggle is off). They sit here rather than on Colors &
+  Animations because they are this layout's parameters — Colors
+  & Animations links across to them.
 - **Monocle**: orientation (affects which arrow keys cycle focus
   and where the app bar sits), **Hidden windows**, wrap focus,
   and **New window** placement. Hidden windows picks how the
@@ -1794,9 +1794,9 @@ and is greyed while the segment is off. **Spring delay** sets
 how long a dragged window must hover a Space before the view
 springs to it (default 1.5 s, 1–4 s).
 
-## Colors & Motion
+## Colors & Animations
 
-The **Colors & Motion** section (in the **This Profile** group) is the
+The **Colors & Animations** section (in the **This Profile** group) is the
 whole colour story for most people: pick a palette, see what you
 are running, and set how windows move. Nothing here asks you to
 choose an individual colour — that is the next section, and you
@@ -1900,8 +1900,8 @@ you apply one).
 - **On relayout**: animate when windows open/close or layout parameters
   change (default on).
 
-The scrolling layout's own focus animation and its speed are not
-here — they live with that layout's parameters, in **Layout
+The scrolling layout's own focus animation and its duration are
+not here — they live with that layout's parameters, in **Layout
 Defaults ▸ Scrolling**, and a link on this card goes there.
 
 ## Advanced Colors
@@ -2129,7 +2129,7 @@ global config; every saved profile is listed below, one row each
 - **Edit** a saved profile **without switching** — Home
   becomes profile-scoped: the This Profile cards (Spaces,
   Layout Defaults, Monitors, Gaps & Borders, Bars,
-  Colors & Motion, Advanced Colors, Behavior) edit this
+  Colors & Animations, Advanced Colors, Behavior) edit this
   profile, and **the General card leaves the grid** — it holds
   global state a profile edit never writes. Save writes to this profile's JSON instead of
   the active one (the caption beside the button names the

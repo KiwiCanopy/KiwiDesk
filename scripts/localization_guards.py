@@ -197,6 +197,15 @@ LATIN_LOCALES = {
 GLOSSARY = {
     # The product, and the technologies it wraps or names.
     "bsp",
+    # The forge the project lives on, named in two star-affordance
+    # keys — `general.about.star` and `onboarding.ready.star_link`
+    # (measured; `star_hint` carries no "GitHub" in any catalog and
+    # was never blocked). A proper noun no locale translates,
+    # exactly like `kiwidesk` and `lua` below — and without it the
+    # residue guard rejects the only CORRECT rendering a non-Latin
+    # locale has, which is what kept those two English in
+    # ja/ko/ru/zh-Hans/zh-Hant.
+    "github",
     "ide",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",

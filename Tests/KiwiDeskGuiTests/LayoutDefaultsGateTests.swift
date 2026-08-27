@@ -191,8 +191,8 @@ struct LayoutDefaultsGateTests {
     }
 
     @Test("scroll speed follows the scroll animation toggle")
-    func scrollSpeed() {
-        let key = SettingKey.colours(.animationsScrollSpeedMS)
+    func scrollDuration() {
+        let key = SettingKey.colours(.animationsScrollDurationMS)
         #expect(
             gates { $0.animations.onScrolling = false }
                 .inertReason(for: key) == .scrollAnimationOff

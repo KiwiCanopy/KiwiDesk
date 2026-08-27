@@ -67,7 +67,7 @@ struct LayoutDefaultsGates {
             return dimensionsAreInert ? .autoSizedGrid : nil
         case .layout(.trackLimit):
             return settings.track.autoTracks ? .autoTracks : nil
-        case .colours(.animationsScrollSpeedMS):
+        case .colours(.animationsScrollDurationMS):
             return settings.animations.onScrolling
                 ? nil : .scrollAnimationOff
         default:
@@ -88,7 +88,7 @@ struct LayoutDefaultsGates {
         .layout(.gridColumns),
         .layout(.gridRows),
         .layout(.trackLimit),
-        .colours(.animationsScrollSpeedMS),
+        .colours(.animationsScrollDurationMS),
     ]
 
     /// Gated rows the area declares but resolves elsewhere. Empty
@@ -216,7 +216,7 @@ enum LayoutDefaultsGateHelp {
 
     static var scrollAnimationOff: String {
         L(
-            "scroll_grid.scroll_speed.animation_off",
+            "scroll_grid.scroll_duration.animation_off",
             "Focus shifts jump straight to the slot while "
                 + "%1$@ is off.",
             L(

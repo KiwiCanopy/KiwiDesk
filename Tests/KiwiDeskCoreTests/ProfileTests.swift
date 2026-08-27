@@ -198,21 +198,48 @@ struct ProfileModelTests {
         #expect(!wrongLength)
     }
 
-    @Test("Profile encodes and decodes format 1 by default")
+    /// Derived from `currentFormat`, never spelled: the subject is
+    /// that a fresh profile carries THE current stamp and survives
+    /// the round trip, which is true at every format. A literal
+    /// reds on each deliberate bump and catches no regression
+    /// (tests.md, #1021).
+    @Test("Profile round-trips the current format by default")
     func profileFormatRoundTrip() throws {
+        let current = Profile.currentFormat
         let profile = makeProfile(name: "p", monitors: ["A:1x1"])
-        #expect(profile.format == 1)
+        #expect(profile.format == current)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let data = try encoder.encode(profile)
         let json = String(decoding: data, as: UTF8.self)
         #expect(
-            json.contains("\"format\":1")
-                || json.contains("\"format\" : 1")
+            json.contains("\"format\":\(current)")
+                || json.contains("\"format\" : \(current)")
         )
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let decoded = try decoder.decode(Profile.self, from: data)
-        #expect(decoded.format == 1)
+        // Decoding an OLDER stamp, not the one just encoded:
+        // `init(from:)` assigns `format = Self.currentFormat`
+        // unconditionally, so re-decoding what we wrote asserts
+        // nothing — it cannot fail (`guard-prover`, 2026-08-27).
+        // What has content is that a file stamped below current
+        // comes back UPGRADED, which is what lets a migrated file
+        // be written back at the new format.
+        let older = String(decoding: data, as: UTF8.self)
+            .replacingOccurrences(
+                of: "\"format\":\(current)",
+                with: "\"format\":0"
+            )
+            .replacingOccurrences(
+                of: "\"format\" : \(current)",
+                with: "\"format\" : 0"
+            )
+        #expect(older != String(decoding: data, as: UTF8.self))
+        let upgraded = try decoder.decode(
+            Profile.self,
+            from: Data(older.utf8)
+        )
+        #expect(upgraded.format == current)
     }
 }

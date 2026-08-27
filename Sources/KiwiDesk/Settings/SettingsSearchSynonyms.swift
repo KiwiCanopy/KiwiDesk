@@ -63,11 +63,15 @@ enum SettingsSearchSynonyms {
         case .appBar(.appBarLiquidGlass),
             .spaceBar(.spaceBarLiquidGlass):
             return ["glass", "translucent", "transparency"]
-        // Motion: speed is the word, duration is the setting.
+        // Animation: speed is the word people reach for,
+        // duration is what the setting stores (#1020). The label
+        // followed the setting; these keep the word reaching it.
         case .colours(.animationsMaster):
             return ["motion", "movement"]
         case .colours(.animationsDurationMS):
             return ["speed", "animation speed"]
+        case .colours(.animationsScrollDurationMS):
+            return ["speed", "scroll speed", "scrolling speed"]
         // Palettes read as themes elsewhere. Only the save row
         // carries the synonyms: the shelf's apply tile is a
         // `.dynamic`-labelled instance row the index excludes.

@@ -4,7 +4,8 @@ import SwiftUI
 /// **The one tier a drawer header row draws at**, so the
 /// title and the summary beside it cannot drift apart
 /// (architect review, 2026-08-26). #1021 took the tier out
-/// of fifteen call sites and the summary out of five, and
+/// of fifteen call sites and the summary out of the call sites
+/// that pass one, and
 /// then left the two literals in two types — retune the
 /// header and the summary silently stays behind, which is
 /// the same drift one level up. The title takes this at

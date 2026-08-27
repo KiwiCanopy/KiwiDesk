@@ -32,6 +32,18 @@ import Foundation
 /// not own or rewrite, and a refusal that names the fix. The
 /// crossing exists for files this app WROTE, where the user made
 /// no choice that could be reported back to them.
+///
+/// A SECOND Lua store sits inside that carve-out, and it is
+/// worth naming because it is easy to miss: a keybinding's `lua`
+/// rides inside `gui.json` and inside every profile
+/// (`layers[].bindings[].lua`), so a file this app rewrites does
+/// carry user-authored Lua. A renamed VERB breaks such a binding
+/// — `animations.set_scroll_speed(300)` after #1020 — and is
+/// still not migrated, for `init.lua`'s reason exactly: the text
+/// is the user's own, the failure is LOUD at press time rather
+/// than silent, and AGENTS.md §5 rules a verb rename free of
+/// aliases. What this crosses is the config VOCABULARY around
+/// the script, never the script.
 public enum ConfigMigration {
     /// The `app_bar.content` spellings retired when the bars
     /// began naming the WINDOW rather than its app (owner ruling
@@ -62,13 +74,27 @@ public enum ConfigMigration {
     /// The ORDERED list is the extension point, and the reason
     /// the wired seam below is `migrated(_:)` rather than any one
     /// migration's name: a reader names the seam, never a step,
-    /// so migration #2 lands here alone instead of re-editing
-    /// every reader and re-asking which readers exist
+    /// so a new migration lands here instead of re-editing every
+    /// reader and re-asking which readers exist
     /// (`ConfigMigrationRoutingTests` is the census). Each step
     /// takes the bytes as they stand after the previous one.
+    ///
+    /// **A step added here is not yet a step that RUNS.**
+    /// `needsMigration` short-circuits on
+    /// `format >= targetFormat(for:)`, so a step owes a
+    /// `currentFormat` bump on EVERY shape it must reach — and
+    /// without one it is dead on arrival, silently, on exactly
+    /// the files it exists to rescue. #1020 is the worked
+    /// example: the rename it crosses would otherwise decode to
+    /// a DEFAULT rather than fail, so nothing anywhere would
+    /// report it. `ScrollDurationMigrationTests` pins that
+    /// rename against a `Profile.currentFormat - 1` fixture;
+    /// nothing pins the coupling itself, which is why it is
+    /// stated here, at the point where a step is added.
     private static let steps: [@Sendable (Data) -> Data?] = [
         migratingLegacyPalettesArray,
         migratingRetiredBarContent,
+        migratingRetiredScrollSpeed,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939).
@@ -137,49 +163,19 @@ public enum ConfigMigration {
 
     /// `data` with every retired bar-content value rewritten, or
     /// nil when there was nothing to rewrite.
+    ///
+    /// The envelope — gate, parse, surgical edit, verify, fall
+    /// back — is `surgicallyApplying`, which owns the argument
+    /// for all three steps. What is local here is the walk.
     @Sendable
     static func migratingRetiredBarContent(
         _ data: Data
     ) -> Data? {
-        // Cheap gate first: a config that never set the bar's
-        // content — the common case, since every field is sparse
-        // — costs one substring scan rather than a parse.
-        guard data.range(of: Data("\"content\"".utf8)) != nil
-        else { return nil }
-        guard
-            let root = try? JSONSerialization.jsonObject(with: data)
-        else { return nil }
-        let (expected, changed) = rewritten(root)
-        guard changed else { return nil }
-        // The parse decides; a TEXTUAL edit applies. Writing the
-        // re-serialized tree back instead re-encodes every
-        // `Double` in the file — `0.4` became
-        // `0.40000000000000002` and `0.6` became
-        // `0.59999999999999998`, in five places, for a one-value
-        // migration (measured, 2026-08-20). The decoded values
-        // are identical, so nothing breaks; what breaks is the
-        // promise. This rewrites the user's file without being
-        // asked, so it may touch only what it came for — a
-        // config kept in a dotfiles repo shows every unasked byte
-        // as a diff.
-        //
-        // Correctness does not rest on the edit: the result is
-        // re-parsed and compared against the tree the walk
-        // produced, and anything but an exact match falls back to
-        // serializing that tree. A surgical edit that is ever
-        // wrong is simply not used.
-        if let text = String(data: data, encoding: .utf8),
-            let edited = surgicallyEdited(text),
-            let reparsed = try? JSONSerialization.jsonObject(
-                with: edited
-            ),
-            canonical(reparsed) == canonical(expected)
-        {
-            return edited
-        }
-        return try? JSONSerialization.data(
-            withJSONObject: expected,
-            options: [.prettyPrinted, .sortedKeys]
+        surgicallyApplying(
+            data,
+            gate: { $0.range(of: Data("\"content\"".utf8)) != nil },
+            rewriting: rewritten,
+            editing: surgicallyEdited
         )
     }
 
@@ -200,16 +196,6 @@ public enum ConfigMigration {
             )
         }
         return out == text ? nil : out.data(using: .utf8)
-    }
-
-    /// One serializer for both sides of the comparison, so the
-    /// check is about VALUES and never about how either side
-    /// happened to spell a float.
-    static func canonical(_ node: Any) -> Data? {
-        try? JSONSerialization.data(
-            withJSONObject: node,
-            options: [.sortedKeys]
-        )
     }
 
     /// The tree with retired `content` values replaced, plus

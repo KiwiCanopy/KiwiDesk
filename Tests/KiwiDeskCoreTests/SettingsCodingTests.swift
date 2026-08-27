@@ -129,8 +129,8 @@ struct SettingsCodingTests {
         #expect(animations["on_relayout"] as? Bool == true)
         // `animations.set_duration` → JSON `animations.duration`
         #expect(animations["duration"] as? Int == 150)
-        // `animations.set_scroll_speed` → `animations.scroll_speed`
-        #expect(animations["scroll_speed"] as? Int == 150)
+        // `animations.set_scroll_duration` → `animations.scroll_duration`
+        #expect(animations["scroll_duration"] as? Int == 150)
         let layout = try object(root["layout"])
         #expect(
             Set(layout.keys) == [
@@ -282,7 +282,7 @@ struct SettingsCodingTests {
         settings.animations.onWindowSwap = false
         settings.animations.onRelayout = false
         settings.animations.durationMS = 400
-        settings.animations.scrollSpeedMS = 180
+        settings.animations.scrollDurationMS = 180
         settings.mouse.followsFocus = true
         settings.quitGridTargetDepth = 12
         let data = try JSONEncoder().encode(settings)
@@ -322,7 +322,7 @@ struct SettingsCodingTests {
         #expect(decoded.animations.onScrolling)
         // Duration knobs absent — keep their 150 ms defaults.
         #expect(decoded.animations.durationMS == 150)
-        #expect(decoded.animations.scrollSpeedMS == 150)
+        #expect(decoded.animations.scrollDurationMS == 150)
     }
 
     @Test("Missing keys fall back to defaults")

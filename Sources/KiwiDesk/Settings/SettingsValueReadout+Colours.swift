@@ -1,6 +1,6 @@
 import KiwiDeskCore
 
-/// Colours & Motion rows: the animation toggles and their two
+/// Colours & Animations rows: the animation toggles and their two
 /// paces. The palette rows are ACTIONS — apply, save, rename,
 /// export, delete and import mutate the palette store, not the
 /// draft config — and the neon-glow hint is a link, so none of
@@ -60,11 +60,11 @@ extension SettingsValueReadout {
                 o.onScrolling,
                 n.onScrolling
             )
-        case .animationsScrollSpeedMS:
+        case .animationsScrollDurationMS:
             return coloursRow(
                 census,
-                milliseconds(Double(o.scrollSpeedMS)),
-                milliseconds(Double(n.scrollSpeedMS))
+                milliseconds(Double(o.scrollDurationMS)),
+                milliseconds(Double(n.scrollDurationMS))
             )
         case .paletteApply, .paletteSave, .paletteRename,
             .paletteExport, .paletteDelete, .paletteImport,

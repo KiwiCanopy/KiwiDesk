@@ -27,25 +27,25 @@ private func display(
 }
 
 /// Pins the issue #51 split: `animations.duration` and
-/// `animations.scroll_speed` are separate persisted knobs,
+/// `animations.scroll_duration` are separate persisted knobs,
 /// each synced to the AnimationEngine on profile apply.
 @Suite("Animation duration persistence", .serialized)
 @MainActor
 struct AnimationPersistenceTests {
     // MARK: - Round-trip
 
-    @Test("duration and scroll_speed round-trip through JSON")
+    @Test("duration and scroll_duration round-trip through JSON")
     func roundTrip() throws {
         var settings = TilingSettings()
         settings.animations.durationMS = 350
-        settings.animations.scrollSpeedMS = 150
+        settings.animations.scrollDurationMS = 150
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: data
         )
         #expect(decoded.animations.durationMS == 350)
-        #expect(decoded.animations.scrollSpeedMS == 150)
+        #expect(decoded.animations.scrollDurationMS == 150)
     }
 
     @Test("Pre-issue-51 profile (no keys) keeps 150 ms defaults")
@@ -57,7 +57,7 @@ struct AnimationPersistenceTests {
             from: Data(json.utf8)
         )
         #expect(decoded.animations.durationMS == 150)
-        #expect(decoded.animations.scrollSpeedMS == 150)
+        #expect(decoded.animations.scrollDurationMS == 150)
     }
 
     // MARK: - Commands
@@ -77,11 +77,11 @@ struct AnimationPersistenceTests {
         )
     }
 
-    @Test("animations.set_scroll_speed persists in settings")
-    func setScrollSpeedPersists() {
+    @Test("animations.set_scroll_duration persists in settings")
+    func setScrollDurationPersists() {
         let core = makeCore()
         let response = core.execute(
-            "animations.set_scroll_speed",
+            "animations.set_scroll_duration",
             args: [.number(150)]
         )
         #expect(response.isSuccess)
@@ -89,7 +89,7 @@ struct AnimationPersistenceTests {
             core.tiler.animation.scrollDurationMS == 150
         )
         #expect(
-            core.tiler.settings.animations.scrollSpeedMS == 150
+            core.tiler.settings.animations.scrollDurationMS == 150
         )
     }
 
@@ -116,15 +116,15 @@ struct AnimationPersistenceTests {
         )
     }
 
-    @Test("scroll_speed clamps on the settings copy too")
-    func scrollSpeedClampingPersists() {
+    @Test("scroll_duration clamps on the settings copy too")
+    func scrollDurationClampingPersists() {
         let core = makeCore()
         core.execute(
-            "animations.set_scroll_speed",
+            "animations.set_scroll_duration",
             args: [.number(9000)]
         )
         #expect(
-            core.tiler.settings.animations.scrollSpeedMS == 1000
+            core.tiler.settings.animations.scrollDurationMS == 1000
         )
         #expect(
             core.tiler.animation.scrollDurationMS == 1000
@@ -134,14 +134,14 @@ struct AnimationPersistenceTests {
     @Test("hand-edited out-of-range JSON decodes clamped")
     func decodeClampsOutOfRange() throws {
         let json = #"""
-            {"animations":{"duration":5000,"scroll_speed":5}}
+            {"animations":{"duration":5000,"scroll_duration":5}}
             """#
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: Data(json.utf8)
         )
         #expect(decoded.animations.durationMS == 1000)
-        #expect(decoded.animations.scrollSpeedMS == 50)
+        #expect(decoded.animations.scrollDurationMS == 50)
     }
 
     // MARK: - Profile apply sync
@@ -152,7 +152,7 @@ struct AnimationPersistenceTests {
         core.state.workspaces.upsertDisplay(display(1, "A"))
         var settings = TilingSettings()
         settings.animations.durationMS = 450
-        settings.animations.scrollSpeedMS = 120
+        settings.animations.scrollDurationMS = 120
         let profile = Profile(
             name: "test",
             monitorSets: [
@@ -181,7 +181,7 @@ struct AnimationPersistenceTests {
         // triggers doesn't animate at the stale duration.
         var config = GuiConfig()
         config.settings.animations.durationMS = 470
-        config.settings.animations.scrollSpeedMS = 130
+        config.settings.animations.scrollDurationMS = 130
         config.spaces = [SpaceID(1)]
         core.applyProfileScopedState(from: config)
         #expect(core.tiler.animation.durationMS == 470)
@@ -200,7 +200,7 @@ struct AnimationPersistenceTests {
             args: [.number(380)]
         )
         core.execute(
-            "animations.set_scroll_speed",
+            "animations.set_scroll_duration",
             args: [.number(160)]
         )
         // Save and wipe.

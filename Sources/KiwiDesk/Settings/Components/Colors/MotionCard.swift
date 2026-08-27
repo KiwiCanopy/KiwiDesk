@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Colours & Motion ▸ Animations (#678 Phase 3, turn 12a). Moved
+/// Colours & Animations ▸ Animations (#678 Phase 3, turn 12a). Moved
 /// here whole from Behavior: the census places every one of its
 /// rows in `.coloursAndMotion`, and a card split across two
 /// destinations is a half-rendered area the parity guard cannot
@@ -13,6 +13,17 @@ import SwiftUI
 /// The drawer is named for what it holds rather than "more" or
 /// "advanced": this area's Power-User twin is a whole separate card,
 /// and one word must never mean both a row tier and mode depth.
+///
+/// **"Motion" in this type's NAME is frozen, and the noun is
+/// "animation" (#1017).** The card, the destination that holds
+/// it and every catalog say *animation*; `MotionCard`,
+/// `ColorsMotionSection` and `.coloursAndMotion` keep the older
+/// word because a census-key re-key is a change with its own
+/// blast radius and #1017 scoped itself to the label. Prose
+/// naming what is ON SCREEN therefore says "the Animations
+/// card", never "the Motion card" — the one place *motion* is
+/// still correct is quoting Apple's own "Reduce Motion", which
+/// this card's help text does.
 struct MotionCard: View {
     @ObservedObject var model: SettingsModel
     /// macOS Reduce Motion forces animations off system-wide, so
@@ -96,7 +107,7 @@ struct MotionCard: View {
             motionRow(k)
         default:
             let _ = assertionFailure(
-                "unrendered Motion census key: \(key.id)"
+                "unrendered Animations census key: \(key.id)"
             )
             EmptyView()
         }
@@ -144,7 +155,7 @@ struct MotionCard: View {
         L(
             "behavior.animations.scrolling_xref",
             "Scrolling-layout focus shifts have their own "
-                + "toggle and speed in %1$@.",
+                + "toggle and duration in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }

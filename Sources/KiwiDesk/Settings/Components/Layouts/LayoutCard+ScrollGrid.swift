@@ -87,7 +87,8 @@ extension LayoutCard {
     /// The scrolling-specific animation pair (#68 §3.5): the
     /// on/off switch and its magnitude sit together, and the
     /// census places both in this area rather than in Colours &
-    /// Motion — a scroll's speed is the scroll's, not the app's.
+    /// Animations — a scroll's timing is the scroll's, not the
+    /// app's.
     var animateFocusShiftsRow: some View {
         ToggleRow(
             label: L(
@@ -99,10 +100,14 @@ extension LayoutCard {
         )
     }
 
-    var scrollSpeedRow: some View {
+    var scrollDurationRow: some View {
         StepperRow(
-            label: L("scroll_grid.scroll_speed", "Scroll speed"),
-            value: $model.config.settings.animations.scrollSpeedMS,
+            label: L(
+                "scroll_grid.scroll_duration",
+                "Scroll duration"
+            ),
+            value: $model.config.settings.animations
+                .scrollDurationMS,
             in: 50...1000,
             step: 10,
             suffix: "ms"

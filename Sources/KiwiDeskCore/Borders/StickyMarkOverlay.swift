@@ -29,7 +29,7 @@ final class StickyMarkOverlay {
 
     /// The pill's own HUD timings — expand settles in, holds long
     /// enough to READ, collapses a touch snappier. Deliberately
-    /// FIXED, not bound to the window animation-speed setting (like
+    /// FIXED, not bound to the window animation-duration setting (like
     /// the border ring's timings and macOS's own volume/brightness
     /// HUDs): the hold is a reading duration, and a user who slows
     /// window tiling to watch it glide should not get a pill that

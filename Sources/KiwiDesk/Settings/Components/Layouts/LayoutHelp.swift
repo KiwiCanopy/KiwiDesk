@@ -171,7 +171,8 @@ enum LayoutHelp {
 
     /// Scrolling's focus-shift animation toggle (#290). Its
     /// static schematic can't demonstrate motion, so the help
-    /// carries the behavior and points at how Scroll speed relates.
+    /// carries the behavior and points at how Scroll duration
+    /// relates.
     @MainActor static var animateFocusShifts: String {
         L(
             "scroll_grid.animate_focus_shifts.help",
@@ -180,7 +181,7 @@ enum LayoutHelp {
                 + "layout immediately. %1$@ sets how long "
                 + "the movement takes and has no effect while "
                 + "animation is off.",
-            L("scroll_grid.scroll_speed", "Scroll speed")
+            L("scroll_grid.scroll_duration", "Scroll duration")
         )
     }
 

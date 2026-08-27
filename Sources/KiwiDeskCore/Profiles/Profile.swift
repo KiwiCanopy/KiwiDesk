@@ -6,7 +6,18 @@ import Foundation
 public struct Profile: Codable, Sendable, Equatable {
     /// Format version of the profile schema (#902).
     /// Format 0 = unversioned legacy (v0.9.7 and earlier).
-    public static let currentFormat = 1
+    ///
+    /// **2** since the scroll-duration rename (#1020):
+    /// `settings.animations.scroll_speed` became
+    /// `scroll_duration`. The bump is not bookkeeping — it is
+    /// what RUNS the crossing. `ConfigMigration.needsMigration`
+    /// short-circuits on `format >= targetFormat`, so a profile
+    /// written by 1.0.1 (`format: 1`) would skip every step and
+    /// keep the retired key, which decodes to the DEFAULT rather
+    /// than failing (`AnimationSettings` uses
+    /// `decodeIfPresent`). Leaving this at 1 loses the user's
+    /// tuned value silently.
+    public static let currentFormat = 2
 
     public var format: Int
     public var name: String

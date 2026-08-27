@@ -91,12 +91,19 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     /// words and nothing else.
     ///
     /// **Those words are user-facing**, so a call site passes an
-    /// `L()` result — four of the five do. The exception is a
-    /// bare COUNT (`PresetsSection`), which needs no catalog
-    /// key and is legal for the reason localization.md gives a
-    /// count the last position in a frame: standing alone,
-    /// behind the header's own localized label, there is no
-    /// frame for a locale to disagree with.
+    /// `L()` result.
+    ///
+    /// **A summary is a PHRASE saying what is inside, never a
+    /// bare count (#1028).** Since #1021 it renders inside the
+    /// header button, so its text composes into that button's
+    /// accessibility NAME and therefore into its headings-rotor
+    /// entry: a lone number announces as an unlabelled digit
+    /// ("Other setups 12, collapsed, heading") where its
+    /// siblings announce "Background, content, indicator, sizes,
+    /// symbol style". The placement is correct and is not what
+    /// should change — the string is. `PresetsSection` was the
+    /// one call site that passed a count; it now passes nothing,
+    /// which is the other legal answer.
     private let summary: String?
     @ViewBuilder private let content: () -> Content
     @ViewBuilder private let accessory: () -> Accessory

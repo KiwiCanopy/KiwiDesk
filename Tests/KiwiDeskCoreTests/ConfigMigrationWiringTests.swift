@@ -16,6 +16,22 @@ import Testing
 @Suite("Config migration wiring")
 struct ConfigMigrationWiringTests {
 
+    /// The `format` line the CURRENT writer emits, derived rather
+    /// than spelled.
+    ///
+    /// A fixture here simulates an unversioned legacy file by
+    /// STRIPPING that line out of one this build just wrote. Spell
+    /// the number and the strip silently stops matching the day the
+    /// format bumps — the fixture is then a current-format file,
+    /// `needsMigration` short-circuits, and the test fails for a
+    /// reason that has nothing to do with what it guards. That is
+    /// exactly what the #1020 bump did to three of these
+    /// (tests.md: pin the shape a decision has, never the value it
+    /// resolves to today).
+    private func stamp(_ format: Int) -> String {
+        "  \"format\" : \(format),\n"
+    }
+
     /// A scratch config directory, cleaned up by the test.
     private func scratch() throws -> URL {
         let dir = FileManager.default.temporaryDirectory
@@ -65,7 +81,7 @@ struct ConfigMigrationWiringTests {
                 with: "\"icon_and_name\""
             )
             .replacingOccurrences(
-                of: "  \"format\" : 1,\n",
+                of: stamp(Profile.currentFormat),
                 with: ""
             ).utf8
         ).write(to: file)
@@ -217,7 +233,7 @@ struct ConfigMigrationWiringTests {
                 with: "\"icon_and_name\""
             )
             .replacingOccurrences(
-                of: "  \"format\" : 1,\n",
+                of: stamp(Profile.currentFormat),
                 with: ""
             )
         let migrated = String(
@@ -231,7 +247,11 @@ struct ConfigMigrationWiringTests {
         #expect(!migrated.contains("0.40000000000000002"))
         #expect(migrated.contains("icon_and_title"))
         #expect(!migrated.contains("icon_and_name"))
-        #expect(migrated.contains("\"format\" : 1"))
+        #expect(
+            migrated.contains(
+                "\"format\" : \(Profile.currentFormat)"
+            )
+        )
 
         // When format: 0 was already present, exactly two lines change:
         // format 0 -> 1 and icon_and_name -> icon_and_title.
@@ -242,8 +262,8 @@ struct ConfigMigrationWiringTests {
                 with: "\"icon_and_name\""
             )
             .replacingOccurrences(
-                of: "  \"format\" : 1,\n",
-                with: "  \"format\" : 0,\n"
+                of: stamp(Profile.currentFormat),
+                with: stamp(0)
             )
         let migratedWithFormat0 = String(
             decoding: try #require(
@@ -263,7 +283,13 @@ struct ConfigMigrationWiringTests {
         let changed = zip(before, after).filter { $0 != $1 }
         #expect(changed.count == 2)
         #expect(changed.contains { $0.1.contains("icon_and_title") })
-        #expect(changed.contains { $0.1.contains("\"format\" : 1") })
+        #expect(
+            changed.contains {
+                $0.1.contains(
+                    "\"format\" : \(Profile.currentFormat)"
+                )
+            }
+        )
     }
 
     /// An unversioned legacy gui.json loads and decodes with current format.
@@ -280,7 +306,7 @@ struct ConfigMigrationWiringTests {
             decoding: try Data(contentsOf: file),
             as: UTF8.self
         ).replacingOccurrences(
-            of: "  \"format\" : 1,\n",
+            of: stamp(GuiConfig.currentFormat),
             with: ""
         )
         try legacy.write(to: file, atomically: true, encoding: .utf8)
