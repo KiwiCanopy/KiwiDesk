@@ -28,9 +28,21 @@ private func makeContext(
 /// nothing focused at all — must not pan the viewport (#141):
 /// there is nothing to scroll into view, so the offset keeps
 /// its boundary-clamped previous value instead of snapping to
-/// the first slot.
+/// the first slot. And because such a pass CARRIES an offset
+/// rather than computing one, it carries that offset's recorded
+/// slot too (#966) — the last two tests are the only net on
+/// that, the rest of the tree having none (guard-prover,
+/// 2026-08-27).
 @Suite("Scrolling floating focus")
 struct ScrollingFloatingFocusTests {
+    /// A rest measured against w2, where w2 sits in the fixture's
+    /// row: 800pt slots and a 10pt gap put it at 810.
+    private static let measured = ScrollRest(
+        offset: -300,
+        focus: w2,
+        position: 810
+    )
+
     @Test("A slotless focus keeps the scrolled offset")
     func slotlessFocusKeepsOffset() {
         // w9 is not in the row; pre-#141 the slot-0 fallback
@@ -135,5 +147,44 @@ struct ScrollingFloatingFocusTests {
         // scrolled" holds everywhere.
         let afterFloat = core.activeSpace?.scrollRest?.offset
         #expect(afterFloat != nil && afterFloat! < 0)
+    }
+    @Test("A slotless pass carries the recorded slot through")
+    func slotlessPassCarriesProvenance() throws {
+        // The offset survives the pass (#141), so the
+        // measurement describing it survives with it — dropping
+        // it would tell the next pan that the focus had moved.
+        var context = makeContext(focused: w9, offset: nil)
+        context.scrollRest = Self.measured
+        let rest = ScrollingLayout.viewportRest(
+            for: [w1, w2, w3],
+            in: context
+        )
+        #expect(rest.offset == -300)
+        #expect(rest.slot == Self.measured.slot)
+    }
+
+    @Test("Coming back from a float still re-anchors")
+    func returnFromFloatReAnchors() throws {
+        // The consequence, and the reason the carry matters:
+        // float-focus, let the row change underneath, then focus
+        // the tiled window again. Its slot moved while the focus
+        // did not, so it keeps its place on screen (#966) —
+        // 510pt in, exactly where the measured rest had it.
+        var context = makeContext(focused: w9, offset: nil)
+        context.scrollRest = Self.measured
+        let carried = ScrollingLayout.viewportRest(
+            for: [w1, w2, w3],
+            in: context
+        )
+        context.scrollRest = carried
+        context.focused = w2
+        context.scrolling.slotSize = .points(700)
+        let frames = ScrollingLayout().calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let lead =
+            try #require(frames[w2]).minX - context.usable.minX
+        #expect(lead == 510)
     }
 }

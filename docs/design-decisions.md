@@ -1617,10 +1617,15 @@ window, different position", and a neighbour closing ahead of
 the focus produces exactly that signal, which is the case the
 rule exists for. And the same answer is the right one anyway:
 the window being acted on is the one that must not jump, so it
-holds still and the row slides past it, which is what a
-scrolling manager's move reads like. What changes is the frame
-of reference, never the outcome — the swapped pair trades
-places either way. Pinned by
+holds still and the row slides past it, which is the genre's
+own idiom (PaperWM and niri both scroll the row under a moved
+column rather than carrying the column across the viewport).
+What changes is the frame of reference, never the outcome — the
+swapped pair trades places either way. And nothing is painted
+into a corner: the rest is plain state, so a verb that ever
+wants the other frame rewrites the recorded position at its own
+mutation site and the next pass reads a delta of zero, with no
+new seam. Pinned by
 `ScrollingResizeAnchorEndToEndTests`, so the ruling is visible
 rather than incidental.
 

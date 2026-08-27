@@ -8,9 +8,9 @@ paths:
   - "Sources/KiwiDeskCore/Tabs/**"
   # `Space` and the values it holds live in Models, so the
   # flat-array rule and the per-space session state below govern
-  # an editor there. Two other files also load on that glob
-  # (parity-tests.md, config-vocabulary.md) — they own the mirror
-  # and the naming halves, this one owns the shape.
+  # an editor there. parity-tests.md and config-vocabulary.md
+  # glob it too — they own the mirror and the naming halves,
+  # this one owns the shape.
   - "Sources/KiwiDeskCore/Models/**"
 ---
 
