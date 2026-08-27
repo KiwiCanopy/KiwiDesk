@@ -75,6 +75,60 @@ struct EffectiveSizeBoundTests {
         )
     }
 
+    @Test("A ceiling needs two distinct asks on one answer")
+    func ceilingRequiresCorroboration() {
+        // The #1055 mirror of the floor's corroboration rule: a
+        // true ceiling answers every larger ask with the SAME
+        // span, which a grid-snapping app can never produce.
+        let corroborated = EffectiveSizeBound(
+            width: [
+                .init(asked: 800, answered: 715),
+                .init(asked: 900, answered: 715),
+            ]
+        )
+        #expect(corroborated.maxWidth == 715)
+        #expect(corroborated.maxHeight == nil)
+
+        // A single refused ask is grid noise as often as a
+        // ceiling — believing it would pin wider asks at a size
+        // the app would have accepted.
+        let single = EffectiveSizeBound(
+            width: .init(asked: 800, answered: 715)
+        )
+        #expect(single.maxWidth == nil)
+
+        // A grid-snapping app answers each ask a few points
+        // under it — different answers to different asks is the
+        // signature corroboration exists to reject.
+        let snapping = EffectiveSizeBound(
+            width: [
+                .init(asked: 800, answered: 796),
+                .init(asked: 900, answered: 898),
+            ]
+        )
+        #expect(snapping.maxWidth == nil)
+
+        // Two entries whose ASKS match within the tolerance are
+        // one ask asked twice, not corroboration.
+        let sameAsk = EffectiveSizeBound(
+            width: [
+                .init(asked: 800, answered: 715),
+                .init(asked: 801, answered: 715),
+            ]
+        )
+        #expect(sameAsk.maxWidth == nil)
+
+        // Floors (answered above asked) never feed the ceiling.
+        let floors = EffectiveSizeBound(
+            width: [
+                .init(asked: 300, answered: 500),
+                .init(asked: 240, answered: 500),
+            ]
+        )
+        #expect(floors.maxWidth == nil)
+        #expect(floors.minWidth == 500)
+    }
+
     @Test("A floor explains like a ceiling")
     func floorExplains() {
         // The mirror case (#677): slot narrower than the app's

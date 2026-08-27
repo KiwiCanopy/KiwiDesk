@@ -13,6 +13,10 @@ enum ResizeRefusal: Equatable {
     /// A grow stopped where `anchor` — a neighboring window —
     /// would drop below ITS effective minimum.
     case neighborMinimum(anchor: WindowID, focused: WindowID)
+    /// A grow stopped at the resized window's own learned
+    /// app-enforced maximum (#1055) — the app refuses to get
+    /// bigger, so growing the slot further only overshoots.
+    case ownMaximum(WindowID)
 }
 
 /// The effective-minimum resolution and the shared clamped
@@ -42,6 +46,20 @@ extension KiwiCore {
             Double(tiler.settings.minWindowSize),
             Double(appMin)
         )
+    }
+
+    /// One window's learned app-enforced maximum on `axis`
+    /// (#1055) — `effectiveMinSize`'s mirror, with one
+    /// asymmetry: there is no configured global maximum the way
+    /// `min_window_size` floors the minimum, so nil means
+    /// unbounded rather than "the default".
+    func effectiveMaxSize(
+        of id: WindowID,
+        axis: String
+    ) -> Double? {
+        let bound = tiler.sizeBound(for: id)
+        return (axis == "x" ? bound?.maxWidth : bound?.maxHeight)
+            .map(Double.init)
     }
 
     /// The largest effective minimum among `members` — a track

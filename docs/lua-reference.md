@@ -1011,7 +1011,10 @@ slot below `min_window_size` (or an app's own learned minimum),
 and it will not grow it past what fits on screen — growing
 further would otherwise bank size you cannot see, and every
 press of it would have to be undone before shrinking did
-anything.
+anything. Nor past a *maximum* the focused window's app itself
+enforces, once KiwiDesk has learned it (#1055): that refusal
+bounces and pills ("Maximum window size reached"), where the
+fits-on-screen stop stays wordless.
 
 Setting a size *here* is not clamped that way, and a `resize`
 will not undo it: a config value travels with you between
@@ -3758,10 +3761,12 @@ the keyboard (the Cmd+Z-with-nothing-to-undo idiom; #184).
 Mute it with `set_resize_feedback(false)` — CLI and IPC
 callers never hear it, they read the error JSON.
 
-Distinct from that no-target alert (#933): a resize a minimum
-size **truncates** — a shrink reaching the focused window's
-effective minimum, or a grow stopped where a neighbor would
-drop below its own — still applies the part that fits, and
+Distinct from that no-target alert (#933): a resize a size
+limit **truncates** — a shrink reaching the focused window's
+effective minimum, a grow stopped where a neighbor would
+drop below its own, or a grow reaching the focused window's
+own learned app maximum (scrolling, #1055; cued on the
+resized window alone) — still applies the part that fits, and
 cues the refusal visually on the first truncated attempt: the
 focus ring gives the same rubber-band bounce as a dead-end
 focus move (#436), and a pill names the reason on the window

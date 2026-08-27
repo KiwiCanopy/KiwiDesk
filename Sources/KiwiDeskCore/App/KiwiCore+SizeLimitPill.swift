@@ -37,6 +37,25 @@ extension KiwiCore {
         )
     }
 
+    /// Cues a grow refused at the window's own learned
+    /// app-enforced maximum (#1055) — `refuseShrinkAtMinimum`'s
+    /// mirror at the other end. One pill only: the limit is the
+    /// resized window's own app, so there is no second window
+    /// to mark, and the bump stays on the gesture that hit the
+    /// wall.
+    func refuseGrowAtMaximum(_ window: WindowID, axis: String) {
+        borders.onResizeRefusal(.ownMaximum(window))
+        let direction: Direction = axis == "y" ? .down : .right
+        flashDeadEnd(window, direction: direction)
+        flashSizeLimitPill(
+            window,
+            text: L(
+                "resize.max_size_reached",
+                "Maximum window size reached"
+            )
+        )
+    }
+
     /// Cues a resize refused because a NEIGHBOR sits at its own
     /// effective minimum (#933): the bump stays on the resized
     /// window (the gesture hit a wall), and BOTH ends pill with

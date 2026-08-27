@@ -895,6 +895,7 @@
   "profiles.which_loads.rule": "A profile bound to the active Desktop loads first. Otherwise KiwiDesk picks the profile whose screen count matches, preferring the one marked default.",
   "profiles.which_loads.standard": "Right now: %1$@ → the built-in %2$@ (no saved profile matches).",
   "profiles.which_loads.title": "Which profile loads",
+  "resize.max_size_reached": "Maximum window size reached",
   "resize.min_size_reached": "Minimum window size reached",
   "resize.neighbor_min_size": "Neighboring window at its minimum size",
   "scroll_grid.anchor.center": "Center",

@@ -63,8 +63,9 @@ public struct EffectiveSizeBound: Sendable, Equatable {
 
     /// The learned minimum width floor (#933): the largest
     /// answer TWO entries with DISTINCT asks agree on (within
-    /// `matchTolerance`), each answering above its ask. This is
-    /// the one accessor that reads ACROSS asks, so it must not
+    /// `matchTolerance`), each answering above its ask. This
+    /// accessor (and its `maxWidth` mirror) reads ACROSS asks,
+    /// so it must not
     /// violate the header's rule that no entry generalizes to a
     /// different ask — and it does not, because it requires the
     /// corroboration a grid-snapping app can never produce: a
@@ -80,6 +81,25 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     /// The learned minimum height floor; see `minWidth`.
     public var minHeight: CGFloat? { floor(of: height) }
 
+    /// The learned maximum width ceiling (#1055) — `minWidth`'s
+    /// mirror, under the same corroboration rule and for the
+    /// same reason: a grid-snapping app answers each ask a few
+    /// points UNDER it too, so a single answered-below-asked
+    /// entry is grid noise as often as a ceiling, and believing
+    /// it would pin every wider ask at a size the app would
+    /// have accepted. A true ceiling answers every larger ask
+    /// with the SAME span, which is the corroboration required
+    /// here: two entries with DISTINCT asks agreeing on one
+    /// answer (within `matchTolerance`), each answering below
+    /// its ask. Nil when uncorroborated. Where the floor takes
+    /// the largest corroborated answer, the ceiling takes the
+    /// smallest — each is the direction in which the bound
+    /// binds first.
+    public var maxWidth: CGFloat? { ceiling(of: width) }
+
+    /// The learned maximum height ceiling; see `maxWidth`.
+    public var maxHeight: CGFloat? { ceiling(of: height) }
+
     private func floor(of entries: [Axis]) -> CGFloat? {
         let floors = entries.filter { $0.answered > $0.asked }
         var best: CGFloat? = nil
@@ -90,6 +110,21 @@ public struct EffectiveSizeBound: Sendable, Equatable {
             {
                 let answer = max(a.answered, b.answered)
                 if answer > (best ?? 0) { best = answer }
+            }
+        }
+        return best
+    }
+
+    private func ceiling(of entries: [Axis]) -> CGFloat? {
+        let ceilings = entries.filter { $0.answered < $0.asked }
+        var best: CGFloat? = nil
+        for (index, a) in ceilings.enumerated() {
+            for b in ceilings.dropFirst(index + 1)
+            where !Self.matches(a.asked, b.asked)
+                && Self.matches(a.answered, b.answered)
+            {
+                let answer = min(a.answered, b.answered)
+                if answer < (best ?? .infinity) { best = answer }
             }
         }
         return best

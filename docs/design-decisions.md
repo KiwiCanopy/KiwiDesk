@@ -2034,6 +2034,28 @@ Four rulings sharpen that:
   event — measuring first-event → last-event resized only part
   of the way.
 
+**The maximum direction clamps and cues too, where a learned
+ceiling can bind (#1055).** An app-enforced *maximum* is
+learned the same way the minimum is (`EffectiveSizeBound`
+models both directions; `maxWidth`/`maxHeight` require the
+same two-distinct-asks corroboration as the floor, because a
+grid-snapping app answers a few points under an ask exactly as
+it answers a few points over one). The scrolling slot is where
+it acts: the one resize store holding an absolute length, and
+one slot serves the whole row, so growing it past what the
+focused window's app will perform only slides the neighbors
+aside for a span the app snaps back from. Three choices
+sharpen it. The ceiling never *reduces* the shared slot — at
+or past the learned maximum a grow refuses rather than trims,
+because trimming a row-wide value to one window's limit would
+visibly shrink every neighbor on a grow press. The refusal
+pills ONE end, unlike the neighbor-minimum pair: the limit is
+the resized window's own app, so there is no second window to
+mark, and the copy mirrors the floor's
+(`"Maximum window size reached"`). And running out of
+*viewport* stays wordless — that limit protects no window and
+names none, so the bounce alone carries it.
+
 **Session weights are healed at retile, not validated forever
 at write time (#944).** [Principle] The write-time clamps above
 validate a weight against the membership at PRESS time, and

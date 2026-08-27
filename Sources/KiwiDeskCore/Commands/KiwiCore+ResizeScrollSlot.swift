@@ -52,13 +52,20 @@ extension KiwiCore {
     /// cap out of `ScrollSize`. A shrink from such a value
     /// steps down by its own delta like any other.
     ///
-    /// A truncated GROW is deliberately silent. The cue kinds
-    /// (`ResizeRefusal`) name a window that cannot move, and
-    /// nothing is being protected here — the limit is the
-    /// viewport itself. Naming a phantom neighbor is the trap
-    /// `reportResizeRefusal`'s grow arm already stands down
-    /// from; a viewport-limit cue is its own change, with its
-    /// own case, renderer and localized string.
+    /// The focused window's learned app maximum (#1055) joins
+    /// the ceiling: one slot size serves the whole row, so a
+    /// grow past what the focused window's app will perform
+    /// only slides the neighbors aside for a span the app then
+    /// refuses — the overshoot-and-re-pack dance the issue's
+    /// repro A shows. A grow the APP ceiling truncates cues
+    /// `ownMaximum` on the focused window — the refusal has a
+    /// window and a reason to name. A grow the VIEWPORT
+    /// truncates stays deliberately silent: nothing is being
+    /// protected there but the screen itself, and naming a
+    /// phantom neighbor is the trap `reportResizeRefusal`'s
+    /// grow arm already stands down from; a viewport-limit cue
+    /// is its own change, with its own case, renderer and
+    /// localized string.
     func writeCappedScrollSlot(
         delta: Double,
         space: Space,
@@ -110,8 +117,23 @@ extension KiwiCore {
         } else {
             configured = 0
         }
+        let drawnAlong = horizontal ? drawn.width : drawn.height
+        let appMax = space.focused.flatMap {
+            effectiveMaxSize(of: $0, axis: axis)
+        }
+        // Floored at `current` so the app ceiling never REDUCES
+        // the slot: one slot size serves the whole row, so
+        // trimming it to the focused window's maximum would
+        // visibly shrink every NEIGHBOR on a grow press. At or
+        // past the ceiling a grow refuses instead. The viewport
+        // trim below is different by construction — the drawn
+        // area binds every window alike.
+        let appCeiling = appMax.map {
+            max(CGFloat($0), current)
+        }
+        let limit = min(drawnAlong, appCeiling ?? .infinity)
         let ceiling = max(
-            horizontal ? drawn.width : drawn.height,
+            limit,
             CGFloat(effectiveMin),
             configured
         )
@@ -124,6 +146,21 @@ extension KiwiCore {
             let focused = space.focused
         {
             refuseShrinkAtMinimum(focused, axis: axis)
+        }
+        // The cue asks WHICH limit truncated the grow: the app
+        // ceiling cues (a window and a reason to name), the
+        // viewport stays silent (header). `appMax < drawnAlong`
+        // is that discrimination — it holds even when a banked
+        // `configured` above the ceiling is what the arithmetic
+        // clamped at, because the reason the slot cannot grow
+        // is still the app's own maximum.
+        if delta > 0,
+            clamped < requested - Self.resizeTruncationEpsilon,
+            let appMax,
+            CGFloat(appMax) < drawnAlong,
+            let focused = space.focused
+        {
+            refuseGrowAtMaximum(focused, axis: axis)
         }
         writeSlotSize(
             .points(clamping: clamped),
