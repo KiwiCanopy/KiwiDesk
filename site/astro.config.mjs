@@ -4,6 +4,7 @@ import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
 import icon from "astro-icon";
 import mermaid from "astro-mermaid";
+import { unified } from "@astrojs/markdown-remark";
 import { remarkDocsLinks } from "./remark-docs-links.mjs";
 
 // The public site URL. Override with SITE_URL at build time
@@ -21,7 +22,17 @@ export default defineConfig({
   prefetch: true,
   // Rewrite the canonical docs' GitHub-style `.md` links to
   // Starlight routes and drop their duplicate H1 (see the plugin).
-  markdown: { remarkPlugins: [remarkDocsLinks] },
+  //
+  // On `markdown.processor`, never the deprecated
+  // `markdown.remarkPlugins` array (#985): that shim drops the
+  // plugins with a `console.warn` the day anything configures a
+  // processor that is not unified, leaving a green build. The
+  // argument is in .claude/rules/site.md ▸ "The docs plugin rides
+  // `markdown.processor`", and the built pages are guarded by
+  // scripts/check-site-tokens.py ▸ check_markdown_pipeline.
+  markdown: {
+    processor: unified({ remarkPlugins: [remarkDocsLinks] }),
+  },
   integrations: [
     // Renders ```mermaid fenced blocks in docs as diagrams,
     // client-side, with light/dark synced to the site theme
