@@ -19,7 +19,11 @@ struct SizeBoundInvalidationTests {
         answered: CGSize
     ) {
         learner.recordAsk(w, size: asked)
-        learner.observe(w, currentSize: answered)
+        learner.observe(
+            w,
+            currentSize: answered,
+            settledRead: true
+        )
     }
 
     @Test("Compliance clears the candidate")
@@ -70,6 +74,66 @@ struct SizeBoundInvalidationTests {
         // ceiling still stands for the 900 ask.
         refused(&learner, asked: answered, answered: answered)
         #expect(learner.bound(for: w)?.width.first?.answered == 715)
+    }
+
+    @Test("A transient compliance does not clear the candidate")
+    func transientComplianceKeepsCandidate() {
+        // The Android emulator (#1049): it ANIMATES to the full
+        // asked size, holds it ~0.4 s, then snaps back to its
+        // aspect ratio — so every probe cycle echoes a
+        // compliance before the real refusal. An echo-channel
+        // read is not past the app's chance to revert, so it
+        // must not run the complied sweep, or the ladder wipes
+        // every cycle and "twice in a row" never accumulates.
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 1626, height: 1005)
+        let snapped = CGSize(width: 439, height: 1005)
+        refused(&learner, asked: asked, answered: snapped)
+        // The transient compliance echo, mid-snap-back.
+        learner.recordAsk(w, size: asked)
+        learner.observe(
+            w,
+            currentSize: asked,
+            settledRead: false
+        )
+        // The snap-back echo is the second matching answer.
+        #expect(
+            learner.observe(
+                w,
+                currentSize: snapped,
+                settledRead: false
+            ) == true
+        )
+        #expect(
+            learner.bound(for: w)?
+                .consumedWidth(asking: 1626) == 439
+        )
+    }
+
+    @Test("A transient compliance does not clear a bound")
+    func transientComplianceKeepsBound() {
+        // The believed half of the same rule (#1049): the
+        // emulator transiently holds the asked size on every
+        // re-ask, and clearing the confirmed entry on that echo
+        // would re-open the endless re-issue the skip closed.
+        // A SETTLED compliance at the same size still clears —
+        // that is `contradictionClearsBound` above.
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 1626, height: 1005)
+        let snapped = CGSize(width: 439, height: 1005)
+        refused(&learner, asked: asked, answered: snapped)
+        refused(&learner, asked: asked, answered: snapped)
+        #expect(learner.bound(for: w) != nil)
+        learner.recordAsk(w, size: asked)
+        learner.observe(
+            w,
+            currentSize: asked,
+            settledRead: false
+        )
+        #expect(
+            learner.bound(for: w)?
+                .consumedWidth(asking: 1626) == 439
+        )
     }
 
     @Test("A ledger-predicted size explains a late resize")

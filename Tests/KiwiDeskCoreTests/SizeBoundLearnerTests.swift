@@ -18,7 +18,11 @@ struct SizeBoundLearnerTests {
         answered: CGSize
     ) {
         learner.recordAsk(w, size: asked)
-        learner.observe(w, currentSize: answered)
+        learner.observe(
+            w,
+            currentSize: answered,
+            settledRead: true
+        )
     }
 
     @Test("Twice in a row confirms; once does not")
@@ -215,24 +219,44 @@ struct SizeBoundLearnerTests {
         let answered = CGSize(width: 715, height: 800)
         learner.recordAsk(w, size: asked)
         #expect(
-            learner.observe(w, currentSize: answered) == false
+            learner.observe(
+                w,
+                currentSize: answered,
+                settledRead: true
+            ) == false
         )
         learner.recordAsk(w, size: asked)
         #expect(
-            learner.observe(w, currentSize: answered) == true
+            learner.observe(
+                w,
+                currentSize: answered,
+                settledRead: true
+            ) == true
         )
         learner.recordAsk(w, size: asked)
         #expect(
-            learner.observe(w, currentSize: answered) == false
+            learner.observe(
+                w,
+                currentSize: answered,
+                settledRead: true
+            ) == false
         )
         // A CHANGED answer that re-confirms is a new edge — the
         // geometry it implies moved.
         let changed = CGSize(width: 640, height: 800)
         learner.recordAsk(w, size: asked)
-        learner.observe(w, currentSize: changed)
+        learner.observe(
+            w,
+            currentSize: changed,
+            settledRead: true
+        )
         learner.recordAsk(w, size: asked)
         #expect(
-            learner.observe(w, currentSize: changed) == true
+            learner.observe(
+                w,
+                currentSize: changed,
+                settledRead: true
+            ) == true
         )
     }
 
@@ -252,6 +276,58 @@ struct SizeBoundLearnerTests {
         refused(&learner, asked: asked, answered: answered)
         refused(&learner, asked: asked, answered: answered)
         #expect(!learner.wantsProbe(w, currentSize: answered))
+    }
+
+    @Test("A comply-then-revoke pair confirms in one cycle")
+    func complyThenRevokePairConfirms() {
+        // The #1049 single-dance shortcut: the ladder needs the
+        // same answer twice because one refusal can be a stale
+        // pre-ask frame — but an echo-channel compliance proves
+        // the window truly held the asked size, so the off-ask
+        // echo that follows within the same ask is the app
+        // actively revoking: one answer, definitively
+        // attributed.
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 1626, height: 1005)
+        let snapped = CGSize(width: 439, height: 1005)
+        learner.recordAsk(w, size: asked)
+        learner.observe(
+            w,
+            currentSize: asked,
+            settledRead: false
+        )
+        #expect(
+            learner.observe(
+                w,
+                currentSize: snapped,
+                settledRead: false
+            ) == true
+        )
+        #expect(
+            learner.bound(for: w)?
+                .consumedWidth(asking: 1626) == 439
+        )
+        // A fresh ask resets the pair — the flag must not
+        // carry a stale compliance into the next question. The
+        // compliance echo BEFORE the fresh ask is load-bearing
+        // (review, 2026-08-27): without it the flag is already
+        // consumed by the promotion above and the clause passes
+        // whether or not `recordAsk` resets anything.
+        learner.forget(w)
+        learner.recordAsk(w, size: asked)
+        learner.observe(
+            w,
+            currentSize: asked,
+            settledRead: false
+        )
+        learner.recordAsk(w, size: asked)
+        #expect(
+            learner.observe(
+                w,
+                currentSize: snapped,
+                settledRead: false
+            ) == false
+        )
     }
 
     @Test("A zero-size frame is no answer")

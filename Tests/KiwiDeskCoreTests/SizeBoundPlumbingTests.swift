@@ -72,7 +72,8 @@ struct SizeBoundPlumbingTests {
             core.tiler.boundLearner.recordAsk(w, size: asked)
             core.tiler.boundLearner.observe(
                 w,
-                currentSize: answered
+                currentSize: answered,
+                settledRead: true
             )
         }
         let space = try #require(

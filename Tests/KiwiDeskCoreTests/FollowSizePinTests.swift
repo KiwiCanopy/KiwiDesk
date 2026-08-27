@@ -140,7 +140,8 @@ struct FollowSizePinTests {
             core.tiler.boundLearner.recordAsk(w, size: asked)
             core.tiler.boundLearner.observe(
                 w,
-                currentSize: answered
+                currentSize: answered,
+                settledRead: true
             )
         }
         core.tiler.animation.animate(
@@ -173,7 +174,8 @@ struct FollowSizePinTests {
             core.tiler.boundLearner.recordAsk(w, size: asked)
             core.tiler.boundLearner.observe(
                 w,
-                currentSize: answered
+                currentSize: answered,
+                settledRead: true
             )
         }
         // No animation in flight: nothing to correct.
@@ -226,7 +228,8 @@ struct FollowSizePinTests {
         core.tiler.boundLearner.recordAsk(w, size: asked)
         core.tiler.boundLearner.observe(
             w,
-            currentSize: answered
+            currentSize: answered,
+            settledRead: true
         )
         #expect(core.tiler.sizeBound(for: w) == nil)
         core.tiler.animation.animate(

@@ -46,18 +46,10 @@ extension KiwiCore {
                     containing: window.frame
                 )?.kiwiDisplay?.id
         }
-        // The frame BEFORE this event folds in — the drag
-        // coordinator anchors a gesture's start on it (#933);
-        // `state.apply` below overwrites it.
-        let preEventFrame: CGRect? = {
-            switch event {
-            case .windowMoved(let id, _),
-                .windowResized(let id, _):
-                return state.windows[id]?.frame
-            default:
-                return nil
-            }
-        }()
+        // Read BEFORE the fold below overwrites/removes them —
+        // both helpers argue their consumer.
+        let preEventFrame = preEventFrame(of: event)
+        let goneWindowPID = goneWindowPID(of: event)
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {
@@ -73,6 +65,11 @@ extension KiwiCore {
             // of a hidden window (see above).
             deferred.cancel(.focusFollow)
             newlyCreatedWindow = window.id
+            // A flapped window's parked size bounds come back
+            // BEFORE the arrival retile below (#1049), so the
+            // re-add tiles straight to the learned answer
+            // instead of re-running the whole dance.
+            tiler.reviveSizeBound(window.id, pid: window.pid)
             emitWindowCreated(
                 window,
                 reason: WindowAppearReason.classify(
@@ -137,7 +134,7 @@ extension KiwiCore {
                 observeSizeAnswer(
                     id,
                     size: frame.size,
-                    channel: "move echo"
+                    channel: .moveEcho
                 )
                 // Reality reported — state beats stamp (#881).
                 tiler.clearInstantTarget(id)
@@ -178,7 +175,7 @@ extension KiwiCore {
                 observeSizeAnswer(
                     id,
                     size: frame.size,
-                    channel: "resize echo"
+                    channel: .resizeEcho
                 )
                 tiler.clearInstantTarget(id)  // as :104, #881
             } else if !tiler.ledgerExplainsResize(
@@ -219,7 +216,7 @@ extension KiwiCore {
                 )
             }
         case .windowDestroyed(let id, let wasMinimized):
-            forgetGoneWindow(id)
+            forgetGoneWindow(id, pid: goneWindowPID)
             // The switch timestamp is set by the
             // .desktopChanged event, which the event loop
             // emits BEFORE the reconcile burst on the same
@@ -240,7 +237,7 @@ extension KiwiCore {
         case .windowHidden(let id):
             // Same forgetting as a destroy — the id can be
             // reused whether the window closed or its app hid.
-            forgetGoneWindow(id)
+            forgetGoneWindow(id, pid: goneWindowPID)
             // `.hidden` rather than the timing classifier: a
             // hide is explicit, like a minimize, so there is
             // nothing to infer from how long ago the desktop

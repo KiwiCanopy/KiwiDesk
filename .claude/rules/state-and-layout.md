@@ -298,15 +298,34 @@ editing here:
   un-forced skip treats the refused target as "already there"
   (ends the endless re-issue) and the layouts place the residue
   (scrolling re-packs, monocle and a lone scrolling window
-  center). Three obligations follow. A frame-producing context
+  center). And only a SETTLED read — the retile-time gate, the
+  settle probe — may clear learning on a compliance (#1049): a
+  raw echo's compliance can be the transient half of an app's
+  comply-then-snap-back (the Android emulator animates to the
+  full ask, holds it ~0.4 s, snaps back), and clearing on it
+  wiped the ladder every probe cycle, so "twice in a row" never
+  accumulated and the dance re-issued forever
+  (`SizeBoundInvalidationTests`,
+  `SizeBoundTransientComplianceTests`). Three obligations
+  follow. A frame-producing context
   build **threads `sizeBounds`** the way it threads
   `screenNeighbors` — `layoutInput` is the site, probes and
   previews rightly omit it (`SizeBoundPlumbingTests`). A path
   that changes a window's size outside the engine's asks **owes
-  the ledger an invalidation** — genuine resize forgets, destroy
-  forgets (ids are reused, #152/#158), rekey migrates — or a
-  stale bound pins the window at a size the app no longer
-  insists on (`RetileBoundSkipTests`). And only the layout loop
+  the ledger an invalidation** — a genuine resize forgets
+  outright, rekey migrates — or a stale bound pins the window
+  at a size the app no longer insists on
+  (`RetileBoundSkipTests`). A GONE path (destroy, hide) is the
+  #1049 carve-out to #152/#158's destroy-forgets: it takes
+  `stashSizeBoundOnGone`, never a bare forget — the believed
+  ledger parks in a pid-checked tombstone the same window's
+  re-add revives before its arrival retile, because a slow-AX
+  app flaps (dropped and re-added under the SAME id seconds
+  apart) and a plain forget re-ran the whole learn dance on
+  every flap and unhide. `SizeBoundReviveTests` pins both gone
+  arms and the stand-downs; a NEW gone path joins the stash
+  deliberately, since nothing scans for a bare forget beside
+  it. And only the layout loop
   **records asks** — a stash park or float restore is not a
   layout ask, and learning from one keys a bound to a frame no
   layout re-issues. Rendering may

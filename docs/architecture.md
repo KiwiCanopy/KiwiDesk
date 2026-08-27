@@ -97,10 +97,12 @@ flowchart TD
 
 Event-driven retiles run **un-forced**, so the engine's ±2 pt "already
 there" tolerance can absorb AX-echo lag without wobbling windows.
-(Contrast with pipeline 2.) A size an app refuses twice is learned as
-that window's **effective bound** (#677): the refused target stops
-being re-issued, and Scrolling/Monocle consume the learned answer to
-place the residue (re-pack / center).
+(Contrast with pipeline 2.) A size an app refuses twice — or once,
+when its own compliance echo proves it performed the ask and then
+revoked it (#1049) — is learned as that window's **effective bound**
+(#677): the refused target stops being re-issued, and
+Scrolling/Monocle consume the learned answer to place the residue
+(re-pack / center).
 
 **Tab reconciliation** (the subtle case in step 2). A native-tab
 switch is temporal — one window disappears as another appears at the
