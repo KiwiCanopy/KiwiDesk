@@ -134,18 +134,6 @@ extension KiwiCore {
             updateStickyMarks()
             return
         }
-        // The raised window's app keying an UNSTAMPED sibling
-        // (#1049): the activation half of the echo the branch
-        // above absorbs, on a window the raise never stamped —
-        // the Android emulator's focus-steal loop. Argument
-        // and discriminators on the predicate.
-        if consumeSiblingActivationEcho(
-            id,
-            before: effects.focusBefore,
-            now: now
-        ) {
-            return
-        }
         // An activation re-report (#465 QA): raising window B
         // activates its app, and a lazy-AX app (Electron)
         // re-reports its OLD focused window A — same pid,
