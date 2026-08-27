@@ -144,17 +144,22 @@ struct MouseResizeApplyTests {
         #expect(abs(stack.masterRatio - 0.7) < 1e-9)
     }
 
-    @Test("scrollWidth grows the slot from the given bounds")
+    @Test("scrollWidth adjusts the slot from the given bounds")
     func scrollWidthApplies() {
         let core = makeCore()
         let space = space(core, mode: "scrolling")
         // The one case that consumes the extracted `bounds`
         // parameter: the auto slot seeds against its scroll
-        // axis, then the delta lands on top in points.
+        // axis, then the delta lands on top in points. The
+        // delta shrinks because the seed is 95% of that axis —
+        // a grow would land on the ceiling (#966) and stop
+        // saying anything about the seed, which is this test's
+        // subject; `scrollWidthGrowStopsAtTheAxis` below owns
+        // the other end.
         let before = core.tiler.settings.scrolling.slotSize
             .editablePoints(along: bounds.width, horizontal: true)
         core.applyResizeAdjustment(
-            .scrollWidth(100),
+            .scrollWidth(-100),
             for: nil,
             in: space,
             bounds: bounds
@@ -163,7 +168,29 @@ struct MouseResizeApplyTests {
             for: core.state.workspaces[SpaceID("1")]!
         ).slotSize
             .editablePoints(along: bounds.width, horizontal: true)
-        #expect(abs(after - before - 100) < 0.5)
+        #expect(abs(after - before + 100) < 0.5)
+    }
+
+    @Test("scrollWidth grow stops at the axis, like the verb")
+    func scrollWidthGrowStopsAtTheAxis() {
+        // #933's parity claim, at the ceiling end (#966): the
+        // drag and the keyboard verb share one writer, so a
+        // drag cannot bank slot the keyboard path refuses. The
+        // seed is 950 of a 1000pt axis; +400 lands on 1000, not
+        // 1350.
+        let core = makeCore()
+        let space = space(core, mode: "scrolling")
+        core.applyResizeAdjustment(
+            .scrollWidth(400),
+            for: nil,
+            in: space,
+            bounds: bounds
+        )
+        let after = core.tiler.settings.resolvedScrolling(
+            for: core.state.workspaces[SpaceID("1")]!
+        ).slotSize
+            .editablePoints(along: bounds.width, horizontal: true)
+        #expect(abs(after - bounds.width) < 0.5)
     }
 
     @Test("trackAcross adjusts track weight")
