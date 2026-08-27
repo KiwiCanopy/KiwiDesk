@@ -41,7 +41,7 @@ struct ScrollingBlockedEdgeTests {
     @Test("A right wall stops every scrolled-out slot flush")
     func rightWallStopsFlush() throws {
         var context = pinContext(focused: w1)
-        context.scrollOffset = 0
+        context.scrollRest = ScrollRest(offset: 0)
         context.screenNeighbors = ScreenNeighbors(right: true)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3, w4, w5],
@@ -74,7 +74,7 @@ struct ScrollingBlockedEdgeTests {
     @Test("A left wall mirrors the stop on the leading edge")
     func leftWallStopsFlush() throws {
         var context = pinContext(focused: w5)
-        context.scrollOffset = -1000
+        context.scrollRest = ScrollRest(offset: -1000)
         context.screenNeighbors = ScreenNeighbors(left: true)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3, w4, w5],
@@ -97,7 +97,7 @@ struct ScrollingBlockedEdgeTests {
     @Test("Walls on both sides act independently")
     func bothWalls() throws {
         var context = pinContext(focused: w3)
-        context.scrollOffset = -800
+        context.scrollRest = ScrollRest(offset: -800)
         context.screenNeighbors = ScreenNeighbors(
             left: true,
             right: true
@@ -130,7 +130,7 @@ struct ScrollingBlockedEdgeTests {
         // the #142 overhang with its `edgePeek` sliver — the
         // wall is per edge, never per axis.
         var context = pinContext(focused: w1)
-        context.scrollOffset = 0
+        context.scrollRest = ScrollRest(offset: 0)
         context.screenNeighbors = ScreenNeighbors(left: true)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3, w4, w5],
@@ -162,7 +162,7 @@ struct ScrollingBlockedEdgeTests {
         // (guard-prover, 2026-08-18).
         var context = pinContext(focused: w1)
         context.minWindowSize = 2000
-        context.scrollOffset = 0
+        context.scrollRest = ScrollRest(offset: 0)
         context.screenNeighbors = ScreenNeighbors(
             left: true,
             right: true
@@ -194,7 +194,7 @@ struct ScrollingBlockedEdgeTests {
         context.scrolling.slotSize = .points(400)
         // Pin the floor the slot resolution reasons from (#660).
         context.minWindowSize = 300
-        context.scrollOffset = 0
+        context.scrollRest = ScrollRest(offset: 0)
         context.screenNeighbors = ScreenNeighbors(bottom: true)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],

@@ -1577,6 +1577,38 @@ two-axis layout's wire keys are named follows the
 geometric-wire rule in
 [Settings UI patterns](ui-patterns.md#labels--wire-names).
 
+**`follow` holds a place, not a number: a resize re-anchors the
+viewport (#966).** A scrolling row has one slot size for every
+slot, so resizing one moves every slot's *position* along the
+row. Three of the four anchors never noticed — `center`,
+`start` and `end` recompute a resting position on every call.
+`follow` is defined against the previous offset, an absolute
+distance along that row, and holding it across a resize meant
+holding a number that now pointed somewhere else: the window
+being resized slid toward the leading edge and the space it
+gave up opened in front of it, reading as a scroll nobody asked
+for.
+
+The ruling is that `follow` remembers where the focused window
+rested, not how far the row was pushed. The stored viewport
+value carries the slot it was measured against, and the offset
+math asks one question of it: is this the same focus as last
+time? A focus change holds the offset and pans minimally —
+`follow`'s original contract (#66), where nothing moved, so the
+side you came from stays open. An unchanged focus whose slot
+has moved holds that slot's place on screen instead and lets
+the row rearrange around it.
+
+That second arm deliberately covers more than the resize that
+found it: a `swap` that re-seats the focus in the array, a
+window opening or closing ahead of it, a #677 bound re-packing
+the row. Those are all one event — the row moved underneath the
+window the user is looking at — and a rule naming only the
+resize would be a special case the next cause re-opens. The
+clamps still win where they disagree, so near a row end the
+focus re-anchors only as far as the boundary allows; the row
+never reveals empty margin past its ends.
+
 **Scrolling at a screen seam: a blocked edge is a hard stop
 (#878).** A scrolling edge is *open* or *blocked*, decided per
 edge from the screen arrangement. Open edges keep the #142

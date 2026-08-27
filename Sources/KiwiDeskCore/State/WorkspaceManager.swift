@@ -102,7 +102,7 @@ public struct WorkspaceManager: Sendable {
     ) {
         guard spaces[id]?.mode != mode else { return }
         spaces[id]?.mode = mode
-        spaces[id]?.scrollOffset = nil
+        spaces[id]?.scrollRest = nil
         // The session resize layer (#458) is a stint value like
         // the offset: a fresh mode stint reseeds from config.
         spaces[id]?.sessionRatios = SessionRatios()

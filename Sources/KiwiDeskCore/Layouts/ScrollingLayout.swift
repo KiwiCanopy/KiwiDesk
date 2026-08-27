@@ -9,10 +9,14 @@ import CoreGraphics
 /// resting position (centred, or flush against the leading
 /// left/top or trailing right/bottom edge — `start`/`end` are
 /// relative to the scroll axis), then clamp so no empty
-/// margin shows past the row ends; `follow` (the default) keeps
-/// the prior offset and pans the minimum to reveal the focus
-/// (#66) — up/down mirror, an already-visible slot doesn't move,
-/// the side you came from stays open. Ends snap to the screen
+/// margin shows past the row ends; `follow` (the default) pans
+/// the minimum to reveal the focus from where the viewport
+/// already was (#66) — up/down mirror, an already-visible slot
+/// doesn't move, the side you came from stays open — and when
+/// the row moves underneath an unchanged focus instead (a slot
+/// resize re-positions every slot), it holds that slot's place
+/// on screen rather than its own number (#966,
+/// `ScrollingLayout+Offset.heldBase`). Ends snap to the screen
 /// edge. With the indicator bar enabled its strip is carved out
 /// of the usable area first, so windows and bar never overlap.
 ///
@@ -80,7 +84,8 @@ public struct ScrollingLayout: LayoutSystem {
         )
         let offset = Self.offset(
             anchor: context.scrolling.anchor,
-            previous: context.scrollOffset,
+            previous: context.scrollRest,
+            focus: context.focused,
             along: metrics.along,
             size: metrics.focusedSpan,
             rowLength: metrics.rowLength,
@@ -175,26 +180,31 @@ public struct ScrollingLayout: LayoutSystem {
         )
     }
 
-    /// The viewport offset `calculateGeometry` would compute for
+    /// The viewport rest `calculateGeometry` would compute for
     /// `windows`, without materializing frames (#66). Lets the
     /// caller read back the value to persist as the next tile's
-    /// `Space.scrollOffset`, so a focus-driven retile can restore
+    /// `Space.scrollRest`, so a focus-driven retile can restore
     /// the "previous offset" input without KiwiCore re-deriving
-    /// the anchor/clamp math itself.
+    /// the anchor/clamp math itself. The offset travels with the
+    /// slot it was measured against, which is what `follow` reads
+    /// to tell a focus change from a row that moved underneath an
+    /// unchanged focus (#966) — so a pass that placed no slot
+    /// records none, and its offset reads as a focus change next
+    /// time, exactly as every offset did before #966.
     ///
     /// A lone window fills the whole area, so `calculateGeometry`
     /// ignores the offset for it — but this must still *preserve*
     /// it, not persist 0 (#155): float one of two scrolled
     /// windows and the row drops to a single tiled window; a 0
     /// here overwrites the saved offset, so unfloating rebuilds
-    /// the row from home. Returning the prior offset keeps the
-    /// viewport where it was.
-    static func viewportOffset(
+    /// the row from home. Returning the prior rest whole keeps
+    /// the viewport where it was.
+    static func viewportRest(
         for windows: [WindowID],
         in context: LayoutContext
-    ) -> CGFloat {
+    ) -> ScrollRest {
         guard windows.count > 1 else {
-            return context.scrollOffset ?? 0
+            return context.scrollRest ?? ScrollRest(offset: 0)
         }
         let area = context.scrolling.windowFrame(
             in: context.usable,
@@ -208,13 +218,22 @@ public struct ScrollingLayout: LayoutSystem {
             area: area,
             horizontal: horizontal
         )
-        return offset(
+        let value = offset(
             anchor: context.scrolling.anchor,
-            previous: context.scrollOffset,
+            previous: context.scrollRest,
+            focus: context.focused,
             along: metrics.along,
             size: metrics.focusedSpan,
             rowLength: metrics.rowLength,
             focusedPos: metrics.focusedPos
+        )
+        guard let focus = context.focused,
+            let position = metrics.focusedPos
+        else { return ScrollRest(offset: value) }
+        return ScrollRest(
+            offset: value,
+            focus: focus,
+            position: position
         )
     }
 

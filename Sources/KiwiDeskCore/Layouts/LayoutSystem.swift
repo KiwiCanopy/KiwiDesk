@@ -100,10 +100,11 @@ public struct LayoutContext: Sendable {
     /// Per-window vertical share of a stack column (#67);
     /// absent = 1.0. Snapshot of `Space.stackWeights`.
     public var stackWeights: [WindowID: Double]
-    /// The scrolling layout's viewport offset from the last
-    /// tile (#66); `nil` before the space has ever scrolled.
-    /// Snapshot of `Space.scrollOffset`.
-    public var scrollOffset: CGFloat?
+    /// The scrolling layout's viewport rest from the last tile
+    /// — the offset and the slot it was measured against (#66,
+    /// #966); `nil` before the space has ever scrolled.
+    /// Snapshot of `Space.scrollRest`.
+    public var scrollRest: ScrollRest?
     /// The track layout's break markers (#128): a window in the
     /// set starts a new track (`TrackLayout.counts`). Snapshot
     /// of `Space.trackBreaks`.
@@ -156,7 +157,7 @@ public struct LayoutContext: Sendable {
         focused: WindowID? = nil,
         minWindowSize: CGFloat = 300,
         stackWeights: [WindowID: Double] = [:],
-        scrollOffset: CGFloat? = nil,
+        scrollRest: ScrollRest? = nil,
         trackBreaks: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
         sticky: Set<WindowID> = [],
@@ -175,7 +176,7 @@ public struct LayoutContext: Sendable {
         self.focused = focused
         self.minWindowSize = minWindowSize
         self.stackWeights = stackWeights
-        self.scrollOffset = scrollOffset
+        self.scrollRest = scrollRest
         self.trackBreaks = trackBreaks
         self.trackWeights = trackWeights
         self.sticky = sticky

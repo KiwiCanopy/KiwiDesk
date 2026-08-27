@@ -333,6 +333,25 @@ editing here:
   fallback — cosmetic, self-correcting); geometry never may.
   The ladder is `SizeBoundLearnerTests`; the
   overlay half is [borders.md](borders.md)'s pin row.
+- **A scrolling viewport offset travels with the slot it was
+  measured against (#966).** One slot size serves the whole
+  row, so anything that changes it — a resize, a `swap`, a
+  window opening or closing ahead of the focus, a #677 re-pack
+  — moves every slot underneath that offset, and `follow` is
+  the one anchor that reads it. So `Space.scrollRest` carries
+  the offset AND the focused slot it was measured against as
+  ONE value, and `ScrollingLayout+Offset.heldBase` is the one
+  place the two causes are told apart: the same focus holds
+  that slot's place on screen, a different focus holds the
+  offset and pans minimally (#66). Never split the pair into
+  two fields beside each other, and never re-derive the verdict
+  at a call site. A rest recorded WITHOUT its slot is not a
+  defect but a "no provenance" verdict, and it reads as a focus
+  change — the pre-#966 behavior — so a producer that drops the
+  slot disables the re-anchor with every suite still green.
+  `ScrollingResizeAnchorTests` pins both arms and the clamps
+  that outrank them; `ScrollRestPlumbingTests` pins the
+  carrier. The product ruling is `docs/design-decisions.md`'s.
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
   resize end call the one set of clamped writers in

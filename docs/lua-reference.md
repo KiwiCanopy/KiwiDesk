@@ -1033,6 +1033,18 @@ only `follow` remembers the prior scroll position. Focusing a
 — a floating window has no slot in the row, so there is nothing
 to place.
 
+`follow` remembers where the *focused window* rested, not how far
+the row was pushed. One slot size serves every slot, so resizing
+one (`resize`, `scroll.set_slot_size`, a mouse edge drag) moves
+every window along the row — and the focused window then keeps
+its place on screen while the row rearranges around it, the freed
+space going to the row's far end. The same holds when a window
+opens or closes ahead of the focus, or when `swap` re-seats it.
+Only a *focus change* pans the viewport, which is what makes the
+minimal pan above read as scroll-into-view. Near a row end the
+boundary wins, as always: the row never reveals empty margin past
+its ends, so there the focus re-anchors only as far as it can.
+
 **Example:**
 
 ```lua

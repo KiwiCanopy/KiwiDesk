@@ -64,10 +64,10 @@ extension KiwiCore {
                 sizing: sizing
             )
         }
-        // Scrolling reads back its own last offset (#66); other
-        // modes never write `scrollOffset`, so this is a no-op
+        // Scrolling reads back its own last rest (#66); other
+        // modes never write `scrollRest`, so this is a no-op
         // for them.
-        persistScrollOffset()
+        persistScrollRest()
         updateAppBar()
         updateSpaceBar()
         // Rings ride the same freshness as the bar: every

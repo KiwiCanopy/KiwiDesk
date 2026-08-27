@@ -31,27 +31,29 @@ private func makeContext(
 }
 
 /// Drives the offset like a real retile loop: each call carries
-/// the previous call's resulting offset forward as
-/// `context.scrollOffset`, exactly as `KiwiCore.persistScrollOffset`
-/// does between retiles. Reads `viewportOffset` (the ideal,
-/// persisted value) rather than deriving it from a frame — far
-/// slots pin at the screen edges (#139/#142), so frames no
-/// longer expose the raw offset.
+/// the previous call's resulting rest forward as
+/// `context.scrollRest`, exactly as `KiwiCore.persistScrollRest`
+/// does between retiles — the whole rest, so `follow` reads the
+/// slot each offset was measured against (#966) and not just the
+/// number. Reads `viewportRest` (the ideal, persisted value)
+/// rather than deriving it from a frame — far slots pin at the
+/// screen edges (#139/#142), so frames no longer expose the raw
+/// offset.
 private func offsets(
     anchor: ScrollingParams.Anchor,
     focusSequence: [WindowID]
 ) -> [CGFloat] {
-    var previous: CGFloat?
+    var previous: ScrollRest?
     var result: [CGFloat] = []
     for focused in focusSequence {
         var context = makeContext(anchor: anchor, focused: focused)
-        context.scrollOffset = previous
-        let offset = ScrollingLayout.viewportOffset(
+        context.scrollRest = previous
+        let rest = ScrollingLayout.viewportRest(
             for: windows,
             in: context
         )
-        result.append(offset)
-        previous = offset
+        result.append(rest.offset)
+        previous = rest
     }
     return result
 }
@@ -115,14 +117,14 @@ struct ScrollingFocusSymmetryTests {
     ) throws {
         let layout = ScrollingLayout()
         // Scroll all the way down (focus w5 -> offset -1000).
-        var previous: CGFloat?
+        var previous: ScrollRest?
         for focused in [w1, w2, w3, w4, w5] {
             var context = makeContext(
                 anchor: anchor,
                 focused: focused
             )
-            context.scrollOffset = previous
-            previous = ScrollingLayout.viewportOffset(
+            context.scrollRest = previous
+            previous = ScrollingLayout.viewportRest(
                 for: windows,
                 in: context
             )
@@ -133,16 +135,16 @@ struct ScrollingFocusSymmetryTests {
         // (not freeze while the slot slides within a static frame,
         // the #66 overlay symptom).
         var context = makeContext(anchor: anchor, focused: w3)
-        context.scrollOffset = atEnd
+        context.scrollRest = atEnd
         let frames = layout.calculateGeometry(
             for: windows,
             in: context
         )
-        let after = ScrollingLayout.viewportOffset(
+        let after = ScrollingLayout.viewportRest(
             for: windows,
             in: context
         )
-        #expect(after > atEnd)
+        #expect(after.offset > atEnd.offset)
 
         // And the newly focused window must be fully in view.
         let f = try #require(frames[w3])
@@ -166,7 +168,7 @@ struct ScrollingFocusSymmetryTests {
             for: windows,
             in: context
         )
-        let seed = ScrollingLayout.viewportOffset(
+        let seed = ScrollingLayout.viewportRest(
             for: windows,
             in: context
         )
@@ -178,11 +180,11 @@ struct ScrollingFocusSymmetryTests {
 
         // Focusing it must not pan the viewport.
         context.focused = w3
-        context.scrollOffset = seed
-        let offset = ScrollingLayout.viewportOffset(
+        context.scrollRest = seed
+        let after = ScrollingLayout.viewportRest(
             for: windows,
             in: context
         )
-        #expect(offset == seed)
+        #expect(after.offset == seed.offset)
     }
 }

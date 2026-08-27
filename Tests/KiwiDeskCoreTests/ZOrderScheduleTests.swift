@@ -249,7 +249,7 @@ struct ZOrderScheduleTests {
             windows: (1...6).map { WindowID(UInt32($0)) },
             focused: WindowID(1)
         )
-        many.scrollOffset = 0
+        many.scrollRest = ScrollRest(offset: 0)
         let manyCtx = settings.context(
             bounds: bounds,
             space: many,
@@ -264,7 +264,7 @@ struct ZOrderScheduleTests {
             windows: [WindowID(1)],
             focused: WindowID(1)
         )
-        few.scrollOffset = 0
+        few.scrollRest = ScrollRest(offset: 0)
         let fewCtx = settings.context(
             bounds: bounds,
             space: few,

@@ -63,7 +63,7 @@ struct ScrollingNavigationTests {
         // must not care.
         for offset in [CGFloat(-4000), 0, 4000] {
             core.state.workspaces.withSpace(space) {
-                $0.scrollOffset = offset
+                $0.scrollRest = ScrollRest(offset: offset)
             }
             core.state.workspaces.focus(WindowID(3), in: space)
             #expect(
@@ -89,7 +89,7 @@ struct ScrollingNavigationTests {
             focus: WindowID(3)
         )
         core.state.workspaces.withSpace(space) {
-            $0.scrollOffset = 4000
+            $0.scrollRest = ScrollRest(offset: 4000)
         }
         #expect(
             core.execute("swap", args: [.string("left")])

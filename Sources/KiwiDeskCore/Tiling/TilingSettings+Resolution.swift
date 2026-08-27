@@ -278,7 +278,7 @@ extension TilingSettings {
             focused: focusedOverride ?? space.focused,
             minWindowSize: minWindowSize,
             stackWeights: space.stackWeights,
-            scrollOffset: space.scrollOffset,
+            scrollRest: space.scrollRest,
             trackBreaks: space.trackBreaks,
             trackWeights: space.trackWeights,
             sticky: sticky,
