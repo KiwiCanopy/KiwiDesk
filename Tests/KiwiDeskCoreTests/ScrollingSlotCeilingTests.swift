@@ -91,10 +91,14 @@ struct ScrollingSlotCeilingTests {
             )
         }
         // Eight 400pt grows would reach ~4300pt unclamped. The
-        // store stops at exactly the area the layout draws into
-        // — asserted against that area rather than a number,
-        // because capping at the layout REGION instead would
-        // bank the outer gaps and the bar strip.
+        // store stops at exactly the area the layout draws into,
+        // asserted against that area rather than a number.
+        // Capping at the raw display bounds instead would bank
+        // the outer gaps here; note the bar strip is NOT visible
+        // on this axis — `usable` already has the gaps off, and
+        // a horizontal bar carves the height, so
+        // `verticalCeilingClearsTheBarStrip` is the only net on
+        // the strip half.
         #expect(try slotPoints(core, space) == areaExtent(core))
         // ...and it got there by GROWING. Without this a
         // ceiling that binds too low — or a writer that refuses
@@ -181,6 +185,21 @@ struct ScrollingSlotCeilingTests {
             "scroll.set_orientation",
             args: [.string("vertical")]
         )
+        // Seed BELOW the ceiling first. A vertical `auto` slot
+        // resolves against the region and already sits above the
+        // drawn area, so without this the clamp fires on the way
+        // DOWN and the assertion below passes without a single
+        // press having grown anything (guard-prover, 2026-08-27).
+        core.execute(
+            "scroll.set_slot_size",
+            args: [.number(300)]
+        )
+        let seed = try slotPoints(
+            core,
+            space,
+            along: 800,
+            horizontal: false
+        )
         for _ in 0..<8 {
             core.execute(
                 "resize",
@@ -196,6 +215,8 @@ struct ScrollingSlotCeilingTests {
         #expect(
             stored == (try areaExtent(core, horizontal: false))
         )
+        // ...and it grew to get there.
+        #expect(stored > seed)
     }
 
     @Test("A grow never shrinks a config-set oversize slot")
