@@ -263,43 +263,4 @@ extension KiwiCore {
         )
     }
 
-    /// Clamped scrolling slot-size write plus the shrink cue —
-    /// shared by the keyboard `resize` and the mouse
-    /// `.scrollWidth` adjustment (which previously wrote
-    /// unclamped, letting a drag cross the floor the keyboard
-    /// path refused).
-    func writeCappedScrollSlot(
-        delta: Double,
-        space: Space,
-        bounds: CGRect
-    ) {
-        let scrolling =
-            tiler.settings.resolvedScrolling(for: space)
-        let horizontal = scrolling.axisIsHorizontal
-        let along = horizontal ? bounds.width : bounds.height
-        let current = scrolling.slotSize
-            .editablePoints(
-                along: along,
-                horizontal: horizontal
-            )
-        let axis = horizontal ? "x" : "y"
-        let effectiveMin = max(
-            Double(ScrollSize.minPoints),
-            space.focused.map {
-                effectiveMinSize(of: $0, axis: axis)
-            } ?? 0
-        )
-        let requested = current + CGFloat(delta)
-        let clamped = max(requested, CGFloat(effectiveMin))
-        if delta < 0,
-            clamped > requested + Self.resizeTruncationEpsilon,
-            let focused = space.focused
-        {
-            refuseShrinkAtMinimum(focused, axis: axis)
-        }
-        writeSlotSize(
-            .points(clamping: clamped),
-            for: space.id
-        )
-    }
 }

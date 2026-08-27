@@ -1577,6 +1577,129 @@ two-axis layout's wire keys are named follows the
 geometric-wire rule in
 [Settings UI patterns](ui-patterns.md#labels--wire-names).
 
+**`follow` holds a place, not a number: a resize re-anchors the
+viewport (#966).** A scrolling row has one slot size for every
+slot, so resizing one moves every slot's *position* along the
+row. Three of the four anchors never noticed — `center`,
+`start` and `end` recompute a resting position on every call.
+`follow` is defined against the previous offset, an absolute
+distance along that row, and holding it across a resize meant
+holding a number that now pointed somewhere else: the window
+being resized slid toward the **leading** edge, reading as a
+scroll nobody asked for. (The freed space does not collect at
+either end — the row contracts around wherever the offset
+happens to hold it, which is the point: nobody chose that
+place.)
+
+The ruling is that `follow` remembers where the focused window
+rested, not how far the row was pushed. The stored viewport
+value carries the slot it was measured against, and the offset
+math asks one question of it: is this the same focus as last
+time? A focus change holds the offset and pans minimally —
+`follow`'s original contract (#66), where nothing moved, so the
+side you came from stays open. An unchanged focus whose slot
+has moved holds that slot's place on screen instead and lets
+the row rearrange around it.
+
+That second arm deliberately covers more than the resize that
+found it: a window opening or closing ahead of the focus, and a
+#677 bound re-packing the row, are the same event — the row
+moved underneath the window the user is looking at — and a rule
+naming only the resize would be a special case the next cause
+re-opens.
+
+**`swap` is the one member of that set where the premise is
+false, and it is ruled in rather than excluded.** There the row
+did not move: the focus moved within a static row, by the
+user's own act. It still re-anchors, for two reasons. Nothing
+inside the layout can separate it — the discriminator is "same
+window, different position", and a neighbour closing ahead of
+the focus produces exactly that signal, which is the case the
+rule exists for. And the same answer is the right one anyway:
+the window being acted on is the one that must not jump, so it
+holds still and the row slides past it, which is the genre's
+own idiom (PaperWM and niri both scroll the row under a moved
+column rather than carrying the column across the viewport).
+What changes is the frame of reference, never the outcome — the
+swapped pair trades places either way. And nothing is painted
+into a corner: the rest is plain state, so a verb that ever
+wants the other frame rewrites the recorded position at its own
+mutation site and the next pass reads a delta of zero, with no
+new seam. Pinned by
+`ScrollingResizeAnchorEndToEndTests`, so the ruling is visible
+rather than incidental.
+
+**A slot resting ON a border keeps the border, not its leading
+edge.** The rule above says "hold the slot's place", and place
+means its leading edge — except where that edge is not what the
+eye is reading. A slot flush against the trailing border of the
+viewport, with more row hidden behind it, has to give its space
+back on the OPEN side: hold the leading edge there and the slot
+tears off the border, opening a gap the hidden neighbour then
+slides into, which is the one shape that reads as broken rather
+than merely different (device QA, 2026-08-27). This also stops
+two identical-looking situations answering differently — a slot
+that is LAST in its row already behaved this way, because the
+boundary clamp refuses to reveal margin past the row end, and
+nothing on screen distinguishes "last" from "flush with more
+behind it".
+
+Flush at BOTH borders — the slot fills the viewport — takes the
+leading edge, the ordinary rule. That is the one place the
+reading anchor is the deciding argument: the trailing rule has
+a claim, and it loses because holding the right edge would shift
+every line of text under the reader for no reason they asked
+for. (A slot filling the viewport has always been reachable —
+the layout draws `min(along, …)`, so any over-grown slot
+rendered flush at both borders long before the ceiling below
+made the store stop there too. The both-borders arm is a case
+this rule had to answer regardless.)
+
+Which border a slot rested on is decided where the offset is
+MEASURED, and carried with it. Deciding it later means comparing
+a recorded extent against whatever the viewport is by then, and
+a bar toggle, a gap edit or a space moving screens is enough to
+make that a verdict about a viewport the slot never sat in.
+
+The clamps still win where they disagree, so near a row end the
+focus re-anchors only as far as the boundary allows; the row
+never reveals empty margin past its ends.
+
+**A scrolling slot is clamped at both ends, and only scrolling
+needs saying so (#966).** Every interactive resize stops at a
+floor (#933). Scrolling also needs a ceiling, and it is the only
+layout that does, because it is the only one whose resize stores
+an **absolute length**: BSP and the stack master store a ratio
+clamped to 0.1…0.9, stack and track weights store shares bounded
+by the other members' floors, and a floating window's resize
+moves the frame itself, which is the drawn thing. A stored
+length has no such bound, so growing past the viewport inflated
+the store while the layout drew `min(along, …)` — the slot
+stopped changing on screen while every press still counted, and
+the shrink afterwards spent one press per invisible step before
+anything moved.
+
+The ceiling cannot live beside the floor in the value type. A
+floor of 100pt is a property of a slot; an absolute-length
+maximum is a property of the **screen**, and the same config
+travels between them — capping a stored size against whichever
+display is attached would silently rewrite what the user asked
+for when they undock. So it belongs at the interactive-write
+site, where a display is in hand, which is where #933 already
+put the floor. A layout that later stores a length rather than a
+share inherits this question; one that stores a share never has
+it.
+
+Two things follow from that, and both are about not destroying a
+choice. The ceiling is the area the layout **draws**, not the
+region it is carved from — cap at the region and the outer gaps
+and bar strip stay bankable, which on a vertical scroll axis is
+the App Bar's own thickness. And it never *reduces* a stored
+value: setting a slot larger than the screen is a legitimate
+thing to have done, so a grow press refuses to go further rather
+than quietly rewriting it. The clamp exists to stop growth
+running away, not to overrule a value someone chose.
+
 **Scrolling at a screen seam: a blocked edge is a hard stop
 (#878).** A scrolling edge is *open* or *blocked*, decided per
 edge from the screen arrangement. Open edges keep the #142

@@ -98,9 +98,9 @@ struct ScrollingVerticalTests {
         context.scrolling.orientation = .vertical
         context.scrolling.appBar.enabled = false
         context.scrolling.slotSize = .points(400)
-        // Read offsets the way `persistScrollOffset` does: a
+        // Read the rest the way `persistScrollRest` does: a
         // pinned row's frame no longer exposes the raw offset.
-        let bottomOffset = ScrollingLayout.viewportOffset(
+        let bottomRest = ScrollingLayout.viewportRest(
             for: [w1, w2, w3],
             in: context
         )
@@ -108,12 +108,12 @@ struct ScrollingVerticalTests {
         // Focus the top row (off-screen at the top), carrying
         // the previous offset forward as a real retile would.
         context.focused = w1
-        context.scrollOffset = bottomOffset
+        context.scrollRest = bottomRest
         let topFrames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context
         )
-        let topOffset = ScrollingLayout.viewportOffset(
+        let topRest = ScrollingLayout.viewportRest(
             for: [w1, w2, w3],
             in: context
         )
@@ -121,7 +121,7 @@ struct ScrollingVerticalTests {
         // The viewport must pan up to reveal it (not freeze at the
         // bottom boundary while the row slides within a static
         // viewport — the #66 overlay symptom).
-        #expect(topOffset > bottomOffset)
+        #expect(topRest.offset > bottomRest.offset)
         // And the newly focused row must be fully in view.
         let w1Frame = try #require(topFrames[w1])
         #expect(w1Frame.minY >= context.usable.minY - 0.01)
@@ -138,7 +138,7 @@ struct ScrollingVerticalTests {
         context.scrolling.orientation = .vertical
         context.scrolling.appBar.enabled = false
         context.scrolling.slotSize = .points(800)
-        context.scrollOffset = 0
+        context.scrollRest = ScrollRest(offset: 0)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context
@@ -160,7 +160,7 @@ struct ScrollingVerticalTests {
         context.scrolling.orientation = .vertical
         context.scrolling.appBar.enabled = false
         context.scrolling.slotSize = .points(800)
-        context.scrollOffset = -550
+        context.scrollRest = ScrollRest(offset: -550)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context
@@ -185,7 +185,7 @@ struct ScrollingVerticalTests {
         context.scrolling.orientation = .vertical
         context.scrolling.appBar.enabled = false
         context.scrolling.slotSize = .points(800)
-        context.scrollOffset = 0
+        context.scrollRest = ScrollRest(offset: 0)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context

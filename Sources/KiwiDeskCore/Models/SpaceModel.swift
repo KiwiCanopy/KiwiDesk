@@ -163,16 +163,17 @@ public struct Space: Sendable, Equatable {
     /// docs/design-decisions.md); pruned when a window leaves
     /// the space.
     public var stackWeights: [WindowID: Double]
-    /// The scrolling layout's last-computed viewport offset
-    /// (#66): `nil` means "never scrolled yet" (fresh space or
-    /// mode switch), so the layout falls back to centering on
-    /// the anchor instead of scrolling minimally from a stale
-    /// position. Ephemeral like `stackWeights` — never
-    /// persisted, cleared only on an actual mode change
+    /// The scrolling layout's last-computed viewport rest (#66)
+    /// — the offset and the slot it was measured against (#966,
+    /// `ScrollRest`). `nil` means "never scrolled yet" (fresh
+    /// space or mode switch), so the layout falls back to
+    /// centering on the anchor instead of scrolling minimally
+    /// from a stale position. Ephemeral like `stackWeights` —
+    /// never persisted, cleared only on an actual mode change
     /// (`setMode`). An emptied space keeps its last value;
     /// harmless, every consumer re-clamps it against the live
     /// row.
-    public var scrollOffset: CGFloat?
+    public var scrollRest: ScrollRest?
     /// The track layout's boundaries (#128): a window in this
     /// set STARTS a new track; the partition of the tiled
     /// window list falls out of the flat array order plus these
@@ -207,7 +208,7 @@ public struct Space: Sendable, Equatable {
         windows: [WindowID] = [],
         focused: WindowID? = nil,
         stackWeights: [WindowID: Double] = [:],
-        scrollOffset: CGFloat? = nil,
+        scrollRest: ScrollRest? = nil,
         trackBreaks: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
         sessionRatios: SessionRatios = SessionRatios()
@@ -217,7 +218,7 @@ public struct Space: Sendable, Equatable {
         self.windows = windows
         self.focused = focused
         self.stackWeights = stackWeights
-        self.scrollOffset = scrollOffset
+        self.scrollRest = scrollRest
         self.trackBreaks = trackBreaks
         self.trackWeights = trackWeights
         self.sessionRatios = sessionRatios

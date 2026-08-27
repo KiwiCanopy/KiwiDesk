@@ -6,6 +6,12 @@ paths:
   - "Sources/KiwiDeskCore/Commands/**"
   - "Sources/KiwiDeskCore/App/**"
   - "Sources/KiwiDeskCore/Tabs/**"
+  # `Space` and the values it holds live in Models, so the
+  # flat-array rule and the per-space session state below govern
+  # an editor there. parity-tests.md and config-vocabulary.md
+  # glob it too — they own the mirror and the naming halves,
+  # this one owns the shape.
+  - "Sources/KiwiDeskCore/Models/**"
 ---
 
 # State, tiling & layout
@@ -333,10 +339,94 @@ editing here:
   fallback — cosmetic, self-correcting); geometry never may.
   The ladder is `SizeBoundLearnerTests`; the
   overlay half is [borders.md](borders.md)'s pin row.
+- **A scrolling viewport offset travels with the slot it was
+  measured against (#966).** One slot size serves the whole
+  row, so anything that changes it — a resize, a `swap`, a
+  window opening or closing ahead of the focus, a #677 re-pack
+  — moves every slot underneath that offset, and `follow` is
+  the one anchor that reads it. So `Space.scrollRest` carries
+  the offset AND the focused slot it was measured against as
+  ONE value: the same focus holds that slot's place on screen,
+  a different focus holds the offset and pans minimally (#66).
+  "Place" is the slot's leading edge, except where it was
+  resting flush against the TRAILING border, which is the edge
+  it keeps instead — otherwise a shrink tears it off a border it
+  was sitting on, and two situations nothing on screen
+  distinguishes (flush-with-more-behind vs last-in-row, which
+  the boundary clamp already holds) answer differently. Flush at
+  both borders takes the leading edge. Which is why the recorded
+  slot carries the VERDICT rather than the geometry behind it —
+  the argument for that is three paragraphs down, and is stated
+  once.
+  Three obligations follow. **Never split the pair into two
+  fields** beside each other, and never re-derive the verdict
+  at a call site — nothing scans for either, so each new author
+  owes it deliberately. **A producer never DESTROYS provenance
+  it was handed**: recording no slot is the "nothing has ever
+  been measured" verdict, so a pass that carries an offset
+  through carries its measurement too, and one that drops it
+  silently reverts to the pre-#966 behavior. A new producer of a
+  rest joins `ScrollingResizeAnchorEndToEndTests`, because a
+  suite that injects the rest by hand cannot see a producer at
+  all — which is most of them, and is why that end-to-end suite
+  states a skipped host must read as a SKIP rather than a green.
+  And a **new id-keyed home inside
+  `Space` owes `Space.rekey`**: `scrollRest.slot.window` is a
+  bare id in a struct, which `WindowRekeyParityTests`' count
+  pin cannot see — only its `String(describing:)` scan can, and
+  only because the fixture populates the field.
+  And the verdict is reached at the PRODUCER, where the offset
+  and the viewport it was measured in are both in hand: a
+  consumer comparing a recorded extent against a later `along`
+  is deciding flushness about a viewport the slot never sat in,
+  which a bar toggle or a gap edit is enough to change.
+  `ScrollingResizeAnchorTests` pins the discrimination itself —
+  same focus, different focus, no slot, fixed anchor — and the
+  row-end clamp that outranks it, that last on a NON-last focus
+  deliberately, since a last slot at a legal offset is
+  flush-trailing by construction and would let the border arm
+  answer in the clamp's place. `ScrollingBorderAnchorTests` is
+  the border half: the arm that keeps an edge, the tolerance
+  that decides flushness, and the producer's recording.
+  `ScrollRestPlumbingTests` pins the carrier. The product
+  ruling — including why `swap` is ruled IN rather than
+  excluded — is `docs/design-decisions.md`'s.
+- **A resize store holding an absolute LENGTH owes a ceiling at
+  its own write site (#966).** A ratio or a share is bounded by
+  construction; a length is not, so it can bank growth the
+  layout never draws (`min(along, …)`) and then charge a press
+  per invisible step on the way back. Three obligations for one.
+  The ceiling clamps beside the floor at the interactive write
+  site, never in the value type — `ScrollSize.minPoints` is a
+  property of a slot and an ABSOLUTE-LENGTH maximum is a
+  property of the screen (`maxFraction` is rightly in the type:
+  a fraction is unitless). It is the area the layout DRAWS,
+  taken from the same `windowFrame` carve
+  `ScrollingLayout.metrics` caps against, never the layout
+  region it is carved from — on a vertical axis the difference
+  is the App Bar's own thickness, the same defect in miniature.
+  And it never reduces a CONFIGURED LENGTH: an explicit
+  `scroll.set_slot_size` above the ceiling is a deliberate
+  statement that survives undocking, so a grow refuses rather
+  than rewrites. An `auto`/`%` store is deliberately NOT covered
+  — it resolves against the region, so leaving it alone would
+  re-bank the strip on the first press; that trim is the rule
+  working, not a defect to fix back.
+  Scrolling is the only such store today, which is an
+  observation rather than the rule.
+  `ScrollingSlotCeilingTests` pins the drawn area rather than
+  the region (on both axes — the vertical one is where the bar
+  strip makes the difference visible), the configured-length
+  rule, and the floor outranking the ceiling. That the ceiling
+  is not in the value type is review's: no suite can see a
+  maximum nobody wrote.
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
-  resize end call the one set of clamped writers in
-  `KiwiCore+ResizeLimits` — never a raw `writeSlotSize`,
+  resize end call the one set of clamped writers — the
+  `writeCapped*` family, named by that prefix rather than by a
+  file, since it has already outgrown one
+  (`KiwiCore+ResizeLimits` and `KiwiCore+ResizeScrollSlot`) —
+  never a raw `writeSlotSize`,
   `writeSplitRatio*`, `writeMasterRatio` or `stackWeights`
   write from a resize path, which is exactly how the mouse
   `.scrollWidth` drag crossed the floor the keyboard path

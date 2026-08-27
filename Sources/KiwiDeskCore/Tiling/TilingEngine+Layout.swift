@@ -32,7 +32,7 @@ extension TilingEngine {
 
     /// The FOCUSED display's active-space layout inputs — the
     /// single source that the focused-space consumers
-    /// (`persistScrollOffset`, ZOrder, TrackSwap) read, so the
+    /// (`persistScrollRest`, ZOrder, TrackSwap) read, so the
     /// screen pick, floating filter, and context can never drift
     /// between the frames we apply and the offset we store. Laid
     /// out on the focused space's OWN display (multi-monitor),
@@ -79,7 +79,7 @@ extension TilingEngine {
             // but can never be the membership-guarded `focused`
             // slot. Scrolling reads `context.focused` to pan
             // and Monocle's `park` reads it to pick the shown
-            // member (#881); `persistScrollOffset` reads this
+            // member (#881); `persistScrollRest` reads this
             // same `layoutInput`, so the pan and the stored
             // offset stay consistent. For a monocle space the
             // anchor is HELD across a float focus — see

@@ -1006,6 +1006,20 @@ scroll.set_slot_size(400)          -- 400 pt
 scroll.set_slot_size("50%")        -- half of available
 ```
 
+An interactive `resize` stops at both ends: it will not take the
+slot below `min_window_size` (or an app's own learned minimum),
+and it will not grow it past what fits on screen — growing
+further would otherwise bank size you cannot see, and every
+press of it would have to be undone before shrinking did
+anything.
+
+Setting a size *here* is not clamped that way, and a `resize`
+will not undo it: a config value travels with you between
+screens, so if you set a slot wider than the screen you are on,
+it keeps that width and the layout simply draws what fits. A
+grow press then does nothing rather than trimming it; a shrink
+steps down from what you wrote, as usual.
+
 ### scroll.set_anchor
 
 **Expects:** `"center"`, `"start"`, `"end"`, or `"follow"`.
@@ -1032,6 +1046,24 @@ only `follow` remembers the prior scroll position. Focusing a
 *floating* window leaves the viewport where it is under any anchor
 — a floating window has no slot in the row, so there is nothing
 to place.
+
+`follow` remembers where the *focused window* rested, not how far
+the row was pushed. One slot size serves every slot, so resizing
+one (`resize`, `scroll.set_slot_size`, a mouse edge drag) moves
+every window along the row — and the focused window then keeps
+its place on screen while the row rearranges around it. The same
+holds when a window opens or closes ahead of the focus, or when
+`swap` re-seats it. Only a *focus change* pans the viewport,
+which is what makes the minimal pan above read as
+scroll-into-view. Near a row end the boundary wins, as always:
+the row never reveals empty margin past its ends, so there the
+focus re-anchors only as far as it can.
+
+One refinement to "keeps its place": a window resting flush
+against the **trailing** edge of the viewport keeps that edge
+rather than its leading one, so the space it gives up comes off
+the open side and reveals more of the window behind it. A window
+filling the whole viewport keeps its leading edge, as usual.
 
 **Example:**
 

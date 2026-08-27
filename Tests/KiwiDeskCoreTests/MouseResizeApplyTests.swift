@@ -144,17 +144,22 @@ struct MouseResizeApplyTests {
         #expect(abs(stack.masterRatio - 0.7) < 1e-9)
     }
 
-    @Test("scrollWidth grows the slot from the given bounds")
+    @Test("scrollWidth adjusts the slot from the given bounds")
     func scrollWidthApplies() {
         let core = makeCore()
         let space = space(core, mode: "scrolling")
         // The one case that consumes the extracted `bounds`
         // parameter: the auto slot seeds against its scroll
-        // axis, then the delta lands on top in points.
+        // axis, then the delta lands on top in points. The
+        // delta shrinks because the seed is 95% of that axis —
+        // a grow would land on the ceiling (#966) and stop
+        // saying anything about the seed, which is this test's
+        // subject; `scrollWidthGrowStopsAtTheAxis` below owns
+        // the other end.
         let before = core.tiler.settings.scrolling.slotSize
             .editablePoints(along: bounds.width, horizontal: true)
         core.applyResizeAdjustment(
-            .scrollWidth(100),
+            .scrollWidth(-100),
             for: nil,
             in: space,
             bounds: bounds
@@ -163,7 +168,57 @@ struct MouseResizeApplyTests {
             for: core.state.workspaces[SpaceID("1")]!
         ).slotSize
             .editablePoints(along: bounds.width, horizontal: true)
-        #expect(abs(after - before - 100) < 0.5)
+        #expect(abs(after - before + 100) < 0.5)
+    }
+
+    @Test("scrollWidth grows stop, like the verb's do")
+    func scrollWidthGrowStopsAtTheAxis() {
+        // #933's parity claim at the ceiling end (#966): the
+        // drag and the keyboard verb share one writer, so a
+        // drag cannot bank slot the keyboard path refuses.
+        //
+        // Asserted as "a second identical grow moves nothing"
+        // rather than against a number: the ceiling is the area
+        // the layout DRAWS, which this fixture's gaps and bar
+        // style decide, and `ScrollingSlotCeilingTests` is what
+        // holds that value. Unclamped, these two presses land
+        // 400pt apart.
+        let core = makeCore()
+        _ = space(core, mode: "scrolling")
+        func grow() -> CGFloat {
+            // Re-read the space each press: a no-override write
+            // lands in the live session layer, and
+            // `resolvedScrolling` reads the value it is HANDED —
+            // so passing one snapshot twice recomputes from the
+            // same stale base and "a second grow moves nothing"
+            // holds however the writer behaves (guard-prover).
+            let live = core.state.workspaces[SpaceID("1")]!
+            core.applyResizeAdjustment(
+                .scrollWidth(400),
+                for: nil,
+                in: live,
+                bounds: bounds
+            )
+            return core.tiler.settings.resolvedScrolling(
+                for: core.state.workspaces[SpaceID("1")]!
+            ).slotSize
+                .editablePoints(
+                    along: bounds.width,
+                    horizontal: true
+                )
+        }
+        let seed = core.tiler.settings.scrolling.slotSize
+            .editablePoints(
+                along: bounds.width,
+                horizontal: true
+            )
+        let first = grow()
+        #expect(abs(grow() - first) < 0.5)
+        // A fixed point alone is satisfied by a writer that
+        // never grows, so pin that it moved...
+        #expect(first > seed)
+        // ...and stopped short of the unclamped 1350.
+        #expect(first < bounds.width)
     }
 
     @Test("trackAcross adjusts track weight")

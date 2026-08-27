@@ -180,6 +180,7 @@ struct ScrollingSchematic: View {
         let viewport = ScrollingLayout.offset(
             anchor: anchor == .follow ? .center : anchor,
             previous: nil,
+            focus: nil,
             along: screenLen,
             size: slot,
             rowLength: rowLength,

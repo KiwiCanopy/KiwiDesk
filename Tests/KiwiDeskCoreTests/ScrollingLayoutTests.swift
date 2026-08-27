@@ -68,16 +68,16 @@ struct ScrollingLayoutTests {
         context.scrolling.slotSize = .points(400)
         context.bounds = CGRect(x: 0, y: 0, width: 1420, height: 1080)
         // w3 is fully visible at this prior offset, but off-center.
-        context.scrollOffset = -180
+        context.scrollRest = ScrollRest(offset: -180)
         let windows = [w1, w2, w3, w4, w5]
         let frames = layout.calculateGeometry(
             for: windows,
             in: context
         )
-        let offset = ScrollingLayout.viewportOffset(
+        let offset = ScrollingLayout.viewportRest(
             for: windows,
             in: context
-        )
+        ).offset
         let focused = try #require(frames[w3])
         #expect(abs(focused.midX - context.usable.midX) < 0.01)
         #expect(offset != -180)
@@ -227,7 +227,7 @@ struct ScrollingLayoutTests {
     @Test("Slots far past the left edge pin at a sliver (#142)")
     func farLeftSlotsPin() throws {
         var context = pinContext(focused: w5)
-        context.scrollOffset = -1000
+        context.scrollRest = ScrollRest(offset: -1000)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3, w4, w5],
             in: context
@@ -253,7 +253,7 @@ struct ScrollingLayoutTests {
     @Test("Slots far past the right edge pin at a sliver (#142)")
     func farRightSlotsPin() throws {
         var context = pinContext(focused: w1)
-        context.scrollOffset = 0
+        context.scrollRest = ScrollRest(offset: 0)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3, w4, w5],
             in: context
@@ -300,9 +300,9 @@ struct ScrollingLayoutTests {
         #expect(abs(focused.maxX - context.usable.maxX) < 0.01)
     }
 
-    @Test("viewportOffset matches frames when no pin engages")
-    func viewportOffsetFrameParity() throws {
-        // Guards the in-file mirror between `viewportOffset`
+    @Test("viewportRest matches frames when no pin engages")
+    func viewportRestFrameParity() throws {
+        // Guards the in-file mirror between `viewportRest`
         // and `calculateGeometry`: with three slots nothing
         // scrolls far enough to pin, so the frame-derived
         // offset must equal the ideal one exactly.
@@ -311,12 +311,12 @@ struct ScrollingLayoutTests {
             for: [w1, w2, w3],
             in: context
         )
-        let ideal = ScrollingLayout.viewportOffset(
+        let ideal = ScrollingLayout.viewportRest(
             for: [w1, w2, w3],
             in: context
         )
         let fromFrame =
             try #require(frames[w1]).minX - context.usable.minX
-        #expect(fromFrame == ideal)
+        #expect(fromFrame == ideal.offset)
     }
 }

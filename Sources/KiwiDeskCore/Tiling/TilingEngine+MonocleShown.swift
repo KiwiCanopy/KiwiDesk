@@ -17,7 +17,7 @@ extension TilingEngine {
     /// stands in, validated against membership at read time.
     /// Falls through to the raw anchor when nothing remembered
     /// survives. Monocle-only on purpose: scrolling's anchor
-    /// drives a pan whose stability `scrollOffset` already
+    /// drives a pan whose stability `scrollRest` already
     /// owns, and no other layout reads `context.focused`.
     func heldMonocleAnchor(
         _ anchor: WindowID?,

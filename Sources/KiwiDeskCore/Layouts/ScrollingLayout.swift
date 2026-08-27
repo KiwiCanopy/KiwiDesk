@@ -9,10 +9,14 @@ import CoreGraphics
 /// resting position (centred, or flush against the leading
 /// left/top or trailing right/bottom edge — `start`/`end` are
 /// relative to the scroll axis), then clamp so no empty
-/// margin shows past the row ends; `follow` (the default) keeps
-/// the prior offset and pans the minimum to reveal the focus
-/// (#66) — up/down mirror, an already-visible slot doesn't move,
-/// the side you came from stays open. Ends snap to the screen
+/// margin shows past the row ends; `follow` (the default) pans
+/// the minimum to reveal the focus from where the viewport
+/// already was (#66) — up/down mirror, an already-visible slot
+/// doesn't move, the side you came from stays open — and when
+/// the row moves underneath an unchanged focus instead (a slot
+/// resize re-positions every slot), it holds that slot's place
+/// on screen rather than its own number (#966,
+/// `ScrollingLayout+Offset.heldBase`). Ends snap to the screen
 /// edge. With the indicator bar enabled its strip is carved out
 /// of the usable area first, so windows and bar never overlap.
 ///
@@ -80,7 +84,8 @@ public struct ScrollingLayout: LayoutSystem {
         )
         let offset = Self.offset(
             anchor: context.scrolling.anchor,
-            previous: context.scrollOffset,
+            previous: context.scrollRest,
+            focus: context.focused,
             along: metrics.along,
             size: metrics.focusedSpan,
             rowLength: metrics.rowLength,
@@ -98,7 +103,7 @@ public struct ScrollingLayout: LayoutSystem {
     }
 
     /// The row geometry shared by `calculateGeometry` and
-    /// `viewportOffset`: per-slot spans and positions, total
+    /// `viewportRest`: per-slot spans and positions, total
     /// row length, and the focused slot's position along the
     /// scroll axis — nil when the focused window has no slot in
     /// the row (a floating window, or nothing focused), so the
@@ -173,78 +178,6 @@ public struct ScrollingLayout: LayoutSystem {
             focusedSpan: focusedIndex.map { spans[$0] }
                 ?? size
         )
-    }
-
-    /// The viewport offset `calculateGeometry` would compute for
-    /// `windows`, without materializing frames (#66). Lets the
-    /// caller read back the value to persist as the next tile's
-    /// `Space.scrollOffset`, so a focus-driven retile can restore
-    /// the "previous offset" input without KiwiCore re-deriving
-    /// the anchor/clamp math itself.
-    ///
-    /// A lone window fills the whole area, so `calculateGeometry`
-    /// ignores the offset for it — but this must still *preserve*
-    /// it, not persist 0 (#155): float one of two scrolled
-    /// windows and the row drops to a single tiled window; a 0
-    /// here overwrites the saved offset, so unfloating rebuilds
-    /// the row from home. Returning the prior offset keeps the
-    /// viewport where it was.
-    static func viewportOffset(
-        for windows: [WindowID],
-        in context: LayoutContext
-    ) -> CGFloat {
-        guard windows.count > 1 else {
-            return context.scrollOffset ?? 0
-        }
-        let area = context.scrolling.windowFrame(
-            in: context.usable,
-            inner: context.gaps.inner,
-            global: context.appBarStyle
-        )
-        let horizontal = context.scrolling.axisIsHorizontal
-        let metrics = metrics(
-            for: windows,
-            context: context,
-            area: area,
-            horizontal: horizontal
-        )
-        return offset(
-            anchor: context.scrolling.anchor,
-            previous: context.scrollOffset,
-            along: metrics.along,
-            size: metrics.focusedSpan,
-            rowLength: metrics.rowLength,
-            focusedPos: metrics.focusedPos
-        )
-    }
-
-    /// Whether the row is longer than the viewport, so slots pile
-    /// up at the edges and their stacking matters (#150). A row
-    /// that fits entirely shows no overlap, so a swap within it
-    /// cannot scramble the edge piles' z-order — there is nothing
-    /// to restore. A superset of "the swapped pair touches a
-    /// pile": the focus that moved in a swap is always panned
-    /// fully into view, so a per-slot test would gate on the
-    /// other window's transient position; the overflow test is
-    /// cheaper and never misses a real scramble.
-    static func rowOverflows(
-        for windows: [WindowID],
-        in context: LayoutContext
-    ) -> Bool {
-        guard windows.count > 1 else { return false }
-        let area = context.scrolling.windowFrame(
-            in: context.usable,
-            inner: context.gaps.inner,
-            global: context.appBarStyle
-        )
-        let horizontal = context.scrolling.axisIsHorizontal
-        let m = metrics(
-            for: windows,
-            context: context,
-            area: area,
-            horizontal: horizontal
-        )
-        return m.rowLength > m.along
     }
 
     private func frames(
