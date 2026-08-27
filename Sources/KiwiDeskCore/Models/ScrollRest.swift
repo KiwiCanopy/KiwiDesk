@@ -10,16 +10,19 @@ import CoreGraphics
 /// a different place in the row. `follow` — the one anchor that
 /// reads the prior offset — then held a position nobody asked it
 /// to hold, and the focused window drifted toward the leading
-/// edge while the freed space opened behind it (#966).
+/// edge (#966).
 ///
 /// Carrying the measurement with the offset is what lets
 /// `ScrollingLayout.offset` tell the two causes apart: the focus
 /// moved (hold the offset, pan minimally — the #66 contract), or
 /// the row moved underneath an unchanged focus (hold that slot's
-/// place on screen). A rest with no `slot` — seeded by hand, or
-/// recorded on a pass that had no slot to measure against —
-/// always reads as the first case, which is what every anchor did
-/// before this type existed.
+/// place on screen). A rest with no `slot` — one seeded by hand,
+/// or a space that has never placed a slot at all — reads as the
+/// first case, which is what every anchor did before this type
+/// existed. A pass that places no slot does not MAKE one: it
+/// carries the offset through (#141) and its measurement with
+/// it, because the pair it was handed still describes the offset
+/// it is returning.
 ///
 /// Ephemeral, like `Space.stackWeights`: never persisted, cleared
 /// on an actual mode change.
@@ -43,8 +46,10 @@ public struct ScrollRest: Sendable, Equatable {
     /// The viewport offset itself: the ideal, unpinned value the
     /// last tile chose (frames may pin, the offset never does).
     public var offset: CGFloat
-    /// The slot `offset` was measured against, or nil when that
-    /// pass placed no slot (a floating focus, nothing focused).
+    /// The slot `offset` was measured against — nil only where
+    /// no pass has ever measured one, since a pass that places
+    /// no slot carries the previous measurement through with the
+    /// offset it is also carrying.
     public var slot: Slot?
 
     public init(offset: CGFloat, slot: Slot? = nil) {

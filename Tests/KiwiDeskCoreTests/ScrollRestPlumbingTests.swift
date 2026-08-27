@@ -25,13 +25,23 @@ struct ScrollRestPlumbingTests {
             windows: [w1, w2],
             focused: w1
         )
-        space.scrollRest = ScrollRest(offset: -123)
+        // Seeded WITH a slot: a `context` that threaded only
+        // the offset and re-wrapped it would pass a slotless
+        // fixture (#966).
+        space.scrollRest = ScrollRest(
+            offset: -123,
+            focus: w2,
+            position: 800
+        )
         let context = settings.context(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
             space: space,
             sticky: []
         )
-        #expect(context.scrollRest == ScrollRest(offset: -123))
+        #expect(
+            context.scrollRest
+                == ScrollRest(offset: -123, focus: w2, position: 800)
+        )
     }
 
     @Test("A mode change clears the rest")
@@ -60,7 +70,11 @@ struct ScrollRestPlumbingTests {
             windows: [w1],
             focused: w1
         )
-        space.scrollRest = ScrollRest(offset: -400)
+        space.scrollRest = ScrollRest(
+            offset: -400,
+            focus: w1,
+            position: 800
+        )
         let context = settings.context(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
             space: space,
@@ -68,7 +82,11 @@ struct ScrollRestPlumbingTests {
         )
         #expect(
             ScrollingLayout.viewportRest(for: [w1], in: context)
-                == ScrollRest(offset: -400)
+                == ScrollRest(
+                    offset: -400,
+                    focus: w1,
+                    position: 800
+                )
         )
     }
 

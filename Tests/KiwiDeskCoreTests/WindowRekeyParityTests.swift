@@ -18,10 +18,12 @@ import Testing
 // round-trip backing that a populated map is actually swapped. And
 // `windowContainers` does not recurse into collection *elements*, so
 // a container whose element WRAPS the id in a struct
-// (`minimizeOrder`, #673) never reaches the count pin. Only the
-// `String(describing:)` scan sees those, because it renders the
-// nested `WindowID` — so `rekeyMigratesMinimized` is their net here,
-// and the count is not.
+// (`minimizeOrder`, #673) never reaches the count pin — nor does a
+// bare id sitting in a struct rather than in any container at all
+// (`scrollRest.slot.window`, #966). Only the `String(describing:)`
+// scan sees those, because it renders the nested `WindowID` — so
+// `rekeyMigratesMinimized` and the fixture's `scrollRest` are their
+// net here, and the count is not.
 
 private let old = WindowID(9001)
 private let new = WindowID(9002)
@@ -43,6 +45,14 @@ private func trackedFixture() -> StateCoordinator {
         space.stackWeights[old] = 2.0
         space.trackBreaks.insert(old)
         space.trackWeights[old] = 1.5
+        // Not a container — a bare id inside a struct (#966), so
+        // the count pin below cannot see it and the
+        // `String(describing:)` scan is its only net.
+        space.scrollRest = ScrollRest(
+            offset: -400,
+            focus: old,
+            position: 800
+        )
     }
     state.setFloating(old, true)
     state.remember(old, in: SpaceID(1))
@@ -54,7 +64,10 @@ private func trackedFixture() -> StateCoordinator {
 /// `manualFloatOverrides`, plus each space's `windows`,
 /// `stackWeights`, `trackBreaks`, `trackWeights`. Bumping the
 /// fixture with a new id-keyed map must bump this — and then the
-/// scan test forces the re-key to clear it.
+/// scan test forces the re-key to clear it. The fixture's
+/// `scrollRest` is deliberately NOT counted: it holds a bare id,
+/// not a container, so reflection never renders it here (see the
+/// limitations above).
 private let expectedContainerCount = 7
 
 /// `String(describing:)` of every non-empty dictionary, set, or

@@ -6,6 +6,7 @@ paths:
   - "Sources/KiwiDeskCore/Commands/**"
   - "Sources/KiwiDeskCore/App/**"
   - "Sources/KiwiDeskCore/Tabs/**"
+  - "Sources/KiwiDeskCore/Models/**"
 ---
 
 # State, tiling & layout
@@ -340,18 +341,27 @@ editing here:
   — moves every slot underneath that offset, and `follow` is
   the one anchor that reads it. So `Space.scrollRest` carries
   the offset AND the focused slot it was measured against as
-  ONE value, and `ScrollingLayout+Offset.heldBase` is the one
-  place the two causes are told apart: the same focus holds
-  that slot's place on screen, a different focus holds the
-  offset and pans minimally (#66). Never split the pair into
-  two fields beside each other, and never re-derive the verdict
-  at a call site. A rest recorded WITHOUT its slot is not a
-  defect but a "no provenance" verdict, and it reads as a focus
-  change — the pre-#966 behavior — so a producer that drops the
-  slot disables the re-anchor with every suite still green.
-  `ScrollingResizeAnchorTests` pins both arms and the clamps
-  that outrank them; `ScrollRestPlumbingTests` pins the
-  carrier. The product ruling is `docs/design-decisions.md`'s.
+  ONE value: the same focus holds that slot's place on screen,
+  a different focus holds the offset and pans minimally (#66).
+  Three obligations follow. **Never split the pair into two
+  fields** beside each other, and never re-derive the verdict
+  at a call site — nothing scans for either, so each new author
+  owes it deliberately. **A producer never DESTROYS provenance
+  it was handed**: recording no slot is the "nothing has ever
+  been measured" verdict, so a pass that carries an offset
+  through carries its measurement too, and one that drops it
+  silently reverts to the pre-#966 behavior — reachable only
+  through `viewportRest`, and pinned there by exactly one test
+  (`ScrollingResizeAnchorEndToEndTests`, whose every other net
+  injects the rest by hand). And a **new id-keyed home inside
+  `Space` owes `Space.rekey`**: `scrollRest.slot.window` is a
+  bare id in a struct, which `WindowRekeyParityTests`' count
+  pin cannot see — only its `String(describing:)` scan can, and
+  only because the fixture populates the field.
+  `ScrollingResizeAnchorTests` pins both arms and the row-end
+  clamp that outranks them; `ScrollRestPlumbingTests` pins the
+  carrier. The product ruling — including why `swap` is ruled
+  IN rather than excluded — is `docs/design-decisions.md`'s.
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
   resize end call the one set of clamped writers in

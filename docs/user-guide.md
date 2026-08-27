@@ -964,10 +964,9 @@ Adjust each mode's defaults:
   flush against the leading/trailing edge, shown as **Left**/
   **Right** when horizontal and **Top**/**Bottom** when vertical;
   or **Follow**, the default, which holds the viewport and pans
-  the minimum to keep the focus visible — and holds the focused
-  window's place on screen when the row moves underneath it,
-  which is what resizing a slot does to every window in the
-  row), slot size (a
+  the minimum to keep the focus visible, and holds the focused
+  window's place on screen when the row moves underneath it),
+  slot size (a
   percentage of the available width or height — 95% out of the
   box, so a sliver of the next window stays visible to show the space
   scrolls; the slider runs 5–100% in 1% steps — or

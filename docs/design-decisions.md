@@ -1585,9 +1585,11 @@ row. Three of the four anchors never noticed — `center`,
 `follow` is defined against the previous offset, an absolute
 distance along that row, and holding it across a resize meant
 holding a number that now pointed somewhere else: the window
-being resized slid toward the leading edge and the space it
-gave up opened in front of it, reading as a scroll nobody asked
-for.
+being resized slid toward the **leading** edge, reading as a
+scroll nobody asked for. (The freed space does not collect at
+either end — the row contracts around wherever the offset
+happens to hold it, which is the point: nobody chose that
+place.)
 
 The ruling is that `follow` remembers where the focused window
 rested, not how far the row was pushed. The stored viewport
@@ -1600,12 +1602,29 @@ has moved holds that slot's place on screen instead and lets
 the row rearrange around it.
 
 That second arm deliberately covers more than the resize that
-found it: a `swap` that re-seats the focus in the array, a
-window opening or closing ahead of it, a #677 bound re-packing
-the row. Those are all one event — the row moved underneath the
-window the user is looking at — and a rule naming only the
-resize would be a special case the next cause re-opens. The
-clamps still win where they disagree, so near a row end the
+found it: a window opening or closing ahead of the focus, and a
+#677 bound re-packing the row, are the same event — the row
+moved underneath the window the user is looking at — and a rule
+naming only the resize would be a special case the next cause
+re-opens.
+
+**`swap` is the one member of that set where the premise is
+false, and it is ruled in rather than excluded.** There the row
+did not move: the focus moved within a static row, by the
+user's own act. It still re-anchors, for two reasons. Nothing
+inside the layout can separate it — the discriminator is "same
+window, different position", and a neighbour closing ahead of
+the focus produces exactly that signal, which is the case the
+rule exists for. And the same answer is the right one anyway:
+the window being acted on is the one that must not jump, so it
+holds still and the row slides past it, which is what a
+scrolling manager's move reads like. What changes is the frame
+of reference, never the outcome — the swapped pair trades
+places either way. Pinned by
+`ScrollingResizeAnchorEndToEndTests`, so the ruling is visible
+rather than incidental.
+
+The clamps still win where they disagree, so near a row end the
 focus re-anchors only as far as the boundary allows; the row
 never reveals empty margin past its ends.
 

@@ -103,7 +103,7 @@ public struct ScrollingLayout: LayoutSystem {
     }
 
     /// The row geometry shared by `calculateGeometry` and
-    /// `viewportOffset`: per-slot spans and positions, total
+    /// `viewportRest`: per-slot spans and positions, total
     /// row length, and the focused slot's position along the
     /// scroll axis — nil when the focused window has no slot in
     /// the row (a floating window, or nothing focused), so the
@@ -188,9 +188,9 @@ public struct ScrollingLayout: LayoutSystem {
     /// the anchor/clamp math itself. The offset travels with the
     /// slot it was measured against, which is what `follow` reads
     /// to tell a focus change from a row that moved underneath an
-    /// unchanged focus (#966) — so a pass that placed no slot
-    /// records none, and its offset reads as a focus change next
-    /// time, exactly as every offset did before #966.
+    /// unchanged focus (#966) — recorded fresh on a pass that
+    /// placed a slot, and carried through unchanged on a pass
+    /// that placed none, where the offset itself is carried too.
     ///
     /// A lone window fills the whole area, so `calculateGeometry`
     /// ignores the offset for it — but this must still *preserve*
@@ -229,7 +229,21 @@ public struct ScrollingLayout: LayoutSystem {
         )
         guard let focus = context.focused,
             let position = metrics.focusedPos
-        else { return ScrollRest(offset: value) }
+        else {
+            // No slot placed this pass (a floating focus, or
+            // nothing focused): `offset` carried the previous
+            // offset through (#141), so its provenance carries
+            // with it — the same call the `count > 1` arm makes
+            // above. Destroying a measurement that still
+            // describes the offset being returned would hand the
+            // next pan a rest that reads as a focus change, and
+            // #966's drift would come back the moment the row
+            // changed while a float held focus.
+            return ScrollRest(
+                offset: value,
+                slot: context.scrollRest?.slot
+            )
+        }
         return ScrollRest(
             offset: value,
             focus: focus,
