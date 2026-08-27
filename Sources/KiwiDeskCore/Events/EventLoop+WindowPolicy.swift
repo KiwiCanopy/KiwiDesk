@@ -175,6 +175,15 @@ extension EventLoop {
     /// This is policy, not the #1037 WindowServer census: an
     /// admitted app that shows nothing is still visited, which
     /// is the #662 warm the sweep exists to pay.
+    ///
+    /// And the census can never JOIN this predicate: a
+    /// windowless agent's observer is the only channel that
+    /// reports its first window (#177), because the
+    /// WindowServer announces apps and Mission Control to a
+    /// foreign connection, never windows — probed 2026-08-27
+    /// on macOS 26.6.2, record and codes on #890 — so a
+    /// census-widened admission hands first windows to the
+    /// scheduled heal's latency.
     func bootPassAdmits(_ app: RunningApp) -> Bool {
         observers[app.pid] != nil
             || Self.shouldAttach(
