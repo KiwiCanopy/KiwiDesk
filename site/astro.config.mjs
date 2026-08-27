@@ -23,18 +23,13 @@ export default defineConfig({
   // Rewrite the canonical docs' GitHub-style `.md` links to
   // Starlight routes and drop their duplicate H1 (see the plugin).
   //
-  // Handed to the processor rather than to the deprecated
-  // `markdown.remarkPlugins` array (#985). That array is a compat
-  // shim, and its failure mode is silence: it runs the plugins
-  // only when the configured processor is a unified one, and
-  // merely `console.warn`s otherwise — while Sätteri, the 7.2
-  // default, is exactly such an otherwise. A build that lost this
-  // plugin stays green and ships every docs page with two H1s and
-  // 404ing prose cross-links, which is why the built artifact is
-  // guarded too (scripts/check-site-tokens.py). Naming `unified()`
-  // here is also what makes `@astrojs/markdown-remark` an honest
-  // dependency: it is an optional peer of both astro and
-  // Starlight, so nothing installs it on our behalf.
+  // On `markdown.processor`, never the deprecated
+  // `markdown.remarkPlugins` array (#985): that shim drops the
+  // plugins with a `console.warn` the day anything configures a
+  // processor that is not unified, leaving a green build. The
+  // argument is in .claude/rules/site.md ▸ "The docs plugin rides
+  // `markdown.processor`", and the built pages are guarded by
+  // scripts/check-site-tokens.py ▸ check_markdown_pipeline.
   markdown: {
     processor: unified({ remarkPlugins: [remarkDocsLinks] }),
   },

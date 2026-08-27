@@ -78,8 +78,11 @@ TOKENS = STYLES / "brand-tokens.css"
 CONSUMERS = (STYLES / "theme.css", STYLES / "landing.css")
 HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
 H1_TAG = re.compile(r"<h1[\s>]", re.I)
-HREF = re.compile(r'href="([^"]*)"')
+HREF = re.compile(r"""href\s*=\s*["']([^"']*)["']""", re.I)
 ABSOLUTE_URL = re.compile(r"[a-z][a-z0-9+.-]*:", re.I)
+# The class Starlight puts on the anchor beside every heading
+# its own remark/rehype pass rewrites.
+STARLIGHT_ANCHOR = "sl-anchor-link"
 TOKEN_DECL = re.compile(r"(--kiwi-[a-z0-9-]+)\s*:\s*([^;}]+)")
 SCAN_SUFFIXES = {".css", ".astro", ".ts", ".js", ".mjs"}
 LIGHT = (
@@ -772,35 +775,90 @@ def check_var_references(dist: pathlib.Path) -> None:
     )
 
 
+def canonical_host() -> str:
+    """The host `astro.config.mjs` publishes the site at."""
+    found = re.search(
+        r'SITE_URL\s*\?\?\s*"(?P<site>[^"]+)"',
+        source_without_comments(REPO / "site" / "astro.config.mjs"),
+    )
+    if not found:
+        fail(
+            "site/astro.config.mjs declares no `SITE_URL ?? \"…\"`, "
+            "so a self-hosted absolute link cannot be told from an "
+            "external one."
+        )
+    return urllib.parse.urlsplit(found.group("site")).netloc
+
+
+def served_paths(dist: pathlib.Path) -> set[str]:
+    """Every path this artifact answers, in href form.
+
+    Astro's default `directory` build format emits
+    `docs/cli/index.html` and the host serves it at `/docs/cli/`,
+    so an index file contributes its directory — with and without
+    the trailing slash — as well as its own filename.
+    """
+    served = set()
+    for path in dist.rglob("*"):
+        if not path.is_file():
+            continue
+        href = "/" + str(path.relative_to(dist))
+        served.add(href)
+        if path.name == "index.html":
+            directory = href[: -len("index.html")]
+            served.add(directory)
+            served.add(directory.rstrip("/") or "/")
+    return served
+
+
 def check_markdown_pipeline(dist: pathlib.Path) -> None:
-    """Every built page has one `<h1>` and no relative `.md` href
-    (#985).
+    """The docs Markdown pipeline ran, and ran correctly (#985).
 
     `remarkDocsLinks` (site/remark-docs-links.mjs) is what makes
-    the repo's `docs/` readable on two surfaces at once. The
-    canonical files open with a `# H1` and cross-link in relative
-    `.md` paths because that is what GitHub renders; Starlight
-    synthesizes its own H1 from frontmatter and rewrites no link,
-    so without that plugin every docs page ships with two H1s and
-    every prose cross-link 404s.
+    one `docs/` file readable on two surfaces. The canonical files
+    open with a `# H1` and cross-link in relative `.md` paths
+    because that is what GitHub renders; Starlight synthesizes its
+    own H1 from frontmatter and rewrites no link. Without the
+    plugin every docs page ships two H1s and every prose
+    cross-link 404s — on a build that is green, complete, and
+    wrong on every page under /docs/.
 
-    Guard the ARTIFACT rather than the config, because the config
-    is what keeps moving. The plugin reached the pipeline through
-    `markdown.remarkPlugins` until #985, and Astro's shim for that
-    array runs the plugins only when the configured processor is a
-    unified one — against Sätteri, the 7.2 default, it merely
-    `console.warn`s and drops them. A build that silently stopped
-    transforming Markdown is green, complete, and wrong on every
-    docs page, which is the shape no config-pair check catches and
-    the next upstream rearrangement can take again.
+    Guard the ARTIFACT, not the config, because the config is what
+    keeps moving. The plugin rode astro's deprecated
+    `markdown.remarkPlugins` array until #985; that array is a
+    compat shim which migrates the plugins onto a unified
+    processor when none is configured — which is why it worked —
+    and `console.warn`s and DROPS them the day anything configures
+    a processor that is not unified. `astro-mermaid` already
+    branches on `markdown.processor?.name` and has a `satteri()`
+    arm, so a processor arriving from some other direction is a
+    plausible next edit rather than a hypothetical.
 
-    On the SITE gate for `check_promoted_download`'s reason:
-    `site/**` is on `.github/ci-ignore.txt`, so a change confined
-    to the site skips the macOS jobs, and `CiPathFilterTests`
-    refuses the Swift placement outright.
+    Four clauses, because three ways of losing the pipeline leave
+    a green build and the fourth is the one the plugin warns about
+    in its own source:
 
-    Two H1s is also a WCAG/SEO fault in its own right, so this
-    holds every built page rather than only `/docs/`.
+    1. every built page has exactly one `<h1>` — two is the
+       plugin not running, zero is a page with no title at all;
+    2. no page carries a site-relative `.md` href, which the
+       static host has no route for;
+    3. every site-relative href RESOLVES to something this
+       artifact emitted. The plugin's slug derivation has a
+       fallback that rewrites links against the site root, and its
+       own comment calls that "silent 404s that CI can't catch" —
+       clauses 1 and 2 both pass through it;
+    4. the docs corpus still carries Starlight's heading anchors.
+       The processor is ours to construct now, and Starlight only
+       `logger.warn`s when handed one it cannot drive.
+
+    Reverting #985's config change alone does NOT red this, and
+    that is the point rather than a gap: the invariant is what the
+    artifact says, not which API expresses it. What reds it is the
+    pipeline actually stopping — drop `remarkDocsLinks` from
+    `markdown.processor`, or force the plugin's slug fallback, and
+    every clause above fires.
+
+    On the SITE gate for `check_promoted_download`'s reason.
     """
     pages = sorted(dist.rglob("*.html"))
     if not pages:
@@ -808,52 +866,128 @@ def check_markdown_pipeline(dist: pathlib.Path) -> None:
             f"no HTML found under {dist} — this check would pass "
             "for having looked at nothing."
         )
-    wrong_h1 = []
-    for page in pages:
-        count = len(H1_TAG.findall(page.read_text(encoding="utf-8")))
-        if count != 1:
-            wrong_h1.append((str(page.relative_to(dist)), count))
+    docs = [p for p in pages if p.is_relative_to(dist / "docs")]
+    if not docs:
+        # Marketing pages alone satisfy every clause below while
+        # the subtree the plugin exists for is missing entirely —
+        # a broken `docs/` symlink builds exactly that.
+        fail(
+            f"{dist} carries no page under docs/ — the symlink "
+            "into site/src/content/docs/ or the Starlight sidebar "
+            "is broken, and every clause below would pass on the "
+            "marketing pages alone (#985)."
+        )
+    html = {
+        page: page.read_text(encoding="utf-8") for page in pages
+    }
+    host = canonical_host()
+    served = served_paths(dist)
+    problems: list[str] = []
+
+    wrong_h1 = [
+        (str(page.relative_to(dist)), len(H1_TAG.findall(text)))
+        for page, text in html.items()
+        if len(H1_TAG.findall(text)) != 1
+    ]
     if wrong_h1:
         listed = "\n".join(
             f"    - {where}  ({count} found)"
-            for where, count in wrong_h1
+            for where, count in sorted(wrong_h1)
         )
-        fail(
+        problems.append(
             "built page(s) without exactly one `<h1>`:\n"
             f"{listed}\n"
-            "  Two usually means remarkDocsLinks stopped running "
-            "and Starlight's frontmatter title now sits beside the "
+            "  Two means remarkDocsLinks stopped running and "
+            "Starlight's frontmatter title now sits beside the "
             "doc's own `# H1` — check `markdown.processor` in "
-            "site/astro.config.mjs and that "
-            "@astrojs/markdown-remark is installed (#985)."
+            "site/astro.config.mjs. Zero means a page that "
+            "renders no title at all."
         )
-    dangling = []
-    for page in pages:
-        text = page.read_text(encoding="utf-8")
-        for match in HREF.finditer(text):
-            url = match.group(1)
-            # An absolute URL to a `.md` file is a link to the
-            # canonical doc ON GitHub, which is a real page and
-            # deliberate. Only a site-relative one is a 404 here.
-            if ABSOLUTE_URL.match(url) or url.startswith("//"):
+
+    dangling: list[tuple[str, str]] = []
+    unresolved: list[tuple[str, str]] = []
+    examined = 0
+    for page, text in html.items():
+        where = str(page.relative_to(dist))
+        for raw in HREF.findall(text):
+            target = raw.split("#")[0].split("?")[0]
+            if not target:
                 continue
-            if url.split("#")[0].split("?")[0].endswith(".md"):
-                dangling.append((str(page.relative_to(dist)), url))
+            if target.startswith("//"):
+                continue
+            if ABSOLUTE_URL.match(target):
+                parts = urllib.parse.urlsplit(target)
+                # An absolute `.md` on ANOTHER host is a link to
+                # the canonical doc on GitHub, which is a real
+                # page. One pointing back at us 404s exactly as
+                # the relative form does.
+                if parts.netloc != host:
+                    continue
+                target = parts.path
+            examined += 1
+            if target.endswith(".md"):
+                dangling.append((where, raw))
+            elif target.startswith("/") and (
+                urllib.parse.unquote(target) not in served
+            ):
+                unresolved.append((where, raw))
+    if not examined:
+        # Clause 2 and 3 both read this loop, so an href shape
+        # HREF stops spelling would make both pass for having
+        # matched nothing while clause 1 kept the check green.
+        fail(
+            f"no site-relative href found across {len(pages)} "
+            "built page(s) — clauses 2 and 3 would pass for "
+            "having looked at nothing. Check the `HREF` pattern "
+            "against what the build now emits."
+        )
     if dangling:
         listed = "\n".join(
-            f"    - {where}  →  {url}" for where, url in dangling
+            f"    - {where}  →  {url}"
+            for where, url in sorted(dangling)
         )
-        fail(
-            "built page(s) carrying a relative `.md` href, which "
-            "the static host has no route for:\n"
-            f"{listed}\n"
+        problems.append(
+            "built page(s) carrying a `.md` href this site has no "
+            f"route for:\n{listed}\n"
             "  remarkDocsLinks rewrites those to Starlight routes; "
             "if it stopped running, every prose cross-link in the "
             "docs 404s while the build stays green (#985)."
         )
+    if unresolved:
+        listed = "\n".join(
+            f"    - {where}  →  {url}"
+            for where, url in sorted(unresolved)
+        )
+        problems.append(
+            "built page(s) linking a path this artifact does not "
+            f"emit:\n{listed}\n"
+            "  If these are docs cross-links, remarkDocsLinks "
+            "derived the wrong slug and rewrote them against the "
+            "site root — the failure its own source calls silent "
+            "404s that CI can't catch (#985)."
+        )
+
+    anchors = sum(
+        html[page].count(STARLIGHT_ANCHOR) for page in docs
+    )
+    if not anchors:
+        problems.append(
+            "no Starlight heading anchor "
+            f"(`{STARLIGHT_ANCHOR}`) anywhere under docs/.\n"
+            "  Starlight pushes its own transforms onto whatever "
+            "`markdown.processor` holds and only `logger.warn`s "
+            "when handed one it cannot drive — so a processor it "
+            "does not recognize silently costs every heading "
+            "anchor, aside and RTL code block (#985)."
+        )
+
+    if problems:
+        fail("\n".join(problems))
     print(
-        f"markdown pipeline ran: {len(pages)} built page(s), one "
-        "<h1> each, no relative .md href"
+        f"markdown pipeline ran: {len(pages)} built page(s) "
+        f"({len(docs)} under docs/), one <h1> each, "
+        f"{examined} site-relative href(s) all resolving, "
+        f"{anchors} heading anchor(s)"
     )
 
 

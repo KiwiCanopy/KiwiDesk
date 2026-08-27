@@ -39,31 +39,52 @@ though:
 correctly on both surfaces: it drops the `# H1` Starlight already
 renders from frontmatter, and rewrites relative `.md` cross-links
 into Starlight routes. **Hand it to `unified({ remarkPlugins:
-[...] })` on `markdown.processor`, and keep
+[...] })` on `markdown.processor`, never to the deprecated
+`markdown.remarkPlugins` array, and keep
 `@astrojs/markdown-remark` declared in `site/package.json`.**
 
-Both halves answer one failure. `markdown.remarkPlugins` is a
-compat shim that runs the plugins only when the configured
-processor is a unified one; against Sätteri — the default
-Markdown processor since astro 7.2 — it emits a `console.warn`
-and drops them. Nothing else notices. The build is green, every
-page is emitted, and every docs page ships with two `<h1>`s and
-prose cross-links the host has no route for. And
-`@astrojs/markdown-remark` is an **optional** peer of both
-`astro` and `@astrojs/starlight`, so leaving it undeclared means
-it arrives only over a transitive edge inside `^` ranges nothing
-pins — and Starlight degrades just as quietly when it is missing,
-logging that its own asides and heading anchors will not run.
+That array is a compat shim, and it is easy to read as more
+broken than it is — the issue that filed this did. It *migrates*
+the plugins onto a unified processor when **none** is configured,
+which is why it worked here for as long as it did; it
+`console.warn`s and DROPS them only once something configures a
+processor that is not unified (both branches run directly against
+the installed astro 7.2.6, 2026-08-27). Which is a plausible next
+edit rather than a hypothetical: `astro-mermaid` already branches
+on `markdown.processor?.name` and carries a `satteri()` arm, and
+Sätteri is the schema default the moment nothing else claims the
+slot. A dropped plugin leaves the build green and every docs page
+shipping two `<h1>`s and prose cross-links the host has no route
+for.
+
+Declaring the package is the smaller half, and it stands on its
+own ground: this config now `import`s `unified` from it directly.
+It reaches the tree over `@astrojs/starlight → @astrojs/mdx →
+@astrojs/markdown-remark`, a hard edge at an exact version but
+two `^` ranges deep, and it is an *optional* peer of `astro` and
+Starlight themselves (astro 7.2.6 / starlight 0.41.8,
+2026-08-27), so nothing there is obliged to keep supplying it.
+Neither half fails quietly — an absent package is an unresolvable
+import, and the old shim threw with the install command in its
+message — which is why this is worth doing early rather than
+urgently.
 
 **Guard the artifact, not the config**, for the reason the 404
 check is: the config API is what keeps moving, and the next
 upstream rearrangement takes this same shape whatever it renames.
 `scripts/check-site-tokens.py` ▸ `check_markdown_pipeline` holds
-every built page to exactly one `<h1>` and to no site-relative
-`.md` href — an absolute one is a link to the canonical doc on
-GitHub and stays — and refuses an empty `dist/` rather than
-passing for having matched nothing. On this gate for the reason
-the feed check below is.
+every built page to exactly one `<h1>`, to no site-relative `.md`
+href — an absolute one on another host is a link to the canonical
+doc on GitHub and stays — and to every site-relative href
+resolving against what the build actually emitted, which is what
+catches the plugin rewriting links against the site root when its
+slug derivation falls back to `""`. It also holds the docs corpus
+to still carrying Starlight's heading anchors, because the
+processor is ours to construct now and Starlight only `warn`s
+when handed one it cannot drive. Reverting the config change
+alone does not red it, by design: the invariant is what the
+artifact says, not which API expresses it. On this gate for the
+reason the feed check below is.
 
 ## One brand-color layer, imported by both stylesheets
 
