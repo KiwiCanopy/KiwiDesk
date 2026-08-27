@@ -77,6 +77,9 @@ SRC = REPO / "site" / "src"
 TOKENS = STYLES / "brand-tokens.css"
 CONSUMERS = (STYLES / "theme.css", STYLES / "landing.css")
 HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
+H1_TAG = re.compile(r"<h1[\s>]", re.I)
+HREF = re.compile(r'href="([^"]*)"')
+ABSOLUTE_URL = re.compile(r"[a-z][a-z0-9+.-]*:", re.I)
 TOKEN_DECL = re.compile(r"(--kiwi-[a-z0-9-]+)\s*:\s*([^;}]+)")
 SCAN_SUFFIXES = {".css", ".astro", ".ts", ".js", ".mjs"}
 LIGHT = (
@@ -769,6 +772,91 @@ def check_var_references(dist: pathlib.Path) -> None:
     )
 
 
+def check_markdown_pipeline(dist: pathlib.Path) -> None:
+    """Every built page has one `<h1>` and no relative `.md` href
+    (#985).
+
+    `remarkDocsLinks` (site/remark-docs-links.mjs) is what makes
+    the repo's `docs/` readable on two surfaces at once. The
+    canonical files open with a `# H1` and cross-link in relative
+    `.md` paths because that is what GitHub renders; Starlight
+    synthesizes its own H1 from frontmatter and rewrites no link,
+    so without that plugin every docs page ships with two H1s and
+    every prose cross-link 404s.
+
+    Guard the ARTIFACT rather than the config, because the config
+    is what keeps moving. The plugin reached the pipeline through
+    `markdown.remarkPlugins` until #985, and Astro's shim for that
+    array runs the plugins only when the configured processor is a
+    unified one — against Sätteri, the 7.2 default, it merely
+    `console.warn`s and drops them. A build that silently stopped
+    transforming Markdown is green, complete, and wrong on every
+    docs page, which is the shape no config-pair check catches and
+    the next upstream rearrangement can take again.
+
+    On the SITE gate for `check_promoted_download`'s reason:
+    `site/**` is on `.github/ci-ignore.txt`, so a change confined
+    to the site skips the macOS jobs, and `CiPathFilterTests`
+    refuses the Swift placement outright.
+
+    Two H1s is also a WCAG/SEO fault in its own right, so this
+    holds every built page rather than only `/docs/`.
+    """
+    pages = sorted(dist.rglob("*.html"))
+    if not pages:
+        fail(
+            f"no HTML found under {dist} — this check would pass "
+            "for having looked at nothing."
+        )
+    wrong_h1 = []
+    for page in pages:
+        count = len(H1_TAG.findall(page.read_text(encoding="utf-8")))
+        if count != 1:
+            wrong_h1.append((str(page.relative_to(dist)), count))
+    if wrong_h1:
+        listed = "\n".join(
+            f"    - {where}  ({count} found)"
+            for where, count in wrong_h1
+        )
+        fail(
+            "built page(s) without exactly one `<h1>`:\n"
+            f"{listed}\n"
+            "  Two usually means remarkDocsLinks stopped running "
+            "and Starlight's frontmatter title now sits beside the "
+            "doc's own `# H1` — check `markdown.processor` in "
+            "site/astro.config.mjs and that "
+            "@astrojs/markdown-remark is installed (#985)."
+        )
+    dangling = []
+    for page in pages:
+        text = page.read_text(encoding="utf-8")
+        for match in HREF.finditer(text):
+            url = match.group(1)
+            # An absolute URL to a `.md` file is a link to the
+            # canonical doc ON GitHub, which is a real page and
+            # deliberate. Only a site-relative one is a 404 here.
+            if ABSOLUTE_URL.match(url) or url.startswith("//"):
+                continue
+            if url.split("#")[0].split("?")[0].endswith(".md"):
+                dangling.append((str(page.relative_to(dist)), url))
+    if dangling:
+        listed = "\n".join(
+            f"    - {where}  →  {url}" for where, url in dangling
+        )
+        fail(
+            "built page(s) carrying a relative `.md` href, which "
+            "the static host has no route for:\n"
+            f"{listed}\n"
+            "  remarkDocsLinks rewrites those to Starlight routes; "
+            "if it stopped running, every prose cross-link in the "
+            "docs 404s while the build stays green (#985)."
+        )
+    print(
+        f"markdown pipeline ran: {len(pages)} built page(s), one "
+        "<h1> each, no relative .md href"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -788,6 +876,7 @@ def main() -> None:
     check_guide_routes(dist)
     check_sitemaps_disjoint(dist)
     check_var_references(dist)
+    check_markdown_pipeline(dist)
 
 
 if __name__ == "__main__":

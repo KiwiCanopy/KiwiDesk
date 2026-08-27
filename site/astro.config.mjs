@@ -4,6 +4,7 @@ import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
 import icon from "astro-icon";
 import mermaid from "astro-mermaid";
+import { unified } from "@astrojs/markdown-remark";
 import { remarkDocsLinks } from "./remark-docs-links.mjs";
 
 // The public site URL. Override with SITE_URL at build time
@@ -21,7 +22,22 @@ export default defineConfig({
   prefetch: true,
   // Rewrite the canonical docs' GitHub-style `.md` links to
   // Starlight routes and drop their duplicate H1 (see the plugin).
-  markdown: { remarkPlugins: [remarkDocsLinks] },
+  //
+  // Handed to the processor rather than to the deprecated
+  // `markdown.remarkPlugins` array (#985). That array is a compat
+  // shim, and its failure mode is silence: it runs the plugins
+  // only when the configured processor is a unified one, and
+  // merely `console.warn`s otherwise — while Sätteri, the 7.2
+  // default, is exactly such an otherwise. A build that lost this
+  // plugin stays green and ships every docs page with two H1s and
+  // 404ing prose cross-links, which is why the built artifact is
+  // guarded too (scripts/check-site-tokens.py). Naming `unified()`
+  // here is also what makes `@astrojs/markdown-remark` an honest
+  // dependency: it is an optional peer of both astro and
+  // Starlight, so nothing installs it on our behalf.
+  markdown: {
+    processor: unified({ remarkPlugins: [remarkDocsLinks] }),
+  },
   integrations: [
     // Renders ```mermaid fenced blocks in docs as diagrams,
     // client-side, with light/dark synced to the site theme

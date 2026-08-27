@@ -33,6 +33,38 @@ though:
 - Site i18n is hand-maintained (not generated from the app
   catalogs).
 
+## The docs plugin rides `markdown.processor` (#985)
+
+`remark-docs-links.mjs` is what lets one `docs/` file read
+correctly on both surfaces: it drops the `# H1` Starlight already
+renders from frontmatter, and rewrites relative `.md` cross-links
+into Starlight routes. **Hand it to `unified({ remarkPlugins:
+[...] })` on `markdown.processor`, and keep
+`@astrojs/markdown-remark` declared in `site/package.json`.**
+
+Both halves answer one failure. `markdown.remarkPlugins` is a
+compat shim that runs the plugins only when the configured
+processor is a unified one; against Sätteri — the default
+Markdown processor since astro 7.2 — it emits a `console.warn`
+and drops them. Nothing else notices. The build is green, every
+page is emitted, and every docs page ships with two `<h1>`s and
+prose cross-links the host has no route for. And
+`@astrojs/markdown-remark` is an **optional** peer of both
+`astro` and `@astrojs/starlight`, so leaving it undeclared means
+it arrives only over a transitive edge inside `^` ranges nothing
+pins — and Starlight degrades just as quietly when it is missing,
+logging that its own asides and heading anchors will not run.
+
+**Guard the artifact, not the config**, for the reason the 404
+check is: the config API is what keeps moving, and the next
+upstream rearrangement takes this same shape whatever it renames.
+`scripts/check-site-tokens.py` ▸ `check_markdown_pipeline` holds
+every built page to exactly one `<h1>` and to no site-relative
+`.md` href — an absolute one is a link to the canonical doc on
+GitHub and stays — and refuses an empty `dist/` rather than
+passing for having matched nothing. On this gate for the reason
+the feed check below is.
+
 ## One brand-color layer, imported by both stylesheets
 
 `site/src/styles/brand-tokens.css` is the **only** place a brand
