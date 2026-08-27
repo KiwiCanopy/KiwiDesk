@@ -70,7 +70,7 @@ struct ScrollingResizeAnchorTests {
         // shown behind it — the reported repro's shape — but
         // NOT touching the trailing border: 500 + 400 leaves
         // 100pt of w4 showing. A slot resting ON a border is
-        // the other rule (`shrinkHoldsTheTrailingBorder`), and
+        // the other rule, in `ScrollingBorderAnchorTests`, and
         // this fixture was that case until the border rule
         // landed, which is why it is spelled out here.
         var context = makeContext(focused: w3, slot: 400)

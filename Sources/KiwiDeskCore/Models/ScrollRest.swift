@@ -56,7 +56,7 @@ public struct ScrollRest: Sendable, Equatable {
         public init(
             window: WindowID,
             position: CGFloat,
-            restingOn: Border? = nil
+            restingOn: Border?
         ) {
             self.window = window
             self.position = position

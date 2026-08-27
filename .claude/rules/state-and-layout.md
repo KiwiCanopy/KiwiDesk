@@ -380,11 +380,14 @@ editing here:
   consumer comparing a recorded extent against a later `along`
   is deciding flushness about a viewport the slot never sat in,
   which a bar toggle or a gap edit is enough to change.
-  `ScrollingResizeAnchorTests` pins both arms, the recording
-  itself, and the row-end clamp that outranks them — that last
-  on a NON-last focus deliberately, since a last slot at a legal
-  offset is flush-trailing by construction and would let the
-  border arm answer in the clamp's place.
+  `ScrollingResizeAnchorTests` pins the discrimination itself —
+  same focus, different focus, no slot, fixed anchor — and the
+  row-end clamp that outranks it, that last on a NON-last focus
+  deliberately, since a last slot at a legal offset is
+  flush-trailing by construction and would let the border arm
+  answer in the clamp's place. `ScrollingBorderAnchorTests` is
+  the border half: the arm that keeps an edge, the tolerance
+  that decides flushness, and the producer's recording.
   `ScrollRestPlumbingTests` pins the carrier. The product
   ruling — including why `swap` is ruled IN rather than
   excluded — is `docs/design-decisions.md`'s.
@@ -402,17 +405,21 @@ editing here:
   `ScrollingLayout.metrics` caps against, never the layout
   region it is carved from — on a vertical axis the difference
   is the App Bar's own thickness, the same defect in miniature.
-  And it never REDUCES what is stored: an explicit
-  `scroll.set_slot_size` above it is a deliberate statement that
-  survives undocking, so a grow refuses rather than rewrites.
+  And it never reduces a CONFIGURED LENGTH: an explicit
+  `scroll.set_slot_size` above the ceiling is a deliberate
+  statement that survives undocking, so a grow refuses rather
+  than rewrites. An `auto`/`%` store is deliberately NOT covered
+  — it resolves against the region, so leaving it alone would
+  re-bank the strip on the first press; that trim is the rule
+  working, not a defect to fix back.
   Scrolling is the only such store today, which is an
   observation rather than the rule.
-  `ScrollingSlotCeilingTests` pins three of those: the drawn
-  area rather than the region (on both axes — the vertical one
-  is where the bar strip makes the difference visible), the
-  never-reduces rule, and the floor outranking the ceiling.
-  That the ceiling is not in the value type is review's: no
-  suite can see a maximum nobody wrote.
+  `ScrollingSlotCeilingTests` pins the drawn area rather than
+  the region (on both axes — the vertical one is where the bar
+  strip makes the difference visible), the configured-length
+  rule, and the floor outranking the ceiling. That the ceiling
+  is not in the value type is review's: no suite can see a
+  maximum nobody wrote.
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
   resize end call the one set of clamped writers — the
