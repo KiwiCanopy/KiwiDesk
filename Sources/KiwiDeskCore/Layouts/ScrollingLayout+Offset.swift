@@ -108,8 +108,11 @@ extension ScrollingLayout {
     ///
     /// The recorded slot is what tells them apart: it names the
     /// focus the offset was measured against and where that slot
-    /// sat at the time. No slot recorded (a hand-seeded rest, or
-    /// a pass with no slot to measure) reads as the first case.
+    /// sat at the time. No slot recorded — a hand-seeded rest, or
+    /// a space that has never placed one — reads as the first
+    /// case. A pass that places no slot does not produce that
+    /// state: it carries the previous measurement through with
+    /// the offset it is also carrying (`ScrollRest`).
     private static func heldBase(
         previous: ScrollRest?,
         focus: WindowID?,

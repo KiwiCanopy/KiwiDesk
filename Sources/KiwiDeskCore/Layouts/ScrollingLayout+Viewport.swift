@@ -2,9 +2,16 @@ import CoreGraphics
 
 /// The read-back half of `ScrollingLayout`, split at the file
 /// ceiling: what a caller asks the layout ABOUT a row without
-/// materializing its frames. Both answers are derived from the
-/// same `metrics` the frames come from, so a caller can never
-/// read a row the layout did not lay out.
+/// materializing its frames. Where either answer needs the row's
+/// geometry it derives it from the same `metrics` the frames come
+/// from, so the two can never disagree about one row — both also
+/// answer a short row without asking for geometry at all.
+///
+/// Neither promises that `windows` is the array
+/// `calculateGeometry` was handed; it is a free parameter here.
+/// `TilingEngine.layoutInput` is what holds the frames, the
+/// persisted rest and the z-order arm to one reading of the
+/// space.
 extension ScrollingLayout {
     /// The viewport rest `calculateGeometry` would compute for
     /// `windows`, without materializing frames (#66). Lets the

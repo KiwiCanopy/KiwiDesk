@@ -6,6 +6,11 @@ paths:
   - "Sources/KiwiDeskCore/Commands/**"
   - "Sources/KiwiDeskCore/App/**"
   - "Sources/KiwiDeskCore/Tabs/**"
+  # `Space` and the values it holds live in Models, so the
+  # flat-array rule and the per-space session state below govern
+  # an editor there. Two other files also load on that glob
+  # (parity-tests.md, config-vocabulary.md) — they own the mirror
+  # and the naming halves, this one owns the shape.
   - "Sources/KiwiDeskCore/Models/**"
 ---
 
@@ -350,10 +355,12 @@ editing here:
   it was handed**: recording no slot is the "nothing has ever
   been measured" verdict, so a pass that carries an offset
   through carries its measurement too, and one that drops it
-  silently reverts to the pre-#966 behavior — reachable only
-  through `viewportRest`, and pinned there by exactly one test
-  (`ScrollingResizeAnchorEndToEndTests`, whose every other net
-  injects the rest by hand). And a **new id-keyed home inside
+  silently reverts to the pre-#966 behavior. A new producer of a
+  rest joins `ScrollingResizeAnchorEndToEndTests`, because a
+  suite that injects the rest by hand cannot see a producer at
+  all — which is most of them, and is why that end-to-end suite
+  states a skipped host must read as a SKIP rather than a green.
+  And a **new id-keyed home inside
   `Space` owes `Space.rekey`**: `scrollRest.slot.window` is a
   bare id in a struct, which `WindowRekeyParityTests`' count
   pin cannot see — only its `String(describing:)` scan can, and
