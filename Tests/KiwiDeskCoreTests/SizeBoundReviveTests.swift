@@ -132,4 +132,42 @@ struct SizeBoundReviveTests {
                 .consumedWidth(asking: 1626) == 439
         )
     }
+
+    @Test("The unhide re-add keeps its bound end to end")
+    func unhideReAddKeepsItsBound() {
+        // The hidden arm's twin wiring (guard-prover round 2
+        // named it unpinned): a hide removal parks with the
+        // pre-fold pid exactly like a destroy, or the unhide —
+        // the #1049 comeback case — re-runs the dance.
+        let core = makeTestCore()
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1000, height: 800)
+        }
+        core.tiler.animation.isEnabled = false
+        core.tiler.animation.apply = { _, _, _ in }
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: w, pid: 9, appName: "App")
+            )
+        )
+        for _ in 0..<2 {
+            core.tiler.boundLearner.recordAsk(w, size: asked)
+            core.tiler.boundLearner.observe(
+                w,
+                currentSize: snapped,
+                settledRead: true
+            )
+        }
+        core.handle(.windowHidden(w))
+        #expect(core.tiler.sizeBound(for: w) == nil)
+        core.handle(
+            .windowCreated(
+                ManagedWindow(id: w, pid: 9, appName: "App")
+            )
+        )
+        #expect(
+            core.tiler.sizeBound(for: w)?
+                .consumedWidth(asking: 1626) == 439
+        )
+    }
 }

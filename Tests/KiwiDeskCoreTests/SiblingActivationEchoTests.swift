@@ -163,6 +163,53 @@ struct SiblingActivationEchoTests {
         #expect(core.activeSpace?.focused == emulatorMain)
     }
 
+    @Test("Insistence after a revert is honored")
+    func insistenceAfterARevertIsHonored() {
+        // The surrender rule (#1049 round 3): a provoked steal
+        // fires once per focus change, so a SECOND report of
+        // the same window with no honored change between is a
+        // user unhide or the app on its own authority —
+        // fighting it kept the ring on the old window while
+        // keystrokes went to the emulator.
+        let core = makeCore()
+        core.handle(.windowFocused(emulatorMain))
+        #expect(core.activeSpace?.focused == claude)
+        core.handle(.windowFocused(emulatorMain))
+        #expect(core.activeSpace?.focused == emulatorMain)
+    }
+
+    @Test("An honored change re-arms the revert")
+    func honoredChangeReArmsTheRevert() {
+        // The reset half: each honored cross-app change is a
+        // new provocation cycle, so its steal earns its own
+        // revert — without the reset, the second steal after
+        // any legitimate change would ride the stale marker
+        // straight through.
+        let core = makeCore()
+        core.handle(.windowFocused(emulatorMain))
+        #expect(core.activeSpace?.focused == claude)
+        // A genuine cross-app change (no evidence): honored,
+        // and it clears the marker.
+        let other = WindowID(30)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: other,
+                    pid: 3,
+                    appName: "Other"
+                )
+            )
+        )
+        core.state.workspaces.focus(claude, in: space)
+        core.handle(.windowFocused(other))
+        #expect(core.activeSpace?.focused == other)
+        // The next provoked steal is reverted again, not
+        // waved through on the stale marker.
+        core.zOrderRaiseEchoes[emulatorToolbar] = Date()
+        core.handle(.windowFocused(emulatorMain))
+        #expect(core.activeSpace?.focused == other)
+    }
+
     @Test("A bound alone does not revert")
     func boundWithoutARecentSetIsHonored() {
         // The recency term is the provocation half: a
