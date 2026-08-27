@@ -1629,9 +1629,55 @@ new seam. Pinned by
 `ScrollingResizeAnchorEndToEndTests`, so the ruling is visible
 rather than incidental.
 
+**A slot resting ON a border keeps the border, not its leading
+edge.** The rule above says "hold the slot's place", and place
+means its leading edge — except where that edge is not what the
+eye is reading. A slot flush against the trailing border of the
+viewport, with more row hidden behind it, has to give its space
+back on the OPEN side: hold the leading edge there and the slot
+tears off the border, opening a gap the hidden neighbour then
+slides into, which is the one shape that reads as broken rather
+than merely different (device QA, 2026-08-27). This also stops
+two identical-looking situations answering differently — a slot
+that is LAST in its row already behaved this way, because the
+boundary clamp refuses to reveal margin past the row end, and
+nothing on screen distinguishes "last" from "flush with more
+behind it".
+
+Flush at BOTH borders — the slot fills the viewport — takes the
+leading edge, the ordinary rule. That is the one place the
+reading anchor is the deciding argument: the trailing rule has
+a claim, and it loses because holding the right edge would shift
+every line of text under the reader for no reason they asked
+for.
+
 The clamps still win where they disagree, so near a row end the
 focus re-anchors only as far as the boundary allows; the row
 never reveals empty margin past its ends.
+
+**A scrolling slot is clamped at both ends, and only scrolling
+needs saying so (#966).** Every interactive resize stops at a
+floor (#933). Scrolling also needs a ceiling, and it is the only
+layout that does, because it is the only one whose resize stores
+an **absolute length**: BSP and the stack master store a ratio
+clamped to 0.1…0.9, stack and track weights store shares bounded
+by the other members' floors, and a floating window's resize
+moves the frame itself, which is the drawn thing. A stored
+length has no such bound, so growing past the viewport inflated
+the store while the layout drew `min(along, …)` — the slot
+stopped changing on screen while every press still counted, and
+the shrink afterwards spent one press per invisible step before
+anything moved.
+
+The ceiling cannot live beside the floor in the value type. A
+floor of 100pt is a property of a slot; a maximum is a property
+of the **screen**, and the same config travels between them —
+capping a stored size against whichever display is attached
+would silently rewrite what the user asked for when they undock.
+So it belongs at the interactive-write site, where a display is
+in hand, which is where #933 already put the floor. A layout
+that later stores a length rather than a share inherits this
+question; one that stores a share never has it.
 
 **Scrolling at a screen seam: a blocked edge is a hard stop
 (#878).** A scrolling edge is *open* or *blocked*, decided per

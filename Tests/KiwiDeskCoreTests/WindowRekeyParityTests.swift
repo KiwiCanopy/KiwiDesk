@@ -51,7 +51,8 @@ private func trackedFixture() -> StateCoordinator {
         space.scrollRest = ScrollRest(
             offset: -400,
             focus: old,
-            position: 800
+            position: 800,
+            span: 400
         )
     }
     state.setFloating(old, true)

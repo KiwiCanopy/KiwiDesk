@@ -1006,6 +1006,15 @@ scroll.set_slot_size(400)          -- 400 pt
 scroll.set_slot_size("50%")        -- half of available
 ```
 
+An interactive `resize` stops at both ends: it will not take the
+slot below `min_window_size` (or an app's own learned minimum),
+and it will not grow it past the screen — growing past what fits
+would otherwise bank size you cannot see, and every press of it
+would have to be undone before shrinking did anything. Setting a
+size *here* is not clamped that way: a config value travels with
+you between screens, so it keeps whatever you wrote and the
+layout simply draws what fits.
+
 ### scroll.set_anchor
 
 **Expects:** `"center"`, `"start"`, `"end"`, or `"follow"`.
@@ -1044,6 +1053,12 @@ which is what makes the minimal pan above read as
 scroll-into-view. Near a row end the boundary wins, as always:
 the row never reveals empty margin past its ends, so there the
 focus re-anchors only as far as it can.
+
+One refinement to "keeps its place": a window resting flush
+against the **trailing** edge of the viewport keeps that edge
+rather than its leading one, so the space it gives up comes off
+the open side and reveals more of the window behind it. A window
+filling the whole viewport keeps its leading edge, as usual.
 
 **Example:**
 

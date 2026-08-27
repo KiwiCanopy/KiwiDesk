@@ -63,14 +63,19 @@ struct ScrollingResizeAnchorTests {
 
     @Test("A slot shrink leaves the focused window in place")
     func shrinkKeepsFocusedWindowInPlace() throws {
-        // w3 flush against the trailing edge, w2 whole and w1
-        // half-shown behind it: the reported repro's shape —
-        // the focus toward the right of the visible run.
+        // w3 toward the right of the visible run with w1 half
+        // shown behind it — the reported repro's shape — but
+        // NOT touching the trailing border: 500 + 400 leaves
+        // 100pt of w4 showing. A slot resting ON a border is
+        // the other rule (`shrinkHoldsTheTrailingBorder`), and
+        // this fixture was that case until the border rule
+        // landed, which is why it is spelled out here.
         var context = makeContext(focused: w3, slot: 400)
         context.scrollRest = ScrollRest(
-            offset: -200,
+            offset: -300,
             focus: w3,
-            position: 800
+            position: 800,
+            span: 400
         )
         let before = try lead(
             of: w3,
@@ -96,8 +101,56 @@ struct ScrollingResizeAnchorTests {
             ScrollingLayout.viewportRest(
                 for: windows,
                 in: context
-            ).offset == -100
+            ).offset == -200
         )
+    }
+
+    @Test("A shrink off a border gives its space to the open side")
+    func shrinkHoldsTheTrailingBorder() throws {
+        // w3 resting flush against the trailing border with a
+        // hidden w2 behind it (device QA, 2026-08-27). Holding
+        // its leading edge would tear it off the border and open
+        // a gap the row then fills from behind; the border is
+        // what it keeps, so the space comes off the open side
+        // and more of w2 shows.
+        var context = makeContext(focused: w3, slot: 400)
+        context.scrollRest = ScrollRest(
+            offset: -200,
+            focus: w3,
+            position: 800,
+            span: 400
+        )
+        context.scrolling.slotSize = .points(350)
+        let frames = layout.calculateGeometry(
+            for: windows,
+            in: context
+        )
+        let focused = try #require(frames[w3])
+        #expect(
+            abs(focused.maxX - context.usable.maxX) < 0.01
+        )
+        #expect(try lead(of: w3, in: frames, context) == 650)
+    }
+
+    @Test("Filling the viewport keeps the leading edge")
+    func fillingTheViewportKeepsTheLeadingEdge() throws {
+        // Flush at BOTH borders, so the trailing rule would have
+        // a claim too — the leading edge wins, which is where
+        // the eye is anchored and the only answer that does not
+        // shift every line of text under the reader.
+        var context = makeContext(focused: w2, slot: 1000)
+        context.scrollRest = ScrollRest(
+            offset: -1000,
+            focus: w2,
+            position: 1000,
+            span: 1000
+        )
+        context.scrolling.slotSize = .points(700)
+        let frames = layout.calculateGeometry(
+            for: windows,
+            in: context
+        )
+        #expect(try lead(of: w2, in: frames, context) == 0)
     }
 
     @Test("A focus change still pans from the recorded offset")
@@ -111,7 +164,8 @@ struct ScrollingResizeAnchorTests {
         context.scrollRest = ScrollRest(
             offset: -200,
             focus: w3,
-            position: 800
+            position: 800,
+            span: 400
         )
         context.focused = w2
         let frames = layout.calculateGeometry(
@@ -156,7 +210,8 @@ struct ScrollingResizeAnchorTests {
         context.scrollRest = ScrollRest(
             offset: -200,
             focus: w3,
-            position: 800
+            position: 800,
+            span: 400
         )
         let frames = layout.calculateGeometry(
             for: windows,
@@ -177,7 +232,8 @@ struct ScrollingResizeAnchorTests {
         context.scrollRest = ScrollRest(
             offset: -1000,
             focus: w5,
-            position: 1600
+            position: 1600,
+            span: 400
         )
         context.scrolling.slotSize = .points(300)
         let frames = layout.calculateGeometry(
@@ -200,7 +256,8 @@ struct ScrollingResizeAnchorTests {
         context.scrollRest = ScrollRest(
             offset: -800,
             focus: w4,
-            position: 1200
+            position: 1200,
+            span: 400
         )
         let frames = layout.calculateGeometry(
             for: [w2, w3, w4, w5],

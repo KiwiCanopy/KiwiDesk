@@ -36,10 +36,22 @@ public struct ScrollRest: Sendable, Equatable {
         /// That window's position along the scroll axis, in the
         /// row as it stood then.
         public var position: CGFloat
+        /// That window's extent along the scroll axis at the
+        /// time — the uniform slot size, or the narrower span a
+        /// #677 bound consumed. Recorded because `position`
+        /// alone cannot say whether the slot was resting flush
+        /// against the viewport's trailing border, which is the
+        /// edge a resize must then hold (#966).
+        public var span: CGFloat
 
-        public init(window: WindowID, position: CGFloat) {
+        public init(
+            window: WindowID,
+            position: CGFloat,
+            span: CGFloat
+        ) {
             self.window = window
             self.position = position
+            self.span = span
         }
     }
 
@@ -57,14 +69,19 @@ public struct ScrollRest: Sendable, Equatable {
         self.slot = slot
     }
 
-    /// The rest for an `offset` measured against `window` sitting
-    /// at `position` along the row.
+    /// The rest for an `offset` measured against `window`
+    /// sitting at `position` along the row, `span` wide.
     public init(
         offset: CGFloat,
         focus window: WindowID,
-        position: CGFloat
+        position: CGFloat,
+        span: CGFloat
     ) {
         self.offset = offset
-        self.slot = Slot(window: window, position: position)
+        self.slot = Slot(
+            window: window,
+            position: position,
+            span: span
+        )
     }
 }

@@ -52,17 +52,18 @@ private func seedLead(
 ) throws -> CGFloat {
     core.state.workspaces.focus(window, in: space)
     core.retile(animated: false)
-    let position = try #require(
-        core.activeSpace?.scrollRest?.slot?.position
+    let slot = try #require(
+        core.activeSpace?.scrollRest?.slot
     )
     core.state.workspaces.withSpace(space) {
         $0.scrollRest = ScrollRest(
-            offset: -position + lead,
+            offset: -slot.position + lead,
             focus: window,
-            position: position
+            position: slot.position,
+            span: slot.span
         )
     }
-    return position
+    return slot.position
 }
 
 /// The same fix at production altitude: the `resize` verb, the

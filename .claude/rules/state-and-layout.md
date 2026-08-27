@@ -348,6 +348,16 @@ editing here:
   the offset AND the focused slot it was measured against as
   ONE value: the same focus holds that slot's place on screen,
   a different focus holds the offset and pans minimally (#66).
+  "Place" is the slot's leading edge, except where it was
+  resting flush against the TRAILING border, which is the edge
+  it keeps instead — otherwise a shrink tears it off a border it
+  was sitting on, and two situations nothing on screen
+  distinguishes (flush-with-more-behind vs last-in-row, which
+  the boundary clamp already holds) answer differently. Flush at
+  both borders takes the leading edge. Which is why the recorded
+  slot carries its SPAN: flushness is a fact about where the
+  slot sat when the offset was measured, not about where it sits
+  now.
   Three obligations follow. **Never split the pair into two
   fields** beside each other, and never re-derive the verdict
   at a call site — nothing scans for either, so each new author
@@ -369,6 +379,20 @@ editing here:
   clamp that outranks them; `ScrollRestPlumbingTests` pins the
   carrier. The product ruling — including why `swap` is ruled
   IN rather than excluded — is `docs/design-decisions.md`'s.
+- **The scrolling slot is the one resize store that needs a
+  CEILING, and it does not live in the value type (#966).**
+  Every interactive resize stops at a floor; only scrolling
+  stores an absolute length rather than a ratio or a share, so
+  only scrolling can bank growth the layout never draws
+  (`min(along, …)`) and then charge a press per invisible step
+  on the way back. Clamp it beside the floor in
+  `writeCappedScrollSlot`, never in `ScrollSize`: `minPoints` is
+  a property of a slot, a maximum is a property of the screen,
+  and the same config travels between screens — so a layout that
+  later stores a length owes this at its own write site, and one
+  that stores a share owes nothing. `ScrollingSlotCeilingTests`
+  pins both ends and which one wins when a display is narrower
+  than the floor.
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
   resize end call the one set of clamped writers in

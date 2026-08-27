@@ -80,7 +80,8 @@ extension ScrollingLayout {
         return ScrollRest(
             offset: value,
             focus: focus,
-            position: position
+            position: position,
+            span: metrics.focusedSpan
         )
     }
 

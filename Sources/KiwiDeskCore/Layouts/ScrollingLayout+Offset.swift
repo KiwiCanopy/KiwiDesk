@@ -57,7 +57,9 @@ extension ScrollingLayout {
                     heldBase(
                         previous: previous,
                         focus: focus,
-                        focusedPos: focusedPos
+                        focusedPos: focusedPos,
+                        focusedSpan: size,
+                        along: along
                     ) ?? visibleMin
                 target = min(max(base, visibleMin), visibleMax)
             case .center, .start, .end:
@@ -104,7 +106,17 @@ extension ScrollingLayout {
     ///   the user is acting on toward the leading edge. Shift it
     ///   by however far the slot moved instead, so that slot
     ///   keeps its place on screen and the row rearranges around
-    ///   it.
+    ///   it — except where the slot was resting flush against
+    ///   the trailing border, where the edge is what it keeps.
+    ///   Otherwise a shrink tears the slot off a border it was
+    ///   sitting on and opens a gap the row then fills from
+    ///   behind, which is the one shape that reads as broken
+    ///   rather than merely different (device QA, 2026-08-27).
+    ///   A slot that is last in its row already behaved this
+    ///   way, because the boundary clamp refuses to reveal
+    ///   margin past the row end — so this is also what stops
+    ///   two identical-looking situations answering
+    ///   differently.
     ///
     /// The recorded slot is what tells them apart: it names the
     /// focus the offset was measured against and where that slot
@@ -116,13 +128,37 @@ extension ScrollingLayout {
     private static func heldBase(
         previous: ScrollRest?,
         focus: WindowID?,
-        focusedPos: CGFloat
+        focusedPos: CGFloat,
+        focusedSpan: CGFloat,
+        along: CGFloat
     ) -> CGFloat? {
         guard let previous else { return nil }
         guard let slot = previous.slot, slot.window == focus
         else { return previous.offset }
+        let lead = previous.offset + slot.position
+        // Resting flush against the TRAILING border, and not
+        // also against the leading one: hold that edge instead,
+        // so the slot gives its space back on the side that is
+        // open rather than tearing away from the border with a
+        // hidden neighbour behind it. Testing the leading edge
+        // first is what rules the fills-the-viewport case — both
+        // edges flush, and the leading one wins, which is where
+        // the eye is anchored.
+        if lead > edgeTolerance,
+            abs(lead + slot.span - along) <= edgeTolerance
+        {
+            return along - focusedSpan - focusedPos
+        }
         return previous.offset + (slot.position - focusedPos)
     }
+
+    /// How near a border counts as resting against it. The
+    /// offsets compared here are the layout's own ideal values
+    /// rather than measured frames, so this absorbs accumulated
+    /// rounding and nothing wider — a slot a visible distance
+    /// from the edge must not read as flush, or a resize would
+    /// jump it there.
+    private static let edgeTolerance: CGFloat = 0.5
 
     /// A fixed anchor's resting offset for a focused slot, before
     /// visibility/boundary clamping. `start`/`end` are
