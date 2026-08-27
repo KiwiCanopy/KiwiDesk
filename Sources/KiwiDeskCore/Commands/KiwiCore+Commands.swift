@@ -9,6 +9,20 @@ extension KiwiCore {
         _ command: String,
         args: [JSONValue] = []
     ) -> CommandResponse {
+        let response = dispatchCommand(command, args: args)
+        // Every command run inside a hotkey fire is tallied so
+        // the hold-to-repeat engine can decide eligibility from
+        // what the press actually DID (#1056) — a binding's
+        // body is opaque Lua, so this is the one honest signal.
+        // The passthrough drops it outside a fire.
+        keys.noteCommand(command, succeeded: response.isSuccess)
+        return response
+    }
+
+    private func dispatchCommand(
+        _ command: String,
+        args: [JSONValue]
+    ) -> CommandResponse {
         // Fail closed before dispatch when a focused-window command
         // is issued while an ignored panel or unmanaged app holds
         // the foreground (#292). Inert until `start()` wires the

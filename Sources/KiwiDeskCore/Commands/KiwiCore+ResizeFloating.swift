@@ -24,12 +24,23 @@ extension KiwiCore {
         let minSize = CGFloat(
             effectiveMinSize(of: id, axis: axis)
         )
+        // Accumulate against the COMMANDED frame, not the echo
+        // (#129/#1056): `state.windows[id].frame` is echo-fed,
+        // and mid-animation the echo lags by whole steps — so a
+        // press (or a hold-to-repeat tick) landing before the
+        // previous one settled re-based on stale geometry and
+        // under-accumulated. The in-flight animation's target
+        // IS the pending commanded value; idle, the settled
+        // frame is the same truth it always was.
+        let base =
+            tiler.animation.targetFrame(window: id)
+            ?? window.frame
         // Growing the top edge under a top app bar would re-hide
         // the title bar; keep the result clear of the strip (#242).
         let target = floatFrameClampedClearOfBars(
             id,
             frame: FloatResize.resized(
-                window.frame,
+                base,
                 horizontal: axis == "x",
                 delta: delta,
                 minSize: minSize
@@ -41,8 +52,8 @@ extension KiwiCore {
         if delta < 0 {
             let requested =
                 (axis == "x"
-                    ? window.frame.width
-                    : window.frame.height) + CGFloat(delta)
+                    ? base.width
+                    : base.height) + CGFloat(delta)
             let actual =
                 axis == "x" ? target.width : target.height
             if actual > requested + Self.resizeTruncationEpsilon {

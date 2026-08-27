@@ -25,6 +25,7 @@ extension KiwiCore {
     /// Fires on the first attempt the clamp truncates — landing
     /// ON the minimum included — not only once already there.
     func refuseShrinkAtMinimum(_ window: WindowID, axis: String) {
+        keys.noteResizeRefusal()
         borders.onResizeRefusal(.ownMinimum(window))
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
@@ -73,6 +74,7 @@ extension KiwiCore {
         anchor: WindowID,
         axis: String
     ) {
+        keys.noteResizeRefusal()
         borders.onResizeRefusal(
             .neighborMinimum(anchor: anchor, focused: focused)
         )

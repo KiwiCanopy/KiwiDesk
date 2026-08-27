@@ -52,6 +52,21 @@ public final class KeybindingManager {
     /// set via `define_layer(name, bindings, { icon = ... })`.
     private var layerIcons: [String: String] = [:]
     private var activeIDs: [UInt32] = []
+    /// The live registrations by id, for the hold-to-repeat
+    /// engine's re-fire and release routing (#1056). Rebuilt
+    /// with `activeIDs` on every activation.
+    var activeBindings: [UInt32: LiveBinding] = [:]
+
+    /// One live registration: the Lua ref and the combo it is
+    /// registered under.
+    struct LiveBinding {
+        var ref: Int32
+        var combo: KeyCombo
+    }
+    /// Hold-to-repeat (#1056). Internal so `KiwiCore.execute`
+    /// and the size-limit cues can feed it through the
+    /// `noteCommand` / `noteResizeRefusal` passthroughs below.
+    let holdRepeat = HoldRepeat()
     /// True while a Settings recorder is armed (#213): all our
     /// hotkeys are unregistered so testing an existing shortcut
     /// mid-capture can't fire its action. Table/layer edits still
@@ -63,6 +78,7 @@ public final class KeybindingManager {
         registrar: HotkeyRegistrar = CarbonHotkeyCenter()
     ) {
         self.registrar = registrar
+        wireHoldRepeat(registrar: registrar)
     }
 
     /// Bindings of one layer (exposed for the GUI editor).
@@ -237,10 +253,14 @@ public final class KeybindingManager {
     // MARK: - Hotkey activation
 
     private func deactivate() {
+        // The ids are about to vanish, so no release can ever
+        // arrive to stop a live repeat — end it here (#1056).
+        holdRepeat.cancelRun()
         for id in activeIDs {
             registrar.unregister(id: id)
         }
         activeIDs = []
+        activeBindings = [:]
     }
 
     private func activate(_ layer: String) {
@@ -254,10 +274,14 @@ public final class KeybindingManager {
                 keyCode: combo.keyCode,
                 modifiers: combo.modifiers
             ) { [weak self] in
-                self?.fire(ref: ref, combo: combo)
+                self?.pressFire(ref: ref, combo: combo)
             }
             if let id {
                 activeIDs.append(id)
+                activeBindings[id] = LiveBinding(
+                    ref: ref,
+                    combo: combo
+                )
             } else {
                 activationFailures.insert(combo)
                 onLog(
@@ -269,7 +293,7 @@ public final class KeybindingManager {
         }
     }
 
-    private func fire(ref: Int32, combo: KeyCombo) {
+    func fire(ref: Int32, combo: KeyCombo) {
         guard let lua else { return }
         let wasFiring = isFiring
         isFiring = true
