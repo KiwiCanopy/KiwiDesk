@@ -78,7 +78,9 @@ TOKENS = STYLES / "brand-tokens.css"
 CONSUMERS = (STYLES / "theme.css", STYLES / "landing.css")
 HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
 H1_TAG = re.compile(r"<h1[\s>]", re.I)
-HREF = re.compile(r"""href\s*=\s*["']([^"']*)["']""", re.I)
+HREF = re.compile(
+    r"""(?<![-\w])href\s*=\s*["']([^"']*)["']""", re.I
+)
 ABSOLUTE_URL = re.compile(r"[a-z][a-z0-9+.-]*:", re.I)
 # The class Starlight puts on the anchor beside every heading
 # its own remark/rehype pass rewrites.
@@ -305,32 +307,10 @@ def check_appcast(dist: pathlib.Path) -> None:
 
     # The host, too. Nothing else covers it: `build-app.sh` is
     # outside site.yml's path filter, so a host typo would ship
-    # with no gate having read it.
-    canonical = re.search(
-        r'SITE_URL\s*\?\?\s*"(?P<site>[^"]+)"',
-        source_without_comments(REPO / "site" / "astro.config.mjs"),
-    )
-    # A miss FAILS rather than skipping. Hanging the host check
-    # on `if canonical:` meant that the day astro.config.mjs
-    # stopped matching, half this function would switch itself
-    # off while the other half still printed its success line —
-    # a guard that stops guarding with no signal. The site cannot
-    # build without a canonical URL, so not finding one is a
-    # defect, not an absence.
-    if not canonical:
-        fail(
-            "site/astro.config.mjs declares no `SITE_URL ?? \"…\"`, "
-            "so the host every build bakes into SUFeedURL cannot "
-            "be checked against the host the site publishes at."
-        )
-    expected_host = urllib.parse.urlsplit(
-        canonical.group("site")
-    ).netloc
-    if not expected_host:
-        fail(
-            f"site/astro.config.mjs's SITE_URL "
-            f"({canonical.group('site')}) has no host."
-        )
+    # with no gate having read it. One derivation, in
+    # `canonical_host` — three readings of the same regex is how
+    # they end up disagreeing.
+    expected_host = canonical_host()
     if parts.netloc != expected_host:
         fail(
             f"SUFeedURL points at {parts.netloc} but the site "
@@ -592,15 +572,11 @@ def check_guide_routes(dist: pathlib.Path) -> None:
             "host — the app's guide link is unguarded until this "
             "parser is fixed"
         )
-    canonical = (REPO / "site/astro.config.mjs").read_text(
-        encoding="utf-8"
-    )
-    # The SOURCE default, which is `process.env.SITE_URL ?? "…"` —
-    # so a build overriding SITE_URL serves a host this does not
-    # check. Stated rather than chased: the override exists for
-    # preview deploys, where a mismatched app link is expected,
-    # and the shipped build is the one whose default this is.
-    if f"https://{host.group(1)}" not in canonical:
+    # Through `canonical_host` rather than a substring test over
+    # the raw file, which a host named only in a COMMENT would
+    # have satisfied — and which was a third reading of one
+    # derivation.
+    if host.group(1) != canonical_host():
         raise SystemExit(
             f"check-site-tokens: the app links {host.group(1)}, "
             "which astro.config.mjs does not publish — every "
@@ -776,7 +752,20 @@ def check_var_references(dist: pathlib.Path) -> None:
 
 
 def canonical_host() -> str:
-    """The host `astro.config.mjs` publishes the site at."""
+    """The host `astro.config.mjs` publishes the site at.
+
+    The SOURCE default, `process.env.SITE_URL ?? "…"` — a build
+    overriding SITE_URL serves a host no check here sees, which is
+    deliberate: the override exists for preview deploys and the
+    shipped build is the one whose default this is.
+
+    A miss FAILS rather than skipping. Hanging a host check on
+    `if canonical:` meant that the day astro.config.mjs stopped
+    matching, the callers would switch themselves off while still
+    printing their success lines — a guard that stops guarding
+    with no signal. The site cannot build without a canonical URL,
+    so not finding one is a defect, not an absence.
+    """
     found = re.search(
         r'SITE_URL\s*\?\?\s*"(?P<site>[^"]+)"',
         source_without_comments(REPO / "site" / "astro.config.mjs"),
@@ -784,10 +773,16 @@ def canonical_host() -> str:
     if not found:
         fail(
             "site/astro.config.mjs declares no `SITE_URL ?? \"…\"`, "
-            "so a self-hosted absolute link cannot be told from an "
-            "external one."
+            "so the host every build bakes into SUFeedURL — and "
+            "every link claiming to be off-site — is unguarded."
         )
-    return urllib.parse.urlsplit(found.group("site")).netloc
+    host = urllib.parse.urlsplit(found.group("site")).netloc
+    if not host:
+        fail(
+            f"site/astro.config.mjs's SITE_URL "
+            f"({found.group('site')}) has no host."
+        )
+    return host
 
 
 def served_paths(dist: pathlib.Path) -> set[str]:
@@ -854,9 +849,11 @@ def check_markdown_pipeline(dist: pathlib.Path) -> None:
     Reverting #985's config change alone does NOT red this, and
     that is the point rather than a gap: the invariant is what the
     artifact says, not which API expresses it. What reds it is the
-    pipeline actually stopping — drop `remarkDocsLinks` from
-    `markdown.processor`, or force the plugin's slug fallback, and
-    every clause above fires.
+    pipeline actually stopping, and the two ways it can stop red
+    DIFFERENT clauses — which is why all four are here. Dropping
+    `remarkDocsLinks` from `markdown.processor` reds 1 and 2 and
+    leaves 3 and 4 green; forcing the plugin's slug fallback reds
+    3 alone, with 1, 2 and 4 green. Measured both ways, #985.
 
     On the SITE gate for `check_promoted_download`'s reason.
     """
@@ -906,7 +903,7 @@ def check_markdown_pipeline(dist: pathlib.Path) -> None:
 
     dangling: list[tuple[str, str]] = []
     unresolved: list[tuple[str, str]] = []
-    examined = 0
+    resolved = 0
     for page, text in html.items():
         where = str(page.relative_to(dist))
         for raw in HREF.findall(text):
@@ -924,19 +921,21 @@ def check_markdown_pipeline(dist: pathlib.Path) -> None:
                 if parts.netloc != host:
                     continue
                 target = parts.path
-            examined += 1
             if target.endswith(".md"):
                 dangling.append((where, raw))
-            elif target.startswith("/") and (
-                urllib.parse.unquote(target) not in served
-            ):
-                unresolved.append((where, raw))
-    if not examined:
-        # Clause 2 and 3 both read this loop, so an href shape
+            elif target.startswith("/"):
+                # Count the branch clause 3 actually resolves, not
+                # every href reached: a floor that counts hrefs it
+                # never resolves can loosen with nobody noticing.
+                resolved += 1
+                if urllib.parse.unquote(target) not in served:
+                    unresolved.append((where, raw))
+    if not resolved:
+        # Clauses 2 and 3 both read this loop, so an href shape
         # HREF stops spelling would make both pass for having
         # matched nothing while clause 1 kept the check green.
         fail(
-            f"no site-relative href found across {len(pages)} "
+            f"no site-relative href resolved across {len(pages)} "
             "built page(s) — clauses 2 and 3 would pass for "
             "having looked at nothing. Check the `HREF` pattern "
             "against what the build now emits."
@@ -974,11 +973,13 @@ def check_markdown_pipeline(dist: pathlib.Path) -> None:
         problems.append(
             "no Starlight heading anchor "
             f"(`{STARLIGHT_ANCHOR}`) anywhere under docs/.\n"
-            "  Starlight pushes its own transforms onto whatever "
-            "`markdown.processor` holds and only `logger.warn`s "
-            "when handed one it cannot drive — so a processor it "
-            "does not recognize silently costs every heading "
-            "anchor, aside and RTL code block (#985)."
+            "  Two causes. Starlight pushes its own transforms "
+            "onto whatever `markdown.processor` holds and only "
+            "`logger.warn`s when handed one it cannot drive, so a "
+            "processor it does not recognize silently costs every "
+            "heading anchor, aside and RTL code block. Or "
+            "Starlight renamed the class, in which case this "
+            "clause is what needs the edit (#985)."
         )
 
     if problems:
@@ -986,7 +987,7 @@ def check_markdown_pipeline(dist: pathlib.Path) -> None:
     print(
         f"markdown pipeline ran: {len(pages)} built page(s) "
         f"({len(docs)} under docs/), one <h1> each, "
-        f"{examined} site-relative href(s) all resolving, "
+        f"{resolved} site-relative href(s) all resolving, "
         f"{anchors} heading anchor(s)"
     )
 
