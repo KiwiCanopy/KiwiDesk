@@ -3,8 +3,9 @@ import CoreGraphics
 /// The viewport-offset half of `ScrollingLayout`, split at the
 /// file ceiling: the anchor dispatch and the clamps that keep a
 /// row from revealing empty margin past its ends. Pure maths —
-/// `calculateGeometry` and `viewportRest` next door both
-/// resolve through it, and so does the Settings preview (#776).
+/// `calculateGeometry` and `viewportRest` (in
+/// `ScrollingLayout+Viewport`) both resolve through it, and so
+/// does the Settings preview (#776).
 extension ScrollingLayout {
     /// The viewport offset for `focus` at `focusedPos`, given the
     /// rest from the last tile (`previous`).
