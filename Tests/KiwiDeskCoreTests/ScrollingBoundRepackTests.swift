@@ -145,6 +145,36 @@ struct ScrollingBoundRepackTests {
         )
     }
 
+    @Test("A NEW slot size consumes a corroborated ceiling")
+    func newSlotConsumesTheCorroboratedCeiling() throws {
+        // The #1055 Lane B churn fix at the layout: one slot
+        // size serves the whole row, so before generalization
+        // EVERY resize press minted a brand-new ask and re-ran
+        // the learn dance (repro B). With the ceiling
+        // corroborated, a slot size the ladder never saw draws
+        // the answered span immediately — no overshoot, no
+        // probe.
+        var context = makeContext()
+        context.scrolling.slotSize = .points(700)
+        context.sizeBounds[w2] = EffectiveSizeBound(
+            width: [
+                .init(asked: 600, answered: 400),
+                .init(asked: 500, answered: 400),
+            ]
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let bounded = try #require(frames[w2])
+        let third = try #require(frames[w3])
+        #expect(bounded.width == 400)
+        // And the row re-packs against the consumed span, the
+        // same #677 mechanics as an exact-ask consume.
+        let first = try #require(frames[w1])
+        #expect(third.minX == first.maxX + 10 + 400 + 10)
+    }
+
     @Test("A lone refused window centers in the area")
     func loneWindowCenters() throws {
         var context = makeContext()

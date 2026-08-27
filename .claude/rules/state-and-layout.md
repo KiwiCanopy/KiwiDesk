@@ -299,9 +299,20 @@ editing here:
   size and reads the settled, echo-fed state frame as the app's
   answer — the same ask refused with the same answer twice
   confirms a per-axis, PER-ASK `EffectiveSizeBound` entry —
-  entries never generalize across asks (a grid-snapping app
+  ENTRIES never generalize across asks (a grid-snapping app
   answers each ask differently; the one deliberate exception is
-  the compliance contradiction sweep, argued on `complied`) and
+  the compliance contradiction sweep, argued on `complied`) —
+  while a CORROBORATED bound does, revocably (#1055 Lane B,
+  owner ruling 2026-08-27): `consumedWidth/Height` and
+  `explains` answer an ask BEYOND `maxWidth`/`minWidth` with
+  that bound, a per-ask entry outranks the generalization for
+  any ask it matches (the falsifier), and a corroborated
+  ceiling corroborates the single floor entry at the same span
+  — the fixed-span lend, the signature no snap grid can
+  produce; the argument and the probe evidence are
+  `EffectiveSizeBound`'s header and the issue
+  (`SizeBoundGeneralizationTests`, `ScrollingFixedSpanCueTests`,
+  `ScrollingBoundRepackTests`) — and
   hold a ladder PER ASK up to `SizeBoundLearner
   .maxEntriesPerAxis` (alternating layouts starved a single
   slot, device QA 2026-08-18; keep that cap sized past every

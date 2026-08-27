@@ -2056,6 +2056,41 @@ mark, and the copy mirrors the floor's
 *viewport* stays wordless — that limit protects no window and
 names none, so the bounce alone carries it.
 
+**A corroborated bound generalizes at the consume site,
+revocably; entries never do (#1055 Lane B).** [Principle] The
+per-ask ledger exists because a single refusal is grid noise as
+often as a bound — a terminal answers each ask a few points off
+— but the corroboration bar changes what the evidence supports:
+two DISTINCT asks agreeing on one answer is a signature a
+nearest-cell snap cannot produce (the ask range mapping more
+than the match tolerance past one cell boundary is narrower
+than the tolerance that makes two asks distinct — probed on the
+issue against Terminal's ~7 pt quantum), while a true fixed
+bound answers every ask past it with that one span (System
+Settings, measured constant across a 12-ask sweep and
+independent of the other axis). So `consumedWidth/Height` and
+`explains` answer an ask beyond a corroborated bound with that
+bound, which is what stops a scrolling row — one slot size
+serving every window — from re-running the whole learn dance
+per resize press (the #1055 churn). Generalizing at the CONSUME
+site rather than in the ledger is what keeps it revocable: the
+learner keeps recording what the layout actually issues, a
+per-ask entry outranks the generalization for any ask it
+matches, so an app that contradicts the bound at a generalized
+ask (an aspect-coupled emulator after an other-axis change)
+corrects itself through the ordinary ladder, and the
+genuine-resize forget and compliance sweep clear stale bounds
+as they always did. One extension rides the same evidence: a
+corroborated ceiling corroborates the single floor entry at the
+same span (and mirrored) — the fixed-span signature, an app
+answering one span from both directions — which is what arms
+the shrink refusal cue on the first press below a fixed-width
+app's span instead of after a ten-press silent walk (repro C).
+The lend consults only the paired value of the other direction,
+never a lent one, so two single entries cannot bootstrap each
+other. (`SizeBoundGeneralizationTests`,
+`ScrollingFixedSpanCueTests`)
+
 **Session weights are healed at retile, not validated forever
 at write time (#944).** [Principle] The write-time clamps above
 validate a weight against the membership at PRESS time, and
