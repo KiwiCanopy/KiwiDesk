@@ -52,8 +52,8 @@ extension StatusItemController {
         if case .scanning = phase {
             // A determinate count, deliberately in words: menus
             // carry no progress bars, and the honest number is
-            // apps LOOKED AT of apps running — `BootPhase` argues
-            // why the attach tally would read as a stalled bar.
+            // apps LOOKED AT of apps the boot queue admits —
+            // `BootPhase` argues both halves of that count.
             // Disabled, monochrome, and gone the moment boot ends;
             // the rows it explains are greyed below.
             let status = NSMenuItem(

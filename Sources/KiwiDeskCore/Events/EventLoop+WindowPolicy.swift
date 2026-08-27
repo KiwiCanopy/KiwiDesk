@@ -156,6 +156,36 @@ extension EventLoop {
             )
     }
 
+    /// Whether a boot pass queues this app at all. Faceless
+    /// (`.prohibited`) helpers and ignore-listed apps can never
+    /// attach, so a queued step for one is inert — and on a
+    /// heavy session they are most of the process table, which
+    /// made the count the menu narrates read "apps: 3 of 145"
+    /// over a desk showing five: the total is the queue, and
+    /// the queue was every running process. Filtering at queue
+    /// build keeps the narrated total the real workload;
+    /// `attach`'s own `shouldAttach` guard stays, because every
+    /// non-boot caller still needs it.
+    ///
+    /// An app already holding an observer is always admitted:
+    /// the startup sweep is the pass the deferred window-rule
+    /// re-check rides (`BootWindowRuleReconcileTests`), so its
+    /// `syncObservation` must still reach an attached app whose
+    /// fresh rules now say ignore — that visit IS the detach.
+    /// This is policy, not the #1037 WindowServer census: an
+    /// admitted app that shows nothing is still visited, which
+    /// is the #662 warm the sweep exists to pay.
+    func bootPassAdmits(_ app: RunningApp) -> Bool {
+        observers[app.pid] != nil
+            || Self.shouldAttach(
+                pid: app.pid,
+                activationPolicy: app.activationPolicy,
+                isIgnored: shouldIgnoreApp(
+                    bundleID: app.ref.bundleID
+                )
+            )
+    }
+
     /// KiwiDesk's normal Settings window can become a main app
     /// window. Its internal overlay panels cannot, giving one
     /// robust distinction for drag/drop, App Bar, and border

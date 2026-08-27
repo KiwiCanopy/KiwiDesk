@@ -161,7 +161,8 @@ extension EventLoop {
         // A new boot has no history: an app that could not answer
         // last time deserves its chance again.
         let visible = visiblePIDs()
-        let apps = runningApplications()
+        // Queue only apps a pass can act on (`bootPassAdmits`).
+        let apps = runningApplications().filter(bootPassAdmits)
         open(
             .scan,
             steps: apps.map {
@@ -191,7 +192,9 @@ extension EventLoop {
     /// chunked and budgeted here, once, not on every switch.
     func beginSweep() -> Bool {
         guard isRunning else { return false }
-        let apps = runningApplications()
+        // Same admission as the scan; an attached app is always
+        // admitted — the visit is the detach (`bootPassAdmits`).
+        let apps = runningApplications().filter(bootPassAdmits)
         var steps: [BootScanStep] = apps.map { .reconcile($0) }
         let live = Set(apps.map(\.pid))
         for pid in observers.keys where !live.contains(pid) {
@@ -335,7 +338,7 @@ extension EventLoop {
         case .scan:
             onLog(
                 "startup scan: \(observers.count) apps attached "
-                    + "of \(bootScan.total) running in \(ms)ms"
+                    + "of \(bootScan.total) eligible in \(ms)ms"
             )
             publishDisplays()
         case .sweep:
