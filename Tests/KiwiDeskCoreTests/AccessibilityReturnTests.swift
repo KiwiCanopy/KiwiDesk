@@ -19,6 +19,14 @@ struct AccessibilityReturnTests {
     private static let voBundle =
         "com.apple.universalaccesscontrol"
 
+    /// The return's log phrase, asserted POSITIVELY on a
+    /// genuine return and NEGATIVELY on the silent let-outs —
+    /// one constant, so a reword of the production line reds
+    /// the positive half instead of leaving the negative one
+    /// vacuously green (guard-prover + re-review, 2026-08-27).
+    private static let returnLogNeedle =
+        "accessibility-steal yield"
+
     /// Windows 1 (OUR pid — the victim) and 2 (a foreign
     /// regular app), window 1 focused — the fixture the steal
     /// hits. Window 3 is the panel app's untracked window in
@@ -70,15 +78,10 @@ struct AccessibilityReturnTests {
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(1)
         )
-        // The POSITIVE half of the needle pair: the fulfilment
-        // test's silence assertion greps for this exact phrase,
-        // and a negative needle alone goes vacuous if the log
-        // line is ever reworded (guard-prover, 2026-08-27) —
-        // renaming it now reds here first.
+        // The POSITIVE half of the needle pair (see
+        // `returnLogNeedle`).
         #expect(
-            log.contains {
-                $0.contains("accessibility-steal yield")
-            }
+            log.contains { $0.contains(Self.returnLogNeedle) }
         )
         // One shot: the debt is spent, so a second foreign
         // report is an ordinary focus and is honored.
@@ -121,9 +124,7 @@ struct AccessibilityReturnTests {
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.accessibilityReturn == nil)
         #expect(
-            !log.contains {
-                $0.contains("accessibility-steal yield")
-            }
+            !log.contains { $0.contains(Self.returnLogNeedle) }
         )
         // The debt is gone, so a later foreign focus follows
         // normally — VoiceOver navigation is never fought once
@@ -197,6 +198,51 @@ struct AccessibilityReturnTests {
                 == WindowID(1)
         )
         #expect(core.accessibilityReturn == nil)
+    }
+
+    @Test("A self-raise echo fall-through never spends it")
+    func selfEchoFallThroughDoesNotSpendTheDebt() {
+        // The re-review major (2026-08-27): a stamped echo of
+        // our OWN raise can fall PAST the self-echo drop block
+        // (a non-defer layout) while still being our fallout —
+        // the `!selfEcho` gate stands the arm down there, so
+        // the debt survives for the genuine yield.
+        let core = makeCore()
+        core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        core.outstandingSelfRaises.insert(WindowID(2))
+        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.handle(.windowFocused(WindowID(2)))
+        // The echo was honored as our own raise's fallout —
+        // and the debt is intact.
+        #expect(core.accessibilityReturn != nil)
+        // The genuine yield — no stamps left (the handle above
+        // consumed the outstanding entry) — is returned.
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(
+            core.state.workspaces[SpaceID(1)]?.focused
+                == WindowID(1)
+        )
+        #expect(core.accessibilityReturn == nil)
+    }
+
+    @Test("A stale unconsumed debt is replaced, not kept")
+    func staleDebtIsReplaced() {
+        // The renewal guard refuses only a LIVE debt: one that
+        // expired unconsumed (the yield landed on an untracked
+        // window) must not block a later VoiceOver start with
+        // the same victim (re-review, 2026-08-27).
+        let core = makeCore()
+        core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        core.accessibilityReturn?.at = Date(
+            timeIntervalSinceNow:
+                -KiwiCore.accessibilityReturnGrace - 1
+        )
+        core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        let at = core.accessibilityReturn?.at
+        #expect(at != nil)
+        #expect(
+            at.map { Date().timeIntervalSince($0) < 2 } == true
+        )
     }
 
     @Test("A lazy panel re-report never renews the grace")

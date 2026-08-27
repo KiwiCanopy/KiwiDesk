@@ -80,9 +80,19 @@ extension KiwiCore {
         // past its bound, and each renewal is another chance
         // to fight a deliberate clickless move — the #689
         // semantic-re-arm shape. The first steal's clock
-        // stands; a debt for a DIFFERENT victim (focus moved
-        // between steals) is a new steal and replaces it.
-        if accessibilityReturn?.victim == anchor { return }
+        // stands only while it is LIVE: an expired debt no
+        // report ever consumed (the yield landed on an
+        // untracked window) is stale, and refusing to replace
+        // it would honor every later steal with the same
+        // victim (re-review, 2026-08-27). A debt for a
+        // DIFFERENT victim is a new steal and replaces it.
+        if let debt = accessibilityReturn,
+            debt.victim == anchor,
+            Date().timeIntervalSince(debt.at)
+                < Self.accessibilityReturnGrace
+        {
+            return
+        }
         accessibilityReturn = AccessibilityReturnDebt(
             victim: anchor,
             at: Date()

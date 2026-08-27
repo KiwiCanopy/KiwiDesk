@@ -252,18 +252,18 @@ extension KiwiCore {
             }
             return
         }
-        // The accessibility-steal return (#958): VoiceOver's
-        // start takes activation from our own focused window
-        // and macOS hands the yield to the previous REGULAR
-        // app. Deliberately LAST among the consumes: a report
-        // the panel, z-order-echo, sibling or self-echo
-        // machines claim is our own raises' fallout and must
-        // not spend the one-shot debt — the genuine yield is
-        // clickless, unstamped and foreign, so it always falls
-        // through to here (review, 2026-08-27). The arms,
-        // let-outs and the #496-shaped correction are
+        // The accessibility-steal return (#958): LAST among
+        // the consumes — a report an earlier machine claims is
+        // our raises' fallout must not spend the one-shot debt
+        // — AND gated on `!selfEcho`, because a stamped
+        // self-raise echo can fall PAST the drop block above
+        // (a non-defer layout, or `intended == id`) while
+        // still being our own fallout, not macOS's misdirected
+        // yield (re-review, 2026-08-27). The rest is
         // `returnAccessibilitySteal`'s.
-        if returnAccessibilitySteal(id: id, now: now) {
+        if !selfEcho,
+            returnAccessibilitySteal(id: id, now: now)
+        {
             return
         }
         // A real focus echo (a user click mid-pan) or a self
