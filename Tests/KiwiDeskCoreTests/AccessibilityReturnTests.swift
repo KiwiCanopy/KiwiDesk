@@ -63,10 +63,22 @@ struct AccessibilityReturnTests {
         #expect(core.accessibilityReturn?.victim == WindowID(1))
         // The yield: a clickless focus report for the foreign
         // regular app, inside the grace.
+        var log: [String] = []
+        core.onLog = { log.append($0) }
         core.handle(.windowFocused(WindowID(2)))
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(1)
+        )
+        // The POSITIVE half of the needle pair: the fulfilment
+        // test's silence assertion greps for this exact phrase,
+        // and a negative needle alone goes vacuous if the log
+        // line is ever reworded (guard-prover, 2026-08-27) —
+        // renaming it now reds here first.
+        #expect(
+            log.contains {
+                $0.contains("accessibility-steal yield")
+            }
         )
         // One shot: the debt is spent, so a second foreign
         // report is an ordinary focus and is honored.
@@ -81,6 +93,9 @@ struct AccessibilityReturnTests {
     func clickCancelsTheDebt() {
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        // The arm must have fired for the let-out to prove
+        // anything — fail-open otherwise (guard-prover).
+        #expect(core.accessibilityReturn != nil)
         core.lastLeftClick = (
             at: Date(), point: .zero, reached: WindowID(2)
         )
@@ -96,8 +111,20 @@ struct AccessibilityReturnTests {
     func ownFocusFulfilsTheDebt() {
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        // Fulfilment must be SILENT — cleared without firing
+        // the return. The log capture is what pins the
+        // `reportedPid != own` clause: without it an own-pid
+        // report is "returned" to itself, which no focus
+        // assertion can tell apart (guard-prover, 2026-08-27).
+        var log: [String] = []
+        core.onLog = { log.append($0) }
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.accessibilityReturn == nil)
+        #expect(
+            !log.contains {
+                $0.contains("accessibility-steal yield")
+            }
+        )
         // The debt is gone, so a later foreign focus follows
         // normally — VoiceOver navigation is never fought once
         // focus came home.
@@ -112,6 +139,9 @@ struct AccessibilityReturnTests {
     func expiredDebtIsHonored() {
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        // Fail-open guard: the backdate below no-ops on nil,
+        // so prove the arm fired first (guard-prover).
+        #expect(core.accessibilityReturn != nil)
         core.accessibilityReturn?.at = Date(
             timeIntervalSinceNow:
                 -KiwiCore.accessibilityReturnGrace - 1
@@ -137,6 +167,50 @@ struct AccessibilityReturnTests {
         #expect(core.accessibilityReturn == nil)
         core.eventLoop.onIgnoredPanelFocus(7, nil)
         #expect(core.accessibilityReturn == nil)
+    }
+
+    @Test("Our own raise fallout never spends the debt")
+    func raiseFalloutDoesNotSpendTheDebt() {
+        // The review-round major (2026-08-27): the yield lands
+        // 3-8 s after the steal, and inside that window our
+        // own raises emit clickless foreign focus echoes. The
+        // return arm runs LAST among the consumes so a report
+        // the z-order echo machine claims leaves the one-shot
+        // debt for the genuine yield.
+        let core = makeCore()
+        core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        core.zOrderRaiseEchoes[WindowID(2)] = Date()
+        core.handle(.windowFocused(WindowID(2)))
+        // The echo machine reverted the report; the debt
+        // survived it.
+        #expect(
+            core.state.workspaces[SpaceID(1)]?.focused
+                == WindowID(1)
+        )
+        #expect(core.accessibilityReturn != nil)
+        // The genuine yield — unstamped, clickless, foreign —
+        // still gets returned.
+        core.zOrderRaiseEchoes[WindowID(2)] = nil
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(
+            core.state.workspaces[SpaceID(1)]?.focused
+                == WindowID(1)
+        )
+        #expect(core.accessibilityReturn == nil)
+    }
+
+    @Test("A lazy panel re-report never renews the grace")
+    func reReportDoesNotRenewTheDebt() {
+        // Sliding `at` forward stretches the grace past its
+        // bound, and each renewal is another chance to fight a
+        // deliberate clickless move — the first steal's clock
+        // stands (#689's semantic-re-arm shape).
+        let core = makeCore()
+        core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        let aged = Date(timeIntervalSinceNow: -5)
+        core.accessibilityReturn?.at = aged
+        core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        #expect(core.accessibilityReturn?.at == aged)
     }
 
     @Test("A foreign focused window is not a victim")

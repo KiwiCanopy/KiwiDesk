@@ -60,14 +60,6 @@ extension KiwiCore {
             }
             return
         }
-        // The accessibility-steal return (#958): VoiceOver's
-        // start takes activation from our own focused window
-        // and macOS hands the yield to the previous REGULAR
-        // app. The arms, let-outs and the #496-shaped
-        // correction are `returnAccessibilitySteal`'s.
-        if returnAccessibilitySteal(id: id, now: now) {
-            return
-        }
         // A focus echo from our own z-order raise (#418/#425):
         // AX couples the raise with app activation, so raising a
         // float above the tiled plane, or a pile member during a
@@ -258,6 +250,20 @@ extension KiwiCore {
             ) {
                 state.workspaces.focus(intended, in: space)
             }
+            return
+        }
+        // The accessibility-steal return (#958): VoiceOver's
+        // start takes activation from our own focused window
+        // and macOS hands the yield to the previous REGULAR
+        // app. Deliberately LAST among the consumes: a report
+        // the panel, z-order-echo, sibling or self-echo
+        // machines claim is our own raises' fallout and must
+        // not spend the one-shot debt — the genuine yield is
+        // clickless, unstamped and foreign, so it always falls
+        // through to here (review, 2026-08-27). The arms,
+        // let-outs and the #496-shaped correction are
+        // `returnAccessibilitySteal`'s.
+        if returnAccessibilitySteal(id: id, now: now) {
             return
         }
         // A real focus echo (a user click mid-pan) or a self

@@ -75,6 +75,14 @@ extension KiwiCore {
                     ProcessInfo.processInfo.processIdentifier
                 )
         else { return }
+        // A lazy re-report of the same panel must not RENEW
+        // the debt: sliding `at` forward stretches the grace
+        // past its bound, and each renewal is another chance
+        // to fight a deliberate clickless move — the #689
+        // semantic-re-arm shape. The first steal's clock
+        // stands; a debt for a DIFFERENT victim (focus moved
+        // between steals) is a new steal and replaces it.
+        if accessibilityReturn?.victim == anchor { return }
         accessibilityReturn = AccessibilityReturnDebt(
             victim: anchor,
             at: Date()
