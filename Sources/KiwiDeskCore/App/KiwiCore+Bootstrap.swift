@@ -141,8 +141,10 @@ extension KiwiCore {
         eventLoop.onEvent = { [weak self] event in
             self?.handle(event)
         }
-        eventLoop.onIgnoredPanelFocus = { [weak self] pid in
+        eventLoop.onIgnoredPanelFocus = {
+            [weak self] pid, bundleID in
             self?.armIgnoredPanel(pid)
+            self?.armAccessibilityReturn(bundleID: bundleID)
         }
         eventLoop.onTransientDrop = { [weak self] in
             self?.scheduleTransientRetrack()

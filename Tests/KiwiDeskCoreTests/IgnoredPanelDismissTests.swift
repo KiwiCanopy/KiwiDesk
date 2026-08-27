@@ -72,7 +72,7 @@ struct IgnoredPanelDismissTests {
         // The event loop fires this when it filters an ignored
         // panel's own focus report (#21); the wiring must flag
         // the pid so the dismiss transition can be caught.
-        core.eventLoop.onIgnoredPanelFocus(7)
+        core.eventLoop.onIgnoredPanelFocus(7, "com.example.app")
         #expect(core.ignoredPanel.active.contains(7))
     }
 

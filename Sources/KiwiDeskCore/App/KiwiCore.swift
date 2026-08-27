@@ -215,6 +215,9 @@ public final class KiwiCore {
     /// `KiwiCore+IgnoredPanel.swift`.
     var ignoredPanel = IgnoredPanelDistrust()
 
+    /// #958 steal debt; `KiwiCore+AccessibilityReturn.swift`.
+    var accessibilityReturn: AccessibilityReturnDebt?
+
     /// Z-order restores whose raise sequence has not re-asserted
     /// focus yet (#186). The pile raises steal focus window by
     /// window and those echoes are not in `outstandingSelfRaises`

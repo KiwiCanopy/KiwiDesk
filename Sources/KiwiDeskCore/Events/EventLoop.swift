@@ -28,7 +28,9 @@ public final class EventLoop {
     /// terminal by manual pass; a future ignored-panel app that
     /// only ever re-reports its main window would not flag, and
     /// the dismiss follow would return (the pre-fix behavior).
-    public var onIgnoredPanelFocus: @MainActor (pid_t) -> Void = { _ in
+    public var onIgnoredPanelFocus: @MainActor (pid_t, String?) -> Void = {
+        _,
+        _ in
     }
 
     /// Fired when a transient filter drops a window mid-launch

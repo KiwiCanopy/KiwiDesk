@@ -60,6 +60,14 @@ extension KiwiCore {
             }
             return
         }
+        // The accessibility-steal return (#958): VoiceOver's
+        // start takes activation from our own focused window
+        // and macOS hands the yield to the previous REGULAR
+        // app. The arms, let-outs and the #496-shaped
+        // correction are `returnAccessibilitySteal`'s.
+        if returnAccessibilitySteal(id: id, now: now) {
+            return
+        }
         // A focus echo from our own z-order raise (#418/#425):
         // AX couples the raise with app activation, so raising a
         // float above the tiled plane, or a pile member during a

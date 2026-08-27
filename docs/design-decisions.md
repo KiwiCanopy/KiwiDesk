@@ -5111,6 +5111,30 @@ ignored-panel family uses, armed at close for KiwiDesk's own
 pid. `ShortcutsPanelReturnTests` pins the yield gate's arms
 and the double-close consume. (#952)
 
+**An accessibility steal is returned, not refused (#958).**
+Starting VoiceOver activates `com.apple.universalaccesscontrol`,
+and when that process yields, macOS re-activates the most
+recent *regular* app — KiwiDesk is an accessory app, so its
+focused Settings window is skipped in the reactivation stack
+and activation lands on whatever regular app came before it,
+3–8 s after VoiceOver starts (device captures 2026-08-24 and
+2026-08-27). The user asked to start a system service, not to
+change windows. The #952 boundary still binds: the misdirected
+handoff is a genuine focus event at OS level, and Core refusing
+to follow one would split state focus from real key focus — so
+the correction is the #496 shape, keep state on the victim and
+re-assert it with a direct AX raise, whose coupled activation
+brings the accessory app back. The debt is narrow by
+construction: only an accessibility system process arms it,
+only a window of our own pid can be a victim (a regular app's
+window comes back on its own), a click clears it (the user
+chose), focus coming home fulfils it, it expires on a bound
+sized past the observed yield window, and it is one-shot per
+steal — so deliberate VoiceOver navigation moments later is
+never fought. The accepted trade is the one clickless
+cross-app focus inside that window being returned once.
+(`AccessibilityReturnTests`)
+
 **Open-or-Focus cycles in canonical order, never
 most-recently-used.** A repeat press of the shortcut walks the
 app's tracked windows in space-creation order, then flat-array
