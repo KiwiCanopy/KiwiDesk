@@ -57,15 +57,13 @@ private func lead(
 /// The fix is a discrimination, so these pin both sides of it:
 /// the row moving underneath an unchanged focus re-anchors, a
 /// focus change still pans minimally from the offset it had.
-/// Since then the suite has grown the border rule's arms (a
-/// slot resting ON a border keeps the border), the clamp that
-/// outranks them, and the producer's recording of which border
-/// a slot rested on — the last because every other test here
-/// builds its rest by hand and so cannot see the write.
+/// The border rule's own arms — a slot resting ON a border
+/// keeps it, and the producer that records which border —
+/// live in `ScrollingBorderAnchorTests`, split off at the file
+/// ceiling.
 @Suite("Scrolling resize re-anchors the viewport (#966)")
 struct ScrollingResizeAnchorTests {
     let layout = ScrollingLayout()
-
     @Test("A slot shrink leaves the focused window in place")
     func shrinkKeepsFocusedWindowInPlace() throws {
         // w3 toward the right of the visible run with w1 half
@@ -108,33 +106,6 @@ struct ScrollingResizeAnchorTests {
                 in: context
             ).offset == -200
         )
-    }
-
-    @Test("A shrink off a border gives its space to the open side")
-    func shrinkHoldsTheTrailingBorder() throws {
-        // w3 resting flush against the trailing border with a
-        // hidden w2 behind it (device QA, 2026-08-27). Holding
-        // its leading edge would tear it off the border and open
-        // a gap the row then fills from behind; the border is
-        // what it keeps, so the space comes off the open side
-        // and more of w2 shows.
-        var context = makeContext(focused: w3, slot: 400)
-        context.scrollRest = ScrollRest(
-            offset: -200,
-            focus: w3,
-            position: 800,
-            restingOn: .trailing
-        )
-        context.scrolling.slotSize = .points(350)
-        let frames = layout.calculateGeometry(
-            for: windows,
-            in: context
-        )
-        let focused = try #require(frames[w3])
-        #expect(
-            abs(focused.maxX - context.usable.maxX) < 0.01
-        )
-        #expect(try lead(of: w3, in: frames, context) == 650)
     }
 
     @Test("A focus change still pans from the recorded offset")
@@ -236,56 +207,6 @@ struct ScrollingResizeAnchorTests {
         #expect(try lead(of: w4, in: frames, context) == 400)
         let last = try #require(frames[w5])
         #expect(abs(last.maxX - context.usable.maxX) < 0.01)
-    }
-
-    @Test("The rest records which border the slot rested on")
-    func viewportRestRecordsTheBorder() throws {
-        // The producer half, and the ONLY net on it: every test
-        // above builds its rest by hand, so a `viewportRest`
-        // that recorded the wrong verdict would leave all of
-        // them green while the border rule was dead in
-        // production (guard-prover, 2026-08-27 — recording a
-        // constant there passed all 4088 tests).
-        //
-        // Each case derives its expectation from the fixture's
-        // own geometry rather than from what the engine just
-        // wrote, which is what makes it a reading rather than
-        // an echo.
-        var context = makeContext(focused: w3, slot: 400)
-
-        // w3 at position 800, offset -200 → lead 600, and
-        // 600 + 400 == the 1000pt viewport: on the trailing
-        // border.
-        context.scrollRest = ScrollRest(offset: -200)
-        #expect(
-            ScrollingLayout.viewportRest(
-                for: windows,
-                in: context
-            ).slot?.restingOn == .trailing
-        )
-
-        context.focused = w1
-        context.scrollRest = ScrollRest(offset: 0)
-        // w1 at position 0 with the viewport at 0: leading.
-        #expect(
-            ScrollingLayout.viewportRest(
-                for: windows,
-                in: context
-            ).slot?.restingOn == .leading
-        )
-
-        // A slot as wide as the viewport is flush at BOTH, and
-        // the leading edge is the recorded verdict — the
-        // precedence lives here, not in the consumer.
-        context.scrolling.slotSize = .points(1000)
-        context.focused = w2
-        context.scrollRest = ScrollRest(offset: -1010)
-        #expect(
-            ScrollingLayout.viewportRest(
-                for: windows,
-                in: context
-            ).slot?.restingOn == .leading
-        )
     }
 
     @Test("A window closing ahead of the focus re-anchors too")

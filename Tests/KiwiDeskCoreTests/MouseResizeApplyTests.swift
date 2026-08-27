@@ -184,12 +184,19 @@ struct MouseResizeApplyTests {
         // holds that value. Unclamped, these two presses land
         // 400pt apart.
         let core = makeCore()
-        let space = space(core, mode: "scrolling")
+        _ = space(core, mode: "scrolling")
         func grow() -> CGFloat {
+            // Re-read the space each press: a no-override write
+            // lands in the live session layer, and
+            // `resolvedScrolling` reads the value it is HANDED —
+            // so passing one snapshot twice recomputes from the
+            // same stale base and "a second grow moves nothing"
+            // holds however the writer behaves (guard-prover).
+            let live = core.state.workspaces[SpaceID("1")]!
             core.applyResizeAdjustment(
                 .scrollWidth(400),
                 for: nil,
-                in: space,
+                in: live,
                 bounds: bounds
             )
             return core.tiler.settings.resolvedScrolling(

@@ -3,8 +3,12 @@ import CoreGraphics
 import Foundation
 
 /// The scrolling half of the shared clamped resize writers
-/// (#933), split from `KiwiCore+ResizeLimits` at the file
-/// ceiling. Scrolling is the one interactive resize whose store
+/// (#933), moved out of `KiwiCore+ResizeLimits` when the file
+/// reached its ceiling. Not a pure relocation: the ceiling
+/// clauses below (the drawn area rather than the layout region,
+/// and a configured size outranking both) landed in the same
+/// change, so read the body rather than assuming it is what
+/// stood in the old file. Scrolling is the one interactive resize whose store
 /// is an absolute LENGTH rather than a ratio or a share, which
 /// is why it is the only one needing a ceiling as well as a
 /// floor — and why it carries enough argument to want its own
