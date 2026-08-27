@@ -1369,12 +1369,13 @@ first press or drag that gets only part of what it asked for,
 not just once you are already at the floor, and keyboard and
 mouse resizes behave identically.
 
-The other direction has a cue of its own on a Scrolling space:
+The other direction has a cue of its own on a scrolling space:
 some apps also enforce a *maximum* size (System Settings will
 not grow past its own width), and once KiwiDesk has learned it,
-growing that window's slot refuses instead of sliding the row
-aside for a span the app then snaps back from — with the same
-bounce and a pill saying why ("Maximum window size reached").
+growing that window's slot stops at that size instead of
+sliding the row aside for a span the app then snaps back
+from — with the same bounce and a pill saying why ("Maximum
+window size reached").
 Running out of screen stays wordless: that edge protects no
 window, so the bounce alone carries it.
 

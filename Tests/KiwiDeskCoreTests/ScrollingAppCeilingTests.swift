@@ -58,7 +58,27 @@ struct ScrollingAppCeilingTests {
             args: [.string(space.raw), .string("scrolling")]
         )
         core.state.workspaces.focus(WindowID(1), in: space)
+        // Pin the default the exact expectations reason from
+        // (#660): the `== 715` / `== 800` / `== 900` assertions
+        // hold only while the global floor sits below them.
+        #expect(core.tiler.settings.minWindowSize == 300)
         return (core, space)
+    }
+
+    /// The area the layout draws into — the viewport ceiling —
+    /// read off the engine's own context (the sibling suite's
+    /// helper, for the same reason: an assertion against it
+    /// cannot be satisfied by a store that merely fits).
+    private func areaExtent(_ core: KiwiCore) throws -> CGFloat {
+        let input = try #require(
+            core.tiler.layoutInput(state: core.state)
+        )
+        let context = input.context
+        return context.scrolling.windowFrame(
+            in: context.usable,
+            inner: context.gaps.inner,
+            global: context.appBarStyle
+        ).width
     }
 
     /// Teaches the learner a believed ceiling of 715pt for
@@ -136,14 +156,84 @@ struct ScrollingAppCeilingTests {
         // The deliberate silence the writer's header rules:
         // with nothing learned, a grow the drawn area truncates
         // names no window and shows no pill.
-        let (core, _) = makeCore()
+        let (core, space) = makeCore()
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         core.execute(
             "resize",
             args: [.string("x"), .number(4000)]
         )
+        // The truncation the silence is ABOUT must have
+        // happened — without this the test stays green if the
+        // resize stops reaching the clamp at all
+        // (code-reviewer, 2026-08-27).
+        #expect(try slotPoints(core, space) == areaExtent(core))
         #expect(refusals.isEmpty)
+    }
+
+    @Test("A learned maximum past the viewport stays wordless")
+    func maximumPastTheViewportStaysSilent() throws {
+        // The cue's discrimination arm (guard-prover,
+        // 2026-08-27): with a corroborated ceiling AT or ABOVE
+        // the drawn area, the VIEWPORT is the binding limit, so
+        // a truncated grow keeps the viewport's silence — the
+        // `appMax < drawnAlong` clause, which no other fixture
+        // can red because they stand the cue down on the nil
+        // appMax alone.
+        let (core, space) = makeCore()
+        let area = try areaExtent(core)
+        for asked in [area + 200, area + 300] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    WindowID(1),
+                    size: CGSize(width: asked, height: 800)
+                )
+                core.tiler.boundLearner.observe(
+                    WindowID(1),
+                    currentSize: CGSize(
+                        width: area + 100,
+                        height: 800
+                    ),
+                    settledRead: true
+                )
+            }
+        }
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        core.execute(
+            "resize",
+            args: [.string("x"), .number(4000)]
+        )
+        #expect(try slotPoints(core, space) == area)
+        #expect(refusals.isEmpty)
+    }
+
+    @Test("The ceiling never trims a resolved auto slot either")
+    func ceilingNeverTrimsAnAutoSlot() throws {
+        // The never-reduce floor's OWN weight (guard-prover,
+        // 2026-08-27): for a `.points` store the configured
+        // clause co-protects, so only an `auto` store — where
+        // `configured` is 0 — can red the
+        // `max(appMax, current)` floor. A default auto slot
+        // resolves well above the learned 715pt ceiling; a
+        // grow press must refuse there, not hand every
+        // neighbor a trim to one window's maximum.
+        let (core, space) = makeCore()
+        learnCeiling(core, asks: [800, 1000])
+        let before = try slotPoints(core, space)
+        // The arm under test only exists while the resolved
+        // slot sits ABOVE the ceiling.
+        #expect(before > 715)
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        core.execute(
+            "resize",
+            args: [.string("x"), .number(50)]
+        )
+        #expect(try slotPoints(core, space) == before)
+        // The app IS at its maximum, so the refusal still says
+        // so — the wordless case is the viewport's alone.
+        #expect(refusals == [.ownMaximum(WindowID(1))])
     }
 
     @Test("The ceiling never reduces the shared slot")

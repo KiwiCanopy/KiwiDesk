@@ -412,6 +412,20 @@ editing here:
   — it resolves against the region, so leaving it alone would
   re-bank the strip on the first press; that trim is the rule
   working, not a defect to fix back.
+  The focused window's learned app MAXIMUM joins the same
+  write-site ceiling (#1055): believed only under the floor's
+  own two-distinct-asks corroboration
+  (`EffectiveSizeBound.maxWidth` / `maxHeight`, read through
+  `effectiveMaxSize`), and it may only ever REFUSE a shared
+  store, never trim it — one slot serves the whole row, so a
+  trim to one window's limit visibly shrinks every neighbor on
+  a grow press. A grow the app ceiling truncates cues
+  `ownMaximum` on the focused window; one the viewport
+  truncates stays wordless (`ScrollingAppCeilingTests` pins
+  the refusal, the never-trim and the silence). A second
+  absolute-length store, or a new `maxWidth` consumer, owes
+  these obligations deliberately — nothing scans for a site
+  that never wires the ceiling at all.
   Scrolling is the only such store today, which is an
   observation rather than the rule.
   `ScrollingSlotCeilingTests` pins the drawn area rather than
