@@ -66,17 +66,22 @@ struct ScrollingSlotCeilingTests {
     private func slotPoints(
         _ core: KiwiCore,
         _ space: SpaceID,
-        along: CGFloat = 1200
+        along: CGFloat = 1200,
+        horizontal: Bool = true
     ) throws -> CGFloat {
         let live = try #require(core.state.workspaces[space])
         return core.tiler.settings.resolvedScrolling(for: live)
             .slotSize
-            .editablePoints(along: along, horizontal: true)
+            .editablePoints(
+                along: along,
+                horizontal: horizontal
+            )
     }
 
     @Test("Growing past the viewport stops at the axis")
     func growStopsAtTheAxis() throws {
         let (core, space) = makeCore()
+        let seed = try slotPoints(core, space)
         for _ in 0..<8 {
             #expect(
                 core.execute(
@@ -86,13 +91,38 @@ struct ScrollingSlotCeilingTests {
             )
         }
         // Eight 400pt grows would reach ~4300pt unclamped. The
-        // store stops at exactly what the layout can DRAW —
-        // asserted against the engine's own frame rather than a
-        // number, because that is the difference the ceiling
-        // turns on: capping at the layout REGION instead would
-        // bank the outer gaps and the bar strip, and would show
-        // up here as a store wider than the frame.
-        #expect(try slotPoints(core, space) == drawnWidth(core))
+        // store stops at exactly the area the layout draws into
+        // — asserted against that area rather than a number,
+        // because capping at the layout REGION instead would
+        // bank the outer gaps and the bar strip.
+        #expect(try slotPoints(core, space) == areaExtent(core))
+        // ...and it got there by GROWING. Without this a
+        // ceiling that binds too low — or a writer that refuses
+        // to grow at all — satisfies the line above.
+        #expect(try slotPoints(core, space) > seed)
+    }
+
+    /// The area the layout has to draw INTO, read off the
+    /// engine's own context — independent of what is stored, so
+    /// an assertion against it cannot be satisfied by a store
+    /// that merely fits. `drawnWidth` below cannot do this job:
+    /// it is `min(area, max(stored, floor))`, so comparing the
+    /// store to it only ever asks `stored <= area` and a ceiling
+    /// binding too LOW passes (code-reviewer, 2026-08-27).
+    private func areaExtent(
+        _ core: KiwiCore,
+        horizontal: Bool = true
+    ) throws -> CGFloat {
+        let input = try #require(
+            core.tiler.layoutInput(state: core.state)
+        )
+        let context = input.context
+        let area = context.scrolling.windowFrame(
+            in: context.usable,
+            inner: context.gaps.inner,
+            global: context.appBarStyle
+        )
+        return horizontal ? area.width : area.height
     }
 
     /// The width the engine would DRAW for window 1 right now,
@@ -127,15 +157,45 @@ struct ScrollingSlotCeilingTests {
             )
         }
         let before = try drawnWidth(core)
-        // The store sits exactly on the drawn width, which is
-        // WHY the next press is visible — an unclamped store
-        // would be thousands of points above it.
-        #expect(try slotPoints(core, space) == before)
+        // The store sits exactly on the area, which is WHY the
+        // next press is visible — an unclamped store would be
+        // thousands of points above it.
+        #expect(try slotPoints(core, space) == areaExtent(core))
         core.execute(
             "resize",
             args: [.string("x"), .number(-600)]
         )
         #expect(try drawnWidth(core) < before)
+    }
+
+    @Test("The vertical ceiling clears the bar on its own axis")
+    func verticalCeilingClearsTheBarStrip() throws {
+        // The case the rule leads with and no fixture covered
+        // (code-reviewer, 2026-08-27): with a vertical scroll
+        // axis the App Bar's strip is carved off the SAME axis,
+        // so a ceiling taken from the layout region banks the
+        // bar's whole thickness rather than the 20pt of outer
+        // gaps a horizontal fixture would show.
+        let (core, space) = makeCore()
+        core.execute(
+            "scroll.set_orientation",
+            args: [.string("vertical")]
+        )
+        for _ in 0..<8 {
+            core.execute(
+                "resize",
+                args: [.string("y"), .number(400)]
+            )
+        }
+        let stored = try slotPoints(
+            core,
+            space,
+            along: 800,
+            horizontal: false
+        )
+        #expect(
+            stored == (try areaExtent(core, horizontal: false))
+        )
     }
 
     @Test("A grow never shrinks a config-set oversize slot")

@@ -90,10 +90,26 @@ extension KiwiCore {
             inner: context.gaps.inner,
             global: context.appBarStyle
         )
+        // The current size joins the ceiling only for a POINTS
+        // store — the case the clause is about, where the user
+        // wrote a number. `auto`/`%` resolve against the layout
+        // REGION (#537) while the ceiling is the drawn area, so
+        // admitting them here would re-bank the bar strip on the
+        // very first press: a default `auto` on the axis
+        // carrying the App Bar already resolves above what the
+        // layout draws. A fraction is screen-relative anyway, so
+        // it survives undocking on its own and has no stated
+        // size to preserve.
+        let configured: CGFloat
+        if case .points = scrolling.slotSize {
+            configured = current
+        } else {
+            configured = 0
+        }
         let ceiling = max(
             horizontal ? drawn.width : drawn.height,
             CGFloat(effectiveMin),
-            current
+            configured
         )
         let clamped = min(
             max(requested, CGFloat(effectiveMin)),

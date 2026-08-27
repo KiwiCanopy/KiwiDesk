@@ -355,9 +355,9 @@ editing here:
   distinguishes (flush-with-more-behind vs last-in-row, which
   the boundary clamp already holds) answer differently. Flush at
   both borders takes the leading edge. Which is why the recorded
-  slot carries its SPAN: flushness is a fact about where the
-  slot sat when the offset was measured, not about where it sits
-  now.
+  slot carries the VERDICT rather than the geometry behind it —
+  the argument for that is three paragraphs down, and is stated
+  once.
   Three obligations follow. **Never split the pair into two
   fields** beside each other, and never re-derive the verdict
   at a call site — nothing scans for either, so each new author
@@ -385,8 +385,9 @@ editing here:
   on a NON-last focus deliberately, since a last slot at a legal
   offset is flush-trailing by construction and would let the
   border arm answer in the clamp's place.
-  `ScrollRestPlumbingTests` pins the carrier. The product ruling — including why `swap` is ruled
-  IN rather than excluded — is `docs/design-decisions.md`'s.
+  `ScrollRestPlumbingTests` pins the carrier. The product
+  ruling — including why `swap` is ruled IN rather than
+  excluded — is `docs/design-decisions.md`'s.
 - **A resize store holding an absolute LENGTH owes a ceiling at
   its own write site (#966).** A ratio or a share is bounded by
   construction; a length is not, so it can bank growth the
@@ -406,11 +407,19 @@ editing here:
   survives undocking, so a grow refuses rather than rewrites.
   Scrolling is the only such store today, which is an
   observation rather than the rule.
-  `ScrollingSlotCeilingTests` pins each obligation.
+  `ScrollingSlotCeilingTests` pins three of those: the drawn
+  area rather than the region (on both axes — the vertical one
+  is where the bar strip makes the difference visible), the
+  never-reduces rule, and the floor outranking the ceiling.
+  That the ceiling is not in the value type is review's: no
+  suite can see a maximum nobody wrote.
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
-  resize end call the one set of clamped writers in
-  `KiwiCore+ResizeLimits` — never a raw `writeSlotSize`,
+  resize end call the one set of clamped writers — the
+  `writeCapped*` family, named by that prefix rather than by a
+  file, since it has already outgrown one
+  (`KiwiCore+ResizeLimits` and `KiwiCore+ResizeScrollSlot`) —
+  never a raw `writeSlotSize`,
   `writeSplitRatio*`, `writeMasterRatio` or `stackWeights`
   write from a resize path, which is exactly how the mouse
   `.scrollWidth` drag crossed the floor the keyboard path

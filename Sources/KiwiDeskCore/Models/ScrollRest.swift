@@ -87,11 +87,17 @@ public struct ScrollRest: Sendable, Equatable {
     /// The rest for an `offset` measured against `window`
     /// sitting at `position` along the row, resting on
     /// `restingOn` (nil for neither border).
+    /// `restingOn` takes no default on purpose: it is the one
+    /// field nothing else can cross-check, and a recorded
+    /// verdict that defaults to something plausible is how a
+    /// producer comes to record a constant unnoticed. A
+    /// hand-seeded rest with no provenance takes
+    /// `ScrollRest(offset:)` instead.
     public init(
         offset: CGFloat,
         focus window: WindowID,
         position: CGFloat,
-        restingOn: Border? = nil
+        restingOn: Border?
     ) {
         self.offset = offset
         self.slot = Slot(

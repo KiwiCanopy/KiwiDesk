@@ -200,9 +200,17 @@ struct MouseResizeApplyTests {
                     horizontal: true
                 )
         }
+        let seed = core.tiler.settings.scrolling.slotSize
+            .editablePoints(
+                along: bounds.width,
+                horizontal: true
+            )
         let first = grow()
         #expect(abs(grow() - first) < 0.5)
-        // And it stopped short of the unclamped 1350.
+        // A fixed point alone is satisfied by a writer that
+        // never grows, so pin that it moved...
+        #expect(first > seed)
+        // ...and stopped short of the unclamped 1350.
         #expect(first < bounds.width)
     }
 
