@@ -1649,7 +1649,17 @@ leading edge, the ordinary rule. That is the one place the
 reading anchor is the deciding argument: the trailing rule has
 a claim, and it loses because holding the right edge would shift
 every line of text under the reader for no reason they asked
-for.
+for. (A slot filling the viewport has always been reachable —
+the layout draws `min(along, …)`, so any over-grown slot
+rendered flush at both borders long before the ceiling below
+made the store stop there too. The both-borders arm is a case
+this rule had to answer regardless.)
+
+Which border a slot rested on is decided where the offset is
+MEASURED, and carried with it. Deciding it later means comparing
+a recorded extent against whatever the viewport is by then, and
+a bar toggle, a gap edit or a space moving screens is enough to
+make that a verdict about a viewport the slot never sat in.
 
 The clamps still win where they disagree, so near a row end the
 focus re-anchors only as far as the boundary allows; the row
@@ -1670,14 +1680,25 @@ the shrink afterwards spent one press per invisible step before
 anything moved.
 
 The ceiling cannot live beside the floor in the value type. A
-floor of 100pt is a property of a slot; a maximum is a property
-of the **screen**, and the same config travels between them —
-capping a stored size against whichever display is attached
-would silently rewrite what the user asked for when they undock.
-So it belongs at the interactive-write site, where a display is
-in hand, which is where #933 already put the floor. A layout
-that later stores a length rather than a share inherits this
-question; one that stores a share never has it.
+floor of 100pt is a property of a slot; an absolute-length
+maximum is a property of the **screen**, and the same config
+travels between them — capping a stored size against whichever
+display is attached would silently rewrite what the user asked
+for when they undock. So it belongs at the interactive-write
+site, where a display is in hand, which is where #933 already
+put the floor. A layout that later stores a length rather than a
+share inherits this question; one that stores a share never has
+it.
+
+Two things follow from that, and both are about not destroying a
+choice. The ceiling is the area the layout **draws**, not the
+region it is carved from — cap at the region and the outer gaps
+and bar strip stay bankable, which on a vertical scroll axis is
+the App Bar's own thickness. And it never *reduces* a stored
+value: setting a slot larger than the screen is a legitimate
+thing to have done, so a grow press refuses to go further rather
+than quietly rewriting it. The clamp exists to stop growth
+running away, not to overrule a value someone chose.
 
 **Scrolling at a screen seam: a blocked edge is a hard stop
 (#878).** A scrolling edge is *open* or *blocked*, decided per

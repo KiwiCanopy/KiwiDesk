@@ -81,9 +81,43 @@ extension ScrollingLayout {
             offset: value,
             focus: focus,
             position: position,
-            span: metrics.focusedSpan
+            restingOn: border(
+                lead: value + position,
+                span: metrics.focusedSpan,
+                along: metrics.along
+            )
         )
     }
+
+    /// Which viewport border a slot at `lead`, `span` wide, is
+    /// resting against — the verdict `ScrollRest.Slot` carries,
+    /// reached HERE because this is where the offset and the
+    /// viewport it was measured in are both in hand (#966).
+    ///
+    /// The leading edge is tested first, so a slot filling the
+    /// viewport — flush at both — records `.leading`. That is
+    /// the ruling rather than an accident of order: the reader's
+    /// eye is anchored at the leading edge, and holding the
+    /// trailing one would shift every line of text under them.
+    static func border(
+        lead: CGFloat,
+        span: CGFloat,
+        along: CGFloat
+    ) -> ScrollRest.Border? {
+        if abs(lead) <= edgeTolerance { return .leading }
+        if abs(lead + span - along) <= edgeTolerance {
+            return .trailing
+        }
+        return nil
+    }
+
+    /// How near a border counts as resting against it. Every
+    /// value compared through it is the layout's own ideal
+    /// geometry rather than a measured frame, so this absorbs
+    /// accumulated floating-point rounding and nothing wider —
+    /// a slot a VISIBLE distance from the edge must not read as
+    /// flush, or a resize would jump it there.
+    static let edgeTolerance: CGFloat = 0.5
 
     /// Whether the row is longer than the viewport, so slots pile
     /// up at the edges and their stacking matters (#150). A row

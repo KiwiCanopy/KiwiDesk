@@ -171,26 +171,39 @@ struct MouseResizeApplyTests {
         #expect(abs(after - before + 100) < 0.5)
     }
 
-    @Test("scrollWidth grow stops at the axis, like the verb")
+    @Test("scrollWidth grows stop, like the verb's do")
     func scrollWidthGrowStopsAtTheAxis() {
-        // #933's parity claim, at the ceiling end (#966): the
+        // #933's parity claim at the ceiling end (#966): the
         // drag and the keyboard verb share one writer, so a
-        // drag cannot bank slot the keyboard path refuses. The
-        // seed is 950 of a 1000pt axis; +400 lands on 1000, not
-        // 1350.
+        // drag cannot bank slot the keyboard path refuses.
+        //
+        // Asserted as "a second identical grow moves nothing"
+        // rather than against a number: the ceiling is the area
+        // the layout DRAWS, which this fixture's gaps and bar
+        // style decide, and `ScrollingSlotCeilingTests` is what
+        // holds that value. Unclamped, these two presses land
+        // 400pt apart.
         let core = makeCore()
         let space = space(core, mode: "scrolling")
-        core.applyResizeAdjustment(
-            .scrollWidth(400),
-            for: nil,
-            in: space,
-            bounds: bounds
-        )
-        let after = core.tiler.settings.resolvedScrolling(
-            for: core.state.workspaces[SpaceID("1")]!
-        ).slotSize
-            .editablePoints(along: bounds.width, horizontal: true)
-        #expect(abs(after - bounds.width) < 0.5)
+        func grow() -> CGFloat {
+            core.applyResizeAdjustment(
+                .scrollWidth(400),
+                for: nil,
+                in: space,
+                bounds: bounds
+            )
+            return core.tiler.settings.resolvedScrolling(
+                for: core.state.workspaces[SpaceID("1")]!
+            ).slotSize
+                .editablePoints(
+                    along: bounds.width,
+                    horizontal: true
+                )
+        }
+        let first = grow()
+        #expect(abs(grow() - first) < 0.5)
+        // And it stopped short of the unclamped 1350.
+        #expect(first < bounds.width)
     }
 
     @Test("trackAcross adjusts track weight")

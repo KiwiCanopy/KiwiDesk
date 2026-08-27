@@ -375,24 +375,38 @@ editing here:
   bare id in a struct, which `WindowRekeyParityTests`' count
   pin cannot see — only its `String(describing:)` scan can, and
   only because the fixture populates the field.
-  `ScrollingResizeAnchorTests` pins both arms and the row-end
-  clamp that outranks them; `ScrollRestPlumbingTests` pins the
-  carrier. The product ruling — including why `swap` is ruled
+  And the verdict is reached at the PRODUCER, where the offset
+  and the viewport it was measured in are both in hand: a
+  consumer comparing a recorded extent against a later `along`
+  is deciding flushness about a viewport the slot never sat in,
+  which a bar toggle or a gap edit is enough to change.
+  `ScrollingResizeAnchorTests` pins both arms, the recording
+  itself, and the row-end clamp that outranks them — that last
+  on a NON-last focus deliberately, since a last slot at a legal
+  offset is flush-trailing by construction and would let the
+  border arm answer in the clamp's place.
+  `ScrollRestPlumbingTests` pins the carrier. The product ruling — including why `swap` is ruled
   IN rather than excluded — is `docs/design-decisions.md`'s.
-- **The scrolling slot is the one resize store that needs a
-  CEILING, and it does not live in the value type (#966).**
-  Every interactive resize stops at a floor; only scrolling
-  stores an absolute length rather than a ratio or a share, so
-  only scrolling can bank growth the layout never draws
-  (`min(along, …)`) and then charge a press per invisible step
-  on the way back. Clamp it beside the floor in
-  `writeCappedScrollSlot`, never in `ScrollSize`: `minPoints` is
-  a property of a slot, a maximum is a property of the screen,
-  and the same config travels between screens — so a layout that
-  later stores a length owes this at its own write site, and one
-  that stores a share owes nothing. `ScrollingSlotCeilingTests`
-  pins both ends and which one wins when a display is narrower
-  than the floor.
+- **A resize store holding an absolute LENGTH owes a ceiling at
+  its own write site (#966).** A ratio or a share is bounded by
+  construction; a length is not, so it can bank growth the
+  layout never draws (`min(along, …)`) and then charge a press
+  per invisible step on the way back. Three obligations for one.
+  The ceiling clamps beside the floor at the interactive write
+  site, never in the value type — `ScrollSize.minPoints` is a
+  property of a slot and an ABSOLUTE-LENGTH maximum is a
+  property of the screen (`maxFraction` is rightly in the type:
+  a fraction is unitless). It is the area the layout DRAWS,
+  taken from the same `windowFrame` carve
+  `ScrollingLayout.metrics` caps against, never the layout
+  region it is carved from — on a vertical axis the difference
+  is the App Bar's own thickness, the same defect in miniature.
+  And it never REDUCES what is stored: an explicit
+  `scroll.set_slot_size` above it is a deliberate statement that
+  survives undocking, so a grow refuses rather than rewrites.
+  Scrolling is the only such store today, which is an
+  observation rather than the rule.
+  `ScrollingSlotCeilingTests` pins each obligation.
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
   resize end call the one set of clamped writers in

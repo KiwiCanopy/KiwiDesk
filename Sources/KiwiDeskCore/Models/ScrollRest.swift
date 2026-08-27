@@ -36,23 +36,38 @@ public struct ScrollRest: Sendable, Equatable {
         /// That window's position along the scroll axis, in the
         /// row as it stood then.
         public var position: CGFloat
-        /// That window's extent along the scroll axis at the
-        /// time — the uniform slot size, or the narrower span a
-        /// #677 bound consumed. Recorded because `position`
-        /// alone cannot say whether the slot was resting flush
-        /// against the viewport's trailing border, which is the
-        /// edge a resize must then hold (#966).
-        public var span: CGFloat
+        /// Which viewport border the slot was resting against
+        /// when the offset was measured, or nil for neither —
+        /// the edge a resize then has to hold (#966).
+        ///
+        /// A VERDICT rather than the geometry behind it, and
+        /// deliberately: flushness is a fact about the viewport
+        /// the offset was measured in, and a bar toggle, a gap
+        /// edit or a space changing screens moves that viewport
+        /// between passes. Recording the span instead would
+        /// leave the consumer comparing a measurement-time
+        /// extent against a current-pass `along` — a verdict
+        /// about a viewport the slot never sat in. It also keeps
+        /// the both-borders precedence at ONE altitude: a slot
+        /// filling the viewport records `.leading`, so the
+        /// consumer never re-decides which border wins.
+        public var restingOn: Border?
 
         public init(
             window: WindowID,
             position: CGFloat,
-            span: CGFloat
+            restingOn: Border? = nil
         ) {
             self.window = window
             self.position = position
-            self.span = span
+            self.restingOn = restingOn
         }
+    }
+
+    /// A viewport border a slot can rest against.
+    public enum Border: Sendable, Equatable {
+        case leading
+        case trailing
     }
 
     /// The viewport offset itself: the ideal, unpinned value the
@@ -70,18 +85,19 @@ public struct ScrollRest: Sendable, Equatable {
     }
 
     /// The rest for an `offset` measured against `window`
-    /// sitting at `position` along the row, `span` wide.
+    /// sitting at `position` along the row, resting on
+    /// `restingOn` (nil for neither border).
     public init(
         offset: CGFloat,
         focus window: WindowID,
         position: CGFloat,
-        span: CGFloat
+        restingOn: Border? = nil
     ) {
         self.offset = offset
         self.slot = Slot(
             window: window,
             position: position,
-            span: span
+            restingOn: restingOn
         )
     }
 }

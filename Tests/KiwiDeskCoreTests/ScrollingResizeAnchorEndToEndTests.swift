@@ -60,7 +60,7 @@ private func seedLead(
             offset: -slot.position + lead,
             focus: window,
             position: slot.position,
-            span: slot.span
+            restingOn: slot.restingOn
         )
     }
     return slot.position

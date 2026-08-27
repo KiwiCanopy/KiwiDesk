@@ -31,8 +31,7 @@ struct ScrollRestPlumbingTests {
         space.scrollRest = ScrollRest(
             offset: -123,
             focus: w2,
-            position: 800,
-            span: 800
+            position: 800
         )
         let context = settings.context(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
@@ -44,8 +43,7 @@ struct ScrollRestPlumbingTests {
                 == ScrollRest(
                     offset: -123,
                     focus: w2,
-                    position: 800,
-                    span: 800
+                    position: 800
                 )
         )
     }
@@ -79,8 +77,7 @@ struct ScrollRestPlumbingTests {
         space.scrollRest = ScrollRest(
             offset: -400,
             focus: w1,
-            position: 800,
-            span: 800
+            position: 800
         )
         let context = settings.context(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
@@ -92,8 +89,7 @@ struct ScrollRestPlumbingTests {
                 == ScrollRest(
                     offset: -400,
                     focus: w1,
-                    position: 800,
-                    span: 800
+                    position: 800
                 )
         )
     }

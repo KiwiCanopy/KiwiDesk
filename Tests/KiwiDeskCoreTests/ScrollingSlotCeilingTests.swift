@@ -15,7 +15,19 @@ import Testing
 /// ceiling lives beside the floor in `writeCappedScrollSlot`, so
 /// the keyboard verb and the mouse `.scrollWidth` drag inherit
 /// it together (#933).
-@Suite("Scrolling slot ceiling (#966)")
+///
+/// Requires a screen, and says so with a trait rather than an
+/// early return: `resizeScrollingSlot` falls back to a
+/// 1920x1080 rect when no screen resolves, so headless these
+/// would assert against a viewport the fixture never pinned.
+/// A SKIP says that; a green would not.
+///
+/// Main-actor spend is light (tests.md): two windows, a handful
+/// of `execute` calls, and one `layoutInput` per `drawnWidth`.
+@Suite(
+    "Scrolling slot ceiling (#966)",
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct ScrollingSlotCeilingTests {
     /// A scrolling space on a pinned 1200pt-wide display (#531),
@@ -73,10 +85,14 @@ struct ScrollingSlotCeilingTests {
                 ).isSuccess
             )
         }
-        // Eight 400pt grows would reach ~4300pt unclamped; the
-        // axis is the ceiling, so the store stops there however
-        // many times the key is pressed.
-        #expect(try slotPoints(core, space) == 1200)
+        // Eight 400pt grows would reach ~4300pt unclamped. The
+        // store stops at exactly what the layout can DRAW —
+        // asserted against the engine's own frame rather than a
+        // number, because that is the difference the ceiling
+        // turns on: capping at the layout REGION instead would
+        // bank the outer gaps and the bar strip, and would show
+        // up here as a store wider than the frame.
+        #expect(try slotPoints(core, space) == drawnWidth(core))
     }
 
     /// The width the engine would DRAW for window 1 right now,
@@ -111,21 +127,54 @@ struct ScrollingSlotCeilingTests {
             )
         }
         let before = try drawnWidth(core)
+        // The store sits exactly on the drawn width, which is
+        // WHY the next press is visible — an unclamped store
+        // would be thousands of points above it.
+        #expect(try slotPoints(core, space) == before)
         core.execute(
             "resize",
             args: [.string("x"), .number(-600)]
         )
         #expect(try drawnWidth(core) < before)
-        // And the store tracked it, so the next press does too.
-        #expect(try slotPoints(core, space) == 600)
+    }
+
+    @Test("A grow never shrinks a config-set oversize slot")
+    func growNeverReducesAConfiguredSlot() throws {
+        // `scroll.set_slot_size` is a deliberate statement that
+        // has to survive undocking to a narrower screen, which
+        // is the whole reason the cap is not in `ScrollSize`.
+        // A grow press may refuse to go further; it must not
+        // quietly rewrite the value downward, because nothing
+        // cues it and the next dock would find it gone.
+        let (core, space) = makeCore()
+        core.execute(
+            "scroll.set_slot_size",
+            args: [.number(3000)]
+        )
+        core.execute(
+            "resize",
+            args: [.string("x"), .number(400)]
+        )
+        #expect(try slotPoints(core, space) == 3000)
+
+        // A shrink from there steps down by its own delta —
+        // it does not snap to the drawn width either.
+        core.execute(
+            "resize",
+            args: [.string("x"), .number(-400)]
+        )
+        #expect(try slotPoints(core, space) == 2600)
     }
 
     @Test("The floor still wins on a display narrower than it")
     func floorOutranksTheCeiling() throws {
-        // `min_window_size` defaults to 300; on a 200pt axis the
-        // ceiling would otherwise clamp below the floor #933
-        // exists to hold, so the floor is the one that binds.
+        // On a 200pt axis the ceiling would otherwise clamp
+        // below the floor #933 exists to hold, so the floor is
+        // the one that binds. Pin the default it reasons from
+        // (#660) — moving `min_window_size` must red this for a
+        // reason, not by coincidence.
         let (core, space) = makeCore(width: 200)
+        #expect(core.tiler.settings.minWindowSize == 300)
         core.execute(
             "resize",
             args: [.string("x"), .number(-400)]

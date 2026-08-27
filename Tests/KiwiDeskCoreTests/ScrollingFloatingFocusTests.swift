@@ -40,8 +40,7 @@ struct ScrollingFloatingFocusTests {
     private static let measured = ScrollRest(
         offset: -300,
         focus: w2,
-        position: 810,
-        span: 800
+        position: 810
     )
 
     @Test("A slotless focus keeps the scrolled offset")

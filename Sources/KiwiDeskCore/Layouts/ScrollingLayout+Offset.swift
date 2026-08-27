@@ -135,30 +135,24 @@ extension ScrollingLayout {
         guard let previous else { return nil }
         guard let slot = previous.slot, slot.window == focus
         else { return previous.offset }
-        let lead = previous.offset + slot.position
-        // Resting flush against the TRAILING border, and not
-        // also against the leading one: hold that edge instead,
+        // Resting against the TRAILING border: hold that edge,
         // so the slot gives its space back on the side that is
         // open rather than tearing away from the border with a
-        // hidden neighbour behind it. Testing the leading edge
-        // first is what rules the fills-the-viewport case — both
-        // edges flush, and the leading one wins, which is where
-        // the eye is anchored.
-        if lead > edgeTolerance,
-            abs(lead + slot.span - along) <= edgeTolerance
-        {
+        // hidden neighbour behind it. The verdict was reached
+        // when the offset was measured (`ScrollRest.Slot`), so
+        // a slot that filled the viewport already reads
+        // `.leading` and falls through — the precedence is not
+        // re-decided here.
+        //
+        // The value returned is the visibility clamp's own upper
+        // bound, which is what "flush at the trailing edge"
+        // means in offsets; the clamp below therefore keeps it
+        // unchanged rather than fighting it.
+        if slot.restingOn == .trailing {
             return along - focusedSpan - focusedPos
         }
         return previous.offset + (slot.position - focusedPos)
     }
-
-    /// How near a border counts as resting against it. The
-    /// offsets compared here are the layout's own ideal values
-    /// rather than measured frames, so this absorbs accumulated
-    /// rounding and nothing wider — a slot a visible distance
-    /// from the edge must not read as flush, or a resize would
-    /// jump it there.
-    private static let edgeTolerance: CGFloat = 0.5
 
     /// A fixed anchor's resting offset for a focused slot, before
     /// visibility/boundary clamping. `start`/`end` are

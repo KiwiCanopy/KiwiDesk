@@ -74,8 +74,7 @@ struct ScrollingResizeAnchorTests {
         context.scrollRest = ScrollRest(
             offset: -300,
             focus: w3,
-            position: 800,
-            span: 400
+            position: 800
         )
         let before = try lead(
             of: w3,
@@ -118,7 +117,7 @@ struct ScrollingResizeAnchorTests {
             offset: -200,
             focus: w3,
             position: 800,
-            span: 400
+            restingOn: .trailing
         )
         context.scrolling.slotSize = .points(350)
         let frames = layout.calculateGeometry(
@@ -132,117 +131,86 @@ struct ScrollingResizeAnchorTests {
         #expect(try lead(of: w3, in: frames, context) == 650)
     }
 
-    @Test("Filling the viewport keeps the leading edge")
-    func fillingTheViewportKeepsTheLeadingEdge() throws {
-        // Flush at BOTH borders, so the trailing rule would have
-        // a claim too — the leading edge wins, which is where
-        // the eye is anchored and the only answer that does not
-        // shift every line of text under the reader.
-        var context = makeContext(focused: w2, slot: 1000)
-        context.scrollRest = ScrollRest(
-            offset: -1000,
-            focus: w2,
-            position: 1000,
-            span: 1000
-        )
-        context.scrolling.slotSize = .points(700)
-        let frames = layout.calculateGeometry(
-            for: windows,
-            in: context
-        )
-        #expect(try lead(of: w2, in: frames, context) == 0)
-    }
-
-    @Test("A focus change still pans from the recorded offset")
-    func focusChangePansFromTheOffset() throws {
-        // The rest was measured against w3; focusing w2 is a
-        // focus change, so the viewport holds its offset and
-        // pans only if w2 would be clipped — it isn't, so it
-        // does not move at all (#66). Re-anchoring here instead
-        // would jump the row by a whole slot.
-        var context = makeContext(focused: w3, slot: 400)
-        context.scrollRest = ScrollRest(
-            offset: -200,
-            focus: w3,
-            position: 800,
-            span: 400
-        )
-        context.focused = w2
-        let frames = layout.calculateGeometry(
-            for: windows,
-            in: context
-        )
-        #expect(try lead(of: w2, in: frames, context) == 200)
-        #expect(
-            ScrollingLayout.viewportRest(
-                for: windows,
-                in: context
-            ).offset == -200
-        )
-    }
-
-    @Test("A rest with no recorded slot holds its offset")
-    func restWithoutSlotHoldsItsOffset() throws {
-        // Nothing says the offset and the row were measured
-        // together — a hand-seeded rest, or one recorded on a
-        // pass that placed no slot — so it reads as a focus
-        // change, which is what every offset did before #966.
-        var context = makeContext(focused: w3, slot: 350)
-        context.scrollRest = ScrollRest(offset: -200)
-        let frames = layout.calculateGeometry(
-            for: windows,
-            in: context
-        )
-        #expect(try lead(of: w3, in: frames, context) == 500)
-    }
-
-    @Test("A fixed anchor re-seats the focus across a resize")
-    func fixedAnchorReseatsAcrossAResize() throws {
-        // The issue's own prediction: `center`/`start`/`end`
-        // recompute a resting position on every call, so they
-        // never read the recorded offset and cannot drift with
-        // it. Seeded with a rest that would drift badly.
-        var context = makeContext(
-            anchor: .center,
-            focused: w3,
-            slot: 350
-        )
-        context.scrollRest = ScrollRest(
-            offset: -200,
-            focus: w3,
-            position: 800,
-            span: 400
-        )
-        let frames = layout.calculateGeometry(
-            for: windows,
-            in: context
-        )
-        let focused = try #require(frames[w3])
-        #expect(abs(focused.midX - context.usable.midX) < 0.01)
-    }
-
     @Test("The row end outranks the re-anchor")
     func rowEndOutranksTheReAnchor() throws {
-        // Holding w5's place would need offset -600, which shows
-        // 100pt of empty margin past a row that shrank to 1500 in
-        // a 1000pt viewport. The boundary clamp wins, so the
-        // focus re-anchors only as far as it can and the row's
-        // trailing end stays flush with the viewport.
-        var context = makeContext(focused: w5, slot: 400)
+        // w4, NOT the last slot: a last slot at a legal offset is
+        // flush-trailing by construction (the boundary clamp
+        // forces `lead + span == along` for it), so seating this
+        // there let the border arm return the clamp's own answer
+        // and the test stopped watching the clamp at all
+        // (code-reviewer, 2026-08-27).
+        //
+        // Slots shrink 400 → 300 (the #660 floor is 300, so a
+        // smaller ask would resolve back up to it and land the
+        // held base exactly ON the boundary — a no-op clamp, the
+        // same trap one step over). The row becomes 1500 in a
+        // 1000pt viewport: holding w4's place would need -600
+        // and reveal 100pt of margin past the row end, so the
+        // clamp stops it at -500.
+        var context = makeContext(focused: w4, slot: 400)
         context.scrollRest = ScrollRest(
-            offset: -1000,
-            focus: w5,
-            position: 1600,
-            span: 400
+            offset: -900,
+            focus: w4,
+            position: 1200
         )
         context.scrolling.slotSize = .points(300)
         let frames = layout.calculateGeometry(
             for: windows,
             in: context
         )
-        #expect(try lead(of: w5, in: frames, context) == 700)
+        #expect(try lead(of: w4, in: frames, context) == 400)
         let last = try #require(frames[w5])
         #expect(abs(last.maxX - context.usable.maxX) < 0.01)
+    }
+
+    @Test("The rest records which border the slot rested on")
+    func viewportRestRecordsTheBorder() throws {
+        // The producer half, and the ONLY net on it: every test
+        // above builds its rest by hand, so a `viewportRest`
+        // that recorded the wrong verdict would leave all of
+        // them green while the border rule was dead in
+        // production (guard-prover, 2026-08-27 — recording a
+        // constant there passed all 4088 tests).
+        //
+        // Each case derives its expectation from the fixture's
+        // own geometry rather than from what the engine just
+        // wrote, which is what makes it a reading rather than
+        // an echo.
+        var context = makeContext(focused: w3, slot: 400)
+
+        // w3 at position 800, offset -200 → lead 600, and
+        // 600 + 400 == the 1000pt viewport: on the trailing
+        // border.
+        context.scrollRest = ScrollRest(offset: -200)
+        #expect(
+            ScrollingLayout.viewportRest(
+                for: windows,
+                in: context
+            ).slot?.restingOn == .trailing
+        )
+
+        context.focused = w1
+        context.scrollRest = ScrollRest(offset: 0)
+        // w1 at position 0 with the viewport at 0: leading.
+        #expect(
+            ScrollingLayout.viewportRest(
+                for: windows,
+                in: context
+            ).slot?.restingOn == .leading
+        )
+
+        // A slot as wide as the viewport is flush at BOTH, and
+        // the leading edge is the recorded verdict — the
+        // precedence lives here, not in the consumer.
+        context.scrolling.slotSize = .points(1000)
+        context.focused = w2
+        context.scrollRest = ScrollRest(offset: -1010)
+        #expect(
+            ScrollingLayout.viewportRest(
+                for: windows,
+                in: context
+            ).slot?.restingOn == .leading
+        )
     }
 
     @Test("A window closing ahead of the focus re-anchors too")
@@ -256,8 +224,7 @@ struct ScrollingResizeAnchorTests {
         context.scrollRest = ScrollRest(
             offset: -800,
             focus: w4,
-            position: 1200,
-            span: 400
+            position: 1200
         )
         let frames = layout.calculateGeometry(
             for: [w2, w3, w4, w5],

@@ -1008,12 +1008,17 @@ scroll.set_slot_size("50%")        -- half of available
 
 An interactive `resize` stops at both ends: it will not take the
 slot below `min_window_size` (or an app's own learned minimum),
-and it will not grow it past the screen — growing past what fits
-would otherwise bank size you cannot see, and every press of it
-would have to be undone before shrinking did anything. Setting a
-size *here* is not clamped that way: a config value travels with
-you between screens, so it keeps whatever you wrote and the
-layout simply draws what fits.
+and it will not grow it past what fits on screen — growing
+further would otherwise bank size you cannot see, and every
+press of it would have to be undone before shrinking did
+anything.
+
+Setting a size *here* is not clamped that way, and a `resize`
+will not undo it: a config value travels with you between
+screens, so if you set a slot wider than the screen you are on,
+it keeps that width and the layout simply draws what fits. A
+grow press then does nothing rather than trimming it; a shrink
+steps down from what you wrote, as usual.
 
 ### scroll.set_anchor
 
