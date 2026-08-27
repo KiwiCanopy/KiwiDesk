@@ -6,6 +6,7 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
 ---
 
@@ -226,14 +227,18 @@ editing AX code:
   `HideObserverWiringTests`.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
-  reconcile warms whatever was skipped (#662).** Three links
-  carry that promise, and all three are pinned now: the skip
+  reconcile warms whatever was skipped (#662).** Four links
+  carry that promise, and all four are pinned now: the skip
   gate and the reconcile-warms retry by
   `StartupWarmupSkipTests`, the scheduled sweep's task actually
-  opening its pass and reconciling by `StartupSweepTests`, and
-  the boot tail still *calling* `scheduleStartupSweep()` by
+  opening its pass and reconciling by `StartupSweepTests`, the
+  boot tail still *calling* `scheduleStartupSweep()` by
   `StartupSweepWiringTests` — which #836 added, having made a
-  second skip rest on the same call. Re-timing is still yours to
+  second skip rest on the same call — and the boot queue's own
+  admission (`EventLoop.bootPassAdmits`, pinned by
+  `BootScanEligibilityTests`): an app dropped at queue build is
+  never warmed by the sweep either, so the admission must stay
+  exactly "can never attach", which no warm is owed. Re-timing is still yours to
   weigh: the needle sees the call, never the latency, so re-time
   it only alongside the ceiling `docs/accepted-limitations.md`
   accepts for the user-visible residue. **Re-timing includes

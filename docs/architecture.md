@@ -210,7 +210,7 @@ and the ⌃⌥K panel are served from — for as long as the AX calls take
 
 ```mermaid
 flowchart TD
-    S["start(): arm machine seams · loadConfig"] --> Q["Events: queue one step per running app<br/>(WindowServer prefilter decides who is scanned)"]
+    S["start(): arm machine seams · loadConfig"] --> Q["Events: queue one step per eligible app<br/>(WindowServer prefilter decides who is warmed)"]
     Q --> C{"chunk: attach apps until<br/>the chunk budget is spent"}
     C -->|"queue not empty"| Y["yield the run loop<br/>publish scanning(scanned, total)"]
     Y --> C
@@ -224,10 +224,14 @@ flowchart TD
    provenance, pointer warp) and loads the config. Nothing is
    attached before this: an attach that ran earlier would make the
    prefilter below test nothing.
-2. **`Events`** — one `CGWindowListCopyWindowInfo` snapshot decides
-   which apps get the expensive AX window query and warmup at attach;
-   the rest keep their observer and are warmed by a later reconcile
-   (§5, the #662 promise). The apps become a queue.
+2. **`Events`** — the queue admits only apps a pass can act on
+   (`EventLoop.bootPassAdmits`): faceless helpers and ignore-listed
+   apps never enter it, which is also what keeps the published
+   `scanning(scanned, total)` an honest workload. Among the admitted,
+   one `CGWindowListCopyWindowInfo` snapshot decides which apps get
+   the expensive AX window query and warmup at attach; the rest keep
+   their observer and are warmed by a later reconcile (§5, the #662
+   promise).
 3. **chunks** — each chunk attaches apps until its budget is spent and
    then hands the run loop back, so the menu answers at any point
    after launch. Every chunk publishes how far the scan has got, which

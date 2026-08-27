@@ -130,14 +130,16 @@ struct BootScanChunkTests {
         #expect(progress.total == 5)
     }
 
-    /// The honest count is apps VISITED of apps running, never
-    /// attached-of-running: on the measured session 51 of 109 ever
-    /// attach, so an attach tally stops at 47% and reads as a
+    /// The honest count is apps VISITED of apps queued, never
+    /// attached-of-queued: an app can refuse its observer, so an
+    /// attach tally stops short of its total and reads as a
     /// progress bar that stalled (`BootPhase` carries the
-    /// ruling). Nothing separated the two readings until this
-    /// fixture let an app refuse its observer — every fake
-    /// attached, so both numbers were the same and the ruling was
-    /// unguarded (guard-prover, 2026-08-12).
+    /// ruling; the queue's own admission filter is
+    /// `BootScanEligibilityTests`'). Nothing separated the two
+    /// readings until this fixture let an app refuse its
+    /// observer — every fake attached, so both numbers were the
+    /// same and the ruling was unguarded (guard-prover,
+    /// 2026-08-12).
     @Test("the count is apps visited, not apps attached")
     func countsVisitedNotAttached() {
         let (loop, box) = makeLoop(apps: 4, step: .milliseconds(10))

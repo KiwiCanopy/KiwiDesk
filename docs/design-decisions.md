@@ -7251,13 +7251,21 @@ returning to full strength IS the ready signal
 
 **[Trade-off]**
 
-**The count is apps looked at, not apps adopted.** On the
-measured session 51 of 109 running apps ever attach — the rest
-own no window or are ignored — so an attach tally stops at 47%
-and reads as a progress bar that stalled. Apps *visited* reaches
-its total, which is the difference between accurate and honest.
-The same number is what the tour's grant screen shows while it is
-arranging, so a user who reads both surfaces never finds two.
+**The count is apps looked at, not apps adopted — over a queue
+of apps worth looking at.** Both halves earn their keep. The
+queue admits only apps a boot pass can act on
+(`EventLoop.bootPassAdmits`): faceless helpers and ignore-listed
+apps can never attach, and on a heavy session they are most of
+`NSWorkspace`'s list, so counting them narrated the whole
+process table — "apps: 3 of 145" over a desk showing five, a
+number that reads as scanning things nobody asked about. Within
+that queue the tally is apps *visited*, never apps attached: an
+app can refuse its observer, so an attach tally can stop short
+of its total and reads as a progress bar that stalled. Visited
+reaches its total, which is the difference between accurate and
+honest. The same number is what the tour's grant screen shows
+while it is arranging, so a user who reads both surfaces never
+finds two.
 
 **A screen that claims a finished job must wait for it.** The
 tour's post-grant screen used to be reachable only after boot
