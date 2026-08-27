@@ -4,7 +4,13 @@ import Foundation
 /// event — captured as it folds the event in, because the write
 /// erases them. `handle(_:)` reads these back to drive its
 /// post-apply side effects instead of snapshotting state in a
-/// pre-apply prologue (#166).
+/// pre-apply prologue (#166). One deliberate carve-out: a fact
+/// the fold would only COPY out of state (the moved window's
+/// pre-event frame, the gone window's pid) stays a pre-fold
+/// read in `KiwiCore+PreFold.swift` — riding it here would
+/// widen this hand-mirrored field list for a value the caller
+/// can read one line earlier with no fold coupling (#1049
+/// review). This struct is for facts the fold COMPUTES.
 ///
 /// One flat struct, not an enum per event: the call site stays a
 /// plain `let effects = state.apply(event)`, and every field is

@@ -312,10 +312,20 @@ editing here:
   `screenNeighbors` — `layoutInput` is the site, probes and
   previews rightly omit it (`SizeBoundPlumbingTests`). A path
   that changes a window's size outside the engine's asks **owes
-  the ledger an invalidation** — genuine resize forgets, destroy
-  forgets (ids are reused, #152/#158), rekey migrates — or a
-  stale bound pins the window at a size the app no longer
-  insists on (`RetileBoundSkipTests`). And only the layout loop
+  the ledger an invalidation** — a genuine resize forgets
+  outright, rekey migrates — or a stale bound pins the window
+  at a size the app no longer insists on
+  (`RetileBoundSkipTests`). A GONE path (destroy, hide) is the
+  #1049 carve-out to #152/#158's destroy-forgets: it takes
+  `stashSizeBoundOnGone`, never a bare forget — the believed
+  ledger parks in a pid-checked tombstone the same window's
+  re-add revives before its arrival retile, because a slow-AX
+  app flaps (dropped and re-added under the SAME id seconds
+  apart) and a plain forget re-ran the whole learn dance on
+  every flap and unhide. `SizeBoundReviveTests` pins both gone
+  arms and the stand-downs; a NEW gone path joins the stash
+  deliberately, since nothing scans for a bare forget beside
+  it. And only the layout loop
   **records asks** — a stash park or float restore is not a
   layout ask, and learning from one keys a bound to a frame no
   layout re-issues. Rendering may

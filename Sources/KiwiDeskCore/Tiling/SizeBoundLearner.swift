@@ -21,7 +21,7 @@ import Foundation
 /// grace is a time bound, not echo receipt, which is the first
 /// accepted imprecision below.
 ///
-/// Three accepted imprecisions, weighed rather than overlooked:
+/// Four accepted imprecisions, weighed rather than overlooked:
 /// an app whose echo outlasts the grace (the stalled-app
 /// class — its echo event also rides the #618 read queue) can
 /// still present the stale pre-ask frame as a repeated answer
@@ -33,11 +33,18 @@ import Foundation
 /// one for an ask that never recurs persists until eviction or
 /// forget — where its one consumer, the overlay pin, can
 /// mis-render a single matching flight before the settle keys
-/// re-read reality. And a constraint
+/// re-read reality. A constraint
 /// that lifts with no resize event and no recurring ask stays
 /// learned until an invalidation fires; the forget on every
 /// genuine (non-echo) resize covers the real-world case, an
 /// app re-bounding itself (System Settings switching panes).
+/// And the comply-then-revoke pair-promote (#1049) trusts the
+/// FIRST off-ask echo after a same-ask compliance as the
+/// definitive answer — an app that ANIMATES its revoke rather
+/// than snapping hands it a mid-travel frame, a believed-tier
+/// twin of the cancel-mid-flight seed above; the next two
+/// same-ask observations overwrite it through the ordinary
+/// ladder, and the shape is bounded the same way.
 ///
 /// Pure bookkeeping — no AX, no actors — so the confirm ladder
 /// is unit-testable (`SizeBoundLearnerTests`).

@@ -308,9 +308,18 @@ struct SizeBoundLearnerTests {
                 .consumedWidth(asking: 1626) == 439
         )
         // A fresh ask resets the pair — the flag must not
-        // carry a stale compliance into the next question.
-        learner.recordAsk(w, size: asked)
+        // carry a stale compliance into the next question. The
+        // compliance echo BEFORE the fresh ask is load-bearing
+        // (review, 2026-08-27): without it the flag is already
+        // consumed by the promotion above and the clause passes
+        // whether or not `recordAsk` resets anything.
         learner.forget(w)
+        learner.recordAsk(w, size: asked)
+        learner.observe(
+            w,
+            currentSize: asked,
+            settledRead: false
+        )
         learner.recordAsk(w, size: asked)
         #expect(
             learner.observe(
