@@ -974,6 +974,29 @@ The Onboarding tree is the worked case: it shipped a raw
 sees, for as long as it existed, because the lens
 stopped at `Settings/`.
 
+## The Reduce Motion gate
+
+**Every `withAnimation` under `Sources/KiwiDesk` names its
+Reduce Motion gate** — at the call (an argument that can resolve
+to nil, or a property making that choice) or in the `if
+reduceMotion` arm just above it. A model has no environment to
+read, so it takes `reduceMotion` as a parameter from its caller
+(`flipSettingsMode`, `setAutoStart`) and names it at the call.
+
+The gate drops the MOTION, never the affordance: a caption still
+appears and leaves, rows still land in their new order, a scroll
+still reaches its target — arriving rather than travelling. The
+user-facing statement of that split is `docs/ui-patterns.md` ▸
+Interaction states.
+
+`ReduceMotionGateTests` holds it **per call, never per file**:
+one gated call and one ungated call in the same file is exactly
+what a whole-file needle passes, and five sites shipped ungated
+at once because nothing watched them (#989). Its `allowed` map
+is the one copy of who may skip the gate, and it is empty by
+design — an entry there is a ruling that some motion must run
+even for a user who asked for less.
+
 ## SwiftUI traps
 
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view
