@@ -15,11 +15,19 @@ struct InactiveDimmed: ViewModifier {
     static let fade = Animation.easeInOut(duration: 0.15)
 
     @Environment(\.controlActiveState) private var activeState
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     func body(content: Content) -> some View {
         content
             .opacity(activeState == .inactive ? 0.5 : 1)
-            .animation(Self.fade, value: activeState)
+            // The dim itself stays — it is the affordance, and
+            // the window really is inactive; only the crossfade
+            // to it stands down (#989).
+            .animation(
+                reduceMotion ? nil : Self.fade,
+                value: activeState
+            )
     }
 }
 

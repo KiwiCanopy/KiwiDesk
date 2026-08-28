@@ -9,6 +9,18 @@ import Testing
 /// nothing about that is visible to a reader who does not have
 /// the setting on — which is how five of them shipped at once.
 ///
+/// **Scope, stated because the headline reads wider than the
+/// scan**: this holds `withAnimation` and nothing else. The
+/// `.animation(_:value:)` modifier is the app's other way to
+/// start motion, and it is NOT watched here — extending the
+/// same needle to it surfaced 49 sites, ~40 of them the layout
+/// schematics' shared `LayoutSchematic.damping`, which is a
+/// sweep and a set of per-site rulings rather than a guard
+/// clause. Two of that family were gated by hand in #989
+/// (`ProfilesSection`'s reorder, which the issue names, and
+/// `InactiveDimmed`'s window fade); the rest are unmeasured.
+/// Do not read a green here as "every animation is gated".
+///
 /// The house split (`SettingsModel+Mode`) is what "gated" means
 /// here: drop the MOTION, keep the affordance. So the shape
 /// required is ONE canonical form — a call whose animation

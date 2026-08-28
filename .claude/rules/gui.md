@@ -1002,6 +1002,16 @@ still reaches its target — arriving rather than travelling. The
 user-facing statement of that split is `docs/ui-patterns.md` ▸
 Interaction states.
 
+**The guard's reach is `withAnimation` only.** The
+`.animation(_:value:)` modifier starts motion too and is not
+watched: the same needle over it surfaced 49 sites, ~40 of them
+the layout schematics' shared `LayoutSchematic.damping`, which
+is a sweep with per-site rulings rather than a guard clause.
+Two were gated by hand in #989 — `ProfilesSection`'s reorder
+(named in the issue) and `InactiveDimmed`'s window fade — and
+the rest are unmeasured, so a new `.animation(` site is
+review's to gate, not the guard's to catch.
+
 `ReduceMotionGateTests` holds it **per call, never per file**:
 one gated call and one ungated call in the same file is exactly
 what a whole-file needle passes, and five sites shipped ungated
