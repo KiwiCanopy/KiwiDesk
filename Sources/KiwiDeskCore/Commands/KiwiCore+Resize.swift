@@ -155,9 +155,6 @@ extension KiwiCore {
         _ delta: Double,
         space: Space
     ) -> CommandResponse {
-        let scrolling =
-            tiler.settings.resolvedScrolling(for: space)
-        let horizontal = scrolling.axisIsHorizontal
         let screen = TilingEngine.screen(
             for: space.id,
             in: state
