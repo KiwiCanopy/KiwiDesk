@@ -21,35 +21,77 @@ extension EffectiveSizeBound {
     /// the unlearned range must be probed, not silently
     /// swapped, or a user widening a slot past a stale bound
     /// would never be heard (#677).
-    public func consumedWidth(asking span: CGFloat) -> CGFloat? {
-        consumed(entries: width, asking: span)
+    public func consumedWidth(
+        asking span: CGFloat,
+        generalizing: Bool = true
+    ) -> CGFloat? {
+        consumed(
+            entries: width,
+            asking: span,
+            generalizing: generalizing
+        )
     }
 
     /// `consumedWidth`'s vertical twin.
-    public func consumedHeight(asking span: CGFloat) -> CGFloat? {
-        consumed(entries: height, asking: span)
+    public func consumedHeight(
+        asking span: CGFloat,
+        generalizing: Bool = true
+    ) -> CGFloat? {
+        consumed(
+            entries: height,
+            asking: span,
+            generalizing: generalizing
+        )
     }
 
+    /// `generalizing: false` is the forced-apply probe (#1055,
+    /// owner ruling 2026-08-28): exact refused asks still
+    /// consume, the corroborated-bound arms stand down, so an
+    /// explicit apply genuinely re-asks the app once —
+    /// `LayoutContext.probesBeyondBounds` is the one producer
+    /// of a false.
     private func consumed(
         entries: [Axis],
-        asking span: CGFloat
+        asking span: CGFloat,
+        generalizing: Bool
     ) -> CGFloat? {
         if let exact = entries.first(where: {
             Self.matches($0.asked, span)
         }) {
             return exact.answered
         }
+        guard generalizing else { return nil }
         if let max = ceiling(of: entries),
             span > max + Self.matchTolerance
         {
-            return max
+            return chained(entries: entries, through: max)
         }
         if let min = floor(of: entries),
             span < min - Self.matchTolerance
         {
-            return min
+            return chained(entries: entries, through: min)
         }
         return nil
+    }
+
+    /// The generalized answer, re-resolved ONCE through the
+    /// ladder at the bound's own span (code review,
+    /// 2026-08-27): the consume rewrites the ask the ladder
+    /// sees — the layout emits the bound, so an app that now
+    /// contradicts it (the aspect-coupled emulator after an
+    /// other-axis change) mints its entry AT the bound's span,
+    /// never at the configured ask. Without this chain that
+    /// entry could never outrank the generalization and the
+    /// row packed a stale span forever; with it, the entry at
+    /// the bound answers every generalized ask, which is the
+    /// falsifier the ruling requires actually engaging.
+    private func chained(
+        entries: [Axis],
+        through bound: CGFloat
+    ) -> CGFloat {
+        entries.first {
+            Self.matches($0.asked, bound)
+        }?.answered ?? bound
     }
 
     /// The centered residue frame for a slot this bound
@@ -61,9 +103,18 @@ extension EffectiveSizeBound {
     /// broken while a symmetric gap reads deliberate; monocle
     /// takes this for its whole slot, scrolling for a row that
     /// cannot re-pack (a single window).
-    public func centered(in slot: CGRect) -> CGRect? {
-        let width = consumedWidth(asking: slot.width)
-        let height = consumedHeight(asking: slot.height)
+    public func centered(
+        in slot: CGRect,
+        generalizing: Bool = true
+    ) -> CGRect? {
+        let width = consumedWidth(
+            asking: slot.width,
+            generalizing: generalizing
+        )
+        let height = consumedHeight(
+            asking: slot.height,
+            generalizing: generalizing
+        )
         guard width != nil || height != nil else { return nil }
         let size = CGSize(
             width: width ?? slot.width,
@@ -116,13 +167,19 @@ extension EffectiveSizeBound {
         }
         if let max = ceiling(of: entries),
             target > max + Self.matchTolerance,
-            Self.matches(current, max)
+            Self.matches(
+                current,
+                chained(entries: entries, through: max)
+            )
         {
             return true
         }
         if let min = floor(of: entries),
             target < min - Self.matchTolerance,
-            Self.matches(current, min)
+            Self.matches(
+                current,
+                chained(entries: entries, through: min)
+            )
         {
             return true
         }

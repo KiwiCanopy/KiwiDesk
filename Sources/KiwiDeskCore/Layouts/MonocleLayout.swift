@@ -30,7 +30,10 @@ public struct MonocleLayout: LayoutSystem {
         // asks the full frame.
         func effective(_ window: WindowID) -> CGRect {
             context.sizeBounds[window]?
-                .centered(in: frame) ?? frame
+                .centered(
+                    in: frame,
+                    generalizing: !context.probesBeyondBounds
+                ) ?? frame
         }
         guard context.monocle.hideStyle == .park else {
             var result: [WindowID: CGRect] = [:]

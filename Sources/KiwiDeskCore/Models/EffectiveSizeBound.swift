@@ -30,15 +30,15 @@ import CoreGraphics
 /// design. A single entry is grid noise as often as a bound —
 /// a terminal answers each ask a few points off, and inferring
 /// "ceiling" from one ask would pin every wider ask at a size
-/// the app would have accepted. But two DISTINCT asks agreeing
-/// on one answer is a signature a nearest-cell snap cannot
-/// produce (the ask range mapping more than `matchTolerance`
-/// past one cell boundary is narrower than the tolerance that
-/// makes two asks distinct — measured on the issue, Terminal at
-/// quantum ~7 pt), while a true fixed bound answers EVERY ask
-/// past it with that one span (System Settings, measured
-/// constant across a 12-ask sweep and independent of the other
-/// axis). So `consumedWidth/Height` and `explains` answer an
+/// the app would have accepted. But two asks a real step apart
+/// agreeing on one answer is a signature a nearest-cell snap
+/// cannot produce below the quantum the distinctness bar
+/// protects — `corroborationDistinctness` derives the
+/// arithmetic, and the device measurements (Terminal's column
+/// and row quanta, System Settings' constant axis-independent
+/// answers) are on the issue — while a true fixed bound
+/// answers EVERY ask past it with that one span. So
+/// `consumedWidth/Height` and `explains` answer an
 /// ask BEYOND a corroborated bound with that bound — and the
 /// generalization stays falsifiable: a per-ask entry outranks
 /// it for any ask it matches, so an app that contradicts the
@@ -156,12 +156,30 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         }?.answered
     }
 
+    /// How far apart two asks must sit to CORROBORATE a bound
+    /// — deliberately wider than `matchTolerance`'s "distinct
+    /// entry" quantum (code review, 2026-08-27). The false
+    /// pair a nearest-cell snap can produce needs two asks
+    /// inside one cell's refusal band, which is (q/2 −
+    /// matchTolerance) wide, so a distinctness bar of t
+    /// protects every quantum q ≤ 2·(t + matchTolerance).
+    /// `matchTolerance` alone (t = 2) protects only q ≤ 8 —
+    /// under Terminal's ~7 pt column WIDTH but far under its
+    /// row HEIGHT, a line height of ~14–24 pt at ordinary
+    /// fonts. 12 protects q ≤ 28, above any ordinary line
+    /// height, while keyboard resize steps (22+ pt apart) and
+    /// distinct layout asks still corroborate in two
+    /// observations; only a fine mouse drag corroborates a
+    /// little later.
+    static let corroborationDistinctness: CGFloat = 12
+
     private func pairedFloor(of entries: [Axis]) -> CGFloat? {
         let floors = entries.filter { $0.answered > $0.asked }
         var best: CGFloat? = nil
         for (index, a) in floors.enumerated() {
             for b in floors.dropFirst(index + 1)
-            where !Self.matches(a.asked, b.asked)
+            where abs(a.asked - b.asked)
+                > Self.corroborationDistinctness
                 && Self.matches(a.answered, b.answered)
             {
                 let answer = max(a.answered, b.answered)
@@ -176,7 +194,8 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         var best: CGFloat? = nil
         for (index, a) in ceilings.enumerated() {
             for b in ceilings.dropFirst(index + 1)
-            where !Self.matches(a.asked, b.asked)
+            where abs(a.asked - b.asked)
+                > Self.corroborationDistinctness
                 && Self.matches(a.answered, b.answered)
             {
                 let answer = min(a.answered, b.answered)

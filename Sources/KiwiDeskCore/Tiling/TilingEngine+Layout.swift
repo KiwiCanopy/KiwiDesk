@@ -66,7 +66,7 @@ extension TilingEngine {
             of: space,
             activeSpace: state.workspaces.activeSpace
         )
-        let context = settings.context(
+        var context = settings.context(
             bounds: bounds,
             space: space,
             sticky: Set(
@@ -104,6 +104,13 @@ extension TilingEngine {
             // origin.
             sizeBounds: sizeBounds(for: tiled)
         )
+        // A FORCED (explicit-apply) pass probes past the
+        // corroborated bounds once (#1055, owner ruling
+        // 2026-08-28) — the flag is pass-scoped, set and
+        // cleared by `retile(force:)` around its frame
+        // computation, so every other `calculatedFrames`
+        // caller keeps the generalized consume.
+        context.probesBeyondBounds = probeBeyondBoundsPass
         return (space, tiled, context)
     }
 

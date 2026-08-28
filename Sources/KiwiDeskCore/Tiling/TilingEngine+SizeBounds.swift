@@ -125,9 +125,12 @@ extension TilingEngine {
     /// Whether a retile target that fails the plain skip check
     /// is nevertheless "already there": the window's position
     /// matches, and every size axis off target is re-asking an
-    /// ask the app has twice refused, with the window at the
+    /// ask the app has twice refused — or asking beyond a
+    /// corroborated bound (#1055) — with the window at the
     /// learned answer. Consulted un-forced only — an explicit
-    /// apply keeps its contract of re-issuing everything.
+    /// apply keeps its contract of re-issuing everything, and
+    /// since #1055 its forced pass also probes past
+    /// corroborated bounds (`LayoutContext.probesBeyondBounds`).
     func sizeBoundExplains(
         _ id: WindowID,
         current: CGRect,

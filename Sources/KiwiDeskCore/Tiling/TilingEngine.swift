@@ -11,6 +11,13 @@ import CoreGraphics
 public final class TilingEngine {
     public let animation = AnimationEngine()
 
+    /// Pass-scoped (#1055): true only while `retile(force:)`
+    /// computes a FORCED pass's frames, read by `layoutInput`
+    /// into `LayoutContext.probesBeyondBounds`. Never set it
+    /// elsewhere — the probe's whole contract is that only an
+    /// explicit apply pays it.
+    var probeBeyondBoundsPass = false
+
     /// The live tiling settings. The animation engine caches
     /// the two duration knobs for its hot path, so mirror them
     /// onto it here: this `didSet` fires on a whole-settings
@@ -206,6 +213,13 @@ public final class TilingEngine {
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
         else { return }
+        // A forced pass is an explicit apply, and it probes
+        // past corroborated bounds once (#1055) — pass-scoped
+        // so every other frame computation keeps the
+        // generalized consume; see
+        // `LayoutContext.probesBeyondBounds`.
+        probeBeyondBoundsPass = force
+        defer { probeBeyondBoundsPass = false }
         let frames = calculatedFrames(state: state)
         // The #45 invariant, enforced rather than trusted: a
         // newcomer IS an instant size, so no promise survives one.

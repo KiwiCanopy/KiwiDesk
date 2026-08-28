@@ -61,6 +61,88 @@ struct SizeBoundGeneralizationTests {
         )
     }
 
+    @Test("A contradiction AT the bound revises every answer")
+    func chainedContradictionRevises() {
+        // The consume rewrites the ask the ladder sees: the
+        // layout emits the bound, so a contradicting app mints
+        // its entry AT the bound's span — (715, 650) here —
+        // never at the configured ask. The generalized answer
+        // re-resolves once through that entry (code review,
+        // 2026-08-27), which is how the falsifier actually
+        // engages at consuming sites.
+        let contradictedAtBound = EffectiveSizeBound(
+            width: [
+                .init(asked: 800, answered: 715),
+                .init(asked: 900, answered: 715),
+                .init(asked: 715, answered: 650),
+            ]
+        )
+        #expect(
+            contradictedAtBound.consumedWidth(asking: 1200)
+                == 650
+        )
+        // And the retile skip follows the same chain: a window
+        // resting at the REVISED answer is explained.
+        #expect(
+            contradictedAtBound.explains(
+                currentSize: CGSize(width: 650, height: 600),
+                targetSize: CGSize(width: 1200, height: 600)
+            )
+        )
+        #expect(
+            !contradictedAtBound.explains(
+                currentSize: CGSize(width: 715, height: 600),
+                targetSize: CGSize(width: 1200, height: 600)
+            )
+        )
+    }
+
+    @Test("Corroboration needs asks a real step apart")
+    func corroborationDistinctnessBar() {
+        // The false pair a coarse snap CAN produce (code
+        // review, 2026-08-27): a terminal's row height
+        // (~14-24pt) puts two close asks inside one cell's
+        // refusal band, both answering the same row multiple.
+        // The distinctness bar refuses them; two asks a real
+        // step apart still corroborate. Both sides derive from
+        // the constant so a retune moves them together.
+        let bar = EffectiveSizeBound.corroborationDistinctness
+        let close = EffectiveSizeBound(
+            width: [
+                .init(asked: 700, answered: 690),
+                .init(asked: 700 + bar - 1, answered: 690),
+            ]
+        )
+        #expect(close.maxWidth == nil)
+        let apart = EffectiveSizeBound(
+            width: [
+                .init(asked: 700, answered: 690),
+                .init(asked: 700 + bar + 1, answered: 690),
+            ]
+        )
+        #expect(apart.maxWidth == 690)
+    }
+
+    @Test("Forcing the probe stands the generalization down")
+    func probeBypassesTheGeneralization() {
+        // The owner-ruled heal (2026-08-28): a forced
+        // (explicit-apply) pass re-asks the app past a
+        // corroborated bound. Exact refused asks still
+        // consume — that half predates generalization.
+        #expect(
+            ceiling.consumedWidth(
+                asking: 1200,
+                generalizing: false
+            ) == nil
+        )
+        #expect(
+            ceiling.consumedWidth(
+                asking: 800,
+                generalizing: false
+            ) == 715
+        )
+    }
+
     @Test("A single entry never generalizes")
     func singleEntryNeverGeneralizes() {
         let single = EffectiveSizeBound(

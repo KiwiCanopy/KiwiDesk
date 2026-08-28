@@ -175,6 +175,30 @@ struct ScrollingBoundRepackTests {
         #expect(third.minX == first.maxX + 10 + 400 + 10)
     }
 
+    @Test("A probing pass asks past the corroborated ceiling")
+    func probingPassAsksPastTheCeiling() throws {
+        // The owner-ruled heal (2026-08-28): a forced
+        // explicit-apply pass sets `probesBeyondBounds`, and
+        // the layout then EMITS the new slot size so the app
+        // is genuinely re-asked — the generalized consume
+        // stands down, exact entries still consume.
+        var context = makeContext()
+        context.scrolling.slotSize = .points(700)
+        context.probesBeyondBounds = true
+        context.sizeBounds[w2] = EffectiveSizeBound(
+            width: [
+                .init(asked: 600, answered: 400),
+                .init(asked: 500, answered: 400),
+            ]
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let bounded = try #require(frames[w2])
+        #expect(bounded.width == 700)
+    }
+
     @Test("A lone refused window centers in the area")
     func loneWindowCenters() throws {
         var context = makeContext()

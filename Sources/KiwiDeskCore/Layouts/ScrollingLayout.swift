@@ -72,7 +72,11 @@ public struct ScrollingLayout: LayoutSystem {
         if windows.count == 1, let only = windows.first {
             return [
                 only: context.sizeBounds[only]?
-                    .centered(in: area) ?? area
+                    .centered(
+                        in: area,
+                        generalizing:
+                            !context.probesBeyondBounds
+                    ) ?? area
             ]
         }
 
@@ -151,10 +155,17 @@ public struct ScrollingLayout: LayoutSystem {
         // cross axis keeps asking the full extent.
         let spans = windows.map { window -> CGFloat in
             let bound = context.sizeBounds[window]
+            let generalizing = !context.probesBeyondBounds
             let consumed =
                 horizontal
-                ? bound?.consumedWidth(asking: size)
-                : bound?.consumedHeight(asking: size)
+                ? bound?.consumedWidth(
+                    asking: size,
+                    generalizing: generalizing
+                )
+                : bound?.consumedHeight(
+                    asking: size,
+                    generalizing: generalizing
+                )
             return consumed ?? size
         }
         var positions: [CGFloat] = []

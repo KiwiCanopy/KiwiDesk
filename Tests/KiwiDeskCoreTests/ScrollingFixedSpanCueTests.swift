@@ -25,6 +25,62 @@ import Testing
 )
 @MainActor
 struct ScrollingFixedSpanCueTests {
+    @Test("An explicit apply re-asks past a corroborated bound")
+    func explicitApplyProbesPastTheBound() throws {
+        // The production wiring of the owner-ruled heal
+        // (2026-08-28): `scroll.set_slot_size` forces the
+        // retile, the forced pass sets the pass-scoped flag,
+        // and the layout ISSUES the new value — the ladder
+        // records the real ask, not the bound. Without this
+        // wiring the pure-layout probe test stays green while
+        // the flag never connects.
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "kiwidesk-probe-wiring-\(UUID().uuidString)"
+            )
+        let core = makeTestCore(configDirectory: directory)
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1200, height: 800)
+        }
+        for id: UInt32 in 1...2 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(id),
+                        pid: pid_t(id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("scrolling")]
+        )
+        core.state.workspaces.focus(WindowID(1), in: space)
+        for asked in [CGFloat(800), 900] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    WindowID(1),
+                    size: CGSize(width: asked, height: 800)
+                )
+                core.tiler.boundLearner.observe(
+                    WindowID(1),
+                    currentSize: CGSize(width: 715, height: 800),
+                    settledRead: true
+                )
+            }
+        }
+        core.execute(
+            "scroll.set_slot_size",
+            args: [.number(1000)]
+        )
+        let asked = core.tiler.boundLearner
+            .lastAsks[WindowID(1)]?.size.width
+        #expect(asked == 1000)
+    }
+
     @Test("The shrink below a fixed span clamps and cues")
     func shrinkBelowTheFixedSpanCues() throws {
         let directory = FileManager.default.temporaryDirectory

@@ -302,17 +302,27 @@ editing here:
   ENTRIES never generalize across asks (a grid-snapping app
   answers each ask differently; the one deliberate exception is
   the compliance contradiction sweep, argued on `complied`) —
-  while a CORROBORATED bound does, revocably (#1055 Lane B,
-  owner ruling 2026-08-27): `consumedWidth/Height` and
-  `explains` answer an ask BEYOND `maxWidth`/`minWidth` with
-  that bound, a per-ask entry outranks the generalization for
-  any ask it matches (the falsifier), and a corroborated
-  ceiling corroborates the single floor entry at the same span
-  — the fixed-span lend, the signature no snap grid can
-  produce; the argument and the probe evidence are
-  `EffectiveSizeBound`'s header and the issue
-  (`SizeBoundGeneralizationTests`, `ScrollingFixedSpanCueTests`,
-  `ScrollingBoundRepackTests`) — and
+  while a CORROBORATED bound does, revocably (#1055, owner
+  rulings 2026-08-27/28): `consumedWidth/Height` and `explains`
+  answer an ask BEYOND `maxWidth`/`minWidth` with that bound —
+  re-resolved once through the entry at the bound's own span,
+  since the consume rewrites the ask the ladder sees — a
+  per-ask entry outranks the generalization for any ask it
+  matches, a FORCED (explicit-apply) pass probes past
+  corroborated bounds via `LayoutContext.probesBeyondBounds`
+  (never widen its producers past `retile(force:)`),
+  corroboration requires asks `corroborationDistinctness`
+  apart (a coarse snap's row height beats the entry-keying
+  tolerance), and a corroborated ceiling corroborates the
+  single floor entry at the same span — the fixed-span lend,
+  paired values only. The cap consequence softens: an evicted
+  ask beyond a still-corroborated bound consumes without
+  re-dancing, while evicting the corroborating pair itself
+  silently revokes the generalization until it re-learns. The
+  argument and the probe evidence are `EffectiveSizeBound`'s
+  header and the issue (`SizeBoundGeneralizationTests`,
+  `ScrollingFixedSpanCueTests`, `ScrollingBoundRepackTests`)
+  — and
   hold a ladder PER ASK up to `SizeBoundLearner
   .maxEntriesPerAxis` (alternating layouts starved a single
   slot, device QA 2026-08-18; keep that cap sized past every
