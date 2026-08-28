@@ -2620,8 +2620,8 @@ you can drive KiwiDesk before configuring anything:
 | Swap with window left / down / up / right | `⌃⌥⇧←` `⌃⌥⇧↓` `⌃⌥⇧↑` `⌃⌥⇧→` |
 | Move to space | `⌃⌥⇧1` … `⌃⌥⇧9`, `⌃⌥⇧0` |
 | Move to space and follow | `⌃⌥⌘1` … `⌃⌥⌘9`, `⌃⌥⌘0` |
-| Grow / Shrink width | `⌥⌘5` / `⌥⌘4` |
-| Grow / Shrink height | `⌥⌘8` / `⌥⌘7` |
+| Grow / Shrink width | `⌥⌘2` / `⌥⌘1` |
+| Grow / Shrink height | `⌥⌘5` / `⌥⌘4` |
 | Toggle floating | `⌃⌥F` |
 | Toggle display sticky | `⌃⌥S` |
 | Toggle sticky (all spaces) | `⌃⌥⇧S` |
@@ -2639,8 +2639,8 @@ shortcut would swallow them; adding Control *or Command* keeps a
 default clear of both macOS system shortcuts and text entry.
 Directions use the arrow keys, which are identical on every
 layout. Resizing uses digits, which hold their place on every
-layout — and on a numeric keypad `7`/`8` sit directly above
-`4`/`5`, so the block itself shows which pair is which.
+layout, in two pairs with a key between them so a mistimed reach
+for one axis can't land on the other.
 
 Each space digit is bound to a space *by name*: `⌃⌥3` goes to
 whichever space was third when the set was seeded. Renaming that

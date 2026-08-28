@@ -42,19 +42,22 @@ override; float and ignore share the generic list-rule primitive
 because two real clients now remove drift — see
 [parity-tests.md](parity-tests.md).
 
-## The seeded keymap has two bases, and `⌥⌘` is bounded
+## The seeded keymap has two bases, plus a residue
 
 - **Seed a positional verb on the `⌃⌥` ladder and a size verb on
   `⌥⌘` — never the reverse (#1075).** `⌘` on the ladder means
   exactly one thing, "and follow"; giving it a second sense is
-  what the split removed. **`⌥⌘` may carry digits and safe
-  letters only:** never arrows (`⌥⌘←`/`→` is next/previous tab in
-  Chrome, Safari and Terminal, and a global Carbon hotkey
-  pre-empts the frontmost app), never `esc`, `space`, `D`, `H` or
-  `M`, each of which is an always-on system shortcut. Both halves
-  are argued in `docs/design-decisions.md` ▸ "Size is not a
-  positional verb" — do not restate the argument here
-  (`SizeLayerSeedTests`).
+  what the split removed. The residue is real, and named here so
+  it is not re-derived: the toggles (`⌃⌥F`, `⌃⌥S`, `⌃⌥⇧S`) and
+  app chrome (`⌃⌥K`) are mnemonic letters on the base tier, where
+  `⇧` means "the broader scope" rather than "act on the window".
+- **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
+  against prose.** That base is free only where the register says
+  so — the first draft of this layer took `⌥⌘8`, which is macOS's
+  Zoom toggle. What the register must carry, and how to enumerate
+  a base, is [input-and-animation.md](input-and-animation.md)'s;
+  the product argument is `docs/design-decisions.md` ▸ "Size is
+  not a positional verb" (`SizeLayerSeedTests`).
 
 ## The starter setup is derived, and its tuning is profile-wide
 
