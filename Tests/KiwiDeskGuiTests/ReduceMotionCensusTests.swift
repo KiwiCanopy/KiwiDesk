@@ -122,7 +122,11 @@ struct ReduceMotionCensusTests {
     /// the only escape left is deleting a needle — which
     /// silently un-watches a whole spelling, and is how a census
     /// guard dies. Empty by design; an entry is a ruling, not a
-    /// silencer.
+    /// silencer — and one that stops firing is deleted, which
+    /// the clause below makes it red to forget. A key silences
+    /// its file/spelling pair FOREVER, so a ruling left behind
+    /// after its site is gated or removed also passes the next
+    /// real starter at that pair (guard-prover, #1069).
     private static let ruled: [String: String] = [:]
 
     @Test("No uncensused way to start motion ships")
@@ -130,6 +134,7 @@ struct ReduceMotionCensusTests {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
         var found: [String] = []
+        var hits: Set<String> = []
         var scanned = 0
         for file in try SourceScan.swiftSources(under: root) {
             scanned += 1
@@ -146,13 +151,23 @@ struct ReduceMotionCensusTests {
                     closureCounts: true
                 ).isEmpty
             {
-                Self.record(spelling, in: file, into: &found)
+                Self.record(
+                    spelling,
+                    in: file,
+                    into: &found,
+                    seen: &hits
+                )
             }
             for spelling in Self.uncensusedTypes
             where source.contains(spelling)
                 && SourceScan.mentions(spelling, in: text)
             {
-                Self.record(spelling, in: file, into: &found)
+                Self.record(
+                    spelling,
+                    in: file,
+                    into: &found,
+                    seen: &hits
+                )
             }
         }
         // A clause whose expected result is zero matches passes
@@ -176,15 +191,25 @@ struct ReduceMotionCensusTests {
             Self.ruled.keys.allSatisfy(Self.namesAWatchedSpelling),
             "a ruling names a spelling no needle watches"
         )
+        // Every ruling was CONSUMED. Without this a ruling
+        // outlives the site it was written for — silent, and
+        // still silencing, so the next real starter at that
+        // file and spelling ships green too (guard-prover).
+        #expect(
+            Self.ruled.keys.allSatisfy(hits.contains),
+            "a ruling fires on nothing: \(Self.ruled.keys)"
+        )
     }
 
     /// One find, unless a ruling covers it.
     private static func record(
         _ spelling: String,
         in file: URL,
-        into found: inout [String]
+        into found: inout [String],
+        seen hits: inout Set<String>
     ) {
         let key = "\(file.lastPathComponent): \(spelling)"
+        hits.insert(key)
         guard ruled[key] == nil else { return }
         found.append(key)
     }
