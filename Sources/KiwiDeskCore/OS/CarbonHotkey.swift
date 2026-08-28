@@ -161,6 +161,13 @@ public final class CarbonHotkeyCenter {
         onRelease(id)
     }
 
+    /// Reached only from `register` — construction touches no
+    /// OS state, and `HoldRepeatSeamTests` leans on that by
+    /// building a live center bare to pin the production
+    /// release channel. Moving this install into an
+    /// initializer would put a Carbon event handler on the
+    /// dispatcher target in every test run (the #565 class)
+    /// through the one construction the test trees permit.
     private func installHandlerIfNeeded() {
         guard eventHandler == nil else { return }
         var eventTypes = [

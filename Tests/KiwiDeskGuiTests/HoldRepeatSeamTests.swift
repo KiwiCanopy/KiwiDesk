@@ -49,21 +49,35 @@ struct HoldRepeatSeamTests {
         // the repeat engine's one honest eligibility signal. A
         // second `dispatchCommand` caller would run commands
         // the tally never sees, so eligibility silently stops
-        // meaning "what the press did".
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources")
+        // meaning "what the press did". The walk covers the
+        // TEST trees too: `dispatchCommand` is module-internal
+        // since the file split, so a suite reaching it under
+        // `@testable` asserts eligibility against a path
+        // production never takes — the same vacuity, one tree
+        // over. This file self-exempts (its needle literals
+        // are not calls).
+        let repo = SourceScan.repoRoot(from: #filePath)
         var callers: [String] = []
-        for file in try SourceScan.swiftSources(under: root) {
-            let source = try SourceScan.strippedSource(at: file)
-            for _
-                in 0..<source.occurrences(
-                    of: "dispatchCommand("
-                )
+        for tree in ["Sources", "Tests"] {
+            let root = repo.appendingPathComponent(tree)
+            for file in try SourceScan.swiftSources(under: root)
+            where
+                file.lastPathComponent
+                != "HoldRepeatSeamTests.swift"
             {
-                callers.append(file.lastPathComponent)
-            }
-            if source.contains("func dispatchCommand(") {
-                callers.removeLast()
+                let source = try SourceScan.strippedSource(
+                    at: file
+                )
+                for _
+                    in 0..<source.occurrences(
+                        of: "dispatchCommand("
+                    )
+                {
+                    callers.append(file.lastPathComponent)
+                }
+                if source.contains("func dispatchCommand(") {
+                    callers.removeLast()
+                }
             }
         }
         #expect(callers == ["KiwiCore+Execute.swift"])
@@ -88,11 +102,26 @@ struct HoldRepeatSeamTests {
                     "KiwiCore+SizeLimitPill.swift"
                 )
         )
-        let cues = pill.occurrences(of: "func refuse")
-        #expect(cues >= 3)
-        #expect(
-            pill.occurrences(of: "cueResizeRefusal(") == cues + 1
+        // Per FUNCTION, not a balance identity: a count that
+        // merely balances passes when one cue forgets the
+        // funnel while another calls it twice (architect
+        // re-review, #1056).
+        let cueNames = SourceScan.allMatches(
+            in: pill,
+            pattern: "func (refuse\\w+)\\("
         )
+        #expect(cueNames.count >= 3)
+        for name in cueNames {
+            let body = try SourceScan.functionBody(
+                of: name,
+                in: "KiwiCore+SizeLimitPill.swift",
+                under: "App"
+            )
+            #expect(
+                body.contains("cueResizeRefusal("),
+                "\(name)"
+            )
+        }
         let funnel = try SourceScan.functionBody(
             of: "cueResizeRefusal",
             in: "KiwiCore+SizeLimitPill.swift",

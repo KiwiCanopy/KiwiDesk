@@ -2,6 +2,12 @@ import Foundation
 
 /// Abstraction over Carbon hotkey registration so the manager
 /// is testable without touching the real event system.
+///
+/// An implementor never fires the handler of a registration
+/// that FAILED (`register` returned nil) — the hold-to-repeat
+/// press path leans on it (`RegistrationBox` carries a nil id
+/// for exactly that handler), and Carbon holds it for free
+/// since a failed registration installs nothing.
 @MainActor
 public protocol HotkeyRegistrar: AnyObject {
     func register(
@@ -71,7 +77,7 @@ public final class KeybindingManager {
     /// closure is built before `register` returns the id, so
     /// the id travels through this box, filled immediately
     /// after. Nil only for a handler whose registration failed
-    /// — which the registrar then never fires.
+    /// — which `HotkeyRegistrar`'s contract says never fires.
     final class RegistrationBox {
         var id: UInt32?
     }

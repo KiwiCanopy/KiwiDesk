@@ -4,51 +4,6 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A registrar fake that can report releases — the channel the
-/// hold-to-repeat engine arms on (#1056). The press-only fakes
-/// across the test trees deliberately do NOT conform, which is
-/// the `HotkeyReleaseReporting` split working as designed.
-@MainActor
-private final class ReleaseRegistrar: HotkeyRegistrar,
-    HotkeyReleaseReporting
-{
-    var onRelease: @MainActor (UInt32) -> Void = { _ in }
-    private var handlers: [UInt32: @MainActor () -> Void] = [:]
-    private var keyCodes: [UInt32: UInt32] = [:]
-    private var nextID: UInt32 = 1
-
-    func register(
-        keyCode: UInt32,
-        modifiers: HotkeyModifiers,
-        handler: @escaping @MainActor () -> Void
-    ) -> UInt32? {
-        let id = nextID
-        nextID += 1
-        handlers[id] = handler
-        keyCodes[id] = keyCode
-        return id
-    }
-
-    func unregister(id: UInt32) {
-        handlers[id] = nil
-        keyCodes[id] = nil
-    }
-
-    func press(keyCode: UInt32) {
-        for (id, code) in keyCodes where code == keyCode {
-            handlers[id]?()
-        }
-    }
-
-    /// Mirrors `CarbonHotkeyCenter.dispatchRelease`: a release
-    /// for an unregistered id is dropped.
-    func release(keyCode: UInt32) {
-        for (id, code) in keyCodes where code == keyCode {
-            onRelease(id)
-        }
-    }
-}
-
 /// The production half of hold-to-repeat (#1056): a real chord
 /// driving a real binding body through `KiwiCore.execute`'s
 /// command tally, the refusal-cue sites, and the teardown
@@ -285,27 +240,31 @@ struct HoldRepeatWiringTests {
         // that no longer exists. The arm must stay keyed to the
         // id the press actually produced (`RegistrationBox`),
         // so the first tick finds its registration gone and the
-        // run ends; re-deriving the id after the fire instead
-        // adopts the fresh id and repeats on a registration the
-        // press never touched (#1056 review).
+        // run ends WITHOUT re-firing the body; re-deriving the
+        // id after the fire instead adopts the rebuilt
+        // registration and repeats on an id the press never
+        // touched. The rebind is ONCE-ONLY, deliberately: a
+        // body that rebinds on every fire re-enters
+        // `deactivate`'s cancel on the tick itself, which
+        // rescued the pre-fix shape and left this guard inert
+        // (guard-prover round 2, #1056).
         let f = try Fixture(
             body: """
-                KiwiDesk.bind("ctrl+alt+k", function() end)
+                if not rebound then
+                    rebound = true
+                    KiwiDesk.bind("ctrl+alt+k", function() end)
+                end
                 KiwiDesk.resize("x", 50)
                 """
         )
         f.seedBspPair()
         f.registrar.press(keyCode: f.combo.keyCode)
-        guard f.heldID != nil else {
-            // Arming from the stale-bindings press is itself
-            // acceptable to refuse; the defect is repeating on
-            // a foreign id, which the tick below would show.
-            #expect(f.ticks.isEmpty)
-            return
-        }
+        #expect(f.hits == .number(1))
+        try #require(f.heldID != nil)
         let tick = f.ticks.popLast()
         try #require(tick).work()
         #expect(f.heldID == nil)
+        #expect(f.hits == .number(1))
         #expect(f.ticks.isEmpty)
     }
 
