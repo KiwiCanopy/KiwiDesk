@@ -53,7 +53,7 @@ public final class KeybindingManager {
     /// system didn't grant it").
     public internal(set) var activationFailures: Set<KeyCombo> =
         []
-    var layers: [String: [KeyCombo: Int32]] = [:]
+    private var layers: [String: [KeyCombo: Int32]] = [:]
     /// Menu bar indicator per layer (SF Symbol name or emoji),
     /// set via `define_layer(name, bindings, { icon = ... })`.
     private var layerIcons: [String: String] = [:]
@@ -95,7 +95,7 @@ public final class KeybindingManager {
     /// hotkeys are unregistered so testing an existing shortcut
     /// mid-capture can't fire its action. Table/layer edits still
     /// apply but skip registration until `resume()`.
-    var suspended = false
+    private var suspended = false
     let registrar: HotkeyRegistrar
 
     public init(

@@ -5275,6 +5275,24 @@ undrawn is already the board's shape: `f1`–`f12`, `home`, `end`,
 `drawnCodes` states outright that a key the board omits is not
 counted as free. The board is a preview, never a census.
 
+Two display residues follow, both accepted rather than
+discovered. **The "taken" tally counts what the board does not
+draw**: `KeyboardCensus.takenKeyCount` folds over every bound
+code, so binding `⌃⌥keypadplus` raises the count while lighting
+no cap — already true of `f1`–`f12` and the navigation keys, and
+widened by eight codes here. And **a non-digit keypad key draws
+the character it prints**, which is the glyph its main-block twin
+already shows, so `⌃⌥keypaddecimal` and `⌃⌥period` both render
+`⌃⌥.`. The bindings stay distinct — conflict detection compares
+key codes — so it is a display collision only, and it is left
+alone deliberately: macOS offers no keypad-distinguishing glyph,
+and a `Num`-style English prefix minted in Core would be neither
+localizable nor Apple-native. Keypad **Clear** is the one that
+could not be left, because it prints nothing at all: without a
+fixed `⌧` in `ComboSymbols.specials` it fell through to the
+uppercased key NAME, rendering `KEYPADCLEAR` inside a compact
+chord (`KeypadKeysTests`).
+
 **The seed fires whenever `init.lua` declares no managed
 _settings_ — not only when `init.lua` is absent (#354).** The
 original gate ("no `init.lua` yet") silently punished a user

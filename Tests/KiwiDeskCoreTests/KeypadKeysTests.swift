@@ -43,35 +43,85 @@ struct KeypadKeysTests {
 
     // MARK: - The twin table itself
 
+    /// `kVK_ANSI_Keypad0`-`9`, in digit order — the independent
+    /// source both twin-table pins read. Indexed by the digit,
+    /// so `carbonKeypadDigits[4]` is keypad `4`.
+    private let carbonKeypadDigits: [UInt32] = [
+        UInt32(kVK_ANSI_Keypad0), UInt32(kVK_ANSI_Keypad1),
+        UInt32(kVK_ANSI_Keypad2), UInt32(kVK_ANSI_Keypad3),
+        UInt32(kVK_ANSI_Keypad4), UInt32(kVK_ANSI_Keypad5),
+        UInt32(kVK_ANSI_Keypad6), UInt32(kVK_ANSI_Keypad7),
+        UInt32(kVK_ANSI_Keypad8), UInt32(kVK_ANSI_Keypad9),
+    ]
+
     @Test("Every twin's keypad side is the Carbon keypad code")
     func keypadSidePinnedToCarbon() {
-        let carbon: [UInt32] = [
-            UInt32(kVK_ANSI_Keypad0), UInt32(kVK_ANSI_Keypad1),
-            UInt32(kVK_ANSI_Keypad2), UInt32(kVK_ANSI_Keypad3),
-            UInt32(kVK_ANSI_Keypad4), UInt32(kVK_ANSI_Keypad5),
-            UInt32(kVK_ANSI_Keypad6), UInt32(kVK_ANSI_Keypad7),
-            UInt32(kVK_ANSI_Keypad8), UInt32(kVK_ANSI_Keypad9),
-        ]
         #expect(
-            Set(KeypadKeys.digitTwins.keys) == Set(carbon)
+            Set(KeypadKeys.digitTwins.keys)
+                == Set(carbonKeypadDigits)
         )
     }
 
-    /// The other side of the same table: a transposed pair here
-    /// would bind the wrong digit silently, which is precisely
-    /// what a hand-read of the literals cannot catch.
+    /// Pins the pad-to-row PAIRING against an independent source
+    /// — each digit's own Carbon constant — rather than against
+    /// the table itself.
+    ///
+    /// The obvious spelling, `rowTwin(of: keypadTwin(of: row))
+    /// == row`, is true by construction of the dictionary for
+    /// ANY table, transposed or not, so it cannot catch the swap
+    /// it claims to. This one does.
     @Test("Every twin's row side is that digit's own code")
     func rowSidePinnedToKeyCodes() throws {
         for digit in 0...9 {
             let name = String(digit)
             let row = try #require(KeyCombo.keyCodes[name])
-            let pad = try #require(
-                KeypadKeys.keypadTwin(of: row),
-                "digit \(name) has no keypad twin"
+            let pad = carbonKeypadDigits[digit]
+            #expect(
+                KeypadKeys.keypadTwin(of: row) == pad,
+                "digit \(name) pairs with the wrong keypad key"
             )
             #expect(
                 KeypadKeys.rowTwin(of: pad) == row,
-                "digit \(name) does not round-trip"
+                "keypad \(name) points at the wrong row key"
+            )
+        }
+    }
+
+    /// The digit half is pinned against Carbon above; this is the
+    /// other half of the vocabulary. Every one of these was
+    /// correct the day it was typed and would bind the wrong
+    /// physical key in silence if edited.
+    @Test("Every non-digit keypad key is its Carbon code")
+    func nonDigitCodesPinnedToCarbon() {
+        let expected: [String: UInt32] = [
+            "keypadplus": UInt32(kVK_ANSI_KeypadPlus),
+            "keypadminus": UInt32(kVK_ANSI_KeypadMinus),
+            "keypadmultiply": UInt32(kVK_ANSI_KeypadMultiply),
+            "keypaddivide": UInt32(kVK_ANSI_KeypadDivide),
+            "keypaddecimal": UInt32(kVK_ANSI_KeypadDecimal),
+            "keypadequals": UInt32(kVK_ANSI_KeypadEquals),
+            "keypadenter": UInt32(kVK_ANSI_KeypadEnter),
+            "keypadclear": UInt32(kVK_ANSI_KeypadClear),
+        ]
+        for (name, code) in expected {
+            #expect(
+                KeyCombo.keyCodes[name] == code,
+                "\(name) is not its Carbon key code"
+            )
+        }
+    }
+
+    /// `KeyCombo.keyCodes` merges the main block with
+    /// `KeypadKeys.names`, and the tie-break keeps the MAIN
+    /// entry — so a name collision would silently un-home a key
+    /// this enum is supposed to own, which is the opposite of
+    /// "KeypadKeys is the one home". Nothing else would notice.
+    @Test("No keypad name is shadowed by a main-block name")
+    func keypadNamesAreNotShadowed() {
+        for (name, code) in KeypadKeys.names {
+            #expect(
+                KeyCombo.keyCodes[name] == code,
+                "\(name) resolved to a main-block code"
             )
         }
     }
@@ -190,9 +240,10 @@ struct KeypadKeysTests {
     }
 
     /// The authored key is the one the user wrote and can see,
-    /// so its refusal is still reported even when the keypad
-    /// twin happened to land.
-    @Test("A refused AUTHORED code is still a failure")
+    /// so its refusal is reported — and the twin is then never
+    /// registered at all, or the keypad would keep firing a
+    /// binding the Settings caption calls ungranted.
+    @Test("A refused AUTHORED code registers no twin either")
     func refusedAuthoredCodeIsAFailure() throws {
         let registrar = RecordingRegistrar()
         let row = try #require(KeyCombo.keyCodes["4"])
@@ -202,5 +253,42 @@ struct KeypadKeysTests {
         manager.bind(combo, ref: 1)
 
         #expect(manager.activationFailures == [combo])
+        #expect(registrar.liveCodes.isEmpty)
+    }
+
+    // MARK: - The invariant downstream readers lean on
+
+    /// `names` resolves the digit aliases to ROW codes, so a
+    /// parsed `KeyCombo` can never carry a keypad digit code.
+    /// That is precisely why conflict detection, the importer,
+    /// `SystemShortcuts` and the Settings board all stayed
+    /// correct without an edit — they compare and draw row
+    /// codes, and only ever see row codes. Making `keypad4`
+    /// bindable apart from `4` would break this silently, and
+    /// split conflict detection from registration.
+    @Test("No parseable key name resolves to a keypad digit")
+    func noNameResolvesToAKeypadDigitCode() {
+        #expect(
+            Set(KeyCombo.keyCodes.values)
+                .isDisjoint(with: KeypadKeys.digitTwins.keys)
+        )
+    }
+
+    /// Keypad Clear and Enter print no character on any layout,
+    /// so each needs a fixed glyph — without one the chord
+    /// renders as the uppercased key NAME ("KEYPADCLEAR") in the
+    /// recorder, the Shortcuts list and the menu. The rest of
+    /// the keypad (`+ − × ÷ . =`) prints, and resolves through
+    /// the active layout instead.
+    @Test("The non-printing keypad keys carry fixed glyphs")
+    func nonPrintingKeypadKeysHaveGlyphs() throws {
+        let clear = try #require(KeyCombo.parse("keypadclear"))
+        let enter = try #require(KeyCombo.parse("keypadenter"))
+        #expect(
+            ComboSymbols.specialKeyGlyph(clear.keyCode) != nil
+        )
+        #expect(
+            ComboSymbols.specialKeyGlyph(enter.keyCode) != nil
+        )
     }
 }

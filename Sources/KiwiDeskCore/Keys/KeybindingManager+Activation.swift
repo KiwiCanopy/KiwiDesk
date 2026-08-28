@@ -4,10 +4,16 @@ import Foundation
 /// ceiling (§2.1): what is registered with the OS right now, and
 /// the second registration a keypad twin adds beside it (#1074).
 ///
-/// `layers`, `suspended`, `registrar`, `activationFailures` and
-/// `activeBindings`'s setter are internal rather than private so
-/// this file can reach them — module-internal, so the GUI target
-/// still cannot see any of them. The same seam
+/// `activate` and `deactivate` themselves went from private to
+/// module-internal to live here, as did `registrar` (a `let`) and
+/// the SETTERS of `activeBindings` and `activationFailures`,
+/// which this file writes. Nothing else was loosened: `layers`
+/// and `suspended` stay private and are read through their
+/// existing accessors (`bindings(for:)`, `isSuspended`), because
+/// `layers` owns the Lua registry refs that `bind`, `defineLayer`,
+/// `replaceLayers` and `reset` are careful to release — an
+/// internal setter there would drop the compiler's enforcement of
+/// that ownership for no gain. The same seam
 /// `KeybindingManager+HoldGlide.swift` took for `holdGlide`.
 extension KeybindingManager {
     func deactivate() {
@@ -25,18 +31,32 @@ extension KeybindingManager {
         activationFailures = []
         // A recorder is armed: keep the table current but
         // register nothing, so testing a shortcut can't fire.
-        guard !suspended else { return }
-        for (combo, ref) in layers[layer] ?? [:] {
-            let landed = registerPhysical(
-                code: combo.keyCode,
-                combo: combo,
-                ref: ref
-            )
+        guard !isSuspended else { return }
+        for (combo, ref) in bindings(for: layer) {
+            guard
+                registerPhysical(
+                    code: combo.keyCode,
+                    combo: combo,
+                    ref: ref
+                )
+            else {
+                activationFailures.insert(combo)
+                onLog(
+                    "keybinding conflict: could not "
+                        + "register a shortcut in layer "
+                        + "'\(layer)'"
+                )
+                continue
+            }
             // A keypad digit IS its number-row twin (#1074), so
-            // one binding claims two physical keys. The twin's
-            // refusal is NOT the binding's: the shortcut still
-            // works from the row, so reporting it would cue a
-            // conflict the user can neither see nor fix.
+            // one binding claims a SECOND physical key — but
+            // only once the authored key has landed. Registering
+            // the twin after the authored code was refused would
+            // leave the keypad firing a binding the Settings
+            // caption calls ungranted, so the report and the
+            // keyboard would disagree. A twin's OWN refusal is
+            // not the binding's — the shortcut still works from
+            // the row — so it is never reported.
             if let twin = KeypadKeys.keypadTwin(
                 of: combo.keyCode
             ) {
@@ -46,13 +66,6 @@ extension KeybindingManager {
                     ref: ref
                 )
             }
-            guard !landed else { continue }
-            activationFailures.insert(combo)
-            onLog(
-                "keybinding conflict: could not "
-                    + "register a shortcut in layer "
-                    + "'\(layer)'"
-            )
         }
     }
 

@@ -88,6 +88,13 @@ public enum ComboSymbols {
     private static let specials: [UInt32: String] = [
         123: "←", 124: "→", 125: "↓", 126: "↑",
         36: "↩", 76: "⌤", 48: "⇥", 49: "␣",
+        // Keypad Clear prints nothing, so without a glyph
+        // here it would fall through to the uppercased key
+        // NAME — a literal "KEYPADCLEAR" in the recorder,
+        // the Shortcuts list and the menu (#1074). Every
+        // other keypad key either prints (`+ − × ÷ . =`,
+        // through `layoutChar`) or is already here (enter).
+        71: "⌧",
         51: "⌫", 117: "⌦", 53: "⎋",
         115: "↖", 119: "↘", 116: "⇞", 121: "⇟",
         122: "F1", 120: "F2", 99: "F3", 118: "F4",
