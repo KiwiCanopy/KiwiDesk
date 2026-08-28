@@ -108,6 +108,30 @@ rather than for there being none. A guard over generated or
 rendered output reads the **built artifact** or uses a parser, and
 asserts its input is non-empty before asserting anything about it.
 
+**A refinement to a needle states what it TRADES, not only what
+it buys.** Narrowing a needle, adding a boundary, tightening a
+match — each buys one case and costs another, and the cost is
+what the NEXT prover round finds, because a refinement documented
+by its win alone leaves nothing for a reader to check against.
+
+#1069 ran that loop three times, each fix opening the hole the
+one after it found. Narrowing `symbolEffect` to `symbolEffect(`
+stopped a disabling spelling firing and re-opened the whitespace
+fail-open the walk exists for — `.symbolEffect (…)` compiles.
+Adding a leading identifier boundary then fixed a false positive
+and blinded every DOT-prefixed needle to its own receiver, so
+`field.animation(…)` written inline went unscanned; that one
+weakened the older, load-bearing guard next door, and the site
+counts did not move by one, because the tree happened to write
+every call at the start of a chain line.
+
+So the cost goes in the docstring beside the refinement, in the
+same change — not the commit message, which the next reader is
+not holding. Where the cost is a class the guard now mis-fires
+on, name the class; where it is a shape the guard can no longer
+see, name the shape. A refinement whose trade you cannot state
+is one you have not finished working out.
+
 ## State a fact once
 
 A count or a list copied into a second file rots in both on one
