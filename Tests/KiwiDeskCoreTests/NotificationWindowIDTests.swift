@@ -87,6 +87,76 @@ struct NotificationWindowIDTests {
         #expect(asked == 0)
     }
 
+    @Test("A dead element's zero frame never reaches state")
+    func deadElementFrameIsDropped() {
+        // The liveness property map-first LOST (#1084 review).
+        // Asking the app filtered destroyed elements for free —
+        // they answer no id, so the arm returned before reading.
+        // The map still names a window whose entry the destroy
+        // sweep has not reached, so the read happens, and
+        // `AXHelper.frame` answers `.zero` for a dead element.
+        // A real on-screen window never has that frame, so it is
+        // dropped at delivery rather than folded into state
+        // where the overlays would follow it — device-observed
+        // as a window snapping to the corner (2026-08-29).
+        let id = WindowID(9)
+        let pid = pid_t(getpid())
+        let loop = makeLoop(id: id, pid: pid) {}
+        loop.elements[pid] = [id: element]
+        loop.frameReads.reader = { _ in .zero }
+        // The read must actually RUN, or this test passes for
+        // the wrong reason — the shared fixture discards the
+        // work, which made a first draft of this vacuous.
+        loop.frameReads.dispatchOverride = { _, work in work() }
+        var events: [KiwiEvent] = []
+        loop.onEvent = { events.append($0) }
+        loop.handle(
+            kAXWindowResizedNotification,
+            element,
+            pid: pid,
+            app: AppRef(bundleID: nil, name: "Test")
+        )
+        #expect(events.isEmpty)
+        #expect(loop.trackedFrames[id] == nil)
+    }
+
+    @Test("An ambiguous element asks rather than guessing")
+    func duplicateMappingAsksTheApp() {
+        // Architect review + device, 2026-08-29: the map is
+        // keyed by id, so two ids CAN point at one element, and
+        // a Dictionary's iteration order is undefined — picking
+        // "the first" match is a coin flip per notification, and
+        // the wrong side of it moves the wrong window. Observed
+        // while merging Finder tabs: windows slid sideways and
+        // an unrelated app minimized, intermittently, which is
+        // what a per-notification coin flip looks like from
+        // outside.
+        //
+        // The app is the one party that can settle it, so an
+        // ambiguous element goes back to the ask. Reverting to
+        // `first(where:)` makes this test's outcome depend on
+        // hash order — it does not merely fail, it becomes
+        // unreliable, which is the property being removed.
+        let pid = pid_t(getpid())
+        var asked = 0
+        let loop = makeLoop(id: WindowID(1), pid: pid) {
+            asked += 1
+        }
+        // Two ids, one element — the shape a re-key that failed
+        // to remove its old key would leave behind.
+        loop.elements[pid] = [
+            WindowID(1): element,
+            WindowID(2): element,
+        ]
+        loop.handle(
+            kAXWindowResizedNotification,
+            element,
+            pid: pid,
+            app: AppRef(bundleID: nil, name: "Test")
+        )
+        #expect(asked == 1)
+    }
+
     @Test("An unknown window still asks — the map is not a wall")
     func untrackedWindowStillAsks() {
         // The fallback must stay, and stay SECOND: a window not

@@ -45,9 +45,25 @@ extension EventLoop {
         of element: AXUIElement,
         pid: pid_t
     ) -> WindowID? {
-        if let id = elements[pid, default: [:]]
-            .first(where: { CFEqual($1, element) })?.key
-        {
+        let matches = elements[pid, default: [:]]
+            .filter { CFEqual($1, element) }
+        // EXACTLY one, or ask (#1084, architect review): the map
+        // is keyed by id, so nothing structurally forbids two
+        // ids pointing at one element, and a Dictionary's
+        // iteration order is undefined — so `first(where:)`
+        // over a duplicate is a COIN FLIP per notification, and
+        // a wrong id moves the wrong window. Device-observed
+        // 2026-08-29 while merging Finder tabs: windows moved
+        // sideways and an unrelated app minimized, intermittently.
+        //
+        // Ambiguity is exactly the case the app can settle, so
+        // hand it back: two matches costs one round-trip, the
+        // same price this path paid for EVERY notification
+        // before. The win is unaffected — the overwhelming case
+        // is one match — and it is now a fact rather than a bet
+        // on every writer of `elements` keeping the map
+        // injective.
+        if matches.count == 1, let id = matches.first?.key {
             return id
         }
         return resolveWindowID(element)
@@ -244,6 +260,19 @@ extension EventLoop {
             // an `NSRunningApplication` lookup per delivered
             // frame, on the main actor, at storm rate.
             guard self.observers[pid] != nil else { return }
+            // A dead element reads as `.zero` (#1084 review):
+            // `AXHelper.frame` answers that when the copy fails,
+            // and a real on-screen window never has it. Asking
+            // the app used to filter these out for free — a
+            // destroyed element answered no id, so the arm
+            // returned before ever reading — and resolving from
+            // the tracked map lost that property, because the
+            // map still names a window whose entry the destroy
+            // sweep has not reached yet. Without this the frame
+            // folds into state and the overlays follow it, which
+            // on device looked like a window snapping to the
+            // corner during Finder tab merges (2026-08-29).
+            guard frame != .zero else { return }
             if self.elements[pid]?[id] != nil {
                 self.trackedFrames[id] = frame
             }
