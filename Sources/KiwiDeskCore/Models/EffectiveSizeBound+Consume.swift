@@ -85,13 +85,27 @@ extension EffectiveSizeBound {
     /// row packed a stale span forever; with it, the entry at
     /// the bound answers every generalized ask, which is the
     /// falsifier the ruling requires actually engaging.
+    /// Chased to a FIXED POINT, not one step (re-review,
+    /// 2026-08-28): a second bound shift mints its entry at
+    /// the first revision's span — (715, 650), (650, 600) —
+    /// and a single-step chain would emit 650 forever. The
+    /// walk is bounded by the entry count, so a pathological
+    /// cycle in the ladder exits rather than spinning.
     private func chained(
         entries: [Axis],
         through bound: CGFloat
     ) -> CGFloat {
-        entries.first {
-            Self.matches($0.asked, bound)
-        }?.answered ?? bound
+        var value = bound
+        for _ in 0..<entries.count {
+            guard
+                let next = entries.first(where: {
+                    Self.matches($0.asked, value)
+                })?.answered,
+                !Self.matches(next, value)
+            else { break }
+            value = next
+        }
+        return value
     }
 
     /// The centered residue frame for a slot this bound

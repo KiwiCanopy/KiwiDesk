@@ -167,10 +167,12 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     /// under Terminal's ~7 pt column WIDTH but far under its
     /// row HEIGHT, a line height of ~14–24 pt at ordinary
     /// fonts. 12 protects q ≤ 28, above any ordinary line
-    /// height, while keyboard resize steps (22+ pt apart) and
-    /// distinct layout asks still corroborate in two
-    /// observations; only a fine mouse drag corroborates a
-    /// little later.
+    /// height. The default 50 pt resize step and distinct
+    /// layout asks corroborate in two observations; a
+    /// configured step at or below the bar (`resize_step`
+    /// clamps down to 1) or a fine mouse drag corroborates
+    /// only once asks drift past it — a few extra silent
+    /// presses, not a wrong answer.
     static let corroborationDistinctness: CGFloat = 12
 
     private func pairedFloor(of entries: [Axis]) -> CGFloat? {

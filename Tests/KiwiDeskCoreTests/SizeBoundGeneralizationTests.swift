@@ -95,6 +95,20 @@ struct SizeBoundGeneralizationTests {
                 targetSize: CGSize(width: 1200, height: 600)
             )
         )
+        // A SECOND shift chains to the fixed point — the entry
+        // at the first revision's span revises again
+        // (re-review, 2026-08-28).
+        let shiftedTwice = EffectiveSizeBound(
+            width: [
+                .init(asked: 800, answered: 715),
+                .init(asked: 900, answered: 715),
+                .init(asked: 715, answered: 650),
+                .init(asked: 650, answered: 600),
+            ]
+        )
+        #expect(
+            shiftedTwice.consumedWidth(asking: 1200) == 600
+        )
     }
 
     @Test("Corroboration needs asks a real step apart")
@@ -121,6 +135,29 @@ struct SizeBoundGeneralizationTests {
             ]
         )
         #expect(apart.maxWidth == 690)
+        // The FLOOR side is a separate copy of the clause
+        // (guard-prover, 2026-08-28) — weaken one and not the
+        // other and the wider copy passes for the wrong
+        // reason.
+        // Both entries must be GENUINE floors (answered above
+        // asked) or the pair never reaches the distinctness
+        // comparison and the assertion passes on an empty set
+        // (guard-prover caught the first fixture doing exactly
+        // that, 2026-08-28).
+        let closeFloors = EffectiveSizeBound(
+            width: [
+                .init(asked: 500, answered: 510),
+                .init(asked: 500 - bar + 1, answered: 510),
+            ]
+        )
+        #expect(closeFloors.minWidth == nil)
+        let apartFloors = EffectiveSizeBound(
+            width: [
+                .init(asked: 500, answered: 510),
+                .init(asked: 500 - bar - 1, answered: 510),
+            ]
+        )
+        #expect(apartFloors.minWidth == 510)
     }
 
     @Test("Forcing the probe stands the generalization down")

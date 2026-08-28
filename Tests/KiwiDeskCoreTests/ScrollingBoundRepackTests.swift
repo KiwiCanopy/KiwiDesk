@@ -199,6 +199,33 @@ struct ScrollingBoundRepackTests {
         #expect(bounded.width == 700)
     }
 
+    @Test("A probing pass reaches the lone window's center too")
+    func probingPassReachesTheLoneWindow() throws {
+        // The lone-window `centered` site reads the flag
+        // independently of the row's spans site (guard-prover,
+        // 2026-08-28) — ignoring it there would stay green
+        // across every other case.
+        var context = makeContext()
+        context.probesBeyondBounds = true
+        let area = context.usable
+        // Corroborated ceiling with NO exact entry at the
+        // area's own span, so only the generalized arm could
+        // consume it — which the probe stands down.
+        context.sizeBounds[w1] = EffectiveSizeBound(
+            width: [
+                .init(asked: area.width - 200, answered: 700),
+                .init(asked: area.width - 100, answered: 700),
+            ]
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1],
+            in: context
+        )
+        // The probe emits the real area, not the bound.
+        let lone = try #require(frames[w1])
+        #expect(lone.width == area.width)
+    }
+
     @Test("A lone refused window centers in the area")
     func loneWindowCenters() throws {
         var context = makeContext()
