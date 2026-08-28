@@ -97,6 +97,114 @@ struct SizeBoundBaselineTests {
         #expect(abs(placed.midX - target.midX) < 0.01)
     }
 
+    @Test("A trusted baseline confirms on the first settled read")
+    func trustedBaselineConfirmsInOneObservation() {
+        // The POSITIVE half of the baseline arm, at the learner
+        // rather than through the engine (guard-prover, #1083):
+        // driven end-to-end, deleting the whole arm leaves every
+        // test green, because the probe's own re-ask retile
+        // supplies a second settled observation by another
+        // route and the ladder completes anyway. The #677
+        // latency win the arm exists for could therefore be
+        // removed silently. Here nothing else can answer.
+        var learner = SizeBoundLearner()
+        let w = WindowID(1)
+        let refused = CGSize(width: 715, height: 800)
+        // The window sat SETTLED at the refused size before the
+        // ask: one prior observation already in hand.
+        learner.recordAsk(
+            w,
+            size: CGSize(width: 980, height: 800),
+            settledFrom: refused
+        )
+        // Hoisted: a mutating call cannot sit inside #expect.
+        let confirmed = learner.observe(
+            w,
+            currentSize: refused,
+            settledRead: true
+        )
+        #expect(confirmed)
+        // The ENTRY is believed after one settled read. Not
+        // `minWidth`, which is the corroborated accessor and
+        // still wants two distinct asks (#933) — the arm buys
+        // the entry a cycle earlier, never the corroboration.
+        let entries = learner.bound(for: w)?.width ?? []
+        #expect(entries.count == 1)
+        #expect(entries.first?.answered == 715)
+    }
+
+    @Test("Without a baseline the ladder still needs two reads")
+    func noBaselineStillNeedsTheLadder() {
+        // The arm's boundary, so the test above cannot pass by
+        // the learner promoting on ANY single settled read: the
+        // identical sequence with no `settledFrom` seeds only.
+        var learner = SizeBoundLearner()
+        let w = WindowID(1)
+        let refused = CGSize(width: 715, height: 800)
+        learner.recordAsk(w, size: CGSize(width: 980, height: 800))
+        let confirmed = learner.observe(
+            w,
+            currentSize: refused,
+            settledRead: true
+        )
+        #expect(!confirmed)
+        #expect(learner.bound(for: w) == nil)
+    }
+
+    @Test("Two raw echoes never confirm between them")
+    func repeatedEchoNeverConfirms() throws {
+        // The ladder's own half of the settled-read rule
+        // (#1083), and the arm the device capture caught: two
+        // raw echoes 72 ms apart satisfied "the same answer
+        // twice" at load average 8.7, minting a bound at
+        // 1231x1011 — the drawn slot geometry — for two
+        // different windows within 44 ms of each other. No app
+        // redraws in 72 ms; that is ONE stale frame counted as
+        // two observations.
+        //
+        // The baseline arm cannot cover this: here the ask is
+        // answered off the baseline, so the ladder runs
+        // properly and the question is only whether a RAW
+        // repeat may cast the confirming vote.
+        guard NSScreen.main != nil else { return }
+        let applied = Applied()
+        let core = makeCore(applied: applied)
+        let target = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w]
+        )
+        let refused = CGRect(
+            origin: target.origin,
+            size: CGSize(width: 715, height: target.height)
+        )
+        core.tiler.echoGraceOverride = { _ in true }
+        // Two asks, each answered by a raw echo carrying the
+        // same refusal — the shape that used to confirm.
+        for _ in 0..<2 {
+            core.retile()
+            core.handle(.windowResized(w, refused))
+        }
+        #expect(core.tiler.sizeBound(for: w) == nil)
+        #expect(core.tiler.candidateSizeBound(for: w) != nil)
+        // …and the settled read that follows DOES confirm, so
+        // the test pins the discrimination rather than mere
+        // silence: a learner that never promotes would pass the
+        // assertions above and fail this one.
+        core.eventLoop.frameReads.reader = { _ in refused }
+        core.eventLoop.frameReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        core.eventLoop.frameReads.dispatchOverride = {
+            _,
+            work in
+            work()
+        }
+        core.eventLoop.elements[1] = [
+            w: AXUIElementCreateSystemWide()
+        ]
+        core.runSizeBoundProbe(w)
+        #expect(core.tiler.sizeBound(for: w) != nil)
+    }
+
     @Test("An echo at the baseline never confirms alone")
     func echoAtBaselineNeverConfirms() throws {
         // #1083, device capture 2026-08-28: on the echo channel

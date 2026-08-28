@@ -299,16 +299,20 @@ editing here:
   size and reads the settled, echo-fed state frame as the app's
   answer — the same ask refused with the same answer twice
   confirms a per-axis, PER-ASK `EffectiveSizeBound` entry, and
-  **only a SETTLED read may cast either of those two votes**
-  (#1083): a raw echo seeds and refreshes a candidate and never
-  promotes one, because an echo reporting the pre-ask frame is
-  the same bytes whether the app refused or has merely not
-  redrawn yet, and under load the second is ordinary for any
-  app. A new `SizeAnswerChannel` therefore owes an honest
-  `isSettledRead`, and widening what counts as settled re-opens
-  #1083 through that door — `SizeBoundBaselineTests` holds the
-  pair (same fixture, one settled read and one echo, opposite
-  verdicts) and is what reds if the term is dropped —
+  **only a SETTLED read may cast either of those two votes,
+  with one named carve-out** (#1083). A raw echo seeds and
+  refreshes a candidate; it promotes one only through #1049's
+  comply-then-revoke pair, where an earlier echo reported the
+  window AT the asked size and so proved it took it. Every
+  other raw promotion is barred, because an echo reporting the
+  pre-ask frame is the same bytes whether the app refused or
+  has merely not redrawn yet, and under load the second is
+  ordinary for any app. A new `SizeAnswerChannel` therefore
+  owes an honest `isSettledRead`, and widening what counts as
+  settled re-opens #1083 through that door —
+  `SizeBoundBaselineTests` holds all three verdicts (the same
+  fixture answered by a settled read, by one echo, and by a
+  repeated echo) and is what reds if either term is dropped —
   ENTRIES never generalize across asks (a grid-snapping app
   answers each ask differently; the one deliberate exception is
   the compliance contradiction sweep, argued on `complied`) —
@@ -520,9 +524,8 @@ editing here:
   write from a resize path, which is exactly how the mouse
   `.scrollWidth` drag crossed the floor the keyboard path
   refused. The writers clamp each side at its members'
-  effective minimums (`min_window_size` alone since #1083 —
-  a #677 learned bound informs the layout, never a press) and
-  cue a truncated attempt — a pill on each end
+  effective minimums (`min_window_size`, raised by a #677
+  learned bound) and cue a truncated attempt — a pill on each end
   (the trier names the reason, the blocker marks itself), the
   bounce on the trier
   (`ResizeSizeLimitFeedbackTests`,

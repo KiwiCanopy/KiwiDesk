@@ -48,6 +48,18 @@ extension KiwiCore {
     static let sizeBoundProbeGraceSeconds = 0.6
 
     /// Wired to `AnimationEngine.onWindowSettled` in Bootstrap.
+    ///
+    /// **It does not fire with Reduce Motion on** (review,
+    /// #1083): `AnimationEngine.animate` applies the frame and
+    /// returns without residency, so nothing ever settles.
+    /// Nothing becomes unlearnable — the retile-time pass
+    /// promotes with `settledRead: true` and every retile makes
+    /// one — but for those users the ladder completes on two
+    /// echo-quiet retiles at the same ask rather than one probe
+    /// grace, so #1083's stated cost is the animated case's.
+    /// Ruled rather than fixed: a probe scheduled off a
+    /// non-existent settle would need its own clock, and the
+    /// retile path already answers.
     /// Gated on the learner still wanting an answer for this
     /// window's last ask AND the state frame not already
     /// showing compliance — so the overwhelmingly common settle

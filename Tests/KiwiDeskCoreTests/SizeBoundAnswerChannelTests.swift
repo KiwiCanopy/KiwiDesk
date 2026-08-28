@@ -192,14 +192,21 @@ struct SizeBoundAnswerChannelTests {
         let placed = try #require(applied.frames[w])
         #expect(abs(placed.midX - target.midX) < 0.01)
     }
-    @Test("An echo confirm places the residue immediately")
-    func echoConfirmPlacesResidueImmediately() throws {
+    @Test("A confirmation places the residue in its own turn")
+    func confirmPlacesResidueImmediately() throws {
         // The device-QA finding (2026-08-18): learning waited
         // on the NEXT retile, so the re-pack/centering arrived
-        // only after "many visits". The echo channel observes
-        // the answer as it arrives, and the confirmation edge
-        // retiles right then — monocle centers on the second
-        // probe's settle, not at some later event.
+        // only after "many visits". The confirmation EDGE
+        // retiles right then, whichever channel carries it —
+        // monocle centers at the confirming observation, not at
+        // some later event.
+        //
+        // Repointed from the echo channel to the settle probe
+        // by #1083 (a raw echo no longer promotes). What is
+        // unique to this test is the tail: the placement's own
+        // echo must not read as a new edge and re-issue. The
+        // confirm-and-place half it shares with
+        // `settleProbeAnswersSilentRefusal`.
         guard NSScreen.main != nil else { return }
         let applied = Applied()
         let core = makeCore(applied: applied)
