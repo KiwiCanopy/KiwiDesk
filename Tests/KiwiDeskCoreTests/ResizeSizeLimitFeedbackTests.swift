@@ -38,8 +38,8 @@ struct ResizeSizeLimitFeedbackTests {
         #expect(ceilingBound.minWidth == nil)
     }
 
-    @Test("Stack resize clamps against learned size bound")
-    func stackResizeClampsAtLearnedMin() {
+    @Test("Stack resize passes a learned bound, stops at the floor")
+    func stackResizeStopsAtConfiguredFloor() {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-stack-resize-limit-\(UUID().uuidString)"
@@ -83,7 +83,11 @@ struct ResizeSizeLimitFeedbackTests {
             }
         }
 
-        // Attempting to shrink past 500pt should clamp
+        // A guess informs the layout; only a fact may refuse a
+        // press (#1083). The learned 500 pt floor is seeded and
+        // deliberately ignored — the press travels past it — but
+        // the CONFIGURED `min_window_size` (300) still binds, so
+        // the two expectations together are the whole ruling.
         let res = core.execute(
             "resize",
             args: [.string("x"), .number(-800)]
@@ -92,12 +96,14 @@ struct ResizeSizeLimitFeedbackTests {
         let spaceObj = core.state.workspaces[space]!
         let stack = core.tiler.settings.resolvedStack(for: spaceObj)
         let ratio = stack.masterRatio
-        // At 1200 width, 500 min size means masterRatio is at least ~0.416
-        #expect(ratio >= 0.40)
+        // Past the learned floor (500/1200 ≈ 0.416)…
+        #expect(ratio < 0.40)
+        // …and stopped at the configured one (300/1200 = 0.25).
+        #expect(ratio >= 0.24)
     }
 
-    @Test("Track resize clamps against learned size bound")
-    func trackResizeClampsAtLearnedMin() {
+    @Test("Track resize passes a learned bound, stops at the floor")
+    func trackResizeStopsAtConfiguredFloor() {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-track-resize-limit-\(UUID().uuidString)"
@@ -151,12 +157,14 @@ struct ResizeSizeLimitFeedbackTests {
         #expect(res.isSuccess)
         let weight =
             core.state.workspaces[space]?.trackWeights[WindowID(1)] ?? 1.0
-        // Weight is clamped at the 500pt floor rather than dropping to 0.1
-        #expect(weight >= 0.5)
+        // #1083: past the learned 500 pt floor (0.5 of 1000)…
+        #expect(weight < 0.5)
+        // …and held by the configured 300 pt one.
+        #expect(weight >= 0.29)
     }
 
-    @Test("BSP resize clamps against learned size bound")
-    func bspResizeClampsAtLearnedMin() {
+    @Test("BSP resize passes a learned bound, stops at the floor")
+    func bspResizeStopsAtConfiguredFloor() {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-bsp-resize-limit-\(UUID().uuidString)"
@@ -207,11 +215,13 @@ struct ResizeSizeLimitFeedbackTests {
         let bsp = core.tiler.settings.resolvedBsp(
             for: core.state.workspaces[space]!
         )
-        #expect(bsp.splitRatioH >= 0.40)
+        // #1083: past the learned floor, held by the configured.
+        #expect(bsp.splitRatioH < 0.40)
+        #expect(bsp.splitRatioH >= 0.24)
     }
 
-    @Test("Floating resize clamps against learned size bound")
-    func floatingResizeClampsAtLearnedMin() {
+    @Test("Floating resize passes a learned bound, stops at the floor")
+    func floatingResizeStopsAtConfiguredFloor() {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-float-resize-limit-\(UUID().uuidString)"
@@ -256,6 +266,9 @@ struct ResizeSizeLimitFeedbackTests {
             args: [.string("x"), .number(-300)]
         )
         #expect(res.isSuccess)
-        #expect(appliedFrame?.width == 480)
+        // 600 − 300 = 300, which is exactly the configured
+        // floor: the seeded 480 pt learned bound no longer
+        // truncates the ask (#1083).
+        #expect(appliedFrame?.width == 300)
     }
 }

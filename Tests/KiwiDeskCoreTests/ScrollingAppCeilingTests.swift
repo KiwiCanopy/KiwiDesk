@@ -5,17 +5,25 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The scrolling slot refuses a grow at the focused window's
-/// learned app-enforced maximum, and says why (#1055).
+/// The scrolling slot and the focused window's learned
+/// app-enforced maximum (#1055, re-ruled by #1083).
 ///
-/// One slot size serves the whole row, so a grow past what the
-/// focused window's app will perform only slides the neighbors
-/// aside for a span the app snaps back from. Once the ceiling
-/// is CORROBORATED (`EffectiveSizeBound.maxWidth`), the write
-/// clamps and cues `ownMaximum`; the viewport limit beside it
-/// stays deliberately wordless, and the ceiling never reduces
-/// the shared slot (`docs/design-decisions.md` owns the
-/// ruling). Split from `ScrollingSlotCeilingTests` at the file
+/// The ceiling used to CLAMP an interactive grow and cue
+/// `ownMaximum`. It no longer does: a learned bound is inferred
+/// from timing, it is measurably wrong under load, and a guess
+/// may not veto a press (`docs/design-decisions.md` owns the
+/// ruling). A grow now travels past it, bounded by the viewport
+/// and wordless there as it always was.
+///
+/// What survives unchanged is the property the ceiling was
+/// protecting: one slot size serves the whole row, so the
+/// ceiling must never REDUCE the shared slot — trimming a 900pt
+/// slot to one window's 715pt maximum would visibly shrink
+/// every neighbor. These tests still hold that, which is why
+/// they were re-pointed rather than deleted; the domain's own
+/// `ownMaximum` arm stays correct for a KNOWN limit and is
+/// covered by `ScrollSlotDomainTests`. Split from
+/// `ScrollingSlotCeilingTests` at the file
 /// ceiling, and under the same screen trait for the same
 /// reason: `resizeScrollingSlot` falls back to a 1920x1080
 /// rect when no screen resolves, so headless these would
@@ -113,8 +121,13 @@ struct ScrollingAppCeilingTests {
             .editablePoints(along: 1200, horizontal: true)
     }
 
-    @Test("A grow refuses at the learned maximum and cues")
-    func growRefusesAtTheLearnedMaximum() throws {
+    @Test("A grow travels past the learned maximum, wordlessly")
+    func growPassesTheLearnedMaximum() throws {
+        // #1083: the seeded 715pt ceiling is present and
+        // deliberately ignored. The press is neither truncated
+        // at it nor cued against it — being wrong about a
+        // learned limit must cost a window that does not fill
+        // its region, never a press the user cannot make.
         let (core, space) = makeCore()
         learnCeiling(core, asks: [800, 900])
         core.execute(
@@ -127,10 +140,8 @@ struct ScrollingAppCeilingTests {
             "resize",
             args: [.string("x"), .number(400)]
         )
-        // The slot stopped ON the ceiling — from below it, a
-        // grow still reaches the maximum itself.
-        #expect(try slotPoints(core, space) == 715)
-        #expect(refusals == [.ownMaximum(WindowID(1))])
+        #expect(try slotPoints(core, space) > 715)
+        #expect(refusals.isEmpty)
     }
 
     @Test("A grow below the maximum still grows, silently")
@@ -213,10 +224,9 @@ struct ScrollingAppCeilingTests {
         // The never-reduce floor's OWN weight (guard-prover,
         // 2026-08-27): for a `.points` store the configured
         // clause co-protects, so only an `auto` store — where
-        // `configured` is 0 — can red the
-        // `max(appMax, current)` floor. A default auto slot
-        // resolves well above the learned 715pt ceiling; a
-        // grow press must refuse there, not hand every
+        // `configured` is 0 — can red the never-reduce floor. A
+        // default auto slot resolves well above the learned
+        // 715pt ceiling, and a grow press must not hand every
         // neighbor a trim to one window's maximum.
         let (core, space) = makeCore()
         learnCeiling(core, asks: [800, 1000])
@@ -230,19 +240,18 @@ struct ScrollingAppCeilingTests {
             "resize",
             args: [.string("x"), .number(50)]
         )
-        #expect(try slotPoints(core, space) == before)
-        // The app IS at its maximum, so the refusal still says
-        // so — the wordless case is the viewport's alone.
-        #expect(refusals == [.ownMaximum(WindowID(1))])
+        // Never REDUCED to the ceiling — the property this
+        // test has always existed for, and the half #1083 keeps.
+        #expect(try slotPoints(core, space) >= before)
+        // No cue: the ceiling is a guess and no longer speaks.
+        #expect(refusals.isEmpty)
     }
 
     @Test("The ceiling never reduces the shared slot")
     func ceilingNeverReducesTheSharedSlot() throws {
         // One slot serves the whole row: trimming a 900pt slot
         // to one window's 715pt maximum would visibly shrink
-        // every NEIGHBOR on a grow press. The grow refuses
-        // instead — and still cues, because the reason the
-        // slot cannot grow is the app's own maximum.
+        // every NEIGHBOR on a grow press.
         let (core, space) = makeCore()
         learnCeiling(core, asks: [800, 1000])
         core.execute(
@@ -255,8 +264,10 @@ struct ScrollingAppCeilingTests {
             "resize",
             args: [.string("x"), .number(400)]
         )
-        #expect(try slotPoints(core, space) == 900)
-        #expect(refusals == [.ownMaximum(WindowID(1))])
+        // The shared slot is never trimmed to one window's
+        // maximum; it may grow, and it says nothing (#1083).
+        #expect(try slotPoints(core, space) >= 900)
+        #expect(refusals.isEmpty)
     }
 
     @Test("A single refused ask does not bind the write")

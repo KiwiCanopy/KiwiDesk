@@ -44,6 +44,14 @@ extension SizeBoundLearner {
         // false entry — it pins the window at the size the user
         // themselves chose, and the next genuine resize or
         // settled compliance clears it.
+        // Untouched by #1083's settled-read rule, deliberately:
+        // this arm fires only after an echo reported the window
+        // AT the asked size, which is positive proof the window
+        // took it — so the reading that follows is a change FROM
+        // a known state, not a frame that might never have moved.
+        // The stale-frame ambiguity #1083 closes needs the
+        // opposite: two readings neither of which proved
+        // anything.
         if lastAsks[id]?[keyPath: echoComplied] == true {
             lastAsks[id]?[keyPath: echoComplied] = false
             return promote(
@@ -102,14 +110,26 @@ extension SizeBoundLearner {
                 prior.answered,
                 current
             ) {
-                // Twice in a row: the entry is believed.
-                confirmed = promote(
-                    id,
-                    asked: asked,
-                    answered: current,
-                    axis: axis
-                )
-                candidateEntries.remove(at: index)
+                // Twice in a row — but only a SETTLED second
+                // reading is a second OBSERVATION (#1083).
+                // Device capture 2026-08-28: two raw echoes 72
+                // ms apart satisfied this at load average 8.7,
+                // and no app redraws in 72 ms — that is one
+                // stale frame counted twice, and it minted the
+                // same false bound the baseline arm did (two
+                // windows confirming an identical 1231x1011,
+                // which is the drawn slot, not an app's limit).
+                // A raw repeat therefore keeps the candidate
+                // standing so the probe can confirm it.
+                if settledRead {
+                    confirmed = promote(
+                        id,
+                        asked: asked,
+                        answered: current,
+                        axis: axis
+                    )
+                    candidateEntries.remove(at: index)
+                }
             } else {
                 // Same ask, different answer: restart this
                 // ask's ladder on the newest observation.

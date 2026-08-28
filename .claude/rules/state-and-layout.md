@@ -461,13 +461,20 @@ editing here:
   — it resolves against the region, so leaving it alone would
   re-bank the strip on the first press; that trim is the rule
   working, not a defect to fix back.
-  The focused window's learned app MAXIMUM joins the same
-  write-site ceiling (#1055): believed only under the floor's
-  own two-distinct-asks corroboration
-  (`EffectiveSizeBound.maxWidth` / `maxHeight`, read through
-  `effectiveMaxSize`), and it may only ever REFUSE a shared
-  store, never trim it — one slot serves the whole row, so a
-  trim to one window's limit visibly shrinks every neighbor on
+  The focused window's learned app MAXIMUM no longer reaches
+  that write-site ceiling (#1055, re-ruled by #1083): a learned
+  bound is inferred from timing, so it informs what the layout
+  asks for and may not refuse a press — `effectiveMaxSize`
+  answers nil and `effectiveMinSize` answers the configured
+  floor alone. What SURVIVES is the shared-store protection it
+  used to carry, now held by `ScrollSlotDomain`'s own floors
+  from both sides — a grow never reduces the store, a shrink
+  never raises it, both wordlessly — because the layout draws a
+  pinned window at its learned limit and the press measures
+  from that drawn span (#1057), so an unguarded write spends a
+  guess on a value the whole row shares. One slot serves the
+  whole row, so a trim to one window's limit visibly shrinks
+  every neighbor on
   a grow press. A grow the app ceiling truncates cues
   `ownMaximum` on the focused window; one the viewport
   truncates stays wordless (`ScrollingAppCeilingTests` pins
@@ -494,8 +501,9 @@ editing here:
   write from a resize path, which is exactly how the mouse
   `.scrollWidth` drag crossed the floor the keyboard path
   refused. The writers clamp each side at its members'
-  effective minimums (`min_window_size`, raised by a #677
-  learned bound) and cue a truncated attempt — a pill on each end
+  effective minimums (`min_window_size` alone since #1083 —
+  a #677 learned bound informs the layout, never a press) and
+  cue a truncated attempt — a pill on each end
   (the trier names the reason, the blocker marks itself), the
   bounce on the trier
   (`ResizeSizeLimitFeedbackTests`,

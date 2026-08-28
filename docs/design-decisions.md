@@ -1977,10 +1977,11 @@ height for y, floored at `min_window_size`). (#122, #124,
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
-resize floor is the configured `min_window_size`, raised where
-its app enforces a larger physical minimum of its own — learned
-from the engine's refused asks (`SizeBoundLearner`, #677), since
-AX exposes no minimum-size attribute. Keyboard and mouse resizes
+resize floor is the configured `min_window_size`. It was once
+raised by a bound learned from the engine's refused asks
+(`SizeBoundLearner`, #677); since #1083 the learned bound
+informs the layout but no longer binds a press — the ruling
+below says why. Keyboard and mouse resizes
 share one set of clamped writers, so the two paths cannot answer
 the same gesture differently. A shrink the clamp truncates gets
 the tactile rubber-band bounce on the focus ring (`DeadEndBump`
@@ -2035,7 +2036,10 @@ Four rulings sharpen that:
   of the way.
 
 **The maximum direction clamps and cues too, where a learned
-ceiling can bind (#1055).** An app-enforced *maximum* is
+ceiling can bind (#1055 — superseded for the PRESS by #1083,
+which is the entry above; the ceiling still shapes what the
+layout asks for, and the never-reduce rule below is now held by
+`ScrollSlotDomain`'s own floor rather than by a refusal).** An app-enforced *maximum* is
 learned the same way the minimum is (`EffectiveSizeBound`
 models both directions; `maxWidth`/`maxHeight` require the
 same two-distinct-asks corroboration as the floor, because a
@@ -2057,6 +2061,62 @@ mark, and the copy mirrors the floor's
 (`"Maximum window size reached"`). And running out of
 *viewport* stays wordless — that limit protects no window and
 names none, so the press is a silent stop.
+
+**A guess informs the layout; only a fact may refuse a press
+(#1083).** [Principle] Two kinds of number reach a resize
+decision, and they do not deserve equal authority. A
+*configured* value — `min_window_size` — is something the user
+set. A *learned* bound is an inference from timing: we asked
+for a size, watched what came back, and concluded the app
+refused. That inference cannot distinguish "the app refused"
+from "the app has not redrawn yet", because both produce the
+identical frame, and under load the second is ordinary for any
+app — the fast ones included.
+
+Measured, on the owner's Mac at load average 9.7 (2026-08-28,
+macOS 26.6.2): sixteen bound confirmations in eight minutes of
+ordinary use, at least fourteen of them false. Each sat at the
+window's own pre-press width, one resize step apart (984, 954,
+924, 894), with heights all equal to the slot's — the layout's
+own geometry recorded as the app's limit. Two different windows
+confirmed an identical bound 44 ms apart. The user could not
+resize; the pill asserted a limit the window was nowhere near;
+dragging the edge by hand worked, which is what proved the app
+imposed nothing.
+
+So the authority splits by what the number IS, not by how
+confident the code feels:
+
+- A **learned** bound shapes what the layout ASKS for — it is
+  why a refusing window's slot re-packs and its residue centers
+  — and may never refuse a keypress.
+- A **configured** value still refuses, and still cues, because
+  it is a fact the user chose and can change.
+
+The asymmetry of being wrong is what decides it. Wrong in the
+permissive direction costs a window that does not fill its
+assigned region — the already-accepted split-layout residue,
+which self-corrects on the next retile. Wrong in the blocking
+direction costs the user the feature, states a falsehood while
+doing it, and leaves no way out but the mouse. Frequent,
+blocking and wrong beats rare and cosmetic every time.
+
+Two floors survive the change, and they are the reason the
+ruling is not simply "ignore the bound". The layout draws a
+bound-pinned window at its learned limit, and a press measures
+from the DRAWN span (#1057) — so a press that took that span as
+its base would write it back into the shared scrolling store,
+trimming the row for every neighbor on a grow and raising it on
+a shrink. `ScrollSlotDomain` therefore holds the store from
+both sides: a grow never reduces it, a shrink never raises it,
+both wordlessly. The store is shared; the guess is not allowed
+to spend it.
+
+`ScrollSlotDomain`'s own-minimum and own-maximum arms are kept,
+not deleted: they are correct for a limit that is KNOWN, and if
+a trustworthy source ever exists — a real AX attribute, a
+user-declared per-app minimum — it plugs into them unchanged.
+What #1083 removes is the habit of feeding them a guess.
 
 **A resize press is measured against what the focused window
 DRAWS, and refuses in place where its bound blocks it

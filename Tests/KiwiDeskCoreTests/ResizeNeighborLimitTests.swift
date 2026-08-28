@@ -129,8 +129,16 @@ struct ResizeNeighborLimitTests {
         #expect(second.width > first.width)
     }
 
-    @Test("A grow is blocked by the NEIGHBOR's learned minimum")
-    func growBlockedByNeighborMin() throws {
+    @Test("A neighbour's LEARNED minimum no longer blocks a grow")
+    func growPassesNeighborLearnedMin() throws {
+        // #1083: the neighbour arm is unchanged for the
+        // CONFIGURED floor (`neighborMinimumStillBinds` below
+        // holds that) — what no longer binds is a learned one,
+        // because it is a guess and a guess may not veto a
+        // press. The neighbour is squeezed toward
+        // `min_window_size` instead, and if its app truly
+        // refuses to follow it simply keeps its size and
+        // overlaps a little: the accepted split-layout residue.
         let (core, _) = makeTrackCore()
         seedMinWidth(core, window: WindowID(2), min: 500)
         var refusals: [ResizeRefusal] = []
@@ -139,6 +147,10 @@ struct ResizeNeighborLimitTests {
             "resize",
             args: [.string("x"), .number(600)]
         )
+        // The cue still fires — but for the CONFIGURED floor,
+        // which is a fact and may refuse. The anchoring is
+        // unchanged (#435): the pill names the neighbour that
+        // cannot shrink further.
         #expect(
             refusals == [
                 .neighborMinimum(
@@ -147,16 +159,18 @@ struct ResizeNeighborLimitTests {
                 )
             ]
         )
-        // The neighbor keeps its floor.
+        // What changed is where it stops: past the learned
+        // 500 pt floor, held by the configured 300 pt one.
         let frames = core.tiler.calculatedFrames(
             state: core.state
         )
         let neighbor = try #require(frames[WindowID(2)])
-        #expect(neighbor.width >= 499)
+        #expect(neighbor.width < 499)
+        #expect(neighbor.width >= 295)
     }
 
-    @Test("A shrink bound by a zone-mate's floor cues on the mate")
-    func shrinkBoundByZoneMateCuesOnMate() {
+    @Test("A zone-mate's LEARNED floor no longer cues")
+    func shrinkPassesZoneMateLearnedFloor() {
         // Three stack windows in array order [1, 2, 3]: w1 the
         // master, w2/w3 the stack zone. Focus w2; its zone-mate
         // w3 carries a learned 500 pt floor, and the zone spans
@@ -188,14 +202,14 @@ struct ResizeNeighborLimitTests {
             "resize",
             args: [.string("x"), .number(-400)]
         )
-        #expect(
-            refusals == [
-                .neighborMinimum(
-                    anchor: WindowID(3),
-                    focused: WindowID(2)
-                )
-            ]
-        )
+        // #1083: with the mate's LEARNED floor no longer
+        // binding, no member carries a floor above the global
+        // one — so there is no `carrier`, and the cue falls to
+        // its documented "only the global floor binds" case:
+        // the own-minimum pill on the trier. The #435 anchoring
+        // rule is untouched and still applies wherever a
+        // configured floor makes one member the binding one.
+        #expect(refusals == [.ownMinimum(WindowID(2))])
     }
 
     @Test("A traveler's share write is refused, not orphaned")

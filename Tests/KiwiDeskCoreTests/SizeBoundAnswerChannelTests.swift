@@ -166,9 +166,28 @@ struct SizeBoundAnswerChannelTests {
         )
         core.retile()
         core.handle(.windowMoved(w, refused))
+        // The move echo still CARRIES the answer — it seeds the
+        // candidate, which is what this test is named for. What
+        // it may not do since #1083 is complete the ladder on
+        // its own: two raw echoes can be one stale frame read
+        // twice, so belief waits for the read that outlasted
+        // the grace.
         #expect(core.tiler.sizeBound(for: w) == nil)
+        #expect(core.tiler.candidateSizeBound(for: w) != nil)
+        core.eventLoop.frameReads.reader = { _ in refused }
+        core.eventLoop.frameReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        core.eventLoop.frameReads.dispatchOverride = {
+            _,
+            work in
+            work()
+        }
+        core.eventLoop.elements[1] = [
+            w: AXUIElementCreateSystemWide()
+        ]
         applied.frames = [:]
-        core.handle(.windowMoved(w, refused))
+        core.runSizeBoundProbe(w)
         #expect(core.tiler.sizeBound(for: w) != nil)
         let placed = try #require(applied.frames[w])
         #expect(abs(placed.midX - target.midX) < 0.01)
@@ -194,15 +213,29 @@ struct SizeBoundAnswerChannelTests {
             origin: target.origin,
             size: CGSize(width: 715, height: target.height)
         )
-        // Probe 1: ask, then the app's echo answers.
+        // Probe 1: ask, then the app's echo seeds the candidate.
         core.retile()
         core.handle(.windowResized(w, refused))
         #expect(core.tiler.sizeBound(for: w) == nil)
-        // Probe 2: ask again; the confirming echo must place
-        // the centered residue in the SAME event turn.
+        // The confirming observation is the settled read since
+        // #1083 — the immediacy this test exists for is
+        // unchanged, and it is what the assertions below hold:
+        // the confirmation edge places the residue in its OWN
+        // turn rather than waiting for a later event.
+        core.eventLoop.frameReads.reader = { _ in refused }
+        core.eventLoop.frameReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        core.eventLoop.frameReads.dispatchOverride = {
+            _,
+            work in
+            work()
+        }
+        core.eventLoop.elements[1] = [
+            w: AXUIElementCreateSystemWide()
+        ]
         applied.frames = [:]
-        core.retile()
-        core.handle(.windowResized(w, refused))
+        core.runSizeBoundProbe(w)
         #expect(core.tiler.sizeBound(for: w) != nil)
         let placed = try #require(applied.frames[w])
         #expect(placed.width == 715)

@@ -141,6 +141,19 @@ public enum ScrollSlotDomain {
         let truncated = clamped < requested - truncationEpsilon
         let appBound =
             appMax.map { $0 < drawnArea } == true
+        // The shared store is never REDUCED by a grow (#1083).
+        // The layout draws a bound-pinned window at its learned
+        // maximum, and the press measures from that drawn span
+        // (#1057) — so without this floor a grow from a pinned
+        // 715pt window inside a 1160pt slot writes 765 and
+        // trims the slot for every neighbour. The bound losing
+        // its veto (#1083) does not make it safe as a base for
+        // a WRITE; one slot serves the whole row either way.
+        // Wordless deliberately: nothing refused the user, the
+        // window simply cannot fill more than it already does.
+        guard clamped > stored + truncationEpsilon else {
+            return Outcome(write: nil, refusal: nil)
+        }
         // A press that grows nothing writes nothing — a
         // fruitless grow must never rewrite the store
         // sideways (a floor-pinned window already wider than
@@ -194,6 +207,18 @@ public enum ScrollSlotDomain {
         let floor = min(globalMin, stored)
         let clamped = max(requested, floor)
         let truncated = clamped > requested + truncationEpsilon
+        // The shared store is never RAISED by a shrink (#1083),
+        // the mirror of the grow floor above and the same
+        // mechanism: the layout draws a bound-pinned window at
+        // its learned minimum, the press measures from that
+        // drawn span (#1057), so a shrink from a window pinned
+        // at 825 inside a 300pt slot would write 775 and grow
+        // the slot for every neighbour on a SHRINK press. The
+        // learned bound losing its veto does not make it a safe
+        // base for a write. Wordless: nothing refused the user.
+        guard clamped < stored + truncationEpsilon else {
+            return Outcome(write: nil, refusal: nil)
+        }
         // A press that shrinks nothing writes nothing — the
         // refusal-in-place twin of the grow guard.
         guard clamped < base - truncationEpsilon else {

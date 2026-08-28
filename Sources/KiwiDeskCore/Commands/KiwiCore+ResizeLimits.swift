@@ -32,35 +32,60 @@ extension KiwiCore {
     static let resizeTruncationEpsilon: CGFloat =
         ScrollSlotDomain.truncationEpsilon
 
-    /// One window's effective minimum on `axis`: the global
-    /// `min_window_size` raised by the window's learned
-    /// app-enforced bound (#677).
+    /// One window's effective minimum on `axis`: the configured
+    /// `min_window_size`, and ONLY that.
+    ///
+    /// **A guess informs the layout; only a fact may refuse a
+    /// press (#1083).** This used to raise the floor by the
+    /// window's LEARNED app bound (#677), which made an
+    /// inference from timing into a veto over what the user
+    /// asked for. That inference is measurably wrong under
+    /// load — device capture 2026-08-28, load average 9.7: 16
+    /// bound confirmations in eight minutes, at least 14 of
+    /// them at the drawn slot geometry rather than any app's
+    /// limit — and being wrong here is a dead end, since the
+    /// press is refused and the pill names a limit the window
+    /// is nowhere near.
+    ///
+    /// Being wrong the other way costs a window that does not
+    /// fill its assigned region, which is the already-accepted
+    /// split-layout residue and self-corrects on the next
+    /// retile. Frequent-and-blocking against rare-and-cosmetic
+    /// is what decides it; `docs/design-decisions.md` carries
+    /// the ruling.
+    ///
+    /// The learner is untouched and still shapes what the
+    /// layout ASKS for (`LayoutContext.sizeBounds`) — it simply
+    /// no longer holds a veto over a keypress.
     func effectiveMinSize(
         of id: WindowID,
         axis: String
     ) -> Double {
-        let bound = tiler.sizeBound(for: id)
-        let appMin =
-            (axis == "x" ? bound?.minWidth : bound?.minHeight)
-            ?? 0
-        return max(
-            Double(tiler.settings.minWindowSize),
-            Double(appMin)
-        )
+        _ = id
+        _ = axis
+        return Double(tiler.settings.minWindowSize)
     }
 
-    /// One window's learned app-enforced maximum on `axis`
-    /// (#1055) — `effectiveMinSize`'s mirror, with one
-    /// asymmetry: there is no configured global maximum the way
-    /// `min_window_size` floors the minimum, so nil means
-    /// unbounded rather than "the default".
+    /// One window's ceiling for an interactive press: always
+    /// nil, i.e. unbounded.
+    ///
+    /// The mirror of `effectiveMinSize` above and retired for
+    /// the same reason (#1083): the only value it ever carried
+    /// was the LEARNED app maximum (#1055), a guess, and a
+    /// guess may not veto a press. There is no configured
+    /// global maximum the way `min_window_size` floors the
+    /// minimum, so with the guess removed nothing is left to
+    /// bind — which is the honest answer rather than a missing
+    /// one. Kept as a named seam so the asymmetry stays
+    /// legible and a configured maximum, if one is ever added,
+    /// has an obvious home.
     func effectiveMaxSize(
         of id: WindowID,
         axis: String
     ) -> Double? {
-        let bound = tiler.sizeBound(for: id)
-        return (axis == "x" ? bound?.maxWidth : bound?.maxHeight)
-            .map(Double.init)
+        _ = id
+        _ = axis
+        return nil
     }
 
     /// The largest effective minimum among `members` — a track
