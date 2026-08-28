@@ -422,8 +422,14 @@ editing here:
   and since #1057 the whole press DECISION lives in ONE pure
   type (#966/#1057).** `ScrollSlotDomain.decide` — reached only
   from the `writeCapped*` seam, which resolves the base input
-  (the bound's consume of the layout-floored, viewport-capped
-  store) — owns every cap and refusal arm
+  off the ENGINE's computed frame for the focused window
+  (#1063, `ScrollingFreshLedgerPressTests`: a reconstruction
+  beside the layout asked the ladder at a span no layout
+  issued, so a fresh ledger ballooned the press; the consume
+  of the layout-floored, viewport-capped store stays as the
+  fallback for a focus the engine computes no frame for — a
+  floating or native-fullscreen focus, mid-adoption) — owns
+  every cap and refusal arm
   (`ScrollSlotDomainTests`); a new arm goes there, never inline
   in a writer. The obligations it holds: the press measures
   from the focused window's DRAWN span; a press the window's
