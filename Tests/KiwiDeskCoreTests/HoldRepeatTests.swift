@@ -23,6 +23,7 @@ struct HoldRepeatTests {
             []
         var cancels = 0
         var fired: [UInt32] = []
+        var overruns = 0
 
         init(releaseCapable: Bool = true) {
             repeatEngine.releaseCapable = releaseCapable
@@ -35,6 +36,9 @@ struct HoldRepeatTests {
             repeatEngine.fire = { [weak self] id in
                 self?.fired.append(id)
             }
+            repeatEngine.onOverrun = { [weak self] in
+                self?.overruns += 1
+            }
         }
 
         /// One press-fire that ran exactly the given commands.
@@ -42,7 +46,7 @@ struct HoldRepeatTests {
             id: UInt32,
             commands: [(String, Bool)] = [("resize", true)]
         ) {
-            repeatEngine.beginFire()
+            _ = repeatEngine.beginFire()
             for (name, ok) in commands {
                 repeatEngine.noteCommand(name, succeeded: ok)
             }
@@ -50,14 +54,18 @@ struct HoldRepeatTests {
         }
 
         /// Runs the pending tick as a fire of the given
-        /// commands — the shape `fireRepeatTick` drives.
+        /// commands — the shape `fireRepeatTick` drives. The
+        /// `#require` is load-bearing (guard-prover, #1056): a
+        /// regression that stops scheduling must fail THIS
+        /// test, not trap the whole runner on an empty array.
         func runTick(
             id: UInt32,
             commands: [(String, Bool)] = [("resize", true)]
-        ) {
-            let tick = ticks.removeLast()
+        ) throws {
+            let popped = ticks.popLast()
+            let tick = try #require(popped)
             tick.work()
-            repeatEngine.beginFire()
+            _ = repeatEngine.beginFire()
             for (name, ok) in commands {
                 repeatEngine.noteCommand(name, succeeded: ok)
             }
@@ -66,12 +74,12 @@ struct HoldRepeatTests {
     }
 
     @Test("One successful resize arms; ticks ride the interval")
-    func armsAndTicks() {
+    func armsAndTicks() throws {
         let h = Harness()
         h.press(id: 7)
         #expect(h.repeatEngine.heldID == 7)
         #expect(h.ticks.map(\.delay) == [0.5])
-        h.runTick(id: 7)
+        try h.runTick(id: 7)
         // The tick re-fired the binding and the run went on at
         // the repeat interval, not the initial delay.
         #expect(h.fired == [7])
@@ -109,11 +117,11 @@ struct HoldRepeatTests {
     }
 
     @Test("A refusal cues once and ends the run")
-    func refusalEndsTheRun() {
+    func refusalEndsTheRun() throws {
         // At the wall on the FIRST press: the pill flashed
         // once, and holding must not flash it per tick.
         let atWall = Harness()
-        atWall.repeatEngine.beginFire()
+        _ = atWall.repeatEngine.beginFire()
         atWall.repeatEngine.noteCommand(
             "resize",
             succeeded: true
@@ -124,12 +132,19 @@ struct HoldRepeatTests {
         #expect(atWall.ticks.isEmpty)
 
         // Reaching the wall MID-run: the tick that hit it is
-        // the last.
+        // the last. Belt-and-braces by design (guard-prover,
+        // #1056): `noteRefusal`'s own cancel AND `endFire`'s
+        // `!refused` term each stop this alone, so no single
+        // mutation reds this leg — the at-wall leg above pins
+        // the eligibility term, and `HoldRepeatWiringTests`
+        // pins the out-of-bracket cancel. Read this leg as the
+        // contract's statement, not as its net.
         let run = Harness()
         run.press(id: 2)
-        let tick = run.ticks.removeLast()
+        let poppedTick = run.ticks.popLast()
+        let tick = try #require(poppedTick)
         tick.work()
-        run.repeatEngine.beginFire()
+        _ = run.repeatEngine.beginFire()
         run.repeatEngine.noteCommand("resize", succeeded: true)
         run.repeatEngine.noteRefusal()
         run.repeatEngine.endFire(id: 2, press: false)
@@ -165,14 +180,69 @@ struct HoldRepeatTests {
     }
 
     @Test("Teardown cancels — no release can arrive")
-    func teardownCancels() {
+    func teardownCancels() throws {
         let h = Harness()
         h.press(id: 6)
         h.repeatEngine.cancelRun()
         #expect(h.repeatEngine.heldID == nil)
         #expect(h.cancels == 1)
         // A cancelled run's work firing late is inert.
-        h.ticks.removeLast().work()
+        let lateTick = h.ticks.popLast()
+        try #require(lateTick).work()
         #expect(h.fired.isEmpty)
+    }
+
+    @Test("A run that outlives its bound is force-ended")
+    func overrunForceEndsTheRun() throws {
+        // The stop signal is one Carbon release event; a lost
+        // one must cost a bounded hold, never the session
+        // (#611's force-settle shape). The bound is derived
+        // from the constant, never restated.
+        let h = Harness()
+        h.press(id: 8)
+        var spent: TimeInterval = 0.5
+        var ticks = 0
+        while h.repeatEngine.heldID != nil {
+            try h.runTick(id: 8)
+            if let next = h.ticks.last?.delay {
+                spent += next
+            }
+            ticks += 1
+            try #require(ticks < 100_000)
+        }
+        #expect(h.overruns == 1)
+        #expect(h.ticks.isEmpty)
+        #expect(spent >= HoldRepeat.maxRunSeconds)
+        // The rescue is one recovery shape: a fresh press arms
+        // a fresh run.
+        h.press(id: 9)
+        #expect(h.repeatEngine.heldID == 9)
+    }
+
+    @Test("A nested fire's tally never leaks into the outer's")
+    func nestedFireTallyIsIsolated() {
+        // A Lua body that pumps a run loop can deliver a second
+        // press mid-fire (the case `KeybindingManager.fire`'s
+        // `wasFiring` exists for). The inner fire judges its own
+        // tally; the outer fire's counts come back via the
+        // snapshot and are judged on their own.
+        let h = Harness()
+        _ = h.repeatEngine.beginFire()
+        h.repeatEngine.noteCommand("resize", succeeded: true)
+
+        // Nested press: one successful resize — arms id 2.
+        let saved = h.repeatEngine.beginFire()
+        h.repeatEngine.noteCommand("resize", succeeded: true)
+        h.repeatEngine.endFire(id: 2, press: true)
+        #expect(h.repeatEngine.heldID == 2)
+        h.repeatEngine.restoreTally(saved)
+
+        // The outer fire runs a second command and closes: two
+        // commands total, so it must not arm — and had the
+        // snapshot leaked, the inner's lone resize would have
+        // made it look like one.
+        h.repeatEngine.noteCommand("focus", succeeded: true)
+        h.repeatEngine.endFire(id: 1, press: true)
+        #expect(h.repeatEngine.heldID == nil)
     }
 }

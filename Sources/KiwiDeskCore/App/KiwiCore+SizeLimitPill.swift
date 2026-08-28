@@ -19,14 +19,25 @@ extension KiwiCore {
         )
     }
 
+    /// The one entry every size-limit cue takes to reach the
+    /// border seam: it also ends a held keyboard run (#1056), so
+    /// a refusal pills once per hold rather than per tick. A new
+    /// cue function routes here — `HoldRepeatSeamTests` pins
+    /// this as the only production caller of
+    /// `borders.onResizeRefusal`, which is what makes "a cue
+    /// stops the run" structural rather than a line to remember.
+    private func cueResizeRefusal(_ refusal: ResizeRefusal) {
+        keys.noteResizeRefusal()
+        borders.onResizeRefusal(refusal)
+    }
+
     /// Triggers both the DeadEndBump rubber-band on the focus ring
     /// and the minimum-size refusal pill when a shrink attempt
     /// hits the window's effective minimum size limit (#933).
     /// Fires on the first attempt the clamp truncates — landing
     /// ON the minimum included — not only once already there.
     func refuseShrinkAtMinimum(_ window: WindowID, axis: String) {
-        keys.noteResizeRefusal()
-        borders.onResizeRefusal(.ownMinimum(window))
+        cueResizeRefusal(.ownMinimum(window))
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
         flashSizeLimitPill(
@@ -45,7 +56,7 @@ extension KiwiCore {
     /// to mark, and the bump stays on the gesture that hit the
     /// wall.
     func refuseGrowAtMaximum(_ window: WindowID, axis: String) {
-        borders.onResizeRefusal(.ownMaximum(window))
+        cueResizeRefusal(.ownMaximum(window))
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
         flashSizeLimitPill(
@@ -74,8 +85,7 @@ extension KiwiCore {
         anchor: WindowID,
         axis: String
     ) {
-        keys.noteResizeRefusal()
-        borders.onResizeRefusal(
+        cueResizeRefusal(
             .neighborMinimum(anchor: anchor, focused: focused)
         )
         let direction: Direction = axis == "y" ? .down : .right

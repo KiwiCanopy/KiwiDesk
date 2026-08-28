@@ -1,25 +1,12 @@
 import AppKit
 import Foundation
 
-/// Command execution: the single entry point shared by the
-/// Lua API, the CLI, and the IPC socket.
+/// The command dispatch switch. `KiwiCore.execute` (in
+/// `KiwiCore+Execute.swift`) is the ONE caller — every entry
+/// point routes through its tally wrapper, which
+/// `HoldRepeatSeamTests` pins.
 extension KiwiCore {
-    @discardableResult
-    public func execute(
-        _ command: String,
-        args: [JSONValue] = []
-    ) -> CommandResponse {
-        let response = dispatchCommand(command, args: args)
-        // Every command run inside a hotkey fire is tallied so
-        // the hold-to-repeat engine can decide eligibility from
-        // what the press actually DID (#1056) — a binding's
-        // body is opaque Lua, so this is the one honest signal.
-        // The passthrough drops it outside a fire.
-        keys.noteCommand(command, succeeded: response.isSuccess)
-        return response
-    }
-
-    private func dispatchCommand(
+    func dispatchCommand(
         _ command: String,
         args: [JSONValue]
     ) -> CommandResponse {

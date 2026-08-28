@@ -51,17 +51,29 @@ public final class KeybindingManager {
     /// Menu bar indicator per layer (SF Symbol name or emoji),
     /// set via `define_layer(name, bindings, { icon = ... })`.
     private var layerIcons: [String: String] = [:]
-    private var activeIDs: [UInt32] = []
-    /// The live registrations by id, for the hold-to-repeat
-    /// engine's re-fire and release routing (#1056). Rebuilt
-    /// with `activeIDs` on every activation.
-    var activeBindings: [UInt32: LiveBinding] = [:]
+    /// The live registrations by id — the ONE home for "what is
+    /// registered right now": `deactivate`'s unregister loop and
+    /// the hold-to-repeat engine's re-fire and release routing
+    /// (#1056) both read it. Written only by
+    /// `activate`/`deactivate`; a second id list beside it would
+    /// be two homes for one fact, drifting in opposite failure
+    /// modes (a leaked live chord vs a tick against a dead id).
+    private(set) var activeBindings: [UInt32: LiveBinding] = [:]
 
     /// One live registration: the Lua ref and the combo it is
     /// registered under.
     struct LiveBinding {
         var ref: Int32
         var combo: KeyCombo
+    }
+
+    /// Hands a registration handler its own id (#1056): the
+    /// closure is built before `register` returns the id, so
+    /// the id travels through this box, filled immediately
+    /// after. Nil only for a handler whose registration failed
+    /// — which the registrar then never fires.
+    final class RegistrationBox {
+        var id: UInt32?
     }
     /// Hold-to-repeat (#1056). Internal so `KiwiCore.execute`
     /// and the size-limit cues can feed it through the
@@ -256,10 +268,9 @@ public final class KeybindingManager {
         // The ids are about to vanish, so no release can ever
         // arrive to stop a live repeat — end it here (#1056).
         holdRepeat.cancelRun()
-        for id in activeIDs {
+        for id in activeBindings.keys {
             registrar.unregister(id: id)
         }
-        activeIDs = []
         activeBindings = [:]
     }
 
@@ -270,14 +281,24 @@ public final class KeybindingManager {
         // register nothing, so testing a shortcut can't fire.
         guard !suspended else { return }
         for (combo, ref) in layers[layer] ?? [:] {
+            // The handler carries its own registration id via
+            // the box, filled the moment `register` returns —
+            // never re-derived after the fire, where the Lua
+            // body may have rebuilt the table and minted fresh
+            // ids for the same ref+combo (#1056 review).
+            let box = RegistrationBox()
             let id = registrar.register(
                 keyCode: combo.keyCode,
                 modifiers: combo.modifiers
             ) { [weak self] in
-                self?.pressFire(ref: ref, combo: combo)
+                self?.pressFire(
+                    ref: ref,
+                    combo: combo,
+                    id: box.id
+                )
             }
             if let id {
-                activeIDs.append(id)
+                box.id = id
                 activeBindings[id] = LiveBinding(
                     ref: ref,
                     combo: combo

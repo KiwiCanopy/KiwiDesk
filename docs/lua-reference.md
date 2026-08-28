@@ -3782,7 +3782,34 @@ focus move (#436), and a pill names the reason on the window
 that cannot shrink — and on a refused grow the resized
 window additionally names the reason while the blocking
 neighbor marks itself at its minimum. Keyboard
-and mouse resizes share these clamps and cues. What the
+and mouse resizes share these clamps and cues.
+
+**Held, the chord repeats (#1056).** A hotkey whose press ran
+exactly one command — a successful `resize` — keeps applying
+while you hold it: one precise step on the press, then, after
+your Mac's own key-repeat delay, a step per key-repeat interval
+(the macOS Keyboard settings, read per hold), accelerating over
+a long hold toward a few times that rate so a large adjustment
+stops costing a drum roll. Whether a binding repeats is decided
+by what its press actually **did**, not by how it is written: a
+body that runs two commands, or a different verb, fires once
+per press exactly as before — and `focus`/`swap` deliberately
+never repeat, because overshooting focus is worse than pressing
+again. A refusal that cues (#933/#1055) ends the run, so a held
+shrink parked on a minimum flashes its pill once rather than
+once per tick, while scrolling's wordless out-of-screen stop
+keeps ticking harmlessly until release, matching its silence.
+Releasing the chord, switching layers, or arming a Settings
+shortcut recorder ends the run immediately.
+A held **floating** resize with window animations on
+accumulates against the in-flight animation's target rather
+than the lagging AX echo, so a fast run of presses lands its
+full distance instead of only part of it (#129). With resize
+animation off, or under system **Reduce Motion**, it still
+re-reads the echo; see
+[accepted limitations](accepted-limitations.md).
+
+What the
 `delta` actually adjusts depends on the layout:
 
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split

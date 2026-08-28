@@ -31,7 +31,16 @@ extension KiwiCore {
         // previous one settled re-based on stale geometry and
         // under-accumulated. The in-flight animation's target
         // IS the pending commanded value; idle, the settled
-        // frame is the same truth it always was.
+        // frame is the same truth it always was. The animated
+        // target is DELIBERATELY the only commanded value
+        // trusted here: it dies at settle, so an app that
+        // silently refuses every ask can bank at most one
+        // hold's worth — a longer-lived commanded record (the
+        // #881 instant stamp was tried) re-arms itself per
+        // press and compounds without bound on such an app,
+        // the #1057 banked-growth class with no ceiling. The
+        // instant-path residue this keeps is recorded in
+        // docs/accepted-limitations.md.
         let base =
             tiler.animation.targetFrame(window: id)
             ?? window.frame

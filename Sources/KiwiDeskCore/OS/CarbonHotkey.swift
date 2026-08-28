@@ -74,8 +74,8 @@ private func hotkeyCallback(
 /// release channel would never stop.
 @MainActor
 public protocol HotkeyReleaseReporting: AnyObject {
-    /// Called with the registration id whose key (or its
-    /// modifiers) was released. One call per physical release.
+    /// Called with the registration id whose key was released.
+    /// One call per physical release.
     var onRelease: @MainActor (UInt32) -> Void { get set }
 }
 
