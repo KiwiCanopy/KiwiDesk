@@ -3535,10 +3535,11 @@ Rulings a contributor might otherwise undo:
   the user remembers to open a menu-bar app with no Dock icon
   prompting them. The off-state is a broken desktop, so the good
   default is At Login — which is why "approachable by default"
-  argues *for* pre-checked here. Auto-restart, though, *lacks*
+  argues *for* pre-checked here. Supervision, though, *lacks*
   that no-neutral-absence argument and installs a
-  less-discoverable LaunchAgent, so it stays opt-in: the good
-  default is the middle level, not the top.
+  less-discoverable LaunchAgent, so it is never on by default
+  and, since #1071, never offered in Settings at all — the good
+  default is the login item alone.
 - **No modal on every start.** A dialog that asks "open at
   login?" each launch was considered and rejected — it is the
   same standing-nag shape the quick-menu Accessibility deep-link
@@ -3547,8 +3548,9 @@ Rulings a contributor might otherwise undo:
   there is no informative third case. Ask once, then the durable
   control owns the decision.
 
-**Two switches, one folded level — and the impossible pair is
-refused, not made unrepresentable.** The service is `RunAtLoad` +
+**The impossible pair was refused in the fold, not made
+unrepresentable — which is why splitting the control was
+survivable, and why removing it costs nothing.** The service is `RunAtLoad` +
 `KeepAlive` as one indivisible unit, so "restart on crash" is a
 *superset* of "open at login," and two independent toggles can
 render *Open at Login: OFF + Restart: ON* — a state whose first
@@ -3561,16 +3563,21 @@ language pick — which re-opens the shape #576 closed. So the
 constraint had to move rather than disappear, and it moved down a
 layer to where it is total: `AutoStartLevel.level(openAtLogin:
 restartOnCrash:)` **discards** the restart flag whenever login is
-off, and both switches write through it, so no caller can express
-the contradiction whatever its two toggles say. That is the layer
-that holds for a CLI verb, a restored preference or a test —
-anything that never passes through the view. The Advanced switch
-*also* greys while login is off, but `gui.md` forbids a grey as
-the sole gate on a side effect (this one writes a launchd plist),
-so the grey is the courtesy that *explains* the refusal to a
-reader, never the refusal itself. Making the pair unrepresentable
-in one control was #576's answer; refusing it in the fold is the
-answer that survives the control being split.
+off, so no caller could express the contradiction whatever its
+toggles said. That is the layer that holds for a CLI verb, a
+restored preference or a test — anything that never passes
+through the view.
+
+**#1071 ended the pair by removing the second switch.** The GUI
+expresses no level at all now: it writes the login item through
+`SettingsModel.setLoginItem`, and the level ladder survives as
+the READ that folds both mechanisms into one answer. Nothing
+writes a level any more, which is why `setAutoStart` and
+`AutoStartManager.set`/`apply` went with the row — a write path
+for a pair nobody can express is dead weight that would invite
+the pair back. Making it unrepresentable in one control was
+#576's answer; refusing it in the fold is what survived the
+control being split; not having two controls is what ended it.
 
 The `AutoStartManager` facade owns that coupling (the GUI analog
 of `CLIMain.runService`): `ServiceManager` stays a pure launchctl
@@ -3581,22 +3588,14 @@ switch shows a transient pending state — a blocking `Process` in a
 SwiftUI `body` would be the AGENTS.md violation the CLI-only
 fallback existed to avoid.
 
-**Turning login on brings crash-restart with it, and that choice
-is not remembered once login is off.** "On" sets both halves,
-because login + restart is the obvious setup for someone who just
-wants KiwiDesk running; the third state — login without
-supervision — is reconstructed by switching the Advanced row off
-afterwards, without making every user read three options to pick
-the obvious one. The cost is accepted deliberately: because the
-control is read-through and caches nothing, a *login-without-
-restart* choice does not survive being switched off and on again.
-`.off` erases the distinction — a copy that never wanted restart
-and one that was simply never started both read as `.off` — so
-re-enabling login has no prior answer to restore and takes the
-default. Storing one would mean holding a preference the OS itself
-does not have, which is the exact drift read-through exists to
-prevent; the Advanced row is where that state is re-chosen, by
-design.
+**The switch reads through, so it reports what the OS holds —
+including ON while the service is what starts KiwiDesk.** With
+one control there is no pair to remember and no third state to
+lose: the switch answers "does KiwiDesk start at login", which
+is true whichever mechanism does it, and goes inert while the
+service owns the answer. Storing a preference instead would mean
+holding a value the OS itself does not have, which is the exact
+drift read-through exists to prevent.
 
 **The control is read-through, and the two subsystems are the
 authority.** It never caches a bool — every level is derived from
@@ -3609,12 +3608,12 @@ At-Login level (the user's intent) with a jump to Login Items,
 reusing onboarding's "asked, not yet confirmed" shape. `.notFound`
 is the *pre-registration* state macOS reports for `mainApp`, so it
 reads as off-but-registerable, not as an error. A copy that
-genuinely cannot register greys out **both** switches (grey,
-don't hide) — the login item needs a stable `.app` path and the
-LaunchAgent needs one just as much, so neither switch has a valid
-"on" and only "off" remains, matching the #171 "inapplicable
-control is greyed, not hidden" precedent. Each switch is greyed
-rather than its row, so its `?` help stays readable, and the
+genuinely cannot register greys the switch out (grey, don't
+hide) — the login item needs a stable `.app` path, so there is
+no valid "on" and only off remains, matching the #171
+"inapplicable control is greyed, not hidden" precedent. The
+control is greyed rather than its row, so its `?` help stays
+readable, and the
 reason-specific caption (a live sibling) names the fix for the
 specific cause: **move to Applications** for a
 Gatekeeper-translocated

@@ -55,16 +55,6 @@ public enum AutoStartManager {
     /// Applies a level (registering/unregistering the login item
     /// and starting/stopping the service as that level demands),
     /// then re-reads so the control adopts OS truth rather than the
-    /// attempted flip. Off the main actor.
-    @discardableResult
-    public static func set(
-        _ level: AutoStartLevel
-    ) async -> AutoStartStatus {
-        await Task.detached(priority: .userInitiated) {
-            apply(level)
-            return read()
-        }.value
-    }
 
     /// Drives the LOGIN ITEM alone, leaving the service exactly
     /// as it is, and re-reads the folded status (#1071).
@@ -104,20 +94,6 @@ public enum AutoStartManager {
     /// service; off clears both. Results are discarded — the
     /// following re-read reports what actually took (a launchctl or
     /// `SMAppService` failure is logged by the callee and simply
-    /// leaves that mechanism where it was).
-    static func apply(_ level: AutoStartLevel) {
-        switch level {
-        case .off:
-            LoginItemManager.setEnabled(false)
-            _ = ServiceManager.stop()
-        case .atLogin:
-            LoginItemManager.setEnabled(true)
-            _ = ServiceManager.stop()
-        case .atLoginWithAutoRestart:
-            LoginItemManager.setEnabled(true)
-            _ = ServiceManager.start()
-        }
-    }
 
     // MARK: - Pure mapping (unit-tested)
 

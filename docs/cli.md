@@ -216,7 +216,8 @@ While the service is loaded, the Settings switch shows as on and
 inert, saying so. To keep the two
 visible to each other, `service status` adds a `login item:` line
 reporting the login-item state, and `service start` prints a note
-when the login item is *also* on. These strings are the login
+when the login item is *also* on — telling you two mechanisms
+will start KiwiDesk, and to run one. These strings are the login
 item's only appearance in CLI output.
 
 ## Commands

@@ -40,8 +40,11 @@ enum LoginItemCLINote {
     static func startNote(_ state: LoginItemState) -> String? {
         guard state == .enabled else { return nil }
         return "Note: KiwiDesk is also set to open at login "
-            + "(Settings \u{25B8} General). The service adds "
-            + "crash-restart supervision on top \u{2014} the two "
-            + "don't conflict."
+            + "(Settings \u{25B8} General), so two mechanisms "
+            + "will start it. They never fight over your "
+            + "windows \u{2014} the instance lock keeps that to "
+            + "one process \u{2014} but only the launch that "
+            + "wins is supervised. Run one: turn off Start at "
+            + "login, or `kiwidesk service stop`."
     }
 }

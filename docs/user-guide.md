@@ -302,14 +302,12 @@ blocks the next launch; the lock dies with the process.
 
 That exit reports **success**, deliberately: declining to start
 beside a running copy is the guard working, not a failure. It
-matters because the launchd helper behind **Restart if it stops
-unexpectedly** (General ▸ Advanced, which **Start at login**
-switches on with it) relaunches KiwiDesk whenever it exits
-*un*successfully — so if declining counted as a failure,
-switching either on while KiwiDesk was already running would
-have that helper start a second copy, watch it bow out, read
-that as a crash and try again about every ten seconds, taking
-your focus each time.
+matters because the launchd helper behind `kiwidesk service`
+relaunches KiwiDesk whenever it exits *un*successfully — so if
+declining counted as a failure, starting the service while
+KiwiDesk was already running would have that helper start a
+second copy, watch it bow out, read that as a crash and try
+again about every ten seconds, taking your focus each time.
 
 ### The Status Bar Quick Menu
 
@@ -503,26 +501,21 @@ stop, reopening it from Spotlight takes a second.
 If you have that service running, **Start at login** shows as on
 and stops being editable, with a line saying why: the service
 already launches KiwiDesk at login, so the login item would only
-add a second launcher. Stop the service and the switch is yours
-again.
+add a second launcher. That line names the command to undo it —
+`kiwidesk service stop` — and the switch is yours again.
 
 First-launch setup offers login pre-selected on its final step,
 so a standard new install launches at login and nothing
 supervises it.
 
-Both switches reflect the real macOS state — revoke the login item
-from **System Settings ▸ General ▸ Login Items** and they follow.
+The switch reflects the real macOS state — revoke the login item
+from **System Settings ▸ General ▸ Login Items** and it follows.
 If macOS shows *Requires approval in System Settings*, click
-**Open Login Items** and enable KiwiDesk there. Both grey out when
+**Open Login Items** and enable KiwiDesk there. It greys out when
 KiwiDesk is run from a spot it can't register from (a
-still-quarantined download, or the bare binary) — only "off" is
-valid there; the caption names the fix, and each switch's `?`
+still-quarantined download, or the bare binary) — only off is
+valid there; the caption names the fix, and the switch's `?`
 stays readable.
-
-Restart-on-crash is the same supervision the advanced `kiwidesk
-service` command installs, so the two stay in sync — `kiwidesk
-service status` reports the same state, and switching the Advanced
-row on is equivalent to running that command.
 
 ## What Changed in This Version
 

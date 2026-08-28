@@ -133,7 +133,7 @@ struct AutoGatedGroup<Gated: View>: View {
 /// Inspector / VoiceOver session on a gated colour card first,
 /// and the answer may well be that a grey's reason belongs
 /// INLINE as text (the redesign's item 19 — "why-you-cannot
-/// always inline, VoiceOver reads it" — which `GeneralRestartRow`
+/// always inline, VoiceOver reads it" — which `LoginItemCard`
 /// and `LoginItemCard` already do) rather than in a hint at all.
 /// Tracked as its own issue; do not re-add the hint here without
 /// that observation recorded.

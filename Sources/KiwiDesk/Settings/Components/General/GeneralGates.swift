@@ -45,8 +45,6 @@ struct GeneralGates {
         /// Applications vs run the packaged app), which the two
         /// rows would otherwise re-split inline.
         case cannotRegister(LoginItemUnavailable)
-        /// Crash-restart is dead unless KiwiDesk also starts at
-        /// login: the LaunchAgent writes `RunAtLoad` and
     }
 
     /// Why `key`'s row is inert right now, or nil while it is

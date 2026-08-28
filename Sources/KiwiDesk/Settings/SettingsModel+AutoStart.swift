@@ -88,49 +88,6 @@ extension SettingsModel {
         }
     }
 
-    /// Applies a (login, restart) pair.
-    ///
-    /// The guard is deliberately NOT "is the Advanced row greyed"
-    /// — greying is a courtesy to the reader and `gui.md` bans it
-    /// as the sole gate on a side effect. `AutoStartLevel.level`
-    /// discards the restart flag when login is off, so the
-    /// impossible pair collapses before it can reach the OS.
-    ///
-    /// The unregisterable refusal is the second, independent
-    /// defense inherited from #342: on a translocated or bare
-    /// binary, applying anything but `.off` would write a
-    /// LaunchAgent pointing at an ephemeral path, which
-
-    /// read-through cannot undo.
-    func setAutoStart(
-        openAtLogin: Bool,
-        restartOnCrash: Bool,
-        reduceMotion: Bool
-    ) {
-        let level = AutoStartLevel.level(
-            openAtLogin: openAtLogin,
-            restartOnCrash: restartOnCrash
-        )
-        guard level != autoStart.level else { return }
-        guard autoStart.registerable || level == .off else {
-            return
-        }
-        autoStartBusy = true
-        Task {
-            // Adopt what the OS actually settled on, never the
-            // level that was requested — a failed apply re-reads
-            // to something else and the rows must say so.
-            let result = await AutoStartManager.set(level)
-            autoStart = result
-            autoStartLoaded = true
-            autoStartBusy = false
-            flashAutoStart(
-                result.level,
-                reduceMotion: reduceMotion
-            )
-        }
-    }
-
     /// Shows the confirmation for `level` and schedules its fade.
     ///
     /// 2.5 s, longer than the key recorder's 1.5 s
