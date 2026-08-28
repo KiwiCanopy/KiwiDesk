@@ -31,7 +31,10 @@ public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
 }
 
 /// C entry point for Carbon hotkey events. Fires on the main
-/// event dispatcher.
+/// event dispatcher, for the pressed AND the released kind —
+/// Carbon delivers exactly one of each per physical hold (a
+/// registered hot key never auto-repeats), which is what the
+/// hold-to-repeat engine builds on (#1056).
 private func hotkeyCallback(
     _ handler: EventHandlerCallRef?,
     _ event: EventRef?,
@@ -49,13 +52,31 @@ private func hotkeyCallback(
         &hotkeyID
     )
     guard status == noErr else { return status }
+    let released =
+        GetEventKind(event) == UInt32(kEventHotKeyReleased)
     let center = Unmanaged<CarbonHotkeyCenter>
         .fromOpaque(refcon)
         .takeUnretainedValue()
     MainActor.assumeIsolated {
-        center.dispatch(id: hotkeyID.id)
+        if released {
+            center.dispatchRelease(id: hotkeyID.id)
+        } else {
+            center.dispatch(id: hotkeyID.id)
+        }
     }
     return noErr
+}
+
+/// A registrar that also reports hot key RELEASES (#1056).
+/// Split from `HotkeyRegistrar` so the many press-only fakes in
+/// the test trees stay valid; the hold-to-repeat engine arms
+/// only when its registrar conforms, because a repeat with no
+/// release channel would never stop.
+@MainActor
+public protocol HotkeyReleaseReporting: AnyObject {
+    /// Called with the registration id whose key was released.
+    /// One call per physical release.
+    var onRelease: @MainActor (UInt32) -> Void { get set }
 }
 
 /// Registers system-wide keyboard shortcuts via the Carbon API.
@@ -70,6 +91,10 @@ public final class CarbonHotkeyCenter {
     private var refs: [UInt32: EventHotKeyRef] = [:]
     private var nextID: UInt32 = 1
     private var eventHandler: EventHandlerRef?
+
+    /// The release fan-out (`HotkeyReleaseReporting`, #1056).
+    /// One consumer slot — `KeybindingManager` owns it.
+    public var onRelease: @MainActor (UInt32) -> Void = { _ in }
 
     /// Four-char code "KIWI" tagging our hotkey registrations.
     private static let signature: OSType = {
@@ -128,20 +153,43 @@ public final class CarbonHotkeyCenter {
         handlers[id]?()
     }
 
+    fileprivate func dispatchRelease(id: UInt32) {
+        // A release for an id already unregistered is dropped
+        // with the handler lookup — `onRelease` consumers key
+        // their own state by id and must not hear stale ids.
+        guard handlers[id] != nil else { return }
+        onRelease(id)
+    }
+
+    /// Reached only from `register` — construction touches no
+    /// OS state, and `HoldRepeatSeamTests` leans on that by
+    /// building a live center bare to pin the production
+    /// release channel. Moving this install into an
+    /// initializer would put a Carbon event handler on the
+    /// dispatcher target in every test run (the #565 class)
+    /// through the one construction the test trees permit.
     private func installHandlerIfNeeded() {
         guard eventHandler == nil else { return }
-        var eventType = EventTypeSpec(
-            eventClass: OSType(kEventClassKeyboard),
-            eventKind: UInt32(kEventHotKeyPressed)
-        )
+        var eventTypes = [
+            EventTypeSpec(
+                eventClass: OSType(kEventClassKeyboard),
+                eventKind: UInt32(kEventHotKeyPressed)
+            ),
+            EventTypeSpec(
+                eventClass: OSType(kEventClassKeyboard),
+                eventKind: UInt32(kEventHotKeyReleased)
+            ),
+        ]
         let refcon = Unmanaged.passUnretained(self).toOpaque()
         InstallEventHandler(
             GetEventDispatcherTarget(),
             hotkeyCallback,
-            1,
-            &eventType,
+            eventTypes.count,
+            &eventTypes,
             refcon,
             &eventHandler
         )
     }
 }
+
+extension CarbonHotkeyCenter: HotkeyReleaseReporting {}

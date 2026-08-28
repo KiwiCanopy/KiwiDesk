@@ -36,6 +36,41 @@ editing here:
   the one copy of who may stamp the mark. The product argument
   is in `docs/design-decisions.md`; the GUI half of it, in
   [gui.md](gui.md).
+- **A held resize chord repeats through one tally, one refusal
+  funnel and one release channel (#1056).** Three obligations,
+  each with the same failure mode — the feature silently stops
+  meaning what it claims while every fake-driven suite stays
+  green — and one guard suite, `HoldRepeatSeamTests`:
+  - Every command a hotkey fire runs reaches the repeat engine
+    through the ONE `KiwiCore.execute` wrapper. Eligibility is
+    "what the press DID", so a second `dispatchCommand` caller
+    runs commands the tally never sees; the suite pins the
+    single call site.
+  - A new size-limit refusal cue routes through
+    `cueResizeRefusal` (`KiwiCore+SizeLimitPill.swift`) — the
+    funnel is what ends a held run, so a cue beside it pills
+    once per TICK instead of once per hold. The suite holds
+    every `refuse*` function to the funnel and the funnel as
+    the one `borders.onResizeRefusal` caller.
+  - The engine arms only when its registrar conforms to
+    `HotkeyReleaseReporting` — a repeat with no stop channel
+    must never start — so a wrapper or replacement registrar
+    that drops the conformance turns the feature off with no
+    red anywhere else; the suite pins the production default's
+    conformance. A run is additionally bounded by
+    `HoldRepeat.maxRunSeconds` against a lost release event —
+    the #611 force-settle shape, reported through the
+    manager's log seam, never silent (the overrun-to-log
+    wiring is pinned by `HoldRepeatWiringTests`, since the
+    seam defaults silent and every machine harness assigns it
+    by hand).
+
+  The product rulings (resize-only, the tally, acceleration)
+  are argued in `docs/design-decisions.md` ▸ "A held resize
+  chord repeats"; widen `HoldRepeat.repeatableCommands` only
+  with a ruling of that shape, and the set's members must name
+  real commands (the suite derives them from the API census, so
+  a §5 verb rename reds there).
 - Use **one `DisplayLink` per monitor** (mixed refresh rates).
   Never drive animations from a single global timer.
 - **The spring integrator must stay inside its stability bound

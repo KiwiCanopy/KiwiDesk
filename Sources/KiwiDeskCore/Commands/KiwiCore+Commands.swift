@@ -1,13 +1,14 @@
 import AppKit
 import Foundation
 
-/// Command execution: the single entry point shared by the
-/// Lua API, the CLI, and the IPC socket.
+/// The command dispatch switch. `KiwiCore.execute` (in
+/// `KiwiCore+Execute.swift`) is the ONE caller — every entry
+/// point routes through its tally wrapper, which
+/// `HoldRepeatSeamTests` pins.
 extension KiwiCore {
-    @discardableResult
-    public func execute(
+    func dispatchCommand(
         _ command: String,
-        args: [JSONValue] = []
+        args: [JSONValue]
     ) -> CommandResponse {
         // Fail closed before dispatch when a focused-window command
         // is issued while an ignored panel or unmanaged app holds

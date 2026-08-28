@@ -2086,6 +2086,53 @@ rather than arithmetic in a command file — the same shape the
 ratio clamps take in `SplitDomain`.
 (`ScrollSlotDomainTests`, `ScrollingFixedSpanCueTests`)
 
+**A held resize chord repeats — and only resize (#1056).**
+[Principle] Every other keyboard adjustment on a Mac repeats
+while held; resize was one press per step by construction — a
+Carbon hot key delivers exactly one press and one release per
+physical hold — so KiwiDesk synthesizes the repeat itself, and
+three rulings shape it. *What repeats is decided by what the
+press DID, not by what the binding says:* a binding's body is
+opaque Lua, so `KiwiCore.execute` tallies every command run
+inside a hotkey fire, and a hold arms only when the press-fire
+executed exactly one command, it was `resize`, and it
+succeeded. `focus` and `swap` are deliberately out —
+overshooting focus is worse than pressing again — and widening
+the set (`HoldRepeat.repeatableCommands`) is a per-verb ruling,
+never an inference. *Timing is the user's, then it
+accelerates:* the initial delay and interval are the system
+key-repeat settings, read per run, and a long hold eases toward
+a bounded multiple of that rate (owner ruling, 2026-08-28) so
+the first press stays one precise step while coarse adjustment
+gets fast; the feel constants live beside
+`HoldRepeat.acceleratedInterval` and are the owner's to retune.
+*A refusal ends the run:* the #933/#1055 size-limit cues stop
+the repeat, so a held shrink parked on a floor pills once per
+hold rather than per tick, while scrolling's wordless
+out-of-screen stop keeps ticking harmlessly — matching that
+silence's own ruling rather than inventing a signal for it.
+Structurally, the engine arms only when its registrar can
+report releases (`HotkeyReleaseReporting` — a repeat with no
+stop channel must never start); any registration teardown
+(layer switch, recorder suspend) ends the run, because an
+unregistered hot key delivers no release to stop on; and a run
+is bounded by `HoldRepeat.maxRunSeconds`, the #611 force-settle
+shape — the stop signal is one Carbon event, and a lost one
+must cost a bounded hold, never the session. A floating resize
+also stopped under-accumulating (#129), which the repeat would
+otherwise have made loud: a press mid-animation accumulates
+against the in-flight animation's target rather than the
+lagging AX echo. The target is deliberately the ONLY commanded
+value trusted — it dies at settle, so a silently-refusing app
+banks at most one hold's worth, where a longer-lived stored
+commanded frame is re-armed by every press that reads it and
+compounds without bound (the #1057 banked-growth class); the
+paths that keep re-reading the echo are recorded in
+[accepted-limitations.md](accepted-limitations.md).
+(`HoldRepeatTests`, `HoldRepeatAccelerationTests`,
+`HoldRepeatWiringTests`, `HoldRepeatSeamTests`,
+`FloatResizeAccumulationTests`)
+
 **A corroborated bound generalizes at the consume site,
 revocably; entries never do (#1055).** [Principle] The per-ask
 ledger exists because a single refusal is grid noise as often
