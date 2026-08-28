@@ -293,11 +293,21 @@ under [Profiles](#profiles); the rows themselves never.
 KiwiDesk runs as a single instance. Launching it while a copy is
 already running never starts a second manager (two instances
 would fight over your windows and hotkeys): the second launch
-brings the running instance forward and exits with a non-zero
-status, printing `already running` to the terminal. When a
+brings the running instance forward and exits, printing
+`already running` to the terminal — that line, not the exit
+status, is what says a new instance did not start. When a
 Finder-launched copy can't surface the running instance, a brief
 notice dialog explains the exit instead. A crashed instance never
 blocks the next launch; the lock dies with the process.
+
+That exit reports **success**, deliberately: declining to start
+beside a running copy is the guard working, not a failure. It
+matters because **Open at login** installs a launchd job that
+restarts KiwiDesk when it exits *un*successfully — so if
+declining counted as a failure, turning that setting on while
+KiwiDesk was already running would have launchd start a second
+copy, watch it bow out, call that a crash, and try again about
+every ten seconds, stealing your focus each time.
 
 ### The Status Bar Quick Menu
 
