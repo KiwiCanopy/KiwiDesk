@@ -418,8 +418,24 @@ editing here:
   `ScrollRestPlumbingTests` pins the carrier. The product
   ruling — including why `swap` is ruled IN rather than
   excluded — is `docs/design-decisions.md`'s.
-- **A resize store holding an absolute LENGTH owes a ceiling at
-  its own write site (#966).** A ratio or a share is bounded by
+- **A resize store holding an absolute LENGTH owes a ceiling,
+  and since #1057 the whole press DECISION lives in ONE pure
+  type (#966/#1057).** `ScrollSlotDomain.decide` — reached only
+  from the `writeCapped*` seam, which resolves the base input
+  (the bound's consume of the layout-floored, viewport-capped
+  store) — owns every cap and refusal arm
+  (`ScrollSlotDomainTests`); a new arm goes there, never inline
+  in a writer. The obligations it holds: the press measures
+  from the focused window's DRAWN span; a press the window's
+  bound blocks outright refuses IN PLACE (pill, no write, no
+  neighbor moved); never-reduce-a-configured-value is
+  GROW-only — a shrink is the user's deliberate act and
+  rewrites the store from the drawn span; the floor never
+  raises the store and wins the narrow-display contradiction;
+  the viewport truncation is a silent stop (no pill, no
+  bounce). The #966 auto-store trim on the first press is
+  RETIRED — the drawn-span base supersedes what it bought.
+  The pre-#1057 clauses below stand where they still apply: A ratio or a share is bounded by
   construction; a length is not, so it can bank growth the
   layout never draws (`min(along, …)`) and then charge a press
   per invisible step on the way back. Three obligations for one.

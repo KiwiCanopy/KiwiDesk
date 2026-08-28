@@ -3772,7 +3772,11 @@ effective minimum, a grow stopped where a neighbor would
 drop below its own, or a grow reaching the focused window's
 own learned app maximum (scrolling, #1055; cued on the
 resized window alone) — still applies the part that fits, and
-cues the refusal visually on the first truncated attempt: the
+cues the refusal visually on the first truncated attempt —
+and on a scrolling space, a press the focused window's own
+learned bound blocks outright (grow at its maximum, shrink at
+its minimum) instead refuses in place: nothing applied, no
+neighbor moved, same bounce and pill (#1057). The
 focus ring gives the same rubber-band bounce as a dead-end
 focus move (#436), and a pill names the reason on the window
 that cannot shrink — and on a refused grow the resized

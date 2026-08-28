@@ -94,6 +94,54 @@ struct ScrollSlotDomainTests {
         #expect(outcome.refusal == nil)
     }
 
+    @Test("The pill survives a maximum past the viewport")
+    func maximumPastTheViewportStillPills() {
+        // The at-maximum arm's OWN weight (guard-prover,
+        // 2026-08-28): with the window's maximum at or past
+        // the drawn area, the fallthrough's app-vs-viewport
+        // discrimination goes wordless — only the refusal arm
+        // keeps the pill for a window that genuinely cannot
+        // grow.
+        let outcome = decide(
+            delta: 50,
+            stored: 1100,
+            drawnFocused: 1200,
+            appMin: 1200,
+            appMax: 1200
+        )
+        #expect(outcome.write == nil)
+        #expect(outcome.refusal == .ownMaximum)
+    }
+
+    @Test("A shrink into the floor writes the part that fits")
+    func shrinkIntoTheFloorWritesAndCues() {
+        // The clamp-then-write arm (code review, 2026-08-28):
+        // a press that reaches below the global floor from
+        // ABOVE it still applies the part that fits, and cues
+        // — refuse-in-place is only for a window already AT a
+        // bound.
+        let outcome = decide(delta: -350, stored: 600)
+        #expect(outcome.write == 300)
+        #expect(outcome.refusal == .ownMinimum)
+    }
+
+    @Test("The tolerance band above the minimum still refuses")
+    func toleranceBandAboveMinimumRefuses() {
+        // The at-minimum arm's OWN weight (guard-prover,
+        // 2026-08-28): one point above the app floor sits
+        // inside the match tolerance — the arm refuses there,
+        // where the fallthrough's global floor (below the app
+        // floor) would have written straight through it.
+        let outcome = decide(
+            delta: -50,
+            stored: 501,
+            drawnFocused: 501,
+            appMin: 500
+        )
+        #expect(outcome.write == nil)
+        #expect(outcome.refusal == .ownMinimum)
+    }
+
     @Test("A shrink at the window's minimum refuses in place")
     func shrinkAtMinimumRefusesInPlace() {
         // Both the below-span store (never-raise) and the

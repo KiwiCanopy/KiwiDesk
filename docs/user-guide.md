@@ -1365,7 +1365,8 @@ perspective — the one you resized explains why nothing moved
 ("Neighboring window at its minimum size") while the blocking
 neighbor marks itself ("Minimum window size reached") — and
 the bounce stays on the window whose gesture hit the wall. The cues fire on the
-first press or drag that gets only part of what it asked for,
+first press or drag that gets less than it asked for —
+including one that gets nothing at all —
 not just once you are already at the floor, and keyboard and
 mouse resizes behave identically.
 
@@ -1376,8 +1377,9 @@ growing that window's slot stops at that size instead of
 sliding the row aside for a span the app then snaps back
 from — with the same bounce and a pill saying why ("Maximum
 window size reached").
-Running out of screen stays wordless: that edge protects no
-window, so the bounce alone carries it.
+Running out of screen is a silent stop: that edge protects no
+window and names none, so nothing pills — the slot simply
+stops growing.
 
 Floating windows take part in directional focus as a second
 tier: tiled windows always win, but when no tiled window lies

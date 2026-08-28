@@ -40,18 +40,13 @@ extension KiwiCore {
     /// this clamp's to settle.)
     ///
     /// Since #1057 this writer is PLUMBING: it resolves the
-    /// inputs — the store, the drawn area, the focused
-    /// window's bounds and its actually-rendered span — and
-    /// `ScrollSlotDomain.decide` owns every cap, base and
-    /// refusal arm, argued on that type and pinned by
-    /// `ScrollSlotDomainTests`. The headline rules it
-    /// enforces: a press is measured against the focused
-    /// window's DRAWN span; a press the window's bound blocks
-    /// outright refuses in place (pill, no write, no neighbor
-    /// moved); an oversize configured store shrinks from the
-    /// drawn size on the first press but is never reduced by a
-    /// grow; the floor never raises the store and the viewport
-    /// truncation stays wordless.
+    /// inputs and `ScrollSlotDomain.decide` owns the decision —
+    /// every cap and refusal arm — while the ONE base input
+    /// resolved here is the focused window's rendered span:
+    /// the bound's consume of the layout-floored,
+    /// viewport-capped store. The rules and their argument
+    /// live on `ScrollSlotDomain`; `ScrollSlotDomainTests`
+    /// pins the arms and the engine suites pin this wiring.
     func writeCappedScrollSlot(
         delta: Double,
         space: Space,
@@ -113,10 +108,23 @@ extension KiwiCore {
             axis == "x" ? $0.minWidth : $0.minHeight
         }
         // The span the focused window actually RENDERS: the
-        // bound's consume where it pins, the viewport-capped
-        // store otherwise — the base the whole decision is
-        // measured against (#1057).
-        let capped = min(current, drawnAlong)
+        // bound's consume where it pins, the layout-floored,
+        // viewport-capped store otherwise — the base the whole
+        // decision is measured against (#1057). The floor
+        // matters (review, 2026-08-28): the layout asks
+        // `min(along, max(resolved, minWindowSize))`, so a
+        // points store below `min_window_size` (representable —
+        // `ScrollSize` floors only at `minPoints`, and the
+        // setting can be raised after the slot was set) renders
+        // at the floor, and measuring from the un-floored store
+        // would consult the ladder at an ask no layout issued.
+        let capped = min(
+            max(
+                current,
+                CGFloat(tiler.settings.minWindowSize)
+            ),
+            drawnAlong
+        )
         let consumed =
             axis == "x"
             ? bound?.consumedWidth(asking: capped)

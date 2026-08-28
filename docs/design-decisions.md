@@ -2046,7 +2046,9 @@ one slot serves the whole row, so growing it past what the
 focused window's app will perform only slides the neighbors
 aside for a span the app snaps back from. Three choices
 sharpen it. The ceiling never *reduces* the shared slot — at
-or past the learned maximum a grow refuses rather than trims,
+the learned maximum a grow refuses rather than trims (since
+#1057 measured against the window's drawn span rather than
+the store; the #1057 entry owns that rule),
 because trimming a row-wide value to one window's limit would
 visibly shrink every neighbor on a grow press. The refusal
 pills ONE end, unlike the neighbor-minimum pair: the limit is
@@ -2054,7 +2056,7 @@ the resized window's own app, so there is no second window to
 mark, and the copy mirrors the floor's
 (`"Maximum window size reached"`). And running out of
 *viewport* stays wordless — that limit protects no window and
-names none, so the bounce alone carries it.
+names none, so the press is a silent stop.
 
 **A resize press is measured against what the focused window
 DRAWS, and refuses in place where its bound blocks it

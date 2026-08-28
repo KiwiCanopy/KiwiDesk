@@ -92,6 +92,13 @@ public enum ScrollSlotDomain {
     private static let tolerance = EffectiveSizeBound
         .matchTolerance
 
+    /// The quantum for "the clamp truncated the request" on
+    /// the point-valued paths — AX frames wobble by sub-point
+    /// rounding, so exact comparison would cue on noise. The
+    /// ONE copy; `KiwiCore.resizeTruncationEpsilon` derives
+    /// from it for the float path.
+    public static let truncationEpsilon: CGFloat = 0.5
+
     private static func grow(
         delta: CGFloat,
         stored: CGFloat,
@@ -113,10 +120,13 @@ public enum ScrollSlotDomain {
         if stored > drawnArea + tolerance {
             return Outcome(write: nil, refusal: nil)
         }
-        // The window can grow: measure from ITS span, so a
-        // window pinned above the store is reached in one
-        // press rather than walking the store up to it.
-        let base = max(drawnFocused, min(stored, drawnArea))
+        // The window can grow: measure from ITS span — the
+        // writer resolves `drawnFocused` once (the bound's
+        // consume of the layout-floored, viewport-capped
+        // store), so a window pinned above the store is
+        // reached in one press rather than walking the store
+        // up to it.
+        let base = drawnFocused
         let requested = base + delta
         let ceiling = max(
             min(drawnArea, appMax ?? .infinity),
@@ -126,7 +136,7 @@ public enum ScrollSlotDomain {
         let clamped = min(max(requested, globalMin), ceiling)
         // A truncated grow cues only when the APP ceiling is
         // the binding limit; the viewport stays wordless.
-        let truncated = clamped < requested - 0.5
+        let truncated = clamped < requested - truncationEpsilon
         let appBound =
             appMax.map { $0 < drawnArea } == true
         // A press that grows nothing writes nothing — a
@@ -134,7 +144,7 @@ public enum ScrollSlotDomain {
         // sideways (a floor-pinned window already wider than
         // the viewport would otherwise snap the store to its
         // span).
-        guard clamped > base + 0.5 else {
+        guard clamped > base + truncationEpsilon else {
             return Outcome(
                 write: nil,
                 refusal:
@@ -167,7 +177,7 @@ public enum ScrollSlotDomain {
         // oversize store shrinks visibly on the FIRST press,
         // and the store is only rewritten now — the moment the
         // user deliberately resizes on this screen.
-        let base = min(drawnFocused, min(stored, drawnArea))
+        let base = drawnFocused
         let requested = base + delta
         // The floor never raises the store (the #1055 mirror);
         // capped at STORED — not the drawn base — so a store
@@ -176,15 +186,15 @@ public enum ScrollSlotDomain {
         // `globalMin`) the floor still wins the contradiction
         // and the press refuses rather than writing a value
         // below `min_window_size`.
-        let floor = min(
-            max(globalMin, appMin ?? 0),
-            stored
-        )
+        // `appMin` is rule 1's alone: the caller's `globalMin`
+        // already carries the effective floor, and a second
+        // max here would pin a branch production cannot take.
+        let floor = min(globalMin, stored)
         let clamped = max(requested, floor)
-        let truncated = clamped > requested + 0.5
+        let truncated = clamped > requested + truncationEpsilon
         // A press that shrinks nothing writes nothing — the
         // refusal-in-place twin of the grow guard.
-        guard clamped < base - 0.5 else {
+        guard clamped < base - truncationEpsilon else {
             return Outcome(
                 write: nil,
                 refusal: truncated ? .ownMinimum : nil
