@@ -66,6 +66,26 @@ public enum AutoStartManager {
         }.value
     }
 
+    /// Drives the LOGIN ITEM alone, leaving the service exactly
+    /// as it is, and re-reads the folded status (#1071).
+    ///
+    /// `set(_:)` takes a LEVEL, and the level ladder stops the
+    /// service on both `.off` and `.atLogin` — correct for a
+    /// caller choosing a level, wrong for the Settings switch,
+    /// which owns the login item and nothing else since #1071.
+    /// Routing the GUI here means it cannot unload a user's
+    /// supervision agent even from a stale read of the status,
+    /// because there is no code path from this function to
+    /// `ServiceManager`.
+    public static func setLoginItem(
+        _ enabled: Bool
+    ) async -> AutoStartStatus {
+        await Task.detached(priority: .userInitiated) {
+            _ = LoginItemManager.setEnabled(enabled)
+            return read()
+        }.value
+    }
+
     // MARK: - Dual read & apply (blocking — call off main)
 
     /// One fresh dual read: the live login-item state + the

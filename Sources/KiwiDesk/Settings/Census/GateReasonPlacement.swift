@@ -167,7 +167,7 @@ extension SettingRuntimeGate {
         switch self {
         case .perEdgeValuesDiffer, .editingStoredProfile,
             .screenCountMismatch,
-            .loginItemServiceStatus,
+            .loginItemServiceStatus, .autoStartServiceLoaded,
             .spaceHasNoOverrides, .reduceMotion:
             return true
         case .orphanPinsExist, .monitorsDisconnected,
@@ -199,7 +199,8 @@ extension SettingRuntimeGate {
             // Every row above the reset action reads "follows
             // the defaults", which IS the condition.
             return true
-        case .reduceMotion, .loginItemServiceStatus:
+        case .reduceMotion, .loginItemServiceStatus,
+            .autoStartServiceLoaded:
             // System state, with nothing in this window to look
             // at. The rows gated on these already draw their
             // reason inline today, which is what

@@ -32,7 +32,10 @@ extension GeneralKey {
                 .general,
                 .appliesImmediately,
                 .atRest,
-                gate: .runtime(.loginItemServiceStatus)
+                gate: .runtimeAnyOf([
+                    .loginItemServiceStatus,
+                    .autoStartServiceLoaded,
+                ])
             )
         case .about:
             return .row(.general, .about, .atRest)

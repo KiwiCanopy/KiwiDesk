@@ -410,7 +410,6 @@
   "general.login_item.open_login_items": "Anmeldeobjekte öffnen",
   "general.login_item.requires_approval": "Bestätigung in den Systemeinstellungen erforderlich",
   "general.login_item.start": "Beim Anmelden starten",
-  "general.login_item.start_help": "KiwiDesk öffnet sich bei der Anmeldung, sodass deine Fenster von Anfang an angeordnet sind. Außerdem hält es sich am Laufen, falls es doch einmal beendet wird — schalte das unter %1$@ aus, wenn du das nicht möchtest.",
   "general.login_item.stored_by_macos": "Wird live von macOS gelesen und dort auch gespeichert — eventuell ist eine Bestätigung in den Systemeinstellungen nötig.",
   "general.login_item.unavailable": "Bewege KiwiDesk in deinen Programme-Ordner, um dies zu aktivieren.",
   "general.login_item.unavailable_binary": "Nur verfügbar, wenn die KiwiDesk-App ausgeführt wird.",

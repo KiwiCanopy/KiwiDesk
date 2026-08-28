@@ -410,7 +410,6 @@
   "general.login_item.open_login_items": "Открыть объекты входа",
   "general.login_item.requires_approval": "Требуется подтверждение в Системных настройках",
   "general.login_item.start": "Запуск при входе",
-  "general.login_item.start_help": "KiwiDesk открывается при входе, поэтому окна расставлены с самого начала. А ещё он сам возвращается к работе, если вдруг завершится, — выключи это в разделе «%1$@», если так не нужно.",
   "general.login_item.stored_by_macos": "Читается напрямую из macOS и хранится там же — может потребоваться подтверждение в Системных настройках.",
   "general.login_item.unavailable": "Перемести KiwiDesk в папку «Программы», чтобы включить эту функцию.",
   "general.login_item.unavailable_binary": "Доступно только при запуске приложения KiwiDesk.",

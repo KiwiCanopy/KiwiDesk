@@ -410,7 +410,6 @@
   "general.login_item.open_login_items": "로그인 항목 열기",
   "general.login_item.requires_approval": "시스템 설정에서 승인이 필요합니다",
   "general.login_item.start": "로그인 시 실행",
-  "general.login_item.start_help": "로그인하면 KiwiDesk가 실행되어 처음부터 윈도우가 정돈된 상태가 됩니다. 또한 도중에 종료되더라도 스스로 다시 실행됩니다. 원하지 않으면 ‘%1$@’에서 끄십시오.",
   "general.login_item.stored_by_macos": "macOS에서 직접 읽어오며 저장도 macOS에 됩니다. 시스템 설정에서 승인이 필요할 수 있습니다.",
   "general.login_item.unavailable": "이 기능을 켜려면 KiwiDesk를 응용 프로그램 폴더로 이동하십시오.",
   "general.login_item.unavailable_binary": "KiwiDesk 앱을 실행할 때만 사용할 수 있습니다.",

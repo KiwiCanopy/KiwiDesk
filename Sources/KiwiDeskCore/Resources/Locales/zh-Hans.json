@@ -410,7 +410,6 @@
   "general.login_item.open_login_items": "打开登录项",
   "general.login_item.requires_approval": "需要在系统设置中批准",
   "general.login_item.start": "登录时启动",
-  "general.login_item.start_help": "登录后 KiwiDesk 会自动启动，窗口从一开始就排列好。它还会在意外停止时自行恢复运行；如果不需要，可在“%1$@”中关闭。",
   "general.login_item.stored_by_macos": "直接读取自 macOS，也存储在那里；可能需要在系统设置中批准。",
   "general.login_item.unavailable": "将 KiwiDesk 移到“应用程序”文件夹以开启此功能。",
   "general.login_item.unavailable_binary": "仅在运行 KiwiDesk App 时可用。",

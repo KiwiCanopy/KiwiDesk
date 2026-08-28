@@ -410,7 +410,6 @@
   "general.login_item.open_login_items": "Apri Elementi login",
   "general.login_item.requires_approval": "Richiede l’approvazione in Impostazioni di Sistema",
   "general.login_item.start": "Avvia all’accesso",
-  "general.login_item.start_help": "KiwiDesk si apre all’accesso, così le tue finestre sono già disposte dall’inizio. Inoltre resta in funzione anche se dovesse arrestarsi: disattivalo in «%1$@» se preferisci di no.",
   "general.login_item.stored_by_macos": "Viene letto in tempo reale da macOS, dove è anche memorizzato: potrebbe richiedere l’approvazione in Impostazioni di Sistema.",
   "general.login_item.unavailable": "Sposta KiwiDesk nella cartella Applicazioni per attivarlo.",
   "general.login_item.unavailable_binary": "Disponibile solo eseguendo l’app KiwiDesk.",

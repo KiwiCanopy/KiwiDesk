@@ -6,10 +6,11 @@ import Testing
 
 /// General's gate resolver (#678 turn 14b).
 ///
-/// The area's two gates are the login toggle and the
-/// crash-restart row, and both became answerable only when the
-/// `SMAppService` status was lifted out of `LoginItemCard` — see
-/// `GeneralGates` for why that mattered.
+/// The area's one gate is the login switch, which became
+/// answerable only when the `SMAppService` status was lifted out
+/// of `LoginItemCard` — see `GeneralGates` for why that
+/// mattered. It went from two gates to one with #1071, crash
+/// supervision having moved to the CLI.
 @Suite("General gates")
 struct GeneralGateTests {
     private func status(
@@ -59,8 +60,8 @@ struct GeneralGateTests {
         }
     }
 
-    @Test("an unregisterable copy greys both rows")
-    func unregisterableGreysBoth() {
+    @Test("an unregisterable copy greys the switch")
+    func unregisterableGreysTheSwitch() {
         let gates = GeneralGates(
             autoStart: status(.off, registerable: false)
         )
@@ -111,31 +112,38 @@ struct GeneralGateTests {
         )
     }
 
-    /// The greying and the refusal must agree: every state the
-    /// resolver calls inert is one the setter would also refuse
-    /// to produce. Derived over `allCases` rather than the two
-    /// levels that exist today.
+    /// The greying and the REFUSAL must agree: every state the
+    /// resolver calls inert is one the model would also refuse
+    /// to act on. Read against the model's own setter rather
+    /// than against a copy of the resolver's predicate — an
+    /// earlier cut compared the resolver to a hand-written
+    /// `level == .atLoginWithAutoRestart` and was `X == X`,
+    /// exercising neither side (code review, #1071).
+    @MainActor
     @Test("what greys is what the setter refuses")
-    func greyAndRefusalAgree() {
+    func greyAndRefusalAgree() async {
         for level in AutoStartLevel.allCases {
             let gates = GeneralGates(autoStart: status(level))
             let inert =
-                gates.inertReason(
-                    for: .general(.startAtLogin)
-                ) != nil
-            // The GUI can only change the login item from a
-            // level it does not already own: while the service
-            // holds it, the switch is inert AND the binding's
-            // guard refuses. Grey and guard, one condition.
-            let guarded = level == .atLoginWithAutoRestart
+                gates.inertReason(for: .general(.startAtLogin))
+                != nil
+            // Drive the real model: a refusal leaves the status
+            // untouched, so `autoStartBusy` never arms.
+            let model = makeTestModel()
+            model.autoStart = status(level)
+            model.autoStartLoaded = true
+            model.setLoginItem(
+                !level.opensAtLogin,
+                reduceMotion: true
+            )
+            let refused = !model.autoStartBusy
             #expect(
-                inert == guarded,
+                inert == refused,
                 Comment(
                     rawValue:
                         "from \(level) the switch is "
                         + "\(inert ? "inert" : "live") but the "
-                        + "setter would "
-                        + "\(guarded ? "refuse" : "accept")"
+                        + "model \(refused ? "refused" : "acted")"
                         + " — the grey and the guard disagree"
                 )
             )
@@ -225,7 +233,7 @@ struct GeneralGateTests {
     /// unregisterable causes must not collapse to one sentence, or
     /// a bare-binary copy reads "move to Applications", advice that
     /// does not apply. Distinct, non-empty, and distinct from the
-    /// login-dependency line.
+    /// service line.
     @MainActor
     @Test("each inert reason renders its own sentence")
     func eachReasonHasItsOwnSentence() {

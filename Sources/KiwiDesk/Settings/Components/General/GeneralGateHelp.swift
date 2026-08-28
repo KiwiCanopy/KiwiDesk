@@ -35,12 +35,28 @@ enum GeneralGateHelp {
             // used the CLI can see it (#1071): the service is
             // reachable no other way, so this answers the person
             // who turned it on rather than advertising it.
+            //
+            // **The command is an ARGUMENT, not prose.** Written
+            // into the sentence it is three ordinary English
+            // words — `service` and `stop` are exactly what a
+            // translator translates — and `english_residue`
+            // proved it both ways: it flags them as untranslated
+            // residue in every non-Latin locale, so a correct
+            // translation would be DISCARDED by `merge-keys`,
+            // while a translated one yields a command that does
+            // not exist. As a specifier it is stripped before
+            // the residue check and never reaches the catalog.
+            // The switch's own label is interpolated for the
+            // same reason #818 gives: naming a control means
+            // interpolating its key, never quoting it.
             return L(
                 "general.login_item.managed_by_service",
                 "KiwiDesk starts at login as a service, which "
                     + "also restarts it if it stops "
-                    + "unexpectedly. Run “kiwidesk service "
-                    + "stop” to manage it here instead."
+                    + "unexpectedly. Run “%1$@” to use “%2$@” "
+                    + "instead.",
+                "kiwidesk service stop",
+                L("general.login_item.start", "Start at login")
             )
         }
     }

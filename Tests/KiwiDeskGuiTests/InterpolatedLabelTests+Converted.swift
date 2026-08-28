@@ -193,6 +193,6 @@ extension InterpolatedLabelTests {
         "border.fit_gaps.updated_new": 1,
         "scroll_grid.animate_focus_shifts.help": 1,
         "sticky.caption": 2,
-        "general.login_item.start_help": 1,
+        "general.login_item.managed_by_service": 1,
     ]
 }
