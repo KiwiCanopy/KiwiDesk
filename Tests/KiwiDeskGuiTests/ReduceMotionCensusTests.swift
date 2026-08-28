@@ -37,23 +37,25 @@ struct ReduceMotionCensusTests {
     /// un-watches the motion-starting use along with whatever
     /// fired.
     ///
-    /// **It fires without motion in three classes**, all
-    /// stated because each costs a diagnosis rather than a
-    /// defect. A needle inside a Swift STRING LITERAL reds —
-    /// `SourceScan.stripComments` removes comments and copies
-    /// literals verbatim, deliberately (its own docstring says
-    /// what a literal-blind stripper cost). A SUPPRESSION
-    /// spelling reds like a starting one:
+    /// **It fires without motion in two classes**, both stated
+    /// because each costs a diagnosis rather than a defect.
+    ///
+    /// A SUPPRESSION spelling reds like a starting one:
     /// `withTransaction(Transaction(animation: nil))`,
     /// `CATransaction.setDisableActions(true)` and
     /// `.contentTransition(.identity)` are how motion is turned
     /// OFF and wear the same shape, so nothing here can tell
-    /// them apart — the site still wants the ruling. And a TYPE
-    /// needle matches a longer name ending the same way; the
-    /// leading boundary is what keeps `RevealTimelineView` from
-    /// firing, and there is no trailing one because
-    /// `NSAnimation` has to go on catching `NSAnimationContext`
-    /// (guard-prover).
+    /// them apart — the site still wants the ruling.
+    ///
+    /// And a needle inside a STRING LITERAL reds, because
+    /// `SourceScan.stripComments` removes comments and copies
+    /// literals verbatim, deliberately (its own docstring says
+    /// what a literal-blind stripper cost). Measured, this is
+    /// narrower than it sounds: a type needle fires on any
+    /// quoted mention, while a call needle fires only where the
+    /// prose happens to carry the call shape too — a literal
+    /// `"no .transaction, no CATransaction"` reds for the type
+    /// and not for the call (guard-prover).
     ///
     /// **Scope: `Sources/KiwiDesk`**, so a green here says the
     /// GUI tree honours the setting, NOT that the app's chrome
@@ -71,7 +73,19 @@ struct ReduceMotionCensusTests {
     /// docstring records: `.symbolEffect (.bounce, …)` compiles,
     /// ships full motion, and an adjacent-paren needle cannot
     /// see it at all (guard-prover). The walk gets both — it
-    /// skips the whitespace AND refuses the longer identifier.
+    /// skips the whitespace AND refuses the longer identifier,
+    /// `.symbolEffectsRemoved()` failing because the character
+    /// after the skip is a letter rather than a paren.
+    ///
+    /// A dot-prefixed needle takes its leading boundary from
+    /// the `.` alone (`SourceScan.needsBoundary`), and that
+    /// exemption is load-bearing rather than tidy: the
+    /// character before `.animator` is the last one of the
+    /// RECEIVER, so boundary-checking it refuses
+    /// `view.animator()` — the spelling every real site uses —
+    /// and leaves only chain-broken calls. It cost the gate
+    /// clause its main shape for one commit, invisibly, because
+    /// the site counts do not move (guard-prover).
     private static let uncensusedCalls = [
         "withTransaction", ".transaction", "phaseAnimator",
         "keyframeAnimator", "symbolEffect", "contentTransition",
@@ -80,6 +94,10 @@ struct ReduceMotionCensusTests {
 
     /// Type spellings, where the bare mention is the signal:
     /// constructing one of these is starting an animation.
+    /// `TimelineView` is deliberately NOT here: constructing
+    /// one is a call, so the call list's paren requirement also
+    /// refuses `TimelineViewModel`, which a bare mention would
+    /// fire on.
     private static let uncensusedTypes = [
         "NSAnimation", "CATransaction", "CATransition",
         "CABasicAnimation", "CAKeyframeAnimation",

@@ -41,9 +41,22 @@ extension SourceScan {
             // the needle. Trailing letters are refused by the
             // paren requirement below (`.animations`, which the
             // settings model spells all over); leading ones
-            // need this, or `RevealTimelineView {` answers for
-            // `TimelineView` (guard-prover).
-            if start > 0, Self.isIdentifier(source[start - 1]) {
+            // need the boundary, or `RevealTimelineView {`
+            // answers for `TimelineView`.
+            //
+            // A DOT-PREFIXED needle is exempt, and getting that
+            // wrong cost the gate clause its main shape: the
+            // character before `.animation` is the last one of
+            // the RECEIVER, so a boundary there refuses
+            // `field.animation(…)` — every inline chain — and
+            // leaves only calls whose receiver ended on the
+            // previous line. The tree writes all 55 at the
+            // start of a chain line, so the count parity stayed
+            // exact and hid it completely (guard-prover). The
+            // leading `.` IS the boundary for those.
+            if Self.needsBoundary(entry), start > 0,
+                Self.isIdentifier(source[start - 1])
+            {
                 continue
             }
             var after = start + needle.count
@@ -75,12 +88,21 @@ extension SourceScan {
             && Array(source[start..<(start + needle.count)])
                 == needle
         {
-            if start > 0, isIdentifier(source[start - 1]) {
+            if needsBoundary(spelling), start > 0,
+                isIdentifier(source[start - 1])
+            {
                 continue
             }
             return true
         }
         return false
+    }
+
+    /// Whether a needle needs a leading boundary at all. One
+    /// starting with `.` carries its own, and applying a second
+    /// refuses the receiver in front of it.
+    static func needsBoundary(_ needle: String) -> Bool {
+        needle.first != "."
     }
 
     static func isIdentifier(_ character: Character)
