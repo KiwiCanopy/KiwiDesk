@@ -210,14 +210,12 @@ struct SegmentedPicker<Value: Hashable>: View {
     }
 
     private func select(_ value: Value) {
-        if reduceMotion {
+        withAnimation(
+            reduceMotion
+                ? nil
+                : .spring(response: 0.32, dampingFraction: 0.75)
+        ) {
             selection = value
-        } else {
-            withAnimation(
-                .spring(response: 0.32, dampingFraction: 0.75)
-            ) {
-                selection = value
-            }
         }
     }
 

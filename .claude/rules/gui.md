@@ -974,6 +974,52 @@ The Onboarding tree is the worked case: it shipped a raw
 sees, for as long as it existed, because the lens
 stopped at `Settings/`.
 
+## The Reduce Motion gate
+
+**Every `withAnimation` under `Sources/KiwiDesk` names its
+Reduce Motion gate IN ITS ARGUMENT** — `reduceMotion ? nil : x`,
+or a binding that makes that choice. One canonical form, because
+the alternative spelling cannot be guarded: recognising
+`if reduceMotion { … } else { withAnimation … }` needs a
+proximity window, and a window wide enough to span the `else` is
+also satisfied by an unrelated mention of the word — a function's
+own `reduceMotion:` parameter was enough to make every ungated
+call inside it unprovable (guard-prover, #989). The three sites
+that used it were normalized. A model has no environment to
+read, so it takes `reduceMotion` as a parameter from its caller
+(`flipSettingsMode`, `setAutoStart`) and names it at the call.
+
+**And `withAnimation { … }` — no parens — is the shape that
+hides.** Swift defaults the animation, so that spelling is an
+ungated call a paren-only needle cannot see AT ALL; one shipped
+in `ShortcutsSection` and left that whole file unscanned until
+the prover found it. The guard matches both spellings and
+rejects the argument-less one outright.
+
+The gate drops the MOTION, never the affordance: a caption still
+appears and leaves, rows still land in their new order, a scroll
+still reaches its target — arriving rather than travelling. The
+user-facing statement of that split is `docs/ui-patterns.md` ▸
+Interaction states.
+
+**The guard's reach is `withAnimation` only.** The
+`.animation(_:value:)` modifier starts motion too and is not
+watched: the same needle over it surfaced 49 sites, ~40 of them
+the layout schematics' shared `LayoutSchematic.damping`, which
+is a sweep with per-site rulings rather than a guard clause.
+Two were gated by hand in #989 — `ProfilesSection`'s reorder
+(named in the issue) and `InactiveDimmed`'s window fade — and
+the rest are unmeasured, so a new `.animation(` site is
+review's to gate, not the guard's to catch.
+
+`ReduceMotionGateTests` holds it **per call, never per file**:
+one gated call and one ungated call in the same file is exactly
+what a whole-file needle passes, and five sites shipped ungated
+at once because nothing watched them (#989). Its `allowed` map
+is the one copy of who may skip the gate, and it is empty by
+design — an entry there is a ruling that some motion must run
+even for a user who asked for less.
+
 ## SwiftUI traps
 
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view

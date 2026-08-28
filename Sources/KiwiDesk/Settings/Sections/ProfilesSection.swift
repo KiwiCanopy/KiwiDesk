@@ -19,6 +19,8 @@ import SwiftUI
 /// the answer to "what is a profile", which is the question this
 /// page opens with.
 struct ProfilesSection: View {
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
     @ObservedObject var model: SettingsModel
     /// The profile whose rename popover is open, if any.
     /// `internal`, not `private`: the rename affordance that
@@ -59,7 +61,7 @@ struct ProfilesSection: View {
                 }
             }
             .animation(
-                .default,
+                reduceMotion ? nil : .default,
                 value: model.profileSummaries.isEmpty
             )
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)

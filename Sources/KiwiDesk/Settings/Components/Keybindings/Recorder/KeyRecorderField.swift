@@ -40,6 +40,10 @@ struct KeyRecorderField: View {
     let onClear: () -> Void
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
+    /// Internal: the caption's fade reads it from
+    /// `KeyRecorderField+Feedback.swift`.
+    @Environment(\.accessibilityReduceMotion)
+    var reduceMotion
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     /// Live preview of the chord being formed ("⌃⌥", then
@@ -55,8 +59,10 @@ struct KeyRecorderField: View {
     /// view lives in `KeyRecorderField+Conflict.swift`.
     @State var conflictPopoverShown = false
     /// Transient live-apply caption (#123): "Active now" (or
-    /// the system-denied branch), auto-fading after ~1.5 s.
-    @State private var liveFeedback: LiveApplyFeedback?
+    /// the system-denied branch), auto-fading after ~1.5 s —
+    /// internal, its fade lives in
+    /// `KeyRecorderField+Feedback.swift`.
+    @State var liveFeedback: LiveApplyFeedback?
 
     private var recording: Bool {
         coordinator.active == fieldID
@@ -78,16 +84,7 @@ struct KeyRecorderField: View {
         }
         .onChange(of: liveFeedback) { _, feedback in
             guard let feedback else { return }
-            Task { @MainActor in
-                try? await Task.sleep(
-                    nanoseconds: 1_500_000_000
-                )
-                // A newer recording restarted the timer —
-                // only the latest feedback clears itself.
-                if liveFeedback == feedback {
-                    withAnimation { liveFeedback = nil }
-                }
-            }
+            scheduleFeedbackFade(feedback)
         }
         .onChange(of: coordinator.generation) { _, _ in
             // The edited mode/target changed — any pending

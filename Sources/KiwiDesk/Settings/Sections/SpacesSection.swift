@@ -50,6 +50,8 @@ struct SpacesSection: View {
     /// another app) still commits, since that path reaches
     /// neither `onEnded` nor `onDisappear` (#299).
     @Environment(\.controlActiveState) var activeState
+    @Environment(\.accessibilityReduceMotion)
+    var reduceMotion
     /// The pushed editor's back crumb, and the row to return to
     /// when it pops (#678 Phase 4 pass 10, turn 20a rule 4). The
     /// shell's back chip and Home's `nav.homeReturnFocus` are the

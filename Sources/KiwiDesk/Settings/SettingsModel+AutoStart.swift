@@ -60,7 +60,11 @@ extension SettingsModel {
     /// binary, applying anything but `.off` would write a
     /// LaunchAgent pointing at an ephemeral path, which
     /// read-through cannot undo.
-    func setAutoStart(openAtLogin: Bool, restartOnCrash: Bool) {
+    func setAutoStart(
+        openAtLogin: Bool,
+        restartOnCrash: Bool,
+        reduceMotion: Bool
+    ) {
         let level = AutoStartLevel.level(
             openAtLogin: openAtLogin,
             restartOnCrash: restartOnCrash
@@ -78,7 +82,10 @@ extension SettingsModel {
             autoStart = result
             autoStartLoaded = true
             autoStartBusy = false
-            flashAutoStart(result.level)
+            flashAutoStart(
+                result.level,
+                reduceMotion: reduceMotion
+            )
         }
     }
 
@@ -90,14 +97,26 @@ extension SettingsModel {
     /// next chord, whereas these are full sentences read once
     /// after a single click, so the reading load is ~double.
     /// Don't "align" it back to 1.5 s.
-    private func flashAutoStart(_ level: AutoStartLevel) {
+    ///
+    /// `reduceMotion` comes from the caller's environment, the
+    /// same way `flipSettingsMode` takes it — a model has no
+    /// environment of its own to read. With it on the caption
+    /// appears and leaves without the cross-fade: the house
+    /// split keeps the affordance and drops only the motion,
+    /// and the confirmation IS the affordance here (nothing
+    /// else says the level applied).
+    private func flashAutoStart(
+        _ level: AutoStartLevel,
+        reduceMotion: Bool
+    ) {
         autoStartFlashToken += 1
         let token = autoStartFlashToken
-        withAnimation { autoStartApplied = level }
+        let fade: Animation? = reduceMotion ? nil : .default
+        withAnimation(fade) { autoStartApplied = level }
         Task {
             try? await Task.sleep(for: .seconds(2.5))
             guard autoStartFlashToken == token else { return }
-            withAnimation { autoStartApplied = nil }
+            withAnimation(fade) { autoStartApplied = nil }
         }
     }
 

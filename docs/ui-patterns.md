@@ -1035,6 +1035,20 @@ family must be focusable so the chord has a target. (#845; the
 seam and its guard are engineering-side, `.claude/rules/gui.md`
 ▸ the keyboard path.)
 
+**Every animation in Settings honours Reduce Motion.** The
+window's own motion — a caption fading in, a list springing
+into its new order after a reorder, the scroll that carries you
+to a search hit — stands down when macOS
+**System Settings ▸ Accessibility ▸ Reduce Motion** is on. It
+stands down by dropping the *motion*, never the affordance: the
+caption still appears and still leaves, the rows still land in
+their new order, the scroll still arrives at its target — they
+simply arrive rather than travel. This is separate from the
+Motion card in Settings, which governs how *managed windows*
+move; the system setting wins over both. (#989; the engineering
+obligation and its guard are `.claude/rules/gui.md` ▸ the
+Reduce Motion gate.)
+
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,
 toggles, sliders, and fields keep system hover. Ambiguous

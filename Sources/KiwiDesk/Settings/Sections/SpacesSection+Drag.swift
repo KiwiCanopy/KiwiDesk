@@ -96,7 +96,7 @@ extension SpacesSection {
                 ? NSCursor.openHand : .arrow)
                 .set()
             commitDragOrder()
-            withAnimation(Self.reorderSpring) {
+            withAnimation(reorderAnimation) {
                 dragged = nil
             }
         }
@@ -124,7 +124,7 @@ extension SpacesSection {
                 ? y >= candidate.value.midY
                 : y <= candidate.value.midY
         else { return }
-        withAnimation(Self.reorderSpring) {
+        withAnimation(reorderAnimation) {
             order.move(
                 fromOffsets: IndexSet(integer: from),
                 toOffset: to > from ? to + 1 : to
@@ -141,6 +141,16 @@ extension SpacesSection {
         response: 0.25,
         dampingFraction: 0.86
     )
+
+    /// The spring, or nothing under Reduce Motion — one
+    /// decision for both the per-swap shuffle and the drop
+    /// settle, since a reorder that springs at one and snaps at
+    /// the other reads as a stutter. The rows still move (the
+    /// house split drops the motion, never the affordance);
+    /// they simply arrive rather than travel.
+    var reorderAnimation: Animation? {
+        reduceMotion ? nil : Self.reorderSpring
+    }
 
     /// Flush the live drag order into the model exactly once, at
     /// the end of a drag (or if the row tears down mid-drag). No-op

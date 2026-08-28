@@ -191,13 +191,11 @@ extension SettingsView {
             // asking the proxy for an id in the same synchronous
             // pass as the state change that mints it misses.
             await Task.yield()
-            if reduceMotion {
-                proxy.scrollTo(anchor, anchor: .top)
-            } else {
-                withAnimation(
-                    .easeInOut(duration: SettingsReveal.scroll)
-                ) { proxy.scrollTo(anchor, anchor: .top) }
-            }
+            withAnimation(
+                reduceMotion
+                    ? nil
+                    : .easeInOut(duration: SettingsReveal.scroll)
+            ) { proxy.scrollTo(anchor, anchor: .top) }
             try? await Task.sleep(
                 nanoseconds: SettingsReveal.nanoseconds(
                     SettingsReveal.scroll + SettingsReveal.settle
