@@ -310,11 +310,17 @@ public final class AnimationEngine {
         screen: NSScreen
     ) {
         if drivers[display] == nil {
-            drivers[display] = DisplayLinkDriver(
+            let driver = DisplayLinkDriver(
                 screen: screen
             ) { [weak self] dt in
                 self?.tick(display: display, dt: dt)
             }
+            // Redirected, not opted into: the driver reports
+            // by default, and this routes it to the engine's
+            // own sink so a starved clock lands beside the two
+            // force-settle nets (#1084, input-and-animation.md).
+            driver.onLog = { [weak self] in self?.onLog($0) }
+            drivers[display] = driver
         }
         drivers[display]?.start()
     }

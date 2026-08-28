@@ -5,17 +5,82 @@ import ApplicationServices
 /// Split from `EventLoop.swift` for file size (§2); the
 /// tracking/lifecycle plumbing it leans on stays there.
 extension EventLoop {
+    /// The window an AX notification is about — from the
+    /// TRACKED map first, and only then by asking the app
+    /// (#1084).
+    ///
+    /// `AXHelper.windowID(of:)` is `_AXUIElementGetWindow`, a
+    /// synchronous MIG round-trip into the other process. It
+    /// costs 1–20 ms when that app is idle and unboundedly more
+    /// when it is busy, and it runs on the main thread — which
+    /// is the thread the `CADisplayLink` callback is delivered
+    /// on. So paying it per notification starved our own frame
+    /// clock: device capture 2026-08-28 measured 42 stalls in
+    /// ten seconds of held resize, up to 607 ms (6–30 frames
+    /// never delivered), with ~37% of main-thread samples
+    /// blocked in that call. Every applied frame emits a
+    /// move/resize notification, so a resize funds its own
+    /// starvation.
+    ///
+    /// The map answers the same question for a window we
+    /// already track — which, during a resize, is all of them —
+    /// with an in-process `CFEqual` scan over that app's
+    /// windows and no IPC at all.
+    ///
+    /// **It needs no invalidation, and that is why it is the
+    /// map rather than a cache of its own.** `elements` is
+    /// dropped per pid on app termination, per window on a
+    /// vanish, and re-keyed (old key removed first) on a native
+    /// tab switch — so it holds at most one id per element and
+    /// never a stale one. A destroyed or unknown element simply
+    /// fails to match and falls through to the ask, which is
+    /// also what makes this safe against the #308 recycled-id
+    /// hazard: a recycled id arrives on a NEW element, which
+    /// cannot `CFEqual` the old one.
+    ///
+    /// The ask stays as the fallback, and stays SECOND: it is
+    /// the only answer for a window not yet adopted, and the
+    /// only thing that can tell us a brand-new window's id.
+    ///
+    /// **The focus and title arms deliberately still ask.**
+    /// They are the same starvation shape — a browser storms
+    /// title changes on this thread — and routing them is
+    /// behaviour-preserving on paper. It is not done here
+    /// because asking carries a property the map does not: a
+    /// destroyed element answers nothing, so an arm that asks
+    /// filters dead windows for free. The move/resize arms buy
+    /// that back with the zero-frame guard at delivery; the
+    /// focus and title arms have no equivalent yet, and this
+    /// change already shipped two regressions from removing
+    /// that filter without replacing it (review + device,
+    /// 2026-08-29). They are #1088, with the same measurement
+    /// available to justify it.
     private func windowID(
         of element: AXUIElement,
         pid: pid_t
     ) -> WindowID? {
-        if let id = AXHelper.windowID(of: element) {
+        let matches = elements[pid, default: [:]]
+            .filter { CFEqual($1, element) }
+        // EXACTLY one, or ask (#1084, architect review): the map
+        // is keyed by id, so nothing structurally forbids two
+        // ids pointing at one element, and a Dictionary's
+        // iteration order is undefined — so `first(where:)`
+        // over a duplicate is a COIN FLIP per notification, and
+        // a wrong id moves the wrong window. Device-observed
+        // 2026-08-29 while merging Finder tabs: windows moved
+        // sideways and an unrelated app minimized, intermittently.
+        //
+        // Ambiguity is exactly the case the app can settle, so
+        // hand it back: two matches costs one round-trip, the
+        // same price this path paid for EVERY notification
+        // before. The win is unaffected — the overwhelming case
+        // is one match — and it is now a fact rather than a bet
+        // on every writer of `elements` keeping the map
+        // injective.
+        if matches.count == 1, let id = matches.first?.key {
             return id
         }
-        // Destroyed elements no longer answer queries; fall back
-        // to comparing against tracked elements.
-        return elements[pid, default: [:]]
-            .first { CFEqual($1, element) }?.key
+        return resolveWindowID(element)
     }
 
     func handle(
@@ -122,7 +187,7 @@ extension EventLoop {
             }
             onEvent(.windowFocused(id))
         case kAXWindowMovedNotification:
-            guard let id = resolveWindowID(element) else {
+            guard let id = windowID(of: element, pid: pid) else {
                 return
             }
             requestFrameRead(
@@ -132,7 +197,7 @@ extension EventLoop {
                 pid: pid
             )
         case kAXWindowResizedNotification:
-            guard let id = resolveWindowID(element) else {
+            guard let id = windowID(of: element, pid: pid) else {
                 return
             }
             requestFrameRead(
@@ -209,6 +274,19 @@ extension EventLoop {
             // an `NSRunningApplication` lookup per delivered
             // frame, on the main actor, at storm rate.
             guard self.observers[pid] != nil else { return }
+            // A dead element reads as `.zero` (#1084 review):
+            // `AXHelper.frame` answers that when the copy fails,
+            // and a real on-screen window never has it. Asking
+            // the app used to filter these out for free — a
+            // destroyed element answered no id, so the arm
+            // returned before ever reading — and resolving from
+            // the tracked map lost that property, because the
+            // map still names a window whose entry the destroy
+            // sweep has not reached yet. Without this the frame
+            // folds into state and the overlays follow it, which
+            // on device looked like a window snapping to the
+            // corner during Finder tab merges (2026-08-29).
+            guard frame != .zero else { return }
             if self.elements[pid]?[id] != nil {
                 self.trackedFrames[id] = frame
             }

@@ -113,7 +113,19 @@ struct LogSeamWiringTests {
         // *to*. It carries the same `CoreLog.write` default they
         // do, which is where their forwarded lines end up, and
         // wiring it to itself would recurse.
-        "KiwiCore": "the syslog sink every other seam feeds"
+        "KiwiCore": "the syslog sink every other seam feeds",
+        // Not constructed by bootstrap at all: one per monitor,
+        // built on demand by `AnimationEngine.startDriver` and
+        // by `BorderBumpAnimator`, so there is no single object
+        // for bootstrap to wire. It keeps the live
+        // `CoreLog.write` default for exactly that reason —
+        // both owners report a starved frame clock without
+        // opting in, and `AnimationEngine` redirects its own to
+        // the engine sink (#1084). An unwired driver is
+        // therefore still heard, which is the property this
+        // guard exists to protect.
+        "DisplayLinkDriver":
+            "per-monitor, built on demand; keeps the live default",
     ]
 
     @Test("Every declared onLog seam is wired in bootstrap")
