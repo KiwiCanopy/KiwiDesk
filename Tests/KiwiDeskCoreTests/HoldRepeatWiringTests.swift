@@ -277,6 +277,38 @@ struct HoldRepeatWiringTests {
         #expect(f.ticks.isEmpty)
     }
 
+    @Test("A body that rebuilds the bindings ends its own run")
+    func rebindingBodyEndsTheRun() throws {
+        // `bind` inside the body re-registers everything,
+        // minting fresh ids for the same ref+combo — and the
+        // physical release will arrive (if at all) for an id
+        // that no longer exists. The arm must stay keyed to the
+        // id the press actually produced (`RegistrationBox`),
+        // so the first tick finds its registration gone and the
+        // run ends; re-deriving the id after the fire instead
+        // adopts the fresh id and repeats on a registration the
+        // press never touched (#1056 review).
+        let f = try Fixture(
+            body: """
+                KiwiDesk.bind("ctrl+alt+k", function() end)
+                KiwiDesk.resize("x", 50)
+                """
+        )
+        f.seedBspPair()
+        f.registrar.press(keyCode: f.combo.keyCode)
+        guard f.heldID != nil else {
+            // Arming from the stale-bindings press is itself
+            // acceptable to refuse; the defect is repeating on
+            // a foreign id, which the tick below would show.
+            #expect(f.ticks.isEmpty)
+            return
+        }
+        let tick = f.ticks.popLast()
+        try #require(tick).work()
+        #expect(f.heldID == nil)
+        #expect(f.ticks.isEmpty)
+    }
+
     @Test("Suspend and a layer switch cancel a live run")
     func teardownPathsCancel() throws {
         let f = try Fixture(
