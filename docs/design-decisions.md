@@ -1977,11 +1977,10 @@ height for y, floored at `min_window_size`). (#122, #124,
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
-resize floor is the configured `min_window_size`. It was once
-raised by a bound learned from the engine's refused asks
-(`SizeBoundLearner`, #677); since #1083 the learned bound
-informs the layout but no longer binds a press — the ruling
-below says why. Keyboard and mouse resizes
+resize floor is the configured `min_window_size`, raised where
+its app enforces a larger physical minimum of its own — learned
+from the engine's refused asks (`SizeBoundLearner`, #677), since
+AX exposes no minimum-size attribute. Keyboard and mouse resizes
 share one set of clamped writers, so the two paths cannot answer
 the same gesture differently. A shrink the clamp truncates gets
 the tactile rubber-band bounce on the focus ring (`DeadEndBump`
@@ -2036,10 +2035,7 @@ Four rulings sharpen that:
   of the way.
 
 **The maximum direction clamps and cues too, where a learned
-ceiling can bind (#1055 — superseded for the PRESS by #1083,
-which is the entry above; the ceiling still shapes what the
-layout asks for, and the never-reduce rule below is now held by
-`ScrollSlotDomain`'s own floor rather than by a refusal).** An app-enforced *maximum* is
+ceiling can bind (#1055).** An app-enforced *maximum* is
 learned the same way the minimum is (`EffectiveSizeBound`
 models both directions; `maxWidth`/`maxHeight` require the
 same two-distinct-asks corroboration as the floor, because a
@@ -2062,61 +2058,70 @@ mark, and the copy mirrors the floor's
 *viewport* stays wordless — that limit protects no window and
 names none, so the press is a silent stop.
 
-**A guess informs the layout; only a fact may refuse a press
-(#1083).** [Principle] Two kinds of number reach a resize
-decision, and they do not deserve equal authority. A
-*configured* value — `min_window_size` — is something the user
-set. A *learned* bound is an inference from timing: we asked
-for a size, watched what came back, and concluded the app
-refused. That inference cannot distinguish "the app refused"
-from "the app has not redrawn yet", because both produce the
-identical frame, and under load the second is ordinary for any
-app — the fast ones included.
+**A bound may refuse a press only if it was learned from a read
+that could tell a refusal from latency (#1083).** [Principle]
+The clamp above rests entirely on the bound being true. It was
+not: the learner was confirming bounds from redraw latency, and
+the pill was then asserting limits that did not exist.
 
-Measured, on the owner's Mac at load average 9.7 (2026-08-28,
+Measured on the owner's Mac at load average 9.7 (2026-08-28,
 macOS 26.6.2): sixteen bound confirmations in eight minutes of
-ordinary use, at least fourteen of them false. Each sat at the
-window's own pre-press width, one resize step apart (984, 954,
-924, 894), with heights all equal to the slot's — the layout's
-own geometry recorded as the app's limit. Two different windows
-confirmed an identical bound 44 ms apart. The user could not
-resize; the pill asserted a limit the window was nowhere near;
-dragging the edge by hand worked, which is what proved the app
-imposed nothing.
+ordinary use, at least fourteen false. Each sat at the window's
+own pre-press width, one resize step apart (984, 954, 924, 894),
+with heights all equal to the slot's — the layout's own geometry
+recorded as the app's limit. Two different windows confirmed an
+identical bound 44 ms apart. Resizing stopped, the pill named a
+limit the window was nowhere near, and dragging the edge by hand
+worked, which is what proved the app imposed nothing.
 
-So the authority splits by what the number IS, not by how
-confident the code feels:
+The cause is that an echo reporting the pre-ask frame is the
+same bytes whether the app refused or has merely not redrawn
+yet, and under load the second is ordinary for ANY app — this
+reproduced on Ghostty, the fast one. So the ladder's two votes —
+seeding a candidate and confirming it — are only meaningful from
+a read that waited out the app's chance to answer. Only the
+settle probe does. Raw echoes still seed, refresh and clear;
+they no longer promote. A genuine limit is learned one probe
+grace (~0.6 s) after its animation settles rather than at echo
+time, which is the whole cost.
 
-- A **learned** bound shapes what the layout ASKS for — it is
-  why a refusing window's slot re-packs and its residue centers
-  — and may never refuse a keypress.
-- A **configured** value still refuses, and still cues, because
-  it is a fact the user chose and can change.
+**The permissive alternative was ruled on and rejected, and the
+reasoning is worth keeping.** The obvious durable fix is to stop
+a learned bound refusing a press at all — three separate paths
+can mistake latency for a refusal, each guarded by its own
+heuristic about whether the app has answered, and they degrade
+together under load. Being wrong permissively costs a window
+that does not fill its region (the accepted split-layout
+residue, self-correcting on the next retile); being wrong
+restrictively costs the user the feature and states a falsehood.
+On frequency alone that argues for permissive.
 
-The asymmetry of being wrong is what decides it. Wrong in the
-permissive direction costs a window that does not fill its
-assigned region — the already-accepted split-layout residue,
-which self-corrects on the next retile. Wrong in the blocking
-direction costs the user the feature, states a falsehood while
-doing it, and leaves no way out but the mouse. Frequent,
-blocking and wrong beats rare and cosmetic every time.
+It was implemented, measured, and then reverted on the owner's
+ruling (2026-08-28): with the learner fixed, the bounds it now
+produces are real — device capture showed the same eight minutes
+of use going from sixteen false confirmations to zero, with
+subsequent confirmations landing on plausible app minimums (500,
+400, 825) — and a window resizing past what its app will follow,
+leaving a neighbour overlapped, is worse than a stop that is
+almost always correct. The permissive rule is the right answer
+when bounds are guesses; it is the wrong trade once they are
+facts. Should a fourth latency path ever be found, this entry is
+the argument for reaching for it again.
 
-Two floors survive the change, and they are the reason the
-ruling is not simply "ignore the bound". The layout draws a
-bound-pinned window at its learned limit, and a press measures
-from the DRAWN span (#1057) — so a press that took that span as
-its base would write it back into the shared scrolling store,
-trimming the row for every neighbor on a grow and raising it on
-a shrink. `ScrollSlotDomain` therefore holds the store from
-both sides: a grow never reduces it, a shrink never raises it,
-both wordlessly. The store is shared; the guess is not allowed
-to spend it.
-
-`ScrollSlotDomain`'s own-minimum and own-maximum arms are kept,
-not deleted: they are correct for a limit that is KNOWN, and if
-a trustworthy source ever exists — a real AX attribute, a
-user-declared per-app minimum — it plugs into them unchanged.
-What #1083 removes is the habit of feeding them a guess.
+**A press writes forward, never across the store (#1083).** The
+layout draws a bound-pinned window at its learned limit, and a
+press measures from that DRAWN span (#1057). Where the drawn
+span sits on the far side of the store, that base made the press
+write across it: a grow from a pinned 715pt window inside a
+1160pt auto slot wrote 765 and trimmed the row for every
+neighbour, and the shrink mirror raised a 300pt store to 775.
+The base is therefore whichever of the drawn span and the store
+lies FORWARD of the press — `max` for a grow, `min` for a shrink
+— which keeps both of #1057's cases and makes crossing the store
+impossible by construction rather than by a guard. A guard was
+tried first and was worse: it swallowed the press with no write
+AND no cue, which is a refusal that cannot explain itself. A
+press that does nothing always says why.
 
 **A resize press is measured against what the focused window
 DRAWS, and refuses in place where its bound blocks it

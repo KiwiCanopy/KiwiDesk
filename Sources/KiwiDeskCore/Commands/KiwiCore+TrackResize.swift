@@ -135,17 +135,18 @@ extension KiwiCore {
             at: track,
             delta: delta,
             span: effectiveSpan,
-            minSizes: trackMins
+            minSizes: trackMins.map(\.size)
         )
         let value = outcome.value
         if let focused = space.focused {
             if delta < 0, outcome.hitOwnMinimum {
-                // The trier since #1083: the track-mate arm
-                // needed a mate whose LEARNED bound stood above
-                // the configured floor, and a learned bound no
-                // longer reaches a press.
+                // The focused track's floor may be carried by a
+                // track-mate with a larger learned bound — then
+                // the mate is the window that cannot shrink and
+                // the pill goes on it (#435's rule).
                 reportResizeRefusal(
                     focused: focused,
+                    bindingCarrier: trackMins[track].carrier,
                     fallbackAnchor: nil,
                     shrinking: true,
                     axis: acrossAxis
@@ -153,8 +154,11 @@ extension KiwiCore {
             } else if delta > 0,
                 let blocked = outcome.blockedByOther
             {
-                let anchor = tiled[ranges[blocked]]
-                    .first(where: { $0 != focused })
+                let anchor =
+                    trackMins[blocked].carrier
+                    ?? tiled[ranges[blocked]].first(where: {
+                        $0 != focused
+                    })
                 refuseGrowAtNeighborMinimum(
                     focused,
                     anchor: anchor ?? focused,

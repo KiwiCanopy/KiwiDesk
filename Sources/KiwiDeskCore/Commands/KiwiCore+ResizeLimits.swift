@@ -13,24 +13,9 @@ enum ResizeRefusal: Equatable {
     /// A grow stopped where `anchor` — a neighboring window —
     /// would drop below ITS effective minimum.
     case neighborMinimum(anchor: WindowID, focused: WindowID)
-    /// A grow stopped at the resized window's own maximum —
-    /// the window refuses to get bigger, so growing the slot
-    /// further only overshoots (#1055).
-    ///
-    /// **No production path produces this today (#1083):** its
-    /// only producer was the LEARNED ceiling, and a learned
-    /// bound may no longer refuse a press. The case, its cue
-    /// (`refuseGrowAtMaximum`) and its catalog string are kept
-    /// rather than retired, because `ScrollSlotDomain`'s
-    /// own-maximum arm is kept for the same reason — both are
-    /// correct for a maximum that is KNOWN, and the eleven
-    /// localized strings are expensive to re-mint.
-    ///
-    /// The obligation on a future producer: supply a maximum
-    /// that is a FACT (a configured value, or an OS-reported
-    /// one), never an inference from timing. Feeding this a
-    /// guess again is the #1083 defect, and the pill is what
-    /// makes that defect assert a falsehood out loud.
+    /// A grow stopped at the resized window's own learned
+    /// app-enforced maximum (#1055) — the app refuses to get
+    /// bigger, so growing the slot further only overshoots.
     case ownMaximum(WindowID)
 }
 
@@ -47,113 +32,93 @@ extension KiwiCore {
     static let resizeTruncationEpsilon: CGFloat =
         ScrollSlotDomain.truncationEpsilon
 
-    /// One window's effective minimum on `axis`: the configured
-    /// `min_window_size`, and ONLY that.
-    ///
-    /// **A guess informs the layout; only a fact may refuse a
-    /// press (#1083).** This used to raise the floor by the
-    /// window's LEARNED app bound (#677), which made an
-    /// inference from timing into a veto over what the user
-    /// asked for. That inference is measurably wrong under
-    /// load — device capture 2026-08-28, load average 9.7: 16
-    /// bound confirmations in eight minutes, at least 14 of
-    /// them at the drawn slot geometry rather than any app's
-    /// limit — and being wrong here is a dead end, since the
-    /// press is refused and the pill names a limit the window
-    /// is nowhere near.
-    ///
-    /// Being wrong the other way costs a window that does not
-    /// fill its assigned region, which is the already-accepted
-    /// split-layout residue and self-corrects on the next
-    /// retile. Frequent-and-blocking against rare-and-cosmetic
-    /// is what decides it; `docs/design-decisions.md` carries
-    /// the ruling.
-    ///
-    /// The learner is untouched and still shapes what the
-    /// layout ASKS for (`LayoutContext.sizeBounds`) — it simply
-    /// no longer holds a veto over a keypress.
+    /// One window's effective minimum on `axis`: the global
+    /// `min_window_size` raised by the window's learned
+    /// app-enforced bound (#677).
     func effectiveMinSize(
         of id: WindowID,
         axis: String
     ) -> Double {
-        Double(tiler.settings.minWindowSize)
+        let bound = tiler.sizeBound(for: id)
+        let appMin =
+            (axis == "x" ? bound?.minWidth : bound?.minHeight)
+            ?? 0
+        return max(
+            Double(tiler.settings.minWindowSize),
+            Double(appMin)
+        )
     }
 
-    /// One window's ceiling for an interactive press: always
-    /// nil, i.e. unbounded.
-    ///
-    /// The mirror of `effectiveMinSize` above and retired for
-    /// the same reason (#1083): the only value it ever carried
-    /// was the LEARNED app maximum (#1055), a guess, and a
-    /// guess may not veto a press. There is no configured
-    /// global maximum the way `min_window_size` floors the
-    /// minimum, so with the guess removed nothing is left to
-    /// bind — which is the honest answer rather than a missing
-    /// one. Kept as a named seam so the asymmetry stays
-    /// legible and a configured maximum, if one is ever added,
-    /// has an obvious home.
+    /// One window's learned app-enforced maximum on `axis`
+    /// (#1055) — `effectiveMinSize`'s mirror, with one
+    /// asymmetry: there is no configured global maximum the way
+    /// `min_window_size` floors the minimum, so nil means
+    /// unbounded rather than "the default".
     func effectiveMaxSize(
         of id: WindowID,
         axis: String
     ) -> Double? {
-        nil
+        let bound = tiler.sizeBound(for: id)
+        return (axis == "x" ? bound?.maxWidth : bound?.maxHeight)
+            .map(Double.init)
     }
 
     /// The largest effective minimum among `members` — a track
     /// or a stack zone spans every member on its axis, so the
-    /// tightest window binds the whole group. An EMPTY group
-    /// still answers the global floor: the ratio caps protect
-    /// the REGION, not only the windows currently in it
-    /// (#383/#44 — an oversized drag must not ratchet the
-    /// stored ratio to the store clamp), while the
-    /// phantom-neighbor problem an empty side poses is the
-    /// CUE's, which `reportResizeRefusal` stands down when no
-    /// anchor exists.
-    ///
-    /// It returned a `carrier` until #1083 — the member whose
-    /// LEARNED bound stood above the global floor, used to
-    /// anchor a refusal pill on the group-mate that could not
-    /// shrink (#435). With learned bounds out of the press
-    /// path, every member answers the same configured floor, so
-    /// no member can be the distinguished blocker and the
-    /// carrier was structurally nil: a branch that cannot fire.
-    /// It is deleted rather than left standing. The max below
-    /// is therefore a no-op today and deliberately kept — a
-    /// future per-window CONFIGURED minimum makes it meaningful
-    /// again, and the shape is where it would land.
+    /// tightest window binds the whole group — plus the member
+    /// that carries a LEARNED bound above the global floor, the
+    /// honest anchor for a refusal cue. `carrier` is nil when
+    /// only the global floor binds (every member is at the
+    /// minimum at once). An EMPTY group still answers the
+    /// global floor: the ratio caps protect the REGION, not
+    /// only the windows currently in it (#383/#44 — an
+    /// oversized drag must not ratchet the stored ratio to the
+    /// store clamp), while the phantom-neighbor problem an
+    /// empty side poses is the CUE's, which
+    /// `reportResizeRefusal` stands down when no anchor
+    /// exists.
     func effectiveMinSize(
         of members: some Collection<WindowID>,
         axis: String
-    ) -> Double {
-        var size = Double(tiler.settings.minWindowSize)
+    ) -> (size: Double, carrier: WindowID?) {
+        let global = Double(tiler.settings.minWindowSize)
+        var size = global
+        var carrier: WindowID? = nil
         for member in members {
-            size = max(
-                size,
-                effectiveMinSize(of: member, axis: axis)
-            )
+            let min = effectiveMinSize(of: member, axis: axis)
+            if min > size {
+                size = min
+                carrier = member
+            }
         }
-        return size
+        return (size, carrier)
     }
 
     /// Renders the refusal for a clamped write: the own-minimum
-    /// own-minimum cue on a shrink, and on a grow the
-    /// neighbor-minimum cue anchored on the window being
-    /// protected — the #435 rule: a GROW's pill goes on the
-    /// window that cannot move, not the trier.
+    /// cue when the binding window IS the resized one (or when
+    /// only the global floor binds on a shrink), the
+    /// neighbor-minimum cue anchored on the binding window
+    /// otherwise — the #435 rule: the pill goes on the window
+    /// that cannot move, not the trier.
     func reportResizeRefusal(
         focused: WindowID,
+        bindingCarrier: WindowID?,
         fallbackAnchor: WindowID?,
         shrinking: Bool,
         axis: String
     ) {
         if shrinking {
-            // Always the trier since #1083: the group-mate arm
-            // needed a member whose floor stood ABOVE the
-            // others', which only a learned bound ever produced.
-            // Every member now answers the same configured
-            // floor, so the window that cannot shrink IS the
-            // one being resized.
-            refuseShrinkAtMinimum(focused, axis: axis)
+            if let carrier = bindingCarrier, carrier != focused {
+                // A group-mate's larger floor binds the shrink:
+                // the mate is the window that cannot shrink.
+                refuseGrowAtNeighborMinimum(
+                    focused,
+                    anchor: carrier,
+                    axis: axis
+                )
+            } else {
+                refuseShrinkAtMinimum(focused, axis: axis)
+            }
             return
         }
         // A grow cue needs a real neighbor to point at; with no
@@ -161,7 +126,7 @@ extension KiwiCore {
         // and the cue stands down rather than naming a phantom
         // (a lone window's ratio still stops at the store
         // clamp, silently).
-        guard let anchor = fallbackAnchor,
+        guard let anchor = bindingCarrier ?? fallbackAnchor,
             anchor != focused
         else { return }
         refuseGrowAtNeighborMinimum(
@@ -202,8 +167,8 @@ extension KiwiCore {
             proposed,
             base: stack.masterRatio,
             available: span,
-            minLow: masterMin,
-            minHigh: stackMin
+            minLow: masterMin.size,
+            minHigh: stackMin.size
         )
         writeMasterRatio(
             min(max(outcome.value, 0.1), 0.9),
@@ -218,10 +183,12 @@ extension KiwiCore {
         // ran into: the focused zone on a shrink, the other
         // zone on a grow.
         let bindingIsMaster = shrinking ? inMaster : !inMaster
+        let binding = bindingIsMaster ? masterMin : stackMin
         let bindingZone: ArraySlice<WindowID> =
             bindingIsMaster ? master : (stackZone ?? ArraySlice([]))
         reportResizeRefusal(
             focused: focused,
+            bindingCarrier: binding.carrier,
             fallbackAnchor: bindingZone.first(where: {
                 $0 != focused
             }),
@@ -287,8 +254,8 @@ extension KiwiCore {
             proposed,
             base: base,
             available: span,
-            minLow: lowMin,
-            minHigh: highMin
+            minLow: lowMin.size,
+            minHigh: highMin.size
         )
         let value = min(max(outcome.value, 0.1), 0.9)
         if axis == "x" {
@@ -302,9 +269,11 @@ extension KiwiCore {
         let focusedFirst = firstSide.contains(focused)
         let shrinking = deltaSign < 0
         let bindingFirst = shrinking ? focusedFirst : !focusedFirst
+        let binding = bindingFirst ? lowMin : highMin
         let bindingSide = bindingFirst ? firstSide : secondSide
         reportResizeRefusal(
             focused: focused,
+            bindingCarrier: binding.carrier,
             fallbackAnchor: bindingSide.first(where: {
                 $0 != focused
             }),

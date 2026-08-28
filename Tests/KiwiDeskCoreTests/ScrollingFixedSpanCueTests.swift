@@ -137,16 +137,13 @@ struct ScrollingFixedSpanCueTests {
             "resize",
             args: [.string("x"), .number(50)]
         )
-        // #1083 re-ruled this: the span is LEARNED, so it no
-        // longer refuses the press or cues. The press measures
-        // from the drawn span (#1057) and grows the row.
-        #expect(refusals.isEmpty)
+        #expect(refusals == [.ownMaximum(WindowID(1))])
         let live = try #require(core.state.workspaces[space])
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)
             .slotSize
             .editablePoints(along: 1200, horizontal: true)
-        #expect(stored > 300)
+        #expect(stored == 300)
     }
 
     @Test("A refused shrink never raises the shared slot")
@@ -215,21 +212,7 @@ struct ScrollingFixedSpanCueTests {
             .resolvedScrolling(for: live)
             .slotSize
             .editablePoints(along: 1200, horizontal: true)
-        // The store is still never RAISED by a shrink — the
-        // half of this test that must never regress. It is now
-        // impossible by construction rather than by a guard:
-        // the press measures from `min(drawn, stored)`, so a
-        // shrink cannot compute a number above the store.
         #expect(stored == 300)
-        // And it is REFUSED OUT LOUD. The store sits at the
-        // configured 300 pt floor, so a fact blocks this press
-        // and says so — the pill is correct here and its
-        // sentence is true. An earlier draft of #1083 asserted
-        // silence instead: the guard swallowed the press with
-        // no write and no cue, which is the learned bound still
-        // vetoing, having only lost the ability to explain
-        // itself (architect review, 2026-08-28). A press that
-        // does nothing must always say why.
         #expect(refusals == [.ownMinimum(WindowID(1))])
     }
 
@@ -280,18 +263,12 @@ struct ScrollingFixedSpanCueTests {
             }
         }
         // Seeded ABOVE the span. Since #1057 the press
-        // measures from the focused window's DRAWN span (825).
-        //
-        // The earlier ruling here — "a window that cannot
-        // follow never resizes the row" (owner, 2026-08-28
-        // morning) — is still right for a limit that is KNOWN,
-        // and `ScrollSlotDomain` still implements it: given a
-        // real `appMin` it refuses in place. What changed the
-        // same evening (#1083) is that a LEARNED bound is not
-        // such a limit — measured wrong 14 times in eight
-        // minutes under load — so the caller no longer hands it
-        // one. The row therefore resizes, and the window that
-        // cannot follow simply does not fill its slot.
+        // measures from the focused window's DRAWN span — 825,
+        // consumed — which is already AT its lent floor, so
+        // the press refuses IN PLACE: pill on the first press,
+        // store untouched, no neighbor moved (owner ruling,
+        // 2026-08-28: a window that cannot follow never
+        // resizes the row).
         core.execute(
             "scroll.set_slot_size",
             args: [.number(850)]
@@ -302,14 +279,12 @@ struct ScrollingFixedSpanCueTests {
             "resize",
             args: [.string("x"), .number(-50)]
         )
-        #expect(refusals.isEmpty)
+        #expect(refusals == [.ownMinimum(WindowID(1))])
         let live = try #require(core.state.workspaces[space])
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)
             .slotSize
             .editablePoints(along: 1200, horizontal: true)
-        // Shrunk rather than refused, and never raised.
-        #expect(stored < 850)
-        #expect(stored > 0)
+        #expect(stored == 850)
     }
 }

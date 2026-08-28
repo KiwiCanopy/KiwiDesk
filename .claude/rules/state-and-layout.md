@@ -471,34 +471,36 @@ editing here:
   — it resolves against the region, so leaving it alone would
   re-bank the strip on the first press; that trim is the rule
   working, not a defect to fix back.
-  **A press takes its limits only from `effectiveMinSize` /
-  `effectiveMaxSize`, and the learner reaches the press through
-  nothing else (#1055, re-ruled by #1083).** A learned bound is
-  inferred from timing, so it informs what the LAYOUT asks for —
-  through `LayoutContext.sizeBounds` — and may never refuse a
-  press. Those two functions are the one home of that split: a
-  resize path that reads `tiler.sizeBound` beside them has
-  re-opened #1083, and nothing scans for it, so this is
-  review's. The same obligation binds a WRITE base: measure
-  from whichever of the drawn span and the store lies forward
-  of the press, never from the bound's consume alone, or a
-  bound-pinned window's press spends the guess on the shared
-  store (`ScrollSlotDomainTests`, `ScrollingAppCeilingTests`).
-  And a press that ends up writing nothing still CUES — the
-  first #1083 draft guarded the write instead of its base and
-  swallowed the press in silence, which is the guess still
-  vetoing, having only lost the ability to explain itself.
-  One slot serves the whole row, so a trim to one window's
-  limit visibly shrinks every neighbour on a grow press —
-  which the forward-base rule above makes impossible by
-  construction rather than by a guard. A grow the VIEWPORT
-  truncates stays wordless, and `ownMaximum` has no producer
-  while no known maximum exists (`ScrollingAppCeilingTests`
-  pins the never-trim and the silence; `ResizeRefusal`'s own
-  doc carries the obligation on a future producer). A second
+  The focused window's learned app MAXIMUM joins the same
+  write-site ceiling (#1055): believed only under the floor's
+  own two-distinct-asks corroboration
+  (`EffectiveSizeBound.maxWidth` / `maxHeight`, read through
+  `effectiveMaxSize`), and it may only ever REFUSE a shared
+  store, never trim it — one slot serves the whole row, so a
+  trim to one window's limit visibly shrinks every neighbor on
+  a grow press. A grow the app ceiling truncates cues
+  `ownMaximum` on the focused window; one the viewport
+  truncates stays wordless (`ScrollingAppCeilingTests` pins
+  the refusal, the never-trim and the silence). A second
   absolute-length store, or a new `maxWidth` consumer, owes
   these obligations deliberately — nothing scans for a site
   that never wires the ceiling at all.
+
+  **A press writes FORWARD, never across the store (#1083).**
+  The layout draws a bound-pinned window at its learned limit
+  and the press measures from that drawn span (#1057) — so
+  where the drawn span sits on the far side of the store, that
+  base wrote across it: a grow from a pinned 715pt window
+  inside a 1160pt auto slot wrote 765 and trimmed the row, and
+  the shrink mirror raised a 300pt store to 775. Take the base
+  from whichever of the two lies forward of the press — `max`
+  on a grow, `min` on a shrink — which keeps both #1057 cases
+  and makes the crossing impossible by construction.
+  `ScrollSlotDomainTests` holds both directions with the device
+  numbers. Do NOT answer this with a guard on the write
+  instead: that was tried and swallowed the press with no write
+  AND no cue, and a press that does nothing must always say
+  why.
   Scrolling is the only such store today, which is an
   observation rather than the rule.
   `ScrollingSlotCeilingTests` pins the drawn area rather than

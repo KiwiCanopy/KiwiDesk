@@ -104,34 +104,15 @@ extension KiwiCore {
             configured = 0
         }
         let drawnAlong = horizontal ? drawn.width : drawn.height
-        // Nil since #1083, and the learned bound is not
-        // consulted for the measurement base either. Feeding it
-        // in as a LIMIT vetoes the press; feeding it in as the
-        // base is subtler and just as wrong — the press then
-        // measures from the guessed maximum rather than from
-        // what the layout draws, so a grow writes that guess
-        // back and TRIMS the shared slot for every neighbour
-        // (caught here by `ceilingNeverTrimsAnAutoSlot`, which
-        // saw a ~1160pt auto slot rewritten to 765). The engine's
-        // own drawn span answers first and the store answers
-        // second; both are facts.
-        //
-        // `ScrollSlotDomain` keeps its own-minimum and
-        // own-maximum arms — correct for a limit that is KNOWN,
-        // and covered by `ScrollSlotDomainTests`. This caller
-        // simply has no known limit to give it. The configured
-        // floor still reaches it, as `globalMin`.
-        // Routed through the seam rather than spelled nil here,
-        // so the ruling has ONE home: `effectiveMaxSize` answers
-        // nil today, and a configured maximum — if one is ever
-        // added — reaches the press without touching this site.
-        let appMax = space.focused
-            .flatMap { effectiveMaxSize(of: $0, axis: axis) }
-            .map { CGFloat($0) }
-        // No app minimum for the same reason (`effectiveMinSize`
-        // is that seam and answers the configured floor alone,
-        // which reaches the domain below as `globalMin`).
-        let appMin: CGFloat? = nil
+        let bound = space.focused.flatMap {
+            tiler.sizeBound(for: $0)
+        }
+        let appMax = space.focused.flatMap {
+            effectiveMaxSize(of: $0, axis: axis)
+        }
+        let appMin: CGFloat? = bound.flatMap {
+            axis == "x" ? $0.minWidth : $0.minHeight
+        }
         // The span the focused window actually RENDERS — the
         // base the whole decision is measured against (#1057) —
         // read off the ENGINE's computed frames: the same
@@ -173,16 +154,19 @@ extension KiwiCore {
             ),
             drawnAlong
         )
-
+        let consumed =
+            axis == "x"
+            ? bound?.consumedWidth(asking: capped)
+            : bound?.consumedHeight(asking: capped)
         let outcome = ScrollSlotDomain.decide(
             delta: CGFloat(delta),
             stored: current,
             drawnArea: drawnAlong,
-            drawnFocused: engineDrawn ?? capped,
+            drawnFocused: engineDrawn ?? consumed ?? capped,
             configured: configured,
             globalMin: CGFloat(effectiveMin),
             appMin: appMin,
-            appMax: appMax
+            appMax: appMax.map { CGFloat($0) }
         )
         if let focused = space.focused {
             switch outcome.refusal {
