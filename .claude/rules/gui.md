@@ -1017,10 +1017,17 @@ and **a new spelling joins it in the change that introduces it**.
 That obligation is held rather than asked for: the spellings
 nothing scans — `withTransaction`, `.transaction`,
 `phaseAnimator`, `symbolEffect` and the AppKit/Core Animation
-ones — are pinned at zero occurrences by a second clause in the
-same suite, so the first one to arrive reds and its author
+ones — are pinned at zero occurrences by
+`ReduceMotionCensusTests`, so the first one to arrive reds and
+its author
 either gates it and moves the needle across, or narrows the
-needle. Left to a sentence it would have gone the way of the
+needle — never drops the entry, which un-watches the
+motion-starting use along with whatever fired. Both clauses
+match through the one whitespace-tolerant walk rather than a
+substring test: narrowing a needle to `symbolEffect(` to stop a
+disabling spelling firing re-opens the fail-open the walk
+exists for, since `.symbolEffect (…)` compiles (guard-prover).
+Left to a sentence it would have gone the way of the
 first census: one `.transaction { $0.animation = … }` in the
 schematics' shared host re-animates all seven for a Reduce
 Motion user, and their own gated chains cover named values

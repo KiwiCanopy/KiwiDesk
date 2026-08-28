@@ -1,0 +1,140 @@
+import Foundation
+import Testing
+
+/// **A census of the ways to start motion is only as good as
+/// its own completeness** (#1069). `ReduceMotionGateTests`
+/// holds every `withAnimation` and `.animation(_:value:)` to
+/// its Reduce Motion gate; this holds the spellings NOTHING
+/// there scans at zero occurrences, so the first one to arrive
+/// reds rather than shipping unwatched.
+///
+/// Split from that suite for size (AGENTS.md §2.1), and the
+/// seam is the honest one: the two clauses share the walk in
+/// `SourceScan+CallSites` and nothing else.
+@Suite("Reduce Motion spelling census (#1069)")
+struct ReduceMotionCensusTests {
+    /// Ways to start motion that NOTHING here scans, held at
+    /// zero occurrences (`Sources/KiwiDesk` carries none today).
+    ///
+    /// A census with no check on its own completeness is the
+    /// #1069 failure one level up: `entryPoints` says a new
+    /// spelling joins it, and nothing made that happen. The
+    /// concrete cost is small and total — one
+    /// `.transaction { $0.animation = LayoutSchematic.damping }`
+    /// in `LayoutSchematicView`, the shared host of all seven
+    /// schematics, injects full motion into every subtree for a
+    /// Reduce Motion user, and no child gate is in the way: the
+    /// schematics' own chains cover named values only, so
+    /// anything they do not name takes the injected animation
+    /// (guard-prover, #1069).
+    ///
+    /// So this fails SHUT rather than tracking the tree. An
+    /// entry firing is not a defect in itself — it means a
+    /// spelling arrived, and the author owes the choice: gate
+    /// the site and move the needle into `entryPoints`, or
+    /// narrow the needle. Dropping the entry outright is the
+    /// one disposition that is almost never right, since it
+    /// un-watches the motion-starting use along with whatever
+    /// fired.
+    ///
+    /// **It fires without motion in three classes**, all
+    /// stated because each costs a diagnosis rather than a
+    /// defect. A needle inside a Swift STRING LITERAL reds —
+    /// `SourceScan.stripComments` removes comments and copies
+    /// literals verbatim, deliberately (its own docstring says
+    /// what a literal-blind stripper cost). A SUPPRESSION
+    /// spelling reds like a starting one:
+    /// `withTransaction(Transaction(animation: nil))`,
+    /// `CATransaction.setDisableActions(true)` and
+    /// `.contentTransition(.identity)` are how motion is turned
+    /// OFF and wear the same shape, so nothing here can tell
+    /// them apart — the site still wants the ruling. And a TYPE
+    /// needle matches a longer name ending the same way; the
+    /// leading boundary is what keeps `RevealTimelineView` from
+    /// firing, and there is no trailing one because
+    /// `NSAnimation` has to go on catching `NSAnimationContext`
+    /// (guard-prover).
+    ///
+    /// **Scope: `Sources/KiwiDesk`**, so a green here says the
+    /// GUI tree honours the setting, NOT that the app's chrome
+    /// does. `Sources/KiwiDeskCore` draws the bars and the
+    /// borders through this same AppKit/Core Animation family
+    /// and is out of `gui.md`'s obligation; reading a green as
+    /// wider is the #1069 mistake told again (guard-prover).
+    ///
+    /// Call spellings, matched through `callSites` — the same
+    /// whitespace-tolerant walk the gate clause uses, and NOT a
+    /// `contains`. An earlier cut narrowed these to
+    /// `symbolEffect(` and friends to stop
+    /// `.symbolEffectsRemoved()` firing, which bought that one
+    /// case and re-opened the fail-open `callSites`' own
+    /// docstring records: `.symbolEffect (.bounce, …)` compiles,
+    /// ships full motion, and an adjacent-paren needle cannot
+    /// see it at all (guard-prover). The walk gets both — it
+    /// skips the whitespace AND refuses the longer identifier.
+    private static let uncensusedCalls = [
+        "withTransaction", ".transaction", "phaseAnimator",
+        "keyframeAnimator", "symbolEffect", "contentTransition",
+        ".animator", "TimelineView",
+    ]
+
+    /// Type spellings, where the bare mention is the signal:
+    /// constructing one of these is starting an animation.
+    private static let uncensusedTypes = [
+        "NSAnimation", "CATransaction", "CATransition",
+        "CABasicAnimation", "CAKeyframeAnimation",
+        "CASpringAnimation", "CAAnimationGroup",
+    ]
+
+    @Test("No uncensused way to start motion ships")
+    func everyMotionSpellingIsCensused() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var found: [String] = []
+        var scanned = 0
+        for file in try SourceScan.swiftSources(under: root) {
+            scanned += 1
+            let source = try SourceScan.strippedSource(at: file)
+            let text = Array(source)
+            // `contains` first, then the walk: the walk is
+            // strictly narrower, so the fast path can only skip
+            // files that had no match to find.
+            for spelling in Self.uncensusedCalls
+            where source.contains(spelling)
+                && !SourceScan.callSites(
+                    in: text,
+                    for: spelling,
+                    closureCounts: true
+                ).isEmpty
+            {
+                found.append(
+                    "\(file.lastPathComponent): \(spelling)"
+                )
+            }
+            for spelling in Self.uncensusedTypes
+            where source.contains(spelling)
+                && SourceScan.mentions(spelling, in: text)
+            {
+                found.append(
+                    "\(file.lastPathComponent): \(spelling)"
+                )
+            }
+        }
+        // A clause whose expected result is zero matches passes
+        // for having scanned NOTHING, in a millisecond, and its
+        // sibling's floor does not stand in — each expresses its
+        // own root (guard-prover). A FLOOR against a tree of
+        // hundreds, not the live count, which every added file
+        // moves (tests.md ▸ a drawn VALUE).
+        #expect(scanned >= 100, "scanned \(scanned) files")
+        #expect(
+            found.isEmpty,
+            """
+            starts motion with no needle watching it — gate the \
+            site and move the spelling into entryPoints, or \
+            narrow the needle. Dropping the entry un-watches \
+            the motion-starting use with it: \(found)
+            """
+        )
+    }
+}

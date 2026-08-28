@@ -62,138 +62,6 @@ struct ReduceMotionGateTests {
         "withAnimation", ".animation",
     ]
 
-    /// Ways to start motion that NOTHING here scans, held at
-    /// zero occurrences (`Sources/KiwiDesk` carries none today).
-    ///
-    /// A census with no check on its own completeness is the
-    /// #1069 failure one level up: `entryPoints` says a new
-    /// spelling joins it, and nothing made that happen. The
-    /// concrete cost is small and total — one
-    /// `.transaction { $0.animation = LayoutSchematic.damping }`
-    /// in `LayoutSchematicView`, the shared host of all seven
-    /// schematics, injects full motion into every subtree for a
-    /// Reduce Motion user, and no child gate is in the way: the
-    /// schematics' own chains cover named values only, so
-    /// anything they do not name takes the injected animation
-    /// (guard-prover, #1069).
-    ///
-    /// So this fails SHUT rather than tracking the tree. An
-    /// entry firing is not a defect in itself — it means a
-    /// spelling arrived, and the author owes the choice: gate
-    /// the site and move the needle into `entryPoints`, or
-    /// narrow the needle. Dropping the entry outright is the
-    /// one disposition that is almost never right, since it
-    /// un-watches the motion-starting use along with whatever
-    /// fired.
-    ///
-    /// **Two ways it fires without motion**, both stated
-    /// because they cost a diagnosis rather than a defect. A
-    /// needle inside a Swift STRING LITERAL reds —
-    /// `SourceScan.stripComments` removes comments and copies
-    /// literals verbatim, deliberately (its own docstring says
-    /// what a literal-blind stripper cost). And a SUPPRESSION
-    /// spelling reds like a starting one:
-    /// `withTransaction(Transaction(animation: nil))` and
-    /// `CATransaction.setDisableActions(true)` are how motion is
-    /// turned OFF, and this cannot tell them apart. Narrowing
-    /// the needle is the repair where one exists —
-    /// `symbolEffect(` does not match `.symbolEffectsRemoved()`
-    /// — and where it does not, the site still wants the ruling.
-    ///
-    /// **Scope: `Sources/KiwiDesk`**, so a green here says the
-    /// GUI tree honours the setting, NOT that the app's chrome
-    /// does. `Sources/KiwiDeskCore` draws the bars and the
-    /// borders through this same AppKit/Core Animation family
-    /// and is out of `gui.md`'s obligation; reading a green as
-    /// wider is the #1069 mistake told again (guard-prover).
-    private static let uncensused = [
-        "withTransaction", ".transaction", "phaseAnimator(",
-        "keyframeAnimator(", "symbolEffect(",
-        "contentTransition(", "NSAnimation", "CATransaction",
-        "CATransition", "CABasicAnimation",
-        "CAKeyframeAnimation", "CASpringAnimation",
-        "CAAnimationGroup", ".animator", "TimelineView",
-    ]
-
-    @Test("No uncensused way to start motion ships")
-    func everyMotionSpellingIsCensused() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk")
-        var found: [String] = []
-        var scanned = 0
-        for file in try SourceScan.swiftSources(under: root) {
-            scanned += 1
-            let source = try SourceScan.strippedSource(at: file)
-            for spelling in Self.uncensused
-            where source.contains(spelling) {
-                found.append(
-                    "\(file.lastPathComponent): \(spelling)"
-                )
-            }
-        }
-        // A clause whose expected result is zero matches passes
-        // for having scanned NOTHING, in a millisecond, and its
-        // sibling's floor does not stand in — each expresses its
-        // own root (guard-prover). A FLOOR against a tree of
-        // hundreds, not the live count, which every added file
-        // moves (tests.md ▸ a drawn VALUE).
-        #expect(scanned >= 100, "scanned \(scanned) files")
-        #expect(
-            found.isEmpty,
-            """
-            starts motion with no needle watching it — gate the \
-            site and add the spelling to entryPoints, or rule \
-            it and drop it from `uncensused`: \(found)
-            """
-        )
-    }
-
-    /// Every call of `entry`, paired with the index of its
-    /// opening paren (nil for the paren-less form).
-    ///
-    /// The whitespace between the name and the `(` is SKIPPED
-    /// rather than required to be absent, and that is not
-    /// tidiness: `.animation (x, value: y)` compiles and ships
-    /// an ungated animation, and a needle demanding an adjacent
-    /// paren does not see the site AT ALL — a fail-OPEN a
-    /// guard-prover round produced by inserting one space. Only
-    /// the imperative spelling may omit its parens entirely
-    /// (Swift defaults the animation, so `withAnimation {` is an
-    /// ungated call), which is the shape that shipped in
-    /// `ShortcutsSection` and left that whole file unscanned
-    /// until the prover found it (#989).
-    private static func callSites(
-        in source: [Character],
-        for entry: String
-    ) -> [(start: Int, paren: Int?)] {
-        let needle = Array(entry)
-        let bare = entry == "withAnimation"
-        var found: [(start: Int, paren: Int?)] = []
-        for start in source.indices
-        where start + needle.count <= source.count
-            && Array(source[start..<(start + needle.count)])
-                == needle
-        {
-            // Skip a longer identifier that merely starts with
-            // the same letters (`.animations`, which the
-            // settings model spells all over), and the
-            // declaration itself.
-            var after = start + needle.count
-            while after < source.count,
-                source[after].isWhitespace
-            {
-                after += 1
-            }
-            guard after < source.count else { continue }
-            if source[after] == "(" {
-                found.append((start, after))
-            } else if bare, source[after] == "{" {
-                found.append((start, nil))
-            }
-        }
-        return found
-    }
-
     @Test("Every animation names its Reduce Motion gate")
     func everyAnimationIsGated() throws {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -206,7 +74,11 @@ struct ReduceMotionGateTests {
             let text = Array(source)
             for entry in Self.entryPoints
             where source.contains(entry) {
-                for site in Self.callSites(in: text, for: entry) {
+                for site in SourceScan.callSites(
+                    in: text,
+                    for: entry,
+                    closureCounts: entry == "withAnimation"
+                ) {
                     scanned[entry, default: 0] += 1
                     guard Self.allowed[name] == nil else {
                         continue
