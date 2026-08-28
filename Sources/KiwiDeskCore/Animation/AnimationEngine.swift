@@ -315,16 +315,11 @@ public final class AnimationEngine {
             ) { [weak self] dt in
                 self?.tick(display: display, dt: dt)
             }
-            // A starved frame clock is invisible downstream —
-            // the driver clamps `dt` so the springs stay
-            // stable — so it is reported here or nowhere
-            // (#1084).
-            driver.onStall = { [weak self] gap in
-                self?.onLog(
-                    "frame clock stalled \(Int(gap * 1000))ms "
-                        + "on display \(display)"
-                )
-            }
+            // Redirected, not opted into: the driver reports
+            // by default, and this routes it to the engine's
+            // own sink so a starved clock lands beside the two
+            // force-settle nets (#1084, input-and-animation.md).
+            driver.onLog = { [weak self] in self?.onLog($0) }
             drivers[display] = driver
         }
         drivers[display]?.start()

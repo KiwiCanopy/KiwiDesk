@@ -41,6 +41,20 @@ extension EventLoop {
     /// The ask stays as the fallback, and stays SECOND: it is
     /// the only answer for a window not yet adopted, and the
     /// only thing that can tell us a brand-new window's id.
+    ///
+    /// **The focus and title arms deliberately still ask.**
+    /// They are the same starvation shape — a browser storms
+    /// title changes on this thread — and routing them is
+    /// behaviour-preserving on paper. It is not done here
+    /// because asking carries a property the map does not: a
+    /// destroyed element answers nothing, so an arm that asks
+    /// filters dead windows for free. The move/resize arms buy
+    /// that back with the zero-frame guard at delivery; the
+    /// focus and title arms have no equivalent yet, and this
+    /// change already shipped two regressions from removing
+    /// that filter without replacing it (review + device,
+    /// 2026-08-29). They are #1088, with the same measurement
+    /// available to justify it.
     private func windowID(
         of element: AXUIElement,
         pid: pid_t

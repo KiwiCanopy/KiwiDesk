@@ -71,6 +71,38 @@ editing here:
   with a ruling of that shape, and the set's members must name
   real commands (the suite derives them from the API census, so
   a §5 verb rename reds there).
+- **The notification path resolves a window from the tracked
+  map before asking the app (#1084).** `AXHelper.windowID(of:)`
+  is `_AXUIElementGetWindow`, a synchronous MIG round-trip into
+  the observed app, and it runs on the thread that delivers the
+  `CADisplayLink` callback. Every frame KiwiDesk applies emits a
+  move/resize notification, so paying that call per notification
+  makes a resize starve its own frame clock: 42 stalls in ten
+  seconds of held resize, worst 607 ms, ~37% of main-thread
+  samples blocked in it — against 1 stall at 134 ms once the
+  arms resolved from `elements[pid]` instead (device,
+  2026-08-29). A new arm on this path takes the same route, and
+  the remaining two — focus and title — are #1088.
+
+  Two properties the map does NOT have, both paid for in
+  regressions the same night, so a router owes an answer to
+  each:
+  - **Liveness.** Asking filtered destroyed elements for free —
+    they answer nothing. The map still names a window whose
+    entry the destroy sweep has not reached, and the frame read
+    that follows answers `.zero`, which folds into state and
+    drags the overlays with it. The move/resize arms buy it
+    back by dropping a zero frame at delivery
+    (`NotificationWindowIDTests`).
+  - **Uniqueness.** The map is keyed by id, so nothing forbids
+    two ids pointing at one element, and `Dictionary`'s
+    iteration order is undefined — "the first match" is a coin
+    flip per notification, and the wrong side moves the wrong
+    window. Resolve only an UNAMBIGUOUS match and hand an
+    ambiguous one back to the app, which is the party that can
+    settle it. A re-key removing its old key first
+    (`EventLoop+Tabs.applyTabRekey`) is what keeps ambiguity
+    rare; it is not what makes the lookup safe.
 - Use **one `DisplayLink` per monitor** (mixed refresh rates).
   Never drive animations from a single global timer.
 - **The spring integrator must stay inside its stability bound
@@ -187,7 +219,14 @@ editing here:
   `KiwiCore+Bootstrap`, asserted end-to-end by
   `AnimationNetLoggingTests`, in `engineLogReachesTheCore` — a
   seam declared and never wired bypasses the sink in production
-  while every unit test that sets it by hand stays green). A rescue
+  while every unit test that sets it by hand stays green). A
+  starved FRAME CLOCK is the third reporter under the same
+  argument (#1084) and differs in one way that matters: it
+  defaults LIVE on `DisplayLinkDriver` rather than waiting to be
+  wired, because there are two driver construction sites and a
+  bump-only period would otherwise be silent about a stall both
+  can see. `AnimationEngine` redirects it to its own sink; it
+  does not enable it. A rescue
   that fires silently removes the symptom that made #599
   findable and leaves only a visible jump.
 - **A shrinking axis snaps to target on frame 1 unless the
