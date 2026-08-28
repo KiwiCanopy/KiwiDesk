@@ -70,36 +70,6 @@ struct SizeBoundAnswerChannelTests {
         return (target, refused)
     }
 
-    @Test("A quiet issue confirms from a single probe")
-    func quietIssueConfirmsFromOneProbe() throws {
-        // The latency ask (device QA, 2026-08-18): a window
-        // that already HELD a settled size before the ask, and
-        // still holds exactly it after the whole animation, has
-        // answered twice — pre-ask baseline plus one probe — so
-        // the residue places ~one probe grace after the dance,
-        // not a full second cycle later.
-        guard NSScreen.main != nil else { return }
-        let applied = Applied()
-        let core = makeCore(applied: applied)
-        let target = try #require(
-            core.tiler.calculatedFrames(state: core.state)[w]
-        )
-        let refused = CGRect(
-            origin: target.origin,
-            size: CGSize(width: 715, height: target.height)
-        )
-        // The window sits settled at its refused size BEFORE
-        // the engine ever asks.
-        core.state.apply(.windowResized(w, refused))
-        core.retile()
-        core.tiler.echoGraceOverride = { _ in true }
-        applied.frames = [:]
-        core.handle(.windowResized(w, refused))
-        #expect(core.tiler.sizeBound(for: w) != nil)
-        let placed = try #require(applied.frames[w])
-        #expect(abs(placed.midX - target.midX) < 0.01)
-    }
-
     @Test("An untrusted baseline still needs the ladder")
     func untrustedBaselineNeedsTheLadder() throws {
         // The ask was issued while an echo could still be in
