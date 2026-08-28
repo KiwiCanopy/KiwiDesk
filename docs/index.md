@@ -49,9 +49,8 @@ brew install --cask kiwicanopy/tap/kiwidesk
 ```
 
 That installs the app and puts the `kiwidesk` CLI on your
-`PATH`; start the background service with `kiwidesk service
-start`. The [User Guide](user-guide.md) covers the Accessibility
-permission and first-run setup.
+`PATH`. The [User Guide](user-guide.md) covers the Accessibility
+permission, first-run setup and starting at login.
 
 Or download the signed, notarized `.dmg` from
 [kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com/) and

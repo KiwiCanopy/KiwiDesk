@@ -184,8 +184,6 @@ struct GeneralSection: View {
             isExpanded: $advancedExpanded
         ) {
             VStack(alignment: .leading, spacing: 8) {
-                restartOnCrashRow
-                Divider()
                 Text(
                     L(
                         "general.advanced.config_file",

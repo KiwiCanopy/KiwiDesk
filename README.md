@@ -155,11 +155,17 @@ detail.
 On first launch, an onboarding wizard walks you through granting
 the Accessibility permission KiwiDesk needs to manage windows.
 
-To start KiwiDesk automatically at login:
+KiwiDesk starts at login by default — first-run setup ticks it,
+and **Settings ▸ General ▸ Start at login** is the switch. To
+have it relaunched after a crash as well, install the LaunchAgent
+that does both:
 
 ```sh
 kiwidesk service start
 ```
+
+Run one or the other, not both — [the CLI guide](docs/cli.md)
+explains why.
 
 ### Building from source
 

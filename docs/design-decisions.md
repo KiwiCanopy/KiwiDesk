@@ -3483,17 +3483,49 @@ beside a working link is worse than the browser's own error page.
 
 **[Principle]**
 
-**Auto-start is one folded level shown as two switches, never a
-per-launch prompt — and never two *independent* toggles.** (#342,
-#576, #678 item 16) General shows a login switch — "Start at
-login" — in the "Applies immediately" group, and a
-crash-restart switch — "Restart if it stops unexpectedly" — first
-among Advanced's five. Both write through one `AutoStartLevel`, so
-the two-switch *presentation* never re-opens the contradiction the
-fold closes (the honesty argument below). Onboarding's closing
-card keeps its own pre-checked box, "Start KiwiDesk at login"
-(the plain login level); auto-restart is advanced, not first-run
-material.
+**Settings owns the login item; crash supervision is the CLI's.**
+(#342, #576, #678 item 16, re-ruled by #1071) General shows ONE
+switch — "Start at login", in the "Applies immediately" group —
+and it drives the `SMAppService` login item and nothing else.
+The `kiwidesk service` LaunchAgent, which adds `KeepAlive`
+crash restart, is reachable only from the command line.
+
+**Why the second switch went away.** It was never one setting
+with two faces: the two mechanisms are two launchers, and having
+one switch install both meant they raced for the instance lock
+at every login. That race is not cosmetic — whichever launch
+loses decides whether supervision runs at all, and the losing
+launch is what produced #1068's ten-second focus theft and
+#1071's silently idle job. The GUI curates and the power layer
+is open (`gui.md`'s north star): a risky-but-valid knob is
+hidden from the GUI and left to the CLI rather than guarded with
+a second switch that cannot express the state honestly. Two
+doc corrections failed to describe the old behaviour truthfully
+before this was ruled, which is the evidence that it could not
+be described — a coin flip the user cannot see has no honest
+short sentence.
+
+**What the mainstream user loses is a crash they can answer
+themselves.** KiwiDesk's crash is not silent in practice: the
+menu bar item disappears and the shortcuts stop, and reopening
+from Spotlight takes a second. Set against a launcher race and
+a `KeepAlive` loop with no breaker on a deterministic crash,
+the supervisor is not what a non-technical user needs from the
+window manager — it is what someone running it as
+infrastructure needs, and they have a terminal.
+
+**A state only the CLI can reach may name the CLI.** While the
+service is loaded the login switch reads ON — true, KiwiDesk
+does start at login — and goes inert with its reason inline,
+naming `kiwidesk service stop`. That is the one place Settings
+prints a shell command, and it is sound because the gate
+decides the audience: the caption cannot render for anyone who
+did not run the CLI to get there. The same reasoning as *config
+presence expands the Simple surface* — show what someone has,
+withhold only the offer.
+
+Onboarding's closing card keeps its own pre-checked box, "Start
+KiwiDesk at login" — the login item, the same one thing.
 Rulings a contributor might otherwise undo:
 
 - **Default At Login, auto-restart opt-in.** Most apps default
@@ -3503,10 +3535,11 @@ Rulings a contributor might otherwise undo:
   the user remembers to open a menu-bar app with no Dock icon
   prompting them. The off-state is a broken desktop, so the good
   default is At Login — which is why "approachable by default"
-  argues *for* pre-checked here. Auto-restart, though, *lacks*
+  argues *for* pre-checked here. Supervision, though, *lacks*
   that no-neutral-absence argument and installs a
-  less-discoverable LaunchAgent, so it stays opt-in: the good
-  default is the middle level, not the top.
+  less-discoverable LaunchAgent, so it is never on by default
+  and, since #1071, never offered in Settings at all — the good
+  default is the login item alone.
 - **No modal on every start.** A dialog that asks "open at
   login?" each launch was considered and rejected — it is the
   same standing-nag shape the quick-menu Accessibility deep-link
@@ -3515,8 +3548,9 @@ Rulings a contributor might otherwise undo:
   there is no informative third case. Ask once, then the durable
   control owns the decision.
 
-**Two switches, one folded level — and the impossible pair is
-refused, not made unrepresentable.** The service is `RunAtLoad` +
+**The impossible pair was refused in the fold, not made
+unrepresentable — which is why splitting the control was
+survivable, and why removing it costs nothing.** The service is `RunAtLoad` +
 `KeepAlive` as one indivisible unit, so "restart on crash" is a
 *superset* of "open at login," and two independent toggles can
 render *Open at Login: OFF + Restart: ON* — a state whose first
@@ -3529,16 +3563,21 @@ language pick — which re-opens the shape #576 closed. So the
 constraint had to move rather than disappear, and it moved down a
 layer to where it is total: `AutoStartLevel.level(openAtLogin:
 restartOnCrash:)` **discards** the restart flag whenever login is
-off, and both switches write through it, so no caller can express
-the contradiction whatever its two toggles say. That is the layer
-that holds for a CLI verb, a restored preference or a test —
-anything that never passes through the view. The Advanced switch
-*also* greys while login is off, but `gui.md` forbids a grey as
-the sole gate on a side effect (this one writes a launchd plist),
-so the grey is the courtesy that *explains* the refusal to a
-reader, never the refusal itself. Making the pair unrepresentable
-in one control was #576's answer; refusing it in the fold is the
-answer that survives the control being split.
+off, so no caller could express the contradiction whatever its
+toggles said. That is the layer that holds for a CLI verb, a
+restored preference or a test — anything that never passes
+through the view.
+
+**#1071 ended the pair by removing the second switch.** The GUI
+expresses no level at all now: it writes the login item through
+`SettingsModel.setLoginItem`, and the level ladder survives as
+the READ that folds both mechanisms into one answer. Nothing
+writes a level any more, which is why `setAutoStart` and
+`AutoStartManager.set`/`apply` went with the row — a write path
+for a pair nobody can express is dead weight that would invite
+the pair back. Making it unrepresentable in one control was
+#576's answer; refusing it in the fold is what survived the
+control being split; not having two controls is what ended it.
 
 The `AutoStartManager` facade owns that coupling (the GUI analog
 of `CLIMain.runService`): `ServiceManager` stays a pure launchctl
@@ -3549,22 +3588,14 @@ switch shows a transient pending state — a blocking `Process` in a
 SwiftUI `body` would be the AGENTS.md violation the CLI-only
 fallback existed to avoid.
 
-**Turning login on brings crash-restart with it, and that choice
-is not remembered once login is off.** "On" sets both halves,
-because login + restart is the obvious setup for someone who just
-wants KiwiDesk running; the third state — login without
-supervision — is reconstructed by switching the Advanced row off
-afterwards, without making every user read three options to pick
-the obvious one. The cost is accepted deliberately: because the
-control is read-through and caches nothing, a *login-without-
-restart* choice does not survive being switched off and on again.
-`.off` erases the distinction — a copy that never wanted restart
-and one that was simply never started both read as `.off` — so
-re-enabling login has no prior answer to restore and takes the
-default. Storing one would mean holding a preference the OS itself
-does not have, which is the exact drift read-through exists to
-prevent; the Advanced row is where that state is re-chosen, by
-design.
+**The switch reads through, so it reports what the OS holds —
+including ON while the service is what starts KiwiDesk.** With
+one control there is no pair to remember and no third state to
+lose: the switch answers "does KiwiDesk start at login", which
+is true whichever mechanism does it, and goes inert while the
+service owns the answer. Storing a preference instead would mean
+holding a value the OS itself does not have, which is the exact
+drift read-through exists to prevent.
 
 **The control is read-through, and the two subsystems are the
 authority.** It never caches a bool — every level is derived from
@@ -3577,12 +3608,12 @@ At-Login level (the user's intent) with a jump to Login Items,
 reusing onboarding's "asked, not yet confirmed" shape. `.notFound`
 is the *pre-registration* state macOS reports for `mainApp`, so it
 reads as off-but-registerable, not as an error. A copy that
-genuinely cannot register greys out **both** switches (grey,
-don't hide) — the login item needs a stable `.app` path and the
-LaunchAgent needs one just as much, so neither switch has a valid
-"on" and only "off" remains, matching the #171 "inapplicable
-control is greyed, not hidden" precedent. Each switch is greyed
-rather than its row, so its `?` help stays readable, and the
+genuinely cannot register greys the switch out (grey, don't
+hide) — the login item needs a stable `.app` path, so there is
+no valid "on" and only off remains, matching the #171
+"inapplicable control is greyed, not hidden" precedent. The
+control is greyed rather than its row, so its `?` help stays
+readable, and the
 reason-specific caption (a live sibling) names the fix for the
 specific cause: **move to Applications** for a
 Gatekeeper-translocated
@@ -3590,12 +3621,12 @@ download, **run the packaged app** for a bare non-bundled binary
 (the device-QA `.build/release` path). The registerability check
 is a *location* fact, evaluated before the OS status, so it holds
 even if a prior install left a stale registration. The service's
-`KeepAlive { SuccessfulExit = false }` restarts only a *crash*, so
-the label "Restart if it stops unexpectedly" is literally
-accurate — a deliberate Quit is never resurrected. The overlap that used to be
-invisible (a loaded service's `RunAtLoad` also launches at login)
-is now *the* top level, made runtime-safe by the #196 instance
-lock — and by that second launch exiting **successfully**, since
+`KeepAlive { SuccessfulExit = false }` restarts only a *crash* —
+a deliberate Quit is never resurrected. The overlap that used to
+be invisible (a loaded service's `RunAtLoad` also launches at
+login) is now something a user assembles deliberately from two
+surfaces rather than one switch installing both, made
+runtime-safe by the #196 instance lock — and by that second launch exiting **successfully**, since
 `KeepAlive { SuccessfulExit = false }` would otherwise read the
 decline as a crash and respawn it every throttle
 ([#1068](https://github.com/KiwiCanopy/KiwiDesk/issues/1068);

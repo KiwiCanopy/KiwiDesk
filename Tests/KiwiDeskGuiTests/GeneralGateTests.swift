@@ -6,10 +6,11 @@ import Testing
 
 /// General's gate resolver (#678 turn 14b).
 ///
-/// The area's two gates are the login toggle and the
-/// crash-restart row, and both became answerable only when the
-/// `SMAppService` status was lifted out of `LoginItemCard` — see
-/// `GeneralGates` for why that mattered.
+/// The area's one gate is the login switch, which became
+/// answerable only when the `SMAppService` status was lifted out
+/// of `LoginItemCard` — see `GeneralGates` for why that
+/// mattered. It went from two gates to one with #1071, crash
+/// supervision having moved to the CLI.
 @Suite("General gates")
 struct GeneralGateTests {
     private func status(
@@ -59,8 +60,8 @@ struct GeneralGateTests {
         }
     }
 
-    @Test("an unregisterable copy greys both rows")
-    func unregisterableGreysBoth() {
+    @Test("an unregisterable copy greys the switch")
+    func unregisterableGreysTheSwitch() {
         let gates = GeneralGates(
             autoStart: status(.off, registerable: false)
         )
@@ -68,68 +69,82 @@ struct GeneralGateTests {
             gates.inertReason(for: .general(.startAtLogin))
                 == .cannotRegister(.notBundled)
         )
-        // Not `.loginOff`: naming the login dependency would send
-        // the reader to a row that is itself dead.
-        #expect(
-            gates.inertReason(
-                for: .general(.advancedRestartOnCrash)
-            ) == .cannotRegister(.notBundled)
-        )
     }
 
-    @Test("crash-restart is inert while login is off")
-    func restartNeedsLogin() {
-        let off = GeneralGates(autoStart: status(.off))
-        #expect(
-            off.inertReason(
-                for: .general(.advancedRestartOnCrash)
-            ) == .loginOff
+    /// Crash supervision is the CLI's since #1071, so the login
+    /// switch answers for it: while the service is loaded it
+    /// reads ON — KiwiDesk does start at login — and goes inert
+    /// with the reason inline, because the login item would only
+    /// add a second launcher racing the agent.
+    @Test("the service makes the login switch inert")
+    func serviceGreysTheLoginSwitch() {
+        let served = GeneralGates(
+            autoStart: status(.atLoginWithAutoRestart)
         )
-        // And live once login is on, at either level.
-        for level in [
-            AutoStartLevel.atLogin, .atLoginWithAutoRestart,
-        ] {
-            let on = GeneralGates(autoStart: status(level))
+        #expect(
+            served.inertReason(for: .general(.startAtLogin))
+                == .managedByService
+        )
+        // And live at the levels the GUI itself can set.
+        for level in [AutoStartLevel.off, .atLogin] {
+            let gates = GeneralGates(autoStart: status(level))
             #expect(
-                on.inertReason(
-                    for: .general(.advancedRestartOnCrash)
-                ) == nil
-            )
-            #expect(
-                on.inertReason(for: .general(.startAtLogin))
+                gates.inertReason(for: .general(.startAtLogin))
                     == nil
             )
         }
     }
 
-    /// The greying and the refusal must agree: every state the
-    /// resolver calls inert is one the setter would also refuse
-    /// to produce. Derived over `allCases` rather than the two
-    /// levels that exist today.
+    /// An unregisterable copy outranks the service reason: it is
+    /// the harder stop, and naming the service there would offer
+    /// a fix that would not work either.
+    @Test("cannot-register outranks the service reason")
+    func unregisterableOutranksService() {
+        let gates = GeneralGates(
+            autoStart: status(
+                .atLoginWithAutoRestart,
+                registerable: false
+            )
+        )
+        #expect(
+            gates.inertReason(for: .general(.startAtLogin))
+                == .cannotRegister(.notBundled)
+        )
+    }
+
+    /// The greying and the REFUSAL must agree: every state the
+    /// resolver calls inert is one the model would also refuse
+    /// to act on. Read against the model's own setter rather
+    /// than against a copy of the resolver's predicate — an
+    /// earlier cut compared the resolver to a hand-written
+    /// `level == .atLoginWithAutoRestart` and was `X == X`,
+    /// exercising neither side (code review, #1071).
+    @MainActor
     @Test("what greys is what the setter refuses")
-    func greyAndRefusalAgree() {
+    func greyAndRefusalAgree() async {
         for level in AutoStartLevel.allCases {
             let gates = GeneralGates(autoStart: status(level))
             let inert =
-                gates.inertReason(
-                    for: .general(.advancedRestartOnCrash)
-                ) != nil
-            // Asking for restart from this level: if the row is
-            // inert, the fold must drop the request.
-            let asked = AutoStartLevel.level(
-                openAtLogin: level.opensAtLogin,
-                restartOnCrash: true
+                gates.inertReason(for: .general(.startAtLogin))
+                != nil
+            // Drive the real model: a refusal leaves the status
+            // untouched, so `autoStartBusy` never arms.
+            let model = makeTestModel()
+            model.autoStart = status(level)
+            model.autoStartLoaded = true
+            model.setLoginItem(
+                !level.opensAtLogin,
+                reduceMotion: true
             )
+            let refused = !model.autoStartBusy
             #expect(
-                inert == !asked.restartsOnCrash,
+                inert == refused,
                 Comment(
                     rawValue:
-                        "from \(level) the row is "
-                        + "\(inert ? "inert" : "live") but "
-                        + "the setter would "
-                        + "\(asked.restartsOnCrash ? "honour" : "drop")"
-                        + " a restart request — the grey and "
-                        + "the guard disagree"
+                        "from \(level) the switch is "
+                        + "\(inert ? "inert" : "live") but the "
+                        + "model \(refused ? "refused" : "acted")"
+                        + " — the grey and the guard disagree"
                 )
             )
         }
@@ -154,15 +169,15 @@ struct GeneralGateTests {
     /// presence checks prove the two symbols are TEXT in the file,
     /// not that the live greying path reaches them — the resolver
     /// tests above own the behaviour; this owns the wiring.
-    @Test("both rows consult the resolver, not an inline copy")
+    @Test("the row consults the resolver, not an inline copy")
     func rowsConsultTheResolver() throws {
         let dir = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/General"
             )
-        let rows = [
-            "LoginItemCard.swift", "GeneralRestartRow.swift",
-        ]
+        // One row since #1071: the Advanced restart row is
+        // gone, crash supervision being the CLI's.
+        let rows = ["LoginItemCard.swift"]
         func read(_ name: String) throws -> String {
             try String(
                 contentsOf: dir.appendingPathComponent(name),
@@ -193,7 +208,7 @@ struct GeneralGateTests {
         // two rows describe one status two ways.
         let help = try read("GeneralGateHelp.swift")
         for key in [
-            "general.advanced.restart_on_crash.needs_login",
+            "general.login_item.managed_by_service",
             "general.login_item.unavailable",
             "general.login_item.unavailable_binary",
         ] {
@@ -218,7 +233,7 @@ struct GeneralGateTests {
     /// unregisterable causes must not collapse to one sentence, or
     /// a bare-binary copy reads "move to Applications", advice that
     /// does not apply. Distinct, non-empty, and distinct from the
-    /// login-dependency line.
+    /// service line.
     @MainActor
     @Test("each inert reason renders its own sentence")
     func eachReasonHasItsOwnSentence() {
@@ -228,12 +243,14 @@ struct GeneralGateTests {
         let notBundled = GeneralGateHelp.sentence(
             for: .cannotRegister(.notBundled)
         )
-        let loginOff = GeneralGateHelp.sentence(for: .loginOff)
-        for sentence in [translocated, notBundled, loginOff] {
+        let managed = GeneralGateHelp.sentence(
+            for: .managedByService
+        )
+        for sentence in [translocated, notBundled, managed] {
             #expect(!sentence.isEmpty)
         }
         #expect(translocated != notBundled)
-        #expect(translocated != loginOff)
-        #expect(notBundled != loginOff)
+        #expect(translocated != managed)
+        #expect(notBundled != managed)
     }
 }

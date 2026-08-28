@@ -12,16 +12,16 @@ import SwiftUI
 /// down (#818); it is the same defect in a doc comment.
 ///
 /// #576 folded #342's login toggle and the `kiwidesk service`
-/// LaunchAgent into ONE 3-level picker, because the two-toggle
-/// shape could render *login off + restart on*, which names no
-/// reachable state. Turn 14b asks for two rows again — the
-/// crash-restart half belongs among Advanced's five — and the
-/// constraint moved rather than went away: both rows write
-/// through `AutoStartLevel.level(openAtLogin:restartOnCrash:)`,
-/// which discards the restart flag when login is off. Read
-/// `AutoStartManager`'s header for why that pair is impossible
-/// at the OS, and `SettingsModel+AutoStart` for why the status
-/// no longer lives in this view.
+/// LaunchAgent into ONE 3-level picker; turn 14b split it into
+/// two rows; **#1071 removed the second one.** The two are two
+/// LAUNCHERS, and one switch installing both meant they raced
+/// for the instance lock at every login — which is what stole
+/// focus every ten seconds in #1068 and left supervision
+/// silently idle in #1071. So this card owns the `SMAppService`
+/// login item and nothing else, and crash restart is
+/// `kiwidesk service`. Read `AutoStartManager`'s header for the
+/// level ladder the CLI still uses, and `SettingsModel
+/// +AutoStart` for why the status does not live in this view.
 ///
 /// A **read-through**, **async** control: it stores no preference,
 /// it reads `AutoStartManager.current()` off the main actor on
@@ -105,32 +105,29 @@ struct LoginItemCard: View {
         L("general.login_item.start", "Start at login")
     }
 
-    /// The one field-level `?` (#94). It names the supervision
-    /// half and points at the Advanced row rather than describing
-    /// three picker levels that no longer exist.
+    /// The one field-level `?` (#94). Since #1071 this switch
+    /// is the login item and nothing else, so the help no longer
+    /// promises supervision or points at an Advanced row that
+    /// does not exist — a new key, the meaning having changed.
     private var startHelp: String {
         L(
-            "general.login_item.start_help",
-            "KiwiDesk opens when you sign in, so your windows are "
-                + "arranged from the start. It also keeps itself "
-                + "running if it ever stops — switch that off "
-                + "under %1$@ if you would rather it did not.",
-            L("general.advanced.title", "Advanced")
+            "general.login_item.start_help_login_only",
+            "KiwiDesk opens when you sign in, so your windows "
+                + "are arranged from the start."
         )
     }
 
     /// This row's half of the folded level: does KiwiDesk start
     /// itself at all.
     ///
-    /// **Turning it on brings crash-restart with it** (item 16,
-    /// "on by default"). That is the north star's "approachable
-    /// by default, powerful on demand" applied to one row: the
-    /// obvious answer for someone who just wants KiwiDesk running
-    /// is *both*, and the design's own argument is that this
-    /// "reconstructs the third state for anyone who wants
-    /// login-without-restart, without making every user read
-    /// three options to pick the obvious one". The third state is
-    /// reached by switching the Advanced row off afterwards.
+    /// **It drives the login item alone (#1071).** Crash
+    /// supervision is the CLI's — the north star's "the GUI
+    /// curates, Lua is open" applied to a knob that is risky
+    /// (it races the login item, and `KeepAlive` on a
+    /// deterministic crash loops with no breaker) and valid
+    /// (someone running KiwiDesk as infrastructure wants it).
+    /// A user who loses the app reopens it from Spotlight; the
+    /// menu bar item vanishing is not a silent failure.
     ///
     /// **A login-without-restart choice does not survive being
     /// switched off and on again**, and it cannot: the level is
@@ -157,15 +154,35 @@ struct LoginItemCard: View {
                 .inertReason(for: .general(.startAtLogin)) != nil
     }
 
+    /// The switch owns the LOGIN ITEM and nothing else (#1071).
+    ///
+    /// It used to pass `restartOnCrash: on` alongside, which made
+    /// one flip install a LaunchAgent as well — two launchers
+    /// racing for the instance lock at every login, which is the
+    /// whole of #1068/#1071. Crash supervision is now the CLI's
+    /// (`kiwidesk service`), so this drives `.off` ↔ `.atLogin`
+    /// and never touches the agent.
+    ///
+    /// **Reading the folded level is deliberate.** While the
+    /// service is loaded the level is `.atLoginWithAutoRestart`,
+    /// so the switch reads ON — which is TRUE, KiwiDesk does
+    /// start at login — and the gate above makes it inert with
+    /// the reason inline. The getter answers "does it start at
+    /// login", not "which mechanism does it".
     private var loginBinding: Binding<Bool> {
         Binding(
             get: { model.autoStart.level.opensAtLogin },
             set: { on in
-                model.setAutoStart(
-                    openAtLogin: on,
-                    restartOnCrash: on,
-                    reduceMotion: reduceMotion
-                )
+                // The refusal that matters is in the model —
+                // gui.md bans a grey as the sole gate on a side
+                // effect — and the path from there reaches no
+                // `ServiceManager` call at all, so the agent is
+                // safe from this switch by construction rather
+                // than by this guard.
+                guard
+                    model.autoStart.level != .atLoginWithAutoRestart
+                else { return }
+                model.setLoginItem(on, reduceMotion: reduceMotion)
             }
         )
     }
@@ -257,13 +274,20 @@ struct LoginItemCard: View {
                 .controlSize(.small)
                 .settingsActionButton()
             }
-        } else if let reason = model.generalGates.inertReason(
+        }
+        // NOT an `else if` on the approval branch (#1071): while
+        // `cannotRegister` and `requiresApproval` are exclusive
+        // arms of one `LoginItemState`, `managedByService` is
+        // read from launchd and is independent of both. Chained,
+        // it would be swallowed for an approval-pending copy
+        // whose service is loaded — precisely the user upgrading
+        // from the old coupled switch — leaving a dimmed switch
+        // with no sentence and a button that cannot unblock it.
+        if let reason = model.generalGates.inertReason(
             for: .general(.startAtLogin)
         ) {
-            // The unavailable sentence, named once by the gate
-            // help for the specific cause — the same source the
-            // Advanced row reads, so the two rows cannot describe
-            // one status two ways.
+            // The sentence is named once by the gate help, so
+            // the grey and its reason cannot disagree.
             unavailableCaption(GeneralGateHelp.sentence(for: reason))
         }
     }

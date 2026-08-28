@@ -141,10 +141,6 @@ extension InterpolatedLabelTests {
         //    hand-confirmed months earlier. Some of its rows were
         //    already converted by the re-review that filed it, so
         //    it is read as a starting set rather than a register.
-        //    One entry here is NOT from that table
-        //    (`general.advanced.restart_on_crash.needs_login`) —
-        //    it quotes the label #864 renamed and was found while
-        //    fixing it.
         "border.controls.disabled": 1,
         "space_bar.disabled.help": 1,
         "scroll_grid.scroll_duration.animation_off": 1,
@@ -166,7 +162,6 @@ extension InterpolatedLabelTests {
         "lua_editor.adopt.message_dirty": 1,
         "layout_params.master_orientation.one_master": 1,
         "shortcuts.app_behavior.help": 2,
-        "general.advanced.restart_on_crash.needs_login": 1,
         // 2. The `**`-marker glossaries. #830 asked that two be
         //    CHECKED rather than swept; the check converted them
         //    and found more of the same family. A bold marker
@@ -198,6 +193,6 @@ extension InterpolatedLabelTests {
         "border.fit_gaps.updated_new": 1,
         "scroll_grid.animate_focus_shifts.help": 1,
         "sticky.caption": 2,
-        "general.login_item.start_help": 1,
+        "general.login_item.managed_by_service": 1,
     ]
 }

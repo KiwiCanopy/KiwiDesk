@@ -167,7 +167,7 @@ extension SettingRuntimeGate {
         switch self {
         case .perEdgeValuesDiffer, .editingStoredProfile,
             .screenCountMismatch,
-            .loginItemServiceStatus, .autoStartLoginOff,
+            .loginItemServiceStatus, .autoStartServiceLoaded,
             .spaceHasNoOverrides, .reduceMotion:
             return true
         case .orphanPinsExist, .monitorsDisconnected,
@@ -200,10 +200,10 @@ extension SettingRuntimeGate {
             // the defaults", which IS the condition.
             return true
         case .reduceMotion, .loginItemServiceStatus,
-            .autoStartLoginOff:
+            .autoStartServiceLoaded:
             // System state, with nothing in this window to look
-            // at. The rows gated on the last two already draw
-            // their reason inline today, which is what
+            // at. The rows gated on these already draw their
+            // reason inline today, which is what
             // `GateReasonPlacementTests` checks this answer
             // against.
             return false

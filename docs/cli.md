@@ -197,21 +197,27 @@ already-running / not-running cases exit 0.
 lock held, brings the running copy forward once — taking focus
 from your terminal — and exits cleanly.
 
-This service is also the supervision half of Settings ▸ General's
-auto-start pair: **Restart if it stops unexpectedly**, first among
-General ▸ Advanced, loads exactly this LaunchAgent, so running
-`service start` and switching that row on are equivalent, and
-`service status` reports the same state — one live source of
-truth, no second store. Its partner, **Start at login**, is
-instead the `SMAppService` login item
-(visible in System Settings ▸ Login Items), a separate path that
-launches KiwiDesk at login without crash supervision. Both launch
-at login; the single-instance lock keeps that to one process, so
-they never conflict (see
-[Accepted limitations](accepted-limitations.md)). To keep the two
+**This service is the only way to get crash supervision** (#1071).
+Settings offers no switch for it: it is a second launcher, and
+running it beside the login item means two mechanisms starting
+KiwiDesk at login, which is a thing to understand rather than a
+checkbox to tick. Settings ▸ General's **Start at login** is the
+`SMAppService` login item (visible in System Settings ▸ Login
+Items) and nothing else — it never touches this agent, and this
+agent never touches it.
+
+Both launch at login. The single-instance lock keeps that to one
+process, so they never fight over your windows — but only the
+launch that *wins* is supervised, so running both means
+supervision is a coin flip (see
+[Accepted limitations](accepted-limitations.md)). Run one: this
+service if you want crash restart, the login item if you do not.
+While the service is loaded, the Settings switch shows as on and
+inert, saying so. To keep the two
 visible to each other, `service status` adds a `login item:` line
 reporting the login-item state, and `service start` prints a note
-when the login item is *also* on. These strings are the login
+when the login item is *also* on — telling you two mechanisms
+will start KiwiDesk, and to run one. These strings are the login
 item's only appearance in CLI output.
 
 ## Commands

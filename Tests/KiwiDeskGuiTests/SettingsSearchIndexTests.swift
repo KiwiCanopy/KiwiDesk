@@ -207,10 +207,10 @@ struct SettingsSearchIndexTests {
                 // anchor yet).
                 .shortcuts: 12,
                 .appRules: 3,
-                // 10: the backup pair and the other General rows
+                // 9: the backup pair and the other General rows
                 // have no #277 catalog anchor. (The deleted
                 // install inventory card was anchored).
-                .general: 10,
+                .general: 9,
             ]
         )
     }

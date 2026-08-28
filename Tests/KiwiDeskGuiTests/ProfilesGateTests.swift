@@ -102,12 +102,14 @@ struct ProfilesGateTests {
                 "\(key.id) names a condition twice"
             )
         }
-        // Vacuity: the sweep must have found the row it is
+        // Vacuity: the sweep must have found the rows it is
         // about, or every check above held over nothing.
         // (`profileBindings` left the compound set with #888 —
-        // its separate-Spaces arm retired, so it is a plain
-        // `.runtime` again and `presetsApply` is the one left.)
-        #expect(compound == 1)
+        // its separate-Spaces arm retired. `presetsApply` and,
+        // since #1071, General's `startAtLogin` — greyed by an
+        // unregisterable copy OR a loaded service — are the
+        // two left.)
+        #expect(compound == 2)
     }
 
     /// No container in this area carries a gate, so the resolver

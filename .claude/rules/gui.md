@@ -440,6 +440,27 @@ gives the tier meaning — `immediateRowsAreGated` pins that every
 hides a user's own configuration from them, which the Shortcuts
 area shipped once. The argument is in `docs/design-decisions.md`.
 
+**A GATED string's audience is decided by its gate, not by the
+surface it renders on.** Weigh a string against *who can see
+it*, not against where it sits: a sentence behind a
+power-user-only condition has a power-user reader by
+construction. #1071 shipped the first shell command in Settings
+copy on that reasoning — the login switch's inert caption, which
+cannot render for anyone who did not run the CLI to reach that
+state. **A second one owes the same test**: name the gate that
+makes its reader a CLI user, or the command does not go in.
+This is not licence for ungated copy — an ungated caption is
+read by everyone, and the GUI curates for them. The argument is
+in `docs/design-decisions.md` ▸ Open at login.
+
+**And the command is an ARGUMENT, never words in the frame** —
+`CommandLiteralCatalogTests`. Spelled into the sentence it
+reaches a translator, and both answers are wrong: translating it
+yields a command that does not exist, keeping it verbatim trips
+`english_residue` and `merge-keys` discards the correct work.
+Interpolated, it is stripped before that check and never enters
+a catalog.
+
 **A live preview that takes a window count owes the arithmetic
 a guard, not a source scan.** Layout Defaults' schematics
 simulate the count the preview's slider supplies, and a
@@ -789,7 +810,7 @@ claim; the obligations a change here takes on:
   own container needs nothing, a row gated from another
   destination owes a LIVE pointer naming that destination, and
   only what falls through all three draws the reason INLINE,
-  outside the dimmed subtree, the way `GeneralRestartRow`
+  outside the dimmed subtree, the way `LoginItemCard`
   already does. What SHAPE the remote
   pointer takes follows from the block: a `?` where there is a
   live label above the dimmed rows to hang one on (Advanced

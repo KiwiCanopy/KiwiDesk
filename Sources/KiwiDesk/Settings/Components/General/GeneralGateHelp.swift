@@ -29,11 +29,33 @@ enum GeneralGateHelp {
                 "general.login_item.unavailable_binary",
                 "Available only when running the KiwiDesk app."
             )
-        case .loginOff:
+        case .managedByService:
+            // The one place Settings names a terminal command,
+            // and it is gated so that only someone who already
+            // used the CLI can see it (#1071): the service is
+            // reachable no other way, so this answers the person
+            // who turned it on rather than advertising it.
+            //
+            // **The command is an ARGUMENT, not prose.** Written
+            // into the sentence it is three ordinary English
+            // words — `service` and `stop` are exactly what a
+            // translator translates — and `english_residue`
+            // proved it both ways: it flags them as untranslated
+            // residue in every non-Latin locale, so a correct
+            // translation would be DISCARDED by `merge-keys`,
+            // while a translated one yields a command that does
+            // not exist. As a specifier it is stripped before
+            // the residue check and never reaches the catalog.
+            // The switch's own label is interpolated for the
+            // same reason #818 gives: naming a control means
+            // interpolating its key, never quoting it.
             return L(
-                "general.advanced.restart_on_crash.needs_login",
-                "Needs “%1$@”, because "
-                    + "the two are one setting to macOS.",
+                "general.login_item.managed_by_service",
+                "KiwiDesk starts at login as a service, which "
+                    + "also restarts it if it stops "
+                    + "unexpectedly. Run “%1$@” to use “%2$@” "
+                    + "instead.",
+                "kiwidesk service stop",
                 L("general.login_item.start", "Start at login")
             )
         }

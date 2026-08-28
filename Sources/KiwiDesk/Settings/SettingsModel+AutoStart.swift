@@ -47,38 +47,37 @@ extension SettingsModel {
         }
     }
 
-    /// Applies a (login, restart) pair.
+    /// The Settings switch's setter: the LOGIN ITEM only
+    /// (#1071). Crash supervision is the CLI's, and this path
+    /// reaches no `ServiceManager` call, so a click taken on a
+    /// stale status cannot unload a service the user started
+    /// from a terminal.
     ///
-    /// The guard is deliberately NOT "is the Advanced row greyed"
-    /// — greying is a courtesy to the reader and `gui.md` bans it
-    /// as the sole gate on a side effect. `AutoStartLevel.level`
-    /// discards the restart flag when login is off, so the
-    /// impossible pair collapses before it can reach the OS.
-    ///
-    /// The unregisterable refusal is the second, independent
-    /// defense inherited from #342: on a translocated or bare
-    /// binary, applying anything but `.off` would write a
-    /// LaunchAgent pointing at an ephemeral path, which
-    /// read-through cannot undo.
-    func setAutoStart(
-        openAtLogin: Bool,
-        restartOnCrash: Bool,
-        reduceMotion: Bool
-    ) {
-        let level = AutoStartLevel.level(
-            openAtLogin: openAtLogin,
-            restartOnCrash: restartOnCrash
-        )
-        guard level != autoStart.level else { return }
-        guard autoStart.registerable || level == .off else {
+    /// The registerability refusal is the same one
+    /// `setAutoStart` carries, and for the same #342 reason: a
+    /// translocated or bare copy would register a login item
+    /// pointing at an ephemeral path, which read-through cannot
+    /// undo. It lives here rather than in the view because the
+    /// harm is a filesystem side effect.
+    func setLoginItem(_ enabled: Bool, reduceMotion: Bool) {
+        // The service owns the answer while it is loaded, so
+        // the model refuses here and not only in the view — a
+        // grey is never the sole gate on a side effect, and
+        // this one writes an OS registration (gui.md). Found by
+        // `greyAndRefusalAgree` once it read the real setter
+        // instead of a copy of the resolver's predicate.
+        guard autoStart.level != .atLoginWithAutoRestart else {
             return
         }
+        guard enabled != autoStart.level.opensAtLogin else {
+            return
+        }
+        guard autoStart.registerable || !enabled else { return }
         autoStartBusy = true
         Task {
-            // Adopt what the OS actually settled on, never the
-            // level that was requested — a failed apply re-reads
-            // to something else and the rows must say so.
-            let result = await AutoStartManager.set(level)
+            let result = await AutoStartManager.setLoginItem(
+                enabled
+            )
             autoStart = result
             autoStartLoaded = true
             autoStartBusy = false

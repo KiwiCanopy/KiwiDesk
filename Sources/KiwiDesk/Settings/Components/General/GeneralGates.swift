@@ -33,6 +33,11 @@ struct GeneralGates {
     /// lives with the renderer, which keeps the whole resolver
     /// assertable off the main actor.
     enum InertReason: Hashable {
+        /// The `kiwidesk service` LaunchAgent is loaded, so it
+        /// already launches KiwiDesk at login and supervises it.
+        /// The login item would only add a second launcher.
+        case managedByService
+
         /// This copy cannot register a login item at all — a bare
         /// binary or a translocated download, neither of which
         /// has the stable `.app` path `SMAppService` needs. Carries
@@ -40,10 +45,6 @@ struct GeneralGates {
         /// Applications vs run the packaged app), which the two
         /// rows would otherwise re-split inline.
         case cannotRegister(LoginItemUnavailable)
-        /// Crash-restart is dead unless KiwiDesk also starts at
-        /// login: the LaunchAgent writes `RunAtLoad` and
-        /// `KeepAlive` as one unit.
-        case loginOff
     }
 
     /// Why `key`'s row is inert right now, or nil while it is
@@ -52,15 +53,21 @@ struct GeneralGates {
         guard key.placement.gate != nil else { return nil }
         switch key {
         case .general(.startAtLogin):
-            return autoStart.unavailable.map(InertReason.cannotRegister)
-        case .general(.advancedRestartOnCrash):
-            // Order matters: an unregisterable copy cannot do
-            // either half, and naming the login dependency there
-            // would send the reader to a row that is itself dead.
+            // Order matters, as it does one case down: a copy
+            // that cannot register at all is the harder stop,
+            // and naming the service there would offer a fix
+            // that would not work either.
             if let cause = autoStart.unavailable {
                 return .cannotRegister(cause)
             }
-            return autoStart.level.opensAtLogin ? nil : .loginOff
+            // The service starts KiwiDesk at login by itself
+            // (`RunAtLoad`), so the login item would be a second
+            // launcher racing the first (#1071). The switch says
+            // what is true — KiwiDesk does start at login — and
+            // stops being editable, because the answer is the
+            // service's to give.
+            return autoStart.level == .atLoginWithAutoRestart
+                ? .managedByService : nil
         default:
             assertionFailure(
                 "unhandled General gate: \(key.id)"
@@ -74,8 +81,7 @@ struct GeneralGates {
     /// it — a new gated row in this area lands in neither set and
     /// reds.
     static let resolved: Set<SettingKey> = [
-        .general(.startAtLogin),
-        .general(.advancedRestartOnCrash),
+        .general(.startAtLogin)
     ]
 
     /// Gated rows the area declares but resolves elsewhere. Empty,
