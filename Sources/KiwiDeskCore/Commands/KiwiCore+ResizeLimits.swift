@@ -76,9 +76,7 @@ extension KiwiCore {
         of id: WindowID,
         axis: String
     ) -> Double {
-        _ = id
-        _ = axis
-        return Double(tiler.settings.minWindowSize)
+        Double(tiler.settings.minWindowSize)
     }
 
     /// One window's ceiling for an interactive press: always
@@ -98,67 +96,64 @@ extension KiwiCore {
         of id: WindowID,
         axis: String
     ) -> Double? {
-        _ = id
-        _ = axis
-        return nil
+        nil
     }
 
     /// The largest effective minimum among `members` — a track
     /// or a stack zone spans every member on its axis, so the
-    /// tightest window binds the whole group — plus the member
-    /// that carries a LEARNED bound above the global floor, the
-    /// honest anchor for a refusal cue. `carrier` is nil when
-    /// only the global floor binds (every member is at the
-    /// minimum at once). An EMPTY group still answers the
-    /// global floor: the ratio caps protect the REGION, not
-    /// only the windows currently in it (#383/#44 — an
-    /// oversized drag must not ratchet the stored ratio to the
-    /// store clamp), while the phantom-neighbor problem an
-    /// empty side poses is the CUE's, which
-    /// `reportResizeRefusal` stands down when no anchor
-    /// exists.
+    /// tightest window binds the whole group. An EMPTY group
+    /// still answers the global floor: the ratio caps protect
+    /// the REGION, not only the windows currently in it
+    /// (#383/#44 — an oversized drag must not ratchet the
+    /// stored ratio to the store clamp), while the
+    /// phantom-neighbor problem an empty side poses is the
+    /// CUE's, which `reportResizeRefusal` stands down when no
+    /// anchor exists.
+    ///
+    /// It returned a `carrier` until #1083 — the member whose
+    /// LEARNED bound stood above the global floor, used to
+    /// anchor a refusal pill on the group-mate that could not
+    /// shrink (#435). With learned bounds out of the press
+    /// path, every member answers the same configured floor, so
+    /// no member can be the distinguished blocker and the
+    /// carrier was structurally nil: a branch that cannot fire.
+    /// It is deleted rather than left standing. The max below
+    /// is therefore a no-op today and deliberately kept — a
+    /// future per-window CONFIGURED minimum makes it meaningful
+    /// again, and the shape is where it would land.
     func effectiveMinSize(
         of members: some Collection<WindowID>,
         axis: String
-    ) -> (size: Double, carrier: WindowID?) {
-        let global = Double(tiler.settings.minWindowSize)
-        var size = global
-        var carrier: WindowID? = nil
+    ) -> Double {
+        var size = Double(tiler.settings.minWindowSize)
         for member in members {
-            let min = effectiveMinSize(of: member, axis: axis)
-            if min > size {
-                size = min
-                carrier = member
-            }
+            size = max(
+                size,
+                effectiveMinSize(of: member, axis: axis)
+            )
         }
-        return (size, carrier)
+        return size
     }
 
     /// Renders the refusal for a clamped write: the own-minimum
-    /// cue when the binding window IS the resized one (or when
-    /// only the global floor binds on a shrink), the
-    /// neighbor-minimum cue anchored on the binding window
-    /// otherwise — the #435 rule: the pill goes on the window
-    /// that cannot move, not the trier.
+    /// own-minimum cue on a shrink, and on a grow the
+    /// neighbor-minimum cue anchored on the window being
+    /// protected — the #435 rule: a GROW's pill goes on the
+    /// window that cannot move, not the trier.
     func reportResizeRefusal(
         focused: WindowID,
-        bindingCarrier: WindowID?,
         fallbackAnchor: WindowID?,
         shrinking: Bool,
         axis: String
     ) {
         if shrinking {
-            if let carrier = bindingCarrier, carrier != focused {
-                // A group-mate's larger floor binds the shrink:
-                // the mate is the window that cannot shrink.
-                refuseGrowAtNeighborMinimum(
-                    focused,
-                    anchor: carrier,
-                    axis: axis
-                )
-            } else {
-                refuseShrinkAtMinimum(focused, axis: axis)
-            }
+            // Always the trier since #1083: the group-mate arm
+            // needed a member whose floor stood ABOVE the
+            // others', which only a learned bound ever produced.
+            // Every member now answers the same configured
+            // floor, so the window that cannot shrink IS the
+            // one being resized.
+            refuseShrinkAtMinimum(focused, axis: axis)
             return
         }
         // A grow cue needs a real neighbor to point at; with no
@@ -166,7 +161,7 @@ extension KiwiCore {
         // and the cue stands down rather than naming a phantom
         // (a lone window's ratio still stops at the store
         // clamp, silently).
-        guard let anchor = bindingCarrier ?? fallbackAnchor,
+        guard let anchor = fallbackAnchor,
             anchor != focused
         else { return }
         refuseGrowAtNeighborMinimum(
@@ -207,8 +202,8 @@ extension KiwiCore {
             proposed,
             base: stack.masterRatio,
             available: span,
-            minLow: masterMin.size,
-            minHigh: stackMin.size
+            minLow: masterMin,
+            minHigh: stackMin
         )
         writeMasterRatio(
             min(max(outcome.value, 0.1), 0.9),
@@ -223,12 +218,10 @@ extension KiwiCore {
         // ran into: the focused zone on a shrink, the other
         // zone on a grow.
         let bindingIsMaster = shrinking ? inMaster : !inMaster
-        let binding = bindingIsMaster ? masterMin : stackMin
         let bindingZone: ArraySlice<WindowID> =
             bindingIsMaster ? master : (stackZone ?? ArraySlice([]))
         reportResizeRefusal(
             focused: focused,
-            bindingCarrier: binding.carrier,
             fallbackAnchor: bindingZone.first(where: {
                 $0 != focused
             }),
@@ -294,8 +287,8 @@ extension KiwiCore {
             proposed,
             base: base,
             available: span,
-            minLow: lowMin.size,
-            minHigh: highMin.size
+            minLow: lowMin,
+            minHigh: highMin
         )
         let value = min(max(outcome.value, 0.1), 0.9)
         if axis == "x" {
@@ -309,11 +302,9 @@ extension KiwiCore {
         let focusedFirst = firstSide.contains(focused)
         let shrinking = deltaSign < 0
         let bindingFirst = shrinking ? focusedFirst : !focusedFirst
-        let binding = bindingFirst ? lowMin : highMin
         let bindingSide = bindingFirst ? firstSide : secondSide
         reportResizeRefusal(
             focused: focused,
-            bindingCarrier: binding.carrier,
             fallbackAnchor: bindingSide.first(where: {
                 $0 != focused
             }),
