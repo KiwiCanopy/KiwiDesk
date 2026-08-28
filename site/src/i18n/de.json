@@ -79,7 +79,7 @@
   "feat_7_title": "Sticky-Fenster",
   "feat_8_body": "Unter VoiceOver beschreiben sich die Einstellungen selbst — jedes Bedienelement nennt seinen Namen und seinen Wert — und sie sind so gebaut, dass du sie komplett über die Tastatur bedienen kannst. Damit die Tastatur wirklich überall hinkommt, muss in macOS „Tastaturnavigation“ eingeschaltet sein.",
   "feat_8_title": "VoiceOver und Tastatur",
-  "feat_9_body": "Wechsle oder verbinde Tabs in Finder, Safari oder Terminal — nichts ordnet sich neu: Das Fenster behält seine Kachel, seine Position in der Reihenfolge und die Einstellung, ob es schwebt. Hinter einem Tab-Wechsel tauscht macOS echte Fenster aus — genau da bricht Tiling sonst.",
+  "feat_9_body": "Wechsle oder verbinde Tabs in Finder, Safari oder Terminal — nichts ordnet sich neu: Das Fenster behält seine Kachel, seine Position in der Reihenfolge und die Einstellung, ob es schwebt. Für einen Fenstermanager ist jeder macOS-Tab ein eigenes Fenster — genau daran scheitert Tiling sonst.",
   "feat_9_title": "Native Tabs behalten ihren Platz",
   "feat_body": "Ein flaches, eindimensionales Fenstermodell — und alles Schnelle, Skriptbare und Sichere, das daraus folgt.",
   "feat_eyebrow": "Warum KiwiDesk",

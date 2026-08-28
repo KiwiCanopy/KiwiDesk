@@ -79,7 +79,7 @@
   "feat_7_title": "Sticky windows",
   "feat_8_body": "Settings narrates itself under VoiceOver — every control announces its name and its value — and is built to be driven entirely from the keyboard. Full keyboard reach needs macOS’s own Keyboard navigation setting.",
   "feat_8_title": "VoiceOver and keyboard",
-  "feat_9_body": "Switch or merge tabs in Finder, Safari or Terminal and nothing reshuffles: the window keeps its tile, its float state and its place in the order. macOS swaps real windows behind a tab switch — the moment tiling usually breaks.",
+  "feat_9_body": "Switch or merge tabs in Finder, Safari or Terminal and nothing reshuffles: the window keeps its tile, its float state and its place in the order. To a window manager, every macOS tab is a separate window — which is where tiling usually falls apart.",
   "feat_9_title": "Native tabs stay put",
   "feat_body": "A flat, one-dimensional window model — and everything fast, scriptable, and safe that falls out of it.",
   "feat_eyebrow": "Why KiwiDesk",
