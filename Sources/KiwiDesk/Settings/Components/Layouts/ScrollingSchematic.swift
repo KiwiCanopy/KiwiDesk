@@ -38,6 +38,17 @@ struct ScrollingSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    /// The restage damping, gated on Reduce Motion (#1069) —
+    /// the arrangement still redraws, it just stops travelling.
+    /// The ternary is spelled here rather than folded into
+    /// `LayoutSchematic.damping`; that file says why.
+    private var damping: Animation? {
+        reduceMotion ? nil : LayoutSchematic.damping
+    }
+
     /// The monitor's share of the canvas along the scroll axis.
     ///
     /// At `.panel` it is a slice of a wider canvas, so the
@@ -132,11 +143,11 @@ struct ScrollingSchematic: View {
             GeometryReader { geo in
                 strip(geo.size)
             }
-            .animation(LayoutSchematic.damping, value: anchor)
-            .animation(LayoutSchematic.damping, value: orientation)
-            .animation(LayoutSchematic.damping, value: slotSize)
-            .animation(LayoutSchematic.damping, value: placement)
-            .animation(LayoutSchematic.damping, value: windows)
+            .animation(damping, value: anchor)
+            .animation(damping, value: orientation)
+            .animation(damping, value: slotSize)
+            .animation(damping, value: placement)
+            .animation(damping, value: windows)
         }
     }
 

@@ -53,7 +53,16 @@ extension SourceScan {
 
     /// Everything before the first top-level comma, collapsed to
     /// single spaces (string- and nesting-aware).
-    private static func firstArgument(of args: String) -> String {
+    ///
+    /// Internal, not private: `ReduceMotionGateTests` asks the
+    /// same question of `.animation(_:value:)` — which argument
+    /// is the ANIMATION — and a second splitter beside this one
+    /// was the weaker copy, tracking bracket depth but not
+    /// string literals, so an argument carrying a quoted comma
+    /// split wrong and the gate read a truncated expression
+    /// (code review, #1069). That is the drift this file's
+    /// header names.
+    static func firstArgument(of args: String) -> String {
         var depth = 0
         var inString = false
         var result = ""

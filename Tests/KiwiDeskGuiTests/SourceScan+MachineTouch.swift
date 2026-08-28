@@ -53,11 +53,7 @@ extension SourceScan {
                                 before: hit.lowerBound
                             )
                         ]
-                        if before.isLetter || before.isNumber
-                            || before == "_"
-                        {
-                            continue
-                        }
+                        if isIdentifier(before, orDot: false) { continue }
                     }
                     found.append(
                         MachineTouchSite(

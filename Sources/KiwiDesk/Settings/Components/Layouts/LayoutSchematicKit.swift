@@ -19,8 +19,15 @@ enum LayoutSchematic {
     static let stroke = SettingsTheme.accent.opacity(0.6)
 
     /// Short enough to track a live slider drag without visible
-    /// lag; still smooths stepper/typed jumps. Mirrors
-    /// `GapsDiagram`.
+    /// lag; still smooths stepper/typed jumps, and the gaps
+    /// diagram reads it too rather than re-spelling it.
+    ///
+    /// A plain VALUE: the tuning is shared, the Reduce Motion
+    /// gate is not. Each caller spells
+    /// `reduceMotion ? nil : LayoutSchematic.damping` itself,
+    /// and folding that ternary in here is the one edit this
+    /// docstring exists to refuse — `.claude/rules/gui.md` ▸ the
+    /// Reduce Motion gate argues why (#1069).
     static let damping = Animation.easeOut(duration: 0.12)
 
     /// The window count the live preview opens on, and the band

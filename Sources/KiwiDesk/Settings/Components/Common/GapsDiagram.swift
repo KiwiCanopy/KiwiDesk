@@ -39,6 +39,19 @@ enum GapPreviewScale {
 struct GapsDiagram: View {
     let outer: Gaps.Outer
     let inner: Gaps.Inner
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    /// The schematics' damping, gated (#1069) — the diagram
+    /// still redraws at the staged gaps, it just stops
+    /// travelling there. READ from `LayoutSchematic`, not
+    /// re-spelled: the gate rule asks only that the ternary be
+    /// local, and this diagram is one of that family's pictures,
+    /// so a second copy of the duration is two tunings nothing
+    /// holds equal (code review, #1069).
+    private var damping: Animation? {
+        reduceMotion ? nil : LayoutSchematic.damping
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -82,10 +95,8 @@ struct GapsDiagram: View {
             .padding(.trailing, mini(outer.right))
         }
         .frame(width: 140, height: 96)
-        // Short enough to track a live slider drag without
-        // visible lag; still smooths stepper/typed jumps.
-        .animation(.easeOut(duration: 0.12), value: outer)
-        .animation(.easeOut(duration: 0.12), value: inner)
+        .animation(damping, value: outer)
+        .animation(damping, value: inner)
     }
 
     private var windowPair: some View {

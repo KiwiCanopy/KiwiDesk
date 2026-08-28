@@ -37,6 +37,17 @@ struct GridSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    /// The restage damping, gated on Reduce Motion (#1069) —
+    /// the arrangement still redraws, it just stops travelling.
+    /// The ternary is spelled here rather than folded into
+    /// `LayoutSchematic.damping`; that file says why.
+    private var damping: Animation? {
+        reduceMotion ? nil : LayoutSchematic.damping
+    }
+
     var columnsFirst: Bool {
         splitDirection == .horizontal
     }
@@ -62,22 +73,13 @@ struct GridSchematic: View {
         ) {
             frame
                 .padding(6)
-                .animation(LayoutSchematic.damping, value: windows)
-                .animation(LayoutSchematic.damping, value: columns)
-                .animation(LayoutSchematic.damping, value: rows)
-                .animation(LayoutSchematic.damping, value: type)
-                .animation(
-                    LayoutSchematic.damping,
-                    value: autoSize
-                )
-                .animation(
-                    LayoutSchematic.damping,
-                    value: splitDirection
-                )
-                .animation(
-                    LayoutSchematic.damping,
-                    value: placement
-                )
+                .animation(damping, value: windows)
+                .animation(damping, value: columns)
+                .animation(damping, value: rows)
+                .animation(damping, value: type)
+                .animation(damping, value: autoSize)
+                .animation(damping, value: splitDirection)
+                .animation(damping, value: placement)
         }
     }
 
@@ -203,9 +205,9 @@ struct GridSchematic: View {
                 }
             }
         }
-        .animation(LayoutSchematic.damping, value: fillEmptyCells)
-        .animation(LayoutSchematic.damping, value: splitDirection)
-        .animation(LayoutSchematic.damping, value: placement)
+        .animation(damping, value: fillEmptyCells)
+        .animation(damping, value: splitDirection)
+        .animation(damping, value: placement)
     }
 
     /// Whether the last window spans the leftover cell. Only a

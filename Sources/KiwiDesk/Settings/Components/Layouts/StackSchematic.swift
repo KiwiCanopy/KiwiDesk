@@ -36,6 +36,17 @@ struct StackSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    /// The restage damping, gated on Reduce Motion (#1069) —
+    /// the arrangement still redraws, it just stops travelling.
+    /// The ternary is spelled here rather than folded into
+    /// `LayoutSchematic.damping`; that file says why.
+    private var damping: Animation? {
+        reduceMotion ? nil : LayoutSchematic.damping
+    }
+
     /// Derived, like the engine (`StackPosition.stackOrientation`).
     /// Internal (not private) for `StackSchematic+Slots.swift`.
     var stackOrientation: StackParams.Orientation {
@@ -135,22 +146,13 @@ struct StackSchematic: View {
             GeometryReader { geo in
                 zones(in: geo.size)
             }
-            .animation(LayoutSchematic.damping, value: windows)
-            .animation(LayoutSchematic.damping, value: masterCount)
-            .animation(LayoutSchematic.damping, value: masterRatio)
-            .animation(
-                LayoutSchematic.damping,
-                value: overflowStyle
-            )
-            .animation(
-                LayoutSchematic.damping,
-                value: masterOrientation
-            )
-            .animation(
-                LayoutSchematic.damping,
-                value: stackPosition
-            )
-            .animation(LayoutSchematic.damping, value: placement)
+            .animation(damping, value: windows)
+            .animation(damping, value: masterCount)
+            .animation(damping, value: masterRatio)
+            .animation(damping, value: overflowStyle)
+            .animation(damping, value: masterOrientation)
+            .animation(damping, value: stackPosition)
+            .animation(damping, value: placement)
         }
     }
 

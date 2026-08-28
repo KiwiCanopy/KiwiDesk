@@ -24,6 +24,17 @@ struct MonocleSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    /// The restage damping, gated on Reduce Motion (#1069) —
+    /// the arrangement still redraws, it just stops travelling.
+    /// The ternary is spelled here rather than folded into
+    /// `LayoutSchematic.damping`; that file says why.
+    private var damping: Animation? {
+        reduceMotion ? nil : LayoutSchematic.damping
+    }
+
     private var horizontal: Bool { orientation == .horizontal }
     private var parked: Bool { hideStyle == .park }
 
@@ -69,9 +80,9 @@ struct MonocleSchematic: View {
                 }
                 chevrons
             }
-            .animation(LayoutSchematic.damping, value: orientation)
-            .animation(LayoutSchematic.damping, value: windows)
-            .animation(LayoutSchematic.damping, value: hideStyle)
+            .animation(damping, value: orientation)
+            .animation(damping, value: windows)
+            .animation(damping, value: hideStyle)
         }
     }
 

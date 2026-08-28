@@ -976,10 +976,13 @@ stopped at `Settings/`.
 
 ## The Reduce Motion gate
 
-**Every `withAnimation` under `Sources/KiwiDesk` names its
+**Every animation started under `Sources/KiwiDesk` names its
 Reduce Motion gate IN ITS ARGUMENT** — `reduceMotion ? nil : x`,
-or a binding that makes that choice. One canonical form, because
-the alternative spelling cannot be guarded: recognising
+or a binding that makes that choice — on both ways in: the
+imperative `withAnimation`, and the `.animation(_:value:)`
+modifier, whose animation is the FIRST argument (the value it
+keys on is the second and gates nothing). One canonical form,
+because the alternative spelling cannot be guarded: recognising
 `if reduceMotion { … } else { withAnimation … }` needs a
 proximity window, and a window wide enough to span the `else` is
 also satisfied by an unrelated mention of the word — a function's
@@ -1002,15 +1005,60 @@ still reaches its target — arriving rather than travelling. The
 user-facing statement of that split is `docs/ui-patterns.md` ▸
 Interaction states.
 
-**The guard's reach is `withAnimation` only.** The
-`.animation(_:value:)` modifier starts motion too and is not
-watched: the same needle over it surfaced 49 sites, ~40 of them
-the layout schematics' shared `LayoutSchematic.damping`, which
-is a sweep with per-site rulings rather than a guard clause.
-Two were gated by hand in #989 — `ProfilesSection`'s reorder
-(named in the issue) and `InactiveDimmed`'s window fade — and
-the rest are unmeasured, so a new `.animation(` site is
-review's to gate, not the guard's to catch.
+**Half the invariant is no invariant**, which is what watching
+one spelling cost: #989 gated and guarded every `withAnimation`,
+and pointing the same needle at `.animation(` immediately
+surfaced 44 ungated sites beside them — the layout schematics'
+shared `LayoutSchematic.damping`, and six sites elsewhere
+(#1069). A guard green on one spelling reads as
+"every animation is gated", which is why the suite's
+`entryPoints` is the census of the spellings that START motion,
+and **a new spelling joins it in the change that introduces it**.
+That obligation is held rather than asked for, as far as a
+list can hold it: the spellings nothing scans —
+`ReduceMotionCensusTests`' `uncensusedCalls` and
+`uncensusedTypes` are the register — are pinned at zero
+occurrences, so the first one to arrive reds and its author
+gates it and moves the needle across, narrows the needle, or
+rules the site in that suite's `ruled` map. What the author
+must not do is drop the entry, which un-watches the
+motion-starting use along with whatever fired. Both clauses
+match through the one whitespace-tolerant walk rather than a
+substring test: narrowing a needle to `symbolEffect(` to stop a
+disabling spelling firing re-opens the fail-open the walk
+exists for, since `.symbolEffect (…)` compiles (guard-prover).
+Left to a sentence it would have gone the way of the first
+census: one `.transaction { $0.animation = … }` in the
+schematics' shared host re-animates every one of them for a
+Reduce Motion user, and their own gated chains cover named
+values only, so nothing downstream stops it.
+
+**The obligation is `Sources/KiwiDesk`'s**, and a green guard
+says that tree honours the setting rather than that the app
+does. `Sources/KiwiDeskCore` draws the bars and the border cues
+through AppKit and Core Animation, outside this guard's reach,
+so **a Core animation is gated at its own site or it is
+ungated** — nothing there is covered by being in a tree that
+has a guard. Where each stood in 2026-08 is worth knowing and
+is not a rule: the border cues read
+`accessibilityDisplayShouldReduceMotion` themselves, and the
+bars read no setting at all.
+
+**A shared animation constant stays a plain VALUE; the gate is
+spelled at each caller.** Sharing the TUNING is fine — every
+layout schematic reads `LayoutSchematic.damping`, and so does
+the gaps diagram beside them — but folding the ternary into
+that shared accessor puts the gate one indirection past what a
+source scan can follow: deleting it there ungates the lot in
+one line while every call-site
+binding still mentions `reduceMotion`, and the guard stays green
+(guard-prover, #1069). So each schematic spells
+`reduceMotion ? nil : LayoutSchematic.damping` in its own
+`damping` binding. That is duplication the guard can SEE, which
+beats an abstraction it cannot — the same trade #989 made in
+rejecting the `if reduceMotion { … } else { … }` spelling. A
+model, having no environment, is the one caller that reaches the
+flag through a parameter instead.
 
 `ReduceMotionGateTests` holds it **per call, never per file**:
 one gated call and one ungated call in the same file is exactly
@@ -1018,7 +1066,11 @@ what a whole-file needle passes, and five sites shipped ungated
 at once because nothing watched them (#989). Its `allowed` map
 is the one copy of who may skip the gate, and it is empty by
 design — an entry there is a ruling that some motion must run
-even for a user who asked for less.
+even for a user who asked for less. An activity indicator is
+the case that looks like one and is NOT — `WaitingDot`'s own
+doc comment rules what that mark keeps and what it drops, and
+`OnboardingProgressRow` never had a claim, the pips it fills
+being a static state it draws either way.
 
 ## SwiftUI traps
 

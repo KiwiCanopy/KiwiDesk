@@ -109,10 +109,7 @@ extension SourceScan {
         at index: Int
     ) -> Bool {
         guard index > 0 else { return true }
-        let previous = text[index - 1]
-        return
-            !(previous.isLetter || previous.isNumber
-            || previous == "_" || previous == ".")
+        return !isIdentifier(text[index - 1], orDot: true)
     }
 
     /// `SettingsDestination.<case>.title` → the key that case
