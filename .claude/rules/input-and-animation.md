@@ -60,7 +60,10 @@ editing here:
     conformance. A run is additionally bounded by
     `HoldRepeat.maxRunSeconds` against a lost release event —
     the #611 force-settle shape, reported through the
-    manager's log seam, never silent.
+    manager's log seam, never silent (the overrun-to-log
+    wiring is pinned by `HoldRepeatWiringTests`, since the
+    seam defaults silent and every machine harness assigns it
+    by hand).
 
   The product rulings (resize-only, the tally, acceleration)
   are argued in `docs/design-decisions.md` ▸ "A held resize

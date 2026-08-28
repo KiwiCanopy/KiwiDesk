@@ -115,4 +115,43 @@ struct HoldRepeatAccelerationTests {
         fire(press: false)
         #expect(delays == [base])
     }
+
+    @Test("The interval base is read once, at the arming press")
+    func intervalBaseReadsOncePerRun() {
+        // The ramp's base must not shift mid-hold, and the
+        // system read is off the repeat hot path — a counting
+        // closure discriminates where a constant one cannot
+        // (re-review, #1056): a regression re-reading per tick
+        // both bumps the count and schedules off 0.4.
+        let engine = HoldRepeat()
+        engine.releaseCapable = true
+        engine.initialDelay = { 0.5 }
+        var reads = 0
+        engine.interval = {
+            reads += 1
+            return reads == 1 ? 0.1 : 0.4
+        }
+        var delays: [TimeInterval] = []
+        var pending: (() -> Void)?
+        engine.schedule = { delay, work in
+            delays.append(delay)
+            pending = work
+            return {}
+        }
+        engine.fire = { _ in }
+
+        func fire(press: Bool) {
+            _ = engine.beginFire()
+            engine.noteCommand("resize", succeeded: true)
+            engine.endFire(id: 1, press: press)
+        }
+
+        fire(press: true)
+        for _ in 1...3 {
+            pending?()
+            fire(press: false)
+        }
+        #expect(reads == 1)
+        #expect(delays == [0.5, 0.1, 0.1, 0.1])
+    }
 }

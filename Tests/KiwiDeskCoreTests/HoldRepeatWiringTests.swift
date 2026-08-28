@@ -309,6 +309,24 @@ struct HoldRepeatWiringTests {
         #expect(f.ticks.isEmpty)
     }
 
+    @Test("An overrun rescue reaches the log seam")
+    func overrunReportsThroughTheLogSeam() throws {
+        // The run bound is a rescue for a LOST stop signal, so
+        // its report must not itself be a seam nobody wired —
+        // `HoldRepeat.onOverrun` defaults to silent, and every
+        // machine harness assigns it by hand (re-review,
+        // #1056; the `engineLogReachesTheCore` shape). This
+        // reds if `wireHoldRepeat` stops assigning it; the
+        // manager-to-core log hop is the log-seam suites' job.
+        let f = try Fixture(
+            body: #"KiwiDesk.resize("x", 50)"#
+        )
+        var logs: [String] = []
+        f.core.keys.onLog = { logs.append($0) }
+        f.core.keys.holdRepeat.onOverrun()
+        #expect(logs.contains { $0.contains("hold-repeat") })
+    }
+
     @Test("Suspend and a layer switch cancel a live run")
     func teardownPathsCancel() throws {
         let f = try Fixture(

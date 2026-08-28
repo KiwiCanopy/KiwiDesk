@@ -225,10 +225,14 @@ struct HoldRepeatTests {
         // press mid-fire (the case `KeybindingManager.fire`'s
         // `wasFiring` exists for). The inner fire judges its own
         // tally; the outer fire's counts come back via the
-        // snapshot and are judged on their own.
+        // snapshot and are judged on their own. The OUTER fire
+        // is a lone `focus` — deliberately different from the
+        // inner's lone `resize`, so a broken save/restore
+        // (re-review, #1056) leaves the inner's arming tally
+        // behind and the outer press wrongly arms below.
         let h = Harness()
         _ = h.repeatEngine.beginFire()
-        h.repeatEngine.noteCommand("resize", succeeded: true)
+        h.repeatEngine.noteCommand("focus", succeeded: true)
 
         // Nested press: one successful resize — arms id 2.
         let saved = h.repeatEngine.beginFire()
@@ -237,11 +241,10 @@ struct HoldRepeatTests {
         #expect(h.repeatEngine.heldID == 2)
         h.repeatEngine.restoreTally(saved)
 
-        // The outer fire runs a second command and closes: two
-        // commands total, so it must not arm — and had the
-        // snapshot leaked, the inner's lone resize would have
-        // made it look like one.
-        h.repeatEngine.noteCommand("focus", succeeded: true)
+        // The outer press closes on its own tally — one focus,
+        // never repeatable — so it replaces the inner hold and
+        // arms nothing. A leaked inner tally reads as one
+        // successful resize here and arms id 1 instead.
         h.repeatEngine.endFire(id: 1, press: true)
         #expect(h.repeatEngine.heldID == nil)
     }
