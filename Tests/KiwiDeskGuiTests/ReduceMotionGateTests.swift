@@ -96,7 +96,8 @@ struct ReduceMotionGateTests {
                             open: "(",
                             close: ")"
                         ) ?? ""
-                    if !Self.gates(Self.animationArgument(args), in: source) {
+                    let animation = SourceScan.firstArgument(of: args)
+                    if !Self.gates(animation, in: source) {
                         ungated.append("\(name) [\(entry)]")
                     }
                 }
@@ -118,27 +119,6 @@ struct ReduceMotionGateTests {
             )
         }
         #expect(ungated.isEmpty, "ungated: \(ungated)")
-    }
-
-    /// The animation argument alone. `.animation(_:value:)`
-    /// carries the value it keys on as a second argument, and
-    /// only the first one is the animation — split at the
-    /// top-level comma, since an animation may carry commas of
-    /// its own (`.spring(response:dampingFraction:)`).
-    private static func animationArgument(
-        _ args: String
-    ) -> String {
-        var depth = 0
-        for (offset, character) in args.enumerated() {
-            switch character {
-            case "(", "[": depth += 1
-            case ")", "]": depth -= 1
-            case "," where depth == 0:
-                return String(args.prefix(offset))
-            default: break
-            }
-        }
-        return args
     }
 
     /// Whether an argument can resolve to no animation: it

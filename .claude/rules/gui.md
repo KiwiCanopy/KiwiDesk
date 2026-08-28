@@ -1009,44 +1009,46 @@ Interaction states.
 one spelling cost: #989 gated and guarded every `withAnimation`,
 and pointing the same needle at `.animation(` immediately
 surfaced 44 ungated sites beside them — the layout schematics'
-shared `LayoutSchematic.damping`, and six hover, focus and
-progress fades (#1069). A guard green on one spelling reads as
+shared `LayoutSchematic.damping`, and six sites elsewhere
+(#1069). A guard green on one spelling reads as
 "every animation is gated", which is why the suite's
 `entryPoints` is the census of the spellings that START motion,
 and **a new spelling joins it in the change that introduces it**.
-That obligation is held rather than asked for: the spellings
-nothing scans — `withTransaction`, `.transaction`,
-`phaseAnimator`, `symbolEffect` and the AppKit/Core Animation
-ones — are pinned at zero occurrences by
-`ReduceMotionCensusTests`, so the first one to arrive reds and
-its author
-either gates it and moves the needle across, or narrows the
-needle — never drops the entry, which un-watches the
+That obligation is held rather than asked for, as far as a
+list can hold it: the spellings nothing scans —
+`ReduceMotionCensusTests`' `uncensusedCalls` and
+`uncensusedTypes` are the register — are pinned at zero
+occurrences, so the first one to arrive reds and its author
+gates it and moves the needle across, narrows the needle, or
+rules the site in that suite's `ruled` map. What the author
+must not do is drop the entry, which un-watches the
 motion-starting use along with whatever fired. Both clauses
 match through the one whitespace-tolerant walk rather than a
 substring test: narrowing a needle to `symbolEffect(` to stop a
 disabling spelling firing re-opens the fail-open the walk
 exists for, since `.symbolEffect (…)` compiles (guard-prover).
-Left to a sentence it would have gone the way of the
-first census: one `.transaction { $0.animation = … }` in the
-schematics' shared host re-animates all seven for a Reduce
-Motion user, and their own gated chains cover named values
-only, so nothing downstream stops it.
+Left to a sentence it would have gone the way of the first
+census: one `.transaction { $0.animation = … }` in the
+schematics' shared host re-animates every one of them for a
+Reduce Motion user, and their own gated chains cover named
+values only, so nothing downstream stops it.
 
 **The obligation is `Sources/KiwiDesk`'s**, and a green guard
 says that tree honours the setting rather than that the app
-does. `Sources/KiwiDeskCore` draws the bars and the focus
-borders through the same AppKit and Core Animation calls and is
-outside it — deliberately, since those overlays answer to the
-Motion card rather than to Settings' own chrome, but the
-distinction is the kind a green is read straight past.
+does. `Sources/KiwiDeskCore` draws the bars and the border cues
+through AppKit and Core Animation, outside this guard's reach —
+the border cues read `accessibilityDisplayShouldReduceMotion` at
+their own call sites, and the bars' frame slide reads nothing at
+all. A green here is evidence about neither: **a Core animation
+is gated at its own site or it is ungated.**
 
 **A shared animation constant stays a plain VALUE; the gate is
-spelled at each caller.** Sharing the TUNING is fine — the eight
-layout schematics all read `LayoutSchematic.damping` — but
-folding the ternary into that shared accessor puts the gate one
-indirection past what a source scan can follow: deleting it
-there ungates ~40 sites in one line while every call-site
+spelled at each caller.** Sharing the TUNING is fine — every
+layout schematic reads `LayoutSchematic.damping`, and so does
+the gaps diagram beside them — but folding the ternary into
+that shared accessor puts the gate one indirection past what a
+source scan can follow: deleting it there ungates the lot in
+one line while every call-site
 binding still mentions `reduceMotion`, and the guard stays green
 (guard-prover, #1069). So each schematic spells
 `reduceMotion ? nil : LayoutSchematic.damping` in its own
@@ -1063,10 +1065,10 @@ at once because nothing watched them (#989). Its `allowed` map
 is the one copy of who may skip the gate, and it is empty by
 design — an entry there is a ruling that some motion must run
 even for a user who asked for less. An activity indicator is
-the case that looks like one and is NOT: `WaitingDot` keeps its
-mark and drops its travel, which is the split read plainly, and
-`OnboardingProgressRow` never had a claim — the pips it fills
-are a static state it draws either way.
+the case that looks like one and is NOT — `WaitingDot`'s own
+doc comment rules what that mark keeps and what it drops, and
+`OnboardingProgressRow` never had a claim, the pips it fills
+being a static state it draws either way.
 
 ## SwiftUI traps
 

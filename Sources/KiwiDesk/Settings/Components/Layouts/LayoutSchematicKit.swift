@@ -22,17 +22,12 @@ enum LayoutSchematic {
     /// lag; still smooths stepper/typed jumps. Mirrors
     /// `GapsDiagram`.
     ///
-    /// A plain VALUE, and deliberately not gate-aware (#1069).
-    /// Each schematic names `reduceMotion ? nil : ` in its own
-    /// `damping` binding instead, which is duplication the guard
-    /// can SEE: fold the gate in here and one deleted ternary
-    /// ungates all ~40 schematic sites at once while every
-    /// call-site binding still mentions the flag and
-    /// `ReduceMotionGateTests` stays green — the same
-    /// indirection #989 rejected the `if reduceMotion { … }`
-    /// spelling for, one level further out (guard-prover).
-    ///
-    /// The tuning stays shared; only the gate is local.
+    /// A plain VALUE: the tuning is shared, the Reduce Motion
+    /// gate is not. Each caller spells
+    /// `reduceMotion ? nil : LayoutSchematic.damping` itself,
+    /// and folding that ternary in here is the one edit this
+    /// docstring exists to refuse — `.claude/rules/gui.md` ▸ the
+    /// Reduce Motion gate argues why (#1069).
     static let damping = Animation.easeOut(duration: 0.12)
 
     /// The window count the live preview opens on, and the band

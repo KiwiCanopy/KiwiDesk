@@ -50,10 +50,10 @@ extension SourceScan {
             // the RECEIVER, so a boundary there refuses
             // `field.animation(…)` — every inline chain — and
             // leaves only calls whose receiver ended on the
-            // previous line. The tree writes all 55 at the
-            // start of a chain line, so the count parity stayed
-            // exact and hid it completely (guard-prover). The
-            // leading `.` IS the boundary for those.
+            // previous line. The tree writes them at the start
+            // of a chain line, so the count parity stayed exact
+            // and hid it completely (guard-prover). The leading
+            // `.` IS the boundary for those.
             if Self.needsBoundary(entry), start > 0,
                 Self.isIdentifier(source[start - 1])
             {
@@ -120,10 +120,21 @@ extension SourceScan {
         needle.first != "."
     }
 
-    static func isIdentifier(_ character: Character)
-        -> Bool
-    {
+    /// Whether `character` continues an identifier — the
+    /// family's ONE copy of that predicate. `orDot` adds `.`,
+    /// which `SourceScan+InterpolatedLabels` needs so a dotted
+    /// path (`fileURL(`) does not read as a bare `L(` call.
+    ///
+    /// Three hand-spellings of this lived here before, and the
+    /// difference between them is exactly the subtle part: this
+    /// diff's own history is a dot-prefix mistake that cost the
+    /// gate clause every inline call site for a commit, without
+    /// moving a single count (code review, #1069).
+    static func isIdentifier(
+        _ character: Character,
+        orDot: Bool = false
+    ) -> Bool {
         character.isLetter || character.isNumber
-            || character == "_"
+            || character == "_" || (orDot && character == ".")
     }
 }

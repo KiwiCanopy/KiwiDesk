@@ -30,10 +30,11 @@ struct ReduceMotionCensusTests {
     ///
     /// So this fails SHUT rather than tracking the tree. An
     /// entry firing is not a defect in itself — it means a
-    /// spelling arrived, and the author owes the choice: gate
-    /// the site and move the needle into `entryPoints`, or
-    /// narrow the needle. Dropping the entry outright is the
-    /// one disposition that is almost never right, since it
+    /// spelling arrived, and the author owes one of three
+    /// dispositions: gate the site and move the needle into
+    /// `entryPoints`; narrow the needle; or, where the site
+    /// genuinely starts no motion, rule it in `ruled`. Dropping
+    /// the entry is the one that is almost never right, since it
     /// un-watches the motion-starting use along with whatever
     /// fired.
     ///
@@ -66,10 +67,8 @@ struct ReduceMotionCensusTests {
     ///
     /// **Scope: `Sources/KiwiDesk`**, so a green here says the
     /// GUI tree honours the setting, NOT that the app's chrome
-    /// does. `Sources/KiwiDeskCore` draws the bars and the
-    /// borders through this same AppKit/Core Animation family
-    /// and is out of `gui.md`'s obligation; reading a green as
-    /// wider is the #1069 mistake told again (guard-prover).
+    /// does — `.claude/rules/gui.md` ▸ the Reduce Motion gate
+    /// rules what that leaves to Core and what it does not.
     ///
     /// Call spellings, matched through `callSites` — the same
     /// whitespace-tolerant walk the gate clause uses, and NOT a
@@ -111,6 +110,21 @@ struct ReduceMotionCensusTests {
         "CASpringAnimation", "CAAnimationGroup",
     ]
 
+    /// Sites ruled to keep an uncensused spelling, keyed
+    /// `File.swift: spelling`, each entry naming the ruling —
+    /// the one copy of who is exempt, the shape every sibling
+    /// scan guard in `gui.md` carries.
+    ///
+    /// It exists because two of the false-fire classes above fit
+    /// NEITHER other disposition (code review, #1069): a
+    /// suppression spelling and a shared-name dotted call start
+    /// no motion and cannot be narrowed away, so without a seam
+    /// the only escape left is deleting a needle — which
+    /// silently un-watches a whole spelling, and is how a census
+    /// guard dies. Empty by design; an entry is a ruling, not a
+    /// silencer.
+    private static let ruled: [String: String] = [:]
+
     @Test("No uncensused way to start motion ships")
     func everyMotionSpellingIsCensused() throws {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -132,17 +146,13 @@ struct ReduceMotionCensusTests {
                     closureCounts: true
                 ).isEmpty
             {
-                found.append(
-                    "\(file.lastPathComponent): \(spelling)"
-                )
+                Self.record(spelling, in: file, into: &found)
             }
             for spelling in Self.uncensusedTypes
             where source.contains(spelling)
                 && SourceScan.mentions(spelling, in: text)
             {
-                found.append(
-                    "\(file.lastPathComponent): \(spelling)"
-                )
+                Self.record(spelling, in: file, into: &found)
             }
         }
         // A clause whose expected result is zero matches passes
@@ -157,9 +167,37 @@ struct ReduceMotionCensusTests {
             """
             starts motion with no needle watching it — gate the \
             site and move the spelling into entryPoints, or \
-            narrow the needle. Dropping the entry un-watches \
-            the motion-starting use with it: \(found)
+            narrow the needle, or rule it in `ruled`. Dropping \
+            the entry un-watches the motion-starting use with \
+            it: \(found)
             """
         )
+        #expect(
+            Self.ruled.keys.allSatisfy(Self.namesAWatchedSpelling),
+            "a ruling names a spelling no needle watches"
+        )
+    }
+
+    /// One find, unless a ruling covers it.
+    private static func record(
+        _ spelling: String,
+        in file: URL,
+        into found: inout [String]
+    ) {
+        let key = "\(file.lastPathComponent): \(spelling)"
+        guard ruled[key] == nil else { return }
+        found.append(key)
+    }
+
+    /// A ruling for a spelling no needle carries watches
+    /// nothing, and reads as coverage this has never had.
+    private static func namesAWatchedSpelling(_ key: String)
+        -> Bool
+    {
+        let spelling =
+            key.split(separator: " ").last
+            .map(String.init) ?? ""
+        return uncensusedCalls.contains(spelling)
+            || uncensusedTypes.contains(spelling)
     }
 }

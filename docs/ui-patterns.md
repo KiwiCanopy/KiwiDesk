@@ -815,10 +815,11 @@ of whatever object the picture is of — never from live window
 state, no AX calls. This is the one non-negotiable: it upholds
 the #123 never-live-apply principle (a preview answers "what would this
 look like" without mutating the session). No hover, no
-tap-to-inspect, no drag-to-preview, and **no animation** — a
+tap-to-inspect, no drag-to-preview, and **no idle animation** —
+a schematic eases between staged values, but nothing loops. A
 looping animation would be architecturally legal (canned,
-config-driven) but was rejected on cost: a timer/reduce-motion
-state machine in every tile for a pane open seconds at a time.
+config-driven) and was rejected on cost: a timer in every tile
+for a pane open seconds at a time.
 *Every tunable layout gets a schematic, Monocle included* — it
 draws the **navigation model** (a fan of full-screen cards +
 `orientation` cycle chevrons), not geometry, which both honours
@@ -1035,12 +1036,12 @@ family must be focusable so the chord has a target. (#845; the
 seam and its guard are engineering-side, `.claude/rules/gui.md`
 ▸ the keyboard path.)
 
-**Every animation KiwiDesk's own windows play honours Reduce
-Motion.** Their motion — a caption fading in, a list springing
-into its new order after a reorder, the scroll that carries you
-to a search hit, a layout preview re-flowing as you drag its
-window-count slider, a hover or focus fade, the setup tour's
-progress row — stands down when macOS
+**Every animation the Settings window and the setup tour play
+honours Reduce Motion.** Their motion — a caption fading in, a
+list springing into its new order after a reorder, the scroll
+that carries you to a search hit, a layout preview or the gaps
+diagram re-flowing as you drag a slider, a hover or focus fade,
+the setup tour's progress row — stands down when macOS
 **System Settings ▸ Accessibility ▸ Reduce Motion** is on. It
 stands down by dropping the *motion*, never the affordance: the
 caption still appears and still leaves, the rows still land in
@@ -1052,11 +1053,12 @@ move; the system setting wins over both. (#989, #1069; the
 engineering obligation and its guard are
 `.claude/rules/gui.md` ▸ the Reduce Motion gate.)
 
-The one thing that keeps moving is a mark whose *movement is
-the message*: the permission step's amber dot pulses to say the
-app is still watching for your answer. Under Reduce Motion it
-stops pulsing and stays put — the mark remains, so the sentence
-it belongs to is still marked.
+Nothing is exempt, including the marks whose movement carries
+meaning. The setup tour's waiting dot pulses to say the app is
+still watching for your answer; under Reduce Motion it stops
+pulsing and stays put, so the sentence it belongs to is still
+marked, and the tour's progress row fills the same pips without
+the crossfade between them.
 
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,

@@ -42,13 +42,15 @@ struct GapsDiagram: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    /// Short enough to track a live slider drag without visible
-    /// lag; still smooths stepper/typed jumps. Mirrors
-    /// `LayoutSchematic.damping`, Reduce Motion included: the
-    /// diagram still redraws at the staged gaps, it just stops
-    /// travelling there (#1069).
+    /// The schematics' damping, gated (#1069) — the diagram
+    /// still redraws at the staged gaps, it just stops
+    /// travelling there. READ from `LayoutSchematic`, not
+    /// re-spelled: the gate rule asks only that the ternary be
+    /// local, and this diagram is one of that family's pictures,
+    /// so a second copy of the duration is two tunings nothing
+    /// holds equal (code review, #1069).
     private var damping: Animation? {
-        reduceMotion ? nil : .easeOut(duration: 0.12)
+        reduceMotion ? nil : LayoutSchematic.damping
     }
 
     var body: some View {
