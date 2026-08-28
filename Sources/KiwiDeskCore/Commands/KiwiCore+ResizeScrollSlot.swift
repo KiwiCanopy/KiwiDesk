@@ -39,38 +39,14 @@ extension KiwiCore {
     /// region, per #537. That mismatch predates this and is not
     /// this clamp's to settle.)
     ///
-    /// Two things outrank the ceiling, and both are about not
-    /// destroying a value the user chose. The floor wins a
-    /// contradiction — on a display narrower than the effective
-    /// minimum, clamping down to the drawn area would cross the
-    /// floor #933 exists to hold — though the floor itself is
-    /// capped at the CURRENT size, its own mirror of the app
-    /// ceiling's never-reduce rule: a refused SHRINK must not
-    /// snap the shared store UP to the focused window's
-    /// minimum, popping every neighbor with it (#1055 device
-    /// QA, 2026-08-28). And the CURRENT size wins:
-    /// `scroll.set_slot_size(2000)` on a 1512pt screen is a
-    /// deliberate statement that survives undocking, so a
-    /// resize press may refuse to grow it further but must
-    /// never quietly rewrite it downward — which is exactly the
-    /// harm `docs/design-decisions.md` cites when it rules the
-    /// cap out of `ScrollSize`. A shrink from such a value
-    /// steps down by its own delta like any other.
-    ///
-    /// The focused window's learned app maximum (#1055) joins
-    /// the ceiling: one slot size serves the whole row, so a
-    /// grow past what the focused window's app will perform
-    /// only slides the neighbors aside for a span the app then
-    /// refuses — the overshoot-and-re-pack dance the issue's
-    /// repro A shows. A grow the APP ceiling truncates cues
-    /// `ownMaximum` on the focused window — the refusal has a
-    /// window and a reason to name. A grow the VIEWPORT
-    /// truncates stays deliberately silent: nothing is being
-    /// protected there but the screen itself, and naming a
-    /// phantom neighbor is the trap `reportResizeRefusal`'s
-    /// grow arm already stands down from; a viewport-limit cue
-    /// is its own change, with its own case, renderer and
-    /// localized string.
+    /// Since #1057 this writer is PLUMBING: it resolves the
+    /// inputs and `ScrollSlotDomain.decide` owns the decision —
+    /// every cap and refusal arm — while the ONE base input
+    /// resolved here is the focused window's rendered span:
+    /// the bound's consume of the layout-floored,
+    /// viewport-capped store. The rules and their argument
+    /// live on `ScrollSlotDomain`; `ScrollSlotDomainTests`
+    /// pins the arms and the engine suites pin this wiring.
     func writeCappedScrollSlot(
         delta: Double,
         space: Space,
@@ -92,7 +68,6 @@ extension KiwiCore {
                 effectiveMinSize(of: $0, axis: axis)
             } ?? 0
         )
-        let requested = current + CGFloat(delta)
         // Built through the same resolver `layoutInput` uses, so
         // `usable` (bounds less the outer gaps) and the bar carve
         // cannot drift from what the layout drew.
@@ -123,57 +98,62 @@ extension KiwiCore {
             configured = 0
         }
         let drawnAlong = horizontal ? drawn.width : drawn.height
+        let bound = space.focused.flatMap {
+            tiler.sizeBound(for: $0)
+        }
         let appMax = space.focused.flatMap {
             effectiveMaxSize(of: $0, axis: axis)
         }
-        // Floored at `current` so the app ceiling never REDUCES
-        // the slot: one slot size serves the whole row, so
-        // trimming it to the focused window's maximum would
-        // visibly shrink every NEIGHBOR on a grow press. At or
-        // past the ceiling a grow refuses instead. The viewport
-        // trim below is different by construction — the drawn
-        // area binds every window alike.
-        let appCeiling = appMax.map {
-            max(CGFloat($0), current)
+        let appMin: CGFloat? = bound.flatMap {
+            axis == "x" ? $0.minWidth : $0.minHeight
         }
-        let limit = min(drawnAlong, appCeiling ?? .infinity)
-        // Capped at `current` so the floor never RAISES the
-        // slot — the mirror of the app ceiling's floor above
-        // (#1055 device QA, 2026-08-28): a store already below
-        // the focused window's learned minimum (the row was
-        // shrunk before that floor armed) must REFUSE a shrink
-        // where it stands, because snapping the shared store
-        // up to the floor pops every NEIGHBOR to the focused
-        // window's minimum on a SHRINK press — and the row
-        // jump also moved the frame the refusal pill had just
-        // anchored on, which is why the cue looked missing.
-        let floor = min(CGFloat(effectiveMin), current)
-        let ceiling = max(limit, floor, configured)
-        let clamped = min(max(requested, floor), ceiling)
-        if delta < 0,
-            clamped > requested + Self.resizeTruncationEpsilon,
-            let focused = space.focused
-        {
-            refuseShrinkAtMinimum(focused, axis: axis)
-        }
-        // The cue asks WHICH limit truncated the grow: the app
-        // ceiling cues (a window and a reason to name), the
-        // viewport stays silent (header). `appMax < drawnAlong`
-        // is that discrimination — it holds even when a banked
-        // `configured` above the ceiling is what the arithmetic
-        // clamped at, because the reason the slot cannot grow
-        // is still the app's own maximum.
-        if delta > 0,
-            clamped < requested - Self.resizeTruncationEpsilon,
-            let appMax,
-            CGFloat(appMax) < drawnAlong,
-            let focused = space.focused
-        {
-            refuseGrowAtMaximum(focused, axis: axis)
-        }
-        writeSlotSize(
-            .points(clamping: clamped),
-            for: space.id
+        // The span the focused window actually RENDERS: the
+        // bound's consume where it pins, the layout-floored,
+        // viewport-capped store otherwise — the base the whole
+        // decision is measured against (#1057). The floor
+        // matters (review, 2026-08-28): the layout asks
+        // `min(along, max(resolved, minWindowSize))`, so a
+        // points store below `min_window_size` (representable —
+        // `ScrollSize` floors only at `minPoints`, and the
+        // setting can be raised after the slot was set) renders
+        // at the floor, and measuring from the un-floored store
+        // would consult the ladder at an ask no layout issued.
+        let capped = min(
+            max(
+                current,
+                CGFloat(tiler.settings.minWindowSize)
+            ),
+            drawnAlong
         )
+        let consumed =
+            axis == "x"
+            ? bound?.consumedWidth(asking: capped)
+            : bound?.consumedHeight(asking: capped)
+        let outcome = ScrollSlotDomain.decide(
+            delta: CGFloat(delta),
+            stored: current,
+            drawnArea: drawnAlong,
+            drawnFocused: consumed ?? capped,
+            configured: configured,
+            globalMin: CGFloat(effectiveMin),
+            appMin: appMin,
+            appMax: appMax.map { CGFloat($0) }
+        )
+        if let focused = space.focused {
+            switch outcome.refusal {
+            case .ownMinimum:
+                refuseShrinkAtMinimum(focused, axis: axis)
+            case .ownMaximum:
+                refuseGrowAtMaximum(focused, axis: axis)
+            case nil:
+                break
+            }
+        }
+        if let write = outcome.write {
+            writeSlotSize(
+                .points(clamping: write),
+                for: space.id
+            )
+        }
     }
 }

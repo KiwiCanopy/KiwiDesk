@@ -238,13 +238,41 @@ struct ScrollingSlotCeilingTests {
         )
         #expect(try slotPoints(core, space) == 3000)
 
-        // A shrink from there steps down by its own delta —
-        // it does not snap to the drawn width either.
+        // A shrink measures from what is DRAWN (#1057): the
+        // first press lands one step below the visible size
+        // instead of unwinding invisible points — the store is
+        // rewritten only now, the moment the user deliberately
+        // resizes on this screen.
         core.execute(
             "resize",
             args: [.string("x"), .number(-400)]
         )
-        #expect(try slotPoints(core, space) == 2600)
+        #expect(
+            try slotPoints(core, space) == areaExtent(core) - 400
+        )
+    }
+
+    @Test("A sub-floor store is measured at the layout's floor")
+    func subFloorStoreMeasuresAtTheFloor() throws {
+        // The writer's layout-floor wiring (guard-prover,
+        // 2026-08-28): a points store below `min_window_size`
+        // is representable (`ScrollSize` floors only at its
+        // own minPoints), but the layout RENDERS it at the
+        // floor — so a press must measure from there, or a
+        // grow spends a dead press walking the invisible
+        // store up to the floor first.
+        let (core, space) = makeCore()
+        #expect(core.tiler.settings.minWindowSize == 300)
+        core.execute(
+            "scroll.set_slot_size",
+            args: [.number(150)]
+        )
+        core.execute(
+            "resize",
+            args: [.string("x"), .number(50)]
+        )
+        // Measured from the floored 300, not the stored 150.
+        #expect(try slotPoints(core, space) == 350)
     }
 
     @Test("The floor still wins on a display narrower than it")

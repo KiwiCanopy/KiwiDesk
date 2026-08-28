@@ -1016,12 +1016,17 @@ enforces, once KiwiDesk has learned it (#1055): that refusal
 bounces and pills ("Maximum window size reached"), where the
 fits-on-screen stop stays wordless.
 
-Setting a size *here* is not clamped that way, and a `resize`
-will not undo it: a config value travels with you between
-screens, so if you set a slot wider than the screen you are on,
-it keeps that width and the layout simply draws what fits. A
-grow press then does nothing rather than trimming it; a shrink
-steps down from what you wrote, as usual.
+Setting a size *here* is not clamped that way: a config value
+travels with you between screens, so if you set a slot wider
+than the screen you are on, it keeps that width and the layout
+simply draws what fits. A grow press then does nothing rather
+than trimming it; a shrink counts from what is *drawn*, not
+from the stored number (#1057) — the first press has visible
+effect, and only that deliberate resize rewrites the stored
+value. And when the focused window's app pins its size, a
+press its bound blocks outright refuses in place with the pill
+— it never resizes the rest of the row from a window that
+cannot follow.
 
 ### scroll.set_anchor
 
@@ -3767,7 +3772,11 @@ effective minimum, a grow stopped where a neighbor would
 drop below its own, or a grow reaching the focused window's
 own learned app maximum (scrolling, #1055; cued on the
 resized window alone) — still applies the part that fits, and
-cues the refusal visually on the first truncated attempt: the
+cues the refusal visually on the first truncated attempt —
+and on a scrolling space, a press the focused window's own
+learned bound blocks outright (grow at its maximum, shrink at
+its minimum) instead refuses in place: nothing applied, no
+neighbor moved, same bounce and pill (#1057). The
 focus ring gives the same rubber-band bounce as a dead-end
 focus move (#436), and a pill names the reason on the window
 that cannot shrink — and on a refused grow the resized

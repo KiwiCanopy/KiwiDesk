@@ -29,7 +29,8 @@ extension KiwiCore {
     /// wobble by sub-point rounding, so exact comparison would
     /// cue on noise. The ratio/weight paths need none — their
     /// outcomes report truncation from the domain math itself.
-    static let resizeTruncationEpsilon: CGFloat = 0.5
+    static let resizeTruncationEpsilon: CGFloat =
+        ScrollSlotDomain.truncationEpsilon
 
     /// One window's effective minimum on `axis`: the global
     /// `min_window_size` raised by the window's learned

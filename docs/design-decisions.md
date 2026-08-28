@@ -2046,7 +2046,9 @@ one slot serves the whole row, so growing it past what the
 focused window's app will perform only slides the neighbors
 aside for a span the app snaps back from. Three choices
 sharpen it. The ceiling never *reduces* the shared slot — at
-or past the learned maximum a grow refuses rather than trims,
+the learned maximum a grow refuses rather than trims (since
+#1057 measured against the window's drawn span rather than
+the store; the #1057 entry owns that rule),
 because trimming a row-wide value to one window's limit would
 visibly shrink every neighbor on a grow press. The refusal
 pills ONE end, unlike the neighbor-minimum pair: the limit is
@@ -2054,7 +2056,35 @@ the resized window's own app, so there is no second window to
 mark, and the copy mirrors the floor's
 (`"Maximum window size reached"`). And running out of
 *viewport* stays wordless — that limit protects no window and
-names none, so the bounce alone carries it.
+names none, so the press is a silent stop.
+
+**A resize press is measured against what the focused window
+DRAWS, and refuses in place where its bound blocks it
+(#1057).** [Principle] The scrolling slot is a shared store,
+and two symptoms came from resizing it by the stored number: an
+oversize configured slot (set at the desk, applied on the
+laptop) made shrink presses move an invisible number for
+several clicks before anything responded, and a window pinned
+by its learned bound let presses silently resize every
+NEIGHBOR — grow walked the store up through the row until it
+caught the pinned span and only then said "maximum reached"
+(owner device QA, 2026-08-28). The rule that fixes both: the
+press acts on the focused window, so it is measured from the
+span that window actually renders. Where its bound blocks the
+direction outright — grow at its maximum, shrink at its
+minimum — the press refuses in place: the pill on the first
+press, nothing written, no neighbor moved; resizing the row
+from a window that cannot follow is done by focusing a window
+that can. Where the window CAN move, the press acts from its
+drawn span — an oversize store shrinks visibly on the first
+press and is rewritten only by that deliberate act (a grow
+still refuses, per the #966 config protection), and a window
+pinned above the store grows in one press instead of walking
+the store up to it. The whole decision lives in one pure type,
+`ScrollSlotDomain`, so every cap arm is a unit-tested case
+rather than arithmetic in a command file — the same shape the
+ratio clamps take in `SplitDomain`.
+(`ScrollSlotDomainTests`, `ScrollingFixedSpanCueTests`)
 
 **A corroborated bound generalizes at the consume site,
 revocably; entries never do (#1055).** [Principle] The per-ask

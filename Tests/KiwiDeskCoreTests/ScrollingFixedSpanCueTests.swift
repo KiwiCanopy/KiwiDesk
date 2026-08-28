@@ -81,6 +81,71 @@ struct ScrollingFixedSpanCueTests {
         #expect(asked == 1000)
     }
 
+    @Test("A grow at the span pills first press, moves nothing")
+    func growAtTheSpanRefusesImmediately() throws {
+        // The owner's grow-side report (2026-08-28): slot far
+        // below the fixed span — grow presses used to walk the
+        // store up through the NEIGHBORS until it caught the
+        // span, and only then pilled. Measured from the drawn
+        // span, the first press refuses with the max pill and
+        // no neighbor moves.
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "kiwidesk-grow-refuse-\(UUID().uuidString)"
+            )
+        let core = makeTestCore(configDirectory: directory)
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1200, height: 800)
+        }
+        for id: UInt32 in 1...2 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(id),
+                        pid: pid_t(id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("scrolling")]
+        )
+        core.state.workspaces.focus(WindowID(1), in: space)
+        for asked in [CGFloat(900), 1000, 800] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    WindowID(1),
+                    size: CGSize(width: asked, height: 800)
+                )
+                core.tiler.boundLearner.observe(
+                    WindowID(1),
+                    currentSize: CGSize(width: 825, height: 800),
+                    settledRead: true
+                )
+            }
+        }
+        core.execute(
+            "scroll.set_slot_size",
+            args: [.number(300)]
+        )
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        core.execute(
+            "resize",
+            args: [.string("x"), .number(50)]
+        )
+        #expect(refusals == [.ownMaximum(WindowID(1))])
+        let live = try #require(core.state.workspaces[space])
+        let stored = core.tiler.settings
+            .resolvedScrolling(for: live)
+            .slotSize
+            .editablePoints(along: 1200, horizontal: true)
+        #expect(stored == 300)
+    }
+
     @Test("A refused shrink never raises the shared slot")
     func refusedShrinkNeverRaisesTheSlot() throws {
         // The device shape (owner, 2026-08-28): the row was
@@ -197,11 +262,13 @@ struct ScrollingFixedSpanCueTests {
                 )
             }
         }
-        // Seeded ABOVE the span: the press shrinks INTO the
-        // floor and clamps AT it. (A store already below the
-        // span refuses where it stands instead — the
-        // never-raise mirror, pinned by
-        // `refusedShrinkNeverRaisesTheSlot`.)
+        // Seeded ABOVE the span. Since #1057 the press
+        // measures from the focused window's DRAWN span — 825,
+        // consumed — which is already AT its lent floor, so
+        // the press refuses IN PLACE: pill on the first press,
+        // store untouched, no neighbor moved (owner ruling,
+        // 2026-08-28: a window that cannot follow never
+        // resizes the row).
         core.execute(
             "scroll.set_slot_size",
             args: [.number(850)]
@@ -212,15 +279,12 @@ struct ScrollingFixedSpanCueTests {
             "resize",
             args: [.string("x"), .number(-50)]
         )
-        // The lent floor binds: the slot clamps AT the span
-        // and the refusal says so — the first press, not the
-        // tenth.
         #expect(refusals == [.ownMinimum(WindowID(1))])
         let live = try #require(core.state.workspaces[space])
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)
             .slotSize
             .editablePoints(along: 1200, horizontal: true)
-        #expect(stored == 825)
+        #expect(stored == 850)
     }
 }
