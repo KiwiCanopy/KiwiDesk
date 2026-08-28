@@ -101,6 +101,21 @@ extension SourceScan {
     /// Whether a needle needs a leading boundary at all. One
     /// starting with `.` carries its own, and applying a second
     /// refuses the receiver in front of it.
+    ///
+    /// **What the exemption trades**, stated here because the
+    /// two rounds before it each documented a refinement's win
+    /// and not its cost, and the undocumented half is what the
+    /// next round found. With no leading boundary, a dotted
+    /// needle matches on ANY receiver — so an ordinary call
+    /// that merely shares the name answers for it:
+    /// `Self.animation(for: step)`, a factory RETURNING an
+    /// animation rather than starting one, reds as an ungated
+    /// site, and a string literal quoting `field.animation(…)`
+    /// reds too. That is the direction to trade in — it fails
+    /// SHUT, and the alternative was a walk blind to every
+    /// inline chain in the tree — but a shared animation
+    /// factory is a plausible next file, and its author will
+    /// arrive here (guard-prover).
     static func needsBoundary(_ needle: String) -> Bool {
         needle.first != "."
     }

@@ -37,8 +37,15 @@ struct ReduceMotionCensusTests {
     /// un-watches the motion-starting use along with whatever
     /// fired.
     ///
-    /// **It fires without motion in two classes**, both stated
-    /// because each costs a diagnosis rather than a defect.
+    /// **It fires without motion in three classes**, all
+    /// stated because each costs a diagnosis rather than a
+    /// defect.
+    ///
+    /// An ordinary dotted call that merely SHARES a needle's
+    /// name reds — `self.animator()`, `Self.animation(for:)` —
+    /// because a dot-prefixed needle takes no leading boundary.
+    /// `SourceScan.needsBoundary` carries why that trade is the
+    /// right way round.
     ///
     /// A SUPPRESSION spelling reds like a starting one:
     /// `withTransaction(Transaction(animation: nil))`,
