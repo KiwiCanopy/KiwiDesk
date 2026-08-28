@@ -26,6 +26,15 @@ struct BspSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    /// The restage damping, gated on Reduce Motion (#1069) —
+    /// the arrangement still redraws, it just stops travelling.
+    private var damping: Animation? {
+        LayoutSchematic.damping(reduceMotion: reduceMotion)
+    }
+
     /// At the tile scale the frame is the strip's, not this
     /// schematic's — see `SchematicScale`, which argues why the
     /// 3:1 widescreen is a panel-only affordance.
@@ -60,11 +69,11 @@ struct BspSchematic: View {
             GeometryReader { geo in
                 tiles(in: geo.size)
             }
-            .animation(LayoutSchematic.damping, value: splitRatioH)
-            .animation(LayoutSchematic.damping, value: splitRatioV)
-            .animation(LayoutSchematic.damping, value: strategy)
-            .animation(LayoutSchematic.damping, value: placement)
-            .animation(LayoutSchematic.damping, value: windows)
+            .animation(damping, value: splitRatioH)
+            .animation(damping, value: splitRatioV)
+            .animation(damping, value: strategy)
+            .animation(damping, value: placement)
+            .animation(damping, value: windows)
         }
     }
 

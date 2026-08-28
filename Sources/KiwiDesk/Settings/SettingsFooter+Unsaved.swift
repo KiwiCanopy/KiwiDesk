@@ -195,6 +195,8 @@ extension SettingsFooter {
 /// the appearance, and this sits on chrome that is dark in both.
 private struct PillHoverWash: ViewModifier {
     @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     func body(content: Content) -> some View {
         content
@@ -214,8 +216,10 @@ private struct PillHoverWash: ViewModifier {
             )
             .padding(.horizontal, -6)
             .padding(.vertical, -3)
+            // The wash still appears and leaves; Reduce Motion
+            // drops only its fade (#1069).
             .animation(
-                .easeOut(duration: 0.12),
+                reduceMotion ? nil : .easeOut(duration: 0.12),
                 value: hovering
             )
             .onHover { hovering = $0 }

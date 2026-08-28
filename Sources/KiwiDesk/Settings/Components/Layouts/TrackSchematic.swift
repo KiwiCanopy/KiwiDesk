@@ -40,6 +40,15 @@ struct TrackSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    /// The restage damping, gated on Reduce Motion (#1069) —
+    /// the arrangement still redraws, it just stops travelling.
+    private var damping: Animation? {
+        LayoutSchematic.damping(reduceMotion: reduceMotion)
+    }
+
     private var vertical: Bool { axis == .vertical }
 
     /// Which drawn track wears the focus — **the one the fold
@@ -88,16 +97,13 @@ struct TrackSchematic: View {
             showsCaption: scale.showsCaption
         ) {
             strip
-                .animation(LayoutSchematic.damping, value: axis)
-                .animation(
-                    LayoutSchematic.damping,
-                    value: overflowStyle
-                )
-                .animation(LayoutSchematic.damping, value: newWindow)
-                .animation(LayoutSchematic.damping, value: placement)
-                .animation(LayoutSchematic.damping, value: limit)
-                .animation(LayoutSchematic.damping, value: autoTracks)
-                .animation(LayoutSchematic.damping, value: windows)
+                .animation(damping, value: axis)
+                .animation(damping, value: overflowStyle)
+                .animation(damping, value: newWindow)
+                .animation(damping, value: placement)
+                .animation(damping, value: limit)
+                .animation(damping, value: autoTracks)
+                .animation(damping, value: windows)
         }
     }
 

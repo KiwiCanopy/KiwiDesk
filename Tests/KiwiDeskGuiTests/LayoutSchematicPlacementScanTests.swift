@@ -189,7 +189,7 @@ struct LayoutSchematicPlacementScanTests {
     ) throws -> (seen: Int, read: Int) {
         let allowed = [
             "let placement: SpawnPlacement",
-            ".animation(LayoutSchematic.damping, value: placement)",
+            ".animation(damping, value: placement)",
             "value: placement",
             "placement,",
         ]

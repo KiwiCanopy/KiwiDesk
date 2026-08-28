@@ -17,6 +17,8 @@ struct SettingsSearchField: View {
     /// from anywhere, and that shortcut belongs to the header. A
     /// `FocusState` binding is how the two share one focus.
     let focus: FocusState<Bool>.Binding
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
     /// Moves the highlighted result while focus stays in the
     /// field, System Settings-style. Without this the results
     /// were mouse-only: the `List` never takes focus while the
@@ -163,8 +165,11 @@ struct SettingsSearchField: View {
                 ),
                 radius: 2
             )
+            // The focus outline is the indicator and must not
+            // wait on motion to appear; Reduce Motion drops the
+            // fade and it simply lands (#1069).
             .animation(
-                .easeOut(duration: 0.12),
+                reduceMotion ? nil : .easeOut(duration: 0.12),
                 value: focus.wrappedValue
             )
     }

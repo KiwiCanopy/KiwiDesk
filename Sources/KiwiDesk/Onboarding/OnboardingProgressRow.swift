@@ -25,6 +25,8 @@ import SwiftUI
 struct OnboardingProgressRow: View {
     let steps: [OnboardingModel.Step]
     let index: Int
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     /// The prototype's bar: 18×5, 3 pt radius, 7 pt apart.
     /// Nothing here is hittable — a pip that looks clickable
@@ -46,7 +48,12 @@ struct OnboardingProgressRow: View {
                     .frame(width: pipWidth, height: pipHeight)
             }
         }
-        .animation(.default, value: index)
+        // Gated, and a progress row is not the exemption it
+        // looks like: the content here is WHICH pips are filled,
+        // a static state drawn either way, so the crossfade
+        // between two already-readable rows is pure travel
+        // (#1069).
+        .animation(reduceMotion ? nil : .default, value: index)
         // One element with a value, never N unlabelled pips: read
         // apart they are five decorations with no number in them,
         // and the number is the whole content.

@@ -1035,19 +1035,28 @@ family must be focusable so the chord has a target. (#845; the
 seam and its guard are engineering-side, `.claude/rules/gui.md`
 ▸ the keyboard path.)
 
-**Every animation in Settings honours Reduce Motion.** The
-window's own motion — a caption fading in, a list springing
+**Every animation KiwiDesk's own windows play honours Reduce
+Motion.** Their motion — a caption fading in, a list springing
 into its new order after a reorder, the scroll that carries you
-to a search hit — stands down when macOS
+to a search hit, a layout preview re-flowing as you drag its
+window-count slider, a hover or focus fade, the setup tour's
+progress row — stands down when macOS
 **System Settings ▸ Accessibility ▸ Reduce Motion** is on. It
 stands down by dropping the *motion*, never the affordance: the
 caption still appears and still leaves, the rows still land in
-their new order, the scroll still arrives at its target — they
+their new order, the scroll still arrives at its target, the
+preview still redraws at the arrangement you just staged — they
 simply arrive rather than travel. This is separate from the
 Motion card in Settings, which governs how *managed windows*
-move; the system setting wins over both. (#989; the engineering
-obligation and its guard are `.claude/rules/gui.md` ▸ the
-Reduce Motion gate.)
+move; the system setting wins over both. (#989, #1069; the
+engineering obligation and its guard are
+`.claude/rules/gui.md` ▸ the Reduce Motion gate.)
+
+The one thing that keeps moving is a mark whose *movement is
+the message*: the permission step's amber dot pulses to say the
+app is still watching for your answer. Under Reduce Motion it
+stops pulsing and stays put — the mark remains, so the sentence
+it belongs to is still marked.
 
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,

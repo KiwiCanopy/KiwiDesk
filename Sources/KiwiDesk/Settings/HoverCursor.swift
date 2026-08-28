@@ -13,6 +13,8 @@ import SwiftUI
 /// the view vanishes under the pointer.
 private struct LinkHover: ViewModifier {
     @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     func body(content: Content) -> some View {
         content
@@ -21,8 +23,10 @@ private struct LinkHover: ViewModifier {
                     ? AnyShapeStyle(.primary)
                     : AnyShapeStyle(.secondary)
             )
+            // The colour lift IS the affordance and stays; only
+            // the cross-fade to it stands down (#1069).
             .animation(
-                .easeOut(duration: 0.12),
+                reduceMotion ? nil : .easeOut(duration: 0.12),
                 value: hovering
             )
             .onHover { inside in
