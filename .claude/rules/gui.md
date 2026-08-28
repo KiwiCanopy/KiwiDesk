@@ -453,6 +453,14 @@ This is not licence for ungated copy — an ungated caption is
 read by everyone, and the GUI curates for them. The argument is
 in `docs/design-decisions.md` ▸ Open at login.
 
+**And the command is an ARGUMENT, never words in the frame** —
+`CommandLiteralCatalogTests`. Spelled into the sentence it
+reaches a translator, and both answers are wrong: translating it
+yields a command that does not exist, keeping it verbatim trips
+`english_residue` and `merge-keys` discards the correct work.
+Interpolated, it is stripped before that check and never enters
+a catalog.
+
 **A live preview that takes a window count owes the arithmetic
 a guard, not a source scan.** Layout Defaults' schematics
 simulate the count the preview's slider supplies, and a
