@@ -3595,7 +3595,13 @@ the label "Restart if it stops unexpectedly" is literally
 accurate — a deliberate Quit is never resurrected. The overlap that used to be
 invisible (a loaded service's `RunAtLoad` also launches at login)
 is now *the* top level, made runtime-safe by the #196 instance
-lock.
+lock — and by that second launch exiting **successfully**, since
+`KeepAlive { SuccessfulExit = false }` would otherwise read the
+decline as a crash and respawn it every throttle
+([#1068](https://github.com/KiwiCanopy/KiwiDesk/issues/1068);
+`SecondLaunchExitTests` pins the exit status and the plist
+clause together). The lock alone was not enough: it deduped the
+processes and said nothing about what the loser reported.
 
 ### Appearance (light / dark override)
 

@@ -1,0 +1,105 @@
+import Foundation
+import Testing
+
+@testable import KiwiDesk
+@testable import KiwiDeskCore
+
+/// A second launch that finds the lock held must report
+/// SUCCESS, because launchd reads that status to decide whether
+/// to respawn (#1068).
+///
+/// The invariant is a PAIR, and neither half means anything
+/// alone: the service plist says
+/// `KeepAlive { SuccessfulExit: false }` — restart only what
+/// exited unsuccessfully — and the second-launch path exits
+/// zero. Break either and `RunAtLoad` beside a running instance
+/// becomes an infinite respawn: launch, find the lock held,
+/// activate the running app (stealing the user's focus), exit,
+/// be called a crash, respawn one throttle later.
+///
+/// So the two are asserted together, in one suite, rather than
+/// each looking correct beside the other. The device capture is
+/// on the issue: focus taken every ~10 s for as long as the
+/// login item was enabled.
+@Suite("Second-launch exit status (#1068)")
+struct SecondLaunchExitTests {
+    @Test("A second launch reports success, so launchd rests")
+    func secondLaunchIsNotAFailure() {
+        #expect(secondLaunchExitStatus == 0)
+    }
+
+    /// The constant is worthless if the process does not use
+    /// it: reverting the call site to a literal `exit(1)` — the
+    /// whole #1068 defect — leaves the assertion above green
+    /// (guard-prover, mutation 5). `-> Never` + `exit` makes a
+    /// call-level test impossible, so the pin is a source scan,
+    /// the shape `ActivationPolicySeamTests` already uses on
+    /// this same file.
+    @Test("The single-instance exit routes through the constant")
+    func theExitRoutesThroughTheConstant() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+            .appendingPathComponent("SingleInstanceGuard.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        // Assert the input before asserting about it: a rename
+        // of the function must not make this pass for having
+        // found nothing (rule-authoring.md).
+        #expect(source.contains("surfaceRunningInstanceAndExit"))
+        #expect(source.occurrences(of: "exit(") == 1)
+        #expect(
+            source.contains("exit(secondLaunchExitStatus)"),
+            "the second-launch exit must name the constant"
+        )
+    }
+
+    /// And the branch has to REACH that function. Scanning
+    /// `SingleInstanceGuard` alone proves the exit is correct,
+    /// never that a second launch goes through it — replacing
+    /// the call in `main.swift` with a bare `exit(1)` revives
+    /// the whole defect with every other clause green
+    /// (guard-prover, probe B). One contiguous needle, because
+    /// a cut ending at the `{` passes on a branch that kept its
+    /// condition and stopped calling.
+    @Test("The lock-held branch goes through that function")
+    func theLockedBranchSurfacesAndExits() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+            .appendingPathComponent("main.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        #expect(source.contains("instanceLock"))
+        let branch = """
+            if !instanceLock.acquire() {
+                surfaceRunningInstanceAndExit()
+            }
+            """
+        #expect(
+            source.contains(branch),
+            "a second launch must route through the guard"
+        )
+    }
+
+    @Test("The plist restarts only an unsuccessful exit")
+    func plistRestartsOnlyFailures() throws {
+        // Read the shipped plist rather than restating it: the
+        // exit status above is only safe BECAUSE of this key,
+        // and a plist that dropped the condition would make
+        // every clean quit respawn (#341's own defect, one
+        // direction over).
+        let plist = ServiceManager.plistContent(
+            executable: "/tmp/KiwiDesk"
+        )
+        #expect(plist.contains("KeepAlive"))
+        #expect(plist.contains("SuccessfulExit"))
+        // The value under SuccessfulExit is false — the whole
+        // clause is what makes a clean exit final.
+        let key = try #require(
+            plist.range(of: "SuccessfulExit")
+        )
+        let after = plist[key.upperBound...].prefix(80)
+        #expect(after.contains("<false/>"))
+    }
+}

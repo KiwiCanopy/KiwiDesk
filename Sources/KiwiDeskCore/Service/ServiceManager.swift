@@ -44,6 +44,13 @@ public enum ServiceManager {
             <true/>
             <key>KeepAlive</key>
             <dict>
+                <!-- Restart a crash, never a clean exit. The
+                     second-launch path depends on this: it
+                     exits SUCCESSFULLY so launchd lets it rest
+                     (`secondLaunchExitStatus`, #1068). Setting
+                     this true, or dropping the condition,
+                     re-opens an infinite respawn that steals
+                     focus every throttle. -->
                 <key>SuccessfulExit</key>
                 <false/>
             </dict>
