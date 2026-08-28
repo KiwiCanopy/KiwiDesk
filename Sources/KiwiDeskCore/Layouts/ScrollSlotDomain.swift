@@ -122,13 +122,19 @@ public enum ScrollSlotDomain {
         if stored > drawnArea + tolerance {
             return Outcome(write: nil, refusal: nil)
         }
-        // The window can grow: measure from ITS span — the
-        // writer resolves `drawnFocused` once (the bound's
-        // consume of the layout-floored, viewport-capped
-        // store), so a window pinned above the store is
-        // reached in one press rather than walking the store
-        // up to it.
-        let base = drawnFocused
+        // The window can grow: measure from whichever of the
+        // drawn span and the store lies FORWARD of the press
+        // (#1083). `drawnFocused` alone is #1057's rule and is
+        // right when the window is pinned ABOVE the store — the
+        // press reaches it in one go rather than walking the
+        // store up. But the layout also draws a bound-pinned
+        // window BELOW an oversize store, and measuring from
+        // there wrote the smaller number back and trimmed the
+        // row for every neighbour (a ~1160pt auto slot rewritten
+        // to 765). Taking the max keeps #1057's case and makes
+        // the other one impossible by construction, rather than
+        // by a guard that silently swallows the press.
+        let base = max(drawnFocused, stored)
         let requested = base + delta
         let ceiling = max(
             min(drawnArea, appMax ?? .infinity),
@@ -175,11 +181,18 @@ public enum ScrollSlotDomain {
         if let appMin, drawnFocused <= appMin + tolerance {
             return Outcome(write: nil, refusal: .ownMinimum)
         }
-        // Measure from the drawn span (#1057's core): an
-        // oversize store shrinks visibly on the FIRST press,
-        // and the store is only rewritten now — the moment the
-        // user deliberately resizes on this screen.
-        let base = drawnFocused
+        // Measure from whichever of the drawn span and the
+        // store lies FORWARD of the press — the mirror of the
+        // grow base (#1083). `drawnFocused` alone is #1057's
+        // rule and is right for an oversize store, which then
+        // shrinks visibly on the FIRST press. Where the window
+        // is pinned ABOVE the store instead, measuring from the
+        // drawn span made a SHRINK compute a bigger number than
+        // the store and raise the row; taking the min keeps
+        // #1057's case and leaves the configured floor as the
+        // thing that answers, WITH its pill, rather than a
+        // guard swallowing the press in silence.
+        let base = min(drawnFocused, stored)
         let requested = base + delta
         // The floor never raises the store (the #1055 mirror);
         // capped at STORED — not the drawn base — so a store

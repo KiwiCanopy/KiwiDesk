@@ -2058,6 +2058,71 @@ mark, and the copy mirrors the floor's
 *viewport* stays wordless — that limit protects no window and
 names none, so the press is a silent stop.
 
+**A bound may refuse a press only if it was learned from a read
+that could tell a refusal from latency (#1083).** [Principle]
+The clamp above rests entirely on the bound being true. It was
+not: the learner was confirming bounds from redraw latency, and
+the pill was then asserting limits that did not exist.
+
+Measured on the owner's Mac at load average 9.7 (2026-08-28,
+macOS 26.6.2): sixteen bound confirmations in eight minutes of
+ordinary use, at least fourteen false. Each sat at the window's
+own pre-press width, one resize step apart (984, 954, 924, 894),
+with heights all equal to the slot's — the layout's own geometry
+recorded as the app's limit. Two different windows confirmed an
+identical bound 44 ms apart. Resizing stopped, the pill named a
+limit the window was nowhere near, and dragging the edge by hand
+worked, which is what proved the app imposed nothing.
+
+The cause is that an echo reporting the pre-ask frame is the
+same bytes whether the app refused or has merely not redrawn
+yet, and under load the second is ordinary for ANY app — this
+reproduced on Ghostty, the fast one. So the ladder's two votes —
+seeding a candidate and confirming it — are only meaningful from
+a read that waited out the app's chance to answer. Only the
+settle probe does. Raw echoes still seed, refresh and clear;
+they no longer promote. A genuine limit is learned one probe
+grace (~0.6 s) after its animation settles rather than at echo
+time, which is the whole cost.
+
+**The permissive alternative was ruled on and rejected, and the
+reasoning is worth keeping.** The obvious durable fix is to stop
+a learned bound refusing a press at all — three separate paths
+can mistake latency for a refusal, each guarded by its own
+heuristic about whether the app has answered, and they degrade
+together under load. Being wrong permissively costs a window
+that does not fill its region (the accepted split-layout
+residue, self-correcting on the next retile); being wrong
+restrictively costs the user the feature and states a falsehood.
+On frequency alone that argues for permissive.
+
+It was implemented, measured, and then reverted on the owner's
+ruling (2026-08-28): with the learner fixed, the bounds it now
+produces are real — device capture showed the same eight minutes
+of use going from sixteen false confirmations to zero, with
+subsequent confirmations landing on plausible app minimums (500,
+400, 825) — and a window resizing past what its app will follow,
+leaving a neighbour overlapped, is worse than a stop that is
+almost always correct. The permissive rule is the right answer
+when bounds are guesses; it is the wrong trade once they are
+facts. Should a fourth latency path ever be found, this entry is
+the argument for reaching for it again.
+
+**A press writes forward, never across the store (#1083).** The
+layout draws a bound-pinned window at its learned limit, and a
+press measures from that DRAWN span (#1057). Where the drawn
+span sits on the far side of the store, that base made the press
+write across it: a grow from a pinned 715pt window inside a
+1160pt auto slot wrote 765 and trimmed the row for every
+neighbour, and the shrink mirror raised a 300pt store to 775.
+The base is therefore whichever of the drawn span and the store
+lies FORWARD of the press — `max` for a grow, `min` for a shrink
+— which keeps both of #1057's cases and makes crossing the store
+impossible by construction rather than by a guard. A guard was
+tried first and was worse: it swallowed the press with no write
+AND no cue, which is a refusal that cannot explain itself. A
+press that does nothing always says why.
+
 **A resize press is measured against what the focused window
 DRAWS, and refuses in place where its bound blocks it
 (#1057).** [Principle] The scrolling slot is a shared store,

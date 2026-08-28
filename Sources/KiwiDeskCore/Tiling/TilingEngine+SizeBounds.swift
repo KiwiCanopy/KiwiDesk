@@ -51,8 +51,14 @@ extension TilingEngine {
     }
 
     /// The echo-time observation (#677, device QA 2026-08-18):
-    /// an echo of our own set IS the app's answer, knowable the
-    /// moment it arrives — the retile-time pass alone starved,
+    /// an echo of our own set carries the app's answer, seen
+    /// the moment it arrives — though since #1083 a raw echo
+    /// may only SEED or refresh a candidate, never promote one
+    /// (the #1049 comply-then-revoke pair excepted), because a
+    /// reading equal to the pre-ask frame cannot be told from
+    /// an app that has not redrawn. The retile-time pass above
+    /// and the settle probe are the promoting channels.
+    /// The retile-time pass alone starved,
     /// because every unconfirmed retile re-issued the ask and
     /// restarted the very grace the observation waited on, and
     /// a quiet screen produced no retile to learn from at all.

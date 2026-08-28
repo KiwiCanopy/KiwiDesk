@@ -298,7 +298,21 @@ editing here:
   learns a bound from its own asks: `retile` records each issued
   size and reads the settled, echo-fed state frame as the app's
   answer — the same ask refused with the same answer twice
-  confirms a per-axis, PER-ASK `EffectiveSizeBound` entry —
+  confirms a per-axis, PER-ASK `EffectiveSizeBound` entry, and
+  **only a SETTLED read may cast either of those two votes,
+  with one named carve-out** (#1083). A raw echo seeds and
+  refreshes a candidate; it promotes one only through #1049's
+  comply-then-revoke pair, where an earlier echo reported the
+  window AT the asked size and so proved it took it. Every
+  other raw promotion is barred, because an echo reporting the
+  pre-ask frame is the same bytes whether the app refused or
+  has merely not redrawn yet, and under load the second is
+  ordinary for any app. A new `SizeAnswerChannel` therefore
+  owes an honest `isSettledRead`, and widening what counts as
+  settled re-opens #1083 through that door —
+  `SizeBoundBaselineTests` holds all three verdicts (the same
+  fixture answered by a settled read, by one echo, and by a
+  repeated echo) and is what reds if either term is dropped —
   ENTRIES never generalize across asks (a grid-snapping app
   answers each ask differently; the one deliberate exception is
   the compliance contradiction sweep, argued on `complied`) —
@@ -475,6 +489,22 @@ editing here:
   absolute-length store, or a new `maxWidth` consumer, owes
   these obligations deliberately — nothing scans for a site
   that never wires the ceiling at all.
+
+  **A press writes FORWARD, never across the store (#1083).**
+  The layout draws a bound-pinned window at its learned limit
+  and the press measures from that drawn span (#1057) — so
+  where the drawn span sits on the far side of the store, that
+  base wrote across it: a grow from a pinned 715pt window
+  inside a 1160pt auto slot wrote 765 and trimmed the row, and
+  the shrink mirror raised a 300pt store to 775. Take the base
+  from whichever of the two lies forward of the press — `max`
+  on a grow, `min` on a shrink — which keeps both #1057 cases
+  and makes the crossing impossible by construction.
+  `ScrollSlotDomainTests` holds both directions with the device
+  numbers. Do NOT answer this with a guard on the write
+  instead: that was tried and swallowed the press with no write
+  AND no cue, and a press that does nothing must always say
+  why.
   Scrolling is the only such store today, which is an
   observation rather than the rule.
   `ScrollingSlotCeilingTests` pins the drawn area rather than

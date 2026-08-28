@@ -70,36 +70,6 @@ struct SizeBoundAnswerChannelTests {
         return (target, refused)
     }
 
-    @Test("A quiet issue confirms from a single probe")
-    func quietIssueConfirmsFromOneProbe() throws {
-        // The latency ask (device QA, 2026-08-18): a window
-        // that already HELD a settled size before the ask, and
-        // still holds exactly it after the whole animation, has
-        // answered twice — pre-ask baseline plus one probe — so
-        // the residue places ~one probe grace after the dance,
-        // not a full second cycle later.
-        guard NSScreen.main != nil else { return }
-        let applied = Applied()
-        let core = makeCore(applied: applied)
-        let target = try #require(
-            core.tiler.calculatedFrames(state: core.state)[w]
-        )
-        let refused = CGRect(
-            origin: target.origin,
-            size: CGSize(width: 715, height: target.height)
-        )
-        // The window sits settled at its refused size BEFORE
-        // the engine ever asks.
-        core.state.apply(.windowResized(w, refused))
-        core.retile()
-        core.tiler.echoGraceOverride = { _ in true }
-        applied.frames = [:]
-        core.handle(.windowResized(w, refused))
-        #expect(core.tiler.sizeBound(for: w) != nil)
-        let placed = try #require(applied.frames[w])
-        #expect(abs(placed.midX - target.midX) < 0.01)
-    }
-
     @Test("An untrusted baseline still needs the ladder")
     func untrustedBaselineNeedsTheLadder() throws {
         // The ask was issued while an echo could still be in
@@ -196,21 +166,47 @@ struct SizeBoundAnswerChannelTests {
         )
         core.retile()
         core.handle(.windowMoved(w, refused))
+        // The move echo still CARRIES the answer — it seeds the
+        // candidate, which is what this test is named for. What
+        // it may not do since #1083 is complete the ladder on
+        // its own: two raw echoes can be one stale frame read
+        // twice, so belief waits for the read that outlasted
+        // the grace.
         #expect(core.tiler.sizeBound(for: w) == nil)
+        #expect(core.tiler.candidateSizeBound(for: w) != nil)
+        core.eventLoop.frameReads.reader = { _ in refused }
+        core.eventLoop.frameReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        core.eventLoop.frameReads.dispatchOverride = {
+            _,
+            work in
+            work()
+        }
+        core.eventLoop.elements[1] = [
+            w: AXUIElementCreateSystemWide()
+        ]
         applied.frames = [:]
-        core.handle(.windowMoved(w, refused))
+        core.runSizeBoundProbe(w)
         #expect(core.tiler.sizeBound(for: w) != nil)
         let placed = try #require(applied.frames[w])
         #expect(abs(placed.midX - target.midX) < 0.01)
     }
-    @Test("An echo confirm places the residue immediately")
-    func echoConfirmPlacesResidueImmediately() throws {
+    @Test("A confirmation places the residue in its own turn")
+    func confirmPlacesResidueImmediately() throws {
         // The device-QA finding (2026-08-18): learning waited
         // on the NEXT retile, so the re-pack/centering arrived
-        // only after "many visits". The echo channel observes
-        // the answer as it arrives, and the confirmation edge
-        // retiles right then — monocle centers on the second
-        // probe's settle, not at some later event.
+        // only after "many visits". The confirmation EDGE
+        // retiles right then, whichever channel carries it —
+        // monocle centers at the confirming observation, not at
+        // some later event.
+        //
+        // Repointed from the echo channel to the settle probe
+        // by #1083 (a raw echo no longer promotes). What is
+        // unique to this test is the tail: the placement's own
+        // echo must not read as a new edge and re-issue. The
+        // confirm-and-place half it shares with
+        // `settleProbeAnswersSilentRefusal`.
         guard NSScreen.main != nil else { return }
         let applied = Applied()
         let core = makeCore(applied: applied)
@@ -224,15 +220,29 @@ struct SizeBoundAnswerChannelTests {
             origin: target.origin,
             size: CGSize(width: 715, height: target.height)
         )
-        // Probe 1: ask, then the app's echo answers.
+        // Probe 1: ask, then the app's echo seeds the candidate.
         core.retile()
         core.handle(.windowResized(w, refused))
         #expect(core.tiler.sizeBound(for: w) == nil)
-        // Probe 2: ask again; the confirming echo must place
-        // the centered residue in the SAME event turn.
+        // The confirming observation is the settled read since
+        // #1083 — the immediacy this test exists for is
+        // unchanged, and it is what the assertions below hold:
+        // the confirmation edge places the residue in its OWN
+        // turn rather than waiting for a later event.
+        core.eventLoop.frameReads.reader = { _ in refused }
+        core.eventLoop.frameReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        core.eventLoop.frameReads.dispatchOverride = {
+            _,
+            work in
+            work()
+        }
+        core.eventLoop.elements[1] = [
+            w: AXUIElementCreateSystemWide()
+        ]
         applied.frames = [:]
-        core.retile()
-        core.handle(.windowResized(w, refused))
+        core.runSizeBoundProbe(w)
         #expect(core.tiler.sizeBound(for: w) != nil)
         let placed = try #require(applied.frames[w])
         #expect(placed.width == 715)

@@ -50,6 +50,47 @@ struct ScrollSlotDomainTests {
         #expect(outcome.refusal == .ownMaximum)
     }
 
+    @Test("A grow measures forward: never below the store")
+    func growNeverMeasuresBelowTheStore() {
+        // #1083. The layout draws a bound-pinned window BELOW
+        // an oversize store, and the press used to measure from
+        // that drawn span — so a grow computed a number smaller
+        // than the store and wrote it back, trimming the row
+        // for every neighbour (device: a ~1160pt auto slot
+        // rewritten to 765). The base is `max(drawn, stored)`,
+        // so a grow can only ever move the store forward.
+        let outcome = decide(
+            delta: 50,
+            stored: 1160,
+            drawnArea: 1400,
+            drawnFocused: 715
+        )
+        let write = outcome.write ?? 0
+        #expect(write > 1160)
+        // Reverting the base to `drawnFocused` writes 765 here.
+        #expect(write != 765)
+    }
+
+    @Test("A shrink measures forward: never above the store")
+    func shrinkNeverMeasuresAboveTheStore() {
+        // The mirror (#1083): a window pinned ABOVE a small
+        // store made a SHRINK compute a bigger number than the
+        // store and raise the row (825 drawn inside a 300pt
+        // slot wrote 775). The base is `min(drawn, stored)`, so
+        // a shrink can only move the store backward — and the
+        // configured floor is what answers, WITH its pill,
+        // rather than the press being swallowed in silence.
+        let outcome = decide(
+            delta: -50,
+            stored: 300,
+            drawnArea: 1400,
+            drawnFocused: 825,
+            globalMin: 300
+        )
+        #expect(outcome.write == nil)
+        #expect(outcome.refusal == .ownMinimum)
+    }
+
     @Test("A grow on an oversize store refuses wordlessly")
     func growOnOversizeStoreIsSilent() {
         // #966's config protection: nothing to grow into, and

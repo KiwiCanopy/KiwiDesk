@@ -196,125 +196,17 @@ struct SizeBoundLearner {
         return widthConfirmed || heightConfirmed
     }
 
-    private mutating func observeAxis(
-        _ id: WindowID,
-        asked: CGFloat,
-        current: CGFloat,
-        baseline: CGFloat?,
-        settledRead: Bool,
-        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>,
-        echoComplied: WritableKeyPath<Ask, Bool>
-    ) -> Bool {
-        var confirmed = false
-        if EffectiveSizeBound.matches(current, asked) {
-            // Only a settled compliance is evidence the
-            // constraint lifted (#1049) — a transient one is
-            // the emulator mid-snap-back, and clearing on it
-            // wiped the ladder every cycle. See `observe`.
-            // An echo-channel compliance is REMEMBERED instead:
-            // if this same ask is next observed OFF its size,
-            // the pair promotes below.
-            if settledRead {
-                complied(id, asked: asked, axis: axis)
-            } else {
-                lastAsks[id]?[keyPath: echoComplied] = true
-            }
-            return false
-        }
-        // The comply-then-revoke pair confirms in ONE cycle
-        // (#1049): the ladder needs "the same answer twice"
-        // because a single refusal can be a stale pre-ask frame
-        // reading as an answer — but a compliance echo proves
-        // the window truly held the asked size moments ago, so
-        // an off-ask reading that follows within the same ask
-        // is the app actively revoking our size: one answer,
-        // definitively attributed, no second dance needed. The
-        // narrow trade: a USER resize landing inside the ask's
-        // echo grace right after the compliance confirms a
-        // false entry — it pins the window at the size the user
-        // themselves chose, and the next genuine resize or
-        // settled compliance clears it.
-        if lastAsks[id]?[keyPath: echoComplied] == true {
-            lastAsks[id]?[keyPath: echoComplied] = false
-            return promote(
-                id,
-                asked: asked,
-                answered: current,
-                axis: axis
-            )
-        }
-        var candidateEntries =
-            candidates[id]?[keyPath: axis] ?? []
-        // The settled pre-ask size is a real prior observation:
-        // unchanged through a whole animation of size-sets, it
-        // completes "the same answer twice" without a second
-        // probe cycle. Only a positive, trusted baseline counts
-        // (a fresh window's .zero state is silence, not an
-        // answer), and a live candidate for the ask keeps the
-        // ordinary ladder.
-        if let baseline,
-            baseline > 0,
-            EffectiveSizeBound.matches(baseline, current),
-            !candidateEntries.contains(where: {
-                EffectiveSizeBound.matches($0.asked, asked)
-            })
-        {
-            return promote(
-                id,
-                asked: asked,
-                answered: current,
-                axis: axis
-            )
-        }
-        if let index = candidateEntries.firstIndex(where: {
-            EffectiveSizeBound.matches($0.asked, asked)
-        }) {
-            let prior = candidateEntries[index]
-            if EffectiveSizeBound.matches(
-                prior.answered,
-                current
-            ) {
-                // Twice in a row: the entry is believed.
-                confirmed = promote(
-                    id,
-                    asked: asked,
-                    answered: current,
-                    axis: axis
-                )
-                candidateEntries.remove(at: index)
-            } else {
-                // Same ask, different answer: restart this
-                // ask's ladder on the newest observation.
-                candidateEntries[index] =
-                    EffectiveSizeBound.Axis(
-                        asked: asked,
-                        answered: current
-                    )
-            }
-        } else {
-            candidateEntries.append(
-                EffectiveSizeBound.Axis(
-                    asked: asked,
-                    answered: current
-                )
-            )
-            if candidateEntries.count > Self.maxEntriesPerAxis {
-                candidateEntries.removeFirst()
-            }
-        }
-        writeCandidates(
-            id,
-            entries: candidateEntries,
-            axis: axis
-        )
-        return confirmed
-    }
-
-    /// Returns whether the believed ledger actually CHANGED —
+    /// Promotes a candidate to a believed bound, returning
+    /// whether the believed ledger actually CHANGED —
     /// re-promoting an identical entry is not a confirmation
     /// edge, which is what keeps the caller's answer (an
     /// immediate retile) from looping on its own echoes.
-    private mutating func promote(
+    ///
+    /// Internal rather than private since #1083 split the
+    /// observation ladder into `SizeBoundLearner+Observe`;
+    /// still module-internal, and no caller outside the two
+    /// learner files may reach it.
+    mutating func promote(
         _ id: WindowID,
         asked: CGFloat,
         answered: CGFloat,
