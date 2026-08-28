@@ -80,13 +80,39 @@ struct ReduceMotionGateTests {
     /// So this fails SHUT rather than tracking the tree. An
     /// entry firing is not a defect in itself — it means a
     /// spelling arrived, and the author owes the choice: gate
-    /// the site and move the needle into `entryPoints`, or rule
-    /// it and drop it from here.
+    /// the site and move the needle into `entryPoints`, or
+    /// narrow the needle. Dropping the entry outright is the
+    /// one disposition that is almost never right, since it
+    /// un-watches the motion-starting use along with whatever
+    /// fired.
+    ///
+    /// **Two ways it fires without motion**, both stated
+    /// because they cost a diagnosis rather than a defect. A
+    /// needle inside a Swift STRING LITERAL reds —
+    /// `SourceScan.stripComments` removes comments and copies
+    /// literals verbatim, deliberately (its own docstring says
+    /// what a literal-blind stripper cost). And a SUPPRESSION
+    /// spelling reds like a starting one:
+    /// `withTransaction(Transaction(animation: nil))` and
+    /// `CATransaction.setDisableActions(true)` are how motion is
+    /// turned OFF, and this cannot tell them apart. Narrowing
+    /// the needle is the repair where one exists —
+    /// `symbolEffect(` does not match `.symbolEffectsRemoved()`
+    /// — and where it does not, the site still wants the ruling.
+    ///
+    /// **Scope: `Sources/KiwiDesk`**, so a green here says the
+    /// GUI tree honours the setting, NOT that the app's chrome
+    /// does. `Sources/KiwiDeskCore` draws the bars and the
+    /// borders through this same AppKit/Core Animation family
+    /// and is out of `gui.md`'s obligation; reading a green as
+    /// wider is the #1069 mistake told again (guard-prover).
     private static let uncensused = [
-        "withTransaction", ".transaction", "phaseAnimator",
-        "keyframeAnimator", "symbolEffect", "contentTransition",
-        "NSAnimationContext", "CATransaction", "CABasicAnimation",
-        ".animator()",
+        "withTransaction", ".transaction", "phaseAnimator(",
+        "keyframeAnimator(", "symbolEffect(",
+        "contentTransition(", "NSAnimation", "CATransaction",
+        "CATransition", "CABasicAnimation",
+        "CAKeyframeAnimation", "CASpringAnimation",
+        "CAAnimationGroup", ".animator", "TimelineView",
     ]
 
     @Test("No uncensused way to start motion ships")
@@ -94,7 +120,9 @@ struct ReduceMotionGateTests {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
         var found: [String] = []
+        var scanned = 0
         for file in try SourceScan.swiftSources(under: root) {
+            scanned += 1
             let source = try SourceScan.strippedSource(at: file)
             for spelling in Self.uncensused
             where source.contains(spelling) {
@@ -103,6 +131,13 @@ struct ReduceMotionGateTests {
                 )
             }
         }
+        // A clause whose expected result is zero matches passes
+        // for having scanned NOTHING, in a millisecond, and its
+        // sibling's floor does not stand in — each expresses its
+        // own root (guard-prover). A FLOOR against a tree of
+        // hundreds, not the live count, which every added file
+        // moves (tests.md ▸ a drawn VALUE).
+        #expect(scanned >= 100, "scanned \(scanned) files")
         #expect(
             found.isEmpty,
             """
