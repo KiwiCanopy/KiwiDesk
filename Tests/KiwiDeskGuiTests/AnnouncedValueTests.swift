@@ -134,18 +134,14 @@ struct AnnouncedValueTests {
         var i = cursor
         while i + word.count < text.count {
             if Array(text[i..<i + word.count]) == word,
-                i == 0 || !Self.isIdentifier(text[i - 1]),
-                !Self.isIdentifier(text[i + word.count])
+                i == 0 || !SourceScan.isIdentifier(text[i - 1], orDot: false),
+                !SourceScan.isIdentifier(text[i + word.count], orDot: false)
             {
                 return i
             }
             i += 1
         }
         return nil
-    }
-
-    private static func isIdentifier(_ c: Character) -> Bool {
-        c.isLetter || c.isNumber || c == "_"
     }
 
     /// Skips whitespace then one balanced run opened by
@@ -184,9 +180,12 @@ struct AnnouncedValueTests {
         while probe < text.count, text[probe].isWhitespace {
             probe += 1
         }
-        guard probe < text.count, Self.isIdentifier(text[probe])
+        guard probe < text.count,
+            SourceScan.isIdentifier(text[probe], orDot: false)
         else { return false }
-        while probe < text.count, Self.isIdentifier(text[probe]) {
+        while probe < text.count,
+            SourceScan.isIdentifier(text[probe], orDot: false)
+        {
             probe += 1
         }
         guard probe < text.count, text[probe] == ":" else {
@@ -214,9 +213,12 @@ struct AnnouncedValueTests {
             return false
         }
         probe += 1
-        guard probe < text.count, Self.isIdentifier(text[probe])
+        guard probe < text.count,
+            SourceScan.isIdentifier(text[probe], orDot: false)
         else { return false }
-        while probe < text.count, Self.isIdentifier(text[probe]) {
+        while probe < text.count,
+            SourceScan.isIdentifier(text[probe], orDot: false)
+        {
             probe += 1
         }
         i = probe

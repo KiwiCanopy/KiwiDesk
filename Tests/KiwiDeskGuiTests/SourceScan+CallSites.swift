@@ -55,7 +55,7 @@ extension SourceScan {
             // and hid it completely (guard-prover). The leading
             // `.` IS the boundary for those.
             if Self.needsBoundary(entry), start > 0,
-                Self.isIdentifier(source[start - 1])
+                Self.isIdentifier(source[start - 1], orDot: false)
             {
                 continue
             }
@@ -89,7 +89,7 @@ extension SourceScan {
                 == needle
         {
             if needsBoundary(spelling), start > 0,
-                isIdentifier(source[start - 1])
+                isIdentifier(source[start - 1], orDot: false)
             {
                 continue
             }
@@ -130,9 +130,17 @@ extension SourceScan {
     /// diff's own history is a dot-prefix mistake that cost the
     /// gate clause every inline call site for a commit, without
     /// moving a single count (code review, #1069).
+    /// `orDot` is stated at every call site, never defaulted:
+    /// flipping it to true here would stop `mentions` matching a
+    /// dotted `Foo.NSAnimation` while every consumer stayed
+    /// green — `.animation` never reaches this (`needsBoundary`
+    /// is false for it) and no other needle is dot-prefixed — so
+    /// the default would be the deciding knob, unpinned. That is
+    /// the same "weakened with the counts unmoved" class as the
+    /// mistake three lines up (code review, #1069).
     static func isIdentifier(
         _ character: Character,
-        orDot: Bool = false
+        orDot: Bool
     ) -> Bool {
         character.isLetter || character.isNumber
             || character == "_" || (orDot && character == ".")

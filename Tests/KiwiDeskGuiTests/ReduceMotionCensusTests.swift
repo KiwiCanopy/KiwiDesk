@@ -21,9 +21,9 @@ struct ReduceMotionCensusTests {
     /// spelling joins it, and nothing made that happen. The
     /// concrete cost is small and total — one
     /// `.transaction { $0.animation = LayoutSchematic.damping }`
-    /// in `LayoutSchematicView`, the shared host of all seven
-    /// schematics, injects full motion into every subtree for a
-    /// Reduce Motion user, and no child gate is in the way: the
+    /// in `LayoutSchematicView`, the shared host every schematic
+    /// draws through, injects full motion into every subtree for
+    /// a Reduce Motion user, and no child gate is in the way: the
     /// schematics' own chains cover named values only, so
     /// anything they do not name takes the injected animation
     /// (guard-prover, #1069).

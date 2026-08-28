@@ -1036,11 +1036,13 @@ values only, so nothing downstream stops it.
 **The obligation is `Sources/KiwiDesk`'s**, and a green guard
 says that tree honours the setting rather than that the app
 does. `Sources/KiwiDeskCore` draws the bars and the border cues
-through AppKit and Core Animation, outside this guard's reach —
-the border cues read `accessibilityDisplayShouldReduceMotion` at
-their own call sites, and the bars' frame slide reads nothing at
-all. A green here is evidence about neither: **a Core animation
-is gated at its own site or it is ungated.**
+through AppKit and Core Animation, outside this guard's reach,
+so **a Core animation is gated at its own site or it is
+ungated** — nothing there is covered by being in a tree that
+has a guard. Where each stood in 2026-08 is worth knowing and
+is not a rule: the border cues read
+`accessibilityDisplayShouldReduceMotion` themselves, and the
+bars read no setting at all.
 
 **A shared animation constant stays a plain VALUE; the gate is
 spelled at each caller.** Sharing the TUNING is fine — every

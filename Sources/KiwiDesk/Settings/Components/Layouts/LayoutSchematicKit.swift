@@ -19,8 +19,8 @@ enum LayoutSchematic {
     static let stroke = SettingsTheme.accent.opacity(0.6)
 
     /// Short enough to track a live slider drag without visible
-    /// lag; still smooths stepper/typed jumps. Mirrors
-    /// `GapsDiagram`.
+    /// lag; still smooths stepper/typed jumps, and the gaps
+    /// diagram reads it too rather than re-spelling it.
     ///
     /// A plain VALUE: the tuning is shared, the Reduce Motion
     /// gate is not. Each caller spells

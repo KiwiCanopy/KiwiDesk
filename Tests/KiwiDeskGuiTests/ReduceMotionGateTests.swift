@@ -12,9 +12,9 @@ import Testing
 ///
 /// **Both ways in are scanned**, because half the invariant is
 /// no invariant: `withAnimation` was gated and guarded by #989
-/// while the `.animation(_:value:)` modifier ran ungated at ~40
+/// while the `.animation(_:value:)` modifier ran ungated at 44
 /// sites — the layout schematics' shared
-/// `LayoutSchematic.damping` and six hover/focus fades — and a
+/// `LayoutSchematic.damping` and six sites elsewhere — and a
 /// green here said "every animation is gated" over them
 /// (#1069). `entryPoints` is the census of the spellings that
 /// start motion; a new one joins it.
