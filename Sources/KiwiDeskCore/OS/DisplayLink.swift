@@ -16,21 +16,6 @@ public final class DisplayLinkDriver {
     private var lastTimestamp: CFTimeInterval?
     private let onTick: Tick
 
-    /// Reports a frame that arrived later than `stallThreshold`,
-    /// with the RAW gap — the tick itself is clamped before the
-    /// engine sees it, so a starved clock is invisible
-    /// downstream and every symptom it causes gets attributed
-    /// to whatever code happened to be nearby (#1084). Assigned
-    /// by `AnimationEngine`, which routes it to its own log
-    /// seam; unset it stays silent.
-    var onStall: (@MainActor (TimeInterval) -> Void)?
-
-    /// Well past a frame at any refresh rate this runs at —
-    /// 120 Hz is 8 ms, 60 Hz is 17 ms, and ProMotion's slowest
-    /// advertised cadence is 24 Hz (42 ms). A gap this size is
-    /// not a rate change; it is the clock not being serviced.
-    private static let stallThreshold: TimeInterval = 0.1
-
     public private(set) var isRunning = false
 
     public init(screen: NSScreen, onTick: @escaping Tick) {
@@ -74,7 +59,6 @@ public final class DisplayLinkDriver {
         }
         let dt = now - last
         guard dt > 0 else { return }
-        if dt > Self.stallThreshold { onStall?(dt) }
         // Clamp huge gaps (e.g. after sleep) to one nominal
         // frame so springs never explode.
         let nominal = link.targetTimestamp - now

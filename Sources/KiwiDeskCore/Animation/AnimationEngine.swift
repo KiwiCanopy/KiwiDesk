@@ -310,22 +310,11 @@ public final class AnimationEngine {
         screen: NSScreen
     ) {
         if drivers[display] == nil {
-            let driver = DisplayLinkDriver(
+            drivers[display] = DisplayLinkDriver(
                 screen: screen
             ) { [weak self] dt in
                 self?.tick(display: display, dt: dt)
             }
-            // A starved frame clock is invisible downstream —
-            // the driver clamps `dt` so the springs stay
-            // stable — so it is reported here or nowhere
-            // (#1084).
-            driver.onStall = { [weak self] gap in
-                self?.onLog(
-                    "frame clock stalled \(Int(gap * 1000))ms "
-                        + "on display \(display)"
-                )
-            }
-            drivers[display] = driver
         }
         drivers[display]?.start()
     }
