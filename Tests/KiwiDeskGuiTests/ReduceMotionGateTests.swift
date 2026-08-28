@@ -62,6 +62,57 @@ struct ReduceMotionGateTests {
         "withAnimation", ".animation",
     ]
 
+    /// Ways to start motion that NOTHING here scans, held at
+    /// zero occurrences (`Sources/KiwiDesk` carries none today).
+    ///
+    /// A census with no check on its own completeness is the
+    /// #1069 failure one level up: `entryPoints` says a new
+    /// spelling joins it, and nothing made that happen. The
+    /// concrete cost is small and total — one
+    /// `.transaction { $0.animation = LayoutSchematic.damping }`
+    /// in `LayoutSchematicView`, the shared host of all seven
+    /// schematics, injects full motion into every subtree for a
+    /// Reduce Motion user, and no child gate is in the way: the
+    /// schematics' own chains cover named values only, so
+    /// anything they do not name takes the injected animation
+    /// (guard-prover, #1069).
+    ///
+    /// So this fails SHUT rather than tracking the tree. An
+    /// entry firing is not a defect in itself — it means a
+    /// spelling arrived, and the author owes the choice: gate
+    /// the site and move the needle into `entryPoints`, or rule
+    /// it and drop it from here.
+    private static let uncensused = [
+        "withTransaction", ".transaction", "phaseAnimator",
+        "keyframeAnimator", "symbolEffect", "contentTransition",
+        "NSAnimationContext", "CATransaction", "CABasicAnimation",
+        ".animator()",
+    ]
+
+    @Test("No uncensused way to start motion ships")
+    func everyMotionSpellingIsCensused() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var found: [String] = []
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = try SourceScan.strippedSource(at: file)
+            for spelling in Self.uncensused
+            where source.contains(spelling) {
+                found.append(
+                    "\(file.lastPathComponent): \(spelling)"
+                )
+            }
+        }
+        #expect(
+            found.isEmpty,
+            """
+            starts motion with no needle watching it — gate the \
+            site and add the spelling to entryPoints, or rule \
+            it and drop it from `uncensused`: \(found)
+            """
+        )
+    }
+
     /// Every call of `entry`, paired with the index of its
     /// opening paren (nil for the paren-less form).
     ///

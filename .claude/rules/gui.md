@@ -1014,6 +1014,17 @@ progress fades (#1069). A guard green on one spelling reads as
 "every animation is gated", which is why the suite's
 `entryPoints` is the census of the spellings that START motion,
 and **a new spelling joins it in the change that introduces it**.
+That obligation is held rather than asked for: the spellings
+nothing scans — `withTransaction`, `.transaction`,
+`phaseAnimator`, `symbolEffect` and the AppKit/Core Animation
+ones — are pinned at zero occurrences by a second clause in the
+same suite, so the first one to arrive reds and its author
+either gates it and moves the needle across, or rules it. Left
+to a sentence it would have gone the way of the first census:
+one `.transaction { $0.animation = … }` in the schematics'
+shared host re-animates all seven for a Reduce Motion user, and
+their own gated chains cover named values only, so nothing
+downstream stops it.
 
 **A shared animation constant stays a plain VALUE; the gate is
 spelled at each caller.** Sharing the TUNING is fine — the eight
