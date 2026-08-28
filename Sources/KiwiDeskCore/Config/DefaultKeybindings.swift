@@ -5,14 +5,25 @@ import Foundation
 /// a fresh install, or a config whose Lua declares none — so a
 /// new user can focus, move, and navigate windows immediately.
 ///
-/// Modifier scheme (#270): every default is built on **Control+
-/// Option**, escalating ⌃⌥ → ⌃⌥⇧ → ⌃⌥⌘. Bare Option is the
-/// macOS special-character (AltGr) modifier, so a global
-/// `option+<key>` hotkey swallows characters on international
-/// Apple keyboards (⌥L = @, ⌥5 = [ …); adding Control or Command
-/// suppresses that composition, so ⌃⌥ is the lightest text-safe
-/// chord. Directions bind the **arrow keys**, which are layout-
-/// stable and never compose a character.
+/// Modifier scheme (#270, amended by #1075): the **positional**
+/// defaults are built on **Control+Option**, escalating ⌃⌥ (act
+/// on the focus) → ⌃⌥⇧ (act on the window) → ⌃⌥⌘ (both), so
+/// `⌘` there means exactly one thing: "and follow". **Size takes a
+/// base of its own, ⌥⌘**, because it is not a positional verb —
+/// it changes a weight or a scroll-slot domain rather than a
+/// place in the flat array — and because it is the one verb a
+/// user HOLDS (#1056), which ⌥⌘ takes as a single thumb roll and
+/// ⌃⌥⌘ does not.
+///
+/// Bare Option is the macOS special-character (AltGr) modifier,
+/// so a global `option+<key>` hotkey swallows characters on
+/// international Apple keyboards (⌥L = @, ⌥5 = [ …); adding
+/// Control **or Command** suppresses that composition, which is
+/// what makes ⌥⌘ text-safe as well as ⌃⌥. Directions bind the
+/// **arrow keys**, which are layout-stable and never compose a
+/// character; size binds **digits**, which hold their physical
+/// position on every layout and are the only keys a numeric
+/// keypad repeats (#1074).
 ///
 /// The Lua and canonical labels mirror what
 /// `KeybindingCatalog` (GUI target) authors for the same
@@ -75,11 +86,13 @@ public enum DefaultKeybindings {
         for (digit, space) in numbered(spaces) {
             rows.append(moveSpaceRow(digit: digit, space: space))
         }
-        // Tier 3 — ⌃⌥⌘: resize, move-to-space-and-follow.
-        rows.append(contentsOf: resizeRows(step: resizeStep))
+        // Tier 3 — ⌃⌥⌘: move-to-space-and-follow.
         for (digit, space) in numbered(spaces) {
             rows.append(followSpaceRow(digit: digit, space: space))
         }
+        // Size — ⌥⌘, a base of its own rather than a rung on the
+        // positional ladder (#1075).
+        rows.append(contentsOf: resizeRows(step: resizeStep))
         // Toggles — mnemonic letters. Display sticky is the more
         // frequent scope, so it takes the lighter ⌃⌥ chord; the
         // broader global sticky escalates to ⌃⌥⇧.
@@ -134,31 +147,52 @@ public enum DefaultKeybindings {
         )
     }
 
-    /// The four ⌃⌥⌘ + arrow resize rows: the arrow points the
-    /// change — →/← grow/shrink width, ↑/↓ grow/shrink height —
-    /// by the configurable `resize.step` (#58).
+    /// The four ⌥⌘ + digit resize rows (#1075): `4`/`5` shrink
+    /// and grow WIDTH, `7`/`8` shrink and grow HEIGHT, each by
+    /// the configurable `resize.step` (#58).
+    ///
+    /// Digits rather than arrows because an arrow reads two ways
+    /// on a tiled window — "which axis and sign" and "which way
+    /// the edge moves" — and which edge is free depends on where
+    /// the window sits in the flat array, so the same arrow grows
+    /// a right-column window and shrinks a left-column one. No
+    /// relabelling fixes that; the arrow shape creates it.
+    ///
+    /// Within a pair the HIGHER digit grows. The pairs are one
+    /// per hand on the number row (`4`/`5` left, `7`/`8` right,
+    /// so left reads as width and right as height) and a 2×2
+    /// block on a numeric keypad, where `7`/`8` sit directly
+    /// above `4`/`5` — the only place a keyboard encodes a second
+    /// axis without using arrows (#1074 makes those keypad keys
+    /// fire this binding). `5`/`6` was rejected: touch typing
+    /// splits the number row between them, so that pair straddles
+    /// the hand boundary.
+    ///
+    /// Why ⌥⌘ is available at all, given #270 rejected it, is
+    /// argued in `docs/design-decisions.md` — every collision it
+    /// named is a letter, an arrow or `esc`, and none is a digit.
     private static func resizeRows(step: Int) -> [KeyBinding] {
         [
             KeyBinding(
-                combo: "control+option+command+right",
+                combo: "option+command+5",
                 lua: "KiwiDesk.resize(\"x\", \(step))",
                 kind: .navigation,
                 label: "Grow width"
             ),
             KeyBinding(
-                combo: "control+option+command+left",
+                combo: "option+command+4",
                 lua: "KiwiDesk.resize(\"x\", -\(step))",
                 kind: .navigation,
                 label: "Shrink width"
             ),
             KeyBinding(
-                combo: "control+option+command+up",
+                combo: "option+command+8",
                 lua: "KiwiDesk.resize(\"y\", \(step))",
                 kind: .navigation,
                 label: "Grow height"
             ),
             KeyBinding(
-                combo: "control+option+command+down",
+                combo: "option+command+7",
                 lua: "KiwiDesk.resize(\"y\", -\(step))",
                 kind: .navigation,
                 label: "Shrink height"

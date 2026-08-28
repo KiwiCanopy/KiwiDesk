@@ -42,6 +42,20 @@ override; float and ignore share the generic list-rule primitive
 because two real clients now remove drift — see
 [parity-tests.md](parity-tests.md).
 
+## The seeded keymap has two bases, and `⌥⌘` is bounded
+
+- **Seed a positional verb on the `⌃⌥` ladder and a size verb on
+  `⌥⌘` — never the reverse (#1075).** `⌘` on the ladder means
+  exactly one thing, "and follow"; giving it a second sense is
+  what the split removed. **`⌥⌘` may carry digits and safe
+  letters only:** never arrows (`⌥⌘←`/`→` is next/previous tab in
+  Chrome, Safari and Terminal, and a global Carbon hotkey
+  pre-empts the frontmost app), never `esc`, `space`, `D`, `H` or
+  `M`, each of which is an always-on system shortcut. Both halves
+  are argued in `docs/design-decisions.md` ▸ "Size is not a
+  positional verb" — do not restate the argument here
+  (`SizeLayerSeedTests`).
+
 ## The starter setup is derived, and its tuning is profile-wide
 
 A fresh install's `Starter` profile is **chosen from the screens

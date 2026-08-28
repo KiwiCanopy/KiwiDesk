@@ -2620,18 +2620,27 @@ you can drive KiwiDesk before configuring anything:
 | Swap with window left / down / up / right | `⌃⌥⇧←` `⌃⌥⇧↓` `⌃⌥⇧↑` `⌃⌥⇧→` |
 | Move to space | `⌃⌥⇧1` … `⌃⌥⇧9`, `⌃⌥⇧0` |
 | Move to space and follow | `⌃⌥⌘1` … `⌃⌥⌘9`, `⌃⌥⌘0` |
-| Grow / Shrink width | `⌃⌥⌘→` / `⌃⌥⌘←` |
-| Grow / Shrink height | `⌃⌥⌘↑` / `⌃⌥⌘↓` |
+| Grow / Shrink width | `⌥⌘5` / `⌥⌘4` |
+| Grow / Shrink height | `⌥⌘8` / `⌥⌘7` |
 | Toggle floating | `⌃⌥F` |
 | Toggle display sticky | `⌃⌥S` |
 | Toggle sticky (all spaces) | `⌃⌥⇧S` |
 
-Every default is built on **Control-Option** (`⌃⌥`), escalating to
-`⌃⌥⇧` and `⌃⌥⌘`. On macOS the Option key by itself types special
-characters — on many layouts `⌥L` is `@` and `⌥5` is `[` — so a
-global `⌥`-only shortcut would swallow them; adding Control keeps
-every default clear of both macOS system shortcuts and text entry.
-Directions use the arrow keys, which are identical on every layout.
+The **movement** defaults are built on **Control-Option**
+(`⌃⌥`), escalating through `⌃⌥⇧` — act on the window rather than
+the focus — to `⌃⌥⌘`, which does both. **Resizing has a layer of
+its own, `⌥⌘`**: changing a window's size isn't a movement, and
+it's the one shortcut you hold down, which `⌥⌘` takes as a single
+thumb roll.
+
+On macOS the Option key by itself types special characters — on
+many layouts `⌥L` is `@` and `⌥5` is `[` — so a global `⌥`-only
+shortcut would swallow them; adding Control *or Command* keeps a
+default clear of both macOS system shortcuts and text entry.
+Directions use the arrow keys, which are identical on every
+layout. Resizing uses digits, which hold their place on every
+layout — and on a numeric keypad `7`/`8` sit directly above
+`4`/`5`, so the block itself shows which pair is which.
 
 Each space digit is bound to a space *by name*: `⌃⌥3` goes to
 whichever space was third when the set was seeded. Renaming that
@@ -2824,9 +2833,10 @@ Each row has an action. Built-in actions live under headings:
   The Desktop rows are Mission Control's Desktops rather than
   KiwiDesk's spaces, and there is one per Desktop you actually
   have — on every screen, since these act on whichever screen
-  the Desktop lives on. They ship **unbound**: all four digit
-  tiers (`⌃⌥`, `⌃⌥⇧`, `⌃⌥⌘` and the arrows) are already spent,
-  so KiwiDesk offers the rows and leaves the keys to you. They
+  the Desktop lives on. They ship **unbound**: the three digit
+  tiers (`⌃⌥`, `⌃⌥⇧`, `⌃⌥⌘`) go to spaces, the arrows to focus
+  and swap, and `⌥⌘` to resizing, so KiwiDesk offers the rows
+  and leaves the keys to you. They
   appear only where macOS exposes the window-management bridge
   they need — see [macOS Desktops](#macos-desktops-mission-control) —
   and a row you bound keeps its place if that Desktop later
