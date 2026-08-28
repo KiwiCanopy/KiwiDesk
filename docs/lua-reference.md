@@ -3715,6 +3715,20 @@ punctuation.
 - `delete`/`backspace`
 - `escape`/`esc`
 
+**The numeric keypad.** Its ten digits are the **same key** as
+their number-row twin — a binding written `control+option+4` fires
+from either, and the two cannot be bound apart. Every other keypad
+key is its own key, bindable on its own: `keypadplus`,
+`keypadminus`, `keypadmultiply`, `keypaddivide`, `keypaddecimal`,
+`keypadequals`, `keypadenter`, `keypadclear`. `keypad0`–`keypad9`
+are accepted as spellings of the plain digits and resolve to them,
+so the recorder writes `4` whichever of the two keys you press.
+
+Keypad digits work whenever the keypad sends digits. Apple keypads
+always do — a Clear key sits where PC keyboards put Num Lock — but
+a third-party PC keyboard with Num Lock **off** sends navigation
+keys from the keypad instead, and no keypad shortcut fires.
+
 The Settings app's shortcut recorder writes the long forms
 (`command`, `option`, `semicolon`, …) for readability; every alias
 round-trips.

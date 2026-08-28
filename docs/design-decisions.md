@@ -5243,6 +5243,38 @@ tiling-plus-sparse-behavior, #55): on first launch the seeded
 model is persisted so the very first boot is GUI-managed and the
 shortcuts actually fire.
 
+**The keypad's ten digits ARE their number-row twins (#1074).** A
+binding written `4` fires from either physical key, and nothing
+binds them apart. Keep that set closed: the tempting
+generalisation — "a keypad key mirrors whatever character it
+prints" — needs an exception the moment it is written, because
+keypad `+` has no number-row twin at all (main-block `+` is `⇧=`),
+while the digit-only rule never needs one. Every other keypad key
+(`+ − × ÷ . = enter clear`) is its own bindable key.
+
+Aliasing rather than ten more distinct keys follows the platform
+instead of our own model: AppKit menu key-equivalents match on the
+CHARACTER, so `⌘1` and `⌘`+keypad-`1` are one shortcut in
+essentially every Mac app. KiwiDesk binds by key code — chosen for
+international position-stability, not to tell a keypad from a
+number row — so the twin has to be stated somewhere, and
+`KeypadKeys` is the one place it is: hotkey registration reads it
+to register the second physical key, `KeyCombo.keyName` reads it
+to canonicalise a captured keypad press back to its digit. The
+cost is accepted rather than discovered — ten keys a power user
+might have wanted bound separately are gone for good, and "the
+keypad works like the number row" is worth more than they are.
+
+**The keypad is deliberately NOT drawn on the Settings board
+(#1074).** `KeyboardMatrix.PhysicalType` distinguishes ANSI, ISO
+and JIS, and macOS exposes no "a keypad is attached" signal at
+all — so a drawn keypad would show every laptop a block of keys it
+does not have, which is worse than omitting it. Bindable-but-
+undrawn is already the board's shape: `f1`–`f12`, `home`, `end`,
+`pageup` and `pagedown` are all bindable and none is drawn, and
+`drawnCodes` states outright that a key the board omits is not
+counted as free. The board is a preview, never a census.
+
 **The seed fires whenever `init.lua` declares no managed
 _settings_ — not only when `init.lua` is absent (#354).** The
 original gate ("no `init.lua` yet") silently punished a user

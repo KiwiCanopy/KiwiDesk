@@ -108,6 +108,13 @@ public struct KeyCombo: Hashable, Sendable {
     /// `comboString(keyCode:…)` would make it synthesise a whole
     /// combo string and re-parse it to get one.
     public static func keyName(for code: UInt32) -> String? {
+        // A keypad digit IS its number-row twin (#1074), so it
+        // names itself as that digit — which is what makes a
+        // captured keypad press round-trip through `parse` to
+        // the code its binding is actually stored under.
+        if let row = KeypadKeys.rowTwin(of: code) {
+            return keyName(for: row)
+        }
         let overrides: [UInt32: String] = [
             36: "return", 51: "delete", 53: "escape",
             41: "semicolon", 43: "comma", 47: "period",
@@ -115,7 +122,9 @@ public struct KeyCombo: Hashable, Sendable {
             50: "grave", 27: "minus", 24: "equal",
             10: "section",
             30: "rightbracket", 33: "leftbracket",
-        ]
+        ].merging(KeypadKeys.displayOverrides) { local, _ in
+            local
+        }
         if let name = overrides[code] { return name }
         return keyCodes.first { $0.value == code }?.key
     }
@@ -131,7 +140,16 @@ public struct KeyCombo: Hashable, Sendable {
     /// de-duplicating by VALUE. It carries no order, no row and
     /// no width — geometry is the caller's, and
     /// `KeyboardMatrix` is where the GUI keeps it.
-    public static let keyCodes: [String: UInt32] = [
+    public static let keyCodes: [String: UInt32] =
+        mainBlockKeyCodes.merging(KeypadKeys.names) { main, _ in
+            main
+        }
+
+    /// The main block — everything but the numeric keypad, whose
+    /// names and digit aliases `KeypadKeys` owns (#1074). Private
+    /// because `keyCodes` above is the whole keyboard, and a
+    /// caller reaching past it would miss the keypad.
+    private static let mainBlockKeyCodes: [String: UInt32] = [
         "a": 0, "s": 1, "d": 2, "f": 3, "h": 4, "g": 5,
         "z": 6, "x": 7, "c": 8, "v": 9, "b": 11, "q": 12,
         "w": 13, "e": 14, "r": 15, "y": 16, "t": 17,
