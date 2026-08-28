@@ -2056,6 +2056,34 @@ mark, and the copy mirrors the floor's
 *viewport* stays wordless — that limit protects no window and
 names none, so the bounce alone carries it.
 
+**A resize press is measured against what the focused window
+DRAWS, and refuses in place where its bound blocks it
+(#1057).** [Principle] The scrolling slot is a shared store,
+and two symptoms came from resizing it by the stored number: an
+oversize configured slot (set at the desk, applied on the
+laptop) made shrink presses move an invisible number for
+several clicks before anything responded, and a window pinned
+by its learned bound let presses silently resize every
+NEIGHBOR — grow walked the store up through the row until it
+caught the pinned span and only then said "maximum reached"
+(owner device QA, 2026-08-28). The rule that fixes both: the
+press acts on the focused window, so it is measured from the
+span that window actually renders. Where its bound blocks the
+direction outright — grow at its maximum, shrink at its
+minimum — the press refuses in place: the pill on the first
+press, nothing written, no neighbor moved; resizing the row
+from a window that cannot follow is done by focusing a window
+that can. Where the window CAN move, the press acts from its
+drawn span — an oversize store shrinks visibly on the first
+press and is rewritten only by that deliberate act (a grow
+still refuses, per the #966 config protection), and a window
+pinned above the store grows in one press instead of walking
+the store up to it. The whole decision lives in one pure type,
+`ScrollSlotDomain`, so every cap arm is a unit-tested case
+rather than arithmetic in a command file — the same shape the
+ratio clamps take in `SplitDomain`.
+(`ScrollSlotDomainTests`, `ScrollingFixedSpanCueTests`)
+
 **A corroborated bound generalizes at the consume site,
 revocably; entries never do (#1055).** [Principle] The per-ask
 ledger exists because a single refusal is grid noise as often

@@ -1016,12 +1016,17 @@ enforces, once KiwiDesk has learned it (#1055): that refusal
 bounces and pills ("Maximum window size reached"), where the
 fits-on-screen stop stays wordless.
 
-Setting a size *here* is not clamped that way, and a `resize`
-will not undo it: a config value travels with you between
-screens, so if you set a slot wider than the screen you are on,
-it keeps that width and the layout simply draws what fits. A
-grow press then does nothing rather than trimming it; a shrink
-steps down from what you wrote, as usual.
+Setting a size *here* is not clamped that way: a config value
+travels with you between screens, so if you set a slot wider
+than the screen you are on, it keeps that width and the layout
+simply draws what fits. A grow press then does nothing rather
+than trimming it; a shrink counts from what is *drawn*, not
+from the stored number (#1057) — the first press has visible
+effect, and only that deliberate resize rewrites the stored
+value. And when the focused window's app pins its size, a
+press its bound blocks outright refuses in place with the pill
+— it never resizes the rest of the row from a window that
+cannot follow.
 
 ### scroll.set_anchor
 

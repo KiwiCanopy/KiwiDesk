@@ -238,13 +238,18 @@ struct ScrollingSlotCeilingTests {
         )
         #expect(try slotPoints(core, space) == 3000)
 
-        // A shrink from there steps down by its own delta —
-        // it does not snap to the drawn width either.
+        // A shrink measures from what is DRAWN (#1057): the
+        // first press lands one step below the visible size
+        // instead of unwinding invisible points — the store is
+        // rewritten only now, the moment the user deliberately
+        // resizes on this screen.
         core.execute(
             "resize",
             args: [.string("x"), .number(-400)]
         )
-        #expect(try slotPoints(core, space) == 2600)
+        #expect(
+            try slotPoints(core, space) == areaExtent(core) - 400
+        )
     }
 
     @Test("The floor still wins on a display narrower than it")
