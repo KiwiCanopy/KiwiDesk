@@ -13,7 +13,7 @@ extension SettingsValueReadout {
     ) -> [SettingsDiffRow] {
         switch key {
         case .language, .appearance, .startAtLogin, .about,
-            .advancedConfigFile, .advancedRestartOnCrash,
+            .advancedConfigFile,
             .advancedEditLua, .advancedDiscardArrangement,
             .advancedResetAll, .onboardingDiscoveryShown,
             .iconPickerRecents, .onboardingOpenAtLogin,

@@ -63,7 +63,6 @@ struct GateReasonPlacementTests {
                 // surface, so the row owes nothing inline and
                 // its view stopped drawing the note.)
                 .general(.startAtLogin),
-                .general(.advancedRestartOnCrash),
                 // Found BY the derivation: the copy action sits
                 // on the App Bar card while the switch that
                 // kills it is on the Space Bar card, so nothing

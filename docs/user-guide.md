@@ -483,43 +483,32 @@ path is offered instead.
 
 ## Start KiwiDesk
 
-Whether KiwiDesk launches itself is **two switches**, not one
-control, because the two halves live in two places. The main one,
-**Start at login**, sits in **General**'s **Applies immediately**
-group (below the language and appearance picks); the supervision
-half, **Restart if it stops unexpectedly**, sits first among
-**General ▸ Advanced**.
+**Start at login** sits in **General**'s **Applies immediately**
+group, below the language and appearance picks. Off, KiwiDesk
+never starts on its own; on, it launches when you sign in, so
+your windows are arranged from the start rather than floating
+loose until you open it by hand. It stores nothing of its own —
+it reads and writes the real macOS login item.
 
-- **Start at login** — off, KiwiDesk never starts on its own; on,
-  it launches when you sign in, so your windows are
-  arranged from the start rather than floating loose until you
-  open it by hand. Turning it on also switches on crash-restart,
-  because that is the obvious setup for someone who just wants
-  KiwiDesk running — the `?` beside the switch says so.
-- **Restart if it stops unexpectedly** (Advanced) — a background
-  helper that relaunches KiwiDesk if it ever *crashes*; a
-  deliberate Quit is never resurrected. It comes on with login;
-  switch it off here if you want KiwiDesk to open at login but not
-  be supervised.
+Crash supervision is **not** in Settings. A background helper
+that relaunches KiwiDesk if it ever *crashes* — never after a
+deliberate Quit — is available from the command line as
+`kiwidesk service start`, and [the CLI guide](cli.md) documents
+it. It is left to the terminal deliberately: it is a second way
+to launch KiwiDesk, and running it alongside the login item
+means two launchers starting the same app at login, which is
+worth understanding before you turn it on. If KiwiDesk ever does
+stop, reopening it from Spotlight takes a second.
 
-The two are one setting to macOS: the supervising helper also
-launches KiwiDesk at login, so "restart but don't start at login"
-is not a state macOS can hold. The Advanced switch therefore greys
-out while login is off, and its caption names the dependency
-rather than leaving a dimmed switch unexplained.
+If you have that service running, **Start at login** shows as on
+and stops being editable, with a line saying why: the service
+already launches KiwiDesk at login, so the login item would only
+add a second launcher. Stop the service and the switch is yours
+again.
 
-Because both switches read the real macOS state and store nothing
-of their own, one thing is worth knowing: **a login-without-restart
-choice is not remembered once you switch login off and on again.**
-Switch login off and the distinction is gone — a copy that never
-wanted restart and one that was simply never started both read as
-"off" — so switching login back on takes the default (login *and*
-restart) rather than restoring a prior "just login" answer. Switch
-restart back off in Advanced when you want that state again.
-
-First-launch setup offers login pre-selected on its final step
-(the plain login level, without crash-restart), so a standard new
-install launches at login; the supervision is opt-in from Advanced.
+First-launch setup offers login pre-selected on its final step,
+so a standard new install launches at login and nothing
+supervises it.
 
 Both switches reflect the real macOS state — revoke the login item
 from **System Settings ▸ General ▸ Login Items** and they follow.

@@ -394,8 +394,6 @@
   "general.advanced.reset_all.confirm.message": "Questa azione elimina tutti i profili salvati, i tuoi spazi, layout e scorciatoie, e dimentica ogni disposizione di finestre memorizzata; KiwiDesk riparte poi dai valori iniziali, come al primo avvio. init.lua e le tue tavolozze di colori vengono conservati. I vecchi file finiscono nel Cestino.",
   "general.advanced.reset_all.confirm.title": "Ripristinare tutte le impostazioni di KiwiDesk?",
   "general.advanced.reset_all.help": "L'ultima risorsa quando KiwiDesk continua a comportarsi male ed eliminare la disposizione salvata non è servito: tutto torna a uno stato predefinito funzionante, come al primo avvio.",
-  "general.advanced.restart_on_crash": "Riavvia se si chiude in modo inatteso",
-  "general.advanced.restart_on_crash.needs_login": "Richiede «%1$@», perché per macOS le due opzioni sono un’unica impostazione.",
   "general.advanced.reveal": "Mostra",
   "general.advanced.title": "Avanzate",
   "general.appearance": "Aspetto",

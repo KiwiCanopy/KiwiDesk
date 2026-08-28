@@ -3483,17 +3483,49 @@ beside a working link is worse than the browser's own error page.
 
 **[Principle]**
 
-**Auto-start is one folded level shown as two switches, never a
-per-launch prompt — and never two *independent* toggles.** (#342,
-#576, #678 item 16) General shows a login switch — "Start at
-login" — in the "Applies immediately" group, and a
-crash-restart switch — "Restart if it stops unexpectedly" — first
-among Advanced's five. Both write through one `AutoStartLevel`, so
-the two-switch *presentation* never re-opens the contradiction the
-fold closes (the honesty argument below). Onboarding's closing
-card keeps its own pre-checked box, "Start KiwiDesk at login"
-(the plain login level); auto-restart is advanced, not first-run
-material.
+**Settings owns the login item; crash supervision is the CLI's.**
+(#342, #576, #678 item 16, re-ruled by #1071) General shows ONE
+switch — "Start at login", in the "Applies immediately" group —
+and it drives the `SMAppService` login item and nothing else.
+The `kiwidesk service` LaunchAgent, which adds `KeepAlive`
+crash restart, is reachable only from the command line.
+
+**Why the second switch went away.** It was never one setting
+with two faces: the two mechanisms are two launchers, and having
+one switch install both meant they raced for the instance lock
+at every login. That race is not cosmetic — whichever launch
+loses decides whether supervision runs at all, and the losing
+launch is what produced #1068's ten-second focus theft and
+#1071's silently idle job. The GUI curates and the power layer
+is open (`gui.md`'s north star): a risky-but-valid knob is
+hidden from the GUI and left to the CLI rather than guarded with
+a second switch that cannot express the state honestly. Two
+doc corrections failed to describe the old behaviour truthfully
+before this was ruled, which is the evidence that it could not
+be described — a coin flip the user cannot see has no honest
+short sentence.
+
+**What the mainstream user loses is a crash they can answer
+themselves.** KiwiDesk's crash is not silent in practice: the
+menu bar item disappears and the shortcuts stop, and reopening
+from Spotlight takes a second. Set against a launcher race and
+a `KeepAlive` loop with no breaker on a deterministic crash,
+the supervisor is not what a non-technical user needs from the
+window manager — it is what someone running it as
+infrastructure needs, and they have a terminal.
+
+**A state only the CLI can reach may name the CLI.** While the
+service is loaded the login switch reads ON — true, KiwiDesk
+does start at login — and goes inert with its reason inline,
+naming `kiwidesk service stop`. That is the one place Settings
+prints a shell command, and it is sound because the gate
+decides the audience: the caption cannot render for anyone who
+did not run the CLI to get there. The same reasoning as *config
+presence expands the Simple surface* — show what someone has,
+withhold only the offer.
+
+Onboarding's closing card keeps its own pre-checked box, "Start
+KiwiDesk at login" — the login item, the same one thing.
 Rulings a contributor might otherwise undo:
 
 - **Default At Login, auto-restart opt-in.** Most apps default
@@ -3590,12 +3622,12 @@ download, **run the packaged app** for a bare non-bundled binary
 (the device-QA `.build/release` path). The registerability check
 is a *location* fact, evaluated before the OS status, so it holds
 even if a prior install left a stale registration. The service's
-`KeepAlive { SuccessfulExit = false }` restarts only a *crash*, so
-the label "Restart if it stops unexpectedly" is literally
-accurate — a deliberate Quit is never resurrected. The overlap that used to be
-invisible (a loaded service's `RunAtLoad` also launches at login)
-is now *the* top level, made runtime-safe by the #196 instance
-lock — and by that second launch exiting **successfully**, since
+`KeepAlive { SuccessfulExit = false }` restarts only a *crash* —
+a deliberate Quit is never resurrected. The overlap that used to
+be invisible (a loaded service's `RunAtLoad` also launches at
+login) is now something a user assembles deliberately from two
+surfaces rather than one switch installing both, made
+runtime-safe by the #196 instance lock — and by that second launch exiting **successfully**, since
 `KeepAlive { SuccessfulExit = false }` would otherwise read the
 decline as a crash and respawn it every throttle
 ([#1068](https://github.com/KiwiCanopy/KiwiDesk/issues/1068);

@@ -26,8 +26,6 @@ enum SettingRuntimeGate: Hashable {
     /// KeepAlive are one unit — so it is dead unless KiwiDesk
     /// also starts at login (#678 item 16). Greying says so;
     /// `AutoStartLevel.level(openAtLogin:restartOnCrash:)` is
-    /// what actually refuses the pair.
-    case autoStartLoginOff
     /// The per-space reset action is dead while the space has
     /// no overrides.
     case spaceHasNoOverrides

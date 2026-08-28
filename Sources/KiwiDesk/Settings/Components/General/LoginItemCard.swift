@@ -157,13 +157,34 @@ struct LoginItemCard: View {
                 .inertReason(for: .general(.startAtLogin)) != nil
     }
 
+    /// The switch owns the LOGIN ITEM and nothing else (#1071).
+    ///
+    /// It used to pass `restartOnCrash: on` alongside, which made
+    /// one flip install a LaunchAgent as well — two launchers
+    /// racing for the instance lock at every login, which is the
+    /// whole of #1068/#1071. Crash supervision is now the CLI's
+    /// (`kiwidesk service`), so this drives `.off` ↔ `.atLogin`
+    /// and never touches the agent.
+    ///
+    /// **Reading the folded level is deliberate.** While the
+    /// service is loaded the level is `.atLoginWithAutoRestart`,
+    /// so the switch reads ON — which is TRUE, KiwiDesk does
+    /// start at login — and the gate above makes it inert with
+    /// the reason inline. The getter answers "does it start at
+    /// login", not "which mechanism does it".
     private var loginBinding: Binding<Bool> {
         Binding(
             get: { model.autoStart.level.opensAtLogin },
             set: { on in
+                // Guarded here, not only by `.disabled()`: this
+                // writes an OS registration, and gui.md bans a
+                // grey as the sole gate on a side effect.
+                guard
+                    model.autoStart.level != .atLoginWithAutoRestart
+                else { return }
                 model.setAutoStart(
                     openAtLogin: on,
-                    restartOnCrash: on,
+                    restartOnCrash: false,
                     reduceMotion: reduceMotion
                 )
             }

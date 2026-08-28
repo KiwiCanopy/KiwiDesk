@@ -7,8 +7,6 @@ enum GeneralKey: String, CaseIterable, Hashable {
     case startAtLogin = "AutoStartManager (no stored pref)"
     case about = "(readonly) general.about"
     case advancedConfigFile = "(readonly) general.advanced.config_file"
-    case advancedRestartOnCrash =
-        "AutoStartManager (restart half)"
     case advancedEditLua = "(action) general.advanced.edit_lua"
     case advancedDiscardArrangement =
         "(action) general.advanced.discard_arrangement"
@@ -38,13 +36,6 @@ extension GeneralKey {
             )
         case .about:
             return .row(.general, .about, .atRest)
-        case .advancedRestartOnCrash:
-            return .row(
-                .general,
-                .advanced,
-                .showMore,
-                gate: .runtime(.autoStartLoginOff)
-            )
         case .advancedConfigFile, .advancedEditLua,
             .advancedDiscardArrangement, .advancedResetAll,
             .advancedExportBackup, .advancedRestoreBackup:
@@ -75,13 +66,6 @@ extension GeneralKey {
             return .text("general.about.title")
         case .advancedConfigFile:
             return .text("general.advanced.config_file")
-        case .advancedRestartOnCrash:
-            return .text(
-                "general.advanced.restart_on_crash",
-                caption:
-                    "general.advanced.restart_on_crash"
-                    + ".needs_login"
-            )
         case .advancedEditLua:
             return .text(
                 "general.advanced.edit_lua",

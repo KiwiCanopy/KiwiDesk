@@ -29,12 +29,18 @@ enum GeneralGateHelp {
                 "general.login_item.unavailable_binary",
                 "Available only when running the KiwiDesk app."
             )
-        case .loginOff:
+        case .managedByService:
+            // The one place Settings names a terminal command,
+            // and it is gated so that only someone who already
+            // used the CLI can see it (#1071): the service is
+            // reachable no other way, so this answers the person
+            // who turned it on rather than advertising it.
             return L(
-                "general.advanced.restart_on_crash.needs_login",
-                "Needs “%1$@”, because "
-                    + "the two are one setting to macOS.",
-                L("general.login_item.start", "Start at login")
+                "general.login_item.managed_by_service",
+                "KiwiDesk starts at login as a service, which "
+                    + "also restarts it if it stops "
+                    + "unexpectedly. Run “kiwidesk service "
+                    + "stop” to manage it here instead."
             )
         }
     }

@@ -36,7 +36,6 @@ enum GeneralRowOrder {
     /// the last rung because it replaces the palettes even Reset
     /// All leaves standing.
     static let advanced: [SettingKey] = [
-        .general(.advancedRestartOnCrash),
         .general(.advancedConfigFile),
         .general(.advancedEditLua),
         .general(.advancedExportBackup),

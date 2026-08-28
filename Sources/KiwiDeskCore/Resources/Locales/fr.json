@@ -394,8 +394,6 @@
   "general.advanced.reset_all.confirm.message": "Cette action supprime tous les profils enregistrés, vos espaces, dispositions et raccourcis clavier, et oublie toute disposition de fenêtres mémorisée — KiwiDesk repart ensuite de ses réglages initiaux, comme au premier lancement. Votre init.lua et vos palettes de couleurs sont conservés. Les anciens fichiers vont à la corbeille.",
   "general.advanced.reset_all.confirm.title": "Réinitialiser tous les réglages de KiwiDesk ?",
   "general.advanced.reset_all.help": "L'ultime recours quand KiwiDesk continue de se comporter anormalement et que supprimer la disposition enregistrée n'a rien changé : tout revient à un état par défaut sain, comme au premier lancement.",
-  "general.advanced.restart_on_crash": "Redémarrer en cas d’arrêt imprévu",
-  "general.advanced.restart_on_crash.needs_login": "Nécessite « %1$@ », car pour macOS les deux ne font qu’un seul réglage.",
   "general.advanced.reveal": "Afficher",
   "general.advanced.title": "Avancé",
   "general.appearance": "Apparence",
