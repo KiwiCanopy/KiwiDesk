@@ -192,6 +192,10 @@ that wasn't there. `status` reports the loaded/running state and
 the pid.
 A real `launchctl` failure exits non-zero; the ordinary
 already-running / not-running cases exit 0.
+`start` while KiwiDesk is already running loads the agent, whose
+`RunAtLoad` spawns one supervised launch; it finds the instance
+lock held, brings the running copy forward once — taking focus
+from your terminal — and exits cleanly.
 
 This service is also the supervision half of Settings ▸ General's
 auto-start pair: **Restart if it stops unexpectedly**, first among

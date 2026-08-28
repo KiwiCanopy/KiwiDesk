@@ -302,12 +302,14 @@ blocks the next launch; the lock dies with the process.
 
 That exit reports **success**, deliberately: declining to start
 beside a running copy is the guard working, not a failure. It
-matters because **Open at login** installs a launchd job that
-restarts KiwiDesk when it exits *un*successfully — so if
-declining counted as a failure, turning that setting on while
-KiwiDesk was already running would have launchd start a second
-copy, watch it bow out, call that a crash, and try again about
-every ten seconds, stealing your focus each time.
+matters because the launchd helper behind **Restart if it stops
+unexpectedly** (General ▸ Advanced, which **Start at login**
+switches on with it) relaunches KiwiDesk whenever it exits
+*un*successfully — so if declining counted as a failure,
+switching either on while KiwiDesk was already running would
+have that helper start a second copy, watch it bow out, read
+that as a crash and try again about every ten seconds, taking
+your focus each time.
 
 ### The Status Bar Quick Menu
 

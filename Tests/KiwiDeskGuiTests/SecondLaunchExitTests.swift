@@ -28,6 +28,32 @@ struct SecondLaunchExitTests {
         #expect(secondLaunchExitStatus == 0)
     }
 
+    /// The constant is worthless if the process does not use
+    /// it: reverting the call site to a literal `exit(1)` — the
+    /// whole #1068 defect — leaves the assertion above green
+    /// (guard-prover, mutation 5). `-> Never` + `exit` makes a
+    /// call-level test impossible, so the pin is a source scan,
+    /// the shape `ActivationPolicySeamTests` already uses on
+    /// this same file.
+    @Test("The single-instance exit routes through the constant")
+    func theExitRoutesThroughTheConstant() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+            .appendingPathComponent("SingleInstanceGuard.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        // Assert the input before asserting about it: a rename
+        // of the function must not make this pass for having
+        // found nothing (rule-authoring.md).
+        #expect(source.contains("surfaceRunningInstanceAndExit"))
+        #expect(source.occurrences(of: "exit(") == 1)
+        #expect(
+            source.contains("exit(secondLaunchExitStatus)"),
+            "the second-launch exit must name the constant"
+        )
+    }
+
     @Test("The plist restarts only an unsuccessful exit")
     func plistRestartsOnlyFailures() throws {
         // Read the shipped plist rather than restating it: the

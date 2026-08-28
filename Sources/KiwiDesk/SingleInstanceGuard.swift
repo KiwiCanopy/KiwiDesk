@@ -18,8 +18,12 @@ import KiwiDeskCore
 ///
 /// So the exit code answers "did this process fail?", and the
 /// answer is no. What it no longer answers is "did a new
-/// instance start?" — the stderr line above carries that, and
-/// nothing in `scripts/` reads the status (checked #1068).
+/// instance start?" — the stderr line carries that, and a
+/// script shelling out to a bare, argument-less launch reads
+/// THAT rather than the status. (A `kiwidesk <command>`
+/// invocation never reaches here at all: `main.swift` routes
+/// any argument to the CLI and exits before the lock is
+/// touched.)
 let secondLaunchExitStatus: Int32 = 0
 
 /// Second-launch path (#196): another process holds the
