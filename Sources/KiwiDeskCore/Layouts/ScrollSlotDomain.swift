@@ -122,13 +122,19 @@ public enum ScrollSlotDomain {
         if stored > drawnArea + tolerance {
             return Outcome(write: nil, refusal: nil)
         }
-        // The window can grow: measure from ITS span — the
-        // writer resolves `drawnFocused` once (the bound's
-        // consume of the layout-floored, viewport-capped
-        // store), so a window pinned above the store is
-        // reached in one press rather than walking the store
-        // up to it.
-        let base = drawnFocused
+        // The window can grow: measure from whichever of the
+        // drawn span and the store lies FORWARD of the press
+        // (#1083). `drawnFocused` alone is #1057's rule and is
+        // right when the window is pinned ABOVE the store — the
+        // press reaches it in one go rather than walking the
+        // store up. But the layout also draws a bound-pinned
+        // window BELOW an oversize store, and measuring from
+        // there wrote the smaller number back and trimmed the
+        // row for every neighbour (a ~1160pt auto slot rewritten
+        // to 765). Taking the max keeps #1057's case and makes
+        // the other one impossible by construction, rather than
+        // by a guard that silently swallows the press.
+        let base = max(drawnFocused, stored)
         let requested = base + delta
         let ceiling = max(
             min(drawnArea, appMax ?? .infinity),
@@ -141,19 +147,6 @@ public enum ScrollSlotDomain {
         let truncated = clamped < requested - truncationEpsilon
         let appBound =
             appMax.map { $0 < drawnArea } == true
-        // The shared store is never REDUCED by a grow (#1083).
-        // The layout draws a bound-pinned window at its learned
-        // maximum, and the press measures from that drawn span
-        // (#1057) — so without this floor a grow from a pinned
-        // 715pt window inside a 1160pt slot writes 765 and
-        // trims the slot for every neighbour. The bound losing
-        // its veto (#1083) does not make it safe as a base for
-        // a WRITE; one slot serves the whole row either way.
-        // Wordless deliberately: nothing refused the user, the
-        // window simply cannot fill more than it already does.
-        guard clamped > stored + truncationEpsilon else {
-            return Outcome(write: nil, refusal: nil)
-        }
         // A press that grows nothing writes nothing — a
         // fruitless grow must never rewrite the store
         // sideways (a floor-pinned window already wider than
@@ -188,11 +181,18 @@ public enum ScrollSlotDomain {
         if let appMin, drawnFocused <= appMin + tolerance {
             return Outcome(write: nil, refusal: .ownMinimum)
         }
-        // Measure from the drawn span (#1057's core): an
-        // oversize store shrinks visibly on the FIRST press,
-        // and the store is only rewritten now — the moment the
-        // user deliberately resizes on this screen.
-        let base = drawnFocused
+        // Measure from whichever of the drawn span and the
+        // store lies FORWARD of the press — the mirror of the
+        // grow base (#1083). `drawnFocused` alone is #1057's
+        // rule and is right for an oversize store, which then
+        // shrinks visibly on the FIRST press. Where the window
+        // is pinned ABOVE the store instead, measuring from the
+        // drawn span made a SHRINK compute a bigger number than
+        // the store and raise the row; taking the min keeps
+        // #1057's case and leaves the configured floor as the
+        // thing that answers, WITH its pill, rather than a
+        // guard swallowing the press in silence.
+        let base = min(drawnFocused, stored)
         let requested = base + delta
         // The floor never raises the store (the #1055 mirror);
         // capped at STORED — not the drawn base — so a store
@@ -207,18 +207,6 @@ public enum ScrollSlotDomain {
         let floor = min(globalMin, stored)
         let clamped = max(requested, floor)
         let truncated = clamped > requested + truncationEpsilon
-        // The shared store is never RAISED by a shrink (#1083),
-        // the mirror of the grow floor above and the same
-        // mechanism: the layout draws a bound-pinned window at
-        // its learned minimum, the press measures from that
-        // drawn span (#1057), so a shrink from a window pinned
-        // at 825 inside a 300pt slot would write 775 and grow
-        // the slot for every neighbour on a SHRINK press. The
-        // learned bound losing its veto does not make it a safe
-        // base for a write. Wordless: nothing refused the user.
-        guard clamped < stored + truncationEpsilon else {
-            return Outcome(write: nil, refusal: nil)
-        }
         // A press that shrinks nothing writes nothing — the
         // refusal-in-place twin of the grow guard.
         guard clamped < base - truncationEpsilon else {

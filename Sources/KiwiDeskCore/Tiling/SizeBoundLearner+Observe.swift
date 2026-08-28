@@ -158,8 +158,4 @@ extension SizeBoundLearner {
         return confirmed
     }
 
-    /// Returns whether the believed ledger actually CHANGED —
-    /// re-promoting an identical entry is not a confirmation
-    /// edge, which is what keeps the caller's answer (an
-    /// immediate retile) from looping on its own echoes.
 }

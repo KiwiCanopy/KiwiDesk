@@ -215,14 +215,22 @@ struct ScrollingFixedSpanCueTests {
             .resolvedScrolling(for: live)
             .slotSize
             .editablePoints(along: 1200, horizontal: true)
-        // The store is still never RAISED by a shrink — that
-        // property is now held by `ScrollSlotDomain`'s own
-        // floor rather than by a learned-bound refusal, which
-        // is the half of this test that must never regress.
+        // The store is still never RAISED by a shrink — the
+        // half of this test that must never regress. It is now
+        // impossible by construction rather than by a guard:
+        // the press measures from `min(drawn, stored)`, so a
+        // shrink cannot compute a number above the store.
         #expect(stored == 300)
-        // No cue: a learned bound is a guess and no longer
-        // speaks (#1083).
-        #expect(refusals.isEmpty)
+        // And it is REFUSED OUT LOUD. The store sits at the
+        // configured 300 pt floor, so a fact blocks this press
+        // and says so — the pill is correct here and its
+        // sentence is true. An earlier draft of #1083 asserted
+        // silence instead: the guard swallowed the press with
+        // no write and no cue, which is the learned bound still
+        // vetoing, having only lost the ability to explain
+        // itself (architect review, 2026-08-28). A press that
+        // does nothing must always say why.
+        #expect(refusals == [.ownMinimum(WindowID(1))])
     }
 
     @Test("The shrink below a fixed span clamps and cues")

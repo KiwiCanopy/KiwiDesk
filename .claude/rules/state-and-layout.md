@@ -298,7 +298,17 @@ editing here:
   learns a bound from its own asks: `retile` records each issued
   size and reads the settled, echo-fed state frame as the app's
   answer — the same ask refused with the same answer twice
-  confirms a per-axis, PER-ASK `EffectiveSizeBound` entry —
+  confirms a per-axis, PER-ASK `EffectiveSizeBound` entry, and
+  **only a SETTLED read may cast either of those two votes**
+  (#1083): a raw echo seeds and refreshes a candidate and never
+  promotes one, because an echo reporting the pre-ask frame is
+  the same bytes whether the app refused or has merely not
+  redrawn yet, and under load the second is ordinary for any
+  app. A new `SizeAnswerChannel` therefore owes an honest
+  `isSettledRead`, and widening what counts as settled re-opens
+  #1083 through that door — `SizeBoundBaselineTests` holds the
+  pair (same fixture, one settled read and one echo, opposite
+  verdicts) and is what reds if the term is dropped —
   ENTRIES never generalize across asks (a grid-snapping app
   answers each ask differently; the one deliberate exception is
   the compliance contradiction sweep, argued on `complied`) —
@@ -461,24 +471,31 @@ editing here:
   — it resolves against the region, so leaving it alone would
   re-bank the strip on the first press; that trim is the rule
   working, not a defect to fix back.
-  The focused window's learned app MAXIMUM no longer reaches
-  that write-site ceiling (#1055, re-ruled by #1083): a learned
-  bound is inferred from timing, so it informs what the layout
-  asks for and may not refuse a press — `effectiveMaxSize`
-  answers nil and `effectiveMinSize` answers the configured
-  floor alone. What SURVIVES is the shared-store protection it
-  used to carry, now held by `ScrollSlotDomain`'s own floors
-  from both sides — a grow never reduces the store, a shrink
-  never raises it, both wordlessly — because the layout draws a
-  pinned window at its learned limit and the press measures
-  from that drawn span (#1057), so an unguarded write spends a
-  guess on a value the whole row shares. One slot serves the
-  whole row, so a trim to one window's limit visibly shrinks
-  every neighbor on
-  a grow press. A grow the app ceiling truncates cues
-  `ownMaximum` on the focused window; one the viewport
-  truncates stays wordless (`ScrollingAppCeilingTests` pins
-  the refusal, the never-trim and the silence). A second
+  **A press takes its limits only from `effectiveMinSize` /
+  `effectiveMaxSize`, and the learner reaches the press through
+  nothing else (#1055, re-ruled by #1083).** A learned bound is
+  inferred from timing, so it informs what the LAYOUT asks for —
+  through `LayoutContext.sizeBounds` — and may never refuse a
+  press. Those two functions are the one home of that split: a
+  resize path that reads `tiler.sizeBound` beside them has
+  re-opened #1083, and nothing scans for it, so this is
+  review's. The same obligation binds a WRITE base: measure
+  from whichever of the drawn span and the store lies forward
+  of the press, never from the bound's consume alone, or a
+  bound-pinned window's press spends the guess on the shared
+  store (`ScrollSlotDomainTests`, `ScrollingAppCeilingTests`).
+  And a press that ends up writing nothing still CUES — the
+  first #1083 draft guarded the write instead of its base and
+  swallowed the press in silence, which is the guess still
+  vetoing, having only lost the ability to explain itself.
+  One slot serves the whole row, so a trim to one window's
+  limit visibly shrinks every neighbour on a grow press —
+  which the forward-base rule above makes impossible by
+  construction rather than by a guard. A grow the VIEWPORT
+  truncates stays wordless, and `ownMaximum` has no producer
+  while no known maximum exists (`ScrollingAppCeilingTests`
+  pins the never-trim and the silence; `ResizeRefusal`'s own
+  doc carries the obligation on a future producer). A second
   absolute-length store, or a new `maxWidth` consumer, owes
   these obligations deliberately — nothing scans for a site
   that never wires the ceiling at all.

@@ -196,6 +196,12 @@ struct SizeBoundLearner {
         return widthConfirmed || heightConfirmed
     }
 
+    /// Promotes a candidate to a believed bound, returning
+    /// whether the believed ledger actually CHANGED —
+    /// re-promoting an identical entry is not a confirmation
+    /// edge, which is what keeps the caller's answer (an
+    /// immediate retile) from looping on its own echoes.
+    ///
     /// Internal rather than private since #1083 split the
     /// observation ladder into `SizeBoundLearner+Observe`;
     /// still module-internal, and no caller outside the two

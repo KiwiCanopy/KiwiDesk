@@ -13,9 +13,24 @@ enum ResizeRefusal: Equatable {
     /// A grow stopped where `anchor` — a neighboring window —
     /// would drop below ITS effective minimum.
     case neighborMinimum(anchor: WindowID, focused: WindowID)
-    /// A grow stopped at the resized window's own learned
-    /// app-enforced maximum (#1055) — the app refuses to get
-    /// bigger, so growing the slot further only overshoots.
+    /// A grow stopped at the resized window's own maximum —
+    /// the window refuses to get bigger, so growing the slot
+    /// further only overshoots (#1055).
+    ///
+    /// **No production path produces this today (#1083):** its
+    /// only producer was the LEARNED ceiling, and a learned
+    /// bound may no longer refuse a press. The case, its cue
+    /// (`refuseGrowAtMaximum`) and its catalog string are kept
+    /// rather than retired, because `ScrollSlotDomain`'s
+    /// own-maximum arm is kept for the same reason — both are
+    /// correct for a maximum that is KNOWN, and the eleven
+    /// localized strings are expensive to re-mint.
+    ///
+    /// The obligation on a future producer: supply a maximum
+    /// that is a FACT (a configured value, or an OS-reported
+    /// one), never an inference from timing. Feeding this a
+    /// guess again is the #1083 defect, and the pill is what
+    /// makes that defect assert a falsehood out loud.
     case ownMaximum(WindowID)
 }
 

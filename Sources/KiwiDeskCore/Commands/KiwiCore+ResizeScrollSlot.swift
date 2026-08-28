@@ -121,7 +121,16 @@ extension KiwiCore {
         // and covered by `ScrollSlotDomainTests`. This caller
         // simply has no known limit to give it. The configured
         // floor still reaches it, as `globalMin`.
-        let appMax: CGFloat? = nil
+        // Routed through the seam rather than spelled nil here,
+        // so the ruling has ONE home: `effectiveMaxSize` answers
+        // nil today, and a configured maximum — if one is ever
+        // added — reaches the press without touching this site.
+        let appMax = space.focused
+            .flatMap { effectiveMaxSize(of: $0, axis: axis) }
+            .map { CGFloat($0) }
+        // No app minimum for the same reason (`effectiveMinSize`
+        // is that seam and answers the configured floor alone,
+        // which reaches the domain below as `globalMin`).
         let appMin: CGFloat? = nil
         // The span the focused window actually RENDERS — the
         // base the whole decision is measured against (#1057) —
