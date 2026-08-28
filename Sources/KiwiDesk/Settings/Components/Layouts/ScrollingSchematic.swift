@@ -43,8 +43,10 @@ struct ScrollingSchematic: View {
 
     /// The restage damping, gated on Reduce Motion (#1069) —
     /// the arrangement still redraws, it just stops travelling.
+    /// The ternary is spelled here rather than folded into
+    /// `LayoutSchematic.damping`; that file says why.
     private var damping: Animation? {
-        LayoutSchematic.damping(reduceMotion: reduceMotion)
+        reduceMotion ? nil : LayoutSchematic.damping
     }
 
     /// The monitor's share of the canvas along the scroll axis.

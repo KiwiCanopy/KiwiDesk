@@ -1015,12 +1015,20 @@ progress fades (#1069). A guard green on one spelling reads as
 `entryPoints` is the census of the spellings that START motion,
 and **a new spelling joins it in the change that introduces it**.
 
-**A shared animation constant takes the flag from its caller**,
-because an enum has no environment to read — the shape
-`SettingsModel.setAutoStart(_:reduceMotion:)` uses. The
-schematics' `LayoutSchematic.damping(reduceMotion:)` is the
-family case: one tuning point, and each schematic resolves it
-into its own `damping` binding that the call names.
+**A shared animation constant stays a plain VALUE; the gate is
+spelled at each caller.** Sharing the TUNING is fine — the eight
+layout schematics all read `LayoutSchematic.damping` — but
+folding the ternary into that shared accessor puts the gate one
+indirection past what a source scan can follow: deleting it
+there ungates ~40 sites in one line while every call-site
+binding still mentions `reduceMotion`, and the guard stays green
+(guard-prover, #1069). So each schematic spells
+`reduceMotion ? nil : LayoutSchematic.damping` in its own
+`damping` binding. That is duplication the guard can SEE, which
+beats an abstraction it cannot — the same trade #989 made in
+rejecting the `if reduceMotion { … } else { … }` spelling. A
+model, having no environment, is the one caller that reaches the
+flag through a parameter instead.
 
 `ReduceMotionGateTests` holds it **per call, never per file**:
 one gated call and one ungated call in the same file is exactly

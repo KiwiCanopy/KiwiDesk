@@ -22,18 +22,18 @@ enum LayoutSchematic {
     /// lag; still smooths stepper/typed jumps. Mirrors
     /// `GapsDiagram`.
     ///
-    /// Nil under Reduce Motion (#1069), and the schematic loses
-    /// nothing by it: what the preview answers is "what would
-    /// this look like", which is the ARRANGEMENT it draws — that
-    /// still redraws on every staged change, only the travel
-    /// between two arrangements goes. An enum has no environment
-    /// to read, so the flag arrives from the caller, the way
-    /// `SettingsModel.setAutoStart` takes it; each schematic
-    /// resolves it into its own `damping` and names that at the
-    /// call.
-    static func damping(reduceMotion: Bool) -> Animation? {
-        reduceMotion ? nil : .easeOut(duration: 0.12)
-    }
+    /// A plain VALUE, and deliberately not gate-aware (#1069).
+    /// Each schematic names `reduceMotion ? nil : ` in its own
+    /// `damping` binding instead, which is duplication the guard
+    /// can SEE: fold the gate in here and one deleted ternary
+    /// ungates all ~40 schematic sites at once while every
+    /// call-site binding still mentions the flag and
+    /// `ReduceMotionGateTests` stays green — the same
+    /// indirection #989 rejected the `if reduceMotion { … }`
+    /// spelling for, one level further out (guard-prover).
+    ///
+    /// The tuning stays shared; only the gate is local.
+    static let damping = Animation.easeOut(duration: 0.12)
 
     /// The window count the live preview opens on, and the band
     /// the slider offers. The floor is **2**, not 1: with a

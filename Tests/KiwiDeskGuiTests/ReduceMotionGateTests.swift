@@ -62,21 +62,27 @@ struct ReduceMotionGateTests {
         "withAnimation", ".animation",
     ]
 
-    /// Every call of `entry`, by index. The acceptance is per
-    /// spelling because only the imperative one may omit its
-    /// parens: Swift defaults the animation, so `withAnimation {`
-    /// is an ungated call a paren-only needle cannot see at all —
-    /// one shipped in `ShortcutsSection` and left that whole file
-    /// unscanned until a guard-prover round found it (#989). The
-    /// modifier has no such shape, and a space or brace after it
-    /// is some other construct rather than a call.
+    /// Every call of `entry`, paired with the index of its
+    /// opening paren (nil for the paren-less form).
+    ///
+    /// The whitespace between the name and the `(` is SKIPPED
+    /// rather than required to be absent, and that is not
+    /// tidiness: `.animation (x, value: y)` compiles and ships
+    /// an ungated animation, and a needle demanding an adjacent
+    /// paren does not see the site AT ALL — a fail-OPEN a
+    /// guard-prover round produced by inserting one space. Only
+    /// the imperative spelling may omit its parens entirely
+    /// (Swift defaults the animation, so `withAnimation {` is an
+    /// ungated call), which is the shape that shipped in
+    /// `ShortcutsSection` and left that whole file unscanned
+    /// until the prover found it (#989).
     private static func callSites(
         in source: [Character],
         for entry: String
-    ) -> [Int] {
+    ) -> [(start: Int, paren: Int?)] {
         let needle = Array(entry)
         let bare = entry == "withAnimation"
-        var found: [Int] = []
+        var found: [(start: Int, paren: Int?)] = []
         for start in source.indices
         where start + needle.count <= source.count
             && Array(source[start..<(start + needle.count)])
@@ -86,12 +92,18 @@ struct ReduceMotionGateTests {
             // the same letters (`.animations`, which the
             // settings model spells all over), and the
             // declaration itself.
-            let after = start + needle.count
+            var after = start + needle.count
+            while after < source.count,
+                source[after].isWhitespace
+            {
+                after += 1
+            }
             guard after < source.count else { continue }
-            let next = source[after]
-            guard next == "(" || (bare && (next == " " || next == "{"))
-            else { continue }
-            found.append(start)
+            if source[after] == "(" {
+                found.append((start, after))
+            } else if bare, source[after] == "{" {
+                found.append((start, nil))
+            }
         }
         return found
     }
@@ -108,15 +120,14 @@ struct ReduceMotionGateTests {
             let text = Array(source)
             for entry in Self.entryPoints
             where source.contains(entry) {
-                for start in Self.callSites(in: text, for: entry) {
+                for site in Self.callSites(in: text, for: entry) {
                     scanned[entry, default: 0] += 1
                     guard Self.allowed[name] == nil else {
                         continue
                     }
-                    var cursor = start + entry.count
                     // A trailing-closure call has no argument at
                     // all, so it can never resolve to nil.
-                    guard text[cursor] == "(" else {
+                    guard var cursor = site.paren else {
                         ungated.append(name)
                         continue
                     }
@@ -181,6 +192,18 @@ struct ReduceMotionGateTests {
     /// — an animation that plays at full motion for a Reduce
     /// Motion user — because the substring appears in the type
     /// name (guard-prover, #989).
+    ///
+    /// **Residue, stated because it fails OPEN**: acceptance is
+    /// the PRESENCE of the word, never proof that the argument
+    /// can reach nil, so `reduceMotion ? .default : .default`
+    /// passes (guard-prover, #1069). Deciding that needs types,
+    /// which a source scan does not have. What follows from it
+    /// is a rule about where the gate may LIVE rather than a
+    /// stronger needle: keep the ternary at the call or in a
+    /// same-file binding, because every level of indirection
+    /// between the word and the nil is a level this cannot
+    /// see — `LayoutSchematic.damping` carries the case that
+    /// made it concrete.
     private static func gates(
         _ args: String,
         in source: String
