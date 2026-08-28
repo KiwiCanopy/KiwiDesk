@@ -145,6 +145,87 @@ struct ScrollingBoundRepackTests {
         )
     }
 
+    @Test("A NEW slot size consumes a corroborated ceiling")
+    func newSlotConsumesTheCorroboratedCeiling() throws {
+        // The #1055 Lane B churn fix at the layout: one slot
+        // size serves the whole row, so before generalization
+        // EVERY resize press minted a brand-new ask and re-ran
+        // the learn dance (repro B). With the ceiling
+        // corroborated, a slot size the ladder never saw draws
+        // the answered span immediately — no overshoot, no
+        // probe.
+        var context = makeContext()
+        context.scrolling.slotSize = .points(700)
+        context.sizeBounds[w2] = EffectiveSizeBound(
+            width: [
+                .init(asked: 600, answered: 400),
+                .init(asked: 500, answered: 400),
+            ]
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let bounded = try #require(frames[w2])
+        let third = try #require(frames[w3])
+        #expect(bounded.width == 400)
+        // And the row re-packs against the consumed span, the
+        // same #677 mechanics as an exact-ask consume.
+        let first = try #require(frames[w1])
+        #expect(third.minX == first.maxX + 10 + 400 + 10)
+    }
+
+    @Test("A probing pass asks past the corroborated ceiling")
+    func probingPassAsksPastTheCeiling() throws {
+        // The owner-ruled heal (2026-08-28): a forced
+        // explicit-apply pass sets `probesBeyondBounds`, and
+        // the layout then EMITS the new slot size so the app
+        // is genuinely re-asked — the generalized consume
+        // stands down, exact entries still consume.
+        var context = makeContext()
+        context.scrolling.slotSize = .points(700)
+        context.probesBeyondBounds = true
+        context.sizeBounds[w2] = EffectiveSizeBound(
+            width: [
+                .init(asked: 600, answered: 400),
+                .init(asked: 500, answered: 400),
+            ]
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let bounded = try #require(frames[w2])
+        #expect(bounded.width == 700)
+    }
+
+    @Test("A probing pass reaches the lone window's center too")
+    func probingPassReachesTheLoneWindow() throws {
+        // The lone-window `centered` site reads the flag
+        // independently of the row's spans site (guard-prover,
+        // 2026-08-28) — ignoring it there would stay green
+        // across every other case.
+        var context = makeContext()
+        context.probesBeyondBounds = true
+        let area = context.usable
+        // Corroborated ceiling with NO exact entry at the
+        // area's own span, so only the generalized arm could
+        // consume it — which the probe stands down.
+        context.sizeBounds[w1] = EffectiveSizeBound(
+            width: [
+                .init(asked: area.width - 200, answered: 700),
+                .init(asked: area.width - 100, answered: 700),
+            ]
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1],
+            in: context
+        )
+        // The probe emits the real area, not the bound.
+        let lone = try #require(frames[w1])
+        #expect(lone.width == area.width)
+    }
+
     @Test("A lone refused window centers in the area")
     func loneWindowCenters() throws {
         var context = makeContext()

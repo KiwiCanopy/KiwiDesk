@@ -43,7 +43,12 @@ extension KiwiCore {
     /// destroying a value the user chose. The floor wins a
     /// contradiction — on a display narrower than the effective
     /// minimum, clamping down to the drawn area would cross the
-    /// floor #933 exists to hold. And the CURRENT size wins:
+    /// floor #933 exists to hold — though the floor itself is
+    /// capped at the CURRENT size, its own mirror of the app
+    /// ceiling's never-reduce rule: a refused SHRINK must not
+    /// snap the shared store UP to the focused window's
+    /// minimum, popping every neighbor with it (#1055 device
+    /// QA, 2026-08-28). And the CURRENT size wins:
     /// `scroll.set_slot_size(2000)` on a 1512pt screen is a
     /// deliberate statement that survives undocking, so a
     /// resize press may refuse to grow it further but must
@@ -132,15 +137,19 @@ extension KiwiCore {
             max(CGFloat($0), current)
         }
         let limit = min(drawnAlong, appCeiling ?? .infinity)
-        let ceiling = max(
-            limit,
-            CGFloat(effectiveMin),
-            configured
-        )
-        let clamped = min(
-            max(requested, CGFloat(effectiveMin)),
-            ceiling
-        )
+        // Capped at `current` so the floor never RAISES the
+        // slot — the mirror of the app ceiling's floor above
+        // (#1055 device QA, 2026-08-28): a store already below
+        // the focused window's learned minimum (the row was
+        // shrunk before that floor armed) must REFUSE a shrink
+        // where it stands, because snapping the shared store
+        // up to the floor pops every NEIGHBOR to the focused
+        // window's minimum on a SHRINK press — and the row
+        // jump also moved the frame the refusal pill had just
+        // anchored on, which is why the cue looked missing.
+        let floor = min(CGFloat(effectiveMin), current)
+        let ceiling = max(limit, floor, configured)
+        let clamped = min(max(requested, floor), ceiling)
         if delta < 0,
             clamped > requested + Self.resizeTruncationEpsilon,
             let focused = space.focused

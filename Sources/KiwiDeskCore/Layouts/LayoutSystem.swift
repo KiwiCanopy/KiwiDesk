@@ -141,6 +141,16 @@ public struct LayoutContext: Sendable {
     /// rightly omit it.
     public var sizeBounds: [WindowID: EffectiveSizeBound]
 
+    /// True only for a FORCED (explicit-apply) layout pass
+    /// (#1055, owner ruling 2026-08-28): the consume then
+    /// bypasses the GENERALIZED arm — exact refused asks still
+    /// consume — so an explicit `scroll.set_slot_size` past a
+    /// corroborated bound genuinely re-asks the app once,
+    /// keeping the ruling's third falsifier alive. The probe
+    /// self-terminates: the refusal it observes mints the
+    /// exact entry the next un-forced pass consumes.
+    public var probesBeyondBounds = false
+
     public var bsp: BspParams
     public var stack: StackParams
     public var scrolling: ScrollingParams

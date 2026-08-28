@@ -122,10 +122,13 @@ struct SizeBoundLearnerTests {
             refused(&learner, asked: asked, answered: answered)
         }
         let bound = learner.bound(for: w)
-        // The oldest ask fell off the cap; the newest hold.
-        #expect(
-            bound?.consumedWidth(asking: asks[0]) == nil
-        )
+        // The oldest ENTRY fell off; its ask still consumes
+        // via the corroborated ceiling (#1055 Lane B).
+        let oldest = bound?.width.contains {
+            EffectiveSizeBound.matches($0.asked, asks[0])
+        }
+        #expect(oldest == false)
+        #expect(bound?.consumedWidth(asking: asks[0]) == 715)
         #expect(bound?.consumedWidth(asking: asks[1]) == 715)
         #expect(
             bound?.consumedWidth(asking: asks[count - 1])

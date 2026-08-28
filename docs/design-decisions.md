@@ -2056,6 +2056,44 @@ mark, and the copy mirrors the floor's
 *viewport* stays wordless — that limit protects no window and
 names none, so the bounce alone carries it.
 
+**A corroborated bound generalizes at the consume site,
+revocably; entries never do (#1055).** [Principle] The per-ask
+ledger exists because a single refusal is grid noise as often
+as a bound — a terminal answers each ask a few points off — but
+corroboration changes what the evidence supports: two asks a
+real step apart agreeing on one answer is a signature a
+nearest-cell snap cannot produce below the quantum the
+distinctness bar protects (`corroborationDistinctness` derives
+the arithmetic; the measurements are on the issue), while a
+true fixed bound answers every ask past it with that one span.
+So `consumedWidth/Height` and `explains` answer an ask beyond a
+corroborated bound with that bound, which is what stops a
+scrolling row — one slot size serving every window — from
+re-running the whole learn dance per resize press. Generalizing
+at the CONSUME site rather than in the ledger is what keeps it
+revocable, and the revocation has three working parts, each
+ruled deliberately. A per-ask entry outranks the generalization
+— and because the consume rewrites the ask the ladder sees, the
+generalized answer re-resolves once through the entry at the
+bound's own span, so an app that contradicts the bound (an
+aspect-coupled emulator after an other-axis change) revises
+every generalized answer through the ordinary ladder. An
+explicit apply PROBES past corroborated bounds — a forced pass
+genuinely re-asks the app once, then the refusal it observes
+mints the exact entry later passes consume — so the user's own
+re-apply remains a reliable clear for a stale bound. And the
+genuine-resize forget and compliance sweep clear stale entries
+as they always did. One extension rides the same evidence
+class: a corroborated ceiling corroborates the single floor
+entry at the same span (and mirrored) — an app answering one
+span from both directions is the fixed-width signature — which
+is what arms the shrink refusal cue on the first press below a
+fixed-width app's span instead of after a long silent walk. The
+lend consults only the paired value of the other direction,
+never a lent one, so two single entries cannot bootstrap each
+other. (`SizeBoundGeneralizationTests`,
+`ScrollingFixedSpanCueTests`)
+
 **Session weights are healed at retile, not validated forever
 at write time (#944).** [Principle] The write-time clamps above
 validate a weight against the membership at PRESS time, and

@@ -253,9 +253,18 @@ struct ScrollingSlotCeilingTests {
         // below the floor #933 exists to hold, so the floor is
         // the one that binds. Pin the default it reasons from
         // (#660) — moving `min_window_size` must red this for a
-        // reason, not by coincidence.
+        // reason, not by coincidence. Seeded AT the floor with
+        // a points store: since the never-raise mirror (#1055
+        // device QA, 2026-08-28) the floor is capped at the
+        // CURRENT size, so what this pins is that a store AT
+        // the floor is never pulled below it by the narrow
+        // drawn area — not that a smaller store is snapped up.
         let (core, space) = makeCore(width: 200)
         #expect(core.tiler.settings.minWindowSize == 300)
+        core.execute(
+            "scroll.set_slot_size",
+            args: [.number(300)]
+        )
         core.execute(
             "resize",
             args: [.string("x"), .number(-400)]

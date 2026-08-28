@@ -22,11 +22,30 @@ import CoreGraphics
 /// different sizes (a scrolling slot vs the monocle area), and a
 /// single slot per axis let alternating layouts overwrite each
 /// other's entry so the second layout never converged — the
-/// monocle dance that never stopped (device QA, 2026-08-18). No
-/// entry ever generalizes to a DIFFERENT ask: a grid-snapping
-/// app (a terminal) answers each ask a few points off, and
-/// inferring "ceiling" from one ask would pin every narrower ask
-/// at a size the app would have accepted.
+/// monocle dance that never stopped (device QA, 2026-08-18).
+///
+/// **No ENTRY ever generalizes to a different ask; a
+/// CORROBORATED bound does, revocably (#1055 Lane B, owner
+/// ruling 2026-08-27).** The distinction carries the whole
+/// design. A single entry is grid noise as often as a bound —
+/// a terminal answers each ask a few points off, and inferring
+/// "ceiling" from one ask would pin every wider ask at a size
+/// the app would have accepted. But two asks a real step apart
+/// agreeing on one answer is a signature a nearest-cell snap
+/// cannot produce below the quantum the distinctness bar
+/// protects — `corroborationDistinctness` derives the
+/// arithmetic, and the device measurements (Terminal's column
+/// and row quanta, System Settings' constant axis-independent
+/// answers) are on the issue — while a true fixed bound
+/// answers EVERY ask past it with that one span. So
+/// `consumedWidth/Height` and `explains` answer an
+/// ask BEYOND a corroborated bound with that bound — and the
+/// generalization stays falsifiable: a per-ask entry outranks
+/// it for any ask it matches, so an app that contradicts the
+/// bound at the generalized ask (an aspect-coupled emulator
+/// after an other-axis change) corrects itself through the
+/// ordinary ladder, and the genuine-resize forget and the
+/// compliance sweep clear stale bounds as they always did.
 public struct EffectiveSizeBound: Sendable, Equatable {
     /// One refused ask on one axis: the engine asked `asked`,
     /// the app answered `answered`, twice in a row.
@@ -100,12 +119,69 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     /// The learned maximum height ceiling; see `maxWidth`.
     public var maxHeight: CGFloat? { ceiling(of: height) }
 
-    private func floor(of entries: [Axis]) -> CGFloat? {
+    /// Pairwise corroboration, or the FIXED-SPAN lend (#1055
+    /// Lane B): a single floor entry whose answer matches a
+    /// pairwise-corroborated ceiling is corroborated BY it —
+    /// the app answered that one span from both directions,
+    /// which is the fixed-width signature (System Settings)
+    /// and one no snap grid can produce (its answers track the
+    /// ask on both sides). The lend consults only the PAIRED
+    /// value of the other direction, never a lent one, so the
+    /// two lends cannot bootstrap each other from two single
+    /// entries.
+    func floor(of entries: [Axis]) -> CGFloat? {
+        if let paired = pairedFloor(of: entries) {
+            return paired
+        }
+        guard let ceiling = pairedCeiling(of: entries) else {
+            return nil
+        }
+        return entries.first {
+            $0.answered > $0.asked
+                && Self.matches($0.answered, ceiling)
+        }?.answered
+    }
+
+    /// `floor(of:)`'s mirror, lend included; see its doc.
+    func ceiling(of entries: [Axis]) -> CGFloat? {
+        if let paired = pairedCeiling(of: entries) {
+            return paired
+        }
+        guard let floor = pairedFloor(of: entries) else {
+            return nil
+        }
+        return entries.first {
+            $0.answered < $0.asked
+                && Self.matches($0.answered, floor)
+        }?.answered
+    }
+
+    /// How far apart two asks must sit to CORROBORATE a bound
+    /// — deliberately wider than `matchTolerance`'s "distinct
+    /// entry" quantum (code review, 2026-08-27). The false
+    /// pair a nearest-cell snap can produce needs two asks
+    /// inside one cell's refusal band, which is (q/2 −
+    /// matchTolerance) wide, so a distinctness bar of t
+    /// protects every quantum q ≤ 2·(t + matchTolerance).
+    /// `matchTolerance` alone (t = 2) protects only q ≤ 8 —
+    /// under Terminal's ~7 pt column WIDTH but far under its
+    /// row HEIGHT, a line height of ~14–24 pt at ordinary
+    /// fonts. 12 protects q ≤ 28, above any ordinary line
+    /// height. The default 50 pt resize step and distinct
+    /// layout asks corroborate in two observations; a
+    /// configured step at or below the bar (`resize_step`
+    /// clamps down to 1) or a fine mouse drag corroborates
+    /// only once asks drift past it — a few extra silent
+    /// presses, not a wrong answer.
+    static let corroborationDistinctness: CGFloat = 12
+
+    private func pairedFloor(of entries: [Axis]) -> CGFloat? {
         let floors = entries.filter { $0.answered > $0.asked }
         var best: CGFloat? = nil
         for (index, a) in floors.enumerated() {
             for b in floors.dropFirst(index + 1)
-            where !Self.matches(a.asked, b.asked)
+            where abs(a.asked - b.asked)
+                > Self.corroborationDistinctness
                 && Self.matches(a.answered, b.answered)
             {
                 let answer = max(a.answered, b.answered)
@@ -115,12 +191,13 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         return best
     }
 
-    private func ceiling(of entries: [Axis]) -> CGFloat? {
+    private func pairedCeiling(of entries: [Axis]) -> CGFloat? {
         let ceilings = entries.filter { $0.answered < $0.asked }
         var best: CGFloat? = nil
         for (index, a) in ceilings.enumerated() {
             for b in ceilings.dropFirst(index + 1)
-            where !Self.matches(a.asked, b.asked)
+            where abs(a.asked - b.asked)
+                > Self.corroborationDistinctness
                 && Self.matches(a.answered, b.answered)
             {
                 let answer = min(a.answered, b.answered)
@@ -143,80 +220,6 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         abs(a - b) <= matchTolerance
     }
 
-    /// The width a layout may emit in place of the `span` it is
-    /// about to ask: the learned answer iff that ask is the one
-    /// the app refused, else nil (a *new* ask must be probed,
-    /// not silently swapped — a user who widens a slot past a
-    /// stale bound would otherwise never be heard, #677).
-    public func consumedWidth(asking span: CGFloat) -> CGFloat? {
-        width.first { Self.matches($0.asked, span) }?.answered
-    }
-
-    /// `consumedWidth`'s vertical twin.
-    public func consumedHeight(asking span: CGFloat) -> CGFloat? {
-        height.first { Self.matches($0.asked, span) }?
-            .answered
-    }
-
-    /// The centered residue frame for a slot this bound
-    /// refuses (owner ruling on #677): per axis, the answered
-    /// span centered in the slot iff the slot's span is the
-    /// refused ask; the other axis keeps the slot's extent.
-    /// Nil when neither axis consumes — the slot must be asked
-    /// as-is. Centered because the residue at the slot origin
-    /// reads broken while a symmetric gap reads deliberate;
-    /// monocle takes this for its whole slot, scrolling for a
-    /// row that cannot re-pack (a single window).
-    public func centered(in slot: CGRect) -> CGRect? {
-        let width = consumedWidth(asking: slot.width)
-        let height = consumedHeight(asking: slot.height)
-        guard width != nil || height != nil else { return nil }
-        let size = CGSize(
-            width: width ?? slot.width,
-            height: height ?? slot.height
-        )
-        return CGRect(
-            x: slot.midX - size.width / 2,
-            y: slot.midY - size.height / 2,
-            width: size.width,
-            height: size.height
-        )
-    }
-
-    /// Whether a window sitting at `currentSize` against a
-    /// retile's `targetSize` is fully explained by this bound:
-    /// per axis, either already within tolerance, or re-asking
-    /// the refused ask with the window at the learned answer.
-    /// The retile skip consults this so a target the app has
-    /// already refused twice is "already there" instead of
-    /// re-issued forever (#677).
-    public func explains(
-        currentSize: CGSize,
-        targetSize: CGSize
-    ) -> Bool {
-        axisExplained(
-            entries: width,
-            current: currentSize.width,
-            target: targetSize.width
-        )
-            && axisExplained(
-                entries: height,
-                current: currentSize.height,
-                target: targetSize.height
-            )
-    }
-
-    private func axisExplained(
-        entries: [Axis],
-        current: CGFloat,
-        target: CGFloat
-    ) -> Bool {
-        if Self.matches(current, target) { return true }
-        return entries.contains {
-            Self.matches(target, $0.asked)
-                && Self.matches(current, $0.answered)
-        }
-    }
 }
 
 /// The learned answer for an animation whose target re-asks a
