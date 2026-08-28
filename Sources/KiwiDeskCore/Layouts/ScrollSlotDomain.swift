@@ -52,8 +52,10 @@ public enum ScrollSlotDomain {
     /// One press. `stored` is the resolved current store;
     /// `drawnArea` the viewport carve the layout draws into;
     /// `drawnFocused` the span the focused window actually
-    /// renders (the caller resolves it through the bound's
-    /// consume, falling back to `min(stored, drawnArea)`);
+    /// renders (the caller reads it off the engine's computed
+    /// frames — #1063 — falling back to the bound's consume of
+    /// the store, then to the layout-floored
+    /// `min(max(stored, globalMin), drawnArea)`);
     /// `configured` the points-store value or 0 (#966's
     /// never-reduce term); `globalMin` the floor from
     /// `min_window_size` and `ScrollSize.minPoints`; `appMin` /

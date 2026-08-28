@@ -42,9 +42,10 @@ extension KiwiCore {
     /// Since #1057 this writer is PLUMBING: it resolves the
     /// inputs and `ScrollSlotDomain.decide` owns the decision —
     /// every cap and refusal arm — while the ONE base input
-    /// resolved here is the focused window's rendered span:
-    /// the bound's consume of the layout-floored,
-    /// viewport-capped store. The rules and their argument
+    /// resolved here is the focused window's rendered span,
+    /// read off the engine's computed frames (#1063; the
+    /// consume-of-the-store reconstruction below stays as the
+    /// fallback). The rules and their argument
     /// live on `ScrollSlotDomain`; `ScrollSlotDomainTests`
     /// pins the arms and the engine suites pin this wiring.
     func writeCappedScrollSlot(
@@ -68,9 +69,14 @@ extension KiwiCore {
                 effectiveMinSize(of: $0, axis: axis)
             } ?? 0
         )
-        // Built through the same resolver `layoutInput` uses, so
-        // `usable` (bounds less the outer gaps) and the bar carve
-        // cannot drift from what the layout drew.
+        // Built through the same resolver `layoutInput` uses,
+        // so the viewport CARVE — `usable` (bounds less the
+        // outer gaps) and the bar strip — cannot drift from
+        // what the layout drew. The carve is all this local
+        // rebuild serves (the ceiling below); the press BASE
+        // takes the engine's full context via
+        // `calculatedFrames` instead, sticky and size bounds
+        // included.
         let context = tiler.settings.context(
             bounds: bounds,
             space: space,
@@ -107,11 +113,34 @@ extension KiwiCore {
         let appMin: CGFloat? = bound.flatMap {
             axis == "x" ? $0.minWidth : $0.minHeight
         }
-        // The span the focused window actually RENDERS: the
-        // bound's consume where it pins, the layout-floored,
-        // viewport-capped store otherwise — the base the whole
-        // decision is measured against (#1057). The floor
-        // matters (review, 2026-08-28): the layout asks
+        // The span the focused window actually RENDERS — the
+        // base the whole decision is measured against (#1057) —
+        // read off the ENGINE's computed frames: the same
+        // answer the layout draws and the ring wraps, consume
+        // included. Reconstructing it from the store's consume
+        // (this writer's first shape) consulted the ladder at
+        // a span no layout ever issued — an `auto` seed
+        // resolves against the raw axis while the layout
+        // resolves against its carve — so on a fresh ledger
+        // (per-ask entries only, nothing corroborated yet:
+        // every relaunch, #1063) the consume missed and the
+        // press measured from the ~full-axis store, ballooning
+        // the slot the whole row shares around a window that
+        // never moved.
+        let engineDrawn: CGFloat? = space.focused.flatMap {
+            tiler.calculatedFrames(state: state)[$0].map {
+                horizontal ? $0.width : $0.height
+            }
+        }
+        // The reconstruction, kept as the FALLBACK for a focus
+        // the engine computes no frame for. The common takers
+        // are a FLOATING and a native-FULLSCREEN focus — both
+        // keep `space.focused` and leave the tiled derivations
+        // (#670), so `calculatedFrames` assigns them nothing —
+        // plus an untracked, mid-adoption focus; for all of
+        // them the store is the only coherent measure of the
+        // shared slot. The floor matters (review,
+        // 2026-08-28): the layout asks
         // `min(along, max(resolved, minWindowSize))`, so a
         // points store below `min_window_size` (representable —
         // `ScrollSize` floors only at `minPoints`, and the
@@ -133,7 +162,7 @@ extension KiwiCore {
             delta: CGFloat(delta),
             stored: current,
             drawnArea: drawnAlong,
-            drawnFocused: consumed ?? capped,
+            drawnFocused: engineDrawn ?? consumed ?? capped,
             configured: configured,
             globalMin: CGFloat(effectiveMin),
             appMin: appMin,
