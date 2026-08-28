@@ -31,6 +31,8 @@ struct GeneralSection: View {
     /// cannot reach `private` — the same reason
     /// `confirmingReset` above is internal.
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.accessibilityReduceMotion)
+    var reduceMotion
 
     var body: some View {
         ScrollView {

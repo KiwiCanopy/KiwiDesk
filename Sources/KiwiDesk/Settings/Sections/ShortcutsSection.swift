@@ -22,6 +22,8 @@ import SwiftUI
 /// setting that already has one, so the card is hand-mounted and
 /// the guard states why it holds no census keys.
 struct ShortcutsSection: View {
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
     @ObservedObject var model: SettingsModel
     @State private var selected = KeyLayer.defaultName
     @State private var advancedExpanded = false
@@ -51,8 +53,15 @@ struct ShortcutsSection: View {
                 _,
                 target in
                 guard let target else { return }
-                withAnimation {
+                // Gated like the detail pane's reveal scroll
+                // (`SettingsView+Detail`): Reduce Motion jumps
+                // to the target rather than travelling to it.
+                if reduceMotion {
                     proxy.scrollTo(target, anchor: .center)
+                } else {
+                    withAnimation {
+                        proxy.scrollTo(target, anchor: .center)
+                    }
                 }
                 coordinator.scrollTarget = nil
             }

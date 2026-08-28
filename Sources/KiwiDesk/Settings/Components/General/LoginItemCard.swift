@@ -39,6 +39,8 @@ import SwiftUI
 struct LoginItemCard: View {
     @ObservedObject var model: SettingsModel
     @EnvironmentObject private var localization: LocalizationManager
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -161,7 +163,8 @@ struct LoginItemCard: View {
             set: { on in
                 model.setAutoStart(
                     openAtLogin: on,
-                    restartOnCrash: on
+                    restartOnCrash: on,
+                    reduceMotion: reduceMotion
                 )
             }
         )

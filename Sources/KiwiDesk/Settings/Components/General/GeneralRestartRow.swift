@@ -69,7 +69,8 @@ extension GeneralSection {
                 model.setAutoStart(
                     openAtLogin:
                         model.autoStart.level.opensAtLogin,
-                    restartOnCrash: on
+                    restartOnCrash: on,
+                    reduceMotion: reduceMotion
                 )
             }
         )
