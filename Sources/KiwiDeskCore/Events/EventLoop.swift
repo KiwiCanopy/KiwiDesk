@@ -28,7 +28,18 @@ public final class EventLoop {
     /// terminal by manual pass; a future ignored-panel app that
     /// only ever re-reports its main window would not flag, and
     /// the dismiss follow would return (the pre-fix behavior).
-    public var onIgnoredPanelFocus: @MainActor (pid_t) -> Void = { _ in
+    ///
+    /// A SECOND consumer rides this signal (#958): the
+    /// accessibility-steal return arms off the bundle id when
+    /// the flagged panel is VoiceOver's control process — so a
+    /// retune of the generic ignored-panel classification
+    /// (`FloatDetection.isBuiltInIgnoredPanel` and the layer
+    /// band behind it) that stops flagging
+    /// `com.apple.universalaccesscontrol` silently disarms
+    /// that return too, with no test on the OS side to red.
+    public var onIgnoredPanelFocus: @MainActor (pid_t, String?) -> Void = {
+        _,
+        _ in
     }
 
     /// Fired when a transient filter drops a window mid-launch

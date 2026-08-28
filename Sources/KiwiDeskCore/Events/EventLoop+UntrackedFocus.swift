@@ -24,7 +24,7 @@ extension EventLoop {
                     + "(\(bundleID ?? "?")) "
                     + "flagged ignored panel"
             )
-            onIgnoredPanelFocus(pid)
+            onIgnoredPanelFocus(pid, bundleID)
         } else {
             // In NEITHER class: no #244 distrust arms, so the
             // app's dismissal re-report will be honored.

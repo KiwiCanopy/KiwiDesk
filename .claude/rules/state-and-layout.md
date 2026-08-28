@@ -153,7 +153,13 @@ editing here:
   consumer. An inline `.insert` / `.removeAll` beside a focus
   call site is exactly the shape #951's disarm race grew from,
   and nothing scans for a new one, so each new focus-path
-  author owes the routing deliberately.
+  author owes the routing deliberately. The #958
+  accessibility-steal return is that machine's SIBLING, not a
+  second writer: `KiwiCore+AccessibilityReturn.swift` owns its
+  own debt the same one-machine way
+  (`AccessibilityReturnTests`), and a new consumer of either
+  latch routes through the owning file rather than reading the
+  stored state beside a call site.
   `IgnoredPanelGraceTests` pins the machine's transitions (the
   dismissal grace, the click-provenance escape, expiry, the
   re-arm reset); the trade the grace accepts is argued in
