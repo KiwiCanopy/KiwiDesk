@@ -54,6 +54,34 @@ struct SecondLaunchExitTests {
         )
     }
 
+    /// And the branch has to REACH that function. Scanning
+    /// `SingleInstanceGuard` alone proves the exit is correct,
+    /// never that a second launch goes through it — replacing
+    /// the call in `main.swift` with a bare `exit(1)` revives
+    /// the whole defect with every other clause green
+    /// (guard-prover, probe B). One contiguous needle, because
+    /// a cut ending at the `{` passes on a branch that kept its
+    /// condition and stopped calling.
+    @Test("The lock-held branch goes through that function")
+    func theLockedBranchSurfacesAndExits() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+            .appendingPathComponent("main.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        #expect(source.contains("instanceLock"))
+        let branch = """
+            if !instanceLock.acquire() {
+                surfaceRunningInstanceAndExit()
+            }
+            """
+        #expect(
+            source.contains(branch),
+            "a second launch must route through the guard"
+        )
+    }
+
     @Test("The plist restarts only an unsuccessful exit")
     func plistRestartsOnlyFailures() throws {
         // Read the shipped plist rather than restating it: the
