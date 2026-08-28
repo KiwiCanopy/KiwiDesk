@@ -56,12 +56,8 @@ struct ShortcutsSection: View {
                 // Gated like the detail pane's reveal scroll
                 // (`SettingsView+Detail`): Reduce Motion jumps
                 // to the target rather than travelling to it.
-                if reduceMotion {
+                withAnimation(reduceMotion ? nil : .default) {
                     proxy.scrollTo(target, anchor: .center)
-                } else {
-                    withAnimation {
-                        proxy.scrollTo(target, anchor: .center)
-                    }
                 }
                 coordinator.scrollTarget = nil
             }

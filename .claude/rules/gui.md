@@ -977,11 +977,24 @@ stopped at `Settings/`.
 ## The Reduce Motion gate
 
 **Every `withAnimation` under `Sources/KiwiDesk` names its
-Reduce Motion gate** — at the call (an argument that can resolve
-to nil, or a property making that choice) or in the `if
-reduceMotion` arm just above it. A model has no environment to
+Reduce Motion gate IN ITS ARGUMENT** — `reduceMotion ? nil : x`,
+or a binding that makes that choice. One canonical form, because
+the alternative spelling cannot be guarded: recognising
+`if reduceMotion { … } else { withAnimation … }` needs a
+proximity window, and a window wide enough to span the `else` is
+also satisfied by an unrelated mention of the word — a function's
+own `reduceMotion:` parameter was enough to make every ungated
+call inside it unprovable (guard-prover, #989). The three sites
+that used it were normalized. A model has no environment to
 read, so it takes `reduceMotion` as a parameter from its caller
 (`flipSettingsMode`, `setAutoStart`) and names it at the call.
+
+**And `withAnimation { … }` — no parens — is the shape that
+hides.** Swift defaults the animation, so that spelling is an
+ungated call a paren-only needle cannot see AT ALL; one shipped
+in `ShortcutsSection` and left that whole file unscanned until
+the prover found it. The guard matches both spellings and
+rejects the argument-less one outright.
 
 The gate drops the MOTION, never the affordance: a caption still
 appears and leaves, rows still land in their new order, a scroll
