@@ -122,6 +122,15 @@ struct SettingsFooter: View {
                 L("footer.profile_name", "Profile name"),
                 text: $newProfileName
             )
+            // This label is INTERPOLATED into sentences
+            // elsewhere ("…review below, then %1$@"), and three
+            // catalogs render those frames with it as a VERB: a
+            // サ変 noun in ja, a 하다-noun in ko, and an
+            // infinitive in de ("und dann Sichern"), so those
+            // frames conjugate it. Retranslating this key to an
+            // ordinary noun would ungrammaticalise four frames
+            // at once, in three languages, and no guard reads
+            // grammar (localization audit, 2026-08-29).
             Button(L("footer.save", "Save")) {
                 model.saveAsNewProfile(named: newProfileName)
                 newProfileName = ""
