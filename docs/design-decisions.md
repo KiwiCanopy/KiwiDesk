@@ -5342,8 +5342,8 @@ every combo. Now `Core.DefaultKeybindings` seeds a starter set on an
 **escalating Control-Option scheme** (#270): `⌃⌥` arrows focus /
 `⌃⌥⇧` arrows swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move
 / move-and-follow, `⌃⌥F` float, `⌃⌥S` display sticky, `⌃⌥⇧S`
-global sticky — plus, since #1075, `⌥⌘` `4`/`5`/`7`/`8` for size
-on a base of its own — with one guard everywhere: **only
+global sticky — plus, since #1075, `⌥⌘` `1`/`2` and `4`/`5` for
+size on a base of its own — with one guard everywhere: **only
 when no layer carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
 never destructive.
@@ -5366,6 +5366,17 @@ layers**, never a profile override (profiles stay
 tiling-plus-sparse-behavior, #55): on first launch the seeded
 model is persisted so the very first boot is GUI-managed and the
 shortcuts actually fire.
+
+**The ladder is not uncontested either, and that is named here so
+a later measurement does not read it as a regression.** Finder
+binds `⌃⌥⌘1`–`7` to View ▸ Sort Groups By, which is tier 3's digit
+range (move-to-space-and-follow). It is admitted on the same
+criterion the size digits are, below: a Finder View submenu,
+menu-reachable, and Finder is rarely frontmost while windows are
+being thrown between Spaces. The two rungs carrying the most
+traffic are clean — `⌃⌥` and `⌃⌥⇧` measured with **no bindings at
+all** across the sixteen apps enumerated for #1075, which is the
+property #270 chose this base for in the first place.
 
 **The keypad's ten digits ARE their number-row twins (#1074).** A
 binding written `4` fires from either physical key, and nothing
@@ -5477,14 +5488,47 @@ against `SystemShortcuts.map`, not against this paragraph.
 **And the criterion is applied to digits too, rather than assumed
 past them.** Arrows are excluded above on an *app*-level
 collision, so it would be dishonest to admit digits on the system
-list alone: `⌥⌘`+digit is Xcode's inspector-pane family, and a
-KiwiDesk global hotkey pre-empts it exactly as it would a
-browser's tab switch. The line drawn is one of reach, not of
-kind — tab switching by `⌥⌘←`/`→` is near-universal across
-browsers and terminals, while `⌥⌘`+digit is one professional tool
-whose users can rebind either side. That is a judgement, and it is
-recorded so it can be re-opened as one rather than rediscovered as
-a bug.
+list alone. The first draft of this paragraph admitted them by
+naming Xcode's inspector-pane family — "one professional tool
+whose users can rebind either side" — and that was reputation
+rather than measurement. It was wrong. Enumerating the menu
+shortcuts of sixteen installed apps through the accessibility API
+(2026-08-29, macOS 26.6) found `⌥⌘`+digit bound by **Finder**
+(`1 2 5 6 7`, View ▸ Clean Up By), **Preview** (`0 1 2 3 4 5 6 9`),
+**Safari** (`1`–`4`, Bookmarks ▸ Favorites — a range that scales
+with the user's own bookmark count) and **PowerPoint** (`1 2 3`,
+Masters). Finder and Preview ship on every Mac, so the seeded
+size layer has shadowed them since 1.0.
+
+**The digits stay; what changed is the criterion.** Every digit
+`0`–`9` was claimed by some always-installed app in that
+enumeration, so there was no free pair to move to. The rule that
+outlives the snapshot is the shape of the question: never which
+digits are free, but which collisions are worth accepting. What separates the
+admitted set from the refused arrows is not frequency (somebody's
+Safari Favorite `1` is pressed all day) but **recoverability and
+diagnosability**: Clean Up By, Preview's sidebar and Safari's
+Favorites each have a visible menu path, so what is lost is an
+accelerator rather than a capability, and the failure presents as
+a menu item that did not respond — something a user can reason
+about. `⌥⌘←`/`→` tab switching has no menu affordance anyone
+thinks to check, so its failure presents as "the browser is
+broken" and never reaches us. Apply that test to the next chord
+question. The enumeration above is dated evidence for it, never
+the rule itself: restating a snapshot of other people's software
+as a rule is exactly how the Xcode sentence rotted.
+
+**The geometry was load-bearing independently of any of this.**
+The `4`/`5` + `7`/`8` draft this section rejects over `⌥⌘8` would
+also have been worse on collisions (Preview `4` and `5`, Finder
+`7`), so the keypad 2×2, the `3` gap between the pairs and the
+`5`/`6` hand split had already picked the best available set
+before it was measured. One thing the glide changes in the
+arithmetic: since #1082 resize is HELD, the chord is pressed once
+per gesture rather than tapped repeatedly — which
+strengthens the `⌥⌘` thumb roll and weakens the frequency case
+against its collisions, a held verb being used in bursts rather
+than scattered through the day.
 
 **Why digits and not some other pair.** An arrow carries two
 readings on a tiled window — "which axis and sign" and "which way
