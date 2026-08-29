@@ -340,6 +340,14 @@ what's *absent*, never text you're revising). Small, targeted
 hand-edits to an already-shipped `<locale>.json` are fine and
 welcome; do not touch `en.json` (see below).
 
+That permission is for **people**. An AI agent never hand-edits a
+catalog — `.claude/rules/localization.md` bans it outright,
+because a hand-written value skips the per-value content guards
+that a merge runs. The agent route to the same end is
+`scripts/drop-key --locale <locale> <key>`, which retires the
+defective value and puts the key back in scope for the ordinary
+round-trip above. Its docstring names this case.
+
 ## The marketing site
 
 The website under `site/` (the landing page, and the `/learn/`
