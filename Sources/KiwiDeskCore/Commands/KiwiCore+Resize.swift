@@ -35,6 +35,43 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// Whether the resize RETILE animates: the configured policy,
+    /// except during a held glide, which writes INSTANTLY
+    /// (#1082, owner ruling 2026-08-29). The glide already IS the
+    /// motion — one write per display frame — so springing each
+    /// frame would smooth an already-smooth signal and add
+    /// ~100–200 ms of trailing behind the key. It also keeps the
+    /// feature clear of #611: a glide frame retargets with a
+    /// CHANGED target every frame, which is precisely the storm
+    /// the settle watchdog cannot tell from a long drag, so a
+    /// springing glide would generate that documented hole
+    /// deliberately and leave `HoldRepeat.maxRunSeconds` as its
+    /// only net. Writing instantly creates no animation at all,
+    /// so there is nothing to defer.
+    ///
+    /// Safe here and NOT on the floating path because of what
+    /// each measures from: every path this retile serves writes a
+    /// stored ratio, weight or length and re-derives geometry
+    /// from it (`calculatedFrames` is a pure recomputation), so
+    /// an instant write leaves the next glide frame's base exact.
+    /// `resizeFloating` measures from a FRAME instead and keeps
+    /// its animation — the argument is at that call site.
+    ///
+    /// This is also the whole of the Reduce Motion answer (owner
+    /// ruling, same date): a held chord glides for those users
+    /// too — a held-key resize is the keyboard's direct
+    /// manipulation, which Reduce Motion does not suppress for
+    /// the mouse either — and since a glide's tiled writes are
+    /// instant for everyone, there is no second mechanism to keep
+    /// alive.
+    ///
+    /// The ONE reader of `keys.isGliding` on the geometry side
+    /// (`HoldRepeatWiringTests` ▸ `glideStepsWriteInstantly`).
+    var resizeRetileAnimated: Bool {
+        !keys.isGliding
+            && tiler.settings.animations.onWindowResize
+    }
+
     func resize(_ args: [JSONValue]) -> CommandResponse {
         guard let axis = args.first?.stringValue,
             axis == "x" || axis == "y",
@@ -132,7 +169,7 @@ extension KiwiCore {
         // the old value to the new on one clock — so a yielding
         // pane may slide its shared edge instead of snapping.
         retile(
-            animated: tiler.settings.animations.onWindowResize,
+            animated: resizeRetileAnimated,
             sizing: .allSpringSized
         )
         // Resizing a track past min_window_size flips it into an

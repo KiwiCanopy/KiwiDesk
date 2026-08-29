@@ -77,6 +77,22 @@ extension KiwiCore {
             id,
             from: window.frame,
             to: target,
+            // Deliberately NOT `resizeRetileAnimated` (#1082):
+            // a glide writes the tiled paths instantly, and this
+            // one may not follow. Every tiled path re-derives
+            // geometry from a STORED ratio, weight or length, so
+            // an instant write leaves the next frame's base
+            // exact; this path measures from a FRAME, and the
+            // only commanded base #1056 trusts is the in-flight
+            // animation's target — which an instant write does
+            // not create. Gliding this path instantly would
+            // therefore re-base each frame on the lagging echo
+            // and under-accumulate (#129), and the bounded-record
+            // alternative was already ruled out above. So a
+            // floating glide keeps the configured animation, and
+            // carries the spring's trailing that a tiled glide
+            // sheds; the retile-time argument is on
+            // `resizeRetileAnimated`.
             animated: tiler.settings.animations.onWindowResize,
             sizing: .allSpringSized
         )

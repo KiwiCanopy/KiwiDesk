@@ -2151,51 +2151,115 @@ rather than arithmetic in a command file — the same shape the
 ratio clamps take in `SplitDomain`.
 (`ScrollSlotDomainTests`, `ScrollingFixedSpanCueTests`)
 
-**A held resize chord repeats — and only resize (#1056).**
+**A held resize chord glides — and only resize (#1056/#1082).**
 [Principle] Every other keyboard adjustment on a Mac repeats
 while held; resize was one press per step by construction — a
 Carbon hot key delivers exactly one press and one release per
-physical hold — so KiwiDesk synthesizes the repeat itself, and
-three rulings shape it. *What repeats is decided by what the
-press DID, not by what the binding says:* a binding's body is
-opaque Lua, so `KiwiCore.execute` tallies every command run
-inside a hotkey fire, and a hold arms only when the press-fire
-executed exactly one command, it was `resize`, and it
-succeeded. `focus` and `swap` are deliberately out —
-overshooting focus is worse than pressing again — and widening
-the set (`HoldRepeat.repeatableCommands`) is a per-verb ruling,
-never an inference. *Timing is the user's, then it
-accelerates:* the initial delay and interval are the system
-key-repeat settings, read per run, and a long hold eases toward
-a bounded multiple of that rate (owner ruling, 2026-08-28) so
-the first press stays one precise step while coarse adjustment
-gets fast; the feel constants live beside
-`HoldRepeat.acceleratedInterval` and are the owner's to retune.
-*A refusal ends the run:* the #933/#1055 size-limit cues stop
-the repeat, so a held shrink parked on a floor pills once per
-hold rather than per tick, while scrolling's wordless
-out-of-screen stop keeps ticking harmlessly — matching that
-silence's own ruling rather than inventing a signal for it.
-Structurally, the engine arms only when its registrar can
-report releases (`HotkeyReleaseReporting` — a repeat with no
-stop channel must never start); any registration teardown
-(layer switch, recorder suspend) ends the run, because an
-unregistered hot key delivers no release to stop on; and a run
-is bounded by `HoldRepeat.maxRunSeconds`, the #611 force-settle
-shape — the stop signal is one Carbon event, and a lost one
-must cost a bounded hold, never the session. A floating resize
-also stopped under-accumulating (#129), which the repeat would
-otherwise have made loud: a press mid-animation accumulates
-against the in-flight animation's target rather than the
-lagging AX echo. The target is deliberately the ONLY commanded
-value trusted — it dies at settle, so a silently-refusing app
-banks at most one hold's worth, where a longer-lived stored
-commanded frame is re-armed by every press that reads it and
-compounds without bound (the #1057 banked-growth class); the
-paths that keep re-reading the echo are recorded in
-[accepted-limitations.md](accepted-limitations.md).
-(`HoldRepeatTests`, `HoldRepeatAccelerationTests`,
-`HoldRepeatWiringTests`, `HoldRepeatSeamTests`,
+physical hold — so KiwiDesk synthesizes the hold itself. *What
+holds is decided by what the press DID, not by what the binding
+says:* a binding's body is opaque Lua, so `KiwiCore.execute`
+tallies every command run inside a hotkey fire, and a hold arms
+only when the press-fire executed exactly one command, it was
+`resize`, and it succeeded. `focus` and `swap` are deliberately
+out — overshooting focus is worse than pressing again — and
+widening the set (`HoldRepeat.repeatableCommands`) is a per-verb
+ruling, never an inference.
+
+*A hold GLIDES rather than repeating* (owner ruling, 2026-08-29,
+replacing #1056's interval acceleration). #1056 re-fired the
+binding on a shrinking timer, which felt chunky on device for a
+reason no constant could fix: `HoldRepeat` decided only *when* to
+fire, never *how much*, because the amount lives inside opaque
+Lua — so acceleration shortened the gaps and left the jumps
+identical. And speed and smoothness are ONE dial, not two: what
+the eye judges is displacement per *rendered* frame, and the
+display draws when it draws, so ticking faster than the refresh
+produces no extra frames, only more accumulated movement in each.
+So the hold now runs as a continuous session on the monitor's own
+`DisplayLink`, moving `velocity × dt` per frame. Riding `dt`
+rather than a fixed per-frame delta is what makes it
+refresh-rate independent — 60 Hz, 120 Hz and a ProMotion panel
+changing rate mid-hold all travel at the same visual speed, with
+a faster panel buying finer motion rather than more speed. The
+press keeps its full configured step, so a tap still moves a
+predictable amount.
+
+*Velocity is counted in steps per second, not points per second.*
+The issue proposed absolute points; the ruling went the other
+way, because `resize`'s delta is in points at every call site and
+`resize.step` spans four decades (the decoder clamps it to
+1…10000), so one absolute speed is discontinuous with the tap at
+both ends: a 10 pt precision step would be overridden by an
+eighteen-of-their-steps-per-second glide the moment the user
+held, and a 200 pt step would make holding *slower* than tapping.
+Scaling the press's own delta keeps the glide continuous with the
+tap at every setting. The feel constants live beside
+`HoldRepeat.glideSteps` and are the owner's to retune.
+
+*The glide re-issues the COMMAND, never the binding.* The press's
+`resize` arguments are captured from the tally and re-issued
+through `execute` with a scaled delta, so the Lua body runs once,
+on the press. This is a deliberate semantic change from #1056,
+where a tick re-ran the whole body: at frame rate that would
+repeat whatever else the body does, and the single-command tally
+already refuses to arm on such a body — so re-issuing the command
+is what makes the arming rule and the run agree. It also moved
+one guard: the repeat ladder caught a body that *rebound
+mid-fire* one layer down, because a tick looked its registration
+up in order to re-fire; the glide looks nothing up, so the arm
+itself now refuses when the press's own registration did not
+survive its fire (a rebind mints fresh ids, so no release would
+ever arrive to stop the hold).
+
+*A glide's tiled writes are instant, and that is also the Reduce
+Motion answer.* The glide already *is* the motion, so springing
+each frame would smooth an already-smooth signal, add ~100–200 ms
+of trailing behind the key, and generate the #611 retarget storm
+deliberately — a changed target every frame is exactly what the
+settle watchdog cannot tell from a long drag. Writing instantly
+creates no animation, so there is nothing to defer. It is safe on
+the tiled paths and *only* there because of what each measures
+from: those write a stored ratio, weight or length and re-derive
+geometry from it, so the next frame's base is exact, while
+`resizeFloating` measures from a frame and the only commanded
+base #1056 trusts is the in-flight animation's target — so a
+floating glide keeps its animation, and its trailing with it. And
+since the tiled glide is instant for everyone, a held chord
+glides under Reduce Motion too: a held-key resize is the
+keyboard's direct manipulation, which Reduce Motion does not
+suppress for the mouse either, and there is no second mechanism
+to keep alive.
+
+*A refusal ends the run:* the #933/#1055 size-limit cues stop the
+glide, so a held shrink parked on a floor pills once per hold
+rather than per frame, while scrolling's wordless out-of-screen
+stop keeps gliding harmlessly — matching that silence's own
+ruling rather than inventing a signal for it. The cue is heard
+during the glide as well as the press fire, since the glide runs
+outside any binding fire.
+Structurally, the engine arms only when its registrar can report
+releases (`HotkeyReleaseReporting` — a hold with no stop channel
+must never start); any registration teardown (layer switch,
+recorder suspend) ends the run, because an unregistered hot key
+delivers no release to stop on; and a run is bounded by
+`HoldRepeat.maxRunSeconds`, the #611 force-settle shape — the
+stop signal is one Carbon event, and a lost one must cost a
+bounded hold, never the session. That bound is spent in
+*simulated* frame time, accumulated from the frames actually
+delivered, so a starved main queue cannot age a hold it never
+ticked. A floating resize also stopped under-accumulating (#129),
+which the hold would otherwise have made loud: a press
+mid-animation accumulates against the in-flight animation's
+target rather than the lagging AX echo. The target is
+deliberately the ONLY commanded value trusted — it dies at
+settle, so a silently-refusing app banks at most one hold's
+worth, where a longer-lived stored commanded frame is re-armed by
+every press that reads it and compounds without bound (the #1057
+banked-growth class); the paths that keep re-reading the echo are
+recorded in [accepted-limitations.md](accepted-limitations.md).
+(`HoldRepeatTests`, `HoldGlideRunTests`, `HoldGlideRampTests`,
+`HoldRepeatWiringTests`, `HoldGlideRefusalWiringTests`,
+`HoldGlideSeamTests`, `HoldRepeatSeamTests`,
 `FloatResizeAccumulationTests`)
 
 **A corroborated bound generalizes at the consume site,

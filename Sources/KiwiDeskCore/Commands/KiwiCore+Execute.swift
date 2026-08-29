@@ -18,7 +18,11 @@ extension KiwiCore {
         // is `dispatchCommand`'s ONE caller
         // (`HoldRepeatSeamTests`): a second dispatch entry
         // would run commands the tally never sees.
-        keys.noteCommand(command, succeeded: response.isSuccess)
+        keys.noteCommand(
+            command,
+            args: args,
+            succeeded: response.isSuccess
+        )
         return response
     }
 }

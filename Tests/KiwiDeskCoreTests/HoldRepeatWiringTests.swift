@@ -4,105 +4,19 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The production half of hold-to-repeat (#1056): a real chord
-/// driving a real binding body through `KiwiCore.execute`'s
-/// command tally, the refusal-cue sites, and the teardown
-/// cancels. This is what reds if the tally call, a cue's
+/// The production half of hold-to-glide (#1056, retimed #1082):
+/// a real chord driving a real binding body through
+/// `KiwiCore.execute`'s command tally, the glide's own command
+/// re-issue, the refusal-cue sites, and the teardown cancels.
+/// This is what reds if the tally call, a cue's
 /// `noteResizeRefusal()` or the release wiring is deleted — the
 /// machine ladder (`HoldRepeatTests`) cannot see any of those.
 @MainActor
-@Suite("Hold-to-repeat wiring (#1056)")
+@Suite("Hold-to-glide wiring (#1056/#1082)")
 struct HoldRepeatWiringTests {
-    @MainActor
-    private final class Fixture {
-        let core: KiwiCore
-        let registrar: ReleaseRegistrar
-        let combo: KeyCombo
-        var ticks: [(delay: TimeInterval, work: () -> Void)] =
-            []
-
-        init(body: String) throws {
-            registrar = ReleaseRegistrar()
-            core = makeTestCore(
-                configDirectory: FileManager.default
-                    .temporaryDirectory
-                    .appendingPathComponent(
-                        "kiwi-holdwire-\(UUID().uuidString)"
-                    ),
-                hotkeyRegistrar: registrar
-            )
-            core.tiler.visibleBounds = { _ in
-                CGRect(x: 0, y: 0, width: 1200, height: 800)
-            }
-            combo = try #require(KeyCombo.parse("ctrl+alt+l"))
-            try FileManager.default.createDirectory(
-                at: core.configDirectory,
-                withIntermediateDirectories: true
-            )
-            let config = """
-                KiwiDesk.bind("ctrl+alt+l", function()
-                    hits = (hits or 0) + 1
-                    \(body)
-                end)
-                KiwiDesk.define_layer("r", {
-                    h = function() end,
-                })
-                """
-            try config.write(
-                to: core.configURL,
-                atomically: true,
-                encoding: .utf8
-            )
-            core.loadConfig()
-            core.keys.holdRepeat.initialDelay = { 0.5 }
-            core.keys.holdRepeat.interval = { 0.1 }
-            core.keys.holdRepeat.schedule = {
-                [weak self] delay, work in
-                self?.ticks.append((delay, work))
-                return {}
-            }
-        }
-
-        /// Two tiled windows in bsp on one space, window 1
-        /// focused, so `resize` succeeds and moves the ratio.
-        func seedBspPair() {
-            for id: UInt32 in 1...2 {
-                core.state.apply(
-                    .windowCreated(
-                        ManagedWindow(
-                            id: WindowID(id),
-                            pid: pid_t(id),
-                            appName: "App\(id)"
-                        )
-                    )
-                )
-            }
-            let space = core.state.workspaces.space(
-                of: WindowID(1)
-            )!
-            core.execute(
-                "set_mode",
-                args: [.string(space.raw), .string("bsp")]
-            )
-            core.state.workspaces.focus(WindowID(1), in: space)
-        }
-
-        var ratio: Double {
-            let space = core.state.workspaces.space(
-                of: WindowID(1)
-            )!
-            return core.tiler.settings.resolvedBsp(
-                for: core.state.workspaces[space]!
-            ).splitRatioH
-        }
-
-        var hits: LuaValue? { core.lua?.global("hits") }
-        var heldID: UInt32? { core.keys.holdRepeat.heldID }
-    }
-
-    @Test("A held chord repeats a lone resize until release")
-    func chordArmsTicksAndReleases() throws {
-        let f = try Fixture(
+    @Test("A held chord glides a lone resize until release")
+    func chordArmsGlidesAndReleases() throws {
+        let f = try HoldGlideFixture(
             body: #"KiwiDesk.resize("x", 50)"#
         )
         f.seedBspPair()
@@ -115,30 +29,66 @@ struct HoldRepeatWiringTests {
         #expect(f.heldID != nil)
         #expect(f.ticks.map(\.delay) == [0.5])
 
-        // The tick re-runs the whole binding body through the
-        // production re-fire, and the run goes on at the
-        // repeat interval. The `#require`s are load-bearing
-        // (guard-prover, #1056): an arming regression must
-        // fail HERE, not trap the runner on an empty array.
-        let tick = f.ticks.popLast()
-        try #require(tick).work()
-        #expect(f.hits == .number(2))
-        #expect(f.ratio > afterPress)
-        #expect(f.ticks.map(\.delay) == [0.1])
+        // The wait starts the frame clock and nothing else: the
+        // `#require`s are load-bearing (guard-prover, #1056) —
+        // an arming regression must fail HERE, not trap the
+        // runner on an empty array.
+        try f.beginGlide()
+        #expect(f.ratio == afterPress)
 
-        // The physical release ends it; the pending tick's late
-        // fire is inert.
+        // A frame moves the ratio further WITHOUT re-running the
+        // Lua body — `hits` is the whole point: the glide
+        // re-issues the captured `resize`, so an implementation
+        // that went back to re-firing the binding reads 2 here.
+        try f.frame()
+        #expect(f.hits == .number(1))
+        #expect(f.ratio > afterPress)
+        let afterFrame = f.ratio
+
+        // And it keeps travelling frame by frame.
+        try f.frame()
+        #expect(f.ratio > afterFrame)
+
+        // The physical release ends it; no further frame is
+        // delivered, and the glide state is clear.
         f.registrar.release(keyCode: f.combo.keyCode)
         #expect(f.heldID == nil)
-        let lateTick = f.ticks.popLast()
-        try #require(lateTick).work()
-        #expect(f.hits == .number(2))
+        #expect(f.core.keys.isGliding == false)
+        #expect(f.frameTick == nil)
+        #expect(f.hits == .number(1))
+    }
+
+    @Test("A glide step writes instantly, never springing")
+    func glideStepsWriteInstantly() throws {
+        // #1082's ruling: the glide IS the motion, so its own
+        // writes do not animate — springing an already-smooth
+        // signal adds trailing AND generates the #611 retarget
+        // storm deliberately. Reads through the one seam the
+        // resize paths take, with animations left ON so the
+        // expectation is about the glide rather than the config.
+        let f = try HoldGlideFixture(
+            body: #"KiwiDesk.resize("x", 50)"#
+        )
+        f.seedBspPair()
+        f.core.execute(
+            "animations.set_on_window_resize",
+            args: [.bool(true)]
+        )
+        #expect(f.core.resizeRetileAnimated)
+
+        f.registrar.press(keyCode: f.combo.keyCode)
+        try f.beginGlide()
+        // While gliding, the same seam answers instant — and it
+        // returns to the configured policy once the hold ends.
+        #expect(f.core.resizeRetileAnimated == false)
+        f.registrar.release(keyCode: f.combo.keyCode)
+        #expect(f.core.resizeRetileAnimated)
     }
 
     @Test("A body that is not exactly one resize never arms")
     func ineligibleBodiesNeverArm() throws {
         // Two commands: repeating the rest was never asked for.
-        let two = try Fixture(
+        let two = try HoldGlideFixture(
             body: """
                 KiwiDesk.resize("x", 50)
                 KiwiDesk.focus("left")
@@ -151,7 +101,7 @@ struct HoldRepeatWiringTests {
         #expect(two.ticks.isEmpty)
 
         // One command, but not resize.
-        let focus = try Fixture(
+        let focus = try HoldGlideFixture(
             body: #"KiwiDesk.focus("left")"#
         )
         focus.seedBspPair()
@@ -160,95 +110,30 @@ struct HoldRepeatWiringTests {
         #expect(focus.ticks.isEmpty)
     }
 
-    @Test("A refusal reached mid-run ends the run")
-    func midRunRefusalEndsTheRun() throws {
-        // A held bsp shrink walks the ratio toward the floor;
-        // the tick that gets clamped fires the real #933 cue
-        // inside its own fire, which must be the run's last —
-        // one pill per hold. Which cue SITES feed the engine is
-        // `HoldRepeatSeamTests`' derived scan, not a list here.
-        let f = try Fixture(
-            body: #"KiwiDesk.resize("x", -200)"#
-        )
-        f.core.execute(
-            "set_min_window_size",
-            args: [.number(300)]
-        )
-        f.seedBspPair()
-
-        f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(f.hits == .number(1))
-        #expect(f.heldID != nil)
-
-        // Ticks shrink further until the clamp truncates; the
-        // run must end on that tick, with no new tick pending.
-        var ticks = 0
-        while f.heldID != nil {
-            let tick = f.ticks.popLast()
-            try #require(tick).work()
-            ticks += 1
-            try #require(ticks < 10)
-        }
-        #expect(ticks >= 1)
-        #expect(f.ticks.isEmpty)
-    }
-
-    @Test("A press refused at the wall arms nothing")
-    func refusedPressNeverArms() throws {
-        // A floating window already at the minimum: the shrink
-        // truncates, the #933 cue fires inside the press-fire,
-        // and holding must not tick a pill per repeat.
-        let f = try Fixture(
-            body: #"KiwiDesk.resize("x", -50)"#
-        )
-        f.core.execute(
-            "set_min_window_size",
-            args: [.number(300)]
-        )
-        f.core.state.apply(
-            .windowCreated(
-                ManagedWindow(
-                    id: WindowID(1),
-                    pid: 1,
-                    appName: "FloatApp",
-                    frame: CGRect(
-                        x: 100,
-                        y: 100,
-                        width: 300,
-                        height: 300
-                    ),
-                    isFloating: true
-                )
-            )
-        )
-        let space = f.core.state.workspaces.space(
-            of: WindowID(1)
-        )!
-        f.core.state.workspaces.focus(WindowID(1), in: space)
-
-        f.registrar.press(keyCode: f.combo.keyCode)
-        #expect(f.hits == .number(1))
-        #expect(f.heldID == nil)
-        #expect(f.ticks.isEmpty)
-    }
-
-    @Test("A body that rebuilds the bindings ends its own run")
-    func rebindingBodyEndsTheRun() throws {
+    @Test("A body that rebuilds the bindings never arms")
+    func rebindingBodyNeverArms() throws {
         // `bind` inside the body re-registers everything,
-        // minting fresh ids for the same ref+combo — and the
-        // physical release will arrive (if at all) for an id
-        // that no longer exists. The arm must stay keyed to the
-        // id the press actually produced (`RegistrationBox`),
-        // so the first tick finds its registration gone and the
-        // run ends WITHOUT re-firing the body; re-deriving the
-        // id after the fire instead adopts the rebuilt
-        // registration and repeats on an id the press never
-        // touched. The rebind is ONCE-ONLY, deliberately: a
-        // body that rebinds on every fire re-enters
-        // `deactivate`'s cancel on the tick itself, which
-        // rescued the pre-fix shape and left this guard inert
-        // (guard-prover round 2, #1056).
-        let f = try Fixture(
+        // minting fresh ids for the same ref+combo — so the
+        // physical release will arrive (if at all) for an id that
+        // no longer exists, and a glide with no stop channel runs
+        // to `maxRunSeconds`. The arm therefore refuses when the
+        // press's OWN registration did not survive its fire.
+        //
+        // #1082 re-homed this guard (`KeybindingManager
+        // .pressFire`): the repeat ladder caught it one layer
+        // down, because a tick looked its registration up in
+        // order to re-fire the binding, and the glide re-issues
+        // the captured command instead and never looks anything
+        // up. So the arm is what must refuse now — dropping the
+        // `activeBindings[id] != nil` term leaves every other
+        // test in this suite green.
+        //
+        // The rebind is ONCE-ONLY, deliberately: a body that
+        // rebinds on every fire re-enters `deactivate`'s cancel
+        // on the glide's own steps, which rescued the pre-fix
+        // shape and left this guard inert (guard-prover round 2,
+        // #1056).
+        let f = try HoldGlideFixture(
             body: """
                 if not rebound then
                     rebound = true
@@ -260,12 +145,9 @@ struct HoldRepeatWiringTests {
         f.seedBspPair()
         f.registrar.press(keyCode: f.combo.keyCode)
         #expect(f.hits == .number(1))
-        try #require(f.heldID != nil)
-        let tick = f.ticks.popLast()
-        try #require(tick).work()
         #expect(f.heldID == nil)
-        #expect(f.hits == .number(1))
         #expect(f.ticks.isEmpty)
+        #expect(f.frameTick == nil)
     }
 
     @Test("An overrun rescue reaches the log seam")
@@ -277,18 +159,18 @@ struct HoldRepeatWiringTests {
         // #1056; the `engineLogReachesTheCore` shape). This
         // reds if `wireHoldRepeat` stops assigning it; the
         // manager-to-core log hop is the log-seam suites' job.
-        let f = try Fixture(
+        let f = try HoldGlideFixture(
             body: #"KiwiDesk.resize("x", 50)"#
         )
         var logs: [String] = []
         f.core.keys.onLog = { logs.append($0) }
         f.core.keys.holdRepeat.onOverrun()
-        #expect(logs.contains { $0.contains("hold-repeat") })
+        #expect(logs.contains { $0.contains("hold-glide") })
     }
 
     @Test("Suspend and a layer switch cancel a live run")
     func teardownPathsCancel() throws {
-        let f = try Fixture(
+        let f = try HoldGlideFixture(
             body: #"KiwiDesk.resize("x", 50)"#
         )
         f.seedBspPair()
