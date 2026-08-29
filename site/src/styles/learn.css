@@ -334,6 +334,79 @@
   white-space: nowrap;
 }
 
+/* Keys drawn as keycaps (#1097).
+   -----------------------------------------------------------
+   Deliberately NOT `.learn code` above, which tints paths and
+   commands green: a key is a thing on a keyboard, not a string
+   you type into one, and the two must not read alike in a
+   sentence that contains both (the search tip has a <code> and
+   the notes beside it have keys).
+
+   The border is the point, not decoration. At prose size ⌃ is a
+   caret with extra steps — it was misread as ^ in the unchipped
+   draft, by the person who wrote the section — and the
+   surrounding sentence supplies no context to recover from that,
+   because the glyph IS the noun. A raised face and a hard edge
+   say "this is one key" before the reader has parsed anything.
+
+   `--bg-3` and `--border-strong` are the raised-surface pair
+   both themes already define, so this needs no colour of its
+   own. `min-width` keeps a single narrow glyph (⌥, L, 5) from
+   drawing a chip narrower than it is tall, which reads as a
+   typo rather than a key. */
+.learn kbd {
+  display: inline-block;
+  min-width: 1.45em;
+  padding: 0.12em 0.38em;
+  margin: 0 0.06em;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  background: var(--bg-3);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.84em;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* The modifier's name, beside its keycap on first use (#1097).
+   -----------------------------------------------------------
+   The other half of #1016's onboarding fix, carried into prose.
+   That ruling separated the caps AND put a legend under each
+   one, on the finding that caps alone "taught a chord to
+   everyone who could already decode ⌃ ⌥ ⇧ and nothing at all to
+   the reader this step is for" — which is this section's reader
+   exactly. A page cannot stack a legend under a cap, so the name
+   rides beside it in parentheses instead.
+
+   Not bold, though it sits inside the bolded lead-in: the name
+   is an aside for whoever needs it and must not compete with the
+   claim the sentence is making. Never a `title`/tooltip — that
+   is invisible on touch and to anyone who does not think to
+   hover, and this exists precisely for the reader who does not
+   already know what to look for.
+
+   The words stay English in every locale, and that is settled
+   rather than skipped: `key_recorder.help_press` spells them
+   "⌃ Control, ⌥ Option, ⇧ Shift, ⌘ Command" untranslated in all
+   eleven app catalogs. */
+.learn .key-name {
+  font-weight: 400;
+  font-size: 0.88em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* Adjacent keys are one chord — tighten the gap so ⌃⌥ reads as
+   a pair rather than as two unrelated keys, without merging
+   them into one chip (they ARE two keys, and a reader has to
+   press both). */
+.learn kbd + kbd {
+  margin-left: -0.01em;
+}
+
 /* A soft subheading within a section. */
 .learn-sub {
   font-size: 1.12rem;
