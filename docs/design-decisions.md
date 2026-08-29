@@ -5490,7 +5490,19 @@ wrong. It is gone: global sticky took `⌃⌥S` (`S` still leads
 the label a GUI-first user is shown, "Toggle sticky everywhere"), and the screen-scoped one took `⌃⌥P`, named for the
 `pin.fill` mark `StickyStyle` draws rather than for a label —
 because a label-derived mnemonic only works in the language the
-label was written in, while a mark is a picture. So `⇧` now means
+label was written in, while a mark is a picture.
+
+**`D` was the obvious letter and it was refused**, recorded here
+because a later author will reach for it again. Three counts:
+*Desktop* is a first-class noun in this app with its own catalog
+rows, so `⌃⌥D` reads as a Desktop verb before it reads as a
+sticky one; the letter would anchor to *display*, a word
+`config-vocabulary.md` retires for a screen, so #865 would strand
+it; and the mitigation offered for the first count — "Desktops
+and Spaces are always digit-bound, so no lettered chord means
+Desktop" — is a state claim nothing enforces (#614), since
+`goToDesktop` and `moveToDesktop` ship as offerable unbound rows
+a user may bind to any letter they like. So `⇧` now means
 exactly one thing everywhere, and so does `⌘`.
 
 The ergonomics ran backwards too. #1056 made resize the one verb
@@ -5527,7 +5539,18 @@ against it.
 register says so.** Never arrows — `⌥⌘←`/`→` is next/previous tab
 in Chrome, Safari and Terminal (observed 2026-08-28) — and a
 global Carbon hotkey pre-empts the frontmost app, so binding them
-would take tab switching away system-wide. Never `esc`, `space`,
+would take tab switching away system-wide.
+
+**That pre-emption is measured, not inferred (owner, 2026-08-29).**
+A KiwiDesk resize verb was bound to `⌘P` — VS Code's Go to File —
+and pressed with VS Code frontmost: KiwiDesk fired and Quick Open
+did not. So the order is macOS's own chords, then KiwiDesk, then
+app menus: `RegisterEventHotKey` FAILS against a live system
+hotkey (which is why `⌥⌘8` was refused above), and WINS against an
+app's own. It matters because every collision in this section is
+a real cost to the user rather than a theoretical one — the app
+loses the chord, silently, and the criterion below exists to rank
+which of those losses are tolerable. Never `esc`, `space`,
 `D`, or the Zoom trio. A new default on this base is checked
 against `SystemShortcuts.map`, not against this paragraph.
 
@@ -5566,16 +5589,14 @@ the rule itself: restating a snapshot of other people's software
 as a rule is exactly how the Xcode sentence rotted.
 
 **The geometry was load-bearing independently of any of this.**
-The measurement does not choose between the two candidate sets:
-the `4`/`5` + `7`/`8` draft this section rejects over `⌥⌘8` keeps
-Preview's `4` and `5` and adds Finder's `7`, while the shipped
-`1`/`2` + `4`/`5` takes `1` and `2`, the two digits every app in
-the enumeration claims. Neither is a collision minimum, and the
-one difference that is decisive is not an app at all: `⌥⌘8` is
-the system's, and Zoom has no menu path to fall back on, which is
-the criterion above refusing it. So the set was picked on
-geometry, and it stays picked on geometry — the keypad 2×2, the
-`3` gap between the pairs, the `5`/`6` hand split. One thing the
+The measurement chooses, and it chooses AGAINST the
+shipped set: `{4,5,7,8}` takes five app bindings (4 → Preview and
+Safari, 5 → Finder and Preview, 7 → Finder, 8 → none) against
+`{1,2,4,5}`'s twelve, since `1` and `2` are each claimed by all
+four apps. What refuses the rejected draft is not the app count
+but the SYSTEM chord: `⌥⌘8` is macOS's Zoom toggle, KiwiDesk
+loses that one outright, and a seeded row that silently never
+fires is worse than one that costs an app a menu accelerator. One thing the
 glide changes in the arithmetic: since #1082 resize is HELD, the
 chord is pressed once per gesture rather than tapped repeatedly
 — which strengthens the `⌥⌘` thumb roll and weakens the

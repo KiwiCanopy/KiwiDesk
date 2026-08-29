@@ -58,9 +58,10 @@ because two real clients now remove drift — see
   one chord in the seed a user who had learned the ladder read
   wrong (#1094, `DefaultKeybindingsTests` ▸
   `shiftNeverQualifiesALetter`). Which letter each sticky scope
-  takes, and why the screen-scoped one is named for a mark
-  rather than a label, is `DefaultKeybindings`' own docstring —
-  do not restate it here.
+  takes, why the screen-scoped one is named for a mark rather
+  than a label, and why `D` was refused, are argued in
+  `docs/design-decisions.md` ▸ "Size is not a positional verb" —
+  do not restate them here or in the seed's docstring.
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took

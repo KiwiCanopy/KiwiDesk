@@ -197,7 +197,7 @@ struct DefaultKeybindingsTests {
         #expect(combos.contains("control+option+0"))
         #expect(combos.contains("control+option+shift+6"))
         #expect(combos.contains("control+option+command+0"))
-        // Five new digits × three tiers, less what macOS owns.
+        // Five new digits × three tiers.
         #expect(
             added.count
                 == expectedTopUp(
@@ -269,8 +269,7 @@ struct DefaultKeybindingsTests {
             existing: [],
             spaces: spaces(12)
         )
-        // Ten digits × three tiers, less what macOS owns;
-        // nothing for spaces 11-12.
+        // Ten digits × three tiers; nothing for 11-12.
         #expect(
             added.count
                 == expectedTopUp(
