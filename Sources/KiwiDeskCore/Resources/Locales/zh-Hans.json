@@ -892,7 +892,7 @@
   "profiles.which_loads.rule": "绑定到活动桌面的描述文件优先载入。否则 KiwiDesk 会选择显示器数量匹配的描述文件，并优先选择标记为默认的那个。",
   "profiles.which_loads.standard": "当前：%1$@ → 内置 %2$@（没有匹配的已保存描述文件）。",
   "profiles.which_loads.title": "哪个描述文件会载入",
-  "resize.boundary_reached": "已无增加尺寸的余地",
+  "resize.boundary_reached": "已无增大尺寸的余地",
   "resize.max_size_reached": "已达到窗口最大尺寸",
   "resize.min_size_reached": "已达到窗口最小尺寸",
   "resize.neighbor_min_size": "相邻窗口已达到最小尺寸",
