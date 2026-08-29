@@ -1003,6 +1003,8 @@
   "shortcuts.restore_defaults.confirm": "Restaurar predeterminados",
   "shortcuts.restore_defaults.help": "Repone los atajos que ofrece KiwiDesk, incluidos los que ha añadido desde que lo instalaste. Los atajos que hayas creado tú se conservan.",
   "shortcuts.restore_defaults.help_other_layer": "Solo la capa estándar tiene atajos predeterminados que restaurar — esta es tuya.",
+  "shortcuts.restore_defaults.message": "Tus propios atajos se conservan, excepto los que usen una tecla que los predeterminados necesitan. Atajos restaurados: %1$d · propios perdidos: %2$d",
+  "shortcuts.restore_defaults.message_clean": "No se pierde nada tuyo. Atajos restaurados: %1$d",
   "shortcuts.restore_defaults.title": "¿Restaurar los atajos predeterminados?",
   "shortcuts.row.inherited.axhint": "Heredado de los atajos base. Asigna aquí una tecla para anularlo.",
   "shortcuts.section.focus": "Enfoque",
