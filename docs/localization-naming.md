@@ -86,6 +86,17 @@ destination — a Shortcuts row wearing another destination's name
 (Family C rule 1, and the reason this sentence no longer says
 "Display Sticky").
 
+**`zh-Hans` is the measured exception, not an oversight.** It
+splits the English "screen" by countability — 屏幕 where the
+sense is mass, 显示器 for a countable one (`presets.screen_name.
+main` 主显示器, `profiles.screens.many` %1$d 台显示器) — so 显示器
+IS its screen word here, and rule 2 is satisfied by the split
+rather than broken by it. That it also equals `destination.
+monitors` is a pre-existing overlap belonging to #865, and not
+something this label can fix on its own: a locale whose own
+screen word collides with a destination label needs the
+destination renamed, not the row.
+
 ### What it requires
 
 Keep the name verbatim wherever the English carries it, and

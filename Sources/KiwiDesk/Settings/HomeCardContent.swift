@@ -174,9 +174,25 @@ enum HomeCardContent {
         model: SettingsModel
     ) -> String? {
         guard destination == .shortcuts else { return nil }
+        // Dormant macOS chords are excluded from the SHOUT,
+        // not from the row (#1094). `⌃⌥⌘8` is seeded — tier 3's
+        // move-to-space-8 — and also Invert Colors, which ships
+        // disabled, so counting it here would put a standing
+        // badge on every install with 8+ Desktops for a chord
+        // that works. The row still carries its ⚠️ and its
+        // reason, which is where someone deliberately binding
+        // one of these wants to be told. Stopgap until the
+        // conflict surface can read the live `enabled` flag and
+        // stop guessing.
         let count = KeybindingConflicts.conflicts(
             in: model.config.layers
-        ).count
+        )
+        .filter { conflict in
+            guard case .systemShortcut(let s) = conflict.target
+            else { return true }
+            return !SystemShortcuts.shipsDisabled.contains(s)
+        }
+        .count
         guard count > 0 else { return nil }
         guard count > 1 else {
             return L("home.card.conflict_one", "1 conflict")
