@@ -32,6 +32,7 @@ enum ShortcutsRowOrder {
         .openApplications,
         .layers,
         .luaBindings,
+        .defaultShortcuts,
     ]
 
     /// Focus: the four directions, one row per live space, then
@@ -158,5 +159,14 @@ enum ShortcutsRowOrder {
     /// `init.lua` holds something to adopt.
     static let luaBindingsAtRest: [SettingKey] = [
         .shortcuts(.import)
+    ]
+
+    /// Restore Defaults, beside Import in the header. Its
+    /// own container because the set it restores spans four
+    /// of them, and at rest for Import's reason: a runtime
+    /// gate, not a disclosure, keeps it away until there is
+    /// something to restore.
+    static let defaultShortcutsAtRest: [SettingKey] = [
+        .shortcuts(.restoreDefaults)
     ]
 }

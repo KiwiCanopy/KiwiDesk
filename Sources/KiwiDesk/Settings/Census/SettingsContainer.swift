@@ -11,6 +11,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case appBar
     case borders
     case bsp
+    case defaultShortcuts
     case dragAndDrop
     case focus
     case focusBorder
@@ -71,7 +72,8 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .setting(.borders(.borderEnabled))
         case .motion:
             return .runtime(.reduceMotion)
-        case .about, .advanced, .borders, .bsp, .dragAndDrop,
+        case .about, .advanced, .borders, .bsp,
+            .defaultShortcuts, .dragAndDrop,
             .focus, .gaps, .general, .generalKeys, .grid,
             .appliesImmediately, .layers, .luaBindings,
             .monitorFingerprints, .monocle, .mouse,

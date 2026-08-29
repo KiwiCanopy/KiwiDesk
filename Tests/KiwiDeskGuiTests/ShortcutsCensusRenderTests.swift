@@ -148,6 +148,23 @@ struct ShortcutsCensusRenderTests {
         )
     }
 
+    /// Restore Defaults is the container's only row, at rest.
+    /// A container of one, because the set it restores spans
+    /// four others — declaring it under any of them would file a
+    /// whole-area action under a quarter of what it acts on.
+    /// Bespoke container — membership only (see the suite note).
+    @Test("Default shortcuts renders its one at-rest action")
+    func defaultShortcutsTier() {
+        pin(
+            ShortcutsRowOrder.defaultShortcutsAtRest,
+            .defaultShortcuts,
+            .atRest,
+            "restore defaults row"
+        )
+        #expect(censusRows(.defaultShortcuts, .showMore).isEmpty)
+        #expect(censusRows(.defaultShortcuts, .immediate).isEmpty)
+    }
+
     /// Which containers are drawn by bespoke views is DERIVED
     /// from the source, not restated here.
     ///
@@ -185,6 +202,7 @@ struct ShortcutsCensusRenderTests {
             ("layersMore", .layers),
             ("luaBindingsMore", .luaBindings),
             ("luaBindingsAtRest", .luaBindings),
+            ("defaultShortcutsAtRest", .defaultShortcuts),
         ]
         // Vacuity: the scan must have read something, and every
         // list named must exist in the source it read.
@@ -268,13 +286,13 @@ struct ShortcutsCensusRenderTests {
     /// renderer to publish its mounted containers as data, which
     /// no area does yet — until one does, a deleted card is a
     /// reviewer's catch.
-    @Test("Shortcuts holds exactly the seven rendered containers")
+    @Test("Shortcuts holds exactly the eight rendered containers")
     func shortcutsContainers() {
         #expect(
             containers(of: .shortcuts) == [
                 .focus, .moveWindows, .sizeAndFloat,
                 .openApplications, .generalKeys, .layers,
-                .luaBindings,
+                .luaBindings, .defaultShortcuts,
             ]
         )
     }

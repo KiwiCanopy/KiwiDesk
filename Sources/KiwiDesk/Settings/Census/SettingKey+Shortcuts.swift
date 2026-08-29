@@ -29,6 +29,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case openApplications = "(rows) shortcuts.open_applications"
     case advanced = "(rows) shortcuts.advanced"
     case `import` = "(action) shortcuts.import"
+    case restoreDefaults = "(action) shortcuts.restore_defaults"
 }
 
 extension ShortcutsKey {
@@ -72,6 +73,27 @@ extension ShortcutsKey {
                 .luaBindings,
                 .atRest,
                 gate: .runtime(.luaImportAvailable)
+            )
+        case .restoreDefaults:
+            // Its own container, because its SUBJECT is the
+            // shipped set and that set spans four of them —
+            // focus, move, size & float, and the general keys.
+            // Borrowing one would file a whole-area action under
+            // a quarter of what it acts on, which is what a
+            // reader building a search snippet off the census
+            // would then be told.
+            //
+            // A container is the subject, not the drawing: Import
+            // above declares `.luaBindings` while drawing in the
+            // header, so nothing about this moves the button. It
+            // draws beside Import, at rest, kept absent by its
+            // runtime gate until KiwiDesk actually has defaults
+            // this install lacks.
+            return .row(
+                .shortcuts,
+                .defaultShortcuts,
+                .atRest,
+                gate: .runtime(.defaultsToRestore)
             )
         }
     }
@@ -118,6 +140,11 @@ extension ShortcutsKey {
             return .text("keybinding.open_settings")
         case .`import`:
             return .text("shortcuts.import", help: "shortcuts.import.help")
+        case .restoreDefaults:
+            return .text(
+                "shortcuts.restore_defaults",
+                help: "shortcuts.restore_defaults.help"
+            )
         }
     }
 }
