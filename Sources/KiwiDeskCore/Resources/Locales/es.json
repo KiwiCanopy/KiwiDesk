@@ -1007,7 +1007,7 @@
   "shortcuts.section.size_float": "Tamaño y flotación",
   "shortcuts.section.switch_layers": "Cambiar de capa",
   "shortcuts.size_float.feedback": "Alerta sonora cuando no se puede redimensionar",
-  "shortcuts.size_float.layouts_caption": "Agrandar/Reducir solo se aplica en los diseños bsp, stack, scrolling y track; no tiene efecto en monocle, grid y floating. El ancho y la altura se redimensionan de forma independiente; scrolling redimensiona su hueco a lo largo del eje de desplazamiento para ambos, y en track un eje redimensiona la pista de la ventana y el otro su parte dentro de ella.",
+  "shortcuts.size_float.layouts_caption": "Los atajos de anchura y altura solo se aplican en los diseños bsp, stack, scrolling y track; no tienen efecto en monocle, grid y floating. La anchura y la altura se redimensionan de forma independiente; scrolling redimensiona su hueco a lo largo del eje de desplazamiento para ambos, y en track un eje redimensiona la pista de la ventana y el otro su parte dentro de ella.",
   "shortcuts.size_float.more": "Aviso al redimensionar",
   "slot_size.column_width": "Ancho de columna",
   "slot_size.percent": "Porcentaje",

@@ -1007,7 +1007,7 @@
   "shortcuts.section.size_float": "Tamanho e float",
   "shortcuts.section.switch_layers": "Alternar camadas",
   "shortcuts.size_float.feedback": "Som de alerta quando o redimensionamento não pode ser aplicado",
-  "shortcuts.size_float.layouts_caption": "Aumentar/Reduzir só vale nos layouts bsp, stack, scrolling e track; não tem efeito em monocle, grid e floating. Largura e altura são redimensionadas de forma independente; scrolling redimensiona seu slot ao longo do eixo de rolagem para ambas, e em track um eixo redimensiona a faixa da janela e o outro a sua parcela dentro dela.",
+  "shortcuts.size_float.layouts_caption": "Os atalhos de largura e altura só valem nos layouts bsp, stack, scrolling e track; não têm efeito em monocle, grid e floating. Largura e altura são redimensionadas de forma independente; scrolling redimensiona seu slot ao longo do eixo de rolagem para ambas, e em track um eixo redimensiona a faixa da janela e o outro a sua parcela dentro dela.",
   "shortcuts.size_float.more": "Feedback de redimensionamento",
   "slot_size.column_width": "Largura da coluna",
   "slot_size.percent": "Porcentagem",

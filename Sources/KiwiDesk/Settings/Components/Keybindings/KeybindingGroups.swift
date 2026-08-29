@@ -255,12 +255,44 @@ struct SizeFloatGroup: View {
     // (stale since track landed, #128/#183): per
     // docs/translating.md a changed English text gets a NEW
     // key, never a rename — rename-key would carry the stale
-    // translations forward as if still valid.
+    // translations forward as if still valid. This caption's
+    // own later rewording took the other sanctioned route,
+    // `scripts/drop-key <key>`, which retires the stale
+    // translations and keeps the key.
+    //
+    // **It names no verb, deliberately** (owner ruling,
+    // 2026-08-29). It used to open "Grow/Shrink", quoting rows
+    // whose own labels are `keybinding.grow_*` /
+    // `keybinding.shrink_*` — the literal-text shape #818 bans,
+    // and the mechanism by which four catalogs came to carry a
+    // second verb for the action their own rows already named
+    // (es, fr, ja, zh-Hans; swept in the change before this).
+    // #818's usual fix is to interpolate the label key, and
+    // there is no single one to interpolate: this stands for
+    // four keys. So the caption stops naming the action
+    // instead, which removes the drift rather than managing it
+    // — with no verb here, there is nothing to disagree with
+    // the rows, and a future verb sweep touches the four labels
+    // alone.
+    //
+    // It scopes by the DIMENSION rather than by "these
+    // shortcuts", and that is a correction rather than a
+    // flourish (localization round, 2026-08-29): the caption
+    // renders after `ShortcutsRowOrder.sizeAndFloatAtRest`,
+    // which is SEVEN rows — the four resize ones and the three
+    // state toggles — so a deictic subject claims Toggle
+    // floating is a no-op in the floating layout. The retired
+    // English was accurate only because naming the verb scoped
+    // it; dropping the verb dropped the scope with it. "Width
+    // and height" names the four rows without quoting a label
+    // ("Grow width", "Shrink height") and without a verb, and
+    // the next sentence already uses that vocabulary.
     private var sizeFloatCaption: String {
         L(
             "shortcuts.size_float.layouts_caption",
-            "Grow/Shrink only applies in the bsp, stack, "
-                + "scrolling, and track layouts; it is a "
+            "Width and height shortcuts only apply in the "
+                + "bsp, stack, "
+                + "scrolling, and track layouts; they are a "
                 + "no-op in monocle, grid, and floating. "
                 + "Width and height resize independently; "
                 + "scrolling resizes its slot along the "

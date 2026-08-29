@@ -1009,7 +1009,7 @@
   "shortcuts.section.size_float": "Size & float",
   "shortcuts.section.switch_layers": "Switch layers",
   "shortcuts.size_float.feedback": "Alert sound when resize can't apply",
-  "shortcuts.size_float.layouts_caption": "Grow/Shrink only applies in the bsp, stack, scrolling, and track layouts; it is a no-op in monocle, grid, and floating. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.",
+  "shortcuts.size_float.layouts_caption": "Width and height shortcuts only apply in the bsp, stack, scrolling, and track layouts; they are a no-op in monocle, grid, and floating. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.",
   "shortcuts.size_float.more": "Resize feedback",
   "slot_size.column_width": "Column width",
   "slot_size.percent": "Percent",
