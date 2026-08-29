@@ -3,8 +3,14 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The hold-to-repeat seams no behavioral suite can hold
-/// (#1056). Every `HoldRepeatWiringTests` fixture hands in a
+/// The hold-to-glide ELIGIBILITY seams no behavioral suite can
+/// hold — what may ARM a glide, and what ends one. Its sibling
+/// `HoldGlideSeamTests` guards the other half, the two inverted
+/// WIRING seams a running glide needs; the two are split by that
+/// question, not by accident of naming.
+///
+/// These are the seams whose loss no behavioural suite can see
+/// (#1056). Every `HoldGlideWiringTests` fixture hands in a
 /// conforming fake and drives commands through `execute`, so
 /// that suite stays green if the PRODUCTION registrar loses its
 /// release channel, if a second dispatch entry bypasses the
@@ -12,33 +18,33 @@ import Testing
 /// "seam declared and never wired" class `tests.md` names. Each
 /// test here pins one of those from the production side.
 @MainActor
-@Suite("Hold-to-repeat seams (#1056)")
-struct HoldRepeatSeamTests {
+@Suite("Hold-glide eligibility seams (#1056)")
+struct HoldGlideEligibilitySeamTests {
     @Test("The production registrar keeps the release channel")
     func productionRegistrarIsReleaseCapable() {
         // Constructing the live center registers nothing (#565
         // is about `register` seizing chords), so this touches
         // no machine state. If `CarbonHotkeyCenter` ever stops
         // conforming to `HotkeyReleaseReporting` — or a wrapper
-        // replaces it as the default — hold-to-repeat silently
+        // replaces it as the default — hold-to-glide silently
         // never arms in the shipped app while every fake-driven
         // suite stays green; this is the two-sided pin.
         let manager = KeybindingManager(
             registrar: CarbonHotkeyCenter()
         )
-        #expect(manager.holdRepeat.releaseCapable)
+        #expect(manager.holdGlide.releaseCapable)
     }
 
-    @Test("Repeatable verbs name real commands")
-    func repeatableCommandsAreInTheCensus() {
-        // `HoldRepeat.repeatableCommands` holds bare strings in
+    @Test("Glidable verbs name real commands")
+    func glidableCommandsAreInTheCensus() {
+        // `HoldGlide.glidableCommands` holds bare strings in
         // `Keys/`, far from the `Commands/Reference` census —
         // and §5 encourages verb renames. Deriving membership
         // from the census makes the rename red HERE instead of
         // leaving a repeat set that matches nothing.
         let census = Set(APIReference.commands.map(\.command))
-        #expect(!HoldRepeat.repeatableCommands.isEmpty)
-        for verb in HoldRepeat.repeatableCommands {
+        #expect(!HoldGlide.glidableCommands.isEmpty)
+        for verb in HoldGlide.glidableCommands {
             #expect(census.contains(verb), "\(verb)")
         }
     }
@@ -46,7 +52,7 @@ struct HoldRepeatSeamTests {
     @Test("Every command reaches dispatch through the tally")
     func dispatchHasOneEntry() throws {
         // `KiwiCore.execute` tallies what a hotkey fire DID —
-        // the repeat engine's one honest eligibility signal. A
+        // the glide engine's one honest eligibility signal. A
         // second `dispatchCommand` caller would run commands
         // the tally never sees, so eligibility silently stops
         // meaning "what the press did". The walk covers the
@@ -63,7 +69,7 @@ struct HoldRepeatSeamTests {
             for file in try SourceScan.swiftSources(under: root)
             where
                 file.lastPathComponent
-                != "HoldRepeatSeamTests.swift"
+                != "HoldGlideEligibilitySeamTests.swift"
             {
                 let source = try SourceScan.strippedSource(
                     at: file

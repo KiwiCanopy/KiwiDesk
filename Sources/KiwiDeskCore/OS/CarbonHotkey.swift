@@ -34,7 +34,7 @@ public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
 /// event dispatcher, for the pressed AND the released kind —
 /// Carbon delivers exactly one of each per physical hold (a
 /// registered hot key never auto-repeats), which is what the
-/// hold-to-repeat engine builds on (#1056).
+/// hold-to-glide engine builds on (#1056).
 private func hotkeyCallback(
     _ handler: EventHandlerCallRef?,
     _ event: EventRef?,
@@ -69,7 +69,7 @@ private func hotkeyCallback(
 
 /// A registrar that also reports hot key RELEASES (#1056).
 /// Split from `HotkeyRegistrar` so the many press-only fakes in
-/// the test trees stay valid; the hold-to-repeat engine arms
+/// the test trees stay valid; the hold-to-glide engine arms
 /// only when its registrar conforms, because a repeat with no
 /// release channel would never stop.
 @MainActor
@@ -162,7 +162,7 @@ public final class CarbonHotkeyCenter {
     }
 
     /// Reached only from `register` — construction touches no
-    /// OS state, and `HoldRepeatSeamTests` leans on that by
+    /// OS state, and `HoldGlideEligibilitySeamTests` leans on that by
     /// building a live center bare to pin the production
     /// release channel. Moving this install into an
     /// initializer would put a Carbon event handler on the

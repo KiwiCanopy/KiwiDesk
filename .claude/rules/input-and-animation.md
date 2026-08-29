@@ -36,41 +36,123 @@ editing here:
   the one copy of who may stamp the mark. The product argument
   is in `docs/design-decisions.md`; the GUI half of it, in
   [gui.md](gui.md).
-- **A held resize chord repeats through one tally, one refusal
-  funnel and one release channel (#1056).** Three obligations,
-  each with the same failure mode — the feature silently stops
-  meaning what it claims while every fake-driven suite stays
-  green — and one guard suite, `HoldRepeatSeamTests`:
-  - Every command a hotkey fire runs reaches the repeat engine
+- **A held resize chord glides through one tally, one refusal
+  funnel and one release channel (#1056, retimed #1082).** Three
+  obligations, each with the same failure mode — the feature
+  silently stops meaning what it claims while every fake-driven
+  suite stays green — and one guard suite,
+  `HoldGlideEligibilitySeamTests`:
+  - Every command a hotkey fire runs reaches the hold engine
     through the ONE `KiwiCore.execute` wrapper. Eligibility is
     "what the press DID", so a second `dispatchCommand` caller
     runs commands the tally never sees; the suite pins the
-    single call site.
+    single call site. Since #1082 that wrapper also carries the
+    ARGUMENTS, because the glide re-issues the press's own
+    `resize` rather than re-running the binding.
   - A new size-limit refusal cue routes through
     `cueResizeRefusal` (`KiwiCore+SizeLimitPill.swift`) — the
     funnel is what ends a held run, so a cue beside it pills
-    once per TICK instead of once per hold. The suite holds
+    once per FRAME instead of once per hold. The suite holds
     every `refuse*` function to the funnel and the funnel as
-    the one `borders.onResizeRefusal` caller.
+    the one `borders.onResizeRefusal` caller. The gate on that
+    funnel is `isFiring || isGliding`, not `isFiring` alone: a
+    glide runs outside any binding fire, so dropping the second
+    term makes the cue unreachable exactly where the hold needs
+    it (`HoldGlideRefusalWiringTests`).
   - The engine arms only when its registrar conforms to
-    `HotkeyReleaseReporting` — a repeat with no stop channel
+    `HotkeyReleaseReporting` — a hold with no stop channel
     must never start — so a wrapper or replacement registrar
     that drops the conformance turns the feature off with no
     red anywhere else; the suite pins the production default's
-    conformance. A run is additionally bounded by
-    `HoldRepeat.maxRunSeconds` against a lost release event —
+    conformance. **The arm additionally refuses when the press's
+    own registration did not survive its fire** (#1082): a body
+    that calls `bind` mints fresh ids, so no release for the
+    pressed id will ever arrive. The repeat ladder caught that
+    one layer down, because a tick looked its registration up in
+    order to re-fire the binding; the glide looks nothing up, so
+    the question is asked at the arm or nowhere
+    (`HoldGlideWiringTests`). A run is also bounded by
+    `HoldGlide.maxRunSeconds` against a lost release event —
     the #611 force-settle shape, reported through the
     manager's log seam, never silent (the overrun-to-log
-    wiring is pinned by `HoldRepeatWiringTests`, since the
+    wiring is pinned by `HoldGlideWiringTests`, since the
     seam defaults silent and every machine harness assigns it
-    by hand).
+    by hand). That bound is spent in SIMULATED frame time,
+    accumulated from frames actually delivered, so a starved
+    main queue cannot age a hold it never ticked — the same
+    idiom the #611 bullet below states for the animation
+    watchdog. It differs from that bullet in owing a SECOND
+    net: the watchdog's clock is the animation's own
+    integration, while the glide's is a `DisplayLink` bound to
+    one `NSScreen`, which display sleep or a disconnect
+    mid-hold simply STOPS. So a wall-clock backstop of the same
+    length sits under the frame bound — a net must not depend
+    on the thing that died — and it can never truncate a
+    healthy glide, since frame time is at most wall time
+    (`HoldGlideRunTests` ▸ `wallClockBackstopEndsAFrozenGlide`).
+    Keep both, or the primary is unreachable in exactly the
+    failure it exists for.
 
-  The product rulings (resize-only, the tally, acceleration)
-  are argued in `docs/design-decisions.md` ▸ "A held resize
-  chord repeats"; widen `HoldRepeat.repeatableCommands` only
-  with a ruling of that shape, and the set's members must name
-  real commands (the suite derives them from the API census, so
-  a §5 verb rename reds there).
+  **The glide's two seams are INVERTED, and take the two-sided
+  guard** (`HoldGlideSeamTests`): `applyGlideStep` and
+  `startFrames` default inert on `HoldGlide` and are opted into
+  live by `KiwiCore+HoldGlide`, because a live default would
+  build a `CADisplayLink` on a real screen in every suite that
+  arms a hold. The inert default is a working no-op rather than
+  a crash, so a deleted wiring is the silent direction — which
+  is tests.md's inverted-seam rule, and the reason both needles
+  are pinned by exact count rather than by "no strays". The two
+  are not equally exposed, and that suite's docstring is the one
+  copy of which is which: state the asymmetry there when you
+  change either seam, rather than averaging the two into one
+  claim here.
+
+  **A glide's tiled writes are instant, and the floating path is
+  the deliberate exception** (#1082). The bit a write consults is
+  `HoldGlide.isApplyingGlideStep` (read as
+  `keys.isApplyingGlideStep`), set around ONE re-issued command
+  and cleared on every exit — never `keys.isGliding`, which is
+  the hold's lifetime and answers the per-write question wrongly
+  in both directions: an unrelated Lua/CLI/IPC resize arriving
+  during a hold would lose its animation, and a hold whose frame
+  clock dies would leave the bit stuck on for the session. Who
+  may read that scope is pinned by count
+  (`HoldGlideSeamTests`), because a new reader inherits two
+  behaviours at once — write instantly, AND stand per-frame work
+  down. Springing a glide frame smooths an
+  already-smooth signal and generates the #611 retarget storm
+  below deliberately — a changed target every frame is what the
+  watchdog cannot tell from a long drag — so writing instantly is
+  a safety property, not only feel. It is safe on the tiled paths
+  because they write a stored ratio, weight or length and
+  re-derive geometry from it, leaving the next frame's base
+  exact; `resizeFloating` measures from a FRAME and its only
+  trusted commanded base is the in-flight animation's target, so
+  it keeps whatever animation the config asks for. A new resize
+  write path decides which of those two it is before taking
+  either.
+
+  That exception is why **Reduce Motion is the configuration
+  where the FLOATING path is worst**, which inverts the obvious
+  reading of "instant writes answer Reduce Motion" — they answer
+  it for the tiled half only. `AnimationEngine.animate` opens
+  with `guard isEnabled, !reduceMotion()`, so under Reduce
+  Motion, with animations off, or with the engine disabled there
+  is no in-flight target at all and `resizeFloating` falls back
+  to the echo-fed frame: at glide rate most frames re-base on
+  the same stale echo. Nothing guards this — it is a shipped
+  limitation with an owner, filed as #1090 and recorded in
+  `docs/accepted-limitations.md` — so treat it as the standing
+  reason not to reach for `resizeRetileAnimated` on that path
+  before #1090 gives it a base it can trust at frame rate.
+
+  The product rulings (resize-only, the tally, the glide, the
+  steps-per-second unit) are argued in `docs/design-decisions.md`
+  ▸ "A held resize chord glides"; widen
+  `HoldGlide.glidableCommands` only with a ruling of that
+  shape, and the set's members must name real commands (the suite
+  derives them from the API census, so a §5 verb rename reds
+  there).
 - **The notification path resolves a window from the tracked
   map before asking the app (#1084).** `AXHelper.windowID(of:)`
   is `_AXUIElementGetWindow`, a synchronous MIG round-trip into

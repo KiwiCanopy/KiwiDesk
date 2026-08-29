@@ -11,14 +11,18 @@ extension KiwiCore {
     ) -> CommandResponse {
         let response = dispatchCommand(command, args: args)
         // Every command run inside a hotkey fire is tallied so
-        // the hold-to-repeat engine can decide eligibility from
+        // the hold-to-glide engine can decide eligibility from
         // what the press actually DID (#1056) — a binding's
         // body is opaque Lua, so this is the one honest signal.
         // The passthrough drops it outside a fire. This wrapper
         // is `dispatchCommand`'s ONE caller
-        // (`HoldRepeatSeamTests`): a second dispatch entry
+        // (`HoldGlideEligibilitySeamTests`): a second dispatch entry
         // would run commands the tally never sees.
-        keys.noteCommand(command, succeeded: response.isSuccess)
+        keys.noteCommand(
+            command,
+            args: args,
+            succeeded: response.isSuccess
+        )
         return response
     }
 }

@@ -1375,10 +1375,10 @@ Running out of screen is a silent stop: that edge protects no
 window and names none, so nothing pills — the slot simply
 stops growing.
 
-Under a held resize shortcut (they repeat — see Shortcuts ▸
-Size & float) these cues stay calm: the first step a size limit
-refuses shows its pill once and ends the repeat, instead of
-flashing it on every step. Running out of screen ends nothing —
+Under a held resize shortcut (they glide — see Shortcuts ▸
+Size & float) these cues stay calm: the moment a size limit
+refuses shows its pill once and ends the glide, instead of
+flashing it continuously. Running out of screen ends nothing —
 there is no cue to end on, so the slot simply sits at its edge
 until you let go.
 
@@ -2840,14 +2840,22 @@ Each row has an action. Built-in actions live under headings:
   feedback** disclosure): a resize shortcut pressed in a
   layout without a resize target (monocle, grid, a floating
   space) plays the system alert instead of failing silently.
-  Held, a resize shortcut repeats: the first press is one
+  Held, a resize shortcut glides: the first press is one
   precise step; keep holding and, after your Mac's own
-  key-repeat delay, it keeps stepping at your key-repeat rate —
-  the same rhythm as holding an arrow key anywhere else — and
-  speeds up over a long hold, so a big adjustment does not cost
-  a drum roll of presses. Only resize repeats: focus and swap
-  fire once per press, where overshooting would hurt more than
-  pressing again.
+  key-repeat delay, the window starts resizing smoothly instead
+  of stepping — gently at first, so a brief hold stays easy to
+  stop where you meant to, then faster over the next couple of
+  seconds, so a big adjustment does not cost a drum roll of
+  presses. The glide is scaled to your resize step, so a smaller
+  step glides more gently and a larger one covers ground faster.
+  It runs at your display's own refresh rate, which means it
+  travels at the same speed on a 60 Hz screen and a 120 Hz one —
+  the faster screen just draws it more smoothly. Only resize
+  glides: focus and swap fire once per press, where overshooting
+  would hurt more than pressing again. One exception to the
+  smoothness: a held resize of a **floating** window with window
+  animations off, or under Reduce Motion, advances in fits — see
+  [Accepted limitations](accepted-limitations.md).
 - **Applications** — launch an app. Each row carries a **Launch
   behavior** menu: *Open or Focus* (the default — pull a running
   instance into the current space, or launch it if it isn't
