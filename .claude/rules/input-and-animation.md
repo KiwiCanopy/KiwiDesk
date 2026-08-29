@@ -186,10 +186,15 @@ editing here:
   (`refuseShrinkAtMinimum` → `noteRefusal` → `cancelRun`), so a
   held shrink parked on a floor clears before the write it meant
   to undo. `HoldGlide.onFireBegan` is the seam, pinned by count
-  from both sides in `HoldGlideSeamTests` ▸
+  from both sides in `FloatGlideSeamTests` ▸
   `fireBeginSeamClearsTheFloatingBase`, with the sequence driven
   end to end in `FloatGlideAccumulationTests` ▸ `A stale record
-  from an earlier press is not read`. A new resize write path
+  from an earlier press is not read`. That same suite carries
+  the headless net for the INSTANT WRITE — a floating write that
+  re-decides its animation beside the call site instead of
+  taking `resizeWritesAnimated` reds exactly one assertion in
+  the whole tree, and that one is display-gated, so the routing
+  is pinned by a source scan as well (guard-prover, 2026-08-29). A new resize write path
   inherits the instant write and owes the same two questions:
   what is my next frame's base, and what retires it?
 
