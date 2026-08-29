@@ -12,6 +12,7 @@ struct ShortcutsHeader: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
     @State private var importedNote = false
+    @State private var confirmingReset = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -28,6 +29,17 @@ struct ShortcutsHeader: View {
                     !model.editingStoredProfile
                 {
                     importButton
+                }
+                // Gated, not permanent: it appears only when
+                // KiwiDesk actually has defaults this install
+                // lacks. That makes its PRESENCE the news #1096
+                // exists to deliver, instead of a destructive-
+                // sounding button standing over every new user's
+                // shortcut list for a condition they do not have
+                // — the same argument that keeps Import absent
+                // until init.lua holds something to adopt.
+                if model.hasDefaultsToRestore {
+                    resetButton
                 }
             }
             if importedNote {
@@ -66,6 +78,137 @@ struct ShortcutsHeader: View {
             .font(.callout)
             .foregroundStyle(.secondary)
         }
+    }
+
+    // MARK: - Restore defaults (#1096)
+
+    /// Takes up the shipped defaults, which the seed alone
+    /// cannot deliver: it fires only into an empty config, so
+    /// an existing install never sees an improved default.
+    ///
+    /// Disabled rather than hidden off the default layer
+    /// (`gui.md` — grey, don't hide), because the seed only ever
+    /// authored that one; `.help` says which, so the greying
+    /// explains itself.
+    ///
+    /// Danger is signalled by the confirmation's destructive
+    /// role, never a resting red button — the house convention
+    /// `GeneralSection+Reset` states.
+    private var resetButton: some View {
+        Button {
+            confirmingReset = true
+        } label: {
+            Label(
+                L(
+                    "shortcuts.restore_defaults",
+                    "Restore Defaults…"
+                ),
+                systemImage: "arrow.counterclockwise"
+            )
+        }
+        .settingsActionButton()
+        .controlSize(.small)
+        .disabled(selected != KeyLayer.defaultName)
+        .help(resetHelp)
+        .confirmationDialog(
+            L(
+                "shortcuts.restore_defaults.title",
+                "Restore the default shortcuts?"
+            ),
+            isPresented: $confirmingReset,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                model.resetShortcutsToDefaults()
+            } label: {
+                Text(
+                    L(
+                        "shortcuts.restore_defaults.confirm",
+                        "Restore Defaults"
+                    )
+                )
+            }
+            Button(role: .cancel) {
+            } label: {
+                // NOT `discard.cancel` — that key reads
+                // "Continue editing" in seven locales, and
+                // nothing is being edited on this dialog.
+                // `GeneralSection+Reset` hit the same trap.
+                Text(
+                    L("spaces.delete_confirm.cancel", "Cancel")
+                )
+            }
+        } message: {
+            Text(resetMessage)
+        }
+    }
+
+    /// Names the COUNT it would discard rather than asking "are
+    /// you sure": a number is what makes the choice informed,
+    /// and it is zero for the common case of an untouched layer,
+    /// where the sentence says so instead of threatening.
+    /// Leads with the GAIN and treats the loss as the caveat:
+    /// the question a user has here is "what do I get, and what
+    /// does it cost", and an earlier draft answered only the
+    /// second half — telling the very population this exists for
+    /// (people who customised their defaults) that their
+    /// shortcuts were about to be deleted, when what was
+    /// happening was the thing they had asked for.
+    ///
+    /// The loss count is now true collateral only: a shortcut of
+    /// the user's OWN removed because a default reclaims its
+    /// key. A default they merely moved is not a loss — the verb
+    /// comes back on its shipped chord, which is the point.
+    private var resetMessage: String {
+        let restored = model.shortcutsTheResetWouldRestore
+        let lost = model.shortcutsTheResetWouldDiscard
+        if lost == 0 {
+            return L(
+                "shortcuts.restore_defaults.message_clean",
+                "Nothing of yours is lost. Shortcuts "
+                    + "restored: %1$d",
+                restored
+            )
+        }
+        // The counts are separated by "·", never a comma: six
+        // locales use the comma as a DECIMAL separator, so
+        // "restored: 12, and" starts parsing as a number. The
+        // corpus already settled this in `behavior.quit.summary`.
+        //
+        // The "review below, then Save" beat this frame used to
+        // carry is gone rather than quoted: naming the Save
+        // button as literal text is the #818 violation a
+        // localization audit caught here (German's is "Sichern",
+        // so a translator reaching for the obvious word names a
+        // button that does not exist), and interpolating it reds
+        // `InterpolatedLabelTests` — that guard equates a frame's
+        // ARGUMENT count with its `%N$@` count, which no frame
+        // mixing a label with a count can satisfy. Filed; the
+        // staged-ness is worth saying once the frame can say it.
+        return L(
+            "shortcuts.restore_defaults.message",
+            "Your own shortcuts are kept, except any that use a "
+                + "key the defaults need. Shortcuts restored: "
+                + "%1$d · your own that are lost: %2$d",
+            restored,
+            lost
+        )
+    }
+
+    private var resetHelp: String {
+        selected == KeyLayer.defaultName
+            ? L(
+                "shortcuts.restore_defaults.help",
+                "Puts back the shortcuts KiwiDesk provides, "
+                    + "including ones it has added since you "
+                    + "installed it. Shortcuts you made yourself "
+                    + "are kept."
+            )
+            : L(
+                "shortcuts.restore_defaults.help_other_layer",
+                "Only the default layer has defaults to restore "
+                    + "— this one is yours."
+            )
     }
 
     // MARK: - Import (#4)
