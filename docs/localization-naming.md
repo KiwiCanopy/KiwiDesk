@@ -295,6 +295,26 @@ you were editing.
 4. **Your ear does not override 1–3.** Awkwardness is an argument
    for a different winner under rule 2, never for keeping a second
    word.
+5. **Where the rivals are verbs for different OBJECTS, the one
+   that names the right object wins — ahead of count** (owner
+   ruling, 2026-08-29). `es` split *aumentar* (increase a
+   quantity) against *agrandar* (enlarge a window), and `fr`
+   *augmenter* against *agrandir*, with the quantity verb ahead
+   2–1 only because it sat on two keybinding rows. Counting
+   picked the word for the wrong kind of thing, and a tie-break
+   is the wrong tool for a distinction that is not a tie.
+
+   Rule 2 still governs where both rivals name the same object —
+   that is most splits, and it is why the register stays the
+   catalog rather than a table.
+
+   **Its residue is an ENGLISH problem, and the sweep does not
+   fix it here.** These labels' grammatical object is a dimension
+   (*Agrandar la altura*), so the winning verb reads a shade
+   less naturally at the very sites it was chosen for. The fix is
+   a label whose object is the window, not a second verb —
+   which is exactly what rule 1's escape says about nouns, one
+   part of speech over.
 
 A rival word is usually still *correct somewhere else in the same
 file* — `it`'s «disposizione» renders English *arrangement* in ten
