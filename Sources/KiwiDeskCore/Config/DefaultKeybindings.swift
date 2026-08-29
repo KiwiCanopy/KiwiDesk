@@ -17,7 +17,10 @@ import Foundation
 ///
 /// Bare Option is the macOS special-character (AltGr) modifier,
 /// so a global `option+<key>` hotkey swallows characters on
-/// international Apple keyboards (⌥L = @, ⌥5 = [ …); adding
+/// every Apple keyboard layout — which character depends on the
+/// layout (⌥L is ¬ on US, @ on German; measured in
+/// `docs/design-decisions.md`, do not quote one unlabelled);
+/// adding
 /// Control **or Command** suppresses that composition, which is
 /// what makes ⌥⌘ text-safe as well as ⌃⌥. Directions bind the
 /// **arrow keys**, which are layout-stable and never compose a

@@ -97,6 +97,7 @@ const toc = [
   { id: "layouts", label: s.guide_toc_layouts },
   { id: "favorite", label: s.guide_toc_favorite },
   { id: "settings", label: s.guide_toc_settings },
+  { id: "shortcuts", label: s.guide_toc_shortcuts },
   { id: "faq", label: s.guide_toc_faq },
   { id: "is-it-for-me", label: s.guide_toc_is_it_for_me },
 ];
@@ -169,6 +170,36 @@ const tour = [
     title: s.guide_tour_apprules_title,
     body: s.guide_tour_apprules_body,
   },
+];
+
+// The "choosing your own shortcuts" section (#1097). Keys are
+// `guide_keys_*` rather than `guide_shortcuts_*` because
+// `guide_tour_shortcuts_*` above is already the Settings tour's
+// card for the same destination — one prefix per meaning, so a
+// translator never has to guess which of two near-identical key
+// names a string belongs to.
+//
+// Both lists carry inline <strong> lead-ins, so they render with
+// set:html below. Each entry is ONE sentence with its own opening
+// clause emphasized — not a title/body pair like the tour cards —
+// because the emphasis is a lead-in the sentence continues from,
+// and splitting it would force a rewrite of every line.
+const tryChord = [
+  s.guide_keys_try_1,
+  s.guide_keys_try_2,
+  s.guide_keys_try_3,
+];
+
+// Three constraint lines, deliberately not the full set. The
+// complete list with the reasoning behind each one lives in
+// docs/user-guide.md under the shortcut table: a reader who wants
+// to know WHY ⌃⌥ is quiet is already on the technical surface,
+// and this page's job is the three that change what a normal
+// reader binds.
+const keyNotes = [
+  s.guide_keys_note_1,
+  s.guide_keys_note_2,
+  s.guide_keys_note_3,
 ];
 
 // FAQ pairs. Answers may carry inline HTML (a <code> chip), so
@@ -679,7 +710,75 @@ const jsonLd = [
               </ul>
             </section>
 
-            {/* ===== 5. FAQ ===== */}
+            {/* ===== 5. Choosing your own shortcuts ===== */}
+            {/* A section, not a page (#1097). The Shortcuts tour
+                 card sits in the Settings section right above, so
+                 this reads as its depth tier rather than a
+                 destination of its own — and a /guide/shortcuts/
+                 route would be an orphan the footer nav never
+                 carries, on a URL the app could pin (#1019) with
+                 no guard behind it.
+
+                 The register is `guide_fav_*`'s: warm, a method
+                 for trying something safely, and a callout saying
+                 nothing is permanent. Rebinding is not a power
+                 user's indulgence to be graded — it is the point,
+                 so the copy never asks the reader to justify it.
+
+                 Step 3's "you can always reset to the defaults"
+                 promises #1096, which is not merged. The line is
+                 true the day #1096 ships; if this section has to
+                 land first, `guide_keys_try_3` is the one string
+                 to swap, for "a binding is one row — change it or
+                 delete it in the same editor", which is true
+                 today and carries the same safety claim. */}
+            <section class="learn-section" id="shortcuts">
+              <div class="learn-section__head">
+                <span class="learn-section__eyebrow"
+                  >{s.guide_keys_eyebrow}</span>
+                <h2>{s.guide_keys_title}</h2>
+              </div>
+              <p>{s.guide_keys_p1}</p>
+              <p>{s.guide_keys_p2}</p>
+
+              <p class="learn-sub">{s.guide_keys_try_sub}</p>
+              <ol class="learn-steps">
+                {tryChord.map((step) => (
+                  <li set:html={step}></li>
+                ))}
+              </ol>
+
+              <div class="learn-callout">
+                <span class="learn-callout__icon" aria-hidden="true">
+                  <Icon name="lucide:info" />
+                </span>
+                <div class="learn-callout__body">
+                  <h3>{s.guide_keys_callout_title}</h3>
+                  <p>{s.guide_keys_callout_p}</p>
+                </div>
+              </div>
+
+              {/* What the app warns about, stated at its real
+                   scope. `SystemShortcuts.map` models macOS's own
+                   shortcuts and nothing else, so silence from the
+                   warner is not "no conflict" — it is "not one of
+                   macOS's". Promising more would make step 2 look
+                   optional, which is the one step that catches
+                   another app's binding. */}
+              <p>{s.guide_keys_warning}</p>
+              <p set:html={s.guide_keys_search}></p>
+
+              <p class="learn-sub">{s.guide_keys_notes_sub}</p>
+              <ul class="learn-notes">
+                {keyNotes.map((note) => (
+                  <li set:html={note}></li>
+                ))}
+              </ul>
+
+              <p>{s.guide_keys_bonus}</p>
+            </section>
+
+            {/* ===== 6. FAQ ===== */}
             <section class="learn-section" id="faq">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
@@ -702,7 +801,7 @@ const jsonLd = [
               </div>
             </section>
 
-            {/* ===== 6. Is KiwiDesk for you? ===== */}
+            {/* ===== 7. Is KiwiDesk for you? ===== */}
             <section class="learn-section" id="is-it-for-me">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"

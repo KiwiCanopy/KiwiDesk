@@ -5350,8 +5350,18 @@ idempotent and never destructive.
 
 **Why Control-Option, not bare Option (#270).** On macOS Option is
 the special-character (AltGr) modifier, so a *global* `⌥`+key
-hotkey swallows text entry on international Apple keyboards
-(`⌥L`=@, `⌥5`=[, `⌥8`={ …). macOS composes those characters only
+hotkey swallows text entry on every Apple keyboard layout.
+**What it composes is layout-specific, and the examples here were
+the author's own keyboard until they were measured** (through
+`UCKeyTranslate` over every installed layout, 2026-08-29, macOS
+26.6): `⌥L`=@ and `⌥5`=[ hold on German, Austrian and ABC–QWERTZ,
+while US, British, Canadian, Dutch, Danish, Spanish and Brazilian
+give `¬` and `∞`, French `¬` and `{`, Italian `¬` and `~`. The
+rule survives the spread and the examples do not, which is the
+point: name a layout when quoting a glyph. (Japanese Kana input is
+the one measured exception — `⌥` there returns the plain
+character — so a Japanese-language surface must not quote these at
+all.) macOS composes those characters only
 when the modifier is exactly `⌥` or `⌥⇧`; adding Control (or
 Command) suppresses it, so `⌃⌥` is the lightest text-safe chord
 (the earlier bare-`⌥` set, and Amethyst's `⌥⇧`, are not). It
