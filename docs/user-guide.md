@@ -2659,6 +2659,27 @@ never overwrites bindings you (or your Lua) authored, and every
 seeded row is an ordinary catalog row: rebind, clear, or override
 it per profile like any other shortcut.
 
+### Restoring the Defaults
+
+Because the set is seeded only into an empty config, an install
+that already has shortcuts never picks up a default added later.
+**Restore Defaults…**, at the top of the Shortcuts area, is how
+you take them up: it replaces the default layer's shortcuts with
+exactly what a new install would get — for *your* Desktops and
+*your* resize step, not some fixed list.
+
+It is deliberately a replacement, not a merge, so what you end up
+with is the shipped set and nothing else. The confirmation says
+how many shortcuts of your own it would discard before you agree,
+and says plainly when the answer is none.
+
+Two things it leaves alone. **Layers you created are untouched** —
+only the default layer was ever seeded, so only it has defaults to
+restore, and the button is greyed on any other layer rather than
+hidden. And nothing outside Shortcuts changes: this is not
+Settings ▸ General ▸ Advanced ▸ **Reset All Settings**, which
+wipes the whole configuration.
+
 ### Recording a Shortcut
 
 Click an empty row or the **Edit** pencil on an existing row. Click

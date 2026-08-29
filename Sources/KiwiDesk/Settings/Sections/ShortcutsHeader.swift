@@ -12,6 +12,7 @@ struct ShortcutsHeader: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
     @State private var importedNote = false
+    @State private var confirmingReset = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -29,6 +30,7 @@ struct ShortcutsHeader: View {
                 {
                     importButton
                 }
+                resetButton
             }
             if importedNote {
                 // `groupHeading` is the green-emphasis TEXT
@@ -66,6 +68,105 @@ struct ShortcutsHeader: View {
             .font(.callout)
             .foregroundStyle(.secondary)
         }
+    }
+
+    // MARK: - Restore defaults (#1096)
+
+    /// Takes up the shipped defaults, which the seed alone
+    /// cannot deliver: it fires only into an empty config, so
+    /// an existing install never sees an improved default.
+    ///
+    /// Disabled rather than hidden off the default layer
+    /// (`gui.md` — grey, don't hide), because the seed only ever
+    /// authored that one; `.help` says which, so the greying
+    /// explains itself.
+    ///
+    /// Danger is signalled by the confirmation's destructive
+    /// role, never a resting red button — the house convention
+    /// `GeneralSection+Reset` states.
+    private var resetButton: some View {
+        Button {
+            confirmingReset = true
+        } label: {
+            Label(
+                L(
+                    "shortcuts.restore_defaults",
+                    "Restore Defaults…"
+                ),
+                systemImage: "arrow.counterclockwise"
+            )
+        }
+        .settingsActionButton()
+        .controlSize(.small)
+        .disabled(selected != KeyLayer.defaultName)
+        .help(resetHelp)
+        .confirmationDialog(
+            L(
+                "shortcuts.restore_defaults.title",
+                "Restore the default shortcuts?"
+            ),
+            isPresented: $confirmingReset,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                model.resetShortcutsToDefaults()
+            } label: {
+                Text(
+                    L(
+                        "shortcuts.restore_defaults.confirm",
+                        "Restore Defaults"
+                    )
+                )
+            }
+            Button(role: .cancel) {
+            } label: {
+                Text(L("discard.cancel", "Cancel"))
+            }
+        } message: {
+            Text(resetMessage)
+        }
+    }
+
+    /// Names the COUNT it would discard rather than asking "are
+    /// you sure": a number is what makes the choice informed,
+    /// and it is zero for the common case of an untouched layer,
+    /// where the sentence says so instead of threatening.
+    private var resetMessage: String {
+        let discards = model.shortcutsTheResetWouldDiscard
+        if discards == 0 {
+            return L(
+                "shortcuts.restore_defaults.message_clean",
+                "Replaces this layer's shortcuts with the ones a "
+                    + "new install gets. You have not changed any "
+                    + "of them, so nothing of yours is lost."
+            )
+        }
+        // The count goes LAST so no locale has to inflect
+        // around it and none needs an "(s)" — the rule
+        // AGENTS.md states for any frame carrying a number,
+        // English included.
+        return L(
+            "shortcuts.restore_defaults.message",
+            "Replaces this layer's shortcuts with the ones a new "
+                + "install gets. Shortcuts of your own that "
+                + "would be discarded: %1$d",
+            discards
+        )
+    }
+
+    private var resetHelp: String {
+        selected == KeyLayer.defaultName
+            ? L(
+                "shortcuts.restore_defaults.help",
+                "Takes up the shortcuts a new install would get, "
+                    + "including any added since you installed "
+                    + "KiwiDesk."
+            )
+            : L(
+                "shortcuts.restore_defaults.help_other_layer",
+                "Only the default layer has defaults to restore "
+                    + "\u{2014} this one is yours."
+            )
     }
 
     // MARK: - Import (#4)
