@@ -1003,6 +1003,8 @@
   "shortcuts.restore_defaults.confirm": "Rétablir les valeurs par défaut",
   "shortcuts.restore_defaults.help": "Remet les raccourcis fournis par KiwiDesk, y compris ceux qu'il a ajoutés depuis votre installation. Les raccourcis que vous avez créés vous-même sont conservés.",
   "shortcuts.restore_defaults.help_other_layer": "Seul le calque standard a des raccourcis par défaut à rétablir — celui-ci est le vôtre.",
+  "shortcuts.restore_defaults.message": "Vos propres raccourcis sont conservés, sauf ceux qui utilisent une touche requise par les raccourcis par défaut. Raccourcis rétablis : %1$d · vos raccourcis perdus : %2$d",
+  "shortcuts.restore_defaults.message_clean": "Aucun de vos raccourcis n'est perdu. Raccourcis rétablis : %1$d",
   "shortcuts.restore_defaults.title": "Rétablir les raccourcis par défaut ?",
   "shortcuts.row.inherited.axhint": "Hérité des raccourcis de base. Définissez une touche ici pour le surcharger.",
   "shortcuts.section.focus": "Focus",

@@ -1003,6 +1003,8 @@
   "shortcuts.restore_defaults.confirm": "デフォルトに戻す",
   "shortcuts.restore_defaults.help": "KiwiDesk が用意しているショートカットを復元します。インストール後に KiwiDesk が追加したものも含まれます。自分で作成したショートカットはそのまま残ります。",
   "shortcuts.restore_defaults.help_other_layer": "復元できるデフォルトがあるのは標準のレイヤーだけです。このレイヤーはあなた自身のものです。",
+  "shortcuts.restore_defaults.message": "自分で作成したショートカットはそのまま残りますが、デフォルトに必要なキーを使っているものは除きます。復元されるショートカット: %1$d · 失われる独自のショートカット: %2$d",
+  "shortcuts.restore_defaults.message_clean": "自分で作成したショートカットは何も失われません。復元されるショートカット: %1$d",
   "shortcuts.restore_defaults.title": "デフォルトのショートカットに戻しますか？",
   "shortcuts.row.inherited.axhint": "基本のショートカットから継承しています。ここでキーを設定すると上書きされます。",
   "shortcuts.section.focus": "フォーカス",

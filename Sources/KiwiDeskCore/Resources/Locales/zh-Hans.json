@@ -1003,6 +1003,8 @@
   "shortcuts.restore_defaults.confirm": "恢复默认",
   "shortcuts.restore_defaults.help": "恢复 KiwiDesk 提供的快捷键，包括它在你安装之后新增的那些。你自己创建的快捷键会保留。",
   "shortcuts.restore_defaults.help_other_layer": "只有标准层才有可恢复的默认快捷键 — 这一层是你自己的。",
+  "shortcuts.restore_defaults.message": "你自己的快捷键会保留，但使用了默认快捷键所需按键的除外。已恢复的快捷键：%1$d · 丢失的自定义快捷键：%2$d",
+  "shortcuts.restore_defaults.message_clean": "你自己的快捷键均不会丢失。已恢复的快捷键：%1$d",
   "shortcuts.restore_defaults.title": "要恢复默认快捷键吗？",
   "shortcuts.row.inherited.axhint": "继承自基础快捷键。在此设置按键即可覆盖它。",
   "shortcuts.section.focus": "焦点",
