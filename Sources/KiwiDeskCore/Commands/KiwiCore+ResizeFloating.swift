@@ -24,12 +24,13 @@ extension KiwiCore {
         let minSize = CGFloat(
             effectiveMinSize(of: id, axis: axis)
         )
-        // Does THIS WRITE belong to a glide? Bound once and
-        // read twice below — the per-WRITE scope, never the
-        // hold's lifetime (`HoldGlide.isApplyingGlideStep`
-        // argues why a lifetime bit answers it wrongly in both
-        // directions). `resizeWritesAnimated` asks the same
-        // question for the animation choice.
+        // Does THIS WRITE belong to a glide? The per-WRITE
+        // scope, never the hold's lifetime
+        // (`HoldGlide.isApplyingGlideStep` argues why a lifetime
+        // bit answers it wrongly in both directions). Bound to a
+        // local so this file reads it exactly once;
+        // `resizeWritesAnimated` asks the same question for the
+        // animation choice, in its own file.
         let isGlideWrite = keys.isApplyingGlideStep
         // Accumulate against the COMMANDED frame, not the echo
         // (#129/#1056/#1090): `state.windows[id].frame` is

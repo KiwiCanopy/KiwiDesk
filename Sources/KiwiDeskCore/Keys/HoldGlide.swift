@@ -90,6 +90,15 @@ final class HoldGlide {
     /// silent (the #611 reporting rule).
     var onOverrun: @MainActor () -> Void = {}
 
+    /// A physical press has begun, before its binding body runs.
+    /// Fires once per press whatever that press turns out to do,
+    /// which is what makes it — and never `onGlideEnd` below —
+    /// the place to retire a press-scoped record (#1090). Inert
+    /// by default and wired live in
+    /// `KiwiCore+HoldGlide.wireFireBegan`, which carries the two
+    /// ways the glide-end seam fails at that job.
+    var onFireBegan: @MainActor () -> Void = {}
+
     /// A glide that was RUNNING has ended, however it ended
     /// (release, refusal, failing step, teardown, overrun). Fires
     /// once per glide and never for a hold that never began
@@ -240,6 +249,7 @@ final class HoldGlide {
     /// no-op pair except in the nested-fire case the snapshot's
     /// doc names.
     func beginFire() -> TallySnapshot {
+        onFireBegan()
         let saved = TallySnapshot(
             commands: commandsInFire,
             glidableSucceeded: glidableSucceeded,

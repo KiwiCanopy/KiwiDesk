@@ -7,6 +7,15 @@ import CoreGraphics
 /// here, instead of branching on which store happens to hold the
 /// answer in this configuration.
 ///
+/// **This is not the only record of what was last commanded, and
+/// the two have separate domains rather than a precedence:**
+/// geometry that ACCUMULATES asks `commandedFrame` below; an
+/// overlay SYNC reads the #881 instant stamp
+/// (`TilingEngine.recentInstantTarget`), which retires on the
+/// window's first self-echo. A consumer reaching for the wrong
+/// one gets the right answer most of the time, which is why the
+/// split is stated here rather than left to be rediscovered.
+///
 /// Its own file rather than `AnimationEngine.swift`, which is at
 /// §2.1's ceiling; only the stored property lives there, since a
 /// Swift extension cannot add one.
@@ -15,10 +24,18 @@ extension AnimationEngine {
     /// when nothing is pending and the settled frame is the same
     /// truth it always was.
     ///
-    /// The in-flight target leads, and the order is load-bearing
-    /// rather than incidental: it is the fresher commanded value
-    /// whenever both exist, which is the arming press's own
-    /// spring still travelling when the first glide frame lands.
+    /// **The in-flight target leads, by ruling rather than by
+    /// derivation.** Where both exist because `resizeFloating`
+    /// wrote them together they hold the same value, so that
+    /// case decides nothing. The case that decides it is a
+    /// target some OTHER subsystem started for this window
+    /// mid-hold — a float clamp, a stash restore, a re-anchor.
+    /// That target is a commanded frame for the window and the
+    /// later one, so it wins. The residue, named rather than
+    /// hidden: such an animation retargets the glide's
+    /// accumulation onto that other intent, so a hold running
+    /// through one travels from where that pass put the window
+    /// rather than from where the hold had got to.
     ///
     /// `includingHeldGlide` is the per-WRITE glide scope, and it
     /// is what keeps the second record from becoming the #881
@@ -54,10 +71,12 @@ extension AnimationEngine {
         glideBase.record(window, frame: frame)
     }
 
-    /// The glide ended, however it ended. Wired to
-    /// `HoldGlide.onGlideEnd`, which fires exactly once per run —
-    /// release, refusal, failing step, teardown or overrun — and
-    /// is what bounds the record by the hold.
+    /// A new physical press has begun. Wired to
+    /// `HoldGlide.onFireBegan`, which fires once per press before
+    /// its binding body runs — deliberately NOT to `onGlideEnd`,
+    /// which fires only for a run that glided and, on the refusal
+    /// path, fires from inside the command that then records.
+    /// `KiwiCore+HoldGlide.wireFireBegan` carries that argument.
     func clearGlideCommanded() {
         glideBase.clear()
     }

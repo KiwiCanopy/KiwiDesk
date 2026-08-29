@@ -3843,8 +3843,8 @@ accumulates against what was last *commanded* rather than
 against the lagging AX echo — the in-flight animation's target
 where one exists (#129), and the glide's own record where none
 does. That record is readable only by a glide frame and is
-dropped when the hold ends, so nothing it commanded can carry
-into a later press. A fast run of separate **presses** still
+retired at the start of the next press, so nothing it commanded
+can carry into a later one. A fast run of separate **presses** still
 re-reads the echo between them and can come up short; see
 [accepted limitations](accepted-limitations.md).
 

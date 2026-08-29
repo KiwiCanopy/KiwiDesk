@@ -13,6 +13,7 @@ extension KiwiCore {
         wireGlideStep()
         wireGlideFrames()
         wireGlideEnd()
+        wireFireBegan()
     }
 
     /// The glide re-issues the PRESS's own command with a scaled
@@ -97,31 +98,45 @@ extension KiwiCore {
         }
     }
 
-    /// What the END of a run owes, whichever way it ended
-    /// (release, refusal, failing step, teardown, overrun). Two
-    /// things now, and they are opposites — one paid because a
-    /// glide frame stood it down, one dropped because a glide
-    /// frame armed it:
-    ///
-    /// - The #674 track z-order arm. `scheduleZOrderRestore` runs
-    ///   immediately at `activeCount == 0`, so the settle that
-    ///   used to coalesce a whole hold into one restore is gone
-    ///   the moment glide frames write instantly — see the
-    ///   stand-down at `resize`'s own arm for the full argument.
-    ///   Firing here rather than per frame is also the correct
-    ///   ordering: the pile is scrambled at most once per hold.
-    /// - The #1090 floating base. It is what BOUNDS that record
-    ///   by the hold, and the bound is the whole reason it is
-    ///   safe where the #881 instant stamp was not (#1056): a
-    ///   commanded frame that outlives its run is re-armed by
-    ///   every press that reads it and banks growth with no
-    ///   ceiling on an app that silently refuses (#1057).
-    ///   Dropping this clear leaves no visible symptom for a
-    ///   whole session of ordinary use, which is why it is here
-    ///   rather than beside the write it undoes.
+    /// The work a glide frame stands down, paid ONCE when the
+    /// hold ends. Today that is the #674 track z-order arm:
+    /// `scheduleZOrderRestore` runs immediately at
+    /// `activeCount == 0`, so the settle that used to coalesce a
+    /// whole hold into one restore is gone the moment glide
+    /// frames write instantly — see the stand-down at `resize`'s
+    /// own arm for the full argument. Firing here rather than per
+    /// frame is also the correct ordering: the pile is scrambled
+    /// at most once per hold.
     private func wireGlideEnd() {
         keys.holdGlide.onGlideEnd = { [weak self] in
             self?.scheduleTrackZOrderRestoreIfOverflowing()
+        }
+    }
+
+    /// Retire the #1090 floating base at the START of every
+    /// press, which is the one moment that bounds it.
+    ///
+    /// It cannot hang off `onGlideEnd` beside the arm above, and
+    /// both review lanes caught that independently: that seam
+    /// fires only for a run that GLIDED, so an ordinary tap's
+    /// record stands forever; and on the refusal path it fires
+    /// synchronously from INSIDE the command that then records
+    /// (`refuseShrinkAtMinimum` → `noteRefusal` → `cancelRun`),
+    /// so a held shrink parked on a size floor clears before the
+    /// write it was meant to undo. Either way a stale record
+    /// survives, and a later hold that reaches this float — an
+    /// arming press on a tiled window plus a focus change
+    /// mid-hold — would base a glide frame on a frame from an
+    /// unrelated press and jump the window.
+    ///
+    /// Clearing per PRESS closes both: every glide's record chain
+    /// provably begins with its own arming press, because a glide
+    /// can only arm from `endFire`, and `beginFire` ran first.
+    /// Dropping this wiring has no visible symptom until that
+    /// exact sequence, which is why `HoldGlideSeamTests` pins it
+    /// by count from both sides.
+    private func wireFireBegan() {
+        keys.holdGlide.onFireBegan = { [weak self] in
             self?.tiler.animation.clearGlideCommanded()
         }
     }

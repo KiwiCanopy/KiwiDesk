@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import Foundation
 import Testing
@@ -72,7 +73,7 @@ struct FloatGlideAccumulationTests {
             try f.frame(Self.dt)
         }
         let expected = Self.expectedWidth(after: frames)
-        let width = try #require(f.commandedWidth)
+        let width = try #require(f.commandedWidth())
         #expect(abs(Double(width) - expected) < 0.5)
         // The echo never moved, which is the whole point: a base
         // read from it would have stopped one frame past the
@@ -86,14 +87,28 @@ struct FloatGlideAccumulationTests {
         )
     }
 
-    @Test("The same run animated lands in the same place")
+    @Test(
+        "The same run animated lands in the same place",
+        .enabled(if: NSScreen.main != nil)
+    )
     func glideAccumulatesWithAnimationsOn() throws {
+        // Gated on a display, like `FloatResizeAccumulationTests`
+        // ▸ `animatedPathAccumulates`: `applyFrame` falls to its
+        // INSTANT branch when no screen resolves, so on a
+        // screenless host this test would silently become a copy
+        // of the one above and the `activeCount` expectation —
+        // the only thing carrying "an instant glide write cancels
+        // the press's spring" — would pass vacuously (code
+        // review, 2026-08-29).
         let f = try floatFixture()
         f.core.execute(
             "animations.set_on_window_resize",
             args: [.bool(true)]
         )
         f.registrar.press(keyCode: f.combo.keyCode)
+        // The press animated: without this the assertion below
+        // asserts nothing.
+        #expect(f.core.tiler.animation.activeCount == 1)
         try f.beginGlide()
         let frames = 20
         for _ in 0..<frames {
@@ -106,7 +121,7 @@ struct FloatGlideAccumulationTests {
         // spring by writing instantly, so the commanded truth is
         // the instant stamp from here on.
         let expected = Self.expectedWidth(after: frames)
-        let width = try #require(f.commandedWidth)
+        let width = try #require(f.commandedWidth())
         #expect(abs(Double(width) - expected) < 0.5)
         // And a glide frame left no animation resident: the
         // floating path writes instantly now, like every tiled
@@ -114,34 +129,50 @@ struct FloatGlideAccumulationTests {
         #expect(f.core.tiler.animation.activeCount == 0)
     }
 
-    @Test("The base dies with the hold, so nothing banks")
-    func theBaseIsBoundedByTheHold() throws {
-        let f = try floatFixture()
+    @Test("A stale record from an earlier press is not read")
+    func aStaleRecordIsNotRead() throws {
+        // The hazard the press-begin clear exists for, driven end
+        // to end (both review lanes, 2026-08-29). An earlier
+        // press resizes the float and leaves a record; a LATER
+        // hold arms on a tiled window, so its own arming press
+        // never writes the float; focus then moves to the float
+        // mid-hold and a glide frame reaches it. Without the
+        // clear that frame measures from the earlier press's
+        // commanded frame and jumps the window.
+        //
+        // The glide-end seam cannot close this: it fires only for
+        // a run that GLIDED, and the earlier press never did.
+        let f = try HoldGlideFixture(
+            body: #"KiwiDesk.resize("x", 50)"#
+        )
+        f.seedBspPair()
+        f.seedFloating(id: 3)
         f.core.execute(
             "animations.set_on_window_resize",
             args: [.bool(false)]
         )
-        f.registrar.press(keyCode: f.combo.keyCode)
-        try f.beginGlide()
-        for _ in 0..<10 {
-            try f.frame(Self.dt)
-        }
-        let held = try #require(f.commandedWidth)
-        #expect(held > 550)
-        f.registrar.release(keyCode: f.combo.keyCode)
-        // The property #1056 was protecting, and the whole
-        // reason the #881 instant stamp was refused as this base:
-        // a record that outlives its run is re-armed by every
-        // press that reads it, so an app silently refusing every
-        // ask banks commanded growth with no ceiling (#1057).
-        // After the release the next press measures from REALITY
-        // — the echo-fed frame, still 500 here — not from where
-        // the hold got to.
+        // An earlier press on the float, which records 550.
         f.core.execute(
             "resize",
             args: [.string("x"), .number(50)]
         )
-        #expect(f.commandedWidth == 550)
+        #expect(f.commandedWidth(3) == 550)
+
+        // A later hold, armed on a TILED window.
+        f.focus(1)
+        f.registrar.press(keyCode: f.combo.keyCode)
+        // The arming press retired the stale record.
+        #expect(f.commandedWidth(3) == nil)
+        try f.beginGlide()
+        // Focus moves onto the float mid-hold.
+        f.focus(3)
+        try f.frame(Self.dt)
+
+        // The frame measured from the echo-fed frame (500), not
+        // from the earlier press's 550.
+        let scale = HoldGlide.glideSteps(elapsed: 0) * Self.dt
+        let width = try #require(f.commandedWidth(3))
+        #expect(abs(Double(width) - (500 + 50 * scale)) < 0.5)
     }
 
     @Test("A press never measures from another press's record")
@@ -166,15 +197,15 @@ struct FloatGlideAccumulationTests {
                 args: [.string("x"), .number(50)]
             )
         }
-        #expect(f.commandedWidth == 550)
+        // Both presses asked for the same target: the second
+        // re-based on the echo-fed 500, not on the first's 550.
+        #expect(
+            f.core.tiler.recentInstantTarget(WindowID(1))?.width
+                == 550
+        )
         // The record IS there — it just cannot be read from
         // outside a glide.
-        #expect(
-            f.core.tiler.animation.commandedFrame(
-                window: WindowID(1),
-                includingHeldGlide: true
-            )?.width == 550
-        )
+        #expect(f.commandedWidth() == 550)
         #expect(
             f.core.tiler.animation.commandedFrame(
                 window: WindowID(1),

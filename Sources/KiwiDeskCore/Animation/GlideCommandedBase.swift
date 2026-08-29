@@ -1,6 +1,6 @@
 import CoreGraphics
 
-/// The commanded frame a running glide has written but no
+/// The commanded frame a floating resize has written but no
 /// animation is carrying (#1090) — the in-flight animation
 /// target's understudy, for exactly the configurations that
 /// have no target to offer.
@@ -17,35 +17,49 @@ import CoreGraphics
 /// most frames re-based on the SAME stale echo and 71% of a held
 /// resize never happened (measured on device, 2026-08-29).
 ///
-/// **Bounded by the HOLD**, which is the whole of why this is
-/// safe where the #881 instant stamp was not (#1056): that
-/// record is re-armed by every press that READS it, so an app
-/// silently refusing every ask banks commanded growth with no
-/// ceiling — the #1057 class. This one is bounded twice over.
-/// Only a glide STEP may read it (the per-write scope reaches
-/// `AnimationEngine.commandedFrame` as `includingHeldGlide`),
-/// so no press can ever measure from another press's record;
-/// and `AnimationEngine.clearGlideCommanded` empties it when
-/// the run ends. Such an app therefore banks at most one hold's
-/// worth, nothing survives the release, and the next press
-/// measures from reality again.
+/// **A commanded base stored here must be bounded, and this one
+/// is bounded at both ends of its life.** It is written by every
+/// floating write, but READ only by a glide step (the per-write
+/// scope reaches `AnimationEngine.commandedFrame` as
+/// `includingHeldGlide`), so no press can ever measure from
+/// another press's record; and it is CLEARED at the start of
+/// every physical press (`HoldGlide.onFireBegan`), so every
+/// glide's record chain provably begins with its own arming
+/// press. The first bound is what stops commanded growth banking
+/// across presses on an app that silently refuses every ask — the
+/// #1057 class, and the objection #1056 raised when the #881
+/// instant stamp was tried as this base. The second stops a
+/// record left by an unrelated earlier press being read by a
+/// later hold that reaches the same window.
 ///
-/// Every floating write records, the arming press included.
-/// That press is not a glide step, but its record is exactly
-/// the base the glide's FIRST frame needs: the pre-glide wait
-/// is the system's key-repeat delay, and an app slow enough to
-/// have echoed nothing by then would otherwise cost the hold
-/// its own opening step. Recording unconditionally is free
-/// because the read is gated — writing more widely than a
-/// record is readable cannot bank anything.
+/// **Why a second store rather than the #881 stamp with a read
+/// gate on it.** Once the gate exists, banking is no longer what
+/// separates them — the lifetime is.
+/// `FrameApplier.instantTarget` retires on the window's first
+/// self-echo and after a one-second grace, both of which are
+/// correct for the thing it serves (an overlay sync, where
+/// reality reported beats a commanded guess). A glide emits
+/// self-echoes continuously, so that stamp would clear under the
+/// glide and hand the next frame the echo again — the defect
+/// this type exists to close. Do not merge the two: they answer
+/// the same question with deliberately different lifetimes.
 ///
-/// ONE entry rather than a table, which makes that bound
-/// structural instead of asserted: `HoldGlide` runs one hold at
-/// a time (a new press ends any previous run, latest wins), so a
-/// second window's entry could only be a leak. A focus change
-/// mid-hold therefore falls back to the echo-fed frame wherever
-/// that window has no record of its own, which is the same
-/// answer a press from rest gets.
+/// Every floating write records, the arming press included. That
+/// press is not a glide step, but its record is exactly the base
+/// the glide's FIRST frame needs: the pre-glide wait is the
+/// system's key-repeat delay, and an app slow enough to have
+/// echoed nothing by then would otherwise cost the hold its own
+/// opening step. Recording more widely than the record can be
+/// read cannot bank anything, which is what makes that free.
+///
+/// ONE entry rather than a table, which makes the single-hold
+/// bound structural instead of asserted: `HoldGlide` runs one
+/// hold at a time (a new press ends any previous run, latest
+/// wins), so a second window's entry could only be a leak. A
+/// glide that reaches a window this press never wrote — a focus
+/// change mid-hold — therefore finds nothing and falls back to
+/// the echo-fed frame, which is the same answer a press from
+/// rest gets.
 struct GlideCommandedBase {
     private var held: (window: WindowID, frame: CGRect)?
 
@@ -66,7 +80,11 @@ struct GlideCommandedBase {
         held = (window, frame)
     }
 
-    /// The run ended, however it ended.
+    /// A new press has begun. Never wired to the glide's END:
+    /// that seam fires only for a run that GLIDED and, on the
+    /// refusal path, fires from inside the very command that
+    /// then records — `KiwiCore+HoldGlide.wireFireBegan` carries
+    /// the worked argument.
     mutating func clear() {
         held = nil
     }

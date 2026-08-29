@@ -169,22 +169,36 @@ editing here:
   `GlideCommandedBase` on the animation engine — beside the
   target it stands in for, so a caller asks ONE accessor
   (`commandedFrame(window:includingHeldGlide:)`) rather than
-  branching on which store holds the answer today. **A commanded
-  base here must be BOUNDED, and this one is bounded twice**:
-  only a glide STEP may read it (the per-write scope is the
-  accessor's own argument), so no press can measure from another
-  press's record, and the glide-end seam clears it. The #881
-  instant stamp was tried as this base and refused for exactly
-  the missing bound — a record every press can read is re-armed
-  by every press, and an app that silently refuses every ask
-  banks commanded growth with no ceiling (#1057). A new resize
-  write path inherits the instant write and owes the same
-  question: what is my next frame's base, and what bounds it?
+  branching on which store holds the answer. **A commanded base
+  stored here must be BOUNDED at both ends of its life, and the
+  two bounds do different jobs — keep both.** Only a glide STEP
+  may read it, which is what stops a press measuring from another
+  press's record (the #1057 objection that refused the #881
+  instant stamp as this base). And it is CLEARED at the start of
+  every physical press, which is what stops a record an unrelated
+  earlier press left behind being read by a later hold that
+  reaches the same window.
+
+  **Hang that clear off the PRESS, never off the glide's end.**
+  `onGlideEnd` fires only for a run that actually glided, so a
+  tap's record would stand forever; and on the refusal path it
+  fires synchronously from inside the command that then records
+  (`refuseShrinkAtMinimum` → `noteRefusal` → `cancelRun`), so a
+  held shrink parked on a floor clears before the write it meant
+  to undo. `HoldGlide.onFireBegan` is the seam, pinned by count
+  from both sides in `HoldGlideSeamTests` ▸
+  `fireBeginSeamClearsTheFloatingBase`, with the sequence driven
+  end to end in `FloatGlideAccumulationTests` ▸ `A stale record
+  from an earlier press is not read`. A new resize write path
+  inherits the instant write and owes the same two questions:
+  what is my next frame's base, and what retires it?
 
   Two residues stay, deliberately. A PRESS still re-bases on the
   echo-fed frame where no animation is in flight — the accepted
   limitation `docs/accepted-limitations.md` records, and the
-  thing the read gate is protecting. And the record is NOT
+  thing the read gate is protecting
+  (`FloatResizeAccumulationTests` ▸
+  `instantPathKeepsTheEchoBase`). And the record is NOT
   invalidated mid-hold by the #677 ledger's genuine-resize
   classifier: that verdict is a heuristic, and one false
   "genuine" during a glide would re-base a frame on the echo and

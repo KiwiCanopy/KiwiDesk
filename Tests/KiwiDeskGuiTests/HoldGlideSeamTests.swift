@@ -281,23 +281,42 @@ struct HoldGlideSeamTests {
         )
     }
 
-    @Test("The glide end clears the #1090 floating base")
-    func glideEndClearsTheFloatingBase() throws {
-        // The second thing the end of a run owes, and the one
-        // with NO visible symptom when it is dropped: the
-        // record simply outlives its hold, and every later
-        // floating press inside a glide measures from a
-        // commanded value nothing confirmed — the #881 stamp
-        // #1056 refused, re-created by omission. The behavioural
-        // suite beside it (`FloatGlideAccumulationTests` ▸ `The
-        // base dies with the hold`) covers the release path, so
-        // this pins that the CLEAR is reachable at all — from
-        // the one seam that fires however a run ends, including
-        // the refusal, teardown and overrun paths no unit test
-        // drives end to end.
+    @Test("The press-begin seam clears the #1090 base")
+    func fireBeginSeamClearsTheFloatingBase() throws {
+        // The bound with NO visible symptom when it is dropped:
+        // the record outlives the press that wrote it, and a
+        // later hold reaching that same float — an arming press
+        // on a tiled window plus a focus change mid-hold — bases
+        // a glide frame on a frame from an unrelated press.
+        //
+        // Pinned from both sides like the two seams above, and
+        // for the same reason: the inert default is a working
+        // no-op. Deleting the wiring is the silent direction, and
+        // a SECOND assignment would clear a record the press had
+        // already written, costing the arming press its own step.
+        //
+        // The behavioural half is `FloatGlideAccumulationTests` ▸
+        // `A stale record from an earlier press is not read`,
+        // which drives that exact sequence; this pins that the
+        // clear is reachable at all, from the one seam that fires
+        // on every press rather than only on runs that glided.
+        let wired = try Self.sites(of: "holdGlide.onFireBegan =")
+        #expect(
+            wired.count == 1,
+            """
+            expected exactly one holdGlide.onFireBegan wiring, \
+            found \(wired.count): \
+            \(wired.map(\.site).joined(separator: ", "))
+            """
+        )
+        #expect(
+            wired.allSatisfy {
+                $0.file.lastPathComponent == Self.wiringFile
+            }
+        )
         // The needle carries the RECEIVER so the declaration in
         // `AnimationEngine+CommandedBase` is not counted as a
-        // call — the same reason the seam needles above carry
+        // call — the same reason the seam needles carry
         // `holdGlide.`.
         let cleared = try Self.sites(
             of: "animation.clearGlideCommanded()"
@@ -315,7 +334,7 @@ struct HoldGlideSeamTests {
                 $0.file.lastPathComponent == Self.wiringFile
             },
             """
-            the #1090 base must be cleared from the glide-end \
+            the #1090 base must be cleared from the press-begin \
             seam, not beside a call site
             """
         )
