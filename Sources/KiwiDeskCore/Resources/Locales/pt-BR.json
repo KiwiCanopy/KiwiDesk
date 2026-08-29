@@ -1003,8 +1003,6 @@
   "shortcuts.restore_defaults.confirm": "Restaurar Padrões",
   "shortcuts.restore_defaults.help": "Repõe os atalhos que o KiwiDesk oferece, incluindo os que ele adicionou desde que você o instalou. Os atalhos que você mesmo criou são mantidos.",
   "shortcuts.restore_defaults.help_other_layer": "Só a camada padrão tem padrões a restaurar — esta é sua.",
-  "shortcuts.restore_defaults.message": "Os atalhos que você adicionou são mantidos, exceto os que usam uma tecla de que os padrões precisam. Revise as alterações abaixo e depois use “%1$@”. Atalhos restaurados: %2$d · seus que se perdem: %3$d",
-  "shortcuts.restore_defaults.message_clean": "Nada do que é seu se perde — revise as alterações abaixo e depois use “%1$@”. Atalhos restaurados: %2$d",
   "shortcuts.restore_defaults.title": "Restaurar os atalhos padrão?",
   "shortcuts.row.inherited.axhint": "Herdado dos atalhos base. Defina uma tecla aqui para substituí-lo.",
   "shortcuts.section.focus": "Foco",

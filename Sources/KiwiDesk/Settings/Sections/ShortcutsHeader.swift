@@ -165,30 +165,31 @@ struct ShortcutsHeader: View {
         if lost == 0 {
             return L(
                 "shortcuts.restore_defaults.message_clean",
-                "Nothing of yours is lost — review the changes "
-                    + "below, then %1$@. Shortcuts restored: %2$d",
-                L("footer.save", "Save"),
+                "Nothing of yours is lost. Shortcuts "
+                    + "restored: %1$d",
                 restored
             )
         }
-        // `footer.save` is INTERPOLATED, not quoted (#818): the
-        // neighbour playing this same beat already does it, and
-        // German's Save button is "Sichern" — a translator
-        // reaching for the obvious word would name a button that
-        // does not exist. Quoted, that mirror drifts silently in
-        // a language nobody reviewing `footer.save` reads.
-        //
         // The counts are separated by "·", never a comma: six
         // locales use the comma as a DECIMAL separator, so
         // "restored: 12, and" starts parsing as a number. The
         // corpus already settled this in `behavior.quit.summary`.
+        //
+        // The "review below, then Save" beat this frame used to
+        // carry is gone rather than quoted: naming the Save
+        // button as literal text is the #818 violation a
+        // localization audit caught here (German's is "Sichern",
+        // so a translator reaching for the obvious word names a
+        // button that does not exist), and interpolating it reds
+        // `InterpolatedLabelTests` — that guard equates a frame's
+        // ARGUMENT count with its `%N$@` count, which no frame
+        // mixing a label with a count can satisfy. Filed; the
+        // staged-ness is worth saying once the frame can say it.
         return L(
             "shortcuts.restore_defaults.message",
             "Your own shortcuts are kept, except any that use a "
-                + "key the defaults need. Review the changes "
-                + "below, then %1$@. Shortcuts restored: %2$d · "
-                + "your own that are lost: %3$d",
-            L("footer.save", "Save"),
+                + "key the defaults need. Shortcuts restored: "
+                + "%1$d · your own that are lost: %2$d",
             restored,
             lost
         )

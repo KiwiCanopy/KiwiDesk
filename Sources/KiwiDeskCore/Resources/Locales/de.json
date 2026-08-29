@@ -1003,8 +1003,6 @@
   "shortcuts.restore_defaults.confirm": "Standards wiederherstellen",
   "shortcuts.restore_defaults.help": "Stellt die von KiwiDesk bereitgestellten Tastenkürzel wieder her, auch die, die es seit deiner Installation ergänzt hat. Selbst angelegte Tastenkürzel bleiben erhalten.",
   "shortcuts.restore_defaults.help_other_layer": "Nur die Standard-Ebene hat Standardkürzel zum Wiederherstellen — diese hier ist deine eigene.",
-  "shortcuts.restore_defaults.message": "Selbst angelegte Tastenkürzel bleiben erhalten — außer sie belegen eine Taste, die die Standardkürzel brauchen. Überprüfe die Änderungen unten und dann %1$@. Wiederhergestellte Kürzel: %2$d · verlorene eigene: %3$d",
-  "shortcuts.restore_defaults.message_clean": "Nichts von dir geht verloren — überprüfe die Änderungen unten und dann %1$@. Wiederhergestellte Kürzel: %2$d",
   "shortcuts.restore_defaults.title": "Standard-Tastenkürzel wiederherstellen?",
   "shortcuts.row.inherited.axhint": "Von den Standard-Tastenkürzeln übernommen. Lege hier ein Kürzel fest, um es zu überschreiben.",
   "shortcuts.section.focus": "Fokus",

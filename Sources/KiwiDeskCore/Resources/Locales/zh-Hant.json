@@ -1003,8 +1003,6 @@
   "shortcuts.restore_defaults.confirm": "回復預設值",
   "shortcuts.restore_defaults.help": "回復 KiwiDesk 提供的快速鍵，包括它在你安裝之後新增的那些。你自己建立的快速鍵會保留。",
   "shortcuts.restore_defaults.help_other_layer": "只有標準層才有可回復的預設快速鍵 — 這一層是你自己的。",
-  "shortcuts.restore_defaults.message": "你自己加入的快速鍵會保留，但佔用了預設快速鍵所需按鍵的除外。請在下方檢閱變更後「%1$@」。回復的快速鍵：%2$d · 遺失的自訂快速鍵：%3$d",
-  "shortcuts.restore_defaults.message_clean": "你的快速鍵不會有任何遺失 — 請在下方檢閱變更後「%1$@」。回復的快速鍵：%2$d",
   "shortcuts.restore_defaults.title": "要回復預設快速鍵嗎？",
   "shortcuts.row.inherited.axhint": "沿用自基礎快速鍵。在此設定按鍵即可覆寫它。",
   "shortcuts.section.focus": "焦點",
