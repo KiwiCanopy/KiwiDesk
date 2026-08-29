@@ -11,8 +11,8 @@ extension KiwiCore {
     /// current size, so a sub-floor window never grows on a
     /// shrink (`FloatResize`). Applies through the tiler's
     /// shared frame policy (`applyFrame`) — animated per
-    /// `animations.on_window_resize`, echo-tracked either way —
-    /// and skips the layout retile: no tiled window moved.
+    /// `resizeWritesAnimated`, echo-tracked either way — and
+    /// skips the layout retile: no tiled window moved.
     func resizeFloating(
         _ id: WindowID,
         axis: String,
@@ -24,26 +24,41 @@ extension KiwiCore {
         let minSize = CGFloat(
             effectiveMinSize(of: id, axis: axis)
         )
+        // Does THIS WRITE belong to a glide? The per-WRITE
+        // scope, never the hold's lifetime
+        // (`HoldGlide.isApplyingGlideStep` argues why a lifetime
+        // bit answers it wrongly in both directions). Bound to a
+        // local so this file reads it exactly once;
+        // `resizeWritesAnimated` asks the same question for the
+        // animation choice, in its own file.
+        let isGlideWrite = keys.isApplyingGlideStep
         // Accumulate against the COMMANDED frame, not the echo
-        // (#129/#1056): `state.windows[id].frame` is echo-fed,
-        // and mid-animation the echo lags by whole steps — so a
-        // press (or a glide frame) landing before the
-        // previous one settled re-based on stale geometry and
-        // under-accumulated. The in-flight animation's target
-        // IS the pending commanded value; idle, the settled
-        // frame is the same truth it always was. The animated
-        // target is DELIBERATELY the only commanded value
-        // trusted here: it dies at settle, so an app that
-        // silently refuses every ask can bank at most one
-        // hold's worth — a longer-lived commanded record (the
-        // #881 instant stamp was tried) re-arms itself per
-        // press and compounds without bound on such an app,
-        // the #1057 banked-growth class with no ceiling. The
-        // instant-path residue this keeps is recorded in
-        // docs/accepted-limitations.md.
+        // (#129/#1056/#1090): `state.windows[id].frame` is
+        // echo-fed, and the echo lags by whole steps — so a
+        // press (or a glide frame) landing before the previous
+        // one was reported re-based on stale geometry and
+        // under-accumulated. `commandedFrame` answers from the
+        // in-flight animation's target where one exists and,
+        // for a glide frame, from the record the writes below
+        // keep — which is the only base there is with
+        // animations off, under Reduce Motion or with the
+        // engine disabled, since `animate` returns early in all
+        // three. Idle, the settled frame is the same truth it
+        // always was.
+        //
+        // Both records are BOUNDED, which is what a commanded
+        // base must be here: the animation target dies at
+        // settle, and the glide record is unreadable outside a
+        // glide step and cleared when the run ends. The #881
+        // instant stamp was tried as this base and rejected
+        // precisely because it is neither — it re-arms itself
+        // per press and compounds without bound on an app that
+        // silently refuses every ask (#1057).
         let base =
-            tiler.animation.targetFrame(window: id)
-            ?? window.frame
+            tiler.animation.commandedFrame(
+                window: id,
+                includingHeldGlide: isGlideWrite
+            ) ?? window.frame
         // Growing the top edge under a top app bar would re-hide
         // the title bar; keep the result clear of the strip (#242).
         let target = floatFrameClampedClearOfBars(
@@ -77,25 +92,44 @@ extension KiwiCore {
             id,
             from: window.frame,
             to: target,
-            // Deliberately NOT `resizeRetileAnimated` (#1082):
-            // a glide writes the tiled paths instantly, and this
-            // one may not follow. Every tiled path re-derives
-            // geometry from a STORED ratio, weight or length, so
-            // an instant write leaves the next frame's base
-            // exact; this path measures from a FRAME, and the
-            // only commanded base #1056 trusts is the in-flight
-            // animation's target — which an instant write does
-            // not create. Gliding this path instantly would
-            // therefore re-base each frame on the lagging echo
-            // and under-accumulate (#129), and the bounded-record
-            // alternative was already ruled out above. So a
-            // floating glide keeps the configured animation, and
-            // carries the spring's trailing that a tiled glide
-            // sheds; the retile-time argument is on
-            // `resizeRetileAnimated`.
-            animated: tiler.settings.animations.onWindowResize,
+            // The same policy every other resize write takes
+            // (#1090): a glide frame writes INSTANTLY, and this
+            // path now may, because the base above no longer
+            // depends on an animation existing. It could not
+            // before — every tiled path re-derives geometry from
+            // a stored ratio, weight or length, so an instant
+            // write leaves the next frame's base exact, while
+            // this one measures from a FRAME and an instant
+            // write creates no animation target to measure from.
+            // The hold-scoped record is that missing base, so
+            // the split `resizeWritesAnimated` used to argue is
+            // gone: a floating glide sheds the spring's ~100–200
+            // ms of trailing exactly as a tiled one does, and
+            // stops generating the #611 retarget storm — a
+            // changed target every frame — that the settle
+            // watchdog cannot tell from a long drag.
+            animated: resizeWritesAnimated,
             sizing: .allSpringSized
         )
+        // Record what was just commanded, so a glide frame
+        // accumulates from it rather than from an echo that has
+        // not arrived. Unconditional, and the ARMING PRESS is
+        // the reason: it is not a glide step, but its record is
+        // exactly the base the glide's first frame needs, and a
+        // press whose echo has not landed by the time the
+        // key-repeat wait expires would otherwise lose its own
+        // step. Nothing banks, because the read above is gated —
+        // a press can never measure from another press's record.
+        //
+        // Deliberately NOT invalidated mid-hold on a "genuine"
+        // resize the way the #677 ledger is: that classifier is
+        // a heuristic, and one false genuine verdict during a
+        // glide would re-base a frame on the echo and re-open
+        // the defect this closes. The hold is the ceiling
+        // instead — an app that refuses every ask moves nothing,
+        // banks nothing past the release, and the next press
+        // measures from reality.
+        tiler.animation.recordGlideCommanded(id, frame: target)
         return .ok()
     }
 }

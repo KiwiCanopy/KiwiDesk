@@ -8,9 +8,19 @@ import Testing
 /// (#1056/#1082): a real `KiwiCore`, a real Lua binding body, a
 /// real release-reporting registrar — only the pre-glide wait and
 /// the frame clock are captured, so a frame reaches the real
-/// `resize`. Its own file because two suites drive it —
-/// `HoldGlideWiringTests` and `HoldGlideRefusalWiringTests` —
-/// split at §2.1's ceiling rather than after crossing it.
+/// `resize`. Its own file because three suites drive it —
+/// `HoldGlideWiringTests`, `HoldGlideRefusalWiringTests` and
+/// `FloatGlideAccumulationTests` — split at §2.1's ceiling rather
+/// than after crossing it.
+///
+/// It is on tests.md's ratified shared-helper list, admitted on
+/// the DIVERGENCE ground: what it shares is a live `KiwiCore`
+/// wired so that a driven frame reaches the real `resize`, and a
+/// copy that stubbed one seam more (`applyGlideStep` is
+/// deliberately NOT stubbed) would leave its suite reading the
+/// ladder instead of the feature, while staying green. Its state
+/// is per-instance — each test builds its own — so nothing is
+/// carried between tests.
 @MainActor
 final class HoldGlideFixture {
     let core: KiwiCore
@@ -93,6 +103,58 @@ final class HoldGlideFixture {
             args: [.string(space.raw), .string("bsp")]
         )
         core.state.workspaces.focus(WindowID(1), in: space)
+    }
+
+    /// One FLOATING window, focused, so `resize` takes the
+    /// `resizeFloating` path (#1090) instead of a layout ratio —
+    /// the path that measures from a FRAME and so needs a
+    /// commanded base at frame rate. Takes an id so a suite can
+    /// seed it BESIDE `seedBspPair`, which is what the stale-
+    /// record case needs: an arming press on a tiled window and
+    /// a focus change onto the float mid-hold.
+    func seedFloating(id: UInt32 = 1) {
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(id),
+                    pid: pid_t(id),
+                    appName: "FloatApp",
+                    frame: CGRect(
+                        x: 100,
+                        y: 100,
+                        width: 500,
+                        height: 400
+                    ),
+                    isFloating: true
+                )
+            )
+        )
+        let space = core.state.workspaces.space(
+            of: WindowID(id)
+        )!
+        core.state.workspaces.focus(WindowID(id), in: space)
+    }
+
+    /// Focus `id` in its own space, for a focus change mid-hold.
+    func focus(_ id: UInt32) {
+        let window = WindowID(id)
+        let space = core.state.workspaces.space(of: window)!
+        core.state.workspaces.focus(window, in: space)
+    }
+
+    /// The width a window was last COMMANDED to, read off the
+    /// store under test rather than off the #881 instant stamp —
+    /// that stamp is a different record with its own self-echo
+    /// clear and one-second grace, so reading it would let a
+    /// change to #881 red this suite for an unrelated reason
+    /// (architect review, 2026-08-29). No echo ever arrives in a
+    /// test, which is precisely the stale-geometry window a glide
+    /// frame lands in on a real machine.
+    func commandedWidth(_ id: UInt32 = 1) -> CGFloat? {
+        core.tiler.animation.commandedFrame(
+            window: WindowID(id),
+            includingHeldGlide: true
+        )?.width
     }
 
     var ratio: Double {

@@ -11,13 +11,18 @@ import Testing
 /// the stale-geometry window a rapid second press or a
 /// glide frame lands in. Before the fix both presses
 /// based on the original frame and the second was swallowed
-/// whole. The animated target is DELIBERATELY the only
-/// commanded value trusted — the instant path re-bases on the
-/// echo-fed frame, an accepted residue this suite pins as such
-/// (the #881 stamp was tried as a base and rejected: it re-arms
-/// per press, so an app that silently refuses every ask banks
-/// commanded growth without bound — the argument is in
-/// `KiwiCore+ResizeFloating` and `docs/accepted-limitations.md`).
+/// whole.
+///
+/// A PRESS re-bases on the echo-fed frame wherever no animation
+/// is in flight, and that is still a ruling rather than a gap.
+/// #1090 gave the path a second commanded record, but only a
+/// glide STEP may read it: the #881 stamp was tried as a
+/// press-readable base and rejected, because a record every
+/// press can measure from is re-armed by every press, so an app
+/// that silently refuses every ask banks commanded growth
+/// without bound (#1057). The held case that residue could not
+/// survive is `FloatGlideAccumulationTests`; the argument is in
+/// `KiwiCore+ResizeFloating` and `docs/accepted-limitations.md`.
 @MainActor
 @Suite("Floating resize accumulation (#129/#1056)")
 struct FloatResizeAccumulationTests {
@@ -60,10 +65,11 @@ struct FloatResizeAccumulationTests {
         // The accepted residue, pinned so it stays a RULING: a
         // second press before the echo re-asks the same target
         // instead of compounding a commanded value nothing
-        // confirmed. Whoever re-bases this path on a stored
-        // commanded frame owes the banked-growth analysis in
-        // `KiwiCore+ResizeFloating` first — this redding is the
-        // prompt to go read it.
+        // confirmed. The #1090 record exists by now and holds
+        // 550 — this is the READ gate refusing it to a press.
+        // Whoever opens that gate wider owes the banked-growth
+        // analysis in `KiwiCore+ResizeFloating` first; this
+        // redding is the prompt to go read it.
         let core = makeFloatCore()
         core.tiler.settings.animations.onWindowResize = false
 

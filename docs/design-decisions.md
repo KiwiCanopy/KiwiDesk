@@ -2216,39 +2216,73 @@ stop the hold. Where that question is asked, and why the
 glide is the layer that has to ask it, belongs to
 `.claude/rules/input-and-animation.md`.
 
-*A glide's tiled writes are instant — which is the Reduce Motion
-answer for the tiled half, and only that half.* The glide already
-*is* the motion, so springing each frame would smooth an
-already-smooth signal, add ~100–200 ms
-of trailing behind the key, and generate the #611 retarget storm
-deliberately — a changed target every frame is exactly what the
-settle watchdog cannot tell from a long drag. Writing instantly
-creates no animation, so there is nothing to defer. It is safe on
-the tiled paths and *only* there because of what each measures
-from: those write a stored ratio, weight or length and re-derive
-geometry from it, so the next frame's base is exact, while
-`resizeFloating` measures from a frame and the only commanded
-base #1056 trusts is the in-flight animation's target — so a
-floating glide keeps the configured animation, and its trailing
-with it.
+*A glide's writes are instant, on every resize path.* The glide
+already *is* the motion, so springing each frame would smooth an
+already-smooth signal, add ~100–200 ms of trailing behind the
+key, and generate the #611 retarget storm deliberately — a
+changed target every frame is exactly what the settle watchdog
+cannot tell from a long drag. Writing instantly creates no
+animation, so there is nothing to defer.
 
-Since the tiled write is instant for everyone, a held chord
-glides under Reduce Motion too, rather than being suppressed: a
-held-key resize is the keyboard's direct manipulation, which
-Reduce Motion does not suppress for the mouse either, and on the
-tiled paths there is no second mechanism to keep alive. On the
-floating path there is one, and Reduce Motion is exactly where it
-is worst: `AnimationEngine.animate` returns early under Reduce
-Motion (as it does with animations off), so there is no in-flight
-target to accumulate against and the path falls back to the
-echo-fed frame. At press rate that costs one echo's lag, which
-[accepted-limitations.md](accepted-limitations.md) records; at
-glide rate most frames re-base on the same stale echo, so the
-hold advances at echo rate instead of at the ramp's. An
-accessibility setting must not quietly degrade a headline
-behaviour, which is why giving that path a commanded base of its
-own is release work (#1090) rather than a deferred consistency
-polish.
+That was true of the *tiled* paths from the first build, and of
+the floating one only after #1090, because of what each measures
+from. A tiled path writes a stored ratio, weight or length and
+re-derives geometry from it, so an instant write leaves the next
+frame's base exact. `resizeFloating` measures from a **frame**,
+and the only commanded base it trusted was the in-flight
+animation's target (#129/#1056) — which an instant write does
+not create, and which `AnimationEngine.animate` never creates at
+all under Reduce Motion, with animations off, or with the engine
+disabled: it opens `guard isEnabled, !reduceMotion()`. So that
+path fell back to the echo-fed frame, and at glide rate most
+frames re-based on the *same* stale echo. Measured on device,
+100 asks at ~102 Hz travelled 29% of what they asked for: the
+window crawled while the key was held, and Reduce Motion was the
+configuration that got it.
+
+*So the floating path was given a commanded base of its own,
+bounded by the hold.* It records what each write commanded, in
+`GlideCommandedBase` on the animation engine — deliberately
+beside the animation target it stands in for, so a caller asks
+one accessor rather than branching on which store happens to
+hold the answer. The hard part was never the record; it was the
+**bound**. #1056 had already tried the #881 instant stamp here
+and rejected it, because a commanded record every press can read
+is re-armed by every press, so an app that silently refuses
+every ask banks growth with no ceiling (the #1057 class) — and
+at glide rate a 30 s hold at the ramp's top speed is many
+screens of banked travel, not one press's worth. This record is
+bounded at both ends of its life instead. **Only a glide step may
+read it**, so no press can ever measure from another press's
+record — that is the bound the #1057 objection asked for. And it
+is retired at the start of every physical press, which is a
+different job: it stops a record left by an unrelated earlier
+press being read by a later hold that reaches the same window.
+The second bound has to hang off the PRESS rather than off the
+glide's end, and both review lanes caught that independently —
+the end-of-run seam fires only for a run that actually glided, so
+a tap's record would stand forever, and on the refusal path it
+fires from inside the very command that then records. A refusing
+app therefore moves nothing, banks nothing past the release, and
+the next press measures from reality. What stays accepted is the
+*per-press* residue — a press with no animation in flight still
+re-bases on the echo — which is what that read gate is
+protecting, and is recorded in
+[accepted-limitations.md](accepted-limitations.md).
+
+*Reduce Motion gets no branch of its own, and that is the point
+of doing it this way.* Because a glide frame writes instantly for
+everyone, no animation exists during a glide in any
+configuration, so the record is the single base on all of them —
+there is nothing to keep in sync. A held chord therefore glides
+under Reduce Motion rather than being suppressed: a held-key
+resize is the keyboard's direct manipulation, which Reduce Motion
+does not suppress for the mouse either. An earlier version of
+this entry claimed the instant *tiled* writes were already the
+whole of that answer. They were the tiled half only, and the
+floating half was where Reduce Motion did the damage — an
+accessibility setting quietly degrading a headline behaviour,
+which is what moved #1090 from deferred polish to release work.
 
 *A refusal ends the run:* the #933/#1055 size-limit cues stop the
 glide, so a held shrink parked on a floor pills once per hold
@@ -2271,20 +2305,24 @@ ticked — with a wall-clock backstop of the same length beneath
 it, because the frame clock is bound to one screen and display
 sleep or a disconnect mid-hold stops it, and a net must not
 depend on the thing that died. A floating resize also stopped
-under-accumulating (#129), which the hold would otherwise have
-made loud: a press
-mid-animation accumulates against the in-flight animation's
-target rather than the lagging AX echo. The target is
-deliberately the ONLY commanded value trusted — it dies at
-settle, so a silently-refusing app banks at most one hold's
-worth, where a longer-lived stored commanded frame is re-armed by
-every press that reads it and compounds without bound (the #1057
-banked-growth class); the paths that keep re-reading the echo are
-recorded in [accepted-limitations.md](accepted-limitations.md).
+under-accumulating (#129/#1090): a write accumulates against
+what was last *commanded* rather than against the lagging AX
+echo — the in-flight animation's target where one exists, and
+`GlideCommandedBase` where none can. **What a commanded record
+stored here has to have is a BOUND**, and each of the two has
+its own: the animation target dies at settle, and the glide
+record is readable only by a glide step and retired at the start
+of the next press. Neither can be re-armed by an ordinary press,
+which is what a stored commanded frame does otherwise — banking
+growth without ceiling on an app that silently refuses every ask
+(the #1057 class). The per-press paths that still re-read the
+echo are recorded in
+[accepted-limitations.md](accepted-limitations.md).
 (`HoldGlideTests`, `HoldGlideRunTests`, `HoldGlideRampTests`,
 `HoldGlideWiringTests`, `HoldGlideRefusalWiringTests`,
 `HoldGlideSeamTests`, `HoldGlideEligibilitySeamTests`,
-`FloatResizeAccumulationTests`)
+`FloatResizeAccumulationTests`,
+`FloatGlideAccumulationTests`)
 
 **A corroborated bound generalizes at the consume site,
 revocably; entries never do (#1055).** [Principle] The per-ask

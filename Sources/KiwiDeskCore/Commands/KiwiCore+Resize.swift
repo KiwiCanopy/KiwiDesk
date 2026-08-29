@@ -35,7 +35,7 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// Whether the resize RETILE animates: the configured policy,
+    /// Whether a resize WRITE animates: the configured policy,
     /// except during a held glide, which writes INSTANTLY
     /// (#1082, owner ruling 2026-08-29). The glide already IS the
     /// motion — one write per display frame — so springing each
@@ -49,34 +49,37 @@ extension KiwiCore {
     /// only net. Writing instantly creates no animation at all,
     /// so there is nothing to defer.
     ///
-    /// Safe here and NOT on the floating path because of what
-    /// each measures from: every path this retile serves writes a
+    /// Named for the WRITE rather than the retile since #1090:
+    /// `resizeFloating` takes this too, and that path applies one
+    /// frame and skips the layout pass entirely, so the former
+    /// `resizeRetileAnimated` would have been a name that lied at
+    /// half its call sites.
+    ///
+    /// It reaches that path because #1090 gave it a base that no
+    /// longer needs an animation to exist. Until then this was
+    /// safe on the tiled paths and ONLY there, because of what
+    /// each measures from: every path the retile serves writes a
     /// stored ratio, weight or length and re-derives geometry
     /// from it (`calculatedFrames` is a pure recomputation), so
-    /// an instant write leaves the next glide frame's base exact.
-    /// `resizeFloating` measures from a FRAME instead and keeps
-    /// its animation — the argument is at that call site.
+    /// an instant write leaves the next glide frame's base exact,
+    /// while `resizeFloating` measures from a FRAME and an
+    /// instant write creates no target to measure from. The
+    /// hold-scoped record (`GlideCommandedBase`) is that missing
+    /// base, and the argument for its lifetime is there.
     ///
     /// A held chord glides under Reduce Motion too (owner
     /// ruling, same date): a held-key resize is the keyboard's
     /// direct manipulation, which Reduce Motion does not suppress
     /// for the mouse either, and since these writes are instant
-    /// for everyone the TILED glide needs no second mechanism.
-    ///
-    /// That is the tiled half ONLY, and an earlier version of
-    /// this comment claimed it was the whole answer, which was
-    /// false (code review, 2026-08-29). `resizeFloating` re-bases
-    /// each press on the in-flight animation's target, and
-    /// `AnimationEngine.animate` takes `guard isEnabled,
-    /// !reduceMotion()` — so with Reduce Motion on, animations
-    /// off, or the engine disabled there IS no target and it
-    /// falls back to the echo-fed frame. At press rate that costs
-    /// one echo's lag (`docs/accepted-limitations.md`); at glide
-    /// rate most frames re-base on the same stale echo and the
-    /// hold advances at echo rate instead of the ramp's. So
-    /// Reduce Motion is exactly where the FLOATING path is worst,
-    /// which is the sharpest argument for giving it a base of its
-    /// own (#1090).
+    /// for everyone no glide needs a second mechanism. An earlier
+    /// version of this comment claimed that was already the whole
+    /// answer, which was false while the floating path still
+    /// re-based on `AnimationEngine.targetFrame` — with Reduce
+    /// Motion on, animations off, or the engine disabled there
+    /// was no target and it fell back to the echo-fed frame,
+    /// losing 71% of a held resize (measured, #1090). It is true
+    /// now because that path has a base of its own, not because
+    /// the tiled half was ever enough.
     ///
     /// Reads the per-WRITE `isApplyingGlideStep`, never the
     /// hold's lifetime — `HoldGlide.isApplyingGlideStep` argues
@@ -84,7 +87,7 @@ extension KiwiCore {
     /// of read. Who else may read it is pinned by count in
     /// `HoldGlideSeamTests`, rather than claimed here: a
     /// behavioural test cannot see a second reader appear (#614).
-    var resizeRetileAnimated: Bool {
+    var resizeWritesAnimated: Bool {
         !keys.isApplyingGlideStep
             && tiler.settings.animations.onWindowResize
     }
@@ -186,7 +189,7 @@ extension KiwiCore {
         // the old value to the new on one clock — so a yielding
         // pane may slide its shared edge instead of snapping.
         retile(
-            animated: resizeRetileAnimated,
+            animated: resizeWritesAnimated,
             sizing: .allSpringSized
         )
         // Resizing a track past min_window_size flips it into an

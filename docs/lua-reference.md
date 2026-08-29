@@ -3832,16 +3832,20 @@ keeps gliding harmlessly until release, matching its silence.
 Releasing the chord, switching layers, or arming a Settings
 shortcut recorder ends the run immediately.
 
-A **tiled** glide writes each frame instantly — the glide is
-itself the motion, so there is nothing left for an animation to
-smooth. A held **floating** resize keeps the configured window
-animation instead, and with window animations on it accumulates
-against the in-flight animation's target rather than the lagging
-AX echo, so a fast run of presses lands its full distance
-instead of only part of it (#129). With resize animation off, or
-under system **Reduce Motion**, there is no such target and it
-re-reads the echo — which at glide rate means a held floating
-resize advances only as fast as those echoes arrive; see
+A glide writes each frame instantly, on every layout and on a
+floating window alike — the glide is itself the motion, so there
+is nothing left for an animation to smooth, and a hold therefore
+feels the same whatever `animations.set_on_window_resize` says
+and under system **Reduce Motion** (#1082/#1090).
+
+A floating resize measures from the window's own frame, so it
+accumulates against what was last *commanded* rather than
+against the lagging AX echo — the in-flight animation's target
+where one exists (#129), and the glide's own record where none
+does. That record is readable only by a glide frame and is
+retired at the start of the next press, so nothing it commanded
+can carry into a later one. A fast run of separate **presses** still
+re-reads the echo between them and can come up short; see
 [accepted limitations](accepted-limitations.md).
 
 What the

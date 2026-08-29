@@ -13,6 +13,7 @@ extension KiwiCore {
         wireGlideStep()
         wireGlideFrames()
         wireGlideEnd()
+        wireFireBegan()
     }
 
     /// The glide re-issues the PRESS's own command with a scaled
@@ -109,6 +110,34 @@ extension KiwiCore {
     private func wireGlideEnd() {
         keys.holdGlide.onGlideEnd = { [weak self] in
             self?.scheduleTrackZOrderRestoreIfOverflowing()
+        }
+    }
+
+    /// Retire the #1090 floating base at the START of every
+    /// press, which is the one moment that bounds it.
+    ///
+    /// It cannot hang off `onGlideEnd` beside the arm above, and
+    /// both review lanes caught that independently: that seam
+    /// fires only for a run that GLIDED, so an ordinary tap's
+    /// record stands forever; and on the refusal path it fires
+    /// synchronously from INSIDE the command that then records
+    /// (`refuseShrinkAtMinimum` → `noteRefusal` → `cancelRun`),
+    /// so a held shrink parked on a size floor clears before the
+    /// write it was meant to undo. Either way a stale record
+    /// survives, and a later hold that reaches this float — an
+    /// arming press on a tiled window plus a focus change
+    /// mid-hold — would base a glide frame on a frame from an
+    /// unrelated press and jump the window.
+    ///
+    /// Clearing per PRESS closes both: every glide's record chain
+    /// provably begins with its own arming press, because a glide
+    /// can only arm from `endFire`, and `beginFire` ran first.
+    /// Dropping this wiring has no visible symptom until that
+    /// exact sequence, which is why `HoldGlideSeamTests` pins it
+    /// by count from both sides.
+    private func wireFireBegan() {
+        keys.holdGlide.onFireBegan = { [weak self] in
+            self?.tiler.animation.clearGlideCommanded()
         }
     }
 }

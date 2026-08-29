@@ -204,12 +204,20 @@ struct HoldGlideSeamTests {
         // added anywhere, so it cannot carry the claim (code
         // review, 2026-08-29).
         //
-        // Two readers by ruling, both in the resize command file:
-        // the animation choice and the #674 z-order stand-down. A
-        // new one inherits BOTH behaviours — write instantly, and
-        // stand per-frame work down — so it is a deliberate
-        // decision that joins this list in the same change, or
-        // the claim is false again.
+        // Three readers by ruling. Two are in the resize command
+        // file — the animation choice and the #674 z-order
+        // stand-down — and a new one THERE inherits both
+        // behaviours (write instantly, and stand per-frame work
+        // down), so it is a deliberate decision that joins this
+        // list in the same change or the claim is false again.
+        //
+        // The third is #1090's, in the floating resize file, and
+        // it is a different question with the same answer: which
+        // base this write may measure from. It is bound to one
+        // local there and read twice, so the count is one — and
+        // that is the shape to keep, since the scope must be
+        // sampled once per write rather than re-read around a
+        // call that could change it.
         let reads = try Self.sites(of: "isApplyingGlideStep")
         let byFile = Dictionary(
             grouping: reads,
@@ -225,11 +233,21 @@ struct HoldGlideSeamTests {
             """
         )
         #expect(
+            byFile["KiwiCore+ResizeFloating.swift"]?.count == 1,
+            """
+            expected exactly one isApplyingGlideStep reader in \
+            KiwiCore+ResizeFloating.swift (the commanded base \
+            gate, bound to one local), found \
+            \(byFile["KiwiCore+ResizeFloating.swift"]?.count ?? 0)
+            """
+        )
+        #expect(
             Set(byFile.keys) == [
                 "HoldGlide.swift",
                 "HoldGlide+Run.swift",
                 "KeybindingManager+HoldGlide.swift",
                 "KiwiCore+Resize.swift",
+                "KiwiCore+ResizeFloating.swift",
             ],
             .init(
                 rawValue: "unexpected isApplyingGlideStep site "

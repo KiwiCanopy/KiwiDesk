@@ -144,6 +144,13 @@ public final class AnimationEngine {
     /// per axis, the target size once shrinking or past
     /// halfway, otherwise the start size held until then.
     var heldSize: [WindowID: CGSize] = [:]
+    /// The press-scoped commanded base a floating glide
+    /// accumulates against where no animation exists to carry
+    /// one (#1090) — stored here, beside the animation target it
+    /// stands in for. `AnimationEngine+CommandedBase` owns the
+    /// accessor and the domain split against the #881 stamp;
+    /// `GlideCommandedBase` argues the lifetime.
+    var glideBase = GlideCommandedBase()
 
     public init() {}
 

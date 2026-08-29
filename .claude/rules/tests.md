@@ -179,6 +179,24 @@ bite large test PRs:
     reaching the branch it named. Stateless: pure builders, no
     assertions, no setup or teardown.
 
+  - *the hold-glide production fixture* in
+    `HoldGlideFixture.swift` — a live `KiwiCore` with a real Lua
+    binding body and a real release-reporting registrar, wired so
+    that only the pre-glide wait and the frame clock are
+    captured. Admitted on the DIVERGENCE ground, and the harm is
+    the vacuity class this area has already shipped: what the
+    fixture shares is precisely which seams are NOT stubbed —
+    `applyGlideStep` is deliberately live, so a driven frame
+    reaches the real `resize` — and a copy that stubbed one more
+    would leave its suite reading the hold ladder instead of the
+    feature under test, with every assertion still green.
+    Extracted at the **second** consumer (#1082, when the arming
+    and refusal suites split at the file ceiling); the third is
+    `FloatGlideAccumulationTests` (#1090). Its state is
+    per-instance — each test builds its own, nothing is carried
+    between tests — so it clears the bar the fake WindowServer
+    entry above says the statelessness rule was protecting.
+
   (The status-item seam deliberately does NOT add a shared
   factory here: its fake is a per-file `StatusItemHandle`
   stub, because the live wrapper is sealed file-`private` and

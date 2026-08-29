@@ -68,7 +68,7 @@ struct HoldGlideWiringTests {
         // Asserted on the ENGINE rather than on the predicate
         // (code review, 2026-08-29). The bit is per-WRITE now, so
         // it is false everywhere except inside the frame's own
-        // execute — reading `resizeRetileAnimated` between frames
+        // execute — reading `resizeWritesAnimated` between frames
         // would assert the opposite of what it used to. What is
         // observable from outside is the consequence: a glide
         // frame leaves no residency behind, with the configured
@@ -83,7 +83,7 @@ struct HoldGlideWiringTests {
             args: [.bool(true)]
         )
         // The configured policy is intact outside a glide write.
-        #expect(f.core.resizeRetileAnimated)
+        #expect(f.core.resizeWritesAnimated)
 
         f.registrar.press(keyCode: f.combo.keyCode)
         try f.beginGlide()
@@ -98,7 +98,7 @@ struct HoldGlideWiringTests {
         // And the policy is untouched once the hold ends — the
         // scope cannot outlive the write it describes.
         f.registrar.release(keyCode: f.combo.keyCode)
-        #expect(f.core.resizeRetileAnimated)
+        #expect(f.core.resizeWritesAnimated)
     }
 
     @Test("A body that is not exactly one resize never arms")

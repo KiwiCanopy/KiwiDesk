@@ -132,9 +132,9 @@ editing here:
   change either seam, rather than averaging the two into one
   claim here.
 
-  **A glide's tiled writes are instant, and the floating path is
-  the deliberate exception** (#1082). The bit a write consults is
-  `HoldGlide.isApplyingGlideStep` (read as
+  **A glide's writes are INSTANT, on every resize path** (#1082,
+  extended to the floating one by #1090). The bit a write
+  consults is `HoldGlide.isApplyingGlideStep` (read as
   `keys.isApplyingGlideStep`), set around ONE re-issued command
   and cleared on every exit — never `keys.isGliding`, which is
   the hold's lifetime and answers the per-write question wrongly
@@ -142,34 +142,72 @@ editing here:
   during a hold would lose its animation, and a hold whose frame
   clock dies would leave the bit stuck on for the session. Who
   may read that scope is pinned by count
-  (`HoldGlideSeamTests`), because a new reader inherits two
-  behaviours at once — write instantly, AND stand per-frame work
-  down. Springing a glide frame smooths an
+  (`HoldGlideSeamTests`), because a reader in the resize command
+  file inherits two behaviours at once — write instantly, AND
+  stand per-frame work down. Springing a glide frame smooths an
   already-smooth signal and generates the #611 retarget storm
   below deliberately — a changed target every frame is what the
   watchdog cannot tell from a long drag — so writing instantly is
-  a safety property, not only feel. It is safe on the tiled paths
-  because they write a stored ratio, weight or length and
-  re-derive geometry from it, leaving the next frame's base
-  exact; `resizeFloating` measures from a FRAME and its only
-  trusted commanded base is the in-flight animation's target, so
-  it keeps whatever animation the config asks for. A new resize
-  write path decides which of those two it is before taking
-  either.
+  a safety property, not only feel.
 
-  That exception is why **Reduce Motion is the configuration
-  where the FLOATING path is worst**, which inverts the obvious
-  reading of "instant writes answer Reduce Motion" — they answer
-  it for the tiled half only. `AnimationEngine.animate` opens
-  with `guard isEnabled, !reduceMotion()`, so under Reduce
-  Motion, with animations off, or with the engine disabled there
-  is no in-flight target at all and `resizeFloating` falls back
-  to the echo-fed frame: at glide rate most frames re-base on
-  the same stale echo. Nothing guards this — it is a shipped
-  limitation with an owner, filed as #1090 and recorded in
-  `docs/accepted-limitations.md` — so treat it as the standing
-  reason not to reach for `resizeRetileAnimated` on that path
-  before #1090 gives it a base it can trust at frame rate.
+  **What each path measures from is what made this conditional,
+  and the floating one needed a record built for it.** A tiled
+  path writes a stored ratio, weight or length and re-derives
+  geometry from it, so an instant write leaves the next frame's
+  base exact. `resizeFloating` measures from a FRAME, and its
+  only commanded base was the in-flight animation's target
+  (#129/#1056) — which an instant write does not create, and
+  which `AnimationEngine.animate` never creates at all under
+  Reduce Motion, with animations off, or with the engine
+  disabled, since it opens `guard isEnabled, !reduceMotion()`.
+  That is why Reduce Motion was the configuration where the
+  FLOATING path was worst: at glide rate most frames re-based on
+  the same stale echo and 71% of a held resize was lost
+  (measured, #1090).
+
+  So a floating write now records what it commanded, in
+  `GlideCommandedBase` on the animation engine — beside the
+  target it stands in for, so a caller asks ONE accessor
+  (`commandedFrame(window:includingHeldGlide:)`) rather than
+  branching on which store holds the answer. **A commanded base
+  stored here must be BOUNDED at both ends of its life, and the
+  two bounds do different jobs — keep both.** Only a glide STEP
+  may read it, which is what stops a press measuring from another
+  press's record (the #1057 objection that refused the #881
+  instant stamp as this base). And it is CLEARED at the start of
+  every physical press, which is what stops a record an unrelated
+  earlier press left behind being read by a later hold that
+  reaches the same window.
+
+  **Hang that clear off the PRESS, never off the glide's end.**
+  `onGlideEnd` fires only for a run that actually glided, so a
+  tap's record would stand forever; and on the refusal path it
+  fires synchronously from inside the command that then records
+  (`refuseShrinkAtMinimum` → `noteRefusal` → `cancelRun`), so a
+  held shrink parked on a floor clears before the write it meant
+  to undo. `HoldGlide.onFireBegan` is the seam, pinned by count
+  from both sides in `FloatGlideSeamTests` ▸
+  `fireBeginSeamClearsTheFloatingBase`, with the sequence driven
+  end to end in `FloatGlideAccumulationTests` ▸ `A stale record
+  from an earlier press is not read`. That same suite carries
+  the headless net for the INSTANT WRITE — a floating write that
+  re-decides its animation beside the call site instead of
+  taking `resizeWritesAnimated` reds exactly one assertion in
+  the whole tree, and that one is display-gated, so the routing
+  is pinned by a source scan as well (guard-prover, 2026-08-29). A new resize write path
+  inherits the instant write and owes the same two questions:
+  what is my next frame's base, and what retires it?
+
+  Two residues stay, deliberately. A PRESS still re-bases on the
+  echo-fed frame where no animation is in flight — the accepted
+  limitation `docs/accepted-limitations.md` records, and the
+  thing the read gate is protecting
+  (`FloatResizeAccumulationTests` ▸
+  `instantPathKeepsTheEchoBase`). And the record is NOT
+  invalidated mid-hold by the #677 ledger's genuine-resize
+  classifier: that verdict is a heuristic, and one false
+  "genuine" during a glide would re-base a frame on the echo and
+  re-open the defect. The hold is the ceiling instead.
 
   The product rulings (resize-only, the tally, the glide, the
   steps-per-second unit) are argued in `docs/design-decisions.md`

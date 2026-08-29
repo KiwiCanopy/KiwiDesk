@@ -2872,10 +2872,9 @@ Each row has an action. Built-in actions live under headings:
   travels at the same speed on a 60 Hz screen and a 120 Hz one —
   the faster screen just draws it more smoothly. Only resize
   glides: focus and swap fire once per press, where overshooting
-  would hurt more than pressing again. One exception to the
-  smoothness: a held resize of a **floating** window with window
-  animations off, or under Reduce Motion, advances in fits — see
-  [Accepted limitations](accepted-limitations.md).
+  would hurt more than pressing again. A held resize feels the
+  same on a **floating** window as on a tiled one, in every
+  animation setting and under Reduce Motion.
 - **Applications** — launch an app. Each row carries a **Launch
   behavior** menu: *Open or Focus* (the default — pull a running
   instance into the current space, or launch it if it isn't
