@@ -2623,8 +2623,8 @@ you can drive KiwiDesk before configuring anything:
 | Grow / Shrink width | `⌥⌘2` / `⌥⌘1` |
 | Grow / Shrink height | `⌥⌘5` / `⌥⌘4` |
 | Toggle floating | `⌃⌥F` |
-| Toggle display sticky | `⌃⌥S` |
-| Toggle sticky (all spaces) | `⌃⌥⇧S` |
+| Toggle sticky everywhere | `⌃⌥S` |
+| Toggle sticky on this screen | `⌃⌥P` |
 
 The **movement** defaults are built on **Control-Option**
 (`⌃⌥`), escalating through `⌃⌥⇧` — act on the window rather than

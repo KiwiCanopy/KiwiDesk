@@ -117,11 +117,12 @@ struct KeyboardPreviewPanel: View {
             )
             if !reservedFree.isEmpty {
                 // Gated on a DRAWN mark, not merely on a chip
-                // being picked: ⌃⌥ — the app's default pair —
-                // reserves nothing, and a chip whose
-                // reservations are all bound draws only red
-                // (code review 2026-08-10; an entry may not
-                // point at a mark the frame does not draw).
+                // being picked: a chip whose reservations are
+                // all bound draws only red (code review
+                // 2026-08-10; an entry may not point at a mark
+                // the frame does not draw). ⌃⌥ reserved nothing
+                // until #1094 gave it ⌃⌥space, so the dashed
+                // ring now reaches the default pair too.
                 lineSwatch(
                     SettingsTheme.keyReserved,
                     dashed: true,

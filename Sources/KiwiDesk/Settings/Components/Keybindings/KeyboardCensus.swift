@@ -280,9 +280,11 @@ enum KeyboardCensus {
     /// The reserved keys still FREE under the shown modifier —
     /// the dashed amber ring's presence, and therefore its
     /// legend entry's gate: under a chip whose reservations are
-    /// all bound (or a layer macOS reserves nothing under, ⌃⌥
-    /// included) the amber entry would point at a mark the
-    /// board does not draw.
+    /// all bound, or a layer macOS reserves nothing under, the
+    /// amber entry would point at a mark the board does not
+    /// draw. ⌃⌥ was named here as such a layer; since #1094 it
+    /// carries one reservation (⌃⌥space), so it is no longer an
+    /// example of the empty case.
     static func reservedUnbound(
         claims: [UInt32: [ModifierLayer]],
         scope: Scope

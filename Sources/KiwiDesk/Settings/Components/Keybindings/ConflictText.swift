@@ -154,6 +154,11 @@ extension SystemShortcut {
                 "system_shortcut.screenshot_tools",
                 "Screenshot Tools"
             )
+        case .inputSourceNext:
+            return L(
+                "system_shortcut.input_source_next",
+                "Select next source in Input menu"
+            )
         }
     }
 }

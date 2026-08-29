@@ -5341,9 +5341,9 @@ user had no way to focus or move a window until they authored
 every combo. Now `Core.DefaultKeybindings` seeds a starter set on an
 **escalating Control-Option scheme** (#270): `⌃⌥` arrows focus /
 `⌃⌥⇧` arrows swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move
-/ move-and-follow, `⌃⌥F` float, `⌃⌥S` display sticky, `⌃⌥⇧S`
-global sticky — plus, since #1075, `⌥⌘` `1`/`2` and `4`/`5` for
-size on a base of its own — with one guard everywhere: **only
+/ move-and-follow, `⌃⌥F` float, `⌃⌥S` sticky everywhere, `⌃⌥P`
+sticky to this screen (#1094) — plus, since #1075, `⌥⌘` `1`/`2`
+and `4`/`5` for size on a base of its own — with one guard everywhere: **only
 when no layer carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
 never destructive.
@@ -5438,14 +5438,34 @@ with an arrow, "and follow" with a digit — so the ladder could
 not be stated in one sentence. Moving it off restores that: `⌘`
 now means "and follow", full stop.
 
-The ladder is **two classes plus a residue**, and the residue is
-named here so the next author does not re-derive it: the
-positional verbs escalate `⌃⌥` → `⌃⌥⇧` → `⌃⌥⌘`, size lives on
-`⌥⌘`, and the **toggles** (`⌃⌥F`, `⌃⌥S`, `⌃⌥⇧S`) plus app chrome
-(`⌃⌥K`) are mnemonic letters on the base tier, where `⇧` means
-"the broader scope" rather than "act on the window". That second
-sense of `⇧` predates this change and survives it; the claim
-being made is only that `⌘` no longer carries two.
+The ladder is **two bases plus one key**, and what divides them
+is not taxonomy: **`⌥⌘` carries the verbs you HOLD, `⌃⌥` the
+verbs you PRESS.** "Not positional" is why resize had to leave
+tier 3; "you hold it" (#1056) is why it landed on `⌥⌘`. Those two
+are different arguments, and conflating them is what left this
+split feeling unsettled — every later attempt to move the
+non-positional TOGGLES onto `⌥⌘` was reasoning from the taxonomy,
+which was never the load-bearing half. Size is the only held
+verb, so it is the only thing on `⌥⌘`; the toggles (`⌃⌥F`,
+`⌃⌥S`, `⌃⌥P`) are pressed, so they stay on `⌃⌥` as mnemonic
+letters; and app chrome (`⌃⌥K`) is the one key that is not a
+window verb at all.
+
+Stated that way the rule **predicts**, which is what makes it a
+rule rather than a label: a future glide-able verb goes to `⌥⌘`,
+anything you tap stays on `⌃⌥`.
+
+**And #1094 retired the exception this paragraph used to
+record.** `⌃⌥⇧S` spent `⇧` on "a broader scope" while the ladder
+three rows up spends it on "act on the window" — the one chord in
+the seed a user who had correctly learned the ladder would read
+wrong. It is gone: global sticky took `⌃⌥S` (the unqualified verb
+takes the unqualified letter, matching the label a GUI-first user
+is shown), and the screen-scoped one took `⌃⌥P`, named for the
+`pin.fill` mark `StickyStyle` draws rather than for a label —
+because a label-derived mnemonic only works in the language the
+label was written in, while a mark is a picture. So `⇧` now means
+exactly one thing everywhere, and so does `⌘`.
 
 The ergonomics ran backwards too. #1056 made resize the one verb
 a user HOLDS, and it sat on the heaviest chord in the scheme —

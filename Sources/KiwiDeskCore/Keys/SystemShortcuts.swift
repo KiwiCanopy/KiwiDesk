@@ -40,6 +40,17 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case zoomOut
     case dockHiding
     case finderSearch
+    // The one ⌃⌥ chord macOS reserves (#1094). ⌃⌥ is otherwise
+    // the quiet base #270 chose it for — measured with NO
+    // bindings across sixteen installed apps (2026-08-29) — but
+    // "quiet" is not "empty", and this entry is the difference.
+    // `SizeLayerSeedTests.noSeededRowShadowsTheSystem` checks
+    // SEEDED rows only, so a chord nothing seeds is invisible to
+    // every guard: before this case, a user binding ⌃⌥space
+    // themselves got no warning and a silently dead hotkey.
+    // Measured from `com.apple.symbolichotkeys` id 61 ("Select
+    // next source in Input menu", enabled) on macOS 26.6.
+    case inputSourceNext
 }
 
 /// Reserved macOS shortcuts KiwiDesk shouldn't shadow, used by
@@ -67,6 +78,7 @@ public enum SystemShortcuts {
         ("option+command+minus", .zoomOut),
         ("option+command+d", .dockHiding),
         ("option+command+space", .finderSearch),
+        ("control+option+space", .inputSourceNext),
     ])
 
     private static func build(

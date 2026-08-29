@@ -93,9 +93,28 @@ public enum DefaultKeybindings {
         // Size — ⌥⌘, a base of its own rather than a rung on the
         // positional ladder (#1075).
         rows.append(contentsOf: resizeRows(step: resizeStep))
-        // Toggles — mnemonic letters. Display sticky is the more
-        // frequent scope, so it takes the lighter ⌃⌥ chord; the
-        // broader global sticky escalates to ⌃⌥⇧.
+        // Toggles — mnemonic letters, and NO `⇧` among them
+        // (#1094). The ladder above spends `⇧` on "act on the
+        // window"; the retired `⌃⌥⇧S` spent it on "a broader
+        // scope", which is the one chord in the seed a user who
+        // learned the ladder would have read wrong.
+        //
+        // `S` carries the UNQUALIFIED verb, matching the label a
+        // GUI-first user is shown: `toggle_sticky` is "sticky
+        // everywhere", `toggle_display_sticky` is the qualified
+        // one. "Sticky = follows me everywhere" is also the
+        // reading someone reaches for before reading anything.
+        //
+        // `P` names the `pin.fill` MARK that
+        // `StickyStyle.displaySymbolName` draws on such a window,
+        // deliberately not the label. A label-derived mnemonic
+        // only works in the language the label was written in
+        // (`config-vocabulary.md` lets each locale pick its own
+        // word), while a mark is a picture — so `P` is teachable
+        // in every catalog, and #865's display→screen rename
+        // cannot orphan it. `D` was rejected: it reads as
+        // *Desktop*, a first-class noun with its own rows, and it
+        // anchors to a word the vocabulary rule retires.
         rows.append(
             KeyBinding(
                 combo: "control+option+f",
@@ -107,17 +126,17 @@ public enum DefaultKeybindings {
         rows.append(
             KeyBinding(
                 combo: "control+option+s",
-                lua: "KiwiDesk.toggle_display_sticky()",
+                lua: "KiwiDesk.toggle_sticky()",
                 kind: .navigation,
-                label: "Toggle display sticky"
+                label: "Toggle sticky"
             )
         )
         rows.append(
             KeyBinding(
-                combo: "control+option+shift+s",
-                lua: "KiwiDesk.toggle_sticky()",
+                combo: "control+option+p",
+                lua: "KiwiDesk.toggle_display_sticky()",
                 kind: .navigation,
-                label: "Toggle sticky"
+                label: "Toggle display sticky"
             )
         )
         // General — open the read-only Shortcuts panel. App
