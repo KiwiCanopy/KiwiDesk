@@ -10,14 +10,14 @@ import Foundation
 /// to drive.
 ///
 /// Eligibility is decided by what the press FIRE actually did:
-/// exactly one command executed, it was in `repeatableCommands`,
+/// exactly one command executed, it was in `glidableCommands`,
 /// and it succeeded — a binding's body is opaque Lua, so the
 /// tally is the one honest signal. The #933/#1055 size-limit
 /// cues end a run through `noteRefusal()`, so a held resize
 /// parked on a limit cues ONCE and stops. Why those are the
 /// rules — and why `resize` alone repeats — is argued in
 /// `docs/design-decisions.md` ▸ "A held resize chord glides";
-/// widen `repeatableCommands` only with a ruling of that shape.
+/// widen `glidableCommands` only with a ruling of that shape.
 ///
 /// **The glide re-issues the COMMAND, never the binding** (owner
 /// ruling, 2026-08-29). The press's `resize` arguments are
@@ -29,20 +29,20 @@ import Foundation
 /// the arming rule and the run agree rather than a new licence.
 /// Re-issuing through `KiwiCore.execute` keeps the capped
 /// writers, the refusal cues and the command contract exactly as
-/// a keypress has them. `HoldRepeat+Glide.swift` owns the ramp
+/// a keypress has them. `HoldGlide+Ramp.swift` owns the ramp
 /// and why speed is counted in steps per second.
 ///
 /// Pure state machine over injected seams — the frame clock, the
 /// initial delay, the scheduler and the apply are all closures —
 /// so the ladder is unit-testable with no timers and no
-/// `CADisplayLink` (`HoldRepeatTests`).
+/// `CADisplayLink` (`HoldGlideTests`).
 @MainActor
-final class HoldRepeat {
-    /// The verbs a held chord may repeat. `resize` alone by
+final class HoldGlide {
+    /// The verbs a held chord may GLIDE. `resize` alone by
     /// ruling; see the type doc before widening. Members must
-    /// name real commands — `HoldRepeatSeamTests` holds the set
+    /// name real commands — `HoldGlideEligibilitySeamTests` holds the set
     /// against the API census so a §5 verb rename reds here.
-    static let repeatableCommands: Set<String> = ["resize"]
+    static let glidableCommands: Set<String> = ["resize"]
 
     /// A glide that outlives this much accumulated FRAME time is
     /// force-ended (`onOverrun`). The stop signal is one Carbon
@@ -56,7 +56,7 @@ final class HoldRepeat {
 
     /// One glide step: the press's captured command NAME, its
     /// arguments, and the factor to scale its delta by. The name
-    /// travels because `repeatableCommands` is the declared
+    /// travels because `glidableCommands` is the declared
     /// owner of what may glide and the rule file contemplates
     /// widening it — a wiring that hardcodes `"resize"` would
     /// then re-issue `resize` for a press that ran a different
@@ -146,7 +146,7 @@ final class HoldRepeat {
     /// The repeatable command the press ran, and the arguments
     /// it ran with. The glide re-issues this verb and scales its
     /// delta rather than inventing either
-    /// (`HoldRepeat+Glide.swift`).
+    /// (`HoldGlide+Ramp.swift`).
     private var fireCommand = ""
     private var fireArgs: [JSONValue] = []
 
@@ -162,13 +162,13 @@ final class HoldRepeat {
     /// glide?" takes `KiwiCore.glideWriteScope` instead — that
     /// property's doc argues why a lifetime bit answers the
     /// per-write question wrongly, and fails open.
-    // `private(set)` would not let `HoldRepeat+Run` set it —
+    // `private(set)` would not let `HoldGlide+Run` set it —
     // Swift access control is file-scoped — so the setter is
     // internal and the type's own files are its only writers.
     var isGliding = false
 
     /// True for the duration of ONE glide frame's write, set
-    /// around the apply in `HoldRepeat+Run` and cleared by
+    /// around the apply in `HoldGlide+Run` and cleared by
     /// `defer` on every exit.
     ///
     /// Separate from `isGliding` deliberately (code review,
@@ -191,14 +191,14 @@ final class HoldRepeat {
     var isApplyingGlideStep = false
 
     // Internal, not private: the run machinery lives in
-    // `HoldRepeat+Run.swift`, split at the file ceiling, and
+    // `HoldGlide+Run.swift`, split at the file ceiling, and
     // Swift `private` does not cross files (the
     // `SizeBoundLearner+Invalidation` precedent).
     var cancelPending: (() -> Void)?
     var stopFrames: (() -> Void)?
     var glideArgs: [JSONValue] = []
     var glideCommand = ""
-    /// Cancels the wall-clock backstop in `HoldRepeat+Run`.
+    /// Cancels the wall-clock backstop in `HoldGlide+Run`.
     var cancelBackstop: (() -> Void)?
     /// Frame time the glide has accumulated: its ramp clock AND
     /// its age, both simulated from the frames actually
@@ -218,7 +218,7 @@ final class HoldRepeat {
         succeeded: Bool
     ) {
         commandsInFire += 1
-        if Self.repeatableCommands.contains(name), succeeded {
+        if Self.glidableCommands.contains(name), succeeded {
             repeatableSucceeded = true
             fireCommand = name
             fireArgs = args

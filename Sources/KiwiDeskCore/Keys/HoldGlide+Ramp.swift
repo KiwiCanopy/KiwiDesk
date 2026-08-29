@@ -48,7 +48,7 @@ import Foundation
 /// `HoldGlideRampTests` pins only the SHAPE (flat start, monotone
 /// ramp, clamped ceiling), derived from these values, so a retune
 /// reds nothing.
-extension HoldRepeat {
+extension HoldGlide {
     /// Steps per second at the glide's first frame. Bounded from
     /// BELOW by two things rather than chosen for feel (designer
     /// round, 2026-08-29):

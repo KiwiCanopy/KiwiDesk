@@ -27,7 +27,7 @@ extension KiwiCore {
         // Accumulate against the COMMANDED frame, not the echo
         // (#129/#1056): `state.windows[id].frame` is echo-fed,
         // and mid-animation the echo lags by whole steps — so a
-        // press (or a hold-to-repeat tick) landing before the
+        // press (or a glide frame) landing before the
         // previous one settled re-based on stale geometry and
         // under-accumulated. The in-flight animation's target
         // IS the pending commanded value; idle, the settled

@@ -4,7 +4,7 @@ import Foundation
 /// is testable without touching the real event system.
 ///
 /// An implementor never fires the handler of a registration
-/// that FAILED (`register` returned nil) — the hold-to-repeat
+/// that FAILED (`register` returned nil) — the hold-to-glide
 /// press path leans on it (`RegistrationBox` carries a nil id
 /// for exactly that handler), and Carbon holds it for free
 /// since a failed registration installs nothing.
@@ -59,8 +59,11 @@ public final class KeybindingManager {
     private var layerIcons: [String: String] = [:]
     /// The live registrations by id — the ONE home for "what is
     /// registered right now": `deactivate`'s unregister loop and
-    /// the hold-to-repeat engine's re-fire and release routing
-    /// (#1056) both read it. Written only by
+    /// the hold-to-glide engine's arm check and release routing
+    /// (#1056/#1082) both read it. The arm check is an EXISTENCE
+    /// question — does the id that will deliver the release still
+    /// exist — never a re-derivation of which binding to act on;
+    /// `KeybindingManager+HoldGlide.pressFire` argues it. Written only by
     /// `activate`/`deactivate`; a second id list beside it would
     /// be two homes for one fact, drifting in opposite failure
     /// modes (a leaked live chord vs a tick against a dead id).
@@ -84,7 +87,7 @@ public final class KeybindingManager {
     /// Hold-to-repeat (#1056). Internal so `KiwiCore.execute`
     /// and the size-limit cues can feed it through the
     /// `noteCommand` / `noteResizeRefusal` passthroughs below.
-    let holdRepeat = HoldRepeat()
+    let holdGlide = HoldGlide()
     /// True while a Settings recorder is armed (#213): all our
     /// hotkeys are unregistered so testing an existing shortcut
     /// mid-capture can't fire its action. Table/layer edits still
@@ -96,7 +99,7 @@ public final class KeybindingManager {
         registrar: HotkeyRegistrar = CarbonHotkeyCenter()
     ) {
         self.registrar = registrar
-        wireHoldRepeat(registrar: registrar)
+        wireHoldGlideChannels(registrar: registrar)
     }
 
     /// Bindings of one layer (exposed for the GUI editor).
@@ -273,7 +276,7 @@ public final class KeybindingManager {
     private func deactivate() {
         // The ids are about to vanish, so no release can ever
         // arrive to stop a live repeat — end it here (#1056).
-        holdRepeat.cancelRun()
+        holdGlide.cancelRun()
         for id in activeBindings.keys {
             registrar.unregister(id: id)
         }

@@ -9,7 +9,7 @@ import Testing
 /// animation's TARGET (#129/#1056): `state.windows[id].frame`
 /// is echo-fed, and in a test no echo ever arrives — exactly
 /// the stale-geometry window a rapid second press or a
-/// hold-to-repeat tick lands in. Before the fix both presses
+/// glide frame lands in. Before the fix both presses
 /// based on the original frame and the second was swallowed
 /// whole. The animated target is DELIBERATELY the only
 /// commanded value trusted — the instant path re-bases on the

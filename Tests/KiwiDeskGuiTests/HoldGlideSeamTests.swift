@@ -2,7 +2,7 @@ import Foundation
 import Testing
 
 /// The glide's two INVERTED seams (#1082). Both default inert on
-/// `HoldRepeat` and are opted into live by `KiwiCore+HoldGlide`,
+/// `HoldGlide` and are opted into live by `KiwiCore+HoldGlide`,
 /// the polarity tests.md names — a live default would build a
 /// `CADisplayLink` on a real screen in every suite that arms a
 /// hold, and would dispatch a real `resize` from every one that
@@ -21,7 +21,7 @@ import Testing
 ///   deleted, this suite is the only thing that reds.
 /// - **`applyGlideStep` has a second net**, because
 ///   `HoldGlideFixture` deliberately does not stub it — deleting
-///   its wiring also reds `HoldRepeatWiringTests` ▸
+///   its wiring also reds `HoldGlideWiringTests` ▸
 ///   `chordArmsGlidesAndReleases`. Still pinned here, since that
 ///   net is one suite's choice and could be stubbed away in a
 ///   refactor without anyone noticing what it was carrying.
@@ -30,9 +30,9 @@ import Testing
 /// one hold double every step. So both needles are pinned by
 /// EXACT COUNT rather than by "no strays".
 ///
-/// What the seams DO once wired is `HoldRepeatWiringTests`
+/// What the seams DO once wired is `HoldGlideWiringTests`
 /// (a real chord, real frames, a real `resize`); the ladder they
-/// hang off is `HoldRepeatTests`.
+/// hang off is `HoldGlideTests`.
 @Suite("Hold-glide seams stay wired, and singular (#1082)")
 struct HoldGlideSeamTests {
     private static let root = SourceScan.repoRoot(
@@ -64,12 +64,12 @@ struct HoldGlideSeamTests {
     @Test("each glide seam is assigned exactly once, in one file")
     func seamsAreAssignedOnce() throws {
         // The needles carry the assignment, not the property
-        // name: reading `holdRepeat.isGliding` elsewhere is
+        // name: reading `holdGlide.isGliding` elsewhere is
         // legitimate (the resize paths do), and a bare property
         // needle would count those and read as duplication.
         for needle in [
-            "holdRepeat.applyGlideStep =",
-            "holdRepeat.startFrames =",
+            "holdGlide.applyGlideStep =",
+            "holdGlide.startFrames =",
         ] {
             let assigned = try Self.sites(of: needle)
             #expect(
@@ -99,17 +99,58 @@ struct HoldGlideSeamTests {
         // called once, so the needle's own declaration is the
         // second site — pin two and name which is which, rather
         // than loosening to "at least one".
-        let all = try Self.sites(of: "wireHoldGlide")
+        //
+        // The needle carries its PARENS deliberately: bare
+        // `wireHoldGlide` is a prefix of
+        // `wireHoldGlideChannels`, the manager's own wiring
+        // point, so the unparenthesised form counts four and
+        // reads as duplication. This suite caught exactly that
+        // when the #1082 rename landed.
+        let all = try Self.sites(of: "wireHoldGlide()")
         #expect(
             all.count == 2,
             """
-            expected `wireHoldGlide` to be declared once and \
+            expected `wireHoldGlide()` to be declared once and \
             called once, found \(all.count): \
             \(all.map(\.site).joined(separator: ", "))
             """
         )
         let files = Set(all.map(\.file.lastPathComponent))
         #expect(files == [Self.wiringFile, Self.bootstrapFile])
+    }
+
+    @Test("one engine, two wiring points, each reached once")
+    func bothWiringPointsAreReached() throws {
+        // The glide's seams are wired from TWO places by
+        // ownership, and nothing said so until architect review
+        // asked (2026-08-29). `KeybindingManager
+        // .wireHoldGlideChannels` owns what the manager itself
+        // can see — the registrar's release channel and its own
+        // log seam — and `KiwiCore.wireHoldGlide` owns the seams
+        // that need the core: the command re-issue, the frame
+        // clock, and the end-of-glide payment.
+        //
+        // A third seam belongs to whichever side can reach its
+        // dependency, and this test is where that split is
+        // recorded rather than left to a reader to infer from
+        // two similar names.
+        let channels = try Self.sites(
+            of: "wireHoldGlideChannels("
+        )
+        #expect(
+            channels.count == 2,
+            """
+            expected `wireHoldGlideChannels(` declared once and \
+            called once, found \(channels.count): \
+            \(channels.map(\.site).joined(separator: ", "))
+            """
+        )
+        #expect(
+            Set(channels.map(\.file.lastPathComponent)) == [
+                "KeybindingManager+HoldGlide.swift",
+                "KeybindingManager.swift",
+            ]
+        )
     }
 
     @Test("the frame clock is the per-monitor driver, not a timer")
@@ -157,7 +198,7 @@ struct HoldGlideSeamTests {
         // to the glide?" and is READ by production geometry code,
         // which makes "there is one reader" a state claim — the
         // shape #614 bans unless a guard names it. The
-        // behavioural test beside it (`HoldRepeatWiringTests` ▸
+        // behavioural test beside it (`HoldGlideWiringTests` ▸
         // `glideStepsWriteInstantly`) asserts the value flips
         // during a hold and would stay green with a second reader
         // added anywhere, so it cannot carry the claim (code
@@ -185,9 +226,9 @@ struct HoldGlideSeamTests {
         )
         #expect(
             Set(byFile.keys) == [
-                "HoldRepeat.swift",
-                "HoldRepeat+Run.swift",
-                "KeybindingManager+Repeat.swift",
+                "HoldGlide.swift",
+                "HoldGlide+Run.swift",
+                "KeybindingManager+HoldGlide.swift",
                 "KiwiCore+Resize.swift",
             ],
             .init(
@@ -206,11 +247,11 @@ struct HoldGlideSeamTests {
         // scrambled after every held resize — visible, but
         // nothing else reds: the stand-down lives in `resize` and
         // stays correct on its own.
-        let wired = try Self.sites(of: "holdRepeat.onGlideEnd =")
+        let wired = try Self.sites(of: "holdGlide.onGlideEnd =")
         #expect(
             wired.count == 1,
             """
-            expected exactly one holdRepeat.onGlideEnd wiring, \
+            expected exactly one holdGlide.onGlideEnd wiring, \
             found \(wired.count): \
             \(wired.map(\.site).joined(separator: ", "))
             """

@@ -3,7 +3,7 @@ import Foundation
 
 /// The two live seams a held resize glide needs (#1082), wired at
 /// bootstrap like every other seam. Both are INERT by default on
-/// `HoldRepeat` — the inverted-seam shape tests.md rules — because
+/// `HoldGlide` — the inverted-seam shape tests.md rules — because
 /// the live frame clock is a `CADisplayLink` on a real screen and
 /// a live default would build one in every suite that arms a
 /// hold. `HoldGlideSeamTests` guards the inversion from both
@@ -24,14 +24,14 @@ extension KiwiCore {
     /// keypress has them: a glide step is a press like any other
     /// and does not get its own path.
     private func wireGlideStep() {
-        keys.holdRepeat.applyGlideStep = {
+        keys.holdGlide.applyGlideStep = {
             [weak self] command, args, scale in
             guard let self,
                 let axis = args.first?.stringValue,
                 let delta = args.dropFirst().first?.numberValue
             else { return false }
             // The VERB the press ran, carried through the tally
-            // rather than spelled here: `repeatableCommands` owns
+            // rather than spelled here: `glidableCommands` owns
             // what may glide, and a hardcoded `"resize"` would
             // re-issue it for a press that ran something else the
             // moment that set widens (architect review,
@@ -39,7 +39,7 @@ extension KiwiCore {
             //
             // The per-write scope the geometry paths read is set
             // by the state machine around this call
-            // (`HoldRepeat.isApplyingGlideStep`), not here, so a
+            // (`HoldGlide.isApplyingGlideStep`), not here, so a
             // re-wiring cannot forget it.
             let response = self.execute(
                 command,
@@ -59,7 +59,7 @@ extension KiwiCore {
     /// is the honest device check that the ramp is being ticked
     /// at all.
     private func wireGlideFrames() {
-        keys.holdRepeat.startFrames = { [weak self] tick in
+        keys.holdGlide.startFrames = { [weak self] tick in
             guard let self else { return {} }
             let screen =
                 self.activeSpace.flatMap {
@@ -107,7 +107,7 @@ extension KiwiCore {
     /// frame is also the correct ordering: the pile is scrambled
     /// at most once per hold.
     private func wireGlideEnd() {
-        keys.holdRepeat.onGlideEnd = { [weak self] in
+        keys.holdGlide.onGlideEnd = { [weak self] in
             self?.scheduleTrackZOrderRestoreIfOverflowing()
         }
     }

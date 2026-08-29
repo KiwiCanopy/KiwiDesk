@@ -2162,13 +2162,13 @@ tallies every command run inside a hotkey fire, and a hold arms
 only when the press-fire executed exactly one command, it was
 `resize`, and it succeeded. `focus` and `swap` are deliberately
 out — overshooting focus is worse than pressing again — and
-widening the set (`HoldRepeat.repeatableCommands`) is a per-verb
+widening the set (`HoldGlide.glidableCommands`) is a per-verb
 ruling, never an inference.
 
 *A hold GLIDES rather than repeating* (owner ruling, 2026-08-29,
 replacing #1056's interval acceleration). #1056 re-fired the
 binding on a shrinking timer, which felt chunky on device for a
-reason no constant could fix: `HoldRepeat` decided only *when* to
+reason no constant could fix: `HoldGlide` decided only *when* to
 fire, never *how much*, because the amount lives inside opaque
 Lua — so acceleration shortened the gaps and left the jumps
 identical. And speed and smoothness are ONE dial, not two: what
@@ -2194,7 +2194,7 @@ eighteen-of-their-steps-per-second glide the moment the user
 held, and a 200 pt step would make holding *slower* than tapping.
 Scaling the press's own delta keeps the glide continuous with the
 tap at every setting. The feel constants live beside
-`HoldRepeat.glideSteps` and are the owner's to retune.
+`HoldGlide.glideSteps` and are the owner's to retune.
 
 *The glide re-issues the COMMAND, never the binding.* The press's
 `resize` arguments are captured from the tally and re-issued
@@ -2242,7 +2242,7 @@ releases (`HotkeyReleaseReporting` — a hold with no stop channel
 must never start); any registration teardown (layer switch,
 recorder suspend) ends the run, because an unregistered hot key
 delivers no release to stop on; and a run is bounded by
-`HoldRepeat.maxRunSeconds`, the #611 force-settle shape — the
+`HoldGlide.maxRunSeconds`, the #611 force-settle shape — the
 stop signal is one Carbon event, and a lost one must cost a
 bounded hold, never the session. That bound is spent in
 *simulated* frame time, accumulated from the frames actually
@@ -2257,9 +2257,9 @@ worth, where a longer-lived stored commanded frame is re-armed by
 every press that reads it and compounds without bound (the #1057
 banked-growth class); the paths that keep re-reading the echo are
 recorded in [accepted-limitations.md](accepted-limitations.md).
-(`HoldRepeatTests`, `HoldGlideRunTests`, `HoldGlideRampTests`,
-`HoldRepeatWiringTests`, `HoldGlideRefusalWiringTests`,
-`HoldGlideSeamTests`, `HoldRepeatSeamTests`,
+(`HoldGlideTests`, `HoldGlideRunTests`, `HoldGlideRampTests`,
+`HoldGlideWiringTests`, `HoldGlideRefusalWiringTests`,
+`HoldGlideSeamTests`, `HoldGlideEligibilitySeamTests`,
 `FloatResizeAccumulationTests`)
 
 **A corroborated bound generalizes at the consume site,

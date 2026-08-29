@@ -1,12 +1,12 @@
 import Foundation
 
-/// The glide's RUN machinery (#1082), split from `HoldRepeat` at
+/// The glide's RUN machinery (#1082), split from `HoldGlide` at
 /// §2.1's ceiling rather than after crossing it: starting the
 /// frame clock, the per-frame step, and the two nets under a run
 /// whose stop signal is a single Carbon event. The ladder's
 /// eligibility tally and lifecycle stay on the type itself; the
-/// velocity ramp is `HoldRepeat+Glide.swift`.
-extension HoldRepeat {
+/// velocity ramp is `HoldGlide+Ramp.swift`.
+extension HoldGlide {
     func beginGlide() {
         guard heldID != nil else { return }
         isGliding = true

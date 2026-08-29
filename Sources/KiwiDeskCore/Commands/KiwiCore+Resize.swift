@@ -45,7 +45,7 @@ extension KiwiCore {
     /// CHANGED target every frame, which is precisely the storm
     /// the settle watchdog cannot tell from a long drag, so a
     /// springing glide would generate that documented hole
-    /// deliberately and leave `HoldRepeat.maxRunSeconds` as its
+    /// deliberately and leave `HoldGlide.maxRunSeconds` as its
     /// only net. Writing instantly creates no animation at all,
     /// so there is nothing to defer.
     ///
@@ -79,7 +79,7 @@ extension KiwiCore {
     /// own (#1090).
     ///
     /// Reads the per-WRITE `isApplyingGlideStep`, never the
-    /// hold's lifetime — `HoldRepeat.isApplyingGlideStep` argues
+    /// hold's lifetime — `HoldGlide.isApplyingGlideStep` argues
     /// why, and `keys.isFiring` one screen up is the same shape
     /// of read. Who else may read it is pinned by count in
     /// `HoldGlideSeamTests`, rather than claimed here: a

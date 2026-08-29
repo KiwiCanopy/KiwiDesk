@@ -7,9 +7,9 @@ import Testing
 /// `HoldGlideHarness`: what a running glide does frame by frame —
 /// the ramp it rides, the age it accumulates, and the two ways it
 /// stops that are not a release. Arming, eligibility and teardown
-/// are `HoldRepeatTests`; the ramp's own arithmetic is
+/// are `HoldGlideTests`; the ramp's own arithmetic is
 /// `HoldGlideRampTests`; the production wiring is
-/// `HoldRepeatWiringTests`.
+/// `HoldGlideWiringTests`.
 @MainActor
 @Suite("Hold-glide run (#1082)")
 struct HoldGlideRunTests {
@@ -34,7 +34,7 @@ struct HoldGlideRunTests {
         try h.frame(dt)
         #expect(
             h.steps[0].scale
-                == HoldRepeat.glideStartSteps * dt
+                == HoldGlide.glideStartSteps * dt
         )
         // And it accelerates: a later frame moves further for the
         // same elapsed frame time.
@@ -79,7 +79,7 @@ struct HoldGlideRunTests {
         }
         #expect(h.overruns == 1)
         #expect(h.frameStops == 1)
-        #expect(Double(frames) * dt >= HoldRepeat.maxRunSeconds)
+        #expect(Double(frames) * dt >= HoldGlide.maxRunSeconds)
         // The rescue is one recovery shape: a fresh press arms a
         // fresh run.
         h.press(id: 9)

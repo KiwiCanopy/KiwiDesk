@@ -7,12 +7,12 @@ import Testing
 /// every seam injected, no timers, no `CADisplayLink`, no Carbon,
 /// no Lua. The production wiring — a real chord driving a real
 /// `resize` through `KiwiCore.execute`'s tally — is
-/// `HoldRepeatWiringTests`, which is what reds if the tally call
+/// `HoldGlideWiringTests`, which is what reds if the tally call
 /// is deleted; this suite cannot see that and does not claim to.
 /// The ramp's own shape is `HoldGlideRampTests`.
 @MainActor
 @Suite("Hold-to-glide ladder (#1056/#1082)")
-struct HoldRepeatTests {
+struct HoldGlideTests {
     @Test("A lone resize arms, waits, then glides on frames")
     func armsWaitsAndGlides() throws {
         let h = HoldGlideHarness()
@@ -30,7 +30,7 @@ struct HoldRepeatTests {
         // backstop, at the run bound — the glide itself rides
         // frames and never the scheduler.
         #expect(
-            h.ticks.map(\.delay) == [HoldRepeat.maxRunSeconds]
+            h.ticks.map(\.delay) == [HoldGlide.maxRunSeconds]
         )
         // Still nothing applied: a glide moves on FRAMES, so an
         // engine that applied on the wait itself would double the

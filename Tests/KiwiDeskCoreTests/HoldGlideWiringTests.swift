@@ -10,10 +10,10 @@ import Testing
 /// re-issue, the refusal-cue sites, and the teardown cancels.
 /// This is what reds if the tally call, a cue's
 /// `noteResizeRefusal()` or the release wiring is deleted — the
-/// machine ladder (`HoldRepeatTests`) cannot see any of those.
+/// machine ladder (`HoldGlideTests`) cannot see any of those.
 @MainActor
 @Suite("Hold-to-glide wiring (#1056/#1082)")
-struct HoldRepeatWiringTests {
+struct HoldGlideWiringTests {
     @Test("A held chord glides a lone resize until release")
     func chordArmsGlidesAndReleases() throws {
         let f = try HoldGlideFixture(
@@ -170,17 +170,17 @@ struct HoldRepeatWiringTests {
     func overrunReportsThroughTheLogSeam() throws {
         // The run bound is a rescue for a LOST stop signal, so
         // its report must not itself be a seam nobody wired —
-        // `HoldRepeat.onOverrun` defaults to silent, and every
+        // `HoldGlide.onOverrun` defaults to silent, and every
         // machine harness assigns it by hand (re-review,
         // #1056; the `engineLogReachesTheCore` shape). This
-        // reds if `wireHoldRepeat` stops assigning it; the
+        // reds if `wireHoldGlideChannels` stops assigning it; the
         // manager-to-core log hop is the log-seam suites' job.
         let f = try HoldGlideFixture(
             body: #"KiwiDesk.resize("x", 50)"#
         )
         var logs: [String] = []
         f.core.keys.onLog = { logs.append($0) }
-        f.core.keys.holdRepeat.onOverrun()
+        f.core.keys.holdGlide.onOverrun()
         #expect(logs.contains { $0.contains("hold-glide") })
     }
 

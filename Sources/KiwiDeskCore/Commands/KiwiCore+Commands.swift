@@ -4,7 +4,7 @@ import Foundation
 /// The command dispatch switch. `KiwiCore.execute` (in
 /// `KiwiCore+Execute.swift`) is the ONE caller — every entry
 /// point routes through its tally wrapper, which
-/// `HoldRepeatSeamTests` pins.
+/// `HoldGlideEligibilitySeamTests` pins.
 extension KiwiCore {
     func dispatchCommand(
         _ command: String,

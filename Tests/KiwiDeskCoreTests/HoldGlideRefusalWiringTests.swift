@@ -8,9 +8,9 @@ import Testing
 /// (#933/#1055, retimed #1082), on the shared
 /// `HoldGlideFixture`: a real size-limit cue reaching the engine
 /// and ending the hold, so the pill flashes once per hold rather
-/// than once per frame. Split from `HoldRepeatWiringTests` at
+/// than once per frame. Split from `HoldGlideWiringTests` at
 /// §2.1's ceiling; which cue SITES feed the funnel at all is
-/// `HoldRepeatSeamTests`' derived scan.
+/// `HoldGlideEligibilitySeamTests`' derived scan.
 @MainActor
 @Suite("Hold-glide refusal wiring (#933/#1082)")
 struct HoldGlideRefusalWiringTests {
@@ -23,7 +23,7 @@ struct HoldGlideRefusalWiringTests {
         // there is the #1082 half: `noteResizeRefusal` gates on
         // `isFiring || isGliding`, and dropping the second term
         // leaves the pill flashing every frame. Which cue SITES
-        // feed the engine is `HoldRepeatSeamTests`' derived scan,
+        // feed the engine is `HoldGlideEligibilitySeamTests`' derived scan,
         // not a list here.
         //
         // **Count the cues, never just the ending** (guard-prover,
@@ -77,7 +77,7 @@ struct HoldGlideRefusalWiringTests {
         // silently re-open the hole: an overrun needs the whole
         // bound's worth of frame time, this needs almost none.
         #expect(
-            Double(frames) * dt < HoldRepeat.maxRunSeconds / 10
+            Double(frames) * dt < HoldGlide.maxRunSeconds / 10
         )
         #expect(f.frameTick == nil)
         #expect(f.core.keys.isGliding == false)

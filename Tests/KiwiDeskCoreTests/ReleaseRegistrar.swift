@@ -3,10 +3,10 @@ import Foundation
 @testable import KiwiDeskCore
 
 /// A registrar fake that can report releases — the channel the
-/// hold-to-repeat engine arms on (#1056). The press-only fakes
+/// hold-to-glide engine arms on (#1056). The press-only fakes
 /// across the test trees deliberately do NOT conform, which is
 /// the `HotkeyReleaseReporting` split working as designed.
-/// Split from `HoldRepeatWiringTests` at the file ceiling; that
+/// Split from `HoldGlideWiringTests` at the file ceiling; that
 /// suite is its consumer.
 @MainActor
 final class ReleaseRegistrar: HotkeyRegistrar,

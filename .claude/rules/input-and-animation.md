@@ -40,7 +40,7 @@ editing here:
   funnel and one release channel (#1056, retimed #1082).** Three
   obligations, each with the same failure mode — the feature
   silently stops meaning what it claims while every fake-driven
-  suite stays green — and one guard suite, `HoldRepeatSeamTests`:
+  suite stays green — and one guard suite, `HoldGlideEligibilitySeamTests`:
   - Every command a hotkey fire runs reaches the hold engine
     through the ONE `KiwiCore.execute` wrapper. Eligibility is
     "what the press DID", so a second `dispatchCommand` caller
@@ -70,11 +70,11 @@ editing here:
     one layer down, because a tick looked its registration up in
     order to re-fire the binding; the glide looks nothing up, so
     the question is asked at the arm or nowhere
-    (`HoldRepeatWiringTests`). A run is also bounded by
-    `HoldRepeat.maxRunSeconds` against a lost release event —
+    (`HoldGlideWiringTests`). A run is also bounded by
+    `HoldGlide.maxRunSeconds` against a lost release event —
     the #611 force-settle shape, reported through the
     manager's log seam, never silent (the overrun-to-log
-    wiring is pinned by `HoldRepeatWiringTests`, since the
+    wiring is pinned by `HoldGlideWiringTests`, since the
     seam defaults silent and every machine harness assigns it
     by hand). That bound is spent in SIMULATED frame time,
     accumulated from frames actually delivered, so a starved
@@ -84,7 +84,7 @@ editing here:
 
   **The glide's two seams are INVERTED, and take the two-sided
   guard** (`HoldGlideSeamTests`): `applyGlideStep` and
-  `startFrames` default inert on `HoldRepeat` and are opted into
+  `startFrames` default inert on `HoldGlide` and are opted into
   live by `KiwiCore+HoldGlide`, because a live default would
   build a `CADisplayLink` on a real screen in every suite that
   arms a hold. Every suite hands in its own fake, so deleting the
@@ -120,7 +120,7 @@ editing here:
   The product rulings (resize-only, the tally, the glide, the
   steps-per-second unit) are argued in `docs/design-decisions.md`
   ▸ "A held resize chord glides"; widen
-  `HoldRepeat.repeatableCommands` only with a ruling of that
+  `HoldGlide.glidableCommands` only with a ruling of that
   shape, and the set's members must name real commands (the suite
   derives them from the API census, so a §5 verb rename reds
   there).

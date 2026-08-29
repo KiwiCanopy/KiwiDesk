@@ -5,21 +5,21 @@ import Foundation
 /// fire bracket that hands the ladder one press's tally, and the
 /// passthroughs `KiwiCore` feeds. The ladder itself —
 /// eligibility, the initial delay, the per-frame glide — lives on
-/// `HoldRepeat`.
+/// `HoldGlide`.
 extension KeybindingManager {
     /// Whether a held glide is applying right now. Read by the
     /// refusal gate below and by `KiwiCore.resizeRetileAnimated`,
     /// both of which need the state at a moment when `isFiring`
     /// is false — the glide re-issues its command outside any
     /// binding fire.
-    public var isGliding: Bool { holdRepeat.isGliding }
+    public var isGliding: Bool { holdGlide.isGliding }
 
     /// Whether a glide frame's own write is executing right now
     /// — the per-WRITE question, which `isGliding` (the hold's
     /// lifetime) answers wrongly. The distinction is argued on
-    /// `HoldRepeat.isApplyingGlideStep`.
+    /// `HoldGlide.isApplyingGlideStep`.
     public var isApplyingGlideStep: Bool {
-        holdRepeat.isApplyingGlideStep
+        holdGlide.isApplyingGlideStep
     }
 
     /// Called once from `init`. The glide arms only when the
@@ -28,19 +28,19 @@ extension KeybindingManager {
     /// across the test trees stay valid by not conforming to
     /// `HotkeyReleaseReporting`; that the PRODUCTION default
     /// registrar does conform — and so keeps the feature alive —
-    /// is pinned by `HoldRepeatSeamTests`, since every suite here
+    /// is pinned by `HoldGlideEligibilitySeamTests`, since every suite here
     /// hands in a conforming fake and would stay green with the
     /// live channel lost.
-    func wireHoldRepeat(registrar: HotkeyRegistrar) {
+    func wireHoldGlideChannels(registrar: HotkeyRegistrar) {
         if let reporting =
             registrar as? HotkeyReleaseReporting
         {
-            holdRepeat.releaseCapable = true
+            holdGlide.releaseCapable = true
             reporting.onRelease = { [weak self] id in
-                self?.holdRepeat.released(id: id)
+                self?.holdGlide.released(id: id)
             }
         }
-        holdRepeat.onOverrun = { [weak self] in
+        holdGlide.onOverrun = { [weak self] in
             self?.onLog(
                 "hold-glide: run exceeded its bound and was "
                     + "force-ended (release event lost?)"
@@ -59,7 +59,7 @@ extension KeybindingManager {
         succeeded: Bool
     ) {
         guard isFiring else { return }
-        holdRepeat.noteCommand(
+        holdGlide.noteCommand(
             name,
             args: args,
             succeeded: succeeded
@@ -81,8 +81,8 @@ extension KeybindingManager {
     /// is a real widening, and the pre-#1082 comment here claimed
     /// the gate excluded exactly this.
     public func noteResizeRefusal() {
-        guard isFiring || holdRepeat.isGliding else { return }
-        holdRepeat.noteRefusal()
+        guard isFiring || holdGlide.isGliding else { return }
+        holdGlide.noteRefusal()
     }
 
     /// A physical key-down fire: runs the binding, then lets the
@@ -110,17 +110,17 @@ extension KeybindingManager {
     /// asked HERE. Existence only — never re-deriving WHICH
     /// binding to act on from a rebuilt table.
     func pressFire(ref: Int32, combo: KeyCombo, id: UInt32?) {
-        let outer = holdRepeat.beginFire()
+        let outer = holdGlide.beginFire()
         fire(ref: ref, combo: combo)
         if let id, activeBindings[id] != nil {
-            holdRepeat.endFire(id: id)
+            holdGlide.endFire(id: id)
         } else {
             // A press with no id — or one whose registration the
             // body replaced — cannot arm, but it is still a new
             // press: the previous run ends, latest wins,
             // unconditionally.
-            holdRepeat.cancelRun()
+            holdGlide.cancelRun()
         }
-        holdRepeat.restoreTally(outer)
+        holdGlide.restoreTally(outer)
     }
 }

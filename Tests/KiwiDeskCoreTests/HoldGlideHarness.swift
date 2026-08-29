@@ -5,7 +5,7 @@ import Testing
 
 /// The shared machine harness for the hold-to-glide ladder
 /// (#1056/#1082): every seam captured, nothing live. Its own file
-/// because two suites drive it — `HoldRepeatTests` (arming,
+/// because two suites drive it — `HoldGlideTests` (arming,
 /// eligibility, teardown) and `HoldGlideRunTests` (the glide
 /// itself) — split at §2.1's ceiling rather than after crossing
 /// it.
@@ -16,7 +16,7 @@ import Testing
 /// constant so no test reads the host's key-repeat preferences.
 @MainActor
 final class HoldGlideHarness {
-    let repeatEngine = HoldRepeat()
+    let repeatEngine = HoldGlide()
     var ticks: [(delay: TimeInterval, work: () -> Void)] = []
     var cancels = 0
     var steps: [(command: String, args: [JSONValue], scale: Double)] = []

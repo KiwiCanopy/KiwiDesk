@@ -9,7 +9,7 @@ import Testing
 /// real release-reporting registrar — only the pre-glide wait and
 /// the frame clock are captured, so a frame reaches the real
 /// `resize`. Its own file because two suites drive it —
-/// `HoldRepeatWiringTests` and `HoldGlideRefusalWiringTests` —
+/// `HoldGlideWiringTests` and `HoldGlideRefusalWiringTests` —
 /// split at §2.1's ceiling rather than after crossing it.
 @MainActor
 final class HoldGlideFixture {
@@ -53,8 +53,8 @@ final class HoldGlideFixture {
             encoding: .utf8
         )
         core.loadConfig()
-        core.keys.holdRepeat.initialDelay = { 0.5 }
-        core.keys.holdRepeat.schedule = {
+        core.keys.holdGlide.initialDelay = { 0.5 }
+        core.keys.holdGlide.schedule = {
             [weak self] delay, work in
             self?.ticks.append((delay, work))
             return {}
@@ -64,7 +64,7 @@ final class HoldGlideFixture {
         // frames by hand. `applyGlideStep` is deliberately
         // NOT stubbed — the whole point of this suite is
         // that a frame reaches the real `resize`.
-        core.keys.holdRepeat.startFrames = {
+        core.keys.holdGlide.startFrames = {
             [weak self] tick in
             self?.frameTick = tick
             return { self?.frameTick = nil }
@@ -105,7 +105,7 @@ final class HoldGlideFixture {
     }
 
     var hits: LuaValue? { core.lua?.global("hits") }
-    var heldID: UInt32? { core.keys.holdRepeat.heldID }
+    var heldID: UInt32? { core.keys.holdGlide.heldID }
 
     /// Fires the one pre-glide wait, starting the glide.
     func beginGlide() throws {
