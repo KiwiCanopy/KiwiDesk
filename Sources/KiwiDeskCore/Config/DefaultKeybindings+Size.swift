@@ -21,9 +21,10 @@ extension DefaultKeybindings {
     /// `1`/`2`, so the pair that is higher drives the dimension
     /// that grows upward. That block is the only place a keyboard
     /// encodes a second axis without using arrows, and it is why
-    /// this binds digits at all; **#1074 is what will make those
-    /// keypad keys reach these rows**, and until it lands only
-    /// the number row fires them.
+    /// this binds digits at all, and **#1074 landed the aliasing
+    /// that makes those keypad keys reach these rows** — a
+    /// keypad digit IS its number-row twin, so both physical
+    /// keys fire these bindings (`KeypadKeys`).
     ///
     /// `5`/`6` and `2`/`3`+`5`/`6` were both rejected: touch
     /// typing splits the number row between `5` and `6`, so any

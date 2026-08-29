@@ -5384,9 +5384,9 @@ Within a pair the higher digit grows. `1`/`2` and `4`/`5` form a
 2×2 block on a numeric keypad, `4`/`5` directly above `1`/`2`, so
 the pair that sits higher drives the dimension that grows upward
 — the only place a keyboard encodes a second axis without arrows,
-and the reason this binds digits at all. **#1074 is what will make
-those keypad keys reach these rows**; until it lands only the
-number row fires them. The pairs are also separated by `3` on the
+and the reason this binds digits at all. **#1074 landed the
+aliasing that makes those keypad keys reach these rows**: a keypad
+digit IS its number-row twin, so both physical keys fire them. The pairs are also separated by `3` on the
 number row, so a mistimed reach for one axis cannot land on the
 other (owner, 2026-08-28). Any pair spanning `5`/`6` was rejected:
 touch typing splits the row there.
