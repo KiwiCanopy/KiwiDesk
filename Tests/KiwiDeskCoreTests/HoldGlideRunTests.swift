@@ -52,10 +52,10 @@ struct HoldGlideRunTests {
         h.press(id: 3)
         try h.beginGlide()
         try h.frame()
-        #expect(h.repeatEngine.isGliding)
+        #expect(h.glideEngine.isGliding)
         h.applySucceeds = false
         try h.frame()
-        #expect(h.repeatEngine.heldID == nil)
+        #expect(h.glideEngine.heldID == nil)
         #expect(h.frameStops == 1)
         #expect(h.isTicking == false)
     }
@@ -72,7 +72,7 @@ struct HoldGlideRunTests {
         h.press(id: 8)
         try h.beginGlide()
         var frames = 0
-        while h.repeatEngine.heldID != nil {
+        while h.glideEngine.heldID != nil {
             try h.frame(dt)
             frames += 1
             try #require(frames < 1_000_000)
@@ -83,7 +83,7 @@ struct HoldGlideRunTests {
         // The rescue is one recovery shape: a fresh press arms a
         // fresh run.
         h.press(id: 9)
-        #expect(h.repeatEngine.heldID == 9)
+        #expect(h.glideEngine.heldID == 9)
     }
 
     @Test("A stalled clock ages the glide by what it moved")
@@ -186,13 +186,13 @@ struct HoldGlideRunTests {
         try h.beginGlide()
         for _ in 0..<20 { try h.frame() }
         #expect(h.glideEnds == 0)
-        h.repeatEngine.released(id: 1)
+        h.glideEngine.released(id: 1)
         #expect(h.glideEnds == 1)
 
         // A tap that armed but never glided pays nothing.
         let tap = HoldGlideHarness()
         tap.press(id: 2)
-        tap.repeatEngine.released(id: 2)
+        tap.glideEngine.released(id: 2)
         #expect(tap.glideEnds == 0)
 
         // And every other way a glide ends pays it exactly once:
@@ -201,7 +201,7 @@ struct HoldGlideRunTests {
         refused.press(id: 3)
         try refused.beginGlide()
         try refused.frame()
-        refused.repeatEngine.noteRefusal()
+        refused.glideEngine.noteRefusal()
         #expect(refused.glideEnds == 1)
 
         let failing = HoldGlideHarness()
@@ -230,8 +230,8 @@ struct HoldGlideRunTests {
         // The pending scheduled work is the backstop.
         let backstop = h.ticks.popLast()
         try #require(backstop).work()
-        #expect(h.repeatEngine.heldID == nil)
-        #expect(h.repeatEngine.isGliding == false)
+        #expect(h.glideEngine.heldID == nil)
+        #expect(h.glideEngine.isGliding == false)
         #expect(h.overruns == 1)
         #expect(h.glideEnds == 1)
     }

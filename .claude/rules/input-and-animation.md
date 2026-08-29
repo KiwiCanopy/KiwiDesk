@@ -40,7 +40,8 @@ editing here:
   funnel and one release channel (#1056, retimed #1082).** Three
   obligations, each with the same failure mode — the feature
   silently stops meaning what it claims while every fake-driven
-  suite stays green — and one guard suite, `HoldGlideEligibilitySeamTests`:
+  suite stays green — and one guard suite,
+  `HoldGlideEligibilitySeamTests`:
   - Every command a hotkey fire runs reaches the hold engine
     through the ONE `KiwiCore.execute` wrapper. Eligibility is
     "what the press DID", so a second `dispatchCommand` caller
@@ -80,23 +81,36 @@ editing here:
     accumulated from frames actually delivered, so a starved
     main queue cannot age a hold it never ticked — the same
     idiom the #611 bullet below states for the animation
-    watchdog.
+    watchdog. It differs from that bullet in owing a SECOND
+    net: the watchdog's clock is the animation's own
+    integration, while the glide's is a `DisplayLink` bound to
+    one `NSScreen`, which display sleep or a disconnect
+    mid-hold simply STOPS. So a wall-clock backstop of the same
+    length sits under the frame bound — a net must not depend
+    on the thing that died — and it can never truncate a
+    healthy glide, since frame time is at most wall time
+    (`HoldGlideRunTests` ▸ `wallClockBackstopEndsAFrozenGlide`).
+    Keep both, or the primary is unreachable in exactly the
+    failure it exists for.
 
   **The glide's two seams are INVERTED, and take the two-sided
   guard** (`HoldGlideSeamTests`): `applyGlideStep` and
   `startFrames` default inert on `HoldGlide` and are opted into
   live by `KiwiCore+HoldGlide`, because a live default would
   build a `CADisplayLink` on a real screen in every suite that
-  arms a hold. Every suite hands in its own fake, so deleting the
-  production wiring leaves the whole tree green while a held
-  chord silently stops gliding — the inert default is a working
-  no-op, not a crash. That is tests.md's inverted-seam rule, and
-  the reason both needles are pinned by exact count rather than
-  by "no strays".
+  arms a hold. The inert default is a working no-op rather than
+  a crash, so a deleted wiring is the silent direction — which
+  is tests.md's inverted-seam rule, and the reason both needles
+  are pinned by exact count rather than by "no strays". The two
+  are not equally exposed, and that suite's docstring is the one
+  copy of which is which: state the asymmetry there when you
+  change either seam, rather than averaging the two into one
+  claim here.
 
   **A glide's tiled writes are instant, and the floating path is
   the deliberate exception** (#1082). The bit a write consults is
-  `KiwiCore.glideWriteScope`, set around ONE re-issued command
+  `HoldGlide.isApplyingGlideStep` (read as
+  `keys.isApplyingGlideStep`), set around ONE re-issued command
   and cleared on every exit — never `keys.isGliding`, which is
   the hold's lifetime and answers the per-write question wrongly
   in both directions: an unrelated Lua/CLI/IPC resize arriving
@@ -114,8 +128,23 @@ editing here:
   re-derive geometry from it, leaving the next frame's base
   exact; `resizeFloating` measures from a FRAME and its only
   trusted commanded base is the in-flight animation's target, so
-  it keeps its animation. A new resize write path decides which
-  of those two it is before taking either.
+  it keeps whatever animation the config asks for. A new resize
+  write path decides which of those two it is before taking
+  either.
+
+  That exception is why **Reduce Motion is the configuration
+  where the FLOATING path is worst**, which inverts the obvious
+  reading of "instant writes answer Reduce Motion" — they answer
+  it for the tiled half only. `AnimationEngine.animate` opens
+  with `guard isEnabled, !reduceMotion()`, so under Reduce
+  Motion, with animations off, or with the engine disabled there
+  is no in-flight target at all and `resizeFloating` falls back
+  to the echo-fed frame: at glide rate most frames re-base on
+  the same stale echo. Nothing guards this — it is a shipped
+  limitation with an owner, filed as #1090 and recorded in
+  `docs/accepted-limitations.md` — so treat it as the standing
+  reason not to reach for `resizeRetileAnimated` on that path
+  before #1090 gives it a base it can trust at frame rate.
 
   The product rulings (resize-only, the tally, the glide, the
   steps-per-second unit) are argued in `docs/design-decisions.md`

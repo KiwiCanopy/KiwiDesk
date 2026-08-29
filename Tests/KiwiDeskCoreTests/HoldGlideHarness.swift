@@ -16,7 +16,7 @@ import Testing
 /// constant so no test reads the host's key-repeat preferences.
 @MainActor
 final class HoldGlideHarness {
-    let repeatEngine = HoldGlide()
+    let glideEngine = HoldGlide()
     var ticks: [(delay: TimeInterval, work: () -> Void)] = []
     var cancels = 0
     var steps: [(command: String, args: [JSONValue], scale: Double)] = []
@@ -32,28 +32,28 @@ final class HoldGlideHarness {
     private var frameTick: ((TimeInterval) -> Void)?
 
     init(releaseCapable: Bool = true) {
-        repeatEngine.releaseCapable = releaseCapable
-        repeatEngine.initialDelay = { 0.5 }
-        repeatEngine.schedule = { [weak self] delay, work in
+        glideEngine.releaseCapable = releaseCapable
+        glideEngine.initialDelay = { 0.5 }
+        glideEngine.schedule = { [weak self] delay, work in
             self?.ticks.append((delay, work))
             return { self?.cancels += 1 }
         }
-        repeatEngine.startFrames = { [weak self] tick in
+        glideEngine.startFrames = { [weak self] tick in
             self?.frameTick = tick
             return {
                 self?.frameStops += 1
                 self?.frameTick = nil
             }
         }
-        repeatEngine.applyGlideStep = {
+        glideEngine.applyGlideStep = {
             [weak self] command, args, scale in
             self?.steps.append((command, args, scale))
             return self?.applySucceeds ?? false
         }
-        repeatEngine.onGlideEnd = { [weak self] in
+        glideEngine.onGlideEnd = { [weak self] in
             self?.glideEnds += 1
         }
-        repeatEngine.onOverrun = { [weak self] in
+        glideEngine.onOverrun = { [weak self] in
             self?.overruns += 1
         }
     }
@@ -64,15 +64,15 @@ final class HoldGlideHarness {
         commands: [(String, Bool)] = [("resize", true)],
         args: [JSONValue] = [.string("x"), .number(50)]
     ) {
-        _ = repeatEngine.beginFire()
+        _ = glideEngine.beginFire()
         for (name, ok) in commands {
-            repeatEngine.noteCommand(
+            glideEngine.noteCommand(
                 name,
                 args: args,
                 succeeded: ok
             )
         }
-        repeatEngine.endFire(id: id)
+        glideEngine.endFire(id: id)
     }
 
     /// Fires the pending pre-glide wait, which starts the

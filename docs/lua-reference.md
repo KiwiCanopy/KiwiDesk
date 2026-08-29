@@ -3784,29 +3784,50 @@ window additionally names the reason while the blocking
 neighbor marks itself at its minimum. Keyboard
 and mouse resizes share these clamps and cues.
 
-**Held, the chord repeats (#1056).** A hotkey whose press ran
-exactly one command — a successful `resize` — keeps applying
-while you hold it: one precise step on the press, then, after
-your Mac's own key-repeat delay, a step per key-repeat interval
-(the macOS Keyboard settings, read per hold), accelerating over
-a long hold toward a few times that rate so a large adjustment
-stops costing a drum roll. Whether a binding repeats is decided
-by what its press actually **did**, not by how it is written: a
-body that runs two commands, or a different verb, fires once
-per press exactly as before — and `focus`/`swap` deliberately
-never repeat, because overshooting focus is worse than pressing
-again. A refusal that cues (#933/#1055) ends the run, so a held
-shrink parked on a minimum flashes its pill once rather than
-once per tick, while scrolling's wordless out-of-screen stop
-keeps ticking harmlessly until release, matching its silence.
+**Held, the chord glides (#1056, retimed #1082).** A hotkey
+whose press ran exactly one command — a successful `resize` —
+keeps applying while you hold it: one precise step on the press,
+then, after your Mac's own key-repeat delay, a continuous
+**glide** on the display's own frame clock rather than a repeat
+on a timer. The glide moves a fraction of *that binding's own
+delta* each frame, at a speed measured in steps per second: it
+starts gently, so a short hold is still fine adjustment, and
+ramps up over a second or two, so a large adjustment stops
+costing a drum roll. Because the amount moved is the frame's
+elapsed time × that speed, the same hold travels the same
+distance on a 60 Hz display, a 120 Hz one, and a ProMotion panel
+changing rate mid-hold — a faster panel buys smoother motion,
+not more speed.
+
+What the glide re-issues is the **`resize` command your press
+ran**, with a scaled delta — not the binding's Lua body, which
+runs exactly once, on the press. Whether a binding glides at all
+is decided by what its press actually **did**, not by how it is
+written: a body that runs two commands, or a different verb,
+fires once per press exactly as before — and `focus`/`swap`
+deliberately never glide, because overshooting focus is worse
+than pressing again. A body that rebuilds its own bindings
+(`bind` inside the body) also arms nothing: the registration the
+press arrived on is gone, so no key-release could ever arrive to
+stop the glide.
+
+A refusal that cues (#933/#1055) ends the run, so a held shrink
+parked on a minimum flashes its pill once rather than
+continuously, while scrolling's wordless out-of-screen stop
+keeps gliding harmlessly until release, matching its silence.
 Releasing the chord, switching layers, or arming a Settings
 shortcut recorder ends the run immediately.
-A held **floating** resize with window animations on
-accumulates against the in-flight animation's target rather
-than the lagging AX echo, so a fast run of presses lands its
-full distance instead of only part of it (#129). With resize
-animation off, or under system **Reduce Motion**, it still
-re-reads the echo; see
+
+A **tiled** glide writes each frame instantly — the glide is
+itself the motion, so there is nothing left for an animation to
+smooth. A held **floating** resize keeps the configured window
+animation instead, and with window animations on it accumulates
+against the in-flight animation's target rather than the lagging
+AX echo, so a fast run of presses lands its full distance
+instead of only part of it (#129). With resize animation off, or
+under system **Reduce Motion**, there is no such target and it
+re-reads the echo — which at glide rate means a held floating
+resize advances only as fast as those echoes arrive; see
 [accepted limitations](accepted-limitations.md).
 
 What the

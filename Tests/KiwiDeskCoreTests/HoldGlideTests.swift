@@ -17,15 +17,15 @@ struct HoldGlideTests {
     func armsWaitsAndGlides() throws {
         let h = HoldGlideHarness()
         h.press(id: 7)
-        #expect(h.repeatEngine.heldID == 7)
+        #expect(h.glideEngine.heldID == 7)
         // Exactly one scheduled wait, at the system delay — the
         // glide itself never rides the scheduler.
         #expect(h.ticks.map(\.delay) == [0.5])
-        #expect(h.repeatEngine.isGliding == false)
+        #expect(h.glideEngine.isGliding == false)
         #expect(h.steps.isEmpty)
 
         try h.beginGlide()
-        #expect(h.repeatEngine.isGliding)
+        #expect(h.glideEngine.isGliding)
         // The only thing left on the scheduler is the wall-clock
         // backstop, at the run bound — the glide itself rides
         // frames and never the scheduler.
@@ -50,7 +50,7 @@ struct HoldGlideTests {
         // is worse than pressing again).
         let focus = HoldGlideHarness()
         focus.press(id: 1, commands: [("focus", true)])
-        #expect(focus.repeatEngine.heldID == nil)
+        #expect(focus.glideEngine.heldID == nil)
         #expect(focus.ticks.isEmpty)
 
         // A body running MORE than the one command: the glide
@@ -61,18 +61,18 @@ struct HoldGlideTests {
             id: 1,
             commands: [("resize", true), ("focus", true)]
         )
-        #expect(two.repeatEngine.heldID == nil)
+        #expect(two.glideEngine.heldID == nil)
 
         // A failed resize (unsupported layout) would beep per
         // frame.
         let failed = HoldGlideHarness()
         failed.press(id: 1, commands: [("resize", false)])
-        #expect(failed.repeatEngine.heldID == nil)
+        #expect(failed.glideEngine.heldID == nil)
 
         // No release channel: a glide could never stop.
         let deaf = HoldGlideHarness(releaseCapable: false)
         deaf.press(id: 1)
-        #expect(deaf.repeatEngine.heldID == nil)
+        #expect(deaf.glideEngine.heldID == nil)
     }
 
     @Test("A refusal cues once and ends the run")
@@ -80,15 +80,15 @@ struct HoldGlideTests {
         // At the wall on the FIRST press: the pill flashed once,
         // and holding must not flash it per frame.
         let atWall = HoldGlideHarness()
-        _ = atWall.repeatEngine.beginFire()
-        atWall.repeatEngine.noteCommand(
+        _ = atWall.glideEngine.beginFire()
+        atWall.glideEngine.noteCommand(
             "resize",
             args: [.string("x"), .number(50)],
             succeeded: true
         )
-        atWall.repeatEngine.noteRefusal()
-        atWall.repeatEngine.endFire(id: 1)
-        #expect(atWall.repeatEngine.heldID == nil)
+        atWall.glideEngine.noteRefusal()
+        atWall.glideEngine.endFire(id: 1)
+        #expect(atWall.glideEngine.heldID == nil)
         #expect(atWall.ticks.isEmpty)
 
         // Reaching the wall MID-GLIDE: the frame that hit it is
@@ -98,9 +98,9 @@ struct HoldGlideTests {
         run.press(id: 2)
         try run.beginGlide()
         try run.frame()
-        run.repeatEngine.noteRefusal()
-        #expect(run.repeatEngine.heldID == nil)
-        #expect(run.repeatEngine.isGliding == false)
+        run.glideEngine.noteRefusal()
+        #expect(run.glideEngine.heldID == nil)
+        #expect(run.glideEngine.isGliding == false)
         #expect(run.frameStops == 1)
         #expect(run.isTicking == false)
     }
@@ -112,11 +112,11 @@ struct HoldGlideTests {
         try h.beginGlide()
         // A release for some OTHER id (a run already replaced)
         // must not touch this one.
-        h.repeatEngine.released(id: 99)
-        #expect(h.repeatEngine.heldID == 3)
+        h.glideEngine.released(id: 99)
+        #expect(h.glideEngine.heldID == 3)
         #expect(h.isTicking)
-        h.repeatEngine.released(id: 3)
-        #expect(h.repeatEngine.heldID == nil)
+        h.glideEngine.released(id: 3)
+        #expect(h.glideEngine.heldID == nil)
         #expect(h.frameStops == 1)
     }
 
@@ -126,29 +126,29 @@ struct HoldGlideTests {
         h.press(id: 4)
         try h.beginGlide()
         h.press(id: 5)
-        #expect(h.repeatEngine.heldID == 5)
+        #expect(h.glideEngine.heldID == 5)
         // The first run's frame clock was torn down — one active
         // hold at a time, and two live clocks would double every
         // step.
         #expect(h.frameStops == 1)
-        #expect(h.repeatEngine.isGliding == false)
+        #expect(h.glideEngine.isGliding == false)
         // The old release arriving later is stale and ignored.
-        h.repeatEngine.released(id: 4)
-        #expect(h.repeatEngine.heldID == 5)
+        h.glideEngine.released(id: 4)
+        #expect(h.glideEngine.heldID == 5)
     }
 
     @Test("Teardown cancels — no release can arrive")
     func teardownCancels() throws {
         let h = HoldGlideHarness()
         h.press(id: 6)
-        h.repeatEngine.cancelRun()
-        #expect(h.repeatEngine.heldID == nil)
+        h.glideEngine.cancelRun()
+        #expect(h.glideEngine.heldID == nil)
         #expect(h.cancels == 1)
         // A cancelled run's wait firing late is inert: it must
         // not start a frame clock nobody can stop.
         let lateTick = h.ticks.popLast()
         try #require(lateTick).work()
-        #expect(h.repeatEngine.isGliding == false)
+        #expect(h.glideEngine.isGliding == false)
         #expect(h.isTicking == false)
         #expect(h.steps.isEmpty)
     }
@@ -165,30 +165,30 @@ struct HoldGlideTests {
         // (re-review, #1056) leaves the inner's arming tally
         // behind and the outer press wrongly arms below.
         let h = HoldGlideHarness()
-        _ = h.repeatEngine.beginFire()
-        h.repeatEngine.noteCommand(
+        _ = h.glideEngine.beginFire()
+        h.glideEngine.noteCommand(
             "focus",
             args: [.string("left")],
             succeeded: true
         )
 
         // Nested press: one successful resize — arms id 2.
-        let saved = h.repeatEngine.beginFire()
-        h.repeatEngine.noteCommand(
+        let saved = h.glideEngine.beginFire()
+        h.glideEngine.noteCommand(
             "resize",
             args: [.string("x"), .number(50)],
             succeeded: true
         )
-        h.repeatEngine.endFire(id: 2)
-        #expect(h.repeatEngine.heldID == 2)
-        h.repeatEngine.restoreTally(saved)
+        h.glideEngine.endFire(id: 2)
+        #expect(h.glideEngine.heldID == 2)
+        h.glideEngine.restoreTally(saved)
 
         // The outer press closes on its own tally — one focus,
         // never repeatable — so it replaces the inner hold and
         // arms nothing. A leaked inner tally reads as one
         // successful resize here and arms id 1 instead.
-        h.repeatEngine.endFire(id: 1)
-        #expect(h.repeatEngine.heldID == nil)
+        h.glideEngine.endFire(id: 1)
+        #expect(h.glideEngine.heldID == nil)
     }
 
 }

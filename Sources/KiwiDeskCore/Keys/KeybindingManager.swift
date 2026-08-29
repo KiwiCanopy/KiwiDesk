@@ -84,7 +84,7 @@ public final class KeybindingManager {
     final class RegistrationBox {
         var id: UInt32?
     }
-    /// Hold-to-repeat (#1056). Internal so `KiwiCore.execute`
+    /// Hold-to-glide (#1056/#1082). Internal so `KiwiCore.execute`
     /// and the size-limit cues can feed it through the
     /// `noteCommand` / `noteResizeRefusal` passthroughs below.
     let holdGlide = HoldGlide()

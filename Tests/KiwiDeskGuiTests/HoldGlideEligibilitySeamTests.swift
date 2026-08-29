@@ -9,7 +9,7 @@ import Testing
 /// WIRING seams a running glide needs; the two are split by that
 /// question, not by accident of naming.
 ///
-/// The original
+/// These are the seams whose loss no behavioural suite can see
 /// (#1056). Every `HoldGlideWiringTests` fixture hands in a
 /// conforming fake and drives commands through `execute`, so
 /// that suite stays green if the PRODUCTION registrar loses its
@@ -35,7 +35,7 @@ struct HoldGlideEligibilitySeamTests {
         #expect(manager.holdGlide.releaseCapable)
     }
 
-    @Test("Repeatable verbs name real commands")
+    @Test("Glidable verbs name real commands")
     func glidableCommandsAreInTheCensus() {
         // `HoldGlide.glidableCommands` holds bare strings in
         // `Keys/`, far from the `Commands/Reference` census —

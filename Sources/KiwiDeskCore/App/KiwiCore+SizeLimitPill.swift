@@ -21,7 +21,7 @@ extension KiwiCore {
 
     /// The one entry every size-limit cue takes to reach the
     /// border seam: it also ends a held keyboard run (#1056), so
-    /// a refusal pills once per hold rather than per tick. A new
+    /// a refusal pills once per hold rather than per frame. A new
     /// cue function routes here — `HoldGlideEligibilitySeamTests` pins
     /// this as the only production caller of
     /// `borders.onResizeRefusal`, which is what makes "a cue

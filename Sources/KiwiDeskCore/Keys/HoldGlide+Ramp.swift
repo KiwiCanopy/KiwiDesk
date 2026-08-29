@@ -53,11 +53,6 @@ extension HoldGlide {
     /// BELOW by two things rather than chosen for feel (designer
     /// round, 2026-08-29):
     ///
-    /// - It must beat mashing the chord by hand, or holding is
-    ///   the worse tool at the one moment the user decides
-    ///   between them — the same argument the steps-per-second
-    ///   ruling above makes about the ends of the step range,
-    ///   applied to the ramp's own first moment.
     /// - It must clear the fineness floor, which is
     ///   `2 pt ÷ step × refresh`: 2.4 steps/s at 60 Hz and 4.8 at
     ///   120 Hz for the default 50 pt step. Below it the glide
@@ -70,6 +65,15 @@ extension HoldGlide {
     /// ~150 ms should cost at most one step — the unit of intent,
     /// and the amount one tap the other way undoes — which is
     /// ≈6.7 steps/s.
+    ///
+    /// A third consideration was dropped rather than kept as
+    /// decoration (docs review, 2026-08-29): "it must beat
+    /// mashing the chord by hand" reads like a bound but names
+    /// no measured rate, so it constrained nothing and 6.0 is
+    /// not derived from it. The two above already bracket the
+    /// value to [4.8, 6.7]. If someone measures a sustained
+    /// mash rate on a three-modifier chord, it becomes a real
+    /// lower bound and belongs back here WITH the number.
     ///
     /// Deliberately NOT justified as "fine adjustment": that is
     /// what a small configured step is for. The tap owns
@@ -88,23 +92,35 @@ extension HoldGlide {
     static let glideMaxSteps = 18.0
 
     /// Seconds from the glide's first frame to `glideMaxSteps`.
-    /// Derived from a target rather than picked: the ceiling
-    /// should arrive at about ONE screen-span of travel at the
-    /// default step, not half of one. At a mean 12 steps/s and
-    /// 30 steps to cross ~1500 pt, that is 2.5 s. The first cut
-    /// shipped 1.5 s, which reached the ceiling at ~800 pt — so
-    /// the ordinary adjustment ended at top speed, which is where
-    /// overshoot is worst.
     ///
-    /// It also buys a perceptual plateau without a fifth
-    /// constant: at this slope the speed moves only ~1.4 steps/s
-    /// across the first 300 ms, so a short hold runs at an
-    /// effectively constant, learnable rate — key repeat's
-    /// predictability — and only a hold that has become a journey
-    /// accelerates. Do NOT re-implement that as an explicit flat
-    /// phase; moving the endpoints gets it with fewer degrees of
-    /// freedom for a future retune to get wrong.
-    static let glideRampSeconds: TimeInterval = 2.5
+    /// Owner-ruled on device at 1.8 s (2026-08-29), OVERRIDING a
+    /// derivation that said 2.5 — recorded rather than quietly
+    /// replaced, because the derivation is still the reasoning a
+    /// future retune should start from.
+    ///
+    /// The derivation: the ceiling should arrive at about one
+    /// screen-span of travel at the default step, which at a mean
+    /// 12 steps/s and 30 steps to cross ~1500 pt is 2.5 s. The
+    /// first cut shipped 1.5 s, reaching the ceiling at ~800 pt,
+    /// so the ordinary adjustment ended at top speed — where
+    /// overshoot is worst. Both of those still hold.
+    ///
+    /// What the device said: 2.5 s read as "a bit slow", and it
+    /// is the only constant that got slower between the two
+    /// builds tried — the start went 3.5 → 6.0 in the same
+    /// change, so a hold that felt slower could only be slower to
+    /// ACCELERATE. 1.8 s reaches the ceiling at ~1080 pt, about
+    /// two thirds of a span: it keeps most of the plateau the
+    /// long ramp bought (the speed still moves only ~2 steps/s
+    /// across the first 300 ms, so a short hold stays a
+    /// learnable, near-constant rate) while cutting the wait for
+    /// top speed by a third.
+    ///
+    /// Do NOT read the derivation as settled against the device.
+    /// Feel outranks it here: the whole constant exists to be
+    /// judged by hand, and the same hands caught the two errors
+    /// this feature's design turned on.
+    static let glideRampSeconds: TimeInterval = 1.8
 
     /// The ramp: linear in elapsed glide time, clamped at both
     /// ends.

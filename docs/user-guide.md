@@ -2843,16 +2843,19 @@ Each row has an action. Built-in actions live under headings:
   Held, a resize shortcut glides: the first press is one
   precise step; keep holding and, after your Mac's own
   key-repeat delay, the window starts resizing smoothly instead
-  of stepping — slowly at first, so a short hold is still fine
-  adjustment, then faster over about a second and a half, so a
-  big adjustment does not cost a drum roll of presses. The glide
-  is scaled to your resize step, so a smaller step glides more
-  gently and a larger one covers ground faster. It runs at your
-  display's own refresh rate, which means it travels at the same
-  speed on a 60 Hz screen and a 120 Hz one — the faster screen
-  just draws it more smoothly. Only resize glides: focus and swap
-  fire once per press, where overshooting would hurt more than
-  pressing again.
+  of stepping — gently at first, so a brief hold stays easy to
+  stop where you meant to, then faster over the next couple of
+  seconds, so a big adjustment does not cost a drum roll of
+  presses. The glide is scaled to your resize step, so a smaller
+  step glides more gently and a larger one covers ground faster.
+  It runs at your display's own refresh rate, which means it
+  travels at the same speed on a 60 Hz screen and a 120 Hz one —
+  the faster screen just draws it more smoothly. Only resize
+  glides: focus and swap fire once per press, where overshooting
+  would hurt more than pressing again. One exception to the
+  smoothness: a held resize of a **floating** window with window
+  animations off, or under Reduce Motion, advances in fits — see
+  [Accepted limitations](accepted-limitations.md).
 - **Applications** — launch an app. Each row carries a **Launch
   behavior** menu: *Open or Focus* (the default — pull a running
   instance into the current space, or launch it if it isn't

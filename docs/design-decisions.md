@@ -2168,11 +2168,11 @@ ruling, never an inference.
 *A hold GLIDES rather than repeating* (owner ruling, 2026-08-29,
 replacing #1056's interval acceleration). #1056 re-fired the
 binding on a shrinking timer, which felt chunky on device for a
-reason no constant could fix: `HoldGlide` decided only *when* to
-fire, never *how much*, because the amount lives inside opaque
-Lua — so acceleration shortened the gaps and left the jumps
-identical. And speed and smoothness are ONE dial, not two: what
-the eye judges is displacement per *rendered* frame, and the
+reason no constant could fix: the repeat engine decided only
+*when* to fire, never *how much*, because the amount lives inside
+opaque Lua — so acceleration shortened the gaps and left the
+jumps identical. And speed and smoothness are ONE dial, not two:
+what the eye judges is displacement per *rendered* frame, and the
 display draws when it draws, so ticking faster than the refresh
 produces no extra frames, only more accumulated movement in each.
 So the hold now runs as a continuous session on the monitor's own
@@ -2182,7 +2182,13 @@ refresh-rate independent — 60 Hz, 120 Hz and a ProMotion panel
 changing rate mid-hold all travel at the same visual speed, with
 a faster panel buying finer motion rather than more speed. The
 press keeps its full configured step, so a tap still moves a
-predictable amount.
+predictable amount, and what separates a tap from a hold is the
+system's OWN key-repeat delay (`NSEvent.keyRepeatDelay`, read per
+run at the arming press) rather than a threshold KiwiDesk
+invents: the user already tuned that number for every other key
+on the machine. That is the surviving half of #1056's "timing is
+the user's" ruling — the repeat INTERVAL is gone, since the glide
+has no interval.
 
 *Velocity is counted in steps per second, not points per second.*
 The issue proposed absolute points; the ruling went the other
@@ -2203,17 +2209,17 @@ on the press. This is a deliberate semantic change from #1056,
 where a tick re-ran the whole body: at frame rate that would
 repeat whatever else the body does, and the single-command tally
 already refuses to arm on such a body — so re-issuing the command
-is what makes the arming rule and the run agree. It also moved
-one guard: the repeat ladder caught a body that *rebound
-mid-fire* one layer down, because a tick looked its registration
-up in order to re-fire; the glide looks nothing up, so the arm
-itself now refuses when the press's own registration did not
-survive its fire (a rebind mints fresh ids, so no release would
-ever arrive to stop the hold).
+is what makes the arming rule and the run agree. It follows that
+a body which *rebinds mid-fire* arms nothing: a rebind mints
+fresh ids, so no release for the pressed id could ever arrive to
+stop the hold. Where that question is asked, and why the
+glide is the layer that has to ask it, belongs to
+`.claude/rules/input-and-animation.md`.
 
-*A glide's tiled writes are instant, and that is also the Reduce
-Motion answer.* The glide already *is* the motion, so springing
-each frame would smooth an already-smooth signal, add ~100–200 ms
+*A glide's tiled writes are instant — which is the Reduce Motion
+answer for the tiled half, and only that half.* The glide already
+*is* the motion, so springing each frame would smooth an
+already-smooth signal, add ~100–200 ms
 of trailing behind the key, and generate the #611 retarget storm
 deliberately — a changed target every frame is exactly what the
 settle watchdog cannot tell from a long drag. Writing instantly
@@ -2223,12 +2229,26 @@ from: those write a stored ratio, weight or length and re-derive
 geometry from it, so the next frame's base is exact, while
 `resizeFloating` measures from a frame and the only commanded
 base #1056 trusts is the in-flight animation's target — so a
-floating glide keeps its animation, and its trailing with it. And
-since the tiled glide is instant for everyone, a held chord
-glides under Reduce Motion too: a held-key resize is the
-keyboard's direct manipulation, which Reduce Motion does not
-suppress for the mouse either, and there is no second mechanism
-to keep alive.
+floating glide keeps the configured animation, and its trailing
+with it.
+
+Since the tiled write is instant for everyone, a held chord
+glides under Reduce Motion too, rather than being suppressed: a
+held-key resize is the keyboard's direct manipulation, which
+Reduce Motion does not suppress for the mouse either, and on the
+tiled paths there is no second mechanism to keep alive. On the
+floating path there is one, and Reduce Motion is exactly where it
+is worst: `AnimationEngine.animate` returns early under Reduce
+Motion (as it does with animations off), so there is no in-flight
+target to accumulate against and the path falls back to the
+echo-fed frame. At press rate that costs one echo's lag, which
+[accepted-limitations.md](accepted-limitations.md) records; at
+glide rate most frames re-base on the same stale echo, so the
+hold advances at echo rate instead of at the ramp's. An
+accessibility setting must not quietly degrade a headline
+behaviour, which is why giving that path a commanded base of its
+own is release work (#1090) rather than a deferred consistency
+polish.
 
 *A refusal ends the run:* the #933/#1055 size-limit cues stop the
 glide, so a held shrink parked on a floor pills once per hold
@@ -2247,8 +2267,12 @@ stop signal is one Carbon event, and a lost one must cost a
 bounded hold, never the session. That bound is spent in
 *simulated* frame time, accumulated from the frames actually
 delivered, so a starved main queue cannot age a hold it never
-ticked. A floating resize also stopped under-accumulating (#129),
-which the hold would otherwise have made loud: a press
+ticked — with a wall-clock backstop of the same length beneath
+it, because the frame clock is bound to one screen and display
+sleep or a disconnect mid-hold stops it, and a net must not
+depend on the thing that died. A floating resize also stopped
+under-accumulating (#129), which the hold would otherwise have
+made loud: a press
 mid-animation accumulates against the in-flight animation's
 target rather than the lagging AX echo. The target is
 deliberately the ONLY commanded value trusted — it dies at

@@ -15,7 +15,7 @@ import Foundation
 /// tally is the one honest signal. The #933/#1055 size-limit
 /// cues end a run through `noteRefusal()`, so a held resize
 /// parked on a limit cues ONCE and stops. Why those are the
-/// rules — and why `resize` alone repeats — is argued in
+/// rules — and why `resize` alone glides — is argued in
 /// `docs/design-decisions.md` ▸ "A held resize chord glides";
 /// widen `glidableCommands` only with a ruling of that shape.
 ///
@@ -134,14 +134,14 @@ final class HoldGlide {
     /// save the outer fire's counts and hand them back.
     struct TallySnapshot {
         let commands: Int
-        let repeatableSucceeded: Bool
+        let glidableSucceeded: Bool
         let refused: Bool
         let command: String
         let args: [JSONValue]
     }
 
     private var commandsInFire = 0
-    private var repeatableSucceeded = false
+    private var glidableSucceeded = false
     private var refused = false
     /// The repeatable command the press ran, and the arguments
     /// it ran with. The glide re-issues this verb and scales its
@@ -159,7 +159,7 @@ final class HoldGlide {
     /// raised anywhere in the hold ends it, and
     /// `KeybindingManager.isFiring` is false outside the press
     /// fire. Anything asking "does THIS WRITE belong to the
-    /// glide?" takes `KiwiCore.glideWriteScope` instead — that
+    /// glide?" takes `isApplyingGlideStep` below instead — that
     /// property's doc argues why a lifetime bit answers the
     /// per-write question wrongly, and fails open.
     // `private(set)` would not let `HoldGlide+Run` set it —
@@ -219,7 +219,7 @@ final class HoldGlide {
     ) {
         commandsInFire += 1
         if Self.glidableCommands.contains(name), succeeded {
-            repeatableSucceeded = true
+            glidableSucceeded = true
             fireCommand = name
             fireArgs = args
         }
@@ -242,13 +242,13 @@ final class HoldGlide {
     func beginFire() -> TallySnapshot {
         let saved = TallySnapshot(
             commands: commandsInFire,
-            repeatableSucceeded: repeatableSucceeded,
+            glidableSucceeded: glidableSucceeded,
             refused: refused,
             command: fireCommand,
             args: fireArgs
         )
         commandsInFire = 0
-        repeatableSucceeded = false
+        glidableSucceeded = false
         refused = false
         fireCommand = ""
         fireArgs = []
@@ -257,7 +257,7 @@ final class HoldGlide {
 
     func restoreTally(_ saved: TallySnapshot) {
         commandsInFire = saved.commands
-        repeatableSucceeded = saved.repeatableSucceeded
+        glidableSucceeded = saved.glidableSucceeded
         refused = saved.refused
         fireCommand = saved.command
         fireArgs = saved.args
@@ -271,7 +271,7 @@ final class HoldGlide {
         let eligible =
             releaseCapable
             && commandsInFire == 1
-            && repeatableSucceeded
+            && glidableSucceeded
             && !refused
         // A new press always ends any previous run — one active
         // hold at a time, latest wins — and does so before the
