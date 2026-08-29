@@ -49,8 +49,10 @@ extension KiwiCore {
     /// a bar, which is unreachable. The retile fit measures
     /// against it.
     ///
-    /// It reserves nothing for the focus ring. `floatGrowBounds`
-    /// below does, and the two are a genuine pair of questions
+    /// It reserves nothing for the focus ring — at a bar edge
+    /// as much as at a screen edge. `floatGrowBounds` below
+    /// reserves exactly one reach on every edge of it, and the
+    /// two are a genuine pair of questions
     /// rather than one rect wearing two meanings (device QA,
     /// 2026-08-29): "is this window unusably large" and "how far
     /// may a deliberate grow take it" have different answers,
@@ -86,22 +88,30 @@ extension KiwiCore {
                 in: state
             )
         else { return nil }
-        let inset = floatRingInset
         var region = tiler.visibleBounds(screen)
         for (strip, edge) in paintedStrips(forSpace: space) {
+            // No ring reservation here, at a bar edge any more
+            // than at a screen edge (guard-prover, 2026-08-29).
+            // Carving one made this bound reserve at bars while
+            // claiming to reserve nowhere, which cost two things:
+            // `floatGrowBounds` then took TWO reaches at a bar,
+            // and the retile fit pulled in a float the user had
+            // resized flush against one — the fit fighting the
+            // hand, surviving on the axis the split forgot.
             region = AppBarGeometry.regionClear(
                 region,
                 of: strip,
-                edge: edge,
-                inset: inset
+                edge: edge
             )
         }
         return region
     }
 
     /// Where a deliberate GROW may take a float: the region
-    /// above with the focus ring's own outward reach reserved on
-    /// every edge, the screen's included.
+    /// above with the focus ring's own outward reach reserved
+    /// ONCE on every edge — bars and screen edges alike, and
+    /// once rather than twice, which is why the bound above
+    /// carves its strips without an inset.
     ///
     /// A ring is the window frame outset by that reach and
     /// paints at `.normal` while bars paint at `BarPanel.level`,

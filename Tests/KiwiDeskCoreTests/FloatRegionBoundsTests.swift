@@ -113,4 +113,70 @@ struct FloatRegionBoundsTests {
         #expect(fit == Self.bounds)
         #expect(grow == fit.insetBy(dx: reach, dy: reach))
     }
+
+    @Test(
+        "A bar edge reserves one reach, on the grow bound only",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func aBarEdgeReservesOneReach() throws {
+        // Neither of this suite's other fixtures paints a bar,
+        // which is exactly how two defects got through
+        // (guard-prover, 2026-08-29): the correctness bound was
+        // carving a reach at bar strips while its docstring said
+        // it reserved none, so the grow bound took TWO there,
+        // and the retile fit pulled in a float the user had
+        // resized flush against a bar — the fit fighting the
+        // hand, surviving on the axis the split forgot.
+        let core = makeFloatCore()
+        core.appBars.sync([
+            paintedAppBar(items: [appBarItem(1, text: "A")])
+        ])
+        let reach = BorderGeometry.outwardReach(
+            width: core.tiler.settings.borderStyle.width
+        )
+        #expect(reach > 0)
+
+        let fit = try #require(core.floatBounds(of: WindowID(1)))
+        let grow = try #require(
+            core.floatGrowBounds(of: WindowID(1))
+        )
+        // The correctness bound stops AT the strip: a window
+        // there is reachable, only its ring is covered.
+        #expect(fit.minY == barTitleStrip.maxY)
+        // The grow bound reserves exactly one reach past it —
+        // not two, which is what a carve here plus the uniform
+        // inset would give.
+        #expect(grow.minY == barTitleStrip.maxY + reach)
+        // And the screen edges of the same rects, so the two
+        // axes cannot drift apart.
+        #expect(fit.maxY == Self.bounds.maxY)
+        #expect(grow.maxY == Self.bounds.maxY - reach)
+        #expect(grow.minX == Self.bounds.minX + reach)
+    }
+
+    @Test(
+        "The clamp still pushes a float clear of the bar's ring",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func theClampKeepsTheRingClearOfABar() {
+        // The third site the ring inset runs through, and the
+        // one that is a POSITION correction rather than a bound:
+        // it may reserve the reach because it is already moving
+        // the window, so it is not fighting a placement the user
+        // chose. Zeroing it left the full suite green.
+        let core = makeFloatCore()
+        core.appBars.sync([
+            paintedAppBar(items: [appBarItem(1, text: "A")])
+        ])
+        let reach = BorderGeometry.outwardReach(
+            width: core.tiler.settings.borderStyle.width
+        )
+        let under = CGRect(x: 100, y: 0, width: 400, height: 300)
+        let clamped = core.floatFrameClampedClearOfBars(
+            WindowID(1),
+            frame: under
+        )
+        #expect(clamped.minY == barTitleStrip.maxY + reach)
+        #expect(clamped.size == under.size)
+    }
 }
