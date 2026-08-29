@@ -97,31 +97,6 @@ public enum SystemShortcuts {
         ("control+option+command+,", .decreaseContrast),
     ])
 
-    /// Chords macOS reserves but ships DISABLED, measured from
-    /// `com.apple.symbolichotkeys` on macOS 26.6 (2026-08-29):
-    /// the Zoom trio and the Accessibility display trio are all
-    /// `enabled = false` out of the box.
-    ///
-    /// They stay in `map` — the board draws them, and a chord
-    /// the user has switched ON really does take the key — but
-    /// `KeybindingConflicts` does not raise them, because the
-    /// register knows the CHORD and not whether macOS currently
-    /// answers it. Raising them anyway made a seeded row
-    /// (`⌃⌥⌘8`, tier 3's move-to-space-8) carry a standing
-    /// conflict shout on every install with 8+ Desktops, for a
-    /// chord that works for everyone who has not turned Invert
-    /// Colors on.
-    ///
-    /// This is a STOPGAP and it errs the other way: a user who
-    /// HAS enabled one of these gets no warning, which is the
-    /// state that shipped. It ends when the conflict surface
-    /// reads the live `enabled` flag and can tell the two apart
-    /// — filed for that, and this set goes away with it.
-    public static let shipsDisabled: Set<SystemShortcut> = [
-        .zoomToggle, .zoomIn, .zoomOut,
-        .invertColors, .increaseContrast, .decreaseContrast,
-    ]
-
     private static func build(
         _ entries: [(String, SystemShortcut)]
     ) -> [KeyCombo: SystemShortcut] {
@@ -132,5 +107,38 @@ public enum SystemShortcuts {
             }
         }
         return map
+    }
+}
+
+extension SystemShortcut {
+    /// Does macOS ship this chord's shortcut switched OFF?
+    ///
+    /// Measured from `com.apple.symbolichotkeys` on macOS 26.6
+    /// (2026-08-29): the Zoom trio and the Accessibility display
+    /// trio are `enabled = false` out of the box, gated behind an
+    /// Accessibility setting.
+    ///
+    /// A `switch` and not a `Set` for the reason this file's own
+    /// enum docstring gives: a new case must not be able to ship
+    /// without an answer here. A hand-listed set would treat the
+    /// next dormant Accessibility chord as ENABLED by omission,
+    /// silently — the compiler is the parity guard (§5).
+    ///
+    /// It reads the SHIPPED default, never the live setting, so
+    /// it is wrong for a user who has turned one on — see #1105,
+    /// which replaces it with a live read and deletes this.
+    public var shipsDisabled: Bool {
+        switch self {
+        case .zoomToggle, .zoomIn, .zoomOut,
+            .invertColors, .increaseContrast, .decreaseContrast:
+            return true
+        case .spotlight, .appSwitcher, .quitApp, .closeWindow,
+            .minimize, .hideApp, .forceQuit,
+            .missionControlSpaceLeft, .missionControlSpaceRight,
+            .missionControl, .appWindows, .screenshot,
+            .screenshotSelection, .screenshotTools, .dockHiding,
+            .finderSearch, .inputSourceNext:
+            return false
+        }
     }
 }

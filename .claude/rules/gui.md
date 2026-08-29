@@ -603,6 +603,20 @@ must keep:
   (`HomeCardContentTests` holds the derivations), previews
   come only from renderers that already ask the real data, and
   only the Shortcuts conflict may shout — glyph + text, never
+
+- **A per-row surface explains; an aggregate surface counts only
+  what the user should act on (#1094).** A ⚠️ on one row and a
+  ring on one key show everything `SystemShortcuts.map` knows,
+  dormant chords included — that is the moment a user asked. A
+  count or a banner reads
+  `KeybindingConflicts.actionable`, which drops a chord macOS
+  ships disabled: `⌃⌥⌘8` is a SEEDED default and also Invert
+  Colors, so counting it alarms every install with 8+ Desktops
+  about a chord that works, and a count that can never reach
+  zero never clears. There are three aggregate readers — card
+  shout, banner, recorder note — and the first fix wired one, so
+  route a new one through that accessor rather than re-deriving
+  the filter.
   hue alone. A profile card's picture rides the desktop plate
   (#786), drawn from the draft in the user's palette through
   the `schematicPalette` environment — never an init

@@ -79,12 +79,13 @@ per-token glossary carve-outs). Its two scopes are **"Toggle sticky everywhere"*
 sticky on this screen"** (#1094) — the qualifier is an ordinary
 phrase that each locale renders in its own words around the fixed
 "Sticky" atom. Render "screen" with the catalog's own SCREEN word,
-never its *display* or *monitor* word: seven catalogs reached for
-the latter when this label was renamed, and in four of them the
-result was byte-identical to that catalog's own **Monitors**
-destination — a Shortcuts row wearing another destination's name
-(Family C rule 1, and the reason this sentence no longer says
-"Display Sticky").
+never its *display* or *monitor* word. Seven catalogs reached for
+the latter when this label was first renamed and were corrected
+before it shipped (#1094) — a past-tense fact, and the reason
+this sentence no longer says "Display Sticky". The risk it
+records is Family C rule 1: a row whose qualifier is the word
+that names the **Monitors** destination reads as a different
+destination, even where the whole string differs.
 
 **`zh-Hans` is the measured exception, not an oversight.** It
 splits the English "screen" by countability — 屏幕 where the

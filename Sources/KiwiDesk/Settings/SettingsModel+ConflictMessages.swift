@@ -13,7 +13,7 @@ extension SettingsModel {
     var liveKeybindingBanner: String? {
         guard keybindingWarning != nil else { return nil }
         return formatConflicts(
-            KeybindingConflicts.conflicts(
+            KeybindingConflicts.actionable(
                 in: config.layers
             )
         )
@@ -32,7 +32,7 @@ extension SettingsModel {
         _ binding: KeyBinding,
         in bindings: [KeyBinding]
     ) {
-        let list = KeybindingConflicts.conflicts(
+        let list = KeybindingConflicts.actionable(
             in: config.layers
         )
         if KeybindingConflicts.conflict(
@@ -53,7 +53,7 @@ extension SettingsModel {
     /// Internal (not `private`): called from `SettingsModel`'s
     /// own `saveLuaSource()` / `adoptIntoGui()`.
     func warnIfAnyConflict() {
-        let list = KeybindingConflicts.conflicts(
+        let list = KeybindingConflicts.actionable(
             in: config.layers
         )
         keybindingWarning =

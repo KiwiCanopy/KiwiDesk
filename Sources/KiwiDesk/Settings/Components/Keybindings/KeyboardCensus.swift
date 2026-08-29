@@ -249,6 +249,12 @@ enum KeyboardCensus {
     /// under `.all` on purpose — macOS reserves COMBINATIONS,
     /// not keys, so there is no single combination to check
     /// against there.
+    /// Deliberately UNFILTERED by `shipsDisabled` (#1094): the
+    /// board is a per-key surface, like the row's ⚠️, so it
+    /// shows everything the register knows. Only AGGREGATE
+    /// surfaces — a count, a banner — drop a dormant chord, via
+    /// `KeybindingConflicts.actionable`. A ring on one key is an
+    /// explanation where a standing badge is an alarm.
     static func reservedKeys(scope: Scope) -> Set<UInt32> {
         guard case .one(let layer) = scope else { return [] }
         return Set(
