@@ -48,6 +48,10 @@ struct RestoreDefaultShortcutsTests {
         #expect(got.contains { $0.lua.contains("80") })
     }
 
+    /// Catches a naive append, not a merge that de-duplicates
+    /// on combo: this row's combo collides with nothing shipped,
+    /// so a "seed wins on conflict" merge would drop it and pass.
+    /// Replacement-vs-conflict-merge is unpinned here.
     @Test("a customised row is gone afterwards")
     func resetDiscardsCustomisations() {
         let model = model()
@@ -98,13 +102,33 @@ struct RestoreDefaultShortcutsTests {
         }) {
             layer.bindings[i].combo = "control+option+shift+f"
         }
+        // And a RE-POINTED verb: a shipped combo kept, its Lua
+        // changed. Without this row the pair is not load-bearing
+        // — `guard-prover` reduced the key to `combo` alone and
+        // every test here stayed green, because both rows above
+        // carry a combo the seed never authors. This is also the
+        // case the production docstring claims to count, so it
+        // was the claim with no net under it.
+        if let i = layer.bindings.firstIndex(where: {
+            $0.combo == "control+option+s"
+        }) {
+            layer.bindings[i].lua = "KiwiDesk.toggle_floating()"
+        }
         model.config.layers = [layer]
-        #expect(model.shortcutsTheResetWouldDiscard == 2)
+        // 3, and each half of the key is needed to reach it:
+        // combo-alone gives 2 (it cannot see the re-pointed
+        // row), lua-alone gives 0 (every lua here is shipped).
+        #expect(model.shortcutsTheResetWouldDiscard == 3)
     }
 
     /// Scoped to the layer the seed authored. A layer the user
     /// invented has no defaults to restore, and the header
     /// disables the row rather than hiding it.
+    ///
+    /// Asserts only NEGATIVES, so it passes against a
+    /// do-nothing reset — it is discriminating in company with
+    /// the three above, never alone (`guard-prover`, 2026-08-29).
+    /// Do not read its green as evidence the reset ran.
     @Test("a user's own layer is left alone")
     func otherLayersAreUntouched() {
         let model = model()
