@@ -65,29 +65,109 @@ public enum AppBarGeometry {
     /// reserves `visibleFrame` (QA 2026-07-19). A no-op once
     /// the frame is within `clampTolerance` of clear; position
     /// only, size unchanged.
+    /// `inset` widens the strip by that much before clearing —
+    /// the focus ring's own width, so the RING clears the bar
+    /// rather than only the window (#1091). The ring is the
+    /// window frame outset by `border.width` and paints at
+    /// `.normal` while the bars paint at `BarPanel.level`
+    /// (`.floating`), so a window pushed flush against a strip
+    /// has that outset sliver hidden under it and the ring reads
+    /// as cut off.
+    ///
+    /// Applied whether or not the window is FOCUSED, which is
+    /// the point rather than a simplification: an inset that
+    /// depended on focus would move the window a few points
+    /// every time it gained or lost the ring. Callers pass 0
+    /// when rings are off.
     public static func clampClear(
         _ frame: CGRect,
         of strip: CGRect,
-        edge: AppBarEdge
+        edge: AppBarEdge,
+        inset: CGFloat = 0
     ) -> CGRect {
         var result = frame
         switch edge {
         case .top:
-            guard frame.minY < strip.maxY - clampTolerance
+            let clear = strip.maxY + inset
+            guard frame.minY < clear - clampTolerance
             else { return frame }
-            result.origin.y = strip.maxY
+            result.origin.y = clear
         case .bottom:
-            guard frame.maxY > strip.minY + clampTolerance
+            let clear = strip.minY - inset
+            guard frame.maxY > clear + clampTolerance
             else { return frame }
-            result.origin.y = strip.minY - frame.height
+            result.origin.y = clear - frame.height
         case .left:
-            guard frame.minX < strip.maxX - clampTolerance
+            let clear = strip.maxX + inset
+            guard frame.minX < clear - clampTolerance
             else { return frame }
-            result.origin.x = strip.maxX
+            result.origin.x = clear
         case .right:
-            guard frame.maxX > strip.minX + clampTolerance
+            let clear = strip.minX - inset
+            guard frame.maxX > clear + clampTolerance
             else { return frame }
-            result.origin.x = strip.minX - frame.width
+            result.origin.x = clear - frame.width
+        }
+        return result
+    }
+
+    /// `region` with the bar `strip` carved off its own `edge`.
+    ///
+    /// **Its sibling is `windowFrame(in:minus:edge:inner:)`
+    /// below, not `clampClear` above** (architect review,
+    /// 2026-08-29). Both carve a region; they differ in who is
+    /// asking. `windowFrame` serves the LAYOUT, so it also
+    /// spends an inner gap and trusts the strip to sit on the
+    /// edge. This serves a FLOAT, which the layout never places:
+    /// no gap, the strip clamped rather than trusted, and the
+    /// extent floored at zero — a float can sit anywhere, so the
+    /// carve cannot assume the strip is where a bar style says
+    /// it should be. A new caller takes `windowFrame` if the
+    /// layout is placing the window and this if it is not.
+    ///
+    /// It is NOT `clampClear`'s sibling, which answers "where
+    /// may this frame sit" by MOVING it and never resizing it —
+    /// which is why a window larger than the space between two
+    /// bars was pushed aside and still overflowed (#1091).
+    ///
+    /// Monotonic, like `clampClear`, so a fold over several
+    /// strips composes in any order and two strips on one edge
+    /// leave the deeper one's carve standing. Never returns a
+    /// negative extent: bars deeper than the screen would
+    /// otherwise produce an inside-out rect that reads as
+    /// enormous free space.
+    /// `inset` carves that much further, for the same reason
+    /// `clampClear`'s does: a float GROWN flush to the region's
+    /// edge would otherwise have its ring hidden under the bar,
+    /// so the two must inset alike or the fix covers only the
+    /// windows that were pushed and not the ones that grew.
+    public static func regionClear(
+        _ region: CGRect,
+        of strip: CGRect,
+        edge: AppBarEdge,
+        inset: CGFloat = 0
+    ) -> CGRect {
+        var result = region
+        let strip = strip.insetBy(dx: -inset, dy: -inset)
+        switch edge {
+        case .top:
+            let cut = max(result.minY, strip.maxY)
+            result.size.height = max(0, result.maxY - cut)
+            result.origin.y = cut
+        case .bottom:
+            result.size.height = max(
+                0,
+                min(result.maxY, strip.minY) - result.minY
+            )
+        case .left:
+            let cut = max(result.minX, strip.maxX)
+            result.size.width = max(0, result.maxX - cut)
+            result.origin.x = cut
+        case .right:
+            result.size.width = max(
+                0,
+                min(result.maxX, strip.minX) - result.minX
+            )
         }
         return result
     }

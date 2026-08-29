@@ -57,6 +57,12 @@ public final class TilingEngine {
     /// consults it. Engine-owned, transient, per-window tiling
     /// state, like `stashedFrames` below.
     var boundLearner = SizeBoundLearner()
+    /// The float fit's own refusal memo (#1091) — beside the
+    /// learner because it answers the same question one
+    /// subsystem over, and deliberately not an entry IN it:
+    /// only the layout loop may record asks there, and a float
+    /// never enters the layout. `FloatFitLedger` argues it.
+    var floatFitLedger = FloatFitLedger()
 
     /// Test seam for the observe gate above: whether one of our
     /// own frame-sets for this window is recent enough that its

@@ -30,6 +30,15 @@ struct FloatingResizeCommandTests {
                 WindowID, CGRect
             ) -> Void
     ) {
+        // Pin the display (#531/#523). Since #1091 the floating
+        // resize reads `floatBounds` → `tiler.visibleBounds`, so
+        // an unpinned fixture makes every expectation below a
+        // function of the host screen — on a narrow runner the
+        // low edge pins first and the split changes (code
+        // review, 2026-08-29).
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        }
         core.execute(
             "set_mode",
             args: [.string("1"), .string(mode)]
@@ -75,7 +84,23 @@ struct FloatingResizeCommandTests {
         #expect(response.isSuccess)
         #expect(frames[WindowID(2)]?.width == 800)
         #expect(frames[WindowID(2)]?.height == 500)
-        #expect(frames[WindowID(2)]?.origin.x == 100)
+        // Symmetric since #1091: the delta splits between both
+        // edges, so the origin moves back by half. It used to
+        // expect an unchanged origin, which was the mouse-drag
+        // model the ruling replaced — a chord has no grabbed
+        // edge to anchor on. The height is untouched because the
+        // ask was on x alone.
+        //
+        // It lands ON the grow bound's left edge rather than at
+        // 0, because that bound reserves the focus ring's reach
+        // (device QA): the window would otherwise be grown flush
+        // to the screen and have its ring clipped there. Derived
+        // rather than pinned at 5 — `border.width` is feel and
+        // the owner's to retune (#1021).
+        let reach = BorderGeometry.outwardReach(
+            width: core.tiler.settings.borderStyle.width
+        )
+        #expect(frames[WindowID(2)]?.origin.x == reach)
         #expect(
             core.tiler.settings.bsp.splitRatioH == ratioBefore
         )

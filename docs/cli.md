@@ -343,7 +343,9 @@ value` and shadows the global for that space only.
 
 `resize` adapts to the active layout and is per-axis (#56). A
 floating focused window resizes itself directly in any mode
-(width for `x`, height for `y`, floored at `min_window_size`).
+(width for `x`, height for `y`, floored at `min_window_size`),
+splitting the delta between both edges and pinning one that is
+already against the screen edge or a bar (#1091).
 For tiled windows: in BSP, `x` moves the side-by-side split
 ratio and `y` the stacked one, independently, each in the
 direction that grows the *focused* window's region (#122).

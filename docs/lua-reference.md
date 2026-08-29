@@ -3767,11 +3767,23 @@ end)
 
 **Does:** grows or shrinks the focused window. A **floating**
 focused window resizes itself directly, in every layout mode:
-`"x"` changes its width by the delta, `"y"` its height, top-left
-corner anchored, floored at its **effective minimum** —
-`min_window_size`, raised by a larger minimum the app itself
-enforces, once KiwiDesk has learned it (#677). A window already
-smaller than that just shrinks no further. Tiled windows
+`"x"` changes its width by the delta, `"y"` its height, floored
+at its **effective minimum** — `min_window_size`, raised by a
+larger minimum the app itself enforces, once KiwiDesk has
+learned it (#677). A window already smaller than that just
+shrinks no further.
+
+The delta is split between **both** edges (#1091): a chord has
+no grabbed edge to anchor on, so a float grows and shrinks
+around its own centre rather than from its top-left corner. An
+edge already against the boundary is *pinned* and the whole
+delta goes to the other side, so a window parked against a
+screen edge grows into the space it actually has instead of
+stopping dead. The boundary is the screen's visible bounds less
+any bar strips on that space, so a float can no longer be grown
+underneath a bar; when both edges are against it, a grow refuses
+and flashes a pill. Shrinking pins the same way, which is what
+keeps grow and shrink reversible at an edge. Tiled windows
 only resize in bsp, stack, scrolling, and track layouts —
 monocle, grid, and the floating layout report "not supported",
 and when that failure comes from a **hotkey** press KiwiDesk
