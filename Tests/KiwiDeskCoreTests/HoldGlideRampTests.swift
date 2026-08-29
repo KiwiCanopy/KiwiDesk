@@ -73,30 +73,4 @@ struct HoldGlideRampTests {
         #expect(mid < HoldRepeat.glideMaxSteps)
     }
 
-    @Test("A frame's travel is velocity × dt, not a fixed step")
-    func travelScalesWithFrameTime() {
-        // This is what makes the glide refresh-rate independent:
-        // the same wall-clock second covers the same distance at
-        // 60 Hz and at 120 Hz, with the faster panel spending its
-        // extra frames on finer motion rather than going quicker.
-        // A fixed per-frame delta would make a 120 Hz display
-        // resize twice as fast.
-        let speed = HoldRepeat.glideSteps(elapsed: 0)
-        let at60 = (0..<60).reduce(0.0) { total, i in
-            total
-                + HoldRepeat.glideSteps(
-                    elapsed: Double(i) / 60
-                ) * (1.0 / 60)
-        }
-        let at120 = (0..<120).reduce(0.0) { total, i in
-            total
-                + HoldRepeat.glideSteps(
-                    elapsed: Double(i) / 120
-                ) * (1.0 / 120)
-        }
-        #expect(speed > 0)
-        // One second of hold, two refresh rates, same travel to
-        // within the ramp's own discretisation.
-        #expect(abs(at60 - at120) < 0.05 * at60)
-    }
 }

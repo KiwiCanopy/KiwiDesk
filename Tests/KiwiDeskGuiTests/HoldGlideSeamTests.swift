@@ -10,13 +10,25 @@ import Testing
 ///
 /// tests.md requires an inverted seam to be guarded from BOTH
 /// sides, and that is the whole reason this suite exists rather
-/// than a behavioural test. Every suite in the tree hands in its
-/// own fake for these two, so **deleting the production wiring
-/// leaves the entire test tree green while a held chord silently
-/// stops gliding** — the inert default is a working no-op, not a
-/// crash. Duplicating it is the other direction: two frame clocks
-/// on one hold double every step. So both needles are pinned by
-/// EXACT COUNT.
+/// than a behavioural test — but the two seams are NOT equally
+/// exposed, and the difference is worth stating rather than
+/// averaging (guard-prover, #1082):
+/// - **`startFrames` is guarded here and nowhere else.** Every
+///   suite hands in its own frame-clock fake, so deleting the
+///   production wiring leaves the rest of the tree green while a
+///   held chord silently stops gliding — the inert default is a
+///   working no-op, not a crash. Measured: with that assignment
+///   deleted, this suite is the only thing that reds.
+/// - **`applyGlideStep` has a second net**, because
+///   `HoldGlideFixture` deliberately does not stub it — deleting
+///   its wiring also reds `HoldRepeatWiringTests` ▸
+///   `chordArmsGlidesAndReleases`. Still pinned here, since that
+///   net is one suite's choice and could be stubbed away in a
+///   refactor without anyone noticing what it was carrying.
+///
+/// Duplicating either is the other direction: two frame clocks on
+/// one hold double every step. So both needles are pinned by
+/// EXACT COUNT rather than by "no strays".
 ///
 /// What the seams DO once wired is `HoldRepeatWiringTests`
 /// (a real chord, real frames, a real `resize`); the ladder they

@@ -19,8 +19,16 @@ struct HoldGlideRunTests {
         // one moves at `glideStartSteps` rather than one frame
         // into the ramp. Derived from the constants, never
         // restated, so a retune reds nothing (rule-authoring.md).
+        //
+        // `dt` is deliberately NOT 1/60 (guard-prover, #1082).
+        // At 1/60 this assertion is blind to the one mutation it
+        // most needs to catch: replacing `× dt` with a hardcoded
+        // `/ 60` — reintroducing exactly the refresh-rate
+        // dependence #1082 exists to remove — makes both sides
+        // equal and the whole suite stays green. Any frame time
+        // other than the masking constant separates them.
         let h = HoldGlideHarness()
-        let dt = 1.0 / 60
+        let dt = 1.0 / 90
         h.press(id: 1)
         try h.beginGlide()
         try h.frame(dt)
@@ -120,5 +128,45 @@ struct HoldGlideRunTests {
         #expect(
             h.steps[0].args == [.string("y"), .number(-25)]
         )
+    }
+
+    @Test("The same hold travels the same distance at any rate")
+    func travelIsRefreshRateIndependent() throws {
+        // The claim #1082 rests on, asserted against the CONSUMER
+        // rather than against the ramp function. `HoldGlideRamp
+        // Tests` used to carry a test of this name that compared
+        // two Riemann sums of `glideSteps` with each other — true
+        // by construction, and blind to `glideFrame`, which is
+        // where `× dt` actually lives (guard-prover, #1082).
+        //
+        // One second of hold at 60 Hz and at 120 Hz must cover
+        // the same distance, with the faster panel spending its
+        // extra frames on finer motion rather than going quicker.
+        // A fixed per-frame delta doubles the 120 Hz travel.
+        func travel(frames: Int, dt: TimeInterval) throws -> Double {
+            let h = HoldGlideHarness()
+            h.press(id: 1)
+            try h.beginGlide()
+            for _ in 0..<frames { try h.frame(dt) }
+            return h.steps.reduce(0) { $0 + $1.scale }
+        }
+        let at60 = try travel(frames: 60, dt: 1.0 / 60)
+        let at120 = try travel(frames: 120, dt: 1.0 / 120)
+        #expect(at60 > 0)
+        // Equal to within the ramp's own discretisation — the
+        // two rates sample a rising ramp at different points.
+        #expect(abs(at60 - at120) < 0.05 * at60)
+        // And the faster panel really did take smaller steps, so
+        // "same distance" is not being bought by identical
+        // per-frame deltas.
+        let h60 = HoldGlideHarness()
+        h60.press(id: 1)
+        try h60.beginGlide()
+        try h60.frame(1.0 / 60)
+        let h120 = HoldGlideHarness()
+        h120.press(id: 1)
+        try h120.beginGlide()
+        try h120.frame(1.0 / 120)
+        #expect(h120.steps[0].scale < h60.steps[0].scale)
     }
 }
