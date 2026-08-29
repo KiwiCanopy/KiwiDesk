@@ -2875,6 +2875,15 @@ Each row has an action. Built-in actions live under headings:
   would hurt more than pressing again. A held resize feels the
   same on a **floating** window as on a tiled one, in every
   animation setting and under Reduce Motion.
+
+  A floating window grows and shrinks around its own centre —
+  both edges move by half the step. If one edge is already
+  against the screen edge or one of your bars, that edge stays
+  put and the whole step goes to the other side, so a window
+  parked in a corner grows into the room it actually has instead
+  of refusing to move. When it has run out of room on both
+  sides, it flashes a pill rather than doing nothing quietly,
+  and it can no longer be grown underneath a bar.
 - **Applications** — launch an app. Each row carries a **Launch
   behavior** menu: *Open or Focus* (the default — pull a running
   instance into the current space, or launch it if it isn't

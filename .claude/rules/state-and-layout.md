@@ -558,6 +558,35 @@ editing here:
   deliberately — a fold-rule change that updates the render
   and misses a hand copy re-opens the exact divergence the
   extraction closed.
+- **Where a float may sit is derived ONCE, and bounds its SIZE
+  only** (#1091). `KiwiCore.floatBounds` is that derivation — the
+  display's visible bounds with every PAINTED strip carved off
+  its own edge — and a new consumer takes it rather than
+  re-deriving a boundary beside a call site. It carves painted
+  chrome rather than routing through `layoutBounds` for the
+  reason `LayoutBoundsRoutingTests`' `allowed` map records
+  against the float nudge: an empty bar is suppressed while
+  `layoutBounds` still reserves its strip, so routing would bound
+  a float out of a region no bar occupies. Fold both strip lists
+  — a space shows one bar or two, on any edge — and rely on
+  `AppBarGeometry.regionClear` being monotonic rather than on an
+  ordering rule.
+  Two obligations fall out. **Bound the SIZE there and leave the
+  POSITION to the user**: the retile-time net fits an oversized
+  float back inside the region, but must not enforce the screen
+  edge, because it runs for every float on every retile and would
+  drag back a window parked half off-screen by hand. And **a
+  resize that cannot move owes a cue** — the float path cued on
+  shrink truncation only, so a blocked grow was the one resize
+  wall with no wall; route a new one through `cueResizeRefusal`
+  like every other (input-and-animation.md's funnel rule).
+  The keyboard resize itself is symmetric with pinned edges, and
+  **the pinning binds shrink as well as grow** — pin only on grow
+  and grow/shrink stops being reversible at exactly the edge
+  people park windows against. `FloatSymmetricResizeTests` holds
+  the reversibility table, the both-pinned refusal and the
+  accepted contact residue at half a step; the product argument
+  is `docs/design-decisions.md`'s.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

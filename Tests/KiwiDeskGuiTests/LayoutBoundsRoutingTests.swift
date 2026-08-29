@@ -94,6 +94,17 @@ struct LayoutBoundsRoutingTests {
         // (`floatFrameClampedClearOfBars`, #242) runs on the very
         // next statement and owns that edge.
         "App/KiwiCore+FloatNudge.swift": 1,
+        // The float REGION (#1091), on the same two grounds as
+        // the nudge above. It measures no span and classifies no
+        // midpoint — it is a containment box for a window the
+        // layout never places, and the resize divides its delta
+        // between two EDGES rather than over a span. And it must
+        // follow PAINTED chrome for the same reason: it carves
+        // the strips the bar managers actually drew, so routing
+        // through `layoutBounds` would bound a float out of a
+        // region no bar occupies whenever an empty bar is
+        // suppressed.
+        "App/KiwiCore+FloatClamp.swift": 1,
     ]
 
     @Test("Only the allowlisted files read raw display bounds")

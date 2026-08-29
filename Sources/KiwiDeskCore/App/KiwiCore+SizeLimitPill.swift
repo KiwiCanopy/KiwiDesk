@@ -68,6 +68,34 @@ extension KiwiCore {
         )
     }
 
+    /// Cues a float grow refused because BOTH edges are against
+    /// the region it may occupy — the screen less its bars
+    /// (#1091). The float path's third wall, and the one that
+    /// had no cue at all until this: a blocked grow simply did
+    /// nothing, which reads as a broken shortcut rather than a
+    /// limit.
+    ///
+    /// Takes `.ownMaximum` rather than a case of its own: the
+    /// refusal reason enum feeds the ring's rubber-band and the
+    /// mark, which care that the RESIZED window hit its own
+    /// ceiling and not which ceiling it was. The pill carries
+    /// the difference, because that is the channel that can say
+    /// it — a learned app maximum and a screen edge are the same
+    /// gesture stopped by different walls, and only the words
+    /// distinguish them.
+    func refuseGrowAtBoundary(_ window: WindowID, axis: String) {
+        cueResizeRefusal(.ownMaximum(window))
+        let direction: Direction = axis == "y" ? .down : .right
+        flashDeadEnd(window, direction: direction)
+        flashSizeLimitPill(
+            window,
+            text: L(
+                "resize.boundary_reached",
+                "No room left to grow"
+            )
+        )
+    }
+
     /// Cues a resize refused because a NEIGHBOR sits at its own
     /// effective minimum (#933): the bump stays on the resized
     /// window (the gesture hit a wall), and BOTH ends pill with

@@ -3,7 +3,15 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Pure frame math for the floating keyboard resize.
+/// Pure frame math for the floating keyboard resize — the
+/// floor, the sub-floor arms and the unbounded case. The
+/// symmetric pinning against a boundary is
+/// `FloatSymmetricResizeTests`, split at §2.1's ceiling rather
+/// than after crossing it.
+///
+/// Every call here passes `bounds: nil` deliberately: with no
+/// boundary neither edge can pin, so the delta always splits
+/// evenly and these tests read the SIZE rules alone.
 @Suite("Float resize math")
 struct FloatResizeTests {
     private let base = CGRect(
@@ -13,16 +21,22 @@ struct FloatResizeTests {
         height: 400
     )
 
-    @Test("x grows the width; origin and height keep")
+    @Test("x grows the width from both edges; height keeps")
     func growsWidth() {
+        // Symmetric since #1091: unbounded, a grow splits the
+        // delta evenly and the origin moves back by half. The
+        // old expectation was `origin == base.origin`, which was
+        // the mouse-drag model this deliberately replaced.
         let result = FloatResize.resized(
             base,
             horizontal: true,
             delta: 150,
-            minSize: 300
-        )
-        #expect(result.origin == base.origin)
+            minSize: 300,
+            bounds: nil
+        ).frame
+        #expect(result.minX == base.minX - 75)
         #expect(result.width == 650)
+        #expect(result.origin.y == base.origin.y)
         #expect(result.height == 400)
     }
 
@@ -32,8 +46,9 @@ struct FloatResizeTests {
             base,
             horizontal: false,
             delta: -10_000,
-            minSize: 300
-        )
+            minSize: 300,
+            bounds: nil
+        ).frame
         #expect(result.height == 300)
         #expect(result.width == 500)
     }
@@ -48,8 +63,9 @@ struct FloatResizeTests {
             small,
             horizontal: true,
             delta: -10,
-            minSize: 300
-        )
+            minSize: 300,
+            bounds: nil
+        ).frame
         #expect(result.width == 100)
     }
 
@@ -60,8 +76,9 @@ struct FloatResizeTests {
             small,
             horizontal: false,
             delta: 50,
-            minSize: 300
-        )
+            minSize: 300,
+            bounds: nil
+        ).frame
         #expect(result.height == 140)
     }
 
@@ -74,8 +91,9 @@ struct FloatResizeTests {
             base,
             horizontal: true,
             delta: -10_000,
-            minSize: 0
-        )
+            minSize: 0,
+            bounds: nil
+        ).frame
         #expect(result.width == 1)
     }
 }

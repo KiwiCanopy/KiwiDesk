@@ -59,17 +59,40 @@ extension KiwiCore {
                 window: id,
                 includingHeldGlide: isGlideWrite
             ) ?? window.frame
+        // The region the float may occupy — screen bounds less
+        // every painted bar strip (#1091). The resize needs the
+        // whole rect rather than a clamp, because pinning is a
+        // question about how much room each EDGE has, and a
+        // clamp that only pushes can answer neither that nor
+        // "this window is already wider than the space between
+        // the bars".
+        let region = floatBounds(of: id)
+        let outcome = FloatResize.resized(
+            base,
+            horizontal: axis == "x",
+            delta: delta,
+            minSize: minSize,
+            bounds: region
+        )
         // Growing the top edge under a top app bar would re-hide
-        // the title bar; keep the result clear of the strip (#242).
+        // the title bar; keep the result clear of the strip
+        // (#242). Still applied on top of the region math: the
+        // region bounds the SIZE, and this bounds the POSITION
+        // for the paths that reach here with a frame the region
+        // never saw.
         let target = floatFrameClampedClearOfBars(
             id,
-            frame: FloatResize.resized(
-                base,
-                horizontal: axis == "x",
-                delta: delta,
-                minSize: minSize
-            )
+            frame: outcome.frame
         )
+        // A grow with both edges against the boundary moves
+        // nothing, and used to do so SILENTLY — the float path
+        // cued on shrink truncation only, so a blocked grow was
+        // the one resize wall with no wall (#1091). Cued before
+        // the shrink arm below so the two stay mutually
+        // exclusive by construction rather than by delta sign.
+        if outcome.refusedGrow {
+            refuseGrowAtBoundary(id, axis: axis)
+        }
         // Cue on TRUNCATION, not only on "no change": the first
         // shrink that lands ON the minimum is already a refusal
         // of part of the request (#933).

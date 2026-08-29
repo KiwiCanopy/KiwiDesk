@@ -892,6 +892,7 @@
   "profiles.which_loads.rule": "활성 데스크탑에 바인딩된 프로필이 먼저 로드됩니다. 그렇지 않으면 KiwiDesk는 화면 수가 일치하는 프로필을 선택하며, 기본값으로 표시된 프로필을 선호합니다.",
   "profiles.which_loads.standard": "현재: %1$@ → 내장된 %2$@ (일치하는 저장된 프로필 없음).",
   "profiles.which_loads.title": "로드되는 프로필",
+  "resize.boundary_reached": "더 늘릴 자리가 없습니다",
   "resize.max_size_reached": "윈도우의 최대 크기에 도달했습니다",
   "resize.min_size_reached": "윈도우의 최소 크기에 도달했습니다",
   "resize.neighbor_min_size": "인접한 윈도우가 최소 크기에 도달했습니다",

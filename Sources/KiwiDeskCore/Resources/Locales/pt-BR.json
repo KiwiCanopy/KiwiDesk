@@ -892,6 +892,7 @@
   "profiles.which_loads.rule": "Um perfil vinculado à Mesa ativa carrega primeiro. Caso contrário, o KiwiDesk escolhe o perfil cuja contagem de telas corresponda, preferindo o marcado como padrão.",
   "profiles.which_loads.standard": "Agora: %1$@ → o %2$@ integrado (nenhum perfil salvo corresponde).",
   "profiles.which_loads.title": "Qual perfil é carregado",
+  "resize.boundary_reached": "Não há mais lugar para aumentar o tamanho",
   "resize.max_size_reached": "Tamanho máximo da janela atingido",
   "resize.min_size_reached": "Tamanho mínimo da janela atingido",
   "resize.neighbor_min_size": "A janela vizinha está no tamanho mínimo",

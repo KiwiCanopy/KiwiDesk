@@ -75,7 +75,13 @@ struct FloatingResizeCommandTests {
         #expect(response.isSuccess)
         #expect(frames[WindowID(2)]?.width == 800)
         #expect(frames[WindowID(2)]?.height == 500)
-        #expect(frames[WindowID(2)]?.origin.x == 100)
+        // Symmetric since #1091: the delta splits between both
+        // edges, so the origin moves back by half. It used to
+        // expect an unchanged origin, which was the mouse-drag
+        // model the ruling replaced — a chord has no grabbed
+        // edge to anchor on. The height is untouched because the
+        // ask was on x alone.
+        #expect(frames[WindowID(2)]?.origin.x == 0)
         #expect(
             core.tiler.settings.bsp.splitRatioH == ratioBefore
         )

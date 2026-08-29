@@ -2436,6 +2436,71 @@ bury a close's successor, so the raise reads `isDialog`), the
 same answer a focused launcher gets (#300); an own key window
 that IS the anchor — the Settings window — keeps its ring.
 
+**A floating keyboard resize is symmetric, with pinned edges
+(#1091).** [Principle] `FloatResize` anchored at the origin, so a
+resize moved the right/bottom edge only — the mouse-drag-the-
+corner idiom, where the grabbed edge *is* the anchor. That is
+right for a drag and wrong for a chord: a keyboard resize has no
+grabbed edge, so privileging one is arbitrary, and against a
+screen edge it stopped the resize dead. Measured on device: a
+float parked with its right edge on the screen edge took 10
+further grow asks and moved **0 pt**, silently, with 892 pt of
+free space sitting to its left.
+
+So the delta now splits between both edges. An edge against the
+boundary is **pinned** and the whole delta goes to the other
+side; with both pinned a grow refuses and cues, while a shrink
+contracts symmetrically as normal — refusing a shrink would
+strand a wall-to-wall window at a size it could never leave.
+*The pinning applies to shrink as well as grow*, and that is the
+load-bearing half rather than a symmetry for its own sake: pin
+only on grow and grow/shrink stops being reversible at exactly
+the edge people park windows against. Every steady state
+round-trips.
+
+One residue is accepted rather than overlooked: reversibility
+does **not** hold across the step that first brings a window into
+contact with a boundary. A window with 28 pt of room on the right
+grown by 100 spills the blocked 22 pt leftward and pins its right
+edge; the following shrink then comes entirely off the left and
+lands half a step right of where it started. It is bounded by
+half a step and fires only on that transition, and it is strictly
+better than the silent no-op it replaces. Do not answer it by
+remembering which way the last grow went — a stored direction
+needs invalidating on every move, mode change and display change,
+and buys back less than it costs.
+
+*The boundary is the screen edges and the bars together, derived
+once.* `KiwiCore.floatBounds` is the one answer to "where may a
+float sit": the display's visible bounds with every painted strip
+carved off its own edge. It carves the strips the bar managers
+actually **painted** rather than routing through `layoutBounds`,
+for the reason the float nudge already does — an empty bar is
+suppressed while `layoutBounds` still reserves its strip, so
+routing would bound a float out of a region no bar occupies.
+Bars vary per space (one or two, on any edge), so it folds both
+strip lists; two strips on one edge leave the deeper carve
+standing, which is what makes the fold need no ordering rule.
+
+*Size is bounded there; position stays the user's.* The retile-time
+net fits an oversized float back inside the region — the clamp
+beside it only ever **moved** a window, so one larger than the
+space between two bars was pushed to one side and still
+overflowed under the other. It deliberately does not enforce the
+screen edge, because that net runs for every float on every
+retile and would drag back a window parked half off-screen by
+hand, which macOS allows and this change never asked for.
+
+*And the ring is kept clear, not just the window.* A float is
+held `border.width` off a bar, because the ring is the window
+frame outset by that width and paints at `.normal` while bars
+paint at `BarPanel.level` — so a window flush against a strip had
+its ring's outer sliver hidden and read as cut off. The inset
+applies whether or not the window is focused, which is the point
+rather than a simplification: an inset that tracked the ring's
+actual presence would shift the float a few points every time it
+gained or lost focus.
+
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
 frame the instant it turns floating, so `make_floating` /
