@@ -122,19 +122,74 @@ struct FloatSymmetricResizeTests {
         #expect(back.minX - 1300 <= step / 2)
     }
 
-    @Test("A grow never exceeds the region it is given")
+    @Test("A grow never exceeds the region, from either side")
     func aGrowNeverLeavesTheRegion() {
         // The under-the-bars defect in its general form: before
         // #1091 nothing bounded a float's SIZE at all, so a grow
         // ran past the region and the bar clamp — which only
         // pushes, never resizes — left it overflowing.
-        var frame = rect(600, 400)
-        for _ in 0..<40 {
-            frame = grow(frame).frame
+        //
+        // Walked from BOTH sides of centre (guard-prover,
+        // 2026-08-29). A single walk starting left of centre
+        // drives the low edge into its pin first, so an overflow
+        // confined to the HIGH edge left this green — the guard
+        // fired every time on the side that happened to saturate
+        // first, and never on the other.
+        for start in [rect(600, 400), rect(900, 400)] {
+            var frame = start
+            for _ in 0..<40 {
+                frame = grow(frame).frame
+            }
+            #expect(frame.minX >= region.minX)
+            #expect(frame.maxX <= region.maxX)
+            #expect(frame.width <= region.width)
         }
-        #expect(frame.minX >= region.minX)
-        #expect(frame.maxX <= region.maxX)
-        #expect(frame.width <= region.width)
+    }
+
+    @Test("The y axis pins exactly as the x axis does")
+    func verticalAxisPinsToo() {
+        // Six of this suite's cases read `horizontal: true`, so
+        // moving the vertical boundary out of reach left them all
+        // green and the y pinning was held only by two suites in
+        // unrelated subsystems (guard-prover, 2026-08-29). The
+        // axis is a parameter, not a second implementation — but
+        // "it is the same code" is exactly the claim a guard is
+        // for.
+        let tall = CGRect(x: 100, y: 717, width: 400, height: 400)
+        // Bottom edge on 1117, the region's own maxY: pinned, so
+        // the whole delta goes upward.
+        let grown = FloatResize.resized(
+            tall,
+            horizontal: false,
+            delta: step,
+            minSize: minSize,
+            bounds: region
+        )
+        #expect(grown.frame.minY == 617)
+        #expect(grown.frame.height == 500)
+        // And the pin holds on the way back.
+        let back = FloatResize.resized(
+            grown.frame,
+            horizontal: false,
+            delta: -step,
+            minSize: minSize,
+            bounds: region
+        )
+        #expect(back.frame == tall)
+    }
+
+    @Test("A y grow with both edges pinned refuses too")
+    func verticalBothPinnedRefuses() {
+        let wall = CGRect(x: 100, y: 0, width: 400, height: 1117)
+        let grown = FloatResize.resized(
+            wall,
+            horizontal: false,
+            delta: step,
+            minSize: minSize,
+            bounds: region
+        )
+        #expect(grown.refusedGrow)
+        #expect(grown.frame == wall)
     }
 
     @Test("A bar-carved region pins at the bar, not the screen")

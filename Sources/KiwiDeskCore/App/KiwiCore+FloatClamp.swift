@@ -101,7 +101,11 @@ extension KiwiCore {
     /// inset that tracked the ring's actual presence would shift
     /// a float a few points each time it gained or lost focus —
     /// which is worse than the sliver it would recover.
-    private var floatRingInset: CGFloat {
+    // Internal rather than private so the guard can read it:
+    // the strips it feeds are only reachable through a painted
+    // bar, so a test that went the long way round would be
+    // guarding `AppBarManager.sync` instead of this rule.
+    var floatRingInset: CGFloat {
         let style = tiler.settings.borderStyle
         return style.enabled ? style.clampedWidth : 0
     }

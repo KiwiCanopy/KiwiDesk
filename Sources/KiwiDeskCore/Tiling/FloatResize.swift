@@ -141,10 +141,15 @@ public enum FloatResize {
                 refused: true
             )
         }
-        let growth = min(delta, roomLow + roomHigh)
-        var takeLow = min(growth / 2, roomLow)
-        var takeHigh = min(growth / 2, roomHigh)
-        let spill = growth - takeLow - takeHigh
+        // Deliberately NOT pre-capped at `roomLow + roomHigh`
+        // (guard-prover, 2026-08-29). Each side is capped by its
+        // own room below and the spill is capped by what is
+        // left, so a total cap here is arithmetically redundant
+        // — and a line no mutation can red reads as load-bearing
+        // while guarding nothing.
+        var takeLow = min(delta / 2, roomLow)
+        var takeHigh = min(delta / 2, roomHigh)
+        let spill = delta - takeLow - takeHigh
         if spill > 0 {
             let toLow = min(spill, roomLow - takeLow)
             takeLow += toLow

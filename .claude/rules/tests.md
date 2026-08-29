@@ -590,10 +590,15 @@ test` run needs that AGENTS.md §4 calls optional, which is why
 `SparkleKeyDerivationTests` carries an `.enabled(if:)` rather
 than redding a host without it — one inert `true` child when
 `FirstRunSeedTests`' executed hooks fixture fires, scratch
-`UserDefaults` suites cleaned on both sides, one live
-`NSEvent.pressedMouseButtons` read —
-`MouseFollowsFocusTests` fails if a human holds a mouse button
-mid-run — `GeometryUtils.menuBarAutoHides`, a read-only
+`UserDefaults` suites cleaned on both sides, live
+`NSEvent.pressedMouseButtons` reads — a human touching the
+mouse mid-run reds `MouseFollowsFocusTests` AND
+`MouseWarpHoldTests`, which #689 split out of it and which
+inherits the same exposure through `mouseWarpEligible`; that
+gate is consulted BEFORE the hold branch, so a click surfaces
+as `pendingMouseWarp == nil` in whichever test was running and
+reads as an unrelated flake (four different tests in that one
+suite, one device-QA session, 2026-08-29) — `GeometryUtils.menuBarAutoHides`, a read-only
 global-defaults lookup that only reaches fixtures which didn't
 pin their bounds, and one read-only `NSScreen.screens` read per
 lifecycle suite that drives `EventLoop.beginScan()` with faked

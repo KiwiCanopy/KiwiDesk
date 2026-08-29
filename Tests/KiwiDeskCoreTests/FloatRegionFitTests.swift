@@ -1,0 +1,172 @@
+import AppKit
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// The float REGION and the retile-time fit into it (#1091).
+///
+/// Both were unguarded when they landed: deleting the size fit,
+/// and separately neutralising the ring inset at all three
+/// sites, each left the whole 4239-test suite green
+/// (guard-prover, 2026-08-29). The pure geometry beneath them is
+/// `FloatClampTests` and `FloatSymmetricResizeTests`; this suite
+/// is the `KiwiCore` altitude, where the region is derived and
+/// the fit is applied.
+@MainActor
+@Suite("Float region and retile fit (#1091)")
+struct FloatRegionFitTests {
+    private static let bounds = CGRect(
+        x: 0,
+        y: 0,
+        width: 1600,
+        height: 1000
+    )
+
+    private func makeFloatCore(
+        frame: CGRect
+    ) -> KiwiCore {
+        let core = makeTestCore(
+            configDirectory: FileManager.default
+                .temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-floatregion-\(UUID().uuidString)"
+                )
+        )
+        // Pin the display rather than inherit it (#531).
+        core.tiler.visibleBounds = { _ in Self.bounds }
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(1),
+                    pid: 1,
+                    appName: "FloatApp",
+                    frame: frame,
+                    isFloating: true
+                )
+            )
+        )
+        let space = core.state.workspaces.space(
+            of: WindowID(1)
+        )!
+        core.state.workspaces.focus(WindowID(1), in: space)
+        return core
+    }
+
+    @Test(
+        "With no bars the region is the display",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func regionIsTheDisplayWithNoBars() throws {
+        let core = makeFloatCore(
+            frame: CGRect(x: 0, y: 0, width: 400, height: 300)
+        )
+        let region = try #require(core.floatBounds(of: WindowID(1)))
+        #expect(region == Self.bounds)
+    }
+
+    @Test(
+        "An oversized float is fitted back into the region",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func oversizedFloatIsFitted() {
+        // The case the owner hit: `clampClear` only ever wrote
+        // `origin`, so a float grown past the region was pushed
+        // to one side and still overflowed. Deleting the fit
+        // reds here and nowhere else.
+        let core = makeFloatCore(
+            frame: CGRect(x: 0, y: 0, width: 2400, height: 1600)
+        )
+        let fitted = core.floatFrameFittedClearOfBars(
+            WindowID(1),
+            frame: CGRect(x: 0, y: 0, width: 2400, height: 1600)
+        )
+        #expect(fitted.width == Self.bounds.width)
+        #expect(fitted.height == Self.bounds.height)
+    }
+
+    @Test(
+        "A float inside the region is left exactly alone",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func fittedIsANoOpInsideTheRegion() {
+        let frame = CGRect(x: 200, y: 150, width: 400, height: 300)
+        let core = makeFloatCore(frame: frame)
+        #expect(
+            core.floatFrameFittedClearOfBars(
+                WindowID(1),
+                frame: frame
+            ) == frame
+        )
+    }
+
+    @Test(
+        "A sub-tolerance overflow is left alone, not re-fitted",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func subToleranceOverflowDoesNotWobble() {
+        // The fit runs on EVERY retile, so correcting a
+        // sub-point overflow would rewrite the frame forever —
+        // the wobble `AppBarGeometry.clampTolerance` exists for,
+        // and the reason the clamp beside it is gated the same
+        // way.
+        let over =
+            Self.bounds.width
+            + AppBarGeometry.clampTolerance / 2
+        let frame = CGRect(x: 0, y: 0, width: over, height: 300)
+        let core = makeFloatCore(frame: frame)
+        #expect(
+            core.floatFrameFittedClearOfBars(
+                WindowID(1),
+                frame: frame
+            ).width == over
+        )
+    }
+
+    @Test(
+        "The fit bounds the SIZE and never the position",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func positionStaysTheUsers() {
+        // The ruled half: this net runs for every float on every
+        // retile, so it must not drag back a window the user
+        // parked half off-screen by hand.
+        let frame = CGRect(
+            x: Self.bounds.maxX - 100,
+            y: 100,
+            width: 400,
+            height: 300
+        )
+        let core = makeFloatCore(frame: frame)
+        let fitted = core.floatFrameFittedClearOfBars(
+            WindowID(1),
+            frame: frame
+        )
+        #expect(fitted.origin == frame.origin)
+        #expect(fitted.size == frame.size)
+    }
+
+    @Test(
+        "The ring inset follows the border setting",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func ringInsetFollowsTheSetting() {
+        // The third of the three sites the ring inset runs
+        // through, and the one the geometry tests cannot see:
+        // `FloatClampTests` passes an inset by hand, so making
+        // this read return zero left them green while every
+        // float went back to sitting flush under its bar
+        // (guard-prover, 2026-08-29).
+        let core = makeFloatCore(
+            frame: CGRect(x: 0, y: 0, width: 400, height: 300)
+        )
+        core.tiler.settings.borderStyle.enabled = true
+        core.tiler.settings.borderStyle.width = 7
+        #expect(core.floatRingInset == 7)
+        // Rings off means no inset at all — a float should not
+        // be held clear of a bar for a ring nobody draws.
+        core.tiler.settings.borderStyle.enabled = false
+        #expect(core.floatRingInset == 0)
+    }
+}
