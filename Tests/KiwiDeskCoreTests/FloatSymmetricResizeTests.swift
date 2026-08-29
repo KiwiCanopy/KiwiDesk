@@ -55,7 +55,7 @@ struct FloatSymmetricResizeTests {
     func middleSplitsEvenly() {
         let grown = grow(rect(800, 400))
         #expect(grown.frame == rect(750, 500))
-        #expect(!grown.refusedGrow)
+        #expect(grown.refusal == nil)
         // ...and back.
         #expect(shrink(grown.frame).frame == rect(800, 400))
     }
@@ -65,7 +65,7 @@ struct FloatSymmetricResizeTests {
         // Right edge exactly on 1728.
         let grown = grow(rect(1328, 400))
         #expect(grown.frame == rect(1228, 500))
-        #expect(!grown.refusedGrow)
+        #expect(grown.refusal == nil)
         // The pin holds on the way back too, which is the half
         // of the rule easiest to drop: shrink pinned on the
         // right must come entirely off the LEFT, or the window
@@ -84,25 +84,51 @@ struct FloatSymmetricResizeTests {
     func bothPinned() {
         let wall = rect(0, 1728)
         let grown = grow(wall)
-        #expect(grown.refusedGrow)
+        #expect(grown.refusal == .blocked)
         #expect(grown.frame == wall)
         // A shrink always has somewhere to go — refusing it
         // would strand a wall-to-wall window at a size it could
         // never leave.
         let shrunk = shrink(wall)
-        #expect(!shrunk.refusedGrow)
+        #expect(shrunk.refusal == nil)
         #expect(shrunk.frame == rect(50, 1628))
     }
 
     @Test("A refused grow is the ONLY thing that reports one")
     func onlyABlockedGrowRefuses() {
-        // The flag drives a user-visible cue, so a false
+        // The refusal drives a user-visible cue, so a false
         // positive pills a resize that worked. Every arm that
-        // moves the window must report false.
-        #expect(!grow(rect(800, 400)).refusedGrow)
-        #expect(!grow(rect(1328, 400)).refusedGrow)
-        #expect(!shrink(rect(0, 1728)).refusedGrow)
-        #expect(!shrink(rect(800, 400)).refusedGrow)
+        // delivered its whole ask must report nil — including
+        // the PINNED grow, which moves only one edge but still
+        // travels the full delta.
+        #expect(grow(rect(800, 400)).refusal == nil)
+        #expect(grow(rect(1328, 400)).refusal == nil)
+        #expect(shrink(rect(0, 1728)).refusal == nil)
+        #expect(shrink(rect(800, 400)).refusal == nil)
+    }
+
+    @Test("A PARTLY blocked grow reports truncation, and moves")
+    func partialGrowIsTruncated() {
+        // The hole review found: 28 pt of room against an asked
+        // 100 moved the window and said nothing, while the
+        // shrink arm three lines away in the command cues on
+        // exactly this — #933's "landing ON the limit is already
+        // a refusal of part of the request", which had never
+        // been applied to the grow end.
+        // Truncation needs the TOTAL room to fall short of the
+        // ask, not merely one edge to be pinned: the spill
+        // means a pinned edge still delivers the whole delta as
+        // long as the other side can absorb it. So the case is a
+        // window nearly filling the region — flush left, 40 pt
+        // of room right, asked 100.
+        let grown = grow(rect(0, 1688))
+        #expect(grown.refusal == .truncated)
+        // Truncated is not blocked: it still moved, by the 40 it
+        // had.
+        #expect(grown.frame == rect(0, 1728))
+        // And the merely-pinned grow is NOT truncated, which is
+        // the distinction the cue rests on.
+        #expect(grow(rect(1300, 400)).refusal == nil)
     }
 
     @Test("The step into contact spills, and costs half a step")
@@ -119,7 +145,23 @@ struct FloatSymmetricResizeTests {
         let back = shrink(grown.frame).frame
         #expect(back == rect(1328, 400))
         #expect(back.minX - 1300 == 28)
-        #expect(back.minX - 1300 <= step / 2)
+        // The CEILING, swept rather than asserted at one
+        // fixture. The single `<= step / 2` clause beside the
+        // `== 28` above was implied by it and could not fail
+        // (code review, 2026-08-29) — so it carried the "half a
+        // step is the ceiling" claim with a literal. Every
+        // offset that puts the window into contact on this press
+        // must stay inside the bound.
+        for offset in stride(
+            from: CGFloat(1229),
+            through: 1328,
+            by: 1
+        ) {
+            let start = rect(offset, 400)
+            let round = shrink(grow(start).frame).frame
+            #expect(round.minX - offset <= step / 2)
+            #expect(round.minX - offset >= 0)
+        }
     }
 
     @Test("A grow never exceeds the region, from either side")
@@ -188,7 +230,7 @@ struct FloatSymmetricResizeTests {
             minSize: minSize,
             bounds: region
         )
-        #expect(grown.refusedGrow)
+        #expect(grown.refusal == .blocked)
         #expect(grown.frame == wall)
     }
 

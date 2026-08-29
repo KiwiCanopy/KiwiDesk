@@ -111,14 +111,24 @@ public enum AppBarGeometry {
         return result
     }
 
-    /// `region` with the bar `strip` carved off its own `edge` —
-    /// `clampClear`'s sibling, and the difference is the whole
-    /// point: that one MOVES a frame off a strip and never
-    /// resizes it, so a window larger than the space between two
-    /// bars is pushed to one side and still overflows under the
-    /// other. This answers the different question "how much room
-    /// is there", which is what a resize needs in order to stop
-    /// (#1091).
+    /// `region` with the bar `strip` carved off its own `edge`.
+    ///
+    /// **Its sibling is `windowFrame(in:minus:edge:inner:)`
+    /// below, not `clampClear` above** (architect review,
+    /// 2026-08-29). Both carve a region; they differ in who is
+    /// asking. `windowFrame` serves the LAYOUT, so it also
+    /// spends an inner gap and trusts the strip to sit on the
+    /// edge. This serves a FLOAT, which the layout never places:
+    /// no gap, the strip clamped rather than trusted, and the
+    /// extent floored at zero — a float can sit anywhere, so the
+    /// carve cannot assume the strip is where a bar style says
+    /// it should be. A new caller takes `windowFrame` if the
+    /// layout is placing the window and this if it is not.
+    ///
+    /// It is NOT `clampClear`'s sibling, which answers "where
+    /// may this frame sit" by MOVING it and never resizing it —
+    /// which is why a window larger than the space between two
+    /// bars was pushed aside and still overflowed (#1091).
     ///
     /// Monotonic, like `clampClear`, so a fold over several
     /// strips composes in any order and two strips on one edge

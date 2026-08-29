@@ -558,8 +558,8 @@ editing here:
   deliberately — a fold-rule change that updates the render
   and misses a hand copy re-opens the exact divergence the
   extraction closed.
-- **Where a float may sit is derived ONCE, and bounds its SIZE
-  only** (#1091). `KiwiCore.floatBounds` is that derivation — the
+- **Derive where a float may sit in ONE place, and bound its
+  SIZE there rather than its position** (#1091). `KiwiCore.floatBounds` is that derivation — the
   display's visible bounds with every PAINTED strip carved off
   its own edge — and a new consumer takes it rather than
   re-deriving a boundary beside a call site. It carves painted
@@ -571,15 +571,26 @@ editing here:
   — a space shows one bar or two, on any edge — and rely on
   `AppBarGeometry.regionClear` being monotonic rather than on an
   ordering rule.
-  Two obligations fall out. **Bound the SIZE there and leave the
-  POSITION to the user**: the retile-time net fits an oversized
-  float back inside the region, but must not enforce the screen
-  edge, because it runs for every float on every retile and would
-  drag back a window parked half off-screen by hand. And **a
-  resize that cannot move owes a cue** — the float path cued on
-  shrink truncation only, so a blocked grow was the one resize
-  wall with no wall; route a new one through `cueResizeRefusal`
-  like every other (input-and-animation.md's funnel rule).
+  Three obligations fall out. **Bound the SIZE there and leave
+  the POSITION to the user**: the retile-time net fits an
+  oversized float back inside the region, but must not enforce
+  the screen edge, because it runs for every float on every
+  retile and would drag back a window parked half off-screen by
+  hand (`FloatRegionFitTests`; the net's own routing is
+  `FloatRegionSeamTests`, since no behavioural test can see
+  which entry the sweep calls). **A SIZE ask that an app can
+  refuse owes a memo** — that net runs every retile, and unlike
+  a position, a size is genuinely refusable, so an app whose
+  minimum exceeds the region is re-asked forever without one;
+  `FloatFitLedger` is #677's shape one subsystem over, and it is
+  deliberately NOT an entry in `SizeBoundLearner`, which only
+  the layout loop may record into. And **a resize that cannot
+  deliver its whole ask owes a cue** — blocked or merely
+  TRUNCATED, which is #933's own rule at the other end and was
+  missing on the grow side; route it through `cueResizeRefusal`
+  like every other (input-and-animation.md's funnel rule), which
+  is also what ends a held glide at the wall instead of pilling
+  per frame.
   The keyboard resize itself is symmetric with pinned edges, and
   **the pinning binds shrink as well as grow** — pin only on grow
   and grow/shrink stops being reversible at exactly the edge

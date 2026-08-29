@@ -30,6 +30,15 @@ struct FloatingResizeCommandTests {
                 WindowID, CGRect
             ) -> Void
     ) {
+        // Pin the display (#531/#523). Since #1091 the floating
+        // resize reads `floatBounds` → `tiler.visibleBounds`, so
+        // an unpinned fixture makes every expectation below a
+        // function of the host screen — on a narrow runner the
+        // low edge pins first and the split changes (code
+        // review, 2026-08-29).
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        }
         core.execute(
             "set_mode",
             args: [.string("1"), .string(mode)]

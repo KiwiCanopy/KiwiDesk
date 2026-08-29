@@ -32,9 +32,7 @@ extension KiwiCore {
         // Order is immaterial: each clamp is a monotonic push
         // off its edge, so on a shared edge the deeper strip's
         // push subsumes the shallower one's either way.
-        for (strip, edge) in spaceBarStrips(forSpace: space)
-            + appBars.strips(forSpace: space)
-        {
+        for (strip, edge) in paintedStrips(forSpace: space) {
             result = AppBarGeometry.clampClear(
                 result,
                 of: strip,
@@ -50,16 +48,17 @@ extension KiwiCore {
     /// carved off its edge (#1091). Nil where the space resolves
     /// to no screen, which callers read as unbounded.
     ///
-    /// **The ONE derivation of "where may a float sit".** The
-    /// resize math takes the whole rect, because it needs to
-    /// know how much room each edge has in order to pin it;
-    /// `floatFrameClampedClearOfBars` above keeps pushing off
-    /// bar edges only. Same fact, two scopes, and stating them
-    /// apart is deliberate: that clamp runs for every float on
+    /// **The one derivation of the region.** It bounds nothing
+    /// by itself — each consumer decides what it enforces, and
+    /// says so at its own site: the resize math takes the whole
+    /// rect because pinning is a question about how much room
+    /// each EDGE has, the retile fit bounds a float's size to
+    /// it, and `floatFrameClampedClearOfBars` above deliberately
+    /// keeps pushing off bar edges alone. That last one is the
+    /// scope worth stating twice: it runs for every float on
     /// every retile, so enforcing the screen edge there would
-    /// also drag back a window the user parked half off-screen
-    /// by hand, which macOS allows and this issue never asked
-    /// for. Size is bounded here; POSITION stays the user's.
+    /// drag back a window the user parked half off-screen by
+    /// hand, which macOS allows and this issue never asked for.
     ///
     /// Bars vary per space — one bar or two, on any edge — so
     /// this folds both strip lists exactly as the clamp does
@@ -79,9 +78,7 @@ extension KiwiCore {
             )
         else { return nil }
         var region = tiler.visibleBounds(screen)
-        for (strip, edge) in spaceBarStrips(forSpace: space)
-            + appBars.strips(forSpace: space)
-        {
+        for (strip, edge) in paintedStrips(forSpace: space) {
             region = AppBarGeometry.regionClear(
                 region,
                 of: strip,
@@ -107,7 +104,28 @@ extension KiwiCore {
     // guarding `AppBarManager.sync` instead of this rule.
     var floatRingInset: CGFloat {
         let style = tiler.settings.borderStyle
-        return style.enabled ? style.clampedWidth : 0
+        guard style.enabled else { return 0 }
+        // `BorderGeometry.outwardReach` is the named authority
+        // for how far the stroke reaches PAST the window edge,
+        // and `BorderStyle.fittingGaps` already routes through
+        // it. `clampedWidth` equals it today and stops the day
+        // reach and stroke diverge — which is exactly the
+        // "ring reads as cut off" defect this inset removes
+        // (architect + code review, 2026-08-29).
+        return BorderGeometry.outwardReach(width: style.width)
+    }
+
+    /// EVERY painted strip covering `space` — both bars, in one
+    /// list. One accessor rather than the `spaceBarStrips +
+    /// appBars.strips` expression repeated per consumer: a
+    /// space shows one bar or two on any edge, and a third bar
+    /// source must reach every site that asks "what chrome
+    /// covers this space" (architect review, 2026-08-29).
+    private func paintedStrips(
+        forSpace space: SpaceID
+    ) -> [(strip: CGRect, edge: AppBarEdge)] {
+        spaceBarStrips(forSpace: space)
+            + appBars.strips(forSpace: space)
     }
 
     /// The painted Space Bar strips covering `space`. The
@@ -154,11 +172,32 @@ extension KiwiCore {
         var result = frame
         if let region = floatBounds(of: id) {
             let slack = AppBarGeometry.clampTolerance
+            // Floored at the window's effective minimum, and the
+            // FLOOR wins the contradiction (code review,
+            // 2026-08-29): bars have a lower thickness clamp and
+            // no upper one, so a deep enough bar leaves a region
+            // narrower than `min_window_size` — or, at the
+            // limit, a zero-extent one, which AppKit rejects
+            // outright. Leave such a window oversized rather
+            // than write a frame it cannot have. Scrolling rules
+            // the same clash the same way.
+            let floorW = CGFloat(
+                effectiveMinSize(of: id, axis: "x")
+            )
+            let floorH = CGFloat(
+                effectiveMinSize(of: id, axis: "y")
+            )
             if result.width > region.width + slack {
-                result.size.width = region.width
+                result.size.width = max(
+                    region.width,
+                    min(floorW, result.width)
+                )
             }
             if result.height > region.height + slack {
-                result.size.height = region.height
+                result.size.height = max(
+                    region.height,
+                    min(floorH, result.height)
+                )
             }
         }
         return floatFrameClampedClearOfBars(id, frame: result)
@@ -189,7 +228,35 @@ extension KiwiCore {
                     id,
                     frame: window.frame
                 )
-                guard clamped != window.frame else { continue }
+                guard clamped != window.frame else {
+                    // Nothing to correct: drop any refusal memo
+                    // so a window that later needs a fit is
+                    // asked afresh.
+                    tiler.floatFitLedger.forget(id)
+                    continue
+                }
+                // A SIZE ask can be refused where a position ask
+                // is not, and this sweep runs on every retile —
+                // so without a memo an app whose minimum exceeds
+                // the region is re-asked forever (code review,
+                // 2026-08-29). #677's shape, one subsystem over:
+                // learn the refusal from our own ask and stop
+                // re-issuing. Position-only corrections are
+                // exempt, since those converge on their own.
+                if clamped.size != window.frame.size {
+                    guard
+                        !tiler.floatFitLedger.repeatsRefusal(
+                            id,
+                            asked: clamped.size,
+                            seen: window.frame.size
+                        )
+                    else { continue }
+                    tiler.floatFitLedger.record(
+                        id,
+                        asked: clamped.size,
+                        seen: window.frame.size
+                    )
+                }
                 tiler.applyFrame(
                     id,
                     from: window.frame,

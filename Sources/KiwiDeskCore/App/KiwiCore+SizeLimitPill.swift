@@ -75,14 +75,19 @@ extension KiwiCore {
     /// nothing, which reads as a broken shortcut rather than a
     /// limit.
     ///
-    /// Takes `.ownMaximum` rather than a case of its own: the
-    /// refusal reason enum feeds the ring's rubber-band and the
-    /// mark, which care that the RESIZED window hit its own
-    /// ceiling and not which ceiling it was. The pill carries
-    /// the difference, because that is the channel that can say
-    /// it — a learned app maximum and a screen edge are the same
-    /// gesture stopped by different walls, and only the words
-    /// distinguish them.
+    /// Takes `.ownMaximum` rather than a case of its own, and
+    /// that is a RULING rather than an observation: every
+    /// consumer of the reason enum today — the ring's
+    /// rubber-band, the mark — acts on "the resized window hit
+    /// its own ceiling" and would do the same thing for either
+    /// wall, so a second case would be a distinction nothing
+    /// reads. The pill carries the difference because it is the
+    /// only channel that can: a learned app maximum and a screen
+    /// edge are one gesture stopped by different walls, and only
+    /// the words tell them apart. A consumer that ever needs to
+    /// ACT on which wall it was owes the case then — and owes it
+    /// as structure, since #96 bars deciding that from the
+    /// sentence.
     func refuseGrowAtBoundary(_ window: WindowID, axis: String) {
         cueResizeRefusal(.ownMaximum(window))
         let direction: Direction = axis == "y" ? .down : .right

@@ -28,7 +28,15 @@ struct FloatRegionSeamTests {
         let sweep = try #require(
             source.range(of: "func clampFloatsClearOfBars()")
         )
-        let body = source[sweep.lowerBound...]
+        // Bounded to the function's BRACE-BALANCED body, not the
+        // rest of the file (code review, 2026-08-29): a slice
+        // running to EOF is satisfied by any later mention of
+        // the name — a doc comment on a function appended below
+        // — while the call itself is gone. tests.md: where a
+        // needle is read is as load-bearing as what it reads.
+        let body = try #require(
+            Self.balancedBody(of: source, from: sweep.upperBound)
+        )
         #expect(
             body.contains("floatFrameFittedClearOfBars("),
             """
@@ -38,5 +46,30 @@ struct FloatRegionSeamTests {
             is the #1091 defect
             """
         )
+    }
+
+    /// The brace-balanced body that opens at or after `start`.
+    /// A per-file private helper, per tests.md's convention —
+    /// nothing else needs it yet.
+    private static func balancedBody(
+        of source: String,
+        from start: String.Index
+    ) -> Substring? {
+        guard
+            let open = source[start...].firstIndex(of: "{")
+        else { return nil }
+        var depth = 0
+        var index = open
+        while index < source.endIndex {
+            if source[index] == "{" { depth += 1 }
+            if source[index] == "}" {
+                depth -= 1
+                if depth == 0 {
+                    return source[open...index]
+                }
+            }
+            index = source.index(after: index)
+        }
+        return nil
     }
 }

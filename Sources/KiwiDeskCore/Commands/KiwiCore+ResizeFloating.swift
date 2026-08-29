@@ -6,10 +6,15 @@ import Foundation
 /// resizes ITSELF — the per-layout ratio paths never see it.
 extension KiwiCore {
     /// Direct resize of a floating focused window: "x" widens
-    /// by the delta, "y" heightens (negative shrinks), origin
-    /// kept, floored at `min_window_size` — capped at the
-    /// current size, so a sub-floor window never grows on a
-    /// shrink (`FloatResize`). Applies through the tiler's
+    /// by the delta, "y" heightens (negative shrinks), floored
+    /// at `min_window_size` — capped at the current size, so a
+    /// sub-floor window never grows on a shrink.
+    ///
+    /// The delta is SPLIT between both edges and an edge against
+    /// the boundary is pinned (#1091), so the origin moves: a
+    /// chord has no grabbed edge to anchor on, and against a
+    /// screen edge the old origin anchor stopped the resize dead.
+    /// `FloatResize` argues it. Applies through the tiler's
     /// shared frame policy (`applyFrame`) — animated per
     /// `resizeWritesAnimated`, echo-tracked either way — and
     /// skips the layout retile: no tiled window moved.
@@ -84,13 +89,17 @@ extension KiwiCore {
             id,
             frame: outcome.frame
         )
-        // A grow with both edges against the boundary moves
-        // nothing, and used to do so SILENTLY — the float path
-        // cued on shrink truncation only, so a blocked grow was
-        // the one resize wall with no wall (#1091). Cued before
-        // the shrink arm below so the two stay mutually
-        // exclusive by construction rather than by delta sign.
-        if outcome.refusedGrow {
+        // A grow the boundary blocks or TRUNCATES cues (#1091).
+        // It used to do neither: the float path cued on shrink
+        // truncation only, so a blocked grow was the one resize
+        // wall with no wall — and a partially blocked one
+        // delivered 12 of an asked 100 in silence, which is the
+        // same defect #933 already rules against at the shrink
+        // end ("landing ON the minimum is already a refusal of
+        // part of the request"). Cued before the shrink arm
+        // below; the two are mutually exclusive by construction
+        // since `Refusal` is only ever set by a grow.
+        if outcome.refusal != nil {
             refuseGrowAtBoundary(id, axis: axis)
         }
         // Cue on TRUNCATION, not only on "no change": the first
@@ -152,6 +161,12 @@ extension KiwiCore {
         // instead — an app that refuses every ask moves nothing,
         // banks nothing past the release, and the next press
         // measures from reality.
+        // The POST-clamp `target`, never `outcome.frame`. They
+        // are equal whenever the region resolves and differ
+        // exactly when it does not (no screen), where recording
+        // the pre-clamp frame would bank a float under a bar one
+        // step per glide frame — the two look interchangeable,
+        // so say which (architect review, 2026-08-29).
         tiler.animation.recordGlideCommanded(id, frame: target)
         return .ok()
     }

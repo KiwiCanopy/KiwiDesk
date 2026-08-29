@@ -57,13 +57,30 @@ public enum FloatResize {
         max(minSize, 1)
     }
 
-    /// What a resize produced, and whether it had nowhere to go.
+    /// Why a GROW could not deliver what it was asked for. Both
+    /// cases owe the user a cue, on #933's stated principle that
+    /// a request the limit truncates is already a refusal of
+    /// part of it — the shrink arm has cued on exactly that
+    /// since #933, and a grow that quietly delivered 12 of an
+    /// asked 100 was the same defect at the other end (code
+    /// review, 2026-08-29).
+    ///
+    /// Shrink never sets one: it always has somewhere to
+    /// contract to, and its own truncation against
+    /// `min_window_size` is cued by the caller.
+    public enum Refusal: Equatable {
+        /// Both edges against the boundary — nothing moved.
+        case blocked
+        /// Moved, but by less than the delta asked for.
+        case truncated
+    }
+
+    /// What a resize produced, and why it fell short if it did.
+    /// Shaped after `ScrollSlotDomain.Outcome`, the house idiom
+    /// for a pure decision that also has to say why it refused.
     public struct Outcome: Equatable {
         public let frame: CGRect
-        /// A GROW with both edges pinned: nothing moved, and the
-        /// caller owes the user a cue. Never set by a shrink,
-        /// which always has somewhere to contract to.
-        public let refusedGrow: Bool
+        public let refusal: Refusal?
     }
 
     /// The frame after resizing along one axis by `delta`
@@ -106,7 +123,7 @@ public enum FloatResize {
             result.origin.y = span.origin
             result.size.height = span.extent
         }
-        return Outcome(frame: result, refusedGrow: span.refused)
+        return Outcome(frame: result, refusal: span.refusal)
     }
 
     /// One axis of a resize: where the near edge lands and how
@@ -114,7 +131,7 @@ public enum FloatResize {
     private struct Span {
         var origin: CGFloat
         var extent: CGFloat
-        var refused = false
+        var refusal: Refusal?
     }
 
     /// Half the delta to each side, each capped by the room it
@@ -138,7 +155,7 @@ public enum FloatResize {
             return Span(
                 origin: origin,
                 extent: extent,
-                refused: true
+                refusal: .blocked
             )
         }
         // Deliberately NOT pre-capped at `roomLow + roomHigh`
@@ -155,9 +172,15 @@ public enum FloatResize {
             takeLow += toLow
             takeHigh += min(spill - toLow, roomHigh - takeHigh)
         }
+        let taken = takeLow + takeHigh
         return Span(
             origin: origin - takeLow,
-            extent: extent + takeLow + takeHigh
+            extent: extent + taken,
+            // Short of the ask, so the boundary took part of the
+            // request even though the window did move.
+            refusal: delta - taken > boundaryTolerance
+                ? .truncated
+                : nil
         )
     }
 
@@ -193,7 +216,8 @@ public enum FloatResize {
         }
         return Span(
             origin: origin + moveLow,
-            extent: extent - shed
+            extent: extent - shed,
+            refusal: nil
         )
     }
 }
