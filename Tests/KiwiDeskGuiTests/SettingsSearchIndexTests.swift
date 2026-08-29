@@ -201,11 +201,14 @@ struct SettingsSearchIndexTests {
                 // that a new census row landed rather than a
                 // catalog anchor going missing.
                 .profiles: 6,
-                // 12: `keybinding.open_settings` joined
+                // 13: `keybinding.open_settings` joined
                 // anchor-less (#678 item 18 — the bindable
                 // "Open Settings" row has no #277 catalog
-                // anchor yet).
-                .shortcuts: 12,
+                // anchor yet), and `(action)
+                // shortcuts.restore_defaults` joined the same
+                // way in #1116 — a new census row landing,
+                // not an anchor going missing.
+                .shortcuts: 13,
                 .appRules: 3,
                 // 9: the backup pair and the other General rows
                 // have no #277 catalog anchor. (The deleted

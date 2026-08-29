@@ -121,6 +121,21 @@ enum SettingsSearchSynonyms {
             return [
                 "pin", "pinned", "always on top", "all desktops",
             ]
+        // The label says "Restore Defaults", so "restore"
+        // and "defaults" already match. "Reset" is the real
+        // alternate vocabulary: it is the word the OTHER
+        // destructive action in this app uses (General ▸
+        // Advanced ▸ Reset All Settings), so a reader who
+        // has met that one types it here — and this is
+        // exactly the row that must answer, since landing on
+        // the whole-config reset instead is the expensive
+        // near-miss. "Factory" and "original" are the
+        // platform-neutral terms for the same idea.
+        case .shortcuts(.restoreDefaults):
+            return [
+                "reset", "reset shortcuts", "factory",
+                "original shortcuts", "stock shortcuts",
+            ]
         // Behaviour near-misses.
         case .behaviour(.mouseFollowsFocus):
             return ["focus follows mouse", "hover focus"]

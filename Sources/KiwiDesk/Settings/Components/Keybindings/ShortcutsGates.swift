@@ -84,7 +84,13 @@ struct ShortcutsGates {
     /// profile is being edited) that no saved `GuiConfig` can
     /// answer, so `ShortcutsHeader` keeps it. Naming it is what
     /// keeps the gap deliberate rather than an omission.
+    /// Restore Defaults joins for the same reason: its
+    /// `.defaultsToRestore` gate compares the live config against
+    /// what the seeder would author for this machine's Desktops
+    /// and resize step, which is a live-editor question no saved
+    /// `GuiConfig` answers. `ShortcutsHeader` keeps it.
     static let resolvedElsewhere: Set<SettingKey> = [
-        .shortcuts(.`import`)
+        .shortcuts(.`import`),
+        .shortcuts(.restoreDefaults),
     ]
 }

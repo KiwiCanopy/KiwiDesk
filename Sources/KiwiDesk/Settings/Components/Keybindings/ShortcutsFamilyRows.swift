@@ -128,7 +128,7 @@ struct ShortcutsFamilyRows {
                 .filter { $0 != currentLayer }
                 .map(KeybindingCatalog.switchLayerCommand)
         case .layers, .layersIcon, .openApplications, .advanced,
-            .`import`:
+            .`import`, .restoreDefaults:
             return nil
         }
     }

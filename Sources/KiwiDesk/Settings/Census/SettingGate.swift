@@ -54,6 +54,15 @@ enum SettingRuntimeGate: Hashable {
     /// edit target — one slot, so this tag carries both arms,
     /// the not-editing-a-stored-profile half included.
     case luaImportAvailable
+    /// Restore Defaults appears only while KiwiDesk has
+    /// defaults this install lacks — a PRESENCE condition,
+    /// not a greying one, which is what makes the button's
+    /// arrival the news rather than a destructive-sounding
+    /// control standing over every new user's list. Like
+    /// `luaImportAvailable` it compares the live config
+    /// against what the seeder would author for THIS
+    /// machine, which no saved `GuiConfig` can answer.
+    case defaultsToRestore
     /// The config defines a layer beyond `default`. Gates the
     /// Layers card's `.immediate` tier: with layers configured
     /// the card is a user's own setup and shows at rest; with

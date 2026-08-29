@@ -172,7 +172,8 @@ extension SettingRuntimeGate {
             return true
         case .orphanPinsExist, .monitorsDisconnected,
             .paletteGlowPairing, .luaImportAvailable,
-            .layersExist, .liquidGlassUnavailable:
+            .layersExist, .liquidGlassUnavailable,
+            .defaultsToRestore:
             // Presence, not greying: these decide whether a row
             // or card is drawn.
             return false
@@ -215,7 +216,8 @@ extension SettingRuntimeGate {
             return true
         case .orphanPinsExist, .monitorsDisconnected,
             .paletteGlowPairing, .luaImportAvailable,
-            .layersExist, .liquidGlassUnavailable:
+            .layersExist, .liquidGlassUnavailable,
+            .defaultsToRestore:
             // Presence conditions: `greys` is false, so this
             // answer is never read. Stated rather than defaulted
             // so the switch stays exhaustive by hand.

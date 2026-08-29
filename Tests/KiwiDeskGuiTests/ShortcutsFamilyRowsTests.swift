@@ -56,6 +56,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.openApplications),
             .shortcuts(.advanced),
             .shortcuts(.import),
+            .shortcuts(.restoreDefaults),
             .behaviour(.resizeFeedback),
         ]
         let expander = fixture()

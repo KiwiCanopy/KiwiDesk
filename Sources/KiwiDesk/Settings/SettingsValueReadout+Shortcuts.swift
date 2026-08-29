@@ -28,9 +28,13 @@ extension SettingsValueReadout {
             .growHeight, .shrinkHeight, .toggleFloating,
             .toggleSticky, .toggleDisplaySticky, .showShortcuts,
             .openSettings, .switchToLayer, .openApplications,
-            .advanced, .`import`:
+            .advanced, .`import`, .restoreDefaults:
             // no model path — never booked by the diff (these
             // families' bindings book under `config.layers`).
+            // Restore Defaults is an ACTION, and what it does
+            // lands in `config.layers` like any other edit —
+            // so the diff narrates the rows that moved, never
+            // the button that moved them.
             return []
         }
     }
