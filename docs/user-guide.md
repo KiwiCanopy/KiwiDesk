@@ -2635,8 +2635,9 @@ it's the one shortcut you hold down, which `⌥⌘` takes as a single
 thumb roll.
 
 On macOS the Option key by itself types special characters — on
-many layouts `⌥L` is `@` and `⌥5` is `[` — so a global `⌥`-only
-shortcut would swallow them; adding Control *or Command* keeps a
+a US layout `⌥L` is `¬` and `⌥5` is `∞`, and on a German one they
+are `@` and `[` — so a global `⌥`-only shortcut would swallow
+them; adding Control *or Command* keeps a
 default clear of both macOS system shortcuts and text entry.
 Directions use the arrow keys, which are identical on every
 layout. Resizing uses digits, which hold their place on every
@@ -2658,6 +2659,55 @@ editable model when your `init.lua` declares no keybindings. It
 never overwrites bindings you (or your Lua) authored, and every
 seeded row is an ordinary catalog row: rebind, clear, or override
 it per profile like any other shortcut.
+
+### Choosing Your Own Shortcuts
+
+Nothing above is fixed. Every seeded row is an ordinary row, so
+rebind whatever fits your hands better. What follows is the
+reasoning behind the shipped chords, for when you want to know
+*why* a combo is a good or a bad idea before you commit to it.
+
+**Three things can claim a chord, and they do not lose it the
+same way.** macOS itself wins outright: when a combo is already a
+live system shortcut, KiwiDesk's registration is refused by the OS
+and the row simply never fires — no error, and nothing at press
+time. KiwiDesk wins against an app's own menu shortcut: bind one,
+and the app stops seeing it while KiwiDesk is running. So a
+collision with macOS costs you the KiwiDesk shortcut, and a
+collision with an app costs you the app's.
+
+**What makes an app collision tolerable is whether you can recover
+from it and reason about it — not how often it fires.** A shortcut
+that shadows a menu item costs an accelerator, not a capability:
+the command is still in the menu, and the failure looks like a
+menu item that didn't respond to a key, which is something you can
+see and work around. A shortcut with no menu behind it costs the
+capability outright, and the failure looks like the app is broken.
+That is the test to apply to a chord you are considering, and it
+is why the shipped resize layer accepts `⌥⌘` digits — Finder,
+Preview and Safari each bind some, all reachable from a visible
+menu — and refuses `⌥⌘` arrows, which are next/previous tab in
+most browsers and terminals, where no menu offers them and nobody
+thinks to check.
+
+A few properties of the modifiers themselves hold whatever you
+bind:
+
+- **`⌃⌥` is the quiet corner.** macOS makes little use of it and
+  most apps leave it alone, which is why the movement defaults
+  live there.
+- **`⌥` alone types characters**, on every layout — though which
+  character depends on the layout. `⌥L` is `¬` on a US keyboard
+  and `@` on a German one. A global `⌥`-only shortcut swallows
+  whatever yours produces; adding `⌃` or `⌘` stops that.
+- **Arrows and digits keep their place on every layout**, which
+  letters do not — a chord picked on QWERTY can land somewhere
+  else on AZERTY or QWERTZ.
+
+The safest way to try one is to bind it and then open the app
+you'd miss it in. [Conflict Detection](#conflict-detection) warns
+you about the first claimant above but not the second, so opening
+the app is the step that catches an app's own binding.
 
 ### Restoring the Defaults
 
@@ -2729,6 +2779,13 @@ A ⚠️ icon appears next to any row whose combo:
 
 - Duplicates another row in the same layer.
 - Conflicts with a reserved macOS shortcut.
+
+**Those two are the whole of it.** KiwiDesk knows macOS's own
+shortcuts and the rows in your own layers; it cannot see what
+your other apps have bound. No warning means "not one of
+macOS's", never "nothing else uses this" — which is why
+[choosing a chord](#choosing-your-own-shortcuts) ends with
+opening the app you'd miss it in.
 
 Click the icon to read the conflict in a popover; hovering it
 shows the same sentence as a tooltip. This indicator updates
