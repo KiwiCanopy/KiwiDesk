@@ -37,6 +37,26 @@ struct FloatRegionSeamTests {
         let body = try #require(
             Self.balancedBody(of: source, from: sweep.upperBound)
         )
+        // The memo consultation rides the same needle: its
+        // EFFECT is guarded at `KiwiCore` altitude
+        // (`FloatRegionFitTests`), but only a scan can see that
+        // the sweep still asks — deleting the call left the
+        // whole suite green (guard-prover, 2026-08-29).
+        #expect(
+            body.contains("shouldIssueFloatFit("),
+            """
+            the retile-time float sweep must consult the refusal \
+            memo — without it an app whose minimum exceeds the \
+            region is re-asked to shrink on every retile, forever
+            """
+        )
+        #expect(
+            body.contains("floatFitLedger.forget("),
+            """
+            the sweep must drop a window's memo when it needs no \
+            fit, or a window that later needs one is never asked
+            """
+        )
         #expect(
             body.contains("floatFrameFittedClearOfBars("),
             """

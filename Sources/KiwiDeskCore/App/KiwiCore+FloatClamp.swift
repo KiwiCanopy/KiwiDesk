@@ -203,6 +203,47 @@ extension KiwiCore {
         return floatFrameClampedClearOfBars(id, frame: result)
     }
 
+    /// Whether the retile sweep should issue `fitted`, and the
+    /// only place the refusal memo is consulted and updated.
+    ///
+    /// A SIZE ask can be refused where a position ask is not,
+    /// and this sweep runs on every retile — so without a memo
+    /// an app whose minimum exceeds the region is re-asked
+    /// forever, having already refused (code review,
+    /// 2026-08-29). #677's shape one subsystem over: learn the
+    /// refusal from our own ask and stop re-issuing.
+    ///
+    /// A position-only correction is exempt and always issues:
+    /// a move is nearly always accepted, so it converges without
+    /// a memo — which is exactly why the clamp this sits beside
+    /// never needed one.
+    ///
+    /// Split out of the sweep so the DECISION is reachable
+    /// without a painted bar (guard-prover, 2026-08-29):
+    /// `FloatFitLedgerTests` guards the ledger's own algebra and
+    /// structurally cannot see its consumer, and deleting this
+    /// consultation left all 4259 tests green.
+    func shouldIssueFloatFit(
+        _ id: WindowID,
+        current: CGRect,
+        fitted: CGRect
+    ) -> Bool {
+        guard fitted.size != current.size else { return true }
+        guard
+            !tiler.floatFitLedger.repeatsRefusal(
+                id,
+                asked: fitted.size,
+                seen: current.size
+            )
+        else { return false }
+        tiler.floatFitLedger.record(
+            id,
+            asked: fitted.size,
+            seen: current.size
+        )
+        return true
+    }
+
     /// Re-asserts the bar clamp for every floating window under
     /// a painted bar, across all displays. The structural
     /// safety net, run from `retile()` after the bars are
@@ -235,28 +276,13 @@ extension KiwiCore {
                     tiler.floatFitLedger.forget(id)
                     continue
                 }
-                // A SIZE ask can be refused where a position ask
-                // is not, and this sweep runs on every retile —
-                // so without a memo an app whose minimum exceeds
-                // the region is re-asked forever (code review,
-                // 2026-08-29). #677's shape, one subsystem over:
-                // learn the refusal from our own ask and stop
-                // re-issuing. Position-only corrections are
-                // exempt, since those converge on their own.
-                if clamped.size != window.frame.size {
-                    guard
-                        !tiler.floatFitLedger.repeatsRefusal(
-                            id,
-                            asked: clamped.size,
-                            seen: window.frame.size
-                        )
-                    else { continue }
-                    tiler.floatFitLedger.record(
+                guard
+                    shouldIssueFloatFit(
                         id,
-                        asked: clamped.size,
-                        seen: window.frame.size
+                        current: window.frame,
+                        fitted: clamped
                     )
-                }
+                else { continue }
                 tiler.applyFrame(
                     id,
                     from: window.frame,

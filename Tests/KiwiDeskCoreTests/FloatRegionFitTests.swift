@@ -269,4 +269,69 @@ struct FloatRegionFitTests {
         #expect(fitted.width == 300)
         #expect(fitted.height == 300)
     }
+
+    @Test(
+        "A refused fit is asked once, then not again",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func aRefusedFitStopsBeingReAsked() {
+        // The memo's EFFECT, not its algebra. `FloatFitLedgerTests`
+        // builds its own ledger value and structurally cannot see
+        // the consumer — deleting the consultation left all 4259
+        // tests green (guard-prover, 2026-08-29).
+        let current = CGRect(x: 0, y: 0, width: 900, height: 800)
+        let fitted = CGRect(x: 0, y: 0, width: 600, height: 500)
+        let core = makeFloatCore(frame: current)
+        let id = WindowID(1)
+        // First sweep asks.
+        #expect(
+            core.shouldIssueFloatFit(
+                id,
+                current: current,
+                fitted: fitted
+            )
+        )
+        // The app refused, so the window still reports the old
+        // size: the second sweep must NOT re-ask.
+        #expect(
+            !core.shouldIssueFloatFit(
+                id,
+                current: current,
+                fitted: fitted
+            )
+        )
+        // Either half moving is a fresh question — here the app
+        // changed its own mind.
+        let moved = CGRect(x: 0, y: 0, width: 880, height: 800)
+        #expect(
+            core.shouldIssueFloatFit(
+                id,
+                current: moved,
+                fitted: fitted
+            )
+        )
+    }
+
+    @Test(
+        "A position-only correction is never memoed away",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func positionOnlyCorrectionsAlwaysIssue() {
+        // A move is nearly always accepted, so it converges
+        // without a memo — which is why the clamp this sits
+        // beside never needed one. Memoing it would stop the bar
+        // clamp re-asserting itself.
+        let current = CGRect(x: 0, y: 0, width: 400, height: 300)
+        let moved = CGRect(x: 40, y: 40, width: 400, height: 300)
+        let core = makeFloatCore(frame: current)
+        for _ in 0..<3 {
+            #expect(
+                core.shouldIssueFloatFit(
+                    WindowID(1),
+                    current: current,
+                    fitted: moved
+                )
+            )
+        }
+    }
 }
