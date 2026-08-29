@@ -240,4 +240,33 @@ struct FloatRegionFitTests {
         #expect(frame?.maxX == Self.bounds.maxX)
         #expect(frame?.minX == Self.bounds.maxX - 500)
     }
+
+    @Test(
+        "The floor outranks the region when they contradict",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func theFloorWinsAgainstANarrowRegion() {
+        // Bar thickness has a lower clamp and no upper one, so a
+        // deep enough bar leaves a region narrower than
+        // `min_window_size` — and at the limit a zero-extent
+        // one, which AppKit rejects outright. Leave the window
+        // oversized rather than write a frame it cannot have;
+        // scrolling rules the same clash the same way (code
+        // review, 2026-08-29).
+        let frame = CGRect(x: 0, y: 0, width: 900, height: 800)
+        let core = makeFloatCore(frame: frame)
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 120, height: 90)
+        }
+        core.execute(
+            "set_min_window_size",
+            args: [.number(300)]
+        )
+        let fitted = core.floatFrameFittedClearOfBars(
+            WindowID(1),
+            frame: frame
+        )
+        #expect(fitted.width == 300)
+        #expect(fitted.height == 300)
+    }
 }
