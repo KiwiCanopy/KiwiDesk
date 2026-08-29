@@ -224,6 +224,60 @@ bitten (`presets.*.summary`), deriving its ban list from
 a second family of prose that names layouts owes its own guard,
 that one being scoped to preset summaries.
 
+### A mode's own structural unit is not a common noun
+
+Some modes name the thing a window sits in after the mode
+itself: a Track holds windows, a Stack has a zone the overflow
+piles into. Read as ordinary vocabulary those look like Family C
+— the English lower-cases them, they never appear alone as a
+label, and every language has a good word of its own for each.
+
+**Render such a unit with whatever your own `layout.<mode>.name`
+says, and never with a word of your own.** A second word for it
+is a second name for one KiwiDesk concept — the shape
+`.claude/rules/config-vocabulary.md` bans for Space and for
+screen — and the two words land on the *same card*, since the
+picker entry and the help text under it are adjacent surfaces.
+
+**Do not sort it with Family C's ladder.** Family C is the family
+with no label key to read (*The question that sorts a name*);
+this concept has one, so the sort is already answered and Family
+B governs. Running the ladder anyway decides it against the name
+every time: rule 2 counts occurrences, and the unit outnumbers
+the picker entry by construction — the owner ruling of
+2026-08-29 settled **Track** after `fr`, `es`, `pt-BR`, `ru` and
+`zh-Hant` had each reached for a noun of their own that
+outnumbered the "Track" their pickers already shipped.
+
+**Where the derived name will not go into your sentence, say so
+rather than smoothing it over.** An indeclinable Latin noun in an
+inflecting language can leave a construction the grammar cannot
+build — Russian lost the genitive that disambiguated "the size of
+the window's Track", and had to gain a plural verb to carry a
+number the noun could no longer mark. Rewording around that is
+part of the obligation, not licence to bring the second word
+back. If nothing rewords, the escape is Family B's own and is a
+ruling rather than a translator's call: your picker may translate
+the mode name, after which the unit follows it there instead.
+
+**One half of this is guarded, and it is the same half as the
+rest of Family B.** `untranslated_mode_names` fires when a
+catalog whose picker translates the mode keeps the English name
+anyway, which catches a translated-picker locale writing "Track"
+for the unit — capitalised only, since that is how the predicate
+tells naming from description. The mirror — a locale whose picker
+keeps English writing its own word for the unit — is invisible to
+it for the polarity reason *Known blind spot* gives above, and no
+predicate can be built for it, because the unit's rival word is
+correct prose somewhere. That half is review's, and it is where
+every case ruled so far was found.
+
+**A new mode joins no register for this.** The rule reads
+`layout.<mode>.name`, which `MODE_NAME_KEYS` already carries.
+What a new mode owes is the sweep: settle the unit's word in
+every catalog in the change that names the unit, rather than
+leaving ten translators to reach for ten nouns.
+
 ### Why the Latin-script locales keep English
 
 A mode name is not an ordinary label. It is a value the user types
