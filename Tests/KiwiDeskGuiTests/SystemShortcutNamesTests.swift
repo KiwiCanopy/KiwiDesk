@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -52,6 +53,37 @@ struct SystemShortcutNamesTests {
                 Comment(rawValue: message)
             )
         }
+    }
+
+    private static let localesDirectory = SourceScan.repoRoot(
+        from: #filePath
+    )
+    .appendingPathComponent("Sources")
+    .appendingPathComponent("KiwiDeskCore")
+    .appendingPathComponent("Resources")
+    .appendingPathComponent("Locales")
+
+    /// Flat `{key: value}` per shipped catalog. A file here that
+    /// is not a flat catalog is a defect and must red, not be
+    /// skipped — the `SettingKeyLocaleTests` twin says why.
+    private static func loadCatalogs() throws
+        -> [String: [String: String]]
+    {
+        let files = try FileManager.default.contentsOfDirectory(
+            at: localesDirectory,
+            includingPropertiesForKeys: nil
+        )
+        .filter { $0.pathExtension == "json" }
+        var catalogs: [String: [String: String]] = [:]
+        for file in files {
+            let data = try Data(contentsOf: file)
+            catalogs[file.lastPathComponent] =
+                try JSONDecoder().decode(
+                    [String: String].self,
+                    from: data
+                )
+        }
+        return catalogs
     }
 
     @Test("every case resolves to a distinct, non-empty name")
@@ -120,4 +152,47 @@ struct SystemShortcutNamesTests {
             ) == "Not a recognized shortcut."
         )
     }
+
+    /// The distinctness above is pinned in ENGLISH only, so a
+    /// collision that exists solely in a translation is invisible
+    /// to it — which is how `it` came to render both `minimize`
+    /// and `zoomOut` as "Riduci" (#1094 review): each was right
+    /// on its own, and Apple's Italian happens to reuse the word.
+    /// A conflict tooltip then names a chord the user cannot tell
+    /// from another one.
+    ///
+    /// Reads the catalogs rather than switching the shared
+    /// `LocalizationManager`, so nothing here depends on
+    /// process-global state (`.claude/rules/tests.md`). The key
+    /// set is derived from each catalog's own `system_shortcut.`
+    /// prefix, never hand-listed, so a new case joins by existing.
+    @Test("no locale renders two shortcuts with one name")
+    func namesAreDistinctInEveryLocale() throws {
+        let catalogs = try Self.loadCatalogs()
+        #expect(catalogs["en.json"] != nil)
+        #expect(catalogs.count > 1)
+        var checked = 0
+        for (locale, catalog) in catalogs {
+            var seen: [String: String] = [:]
+            for (key, value) in catalog
+            where key.hasPrefix("system_shortcut.") {
+                checked += 1
+                if let clash = seen[value] {
+                    Issue.record(
+                        Comment(
+                            rawValue: "\(locale): \(key) and "
+                                + "\(clash) both render "
+                                + "\"\(value)\" — a conflict "
+                                + "tooltip cannot tell the two "
+                                + "chords apart"
+                        )
+                    )
+                }
+                seen[value] = key
+            }
+        }
+        // Non-vacuity: an empty prefix match would pass silently.
+        #expect(checked > SystemShortcut.allCases.count)
+    }
+
 }

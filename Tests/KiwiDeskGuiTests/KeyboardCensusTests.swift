@@ -223,6 +223,12 @@ struct KeyboardCensusTests {
         )
     }
 
+    /// The premise that keyCode 13 is unreserved under ⌃⌥ is
+    /// pinned by `systemReservedIsPerModifier` above, not here.
+    /// If a real ⌃⌥W reservation ever lands, THIS test reds with
+    /// a message that reads like a `KeyboardCensus.state`
+    /// regression — look one test up first. Space expired out of
+    /// this fixture exactly that way in #1094.
     @Test("An unclaimed, unreserved key reads free")
     func freeIsTheRemainder() {
         let ctrlOpt = KeyboardCensus.ModifierLayer(

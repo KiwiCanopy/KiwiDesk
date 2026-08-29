@@ -159,6 +159,21 @@ extension SystemShortcut {
                 "system_shortcut.input_source_next",
                 "Select next source in Input menu"
             )
+        case .invertColors:
+            return L(
+                "system_shortcut.invert_colors",
+                "Invert Colors"
+            )
+        case .increaseContrast:
+            return L(
+                "system_shortcut.increase_contrast",
+                "Increase Contrast"
+            )
+        case .decreaseContrast:
+            return L(
+                "system_shortcut.decrease_contrast",
+                "Decrease Contrast"
+            )
         }
     }
 }

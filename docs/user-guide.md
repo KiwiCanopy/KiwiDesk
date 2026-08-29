@@ -1439,14 +1439,15 @@ laid out as the same two columns.
 
 A **sticky** window stays visible on every space
 instead of hiding with its home space when you switch — mark
-one with the **Toggle sticky** shortcut (Shortcuts ▸ Size &
-float; there is no app rule list, stickiness is per window).
-Sticky has two scopes, both in that shortcut list:
-**Toggle sticky** keeps the window on every space of **every**
-monitor (marked with an ∞ mark), while **Toggle display sticky**
-keeps it on every space of just **one** monitor — the screen it
-lives on (marked with a 📌 mark). Moving a display-sticky window
-to a space on another monitor re-homes it there; moving a
+one with the **Toggle sticky everywhere** shortcut (Shortcuts ▸
+Size & float; there is no app rule list, stickiness is per
+window). Sticky has two scopes, both in that shortcut list:
+**Toggle sticky everywhere** keeps the window on every space of
+**every** monitor (marked with an ∞ mark), while **Toggle sticky
+on this screen** keeps it on every space of just **one** monitor
+— the screen it lives on (marked with a 📌 mark). Moving a
+display-sticky window to a space on another monitor re-homes it
+there; moving a
 global-sticky one anywhere, or a display-sticky one to a
 different space on the *same* monitor, is refused with a brief
 pill on the window (its whole point is to stay put). On a single
@@ -1460,8 +1461,8 @@ of falling into the overflow pile (in the scrolling layout it
 scrolls like any other slot — the row itself is the
 overflow). Rearrange it on its home space to move it
 everywhere; on other spaces it cannot be reordered or mouse-resized — the gesture snaps back. The `?` beside **Toggle
-sticky** in Shortcuts spells this out. When such a drag snaps
-back, the window's mark briefly expands into a pill naming its
+sticky everywhere** in Shortcuts spells this out. When such a
+drag snaps back, the window's mark briefly expands into a pill naming its
 **home space** — by the same icon or name its Space Bar tile
 shows — so you can see where the tile actually belongs. The same
 pill appears on the sticky window when you drag *another* window
@@ -2754,9 +2755,9 @@ for a fill, a key-shaped ring for a ring:
   reserves that key under the shown modifier combination (⌘Space
   is Spotlight's). The ring — and its legend entry — appear only
   while such a key is actually on the board: never under
-  **All** (macOS reserves combinations, not keys — a key it
-  owns under ⌘ is still free under ⌃⌥), and not under a
-  combination macOS reserves nothing for, ⌃⌥ included.
+  **All** (macOS reserves combinations, not keys — the key it
+  owns under one combination is usually free under another),
+  and not under a combination macOS reserves nothing for.
 - **conflict** — a solid red ring on a *bound* (green) key,
   meaning one of two clashes: two of your own bindings in the
   same layer claim the same combo (the board's view of the

@@ -11,7 +11,7 @@ import Testing
 struct SizeLayerSeedTests {
     private func seeded(step: Int = 50) -> [KeyBinding] {
         DefaultKeybindings.bindings(
-            spaces: ["1", "2", "3"],
+            spaces: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
             resizeStep: step
         )
     }
@@ -128,11 +128,63 @@ struct SizeLayerSeedTests {
         for row in seeded() {
             let combo = try #require(KeyCombo.parse(row.combo))
             let reserved = SystemShortcuts.map[combo]
+            if Self.knownShadows.contains(row.combo) { continue }
             #expect(
                 reserved == nil,
                 "\(row.combo) shadows \(reserved as Any)"
             )
         }
+        // Non-vacuity: a builder that emitted nothing would
+        // satisfy the loop above without guarding anything.
+        #expect(seeded().count > 20)
+        // An exemption that stops shadowing is a stale one, and
+        // a guard that keeps waving a chord through after macOS
+        // releases it is one the next author trusts wrongly.
+        for combo in Self.knownShadows {
+            let parsed = try #require(KeyCombo.parse(combo))
+            #expect(
+                SystemShortcuts.map[parsed] != nil,
+                "\(combo) is exempt but no longer shadows"
+            )
+        }
+    }
+
+    /// Seeded chords that DO shadow a macOS reservation and
+    /// ship anyway — the one copy of who is exempt, and why.
+    ///
+    /// `⌃⌥⌘8` is tier 3's move-to-space-8-and-follow chord AND
+    /// macOS's Invert Colors (symbolichotkeys id 21, measured
+    /// 2026-08-29 on macOS 26.6). Kept bound on an owner ruling:
+    /// Invert Colors ships DISABLED, so the row works for
+    /// essentially everyone, and dropping it would take a working
+    /// shortcut from all users to spare the few who enable it.
+    /// The register entry is what the ruling buys — the chord is
+    /// now flagged in the editor, where before the failure was
+    /// invisible on both sides.
+    ///
+    /// What that costs, stated so nobody rediscovers it: for a
+    /// user who DOES enable Invert Colors, macOS wins the chord
+    /// (`RegisterEventHotKey` fails silently), so this row does
+    /// nothing and says nothing. Moving it is not available —
+    /// the digits map to space POSITIONS, so skipping one breaks
+    /// the mapping the other nine rows depend on.
+    private static let knownShadows: Set<String> = [
+        "control+option+command+8"
+    ]
+
+    /// The pair is the point: the chord is seeded AND registered.
+    /// Seeded alone is the silent failure this change found;
+    /// registered alone would mean the ruling had been reversed
+    /// without this comment being updated.
+    @Test("⌃⌥⌘8 is both seeded and registered as reserved")
+    func invertColorsChordIsSeededAndKnown() throws {
+        let combo = try #require(
+            KeyCombo.parse("control+option+command+8")
+        )
+        #expect(SystemShortcuts.map[combo] != nil)
+        #expect(
+            seeded().contains { KeyCombo.parse($0.combo) == combo }
+        )
     }
 
     /// The specific collision that moved this layer off `7`/`8`,

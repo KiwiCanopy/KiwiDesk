@@ -163,7 +163,7 @@ extension KeybindingCatalog {
                 "Keeps this window visible on every Space of the "
                     + "screen it lives on. Moving it to a Space on "
                     + "another screen re-homes it there. Turn a "
-                    + "sticky window fully global with %1$@.",
+                    + "sticky window fully global with “%1$@”.",
                 L(
                     "keybinding.toggle_sticky",
                     "Toggle sticky everywhere"

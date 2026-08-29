@@ -75,9 +75,16 @@ descriptive-occurrence check below was run: all 17 keys (21
 feature — there
 is no incidental "sticky" in ordinary prose to false-positive on
 (unlike `app`/`space`/`bar`, which are common words and needed the
-per-token glossary carve-outs). Its display tier is **"Display
-Sticky"** (German **"Display-Sticky"**), "display" being an ordinary
-qualifier that compounds per locale around the fixed "Sticky" atom.
+per-token glossary carve-outs). Its two scopes are **"Toggle sticky everywhere"** and **"Toggle
+sticky on this screen"** (#1094) — the qualifier is an ordinary
+phrase that each locale renders in its own words around the fixed
+"Sticky" atom. Render "screen" with the catalog's own SCREEN word,
+never its *display* or *monitor* word: seven catalogs reached for
+the latter when this label was renamed, and in four of them the
+result was byte-identical to that catalog's own **Monitors**
+destination — a Shortcuts row wearing another destination's name
+(Family C rule 1, and the reason this sentence no longer says
+"Display Sticky").
 
 ### What it requires
 

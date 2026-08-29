@@ -42,19 +42,34 @@ override; float and ignore share the generic list-rule primitive
 because two real clients now remove drift — see
 [parity-tests.md](parity-tests.md).
 
-## The seeded keymap has two bases, plus a residue
+## The seeded keymap has two bases, plus one key
 
-- **Seed a positional verb on the `⌃⌥` ladder and a size verb on
-  `⌥⌘` — never the reverse (#1075).** `⌘` on the ladder means
-  exactly one thing, "and follow"; giving it a second sense is
-  what the split removed. The residue is real, and named here so
-  it is not re-derived: the toggles (`⌃⌥F`, `⌃⌥S`, `⌃⌥⇧S`) and
-  app chrome (`⌃⌥K`) are mnemonic letters on the base tier, where
-  `⇧` means "the broader scope" rather than "act on the window".
+- **Seed a HELD verb on `⌥⌘` and a PRESSED verb on the `⌃⌥`
+  ladder — never the reverse (#1075/#1094).** Size is the one verb
+  a user holds, so it is the only thing on `⌥⌘`; `⌘` on the
+  ladder means exactly one thing, "and follow", and giving it a
+  second sense is what the split removed. The toggles (`⌃⌥F`,
+  `⌃⌥S`, `⌃⌥P`) and app chrome (`⌃⌥K`) are pressed, so they
+  stay on the base tier as mnemonic letters
+  (`SizeLayerSeedTests`, `DefaultKeybindingsTests`).
+- **Never spend `⇧` on anything but "act on the window".** It
+  qualifies a positional row — an arrow or a digit — so a
+  lettered toggle never carries it: `⌃⌥⇧S` did, and it was the
+  one chord in the seed a user who had learned the ladder read
+  wrong (#1094, `DefaultKeybindingsTests` ▸
+  `shiftNeverQualifiesALetter`). Which letter each sticky scope
+  takes, and why the screen-scoped one is named for a mark
+  rather than a label, is `DefaultKeybindings`' own docstring —
+  do not restate it here.
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
-  against prose.** That base is free only where the register says
-  so — the first draft of this layer took `⌥⌘8`, which is macOS's
-  Zoom toggle. What the register must carry, and how to enumerate
+  against prose — and do not stop there.** That base is free only
+  where the register says so: the first draft of this layer took
+  `⌥⌘8`, which is macOS's Zoom toggle. But the register models
+  macOS's OWN chords, so it is blind to app menus, which is where
+  most real collisions live — `⌥⌘`+digit came back bound in
+  Finder, Preview, Safari and PowerPoint against a register that
+  stayed green (#1098). The check is necessary and not
+  sufficient; enumerate the apps too. What the register must carry, and how to enumerate
   a base, is [input-and-animation.md](input-and-animation.md)'s;
   the product argument is `docs/design-decisions.md` ▸ "Size is
   not a positional verb" (`SizeLayerSeedTests`).

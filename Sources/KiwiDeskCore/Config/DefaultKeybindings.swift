@@ -99,22 +99,11 @@ public enum DefaultKeybindings {
         // scope", which is the one chord in the seed a user who
         // learned the ladder would have read wrong.
         //
-        // `S` carries the UNQUALIFIED verb, matching the label a
-        // GUI-first user is shown: `toggle_sticky` is "sticky
-        // everywhere", `toggle_display_sticky` is the qualified
-        // one. "Sticky = follows me everywhere" is also the
-        // reading someone reaches for before reading anything.
-        //
-        // `P` names the `pin.fill` MARK that
-        // `StickyStyle.displaySymbolName` draws on such a window,
-        // deliberately not the label. A label-derived mnemonic
-        // only works in the language the label was written in
-        // (`config-vocabulary.md` lets each locale pick its own
-        // word), while a mark is a picture — so `P` is teachable
-        // in every catalog, and #865's display→screen rename
-        // cannot orphan it. `D` was rejected: it reads as
-        // *Desktop*, a first-class noun with its own rows, and it
-        // anchors to a word the vocabulary rule retires.
+        // Which letter each sticky scope takes, and why `P`
+        // names the mark rather than the label, is argued in
+        // `docs/design-decisions.md` ▸ "Size is not a positional
+        // verb" — not restated here (the sibling
+        // `DefaultKeybindings+Size.swift` sets that shape).
         rows.append(
             KeyBinding(
                 combo: "control+option+f",
