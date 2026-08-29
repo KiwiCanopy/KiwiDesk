@@ -167,7 +167,10 @@ struct KeyboardCensusTests {
 
     @Test("Reserved is answered under the selection, not blind")
     func systemReservedIsPerModifier() {
-        // Space (49) is Spotlight under ⌘, free under ⌃⌥.
+        // W (13) is Close Window under ⌘, free under ⌃⌥.
+        // Space was this fixture's example until #1094 put
+        // ⌃⌥space (next input source) in the map — ⌃⌥ is the
+        // quiet base, but since then it is not the empty one.
         let command = KeyboardCensus.ModifierLayer(
             modifiers: .command
         )
@@ -176,14 +179,14 @@ struct KeyboardCensusTests {
         )
         #expect(
             SystemShortcuts.map[
-                KeyCombo(keyCode: 49, modifiers: .command)
+                KeyCombo(keyCode: 13, modifiers: .command)
             ] != nil
         )
         #expect(
-            KeyboardCensus.isSystemReserved(49, under: [command])
+            KeyboardCensus.isSystemReserved(13, under: [command])
         )
         #expect(
-            !KeyboardCensus.isSystemReserved(49, under: [ctrlOpt])
+            !KeyboardCensus.isSystemReserved(13, under: [ctrlOpt])
         )
     }
 
@@ -227,7 +230,7 @@ struct KeyboardCensusTests {
         )
         #expect(
             KeyboardCensus.state(
-                of: 49,
+                of: 13,
                 claims: [:],
                 scope: .one(ctrlOpt)
             ) == .free

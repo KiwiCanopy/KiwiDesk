@@ -36,10 +36,14 @@ struct KeyboardBoardSpokenTests {
     @Test("keys land in the bucket the cap draws them in")
     func bucketsFollowTheCaps() {
         LocalizationManager.shared.select("en")
-        // ⌃⌥ reserves nothing under macOS, so only the user's
-        // own facts speak: W and Space bound, Q colliding.
+        // W bound, Q colliding, Space macOS's. Space used to be
+        // BOUND here, on a comment reading "⌃⌥ reserves nothing
+        // under macOS" — true until #1094 added ⌃⌥space (next
+        // input source) to the map. Leaving it unclaimed is the
+        // better fixture anyway: all three buckets now carry a
+        // key, where `reserved` was previously empty.
         let pair = Layer(modifiers: [.control, .option])
-        let claims: [UInt32: [Layer]] = [13: [pair], 49: [pair]]
+        let claims: [UInt32: [Layer]] = [13: [pair]]
         let buckets = KeyboardBoardSpoken.buckets(
             rows: rows,
             claims: claims,
@@ -47,9 +51,9 @@ struct KeyboardBoardSpokenTests {
             conflicted: [12],
             glyph: glyph
         )
-        #expect(buckets.bound == ["W", "space"])
+        #expect(buckets.bound == ["W"])
         #expect(buckets.conflict == ["Q"])
-        #expect(buckets.reserved.isEmpty)
+        #expect(buckets.reserved == ["space"])
     }
 
     @Test("a bound key over a macOS reservation is a conflict")

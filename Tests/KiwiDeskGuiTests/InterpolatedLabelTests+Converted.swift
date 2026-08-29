@@ -194,5 +194,10 @@ extension InterpolatedLabelTests {
         "scroll_grid.animate_focus_shifts.help": 1,
         "sticky.caption": 2,
         "general.login_item.managed_by_service": 1,
+        // 4. #1094. The help quoted "Toggle sticky" as literal
+        //    text while the label itself was being reworded, so
+        //    the sentence would have named a control that no
+        //    longer exists under that name in any locale.
+        "keybinding.toggle_display_sticky.help": 1,
     ]
 }
