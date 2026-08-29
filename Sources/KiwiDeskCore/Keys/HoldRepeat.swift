@@ -54,14 +54,24 @@ final class HoldRepeat {
     /// travel.
     static let maxRunSeconds: TimeInterval = 30
 
-    /// One glide step: the press's captured arguments and the
-    /// factor to scale its delta by. Returns whether the command
-    /// succeeded — a failure ends the glide, so a resize that
-    /// starts failing (a mode change, a focus loss) stops rather
-    /// than hammering the dispatcher every frame. Inert by
-    /// default and wired live in `KiwiCore+HoldGlide`.
-    var applyGlideStep: @MainActor ([JSONValue], Double) -> Bool = { _, _ in
-        false
+    /// One glide step: the press's captured command NAME, its
+    /// arguments, and the factor to scale its delta by. The name
+    /// travels because `repeatableCommands` is the declared
+    /// owner of what may glide and the rule file contemplates
+    /// widening it — a wiring that hardcodes `"resize"` would
+    /// then re-issue `resize` for a press that ran a different
+    /// verb, with every suite green (architect review,
+    /// 2026-08-29).
+    ///
+    /// Returns whether the command succeeded — a failure ends the
+    /// glide, so a resize that starts failing (a mode change, a
+    /// focus loss) stops rather than hammering the dispatcher
+    /// every frame. Inert by default and wired live in
+    /// `KiwiCore+HoldGlide`.
+    var applyGlideStep: @MainActor (String, [JSONValue], Double) -> Bool = {
+        _,
+        _,
+        _ in false
     }
 
     /// Starts the frame clock, returning its stop. Inert by
@@ -79,6 +89,14 @@ final class HoldRepeat {
     /// the manager's log seam so the rescue is visible, never
     /// silent (the #611 reporting rule).
     var onOverrun: @MainActor () -> Void = {}
+
+    /// A glide that was RUNNING has ended, however it ended
+    /// (release, refusal, failing step, teardown, overrun). Fires
+    /// once per glide and never for a hold that never began
+    /// gliding. It exists so work a glide frame stands down can
+    /// be paid exactly once at the end — the #674 z-order arm is
+    /// the first taker (`KiwiCore+HoldGlide`).
+    var onGlideEnd: @MainActor () -> Void = {}
 
     /// Schedules `work` after `delay`; returns a cancel. This
     /// drives the ONE pre-glide wait and never the glide itself,
@@ -118,36 +136,76 @@ final class HoldRepeat {
         let commands: Int
         let repeatableSucceeded: Bool
         let refused: Bool
+        let command: String
         let args: [JSONValue]
     }
 
     private var commandsInFire = 0
     private var repeatableSucceeded = false
     private var refused = false
-    /// The repeatable command's arguments as the press ran them.
-    /// The glide scales this delta rather than inventing a
-    /// distance of its own (`HoldRepeat+Glide.swift`).
+    /// The repeatable command the press ran, and the arguments
+    /// it ran with. The glide re-issues this verb and scales its
+    /// delta rather than inventing either
+    /// (`HoldRepeat+Glide.swift`).
+    private var fireCommand = ""
     private var fireArgs: [JSONValue] = []
 
     /// The registration id currently held.
     private(set) var heldID: UInt32?
 
     /// True from the moment the frame clock starts until the run
-    /// ends. Two readers, both needing "a held glide is applying
-    /// right now" at a moment when `KeybindingManager.isFiring`
-    /// is false: the refusal gate, and the resize paths' choice
-    /// to write instantly (`KiwiCore.resizeRetileAnimated`).
-    private(set) var isGliding = false
+    /// ends — the hold's LIFETIME. Its one reader is the refusal
+    /// gate, which is a lifetime question: a size-limit cue
+    /// raised anywhere in the hold ends it, and
+    /// `KeybindingManager.isFiring` is false outside the press
+    /// fire. Anything asking "does THIS WRITE belong to the
+    /// glide?" takes `KiwiCore.glideWriteScope` instead — that
+    /// property's doc argues why a lifetime bit answers the
+    /// per-write question wrongly, and fails open.
+    // `private(set)` would not let `HoldRepeat+Run` set it —
+    // Swift access control is file-scoped — so the setter is
+    // internal and the type's own files are its only writers.
+    var isGliding = false
 
-    private var cancelPending: (() -> Void)?
-    private var stopFrames: (() -> Void)?
-    private var glideArgs: [JSONValue] = []
+    /// True for the duration of ONE glide frame's write, set
+    /// around the apply in `HoldRepeat+Run` and cleared by
+    /// `defer` on every exit.
+    ///
+    /// Separate from `isGliding` deliberately (code review,
+    /// 2026-08-29). A geometry path asking "does THIS WRITE
+    /// belong to the glide?" must not read the hold's lifetime:
+    /// that answers wrongly in both directions — an unrelated
+    /// Lua, CLI or IPC `resize` arriving during a hold would
+    /// silently lose its animation, and a hold whose frame clock
+    /// dies (display sleep or disconnect mid-hold) would leave
+    /// the bit stuck true for the session, making every later
+    /// resize instant. This one cannot outlive the write it
+    /// describes, and it is owned by the state machine rather
+    /// than by the wiring so a re-wiring cannot forget it.
+    ///
+    /// Read through `KeybindingManager.isApplyingGlideStep`, the
+    /// `keys.isFiring` precedent one screen up in
+    /// `KiwiCore+Resize`. Who may read it is pinned by count in
+    /// `HoldGlideSeamTests`, since "there is one reader" is
+    /// otherwise the state claim #614 bans.
+    var isApplyingGlideStep = false
+
+    // Internal, not private: the run machinery lives in
+    // `HoldRepeat+Run.swift`, split at the file ceiling, and
+    // Swift `private` does not cross files (the
+    // `SizeBoundLearner+Invalidation` precedent).
+    var cancelPending: (() -> Void)?
+    var stopFrames: (() -> Void)?
+    var glideArgs: [JSONValue] = []
+    var glideCommand = ""
+    /// Cancels the wall-clock backstop in `HoldRepeat+Run`.
+    var cancelBackstop: (() -> Void)?
     /// Frame time the glide has accumulated: its ramp clock AND
     /// its age, both simulated from the frames actually
     /// delivered — never wall clock (the #611 idiom), so a
     /// starved main queue cannot age a glide it never ticked, and
     /// the ramp cannot jump a stall's worth of speed.
-    private var glideElapsed: TimeInterval = 0
+    var glideElapsed: TimeInterval = 0
 
     // MARK: - Fed by KiwiCore during a fire
 
@@ -162,6 +220,7 @@ final class HoldRepeat {
         commandsInFire += 1
         if Self.repeatableCommands.contains(name), succeeded {
             repeatableSucceeded = true
+            fireCommand = name
             fireArgs = args
         }
     }
@@ -185,11 +244,13 @@ final class HoldRepeat {
             commands: commandsInFire,
             repeatableSucceeded: repeatableSucceeded,
             refused: refused,
+            command: fireCommand,
             args: fireArgs
         )
         commandsInFire = 0
         repeatableSucceeded = false
         refused = false
+        fireCommand = ""
         fireArgs = []
         return saved
     }
@@ -198,6 +259,7 @@ final class HoldRepeat {
         commandsInFire = saved.commands
         repeatableSucceeded = saved.repeatableSucceeded
         refused = saved.refused
+        fireCommand = saved.command
         fireArgs = saved.args
     }
 
@@ -214,11 +276,19 @@ final class HoldRepeat {
         // A new press always ends any previous run — one active
         // hold at a time, latest wins — and does so before the
         // eligibility verdict, unconditionally.
+        let command = fireCommand
         let args = fireArgs
         cancelRun()
         guard eligible else { return }
         heldID = id
+        glideCommand = command
         glideArgs = args
+        // Each press restarts the ramp, deliberately: repeated
+        // short holds must never accumulate speed. A ramp that
+        // carried across quick re-holds makes the third nudge in
+        // a row lurch, which is the classic defect in this family
+        // — so this is not a warm-start waiting to be optimised
+        // in (designer round, 2026-08-29).
         glideElapsed = 0
         cancelPending = schedule(initialDelay()) { [weak self] in
             self?.cancelPending = nil
@@ -240,43 +310,18 @@ final class HoldRepeat {
     func cancelRun() {
         cancelPending?()
         cancelPending = nil
+        cancelBackstop?()
+        cancelBackstop = nil
         stopFrames?()
         stopFrames = nil
+        let wasGliding = isGliding
         isGliding = false
         heldID = nil
         glideArgs = []
-    }
-
-    private func beginGlide() {
-        guard heldID != nil else { return }
-        isGliding = true
-        stopFrames = startFrames { [weak self] dt in
-            self?.glideFrame(dt: dt)
-        }
-    }
-
-    /// One display frame of glide: move the ramp's current speed
-    /// for the time this frame actually took. `dt` arrives
-    /// clamped by the driver, so a stalled frame costs distance
-    /// rather than lurching a whole stall's worth in one step.
-    private func glideFrame(dt: TimeInterval) {
-        guard isGliding, heldID != nil, dt > 0 else { return }
-        guard glideElapsed < Self.maxRunSeconds else {
-            cancelRun()
-            onOverrun()
-            return
-        }
-        // The ramp is read BEFORE the frame is banked, so the
-        // first frame moves at `glideStartSteps` rather than one
-        // frame's worth into the ramp.
-        let scale = Self.glideSteps(elapsed: glideElapsed) * dt
-        glideElapsed += dt
-        let args = glideArgs
-        guard applyGlideStep(args, scale) else {
-            // Already cancelled if the step cued a refusal; a
-            // second cancel is idempotent.
-            cancelRun()
-            return
-        }
+        glideCommand = ""
+        // Last, and only for a glide that actually ran: the
+        // consumer re-enters the command layer, so every field
+        // above must already read as ended.
+        if wasGliding { onGlideEnd() }
     }
 }

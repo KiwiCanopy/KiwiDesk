@@ -132,7 +132,10 @@ struct HoldGlideSeamTests {
             """
         )
         // And nothing in that file reaches for a timer instead.
-        for banned in ["Timer(", "Timer.scheduled", "DispatchSourceTimer"] {
+        let banned = [
+            "Timer(", "Timer.scheduled", "DispatchSourceTimer",
+        ]
+        for banned in banned {
             let strays = try Self.sites(of: banned).filter {
                 $0.file.lastPathComponent == Self.wiringFile
             }
@@ -146,5 +149,76 @@ struct HoldGlideSeamTests {
                 )
             )
         }
+    }
+
+    @Test("The write scope has exactly the ruled readers")
+    func glideWriteScopeReadersArePinned() throws {
+        // `isApplyingGlideStep` answers "does THIS WRITE belong
+        // to the glide?" and is READ by production geometry code,
+        // which makes "there is one reader" a state claim — the
+        // shape #614 bans unless a guard names it. The
+        // behavioural test beside it (`HoldRepeatWiringTests` ▸
+        // `glideStepsWriteInstantly`) asserts the value flips
+        // during a hold and would stay green with a second reader
+        // added anywhere, so it cannot carry the claim (code
+        // review, 2026-08-29).
+        //
+        // Two readers by ruling, both in the resize command file:
+        // the animation choice and the #674 z-order stand-down. A
+        // new one inherits BOTH behaviours — write instantly, and
+        // stand per-frame work down — so it is a deliberate
+        // decision that joins this list in the same change, or
+        // the claim is false again.
+        let reads = try Self.sites(of: "isApplyingGlideStep")
+        let byFile = Dictionary(
+            grouping: reads,
+            by: { $0.file.lastPathComponent }
+        )
+        #expect(
+            byFile["KiwiCore+Resize.swift"]?.count == 2,
+            """
+            expected exactly two isApplyingGlideStep readers in \
+            KiwiCore+Resize.swift (the animation choice and the \
+            z-order stand-down), found \
+            \(byFile["KiwiCore+Resize.swift"]?.count ?? 0)
+            """
+        )
+        #expect(
+            Set(byFile.keys) == [
+                "HoldRepeat.swift",
+                "HoldRepeat+Run.swift",
+                "KeybindingManager+Repeat.swift",
+                "KiwiCore+Resize.swift",
+            ],
+            .init(
+                rawValue: "unexpected isApplyingGlideStep site "
+                    + "in "
+                    + Set(byFile.keys).sorted()
+                    .joined(separator: ", ")
+            )
+        )
+    }
+
+    @Test("The glide-end seam is wired, and pays the arm")
+    func glideEndSeamIsWired() throws {
+        // The #674 arm is stood down per frame and paid once
+        // here, so a deleted wiring means a track pile stays
+        // scrambled after every held resize — visible, but
+        // nothing else reds: the stand-down lives in `resize` and
+        // stays correct on its own.
+        let wired = try Self.sites(of: "holdRepeat.onGlideEnd =")
+        #expect(
+            wired.count == 1,
+            """
+            expected exactly one holdRepeat.onGlideEnd wiring, \
+            found \(wired.count): \
+            \(wired.map(\.site).joined(separator: ", "))
+            """
+        )
+        #expect(
+            wired.allSatisfy {
+                $0.file.lastPathComponent == Self.wiringFile
+            }
+        )
     }
 }

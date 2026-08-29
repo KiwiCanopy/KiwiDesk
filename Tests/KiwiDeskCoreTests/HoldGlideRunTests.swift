@@ -169,4 +169,70 @@ struct HoldGlideRunTests {
         try h120.frame(1.0 / 120)
         #expect(h120.steps[0].scale < h60.steps[0].scale)
     }
+
+    @Test("The stood-down work is paid once, at the hold's end")
+    func glideEndFiresOncePerGlide() throws {
+        // The #674 z-order arm is stood down per glide frame and
+        // paid here (`KiwiCore+HoldGlide`). Two properties, both
+        // load-bearing and neither visible from the arm's own
+        // site: it fires ONCE however many frames ran — the
+        // coalescing the settle used to provide, and whose loss
+        // was this change's blocker (architect + code review,
+        // 2026-08-29) — and it does not fire for a hold that
+        // never began gliding, which would arm a restore for a
+        // single tap.
+        let h = HoldGlideHarness()
+        h.press(id: 1)
+        try h.beginGlide()
+        for _ in 0..<20 { try h.frame() }
+        #expect(h.glideEnds == 0)
+        h.repeatEngine.released(id: 1)
+        #expect(h.glideEnds == 1)
+
+        // A tap that armed but never glided pays nothing.
+        let tap = HoldGlideHarness()
+        tap.press(id: 2)
+        tap.repeatEngine.released(id: 2)
+        #expect(tap.glideEnds == 0)
+
+        // And every other way a glide ends pays it exactly once:
+        // a refusal, and a failing step.
+        let refused = HoldGlideHarness()
+        refused.press(id: 3)
+        try refused.beginGlide()
+        try refused.frame()
+        refused.repeatEngine.noteRefusal()
+        #expect(refused.glideEnds == 1)
+
+        let failing = HoldGlideHarness()
+        failing.press(id: 4)
+        try failing.beginGlide()
+        failing.applySucceeds = false
+        try failing.frame()
+        #expect(failing.glideEnds == 1)
+    }
+
+    @Test("A frozen frame clock still ends the hold")
+    func wallClockBackstopEndsAFrozenGlide() throws {
+        // The run bound is spent in SIMULATED frame time, which
+        // is right — a starved queue must not age a glide it
+        // never ticked — but that clock can STOP: the driver is
+        // bound to one screen, and display sleep or a disconnect
+        // mid-hold freezes it (architect review, 2026-08-29).
+        // Without a second net the run stays armed for the
+        // session. The backstop rides the already-injected
+        // `schedule` seam, so it is reachable with no timers.
+        let h = HoldGlideHarness()
+        h.press(id: 1)
+        try h.beginGlide()
+        try h.frame()
+        // The clock dies here: no further frames ever arrive.
+        // The pending scheduled work is the backstop.
+        let backstop = h.ticks.popLast()
+        try #require(backstop).work()
+        #expect(h.repeatEngine.heldID == nil)
+        #expect(h.repeatEngine.isGliding == false)
+        #expect(h.overruns == 1)
+        #expect(h.glideEnds == 1)
+    }
 }

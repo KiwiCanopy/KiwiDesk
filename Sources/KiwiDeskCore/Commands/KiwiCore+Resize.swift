@@ -57,18 +57,35 @@ extension KiwiCore {
     /// `resizeFloating` measures from a FRAME instead and keeps
     /// its animation — the argument is at that call site.
     ///
-    /// This is also the whole of the Reduce Motion answer (owner
-    /// ruling, same date): a held chord glides for those users
-    /// too — a held-key resize is the keyboard's direct
-    /// manipulation, which Reduce Motion does not suppress for
-    /// the mouse either — and since a glide's tiled writes are
-    /// instant for everyone, there is no second mechanism to keep
-    /// alive.
+    /// A held chord glides under Reduce Motion too (owner
+    /// ruling, same date): a held-key resize is the keyboard's
+    /// direct manipulation, which Reduce Motion does not suppress
+    /// for the mouse either, and since these writes are instant
+    /// for everyone the TILED glide needs no second mechanism.
     ///
-    /// The ONE reader of `keys.isGliding` on the geometry side
-    /// (`HoldRepeatWiringTests` ▸ `glideStepsWriteInstantly`).
+    /// That is the tiled half ONLY, and an earlier version of
+    /// this comment claimed it was the whole answer, which was
+    /// false (code review, 2026-08-29). `resizeFloating` re-bases
+    /// each press on the in-flight animation's target, and
+    /// `AnimationEngine.animate` takes `guard isEnabled,
+    /// !reduceMotion()` — so with Reduce Motion on, animations
+    /// off, or the engine disabled there IS no target and it
+    /// falls back to the echo-fed frame. At press rate that costs
+    /// one echo's lag (`docs/accepted-limitations.md`); at glide
+    /// rate most frames re-base on the same stale echo and the
+    /// hold advances at echo rate instead of the ramp's. So
+    /// Reduce Motion is exactly where the FLOATING path is worst,
+    /// which is the sharpest argument for giving it a base of its
+    /// own (#1090).
+    ///
+    /// Reads the per-WRITE `isApplyingGlideStep`, never the
+    /// hold's lifetime — `HoldRepeat.isApplyingGlideStep` argues
+    /// why, and `keys.isFiring` one screen up is the same shape
+    /// of read. Who else may read it is pinned by count in
+    /// `HoldGlideSeamTests`, rather than claimed here: a
+    /// behavioural test cannot see a second reader appear (#614).
     var resizeRetileAnimated: Bool {
-        !keys.isGliding
+        !keys.isApplyingGlideStep
             && tiler.settings.animations.onWindowResize
     }
 
@@ -175,7 +192,25 @@ extension KiwiCore {
         // Resizing a track past min_window_size flips it into an
         // overflow cascade (or unflips one back); fix the pile's
         // z-order once it settles (#193, self-gated).
-        scheduleTrackZOrderRestoreIfOverflowing()
+        //
+        // A glide frame stands the arm down and pays it ONCE when
+        // the hold ends (#1082, architect + code review
+        // 2026-08-29). `scheduleZOrderRestore` runs immediately
+        // when `activeCount == 0` and defers otherwise, so the
+        // settle was this arm's COALESCER as much as its ordering
+        // rule: with animated writes a whole hold cost one
+        // restore, while a glide's instant writes make
+        // `activeCount` zero on every frame and would fire a full
+        // verified `raiseSequentially` per display frame —
+        // 60–120 a second of ordered raises on the blocking
+        // queue, each holding the mouse warp, with
+        // `zOrderRestoresInFlight` never returning to zero.
+        // #674's "arm narrowly" is exactly this clause; the pile
+        // is scrambled at most once per hold, so paying it once
+        // at the end is also the correct ordering.
+        if !keys.isApplyingGlideStep {
+            scheduleTrackZOrderRestoreIfOverflowing()
+        }
         return response
     }
 

@@ -21,9 +21,12 @@ struct HoldGlideRampTests {
             HoldRepeat.glideSteps(elapsed: 0)
                 == HoldRepeat.glideStartSteps
         )
-        // Negative elapsed cannot arise from a clamped `dt`, but
-        // the guard is the reason it cannot — pin it, since a
-        // ramp read below its floor would move BACKWARDS.
+        // Negative elapsed is unreachable in production — the
+        // ramp's own docstring says so — so read this leg as
+        // pinning the DEFENSIVE arm's behaviour, not a protected
+        // invariant (code review, 2026-08-29). The first version
+        // justified it by a backwards-moving ramp, which names a
+        // state no caller can produce.
         #expect(
             HoldRepeat.glideSteps(elapsed: -1)
                 == HoldRepeat.glideStartSteps

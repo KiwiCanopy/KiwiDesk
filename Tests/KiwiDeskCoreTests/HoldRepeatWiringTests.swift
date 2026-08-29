@@ -63,9 +63,17 @@ struct HoldRepeatWiringTests {
         // #1082's ruling: the glide IS the motion, so its own
         // writes do not animate — springing an already-smooth
         // signal adds trailing AND generates the #611 retarget
-        // storm deliberately. Reads through the one seam the
-        // resize paths take, with animations left ON so the
-        // expectation is about the glide rather than the config.
+        // storm deliberately.
+        //
+        // Asserted on the ENGINE rather than on the predicate
+        // (code review, 2026-08-29). The bit is per-WRITE now, so
+        // it is false everywhere except inside the frame's own
+        // execute — reading `resizeRetileAnimated` between frames
+        // would assert the opposite of what it used to. What is
+        // observable from outside is the consequence: a glide
+        // frame leaves no residency behind, with the configured
+        // policy left ON so the expectation is about the glide
+        // rather than about the config.
         let f = try HoldGlideFixture(
             body: #"KiwiDesk.resize("x", 50)"#
         )
@@ -74,13 +82,21 @@ struct HoldRepeatWiringTests {
             "animations.set_on_window_resize",
             args: [.bool(true)]
         )
+        // The configured policy is intact outside a glide write.
         #expect(f.core.resizeRetileAnimated)
 
         f.registrar.press(keyCode: f.combo.keyCode)
         try f.beginGlide()
-        // While gliding, the same seam answers instant — and it
-        // returns to the configured policy once the hold ends.
-        #expect(f.core.resizeRetileAnimated == false)
+        let before = f.ratio
+        try f.frame()
+        // The frame moved the ratio...
+        #expect(f.ratio > before)
+        // ...and animated nothing: an animated pass would leave
+        // the resized windows resident in the engine.
+        #expect(f.core.tiler.animation.activeCount == 0)
+
+        // And the policy is untouched once the hold ends — the
+        // scope cannot outlive the write it describes.
         f.registrar.release(keyCode: f.combo.keyCode)
         #expect(f.core.resizeRetileAnimated)
     }

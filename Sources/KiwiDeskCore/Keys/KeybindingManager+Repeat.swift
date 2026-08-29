@@ -14,6 +14,14 @@ extension KeybindingManager {
     /// binding fire.
     public var isGliding: Bool { holdRepeat.isGliding }
 
+    /// Whether a glide frame's own write is executing right now
+    /// — the per-WRITE question, which `isGliding` (the hold's
+    /// lifetime) answers wrongly. The distinction is argued on
+    /// `HoldRepeat.isApplyingGlideStep`.
+    public var isApplyingGlideStep: Bool {
+        holdRepeat.isApplyingGlideStep
+    }
+
     /// Called once from `init`. The glide arms only when the
     /// registrar can report releases — without that channel a
     /// hold would never stop. The press-only registrar fakes
@@ -61,9 +69,17 @@ extension KeybindingManager {
     /// A size-limit refusal cue fired (#933): a held run stops,
     /// so the pill flashes once per hold. Heard during the press
     /// fire AND during the glide, which runs outside any fire —
-    /// the gate is those two states rather than none, because the
-    /// same cue funnels serve the mouse resize end and a mouse
-    /// refusal is not this keyboard hold's wall.
+    /// the gate is those two states rather than none.
+    ///
+    /// The residue that widening buys, stated rather than left
+    /// implied (code review, 2026-08-29): the same
+    /// `cueResizeRefusal` funnel serves the MOUSE resize end, so
+    /// for the glide's duration a mouse refusal now passes this
+    /// gate and ends the keyboard hold. Accepted — it needs a
+    /// drag and a held chord at once, and the failure is a hold
+    /// that stops early rather than one that cannot stop — but it
+    /// is a real widening, and the pre-#1082 comment here claimed
+    /// the gate excluded exactly this.
     public func noteResizeRefusal() {
         guard isFiring || holdRepeat.isGliding else { return }
         holdRepeat.noteRefusal()

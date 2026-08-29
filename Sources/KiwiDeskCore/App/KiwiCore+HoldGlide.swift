@@ -12,6 +12,7 @@ extension KiwiCore {
     func wireHoldGlide() {
         wireGlideStep()
         wireGlideFrames()
+        wireGlideEnd()
     }
 
     /// The glide re-issues the PRESS's own command with a scaled
@@ -24,13 +25,24 @@ extension KiwiCore {
     /// and does not get its own path.
     private func wireGlideStep() {
         keys.holdRepeat.applyGlideStep = {
-            [weak self] args, scale in
+            [weak self] command, args, scale in
             guard let self,
                 let axis = args.first?.stringValue,
                 let delta = args.dropFirst().first?.numberValue
             else { return false }
+            // The VERB the press ran, carried through the tally
+            // rather than spelled here: `repeatableCommands` owns
+            // what may glide, and a hardcoded `"resize"` would
+            // re-issue it for a press that ran something else the
+            // moment that set widens (architect review,
+            // 2026-08-29).
+            //
+            // The per-write scope the geometry paths read is set
+            // by the state machine around this call
+            // (`HoldRepeat.isApplyingGlideStep`), not here, so a
+            // re-wiring cannot forget it.
             let response = self.execute(
-                "resize",
+                command,
                 args: [.string(axis), .number(delta * scale)]
             )
             return response.isSuccess
@@ -66,12 +78,37 @@ extension KiwiCore {
                 // but INVALIDATE off this turn: a glide can stop
                 // from inside a frame callback (a refusal cue
                 // reached mid-step), and tearing the link down
-                // there releases the driver — the link owns the
-                // only strong reference to it — while that
-                // driver's own `fire` is still on the stack.
+                // there can release the driver while its own
+                // `fire` is still on the stack.
+                //
+                // Which reference is last matters, so state it
+                // rather than the shorthand an earlier version
+                // used (code review, 2026-08-29): the link
+                // retains the driver AND this closure captures
+                // it, so `invalidate()` alone is not fatal — it
+                // is `cancelRun`'s `stopFrames = nil` right after
+                // this call that drops the last one, still inside
+                // the callback. Deferring keeps the driver alive
+                // past the frame either way, and the link is
+                // already paused so no frame lands between.
                 driver.stop()
                 DispatchQueue.main.async { driver.invalidate() }
             }
+        }
+    }
+
+    /// The work a glide frame stands down, paid ONCE when the
+    /// hold ends. Today that is the #674 track z-order arm:
+    /// `scheduleZOrderRestore` runs immediately at
+    /// `activeCount == 0`, so the settle that used to coalesce a
+    /// whole hold into one restore is gone the moment glide
+    /// frames write instantly — see the stand-down at `resize`'s
+    /// own arm for the full argument. Firing here rather than per
+    /// frame is also the correct ordering: the pile is scrambled
+    /// at most once per hold.
+    private func wireGlideEnd() {
+        keys.holdRepeat.onGlideEnd = { [weak self] in
+            self?.scheduleTrackZOrderRestoreIfOverflowing()
         }
     }
 }

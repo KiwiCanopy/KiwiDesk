@@ -26,7 +26,12 @@ struct HoldRepeatTests {
 
         try h.beginGlide()
         #expect(h.repeatEngine.isGliding)
-        #expect(h.ticks.isEmpty)
+        // The only thing left on the scheduler is the wall-clock
+        // backstop, at the run bound — the glide itself rides
+        // frames and never the scheduler.
+        #expect(
+            h.ticks.map(\.delay) == [HoldRepeat.maxRunSeconds]
+        )
         // Still nothing applied: a glide moves on FRAMES, so an
         // engine that applied on the wait itself would double the
         // press's own step.

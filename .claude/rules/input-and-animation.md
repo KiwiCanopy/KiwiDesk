@@ -95,9 +95,17 @@ editing here:
   by "no strays".
 
   **A glide's tiled writes are instant, and the floating path is
-  the deliberate exception** (#1082). `KiwiCore
-  .resizeRetileAnimated` is the one reader of `keys.isGliding` on
-  the geometry side. Springing a glide frame smooths an
+  the deliberate exception** (#1082). The bit a write consults is
+  `KiwiCore.glideWriteScope`, set around ONE re-issued command
+  and cleared on every exit — never `keys.isGliding`, which is
+  the hold's lifetime and answers the per-write question wrongly
+  in both directions: an unrelated Lua/CLI/IPC resize arriving
+  during a hold would lose its animation, and a hold whose frame
+  clock dies would leave the bit stuck on for the session. Who
+  may read that scope is pinned by count
+  (`HoldGlideSeamTests`), because a new reader inherits two
+  behaviours at once — write instantly, AND stand per-frame work
+  down. Springing a glide frame smooths an
   already-smooth signal and generates the #611 retarget storm
   below deliberately — a changed target every frame is what the
   watchdog cannot tell from a long drag — so writing instantly is

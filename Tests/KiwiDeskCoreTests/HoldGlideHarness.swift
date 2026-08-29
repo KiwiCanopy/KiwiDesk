@@ -19,7 +19,10 @@ final class HoldGlideHarness {
     let repeatEngine = HoldRepeat()
     var ticks: [(delay: TimeInterval, work: () -> Void)] = []
     var cancels = 0
-    var steps: [(args: [JSONValue], scale: Double)] = []
+    var steps: [(command: String, args: [JSONValue], scale: Double)] = []
+    /// How many times the glide-end seam fired — the #674 arm's
+    /// "pay it once at the end" contract.
+    var glideEnds = 0
     var overruns = 0
     var frameStops = 0
     /// What `applyGlideStep` reports back — false is a resize
@@ -43,9 +46,12 @@ final class HoldGlideHarness {
             }
         }
         repeatEngine.applyGlideStep = {
-            [weak self] args, scale in
-            self?.steps.append((args, scale))
+            [weak self] command, args, scale in
+            self?.steps.append((command, args, scale))
             return self?.applySucceeds ?? false
+        }
+        repeatEngine.onGlideEnd = { [weak self] in
+            self?.glideEnds += 1
         }
         repeatEngine.onOverrun = { [weak self] in
             self?.overruns += 1

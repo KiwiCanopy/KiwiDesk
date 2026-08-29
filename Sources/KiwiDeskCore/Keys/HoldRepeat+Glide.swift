@@ -49,22 +49,85 @@ import Foundation
 /// ramp, clamped ceiling), derived from these values, so a retune
 /// reds nothing.
 extension HoldRepeat {
-    /// Steps per second at the glide's first frame. Slow enough
-    /// that a short hold past the initial delay reads as fine
-    /// adjustment rather than a second jump.
-    static let glideStartSteps = 3.5
+    /// Steps per second at the glide's first frame. Bounded from
+    /// BELOW by two things rather than chosen for feel (designer
+    /// round, 2026-08-29):
+    ///
+    /// - It must beat mashing the chord by hand, or holding is
+    ///   the worse tool at the one moment the user decides
+    ///   between them — the same argument the steps-per-second
+    ///   ruling above makes about the ends of the step range,
+    ///   applied to the ramp's own first moment.
+    /// - It must clear the fineness floor, which is
+    ///   `2 pt ÷ step × refresh`: 2.4 steps/s at 60 Hz and 4.8 at
+    ///   120 Hz for the default 50 pt step. Below it the glide
+    ///   asks for frames the un-forced retile's ±2 pt tolerance
+    ///   does not apply, so a ProMotion panel spends its extra
+    ///   refreshes on nothing. The first cut shipped 3.5, under
+    ///   the 120 Hz floor.
+    ///
+    /// Bounded from ABOVE by overshoot: a release reaction of
+    /// ~150 ms should cost at most one step — the unit of intent,
+    /// and the amount one tap the other way undoes — which is
+    /// ≈6.7 steps/s.
+    ///
+    /// Deliberately NOT justified as "fine adjustment": that is
+    /// what a small configured step is for. The tap owns
+    /// precision and the glide owns travel, so a start speed
+    /// duplicating the tap's job taxes the glide's.
+    static let glideStartSteps = 6.0
 
-    /// Steps per second once the ramp is complete.
+    /// Steps per second once the ramp is complete. The
+    /// "powerful on demand" end, deliberately uncapped-feeling:
+    /// it costs ~2.7 steps of overshoot at a 150 ms reaction,
+    /// which is only acceptable in a regime where the user has
+    /// declared they are travelling — and it is the RAMP that
+    /// establishes that, not the ceiling. Lowering this to buy
+    /// back overshoot would make the long haul permanently worse
+    /// to protect a case the ramp duration already protects.
     static let glideMaxSteps = 18.0
 
     /// Seconds from the glide's first frame to `glideMaxSteps`.
-    static let glideRampSeconds: TimeInterval = 1.5
+    /// Derived from a target rather than picked: the ceiling
+    /// should arrive at about ONE screen-span of travel at the
+    /// default step, not half of one. At a mean 12 steps/s and
+    /// 30 steps to cross ~1500 pt, that is 2.5 s. The first cut
+    /// shipped 1.5 s, which reached the ceiling at ~800 pt — so
+    /// the ordinary adjustment ended at top speed, which is where
+    /// overshoot is worst.
+    ///
+    /// It also buys a perceptual plateau without a fifth
+    /// constant: at this slope the speed moves only ~1.4 steps/s
+    /// across the first 300 ms, so a short hold runs at an
+    /// effectively constant, learnable rate — key repeat's
+    /// predictability — and only a hold that has become a journey
+    /// accelerates. Do NOT re-implement that as an explicit flat
+    /// phase; moving the endpoints gets it with fewer degrees of
+    /// freedom for a future retune to get wrong.
+    static let glideRampSeconds: TimeInterval = 2.5
 
     /// The ramp: linear in elapsed glide time, clamped at both
-    /// ends. Linear on purpose — the value reads back as "how
-    /// fast is it moving right now", and an eased curve makes the
-    /// same hold duration mean different speeds depending on
-    /// where in the ease it lands.
+    /// ends.
+    ///
+    /// Linear because **displacement is what the user controls,
+    /// and displacement is the integral**. A velocity linear in
+    /// time already makes distance quadratic in hold duration; an
+    /// ease-IN makes it cubic and unlearnable, and an ease-OUT is
+    /// a plateau wearing a curve — reachable by moving the two
+    /// endpoints above, which a guard can pin, where a curve is a
+    /// fifth free parameter nothing can. (The first cut argued
+    /// this as "an eased curve makes the same hold duration mean
+    /// different speeds depending on where in the ease it lands",
+    /// which is true of a linear ramp too and so defended
+    /// nothing — a wrong reason in a docstring is how the next
+    /// retune goes wrong.)
+    /// The `elapsed > 0` arm is DEFENSIVE, not a protected
+    /// invariant (code review, 2026-08-29): `glideElapsed` starts
+    /// at zero and only accumulates a `dt` the driver has already
+    /// proved positive, and zero returns `glideStartSteps`
+    /// through the arithmetic anyway. It is kept because the
+    /// function is `static` and reachable from anywhere, not
+    /// because a caller can reach it.
     static func glideSteps(elapsed: TimeInterval) -> Double {
         guard elapsed > 0 else { return glideStartSteps }
         let progress = min(1.0, elapsed / glideRampSeconds)
