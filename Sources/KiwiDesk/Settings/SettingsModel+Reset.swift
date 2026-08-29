@@ -45,37 +45,89 @@ extension SettingsModel {
                 $0.name == KeyLayer.defaultName
             })
         else { return }
-        config.layers[index].bindings =
-            DefaultKeybindings.bindings(
-                spaces: config.spaces,
-                resizeStep: Int(config.settings.resizeStep)
-            )
+        let shipped = shippedDefaults
+        let kept = config.layers[index].bindings.filter {
+            Self.survivesReset($0, against: shipped)
+        }
+        config.layers[index].bindings = shipped + kept
     }
 
-    /// How many of the default layer's rows the reset would
-    /// DISCARD — the number the confirmation names, so the
-    /// choice is informed rather than a bare "are you sure".
+    /// The set a fresh install would seed for THIS config — the
+    /// same `spaces` and `resizeStep` the seeder reads, so a user
+    /// gets what this machine would have been given.
+    private var shippedDefaults: [KeyBinding] {
+        DefaultKeybindings.bindings(
+            spaces: config.spaces,
+            resizeStep: Int(config.settings.resizeStep)
+        )
+    }
+
+    /// Does `row` outlive a reset?
     ///
-    /// A row counts as the user's when the shipped set authors
-    /// no row with that combo AND that Lua: an edited combo, a
-    /// re-pointed verb and an added row all qualify, while a row
-    /// that merely matches a default does not.
+    /// Only rows the SEED AUTHORS are replaced — those are the
+    /// only ones KiwiDesk provides, so they are the only ones it
+    /// can restore (owner ruling). An app launcher, a Desktop row
+    /// or anything else the user invented is not a "customised
+    /// default"; it exists only because they made it, and a
+    /// restore has no business deleting it.
+    ///
+    /// Two ways a row is the seed's, and both must go or the
+    /// restored set is not the shipped one:
+    ///
+    /// - its **Lua** is a shipped verb — a default whose combo the
+    ///   user moved; leaving it would double the verb.
+    /// - its **combo** is a shipped chord — the seed is about to
+    ///   reclaim that key, and leaving the row would put two
+    ///   bindings on it, which is precisely the conflict the
+    ///   restore should not manufacture. This is the case that
+    ///   costs a user something real: an app shortcut parked on a
+    ///   default's chord does not survive, which is why the
+    ///   confirmation counts it.
+    ///
+    /// Combos compare through `KeyCombo`, not as text, so a
+    /// hand-authored alias (`ctrl+alt+1`) counts as the same
+    /// chord — the identity `digitTopUp` already uses.
+    private static func survivesReset(
+        _ row: KeyBinding,
+        against shipped: [KeyBinding]
+    ) -> Bool {
+        if shipped.contains(where: { $0.lua == row.lua }) {
+            return false
+        }
+        guard let combo = KeyCombo.parse(row.combo) else {
+            return true
+        }
+        return !shipped.contains {
+            KeyCombo.parse($0.combo) == combo
+        }
+    }
+
+    /// How many of the user's own rows the reset would DISCARD —
+    /// the number the confirmation names, so agreeing is an
+    /// informed act rather than a bare "are you sure".
+    ///
+    /// Counts exactly what will not survive: a default whose
+    /// combo was moved, and a row of the user's own parked on a
+    /// chord the seed is about to reclaim. A row that merely
+    /// matches a default is not "theirs", and a row that outlives
+    /// the reset is not discarded — so this is neither the count
+    /// of non-default rows nor the count of changes.
     var shortcutsTheResetWouldDiscard: Int {
         guard
             let layer = config.layers.first(where: {
                 $0.name == KeyLayer.defaultName
             })
         else { return 0 }
-        let shipped = Set(
-            DefaultKeybindings.bindings(
-                spaces: config.spaces,
-                resizeStep: Int(config.settings.resizeStep)
-            )
-            .map { "\($0.combo)\u{1F}\($0.lua)" }
-        )
-        return layer.bindings.filter {
-            !shipped.contains("\($0.combo)\u{1F}\($0.lua)")
+        let shipped = shippedDefaults
+        return layer.bindings.filter { row in
+            guard !Self.survivesReset(row, against: shipped)
+            else { return false }
+            // A row identical to a shipped one is not a loss.
+            return !shipped.contains {
+                $0.lua == row.lua && $0.combo == row.combo
+            }
         }
         .count
     }
+
 }

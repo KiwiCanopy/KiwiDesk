@@ -136,9 +136,9 @@ struct ShortcutsHeader: View {
         if discards == 0 {
             return L(
                 "shortcuts.restore_defaults.message_clean",
-                "Replaces this layer's shortcuts with the ones a "
-                    + "new install gets. You have not changed any "
-                    + "of them, so nothing of yours is lost."
+                "Puts back the shortcuts a new install gets. "
+                    + "Shortcuts you added yourself are kept, and "
+                    + "nothing of yours is lost."
             )
         }
         // The count goes LAST so no locale has to inflect
@@ -147,8 +147,9 @@ struct ShortcutsHeader: View {
         // English included.
         return L(
             "shortcuts.restore_defaults.message",
-            "Replaces this layer's shortcuts with the ones a new "
-                + "install gets. Shortcuts of your own that "
+            "Puts back the shortcuts a new install gets. "
+                + "Shortcuts you added yourself are kept, unless "
+                + "they use a key a default needs. Yours that "
                 + "would be discarded: %1$d",
             discards
         )
@@ -158,9 +159,9 @@ struct ShortcutsHeader: View {
         selected == KeyLayer.defaultName
             ? L(
                 "shortcuts.restore_defaults.help",
-                "Takes up the shortcuts a new install would get, "
+                "Puts back the shortcuts KiwiDesk provides, "
                     + "including any added since you installed "
-                    + "KiwiDesk."
+                    + "it. Shortcuts you made yourself are kept."
             )
             : L(
                 "shortcuts.restore_defaults.help_other_layer",

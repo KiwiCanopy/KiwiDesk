@@ -2668,10 +2668,13 @@ you take them up: it replaces the default layer's shortcuts with
 exactly what a new install would get — for *your* Desktops and
 *your* resize step, not some fixed list.
 
-It is deliberately a replacement, not a merge, so what you end up
-with is the shipped set and nothing else. The confirmation says
-how many shortcuts of your own it would discard before you agree,
-and says plainly when the answer is none.
+It replaces the shortcuts **KiwiDesk provides** — those are the
+only ones it can restore. Anything you made yourself is kept: an
+app launcher, a Desktop shortcut, a layer switch. The one
+exception is a shortcut of yours sitting on a key a default needs,
+which cannot stay without putting two bindings on one chord. The
+confirmation counts those before you agree, and says plainly when
+the answer is none.
 
 Two things it leaves alone. **Layers you created are untouched** —
 only the default layer was ever seeded, so only it has defaults to

@@ -10,8 +10,12 @@ import Testing
 /// The seed fires only into an empty config
 /// (`KiwiCore+GuiConfigSeed`), so before this there was no way to
 /// take up an improved default — every seed change reached new
-/// installs only. These pin what the action produces and what it
-/// admits to discarding.
+/// installs only.
+///
+/// The restore replaces only what the seed AUTHORS, because those
+/// are the only shortcuts KiwiDesk provides and so the only ones
+/// it can restore (owner ruling). App launchers and anything else
+/// the user invented are not customised defaults; they survive.
 @Suite("Restore default shortcuts (#1096)")
 @MainActor
 struct RestoreDefaultShortcutsTests {
@@ -26,10 +30,31 @@ struct RestoreDefaultShortcutsTests {
         return model
     }
 
-    /// Derived from the LIVE config, not a snapshot: the same
-    /// `spaces` and `resizeStep` the seeder reads, so a user gets
+    private func row(
+        _ combo: String,
+        _ lua: String,
+        _ label: String = "Mine"
+    ) -> KeyBinding {
+        KeyBinding(
+            combo: combo,
+            lua: lua,
+            kind: .navigation,
+            label: label
+        )
+    }
+
+    private func setBindings(
+        _ model: SettingsModel,
+        _ rows: [KeyBinding]
+    ) {
+        var layer = model.config.layers[0]
+        layer.bindings = rows
+        model.config.layers = [layer]
+    }
+
+    /// Derived from the LIVE config, not a snapshot: a user gets
     /// what this machine would have been given.
-    @Test("the reset yields exactly the seed for this config")
+    @Test("the reset yields the seed for this config")
     func resetMatchesTheSeed() {
         let model = model(
             spaces: [SpaceID("1"), SpaceID("2"), SpaceID("3")]
@@ -48,105 +73,92 @@ struct RestoreDefaultShortcutsTests {
         #expect(got.contains { $0.lua.contains("80") })
     }
 
-    /// Catches a naive append, not a merge that de-duplicates
-    /// on combo: this row's combo collides with nothing shipped,
-    /// so a "seed wins on conflict" merge would drop it and pass.
-    /// Replacement-vs-conflict-merge is unpinned here.
-    @Test("a customised row is gone afterwards")
-    func resetDiscardsCustomisations() {
+    /// The owner's ruling, and the case his question found: an
+    /// app launcher is not a default, so a restore must not
+    /// delete it. It sits on a chord the seed never claims.
+    @Test("a shortcut KiwiDesk never provided survives")
+    func inventedRowsSurvive() {
         let model = model()
-        model.resetShortcutsToDefaults()
-        var layer = model.config.layers[0]
-        layer.bindings.append(
-            KeyBinding(
-                combo: "control+option+j",
-                lua: "KiwiDesk.focus(\"left\")",
-                kind: .navigation,
-                label: "Mine"
-            )
+        let app = row(
+            "control+option+command+j",
+            "KiwiDesk.open_or_focus(\"com.apple.Safari\")",
+            "Safari"
         )
-        model.config.layers = [layer]
+        setBindings(model, [app])
+        model.resetShortcutsToDefaults()
+        let after = model.config.layers[0].bindings
         #expect(
-            model.config.layers[0].bindings.contains {
-                $0.combo == "control+option+j"
+            after.contains {
+                $0.lua == app.lua && $0.combo == app.combo
             }
         )
+        // …and it is not reported as a loss.
+        #expect(model.shortcutsTheResetWouldDiscard == 0)
+    }
+
+    /// The cost that IS real, so the confirmation counts it: a
+    /// row of the user's parked on a chord the seed reclaims
+    /// cannot stay, or the restore manufactures a conflict.
+    @Test("a row on a chord the seed reclaims is discarded")
+    func rowsOnShippedChordsGo() {
+        let model = model()
+        model.resetShortcutsToDefaults()
+        let taken = model.config.layers[0].bindings[0].combo
+        let mine = row(taken, "KiwiDesk.open_or_focus(\"x\")")
+        setBindings(model, [mine])
+        #expect(model.shortcutsTheResetWouldDiscard == 1)
         model.resetShortcutsToDefaults()
         #expect(
             !model.config.layers[0].bindings.contains {
-                $0.combo == "control+option+j"
+                $0.lua == mine.lua
             }
         )
     }
 
-    /// The number the confirmation names. Zero for an untouched
-    /// layer, so the dialog can say "nothing of yours is lost"
-    /// instead of threatening.
-    @Test("the discard count counts only the user's own rows")
-    func discardCountIsTheUsersRows() {
+    /// A default whose combo the user moved is still the seed's
+    /// row, so it goes — otherwise the verb would be bound twice.
+    @Test("a moved default is replaced, not duplicated")
+    func movedDefaultsAreReplaced() {
         let model = model()
         model.resetShortcutsToDefaults()
-        #expect(model.shortcutsTheResetWouldDiscard == 0)
-        var layer = model.config.layers[0]
-        layer.bindings.append(
-            KeyBinding(
-                combo: "control+option+j",
-                lua: "KiwiDesk.focus(\"left\")",
-                kind: .navigation,
-                label: "Mine"
-            )
-        )
-        // An EDITED default counts too: same verb, moved combo.
-        if let i = layer.bindings.firstIndex(where: {
+        let shipped = model.config.layers[0].bindings
+        let float = shipped.first {
             $0.lua == "KiwiDesk.toggle_floating()"
-        }) {
-            layer.bindings[i].combo = "control+option+shift+f"
-        }
-        // And a RE-POINTED verb: a shipped combo kept, its Lua
-        // changed. Without this row the pair is not load-bearing
-        // — `guard-prover` reduced the key to `combo` alone and
-        // every test here stayed green, because both rows above
-        // carry a combo the seed never authors. This is also the
-        // case the production docstring claims to count, so it
-        // was the claim with no net under it.
-        if let i = layer.bindings.firstIndex(where: {
-            $0.combo == "control+option+s"
-        }) {
-            layer.bindings[i].lua = "KiwiDesk.toggle_floating()"
-        }
-        model.config.layers = [layer]
-        // 3, and each half of the key is needed to reach it:
-        // combo-alone gives 2 (it cannot see the re-pointed
-        // row), lua-alone gives 0 (every lua here is shipped).
-        #expect(model.shortcutsTheResetWouldDiscard == 3)
+        }!
+        setBindings(
+            model,
+            [row("control+option+shift+f", float.lua)]
+        )
+        #expect(model.shortcutsTheResetWouldDiscard == 1)
+        model.resetShortcutsToDefaults()
+        let after = model.config.layers[0].bindings
+        #expect(after.filter { $0.lua == float.lua }.count == 1)
+        #expect(
+            after.first { $0.lua == float.lua }?.combo
+                == float.combo
+        )
     }
 
     /// Scoped to the layer the seed authored. A layer the user
     /// invented has no defaults to restore, and the header
     /// disables the row rather than hiding it.
     ///
-    /// Asserts only NEGATIVES, so it passes against a
-    /// do-nothing reset — it is discriminating in company with
-    /// the three above, never alone (`guard-prover`, 2026-08-29).
-    /// Do not read its green as evidence the reset ran.
+    /// Asserts only NEGATIVES, so it passes against a do-nothing
+    /// reset — discriminating in company with the tests above,
+    /// never alone (`guard-prover`, 2026-08-29).
     @Test("a user's own layer is left alone")
     func otherLayersAreUntouched() {
         let model = model()
-        let mine = KeyBinding(
-            combo: "control+option+j",
-            lua: "KiwiDesk.focus(\"left\")",
-            kind: .navigation,
-            label: "Mine"
-        )
+        let mine = row("control+option+j", "KiwiDesk.focus(\"left\")")
         model.config.layers.append(
             KeyLayer(name: "Gaming", bindings: [mine])
         )
         model.resetShortcutsToDefaults()
-        let gaming = model.config.layers.first { $0.name == "Gaming" }
+        let gaming = model.config.layers.first {
+            $0.name == "Gaming"
+        }
         #expect(gaming?.bindings.count == 1)
-        #expect(gaming?.bindings.first?.combo == "control+option+j")
-        // And the count ignores it, so the dialog cannot claim
-        // to discard a row this action will not touch.
+        #expect(gaming?.bindings.first?.combo == mine.combo)
         #expect(model.shortcutsTheResetWouldDiscard == 0)
     }
 }
