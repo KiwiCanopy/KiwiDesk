@@ -540,6 +540,37 @@
 }
 
 /* =========================================================
+   In-prose lists — a numbered recipe (.learn-steps) and short
+   note lines (.learn-notes).
+   -----------------------------------------------------------
+   Deliberately NOT .learn-tour or .learn-checklist. Both of
+   those drop the marker and box each item, which suits a card
+   whose title and body are separable; these entries are single
+   sentences that open with an emphasized clause, so the ordinal
+   has to stay visible (the recipe is steps, in order) and the
+   line has to keep reading as prose. Only the marker is tinted;
+   the text inherits the section's own body type so a note beside
+   a paragraph is the same voice at the same size.
+   ========================================================= */
+.learn-steps,
+.learn-notes {
+  margin: 0 0 1rem;
+  padding-left: 1.35rem;
+  display: grid;
+  gap: 0.55rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+  text-wrap: pretty;
+}
+
+.learn-steps li::marker,
+.learn-notes li::marker {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+/* =========================================================
    Reassurance checklist (e.g. "never does X")
    ========================================================= */
 .learn-checklist {
