@@ -71,7 +71,7 @@ extension KiwiCore {
         // clamp that only pushes can answer neither that nor
         // "this window is already wider than the space between
         // the bars".
-        let region = floatBounds(of: id)
+        let region = floatGrowBounds(of: id)
         let outcome = FloatResize.resized(
             base,
             horizontal: axis == "x",

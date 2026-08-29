@@ -104,7 +104,7 @@ struct LayoutBoundsRoutingTests {
         // through `layoutBounds` would bound a float out of a
         // region no bar occupies whenever an empty bar is
         // suppressed.
-        "App/KiwiCore+FloatClamp.swift": 1,
+        "App/KiwiCore+FloatRegion.swift": 1,
     ]
 
     @Test("Only the allowlisted files read raw display bounds")

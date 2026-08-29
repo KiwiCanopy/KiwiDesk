@@ -55,18 +55,6 @@ struct FloatRegionFitTests {
     }
 
     @Test(
-        "With no bars the region is the display",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func regionIsTheDisplayWithNoBars() throws {
-        let core = makeFloatCore(
-            frame: CGRect(x: 0, y: 0, width: 400, height: 300)
-        )
-        let region = try #require(core.floatBounds(of: WindowID(1)))
-        #expect(region == Self.bounds)
-    }
-
-    @Test(
         "An oversized float is fitted back into the region",
         .enabled(if: NSScreen.main != nil)
     )
@@ -78,12 +66,14 @@ struct FloatRegionFitTests {
         let core = makeFloatCore(
             frame: CGRect(x: 0, y: 0, width: 2400, height: 1600)
         )
+        let region = core.floatBounds(of: WindowID(1))!
+        #expect(region == Self.bounds)
         let fitted = core.floatFrameFittedClearOfBars(
             WindowID(1),
             frame: CGRect(x: 0, y: 0, width: 2400, height: 1600)
         )
-        #expect(fitted.width == Self.bounds.width)
-        #expect(fitted.height == Self.bounds.height)
+        #expect(fitted.width == region.width)
+        #expect(fitted.height == region.height)
     }
 
     @Test(
@@ -114,13 +104,20 @@ struct FloatRegionFitTests {
         let over =
             Self.bounds.width
             + AppBarGeometry.clampTolerance / 2
-        let frame = CGRect(x: 0, y: 0, width: over, height: 300)
-        let core = makeFloatCore(frame: frame)
+        let core = makeFloatCore(
+            frame: CGRect(x: 0, y: 0, width: over, height: 300)
+        )
+        let region = core.floatBounds(of: WindowID(1))!
+        // Just over the region, by less than the tolerance.
+        let width =
+            region.width
+            + AppBarGeometry.clampTolerance / 2
+        let frame = CGRect(x: 0, y: 0, width: width, height: 300)
         #expect(
             core.floatFrameFittedClearOfBars(
                 WindowID(1),
                 frame: frame
-            ).width == over
+            ).width == width
         )
     }
 

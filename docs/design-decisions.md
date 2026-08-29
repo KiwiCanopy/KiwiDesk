@@ -2492,14 +2492,31 @@ retile and would drag back a window parked half off-screen by
 hand, which macOS allows and this change never asked for.
 
 *And the ring is kept clear, not just the window.* A float is
-held `border.width` off a bar, because the ring is the window
-frame outset by that width and paints at `.normal` while bars
-paint at `BarPanel.level` — so a window flush against a strip had
-its ring's outer sliver hidden and read as cut off. The inset
-applies whether or not the window is focused, which is the point
-rather than a simplification: an inset that tracked the ring's
-actual presence would shift the float a few points every time it
-gained or lost focus.
+held the ring's own outward reach off **every** edge of that
+region — bars and screen edges alike. The ring is the window
+frame outset by that reach and paints at `.normal` while bars
+paint at `BarPanel.level`, so a window flush against a strip had
+its outer sliver hidden; flush against a screen edge it was
+clipped instead. Device QA caught the first version insetting at
+bars only, which is two rules where the principle gives one:
+**float geometry follows PAINTED chrome**, and a ring is painted
+wherever it is drawn. The number is not invented for this — it is
+`BorderGeometry.outwardReach`, the renderer's own function, and
+`BorderStyle.fittingGaps` already answers the same question for
+the layout with the same value on all four edges.
+
+A tempting alternative was rejected on that same principle: to
+follow `gap.outer` instead, so `border.fit_gaps` would cover
+floats. A gap is a layout *reservation* and nothing is painted
+there — the recorded reason `floatBounds` carves painted strips
+rather than routing through `layoutBounds` is exactly that an
+empty bar is suppressed while the reservation stands.
+
+The inset applies whether or not the window is focused, which is
+the point rather than a simplification: one that tracked the
+ring's actual presence would shift the float every time it gained
+or lost focus. And it goes to zero with borders off, so nothing
+is reserved for chrome that is not on screen.
 
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact

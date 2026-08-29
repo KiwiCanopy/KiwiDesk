@@ -90,7 +90,17 @@ struct FloatingResizeCommandTests {
         // model the ruling replaced — a chord has no grabbed
         // edge to anchor on. The height is untouched because the
         // ask was on x alone.
-        #expect(frames[WindowID(2)]?.origin.x == 0)
+        //
+        // It lands ON the grow bound's left edge rather than at
+        // 0, because that bound reserves the focus ring's reach
+        // (device QA): the window would otherwise be grown flush
+        // to the screen and have its ring clipped there. Derived
+        // rather than pinned at 5 — `border.width` is feel and
+        // the owner's to retune (#1021).
+        let reach = BorderGeometry.outwardReach(
+            width: core.tiler.settings.borderStyle.width
+        )
+        #expect(frames[WindowID(2)]?.origin.x == reach)
         #expect(
             core.tiler.settings.bsp.splitRatioH == ratioBefore
         )

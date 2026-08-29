@@ -2889,9 +2889,11 @@ Each row has an action. Built-in actions live under headings:
   the window: switch a bar on, make one thicker, or move a
   floating window to a smaller screen, and any float that no
   longer fits is shortened to fit — down to its minimum size and
-  no further. Floats are also held a few points clear of a bar
-  rather than flush against it, so the focus ring around one
-  stays fully visible instead of having its edge hidden.
+  no further. Floats are also held a few points clear of
+  a bar and of the screen edge rather than flush against either,
+  so the focus ring around one stays fully visible instead of
+  being clipped. That reservation is the ring's own width, and it
+  disappears if you turn the focus ring off.
 - **Applications** — launch an app. Each row carries a **Launch
   behavior** menu: *Open or Focus* (the default — pull a running
   instance into the current space, or launch it if it isn't

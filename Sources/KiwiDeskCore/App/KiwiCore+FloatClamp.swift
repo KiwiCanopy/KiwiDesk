@@ -48,98 +48,45 @@ extension KiwiCore {
     /// carved off its edge (#1091). Nil where the space resolves
     /// to no screen, which callers read as unbounded.
     ///
-    /// **The one derivation of the region.** It bounds nothing
-    /// by itself — each consumer decides what it enforces, and
-    /// says so at its own site: the resize math takes the whole
-    /// rect because pinning is a question about how much room
-    /// each EDGE has, the retile fit bounds a float's size to
-    /// it, and `floatFrameClampedClearOfBars` above deliberately
-    /// keeps pushing off bar edges alone. That last one is the
-    /// scope worth stating twice: it runs for every float on
-    /// every retile, so enforcing the screen edge there would
-    /// drag back a window the user parked half off-screen by
-    /// hand, which macOS allows and this issue never asked for.
+    /// Whether the retile sweep should issue `fitted`, and the
+    /// only place the refusal memo is consulted and updated.
     ///
-    /// Bars vary per space — one bar or two, on any edge — so
-    /// this folds both strip lists exactly as the clamp does
-    /// rather than assuming a count or an edge. Two strips on
-    /// ONE edge leave the deeper carve standing, which is the
-    /// monotonicity `AppBarGeometry.regionClear` provides and
-    /// the reason the fold needs no ordering rule.
+    /// A SIZE ask can be refused where a position ask is not,
+    /// and this sweep runs on every retile — so without a memo
+    /// an app whose minimum exceeds the region is re-asked
+    /// forever, having already refused (code review,
+    /// 2026-08-29). #677's shape one subsystem over: learn the
+    /// refusal from our own ask and stop re-issuing.
     ///
-    /// Reads the display through `TilingEngine.visibleBounds`
-    /// (#531), never `GeometryUtils.axVisibleFrame` — a direct
-    /// call reds `VisibleBoundsRoutingTests`.
-    func floatBounds(of id: WindowID) -> CGRect? {
-        guard let space = state.workspaces.space(of: id),
-            let screen = TilingEngine.screen(
-                for: space,
-                in: state
+    /// A position-only correction is exempt and always issues:
+    /// a move is nearly always accepted, so it converges without
+    /// a memo — which is exactly why the clamp this sits beside
+    /// never needed one.
+    ///
+    /// Split out of the sweep so the DECISION is reachable
+    /// without a painted bar (guard-prover, 2026-08-29):
+    /// `FloatFitLedgerTests` guards the ledger's own algebra and
+    /// structurally cannot see its consumer, and deleting this
+    /// consultation left all 4259 tests green.
+    func shouldIssueFloatFit(
+        _ id: WindowID,
+        current: CGRect,
+        fitted: CGRect
+    ) -> Bool {
+        guard fitted.size != current.size else { return true }
+        guard
+            !tiler.floatFitLedger.repeatsRefusal(
+                id,
+                asked: fitted.size,
+                seen: current.size
             )
-        else { return nil }
-        var region = tiler.visibleBounds(screen)
-        for (strip, edge) in paintedStrips(forSpace: space) {
-            region = AppBarGeometry.regionClear(
-                region,
-                of: strip,
-                edge: edge,
-                inset: floatRingInset
-            )
-        }
-        return region
-    }
-
-    /// How far clear of a bar a float is kept so its focus RING
-    /// clears it too, not only the window (#1091): the
-    /// configured ring width, or zero with rings off.
-    ///
-    /// Read from the configured style rather than a window's own
-    /// spec, and applied to every float regardless of focus. An
-    /// inset that tracked the ring's actual presence would shift
-    /// a float a few points each time it gained or lost focus —
-    /// which is worse than the sliver it would recover.
-    // Internal rather than private so the guard can read it:
-    // the strips it feeds are only reachable through a painted
-    // bar, so a test that went the long way round would be
-    // guarding `AppBarManager.sync` instead of this rule.
-    var floatRingInset: CGFloat {
-        let style = tiler.settings.borderStyle
-        guard style.enabled else { return 0 }
-        // `BorderGeometry.outwardReach` is the named authority
-        // for how far the stroke reaches PAST the window edge,
-        // and `BorderStyle.fittingGaps` already routes through
-        // it. `clampedWidth` equals it today and stops the day
-        // reach and stroke diverge — which is exactly the
-        // "ring reads as cut off" defect this inset removes
-        // (architect + code review, 2026-08-29).
-        return BorderGeometry.outwardReach(width: style.width)
-    }
-
-    /// EVERY painted strip covering `space` — both bars, in one
-    /// list. One accessor rather than the `spaceBarStrips +
-    /// appBars.strips` expression repeated per consumer: a
-    /// space shows one bar or two on any edge, and a third bar
-    /// source must reach every site that asks "what chrome
-    /// covers this space" (architect review, 2026-08-29).
-    private func paintedStrips(
-        forSpace space: SpaceID
-    ) -> [(strip: CGRect, edge: AppBarEdge)] {
-        spaceBarStrips(forSpace: space)
-            + appBars.strips(forSpace: space)
-    }
-
-    /// The painted Space Bar strips covering `space`. The
-    /// Space Bar is per-display; a space is covered by the
-    /// bar of the display currently showing it.
-    private func spaceBarStrips(
-        forSpace space: SpaceID
-    ) -> [(strip: CGRect, edge: AppBarEdge)] {
-        spaceBars.shownStrips
-            .filter { display, _, _ in
-                state.workspaces.currentSpace(on: display)
-                    == space
-            }
-            .map { (strip: $0.strip, edge: $0.edge) }
+        else { return false }
+        tiler.floatFitLedger.record(
+            id,
+            asked: fitted.size,
+            seen: current.size
+        )
+        return true
     }
 
     /// The clamp above, plus a SIZE fit into `floatBounds`
@@ -201,47 +148,6 @@ extension KiwiCore {
             }
         }
         return floatFrameClampedClearOfBars(id, frame: result)
-    }
-
-    /// Whether the retile sweep should issue `fitted`, and the
-    /// only place the refusal memo is consulted and updated.
-    ///
-    /// A SIZE ask can be refused where a position ask is not,
-    /// and this sweep runs on every retile — so without a memo
-    /// an app whose minimum exceeds the region is re-asked
-    /// forever, having already refused (code review,
-    /// 2026-08-29). #677's shape one subsystem over: learn the
-    /// refusal from our own ask and stop re-issuing.
-    ///
-    /// A position-only correction is exempt and always issues:
-    /// a move is nearly always accepted, so it converges without
-    /// a memo — which is exactly why the clamp this sits beside
-    /// never needed one.
-    ///
-    /// Split out of the sweep so the DECISION is reachable
-    /// without a painted bar (guard-prover, 2026-08-29):
-    /// `FloatFitLedgerTests` guards the ledger's own algebra and
-    /// structurally cannot see its consumer, and deleting this
-    /// consultation left all 4259 tests green.
-    func shouldIssueFloatFit(
-        _ id: WindowID,
-        current: CGRect,
-        fitted: CGRect
-    ) -> Bool {
-        guard fitted.size != current.size else { return true }
-        guard
-            !tiler.floatFitLedger.repeatsRefusal(
-                id,
-                asked: fitted.size,
-                seen: current.size
-            )
-        else { return false }
-        tiler.floatFitLedger.record(
-            id,
-            asked: fitted.size,
-            seen: current.size
-        )
-        return true
     }
 
     /// Re-asserts the bar clamp for every floating window under
