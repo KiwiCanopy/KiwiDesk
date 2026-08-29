@@ -2,6 +2,86 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.1.0",
+      "tag": "v1.1.0",
+      "date": "2026-08-29",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.1.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.1.0/KiwiDesk-1.1.0.dmg",
+      "summary": "The release where resizing a window started telling you the truth, and where the keys got out of your way. Most of what changed you will notice without looking for it. It gets more technical as you read down — and four things need a minute of your attention, marked where they come up.",
+      "sections": [
+        {
+          "title": "Resizing, made honest",
+          "items": [
+            "This got the most attention of anything in the release, because nearly every complaint about it turned out to be the same thing: KiwiDesk was resizing something other than what you asked, or refusing for a reason that did not exist.",
+            "**A resize press acts on the focused window, measured from the size it is actually drawn at.** Before, the first several presses could do nothing visible, or silently resize every neighbour instead.",
+            "**Holding the chord resizes continuously, at your display's refresh rate**, rather than stepping along a key-repeat timer that got slower the longer you held it.",
+            "**A floating window grows and shrinks from both edges**, keeps working when it is parked against the edge of the screen, and will not grow underneath a bar. Held resizing on a floating window now travels the whole distance you asked for — with Reduce Motion on, it used to deliver under a third of it.",
+            "**When an app refuses to go smaller or larger, you are told on the first press.** \"Maximum window size reached\" is a message now, in your language, instead of ten silent presses followed by the window snapping back.",
+            "**Resizing stopped stalling.** A pass that froze for up to two seconds and then jumped now runs clean; in the measured session, forty-two stalls became one.",
+            "**Scrolling spaces stopped sliding.** Resizing no longer drags the focused window toward the leading edge, a slot cannot be grown past what is drawn, and a window resting against the trailing border keeps that border.",
+            "**Apps that fight back are handled.** The Android emulator and its kind used to send tiling into an endless expand-and-snap loop about once a second. Now there is one adjustment when the window appears, and then the row settles."
+          ]
+        },
+        {
+          "title": "A keyboard layout that gets out of the way — and how to take it up",
+          "items": [
+            "The shipped shortcuts were re-measured against what macOS and common apps actually claim, and moved accordingly.",
+            "**Resizing has its own layer, `⌥⌘`**, on digits rather than arrows — `⌥⌘1`/`⌥⌘2` for width, `⌥⌘4`/`⌥⌘5` for height. Arrows were rejected because `⌥⌘` with arrows is next and previous tab in most browsers and terminals, and those have no menu to fall back on.",
+            "**`⇧` means one thing again.** Sticky moved to `⌃⌥S` for everywhere and `⌃⌥P` for this screen only.",
+            "**The numeric keypad works.** Keypad digits fire the same bindings as their number-row twins — so if you already have space shortcuts on `⌃⌥1` through `⌃⌥9`, they start answering the keypad the moment you upgrade, with nothing to configure.",
+            "**Worth knowing: none of the other shortcut changes reach an existing install by themselves.** The shipped set is seeded only into a configuration that has no shortcuts at all, so it never overwrites anything you or your Lua wrote. If you have been using KiwiDesk, your keys are exactly where you left them.",
+            "**Restore Defaults… is how you take them up**, at the top of Settings ▸ Shortcuts. It puts back the set a fresh install would get — for your Desktops and your resize step, not a fixed list — including defaults added since you installed. Your own shortcuts are kept. The one exception is a shortcut of yours sitting on a key a default needs, which cannot stay without putting two bindings on one key; the confirmation counts those before you agree, and says so plainly when the answer is none. Settings search finds it under \"restore\", \"defaults\" or \"reset\".",
+            "**The guide now teaches how to choose a shortcut of your own** — what makes a chord safe, why ⌃⌥ is the quiet corner, and the one thing worth doing before you commit to a new one. In English, German and Japanese."
+          ]
+        },
+        {
+          "title": "Reduce Motion and VoiceOver",
+          "items": [
+            "**Reduce Motion is honoured across Settings.** Layout previews arrive instead of springing, and fifty-one animation sites that ignored the system setting now stand down with it.",
+            "**Starting VoiceOver no longer steals your focus** to a different app a few seconds later.",
+            "**Drawer headers behave as one thing** across fifteen drawers, and all of them join the VoiceOver headings rotor."
+          ]
+        },
+        {
+          "title": "Start at login does one job now",
+          "items": [
+            "**The switch installs the login item and nothing else.** Crash supervision used to ride along with it, unasked. It is still available, deliberately, as `kiwidesk service` from the command line.",
+            "**If you relied on that supervision, turn it on explicitly after upgrading.** Nothing else changes for you.",
+            "**Turning Start at login on while KiwiDesk is running no longer steals focus** every ten seconds, indefinitely.",
+            "**The update prompt comes to the front** when it is ready to install and restart, instead of waiting behind every other window where it could not be found."
+          ]
+        },
+        {
+          "title": "KiwiDesk can move around macOS's Desktops",
+          "items": [
+            "**Switching Desktops and sending windows between them now works** — on stock macOS, with System Integrity Protection on. This was listed as impossible for most of KiwiDesk's life. Two new commands, `focus_desktop` and `move_to_desktop`, and the Space Bar and shortcut editor speak them like anything else.",
+            "**A switch KiwiDesk drives performs the real transition**, instead of leaving two Desktops drawn on top of each other for a moment.",
+            "**Moving a window to another Desktop and following it lands your keyboard focus on that window**, every time, rather than most of the time.",
+            "**A window sent to a Desktop on another screen stays there** instead of springing back to where it came from.",
+            "**Switching Desktops settles immediately.** It used to take five to ten seconds to stop rearranging, even switching to an empty one."
+          ]
+        },
+        {
+          "title": "Scripting",
+          "items": [
+            "**Every command describes itself.** `kiwidesk list_commands` now documents all 262 — group, typed arguments, and a one-line summary each. `kiwidesk help <command>` works, and `list_commands <group>` filters instead of returning everything.",
+            "**Output is readable at a terminal and unchanged in a pipe.** Pretty-printed when you are looking at it, the same compact line when a script is reading it. Keys are sorted either way.",
+            "**One rename needs your hand: `animations.set_scroll_speed` is now `animations.set_scroll_duration`.** It always was the duration — raising it made scrolling slower — and the setting is renamed in the interface to match. Your stored configuration is migrated for you. Lua is not, on purpose: if your `init.lua` or one of your keybindings calls `set_scroll_speed`, it will fail loudly at the moment you press it, which is better than failing silently. Rewrite it once and it is done."
+          ]
+        },
+        {
+          "title": "Also",
+          "items": [
+            "**New installs open in Scrolling** on every screen but the smallest, with a deliberate slot width instead of an automatic one. Existing setups are untouched.",
+            "**One word per concept, in every language.** Width, floating, the Track unit, and \"make it bigger\" each had two words in at least one language and now have one. Japanese and Korean can now tell Go to Space from Move to Space, and German and Korean can tell the shortcuts a profile inherits from the ones KiwiDesk ships.",
+            "**The Restore Defaults confirmation speaks your language.** It was English everywhere but English — at the one moment it is telling you what you are about to lose.",
+            "**Your profiles move to a newer format** the first time this version saves one, which means 1.0.1 cannot read them afterwards. Nothing to worry about: kiwis only grow, they never shrink back. 🥝"
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.1",
       "tag": "v1.0.1",
       "date": "2026-08-25",
