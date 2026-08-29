@@ -51,7 +51,7 @@ public final class KeybindingManager {
     /// activation; the GUI's live-apply (#123) reads it to
     /// branch its feedback caption ("Active now" vs "the
     /// system didn't grant it").
-    public private(set) var activationFailures: Set<KeyCombo> =
+    public internal(set) var activationFailures: Set<KeyCombo> =
         []
     private var layers: [String: [KeyCombo: Int32]] = [:]
     /// Menu bar indicator per layer (SF Symbol name or emoji),
@@ -63,11 +63,14 @@ public final class KeybindingManager {
     /// (#1056/#1082) both read it. The arm check is an EXISTENCE
     /// question — does the id that will deliver the release still
     /// exist — never a re-derivation of which binding to act on;
-    /// `KeybindingManager+HoldGlide.pressFire` argues it. Written only by
-    /// `activate`/`deactivate`; a second id list beside it would
+    /// `KeybindingManager+HoldGlide.pressFire` argues it. Written
+    /// only by `activate`/`deactivate` (both in
+    /// `KeybindingManager+Activation.swift`, which is why the
+    /// setter is internal rather than private); a second id
+    /// list beside it would
     /// be two homes for one fact, drifting in opposite failure
     /// modes (a leaked live chord vs a tick against a dead id).
-    private(set) var activeBindings: [UInt32: LiveBinding] = [:]
+    var activeBindings: [UInt32: LiveBinding] = [:]
 
     /// One live registration: the Lua ref and the combo it is
     /// registered under.
@@ -93,7 +96,7 @@ public final class KeybindingManager {
     /// mid-capture can't fire its action. Table/layer edits still
     /// apply but skip registration until `resume()`.
     private var suspended = false
-    private let registrar: HotkeyRegistrar
+    let registrar: HotkeyRegistrar
 
     public init(
         registrar: HotkeyRegistrar = CarbonHotkeyCenter()
@@ -269,58 +272,6 @@ public final class KeybindingManager {
         guard suspended else { return }
         suspended = false
         activate(currentLayer)
-    }
-
-    // MARK: - Hotkey activation
-
-    private func deactivate() {
-        // The ids are about to vanish, so no release can ever
-        // arrive to stop a live repeat — end it here (#1056).
-        holdGlide.cancelRun()
-        for id in activeBindings.keys {
-            registrar.unregister(id: id)
-        }
-        activeBindings = [:]
-    }
-
-    private func activate(_ layer: String) {
-        deactivate()
-        activationFailures = []
-        // A recorder is armed: keep the table current but
-        // register nothing, so testing a shortcut can't fire.
-        guard !suspended else { return }
-        for (combo, ref) in layers[layer] ?? [:] {
-            // The handler carries its own registration id via
-            // the box, filled the moment `register` returns —
-            // never re-derived after the fire, where the Lua
-            // body may have rebuilt the table and minted fresh
-            // ids for the same ref+combo (#1056 review).
-            let box = RegistrationBox()
-            let id = registrar.register(
-                keyCode: combo.keyCode,
-                modifiers: combo.modifiers
-            ) { [weak self] in
-                self?.pressFire(
-                    ref: ref,
-                    combo: combo,
-                    id: box.id
-                )
-            }
-            if let id {
-                box.id = id
-                activeBindings[id] = LiveBinding(
-                    ref: ref,
-                    combo: combo
-                )
-            } else {
-                activationFailures.insert(combo)
-                onLog(
-                    "keybinding conflict: could not "
-                        + "register a shortcut in layer "
-                        + "'\(layer)'"
-                )
-            }
-        }
     }
 
     func fire(ref: Int32, combo: KeyCombo) {

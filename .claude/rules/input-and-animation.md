@@ -13,6 +13,17 @@ editing here:
 - Hotkeys use the **Carbon API** (`RegisterEventHotKey`), not
   CGEventTap — this avoids the Input Monitoring permission. Event
   taps are only for mouse drag tracking.
+- **A keypad digit is the same key as its number-row twin
+  (#1074), and `KeypadKeys` is the one place that says so.** Both
+  readers come to it — hotkey registration and `KeyCombo.keyName`
+  — so never re-derive the relation beside a call site. Keep the
+  aliased set **closed to the ten digits**; register a twin only
+  once the authored key has LANDED, or the keypad keeps firing a
+  binding the Settings caption calls ungranted; and never report
+  a twin's own refusal, which is not the binding's. The argument
+  for each of those is `docs/design-decisions.md` ▸ "The keypad's
+  ten digits ARE their number-row twins" — do not restate it here
+  (`KeypadKeysTests`).
 - **KiwiDesk's own windows are discriminated per WINDOW, never
   per process (#678 item 18).** `shouldForceFloat`'s own-process
   arm reads the tiling mark

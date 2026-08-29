@@ -2797,6 +2797,16 @@ symbol or a word name:
 - `` ` `` or `grave` / `backtick`
 - `'` or `quote` / `apostrophe`
 
+**The numeric keypad** works like the number row: its digits are
+the *same* keys, so a shortcut on `4` fires from keypad 4 too, and
+every digit shortcut you already have works from the keypad
+without changing anything. The keypad's other keys are separate
+keys you can bind on their own — `keypadplus`, `keypadminus`,
+`keypadmultiply`, `keypaddivide`, `keypaddecimal`, `keypadequals`,
+`keypadenter` and `keypadclear`. On a third-party PC keyboard the
+keypad only sends digits while Num Lock is on; Apple keypads
+always do.
+
 A combo is one set of modifiers + exactly one key. Multi-key chords
 like `cmd+j+k` are not supported — use extra layers instead.
 
