@@ -249,6 +249,12 @@ enum KeyboardCensus {
     /// under `.all` on purpose — macOS reserves COMBINATIONS,
     /// not keys, so there is no single combination to check
     /// against there.
+    /// Deliberately UNFILTERED by `shipsDisabled` (#1094): the
+    /// board is a per-key surface, like the row's ⚠️, so it
+    /// shows everything the register knows. Only AGGREGATE
+    /// surfaces — a count, a banner — drop a dormant chord, via
+    /// `KeybindingConflicts.actionable`. A ring on one key is an
+    /// explanation where a standing badge is an alarm.
     static func reservedKeys(scope: Scope) -> Set<UInt32> {
         guard case .one(let layer) = scope else { return [] }
         return Set(
@@ -280,9 +286,11 @@ enum KeyboardCensus {
     /// The reserved keys still FREE under the shown modifier —
     /// the dashed amber ring's presence, and therefore its
     /// legend entry's gate: under a chip whose reservations are
-    /// all bound (or a layer macOS reserves nothing under, ⌃⌥
-    /// included) the amber entry would point at a mark the
-    /// board does not draw.
+    /// all bound, or a layer macOS reserves nothing under, the
+    /// amber entry would point at a mark the board does not
+    /// draw. ⌃⌥ was named here as such a layer; since #1094 it
+    /// carries one reservation (⌃⌥space), so it is no longer an
+    /// example of the empty case.
     static func reservedUnbound(
         claims: [UInt32: [ModifierLayer]],
         scope: Scope

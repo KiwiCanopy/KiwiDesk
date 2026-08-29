@@ -75,9 +75,28 @@ descriptive-occurrence check below was run: all 17 keys (21
 feature — there
 is no incidental "sticky" in ordinary prose to false-positive on
 (unlike `app`/`space`/`bar`, which are common words and needed the
-per-token glossary carve-outs). Its display tier is **"Display
-Sticky"** (German **"Display-Sticky"**), "display" being an ordinary
-qualifier that compounds per locale around the fixed "Sticky" atom.
+per-token glossary carve-outs). Its two scopes are **"Toggle sticky everywhere"** and **"Toggle
+sticky on this screen"** (#1094) — the qualifier is an ordinary
+phrase that each locale renders in its own words around the fixed
+"Sticky" atom. Render "screen" with the catalog's own SCREEN word,
+never its *display* or *monitor* word. Seven catalogs reached for
+the latter when this label was first renamed and were corrected
+before it shipped (#1094) — a past-tense fact, and the reason
+this sentence no longer says "Display Sticky". The risk it
+records is Family C rule 1: a row whose qualifier is the word
+that names the **Monitors** destination reads as a different
+destination, even where the whole string differs.
+
+**`zh-Hans` is the measured exception, not an oversight.** It
+splits the English "screen" by countability — 屏幕 where the
+sense is mass, 显示器 for a countable one (`presets.screen_name.
+main` 主显示器, `profiles.screens.many` %1$d 台显示器) — so 显示器
+IS its screen word here, and rule 2 is satisfied by the split
+rather than broken by it. That it also equals `destination.
+monitors` is a pre-existing overlap belonging to #865, and not
+something this label can fix on its own: a locale whose own
+screen word collides with a destination label needs the
+destination renamed, not the row.
 
 ### What it requires
 

@@ -35,6 +35,16 @@ public struct StickyStyle: Sendable, Equatable {
     /// uses the same pin for "bound to one space", the neighbouring
     /// idea — display-sticky is "bound to one display", so the
     /// shared family reads as intended, not as a collision.
+    ///
+    /// **A seeded keybinding is named for this glyph (#1094):**
+    /// `⌃⌥P` toggles display-sticky because the user sees a PIN
+    /// on the window, and a mark is language-independent where a
+    /// label is not. So re-picking this symbol is not a private
+    /// rendering choice — it strands that letter's rationale, in
+    /// every catalog at once. The global mark was already
+    /// re-picked once (`square.stack.3d.up.fill` → `infinity`,
+    /// #429), which is why this says so here rather than only at
+    /// the consumer. Re-pick it and re-argue the letter.
     public static let displaySymbolName = "pin.fill"
 
     /// The mark glyph for a scope, or nil for `.none` (no mark).

@@ -92,4 +92,57 @@ struct KeybindingBannerLocaleTests {
                 != true
         )
     }
+
+    /// The banner must be able to reach zero (#1094).
+    ///
+    /// `noteRecordedCombo` clears only on `list.isEmpty`, so a
+    /// conflict that can never leave the list latches the banner
+    /// open: fixing every real clash refreshes it instead of
+    /// dismissing it. `⌃⌥⌘8` is exactly that shape — a SEEDED
+    /// row (tier 3's move-to-space-8) against a macOS chord that
+    /// ships disabled — which is why aggregate surfaces read
+    /// `KeybindingConflicts.actionable` and not `conflicts`.
+    @Test("a dormant macOS chord cannot latch the banner open")
+    func dormantChordDoesNotLatchTheBanner() {
+        reset()
+        defer { reset() }
+        let model = makeTestModel()
+        model.config.spaces = [SpaceID("1")]
+        let seeded = KeyBinding(
+            combo: "control+option+command+8",
+            lua: "KiwiDesk.move_to_space_and_follow(\"8\")",
+            kind: .navigation,
+            label: "Move to Space 8 & follow"
+        )
+        let clash = KeyBinding(
+            combo: "alt+h",
+            lua: "KiwiDesk.focus(\"left\")",
+            kind: .navigation,
+            label: "Focus window to the left"
+        )
+        let twin = KeyBinding(
+            combo: "alt+h",
+            lua: "KiwiDesk.focus(\"right\")",
+            kind: .navigation,
+            label: "Focus window to the right"
+        )
+        model.config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [seeded, clash, twin]
+            )
+        ]
+        model.warnIfAnyConflict()
+        #expect(model.keybindingWarning != nil)
+        // Resolve the only REAL conflict; the dormant one stays.
+        var layer = model.config.layers[0]
+        layer.bindings = [seeded, clash]
+        model.config.layers = [layer]
+        model.noteRecordedCombo(clash, in: layer.bindings)
+        #expect(
+            model.keybindingWarning == nil,
+            "the banner latched open on a dormant chord"
+        )
+    }
+
 }

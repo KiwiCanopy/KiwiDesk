@@ -254,4 +254,45 @@ struct HomeCardContentTests {
         )
         #expect(line.contains("\(expected)"))
     }
+
+    /// A macOS chord that ships DISABLED must not put a standing
+    /// badge on the card (#1094). `⌃⌥⌘8` is seeded — tier 3's
+    /// move-to-space-8 — and is also Invert Colors, so counting
+    /// it would shout on every install with 8+ Desktops about a
+    /// chord that works for everyone who has not enabled it.
+    ///
+    /// The ROW keeps its warning: this asserts the shout is
+    /// silent AND that `KeybindingConflicts` still reports the
+    /// conflict, because suppressing both would take away the
+    /// warning someone deliberately binding one of these needs
+    /// — which is what the first draft of this fix did.
+    @Test("a dormant macOS chord does not shout, but still warns")
+    func dormantSystemChordIsNotShouted() {
+        pinEnglish()
+        let model = model()
+        var layer = KeyLayer.defaultLayer
+        let row = KeyBinding(
+            combo: "control+option+command+8",
+            lua: "KiwiDesk.move_to_space_and_follow(\"8\")",
+            kind: .navigation,
+            label: "Move to Space 8 & follow"
+        )
+        layer.bindings = [row]
+        model.config.layers = [layer]
+        // The register knows it, so the row can explain itself…
+        #expect(
+            KeybindingConflicts.conflict(
+                for: row,
+                in: layer.bindings
+            ) != nil
+        )
+        // …and the card stays quiet about it.
+        #expect(
+            HomeCardContent.conflictShout(
+                for: .shortcuts,
+                model: model
+            ) == nil
+        )
+    }
+
 }

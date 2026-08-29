@@ -126,7 +126,10 @@ extension KeybindingCatalog {
         label: "Toggle sticky",
         lua: "KiwiDesk.toggle_sticky()",
         displayLabel: {
-            L("keybinding.toggle_sticky", "Toggle sticky")
+            L(
+                "keybinding.toggle_sticky",
+                "Toggle sticky everywhere"
+            )
         },
         help: {
             L(
@@ -151,16 +154,20 @@ extension KeybindingCatalog {
         displayLabel: {
             L(
                 "keybinding.toggle_display_sticky",
-                "Toggle display sticky"
+                "Toggle sticky on this screen"
             )
         },
         help: {
             L(
                 "keybinding.toggle_display_sticky.help",
                 "Keeps this window visible on every Space of the "
-                    + "monitor it lives on. Moving it to a Space on "
-                    + "another monitor re-homes it there. Turn a "
-                    + "sticky window fully global with Toggle sticky."
+                    + "screen it lives on. Moving it to a Space on "
+                    + "another screen re-homes it there. Turn a "
+                    + "sticky window fully global with “%1$@”.",
+                L(
+                    "keybinding.toggle_sticky",
+                    "Toggle sticky everywhere"
+                )
             )
         }
     )
@@ -173,7 +180,10 @@ extension KeybindingCatalog {
         label: "Make sticky",
         lua: "KiwiDesk.make_sticky()",
         displayLabel: {
-            L("keybinding.make_sticky", "Make sticky")
+            L(
+                "keybinding.make_sticky",
+                "Make sticky everywhere"
+            )
         }
     )
 
@@ -183,7 +193,7 @@ extension KeybindingCatalog {
         displayLabel: {
             L(
                 "keybinding.make_display_sticky",
-                "Make display sticky"
+                "Make sticky on this screen"
             )
         }
     )

@@ -174,7 +174,11 @@ enum HomeCardContent {
         model: SettingsModel
     ) -> String? {
         guard destination == .shortcuts else { return nil }
-        let count = KeybindingConflicts.conflicts(
+        // Aggregate surface: count only what the user should
+        // act on. `KeybindingConflicts.actionable` is the one
+        // copy of that policy — the banner and the recorder note
+        // read it too (#1094).
+        let count = KeybindingConflicts.actionable(
             in: model.config.layers
         ).count
         guard count > 0 else { return nil }

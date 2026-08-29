@@ -93,9 +93,17 @@ public enum DefaultKeybindings {
         // Size — ⌥⌘, a base of its own rather than a rung on the
         // positional ladder (#1075).
         rows.append(contentsOf: resizeRows(step: resizeStep))
-        // Toggles — mnemonic letters. Display sticky is the more
-        // frequent scope, so it takes the lighter ⌃⌥ chord; the
-        // broader global sticky escalates to ⌃⌥⇧.
+        // Toggles — mnemonic letters, and NO `⇧` among them
+        // (#1094). The ladder above spends `⇧` on "act on the
+        // window"; the retired `⌃⌥⇧S` spent it on "a broader
+        // scope", which is the one chord in the seed a user who
+        // learned the ladder would have read wrong.
+        //
+        // Which letter each sticky scope takes, and why `P`
+        // names the mark rather than the label, is argued in
+        // `docs/design-decisions.md` ▸ "Size is not a positional
+        // verb" — not restated here (the sibling
+        // `DefaultKeybindings+Size.swift` sets that shape).
         rows.append(
             KeyBinding(
                 combo: "control+option+f",
@@ -107,17 +115,17 @@ public enum DefaultKeybindings {
         rows.append(
             KeyBinding(
                 combo: "control+option+s",
-                lua: "KiwiDesk.toggle_display_sticky()",
+                lua: "KiwiDesk.toggle_sticky()",
                 kind: .navigation,
-                label: "Toggle display sticky"
+                label: "Toggle sticky"
             )
         )
         rows.append(
             KeyBinding(
-                combo: "control+option+shift+s",
-                lua: "KiwiDesk.toggle_sticky()",
+                combo: "control+option+p",
+                lua: "KiwiDesk.toggle_display_sticky()",
                 kind: .navigation,
-                label: "Toggle sticky"
+                label: "Toggle display sticky"
             )
         )
         // General — open the read-only Shortcuts panel. App

@@ -165,6 +165,19 @@ struct DefaultKeybindingsTests {
 
     // MARK: - Additive digit top-up (#485)
 
+    /// Rows the top-up authors for `digits`: one per tier.
+    /// Derived from the tier list rather than restated as a
+    /// literal, so adding a tier moves this without an edit
+    /// (rule-authoring.md — a number-pin derives its number).
+    private func expectedTopUp(digits: [String]) -> Int {
+        let tiers = [
+            "control+option+",
+            "control+option+shift+",
+            "control+option+command+",
+        ]
+        return digits.count * tiers.count
+    }
+
     @Test("top-up binds only the digits grown past the seed")
     func topUpAddsOnlyNewDigits() {
         // Seeded for five spaces; the display change grew to ten.
@@ -185,7 +198,12 @@ struct DefaultKeybindingsTests {
         #expect(combos.contains("control+option+shift+6"))
         #expect(combos.contains("control+option+command+0"))
         // Five new digits × three tiers.
-        #expect(added.count == 15)
+        #expect(
+            added.count
+                == expectedTopUp(
+                    digits: ["6", "7", "8", "9", "0"]
+                )
+        )
         #expect(
             added.contains {
                 $0.combo == "control+option+0"
@@ -251,8 +269,16 @@ struct DefaultKeybindingsTests {
             existing: [],
             spaces: spaces(12)
         )
-        // Ten spaces × three tiers; nothing for spaces 11-12.
-        #expect(added.count == 30)
+        // Ten digits × three tiers; nothing for 11-12.
+        #expect(
+            added.count
+                == expectedTopUp(
+                    digits: [
+                        "1", "2", "3", "4", "5",
+                        "6", "7", "8", "9", "0",
+                    ]
+                )
+        )
         #expect(
             !added.contains { $0.lua.contains("(\"11\")") }
         )

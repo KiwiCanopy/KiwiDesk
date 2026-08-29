@@ -80,6 +80,36 @@ public enum KeybindingConflicts {
         }
         return nil
     }
+
+    /// The conflicts an AGGREGATE surface should count — a
+    /// badge, a banner, any "you have N problems" narration.
+    ///
+    /// Drops a clash with a chord macOS ships DISABLED. Those are
+    /// real reservations and a per-ROW surface must still explain
+    /// them, but counting them puts a standing alarm on a seeded
+    /// default (`⌃⌥⌘8` is tier 3's move-to-space-8 AND Invert
+    /// Colors) for every user who has not enabled the feature —
+    /// and a permanent count can never reach zero, so fixing the
+    /// real conflicts refreshes the banner instead of clearing it
+    /// (#1094).
+    ///
+    /// One accessor rather than a filter per surface: there are
+    /// three aggregate readers (card shout, banner, recorder
+    /// note) and the first fix wired only one of them.
+    ///
+    /// `shipsDisabled` reads the shipped default, not the live
+    /// setting, so this is silent for a user who HAS enabled one
+    /// — #1105 replaces it with a live read and this filter goes
+    /// back to being unconditional.
+    public static func actionable(
+        in layers: [KeyLayer]
+    ) -> [Conflict] {
+        conflicts(in: layers).filter { conflict in
+            guard case .systemShortcut(let s) = conflict.target
+            else { return true }
+            return !s.shipsDisabled
+        }
+    }
 }
 
 /// One row's conflict, as structured data (see

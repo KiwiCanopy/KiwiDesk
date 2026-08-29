@@ -40,6 +40,30 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case zoomOut
     case dockHiding
     case finderSearch
+    // The one ⌃⌥ chord macOS reserves (#1094). ⌃⌥ is otherwise
+    // the quiet base #270 chose it for — measured with NO
+    // bindings across sixteen installed apps (2026-08-29) — but
+    // "quiet" is not "empty", and this entry is the difference.
+    // `SizeLayerSeedTests.noSeededRowShadowsTheSystem` checks
+    // SEEDED rows only — and only those its fixture generates,
+    // so widen that fixture rather than trusting its green. A
+    // chord nothing seeds is invisible to every guard: before
+    // this case, a user binding ⌃⌥space themselves got no
+    // warning and a silently dead hotkey.
+    // Measured from `com.apple.symbolichotkeys` id 61 ("Select
+    // next source in Input menu", enabled) on macOS 26.6.
+    case inputSourceNext
+    // The ⌃⌥⌘ family (#1094 review). Measured from
+    // `com.apple.symbolichotkeys` ids 21/25/26 on macOS 26.6,
+    // 2026-08-29 — all three ship DISABLED, gated on
+    // Accessibility, which is exactly the shape that made the
+    // ⌥⌘ Zoom trio invisible to a reputation-based list one rung
+    // up this ladder. `⌃⌥⌘8` is a SEEDED row (move-to-space-8
+    // and follow), so this entry makes an existing collision
+    // visible rather than introducing one.
+    case invertColors
+    case increaseContrast
+    case decreaseContrast
 }
 
 /// Reserved macOS shortcuts KiwiDesk shouldn't shadow, used by
@@ -67,6 +91,10 @@ public enum SystemShortcuts {
         ("option+command+minus", .zoomOut),
         ("option+command+d", .dockHiding),
         ("option+command+space", .finderSearch),
+        ("control+option+space", .inputSourceNext),
+        ("control+option+command+8", .invertColors),
+        ("control+option+command+.", .increaseContrast),
+        ("control+option+command+,", .decreaseContrast),
     ])
 
     private static func build(
@@ -79,5 +107,38 @@ public enum SystemShortcuts {
             }
         }
         return map
+    }
+}
+
+extension SystemShortcut {
+    /// Does macOS ship this chord's shortcut switched OFF?
+    ///
+    /// Measured from `com.apple.symbolichotkeys` on macOS 26.6
+    /// (2026-08-29): the Zoom trio and the Accessibility display
+    /// trio are `enabled = false` out of the box, gated behind an
+    /// Accessibility setting.
+    ///
+    /// A `switch` and not a `Set` for the reason this file's own
+    /// enum docstring gives: a new case must not be able to ship
+    /// without an answer here. A hand-listed set would treat the
+    /// next dormant Accessibility chord as ENABLED by omission,
+    /// silently — the compiler is the parity guard (§5).
+    ///
+    /// It reads the SHIPPED default, never the live setting, so
+    /// it is wrong for a user who has turned one on — see #1105,
+    /// which replaces it with a live read and deletes this.
+    public var shipsDisabled: Bool {
+        switch self {
+        case .zoomToggle, .zoomIn, .zoomOut,
+            .invertColors, .increaseContrast, .decreaseContrast:
+            return true
+        case .spotlight, .appSwitcher, .quitApp, .closeWindow,
+            .minimize, .hideApp, .forceQuit,
+            .missionControlSpaceLeft, .missionControlSpaceRight,
+            .missionControl, .appWindows, .screenshot,
+            .screenshotSelection, .screenshotTools, .dockHiding,
+            .finderSearch, .inputSourceNext:
+            return false
+        }
     }
 }

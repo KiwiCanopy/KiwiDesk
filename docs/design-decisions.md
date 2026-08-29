@@ -5341,12 +5341,12 @@ user had no way to focus or move a window until they authored
 every combo. Now `Core.DefaultKeybindings` seeds a starter set on an
 **escalating Control-Option scheme** (#270): `⌃⌥` arrows focus /
 `⌃⌥⇧` arrows swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move
-/ move-and-follow, `⌃⌥F` float, `⌃⌥S` display sticky, `⌃⌥⇧S`
-global sticky — plus, since #1075, `⌥⌘` `1`/`2` and `4`/`5` for
-size on a base of its own — with one guard everywhere: **only
-when no layer carries a single binding** — a user- or Lua-authored
-binding anywhere blocks the seed, making it idempotent and
-never destructive.
+/ move-and-follow, `⌃⌥F` float, `⌃⌥S` sticky everywhere, `⌃⌥P`
+sticky to this screen (#1094) — plus, since #1075, `⌥⌘` `1`/`2`
+and `4`/`5` for size on a base of its own — with one guard
+everywhere: **only when no layer carries a single binding** — a
+user- or Lua-authored binding anywhere blocks the seed, making it
+idempotent and never destructive.
 
 **Why Control-Option, not bare Option (#270).** On macOS Option is
 the special-character (AltGr) modifier, so a *global* `⌥`+key
@@ -5354,12 +5354,17 @@ hotkey swallows text entry on international Apple keyboards
 (`⌥L`=@, `⌥5`=[, `⌥8`={ …). macOS composes those characters only
 when the modifier is exactly `⌥` or `⌥⇧`; adding Control (or
 Command) suppresses it, so `⌃⌥` is the lightest text-safe chord
-(the earlier bare-`⌥` set, and Amethyst's `⌥⇧`, are not). Its only
-overlap is VoiceOver's `⌃⌥` modifier, inert unless VoiceOver is on
-and remappable to Caps Lock; `⌘⌥` was rejected because it collides
-with always-on system shortcuts (Force Quit, Dock, Hide/Minimize)
-— **narrowed by #1075 below**, which measures the base and opens
-it to digits under a stated boundary.
+(the earlier bare-`⌥` set, and Amethyst's `⌥⇧`, are not). It
+overlaps VoiceOver's `⌃⌥` modifier, inert unless VoiceOver is on
+and remappable to Caps Lock, and macOS reserves exactly one chord
+on it — `⌃⌥space` switches the input source
+(`com.apple.symbolichotkeys` id 61, enabled, read 2026-08-29 on
+macOS 26.6). Nothing is seeded there, and `SystemShortcuts.map`
+carries it so a user who binds it is warned rather than left with
+a silently dead hotkey (#1094). `⌘⌥` was rejected because it
+collides with always-on system shortcuts (Force Quit, Dock,
+Hide/Minimize) — **narrowed by #1075 below**, which measures the
+base and opens it to digits under a stated boundary.
 Directions bind the arrow keys, which never compose a character on
 any layout. The set lives in the **base `gui.json`
 layers**, never a profile override (profiles stay
@@ -5369,14 +5374,36 @@ shortcuts actually fire.
 
 **The ladder is not uncontested either, and that is named here so
 a later measurement does not read it as a regression.** Finder
-binds `⌃⌥⌘1`–`7` to View ▸ Sort Groups By, which is tier 3's digit
-range (move-to-space-and-follow). It is admitted on the same
-criterion the size digits are, below: a Finder View submenu,
-menu-reachable, and Finder is rarely frontmost while windows are
-being thrown between Spaces. The two rungs carrying the most
-traffic are clean — `⌃⌥` and `⌃⌥⇧` measured with **no bindings at
-all** across the sixteen apps enumerated for #1075, which is the
-property #270 chose this base for in the first place.
+binds `⌃⌥⌘1`–`7` to View ▸ Sort Groups By (2026-08-29, macOS
+26.6), which is tier 3's digit range (move-to-space-and-follow).
+It is admitted on the same criterion the size digits are, below:
+a Finder View submenu, menu-reachable, and Finder is rarely
+frontmost while windows are being thrown between Spaces.
+
+**`⌃⌥⌘8` is the harder one on that rung, and it is ruled rather
+than accidental (#1094).** It is tier 3's move-to-space-8 chord
+AND macOS's Invert Colors (`symbolichotkeys` id 21, read
+2026-08-29 on macOS 26.6). Unlike the Finder rows this one is not
+recoverable: `RegisterEventHotKey` fails silently against a live
+system chord, so for a user who turns Invert Colors on the row
+does nothing and says nothing. It stays bound anyway, because
+Invert Colors ships DISABLED — dropping the row would take a
+working shortcut from everyone to spare the few who enable it —
+and because moving it is not available, the digits being space
+POSITIONS rather than names. What the ruling buys is the register
+entry: the chord is now in `SystemShortcuts.map`, so the editor
+can say why, where before the failure was mute on both sides.
+`SizeLayerSeedTests` ▸ `knownShadows` is the one copy of that
+exemption, and it reds if the chord ever stops being reserved. The two
+rungs carrying the most traffic take no *app* collision at all —
+`⌃⌥` and `⌃⌥⇧` came back with **no menu bindings** across the
+same sixteen apps, which is the property #270 chose this base for
+in the first place; the one chord macOS itself reserves on `⌃⌥`
+is named above. One near-miss for whoever measures next: macOS 26
+puts a Window ▸ Move & Resize submenu in every app's menu bar
+whose quarter-tile rows read `⌃⌥⇧`+arrow, and they carry `fn` as
+well — a different chord, and not one a Carbon hotkey can be
+registered on.
 
 **The keypad's ten digits ARE their number-row twins (#1074).** A
 binding written `4` fires from either physical key, and nothing
@@ -5438,14 +5465,45 @@ with an arrow, "and follow" with a digit — so the ladder could
 not be stated in one sentence. Moving it off restores that: `⌘`
 now means "and follow", full stop.
 
-The ladder is **two classes plus a residue**, and the residue is
-named here so the next author does not re-derive it: the
-positional verbs escalate `⌃⌥` → `⌃⌥⇧` → `⌃⌥⌘`, size lives on
-`⌥⌘`, and the **toggles** (`⌃⌥F`, `⌃⌥S`, `⌃⌥⇧S`) plus app chrome
-(`⌃⌥K`) are mnemonic letters on the base tier, where `⇧` means
-"the broader scope" rather than "act on the window". That second
-sense of `⇧` predates this change and survives it; the claim
-being made is only that `⌘` no longer carries two.
+The ladder is **two bases plus one key**, and what divides them
+is not taxonomy: **`⌥⌘` carries the verbs you HOLD, `⌃⌥` the
+verbs you PRESS.** "Not positional" is why resize had to leave
+tier 3; "you hold it" (#1056) is why it landed on `⌥⌘`. Those two
+are different arguments, and conflating them is what left this
+split feeling unsettled — every later attempt to move the
+non-positional TOGGLES onto `⌥⌘` was reasoning from the taxonomy,
+which was never the load-bearing half. Size is the only held
+verb, so it is the only thing on `⌥⌘`; the toggles (`⌃⌥F`,
+`⌃⌥S`, `⌃⌥P`) are pressed, so they stay on `⌃⌥` as mnemonic
+letters; and app chrome (`⌃⌥K`) is the one key that is not a
+window verb at all.
+
+Stated that way the rule **predicts**, which is what makes it a
+rule rather than a label: a future glide-able verb goes to `⌥⌘`,
+anything you tap stays on `⌃⌥`.
+
+**`⇧` has one meaning, and a toggle does not qualify (#1094).**
+`⌃⌥⇧S` spent `⇧` on "a broader scope" while the ladder
+three rows up spends it on "act on the window" — the one chord in
+the seed a user who had correctly learned the ladder would read
+wrong. It is gone: global sticky took `⌃⌥S` (`S` still leads
+the label a GUI-first user is shown, "Toggle sticky everywhere"), and the screen-scoped one took `⌃⌥P`, named for the
+`pin.fill` mark `StickyStyle` draws rather than for a label —
+because a label-derived mnemonic only works in the language the
+label was written in, while a mark is a picture.
+
+**`D` was the obvious letter and it was refused**, recorded here
+because a later author will reach for it again. Three counts:
+*Desktop* is a first-class noun in this app with its own catalog
+rows, so `⌃⌥D` reads as a Desktop verb before it reads as a
+sticky one; the letter would anchor to *display*, a word
+`config-vocabulary.md` retires for a screen, so #865 would strand
+it; and the mitigation offered for the first count — "Desktops
+and Spaces are always digit-bound, so no lettered chord means
+Desktop" — is a state claim nothing enforces (#614), since
+`goToDesktop` and `moveToDesktop` ship as offerable unbound rows
+a user may bind to any letter they like. So `⇧` now means
+exactly one thing everywhere, and so does `⌘`.
 
 The ergonomics ran backwards too. #1056 made resize the one verb
 a user HOLDS, and it sat on the heaviest chord in the scheme —
@@ -5481,33 +5539,45 @@ against it.
 register says so.** Never arrows — `⌥⌘←`/`→` is next/previous tab
 in Chrome, Safari and Terminal (observed 2026-08-28) — and a
 global Carbon hotkey pre-empts the frontmost app, so binding them
-would take tab switching away system-wide. Never `esc`, `space`,
+would take tab switching away system-wide.
+
+**That pre-emption is measured, not inferred (owner, 2026-08-29).**
+A KiwiDesk resize verb was bound to `⌘P` — VS Code's Go to File —
+and pressed with VS Code frontmost: KiwiDesk fired and Quick Open
+did not. So the order is macOS's own chords, then KiwiDesk, then
+app menus: `RegisterEventHotKey` FAILS against a live system
+hotkey (which is why `⌥⌘8` was refused above), and WINS against an
+app's own. It matters because every collision in this section is
+a real cost to the user rather than a theoretical one — the app
+loses the chord, silently, and the criterion below exists to rank
+which of those losses are tolerable. Never `esc`, `space`,
 `D`, or the Zoom trio. A new default on this base is checked
 against `SystemShortcuts.map`, not against this paragraph.
 
 **And the criterion is applied to digits too, rather than assumed
 past them.** Arrows are excluded above on an *app*-level
 collision, so it would be dishonest to admit digits on the system
-list alone. The first draft of this paragraph admitted them by
-naming Xcode's inspector-pane family — "one professional tool
-whose users can rebind either side" — and that was reputation
-rather than measurement. It was wrong. Enumerating the menu
+list alone. The first draft of this paragraph admitted them from
+Xcode's reputation rather than from a measurement. Enumerating the
+menu
 shortcuts of sixteen installed apps through the accessibility API
 (2026-08-29, macOS 26.6) found `⌥⌘`+digit bound by **Finder**
 (`1 2 5 6 7`, View ▸ Clean Up By), **Preview** (`0 1 2 3 4 5 6 9`),
 **Safari** (`1`–`4`, Bookmarks ▸ Favorites — a range that scales
 with the user's own bookmark count) and **PowerPoint** (`1 2 3`,
-Masters). Finder and Preview ship on every Mac, so the seeded
-size layer has shadowed them since 1.0.
+Masters). Finder and Preview ship on every Mac, so this is not a
+collision some installs have and others do not: wherever the size
+layer seeds, it shadows something.
 
-**The digits stay; what changed is the criterion.** Every digit
-`0`–`9` was claimed by some always-installed app in that
-enumeration, so there was no free pair to move to. The rule that
-outlives the snapshot is the shape of the question: never which
-digits are free, but which collisions are worth accepting. What separates the
-admitted set from the refused arrows is not frequency (somebody's
-Safari Favorite `1` is pressed all day) but **recoverability and
-diagnosability**: Clean Up By, Preview's sidebar and Safari's
+**The digits stay; what changed is the criterion.** Nine of the
+ten digits were claimed by an app in that enumeration, and the
+tenth — `8` — is macOS's own Zoom toggle above, so there was no
+free pair to move to. The rule that outlives the snapshot is the
+shape of the question: never which digits are free, but which
+collisions are worth accepting. What separates the admitted set
+from the refused arrows is not frequency (somebody's Safari
+Favorite `1` is pressed all day) but **recoverability and
+diagnosability**: Clean Up By, Preview's View menu and Safari's
 Favorites each have a visible menu path, so what is lost is an
 accelerator rather than a capability, and the failure presents as
 a menu item that did not respond — something a user can reason
@@ -5519,16 +5589,19 @@ the rule itself: restating a snapshot of other people's software
 as a rule is exactly how the Xcode sentence rotted.
 
 **The geometry was load-bearing independently of any of this.**
-The `4`/`5` + `7`/`8` draft this section rejects over `⌥⌘8` would
-also have been worse on collisions (Preview `4` and `5`, Finder
-`7`), so the keypad 2×2, the `3` gap between the pairs and the
-`5`/`6` hand split had already picked the best available set
-before it was measured. One thing the glide changes in the
-arithmetic: since #1082 resize is HELD, the chord is pressed once
-per gesture rather than tapped repeatedly — which
-strengthens the `⌥⌘` thumb roll and weakens the frequency case
-against its collisions, a held verb being used in bursts rather
-than scattered through the day.
+The measurement chooses, and it chooses AGAINST the
+shipped set: `{4,5,7,8}` takes five app bindings (4 → Preview and
+Safari, 5 → Finder and Preview, 7 → Finder, 8 → none) against
+`{1,2,4,5}`'s twelve, since `1` and `2` are each claimed by all
+four apps. What refuses the rejected draft is not the app count
+but the SYSTEM chord: `⌥⌘8` is macOS's Zoom toggle, KiwiDesk
+loses that one outright, and a seeded row that silently never
+fires is worse than one that costs an app a menu accelerator. One thing the
+glide changes in the arithmetic: since #1082 resize is HELD, the
+chord is pressed once per gesture rather than tapped repeatedly
+— which strengthens the `⌥⌘` thumb roll and weakens the
+frequency case against its collisions, a held verb being used in
+bursts rather than scattered through the day.
 
 **Why digits and not some other pair.** An arrow carries two
 readings on a tiled window — "which axis and sign" and "which way
@@ -8290,9 +8363,9 @@ of it, rather than separate rulings:
   while its ring is actually drawn on the board — the red while
   a collision or an overwrite shows, the amber while a reserved
   key is still free under the shown combination. A chip being
-  picked is not enough for the amber: ⌃⌥, the app's default
-  pair, reserves nothing, and under **All** there is no single
-  combination to check a reserved key against.
+  picked is not enough for the amber: a chip whose reserved keys
+  are all bound draws red alone, and under **All** there is no
+  single combination to check a reserved key against.
 - **Measure colour with `ColorVision`, never a re-derivation of
   it.** `ColorVision.separation` is Euclidean distance in
   *simulated sRGB*. A hand-rolled CIE-Lab proxy used during pass

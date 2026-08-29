@@ -25,7 +25,10 @@ struct StickyMarkEditor: View {
                 "sticky.caption",
                 "Sticky windows stay visible on every "
                     + "Space (%1$@, in %2$@).",
-                L("keybinding.toggle_sticky", "Toggle sticky"),
+                L(
+                    "keybinding.toggle_sticky",
+                    "Toggle sticky everywhere"
+                ),
                 SettingsDestination.shortcuts.title
             )
         ) {
