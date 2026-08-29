@@ -30,7 +30,17 @@ struct ShortcutsHeader: View {
                 {
                     importButton
                 }
-                resetButton
+                // Gated, not permanent: it appears only when
+                // KiwiDesk actually has defaults this install
+                // lacks. That makes its PRESENCE the news #1096
+                // exists to deliver, instead of a destructive-
+                // sounding button standing over every new user's
+                // shortcut list for a condition they do not have
+                // — the same argument that keeps Import absent
+                // until init.lua holds something to adopt.
+                if model.hasDefaultsToRestore {
+                    resetButton
+                }
             }
             if importedNote {
                 // `groupHeading` is the green-emphasis TEXT
@@ -120,7 +130,13 @@ struct ShortcutsHeader: View {
             }
             Button(role: .cancel) {
             } label: {
-                Text(L("discard.cancel", "Cancel"))
+                // NOT `discard.cancel` — that key reads
+                // "Continue editing" in seven locales, and
+                // nothing is being edited on this dialog.
+                // `GeneralSection+Reset` hit the same trap.
+                Text(
+                    L("spaces.delete_confirm.cancel", "Cancel")
+                )
             }
         } message: {
             Text(resetMessage)
@@ -131,27 +147,50 @@ struct ShortcutsHeader: View {
     /// you sure": a number is what makes the choice informed,
     /// and it is zero for the common case of an untouched layer,
     /// where the sentence says so instead of threatening.
+    /// Leads with the GAIN and treats the loss as the caveat:
+    /// the question a user has here is "what do I get, and what
+    /// does it cost", and an earlier draft answered only the
+    /// second half — telling the very population this exists for
+    /// (people who customised their defaults) that their
+    /// shortcuts were about to be deleted, when what was
+    /// happening was the thing they had asked for.
+    ///
+    /// The loss count is now true collateral only: a shortcut of
+    /// the user's OWN removed because a default reclaims its
+    /// key. A default they merely moved is not a loss — the verb
+    /// comes back on its shipped chord, which is the point.
     private var resetMessage: String {
-        let discards = model.shortcutsTheResetWouldDiscard
-        if discards == 0 {
+        let restored = model.shortcutsTheResetWouldRestore
+        let lost = model.shortcutsTheResetWouldDiscard
+        if lost == 0 {
             return L(
                 "shortcuts.restore_defaults.message_clean",
-                "Puts back the shortcuts a new install gets. "
-                    + "Shortcuts you added yourself are kept, and "
-                    + "nothing of yours is lost."
+                "Nothing of yours is lost — review the changes "
+                    + "below, then %1$@. Shortcuts restored: %2$d",
+                L("footer.save", "Save"),
+                restored
             )
         }
-        // The count goes LAST so no locale has to inflect
-        // around it and none needs an "(s)" — the rule
-        // AGENTS.md states for any frame carrying a number,
-        // English included.
+        // `footer.save` is INTERPOLATED, not quoted (#818): the
+        // neighbour playing this same beat already does it, and
+        // German's Save button is "Sichern" — a translator
+        // reaching for the obvious word would name a button that
+        // does not exist. Quoted, that mirror drifts silently in
+        // a language nobody reviewing `footer.save` reads.
+        //
+        // The counts are separated by "·", never a comma: six
+        // locales use the comma as a DECIMAL separator, so
+        // "restored: 12, and" starts parsing as a number. The
+        // corpus already settled this in `behavior.quit.summary`.
         return L(
             "shortcuts.restore_defaults.message",
-            "Puts back the shortcuts a new install gets. "
-                + "Shortcuts you added yourself are kept, unless "
-                + "they use a key a default needs. Yours that "
-                + "would be discarded: %1$d",
-            discards
+            "Your own shortcuts are kept, except any that use a "
+                + "key the defaults need. Review the changes "
+                + "below, then %1$@. Shortcuts restored: %2$d · "
+                + "your own that are lost: %3$d",
+            L("footer.save", "Save"),
+            restored,
+            lost
         )
     }
 
@@ -160,13 +199,14 @@ struct ShortcutsHeader: View {
             ? L(
                 "shortcuts.restore_defaults.help",
                 "Puts back the shortcuts KiwiDesk provides, "
-                    + "including any added since you installed "
-                    + "it. Shortcuts you made yourself are kept."
+                    + "including ones it has added since you "
+                    + "installed it. Shortcuts you made yourself "
+                    + "are kept."
             )
             : L(
                 "shortcuts.restore_defaults.help_other_layer",
                 "Only the default layer has defaults to restore "
-                    + "\u{2014} this one is yours."
+                    + "— this one is yours."
             )
     }
 

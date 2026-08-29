@@ -46,8 +46,13 @@ extension SettingsModel {
             })
         else { return }
         let shipped = shippedDefaults
+        let orphanLua = orphanLuaInDefaultLayer
         let kept = config.layers[index].bindings.filter {
-            Self.survivesReset($0, against: shipped)
+            Self.survivesReset(
+                $0,
+                against: shipped,
+                orphans: orphanLua
+            )
         }
         config.layers[index].bindings = shipped + kept
     }
@@ -60,6 +65,59 @@ extension SettingsModel {
             spaces: config.spaces,
             resizeStep: Int(config.settings.resizeStep)
         )
+    }
+
+    /// The Lua of every row in the default layer that targets a
+    /// Space which no longer exists.
+    ///
+    /// Asked of `OrphanedShortcuts`, never re-derived: its own
+    /// docstring rules that a third surface asking "is this
+    /// binding inactive?" asks THERE, because two surfaces
+    /// disagreeing about what is inactive was the whole of #820.
+    ///
+    /// They are stale DEFAULTS, not inventions — a fresh install
+    /// with these Spaces would have none of them — so a restore
+    /// drops them. #92 keeps them as holders through ordinary
+    /// editing; an explicit restore is a different act.
+    private var orphanLuaInDefaultLayer: Set<String> {
+        guard
+            let layer = config.layers.first(where: {
+                $0.name == KeyLayer.defaultName
+            })
+        else { return [] }
+        return Set(
+            OrphanedShortcuts.commands(
+                bindings: layer.bindings,
+                spaces: config.spaces
+            )
+            .map(\.lua)
+        )
+    }
+
+    /// How many shipped rows this install does not already have,
+    /// exactly as they ship — the GAIN, and the number the
+    /// confirmation leads with.
+    var shortcutsTheResetWouldRestore: Int {
+        guard
+            let layer = config.layers.first(where: {
+                $0.name == KeyLayer.defaultName
+            })
+        else { return 0 }
+        let have = Set(
+            layer.bindings.map { "\($0.combo)\u{1F}\($0.lua)" }
+        )
+        return shippedDefaults.filter {
+            !have.contains("\($0.combo)\u{1F}\($0.lua)")
+        }
+        .count
+    }
+
+    /// Is there anything to restore? The button's gate: absent
+    /// rather than greyed when this install already matches what
+    /// KiwiDesk ships, so its presence is itself the news.
+    var hasDefaultsToRestore: Bool {
+        shortcutsTheResetWouldRestore > 0
+            || shortcutsTheResetWouldDiscard > 0
     }
 
     /// Does `row` outlive a reset?
@@ -89,9 +147,13 @@ extension SettingsModel {
     /// chord — the identity `digitTopUp` already uses.
     private static func survivesReset(
         _ row: KeyBinding,
-        against shipped: [KeyBinding]
+        against shipped: [KeyBinding],
+        orphans: Set<String>
     ) -> Bool {
         if shipped.contains(where: { $0.lua == row.lua }) {
+            return false
+        }
+        if orphans.contains(row.lua) {
             return false
         }
         guard let combo = KeyCombo.parse(row.combo) else {
@@ -119,15 +181,27 @@ extension SettingsModel {
             })
         else { return 0 }
         let shipped = shippedDefaults
+        let orphanLua = orphanLuaInDefaultLayer
         return layer.bindings.filter { row in
-            guard !Self.survivesReset(row, against: shipped)
-            else { return false }
-            // A row identical to a shipped one is not a loss.
-            return !shipped.contains {
-                $0.lua == row.lua && $0.combo == row.combo
+            // A default — moved or not — is not the user's, and
+            // its verb comes back on the shipped chord. Counting
+            // it told the very population this feature is for
+            // that their shortcuts were being deleted.
+            if shipped.contains(where: { $0.lua == row.lua }) {
+                return false
+            }
+            // A row for a Space that is gone is KiwiDesk's own,
+            // just stale. Dropping it costs the user nothing.
+            if orphanLua.contains(row.lua) { return false }
+            // What is left is theirs. It is lost only if a
+            // default is about to reclaim its chord.
+            guard let combo = KeyCombo.parse(row.combo) else {
+                return false
+            }
+            return shipped.contains {
+                KeyCombo.parse($0.combo) == combo
             }
         }
         .count
     }
-
 }

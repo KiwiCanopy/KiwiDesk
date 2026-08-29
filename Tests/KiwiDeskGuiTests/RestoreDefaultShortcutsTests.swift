@@ -129,7 +129,10 @@ struct RestoreDefaultShortcutsTests {
             model,
             [row("control+option+shift+f", float.lua)]
         )
-        #expect(model.shortcutsTheResetWouldDiscard == 1)
+        // NOT a loss: the verb returns on its shipped chord,
+        // which is the whole point of the button. Counting it
+        // was the design review's "if you do one thing".
+        #expect(model.shortcutsTheResetWouldDiscard == 0)
         model.resetShortcutsToDefaults()
         let after = model.config.layers[0].bindings
         #expect(after.filter { $0.lua == float.lua }.count == 1)
@@ -161,4 +164,35 @@ struct RestoreDefaultShortcutsTests {
         #expect(gaming?.bindings.first?.combo == mine.combo)
         #expect(model.shortcutsTheResetWouldDiscard == 0)
     }
+
+    /// Rows targeting a Space that no longer exists are STALE
+    /// DEFAULTS, not inventions — a fresh install with these
+    /// Spaces would have none of them — so a restore drops them.
+    ///
+    /// #92 keeps them as holders through ordinary editing, in
+    /// case the Space returns; an explicit restore is a different
+    /// act. Owner observation on the running build, 2026-08-29:
+    /// they survived the first implementation.
+    @Test("a shortcut for a Space that is gone does not survive")
+    func orphanedRowsAreDropped() {
+        let model = model(spaces: [SpaceID("1"), SpaceID("2")])
+        // Space 9 is not in `spaces`, so this row is inactive.
+        let stale = row(
+            "control+option+9",
+            "KiwiDesk.focus_space(\"9\")",
+            "Go to Space 9"
+        )
+        setBindings(model, [stale])
+        #expect(model.shortcutsTheResetWouldDiscard == 0)
+        model.resetShortcutsToDefaults()
+        #expect(
+            !model.config.layers[0].bindings.contains {
+                $0.lua == stale.lua
+            }
+        )
+        // Not counted as a loss: it is KiwiDesk's own row for a
+        // Space that is gone, not a shortcut the user invented.
+        #expect(model.shortcutsTheResetWouldDiscard == 0)
+    }
+
 }
