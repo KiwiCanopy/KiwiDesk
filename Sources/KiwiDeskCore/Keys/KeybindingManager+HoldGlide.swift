@@ -8,7 +8,7 @@ import Foundation
 /// `HoldGlide`.
 extension KeybindingManager {
     /// Whether a held glide is applying right now. Read by the
-    /// refusal gate below and by `KiwiCore.resizeRetileAnimated`,
+    /// refusal gate below and by `KiwiCore.resizeWritesAnimated`,
     /// both of which need the state at a moment when `isFiring`
     /// is false — the glide re-issues its command outside any
     /// binding fire.

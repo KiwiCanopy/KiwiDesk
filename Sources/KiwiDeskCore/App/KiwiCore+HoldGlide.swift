@@ -97,18 +97,32 @@ extension KiwiCore {
         }
     }
 
-    /// The work a glide frame stands down, paid ONCE when the
-    /// hold ends. Today that is the #674 track z-order arm:
-    /// `scheduleZOrderRestore` runs immediately at
-    /// `activeCount == 0`, so the settle that used to coalesce a
-    /// whole hold into one restore is gone the moment glide
-    /// frames write instantly — see the stand-down at `resize`'s
-    /// own arm for the full argument. Firing here rather than per
-    /// frame is also the correct ordering: the pile is scrambled
-    /// at most once per hold.
+    /// What the END of a run owes, whichever way it ended
+    /// (release, refusal, failing step, teardown, overrun). Two
+    /// things now, and they are opposites — one paid because a
+    /// glide frame stood it down, one dropped because a glide
+    /// frame armed it:
+    ///
+    /// - The #674 track z-order arm. `scheduleZOrderRestore` runs
+    ///   immediately at `activeCount == 0`, so the settle that
+    ///   used to coalesce a whole hold into one restore is gone
+    ///   the moment glide frames write instantly — see the
+    ///   stand-down at `resize`'s own arm for the full argument.
+    ///   Firing here rather than per frame is also the correct
+    ///   ordering: the pile is scrambled at most once per hold.
+    /// - The #1090 floating base. It is what BOUNDS that record
+    ///   by the hold, and the bound is the whole reason it is
+    ///   safe where the #881 instant stamp was not (#1056): a
+    ///   commanded frame that outlives its run is re-armed by
+    ///   every press that reads it and banks growth with no
+    ///   ceiling on an app that silently refuses (#1057).
+    ///   Dropping this clear leaves no visible symptom for a
+    ///   whole session of ordinary use, which is why it is here
+    ///   rather than beside the write it undoes.
     private func wireGlideEnd() {
         keys.holdGlide.onGlideEnd = { [weak self] in
             self?.scheduleTrackZOrderRestoreIfOverflowing()
+            self?.tiler.animation.clearGlideCommanded()
         }
     }
 }

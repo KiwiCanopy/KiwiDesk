@@ -204,12 +204,20 @@ struct HoldGlideSeamTests {
         // added anywhere, so it cannot carry the claim (code
         // review, 2026-08-29).
         //
-        // Two readers by ruling, both in the resize command file:
-        // the animation choice and the #674 z-order stand-down. A
-        // new one inherits BOTH behaviours — write instantly, and
-        // stand per-frame work down — so it is a deliberate
-        // decision that joins this list in the same change, or
-        // the claim is false again.
+        // Three readers by ruling. Two are in the resize command
+        // file — the animation choice and the #674 z-order
+        // stand-down — and a new one THERE inherits both
+        // behaviours (write instantly, and stand per-frame work
+        // down), so it is a deliberate decision that joins this
+        // list in the same change or the claim is false again.
+        //
+        // The third is #1090's, in the floating resize file, and
+        // it is a different question with the same answer: which
+        // base this write may measure from. It is bound to one
+        // local there and read twice, so the count is one — and
+        // that is the shape to keep, since the scope must be
+        // sampled once per write rather than re-read around a
+        // call that could change it.
         let reads = try Self.sites(of: "isApplyingGlideStep")
         let byFile = Dictionary(
             grouping: reads,
@@ -225,11 +233,21 @@ struct HoldGlideSeamTests {
             """
         )
         #expect(
+            byFile["KiwiCore+ResizeFloating.swift"]?.count == 1,
+            """
+            expected exactly one isApplyingGlideStep reader in \
+            KiwiCore+ResizeFloating.swift (the commanded base \
+            gate, bound to one local), found \
+            \(byFile["KiwiCore+ResizeFloating.swift"]?.count ?? 0)
+            """
+        )
+        #expect(
             Set(byFile.keys) == [
                 "HoldGlide.swift",
                 "HoldGlide+Run.swift",
                 "KeybindingManager+HoldGlide.swift",
                 "KiwiCore+Resize.swift",
+                "KiwiCore+ResizeFloating.swift",
             ],
             .init(
                 rawValue: "unexpected isApplyingGlideStep site "
@@ -260,6 +278,46 @@ struct HoldGlideSeamTests {
             wired.allSatisfy {
                 $0.file.lastPathComponent == Self.wiringFile
             }
+        )
+    }
+
+    @Test("The glide end clears the #1090 floating base")
+    func glideEndClearsTheFloatingBase() throws {
+        // The second thing the end of a run owes, and the one
+        // with NO visible symptom when it is dropped: the
+        // record simply outlives its hold, and every later
+        // floating press inside a glide measures from a
+        // commanded value nothing confirmed — the #881 stamp
+        // #1056 refused, re-created by omission. The behavioural
+        // suite beside it (`FloatGlideAccumulationTests` ▸ `The
+        // base dies with the hold`) covers the release path, so
+        // this pins that the CLEAR is reachable at all — from
+        // the one seam that fires however a run ends, including
+        // the refusal, teardown and overrun paths no unit test
+        // drives end to end.
+        // The needle carries the RECEIVER so the declaration in
+        // `AnimationEngine+CommandedBase` is not counted as a
+        // call — the same reason the seam needles above carry
+        // `holdGlide.`.
+        let cleared = try Self.sites(
+            of: "animation.clearGlideCommanded()"
+        )
+        #expect(
+            cleared.count == 1,
+            """
+            expected exactly one clearGlideCommanded() call, \
+            found \(cleared.count): \
+            \(cleared.map(\.site).joined(separator: ", "))
+            """
+        )
+        #expect(
+            cleared.allSatisfy {
+                $0.file.lastPathComponent == Self.wiringFile
+            },
+            """
+            the #1090 base must be cleared from the glide-end \
+            seam, not beside a call site
+            """
         )
     }
 }

@@ -2216,39 +2216,65 @@ stop the hold. Where that question is asked, and why the
 glide is the layer that has to ask it, belongs to
 `.claude/rules/input-and-animation.md`.
 
-*A glide's tiled writes are instant — which is the Reduce Motion
-answer for the tiled half, and only that half.* The glide already
-*is* the motion, so springing each frame would smooth an
-already-smooth signal, add ~100–200 ms
-of trailing behind the key, and generate the #611 retarget storm
-deliberately — a changed target every frame is exactly what the
-settle watchdog cannot tell from a long drag. Writing instantly
-creates no animation, so there is nothing to defer. It is safe on
-the tiled paths and *only* there because of what each measures
-from: those write a stored ratio, weight or length and re-derive
-geometry from it, so the next frame's base is exact, while
-`resizeFloating` measures from a frame and the only commanded
-base #1056 trusts is the in-flight animation's target — so a
-floating glide keeps the configured animation, and its trailing
-with it.
+*A glide's writes are instant, on every resize path.* The glide
+already *is* the motion, so springing each frame would smooth an
+already-smooth signal, add ~100–200 ms of trailing behind the
+key, and generate the #611 retarget storm deliberately — a
+changed target every frame is exactly what the settle watchdog
+cannot tell from a long drag. Writing instantly creates no
+animation, so there is nothing to defer.
 
-Since the tiled write is instant for everyone, a held chord
-glides under Reduce Motion too, rather than being suppressed: a
-held-key resize is the keyboard's direct manipulation, which
-Reduce Motion does not suppress for the mouse either, and on the
-tiled paths there is no second mechanism to keep alive. On the
-floating path there is one, and Reduce Motion is exactly where it
-is worst: `AnimationEngine.animate` returns early under Reduce
-Motion (as it does with animations off), so there is no in-flight
-target to accumulate against and the path falls back to the
-echo-fed frame. At press rate that costs one echo's lag, which
-[accepted-limitations.md](accepted-limitations.md) records; at
-glide rate most frames re-base on the same stale echo, so the
-hold advances at echo rate instead of at the ramp's. An
-accessibility setting must not quietly degrade a headline
-behaviour, which is why giving that path a commanded base of its
-own is release work (#1090) rather than a deferred consistency
-polish.
+That was true of the *tiled* paths from the first build, and of
+the floating one only after #1090, because of what each measures
+from. A tiled path writes a stored ratio, weight or length and
+re-derives geometry from it, so an instant write leaves the next
+frame's base exact. `resizeFloating` measures from a **frame**,
+and the only commanded base it trusted was the in-flight
+animation's target (#129/#1056) — which an instant write does
+not create, and which `AnimationEngine.animate` never creates at
+all under Reduce Motion, with animations off, or with the engine
+disabled: it opens `guard isEnabled, !reduceMotion()`. So that
+path fell back to the echo-fed frame, and at glide rate most
+frames re-based on the *same* stale echo. Measured on device,
+100 asks at ~102 Hz travelled 29% of what they asked for: the
+window crawled while the key was held, and Reduce Motion was the
+configuration that got it.
+
+*So the floating path was given a commanded base of its own,
+bounded by the hold.* It records what each write commanded, in
+`GlideCommandedBase` on the animation engine — deliberately
+beside the animation target it stands in for, so a caller asks
+one accessor rather than branching on which store happens to
+hold the answer. The hard part was never the record; it was the
+**bound**. #1056 had already tried the #881 instant stamp here
+and rejected it, because a commanded record every press can read
+is re-armed by every press, so an app that silently refuses
+every ask banks growth with no ceiling (the #1057 class) — and
+at glide rate a 30 s hold at the ramp's top speed is many
+screens of banked travel, not one press's worth. This record is
+bounded twice instead: **only a glide step may read it**, so no
+press can ever measure from another press's record, and the
+glide-end seam clears it however the run ended. A refusing app
+therefore moves nothing, banks nothing past the release, and the
+next press measures from reality. What stays accepted is the
+*per-press* residue — a press with no animation in flight still
+re-bases on the echo — which is what that read gate is
+protecting, and is recorded in
+[accepted-limitations.md](accepted-limitations.md).
+
+*Reduce Motion gets no branch of its own, and that is the point
+of doing it this way.* Because a glide frame writes instantly for
+everyone, no animation exists during a glide in any
+configuration, so the record is the single base on all of them —
+there is nothing to keep in sync. A held chord therefore glides
+under Reduce Motion rather than being suppressed: a held-key
+resize is the keyboard's direct manipulation, which Reduce Motion
+does not suppress for the mouse either. An earlier version of
+this entry claimed the instant *tiled* writes were already the
+whole of that answer. They were the tiled half only, and the
+floating half was where Reduce Motion did the damage — an
+accessibility setting quietly degrading a headline behaviour,
+which is what moved #1090 from deferred polish to release work.
 
 *A refusal ends the run:* the #933/#1055 size-limit cues stop the
 glide, so a held shrink parked on a floor pills once per hold

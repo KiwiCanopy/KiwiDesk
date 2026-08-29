@@ -95,6 +95,41 @@ final class HoldGlideFixture {
         core.state.workspaces.focus(WindowID(1), in: space)
     }
 
+    /// One FLOATING window, focused, so `resize` takes the
+    /// `resizeFloating` path (#1090) instead of a layout ratio —
+    /// the path that measures from a FRAME and so needs a
+    /// commanded base at frame rate.
+    func seedFloating() {
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(1),
+                    pid: 1,
+                    appName: "FloatApp",
+                    frame: CGRect(
+                        x: 100,
+                        y: 100,
+                        width: 500,
+                        height: 400
+                    ),
+                    isFloating: true
+                )
+            )
+        )
+        let space = core.state.workspaces.space(
+            of: WindowID(1)
+        )!
+        core.state.workspaces.focus(WindowID(1), in: space)
+    }
+
+    /// The width window 1 was last COMMANDED to, read off the
+    /// #881 instant stamp. No echo ever arrives in a test, which
+    /// is precisely the stale-geometry window a glide frame
+    /// lands in on a real machine.
+    var commandedWidth: CGFloat? {
+        core.tiler.recentInstantTarget(WindowID(1))?.width
+    }
+
     var ratio: Double {
         let space = core.state.workspaces.space(
             of: WindowID(1)

@@ -132,9 +132,9 @@ editing here:
   change either seam, rather than averaging the two into one
   claim here.
 
-  **A glide's tiled writes are instant, and the floating path is
-  the deliberate exception** (#1082). The bit a write consults is
-  `HoldGlide.isApplyingGlideStep` (read as
+  **A glide's writes are INSTANT, on every resize path** (#1082,
+  extended to the floating one by #1090). The bit a write
+  consults is `HoldGlide.isApplyingGlideStep` (read as
   `keys.isApplyingGlideStep`), set around ONE re-issued command
   and cleared on every exit — never `keys.isGliding`, which is
   the hold's lifetime and answers the per-write question wrongly
@@ -142,34 +142,53 @@ editing here:
   during a hold would lose its animation, and a hold whose frame
   clock dies would leave the bit stuck on for the session. Who
   may read that scope is pinned by count
-  (`HoldGlideSeamTests`), because a new reader inherits two
-  behaviours at once — write instantly, AND stand per-frame work
-  down. Springing a glide frame smooths an
+  (`HoldGlideSeamTests`), because a reader in the resize command
+  file inherits two behaviours at once — write instantly, AND
+  stand per-frame work down. Springing a glide frame smooths an
   already-smooth signal and generates the #611 retarget storm
   below deliberately — a changed target every frame is what the
   watchdog cannot tell from a long drag — so writing instantly is
-  a safety property, not only feel. It is safe on the tiled paths
-  because they write a stored ratio, weight or length and
-  re-derive geometry from it, leaving the next frame's base
-  exact; `resizeFloating` measures from a FRAME and its only
-  trusted commanded base is the in-flight animation's target, so
-  it keeps whatever animation the config asks for. A new resize
-  write path decides which of those two it is before taking
-  either.
+  a safety property, not only feel.
 
-  That exception is why **Reduce Motion is the configuration
-  where the FLOATING path is worst**, which inverts the obvious
-  reading of "instant writes answer Reduce Motion" — they answer
-  it for the tiled half only. `AnimationEngine.animate` opens
-  with `guard isEnabled, !reduceMotion()`, so under Reduce
-  Motion, with animations off, or with the engine disabled there
-  is no in-flight target at all and `resizeFloating` falls back
-  to the echo-fed frame: at glide rate most frames re-base on
-  the same stale echo. Nothing guards this — it is a shipped
-  limitation with an owner, filed as #1090 and recorded in
-  `docs/accepted-limitations.md` — so treat it as the standing
-  reason not to reach for `resizeRetileAnimated` on that path
-  before #1090 gives it a base it can trust at frame rate.
+  **What each path measures from is what made this conditional,
+  and the floating one needed a record built for it.** A tiled
+  path writes a stored ratio, weight or length and re-derives
+  geometry from it, so an instant write leaves the next frame's
+  base exact. `resizeFloating` measures from a FRAME, and its
+  only commanded base was the in-flight animation's target
+  (#129/#1056) — which an instant write does not create, and
+  which `AnimationEngine.animate` never creates at all under
+  Reduce Motion, with animations off, or with the engine
+  disabled, since it opens `guard isEnabled, !reduceMotion()`.
+  That is why Reduce Motion was the configuration where the
+  FLOATING path was worst: at glide rate most frames re-based on
+  the same stale echo and 71% of a held resize was lost
+  (measured, #1090).
+
+  So a floating write now records what it commanded, in
+  `GlideCommandedBase` on the animation engine — beside the
+  target it stands in for, so a caller asks ONE accessor
+  (`commandedFrame(window:includingHeldGlide:)`) rather than
+  branching on which store holds the answer today. **A commanded
+  base here must be BOUNDED, and this one is bounded twice**:
+  only a glide STEP may read it (the per-write scope is the
+  accessor's own argument), so no press can measure from another
+  press's record, and the glide-end seam clears it. The #881
+  instant stamp was tried as this base and refused for exactly
+  the missing bound — a record every press can read is re-armed
+  by every press, and an app that silently refuses every ask
+  banks commanded growth with no ceiling (#1057). A new resize
+  write path inherits the instant write and owes the same
+  question: what is my next frame's base, and what bounds it?
+
+  Two residues stay, deliberately. A PRESS still re-bases on the
+  echo-fed frame where no animation is in flight — the accepted
+  limitation `docs/accepted-limitations.md` records, and the
+  thing the read gate is protecting. And the record is NOT
+  invalidated mid-hold by the #677 ledger's genuine-resize
+  classifier: that verdict is a heuristic, and one false
+  "genuine" during a glide would re-base a frame on the echo and
+  re-open the defect. The hold is the ceiling instead.
 
   The product rulings (resize-only, the tally, the glide, the
   steps-per-second unit) are argued in `docs/design-decisions.md`
