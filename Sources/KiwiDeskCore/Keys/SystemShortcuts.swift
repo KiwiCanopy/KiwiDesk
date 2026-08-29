@@ -27,6 +27,19 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case screenshot
     case screenshotSelection
     case screenshotTools
+    // The ⌥⌘ family (#1075). Added when size took that base:
+    // the map had no ⌥⌘ entry at all, so nothing warned a user
+    // binding one and the board drew them free. Zoom's three are
+    // gated on Accessibility ▸ Zoom ▸ "Use keyboard shortcuts to
+    // zoom" and ship OFF, but a gated shortcut still wins when
+    // it is on, and `RegisterEventHotKey` fails silently.
+    // Measured from `com.apple.symbolichotkeys` (ids 15/19/17,
+    // 52, 65) on macOS 26.6, 2026-08-28.
+    case zoomToggle
+    case zoomIn
+    case zoomOut
+    case dockHiding
+    case finderSearch
 }
 
 /// Reserved macOS shortcuts KiwiDesk shouldn't shadow, used by
@@ -49,6 +62,11 @@ public enum SystemShortcuts {
         ("command+shift+3", .screenshot),
         ("command+shift+4", .screenshotSelection),
         ("command+shift+5", .screenshotTools),
+        ("option+command+8", .zoomToggle),
+        ("option+command+equal", .zoomIn),
+        ("option+command+minus", .zoomOut),
+        ("option+command+d", .dockHiding),
+        ("option+command+space", .finderSearch),
     ])
 
     private static func build(

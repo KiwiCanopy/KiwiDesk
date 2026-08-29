@@ -123,6 +123,25 @@ extension SystemShortcut {
                 "system_shortcut.app_windows",
                 "App Windows"
             )
+        case .zoomToggle:
+            return L(
+                "system_shortcut.zoom_toggle",
+                "Zoom On/Off"
+            )
+        case .zoomIn:
+            return L("system_shortcut.zoom_in", "Zoom In")
+        case .zoomOut:
+            return L("system_shortcut.zoom_out", "Zoom Out")
+        case .dockHiding:
+            return L(
+                "system_shortcut.dock_hiding",
+                "Turn Dock Hiding On/Off"
+            )
+        case .finderSearch:
+            return L(
+                "system_shortcut.finder_search",
+                "Finder Search Window"
+            )
         case .screenshot:
             return L("system_shortcut.screenshot", "Screenshot")
         case .screenshotSelection:

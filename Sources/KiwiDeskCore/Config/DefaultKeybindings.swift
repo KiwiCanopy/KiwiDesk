@@ -5,14 +5,25 @@ import Foundation
 /// a fresh install, or a config whose Lua declares none — so a
 /// new user can focus, move, and navigate windows immediately.
 ///
-/// Modifier scheme (#270): every default is built on **Control+
-/// Option**, escalating ⌃⌥ → ⌃⌥⇧ → ⌃⌥⌘. Bare Option is the
-/// macOS special-character (AltGr) modifier, so a global
-/// `option+<key>` hotkey swallows characters on international
-/// Apple keyboards (⌥L = @, ⌥5 = [ …); adding Control or Command
-/// suppresses that composition, so ⌃⌥ is the lightest text-safe
-/// chord. Directions bind the **arrow keys**, which are layout-
-/// stable and never compose a character.
+/// Modifier scheme (#270, amended by #1075): the **positional**
+/// defaults are built on **Control+Option**, escalating ⌃⌥ (act
+/// on the focus) → ⌃⌥⇧ (act on the window) → ⌃⌥⌘ (both), so
+/// `⌘` there means exactly one thing: "and follow". **Size takes a
+/// base of its own, ⌥⌘**, because it is not a positional verb —
+/// it changes a weight or a scroll-slot domain rather than a
+/// place in the flat array — and because it is the one verb a
+/// user HOLDS (#1056), which ⌥⌘ takes as a single thumb roll and
+/// ⌃⌥⌘ does not.
+///
+/// Bare Option is the macOS special-character (AltGr) modifier,
+/// so a global `option+<key>` hotkey swallows characters on
+/// international Apple keyboards (⌥L = @, ⌥5 = [ …); adding
+/// Control **or Command** suppresses that composition, which is
+/// what makes ⌥⌘ text-safe as well as ⌃⌥. Directions bind the
+/// **arrow keys**, which are layout-stable and never compose a
+/// character; size binds **digits**, which hold their physical
+/// position on every layout and are the only keys a numeric
+/// keypad will be able to repeat once #1074 lands.
 ///
 /// The Lua and canonical labels mirror what
 /// `KeybindingCatalog` (GUI target) authors for the same
@@ -75,11 +86,13 @@ public enum DefaultKeybindings {
         for (digit, space) in numbered(spaces) {
             rows.append(moveSpaceRow(digit: digit, space: space))
         }
-        // Tier 3 — ⌃⌥⌘: resize, move-to-space-and-follow.
-        rows.append(contentsOf: resizeRows(step: resizeStep))
+        // Tier 3 — ⌃⌥⌘: move-to-space-and-follow.
         for (digit, space) in numbered(spaces) {
             rows.append(followSpaceRow(digit: digit, space: space))
         }
+        // Size — ⌥⌘, a base of its own rather than a rung on the
+        // positional ladder (#1075).
+        rows.append(contentsOf: resizeRows(step: resizeStep))
         // Toggles — mnemonic letters. Display sticky is the more
         // frequent scope, so it takes the lighter ⌃⌥ chord; the
         // broader global sticky escalates to ⌃⌥⇧.
@@ -132,38 +145,6 @@ public enum DefaultKeybindings {
             kind: .navigation,
             label: "Show shortcuts panel"
         )
-    }
-
-    /// The four ⌃⌥⌘ + arrow resize rows: the arrow points the
-    /// change — →/← grow/shrink width, ↑/↓ grow/shrink height —
-    /// by the configurable `resize.step` (#58).
-    private static func resizeRows(step: Int) -> [KeyBinding] {
-        [
-            KeyBinding(
-                combo: "control+option+command+right",
-                lua: "KiwiDesk.resize(\"x\", \(step))",
-                kind: .navigation,
-                label: "Grow width"
-            ),
-            KeyBinding(
-                combo: "control+option+command+left",
-                lua: "KiwiDesk.resize(\"x\", -\(step))",
-                kind: .navigation,
-                label: "Shrink width"
-            ),
-            KeyBinding(
-                combo: "control+option+command+up",
-                lua: "KiwiDesk.resize(\"y\", \(step))",
-                kind: .navigation,
-                label: "Grow height"
-            ),
-            KeyBinding(
-                combo: "control+option+command+down",
-                lua: "KiwiDesk.resize(\"y\", -\(step))",
-                kind: .navigation,
-                label: "Shrink height"
-            ),
-        ]
     }
 
     // MARK: - Per-space rows (one per tier, shared with top-up)

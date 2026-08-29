@@ -3523,7 +3523,8 @@ costs a pixel. There is nothing to buy by withholding one.
 
 **And the rule outranks the rows.** The seeded keymap is a tier
 system — `⌃⌥` moves the focus, `⌃⌥⇧` moves the window, `⌃⌥⌘`
-moves it and follows — so a list of unrelated rows asks the
+moves it and follows, and `⌥⌘` sizes it — so a list of unrelated
+rows asks the
 reader to memorise every chord separately when there is one
 scheme to learn. The step states the scheme. But it states it
 **derived from the live chords, never asserted**: every glyph on
@@ -5220,8 +5221,9 @@ user had no way to focus or move a window until they authored
 every combo. Now `Core.DefaultKeybindings` seeds a starter set on an
 **escalating Control-Option scheme** (#270): `⌃⌥` arrows focus /
 `⌃⌥⇧` arrows swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move
-/ move-and-follow, `⌃⌥⌘` arrows resize, `⌃⌥F` float, `⌃⌥S` display
-sticky, `⌃⌥⇧S` global sticky — with one guard everywhere: **only
+/ move-and-follow, `⌃⌥F` float, `⌃⌥S` display sticky, `⌃⌥⇧S`
+global sticky — plus, since #1075, `⌥⌘` `4`/`5`/`7`/`8` for size
+on a base of its own — with one guard everywhere: **only
 when no layer carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
 never destructive.
@@ -5235,7 +5237,9 @@ Command) suppresses it, so `⌃⌥` is the lightest text-safe chord
 (the earlier bare-`⌥` set, and Amethyst's `⌥⇧`, are not). Its only
 overlap is VoiceOver's `⌃⌥` modifier, inert unless VoiceOver is on
 and remappable to Caps Lock; `⌘⌥` was rejected because it collides
-with always-on system shortcuts (Force Quit, Dock, Hide/Minimize).
+with always-on system shortcuts (Force Quit, Dock, Hide/Minimize)
+— **narrowed by #1075 below**, which measures the base and opens
+it to digits under a stated boundary.
 Directions bind the arrow keys, which never compose a character on
 any layout. The set lives in the **base `gui.json`
 layers**, never a profile override (profiles stay
@@ -5292,6 +5296,124 @@ could not be left, because it prints nothing at all: without a
 fixed `⌧` in `ComboSymbols.specials` it fell through to the
 uppercased key NAME, rendering `KEYPADCLEAR` inside a compact
 chord (`KeypadKeysTests`).
+
+**Size is not a positional verb, so it takes a base of its own:
+`⌥⌘` (#1075).** The `⌃⌥` ladder above escalates over one idea —
+who the verb acts on — and resize never belonged to it. Focus,
+swap, move and follow all place a window in the flat array;
+resize changes a weight or a scroll-slot domain instead. Parking
+it on tier 3 made `⌘` mean two unrelated things at once — resize
+with an arrow, "and follow" with a digit — so the ladder could
+not be stated in one sentence. Moving it off restores that: `⌘`
+now means "and follow", full stop.
+
+The ladder is **two classes plus a residue**, and the residue is
+named here so the next author does not re-derive it: the
+positional verbs escalate `⌃⌥` → `⌃⌥⇧` → `⌃⌥⌘`, size lives on
+`⌥⌘`, and the **toggles** (`⌃⌥F`, `⌃⌥S`, `⌃⌥⇧S`) plus app chrome
+(`⌃⌥K`) are mnemonic letters on the base tier, where `⇧` means
+"the broader scope" rather than "act on the window". That second
+sense of `⇧` predates this change and survives it; the claim
+being made is only that `⌘` no longer carries two.
+
+The ergonomics ran backwards too. #1056 made resize the one verb
+a user HOLDS, and it sat on the heaviest chord in the scheme —
+three modifiers with `⌃` and `⌘` at opposite ends of the left
+cluster. `⌥⌘` is a single thumb roll, because the two keys are
+adjacent.
+
+**This amends #270's rejection of `⌘⌥` rather than contradicting
+it.** That ruling turned the base down for colliding with
+always-on system shortcuts, and named Force Quit, Dock and
+Hide/Minimize. The amendment is narrower than "those were wrong":
+they are real, and the boundary below keeps clear of them. What
+#270 did not do is enumerate the base, so the collisions were
+known by reputation rather than measured.
+
+**They are measured now, and the first draft of this layer was
+wrong because they were not.** Reading `com.apple.symbolichotkeys`
+on macOS 26.6 (2026-08-28), the chords whose modifiers are exactly
+`⌥⌘` are: `8` (Zoom on/off, id 15), `=` (Zoom in, 17), `-` (Zoom
+out, 19), `\` (23), `D` (Dock hiding, 52) and `space` (Finder
+search, 65). So **`⌥⌘8` is a digit and it is macOS's**, which an
+earlier `4`/`5` + `7`/`8` draft of this very layer had taken for
+Grow height — dead or double-firing for every user with Zoom's
+keyboard shortcuts on, and `RegisterEventHotKey` refuses it
+silently. Zoom's three are gated on Accessibility ▸ Zoom ▸ "Use
+keyboard shortcuts to zoom" and ship off, which is exactly why a
+reputation-based enumeration missed them. `SystemShortcuts.map`
+now carries the `⌥⌘` family, so the app warns instead of the
+prose promising; `SizeLayerSeedTests` holds every seeded row
+against it.
+
+**The boundary, stated as what it is: `⌥⌘` is free only where the
+register says so.** Never arrows — `⌥⌘←`/`→` is next/previous tab
+in Chrome, Safari and Terminal (observed 2026-08-28) — and a
+global Carbon hotkey pre-empts the frontmost app, so binding them
+would take tab switching away system-wide. Never `esc`, `space`,
+`D`, or the Zoom trio. A new default on this base is checked
+against `SystemShortcuts.map`, not against this paragraph.
+
+**And the criterion is applied to digits too, rather than assumed
+past them.** Arrows are excluded above on an *app*-level
+collision, so it would be dishonest to admit digits on the system
+list alone: `⌥⌘`+digit is Xcode's inspector-pane family, and a
+KiwiDesk global hotkey pre-empts it exactly as it would a
+browser's tab switch. The line drawn is one of reach, not of
+kind — tab switching by `⌥⌘←`/`→` is near-universal across
+browsers and terminals, while `⌥⌘`+digit is one professional tool
+whose users can rebind either side. That is a judgement, and it is
+recorded so it can be re-opened as one rather than rediscovered as
+a bug.
+
+**Why digits and not some other pair.** An arrow carries two
+readings on a tiled window — "which axis and sign" and "which way
+the edge moves" — and which edge is free depends on where the
+window sits in the array, so the same arrow grows a right-column
+window and shrinks a left-column one. Nothing about relabelling
+fixes that; the arrow shape creates it. Digits carry no
+directional claim, and they are the only key family that holds
+its physical position on every layout. `-`/`=` was considered and
+rejected twice over: on a German ISO board those positions print
+`ß` and `´` while the actual `-` and `+` legends live two keys
+apart, so the `+`/`−` mnemonic is a US-layout artifact — and the
+measurement above shows macOS owns that exact pair for Zoom
+anyway.
+
+Within a pair the higher digit grows. `1`/`2` and `4`/`5` form a
+2×2 block on a numeric keypad, `4`/`5` directly above `1`/`2`, so
+the pair that sits higher drives the dimension that grows upward
+— the only place a keyboard encodes a second axis without arrows,
+and the reason this binds digits at all. **#1074 landed the
+aliasing that makes those keypad keys reach these rows**: a keypad
+digit IS its number-row twin, so both physical keys fire them. The pairs are also separated by `3` on the
+number row, so a mistimed reach for one axis cannot land on the
+other (owner, 2026-08-28). Any pair spanning `5`/`6` was rejected:
+touch typing splits the row there.
+
+**What this costs, since the charter's job is to stop the
+re-litigation.** A user now learns a base *and* a ladder rather
+than one ladder, and the digit→axis map has no glyph relation to
+width or height — an arrow at least carried its own meaning,
+where `1`/`2` versus `4`/`5` must be memorised or read off the
+keypad block. The trade accepted: that cost is paid once, while
+the arrow's ambiguity was paid on every press from a column where
+the free edge ran the other way, and `⌘`'s double meaning was paid
+by every reader of the scheme.
+
+**No migration, deliberately.** The seed guard above fires only
+when no layer carries a single binding, so every existing config
+blocks it and `digitTopUp` is strictly additive. Nobody is moved:
+an existing install keeps `⌃⌥⌘`+arrows for as long as it lives,
+and `ShortcutsReferenceBuilder` renders the live layer rather
+than the defaults, so its Shortcuts panel stays accurate. The
+cost, accepted rather than discovered: there is no
+restore-to-defaults affordance in the Keybindings editor, so an
+existing user who WANTS the new map hand-edits four rows, and
+prose that names a chord has to say which population it means —
+which is why the resize workaround in
+[Accepted limitations](accepted-limitations.md) points at the
+`⌃⌥K` panel instead of naming one (`SizeLayerSeedTests`).
 
 **The seed fires whenever `init.lua` declares no managed
 _settings_ — not only when `init.lua` is absent (#354).** The

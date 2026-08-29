@@ -24,6 +24,20 @@ editing here:
   for each of those is `docs/design-decisions.md` ▸ "The keypad's
   ten digits ARE their number-row twins" — do not restate it here
   (`KeypadKeysTests`).
+- **A chord's admissibility is `SystemShortcuts.map`'s to state,
+  never prose's (#1075).** That map is the one derivation the
+  conflict ring and the Settings keyboard board already share
+  (`KeyboardCensus.reservedKeys`), so a modifier base newly
+  opened to bindings adds that base's reserved chords THERE in
+  the same change — `⌥⌘` did, when size took it. **Enumerate a
+  base by reading `com.apple.symbolichotkeys`, not from
+  reputation, and date what you read:** `⌥⌘`'s Zoom trio (`8`,
+  `-`, `=`) ships gated on an Accessibility setting and OFF,
+  which is precisely how a reputation-based list misses it, and
+  `RegisterEventHotKey` refuses a taken chord by returning nil
+  with nothing said. The product ruling is
+  `docs/design-decisions.md` ▸ "Size is not a positional verb"
+  (`SizeLayerSeedTests`).
 - **KiwiDesk's own windows are discriminated per WINDOW, never
   per process (#678 item 18).** `shouldForceFloat`'s own-process
   arm reads the tiling mark
