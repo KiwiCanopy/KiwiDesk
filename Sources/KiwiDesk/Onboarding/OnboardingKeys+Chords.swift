@@ -1,18 +1,10 @@
 import Foundation
 import KiwiDeskCore
 
-/// How `OnboardingKeys` turns a keymap's combos into the chord a
-/// row draws — the fallback ladder, and nothing else.
-///
-/// Split out of `OnboardingKeys.swift` when #1016 pushed that
-/// file past AGENTS.md §2.1's ceiling. These are `static` rather
-/// than `private` only because Swift scopes `private` to the
-/// FILE: they are the enum's internals, and a call site outside
-/// this tree is a review finding rather than a supported route.
+/// Formats keymap combos into structured chords for onboarding (#1016).
 @MainActor
 extension OnboardingKeys {
-    /// Turn 15's reading order, which is also the arrow
-    /// row's.
+    /// Directional arrow reading order.
     private static let directions = [
         "left", "down", "up", "right",
     ]
@@ -36,14 +28,8 @@ extension OnboardingKeys {
         return collapsed(combos) ?? listed(combos)
     }
 
-    /// `⌃⌥ 1–5`: the shared modifiers, then the first and last
-    /// bound digit. A single space renders as one digit, never a
-    /// range of one.
-    ///
-    /// A keymap that cannot be written as a range falls back the
-    /// way the arrows path already does — `collapsed` first, so
-    /// ten spaces render `⌃⌥ 1 2 4 5 …` rather than ten full
-    /// chords stacked in a 560 pt window.
+    /// Formats space digit chords as a range (e.g. `⌃⌥ 1–5`) or
+    /// collapsed list.
     static func digits(
         layer: KeyLayer,
         command: String,
@@ -65,22 +51,7 @@ extension OnboardingKeys {
         guard combos.count > 1 else {
             return .shared(modifiers, keys: head)
         }
-        // A range may only be written where the digits ACTUALLY
-        // run unbroken from the first to the last. `combos` is
-        // compacted, so an unbound space in the middle vanishes
-        // and "1–5" would name a chord the user does not have —
-        // the same lie the arrows path refuses (code review,
-        // 2026-08-11). It also catches the tenth space, which
-        // `DefaultKeybindings` maps to `0`: "1–0" runs backwards
-        // and is not a range at all.
-        //
-        // Contiguity is the WHOLE test. An earlier cut also
-        // required a chord per live space, which suppressed a
-        // range that was true — five spaces with only 1…3 bound
-        // renders "⌃⌥ 1–3", an honest statement about the chords
-        // the user has. Nothing watched that clause, and removing
-        // it reds nothing, because it forbade nothing the
-        // invariant forbids (guard-prover, 2026-08-11).
+        // Require contiguous digits sharing modifiers to format as a range.
         guard sameModifiers(combos),
             let run = contiguousDigits(combos)
         else {
@@ -161,17 +132,7 @@ extension OnboardingKeys {
         return String(full.dropFirst(modifiers.count))
     }
 
-    /// One chord, split the way the multi-key families split
-    /// theirs: the modifier set, then the key.
-    ///
-    /// The SPACE between them is `OnboardingChord.glyphs`' now,
-    /// which is why this no longer writes one — `ComboSymbols
-    /// .render` packs them tight (`⌃⌥K`), which is right in a
-    /// recorder field and wrong in a list where every other row
-    /// reads `⌃⌥ 1–5`, and the odd one out looked like a
-    /// different kind of chord (owner, on device, 2026-08-12).
-    /// Held there, that spacing is one rule rather than a
-    /// courtesy each family remembers.
+    /// Splits a single chord into shared modifiers and key glyph.
     static func single(
         combo: String?
     ) -> OnboardingChord? {
@@ -187,9 +148,7 @@ extension OnboardingKeys {
         return .shared(parsed.modifiers, keys: key)
     }
 
-    /// The same `ComboSymbols` + layout path the editor and the
-    /// shortcuts panel use, so a chord is pixel-identical
-    /// wherever the app draws it.
+    /// Renders combo string with layout glyphs via `ComboSymbols`.
     static func rendered(combo: String?) -> String? {
         guard let combo, !combo.isEmpty else { return nil }
         guard let parsed = KeyCombo.parse(combo) else {

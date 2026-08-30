@@ -8,9 +8,7 @@ func runCLI(_ arguments: [String]) -> Int32 {
 
     switch command {
     case let help where CLIHelp.verbs.contains(help):
-        // Answered from this binary's own `APIReference`, so
-        // `kiwidesk help focus` works whether or not the app is
-        // running (#1033) — `CLIHelp` argues the ruling.
+        // Answered locally from binary's APIReference (#1033).
         return CLIHelp.run(arguments)
     case "--version", "-v":
         print(KiwiDeskVersion.displayString)
@@ -41,17 +39,11 @@ private func runService(_ arguments: [String]) -> Int32 {
         print("unknown service command: \(arguments[2])")
         return 1
     }
-    // Real launchctl failures exit non-zero and go to stderr per
-    // the CLI's stream contract (message on stderr, data on
-    // stdout); the ordinary already-running / not-running cases
-    // stay 0 on stdout (#328).
+    // Errors go to stderr with non-zero exit; status messages to
+    // stdout (#328).
     if outcome.ok {
         print(outcome.message)
-        // The login item is a second, independent auto-start path
-        // (#575). Surface the overlap here — the CLI is the
-        // composition root that knows both verbs, so the two Core
-        // subsystems stay decoupled (`ServiceManager` never learns
-        // about `SMAppService`).
+        // Surface independent login-item auto-start state (#575).
         printLoginItemOverlap(for: arguments[2])
     } else {
         FileHandle.standardError.write(

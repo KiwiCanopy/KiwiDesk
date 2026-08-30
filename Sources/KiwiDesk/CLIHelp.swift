@@ -1,29 +1,11 @@
 import Foundation
 import KiwiDeskCore
 
-/// `kiwidesk help [name]` and `kiwidesk list_commands [name]`
-/// (#1033).
-///
-/// **These two are answered locally, not over the socket**, and
-/// that is the ruling the issue asked for. The listing describes
-/// the API surface a binary was built with — static data, no app
-/// state in it — and `APIReference` is compiled into this same
-/// binary, so a round trip would buy nothing and would make
-/// `kiwidesk help focus` fail exactly when a user reaches for it:
-/// while the app is not running. `--version` is answered the same
-/// way for the same reason.
-///
-/// The cost is honest and worth naming: if an older KiwiDesk is
-/// running while a newer `kiwidesk` is on `$PATH`, the listing
-/// describes the newer one. They ship as one binary, so that is
-/// a mismatched install rather than a mode of operation.
-///
-/// The listing itself comes from `APIReference.helpResponse`,
-/// the same function the dispatcher's `help` case returns — this
-/// renders it, and never re-derives it (`CLIHelpSeamTests`).
+/// Answers `kiwidesk help [name]` and `kiwidesk list_commands [name]`
+/// locally, rendering APIReference data and never re-derives it
+/// (#1033, CLIHelpSeamTests).
 enum CLIHelp {
-    /// The verbs this answers. `help` also arrives spelled as a
-    /// flag, which is how a CLI user asks the same question.
+    /// Verbs answered by local CLI help.
     static let verbs: Set<String> = [
         "help", "--help", "-h", "list_commands",
     ]
@@ -39,9 +21,7 @@ enum CLIHelp {
         let wantsJSON = rest.contains(jsonFlag)
         let topic = rest.first { !$0.hasPrefix("-") }
 
-        // Say so rather than ignoring it: silently dropping
-        // `--jsn` printed the usage block and exited 0, which
-        // reads as "that worked" to a script.
+        // Reject unknown flags explicitly.
         let unknown = rest.filter {
             $0.hasPrefix("-") && $0 != jsonFlag
         }
@@ -52,9 +32,7 @@ enum CLIHelp {
             return 1
         }
 
-        // No topic and no `--json` on the front-door spelling:
-        // the usage block, which is what a bare `kiwidesk help`
-        // has always printed and what a first-time reader wants.
+        // Print usage block when invoked without topic or JSON flag.
         if topic == nil, !wantsJSON, verb != "list_commands" {
             print(cliUsage)
             return 0
@@ -74,9 +52,7 @@ enum CLIHelp {
         return 0
     }
 
-    /// JSON when asked for it or when stdout is not a terminal —
-    /// a pipe is a script, and scripts already parse this
-    /// command's JSON. A terminal gets the grouped text.
+    /// Returns formatted help string, using JSON for pipes or explicit flag.
     private static func rendered(
         _ data: JSONValue,
         topic: String?,
@@ -84,8 +60,7 @@ enum CLIHelp {
     ) -> String {
         let asJSON = json || !CLIOutput.stdoutIsTerminal
         if asJSON {
-            // Pretty on a terminal only, as #1035 ruled: a pipe
-            // keeps the compact line scripts already parse.
+            // Pretty-print JSON for terminal; compact for pipes (#1035).
             return CLIOutput.render(
                 data,
                 pretty: CLIOutput.stdoutIsTerminal

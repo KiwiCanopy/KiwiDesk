@@ -2,11 +2,6 @@ import Foundation
 import KiwiDeskCore
 
 /// Renders the API listing for a terminal (#1033).
-///
-/// English, like every other CLI string (core-boundaries.md):
-/// Core returns the structure, and this is the CLI narrating it.
-/// Pure string work over `APIEntry`, so a test can read what a
-/// user would see without owning a terminal.
 enum CLIHelpText {
     /// The whole surface: one block per group, each command's
     /// call signature aligned against its summary.
@@ -73,9 +68,8 @@ enum CLIHelpText {
             ? entry.name : "\(entry.name) \(arguments)"
     }
 
-    /// `<space> [mode]` — required in angle brackets, optional
-    /// in square ones, the shape a reader already knows from
-    /// every other CLI.
+    /// Formats argument names with angle (<required>) or square ([optional])
+    /// brackets.
     static func argumentList(of entry: APIEntry) -> String {
         entry.record.arguments
             .map {
