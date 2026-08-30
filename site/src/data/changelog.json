@@ -2,6 +2,29 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.1.1",
+      "tag": "v1.1.1",
+      "date": "2026-08-30",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.1.1",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.1.1/KiwiDesk-1.1.1.dmg",
+      "summary": "A small patch about focus: one fix for the moment your Mac wakes, one for the keyboard path in Settings. The rest is housekeeping — the site now names the sticky feature what Settings names it, a localization tool refuses a half-redirect it once obeyed silently, and a broad comment trim landed across the Settings tree.",
+      "sections": [
+        {
+          "title": "Waking up",
+          "items": [
+            "**Shortcuts work right after your Mac wakes.** Waking or unlocking used to restore your focused window on screen — ring, bars, everything — while macOS quietly kept another app in front, so every shortcut was denied until a rescue click produced a real focus change. The wake restore now actually hands that window the focus (and when it is gone, the window genuinely in front), and if macOS refuses the handoff, the first key press heals it instead of dying."
+          ]
+        },
+        {
+          "title": "The Settings keyboard path",
+          "items": [
+            "**Jumping between areas keeps the keyboard with you.** Following a cross-reference link, or picking a search result that lives in another area, left keyboard focus stranded at the top of the window. It now lands on the ← Home chip, exactly as opening an area from Home always did, so Tab keeps walking from where you are. (As before, full keyboard access needs System Settings ▸ Keyboard ▸ Keyboard navigation turned on.)"
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.1.0",
       "tag": "v1.1.0",
       "date": "2026-08-29",
