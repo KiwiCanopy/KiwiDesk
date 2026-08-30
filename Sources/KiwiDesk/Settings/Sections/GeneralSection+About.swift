@@ -1,28 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// General ▸ About: the brand block, the version string and
-/// the support link. Split out of `GeneralSection` when the
-/// turn-16b skin took that file past the §2.1 ceiling — it is
-/// the one part of General that is presentation with no
-/// settings in it at all.
+/// General ▸ About section displaying brand, version, notes, guide, and
+/// support links (#68, #570, #1019).
 extension GeneralSection {
-    /// About (#68 §3.9): the wordmark as the canonical logo +
-    /// name placement, version and the discreet support link
-    /// beneath. Falls back to the pre-logo glyph row when the
-    /// bundled resource is missing.
     var aboutSection: some View {
         SettingsSection(SettingsCatalog.general.aboutCard) {
             VStack(spacing: 10) {
                 aboutBrand
-                // The version and what changed in it are ONE
-                // topic — "what you have" and "what arrived" —
-                // so they sit closer to each other than either
-                // does to the support ask below, which is an
-                // unrelated request and reads best as the card's
-                // last word (ui-designer, 2026-08-17). Uniform
-                // spacing made all three equidistant and said
-                // none of that.
                 VStack(spacing: 4) {
                     Text(KiwiDeskVersion.displayString)
                         .font(.caption)
@@ -37,29 +22,7 @@ extension GeneralSection {
         }
     }
 
-    /// What changed in the version above it (#570).
-    ///
-    /// Deliberately NOT the ask row's shape: its symbols and
-    /// `.callout` mark this card's ask, and an informational
-    /// link drawn to match turns a personal plea into a links
-    /// row, after which nothing on screen says what the maker
-    /// actually wants. So this one takes the plainer
-    /// informational treatment — the caption's size, no symbol —
-    /// and the asymmetry is the point rather than an oversight
-    /// (ui-designer, 2026-08-17; the ask widened to a pair
-    /// 2026-08-26 without touching this rule).
-    ///
-    /// No `.foregroundStyle` here on purpose: `linkHover()`
-    /// already renders secondary at rest and lifts to primary on
-    /// hover, so a foreground of our own would either fight it or
-    /// be overwritten.
-    ///
-    /// A plain outbound `Link` rather than an in-app notes
-    /// reader. `gui.md`'s "a picture whose object is not the
-    /// draft goes in a sheet" does **not** reach this: its scope
-    /// is content this app renders from data it owns, and release
-    /// notes are neither — GitHub already renders them, with
-    /// formatting and images a native sheet would not reproduce.
+    /// Link to GitHub release notes (#570).
     @ViewBuilder var releaseNotesLink: some View {
         Link(destination: SupportLinks.releases) {
             Text(
@@ -72,38 +35,7 @@ extension GeneralSection {
         .linkHover()
     }
 
-    /// The app's PERMANENT route to the written guide (#1019).
-    ///
-    /// The tour's closing card and Home's first-run banner both
-    /// point at it, and both are one-shot: the tour never comes
-    /// back on its own, and the banner retires for good on
-    /// dismiss or on the first save. So a user who dismissed the
-    /// welcome — or simply saved one change — had no route to the
-    /// guide anywhere in the app, which is the gap #1019 is
-    /// titled after rather than a nicety on top of it
-    /// (`ui-designer`, 2026-08-26). This is the half that still
-    /// works on day 30.
-    ///
-    /// Drawn as `releaseNotesLink` is, not as the ask row is:
-    /// that row's symbols and `.callout` are this card's ask,
-    /// and the asymmetry is deliberate (`askRow`'s own doc).
-    /// A third informational link takes the plain treatment.
-    ///
-    /// Its own line rather than inside the version group above:
-    /// that group is "what you have" and "what arrived", and the
-    /// guide is neither.
-    ///
-    /// **It carries a catalog declaration, which is the half that
-    /// makes it reachable.** About is two clicks and a scroll
-    /// from Home; the guide is the one thing in this window a
-    /// stuck reader looks for BY NAME, and `SettingsSearchIndex`
-    /// derives its rows from the census plus the catalog — so
-    /// without the declaration, searching "Guide" (or "Handbuch")
-    /// found nothing at all. Placement was never the problem
-    /// (`ui-designer`, 2026-08-26): Home's grid is destinations
-    /// resolved through one offer predicate and has no
-    /// representation for a URL, so a card here would have to
-    /// invent a second navigation model.
+    /// Link to user guide, registered with search index (#1019).
     @ViewBuilder var guideLink: some View {
         Link(destination: SupportLinks.guide) {
             Text(SettingsCatalog.general.guideLink.text)
@@ -112,23 +44,10 @@ extension GeneralSection {
         .buttonStyle(.plain)
         .font(.caption)
         .linkHover()
-        // Its own scroll target and wash: a search for "guide"
-        // has to land ON the link, not merely on the card that
-        // contains it. Self-anchoring, because there is no
-        // header/card split here to place the two halves across.
         .searchAnchored(SettingsCatalog.general.guideLink)
     }
 
-    /// The card's last word: the ask, a PAIR since the 1.1
-    /// launch (owner, 2026-08-26). The star is the ask a free
-    /// MIT tool lives on and costs the reader nothing; Ko-fi
-    /// stays beside it for the reader who wants to give more.
-    /// One row at one weight rather than two stacked pleas —
-    /// stacked they would read as a fundraising block, and the
-    /// informational links above keep the plain treatment for
-    /// exactly that contrast (the 2026-08-17 asymmetry ruling,
-    /// carried by `releaseNotesLink`'s doc, is about ask versus
-    /// information, not about the ask's arity).
+    /// GitHub star and Ko-fi sponsor links.
     @ViewBuilder var askRow: some View {
         HStack(spacing: 14) {
             starLink
@@ -136,9 +55,6 @@ extension GeneralSection {
         }
     }
 
-    /// The star half of the ask. A bare SwiftUI `Link` at the
-    /// URL, as `guideLink` is — its label IS the destination, so
-    /// no sentence frame is owed.
     @ViewBuilder var starLink: some View {
         Link(destination: SupportLinks.gitHub) {
             HStack(spacing: 4) {
@@ -157,7 +73,6 @@ extension GeneralSection {
         .linkHover()
     }
 
-    /// The sponsor half of the ask.
     @ViewBuilder var supportLink: some View {
         Link(destination: SupportLinks.koFi) {
             HStack(spacing: 4) {
@@ -176,24 +91,9 @@ extension GeneralSection {
         .linkHover()
     }
 
-    /// The wordmark is artwork, not text, so its ink is baked at
-    /// rasterization time rather than tinted at runtime: we ship
-    /// two masters — forest lettering for light, mist-green for
-    /// dark — and swap by `colorScheme`, so no backing card is
-    /// needed and the mark melts into the pane in both. The
-    /// **symbol** is identical in the two (#479); only the
-    /// lettering is themed, and `BrandMasterParityTests` pins
-    /// that.
-    ///
-    /// The fallback is the mark at 42 pt beside the name — the
-    /// About block's size in the #678 §3 mark inventory, and the
-    /// prototype's whole construction there, since it ships no
-    /// wordmark asset. It is a fallback rather than the primary
-    /// because the wordmark carries the same mark AND the
-    /// lettering as one piece of artwork; drawing both would put
-    /// two kiwis in one block. The generic `rectangle.3.group`
-    /// this replaces was the one brand surface in the app with no
-    /// brand in it.
+    /// Wordmark artwork with dynamic dark/light master and fallback
+    /// glyph (#479, `BrandMasterParityTests`). The fallback mark is
+    /// 42 pt — the About block's size in the #678 §3 mark inventory.
     @ViewBuilder var aboutBrand: some View {
         if let wordmark {
             Image(nsImage: wordmark)
@@ -223,9 +123,6 @@ extension GeneralSection {
         }
     }
 
-    /// The dark master falls back to the light one if it is
-    /// ever missing — a readable-but-imperfect degrade beats
-    /// showing nothing.
     var wordmark: NSImage? {
         colorScheme == .dark
             ? BrandAssets.wordmarkDark ?? BrandAssets.wordmark

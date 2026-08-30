@@ -1,58 +1,20 @@
 import KiwiDeskCore
 
-/// The static settings search index (#678 turn 11, spec 11a):
-/// ONE row per census `SettingKey`, never per instance — a
-/// keybinding family or a per-space override is one setting and
-/// one result, so the index is the same fixed list whatever the
-/// user's config holds. Built once per locale from the census
-/// and matched by synchronous substring scan; everything a
-/// match needs (label, synonyms, breadcrumb, anchor) is resolved
-/// at build time, so the match path allocates nothing and asks
-/// nothing beyond this array.
-///
-/// Enrichment — the current value, gate state, the mode tag's
-/// resolution — deliberately does NOT live here: it is computed
-/// per visible row after the result list paints
-/// (`SettingsSearchRow`), from the draft in memory. Nothing on
-/// the search path touches AX, the session, or the filesystem.
+/// Static settings search index row: ONE row per census
+/// `SettingKey`, never per instance (#678). Everything a match
+/// needs is resolved at build time — nothing on the search path
+/// touches AX, the session, or the filesystem.
 struct SettingsSearchIndexRow: Identifiable, Equatable {
-    /// The census setting this row answers for — or nil for a
-    /// catalog-only anchor row: a Layout Defaults mode tab, a
-    /// drawer title, the Bars switch chips. Those are
-    /// NAVIGATION surfaces rather than settings (no value, no
-    /// tier of their own), but a search that cannot find
-    /// "Monocle" or "Per-edge…" would answer less than the
-    /// sidebar-era search did. Which controls they are is
-    /// derived — every catalog control no census label key
-    /// claims — never a hand-kept list.
+    /// nil for a catalog-only anchor row (a mode tab, a drawer
+    /// title) — which controls those are is DERIVED, every catalog
+    /// control no census label key claims, never a hand-kept list.
     let key: SettingKey?
-    /// Localized label, resolved at build through
-    /// `SettingsCensusLabel` — the diff rows' label authority,
-    /// so search and the draft popover cannot name one row two
-    /// ways.
     let label: String
-    /// Match-only English terms (`SettingsSearchSynonyms`) —
-    /// never displayed, so they stay code data rather than
-    /// catalog keys.
     let synonyms: [String]
     let destination: SettingsDestination
-    /// Where committing the row lands: the catalog control that
-    /// carries the row's label key when one exists (surface +
-    /// scroll id + drawer auto-expand come free), else the bare
-    /// destination. The #277 catalog covers a fraction of the
-    /// census, so MOST census rows land destination-only today
-    /// and gain their scroll anchor as the catalog fills; the
-    /// per-destination anchor-less counts are pinned in
-    /// `SettingsSearchIndexTests`, so a label-key rename that
-    /// silently strips an existing match reds.
+    /// Navigation anchor pinned in `SettingsSearchIndexTests` (#277).
     let anchor: SettingsAnchor
-    /// Breadcrumb above the label, outermost first — the
-    /// destination, the local surface when one must be
-    /// selected, the drawer the row hides inside.
     let path: [String]
-    /// `.atRest` for catalog-only anchor rows — a tab or drawer
-    /// title is on screen (or one honest click away) whenever
-    /// its destination is.
     let tier: SettingTier
     var id: String {
         key.map(\.id) ?? "control/\(anchor.anchor ?? "none")"
@@ -61,19 +23,13 @@ struct SettingsSearchIndexRow: Identifiable, Equatable {
 
 @MainActor
 enum SettingsSearchIndex {
-    /// The tiers with a Settings surface — the index's
-    /// membership line. `.luaOnly`, `.internalOnly` and
-    /// `.outsideSettings` rows have no row on any screen, so a
-    /// result for one would land nowhere.
+    /// The membership line — the other tiers have no row on any
+    /// screen, so a result for one would land nowhere.
     static let indexedTiers: Set<SettingTier> = [
         .atRest, .showMore, .immediate,
     ]
 
-    /// Labels resolve per locale and the census is static, so
-    /// the built index is a pure function of the locale.
-    /// `LocaleScopedRoot` rebuilds the search UI on a language
-    /// switch, and the rebuilt rows read the new locale's cache
-    /// entry.
+    /// Locale-keyed search index cache.
     private static var cache = [String: [SettingsSearchIndexRow]]()
 
     static func rows() -> [SettingsSearchIndexRow] {
@@ -86,35 +42,16 @@ enum SettingsSearchIndex {
         return built
     }
 
-    /// Whether `key` is a search row on THIS machine. Beyond the
-    /// tier line, two exclusions, both data-driven:
-    ///
-    /// - A `.dynamic`-labelled key composes its text per
-    ///   instance (space names, per-instance keybinding rows),
-    ///   so it has no static label to match or show; its
-    ///   *family* stays findable through its container and
-    ///   destination. Which keys these are is the census's
-    ///   `SettingLabel.dynamic`, never a hand-kept list here.
-    /// - A row gated on `.liquidGlassUnavailable` is HIDDEN on
-    ///   machines that cannot render it (#390) — search must not
-    ///   return a row that cannot exist on this machine, so the
-    ///   index asks the same one predicate the renderer does
-    ///   (`AppBarStyle.glassAvailable`).
+    /// Tests whether key should be indexed on this machine. The
+    /// exclusions are data-driven: `.dynamic` labels have no
+    /// static text, glass-gated rows ask the renderer's own
+    /// predicate (#390), and a `[space]` key is an INSTANCE —
+    /// reachable as a link, never a result (spec item 11).
     static func indexes(_ key: SettingKey) -> Bool {
         let placement = key.placement
         guard placement.area != nil,
             indexedTiers.contains(placement.tier),
             SettingsCensusLabel.label(for: key) != nil,
-            // A per-space key (`…[space]…` in the census id) is
-            // an INSTANCE of a setting, and overrides are
-            // reachable as links, never as results (spec item
-            // 11) — its editor is the per-space popover, which
-            // opens from a row button and is exactly the
-            // surface a reveal cannot land on
-            // (docs/accepted-limitations.md). Indexing one
-            // sends the user to an area where the label
-            // appears nowhere (owner, 2026-08-10: a Spaces
-            // "Spalten" result with no findable field).
             !key.id.contains("[space]")
         else { return false }
         let conditions =
@@ -124,10 +61,8 @@ enum SettingsSearchIndex {
         return true
     }
 
-    /// Destination order first (`thisProfile` + `wholeApp`, the
-    /// order the old one-per-destination list already answered
-    /// in); within a destination the census rows in declaration
-    /// order, then the catalog-only anchor rows.
+    /// Builds index in destination order: census settings followed by
+    /// catalog-only anchors.
     private static func build() -> [SettingsSearchIndexRow] {
         let all = SettingKey.allCases.filter(indexes)
         let ordered =
@@ -150,12 +85,9 @@ enum SettingsSearchIndex {
         }
     }
 
-    /// The catalog-only anchor rows: every control in the
-    /// destination's catalog that no census row landed on — the
-    /// mode tabs, drawer titles and switch chips the census does
-    /// not model as settings. Derived from the two lists, so a
-    /// control is a search row exactly once however it is
-    /// declared.
+    /// Catalog controls no census row landed on, derived from the
+    /// two lists so a control is a search row exactly once however
+    /// it is declared.
     private static func extras(
         in destination: SettingsDestination,
         _ entries: [SettingsIndexEntry],
@@ -227,12 +159,7 @@ enum SettingsSearchIndex {
         )
     }
 
-    /// The anchor-less fallback for LAYOUT keys: their census
-    /// ids are `settings.<mode>.…`, so the tab a row belongs to
-    /// is derivable from the key alone — a "Columns" hit with
-    /// no catalog control still opens the Grid tab instead of
-    /// dumping the user on whatever tab renders first (owner
-    /// eyeball, 2026-08-10). Every other key stays `.main`.
+    /// Derives layout tab surface for anchorless layout mode settings.
     private static func fallbackSurface(
         for key: SettingKey
     ) -> SettingsSurface {
@@ -250,8 +177,6 @@ enum SettingsSearchIndex {
 }
 
 extension SettingsSurface {
-    /// The surface's own user-facing name, reusing the exact
-    /// tuples of the controls that select it, or nil for `.main`.
     @MainActor var displayName: String? {
         switch self {
         case .main: return nil

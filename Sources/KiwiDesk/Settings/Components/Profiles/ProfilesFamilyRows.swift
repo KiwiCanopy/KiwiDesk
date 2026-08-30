@@ -1,59 +1,23 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// One instance a Profiles census key expands into (#678 Phase 3,
-/// turn 13a).
-///
-/// Every container in this area draws a row per live thing rather
-/// than a row per setting, so the instance carries the thing's
-/// identity — which is what a guard can compare, and what set
-/// equality over `SettingKey` alone cannot see.
+/// Instance representing expanded row in Profiles census (#678).
 enum ProfilesRowInstance: Hashable {
-    /// One saved profile, by name.
     case profile(String)
-    /// One native macOS Desktop, by Mission Control number.
     case desktop(Int)
-    /// One built-in preset, by its stable English
-    /// `StandardLayout.name` (never the localized display name —
-    /// identity must not move with the GUI language).
+    /// By the stable English `StandardLayout.name` — identity must
+    /// not move with the GUI language.
     case preset(String)
 }
 
-/// Expands a Profiles census key into the rows it renders (#678
-/// Phase 3, turn 13a).
-///
-/// The census records settings, not rows: `profilesLoad` is one
-/// case and puts one button on every saved profile's row,
-/// `profileBindings` one case and one row per Desktop. That is
-/// the same asymmetry the Shortcuts area met first, and it needs
-/// the same second seam — `ProfilesRowOrder` answers *where does
-/// this key sit*, this answers *what does it draw*, and
-/// `ProfilesCensusRenderTests` pins each against the census
-/// independently.
-///
-/// The switch is exhaustive over `ProfilesKey` on purpose: a key
-/// added to the census fails to compile here until it is given an
-/// expansion, which is a stronger net than the render guard alone.
-///
-/// A key with no rows of its own returns `nil` — and WHICH keys
-/// may answer it is enumerated in `ProfilesCensusRenderTests`
-/// rather than counted here, because a renderer reading
-/// `rows(for:) ?? []` cannot tell a key that never draws from one
-/// whose rows disappeared.
+/// Expands Profiles census keys into rendered instances (#678,
+/// `ProfilesCensusRenderTests`).
 struct ProfilesFamilyRows {
-    /// The saved profiles, unordered — `orderedProfiles` is what
-    /// puts them in display order, and it is the same call the
-    /// list makes.
     let profiles: [ProfileSummary]
-    /// The MAIN screen's native Desktops, by Mission Control
-    /// number (#888) — the ones a binding can fire on. Global
-    /// numbers, possibly non-contiguous; never a count, which
-    /// could only mean `1...n` and would renumber them.
+    /// Main display Mission Control desktops (#888).
     let mainDesktops: [Int]
-    /// Desktop numbers a binding already names, so one to a
-    /// now-absent Space stays listed.
+    /// Desktops currently bound by settings.
     let boundDesktops: [Int]
-    /// The presets the area offers, in catalog order.
     let presets: [StandardLayout]
 
     func rows(for key: SettingKey) -> [ProfilesRowInstance]? {
@@ -61,43 +25,9 @@ struct ProfilesFamilyRows {
         return rows(for: family)
     }
 
-    /// The saved profiles the list draws, in display order: the
-    /// ones matching the connected displays first — the card's
-    /// caption promises one of them loads — then the ones whose
-    /// screen COUNT matches, then by screen count, then by name,
-    /// so the order is stable while nothing is plugged or
-    /// unplugged.
-    ///
-    /// The count key exists because the first key is a
-    /// FINGERPRINT match and the third is a bare number, and a
-    /// profile can be neither: on a two-screen desk a saved
-    /// two-screen profile for different monitors sorted behind
-    /// every one-screen profile, since 1 < 2 — under a caption
-    /// promising one of them loads. It sits SECOND rather than
-    /// first because a fingerprint match is the stronger claim.
-    ///
-    /// Where the two keys could disagree — a hand-edited file
-    /// whose sets are of different sizes, `monitorCount` being
-    /// the FIRST set's — it does not matter: key one dominates,
-    /// so a fingerprint match leads whatever the count says.
-    ///
-    /// Both flags are derived in `refreshProfiles` from one read
-    /// of the live displays, which is why this stayed a pure
-    /// function of its summaries: passing the connected count in
-    /// made "the two answer about one moment" a comment at the
-    /// call site rather than a property of the data, and left a
-    /// second `displays.count` read one edit away.
-    ///
-    /// The ORDER lives here, with the expansion, rather than in
-    /// the view, so the rule is stated once and is reachable
-    /// from a test (`ProfilesFamilyRowsTests`); that the views
-    /// actually call it is
-    /// `ProfilesGateWiringTests.viewsConsultTheFamilySeam`.
-    /// Note which guard holds which: `rows(for:)` and its census
-    /// parity are held over fixtures, and it is this static half
-    /// the screen consumes — including
-    /// `ProfilesSection.neighbourAfterDeleting`, whose focus
-    /// destination IS this order.
+    /// Sorts profiles by live display match, screen count match, count, and
+    /// name
+    /// (`ProfilesFamilyRowsTests`, `ProfilesGateWiringTests`).
     static func orderedProfiles(
         _ summaries: [ProfileSummary]
     ) -> [ProfileSummary] {
@@ -114,19 +44,9 @@ struct ProfilesFamilyRows {
         return summaries.sorted { key($0) < key($1) }
     }
 
-    /// The Desktops the bindings card lists: the MAIN screen's —
-    /// the ones a binding can fire on (#888) — plus any number
-    /// already bound, so a binding on another screen's Desktop,
-    /// or on a now-absent one, stays visible and clearable rather
-    /// than silently lost.
-    ///
-    /// `onMain` carries GLOBAL Mission Control numbers and may be
-    /// non-contiguous: depending on the display order the main
-    /// screen's Desktops can be 3 and 4. That is why this takes
-    /// the numbers rather than a count — a count could only mean
-    /// `1...n`, which would renumber them, and a row reading
-    /// "Desktop 1" that wrote a binding on another Desktop is
-    /// worse than the over-offer this replaced (owner QA,
+    /// Union of main screen desktops and already-bound desktops
+    /// (#888). Takes the NUMBERS, never a count — main's Desktops
+    /// can be 3 and 4, and `1...n` would renumber them (owner QA,
     /// 2026-08-18).
     static func desktops(
         onMain: some Collection<Int>,
@@ -135,13 +55,7 @@ struct ProfilesFamilyRows {
         Array(Set(onMain).union(bound)).sorted()
     }
 
-    /// The presets a screen count offers, in catalog order.
-    ///
-    /// `sizes` are the LIVE screens, which the `Starter` entry is
-    /// derived from (#678 Phase 4 pass 11). It follows that the
-    /// drawer below offers no Starter at all: a count you are not
-    /// running has no screen shapes to choose layouts from, so
-    /// "For other setups" is the workflow layouts alone.
+    /// Presets matching screen count, including starter derivation (#678).
     static func presets(
         forScreens screens: Int,
         sizes: [CGSize]
@@ -149,8 +63,7 @@ struct ProfilesFamilyRows {
         StandardProfiles.layouts(for: screens, sizes: sizes)
     }
 
-    /// Every preset for a count that is NOT connected — the
-    /// "For other setups" drawer's contents.
+    /// Presets excluding current connected screen count.
     static func presets(
         excludingScreens screens: Int
     ) -> [StandardLayout] {
@@ -159,19 +72,10 @@ struct ProfilesFamilyRows {
         }
     }
 
-    /// Both halves of the seam answer from ONE derivation.
-    ///
-    /// The static helpers ABOVE are what the three containers
-    /// call; this expansion is what the census guards read, and
-    /// it reaches those same statics rather than re-deriving
-    /// beside them. An earlier cut computed the two separately
-    /// from the same inputs, which made `familiesExpand` and
-    /// `instanceCounts` assert over a structure the screen never
-    /// touched — the dead seam moved rather than removed. The
-    /// join is proved, not asserted: mutating `orderedProfiles`
-    /// reds `ProfilesFamilyRowsTests` AND
-    /// `ProfilesCensusRenderTests.instanceCounts` together
-    /// (guard-prover, 2026-08-04).
+    /// Expands census family key into row instances, reaching the
+    /// same statics the views call — one derivation, the join
+    /// proved: mutating it reds `ProfilesFamilyRowsTests` AND
+    /// `ProfilesCensusRenderTests.instanceCounts` together.
     private func rows(
         for family: ProfilesKey
     ) -> [ProfilesRowInstance]? {
@@ -187,16 +91,10 @@ struct ProfilesFamilyRows {
             )
             .map(ProfilesRowInstance.desktop)
         case .presetsApply, .presetsLayouts:
-            // Both of the card's actions expand per preset, so
-            // they share one arm — the instance set is the card,
-            // not the button.
             return presets.map {
                 ProfilesRowInstance.preset($0.name)
             }
         case .isStarterSetup:
-            // Lua-only: a profile identity flag with no Settings
-            // surface at all (`SettingPlacement.luaOnly`), so it
-            // draws nothing here and never will.
             return nil
         }
     }

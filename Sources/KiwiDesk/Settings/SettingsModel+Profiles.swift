@@ -2,26 +2,10 @@ import Foundation
 import KiwiDeskCore
 import SwiftUI
 
-/// The profile half of the dashboard model (#36/#53): the
-/// two-button save UX (Update / Save as new), the preset Apply
-/// flow, list actions, and the Canvas placement resolution.
+/// Profile save, load, and preset operations for dashboard model (#36, #53).
 extension SettingsModel {
-    /// Non-nil while a profile save that captures the live
-    /// monitor set must be blocked (#335): with Accessibility
-    /// off the engine has discovered no displays, so persisting
-    /// records a degenerate 0-screen set that can never resolve.
-    /// Gates the monitor-capturing actions — Save as New Profile,
-    /// Update, and Save a Copy As from the live active profile —
-    /// and doubles as their disabled-button tooltip. Since #516
-    /// the first two are only *reached* by this gate when there
-    /// is nothing global to save; a pending global edit routes
-    /// to `.saveGlobalsOnly` instead. Copy stays unconditionally
-    /// gated — it always captures a monitor set. Stored-
-    /// profile edits are NOT gated: their write path only upserts
-    /// a monitor set that already matches the live set, and while
-    /// paused `set(matching: [])` finds none, so the refresh is
-    /// inert and no degenerate set is written (see
-    /// `KiwiCore+ProfileEdit.applyProfileEdits`).
+    /// Explains why profile saving is blocked when accessibility is disabled
+    /// (#335, #516).
     var profileSaveBlockedReason: String? {
         guard permissionPaused else { return nil }
         return L(
@@ -33,9 +17,7 @@ extension SettingsModel {
         )
     }
 
-    /// Whether Update can write into the active profile: it
-    /// exists and covers the live screen count. A different
-    /// count (extra screen attached) needs "Save as new…".
+    /// Whether active profile matches connected screen count for update.
     var updateEnabled: Bool {
         guard let name = activeProfile,
             let summary = profileSummaries.first(where: {
@@ -45,7 +27,8 @@ extension SettingsModel {
         return summary.count == displays.count
     }
 
-    /// The greyed-out Update button's explanation, when any.
+    /// Tooltip explanation when active profile screen count differs from
+    /// connected displays.
     var updateHint: String? {
         guard let name = activeProfile,
             let summary = profileSummaries.first(where: {
@@ -62,17 +45,12 @@ extension SettingsModel {
         )
     }
 
-    /// Update "<profile>": persists the edited tiling into the
-    /// active profile and adds/refreshes the live monitor set.
-    /// Warns (without mutating them) when other profiles also
-    /// claim this monitor set.
+    /// Persists edited tiling into active profile and refreshes monitor set.
     func updateActiveProfile() {
         guard let name = activeProfile else { return }
         let overlap = core.profilesClaimingLiveSet(
             excluding: name
         )
-        // A save failure must stay visible; only a successful
-        // update may show the overlap warning.
         guard persist(named: name) else { return }
         if !overlap.isEmpty {
             let names = overlap.map { "\"\($0)\"" }
@@ -87,8 +65,7 @@ extension SettingsModel {
         }
     }
 
-    /// Save as new…: creates a profile carrying only the live
-    /// monitor set (name auto-suffixed `_1`, `_2`, … if taken).
+    /// Creates new profile with unique name capturing live monitor set.
     func saveAsNewProfile(named name: String) {
         let trimmed = name.trimmingCharacters(
             in: .whitespaces
@@ -99,11 +76,6 @@ extension SettingsModel {
 
     @discardableResult
     private func persist(named name: String) -> Bool {
-        // Freshness net: a space that appeared live while the
-        // dashboard sat open (profile load, hotkey-created) is
-        // absent from the staged model; without the merge the
-        // apply below would prune it — and pruning the active
-        // space snapped focus to the first space on save.
         core.mergeLiveSpaces(
             into: &config,
             seededWith: seedSpaces
@@ -126,9 +98,7 @@ extension SettingsModel {
         return saved
     }
 
-    /// The sidecar and `init.lua` only regenerate when a global
-    /// (non-profile) setting actually changed, keeping their
-    /// diffs clean (#36).
+    /// Persists global configuration when non-profile settings changed (#36).
     private func persistGlobalsIfNeeded() {
         guard globalsChanged else { return }
         do {
@@ -137,14 +107,6 @@ extension SettingsModel {
             core.onLog("settings save failed: \(error)")
         }
     }
-
-    // MARK: - Editing a stored profile (#18)
-
-    // `selectEditTarget` lives with the edit-mode state machine
-    // in `SettingsModel+EditTarget.swift` (#64);
-    // `saveEditedProfile` / `saveEditedProfileCopy` with the
-    // rest of the stored-profile editing surface in
-    // `SettingsModel+ProfileOverrides.swift`.
 
     func loadProfile(named name: String) {
         _ = core.execute(
@@ -170,15 +132,7 @@ extension SettingsModel {
         refreshProfiles()
     }
 
-    /// Renames a saved profile. Immediate, like Delete / make
-    /// default (pending edits are discarded by the reload).
-    /// The core facade owns the whole chase — file, adopted
-    /// name, runtime native-Space bindings, and the sidecar's
-    /// binding lines — so the model only retargets its edit
-    /// session and reloads.
-    /// Collisions are the core's call (the only
-    /// case-insensitive tier) — a rejection surfaces as
-    /// `profileWarning`, never a silent dead click.
+    /// Renames profile file, references, and active edit target.
     func renameProfile(from old: String, to new: String) {
         let name = new.trimmed
         guard name != old, !name.isEmpty else { return }
@@ -198,10 +152,7 @@ extension SettingsModel {
         reload()
     }
 
-    // MARK: - Presets (#53)
-
-    /// Applies a built-in layout and materializes it as a saved
-    /// profile named after the preset (`_N` when taken).
+    /// Applies standard layout preset as saved profile (#53).
     func applyStandardPreset(_ layout: StandardLayout) {
         do {
             try core.applyStandard(layout)
@@ -215,76 +166,30 @@ extension SettingsModel {
         }
         reload()
     }
-
 }
 
-/// One saved profile as the load list shows it (#36).
+/// Saved profile summary for profile list and resolution (#36, #789, #678).
 struct ProfileSummary: Identifiable {
     let name: String
     let count: Int
-    /// Each covered monitor combination, as fingerprints.
     let sets: [[String]]
     let isDefault: Bool
-    /// One of the sets equals the live monitors.
     let matchesLive: Bool
-    /// The profile is saved for as many screens as are connected
-    /// right now — a WEAKER claim than `matchesLive`, which is a
-    /// fingerprint match (#789).
-    ///
-    /// Its own sort key, because the two are not the same
-    /// question and the gap between them is where a profile got
-    /// lost: a two-screen profile for different monitors matches
-    /// no fingerprint, so without this it sorted behind every
-    /// one-screen profile on the bare count, since 1 < 2 — under
-    /// a card caption promising one of them loads.
-    ///
-    /// Derived beside `matchesLive` in `refreshProfiles` from
-    /// one read of the live displays, so the two cannot answer
-    /// about different moments.
     let matchesConnectedCount: Bool
-    /// What each of this profile's screens opens in, in the
-    /// stored set's canonical monitor order — `nil` where the
-    /// profile does not say (#789).
-    ///
-    /// Carried on the summary rather than derived in the view so
-    /// the row and the preset card read ONE accessor
-    /// (`Profile.openingModes()`), which is also what keeps the
-    /// two surfaces' pictures in one grammar. `count` and this
-    /// array agree by construction — the accessor returns one
-    /// entry per covered screen.
     let openingModes: [LayoutMode?]
-    /// Spaces the profile declares (#678 turn 13a). Part of the
-    /// row's subtitle, which counts only what the profile OWNS.
     let spaceCount: Int
-    /// Keybindings the profile overrides — the count of rows in
-    /// its sparse `layers` override, never the size of the
-    /// resolved set. "18 shortcuts" on a profile row would claim
-    /// the profile carries a keybinding set of its own; it
-    /// carries a diff over the global one (#678 turn 13a).
     let shortcutOverrideCount: Int
     var id: String { name }
 }
 
-/// One profile whose file will not decode (#246), with why.
-///
-/// A sibling of `ProfileSummary` rather than a field on it: a
-/// broken file yields no count, no monitor sets and no default
-/// flag, so every one of that type's fields would be an optional
-/// nobody could fill. The name is the only thing both rows share,
-/// which is exactly the shape two types express and one type with
-/// eight optionals hides.
+/// Unparseable profile with failure cause (#246).
 struct BrokenProfile: Identifiable, Equatable {
     let name: String
     let cause: ProfileBrokenCause
     var id: String { name }
 }
 
-/// The "Which profile loads" answer as one value (#678 turn
-/// 13a): what resolves, and the screen count it resolved over.
-///
-/// One value, not two published fields, because the card renders
-/// them in a single sentence — and two fields refreshed together
-/// today are two fields somebody refreshes apart tomorrow.
+/// Resolution verdict and screen count for profile loading card (#678).
 struct ProfileResolution: Equatable {
     let verdict: ProfileVerdict
     let screens: Int
