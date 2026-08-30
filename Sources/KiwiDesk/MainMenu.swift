@@ -1,31 +1,8 @@
 import AppKit
 import KiwiDeskCore
 
-/// Builds KiwiDesk's application menu bar.
-///
-/// A bare SwiftPM executable ships no `MainMenu.nib`, so
-/// `NSApp.mainMenu` is nil until we install one.
-///
-/// **It is still needed even though the app never leaves
-/// `.accessory` and so never displays a menu bar.** AppKit
-/// dispatches menu key equivalents through `NSApp.mainMenu` for
-/// the key window whatever the activation policy, so this is what
-/// gives the Settings text fields their standard Edit shortcuts
-/// (Cut/Copy/Paste/Undo) — without it they have none.
-///
-/// It was originally installed to fix #329, an auto-hidden menu
-/// bar with nothing to reveal on a top-edge hover: KiwiDesk was
-/// `.regular` then and owned the menu bar with `mainMenu` nil.
-/// **Do not read that as #329 being unreachable now.** The
-/// permanent `.accessory` policy removed the promotion instead,
-/// so the process owns no menu bar at all and the symptom is
-/// back by a second route — accepted, and written up in
-/// `docs/accepted-limitations.md`. What this menu fixed was the
-/// nil-`mainMenu` cause, which cannot recur while it is built.
-///
-/// Titles route through `L(_:_:)` like every GUI string (#9);
-/// the items use AppKit's standard first-responder selectors so
-/// the responder chain services them with no extra wiring.
+/// Builds the application menu bar to provide standard Edit and Window
+/// key equivalents (#9, #329).
 @MainActor
 enum MainMenu {
     /// The App menu's "Settings…" item routes here; the delegate
@@ -69,8 +46,7 @@ enum MainMenu {
         )
         menu.addItem(.separator())
         let settings = menu.addItem(
-            // Shares the quick menu's key — one "Settings…"
-            // translation unit, both routes to the dashboard.
+            // Shares the quick menu's translation key.
             withTitle: L("menu.settings", "Settings…"),
             action: action,
             keyEquivalent: ","
@@ -158,13 +134,8 @@ enum MainMenu {
             action: #selector(NSWindow.performZoom(_:)),
             keyEquivalent: ""
         )
-        // Deliberately NOT wired to `NSApp.windowsMenu`: that
-        // would auto-append every eligible window, and KiwiDesk's
-        // borderless overlay panels (border rings, App Bar, drag
-        // ghost) are only kept out by an unenforced invariant. A
-        // 1–2 window settings app gains nothing from the window
-        // list; Minimize/Zoom still reach the key window through
-        // the responder chain without it.
+        // Not wired to `NSApp.windowsMenu` to prevent overlay panels
+        // from being listed.
         return item
     }
 }
