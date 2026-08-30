@@ -1,22 +1,4 @@
-/// Borders, sticky/floating marks and drag visuals
-/// (`BorderStyle`, `StickyStyle`, `FloatingStyle`,
-/// `DragGhost`, `DragDropZone`).
-///
-/// The three strokes KiwiDesk draws — the focus ring, the drag
-/// ghost and the drop zone — share one width and one corner
-/// decision, and the GUI asks each of them exactly once, in the
-/// `.borders` card (#754). Everything that would ask a second
-/// time left the GUI there (GUI_REMOVED_2026-08): both per-stroke
-/// alignments, both per-stroke widths, and the drag pair's
-/// numeric corner radius. Every one of those Lua verbs stays
-/// open and unclamped.
-///
-/// The two card rows are their own `(master)` cases, the shape
-/// the gaps masters already use: a master is one control over
-/// several stored leaves, so naming it after any ONE of them
-/// tells a census reader that the others are untouched when the
-/// row overwrites them on every edit. Which leaves each writes
-/// is `SettingKey.masterWrites`.
+/// Borders, sticky/floating marks and drag visuals census slice (#754).
 
 enum BordersKey: String, CaseIterable, Hashable {
     case borderEnabled = "settings.borderStyle.enabled"
@@ -58,30 +40,16 @@ extension BordersKey {
     var placement: SettingPlacement {
         switch self {
         case .borderEnabled:
-            // Owns the .focusBorder container gate — stays
-            // live while the container greys.
             return .row(
                 .gapsAndBorders,
                 .focusBorder,
                 .atRest,
                 exemptFromContainerGate: true
             )
-        // The two shared decisions, lifted out of the sections
-        // they used to sit in (#754). Each is one master row
-        // that WRITES all three strokes, so it belongs to no
-        // one section any more. Never inside `.focusBorder`:
-        // the ring going off must not grey a control the drag
-        // visuals read. Both draw as lead controls of the card
-        // with no disclosure over them, hence `.atRest`.
         case .borderWidthMaster, .borderCornerMaster:
             return .row(.gapsAndBorders, .borders, .atRest)
         case .borderFitGapsExtraSpacing:
-            // Behind Show more with the glow rows: a parameter
-            // to one action, below the ring's own shape.
             return .row(.gapsAndBorders, .focusBorder, .showMore)
-        // The .borders container carries no block gate
-        // (stickyColor shares it, deliberately ungated), so
-        // the border colors ride borderEnabled on the row.
         case .borderFocusedColor:
             return .row(
                 .advancedColours,
@@ -103,18 +71,8 @@ extension BordersKey {
                 ])
             )
         case .stickyColor:
-            // The table marks this GATED; the Colours phase
-            // ruled it UNGATED and it ships that way. The tint
-            // has a consumer the Space Bar does not own — the
-            // on-window mark — so no state of the BAR can make
-            // it inert, which is why the .borders container
-            // carries no block gate at all. (Not "it always
-            // tints something": the mark's own toggle can be
-            // off, a state the sticky-mark ruling deliberately
-            // leaves reachable.)
             return .row(.advancedColours, .borders, .atRest)
         case .borderGlowSize:
-            // Glow on, and not auto-sized (AutoGatedGroup).
             return .row(
                 .gapsAndBorders,
                 .focusBorder,
@@ -127,16 +85,9 @@ extension BordersKey {
         case .borderDrawOrder:
             return .luaOnly
         case .borderFitGaps:
-            // The whole-editor grey off the enable toggle is
-            // the .focusBorder CONTAINER gate.
             return .row(.gapsAndBorders, .focusBorder, .atRest)
         case .stickyMark:
-            // Ungated. The mark paints on the window, so it is
-            // what survives the Space Bar going off — a gate
-            // here would record a dependency that runs the
-            // other way, for every reader of the census. The
-            // row is drawn by StickyMarkEditor and held ungated
-            // by StickyMarkUngatedTests; neither reads this.
+            // Ungated (StickyMarkUngatedTests).
             return .row(
                 .gapsAndBorders,
                 .stickyWindows,
@@ -144,10 +95,6 @@ extension BordersKey {
             )
         case .dragGhostEnabled, .dragDropZoneEnabled:
             return .row(.gapsAndBorders, .dragAndDrop, .atRest)
-        // Each drag column greys wholesale off its Enabled
-        // toggle (DragVisualControls' outer GreyOut), so every
-        // row names its column's Enabled owner; sub-rows add
-        // their Border/Fill owner.
         case .dragGhostBorder, .dragGhostFill:
             return .row(
                 .gapsAndBorders,
@@ -182,29 +129,11 @@ extension BordersKey {
                     .borders(.dragGhostFill),
                 ])
             )
-        // Two DIFFERENT reasons for one tier, kept apart so a
-        // reader can tell them apart (see `SettingPlacement`
-        // `.luaOnly`'s carve-out). First: written by a master
-        // on every edit of it, surfaced by nothing of their
-        // own. GUI_REMOVED_2026-08 (#754) for the last three —
-        // the ring has no corner RADIUS, so collapsing a 0–40 pt
-        // slider into its two-value style rendered 1 pt and
-        // 40 pt identically, and a per-stroke width row would
-        // undo the card above it. `SettingKey.masterWrites` is
-        // where the writing is declared.
         case .borderWidth, .borderCorner,
             .dragGhostBorderWidth,
             .dragDropZoneBorderWidth,
-            .dragCornerRadius:
-            return .luaOnly
-        // Second: nothing in the GUI reads or writes these at
-        // all. Alignment left in #754 because the question
-        // cannot be put to all three strokes — the ring outsets
-        // and has no alignment concept — and a row covering two
-        // of three teaches the wrong model. Both verbs stay
-        // per stroke and unclamped. A surfaceless row carries
-        // no gate.
-        case .dragGhostBorderAlignment,
+            .dragCornerRadius,
+            .dragGhostBorderAlignment,
             .dragDropZoneBorderAlignment:
             return .luaOnly
         case .dragDropZoneBorderColor:
@@ -228,12 +157,6 @@ extension BordersKey {
                 ])
             )
         case .floatingColor:
-            // Drawn only in the Space Bar (owner ruling
-            // 2026-08-02; the gate item 10 keeps) — carried by
-            // the .spaceBar CONTAINER gate. Rides the badge
-            // cluster into that group's "More colors" drawer: it
-            // tints a state badge, not one of the three accents
-            // the bar is read by.
             return .row(.advancedColours, .spaceBar, .showMore)
         }
     }

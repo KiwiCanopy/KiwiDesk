@@ -1,7 +1,5 @@
-/// Per-layout App Bar overrides (`LayoutAppBar`, Monocle and
-/// Scrolling). Styling rows leave the GUI with the redesign
-/// (GUI_REMOVED_2026-08, Phase 2 Bars PR) — only the two
-/// enabled toggles keep a Settings surface.
+/// Per-layout App Bar overrides census slice (`LayoutAppBar`, Monocle and
+/// Scrolling).
 
 enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case monocleAppBarEnabled = "settings.monocle.appBar.enabled"
@@ -78,8 +76,6 @@ extension LayoutAppBarKey {
     var placement: SettingPlacement {
         switch self {
         case .monocleAppBarEnabled, .scrollingAppBarEnabled:
-            // These own the .appBar container gate — they stay
-            // live while the editor greys.
             return .row(
                 .bars,
                 .appBar,
@@ -104,17 +100,12 @@ extension LayoutAppBarKey {
             .scrollingAppBarItemColor, .scrollingAppBarActiveItemColor,
             .scrollingAppBarHoverFillColor, .scrollingAppBarHoverItemColor,
             .scrollingAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeTextColor:
-            // GUI_REMOVED_2026-08
-            return .luaOnly
-        case .monocleAppBarBackgroundFit, .monocleAppBarContent,
+            .scrollingAppBarGroupBadgeTextColor,
+            .monocleAppBarBackgroundFit, .monocleAppBarContent,
             .monocleAppBarTitleCap,
             .scrollingAppBarBackgroundFit, .scrollingAppBarContent,
-            .scrollingAppBarTitleCap:
-            // GUI_REMOVED_2026-08. The table also marks these
-            // GATED; a surfaceless row carries no gate.
-            return .luaOnly
-        case .monocleAppBarLiquidGlass, .monocleAppBarIconSource,
+            .scrollingAppBarTitleCap,
+            .monocleAppBarLiquidGlass, .monocleAppBarIconSource,
             .monocleAppBarDimFactor, .scrollingAppBarLiquidGlass,
             .scrollingAppBarIconSource, .scrollingAppBarDimFactor:
             return .luaOnly
@@ -125,9 +116,6 @@ extension LayoutAppBarKey {
 extension LayoutAppBarKey {
     var text: SettingRowText {
         switch self {
-        // The "Show it in" rows are titled by their layout's
-        // name (turn 7a) — the keys `LayoutMode.displayName`
-        // already authors.
         case .monocleAppBarEnabled:
             return .text("layout.monocle.name")
         case .scrollingAppBarEnabled:

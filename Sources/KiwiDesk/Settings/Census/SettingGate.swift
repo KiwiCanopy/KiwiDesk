@@ -1,116 +1,48 @@
-/// The census's gate vocabulary (#678, spec 4f), split out of
-/// `SettingPlacement.swift` when that file crossed the size
-/// ceiling: what a row can be inert BEHIND, in the two flavours
-/// a census gate comes in — another setting's value, and a
-/// runtime condition that is not a setting at all.
+/// Settings census gate vocabulary (#678).
 
-/// A runtime condition a row greys — or, for the table's
-/// CONDITIONAL presence rows, surfaces — on that is not itself
-/// a setting. The tag names the condition; the wiring's help
-/// string stays the authority for the on-screen sentence
-/// (why-you-cannot is always inline, item 19).
+/// Runtime condition gating row availability or presence (#342, #390, #578,
+/// #1071).
 enum SettingRuntimeGate: Hashable {
-    /// The gaps master slider reads "mixed" while the per-edge
-    /// values differ.
+    /// The gaps master slider reads "mixed" while the per-edge values differ.
     case perEdgeValuesDiffer
-    /// A stored profile is being edited, so a global setting
-    /// this profile may never override is dead (switch to Live).
+    /// A stored profile is being edited, so global settings are locked.
     case editingStoredProfile
-    /// Presets apply only when the connected screen count
-    /// matches the preset's.
+    /// Presets apply only when connected screen count matches.
     case screenCountMismatch
-    /// The login item follows `SMAppService` status — the
-    /// setter is guarded, the control greys (#342).
+    /// Login item follows SMAppService status (#342).
     case loginItemServiceStatus
-    /// The `kiwidesk service` LaunchAgent is loaded, so it
-    /// already launches KiwiDesk at login and the login item
-    /// would only add a second launcher — the switch says so
-    /// and stops being editable (#1071).
+    /// LaunchAgent service is already loaded (#1071).
     case autoStartServiceLoaded
-    /// The per-space reset action is dead while the space has
-    /// no overrides.
+    /// Space reset is inert when no overrides exist.
     case spaceHasNoOverrides
-    /// macOS Reduce Motion greys the animations card.
+    /// macOS Reduce Motion greys animations card.
     case reduceMotion
-    /// The orphaned-pins card exists only while a space is
-    /// pinned to a disconnected monitor.
+    /// Space pinned to a disconnected monitor.
     case orphanPinsExist
-    /// A stored profile is being edited AND its monitors are not
-    /// attached — one slot, so this tag carries both arms, like
-    /// `paletteGlowPairing` and `luaImportAvailable` below. There
-    /// are then no display frames to draw the Monitors picture
-    /// from, so the condition surfaces the not-connected banner
-    /// and withholds the cards it stands in for
-    /// (`MonitorsGates` resolves both sides).
+    /// Stored profile edited while monitors are disconnected.
     case monitorsDisconnected
-    /// The neon "Pair with Glow" link shows only for palettes
-    /// that carry the glow pairing (#578) — and only while
-    /// Glow itself is off (`borderGlow` is the setting half of
-    /// this condition; one gate slot per row, so the runtime
-    /// tag carries the whole conjunction).
+    /// Palettes that carry neon Glow pairing (#578).
     case paletteGlowPairing
-    /// The import row shows only while `init.lua` holds
-    /// bindings the GUI can adopt AND the LIVE config is the
-    /// edit target — one slot, so this tag carries both arms,
-    /// the not-editing-a-stored-profile half included.
+    /// Unadopted shortcuts present in init.lua.
     case luaImportAvailable
-    /// Restore Defaults appears only while KiwiDesk has
-    /// defaults this install lacks — a PRESENCE condition,
-    /// not a greying one, which is what makes the button's
-    /// arrival the news rather than a destructive-sounding
-    /// control standing over every new user's list. Like
-    /// `luaImportAvailable` it compares the live config
-    /// against what the seeder would author for THIS
-    /// machine, which no saved `GuiConfig` can answer.
+    /// Restore Defaults appears when unseeded defaults exist.
     case defaultsToRestore
-    /// The config defines a layer beyond `default`. Gates the
-    /// Layers card's `.immediate` tier: with layers configured
-    /// the card is a user's own setup and shows at rest; with
-    /// only `default` it is purely the offer to create one.
+    /// Non-default layer exists in configuration.
     case layersExist
-    /// Liquid Glass is offered only where it can render
-    /// (macOS 26+) — hidden, never greyed, matching the OS
-    /// capability gate (#390); the `#available` check itself
-    /// belongs to the renderer.
+    /// Liquid Glass unavailable on pre-macOS 26 (#390).
     case liquidGlassUnavailable
 }
 
-/// What greys a surfaced row (the placement table's GATED
-/// rows). `.setting` / `.anyOf` name the surfaced rows whose
-/// values decide the grey — the exact predicate (resolved
-/// override chains, value comparisons) lives with the wiring,
-/// and gates on resolved values name every surfaced owner
-/// (#406: gate on RESOLVED, not global). `.runtime` names a
-/// condition that is not itself a setting, and `.runtimeAnyOf`
-/// names SEVERAL such conditions where a row dies for any of
-/// them — so a multi-arm predicate is spelled out in the census
-/// rather than hidden behind one tag standing for the whole
-/// disjunction.
-///
-/// That distinction is load-bearing: a tag named for the row's
-/// own OUTCOME ("this control is unavailable") records nothing a
-/// reader could not see from the greyed row itself, and leaves
-/// the predicate knowable only inside the area's resolver. Two
-/// such tags existed for one commit; `.runtimeAnyOf` replaced
-/// them, and with them a hand-kept register of which tags were
-/// secretly compound. The remaining CONJUNCTIONS
-/// (`paletteGlowPairing`, `luaImportAvailable`,
-/// `monitorsDisconnected`) each state both arms in their own
-/// docstring — `allOf` stays unbuilt because a conjunction has
-/// no per-arm sentence to render: a row dead for both reasons
-/// says one thing, while a disjunction has to name the arm that
-/// killed it.
+/// Gating specification for disabled or conditionally surfaced setting rows
+/// (#406).
 enum SettingGate: Hashable {
     case setting(SettingKey)
     case anyOf([SettingKey])
     case runtime(SettingRuntimeGate)
-    /// The row is inert while ANY of these conditions holds —
-    /// the runtime peer of `.anyOf`, so a row with a two-arm
-    /// predicate names both arms instead of one tag standing for
-    /// the pair.
+    /// Row is inert while any of these conditions holds.
     case runtimeAnyOf([SettingRuntimeGate])
 
-    /// The setting rows this gate reads, for the guards.
+    /// The setting rows this gate reads.
     var settings: [SettingKey] {
         switch self {
         case .setting(let key): return [key]
@@ -119,7 +51,7 @@ enum SettingGate: Hashable {
         }
     }
 
-    /// The runtime conditions this gate names, for the guards.
+    /// The runtime conditions this gate names.
     var runtimeConditions: [SettingRuntimeGate] {
         switch self {
         case .setting, .anyOf: return []
