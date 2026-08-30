@@ -68,7 +68,7 @@ struct SentenceFrame {
         }
     }
 
-    /// The controls this frame draws, in its own order.
+    /// Controls referenced by frame in parsed appearance order.
     var controls: [Control] {
         argumentPositions.compactMap(Self.control(at:))
     }

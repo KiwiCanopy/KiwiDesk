@@ -1,15 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Pure math for the gap preview: maps real 0–100 pt gap
-/// values onto the miniature's 1–14 pt span. The square root
-/// exaggerates the 0–20 pt range users actually live in and
-/// compresses 60–100 pt, so slider drags stay perceptible
-/// without the miniature blowing out. The 1 pt floor is
-/// deliberate: even a real gap of 0 keeps a hairline seam so
-/// the miniature's windows stay countable. The enum itself
-/// touches no AppKit/SwiftUI API (`GapPreviewScaleTests`);
-/// it lives here only until it grows more math.
+/// Pure scaling math mapping 0–100 pt gaps onto 1–14 pt preview span
+/// (`GapPreviewScaleTests`).
 enum GapPreviewScale {
     static let realMax: CGFloat = 100
     static let miniMin: CGFloat = 1
@@ -21,34 +14,14 @@ enum GapPreviewScale {
     }
 }
 
-/// The live gap preview beside the legend (#68 §3.14): a
-/// screen outline holding a 2×2 window grid, so both gap
-/// kinds show on both axes — outer as the margin to the
-/// screen edge, inner as the seams between the windows. Every
-/// stored value maps through `GapPreviewScale` independently,
-/// so per-edge asymmetry renders honestly as uneven margins.
-/// It teaches the outer/inner vocabulary; it is deliberately
-/// not a layout preview.
-///
-/// Left-aligned beside its legend (not centered like a
-/// `SchematicCanvas`): this preview is **paired with the exact
-/// controls in its card**, so it lines up flush with them as one
-/// stack rather than reading as a standalone figure (see
-/// design-decisions "Preview alignment splits on
-/// standalone-vs-paired").
+/// Visual 2×2 grid diagram demonstrating inner and outer gaps (#68, #812).
 struct GapsDiagram: View {
     let outer: Gaps.Outer
     let inner: Gaps.Inner
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    /// The schematics' damping, gated (#1069) — the diagram
-    /// still redraws at the staged gaps, it just stops
-    /// travelling there. READ from `LayoutSchematic`, not
-    /// re-spelled: the gate rule asks only that the ternary be
-    /// local, and this diagram is one of that family's pictures,
-    /// so a second copy of the duration is two tunings nothing
-    /// holds equal (code review, #1069).
+    /// Shared damping animation gated by reduce motion (#1069).
     private var damping: Animation? {
         reduceMotion ? nil : LayoutSchematic.damping
     }
@@ -56,10 +29,6 @@ struct GapsDiagram: View {
     var body: some View {
         HStack(spacing: 12) {
             miniScreen
-                // A picture of the sliders' values; the legend
-                // beside it and the sliders themselves speak
-                // them, so the shapes say nothing (#812, as
-                // `BarsPanelPreview` is treated).
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 legend(

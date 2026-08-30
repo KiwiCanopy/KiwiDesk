@@ -1,7 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Settings card for window animations (#171, #678, #1017).
+/// Animations settings card (#678). Moved whole from Behavior —
+/// the census places every row in `.coloursAndMotion`, and a
+/// card split across two destinations is a half-rendered area
+/// the parity guard cannot see. "Motion" in this type's NAME is
+/// frozen while the noun is "animation" (#1017, scoped to
+/// labels — a census re-key has its own blast radius): prose
+/// naming what is on screen says "the Animations card", and
+/// *motion* survives only quoting Apple's "Reduce Motion".
 struct MotionCard: View {
     @ObservedObject var model: SettingsModel
     /// macOS Reduce Motion forces animations off system-wide (#171).
@@ -20,6 +27,10 @@ struct MotionCard: View {
                     rows(ColorsRowOrder.motionAtRest)
                     disclosure
                 }
+                // Reduce Motion greys the CONTENT, never the
+                // header, so the `?` stays a live #527 anchor —
+                // the `.motion` container's `.runtime` census
+                // gate (#171).
                 .modifier(GreyOut(active: reduceMotion))
                 // Signpost stays outside the Reduce Motion gate
                 // (#171; `LinkedCaption`).
