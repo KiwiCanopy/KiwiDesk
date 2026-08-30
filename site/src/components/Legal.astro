@@ -37,7 +37,6 @@ const pageDesc = `${data.title} — KiwiDesk / KiwiCanopy.`;
   noindex={true}
   mainClass="legal"
 >
-  <a class="back" href={localePath(lang)}>← {strings.backHome}</a>
   <h1>{data.title}</h1>
   <p class="updated">{strings.updatedLabel} {data.updated}</p>
 
@@ -59,18 +58,7 @@ const pageDesc = `${data.title} — KiwiDesk / KiwiCanopy.`;
     z-index: 1;
     max-width: 720px;
     margin: 0 auto;
-    padding: 1.5rem 1.5rem 4rem;
-  }
-  .back {
-    display: inline-block;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--accent);
-  }
-  .back:hover {
-    text-decoration: underline;
-    text-underline-offset: 2px;
+    padding: clamp(1.25rem, 3.5vw, 2rem) 1.5rem 4rem;
   }
   .legal h1 {
     font-size: clamp(1.9rem, 5vw, 2.6rem);

@@ -92,6 +92,7 @@ const cq = lang === "de" ? "“" : lang === "ja" ? "」" : "”";
 
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
+const kiwiCanopyUrl = "https://kiwicanopy.com";
 // The maker's personal GitHub profile — distinct from the project
 // repo link above, used only for the low-key footer credit.
 const makerProfile = "https://github.com/hajiboy95";
@@ -368,6 +369,12 @@ const jsonLd = [
                it's useful in Nerd mode too. */}
           <a class="nav__link nav__link--guide" href="/guide/"
             >{t.nav_guide}</a>
+          {/* Alternatives: ungated like Guide. Both audiences ask
+               "how does this compare?" — the Simple reader about
+               Magnet, the Nerd reader about yabai — and the page
+               answers both (#975). */}
+          <a class="nav__link" href={`${homeHref}compare/`}
+            >{t.nav_compare}</a>
           {/* Release Notes: shown in Nerd mode (dev-only). "What changed"
                is accessible to everyone via the footer and About window. */}
           <a class="nav__link nav__link--changelog dev-only"
@@ -630,6 +637,28 @@ const jsonLd = [
               {downloadIsPrerelease && ` · ${t.beta_suffix}`}
             </span>
           )}
+
+          {/* Comparison link (#975), first screen, Nerd page
+               ONLY. The two audiences ask this question at
+               opposite ends of the page: someone arriving from
+               yabai asks it before reading a word, while a Magnet
+               user cannot ask it until they know what tiling is —
+               so the Simple page carries its own copy down at
+               #calm. Never both, never the same wording.
+
+               BELOW the version pill, not above it. The download
+               button, the requirements line and the pill are one
+               cluster — all three describe the download — and a
+               link about something else in the middle of them
+               reads as an interruption. Here it is a closing
+               beat of its own. */}
+          <p class="hero__compare">
+            <a class="link-arrow" href={`${homeHref}compare/`}>
+              {t.compare_nudge_dev_short}
+              <Icon name="lucide:arrow-right" width={15}
+                height={15} aria-hidden="true" />
+            </a>
+          </p>
         </div>
         )}
       </div>
@@ -798,6 +827,13 @@ const jsonLd = [
             </ul>
           </div>
         </div>
+        <p class="calm__compare reveal">
+          <a class="link-arrow" href={`${homeHref}compare/`}>
+            {t.compare_nudge_simple_short}
+            <Icon name="lucide:arrow-right" width={15}
+              height={15} aria-hidden="true" />
+          </a>
+        </p>
       </div>
     </section>
     )}
@@ -1158,11 +1194,23 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
     <footer class="footer">
       <div class="wrap">
         <div class="footer__brand">
-          <Image class="footer__logo" src={kiwiCanopy}
-            alt="KiwiCanopy"
-            widths={[110, 160, 220]}
-            sizes="110px" />
-          <p class="footer__name">{t.footer_org}</p>
+          {/* The brand MARK links to the parent; the `© 2026
+               KiwiCanopy` line below stays unlinked chrome, which
+               is the call Footer.astro documents for the docs
+               surface. Not for ranking — a subdomain linking its
+               own root passes little, and an outbound link never
+               lifts the page giving it — but for the
+               product→parent entity association, and because a
+               reader who wonders who made this had no way to
+               find out. */}
+          <a class="footer__parent" href={kiwiCanopyUrl}
+            target="_blank" rel="noopener">
+            <Image class="footer__logo" src={kiwiCanopy}
+              alt="KiwiCanopy"
+              widths={[110, 160, 220]}
+              sizes="110px" />
+            <span class="footer__name">{t.footer_org}</span>
+          </a>
           <p class="footer__tag">{t.footer_tag}</p>
         </div>
         {/* No Ko-fi here. It is offered twice already — quietly
@@ -1175,6 +1223,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <a class="dev-only" href="/docs/">{t.footer_docs}</a>
           <a class="dev-only" href={repo} target="_blank"
             rel="noopener">{t.footer_github}</a>
+          <a href={`${homeHref}compare/`}>{t.nav_compare}</a>
           <a href={`${homeHref}changelog/`}>{t.footer_changelog}</a>
           {/* Legal links stay visible in every mode — the Impressum
               must be reachable from every page (§ 5 DDG). */}

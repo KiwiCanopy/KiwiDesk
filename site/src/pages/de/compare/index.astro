@@ -1,0 +1,11 @@
+---
+// KiwiDesk — German comparison page at /de/compare/ (#975).
+//
+// Renders the same shared <Compare> component as the English
+// route, with the German locale. Untranslated keys fall back to
+// English per key (see Compare.astro), so this route is safe
+// before de.json's compare_* keys land.
+import Compare from "../../../components/Compare.astro";
+---
+
+<Compare lang="de" />

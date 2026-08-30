@@ -86,7 +86,7 @@ const downloadLabel = downloadVersion
     (downloadIsPrerelease ? ` · ${s.beta_suffix}` : "")
   : null;
 const downloadAria = downloadVersion
-  ? s.download_aria_versioned.replace("{v}", downloadVersion)
+  ? s.download_versioned.replace("{v}", downloadVersion)
   : null;
 
 // The table of contents — drives both the desktop rail and the
@@ -875,10 +875,13 @@ const jsonLd = [
     <footer class="footer">
       <div class="wrap">
         <div class="footer__brand">
-          <Image class="footer__logo" src={kiwiCanopy}
-            alt="KiwiCanopy" widths={[110, 160, 220]}
-            sizes="110px" />
-          <p class="footer__name">{s.footer_org}</p>
+          <a class="footer__parent" href="https://kiwicanopy.com"
+            target="_blank" rel="noopener">
+            <Image class="footer__logo" src={kiwiCanopy}
+              alt="KiwiCanopy" widths={[110, 160, 220]}
+              sizes="110px" />
+            <span class="footer__name">{s.footer_org}</span>
+          </a>
           <p class="footer__tag">{s.footer_tag}</p>
         </div>
         <a class="footer__kofi" href={kofi} target="_blank"
@@ -890,6 +893,8 @@ const jsonLd = [
         <nav class="footer__links" aria-label={s.footer_nav_aria}>
           <a href={homeHref}>{s.guide_footer_home}</a>
           <a href="/docs/">{s.footer_docs}</a>
+          <a href={`${homeHref}compare/`}
+            >{s.footer_compare}</a>
           <a href={`${homeHref}changelog/`}
             >{s.footer_changelog}</a>
           <a href={repo} target="_blank" rel="noopener"

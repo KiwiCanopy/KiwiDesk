@@ -488,6 +488,36 @@ body::before {
   background: var(--nav-hover-bg);
 }
 
+/* Back-to-home affordance in subpage navs (Guide, Changelog, Compare, Legal). */
+.learn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--nav-ink-dim);
+  padding: 0.5rem 0.7rem 0.5rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 550;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.learn-back:hover {
+  color: var(--nav-ink);
+  background: var(--nav-hover-bg);
+}
+
+.learn-back svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 520px) {
+  .learn-back__text {
+    display: none;
+  }
+}
+
 /* Ko-fi nav button — icon-only and compact. Counterintuitively this
    reads as LESS obtrusive than a worded link: a small, recognizable,
    clearly-clickable button sits quietly among the other nav
@@ -1266,13 +1296,18 @@ section {
 }
 
 .req {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.9rem;
-  font-size: 0.85rem;
+  display: block;
+  margin-top: 1.7rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
   color: var(--text-faint);
-  margin-top: 1.25rem;
+  text-wrap: balance;
+}
+.req > svg,
+.req > [data-icon] {
+  display: inline-block;
+  vertical-align: -0.15em;
+  margin-right: 0.45rem;
 }
 
 /* The closing band's quiet star ask — the req line's voice with
@@ -1280,7 +1315,7 @@ section {
    it reads as a caption that happens to be followable rather
    than as another button. */
 .star-hint {
-  margin-top: 0.6rem;
+  margin-top: 0.35rem;
 }
 .star-hint a {
   color: inherit;
@@ -1427,6 +1462,30 @@ section {
   height: auto;
   display: block;
   margin-inline: auto;
+}
+
+.footer__parent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+.footer__parent .footer__name {
+  display: block;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color 140ms ease;
+}
+.footer__parent:hover .footer__name,
+.footer__parent:focus-visible .footer__name {
+  text-decoration-color: currentColor;
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer__parent .footer__name {
+    transition: none;
+  }
 }
 
 .footer__name {

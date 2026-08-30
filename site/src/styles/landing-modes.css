@@ -435,6 +435,20 @@
   margin-bottom: 0.9rem;
 }
 
+/* Comparison-link wrappers (#975). Two placements, because the
+   two audiences ask "how is this different?" at opposite ends of
+   the page: the Nerd hero catches a visitor already running a
+   tiling WM on the first screen, while the Simple page waits
+   until #calm has explained what tiling buys them. */
+.hero__compare {
+  margin: 0.9rem 0 0;
+  text-align: center;
+}
+.calm__compare {
+  margin: 1.9rem 0 0;
+  text-align: center;
+}
+
 .link-arrow {
   display: inline-flex;
   align-items: center;
@@ -992,6 +1006,12 @@ a.quote-card__byline-main:hover {
 }
 
 /* Centered under a video, CTA or footer element. */
+/* The closing band's captions read as one group, so they sit
+   tighter than the component's default. */
+.cta-band .quote-aside {
+  margin-top: 0.8rem;
+}
+
 .quote-aside--center {
   margin-inline: auto;
   text-align: center;
@@ -1062,7 +1082,7 @@ a.quote-card__byline-main:hover {
   margin-bottom: 0;
 }
 .req--center {
-  justify-content: center;
+  text-align: center;
   margin-inline: auto;
 }
 

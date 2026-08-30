@@ -15,6 +15,7 @@
 import "../styles/landing.css";
 import ThemeHead from "./ThemeHead.astro";
 import logoMark from "../assets/brand/logo.svg";
+import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
@@ -63,6 +64,7 @@ const canonical = `${site}${localePath(lang, slug)}`;
 const ogLocale = { en: "en_US", de: "de_DE", ja: "ja_JP" }[lang];
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
+const kiwiCanopyUrl = "https://kiwicanopy.com";
 ---
 
 <!doctype html>
@@ -121,46 +123,72 @@ const kofi = "https://ko-fi.com/kiwicanopy";
   <body>
     <a href="#main-content" class="skip-link">{t("skip_to_content")}</a>
 
-    <header class="lnav">
-      <a class="brand" href={localePath(lang)} aria-label={t("nav_home_label") || "KiwiDesk"}>
-        <img src={logoMark.src} alt="" width="34" height="34" />
-        <span>KiwiDesk</span>
-      </a>
-      <nav class="right">
-        <span class="langs">
-          {
-            (Object.entries(LANGS) as [Lang, string][]).map(([code, label]) => (
-              <a
-                href={localePath(code, slug)}
-                data-lang={code}
-                title={label}
-                aria-current={code === lang ? "page" : undefined}
-              >
-                {code.toUpperCase()}
-              </a>
-            ))
-          }
-        </span>
-        <button
-          id="themeToggle"
-          class="theme-toggle"
-          type="button"
-          aria-label="Switch color theme"
-        >
-          <span class="theme-toggle__track" aria-hidden="true">
-            <span class="theme-toggle__thumb">
-              <svg class="theme-toggle__sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="4"></circle>
-                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-              </svg>
-              <svg class="theme-toggle__moon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-              </svg>
+    <nav class="nav" id="nav">
+      <div class="wrap nav__inner">
+        <a class="nav__brand" href={localePath(lang)} aria-label={t("nav_home_label") || "KiwiDesk"}>
+          <img class="nav__mark" src={logoMark.src} alt="" width="28" height="28" aria-hidden="true" />
+          <span>KiwiDesk</span>
+        </a>
+        <div class="nav__links">
+          <a class="learn-back" href={localePath(lang)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m12 19-7-7 7-7"></path>
+              <path d="M19 12H5"></path>
+            </svg>
+            <span class="learn-back__text">{t("guide_back_home")}</span>
+          </a>
+          <div class="lang-switch" role="group"
+            aria-label={t("nav_lang_label")}>
+            {
+              (Object.entries(LANGS) as [Lang, string][]).map(
+                ([code, label], index) => (
+                  <>
+                    {index > 0 && (
+                      <span class="lang-switch__sep" aria-hidden="true"
+                      ></span>
+                    )}
+                    <a
+                      class="lang-switch__opt"
+                      href={localePath(code, slug)}
+                      data-lang={code}
+                      lang={code}
+                      title={label}
+                      aria-current={code === lang ? "true" : undefined}
+                    >
+                      {code.toUpperCase()}
+                    </a>
+                  </>
+                ),
+              )
+            }
+          </div>
+          <button
+            id="themeToggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="Switch color theme"
+          >
+            <span class="theme-toggle__track" aria-hidden="true">
+              <span class="theme-toggle__thumb">
+                <svg class="theme-toggle__sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                </svg>
+                <svg class="theme-toggle__moon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+              </span>
             </span>
-          </span>
-        </button>
-      </nav>
-    </header>
+          </button>
+          <a class="nav__support" href={kofi} target="_blank"
+            rel="noopener" aria-label={t("nav_support_aria")}
+            title={t("nav_support_aria")}>
+            <img class="kofi-icon" src={kofiIcon.src} alt=""
+              aria-hidden="true" width="20" height="16" />
+          </a>
+        </div>
+      </div>
+    </nav>
 
     <main id="main-content" class={mainClass}>
       <slot />
@@ -170,6 +198,7 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       <p class="tag">{t("footer_tag")}</p>
       <nav class="flinks" aria-label={t("footer_nav_aria")}>
         <a href="/docs">{t("footer_docs")}</a>
+        <a href={localePath(lang, "/compare/")}>{t("nav_compare")}</a>
         <a href={localePath(lang, "/changelog/")}>{t("footer_changelog")}</a>
         <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>
         <a href={localePath(lang, "/privacy")}>{t("footer_privacy")}</a>
@@ -194,64 +223,6 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       }
       .skip-link:focus {
         top: 0.5rem;
-      }
-
-      .lnav {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        max-width: var(--maxw);
-        margin: 0 auto;
-        padding: 1.25rem 1.5rem;
-        flex-wrap: wrap;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        font-weight: 800;
-        font-size: 1.15rem;
-        color: var(--text);
-      }
-      .brand img {
-        height: 30px;
-        width: auto;
-      }
-      .right {
-        display: flex;
-        align-items: center;
-        gap: 1.1rem;
-      }
-      .langs {
-        display: flex;
-        gap: 0.25rem;
-        font-size: 0.78rem;
-        font-weight: 700;
-        padding: 0.2rem;
-        border-radius: 999px;
-        background: var(--bg-2);
-      }
-      .langs a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 24px;
-        padding: 0.4rem 0.6rem;
-        border-radius: 999px;
-        color: var(--text);
-        opacity: 0.55;
-        transition: background 140ms ease, opacity 140ms ease;
-      }
-      .langs a:hover {
-        opacity: 1;
-      }
-      .langs a[aria-current="page"] {
-        background: var(--bg-1);
-        opacity: 1;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
       }
 
       /* Theme toggle — sliding sun/moon pill */
@@ -376,7 +347,6 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         const explicit = root.getAttribute("data-theme");
         const prefersDark = matchMedia("(prefers-color-scheme: dark)").matches;
         const effective = explicit || (prefersDark ? "dark" : "light");
-        const next = effective === "dark" ? "light" : "dark";
         root.setAttribute("data-theme", next);
         try {
           localStorage.setItem("starlight-theme", next);
@@ -384,6 +354,15 @@ const kofi = "https://ko-fi.com/kiwicanopy";
           /* ignore */
         }
       });
+
+      // Nav blur on scroll
+      const nav = document.getElementById("nav");
+      function onScroll() {
+        if (window.scrollY > 12) nav?.classList.add("scrolled");
+        else nav?.classList.remove("scrolled");
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
     </script>
   </body>
 </html>

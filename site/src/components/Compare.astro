@@ -1,0 +1,709 @@
+---
+// KiwiDesk — the comparison page at /compare/ (#975).
+//
+// Rendered by /src/pages/compare/index.astro (English) and its
+// /de/ and /ja/ counterparts. Structurally a sibling of
+// Changelog.astro and Legal.astro: a standalone document reusing
+// the landing's design tokens (landing.css) through
+// PageShell.astro rather than Starlight chrome or the landing
+// monolith.
+//
+// WHY A ROUTE OF ITS OWN, not a section on /nerd/ (owner,
+// 2026-08-29). The mode split (#1048) taught the lesson this page
+// is built on: one page ranks for one audience, because one page
+// gets one title, one h1 and one description. "yabai alternative"
+// and "Magnet alternative" are the queries this exists to answer,
+// and a block inside the Nerd landing could never carry a title
+// that answers them.
+//
+// THE TABLE IS WORDS, NEVER TICKS — and that is a correctness
+// rule, not a style preference. Every cell in a competitor column
+// is a claim about someone else's product that we owe an accurate
+// reading of, and the three rows a tick would most tempt us on
+// are exactly the three where a tick is FALSE: AeroSpace and Rift
+// are both SIP-clean, so a SIP cross would libel two projects;
+// our own spaces are emulated the same corner-parking way
+// AeroSpace's are (docs/lua-reference.md ▸ "How inactive spaces
+// hide their windows" cites them for it), so a native-Spaces tick
+// would be false in our own favour. A short phrase carries the
+// nuance a glyph cannot, and it is indexable text besides — the
+// prose is what ranks, and a page of glyphs ranks for nothing.
+//
+// ONE ROW WE LOSE, on purpose. `ecosystem` hands yabai a plain
+// win. If every row favoured KiwiDesk a reader would discount all
+// of them, including the true ones; the row is what makes the
+// other nine legible as reporting rather than marketing. Do not
+// "fix" it.
+//
+// NEVER COUNT LAYOUTS HERE. An earlier draft carried "7 engines
+// vs 4" from the growth bank; verification killed it (Rift ships
+// five including niri-style scrolling, and AeroSpace's four are
+// arguably two with an axis, exactly as our own `grid` is one
+// name over two modes). Counting invites an argument that turns
+// on definitions rather than on behaviour, so the cells name the
+// layouts that have no counterpart instead.
+//
+// Every differentiating claim carries a source link, and a claim
+// we could not verify says so rather than guessing — the Rift
+// native-tab cell is the live example.
+import { Image } from "astro:assets";
+import PageShell, { type Lang } from "./PageShell.astro";
+// The KiwiDesk app mark — the same file PageShell puts in the
+// nav brand. Not kiwi-mark.svg, which is the KiwiCanopy house
+// kiwi: this column names the product, so it wears the product's
+// own mark (owner, 2026-08-30).
+import logoMark from "../assets/brand/logo.svg";
+import { Icon } from "astro-icon/components";
+import { downloadHref } from "../lib/download";
+import en from "../i18n/en.json";
+import de from "../i18n/de.json";
+import ja from "../i18n/ja.json";
+import ogBannerEn from "../assets/brand/og-banner.jpg";
+import ogBannerDe from "../assets/brand/og-banner.de.jpg";
+import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+// Per-key English fallback, exactly as Landing/Guide/Changelog do
+// it: a key a locale has not translated renders its English
+// source rather than a blank.
+const dict = { ...en, ...{ en, de, ja }[lang] } as Record<
+  string,
+  string
+>;
+const t = (k: string): string =>
+  dict[k] ?? (en as Record<string, string>)[k] ?? k;
+
+const ogImage = new URL(
+  (lang === "de"
+    ? ogBannerDe
+    : lang === "ja"
+      ? ogBannerJa
+      : ogBannerEn).src,
+  Astro.site,
+).href;
+
+function localePath(l: Lang, sub = ""): string {
+  const prefix = l === "en" ? "" : `/${l}`;
+  return `${prefix}${sub}` || "/";
+}
+const homeHref = localePath(lang);
+
+
+// Source links. Named here rather than inline so a URL that moves
+// is fixed in one place, and so the prose below reads as prose.
+const src = {
+  ghosttyTabs: "https://ghostty.org/docs/help/macos-tiling-wms",
+  aerospace: "https://nikitabobko.github.io/AeroSpace/guide",
+  aerospaceWorkspaces:
+    "https://nikitabobko.github.io/AeroSpace/guide#emulation-of-virtual-workspaces",
+  yabai: "https://github.com/koekeishiya/yabai",
+  yabaiSip:
+    "https://github.com/koekeishiya/yabai/wiki/Disabling-System-Integrity-Protection",
+  rift: "https://github.com/acsandmann/rift",
+  magnet: "https://magnet.crowdcafe.com/",
+  sipDecision:
+    "/docs/design-decisions/#blocked-by-macos-sip",
+  tabsLimit: "/docs/accepted-limitations/",
+  luaRef: "/docs/lua-reference/",
+};
+
+// The comparison table. `head` is the column order; every `cells`
+// array matches it index-for-index. Cell copy is short on purpose
+// — a cell is a label, and the paragraph below the table is where
+// the nuance lives.
+const tools = [
+  { key: "kiwidesk", label: "KiwiDesk", own: true },
+  { key: "yabai", label: "yabai", own: false },
+  { key: "aerospace", label: "AeroSpace", own: false },
+  { key: "rift", label: "Rift", own: false },
+  { key: "magnet", label: "Magnet", own: false },
+];
+
+// The closing list runs in the OPPOSITE order to the table, and
+// the difference is not an oversight. A table is scanned across
+// and re-scanned against a reference, so the reference column
+// belongs at the left edge the eye keeps returning to. The list
+// is read once, downward: its last line is the one a reader
+// leaves with, and it hands off directly to the call to action
+// beneath it (owner, 2026-08-30).
+const picks = [
+  ...tools.filter((tool) => !tool.own),
+  ...tools.filter((tool) => tool.own),
+];
+
+const rows = [
+  "setup",
+  "sip",
+  "desktops",
+  "tabs",
+  "mouse",
+  "onscreen",
+  "hotkeys",
+  "layouts",
+  "scripting",
+  "ecosystem",
+  "licence",
+];
+---
+
+<PageShell
+  lang={lang}
+  slug="/compare/"
+  title={t("compare_meta_title")}
+  desc={t("compare_meta_desc")}
+  ogImage={ogImage}
+  mainClass="cmp"
+>
+  <p class="cmp__eyebrow">{t("compare_eyebrow")}</p>
+  <h1>{t("compare_h1")}</h1>
+  <p class="intro">{t("compare_intro")}</p>
+  <p class="intro intro--fine">{t("compare_intro_honesty")}</p>
+
+  {/* Horizontal scroll rather than a second, duplicated card
+      layout for narrow screens: a duplicate would ship the same
+      claims twice to a crawler and twice to a screen reader. The
+      row-label column stays put via `position: sticky`, so a
+      phone reader never loses which row they are reading. */}
+  <div class="cmp__scroll" tabindex="0" role="region"
+    aria-label={t("compare_table_aria")}>
+    <table class="cmp__table">
+      <caption class="visually-hidden">{t("compare_table_aria")}</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="cmp__corner"><span
+            class="visually-hidden"
+            >{t("compare_row_header")}</span></th>
+          {tools.map((tool) => (
+            <th scope="col" class={tool.own ? "is-own" : undefined}>
+              <span class="cmp__th">
+                {tool.own && (
+                  <Image class="cmp__mark" src={logoMark} alt=""
+                    width={17} height={17} aria-hidden="true" />
+                )}
+                {tool.label}
+              </span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr>
+            <th scope="row">{t(`compare_row_${row}`)}</th>
+            {tools.map((tool) => (
+              <td class={tool.own ? "is-own" : undefined}>
+                {t(`compare_cell_${row}_${tool.key}`)}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="cmp__note">{t("compare_table_note")}</p>
+
+  <section class="cmp__anchors" aria-labelledby="different">
+    <h2 id="different">{t("compare_diff_title")}</h2>
+    <p class="cmp__lede">{t("compare_diff_lede")}</p>
+
+    <div class="cmp__anchor">
+      <h3><span class="cmp__num" aria-hidden="true">1</span>{t("compare_anchor_gui_title")}</h3>
+      <p>{t("compare_anchor_gui_body")}</p>
+    </div>
+
+    <div class="cmp__anchor">
+      <h3><span class="cmp__num" aria-hidden="true">2</span>{t("compare_anchor_tabs_title")}</h3>
+      <p>
+        <Fragment set:html={t("compare_anchor_tabs_body")
+          .replace("{ghostty}", `<a href="${src.ghosttyTabs}" target="_blank" rel="noopener">`)
+          .replace("{/ghostty}", "</a>")
+          .replace("{limits}", `<a href="${src.tabsLimit}">`)
+          .replace("{/limits}", "</a>")} />
+      </p>
+    </div>
+
+    <div class="cmp__anchor">
+      <h3><span class="cmp__num" aria-hidden="true">3</span>{t("compare_anchor_mouse_title")}</h3>
+      <p>{t("compare_anchor_mouse_body")}</p>
+    </div>
+
+    <div class="cmp__anchor">
+      <h3><span class="cmp__num" aria-hidden="true">4</span>{t("compare_anchor_desktops_title")}</h3>
+      <p>
+        <Fragment set:html={t("compare_anchor_desktops_body")
+          .replace("{sip}", `<a href="${src.sipDecision}">`)
+          .replace("{/sip}", "</a>")
+          .replace("{aero}", `<a href="${src.aerospaceWorkspaces}" target="_blank" rel="noopener">`)
+          .replace("{/aero}", "</a>")} />
+      </p>
+    </div>
+  </section>
+
+  <section class="cmp__tools" aria-labelledby="tools">
+    <h2 id="tools">{t("compare_tools_title")}</h2>
+
+    <article class="cmp__tool" id="yabai">
+      <h3>
+        <a href={src.yabai} target="_blank" rel="noopener">yabai</a>
+      </h3>
+      <p class="cmp__good">{t("compare_yabai_good")}</p>
+      <p>
+        <Fragment set:html={t("compare_yabai_diff")
+          .replace("{sip}", `<a href="${src.yabaiSip}" target="_blank" rel="noopener">`)
+          .replace("{/sip}", "</a>")} />
+      </p>
+    </article>
+
+    <article class="cmp__tool" id="aerospace">
+      <h3>
+        <a href={src.aerospace} target="_blank" rel="noopener">AeroSpace</a>
+      </h3>
+      <p class="cmp__good">{t("compare_aerospace_good")}</p>
+      <p>{t("compare_aerospace_diff")}</p>
+    </article>
+
+    <article class="cmp__tool" id="rift">
+      <h3>
+        <a href={src.rift} target="_blank" rel="noopener">Rift</a>
+      </h3>
+      <p class="cmp__good">{t("compare_rift_good")}</p>
+      <p>{t("compare_rift_diff")}</p>
+    </article>
+
+    <article class="cmp__tool" id="magnet">
+      <h3>
+        <a href={src.magnet} target="_blank" rel="noopener">Magnet</a>
+        <span class="cmp__also">{t("compare_magnet_also")}</span>
+      </h3>
+      <p class="cmp__good">{t("compare_magnet_good")}</p>
+      <p>{t("compare_magnet_diff")}</p>
+    </article>
+  </section>
+
+  <section class="cmp__pick" aria-labelledby="pick">
+    <h2 id="pick">{t("compare_pick_title")}</h2>
+    <p class="cmp__lede">{t("compare_pick_lead")}</p>
+    {/* A definition list, not a bulleted one: each row genuinely
+        IS a term (the tool) and its definition (who it suits), and
+        `dt`/`dd` is what lets a screen reader pair them. It also
+        stops five consecutive lines from opening with "Choose". */}
+    <dl class="cmp__picks">
+      {picks.map((tool) => (
+        <div class={`cmp__pickrow${tool.own ? " is-own" : ""}`}>
+          <dt>
+            {tool.label}
+          </dt>
+          <dd>{t(`compare_pick_${tool.key}`)}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <p class="cmp__outro" id="cmpReq">
+      <Fragment set:html={t("compare_outro")
+        .replace("{lua}", `<a href="${src.luaRef}">`)
+        .replace("{/lua}", "</a>")} />
+    </p>
+
+    {/* Offered only when the data carries a promoted download —
+        omitted outright rather than dimmed (site.md), and the
+        outro above stands alone without it. */}
+    {downloadHref && (
+      <div class="cmp__cta">
+        <a class="btn btn--primary" href={downloadHref}
+          aria-describedby="cmpReq">
+          <Icon name="lucide:download" width={16} height={16}
+            aria-hidden="true" />
+          {t("download_cta")}
+        </a>
+        <a class="btn btn--ghost" href={localePath(lang, "/guide/")}>
+          {t("compare_cta_guide")}
+          <Icon name="lucide:arrow-right" width={16} height={16}
+            aria-hidden="true" />
+        </a>
+      </div>
+    )}
+  </section>
+</PageShell>
+
+<style>
+  /* `:global` is required, not stylistic — `<main class="cmp">`
+     is rendered by PageShell, so it carries PageShell's scope id
+     and never this component's. Changelog.astro documents the
+     same trap at length. */
+  :global(main.cmp) {
+    position: relative;
+    z-index: 1;
+    max-width: 58rem;
+    margin: 0 auto;
+    padding: clamp(1.25rem, 3.5vw, 2rem) clamp(1rem, 4vw, 2.5rem) 5rem;
+  }
+  :global(main.cmp) h1 {
+    margin: 0 0 0.6rem;
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
+    line-height: 1.15;
+  }
+  .intro {
+    margin: 0 0 1rem;
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 44rem;
+  }
+  .intro--fine {
+    font-size: 0.95rem;
+    margin-bottom: 2.4rem;
+  }
+
+  /* The table scrolls inside its own box so the page body never
+     scrolls sideways. `tabindex` + `role=region` make that box
+     reachable by keyboard, which a bare `overflow: auto` is not. */
+  .cmp__scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-3);
+  }
+  .cmp__scroll:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  /* Fixed layout, not auto. Auto sizing hands the widest column
+     to whichever tool happens to have the longest cell — which
+     made KiwiDesk's own column the narrowest, and therefore the
+     first to wrap. Fixed gives every tool the same width, so a
+     cell that wraps does so because its text is long, not because
+     its column lost an auction.
+
+     Cells are NOT written to fit on one line, and must not be:
+     every locale wraps at a different place (German needs roughly
+     a third more room than English for the same cell), so a table
+     tuned until the English fits on one line is a table that
+     breaks in the other two. Two lines is a fine cell. What makes
+     wrapping read as accidental is neighbours that do not wrap
+     hugging the top of the row — which `vertical-align` below
+     fixes once, for every language. */
+  .cmp__table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+    min-width: 54rem;
+    font-size: 0.9rem;
+  }
+  .cmp__table th:first-child {
+    width: 22%;
+  }
+  .cmp__table th,
+  .cmp__table td {
+    padding: 0.75rem 0.85rem;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.4;
+    overflow-wrap: break-word;
+  }
+  .cmp__table thead th {
+    font-size: 0.82rem;
+    /* No fixed height. An explicit one plus the cell padding left
+       about two pixels of slack, so `vertical-align: middle` had
+       nothing to centre within and the row read as top-aligned.
+       Padding owns the height; the mark is inline-flex, which is
+       what keeps the band to one row. */
+    padding-block: 0.85rem;
+    line-height: 1.35;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+  }
+  /* The row-label column stays put while the tool columns scroll,
+     so a narrow screen never shows a cell whose row is off-view. */
+  .cmp__table tbody th {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bg-3);
+    font-weight: 600;
+    box-shadow: inset -1px 0 0 var(--border-strong);
+  }
+  .cmp__table td {
+    color: var(--text-dim);
+  }
+  /* KiwiDesk's column, marked by a quiet tint and a single accent
+     rule at its head rather than a winner's ribbon — the reader
+     should find our column fast, not be told who won. The rule is
+     drawn with box-shadow rather than border-top so it does not
+     shift the header's baseline against the other four. */
+  .cmp__table .is-own {
+    background: color-mix(in srgb, var(--accent-deep) 16%, transparent);
+    color: var(--text);
+  }
+  .cmp__table thead th.is-own {
+    color: var(--text);
+    font-weight: 700;
+    box-shadow: inset 0 3px 0 var(--accent);
+    border-radius: 8px 8px 0 0;
+  }
+  /* Inline and text-sized on purpose: a block-level or oversized
+     mark makes the corner cell taller than the five text headers,
+     and the header band then reads as two rows instead of one. */
+  .cmp__mark {
+    width: 17px;
+    height: 17px;
+    flex: none;
+    opacity: 0.9;
+  }
+  .cmp__th {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    gap: 0.45rem;
+  }
+  /* The corner is the row-label column's own header. It sticks
+     with that column so the mark stays put while the tool columns
+     scroll under it, and it sits above them — a sticky cell that
+     is not raised gets painted over by the row beneath. */
+  .cmp__corner {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--bg-3);
+    box-shadow: inset -1px 0 0 var(--border-strong);
+    border-bottom-color: transparent;
+  }
+  /* Hover tracks the row, which is how a wide table is actually
+     read — across, not down. Suppressed for a coarse pointer,
+     where there is no hover and the tint would only ever fire on
+     a tap. */
+  @media (hover: hover) {
+    .cmp__table tbody tr:hover td {
+      background: color-mix(in srgb, var(--text) 7%, transparent);
+    }
+    .cmp__table tbody tr:hover td.is-own {
+      background: color-mix(in srgb, var(--accent-deep) 24%, transparent);
+    }
+    .cmp__table tbody tr:hover th {
+      color: var(--accent);
+    }
+  }
+  .cmp__table tbody tr:last-child td,
+  .cmp__table tbody tr:last-child th {
+    border-bottom: 0;
+  }
+  .cmp__note {
+    margin: 0.9rem 0 3rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+
+  :global(main.cmp) section {
+    padding-block: 0;
+    margin-bottom: 5rem;
+  }
+  /* The rule between peers must not also appear above the FIRST
+     peer, where it reads as the h2's underline rather than as a
+     separator. */
+  .cmp__anchor:first-of-type,
+  .cmp__tool:first-of-type {
+    border-top: 0;
+    padding-top: 0.4rem;
+  }
+  :global(main.cmp) h2 {
+    margin: 0 0 0.7rem;
+    font-size: clamp(1.35rem, 3.4vw, 1.7rem);
+    line-height: 1.2;
+  }
+  .cmp__lede {
+    margin: 0 0 1.8rem;
+    color: var(--text-dim);
+    max-width: 44rem;
+    line-height: 1.6;
+  }
+  .cmp__anchor {
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border);
+    margin-bottom: 1.2rem;
+  }
+  .cmp__anchor h3,
+  .cmp__tool h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.08rem;
+    line-height: 1.25;
+  }
+  .cmp__anchor h3 {
+    display: flex;
+    align-items: start;
+    gap: 0.65rem;
+  }
+  .cmp__anchor p,
+  .cmp__tool p {
+    margin: 0 0 0.6rem;
+    color: var(--text-dim);
+    line-height: 1.65;
+    max-width: 44rem;
+  }
+  .cmp__tool {
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--border);
+    margin-bottom: 1.6rem;
+  }
+  .cmp__tool h3 a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .cmp__tool h3 a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .cmp__also {
+    margin-left: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-dim);
+  }
+  /* What each tool is genuinely good at leads its section, in the
+     page's full ink — the differences that follow are the dimmer
+     voice. A comparison that opens by conceding is the only kind
+     worth believing. */
+
+  .cmp__outro {
+    margin: 0;
+    color: var(--text-dim);
+    line-height: 1.65;
+    max-width: 44rem;
+  }
+
+  .cmp__eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  /* The numeral is the only thing telling a skimmer the argument
+     has exactly four parts — the headings alone read as a list of
+     unknown length. */
+  .cmp__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent-deep) 24%, transparent);
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 0.1em;
+  }
+  /* What a tool is genuinely good at is set off as a quote-like
+     callout, so conceding reads as deliberate rather than as
+     throat-clearing before the pitch. */
+  .cmp__tool p.cmp__good {
+    color: var(--text);
+    padding-left: 0.9rem;
+    border-left: 3px solid
+      color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+
+  .cmp__picks {
+    margin: 0 0 1.8rem;
+  }
+  .cmp__pickrow {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 0 1.2rem;
+    align-items: baseline;
+    padding: 0.85rem 1rem;
+    border-left: 2px solid var(--border-strong);
+  }
+  .cmp__pickrow.is-own {
+    border-radius: 10px;
+    border: 1px solid
+      color-mix(in srgb, var(--accent) 30%, transparent);
+    border-left: 2px solid var(--accent);
+  }
+  .cmp__pickrow dt {
+    font-weight: 700;
+    color: var(--text);
+  }
+  .cmp__pickrow dd {
+    margin: 0;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .cmp__pickrow.is-own {
+    border-left-color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    border-left-width: 2px;
+    background: color-mix(in srgb, var(--accent-deep) 14%, transparent);
+  }
+  .cmp__pickrow.is-own dd {
+    color: var(--text);
+  }
+  /* One column below the row-axis breakpoint: a 9.5rem term
+     column leaves too little for the sentence on a phone. */
+  @media (max-width: 34rem) {
+    .cmp__pickrow {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+  }
+  .cmp__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1.6rem;
+  }
+  :global(main.cmp) p a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color:
+      color-mix(in srgb, currentColor 45%, transparent);
+  }
+  /* MAJOR — 427px of table is hidden at 375px and macOS overlay
+     scrollbars are invisible at rest, so the only cue was a
+     clipped word. A `scroll`-attached gradient over a `local`
+     one shows an edge fade only while there is more to reach. */
+  .cmp__scroll {
+    background-image:
+      linear-gradient(to left, var(--bg-3), transparent 2.5rem),
+      linear-gradient(to left,
+        color-mix(in srgb, var(--text) 12%, transparent),
+        transparent 1rem);
+    background-attachment: local, scroll;
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 2.5rem 100%, 1rem 100%;
+  }
+  /* MINOR — the smallest type on the page had the longest
+     measure; everything else is capped at 44rem. */
+  .cmp__note,
+  .cmp__picks {
+    max-width: 44rem;
+  }
+  /* MINOR — centring the numeral is right for a one-line heading
+     and wrong for two, and every anchor title wraps at 375px. */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
