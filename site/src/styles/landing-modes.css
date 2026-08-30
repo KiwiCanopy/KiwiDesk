@@ -1066,7 +1066,7 @@ a.quote-card__byline-main:hover {
   letter-spacing: -0.02em;
   margin: 0 0 0.75rem;
 }
-.cta-band__inner p:not(.req) {
+.cta-band__inner > p:not(.req) {
   color: var(--text-dim);
   font-size: clamp(1rem, 2.2vw, 1.12rem);
   margin: 0 auto 1.6rem;
