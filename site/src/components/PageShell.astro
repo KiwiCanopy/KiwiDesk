@@ -213,8 +213,8 @@ const kiwiCanopyUrl = "https://kiwicanopy.com";
         <a href={localePath(lang, "/changelog/")}>{t("footer_changelog")}</a>
         <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>
         <a href={localePath(lang, "/privacy")}>{t("footer_privacy")}</a>
-        <a href={repo} target="_blank" rel="noopener">{t("footer_github")}</a>
-        <a href={kofi} target="_blank" rel="noopener">{t("footer_kofi")}</a>
+        <a href={repo} target="_blank" rel="noopener">{t("footer_github")}<span aria-hidden="true"> ↗</span></a>
+        <a href={kofi} target="_blank" rel="noopener">{t("footer_kofi")}<span aria-hidden="true"> ↗</span></a>
       </nav>
       <p class="copy">{t("footer_copy")}</p>
     </footer>
