@@ -1023,6 +1023,9 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <Icon name="lucide:arrow-right" width={16} height={16}
               aria-hidden="true" />
           </a>
+          {downloadHref && (
+            <p class="quickstart__note">{t.build_download_note}</p>
+          )}
           {/* The note describes the disk image, so it is gated
                with it: a sentence makes a download's promise
                exactly as a dimmed button would — see
@@ -1089,9 +1092,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
               t.build_req
             )}
           </p>
-          {downloadHref && (
-            <p class="quickstart__note">{t.build_download_note}</p>
-          )}
+
 
           <details class="quickstart__alt">
             <summary>
