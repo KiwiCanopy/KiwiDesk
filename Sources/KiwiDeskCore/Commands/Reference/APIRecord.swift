@@ -5,7 +5,14 @@ import Foundation
 public struct APIRecord: Sendable, Equatable {
     /// Single sentence summary (capitalized, ending in period).
     public let summary: String
-    /// Positional arguments in decoding order.
+    /// Positional arguments in decoding order; optionals come
+    /// last. Stated residue: this list is a hand-kept mirror of
+    /// the decoder — only the enum VALUES are derived — so a wrong
+    /// list is worse than a pending one. Two shapes it cannot
+    /// state take the closed-kind escape (`subscribe` is variadic,
+    /// `set_mode` takes a LEADING optional); weigh a third such
+    /// command as evidence the shape, not the summary, must
+    /// change.
     public let arguments: [APIArgument]
 
     public init(_ summary: String, _ arguments: APIArgument...) {
@@ -17,7 +24,9 @@ public struct APIRecord: Sendable, Equatable {
         self.arguments = arguments
     }
 
-    /// Placeholder summary for unwritten command documentation.
+    /// Placeholder summary for unwritten prose — deliberately not
+    /// sentence-shaped, so `APIRecordShapeTests` exempts it by
+    /// identity rather than by pattern.
     public static let pendingSummary = "(summary pending)"
 
     /// True if summary has not been authored yet.

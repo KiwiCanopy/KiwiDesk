@@ -4,7 +4,10 @@ import Foundation
 /// Debounces `windowMoved` events to detect user window drags and drops (#45).
 @MainActor
 public final class DragCoordinator {
-    /// Fired once per finished drag: `(windowId, startFrame, endFrame)`.
+    /// Fired once per finished drag with the gesture's start and
+    /// final frames — the start frame is what tells a move (same
+    /// size) from a resize, and it is the window's REAL size, not
+    /// its slot: constrained apps never match their slot exactly.
     public var onDragEnd:
         @MainActor (WindowID, _ start: CGRect, _ end: CGRect)
             -> Void = { _, _, _ in }
@@ -42,7 +45,12 @@ public final class DragCoordinator {
 
     public init() {}
 
-    /// Ingests `windowMoved` event and schedules debounce settle (#45, #933).
+    /// Ingests a `windowMoved` event and schedules the debounce
+    /// settle (#45). The gesture's start frame comes from
+    /// `previous`, the caller's pre-event state: AX throttles move
+    /// notifications, so a fast gesture's FIRST event already sits
+    /// mid-flight — measuring from it loses everything before
+    /// (#933: a fast border drag resized only part of the way).
     public func windowMoved(
         _ id: WindowID,
         frame: CGRect,
@@ -84,8 +92,11 @@ public final class DragCoordinator {
     }
 
     #if DEBUG
-        /// Pending settle task for async test synchronization (#994;
-        /// tests.md).
+        /// Pending settle task for async test synchronization
+        /// (#994; tests.md ▸ Async tests). Awaiting it does NOT
+        /// mean the drag ended: a settle finding the button still
+        /// down reschedules itself, and after the drop it is nil,
+        /// whose await returns at once. Assert on `onDragEnd`.
         func settleTask(for id: WindowID) -> Task<Void, Never>? {
             pending[id]
         }

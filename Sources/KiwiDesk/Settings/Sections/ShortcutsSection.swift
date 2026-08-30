@@ -1,9 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Shortcuts settings section for keybinding configuration (#68, #678).
-/// Single active recorder (#33), duplicate blocking (#34), live conflict
-/// detection (#35).
+/// Shortcuts settings section, rendered FROM the census (#68,
+/// #678): the census owns placement, `ShortcutsRowOrder` display
+/// order, `ShortcutsFamilyRows` the family→rows expansion —
+/// `ShortcutsCensusRenderTests` pins all three. The Inactive
+/// shortcuts card is deliberately NOT censused: its rows are
+/// instances of families already placed, so the card is
+/// hand-mounted and the guard states why it holds no keys.
+/// Single active recorder (#33), duplicate blocking (#34), live
+/// conflict detection (#35).
 struct ShortcutsSection: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -178,6 +184,12 @@ struct ShortcutsSection: View {
         )
     }
 
+    /// Withheld in Simple (owner ruling 2026-08-04): importing
+    /// bindings out of init.lua is not a first-week concept.
+    /// `hasCustomLua` is the FIRST term for `layersExist`'s
+    /// reason: someone whose init.lua already carries bindings
+    /// must not have the one surface that explains them hidden by
+    /// a mode they did not know they were in.
     private func offersAdvancedDrawer(
         in mode: SettingsMode
     ) -> Bool {
@@ -199,6 +211,8 @@ struct ShortcutsSection: View {
             SettingsCatalog.shortcuts.luaBindings,
             chrome: .card,
             isExpanded: $advancedExpanded,
+            // One predicate at `.simple` (#760): with custom Lua
+            // present the drawer is Simple content, unmarked.
             modeGated: !offersAdvancedDrawer(in: .simple)
         ) {
             VStack(alignment: .leading, spacing: 8) {
@@ -224,7 +238,11 @@ struct ShortcutsSection: View {
         )
     }
 
-    /// Family-to-rows expansion built from live state.
+    /// Family-to-rows expansion built from live state. The
+    /// Desktop list reads EVERY layer's bindings, not the
+    /// selected one's: a row existing only while its layer is
+    /// selected would vanish from under the duplicate block's
+    /// "Go to", which may point into another layer.
     private var expander: ShortcutsFamilyRows {
         return ShortcutsFamilyRows(
             spaces: model.config.spaces,

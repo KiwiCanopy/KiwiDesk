@@ -1,12 +1,21 @@
 import CoreGraphics
 
-/// Symmetric keyboard resize math for floating windows with boundary
-/// edge pinning (#1091, owner ruling 2026-08-29; `FloatSymmetricResizeTests`).
+/// Symmetric keyboard resize math for floating windows with
+/// boundary-edge pinning (#1091, owner ruling 2026-08-29;
+/// `FloatSymmetricResizeTests`). One accepted residue:
+/// reversibility does not hold across the step that FIRST brings
+/// a window into contact with a boundary (bounded by half a step,
+/// confined to that transition). Do NOT answer it by remembering
+/// which way the last grow went — a stored direction needs
+/// invalidating on every move, mode and display change, and buys
+/// back less than it costs.
 public enum FloatResize {
     /// Tolerance for detecting contact with a boundary edge (1 pt).
     public static let boundaryTolerance: CGFloat = 1
 
-    /// Floor for frame shrink: `min_window_size` or 1 pt minimum.
+    /// Floor for a frame shrink: `min_window_size`, never below
+    /// 1 pt (AppKit rejects zero frames). `resized` caps this at
+    /// the CURRENT size, so the floor never LIFTS a frame.
     public static func shrinkFloor(
         minSize: CGFloat
     ) -> CGFloat {

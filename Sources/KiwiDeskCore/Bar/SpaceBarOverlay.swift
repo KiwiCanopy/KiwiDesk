@@ -48,7 +48,10 @@ public final class SpaceBarOverlay {
     var scrollOffset: CGFloat = 0
     /// Cached scroll geometry for hit-testing and autoscroll (#385).
     var scrollGeom: ScrollGeom?
-    /// Running drag-autoscroll task when dwelling on arrow zone (#385).
+    /// Running drag-autoscroll task when dwelling on an arrow
+    /// zone (#385). A `Task` loop, not a `Timer`: a `Timer`'s
+    /// `@Sendable` block cannot weak-capture this non-`Sendable`
+    /// `@MainActor` type in a release build.
     var autoScrollTask: Task<Void, Never>?
     var autoScrollDirection: ScrollArrow?
     /// Last-rendered strip in AX coordinates and the per-item

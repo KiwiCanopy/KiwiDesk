@@ -1,9 +1,20 @@
 import Foundation
 
-/// Migrates `animations.scroll_speed` to `scroll_duration` (#1020,
-/// `ConfigMigrationRoutingTests`, `ScrollDurationMigrationTests`).
+/// Migrates `animations.scroll_speed` to `scroll_duration`
+/// (#1020, `ConfigMigrationRoutingTests`,
+/// `ScrollDurationMigrationTests`). The failure this prevents is
+/// SILENT: `AnimationSettings` decodes with
+/// `decodeIfPresent ?? 150`, so a file still carrying the old key
+/// decodes "successfully" with the user's tuned value replaced by
+/// the default, then saves back without the old key.
 extension ConfigMigration {
-    /// Retired key name and replacement target (#1020).
+    /// Retired key name and replacement target (#1020). The
+    /// TARGET is spelled here rather than derived from
+    /// `AnimationSettings.CodingKeys`, deliberately: a historical
+    /// step must keep emitting the name it was written to emit so
+    /// a LATER rename composes on top — derived, it would skip
+    /// every intermediate crossing. The routing guard's set
+    /// equality reds if the live key stops being declared.
     static let retiredScrollSpeedKey = "scroll_speed"
     static let scrollDurationKey = "scroll_duration"
 
@@ -22,8 +33,16 @@ extension ConfigMigration {
         )
     }
 
-    /// Surgically renames key in raw JSON text (stands down if target present,
-    /// code-reviewer 2026-08-27).
+    /// Surgically renames the key in raw JSON text — standing
+    /// down when the target key is already present, which is the
+    /// one case it cannot do correctly (code-reviewer 2026-08-27):
+    /// a textual rename cannot see a sibling, and a node carrying
+    /// both spellings would become one key twice. The envelope's
+    /// re-parse net cannot catch that — `JSONSerialization` keeps
+    /// the FIRST occurrence and `.sortedKeys` puts the new key
+    /// first, so the duplicate decodes right and compares equal
+    /// while Foundation and `jq` read different values out of one
+    /// file (measured, both ways). The tree walk handles it.
     static func surgicallyRenamed(
         _ text: String
     ) -> Data? {

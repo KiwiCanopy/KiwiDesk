@@ -1,7 +1,11 @@
 /// Stack layout shared domain rules: weight domain, partition, and resize
 /// math (#44, #67).
 extension StackLayout {
-    /// Renormalization floor applied when reading stack weight (#67).
+    /// Renormalization floor applied when READING a stack weight
+    /// (#67). Deliberately below `weightRange.lowerBound`: the
+    /// command never stores a value this small, so the floor only
+    /// defends against a future writer — do not collapse the two
+    /// constants.
     public static let weightFloor: Double = 0.05
     /// Clamp for resize command stored weights (#67).
     public static let weightRange: ClosedRange<Double> = 0.1...10
@@ -15,8 +19,11 @@ extension StackLayout {
         public let blockedByOther: Int?
     }
 
-    /// Safety margin (pt) added to minimum size before deriving weight clamp
-    /// (#925).
+    /// Safety margin (pt) added to a minimum before deriving its
+    /// weight clamp (#925): the cascade check sits at exact
+    /// equality with the clamp's fixed point, so float rounding
+    /// alone could tip a clamped write into a pile. A quarter
+    /// point is invisible on screen and decisively inside.
     public static let minSizeMargin: Double = 0.25
 
     /// Single authority for interactive weight step math (#67, #128).

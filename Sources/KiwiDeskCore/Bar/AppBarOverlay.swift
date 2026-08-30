@@ -1,6 +1,8 @@
 import AppKit
 
-/// Non-activating overlay panel displaying window items in AX coordinates.
+/// Non-activating overlay panel displaying window items in AX
+/// coordinates; the style's `edge` is the stored absolute edge
+/// the bar sits on (#293).
 @MainActor
 public final class AppBarOverlay {
     /// Click-to-focus hook; wired to `KiwiCore.focusWindow`.
@@ -189,6 +191,9 @@ public final class AppBarOverlay {
                 viewport: viewport,
                 animated: true
             )
+            // Items hosted in a glass wrapper are placed by the
+            // glass path; animating them here in container coords
+            // would fight that and flicker.
             for (index, view) in itemViews.enumerated()
             where view.superview === itemContainer {
                 if view.frame == .zero {

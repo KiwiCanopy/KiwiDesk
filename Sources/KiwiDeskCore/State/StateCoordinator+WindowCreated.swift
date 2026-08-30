@@ -69,8 +69,15 @@ extension StateCoordinator {
                 }
             }
         }
-        // Returning windows do not steal focus; transient overlays never get
-        // focus grant (#636, #300, #671).
+        // A RETURNING window joins its space without stealing an
+        // existing focus (#636): the re-track burst arrives in
+        // arbitrary per-pid order, so the focus REPORT — never
+        // re-track order — is the authority. A transient overlay
+        // is granted nothing (#300/#671), asked of STATE, not the
+        // snapshot (a remembered-tiled restore above may have just
+        // cleared it); and it beats the `focused == nil` arm, so
+        // an overlay spawning into a focusless space leaves it
+        // nil — a popup is not a settle target.
         if windows[window.id]?.isTransientOverlay != true,
             !effects.hadRememberedSpace
                 || workspaces[target]?.focused == nil
@@ -79,7 +86,13 @@ extension StateCoordinator {
         }
     }
 
-    /// Screen home for arrivals crossing displays (#1010, #671).
+    /// Screen home for arrivals crossing displays (#1010) — the
+    /// verdict is `screenHome`'s one copy; what this adds is the
+    /// arrival's own gate: a WATCHED DEPARTURE. A `.restored`
+    /// memory is KiwiDesk's own filing, never an observed move —
+    /// after an undock macOS piles windows onto the built-in
+    /// screen, and following THAT frame would discard the very
+    /// layout the snapshot exists to put back (#671).
     private func arrivalScreenHome(
         of window: ManagedWindow?,
         remembered: SpaceMemory?,

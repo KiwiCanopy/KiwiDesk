@@ -43,14 +43,28 @@ extension KeybindingManager {
         )
     }
 
-    /// Notifies glide manager of resize limit refusal cue (#933, 2026-08-29).
+    /// Notifies the glide of a size-limit refusal cue (#933) —
+    /// heard during the press fire AND during the glide, which
+    /// runs outside any fire. Stated residue (code review,
+    /// 2026-08-29): the same `cueResizeRefusal` funnel serves the
+    /// MOUSE end, so a mouse refusal during a glide ends the
+    /// keyboard hold. Accepted — it needs a drag and a held chord
+    /// at once, and the failure is a hold that stops early.
     public func noteResizeRefusal() {
         guard isFiring || holdGlide.isGliding else { return }
         holdGlide.noteRefusal()
     }
 
-    /// Executes key-down binding and arms glide if chord is held (#1056,
-    /// #1082).
+    /// Executes the key-down binding, then lets the ladder judge
+    /// the fire's tally (#1056/#1082). `id` is CARRIED from the
+    /// registration itself, and looked up for EXISTENCE only — the
+    /// one question the table still answers honestly after a Lua
+    /// body rebuilds the bindings: `bind` inside a body runs
+    /// `deactivate`, minting fresh ids, so the release for THIS
+    /// press's id will never arrive and a glide armed on it would
+    /// run to `maxRunSeconds`. The glide re-issues the captured
+    /// command and never looks anything up, so the question must
+    /// be asked here — never re-deriving WHICH binding to act on.
     func pressFire(ref: Int32, combo: KeyCombo, id: UInt32?) {
         let outer = holdGlide.beginFire()
         fire(ref: ref, combo: combo)

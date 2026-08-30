@@ -1,8 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Derives preset preview structure and layout modes (#859,
-/// `PresetPreviewPlanTests`, `SparseModeFallbackTests`).
+/// Derives the preset preview from the LAYOUT's own accessors
+/// and nothing else (#859, `PresetPreviewPlanTests`).
+/// `liveSizes` threads through unchanged — a caller that CAN know
+/// the hardware and passes nil makes preview and apply disagree.
+/// From the "For other setups" drawer nil is correct, and the
+/// drawer's answer genuinely differs from what Apply would draw
+/// (`SparseModeFallbackTests`); what makes that unreachable is
+/// Apply being GATED on the screen-count match, not the drawer
+/// being right (architect review, 2026-08-17).
 struct PresetPreviewPlan: Equatable {
     /// One planned space and its layout mode.
     struct Slot: Equatable, Identifiable {
@@ -11,7 +18,11 @@ struct PresetPreviewPlan: Equatable {
         var id: SpaceID { space }
     }
 
-    /// One screen's planned spaces.
+    /// One screen's planned spaces — INCLUDING a screen the
+    /// preset plans nothing for (empty `slots`): empties are kept
+    /// in the value and dropped at the DRAWING site, which is what
+    /// lets `PresetScreenCard` consume this plan too (review,
+    /// 2026-08-17).
     struct Group: Equatable, Identifiable {
         let screen: Int
         let slots: [Slot]
@@ -53,7 +64,11 @@ struct PresetPreviewPlan: Equatable {
         }
     }
 
-    /// Resolves `ScreenClass` for screen index from live display sizes (#859).
+    /// Resolves `ScreenClass` for a screen index — THE ONE COPY
+    /// (#859): `PresetScreenCard` kept its own four lines of this,
+    /// held by an agreement test that could not see the card's
+    /// private half, so a drift passed green (code review,
+    /// 2026-08-17). Both consumers now read this.
     static func shape(
         of screen: Int,
         in liveSizes: [CGSize]?

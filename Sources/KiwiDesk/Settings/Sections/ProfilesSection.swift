@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Profiles section: lists saved profiles, loading defaults, and presets
-/// (#36, #53, #68).
+/// Profiles section: lists saved profiles, loading defaults, and
+/// presets (#36, #53, #68; rebuilt in #678 Phase 3 turn 13a).
 struct ProfilesSection: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -80,6 +80,9 @@ struct ProfilesSection: View {
         }
     }
 
+    /// "a built-in layout", not "the built-in Standard": no
+    /// layout is NAMED Standard, and two nouns for one thing on
+    /// one page sends a translator two ways.
     private var noProfilesCaption: String {
         L(
             "profiles.saved.empty",
@@ -121,6 +124,12 @@ struct ProfilesSection: View {
     private func profileRow(
         _ summary: ProfileSummary
     ) -> some View {
+        // CENTRED, not first-text-baseline (owner eye-confirm,
+        // 2026-08-16): the picture belongs to the whole two-line
+        // block. Centring is also what RETIRED an .alignmentGuide
+        // here — a picture with no text baseline resolves to its
+        // own bottom edge, so rows with and without a "+N" chip
+        // seated differently under baseline alignment.
         HStack(alignment: .center) {
             // Screen count icon (#789).
             screenPicture(summary)

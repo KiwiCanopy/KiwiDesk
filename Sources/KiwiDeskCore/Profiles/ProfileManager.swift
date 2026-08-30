@@ -126,8 +126,13 @@ public final class ProfileManager {
         }
     }
 
-    /// Renames a stored profile via atomic move, preventing APFS
-    /// case-only collision deletion.
+    /// Renames a stored profile via an atomic move — NOT
+    /// write-new-then-remove-old: on case-insensitive APFS a
+    /// case-only rename resolves both names to ONE file, and the
+    /// remove leg would delete the just-renamed profile. Accepted
+    /// non-atomicity: if the name-field rewrite after the move
+    /// fails, the file sits at the new name with the old name
+    /// inside — a tiny window, traded for the case safety.
     func rename(from old: String, to new: String) throws {
         guard old != new else { return }
         var profile = try read(name: old)

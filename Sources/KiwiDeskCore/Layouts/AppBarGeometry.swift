@@ -45,8 +45,12 @@ public enum AppBarGeometry {
     /// Tolerance for bar frame clamping (2 pt, #148).
     public static let clampTolerance: CGFloat = 2
 
-    /// Nudges `frame` clear of painted bar `strip` on `edge` (#242, #1091,
-    /// QA 2026-07-19).
+    /// Nudges `frame` clear of a painted bar strip (#242, QA
+    /// 2026-07-19); position only, size unchanged. `inset` widens
+    /// the strip by the focus ring's width so the RING clears the
+    /// bar too (#1091) — applied whether or not the window is
+    /// FOCUSED, which is the point: a focus-dependent inset would
+    /// move the window on every ring change.
     public static func clampClear(
         _ frame: CGRect,
         of strip: CGRect,
@@ -79,8 +83,12 @@ public enum AppBarGeometry {
         return result
     }
 
-    /// Carves `strip` from `region` for float bounding (#1091, architect
-    /// review 2026-08-29).
+    /// Carves `strip` from `region` for float bounding (#1091).
+    /// Its sibling is `windowFrame(in:minus:edge:inner:)`, NOT
+    /// `clampClear` (architect review 2026-08-29): a new caller
+    /// takes `windowFrame` if the layout is placing the window and
+    /// this if it is not. Monotonic, and never a negative extent —
+    /// an inside-out rect reads as enormous free space.
     public static func regionClear(
         _ region: CGRect,
         of strip: CGRect,

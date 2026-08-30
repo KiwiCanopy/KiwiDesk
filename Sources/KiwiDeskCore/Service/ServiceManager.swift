@@ -32,7 +32,11 @@ public enum ServiceManager {
             <true/>
             <key>KeepAlive</key>
             <dict>
-                <!-- Restart a crash, never a clean exit (#1068). -->
+                <!-- Restart a crash, never a clean exit: the
+                     second launch exits SUCCESSFULLY so launchd
+                     lets it rest (#1068). Setting this true, or
+                     dropping the condition, re-opens an infinite
+                     respawn that steals focus every throttle. -->
                 <key>SuccessfulExit</key>
                 <false/>
             </dict>

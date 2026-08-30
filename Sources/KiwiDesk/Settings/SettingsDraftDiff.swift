@@ -81,6 +81,11 @@ struct SettingsDraftDiff {
                 }
             }
         }
+        // A master's followers have no row of their own, so the
+        // master owns their leaves outright — an OVERRIDE, not
+        // first-wins: the follower's surfaceless census row claims
+        // its own path above and would book a second change for a
+        // value the user set once.
         for (key, paths) in SettingKey.masterWrites {
             for path in paths { bases[path] = key }
         }
@@ -109,8 +114,12 @@ struct SettingsDraftDiff {
         }
     }
 
-    /// Normalizes path keys by replacing instance identifiers with `[]`
-    /// (`guard-prover 2026-08-04`).
+    /// Normalizes path keys by replacing instance identifiers
+    /// with `[]`. Redundant with `censusBases()`' container-prefix
+    /// registration BY DESIGN — each is the other's only backup
+    /// (guard-prover 2026-08-04: deleting either alone leaves the
+    /// suite green through the other). Do not "simplify" one away
+    /// on the strength of a green run.
     private static func normalized(_ path: String) -> String {
         var result = ""
         var rest = Substring(path)

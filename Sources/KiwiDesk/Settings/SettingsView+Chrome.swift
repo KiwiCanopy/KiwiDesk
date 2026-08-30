@@ -14,6 +14,10 @@ extension SettingsView {
             SettingsHeaderBar(model: model)
                 // Lift header z-index so search dropdown paints over content.
                 .zIndex(1)
+            // The paused banner outranks the per-section Lua one:
+            // missing Accessibility makes the whole dashboard
+            // inert. Gated here (not self-gating) so the padding
+            // never reserves empty space when trusted.
             if model.permissionPaused {
                 PermissionPausedBanner(
                     onResolve: model.onResolvePermission
@@ -26,10 +30,18 @@ extension SettingsView {
                     .padding(.horizontal, 12)
                     .padding(.top, 10)
             }
+            // `ClickAwayResignsFocus` installs a window-scoped
+            // mouse-down monitor (#93) committing an edited field
+            // when a click lands outside it — a zero-size,
+            // hit-test-transparent probe.
             ZStack {
                 ClickAwayResignsFocus()
                 content()
             }
+            // Above BOTH panes on purpose (#760): the segment is
+            // always in the header, so a flip can wash Home's
+            // inserted cards or an in-area surface alike — one
+            // mount, the model owns the timeline.
             .environment(
                 \.settingsModeReveal,
                 model.modeRevealActive
@@ -39,6 +51,9 @@ extension SettingsView {
             }
             // Save pill floats over content when undocked (#678, owner ruling
             // 2026-08-09).
+            // The overlay is EMPTY below the row breakpoint
+            // rather than conditionally applied, so the content
+            // subtree's identity survives the crossing.
             .overlay(alignment: .bottom) {
                 if !width.docksSavePill {
                     SettingsFooter(model: model)

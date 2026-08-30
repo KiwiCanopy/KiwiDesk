@@ -27,11 +27,18 @@ public final class DragCrossingCoordinator {
         var stickyRefused = false
     }
     private var gestures: [WindowID: Gesture] = [:]
+    /// A single slot, not per-window: only one window is ever
+    /// user-dragged at a time, so `schedule` may displace another
+    /// window's dwell without harm; `gestures` stays per-window
+    /// because ids must not inherit stale bookkeeping.
     private var pending:
         (window: WindowID, display: DisplayID, task: Task<Void, Never>)?
 
     #if DEBUG
-        /// Timeline handle for async crossing testing (#994, `tests.md`).
+        /// Timeline handle for async crossing testing (#994;
+        /// tests.md). Awaiting it does NOT mean a crossing fired —
+        /// it also completes for a disarmed dwell, and it is nil
+        /// when none is armed. `onCross` is the fact.
         var dwellTask: Task<Void, Never>? { pending?.task }
     #endif
 

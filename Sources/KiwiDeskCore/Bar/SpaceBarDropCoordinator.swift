@@ -39,7 +39,10 @@ final class SpaceBarDropCoordinator {
 
     /// Clear hover tint and pending sweep.
     var clearFeedback: @MainActor () -> Void = {}
-    /// Springs visible space to `target` mid-drag (#445).
+    /// Springs the visible space to `target` mid-drag. Returns
+    /// whether the spring actually happened — a refused sticky
+    /// move (#445) or an already-active target springs nothing,
+    /// so `fire` must not record it as `sprungSpace`.
     var spring:
         @MainActor (_ target: SpaceID, _ window: WindowID)
             -> Bool = { _, _ in false }
@@ -53,7 +56,11 @@ final class SpaceBarDropCoordinator {
     private var pendingDwell: Task<Void, Never>?
 
     #if DEBUG
-        /// Pending dwell task for async test synchronization (#994; tests.md).
+        /// Pending dwell task for async test synchronization
+        /// (#994; tests.md ▸ Async tests). Cleared the instant the
+        /// dwell fires or disarms, and it also completes for a
+        /// CANCELLED dwell — it says the dwell ended, never that
+        /// it sprang; `sprungSpace` is that fact.
         var dwellTask: Task<Void, Never>? { pendingDwell }
     #endif
 

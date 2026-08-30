@@ -8,8 +8,10 @@ public struct TilingSettings: Sendable, Equatable {
     /// Space gap overrides (`gap.override[space_id]`).
     public var gapsOverride: [SpaceID: Gaps] = [:]
     public var minWindowSize: CGFloat = 300
-    /// Global magnitude (points) for authored resize hotkeys (`resize.step`,
-    /// #58).
+    /// Global magnitude (points) the catalog AUTHORS Grow/Shrink
+    /// keybindings with (`resize.step`, #58). Layout math never
+    /// reads this — the bound row's own literal delta drives an
+    /// actual resize.
     public var resizeStep: CGFloat = 50
     /// Sound alert when resize hotkey cannot act in layout (`resize.feedback`,
     /// #184).
@@ -19,7 +21,12 @@ public struct TilingSettings: Sendable, Equatable {
     public var swapSkipsCascade = true
     /// Nudge float toward screen center on float toggle (`float.nudge`).
     public var floatNudge = true
-    /// Scale float size proportionally on display change (#502, #444, #493).
+    /// Scale float size proportionally on display change (#502,
+    /// superseding #444/#493's keep-the-size). Read only by
+    /// `FloatReanchor.target` at a display-crossing re-anchor,
+    /// never by layout math — flipping it moves nothing. OFF keeps
+    /// the exact pixel size and accepts the OS overflow (the
+    /// narrow, technical ask — Lua-only, §2.7).
     public var floatScaleOnDisplayChange = true
     public var bsp = BspParams()
     public var stack = StackParams()

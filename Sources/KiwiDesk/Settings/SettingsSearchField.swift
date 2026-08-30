@@ -5,11 +5,19 @@ import SwiftUI
 /// `SettingsView.chrome`).
 struct SettingsSearchField: View {
     @Binding var text: String
-    /// Shared FocusState binding for programmatic focus (⌘K).
+    /// Focus, owned by the caller: the field lives as long as the
+    /// window, so it must NOT grab focus on appear — but ⌘K must
+    /// put focus here from anywhere, and that shortcut belongs to
+    /// the header. A `FocusState` binding is how the two share
+    /// one focus.
     let focus: FocusState<Bool>.Binding
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
-    /// Moves result highlight while maintaining field focus.
+    /// Moves the highlighted result while focus stays in the
+    /// field. No default value, deliberately: a default on a
+    /// required collaboration is fail-open — a call site that
+    /// forgot it would get a silently mouse-only field, the bug
+    /// this parameter exists to fix.
     let onMove: (MoveCommandDirection) -> Void
     /// Commits selection and performs search reveal.
     let onCommit: () -> Void
@@ -49,7 +57,16 @@ struct SettingsSearchField: View {
         .font(.body)
         .focused(focus)
         .onExitCommand { text = "" }
+        // `onKeyPress`, not `onMoveCommand`: the latter has no
+        // pass-through and would swallow ←/→, and the
+        // `KeyEquivalent` overload matches whatever the modifiers
+        // are — claiming ↑/↓ there also ate ⇧↑ and ⌘↑.
         .onKeyPress { press in
+            // Subtracting, not `isEmpty`: AppKit reports an arrow
+            // key with `.function` and `.numericPad` set, so an
+            // isEmpty test refuses EVERY bare arrow and silently
+            // kills the navigation this exists to restore — a
+            // green build says nothing about it.
             guard
                 press.modifiers.intersection(
                     [.shift, .command, .option]
@@ -91,6 +108,10 @@ struct SettingsSearchField: View {
     private var fieldShape: some View {
         ChipMetrics.shape
             .fill(SettingsTheme.sunken)
+            // Full-strength accent: `.plain` removes the system
+            // focus ring, so this stroke IS the focus indicator —
+            // blended at 0.55 it measured 1.52:1, below what the
+            // platform ring it replaces delivers.
             .overlay {
                 ChipMetrics.shape
                     .strokeBorder(

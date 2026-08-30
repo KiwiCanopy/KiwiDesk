@@ -37,6 +37,11 @@ public struct Gaps: Sendable, Equatable, Codable {
         /// Gap between stacked windows (rows).
         public var vertical: CGFloat
 
+        /// The 10 pt default couples to `BorderStyle.width` (5):
+        /// two neighbouring rings each reach their width into this
+        /// gap, so 2 × 5 fills it without overlap. Lowering it
+        /// silently invalidates that rationale — revisit the width
+        /// default and its docs together.
         public init(
             horizontal: CGFloat = 10,
             vertical: CGFloat = 10
@@ -86,15 +91,22 @@ public struct LayoutContext: Sendable {
     public var trackBreaks: Set<WindowID>
     /// Track column weights (#128).
     public var trackWeights: [WindowID: Double]
-    /// Sticky windows exempt from overlap piling (#414).
+    /// Sticky windows exempt from overlap piling (#414). May
+    /// contain ids not in the passed window array (floating
+    /// stickies); layouts only test membership against the ids
+    /// they were handed, so the over-approximation is harmless.
     public var sticky: Set<WindowID>
     /// Screen neighbor topology for clamping and park corners (#878, #881).
     public var screenNeighbors: ScreenNeighbors
     /// App-enforced size bounds confirmed by engine (#677).
     public var sizeBounds: [WindowID: EffectiveSizeBound]
 
-    /// Bypasses generalized size bounds on explicit set commands (#1055,
-    /// owner ruling 2026-08-28).
+    /// Bypasses the GENERALIZED size-bound arm on a forced,
+    /// explicit-apply pass (#1055, owner ruling 2026-08-28) — an
+    /// explicit set past a corroborated bound genuinely re-asks
+    /// the app once. The probe self-terminates: the refusal it
+    /// observes mints the exact entry the next un-forced pass
+    /// consumes.
     public var probesBeyondBounds = false
 
     public var bsp: BspParams

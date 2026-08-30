@@ -27,8 +27,15 @@ extension SpacesSection {
         )
     }
 
-    /// Per-row override cell button opening full-pane editor (#678 8b, owner
-    /// ruling 2026-08-04).
+    /// Per-row override cell opening the full-pane editor (#678
+    /// 8b). Wording turns on the mode (owner ruling 2026-08-04):
+    /// tiled counts read "N custom"; Floating reads a muted "N
+    /// saved" that still opens the editor (grey, don't hide).
+    /// Withheld entirely while the offer is locked (#678 8c) —
+    /// `SpaceOverrideOffer` owns that predicate, gated HERE at the
+    /// one render site so the row never holds a second copy (the
+    /// hand-negated-copy drift `HomeCardOrder.isOffered` prevents
+    /// one level up).
     @ViewBuilder func customizeButton(
         _ space: SpaceID
     ) -> some View {

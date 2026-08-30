@@ -1,10 +1,17 @@
 import AppKit
 
-/// WindowServer event integration and geometry tracking for `BorderManager`
-/// (#285, #414).
+/// WindowServer event integration and geometry tracking for
+/// `BorderManager` (#285). The manager is the WS-events broker
+/// for two consumers — the ring and the sticky mark's tees —
+/// because `SkyLightWindowEvents` has a single weak sink. Two is
+/// a deliberate deferral; a THIRD is the trigger to extract a
+/// standalone `WindowServerWatch` service (#414).
 extension BorderManager {
-    /// Configures WindowServer tracking state from environment
-    /// (`KIWIDESK_NO_WS_TRACKING`, #596).
+    /// Configures WindowServer tracking from the environment
+    /// (`KIWIDESK_NO_WS_TRACKING`, #596). Named after
+    /// `StrandDetector.configureFromEnvironment` but NOT its twin:
+    /// where `KIWIDESK_STRAND_LOG` only turns on logging, this
+    /// kills a production fast path for the whole run.
     func configureFromEnvironment(
         _ environment: [String: String] = ProcessInfo.processInfo
             .environment
@@ -32,7 +39,10 @@ extension BorderManager {
         updateSkyLightSubscription(Set(overlays.keys))
     }
 
-    /// Handles WindowServer notification from `SkyLightWindowEvents`.
+    /// Handles a WindowServer notification. The guard is scoped
+    /// to windows we watch EITHER way (ring or sticky-tracked); a
+    /// window watched neither way is a stale additive delivery
+    /// (`watch(_:)`'s undocumented semantics) and is dropped.
     func handleSkyLightEvent(
         _ kind: SkyLightWindowEvents.Kind,
         window id: WindowID
@@ -46,6 +56,10 @@ extension BorderManager {
             onWindowReordered(id)
             overlays[id]?.order(relativeTo: id.raw)
         case .followAndReorder:
+            // Unhide must re-assert order even when the bounds
+            // read fails; restoration stays with that one explicit
+            // order so a successful reconcile cannot issue it
+            // twice.
             _ = reconcile(id, restoreVisibility: false)
             onWindowReordered(id)
             overlays[id]?.order(relativeTo: id.raw)
@@ -104,8 +118,10 @@ extension BorderManager {
         }
     }
 
-    /// Status message reporting active WindowServer vs AX fallback tracking
-    /// mode.
+    /// The one line telling a QA run which path it is on — names
+    /// the lever explicitly when it forced the fallback, or an
+    /// unexplained "unavailable" on a healthy Mac reads as a real
+    /// WindowServer failure.
     private var trackingStatusMessage: String {
         if skyLightActive {
             return "WindowServer border tracking active"

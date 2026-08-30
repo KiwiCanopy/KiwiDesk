@@ -37,6 +37,13 @@ struct SpaceOverrideRows: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer(minLength: SettingsMetrics.overrideRowInset)
+            // ONE line, always: sized for the middle of the
+            // range, the two longest locales shrink slightly
+            // rather than wrap (German's ÜBERSCHREIBUNG
+            // hyphenated into three lines; owner, on device,
+            // 2026-08-16). Stated residue: a measured column
+            // needs a preference key across two views — worth it
+            // if a third surface grows this column.
             Text(L("space_override.override_column", "Override"))
                 .font(.caption2)
                 .fontWeight(.semibold)

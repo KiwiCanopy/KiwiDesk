@@ -1,11 +1,19 @@
 import Foundation
 import ServiceManagement
 
-/// Authority for KiwiDesk login item registration via `SMAppService.mainApp`
-/// (#342, #96).
+/// Authority for the KiwiDesk login item via `SMAppService`
+/// (#342, #96). Not the only auto-start: the `kiwidesk service`
+/// LaunchAgent sets `RunAtLoad`, so it also launches at login,
+/// invisibly to this toggle — the #196 instance lock dedupes the
+/// two into one process. Read-through: never a cached bool, so a
+/// change made in System Settings is seen on the next poll.
 public enum LoginItemManager {
     /// Live registration state mapped from the OS.
     public static var current: LoginItemState {
+        // Location first, unconditionally: a copy at a path that
+        // cannot be a stable login item is `.unavailable` whatever
+        // `SMAppService` reports — even if a prior install left a
+        // stale registration.
         if let reason = unavailableReason(for: Bundle.main.bundleURL) {
             return .unavailable(reason)
         }
@@ -47,7 +55,13 @@ public enum LoginItemManager {
         SMAppService.openSystemSettingsLoginItems()
     }
 
-    /// Pure mapping from OS `SMAppService.Status` to `LoginItemState`.
+    /// Pure mapping from the OS status. `.notFound` folds to
+    /// `.notRegistered` — it is the ordinary pre-registration
+    /// state for `mainApp` (verified on 26.x), so a registerable
+    /// app offers to turn it on rather than greying; the terminal
+    /// `.notFound` is caught by `current`'s location check. An
+    /// unknown future status also folds there: offer, log, re-read
+    /// — the switch flips back cleanly on failure.
     static func state(from status: SMAppService.Status) -> LoginItemState {
         switch status {
         case .enabled: return .enabled

@@ -15,7 +15,11 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// AppKit backend supports glow rendering (#533).
     let rendersGlow = true
 
-    /// Updates ring geometry, stroke color, and glow bloom (#358).
+    /// Updates ring geometry, stroke color, and glow bloom
+    /// (#358). Implicit Core Animation is disabled so the ring
+    /// snaps to each commanded frame instead of easing a step
+    /// behind the window; stacking is `order(relativeTo:)`'s job,
+    /// called on sync only, never per tick.
     func update(
         geometry: BorderGeometry,
         colorHex: String,
@@ -118,6 +122,9 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.backgroundColor = .clear
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
+        // Normal level, not floating: the ring is stacked
+        // relative to its target and must share the target's band
+        // to sit below windows layered over it.
         panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none

@@ -81,6 +81,10 @@ extension SpaceBarOverlay {
                 ? style.fontSize : depth * 0.42
             extent +=
                 ceil(
+                    // What is DRAWN, not the app name: measuring
+                    // a different string than `layoutFrontName`
+                    // lays out slides the whole Space run off its
+                    // alignment.
                     ((app.title ?? app.name) as NSString).size(
                         withAttributes: [
                             .font: NSFont.systemFont(
@@ -94,6 +98,10 @@ extension SpaceBarOverlay {
     }
 
     private func attachFrontViewsIfNeeded() {
+        // Re-added every render so the segment stays ABOVE item
+        // views created later (`syncItemViewCount` appends on
+        // top); moving hosts also detaches from the previous
+        // parent (a plain `addSubview` reparents).
         let content = frontHost ?? itemContainer
         for view in [
             frontBox, frontDivider, frontIcon, frontGlyph, frontName,
@@ -160,6 +168,12 @@ extension SpaceBarOverlay {
                 width: cell,
                 height: cell
             )
+        // The one AX element the segment exposes. Names the APP
+        // even when a title is drawn, and first — a title alone
+        // says nothing about where it lives. Two frames rather
+        // than one with a withheld argument: an app with no title
+        // yet (#160) should announce a short sentence, not a
+        // dangling separator.
         let axLabel =
             app.title.map {
                 L(

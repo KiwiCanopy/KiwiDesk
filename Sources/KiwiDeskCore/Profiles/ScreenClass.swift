@@ -1,8 +1,13 @@
 import CoreGraphics
 import Foundation
 
-/// Display shape classification for starter layout assignment (#678,
-/// `ScreenClassTests`). Measured in points from `Display.frame`.
+/// Display shape classification for starter layout assignment
+/// (#678). Measured in POINTS from `Display.frame` — a 5K and a
+/// 1440p 27" want identical layouts; `visibleFrame` is chrome the
+/// user can move, and a screen does not change shape when they
+/// do. The four cases are disjoint only because they are tested
+/// in `allCases` order — a case added here states where in that
+/// order it goes (`ScreenClassTests` pins order and boundaries).
 public enum ScreenClass: String, Sendable, CaseIterable, Codable {
     /// Taller than wide.
     case pivoted
@@ -38,8 +43,14 @@ public enum ScreenClass: String, Sendable, CaseIterable, Codable {
         of(display.frame.size)
     }
 
-    /// Candidate layout modes for this shape, ordered best first
-    /// (`StarterAllocation`, architect review 2026-08-11).
+    /// Candidate layouts for this shape, best first. The ABSENCES
+    /// are as deliberate as the entries: `track` is out of
+    /// desktop/laptop, `monocle` out of desktop/ultrawide, `bsp`
+    /// only under desktop (absurd at 3440 pt, unusable at
+    /// 1728 pt). `floating` is in NO list — one Floating space per
+    /// setup is a rule about the SETUP, owned end to end by
+    /// `StarterAllocation` (architect review, 2026-08-11), which
+    /// also owns each screen's LEAD before this list is read.
     public var layouts: [LayoutMode] {
         switch self {
         case .laptop:

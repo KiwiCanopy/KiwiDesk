@@ -18,9 +18,19 @@ public final class LocalizationManager: ObservableObject {
         reload()
     }
 
-    /// Effective locale code (`nil` for inline English fallback, #659).
+    /// Effective locale code (`nil` = inline English). Reads
+    /// `Locale.preferredLanguages`, never `Locale.current`: inside
+    /// the packaged `.app` the resolved locale answered
+    /// `CFBundleDevelopmentRegion` (English) whatever the system
+    /// language, because the bundle declared no other localization
+    /// — and it never reproduced under `swift run`, which has no
+    /// Info.plist at all (#659; `build-app.sh` also declares
+    /// `CFBundleLocalizations`, and the two ship together).
     public var effectiveLocale: String? {
         if let selection {
+            // Explicit English: no en.json ships, so it resolves
+            // to inline English everywhere — never the OS
+            // language. Distinct from nil (System default).
             if selection == "en" { return nil }
             return available.contains(selection)
                 ? selection : nil

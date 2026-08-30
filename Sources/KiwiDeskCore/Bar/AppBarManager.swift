@@ -43,6 +43,8 @@ public final class AppBarManager {
 
     private var overlays: [DisplayID: AppBarOverlay] = [:]
     private var spaceOfDisplay: [DisplayID: SpaceID] = [:]
+    /// The bars actually painted after `sync`'s filter — the one
+    /// source for anything that must sit clear of a bar (#242).
     private var shownBars: [Bar] = []
 
     public init() {}
@@ -64,9 +66,13 @@ public final class AppBarManager {
         }
     }
 
-    /// True when a painted bar is currently rendering or announcing `id`'s
-    /// title
-    /// (#670, #937, 2026-08-20).
+    /// True when a painted bar is currently rendering or
+    /// announcing `id`'s title (#670, 2026-08-20). Deliberately
+    /// NOT gated on `showsText` or the edge (#937): icon-only and
+    /// vertical bars still build their accessibility label from
+    /// the title, and an announced-stale title is as wrong as a
+    /// drawn-stale one. A `count > 1` group draws its APP NAME,
+    /// never a member's title, so a group is not a consumer.
     public func showsTitle(of id: WindowID) -> Bool {
         shownBars.contains { bar in
             bar.items.contains {

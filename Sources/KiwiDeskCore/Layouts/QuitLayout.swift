@@ -13,7 +13,12 @@ public enum QuitGridLayout {
     public static let defaultTargetDepth = 5
     /// Accepted grid target depth range (1...20).
     public static let targetDepthRange = 1...20
-    /// Teardown dimension ceiling (4x4 = 16 cells max per display).
+    /// Teardown dimension ceiling (4×4), a safety boundary and
+    /// deliberately not configurable. The 2×2…4×4 span and its
+    /// growth thresholds are restated as prose in
+    /// `BehaviorSection`, `docs/user-guide.md` and
+    /// `docs/lua-reference.md` — changing the cap or the formula
+    /// updates those sites too.
     public static let maxDimension = 4
 
     /// Calculates grid dimension for `count` windows with `targetDepth` depth.
@@ -28,7 +33,9 @@ public enum QuitGridLayout {
         return min(max(Int(needed), 2), maxDimension)
     }
 
-    /// Partitions windows into round-robin cell buckets.
+    /// Round-robin cell buckets — the shared partition behind
+    /// `frames` and `raiseOrder`: both MUST agree, or the raise
+    /// circle stacks a different pile than the one placed.
     private static func buckets(
         for windows: [WindowID],
         targetDepth: Int
@@ -90,7 +97,12 @@ public enum QuitGridLayout {
         return result
     }
 
-    /// Deterministic raise circle order across quit grid cells (#688).
+    /// Deterministic raise circle order across quit-grid cells.
+    /// The order is the whole promise — the resulting stacking is
+    /// the caller's: `restackForTeardown` drops one member (the
+    /// unbeatable key window) and is wall-clock bounded, so read
+    /// the guarantees as properties of the circle, not of every
+    /// quit (#688).
     public static func raiseOrder(
         for windows: [WindowID],
         targetDepth: Int

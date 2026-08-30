@@ -15,6 +15,10 @@ public struct WindowID: Hashable, Sendable, Codable,
 }
 
 /// Running application identity and localized display name.
+/// `bundleID` is lower-cased on the way in: LaunchServices treats
+/// bundle identifiers case-insensitively, so a stored config
+/// value and the live `NSRunningApplication` value must compare
+/// in one case. `name` is presentation only — never matching.
 public struct AppRef: Sendable, Equatable {
     public let bundleID: String?
     public let name: String
@@ -76,8 +80,10 @@ public struct ManagedWindow: Sendable, Equatable {
         self.isFullscreen = isFullscreen
     }
 
-    /// Reconstructs snapshot with a new `WindowID` for native tab switches
-    /// (#308).
+    /// Reconstructs the snapshot with a new `WindowID` for native
+    /// tab switches (#308) — kept beside the field list so the
+    /// mirror lives in one place; a `WindowManager` round-trip
+    /// test guards a forgotten field.
     public func withID(_ newID: WindowID) -> ManagedWindow {
         ManagedWindow(
             id: newID,

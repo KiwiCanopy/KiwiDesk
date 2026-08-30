@@ -1,8 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Settings group for binding profiles to macOS Desktops (#7, #678, #768,
-/// #888).
+/// Settings group for binding profiles to macOS Desktops (#7,
+/// #678, #768, #888). The remaining grey is the resolver's and is
+/// scoped to the ROWS, not the whole card (#527: the drawer keeps
+/// its header and `?` anchor clickable). By the #815 derivation
+/// (`GateReasonPlacement`) these rows owe no inline sentence —
+/// the `bindingsAreGlobal` cause is on the surface, exactly like
+/// `presetsApply` under the same reason.
 struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = true
@@ -43,7 +48,11 @@ struct DesktopsGroup: View {
         }
     }
 
-    /// Help explanation for main screen Desktop binding behavior (#888).
+    /// Help explanation for the main-screen authority (#888,
+    /// ui-designer 2026-08-18). Descriptive, never prescriptive —
+    /// the retired shape was ambient advice with a one-click
+    /// flip; the checkbox is quoted verbatim so System Settings'
+    /// own search finds it (config-vocabulary.md's ask).
     private var helpText: String {
         L(
             "desktops.help",
@@ -158,6 +167,9 @@ struct DesktopsGroup: View {
         .labelsHidden()
         .controlSize(.large)
         .frame(width: 180)
+        // An empty title names nothing, so the picker is named
+        // here — and named, it owes its selection back as the
+        // value (#812).
         .accessibilityLabel(
             L(
                 "desktops.profile_ax",

@@ -128,6 +128,11 @@ struct AppRulesSection: View {
         HStack {
             AppSelector(name: $newApp, exclude: Set(apps))
             Button {
+                // Lower-cased so a hand-typed mixed-case bundle
+                // id (osascript reports `com.apple.Safari`) keys
+                // the same as the normalized `appBundleID` the
+                // engine and dropdown use — otherwise dedup and
+                // the open-title list silently miss (#262 review).
                 let app = newApp.trimmed.lowercased()
                 guard !app.isEmpty else { return }
                 if !apps.contains(app) {

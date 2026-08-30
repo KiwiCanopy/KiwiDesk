@@ -1,7 +1,14 @@
 import Foundation
 
-/// Generates adopted `init.lua` commenting out GUI-managed statements (#55,
-/// #355).
+/// Generates the adopted `init.lua`, commenting out GUI-managed
+/// statements while custom Lua stays LIVE (#55, #355). The
+/// correctness invariant is stated for FOREIGN code only: a
+/// `set_*` verb left live is benign (`loadConfig` applies the
+/// owned settings wholesale AFTER init.lua runs), so the net must
+/// NOT widen to `declaresManagedSettings` — that would re-comment
+/// a live hook whose body legitimately calls `set_`. Two accepted
+/// blind spots (a token split across lines, an aliased receiver)
+/// are `docs/design-decisions.md`'s.
 extension ManagedConfig {
     public static func adopt(
         original: String,
@@ -72,7 +79,11 @@ extension ManagedConfig {
         return false
     }
 
-    /// Bracket and keyword depth delta for a line of code.
+    /// Bracket and keyword depth delta for one line of code.
+    /// `do`/`then` are deliberately uncounted — they pair with an
+    /// already-counted opener, so counting them double-counts; a
+    /// bare `do … end` block reads as unbalanced and trips the
+    /// full-comment fallback, which is safe.
     static func depthDelta(_ code: String) -> Int {
         var depth = 0
         for ch in code {

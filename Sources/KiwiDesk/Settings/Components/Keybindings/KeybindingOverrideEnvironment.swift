@@ -33,9 +33,19 @@ extension KeyBinding {
 }
 
 extension View {
-    /// Applies dimmed styling and accessibility hint for inherited/unavailable
-    /// shortcut rows
-    /// (#678, #830, #818).
+    /// Applies dimmed styling and a spoken hint for
+    /// inherited/unavailable rows (#678 turn 20a rule 3). Both
+    /// states stay EDITABLE — dim, never disable. The hint names
+    /// no control, deliberately, against #830's table: the label
+    /// it quoted renders only while `combo.isEmpty`, so the
+    /// sentence named a word not on screen for the one row it
+    /// describes — when a control's label is not visible, the fix
+    /// is to stop naming it, not a better interpolation (#818's
+    /// boundary). Unverified whether a container hint reaches the
+    /// control inside; kept because the worse case here is an
+    /// inert hint — where `GreyOut`'s was DELETING shipped hints,
+    /// which is why that one was backed out. Confirm both in one
+    /// Accessibility Inspector pass.
     func keybindingRowStyle(
         inherited: Bool,
         unavailable: String? = nil

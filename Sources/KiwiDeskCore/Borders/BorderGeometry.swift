@@ -14,10 +14,19 @@ struct BorderGeometry: Equatable {
     let lineWidth: CGFloat
     /// Corner radius of stroke centerline path.
     let cornerRadius: CGFloat
-    /// Outward margin for glow bloom expansion (#358).
+    /// Outward margin for glow bloom expansion (#358); 0 when
+    /// glow is off. Deliberately kept OUT of `outwardReach`: the
+    /// soft bloom may bleed into the layout gap, so
+    /// `border.fit_gaps` stays sized to the crisp stroke (#358
+    /// ui-designer decision).
     let glowMargin: CGFloat
 
-    /// Below-order cushion to close squircle corner seam (#361).
+    /// Below-order cushion to close the squircle corner seam
+    /// (#361). Kept to a sliver because a below-order ring lingers
+    /// through a minimize genie (macOS reports the minimize only
+    /// once the window lands at the Dock) and the shrinking window
+    /// un-masks the overlap as a band this thick. Nudge up if a
+    /// faint corner seam ever shows.
     static let hiddenOverlapCushion: CGFloat = 0.1
 
     /// Corner reveal depth for square ring behind rounded window (#361).
@@ -28,11 +37,17 @@ struct BorderGeometry: Equatable {
         return systemRadius * tuck + hiddenOverlapCushion
     }
 
-    /// Above-order visible overlap cap to avoid content smearing (#311).
+    /// Above-order visible overlap cap (#311 hybrid): capped to
+    /// `min(visible / 2, this)` so the ring stays predominantly
+    /// outside the window; the outer edge stays at
+    /// `systemRadius + visible` regardless — only the inner edge
+    /// moves, so fit-gaps' reach is unchanged.
     static let aboveVisibleLapCap: CGFloat = 1
 
-    /// Computes ring geometry for `windowFrame` in AX coordinates (#358,
-    /// #533).
+    /// Computes ring geometry for `windowFrame` in AX coordinates.
+    /// `glowBlur` arrives RESOLVED (`BorderStyle.resolvedGlowBlur`
+    /// — width-scaled auto or the explicit size, #533/#551), so
+    /// the geometry math stays free of style resolution.
     static func compute(
         windowFrame: CGRect,
         width: CGFloat,

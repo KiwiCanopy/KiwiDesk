@@ -1,7 +1,12 @@
 import KiwiDeskCore
 
-/// Descriptor for searchable, revealable settings control with stable anchor
-/// ID (#277).
+/// Descriptor for a searchable, revealable settings control
+/// (#277). Identity is `id`, never the text: label-text `.id()`
+/// churn would tear down rows holding uncommitted `@State`
+/// drafts and keyboard focus mid-edit (Appearance renders
+/// "Color" six times at once). Declared once in `SettingsCatalog`
+/// and read by BOTH the render site and the search index — one
+/// list, and it is the render path (parity-tests.md).
 struct SettingsControl: Hashable, Sendable {
     private enum Label: Hashable, Sendable {
         case tuple(key: String, english: String)
@@ -131,7 +136,10 @@ extension AnySettingsDrawer {
         )
     }
 
-    /// Whether drawer must expand to reveal target control ID.
+    /// Whether the drawer must expand to reveal `target`. True
+    /// only for an INTERIOR control — a direct hit on the drawer's
+    /// own label deliberately does not expand it (part-1 design
+    /// call, do not relitigate).
     func shouldExpand(revealing target: String?) -> Bool {
         guard let target else { return false }
         return childIDs.contains(target)
@@ -181,7 +189,12 @@ enum SettingsControlIndex {
         return out
     }
 
-    /// Identifies stored members that failed catalog enumeration.
+    /// Stored members `entries(in:)` did NOT enumerate. Always
+    /// empty for a well-formed catalog; the guard fails loudly
+    /// otherwise, so a member shape the enumerator drops becomes
+    /// a test failure instead of a rendered-but-unsearchable hole.
+    /// (A computed `var` is invisible to `Mirror`; a source scan
+    /// guards that separately.)
     static func unenumerated(in container: Any) -> [String] {
         var out: [String] = []
         for child in Mirror(reflecting: container).children {

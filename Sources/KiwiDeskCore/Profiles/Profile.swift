@@ -2,7 +2,12 @@ import Foundation
 
 /// Saved KiwiDesk configuration for monitor setups (#36).
 public struct Profile: Codable, Sendable, Equatable {
-    /// Format version of profile schema (#902, #1020). Format 0 = unversioned.
+    /// Format version of the profile schema (#902); 0 =
+    /// unversioned legacy. 2 since the scroll-duration rename
+    /// (#1020) — and the bump is what RUNS the crossing:
+    /// `needsMigration` short-circuits on it, and the retired key
+    /// decodes to the DEFAULT rather than failing, so leaving this
+    /// at 1 loses the user's tuned value silently.
     public static let currentFormat = 2
 
     public var format: Int
@@ -13,9 +18,16 @@ public struct Profile: Codable, Sendable, Equatable {
     public var mainSpaces: [SpaceID]
     /// Default profile for this screen count.
     public var isDefault: Bool
-    /// Marks starter setup baseline (#466, #485).
+    /// Marks the starter-setup baseline (#466, #485). Survives
+    /// edits (a tweaked mode keeps the identity) but not a "save
+    /// as new" — an explicitly named copy is the user's own.
     public var isStarterSetup: Bool
-    /// Authoritative display order of spaces for this profile (#75).
+    /// Authoritative display order of this profile's spaces
+    /// (#75). Authority split: `gui.json` owns LIVE order across
+    /// the session; this owns per-profile order, consulted on
+    /// load. They stay in sync because `apply(profile:)` seeds
+    /// live order from here and both save paths capture the
+    /// resulting live order back.
     public var spaces: [SpaceID]
     /// Designated rehome target when spaces are missing (#68).
     public var fallbackSpace: SpaceID?

@@ -43,6 +43,10 @@ struct GapsBordersGates {
             return settings.dragDropZone.enabled
                 ? nil : .visualOff
         default:
+            // A gated key with no arm is a bug — fail loud in
+            // debug, fail-OPEN in release so a shipped Settings
+            // window never locks a row it cannot reason about
+            // (mirrors `LayoutDefaultsGates`).
             assertionFailure(
                 "unhandled Gaps & Borders gate: \(key.id)"
             )
@@ -64,7 +68,12 @@ struct GapsBordersGates {
     /// Declared-but-answered-elsewhere set.
     static let resolvedElsewhere: Set<SettingKey> = []
 
-    /// True if strokes written by a shared master row currently disagree.
+    /// True if the strokes a shared MASTER row writes currently
+    /// disagree. Deliberately NOT an `InertReason`: the gap
+    /// masters grey because a per-edge drawer sits under them to
+    /// repair from; these two have none, so greying them would
+    /// state the disagreement and withhold the only control that
+    /// ends it — they stay live and acknowledge through the `?`.
     func strokesDiffer(for key: SettingKey) -> Bool {
         switch key {
         case .borders(.borderWidthMaster):
@@ -76,7 +85,11 @@ struct GapsBordersGates {
         }
     }
 
-    /// Agreed corner shape across ring style and drag radius.
+    /// Agreed corner shape across ring style and drag radius —
+    /// the ONE copy of that comparison: the master binding reads
+    /// it as its displayed value and `strokesDiffer` as the `?`
+    /// predicate, so the blank picker and its explanation cannot
+    /// contradict.
     var agreedCornerStyle: BorderStyle.CornerStyle? {
         let fromRadius: BorderStyle.CornerStyle =
             settings.dragCornerRadius > 0 ? .rounded : .square
