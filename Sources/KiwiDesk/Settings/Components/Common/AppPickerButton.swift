@@ -2,38 +2,18 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The searchable app picker (#263), the sibling of
-/// `IconPicker` for the two app choosers (`AppSelector` in App
-/// Rules, `appMenu` in Open applications). A native `Menu` over
-/// 150–300 installed apps only offers prefix type-to-select; a
-/// popover with a substring search over a lazy icon list is the
-/// macOS move for long app lists. The persistent escape row
-/// beneath the search (Custom… / Other…) survives filtering.
-///
-/// Apps are identified by lower-cased bundle id and shown by
-/// localized name (see `AppRef`); the caller stores the id the
-/// `onPick` app carries. Icons come from the `@MainActor`
-/// `AppIconCache`, not off `InstalledApp`.
+/// Searchable app picker button and popover (#263, `IconPicker`,
+/// `AppSelector`, `appMenu`, `AppRef`, `AppIconCache`, `InstalledApp`).
 struct AppPickerButton: View {
     /// Shown on the trigger when nothing is chosen yet.
     let placeholder: String
     /// The current selection's display name, or nil for none.
     let selection: String?
-    /// Floor width for the trigger — just enough for the
-    /// "Choose app…" placeholder; it hugs longer names. A caller
-    /// that needs a fixed column (Open applications) wraps the
-    /// button in its own `.frame(width:)` instead.
     var minWidth: CGFloat = 110
     let onPick: (KeybindingCatalog.InstalledApp) -> Void
-    /// The persistent escape row: its label (Custom… / Other…)
-    /// and the action it triggers (reveal a field / open a
-    /// panel). Runs after the popover dismisses.
     let escapeLabel: String
     let onEscape: () -> Void
-    /// Bundle ids to omit from the list. Open applications drops
-    /// apps that already carry every launch behavior, since
-    /// re-adding could only duplicate (#334). Empty by default, so
-    /// a per-row re-pick still offers every app.
+    /// Bundle IDs to omit from the picker list (#334).
     var exclude: Set<String> = []
 
     @State private var showing = false
@@ -46,10 +26,6 @@ struct AppPickerButton: View {
             HStack(spacing: 4) {
                 Text(selection ?? placeholder)
                     .lineLimit(1)
-                // Absorbs the slack between text and chevron, so
-                // the chevron pins to the trailing edge (native
-                // pop-up look) instead of floating mid-button when
-                // the frame is wider than the content.
                 Spacer(minLength: 4)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
@@ -61,14 +37,6 @@ struct AppPickerButton: View {
         .controlSize(.large)
         .onAppear {
             AppIconCache.shared.warm()
-            // Warm the heavy part — the one-time Spotlight scan of
-            // ~150–300 disk apps — off the main thread, so the
-            // first open mostly finds it ready. Only the disk scan
-            // moves off-main: it touches no AppKit (FileManager /
-            // Bundle / NSMetadataItem only). The running-app union
-            // in `installedAppsSnapshot` still reads
-            // `NSWorkspace` on the main thread at first open, but
-            // that part is cheap.
             Task.detached {
                 _ = KeybindingCatalog.diskAppIconPaths
             }
@@ -87,11 +55,6 @@ struct AppPickerButton: View {
             .textFieldStyle(.roundedBorder)
             escapeRow
             Divider()
-            // Eager `VStack`, not `LazyVStack`: a lazy stack
-            // renders blank in a popover until a state change
-            // (a keystroke) forces relayout. Icons come warmed
-            // from the cache, so building every row up front is
-            // cheap.
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(filtered) { app in
@@ -108,15 +71,9 @@ struct AppPickerButton: View {
         .frame(width: 280, height: 360)
     }
 
-    /// The escape hatch, kept above the list so it never scrolls
-    /// out of reach and survives filtering.
     private var escapeRow: some View {
         Button {
             showing = false
-            // Let SwiftUI process the dismiss before the escape
-            // action runs — `Other…` opens a modal `NSOpenPanel`
-            // that would otherwise block with the popover still
-            // on screen.
             DispatchQueue.main.async { onEscape() }
         } label: {
             HStack(spacing: 8) {
@@ -170,16 +127,8 @@ struct AppPickerButton: View {
     }
 }
 
-/// The picker's substring filter, split out pure so it is unit
-/// testable without the view. Matches through `searchMatches`,
-/// the app's one search-matching predicate (shared with the
-/// Settings search: case-, diacritic- and separator-insensitive) on
-/// the
-/// localized name OR the bundle id — the latter keeps an app
-/// findable by its English/habitual name (typing "preview"
-/// matches `com.apple.preview` even when it's shown localized
-/// as "Vorschau"). An empty (or whitespace) query keeps every
-/// app.
+/// Pure substring filter matching localized name or bundle id via
+/// `searchMatches`.
 enum AppPickerFilter {
     static func matching(
         _ apps: [KeybindingCatalog.InstalledApp],
