@@ -169,6 +169,36 @@ wrangler.toml holds the one-time setup fields too, including the
 one that reads wrong — *Build output directory* is relative to
 *Root directory*, so it is `dist`, never `site/dist`.
 
+### Build watch paths are the one field the repo cannot hold
+
+`wrangler.toml` has no key for **Build watch paths**, so that
+single field is dashboard-held by necessity rather than by
+preference (Workers & Pages ▸ `kiwidesk` ▸ Settings ▸ Build).
+It includes `site/*` and nothing else, so a PR that touches no
+site file starts no deploy — which is also what stops the Pages
+bot commenting on every Swift-only PR, and with it the mail
+GitHub sends the author about that comment.
+
+Nothing in this repo can read that field, so the two obligations
+below are the whole of its enforcement:
+
+- **A change that gives the site build an input outside `site/`
+  moves the watch path in the same change set.** The build is
+  self-contained today: every import under `site/src` resolves
+  within `site/`, there are no symlinks, and nothing reads
+  repo-root `docs/`. The day something does, the include list is
+  silently wrong and the symptom is a *stale production site* —
+  no build runs, so no build can go red.
+- **Write the include as `site/*`, never `site/**`.**
+  Cloudflare's wildcard matches path separators, so `site/*`
+  already covers `site/src/pages/index.astro` (their own example:
+  `docs/*` matches `docs/guides/advanced/config.md`). `**` is
+  undocumented there, and a pattern that matches nothing skips
+  every build, production included.
+
+Excludes are evaluated before includes, so an exclude added later
+cannot be reasoned about from the include line alone.
+
 ## The 404 is a user page, so withdraw Starlight's (#635)
 
 `src/pages/404.astro` and `disable404Route: true` in
