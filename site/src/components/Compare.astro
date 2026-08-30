@@ -108,6 +108,15 @@ const src = {
   magnet: "https://magnet.crowdcafe.com/",
   sipDecision:
     "/docs/design-decisions/#blocked-by-macos-sip",
+  // Apple's own explanation of what SIP IS and what it protects.
+  // The row label wants this, not our design decision: a reader
+  // who does not know the term needs the neutral definition
+  // first, and our page arguing why we will not disable it is a
+  // different question they have not asked yet. That one stays
+  // linked from the anchor prose, where it answers it.
+  sipApple:
+    "https://support.apple.com/guide/security/" +
+    "system-integrity-protection-secb7ea06b49/web",
   tabsLimit: "/docs/accepted-limitations/",
   luaRef: "/docs/lua-reference/",
 };
@@ -149,7 +158,7 @@ const picks = [
 // Licence, Mouse) simply have no entry.
 const rowLinks = {
   setup: "/guide/",
-  sip: src.sipDecision,
+  sip: src.sipApple,
   tabs: src.tabsLimit,
   hotkeys: "/guide/",
   layouts: "/guide/",
@@ -217,7 +226,11 @@ const rows = [
           <tr>
             <th scope="row">
               {rowLinks[row] ? (
-                <a class="cmp__rowlink" href={rowLinks[row]}>
+                <a class="cmp__rowlink" href={rowLinks[row]}
+                  target={rowLinks[row].startsWith("http")
+                    ? "_blank" : undefined}
+                  rel={rowLinks[row].startsWith("http")
+                    ? "noopener" : undefined}>
                   {t(`compare_row_${row}`)}
                 </a>
               ) : (
@@ -754,14 +767,12 @@ const rows = [
     color: inherit;
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-style: dotted;
     text-decoration-color:
-      color-mix(in srgb, currentColor 35%, transparent);
+      color-mix(in srgb, currentColor 50%, transparent);
   }
   .cmp__rowlink:hover,
   .cmp__rowlink:focus-visible {
     color: var(--accent);
-    text-decoration-style: solid;
     text-decoration-color: currentColor;
   }
   .cmp__note,
