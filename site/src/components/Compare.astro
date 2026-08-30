@@ -104,6 +104,7 @@ const src = {
   yabaiSip:
     "https://github.com/koekeishiya/yabai/wiki/Disabling-System-Integrity-Protection",
   rift: "https://github.com/acsandmann/rift",
+  omniwm: "https://github.com/BarutSRB/OmniWM",
   magnet: "https://magnet.crowdcafe.com/",
   sipDecision:
     "/docs/design-decisions/#blocked-by-macos-sip",
@@ -120,6 +121,7 @@ const tools = [
   { key: "yabai", label: "yabai", own: false },
   { key: "aerospace", label: "AeroSpace", own: false },
   { key: "rift", label: "Rift", own: false },
+  { key: "omniwm", label: "OmniWM", own: false },
   { key: "magnet", label: "Magnet", own: false },
 ];
 
@@ -138,6 +140,7 @@ const picks = [
 const rows = [
   "setup",
   "sip",
+  "permissions",
   "desktops",
   "tabs",
   "mouse",
@@ -213,7 +216,7 @@ const rows = [
 
     <div class="cmp__anchor">
       <h3><span class="cmp__num" aria-hidden="true">1</span>{t("compare_anchor_gui_title")}</h3>
-      <p>{t("compare_anchor_gui_body")}</p>
+      <p><Fragment set:html={t("compare_anchor_gui_body")} /></p>
     </div>
 
     <div class="cmp__anchor">
@@ -240,6 +243,18 @@ const rows = [
           .replace("{/sip}", "</a>")
           .replace("{aero}", `<a href="${src.aerospaceWorkspaces}" target="_blank" rel="noopener">`)
           .replace("{/aero}", "</a>")} />
+      </p>
+    </div>
+
+    <div class="cmp__anchor">
+      <h3><span class="cmp__num" aria-hidden="true">5</span>{t(
+        "compare_anchor_permissions_title")}</h3>
+      <p>
+        <Fragment set:html={t("compare_anchor_permissions_body")
+          .replace("{sip}", `<a href="${src.sipDecision}">`)
+          .replace("{/sip}", "</a>")
+          .replace("{omni}", `<a href="${src.omniwm}" target="_blank" rel="noopener">`)
+          .replace("{/omni}", "</a>")} />
       </p>
     </div>
   </section>
@@ -273,6 +288,14 @@ const rows = [
       </h3>
       <p class="cmp__good">{t("compare_rift_good")}</p>
       <p>{t("compare_rift_diff")}</p>
+    </article>
+
+    <article class="cmp__tool" id="omniwm">
+      <h3>
+        <a href={src.omniwm} target="_blank" rel="noopener">OmniWM</a>
+      </h3>
+      <p class="cmp__good">{t("compare_omniwm_good")}</p>
+      <p><Fragment set:html={t("compare_omniwm_diff")} /></p>
     </article>
 
     <article class="cmp__tool" id="magnet">
