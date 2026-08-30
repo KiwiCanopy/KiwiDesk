@@ -2009,7 +2009,9 @@ the [Lua reference](lua-reference.md)); there is no GUI control:
 
 - **Restore on wake**: when your Mac wakes from sleep or the
   screen unlocks, restore the window arrangement captured when
-  it went to rest (on by default).
+  it went to rest (on by default), and put the keyboard focus
+  back on the window you were in — so your shortcuts work right
+  away, without a click first.
 - **Wake restore delay** (ms): how long to wait after wake before
   restoring (default 1500 ms, giving displays time to settle).
 

@@ -22,6 +22,11 @@ extension KiwiCore {
             NSWorkspace.shared.frontmostApplication?
                 .processIdentifier
         }
+        // The wake payment's fallback seed reads the one trusted
+        // frontmost chain (#442/#1130).
+        trustedFrontmostProvider = { [weak self] in
+            self?.trustedFrontmostFocusedWindowID()
+        }
         // Arm the raise-echo revert's click-provenance check
         // (#687): the press stamp below resolves which window
         // each click reached.

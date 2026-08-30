@@ -46,19 +46,15 @@ extension KiwiCore {
         }
     }
 
-    /// The full restore contract for the wake/unlock and crash
-    /// paths: replay, then settle like any other space switch —
-    /// force past the ±2 pt tolerance and tell bus subscribers
-    /// (the bar) where we landed. Both paths used to stop at
-    /// the bare replay (#633), which left everything un-retiled
-    /// with stale bars. The launch-time session restore keeps
-    /// its own sequence in `KiwiCore+Lifecycle` — it seeds
-    /// focus between the replay and the settle. Crash restore
-    /// gets no focus seeding here on purpose: it runs inside
-    /// `start()`, whose 1 s startup sweep
-    /// (`scheduleStartupSweep`) re-runs the landing choice and
-    /// `seedStartupFocus` — that sweep is the focus half of
-    /// this path's contract.
+    /// The crash leg's restore contract: replay, then settle
+    /// like any other space switch — force past the ±2 pt
+    /// tolerance and tell bus subscribers (the bar) where we
+    /// landed (#633). No focus seeding on purpose: it runs
+    /// inside `start()`, whose startup sweep re-runs the
+    /// landing choice and `seedStartupFocus`. The launch-time
+    /// session restore seeds focus itself (`KiwiCore+Lifecycle`)
+    /// and the wake/unlock leg pays the adopted focus for real
+    /// (`restoreAndSettleAfterWake`, #1130).
     func restoreAndSettle(_ snapshot: StateSnapshot) {
         restore(snapshot)
         spaceSwitchRetile()

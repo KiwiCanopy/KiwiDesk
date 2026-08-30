@@ -162,18 +162,15 @@ public final class KiwiCore {
     /// provenance.
     var stackingOrderProvider: (@MainActor () -> [WindowID])?
 
-    /// Windows raised purely for z-order, stamped with the
-    /// raise time — floats promoted above the tiled plane
-    /// (#418) and the pile members a restore re-raises (#425).
-    /// A raise couples with app activation and echoes a focus
-    /// report with no self-raise provenance (#152); a fresh
-    /// stamped report that is not the intended focus is that
-    /// echo — reverted, unless it carries click provenance
-    /// (#687; the design-decisions entry owns the ruling).
-    /// Stamped per sequence, age-pruned, cleaned on
-    /// destroy/rekey — and NEVER consumed by an echo: lazy
-    /// apps re-report a raised window, and the unstamped
-    /// duplicate was honored as deliberate focus (#689 QA).
+    /// Windows raised purely for z-order (#418 floats, #425 pile
+    /// restores), stamped per raise sequence. Their focus echoes
+    /// carry no self-raise provenance (#152), so a fresh stamped
+    /// report that is not the intended focus is reverted unless
+    /// it carries click provenance (#687 — the design-decisions
+    /// entry owns the ruling). Age-pruned, cleaned on
+    /// destroy/rekey, and NEVER consumed by an echo: lazy apps
+    /// re-report, and the unstamped duplicate was honored as
+    /// deliberate focus (#689).
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
     /// Bumped per z-order raise sequence (float raise or pile
@@ -194,6 +191,15 @@ public final class KiwiCore {
     /// inject a stub. When wired, a `nil` *return* means foreground
     /// ownership is unknown, which fails the command closed.
     var frontmostPIDProvider: (@MainActor () -> pid_t?)?
+
+    /// Trusted OS-frontmost focused window id (#1130); nil until
+    /// `start()` wires the #442 chain (the `frontmostPIDProvider`
+    /// pattern), so unit tests never read the host's focus.
+    var trustedFrontmostProvider: (@MainActor () -> WindowID?)?
+
+    /// The wake heal arm's timestamp (#1130) —
+    /// `KiwiCore+WakeFocus.swift` is the one machine mutating it.
+    var wakeFocusHealArmedAt: Date?
 
     /// Hands key focus to the desktop (Finder) when a move without
     /// follow empties the focused display's space (#446). macOS has
@@ -218,18 +224,12 @@ public final class KiwiCore {
     /// #958 steal debt; `KiwiCore+AccessibilityReturn.swift`.
     var accessibilityReturn: AccessibilityReturnDebt?
 
-    /// Z-order restores whose raise sequence has not re-asserted
-    /// focus yet (#186). The pile raises steal focus window by
-    /// window and those echoes are not in `outstandingSelfRaises`
-    /// (#152's provenance gap), so mouse-follows-focus holds its
-    /// warp while any restore is in flight. A count, not a flag:
-    /// back-to-back restores overlap on the serial raise queue.
-    /// WARP-scoped by design, and again in fact since #689
-    /// retired the monocle arm's read: the hold in
-    /// `warpMouseToFocused` and its release
-    /// (`runPendingMouseWarp`) are the only readers. A consumer
-    /// outside the warp is the signal to close #152's gap
-    /// properly, not to extend this.
+    /// Z-order restores whose raises have not re-asserted focus
+    /// yet (#186); their echoes lack provenance (#152), so the
+    /// mouse warp holds while any restore is in flight. A count —
+    /// restores overlap. WARP-scoped (#689): `warpMouseToFocused`
+    /// and `runPendingMouseWarp` are the only readers; a consumer
+    /// outside the warp closes #152's gap properly instead.
     var zOrderRestoresInFlight = 0
 
     /// The warp a draining restore held (#689): recorded while
