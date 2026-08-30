@@ -2,10 +2,11 @@ import Foundation
 
 extension KiwiCore {
     /// Fail-closed preflight for implicit-focused commands (#292).
-    /// Returns a failed `CommandResponse` — and blocks the command
-    /// before any state mutation — when the command acts on the
-    /// focused window but the OS foreground is not that managed
-    /// window. Returns `nil` (allow) otherwise.
+    /// Returns a failed `CommandResponse` — blocking the command —
+    /// when the command acts on the focused window but the OS
+    /// foreground is not that managed window. Returns `nil`
+    /// (allow) otherwise. The one mutation it may make: a fresh
+    /// wake heal (#1130) re-seeds state focus from the frontmost.
     ///
     /// The guard is inert until `frontmostPIDProvider` is wired
     /// (`start()` installs it; unit tests leave it `nil`), so it
@@ -37,11 +38,11 @@ extension KiwiCore {
         // window this seam diagnoses.
         let front = frontmostPID()
         if foregroundOwned(front: front) { return nil }
-        // The wake heal (#1130), one-shot: the wake payment's
-        // activation can be refused, so re-seed from the real
-        // frontmost and re-ask before failing the press.
-        if consumeWakeFocusHeal() {
-            seedFocusFromFrontmost()
+        // The wake heal (#1130), one-shot and time-bounded: the
+        // wake payment's activation can be refused, so re-seed
+        // from the real frontmost (a blocking AX read, paid at
+        // most once per arm) and re-ask before failing the press.
+        if consumeWakeFocusHeal(), reseedFromFrontmostForHeal() {
             if foregroundOwned(front: front) {
                 onLog(
                     "wake focus heal: reseeded from frontmost, "

@@ -162,13 +162,15 @@ public final class KiwiCore {
     /// provenance.
     var stackingOrderProvider: (@MainActor () -> [WindowID])?
 
-    /// Z-order raises' stamps (#418/#425). Their focus echoes
+    /// Windows raised purely for z-order (#418 floats, #425 pile
+    /// restores), stamped per raise sequence. Their focus echoes
     /// carry no self-raise provenance (#152), so a fresh stamped
     /// report that is not the intended focus is reverted unless
-    /// it carries click provenance (#687). Age-pruned, cleaned
-    /// on destroy/rekey, and NEVER consumed by an echo — lazy
-    /// apps re-report, and the unstamped duplicate was honored
-    /// as deliberate focus (#689).
+    /// it carries click provenance (#687 — the design-decisions
+    /// entry owns the ruling). Age-pruned, cleaned on
+    /// destroy/rekey, and NEVER consumed by an echo: lazy apps
+    /// re-report, and the unstamped duplicate was honored as
+    /// deliberate focus (#689).
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
     /// Bumped per z-order raise sequence (float raise or pile
@@ -195,9 +197,9 @@ public final class KiwiCore {
     /// pattern), so unit tests never read the host's focus.
     var trustedFrontmostProvider: (@MainActor () -> WindowID?)?
 
-    /// The wake heal latch (#1130) — `KiwiCore+WakeFocus.swift`
-    /// is the one machine mutating it.
-    var wakeFocusHealArmed = false
+    /// The wake heal arm's timestamp (#1130) —
+    /// `KiwiCore+WakeFocus.swift` is the one machine mutating it.
+    var wakeFocusHealArmedAt: Date?
 
     /// Hands key focus to the desktop (Finder) when a move without
     /// follow empties the focused display's space (#446). macOS has

@@ -5,9 +5,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The foreground-ownership preflight (#292): an implicit-focused
-/// command fails closed — with no state mutation — unless the OS
-/// frontmost app is KiwiDesk's focused managed window. The guard is
-/// inert until `frontmostPIDProvider` is wired, so these tests
+/// command fails closed — the command itself never mutates — unless
+/// the OS frontmost app is KiwiDesk's focused managed window (a
+/// fresh wake heal may re-seed state focus first, #1130). The guard
+/// is inert until `frontmostPIDProvider` is wired, so these tests
 /// inject a stub (and, for the allow path, a real self observer).
 @Suite("Focused-command foreground guard", .serialized)
 @MainActor

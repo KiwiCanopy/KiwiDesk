@@ -16,11 +16,10 @@ extension KiwiCore {
     /// Seeds internal focus state after the startup landing
     /// (session restore and the delayed startup sweep). State
     /// only — never raises or AX-focuses anything, so launch
-    /// steals no OS focus.
+    /// steals no OS focus. The frontmost read is the one
+    /// `trustedFrontmostTracked` copy (#1130).
     func seedStartupFocus() {
-        let frontmost = trustedFrontmostFocusedWindowID()
-            .flatMap { state.windows[$0] != nil ? $0 : nil }
-        seedStartupFocus(frontmost: frontmost)
+        seedStartupFocus(frontmost: trustedFrontmostTracked())
     }
 
     /// Testable core, the OS-frontmost managed window injected.

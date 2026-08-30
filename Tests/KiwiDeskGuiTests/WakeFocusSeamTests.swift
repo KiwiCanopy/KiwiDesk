@@ -6,7 +6,7 @@ import Testing
 /// a bare `workspaces.focus` stamp leave identical state — no AX
 /// element, so no raise — and the bare stamp IS the shipped
 /// defect. `WakeFocusRestoreTests` holds what the payment does;
-/// this holds that it stays a payment.
+/// this holds that it stays a payment, singly wired.
 @Suite("The wake focus payment stays wired (#1130)")
 struct WakeFocusSeamTests {
     private static let root = SourceScan.repoRoot(
@@ -34,6 +34,14 @@ struct WakeFocusSeamTests {
             "KiwiCore+WakeFocus.swift",
             "KiwiCore+FocusEvents.swift"
         ),
+        // The consume is one-shot, so a second consumer would
+        // silently eat the arm before the press it exists to
+        // heal — with every behavioral test green.
+        (
+            "consumeWakeFocusHeal(",
+            "KiwiCore+WakeFocus.swift",
+            "KiwiCore+FocusedCommandGuard.swift"
+        ),
     ]
 
     @Test("each wiring is declared once and wired once")
@@ -44,15 +52,65 @@ struct WakeFocusSeamTests {
                 under: Self.core
             )
             let files = sites.map(\.file.lastPathComponent)
+            let expected =
+                declared == wired
+                ? [declared] : [declared, wired].sorted()
             #expect(
-                files.sorted() == [declared, wired].sorted(),
+                files.sorted() == expected,
                 """
-                expected `\(needle)` exactly twice — declared \
-                in \(declared), wired in \(wired) — found: \
+                expected `\(needle)` only as declared in \
+                \(declared) and wired in \(wired) — found: \
                 \(sites.map(\.site).joined(separator: ", "))
                 """
             )
         }
+    }
+
+    /// No behavior test can red on the wiring — every test
+    /// injects the provider — so this pins it (tests.md:
+    /// forget-proof the injection). Declaration, `armMachineSeams`
+    /// wiring, and the one `trustedFrontmostTracked` read.
+    @Test("the frontmost provider is wired and read once each")
+    func providerIsWiredAndReadOnce() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "trustedFrontmostProvider",
+            under: Self.core
+        )
+        let files = sites.map(\.file.lastPathComponent).sorted()
+        #expect(
+            files
+                == [
+                    "KiwiCore.swift",
+                    "KiwiCore+BootSeams.swift",
+                    "KiwiCore+WakeFocus.swift",
+                ].sorted(),
+            """
+            expected the provider declared in KiwiCore.swift, \
+            wired in KiwiCore+BootSeams.swift, read in \
+            KiwiCore+WakeFocus.swift — found: \
+            \(sites.map(\.site).joined(separator: ", "))
+            """
+        )
+    }
+
+    @Test("the latch mutates only through its one machine")
+    func latchHasOneHome() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "wakeFocusHealArmedAt",
+            under: Self.core
+        )
+        let files = Set(sites.map(\.file.lastPathComponent))
+        #expect(
+            files == [
+                "KiwiCore.swift", "KiwiCore+WakeFocus.swift",
+            ],
+            """
+            `wakeFocusHealArmedAt` may appear only in its \
+            declaration and its one machine — an inline write \
+            beside a call site is the #951 disarm-race shape. \
+            Found: \(sites.map(\.site).joined(separator: ", "))
+            """
+        )
     }
 
     @Test("the payment performs a focus, never a bare stamp")
@@ -66,11 +124,11 @@ struct WakeFocusSeamTests {
         )
         guard
             let payer = SourceScan.declarationBody(
-                after: "func performWakeFocusPayment",
+                after: "func restoreAndSettleAfterWake",
                 in: source
             )
         else {
-            Issue.record("performWakeFocusPayment missing")
+            Issue.record("restoreAndSettleAfterWake missing")
             return
         }
         #expect(

@@ -75,7 +75,7 @@ struct WakeFocusRestoreTests {
         core.state.workspaces.focus(WindowID(2), in: space)
         core.sleepWake.restoreState(snapshot)
         #expect(core.focusedWindowID == WindowID(1))
-        #expect(core.wakeFocusHealArmed)
+        #expect(core.wakeFocusHealArmedAt != nil)
     }
 
     @Test("The crash leg stays a bare replay: no heal armed")
@@ -84,7 +84,7 @@ struct WakeFocusRestoreTests {
         addWindow(core, 1)
         let snapshot = core.state.snapshot()
         core.crash.restoreState(snapshot)
-        #expect(!core.wakeFocusHealArmed)
+        #expect(core.wakeFocusHealArmedAt == nil)
     }
 
     @Test(
@@ -138,11 +138,11 @@ struct WakeFocusRestoreTests {
         observe(core, pid: own)
         core.frontmostPIDProvider = { own }
         core.trustedFrontmostProvider = { WindowID(2) }
-        core.wakeFocusHealArmed = true
+        core.wakeFocusHealArmedAt = Date()
         let response = core.execute("make_floating")
         #expect(response.isSuccess)
         #expect(core.focusedWindowID == WindowID(2))
-        #expect(!core.wakeFocusHealArmed)
+        #expect(core.wakeFocusHealArmedAt == nil)
     }
 
     @Test("Unarmed, the same divergence still fails closed")
@@ -176,10 +176,41 @@ struct WakeFocusRestoreTests {
         addWindow(core, 1, pid: 1)
         core.frontmostPIDProvider = { 999 }
         core.trustedFrontmostProvider = { nil }
-        core.wakeFocusHealArmed = true
+        core.wakeFocusHealArmedAt = Date()
         let response = core.execute("make_floating")
         #expect(!response.isSuccess)
-        #expect(!core.wakeFocusHealArmed)
+        #expect(core.wakeFocusHealArmedAt == nil)
+    }
+
+    @Test(
+        """
+        An expired arm cannot spend the heal: hours later an \
+        ordinary #292 race is still refused, latch cleared
+        """
+    )
+    func expiredArmDoesNotHeal() {
+        let core = makeCore()
+        let own = getpid()
+        addWindow(core, 2, pid: own)
+        addWindow(core, 1, pid: 1)
+        guard let space = core.state.workspaces.activeSpace
+        else {
+            Issue.record("no active space")
+            return
+        }
+        core.state.workspaces.focus(WindowID(1), in: space)
+        observe(core, pid: own)
+        core.frontmostPIDProvider = { own }
+        core.trustedFrontmostProvider = { WindowID(2) }
+        // Just past the window, derived from the shipped bound
+        // rather than restating it (tests.md — number pins).
+        core.wakeFocusHealArmedAt = Date(
+            timeIntervalSinceNow: -KiwiCore.wakeFocusHealWindow - 1
+        )
+        let response = core.execute("make_floating")
+        #expect(!response.isSuccess)
+        #expect(core.focusedWindowID == WindowID(1))
+        #expect(core.wakeFocusHealArmedAt == nil)
     }
 
     @Test("An honored focus event disarms the heal")
@@ -187,8 +218,8 @@ struct WakeFocusRestoreTests {
         let core = makeCore()
         addWindow(core, 1)
         addWindow(core, 2)
-        core.wakeFocusHealArmed = true
+        core.wakeFocusHealArmedAt = Date()
         core.handle(.windowFocused(WindowID(1)))
-        #expect(!core.wakeFocusHealArmed)
+        #expect(core.wakeFocusHealArmedAt == nil)
     }
 }

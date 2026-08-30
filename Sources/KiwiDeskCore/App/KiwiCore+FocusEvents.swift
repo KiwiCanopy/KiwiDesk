@@ -216,9 +216,9 @@ extension KiwiCore {
         // from the outstanding set either way.
         // An outstanding entry is our echo only while the raise
         // is RECENT (`selfRaiseStamps`): an already-key raise
-        // never echoes, so an unbounded entry classified the
-        // user's NEXT click on that window as our echo, eating
-        // it (#687). The entry is consumed either way.
+        // never echoes (device QA 2026-08-03), so an unbounded
+        // entry classified the user's NEXT click on that window
+        // as our echo, eating it (#687). Consumed either way.
         let selfEcho = freshSelfRaise(id, now: now)
         outstandingSelfRaises.remove(id)
         // And even a FRESH entry stands down for a report with
