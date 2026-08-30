@@ -27,6 +27,20 @@
 
   --maxw: 1120px;
   --prose-measure: 45rem;
+  /* Section headings, two ranks. A full-width section band takes
+     --h2, a heading inside a column takes --h2-column. */
+  --h2: clamp(1.7rem, 4vw, 2.5rem);
+  --h2-column: clamp(1.6rem, 3.6vw, 2.3rem);
+  /* Theme toggle's sun and moon. The only deliberate non-brand
+     hues on the site — a control that depicts daylight cannot be
+     drawn in kiwi green — and previously six raw literals spread
+     over three rules and two files. */
+  --toggle-sun-from: #f6c453;
+  --toggle-sun-to: #e0932f;
+  --toggle-sun-ink: #fff8e6;
+  --toggle-moon-from: #cfe0bd;
+  --toggle-moon-to: #9db785;
+  --toggle-moon-ink: #10210b;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display",
     "Segoe UI", system-ui, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
@@ -623,8 +637,12 @@ body::before {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #fff8e6;
-  background: linear-gradient(180deg, #f6c453, #e0932f);
+  color: var(--toggle-sun-ink);
+  background: linear-gradient(
+    180deg,
+    var(--toggle-sun-from),
+    var(--toggle-sun-to)
+  );
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
     background 0.25s ease;
@@ -633,8 +651,12 @@ body::before {
 /* Dark theme → moon on the right; light theme → sun on the left. */
 :root[data-theme="dark"] .theme-toggle__thumb {
   transform: translateX(22px);
-  background: linear-gradient(180deg, #cfe0bd, #9db785);
-  color: #10210b;
+  background: linear-gradient(
+    180deg,
+    var(--toggle-moon-from),
+    var(--toggle-moon-to)
+  );
+  color: var(--toggle-moon-ink);
 }
 
 .theme-toggle:hover .theme-toggle__track {
@@ -721,8 +743,12 @@ body::before {
 /* Active locale reads as filled, echoing the theme toggle's thumb
    gradient so the three controls share one visual language. */
 .lang-switch__opt[aria-current="true"] {
-  color: #10210b;
-  background: linear-gradient(180deg, #cfe0bd, #9db785);
+  color: var(--toggle-moon-ink);
+  background: linear-gradient(
+    180deg,
+    var(--toggle-moon-from),
+    var(--toggle-moon-to)
+  );
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
 }
 
@@ -844,7 +870,14 @@ section {
   text-align: center;
 }
 
-.eyebrow {
+/* ONE eyebrow, in two ranks. There were four implementations —
+   four sizes, two weights, two tracking values — for one thing,
+   and `.learn__eyebrow` differed from this by 0.05rem of margin
+   and nothing else. The other files' selectors are named here
+   rather than in their own files so the values cannot drift
+   apart again; each keeps its own class in markup. */
+.eyebrow,
+.learn__eyebrow {
   display: inline-block;
   font-size: 0.8rem;
   font-weight: 650;
@@ -854,8 +887,22 @@ section {
   margin-bottom: 0.75rem;
 }
 
+/* The section rank: smaller and tighter, for an eyebrow heading a
+   section rather than a page. */
+.eyebrow--sm,
+.learn-section__eyebrow,
+.cmp__eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
 .section-head h2 {
-  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-size: var(--h2);
   line-height: 1.12;
   letter-spacing: -0.02em;
   margin: 0 0 0.75rem;
@@ -1306,7 +1353,7 @@ section {
 }
 
 .quickstart h2 {
-  font-size: clamp(1.6rem, 3.6vw, 2.3rem);
+  font-size: var(--h2-column);
   line-height: 1.14;
   letter-spacing: -0.02em;
   margin: 0 0 0.85rem;

@@ -476,7 +476,7 @@
   }
 }
 .what__copy h2 {
-  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-size: var(--h2);
   line-height: 1.12;
   letter-spacing: -0.02em;
   margin: 0 0 0.85rem;
@@ -789,7 +789,7 @@
   min-width: 0;
 }
 .split__copy h2 {
-  font-size: clamp(1.6rem, 3.6vw, 2.3rem);
+  font-size: var(--h2-column);
   line-height: 1.14;
   letter-spacing: -0.02em;
   margin: 0 0 0.85rem;
@@ -1065,7 +1065,7 @@ a.quote-card__byline-main:hover {
   position: relative;
 }
 .cta-band__inner h2 {
-  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-size: var(--h2);
   line-height: 1.12;
   letter-spacing: -0.02em;
   margin: 0 0 0.75rem;
