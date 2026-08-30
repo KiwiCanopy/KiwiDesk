@@ -129,8 +129,12 @@ struct LocaleWorksheetRejectionTests {
     /// from the script's own location — so a run under any of
     /// them reads, and under `--prune` rewrites, the developer's
     /// real site catalogs while believing it is redirected. Half
-    /// a redirect is worse than none, so both scripts refuse
-    /// before touching a path.
+    /// a redirect is worse than none, so `extract-keys` refuses
+    /// before touching a path. `merge-keys` refuses the whole
+    /// family in EVERY mode since #1107, with a message that no
+    /// longer names the site tree —
+    /// `MergeKeysOverrideRefusalTests` owns that half, which is
+    /// why this case no longer spawns it.
     ///
     /// Both variables are exercised, and `_LOCALES` is the one
     /// that matters most: it is the mutating half, and the first
@@ -139,27 +143,19 @@ struct LocaleWorksheetRejectionTests {
     /// place and left open the half that rewrites shipped
     /// catalogs.
     ///
-    /// **The status check is inert on the `merge-keys` half** and
-    /// is kept only for symmetry: that script exits 1 anyway with
-    /// "worksheet does not exist". The message needles are what
-    /// carry this test there, so do not trim them as redundant —
-    /// those cases would go green for the wrong reason.
-    ///
-    /// Note when this reds: the `extract-keys` × `_LOCALES` case
-    /// really would run `--site` against the developer's real
-    /// `site/src/i18n` and drop a worksheet into the checkout.
-    /// That is the harm being prevented, and it is invisible to
-    /// `git status` because the worksheet tree is gitignored.
+    /// Note when this reds: the `_LOCALES` case really would run
+    /// `--site` against the developer's real `site/src/i18n` and
+    /// drop a worksheet into the checkout. That is the harm
+    /// being prevented, and it is invisible to `git status`
+    /// because the worksheet tree is gitignored.
     @Test(
         "--site refuses to run under any extract override",
-        arguments: ["extract-keys", "merge-keys"],
-        [
+        arguments: [
             "KIWIDESK_EXTRACT_WORKSHEETS",
             "KIWIDESK_EXTRACT_LOCALES",
         ]
     )
     func siteRefusesUnderTheOverride(
-        script: String,
         variable: String
     ) throws {
         let base = FileManager.default.temporaryDirectory
@@ -168,7 +164,9 @@ struct LocaleWorksheetRejectionTests {
             )
         defer { try? FileManager.default.removeItem(at: base) }
         let result = try runPythonScript(
-            at: repoRoot.appendingPathComponent("scripts/\(script)"),
+            at:
+                repoRoot
+                .appendingPathComponent("scripts/extract-keys"),
             arguments: ["--site", "de"],
             environment: [variable: base.path]
         )

@@ -81,7 +81,7 @@ from pathlib import Path
 
 from locale_decoder import decode_json_object
 from locale_paths import (
-    site_override_conflict,
+    merge_override_conflict,
     worksheet_name,
     worksheets_dir,
 )
@@ -102,9 +102,8 @@ LOCALES_DIR = (
 # Where `scripts/extract-keys` leaves the worksheet — read here
 # and unlinked here; `<locale>.json` is still written under
 # `LOCALES_DIR`. `scripts/locale_paths.py` is the one definition,
-# imported rather than re-derived: a second literal would agree
-# only until the override is set, and the symptom is this script
-# reporting "does not exist" for a file just written.
+# imported rather than re-derived; any live `KIWIDESK_EXTRACT_*`
+# is refused in `main()` before this path is read (#1107).
 WORKSHEETS_DIR = worksheets_dir(ROOT)
 SITE_WORKSHEETS_DIR = worksheets_dir(ROOT, site=True)
 
@@ -194,9 +193,9 @@ def main(argv: list[str]) -> int:
         return 0
     site = "--site" in args
     flag = "--site " if site else ""
-    conflict = site_override_conflict(site)
+    conflict = merge_override_conflict()
     if conflict:
-        print(f"merge-keys --site: {conflict}", file=sys.stderr)
+        print(f"merge-keys: {conflict}", file=sys.stderr)
         return 1
     if site:
         args = [a for a in args if a != "--site"]

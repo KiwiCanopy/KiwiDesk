@@ -72,21 +72,65 @@ def worksheets_dir(root: Path, site: bool = False) -> Path:
     """The directory `missing_<locale>.json` is written to and
     read from. `site` selects the marketing site's sub-tree.
 
-    The override exists so a test spawning these scripts cannot
+    The override exists so a test spawning `extract-keys` cannot
     write into the developer's own checkout; it is never set for
     a human run. It redirects the app tree only — `--site`'s
     catalogs have no matching override, and redirecting half of
     a mode is worse than redirecting none of it, so
     `extract-keys` refuses the combination outright rather than
-    letting it through here.
+    letting it through here. `merge-keys` refuses the whole
+    family in every mode (`merge_override_conflict`), so only
+    `extract-keys` can reach here with the override live.
     """
     base = Path(_override() or str(root / WORKSHEETS_DIRNAME))
     return base / "site" if site else base
 
 
+def _live_overrides() -> list[str]:
+    """Every `KIWIDESK_EXTRACT_*` set to a non-empty value,
+    sorted. An empty value is not set — `_override`'s rule,
+    applied here per variable."""
+    return sorted(
+        name
+        for name, value in os.environ.items()
+        if name.startswith(OVERRIDE_PREFIX) and value
+    )
+
+
+def merge_override_conflict() -> str | None:
+    """Why a `merge-keys` run must not proceed under any
+    override, or None. Called before it touches a path, in both
+    modes.
+
+    `merge-keys` honours no `KIWIDESK_EXTRACT_*` variable: its
+    catalog directory is `__file__`-derived, so honouring the
+    worksheet override alone — what it did before #1107 — read
+    redirected worksheets and rewrote the developer's REAL
+    catalogs while the caller believed the run was sandboxed,
+    then unlinked the worksheet, the only copy of the work. Its
+    sanctioned harness is the repo-shaped `ScriptFixture`, which
+    clears the family, so honouring the rest would add a
+    production-only test hook no test needs; refusing makes the
+    half-redirect unrepresentable instead.
+    """
+    live = _live_overrides()
+    if not live:
+        return None
+    return (
+        f"{', '.join(live)} set, but merge-keys honours no "
+        "override — its catalog directory is derived from the "
+        "script's own location, so the run would read redirected "
+        "worksheets and rewrite the real catalogs while believing "
+        "it was redirected, then unlink the worksheet. Unset "
+        "them (a test uses the repo-shaped fixture instead)."
+    )
+
+
 def site_override_conflict(site: bool) -> str | None:
     """Why a `--site` run must not proceed under an override, or
-    None. Called by both scripts before either touches a path.
+    None. Called by `extract-keys` before it touches a path
+    (`merge-keys` refuses the family in every mode via
+    `merge_override_conflict`, which subsumes this).
 
     Refuses on ANY `KIWIDESK_EXTRACT_*`, not just the worksheet
     one. Site mode honours none of them — `main()` reassigns
@@ -101,11 +145,7 @@ def site_override_conflict(site: bool) -> str | None:
     """
     if not site:
         return None
-    live = sorted(
-        name
-        for name, value in os.environ.items()
-        if name.startswith(OVERRIDE_PREFIX) and value
-    )
+    live = _live_overrides()
     if not live:
         return None
     return (
