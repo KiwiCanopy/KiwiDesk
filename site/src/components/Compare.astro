@@ -309,7 +309,7 @@ const jsonLd = [
       <p>
         <Fragment set:html={t("compare_anchor_tabs_body")
           .replace("{ghostty}", `<a href="${src.ghosttyTabs}" target="_blank" rel="noopener">`)
-          .replace("{/ghostty}", "</a>")
+          .replace("{/ghostty}", `<span aria-hidden="true"> ↗</span></a>`)
           .replace("{limits}", `<a href="${src.tabsLimit}">`)
           .replace("{/limits}", "</a>")} />
       </p>
@@ -327,7 +327,7 @@ const jsonLd = [
           .replace("{sip}", `<a href="${src.sipDecision}">`)
           .replace("{/sip}", "</a>")
           .replace("{aero}", `<a href="${src.aerospaceWorkspaces}" target="_blank" rel="noopener">`)
-          .replace("{/aero}", "</a>")} />
+          .replace("{/aero}", `<span aria-hidden="true"> ↗</span></a>`)} />
       </p>
     </div>
 
@@ -339,7 +339,7 @@ const jsonLd = [
           .replace("{sip}", `<a href="${src.sipDecision}">`)
           .replace("{/sip}", "</a>")
           .replace("{omni}", `<a href="${src.omniwm}" target="_blank" rel="noopener">`)
-          .replace("{/omni}", "</a>")} />
+          .replace("{/omni}", `<span aria-hidden="true"> ↗</span></a>`)} />
       </p>
     </div>
   </section>
@@ -355,7 +355,7 @@ const jsonLd = [
       <p>
         <Fragment set:html={t("compare_yabai_diff")
           .replace("{sip}", `<a href="${src.yabaiSip}" target="_blank" rel="noopener">`)
-          .replace("{/sip}", "</a>")} />
+          .replace("{/sip}", `<span aria-hidden="true"> ↗</span></a>`)} />
       </p>
     </article>
 
@@ -782,8 +782,12 @@ const jsonLd = [
   :global(main.cmp p a) {
     text-decoration: underline;
     text-underline-offset: 2px;
-    text-decoration-color:
-      color-mix(in srgb, currentColor 45%, transparent);
+    text-decoration-thickness: from-font;
+    text-decoration-color: currentColor;
+  }
+  :global(main.cmp p a:hover),
+  :global(main.cmp p a:focus-visible) {
+    text-decoration-thickness: 2px;
   }
   /* MAJOR — 427px of table is hidden at 375px and macOS overlay
      scrollbars are invisible at rest, so the only cue was a
