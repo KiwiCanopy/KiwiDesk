@@ -1,21 +1,11 @@
 import AppKit
 import KiwiDeskCore
 
-/// The launch behavior an Open-Applications binding encodes,
-/// derived from its `lua` verb rather than a persisted field
-/// (#334) — so surfacing the choice adds no `KeyBinding` shape to
-/// migrate or parity-test. Both verbs already dispatch to the same
-/// engine helper (`launch(newInstance:)`); the GUI only exposes the
-/// flag. Default is `openOrFocus`, the single most useful behavior.
+/// Launch behavior for Open-Applications shortcut bindings (#334).
 enum AppLaunchBehavior: String, CaseIterable {
-    /// `pull_or_spawn` — pull a running instance into the current
-    /// space, or launch it if absent. The default.
     case openOrFocus
-    /// `spawn_new` — always launch a fresh instance, even when one
-    /// is already running.
     case openNew
 
-    /// The Lua verb this behavior dispatches to.
     var verb: String {
         switch self {
         case .openOrFocus: return "pull_or_spawn"
@@ -24,17 +14,11 @@ enum AppLaunchBehavior: String, CaseIterable {
     }
 }
 
-/// The installed-application catalog and the app-launch command
-/// inverse, split from `KeybindingCatalog` to stay under the
-/// file-size ceiling. Apps are identified by bundle id (the
-/// stable, locale- and rename-proof key — see `AppRef`) and
-/// shown by their localized display name.
+/// Application catalog and command parser helpers for app shortcuts (#334,
+/// #333).
 extension KeybindingCatalog {
-    /// The Open-Applications action for this bundle id and launch
-    /// behavior. Paired with `appBundleID(from:)` /
-    /// `appLaunchBehavior(from:)`, its exact inverse. Behavior
-    /// defaults to open-or-focus so existing call sites keep their
-    /// meaning.
+    /// Formats Lua command for launching bundle identifier with specified
+    /// behavior.
     static func appCommand(
         _ bundleID: String,
         behavior: AppLaunchBehavior = .openOrFocus
@@ -42,27 +26,20 @@ extension KeybindingCatalog {
         "KiwiDesk.\(behavior.verb)(\"\(bundleID)\")"
     }
 
-    /// The bundle id inside `appCommand`'s output, or nil when
-    /// `lua` isn't exactly one of the app-launch calls — the
-    /// inverse used by import classification. Matches either verb.
+    /// Extracts bundle identifier from app-launch Lua command string.
     static func appBundleID(from lua: String) -> String? {
         parseAppCommand(lua)?.bundleID
     }
 
-    /// The launch behavior `lua` encodes, or nil when it isn't an
-    /// app-launch call. The sibling inverse to `appBundleID(from:)`.
+    /// Extracts launch behavior from app-launch Lua command string.
     static func appLaunchBehavior(
         from lua: String
     ) -> AppLaunchBehavior? {
         parseAppCommand(lua)?.behavior
     }
 
-    /// The launch behaviors already bound for `bundleID` across
-    /// these application bindings, `excluding` one row (the one
-    /// being edited). The single basis the GUI reasons over for the
-    /// per-row grey-out, the add-row seed, and the fully-bound
-    /// exclusion (#334) — pure, so it is unit-testable without the
-    /// view.
+    /// Launch behaviors already bound for `bundleID` in given keybindings
+    /// (#334).
     static func takenBehaviors(
         for bundleID: String,
         in bindings: [KeyBinding],
@@ -77,8 +54,7 @@ extension KeybindingCatalog {
         )
     }
 
-    /// The first launch behavior not yet bound for `bundleID`, or
-    /// nil when every behavior is already taken (#334).
+    /// First available launch behavior for `bundleID` (#334).
     static func firstAvailableBehavior(
         for bundleID: String,
         in bindings: [KeyBinding]
@@ -89,12 +65,8 @@ extension KeybindingCatalog {
         }
     }
 
-    /// The behavior a row should carry after (re-)assigning it to
-    /// `bundleID`: keep `preferred` when it's still free for that
-    /// app, else the first free behavior, else `preferred` as a
-    /// last resort (every behavior is already bound on other rows).
-    /// `excluding` drops the row being reassigned. Keeps a re-pick
-    /// from silently colliding with another row (#334).
+    /// Resolves preferred or available behavior when reassigning application
+    /// row (#334).
     static func behaviorForAssignment(
         to bundleID: String,
         preferred: AppLaunchBehavior,
@@ -112,10 +84,6 @@ extension KeybindingCatalog {
         } ?? preferred
     }
 
-    /// Decomposes an app-launch Lua call into its bundle id and
-    /// behavior, or nil when `lua` isn't exactly such a call. An
-    /// embedded quote means escaped content the app menu never
-    /// authors, so such Lua stays unmatched.
     private static func parseAppCommand(
         _ lua: String
     ) -> (bundleID: String, behavior: AppLaunchBehavior)? {
@@ -133,21 +101,13 @@ extension KeybindingCatalog {
         return nil
     }
 
-    /// One app a picker can target: the bundle identifier is
-    /// the stored identity (stable across locale and rename —
-    /// see `AppRef`), the localized display name is what's
-    /// shown. Apps with no bundle id (rare unbundled helpers)
-    /// can't be targeted by a rule and are dropped.
+    /// Target application with bundle ID and display name.
     struct InstalledApp: Hashable, Identifiable {
         let bundleID: String
         let name: String
         var id: String { bundleID }
     }
 
-    /// The single disk scan under the standard roots, run once:
-    /// the app catalog plus each app's path for the icon cache
-    /// to warm from. De-duplicated by bundle id (lower-cased,
-    /// matching the normalized `AppRef.bundleID`).
     private static let diskScan:
         (apps: [InstalledApp], iconPaths: [String: String]) = {
             let manager = FileManager.default
@@ -182,23 +142,15 @@ extension KeybindingCatalog {
             return (Array(byID.values), paths)
         }()
 
-    /// Apps discoverable on disk under the standard roots.
     private static var diskApps: [InstalledApp] { diskScan.apps }
 
-    /// Bundle id → app path for every disk app, the seed the
-    /// icon cache warms from (running apps outside the scanned
-    /// roots resolve lazily on miss). Frozen for process life,
-    /// so the cache needs no invalidation.
+    /// Bundle ID to application file path mapping for disk applications.
     static var diskAppIconPaths: [String: String] {
         diskScan.iconPaths
     }
 
-    /// The picker list: disk apps unioned with currently
-    /// running apps, sorted by display name. Running apps fill
-    /// in bundles outside the scanned roots — Finder (in
-    /// /System/Library/CoreServices) most notably — without
-    /// scanning the noisy system directories for the handful of
-    /// user-facing apps they hold.
+    /// Installed disk and running regular applications sorted by localized
+    /// display name.
     static var installedApps: [InstalledApp] {
         var byID = Dictionary(
             diskApps.map { ($0.bundleID, $0) },
@@ -209,11 +161,6 @@ extension KeybindingCatalog {
             guard let id = app.bundleIdentifier?.lowercased(),
                 byID[id] == nil
             else { continue }
-            // Only fills bundles outside the scanned roots
-            // (Finder in CoreServices). Name via the same Spotlight
-            // resolver so it's localized and matches the disk
-            // entries; `localizedName` (the app's own) is the
-            // fallback when the bundle has no URL.
             let name =
                 app.bundleURL.map {
                     localizedName(url: $0, path: $0.path)
@@ -226,39 +173,19 @@ extension KeybindingCatalog {
         }
     }
 
-    /// A one-shot snapshot of `installedApps` for the picker,
-    /// computed on first access and cached for process life. The
-    /// popover reads this directly, so its list is fully
-    /// populated the instant it renders — no empty-then-fill race
-    /// through view state — and isn't rebuilt on every keystroke.
-    /// The trade is that an app launched mid-session (outside the
-    /// scanned disk roots) won't appear until relaunch; disk apps,
-    /// the bulk, are already frozen for process life.
+    /// Process-lifetime cached snapshot of installed applications.
     static let installedAppsSnapshot: [InstalledApp] = installedApps
 
-    /// Process-life `bundleID → localized name` index over the
-    /// snapshot, so `displayName(forBundleID:)` resolves an
-    /// installed app with a dictionary hit instead of a live
-    /// `NSWorkspace` + Spotlight read. Immutable (`static let`), so
-    /// it's concurrency-safe and shared by every render that
-    /// resolves or sorts app rows (#333 sorts by display name, so
-    /// the App Rules list would otherwise re-hit Spotlight per app
-    /// on every pass — a §5 main-thread cost).
+    /// Process-lifetime dictionary mapping bundle ID to localized name (#333).
     static let installedNameByID: [String: String] =
         Dictionary(
             installedAppsSnapshot.map { ($0.bundleID, $0.name) },
             uniquingKeysWith: { first, _ in first }
         )
 
-    /// The localized display name for a bundle id, for showing
-    /// a stored rule or binding whose identity is the id. Routed
-    /// through the same `localizedName` resolver as the picker,
-    /// so the two surfaces agree for any installed app. Falls
-    /// back to the id itself when the app isn't installed.
+    /// Resolves localized display name for bundle identifier (#333).
     static func displayName(forBundleID id: String) -> String {
         let id = id.lowercased()
-        // The snapshot covers every app present at launch; a live
-        // lookup only remains for one installed mid-session.
         if let name = installedNameByID[id] { return name }
         if let url = NSWorkspace.shared.urlForApplication(
             withBundleIdentifier: id
@@ -268,18 +195,8 @@ extension KeybindingCatalog {
         return id
     }
 
-    /// The app's user-language display name, the single resolver
-    /// both the picker and `displayName(forBundleID:)` use.
-    /// Reads Spotlight's `kMDItemDisplayName` — the same index
-    /// Finder, the Dock, and Spotlight read, so it localizes
-    /// ("Vorschau", "Systemeinstellungen") where a process-local
-    /// bundle lookup can't (KiwiDesk ships an English-only bundle,
-    /// localizing its own GUI via a JSON catalog, not `.lproj`).
-    /// Strips a soft hyphen some localized names carry
-    /// ("System\u{00AD}einstellungen") so it never leaks a line
-    /// break into a label or skews a sort/search key. Falls back
-    /// to `FileManager`'s display name when Spotlight has no entry
-    /// (indexing off, a just-installed or atypical bundle).
+    /// Resolves user-language display name via Spotlight metadata or
+    /// FileManager fallback.
     private static func localizedName(
         url: URL,
         path: String
@@ -301,11 +218,6 @@ extension KeybindingCatalog {
         return appDisplayName(path: path)
     }
 
-    /// `FileManager`'s display name for a bundle, without the
-    /// ".app" extension — the fallback when Spotlight can't name
-    /// the app. Resolves in KiwiDesk's English-only process, so a
-    /// CoreServices-localized system app reads in English here;
-    /// the stored identity is the bundle id regardless (`AppRef`).
     private static func appDisplayName(path: String) -> String {
         let shown = FileManager.default.displayName(
             atPath: path

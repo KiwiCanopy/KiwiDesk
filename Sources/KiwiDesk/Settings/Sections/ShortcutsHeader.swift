@@ -1,13 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Shortcuts header: the Import button — placed here,
-/// visible without scrolling, where the new user it serves can
-/// find it — and a label naming which layer the groups below
-/// bind into.
-///
-/// The layer strip itself lives in the Layers card
-/// (`LayerStripEditor`), which is where the census places it.
+/// Header for Shortcuts section with active layer label, Import, and Restore
+/// Defaults (#4, #1096).
 struct ShortcutsHeader: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
@@ -19,35 +14,16 @@ struct ShortcutsHeader: View {
             HStack(spacing: 8) {
                 editingLabel
                 Spacer()
-                // Import only offers itself when init.lua has
-                // custom Lua (the same condition as the
-                // banner): with nothing custom in the file
-                // there is nothing it could find, and inside
-                // the visual editor active foreign binds have
-                // already forced the raw-Lua fallback anyway.
                 if model.hasCustomLua,
                     !model.editingStoredProfile
                 {
                     importButton
                 }
-                // Gated, not permanent: it appears only when
-                // KiwiDesk actually has defaults this install
-                // lacks. That makes its PRESENCE the news #1096
-                // exists to deliver, instead of a destructive-
-                // sounding button standing over every new user's
-                // shortcut list for a condition they do not have
-                // — the same argument that keeps Import absent
-                // until init.lua holds something to adopt.
                 if model.hasDefaultsToRestore {
                     resetButton
                 }
             }
             if importedNote {
-                // `groupHeading` is the green-emphasis TEXT
-                // token (the diff rows' precedent) — `.green`
-                // lifts in dark while the app's greens do not,
-                // and full-strength `accent` on words reads
-                // clickable (dark pass).
                 Text(importedNoteText)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.groupHeading)
@@ -55,17 +31,7 @@ struct ShortcutsHeader: View {
         }
     }
 
-    /// Which layer the rows below belong to — a LABEL, not a
-    /// control, and shown only once a second layer exists.
-    ///
-    /// The census tiers the layer strip `.showMore`, so the strip
-    /// itself now lives in the Layers card rather than the header
-    /// (owner ruling: the census is the area's authority). But
-    /// every group below binds into the SELECTED layer, and an
-    /// editor that does not say what it is editing is a trap the
-    /// moment a second layer exists — so the header keeps the
-    /// fact and gives up the control. With only `default` there
-    /// is nothing to disambiguate and it stays silent.
+    /// Label indicating active layer when multiple layers exist.
     @ViewBuilder private var editingLabel: some View {
         if model.config.layers.count > 1 {
             Text(
@@ -80,20 +46,7 @@ struct ShortcutsHeader: View {
         }
     }
 
-    // MARK: - Restore defaults (#1096)
-
-    /// Takes up the shipped defaults, which the seed alone
-    /// cannot deliver: it fires only into an empty config, so
-    /// an existing install never sees an improved default.
-    ///
-    /// Disabled rather than hidden off the default layer
-    /// (`gui.md` — grey, don't hide), because the seed only ever
-    /// authored that one; `.help` says which, so the greying
-    /// explains itself.
-    ///
-    /// Danger is signalled by the confirmation's destructive
-    /// role, never a resting red button — the house convention
-    /// `GeneralSection+Reset` states.
+    /// Restores shipped shortcut defaults onto default layer (#1096).
     private var resetButton: some View {
         Button {
             confirmingReset = true
@@ -130,10 +83,6 @@ struct ShortcutsHeader: View {
             }
             Button(role: .cancel) {
             } label: {
-                // NOT `discard.cancel` — that key reads
-                // "Continue editing" in seven locales, and
-                // nothing is being edited on this dialog.
-                // `GeneralSection+Reset` hit the same trap.
                 Text(
                     L("spaces.delete_confirm.cancel", "Cancel")
                 )
@@ -143,22 +92,7 @@ struct ShortcutsHeader: View {
         }
     }
 
-    /// Names the COUNT it would discard rather than asking "are
-    /// you sure": a number is what makes the choice informed,
-    /// and it is zero for the common case of an untouched layer,
-    /// where the sentence says so instead of threatening.
-    /// Leads with the GAIN and treats the loss as the caveat:
-    /// the question a user has here is "what do I get, and what
-    /// does it cost", and an earlier draft answered only the
-    /// second half — telling the very population this exists for
-    /// (people who customised their defaults) that their
-    /// shortcuts were about to be deleted, when what was
-    /// happening was the thing they had asked for.
-    ///
-    /// The loss count is now true collateral only: a shortcut of
-    /// the user's OWN removed because a default reclaims its
-    /// key. A default they merely moved is not a loss — the verb
-    /// comes back on its shipped chord, which is the point.
+    /// Explains restored defaults count and collateral loss count (#1096).
     private var resetMessage: String {
         let restored = model.shortcutsTheResetWouldRestore
         let lost = model.shortcutsTheResetWouldDiscard
@@ -170,21 +104,6 @@ struct ShortcutsHeader: View {
                 restored
             )
         }
-        // The counts are separated by "·", never a comma: six
-        // locales use the comma as a DECIMAL separator, so
-        // "restored: 12, and" starts parsing as a number. The
-        // corpus already settled this in `behavior.quit.summary`.
-        //
-        // The "review below, then Save" beat this frame used to
-        // carry is gone rather than quoted: naming the Save
-        // button as literal text is the #818 violation a
-        // localization audit caught here (German's is "Sichern",
-        // so a translator reaching for the obvious word names a
-        // button that does not exist), and interpolating it reds
-        // `InterpolatedLabelTests` — that guard equates a frame's
-        // ARGUMENT count with its `%N$@` count, which no frame
-        // mixing a label with a count can satisfy. Filed; the
-        // staged-ness is worth saying once the frame can say it.
         return L(
             "shortcuts.restore_defaults.message",
             "Your own shortcuts are kept, except any that use a "
@@ -211,8 +130,7 @@ struct ShortcutsHeader: View {
             )
     }
 
-    // MARK: - Import (#4)
-
+    /// Import button reading shortcuts from init.lua (#4, #818).
     private var importButton: some View {
         Button {
             model.importCurrentShortcuts()
@@ -231,22 +149,11 @@ struct ShortcutsHeader: View {
                 systemImage: "square.and.arrow.down"
             )
         }
-        // Explicitly sealed rather than left to the default
-        // style: the two render alike, but only a named style
-        // is visible to the guard keeping the accent off button
-        // labels.
         .settingsActionButton()
-        // Small: it sits inline beside the layer chips and
-        // must not read as a peer tab.
         .controlSize(.small)
         .help(importHelp)
     }
 
-    /// The destination group is INTERPOLATED from the key that
-    /// labels it rather than named as text (#818): this sentence
-    /// said "lands in Advanced" while the drawer had read "Lua
-    /// bindings" since #68, so every locale had faithfully
-    /// translated a group name no locale draws.
     private var importHelp: String {
         L(
             "shortcuts.import.help",
