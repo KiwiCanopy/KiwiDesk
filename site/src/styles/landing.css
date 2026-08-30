@@ -1532,6 +1532,20 @@ section {
   margin-inline: auto;
 }
 
+.lfoot .footer__parent {
+  margin-bottom: 0.9rem;
+}
+.lfoot .footer__credit {
+  margin: 0.6rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+.lfoot .footer__credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .footer__parent {
   display: flex;
   flex-direction: column;

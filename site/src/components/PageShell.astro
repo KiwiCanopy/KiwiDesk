@@ -16,6 +16,8 @@ import "../styles/landing.css";
 import ThemeHead from "./ThemeHead.astro";
 import logoMark from "../assets/brand/logo.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
+import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
+import { Image } from "astro:assets";
 import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
@@ -72,6 +74,7 @@ const ogLocale = { en: "en_US", de: "de_DE", ja: "ja_JP" }[lang];
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
 const kiwiCanopyUrl = "https://kiwicanopy.com";
+const makerProfile = "https://github.com/hajiboy95";
 ---
 
 <!doctype html>
@@ -199,6 +202,13 @@ const kiwiCanopyUrl = "https://kiwicanopy.com";
     </main>
 
     <footer class="lfoot">
+      <a class="footer__parent" href={kiwiCanopyUrl}
+        target="_blank" rel="noopener">
+        <Image class="footer__logo" src={kiwiCanopy} alt=""
+          widths={[110, 160, 220]} sizes="110px" />
+        <span class="footer__name">{t("footer_org")}<span
+          aria-hidden="true"> ↗</span></span>
+      </a>
       <p class="tag">{t("footer_tag")}</p>
       <nav class="flinks" aria-label={t("footer_nav_aria")}>
         <a href="/docs">{t("footer_docs")}</a>
@@ -211,6 +221,12 @@ const kiwiCanopyUrl = "https://kiwicanopy.com";
         <a href={kofi} target="_blank" rel="noopener">{t("footer_kofi")}<span aria-hidden="true"> ↗</span></a>
       </nav>
       <p class="copy">{t("footer_copy")}</p>
+      <p class="footer__credit">
+        {t("footer_credit_built_by")}{" "}
+        <a href={makerProfile} target="_blank" rel="noopener">
+          {t("footer_credit_name")} · {t("footer_credit_handle")}
+        </a>
+      </p>
     </footer>
 
     <style>

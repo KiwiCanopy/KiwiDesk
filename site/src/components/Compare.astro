@@ -244,6 +244,25 @@ const jsonLd = [
   <p class="intro">{t("compare_intro")}</p>
   <p class="intro intro--fine">{t("compare_intro_honesty")}</p>
 
+  {/* "Which one are you using?" — the question the reader arrived
+       with, asked once. Picking a chip jumps to that tool's
+       section and rings its column for the rest of the visit, so
+       a 6-column table becomes two columns they care about.
+       Nothing is hidden: everything stays in the DOM and the
+       chips degrade to anchors when the script does not run.
+       Session-only, no storage — a reading aid is not a
+       preference (design review, 2026-08-30). */}
+  <nav class="cmp__chips" id="cmpChips"
+    aria-label={t("compare_chips_lead")}>
+    <span class="cmp__chips-lead">{t("compare_chips_lead")}</span>
+    {tools.filter((tool) => !tool.own).map((tool) => (
+      <a class="cmp__chip" href={`#${tool.key}`}
+        data-pick={tool.key}>{tool.label}</a>
+    ))}
+    <a class="cmp__chip" href="#different"
+      data-pick="">{t("compare_chips_none")}</a>
+  </nav>
+
   {/* Horizontal scroll rather than a second, duplicated card
       layout for narrow screens: a duplicate would ship the same
       claims twice to a crawler and twice to a screen reader. The
@@ -259,7 +278,8 @@ const jsonLd = [
             class="visually-hidden"
             >{t("compare_row_header")}</span></th>
           {tools.map((tool) => (
-            <th scope="col" class={tool.own ? "is-own" : undefined}>
+            <th scope="col" data-tool={tool.key}
+              class={tool.own ? "is-own" : undefined}>
               {tool.own ? (
               <span class="cmp__th">
                 {tool.own && (
@@ -297,7 +317,8 @@ const jsonLd = [
               )}
             </th>
             {tools.map((tool) => (
-              <td class={tool.own ? "is-own" : undefined}>
+              <td data-tool={tool.key}
+                class={tool.own ? "is-own" : undefined}>
                 {t(`compare_cell_${row}_${tool.key}`)}
               </td>
             ))}
@@ -369,7 +390,9 @@ const jsonLd = [
       <h3>
         <a href={src.yabai} target="_blank" rel="noopener">yabai<span aria-hidden="true"> ↗</span></a>
       </h3>
+      <p class="cmp__label">{t("compare_tool_good_label")}</p>
       <p class="cmp__good">{t("compare_yabai_good")}</p>
+      <p class="cmp__label cmp__label--diff">{t("compare_tool_diff_label")}</p>
       <p>
         <Fragment set:html={t("compare_yabai_diff")
           .replace("{sip}", `<a href="${src.yabaiSip}" target="_blank" rel="noopener">`)
@@ -381,7 +404,9 @@ const jsonLd = [
       <h3>
         <a href={src.aerospace} target="_blank" rel="noopener">AeroSpace<span aria-hidden="true"> ↗</span></a>
       </h3>
+      <p class="cmp__label">{t("compare_tool_good_label")}</p>
       <p class="cmp__good">{t("compare_aerospace_good")}</p>
+      <p class="cmp__label cmp__label--diff">{t("compare_tool_diff_label")}</p>
       <p>{t("compare_aerospace_diff")}</p>
     </article>
 
@@ -389,7 +414,9 @@ const jsonLd = [
       <h3>
         <a href={src.rift} target="_blank" rel="noopener">Rift<span aria-hidden="true"> ↗</span></a>
       </h3>
+      <p class="cmp__label">{t("compare_tool_good_label")}</p>
       <p class="cmp__good">{t("compare_rift_good")}</p>
+      <p class="cmp__label cmp__label--diff">{t("compare_tool_diff_label")}</p>
       <p>{t("compare_rift_diff")}</p>
     </article>
 
@@ -397,7 +424,9 @@ const jsonLd = [
       <h3>
         <a href={src.omniwm} target="_blank" rel="noopener">OmniWM<span aria-hidden="true"> ↗</span></a>
       </h3>
+      <p class="cmp__label">{t("compare_tool_good_label")}</p>
       <p class="cmp__good">{t("compare_omniwm_good")}</p>
+      <p class="cmp__label cmp__label--diff">{t("compare_tool_diff_label")}</p>
       <p><Fragment set:html={t("compare_omniwm_diff")} /></p>
     </article>
 
@@ -406,7 +435,9 @@ const jsonLd = [
         <a href={src.magnet} target="_blank" rel="noopener">Magnet<span aria-hidden="true"> ↗</span></a>{" "}
         <span class="cmp__also">{t("compare_magnet_also")}</span>
       </h3>
+      <p class="cmp__label">{t("compare_tool_good_label")}</p>
       <p class="cmp__good">{t("compare_magnet_good")}</p>
+      <p class="cmp__label cmp__label--diff">{t("compare_tool_diff_label")}</p>
       <p>{t("compare_magnet_diff")}</p>
     </article>
   </section>
@@ -454,6 +485,31 @@ const jsonLd = [
       </div>
     )}
   </section>
+
+<script>
+  // Emphasis only: every cell stays in the DOM and stays readable,
+  // so this adds nothing a crawler or a screen reader depends on.
+  // Session-only by design — a reading aid is not a preference,
+  // and storing it would be the hidden state #1048 removed.
+  const chips = document.getElementById("cmpChips");
+  chips?.addEventListener("click", (event) => {
+    const chip = (event.target as HTMLElement).closest<HTMLElement>(
+      "[data-pick]",
+    );
+    if (!chip) return;
+    event.preventDefault();
+    const pick = chip.dataset.pick ?? "";
+    chips.querySelectorAll("[data-pick]").forEach((el) => {
+      el.classList.toggle(
+        "is-picked",
+        (el as HTMLElement).dataset.pick === pick && pick !== "",
+      );
+    });
+    document.querySelectorAll<HTMLElement>("[data-tool]").forEach((el) => {
+      el.classList.toggle("is-picked", el.dataset.tool === pick);
+    });
+  });
+</script>
 </PageShell>
 
 <style>
@@ -872,6 +928,64 @@ const jsonLd = [
   }
   /* MINOR — centring the numeral is right for a one-line heading
      and wrong for two, and every anchor title wraps at 375px. */
+  .cmp__label {
+    margin: 0 0 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .cmp__label--diff {
+    color: var(--text-dim);
+    margin-top: 0.2rem;
+  }
+  .cmp__tool p.cmp__good {
+    padding-top: 0.5rem;
+  }
+  .cmp__chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 2.4rem;
+  }
+  .cmp__chips-lead {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-right: 0.2rem;
+  }
+  .cmp__chip {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .cmp__chip:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .cmp__chip.is-picked {
+    color: var(--text);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent-deep) 16%, transparent);
+  }
+  /* The picked column is ringed, not recoloured: our own column
+     keeps its tint, and the two read as "mine" and "theirs"
+     rather than competing for the same emphasis. */
+  .cmp__table [data-tool].is-picked {
+    background: color-mix(in srgb, var(--accent-deep) 9%, transparent);
+    color: var(--text);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cmp__chip {
+      transition: none;
+    }
+  }
   .visually-hidden {
     position: absolute;
     width: 1px;
