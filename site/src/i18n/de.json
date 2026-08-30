@@ -364,7 +364,7 @@
   "guide_tour_spaces_title": "Spaces",
   "hero_cta_primary": "KiwiDesk holen",
   "hero_cta_secondary": "In Aktion ansehen",
-  "hero_dev_cta_github": "Auf GitHub ansehen",
+  "hero_dev_cta_github": "Quellcode lesen",
   "hero_dev_cta_star": "Stern auf GitHub geben",
   "hero_dev_kicker": "Ein Tiling Window Manager, der sich wie macOS anfühlt – kein Linux-Terminal-Hack",
   "hero_dev_sub": "KiwiDesk verwaltet Fenster in <b>flachen Arrays</b>, nicht in i3-artigen Bäumen — <b>voll in Lua konfigurierbar</b>, mit <b>sieben Layouts</b> zum Umschalten. Und es <b>deaktiviert nie SIP</b>.",
