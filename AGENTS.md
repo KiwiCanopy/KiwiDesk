@@ -149,6 +149,22 @@ traced at directory altitude — see **`docs/architecture.md`**.
    it are in [`.claude/rules/gui.md`](.claude/rules/gui.md);
    `docs/ui-patterns.md` holds the shared control conventions
    and `docs/design-decisions.md` the rulings behind them.
+8. **Comments: state the constraint, cite the ruling, stop.**
+   A comment carries only what the code cannot show — a
+   non-obvious invariant, a platform trap, the why behind a
+   choice that looks wrong. Budget: 1–3 lines plus the issue
+   ref (`#NNN`) where an argument exists; the argument itself
+   lives in the issue, the owning rule file, or
+   `docs/design-decisions.md`, never in the source. A
+   docstring states the contract — what it does, units,
+   threading, ownership — not the design history. Never
+   write: how the code got here, alternatives considered and
+   rejected, what the next line visibly does, or justification
+   aimed at a reviewer. One exception: a docstring a rule file
+   or guard names as a canonical home — a census like
+   `OwnWindowTiling`'s doc, or a number-pin's retuning
+   argument ([tests.md](.claude/rules/tests.md), #1021) —
+   keeps whatever length that job needs.
 
 ## 3. Workflow: Refine → Plan → Act → Verify
 
