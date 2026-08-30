@@ -1,28 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The GUI boundary where a Core `ConfigIssue` becomes readable
-/// text (#96/#601) — `Conflict` → `ConflictText`, mirrored.
-///
-/// Core detects these conditions while loading config and
-/// reports the condition; this file says it in the user's
-/// language. The reason is OWNERSHIP, not actor isolation —
-/// `KiwiCore` is itself `@MainActor` and could call `L()` (it
-/// did, until #601). Copy authored in Core cannot be re-rendered
-/// when the user switches language, and a plain English literal
-/// there never reaches `scripts/extract-keys`, so it never
-/// becomes a key and no locale can translate it. That is exactly
-/// how four of these five shipped untranslatable.
+/// Localizes Core `ConfigIssue` descriptions for display (#96, #601).
 enum ConfigIssueText {
     /// The sentence for one issue, in the user's language.
     @MainActor
     static func message(for kind: ConfigIssue.Kind) -> String {
         switch kind {
         case .profileBroken(let cause):
-            // Delegated, not duplicated: the Settings row under
-            // App ▸ Profiles names the same file for the same
-            // reason, and two strings about one condition drift
-            // (#678 Phase 4 pass 9).
+            // Shared with Settings ▸ Profiles row (#678).
             return ProfileBrokenText.message(for: cause)
         case .luaVMUnavailable:
             return L(
@@ -31,10 +17,7 @@ enum ConfigIssueText {
                     + "configuration was applied."
             )
         case .luaError(let detail):
-            // The interpreter's own message, deliberately not
-            // translated — it is machine output the user will
-            // search for verbatim. Only the frame around it is
-            // localized.
+            // Preserves raw error message inside localized frame.
             return L(
                 "config_issues.lua_error",
                 "This file raised an error: %1$@",

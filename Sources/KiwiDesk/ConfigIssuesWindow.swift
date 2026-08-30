@@ -57,10 +57,7 @@ final class ConfigIssuesWindowController: NSObject {
     }
 }
 
-/// Every load/validation error with its offending file — a
-/// half-loaded config is a visible state, not a silent partial
-/// start (§3.7). Surface only: the validation cores stay with
-/// #39/#31.
+/// Displays load/validation errors with their source files (§3.7).
 struct ConfigIssuesView: View {
     @ObservedObject var model: ConfigIssuesModel
     @EnvironmentObject private var localization: LocalizationManager
@@ -154,11 +151,7 @@ struct ConfigIssuesView: View {
                     .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // A remedy rides only on profile rows — an unreadable
-            // profile is deletable in place, so the panel is no
-            // longer a dead end (#246). Load-scoped issues
-            // (init.lua/gui.json) carry no profile name and stay
-            // reload-only.
+            // Profile rows include delete and reveal actions (#246).
             if let name = issue.profileName {
                 profileActions(name)
             }
@@ -188,9 +181,7 @@ struct ConfigIssuesView: View {
         .controlSize(.small)
     }
 
-    /// Modal confirm before an irreversible file delete. NSAlert
-    /// (not a SwiftUI dialog) since this is a small AppKit panel
-    /// with no sheet host wired.
+    /// Prompts for confirmation before deleting a profile file.
     private func confirmDelete(_ name: String) {
         let alert = NSAlert()
         alert.alertStyle = .warning
