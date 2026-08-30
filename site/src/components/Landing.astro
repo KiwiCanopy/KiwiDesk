@@ -1030,7 +1030,6 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                The REQUIREMENT line is not here at all; it belongs
                beside the install affordances in the other column,
                not beside "Read the Docs". */}
-          {downloadHref && <p class="quickstart__note">{t.build_download_note}</p>}
         </div>
         <div class="quickstart__codes">
           <div class="code" aria-label={t.install_code_aria}>
@@ -1081,8 +1080,18 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <p class="req" id="startReq">
             <Icon name="lucide:shield" width={15} height={15}
               aria-hidden="true" />
-            {downloadHref ? t.download_req : t.build_req}
+            {downloadHref ? (
+              <Fragment set:html={t.download_req_dev
+                .replace("{mit}", `<a href="${repo}/blob/main/LICENSE"`
+                  + ` target="_blank" rel="noopener">`)
+                .replace("{/mit}", "</a>")} />
+            ) : (
+              t.build_req
+            )}
           </p>
+          {downloadHref && (
+            <p class="quickstart__note">{t.build_download_note}</p>
+          )}
 
           <details class="quickstart__alt">
             <summary>
