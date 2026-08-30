@@ -69,7 +69,13 @@ public enum AutoStartLevel: Equatable, Sendable, CaseIterable {
         self == .atLoginWithAutoRestart
     }
 
-    /// Resolves (login, restart) pair refusing invalid permutations (#678).
+    /// The level a (login, restart) pair means — and the ONE place
+    /// the impossible pair (login OFF + restart ON) is refused
+    /// (#678 item 16): with login off the restart flag is
+    /// DISCARDED. The Advanced row's grey is a courtesy; this is
+    /// the half that holds for a CLI verb, a restored preference
+    /// or a test that never passes the view. Do not re-derive the
+    /// pair anywhere else.
     public static func level(
         openAtLogin: Bool,
         restartOnCrash: Bool

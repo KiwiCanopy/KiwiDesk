@@ -90,6 +90,10 @@ public struct SpaceBarStyle: Sendable, Equatable {
 
 }
 
-/// Synthesized Codable conformance must stay in type's own file; backed by
-/// `SpaceBarParityTests` and `SettingsCodingTests`.
+/// Synthesized Codable conformance must stay in the type's own
+/// file (cross-file conformances get no synthesized `encode`,
+/// forcing the mirrored list parity-tests.md bans). The OPPOSITE
+/// placement from `TilingSettings+Coding` is deliberate — do not
+/// harmonize; `SpaceBarParityTests` and `SettingsCodingTests`
+/// backstop the residual hazard.
 extension SpaceBarStyle: Codable {}

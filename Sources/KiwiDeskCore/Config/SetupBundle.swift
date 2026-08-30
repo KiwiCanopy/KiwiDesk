@@ -1,10 +1,22 @@
 import Foundation
 
-/// Everything a KiwiDesk backup carries as one JSON document (#606).
-/// Carries `gui.json`, profiles, and saved palette library (`palettes.json`).
+/// Everything a KiwiDesk backup carries as one JSON document
+/// (#606): `gui.json`, profiles, and the saved palette library.
+/// The contents are an ALLOW-LIST, never a directory sweep —
+/// `init.lua` stays behind (user-authored code a backup must not
+/// claim), as do the arrangement snapshots (this Mac's session)
+/// and the socket/lock (runtime). Add an entry only for a path
+/// something actually creates.
 public struct SetupBundle: Codable, Sendable, Equatable {
-    /// Supported bundle format version (format 2: bar-content rename, owner
-    /// ruling 2026-08-19; format 3: scroll-duration rename on Profile, #1020).
+    /// Supported bundle format version. Not a compatibility shim —
+    /// a refusal signal: this is the one artifact that legitimately
+    /// outlives the build, and `JSONDecoder` is lenient, so a
+    /// future-format bundle would decode "successfully" with data
+    /// silently dropped. One integer turns that into a refusal.
+    /// 2 = the bar-content rename (owner ruling 2026-08-19);
+    /// 3 = the scroll-duration rename, on `[Profile]` alone
+    /// (#1020 — `GuiConfig.currentFormat` carries why its half
+    /// deliberately did not move).
     public static let currentFormat = 3
 
     public let format: Int
@@ -15,7 +27,12 @@ public struct SetupBundle: Codable, Sendable, Equatable {
 
     /// Informational version string of the writing KiwiDesk build.
     public let writtenBy: String
-    /// GUI-managed settings, or nil if unmanaged (code-reviewer 2026-08-17).
+    /// GUI-managed settings, or nil. Nil has TWO causes and only
+    /// one is benign — no sidecar at all, or one that would not
+    /// decode — so `exportSetup` checks `guiConfigStore.exists`
+    /// rather than trusting the nil (code-reviewer 2026-08-17): a
+    /// backup is the artifact a user makes because they are about
+    /// to need it.
     public let config: GuiConfig?
     public let profiles: [Profile]
     public let palettes: [ColorPalette]
@@ -39,7 +56,11 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         format <= SetupBundle.currentFormat
     }
 
-    /// Whether this bundle replaces `artifact`
+    /// Whether this bundle replaces `artifact` — and the
+    /// distinction is ABSENT, not empty: the export always writes
+    /// both arrays, so `[]` means the source Mac had none, and
+    /// replacing with none is what "a restore replaces; it never
+    /// merges" promises. Only `config == nil` is a true absence
     /// (architect-reviewer 2026-08-17).
     public func replaces(_ artifact: ConfigArtifact) -> Bool {
         switch artifact {
@@ -83,6 +104,10 @@ public enum SetupBundleError: Error, Equatable, Sendable {
     case unreadableSettings
     /// Existing `palettes.json` failed to decode during export (#945).
     case unreadablePalettes
-    /// Target Mac is Lua-managed so GUI settings cannot apply.
+    /// Target Mac is Lua-owned, so the settings half could not
+    /// apply: `loadConfig` never reads the restored rules and
+    /// keybindings there while the profile-scoped half applies
+    /// anyway — a half-landed restore, and reporting success for
+    /// it is the failure this case exists to prevent.
     case luaOwnsThisMac
 }

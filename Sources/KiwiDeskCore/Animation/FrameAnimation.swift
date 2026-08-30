@@ -41,7 +41,13 @@ public struct FrameAnimation: Sendable {
         )
     }
 
-    /// Retargets animation mid-flight with a new sizing promise (#593, #611).
+    /// Retargets animation mid-flight with a new sizing promise
+    /// (#593). The watchdog clock restarts only on a CHANGED
+    /// target (#611): an echo/retile loop re-issuing an identical
+    /// rect must not reset the clock forever and blind the
+    /// watchdog to the one wedge it can meet in production. Keyed
+    /// on the target alone — a pass changing only its sizing
+    /// promise has not restarted the journey.
     public mutating func retarget(
         to frame: CGRect,
         sizing: BatchSizing
@@ -55,7 +61,14 @@ public struct FrameAnimation: Sendable {
         initialDistance = Self.distance(current, target)
     }
 
-    /// Re-seats size springs onto current on-screen size per axis (#45).
+    /// Re-seats size springs onto the on-screen size, per axis and
+    /// only where spring and screen disagree (#45): under
+    /// `.mayInstantSize` a shrinking axis renders the target while
+    /// the spring travels on, so switching to `.allSpringSized`
+    /// without re-seating jumps the window back up by the
+    /// divergence — #45 reintroduced ACROSS batches. A growing
+    /// axis already agrees and must be left alone (zeroing its
+    /// velocity stalls a healthy grow — measured in review).
     public mutating func reseatSize(_ size: CGSize) {
         let onScreen = [Double(size.width), Double(size.height)]
         for (offset, value) in onScreen.enumerated() {
@@ -83,7 +96,12 @@ public struct FrameAnimation: Sendable {
                 target: target[i],
                 dt: dt
             )
-            // Non-finite recovery net (#599, #611).
+            // Non-finite recovery net (#599, #611): a component
+            // that stops being finite can never settle, so force
+            // it home. The live trigger is a non-finite START (a
+            // garbage AX read) — check there first if this fires.
+            // A non-finite TARGET is refused upstream in `animate`;
+            // this recovery would hand the NaN straight to AX.
             if !current[i].isFinite || !velocity[i].isFinite {
                 current[i] = target[i]
                 velocity[i] = 0

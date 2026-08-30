@@ -88,7 +88,11 @@ extension TilingSettings {
         return params
     }
 
-    /// Writes splitRatioH into authored override if present (#458).
+    /// Writes splitRatioH into the authored override if present
+    /// (#458). Only the interactive-resize path routes into these
+    /// setters: on `false` the caller stores the value in the
+    /// space's SESSION layer instead — never the global, which
+    /// would visibly resize every other no-override space.
     @discardableResult
     public mutating func setSplitRatioH(
         _ value: Double,
@@ -150,7 +154,12 @@ extension TilingSettings {
         }
     }
 
-    /// Resolves bar hosting protocol for mode (#527).
+    /// The bar-hosting layout for a mode — the ONE place that
+    /// decides which layouts host an App Bar (#527): everything
+    /// asking "does this mode show a bar?" derives from here, so
+    /// a third hosting layout is one edit. `KiwiCore`'s per-space
+    /// twin keeps its own switch by necessity — two mirrors, which
+    /// §2.4 allows, never three.
     public func appBarHost(
         for mode: LayoutMode
     ) -> AppBarHosting? {
@@ -168,7 +177,12 @@ extension TilingSettings {
         }
     }
 
-    /// Insets visible bounds by Space Bar reservation (#293, #537).
+    /// Insets visible bounds by the Space Bar reservation (#293).
+    /// Deliberately NOT public: it takes a raw frame the caller
+    /// obtained some other way — the unsafe half. Callers with a
+    /// screen want `TilingEngine.layoutBounds(on:)` (#537), and
+    /// the routing guards scan only this module, so a cross-module
+    /// caller would be invisible to them.
     func layoutBounds(from visible: CGRect) -> CGRect {
         SpaceBarGeometry.remainingFrame(
             in: visible,
@@ -176,8 +190,14 @@ extension TilingSettings {
         )
     }
 
-    /// Builds LayoutContext with sticky (#414 v2),
-    /// overrides (#431, #881, #878), and sizeBounds (#677).
+    /// Builds a LayoutContext. `sticky` (#414 v2) is REQUIRED so every call
+    /// site chooses (the `forceRetile` pattern, §5): a
+    /// frame-producing build that silently omitted it would
+    /// diverge only when a sticky is piled — the hardest drift to
+    /// spot; strip-geometry builds pass `[]` explicitly.
+    /// `focusedOverride` (#431), `screenNeighbors` (#878, #881)
+    /// and `sizeBounds` (#677) follow the same choose-or-omit
+    /// shape.
     public func context(
         bounds: CGRect,
         space: Space,

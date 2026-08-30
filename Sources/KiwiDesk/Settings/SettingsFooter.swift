@@ -21,6 +21,9 @@ struct SettingsFooter: View {
     /// VoiceOver announcement delay before speaking (#812).
     static let announceDelay: TimeInterval = 1.2
 
+    /// Anything that gives a verb meaning. The creation offer on
+    /// a fully clean setup deliberately does NOT summon the pill —
+    /// creation lives in Profiles; the pill narrates a draft.
     private var hasWork: Bool {
         model.isDirty || model.profileDirty
             || model.hasLayoutDrift
@@ -37,6 +40,13 @@ struct SettingsFooter: View {
                     )
             }
         }
+        // Announce ONCE as the pill appears, never the count
+        // (owner ruling, #812 session 2) — the pill is last in
+        // reading order, so an editing VoiceOver user would never
+        // learn a Save is pending. Delayed: posted in the same
+        // instant as the control's own value it was dropped on
+        // device. The flip to false cancels the pending post so
+        // it cannot land on a clean tree.
         .onChange(of: hasWork) { _, now in
             pendingAnnouncement?.cancel()
             guard now else { return }

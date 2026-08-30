@@ -140,8 +140,14 @@ extension AppBarItemView {
         )
     }
 
-    /// Vertical bar icon-only layout (QA 2026-07-19; tested in
-    /// `AppBarGlyphLayoutTests.verticalReuseHidesLabel`).
+    /// Vertical bar icon-only layout (QA 2026-07-19). This pass
+    /// hides the label ITSELF, and must: item views are reused
+    /// across renders, so one that laid out horizontally arrives
+    /// still showing a stale title — the hide looked redundant
+    /// from every horizontal fixture and was deleted once, a real
+    /// defect for one commit
+    /// (`AppBarGlyphLayoutTests.verticalReuseHidesLabel`). Hidden
+    /// BEFORE the `side` guard, which can return early.
     private func layoutVertical() {
         label.isHidden = true
         let pad = Self.contentPadding

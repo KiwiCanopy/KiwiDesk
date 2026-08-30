@@ -45,7 +45,10 @@ public struct DesktopSnapshot: Sendable {
             .sorted()
     }
 
-    /// True if current space on display is a user space (#670).
+    /// True if the current space on the display is a user space
+    /// (#670). True for an unknown screen: standing down needs
+    /// positive evidence of a fullscreen/system space, never a
+    /// lookup miss.
     public func currentSpaceIsUser(on uuid: String?) -> Bool {
         guard let uuid, let id = currentSpaces[uuid] else {
             return true

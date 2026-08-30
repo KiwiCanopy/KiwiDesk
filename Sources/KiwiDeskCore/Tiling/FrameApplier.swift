@@ -19,7 +19,11 @@ final class FrameApplier {
     /// Grace period for ignoring self-inflicted AX frame echoes.
     private static let echoGrace: TimeInterval = 1.0
 
-    /// True if window's frame was set within echo grace period.
+    /// True if window's frame was set within the echo grace —
+    /// tells our own AX echoes apart from user drags. Without it
+    /// a settled animation's echo reads as a drag end, and in
+    /// stack layouts (all slots overlap) that fake drop swaps
+    /// windows and retriggers itself forever.
     func didRecentlySetFrame(_ id: WindowID) -> Bool {
         recent.isRecent(id, within: Self.echoGrace)
     }
@@ -94,8 +98,17 @@ final class FrameApplier {
         }
     }
 
-    /// Applies frame instantly dropping EUI around the set (#881).
+    /// Applies a frame instantly, dropping EUI around the set
+    /// (#881). Deliberately outside the `begin/endAnimating`
+    /// ref-count: every EUI toggle and frame-set for a pid rides
+    /// the one serial queue, so the live read observes the correct
+    /// interleaved state. Callers must `animation.cancel(window:)`
+    /// first (as `retile` and `stashInactive` do) so a window is
+    /// never spring-animated and instant-set at once.
     func applyInstant(_ id: WindowID, _ frame: CGRect) {
+        // Recorded before the element guard, at enqueue time: the
+        // overlay sync wants the commanded frame this same turn
+        // (#881); a stamp for a gone window expires unread.
         instantTargets.record(id, frame: frame)
         guard let element = elementProvider(id) else { return }
         guard
@@ -141,6 +154,8 @@ final class FrameApplier {
         return queue
     }
 
+    /// EUI toggles ride the same per-app queue as the frames, so
+    /// off → frames → on ordering is guaranteed.
     private func setEUI(pid: pid_t, enabled: Bool) {
         queue(for: pid).async {
             AXHelper.setEnhancedUserInterface(
@@ -233,7 +248,9 @@ private final class PendingFrames: @unchecked Sendable {
     private let lock = NSLock()
     private var entries: [WindowID: Entry] = [:]
 
-    /// Stores newest frame; returns true if an apply was already scheduled.
+    /// Stores the newest frame; returns true when an apply is
+    /// already scheduled. A pending size change survives being
+    /// overwritten by a position-only frame.
     func put(_ id: WindowID, _ entry: Entry) -> Bool {
         lock.lock()
         defer { lock.unlock() }

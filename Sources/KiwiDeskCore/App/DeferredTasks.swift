@@ -20,25 +20,39 @@ final class DeferredTasks {
         case desktopSettle
         case desktopMoveReap
         /// Adopts window sent to hidden desktop by follow (#1023).
+        /// A separate slot from `desktopMoveReap` deliberately:
+        /// keys are cancel-and-replace and the two verbs are one
+        /// keystroke apart — whichever fired second would silently
+        /// drop the other's reap.
         case desktopFollowReap
         /// Verifies desktop switch dispatch (#1023).
         case desktopSwitchVerify
         case borderDropSettle
-        /// Re-syncs border and mark geometry after animations (#596).
+        /// Re-syncs border and mark geometry after animations
+        /// (#596). A separate slot from `borderDropSettle`
+        /// deliberately: different delays for different reasons,
+        /// and sharing one would let whichever landed second
+        /// cancel the other.
         case borderResync
         case floatRaise
         /// Adoption-heal sweep for unhandled windows (#675).
         case adoptionHeal
         /// Re-tracks windows dropped mid-launch (#675).
         case transientRetrack
+        /// Bar re-render on a drawn title change — the one slot
+        /// whose reschedule is the POINT: cancel-and-replace turns
+        /// a keystroke-rate burst into one refresh when it stops.
         case barTitleRefresh
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]
     private var burstStarts: [Key: ContinuousClock.Instant] = [:]
 
-    /// Schedules `body` after `delay` (bounded by `maxWait` across bursts,
-    /// #900).
+    /// Schedules `body` after `delay` (bounded by `maxWait` across
+    /// bursts, #900). Cancellation is checked once, after the
+    /// sleep — `body` is synchronous main-actor code, so a cancel
+    /// cannot interleave once it starts. `body` is retained until
+    /// it fires: capture the core weakly.
     func schedule(
         _ key: Key,
         after delay: Duration,
@@ -83,7 +97,10 @@ final class DeferredTasks {
         burstStarts[key] = nil
     }
 
-    /// Returns task stored for key (used for test assertions).
+    /// The task stored for a key — for pinning cancel-and-replace
+    /// claims. NOT a pending-check: a fired body leaves its
+    /// finished task in the slot, so this stays non-nil after
+    /// firing; only `cancel`/`cancelAll` clear it.
     func task(for key: Key) -> Task<Void, Never>? {
         tasks[key]
     }

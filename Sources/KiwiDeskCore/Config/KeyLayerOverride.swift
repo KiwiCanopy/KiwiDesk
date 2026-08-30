@@ -13,13 +13,20 @@ public struct KeyLayerOverride: Sendable, Equatable {
     /// True when no layer diverges.
     public var isEmpty: Bool { layers.isEmpty }
 
-    /// Count of divergent layers and bindings (#678 turn 13a).
+    /// Count of things this override overrides (#678 turn 13a).
+    /// Not `flatMap(\.bindings).count`: `diff` emits a layer with
+    /// NO bindings when only its icon diverges, so a diverging
+    /// layer contributes at least itself. The invariant to keep is
+    /// `isEmpty == (overrideCount == 0)`.
     public var overrideCount: Int {
         layers.reduce(0) { $0 + max($1.bindings.count, 1) }
     }
 
-    /// Merges this override onto `base` layer list (distinct from
-    /// `KeybindingMerge`).
+    /// Merges this override onto `base` (O4 soft: override wins
+    /// per combo IN PLACE, unmentioned base combos and layers
+    /// survive). `KeybindingMerge` folds by the same key with the
+    /// OPPOSITE icon precedence — both are correct for their
+    /// direction, do not unify them.
     public func resolved(
         onto base: [KeyLayer]
     ) -> [KeyLayer] {
@@ -35,6 +42,9 @@ public struct KeyLayerOverride: Sendable, Equatable {
                 result.append(baseLayer)
                 continue
             }
+            // EVERY matching base row is replaced — a hand-edited
+            // duplicate base combo must not let a stale copy
+            // outlive the override (registration is last-wins).
             var merged = baseLayer.bindings
             for row in over.bindings {
                 var replaced = false
@@ -65,7 +75,11 @@ public struct KeyLayerOverride: Sendable, Equatable {
 }
 
 extension KeyLayerOverride {
-    /// Produces sparse override diff from base to edited (nil if identical).
+    /// Inverse of `resolved(onto:)` — nil when nothing diverges.
+    /// DELETIONS are not expressible (O4 soft: unmentioned base
+    /// rows always survive): the editor treats deleting an
+    /// inherited row as revert, never removal — rebind to a no-op
+    /// to disable a combo in one profile. No tombstones.
     public static func diff(
         base: [KeyLayer],
         edited: [KeyLayer]

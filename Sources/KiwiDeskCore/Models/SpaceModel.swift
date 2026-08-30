@@ -207,6 +207,10 @@ public struct Space: Sendable, Equatable {
         windows.removeAll { $0 == window }
         stackWeights[window] = nil
         if focused == window {
+            // The neighbor that slid into the removed slot — not
+            // `windows.last` unconditionally, which yanked focus
+            // across the whole scrolling row when a middle window
+            // closed.
             focused =
                 removedIndex.flatMap {
                     windows.indices.contains($0) ? windows[$0] : nil
@@ -231,6 +235,8 @@ public struct Space: Sendable, Equatable {
                 trackBreaks.insert(a)
             }
         }
+        // Index 0 is an IMPLICIT head, so its weight stays at the
+        // slot even though it may carry no explicit marker.
         if aBreak || bBreak || i == 0 || j == 0 {
             let weight = trackWeights[a]
             trackWeights[a] = trackWeights[b]

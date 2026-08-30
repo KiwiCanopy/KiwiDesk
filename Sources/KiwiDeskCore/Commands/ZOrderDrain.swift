@@ -18,13 +18,20 @@ struct ZOrderDrain: Sendable {
     /// Budget and exhaustion policy.
     let policy: Policy
 
-    /// Max per-window landing wait (120ms).
+    /// Max per-window landing wait — 6x the 20 ms worst case
+    /// measured; per-window so one wedged app cannot stall the
+    /// windows behind it.
     static let landingLimit: TimeInterval = 0.12
     /// Poll interval while awaiting landing (5ms).
     static let pollInterval: TimeInterval = 0.005
 
-    /// Raises `order` deepest first; exactly one pass per window (owner QA,
-    /// 2026-08-02; architect review, 2026-08-02; #688, #689).
+    /// Raises `order` deepest first; exactly one pass per window
+    /// (owner QA 2026-08-02; #688, #689). Blocking: call on
+    /// `zOrderQueue`, never the main actor — the one exception is
+    /// the teardown restack (#688), which has no live session left
+    /// to block. Returns the windows actually RAISED, and every
+    /// one of them: the caller keys the echo ledger off this and
+    /// drops the stamps of the rest (`releaseZOrderStamps`).
     func run(_ rawOrder: [WindowID]) -> [WindowID] {
         guard isCurrent() else { return [] }
         let deadline = now() + policy.budget
@@ -34,6 +41,11 @@ struct ZOrderDrain: Sendable {
         let order = rawOrder.filter { seenIDs.insert($0).inserted }
         let targets = seenIDs
         let observed = stacking()
+        // An empty read is `CGWindowListCopyWindowInfo` answering
+        // nothing at all (the list otherwise always carries the
+        // menu bar) — never a screen with no windows. Diffing
+        // against it would drop every raise silently for as long
+        // as the read failed (architect review, 2026-08-02).
         guard !observed.isEmpty else {
             order.forEach(raise)
             return order
@@ -51,6 +63,10 @@ struct ZOrderDrain: Sendable {
     }
 
     /// Issues the planned raises, awaiting verification per step.
+    /// Every window here comes back in the return value, the
+    /// unverified tail included — a raise left out would have its
+    /// echo-ledger stamp dropped while its echo was in flight,
+    /// which is the focus jump all over again.
     private func issue(
         _ plan: [WindowID],
         over untouched: [WindowID],
@@ -79,7 +95,10 @@ struct ZOrderDrain: Sendable {
         return raised
     }
 
-    /// Polls until raised windows stand in desired relative order above floor.
+    /// Polls until raised windows stand in desired relative order
+    /// above the floor. RELATIVE, never "is it frontmost": the
+    /// focused window sits above the whole pile by design, and a
+    /// window on another display can never be beaten.
     private func awaitLanding(
         raised: [WindowID],
         over untouched: [WindowID],

@@ -46,7 +46,15 @@ extension ScrollingLayout {
         return min(max(target, along - rowLength), 0)
     }
 
-    /// Offset from which `follow` pans (#966, #677; device QA, 2026-08-27).
+    /// Offset from which `follow` pans — nil for a never-scrolled
+    /// space (#966). Two things move the focused slot and they owe
+    /// opposite answers: the FOCUS moved (hold the recorded offset
+    /// — scroll-into-view, #66), or every slot moved underneath an
+    /// unchanged focus (a resize, swap, neighbour change, #677
+    /// re-pack — shift by how far the slot moved so it keeps its
+    /// place on screen). The recorded slot tells them apart;
+    /// except when it rested flush at the trailing border, the
+    /// edge is what it keeps (device QA, 2026-08-27).
     private static func heldBase(
         previous: ScrollRest?,
         focus: WindowID?,
@@ -57,6 +65,10 @@ extension ScrollingLayout {
         guard let previous else { return nil }
         guard let slot = previous.slot, slot.window == focus
         else { return previous.offset }
+        // The trailing verdict was reached when the offset was
+        // measured (`ScrollRest.Slot`) — never re-decided here;
+        // the value returned is the visibility clamp's own upper
+        // bound, so the clamp keeps it unchanged.
         if slot.restingOn == .trailing {
             return along - focusedSpan - focusedPos
         }

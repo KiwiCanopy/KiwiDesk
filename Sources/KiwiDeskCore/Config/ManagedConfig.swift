@@ -3,7 +3,13 @@ import Foundation
 /// Classifies `init.lua` by whether it touches GUI-managed vocabulary
 /// (#55, #116).
 public enum ManagedConfig {
-    /// Tokens matched against non-comment lines that force the raw Lua editor.
+    /// Tokens matched against non-comment lines that force the raw
+    /// Lua editor. Known limitation: receiver aliasing
+    /// (`local K = KiwiDesk; K.bind(…)`) escapes this token scan —
+    /// a deliberate tradeoff, and the stakes are why bindings stay
+    /// in ONE home (O7): an evading bind is registered by
+    /// init.lua, then silently unregistered when the structured
+    /// loader resets.
     public static let managedTokens: [String] = [
         "app_rules",
         "float_rules",
@@ -23,7 +29,10 @@ public enum ManagedConfig {
         classify(source).custom
     }
 
-    /// Whether config declares any managed setting, gating seed (#354).
+    /// Whether the config declares any managed SETTING — the
+    /// first-launch seed gate (#354): a hand-written config using
+    /// `set_*` verbs is Lua-owned and must never be seeded over,
+    /// while a hooks-only file still earns the GUI defaults.
     public static func declaresManagedSettings(
         _ source: String
     ) -> Bool {

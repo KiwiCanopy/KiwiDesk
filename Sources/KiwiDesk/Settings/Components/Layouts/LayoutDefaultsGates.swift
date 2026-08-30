@@ -47,6 +47,10 @@ struct LayoutDefaultsGates {
         .colours(.animationsScrollDurationMS),
     ]
 
+    /// Gated rows the area declares but resolves elsewhere. Empty
+    /// today, and kept as a declared slot rather than dropped: its
+    /// absence would make a future unanswerable gate look like an
+    /// omission instead of a decision.
     static let resolvedElsewhere: Set<SettingKey> = []
 
     /// Checks if any space override satisfies predicate (#520, #527).

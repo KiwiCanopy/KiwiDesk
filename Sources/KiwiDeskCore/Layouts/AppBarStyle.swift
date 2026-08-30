@@ -34,7 +34,9 @@ public struct AppBarStyle: Sendable, Equatable {
     public var cornerRoundness: CGFloat = 50
     /// Dim opacity for untinted inactive items (`BarAccent.untintedAlpha`).
     public var dimFactor: CGFloat = BarAccent.untintedAlpha
-    /// Inactive item text and glyph color.
+    /// Inactive item text and glyph colour. The colour defaults
+    /// here are mirrored as examples in docs/lua-reference.md —
+    /// change both.
     public var itemColor = "#EAF3EE"
     /// Background fill color (#14201CB3, #660, retuned by #755;
     /// `PaletteBarFillTests`).
@@ -73,7 +75,11 @@ public struct AppBarStyle: Sendable, Equatable {
         backgroundStyle == .boxed && !glassEnabled
     }
 
-    /// True if plate spans edge-to-edge.
+    /// True if the plate spans edge-to-edge — the SETTINGS
+    /// PREVIEWS' one copy of the spans rule; the live bars resolve
+    /// one layer down in `BarPlate.frame` (which adds the hug→full
+    /// overflow fallback), so a retune touches this and `BarPlate`
+    /// together. `SpaceBarStyle.plateSpans` is the twin.
     public var plateSpans: Bool {
         !hasBox && backgroundFit == .full
     }

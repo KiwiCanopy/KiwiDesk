@@ -1,6 +1,9 @@
 import Foundation
 
-/// Abstraction over Carbon hotkey registration for test isolation.
+/// Abstraction over Carbon hotkey registration for test
+/// isolation. An implementor never fires the handler of a FAILED
+/// registration — the hold-to-glide press path leans on it
+/// (`RegistrationBox` carries a nil id for exactly that handler).
 @MainActor
 public protocol HotkeyRegistrar: AnyObject {
     func register(
@@ -27,14 +30,24 @@ public final class KeybindingManager {
     }
 
     public private(set) var currentLayer = defaultLayer
-    /// True while executing Lua hotkey handler (#184).
+    /// True while a hotkey's Lua callback runs (#184): failure
+    /// cues key off this, so the same command from CLI/IPC stays
+    /// silent. Deliberately synchronous-only — deferred work runs
+    /// with the flag off and never cues. Save/restore (not
+    /// set/clear) in `fire`, so a callback pumping a nested run
+    /// loop cannot clear the outer fire's flag.
     public private(set) var isFiring = false
     /// Combos rejected during activation (#123).
     public internal(set) var activationFailures: Set<KeyCombo> =
         []
     private var layers: [String: [KeyCombo: Int32]] = [:]
     private var layerIcons: [String: String] = [:]
-    /// Live registrations mapped by id (#1056, #1082).
+    /// Live registrations by id — the ONE home for "what is
+    /// registered right now" (#1056/#1082): the unregister loop
+    /// and the glide's arm check both read it, and the arm check
+    /// is an EXISTENCE question, never a re-derivation of which
+    /// binding to act on. A second id list beside it would be two
+    /// homes drifting in opposite failure modes.
     var activeBindings: [UInt32: LiveBinding] = [:]
 
     struct LiveBinding {

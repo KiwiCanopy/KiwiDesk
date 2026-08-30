@@ -3,8 +3,13 @@ import Foundation
 /// The GUI's editable configuration split across global `gui.json` and
 /// active profile JSON (#36, #55).
 public struct GuiConfig: Codable, Equatable, Sendable {
-    /// Format version of gui.json schema (#902, #1020).
-    /// Format 0 = unversioned.
+    /// Format version of the gui.json schema (#902); 0 =
+    /// unversioned legacy. **Deliberately NOT bumped by the
+    /// scroll-duration rename (#1020)**: `settings` is absent from
+    /// `CodingKeys`, so the renamed key never reaches this file —
+    /// a bump would rewrite every gui.json for nothing and make
+    /// the previous release refuse one this build wrote. That note
+    /// is the ruling `SetupBundle.currentFormat` cites.
     public static let currentFormat = 1
 
     public var format: Int = GuiConfig.currentFormat
@@ -76,7 +81,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         return true
     }
 
-    /// Deletes a space and all profile-scoped overrides (#68).
+    /// Deletes a space and all profile-scoped overrides (#68) — a
+    /// pin left behind keeps the space in `Profile.declaredSpaces`
+    /// and the next authoritative load resurrects it. Deliberately
+    /// does NOT touch `appRules` (unlike `renameSpace`): app rules
+    /// are global, and another profile may still declare a space
+    /// of this name.
     public mutating func removeSpace(_ space: SpaceID) {
         spaces.removeAll { $0 == space }
         spaceModes[space] = nil
@@ -87,6 +97,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     }
 
     /// True if deleting space would drop custom overrides (#205).
+    /// The settings half probes by mutating a copy and comparing,
+    /// so it can never drift from `TilingSettings.removeSpace`'s
+    /// reflection-guarded map list.
     public func carriesOverrides(_ space: SpaceID) -> Bool {
         if spacePins[space] != nil { return true }
         if mainSpaces.contains(space) { return true }
@@ -96,6 +109,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         return probe != settings
     }
 
+    /// Only the global fields persist in the sidecar — the
+    /// profile-scoped ones round-trip through the profile JSON
+    /// instead (#36), which is what lets the two files never
+    /// drift.
     private enum CodingKeys: String, CodingKey {
         case format
         case spaces
@@ -147,6 +164,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             ) ?? []
         profileBindings =
             try decodeProfileBindings(from: container)
+        // A hand-edited sidecar can carry duplicate mode names or
+        // an icon on the default mode (#31) — normalized here so
+        // invalid entries never reach the loader or the GUI.
         layers = KeyLayer.normalized(
             full: try container.decodeIfPresent(
                 [KeyLayer].self,
@@ -157,6 +177,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     }
 
     private mutating func dropEmptyNamedSpaces() {
+        // ONE definition of the reference sites (removeSpace)
+        // rather than a third hand-mirror; only the appRules VALUE
+        // filter stays separate.
         removeSpace(SpaceID(""))
         appRules = appRules.filter { !$0.value.raw.isEmpty }
     }

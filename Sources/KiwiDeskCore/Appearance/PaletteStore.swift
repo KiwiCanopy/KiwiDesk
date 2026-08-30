@@ -77,7 +77,15 @@ public final class PaletteStore {
         try write(palettes)
     }
 
-    /// Bulk replaces user palettes during backup restore (#606).
+    /// Bulk-replaces the user library on a backup restore (#606) —
+    /// the one entry point whose input is untrusted, so it
+    /// enforces every single-item invariant: a built-in's name is
+    /// dropped, a duplicate keeps the first, unknown colour keys
+    /// are filtered. Dropping rather than throwing — one bad entry
+    /// must not fail a confirmed restore; the count says how many
+    /// were refused. It deliberately does NOT read the existing
+    /// library first: replacing an unreadable newer-format file is
+    /// exactly the restore the user confirmed.
     @discardableResult
     public func replaceUserPalettes(
         with palettes: [ColorPalette]
@@ -142,7 +150,12 @@ public final class PaletteStore {
         try encoder.encode(palette).write(to: url)
     }
 
-    /// Imports palette from file URL (#945 review).
+    /// Imports a palette from a file URL, filtering colours to
+    /// known paths. The sidecar is a BARE `ColorPalette` — no
+    /// envelope, no format — and deliberately outside the
+    /// migration census (#945 review): a breaking `ColorPalette`
+    /// schema change must rule the sidecar deliberately
+    /// (profiles.md's bump paragraph).
     public func importPalette(from url: URL) throws -> ColorPalette {
         guard let data = try? Data(contentsOf: url),
             let raw = try? JSONDecoder().decode(
@@ -170,6 +183,9 @@ public final class PaletteStore {
             format: PaletteDocument.currentFormat,
             palettes: palettes
         )
+        // Atomic: a crash mid-flush must not truncate the library
+        // — a corrupt file decodes to [] and the next save would
+        // rewrite it with only the new palette, losing it all.
         try encoder.encode(doc).write(
             to: fileURL,
             options: .atomic

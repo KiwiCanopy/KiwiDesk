@@ -38,7 +38,10 @@ public struct StateCoordinator: Sendable {
     /// Explicit `make_floating` / `make_tiled` verdicts per window.
     var manualFloatOverrides: [WindowID: Bool] = [:]
 
-    /// Manual float intent remembered across window close/reopen (#160).
+    /// Manual float intent remembered across close/reopen (#160).
+    /// Keyed by app + title, not `WindowID`: a reopened window
+    /// gets a fresh id, and old ids can be recycled onto unrelated
+    /// windows. Last close wins, first reopen consumes.
     var rememberedFloating: [WindowIdentity: Bool] = [:]
 
     /// Sticky intent remembered across window close/reopen (#414, #445).
@@ -59,8 +62,14 @@ public struct StateCoordinator: Sendable {
         workspaces.ensureSpace(defaultSpace)
     }
 
-    /// Swaps a window ID across all ID-keyed maps for native tab switches
-    /// (#308, #673; `WindowRekeyParityTests`, `MinimizeOrderTests`).
+    /// Swaps a window ID across every ID-keyed map for native tab
+    /// switches (#308) — the hand-mirrored list §5 warns about, so
+    /// `WindowRekeyParityTests` discovers the containers by
+    /// reflection. `minimizeOrder`'s element is a struct the
+    /// reflection cannot see; the `String(describing:)` scan and
+    /// `MinimizeOrderTests` are its nets (#673).
+    /// `rememberedFloating` is keyed by app+title and deliberately
+    /// untouched.
     mutating func rekey(_ old: WindowID, to new: WindowID) {
         windows.rekey(old, to: new)
         workspaces.rekey(old, to: new)

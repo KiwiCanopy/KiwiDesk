@@ -41,7 +41,11 @@ public final class BorderManager {
     var triedEventSource = false
     var privateRuntimeStarted = false
     var skyLightActive = false
-    /// QA lever to disable WindowServer tracking path (#596).
+    /// QA lever forcing the AX-fallback path (#596): set from
+    /// `KIWIDESK_NO_WS_TRACKING` at wiring — the settle-tail
+    /// symptoms are AX-fallback-only and the WS stream is up on
+    /// every developer Mac, so without a lever they are
+    /// unobservable.
     var windowServerTrackingDisabled = false
     var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = CoreLog.write
@@ -58,7 +62,10 @@ public final class BorderManager {
     }
     /// WindowServer bounds reconcile tee for sticky marks (QA 2026-07-21).
     var onFrameReconciled: @MainActor (WindowID, CGRect) -> Void = { _, _ in }
-    /// WindowServer z-order reorder tee (owner QA 2026-07-21).
+    /// WindowServer z-order reorder tee (owner QA 2026-07-21): a
+    /// re-click on an ALREADY-focused window raises it above its
+    /// own mark yet fires no AX focus event, so the focus-driven
+    /// re-sync never runs — this is what reaches the mark instead.
     var onWindowReordered: @MainActor (WindowID) -> Void = { _ in }
     /// Windows tracked for sticky mark z-order without active rings.
     var stickyTracked: Set<WindowID> = []
@@ -137,7 +144,10 @@ public final class BorderManager {
         cornerRadii[id] = nil
     }
 
-    /// Returns existing or newly created overlay for steady-state sync.
+    /// The window's ring, creating one if needed — a mutating
+    /// getter only `sync` may call. The dead-end bounce routes
+    /// around it via `makeOverlay` into a separate store, so a
+    /// concurrent `sync` can never adopt or stomp its transient.
     func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
         let overlay = makeOverlay(for: window)

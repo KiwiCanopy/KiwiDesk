@@ -6,6 +6,11 @@ final class StickyMarkOverlay {
     static let size: CGFloat = StickyMarkPlate.size
     static let inset: CGFloat = 6
 
+    /// The pill's HUD timings are deliberately FIXED, not bound to
+    /// the animation-duration setting (like macOS's own HUDs): the
+    /// hold is a reading duration, and slowing window tiling must
+    /// not make the pill crawl open. Only the snap-back `delay`
+    /// tracks the setting, because it waits on a window animation.
     private static let expandDuration: TimeInterval = 0.22
     private static let holdDuration: TimeInterval = 1.6
     private static let collapseDuration: TimeInterval = 0.16
@@ -70,6 +75,8 @@ final class StickyMarkOverlay {
         expandWork = nil
         collapseWork?.cancel()
         collapseWork = nil
+        // Retire in the collapsed state so a later re-show cannot
+        // resurrect the mark mid-pill.
         currentWidth = Self.size
         plate.setNameShown(false, animated: false, duration: 0)
         panel?.orderOut(nil)
@@ -201,6 +208,9 @@ final class StickyMarkOverlay {
         panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
+        // `.transient` hides the mark in Exposé/Mission Control at
+        // the compositor level — it vanishes with the swipe, no
+        // handler lag.
         panel.collectionBehavior = [
             .transient,
             .fullScreenAuxiliary,

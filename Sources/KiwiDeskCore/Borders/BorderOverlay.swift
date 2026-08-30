@@ -1,6 +1,9 @@
 import AppKit
 
-/// Focus-ring backend protocol (#357, #533).
+/// Focus-ring backend protocol (#357, #533). The SkyLight
+/// implementation returns `false` after any private-API failure
+/// so the facade can retire it and replay the latest state
+/// through the mandatory AppKit fallback.
 @MainActor
 protocol BorderOverlayBackend: AnyObject {
     var orderMode: BorderGeometry.Order { get }
@@ -23,6 +26,10 @@ extension BorderOverlayBackend {
 @MainActor
 final class BorderOverlay {
     private var backend: any BorderOverlayBackend
+    /// The raw inputs of the last render, kept so a fallback swap
+    /// can rebuild geometry for the new backend's order mode — the
+    /// `above` SkyLight geometry cannot be reused by the `below`
+    /// AppKit panel (#357).
     private var lastFrame: CGRect?
     private var lastWidth: CGFloat = 0
     private var lastCornerStyle: BorderStyle.CornerStyle = .rounded
@@ -40,6 +47,10 @@ final class BorderOverlay {
     private let makePreferred:
         @MainActor (CGWindowID) -> (any BorderOverlayBackend)?
     private let onFallback: @MainActor (String) -> Void
+    /// True once SkyLight must never be re-attempted: after a real
+    /// failure, and after a nil init (static unavailability) —
+    /// otherwise every glow-off update on the apply hot path would
+    /// re-run the doomed init forever.
     private var skyLightRetired = false
 
     init(
@@ -53,6 +64,10 @@ final class BorderOverlay {
         makePreferred = {
             SkyLightBorderOverlay(targetWindow: $0, order: order)
         }
+        // Both orders prefer SkyLight: its window is space-pinned
+        // at creation, so Mission Control leaves the ring behind
+        // instantly; `above` keeps the sub-level path that makes
+        // it occlusion-correct (#357/#367).
         if let skyLight = SkyLightBorderOverlay(
             targetWindow: window,
             order: order
@@ -84,7 +99,11 @@ final class BorderOverlay {
         onFallback = { _ in }
     }
 
-    /// Dynamically swaps backend when glow is toggled (#533).
+    /// Swaps backend on the glow toggle (#533): the
+    /// WindowServer-backed SkyLight context drops every shadow
+    /// colour to a grey smear, so a glow ring always renders on a
+    /// backend that can bloom; plain rings stay on SkyLight for
+    /// its space pin. Two-way, except once SkyLight is retired.
     @discardableResult
     private func ensureBackend(glow: Bool) -> Bool {
         if glow, !backend.rendersGlow {
@@ -144,6 +163,10 @@ final class BorderOverlay {
             return
         }
         if swapped && !shouldRestore {
+            // Re-assert through the FACADE methods, so a failed
+            // op on a fresh SkyLight window follows the
+            // retire-and-fall-back discipline instead of leaving
+            // a drawn-but-unordered ring.
             if isHidden {
                 hide()
             } else {
@@ -164,7 +187,9 @@ final class BorderOverlay {
         }
     }
 
-    /// Renders rubber-band bump offset for dead-end cue (#436).
+    /// Renders the rubber-band bump offset for the dead-end cue
+    /// (#436). Pure overlay motion: it never touches the window —
+    /// no AX write, nothing for the frame authority to fight.
     func renderBump(offset: CGVector, colorHex: String? = nil) {
         guard lastFrame != nil else { return }
         bumpOffset = offset

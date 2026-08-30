@@ -67,7 +67,10 @@ extension StateCoordinator {
         }
     }
 
-    /// Display assigned to a window's home space (#445).
+    /// Display assigned to a window's home space (#445) — the one
+    /// primitive the "home display = display of home space"
+    /// invariant rests on, shared so `stickyRenderSpace`,
+    /// `stickyExemptFromStash` and the move guard cannot drift.
     func homeDisplay(of window: WindowID) -> DisplayID? {
         workspaces.space(of: window)
             .flatMap { workspaces.display(of: $0) }
@@ -91,8 +94,13 @@ extension StateCoordinator {
         }
     }
 
-    /// The window a focus-driven surface should treat as focused on `space`,
-    /// including frontmost sticky travelers (#431, #416, #292).
+    /// The window a focus-driven surface should treat as focused
+    /// on `space` (#431, #416, #292). Normally `space.focused`,
+    /// except when a sticky traveler is frontmost and can never BE
+    /// that slot (the membership guard keeps `space.focused` off
+    /// it). `lastFocused` is GLOBAL, so the anchor yields the
+    /// traveler until a real member is next focused — an inactive
+    /// space injects none and always yields its own focus.
     public func focusAnchor(
         of space: Space,
         tiled: [WindowID]
@@ -133,7 +141,11 @@ extension StateCoordinator {
         var result: [WindowID] = []
         var next = 0
         for id in space.windows {
-            // Fullscreen stickies stay home (#670).
+            // Fullscreen first (#670), BEFORE the sticky skip:
+            // absent from `injected`, the tiled cursor below would
+            // drain past it and duplicate every later member, and
+            // a fullscreen sticky travels nowhere — its one glyph
+            // stays home.
             if let window = windows[id], window.isFullscreen {
                 result.append(id)
                 continue

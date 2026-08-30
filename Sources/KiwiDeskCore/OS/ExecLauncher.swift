@@ -71,6 +71,9 @@ public final class ExecLauncher {
 
         let key = ObjectIdentifier(process)
 
+        // Install before run(): a fast child may exit before
+        // launch() returns, and a handler set after the fact would
+        // never fire.
         process.terminationHandler = { [weak self] child in
             let code = child.terminationStatus
             let deliver: @Sendable (String, String) -> Void = {
@@ -172,7 +175,13 @@ public final class ExecLauncher {
         UInt64(max(0, seconds) * 1_000_000_000)
     }
 
-    /// Cancels timeout watchdogs on teardown without killing children.
+    /// Cancels timeout watchdogs on teardown without killing
+    /// children — a `timeout` armed before a mid-session stop must
+    /// not SIGTERM after management tore down. Accepted trade: a
+    /// child ALREADY stuck at that instant leaks its `running`
+    /// entry for the process life (its command stays
+    /// dedup-blocked); clearing here would be worse — a later EOF
+    /// reap would find no entry and leak its Lua callback ref.
     func cancelWatchdogs() {
         for key in Array(running.keys) {
             running[key]?.watchdog?.cancel()
@@ -187,6 +196,10 @@ public final class ExecLauncher {
         stdout: String,
         stderr: String
     ) {
+        // Idempotent: the EOF path and the timeout force-reap can
+        // both target the same child; whichever runs first wins,
+        // so `onExit` (which releases the Lua ref) fires exactly
+        // once.
         guard let child = running[key] else { return }
         child.watchdog?.cancel()
         running[key] = nil

@@ -13,7 +13,10 @@ extension SettingsModel {
         reload()
     }
 
-    /// Resets default layer shortcuts to current install defaults (#1096).
+    /// Resets default-layer shortcuts to what a fresh install
+    /// would seed for THIS config (#1096) — derived from the live
+    /// `spaces` and `resizeStep`, never a snapshot. Scoped to the
+    /// default layer: it is the only one the seed ever authored.
     func resetShortcutsToDefaults() {
         guard
             let index = config.layers.firstIndex(where: {
@@ -77,6 +80,14 @@ extension SettingsModel {
             || shortcutsTheResetWouldDiscard > 0
     }
 
+    /// Does `row` outlive a reset? Only rows the SEED authors are
+    /// replaced (owner ruling) — a launcher or Desktop row the
+    /// user invented is not a "customised default". Two ways a row
+    /// is the seed's, and both must go: its Lua is a shipped verb
+    /// (leaving it doubles the verb), or its COMBO is a shipped
+    /// chord (the seed reclaims that key — leaving the row puts
+    /// two bindings on it). Combos compare through `KeyCombo`, the
+    /// identity `digitTopUp` uses.
     private static func survivesReset(
         _ row: KeyBinding,
         against shipped: [KeyBinding],

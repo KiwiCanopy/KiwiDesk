@@ -1,7 +1,13 @@
-/// Resolves opening layout modes per screen for saved profile preview
-/// cards (#789, #959).
-/// Precedence follows `SpacePlacement` (pin -> Main role -> fallback).
-/// Tested via `ProfileOpeningModesTests`.
+/// Resolves opening layout modes per screen for saved-profile
+/// preview cards (#789, #959) — the static shadow of
+/// `SpacePlacement`, answering its first two legs (pin, Main
+/// role) in the same order; a change to the precedence belongs in
+/// `SpacePlacement` first, and here second. Two accepted
+/// residues, pinned by `ProfileOpeningModesTests`: a space pinned
+/// to the MAIN display lets a blank secondary borrow Main's
+/// glyph, and a multi-set profile answers from
+/// `monitorSets.first`, which a screen blank there may contradict
+/// in another set.
 extension Profile {
     /// Opening layout mode for each screen in monitor order
     /// (nil if unassigned).
@@ -33,7 +39,12 @@ extension Profile {
         return blank.count == 1 ? blank.first : nil
     }
 
-    /// First ordered space assigned to Main role without display pin.
+    /// First ordered space assigned to the Main role WITHOUT a
+    /// pin: `SpacePlacement.resolve` gives the pin precedence, so
+    /// a space carrying both opens on the pinned screen — painting
+    /// the blank one with its mode would name a screen it never
+    /// reaches. The GUI writers clear one when they set the other;
+    /// a hand-edited profile can carry both.
     private func firstMainSpace(in set: MonitorSet) -> SpaceID? {
         let main = Set(mainSpaces)
         return orderedSpaces.first {
@@ -41,7 +52,10 @@ extension Profile {
         }
     }
 
-    /// First ordered space pinned to monitor fingerprint.
+    /// First ordered space pinned to the fingerprint — the
+    /// profile's own order decides "first", never the
+    /// dictionary's, which would pick differently between
+    /// launches.
     private func firstSpace(
         pinnedTo fingerprint: String,
         in set: MonitorSet

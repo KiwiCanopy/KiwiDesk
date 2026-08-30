@@ -39,7 +39,16 @@ extension SpacesSection {
                     space: space,
                     pendingResetAll: $pendingResetAll
                 )
+                // Bounded at 700, deliberately: the `.menu`
+                // picker exception (#291) is argued from these
+                // rows sitting in a bounded column, and a width
+                // fix has no business retiring a settled control
+                // ruling as a side effect.
                 .frame(maxWidth: 700, alignment: .leading)
+                // Win the width negotiation, or a preview can
+                // overconstrain the HStack and spill over these
+                // rows' trailing checkboxes — which silently
+                // swallowed clicks until a re-render settled.
                 .layoutPriority(1)
             }
             resetActiveButton(space, mode: mode, gates: gates)
@@ -50,6 +59,10 @@ extension SpacesSection {
     private func overridesBreadcrumb(_ space: SpaceID) -> some View {
         HStack(spacing: 6) {
             Button {
+                // State the return destination BEFORE the pop —
+                // a focus assigned after the branch swaps has no
+                // view to land on and is dropped (#678 Phase 4
+                // pass 10, turn 20a rule 4).
                 returningRow = space
                 model.nav.spaceOverridesFocus = nil
             } label: {
@@ -73,6 +86,9 @@ extension SpacesSection {
         .lineLimit(1)
         .padding(.horizontal, SettingsMetrics.paneInset)
         .padding(.vertical, 10)
+        // Entering the sub-view puts focus on the back button —
+        // never inside the rows, which would strand a keyboard
+        // user one Shift-Tab short of the only way out.
         .onAppear { overridesBackFocused = true }
     }
 

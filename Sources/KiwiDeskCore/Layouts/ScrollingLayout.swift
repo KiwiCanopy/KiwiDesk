@@ -21,6 +21,10 @@ public struct ScrollingLayout: LayoutSystem {
         )
         let horizontal = context.scrolling.axisIsHorizontal
 
+        // A single window fills the whole area — unless its app
+        // refuses that size (#677): with no neighbors to re-pack
+        // against, the answered size is CENTERED (the monocle
+        // treatment; a symmetric gap reads deliberate).
         if windows.count == 1, let only = windows.first {
             return [
                 only: context.sizeBounds[only]?
@@ -85,6 +89,9 @@ public struct ScrollingLayout: LayoutSystem {
             along: along,
             horizontal: horizontal
         )
+        // BSP/Stack/Grid use minWindowSize as a TRIGGER to spill
+        // into a pile; scrolling has no pile (its overflow is the
+        // scroll itself), so it floors the slot instead.
         let size = min(along, max(resolved, context.minWindowSize))
         let spans = windows.map { window -> CGFloat in
             let bound = context.sizeBounds[window]
@@ -133,6 +140,14 @@ public struct ScrollingLayout: LayoutSystem {
         neighbors: ScreenNeighbors
     ) -> [WindowID: CGRect] {
         let along = metrics.along
+        // A blocked edge — another screen beyond it, or the
+        // vertical top macOS walls off itself (#139) — is a hard
+        // stop (#878): frames are global and macOS cannot clip
+        // another app's window, so an overhang there would render
+        // on the neighbor screen — the scrolled-out slot stops
+        // flush and stacks behind the viewport (the #150 pile,
+        // relocated). An open edge keeps the
+        // overhang-with-sliver pin below.
         let leadingBlocked =
             horizontal ? neighbors.left : true
         let trailingBlocked =
@@ -141,6 +156,13 @@ public struct ScrollingLayout: LayoutSystem {
         for (index, window) in windows.enumerated() {
             let span = metrics.spans[index]
             var lead = offset + metrics.positions[index]
+            // On an open edge, pin what macOS would refuse anyway
+            // (#142): an unreachable target makes every retile
+            // re-issue the frame past the ±2 pt tolerance. The
+            // peek caps at the slot's own span so a tiny
+            // `.fraction` slot pins fully visible; the focused
+            // slot is provably never touched — the offset clamps
+            // already bound its lead with the same span.
             let peek = min(Self.edgePeek, span)
             lead = min(
                 lead,

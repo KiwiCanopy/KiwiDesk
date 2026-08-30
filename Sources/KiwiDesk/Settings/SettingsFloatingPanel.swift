@@ -50,7 +50,13 @@ struct SettingsFloatingPanel: View {
     }
 }
 
-/// Draggable card chrome holding stored child content (#678 turn 17a, #758).
+/// Draggable card chrome holding a STORED child (#678 turn 17a).
+/// Load-bearing split: a drag invalidates the gesture-declaring
+/// view's body every frame, and building the panel inside it
+/// re-ran the whole draft diff per frame — the card stuttered
+/// under the pointer (owner, on device). Never move the
+/// `@GestureState` back up into a view that builds the preview,
+/// and never build the preview inline.
 private struct MovableCard<Content: View>: View {
     let bounds: CGSize
     let close: () -> Void
@@ -106,6 +112,9 @@ private struct MovableCard<Content: View>: View {
             )
             .strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
         )
+        // Without this the shadow halos every primitive inside
+        // the card (#758's lesson); it also gives the drag ONE
+        // composited layer to translate.
         .compositingGroup()
         .shadow(color: .black.opacity(0.18), radius: 18, y: 8)
     }

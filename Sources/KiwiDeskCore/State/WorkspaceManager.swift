@@ -11,14 +11,21 @@ public struct WorkspaceManager: Sendable {
     /// Space shown on currently focused display.
     public private(set) var activeSpace: SpaceID?
 
-    /// Spaces shown on non-focused displays (#multi-monitor).
+    /// Spaces shown on non-focused displays (#multi-monitor). The
+    /// invariant: `display(of: activeSpace)` is never a key here;
+    /// a display absent from the map falls back to its
+    /// first-assigned space.
     var secondaryShown: [DisplayID: SpaceID] = [:]
 
     /// Window holding system-wide focus (#414).
     public private(set) var lastFocused: WindowID?
 
-    /// Previous focused window for close-return focus
-    /// (`focusReturnCandidate`).
+    /// The window focused immediately before `lastFocused` — a
+    /// one-deep history, deliberately never a deeper walk-back:
+    /// invisible self-reordering history is what the
+    /// repeat-press-cycling ruling rejected, and one visible step
+    /// back is the whole close-return promise
+    /// (design-decisions ▸ Close-return focus).
     public private(set) var focusReturnCandidate: WindowID?
 
     public init() {}
@@ -49,8 +56,11 @@ public struct WorkspaceManager: Sendable {
         return space
     }
 
-    /// Sets layout mode; mode changes clear viewport offset and stint state
-    /// (#66, #458, #128, #437).
+    /// Sets layout mode; an actual mode CHANGE clears the viewport
+    /// offset and stint state (#66, #458, #128, #437). A same-mode
+    /// set must NOT clear: profile/GUI applies call this densely
+    /// over all live spaces, and an unconditional clear would snap
+    /// every scrolling viewport home on any unrelated edit.
     public mutating func setMode(
         _ id: SpaceID,
         _ mode: LayoutMode,
@@ -98,6 +108,10 @@ public struct WorkspaceManager: Sendable {
         if let active = activeSpace, spaceDisplay[active] == display {
             return active
         }
+        // Self-healing: a pick counts only while that space still
+        // lives on THIS display — a stale entry would lay one
+        // space on two screens, so it is ignored rather than
+        // honored.
         if let shown = secondaryShown[display],
             spaceDisplay[shown] == display
         {
@@ -189,6 +203,8 @@ public struct WorkspaceManager: Sendable {
     /// Re-keys window ID preserving slot and focus (#308).
     public mutating func rekey(_ old: WindowID, to new: WindowID) {
         if lastFocused == old { lastFocused = new }
+        // The candidate follows a native-tab rekey like
+        // `lastFocused`, or every tab switch silently kills it.
         if focusReturnCandidate == old { focusReturnCandidate = new }
         guard let id = space(of: old) else { return }
         spaces[id]?.rekey(old, to: new)
@@ -201,6 +217,8 @@ public struct WorkspaceManager: Sendable {
         guard spaces[id]?.windows.contains(window) == true else {
             return
         }
+        // A re-focus of the already-focused window must not
+        // collapse the history to itself.
         if lastFocused != window {
             focusReturnCandidate = lastFocused
         }

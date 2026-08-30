@@ -1,9 +1,13 @@
 import AppKit
 import SwiftUI
 
-/// Caption sentence with an embedded clickable link formatted via AppKit
-/// (device 2026-08-03, code review 2026-08-12;
-/// tested in `LinkedCaptionHitTests`).
+/// Caption sentence with an embedded clickable link, laid out by
+/// AppKit (`LinkedCaptionHitTests`). SwiftUI's own `.link` run
+/// navigates but gives NO pointing-hand cursor (device
+/// 2026-08-03) — the affordance that says a caption is followable
+/// — and `NSLayoutManager` is also what breaks lines correctly
+/// mid-paragraph in ja/ko/zh, exactly the locales the
+/// name-in-sentence frame exists for.
 struct LinkedCaption: NSViewRepresentable {
     let leading: String
     let linkTitle: String
@@ -16,6 +20,11 @@ struct LinkedCaption: NSViewRepresentable {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeNSView(context: Context) -> CaptionTextView {
+        // A SELECTABLE text view cannot be talked out of the
+        // I-beam — its own tracking area outranks any cursor rects
+        // a subclass sets, and an I-beam over a caption says "type
+        // here" (`resetCursorRects` was tried and lost, device
+        // 2026-08-03).
         let view = CaptionTextView.configured()
         view.delegate = context.coordinator
         return view
@@ -57,7 +66,11 @@ struct LinkedCaption: NSViewRepresentable {
         )
     }
 
-    /// Splits frame text around the `%1$@` link format specifier.
+    /// Splits the RAW frame at `%1$@` — the label is drawn AT the
+    /// specifier, never formatted into it: a frame already through
+    /// `String(format:)` has nothing left to draw at, which is how
+    /// the tour's closing card shipped words with no link under
+    /// them.
     static func split(frame: String) -> (String, String) {
         guard let slot = frame.range(of: "%1$@") else {
             assertionFailure("frame has no link slot")
@@ -76,6 +89,11 @@ struct LinkedCaption: NSViewRepresentable {
         )
     }
 
+    /// Built by hand rather than converted from an
+    /// `AttributedString`: SwiftUI's and AppKit's attribute scopes
+    /// name these differently, and a silently unmapped `.link`
+    /// renders as plain text that still passes every word-level
+    /// test.
     private var sentence: NSAttributedString {
         let out = NSMutableAttributedString()
         out.append(NSAttributedString(string: leading))
@@ -107,6 +125,9 @@ struct LinkedCaption: NSViewRepresentable {
         )
     }
 
+    /// A run needs a URL to BE a link. Nothing resolves this
+    /// scheme — every activation route is wired to `onLink`, and
+    /// none of them opens it.
     private static let href = URL(
         string: "kiwidesk-settings://cross-reference"
     )!

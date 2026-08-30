@@ -3,7 +3,10 @@ import Foundation
 
 /// App bar nested option vocabularies (split from `AppBarStyle.swift`).
 extension AppBarStyle {
-    /// Minimum bar thickness in pt (QA 2026-07-19).
+    /// Minimum bar thickness in pt (QA 2026-07-19): below it the
+    /// plate stroke and glyph run collide. Every entry point
+    /// clamps to it — profile decode, the Lua/CLI setter, and the
+    /// GUI slider's lower bound.
     public static let minThickness: CGFloat = 20
 
     /// True if platform supports Liquid Glass (macOS 26+, #390).
@@ -44,7 +47,12 @@ extension AppBarStyle {
             horizontal ? self : .icon
         }
 
-        /// True if content displays text.
+        /// True if content displays text. A consumer deciding for
+        /// a PAINTED bar asks `AppBarStyle.renderedContent`, which
+        /// folds in the vertical collapse; the two sites reading
+        /// raw `content` are legal only because each stands on a
+        /// horizontal-only path — moving either off it owes it
+        /// `renderedContent` (#937).
         public var showsText: Bool { self != .icon }
     }
 

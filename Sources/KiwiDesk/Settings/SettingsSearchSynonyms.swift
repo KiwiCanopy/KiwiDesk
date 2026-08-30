@@ -1,4 +1,7 @@
-/// Search index alternate vocabulary mapping (spec 11a). English match-only.
+/// Search index alternate vocabulary mapping (spec 11a). English
+/// match-only, never displayed. Sparse by design: a synonym earns
+/// its row by naming a REAL alternate vocabulary (another
+/// platform's term, a retired noun), never by restating the label.
 enum SettingsSearchSynonyms {
     /// Synonym terms for unmodeled catalog items (#1019,
     /// `SettingsSearchIndexTests`).
@@ -28,6 +31,8 @@ enum SettingsSearchSynonyms {
             return ["glass", "translucent", "transparency"]
         case .colours(.animationsMaster):
             return ["motion", "movement"]
+        // Speed is the word people reach for; duration is what
+        // the setting stores (#1020).
         case .colours(.animationsDurationMS):
             return ["speed", "animation speed"]
         case .colours(.animationsScrollDurationMS):
@@ -42,8 +47,10 @@ enum SettingsSearchSynonyms {
             return ["login item", "autostart", "launch"]
         case .shortcuts(.toggleSticky),
             .shortcuts(.toggleDisplaySticky):
-            // Pin synonyms attached to shortcut verbs
-            // (ui-designer/owner 2026-08-26).
+            // The SHORTCUTS carry "pin", not the appearance rows
+            // (owner 2026-08-26): someone typing it wants to pin
+            // a window, not style the mark that says one is
+            // pinned.
             return [
                 "pin", "pinned", "always on top", "all desktops",
             ]

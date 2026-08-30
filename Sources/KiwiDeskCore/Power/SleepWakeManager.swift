@@ -16,8 +16,13 @@ public final class SleepWakeManager {
 
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
-    /// Display topology fingerprints; tested via `WakeFingerprintWiringTests`
-    /// (#633).
+    /// Display topology of a held snapshot, re-read when the
+    /// delayed restore fires — replaying onto changed geometry is
+    /// what scrambled wakes (#633). Compared as a sorted MULTISET,
+    /// never a `Set`: two identical monitors share one
+    /// fingerprint, and a `Set` would swallow the loss of one of
+    /// them — the most common matched-pair undock
+    /// (`WakeFingerprintWiringTests`).
     public var displayFingerprints: @MainActor () -> [String] = { [] }
 
     /// Diagnostic session presence (`WakeSessionPresenceWiringTests`, #835).
@@ -35,6 +40,11 @@ public final class SleepWakeManager {
     /// Identifies the transition leg for logging (#835).
     enum Leg: String {
         case sleep, wake, lock, unlock
+        /// Driven with no notification behind it — the tests. A
+        /// production trigger added later takes a case of its OWN:
+        /// an anonymous leg in the log is the evidence gap `Leg`
+        /// exists to close, and there is no default parameter so
+        /// the choice cannot be made by omission.
         case direct
 
         var isRest: Bool { self == .sleep || self == .lock }
@@ -86,7 +96,15 @@ public final class SleepWakeManager {
     /// True if a state snapshot is currently held.
     var holdsSnapshot: Bool { snapshot != nil }
 
-    /// Armed replay task for tests to await (#791).
+    /// The most recently ARMED replay, for a test to await instead
+    /// of polling — the one authority for why polling was wrong
+    /// here, which tests.md ▸ "Async tests" cites: swift-testing
+    /// starves the shared main actor under a full run (one 10 ms
+    /// sleep measured 65 s), so a wall-clock deadline decided by
+    /// which continuation drained first (#791). NOT an in-flight
+    /// predicate: the task is left uncleared deliberately (clearing
+    /// from inside would race a newer arm); `holdsSnapshot` is the
+    /// in-flight question. Production must not read either.
     var pendingReplay: Task<Void, Never>? { restoreTask }
 
     private func observe(

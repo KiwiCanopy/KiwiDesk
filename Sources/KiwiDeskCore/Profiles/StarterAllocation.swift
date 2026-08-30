@@ -67,7 +67,11 @@ public enum StarterAllocation {
         return share
     }
 
-    /// Layouts per screen in positional order (index 0 = main, #1018).
+    /// Layouts per screen in positional order (index 0 = main).
+    /// Each screen's FIRST space is `lead(_:of:)`'s before its own
+    /// list is read (#1018) — the deliberate exception to the
+    /// no-repeat rule, appended without consulting `used` (it
+    /// still JOINS `used` after, so no screen draws it twice).
     public static func modes(sizes: [CGSize]) -> [[LayoutMode]] {
         guard !sizes.isEmpty else { return [] }
         let widths = sizes.map(\.width)
@@ -145,7 +149,10 @@ public enum StarterAllocation {
         }
     }
 
-    /// Takes `quota` layouts, avoiding repeats and rotating when exhausted.
+    /// Takes `quota` layouts off the list. The obligation: never
+    /// repeat while this screen still has an unheld entry, and
+    /// when the budget forces a repeat, rotate PAST the held one
+    /// so the duplicate is never adjacent to its twin.
     private static func take(
         _ quota: Int,
         from list: [LayoutMode],

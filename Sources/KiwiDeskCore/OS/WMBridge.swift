@@ -1,8 +1,14 @@
 import Foundation
 import ObjectiveC
 
-/// Runtime bridge to SkyLight's `SLSBridged*Operation` window-management
-/// classes (#884, #889). Tested via `WMBridgeSeamTests`.
+/// Runtime bridge to SkyLight's `SLSBridged*Operation`
+/// window-management classes (#884, #889); `WMBridgeSeamTests`
+/// pins that every bridge call routes through this file.
+/// Main-actor deliberately: #889 probed the operations on the
+/// main thread only, and the first `isAvailable` read is a live
+/// WindowServer round trip inside a once-initialiser — a hop to
+/// main from inside that lock while main waited on it would
+/// deadlock.
 @MainActor
 public enum WMBridge {
     public typealias SpaceID = SkyLight.SpaceID
@@ -10,7 +16,11 @@ public enum WMBridge {
     /// Prefix joined to short operation names at runtime lookup.
     static let classPrefix = "SLSBridged"
 
-    /// Stored desktop store prefix (#889 item 3).
+    /// Stored desktop-store key prefix (#889 item 3). A STORED
+    /// value (AGENTS.md §5): the WindowServer persists these keys
+    /// across logout, so a change to this string owes a re-stamp
+    /// crossing for every Desktop carrying the old one — never a
+    /// reader lenient to both.
     public static let valueKeyPrefix = "kiwidesk."
 
     /// Transforms dictionary keys under `valueKeyPrefix`.
@@ -54,6 +64,10 @@ public enum WMBridge {
         return NSClassFromString(classPrefix + operation)
     }
 
+    /// `objc_msgSend`, typed per call: the initialisers take C
+    /// scalars `perform(_:with:)` cannot pass, and the async
+    /// `perform…` returns VOID — read through `perform(_:)` that
+    /// is a stale register, not a result.
     private nonisolated(unsafe) static let send: UnsafeMutableRawPointer? =
         dlsym(dlopen(nil, RTLD_LAZY), "objc_msgSend")
 
@@ -126,7 +140,10 @@ public enum WMBridge {
         return true
     }
 
-    /// Reads typed field from result object if selector is supported.
+    /// Reads a typed field from a result object, only where the
+    /// selector is supported: `value(forKey:)` on an unknown key
+    /// raises an ObjC exception Swift cannot catch — a trap, and
+    /// the key is the same release-churn surface as the class.
     static func field<T>(_ key: String, of result: NSObject?) -> T? {
         guard let result,
             result.responds(to: NSSelectorFromString(key))

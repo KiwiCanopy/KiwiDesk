@@ -145,6 +145,9 @@ extension TrackLayout {
         let overflows =
             markerCount > normalCap || markerCount > geoCap
         guard overflows else { return (markerCount, false) }
+        // Auto (`normalCap == .max`) caps at the fit count; the
+        // branch also sidesteps `.max + 1`, which would overflow
+        // `Int`.
         let cap = min(
             normalCap == .max ? geoCap : normalCap + 1,
             geoCap

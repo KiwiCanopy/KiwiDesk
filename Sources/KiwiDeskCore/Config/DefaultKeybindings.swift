@@ -79,7 +79,10 @@ public enum DefaultKeybindings {
         return rows
     }
 
-    /// ⌃⌥K row that opens Shortcuts panel (#602).
+    /// ⌃⌥K row that opens the Shortcuts panel (#602). Seeded into
+    /// the base mode here AND into every GUI-created mode
+    /// (`ShortcutsHeader.addMode`), so the cheat-sheet stays
+    /// keyboard-reachable in any mode.
     public static func showShortcutsRow() -> KeyBinding {
         KeyBinding(
             combo: "control+option+k",
@@ -128,7 +131,10 @@ public enum DefaultKeybindings {
         )
     }
 
-    /// Additive top-up of missing space digit rows without overwriting (#485).
+    /// Additive top-up of missing space digit rows (#485) — a
+    /// combo already bound is left untouched, so the top-up can
+    /// never overwrite. Combo identity is by parsed `KeyCombo`,
+    /// so a hand-authored alias (`ctrl+alt+6`) counts as taken.
     public static func digitTopUp(
         existing: [KeyBinding],
         spaces: [SpaceID]

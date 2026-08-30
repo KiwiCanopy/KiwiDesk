@@ -24,8 +24,17 @@ public struct BorderStyle: Sendable, Equatable {
 
     public var enabled = true
     /// Ring width in pt (clamped to `minWidth...maxWidth`).
+    /// Default 5: the largest width that still tiles cleanly with
+    /// unfocused rings on — each ring reaches `width` into the
+    /// 10 pt inner gap, so 2 × 5 fills it edge-to-edge; 6 would
+    /// overlap.
     public var width: CGFloat = 5
-    /// Focused ring color (#4A9816, #578; distinct from drag visual #511).
+    /// Focused ring colour (#578: shifted ~12° off the brand hue
+    /// to escape the moss cast while clearing the 3:1 floor both
+    /// ways; docs/lua-reference.md mirrors the default — change
+    /// both). The drag ghost deliberately is NOT this family
+    /// (#511: it must separate from the drop-zone amber under
+    /// red-green vision loss) — do not re-converge them.
     public var focusedColor = "#4A9816"
     public var unfocusedEnabled = false
     public var unfocusedColor = "#8E8E93CC"
@@ -56,6 +65,9 @@ public struct BorderStyle: Sendable, Equatable {
     }
 
     /// Computes gaps fitting border widths without overlap (#295).
+    /// A one-shot convenience: `remaining` is an action parameter,
+    /// never a persisted setting, and the layout math itself stays
+    /// free of any border coupling (AGENTS.md §5).
     public func fittingGaps(remaining: CGFloat = 0) -> Gaps {
         let reach = BorderGeometry.outwardReach(
             width: clampedWidth

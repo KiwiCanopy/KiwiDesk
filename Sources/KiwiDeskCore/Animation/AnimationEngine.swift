@@ -27,7 +27,10 @@ public final class AnimationEngine {
     /// Log consumer for force-settles and diagnostics (#611, #624).
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
-    /// Test seam: synchronously snaps to target when false.
+    /// Test seam: synchronously snaps to target when false. Not
+    /// reachable from config — the instant path can't reliably
+    /// place windows on slow-AX apps, so animation is always on
+    /// in production.
     var isEnabled = true
 
     /// Whether macOS Reduce Motion is enabled.
@@ -96,7 +99,11 @@ public final class AnimationEngine {
         )
     }
 
-    /// Animates window to target frame on screen (#45, #593, #599).
+    /// Animates window to target frame on screen (#45, #593,
+    /// #599). `sizing` is deliberately NOT derivable from
+    /// `isNewWindow`: that flag marks the newly-opened window,
+    /// while a make-room shrink hits the SIBLINGS, which retile
+    /// with `isNewWindow: false`.
     public func animate(
         window: WindowID,
         on screen: NSScreen,
