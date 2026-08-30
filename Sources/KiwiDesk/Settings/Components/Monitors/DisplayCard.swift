@@ -1,50 +1,19 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One display in the Monitors picture (#678 Phase 3, turn 13b):
-/// a rectangle the size and shape of the real monitor, holding
-/// the space chips that resolve to it.
-///
-/// **The rectangle is data, not decoration.** Its size and its
-/// place come from `MonitorArrangement`, which reads the live
-/// frames — so a portrait display draws portrait, a laptop under
-/// a desk display draws under it, and the picture answers "which
-/// one is that?" without reading a single name.
-///
-/// It draws as a lit PLATE on the picture's recessed well, not as
-/// a card on the section's card: a display and the desk around it
-/// filled with the same colour once, and the arrangement — the
-/// whole point of the area — was then invisible.
-///
-/// Three states, three channels, because an opacity step on one
-/// hue separates nothing: **main** is the badge (plus an accent
-/// glow, which is decoration — the badge is the answer, since a
-/// glow is hue alone and dies under colour-vision deficiency,
-/// #758), **selected** is the border, **targeted** is a fill
-/// wash.
+/// Display card in monitors arrangement preview (#678, #758).
 struct DisplayCard: View {
     @ObservedObject var model: SettingsModel
     let display: Display
-    /// The area's row expansion — the same instance the census
-    /// guards read, so the chips on screen are the rows the
-    /// census counts.
+    /// Row expansion from census.
     let rows: MonitorsFamilyRows
-    /// The card's drawn size, from the arrangement. Passed in
-    /// rather than measured: the chip capacity is arithmetic over
-    /// it, and a capacity that waited for a layout pass could
-    /// only ever clip.
+    /// Scaled dimensions from arrangement.
     let size: CGSize
     @Binding var selection: DisplayID?
     @State private var targeted = false
     @State private var showingOverflow = false
 
     var body: some View {
-        // TWO children and one gap, laid out with the constant
-        // the capacity arithmetic subtracts. The trailing
-        // `Spacer` this used to carry was a third child — so a
-        // second gap the arithmetic did not know about — and the
-        // frame below already pins the content to the top
-        // (code review, 2026-08-04).
         VStack(
             alignment: .leading,
             spacing: MonitorCardChips.stackSpacing
@@ -62,15 +31,7 @@ struct DisplayCard: View {
         .overlay(dropWash)
         .overlay(border)
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        // The main display's glow — OUTSIDE the clip, so it can
-        // spill past the card's edge onto the well. Decoration
-        // only; the header's "main" badge stays the answer
-        // (#758). The compositing group is load-bearing:
-        // `.shadow` shadows every drawing primitive separately,
-        // so without flattening first the main card's text,
-        // chips and strokes each grow their own green halo
-        // while the silhouette gets none (ui-designer,
-        // 2026-08-09).
+        // Main display accent glow (#758, ui-designer 2026-08-09).
         .compositingGroup()
         .shadow(
             color: isMain
@@ -95,12 +56,8 @@ struct DisplayCard: View {
         .help(readout)
     }
 
-    /// By display ID, not by fingerprint: two identical monitors
-    /// share a fingerprint, so a fingerprint comparison drew the
-    /// "main" badge on BOTH cards while the tray hung off one —
-    /// the two answers to one question that
-    /// `SettingsModel.mainDisplay` exists to prevent (code
-    /// review, 2026-08-04).
+    /// Checked by ID rather than fingerprint for duplicate screens
+    /// (2026-08-04).
     private var isMain: Bool {
         model.mainDisplay?.id == display.id
     }
@@ -221,12 +178,6 @@ struct DisplayCard: View {
             .strokeBorder(
                 isSelected || targeted
                     ? AnyShapeStyle(.tint)
-                    // ink3, not the hairline: on the sunken
-                    // well the hairline sits within a few
-                    // points of the ground and the resting
-                    // cards read borderless — every display
-                    // owes a visible frame, the main one keeps
-                    // the tint on top (owner, 2026-08-09).
                     : AnyShapeStyle(
                         SettingsTheme.ink3.opacity(0.5)
                     ),
@@ -236,8 +187,7 @@ struct DisplayCard: View {
             )
     }
 
-    /// The one thing the picture cannot say by drawing: how many
-    /// spaces live here, and which of them is up.
+    /// Readout sentence describing assigned and showing spaces.
     private var readout: String {
         MonitorReadout.sentence(
             held: rows.held(on: display, isMain: isMain),
@@ -245,11 +195,6 @@ struct DisplayCard: View {
         )
     }
 
-    /// Named with its object, not deictically: these reach a
-    /// translator as bare worksheet lines with no element label
-    /// and no screen, and "what this holds" needs an explicit
-    /// noun in most target languages (localization audit,
-    /// 2026-08-04).
     private var selectActionName: String {
         isSelected
             ? L(
@@ -262,17 +207,11 @@ struct DisplayCard: View {
             )
     }
 
-    /// Selecting is a toggle: the readout under the picture is
-    /// the only thing selection drives, so a second click on the
-    /// same card puts it away rather than leaving the user
-    /// hunting for what dismisses it.
     private func toggleSelection() {
         selection = isSelected ? nil : display.id
     }
 
-    /// Pins each dropped space to this monitor's fingerprint
-    /// (clearing a follows-main assignment); the footer's profile
-    /// actions persist it into the profile JSON (#36).
+    /// Pins dropped spaces to monitor fingerprint (#36).
     private func pin(_ items: [DraggableSpace]) -> Bool {
         var assigned = false
         for item in items {

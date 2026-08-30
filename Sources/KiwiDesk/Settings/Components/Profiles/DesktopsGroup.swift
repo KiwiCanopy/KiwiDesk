@@ -1,37 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ Profiles ▸ **Profiles per macOS Desktop** (#7,
-/// rebuilt in #678 turn 13a): bind a saved profile to each macOS
-/// Desktop, picked from the row's dropdown; the binding emits
-/// `bind_profile_to_desktop` — a wire name #768 deliberately
-/// froze — and loads that profile when the Desktop activates on
-/// the main display (#888, the definition that made the rows
-/// well-defined under "Displays have separate Spaces" and
-/// retired that state's grey, warning and escape hatch).
-/// Rows are named "Desktop n", the name Mission Control shows,
-/// never "Space n", which is how KiwiDesk's own Spaces read
-/// elsewhere in the app. Bindings mutate
-/// `model.config.profileBindings`; the footer's profile actions
-/// persist them.
-///
-/// A drawer now, because the census tiers `profileBindings`
-/// `.showMore` — most people never bind a Desktop, and the ones
-/// who do are looking for it. It opens by default all the same:
-/// the card is one interaction deep, not hidden, and a reader who
-/// scrolled to it has already asked the question its title
-/// answers.
-///
-/// The remaining grey is the resolver's (`ProfilesGates`) and is
-/// scoped to the ROWS: the explanation stays live under it. That
-/// is also why the gate is not wrapped around the whole card
-/// (#527): the drawer keeps its header and its `?` anchor
-/// clickable.
+/// Settings group for binding profiles to macOS Desktops (#7,
+/// #678, #768, #888). The remaining grey is the resolver's and is
+/// scoped to the ROWS, not the whole card (#527: the drawer keeps
+/// its header and `?` anchor clickable). By the #815 derivation
+/// (`GateReasonPlacement`) these rows owe no inline sentence —
+/// the `bindingsAreGlobal` cause is on the surface, exactly like
+/// `presetsApply` under the same reason.
 struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
-    /// Drawn open (#678 turn 13a). View state, like every other
-    /// drawer in the tree — per-container disclosure memory
-    /// arrives with the mode mechanics.
     @State private var expanded = true
 
     private var gates: ProfilesGates {
@@ -70,23 +48,11 @@ struct DesktopsGroup: View {
         }
     }
 
-    /// Why only some Desktops are offered, and what the other
-    /// side of the macOS lever costs (#888, ui-designer
-    /// 2026-08-18).
-    ///
-    /// **Behind a click, and descriptive rather than
-    /// prescriptive.** #888 retired a standing recommendation to
-    /// turn "Displays have separate Spaces" off — advice shown to
-    /// every multi-screen user whether or not it applied, with a
-    /// button one click from flipping it. This answers a question
-    /// a reader has visibly already asked, names the ergonomic
-    /// costs the retirement was argued on rather than only the
-    /// gain, and carries no imperative and no deep link: the
-    /// checkbox is quoted verbatim so System Settings' own search
-    /// finds it, which is what `config-vocabulary.md` asks for
-    /// and all it asks for. Putting this in the card's caption
-    /// instead would make it ambient again, which is the retired
-    /// shape in miniature.
+    /// Help explanation for the main-screen authority (#888,
+    /// ui-designer 2026-08-18). Descriptive, never prescriptive —
+    /// the retired shape was ambient advice with a one-click
+    /// flip; the checkbox is quoted verbatim so System Settings'
+    /// own search finds it (config-vocabulary.md's ask).
     private var helpText: String {
         L(
             "desktops.help",
@@ -112,18 +78,6 @@ struct DesktopsGroup: View {
                 + "(the one with the menu bar)."
         )
     }
-
-    // #888 retired the inline warning note along with the
-    // separate-Spaces grey. The one reason left
-    // (`bindingsAreGlobal`) has its cause on the surface — the
-    // header chip names the profile being edited — so by the
-    // #815 derivation (`GateReasonPlacement`) these rows owe no
-    // inline sentence, exactly like `presetsApply` under the
-    // same reason; the `GreyOut`'s hover help still carries it.
-    // The "Clear all bindings" escape hatch retired with the
-    // grey too: with the rows live, each binding is cleared on
-    // its own row, so the hatch lost the trap it existed to
-    // open — `docs/design-decisions.md` re-argues the ruling.
 
     @ViewBuilder private func rows(
         inert reason: ProfilesGates.InertReason?
@@ -228,11 +182,7 @@ struct DesktopsGroup: View {
         )
     }
 
-    // MARK: - Data
-
-    /// Desktops to list — from the family seam that records
-    /// what this census key expands to, so the guard over that
-    /// expansion watches the rows the card actually draws.
+    /// Desktops to list from `ProfilesFamilyRows.desktops`.
     private var spaceNumbers: [Int] {
         ProfilesFamilyRows.desktops(
             onMain: model.mainDesktops,

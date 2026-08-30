@@ -1,73 +1,28 @@
 import CoreGraphics
 
-/// Pure frame math for keyboard-resizing a FLOATING window:
-/// `resize` on a floating focused window grows or shrinks the
-/// window itself along the requested axis instead of nudging
-/// the layout it does not participate in.
-///
-/// **A keyboard resize is SYMMETRIC, with pinned edges** (#1091,
-/// owner ruling 2026-08-29). Both edges move by half the delta;
-/// an edge against the boundary is PINNED and the whole delta
-/// goes to the other side; with both pinned a grow refuses and
-/// the caller cues, while a shrink contracts symmetrically as
-/// normal.
-///
-/// This replaced an origin-anchored model that mirrored **a
-/// mouse drag of the bottom-right corner** — the grabbed edge is
-/// the anchor. That is the right model for a drag and the wrong
-/// one for a keyboard: a chord has no grabbed edge, so
-/// privileging the right/bottom one is arbitrary, and against a
-/// screen edge it stopped the resize dead while free space sat
-/// on the other side (measured: 10 further grow asks moved the
-/// window 0 pt, silently, with 892 pt free to its left).
-///
-/// **The pinning applies to SHRINK as well as grow**, which is
-/// the load-bearing half: pin only on grow and grow/shrink stops
-/// being reversible at exactly the edge people park windows
-/// against. Every steady state round-trips — the reversibility
-/// table is on the issue.
-///
-/// One accepted residue, deliberate rather than overlooked:
-/// reversibility does NOT hold across the step that first brings
-/// a window into contact with a boundary. A window with 28 pt of
-/// room on the right, grown by 100, spills the blocked 22 pt
-/// leftward and pins its right edge; the following shrink then
-/// comes entirely off the left and lands half a step right of
-/// where it started. Bounded by half a step and confined to that
-/// one transition. Do NOT answer it by remembering which way the
-/// last grow went: a stored direction needs invalidating on
-/// every move, mode change and display change, and buys back
-/// less than it costs.
+/// Symmetric keyboard resize math for floating windows with
+/// boundary-edge pinning (#1091, owner ruling 2026-08-29;
+/// `FloatSymmetricResizeTests`). One accepted residue:
+/// reversibility does not hold across the step that FIRST brings
+/// a window into contact with a boundary (bounded by half a step,
+/// confined to that transition). Do NOT answer it by remembering
+/// which way the last grow went — a stored direction needs
+/// invalidating on every move, mode and display change, and buys
+/// back less than it costs.
 public enum FloatResize {
-    /// How near an edge counts as touching it. Matches the bar
-    /// clamp's own tolerance in spirit: a window within a point
-    /// of the boundary has no usable room there, and treating it
-    /// as free would hand it a sub-pixel share of the delta and
-    /// leave the other side short.
+    /// Tolerance for detecting contact with a boundary edge (1 pt).
     public static let boundaryTolerance: CGFloat = 1
 
-    /// The size a shrink stops at: `min_window_size` when set,
-    /// never below 1 pt — AppKit rejects zero/negative frames.
-    /// `resized` caps this at the CURRENT size, so the floor
-    /// never *lifts* a frame; growing back works from any size
-    /// regardless.
+    /// Floor for a frame shrink: `min_window_size`, never below
+    /// 1 pt (AppKit rejects zero frames). `resized` caps this at
+    /// the CURRENT size, so the floor never LIFTS a frame.
     public static func shrinkFloor(
         minSize: CGFloat
     ) -> CGFloat {
         max(minSize, 1)
     }
 
-    /// Why a GROW could not deliver what it was asked for. Both
-    /// cases owe the user a cue, on #933's stated principle that
-    /// a request the limit truncates is already a refusal of
-    /// part of it — the shrink arm has cued on exactly that
-    /// since #933, and a grow that quietly delivered 12 of an
-    /// asked 100 was the same defect at the other end (code
-    /// review, 2026-08-29).
-    ///
-    /// Shrink never sets one: it always has somewhere to
-    /// contract to, and its own truncation against
-    /// `min_window_size` is cued by the caller.
+    /// Why a grow operation was blocked or truncated (#933, 2026-08-29).
     public enum Refusal: Equatable {
         /// Both edges against the boundary — nothing moved.
         case blocked
@@ -75,18 +30,14 @@ public enum FloatResize {
         case truncated
     }
 
-    /// What a resize produced, and why it fell short if it did.
-    /// Shaped after `ScrollSlotDomain.Outcome`, the house idiom
-    /// for a pure decision that also has to say why it refused.
+    /// Resize outcome and refusal status.
     public struct Outcome: Equatable {
         public let frame: CGRect
         public let refusal: Refusal?
     }
 
-    /// The frame after resizing along one axis by `delta`
-    /// (negative shrinks), split between both edges and pinned
-    /// against `bounds`. A nil `bounds` is unbounded — no edge
-    /// pins, so the delta always splits evenly.
+    /// Resizes floating `frame` along axis by `delta`, splitting symmetrically
+    /// with edge pinning against `bounds` (#1091).
     public static func resized(
         _ frame: CGRect,
         horizontal: Bool,

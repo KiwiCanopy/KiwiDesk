@@ -1,25 +1,17 @@
 import AppKit
 
-/// One app bar per display (#16). Owns an `AppBarOverlay` keyed by
-/// `DisplayID`, so several monitors can each show the bar of the
-/// space currently visible on them at the same time. The driver
-/// (`KiwiCore.updateAppBar`) computes the bars; this manager just
-/// creates, shows, and retires overlays and routes their callbacks.
+/// Manages per-display `AppBarOverlay` instances and event routing (#16,
+/// #293).
 @MainActor
 public final class AppBarManager {
-    /// One display's resolved bar. `space` rides along so a drag
-    /// on that bar reorders the right space (not the global
-    /// active one) — displays other than the focused one host
-    /// their own space's bar.
+    /// Resolved bar configuration and geometry for a single display.
     public struct Bar {
         public let display: DisplayID
         public let space: SpaceID
         public let items: [AppBarOverlay.Item]
         public let activeIndex: Int?
         public let strip: CGRect
-        /// The resolved style; its `edge` is the stored absolute
-        /// edge the bar sits on (#293) — no separate channel, so
-        /// strip and edge can't disagree.
+        /// The resolved style with absolute bar edge (#293).
         public let style: AppBarStyle
 
         public init(
@@ -42,8 +34,7 @@ public final class AppBarManager {
     /// Click-to-focus hook; wired to `KiwiCore.focusWindow`.
     public var onSelect: @MainActor (WindowID) -> Void = { _ in }
     /// Drag reorder hook (space, from slot, to slot); wired to
-    /// `KiwiCore.moveBarItem`. The space is the one whose bar the
-    /// dragged overlay is currently showing.
+    /// `KiwiCore.moveBarItem`.
     public var onMove: @MainActor (SpaceID, Int, Int) -> Void = {
         _,
         _,
@@ -52,27 +43,18 @@ public final class AppBarManager {
 
     private var overlays: [DisplayID: AppBarOverlay] = [:]
     private var spaceOfDisplay: [DisplayID: SpaceID] = [:]
-    /// The bars actually painted after `sync`'s render filter —
-    /// the single source of truth for anything that must sit clear
-    /// of a bar (the #242 float clamp), so it can never disagree
-    /// with what is on screen.
+    /// The bars actually painted after `sync`'s filter — the one
+    /// source for anything that must sit clear of a bar (#242).
     private var shownBars: [Bar] = []
 
     public init() {}
 
-    /// Displays currently showing a bar; the manager's contract
-    /// surface for tests and diagnostics.
+    /// Displays currently showing an app bar.
     public var shownDisplays: Set<DisplayID> {
         Set(spaceOfDisplay.keys)
     }
 
-    /// Every painted bar as `(space, strip, edge)`. A window
-    /// that must clear a bar (a floating window — #242, all
-    /// four edges since QA 2026-07-19) reads these rendered
-    /// strips rather than re-deriving bar geometry, which
-    /// drifts (outer gaps, empty-bar suppression, per-display
-    /// screen). Covers all displays, so a bar on a non-active
-    /// monitor is included.
+    /// Painted app bar strips across all displays (#242, QA 2026-07-19).
     public var shownStrips: [(space: SpaceID, strip: CGRect, edge: AppBarEdge)]
     {
         shownBars.map {
@@ -84,31 +66,13 @@ public final class AppBarManager {
         }
     }
 
-    /// True when a painted bar is showing `id`'s own window
-    /// title right now — drawing it, or announcing it.
-    ///
-    /// Read from `shownBars` — what `sync` accepted and the
-    /// overlays drew — for the same reason `shownStrips` is:
-    /// a second derivation drifts from what is on screen. The
-    /// title-refresh gate asked its own copy of this question
-    /// until a review found it disagreeing with a driver
-    /// (2026-08-20); everything it had to re-derive (the #670
-    /// stand-down, the screen pick, the empty-bar filter, the
-    /// cold-start fallback) is already folded into this array.
-    ///
-    /// Deliberately NOT gated on `showsText` or the edge (#937).
-    /// Icon-only and vertical bars draw no title text, but
-    /// `AppBarItemView` builds its accessibility label from
-    /// the same title unconditionally, so there the title is
-    /// announced rather than drawn — and a title that is
-    /// announced stale is as wrong as one drawn stale (the
-    /// same rule `SpaceBarManager.showsTitle` follows).
-    ///
-    /// A `count > 1` item draws and announces its APP NAME and
-    /// count, never a member's title (`KiwiCore.barItemText`,
-    /// `AppBarItemView.updateAccessibilityLabel`), so a group
-    /// is not a consumer — exact here, where the groups are the
-    /// painted ones, and only approximable from state.
+    /// True when a painted bar is currently rendering or
+    /// announcing `id`'s title (#670, 2026-08-20). Deliberately
+    /// NOT gated on `showsText` or the edge (#937): icon-only and
+    /// vertical bars still build their accessibility label from
+    /// the title, and an announced-stale title is as wrong as a
+    /// drawn-stale one. A `count > 1` group draws its APP NAME,
+    /// never a member's title, so a group is not a consumer.
     public func showsTitle(of id: WindowID) -> Bool {
         shownBars.contains { bar in
             bar.items.contains {
@@ -117,9 +81,7 @@ public final class AppBarManager {
         }
     }
 
-    /// The painted strips covering `space` (empty when it shows
-    /// no bar: off, or suppressed because it has no non-floating
-    /// windows).
+    /// Painted app bar strips covering `space`.
     public func strips(
         forSpace space: SpaceID
     ) -> [(strip: CGRect, edge: AppBarEdge)] {
@@ -128,17 +90,9 @@ public final class AppBarManager {
             .map { (strip: $0.strip, edge: $0.edge) }
     }
 
-    /// Shows exactly `bars` — one per display — and retires the
-    /// overlays of any display no longer in the set (passing an
-    /// empty array retires them all). Retiring releases the
-    /// panel, so a display that never returns leaves nothing
-    /// behind.
+    /// Synchronizes painted overlays with `bars`, retiring overlays for
+    /// removed displays.
     public func sync(_ bars: [Bar]) {
-        // A bar whose strip/items can't render is treated as
-        // absent — AppBarOverlay.show would hide it anyway — so
-        // its display retires instead of keeping a stale panel,
-        // and the "shown" bookkeeping (and thus onMove routing)
-        // never claims a display whose panel is hidden.
         let valid = bars.filter {
             !$0.items.isEmpty
                 && $0.strip.width >= 1 && $0.strip.height >= 1
@@ -163,19 +117,13 @@ public final class AppBarManager {
     }
 
     #if DEBUG
-        /// Test seam: the overlay currently backing a display.
         func overlayForTesting(
             _ display: DisplayID
         ) -> AppBarOverlay? {
             overlays[display]
         }
 
-        /// Test seam: the bars `sync` last accepted, items and
-        /// all. `shownStrips` exposes only geometry, which
-        /// cannot answer "what does the item SAY" — the question
-        /// the title refresh exists to change, and the one a
-        /// suite asserting on task identity alone cannot reach
-        /// (`BarTitleRefreshTests.refreshRedrawsTheItem`).
+        /// Test seam: bars accepted by last `sync` (`BarTitleRefreshTests`).
         var shownBarsForTesting: [Bar] { shownBars }
     #endif
 

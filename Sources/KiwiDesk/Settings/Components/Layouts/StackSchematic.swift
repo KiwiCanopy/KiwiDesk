@@ -1,26 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Stack schematic (#125): a master zone sized by the staged
-/// master ratio, beside a six-window stack zone that shows the
-/// overflow style *directly* rather than with a stand-in glyph —
-/// `cascade_overflow` piles only the surplus windows, `cascade_all`
-/// piles the whole zone so just the top edges peek. The #222
-/// arrangement fields feed it too: the split follows the staged
-/// stack position (which also derives the stack zone's lineup)
-/// and the master zone follows its staged orientation (piles
-/// keep cascading downward, like the engine).
-/// Focus sits on the first stack window, so the new-window
-/// placement (first / last / before / after focused) reads off
-/// which slot the dense `+` tile takes.
-///
-/// The piled tiles are drawn **opaque** (each with its own solid
-/// base), so overlapping them never sums the accent alpha into
-/// muddy bands — the front (last) window carries the dominant
-/// colour and the buried ones read as lighter title-bar slivers
-/// behind it. Hand-drawn, unlike the BSP schematic which drives the
-/// real `BspLayout`: the engine's 40 pt cascade offset would throw
-/// tiles off this mini canvas, so the offset is scaled down here.
+/// Stack layout schematic preview showing master and stack zones (#125, #222).
 struct StackSchematic: View {
     let masterCount: Int
     let masterRatio: Double
@@ -28,40 +9,28 @@ struct StackSchematic: View {
     let masterOrientation: StackParams.Orientation
     let stackPosition: StackParams.StackPosition
     let placement: SpawnPlacement
-    /// Windows on screen, the incoming one included. This is the
-    /// input that makes the two overflow styles diverge (turn
-    /// 10): below the tiled run they draw the same picture, and
-    /// only a stack deep enough to overflow separates "pile the
-    /// surplus" from "pile the lot".
+    /// Total windows drawn including incoming tile.
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    /// The restage damping, gated on Reduce Motion (#1069) —
-    /// the arrangement still redraws, it just stops travelling.
-    /// The ternary is spelled here rather than folded into
-    /// `LayoutSchematic.damping`; that file says why.
+    /// Restage animation damping gated on Reduce Motion (#1069).
     private var damping: Animation? {
         reduceMotion ? nil : LayoutSchematic.damping
     }
 
-    /// Derived, like the engine (`StackPosition.stackOrientation`).
-    /// Internal (not private) for `StackSchematic+Slots.swift`.
+    /// Derived stack orientation matching engine
+    /// (`StackSchematic+Slots.swift`).
     var stackOrientation: StackParams.Orientation {
         stackPosition.stackOrientation
     }
 
-    /// Tiled windows kept beside the cascade-overflow pile; the
-    /// rest (the surplus) pile. Internal (not private), with
-    /// the offset below and `stackWins`, for the slot math in
-    /// `StackSchematic+Slots.swift`.
+    /// Tiled windows count before cascade overflow kicks in.
     static let overflowTiled = 3
 
-    /// Masters cannot outnumber the established windows: at two
-    /// windows a master count of ten still leaves the stack zone
-    /// on screen, which is what the two-zone split is *for*.
+    /// Effective master count clamped to window count.
     var masters: Int {
         min(max(1, masterCount), max(1, windows - 1))
     }
@@ -69,32 +38,18 @@ struct StackSchematic: View {
         WindowID(UInt32(max(1, windows - 1) + 1))
     }
 
-    /// Established windows that land in the stack zone: the count
-    /// less the masters and less the incoming one.
+    /// Established windows assigned to stack zone.
     var stackWindows: Int {
         max(0, windows - 1 - masters)
     }
 
-    /// The first stack window is the focused one — or, where the
-    /// count leaves no stack zone at all, the last established
-    /// window, so the relative placements keep a reference. They
-    /// had none at two windows: the focus id was not in the
-    /// array, the old `if let` found no index and the incoming
-    /// window was dropped from the preview outright (#702).
+    /// Focused window ID for placement reference (#702).
     var focused: WindowID {
         WindowID(UInt32(min(masters + 1, max(1, windows - 1))))
     }
 
-    /// The windows in array order with the new one spliced in
-    /// where `placement` opens it (focus = first stack window),
-    /// asked of the engine through `SchematicPlacement` rather
-    /// than reproduced here (#702). Partitioning at `masters`
-    /// then sorts them into the two zones exactly as
-    /// `StackLayout` does.
-    ///
-    /// Internal so `LayoutSchematicPlacementTests` can read the
-    /// landing: a scan for the call cannot tell a live splice
-    /// from one whose result is thrown away.
+    /// Windows in array order with new window spliced in
+    /// (`LayoutSchematicPlacementTests`, #702).
     var order: [WindowID] {
         var w = (1...max(1, masters + stackWindows))
             .map { WindowID(UInt32($0)) }
@@ -107,21 +62,12 @@ struct StackSchematic: View {
         return w
     }
 
-    /// The master zone: the first `masters` windows of the array,
-    /// which is `StackLayout`'s own boundary rule. Internal with
-    /// `stackWins` and `masterDisplay` so
-    /// `LayoutSchematicZoneTests` can read the partition against
-    /// `StackLayout.partition` — the SIZES were guarded and the
-    /// membership was not, so both zone reads could be swapped
-    /// with the whole suite green (#707).
+    /// Master zone windows (`LayoutSchematicZoneTests`, #707).
     var masterWins: [WindowID] {
         Array(order.prefix(masters))
     }
 
-    /// Master tiles in render order — mirrored in lockstep with
-    /// the engine (#313, `StackLayout.mirrorsMasterZone`), so
-    /// the preview never lies about where the boundary master
-    /// sits when the stack leads.
+    /// Master tiles in display order (#313, `StackLayout.mirrorsMasterZone`).
     var masterDisplay: [WindowID] {
         var params = StackParams()
         params.masterOrientation = masterOrientation
@@ -217,11 +163,7 @@ struct StackSchematic: View {
         }
     }
 
-    // MARK: - Stack zone
-
-    /// One slot per stack window, in array order. Draw order is
-    /// array order, so a pile's later tiles land on top — the
-    /// front window covers the buried ones except their top edge.
+    /// Slot geometry and pile state per stack window.
     struct Slot {
         var rect: CGRect
         var piled: Bool

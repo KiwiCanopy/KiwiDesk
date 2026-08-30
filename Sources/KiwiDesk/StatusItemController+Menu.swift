@@ -1,37 +1,16 @@
 import AppKit
 import KiwiDeskCore
 
-/// The quick menu (#68 §3.10): rebuilt on every open so the
-/// profile list and the conditional warning rows are always
-/// current. The icon state machine lives in the main
-/// `StatusItemController` file.
+/// Status bar quick menu builder (#68 §3.10, #802).
 extension StatusItemController {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        // Every row below states its own `isEnabled` (#802): with
-        // AppKit's auto-enabling on, a row is enabled iff its
-        // action validates, so a row that WORKS cannot be greyed
-        // for a reason of ours — which is exactly what boot needs
-        // for Layout and Switch Profile. The cost is that a
-        // nil-action row is no longer disabled for free, so each
-        // one says so.
         menu.autoenablesItems = false
         let profiles = profilesProvider()
         let phase = bootPhase
 
-        // Problem zone (top): warning rows appear only when they
-        // apply, so a healthy menu opens straight on Layout with
-        // no permanent chrome above it. A missing permission
-        // blocks everything, so it outranks a broken-config
-        // issue. The fence separator is derived from presence —
-        // "fence iff a warning exists" stays structural, so a
-        // future third warning source can't forget it.
         var warnings: [NSMenuItem] = []
         if warning {
-            // A loud row naming the *consequence* (not the jargon
-            // "Accessibility"); click routes to the onboarding
-            // grant step — the app's one "why + how" explainer —
-            // not a bare System Settings link.
             let paused = NSMenuItem(
                 title: L(
                     "menu.accessibility_paused",
@@ -50,12 +29,6 @@ extension StatusItemController {
             warnings.append(paused)
         }
         if case .scanning = phase {
-            // A determinate count, deliberately in words: menus
-            // carry no progress bars, and the honest number is
-            // apps LOOKED AT of apps the boot queue admits —
-            // `BootPhase` argues both halves of that count.
-            // Disabled, monochrome, and gone the moment boot ends;
-            // the rows it explains are greyed below.
             let status = NSMenuItem(
                 title: Self.startingTitle(for: phase),
                 action: nil,
@@ -63,10 +36,6 @@ extension StatusItemController {
             )
             status.isEnabled = false
             warnings.append(status)
-            // Retitled in place while the menu stays open
-            // (`setBootPhase`) — a menu opened at second 2 of a
-            // ten-second boot would otherwise report second 2 for
-            // as long as the user holds it.
             startingRow = status
         } else {
             startingRow = nil
@@ -81,9 +50,6 @@ extension StatusItemController {
                 keyEquivalent: ""
             )
             issues.target = self
-            // A warning triangle makes the entry unmissable in
-            // the quick menu; safe from the §3.7 status-glyph
-            // distinction here because the row is text-labeled.
             issues.image = symbol("exclamationmark.triangle.fill")
             warnings.append(issues)
         }
@@ -92,24 +58,12 @@ extension StatusItemController {
             menu.addItem(.separator())
         }
 
-        // Daily actions — Layout first (the most-used control),
-        // Switch Profile under it: same topic, no separator
-        // between them. Switch Profile appears only when there is
-        // something to switch *to* — a saved profile that isn't the
-        // active one and isn't broken; with none, switching is a
-        // no-op or impossible, so the row is pure noise.
         let hasSwitchTarget = profiles.all.contains {
             $0 != profiles.active
                 && !profiles.broken.contains($0)
         }
-        // A disabled context line naming the active profile — shown
-        // only when a profile is loaded *and* a real alternative
-        // exists to switch to (the same gate as the Switch Profile
-        // row). With one profile or none there is no choice to
-        // orient, so the name would be permanent chrome the
-        // declutter (#324) removed. Any profile is loadable
-        // regardless of screen count (#36), so this does not filter
-        // by display setup.
+        // Active profile header shown only when alternative targets exist
+        // (#324, #36).
         if let active = profiles.active, hasSwitchTarget {
             let current = NSMenuItem.sectionHeader(
                 title: L(
@@ -120,10 +74,7 @@ extension StatusItemController {
             )
             menu.addItem(current)
         }
-        // Grey, don't hide (#171): both act on state the scan has
-        // not finished collecting, and both will work in a
-        // moment — which is the case dimming is for. The starting
-        // row above is the sentence that says why.
+        // Dim rather than hide during boot scanning (#171).
         let layout = layoutItem()
         layout.isEnabled = !phase.isStarting
         menu.addItem(layout)
@@ -133,10 +84,7 @@ extension StatusItemController {
             menu.addItem(switcher)
         }
 
-        // App chrome: Settings sits low, next to Quit, as in
-        // every native menu-bar extra — not mid-list among the
-        // workspace actions. "View Shortcuts…" shares Settings'
-        // separator group and reads glance → editor (#326).
+        // App chrome (#326).
         menu.addItem(.separator())
         let shortcutsTitle = L(
             "menu.view_shortcuts",
@@ -291,17 +239,13 @@ extension StatusItemController {
             ?? LayoutKeyGlyph.char(for: code)?.lowercased()
     }
 
-    // MARK: - Actions
-
     @objc private func openDashboard() {
         onOpenDashboard()
     }
 
     @objc private func showShortcuts(_ sender: NSMenuItem) {
-        // AppKit needs a real key equivalent to render its native
-        // trailing column, but Carbon already owns this shortcut
-        // globally. Ignore AppKit's duplicate keyboard action;
-        // mouse selection and programmatic dispatch still toggle.
+        // Carbon owns shortcut globally; ignore AppKit's duplicate keyDown
+        // event.
         if NSApp.currentEvent?.type == .keyDown { return }
         onShowShortcuts()
     }

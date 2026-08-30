@@ -1,41 +1,16 @@
 import KiwiDeskCore
 
-/// The per-setting view of the draft (#678 turn 9): which
-/// settings differ between the edited `GuiConfig` and the clean
-/// baseline, counted for the Home header's "N unsaved changes"
-/// button and grouped by area for its popover. One draft, one
-/// diff — the footer's dirty flag and this must never disagree,
-/// which `SettingsDraftDiffTests` holds by construction
-/// (`total == 0` exactly when the configs are equal).
-///
-/// The walk mirrors the census's path convention — struct
-/// fields as `.name` segments, dictionaries as `[]`, scalars
-/// and enums as leaves — which is the convention
-/// `SettingKeyModelParityTests` already proves the census's
-/// `settings.*` ids share. A changed leaf therefore resolves to
-/// its `SettingKey` by longest matching census base; several
-/// leaves under one setting (a per-space override dictionary, a
-/// master/value pair) count as ONE changed setting. Where a
-/// master's leaves are NOT under it — the two border masters
-/// write across the model — the prefix cannot see them, so the
-/// fan-out is declared in `SettingKey.masterWrites` and folded
-/// in below.
+/// Per-setting diff between draft `GuiConfig` and baseline (#678,
+/// `SettingsDraftDiffTests`).
 struct SettingsDraftDiff {
-    /// The distinct settings that differ, resolved to census
-    /// keys where the path has an owner.
+    /// Distinct settings that differ, resolved to census keys.
     var changedSettings: [SettingKey] = []
-    /// Changed leaf paths no census base claims. Empty in any
-    /// healthy diff — the guard keeps the attribution total, so
-    /// a `GuiConfig` field landing outside the map reds a test
-    /// instead of silently vanishing from the count.
+    /// Changed leaf paths not claimed by any census base.
     var unattributed: [String] = []
-    /// Whether the raw `init.lua` text differs from its baseline.
+    /// True if raw `init.lua` text differs from baseline.
     var luaChanged = false
 
-    /// The button's N: distinct changed settings, plus one for
-    /// an edited init.lua (the raw editor is one surface, not a
-    /// per-key edit), plus any unattributed stragglers so the
-    /// count can never read lower than the dirty flag implies.
+    /// Total count of changed settings, Lua edit, and unattributed paths.
     var total: Int {
         changedSettings.count + unattributed.count
             + (luaChanged ? 1 : 0)
@@ -66,8 +41,6 @@ struct SettingsDraftDiff {
                 orphans.insert(path)
             }
         }
-        // Census declaration order, so the popover lists changes
-        // the way the areas list their rows.
         diff.changedSettings = SettingKey.allCases.filter {
             keys.contains($0)
         }
@@ -75,25 +48,12 @@ struct SettingsDraftDiff {
         return diff
     }
 
-    // MARK: - Path → SettingKey attribution
-
-    /// Whether a census id names a model path the walk can
-    /// book — `settings.*` for `TilingSettings` fields and
-    /// `config.*` for `GuiConfig`'s top-level ones. The ONE
-    /// copy of that key-space: `censusBases()` builds the
-    /// attribution from it and the readout totality net
-    /// (`SettingsValueReadoutTests`) consults it, so the two
-    /// cannot drift apart.
+    /// True if census id names a model path (`SettingsValueReadoutTests`).
     static func namesModelPath(_ id: String) -> Bool {
         id.hasPrefix("settings.") || id.hasPrefix("config.")
     }
 
-    /// The census's model-path ids (`namesModelPath`),
-    /// normalized exactly as `SettingKeyModelParityTests`
-    /// normalizes the settings half (synthetic row suffixes
-    /// stripped, instance brackets `[space]`/`[app]`/`[n]` →
-    /// `[]`). Action/readonly/state ids name no model path and
-    /// stay out.
+    /// Normalized census model-path bases (`SettingKeyModelParityTests`).
     static func censusBases() -> [String: SettingKey] {
         var bases: [String: SettingKey] = [:]
         for key in SettingKey.allCases {
@@ -111,13 +71,7 @@ struct SettingsDraftDiff {
                     with: "[]"
                 )
             }
-            // First declaration wins: variants of one setting
-            // (auto/value pairs) share a base and must resolve
-            // to ONE key, or the count double-books a change.
             if bases[base] == nil { bases[base] = key }
-            // A dictionary setting also owns its container's
-            // own leaves — the walk's `.count` sentinel and any
-            // sibling the bracket form cannot prefix-match.
             if let bracket = base.range(of: "[]") {
                 let container = String(
                     base[..<bracket.lowerBound]
@@ -129,12 +83,9 @@ struct SettingsDraftDiff {
         }
         // A master's followers have no row of their own, so the
         // master owns their leaves outright — an OVERRIDE, not
-        // a first-wins registration, because the follower's own
-        // surfaceless census row claims its own path in the
-        // loop above and would book a second change for a
-        // value the user set once. Prefix matching cannot do
-        // this: these leaves sit outside the master's subtree
-        // (`SettingKey.masterWrites`).
+        // first-wins: the follower's surfaceless census row claims
+        // its own path above and would book a second change for a
+        // value the user set once.
         for (key, paths) in SettingKey.masterWrites {
             for path in paths { bases[path] = key }
         }
@@ -163,22 +114,18 @@ struct SettingsDraftDiff {
         }
     }
 
-    /// `settings.gapsOverride[]1.outer.top` →
-    /// `settings.gapsOverride[].outer.top`.
-    ///
-    /// Redundant with `censusBases()`' container-prefix
-    /// registration by design, and each is the other's ONLY
-    /// backup (guard-prover 2026-08-04: deleting either alone
-    /// leaves the suite green through the other) — do not
-    /// "simplify" one away on the strength of a green run.
+    /// Normalizes path keys by replacing instance identifiers
+    /// with `[]`. Redundant with `censusBases()`' container-prefix
+    /// registration BY DESIGN — each is the other's only backup
+    /// (guard-prover 2026-08-04: deleting either alone leaves the
+    /// suite green through the other). Do not "simplify" one away
+    /// on the strength of a green run.
     private static func normalized(_ path: String) -> String {
         var result = ""
         var rest = Substring(path)
         while let open = rest.range(of: "[]") {
             result += rest[..<open.upperBound]
             rest = rest[open.upperBound...]
-            // Drop the entry key: everything up to the next
-            // path separator.
             if let next = rest.firstIndex(where: {
                 $0 == "." || $0 == "["
             }) {
@@ -190,11 +137,7 @@ struct SettingsDraftDiff {
         return result + rest
     }
 
-    // MARK: - The walk
-
-    /// Leaf paths → display-agnostic value descriptions. Only
-    /// EQUALITY of two walks is consumed; the strings never
-    /// reach the screen.
+    /// Leaf paths mapped to value descriptions for comparison.
     static func leaves(of config: GuiConfig) -> [String: String] {
         var result: [String: String] = [:]
         walk(config.settings, at: "settings", into: &result)
@@ -226,9 +169,6 @@ struct SettingsDraftDiff {
                 result[path] = "nil"
             }
         case .dictionary:
-            // Dictionary order is unstable, so entries key by
-            // THEIR OWN key's description under `[]` — two walks
-            // of equal dictionaries then produce equal maps.
             for entry in mirror.children {
                 let pair = Mirror(reflecting: entry.value)
                     .children.map(\.value)
@@ -251,9 +191,6 @@ struct SettingsDraftDiff {
                 )
             }
         case .collection, .set:
-            // Order matters for arrays (the space list IS its
-            // order); sets stringify order-independently via a
-            // sorted dump.
             if mirror.displayStyle == .set {
                 let parts = mirror.children
                     .map { String(describing: $0.value) }

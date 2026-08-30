@@ -2,21 +2,11 @@ import KiwiDeskCore
 import SwiftUI
 
 extension SettingsView {
-    /// The pushed area's pane. Split out of `SettingsView` when
-    /// the shell's theme wiring took that file past the §2.1
-    /// ceiling — pure routing, and the one place the twelve areas
-    /// are named, so it is the part that reads best alone.
-    ///
-    /// Takes the destination rather than reading `selection`: that
-    /// property is `private`, and an extension in a second file
-    /// cannot see it. Passing it also makes the pane a function of
-    /// its argument, which is what it always was.
+    /// Renders the section pane for `selection`.
     @ViewBuilder func detail(
         _ selection: SettingsDestination?
     ) -> some View {
         switch selection {
-        // nil is Home, which mounts instead of this pane —
-        // unreachable here, but the switch must be total.
         case nil:
             EmptyView()
         case .spaces:
@@ -46,25 +36,16 @@ extension SettingsView {
         }
     }
 
-    /// The two-column detail (digest §1.1): the flexing content
-    /// column, then — where the area offers one AND the window
-    /// is wide enough to seat it (17a) — the fixed preview panel
-    /// behind a hairline. The offer is consulted through
-    /// `SettingsDetailPanelOffer` only; an area outside the set
-    /// takes the full width, which is the prototype's stated
-    /// rule for areas with nothing to show, and an offering area
-    /// below 1200 pt keeps its preview as the detached card
-    /// instead (`SettingsView+Preview`).
+    /// Two-column detail hosting content and docked preview panel (17a).
     @ViewBuilder func detailPane(
         _ width: SettingsWidthClass
     ) -> some View {
         HStack(spacing: 0) {
             contentColumn
-            // `panelDocked` FIRST, the same predicate the
-            // pill's centring offset reads — one conjunct
-            // added there must move the pill and the mount
-            // together (review 2026-08-10; the two had
-            // already drifted on the `editingLua` half).
+            // `panelDocked` FIRST — the same predicate the pill's
+            // centring offset reads: a conjunct added there must
+            // move the pill and the mount together (review
+            // 2026-08-10; the two had already drifted once).
             if panelDocked(width),
                 let destination = model.destination
             {
@@ -86,24 +67,14 @@ extension SettingsView {
                 Divider()
                     .padding(.top, 10)
             }
-            // ONE reader for all ten sections (#277), above the
-            // `switch` rather than wrapped around each section's
-            // own `ScrollView`: the proxy scrolls any scroll view
-            // in its subtree that holds the id, so ten per-section
-            // wrappers would buy nothing and drift.
+            // Single reader across all sections (#277).
             ScrollViewReader { proxy in
                 detail(model.destination)
-                    // Every section's root is its own scroll
-                    // view, which VoiceOver lands on as a bare
-                    // "scroll area" (owner, #812 session 2);
-                    // the area's title names it, as the panel's
-                    // header names the panel's.
+                    // Every section's root is a scroll view,
+                    // which VoiceOver lands on as a bare "scroll
+                    // area" (owner, #812 session 2) — the area's
+                    // title names it.
                     .accessibilityLabel(model.destination?.title ?? "")
-                    // The wide-window cap (owner 2026-08-10):
-                    // rows never stretch past the widest column
-                    // the prototype drew; the surplus becomes
-                    // symmetric margin. Inside the reader so the
-                    // reveal proxy still spans the pane.
                     .frame(
                         maxWidth: SettingsTheme.contentMaxWidth
                     )
@@ -111,16 +82,7 @@ extension SettingsView {
                         maxWidth: .infinity,
                         alignment: .center
                     )
-                    // The in-area half of the flip's reflow
-                    // (#760): Home's grid animates its own, and
-                    // an area the user is standing in animates
-                    // the surfaces the flip inserts (the
-                    // drawer, the Layers card, the per-row
-                    // offers) the same 0.3 s instead of popping
-                    // them in — one mount for all ten panes,
-                    // keyed on the mode so nothing else rides
-                    // it. Reduce Motion stands down; the wash
-                    // and frame still answer.
+                    // Animated surface reflow on mode switch (#760).
                     .animation(
                         reduceMotion
                             ? nil
@@ -129,20 +91,6 @@ extension SettingsView {
                             ),
                         value: model.settingsMode
                     )
-                    // The panes' top gutter, spent here rather
-                    // than as padding inside each one: a content
-                    // margin moves what "top of the viewport"
-                    // means, so `scrollTo(anchor: .top)` lands a
-                    // revealed card with the same gutter above it
-                    // that a pane's first card has at rest —
-                    // where padding would only have pushed the
-                    // resting content down and left the scrolled
-                    // card just as flush.
-                    //
-                    // One call site, not ten: the margin
-                    // propagates to every scroll view below,
-                    // which is the same reach the one
-                    // `ScrollViewReader` above already relies on.
                     .contentMargins(
                         .top,
                         SettingsMetrics.paneInset,
@@ -168,10 +116,7 @@ extension SettingsView {
         }
     }
 
-    /// Phase 2: scrolls the pane to `anchor` and flashes it, then
-    /// clears the request. Runs after `apply` has selected the
-    /// destination and surface, so the target exists or is about
-    /// to.
+    /// Scrolls pane to `anchor` and triggers highlight flash.
     func reveal(
         _ anchor: String?,
         proxy: ScrollViewProxy
@@ -179,17 +124,12 @@ extension SettingsView {
         guard let anchor else { return }
         model.nav.pendingScroll = nil
         revealTask?.cancel()
-        // Captured, so a task that outlives its pane bails instead
-        // of relying on the id being absent from the new one.
-        // Cross-destination duplicate labels are legitimate (only
-        // one destination mounts), and nothing guards them — this
-        // stale window is the single place where that would bite.
+        // Captured, so a task that outlives its pane bails —
+        // cross-destination duplicate labels are legitimate and
+        // unguarded; this stale window is the one place they
+        // would bite.
         let destination = model.destination
         revealTask = Task { @MainActor in
-            // Yield one pass first: `apply` may have just flipped
-            // the surface that *creates* the target view, and
-            // asking the proxy for an id in the same synchronous
-            // pass as the state change that mints it misses.
             await Task.yield()
             withAnimation(
                 reduceMotion
@@ -205,28 +145,19 @@ extension SettingsView {
                 !Task.isCancelled,
                 model.destination == destination
             else { return }
-            // Re-issue, un-animated. One cooperative yield drains
-            // queued main-actor work but does not promise SwiftUI
-            // has LAID OUT the new subtree, so the first
-            // `scrollTo` can be a silent no-op — and then the wash
-            // would paint off-screen and the user would see
-            // nothing at all. Layout has certainly run by now; if
-            // the first attempt landed, this is a no-op.
+            // Re-issue, un-animated: one yield drains main-actor
+            // work but does not promise SwiftUI has LAID OUT the
+            // new subtree, so the first scrollTo can be a silent
+            // no-op — and the wash would paint off-screen.
             proxy.scrollTo(anchor, anchor: .top)
             let token = model.nav.startFlash(anchor)
-            // Under Reduce Motion the wash has no fade to live
-            // through — clearing removes it instantly — so the
-            // hold absorbs the fade's duration instead. Without
-            // this the accessibility branch gets a 0.3 s cue
-            // against everyone else's 1.2 s, which is backwards.
+            // Under Reduce Motion, hold absorbs fade duration.
             try? await Task.sleep(
                 nanoseconds: SettingsReveal.nanoseconds(
                     SettingsReveal.hold
                         + (reduceMotion ? SettingsReveal.fade : 0)
                 )
             )
-            // Clearing is what triggers the fade — the modifier
-            // keeps no timer of its own.
             model.nav.endFlash(token: token)
         }
     }

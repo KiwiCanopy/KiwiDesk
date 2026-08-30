@@ -1,26 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ App Rules (#68 §3.11): one list, one row per
-/// app, with the app's rules as two structured facets — Space
-/// (pin to a space) and Float (never tile). Replaces the two
-/// mismatched lists whose `App:Title` colon syntax leaked the
-/// serialization format into the UI; storage is untouched
-/// (`app_rules` dict + `float_rules` strings), the GUI now
-/// assembles the syntax.
+/// Whole App ▸ App Rules settings section (#68 §3.11).
 struct AppRulesSection: View {
     @ObservedObject var model: SettingsModel
-    /// Apps added this session that have no stored rule yet
-    /// (both facets still at their defaults) — they live only
-    /// in the GUI until a facet is set.
     @State private var draftApps: [String] = []
-    /// Where the keyboard lands after a rule row stops existing
-    /// (#816), keyed by the row's app id.
+    /// Restores keyboard focus after deleting a rule row (#816).
     @FocusState private var returningRow: String?
     @State private var newApp = ""
 
-    /// The base rules while editing a stored profile — the
-    /// override-mode switch (#109); nil during live editing.
+    /// Base rules when editing stored profile (#109); nil during live editing.
     private var overrideBase: [String: SpaceID]? {
         model.profileEditingBaseAppRules
     }
@@ -59,8 +48,7 @@ struct AppRulesSection: View {
         }
     }
 
-    /// Shown while editing a stored profile whose space rules
-    /// diverge from the base — the Shortcuts tab's twin (#109).
+    /// Banner shown when active profile overrides base app rules (#109).
     @ViewBuilder private var overrideIndicator: some View {
         if model.editedProfileOverridesAppRules {
             Label(
@@ -89,25 +77,14 @@ struct AppRulesSection: View {
                     + "loaded profile in the header's picker."
             )
         }
-        // States the card's SUBJECT, not its instructions
-        // (turn 14a). The rows are sentences now, so they teach
-        // what a rule can say better than a caption listing the
-        // options could; and "deleting a row removes all of the
-        // app's rules" moved to the delete button's own help,
-        // where it is read at the moment it matters.
         return L(
             "app_rules.section.caption",
             "What an app should do when it opens."
         )
     }
 
-    /// One row per distinct app, however its rules are stored:
-    /// assignment key, float-rule app segment, or a session
-    /// draft. Hand-written float rules for apps that aren't
-    /// installed still render (name as typed). In override
-    /// mode the BASE's pinned apps are included too, so a
-    /// tombstoned (un-pinned) app keeps its row — visible as
-    /// "Automatic" overriding the base pin (#109).
+    /// Sorted list of unique apps with configured rules or drafts (#333,
+    /// #109).
     private var apps: [String] {
         var set = Set(model.config.appRules.keys)
         for rule in model.config.floatRules {
@@ -122,11 +99,6 @@ struct AppRulesSection: View {
             }
         }
         set.formUnion(draftApps)
-        // Sort by the display name the row actually shows, not
-        // the raw bundle id (#333). Resolve each name once into a
-        // map so the O(n log n) compare doesn't re-hit NSWorkspace/
-        // Spotlight per comparison; tie-break on the id for a
-        // stable order when two apps share a display name.
         let names = Dictionary(
             uniqueKeysWithValues: set.map {
                 ($0, KeybindingCatalog.displayName(forBundleID: $0))
@@ -140,11 +112,6 @@ struct AppRulesSection: View {
         }
     }
 
-    /// What happens to an app with no rule — the answer to the
-    /// question an empty list otherwise leaves open. It states
-    /// the default behaviour rather than inviting an action,
-    /// because having no rules is a perfectly good state and the
-    /// "Add app…" control below is already the invitation.
     private var emptyNote: some View {
         Text(
             L(
@@ -159,17 +126,13 @@ struct AppRulesSection: View {
 
     private var addRow: some View {
         HStack {
-            // Each app has at most one rule row, so hide the ones
-            // already listed — re-adding would only re-select the
-            // existing row.
             AppSelector(name: $newApp, exclude: Set(apps))
             Button {
-                // Lower-case so a hand-typed Custom bundle id
-                // (e.g. the mixed-case `com.apple.Safari` that
-                // `osascript` reports) keys the same as the
-                // normalized `appBundleID` the engine and the
-                // dropdown path use — otherwise the row's open-
-                // title list and dedup silently miss (#262 review).
+                // Lower-cased so a hand-typed mixed-case bundle
+                // id (osascript reports `com.apple.Safari`) keys
+                // the same as the normalized `appBundleID` the
+                // engine and dropdown use — otherwise dedup and
+                // the open-title list silently miss (#262 review).
                 let app = newApp.trimmed.lowercased()
                 guard !app.isEmpty else { return }
                 if !apps.contains(app) {
@@ -188,19 +151,8 @@ struct AppRulesSection: View {
         }
     }
 
-    /// Deleting a rule row, and where the keyboard lands (#816).
-    ///
-    /// The focus move is conditional on the row actually LEAVING
-    /// the list, which in override mode it does not: `apps`
-    /// unions the base's pinned apps, so a tombstoned row stays
-    /// drawn as "Automatic" overriding the base pin (#109). Focus
-    /// belongs where the user left it there — moving it to the
-    /// next row would step off a row that is still on screen
-    /// (code review, 2026-08-12).
+    /// Removes app rules and updates focus target (#816, #109, 2026-08-12).
     private func delete(_ app: String) {
-        // Before the mutation (#816): afterwards the list cannot
-        // name the deleted row's neighbour, only whichever row
-        // slid into the gap.
         let neighbour = neighbourAfterDeleting(app)
         model.config.appRules[app] = nil
         model.config.floatRules.removeAll {
@@ -212,8 +164,6 @@ struct AppRulesSection: View {
         }
     }
 
-    /// `apps` is the DISPLAY order (sorted by the name the row
-    /// shows, #333), not the rules dictionary's.
     private func neighbourAfterDeleting(
         _ app: String
     ) -> String? {
@@ -221,19 +171,13 @@ struct AppRulesSection: View {
     }
 }
 
-/// The float-facet bridge over `float_rules` strings: `"App"`
-/// floats every window, `"App:Title"` floats windows whose
-/// title contains the fragment (first colon splits, matching
-/// `FloatRules`). The colon is assembled here and never shown.
+/// Float facet parsing and filtering helper matching `FloatRules`.
 enum FloatFacet: Equatable {
     case never
     case all
     case titled
 
-    /// Mirrors `FloatRules`' parse exactly: only a rule that
-    /// splits into two non-empty-side parts has a title; a
-    /// degenerate `"App:"` / `":Title"` is a literal app name
-    /// to the engine and must group the same way here.
+    /// Extracts app segment from float rule string (`FloatRules`).
     static func appSegment(of rule: String) -> String {
         let parts = rule.split(separator: ":", maxSplits: 1)
         return parts.count == 2 ? String(parts[0]) : rule

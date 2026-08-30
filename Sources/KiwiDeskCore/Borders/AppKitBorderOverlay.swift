@@ -1,54 +1,25 @@
 import AppKit
 
-/// One window's focus-border ring (#278): a borderless,
-/// non-activating, shadowless panel that ignores mouse events and
-/// draws a single stroked rounded rect. The manager
-/// (`BorderManager`) creates one per bordered window and feeds it
-/// geometry; the overlay knows nothing about layouts or focus.
-///
-/// Non-interactive by design (`ignoresMouseEvents`) — unlike the
-/// app bar, a border is never clicked. Sits at the normal window
-/// level and is stacked directly behind its target window with
-/// `order(.below, relativeTo:)` (see `order(relativeTo:)`). The stroke's
-/// inner overlap sits under the target while its outward reach stays
-/// visible; child panels and other windows above the target therefore
-/// cover the ring naturally. The mandatory AppKit fallback for the
-/// SkyLight fast path — `BorderOverlay` swaps to one on any private
-/// surface failure — so it is module-internal, not file-private.
+/// AppKit NSPanel fallback backend for window focus border rings (#278, #320).
 @MainActor
 final class AppKitBorderOverlay: BorderOverlayBackend {
     private var panel: NSPanel?
     private let shape = CAShapeLayer()
-    /// A second, tighter shadow stacked under the ring (#533): a
-    /// single Gaussian shadow starts at only ~half the glow
-    /// colour's intensity at the ring edge and reads washy. This
-    /// layer casts the same silhouette at half the radius, so
-    /// the two sum toward the full colour at the edge and fade
-    /// out along the wider tail — the "100% at the ring → 0 at
-    /// the reach" ramp the owner asked for. Content-free: only
-    /// its `shadowPath` renders.
+    /// Secondary shadow layer stacked under ring for edge bloom density
+    /// (#533).
     private let glowBoost = CAShapeLayer()
 
-    /// The AppKit panel stacks below its target (it cannot express a
-    /// SkyLight sub-level, so `above` here would paint over child
-    /// popovers — the #320 regression). Below keeps that occlusion
-    /// correct at the cost of the rounded corner seam, which only
-    /// the SkyLight `above` path fixes.
+    /// Stacks below target window to preserve popover occlusion (#320).
     let orderMode: BorderGeometry.Order = .below
 
-    /// Explicit, not just the protocol default: this backend IS
-    /// the glow renderer (#533), and the capability should be
-    /// legible beside `applyGlow` rather than inherited by
-    /// omission.
+    /// AppKit backend supports glow rendering (#533).
     let rendersGlow = true
 
-    /// Positions the ring around `geometry.overlayFrame` (AX
-    /// coords) and strokes it in `colorHex`. Used both for a
-    /// steady-state sync and per animation tick — implicit Core
-    /// Animation is disabled so the ring snaps to each commanded
-    /// frame instead of easing a step behind the window. Stacking
-    /// is left to `order(relativeTo:)`, called only on sync (not per
-    /// tick) so the ring isn't re-ordered every frame.
+    /// Updates ring geometry, stroke color, and glow bloom
+    /// (#358). Implicit Core Animation is disabled so the ring
+    /// snaps to each commanded frame instead of easing a step
+    /// behind the window; stacking is `order(relativeTo:)`'s job,
+    /// called on sync only, never per tick.
     func update(
         geometry: BorderGeometry,
         colorHex: String,
@@ -70,11 +41,6 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
             size: geometry.overlayFrame.size
         )
         shape.frame = bounds
-        // Stroke is centered on its path, so inset the path by half
-        // the line width to keep the whole stroke inside the overlay
-        // bounds — plus `glowMargin` (0 without glow) so the ring
-        // stays put in the grown frame and the margin is bloom room
-        // (#358).
         let inset = geometry.glowMargin + geometry.lineWidth / 2
         let rect = bounds.insetBy(dx: inset, dy: inset)
         shape.path = CGPath(
@@ -95,15 +61,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         return true
     }
 
-    /// The glow bloom (#358/#533) — this backend is the SOLE
-    /// glow renderer: the facade swaps every glow ring here
-    /// (`BorderOverlay.ensureBackend`). The shadow is cast from
-    /// a **filled** outer rounded-rect `shadowPath`, not the
-    /// thin stroke, so the bloom is a solid halo instead of a
-    /// banded contour smear. Below-order occludes the inward
-    /// half of the bloom behind the window, so only the outward
-    /// bloom shows. `masksToBounds` stays false so the halo can
-    /// spill past the shape into the grown frame.
+    /// Renders outer glow halo from filled silhouette (#358, #533).
     private func applyGlow(
         geometry: BorderGeometry,
         rect: CGRect,
@@ -141,12 +99,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         glowBoost.shadowPath = silhouette
     }
 
-    /// Stacks the ring directly behind its target window in the
-    /// global window order (`windowNumber` is the target's
-    /// `CGWindowID`). Anything layered over the target — an
-    /// ignored panel, a higher-level utility window — therefore
-    /// stays in front of the ring. Called on sync, not per tick.
-    /// A no-op until the panel exists (first `update` creates it).
+    /// Stacks ring directly behind target window in WindowServer hierarchy.
     func order(relativeTo windowNumber: CGWindowID) -> Bool {
         panel?.order(.below, relativeTo: Int(windowNumber))
         return true
@@ -158,8 +111,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     }
 
     private func makePanel() -> NSPanel {
-        // A frame-constraining panel would clamp a top-row ring's
-        // upward dead-end bump to zero (#436) — see BorderOverlayPanel.
+        // BorderOverlayPanel avoids frame clamping on top edge (#436).
         let panel = BorderOverlayPanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel],
@@ -170,19 +122,12 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.backgroundColor = .clear
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
-        // Normal window level (not floating): the ring is stacked
-        // relative to its target by `order(relativeTo:)`, so it must
-        // share the target's band to sit *below* windows layered
-        // over it — a floating level would force it above them.
+        // Normal level, not floating: the ring is stacked
+        // relative to its target and must share the target's band
+        // to sit below windows layered over it.
         panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
-        // A fullscreen window gets no border (auxiliary only); not
-        // cycled by the app switcher. `.transient` hides this AppKit
-        // fallback ring in Exposé/Mission Control at the compositor
-        // level so it vanishes with the swipe — the SkyLight fast
-        // path self-vanishes via its space pin, and this hint gives
-        // the fallback ring the same instant behavior.
         panel.collectionBehavior = [
             .transient,
             .fullScreenAuxiliary,

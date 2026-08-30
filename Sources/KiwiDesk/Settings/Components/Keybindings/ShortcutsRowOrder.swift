@@ -1,33 +1,7 @@
-/// The Shortcuts area's display order (turn 5 of the redesign,
-/// #678 Phase 3). Same split as `BarsRowOrder` and
-/// `ColorsRowOrder`: the census owns *placement* — which
-/// container and tier each row sits in — and records no display
-/// order, so the renderer declares it here as data.
-///
-/// `ShortcutsCensusRenderTests` pins each list against the
-/// census: every `.shortcuts`-area key must appear in exactly
-/// the list its placement names, so a census row added or
-/// retiered without a renderer update is a red test, not a
-/// silently missing control.
-///
-/// **These are FAMILIES, not rows.** A census case here is one
-/// keybinding family — `focusDir` is the setting, and the four
-/// directional rows on screen are its instances. The expansion
-/// lives in `ShortcutsFamilyRows`, which switches exhaustively
-/// over the same cases, so the two halves cannot drift: a family
-/// added to the census must be placed in a list here AND given
-/// an expansion there before it compiles and passes.
+/// Display order definitions for Shortcuts settings section (#678,
+/// `ShortcutsCensusRenderTests`).
 enum ShortcutsRowOrder {
-    /// Containers the section draws with BESPOKE views rather
-    /// than a `ForEach` over an order list: the app list, the
-    /// layer strip and the raw-Lua drawer.
-    ///
-    /// Data, not prose, because the promise above is weaker for
-    /// these three — their order lists guard MEMBERSHIP and
-    /// nothing checks that a family added to one reaches the
-    /// screen. A fourth container going bespoke has to edit this
-    /// set, which `ShortcutsCensusRenderTests` asserts over, so
-    /// the limitation cannot quietly widen.
+    /// Containers drawn with bespoke views rather than a standard list loop.
     static let bespokeContainers: Set<SettingsContainer> = [
         .openApplications,
         .layers,
@@ -35,20 +9,15 @@ enum ShortcutsRowOrder {
         .defaultShortcuts,
     ]
 
-    /// Focus: the four directions, one row per live space, then
-    /// one per macOS Desktop. KiwiDesk's own Spaces lead — they
-    /// are what the rest of the app is about, and a Desktop row
-    /// is the escape into macOS's own arrangement.
+    /// Focus group order: directions, live spaces, macOS Desktops.
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
         .shortcuts(.goToSpace),
         .shortcuts(.focusDesktop),
     ]
 
-    /// Move windows: the directional swaps, the track verbs
-    /// (authoring rows, always rendered — only meaningful in the
-    /// track layout, which the caption says), then the per-space
-    /// move pair and the per-Desktop one.
+    /// Move windows group order: swaps, track verbs, space moves, Desktop
+    /// moves.
     static let moveWindowsAtRest: [SettingKey] = [
         .shortcuts(.swapDir),
         .shortcuts(.moveWindowToTrack),
@@ -59,27 +28,7 @@ enum ShortcutsRowOrder {
         .shortcuts(.moveToDesktopFollow),
     ]
 
-    /// Families whose INSTANCES interleave instead of stacking.
-    ///
-    /// An order list orders FAMILIES, which is almost always the
-    /// whole story — but "Move to Space 2" and "Move to Space 2
-    /// & follow" are one decision about one space, and drawing
-    /// every plain row and then every follow row makes the user
-    /// cross-reference two lists to make it. So the per-space
-    /// pair renders per space: plain, follow, plain, follow. The
-    /// per-Desktop pair is the same decision one noun over.
-    ///
-    /// Data rather than a special case inside the renderer,
-    /// because it is a design decision about instance order and
-    /// the render guard compares SETS — set equality cannot see
-    /// interleaving, which is exactly how splitting these two
-    /// families into two census cases un-paired them on screen
-    /// with every test green.
-    ///
-    /// Each run's members must share a container and tier;
-    /// `ShortcutsCensusRenderTests` pins that, and the runs stay
-    /// short by construction — a run is a row shape, not a
-    /// grouping mechanism.
+    /// Families whose instances interleave per target rather than stacking.
     static let interleavedRuns: [[SettingKey]] = [
         [.shortcuts(.moveToSpace), .shortcuts(.moveToSpaceFollow)],
         [
@@ -88,22 +37,21 @@ enum ShortcutsRowOrder {
         ],
     ]
 
-    /// The run `key` leads, if it leads one. A non-leading member
-    /// draws nothing: its rows were emitted with the leader's.
+    /// Interleaved run starting at `key`, if any.
     static func interleavedRun(
         startingAt key: SettingKey
     ) -> [SettingKey]? {
         interleavedRuns.first { $0.first == key }
     }
 
+    /// True if `key` is a non-leading member of an interleaved run.
     static func isInterleavedFollower(_ key: SettingKey) -> Bool {
         interleavedRuns.contains {
             $0.dropFirst().contains(key)
         }
     }
 
-    /// Size & float: the four resize rows in grow/shrink pairs
-    /// per axis, then the three state toggles.
+    /// Size & float order: resize pairs followed by state toggles.
     static let sizeAndFloatAtRest: [SettingKey] = [
         .shortcuts(.growWidth),
         .shortcuts(.shrinkWidth),
@@ -114,58 +62,40 @@ enum ShortcutsRowOrder {
         .shortcuts(.toggleDisplaySticky),
     ]
 
-    /// Behind Size & float's disclosure: the unsupported-resize
-    /// cue. Not a keybinding at all but a `TilingSettings`
-    /// toggle, which is why its census case lives in the
-    /// Behaviour sub-enum while its PLACEMENT names this
-    /// container — the census is grouped by model subsystem and
-    /// placed by area, and this row is the case that proves the
-    /// two are separate axes.
+    /// Unsupported resize sound cue setting.
     static let sizeAndFloatMore: [SettingKey] = [
         .behaviour(.resizeFeedback)
     ]
 
-    /// Open applications: one family, expanding to a row per
-    /// configured app plus the trailing "Add application".
+    /// Open applications group order.
     static let openApplicationsAtRest: [SettingKey] = [
         .shortcuts(.openApplications)
     ]
 
-    /// App chrome rather than a workspace action, so it sits
-    /// below the action groups and behind a disclosure.
+    /// General shortcuts behind disclosure.
     static let generalKeysMore: [SettingKey] = [
         .shortcuts(.showShortcuts),
         .shortcuts(.openSettings),
     ]
 
-    /// Layers: the strip itself, the selected layer's menu-bar
-    /// icon, and one switch row per other layer. All three are
-    /// one container — the rows that switch layers belong beside
-    /// the strip that defines them, not among the action groups.
+    /// Layers group order behind disclosure.
     static let layersMore: [SettingKey] = [
         .shortcuts(.layers),
         .shortcuts(.layersIcon),
         .shortcuts(.switchToLayer),
     ]
 
-    /// The power-user escape hatch, behind the Advanced drawer.
+    /// Advanced Lua bindings behind disclosure.
     static let luaBindingsMore: [SettingKey] = [
         .shortcuts(.advanced)
     ]
 
-    /// Import draws at rest, in the header — the same container
-    /// as the raw-Lua rows, a different tier. Its runtime gate,
-    /// not a disclosure, is what keeps it out of the way until
-    /// `init.lua` holds something to adopt.
+    /// Header import action.
     static let luaBindingsAtRest: [SettingKey] = [
         .shortcuts(.import)
     ]
 
-    /// Restore Defaults, beside Import in the header. Its
-    /// own container because the set it restores spans four
-    /// of them, and at rest for Import's reason: a runtime
-    /// gate, not a disclosure, keeps it away until there is
-    /// something to restore.
+    /// Header restore defaults action.
     static let defaultShortcutsAtRest: [SettingKey] = [
         .shortcuts(.restoreDefaults)
     ]

@@ -1,29 +1,16 @@
 import Foundation
 
-/// Locale lookup for every user-facing string in the GUI
-/// (issue #9). English is the source of truth, inlined at every
-/// call site (`L("key", "English")`); a locale file only needs
-/// to carry the keys it translates — any key it omits falls
-/// back to the English argument, per-key.
-///
-/// Lives in `KiwiDeskCore` (not the GUI target) so both the
-/// SwiftUI settings window and the AppKit quick menu
-/// (`StatusItemController`) can call the same lookup.
+/// Locale lookup for user-facing GUI strings with inline English fallback
+/// (#9).
 @MainActor
 public final class LocalizationManager: ObservableObject {
     public static let shared = LocalizationManager()
 
-    /// `nil` means "System default" — the macOS UI locale when a
-    /// matching locale file ships, else English. A non-nil value
-    /// is an explicit user pick (persisted by the GUI layer via
-    /// `LocalizationPreference`, backed by `UserDefaults`; this
-    /// manager does not read or write that store itself).
+    /// Explicit user selection (`nil` for system default).
     @Published public private(set) var selection: String?
-    /// The locale codes shipped as `Resources/Locales/*.json`,
-    /// excluding `en`.
+    /// Available locale codes from bundled `Resources/Locales/*.json`.
     public let available: [String]
 
-    /// The effective locale's key -> translation dictionary.
     private var strings: [String: String] = [:]
 
     private init() {
@@ -31,39 +18,19 @@ public final class LocalizationManager: ObservableObject {
         reload()
     }
 
-    /// The locale actually in effect right now: the explicit
-    /// selection if shipped, else the macOS UI language if
-    /// shipped, else English (`nil` meaning English — there is
-    /// no `en.json` to load; English lives inline at call
-    /// sites).
-    ///
-    /// "System default" reads `Locale.preferredLanguages` — the
-    /// user's ordered language list — and not
-    /// `Locale.current.language`, which is the *resolved* locale
-    /// for this process. Inside the packaged `.app` that
-    /// resolution answered `CFBundleDevelopmentRegion` (English)
-    /// whatever the system language was, because the bundle
-    /// declared no other localization, so this branch could not
-    /// return anything else (#659). It never reproduced under
-    /// `swift run`, which has no `Info.plist` at all.
-    ///
-    /// `scripts/build-app.sh` now also declares
-    /// `CFBundleLocalizations`, and the two changes ship
-    /// together. Scoping the claim honestly: `preferredLanguages`
-    /// is documented as the *user's* list rather than the
-    /// bundle-resolved one, so the matcher change alone may well
-    /// be what fixes this path — that was not measured inside a
-    /// packaged build. The plist is independently right (it is
-    /// what makes macOS treat KiwiDesk as multilingual at all,
-    /// including its per-app language entry in System Settings),
-    /// which is why it is not worth unpicking which half carries
-    /// the fix.
+    /// Effective locale code (`nil` = inline English). Reads
+    /// `Locale.preferredLanguages`, never `Locale.current`: inside
+    /// the packaged `.app` the resolved locale answered
+    /// `CFBundleDevelopmentRegion` (English) whatever the system
+    /// language, because the bundle declared no other localization
+    /// — and it never reproduced under `swift run`, which has no
+    /// Info.plist at all (#659; `build-app.sh` also declares
+    /// `CFBundleLocalizations`, and the two ship together).
     public var effectiveLocale: String? {
         if let selection {
-            // Explicit English: no `en.json` ships (English lives
-            // inline), so it resolves to the empty dictionary —
-            // inline English everywhere — never to the OS
-            // language. Distinct from `nil` (System default).
+            // Explicit English: no en.json ships, so it resolves
+            // to inline English everywhere — never the OS
+            // language. Distinct from nil (System default).
             if selection == "en" { return nil }
             return available.contains(selection)
                 ? selection : nil
@@ -74,24 +41,12 @@ public final class LocalizationManager: ObservableObject {
         )
     }
 
-    /// Looks up `key` in the effective locale; returns `english`
-    /// when the locale has no translation for it (per-key
-    /// fallback) or when the effective locale is English.
+    /// Looks up translation for `key`, falling back to `english`.
     public func string(_ key: String, _ english: String) -> String {
         strings[key] ?? english
     }
 
-    /// The interpolating counterpart of `string(_:_:)`: resolves
-    /// the template (translation-or-English, same per-key
-    /// fallback) then fills it with `args` via `String(format:)`.
-    /// Templates use POSITIONAL specifiers (`%1$@`, `%2$d`, …),
-    /// never bare `%@`/`%d` — positional lets a translation
-    /// reorder an argument relative to the surrounding words,
-    /// which is the entire reason this overload exists instead
-    /// of `+`-concatenating a prefix and a value (issue #9
-    /// review: a concatenated fragment can never be reordered by
-    /// a translation, no matter how the target language's
-    /// grammar wants it).
+    /// Looks up format template and interpolates positional `args` (#9).
     public func string(
         _ key: String,
         _ english: String,
@@ -101,18 +56,13 @@ public final class LocalizationManager: ObservableObject {
         return String(format: template, arguments: args)
     }
 
-    /// Updates the explicit selection and reloads the effective
-    /// locale's strings. Pass `nil` to restore "System default".
-    /// Persisting the choice (`LocalizationPreference`) is the
-    /// caller's job (`SettingsModel+Language.swift`).
+    /// Updates explicit locale selection and reloads translations.
     public func select(_ locale: String?) {
         selection = locale
         reload()
     }
 
-    /// Injects a persisted selection at startup, before any view
-    /// reads `string(_:_:)`, without re-publishing twice — call
-    /// this once, ahead of building the UI.
+    /// Seeds persisted locale selection at startup.
     public func adoptPersistedSelection(_ locale: String?) {
         selection = locale
         reload()
@@ -124,24 +74,14 @@ public final class LocalizationManager: ObservableObject {
     }
 }
 
-/// Shorthand call-site lookup: `L("menu.quit", "Quit KiwiDesk")`.
-/// Delegates to `LocalizationManager.shared`. The single-letter
-/// name is the deliberate convention (matches the terse `L(_:_:)`
-/// idiom used by other gettext-style i18n APIs) — exempted from
-/// swift-format's lower-camel-case rule below.
+/// Shorthand string lookup with inline English fallback (#9).
 // swift-format-ignore: AlwaysUseLowerCamelCase
 @MainActor
 public func L(_ key: String, _ english: String) -> String {
     LocalizationManager.shared.string(key, english)
 }
 
-/// The interpolating overload: `L("monitor_chip.move_to",
-/// "Move to %1$@", display.name)`. The template's positional
-/// specifiers (`%1$@`, `%2$d`, …) let a translation reorder an
-/// argument, unlike a `+`-concatenated prefix/suffix pair — use
-/// this instead of building a sentence out of literal
-/// concatenation whenever a value needs to sit inside English
-/// prose. See `docs/translating.md` for the convention.
+/// Shorthand string lookup with positional argument interpolation (#9).
 // swift-format-ignore: AlwaysUseLowerCamelCase
 @MainActor
 public func L(

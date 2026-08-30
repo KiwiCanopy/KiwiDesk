@@ -1,57 +1,18 @@
 import Foundation
 
-/// One command's machine-readable signature: what it takes, and
-/// what it does in one line (#1033).
-///
-/// **A record carries neither its own name nor its group.** Both
-/// are the keys it is filed under in `APIReference` — the
-/// `commands`, `namespaces` and `luaOnly` tables stay the single
-/// source of truth for names, exactly as that file already
-/// claimed to be, and a record that cannot name itself cannot
-/// disagree with them. What a record adds is the metadata those
-/// tables never carried. `APIRecordCensusTests` holds the key
-/// sets against the name tables in both directions.
+/// Machine-readable command signature and summary (#1033,
+/// `APIRecordCensusTests`, `APIRecordShapeTests`).
 public struct APIRecord: Sendable, Equatable {
-    /// One line, sentence-shaped: a capital, a full stop, no
-    /// newline. `APIRecordShapeTests` pins that shape, so 262
-    /// summaries written by different hands read as one voice.
+    /// Single sentence summary (capitalized, ending in period).
     public let summary: String
-
-    /// Positional arguments, in the order the command reads
-    /// them. Optional arguments come last — a positional list
-    /// cannot skip one (`APIRecordShapeTests`).
-    ///
-    /// **Stated residue: this list is a hand-kept mirror of the
-    /// decoder, and only its enum VALUES are derived.** A
-    /// decoder reads `args[0]` / `args[1]` positionally with no
-    /// declared signature to reflect over, so nothing can check
-    /// that a record's argument names, count or optionality
-    /// match what the command actually parses — `APIChoice`
-    /// covers the values an argument may carry, and the census
-    /// covers command names, but neither sees the argument that
-    /// carries them. `APIRecordShapeTests` holds the shape a
-    /// list must have, never that it is the right list.
-    ///
-    /// So an argument list is review's, and a wrong one is
-    /// worse than a pending one — it describes a call that will
-    /// be rejected. Closing this properly means the decoders
-    /// declaring their signature and parsing FROM the record,
-    /// which is a much larger change than #1033 and is where
-    /// this data wants to go next.
-    ///
-    /// **Two shapes this fixed positional list cannot state, and
-    /// both take the closed-kind escape — the closest kind, and
-    /// a summary that says the rest.** `subscribe` is VARIADIC
-    /// (`SocketServer.subscribe` loops over every argument), so
-    /// its one optional `event` stands for a list. `set_mode`
-    /// takes a LEADING optional (one argument means the active
-    /// Space), which cannot be encoded at all while optionals
-    /// must trail. Adding a `repeats` flag or a leading-optional
-    /// case for one command each would buy a truer list for two
-    /// records and a second way to describe an argument for all
-    /// 262; the summary already carries it. Weigh a third such
-    /// command as evidence the shape, not the summary, is what
-    /// needs to change.
+    /// Positional arguments in decoding order; optionals come
+    /// last. Stated residue: this list is a hand-kept mirror of
+    /// the decoder — only the enum VALUES are derived — so a wrong
+    /// list is worse than a pending one. Two shapes it cannot
+    /// state take the closed-kind escape (`subscribe` is variadic,
+    /// `set_mode` takes a LEADING optional); weigh a third such
+    /// command as evidence the shape, not the summary, must
+    /// change.
     public let arguments: [APIArgument]
 
     public init(_ summary: String, _ arguments: APIArgument...) {
@@ -63,23 +24,21 @@ public struct APIRecord: Sendable, Equatable {
         self.arguments = arguments
     }
 
-    /// The summary of a record whose prose is not written yet.
-    ///
-    /// Deliberately not sentence-shaped, so it can never be
-    /// mistaken for a written one and `APIRecordShapeTests`
-    /// exempts it by identity rather than by pattern.
+    /// Placeholder summary for unwritten prose — deliberately not
+    /// sentence-shaped, so `APIRecordShapeTests` exempts it by
+    /// identity rather than by pattern.
     public static let pendingSummary = "(summary pending)"
 
-    /// Whether this record still owes its prose.
+    /// True if summary has not been authored yet.
     public var isPending: Bool { summary == Self.pendingSummary }
 }
 
-/// One positional argument of a command.
+/// One positional argument of a command (#1033).
 public struct APIArgument: Sendable, Equatable {
-    /// `lower_snake_case`, the name the docs use for it.
+    /// Argument name in snake_case.
     public let name: String
     public let kind: APIArgumentKind
-    /// Whether the command reads a default when it is absent.
+    /// True if argument has a default value when omitted.
     public let isOptional: Bool
 
     public init(
@@ -127,8 +86,7 @@ public struct APIArgument: Sendable, Equatable {
         APIArgument(name, .color, optional: optional)
     }
 
-    /// A Space identifier — a string, and a numeric string is
-    /// equivalent to the integer (AGENTS.md §5).
+    /// Space identifier argument (string or numeric string, AGENTS.md §5).
     public static func space(
         _ name: String,
         optional: Bool = false
@@ -136,8 +94,7 @@ public struct APIArgument: Sendable, Equatable {
         APIArgument(name, .space, optional: optional)
     }
 
-    /// A macOS Desktop's Mission Control number, counted
-    /// globally across every screen (#884/#888).
+    /// macOS Desktop index across all screens (#884, #888).
     public static func desktop(
         _ name: String,
         optional: Bool = false
@@ -145,8 +102,7 @@ public struct APIArgument: Sendable, Equatable {
         APIArgument(name, .desktop, optional: optional)
     }
 
-    /// A Lua function. Only a Lua-only entry point takes one —
-    /// nothing crossing the socket can carry a callback.
+    /// Lua function callback argument (Lua-only).
     public static func callback(
         _ name: String,
         optional: Bool = false
@@ -154,8 +110,7 @@ public struct APIArgument: Sendable, Equatable {
         APIArgument(name, .callback, optional: optional)
     }
 
-    /// A Lua table. Same reason as `callback`: it never crosses
-    /// the socket.
+    /// Lua table argument (Lua-only).
     public static func table(
         _ name: String,
         optional: Bool = false
@@ -163,13 +118,8 @@ public struct APIArgument: Sendable, Equatable {
         APIArgument(name, .table, optional: optional)
     }
 
-    /// An argument whose legal values are a Swift enum's cases.
-    ///
-    /// **The only way to build one, and it takes the type, not
-    /// the values** — so the listing can never disagree with the
-    /// decoder that accepts or rejects what a caller sends.
-    /// `APIChoiceDerivationTests` holds that there is no second
-    /// initializer to type them into.
+    /// Enum choice argument derived directly from type
+    /// (`APIChoiceDerivationTests`).
     public static func choice<T: APIChoiceType>(
         _ name: String,
         _ type: T.Type,
@@ -183,13 +133,7 @@ public struct APIArgument: Sendable, Equatable {
     }
 }
 
-/// The closed vocabulary of argument shapes.
-///
-/// Closed on purpose: a value shape that is none of these — the
-/// points-or-`"NN%"`-or-`0` of `scroll.set_slot_size`, say —
-/// takes the closest kind and explains itself in the summary.
-/// The alternative, a free-text type field, is where a second
-/// hand-typed spelling of an enum would eventually land.
+/// Closed vocabulary of supported argument kinds.
 public enum APIArgumentKind: Sendable, Equatable {
     case number
     case integer
@@ -202,8 +146,7 @@ public enum APIArgumentKind: Sendable, Equatable {
     case table
     case choice(APIChoice)
 
-    /// The word `list_commands` prints for this kind. English,
-    /// like every other CLI/IPC string (core-boundaries.md).
+    /// Name printed by `list_commands` (English, core-boundaries.md).
     public var wireName: String {
         switch self {
         case .number: return "number"

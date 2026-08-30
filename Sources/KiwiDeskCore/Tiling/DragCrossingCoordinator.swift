@@ -1,91 +1,50 @@
 import CoreGraphics
 import Foundation
 
-/// Debounce + per-gesture bookkeeping for the live cross-display
-/// "make-room" drag (#504).
-///
-/// While a tiled window is dragged, the cursor crossing onto a
-/// display OTHER than the one its space lives on arms a dwell
-/// timer; only when the cursor has stayed on that display for
-/// `dwell` does `onCross` fire, and KiwiCore eager-moves the
-/// window's membership there (the Space-Bar-spring model, #372,
-/// keyed on displays). The dwell is the flip-flop guard: a cursor
-/// skimming the display seam — or an overflow-inducing crossing
-/// bouncing straight back — never re-tiles both displays per
-/// mouse event; AX frame-sets are the slow path (AGENTS.md §5).
-///
-/// AppKit-free by injection (`displayAt`), like DragCoordinator:
-/// tests place the cursor and describe displays without screens.
+/// Debounce and gesture bookkeeping for cross-display drag movement (#504,
+/// #372).
 @MainActor
 public final class DragCrossingCoordinator {
-    /// How long the cursor must stay on a foreign display before
-    /// the membership moves. Long enough to ride out a seam skim,
-    /// short enough to read as immediate.
+    /// Dwell delay before cross-display window migration triggers (0.15s).
     public var dwell: TimeInterval = 0.15
 
-    /// Resolves the display under a Cocoa (bottom-left) screen
-    /// point. Wired to an NSScreen lookup in `wireDragCrossing`;
-    /// injected so drag tests can fake a display topology.
+    /// Resolves display ID under Cocoa screen point. Injected for unit
+    /// testing.
     public var displayAt: @MainActor (CGPoint) -> DisplayID? = {
         _ in nil
     }
 
-    /// Fired once per debounced crossing with the display the
-    /// cursor settled on. KiwiCore re-checks eligibility there —
-    /// state may have shifted during the dwell.
+    /// Callback invoked when debounced display crossing fires.
     var onCross: @MainActor (WindowID, DisplayID) -> Void = {
         _,
         _ in
     }
 
-    /// What one drag gesture accumulated. Cleared by
-    /// `endGesture` / `revertLiveCrossing` at drop or cancel.
     private struct Gesture {
-        /// The window's home before the FIRST crossing — the
-        /// abnormal-cancel restore point. Later crossings keep
-        /// the original record.
         var originSpace: SpaceID?
         var originIndex = 0
-        /// Whether any crossing actually moved membership this
-        /// gesture. Read by the drop path to skip the resize
-        /// interpretation (#492's clamp gotcha, live edition).
         var crossed = false
-        /// A sticky refusal already flashed its pill this
-        /// gesture; later dwell fires stay silent.
         var stickyRefused = false
     }
     private var gestures: [WindowID: Gesture] = [:]
     /// A single slot, not per-window: only one window is ever
     /// user-dragged at a time, so `schedule` may displace another
-    /// window's dwell without harm. `gestures` stays per-window
+    /// window's dwell without harm; `gestures` stays per-window
     /// because ids must not inherit stale bookkeeping.
     private var pending:
         (window: WindowID, display: DisplayID, task: Task<Void, Never>)?
 
     #if DEBUG
-        /// The armed dwell's timeline, so a test can await the
-        /// crossing instead of polling a clock for its effect
-        /// (#994; `.claude/rules/tests.md` ▸ Async tests).
-        /// Debug-only so a production read fails the release
-        /// build rather than a review — `pending` is the
-        /// bookkeeping it belongs to.
-        ///
-        /// What awaiting it does **not** mean: that a crossing
-        /// FIRED. `fire` clears the slot, the handle also
-        /// completes for a dwell that was disarmed (the cursor
-        /// came home, `cancelPending`, `rekey`), and it is nil
-        /// whenever none is armed — whose `await` returns at
-        /// once and asserts nothing. `onCross` is the fact.
+        /// Timeline handle for async crossing testing (#994;
+        /// tests.md). Awaiting it does NOT mean a crossing fired —
+        /// it also completes for a disarmed dwell, and it is nil
+        /// when none is armed. `onCross` is the fact.
         var dwellTask: Task<Void, Never>? { pending?.task }
     #endif
 
     public init() {}
 
-    /// Feed every live drag move. Schedules a dwell when the
-    /// cursor sits on a display other than `homeDisplay`
-    /// (the dragged window's current space's display), keeps an
-    /// already-armed dwell for the SAME display running, and
-    /// disarms when the cursor returns home or resolves nowhere.
+    /// Feeds live drag motion updates and schedules crossing dwell timer.
     func moved(
         _ id: WindowID,
         cursor: CGPoint,
@@ -107,17 +66,14 @@ public final class DragCrossingCoordinator {
         schedule(id, display: cursorDisplay)
     }
 
-    /// Disarms a pending dwell for `id` (cursor back home, a
-    /// Space Bar target armed, or the gesture stopped looking
-    /// like a move).
+    /// Disarms pending dwell timer for `id`.
     func cancelPending(for id: WindowID) {
         guard let pending, pending.window == id else { return }
         pending.task.cancel()
         self.pending = nil
     }
 
-    /// Records the home to restore on an abnormal cancel. Only
-    /// the FIRST crossing of a gesture writes it.
+    /// Records pre-crossing origin space and slot for abnormal revert (#504).
     func recordOriginIfNeeded(
         _ id: WindowID,
         space: SpaceID,
@@ -130,7 +86,7 @@ public final class DragCrossingCoordinator {
         gestures[id] = gesture
     }
 
-    /// The pre-crossing home, for the abnormal-cancel revert.
+    /// Returns pre-crossing home space and index.
     func origin(for id: WindowID) -> (space: SpaceID, index: Int)? {
         guard let space = gestures[id]?.originSpace else {
             return nil
@@ -144,15 +100,11 @@ public final class DragCrossingCoordinator {
         gestures[id] = gesture
     }
 
-    /// Whether membership already moved displays this gesture.
+    /// Returns whether window crossed displays during current gesture (#492).
     func hasCrossed(_ id: WindowID) -> Bool {
         gestures[id]?.crossed == true
     }
 
-    /// Defense in depth only: sticky windows never arm the dwell
-    /// (`updateDragCrossing` filters them), so this fires solely
-    /// when a window BECAME sticky mid-dwell. Per-gesture, not
-    /// per-display — revisit if the sticky exclusion is relaxed.
     func markStickyRefused(_ id: WindowID) {
         var gesture = gestures[id] ?? Gesture()
         gesture.stickyRefused = true
@@ -163,11 +115,7 @@ public final class DragCrossingCoordinator {
         gestures[id]?.stickyRefused == true
     }
 
-    /// Retargets a gesture's bookkeeping onto a native-tab
-    /// rekeyed id (#308) — the id swapped in place mid-drag, and
-    /// the revert must find the origin under the NEW id. Any
-    /// pending dwell dies with the old id: the gesture is being
-    /// aborted, not continued.
+    /// Retargets gesture bookkeeping across native-tab rekeys (#308).
     func rekey(old: WindowID, new: WindowID) {
         cancelPending(for: old)
         guard let gesture = gestures.removeValue(forKey: old)
@@ -175,9 +123,7 @@ public final class DragCrossingCoordinator {
         gestures[new] = gesture
     }
 
-    /// Ends the gesture at drop or cancel: disarms any dwell,
-    /// forgets the bookkeeping, and reports whether the gesture
-    /// ever crossed (the drop path's resize-gate bypass).
+    /// Ends gesture, cancels pending dwell, and reports if crossing occurred.
     @discardableResult
     func endGesture(_ id: WindowID) -> Bool {
         cancelPending(for: id)

@@ -1,18 +1,13 @@
 import Foundation
 
-/// The outcome of matching the live monitors against the saved
-/// profiles (#36). Either an exact set matches (adopt clean),
-/// the count's default user profile applies (load dirty), or
-/// nothing does and the caller composes the built-in Standard
-/// (#53). No near-match adaptation.
+/// Outcome of matching live monitors against saved profiles (#36, #53).
 public enum ProfileMatch: Equatable {
     case exact(Profile)
     case countDefault(Profile)
     case none
 }
 
-/// Thrown for profile names that cannot become file names, and
-/// for renames that would clobber an existing profile.
+/// Thrown for invalid profile names or name collisions.
 public enum ProfileError: Error, CustomStringConvertible {
     case invalidName(String)
     case nameTaken(String)
@@ -27,16 +22,14 @@ public enum ProfileError: Error, CustomStringConvertible {
     }
 }
 
-/// Persists profiles and picks the right one when the monitor
-/// setup changes.
+/// Persists profiles and selects matching configurations for monitor setups.
 @MainActor
 public final class ProfileManager {
     public private(set) var currentName: String?
-    /// The built-in Standard currently resolving (no saved
-    /// profile covers the live screen count), if any.
+    /// Built-in Standard currently resolving (nil if covered by saved
+    /// profile).
     public private(set) var currentStandard: String?
-    /// True when the live state diverged from the saved
-    /// profile (e.g. after a monitor change).
+    /// True when live state diverged from saved profile.
     public private(set) var isDirty = false
 
     let directory: URL
@@ -48,8 +41,6 @@ public final class ProfileManager {
         self.directory = directory
     }
 
-    // MARK: - Persistence
-
     public func list() -> [String] {
         let contents =
             (try? FileManager.default.contentsOfDirectory(
@@ -59,25 +50,19 @@ public final class ProfileManager {
             contents
             .filter { $0.hasSuffix(".json") }
             .map { String($0.dropLast(5)) }
-            // read() rejects invalid names, so listing them
-            // (e.g. a hand-placed dot-file) would only log
-            // "invalid" on every allProfiles() pass.
             .filter(Self.isValidName)
             .sorted()
     }
 
-    /// Every profile file with its decode outcome, in one disk
-    /// pass: a readable `Profile`, or the error that makes it
-    /// broken. The single source `allProfiles`, `brokenProfiles`,
-    /// and the config-issue scan all derive from (#246).
+    /// Every profile file with its decode outcome (#246).
     func scan() -> [(name: String, result: Result<Profile, Error>)] {
         list().map { name in
             (name, Result { try read(name: name) })
         }
     }
 
-    /// Every readable profile, sorted by name. Unreadable files
-    /// are skipped (and logged), never fatal.
+    /// Every readable profile, sorted by name (unreadable files
+    /// skipped/logged).
     public func allProfiles() -> [Profile] {
         scan().compactMap { name, result in
             switch result {
@@ -90,15 +75,12 @@ public final class ProfileManager {
         }
     }
 
-    /// On-disk path of a profile file, for Reveal in Finder
-    /// (#246). Validated like every other path; the file may or
-    /// may not exist.
+    /// On-disk path of a profile file (#246).
     public func fileURL(name: String) throws -> URL {
         url(for: try validated(name))
     }
 
-    /// Saves the profile; the first profile of its screen count
-    /// is auto-flagged as that count's default.
+    /// Saves the profile; auto-flags as count's default if first for count.
     func save(_ profile: Profile) throws {
         var profile = profile
         if !profile.isDefault,
@@ -120,13 +102,7 @@ public final class ProfileManager {
         return profile
     }
 
-    /// Deletes a profile. A count left without a default gets
-    /// the alphabetically-first remaining profile flagged; the
-    /// last profile of a count simply reverts the count to the
-    /// built-in Standard. A count that still has a default
-    /// (hand-edited duplicates) is left alone. When the deleted
-    /// file was unreadable its count is unknown, so every
-    /// orphaned count is repaired.
+    /// Deletes a profile, repairing orphaned count defaults if needed.
     func delete(name: String) throws {
         let deleted = try? read(name: name)
         try FileManager.default.removeItem(
@@ -150,22 +126,13 @@ public final class ProfileManager {
         }
     }
 
-    /// Renames a stored profile via an atomic file move, then
-    /// rewrites the JSON's own name field. NOT write-new-then-
-    /// remove-old: on a case-insensitive volume (default APFS)
-    /// a case-only rename ("work" → "Work") resolves both
-    /// names to ONE file, and the remove leg would delete the
-    /// just-renamed profile. `moveItem` handles the case
-    /// change in place; any other existing destination is
-    /// rejected, never clobbered (`fileExists` matches case-
-    /// insensitively there, so "a" → "b" beside "B.json" is
-    /// caught too). Same-name is a no-op. Carries the adopted
-    /// `currentName` along. The `KiwiCore` facade chases
-    /// external references (native-Space bindings). Accepted
-    /// non-atomicity: if the name-field rewrite after the
-    /// move fails, the file is at the new name with the old
-    /// name inside — a tiny window (same directory, just
-    /// proven writable), traded for the case-safety above.
+    /// Renames a stored profile via an atomic move — NOT
+    /// write-new-then-remove-old: on case-insensitive APFS a
+    /// case-only rename resolves both names to ONE file, and the
+    /// remove leg would delete the just-renamed profile. Accepted
+    /// non-atomicity: if the name-field rewrite after the move
+    /// fails, the file sits at the new name with the old name
+    /// inside — a tiny window, traded for the case safety.
     func rename(from old: String, to new: String) throws {
         guard old != new else { return }
         var profile = try read(name: old)
@@ -185,8 +152,7 @@ public final class ProfileManager {
         if currentName == old { currentName = new }
     }
 
-    /// Re-designates a count's default: flags `name`, clears
-    /// the flag on every other profile of the same count.
+    /// Re-designates a count's default profile.
     func setDefault(name: String) throws {
         var chosen = try read(name: name)
         chosen.isDefault = true
@@ -201,12 +167,8 @@ public final class ProfileManager {
         }
     }
 
-    /// `base`, or `base_1`, `base_2`, … up to the next free
-    /// name — repeated preset Applies accumulate copies (#53).
-    /// Case-insensitive, matching the rename path: profile
-    /// files live on case-insensitive APFS, so "My Setup"
-    /// passing a case-sensitive check would silently overwrite
-    /// "my setup.json" (QA round 2 review).
+    /// Next available case-insensitive name suffix (`base`, `base_1`, ...)
+    /// (#53, APFS case safety).
     public func freeName(base: String) -> String {
         let taken = Set(list().map { $0.lowercased() })
         guard taken.contains(base.lowercased()) else {
@@ -221,26 +183,13 @@ public final class ProfileManager {
         return "\(base)_\(suffix)"
     }
 
-    /// Reads a profile without touching current/dirty state.
-    ///
-    /// Migrates the file first when it was written by a build
-    /// whose vocabulary this one no longer reads
-    /// (`ConfigMigration`). The rewrite is best-effort: a config
-    /// directory we cannot write to must not turn a readable
-    /// profile into a broken one, and the migration is
-    /// idempotent, so the next launch simply tries again with
-    /// the in-memory copy carrying the read either way.
+    /// Reads a profile with atomic best-effort `ConfigMigration` rewrite.
     public func read(name: String) throws -> Profile {
         let file = url(for: try validated(name))
         var data = try Data(contentsOf: file)
         if let migrated = ConfigMigration.migrated(data) {
             data = migrated
-            // The SECOND writer of a profile file, beside
-            // `write(_:)`. Deliberately not routed through it:
-            // that one encodes a decoded `Profile`, which would
-            // silently drop any key this build does not know,
-            // and a migration must preserve what it did not come
-            // for. It writes the migrated BYTES instead.
+            // Writes migrated raw bytes directly to preserve unknown keys.
             try? migrated.write(to: file, options: .atomic)
         }
         let decoder = JSONDecoder()
@@ -248,10 +197,7 @@ public final class ProfileManager {
         return try decoder.decode(Profile.self, from: data)
     }
 
-    /// Names become file names inside the profiles directory:
-    /// path separators, traversal, hidden-file prefixes, and
-    /// blank names are rejected at this boundary — every caller
-    /// (CLI, Lua, IPC, GUI) funnels through here.
+    /// Validates profile filename boundaries (no slashes, nulls, dot-files).
     public static func isValidName(_ name: String) -> Bool {
         let trimmed = name.trimmingCharacters(
             in: .whitespacesAndNewlines
@@ -272,8 +218,6 @@ public final class ProfileManager {
         return name
     }
 
-    // MARK: - State
-
     /// Marks the live state as diverged (transient state).
     func markDirty() {
         isDirty = true
@@ -286,30 +230,21 @@ public final class ProfileManager {
         isDirty = false
     }
 
-    /// Records that a built-in Standard is resolving; always a
-    /// dirty (transient) state until the user saves.
+    /// Records that a built-in Standard is resolving (dirty state).
     func adoptStandard(named name: String) {
         currentName = nil
         currentStandard = name
         isDirty = true
     }
 
-    /// Back to the nothing-adopted state — for Reset All
-    /// Settings (#634), after the profile files were trashed:
-    /// a `currentName` pointing at a deleted file would make
-    /// every re-apply path report a read failure.
+    /// Resets adoption state for Reset All Settings (#634).
     func resetAdoption() {
         currentName = nil
         currentStandard = nil
         isDirty = false
     }
 
-    /// The non-adopting write: persists the JSON only, touching
-    /// no `current`/`dirty` state. `save()` layers adoption on
-    /// top; the edit-without-activating paths
-    /// (`overwriteProfile`, `copyProfile` #82) write through
-    /// here directly so editing a stored profile never
-    /// switches the live layout (#18).
+    /// Non-adopting write for background profile editing (#18, #82).
     func write(_ profile: Profile) throws {
         let name = try validated(profile.name)
         try FileManager.default.createDirectory(

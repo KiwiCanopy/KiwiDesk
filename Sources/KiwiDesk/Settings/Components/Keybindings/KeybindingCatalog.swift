@@ -1,24 +1,15 @@
 import AppKit
 import KiwiDeskCore
 
-/// The catalog backing the keybindings tab: navigation presets
-/// and installed applications. Known macOS shortcuts used for
-/// conflict detection live in Core's `SystemShortcuts`.
+/// Catalog backing shortcuts settings tab: navigation presets and application
+/// launchers.
 enum KeybindingCatalog {
-    // dir is the Lua argument; phrase is the positional English
-    // wording used in the canonical `label` ("above"/"below"
-    // read better than "up"/"down").
     private static let directions = [
         ("left", "to the left"), ("down", "below"),
         ("up", "above"), ("right", "to the right"),
     ]
 
-    /// The translated phrase for a direction's Lua argument.
-    /// A literal `L(...)` per case (not a dynamic key lookup)
-    /// so `scripts/extract-keys` can enumerate it — the
-    /// extractor only recognizes string-literal key/English
-    /// arguments (`docs/translating.md` § Extraction
-    /// limitations).
+    /// Translates direction argument for display (`docs/translating.md`).
     @MainActor private static func directionPhrase(
         _ dir: String
     ) -> String {
@@ -36,7 +27,7 @@ enum KeybindingCatalog {
         }
     }
 
-    /// The four directional focus rows (#68 §3.6.1 Focus).
+    /// Four directional focus rows (#68 §3.6.1).
     static let focusDirections: [NavCommand] = directions.map {
         dir,
         phrase in
@@ -53,9 +44,7 @@ enum KeybindingCatalog {
         )
     }
 
-    /// One "Go to Space …" row per defined space. The space
-    /// name is user data (never translated), passed as a
-    /// positional arg into the translated sentence.
+    /// "Go to Space …" commands for configured spaces.
     static func goToSpace(
         _ spaces: [SpaceID],
         icons: [SpaceID: String] = [:]
@@ -77,7 +66,7 @@ enum KeybindingCatalog {
         }
     }
 
-    /// The four directional swap rows (Move windows).
+    /// Four directional swap rows.
     static let swapDirections: [NavCommand] = directions.map {
         dir,
         phrase in
@@ -94,22 +83,11 @@ enum KeybindingCatalog {
         )
     }
 
-    /// The track verbs speak prev/next, not compass directions
-    /// (#185 review): they act on the 1D track sequence, so
-    /// two rows replace four (no per-axis inert pair, and a
-    /// binding survives an axis flip). prev = the track toward
-    /// the sequence start — left for columns, top for rows;
-    /// next toward the end — right/bottom.
     private static let sequenceSteps = [
         ("prev", "previous"), ("next", "next"),
     ]
 
-    /// The translated phrase for a sequence step's Lua
-    /// argument (the `directionPhrase` twin). i18n seam: the
-    /// one phrase interpolates into BOTH sentence frames
-    /// (move + swap), which works for en/de but cannot carry
-    /// per-frame case/gender inflection — if a 1.0 language
-    /// (#95) needs it, split into per-frame keys then.
+    /// Translates sequence step argument for display (#95).
     @MainActor private static func sequencePhrase(
         _ step: String
     ) -> String {
@@ -123,8 +101,7 @@ enum KeybindingCatalog {
         }
     }
 
-    /// The two move-to-track rows (#128, prev/next). Labels
-    /// name the actor — the window moves, not the focus.
+    /// Move window to previous/next track rows (#185, #128).
     static let moveToTrackRows: [NavCommand] =
         sequenceSteps.map { step, phrase in
             NavCommand(
@@ -140,9 +117,7 @@ enum KeybindingCatalog {
             )
         }
 
-    /// The two whole-track swap rows (#182, prev/next).
-    /// Always rendered like `moveToTrackRows` (the gate was
-    /// dropped in #188); only relevant in the track layout.
+    /// Swap with previous/next track rows (#182, #188).
     static let trackSwapRows: [NavCommand] =
         sequenceSteps.map { step, phrase in
             NavCommand(
@@ -158,16 +133,8 @@ enum KeybindingCatalog {
             )
         }
 
-    /// The per-space "Move to …" / "… & follow" row pairs,
-    /// interleaved per space — the order the import classifier
-    /// and the old flat group both read.
-    ///
-    /// Composed from the two half-builders below rather than
-    /// repeating their commands: "Move to Space" and "Move to
-    /// Space & follow" are two census families (#678 Phase 3),
-    /// so the Shortcuts area renders each half on its own, and a
-    /// second copy of either Lua here would be the byte-for-byte
-    /// drift that silently demotes an import to Custom (#4).
+    /// Interleaved "Move to Space" and "Move to Space & follow" command pairs
+    /// (#678 Phase 3, #4).
     static func moveToSpace(
         _ spaces: [SpaceID],
         icons: [SpaceID: String] = [:]
@@ -179,8 +146,7 @@ enum KeybindingCatalog {
         .flatMap { [$0, $1] }
     }
 
-    /// One "Move to Space …" row per space. The space name is
-    /// user data, passed as a positional arg.
+    /// "Move to Space …" commands for configured spaces.
     static func moveToSpaceRows(
         _ spaces: [SpaceID],
         icons: [SpaceID: String] = [:]
@@ -202,7 +168,7 @@ enum KeybindingCatalog {
         }
     }
 
-    /// One "Move to Space … & follow" row per space.
+    /// "Move to Space … & follow" commands for configured spaces.
     static func moveToSpaceFollowRows(
         _ spaces: [SpaceID],
         icons: [SpaceID: String] = [:]
@@ -225,11 +191,7 @@ enum KeybindingCatalog {
         }
     }
 
-    /// Navigation grouped for the import classifier (#4): the
-    /// commands the sections render, so a recovered row matches
-    /// byte-for-byte. Grow/Shrink is deliberately absent — its
-    /// magnitude is configurable (#58), so import matches it by
-    /// *shape* via `resizeShape(from:)`, not from this map.
+    /// Grouped navigation commands for keybinding import classifier (#4, #58).
     static func navigationGroups(
         spaces: [SpaceID]
     ) -> [NavGroup] {
@@ -248,28 +210,17 @@ enum KeybindingCatalog {
         ]
     }
 
-    // Size & float presets (resizeAndFloat, makeFloating,
-    // resizeShape) live in `KeybindingCatalog+Resize.swift`.
-
-    /// A space id as a quoted, escaped Lua string argument.
+    /// Formats space ID as quoted Lua string argument (#13).
     static func spaceArg(_ space: SpaceID) -> String {
         quote(space.raw)
     }
 
-    /// A quoted, escaped Lua string literal. Delegates to the
-    /// canonical `SpaceLuaArg.quote` so the form a space rename
-    /// rewrites always matches what the catalog authored (#13).
+    /// Quotes raw string via `SpaceLuaArg.quote`.
     static func quote(_ raw: String) -> String {
         SpaceLuaArg.quote(raw)
     }
 
-    /// The bindable "open the shortcuts reference panel" row
-    /// (#330): a GUI action verb (`KiwiDesk.show_shortcuts()`).
-    /// Seeded to **⌃⌥K** by default (#602) — reachable from the
-    /// keyboard out of the box — but editable or clearable per
-    /// layer like any default. The Lua comes from
-    /// `ShortcutsOpenBinding` so the row, the classifier, and the
-    /// quick-menu combo all speak of one binding.
+    /// Command opening shortcuts cheat sheet overlay (#330, #602).
     static let showShortcuts = NavCommand(
         label: "Show shortcuts panel",
         lua: ShortcutsOpenBinding.lua,
@@ -278,12 +229,8 @@ enum KeybindingCatalog {
         }
     )
 
-    /// The bindable "Open Settings" row (#678 item 18): a GUI
-    /// action verb (`KiwiDesk.open_settings()`), deliberately
-    /// UNBOUND by default — Settings is not a prerequisite, so
-    /// no default chord is spent on it. The catalog row is the
-    /// one production copy of the Lua body;
-    /// `OpenSettingsClassifyTests` pins it to the Core verb.
+    /// Command opening settings window (`OpenSettingsClassifyTests`, #678 item
+    /// 18).
     static let openSettings = NavCommand(
         label: "Open Settings",
         lua: "KiwiDesk.open_settings()",

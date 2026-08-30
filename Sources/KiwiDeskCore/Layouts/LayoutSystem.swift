@@ -1,21 +1,16 @@
 import CoreGraphics
 import Foundation
 
-/// A layout algorithm: a pure function from a flat window array
-/// to per-window geometry. No trees, no containers — this is the
-/// core KiwiDesk idea.
+/// Pure function layout algorithm from flat window array to geometry.
 public protocol LayoutSystem: Sendable {
-    /// Calculates frames for tiled windows inside the context's
-    /// bounds. Windows not present in the result keep their
-    /// current frame (e.g. floating mode returns [:]).
+    /// Computes frames for tiled windows inside context bounds.
     func calculateGeometry(
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect]
 }
 
-/// Gap configuration (Rift-style): outer gaps per screen edge,
-/// inner gaps between adjacent windows.
+/// Gap configuration with outer edge gaps and inner inter-window gaps.
 public struct Gaps: Sendable, Equatable, Codable {
     public struct Outer: Sendable, Equatable, Codable {
         public var top: CGFloat
@@ -42,12 +37,11 @@ public struct Gaps: Sendable, Equatable, Codable {
         /// Gap between stacked windows (rows).
         public var vertical: CGFloat
 
-        /// The 10 pt default couples to `BorderStyle.width` (5 pt):
-        /// two neighbouring focus rings each reach their width into
-        /// this gap, so `2 × 5 = 10` fills it edge-to-edge without
-        /// overlap. Lowering this default silently invalidates that
-        /// rationale (rings would overlap with unfocused borders on) —
-        /// revisit the width default and its docs if you change it.
+        /// The 10 pt default couples to `BorderStyle.width` (5):
+        /// two neighbouring rings each reach their width into this
+        /// gap, so 2 × 5 fills it without overlap. Lowering it
+        /// silently invalidates that rationale — revisit the width
+        /// default and its docs together.
         public init(
             horizontal: CGFloat = 10,
             vertical: CGFloat = 10
@@ -79,76 +73,40 @@ public struct Gaps: Sendable, Equatable, Codable {
     }
 }
 
-/// Everything a layout needs to compute geometry.
+/// Geometry and parameters context for layout calculation.
 public struct LayoutContext: Sendable {
     /// Usable screen area in layout coordinates.
     public var bounds: CGRect
     /// Resolved gaps for this space (override > global).
     public var gaps: Gaps
-    /// The window Scrolling pans to. A render/pan anchor that may
-    /// diverge from the space's own focus: it can carry a
-    /// tiled-sticky traveler that is the frontmost window but not
-    /// the membership-guarded `focused` slot (#431,
-    /// `StateCoordinator.focusAnchor`). Scrolling reads it to
-    /// pan, and Monocle's `park` hide style reads it to pick
-    /// the one member it shows (#881) — Monocle's raise still
-    /// resolves the anchor itself (`restoreMonocleZOrder`), it
-    /// does not read this field.
+    /// Focused window or pan anchor (#431, #881).
     public var focused: WindowID?
-    /// Below this width/height the Overlap Stack kicks in.
+    /// Overlap Stack trigger dimension threshold.
     public var minWindowSize: CGFloat
-    /// Per-window vertical share of a stack column (#67);
-    /// absent = 1.0. Snapshot of `Space.stackWeights`.
+    /// Stack column share per window (#67).
     public var stackWeights: [WindowID: Double]
-    /// The scrolling layout's viewport rest from the last tile
-    /// — the offset and the slot it was measured against (#66,
-    /// #966); `nil` before the space has ever scrolled.
-    /// Snapshot of `Space.scrollRest`.
+    /// Viewport offset and anchor slot from last scrolling tile (#66, #966).
     public var scrollRest: ScrollRest?
-    /// The track layout's break markers (#128): a window in the
-    /// set starts a new track (`TrackLayout.counts`). Snapshot
-    /// of `Space.trackBreaks`.
+    /// Track layout break markers (#128).
     public var trackBreaks: Set<WindowID>
-    /// Per-track size weight, keyed by the track's head window
-    /// (#128). Snapshot of `Space.trackWeights`.
+    /// Track column weights (#128).
     public var trackWeights: [WindowID: Double]
-    /// Sticky windows (#414 v2): members here keep a fully
-    /// tiled slot when a layout overflows into an
-    /// `OverlapStack` pile (`OverlapStack.stickyExempt`) —
-    /// a non-sticky window overflows instead. May contain ids
-    /// not in the passed window array (floating stickies);
-    /// layouts only ever test membership against the ids they
-    /// were handed, so the over-approximation is harmless.
+    /// Sticky windows exempt from overlap piling (#414). May
+    /// contain ids not in the passed window array (floating
+    /// stickies); layouts only test membership against the ids
+    /// they were handed, so the over-approximation is harmless.
     public var sticky: Set<WindowID>
-    /// Which screen edges have another screen beyond them
-    /// (#878). Scrolling picks its per-edge clamp form from
-    /// this, and Monocle's `park` hide style picks its stash
-    /// corner from the left/right pair (#881); every other
-    /// layout ignores it. Defaults to no neighbors — the
-    /// single-screen verdict, under which every edge is open,
-    /// the clamps behave as they did before the flags existed,
-    /// and the park corner is the bottom-right default.
+    /// Screen neighbor topology for clamping and park corners (#878, #881).
     public var screenNeighbors: ScreenNeighbors
-    /// App-enforced size bounds the engine has confirmed
-    /// (#677), keyed by window. A layout MAY consume one as
-    /// that window's own extent — scrolling re-packs the row
-    /// around the answered span, monocle centers the answered
-    /// size — so the refusal's residue is placed deliberately.
-    /// Only an ask matching the refused one consumes
-    /// (`EffectiveSizeBound.consumedWidth/Height`); defaults
-    /// empty, under which every layout asks exactly what it
-    /// always did — capacity probes and schematic previews
-    /// rightly omit it.
+    /// App-enforced size bounds confirmed by engine (#677).
     public var sizeBounds: [WindowID: EffectiveSizeBound]
 
-    /// True only for a FORCED (explicit-apply) layout pass
-    /// (#1055, owner ruling 2026-08-28): the consume then
-    /// bypasses the GENERALIZED arm — exact refused asks still
-    /// consume — so an explicit `scroll.set_slot_size` past a
-    /// corroborated bound genuinely re-asks the app once,
-    /// keeping the ruling's third falsifier alive. The probe
-    /// self-terminates: the refusal it observes mints the
-    /// exact entry the next un-forced pass consumes.
+    /// Bypasses the GENERALIZED size-bound arm on a forced,
+    /// explicit-apply pass (#1055, owner ruling 2026-08-28) — an
+    /// explicit set past a corroborated bound genuinely re-asks
+    /// the app once. The probe self-terminates: the refusal it
+    /// observes mints the exact entry the next un-forced pass
+    /// consumes.
     public var probesBeyondBounds = false
 
     public var bsp: BspParams
@@ -157,8 +115,7 @@ public struct LayoutContext: Sendable {
     public var grid: GridParams
     public var monocle: MonocleParams
     public var track: TrackParams
-    /// The indicator bar's global look; a layout resolves its
-    /// own bar against this to carve the strip.
+    /// Global indicator bar style for strip reservation.
     public var appBarStyle: AppBarStyle
 
     public init(

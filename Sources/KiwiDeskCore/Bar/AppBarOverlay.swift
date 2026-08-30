@@ -1,15 +1,8 @@
 import AppKit
 
-/// The app bar: a non-activating panel listing the windows of a
-/// container, one item per window, the active one highlighted
-/// (or left out as a gap). Items that don't fit the strip scroll
-/// instead of shrinking: the bar follows the focused item, and
-/// clickable arrows appear over the ends that hide more items.
-///
-/// Deliberately generic — it renders items into a strip handed
-/// to it in AX coordinates and knows nothing about layouts.
-/// Monocle and scrolling both drive it; Lua-registered custom
-/// layouts can adopt it later without a rewrite.
+/// Non-activating overlay panel displaying window items in AX
+/// coordinates; the style's `edge` is the stored absolute edge
+/// the bar sits on (#293).
 @MainActor
 public final class AppBarOverlay {
     /// Click-to-focus hook; wired to `KiwiCore.focusWindow`.
@@ -24,23 +17,14 @@ public final class AppBarOverlay {
         _ in
     }
 
-    /// Depth of the clickable scroll-arrow zones at the
-    /// strip's ends; doubles as the visibility margin the
-    /// active item keeps clear of them. The shared constant
-    /// lives on `BarArrowView` (the Space Bar reuses it, #385).
+    /// Depth of scroll-arrow zones at strip ends (`BarArrowView.zone`, #385).
     nonisolated static let arrowZone = BarArrowView.zone
 
-    /// The inputs of the last `show()`, kept so manual arrow
-    /// scrolling can re-render without a new layout pass from
-    /// the core.
+    /// Cached inputs from last `show()` for manual arrow scrolling.
     private struct RenderState {
         let items: [Item]
         let activeIndex: Int?
         let strip: CGRect
-        /// The already-resolved style (global overlaid by the
-        /// active layout's overrides) — the overlay is
-        /// layout-agnostic. Its `edge` is the stored absolute
-        /// edge the bar sits on (#293).
         let style: AppBarStyle
     }
 
@@ -49,47 +33,25 @@ public final class AppBarOverlay {
     let itemContainer = FlippedView()
     let backArrow = BarArrowView()
     let forwardArrow = BarArrowView()
-    /// The Liquid Glass plate under the items when `backgroundStyle`
-    /// resolves to `material` (#390); nil otherwise / below macOS
-    /// 26. Stored as a plain view — the concrete type is 26-only.
+    /// Liquid Glass plate under items for material background (#390).
     var glassPlate: NSView?
-    /// Per-box Liquid Glass: one `NSGlassEffectView` per item under
-    /// `boxed + liquid_glass`, each hosting its item as `contentView`
-    /// (piece 2). Empty otherwise / below macOS 26. Plain views —
-    /// the concrete type is 26-only (see AppBarOverlay+BoxGlass).
+    /// Per-box Liquid Glass views for `boxed + liquid_glass`.
     var boxGlasses: [NSView] = []
-    /// Solid colored backdrops behind each per-box glass, filled
-    /// with the box Fill so the near-colorless glass refracts a hue
-    /// (#408). Kept parallel to `boxGlasses`. Empty / below macOS 26.
+    /// Solid backdrops behind per-box glass for tint refraction (#408).
     var boxTints: [NSView] = []
-    /// The scroll arrows' own frosted backdrop boxes under per-box
-    /// glass, so they read as glass, not solid islands. The arrow
-    /// stays interactive on top (its own box goes transparent).
+    /// Scroll arrows frosted backdrop boxes.
     var backArrowGlass: NSView?
     var forwardArrowGlass: NSView?
-    /// Colored backdrops behind the arrow glasses (#408), so the
-    /// arrows tint with the boxes instead of staying grey.
+    /// Tinted backdrops behind arrow glasses (#408).
     var backArrowTint: NSView?
     var forwardArrowTint: NSView?
-    /// Colored backdrop behind the single glass plate (plain +
-    /// glass, hug and span), filled with the bar Fill (#408).
+    /// Colored backdrop behind single glass plate (#408).
     var glassTint: NSView?
-    /// `plain`'s shared fill plate — its own view (not the
-    /// container layer) so it can hug the run
-    /// (`background_fit`, QA 2026-07-19).
+    /// Shared fill plate for plain style (`background_fit`, QA 2026-07-19).
     var plainPlate: NSView?
-    /// Under plain + glass when the run fits (no overflow), the
-    /// glass hosts this flipped run wrapper at the hugged plate
-    /// frame with the items positioned run-local inside it — so the
-    /// frosted plate hugs the run instead of spanning the viewport.
-    /// On overflow the glass falls back to hosting `itemContainer`
-    /// at the viewport (piece 1). Empty otherwise / below macOS 26.
+    /// Flipped run wrapper for plain + glass without overflow.
     var glassRun: AppBarOverlay.FlippedView?
-    /// The hugging plate's span geometry from the last render,
-    /// so a reorder drag that begins mid-hug can hand the items
-    /// back to `itemContainer` and span the plate for the drag
-    /// (`spanPlainGlassForDrag`) — the mover and its reflowing
-    /// siblings then share one coordinate space.
+    /// Hugging plate span geometry for reorder drag transitions.
     struct GlassDragSpan {
         let viewport: CGRect
         let radius: CGFloat
@@ -97,8 +59,6 @@ public final class AppBarOverlay {
     }
     var glassDragSpan: GlassDragSpan?
     var scrollOffset: CGFloat = 0
-    /// The last render's geometry, kept for the drag
-    /// handlers (AppBarOverlay+Drag).
     var lastMetrics: Metrics?
     private var lastShown: RenderState?
 
@@ -200,11 +160,6 @@ public final class AppBarOverlay {
             alignment: m.alignment,
             scrolledBy: scrollOffset
         )
-        // The shared plate (plain fill / glass) hugs or spans
-        // per `background_fit`. With no arrow inset the
-        // viewport is the strip, so viewport-local frames are
-        // already strip-local; while inset > 0 the plate is
-        // full anyway.
         let runStart: CGFloat
         if let first = frames.first {
             runStart = m.horizontal ? first.minX : first.minY
@@ -220,15 +175,8 @@ public final class AppBarOverlay {
             horizontal: m.horizontal,
             fit: style.backgroundFit
         )
-        // The one hosting mode for this render (#407): prepared
-        // (non-target teardown) in the animation group below, then
-        // installed post-loop once the item frames are laid out.
         let depth = edge.isHorizontal ? strip.height : strip.width
         let hosting = glassHosting(style, overflow: m.inset > 0)
-        // Frame changes ease into place so group expansion
-        // (and scroll-follow) widens out instead of popping;
-        // fresh views snap. The plates ride the same group —
-        // a hug plate must slide with the items it wraps.
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.15
             context.timingFunction = CAMediaTimingFunction(
@@ -243,12 +191,11 @@ public final class AppBarOverlay {
                 viewport: viewport,
                 animated: true
             )
+            // Items hosted in a glass wrapper are placed by the
+            // glass path; animating them here in container coords
+            // would fight that and flicker.
             for (index, view) in itemViews.enumerated()
             where view.superview === itemContainer {
-                // Items hosted in a glass wrapper (per-box, or the
-                // plain-glass run) are placed by the glass path;
-                // animating them here in container coords would
-                // fight that and flicker.
                 if view.frame == .zero {
                     view.frame = frames[index]
                 } else {
@@ -259,8 +206,7 @@ public final class AppBarOverlay {
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             let active = index == activeIndex
-            // "gap" indicator: the focused window's slot stays
-            // empty instead of being marked.
+            // "gap" indicator: focused window slot stays empty.
             view.isHidden =
                 active && style.activeIndicator == .gap
             view.configure(
@@ -274,8 +220,6 @@ public final class AppBarOverlay {
                 horizontal: m.horizontal,
                 style: style
             )
-            // Only the run's outer items meet a rounded plate end,
-            // so only they clip their outer corner (Plain).
             view.isFirstInRun = index == 0
             view.isLastInRun = index == items.count - 1
             view.onSelect = { [weak self] id in
@@ -288,11 +232,7 @@ public final class AppBarOverlay {
                 self?.dragEnded(view)
             }
         }
-        // Install the target hosting from the now-laid-out frames
-        // (per-box glass and the plain-glass run both position items
-        // from them, so this runs after the item loop with the
-        // gap-hidden state set). #407: one dispatch, no per-mode
-        // branching at the call site.
+        // Single dispatch for glass hosting mode (#407).
         installGlassHosting(
             hosting,
             panel: panel,

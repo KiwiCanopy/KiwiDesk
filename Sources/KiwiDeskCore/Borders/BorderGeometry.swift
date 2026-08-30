@@ -1,108 +1,53 @@
 import CoreGraphics
 
-/// Pure geometry of one focus-border ring (#278). Turns a window
-/// frame + width + corner style into the overlay window's frame
-/// and the stroke's line width / corner radius, with no AppKit —
-/// so the hidden-overlap rule is unit-testable in isolation.
-///
-/// `width` is always the visible stroke width outside the target.
-/// The renderer adds a fixed overlap behind the target; that hidden
-/// part is not counted in the width. Ordering the overlay behind
-/// the target masks the overlap and lets square rings fill the reveal
-/// beneath rounded window corners.
+/// Pure geometry of one focus-border ring (#278).
 struct BorderGeometry: Equatable {
-    /// Where the ring sits in the window stack, which flips what the
-    /// overlap *is* (#357). `below` masks the overlap behind the
-    /// target (the AppKit fallback); `above` draws it on top of the
-    /// target (the SkyLight fast path), so the overlap is visible and
-    /// must stay a hairline.
+    /// Layering order in window stack determining overlap visibility (#357).
     enum Order: Sendable, Equatable {
         case above
         case below
     }
 
-    /// The overlay window's frame in AX (top-left) coordinates:
-    /// the window grown by the ring's outward reach on every
-    /// side, big enough to hold the whole stroke.
+    /// Overlay window frame in AX coordinates.
     let overlayFrame: CGRect
-    /// The renderer's total stroke width: configured visible width
-    /// plus the overlap hidden behind the target.
+    /// Total stroke width including overlap.
     let lineWidth: CGFloat
-    /// Corner radius (pt) of the stroke's centerline path, drawn
-    /// in the overlay's own bounds inset by `lineWidth / 2` plus
-    /// `glowMargin`.
+    /// Corner radius of stroke centerline path.
     let cornerRadius: CGFloat
-    /// Extra outward room (pt) the overlay frame carries **beyond**
-    /// the visible reach so a glow bloom isn't clipped by the
-    /// window bounds (#358). `0` when glow is off — then the frame
-    /// and draw math are identical to a plain ring. When on, the
-    /// frame grows by this on every side and the stroke path is
-    /// inset back by it, so the ring stays put and the margin is
-    /// pure bloom space. Deliberately kept OUT of `outwardReach`:
-    /// the soft bloom is allowed to bleed into the layout gap, so
+    /// Outward margin for glow bloom expansion (#358); 0 when
+    /// glow is off. Deliberately kept OUT of `outwardReach`: the
+    /// soft bloom may bleed into the layout gap, so
     /// `border.fit_gaps` stays sized to the crisp stroke (#358
     /// ui-designer decision).
     let glowMargin: CGFloat
 
-    /// **`below`-order only.** The one cushion beyond what corner
-    /// geometry strictly requires, shared by both styles: rounded's arc
-    /// already hugs the window's real radius, so its whole overlap is
-    /// this cushion; square adds it on top of the mandatory
-    /// `0.29 · radius` reveal (see `squareHiddenOverlap`). Kept to a
-    /// sliver because a below-order ring lingers through a minimize
-    /// genie — macOS reports the minimize only once the window lands at
-    /// the Dock, so there is no earlier signal to hide on — and the
-    /// shrinking window un-masks the overlap as a band whose thickness
-    /// this sets. It only has to hide the hairline where our circular
-    /// corner arc meets the window's continuous squircle, which the
-    /// real per-window radius already all but closes (#361). Nudge up
-    /// if a faint corner seam ever shows. Never used by `above`-order,
-    /// where the overlap is on-screen and stays a hairline (see
-    /// `aboveVisibleLapCap`).
+    /// Below-order cushion to close the squircle corner seam
+    /// (#361). Kept to a sliver because a below-order ring lingers
+    /// through a minimize genie (macOS reports the minimize only
+    /// once the window lands at the Dock) and the shrinking window
+    /// un-masks the overlap as a band this thick. Nudge up if a
+    /// faint corner seam ever shows.
     static let hiddenOverlapCushion: CGFloat = 0.1
 
-    /// **`below`-order only.** The corner reveal a *square* ring must
-    /// fill sits at `systemRadius · (1 − √2/2)` — the deepest point of
-    /// a rounded window's corner, on the diagonal. Derived per window
-    /// from its real radius (`BorderManager` reads it via SkyLight)
-    /// plus `hiddenOverlapCushion`, rather than a fixed constant that
-    /// could not scale and left a corner gap on large-radius windows
-    /// (the old fixed 8 pt; #361). Under-provisioning re-opens the
-    /// reveal in steady state. Never used by `above`-order, where the
-    /// overlap is on-screen and stays a hairline (see
-    /// `aboveVisibleLapCap`).
+    /// Corner reveal depth for square ring behind rounded window (#361).
     static func squareHiddenOverlap(
         systemRadius: CGFloat
     ) -> CGFloat {
         let tuck = 1 - CGFloat(2).squareRoot() / 2
         return systemRadius * tuck + hiddenOverlapCushion
     }
-    /// **`above`-order cap.** With the ring stacked above the target
-    /// the overlap laps *on top of* the window and is therefore
-    /// visible, so over-provisioning is no longer free — a 5/8 pt
-    /// band would smear across window content. Its only job here is
-    /// to close the hairline seam where our circular corner arc meets
-    /// the window's continuous-squircle corner, so it is capped to
-    /// `min(visible / 2, aboveVisibleLapCap)` (the #311 hybrid): at
-    /// most 1 pt, and never more than half the visible width so the
-    /// ring stays predominantly outside the window. The outer edge
-    /// stays at `systemRadius + visible` regardless (fit-gaps reach
-    /// unchanged); only the inner edge moves.
+
+    /// Above-order visible overlap cap (#311 hybrid): capped to
+    /// `min(visible / 2, this)` so the ring stays predominantly
+    /// outside the window; the outer edge stays at
+    /// `systemRadius + visible` regardless — only the inner edge
+    /// moves, so fit-gaps' reach is unchanged.
     static let aboveVisibleLapCap: CGFloat = 1
 
-    // The glow blur formula lives on `BorderStyle.glowBlur(for:)`
-    // beside `glowColor` — both style-derived; the resolved
-    // number reaches `compute` via `Spec.glowBlur`.
-
-    /// Builds the ring geometry for `windowFrame` (AX coords).
-    /// `width` is clamped defensively; `systemRadius` is the
-    /// shared window corner radius (rounded style) or ignored
-    /// (square style → 0). `glowBlur` (`0` = no glow) grows the
-    /// overlay frame by itself on every side so the bloom has
-    /// room (#358). It arrives RESOLVED
-    /// (`BorderStyle.resolvedGlowBlur` — width-scaled auto or
-    /// the explicit `glow_size`, #533/#551): geometry takes the
-    /// finished number and stays free of style resolution.
+    /// Computes ring geometry for `windowFrame` in AX coordinates.
+    /// `glowBlur` arrives RESOLVED (`BorderStyle.resolvedGlowBlur`
+    /// — width-scaled auto or the explicit size, #533/#551), so
+    /// the geometry math stays free of style resolution.
     static func compute(
         windowFrame: CGRect,
         width: CGFloat,

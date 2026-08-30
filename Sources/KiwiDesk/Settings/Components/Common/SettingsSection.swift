@@ -1,9 +1,6 @@
 import SwiftUI
 
-/// The heading over a run of related sections (the App Bar
-/// block in Appearance): the one registered level above a
-/// section's `.headline`, so multi-section groups don't each
-/// invent their own title style.
+/// Heading over related sections in settings dashboard.
 struct SettingsGroupHeader: View {
     let title: String
 
@@ -17,48 +14,20 @@ struct SettingsGroupHeader: View {
     }
 }
 
-/// A titled group used across the dashboard sections. The
-/// optional symbol puts a glyph before the title — used by the
-/// per-mode sections so a layout's glyph (§6.3) travels with
-/// its name. The optional caption is a one-sentence plain-words
-/// explanation under the title; `subsection` shrinks the title
-/// for groups that belong to a bigger one (Ghost / Drop zone
-/// under Drag & drop).
-///
-/// The optional `help` renders a live `HelpButton` beside the
-/// title — the block-gate anchor (#527): the header sits
-/// OUTSIDE any `GreyOut` in `content`, so while a gate dims the
-/// body (killing every `?` inside it, since `.disabled` is
-/// cumulative), this one stays clickable and explains why the
-/// block is off and how to enable it. Call sites pass it only
-/// while their gate is active — once the block is live, its own
-/// controls' help takes over and the anchor would gloss nothing.
+/// Titled container card for settings sections with search anchoring (#527,
+/// #760, #573).
 struct SettingsSection<Content: View>: View {
     let title: String
-    /// The catalog declaration this section was mounted as, or
-    /// nil for the String init — whose remaining callers are the
-    /// deliberately-unindexed computed titles (`%1$@ bar`). The
-    /// whole descriptor rather than its id, so both halves of
-    /// the pair below can only be fed from one control (#573).
     private let control: SettingsControl?
     let symbol: String?
     let caption: String?
     let subsection: Bool
     let help: String?
-    /// The section's presence is mode-gated — it would leave the
-    /// page in Simple (#760). Picks the heavier stroke and lets
-    /// the mode-reveal wash mark the heading; call sites derive
-    /// it from their own offer predicate evaluated at `.simple`,
-    /// never a second copy of that predicate.
     let modeGated: Bool
     @ViewBuilder let content: Content
 
-    /// Computed-title init: renders identically but is NOT a
-    /// search anchor. An indexable section takes a
-    /// `SettingsControl` instead — declaring it in the catalog
-    /// is what makes it findable, and the catalog's declaration
-    /// is the one list (`SettingsCatalogArgumentTests` refuses a
-    /// literal `L()` title here).
+    /// Computed-title initializer for unindexed sections
+    /// (`SettingsCatalogArgumentTests`).
     init(
         _ title: String,
         symbol: String? = nil,
@@ -78,10 +47,7 @@ struct SettingsSection<Content: View>: View {
         self.content = content()
     }
 
-    /// The catalog init: one declaration supplies the rendered
-    /// title AND the search anchor, so a section is findable by
-    /// existing (#277) and its anchor id is stable however the
-    /// localized text collides or changes.
+    /// Catalog initializer supplying title and search anchor (#277).
     @MainActor init(
         _ control: SettingsControl,
         symbol: String? = nil,
@@ -120,11 +86,6 @@ struct SettingsSection<Content: View>: View {
                 maxWidth: .infinity,
                 alignment: .leading
             )
-            // Card fill on the SECTION radius, plus a hairline.
-            // The border is not decoration: on the dark
-            // appearance the container and the page behind it are
-            // within ten points of each other, so without it the
-            // card has no edge at all.
             .background(
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.sectionRadius
@@ -149,15 +110,7 @@ struct SettingsSection<Content: View>: View {
                 )
             )
         }
-        // The hoisted scroll markers (#610): any `scrollHoisted`
-        // inline drawer inside `content` publishes its control up
-        // `HoistedRevealAnchorsKey`, and each becomes a zero-size
-        // marker pinned to the top edge ABOVE the heading — so a
-        // reveal of that drawer lands the section's top, heading
-        // first, while the drawer's own wash paints below. The id
-        // is the drawer's own, so scroll and wash cannot disagree.
-        // Then consume the value, so a section nested in another
-        // never re-collects the same id and doubles the marker.
+        // Hoisted scroll markers for nested search anchors (#610).
         .overlayPreferenceValue(HoistedRevealAnchorsKey.self) {
             anchors in
             revealMarkers(anchors)
@@ -170,10 +123,6 @@ struct SettingsSection<Content: View>: View {
     private func revealMarkers(
         _ anchors: [SettingsControl]
     ) -> some View {
-        // Fill the section and top-pin the markers, so this does
-        // not lean on `overlayPreferenceValue`'s default centering
-        // — the markers must sit at the section's top edge for
-        // `scrollTo(anchor: .top)` to land the heading.
         VStack(spacing: 0) {
             ForEach(anchors, id: \.id) { target in
                 Color.clear
@@ -189,16 +138,9 @@ struct SettingsSection<Content: View>: View {
         .allowsHitTesting(false)
     }
 
-    /// A catalog-declared section is a search anchor by existing
-    /// (#277) — its `SettingsControl` supplies the stable id. The
-    /// wash marks the heading; the scroll target is the whole
-    /// card (`body`). Both halves read the one `control`, and the
-    /// unanchored String init takes neither: an earlier cut
-    /// flashed on `anchorID ?? ""`, a sentinel that no reveal can
-    /// ever name and that reads as a second, disagreeing id.
+    /// Header view with search flash and mode-reveal highlighting (#277,
+    /// #760).
     @ViewBuilder private var flashedHeader: some View {
-        // The mode-reveal wash rides the same heading band the
-        // search wash does (#760) — never the whole card.
         if let control {
             header
                 .searchFlashHeader(control)
@@ -218,12 +160,8 @@ struct SettingsSection<Content: View>: View {
                     }
                     Text(title)
                         .foregroundStyle(SettingsTheme.ink)
-                        // A heading for the rotor (#812): every
-                        // section title in every area, so a
-                        // VoiceOver user jumps card to card
-                        // instead of walking every row. Home's
-                        // group labels were the only headings
-                        // the app had.
+                        // Section heading accessibility trait for rotor
+                        // (#812).
                         .accessibilityAddTraits(.isHeader)
                 }
                 .font(

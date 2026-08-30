@@ -1,31 +1,11 @@
 import SwiftUI
 
-/// The tab-style option chooser shared across the settings
-/// (#68): a capsule track where the selection is a solid
-/// ACCENT pill with the on-accent ink — the settled "accent
-/// marks control fills" convention, which the dark pass
-/// extended here: the earlier white pill (light grey in dark)
-/// carried the near-white ambient ink at ~3:1 in dark, the
-/// worst text pairing in the control set, behind a manual
-/// `colorScheme` branch the theme exists to end. Liquid Glass
-/// was tried and dropped here — the glass layer refracted
-/// whatever sat behind it, reading as blur under the text and
-/// stray tint. ONE persistent pill slides between segments via
-/// matched geometry: each segment anchors a frame and the pill
-/// adopts the selected anchor, so a selection change moves the
-/// same view (a slide) instead of swapping styling between
-/// labels, which crossfades.
-///
-/// Precondition: option `value`s must be unique — duplicates
-/// would make two segments claim the pill's anchor.
+/// Capsule segmented picker with animated sliding accent pill (#68).
 struct SegmentedPicker<Value: Hashable>: View {
     private let label: String?
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
-    /// Optional `?` popover (#94), label-adjacent — one per
-    /// field, never per segment. Unlabeled instances (icon
-    /// tabs) have no label to sit beside, so theirs trails
-    /// the track instead.
+    /// Optional field help text (#94).
     private let help: String?
     @Namespace private var pillSpace
     @State private var hoveredIndex: Int?
@@ -62,9 +42,6 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    /// The label attaches only when one exists — an empty
-    /// accessibility label on the unlabeled instances (icon
-    /// picker tabs) would override the group's inferred name.
     @ViewBuilder private var labeledTrack: some View {
         if let label {
             track.accessibilityLabel(label)
@@ -73,14 +50,8 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    /// Which segment the pill sits on, or nil when the bound
-    /// value matches no option — a hand-edited config, or an
-    /// OPTIONAL-valued binding whose two halves disagree (the
-    /// shared Corners master, #754). Internal rather than
-    /// private because that nil is now load-bearing and
-    /// `SegmentedPickerUnmatchedTests` reads it: it is the
-    /// difference between "no answer yet" and a picker
-    /// asserting an answer the app is not drawing.
+    /// Index of selected option or nil if unmatched
+    /// (`SegmentedPickerUnmatchedTests`, #754).
     var selectedIndex: Int? {
         options.firstIndex { $0.value == selection }
     }
@@ -105,13 +76,7 @@ struct SegmentedPicker<Value: Hashable>: View {
             )
         )
         .accessibilityElement(children: .contain)
-        // The group's choice as its value, so arriving on the
-        // track hears "Position, Top" the way a native
-        // segmented control says it, before the segments are
-        // walked (#812). On the TRACK, not the labelled branch:
-        // an unnamed instance labelled at its call site (the
-        // header's mode segment, the icon tabs) must ride the
-        // same value (code review, 2026-08-24).
+        // Group value announcement for accessibility (#812, 2026-08-24).
         .accessibilityValue(
             selectedIndex.map { options[$0].title } ?? ""
         )
@@ -158,20 +123,11 @@ struct SegmentedPicker<Value: Hashable>: View {
         index: Int
     ) -> some View {
         Text(title)
-            // A real font-size step, not `scaleEffect` — a
-            // scale rasterizes the drawn text and stretches
-            // it, which reads as blur. The equal-width
-            // segments absorb the width change.
             .font(
                 selected
                     ? .body.weight(.semibold)
                     : .callout
             )
-            // Explicit inks: the selected label rides the
-            // accent pill (`accentInk` is the one ink for
-            // that), and the rest name `ink` so no ancestor
-            // foreground can recolour them (the hierarchical
-            // trap).
             .foregroundStyle(
                 selected
                     ? SettingsTheme.accentInk
@@ -219,10 +175,6 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    /// The one persistent pill. It adopts the selected
-    /// segment's anchored frame, so a selection change slides
-    /// this same view. Hidden when the bound value matches no
-    /// option (hand-edited config).
     @ViewBuilder private var slidingPill: some View {
         if let index = selectedIndex {
             pill.matchedGeometryEffect(
@@ -233,30 +185,14 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    /// The solid accent pill. No shadow: the white pill needed
-    /// one to lift off a same-luminance track, and its black
-    /// shadow was dead in dark anyway; the accent separates by
-    /// hue and luminance from the track in both modes, and the
-    /// selected state never rides colour alone — the font-step
-    /// carries it too.
     private var pill: some View {
         Capsule()
             .fill(SettingsTheme.accent)
     }
 }
 
-/// The segmented picker's own metrics, in a non-generic type so
-/// they can be named from outside (a `static` stored property is
-/// not allowed on a generic one).
-///
-/// `trackAlpha` is here rather than inline because
-/// `SegmentedPickerCoverageTests` MEASURES the unselected label
-/// against it: with the number restated in the test, washing the
-/// track to 0.6 — a near-white track under a near-white label in
-/// dark — passed green, the guard's input never having touched
-/// this file (guard-prover, 2026-08-12).
+/// Shared geometry metrics for segmented pickers
+/// (`SegmentedPickerCoverageTests`, 2026-08-12).
 enum SegmentedPickerMetrics {
-    /// The track's wash over its card, and the same value its
-    /// hairline takes.
     static let trackAlpha = 0.08
 }
