@@ -1,0 +1,112 @@
+import Foundation
+import Testing
+
+/// The SHELL's own two focus statements — the pair gui.md cites
+/// as the exemplars of "every shape change states a focus
+/// destination", and the only wirings in the tree that had no
+/// needle at all until #998 (a push focuses the back chip; a
+/// return restores `nav.homeReturnFocus`).
+///
+/// Split from `KeyboardActionParityTests.swift` under the §2.1
+/// ceiling, same suite. Per-file private helpers are the
+/// convention, so the small wiring/squash pair below is a
+/// deliberate copy of that file's.
+///
+/// The header needle spans the WHOLE `onChange` closure,
+/// including its key: #998 shipped as a wiring keyed on
+/// `destination != nil`, which fires on Home→area and never on
+/// area→area (a cross-reference, a search pick into another
+/// area) — so the raise existed, read as correct, and stated no
+/// destination on one navigation path. A needle on the
+/// assignment alone would have stayed green through exactly
+/// that.
+extension KeyboardActionParityTests {
+    @Test("the shell states its two focus destinations")
+    func shellStatesItsFocusDestinations() throws {
+        let wirings: [ShellWiring] = [
+            ShellWiring(
+                "SettingsHeaderBar.swift",
+                ".focused($backChipFocused)",
+                "the back chip is the push destination — an "
+                    + "unattached @FocusState moves focus nowhere"
+            ),
+            ShellWiring(
+                "SettingsHeaderBar.swift",
+                ".onChange(of: destination) { _, now in "
+                    + "if now != nil { backChipFocused = true } }",
+                "and the raise is keyed on the VALUE: keyed on "
+                    + "`destination != nil` it fires on Home→area "
+                    + "only, so an area→area navigation destroys "
+                    + "the focused subtree and states nothing "
+                    + "(#998)"
+            ),
+            ShellWiring(
+                "HomeScreen.swift",
+                ".focused($focusedCard, equals: destination)",
+                "a Home card is the return destination"
+            ),
+            ShellWiring(
+                "HomeScreen.swift",
+                "model.nav.homeReturnFocus = destination",
+                "the push records which card to return to — "
+                    + "without it the restore reads nil forever"
+            ),
+            ShellWiring(
+                "HomeScreen.swift",
+                "if let last = model.nav.homeReturnFocus { "
+                    + "focusedCard = last "
+                    + "model.nav.homeReturnFocus = nil }",
+                "and the return pays it, once — the whole "
+                    + "closure, so clearing the slot stays beside "
+                    + "the restore rather than leaking a stale "
+                    + "card into the next unrelated appear"
+            ),
+        ]
+        let dir = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+        let files = try SourceScan.swiftSources(under: dir)
+        for wiring in wirings {
+            let file = try #require(
+                files.first {
+                    $0.lastPathComponent == wiring.file
+                },
+                "\(wiring.file) is gone"
+            )
+            let source = squashedShell(
+                SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+            )
+            #expect(
+                source.contains(squashedShell(wiring.needle)),
+                Comment(
+                    rawValue:
+                        "\(wiring.file) lost `\(wiring.needle)` "
+                        + "— \(wiring.why), and the failure is "
+                        + "silent to everything except a person "
+                        + "using the keyboard"
+                )
+            )
+        }
+    }
+}
+
+/// Whitespace-free source, so a needle survives the formatter
+/// wrapping a call across lines — this file's copy of the main
+/// file's private `squashed` (per-file helpers, tests.md).
+private func squashedShell(_ source: String) -> String {
+    source.split(whereSeparator: \.isWhitespace).joined()
+}
+
+/// One focus wiring: file, use-site needle, and why it matters.
+private struct ShellWiring {
+    let file: String
+    let needle: String
+    let why: String
+
+    init(_ file: String, _ needle: String, _ why: String) {
+        self.file = file
+        self.needle = needle
+        self.why = why
+    }
+}

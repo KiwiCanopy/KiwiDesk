@@ -109,8 +109,11 @@ struct SettingsHeaderBar: View {
         // shell whose colour the app did not choose — the single
         // biggest "wrong colour" report on the shipped shell.
         .background(SettingsTheme.card)
-        .onChange(of: destination != nil) { _, pushed in
-            if pushed { backChipFocused = true }
+        // Keyed on the VALUE, never `destination != nil`: an
+        // area→area navigation keeps that Boolean true, so a
+        // Boolean-keyed raise never fires there (#998).
+        .onChange(of: destination) { _, now in
+            if now != nil { backChipFocused = true }
         }
         // A navigation closes the collapsed field with the same
         // reasoning `HeaderSearch.id(destination)` clears the
