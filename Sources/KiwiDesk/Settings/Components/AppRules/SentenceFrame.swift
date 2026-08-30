@@ -1,35 +1,8 @@
 import Foundation
 
-/// A localized sentence whose arguments are CONTROLS, split
-/// into the pieces a view lays out in the translation's own
-/// order.
-///
-/// `L(key, english, args…)` covers the ordinary case: the
-/// arguments are strings, `String(format:)` places them, and a
-/// translator moves `%2$@` before `%1$@` freely. A menu is not
-/// a string, so a row that wants "Spotify opens in media ▾ and
-/// floats ▾" cannot format its way there — and the tempting
-/// alternative, emitting the connectives as their own keys
-/// between fixed stack positions, is exactly what
-/// `.claude/rules/localization.md` bans: a translation cannot
-/// reorder pieces stitched together in Swift, and this app
-/// ships ja, ko, zh-Hans and zh-Hant, where a verb-final
-/// language cannot render "opens in" as anything that sits
-/// where an English stack puts it.
-///
-/// So the frame stays one key with positional specifiers, and
-/// this splits it into literal text and argument slots **in the
-/// order the translation wrote them**. The view then draws its
-/// controls at the slots, which is the same contract
-/// `String(format:)` offers, with views instead of strings.
-///
-/// Unrecognized specifiers are kept as literal text rather than
-/// dropped: a catalog carrying `%4$@` for a frame with three
-/// arguments is a translation bug, and showing it is how it gets
-/// noticed instead of silently losing a word.
+/// Localized format string parsed into interleaved text and control slots.
 struct SentenceFrame {
-    /// One piece of the sentence: literal words, or the slot
-    /// where argument *n* goes.
+    /// Literal text chunk or argument position.
     enum Slot: Hashable {
         case text(String)
         case argument(Int)
@@ -58,8 +31,6 @@ struct SentenceFrame {
         while let percent = rest.firstIndex(of: "%") {
             literal += rest[rest.startIndex..<percent]
             rest = rest[rest.index(after: percent)...]
-            // `%n$@` — the only shape the localization rules
-            // allow, so anything else is literal text.
             let digits = rest.prefix { $0.isNumber }
             let after = rest.dropFirst(digits.count)
             if let index = Int(digits), after.hasPrefix("$@") {
@@ -80,22 +51,14 @@ struct SentenceFrame {
         self.segments = segments
     }
 
-    /// Which control an argument slot draws. A pure function so
-    /// a guard can assert it: the row's own `switch` cannot be,
-    /// and a `default:` arm there silently gave every
-    /// unrecognized position the float menu — so a catalog
-    /// carrying `%4$@` drew a SECOND float menu rather than
-    /// anything a reader would spot as a translation bug,
-    /// defeating the preservation promise above at its only
-    /// consumer.
+    /// Supported control types mapped to argument positions.
     enum Control: Hashable {
         case appName
         case space
         case float
     }
 
-    /// `nil` for a position the row has no control for — which
-    /// the row must draw as nothing, never as its last case.
+    /// Resolves argument index to control type, returning nil if unmapped.
     static func control(at position: Int) -> Control? {
         switch position {
         case 1: return .appName
@@ -110,9 +73,7 @@ struct SentenceFrame {
         argumentPositions.compactMap(Self.control(at:))
     }
 
-    /// The argument positions the frame actually uses, so a
-    /// guard can hold a translation to the slots its view draws
-    /// rather than trusting the catalog.
+    /// Argument slot indices referenced by the format string.
     var argumentPositions: [Int] {
         segments.compactMap {
             if case .argument(let index) = $0.slot { return index }

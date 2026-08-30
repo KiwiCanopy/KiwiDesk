@@ -1,13 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Bars panel content (#678 redesign spec, turn 7a): ONE desktop
-/// scene with both bars in place — the fused view the owner
-/// asked for (2026-08-10), so "both on top" coexistence is
-/// seen, not described. The scene is `HomeCardBarsTile`, the
-/// Home plate's own renderer, mounted larger with the same
-/// palette fold — one renderer, two sizes, never a second
-/// drawing. Space pips are the draft's real space count.
+/// Desktop preview scene for the Bars panel (#678, `HomeCardBarsTile`).
 struct BarsPanelPreview: View {
     @ObservedObject var model: SettingsModel
 

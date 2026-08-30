@@ -1,18 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The neutral both-bars-share-an-edge explainer (#293/#374),
-/// shown under each bar editor's Position row when both
-/// *enabled* bars resolve to the same edge
-/// (`TilingSettings.spaceBarSharesEdgeWithAppBar`). Never a
-/// warning, never a popup.
-///
-/// Renders the **Space Bar's** edge, never the App Bar's
-/// global one: the predicate matches per-layout *resolved*
-/// App Bar edges, so the shared edge can legitimately differ
-/// from the App Bar's global Position control sitting right
-/// above this row (global top, monocle override bottom,
-/// Space Bar bottom → the shared edge is bottom).
+/// Explainer row when both enabled bars share an edge (#293, #374,
+/// `TilingSettings.spaceBarSharesEdgeWithAppBar`).
 struct BarSameEdgeRow: View {
     let edge: AppBarEdge
 

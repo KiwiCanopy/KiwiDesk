@@ -1,5 +1,4 @@
-/// The row text for the layout-parameter slice — split from
-/// `SettingKey+Layout.swift` for the file-size sweet spot.
+/// Row text for the layout-parameter census slice.
 
 extension LayoutKey {
     var text: SettingRowText {

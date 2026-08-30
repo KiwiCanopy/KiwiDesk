@@ -42,9 +42,7 @@ extension AppBarCard {
                     .map { ($0.1, $0.0) }
             )
         case .appBarLiquidGlass:
-            // Hidden, not greyed, below macOS 26 — matching the
-            // OS-capability gate (#390) and the census's
-            // `.liquidGlassUnavailable` runtime tag.
+            // Hidden below macOS 26 (#390).
             if AppBarStyle.glassAvailable {
                 ToggleRow(
                     label: L(
@@ -69,15 +67,6 @@ extension AppBarCard {
                 selection: style.alignment,
                 options: AppBarOptions.alignment
                     .map { ($0.1, $0.0) },
-                // The two option names are INTERPOLATED from the
-                // picker's own keys rather than re-typed (#818).
-                // Each appears ONCE: `placeholder_drift` compares
-                // a multiset, so a repeated specifier would make
-                // a stylistic second mention mandatory in every
-                // language and fail a translation that
-                // pronominalises it — correct copy, hard failure.
-                // The mapping is carried by the common noun
-                // instead, which no locale has to match.
                 help: L(
                     "app_bar.alignment.label.help",
                     "Where the item group sits along the bar "
@@ -107,11 +96,6 @@ extension AppBarCard {
         case .appBarIconSource:
             iconSourceRow
         case .appBarCornerRoundness:
-            // Never greyed since background_fit: roundness
-            // shapes the Boxed items, the glass plate, AND
-            // Plain's own shared plate (BarPlate) — the old
-            // Plain grey predated Plain getting a plate
-            // (QA 2026-07-19).
             PtSlider(
                 label: L(
                     "app_bar.corner_roundness",
@@ -158,20 +142,12 @@ extension AppBarCard {
                 )
             }
         case .appBarItemSize, .appBarFontSize:
-            // Rendered by their Auto toggles' `AutoGatedGroup`
-            // above — the census keeps them as their own gated
-            // rows, the GUI composes the pair.
             EmptyView()
         case .appBarDimFactor, .appBarFillColor,
             .appBarHighlightColor, .appBarItemColor,
             .appBarActiveItemColor, .appBarHoverFillColor,
             .appBarHoverItemColor, .appBarGroupBadgeColor,
             .appBarGroupBadgeTextColor:
-            // Lua-only or colour-card rows today. If a census
-            // move places one in this card, the render-parity
-            // guard forces it into the order lists and it lands
-            // here — fail loud in debug rather than render
-            // nothing.
             let _ = assertionFailure(
                 "unrendered App Bar census key: \(key.rawValue)"
             )
@@ -179,8 +155,7 @@ extension AppBarCard {
         }
     }
 
-    /// Position plus the shared-edge info row directly under it
-    /// (#374) — the Space Bar card shows the same row.
+    /// Position plus the shared-edge info row directly under it (#374).
     @ViewBuilder private var edgeRow: some View {
         SegmentedPicker(
             L("app_bar.edge.label", "Position"),
@@ -212,21 +187,8 @@ extension AppBarCard {
         )
         .modifier(
             GreyOut(
-                // Boxed never draws a shared plate to size — so
-                // fit is inert for Boxed regardless of the glass
-                // finish; Plain (the shipped default, #660)
-                // un-greys it. Asked of the bars actually SHOWN,
-                // not the global value: a layout overriding to
-                // Plain via Lua still reads this global fit, and
-                // greying it hid the only editor for a value in
-                // use.
+                // Inert when Boxed (#660, #818).
                 active: gates.everyShownBarBoxed,
-                // Style name INTERPOLATED from the picker entry's
-                // own key, not re-typed (#818) — and it must move
-                // with its Space Bar twin, which carries the
-                // identical English: one anchored and one typed
-                // is worse than either end, since the two then
-                // disagree per locale with nothing checking.
                 help: L(
                     "app_bar.background_fit.boxed_only",
                     "\u{201C}%1$@\u{201D} draws a box per item, "

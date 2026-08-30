@@ -1,18 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The App Bar card's three content rows: what an item draws
-/// (`contentRow`), how much of a title it may draw
-/// (`titleCapRow`), and how its icon is drawn
-/// (`iconSourceRow`). Split from AppBarCard+Rows.swift at the
-/// §2.1 ceiling — the shape `SpaceBarCard+RowHelpers.swift`
-/// already uses on the other card.
-///
-/// The three travel together rather than by line count: each one
-/// greys on a gate the other two decide. Icon-only content
-/// silences the title cap; title-only content silences the icon
-/// style; and a vertical bar, which renders icon-only whatever
-/// is stored, silences both.
+/// Content configuration rows for AppBarCard: content, title cap, icon style.
 extension AppBarCard {
     var contentRow: some View {
         SegmentedPicker(
@@ -22,9 +11,6 @@ extension AppBarCard {
         )
         .modifier(
             GreyOut(
-                // Vertical bars render icon-only (names would
-                // need stacked or rotated text) — the stored
-                // preference survives an edge round-trip.
                 active: gates.everyShownBarVertical,
                 help: L(
                     "app_bar.content.vertical_only",
@@ -35,15 +21,7 @@ extension AppBarCard {
         )
     }
 
-    /// How much of a window title an item shows, directly
-    /// below the Content control it depends on. Deliberately
-    /// NOT greyed under icon-only content (#937): an icon-only
-    /// or vertical bar draws no title but its items still
-    /// ANNOUNCE the capped title (`AppBarItemView`'s
-    /// accessibility label), so the knob is live on every
-    /// content — the same reasoning the Space Bar twin's
-    /// asymmetry note reserved for the day #901 gave items an
-    /// accessible name, which it since has.
+    /// Window title character length cap (#901, #937).
     var titleCapRow: some View {
         StepperRow(
             label: L("app_bar.title_cap", "Title length"),
@@ -59,25 +37,13 @@ extension AppBarCard {
         )
     }
 
-    /// #294 icon rendering, directly below the Content control
-    /// it depends on; greyed (never hidden, #171) when
-    /// title-only content shows no icons at all. Census-exempt from the
-    /// container gate: the ⌃⌥K panel's Apps band reads this
-    /// whether or not any bar renders.
+    /// App icon rendering dropdown (#171, #294, #818).
     var iconSourceRow: some View {
         DropdownRow(
             label: L("app_bar.icon_source.label", "App symbol style"),
             spokenValue: AppBarOptions.iconSourceTitle(
                 style.iconSource.wrappedValue
             ),
-            // Five labels INTERPOLATED from their own keys, not
-            // re-typed (#818): the mode, the three colour rows
-            // this sentence sends the reader to, and the page
-            // they are on. The rows are NOT below — they render
-            // at `.row(.advancedColours, .appBar, .showMore)`,
-            // all three Power-User-only — so the sentence
-            // names the destination instead of saying "below",
-            // which sent the reader looking down this card.
             help: L(
                 "app_bar.icon_source.help",
                 "How app icons are drawn. "
@@ -109,12 +75,7 @@ extension AppBarCard {
         }
         .modifier(
             GreyOut(
-                // Gate on the RENDERED content: a vertical bar
-                // collapses Title to icon-only, so icons are on
-                // screen and this control must stay live.
                 active: gates.everyShownBarTitleOnly,
-                // Both labels INTERPOLATED from their own keys,
-                // not re-typed (#818).
                 help: L(
                     "app_bar.icon_source.title_only",
                     "Icons are hidden while \u{201C}%1$@\u{201D} "
