@@ -17,8 +17,6 @@ Closes #... (if applicable)
   required)
 - [ ] User-facing changes are documented in `docs/`
 - [ ] No contradictions between code and docs
-- [ ] `swift build && swift test && ./scripts/lint.sh`
-  passes
 - [ ] Release build green — CI's `Release Build` job (read it
   before merging; it reports, it does not block), or locally
   for concurrency / `@Sendable` changes
