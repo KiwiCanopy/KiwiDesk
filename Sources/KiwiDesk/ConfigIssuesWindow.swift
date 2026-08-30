@@ -57,7 +57,7 @@ final class ConfigIssuesWindowController: NSObject {
     }
 }
 
-/// Displays load/validation errors with their source files (§3.7).
+/// Displays load/validation errors with their source files (§3.7, #31, #39).
 struct ConfigIssuesView: View {
     @ObservedObject var model: ConfigIssuesModel
     @EnvironmentObject private var localization: LocalizationManager

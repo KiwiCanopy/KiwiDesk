@@ -115,7 +115,8 @@ enum OnboardingKeys {
     ) -> String? {
         guard let base = sharedModifiers(rows, of: .movesFocus),
             let moves = sharedModifiers(rows, of: .movesWindow),
-            // Requires non-empty base modifiers without Shift.
+            // Requires non-empty base modifiers without Shift
+            // (OnboardingTierAnchorTests).
             !base.isEmpty,
             !base.contains(.shift),
             moves == base.union(.shift)

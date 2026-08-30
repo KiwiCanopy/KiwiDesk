@@ -5,7 +5,8 @@ import SwiftUI
 struct OnboardingSpaceCard: Identifiable, Equatable {
     let id: String
     let mode: LayoutMode
-    /// The screen name it sits on, or nil if not currently connected.
+    /// The screen name it sits on, or nil if not connected (never in inches,
+    /// which EDID lies about).
     let screen: String?
 }
 
@@ -20,7 +21,8 @@ final class OnboardingModel {
         case keys
         case done
 
-        /// Whether reaching this step marks tour completion.
+        /// The one place closing beats are enumerated; the close seam
+        /// asks `reachedEnd`, never a list of cases of its own.
         var isClosingBeat: Bool {
             switch self {
             case .grant, .spaces: false
@@ -29,7 +31,8 @@ final class OnboardingModel {
         }
     }
 
-    /// Current step, updated via `beginPresentation(at:)` and `advance()`.
+    /// Current step, updated via `beginPresentation(at:)` and `advance()`
+    /// (#331, #828).
     private(set) var step: Step = .grant {
         didSet {
             if step.isClosingBeat { reachedEnd = true }
@@ -55,7 +58,7 @@ final class OnboardingModel {
         plannedSteps.firstIndex(of: step)
     }
 
-    /// Whether the tour reached a closing beat.
+    /// Whether the tour reached a closing beat (HomeSurfacingTests).
     private(set) var reachedEnd = false
 
     /// Clears the `reachedEnd` flag between presentations.
@@ -91,6 +94,7 @@ final class OnboardingModel {
         advance()
     }
 
+    /// The keys step is always next (#331, #828).
     func continueAfterSpaces() {
         advance()
     }

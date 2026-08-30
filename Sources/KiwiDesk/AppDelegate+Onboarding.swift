@@ -82,7 +82,7 @@ extension AppDelegate {
         window.contentView = host
         window.isReleasedWhenClosed = false
         window.delegate = self
-        // Cleared so window background does not show through titlebar or gaps.
+        // Cleared so SwiftUI page ground is the one copy of window ground.
         window.backgroundColor = .clear
         window.isOpaque = false
         // Sized before centering so center() calculates from final bounds.

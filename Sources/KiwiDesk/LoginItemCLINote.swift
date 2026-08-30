@@ -1,6 +1,7 @@
 import KiwiDeskCore
 
-/// Formats login-item status notes for `kiwidesk service` CLI output (#575).
+/// Formats login-item status notes for `kiwidesk service` CLI output
+/// (#96, #196, #575).
 enum LoginItemCLINote {
     /// Status line appended to `service status`.
     static func statusLine(_ state: LoginItemState) -> String {

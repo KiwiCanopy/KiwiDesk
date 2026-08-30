@@ -5,7 +5,7 @@ import KiwiDeskCore
 @MainActor
 enum OnboardingEntry {
     /// Returns initial step for voluntary replay (.spaces if trusted,
-    /// .grant otherwise).
+    /// .grant otherwise) (#678).
     static func replayStep(
         isTrusted: Bool
     ) -> OnboardingModel.Step {
@@ -13,7 +13,7 @@ enum OnboardingEntry {
     }
 
     /// Returns the sequence of steps from `entry` to the end of
-    /// the tour (#828, #888).
+    /// the tour (#678, #828, #888, OnboardingProgressTests).
     static func plannedSteps(
         from entry: OnboardingModel.Step
     ) -> [OnboardingModel.Step] {

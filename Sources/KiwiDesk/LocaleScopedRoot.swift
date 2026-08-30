@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Rebuilds its content view tree whenever the GUI language changes
-/// by mutating the subtree `.id` (#9, HostingRootLocaleScopeTests).
+/// by mutating the subtree `.id` (#9, #329, HostingRootLocaleScopeTests).
 struct LocaleScopedRoot<Content: View>: View {
     @EnvironmentObject private var localization: LocalizationManager
 

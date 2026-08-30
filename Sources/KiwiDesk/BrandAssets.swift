@@ -28,7 +28,7 @@ enum BrandAssets {
     static let wordmarkDark: NSImage? =
         Bundle.kiwiDeskGui.image(forResource: "WordmarkDark")
 
-    /// Full-colour app mark for Settings sidebar identity (#89, #479).
+    /// Full-colour app mark for Settings sidebar identity (#89, #439, #479).
     static let appMark: NSImage? =
         Bundle.kiwiDeskGui.image(forResource: "AppMark")
 }

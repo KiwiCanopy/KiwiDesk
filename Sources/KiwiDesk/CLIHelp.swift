@@ -2,7 +2,8 @@ import Foundation
 import KiwiDeskCore
 
 /// Answers `kiwidesk help [name]` and `kiwidesk list_commands [name]`
-/// locally without requiring a running socket connection (#1033).
+/// locally, rendering APIReference data and never re-derives it
+/// (#1033, CLIHelpSeamTests).
 enum CLIHelp {
     /// Verbs answered by local CLI help.
     static let verbs: Set<String> = [

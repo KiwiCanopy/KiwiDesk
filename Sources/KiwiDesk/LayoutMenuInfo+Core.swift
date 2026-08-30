@@ -1,6 +1,6 @@
 import KiwiDeskCore
 
-/// Populates `LayoutMenuInfo` from live `KiwiCore` state (#752).
+/// The one place deriving `LayoutMenuInfo` from live `KiwiCore` state (#752).
 extension LayoutMenuInfo {
     @MainActor
     static func current(from core: KiwiCore) -> LayoutMenuInfo {
