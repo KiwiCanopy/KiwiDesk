@@ -1,5 +1,6 @@
-/// Display order for the Behaviour settings area (#678,
-/// `BehaviorCensusRenderTests`).
+/// Display order for the Behaviour settings area (#678).
+/// `BehaviorCensusRenderTests` holds these equal to the census —
+/// a row moves by editing the census; these lists follow.
 enum BehaviorRowOrder {
     /// The mouse card, top to bottom.
     static let mouse: [SettingKey] = [

@@ -53,6 +53,12 @@ struct AdvancedColorsGates {
 
 /// Explanatory strings for disabled swatches across destinations
 /// (`SourceScan.interpolatingFrames`, `InterpolatedLabelTests.converted`).
+/// Only the TITLE is derived — which destination owns each gate
+/// is chosen by hand below, and no map can derive it (an area is
+/// not a destination; one area spans two). So the obligation:
+/// moving a gating control to another destination updates the
+/// sentence that points at it, in the same change set — nothing
+/// here reds when it does not.
 @MainActor
 enum AdvancedColorsHelp {
     static var borderOff: String {

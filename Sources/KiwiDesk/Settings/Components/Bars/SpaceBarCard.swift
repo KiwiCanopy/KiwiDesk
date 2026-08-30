@@ -31,7 +31,9 @@ struct SpaceBarCard: View {
         }
     }
 
-    /// Parallel per-row gates, respecting census exemptions.
+    /// Each row carries the container gate unless the census
+    /// exempts it — parallel `GreyOut`s, never nested, so
+    /// nothing compounds to 0.25.
     private func rows(_ keys: [SettingKey]) -> some View {
         ForEach(keys, id: \.id) { key in
             row(for: key)
