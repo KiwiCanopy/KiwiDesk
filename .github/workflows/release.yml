@@ -185,7 +185,7 @@ jobs:
       # failure attribution; this job mirrors the skill instead,
       # and VerifyGateParityTests pins it there.
       - name: Test
-        run: swift test
+        run: swift test -q
 
 
   release:

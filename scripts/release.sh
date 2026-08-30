@@ -266,7 +266,7 @@ else
     echo "==> swift build"
     swift build
     echo "==> swift test"
-    swift test
+    swift test -q
     echo "==> scripts/lint.sh"
     ./scripts/lint.sh
     echo "==> swift build -c release"

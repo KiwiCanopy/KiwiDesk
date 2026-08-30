@@ -37,9 +37,12 @@ Say in the report which gate you ran and why.
 ## Fast inner loop
 
 1. `swift build`
-2. `swift test` (one command — the old two-command split died
-   with the #494 tail-hang fix; history and the rest of the
-   test conventions live in `.claude/rules/tests.md`)
+2. `swift test -q` (one command — the old two-command split
+   died with the #494 tail-hang fix; history and the rest of
+   the test conventions live in `.claude/rules/tests.md`. `-q`
+   drops the ~20k per-test progress lines a green full run
+   prints (#1140); failure issues and the run summary still
+   print, and a red run is re-run `--filter`ed for detail)
 3. `scripts/lint.sh $ARGUMENTS` (omit the argument to lint the
    repo)
 
