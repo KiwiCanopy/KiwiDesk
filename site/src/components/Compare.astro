@@ -232,6 +232,9 @@ const rows = [
                   rel={rowLinks[row].startsWith("http")
                     ? "noopener" : undefined}>
                   {t(`compare_row_${row}`)}
+                  {rowLinks[row].startsWith("http") && (
+                    <span aria-hidden="true"> ↗</span>
+                  )}
                 </a>
               ) : (
                 t(`compare_row_${row}`)
