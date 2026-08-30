@@ -347,6 +347,7 @@ const kiwiCanopyUrl = "https://kiwicanopy.com";
         const explicit = root.getAttribute("data-theme");
         const prefersDark = matchMedia("(prefers-color-scheme: dark)").matches;
         const effective = explicit || (prefersDark ? "dark" : "light");
+        const next = effective === "dark" ? "light" : "dark";
         root.setAttribute("data-theme", next);
         try {
           localStorage.setItem("starlight-theme", next);
