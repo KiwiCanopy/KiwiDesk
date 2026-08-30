@@ -146,23 +146,22 @@ const picks = [
   ...tools.filter((tool) => tool.own),
 ];
 
-// Where a row's SUBJECT has a page that explains it, the row
-// LABEL links there. The label names the concept the whole row
-// asks about, so one link serves every column — where a link
-// inside a cell would explain KiwiDesk's answer only, and put
-// underlines in our column and nowhere else.
+// A row label may link ONLY to a neutral, third-party
+// explanation of its subject. The label heads all six columns,
+// so a link to OUR guide quietly reframes a neutral row as being
+// about KiwiDesk — clicking "Layouts" and landing on our own
+// documentation answers a question the row did not ask (owner,
+// 2026-08-30). Apple explains SIP for everyone; Ghostty explains
+// why macOS tabs break tiling window managers generally.
 //
-// Only destinations this page already cites, because
-// check-site-tokens fails the build on a site-relative href that
-// does not resolve. Rows whose subject has no page (Community,
-// Licence, Mouse) simply have no entry.
+// The other rows carry no label link rather than pointing at our
+// docs, and their answers are NOT linked from inside our own
+// cell either: that would put underlines in one column of a grid
+// built for scanning. The prose anchors and the table note carry
+// those links, which is where an argument belongs.
 const rowLinks = {
-  setup: "/guide/#getting-started",
   sip: src.sipApple,
-  tabs: src.tabsLimit,
-  hotkeys: "/guide/#shortcuts",
-  layouts: "/guide/#layouts",
-  scripting: src.luaRef,
+  tabs: src.ghosttyTabs,
 };
 
 const rows = [
