@@ -209,6 +209,13 @@ Use the GitHub [issue templates](.github/ISSUE_TEMPLATE/) and
 [PR template](.github/pull_request_template.md). Reference issues
 with `fixes #123`.
 
+**Merge through the queue** (owner ruling 2026-08-30): `main`
+carries a merge-queue ruleset, so land a green PR with "Merge
+when ready" (`gh pr merge <n> --auto --squash`) and let the
+queue validate it against whatever is queued ahead — never merge
+directly, and never hand-rebase a branch just to satisfy
+staleness, which the queue now owns.
+
 **An agent drafting an issue renders the template, rather than
 writing whatever shape it likes.** GitHub applies a `.yml` form
 only when a human opens the *New issue* page (observed
