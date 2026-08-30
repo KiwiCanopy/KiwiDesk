@@ -1565,6 +1565,64 @@ panel blip-keys another own window, whose clickless AX
 re-report trails the close's activation yield (#952 — the
 yield itself is a Shortcuts-section ruling). (#951)
 
+### A wake restore pays the focus it adopts; a launch never steals one
+
+**[Principle]**
+
+A state snapshot carries each space's focused window, and a
+restore adopts it. But state is only half of what "focused"
+means: macOS keeps its own key app, and the command preflight
+compares the two before any implicit-focused shortcut runs
+([#292](https://github.com/KiwiCanopy/KiwiDesk/issues/292)). A
+restore that stamps state and performs nothing leaves them
+diverged, so every shortcut fails "no managed window is
+currently focused" until the first click — which is exactly what
+the wake/unlock restore did
+([#1130](https://github.com/KiwiCanopy/KiwiDesk/issues/1130)):
+the arrangement came back, and the window the user went to rest
+in did not.
+
+So the wake leg **performs** the focus it adopted — raise plus
+app activation, the same act a focus command pays. It is
+[#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)'s
+principle extended one leg over: an operation that names a
+window owes the user the window, never a bookkeeping entry about
+it, and a wake restore names the window the user was standing in
+when the machine went to rest. Fronting it again is restoring,
+not stealing — the user is at the machine, mid-return, and the
+feature's whole promise is "as you left it". Two boundaries keep
+the payment honest. When the remembered window is gone, the
+payment inverts: macOS already fronted something at unlock, so
+state follows the OS (the
+[#442](https://github.com/KiwiCanopy/KiwiDesk/issues/442)
+frontmost seed) rather than raising a stand-in nobody chose. And
+the pointer is no part of it: it sits wherever the user
+unlocked, so the focus is paid without the mouse-follows-focus
+warp.
+
+The launch and crash-relaunch legs answer the same question the
+other way, deliberately: they seed state only, from the OS
+frontmost ([#442](https://github.com/KiwiCanopy/KiwiDesk/issues/442)),
+because a starting app must never yank key focus from whatever
+the user is doing while it boots. The asymmetry is the ruling —
+unifying the legs in either direction re-breaks one of them: a
+state-only wake restore is #1130 again, and a performed launch
+focus is a focus steal.
+
+Activation is cooperative and macOS may decline it, so the
+payment can silently fail to land. The escape is a one-shot heal
+on the preflight itself: armed at the wake payment, the first
+shortcut press that would otherwise fail re-seeds from the real
+frontmost and asks again — so the press acts on the window the
+user is genuinely looking at — and any honored focus event
+disarms it, the divergence being over. The accepted residue:
+after a declined activation, that first press acts on macOS's
+front window rather than the remembered one, which is strictly
+better than a press that does nothing. `WakeFocusRestoreTests`
+pins the wake leg's payment, the crash leg's stand-down, the
+gone-window seed and the heal; `WakeFocusSeamTests` pins the
+wiring no unit fixture can see.
+
 ### Layout and resize behavior
 
 **[Rationale]**
