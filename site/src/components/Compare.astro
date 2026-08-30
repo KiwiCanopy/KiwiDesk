@@ -35,13 +35,16 @@
 // other nine legible as reporting rather than marketing. Do not
 // "fix" it.
 //
-// NEVER COUNT LAYOUTS HERE. An earlier draft carried "7 engines
-// vs 4" from the growth bank; verification killed it (Rift ships
-// five including niri-style scrolling, and AeroSpace's four are
-// arguably two with an axis, exactly as our own `grid` is one
-// name over two modes). Counting invites an argument that turns
-// on definitions rather than on behaviour, so the cells name the
-// layouts that have no counterpart instead.
+// THE LAYOUT CELLS ARE COUNTS, and the count comes from each
+// project's own documentation, checked August 2026 — never from
+// our reading of their source. An earlier draft named layouts
+// instead, on the argument that counting turns the comparison on
+// definitions (is `h_tiles` vs `v_tiles` one layout or two?).
+// That argument still holds and the row survives it only because
+// every count is attributable and the note above the table says
+// so. If you change these cells back to names, change this
+// comment with them: a stale instruction here is worse than none,
+// because the next author will reason from it (#614).
 //
 // Every differentiating claim carries a source link, and a claim
 // we could not verify says so rather than guessing — the Rift
@@ -90,8 +93,6 @@ function localePath(l: Lang, sub = ""): string {
   const prefix = l === "en" ? "" : `/${l}`;
   return `${prefix}${sub}` || "/";
 }
-const homeHref = localePath(lang);
-
 
 // Source links. Named here rather than inline so a URL that moves
 // is fixed in one place, and so the prose below reads as prose.
@@ -261,12 +262,12 @@ const rows = [
     <p class="cmp__lede">{t("compare_diff_lede")}</p>
 
     <div class="cmp__anchor">
-      <h3><span class="cmp__num" aria-hidden="true">1</span>{t("compare_anchor_gui_title")}</h3>
+      <h3 id="gui"><span class="cmp__num" aria-hidden="true">1</span>{t("compare_anchor_gui_title")}</h3>
       <p><Fragment set:html={t("compare_anchor_gui_body")} /></p>
     </div>
 
     <div class="cmp__anchor">
-      <h3><span class="cmp__num" aria-hidden="true">2</span>{t("compare_anchor_tabs_title")}</h3>
+      <h3 id="tabs"><span class="cmp__num" aria-hidden="true">2</span>{t("compare_anchor_tabs_title")}</h3>
       <p>
         <Fragment set:html={t("compare_anchor_tabs_body")
           .replace("{ghostty}", `<a href="${src.ghosttyTabs}" target="_blank" rel="noopener">`)
@@ -277,12 +278,12 @@ const rows = [
     </div>
 
     <div class="cmp__anchor">
-      <h3><span class="cmp__num" aria-hidden="true">3</span>{t("compare_anchor_mouse_title")}</h3>
+      <h3 id="mouse"><span class="cmp__num" aria-hidden="true">3</span>{t("compare_anchor_mouse_title")}</h3>
       <p>{t("compare_anchor_mouse_body")}</p>
     </div>
 
     <div class="cmp__anchor">
-      <h3><span class="cmp__num" aria-hidden="true">4</span>{t("compare_anchor_desktops_title")}</h3>
+      <h3 id="desktops"><span class="cmp__num" aria-hidden="true">4</span>{t("compare_anchor_desktops_title")}</h3>
       <p>
         <Fragment set:html={t("compare_anchor_desktops_body")
           .replace("{sip}", `<a href="${src.sipDecision}">`)
@@ -293,7 +294,7 @@ const rows = [
     </div>
 
     <div class="cmp__anchor">
-      <h3><span class="cmp__num" aria-hidden="true">5</span>{t(
+      <h3 id="permissions"><span class="cmp__num" aria-hidden="true">5</span>{t(
         "compare_anchor_permissions_title")}</h3>
       <p>
         <Fragment set:html={t("compare_anchor_permissions_body")
@@ -346,7 +347,7 @@ const rows = [
 
     <article class="cmp__tool" id="magnet">
       <h3>
-        <a href={src.magnet} target="_blank" rel="noopener">Magnet</a>
+        <a href={src.magnet} target="_blank" rel="noopener">Magnet</a>{" "}
         <span class="cmp__also">{t("compare_magnet_also")}</span>
       </h3>
       <p class="cmp__good">{t("compare_magnet_good")}</p>

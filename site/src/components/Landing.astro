@@ -1143,7 +1143,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                  they are. Without a published disk image the guide
                  takes the primary slot back. */}
             {downloadHref ? (
-              <a class="btn btn--primary simple-only" href={downloadHref}
+              <a class="btn btn--primary" href={downloadHref}
                 aria-describedby="ctaReq">
                 <Icon name="lucide:download" width={16} height={16}
                   aria-hidden="true" />
@@ -1167,7 +1167,14 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <p class="req req--center" id="ctaReq">
               <Icon name="lucide:shield" width={15} height={15}
                 aria-hidden="true" />
-              {t.download_req}
+              {isDev ? (
+                <Fragment set:html={t.download_req_dev
+                  .replace("{mit}", `<a href="${repo}/blob/main/LICENSE"`
+                    + ` target="_blank" rel="noopener">`)
+                  .replace("{/mit}", "</a>")} />
+              ) : (
+                t.download_req
+              )}
             </p>
           )}
           {/* The Simple band's star ask (owner, 2026-08-26): a
