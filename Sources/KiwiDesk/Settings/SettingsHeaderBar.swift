@@ -48,8 +48,11 @@ struct SettingsHeaderBar: View {
         .padding(.bottom, 18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(SettingsTheme.card)
-        .onChange(of: destination != nil) { _, pushed in
-            if pushed { backChipFocused = true }
+        // Keyed on the VALUE, never `destination != nil`: an
+        // area→area navigation keeps that Boolean true, so a
+        // Boolean-keyed raise never fires there (#998).
+        .onChange(of: destination) { _, now in
+            if now != nil { backChipFocused = true }
         }
         .onChange(of: destination) { _, _ in
             searchExpanded = false
