@@ -1,6 +1,7 @@
 #!/bin/bash
 # KiwiDesk lint: formatting, line length (79), file size (350).
-# Usage: scripts/lint.sh [file ...]   (defaults to all Swift files)
+# Usage: scripts/lint.sh [--show-warnings] [file ...]
+#        (defaults to all Swift files)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -8,6 +9,16 @@ MAX_LINE=79
 SOFT_FILE=250
 HARD_FILE=350
 STATUS=0
+
+# Soft-target warnings are advisory — the exit code decides
+# (AGENTS.md §2.5) — and listing all ~150 of them per run drowned
+# the errors, so the list is opt-in and the default is one count.
+SHOW_WARNINGS=0
+SOFT_COUNT=0
+if [ "${1:-}" = "--show-warnings" ]; then
+    SHOW_WARNINGS=1
+    shift
+fi
 
 if [ "$#" -gt 0 ]; then
     FILES=("$@")
@@ -63,9 +74,18 @@ for f in "${FILES[@]}"; do
         echo "ERROR: $f has $lines lines (hard limit $HARD_FILE)"
         STATUS=1
     elif [ "$is_test" -eq 0 ] && [ "$lines" -gt "$SOFT_FILE" ]; then
-        echo "WARNING: $f has $lines lines (sweet spot <=$SOFT_FILE)"
+        SOFT_COUNT=$((SOFT_COUNT + 1))
+        if [ "$SHOW_WARNINGS" -eq 1 ]; then
+            echo "WARNING: $f has $lines lines" \
+                "(sweet spot <=$SOFT_FILE)"
+        fi
     fi
 done
+
+if [ "$SOFT_COUNT" -gt 0 ] && [ "$SHOW_WARNINGS" -eq 0 ]; then
+    echo "NOTE: $SOFT_COUNT file(s) over the $SOFT_FILE-line sweet" \
+        "spot; rerun with --show-warnings to list them"
+fi
 
 # swift-format lint (ships with Xcode 16+ toolchains)
 if swift format --version >/dev/null 2>&1; then
