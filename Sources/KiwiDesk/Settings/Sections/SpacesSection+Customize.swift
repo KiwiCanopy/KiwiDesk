@@ -1,17 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The per-row override cell, the row context menu, the
-/// destructive-delete confirmation, and their mutations — split
-/// from `SpacesSection.swift` to stay under the line ceiling
-/// (#205). The cell summarises the space's saved overrides and
-/// pushes the full-pane editor (`SpacesSection+Overrides.swift`);
-/// its four-state wording is resolved purely by
-/// `OverrideCellState`.
-/// The widest override-cell label currently on screen, so every
-/// row's button locks to one shared column width instead of each
-/// hugging its own (variable-count / variable-locale) label —
-/// mirrors `SpaceRowFrames` in `SpacesSection+Drag.swift`.
+/// Per-row override cell, context menu, and delete confirmation dialogs (#205,
+/// #678).
 struct OverridesButtonWidth: PreferenceKey {
     static let defaultValue: CGFloat = 0
     static func reduce(
@@ -23,9 +14,7 @@ struct OverridesButtonWidth: PreferenceKey {
 }
 
 extension SpacesSection {
-    /// Destructive row action, kept behind the divider in the
-    /// trailing danger slot. The shared icon affordance supplies
-    /// its persistent chip, hover confirmation, and VoiceOver name.
+    /// Destructive row action in trailing danger slot.
     func deleteButton(_ space: SpaceID) -> some View {
         Button {
             requestRemove(space)
@@ -38,27 +27,8 @@ extension SpacesSection {
         )
     }
 
-    /// The per-row override cell: a bordered button whose label
-    /// summarises the space's saved overrides and whose tap pushes
-    /// the full-pane editor (#678 8b, replacing the #205 popover).
-    ///
-    /// The label is the SUM across every layout
-    /// (`overrideFieldCount(for:)`), the scannable "how much custom
-    /// config does this Space carry" signal; the editor breaks it
-    /// into active-layout rows and a dormant drawer. Wording turns
-    /// on the space's mode (owner ruling 2026-08-04):
-    /// - tiled, N>0 → "N custom"; N==0 → "Customize…";
-    /// - Floating, N>0 → a muted "N saved" (the values apply to
-    ///   OTHER layouts, not this one) that still opens the editor
-    ///   so they stay reachable — "grey, don't hide", §2.7;
-    /// - Floating, N==0 → "—", disabled: genuinely no destination.
-    /// Withheld entirely while the offer is locked (#678 8c) —
-    /// see `SpaceOverrideOffer`, which owns that predicate and
-    /// the argument for hiding rather than dimming. Gated HERE,
-    /// at the one render site, rather than at the row: the row
-    /// would then hold a second copy of the rule, which is the
-    /// hand-negated-copy drift `HomeCardOrder.isOffered` exists
-    /// to prevent one level up.
+    /// Per-row override cell button opening full-pane editor (#678 8b, owner
+    /// ruling 2026-08-04).
     @ViewBuilder func customizeButton(
         _ space: SpaceID
     ) -> some View {
@@ -90,15 +60,7 @@ extension SpacesSection {
         }
         .settingsActionButton()
         .controlSize(.large)
-        // Hug the label so the GeometryReader below measures its
-        // true (untruncated) width, not a compressed one.
         .fixedSize()
-        // Report this row's intrinsic width upward; the list-wide
-        // max (measured, never a hardcoded guess, so it survives
-        // longer locales) is fed back as every row's column width
-        // below. A bigger count or longer label only widens the
-        // shared column — it can never truncate one, and every
-        // button lines up in a stable column across rows.
         .background(
             GeometryReader { proxy in
                 Color.clear.preference(
@@ -124,8 +86,6 @@ extension SpacesSection {
         )
     }
 
-    /// The cell's text, muted on the Floating-dormant case so it
-    /// reads as "saved, not live" rather than an active count.
     @ViewBuilder
     private func overrideCellLabel(
         _ state: OverrideCellState
@@ -164,14 +124,7 @@ extension SpacesSection {
         }
     }
 
-    // MARK: - Destructive delete
-
-    /// Deleting a space that only holds a name and a mode is
-    /// cheap and reversible (re-add it), so it goes straight
-    /// through. One that carries overrides — a pin, the Main
-    /// role, the fallback flag, or per-space settings the user
-    /// may have just tuned in the popover — asks first, since
-    /// the delete cascades through all of them.
+    /// Prompts confirmation if space carries overrides before removing.
     func requestRemove(_ space: SpaceID) {
         if model.config.carriesOverrides(space) {
             pendingDelete = space
@@ -191,12 +144,7 @@ extension SpacesSection {
         L("spaces.delete_confirm.title", "Delete this Space?")
     }
 
-    /// The two roles are INTERPOLATED from the keys that label
-    /// them on screen rather than re-typed (#818). "Main" was
-    /// never a label at all — the tray header reads "Follows main
-    /// display" — so no locale had an anchor for it, and three
-    /// invented one each. Quoting the label keys means a
-    /// translation of either one moves this sentence with it.
+    /// Confirmation message with interpolated role names (#818).
     var deleteConfirmMessage: String {
         L(
             "spaces.delete_confirm.message",
@@ -225,15 +173,8 @@ extension SpacesSection {
         ) {}
     }
 
-    // MARK: - Reset all layout overrides
-
-    /// The only destructive reset that confirms (#290): clearing a
-    /// single layout's overrides is one click away from re-adding
-    /// them, but wiping every layout's saved values — including the
-    /// dormant ones the popover doesn't show — can't be eyeballed
-    /// before it happens, so it asks. State lives here (not on the
-    /// popover) so the dialog outlives the popover's dismissal,
-    /// mirroring `pendingDelete`.
+    /// Confirmation binding for resetting all layout overrides on space
+    /// (#290).
     var resetAllConfirmPresented: Binding<Bool> {
         Binding(
             get: { pendingResetAll != nil },
@@ -273,13 +214,7 @@ extension SpacesSection {
         ) {}
     }
 
-    // MARK: - Row context menu
-
-    /// Keyboard-reachable equivalents of the drag/badge
-    /// affordances (the §3.13 accessibility pattern). Here beside
-    /// the delete confirmation it invokes, and the reorder helpers
-    /// it is the only caller of, to keep `SpacesSection.swift`
-    /// under the line ceiling.
+    /// Context menu actions for space row reordering and role assignments.
     @ViewBuilder
     func contextActions(_ space: SpaceID) -> some View {
         if model.config.fallbackSpace == space {

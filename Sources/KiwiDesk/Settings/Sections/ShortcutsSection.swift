@@ -1,26 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ Shortcuts (#68 §3.6), rendered FROM the settings
-/// census (#678 Phase 3): flat intent groups (Focus / Move
-/// windows / Size & float / Open applications), then the
-/// advanced half — the Layers card and the raw-Lua drawer — with
-/// Import in the header where a new user can see it. One
-/// recorder can be active at a
-/// time (#33), duplicates hard-block with Steal / Go to (#34),
-/// and conflict state derives live from the bindings on every
-/// render (#35).
-///
-/// The census owns placement, `ShortcutsRowOrder` owns display
-/// order and `ShortcutsFamilyRows` owns the family→rows
-/// expansion; `ShortcutsCensusRenderTests` pins all three
-/// together. What the census does NOT place is the Inactive
-/// shortcuts card: its rows are instances of the `goToSpace` and
-/// `moveToSpace` families already censused under Focus and Move
-/// windows, surfaced a second time because their space left the
-/// list. A census row for it would be a second placement of a
-/// setting that already has one, so the card is hand-mounted and
-/// the guard states why it holds no census keys.
+/// Shortcuts settings section for keybinding configuration (#68, #678).
+/// Single active recorder (#33), duplicate blocking (#34), live conflict
+/// detection (#35).
 struct ShortcutsSection: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -53,9 +36,6 @@ struct ShortcutsSection: View {
                 _,
                 target in
                 guard let target else { return }
-                // Gated like the detail pane's reveal scroll
-                // (`SettingsView+Detail`): Reduce Motion jumps
-                // to the target rather than travelling to it.
                 withAnimation(reduceMotion ? nil : .default) {
                     proxy.scrollTo(target, anchor: .center)
                 }
@@ -64,17 +44,12 @@ struct ShortcutsSection: View {
         }
         .onAppear {
             ensureSelection()
-            // Arm the recorder ⇒ suspend live hotkeys so testing
-            // an existing shortcut mid-capture can't fire it
-            // (#213). Idempotent across re-appears.
+            // Suspend hotkeys while capturing to avoid trigger during edit
+            // (#213).
             coordinator.onArmedChange = { [model] armed in
                 model.setRecorderArmed(armed)
             }
         }
-        // The section stays mounted across reloads and edit-
-        // target switches; a vanished layer must never leave
-        // `selected` pointing at layers[0] under a phantom
-        // header (#68 review M1).
         .onChange(of: model.config.layers.map(\.name)) {
             _,
             _ in
@@ -89,23 +64,11 @@ struct ShortcutsSection: View {
         }
     }
 
-    // MARK: - Body pieces
-    //
-    // Split out of `body` rather than nested in it: a single
-    // expression holding every group blew the type-checker's
-    // budget, which fails on the slower CI runner while
-    // compiling fine locally (gui.md's shallow-body rule).
-
     @ViewBuilder private var header: some View {
         KeybindingConflictBanner(model: model)
         overrideBanner
         ShortcutsHeader(model: model, selected: $selected)
-        // The layers that define alternate key sets. It LEADS the
-        // area rather than tailing it (owner ruling 2026-08-04):
-        // the layer selected here decides what every card below
-        // is showing, and a control that reframes the whole page
-        // cannot sit under the page it reframes. It withholds
-        // itself entirely until earned — see `LayersCard`.
+        // LayersCard leads section (owner ruling 2026-08-04).
         layersCard
     }
 
@@ -143,36 +106,21 @@ struct ShortcutsSection: View {
     }
 
     @ViewBuilder private var tail: some View {
-        // Orphaned space-targeting rows (#92): rendered so "Go
-        // to" from a rejected recording can reach the holder —
-        // the per-space groups above only render live spaces.
+        // Orphaned space-targeting rows (#92).
         OrphanedShortcutsGroup(
             model: model,
             bindings: bindingsBinding,
             spaces: model.config.spaces
         )
-        // Then the raw-Lua escape hatch, which is `.showMore`
-        // outright. `LayersCard` used to sit here and now LEADS
-        // the area — see `layersCard` above.
         advancedDrawer
     }
 
-    // MARK: - Override layer (#55 phase 7)
-
-    /// Shown while editing a stored profile: the section
-    /// renders the RESOLVED layers; only rows diverging from
-    /// the base are saved into the profile's sparse override.
+    // Profile keybinding overrides (#55, #123, #209).
     @ViewBuilder private var overrideBanner: some View {
         if model.editingStoredProfile {
             SettingsSection(
                 SettingsCatalog.shortcuts.profileShortcuts
             ) {
-                // #123: the live target applies recordings
-                // instantly; a stored profile stays staged —
-                // say so where the recording happens. But the
-                // loaded profile's own overrides re-apply on save
-                // (#209), so its banner can't claim "next time
-                // it's active" — it IS active.
                 if let name = model.editingProfile {
                     Text(overrideBannerText(name))
                         .font(.callout)
@@ -196,9 +144,7 @@ struct ShortcutsSection: View {
         }
     }
 
-    /// The loaded profile's overrides re-apply the moment you
-    /// save (it is the layout on screen); every other stored
-    /// profile stays staged until it next loads (#209).
+    /// Re-application notice when editing active vs stored profile (#209).
     private func overrideBannerText(_ name: String) -> String {
         if name == model.activeProfile {
             return L(
@@ -232,18 +178,6 @@ struct ShortcutsSection: View {
         )
     }
 
-    // MARK: - Advanced drawer (§3.6.1)
-
-    /// Withheld in Simple (owner ruling 2026-08-04): importing
-    /// bindings out of `init.lua` is not a first-week concept,
-    /// and a collapsed drawer for it still costs a Simple user a
-    /// row of chrome to read past.
-    ///
-    /// `hasCustomLua` is the FIRST term for the same reason
-    /// `layersExist` is on the Layers card: someone whose
-    /// `init.lua` already carries bindings must not have the one
-    /// surface that explains them hidden by a mode they did not
-    /// know they were in.
     private func offersAdvancedDrawer(
         in mode: SettingsMode
     ) -> Bool {
@@ -265,8 +199,6 @@ struct ShortcutsSection: View {
             SettingsCatalog.shortcuts.luaBindings,
             chrome: .card,
             isExpanded: $advancedExpanded,
-            // One predicate at `.simple` (#760): with custom Lua
-            // in init.lua the drawer is Simple content, unmarked.
             modeGated: !offersAdvancedDrawer(in: .simple)
         ) {
             VStack(alignment: .leading, spacing: 8) {
@@ -292,16 +224,7 @@ struct ShortcutsSection: View {
         )
     }
 
-    /// The family→rows expansion every group reads. Built once
-    /// per render from live state, so the per-space,
-    /// per-Desktop and per-layer families expand against what is
-    /// actually configured right now.
-    ///
-    /// The Desktop list is read across EVERY layer's bindings,
-    /// not the selected one's: a row that exists only while its
-    /// layer is selected would vanish from under the
-    /// duplicate-combo block's "Go to", which is free to point
-    /// at a row in another layer.
+    /// Family-to-rows expansion built from live state.
     private var expander: ShortcutsFamilyRows {
         return ShortcutsFamilyRows(
             spaces: model.config.spaces,
@@ -315,8 +238,6 @@ struct ShortcutsSection: View {
             currentLayer: selected
         )
     }
-
-    // MARK: - Bindings into the selected layer
 
     private var layerIndex: Int {
         model.config.layers.firstIndex {

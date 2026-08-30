@@ -1,10 +1,6 @@
 import CoreGraphics
 
-/// The concrete screen edge a bar occupies. Stored directly in
-/// bar styles (`app_bar.edge`) — absolute, never derived from a
-/// layout's axis, so both bars can sit on any of the four edges
-/// regardless of layout (#293). `CaseIterable` feeds the GUI
-/// picker and the CodingKeys parity net.
+/// Screen edge a bar occupies (`app_bar.edge`, #293).
 public enum AppBarEdge: String, Sendable, Codable, CaseIterable,
     Equatable
 {
@@ -16,12 +12,9 @@ public enum AppBarEdge: String, Sendable, Codable, CaseIterable,
     }
 }
 
-/// Carves the indicator-bar strip out of a layout's usable area
-/// so bar and windows never overlap. Shared by every layout that
-/// hosts a bar (monocle, scrolling) via `AppBarHosting`.
+/// Computes bar strips and window bounds for layouts hosting a bar.
 public enum AppBarGeometry {
-    /// The strip the bar occupies, carved from the resolved
-    /// `edge` of `usable` (AX coordinates, y grows downward).
+    /// The strip the bar occupies in AX coordinates.
     public static func barFrame(
         in usable: CGRect,
         edge: AppBarEdge,
@@ -49,36 +42,11 @@ public enum AppBarGeometry {
         }
     }
 
-    /// How far a float may sit inside a bar before the clamp
-    /// acts. Mirrors the engine's frame tolerance (#148): an
-    /// app that lands a hair off the exact target (character grids,
-    /// min sizes) must not be re-clamped every retile, which would
-    /// wobble the window.
+    /// Tolerance for bar frame clamping (2 pt, #148).
     public static let clampTolerance: CGFloat = 2
 
-    /// Nudges `frame` clear of a painted bar `strip` on its
-    /// `edge` (AX coordinates, y grows downward). Keeps a
-    /// floating window — which layout never clamps — from
-    /// sliding under a bar: the original motivator was a TOP
-    /// bar covering the title bar (#242), but a bar reserves
-    /// its edge for every window kind, the way the Dock
-    /// reserves `visibleFrame` (QA 2026-07-19). A no-op once
-    /// the frame is within `clampTolerance` of clear; position
-    /// only, size unchanged.
-    /// `inset` widens the strip by that much before clearing —
-    /// the focus ring's own width, so the RING clears the bar
-    /// rather than only the window (#1091). The ring is the
-    /// window frame outset by `border.width` and paints at
-    /// `.normal` while the bars paint at `BarPanel.level`
-    /// (`.floating`), so a window pushed flush against a strip
-    /// has that outset sliver hidden under it and the ring reads
-    /// as cut off.
-    ///
-    /// Applied whether or not the window is FOCUSED, which is
-    /// the point rather than a simplification: an inset that
-    /// depended on focus would move the window a few points
-    /// every time it gained or lost the ring. Callers pass 0
-    /// when rings are off.
+    /// Nudges `frame` clear of painted bar `strip` on `edge` (#242, #1091,
+    /// QA 2026-07-19).
     public static func clampClear(
         _ frame: CGRect,
         of strip: CGRect,
@@ -111,36 +79,8 @@ public enum AppBarGeometry {
         return result
     }
 
-    /// `region` with the bar `strip` carved off its own `edge`.
-    ///
-    /// **Its sibling is `windowFrame(in:minus:edge:inner:)`
-    /// below, not `clampClear` above** (architect review,
-    /// 2026-08-29). Both carve a region; they differ in who is
-    /// asking. `windowFrame` serves the LAYOUT, so it also
-    /// spends an inner gap and trusts the strip to sit on the
-    /// edge. This serves a FLOAT, which the layout never places:
-    /// no gap, the strip clamped rather than trusted, and the
-    /// extent floored at zero — a float can sit anywhere, so the
-    /// carve cannot assume the strip is where a bar style says
-    /// it should be. A new caller takes `windowFrame` if the
-    /// layout is placing the window and this if it is not.
-    ///
-    /// It is NOT `clampClear`'s sibling, which answers "where
-    /// may this frame sit" by MOVING it and never resizing it —
-    /// which is why a window larger than the space between two
-    /// bars was pushed aside and still overflowed (#1091).
-    ///
-    /// Monotonic, like `clampClear`, so a fold over several
-    /// strips composes in any order and two strips on one edge
-    /// leave the deeper one's carve standing. Never returns a
-    /// negative extent: bars deeper than the screen would
-    /// otherwise produce an inside-out rect that reads as
-    /// enormous free space.
-    /// `inset` carves that much further, for the same reason
-    /// `clampClear`'s does: a float GROWN flush to the region's
-    /// edge would otherwise have its ring hidden under the bar,
-    /// so the two must inset alike or the fix covers only the
-    /// windows that were pushed and not the ones that grew.
+    /// Carves `strip` from `region` for float bounding (#1091, architect
+    /// review 2026-08-29).
     public static func regionClear(
         _ region: CGRect,
         of strip: CGRect,
@@ -172,8 +112,7 @@ public enum AppBarGeometry {
         return result
     }
 
-    /// `usable` minus the bar `strip` and one inner gap between
-    /// strip and window.
+    /// `usable` minus bar `strip` and inner gap.
     public static func windowFrame(
         in usable: CGRect,
         minus strip: CGRect,
@@ -201,26 +140,20 @@ public enum AppBarGeometry {
     }
 }
 
-/// A layout that can show the indicator bar: it owns a
-/// per-layout `LayoutAppBar` (whose `edge` override, like every
-/// look field, falls back to the global style).
+/// Protocol for layouts supporting an indicator bar.
 public protocol AppBarHosting {
     var appBar: LayoutAppBar { get }
 }
 
 extension AppBarHosting {
-    /// The concrete style this layout's bar renders with: the
-    /// global `style` overlaid by this layout's overrides. Its
-    /// `edge` is the stored absolute one — the single source
-    /// everything downstream reads. Resolve once, here, at the
-    /// layer boundary.
+    /// Resolves layout bar overrides against global style.
     public func resolvedBar(
         global: AppBarStyle
     ) -> AppBarStyle {
         appBar.resolved(with: global)
     }
 
-    /// The strip the bar occupies, or nil while it is off.
+    /// Bar strip bounds or nil when disabled.
     public func barFrame(
         in usable: CGRect,
         global: AppBarStyle
@@ -234,8 +167,7 @@ extension AppBarHosting {
         )
     }
 
-    /// The window area: `usable` minus the bar strip and one
-    /// inner gap. Falls back to all of `usable` when off.
+    /// Window area minus bar strip and inner gap.
     public func windowFrame(
         in usable: CGRect,
         inner: Gaps.Inner,

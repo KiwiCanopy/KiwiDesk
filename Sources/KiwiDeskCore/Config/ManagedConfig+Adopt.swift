@@ -1,45 +1,7 @@
 import Foundation
 
-/// Builds the "adopted" `init.lua` when a hand-written config is
-/// migrated into GUI management (#55/#355).
-///
-/// The managed statements — the settings, rules, and keybindings
-/// `gui.json` now owns — are commented out as an inert, dated
-/// backup. Harmless custom Lua (event hooks like `KiwiDesk.on`,
-/// `print`, helper functions) is kept **live**, so integrations
-/// such as the sketchybar bridge keep firing after adoption
-/// instead of going silent (#355).
-///
-/// Correctness invariant: the result must contain **no** foreign
-/// code (`managedTokens` — rules/binds/modes), or `isGuiManaged`
-/// flips false and the adopt silently fails to switch ownership.
-/// Two nets guarantee it — statement segmentation bails to
-/// commenting everything on any structural anomaly
-/// (unbalanced/never-closing spans), and the finished file is
-/// re-checked with `hasForeignCode`; a positive there also falls
-/// back to the full comment. Data-safe either way: the original is
-/// always recoverable from the commented backup.
-///
-/// The invariant is stated for **foreign** code only, on purpose.
-/// A `set_*` setting verb left live is benign — it neither trips
-/// `hasForeignCode` (so ownership holds) nor survives: `loadConfig`
-/// applies the `gui.json`/profile settings **wholesale after**
-/// init.lua runs, overwriting it with the value `gui.json` already
-/// owns. So `set_*` needs no backstop, and the net must NOT widen
-/// to `declaresManagedSettings` — that would re-comment a live
-/// hook whose body legitimately calls `set_` (the whole point of
+/// Generates adopted `init.lua` commenting out GUI-managed statements (#55,
 /// #355).
-///
-/// Two blind spots are inherited from the token scanner and
-/// accepted (see `docs/design-decisions.md`): a foreign token
-/// split across physical lines (`app_rules\n= {…}`) or reached via
-/// an aliased receiver (`local K = KiwiDesk; K.bind(…)`) is kept
-/// live and also escapes the foreign net — rare in hand-written
-/// Lua, and the backup preserves the original. Conversely, a
-/// managed token mentioned only inside a **string** in otherwise
-/// custom code trips the foreign net and forces the whole file to
-/// the full-comment fallback (safe direction — no live foreign —
-/// but it silences that file's hooks).
 extension ManagedConfig {
     public static func adopt(
         original: String,
@@ -50,8 +12,7 @@ extension ManagedConfig {
             selectivelyCommented(original)
             ?? commentedEverything(original)
         let result = header + "\n" + body + "\n"
-        // Correctness net: if selective commenting somehow left a
-        // foreign token live, fall back to commenting everything.
+        // Fall back to commenting everything if foreign tokens remain.
         if hasForeignCode(result) {
             return header + "\n"
                 + commentedEverything(original) + "\n"
@@ -59,20 +20,14 @@ extension ManagedConfig {
         return result
     }
 
-    // MARK: - Selective commenting
-
-    /// Comments out only the managed statements, keeping custom
-    /// Lua live. Returns nil on any structural anomaly (a span
-    /// that never balances), so the caller falls back to
-    /// commenting the whole file.
+    /// Selectively comments out managed statements while keeping custom Lua
+    /// live (#355).
     static func selectivelyCommented(_ source: String) -> String? {
         let lines = source.components(separatedBy: "\n")
         var out: [String] = []
         var i = 0
         while i < lines.count {
             let trimmed = lines[i].trimmedLua
-            // Blank lines and full-line comments carry through
-            // verbatim — they belong to no statement.
             if trimmed.isEmpty || trimmed.hasPrefix("--") {
                 out.append(lines[i])
                 i += 1
@@ -92,10 +47,7 @@ extension ManagedConfig {
         return out.joined(separator: "\n")
     }
 
-    /// The index one past the last line of the statement starting
-    /// at `from`, found by tracking bracket + block depth until it
-    /// returns to zero. Nil if the depth goes negative or the file
-    /// ends mid-statement — the signal to fall back.
+    /// End index of statement starting at `from` tracked via block depth.
     static func statementSpan(
         _ lines: [String],
         from start: Int
@@ -110,11 +62,7 @@ extension ManagedConfig {
         return depth == 0 ? j : nil
     }
 
-    /// A statement block is managed when its **head** — the first
-    /// non-blank, non-comment line — opens a managed construct.
-    /// Keying on the head (not "any line") keeps a `KiwiDesk.on`
-    /// hook whose body happens to call `set_*` classified as
-    /// custom, so the hook stays live (#355).
+    /// True if block begins with a managed declaration (#355).
     static func blockIsManaged(_ block: [String]) -> Bool {
         for line in block {
             let t = line.trimmedLua
@@ -124,16 +72,7 @@ extension ManagedConfig {
         return false
     }
 
-    // MARK: - Depth scanning
-
-    /// The bracket + block-keyword depth change on one line of
-    /// code (comments and string contents already stripped).
-    /// `(`/`{` and the block openers `function`/`if`/`for`/
-    /// `while`/`repeat` open; `)`/`}` and `end`/`until` close.
-    /// `do`/`then` are deliberately uncounted — they pair with an
-    /// already-counted `for`/`while`/`if`, so counting them would
-    /// double-count. A bare `do … end` block therefore reads as
-    /// unbalanced and trips the fallback, which is safe.
+    /// Bracket and keyword depth delta for a line of code.
     static func depthDelta(_ code: String) -> Int {
         var depth = 0
         for ch in code {
@@ -211,10 +150,7 @@ extension ManagedConfig {
         return out
     }
 
-    // MARK: - Full-comment fallback
-
-    /// The whole original commented out, line by line — the
-    /// original `adopt` behavior, kept as the fallback.
+    /// Fallback that comments out the full source line-by-line.
     static func commentedEverything(_ source: String) -> String {
         source
             .components(separatedBy: "\n")

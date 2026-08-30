@@ -1,24 +1,10 @@
 import KiwiDeskCore
 
-// The declaration structs behind the sidebar's **This Profile**
-// group (`SettingsDestination.thisProfile`): Spaces, Layout
-// Defaults, Monitors, Colors & Animations, Advanced Colors, Gaps &
-// Borders, Bars, Behavior. Split from
-// `SettingsCatalog.swift` on the seam the sidebar already
-// draws, so a destination's declarations sit where its
-// neighbours do. The aggregation and the enumeration stay in
-// `SettingsCatalog.swift`; the authoring rules are in its
-// header, and the catalog guards treat every
-// `SettingsCatalog+*` slice as catalog, not as a render site —
-// the `+` is load-bearing, see `SettingsCatalogFiles`.
+// Settings catalog declarations for the "This Profile" sidebar group.
 
 struct SpacesControls: Sendable {
     let spacesCard = SettingsControl("spaces.title", "Spaces")
-    /// The detail panel's per-Space preview (#794). Its own
-    /// title rather than Layout Defaults' "Live preview": that
-    /// one draws a LAYOUT's defaults and this one draws a
-    /// SPACE's resolved reality, which is the whole distinction
-    /// the panel exists to make.
+    /// Detail panel per-Space preview (#794).
     let spacePreview = SettingsControl(
         "spaces.preview.title",
         "This Space's layout"
@@ -26,19 +12,10 @@ struct SpacesControls: Sendable {
 }
 
 struct LayoutDefaultsControls: Sendable {
-    /// The min-size card sits above the strip and feeds every
-    /// layout, so it is surface-free; the layout tiles are
-    /// appended from `LayoutMode.placementTabs` in
-    /// `entries(of:)`.
     let minWindowSize = SettingsControl(
         "layout_defaults.min_window_size",
         "Minimum window size"
     )
-    /// The live preview and the spaces list are cards a reveal
-    /// can land on, so they are declared rather than rendered
-    /// with a computed title — a reader searching "preview"
-    /// should reach the one that answers "what will this look
-    /// like".
     let livePreview = SettingsControl(
         "layout_defaults.live_preview",
         "Live preview"
@@ -79,10 +56,7 @@ struct GapAxisControls: Sendable {
     let axisVertical = SettingsControl("gaps.vertical", "Vertical")
 }
 
-/// Colours & Animations (#678 Phase 3): the palette shelf, the
-/// live-colours scene, and the Animations card that moved here
-/// whole
-/// from Behavior.
+/// Colors & Animations catalog controls (#678 Phase 3).
 struct ColorsControls: Sendable {
     let paletteShelf = SettingsControl(
         "palettes.title",
@@ -96,31 +70,14 @@ struct ColorsControls: Sendable {
         "behavior.animations.title",
         "Animations"
     )
-    /// Named for what it holds, not "more" or "advanced": this
-    /// area's Power-User twin is a whole separate card, and one word
-    /// must never mean both a row tier and mode depth.
     let motionMore = SettingsDrawer(
         "motion.more",
         "Per-event and duration"
     )
 }
 
-/// Advanced Colours (#678 Phase 3): four groups matching the four
-/// things on screen. The two drawers co-render on one page, so
-/// each carries its own instance id — the twice-mounted shape
-/// (#277) a shared declaration would make `scrollTo`-undefined.
+/// Advanced Colors catalog controls (#678 Phase 3, #277, #793).
 struct AdvancedColorsControls: Sendable {
-    /// Each group's title names the SUBSYSTEM plus "colors".
-    /// Bare "Space Bar" / "Drag & drop" would collide in search
-    /// with the cards that own those things' structure: sidebar
-    /// search returns one row per destination, so the query
-    /// would come back as two rows reading identically, with
-    /// nothing to tell the swatch grid from the bar's own card.
-    /// (The ORDER decides which comes first and is settled
-    /// separately, in `SettingsDestination.thisProfile`; it is
-    /// not what makes the titles distinct.) The two bar titles
-    /// are the retired interim cards' keys, so their eleven
-    /// translations carry straight over.
     let bordersGroup = SettingsControl(
         "colors.borders.title",
         "Border colors"
@@ -147,19 +104,14 @@ struct AdvancedColorsControls: Sendable {
         "More colors",
         instance: "app_bar"
     )
-    /// The detail panel's scene (#793). Its own key rather than
-    /// `colors.scene.title`: that one names Colours & Animations's
-    /// "Current colors", a sample of a palette, while this names
-    /// the whole set drawn at once — one concept, one word, and
-    /// two different concepts here.
+    /// Detail panel full-palette preview (#793).
     let everyColorScene = SettingsControl(
         "colors.advanced.scene.title",
         "Every color at once"
     )
 }
 
-/// Gaps & Borders — the structure half of the old Appearance
-/// destination, renamed with its page in #678 Phase 3.
+/// Gaps & Borders catalog controls (#678 Phase 3, #754).
 struct GapsAndBordersControls: Sendable {
     let gapsCard = SettingsControl("gaps.title", "Gaps")
     let gapsPerEdge = SettingsDrawer(
@@ -172,11 +124,6 @@ struct GapsAndBordersControls: Sendable {
         "Per-axis…",
         children: GapAxisControls()
     )
-    /// The shared-decisions card (#754). Titled for what it
-    /// DECIDES, not for the thing it decides about: a bare
-    /// "Borders" reads as a fourth section competing with the
-    /// two that draw the strokes, and sits one letter from the
-    /// `border.*` family whose own title is "Focus border".
     let bordersCard = SettingsControl(
         "border.shared.title",
         "Shared by all borders"
@@ -197,25 +144,12 @@ struct GapsAndBordersControls: Sendable {
     )
 }
 
+/// Bars catalog controls (#293, #277).
 struct BarsControls: Sendable {
-    /// The two bar cards, one page (turn 7a of the redesign —
-    /// the #293 App Bar / Space Bar switch is gone). The card
-    /// titles keep the old switch chips' `bars.switch.*` keys:
-    /// the English is unchanged ("Space Bar" / "App Bar"), so
-    /// re-keying would only throw away eleven translations.
-    ///
-    /// Space Bar leads, matching everywhere else it does — the
-    /// omnipresent bar, and the first card on the page — so a
-    /// bare "bar" query lists the leading bar's row above App
-    /// Bar's.
     let spaceBarCard = SettingsControl(
         "bars.switch.space_bar",
         "Space Bar"
     )
-    /// One "Style" drawer per card, co-rendered on the one page,
-    /// so each carries its own instance id — the twice-mounted
-    /// shape (#277) that a shared declaration would make
-    /// `scrollTo`-undefined.
     let spaceBarStyle = SettingsDrawer(
         "bars.style",
         "Style",
@@ -230,9 +164,6 @@ struct BarsControls: Sendable {
         "Style",
         instance: "app_bar"
     )
-    /// The two "Show it in" rows, titled by their layout's name
-    /// (the keys `LayoutMode.displayName` authors). Distinct
-    /// keys, so no instance tag is needed.
     let monocleShowIn = SettingsControl(
         "layout.monocle.name",
         "Monocle"

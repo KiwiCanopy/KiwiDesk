@@ -1,92 +1,43 @@
 import Foundation
 
-/// A saved KiwiDesk configuration: layout modes per space plus
-/// all tiling settings, valid for one or more concrete monitor
-/// combinations (#36).
+/// Saved KiwiDesk configuration for monitor setups (#36).
 public struct Profile: Codable, Sendable, Equatable {
-    /// Format version of the profile schema (#902).
-    /// Format 0 = unversioned legacy (v0.9.7 and earlier).
-    ///
-    /// **2** since the scroll-duration rename (#1020):
-    /// `settings.animations.scroll_speed` became
-    /// `scroll_duration`. The bump is not bookkeeping — it is
-    /// what RUNS the crossing. `ConfigMigration.needsMigration`
-    /// short-circuits on `format >= targetFormat`, so a profile
-    /// written by 1.0.1 (`format: 1`) would skip every step and
-    /// keep the retired key, which decodes to the DEFAULT rather
-    /// than failing (`AnimationSettings` uses
-    /// `decodeIfPresent`). Leaving this at 1 loses the user's
-    /// tuned value silently.
+    /// Format version of profile schema (#902, #1020). Format 0 = unversioned.
     public static let currentFormat = 2
 
     public var format: Int
     public var name: String
-    /// The monitor combinations this profile covers. All entries
-    /// share one length; the profile's screen count.
+    /// Monitor combinations this profile covers (uniform screen count).
     public var monitorSets: [MonitorSet]
-    /// Spaces assigned to the *Main* role — the current main
-    /// display, resolved live. Hardware-agnostic, so stored once
-    /// at profile level, not per set.
+    /// Spaces assigned to Main role on current main display.
     public var mainSpaces: [SpaceID]
-    /// Marks this profile as its screen count's default (the
-    /// dirty-load fallback when no set matches exactly).
+    /// Default profile for this screen count.
     public var isDefault: Bool
-    /// Marks this profile as the beginner `Starter` setup seed
-    /// (#466/#485). While it is the active baseline, a monitor
-    /// change that no stored set covers recomposes the *setup*
-    /// at the live display count instead of a workflow Standard,
-    /// so the five-per-display shape survives every reconnect.
-    /// Survives edits (a tweaked mode keeps the identity) but not
-    /// a "save as new" — an explicitly named copy is the user's
-    /// own profile. Legacy/other profiles decode to `false`.
+    /// Marks starter setup baseline (#466, #485).
     public var isStarterSetup: Bool
-    /// Persisted display order of the profile's spaces (#75).
-    /// This is the authoritative order for the Spaces list and
-    /// for the reconcile rehome fallback on profile switch.
-    /// New spaces append; existing profiles without this key
-    /// decode to `[]` and fall back to the derived order.
-    ///
-    /// Authority: `gui.json` owns live display order across the
-    /// session; `Profile.spaces` owns per-profile order,
-    /// consulted when that profile is loaded. The two stay in
-    /// sync because `apply(profile:)` seeds live order from
-    /// this list and both save paths (`persistProfile`,
-    /// `overwriteProfile`) capture the resulting live order
-    /// back here.
+    /// Authoritative display order of spaces for this profile (#75).
     public var spaces: [SpaceID]
-    /// The explicitly designated rehome target (#68): windows
-    /// from spaces this profile doesn't declare land here when
-    /// the profile is loaded. nil (or a dangling reference)
-    /// falls back to the stored order's first surviving space
-    /// — the pre-#68 rule, so legacy profiles keep behaving.
+    /// Designated rehome target when spaces are missing (#68).
     public var fallbackSpace: SpaceID?
     /// Layout mode per space.
     public var spaceModes: [SpaceID: LayoutMode]
     public var settings: TilingSettings
     public var savedAt: Date
-    /// Per-profile sparse keybinding override (#55). nil
-    /// inherits the base modes (gui.json) entirely; present,
-    /// it shadows by mode name then combo (O4 soft).
+    /// Sparse keybinding overrides (#55).
     public var layers: KeyLayerOverride?
-    /// Per-profile sparse app→space rule override (#109). nil
-    /// inherits the global `app_rules` base entirely;
-    /// present, it shadows per app — with a null tombstone to
-    /// un-pin an app the base pins.
+    /// Sparse app-to-space rule overrides (#109).
     public var appRules: AppRuleOverride?
-    /// Sparse additions/removals over the global `float_rules`.
+    /// Sparse additions/removals over global `float_rules`.
     public var floatRules: RuleListOverride?
-    /// Hidden sparse additions/removals over global `ignore_rules`.
+    /// Sparse additions/removals over global `ignore_rules`.
     public var ignoreRules: RuleListOverride?
 
-    /// Derived from the sets — never stored separately.
+    /// Number of monitors covered by profile sets.
     public var monitorCount: Int {
         monitorSets.first?.monitors.count ?? 0
     }
 
-    /// Every space the profile declares — by ordered list, mode,
-    /// Main role, or a monitor pin. The one definition of "this
-    /// profile's spaces", so an authoritative load prunes to
-    /// exactly what the editor shows.
+    /// All spaces declared across ordered list, modes, Main, or pins.
     public var declaredSpaces: Set<SpaceID> {
         var all = Set(spaces)
         all.formUnion(spaceModes.keys)
@@ -97,13 +48,7 @@ public struct Profile: Codable, Sendable, Equatable {
         return all
     }
 
-    /// Authoritative display order for this profile's spaces.
-    ///
-    /// Returns `spaces` when non-empty, with any declared space
-    /// absent from the list appended (sorted numerically then
-    /// lexically) — guards against hand-edited JSON gaps.
-    /// Falls back to sorted `declaredSpaces` for legacy profiles
-    /// that predate the `spaces` key.
+    /// Authoritative display order with unlisted declared spaces appended.
     public var orderedSpaces: [SpaceID] {
         if spaces.isEmpty {
             return SpaceID.numericLexicalSorted(

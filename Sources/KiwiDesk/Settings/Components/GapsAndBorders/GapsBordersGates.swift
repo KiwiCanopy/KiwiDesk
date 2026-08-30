@@ -1,43 +1,10 @@
 import KiwiDeskCore
 
-/// The Gaps & Borders area's greying, resolved from the census
-/// (#678 Phase 3). Keyed on a row's own `SettingKey` over
-/// `TilingSettings`, returning a REASON case rather than a Bool
-/// — the shape General and Layout Defaults already share, so
-/// this area adds no new resolver signature (owner ruling
-/// 2026-08-03: converge Bars/Shortcuts onto it in a later PR,
-/// not here).
-///
-/// Unlike Layout Defaults this area carries all three gate
-/// flavours, so the resolver answers two questions:
-///
-/// - `containerReason(for:)` — the Focus-border block gate. Every
-///   row in `.focusBorder` is inert while the ring is off, except
-///   the enable toggle that owns the gate (`exemptFromContainer\
-///   Gate`). The block draws one grey with one sentence, so the
-///   gate resolves once at the container, not per row.
-/// - `inertReason(for:)` — the row gates inside a live block:
-///   the glow-size row (glow off), each drag column's Border and
-///   Fill toggles (the visual itself off) and the two gap
-///   masters (their edges / axes differ, the
-///   `.runtime(.perEdgeValuesDiffer)` gate).
-///
-/// Returning the reason rather than a Bool keeps the grey and its
-/// inline sentence from being two decisions that can disagree
-/// (`GapsBordersGateHelp` renders it). The reason cases keep the
-/// whole resolver assertable off the main actor.
-///
-/// It answers one question that is not a gate at all —
-/// `strokesDiffer(for:)`, whether a shared master's strokes
-/// currently disagree. That lives here because the same
-/// predicates resolve the corner master's own displayed value,
-/// and a view re-deriving "differ" beside the control is the
-/// drift `inertReason` exists to prevent one row further down.
+/// Gaps & Borders row and container gate resolver (#678 Phase 3, 2026-08-03).
 struct GapsBordersGates {
     let settings: TilingSettings
 
-    /// Why a row (or the Focus-border block) is inert. One case
-    /// per predicate; the sentence lives in `GapsBordersGateHelp`.
+    /// Why a row or container is inert (`GapsBordersGateHelp`).
     enum InertReason: Hashable {
         case borderOff
         case glowOff
@@ -45,9 +12,7 @@ struct GapsBordersGates {
         case gapsDiffer
     }
 
-    /// The one container gate in this area: the Focus-border block
-    /// is inert while the ring is off. Other containers gate
-    /// nothing.
+    /// Container-level gate reason.
     func containerReason(
         for container: SettingsContainer
     ) -> InertReason? {
@@ -59,10 +24,7 @@ struct GapsBordersGates {
         }
     }
 
-    /// The row / runtime gate for a row inside a LIVE block. The
-    /// container gate is the block's job, so a Focus-border row's
-    /// reason here never repeats `.borderOff` — it guards on the
-    /// ring being enabled first.
+    /// Row-level gate reason inside a live block.
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {
@@ -81,11 +43,6 @@ struct GapsBordersGates {
             return settings.dragDropZone.enabled
                 ? nil : .visualOff
         default:
-            // A gated key with no arm here is a bug: the census
-            // declared a gate this resolver cannot answer. Fail
-            // loud in debug, fail-open in release so a shipped
-            // Settings window never locks a row it can't reason
-            // about (mirrors `LayoutDefaultsGates`).
             assertionFailure(
                 "unhandled Gaps & Borders gate: \(key.id)"
             )
@@ -93,10 +50,7 @@ struct GapsBordersGates {
         }
     }
 
-    /// The gated rows this resolver answers (data, so
-    /// `everyGatedRowIsResolved` reds when a new census gate lands
-    /// in neither set). The Focus-border CONTAINER gate is held
-    /// separately by `containerGateIsResolved`.
+    /// Gated rows answered by this resolver (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
         .gaps(.outer),
         .gaps(.inner),
@@ -107,25 +61,10 @@ struct GapsBordersGates {
         .borders(.dragDropZoneFill),
     ]
 
-    /// Declared-but-answered-elsewhere. Empty and kept so a new
-    /// gate this resolver cannot answer must land here on purpose
-    /// rather than pass silently.
+    /// Declared-but-answered-elsewhere set.
     static let resolvedElsewhere: Set<SettingKey> = []
 
-    // MARK: - Shared masters
-
-    /// Whether the strokes a shared MASTER row writes disagree
-    /// with each other right now.
-    ///
-    /// Deliberately NOT an `InertReason`. The gap masters grey
-    /// on their own version of this because a per-edge drawer
-    /// sits under them to repair from; these two have none, so
-    /// greying them would state the disagreement and then
-    /// withhold the only control that ends it. They stay live
-    /// and acknowledge instead, through the row's `?`
-    /// (`GapsBordersGateHelp.strokesDiffer`) — and the corner
-    /// master additionally shows no segment selected, which is
-    /// `agreedCornerStyle` below.
+    /// True if strokes written by a shared master row currently disagree.
     func strokesDiffer(for key: SettingKey) -> Bool {
         switch key {
         case .borders(.borderWidthMaster):
@@ -137,13 +76,7 @@ struct GapsBordersGates {
         }
     }
 
-    /// The corner shape all three strokes agree on, or nil while
-    /// the ring's two-value style and the drag pair's radius
-    /// disagree. The ONE copy of that comparison: the master
-    /// binding's getter reads it as its displayed value and
-    /// `strokesDiffer` reads it as the `?` predicate, so the
-    /// blank picker and the sentence explaining it cannot
-    /// contradict each other.
+    /// Agreed corner shape across ring style and drag radius.
     var agreedCornerStyle: BorderStyle.CornerStyle? {
         let fromRadius: BorderStyle.CornerStyle =
             settings.dragCornerRadius > 0 ? .rounded : .square

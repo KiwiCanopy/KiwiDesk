@@ -1,18 +1,7 @@
 import Foundation
 
-/// launchd service control (`kiwidesk service start|stop|
-/// restart`). Writes a LaunchAgent referencing the installed
-/// binary and drives it via `launchctl bootstrap`/`bootout` —
-/// no Homebrew services dependency.
-///
-/// This is the advanced/CLI crash-supervision path, distinct from
-/// the user-facing login item (`LoginItemManager`, `SMAppService`).
-/// Note the overlap: the plist below sets `RunAtLoad`, so a loaded
-/// service ALSO auto-starts at login, independently of and
-/// invisibly to the "Open at Login" toggle. If `RunAtLoad` is ever
-/// reconsidered, weigh it against that toggle being the primary
-/// login mechanism (#342). The #196 instance lock keeps the two
-/// launch triggers from spawning two processes.
+/// launchd service management and crash supervision (`kiwidesk service`)
+/// (#342, #196).
 public enum ServiceManager {
     public static let label = "org.kiwidesk.KiwiDesk"
 
@@ -23,8 +12,7 @@ public enum ServiceManager {
             )
     }
 
-    /// LaunchAgent contents for a given executable path.
-    /// Exposed for tests.
+    /// Generates LaunchAgent plist content for `executable` (#1068).
     public static func plistContent(
         executable: String
     ) -> String {
@@ -44,13 +32,7 @@ public enum ServiceManager {
             <true/>
             <key>KeepAlive</key>
             <dict>
-                <!-- Restart a crash, never a clean exit. The
-                     second-launch path depends on this: it
-                     exits SUCCESSFULLY so launchd lets it rest
-                     (`secondLaunchExitStatus`, #1068). Setting
-                     this true, or dropping the condition,
-                     re-opens an infinite respawn that steals
-                     focus every throttle. -->
+                <!-- Restart a crash, never a clean exit (#1068). -->
                 <key>SuccessfulExit</key>
                 <false/>
             </dict>
@@ -59,10 +41,7 @@ public enum ServiceManager {
         """
     }
 
-    /// The result of a service verb: a line to print plus whether
-    /// it succeeded, so the CLI can map a real launchctl failure
-    /// to a non-zero exit while the ordinary already-running /
-    /// not-running cases stay exit 0 (#328).
+    /// Result of a service command operation (#328).
     public struct Outcome {
         public let message: String
         public let ok: Bool
@@ -73,18 +52,7 @@ public enum ServiceManager {
         }
     }
 
-    // MARK: - Commands
-
-    /// Bootstraps the agent, relaunches it when the job is loaded
-    /// but idle, or no-ops when a process is already running. The
-    /// plist is always (re)written first so a moved binary is
-    /// picked up on the next `start`.
-    ///
-    /// The loaded-but-idle case matters: quitting via the quick
-    /// menu exits cleanly, and `KeepAlive{SuccessfulExit=false}`
-    /// leaves launchd holding the job registered without a process
-    /// — a bare `isLoaded()` check would then wrongly report
-    /// "already running" and never bring it back (#341).
+    /// Starts or relaunches the LaunchAgent service (#341).
     public static func start() -> Outcome {
         if let failure = writePlist() {
             return Outcome(failure, ok: false)
@@ -106,9 +74,7 @@ public enum ServiceManager {
         }
     }
 
-    /// Boots out the agent, or reports cleanly when nothing is
-    /// loaded — never leaking launchctl's "re-run as root" noise
-    /// for the ordinary not-running case (#328).
+    /// Stops and unloads the LaunchAgent service (#328).
     public static func stop() -> Outcome {
         guard isLoaded() else {
             return Outcome(
@@ -127,15 +93,7 @@ public enum ServiceManager {
             )
     }
 
-    /// The explicit kill-and-relaunch path: boots out any prior
-    /// registration (result discarded — it may not be loaded)
-    /// and bootstraps fresh.
-    ///
-    /// Reports honestly whether it actually *restarted* a loaded
-    /// job or merely *started* one that wasn't running — a plain
-    /// "restarted" would otherwise claim it stopped something that
-    /// was never there (matches the loaded-aware wording `start`
-    /// and `stop` already give, #328).
+    /// Boots out and re-bootstraps the LaunchAgent service (#328).
     public static func restart() -> Outcome {
         if let failure = writePlist() {
             return Outcome(failure, ok: false)
@@ -147,8 +105,7 @@ public enum ServiceManager {
         return Outcome(restartMessage(wasLoaded: wasLoaded), ok: true)
     }
 
-    /// Reports whether the agent is loaded and, if launchd has it
-    /// running, its pid. A query — always exit 0.
+    /// Returns human-readable status outcome for CLI (#328, #341).
     public static func status() -> Outcome {
         let (status, output) = printState()
         guard status == 0 else {
@@ -163,23 +120,14 @@ public enum ServiceManager {
         )
     }
 
-    /// The agent's launchd state as structure (#576), for the
-    /// `AutoStartManager` facade. A blocking `launchctl print`
-    /// spawn like the other verbs — the facade calls it off the
-    /// main actor. Distinct from `status()`, which renders the CLI
-    /// sentence; this returns the machine value the facade folds.
+    /// Structured LaunchAgent service status for `AutoStartManager` (#576).
     public static func currentStatus() -> ServiceStatus {
         let (exit, output) = printState()
         return serviceStatus(printExit: exit, output: output)
     }
 
-    // MARK: - Helpers (pure — unit-tested)
-
-    /// Maps a `launchctl print` exit + output to structure. A
-    /// non-zero exit means the job isn't loaded in this domain; a
-    /// zero exit means loaded, with a pid only when a process is
-    /// actually running (#341). Pure so the mapping is testable
-    /// without spawning launchctl.
+    /// Parses `launchctl print` exit code and output into `ServiceStatus`
+    /// (#341).
     static func serviceStatus(
         printExit: Int32,
         output: String
@@ -193,10 +141,7 @@ public enum ServiceManager {
         )
     }
 
-    /// What `start` must do given the agent's launchd state.
-    /// Loaded-but-idle (registered, no pid) means the process was
-    /// quit while the job stayed registered, so it is relaunched
-    /// rather than reported as already running (#341).
+    /// Action required for `start` based on current launchd state (#341).
     enum StartAction: Equatable {
         case bootstrap
         case kickstart
@@ -211,8 +156,7 @@ public enum ServiceManager {
         return pid != nil ? .alreadyRunning : .kickstart
     }
 
-    /// The `status` line for a loaded agent: names the pid when
-    /// launchd is running the process, else flags loaded-but-idle.
+    /// Formats status message for loaded agent.
     static func statusMessage(pid: Int32?) -> String {
         if let pid {
             return "KiwiDesk service is running (pid \(pid))"
@@ -220,24 +164,20 @@ public enum ServiceManager {
         return "KiwiDesk service is loaded but not running"
     }
 
-    /// The `restart` line: a genuine restart when the job was
-    /// already loaded, otherwise a plain start so the CLI never
-    /// claims to have stopped a service that wasn't running.
+    /// Formats restart message distinguishing fresh starts from restarts.
     static func restartMessage(wasLoaded: Bool) -> String {
         wasLoaded
             ? "KiwiDesk service restarted"
             : "KiwiDesk service was not running — started it"
     }
 
-    /// Extracts the `pid = N` line from `launchctl print` output.
+    /// Parses PID from `launchctl print` output.
     static func parsePID(from output: String) -> Int32? {
         for raw in output.split(separator: "\n") {
             let line = raw.trimmingCharacters(in: .whitespaces)
             guard line.hasPrefix("pid = ") else { continue }
             let value = line.dropFirst("pid = ".count)
                 .trimmingCharacters(in: .whitespaces)
-            // Keep scanning if this line's value is malformed
-            // rather than giving up on the whole output.
             if let pid = Int32(value) { return pid }
         }
         return nil

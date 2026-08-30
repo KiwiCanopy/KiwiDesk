@@ -1,40 +1,22 @@
 import CoreGraphics
 import Foundation
 
-/// The Space Bar drag-drop state machine (#372).
-///
-/// A two-speed gesture, driven off the same AX drag signal the
-/// rest of tiling uses (`DragCoordinator` → `onDragMove`/
-/// `onDragEnd`):
-///
-/// - **Fast drop** — release on a Space item before the dwell
-///   fires → relocate the window there, stay put (`move_to_space`).
-/// - **Dwell** — hold over a Space item for `dwell` seconds → the
-///   visible space springs to it; the drop is then an ordinary
-///   in-space placement into the now-live layout.
-///
-/// The switch and the relocate are performed by injected closures
-/// (KiwiCore), so this type stays AppKit-free and unit-testable.
+/// Space Bar drag-drop state machine for fast relocate and spring hover
+/// (#372).
 @MainActor
 final class SpaceBarDropCoordinator {
     /// What `ended` asks the driver to do.
     enum Outcome: Equatable {
-        /// No bar target — hand back to the ordinary drag-end
-        /// logic (same-space swap / snap-back).
+        /// No bar target — hand back to ordinary drag-end logic.
         case none
         /// Fast drop onto a different space's item — relocate.
         case relocate(SpaceID)
-        /// The space had already sprung; the window is on the
-        /// now-visible target, so place it there with the
-        /// ordinary in-space drop after re-homing its membership.
+        /// Drop into a space that already sprang visible during dwell.
         case placeInSprung(SpaceID)
     }
 
-    /// The dwell before a hover springs the space, read fresh at
-    /// arm time so a live `space_bar.set_spring_delay` change takes
-    /// effect on the next gesture with no cached-value staleness
-    /// (#372). Injected so this type stays settings-free; the
-    /// default is only a pre-wiring placeholder.
+    /// Dwell duration provider before spring fires
+    /// (`space_bar.set_spring_delay`, #372).
     var dwellProvider: @MainActor () -> TimeInterval = { 1.5 }
 
     /// Space whose item contains a Cocoa screen point, else nil.
@@ -43,61 +25,35 @@ final class SpaceBarDropCoordinator {
     var currentSpace: @MainActor (WindowID) -> SpaceID? = {
         _ in nil
     }
-    /// Tint a space's item with the synthetic drag-hover (nil
-    /// clears all).
+    /// Tint a space's item with synthetic drag-hover (nil clears all).
     var setHover: @MainActor (SpaceID?) -> Void = { _ in }
-    /// Start the pending-spring ring sweep on a space's item: it
-    /// stays empty for `delay`, then fills over `fill`.
+    /// Start pending-spring sweep on a space's item: (space, fill, delay).
     var beginSweep:
         @MainActor (
             _ space: SpaceID, _ fill: TimeInterval,
             _ delay: TimeInterval
         ) -> Void = { _, _, _ in }
 
-    /// Quiet time after entering an item before the sweep starts
-    /// (#372 QA): a quick flick-to-relocate shows no loading ring.
-    /// The spring still fires at the full dwell, so the sweep fills
-    /// over `dwell - springPreDelay`; the dwell range floors above
-    /// this so the sweep is always visible.
+    /// Quiet time after entering item before sweep starts (#372 QA).
     static let springPreDelay: TimeInterval = 0.5
 
-    /// Clear every hover tint and pending sweep.
+    /// Clear hover tint and pending sweep.
     var clearFeedback: @MainActor () -> Void = {}
-    /// Spring the visible space to `target` while `window` stays
-    /// pinned mid-drag. Returns whether the spring actually
-    /// happened — a refused sticky move (#445) or an already-active
-    /// target springs nothing, so `fire` must not record it as
-    /// `sprungSpace`.
+    /// Springs visible space to `target` mid-drag (#445).
     var spring:
         @MainActor (_ target: SpaceID, _ window: WindowID)
             -> Bool = { _, _ in false }
 
-    /// The item currently armed (hover tint + running sweep), or
-    /// nil. Lets `handleDragMove` suppress the in-space ghost
-    /// while a bar target is armed.
+    /// Armed space target (hover tint + active sweep).
     private(set) var armedSpace: SpaceID?
-    /// The space this drag has already sprung into, if any.
+    /// Space already sprung during this drag.
     private(set) var sprungSpace: SpaceID?
-    /// The window this gesture is dragging, or nil between
-    /// gestures. Lets an abnormal drag end (window closed / tab
-    /// rekeyed mid-drag) scope its teardown to the right window.
+    /// Dragged window in flight.
     private(set) var draggingWindow: WindowID?
     private var pendingDwell: Task<Void, Never>?
 
     #if DEBUG
-        /// The pending spring's timeline, so a test can await the
-        /// dwell instead of polling a clock for its effect (#994;
-        /// `.claude/rules/tests.md` ▸ Async tests). Debug-only so
-        /// a production read fails the release build rather than
-        /// a review — `isArmed` is the in-flight predicate.
-        ///
-        /// What awaiting it does **not** mean. It is cleared the
-        /// instant the dwell fires or is disarmed, so it is only
-        /// readable while a spring is pending: read it afterwards
-        /// and it is nil, whose `await` returns at once and
-        /// asserts nothing. It also completes for a *cancelled*
-        /// dwell, so it says the dwell ended, never that it
-        /// sprang — that fact is `sprungSpace`.
+        /// Pending dwell task for async test synchronization (#994; tests.md).
         var dwellTask: Task<Void, Never>? { pendingDwell }
     #endif
 

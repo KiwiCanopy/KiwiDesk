@@ -1,15 +1,6 @@
 import AppKit
 
-/// The Space Bar panel for one display (#293): renders Space
-/// items into a strip handed to it in AX coordinates. A dumb
-/// renderer like `AppBarOverlay` — the driver resolves state,
-/// identifiers, and glyphs. Items size to their content
-/// (identifier + app glyphs), so lengths vary per item. When the
-/// run overflows the strip the bar scrolls rather than clipping
-/// (#385): items render inside a clipping viewport inset by an
-/// arrow zone at each end, with clickable chevrons toward the
-/// hidden Spaces and a scroll that follows the active Space — the
-/// App Bar's overflow model (see `SpaceBarOverlay+Scroll`).
+/// Space Bar overlay panel for one display in AX coordinates (#293, #385).
 @MainActor
 public final class SpaceBarOverlay {
     /// One Space's resolved content.
@@ -20,81 +11,44 @@ public final class SpaceBarOverlay {
         let active: Bool
         /// Windows hidden past the glyph cap ("+n" badge).
         let overflow: Int
-        /// The focused window is one hidden past the cap — the "+n"
-        /// tints to signal focus is behind it (#376).
+        /// Focused window is hidden past the cap (#376).
         let focusInOverflow: Bool
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
     public var onSelect: @MainActor (SpaceID) -> Void = { _ in }
 
-    // Internal (not private): `render()` in the +Render extension
-    // reads and lazily creates the panel.
     var panel: NSPanel?
     var itemViews: [SpaceBarItemView] = []
-    /// The clipping item viewport (#385): items and the trailing
-    /// front segment render inside it, inset by an arrow zone at
-    /// each end while the run overflows, so a half-scrolled item
-    /// is cut a gap short of the arrows instead of sliding under
-    /// them. Spans the full strip while everything fits.
+    /// Clipping item viewport (#385).
     let itemContainer = AppBarOverlay.FlippedView()
     let backArrow = BarArrowView()
     let forwardArrow = BarArrowView()
-    /// Where the front-app segment's views (and its glass backdrop)
-    /// are hosted this render (#409): `itemContainer` while the run
-    /// fits, so the segment is the run's tail as before; the panel
-    /// content (outside the clipping viewport) while the run
-    /// overflows, so the segment stays pinned to the trailing rim
-    /// while only the Spaces scroll behind the arrows. Set by
-    /// `render()` before the front pass; read by
-    /// `attachFrontViewsIfNeeded` and `updateFrontGlass`.
+    /// Host view for front-app segment (#409).
     weak var frontHost: NSView?
-    /// The Liquid Glass plate under the items when `backgroundStyle`
-    /// resolves to `material` (#390); nil otherwise / below macOS
-    /// 26. Stored as a plain view — the concrete type is 26-only.
+    /// Liquid Glass plate for material background (#390).
     var glassPlate: NSView?
-    /// Per-box Liquid Glass: one `NSGlassEffectView` per Space item
-    /// under `boxed + liquid_glass`, each hosting its item as
-    /// `contentView` (piece 2, App Bar twin). Empty otherwise /
-    /// below macOS 26. See SpaceBarOverlay+BoxGlass.
+    /// Per-box Liquid Glass views for `boxed + liquid_glass`.
     var boxGlasses: [NSView] = []
-    /// Colored backdrops behind each per-box glass (`GlassTint`,
-    /// #408); parallel to `boxGlasses`, empty / below macOS 26.
+    /// Colored backdrops behind per-box glass (#408).
     var boxTints: [NSView] = []
-    /// The front-app segment's own frosted box under per-box glass.
-    /// The segment is non-interactive, so this sits as a backdrop
-    /// behind its loose views rather than hosting them.
+    /// Front-app segment frosted backdrop box.
     var frontGlass: NSView?
-    /// Colored backdrop behind the front segment's glass (#408).
+    /// Colored backdrop behind front segment glass (#408).
     var frontTint: NSView?
-    /// Colored backdrop behind the single glass plate (#408).
+    /// Colored backdrop behind single glass plate (#408).
     var glassTint: NSView?
-    /// Throwaway content view that turns the shared plate into a
-    /// bare frosted backdrop when the front app is pinned over an
-    /// overflowing run (#409) — an empty content view frosts as
-    /// true glass (the `frontGlass` precedent), letting the plate
-    /// span the strip under both the items and the pinned segment.
+    /// Backdrop filler view for glass hosting (#409).
     let glassBackdropFiller = NSView()
-    /// Under plain + glass when the run fits, the glass hosts this
-    /// flipped run wrapper at the hugged plate frame with the run
-    /// (items + front segment) placed run-local — so the frosted
-    /// plate hugs instead of spanning the viewport (piece 1). On
-    /// overflow the glass falls back to hosting `itemContainer`.
+    /// Flipped run wrapper for plain + glass without overflow.
     var glassRun: AppBarOverlay.FlippedView?
-    /// `plain`'s shared fill plate — its own view (not the
-    /// container layer) so it can hug the run
-    /// (`background_fit`, QA 2026-07-19).
+    /// Shared fill plate for plain style (`background_fit`, QA 2026-07-19).
     var plainPlate: NSView?
-    /// Whole-bar scroll offset (#385); 0 while the run fits.
+    /// Whole-bar scroll offset (#385).
     var scrollOffset: CGFloat = 0
-    /// Cached scroll geometry, kept for the arrow-zone hit test
-    /// and the drag autoscroll stepping between renders (#385).
+    /// Cached scroll geometry for hit-testing and autoscroll (#385).
     var scrollGeom: ScrollGeom?
-    /// The running drag-autoscroll task and its direction while a
-    /// window drag dwells over an arrow zone (#385); nil when idle.
-    /// A `Task` loop (not a `Timer`) mirrors the drop coordinator's
-    /// dwell — a `Timer`'s `@Sendable` block can't weak-capture
-    /// this non-`Sendable` `@MainActor` type in a release build.
+    /// Running drag-autoscroll task when dwelling on arrow zone (#385).
     var autoScrollTask: Task<Void, Never>?
     var autoScrollDirection: ScrollArrow?
     /// Last-rendered strip in AX coordinates and the per-item
@@ -104,10 +58,7 @@ public final class SpaceBarOverlay {
     /// arrow zone or a scrolled-off item is never a drop target.
     var hitStrip: CGRect = .zero
     var hitFrames: [(space: SpaceID, frame: CGRect)] = []
-    // The optional trailing front-app segment (#293 verdict 6):
-    // a Boxed-only fill box behind the content, a divider rule,
-    // the focused app's glyph, and — on horizontal bars only —
-    // its name.
+    // Optional trailing front-app segment (#293).
     let frontBox = NSView()
     let frontDivider = NSView()
     let frontIcon = NSImageView()
@@ -118,8 +69,6 @@ public final class SpaceBarOverlay {
         return tf
     }()
     let frontName = NSTextField(labelWithString: "")
-    // Internal (not private): read by `render()` in the +Render
-    // extension.
     var lastShown:
         (
             items: [Item],
@@ -133,9 +82,7 @@ public final class SpaceBarOverlay {
 
     public var isVisible: Bool { panel?.isVisible ?? false }
 
-    /// Renders `items` into `strip` (AX coordinates).
-    /// `frontApp` is the trailing segment's app; nil while the
-    /// toggle is off or no window is focused.
+    /// Renders `items` into `strip` in AX coordinates.
     func show(
         items: [Item],
         frontApp: SpaceBarItemView.App? = nil,
@@ -163,21 +110,10 @@ public final class SpaceBarOverlay {
         panel?.orderOut(nil)
     }
 
-    /// Whether the panel is on screen — the hit test is only
-    /// meaningful for a visible bar.
+    /// True if overlay panel is visible on screen.
     var isPanelVisible: Bool { panel?.isVisible == true }
 
-    // MARK: - Rendering
-
-    // `render(followingActive:)` and `activeIndex` live in
-    // `SpaceBarOverlay+Render.swift` (file size, §2).
-
-    /// Axis start of the content run per `alignment` (#293
-    /// QA). `pad` keeps the run off the strip's rim and floors
-    /// every case. Overflowing runs never reach this — they start
-    /// at the scroll offset (#385, see `runMetrics`). `pad` is a
-    /// parameter (callers pass `SpaceBarItemView.pad`) so this
-    /// stays nonisolated and unit-testable.
+    /// Content run start for given alignment (#293 QA, #385).
     nonisolated static func contentStart(
         total: CGFloat,
         axis: CGFloat,

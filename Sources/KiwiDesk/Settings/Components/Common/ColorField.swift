@@ -2,36 +2,14 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// A labeled color control (#68 §3.14): a lightweight swatch
-/// that opens the shared system color panel on click, instead
-/// of a per-row `NSColorWell`. The Appearance tab mounts ~14 of
-/// these; a color well each is expensive to instantiate in
-/// bulk (a visible open lag), while a swatch is a cheap filled
-/// shape and there is only ever one system panel. Beside the
-/// swatch an inline hex field types/pastes an exact value: the
-/// system panel's hex field is 6-digit RGB only, so it cannot
-/// express the alpha our `#RRGGBBAA` format carries — the
-/// inline field is the only path to an exact translucent color.
-/// "Hex" in the name is also the STORAGE contract: the binding
-/// is the `#RRGGBBAA` string the config persists. One component
-/// everywhere a color appears (App Bar, overrides, drag
-/// visuals).
+/// Labeled color control with swatch button and hex text field (#68, #231).
 struct HexColorField: View {
     let label: String
-    /// The screen label may be shortened to its in-group form
-    /// ("Color" under a Border/Fill group, #231); VoiceOver
-    /// still needs the disambiguated name, so `a11yLabel`
-    /// overrides what `ColorSwatch` announces. Defaults to the
-    /// visible `label` when they're the same.
+    /// Accessibility label override for VoiceOver disambiguation (#231).
     var a11yLabel: String?
-    /// Label-column width — narrowed in the Drag editor's
-    /// half-width columns (#231); the App Bar color grid keeps
-    /// the default `colorLabelColumn`.
+    /// Label column width.
     var labelWidth: CGFloat = SettingsMetrics.colorLabelColumn
-    /// Whether an EMPTY hex is a valid "Automatic" value (#429):
-    /// the swatch then shows an adaptive split state and an empty
-    /// entry commits instead of reverting. Off for the ~14 wells
-    /// whose color has a concrete default and no adaptive concept.
+    /// Whether an empty hex represents an "Automatic" adaptive value (#429).
     var automatic: Bool = false
     @Binding var hex: String
 
@@ -48,8 +26,7 @@ struct HexColorField: View {
         }
     }
 
-    /// Formats an `NSColor` back into the stored hex string:
-    /// `#RRGGBB`, or `#RRGGBBAA` when translucent.
+    /// Formats `NSColor` to `#RRGGBB` or `#RRGGBBAA` hex string.
     static func hexString(from color: NSColor) -> String {
         let ns = color.usingColorSpace(.sRGB) ?? .black
         let r = Int(round(ns.redComponent * 255))
@@ -69,33 +46,14 @@ struct HexColorField: View {
     }
 }
 
-/// The color control: two adjacent native affordances, not one
-/// filled shape. A bordered swatch *button* (the color dot in a
-/// pressable chip) opens the shared system panel for visual
-/// picking; a `.roundedBorder` hex *field* beside it types or
-/// pastes an exact value — the only path to an `#RRGGBBAA`
-/// alpha the system panel's 6-digit hex field can't express.
-/// The two pieces are shaped like the two different controls
-/// they are (button vs. text field, with a gap between), so the
-/// split reads as "two controls" rather than one ambiguous hit
-/// region. Both write the same `hex`, so a panel pick repaints
-/// the dot and updates the field, and a typed value repaints
-/// the dot — they stay in sync for free.
+/// Swatch button and hex input field for color editing (#68, #429).
 struct ColorSwatch: View {
     let label: String
-    /// Empty hex = "Automatic" (adaptive), not a parse failure —
-    /// see `HexColorField.automatic`.
+    /// Empty hex represents "Automatic" adaptive color (#429).
     var automatic: Bool = false
     @Binding var hex: String
-    /// The field edits a string proxy so intermediate typing
-    /// never clobbers `hex`; it commits (parse + normalize) on
-    /// Return or focus loss, matching `StepperRow`'s discipline.
     @State private var draft: String
     @FocusState private var focused: Bool
-    /// The panel-ownership token from the last `present`, so
-    /// this swatch can resign the shared panel when it goes
-    /// away (tab switch, App Bar disclosure collapse) without
-    /// clobbering a later swatch that took the panel.
     @State private var token = 0
 
     init(
@@ -264,15 +222,8 @@ struct ColorSwatch: View {
         )
     }
 
-    /// Parse the draft; on success normalize the GUI's own
-    /// write via `hexString` (uppercase, alpha dropped when
-    /// opaque) — the Lua/CLI command paths store raw hex, so
-    /// the stored form is not canonical, only the parser is
-    /// shared. On failure silently revert to the last-good
-    /// value.
+    /// Parse draft and normalize hex; empty field commits Automatic (#429).
     private func commit() {
-        // On an adaptive well, an emptied field is a valid commit
-        // to "Automatic" — not a parse failure to revert (#429).
         if automatic,
             draft.trimmingCharacters(in: .whitespaces).isEmpty
         {
@@ -293,10 +244,7 @@ struct ColorSwatch: View {
     }
 
     private func present() {
-        // Seed an OPAQUE color when Automatic: the empty well's
-        // `color` is `.clear` (alpha 0), which would open the panel
-        // with the opacity slider at zero — a hue picked without
-        // touching alpha would commit an invisible mark (#429).
+        // Seed opaque color when automatic to prevent 0-alpha picker (#429).
         let seed = isAutomatic ? NSColor.labelColor : NSColor(color)
         token = ColorPanelController.shared.present(
             current: seed

@@ -1,38 +1,21 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The per-space layout override rows (issue #17): the fields
-/// the space's current mode can override, each inheriting the
-/// global value (gray) until its checkbox is ticked. Rendered in
-/// the pushed per-space override editor (#678 8b,
-/// `SpacesSection+Overrides.swift`; an inline expander in #68
-/// §3.2, then a Customize popover in #205 before the pane) — the
-/// row set mirrors the app-bar override controls, keyed by space
-/// instead of layout.
+/// Per-space layout override rows editor (#17, #678, #68, #205).
 struct SpaceOverrideRows: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
-    /// Set by the `Reset All Layout Overrides` button to arm the
-    /// confirmation dialog (#290). The dialog lives on
-    /// `SpacesSection`, not here, so it survives the popover
-    /// dismissing — this row set only requests it.
+    /// Armed confirmation dialog for resetting overrides (#290).
     @Binding var pendingResetAll: SpaceID?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                // Floating has no override rows, only the placeholder
-                // below, so it carries no caption or column header —
-                // an "inherit Floating defaults" caption over "has no
-                // overrides" contradicts itself.
                 if mode != .floating {
                     captionRow
                 }
                 modeRows
             }
-            // The active layout's name, read by every `OverrideChrome`
-            // below to render "follows <Layout> defaults · <value>"
-            // on an inheriting row (#678 8b).
             .environment(\.overrideLayoutName, mode.displayName)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
@@ -44,9 +27,7 @@ struct SpaceOverrideRows: View {
         }
     }
 
-    /// The caption and the "OVERRIDE" column header aligned over
-    /// the rows' trailing checkboxes. Only drawn for a tiling
-    /// layout (the caller gates Floating out).
+    /// Caption and override column header row (2026-08-16).
     private var captionRow: some View {
         HStack(
             alignment: .firstTextBaseline,
@@ -56,22 +37,6 @@ struct SpaceOverrideRows: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer(minLength: SettingsMetrics.overrideRowInset)
-            // ONE line, always. The column was sized for the
-            // English "OVERRIDE" and every longer noun stacked:
-            // German's "ÜBERSCHREIBUNG" hyphenated into three
-            // lines above the checkboxes (owner, on device,
-            // 2026-08-16). Italian's "PERSONALIZZAZIONE" is 17
-            // characters and sizing the column to it would give
-            // a checkbox a 110 pt column in every locale — so
-            // the width fits the middle of the range and the
-            // two longest shrink slightly rather than wrap.
-            //
-            // Stated residue: a column that MEASURED its header
-            // would need neither the constant nor the scale
-            // factor, but the header and the checkboxes live in
-            // different views, so sharing an intrinsic width
-            // needs a preference key. Worth it if a third
-            // surface ever grows this column.
             Text(L("space_override.override_column", "Override"))
                 .font(.caption2)
                 .fontWeight(.semibold)
@@ -87,9 +52,8 @@ struct SpaceOverrideRows: View {
         .padding(.horizontal, SettingsMetrics.overrideRowInset)
     }
 
-    /// Dynamic caption naming the active layout whose defaults an
-    /// unchecked row inherits (#290), replacing the old generic
-    /// "gray = inherit" gloss.
+    /// Dynamic caption naming the active layout whose defaults an unchecked
+    /// row inherits (#290).
     private var caption: String {
         L(
             "space_override.caption",
@@ -98,24 +62,14 @@ struct SpaceOverrideRows: View {
         )
     }
 
-    /// Internal so the footer extension
-    /// (`SpaceOverrideRows+Footer.swift`) can read the active
-    /// layout for its reset label and dormant filter.
     var mode: LayoutMode {
         model.config.spaceModes[space] ?? .bsp
     }
 
-    /// Internal (not private) so the Grid/Monocle/Track rows,
-    /// which live in `SpaceOverrideRows+ModeRows.swift` to keep
-    /// each file under the line ceiling, can read it.
     var g: TilingSettings { model.config.settings }
 
-    /// The census-resolved greying for this space's override rows
-    /// and reset action (#678 Phase 3). One per-instance resolver,
-    /// keyed on the space and its active layout, so a row never
-    /// re-derives "is this Space rigid / auto-sized" beside the
-    /// gate that declares it. Internal so the mode-row and footer
-    /// extensions consult the same instance.
+    /// Census-resolved greying for space override rows and reset action (#678
+    /// Phase 3).
     var gates: SpacesGates {
         SpacesGates(settings: g, space: space, mode: mode)
     }
@@ -125,8 +79,6 @@ struct SpaceOverrideRows: View {
             .font(.caption)
             .foregroundStyle(.secondary)
     }
-
-    // MARK: - Per-mode rows
 
     @ViewBuilder
     private var modeRows: some View {
@@ -195,11 +147,7 @@ struct SpaceOverrideRows: View {
         }
     }
 
-    /// The effective scroll orientation for this space (its
-    /// override, else the global), so the slot-size and anchor
-    /// labels read Row height / Top-Bottom on a vertical space and
-    /// Column width / Left-Right otherwise — the values stored
-    /// stay axis-neutral (`start`/`end`, `ScrollSize`) (#239).
+    /// Effective scroll orientation for space (#239).
     private var scrollingIsVertical: Bool {
         g.resolvedScrolling(for: space).orientation == .vertical
     }
@@ -248,16 +196,7 @@ struct SpaceOverrideRows: View {
         )
     }
 
-    // The Stack rows live in `SpaceOverrideRows+StackRows.swift`
-    // (#222 grew them past this file's line budget).
-
-    // MARK: - Binding helper
-
-    /// One generic bridge from an override map's optional field
-    /// to a `Binding<T?>`. Setting a field to nil that empties
-    /// the override drops the map entry, mirroring the Lua
-    /// command. Internal so the mode rows split into
-    /// `SpaceOverrideRows+ModeRows.swift` can reach it.
+    /// Generic binding bridge for optional override map fields.
     func binding<O: SpaceLayoutOverride, T>(
         _ map: WritableKeyPath<TilingSettings, [SpaceID: O]>,
         _ space: SpaceID,
