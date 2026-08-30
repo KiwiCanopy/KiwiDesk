@@ -1298,9 +1298,9 @@ section {
 
 .req {
   display: block;
-  margin-top: 3rem;
+  margin-top: 1.25rem;
   margin-bottom: 0;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   line-height: 1.55;
   color: var(--text-faint);
   text-wrap: balance;
@@ -1308,8 +1308,10 @@ section {
 .req > svg,
 .req > [data-icon] {
   display: inline-block;
-  vertical-align: -0.15em;
-  margin-right: 0.45rem;
+  width: 0.9em;
+  height: 0.9em;
+  vertical-align: -0.1em;
+  margin-right: 0.4rem;
 }
 
 /* The closing band's quiet star ask — the req line's voice with
@@ -1317,7 +1319,7 @@ section {
    it reads as a caption that happens to be followable rather
    than as another button. */
 .star-hint {
-  margin-top: 0.35rem;
+  margin-top: 0.6rem;
 }
 .star-hint a {
   color: inherit;

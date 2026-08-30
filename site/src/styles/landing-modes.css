@@ -1006,12 +1006,6 @@ a.quote-card__byline-main:hover {
 }
 
 /* Centered under a video, CTA or footer element. */
-/* The closing band's captions read as one group, so they sit
-   tighter than the component's default. */
-.cta-band .quote-aside {
-  margin-top: 0.7rem;
-}
-
 .quote-aside--center {
   margin-inline: auto;
   text-align: center;
