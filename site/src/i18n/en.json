@@ -137,7 +137,7 @@
   "compare_diff_title": "What is actually different about KiwiDesk",
   "compare_eyebrow": "How KiwiDesk compares",
   "compare_h1": "KiwiDesk and the other macOS window managers",
-  "compare_intro": "macOS has good window managers, and this page is not an argument that they are bad. It is here so you can work out quickly which one fits the way you work — including the cases where the answer is not KiwiDesk.",
+  "compare_intro": "macOS has good window managers, and this page is not an argument that they are bad. If you are looking for an alternative to yabai, AeroSpace or Magnet — or working out which to start with — it is here so you can see quickly which one fits the way you work, including the cases where the answer is not KiwiDesk.",
   "compare_intro_honesty": "Everything here was checked against each project’s own documentation, and the claims that turn on a source link to it — including ours. Where we could not verify something, this page says so rather than guessing.",
   "compare_magnet_also": "and Rectangle",
   "compare_magnet_diff": "Magnet snaps windows into regions; it does not manage a layout. There is no automatic tiling when a window opens, no spaces model, no per-app rules, no profiles that reshape the whole desktop, and no scripting. It is also paid and closed source. If what you want is “Magnet, but it keeps arranging things for me”, that is roughly the gap KiwiDesk fills.",
