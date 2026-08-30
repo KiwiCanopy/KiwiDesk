@@ -137,6 +137,25 @@ const picks = [
   ...tools.filter((tool) => tool.own),
 ];
 
+// Where a row's SUBJECT has a page that explains it, the row
+// LABEL links there. The label names the concept the whole row
+// asks about, so one link serves every column — where a link
+// inside a cell would explain KiwiDesk's answer only, and put
+// underlines in our column and nowhere else.
+//
+// Only destinations this page already cites, because
+// check-site-tokens fails the build on a site-relative href that
+// does not resolve. Rows whose subject has no page (Community,
+// Licence, Mouse) simply have no entry.
+const rowLinks = {
+  setup: "/guide/",
+  sip: src.sipDecision,
+  tabs: src.tabsLimit,
+  hotkeys: "/guide/",
+  layouts: "/guide/",
+  scripting: src.luaRef,
+};
+
 const rows = [
   "setup",
   "sip",
@@ -196,7 +215,15 @@ const rows = [
       <tbody>
         {rows.map((row) => (
           <tr>
-            <th scope="row">{t(`compare_row_${row}`)}</th>
+            <th scope="row">
+              {rowLinks[row] ? (
+                <a class="cmp__rowlink" href={rowLinks[row]}>
+                  {t(`compare_row_${row}`)}
+                </a>
+              ) : (
+                t(`compare_row_${row}`)
+              )}
+            </th>
             {tools.map((tool) => (
               <td class={tool.own ? "is-own" : undefined}>
                 {t(`compare_cell_${row}_${tool.key}`)}
@@ -208,7 +235,11 @@ const rows = [
     </table>
   </div>
 
-  <p class="cmp__note">{t("compare_table_note")}</p>
+  <p class="cmp__note">
+    <Fragment set:html={t("compare_table_note")
+      .replace("{guide}", `<a href="${localePath(lang, "/guide/")}">`)
+      .replace("{/guide}", "</a>")} />
+  </p>
 
   <section class="cmp__anchors" aria-labelledby="different">
     <h2 id="different">{t("compare_diff_title")}</h2>
@@ -717,6 +748,22 @@ const rows = [
   }
   /* MINOR — the smallest type on the page had the longest
      measure; everything else is capped at 44rem. */
+  /* Quiet by default — the label is a label first and a link
+     second, so it must not out-shout the cells it heads. */
+  .cmp__rowlink {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-style: dotted;
+    text-decoration-color:
+      color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .cmp__rowlink:hover,
+  .cmp__rowlink:focus-visible {
+    color: var(--accent);
+    text-decoration-style: solid;
+    text-decoration-color: currentColor;
+  }
   .cmp__note,
   .cmp__picks {
     max-width: 44rem;
