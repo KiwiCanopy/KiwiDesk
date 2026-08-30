@@ -637,6 +637,7 @@
   }
 }
 .ba__card {
+  min-width: 0;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   padding: clamp(1.4rem, 3vw, 1.85rem);
@@ -648,6 +649,7 @@
    Bare, it reads as the reply to the card beside it rather than
    as its twin. */
 .ba__answer {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;

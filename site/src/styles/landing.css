@@ -265,6 +265,10 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  overflow-x: clip;
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -1320,6 +1324,11 @@ section {
 .star-hint {
   margin-top: 0.6rem;
 }
+.req a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 .star-hint a {
   color: inherit;
   text-decoration: underline;
@@ -1736,4 +1745,18 @@ section {
   display: flex;
   width: fit-content;
   margin: 0 auto 2.6rem;
+}
+
+/* Below this width the nav keeps its CONTROLS and drops its
+   LINKS. Measured before this rule: at 390px the language switch
+   ran to 422px and the theme toggle to 473px, both off a 390px
+   screen; at 320px the whole switcher was gone. Every link here
+   is reachable from the footer, so shedding them costs a
+   shortcut; keeping them cost the theme toggle and the language
+   switch outright (site + design review, 2026-08-30). */
+@media (max-width: 840px) {
+  .nav__link,
+  :root[data-mode="dev"] a.nav__link.dev-only {
+    display: none;
+  }
 }

@@ -369,12 +369,19 @@ const jsonLd = [
                it's useful in Nerd mode too. */}
           <a class="nav__link nav__link--guide" href="/guide/"
             >{t.nav_guide}</a>
-          {/* Alternatives: ungated like Guide. Both audiences ask
-               "how does this compare?" — the Simple reader about
-               Magnet, the Nerd reader about yabai — and the page
-               answers both (#975). */}
-          <a class="nav__link" href={`${homeHref}compare/`}
-            >{t.nav_compare}</a>
+          {/* No Comparison entry here (design + site review,
+               2026-08-30). A global nav asks every visitor on every
+               page whether that word is for them — including a
+               Simple reader who does not yet know what tiling is.
+               The in-content links self-select instead: they NAME
+               yabai, AeroSpace and Rift, so a reader who does not
+               recognise them reads past. It was also 114px the nav
+               could not afford — it pushed the theme toggle off
+               screen below 500px — and `nav__link--changelog`
+               already sheds at 720px, so a longer word in two of
+               three locales could not have stayed at every width.
+               /compare/ is reached from the hero, #calm and every
+               footer. */}
           {/* Release Notes: shown in Nerd mode (dev-only). "What changed"
                is accessible to everyone via the footer and About window. */}
           <a class="nav__link nav__link--changelog dev-only"
@@ -623,7 +630,10 @@ const jsonLd = [
             <p class="req req--center" id="devHeroReq">
               <Icon name="lucide:shield" width={15} height={15}
                 aria-hidden="true" />
-              {t.download_req}
+              <Fragment set:html={t.download_req_dev
+                .replace("{mit}", `<a href="${repo}/blob/main/LICENSE"`
+                  + ` target="_blank" rel="noopener">`)
+                .replace("{/mit}", "</a>")} />
             </p>
           )}
           {/* The badge states the version, read from the release
