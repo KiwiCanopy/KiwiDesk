@@ -4735,7 +4735,10 @@ delay (default 1500 ms). The restore is skipped when the display set
 changed while the machine was away (undock, monitor power-off): the
 captured frames belong to the old displays, so the monitor-change
 profile resolution wins instead. A restore that does run finishes
-with a full retile, like any space switch.
+with a full retile, like any space switch, and actually focuses the
+remembered window — raises it and activates its app — so shortcuts
+act on it immediately. If that window is gone, focus follows
+whatever macOS brought to the front at unlock.
 
 **Example:**
 

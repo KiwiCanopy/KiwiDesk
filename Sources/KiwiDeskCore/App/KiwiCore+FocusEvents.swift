@@ -214,16 +214,11 @@ extension KiwiCore {
         // would revert to the stale target. Re-assert the
         // intended focus and drop the echo. Consume the id
         // from the outstanding set either way.
-        // An outstanding entry is our raise's echo only while
-        // the raise is RECENT (`selfRaiseStamps`, stamped at
-        // raise time, age-pruned): raising an already-key
-        // window emits no echo at all — the restore's closing
-        // re-assert does exactly that — so its entry sat
-        // unconsumed forever and classified the user's NEXT
-        // click on that window as our echo, eating it (device
-        // QA 2026-08-03). `outstandingSelfRaises` was the last
-        // unbounded ledger — the `zOrderRaiseEchoWindow`
-        // lesson again. The entry is consumed either way.
+        // An outstanding entry is our echo only while the raise
+        // is RECENT (`selfRaiseStamps`): an already-key raise
+        // never echoes, so an unbounded entry classified the
+        // user's NEXT click on that window as our echo, eating
+        // it (#687). The entry is consumed either way.
         let selfEcho = freshSelfRaise(id, now: now)
         outstandingSelfRaises.remove(id)
         // And even a FRESH entry stands down for a report with
@@ -272,6 +267,8 @@ extension KiwiCore {
         // the user reached, and a stale raise firing after the
         // pan would steal focus back.
         pendingFocusRaise = nil
+        // State and the OS agree again (#1130).
+        disarmWakeFocusHeal()
         let honoredApp: String =
             state.windows[id]?.appName ?? "?"
         let honoredBefore: String = describe(

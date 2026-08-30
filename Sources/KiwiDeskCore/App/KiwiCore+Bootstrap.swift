@@ -153,8 +153,10 @@ extension KiwiCore {
         sleepWake.captureState = { [weak self] in
             self?.state.snapshot()
         }
+        // The wake leg pays the adopted focus for real (#1130);
+        // the crash leg above keeps the bare replay.
         sleepWake.restoreState = { [weak self] snapshot in
-            self?.restoreAndSettle(snapshot)
+            self?.restoreAndSettleAfterWake(snapshot)
         }
         sleepWake.displayFingerprints = { [weak self] in
             self?.state.workspaces.allDisplays

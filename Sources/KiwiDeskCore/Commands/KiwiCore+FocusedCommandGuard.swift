@@ -36,25 +36,43 @@ extension KiwiCore {
         // that may have changed in exactly the racy activation
         // window this seam diagnoses.
         let front = frontmostPID()
+        if foregroundOwned(front: front) { return nil }
+        // The wake heal (#1130), one-shot: the wake payment's
+        // activation can be refused, so re-seed from the real
+        // frontmost and re-ask before failing the press.
+        if consumeWakeFocusHeal() {
+            seedFocusFromFrontmost()
+            if foregroundOwned(front: front) {
+                onLog(
+                    "wake focus heal: reseeded from frontmost, "
+                        + "allowed \(command)"
+                )
+                return nil
+            }
+        }
+        // The hotkey path discards the response, so a denial
+        // is otherwise invisible — the "#483 `_and_follow`
+        // does nothing" trap. Log which clause denied: the
+        // anchor/frontmost divergence is usually a dropped
+        // cooperative activate (#463).
+        logFocusedCommandDenial(
+            command,
+            focused: focusedWindow,
+            front: front
+        )
+        return .fail("no managed window is currently focused")
+    }
+
+    /// The #292 ownership clauses in one place, so the wake heal
+    /// (#1130) re-asks the same question after its reseed.
+    private func foregroundOwned(front: pid_t?) -> Bool {
         guard let focused = focusedWindow,
             let front,
             front == focused.pid,
             eventLoop.observes(pid: focused.pid),
             !ignoredPanel.active.contains(focused.pid)
-        else {
-            // The hotkey path discards the response, so a denial
-            // is otherwise invisible — the "#483 `_and_follow`
-            // does nothing" trap. Log which clause denied: the
-            // anchor/frontmost divergence is usually a dropped
-            // cooperative activate (#463).
-            logFocusedCommandDenial(
-                command,
-                focused: focusedWindow,
-                front: front
-            )
-            return .fail("no managed window is currently focused")
-        }
-        return nil
+        else { return false }
+        return true
     }
 
     /// One line naming the denied command, both sides of the
