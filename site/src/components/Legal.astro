@@ -53,14 +53,14 @@ const pageDesc = `${data.title} — KiwiDesk / KiwiCanopy.`;
 </PageShell>
 
 <style>
-  .legal {
+  :global(main.legal) {
     position: relative;
     z-index: 1;
     max-width: var(--prose-measure);
     margin: 0 auto;
     padding: clamp(1.25rem, 3.5vw, 2rem) 1.5rem 4rem;
   }
-  .legal h1 {
+  :global(main.legal) h1 {
     font-size: clamp(1.9rem, 5vw, 2.6rem);
     color: var(--text);
     line-height: 1.15;

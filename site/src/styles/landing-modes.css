@@ -1009,7 +1009,7 @@ a.quote-card__byline-main:hover {
 /* The closing band's captions read as one group, so they sit
    tighter than the component's default. */
 .cta-band .quote-aside {
-  margin-top: 0.8rem;
+  margin-top: 0.9rem;
 }
 
 .quote-aside--center {
