@@ -15,6 +15,9 @@
 import "../styles/landing.css";
 import ThemeHead from "./ThemeHead.astro";
 import logoMark from "../assets/brand/logo.svg";
+import kofiIcon from "../assets/brand/kofi_symbol.svg";
+import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
+import { Image } from "astro:assets";
 import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
@@ -27,6 +30,12 @@ interface Props {
   title: string;
   desc: string;
   noindex?: boolean;
+  /** Structured data for this page, serialised into a
+      `application/ld+json` block. Landing and Guide emit their own;
+      this shell had no slot, so Compare and Changelog shipped none
+      (site review, 2026-08-30). Optional — a page that passes
+      nothing emits nothing. */
+  jsonLd?: unknown;
   ogImage?: string;
   mainClass?: string;
 }
@@ -37,6 +46,7 @@ const {
   title,
   desc,
   noindex = false,
+  jsonLd,
   ogImage,
   mainClass,
 } = Astro.props;
@@ -63,6 +73,8 @@ const canonical = `${site}${localePath(lang, slug)}`;
 const ogLocale = { en: "en_US", de: "de_DE", ja: "ja_JP" }[lang];
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
+const kiwiCanopyUrl = "https://kiwicanopy.com";
+const makerProfile = "https://github.com/hajiboy95";
 ---
 
 <!doctype html>
@@ -85,6 +97,10 @@ const kofi = "https://ko-fi.com/kiwicanopy";
     {ogImage && <meta name="twitter:title" content={title} />}
     {ogImage && <meta name="twitter:description" content={desc} />}
     {ogImage && <meta name="twitter:image" content={ogImage} />}
+    {jsonLd && (
+      <script type="application/ld+json"
+        set:html={JSON.stringify(jsonLd)}></script>
+    )}
     <ThemeHead />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" hreflang="en" href={`${site}${localePath("en", slug)}`} />
@@ -121,62 +137,96 @@ const kofi = "https://ko-fi.com/kiwicanopy";
   <body>
     <a href="#main-content" class="skip-link">{t("skip_to_content")}</a>
 
-    <header class="lnav">
-      <a class="brand" href={localePath(lang)} aria-label={t("nav_home_label") || "KiwiDesk"}>
-        <img src={logoMark.src} alt="" width="34" height="34" />
-        <span>KiwiDesk</span>
-      </a>
-      <nav class="right">
-        <span class="langs">
-          {
-            (Object.entries(LANGS) as [Lang, string][]).map(([code, label]) => (
-              <a
-                href={localePath(code, slug)}
-                data-lang={code}
-                title={label}
-                aria-current={code === lang ? "page" : undefined}
-              >
-                {code.toUpperCase()}
-              </a>
-            ))
-          }
-        </span>
-        <button
-          id="themeToggle"
-          class="theme-toggle"
-          type="button"
-          aria-label="Switch color theme"
-        >
-          <span class="theme-toggle__track" aria-hidden="true">
-            <span class="theme-toggle__thumb">
-              <svg class="theme-toggle__sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="4"></circle>
-                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-              </svg>
-              <svg class="theme-toggle__moon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-              </svg>
+    <nav class="nav" id="nav">
+      <div class="wrap nav__inner">
+        <a class="nav__brand" href={localePath(lang)} aria-label={t("nav_home_label") || "KiwiDesk"}>
+          <img class="nav__mark" src={logoMark.src} alt="" width="28" height="28" aria-hidden="true" />
+          <span>KiwiDesk</span>
+        </a>
+        <div class="nav__links">
+          <div class="lang-switch" role="group"
+            aria-label={t("nav_lang_label")}>
+            {
+              (Object.entries(LANGS) as [Lang, string][]).map(
+                ([code, label], index) => (
+                  <>
+                    {index > 0 && (
+                      <span class="lang-switch__sep" aria-hidden="true"
+                      ></span>
+                    )}
+                    <a
+                      class="lang-switch__opt"
+                      href={localePath(code, slug)}
+                      data-lang={code}
+                      lang={code}
+                      title={label}
+                      aria-current={code === lang ? "true" : undefined}
+                    >
+                      {code.toUpperCase()}
+                    </a>
+                  </>
+                ),
+              )
+            }
+          </div>
+          <button
+            id="themeToggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="Switch color theme"
+          >
+            <span class="theme-toggle__track" aria-hidden="true">
+              <span class="theme-toggle__thumb">
+                <svg class="theme-toggle__sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                </svg>
+                <svg class="theme-toggle__moon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+              </span>
             </span>
-          </span>
-        </button>
-      </nav>
-    </header>
+          </button>
+          <a class="nav__support" href={kofi} target="_blank"
+            rel="noopener" aria-label={t("nav_support_aria")}
+            title={t("nav_support_aria")}>
+            <img class="kofi-icon" src={kofiIcon.src} alt=""
+              aria-hidden="true" width="20" height="16" />
+          </a>
+        </div>
+      </div>
+    </nav>
 
     <main id="main-content" class={mainClass}>
       <slot />
     </main>
 
     <footer class="lfoot">
+      <a class="footer__parent" href={kiwiCanopyUrl}
+        target="_blank" rel="noopener">
+        <Image class="footer__logo" src={kiwiCanopy} alt=""
+          widths={[110, 160, 220]} sizes="110px" />
+        <span class="footer__name">{t("footer_org")}<span
+          aria-hidden="true"> ↗</span></span>
+      </a>
       <p class="tag">{t("footer_tag")}</p>
       <nav class="flinks" aria-label={t("footer_nav_aria")}>
         <a href="/docs">{t("footer_docs")}</a>
+        <a href={localePath(lang)}>{t("guide_footer_home")}</a>
+        <a href={localePath(lang, "/compare/")}>{t("nav_compare")}</a>
         <a href={localePath(lang, "/changelog/")}>{t("footer_changelog")}</a>
         <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>
         <a href={localePath(lang, "/privacy")}>{t("footer_privacy")}</a>
-        <a href={repo} target="_blank" rel="noopener">{t("footer_github")}</a>
-        <a href={kofi} target="_blank" rel="noopener">{t("footer_kofi")}</a>
+        <a href={repo} target="_blank" rel="noopener">{t("footer_github")}<span aria-hidden="true"> ↗</span></a>
+        <a href={kofi} target="_blank" rel="noopener">{t("footer_kofi")}<span aria-hidden="true"> ↗</span></a>
       </nav>
       <p class="copy">{t("footer_copy")}</p>
+      <p class="footer__credit">
+        {t("footer_credit_built_by")}{" "}
+        <a href={makerProfile} target="_blank" rel="noopener">
+          {t("footer_credit_name")} · {t("footer_credit_handle")}
+        </a>
+      </p>
     </footer>
 
     <style>
@@ -194,128 +244,6 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       }
       .skip-link:focus {
         top: 0.5rem;
-      }
-
-      .lnav {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        max-width: var(--maxw);
-        margin: 0 auto;
-        padding: 1.25rem 1.5rem;
-        flex-wrap: wrap;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        font-weight: 800;
-        font-size: 1.15rem;
-        color: var(--text);
-      }
-      .brand img {
-        height: 30px;
-        width: auto;
-      }
-      .right {
-        display: flex;
-        align-items: center;
-        gap: 1.1rem;
-      }
-      .langs {
-        display: flex;
-        gap: 0.25rem;
-        font-size: 0.78rem;
-        font-weight: 700;
-        padding: 0.2rem;
-        border-radius: 999px;
-        background: var(--bg-2);
-      }
-      .langs a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 24px;
-        padding: 0.4rem 0.6rem;
-        border-radius: 999px;
-        color: var(--text);
-        opacity: 0.55;
-        transition: background 140ms ease, opacity 140ms ease;
-      }
-      .langs a:hover {
-        opacity: 1;
-      }
-      .langs a[aria-current="page"] {
-        background: var(--bg-1);
-        opacity: 1;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
-      }
-
-      /* Theme toggle — sliding sun/moon pill */
-      .theme-toggle {
-        display: inline-grid;
-        place-items: center;
-        padding: 0;
-        border: 0;
-        background: none;
-        cursor: pointer;
-        border-radius: 999px;
-      }
-      .theme-toggle__track {
-        position: relative;
-        display: block;
-        width: 52px;
-        height: 30px;
-        border-radius: 999px;
-        border: 1px solid var(--border-strong);
-        background: var(--bg-2);
-        transition: background 0.25s ease, border-color 0.25s ease;
-      }
-      .theme-toggle__thumb {
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        color: #fff8e6;
-        background: linear-gradient(180deg, #f6c453, #e0932f);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
-        transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease;
-      }
-      :root[data-theme="dark"] .theme-toggle__thumb {
-        transform: translateX(22px);
-        background: linear-gradient(180deg, #cfe0bd, #9db785);
-        color: #10210b;
-      }
-      .theme-toggle:hover .theme-toggle__track {
-        border-color: var(--accent);
-      }
-      .theme-toggle:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 3px;
-      }
-      .theme-toggle svg {
-        display: block;
-      }
-      .theme-toggle__sun,
-      .theme-toggle__moon {
-        grid-area: 1 / 1;
-        transition: opacity 0.2s ease;
-      }
-      .theme-toggle__moon {
-        opacity: 0;
-      }
-      :root[data-theme="dark"] .theme-toggle__sun {
-        opacity: 0;
-      }
-      :root[data-theme="dark"] .theme-toggle__moon {
-        opacity: 1;
       }
 
       /* --- Footer --- */
@@ -384,6 +312,15 @@ const kofi = "https://ko-fi.com/kiwicanopy";
           /* ignore */
         }
       });
+
+      // Nav blur on scroll
+      const nav = document.getElementById("nav");
+      function onScroll() {
+        if (window.scrollY > 12) nav?.classList.add("scrolled");
+        else nav?.classList.remove("scrolled");
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
     </script>
   </body>
 </html>

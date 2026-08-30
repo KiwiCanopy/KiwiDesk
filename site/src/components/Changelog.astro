@@ -34,7 +34,7 @@ import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 import changelog from "../data/changelog.json";
-import { downloadHref } from "../lib/download";
+import { downloadHref, downloadVersion } from "../lib/download";
 import ogBannerEn from "../assets/brand/og-banner.jpg";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
@@ -114,9 +114,6 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
   ogImage={ogImage}
   mainClass="clog"
 >
-  <a class="back" href={localePath(lang)}>
-    ← {t("guide_back_home")}
-  </a>
   <h1>{t("changelog_title")}</h1>
   <p class="intro">{t("changelog_intro")}</p>
 
@@ -134,7 +131,9 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
     <a class="btn btn--primary clog__download" href={downloadHref}>
       <Icon name="lucide:download" width={16} height={16}
         aria-hidden="true" />
-      {t("changelog_download_cta")}
+      {downloadVersion
+        ? t("download_versioned").replace("{v}", downloadVersion)
+        : t("changelog_download_cta")}
     </a>
   )}
 
@@ -232,20 +231,10 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
        the global `section` rule. */
     position: relative;
     z-index: 1;
-    max-width: 46rem;
+    max-width: var(--prose-measure);
     margin: 0 auto;
-    padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem)
+    padding: clamp(1.25rem, 3.5vw, 2rem) clamp(1rem, 4vw, 2.5rem)
       5rem;
-  }
-  .back {
-    display: inline-block;
-    margin-bottom: 1.6rem;
-    color: var(--text-dim);
-    text-decoration: none;
-    font-size: 0.92rem;
-  }
-  .back:hover {
-    color: var(--text);
   }
   :global(main.clog) h1 {
     margin: 0 0 0.4rem;

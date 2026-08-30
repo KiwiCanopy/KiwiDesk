@@ -21,7 +21,7 @@ type Lang = (typeof langs)[number];
 // with hreflang alternates, so a path may only join this list
 // once its /de/ and /ja/ routes genuinely exist — otherwise the
 // alternates advertise URLs that 404.
-const paths = ["", "nerd", "guide", "changelog"];
+const paths = ["", "nerd", "guide", "changelog", "compare"];
 
 function urlFor(base: string, lang: Lang, path: string): string {
   // English lives at root, other locales under /<lang>/

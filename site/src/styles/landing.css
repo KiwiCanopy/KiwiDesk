@@ -11,21 +11,27 @@
    ========================================================= */
 
 :root {
-  /* ---- Spacing scale (8pt-ish, fluid at the edges) ---- */
-  --sp-1: 0.5rem;
-  --sp-2: 0.75rem;
-  --sp-3: 1rem;
-  --sp-4: 1.5rem;
-  --sp-5: 2rem;
-  --sp-6: 3rem;
-  --sp-7: 4.5rem;
-  --sp-8: 7rem;
 
   --radius-sm: 10px;
   --radius: 16px;
   --radius-lg: 24px;
 
   --maxw: 1120px;
+  --prose-measure: 45rem;
+  /* Section headings, two ranks. A full-width section band takes
+     --h2, a heading inside a column takes --h2-column. */
+  --h2: clamp(1.7rem, 4vw, 2.5rem);
+  --h2-column: clamp(1.6rem, 3.6vw, 2.3rem);
+  /* Theme toggle's sun and moon. The only deliberate non-brand
+     hues on the site — a control that depicts daylight cannot be
+     drawn in kiwi green — and previously six raw literals spread
+     over three rules and two files. */
+  --toggle-sun-from: #f6c453;
+  --toggle-sun-to: #e0932f;
+  --toggle-sun-ink: #fff8e6;
+  --toggle-moon-from: #cfe0bd;
+  --toggle-moon-to: #9db785;
+  --toggle-moon-ink: #10210b;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display",
     "Segoe UI", system-ui, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
@@ -264,6 +270,10 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  overflow-x: clip;
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -329,10 +339,10 @@ body::before {
    ========================================================= */
 .skip-link {
   position: fixed;
-  top: var(--sp-1);
-  left: var(--sp-1);
+  top: 0.5rem;
+  left: 0.5rem;
   z-index: 100;
-  padding: var(--sp-1) var(--sp-3);
+  padding: 0.5rem 1rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
   background: var(--bg-3);
@@ -371,7 +381,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sp-3);
+  gap: 1rem;
   padding-block: 0.85rem;
 }
 
@@ -450,10 +460,28 @@ body::before {
   transition: color 0.3s ease;
 }
 
+.nav__brand:hover {
+  color: var(--accent);
+}
+.nav__brand:hover .nav__mark {
+  transform: scale(1.06);
+}
+.nav__brand:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav__brand:hover .nav__mark {
+    transform: none;
+  }
+}
+
 .nav__mark {
   display: block;
   width: 28px;
   height: 28px;
+  transition: transform 0.2s ease, filter 0.3s ease;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
   transition: filter 0.3s ease;
 }
@@ -486,6 +514,36 @@ body::before {
 .nav__link:hover {
   color: var(--nav-ink);
   background: var(--nav-hover-bg);
+}
+
+/* Back-to-home affordance in subpage navs (Guide, Changelog, Compare, Legal). */
+.learn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--nav-ink-dim);
+  padding: 0.5rem 0.7rem 0.5rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 550;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.learn-back:hover {
+  color: var(--nav-ink);
+  background: var(--nav-hover-bg);
+}
+
+.learn-back svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 520px) {
+  .learn-back__text {
+    display: none;
+  }
 }
 
 /* Ko-fi nav button — icon-only and compact. Counterintuitively this
@@ -570,8 +628,12 @@ body::before {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #fff8e6;
-  background: linear-gradient(180deg, #f6c453, #e0932f);
+  color: var(--toggle-sun-ink);
+  background: linear-gradient(
+    180deg,
+    var(--toggle-sun-from),
+    var(--toggle-sun-to)
+  );
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
     background 0.25s ease;
@@ -580,8 +642,12 @@ body::before {
 /* Dark theme → moon on the right; light theme → sun on the left. */
 :root[data-theme="dark"] .theme-toggle__thumb {
   transform: translateX(22px);
-  background: linear-gradient(180deg, #cfe0bd, #9db785);
-  color: #10210b;
+  background: linear-gradient(
+    180deg,
+    var(--toggle-moon-from),
+    var(--toggle-moon-to)
+  );
+  color: var(--toggle-moon-ink);
 }
 
 .theme-toggle:hover .theme-toggle__track {
@@ -668,8 +734,12 @@ body::before {
 /* Active locale reads as filled, echoing the theme toggle's thumb
    gradient so the three controls share one visual language. */
 .lang-switch__opt[aria-current="true"] {
-  color: #10210b;
-  background: linear-gradient(180deg, #cfe0bd, #9db785);
+  color: var(--toggle-moon-ink);
+  background: linear-gradient(
+    180deg,
+    var(--toggle-moon-from),
+    var(--toggle-moon-to)
+  );
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
 }
 
@@ -771,7 +841,7 @@ body::before {
 section {
   position: relative;
   z-index: 1;
-  padding-block: clamp(3.5rem, 9vw, var(--sp-8));
+  padding-block: clamp(3.5rem, 9vw, 7rem);
   /* L5: every top-level section doubles as an anchor-jump
      target (hero CTAs, footer/nav links), so it needs the same
      clearance under the sticky .nav (~68.5px tall) that
@@ -791,7 +861,14 @@ section {
   text-align: center;
 }
 
-.eyebrow {
+/* ONE eyebrow, in two ranks. There were four implementations —
+   four sizes, two weights, two tracking values — for one thing,
+   and `.learn__eyebrow` differed from this by 0.05rem of margin
+   and nothing else. The other files' selectors are named here
+   rather than in their own files so the values cannot drift
+   apart again; each keeps its own class in markup. */
+.eyebrow,
+.learn__eyebrow {
   display: inline-block;
   font-size: 0.8rem;
   font-weight: 650;
@@ -801,8 +878,22 @@ section {
   margin-bottom: 0.75rem;
 }
 
+/* The section rank: smaller and tighter, for an eyebrow heading a
+   section rather than a page. */
+.eyebrow--sm,
+.learn-section__eyebrow,
+.cmp__eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
 .section-head h2 {
-  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-size: var(--h2);
   line-height: 1.12;
   letter-spacing: -0.02em;
   margin: 0 0 0.75rem;
@@ -1253,7 +1344,7 @@ section {
 }
 
 .quickstart h2 {
-  font-size: clamp(1.6rem, 3.6vw, 2.3rem);
+  font-size: var(--h2-column);
   line-height: 1.14;
   letter-spacing: -0.02em;
   margin: 0 0 0.85rem;
@@ -1266,13 +1357,20 @@ section {
 }
 
 .req {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.9rem;
-  font-size: 0.85rem;
-  color: var(--text-faint);
+  display: block;
   margin-top: 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-faint);
+  text-wrap: balance;
+}
+.req > svg,
+.req > [data-icon] {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  vertical-align: -0.1em;
+  margin-right: 0.4rem;
 }
 
 /* The closing band's quiet star ask — the req line's voice with
@@ -1281,6 +1379,11 @@ section {
    than as another button. */
 .star-hint {
   margin-top: 0.6rem;
+}
+.req a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .star-hint a {
   color: inherit;
@@ -1427,6 +1530,44 @@ section {
   height: auto;
   display: block;
   margin-inline: auto;
+}
+
+.lfoot .footer__parent {
+  margin-bottom: 0.9rem;
+}
+.lfoot .footer__credit {
+  margin: 0.6rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+.lfoot .footer__credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer__parent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+.footer__parent .footer__name {
+  display: block;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color 140ms ease;
+}
+.footer__parent:hover .footer__name,
+.footer__parent:focus-visible .footer__name {
+  text-decoration-color: currentColor;
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer__parent .footer__name {
+    transition: none;
+  }
 }
 
 .footer__name {
@@ -1674,4 +1815,18 @@ section {
   display: flex;
   width: fit-content;
   margin: 0 auto 2.6rem;
+}
+
+/* Below this width the nav keeps its CONTROLS and drops its
+   LINKS. Measured before this rule: at 390px the language switch
+   ran to 422px and the theme toggle to 473px, both off a 390px
+   screen; at 320px the whole switcher was gone. Every link here
+   is reachable from the footer, so shedding them costs a
+   shortcut; keeping them cost the theme toggle and the language
+   switch outright (site + design review, 2026-08-30). */
+@media (max-width: 840px) {
+  .nav__link,
+  :root[data-mode="dev"] a.nav__link.dev-only {
+    display: none;
+  }
 }

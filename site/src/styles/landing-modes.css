@@ -435,6 +435,22 @@
   margin-bottom: 0.9rem;
 }
 
+/* Comparison-link wrappers (#975). Two placements, because the
+   two audiences ask "how is this different?" at opposite ends of
+   the page: the Nerd hero catches a visitor already running a
+   tiling WM on the first screen, while the Simple page waits
+   until #calm has explained what tiling buys them. */
+.hero__compare {
+  margin: 0.9rem 0 0;
+  text-align: center;
+}
+.what__fork {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.6rem;
+  margin: 0;
+}
+
 .link-arrow {
   display: inline-flex;
   align-items: center;
@@ -460,7 +476,7 @@
   }
 }
 .what__copy h2 {
-  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-size: var(--h2);
   line-height: 1.12;
   letter-spacing: -0.02em;
   margin: 0 0 0.85rem;
@@ -623,6 +639,7 @@
   }
 }
 .ba__card {
+  min-width: 0;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   padding: clamp(1.4rem, 3vw, 1.85rem);
@@ -634,6 +651,7 @@
    Bare, it reads as the reply to the card beside it rather than
    as its twin. */
 .ba__answer {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -771,7 +789,7 @@
   min-width: 0;
 }
 .split__copy h2 {
-  font-size: clamp(1.6rem, 3.6vw, 2.3rem);
+  font-size: var(--h2-column);
   line-height: 1.14;
   letter-spacing: -0.02em;
   margin: 0 0 0.85rem;
@@ -1047,12 +1065,12 @@ a.quote-card__byline-main:hover {
   position: relative;
 }
 .cta-band__inner h2 {
-  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-size: var(--h2);
   line-height: 1.12;
   letter-spacing: -0.02em;
   margin: 0 0 0.75rem;
 }
-.cta-band__inner p {
+.cta-band__inner > p:not(.req) {
   color: var(--text-dim);
   font-size: clamp(1rem, 2.2vw, 1.12rem);
   margin: 0 auto 1.6rem;
@@ -1062,8 +1080,7 @@ a.quote-card__byline-main:hover {
   margin-bottom: 0;
 }
 .req--center {
-  justify-content: center;
-  margin-inline: auto;
+  text-align: center;
 }
 
 /* =========================================================
