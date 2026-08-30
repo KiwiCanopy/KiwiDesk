@@ -151,6 +151,14 @@ input. A tool that mints a working file writes it under
 `locale-worksheets/` — outside every tree a target ships from,
 and `scripts/locale_paths.py` is the one definition of that path,
 imported by both scripts that touch it rather than re-derived.
+The `KIWIDESK_EXTRACT_*` env overrides belong to `extract-keys`
+alone; `merge-keys` refuses to run while any is set (#1107,
+`MergeKeysOverrideRefusalTests`), because honouring half the
+family once rewrote a developer's real catalogs under a harness
+that believed it was sandboxed — its one sanctioned harness is
+the repo-shaped `ScriptFixture`, which needs no env hook, and a
+new script wanting a quick env-var test hook must meet the same
+bar rather than widen the family.
 `LocaleWorksheetLocationTests` pins where `extract-keys` writes
 and `LocaleWorksheetRejectionTests` pins that one found among the
 catalogs is still *rejected*. Two rejections exist, deliberately:

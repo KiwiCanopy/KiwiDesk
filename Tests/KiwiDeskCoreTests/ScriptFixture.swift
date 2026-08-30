@@ -321,14 +321,11 @@ func runRepoScript(
     // point this run's *writes* at the real checkout. Nothing in
     // the test tree sets them for a repo-shaped run; this makes
     // that a property of the harness instead of a habit.
+    // Swept by prefix (`locale_paths.OVERRIDE_PREFIX`), never a
+    // hand-listed family: a fourth variable a script honours but
+    // this clear misses re-opens #1107 with every suite green.
     var environment = ProcessInfo.processInfo.environment
-    for key in [
-        "KIWIDESK_EXTRACT_SOURCES",
-        "KIWIDESK_EXTRACT_LOCALES",
-        "KIWIDESK_EXTRACT_WORKSHEETS",
-    ] {
-        environment.removeValue(forKey: key)
-    }
+        .filter { !$0.key.hasPrefix("KIWIDESK_EXTRACT_") }
     environment.merge(overrides) { _, new in new }
     return try runPythonScript(
         at: scriptsDir.appendingPathComponent(name),
