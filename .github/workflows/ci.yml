@@ -22,6 +22,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # The merge queue validates entries on its own merge-group
+  # refs; without this trigger the required checks never start
+  # there and every queued PR waits out the queue's timeout.
+  merge_group:
   # Manual "Run workflow" button in the Actions tab. Additive — the
   # automatic triggers above still fire. Useful while the repo is
   # private, where macOS runners bill at a 10x multiplier against a
