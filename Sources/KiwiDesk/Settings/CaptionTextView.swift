@@ -5,7 +5,8 @@ import AppKit
 final class CaptionTextView: NSTextView {
     var onLink: (() -> Void)?
     var linkLabel: String = ""
-    /// Mirrors SwiftUI's `isEnabled`.
+    /// Mirrors SwiftUI's `isEnabled`. A greyed caption must not claim hover
+    /// or focus.
     var isLive = true {
         didSet { if isLive != oldValue { refreshCursor() } }
     }

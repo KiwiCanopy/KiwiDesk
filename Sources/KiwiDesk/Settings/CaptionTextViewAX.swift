@@ -16,6 +16,8 @@ extension CaptionTextView {
         guard let first = rects.first else { return nil }
         let element = linkElement
         element.setAccessibilityLabel(linkLabel)
+        // Frame is union of all line rects so multiline AX highlights
+        // match focus ring.
         element.setAccessibilityFrameInParentSpace(
             rects.dropFirst().reduce(first) { $0.union($1) }
         )

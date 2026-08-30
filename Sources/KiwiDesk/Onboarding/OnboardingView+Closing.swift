@@ -37,7 +37,8 @@ extension OnboardingView {
         }
     }
 
-    /// The one place the running app asks for a star.
+    /// The ONE place the running app asks for a star. It cannot become a
+    /// nag — recurring surfaces (menu bar, banners) stay closed to it.
     private var starLine: some View {
         let parts = LinkedCaption.split(frame: starProse)
         return LinkedCaption(

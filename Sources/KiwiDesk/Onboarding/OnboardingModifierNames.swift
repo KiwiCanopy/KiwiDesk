@@ -7,8 +7,10 @@ struct OnboardingModifierName: Identifiable, Equatable {
     let name: String
 }
 
-/// Language-neutral short names under tour modifier glyphs
-/// (OnboardingModifierNameTests).
+/// Language-neutral short names under tour modifier glyphs.
+/// `OnboardingModifierNameTests.namesStayShort` is the one home for those
+/// numbers; do not restate them. An abbreviation of the app's own word is
+/// not a second word.
 @MainActor
 enum OnboardingModifierNames {
     /// Modifiers in canonical ⌃⌥⇧⌘ order

@@ -113,7 +113,7 @@ extension OnboardingView {
             .padding(.vertical, 4)
     }
 
-    /// Visual keycap chip styled for gateway or standard chords.
+    /// Visual keycap chip; gateway chords draw accent ink on accent fill.
     private func chip(
         _ text: String,
         family: OnboardingKeyFamily
