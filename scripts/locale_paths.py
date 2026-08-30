@@ -78,9 +78,10 @@ def worksheets_dir(root: Path, site: bool = False) -> Path:
     catalogs have no matching override, and redirecting half of
     a mode is worse than redirecting none of it, so
     `extract-keys` refuses the combination outright rather than
-    letting it through here. `merge-keys` refuses the whole
-    family in every mode (`merge_override_conflict`), so only
-    `extract-keys` can reach here with the override live.
+    letting it through here. `merge-keys` must refuse via
+    `merge_override_conflict` before any path computed here is
+    read — `MergeKeysOverrideRefusalTests` pins that with its
+    untouched-fixture assertions.
     """
     base = Path(_override() or str(root / WORKSHEETS_DIRNAME))
     return base / "site" if site else base
@@ -100,18 +101,11 @@ def _live_overrides() -> list[str]:
 def merge_override_conflict() -> str | None:
     """Why a `merge-keys` run must not proceed under any
     override, or None. Called before it touches a path, in both
-    modes.
-
-    `merge-keys` honours no `KIWIDESK_EXTRACT_*` variable: its
-    catalog directory is `__file__`-derived, so honouring the
-    worksheet override alone — what it did before #1107 — read
-    redirected worksheets and rewrote the developer's REAL
-    catalogs while the caller believed the run was sandboxed,
-    then unlinked the worksheet, the only copy of the work. Its
-    sanctioned harness is the repo-shaped `ScriptFixture`, which
-    clears the family, so honouring the rest would add a
-    production-only test hook no test needs; refusing makes the
-    half-redirect unrepresentable instead.
+    modes: merge-keys honours no `KIWIDESK_EXTRACT_*` variable —
+    its sanctioned harness is the repo-shaped fixture, which
+    needs no env hook — so refusal makes a half-redirect
+    unrepresentable (#1107; the argument is in
+    `.claude/rules/localization.md`).
     """
     live = _live_overrides()
     if not live:
