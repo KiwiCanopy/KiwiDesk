@@ -2,24 +2,17 @@ import AppKit
 import ApplicationServices
 
 /// Private AX call that maps an `AXUIElement` to its `CGWindowID`.
-/// Used by every serious macOS window manager; falls back cleanly
-/// (returns an error code) if unavailable.
 @_silgen_name("_AXUIElementGetWindow")
 private func _AXUIElementGetWindow(
     _ element: AXUIElement,
     _ out: UnsafeMutablePointer<UInt32>
 ) -> AXError
 
-/// Thin, synchronous helpers around the public Accessibility API.
-///
-/// AX calls can block (Electron/WebKit apps answer lazily), so
-/// callers must snapshot results instead of querying in loops.
+/// Synchronous helpers around the public Accessibility API.
 public enum AXHelper {
     /// Whether the process has Accessibility permission.
     public static func isTrusted(prompt: Bool = false) -> Bool {
         guard prompt else { return AXIsProcessTrusted() }
-        // Literal value of kAXTrustedCheckOptionPrompt; the SDK
-        // global is not concurrency-safe under Swift 6.
         let key = "AXTrustedCheckOptionPrompt"
         let options = [key: true] as CFDictionary
         return AXIsProcessTrustedWithOptions(options)
@@ -70,20 +63,7 @@ public enum AXHelper {
         return list ?? []
     }
 
-    // WindowServer-side queries (normalWindowCount,
-    // pidsWithNormalWindows) live in
-    // `AXHelper+WindowServer.swift`.
-
-    /// Bounds every AX message this process sends. A message to
-    /// an unresponsive app (stopped, deadlocked, paged out)
-    /// blocks the caller for the system default of ~6 s per
-    /// call; the boot scan makes several sequential main-thread
-    /// calls per app, so one hung helper serializes startup
-    /// into tens of seconds (#672 field report: ~60 s).
-    /// Setting the timeout on the system-wide element makes it
-    /// the process-wide default; an element carrying its own
-    /// timeout keeps it. Deterministic repro for the failure
-    /// this bounds: `kill -STOP` any GUI app, then boot.
+    /// Bounds process-wide AX messaging timeout to avoid hangs (#672).
     public static func setGlobalMessagingTimeout(
         seconds: Float
     ) {
@@ -121,7 +101,6 @@ public enum AXHelper {
             let axValue = value,
             CFGetTypeID(axValue) == AXValueGetTypeID()
         else { return rect }
-        // Sound: type verified via CFGetTypeID above.
         let frameValue = unsafeDowncast(
             axValue,
             to: AXValue.self
@@ -140,9 +119,7 @@ public enum AXHelper {
             ?? ""
     }
 
-    /// Whether a window is minimized to the Dock. Minimized
-    /// windows stay in the AX window list but must not occupy
-    /// layout slots.
+    /// True if window is minimized to the Dock.
     public static func isMinimized(
         _ element: AXUIElement
     ) -> Bool {
@@ -153,12 +130,7 @@ public enum AXHelper {
         ) ?? false
     }
 
-    /// Brings a minimized window back out of the Dock — the
-    /// setter twin of `isMinimized`, writing the same attribute
-    /// (#673). Activating an app does NOT deminiaturize, so this
-    /// is the only way to make an all-minimized app show
-    /// something. Returns whether AX accepted the write; a
-    /// window that is already restored accepts it as a no-op.
+    /// Unminimizes a window from the Dock (#673).
     @discardableResult
     public static func unminimize(
         _ element: AXUIElement
@@ -170,10 +142,7 @@ public enum AXHelper {
         ) == .success
     }
 
-    /// Whether a window is in native (green-button) fullscreen.
-    /// Standard AX attribute string; the SDK header exposes no
-    /// Swift constant for it. Snapshot at track/reconcile only —
-    /// never in the border or layout path (AGENTS.md §5).
+    /// True if window is in native fullscreen.
     public static func isFullscreen(
         _ element: AXUIElement
     ) -> Bool {
@@ -184,11 +153,7 @@ public enum AXHelper {
         ) ?? false
     }
 
-    /// Current `AXEnhancedUserInterface` state of an app, read
-    /// live (nil if the app does not answer). Used to bracket an
-    /// instant frame-set: EUI-on apps animate programmatic frame
-    /// changes themselves, so an un-animated placement must drop
-    /// it for the set and restore whatever it was.
+    /// Reads `AXEnhancedUserInterface` state.
     public static func getEnhancedUserInterface(
         pid: pid_t
     ) -> Bool? {
@@ -199,8 +164,7 @@ public enum AXHelper {
         )
     }
 
-    /// Keeps Electron/WebKit AX trees warm to avoid 100-300 ms
-    /// query latency. See AGENTS.md guardrails before changing.
+    /// Sets `AXEnhancedUserInterface` on application element.
     public static func setEnhancedUserInterface(
         pid: pid_t,
         enabled: Bool
@@ -213,12 +177,7 @@ public enum AXHelper {
         )
     }
 
-    /// Chromium-family browsers (Chrome, Brave, Edge, Arc, …) build
-    /// their AX tree lazily and gate it behind `AXManualAccessibility`
-    /// rather than `AXEnhancedUserInterface` — until it is set,
-    /// `kAXWindowsAttribute` stays empty and their windows are never
-    /// discovered or tiled. Setting it makes that tree materialize.
-    /// Harmless no-op on apps that do not recognize the attribute.
+    /// Sets `AXManualAccessibility` for Chromium-family browsers.
     public static func setManualAccessibility(
         pid: pid_t,
         enabled: Bool
@@ -230,18 +189,8 @@ public enum AXHelper {
         )
     }
 
-    /// Raises a window without focusing it or activating its
-    /// app — z-order only. For a FOREIGN window this is blocking
-    /// IPC and safe off the main thread; for an OWN-process window
-    /// AppKit runs the ordering in-process on the calling thread,
-    /// so the caller must gate on `mustRaiseOnMainThread` (#426).
-    ///
-    /// **The return says the app accepted the action, not that it
-    /// performed it** (#684). Anything that needs several raises
-    /// to land in a given ORDER — or one raise to clear a plane it
-    /// must sit above — verifies against the WindowServer through
-    /// `ZOrderDrain`, which owns the measurements; never issue
-    /// them back to back and trust the returns.
+    /// Raises window without activating app (z-order only, verify via
+    /// `ZOrderDrain`, #426, #684).
     public static func raiseQuietly(_ element: AXUIElement) {
         AXUIElementPerformAction(
             element,
@@ -249,15 +198,8 @@ public enum AXHelper {
         )
     }
 
-    /// Whether `element`'s window belongs to our own process, so
-    /// raising it must happen on the main thread:
-    /// `AXUIElementPerformAction` on an own-process window runs
-    /// AppKit's window ordering in-process on the calling thread,
-    /// and the background z-order queue then trips AppKit's
-    /// main-thread assertion (#426). A failed pid lookup is treated
-    /// as own — the safe default, since a foreign window wrongly
-    /// raised on the main thread only costs a blocking call, while
-    /// an own window wrongly raised off it crashes.
+    /// True if window belongs to own process and must raise on main thread
+    /// (#426).
     public static func mustRaiseOnMainThread(
         _ element: AXUIElement
     ) -> Bool {
@@ -266,36 +208,8 @@ public enum AXHelper {
         return err != .success || pid == getpid()
     }
 
-    /// Raises a window and gives it (and its app) focus.
-    ///
-    /// Order and options are load-bearing (#496): with several
-    /// windows of one app across monitors, a COOPERATIVE
-    /// `activate()` may be deferred by macOS and resolved
-    /// against the app's most-recently-used window — key focus
-    /// then lands on another display's sibling, not the raised
-    /// target. So: make the target the app's MAIN window first,
-    /// raise it (both synchronous AX round-trips — processed by
-    /// the app before the next line runs), then FORCE the
-    /// activation. The AeroSpace-proven sequence for the same
-    /// macOS multi-monitor bug (their #101); public API only.
-    ///
-    /// **The deprecation warning on `.activateIgnoringOtherApps`
-    /// is accepted deliberately — do NOT "clean it up".** Apple
-    /// documents the flag as having no effect from macOS 14 on,
-    /// and 14 is this app's deployment floor, so on paper it is
-    /// dead code that only earns a warning. Observation says
-    /// otherwise: an earlier build without it let focus jump to
-    /// the MRU sibling — the very symptom described above.
-    /// AeroSpace still ships the same flag today.
-    ///
-    /// Removing it needs evidence, not a doc string: an A/B on
-    /// two displays, one app holding a window on each, 20+ focus
-    /// commands per build, checking key focus lands on the
-    /// targeted window and not the sibling. The failure is a
-    /// race, so a handful of repetitions proves nothing — a
-    /// probe of app-level activation proves less still, since
-    /// this bug is about WHICH WINDOW inside an already-active
-    /// app takes key focus.
+    /// Raises window and activates its app with MRU disambiguation (#496).
+    /// `.activateIgnoringOtherApps` accepted deliberately on macOS 14+.
     @MainActor
     public static func raise(
         _ element: AXUIElement,
