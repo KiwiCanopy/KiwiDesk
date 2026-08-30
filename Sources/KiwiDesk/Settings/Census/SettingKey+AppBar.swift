@@ -32,9 +32,6 @@ enum AppBarKey: String, CaseIterable, Hashable {
 
 extension AppBarKey {
     var placement: SettingPlacement {
-        // The editor-wide "no layout shows the bar" grey is
-        // the CONTAINER's gate (SettingsContainer.appBar) —
-        // rows here carry only their row-specific gates.
         switch self {
         case .appBarEdge:
             return .row(.bars, .appBar, .atRest)
@@ -57,8 +54,6 @@ extension AppBarKey {
                 gate: .runtime(.liquidGlassUnavailable)
             )
         case .appBarBackgroundFit:
-            // Boxed draws no shared plate to size — asked of the
-            // bars actually shown, overrides included.
             return .row(
                 .bars,
                 .appBar,
@@ -66,7 +61,6 @@ extension AppBarKey {
                 gate: .setting(.appBar(.appBarBackground))
             )
         case .appBarContent:
-            // Vertical bars render icon-only.
             return .row(
                 .bars,
                 .appBar,
@@ -74,20 +68,13 @@ extension AppBarKey {
                 gate: .setting(.appBar(.appBarEdge))
             )
         case .appBarTitleCap:
-            // Ungated (#937): icon-only content still ANNOUNCES
-            // the capped title through each item's accessibility
-            // label, so the knob is never inert — the old
-            // content gate claimed "no titles are shown" on a
-            // channel that shows them.
+            // Ungated (#937): accessibility label still announces title.
             return .row(
                 .bars,
                 .appBar,
                 .showMore
             )
         case .appBarIconSource:
-            // Title-only content shows no icons. Deliberately
-            // outside the container gate: the ⌃⌥K panel's Apps
-            // band reads this whether or not any bar renders.
             return .row(
                 .bars,
                 .appBar,
@@ -106,17 +93,9 @@ extension AppBarKey {
             return .row(.bars, .appBar, .atRest)
         case .appBarDimFactor:
             return .luaOnly
-        // Advanced Colours keeps each group's two or three accent
-        // colors at rest and hides the rest behind one "More
-        // colors" drawer (turn 12b). The split is the one the
-        // live GUI already made — the two the preview strip
-        // reflects most inline, the remaining palette in the
-        // drawer — recorded in the census now that the area
-        // renders from it.
         case .appBarFillColor:
             return .row(.advancedColours, .appBar, .atRest)
         case .appBarHighlightColor:
-            // Nothing to tint while the active indicator is Gap.
             return .row(
                 .advancedColours,
                 .appBar,

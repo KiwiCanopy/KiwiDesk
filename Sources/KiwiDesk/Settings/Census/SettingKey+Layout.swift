@@ -81,12 +81,7 @@ extension LayoutKey {
             .stackOverflowStyle, .stackNewWindowPlacement:
             return .row(.layoutDefaults, .stack, .atRest)
         case .stackMasterOrientation:
-            // Orientation only matters with several masters —
-            // and "several" is the RESOLVED count (#406), since
-            // a space overriding the count to 3 is reading this
-            // orientation whatever the global says. Both owners
-            // are surfaced, so both are named, exactly as the
-            // per-space twin below already does.
+            // Orientation applies only with multiple masters (#406).
             return .row(
                 .layoutDefaults,
                 .stack,
@@ -104,9 +99,6 @@ extension LayoutKey {
             .gridNewWindowPlacement:
             return .row(.layoutDefaults, .grid, .atRest)
         case .gridFillEmptyCells:
-            // Inert while the RESOLVED grid type is rigid —
-            // global rigid with no dynamic override
-            // (GridEditor.fillEmptyIsInert), so both owners.
             return .row(
                 .layoutDefaults,
                 .grid,
@@ -117,8 +109,6 @@ extension LayoutKey {
                 ])
             )
         case .gridColumns, .gridRows:
-            // Auto-size grid supplies both dimensions
-            // (AutoGatedGroup greys the pair).
             return .row(
                 .layoutDefaults,
                 .grid,
@@ -132,7 +122,6 @@ extension LayoutKey {
             .trackNewWindowPosition, .trackAutoTracks, .trackWrapFocus:
             return .row(.layoutDefaults, .track, .atRest)
         case .trackLimit:
-            // Auto track limit pins it.
             return .row(
                 .layoutDefaults,
                 .track,
@@ -148,10 +137,6 @@ extension LayoutKey {
             .monocleOverrideOrientation, .trackOverrideAxis,
             .trackOverrideOverflowStyle:
             return .row(.spacesAndLayouts, .perSpaceOverrides, .atRest)
-        // The override rows grey on the RESOLVED value
-        // (override ?? global, #406), so their gates name both
-        // surfaced owners; where the override side is Lua-only
-        // (auto-size, auto-tracks) only the global row remains.
         case .stackOverrideMasterOrientation:
             return .row(
                 .spacesAndLayouts,

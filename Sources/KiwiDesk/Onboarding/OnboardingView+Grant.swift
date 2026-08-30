@@ -1,20 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The tour's first screen — the only one carrying the
-/// wordmark, and the one that narrates the retile.
+/// Tour screen for Accessibility permission setup (#678, #828).
 extension OnboardingView {
-
-    /// The tour's first screen, and the only one that carries the
-    /// wordmark: the wordmark is the app introducing itself, which
-    /// happens once. It is a mark-plus-name-plus-tagline lockup,
-    /// so the kiwi mark is already inside it and adding a separate
-    /// one would put both on a single surface.
-    ///
-    /// The numbered instructions sit in a card, as the prototype
-    /// draws them (#828): they are a procedure the user carries
-    /// out in another app, so they read as a list of things to do
-    /// rather than as a paragraph about the permission.
+    /// Initial tour screen requesting Accessibility permissions (#828).
     var grant: some View {
         OnboardingPage(
             title: grantTitle,
@@ -50,24 +39,7 @@ extension OnboardingView {
         }
     }
 
-    /// Three states, not two: waiting for the grant, arranging,
-    /// arranged. The middle one exists because the boot is chunked
-    /// now (#801) — the Continue button answers immediately, so
-    /// this screen is read while the scan is still running, and
-    /// the finished-job copy would be the only thing lying about
-    /// it.
-    ///
-    /// **The finished claim is gated on `.ready`, not on "not
-    /// scanning".** Every other phase — `.idle` from a `stop()`, or
-    /// the gap before the first publication — must narrate rather
-    /// than assert a completed job (ui-designer, 2026-08-12). The
-    /// inverse predicate is right for the MARK and the greys,
-    /// which owe a readiness signal, and wrong for a claim.
-    ///
-    /// Internal, not private: the three states are a surfacing
-    /// branch, and `OnboardingGrantPhaseTests` reads them — a
-    /// branch inside a `body` is exactly what every other guard
-    /// passes over (gui.md).
+    /// Title string for current grant state (OnboardingGrantPhaseTests, #801).
     var grantTitle: String {
         guard model.isTrusted else {
             return L(
@@ -102,21 +74,7 @@ extension OnboardingView {
         ].joined(separator: "\n\n")
     }
 
-    /// The count, in the footer rather than under the hero
-    /// (ui-designer, 2026-08-12): the hint slot is documented for
-    /// what happens if the user does nothing, which is exactly
-    /// this — Continue is live throughout and the arranging
-    /// finishes on its own. Under the hero it welded a transient
-    /// tally to the app's one moment of good news, and its
-    /// disappearance at `.ready` moved the copy above it.
-    ///
-    /// It carries the same NUMBER as the quick menu's row, not the
-    /// same sentence: this reader is one minute into owning the
-    /// app, and "scanned" is antivirus vocabulary for a count of
-    /// everything running on their Mac.
-    /// Trusted, and the scan has not finished. One predicate, so
-    /// the pulse and the count cannot disagree about whether work
-    /// is in flight.
+    /// Whether window arrangement scan is actively running (#801).
     var isArranging: Bool {
         model.isTrusted && grantHintCount != nil
     }
@@ -140,13 +98,6 @@ extension OnboardingView {
         return (scanned, total)
     }
 
-    /// Said in both trusted states, and authored once: the
-    /// arranging arm used to carry a byte-identical copy of it,
-    /// which every catalog would have translated twice and which
-    /// would then have been rewritten under the reader's eyes at
-    /// `.ready` if the two drifted (localization audit,
-    /// 2026-08-12). Paragraph joining, not sentence stitching — no
-    /// locale needs to reorder two paragraphs.
     private var ownWindowNote: String {
         L(
             "onboarding.grant.own_window",
@@ -161,9 +112,6 @@ extension OnboardingView {
                 Image(nsImage: image)
                     .resizable()
                     .scaledToFit()
-                    // Sized by WIDTH: a lockup has no point size,
-                    // and 180 pt in the content column reads as a
-                    // logo rather than as a splash.
                     .frame(width: 180)
             } else {
                 Image(systemName: "rectangle.3.group")
@@ -180,8 +128,7 @@ extension OnboardingView {
             : BrandAssets.wordmark
     }
 
-    /// The two things to do, numbered, plus the line saying the
-    /// page continues by itself.
+    /// Steps card explaining how to grant Accessibility permissions.
     private var grantSteps: some View {
         VStack(alignment: .leading, spacing: 10) {
             grantStep(
@@ -205,22 +152,7 @@ extension OnboardingView {
         .onboardingCard()
     }
 
-    /// The granted state is the tour's one moment of good news,
-    /// so it is drawn as one — centred, at hero size, standing off
-    /// the copy above it (owner, 2026-08-12). Before this it was
-    /// the same 12.5 pt status line that had been saying
-    /// "waiting", which made the app's first success read like a
-    /// log entry.
-    ///
-    /// **The check takes the accent, and that does not reopen the
-    /// hue ruling.** What `waitingLine` forbids is hue as the ONLY
-    /// channel telling two states apart — which is what a green
-    /// check beside an orange lock, at the same size in the same
-    /// slot, would be. These two share nothing: the lock is a
-    /// 12.5 pt line inside the instruction card, this is a 34 pt
-    /// mark in the middle of the screen with its own sentence
-    /// under it. Shape, size, position and words all differ before
-    /// colour is asked to say anything.
+    /// Centered confirmation shown once Accessibility is granted (#828).
     private var grantedMark: some View {
         VStack(spacing: 10) {
             Image(systemName: "checkmark.circle.fill")
@@ -254,23 +186,10 @@ extension OnboardingView {
                 .font(.system(size: 13.5))
                 .fixedSize(horizontal: false, vertical: true)
         }
-        // One element: the number and the instruction are one
-        // step, and read apart the number is an unnamed digit.
         .accessibilityElement(children: .combine)
     }
 
-    /// The status glyph, at TEXT height rather than as a 56 pt
-    /// hero: the wordmark owns the hero slot on this screen, and
-    /// two marks in one slot is one too many. It is never deleted
-    /// — lock-versus-check is the only feedback the auto-detect
-    /// gives, and it is the channel that separates the two states
-    /// now that neither is coloured.
-    ///
-    /// **Uncoloured is a ruling, not an omission**, and it
-    /// survived the tint (#828): accent on the checkmark would put
-    /// hue back as the channel telling the two states apart, on
-    /// the app's own green, which is the exact defect this tree
-    /// shipped as a raw `.green`/`.orange` hero.
+    /// Status line while waiting for system permission grant (#828).
     private var waitingLine: some View {
         HStack(spacing: 9) {
             WaitingDot()
@@ -284,16 +203,10 @@ extension OnboardingView {
         }
         .font(.system(size: 12.5))
         .foregroundStyle(SettingsTheme.ink3)
-        // The dot is decoration; the sentence carries the state,
-        // so VoiceOver reads one thing rather than an unnamed
-        // shape followed by a line of text.
         .accessibilityElement(children: .combine)
     }
 
-    /// SIP and keylogging are the two objections a macOS user
-    /// actually has to an Accessibility prompt, so this is the
-    /// line that earns the grant. It sits in the footer, opposite
-    /// the button it earns.
+    /// Privacy and SIP reassurance note shown in the footer.
     private var grantHint: String {
         L(
             "onboarding.grant.trust",
@@ -303,13 +216,6 @@ extension OnboardingView {
         )
     }
 
-    /// What the permission is FOR, in one sentence.
-    ///
-    /// The numbered procedure moved into `grantSteps`, so this no
-    /// longer interpolates the button's label — the list below it
-    /// is the instruction now, and step 1 named a button the user
-    /// can see (#818's obligation is on a sentence NAMING a
-    /// control; this one names none).
     private var grantLead: String {
         L(
             "onboarding.grant.lead",
@@ -318,15 +224,7 @@ extension OnboardingView {
         )
     }
 
-    /// The moment the grant lands, `startManaging()` arranges
-    /// every window behind this one. That is the demonstration —
-    /// on the user's own windows, at the moment it means
-    /// something — and until #678 Phase 4 pass 11 the tour said
-    /// nothing about it and answered with "Permission granted!".
-    ///
-    /// The second sentence answers "why is this window special"
-    /// outright, once. Said once, the exception stops reading as
-    /// an inconsistency and starts reading as a rule.
+    /// Explanation of arranged windows shown once granted (#678, #818).
     private var grantedBody: String {
         [
             L(

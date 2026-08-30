@@ -19,8 +19,6 @@ extension GapsKey {
             .innerHorizontal, .innerVertical:
             return .row(.gapsAndBorders, .gaps, .showMore)
         case .outer, .inner:
-            // The unified slider reads "mixed" while its
-            // per-edge values differ (GapsEditor).
             return .row(
                 .gapsAndBorders,
                 .gaps,

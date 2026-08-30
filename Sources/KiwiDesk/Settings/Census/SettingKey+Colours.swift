@@ -27,9 +27,6 @@ extension ColoursKey {
         case .animationsOnSpaceChange, .animationsOnWindowResize,
             .animationsOnWindowSwap, .animationsOnRelayout,
             .animationsDurationMS:
-            // The whole gated group follows the master toggle
-            // (`MotionCard.disclosure`); the Reduce Motion grey
-            // is the .motion CONTAINER gate.
             return .row(
                 .coloursAndMotion,
                 .motion,
@@ -46,20 +43,9 @@ extension ColoursKey {
                 gate: .setting(.colours(.animationsOnScrolling))
             )
         case .paletteApply, .paletteSave, .paletteImport:
-            // The shelf's own affordances: a tile applies, the
-            // trailing tile saves, Import sits on the group
-            // header. All three are visible at rest, which is
-            // what the tier means.
             return .row(.coloursAndMotion, .palettes, .atRest)
         case .paletteRename, .paletteExport, .paletteDelete:
-            // The per-palette CONTEXT MENU. `.showMore` is the
-            // nearest true tier — not visible at rest, one
-            // interaction away — and the tier vocabulary has no
-            // case of its own for a menu. Recorded here rather
-            // than left as a wiring detail the census cannot
-            // see: `ColorsCensusRenderTests` pins this set
-            // against the menu's own list, so an action added
-            // to the menu without a census row still reds.
+            // Context menu actions pinned by ColorsCensusRenderTests.
             return .row(.coloursAndMotion, .palettes, .showMore)
         case .paletteNeonGlowHint:
             return .row(

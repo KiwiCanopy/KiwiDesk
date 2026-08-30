@@ -36,9 +36,6 @@ extension AppRulesKey {
         case .appRulesAdd:
             return .text("app_rules.add_rule")
         case .appRulesDelete:
-            // Context-swapped live (remove_all vs
-            // remove_override when a profile override is being
-            // edited), so the title is runtime-composed.
             return .dynamic
         }
     }
