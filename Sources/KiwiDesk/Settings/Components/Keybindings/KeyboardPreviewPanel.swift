@@ -236,6 +236,9 @@ struct KeyboardPreviewPanel: View {
         ).isEmpty
     }
 
+    /// The board's own predicate, never a re-derivation: the
+    /// rings and this gate read one census set, so the legend
+    /// cannot claim a mark the board does not draw.
     private var reservedFree: Set<UInt32> {
         KeyboardCensus.reservedUnbound(
             claims: claims,

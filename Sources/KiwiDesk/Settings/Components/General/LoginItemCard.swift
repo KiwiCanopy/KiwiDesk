@@ -50,7 +50,11 @@ struct LoginItemCard: View {
         )
     }
 
-    /// Toggle greyed state: unregisterable gate or loading state (#171, #342).
+    /// Toggle greyed state (#171, #342): the durable reason (an
+    /// unregisterable copy) comes from the gate resolver, never a
+    /// predicate re-derived here — so the grey and the
+    /// census-declared gate cannot drift; the transient
+    /// load/write block is added on top.
     private var loginInert: Bool {
         model.autoStartLoading
             || model.generalGates

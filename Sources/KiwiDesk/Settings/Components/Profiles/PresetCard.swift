@@ -66,7 +66,13 @@ struct PresetCard: View {
         .settingsActionButton()
     }
 
-    /// Applies preset after confirmation (`ProfilesGates`, #171, #515).
+    /// Applies the preset after confirmation; it drops staged
+    /// edits like the profile actions (#515). Greyed, never
+    /// hidden (#171), WITH the reason — "why is Apply dead" has
+    /// two answers and the stored-profile one contradicts the
+    /// header (#518) — and both answers are `ProfilesGates`':
+    /// a predicate re-derived here could grey a row the census
+    /// says is live.
     @ViewBuilder private var applyButton: some View {
         let reason = gates.inertReason(
             for: .profiles(.presetsApply)

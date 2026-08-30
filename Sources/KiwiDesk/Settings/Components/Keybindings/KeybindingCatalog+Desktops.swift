@@ -163,6 +163,8 @@ extension KeybindingCatalog {
         String(number)
     }
 
-    /// Glyph for desktop rows (`DesktopGlyph.symbol`).
+    /// `DesktopGlyph.symbol` is the one copy of the Desktop-row
+    /// glyph — a second literal here would claim these rows
+    /// picture a Desktop while nothing holds it.
     private static let desktopIcon = DesktopGlyph.symbol
 }

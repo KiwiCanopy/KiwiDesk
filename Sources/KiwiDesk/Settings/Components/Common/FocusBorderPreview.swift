@@ -83,6 +83,12 @@ struct FocusBorderPreview: View {
             style.clampedWidth,
             to: 1...7
         )
+        // Remap the RESOLVED glow blur (auto or explicit
+        // glow_size, #533/#551): the literal pt value would read
+        // as a smear on this 96 pt mock, not a halo (#358). The
+        // source band derives from the formula's own clamp, so a
+        // retuned floor/cap cannot leave the remap stale — the
+        // numbers live in `BorderGeometryTests`, nowhere else.
         let glowRadius = scale(
             style.resolvedGlowBlur,
             from: BorderStyle.glowBlur(
@@ -102,6 +108,9 @@ struct FocusBorderPreview: View {
                             lineWidth: width
                         )
                         .shadow(
+                            // Focused-ring-only, brightened
+                            // derivative — the real renderer's
+                            // rule (#358).
                             color: glow
                                 ? Color(
                                     kiwiHex: BorderStyle.glowColor(

@@ -9,9 +9,19 @@ struct HeaderSearch: View {
     /// Whether collapsed entry is expanded.
     @Binding var expanded: Bool
     let context: SettingsSearchContext
+    /// Profiles spotlight badge state — passed through so which
+    /// list renders the tile does not change it.
     let spotlightProfiles: Bool
+    /// A census key's current value, from the draft in memory —
+    /// evaluated per rendered row, after the list paints.
     let value: (SettingKey) -> String?
+    /// Hands a pick up to the shell, which owns the destination
+    /// and the scroll choreography.
     let reveal: (SettingsAnchor) -> Void
+    /// Arms the shell's confirmation for a pick predicting a
+    /// mode flip; the reveal pipeline announces it only if the
+    /// promotion happens (`SettingsView.apply`), so a refused
+    /// reveal stays silent. Search's only mention of the mode.
     let armModeNotice: (SettingsDestination) -> Void
 
     @State var query = ""

@@ -62,7 +62,15 @@ final class SparkleUpdater: AppUpdating {
     }
 }
 
-/// Inert updater for tests and unbundled runs.
+/// Inert updater for tests and unbundled runs. The INERT default
+/// is deliberate, not test-detection — the live object starts a
+/// network channel and XPC services on construction, so an
+/// unwired build greys the row rather than doing something
+/// dangerous. Inverted polarity vs the hotkey seam (#565), whose
+/// LIVE default exists because a forgotten injection there would
+/// silently disable a feature; here it costs a visible grey.
+/// tests.md ▸ "one seam runs the OTHER way" owns the two-sided
+/// guard this inversion requires (`UpdaterSeamGuardTests`).
 @MainActor
 final class NoUpdater: AppUpdating {
     var canCheckForUpdates: Bool { false }
