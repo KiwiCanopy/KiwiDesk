@@ -11,15 +11,6 @@
    ========================================================= */
 
 :root {
-  /* ---- Spacing scale (8pt-ish, fluid at the edges) ---- */
-  --sp-1: 0.5rem;
-  --sp-2: 0.75rem;
-  --sp-3: 1rem;
-  --sp-4: 1.5rem;
-  --sp-5: 2rem;
-  --sp-6: 3rem;
-  --sp-7: 4.5rem;
-  --sp-8: 7rem;
 
   --radius-sm: 10px;
   --radius: 16px;
@@ -348,10 +339,10 @@ body::before {
    ========================================================= */
 .skip-link {
   position: fixed;
-  top: var(--sp-1);
-  left: var(--sp-1);
+  top: 0.5rem;
+  left: 0.5rem;
   z-index: 100;
-  padding: var(--sp-1) var(--sp-3);
+  padding: 0.5rem 1rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
   background: var(--bg-3);
@@ -390,7 +381,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sp-3);
+  gap: 1rem;
   padding-block: 0.85rem;
 }
 
@@ -850,7 +841,7 @@ body::before {
 section {
   position: relative;
   z-index: 1;
-  padding-block: clamp(3.5rem, 9vw, var(--sp-8));
+  padding-block: clamp(3.5rem, 9vw, 7rem);
   /* L5: every top-level section doubles as an anchor-jump
      target (hero CTAs, footer/nav links), so it needs the same
      clearance under the sticky .nav (~68.5px tall) that
