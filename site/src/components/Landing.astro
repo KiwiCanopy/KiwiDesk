@@ -713,11 +713,18 @@ const jsonLd = [
             <span class="eyebrow">{t.what_eyebrow}</span>
             <h2>{t.what_title}</h2>
             <p>{t.what_body}</p>
-            <a class="link-arrow" href="/guide/#getting-started">
-              {t.what_learn}
-              <Icon name="lucide:arrow-right" width={15} height={15}
-                aria-hidden="true" />
-            </a>
+            <p class="what__fork">
+              <a class="link-arrow" href="/guide/#getting-started">
+                {t.what_learn}
+                <Icon name="lucide:arrow-right" width={15} height={15}
+                  aria-hidden="true" />
+              </a>
+              <a class="link-arrow" href={`${homeHref}compare/`}>
+                {t.what_compare}
+                <Icon name="lucide:arrow-right" width={15} height={15}
+                  aria-hidden="true" />
+              </a>
+            </p>
           </div>
           <div class="what__art" aria-hidden="true">
             <div class="what__win what__win--messy">
@@ -840,13 +847,6 @@ const jsonLd = [
             </ul>
           </div>
         </div>
-        <p class="calm__compare reveal">
-          <a class="link-arrow" href={`${homeHref}compare/`}>
-            {t.compare_nudge_simple_short}
-            <Icon name="lucide:arrow-right" width={15}
-              height={15} aria-hidden="true" />
-          </a>
-        </p>
       </div>
     </section>
     )}

@@ -165,19 +165,30 @@ const rowLinks = {
   tabs: src.ghosttyTabs,
 };
 
+// Ordered by what a reader can EVALUATE, not by what most
+// differentiates us. The old order was most-differentiating-first,
+// which is a Nerd ordering on a page both audiences read: rows one
+// to four were setup, SIP, permissions and Desktops, so a Magnet
+// user met System Integrity Protection as the second thing on the
+// page, while the one row they could judge — mouse — sat at six.
+//
+// Evaluable rows first, then trust, then plumbing. The Nerd reader
+// loses nothing: a table is scanned rather than read down, every
+// row is still here, and theirs are grouped now instead of
+// interleaved (design review, 2026-08-30).
 const rows = [
   "setup",
-  "sip",
+  "mouse",
+  "layouts",
+  "onscreen",
+  "licence",
   "permissions",
+  "sip",
   "desktops",
   "tabs",
-  "mouse",
-  "onscreen",
   "hotkeys",
-  "layouts",
   "scripting",
   "ecosystem",
-  "licence",
 ];
 
 const site = Astro.site?.toString().replace(/\/$/, "") ?? "";

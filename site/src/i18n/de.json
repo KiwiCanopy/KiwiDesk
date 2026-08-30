@@ -139,7 +139,6 @@
   "compare_meta_desc": "Ein ehrlicher Vergleich von KiwiDesk mit yabai, AeroSpace, Rift, OmniWM und Magnet: was jedes Werkzeug gut macht, welche Berechtigungen es verlangt und wo KiwiDesk sich wirklich unterscheidet.",
   "compare_meta_title": "KiwiDesk vs. yabai, AeroSpace, Rift, OmniWM und Magnet — Fenstermanager für macOS",
   "compare_nudge_dev_short": "Mit yabai, AeroSpace und Rift vergleichen",
-  "compare_nudge_simple_short": "Mit Magnet und anderen Fenstermanagern vergleichen",
   "compare_omniwm_diff": "Zwei Unterschiede, die man vor der Wahl kennen sollte. Es verlangt beim Start <strong>Eingabeüberwachung</strong>, wo KiwiDesk nur nach Bedienungshilfen fragt; und es verlangt, dass „Bildschirme verwenden eigene Spaces“ in macOS aktiv ist, und pausiert die Fensterverwaltung, bis das so ist — KiwiDesk funktioniert in beiden Fällen. Unter seiner GUI liegt eine TOML-Datei statt einer Skripting-VM, es liefert zwei Layouts gegenüber unseren sieben, und es steht unter GPL-2.0, wo KiwiDesk MIT ist — was zählt, wenn du den Code weiterverwenden willst.",
   "compare_omniwm_good": "Das, was einem Ebenbürtigen hier am nächsten kommt: Swift, SIP-sauber, notarisierte Builds — und das einzige andere in dieser Liste mit einer echten Einstellungen-App. Seine niri-artigen Scrolling- und Dwindle-BSP-Layouts sind gut gemacht, und es ist schnell gewachsen.",
   "compare_outro": "Kostenlos und MIT-lizenziert, für macOS 14 und neuer auf Apple Silicon. Kommst du von einem der Werkzeuge oben? Die {lua}Lua-Referenz{/lua} zeigt, wie weit die Konfiguration wirklich reicht.",
@@ -437,6 +436,7 @@
   "skip_to_content": "Zum Inhalt springen",
   "version_pill": "🥝 Version",
   "what_body": "KiwiDesk ist ein Fenstermanager: Er bringt deine offenen Fenster für dich in Ordnung, statt dir das zu überlassen. Öffne ein Fenster, und es fügt sich sauber neben die anderen ein — aufgeräumt, Kante an Kante, ohne Lücken, um die du nicht gebeten hast.",
+  "what_compare": "Nutzt du schon etwas anderes?",
   "what_eyebrow": "Neu hier? Fang hier an",
   "what_learn": "Die Grundlagen lernen",
   "what_title": "Was ist KiwiDesk eigentlich?"

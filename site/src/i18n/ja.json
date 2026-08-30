@@ -139,7 +139,6 @@
   "compare_meta_desc": "KiwiDesk と yabai、AeroSpace、Rift、OmniWM、Magnet の率直な比較。それぞれの得意なこと、要求する権限、そして KiwiDesk が本当に違う点。",
   "compare_meta_title": "KiwiDesk と yabai・AeroSpace・Rift・OmniWM・Magnet の比較 — macOS のウインドウマネージャー",
   "compare_nudge_dev_short": "yabai・AeroSpace・Rift と比較する",
-  "compare_nudge_simple_short": "Magnet や他のウインドウマネージャーと比較する",
   "compare_omniwm_diff": "選ぶ前に知っておく価値のある違いが 2 つ。起動時に<strong>入力監視</strong>を要求します（KiwiDesk はアクセシビリティだけです）。そして macOS の「ディスプレイごとに個別の操作スペース」がオンであることを要求し、オンになるまでウインドウ管理を停止します。KiwiDesk はどちらでも動きます。GUI の下にあるのはスクリプト VM ではなく TOML ファイルで、レイアウトは 2 つ（KiwiDesk は 7 つ）、ライセンスは GPL-2.0 です（KiwiDesk は MIT）。コードを再利用するつもりなら、この違いは効いてきます。",
   "compare_omniwm_good": "ここで最も対等に近い存在です。Swift 製、SIP を切らず、公証済みのビルドを配布し、このリストで本物の設定 App を持つもう一方でもあります。niri 風のスクロールと dwindle の BSP レイアウトはよくできており、急速に伸びています。",
   "compare_outro": "無料で MIT ライセンス、macOS 14 以降・Apple シリコン向けです。上のいずれかから移ってきましたか？ {lua}Lua リファレンス{/lua}が、設定がどこまで届くかを示します。",
@@ -437,6 +436,7 @@
   "skip_to_content": "本文へスキップ",
   "version_pill": "🥝 バージョン",
   "what_body": "KiwiDesk はウインドウマネージャです。開いたウインドウを整える仕事を、あなたに任せずに引き受けます。ウインドウを開けば、ほかのウインドウの隣にすっと収まります。端から端まで整い、頼んでもいない隙間はできません。",
+  "what_compare": "すでに別のものを使っていますか？",
   "what_eyebrow": "はじめての方はこちら",
   "what_learn": "基本を学ぶ",
   "what_title": "KiwiDesk とは、結局なに？"

@@ -444,9 +444,11 @@
   margin: 0.9rem 0 0;
   text-align: center;
 }
-.calm__compare {
-  margin: 1.9rem 0 0;
-  text-align: center;
+.what__fork {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.6rem;
+  margin: 0;
 }
 
 .link-arrow {

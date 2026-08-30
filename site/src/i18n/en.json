@@ -139,7 +139,6 @@
   "compare_meta_desc": "An honest comparison of KiwiDesk with yabai, AeroSpace, Rift, OmniWM and Magnet: what each one does well, which permissions each asks for, and where KiwiDesk is genuinely different.",
   "compare_meta_title": "KiwiDesk vs yabai, AeroSpace, Rift, OmniWM and Magnet — macOS window managers",
   "compare_nudge_dev_short": "Compare with yabai, AeroSpace and Rift",
-  "compare_nudge_simple_short": "Compare with Magnet and other window managers",
   "compare_omniwm_diff": "Two differences worth knowing before you choose. It requires <strong>Input Monitoring</strong> at launch, where KiwiDesk asks only for Accessibility; and it requires macOS’s “Displays have separate Spaces” to be on, pausing window management until it is, where KiwiDesk works either way. Underneath its GUI is a TOML file rather than a scripting VM, it ships two layouts to our seven, and it is GPL-2.0 where KiwiDesk is MIT — which matters if you intend to reuse the code.",
   "compare_omniwm_good": "The closest thing here to a peer: Swift, SIP-clean, notarized builds, and the only other one in this list with a real settings app. Its niri-style scrolling and dwindle BSP layouts are well made, and it has grown fast.",
   "compare_outro": "Free and MIT-licensed, for macOS 14 and later on Apple silicon. Arriving from one of the tools above? The {lua}Lua reference{/lua} shows how far the configuration actually goes.",
@@ -437,6 +436,7 @@
   "skip_to_content": "Skip to content",
   "version_pill": "🥝 Version",
   "what_body": "KiwiDesk is a window manager: it puts your open windows in order for you, instead of leaving that to you. Open a window and it slots neatly into place beside the others — tidy, edge to edge, no gaps you didn’t ask for.",
+  "what_compare": "Already using something else?",
   "what_eyebrow": "New here? Start here",
   "what_learn": "Learn the basics",
   "what_title": "What is KiwiDesk, really?"
