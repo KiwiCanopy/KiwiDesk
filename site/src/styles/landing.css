@@ -1299,7 +1299,6 @@ section {
 .req {
   display: block;
   margin-top: 1.25rem;
-  margin-bottom: 0;
   font-size: 0.85rem;
   line-height: 1.55;
   color: var(--text-faint);
