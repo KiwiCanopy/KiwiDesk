@@ -13,8 +13,10 @@ private func logPanel(_ message: String) {
     panelLog.log("KiwiDesk: \(message, privacy: .public)")
 }
 
-/// Floating panel receiving keyboard events and dismissing on Esc or
-/// click-away.
+/// Floating panel receiving keyboard events and dismissing on Esc
+/// or click-away. Borderless, so it opts into key status — and the
+/// app is activated on show, or an accessory app's key window
+/// never actually receives keyboard events.
 final class ShortcutsPanel: NSPanel {
     var onCancel: () -> Void = {}
 
@@ -24,6 +26,9 @@ final class ShortcutsPanel: NSPanel {
         onCancel()
     }
 
+    /// Esc explicitly as well as `cancelOperation` — a borderless
+    /// panel hosting SwiftUI doesn't always route Esc through the
+    /// cancel action (53 = Escape).
     override func keyDown(with event: NSEvent) {
         if event.keyCode == 53 {
             onCancel()
@@ -56,7 +61,11 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         super.init()
     }
 
-    /// Whether close should yield activation back to previous app (#952).
+    /// Whether close should yield activation back to the previous
+    /// app (#952): only a keyboard-commanded close — a click-away
+    /// already activated the clicked app, and re-activating the
+    /// remembered one would fight it. Pure, so all four arms are
+    /// testable without NSApp.
     static func shouldYield(
         commanded: Bool,
         appActive: Bool,
@@ -73,6 +82,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
                 core: core
             ),
             onEdit: { [weak self] in
+                // A click whose next step is Settings — our own
+                // app — coming forward, not the remembered one,
+                // so it does not yield (#952).
                 self?.close(yieldingActivation: false)
                 self?.onEdit()
             }
@@ -108,9 +120,17 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     func close(yieldingActivation: Bool) {
         let key = NSApplication.shared.keyWindow?.title ?? "none"
         logPanel("sheet close; key \(key)")
+        // Consume BEFORE orderOut: it fires `windowDidResignKey`,
+        // whose re-entrant close would nil `returnTarget` under
+        // this frame — the Escape yield dead in production while
+        // tests (no real key panel) stay green.
         let target = returnTarget
         returnTarget = nil
         let active = isAppActive()
+        // Armed BEFORE orderOut and only on a commanded close of
+        // the still-active app — a click-away already resigned,
+        // and arming on Edit-in-Settings ate the intended focus
+        // (#952 capture; review, 2026-08-23).
         if yieldingActivation, active {
             core.distrustOwnDismissHandoff()
         }

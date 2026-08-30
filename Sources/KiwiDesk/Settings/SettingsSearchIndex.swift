@@ -1,8 +1,13 @@
 import KiwiDeskCore
 
-/// Static settings search index row mapping census setting or catalog anchor
-/// (#678).
+/// Static settings search index row: ONE row per census
+/// `SettingKey`, never per instance (#678). Everything a match
+/// needs is resolved at build time — nothing on the search path
+/// touches AX, the session, or the filesystem.
 struct SettingsSearchIndexRow: Identifiable, Equatable {
+    /// nil for a catalog-only anchor row (a mode tab, a drawer
+    /// title) — which controls those are is DERIVED, every catalog
+    /// control no census label key claims, never a hand-kept list.
     let key: SettingKey?
     let label: String
     let synonyms: [String]
@@ -18,6 +23,8 @@ struct SettingsSearchIndexRow: Identifiable, Equatable {
 
 @MainActor
 enum SettingsSearchIndex {
+    /// The membership line — the other tiers have no row on any
+    /// screen, so a result for one would land nowhere.
     static let indexedTiers: Set<SettingTier> = [
         .atRest, .showMore, .immediate,
     ]
@@ -35,8 +42,11 @@ enum SettingsSearchIndex {
         return built
     }
 
-    /// Tests whether key should be indexed on current runtime environment
-    /// (#390).
+    /// Tests whether key should be indexed on this machine. The
+    /// exclusions are data-driven: `.dynamic` labels have no
+    /// static text, glass-gated rows ask the renderer's own
+    /// predicate (#390), and a `[space]` key is an INSTANCE —
+    /// reachable as a link, never a result (spec item 11).
     static func indexes(_ key: SettingKey) -> Bool {
         let placement = key.placement
         guard placement.area != nil,
@@ -75,6 +85,9 @@ enum SettingsSearchIndex {
         }
     }
 
+    /// Catalog controls no census row landed on, derived from the
+    /// two lists so a control is a search row exactly once however
+    /// it is declared.
     private static func extras(
         in destination: SettingsDestination,
         _ entries: [SettingsIndexEntry],

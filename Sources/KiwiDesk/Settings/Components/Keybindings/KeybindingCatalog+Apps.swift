@@ -1,7 +1,9 @@
 import AppKit
 import KiwiDeskCore
 
-/// Launch behavior for Open-Applications shortcut bindings (#334).
+/// Launch behavior for Open-Applications shortcut bindings (#334),
+/// derived from the binding's `lua` verb, never a persisted field
+/// — so there is no `KeyBinding` shape to migrate or parity-test.
 enum AppLaunchBehavior: String, CaseIterable {
     case openOrFocus
     case openNew
@@ -84,6 +86,8 @@ extension KeybindingCatalog {
         } ?? preferred
     }
 
+    /// nil unless `lua` is exactly an app-launch call; an embedded
+    /// quote means escaped content the app menu never authors.
     private static func parseAppCommand(
         _ lua: String
     ) -> (bundleID: String, behavior: AppLaunchBehavior)? {
@@ -195,8 +199,10 @@ extension KeybindingCatalog {
         return id
     }
 
-    /// Resolves user-language display name via Spotlight metadata or
-    /// FileManager fallback.
+    /// Resolves user-language display name via Spotlight metadata
+    /// or FileManager fallback, stripping the soft hyphen some
+    /// localized names carry so it never leaks a line break into
+    /// a label or skews a sort key.
     private static func localizedName(
         url: URL,
         path: String

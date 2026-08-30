@@ -1,8 +1,21 @@
 import AppKit
 import SwiftUI
 
-/// Action menu composition point across context menu, accessibility, and
-/// keyboard chord (#845).
+/// The ONE composition point for a row's action menu (#845):
+/// right-click, VoiceOver actions and the `⌃.` chord from one
+/// builder — never spell a channel beside the seam;
+/// `KeyboardActionParityTests` reds on a bare one outside this
+/// file.
+///
+/// Delivery is a key MONITOR plus a row-anchored popover, each the
+/// residue of a shipped failure (#845 review + device QA
+/// 2026-08-23): per-row `.keyboardShortcut` is window-scoped and
+/// cross-targeted the FIRST row; a focus-gated hidden `Menu` never
+/// hears AppKit-backed focus; nothing opens a `.contextMenu`
+/// programmatically, and synthesized right-clicks proved
+/// nondeterministic on device. A row joining the family must be
+/// able to HOLD focus, and whether the chord LANDS is a device
+/// fact — verify with keyboard navigation ON.
 private struct RowActionFocusKey: FocusedValueKey {
     typealias Value = RowChordCatcher.Token
 }
@@ -59,6 +72,9 @@ private struct RowActions<MenuContent: View>: ViewModifier {
                         catcher.view
                     )
                 } else if let view = catcher.view {
+                    // Clear only our own claim: A→B focus moves
+                    // deliver A's false AFTER B's true, and an
+                    // unconditional nil would wipe B's.
                     RowChordMonitor.shared.clearFocused(
                         if: view
                     )
@@ -67,7 +83,10 @@ private struct RowActions<MenuContent: View>: ViewModifier {
     }
 }
 
-/// Zero-size view publishing frame to monitor and anchoring popovers (#845).
+/// Zero-size view publishing frame to monitor and anchoring
+/// popovers (#845). One shared monitor serves every catcher —
+/// installed on the first arrival, never removed: an app-lifetime
+/// singleton, like the menus it serves.
 struct RowChordCatcher: NSViewRepresentable {
     let token: Token
 
@@ -170,6 +189,10 @@ final class RowChordMonitor {
         }
         guard let responder = window.firstResponder as? NSView
         else { return nil }
+        // FULL-frame containment, not a midpoint: under SwiftUI
+        // focus the first responder is the hosting view, whose
+        // frame is the whole window — a midpoint test would
+        // false-match whichever row sits at window center.
         let rect = responder.convert(responder.bounds, to: nil)
         return catchers.allObjects.first { catcher in
             catcher.window === window

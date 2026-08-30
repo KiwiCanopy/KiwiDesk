@@ -205,7 +205,10 @@ struct SizeFloatGroup: View {
         }
     }
 
-    /// Caption describing resize scope across layouts (#818).
+    /// Caption describing resize scope across layouts. It names no
+    /// verb (owner ruling 2026-08-29) — quoting the rows' labels is
+    /// the #818 drift — and scopes by the dimension: it renders
+    /// after SEVEN rows, the four resize ones plus three toggles.
     private var sizeFloatCaption: String {
         L(
             "shortcuts.size_float.layouts_caption",

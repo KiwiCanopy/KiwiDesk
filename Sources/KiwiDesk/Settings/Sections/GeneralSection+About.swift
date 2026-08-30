@@ -91,8 +91,9 @@ extension GeneralSection {
         .linkHover()
     }
 
-    /// Wordmark artwork with dynamic dark/light master and fallback glyph
-    /// (#479, `BrandMasterParityTests`).
+    /// Wordmark artwork with dynamic dark/light master and fallback
+    /// glyph (#479, `BrandMasterParityTests`). The fallback mark is
+    /// 42 pt — the About block's size in the #678 §3 mark inventory.
     @ViewBuilder var aboutBrand: some View {
         if let wordmark {
             Image(nsImage: wordmark)

@@ -7,17 +7,25 @@ import SwiftUI
 @MainActor
 final class StatusItemController: NSObject, NSMenuDelegate {
     var onOpenDashboard: () -> Void = {}
+    /// Opens the read-only shortcuts reference panel (#326).
     var onShowShortcuts: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
+    /// The combo bound to open the shortcuts panel (#330), read
+    /// fresh on each menu open so AppKit renders the live binding.
     var shortcutsComboProvider: () -> KeyCombo? = { nil }
 
+    /// Drives "Check for Updates…" (#874). Inert by default —
+    /// `AppUpdater.swift` owns why.
     var updater: any AppUpdating = NoUpdater()
     var onShowAccessibilityHelp: () -> Void = {}
     var onLoadProfile: (String) -> Void = { _ in }
+    /// Saved profiles, pulled fresh each menu open; broken entries
+    /// stay listed but disabled — greyed, not hidden (#246, #171).
     var profilesProvider:
         () -> (
             active: String?, all: [String], broken: Set<String>
         ) = { (nil, [], []) }
+    /// What the Layout submenu draws from, fresh per open (#752).
     var layoutInfoProvider: () -> LayoutMenuInfo = {
         LayoutMenuInfo.empty
     }
@@ -25,12 +33,23 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
     var onSaveLayoutToProfile: () -> Void = {}
 
+    /// Injected menu-bar slot so tests never register a real
+    /// system item (`StatusItemHandle`, the #565-class seam).
     private let item: StatusItemHandle
     private let menu = NSMenu()
+    /// `private(set)`: only `setWarning` may mutate — every write
+    /// goes through `render()`.
     private(set) var warning = false
+    /// Distinct badge so the two causes never blur (§3.7); mutated
+    /// only via `setConfigError`, the same rule as `warning`.
     private(set) var configError = false
     private var modeIcon: String?
+    /// ONE stored value (#802), read by the icon AND the menu
+    /// builder — two reads of one fact showed half the signal
+    /// (architect review, 2026-08-12).
     private(set) var bootPhase: BootPhase = .ready
+    /// Held so a phase published mid-tracking can retitle the open
+    /// menu's row in place (owner, on device, 2026-08-12).
     weak var startingRow: NSMenuItem?
 
     init(item: (any StatusItemHandle)? = nil) {

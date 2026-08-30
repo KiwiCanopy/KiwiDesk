@@ -12,8 +12,14 @@ import SwiftUI
 /// (#68, #678).
 struct OverrideChrome<Content: View>: View {
     let isOn: Binding<Bool>
+    /// The collapse target when inheriting; nil keeps the live
+    /// control visible-but-disabled — the slot-size pair, whose
+    /// value has no one-line form (#290).
     var inherited: (label: String, value: String)? = nil
     var alignment: VerticalAlignment = .center
+    /// Rendered by the chrome, not the wrapped row, so it escapes
+    /// the inherit-state dim — help stays clickable while the user
+    /// decides whether to override (#94).
     var help: String? = nil
     var subject: String? = nil
     @ViewBuilder let content: Content
@@ -25,6 +31,10 @@ struct OverrideChrome<Content: View>: View {
             alignment: alignment,
             spacing: SettingsMetrics.overrideRowInset
         ) {
+            // Fill a bounded width: a long inheriting readout
+            // otherwise overflows the FIRST layout pass and
+            // shoves the checkbox off the hittable edge — it then
+            // silently ignored the first click.
             leadingContent
                 .frame(maxWidth: .infinity, alignment: .leading)
             overrideCheckbox
@@ -58,13 +68,23 @@ struct OverrideChrome<Content: View>: View {
         } else if let inherited {
             inheritedReadout(inherited)
         } else {
+            // `alignment`, not `.center`: the multi-row slot-size
+            // pair floats a centred `?` between its rows (owner,
+            // on device, 2026-08-16).
             HStack(
                 alignment: alignment,
                 spacing: SettingsMetrics.overrideRowInset
             ) {
                 liveControl
                     .disabled(true)
+                    // Same single-dim rule as `GreyOut` (#520):
+                    // inside a gated block this would compound
+                    // to 0.25.
                     .opacity(!alreadyDimmed ? 0.5 : 1)
+                    // A dim is not a sentence: this branch has no
+                    // inherited value to narrate, so without the
+                    // hint the row announces a disabled control
+                    // and no reason at all.
                     .accessibilityHint(
                         L(
                             "space_override.off.help",
@@ -95,6 +115,9 @@ struct OverrideChrome<Content: View>: View {
     private func inheritedReadout(
         _ inherited: (label: String, value: String)
     ) -> some View {
+        // Through the shared shape so an inheriting row stacks
+        // with its live siblings below the row breakpoint (code
+        // review, 2026-08-11).
         SettingsRowShape {
             HStack(spacing: 4) {
                 Text(inherited.label).lineLimit(1)
@@ -121,6 +144,8 @@ struct OverrideChrome<Content: View>: View {
 }
 
 /// Binding bridging optional override to active bool (#290).
+/// Internal: `OverrideSlotSizeRow` drives the same chrome from
+/// another file and must share this exact seed-on-check semantics.
 func overrideToggle<T: Sendable>(
     _ value: Binding<T?>,
     global: T
@@ -188,7 +213,9 @@ struct OverrideStepperRow: View {
     }
 }
 
-/// Override ratio slider row (#94).
+/// Override ratio slider row (#94); the 0.1–0.9 range matches the
+/// Lua ratio clamp, so the GUI can't store a value the setters
+/// would reject.
 struct OverrideFractionRow: View {
     let label: String
     @Binding var value: Double?

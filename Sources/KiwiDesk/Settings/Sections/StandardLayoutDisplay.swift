@@ -40,6 +40,10 @@ extension StandardLayout {
     /// `PresetSummaryCoverageTests`).
     @MainActor var displaySummary: String {
         switch name {
+        // Never name layout modes in prose — ten catalogs drifted
+        // when these did (#859); modes render only through
+        // `LayoutMode.displayName`, under the policy
+        // `LocalizationModeNamePolicyTests` pins.
         case "Developer":
             return L(
                 "presets.developer.summary",
@@ -82,6 +86,9 @@ extension StandardLayout {
                 "Frontend IDE and previews center, design "
                     + "canvas left, inspectors right."
             )
+        // ONE key (#601): the Starter's modes derive from the
+        // connected screens, so the summary states the rule rather
+        // than a per-Mac list (#678 Phase 4 pass 11).
         case StarterSetup.name:
             return L(
                 "presets.starter.summary",

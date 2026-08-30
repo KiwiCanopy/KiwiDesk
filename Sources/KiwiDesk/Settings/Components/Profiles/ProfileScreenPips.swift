@@ -5,13 +5,25 @@ import SwiftUI
 struct ProfileScreenPips: View {
     let count: Int
     var openingModes: [LayoutMode?] = []
+    /// How many slots the row RESERVES — the widest profile in the
+    /// list. Alignment is a property of the LIST, not a row, and
+    /// reserving the cap stranded a one-screen profile's outline
+    /// ~69 pt from its name (owner eye-confirm, 2026-08-16).
     var reservedSlots: Int = slots
 
+    /// The "+N" chip takes a slot of its own, so `hidden` never
+    /// equals 1 (`docs/ui-patterns.md` ▸ "+N").
     static let slots = 4
+    /// The small mount of the outline `PresetScreenCard` draws
+    /// large — the RATIO keeps them one picture, so a change to
+    /// either is a change to both (#789); the ceiling on growing
+    /// it is the row's ~32 pt text block, not taste.
     static let screen = CGSize(width: 34, height: 22)
     static let gap: CGFloat = 3
     static let corner: CGFloat = 3
     static let glyph: CGFloat = 12
+    /// Scaled by `PresetScreenCard` for the large mount (#859) —
+    /// the two must move together.
     static let moreSize: CGFloat = 9
 
     static func slotWidth(

@@ -5,6 +5,8 @@ import KiwiDeskCore
 enum ProfilesRowInstance: Hashable {
     case profile(String)
     case desktop(Int)
+    /// By the stable English `StandardLayout.name` — identity must
+    /// not move with the GUI language.
     case preset(String)
 }
 
@@ -42,7 +44,10 @@ struct ProfilesFamilyRows {
         return summaries.sorted { key($0) < key($1) }
     }
 
-    /// Union of main screen desktops and already-bound desktops (#888).
+    /// Union of main screen desktops and already-bound desktops
+    /// (#888). Takes the NUMBERS, never a count — main's Desktops
+    /// can be 3 and 4, and `1...n` would renumber them (owner QA,
+    /// 2026-08-18).
     static func desktops(
         onMain: some Collection<Int>,
         bound: some Collection<Int>
@@ -67,8 +72,10 @@ struct ProfilesFamilyRows {
         }
     }
 
-    /// Expands census family key into row instances
-    /// (`ProfilesCensusRenderTests`).
+    /// Expands census family key into row instances, reaching the
+    /// same statics the views call — one derivation, the join
+    /// proved: mutating it reds `ProfilesFamilyRowsTests` AND
+    /// `ProfilesCensusRenderTests.instanceCounts` together.
     private func rows(
         for family: ProfilesKey
     ) -> [ProfilesRowInstance]? {

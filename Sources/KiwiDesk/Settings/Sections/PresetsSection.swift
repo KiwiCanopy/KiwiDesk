@@ -95,7 +95,10 @@ struct PresetsSection: View {
         )
     }
 
-    /// Presets for disconnected screen counts in disclosure (#1028).
+    /// Presets for disconnected screen counts, behind one
+    /// disclosure — deliberately no summary (#1028): since #1021 a
+    /// header summary composes into the button's accessibility
+    /// name, where a bare count announced as an unlabelled digit.
     @ViewBuilder private var otherSetups: some View {
         let others = ProfilesFamilyRows.presets(
             excludingScreens: liveCount

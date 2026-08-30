@@ -16,11 +16,16 @@ struct OrphanPin: Identifiable, Hashable {
     var id: String { space.raw }
 }
 
-/// Expands Monitors census keys into rendered instances (#678,
-/// `MonitorsGateWiringTests`).
+/// Expands Monitors census keys into rendered instances (#678).
+/// The views build one and READ it, never re-derive beside it —
+/// `MonitorsGateWiringTests` pins each call site — and the switch
+/// is exhaustive so a new census key fails to compile until given
+/// an expansion.
 struct MonitorsFamilyRows {
     let spaces: [SpaceID]
     let mainSpaces: Set<SpaceID>
+    /// From the model's one `resolutions()` pass — the runtime's
+    /// own precedence, never re-implemented here.
     let resolutions: [SpaceID: SpaceResolution]
     let pins: [SpaceID: String]
     let displays: [Display]
@@ -64,7 +69,11 @@ struct MonitorsFamilyRows {
             + (isMain ? trayChips.count : 0)
     }
 
-    /// Stored pins for currently disconnected displays.
+    /// Stored pins for currently disconnected displays — read from
+    /// the SAVED pins (a resolution can only name a connected
+    /// display), keeping the user's intent visible and clearable;
+    /// follows-main spaces are excluded, the tray already draws
+    /// them.
     var orphans: [OrphanPin] {
         let connected = Set(displays.map(\.fingerprint))
         return
@@ -75,7 +84,10 @@ struct MonitorsFamilyRows {
             .sorted { $0.space.raw < $1.space.raw }
     }
 
-    /// Deduplicated spaces assigned to display cards.
+    /// Deduplicated spaces assigned to display cards: fingerprint
+    /// twins would each claim the same chips, double-counting the
+    /// census expansion — the picture may draw both, the COUNT
+    /// must not (code review, 2026-08-04).
     var cardedSpaces: [SpaceAssignment] {
         var seen: Set<SpaceID> = []
         return
@@ -110,6 +122,8 @@ struct MonitorsFamilyRows {
                 MonitorsRowInstance.display($0.fingerprint)
             }
         case .placementUnavailable:
+            // Exactly one row, always — on-screen is the GATE's
+            // answer, not this seam's.
             return [.banner]
         }
     }

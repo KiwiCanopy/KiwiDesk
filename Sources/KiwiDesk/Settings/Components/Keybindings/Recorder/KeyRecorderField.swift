@@ -2,13 +2,22 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// Keybinding recorder capturing shortcuts into canonical combo strings (#212,
-/// #33, #34).
+/// Keybinding recorder capturing shortcuts into canonical combo
+/// strings (#212, #33, #34). Requires a `RecorderCoordinator` in
+/// the environment — rendering it outside `ShortcutsSection` is a
+/// programmer error and will crash.
 struct KeyRecorderField: View {
+    /// VoiceOver's name for the field — the command it binds. The
+    /// visible text is the COMBO, its value, so without this every
+    /// row announced its value as its name (#812).
     let name: String
     let combo: String
     var conflict: String?
+    /// KiwiDesk-collision check run before committing; nil commits
+    /// unconditionally.
     var preflight: ((String) -> RecorderRejection?)? = nil
+    /// Commits the combo; returns the live-apply feedback to flash
+    /// (#123), or nil when the edit stays staged.
     let onRecord: (String) -> LiveApplyFeedback?
     let onClear: () -> Void
 
@@ -18,6 +27,9 @@ struct KeyRecorderField: View {
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var preview = ""
+    /// Set when a click-away cancelled recording — the button's own
+    /// click lands right after the mouse monitor and must not
+    /// immediately restart it.
     @State private var cancelledByClick: Date?
     @State private var rejection: RecorderRejection?
     @State private var flashing = false
@@ -152,6 +164,9 @@ struct KeyRecorderField: View {
         guard !combo.isEmpty else {
             return L("key_recorder.record", "Record")
         }
+        // Display-only glyph mapping (#23): the stored combo stays
+        // the canonical word form, so a parse failure just shows
+        // the raw string.
         guard let parsed = KeyCombo.parse(combo) else {
             return combo
         }

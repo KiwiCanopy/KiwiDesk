@@ -4,6 +4,10 @@ import CoreGraphics
 /// cards (#678, #758).
 enum MonitorCardChips {
     static let chipHeight: CGFloat = 22
+    /// Narrowest chip; ~16 pt of deliberate breathing room since
+    /// #758 moved the clear button — capacity is an UPPER bound,
+    /// and a `+n` one chip early costs nothing where a chip that
+    /// silently does not fit costs its affordance.
     static let minChipWidth: CGFloat = 52
     static var spacing: CGFloat { ChipMetrics.spacing }
     static let cardPadding: CGFloat = 6
@@ -11,6 +15,10 @@ enum MonitorCardChips {
     static let trayHeaderHeight: CGFloat = 14
     /// Child spacing for chip stacks pinned in `MonitorsGateWiringTests`.
     static let stackSpacing: CGFloat = 2
+    /// A COLUMN, not a slot: it narrows every row beside the wrap.
+    /// BOUND — both markers frame themselves to it, or a `+123`
+    /// squeezes the rows the reservation protects (code review,
+    /// 2026-08-04).
     static let markerWidth: CGFloat = 34
 
     /// Returns usable chip area inside card geometry.
@@ -51,6 +59,10 @@ enum MonitorCardChips {
         let usable =
             reservingMarker
             ? area.width - markerWidth - spacing : area.width
+        // Zero is a real answer WITH the marker reserved: a card
+        // at the floor shows the marker alone rather than a chip
+        // pushed off the edge; plain capacity stays >= 1 —
+        // `MonitorArrangement.minimumCard`'s promise.
         let perRow = max(
             reservingMarker ? 0 : 1,
             Int((usable + spacing) / (minChipWidth + spacing))
@@ -58,8 +70,10 @@ enum MonitorCardChips {
         return rows * perRow
     }
 
-    /// Splits chips into visible items and overflow count
-    /// (`MonitorCardChipsTests`).
+    /// Splits chips into visible items and overflow count. The
+    /// count is never exactly one — `OverflowSplit` owns that rule
+    /// (`monitor_card.more_spaces.axlabel` has no singular), and
+    /// `MonitorCardChipsTests` pins the property.
     static func split<Chip>(
         _ chips: [Chip],
         in size: CGSize,

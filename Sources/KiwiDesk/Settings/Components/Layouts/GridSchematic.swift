@@ -66,7 +66,10 @@ struct GridSchematic: View {
         case piled(TileKind, hidden: Int)
     }
 
-    /// Cell ceiling derived from params or auto-size cap (#712).
+    /// Cell ceiling derived from params or auto-size cap (#712) —
+    /// deliberately NOT clamped to what the canvas can draw: a
+    /// legibility clamp made one config draw two pictures. The
+    /// drawing may be clamped; the rule may not.
     var cap: (columns: Int, rows: Int) {
         autoSize
             ? LayoutSchematic.gridAutoSizeCap
@@ -87,7 +90,10 @@ struct GridSchematic: View {
 
     var capacity: Int { max(1, dims.columns * dims.rows) }
 
-    /// Number of overflow windows stacked in the last cell.
+    /// Number of overflow windows stacked in the last cell — zero
+    /// until the count EXCEEDS capacity: the engine piles
+    /// `capacity - 1` plus the rest only past full, and nothing
+    /// at exactly full.
     var piledCount: Int {
         ids.count > capacity ? ids.count - (capacity - 1) : 0
     }

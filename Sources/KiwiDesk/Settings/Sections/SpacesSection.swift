@@ -7,16 +7,28 @@ import SwiftUI
 struct SpacesSection: View {
     @ObservedObject var model: SettingsModel
     @State private var newSpace = ""
+    /// Set only for a space that `carriesOverrides` — a plain
+    /// empty space still deletes in one click (#205).
     @State var pendingDelete: SpaceID?
+    /// Held here, not on the popover, so the dialog outlives the
+    /// popover closing (#290).
     @State var pendingResetAll: SpaceID?
     @State var dragged: SpaceID?
+    /// Live display order during a drag, written back once on
+    /// drop — a per-crossing profile write re-evaluated the whole
+    /// config (#299). nil when idle.
     @State var dragOrder: [SpaceID]?
     @State var hoveredHandle: SpaceID?
     @State var rowFrames: [SpaceID: CGRect] = [:]
+    /// Measured, never guessed, so every row's button locks to one
+    /// column width across locales and counts (#290).
     @State var overridesButtonWidth: CGFloat = 0
     @Environment(\.controlActiveState) var activeState
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
+    /// The pushed editor's back crumb and the row to return to on
+    /// pop (#678 Phase 4 pass 10); wired in `+Overrides` and
+    /// `+Customize`, which carry the argument.
     @FocusState var overridesBackFocused: Bool
     @FocusState var returningRow: SpaceID?
 
@@ -28,6 +40,8 @@ struct SpacesSection: View {
                 spaceList
             }
         }
+        // On the container present in both branches: the dialog
+        // must outlive the surface that requested it (#290).
         .confirmationDialog(
             deleteConfirmTitle,
             isPresented: deleteConfirmPresented,
@@ -72,6 +86,9 @@ struct SpacesSection: View {
             }
         }
         .onChange(of: activeState) { _, now in
+            // Deactivating mid-drag abandons the gesture with no
+            // onEnded — commit so the list cannot keep showing an
+            // unsaved reorder (#299).
             if now != .key, dragged != nil {
                 commitDragOrder()
                 dragged = nil
@@ -141,6 +158,9 @@ struct SpacesSection: View {
                 Spacer()
                 modePicker(space)
                 customizeButton(space)
+                // Danger zone: set the destructive delete apart
+                // so the trash can't be hit reaching for the
+                // picker or Overrides (#205).
                 Divider()
                     .frame(height: 16)
                     .padding(.horizontal, 2)
@@ -158,6 +178,9 @@ struct SpacesSection: View {
                     SettingsTheme.hairline
                 )
         )
+        // One builder, three channels (#845): the context menu is
+        // the ONLY site for Move Up/Down/Make Fallback, so a bare
+        // channel here was pointer-only for those verbs.
         .rowActions { contextActions(space) }
         .scaleEffect(dragged == space ? 1.02 : 1)
         .shadow(
@@ -202,6 +225,8 @@ struct SpacesSection: View {
             }
             .disabled(!canAdd)
             .settingsActionButton()
+            // Icon-only like its siblings (#94) — and named for
+            // VoiceOver, which `.help` is not.
             .help(L("spaces.add.help", "Add Space"))
             .accessibilityLabel(L("spaces.add.help", "Add Space"))
         }

@@ -102,6 +102,10 @@ struct ScrollingSchematic: View {
         let low = placed.slots.lowerBound
         let high = placed.slots.upperBound
         let newIdx = placed.incoming
+        // Where the row rests is the ENGINE's answer (#776): local
+        // anchor math once drew a leading margin no real space can
+        // reach. `.follow` resolves as `.center` — a static preview
+        // has no pan history (#753).
         let count = high - low + 1
         let rowLength = CGFloat(count) * step - gap
         let focusedPos = CGFloat(-low) * step

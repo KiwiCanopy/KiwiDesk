@@ -104,6 +104,11 @@ struct ShortcutsHeader: View {
                 restored
             )
         }
+        // "·" never a comma — six locales use the comma as a
+        // decimal separator (settled in `behavior.quit.summary`).
+        // Naming Save as literal text is the #818 violation, and
+        // interpolating it reds `InterpolatedLabelTests`; filed —
+        // the staged-ness beat returns once the frame can say it.
         return L(
             "shortcuts.restore_defaults.message",
             "Your own shortcuts are kept, except any that use a "
@@ -154,6 +159,8 @@ struct ShortcutsHeader: View {
         .help(importHelp)
     }
 
+    /// The destination group is interpolated from the key that
+    /// labels it, never named as text (#818).
     private var importHelp: String {
         L(
             "shortcuts.import.help",

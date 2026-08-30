@@ -9,6 +9,10 @@ struct PtSlider: View {
     @Binding var value: CGFloat
     var range: ClosedRange<Double> = 0...100
     var unit: String = "pt"
+    /// Opt-in: 0 is this slider's Auto sentinel, read out as the
+    /// full word (R6/#406). Explicit, never inferred from the
+    /// range — a 1-floored slider without a sentinel must keep
+    /// printing its number (QA 2026-07-19).
     var autoAtZero: Bool = false
     var help: String? = nil
 
@@ -47,6 +51,11 @@ struct PtSlider: View {
             )
             .foregroundStyle(.secondary)
             .font(.body.monospacedDigit())
+            // A long localized "Automatic" shrinks rather than
+            // truncates. Load-bearing: the word only renders
+            // dimmed beside full-size numbers, so smaller reads
+            // as inert, not broken — don't "fix" the scale
+            // factor away.
             .lineLimit(1)
             .minimumScaleFactor(0.75)
     }
@@ -122,6 +131,8 @@ struct RatioRow: View {
         }
     }
 
+    /// Rounded, not truncated: a stored exact 0.29 must read
+    /// "29%", never "28%".
     private var readoutText: String {
         "\(Int((value * 100).rounded()))%"
     }
@@ -136,6 +147,9 @@ extension View {
 }
 
 /// Labeled checkbox toggle row with optional help popover (#94).
+/// The `?` is a sibling after the toggle, never nested in its
+/// label — an independent hit target and rotor stop the Toggle
+/// would otherwise swallow.
 struct ToggleRow: View {
     let label: String
     @Binding var isOn: Bool

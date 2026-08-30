@@ -1,8 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Track layout schematic displaying track arrangement, focus, and overflow
-/// (#125, #708).
+/// Track layout schematic displaying track arrangement, focus, and
+/// overflow (#125, #708). The overflow track piles as the Stack
+/// cascade, always vertical (#192).
 struct TrackSchematic: View {
     let axis: TrackParams.Axis
     let overflowStyle: StackParams.OverflowStyle
@@ -84,8 +85,10 @@ struct TrackSchematic: View {
         return s
     }
 
-    /// Target track splice index via `SchematicPlacement` (#702, #437,
-    /// `LayoutSchematicTrackEngineTests`).
+    /// Target track splice index via `SchematicPlacement` (#702) —
+    /// mirroring `Space.insertIntoTrack` (#128/#188), pinned by
+    /// `LayoutSchematicTrackEngineTests`; the fill-then-spill half
+    /// (#437) lives in `TrackSchematic+Fold`, guarded separately.
     private var newTrackIndex: Int {
         SchematicPlacement.splice(
             placement,

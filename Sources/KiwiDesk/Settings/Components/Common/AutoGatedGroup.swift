@@ -32,7 +32,20 @@ struct AutoGatedGroup<Gated: View>: View {
     }
 }
 
-/// Disables and dims inert controls without compounding opacity (#171, #520).
+/// Disables and dims inert controls without compounding opacity
+/// (#171, #520): the first active gate dims and publishes the fact;
+/// nested gates still `.disabled` but leave opacity alone.
+///
+/// `help` is a HOVER fallback only, never the #94 affordance:
+/// `.disabled` is cumulative, so a `HelpButton` inside the gated
+/// content is dead — a block gate anchors a live `?` outside the
+/// subtree (#527). And a "no tooltip" report is AppKit's default
+/// tooltip delay until proven otherwise — `.disabled()` does NOT
+/// suppress `.help()` (2026-08-03).
+///
+/// Do not re-add an `.accessibilityHint` beside the `.help()`:
+/// written and BACKED OUT pending a live VoiceOver observation of
+/// block-granularity hints (#678 Phase 4 pass 10; tracked issue).
 struct GreyOut: ViewModifier {
     let active: Bool
     var help: String = ""

@@ -8,11 +8,17 @@ enum SettingsWidthClass: String, CaseIterable, Sendable {
     case compact
     case tight
 
+    /// The ruled breakpoints and the hard minimum, public so the
+    /// shell and the tests read the same numbers — a second copy
+    /// of 720 anywhere is the drift this enum exists to prevent.
     static let panelBreakpoint: CGFloat = 1200
     static let rowBreakpoint: CGFloat = 900
     static let chromeBreakpoint: CGFloat = 820
     static let minimum: CGFloat = 720
-    /// Minimum content height (#859).
+    /// Minimum content height — one fact with two axes, homed
+    /// beside `minimum` so surfaces derive from it rather than
+    /// restate it (#859); the window controller's opening HEIGHT
+    /// is still a bare literal, deliberately unclaimed.
     static let minimumHeight: CGFloat = 540
 
     static func of(width: CGFloat) -> SettingsWidthClass {

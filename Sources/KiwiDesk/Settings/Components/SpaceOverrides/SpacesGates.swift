@@ -102,8 +102,11 @@ enum SpacesGateHelp {
         }
     }
 
-    /// Remote gate reasons whose switch lives on another destination
-    /// (`GateReasonPlacementTests`, #841).
+    /// Remote gate reasons whose switch lives on another
+    /// destination (#841, #815). A hand-kept copy of what
+    /// `GateReasonPlacement.channel` derives, bound by
+    /// `remoteMatchesTheCensus` (`GateReasonPlacementTests`); the
+    /// derivation is owed (architect review, 2026-08-16).
     static let remote: Set<SpacesGates.InertReason> = [
         .autoSizedGrid, .autoTracks,
     ]
