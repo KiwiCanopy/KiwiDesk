@@ -60,10 +60,7 @@ extension SpaceBarCard {
                     .map { ($0.1, $0.0) }
             )
         case .spaceBarLiquidGlass:
-            // Offered only where it can render (macOS 26+) —
-            // hidden, not greyed, matching the OS-capability
-            // gate (#390); the census carries the same rule as
-            // its `.liquidGlassUnavailable` runtime tag.
+            // Hidden below macOS 26 (#390).
             if AppBarStyle.glassAvailable {
                 ToggleRow(
                     label: L(
@@ -88,10 +85,7 @@ extension SpaceBarCard {
                 selection: style.alignment,
                 options: AppBarOptions.alignment
                     .map { ($0.1, $0.0) },
-                // Option names INTERPOLATED from the picker's own
-                // keys, not re-typed (#818) — the App Bar twin
-                // carries the argument, including why each name
-                // appears exactly once.
+                // Option names interpolated from picker keys (#818).
                 help: L(
                     "space_bar.alignment.label.help",
                     "Where the Space items — and the front-app "
@@ -111,10 +105,6 @@ extension SpaceBarCard {
                     "Active indicator"
                 ),
                 selection: style.activeIndicator,
-                // No `.gap` here: an empty slot marking the
-                // active Space reads as a missing Space, not a
-                // highlight (QA 2026-07-19). The App Bar keeps
-                // it (an empty window slot is legible there).
                 options: AppBarOptions.activeIndicator
                     .filter { $0.0 != .gap }
                     .map { ($0.1, $0.0) }
@@ -122,11 +112,6 @@ extension SpaceBarCard {
         case .spaceBarIconSource:
             iconSourceRow
         case .spaceBarCornerRoundness:
-            // Never greyed since background_fit: roundness
-            // shapes the Boxed items, the glass plate, AND
-            // Plain's own shared plate (BarPlate) — the old
-            // Plain grey predated Plain getting a plate
-            // (QA 2026-07-19).
             PtSlider(
                 label: L(
                     "space_bar.corner_roundness",
@@ -197,9 +182,6 @@ extension SpaceBarCard {
                 )
             )
         case .spaceBarItemSize, .spaceBarFontSize:
-            // Rendered by their Auto toggles' `AutoGatedGroup`
-            // above — the census keeps them as their own gated
-            // rows, the GUI composes the pair.
             EmptyView()
         case .spaceBarDimFactor, .spaceBarActiveDimFactor,
             .spaceBarStickyBadge, .copyAppearance,
@@ -208,11 +190,6 @@ extension SpaceBarCard {
             .spaceBarHighlightColor, .spaceBarHoverFillColor,
             .spaceBarHoverItemColor, .spaceBarGroupBadgeColor,
             .spaceBarGroupBadgeTextColor:
-            // Lua-only, App-Bar-card, or colour-card rows
-            // today. If a census move places one in this
-            // card, the render-parity guard forces it into the
-            // order lists and it lands here — fail loud in
-            // debug rather than render nothing.
             let _ = assertionFailure(
                 "unrendered Space Bar census key: \(key.rawValue)"
             )

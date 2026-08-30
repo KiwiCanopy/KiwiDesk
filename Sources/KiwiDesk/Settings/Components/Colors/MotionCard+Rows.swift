@@ -1,10 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Motion card's per-key controls. Same English as the
-/// Behavior card they moved from, so the eleven translations
-/// carry over; this file is now their only
-/// `scripts/extract-keys`-visible call site.
+/// Motion card row builders.
 extension MotionCard {
     @ViewBuilder func motionRow(_ key: ColoursKey) -> some View {
         switch key {
@@ -32,8 +29,7 @@ extension MotionCard {
                 ),
                 isOn: animations.onSpaceChange
             )
-            // Retires the entrance-only mental image (#207):
-            // the transition is a coordinated out+in.
+            // Coordinated out+in transition caption (#207).
             Text(
                 L(
                     "behavior.animations.space_change.caption",
@@ -70,7 +66,7 @@ extension MotionCard {
             )
         case .animationsDurationMS:
             Divider()
-            // Paces exactly the four toggles above (#51).
+            // Paces the animation toggles above (#51).
             StepperRow(
                 label: L("behavior.animations.duration", "Duration"),
                 value: animations.durationMS,
@@ -79,10 +75,6 @@ extension MotionCard {
                 suffix: "ms"
             )
         default:
-            // Palette and scrolling rows share the `ColoursKey`
-            // slice but belong to other containers; the
-            // render-parity guard keeps them out of the order
-            // lists, so reaching here is a placement bug.
             let _ = assertionFailure(
                 "non-Motion Colours key in the Motion card: "
                     + key.rawValue

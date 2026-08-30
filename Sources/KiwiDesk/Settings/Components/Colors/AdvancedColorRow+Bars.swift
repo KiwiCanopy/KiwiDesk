@@ -1,10 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The two bar groups' swatches. Labels and help are the strings
-/// the retired interim colour cards authored — same English, so
-/// the eleven translations carry over; this file is now their
-/// only `scripts/extract-keys`-visible call site.
+/// Advanced color swatch rows for App Bar and Space Bar.
 extension AdvancedColorRow {
     @ViewBuilder func appBarRow(_ key: AppBarKey) -> some View {
         let style = settings.appBarStyle
