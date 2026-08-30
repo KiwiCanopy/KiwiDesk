@@ -15,58 +15,18 @@ struct SpaceAssignment: Identifiable, Hashable {
     var id: String { space.raw }
 }
 
-/// One space chip inside a display card. Semantic micro-icons
-/// (pin / arrow) encode the resolution kind — border style alone
-/// would be an accessibility risk (§3.13). Explicit chips clear
-/// back to automatic via an always-visible ⓧ drawn as a CORNER
-/// BADGE overlay on the trailing-top corner (#758): an overlay
-/// never contributes to the parent's size, so the chip's metrics
-/// stop depending on whether it is pinned. Its two ancestors
-/// died of the same measurement — a hover-only button grew the
-/// chip after the flow layout had sized it, so its ⓧ overflowed
-/// a narrow card, and the in-flow trailing slot that replaced it
-/// ate label width on every pinned chip and made each read as a
-/// delete button.
+/// Space chip displaying placement on a monitor card (#758).
 ///
-/// **A `Menu` inside the chip is what makes the keyboard route
-/// real** (#678 turn 13b). Before it, the chip was an `HStack`
-/// with a `.draggable`: not focusable, no Tab stop, no Return,
-/// nothing for VoiceOver to activate — so the docstring's promise
-/// of a "keyboard-navigable fallback" was false for exactly the
-/// users it was written for. A `Menu` earns focus, keyboard
-/// activation and the VoiceOver trait from AppKit.
-///
-/// 13b gave the menu the WHOLE chip, which cost the drag: a
-/// borderless menu consumes the mouse-down to open itself, so
-/// `.draggable` never saw a press to begin from.
-///
-/// **Four routes now:** drag the chip, right-click it, reach
-/// the same items as VoiceOver actions, or press the keyboard
-/// chord on the focused chip — the menu routes come as one
-/// through the `rowActions` seam, and `.focusable()` below is
-/// what gives the chord a target at all (#845).
-///
-/// A visible chevron carrying the `Menu` was tried twice and
-/// rejected as clutter (owner ruling 2026-08-04) — first beside
-/// the pill, then inside it — and the owner upheld that on
-/// 2026-08-11 against turn 20a's ask for a visible trigger in
-/// every draggable row. A whole-chip `Menu` is what took the drag
-/// in 13b (the borderless menu consuming the mouse-down
-/// `.draggable` needed to begin from). The keyboard chord (`⌃.`)
-/// satisfies the Tab-only path without chrome or eating the drag.
+/// Supports drag, context menu, VoiceOver actions, and keyboard menu chord
+/// via `.rowActions` (#678, #845).
+/// Explicit chips clear to automatic via corner badge.
 struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
     let kind: SpaceAssignment.Kind
-    /// The displays the "move to…" menu offers, in the picture's
-    /// own left-to-right order — passed in from the area's row
-    /// expansion rather than re-read here, so the menu and the
-    /// cards can never list different monitors.
+    /// Target displays for move actions in picture order.
     let displays: [Display]
 
-    /// A plain draggable chip with a context menu — no `Menu`
-    /// anywhere in it, which is the only way the drag works at
-    /// all (see the type's docstring).
     var body: some View {
         capsule
             .fixedSize()
@@ -81,30 +41,7 @@ struct SpaceAssignmentChip: View {
             )
             .accessibilityLabel(space.raw)
             .accessibilityValue(hint)
-            // The chip must be able to HOLD focus for the #845
-            // chord to have a target at all: it is an `HStack`,
-            // not a `Button`, so without this a Tab-only
-            // keyboard can never reach it (#845 review). The
-            // platform draws the focus ring; the drag and the
-            // right-click are untouched.
             .focusable()
-            // ONE builder, three channels, through the one seam
-            // (#678 Phase 4 pass 10, turn 20a rule 1: the drag
-            // is the shortcut, the menu is the mechanism; #845).
-            // Right-click keeps working — making the chip a
-            // `Menu` once dropped the `.contextMenu` it used to
-            // carry, silently retiring the gesture people
-            // already had (docs review, 2026-08-04) — and this
-            // menu is already built from a `displays` the area
-            // passes in precisely so the menu and the cards
-            // cannot disagree.
-            //
-            // The seam adds NO chrome, which is what lets it
-            // coexist with the 2026-08-04 ruling: a visible
-            // chevron was tried twice and rejected as clutter,
-            // and a whole-chip `Menu` is what took the drag.
-            // The hidden chord anchor draws nothing and
-            // consumes no mouse-down.
             .rowActions { menu }
     }
 
@@ -119,22 +56,7 @@ struct SpaceAssignmentChip: View {
             {
                 IconGlyphLabel(icon: spaceIcon)
                     .font(.system(size: 10))
-                    // The glyph outranks the name (#545).
-                    // `FlowLayout` measures this chip at its
-                    // ideal size and then re-proposes exactly
-                    // that, so any rounding shortfall is taken
-                    // from a flexible child — and at equal
-                    // priority that was the emoji, which cannot
-                    // shrink and so clipped. The name absorbs it
-                    // instead, which it already does by design
-                    // (it truncates into the row's tooltip).
-                    //
-                    // Priority, not `.fixedSize()`: an icon is
-                    // one character only by the GUI picker's
-                    // rule, never Lua's (`set_space_icon` takes
-                    // any string — the GUI curates, Lua is
-                    // open), and a fixed-size glyph would let a
-                    // long one push the whole chip wide.
+                    // Glyph outranks name on overflow (#545).
                     .layoutPriority(1)
             }
             Text(space.raw)
@@ -142,24 +64,11 @@ struct SpaceAssignmentChip: View {
                 .fontWeight(.medium)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                // Provisional cap; the full name lives in the
-                // tooltip when elided. Re-evaluate with the
-                // 8-language add (#95) — localized names run
-                // longer.
                 .frame(maxWidth: 120, alignment: .leading)
         }
         .padding(.leading, 8)
-        // The clear badge rides the trailing-top corner, so a
-        // pinned chip's content earns extra trailing room — at
-        // the symmetric 8 the disc sat ON the space number
-        // (owner, 2026-08-09).
         .padding(.trailing, kind == .auto ? 8 : 14)
         .padding(.vertical, 3)
-        // Fill says EXPLICIT, outline says automatic — shape, not
-        // opacity. A dimmed chip spends this app's inert
-        // vocabulary (`GreyOut`) on something fully draggable,
-        // which reads as "you cannot move this" about the one
-        // chip most worth moving.
         .background(
             Capsule().fill(
                 .tint.opacity(kind == .auto ? 0 : 0.15)
@@ -176,19 +85,10 @@ struct SpaceAssignmentChip: View {
                 ? AnyShapeStyle(.secondary)
                 : AnyShapeStyle(.primary)
         )
-        // Always visible, never hover-revealed: a hover-inserted
-        // control changes the pill's size, which is the trap the
-        // overlay exists to close — hover may change only the
-        // badge's tint, never its presence or any metric.
         .overlay(alignment: .topTrailing) { clearBadge }
     }
 
-    /// The clear-pin control, riding the trailing-top corner and
-    /// slightly overlapping the border. In the accessibility
-    /// tree at full strength however quietly it draws: the
-    /// 16 × 16 hit target (the affordance is the target, not the
-    /// 9 pt glyph), the spoken label and keyboard reachability
-    /// all survive the move out of the flow (#758).
+    /// Clear-pin button overlay on trailing-top corner (#758).
     @ViewBuilder private var clearBadge: some View {
         if kind != .auto {
             Button {
@@ -196,16 +96,6 @@ struct SpaceAssignmentChip: View {
             } label: {
                 Image(systemName: "xmark.circle.fill")
                     .font(.system(size: 9))
-                    // Grey disc, light x — the NSSearchField
-                    // cancel shape. The chip renders on three
-                    // surfaces (card plate, the tray's bare
-                    // well, the overflow popover), and a
-                    // card-coloured disc is invisible by
-                    // construction on the first and a punched
-                    // hole on the second; an ink2 disc reads on
-                    // all three, masks whatever stroke it
-                    // overlaps, and separates by lightness, not
-                    // hue (ui-designer, 2026-08-09).
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(
                         SettingsTheme.card,
@@ -221,22 +111,11 @@ struct SpaceAssignmentChip: View {
                     "Back to automatic placement"
                 )
             )
-            // y −2, not −4: the 16 pt hit target's top edge
-            // stays inside `stackSpacing`'s gap, so a click on
-            // the tail of a truncated header name cannot land
-            // on "clear this pin" (ui-designer, 2026-08-09).
             .offset(x: 4, y: -2)
         }
     }
 
-    /// One glyph per kind, and the follows-main one is an ARROW
-    /// (#678 turn 13b): the tray it belongs to is dashed and sits
-    /// off the main display, and an arrow says "goes wherever
-    /// that is" where the old link glyph said only "attached to
-    /// something" — the tray's own header carries the same arrow,
-    /// so the concept has one glyph rather than three. Automatic
-    /// carries none: a chip placed by a default is the absence of
-    /// a decision, and the outline-only capsule says so.
+    /// Semantic micro-icon for assignment kind (#678).
     private var icon: String? {
         switch kind {
         case .pinned: return "pin.fill"
@@ -245,11 +124,6 @@ struct SpaceAssignmentChip: View {
         }
     }
 
-    /// The hints name the CLEAR BUTTON rather than drawing a "ⓧ"
-    /// in prose: the button renders `xmark.circle.fill`, so the
-    /// character was already an approximation of it, and a glyph
-    /// inside a translated sentence is one more thing a catalog
-    /// can lose.
     private var hint: String {
         switch kind {
         case .pinned:
@@ -287,9 +161,6 @@ struct SpaceAssignmentChip: View {
             model.config.spacePins[space] = nil
         }
         .disabled(kind == .main)
-        // Only the displays this space could MOVE to: the one it
-        // already sits on is not a move, and on a one-display Mac
-        // the whole list is the display it is already on.
         let elsewhere = displays.filter {
             $0.fingerprint != currentFingerprint
         }
@@ -311,9 +182,6 @@ struct SpaceAssignmentChip: View {
         }
     }
 
-    /// The fingerprint this chip is drawn on, when it is drawn on
-    /// one: a follows-main chip lives in the tray rather than on
-    /// a display, so every display is a move for it.
     private var currentFingerprint: String? {
         kind == .main ? nil : model.config.spacePins[space]
     }

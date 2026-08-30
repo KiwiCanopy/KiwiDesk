@@ -1,134 +1,54 @@
 import AppKit
 import SwiftUI
 
-/// The Settings window's colour and shape tokens (#678 turn 16b).
+/// Settings window colour and shape tokens (#678).
 ///
-/// Every surface, ink and border in the Settings tree resolves
-/// here. A hex literal beside a view is the drift this type
-/// exists to end: before it, the header painted `.bar`, the cards
-/// `controlBackgroundColor` and the hairlines
-/// `Color.primary.opacity(0.12)`, so three neighbouring greys came
-/// from three unrelated systems and no two moved together.
-///
-/// **A static enum, not an `@Environment` value.** Each token is a
-/// `Color` wrapping `NSColor(name:dynamicProvider:)`, so light and
-/// dark resolve per-draw from the *effective* appearance —
-/// `AppearanceChoice.apply()` sets `NSApp.appearance` app-wide
-/// (`AppearanceChoice+Scheme.swift`) and both modes follow with no
-/// further plumbing. An environment theme would pay only if two
-/// themes could coexist in one view tree; the appearance is
-/// process-global, so they cannot, and it would tax every `body`
-/// the shallow-body rule protects (`.claude/rules/gui.md`).
-///
-/// Same reasoning as `SettingsMetrics`, one shelf up: a constant
-/// on a view is one nobody measures against.
-///
-/// The hex pairs are pinned by `SettingsThemeTokenTests`, which
-/// resolves each token under `.aqua` and `.darkAqua` and holds the
-/// only copy of the table. Do not restate a hex here.
+/// Dynamic `Color` values wrapping `NSColor(name:dynamicProvider:)`.
+/// Hex pairs are pinned by `SettingsThemeTokenTests`.
 enum SettingsTheme {
 
     // MARK: - Surfaces
 
-    /// The window behind everything. Flat and opaque — the
-    /// prototype carries no vibrancy, and the translucent header
-    /// was the single biggest "wrong colour" report (owner
-    /// 2026-08-04).
+    /// Window background behind all content.
     static let page = token(light: 0xFB_FC_FA, dark: 0x17_1C_19)
 
-    /// Containers and rows: the header bar, Home cards, section
-    /// containers, the footer.
+    /// Containers and rows: header bar, cards, section containers, footer.
     static let card = token(light: 0xFF_FF_FF, dark: 0x1E_25_21)
 
-    /// The preview column. No consumer until Phase 4 lands the
-    /// 392 pt panel; it ships now so the guard pins one whole
-    /// table rather than growing a row per phase.
+    /// Preview column panel background.
     static let panel = token(light: 0xF4_F6_F1, dark: 0x1A_20_1C)
 
-    /// Disclosure interiors — and, by ruling rather than by the
-    /// 16b table, the filled chips. The prototype paints chips
-    /// `#F2F5EF`, within two points of this; a third near-identical
-    /// light grey-green would be a token nobody could tell from
-    /// its neighbour on screen.
+    /// Disclosure interiors and filled chips.
     static let sunken = token(light: 0xF4_F7_F1, dark: 0x23_2B_26)
 
-    /// The desktop-dark plate behind a Home card's picture
-    /// (#786): the tile is a picture of the user's desktop, so
-    /// its ground is a desktop at night, not a Settings surface.
-    /// Identical in both modes for the same reason the palette
-    /// inside it is (4g): what the picture shows must not change
-    /// with the window's appearance. Deliberately NOT `page`'s
-    /// dark `0x171C19`: in dark mode the plate must still read
-    /// as sitting below the card (`0x1E_25_21`), and the page
-    /// grey is within four points of it.
+    /// Desktop-dark plate behind Home card picture (#786).
     static let previewPlate = token(
         light: 0x12_25_1A,
         dark: 0x12_25_1A
     )
 
-    /// The plate's own light ink — the fallback the palette fold
-    /// swaps in when the USER's ink or accent sinks into
-    /// `previewPlate` (a legal palette: Lua is open, and a
-    /// light-styled bar carries a dark ink that is legible on
-    /// its own fill and invisible on this fixed dark ground).
-    /// Identical in both modes for the plate's own reason.
+    /// Plate light ink fallback when palette ink sinks into `previewPlate`.
     static let plateInk = token(
         light: 0xEA_F3_EE,
         dark: 0xEA_F3_EE
     )
 
-    // MARK: - Keyboard preview (#678 pass 5)
+    // MARK: - Keyboard preview (#678)
 
-    /// The board draws its BOUND keys in `accent` — the app's own
-    /// green, not a bespoke one — so only the three below are
-    /// its own. All are fixed in both modes for `previewPlate`'s
-    /// reason: the board is a picture of a keyboard on that same
-    /// dark ground, and what it shows must not change with the
-    /// window's appearance.
-    ///
-    /// A lighter bound green and a salmon conflict ring lived
-    /// here for a day. They came from a measurement taken with
-    /// the WRONG metric: `ColorVision.separation` is Euclidean
-    /// distance in SIMULATED sRGB, and a CIE-Lab proxy used
-    /// during the pass reported warm colours at 17–25 against the
-    /// accent where the repo's own measure puts them at 84–126.
-    /// Nothing needed a bespoke green. Use `ColorVision`, never a
-    /// re-derivation of it.
-
-    /// A key nothing claims — the board's unbound fill.
+    /// Unbound key fill on keyboard preview.
     static let keyFree = token(
         light: 0x37_46_3B,
         dark: 0x37_46_3B
     )
 
-    /// The dashed ring on a FREE key macOS already owns under
-    /// the shown modifier. A WARNING, not a third fill: the fill
-    /// says whether the USER has claimed the key, and blacking
-    /// it out said "unavailable" about a key that is free under
-    /// every other modifier.
-    ///
-    /// Measured against `keyFree` alone, because that is the
-    /// only fill it can sit on — a BOUND key whose combo macOS
-    /// owns rings `keyConflict` instead (owner ruled the
-    /// overwrite conflict-class, 2026-08-10; this amber measures
-    /// 10.5 against the accent where the floor is 60 —
-    /// `KeyboardRingSeparationTests` carries both numbers).
+    /// Dashed warning ring on free key macOS owns under shown modifier
+    /// (`KeyboardRingSeparationTests`).
     static let keyReserved = token(
         light: 0xE0_A3_4A,
         dark: 0xE0_A3_4A
     )
 
-    /// The solid ring on a key in conflict: two of the user's
-    /// OWN bindings claiming one combo, or a binding sitting
-    /// OVER a macOS reservation (owner ruled the overwrite
-    /// conflict-class, 2026-08-10). The dashed amber is only
-    /// ever a free key's warning.
-    ///
-    /// Deliberately not `SettingsTheme.danger`, which varies by
-    /// appearance: its dark value measures 55.6 against `accent`,
-    /// under the floor of 60, on a board pinned in both modes so
-    /// that cannot happen. This is danger's LIGHT value, fixed —
-    /// 136.6 on the accent it always sits on.
+    /// Solid ring on key in conflict with user binding or macOS reservation.
     static let keyConflict = token(
         light: 0xB0_3A_2A,
         dark: 0xB0_3A_2A
@@ -136,23 +56,13 @@ enum SettingsTheme {
 
     // MARK: - Borders
 
-    /// Every container border: card, section, header underline,
-    /// footer overline. In dark it does the work fills do in
-    /// light, because the surfaces there sit within ~10 points of
-    /// each other.
+    /// Container border hairline: card, section, header, footer.
     static let hairline = token(
         light: 0xE4_E9_E1,
         dark: 0x2C_33_2D
     )
 
-    /// The 16b construction that is not a colour swap: an inset
-    /// light line that separates a dark plane from a dark ground
-    /// ONLY in dark mode. In light the fills do the separating —
-    /// the plate measures 15.6:1 against the page — so this
-    /// resolves fully transparent there; in dark the plate, the
-    /// save pill and the search panel all sit within ~1.1:1 of
-    /// their grounds and this line is the edge. Drawn OVER a
-    /// hairline where one exists, not instead of it.
+    /// Inset light line separating dark planes in dark mode only.
     static let planeRing = token(
         light: 0xFF_FF_FF,
         dark: 0xFF_FF_FF,
@@ -169,29 +79,11 @@ enum SettingsTheme {
     /// slider's readout.
     static let ink2 = token(light: 0x55_63_5C, dark: 0xA8_B3_A9)
 
-    /// Captions and disclosure hints, the quietest legible ink —
-    /// and *legible* is the operative word: this paints a
-    /// section's one-sentence explanation, which is body copy and
-    /// owes 4.5:1 on EVERY surface it draws on. The 16b table's
-    /// `#7C8A82` / `#869184` measured 3.61:1 on `card` in light
-    /// and 4.43:1 on `sunken` in dark; the first correction
-    /// (`#6B7A72`) cleared `card` and still missed `panel` and
-    /// `sunken` in light (4.15 / 4.17 — the detail panel's
-    /// notices and the disclosure captions). Both ends now clear
-    /// the worst pairing, which `SettingsThemeContrastTests`
-    /// derives from these very tokens. A caption nobody can read
-    /// is not quiet, it is missing.
+    /// Captions and disclosure hints; contrast is tested across surfaces
+    /// (`SettingsThemeContrastTests`).
     static let ink3 = token(light: 0x64_72_6A, dark: 0x98_A2_96)
 
-    /// The small-caps group heading ("THIS PROFILE", a disclosure
-    /// interior's group label).
-    ///
-    /// The one pair 16b does not carry: the prototype only ever
-    /// draws this on light. Owner ruled a dedicated dark
-    /// counterpart (2026-08-04) over reusing `accent` — at full
-    /// accent strength a 10 pt small-caps label reads as something
-    /// clickable — and over `ink3`, which would drop the green
-    /// identity in both modes.
+    /// Small-caps group heading label.
     static let groupHeading = token(
         light: 0x50_6C_37,
         dark: 0x9B_B0_7E
@@ -199,45 +91,28 @@ enum SettingsTheme {
 
     // MARK: - Accent
 
-    /// KiwiDesk green, on controls and chrome alike. Owner ruled
-    /// the full-kiwi option (2026-08-04): the window is tinted
-    /// with this rather than the user's system accent, which is
-    /// what the prototype shows and what the fidelity complaint
-    /// pointed at. Deliberately identical in both modes — the
-    /// brand should not change hue with the appearance.
+    /// KiwiDesk green accent, identical in both modes.
     static let accent = token(light: 0x8D_B3_54, dark: 0x8D_B3_54)
 
-    /// Text and glyphs drawn ON `accent`. Stays dark in both
-    /// modes: kiwi is a mid-light green, so white on it fails
-    /// contrast whatever the appearance says.
+    /// Text and glyphs drawn on `accent` (dark in both modes for contrast).
     static let accentInk = token(
         light: 0x12_25_1A,
         dark: 0x12_25_1A
     )
 
-    /// A switch knob riding an accent track — the one token that
-    /// flips, because a white knob glares against dark chrome.
-    /// Its first consumer is Phase 4's control restyle; it ships
-    /// with the table for the same reason `panel` does.
+    /// Switch knob riding an accent track.
     static let onAccentKnob = token(
         light: 0xFF_FF_FF,
         dark: 0x12_25_1A
     )
 
-    /// The floating save pill's plate (#678 turn 9; owner
-    /// 2026-08-09 overturned the docked-footer ruling after
-    /// seeing the two side by side). Dark chrome floating OVER
-    /// the content, so on light it is the deep desktop green;
-    /// in dark mode it drops to the preview-frame fill 16b pins
-    /// BELOW the page (`0x0C1410`) so it still reads as a
-    /// separate plane when the page itself is near-black.
+    /// Floating save pill plate (#678).
     static let savePill = token(
         light: 0x12_25_1A,
         dark: 0x0C_14_10
     )
 
-    /// Text ON the save pill — light in both modes, the pill
-    /// being dark chrome in both.
+    /// Text on save pill (light in both modes).
     static let savePillInk = token(
         light: 0xEA_F3_EE,
         dark: 0xEA_F3_EE
@@ -245,34 +120,24 @@ enum SettingsTheme {
 
     // MARK: - States
 
-    /// The paused bar and the first-run banner's fill.
+    /// Paused bar and first-run banner fill.
     static let warningSurface = token(
         light: 0xFD_F1_DD,
         dark: 0x3A_2A_18
     )
 
-    /// Warning text and glyphs — the paused banner, the
-    /// header's divergence status row. Darker on light so it
-    /// holds 4.5:1 against `warningSurface`.
+    /// Warning text and glyphs (4.5:1 contrast on `warningSurface`).
     static let warningInk = token(
         light: 0x9A_62_00,
         dark: 0xE0_A3_4A
     )
 
-    /// Destructive text and glyphs. Lifted in dark so it stays
-    /// legible instead of sinking into `page`.
+    /// Destructive text and glyphs.
     static let danger = token(light: 0xB0_3A_2A, dark: 0xE0_82_76)
 
     // MARK: - Construction
 
-    /// One dynamic colour from a light/dark `0xRRGGBB` pair,
-    /// optionally with a per-mode alpha (`planeRing` is the one
-    /// consumer — a construction that exists in dark only).
-    ///
-    /// `bestMatch` rather than a raw name comparison: an
-    /// appearance can be a vibrant or high-contrast variant of
-    /// either mode, and those must resolve to the mode they
-    /// belong to instead of silently falling through to light.
+    /// Dynamic colour from light/dark pair using `bestMatch` for appearance.
     private static func token(
         light: UInt32,
         dark: UInt32,

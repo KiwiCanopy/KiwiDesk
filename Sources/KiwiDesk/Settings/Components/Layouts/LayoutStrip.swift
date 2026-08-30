@@ -1,20 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The "Choose a layout" strip (turn 10): a row of **live
-/// thumbnails**, not a tab strip of words.
-///
-/// This is the area's structural move. "Track" and "Scrolling"
-/// and "Monocle" are words only a tiler user knows, and this is
-/// the card where a beginner is most lost — a drawing of the
-/// layout is the only honest label, so the strip doubles as the
-/// answer to "which of these do I want?". Each tile also says
-/// how many spaces use it, so a layout nothing runs is visibly
-/// not worth tuning.
-///
-/// The tiles draw the *staged* settings, like every other
-/// preview here: they are the same schematics the panel below
-/// renders, at `SchematicScale.tile`.
+/// Layout selection strip with live schematic thumbnails
+/// (`SchematicScale.tile`).
 struct LayoutStrip: View {
     @ObservedObject var model: SettingsModel
     @Binding var selection: LayoutMode
@@ -34,10 +22,6 @@ struct LayoutStrip: View {
                 .padding(.bottom, 4)
             }
         }
-        // The same string the header shows: a container VoiceOver
-        // names one thing while the screen reads another is two
-        // names for one control, and the old key's English still
-        // described the tab strip this area no longer has.
         .accessibilityElement(children: .contain)
         .accessibilityLabel(chooseTitle)
     }
@@ -55,10 +39,6 @@ struct LayoutStrip: View {
                 LayoutSchematicView(
                     mode: mode,
                     settings: model.config.settings,
-                    // The tiles all draw the same count, so the
-                    // strip compares seven layouts rather than
-                    // seven arbitrary window counts; the panel
-                    // below is where the count is the question.
                     windows: LayoutSchematic.defaultWindowCount,
                     scale: .tile
                 )
@@ -78,11 +58,7 @@ struct LayoutStrip: View {
         )
     }
 
-    /// The selected tile is marked by a filled, accent-bordered
-    /// plate rather than by tinting the drawing: the thumbnail is
-    /// the layout's own picture, and recolouring it would make
-    /// "selected" and "this is what the accent colour paints"
-    /// the same signal.
+    /// Background plate indicating selection state.
     private func selectionChrome(_ selected: Bool) -> some View {
         RoundedRectangle(cornerRadius: 8)
             .fill(
@@ -101,10 +77,7 @@ struct LayoutStrip: View {
             )
     }
 
-    /// How many spaces run this layout. A space with no recorded
-    /// mode runs the default, exactly as everywhere else reads
-    /// it (`?? .bsp`), so BSP's count includes the untouched
-    /// spaces rather than under-reporting them.
+    /// Usage summary for layout across active spaces (`LayoutUsage.spaces`).
     private func usageText(_ mode: LayoutMode) -> String {
         let count = LayoutUsage.spaces(
             on: mode,

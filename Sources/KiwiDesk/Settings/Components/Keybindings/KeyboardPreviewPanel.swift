@@ -1,36 +1,18 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// "KEYBOARD · WHAT'S TAKEN" — the Shortcuts area's panel
-/// content (#678 turn 5a). One resolved keyboard, drawn from the
-/// draft, answering which physical keys the user's bindings have
-/// already claimed and under which modifier combinations.
+/// Keyboard shortcut allocation preview panel (#678, #812).
 ///
-/// The chip row is the state everything else derives from: the
-/// board and the count sentence both read the same scope through
-/// `KeyboardCensus`, so the sentence cannot disagree with the
-/// picture above it.
+/// Visualizes bound and available keys across modifier layers
+/// via `KeyboardCensus`.
 struct KeyboardPreviewPanel: View {
     @ObservedObject var model: SettingsModel
-
-    /// Which modifier combinations are showing. Seeded to all of
-    /// them on first render and then narrowed by the user —
-    /// starting empty would open on a board that answers nothing.
-    /// Which combination the board is showing, or all of them.
-    /// Opens on `.all` — the only answer that stays true however
-    /// many combinations the draft has, since a board narrowed to
-    /// a subset reads as the total under this panel's heading.
     @State private var scope: KeyboardCensus.Scope = .all
 
-    /// Every combination the draft uses. Each gets a chip.
     private var layers: [KeyboardCensus.ModifierLayer] {
         KeyboardCensus.layers(in: model.config.layers)
     }
 
-    /// The scope, dropped back to `.all` if the draft no longer
-    /// has the combination it names — unbinding the last ⌘
-    /// shortcut must not leave the board showing a ⌘ that is not
-    /// there.
     private var liveScope: KeyboardCensus.Scope {
         if case .one(let layer) = scope, !layers.contains(layer) {
             return .all
@@ -38,9 +20,6 @@ struct KeyboardPreviewPanel: View {
         return scope
     }
 
-    /// The selection, minus any layer the draft no longer has —
-    /// unbinding the last ⌘ shortcut must not leave a ⌘ chip
-    /// selected and counted.
     private var selected: Set<KeyboardCensus.ModifierLayer> {
         KeyboardCensus.inScope(liveScope, among: layers)
     }
@@ -61,8 +40,6 @@ struct KeyboardPreviewPanel: View {
                 scope: liveScope,
                 conflicted: collisions
             )
-            // Drawn, not spoken: the board's sentence names
-            // every state in words (#812).
             fillLegend.accessibilityHidden(true)
             tallySentence
             layoutRow
@@ -100,11 +77,6 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Legends
 
-    /// Each entry is drawn the way the board draws the thing it
-    /// names: a fill for a fill, a line for a ring. A square of
-    /// solid colour standing for a 1.5 pt dashed border is the
-    /// caption rule's failure in miniature — a legend may not
-    /// point at a mark the frame does not draw.
     private var fillLegend: some View {
         FlowLayout(spacing: 12) {
             swatch(
@@ -116,28 +88,12 @@ struct KeyboardPreviewPanel: View {
                 L("keyboard.legend.free", "free")
             )
             if !reservedFree.isEmpty {
-                // Gated on a DRAWN mark, not merely on a chip
-                // being picked: a chip whose reservations are
-                // all bound draws only red (code review
-                // 2026-08-10; an entry may not point at a mark
-                // the frame does not draw). ⌃⌥ reserved nothing
-                // until #1094 gave it ⌃⌥space, so the dashed
-                // ring now reaches the default pair too.
                 lineSwatch(
                     SettingsTheme.keyReserved,
                     dashed: true,
                     L("keyboard.legend.blocked", "macOS owns it")
                 )
             }
-            // The caption rule, applied to a legend: an entry
-            // may not point at a mark the frame does not draw
-            // (owner, 2026-08-10) — the red entry exists only
-            // while a red ring is on the board: an own-row
-            // collision, or a bound key overwriting a macOS
-            // shortcut, which is the same solid red (owner
-            // ruled it conflict-class). ONE reused key: a
-            // second label would cost a translation round for
-            // a distinction the banner already narrates.
             if !collisions.isEmpty || overwritesReserved {
                 lineSwatch(
                     SettingsTheme.keyConflict,
@@ -148,15 +104,6 @@ struct KeyboardPreviewPanel: View {
         }
     }
 
-    /// A fill swatch on the panel, delimited by a hairline —
-    /// which does light mode's work — with the `planeRing` seam
-    /// over it doing dark's, where the panel drops to within
-    /// ~1.3:1 of `keyFree` and the hairline sits eleven points
-    /// from it. A first dark-pass cut set every swatch on a
-    /// sliver of the board plate instead; the owner vetoed it
-    /// on sight (2026-08-10) — black chips beside caption text
-    /// in light mode read as blobs, and the legend is panel
-    /// furniture, not part of the picture.
     private func swatch(_ fill: Color, _ label: String) -> some View {
         HStack(spacing: 5) {
             RoundedRectangle(cornerRadius: 3)
@@ -182,9 +129,6 @@ struct KeyboardPreviewPanel: View {
         }
     }
 
-    /// A ring, drawn as the KEY-SHAPED outline it is on the
-    /// board — dashed for reserved, solid for a conflict. A
-    /// capsule read as a pill rather than as a key edge.
     private func lineSwatch(
         _ stroke: Color,
         dashed: Bool,
@@ -208,16 +152,6 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Sentence and layout row
 
-    /// A label rather than a sentence ("Keys taken: 12", not "12
-    /// keys taken."), because one catalog string has no plural
-    /// forms: every inflected locale would have to pick a single
-    /// grammatical number and be wrong at the others — "1 Tasten
-    /// belegt", "0 touches attribuées". Putting the count last
-    /// leaves nothing to agree with it. No terminal period for
-    /// the same reason it is not a sentence, and because after a
-    /// digit a period reads as a number separator in several of
-    /// the shipped locales (localization.md ▸ a frame
-    /// interpolating a count owns the argument).
     private var tallySentence: some View {
         let taken = KeyboardCensus.takenKeyCount(claims: claims)
         return Text(
@@ -232,31 +166,10 @@ struct KeyboardPreviewPanel: View {
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// States what was RESOLVED, never offers a choice — the app
-    /// binds by physical position and stores no layout, so this
-    /// is a reading of the machine, which is what "from macOS"
-    /// tells the user.
-    ///
-    /// ONE localized frame with the value at `%1$@`, rendered
-    /// through `SentenceFrame` — not `Text` · chip · `Text`.
-    /// Sibling views stitched around a value is the same defect
-    /// as `+`-concatenating fragments: the chip could only ever
-    /// land in the middle, and no catalog could move it (gui.md
-    /// ▸ Strings, the `CrossReferenceRow` case).
     private var layoutRow: some View {
-        // Spacing 0: the frame's own literals carry it. A
-        // per-segment gap merely double-spaces English and is
-        // wrong outright wherever the literal after a slot opens
-        // with a particle that must hug the noun before it.
         HStack(spacing: 0) {
             ForEach(
                 SentenceFrame(
-                    // "Keyboard layout", never bare "Layout":
-                    // that word is this app's own tiling noun
-                    // (`destination.layout` is "Layout
-                    // Defaults"), and this sentence sits inside
-                    // Settings where both senses are one search
-                    // away from each other.
                     L(
                         "keyboard.layout.sentence",
                         "Keyboard layout %1$@ from macOS"
@@ -277,10 +190,6 @@ struct KeyboardPreviewPanel: View {
                             RoundedRectangle(cornerRadius: 5)
                                 .fill(SettingsTheme.card)
                         )
-                        // `card` sits within a point of
-                        // `sunken` in BOTH modes — without an
-                        // edge the chip is not a chip (dark
-                        // pass).
                         .overlay(
                             RoundedRectangle(cornerRadius: 5)
                                 .strokeBorder(
@@ -313,11 +222,6 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Derived
 
-    /// One half of the solid red ring's keys: two bindings in
-    /// one layer claiming the same combo. The other half is
-    /// `overwritesReserved` — a binding over a macOS
-    /// reservation, the same solid red since the owner ruled
-    /// the overwrite conflict-class (2026-08-10).
     private var collisions: Set<UInt32> {
         KeyboardCensus.collisions(
             in: model.config.layers,
@@ -325,10 +229,6 @@ struct KeyboardPreviewPanel: View {
         )
     }
 
-    /// The board's own predicate, not a re-derivation: the
-    /// rings and this gate read one census set, so the legend
-    /// cannot claim a mark the board does not draw (architect
-    /// review 2026-08-10).
     private var overwritesReserved: Bool {
         !KeyboardCensus.overwrittenReserved(
             claims: claims,
@@ -336,13 +236,10 @@ struct KeyboardPreviewPanel: View {
         ).isEmpty
     }
 
-    /// The dashed amber ring's presence — its legend entry's
-    /// gate, same shape.
     private var reservedFree: Set<UInt32> {
         KeyboardCensus.reservedUnbound(
             claims: claims,
             scope: liveScope
         )
     }
-
 }

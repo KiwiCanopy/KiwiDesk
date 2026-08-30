@@ -20,7 +20,6 @@ struct BarsPanelPreview: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(SettingsTheme.previewPlate)
             )
-            // 16b dark seam — see `SettingsTheme.planeRing`.
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(
@@ -45,8 +44,7 @@ struct BarsPanelPreview: View {
         }
     }
 
-    /// Each declared space's identifier, the real bar's rule:
-    /// the stored icon, else the space's ordinal.
+    /// Space label identifiers (icon or ordinal).
     private var spaceLabels: [String] {
         let icons = model.config.settings.spaceIcons
         return model.config.spaces.enumerated().map {

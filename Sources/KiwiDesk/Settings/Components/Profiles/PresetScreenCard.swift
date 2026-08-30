@@ -1,122 +1,31 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A preset's thumbnail (#678 turn 13a): **one outline per
-/// screen**, not one tile per space.
+/// Preset thumbnail drawing one outline per screen (#678).
 ///
-/// The old thumbnail drew a tile per space, which reads at four
-/// and turns into a row of identical stamps at ten — and a
-/// three-screen preset's whole point is *which screen gets what*,
-/// which a flat run of tiles cannot say at any count. Screens are
-/// the thing that stays legible from one screen to three, so the
-/// picture draws screens and the count of spaces goes underneath
-/// as text.
-///
-/// Each outline carries the glyph of its screen's FIRST space —
-/// the layout that screen opens on. That is a deliberate part of
-/// the preset's plan rather than a sample: `spaceScreens` orders
-/// the spaces per screen, and the first one is what a user lands
-/// in when the preset applies.
-///
-/// **The count stays UNDER the picture, and the picture stays above
-/// the text** (owner, 2026-08-17, on the shipped German cards). Two
-/// alternatives were looked at and both lose:
-///
-/// - *The whole block left of the text.* Ruled out by the widest
-///   case rather than by taste — the picture is one outline per
-///   screen, 48 pt each, so it runs 48 pt at one screen to 204 pt at
-///   the four-slot cap, inside a ~276 pt card interior. Three
-///   screens already needs 152 pt, leaving ~120 pt for a title like
-///   "Visual Creative & Developer" to wrap to three lines beside a
-///   picture one line tall — so the card would be a different shape
-///   per preset, in a grid whose whole job is comparing presets.
-///   (`ProfileScreenPips` DOES sit left of its text, and that is why
-///   one grammar takes two axes: a full-width list row has the room
-///   a card does not.)
-/// - *The count beside the picture, filling the one-screen case's
-///   empty row.* Tried and refused on sight — the owner's read, and
-///   the reason to record it is that the empty row is real and the
-///   obvious fix for it is this one.
-///
-/// So the one-screen card carries some air to the right of its
-/// outline, deliberately, as the price of every card being the same
-/// shape.
+/// Displays opening layout glyph per screen, with space count underneath.
 struct PresetScreenCard: View {
     let layout: StandardLayout
-    /// The live screens, when this card is one the user can
-    /// actually apply — `nil` in the "For other setups" drawer,
-    /// where the plan is drawn for a screen COUNT and there is no
-    /// hardware to resolve it against.
-    ///
-    /// Without this the card drew the historic `bsp` for an
-    /// unlisted first space while `ProfileComposition.compose`
-    /// answered the same space from the display it lands on, so
-    /// the three appliable multi-screen presets named a layout
-    /// Apply never produces (code review, 2026-08-11).
+    /// Live screen sizes, or nil when in "For other setups" drawer.
     var liveSizes: [CGSize]?
 
-    /// #789 grew these from 34×22. The consult that ruled on it
-    /// REFUSED drawing a `LayoutSchematicView` in here instead:
-    /// the card draws one mode per screen — the first space's
-    /// opening mode — which is exactly what the glyph already
-    /// encodes, so a schematic would be ~9× the pixels for no
-    /// extra discrimination between catalog entries, at a scale
-    /// (≈0.43 of `.tile`, half the shipped floor
-    /// `HomeCardSchematicBand` uses) where the family's 1 pt and
-    /// 2 pt strokes stop rendering. The pixels the bigger card
-    /// buys go to the glyph instead.
+    /// Screen outline size and layout metrics (#789).
     private static let outline = CGSize(width: 48, height: 30)
-    /// Grown with the outline, so the glyph keeps its share of
-    /// the frame rather than shrinking inside a larger one.
     private static let glyphSize: CGFloat = 14
     private static let gap: CGFloat = 4
 
-    /// How many slots the row draws before the "+N" chip takes
-    /// one — the SAME cap the small mount uses, because the two
-    /// draw one grammar at two sizes and a cap that differed would
-    /// make a five-screen profile hide a different number of
-    /// screens in the list than on its card.
+    /// Maximum slots drawn before "+N" chip (`ProfileScreenPips.slots`).
     private static var slots: Int { ProfileScreenPips.slots }
 
-    /// The pips' chip size scaled by the step the glyph takes
-    /// between the mounts, so the chip keeps its share of the
-    /// outline exactly as `glyphSize` does.
     private static var moreSize: CGFloat {
         ProfileScreenPips.moreSize
             * (glyphSize / ProfileScreenPips.glyph)
     }
 
-    /// Clamped at zero for readability, not for safety.
-    ///
-    /// A hand-edited layout claiming a negative screen count must
-    /// not trap, and this is NOT what prevents that: deleting this
-    /// clamp leaves `PresetScreenCardOverflowTests` fully green,
-    /// because `OverflowSplit.shown`'s own `max(count, 0)` and
-    /// `hidden`'s clamp already cover it (guard-prover,
-    /// 2026-08-17). The load-bearing twin is
-    /// `PresetPreviewPlan`'s, which reads identically and whose
-    /// removal traps the runner on `0..<(-3)`. The two look alike
-    /// and are not alike; said here so the next reader does not
-    /// reason from this one as if it were the net.
     private var screenCount: Int { max(layout.screenCount, 0) }
 
-    /// Outlines drawn, and screens hidden behind the chip.
-    ///
-    /// **The row was uncapped until #859**, while the small mount
-    /// has always capped: `screenCount` fed the `ForEach`
-    /// directly, so a `Starter` derived from five connected
-    /// displays drew five 48 pt outlines — 256 pt of them — inside
-    /// a card whose grid minimum is 200. Only `Starter` can reach
-    /// it (the seven declared presets are capped by hand at three
-    /// screens) but `StarterAllocation`'s own docstring is explicit
-    /// that eleven displays gets eleven spaces, so the ceiling is
-    /// the desk's, not the catalog's.
-    ///
-    /// Internal rather than private, and asserted directly: a view
-    /// that takes a count and draws a constant satisfies every
-    /// substring a source scan can look for while answering
-    /// nothing (`LayoutSchematicCountTests`' lesson, which
-    /// `ProfileScreenPips` took first).
+    /// Screen outlines drawn before overflow
+    /// (`LayoutSchematicCountTests`, #859).
     var shown: Int {
         OverflowSplit.shown(
             of: screenCount,
@@ -143,13 +52,7 @@ struct PresetScreenCard: View {
         }
     }
 
-    /// Counts the screens NOT drawn, never the total — and stays
-    /// silent to VoiceOver, because the screen count is already
-    /// stated in words directly above every card that draws one
-    /// (`presets.for_your.*` for the live group,
-    /// `profiles.screens.*` per group in the drawer). Announcing
-    /// "+2" beside those would read one fact twice, and "+2" alone
-    /// says nothing a reader could act on.
+    /// Chip displaying count of hidden overflow screens.
     private var moreChip: some View {
         Text(verbatim: "+\(hidden)")
             .font(.system(size: Self.moreSize, weight: .semibold))
@@ -162,11 +65,6 @@ struct PresetScreenCard: View {
             .accessibilityHidden(true)
     }
 
-    /// One noun, one pair of keys: the profile row counts spaces
-    /// with `profiles.spaces.*` and so does this card. A second
-    /// pair with byte-identical English doubles the translation
-    /// work and lets the two drift per locale with nothing to
-    /// catch it.
     private var spaceCountText: String {
         spaceCountPhrase(layout.spaceCount)
     }
@@ -177,9 +75,7 @@ struct PresetScreenCard: View {
             : L("profiles.spaces.many", "%1$d Spaces", count)
     }
 
-    /// An empty screen draws its outline with NO glyph: a layout
-    /// mode drawn on a screen the preset plans nothing for is a
-    /// claim about behavior that applying it would not produce.
+    /// Screen outline view with layout mode glyph and accessibility label.
     private func outlineView(_ screen: Int) -> some View {
         RoundedRectangle(cornerRadius: 4)
             .fill(SettingsTheme.accent.opacity(0.12))
@@ -201,35 +97,11 @@ struct PresetScreenCard: View {
                 height: Self.outline.height
             )
             .help(screenHelp(screen))
-            // `.help` alone does NOT discharge `screenHelp`'s
-            // promise to the reader who cannot see the row: a
-            // `Shape` is not an accessibility element, so the
-            // hint has nothing to attach to and the sentence is
-            // hover-only. Making the outline an element gives
-            // VoiceOver the same sentence the pointer gets —
-            // which is the whole reason the main display is
-            // named in words rather than by position.
             .accessibilityElement()
             .accessibilityLabel(screenHelp(screen))
     }
 
-    /// **The card and the sheet read ONE derivation.**
-    ///
-    /// This card had its own `spaces(on:)`, `openingMode(_:)` and
-    /// `shape(of:)` against the plan's until #859's review round.
-    /// Both reviewers found the pair independently: the copies were
-    /// held together only by an agreement test that recomputed the
-    /// shape itself and could not see the card's `private` half, so
-    /// a drift in the card's bound or its index passed green. The
-    /// plan keeps EMPTY groups precisely so it can serve this card
-    /// too — the card draws an outline per screen whether or not
-    /// that screen has spaces, and a derivation that filtered could
-    /// not answer it.
-    ///
-    /// Screen 0 is the main display, 1 the next secondary, … — and
-    /// both the plan and its sparse fallbacks are the LAYOUT's to
-    /// answer (`StandardLayout+Screens`), the same accessors
-    /// `ProfileComposition.compose` builds a real profile from.
+    /// Shared preview plan derivation (`PresetPreviewPlan`, #859).
     private var plan: PresetPreviewPlan {
         PresetPreviewPlan(layout: layout, liveSizes: liveSizes)
     }
@@ -242,10 +114,7 @@ struct PresetScreenCard: View {
         plan.group(screen: screen)?.openingMode
     }
 
-    /// Named for the reader who cannot see the glyph — the count
-    /// of spaces on that screen and the layout it opens in. A
-    /// screen the preset plans nothing for says so instead of
-    /// naming a mode it does not have.
+    /// Help tooltip and accessibility description for a screen outline.
     private func screenHelp(_ screen: Int) -> String {
         guard let mode = openingMode(screen) else {
             return L(
@@ -254,9 +123,6 @@ struct PresetScreenCard: View {
                 presetScreenName(screen)
             )
         }
-        // The count phrase, not a `space(s)` parenthetical: the
-        // pair already exists for this noun and `spaceCountPhrase`
-        // above is this file's own use of it.
         return L(
             "presets.screen_help",
             "%1$@: %2$@, opens in %3$@",

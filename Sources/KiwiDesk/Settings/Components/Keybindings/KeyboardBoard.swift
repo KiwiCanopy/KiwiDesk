@@ -1,24 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The drawn keyboard: one board, showing one scope at a time.
+/// Keyboard visual matrix showing shortcut bindings for a scope.
 struct KeyboardBoard: View {
     let type: KeyboardMatrix.PhysicalType
     let claims: [UInt32: [KeyboardCensus.ModifierLayer]]
     let scope: KeyboardCensus.Scope
     let conflicted: Set<UInt32>
 
-    /// Widths are in key units, so the board scales to whatever
-    /// the panel column gives it rather than to a pinned size —
-    /// the responsive pass moves that column.
     var body: some View {
         GeometryReader { geometry in
             let rows = KeyboardMatrix.rows(for: type)
             let units = rows.first?.reduce(0) { $0 + $1.units } ?? 1
-            // The plate's own padding comes off FIRST: it sits
-            // outside the rows, so sizing the unit against the
-            // full width overflows the column by exactly twice
-            // it, which is how the board shipped clipped.
             let available =
                 geometry.size.width - Self.padding * 2
             let unit =
@@ -40,7 +33,6 @@ struct KeyboardBoard: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(SettingsTheme.previewPlate)
             )
-            // 16b dark seam — see `SettingsTheme.planeRing`.
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(
@@ -55,26 +47,15 @@ struct KeyboardBoard: View {
     private static let gap: CGFloat = 3
     private static let padding: CGFloat = 8
 
-    /// ONE unit governs both axes, and it is DERIVED from the
-    /// column the board is given rather than pinned. The width
-    /// was unit-derived while the height was a hardcoded 26, so
-    /// the board's aspect ratio was a function of the panel
-    /// width — the single thing a unit system exists to make
-    /// invariant, and what the eye read as "squashed".
-    ///
-    /// Deriving it from `panelWidth` rather than from a
-    /// `GeometryReader` is deliberate: the height has to be known
-    /// before the body is proposed, and the panel's width is a
-    /// constant by design. A board asked to render in some other
-    /// column would need the reader; nothing asks.
+    /// Key unit size derived from width constraint.
     static func unit(in width: CGFloat) -> CGFloat {
         let available = width - padding * 2
         return (available - gap * (unitsPerRow - 1))
             / unitsPerRow
     }
 
-    /// Every row of both boards totals this — asserted by
-    /// `KeyboardMatrixTests.rowsKeepOneWidth`.
+    /// Total units per row across keyboard models
+    /// (`KeyboardMatrixTests.rowsKeepOneWidth`).
     private static let unitsPerRow: CGFloat = 15
 
     private var boardHeight: CGFloat {
@@ -86,8 +67,6 @@ struct KeyboardBoard: View {
             + Self.padding * 2
     }
 
-    /// The panel's own horizontal padding, which the board never
-    /// sees — `SettingsDetailPanel` applies it outside.
     private static let columnInset: CGFloat = 44
 
     @ViewBuilder
@@ -95,8 +74,6 @@ struct KeyboardBoard: View {
         _ key: KeyboardMatrix.Key,
         unit: CGFloat
     ) -> some View {
-        // A letter key is `units: 1` in the matrix, so it is one
-        // unit tall as well as one wide.
         let width =
             unit * key.units
             + Self.gap * (key.units - 1)
@@ -123,51 +100,22 @@ struct KeyboardBoard: View {
         )
     }
 
-    /// The ONE conflict-class predicate — the legend's gate
-    /// reads the same set, so the ring and its entry cannot
-    /// drift (architect review 2026-08-10).
     private var overwritten: Set<UInt32> {
         KeyboardCensus.overwrittenReserved(
             claims: claims,
             scope: scope
         )
     }
-
 }
 
-/// One key. The FILL says what the user's config has done with
-/// it — bound or free — and a RING warns about it: dashed where
-/// macOS already owns the key under the shown modifier, solid
-/// where two of the user's own bindings collide.
-///
-/// Two channels rather than one fill carrying three meanings,
-/// which is what let "can't bind" stop being a near-black hole
-/// on a key that is free under every other modifier.
+/// Single keycap with status fill and ring (`KeyboardRingSeparationTests`).
 struct KeyCap: View {
     let code: UInt32?
     let state: KeyboardCensus.KeyState
     let isConflicted: Bool
-    /// The user bound this key OVER a macOS reservation —
-    /// conflict-class (owner 2026-08-10: binding ⌘W does not
-    /// un-own it, and suppressing the warning on bind hid
-    /// exactly the clash the user most needs to see). Member
-    /// of `KeyboardCensus.overwrittenReserved`, the one
-    /// predicate the legend gate shares.
     let isOverwritten: Bool
-    /// What a code-less cap prints (⇧, ⌘) — see
-    /// `KeyboardMatrix.Key.legend`.
     let legend: String?
 
-    /// The fill says what YOUR config has done with the key;
-    /// the border warns about it. Two channels rather than one
-    /// fill carrying three meanings — which is what let "can't
-    /// bind" be a near-black hole that no longer needed to be
-    /// (owner, 2026-08-10).
-    ///
-    /// The two warnings differ by DASH as well as by hue: a
-    /// reserved key is dashed, a conflicted one solid. Amber and
-    /// red are both warm, so hue alone would collapse them for
-    /// the same viewers the palette work was about.
     var body: some View {
         RoundedRectangle(cornerRadius: 4)
             .fill(fill)
@@ -183,12 +131,6 @@ struct KeyCap: View {
 
     @ViewBuilder private var border: some View {
         if isConflicted || isOverwritten {
-            // An overwrite clashes with macOS exactly as two
-            // own rows clash with each other, and takes the
-            // same solid red — which is also what the CVD
-            // floor forces, amber measuring 10.5 against the
-            // accent where red measures 136.6
-            // (`KeyboardRingSeparationTests`).
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(SettingsTheme.keyConflict, lineWidth: 2)
         } else if state == .cantBind {
@@ -200,10 +142,6 @@ struct KeyCap: View {
         }
     }
 
-    /// A reserved key is drawn FREE and ringed, not blacked
-    /// out: macOS owning it under this modifier is a warning
-    /// about a key that is otherwise unclaimed, and the fill's
-    /// job is to say whether the user has claimed it.
     private var fill: Color {
         state == .bound
             ? SettingsTheme.accent
@@ -216,10 +154,7 @@ struct KeyCap: View {
             : SettingsTheme.plateInk.opacity(0.75)
     }
 
-    /// The label the USER's keyboard prints, not the physical
-    /// key's US name — `LayoutKeyGlyph` is the app's one
-    /// layout-aware stage (#23) and the reason a German board
-    /// shows `ß` where the model calls the key `minus`.
+    /// Layout-aware character glyph for keycode (`LayoutKeyGlyph`, #23).
     private var glyph: String {
         guard let code else { return legend ?? "" }
         if let char = LayoutKeyGlyph.char(for: code),
