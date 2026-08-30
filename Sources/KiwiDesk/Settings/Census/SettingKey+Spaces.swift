@@ -1,5 +1,4 @@
-/// Spaces: the space list, per-space assignments and
-/// override reset actions.
+/// Spaces census slice: space list, assignments, and override reset actions.
 
 enum SpacesKey: String, CaseIterable, Hashable {
     case spaceIcon = "settings.spaceIcons[space]"
@@ -20,8 +19,7 @@ extension SpacesKey {
         case .fallbackSpace:
             return .row(.spacesAndLayouts, .spaceList, .showMore)
         case .spaceOverrideResetActive:
-            // Dead while the space has nothing to reset. Drawn in
-            // the editor header (SpacesSection+Overrides), #678 8b.
+            // Inactive when the space has no overrides (#678).
             return .row(
                 .spacesAndLayouts,
                 .perSpaceOverrides,
@@ -37,8 +35,6 @@ extension SpacesKey {
 extension SpacesKey {
     var text: SettingRowText {
         switch self {
-        // reset_active's key is "Reset %1$@ Overrides" — the
-        // layout name is interpolated per space, so dynamic.
         case .spaceIcon, .spaceList, .spacesName, .spaceModes,
             .fallbackSpace, .spaceOverrideResetActive:
             return .dynamic

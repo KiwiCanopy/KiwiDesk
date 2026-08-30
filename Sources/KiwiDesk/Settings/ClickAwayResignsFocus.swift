@@ -1,23 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// Resigns the settings window's first responder when the user
-/// clicks outside the currently-edited text field (#93).
-///
-/// Several settings fields (`StepperRow`, `ColorSwatch`'s hex
-/// field, `SpaceNameField`) use `@FocusState` and commit on focus
-/// loss — but on macOS, clicking empty/non-focusable space does
-/// NOT resign a `TextField`'s first responder the way it does on
-/// iOS, so a typed value can stick uncommitted until Return or a
-/// click into another field.
-///
-/// A transparent tap layer can't fix this: the section
-/// `ScrollView`s and every control claim the mouse-down before it
-/// reaches a sibling behind them. So this installs a window-scoped
-/// `NSEvent` local monitor, independent of SwiftUI hit-testing: on
-/// a left mouse-down, if a field editor holds focus and the click
-/// landed outside it, resign — which fires each field's
-/// commit-on-focus-loss path.
+/// Resigns first responder when clicking outside an active text field (#93).
+/// Uses an `NSEvent` local monitor so unfocusable clicks trigger commits.
 struct ClickAwayResignsFocus: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
         FocusResignMonitorView()
@@ -26,13 +11,7 @@ struct ClickAwayResignsFocus: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
-/// Owns a left-mouse-down monitor scoped to its own window. The
-/// monitor is torn down (and re-installed) in `viewDidMoveToWindow`
-/// whenever the view's window changes — including leaving the
-/// window (`window == nil`), which is the teardown path — so no
-/// `deinit` is needed (a nonisolated `deinit` can't touch the
-/// `@MainActor` monitor state anyway). Never intercepts clicks
-/// itself (`hitTest` returns nil).
+/// Window-scoped monitor view for resigning text field focus.
 private final class FocusResignMonitorView: NSView {
     private var monitor: Any?
 
@@ -51,10 +30,7 @@ private final class FocusResignMonitorView: NSView {
         }
     }
 
-    /// Keep editing when the click lands inside the focused field
-    /// editor; otherwise resign so the field commits. A no-op
-    /// unless a text field editor currently holds focus, so plain
-    /// clicks never disturb button/menu behaviour.
+    /// Resigns focus when a click occurs outside the active field editor.
     private static func resignIfClickOutsideEditor(
         _ window: NSWindow,
         _ event: NSEvent

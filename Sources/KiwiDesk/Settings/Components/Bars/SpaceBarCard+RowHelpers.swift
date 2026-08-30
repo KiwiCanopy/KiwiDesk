@@ -6,11 +6,7 @@ import SwiftUI
 /// (not private) only because the `row(for:)` switch lives in
 /// the sibling extension file.
 extension SpaceBarCard {
-    /// A plain binding. It wrote `stickyStyle.mark = true`
-    /// through on the way off until #678 Phase 3, to back the
-    /// sticky-mark toggle's forced-ON greying; that gate is gone
-    /// (`StickyMarkEditor`), and with it the only reason this
-    /// switch had to reach into another setting.
+    /// Space Bar enable toggle (#678, `StickyMarkEditor`).
     var showToggle: some View {
         ToggleRow(
             label: L("space_bar.enabled", "Show Space Bar"),
@@ -25,8 +21,7 @@ extension SpaceBarCard {
         )
     }
 
-    /// Position plus the shared-edge info row directly under it
-    /// (#374) — the App Bar card shows the same row.
+    /// Position plus the shared-edge info row directly under it (#374).
     @ViewBuilder var edgeRow: some View {
         SegmentedPicker(
             L("space_bar.edge.label", "Position"),
@@ -56,15 +51,9 @@ extension SpaceBarCard {
         )
         .modifier(
             GreyOut(
-                // Boxed never draws a shared plate to size —
-                // glass hugs each box, solid draws each box — so
-                // fit is inert for Boxed regardless of the glass
-                // finish. Plain (the shipped default, #660)
-                // un-greys it.
+                // Inert when Boxed (#660, #818).
                 active: style.wrappedValue.backgroundStyle
                     == .boxed,
-                // Style name INTERPOLATED from the picker entry's
-                // own key, not re-typed (#818).
                 help: L(
                     "space_bar.background_fit.boxed_only",
                     "\u{201C}%1$@\u{201D} draws a box per item, "
@@ -85,12 +74,7 @@ extension SpaceBarCard {
             spokenValue: AppBarOptions.iconSourceTitle(
                 style.iconSource.wrappedValue
             ),
-            // Two labels INTERPOLATED from their own keys, not
-            // re-typed (#818): the picker entry, and the page
-            // the item colours this sentence names are edited
-            // on. The App Bar twin already named that page; this
-            // one said "the bar's item colors" and pointed
-            // nowhere, so the reader had no way to reach them.
+            // Interpolated labels (#818).
             help: L(
                 "space_bar.icon_source.help",
                 "How app glyphs are drawn. "
@@ -119,24 +103,9 @@ extension SpaceBarCard {
         }
     }
 
-    /// The front segment's title length — the only text the
-    /// Space Bar draws, so the knob is inert while that segment
-    /// is off. Greyed rather than hidden (#171), pairing the
-    /// census gate `SettingKey+SpaceBar` declares with a live
-    /// `GreyOut`, as `backgroundFitRow` above does.
-    ///
-    /// Gated on the toggle ALONE: with the front segment off
-    /// the title is truly nowhere — not drawn, not announced.
-    /// A vertical Space Bar draws no front name but still
-    /// ANNOUNCES one — the segment's accessibility label is
-    /// built from the capped title on every edge
-    /// (`SpaceBarOverlay+FrontApp`) — so the cap is live there
-    /// and greying it would lie. The App Bar twin now follows
-    /// the same reasoning (#937): #901 gave its items an
-    /// accessible name, which is the condition the 2026-08-20
-    /// review ruling attached to retiring that twin's
-    /// icon-only grey, so both caps now grey only where the
-    /// title reaches NEITHER channel.
+    /// Front segment title length cap (#171, #818, #901, #937,
+    /// `SettingKey+SpaceBar`, `SpaceBarOverlay+FrontApp`). Greys on the toggle
+    /// alone: vertical bars announce the name via AX even when not drawn.
     @ViewBuilder var titleCapRow: some View {
         StepperRow(
             label: L("space_bar.title_cap", "Title length"),
@@ -152,8 +121,6 @@ extension SpaceBarCard {
         .modifier(
             GreyOut(
                 active: !style.wrappedValue.showFrontApp,
-                // Toggle name INTERPOLATED from its own key,
-                // not re-typed (#818).
                 help: L(
                     "space_bar.title_cap.front_app_only",
                     "Only \u{201C}%1$@\u{201D} draws a title.",
@@ -166,11 +133,7 @@ extension SpaceBarCard {
         )
     }
 
-    /// The stepper plus a neutral live summary of the current
-    /// cap — a caption that states what shows, not why (#94
-    /// defers the why to `help`). The preview strip is a fixed
-    /// stand-in and cannot honestly render N synthetic glyphs,
-    /// so the fact lives here.
+    /// Glyphs per Space stepper and live summary (#94).
     @ViewBuilder var glyphCapRow: some View {
         StepperRow(
             label: L("space_bar.glyph_cap", "Glyphs per Space"),

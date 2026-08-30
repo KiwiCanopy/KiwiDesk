@@ -1,17 +1,7 @@
 import KiwiDeskCore
 
-/// The shared App Bar option lists so the global editor and the
-/// per-layout override pickers stay in sync — one source of the
-/// value/label pairs both surfaces render (as segments now, #291).
-/// Split out of the per-space override chrome
-/// (`SpaceOverrides/OverrideControls.swift`) to keep that file
-/// under the line ceiling. It stays here because these ARE bar
-/// data — the edges and alignments the App Bar editor renders —
-/// while the chrome that once wrapped them moved to the one
-/// surface that still draws it (#819).
+/// Shared App Bar option value/label pairs (#291, #819).
 enum AppBarOptions {
-    /// Built from `allCases` through an exhaustive switch, so a
-    /// new edge case can't silently vanish from the pickers.
     @MainActor
     static let edge: [(AppBarEdge, String)] =
         AppBarEdge.allCases.map { ($0, label($0)) }
@@ -25,7 +15,7 @@ enum AppBarOptions {
         case .right: return L("app_bar.edge.right", "Right")
         }
     }
-    /// Same exhaustive-switch guard as `edge`.
+
     @MainActor
     static let alignment: [(AppBarStyle.BarAlignment, String)] =
         AppBarStyle.BarAlignment.allCases.map {
@@ -46,17 +36,14 @@ enum AppBarOptions {
         }
     }
 
-    /// WHERE the background is drawn — per item, or one plate
-    /// behind all of them. Liquid Glass is no longer an option
-    /// here — it is a separate `liquidGlass` finish toggle (#390),
-    /// offered only where it can render (macOS 26+).
+    /// Background plate drawing style (#390).
     @MainActor
     static let backgroundStyle: [(AppBarStyle.BackgroundStyle, String)] = [
         (.boxed, L("app_bar.background_style.boxed", "Boxed")),
         (.plain, L("app_bar.background_style.plain", "Plain")),
     ]
-    /// How far the shared plate reaches (QA 2026-07-19).
-    /// Default (hug) first, like every options list here.
+
+    /// Background reach options.
     @MainActor
     static let backgroundFit: [(AppBarStyle.BackgroundFit, String)] = [
         (
@@ -74,6 +61,7 @@ enum AppBarOptions {
             )
         ),
     ]
+
     @MainActor
     static let activeIndicator: [(AppBarStyle.ActiveIndicator, String)] = [
         (.outline, L("app_bar.active_indicator.outline", "Outline")),
@@ -86,10 +74,8 @@ enum AppBarOptions {
         ),
         (.gap, L("app_bar.active_indicator.gap", "Gap")),
     ]
-    /// #294 icon rendering. "System default" = the icon as
-    /// macOS hands it out (the system-wide Icon & widget
-    /// style already covers tinting wants); styled variants
-    /// are not obtainable via public API (#362).
+
+    /// App icon rendering options (#294, #362).
     @MainActor
     static let iconSource: [(BarAppIconSource, String)] = [
         (
@@ -101,8 +87,8 @@ enum AppBarOptions {
             L("app_bar.icon_source.app_font", "Glyphs")
         ),
     ]
-    /// The icon-source entry's title, for a row to speak as its
-    /// value — the same strings the picker draws.
+
+    /// Localized title for a given icon source option.
     @MainActor
     static func iconSourceTitle(_ source: BarAppIconSource) -> String {
         iconSource.first { $0.0 == source }?.1 ?? ""

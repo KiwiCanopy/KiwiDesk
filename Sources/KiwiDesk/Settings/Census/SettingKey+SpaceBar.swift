@@ -41,9 +41,7 @@ extension SpaceBarKey {
     var placement: SettingPlacement {
         switch self {
         case .spaceBarEnabled:
-            // Owns the .spaceBar container gate — must stay
-            // live while the container greys, or the editor
-            // could never be re-enabled.
+            // Owns the .spaceBar container gate — stays live while greyed.
             return .row(
                 .bars,
                 .spaceBar,
@@ -59,8 +57,7 @@ extension SpaceBarKey {
             .spaceBarCornerRoundness:
             return .row(.bars, .spaceBar, .showMore)
         case .spaceBarTitleCap:
-            // Only the front segment draws a title, so the cap
-            // is inert while that segment is off.
+            // Inert while front segment is off.
             return .row(
                 .bars,
                 .spaceBar,
@@ -89,7 +86,6 @@ extension SpaceBarKey {
                 gate: .runtime(.liquidGlassUnavailable)
             )
         case .spaceBarBackgroundFit:
-            // Boxed draws no shared plate to size.
             return .row(
                 .bars,
                 .spaceBar,
@@ -99,11 +95,6 @@ extension SpaceBarKey {
         case .spaceBarDimFactor, .spaceBarActiveDimFactor,
             .spaceBarStickyBadge:
             return .luaOnly
-        // The three-state accent ladder is the bar's defining
-        // signature, so it stays at rest; the rest of the palette
-        // sits behind the group's one "More colors" drawer (turn
-        // 12b — the split the live GUI already made, recorded in
-        // the census now that Advanced Colours renders from it).
         case .spaceBarItemColor, .spaceBarActiveItemColor:
             return .row(.advancedColours, .spaceBar, .atRest)
         case .spaceBarFillColor, .spaceBarHighlightColor,
@@ -111,10 +102,7 @@ extension SpaceBarKey {
             .spaceBarGroupBadgeColor, .spaceBarGroupBadgeTextColor:
             return .row(.advancedColours, .spaceBar, .showMore)
         case .spaceBarFocusedItemColor:
-            // Nothing to tint when glyphs are native images and
-            // no front-app name renders (icon source + front
-            // app + edge). Predicate:
-            // `AdvancedColorsGates.focusedItemInert`.
+            // Inert when front-app is off or icon source does not tint.
             return .row(
                 .advancedColours,
                 .spaceBar,
@@ -126,16 +114,7 @@ extension SpaceBarKey {
                 ])
             )
         case .copyAppearance:
-            // At rest on the App Bar card (owner flipped the
-            // direction 2026-08-10: it copies Space Bar → App
-            // Bar, filling in THIS card's bar), never behind
-            // the Style disclosure — the adjust-gaps precedent
-            // for a one-shot verb. Gated on the SOURCE bar
-            // being on, and deliberately EXEMPT from the
-            // card's container gate: styling the App Bar from
-            // the Space Bar before any layout shows one is
-            // configure-before-enable, the icon-source
-            // precedent one entry up.
+            // Copies Space Bar appearance to App Bar.
             return .row(
                 .bars,
                 .appBar,

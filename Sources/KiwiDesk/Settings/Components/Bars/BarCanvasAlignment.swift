@@ -1,14 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Maps a bar's absolute edge plus its along-axis alignment
-/// onto the composite SwiftUI `Alignment` a preview canvas
-/// uses (#293 QA): the edge supplies the cross-axis component
-/// (the strip hugs its matching side; the off-axis emptiness
-/// mirrors the bar's real relationship to the desktop), the
-/// alignment the along-axis one. Both preview strips share
-/// this one mapping. GUI-side on purpose — SwiftUI's
-/// `Alignment` must never leak into KiwiDeskCore.
+/// Maps bar edge and along-axis alignment to SwiftUI `Alignment` (#293).
 extension AppBarEdge {
     func canvasAlignment(
         _ alignment: AppBarStyle.BarAlignment

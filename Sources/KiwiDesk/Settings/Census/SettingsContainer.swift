@@ -1,10 +1,4 @@
-/// A titled card or group within an area. Several containers
-/// deliberately span TWO areas (`.appBar`, `.spaceBar`,
-/// `.borders`, `.dragAndDrop`, `.scrolling` appear in both a
-/// home area and Advanced Colours / Layout Defaults), and the
-/// spanning is load-bearing: it is what carries a container
-/// gate onto both surfaces. Never normalize to per-area
-/// containers.
+/// Titled card or group within an area. Spans multiple areas where relevant.
 enum SettingsContainer: CaseIterable, Hashable {
     case about
     case advanced
@@ -45,20 +39,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case stickyWindows
     case track
 
-    /// The gate that greys this container's rows AS A UNIT,
-    /// where the live editor greys wholesale (the App Bar and
-    /// Space Bar editors off their bar-shown switches, Focus
-    /// border off its enable toggle, the animations card under
-    /// macOS Reduce Motion). Composes with each row's own
-    /// `SettingPlacement.gate` (both apply). There is ONE
-    /// escape and it is data, never prose: any row that must
-    /// stay live while its container greys — the gate's own
-    /// owner toggles included, or a lockout follows — sets
-    /// `exemptFromContainerGate`, and the census guards pin
-    /// that every in-container owner does. Containers whose
-    /// greys have no single owning switch (Drag & drop's two
-    /// halves) record nothing here — the row gates carry the
-    /// owners.
+    /// Container-level gate that greys member rows as a unit.
     var gate: SettingGate? {
         switch self {
         case .appBar:

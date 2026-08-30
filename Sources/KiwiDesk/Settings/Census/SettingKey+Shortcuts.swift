@@ -1,6 +1,4 @@
-/// Shortcuts: keybinding families (one case per family — the
-/// xN row expansions are instances, not settings), layers,
-/// and the Lua-binding rows.
+/// Shortcuts census slice: keybinding families, layers, and Lua bindings.
 
 enum ShortcutsKey: String, CaseIterable, Hashable {
     case layers = "config.layers"
@@ -36,10 +34,7 @@ extension ShortcutsKey {
     var placement: SettingPlacement {
         switch self {
         case .layers, .layersIcon, .switchToLayer:
-            // `.immediate`, not `.showMore`: a configured layer
-            // is the user's own setup, so the card surfaces at
-            // rest the moment one exists. Only the offer to
-            // create the first one is withheld.
+            // Surfaces at rest when configured layers exist.
             return .row(
                 .shortcuts,
                 .layers,
@@ -61,13 +56,8 @@ extension ShortcutsKey {
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)
         case .`import`:
-            // At rest, in the header, not in the Lua drawer: the
-            // row it belongs to conceptually is the raw-Lua one,
-            // but Import is the affordance a NEW user needs and
-            // the one thing on this page that must not be behind
-            // a disclosure. Its `.runtime` gate already keeps it
-            // absent until `init.lua` holds something to adopt,
-            // which is what makes surfacing it at rest safe.
+            // Surfaced at rest (never behind disclosure) when init.lua has
+            // unadopted shortcuts.
             return .row(
                 .shortcuts,
                 .luaBindings,
@@ -75,20 +65,7 @@ extension ShortcutsKey {
                 gate: .runtime(.luaImportAvailable)
             )
         case .restoreDefaults:
-            // Its own container, because its SUBJECT is the
-            // shipped set and that set spans four of them —
-            // focus, move, size & float, and the general keys.
-            // Borrowing one would file a whole-area action under
-            // a quarter of what it acts on, which is what a
-            // reader building a search snippet off the census
-            // would then be told.
-            //
-            // A container is the subject, not the drawing: Import
-            // above declares `.luaBindings` while drawing in the
-            // header, so nothing about this moves the button. It
-            // draws beside Import, at rest, kept absent by its
-            // runtime gate until KiwiDesk actually has defaults
-            // this install lacks.
+            // Surfaced at rest when unseeded defaults are missing.
             return .row(
                 .shortcuts,
                 .defaultShortcuts,
@@ -102,11 +79,6 @@ extension ShortcutsKey {
 extension ShortcutsKey {
     var text: SettingRowText {
         switch self {
-        // Family keys (`keybinding.focus_dir` = "Focus window
-        // %1$@" …) carry positional specifiers and are only
-        // ever formatted per instance — a family ROW's title is
-        // runtime-composed, so these are `.dynamic`, not the
-        // template key.
         case .layers, .openApplications, .advanced, .focusDir,
             .goToSpace, .swapDir, .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
