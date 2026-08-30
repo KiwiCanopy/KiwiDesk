@@ -2,7 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Previews what an app rule matches against open windows as the user types
-/// (#123, `FloatRules.matches`).
+/// (#123, `FloatRules.matches`). Title patterns are the one part whose effect
+/// cannot be read off the rule text alone.
 struct AppRuleMatchPreview: View {
     @ObservedObject var model: SettingsModel
     let app: String

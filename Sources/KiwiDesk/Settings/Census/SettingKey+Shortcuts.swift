@@ -56,7 +56,8 @@ extension ShortcutsKey {
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)
         case .`import`:
-            // Surfaced at rest when unadopted shortcuts exist in init.lua.
+            // Surfaced at rest (never behind disclosure) when init.lua has
+            // unadopted shortcuts.
             return .row(
                 .shortcuts,
                 .luaBindings,

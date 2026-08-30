@@ -2,7 +2,8 @@ import KiwiDeskCore
 
 /// Resolves Bars area gating states to structured reason codes (#520, #678,
 /// `GapsBordersGates`, `GeneralGates`, `LayoutDefaultsGates`,
-/// `BarsGateHelp.sentence`).
+/// `BarsGateHelp.sentence`). The census is the one copy of container
+/// exemptions.
 struct BarsGates {
     let settings: TilingSettings
 
