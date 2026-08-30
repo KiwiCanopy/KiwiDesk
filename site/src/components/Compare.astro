@@ -248,6 +248,7 @@ const jsonLd = [
             >{t("compare_row_header")}</span></th>
           {tools.map((tool) => (
             <th scope="col" class={tool.own ? "is-own" : undefined}>
+              {tool.own ? (
               <span class="cmp__th">
                 {tool.own && (
                   <Image class="cmp__mark" src={logoMark} alt=""
@@ -255,6 +256,11 @@ const jsonLd = [
                 )}
                 {tool.label}
               </span>
+              ) : (
+              <a class="cmp__th cmp__collink" href={`#${tool.key}`}>
+                {tool.label}
+              </a>
+              )}
             </th>
           ))}
         </tr>
@@ -639,21 +645,30 @@ const jsonLd = [
     max-width: var(--prose-measure);
     line-height: 1.6;
   }
+  /* The five anchors are ONE argument in five steps, so they are
+     laid out as one: no rule between them, and the numerals hang
+     in a left column of their own. Five isolated circles say
+     nothing about how many parts there are; a vertical column of
+     numerals says "five" before a word is read. */
   .cmp__anchor {
-    padding-top: 1.2rem;
-    border-top: 1px solid var(--border);
-    margin-bottom: 1.2rem;
+    position: relative;
+    padding-left: 3rem;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 34rem) {
+    .cmp__anchor {
+      padding-left: 2.4rem;
+    }
   }
   .cmp__anchor h3,
   .cmp__tool h3 {
-    margin: 0 0 0.4rem;
-    font-size: 1.08rem;
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
     line-height: 1.25;
+    color: var(--text);
   }
   .cmp__anchor h3 {
-    display: flex;
-    align-items: start;
-    gap: 0.65rem;
+    display: block;
   }
   .cmp__anchor p,
   .cmp__tool p {
@@ -663,9 +678,17 @@ const jsonLd = [
     max-width: var(--prose-measure);
   }
   .cmp__tool {
-    padding-top: 1.4rem;
-    border-top: 1px solid var(--border);
-    margin-bottom: 1.6rem;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem 1.5rem 1.2rem;
+    margin-bottom: 1.1rem;
+    scroll-margin-top: 5rem;
+  }
+  @media (max-width: 34rem) {
+    .cmp__tool {
+      padding: 1.2rem 1.1rem 1rem;
+    }
   }
   .cmp__tool h3 a {
     color: var(--text);
@@ -706,28 +729,47 @@ const jsonLd = [
      has exactly four parts — the headings alone read as a list of
      unknown length. */
   .cmp__num {
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: none;
-    width: 1.55rem;
-    height: 1.55rem;
+    width: 1.9rem;
+    height: 1.9rem;
     border-radius: 50%;
     background: color-mix(in srgb, var(--accent-deep) 24%, transparent);
     color: var(--accent);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     line-height: 1;
-    margin-top: 0.1em;
+  }
+  @media (max-width: 34rem) {
+    .cmp__num {
+      width: 1.6rem;
+      height: 1.6rem;
+      font-size: 0.8rem;
+    }
   }
   /* What a tool is genuinely good at is set off as a quote-like
      callout, so conceding reads as deliberate rather than as
      throat-clearing before the pitch. */
   .cmp__tool p.cmp__good {
     color: var(--text);
-    padding-left: 0.9rem;
-    border-left: 3px solid
-      color-mix(in srgb, var(--accent) 45%, transparent);
+    margin: 0 -1.5rem 0.9rem;
+    padding: 0.85rem 1.5rem;
+    background: color-mix(in srgb, var(--accent-deep) 10%, transparent);
+    border-top: 1px solid
+      color-mix(in srgb, var(--accent) 22%, transparent);
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--accent) 22%, transparent);
+    max-width: none;
+  }
+  @media (max-width: 34rem) {
+    .cmp__tool p.cmp__good {
+      margin-inline: -1.1rem;
+      padding-inline: 1.1rem;
+    }
   }
 
   .cmp__picks {
