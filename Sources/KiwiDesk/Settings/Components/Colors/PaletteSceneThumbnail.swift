@@ -1,58 +1,29 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A small static preview of a palette (#375): a mock bar strip, a
-/// ringed window, and a drag ghost swatch, painted in the palette's
-/// colors — so the picker shows *composition*, not isolated chips.
-/// Takes the palette by value; sparse palettes fall back to the
-/// shipped defaults for any color they omit, so a thumbnail always
-/// reads as a complete scene.
-/// The Colours & Animations page reuses it at a larger `height` as
-/// its live "current colours" scene, fed
-/// `ColorPaletteKeys.extract(from:)` over the staged config —
-/// same drawing, so the shelf and the page can never disagree
-/// about what a palette paints.
+/// Static preview thumbnail of a color palette (#375,
+/// `ColorPaletteKeys.extract`).
 struct PaletteSceneThumbnail: View {
     let palette: ColorPalette
-    /// The height every internal metric is expressed against.
-    /// Named, because `scale` divides by it: restating 72 in
-    /// both places would silently rescale the whole drawing by
-    /// the wrong factor the day the tile is retuned.
+    /// Base height against which internal metrics scale.
     static let baseHeight: CGFloat = 72
 
-    /// The plate's corner at `baseHeight`. `PaletteTile` derives
-    /// its padding from this so the tile's frame and the plate
-    /// inside it stay concentric — nested rounds that are not
-    /// read as a mistake, and the relation cannot break by
-    /// retuning either number alone.
+    /// Plate corner radius; `PaletteTile` derives padding from this.
     static let plateRadius: CGFloat = 6
 
-    /// Tile height on the shelf; the page-level scene passes a
-    /// larger one. Every element inside is laid out relative to
-    /// the frame, so one number scales the whole picture.
+    /// Height on the shelf; scales internal elements.
     var height: CGFloat = baseHeight
 
-    /// Which roles this drawing shows (#793). A **scale**, not a
-    /// height threshold: what changes between the two is which
-    /// colours are on the frame, and `PaletteSceneRoles` is the
-    /// one census of that. The default keeps every existing call
-    /// site — the shelf's tiles — exactly as it was.
+    /// Which roles this drawing shows (#793, `PaletteSceneRoles`).
     var scene: PaletteSceneScale = .tile
 
     private static let fallback = ColorPaletteKeys.extract(
         from: TilingSettings()
     )
 
-    /// Internal, not private: `PaletteSceneThumbnail+Panel` draws
-    /// the full scene from the same lookup, so a sparse palette
-    /// falls back identically at both scales.
-    ///
-    /// A path whose empty value means **Automatic** rather than
-    /// unset resolves through `Color.kiwiMark` — derived from
-    /// `ColorPaletteKeys.allowsAutomatic` rather than a list of
-    /// the two paths here, so a third adaptive mark joins by
-    /// existing. Without it the sticky and floating marks drew
-    /// as holes at their shipped defaults, both being empty.
+    /// Resolves color path, handling automatic mark tints
+    /// (`PaletteSceneThumbnail+Panel`, `Color.kiwiMark`,
+    /// `ColorPaletteKeys.allowsAutomatic`).
     func color(_ path: String) -> Color {
         let hex =
             palette.colors[path] ?? Self.fallback[path] ?? ""
@@ -62,20 +33,7 @@ struct PaletteSceneThumbnail: View {
         return .kiwiMark(hex)
     }
 
-    /// Everything inside is expressed against the shelf tile's
-    /// 72 pt, so one `height` scales the whole scene rather than
-    /// stretching a fixed drawing inside a taller box.
-    /// Internal for the same reason `color` is — the panel scene
-    /// expresses its own metrics against it.
-    ///
-    /// **Only the tile derives it from `height`.** That
-    /// "one number scales the whole picture" trick works while
-    /// the picture is three rows tall; the panel scene stacks
-    /// seven, so deriving 300/72 = 4.17 asked for a 538 pt
-    /// drawing inside a 300 pt frame and it spilled over the
-    /// diff list beneath it (owner, on device, 2026-08-16). The
-    /// panel therefore fixes its own unit and lets its HEIGHT
-    /// follow, which is the opposite dependency.
+    /// Scaling factor for internal layout.
     var scale: CGFloat {
         switch scene {
         case .tile: return height / Self.baseHeight
@@ -83,20 +41,11 @@ struct PaletteSceneThumbnail: View {
         }
     }
 
-    /// The panel scene's unit. Chosen so the whole composition
-    /// fits the panel column's width at a legible size — the
-    /// badges are the floor, at 8 × this.
+    /// Fixed scale factor for the panel scene.
     static let panelScale: CGFloat = 1.9
 
-    /// What the panel scene actually needs, in points: the sum
-    /// of its rows and their gaps at `panelScale`, so the frame
-    /// is derived from the drawing rather than asserted over it.
-    /// `PaletteSceneRoleTests` holds it against the panel
-    /// column's own budget.
+    /// Computed panel scene height (`PaletteSceneRoleTests`).
     static var panelHeight: CGFloat {
-        // Each bar carries a name above it (7 pt + a 3 pt gap),
-        // then: strip + gap + windows + gap + drag + gap +
-        // strip, then the plate's padding top and bottom.
         (10 + 20 + 7 + 30 + 7 + 22 + 7 + 10 + 20 + 16)
             * panelScale
     }

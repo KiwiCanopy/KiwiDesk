@@ -1,18 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Borders and Drag groups' swatches — the `BordersKey`
-/// slice, which owns the ring, the two marks and the drag
-/// visuals.
-///
-/// Two labels are new here: on the Focus-border card each ring
-/// colour could be called "Color", because the card was the
-/// context. In a Borders group holding three tints, two rows
-/// named "Color" name nothing, so they take the wording their
-/// VoiceOver labels already carried. The drag rows go the other
-/// way — they reuse the `drag.border` / `drag.fill` labels,
-/// because the Border/Fill sub-grouping that made "Color"
-/// readable does not exist on this page either.
+/// Advanced color swatches for borders and drag visuals.
 extension AdvancedColorRow {
     @ViewBuilder func structureRow(_ key: BordersKey) -> some View {
         switch key {
@@ -42,9 +31,6 @@ extension AdvancedColorRow {
             )
             .modifier(gated(unfocusedInert, unfocusedHelp))
         case .stickyColor:
-            // Deliberately ungated: it also paints the on-window
-            // mark, so it always tints something even with the
-            // Space Bar off (the census records the same).
             HexColorField(
                 label: L("sticky.color", "Sticky"),
                 a11yLabel: L(
@@ -55,9 +41,6 @@ extension AdvancedColorRow {
                 hex: settings.stickyStyle.color
             )
         case .floatingColor:
-            // The floating mark's ONLY surface is the Space Bar
-            // badge, so this row lives in the Space Bar group and
-            // rides that group's container gate — no row gate.
             HexColorField(
                 label: L("floating.color", "Floating"),
                 a11yLabel: L(
@@ -84,17 +67,7 @@ extension AdvancedColorRow {
         }
     }
 
-    /// One drag column's Border or Fill tint. Both columns edit
-    /// the same `DragVisual` shape, so one builder covers four
-    /// census rows.
-    /// `labelWidth` is passed EXPLICITLY, not read from the
-    /// environment: `HexColorField.labelWidth` is a plain
-    /// parameter, so the `settingsLabelColumn` value the twin
-    /// columns publish reaches every other row type and not this
-    /// one. Dropping it renders the half-width columns on the
-    /// full 140 pt axis — which is what happened when these rows
-    /// moved off the structure editor, where the old call site
-    /// did pass it.
+    /// Swatch row for drag visuals (ghost and drop zone).
     @ViewBuilder private func dragRow(
         ghost: Bool,
         fill: Bool

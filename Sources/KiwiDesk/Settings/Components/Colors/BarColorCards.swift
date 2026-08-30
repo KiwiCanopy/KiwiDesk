@@ -1,18 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The two bar groups on Advanced Colours (turn 12b). Each keeps
-/// its accent colours at rest and puts the rest behind one "More
-/// colors" drawer — the split the interim colour cards already
-/// made, now read from the census's tiers.
-///
-/// "More colors", never "Advanced colors": inside an area whose
-/// own name is Advanced Colors, that adjective re-scopes onto the
-/// area and reads as mode depth — a row tier and a mode depth
-/// must never be spelled with one word. The drawer's collapsed
-/// summary does the naming instead. Argued in
-/// `docs/ui-patterns.md` ("Advanced" prefixes a disclosure's
-/// noun only when…).
+/// Space Bar color group on Advanced Colours.
 struct SpaceBarColorCard: View {
     @ObservedObject var model: SettingsModel
     @State private var moreExpanded = false
@@ -25,9 +14,7 @@ struct SpaceBarColorCard: View {
     }
 
     var body: some View {
-        // The header `?` is the block gate's live anchor (#527),
-        // and from here it must also say WHERE: the Show switch
-        // is on another page now.
+        // Section header help provides the block gate anchor (#527).
         SettingsSection(
             SettingsCatalog.advancedColors.spaceBarGroup,
             help: allows ? nil : AdvancedColorsHelp.spaceBarOff
@@ -118,9 +105,7 @@ struct AppBarColorCard: View {
     }
 }
 
-/// One group's rows, each carrying its container gate in
-/// PARALLEL with its own row gate — never nested, and honoring
-/// `exemptFromContainerGate` as data the way the Bars cards do.
+/// Renders color rows with parallel container and row-level gates.
 struct AdvancedColorRows: View {
     @ObservedObject var model: SettingsModel
     let keys: [SettingKey]
@@ -141,31 +126,7 @@ struct AdvancedColorRows: View {
         }
     }
 
-    /// How a row's two gates resolve — ONE decision with one
-    /// answer.
-    ///
-    /// It is hoisted because the two halves were computed six
-    /// lines apart in `body` and disagreed about the exemption:
-    /// the container grey honored it, the row predicate did not.
-    /// An exempt row under a closed container therefore had its
-    /// block grey lifted AND its own predicate suppressed —
-    /// an editable swatch tinting nothing, explaining nothing,
-    /// the exact opposite of what the exemption asks for. The
-    /// exemption means "escape the CONTAINER gate", not "escape
-    /// both".
-    ///
-    /// That disagreement is the warrant, not testability: a
-    /// two-line expression does not leave a view because a test
-    /// wants a handle on it. Being assertable is what the
-    /// co-location bought, and it matters here because nothing
-    /// in this area is exempt yet — so no rendered behaviour
-    /// distinguishes the two forms, and only a direct assertion
-    /// can hold the rule until the first exemption lands.
-    ///
-    /// The two values are exact complements today. Both are
-    /// named anyway: a future exemption could want the block
-    /// grey lifted WITHOUT re-arming the row's own predicate,
-    /// and only this shape can say so.
+    /// Resolves container gate and row predicate state for a setting key.
     static func gate(
         allows: Bool,
         key: SettingKey

@@ -1,13 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The palette shelf's two name popovers, both built on the
-/// shared `NameEditPopover`, which OWNS the name it edits (#843).
-///
-/// Each is presented by ITEM, so the seed travels to the builder
-/// instead of being read back out of shelf state written one tick
-/// earlier — which is what left Save disabled over a valid name
-/// on the first open of every visit.
+/// Name edit popovers for palette saving and renaming (#843,
+/// `NameEditPopover`).
 extension PaletteShelf {
     @MainActor static var namePlaceholder: String {
         L("palettes.name_placeholder", "Palette name")

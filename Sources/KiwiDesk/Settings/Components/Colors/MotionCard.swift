@@ -1,41 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Colours & Animations ▸ Animations (#678 Phase 3, turn 12a). Moved
-/// here whole from Behavior: the census places every one of its
-/// rows in `.coloursAndMotion`, and a card split across two
-/// destinations is a half-rendered area the parity guard cannot
-/// see.
-///
-/// Rendered from the census: `ColorsRowOrder` gives the order and
-/// the tiers decide what the disclosure hides — the master switch
-/// at rest, the four per-event toggles and the duration behind it.
-/// The drawer is named for what it holds rather than "more" or
-/// "advanced": this area's Power-User twin is a whole separate card,
-/// and one word must never mean both a row tier and mode depth.
-///
-/// **"Motion" in this type's NAME is frozen, and the noun is
-/// "animation" (#1017).** The card, the destination that holds
-/// it and every catalog say *animation*; `MotionCard`,
-/// `ColorsMotionSection` and `.coloursAndMotion` keep the older
-/// word because a census-key re-key is a change with its own
-/// blast radius and #1017 scoped itself to the label. Prose
-/// naming what is ON SCREEN therefore says "the Animations
-/// card", never "the Motion card" — the one place *motion* is
-/// still correct is quoting Apple's own "Reduce Motion", which
-/// this card's help text does.
+/// Settings card for window animations (#171, #678, #1017).
 struct MotionCard: View {
     @ObservedObject var model: SettingsModel
-    /// macOS Reduce Motion forces animations off system-wide, so
-    /// the whole card reads as a control with no effect and greys
-    /// (#171) — the `.motion` container's census gate, which is a
-    /// `.runtime` tag precisely because no setting owns it.
+    /// macOS Reduce Motion forces animations off system-wide (#171).
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var moreExpanded = false
 
     var body: some View {
-        // Reduce Motion greys the card CONTENT, not the header, so
-        // the header `?` stays a live #527 anchor.
+        // Section header help provides the gate anchor (#527).
         SettingsSection(
             SettingsCatalog.colors.motionCard,
             caption: caption,
@@ -47,18 +21,8 @@ struct MotionCard: View {
                     disclosure
                 }
                 .modifier(GreyOut(active: reduceMotion))
-                // OUTSIDE the grey deliberately. Reduce Motion
-                // makes these animation settings inert; it has
-                // no authority over a signpost, and a greyed
-                // pointer would be the worst pairing available —
-                // #171 says a dim means "switch that on and I
-                // act", so a dimmed thing that still navigates
-                // teaches the reader that grey means nothing
-                // here. (`GreyOut`'s `.disabled` is
-                // environment-only and does not reach an AppKit
-                // subview by itself; `LinkedCaption` reads
-                // `isEnabled` so a future wrap cannot silently
-                // re-open that gap.)
+                // Signpost stays outside the Reduce Motion gate
+                // (#171; `LinkedCaption`).
                 CrossReferenceRow(
                     prose: Self.scrollingXrefProse,
                     linkTitle: L(
@@ -77,9 +41,6 @@ struct MotionCard: View {
             isExpanded: $moreExpanded,
             scrollHoisted: true
         ) {
-            // The master gates every row inside; the
-            // non-compounding `GreyOut` dims once however this
-            // nests inside the Reduce-Motion gate above.
             rows(ColorsRowOrder.motionMore)
                 .padding(.top, 8)
                 .modifier(
@@ -113,23 +74,10 @@ struct MotionCard: View {
         }
     }
 
-    /// Master switch over the per-event animation toggles shown
-    /// in this card. Derived, not a stored field (a second
-    /// persisted on/off would re-create the removed global
-    /// `enable_animations` and a drift hazard): on when any of
-    /// the four animates; off silences all four; on restores
-    /// their shipped defaults (space switch stays opt-in).
-    /// Deliberately excludes `onScrolling` — the scrolling slide
-    /// has its own toggle on the Scrolling card (linked above),
-    /// so folding it in here would let the master read on with
-    /// every visible box off, and silently revert a choice made
-    /// on a card the user can't see from here.
+    /// Master switch over per-event animation toggles; excludes scrolling.
     var animationsMasterBinding: Binding<Bool> {
         Binding(
             get: {
-                // The shared derivation (`anyEnabled`), so the
-                // Home card's subtitle and this toggle cannot
-                // disagree about "animations on".
                 model.config.settings.animations.anyEnabled
             },
             set: { on in
@@ -144,13 +92,8 @@ struct MotionCard: View {
         )
     }
 
-    /// Internal and `static` rather than inline in `body` so
-    /// `CrossReferenceRowSlotTests` can assert the STRING carries
-    /// `CrossReferenceRow.linkSlot` — a source scan over the call
-    /// site reads a substring and cannot tell a sentence that
-    /// places the link from one that lost it, which is the shape
-    /// `LayoutSchematicCountTests` was red-proofed against
-    /// (gui.md, the live-preview clause).
+    /// Static string for slot verification (`CrossReferenceRowSlotTests`,
+    /// `CrossReferenceRow.linkSlot`, `LayoutSchematicCountTests`).
     static var scrollingXrefProse: String {
         L(
             "behavior.animations.scrolling_xref",

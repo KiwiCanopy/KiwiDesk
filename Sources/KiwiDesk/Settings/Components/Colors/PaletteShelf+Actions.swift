@@ -3,10 +3,7 @@ import KiwiDeskCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The palette shelf's actions: save-current, rename, delete, and
-/// export/import through Finder panels. Every mutation goes through
-/// the stateless `PaletteStore` and then `reload()`s the local
-/// list so the grid refreshes (#375).
+/// Palette shelf mutation and file action handlers (#375, `PaletteStore`).
 extension PaletteShelf {
     func reload() {
         userPalettes = store.userPalettes()
@@ -18,9 +15,7 @@ extension PaletteShelf {
 
     // MARK: - Save current
 
-    /// Functions of the TYPED name, not of shelf state (#843):
-    /// the popover owns what it edits, so the rule has to be
-    /// askable about a name the shelf has never seen.
+    /// Validation evaluated on typed name string (#843).
     func canSave(_ typed: String) -> Bool {
         let name = trimmed(typed)
         return !name.isEmpty && !store.isBuiltinName(name)
@@ -105,11 +100,7 @@ extension PaletteShelf {
         return name == oldName || !store.hasUserPalette(name)
     }
 
-    /// Drives a per-tile rename popover: the request is handed
-    /// to the tile whose name it names, so only that tile
-    /// presents — the per-item shape `.popover(item:)` needs,
-    /// and the seed rides the request rather than a shared
-    /// draft (#843).
+    /// Per-tile rename binding seeded from request (#843).
     func renameBinding(
         _ name: String
     ) -> Binding<NameEditRequest?> {
@@ -130,11 +121,7 @@ extension PaletteShelf {
         reload()
     }
 
-    /// Deleting a saved palette lands the keyboard on the next
-    /// tile, else the previous, else nothing (#816). Read BEFORE
-    /// the delete: `reload()` re-reads the store, so afterwards
-    /// the neighbour can only be named by whichever tile slid
-    /// into the gap.
+    /// Deletes a palette and directs focus to the neighbouring tile (#816).
     func deletePalette(_ name: String) {
         let neighbour = neighbourAfterDeleting(name)
         try? store.delete(name)
@@ -142,9 +129,6 @@ extension PaletteShelf {
         returningTile = neighbour
     }
 
-    /// Grid order is the order `userPalettes` renders in — the
-    /// tiles wrap across rows, so "next" is the next tile in
-    /// reading order, which is what a keyboard walk follows too.
     func neighbourAfterDeleting(_ name: String) -> String? {
         DeletionFocus.neighbour(
             after: name,
