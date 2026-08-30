@@ -1,4 +1,6 @@
-/// Settings census (#678): one case per reviewed row. `id` is the row key.
+/// Settings census (#678; contract in `SettingPlacement.swift`).
+/// `id` is the machine-checked key for `settings.*`/`config.*` slices
+/// (parsed by model-parity guard); other prefixes are convention-only.
 enum SettingKey: Hashable, CaseIterable {
     case appBar(AppBarKey)
     case appRules(AppRulesKey)

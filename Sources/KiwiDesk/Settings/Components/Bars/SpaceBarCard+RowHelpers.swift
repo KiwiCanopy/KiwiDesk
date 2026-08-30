@@ -104,7 +104,8 @@ extension SpaceBarCard {
     }
 
     /// Front segment title length cap (#171, #818, #901, #937,
-    /// `SettingKey+SpaceBar`, `SpaceBarOverlay+FrontApp`).
+    /// `SettingKey+SpaceBar`, `SpaceBarOverlay+FrontApp`). Greys on the toggle
+    /// alone: vertical bars announce the name via AX even when not drawn.
     @ViewBuilder var titleCapRow: some View {
         StepperRow(
             label: L("space_bar.title_cap", "Title length"),
