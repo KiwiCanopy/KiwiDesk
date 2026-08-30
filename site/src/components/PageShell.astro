@@ -141,13 +141,6 @@ const kiwiCanopyUrl = "https://kiwicanopy.com";
           <span>KiwiDesk</span>
         </a>
         <div class="nav__links">
-          <a class="learn-back" href={localePath(lang)}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m12 19-7-7 7-7"></path>
-              <path d="M19 12H5"></path>
-            </svg>
-            <span class="learn-back__text">{t("guide_back_home")}</span>
-          </a>
           <div class="lang-switch" role="group"
             aria-label={t("nav_lang_label")}>
             {
@@ -209,6 +202,7 @@ const kiwiCanopyUrl = "https://kiwicanopy.com";
       <p class="tag">{t("footer_tag")}</p>
       <nav class="flinks" aria-label={t("footer_nav_aria")}>
         <a href="/docs">{t("footer_docs")}</a>
+        <a href={localePath(lang)}>{t("guide_footer_home")}</a>
         <a href={localePath(lang, "/compare/")}>{t("nav_compare")}</a>
         <a href={localePath(lang, "/changelog/")}>{t("footer_changelog")}</a>
         <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>

@@ -455,10 +455,28 @@ body::before {
   transition: color 0.3s ease;
 }
 
+.nav__brand:hover {
+  color: var(--accent);
+}
+.nav__brand:hover .nav__mark {
+  transform: scale(1.06);
+}
+.nav__brand:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav__brand:hover .nav__mark {
+    transform: none;
+  }
+}
+
 .nav__mark {
   display: block;
   width: 28px;
   height: 28px;
+  transition: transform 0.2s ease, filter 0.3s ease;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
   transition: filter 0.3s ease;
 }
