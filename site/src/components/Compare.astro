@@ -179,6 +179,43 @@ const rows = [
   "ecosystem",
   "licence",
 ];
+
+const site = Astro.site?.toString().replace(/\/$/, "") ?? "";
+const canonical = `${site}${localePath(lang, "/compare/")}`;
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: t("compare_h1"),
+    description: t("compare_meta_desc"),
+    url: canonical,
+    inLanguage: lang,
+    image: ogImage,
+    author: {
+      "@type": "Organization",
+      name: "KiwiCanopy",
+      url: "https://kiwicanopy.com",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "KiwiDesk",
+        item: `${site}${localePath(lang)}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: t("nav_compare"),
+        item: canonical,
+      },
+    ],
+  },
+];
 ---
 
 <PageShell
@@ -187,6 +224,7 @@ const rows = [
   title={t("compare_meta_title")}
   desc={t("compare_meta_desc")}
   ogImage={ogImage}
+  jsonLd={jsonLd}
   mainClass="cmp"
 >
   <p class="cmp__eyebrow">{t("compare_eyebrow")}</p>

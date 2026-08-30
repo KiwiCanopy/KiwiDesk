@@ -17,6 +17,8 @@ import en from "../i18n/en.json";
 
 <Default {...Astro.props}><slot /></Default>
 <nav class="kiwicanopy-legal" aria-label={en.footer_nav_aria}>
+  <a href="/compare/">{en.nav_compare}</a>
+  <span aria-hidden="true">·</span>
   <a href="/changelog/">{en.footer_changelog}</a>
   <span aria-hidden="true">·</span>
   <a href="https://ko-fi.com/kiwicanopy" target="_blank"

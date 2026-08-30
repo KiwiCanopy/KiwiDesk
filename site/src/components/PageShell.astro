@@ -28,6 +28,12 @@ interface Props {
   title: string;
   desc: string;
   noindex?: boolean;
+  /** Structured data for this page, serialised into a
+      `application/ld+json` block. Landing and Guide emit their own;
+      this shell had no slot, so Compare and Changelog shipped none
+      (site review, 2026-08-30). Optional — a page that passes
+      nothing emits nothing. */
+  jsonLd?: unknown;
   ogImage?: string;
   mainClass?: string;
 }
@@ -38,6 +44,7 @@ const {
   title,
   desc,
   noindex = false,
+  jsonLd,
   ogImage,
   mainClass,
 } = Astro.props;
@@ -87,6 +94,10 @@ const kiwiCanopyUrl = "https://kiwicanopy.com";
     {ogImage && <meta name="twitter:title" content={title} />}
     {ogImage && <meta name="twitter:description" content={desc} />}
     {ogImage && <meta name="twitter:image" content={ogImage} />}
+    {jsonLd && (
+      <script type="application/ld+json"
+        set:html={JSON.stringify(jsonLd)}></script>
+    )}
     <ThemeHead />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" hreflang="en" href={`${site}${localePath("en", slug)}`} />
