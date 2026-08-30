@@ -26,6 +26,7 @@
   --radius-lg: 24px;
 
   --maxw: 1120px;
+  --prose-measure: 45rem;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display",
     "Segoe UI", system-ui, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
