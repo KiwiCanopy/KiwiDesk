@@ -31,7 +31,23 @@ on:
   # private, where macOS runners bill at a 10x multiplier against a
   # 2,000-minute allowance; on a public repo Actions is free and this
   # is just a convenience for re-running without an empty commit.
+  #
+  # It is also how `changelog.yml` gets CI onto a PR it opened —
+  # packaging-and-release.md ("CI") carries that argument.
   workflow_dispatch:
+    inputs:
+      filter_paths:
+        description: >-
+          Apply .github/ci-ignore.txt, the way a pull_request run
+          does. ON for a workflow dispatching this one in place
+          of the pull_request it cannot fire. OFF for the button,
+          which is the manual override for a WRONG entry on that
+          list — the one failure this filter has actually cost
+          somebody (#661) — and an override that re-read the list
+          would be no override at all.
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -59,6 +75,8 @@ jobs:
           EVENT: ${{ github.event_name }}
           BEFORE: ${{ github.event.before }}
           BASE: ${{ github.event.pull_request.base.sha }}
+          FILTER: ${{ inputs.filter_paths }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
           # Every unknown resolves to "run". A false negative here
@@ -67,6 +85,20 @@ jobs:
           case "$EVENT" in
             pull_request) base="$BASE" ;;
             push)         base="$BEFORE" ;;
+            # Only when the dispatcher asked for it. A dispatch
+            # standing in for a pull_request wants that event's
+            # filtering; the button means "run everything", and
+            # the fork point is what a pull_request would have
+            # compared against anyway. An unresolvable one falls
+            # through to the same "run everything" below.
+            workflow_dispatch)
+              base=""
+              if [ "$FILTER" = "true" ]; then
+                base="$(git merge-base \
+                  "origin/${DEFAULT_BRANCH}" HEAD 2>/dev/null \
+                  || true)"
+              fi
+              ;;
             *)            base="" ;;
           esac
           if [ -z "$base" ] \

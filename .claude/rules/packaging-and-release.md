@@ -552,6 +552,54 @@ exists** — a PR opened with `GITHUB_TOKEN` does not fire
 `pull_request`, so `ci.yml` reports nothing on it and the workflow
 run log is the only proof the drop was ever built.
 
+**A workflow-opened PR gets its CI started for it, and one it
+expects to merge itself gets armed too.** Running the gate before
+the PR exists proves the change; it does not get the PR merged.
+Branch protection requires `ci.yml`'s two macOS contexts, and a
+PR opened with `GITHUB_TOKEN` fires no `pull_request`, so neither
+ever reports and the PR sits BLOCKED — the release path hit that
+at v1.1.1, and every release before #1154 needed a human between
+publishing and the feed going live. So the workflow starts
+`ci.yml` itself, through `workflow_dispatch`, which is the one
+event a `GITHUB_TOKEN` may still create (observed 2026-08-31
+against this repo), and arms auto-merge beside it.
+
+**Both halves are owed to a PR nobody is watching land, and
+that is the scope.** The release path is unwatched by
+construction — publish, and the feed waits on the sync PR — so
+it owes both. `app-font.yml`'s PR is the other shape: a human
+reads it before it lands, because an upstream drop can restyle
+a glyph, so auto-merge would be wrong there and its manual CI
+start is a cost its reviewer already pays. That is a scope line,
+not an argument that it is fine: the two halves are separable,
+and a workflow-opened PR that acquires an unwatched landing owes
+the dispatch on the day it does.
+
+**The dispatch is filtered, and that buys the PR leg only.** It
+passes `filter_paths`, asking that run to apply
+`.github/ci-ignore.txt` the way the `pull_request` it stands in
+for would — so a `site/**`-only sync reports both contexts as
+skipped in under a minute instead of paying a full macOS build
+before the queue can even take it. The **queue leg still builds
+unfiltered**: `merge_group` has no base to diff against and
+resolves to "run everything", which is the fail-closed default
+and stays that way. The button's default stays OFF for a
+different reason again — it is the manual override for a WRONG
+entry on that list (#661), and an override that re-read the list
+would be no override.
+
+`ReleaseSyncTriggerTests` holds both halves, scoped through
+`workflowSource`/`workflowStep` rather than a reader of its own,
+and reads every input name off the dispatching side to require
+it of the accepting one. That parity is worth having even though
+a one-sided rename is not silent: the dispatch API refuses an
+undeclared input outright (`422 Unexpected inputs provided`,
+observed 2026-08-31), so the failure lands on the release run —
+after publishing, with the feed waiting — and the guard moves it
+to PR time. It states in its own doc comment what it cannot see:
+the merge queue's willingness to take an entry a bot armed is
+answered only by a real release.
+
 **A path a rule file pins is a path the suite reads.**
 `InstructionPinTests` resolves every non-glob `paths:` entry in
 `.claude/rules/*.md`, so ignoring one makes its rename a

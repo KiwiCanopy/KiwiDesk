@@ -71,6 +71,9 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      # `gh workflow run` on the branch this job pushes — the one
+      # way its PR ever gets a check run (#1154, last step).
+      actions: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -164,7 +167,9 @@ jobs:
           python3 ../scripts/check-site-tokens.py --dist dist
         working-directory: site
 
-      - name: Open a PR if anything moved
+      # One step for all three: the branch name is the thread
+      # through them.
+      - name: Open a PR if anything moved, and let it land
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
@@ -202,13 +207,38 @@ jobs:
             --jq .state 2>/dev/null || true)"
           if [ "$STATE" = "OPEN" ]; then
             echo "PR already open for $BRANCH — updated by push."
-            exit 0
-          fi
-          gh pr create --base main --head "$BRANCH" \
-            --title \
-            "chore(site): sync release notes and feed for ${LABEL}" \
-            --body "$MESSAGE
+          else
+            gh pr create --base main --head "$BRANCH" \
+              --title \
+              "chore(site): sync release notes and feed for ${LABEL}" \
+              --body "$MESSAGE
 
           Merging this rebuilds the release-notes page AND puts
           the new version in front of every installed copy — the
           appcast is live the moment Cloudflare redeploys."
+          fi
+
+          # Start CI by hand — nothing else will, and
+          # packaging-and-release.md ("CI") carries why. Every
+          # run dispatches, the already-open one included: the
+          # push above moved the head, and the checks that count
+          # are the ones on it.
+          gh workflow run ci.yml --ref "$BRANCH" \
+            -f filter_paths=true
+
+          # Arm the queue, so a green release needs no human
+          # between publishing and the feed going live. A re-run
+          # finds it already armed, which is success — but only
+          # ASKING says so. A swallowed failure would print that
+          # sentence with nothing armed and leave the job green,
+          # which is the invisible "somebody has to notice"
+          # state this whole change exists to end.
+          if ! gh pr merge "$BRANCH" --auto --squash; then
+            ARMED="$(gh pr view "$BRANCH" \
+              --json autoMergeRequest --jq .autoMergeRequest)"
+            if [ -z "$ARMED" ] || [ "$ARMED" = "null" ]; then
+              echo "::error::auto-merge is not armed on $BRANCH"
+              exit 1
+            fi
+            echo "auto-merge was already armed for $BRANCH."
+          fi
