@@ -701,11 +701,13 @@ KiwiDesk solves hiding similarly, so the same arrangements work.
 
 ### bsp.set_strategy
 
-**Expects:** `"longest_side"` or `"alternating"`.
+**Expects:** `"longest_side"` or `"alternating"` (default
+`alternating`).
 
-**Does:** sets the BSP split strategy. `longest_side` cuts the
-longer side of each region (keeps windows square-ish);
-`alternating` alternates horizontal then vertical by depth.
+**Does:** sets the BSP split strategy. `alternating` alternates
+horizontal then vertical by depth — the classic BSP behaviour,
+and the default; `longest_side` cuts the longer side of each
+region instead, which keeps windows square-ish.
 
 **Example:**
 
@@ -4457,7 +4459,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
         "new_window_placement": "after_focused",
         "ratio_h": 0.5,
         "ratio_v": 0.5,
-        "strategy": "longest_side"
+        "strategy": "alternating"
       },
       "grid": { "columns": 3, "rows": 2, "type": "dynamic",
                 "fill_empty_cells": true,

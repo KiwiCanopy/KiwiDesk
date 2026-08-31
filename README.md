@@ -86,7 +86,7 @@ that list:
 
 | Layout | Behavior |
 |---|---|
-| `bsp` | Binary space partitioning (square-ish splits) |
+| `bsp` | Binary space partitioning (each new window halves a pane) |
 | `stack` | Master zone + stack column (`master_count`) |
 | `scrolling` | Niri/PaperWM-style scrolling columns or rows |
 | `monocle` | Focused window maximized, rest behind it |

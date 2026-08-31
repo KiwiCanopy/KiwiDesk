@@ -102,7 +102,8 @@ struct LayoutOverrideCodingParityTests {
 
     private static func bsp() -> BspOverride {
         var over = BspOverride()
-        over.strategy = .alternating
+        // Non-default, and the default moved (#1181).
+        over.strategy = .longestSide
         over.splitRatioH = 0.7
         over.splitRatioV = 0.35
         return over

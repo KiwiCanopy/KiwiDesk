@@ -76,7 +76,9 @@ struct LayoutParamsCodingParityTests {
 
     private static func bsp() -> BspParams {
         var params = BspParams()
-        params.strategy = .alternating
+        // Non-default, and the default moved (#1181): the
+        // fixture's job is to differ from it.
+        params.strategy = .longestSide
         params.splitRatioH = 0.75
         params.splitRatioV = 0.25
         params.newWindowPlacement = .last

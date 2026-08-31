@@ -65,9 +65,17 @@ struct BspLayoutTests {
 
     @Test("Third window splits the tall remainder vertically")
     func longestSideRecursion() throws {
+        // PINNED (#660/#1181), and this is the fixture that
+        // needs it most: on these bounds both strategies draw
+        // the same three frames, so the flip left the one test
+        // named for longest-side recursion silently running
+        // `.alternating` — and no test in the tree exercised
+        // `.longestSide` past depth 0 (code review, 2026-08-31).
+        var context = makeContext()
+        context.bsp.strategy = .longestSide
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
-            in: makeContext()
+            in: context
         )
         let b = try #require(frames[w2])
         let c = try #require(frames[w3])
@@ -120,12 +128,17 @@ struct BspLayoutTests {
 
     @Test("V ratio shifts the stacked boundary")
     func splitRatioV() throws {
-        // Portrait screen: shortest-side stacks the first
-        // split, so only the V ratio moves the boundary.
+        // Portrait screen: longest-side stacks the first split,
+        // so only the V ratio moves the boundary. The strategy
+        // is PINNED rather than inherited (#660/#1181) — the
+        // default is `.alternating`, which splits the first
+        // level vertically whatever the screen's shape, and
+        // this fixture is about the shape.
         var context = makeContext(
             bounds: CGRect(x: 0, y: 0, width: 800, height: 2000)
         )
         context.minWindowSize = 100
+        context.bsp.strategy = .longestSide
         context.bsp.splitRatioV = 0.7
         let frames = layout.calculateGeometry(
             for: [w1, w2],
@@ -140,8 +153,12 @@ struct BspLayoutTests {
     func ratioIndependence() throws {
         // Three windows: depth 0 splits side by side (H),
         // depth 1 stacks the tall remainder (V) — one split
-        // per axis, each following its own ratio.
+        // per axis, each following its own ratio. The strategy
+        // is pinned because that arrangement is what the
+        // assertions read, not because the two disagree here
+        // (#660).
         var context = makeContext()
+        context.bsp.strategy = .longestSide
         context.bsp.splitRatioH = 0.6
         context.bsp.splitRatioV = 0.3
         let frames = layout.calculateGeometry(

@@ -396,7 +396,7 @@
   "install_code_aria": "Homebrew で KiwiDesk をインストールする",
   "install_copy_aria": "インストールコマンドをコピー",
   "install_title_bar": "zsh — install",
-  "layout_bsp": "二分割による、正方形に近い分割。",
+  "layout_bsp": "二分割：新しいウインドウがペインを半分にします。",
   "layout_floating": "macOS のデフォルトを、そのまま。",
   "layout_grid": "動的または固定の、行 × 列。",
   "layout_monocle": "フォーカス中のウインドウを最大化し、残りは背面へ。",

@@ -305,7 +305,7 @@ item's only appearance in CLI output.
 | | `stack.set_stack_position` | `top\|right\|bottom\|left` (default `right`; derives the stack's lineup) |
 | | `stack.set_master_orientation` | `vertical\|horizontal` (default `horizontal`) |
 | | `stack.set_new_window_placement` | placement¹ (default `first`) |
-| BSP | `bsp.set_strategy` | `longest_side\|alternating` |
+| BSP | `bsp.set_strategy` | `longest_side\|alternating` (default `alternating`) |
 | | `bsp.set_ratio_h` | 0.1–0.9 (side-by-side splits) |
 | | `bsp.set_ratio_v` | 0.1–0.9 (stacked splits) |
 | | `bsp.set_new_window_placement` | placement¹ (default `after_focused`) |

@@ -396,7 +396,7 @@
   "install_code_aria": "KiwiDesk mit Homebrew installieren",
   "install_copy_aria": "Installationsbefehl kopieren",
   "install_title_bar": "zsh — install",
-  "layout_bsp": "Binäre Raumaufteilung, annähernd quadratische Splits.",
+  "layout_bsp": "Binäre Raumaufteilung: Jedes neue Fenster halbiert einen Bereich.",
   "layout_floating": "Der macOS-Standard, unangetastet gelassen.",
   "layout_grid": "Dynamische oder feste Zeilen × Spalten.",
   "layout_monocle": "Fokussiertes Fenster maximiert, der Rest dahinter.",
