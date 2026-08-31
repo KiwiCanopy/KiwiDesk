@@ -236,7 +236,7 @@ struct SettingsSaveTemporaryLayoutTests {
         // channel over.
         let (model, core) = try makeSeeded()
         var captured: [String] = []
-        core.onProfileCapturedLive = { captured.append($0) }
+        core.profiles.onCapturedLive = { captured.append($0) }
 
         // The command path pays it...
         #expect(

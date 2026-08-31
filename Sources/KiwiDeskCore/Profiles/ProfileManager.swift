@@ -37,6 +37,12 @@ public final class ProfileManager {
     /// Invalid profile files reported while listing (#31).
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
+    /// Fired after a CAPTURE-LIVE profile write lands — the
+    /// quick menu's Keep and the `save_profile` command alike,
+    /// so an open Settings draft's baseline follows the file.
+    /// On the WRITE rather than on either caller (#1179).
+    public var onCapturedLive: @MainActor (String) -> Void = { _ in }
+
     public init(directory: URL) {
         self.directory = directory
     }

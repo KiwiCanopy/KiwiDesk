@@ -321,20 +321,6 @@ public final class KiwiCore {
         @MainActor ([ConfigIssue])
             -> Void = { _ in }
 
-    /// Fired after a CAPTURE-LIVE profile write lands — the
-    /// quick menu's Keep and the `save_profile` command alike.
-    ///
-    /// On the WRITE rather than on either caller (#1179): an
-    /// open Settings draft seeds its modes from the saved
-    /// profile, so a capture-live write moves the file under it
-    /// and the draft's baseline has to follow, or the next
-    /// Settings Save commits the pre-write modes back over what
-    /// was just saved. A draft-commit write is NOT one of these
-    /// — it wrote the draft's own modes, so the baseline is
-    /// already right.
-    public var onProfileCapturedLive: @MainActor (String) -> Void =
-        { _ in }
-
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18) —
     /// declared and argued as a bundle in `KiwiCore+LuaAPI`,
     /// the `openOrFocus` seam shape.

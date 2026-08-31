@@ -296,9 +296,13 @@ to are not the same verb. Keep them apart, in both directions:
 
 - **The quick menu's Keep = a whole-live snapshot.** "Write down
   what is on screen", every screen at once.
-  `persistProfile(named:)` with no `modesFrom` is that meaning,
-  and it is the only thing that turns a temporary layout
-  permanent.
+  `persistProfile(named:modes:)` with a nil `modes` is that
+  meaning, and it is the only thing that turns a temporary
+  layout permanent. **The debt it owes an open draft hangs off
+  the WRITE, not the caller** — `ProfileManager.onCapturedLive`
+  — because `save_profile` from Lua, the CLI or IPC is the same
+  write through another door, and a debt paid at one door only
+  is this issue's failure one channel over.
 - **A Settings Save against the LIVE target = a draft commit.**
   "Save what I edited." It applies and persists the modes of the
   spaces the draft actually edited and nothing else —

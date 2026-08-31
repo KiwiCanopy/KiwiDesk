@@ -211,7 +211,7 @@ extension KiwiCore {
                 buildProfile(name: name, modes: modes)
             )
             refreshConfigIssues()
-            if modes == nil { onProfileCapturedLive(name) }
+            if modes == nil { profiles.onCapturedLive(name) }
             return
         }
         let live = liveMonitorSet()
@@ -232,7 +232,7 @@ extension KiwiCore {
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).
         refreshConfigIssues()
-        if modes == nil { onProfileCapturedLive(name) }
+        if modes == nil { profiles.onCapturedLive(name) }
     }
 
     // The non-adopting edit writes (`overwriteProfile`,

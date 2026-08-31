@@ -110,8 +110,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             else { return }
             do {
                 // Capture-live (#1179); the draft's baseline
-                // follows through `onProfileCapturedLive`, which
-                // the `save_profile` command reaches too.
+                // follows through `profiles.onCapturedLive`,
+                // which `save_profile` reaches too.
                 try self.core.persistProfile(
                     named: name,
                     modes: nil
@@ -171,7 +171,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.dashboardIfCreated?.refreshProfiles()
         }
         configIssues.model.onRevealProfile = revealProfile
-        core.onProfileCapturedLive = { [weak self] _ in
+        core.profiles.onCapturedLive = { [weak self] _ in
             self?.dashboardIfCreated?.adoptKeptLayout()
         }
         core.onConfigIssuesChange = { [weak self] issues in
