@@ -41,7 +41,6 @@ extension SettingsModel {
             verdict: resolved.verdict,
             screens: resolved.screens
         )
-        refreshLayoutDrift()
     }
 
     /// Imports live Lua shortcuts into current config (`KeybindingMerge`, #4).

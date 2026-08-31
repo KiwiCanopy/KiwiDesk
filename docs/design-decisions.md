@@ -5008,26 +5008,74 @@ carries the why. The blocked tooltip's monitor wording is
 unchanged and is finally accurate: it now appears only when a
 monitor set really is the only thing a save would write.
 
-**Quick-menu layout switch is session-only.** Changing the active
-space's layout mode from the status-bar quick menu updates the running
-state immediately but is session-only by default (temporary). It does
-not write to the active profile JSON, letting users experiment with
-transient layouts (e.g., trying Monocle momentarily) without
-rewriting their configuration. If they want to keep the layout, a
-"Save Current Layout to Profile" row is provided. Saving adopts the
-whole live state (whole-state snapshot semantics), avoiding partial
-saves or complex tracking; a failed save (e.g. a screen-count
-mismatch) raises an alert — the menu has no save surface to
-warn in.
-Reverting in Settings re-applies the saved profile **only while
-layout drift exists** — matching the pill caption that announces
-it; a plain staged-edit revert stays model-only, exactly as before.
-The drift-revert reuses the in-effect re-apply path, so it also
-prunes spaces created since the profile was saved (their windows
-move to the fallback space) — Revert means "back to the profile",
-not "back minus the layout". Drift captions recompute on window
-show and on quick-menu actions, not on external `set_mode`
-(hotkey/Lua/CLI) — the next open catches up.
+**Quick-menu layout switch is session-only, and Settings does
+not narrate it.** Changing a space's layout from the status-bar
+quick menu updates the running state immediately and writes
+nothing: users try Monocle for ten minutes without rewriting
+their configuration. Keeping it is one row away — **Keep Layout
+in Profile "<name>"** — and Keep, not Save, is the word,
+because macOS already uses it for exactly this shape: a change
+that is undone unless you say otherwise. That row arms when ANY
+screen's shown space stands on a temporary layout, not just the
+focused one, since the verb writes the whole profile; a failed
+keep (a screen-count mismatch) raises an alert, the menu having
+no surface to warn in.
+
+**The two write paths mean different things, and that is the
+whole design (#1179).**
+
+- **Quick-menu Keep = a whole-live snapshot.** "Write down what
+  is on screen." It takes every screen at once, and it is the
+  only thing that turns a temporary layout permanent.
+- **Settings Save = a draft commit.** "Save what I edited." It
+  applies and persists the modes of the spaces the draft
+  actually edited, and nothing else. It never re-asserts the
+  profile's modes wholesale — that is Revert's meaning, and a
+  Save carrying it destroys the very layout the user was about
+  to keep. It never captures live either, which would adopt a
+  temporary layout nobody asked to keep.
+
+Both halves used to be wrong at once. Save re-applied the draft
+over live and then captured live back, so pressing Save with a
+temporary layout standing **restored the previous layout and
+saved that** — Save behaving exactly like Revert, destroying the
+change it advertised. And the draft seeded its per-space modes
+from LIVE, so an unrelated Save could silently write a temporary
+layout into the file. The draft now seeds its modes from the
+SAVED profile; live still supplies which spaces exist, their
+order, their pins and the Main role, because those are live's to
+state.
+
+"Edited" is one predicate — `SettingsDraftDiff`'s attribution,
+the same seam the save pill's count and the unsaved-changes
+popover read. The pill is the draft's only narrator, so what a
+Save writes must never exceed what the pill counted. Editing a
+mode and editing it back leaves the leaf equal and therefore
+counts as un-edited, exactly as that popover row disappears.
+
+Two consequences are the model rather than bugs, and are named
+here so they read that way:
+
+- After an unrelated Save, screen and file may disagree about a
+  space you did not touch. That is what "temporary" means. The
+  quick menu's per-entry **"not saved to profile"** subtitle is
+  the one narration of it — and with the Settings drift surface
+  retired it is the app's only statement that a switch is
+  temporary, which is why it stays.
+- Editing a mode back to its saved value neither saves nor ends
+  a standing temporary layout. Ending one is the quick menu's
+  job: switch back, or Keep.
+
+**Settings stopped surfacing drift at all.** There is no drift
+pill, no drift-armed Save, no drift caption under the Spaces
+mode picker, and Revert is a plain draft revert again. A Save
+enabled *because of* drift whose effect on that drift was
+identical to Revert is what this removes; the one permanent path
+through Settings is the ordinary draft flow — Spaces, change the
+mode, Save. A quick-menu Keep does move the open draft's saved
+baseline onto the layout it just wrote, leaving staged edits
+staged: without that, the next Save would commit the pre-keep
+mode over the layout just kept.
 
 ### Spaces
 

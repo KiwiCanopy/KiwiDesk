@@ -26,7 +26,6 @@ struct SettingsFooter: View {
     /// creation lives in Profiles; the pill narrates a draft.
     private var hasWork: Bool {
         model.isDirty || model.profileDirty
-            || model.hasLayoutDrift
     }
 
     var body: some View {
@@ -122,7 +121,7 @@ struct SettingsFooter: View {
             .foregroundStyle(
                 SettingsTheme.savePillInk.opacity(0.8)
             )
-            .disabled(!(model.isDirty || model.hasLayoutDrift))
+            .disabled(!model.isDirty)
             copySlot
             primarySlot
         }

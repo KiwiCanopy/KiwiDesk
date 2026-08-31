@@ -28,21 +28,6 @@ extension SpacesSection {
             )
             // Focused row target for navigation returns (#678 Phase 4, #812).
             .focused($returningRow, equals: space)
-
-            if space == model.core.activeSpace?.id,
-                let drift = model.layoutDrift
-            {
-                Text(
-                    L(
-                        "settings.layout.drift",
-                        "Live: %1$@ — profile has %2$@ (not saved)",
-                        drift.live.displayName,
-                        drift.saved.displayName
-                    )
-                )
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            }
         }
     }
 

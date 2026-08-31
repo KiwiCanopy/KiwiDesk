@@ -9,6 +9,16 @@ struct SettingsDraftDiff {
     var unattributed: [String] = []
     /// True if raw `init.lua` text differs from baseline.
     var luaChanged = false
+    /// Spaces whose layout MODE the draft edited.
+    ///
+    /// Read off the SAME changed-leaf set that resolves the
+    /// census keys above, never a second comparison beside the
+    /// apply (#1179): the save pill is the draft's one narrator,
+    /// so what a Save writes must not exceed what the pill
+    /// counted. Edit-then-edit-back leaves the leaf equal and so
+    /// counts as un-edited here for free, exactly as the popover
+    /// row vanishes.
+    var editedSpaceModes: Set<SpaceID> = []
 
     /// Total count of changed settings, Lua edit, and unattributed paths.
     var total: Int {
@@ -29,6 +39,10 @@ struct SettingsDraftDiff {
         let changedPaths = Set(edited.keys)
             .union(clean.keys)
             .filter { edited[$0] != clean[$0] }
+        diff.editedSpaceModes = editedSpaceModes(
+            config: config,
+            cleanConfig: cleanConfig
+        )
         guard !changedPaths.isEmpty else { return diff }
 
         let bases = censusBases()
@@ -46,6 +60,35 @@ struct SettingsDraftDiff {
         }
         diff.unattributed = orphans.sorted()
         return diff
+    }
+
+    /// The spaces whose layout MODE differs between a draft and
+    /// its baseline — the ONE answer to "which spaces did the
+    /// user edit" (#1179).
+    ///
+    /// Three readers, deliberately: the diff's own attribution
+    /// below, the Settings Save's partial apply, and the
+    /// unsaved-changes popover's rows. A second comparison
+    /// beside any of them agrees today and disagrees on the
+    /// release that changes the encoding — and the save pill is
+    /// the draft's one narrator, so a Save writing a space the
+    /// popover never listed is the failure this closes.
+    ///
+    /// Dense on both sides through `GuiConfig.modes(for:)`,
+    /// which is the one place the sparse encoding's omitted
+    /// `.bsp` resolves: a space present on one side only differs
+    /// exactly when its stated mode is not `.bsp`.
+    static func editedSpaceModes(
+        config: GuiConfig,
+        cleanConfig: GuiConfig
+    ) -> Set<SpaceID> {
+        let spaces = Array(
+            Set(config.spaceModes.keys)
+                .union(cleanConfig.spaceModes.keys)
+        )
+        let edited = config.modes(for: spaces)
+        let clean = cleanConfig.modes(for: spaces)
+        return Set(spaces.filter { edited[$0] != clean[$0] })
     }
 
     /// True if census id names a model path (`SettingsValueReadoutTests`).

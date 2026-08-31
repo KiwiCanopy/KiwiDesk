@@ -15,10 +15,10 @@ private final class FakeStatusItem: StatusItemHandle {
     var menu: NSMenu?
 }
 
-@Suite("Layout Quick Menu and Drift", .serialized)
+@Suite("Layout Quick Menu and Keep", .serialized)
 @MainActor
 struct LayoutQuickMenuTests {
-    private func makeModel() -> (SettingsModel, KiwiCore) {
+    func makeModel() -> (SettingsModel, KiwiCore) {
         // makeTestCore's default registrar is already the no-op
         // (#565) — this suite asserts nothing about registration.
         let core = makeTestCore()
@@ -38,7 +38,7 @@ struct LayoutQuickMenuTests {
         return controller
     }
 
-    private func loadProfile(
+    func loadProfile(
         _ core: KiwiCore,
         mode: LayoutMode = .bsp
     ) throws {
@@ -141,8 +141,8 @@ struct LayoutQuickMenuTests {
         #expect(checkedCount == 1)
     }
 
-    @Test("Save row hidden without profile, enablement by drift")
-    func saveLayoutRow() throws {
+    @Test("Keep row hidden without profile, armed by drift")
+    func keepLayoutRow() throws {
         let (_, core) = makeModel()
         let controller = makeController(core)
 
@@ -202,74 +202,5 @@ struct LayoutQuickMenuTests {
             drifted.items.first { $0.state == .on }
         )
         #expect(driftedChecked.subtitle?.isEmpty == false)
-    }
-
-    @Test("Drift computation does not set dirty flags")
-    func driftComputationFlags() throws {
-        let (model, core) = makeModel()
-
-        core.state.workspaces.ensureSpace(SpaceID("1"))
-        try loadProfile(core)
-        model.reload()
-
-        #expect(!model.isDirty)
-        #expect(!model.profileDirty)
-        #expect(!model.hasLayoutDrift)
-
-        // Introduce drift.
-        core.state.workspaces.setMode(SpaceID("1"), .monocle)
-        model.reload()
-
-        #expect(model.hasLayoutDrift)
-        #expect(model.layoutDrift?.live == .monocle)
-        #expect(model.layoutDrift?.saved == .bsp)
-        // Guardrail 3: never routed through the dirty flags.
-        #expect(!model.isDirty)
-        #expect(!model.profileDirty)
-    }
-
-    @Test("Unreadable profile reads as unknown, never as drift")
-    func unreadableProfileNoDrift() throws {
-        let (model, core) = makeModel()
-
-        core.state.workspaces.ensureSpace(SpaceID("1"))
-        try loadProfile(core)
-        core.state.workspaces.setMode(SpaceID("1"), .monocle)
-
-        // Corrupt the saved JSON: the saved mode is now
-        // unknown — no phantom `.bsp`, no phantom drift.
-        try Data("not json".utf8).write(
-            to: core.configURL
-                .deletingLastPathComponent()
-                .appendingPathComponent(
-                    "profiles/test-profile.json"
-                )
-        )
-        #expect(core.savedModeForActiveSpace() == nil)
-        model.reload()
-        #expect(!model.hasLayoutDrift)
-    }
-
-    @Test("refreshLayoutDrift keeps staged edits intact")
-    func refreshKeepsStagedEdits() throws {
-        let (model, core) = makeModel()
-
-        core.state.workspaces.ensureSpace(SpaceID("1"))
-        try loadProfile(core)
-        model.reload()
-
-        // Stage an edit, then drift the live layout and take
-        // the non-destructive refresh path the quick menu uses.
-        model.config.spaces.append(SpaceID("staged"))
-        #expect(model.isDirty)
-
-        core.state.workspaces.setMode(SpaceID("1"), .monocle)
-        model.refreshLayoutDrift()
-
-        #expect(model.hasLayoutDrift)
-        #expect(model.isDirty)
-        #expect(
-            model.config.spaces.contains(SpaceID("staged"))
-        )
     }
 }

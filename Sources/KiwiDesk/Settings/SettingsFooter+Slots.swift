@@ -65,8 +65,7 @@ extension SettingsFooter {
                     model.profileSaveBlockedReason != nil
                         || !model.updateEnabled
                         || !(model.isDirty
-                            || model.profileDirty
-                            || model.hasLayoutDrift)
+                            || model.profileDirty)
                 )
                 .help(
                     model.profileSaveBlockedReason

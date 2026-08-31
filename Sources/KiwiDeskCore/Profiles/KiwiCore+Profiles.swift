@@ -148,13 +148,22 @@ extension KiwiCore {
     /// carrying only the live monitor set. The live space order
     /// from `allSpaces` is captured as the profile's stored
     /// order (#75) so the Spaces list round-trips unchanged.
-    func buildProfile(name: String) -> Profile {
-        var modes: [SpaceID: LayoutMode] = [:]
-        var liveSpaces: [SpaceID] = []
-        for space in state.workspaces.allSpaces {
-            modes[space.id] = space.mode
-            liveSpaces.append(space.id)
-        }
+    func buildProfile(
+        name: String,
+        modesFrom draft: GuiConfig? = nil
+    ) -> Profile {
+        let liveSpaces = state.workspaces.allSpaces.map(\.id)
+        // Dense either way. A draft's `spaceModes` is sparse and
+        // `modes(for:)` is the one place that omission resolves
+        // to `.bsp`; nil means capture what is on screen (#1179).
+        let modes =
+            draft?.modes(for: liveSpaces)
+            ?? Dictionary(
+                uniqueKeysWithValues:
+                    state.workspaces.allSpaces.map {
+                        ($0.id, $0.mode)
+                    }
+            )
         return Profile(
             name: name,
             monitorSets: [liveMonitorSet()],
@@ -183,10 +192,22 @@ extension KiwiCore {
     /// a profile with only the live set. Updating a profile of
     /// a different screen count is refused — that state needs
     /// "save as new" (#36).
-    public func persistProfile(named name: String) throws {
+    ///
+    /// `modesFrom` makes the per-space MODES come from a draft
+    /// instead of from live. Nil is the capture-live meaning the
+    /// quick menu's Keep verb wants — "write down what is on
+    /// screen". A Settings Save passes its draft, because that
+    /// write means "commit what I edited", and a standing
+    /// temporary layout is not in it (#1179).
+    public func persistProfile(
+        named name: String,
+        modesFrom draft: GuiConfig? = nil
+    ) throws {
         guard var existing = try? profiles.read(name: name)
         else {
-            try profiles.save(buildProfile(name: name))
+            try profiles.save(
+                buildProfile(name: name, modesFrom: draft)
+            )
             refreshConfigIssues()
             return
         }
@@ -197,7 +218,7 @@ extension KiwiCore {
                 live: live.monitors.count
             )
         }
-        let fresh = buildProfile(name: name)
+        let fresh = buildProfile(name: name, modesFrom: draft)
         existing.spaces = fresh.spaces
         existing.fallbackSpace = fresh.fallbackSpace
         existing.spaceModes = fresh.spaceModes

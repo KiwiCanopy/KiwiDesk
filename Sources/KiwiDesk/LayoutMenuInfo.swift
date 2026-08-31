@@ -45,6 +45,17 @@ struct LayoutMenuInfo {
         )
     }
 
+    /// Whether ANY screen's shown space stands on a temporary
+    /// layout. The keep row's enablement (#1179 condition 1):
+    /// the verb writes the whole profile, so arming it on the
+    /// FOCUSED screen alone left a non-focused screen's submenu
+    /// saying "not saved to profile" above a greyed row that
+    /// would have saved it.
+    var anyScreenHasDrifted: Bool {
+        activeSpaceHasDrifted
+            || screens.contains(where: \.hasDrifted)
+    }
+
     /// Screens in desk reading order via `DeskOrder` (#752).
     var orderedScreens: [Screen] {
         screens.sorted {

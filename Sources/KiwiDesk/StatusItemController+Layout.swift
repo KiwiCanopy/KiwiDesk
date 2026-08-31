@@ -123,26 +123,34 @@ extension StatusItemController {
         }
     }
 
-    /// Save row persisting the ACTIVE space's layout. Deliberately
-    /// not per screen: `persistProfile` is a whole-profile
-    /// operation, so a per-screen save would be a second feature,
-    /// not a second row.
+    /// Keep row, persisting every screen's layout into the
+    /// active profile. Deliberately not per screen:
+    /// `persistProfile` is a whole-profile operation, so a
+    /// per-screen keep would be a second feature, not a second
+    /// row — which is also why it arms on ANY screen's drift
+    /// rather than the focused one's (#1179).
+    ///
+    /// "Keep", not "Save": since #1179 the Settings pill is the
+    /// only Save, and this row is the one lightweight exit from
+    /// a temporary layout — macOS's own Keep pattern for a
+    /// change that is undone unless you say otherwise.
     private func addSaveRow(
         to menu: NSMenu,
         info: LayoutMenuInfo
     ) {
-        guard info.activeProfileName != nil else { return }
+        guard let profile = info.activeProfileName else { return }
         menu.addItem(.separator())
         let saveEntry = NSMenuItem(
             title: L(
-                "menu.layout.save",
-                "Save Current Layout to Profile"
+                "menu.layout.keep",
+                "Keep Layout in Profile “%1$@”",
+                profile
             ),
             action: #selector(saveLayoutToProfile(_:)),
             keyEquivalent: ""
         )
         saveEntry.target = self
-        saveEntry.isEnabled = info.activeSpaceHasDrifted
+        saveEntry.isEnabled = info.anyScreenHasDrifted
         menu.addItem(saveEntry)
     }
 

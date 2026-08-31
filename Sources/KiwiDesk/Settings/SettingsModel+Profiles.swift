@@ -74,16 +74,44 @@ extension SettingsModel {
         persist(named: core.profiles.freeName(base: trimmed))
     }
 
+    /// A Settings Save is a DRAFT COMMIT, and the two lines
+    /// below are what that means (#1179).
+    ///
+    /// It applies only the modes the draft actually edited, and
+    /// it writes the DRAFT's modes to the file — never live's. A
+    /// whole-profile re-apply here is Revert semantics wearing a
+    /// Save label: it destroys a standing quick-menu layout the
+    /// save pill never counted, which is the bug this closes,
+    /// and capturing live instead would silently adopt that same
+    /// temporary layout into the file, which is its mirror. The
+    /// quick menu's Keep verb is the capture-live path and stays
+    /// separate.
+    ///
+    /// "Edited" is `SettingsDraftDiff`'s answer, the same seam
+    /// the pill count and the unsaved popover read — never a
+    /// comparison re-derived beside this apply.
     @discardableResult
     private func persist(named name: String) -> Bool {
         core.mergeLiveSpaces(
             into: &config,
             seededWith: seedSpaces
         )
-        core.applyProfileScopedState(from: config)
+        let edited = SettingsDraftDiff.between(
+            config: config,
+            cleanConfig: cleanConfig,
+            luaSource: luaSource,
+            cleanLuaSource: cleanLuaSource
+        ).editedSpaceModes
+        core.applyProfileScopedState(
+            from: config,
+            applyingModesFor: edited
+        )
         var saved = true
         do {
-            try core.persistProfile(named: name)
+            try core.persistProfile(
+                named: name,
+                modesFrom: config
+            )
         } catch {
             profileWarning = L(
                 "profiles.save_failed",

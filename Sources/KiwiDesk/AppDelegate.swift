@@ -100,16 +100,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 space.map { [.string($0.raw), .string(mode.rawValue)] }
                 ?? [.string(mode.rawValue)]
             _ = self?.core.execute("set_mode", args: args)
-            // Drift-only refresh: a full reload would discard staged edits.
-            self?.dashboardIfCreated?.refreshLayoutDrift()
+            // Nothing to tell Settings: a quick-menu switch is
+            // session-only, and since #1179 the draft narrates
+            // the PROFILE rather than the session.
         }
         statusItem.onSaveLayoutToProfile = { [weak self] in
             guard let self,
                 let name = self.core.profiles.currentName
             else { return }
             do {
+                // Capture-live: the Keep verb writes down what
+                // is on screen, which is the meaning a Settings
+                // Save deliberately does NOT have (#1179).
                 try self.core.persistProfile(named: name)
-                self.dashboardIfCreated?.refreshLayoutDrift()
+                self.dashboardIfCreated?.adoptKeptLayout()
             } catch {
                 self.core.onLog("profile save failed: \(error)")
                 self.presentLayoutSaveFailure(error)

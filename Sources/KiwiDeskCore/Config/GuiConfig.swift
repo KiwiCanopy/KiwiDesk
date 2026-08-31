@@ -17,8 +17,27 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var settings = TilingSettings()
     /// User-defined Spaces in display order.
     public var spaces: [SpaceID] = []
-    /// Layout mode per Space (profile-scoped).
+    /// Layout mode per Space (profile-scoped). SPARSE: `.bsp`
+    /// is the omitted default, so read it through `modes(for:)`
+    /// rather than spelling that default again at a call site.
     public var spaceModes: [SpaceID: LayoutMode] = [:]
+
+    /// This draft's mode for every space in `spaces`, dense.
+    ///
+    /// The sparse encoding omits `.bsp`, and a reader that
+    /// spells that default itself is a second copy of it — which
+    /// is how a mode-scoped write can disagree with the apply
+    /// beside it (#1179).
+    public func modes(
+        for spaces: [SpaceID]
+    ) -> [SpaceID: LayoutMode] {
+        var dense: [SpaceID: LayoutMode] = [:]
+        for space in spaces {
+            dense[space] = spaceModes[space] ?? .bsp
+        }
+        return dense
+    }
+
     /// App -> space assignment (`app_rules`).
     public var appRules: [String: SpaceID] = [:]
     /// Space -> monitor fingerprint pin (profile-scoped).
