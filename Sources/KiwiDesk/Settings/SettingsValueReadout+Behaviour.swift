@@ -1,11 +1,6 @@
 import KiwiDeskCore
 
-/// Behaviour rows: the top-level `TilingSettings` knobs. Enum
-/// values reuse the GUI's own option labels where the area
-/// draws a picker (`BehaviorSection`, `PlacementPicker`), so
-/// the diff speaks the words the control does; the Lua-only
-/// keys author their labels here, there being no census text
-/// to resolve.
+/// Behaviour settings diff readout generators.
 extension SettingsValueReadout {
     static func behaviourRows(
         _ key: BehaviourKey,

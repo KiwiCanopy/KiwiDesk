@@ -1,17 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One glyph per layout mode (#68 §6.3), used wherever a mode
-/// is named — the space rows' mode picker, the Layout Defaults
-/// section headers, the App Bar override headers, the preset
-/// thumbnails — so the association gets learned. The glyph is
-/// never the only signifier; it always accompanies the label.
+/// Layout mode SF Symbol glyphs and curated tab ordering
+/// (#68 §6.3, #204). The glyph is never the only signifier — it
+/// always accompanies the label.
 extension LayoutMode {
-    /// The placement layouts in the order the Layout Defaults
-    /// pane taught them (#204) — not `allCases` order, and
-    /// without Floating. The one home for that curated list:
-    /// the tab strip renders it and the Settings search indexes
-    /// it, so the two can't drift (review of #90).
+    /// Ordered placement layouts — NOT `allCases` order, and
+    /// without Floating (#204). One home: the tab strip renders
+    /// it and search indexes it, so the two can't drift (#90).
     static let placementTabs: [LayoutMode] = [
         .bsp, .stack, .scrolling, .grid, .monocle, .track,
     ]

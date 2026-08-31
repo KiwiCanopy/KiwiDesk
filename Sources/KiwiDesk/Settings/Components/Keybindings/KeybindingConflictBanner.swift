@@ -1,14 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A dismissible in-app warning shown when a keybinding
-/// conflict was just introduced (recording a clashing combo, or
-/// a batch check after Adopt / a raw-Lua save). The persistent
-/// per-row ⚠️ + tooltip always reflects live state on its own;
-/// this banner is only a transient nudge toward it. Its text
-/// derives live (`liveKeybindingBanner`), so it disappears
-/// once dismissed — or once the conflicts it names are gone,
-/// however they were fixed.
+/// Dismissible banner warning for keybinding conflicts — a
+/// transient nudge toward the per-row ⚠️, which reflects live
+/// state on its own. Its text derives live, so it disappears
+/// once dismissed or once the conflicts it names are gone.
 struct KeybindingConflictBanner: View {
     @ObservedObject var model: SettingsModel
 
@@ -26,11 +22,9 @@ struct KeybindingConflictBanner: View {
                     Image(systemName: "xmark.circle.fill")
                 }
                 .buttonStyle(.borderless)
-                // `warningInk`, not `.secondary` (dark pass):
-                // the hierarchical grey lands at ~3.5:1 on the
-                // warm brown this surface flips to in dark,
-                // and the banner's own ink is the pairing the
-                // token table clears.
+                // `warningInk`, not `.secondary`: the
+                // hierarchical grey lands ~3.5:1 on this
+                // surface's dark-mode brown.
                 .foregroundStyle(SettingsTheme.warningInk)
                 .iconButtonAffordance(
                     L(

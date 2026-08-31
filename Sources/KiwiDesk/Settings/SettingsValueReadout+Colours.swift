@@ -1,10 +1,9 @@
 import KiwiDeskCore
 
-/// Colours & Animations rows: the animation toggles and their two
-/// paces. The palette rows are ACTIONS — apply, save, rename,
-/// export, delete and import mutate the palette store, not the
-/// draft config — and the neon-glow hint is a link, so none of
-/// them stores a value a draft diff could state.
+/// Colours & Animations settings diff readout generators. The
+/// palette rows are ACTIONS — they mutate the palette store,
+/// not the draft config — so none stores a value a draft diff
+/// could state.
 extension SettingsValueReadout {
     static func coloursRows(
         _ key: ColoursKey,

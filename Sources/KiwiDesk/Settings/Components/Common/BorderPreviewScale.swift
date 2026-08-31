@@ -1,16 +1,12 @@
 import CoreGraphics
 
-/// Pure math for the border-width readouts (#786 review): the
-/// ONE remap from the real 1–20 pt border-width band onto a
-/// preview's smaller span, like `GapPreviewScale` one shelf
-/// over. The editor's 96 pt mock windows read through 1–7; the
-/// Home tile's third-size panes read through a proportionally
-/// smaller band — the same real width must carry the same
-/// perceived weight on both pictures (owner, 2026-08-09), and
-/// two textual copies of the remap disagree on the next retune
-/// with every test green (#702's class, one preview down).
+/// The ONE remap from the real border-width band onto a
+/// preview's smaller span (#786): the same real width must carry
+/// the same perceived weight on every picture, and two textual
+/// copies disagree on the next retune with every test green
+/// (#702's class).
 enum BorderPreviewScale {
-    /// The width band `BorderStyle.clampedWidth` can produce.
+    /// Width band `BorderStyle.clampedWidth` can produce.
     static let real: ClosedRange<CGFloat> = 1...20
 
     static func width(

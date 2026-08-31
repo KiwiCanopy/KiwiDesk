@@ -1,15 +1,13 @@
 import Foundation
 
-/// The GUI language pick's storage (issue #9): app preferences
-/// (`UserDefaults`), NOT `gui.json`. A language change is
-/// documented as side-effect-free — it must never create a
-/// `gui.json` sidecar (which would flip `KiwiCore.isGuiManaged`
-/// and hand config ownership to the structured loader for a
-/// user who never asked to adopt the GUI). `UserDefaults` has
-/// no such coupling: nothing else keys off its existence.
+/// GUI language preference stored in `UserDefaults`, NOT
+/// `gui.json` (#9): a language change is documented as
+/// side-effect-free and must never create a sidecar — that
+/// would flip `KiwiCore.isGuiManaged` and hand config
+/// ownership to the structured loader for a hand-written-Lua
+/// user who only wanted a different language.
 public enum LocalizationPreference {
-    /// The `UserDefaults` key. `nil`/absent means "System
-    /// default".
+    /// The `UserDefaults` key. `nil`/absent means "System default".
     public static let key = "language"
 
     /// Reads the persisted pick, or `nil` for "System default".
@@ -19,9 +17,7 @@ public enum LocalizationPreference {
         defaults.string(forKey: key)
     }
 
-    /// Persists `language`; `nil` removes the key entirely (so
-    /// "System default" leaves no trace in the domain, mirroring
-    /// the old absent-key-in-JSON contract).
+    /// Persists language pick, removing key on nil for system default.
     public static func write(
         _ language: String?,
         to defaults: UserDefaults = .standard

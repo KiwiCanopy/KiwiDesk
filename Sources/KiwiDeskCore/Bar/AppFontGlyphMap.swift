@@ -1,21 +1,18 @@
 import Foundation
 
-/// Decodes the vendored `icon_map.json` (see
-/// `Resources/AppFont/UPSTREAM.md`): an array of
-/// `{iconName, appNames}` entries, expanded into a flat
-/// display-name → ligature lookup. Upstream lists localized
-/// app names as plain extra `appNames` members, so localized
-/// lookups need no special handling here.
+/// Decodes vendored icon_map.json into app name to ligature map
+/// (`Resources/AppFont/UPSTREAM.md`).
 enum AppFontGlyphMap {
     struct Entry: Decodable {
         let iconName: String
         let appNames: [String]
     }
 
-    /// The bundled map as a flat lookup, or nil when the
-    /// resource is missing or corrupt — that is a build defect
-    /// (the shipped-resource test fails); at runtime it only
-    /// degrades to image rendering, never a crash.
+    /// Loads bundled icon map as a flat dictionary. Nil is a
+    /// build defect (the shipped-resource test fails); at
+    /// runtime it only degrades to image rendering, never a
+    /// crash. Upstream lists localized app names as plain
+    /// `appNames` members, so no locale handling is needed.
     static func loadBundled() -> [String: String]? {
         guard
             let url = Bundle.kiwiDeskCore.url(

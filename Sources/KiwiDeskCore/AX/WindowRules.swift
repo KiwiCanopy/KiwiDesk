@@ -1,10 +1,7 @@
 import Foundation
 
-/// User-overridable float rules from the Lua config:
-/// `float_rules = { "com.apple.finder:Get Info",
-/// "com.apple.calculator" }`. The identity segment is the app's
-/// bundle identifier. `"id"` floats every window of the app;
-/// `"id:Title"` matches a case-sensitive title fragment.
+/// Float rules matching bundle IDs and optional case-sensitive
+/// title fragments.
 public struct FloatRules: Sendable, Equatable {
     private let rules: [(app: String, title: String?)]
 
@@ -21,9 +18,9 @@ public struct FloatRules: Sendable, Equatable {
         }
     }
 
-    /// Canonical identity used by profile sparse diffs: bundle ids
-    /// compare case-insensitively, while title fragments preserve
-    /// their current case-sensitive matching semantics.
+    /// Canonical identity used by profile sparse diffs: bundle
+    /// ids compare case-insensitively, while title fragments
+    /// keep their case-sensitive matching semantics.
     public static func normalizedRule(_ rule: String) -> String {
         let parts = rule.split(separator: ":", maxSplits: 1)
         guard parts.count == 2 else { return rule.lowercased() }

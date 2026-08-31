@@ -1,13 +1,6 @@
 import Foundation
 
-/// `monocle.*` — the monocle layout and its App Bar override
-/// (#1033).
-///
-/// The 25 `set_app_bar_*` fields are the same values `app_bar.*`
-/// sets globally, so `APIRecords+AppBar.swift` and the scrolling
-/// layout's identical block in `APIRecords+Scroll.swift` are the
-/// pattern to copy — with "for this layout" saying what an
-/// override is.
+/// `monocle.*` — monocle layout command records (#1033).
 extension APIReference {
     static let monocleRecords: [String: APIRecord] = [
         "set_orientation": APIRecord(

@@ -1,11 +1,8 @@
 import AppKit
 
-/// Scroll arrows: end-of-strip zones shown only toward hidden
-/// items, each click shifting the run by one slot. Split out of
-/// AppBarOverlay to keep the render file under the size ceiling.
+/// Scroll arrow layout and click handling for AppBarOverlay.
 extension AppBarOverlay {
-    /// Arrows sit at the strip's ends, shown only toward
-    /// hidden items; clicking shifts the bar by one slot.
+    /// Positions scroll arrows at strip ends when content overflows.
     func layoutArrows(
         strip: CGRect,
         m: Metrics,

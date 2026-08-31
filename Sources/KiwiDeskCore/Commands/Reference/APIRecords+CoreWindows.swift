@@ -1,13 +1,10 @@
 import Foundation
 
-/// The dispatcher verbs that move windows, Spaces and Desktops
-/// (#1033) — the `KiwiDesk.*` half a keybinding usually names.
-///
+/// Window, Space, and Desktop movement command records (#1033).
 /// The three Desktop verbs are the `.desktop` argument's only
-/// home, and the reason that kind exists rather than a bare
-/// integer: a Desktop number is Mission Control's, counted
-/// globally across every screen, while a Space id is KiwiDesk's
-/// own string (#884/#888).
+/// home, and why that kind exists: a Desktop number is Mission
+/// Control's, counted globally across screens, while a Space
+/// id is KiwiDesk's own string (#884/#888).
 extension APIReference {
     static let coreWindowRecords: [String: APIRecord] = [
         "focus": APIRecord(

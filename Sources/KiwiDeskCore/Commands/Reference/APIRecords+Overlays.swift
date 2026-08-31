@@ -1,13 +1,9 @@
 import Foundation
 
-/// `drag.*`, `border.*`, `sticky.*`, `floating.*`, `mouse.*`
-/// and `quit.*` — the overlays and the odd single-setting
-/// namespaces (#1033).
-///
-/// The colour setters take `.color`; `sticky.set_color` and
-/// `floating.set_color` also accept an empty string, which
-/// clears the mark colour back to the palette's — that belongs
-/// in the summary, not in a new argument kind.
+/// Overlay and single-setting command records (#1033).
+/// `sticky.set_color` / `floating.set_color` also accept an
+/// empty string, clearing the mark colour — that belongs in
+/// the summary, not in a new argument kind.
 extension APIReference {
     static let dragRecords: [String: APIRecord] = [
         "set_ghost_enabled": APIRecord(

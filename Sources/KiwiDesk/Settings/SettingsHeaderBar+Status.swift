@@ -1,16 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The header's SECOND row: the profile status sentence and the
-/// dismissible profile warning, carried whole from the old
-/// header. Split out of `SettingsHeaderBar` when the turn-16b
-/// skin took that file past the §2.1 ceiling — this half is
-/// prose-and-state, the other is the chrome row, and they change
-/// for different reasons.
-///
-/// Unlike the title row it takes NO traffic-light inset: it sits
-/// below the lights, so it keeps the bar's ordinary gutter and
-/// stays aligned with the content column beneath it.
+/// Status row and profile warning views for SettingsHeaderBar.
+/// Takes NO traffic-light inset: it sits below the lights, so
+/// it keeps the bar's ordinary gutter and stays aligned with
+/// the content column beneath.
 extension SettingsHeaderBar {
 
     var showDivergence: Bool {

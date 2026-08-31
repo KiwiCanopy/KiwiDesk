@@ -1,13 +1,12 @@
 import Foundation
 
-/// Applying a palette onto a settings value — one shot, no live
-/// link (#375). Each color routes through the SAME validated field
-/// setter the per-key `set_*_color` commands use (bars) or a direct
-/// write (border, drag), so a palette can never set a color a
-/// command couldn't. Invalid hex or unknown path = skipped.
+/// One-shot application of ColorPalette onto TilingSettings
+/// (#375). Each color routes through the SAME validated field
+/// setter the per-key `set_*_color` commands use, so a palette
+/// can never set a color a command couldn't. Invalid hex or
+/// unknown path = skipped, never fatal.
 extension ColorPalette {
-    /// Overwrites `settings`' colors with this palette's, in place.
-    /// Absent keys are left untouched (sparse).
+    /// Overwrites `settings`' colors with this palette's, in place (sparse).
     public func apply(to settings: inout TilingSettings) {
         for (path, hex) in colors {
             guard isPaintable(hex, at: path) else { continue }

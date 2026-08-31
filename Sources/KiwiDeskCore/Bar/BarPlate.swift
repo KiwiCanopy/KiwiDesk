@@ -1,15 +1,11 @@
 import CoreGraphics
 
-/// The shared background plate's frame — `plain`'s fill and the
-/// Liquid Glass plate — for `background_fit`
-/// (QA 2026-07-19). Strip-local coordinates; pure math shared
-/// by both bars so the two plates can't drift.
+/// Shared background plate frame math for bar background_fit.
 enum BarPlate {
-    /// `full` spans the strip; `hug` wraps the content run plus
-    /// one item gap of breathing room per end, clamped to the
-    /// strip. Hug falls back to full while the run overflows
-    /// and scrolls (`inset > 0` — content fills the strip, so
-    /// there is nothing to hug) and for an empty run.
+    /// Computes plate frame for `full` or `hug` background fit.
+    /// Hug falls back to full while the run overflows and
+    /// scrolls (`inset > 0` — content fills the strip, nothing
+    /// to hug) and for an empty run.
     nonisolated static func frame(
         strip: CGRect,
         runStart: CGFloat,

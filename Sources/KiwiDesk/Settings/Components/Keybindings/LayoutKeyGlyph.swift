@@ -1,18 +1,12 @@
 import Carbon.HIToolbox
 import Foundation
 
-/// Resolves a virtual key code to its base character on the
-/// *active* keyboard layout via `UCKeyTranslate`, so the
-/// keybinding editor renders layout-correct glyphs — a German
-/// layout shows `+` where a US layout shows `]` (#23). Returns nil
-/// for keys with no printable base character (arrows, function
-/// keys); `ComboSymbols` then falls back to a fixed glyph.
-///
-/// Translation uses no modifier state, so it yields the key's base
-/// glyph (the modifiers are shown separately as ⌃⌥⇧⌘). The current
-/// layout is queried first, with the ASCII-capable layout as a
-/// fallback for input sources (some IMEs) that expose no Unicode
-/// layout data.
+/// Resolves virtual key codes to base characters on the ACTIVE
+/// layout via UCKeyTranslate (#23) — no modifier state, so the
+/// base glyph (modifiers render separately). Nil for keys with
+/// no printable base; `ComboSymbols` then uses a fixed glyph.
+/// The ASCII-capable layout is the fallback for input sources
+/// (some IMEs) that expose no Unicode layout data.
 enum LayoutKeyGlyph {
     static func char(for keyCode: UInt32) -> String? {
         guard let source = currentSource() ?? asciiSource()

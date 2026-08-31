@@ -1,21 +1,12 @@
 import SwiftUI
 
-/// The live-apply caption's own fade (#123), split from
-/// `KeyRecorderField` at AGENTS.md §2.1's line ceiling — the
-/// same reason the conflict popover has its own file.
+/// Live-apply feedback auto-fade for KeyRecorderField (#123).
 extension KeyRecorderField {
-    /// Clears the caption ~1.5 s after it appeared.
-    ///
-    /// One writer, latest wins: a newer recording sets a new
-    /// feedback and starts its own timer, and the equality
-    /// check is what keeps the older timer from clearing it
-    /// early.
-    ///
-    /// **The fade is gated on Reduce Motion (#989).** With it
-    /// on the caption still appears and still leaves — the
-    /// house split drops the motion, never the affordance, and
-    /// here the caption IS the affordance: nothing else says
-    /// the binding applied live.
+    /// Schedules timed fade of live-apply feedback. One writer,
+    /// latest wins: the equality check keeps an older timer from
+    /// clearing a newer caption early. Reduce Motion drops only
+    /// the motion (#989) — the caption still appears and leaves,
+    /// and here the caption IS the affordance.
     func scheduleFeedbackFade(_ feedback: LiveApplyFeedback) {
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 1_500_000_000)

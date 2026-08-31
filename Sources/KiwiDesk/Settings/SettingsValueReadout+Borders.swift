@@ -1,17 +1,7 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Borders, marks and drag-visual rows. The two master rows
-/// narrate the shared value the #754 card shows — reading
-/// "mixed" where the strokes disagree, resolved through
-/// `GapsBordersGates.agreedCornerStyle`, the one copy of that
-/// comparison — while the master-written leaves narrate their
-/// own stored values for a Lua edit that split them. The two
-/// fit-gaps rows are actions and store nothing, so they draw
-/// no row. Colours show their stored hex; the two mark tints'
-/// empty sentinel reads "Automatic" the way the colour well's
-/// own field prints it. The value formatters and the row shape
-/// live in `SettingsValueReadout+BordersValues.swift`.
+/// Borders, marks, and drag visual settings diff row generators (#754).
 extension SettingsValueReadout {
     static func bordersRows(
         _ key: BordersKey,

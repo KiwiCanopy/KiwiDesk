@@ -1,13 +1,8 @@
-/// The destination ↔ census-area bridge (#678 turn 9). The two
-/// enums predate each other from opposite ends — the destination
-/// is the navigation identity (American spellings, `Codable`
-/// selection), the area is the census's placement vocabulary
-/// (British spellings) — and Home is where they finally meet:
-/// a card is offered per AREA rule (`minimumMode`, the Monitors
-/// auto-promotion) and opens a DESTINATION. One exhaustive map
-/// each way; `DestinationAreaParityTests` pins the bijection so
-/// a thirteenth case on either side reds instead of silently
-/// missing a card.
+/// Destination ↔ census-area bridge (#678): the destination is
+/// the navigation identity, the area the census's placement
+/// vocabulary. One exhaustive map each way;
+/// `DestinationAreaParityTests` pins the bijection so a new
+/// case on either side reds instead of missing a card.
 extension SettingsDestination {
     /// The census area this destination renders.
     var area: SettingsArea {

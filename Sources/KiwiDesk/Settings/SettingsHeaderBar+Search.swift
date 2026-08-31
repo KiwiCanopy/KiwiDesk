@@ -1,14 +1,11 @@
 import KiwiDeskCore
 
-/// The header bar's search context (#678 turn 11) — its own
-/// file for the §2.1 ceiling, not for reuse.
+/// Search context builder for SettingsHeaderBar (#678).
 extension SettingsHeaderBar {
-    /// Everything search may consult, collected here from state
-    /// already in memory (spec 11a: nothing on the search path
-    /// touches AX, the session or the filesystem). Palettes are
-    /// absent by type — `SettingsSearchPlace.Kind` has no case
-    /// for them until an in-memory palette-name seam exists
-    /// (the argument lives on the Kind enum).
+    /// Constructs SettingsSearchContext from state already in
+    /// memory — nothing on the search path touches AX, the
+    /// session or the filesystem (spec 11a). Palettes are absent
+    /// by type; the argument lives on the Kind enum.
     var searchContext: SettingsSearchContext {
         SettingsSearchContext(
             editingStoredProfile: model.editingStoredProfile,

@@ -1,10 +1,6 @@
 import KiwiDeskCore
 
-/// The Layout area's per-space override keys: each expands to
-/// one row per space whose value for that FIELD differs, the
-/// side that has no override reading as unset (— → 60 %). The
-/// expansion machinery and the two axis-relative bespoke rows
-/// live in `SettingsValueReadout+Layout4`.
+/// Layout per-space override diff row generators.
 extension SettingsValueReadout {
     static func layoutOverrideRows(
         _ key: LayoutKey,

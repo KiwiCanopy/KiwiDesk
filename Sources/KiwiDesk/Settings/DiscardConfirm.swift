@@ -2,11 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Hosts the one discard dialog for the whole dashboard (#515).
-/// Applied in `SettingsView.body` **above** the `editingLua`
+/// Applied in `SettingsView.body` ABOVE the `editingLua`
 /// branch: two of the gated actions flip that flag, so a host
 /// inside either arm would be torn down by its own confirm
-/// button. The model half — `PendingDiscard` and the gate — is
-/// `SettingsModel+Discard.swift`.
+/// button.
 struct DiscardConfirmation: ViewModifier {
     @ObservedObject var model: SettingsModel
 

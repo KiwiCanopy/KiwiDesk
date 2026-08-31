@@ -1,17 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// An app chooser: a dropdown of installed apps (identified by
-/// bundle id, shown by localized name) plus a "Custom…" option
-/// that reveals a free text field for a bundle id an app that
-/// isn't installed right now would use.
+/// App picker with installed apps list and custom bundle ID text entry.
 struct AppSelector: View {
-    /// The bundle identifier of the chosen app — the stored
-    /// identity (see `AppRef`), not the display name.
+    /// Bundle identifier of chosen app (`AppRef`).
     @Binding var name: String
-    /// Bundle ids to omit from the picker — App Rules passes the
-    /// apps that already have a rule row, since each app carries at
-    /// most one (its space + float facets live on that single row).
+    /// Bundle IDs to omit — App Rules passes the apps that
+    /// already have a rule row, since each app carries at most
+    /// one (its space + float facets live on that single row).
     var exclude: Set<String> = []
     @State private var custom = false
 

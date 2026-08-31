@@ -24,16 +24,11 @@ struct SpaceNameField: View {
     }
 
     var body: some View {
-        // A visible, fixed-width field: renaming is
-        // discoverable without clicking first, and the fields
-        // align in a column across rows.
         TextField("", text: $draft)
             .textFieldStyle(.roundedBorder)
-            // Nameless otherwise — an empty title, and the row
-            // draws no label beside it (#812). The DIFF ROW's
-            // label key, not a twin: both name the same setting,
-            // and one key cannot disagree with itself across ten
-            // locales (localization audit, 2026-08-24).
+            // Accessible label for the nameless field (#812) —
+            // the DIFF ROW's key, not a twin: one key cannot
+            // disagree with itself across ten locales.
             .accessibilityLabel(
                 L("diff.label.space_name", "Space name")
             )

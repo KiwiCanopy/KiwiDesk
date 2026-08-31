@@ -1,13 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// New-window placement picker shared by every layout (BSP,
-/// Stack, Scrolling, Grid).
+/// New-window placement picker shared across layouts
+/// (BSP, Stack, Scrolling, Grid).
 struct PlacementPicker: View {
     @Binding var placement: SpawnPlacement
     /// Row label; defaults to "New window". Track passes
-    /// "Position" — it already has a separate own/focused mode
-    /// row above, so a second "New window" would read wrong.
+    /// "Position" — its own/focused mode row above makes a
+    /// second "New window" read wrong.
     var label: String? = nil
     /// Help override for callers whose picker means something
     /// else — Track positions a whole track in own-track mode,

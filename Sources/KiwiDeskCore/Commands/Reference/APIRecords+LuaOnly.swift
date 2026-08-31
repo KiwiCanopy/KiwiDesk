@@ -1,13 +1,11 @@
 import Foundation
 
-/// The `KiwiDesk` table's Lua-only entry points (#1033).
-///
-/// **An exemplar group: every record here is written.** These
-/// bypass the dispatcher, so the CLI and the IPC socket cannot
-/// reach them — `list_commands` marks them `lua` on the channel
-/// field, and `APIReference.suggestion` still refuses to hint at
-/// them (#37). They are the only records that take a
-/// `.callback`, because a Lua function cannot cross a socket.
+/// `KiwiDesk` table Lua-only entry point records (#1033). These
+/// bypass the dispatcher, so the CLI and IPC socket cannot
+/// reach them — `list_commands` marks them `lua`, and
+/// `APIReference.suggestion` refuses to hint at them (#37).
+/// The only records taking `.callback`: a Lua function cannot
+/// cross a socket.
 extension APIReference {
     static let luaOnlyRecords: [String: APIRecord] = [
         "exec": APIRecord(

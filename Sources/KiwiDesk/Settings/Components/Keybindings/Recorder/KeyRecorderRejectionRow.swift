@@ -1,12 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The inline "Assigned to…" row `KeyRecorderField` shows when a
-/// lock-in collides with another KiwiDesk row (#34): Steal /
-/// Go to are link-styled (`.buttonStyle(.link)`), so they get
-/// the pointing-hand cursor explicitly — `.link` sets color but
-/// not the cursor. Split out of `KeyRecorderField` to keep that
-/// file under the line ceiling.
+/// Inline conflict row showing Steal / Go to actions (#34).
 struct KeyRecorderRejectionRow: View {
     let rejection: RecorderRejection
     let onSteal: () -> Void
@@ -15,13 +10,10 @@ struct KeyRecorderRejectionRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            // A shape cue beside the red text — the conflict must
-            // not read by colour alone (WCAG 1.4.1). Hidden from
-            // VoiceOver: the text below already states it.
-            //
-            // `danger`, not `.red`: system red is tuned against
-            // the system window background, and this row sits on
-            // the theme's own dark card, where it sinks.
+            // Shape cue beside the red text — the conflict must
+            // not read by colour alone (WCAG 1.4.1); hidden from
+            // VoiceOver, the text states it. `danger`, not
+            // `.red`: system red sinks on the theme's dark card.
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(SettingsTheme.danger)
                 .accessibilityHidden(true)

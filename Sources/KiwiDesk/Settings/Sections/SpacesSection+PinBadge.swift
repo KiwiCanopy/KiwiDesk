@@ -1,16 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The space row's display-pin badge (#678 Phase 3, turn 8a),
-/// split from `SpacesSection.swift` to stay under the line ceiling
-/// (same seam as `+Drag`/`+Customize`/`+ModePicker`).
-///
-/// Names the display a space is pinned to, or flags a pin whose
-/// display is offline — so the pin is visible on the row without
-/// opening Monitors. The connected/offline split is resolved by
-/// `SpacePinBadge` from the same attached-fingerprint set the
-/// placement resolver reads, so the row and the placement cannot
-/// disagree about whether a pin is live.
+/// Space row display-pin badge view for SpacesSection (#678 Phase 3).
 extension SpacesSection {
     @ViewBuilder
     func pinBadge(_ space: SpaceID) -> some View {

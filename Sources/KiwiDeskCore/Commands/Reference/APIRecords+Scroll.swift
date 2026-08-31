@@ -1,13 +1,8 @@
 import Foundation
 
-/// `scroll.*` — the scrolling layout (#1033).
-///
-/// **The largest exemplar group, and every record is written.**
-/// It carries one of every argument shape the surface has: a
-/// bare value (`set_slot_size`), a Space id followed by a value
-/// (`set_anchor_override`), an enum read off its decoder
-/// (`set_anchor`), a boolean, and the 25 `set_app_bar_*` fields
-/// that override the global App Bar for this layout alone.
+/// `scroll.*` — scrolling layout command records (#1033). The
+/// largest exemplar group: one of every argument shape the
+/// surface has.
 extension APIReference {
     static let scrollRecords: [String: APIRecord] = [
         "set_slot_size": APIRecord(

@@ -1,9 +1,6 @@
 import KiwiDeskCore
 
-/// Profiles-area rows. Only the native-Desktop → profile
-/// binding map names a model path in the draft; the
-/// saved-profile verbs and flags act on stored profile files,
-/// which the draft diff never walks.
+/// Profiles-area diff readout generators.
 extension SettingsValueReadout {
     static func profilesRows(
         _ key: ProfilesKey,
