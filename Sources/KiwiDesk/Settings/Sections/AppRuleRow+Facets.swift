@@ -1,31 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The two menus inside the rule sentence, and the mutations
-/// behind them (see `AppRuleRow` for the sentence itself).
-///
-/// **The values are verb phrases** — "floats", "tiles
-/// normally", "floats when titled…" — because each one has to
-/// complete the sentence it sits in. The nouns they replaced
-/// ("All windows", "Never") were correct beside a "Float:"
-/// label and read as nothing at all inside a statement.
-///
-/// Each menu carries the facet's old label as its
-/// **accessibility label**. That is not a consolation prize for
-/// the deleted labels: a sentence gives a screen reader no name
-/// for the control, and the settings census names this row by
-/// the same key, so `app_rules.space` / `app_rules.float` have
-/// to stay authored at a call site the key scanner can see or
-/// they are pruned from every locale.
+/// Facet dropdown menus and mutations within `AppRuleRow` sentence.
 extension AppRuleRow {
-    /// `app_rules[app]`; the unset state deletes the entry.
-    ///
-    /// Its label is a phrase, not "Automatic". The unset state
-    /// is the one every float-only rule shows — "Finder opens in
-    /// Automatic and floats" is the DEFAULT reading of this row,
-    /// and a noun there leaves the sentence half-converted. The
-    /// menu ITEM keeps a noun, because a menu is a list of
-    /// choices rather than a sentence.
+    /// Space assignment dropdown menu (`app_rules.space`, #678 Phase 4,
+    /// turn 20a rule 3).
     var spaceMenu: some View {
         return Menu {
             Button(L("app_rules.automatic", "Automatic")) {
@@ -44,20 +23,10 @@ extension AppRuleRow {
         .neutralMenuLabel()
         .fixedSize()
         .accessibilityLabel(L("app_rules.space", "Space"))
-        // The label above REPLACES the name VoiceOver would have
-        // derived, which for a menu is its current choice — so
-        // without this the control announced "Space, pop up
-        // button" and never which space (#678 Phase 4 pass 10,
-        // turn 20a rule 3: a row announces its state, not just
-        // its name). Sighted readers get the value from the
-        // sentence; naming the control took it away from everyone
-        // else.
         .accessibilityValue(spaceFacetLabel)
     }
 
-    /// The current space choice as the sentence renders it —
-    /// drawn and spoken from one expression, so the two cannot
-    /// come to disagree.
+    /// Spoken and rendered space assignment label.
     var spaceFacetLabel: String {
         model.config.appRules[app]?.raw
             ?? L(
@@ -66,13 +35,12 @@ extension AppRuleRow {
             )
     }
 
+    /// Float behavior dropdown menu (`app_rules.float`, #68).
     var floatMenu: some View {
         Menu {
             Button(neverLabel) { setNever() }
             Button(allLabel) { setAll() }
             Button(titledLabel) {
-                // Re-selecting the active choice must not
-                // wipe the pattern list (#68 review m3).
                 if floatFacet != .titled {
                     setNever()
                 }
@@ -85,25 +53,13 @@ extension AppRuleRow {
         .neutralMenuLabel()
         .fixedSize()
         .accessibilityLabel(L("app_rules.float", "Float"))
-        // Same reason as the space menu's: the label replaces the
-        // choice VoiceOver would otherwise read.
         .accessibilityValue(floatLabel)
         .help(
-            // The catalog string carries Markdown emphasis for
-            // the `?` popover that renders it richly. A tooltip
-            // renders none, so the markers would ship literally
-            // in all eleven locales — `HelpButton` strips them
-            // for its own hover fallback and this must too.
             floatHelp.replacingOccurrences(of: "**", with: "")
         )
     }
 
-    /// The borderless-menu signature (`ProfileEditTargetMenu`):
-    /// a trailing chevron on the label so a bare-text menu
-    /// still reads as "this opens a menu". Inside a sentence
-    /// the menu hugs its value (`fixedSize`) rather than
-    /// filling a fixed facet column — the words on either side
-    /// are what it has to line up with now, not a grid.
+    /// Inline menu label with disclosure chevron (`ProfileEditTargetMenu`).
     private func menuLabel(_ text: String) -> some View {
         HStack(spacing: 4) {
             Text(text)
@@ -113,8 +69,6 @@ extension AppRuleRow {
                 .foregroundStyle(.secondary)
         }
     }
-
-    // MARK: - Float facet vocabulary
 
     private var neverLabel: String {
         L("app_rules.float.never", "tiles normally")
@@ -128,11 +82,6 @@ extension AppRuleRow {
         L("app_rules.float.titled", "floats when titled…")
     }
 
-    /// The resting VALUE drops the ellipsis the menu item
-    /// carries: an ellipsis promises further UI, which is right
-    /// on a choice that opens the pattern editor and wrong on a
-    /// statement — "Spotify opens in media and floats when
-    /// titled…" reads as a sentence that was cut off.
     private var restingTitledLabel: String {
         L("app_rules.float.titled.resting", "floats when titled")
     }
@@ -147,17 +96,7 @@ extension AppRuleRow {
         }
     }
 
-    /// Optional "why" depth for the Float facet (#260): what
-    /// floating a window actually does, plus the per-app-vs-
-    /// layout-mode disambiguation (same English word, two
-    /// mechanisms). Must-know scope stays in the section
-    /// caption; the titled-pattern mechanics stay in
-    /// `AppRuleTitledEditor` — don't restate them here or the
-    /// two drift.
-    ///
-    /// A hover string rather than the `?` affordance it used to
-    /// be: a `?` button inside the sentence would break the
-    /// sentence, which is the one thing this row is for.
+    /// Tooltip explanation for float facet (#260, `AppRuleTitledEditor`).
     private var floatHelp: String {
         L(
             "app_rules.float.help",

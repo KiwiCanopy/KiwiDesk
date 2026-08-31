@@ -1,17 +1,7 @@
 import KiwiDeskCore
 
-/// The search result model (#678 turn 11): one row per census
-/// setting from the static index, destination-title rows for
-/// area names, and a capped "Made by you" group (`place` in
-/// code) for the user's own
-/// named things. Replaced `SidebarSearch`'s one-hit-per-
-/// destination cap — that cap existed because a result could
-/// not say WHICH row it meant; a per-setting index can, so a
-/// query like "color" now lists each matching setting under its
-/// own breadcrumb.
+/// Settings search results model and query engine (#678 turn 11).
 enum SettingsSearchResult: Identifiable, Equatable {
-    /// The area name itself matched — the pane opens without
-    /// scrolling (the tier-1 shape, kept).
     case destination(SettingsDestination)
     case setting(SettingsSearchIndexRow)
     case place(SettingsSearchPlace)
@@ -41,19 +31,8 @@ enum SettingsSearchResult: Identifiable, Equatable {
     }
 }
 
-/// One entry in the "Made by you" group (spec 11a): a thing the
-/// user
-/// NAMED — a space, a profile, a palette, an app rule — findable
-/// by that name, one entry per object, landing on the area that
-/// owns it. Lua binding contents stay out (free text would swamp
-/// everything), and values are not indexed at all.
+/// User-named settings search target (spec 11a, `PaletteStore`).
 struct SettingsSearchPlace: Identifiable, Equatable {
-    /// No `.palette` case, deliberately: `PaletteStore` is
-    /// stateless and file-backed, so palette names have no
-    /// in-memory production source yet, and a kind nothing can
-    /// feed is a seam without a consumer plus a translated
-    /// string nothing renders. The kind joins WITH the cache
-    /// seam (follow-up filed on the search rework PR).
     enum Kind: String, CaseIterable {
         case space, profile, appRule
     }
@@ -64,11 +43,7 @@ struct SettingsSearchPlace: Identifiable, Equatable {
     var id: String { "\(kind.rawValue)/\(name)" }
 }
 
-/// Everything the result builder may consult — collected by the
-/// CALLER from state already in memory. The search path itself
-/// touches nothing else: no AX, no disk, no session. Palettes in
-/// particular arrive as whatever list the model already holds;
-/// search never triggers a store load.
+/// In-memory search evaluation context.
 struct SettingsSearchContext {
     var editingStoredProfile = false
     var mode: SettingsMode = .simple
@@ -77,11 +52,6 @@ struct SettingsSearchContext {
     var profiles: [String] = []
     var appRules: [String] = []
 
-    /// Exhaustive by construction: a new `Kind` fails to
-    /// compile here (and in `Kind.destination`) before it can
-    /// ship as a kind no context feeds and no builder consumes
-    /// — the three hand-mirrors the architect review counted,
-    /// collapsed onto the enum (2026-08-10).
     func names(of kind: SettingsSearchPlace.Kind) -> [String] {
         switch kind {
         case .space: return spaces
@@ -92,7 +62,6 @@ struct SettingsSearchContext {
 }
 
 extension SettingsSearchPlace.Kind {
-    /// The area that owns things of this kind.
     var destination: SettingsDestination {
         switch self {
         case .space: return .spaces
@@ -102,8 +71,7 @@ extension SettingsSearchPlace.Kind {
     }
 }
 
-/// The two result groups, in commit order: settings rows, then
-/// Places. `flat` is the keyboard-navigation order.
+/// Search result groups for settings rows and user-named places.
 struct SettingsSearchResults: Equatable {
     var settings: [SettingsSearchResult] = []
     var places: [SettingsSearchResult] = []
@@ -113,15 +81,10 @@ struct SettingsSearchResults: Equatable {
 
 @MainActor
 enum SettingsSearch {
-    /// The "Made by you" group's cap (spec 11a): the group exists to
-    /// jump to a thing you named, not to enumerate your config.
+    /// Maximum matches displayed under "Made by you" (spec 11a).
     static let placesCap = 5
 
-    /// Settings rows then Places, each internally ordered.
-    /// Matching is `searchMatches` — the app's one predicate —
-    /// over the localized label, the destination title and the
-    /// English synonyms. Search indexes BOTH modes, always; the
-    /// mode is mentioned nowhere but the result tag.
+    /// Evaluates query against search index and user places (`searchMatches`).
     static func results(
         query: String,
         context: SettingsSearchContext
@@ -136,14 +99,8 @@ enum SettingsSearch {
         )
     }
 
-    /// Whether committing `result` will flip the window into
-    /// Power User mode — the result rows' mode tag and the only
-    /// place search mentions the mode. Asks the one offer
-    /// predicate (`HomeCardOrder.isOffered`), never a
-    /// hand-negated copy: a destination not offered in the
-    /// CURRENT mode is one `ensureModeAdmits` will promote for,
-    /// which keeps the Monitors display-count promotion and the
-    /// already-in-Power-User case both silent.
+    /// Whether selecting result triggers Power User mode promotion
+    /// (`HomeCardOrder.isOffered`, `ensureModeAdmits`).
     static func switchesMode(
         _ result: SettingsSearchResult,
         context: SettingsSearchContext
@@ -193,9 +150,7 @@ enum SettingsSearch {
             }
     }
 
-    /// One entry per named object, kinds in a fixed order,
-    /// capped at `placesCap` AFTER matching so the first five
-    /// matches win, not the first five objects.
+    /// Matches named entities capped at `placesCap` (guard-prover 2026-08-10).
     private static func placeResults(
         _ query: String,
         _ context: SettingsSearchContext
@@ -203,13 +158,6 @@ enum SettingsSearch {
         let kinds = Kind.allCases.map { kind in
             (kind, context.names(of: kind), kind.destination)
         }
-        // No reachability filter here, on purpose: every place
-        // kind lands on a destination #18 never hides (only
-        // General is withheld while a stored profile is
-        // edited), so a filter would be dead code no test can
-        // red (guard-prover, 2026-08-10). A NEW kind whose
-        // destination can be withheld owes the filter back —
-        // and a test that reds without it.
         let matched = kinds.flatMap { kind, names, destination in
             names.filter { $0.searchMatches(query) }
                 .map {

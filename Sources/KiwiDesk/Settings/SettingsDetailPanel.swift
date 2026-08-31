@@ -1,30 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Which destinations offer the live-preview panel (#678
-/// redesign spec). DATA, not a scattered condition: the
-/// two-column mount, the pill's centring offset and the tests
-/// all consult this one set, and a pass that teaches a new
-/// area to preview (the keyboard, pass 5) joins by adding its
-/// case here and its content below. An area with nothing to
-/// show hides the panel and takes the full width — the
-/// prototype's own rule, so absence is a stated verdict, not
-/// a missing feature.
+/// Destinations supporting the side live-preview panel (#678, #793, #795,
+/// owner rulings 2026-08-09, 2026-08-16).
 enum SettingsDetailPanelOffer {
-    /// v1 (owner-scoped 2026-08-09): the four areas whose
-    /// preview renderers exist this pass. Shortcuts joined in
-    /// pass 5 (the keyboard board), and Advanced Colours in #793
-    /// — the extension motion is the same each time: a case
-    /// here, a branch below, and the area's cards give up any
-    /// preview the panel now owns.
-    ///
-    /// General is deliberately NOT here and #795 is where that
-    /// was argued rather than assumed (owner, 2026-08-16): every
-    /// fact an inventory panel would list is already in the
-    /// content column, and every `GeneralKey` is a
-    /// `UserDefaults`/readonly/action row, so its diff list would
-    /// be a structural zero. Its empty right side is this set's
-    /// own rule working — absence is a stated verdict.
     static let offering: Set<SettingsDestination> = [
         .gapsAndBorders, .bars, .colors, .layoutDefaults,
         .shortcuts, .advancedColors, .spaces,
@@ -38,15 +17,8 @@ enum SettingsDetailPanelOffer {
     }
 }
 
-/// The detail view's right column: "LIVE PREVIEW · <AREA>",
-/// the area's preview drawn from the DRAFT, and the "CHANGED
-/// IN THIS DRAFT" diff list — one draft, three views, this
-/// being the in-area one (#678 redesign spec). The spec's `›`
-/// collapse handle is deliberately NOT built (owner
-/// 2026-08-10): the window drops the panel by WIDTH below
-/// 1200 pt (17a, shipped), and a manual collapse beside that
-/// is a persisted preference duplicating what the window
-/// already decides.
+/// Right-column panel displaying live preview and draft change list
+/// (#678, 17a, owner ruling 2026-08-10).
 struct SettingsDetailPanel: View {
     @ObservedObject var model: SettingsModel
     let destination: SettingsDestination
@@ -62,11 +34,6 @@ struct SettingsDetailPanel: View {
                 .padding(.bottom, 18)
             }
             .scrollIndicators(.hidden)
-            // VoiceOver lands on the scroll view as a bare
-            // "scroll area" before interacting into it (owner,
-            // #812 session 2, German "Rollbereich"); the header
-            // sentence names it so the reader knows what they
-            // are about to enter.
             .accessibilityLabel(headerSentence)
         }
         .padding(.horizontal, 22)
@@ -116,31 +83,16 @@ struct SettingsDetailPanel: View {
         case .shortcuts:
             KeyboardPreviewPanel(model: model)
         case .layoutDefaults:
-            // The section's `onAppear` latch writes the tab
-            // before first render; `.bsp` only covers the
-            // frame between mount and latch.
             LayoutPreviewPanel(
                 model: model,
                 mode: model.nav.layoutModeTab ?? .bsp
             )
         default:
-            // Unreachable while the mount consults
-            // `SettingsDetailPanelOffer` — the guard suite pins
-            // that every offering destination has a branch
-            // here, so a new offer without a preview reds
-            // instead of rendering this.
             EmptyView()
         }
     }
 
-    // MARK: - Diff list
-
     private var diffList: some View {
-        // One rows array feeds the heading's N, the list and
-        // the elsewhere remainder — the counts a user can
-        // cross-check against a visible list must BE that
-        // list's count (owner 2026-08-10: `draftChangeCount`
-        // said "1" over a three-row per-space family).
         let all = SettingsDiffRowSource.rows(for: model)
         let rows = SettingsDiffRowSource.areaRows(
             all,
@@ -191,9 +143,8 @@ struct SettingsDetailPanel: View {
         }
     }
 
-    /// The prototype's "each row is clickable — jumps to the
-    /// control that changed": the same anchor pipeline search
-    /// lands through (`SettingsView.apply`).
+    /// Jumps to setting control associated with diff row
+    /// (`SettingsView.apply`).
     private func jump(to row: SettingsDiffRow) {
         guard let anchor = SettingsDiffJump.anchor(for: row)
         else { return }
@@ -202,11 +153,7 @@ struct SettingsDetailPanel: View {
 
 }
 
-/// The draft's display rows: every changed setting through the
-/// readout, then the two residues the attribution net names —
-/// an edited init.lua (one surface, one row) and any
-/// unattributed leaf (empty in a healthy diff; shown raw so a
-/// hole is at least visible where the guard missed it).
+/// Builds display rows for uncommitted draft changes.
 @MainActor
 enum SettingsDiffRowSource {
     static func rows(
@@ -248,14 +195,8 @@ enum SettingsDiffRowSource {
         return rows
     }
 
-    /// The panel's slice of the draft: only rows whose census
-    /// placement lands in `destination` — the whole draft
-    /// lives in the save pill's popover, and a row the user
-    /// cannot see change on this screen is noise (owner
-    /// 2026-08-10). Same area mapping as the row's own jump.
-    /// Stated residue: a row whose key has no Settings surface
-    /// (nil placement area — a Lua-only override) appears only
-    /// in the pill's popover.
+    /// Filters draft diff rows relevant to specific destination area
+    /// (owner ruling 2026-08-10).
     static func areaRows(
         _ rows: [SettingsDiffRow],
         in destination: SettingsDestination

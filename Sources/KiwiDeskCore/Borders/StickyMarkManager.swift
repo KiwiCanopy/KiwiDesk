@@ -1,26 +1,17 @@
 import AppKit
 import CoreGraphics
 
-/// Keeps one sticky mark per sticky window (#414),
-/// mirroring `BorderManager`'s diff-sync at marker scale: `sync`
-/// for steady state (create / move / retire), `follow` for the
-/// move/animation hot path. Driven by
-/// `KiwiCore.updateStickyMarks()` inside `retile()`.
+/// Manages sticky mark overlay indicators per sticky window
+/// (#414, `BorderManager`).
 @MainActor
 public final class StickyMarkManager {
-    /// One window's desired mark. Frames are AX coordinates
-    /// from cached window state — never a live AX call.
+    /// Window mark specification.
     public struct Spec: Equatable {
         public let window: WindowID
         public let frame: CGRect
-        /// The mark tint as raw hex (#429); empty = "Automatic"
-        /// (adaptive `.labelColor`). Resolved at the plate via
-        /// `NSColor.mark` so the mark and the Space Bar sticky
-        /// badge read the one `StickyStyle.color`.
+        /// Hex color string (`StickyStyle.color`, #429).
         public let color: String
-        /// The SF Symbol for this window's sticky SCOPE (#445):
-        /// `infinity` for global, `pin.fill` for display. Carried
-        /// per-window because one mark manager serves both kinds.
+        /// SF Symbol name for sticky scope (`infinity` / `pin.fill`, #445).
         public let symbolName: String
 
         public init(
@@ -39,52 +30,36 @@ public final class StickyMarkManager {
     private var overlays: [WindowID: StickyMarkOverlay] =
         [:]
 
-    /// Whether the WindowServer stream already tracks this window's
-    /// frame — wired to `BorderManager.markUsesWindowServerTracking`.
-    /// When true, `follow` (the AX-echo / animation path) stands
-    /// down so a coalesced echo can't rewind the mark behind the
-    /// live WS bounds (the ring's `follow` guard, mirrored). A no-op
-    /// default keeps the manager testable in isolation.
+    /// Whether WindowServer stream tracks window
+    /// (`BorderManager.markUsesWindowServerTracking`).
     public var isWindowServerTracked: @MainActor (WindowID) -> Bool = { _ in
         false
     }
 
-    /// Whether OUR OWN animation currently drives this window —
-    /// wired to `AnimationEngine.isAnimating` (the ring's guard,
-    /// mirrored, #594). While true the per-tick commanded frame
-    /// owns the mark, so the AX-echo `follow` stands down; the
-    /// WS `reposition` tee already stands down upstream (the
-    /// ring's `reconcile` gate). A no-op default keeps the
-    /// manager testable in isolation.
+    /// Whether active animation drives window
+    /// (`AnimationEngine.isAnimating`, #594).
     public var isAnimating: @MainActor (WindowID) -> Bool = { _ in
         false
     }
 
-    /// The engine's just-commanded instant-set target while its
-    /// echo is pending (#881) — the `commanded` input `sync`
-    /// hands `FollowSource.syncFrame`. Wired in
-    /// `KiwiCore+Bootstrap` beside `isAnimating`, one closure
-    /// shared with the ring manager.
+    /// Engine's pending target frame (`KiwiCore+Bootstrap`, #881).
     public var commandedFrame: @MainActor (WindowID) -> CGRect? = {
         _ in nil
     }
 
     public init() {}
 
-    /// Windows currently wearing the mark — the contract
-    /// surface for tests and diagnostics.
+    /// Windows currently displaying a sticky mark.
     public var markedWindows: Set<WindowID> {
         Set(overlays.keys)
     }
 
-    /// The frame a window's mark last positioned against, for
-    /// tests that need to prove `follow` stood down (or didn't).
+    /// Frame used in the last positioning update.
     public func lastFrame(_ id: WindowID) -> CGRect? {
         overlays[id]?.lastFrame
     }
 
-    /// Shows exactly `desired` — one mark per sticky window —
-    /// and retires the marks of any window no longer in the set.
+    /// Synchronizes visible marks to desired specs (#596).
     public func sync(_ desired: [Spec]) {
         let wanted = Set(desired.map(\.window))
         for (id, overlay) in overlays
@@ -101,10 +76,6 @@ public final class StickyMarkManager {
             overlays[spec.window] = overlay
             overlay.setMarkColor(spec.color)
             overlay.setSymbol(spec.symbolName)
-            // Geometry stands down mid-animation (#596) — the
-            // same call the ring's `sync` makes, not a mirror of
-            // it. Colour, symbol, stacking and retirement are
-            // unaffected.
             overlay.update(
                 frame: FollowSource.syncFrame(
                     spec: spec.frame,
@@ -113,19 +84,12 @@ public final class StickyMarkManager {
                     commanded: commandedFrame(spec.window)
                 )
             )
-            // Re-assert stacking each sync (focus change,
-            // retile, z-order restore) — never per follow
-            // tick (the mark lags otherwise).
             overlay.order()
         }
     }
 
-    /// AX-echo / animation hot path: re-corner an already-shown
-    /// mark on a fresh frame. The render decision is
-    /// `FollowSource.renderFrame` — one switch shared with the
-    /// ring, so the two overlays cannot drift (#285/#594), and
-    /// the #677 size pin corrects a tick riding a refused ask
-    /// for both at once. A no-op for unmarked windows.
+    /// Follows moving/animating window frame
+    /// (`FollowSource.renderFrame`, #285, #594, #677).
     public func follow(
         _ id: WindowID,
         windowFrame: CGRect,
@@ -143,28 +107,19 @@ public final class StickyMarkManager {
         overlays[id]?.update(frame: frame)
     }
 
-    /// Unguarded reposition — the WindowServer bounds re-read
-    /// (`onFrameReconciled`) owns the mark's frame directly, so it
-    /// bypasses the WS-tracking guard on `follow` (the ring's
-    /// `apply`, mirrored). A no-op for unmarked windows.
+    /// Direct un-guarded reposition from reconciled bounds
+    /// (`onFrameReconciled`).
     public func reposition(_ id: WindowID, windowFrame: CGRect) {
         overlays[id]?.update(frame: windowFrame)
     }
 
-    /// Re-asserts a mark's stacking above its target after a
-    /// WindowServer z-order change (`onWindowReordered`): a
-    /// re-click raises the window above its own mark yet fires no
-    /// AX focus event, so this is the only re-assert that path
-    /// gets (#414 QA). A no-op for unmarked windows.
+    /// Re-orders mark above window following z-order changes
+    /// (`onWindowReordered`, #414).
     public func reassert(_ id: WindowID) {
         overlays[id]?.order()
     }
 
-    /// Briefly expands a window's mark into a pill showing its
-    /// home-space reorder hint (`format` with the space's `mark`
-    /// substituted), then auto-collapses (#421) — the friction-
-    /// moment cue when a tiled-sticky traveler snaps back on a
-    /// foreign space. A no-op for unmarked windows.
+    /// Flashes expanded home-space reorder hint (#421).
     public func flash(
         _ id: WindowID,
         format: String,
@@ -178,7 +133,7 @@ public final class StickyMarkManager {
         )
     }
 
-    /// Retires every mark at once (shutdown).
+    /// Removes and hides all active marks.
     public func clear() {
         for overlay in overlays.values { overlay.hide() }
         overlays = [:]

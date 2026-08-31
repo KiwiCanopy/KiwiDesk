@@ -1,7 +1,7 @@
 import Carbon.HIToolbox
 import Foundation
 
-/// A parsed keyboard shortcut ("ctrl+alt+r", "cmd+shift+left").
+/// Parsed keyboard shortcut representation ("ctrl+alt+r", "cmd+shift+left").
 public struct KeyCombo: Hashable, Sendable {
     public let keyCode: UInt32
     public let modifiers: HotkeyModifiers
@@ -11,9 +11,7 @@ public struct KeyCombo: Hashable, Sendable {
         self.modifiers = modifiers
     }
 
-    /// Parses "mod+mod+key". Modifier aliases: cmd/command,
-    /// alt/opt/option, ctrl/control, shift. Returns nil for
-    /// unknown keys or empty input.
+    /// Parses combo string ("mod+mod+key") into `KeyCombo`.
     public static func parse(_ text: String) -> KeyCombo? {
         let parts = text.lowercased()
             .split(separator: "+")
@@ -44,9 +42,7 @@ public struct KeyCombo: Hashable, Sendable {
         )
     }
 
-    /// True when two authored strings resolve to the same
-    /// physical Carbon shortcut. Exact invalid strings remain
-    /// equal so existing validation/conflict behavior is stable.
+    /// Tests equivalence of two shortcut strings.
     public static func equivalent(
         _ lhs: String,
         _ rhs: String
@@ -56,18 +52,7 @@ public struct KeyCombo: Hashable, Sendable {
         return left == right
     }
 
-    /// Formats a captured key event into a combo string using
-    /// the words printed on Apple keyboards
-    /// (`"control+option+r"`) so users can read exactly what a
-    /// binding is. `parse` round-trips it and also accepts the
-    /// short aliases (ctrl / alt / cmd) in hand-written configs.
-    /// Returns nil for key codes with no known name (so the
-    /// recorder can reject them). Modifier order follows ⌃⌥⇧⌘.
-    ///
-    /// Carbon hotkeys can't tell left from right modifiers
-    /// (that needs an event tap + Input Monitoring, which
-    /// KiwiDesk avoids), so the two sides are intentionally
-    /// unified here.
+    /// Formats key code and modifiers into readable combo string.
     public static func comboString(
         keyCode: UInt32,
         command: Bool,
@@ -85,10 +70,7 @@ public struct KeyCombo: Hashable, Sendable {
         return parts.joined(separator: "+")
     }
 
-    /// This combo formatted as a canonical string
-    /// (`"control+option+r"`), reversing `parse`. Returns nil
-    /// when the key code has no known name. Used when importing
-    /// live bindings back into the GUI (#4).
+    /// Formats combo as canonical string (#4).
     public func comboString() -> String? {
         Self.comboString(
             keyCode: keyCode,
@@ -99,19 +81,8 @@ public struct KeyCombo: Hashable, Sendable {
         )
     }
 
-    /// The canonical name for a key code (reverse of
-    /// `keyCodes`). Codes that carry both a symbol and a word
-    /// alias resolve to the readable word form for display.
-    ///
-    /// Public alongside `keyCodes`: a caller drawing a physical
-    /// board holds a code and needs the name, and the public
-    /// `comboString(keyCode:…)` would make it synthesise a whole
-    /// combo string and re-parse it to get one.
+    /// Returns canonical display name for key code (`KeypadKeys`, #1074).
     public static func keyName(for code: UInt32) -> String? {
-        // A keypad digit IS its number-row twin (#1074), so it
-        // names itself as that digit — which is what makes a
-        // captured keypad press round-trip through `parse` to
-        // the code its binding is actually stored under.
         if let row = KeypadKeys.rowTwin(of: code) {
             return keyName(for: row)
         }
@@ -129,26 +100,13 @@ public struct KeyCombo: Hashable, Sendable {
         return keyCodes.first { $0.value == code }?.key
     }
 
-    /// US-layout virtual key codes (Carbon kVK_*).
-    ///
-    /// Public because binding by physical position makes this
-    /// the only description of the keyboard the app has, and the
-    /// GUI draws that board (the Shortcuts preview panel). Read
-    /// it as a name→code map, never as a key list: aliases
-    /// collapse onto one code (`esc`/`escape` → 53,
-    /// `return`/`enter` → 36), so enumerating physical keys means
-    /// de-duplicating by VALUE. It carries no order, no row and
-    /// no width — geometry is the caller's, and
-    /// `KeyboardMatrix` is where the GUI keeps it.
+    /// Mapping of key names to virtual key codes (`KeyboardMatrix`, `Carbon`).
     public static let keyCodes: [String: UInt32] =
         mainBlockKeyCodes.merging(KeypadKeys.names) { main, _ in
             main
         }
 
-    /// The main block — everything but the numeric keypad, whose
-    /// names and digit aliases `KeypadKeys` owns (#1074). Private
-    /// because `keyCodes` above is the whole keyboard, and a
-    /// caller reaching past it would miss the keypad.
+    /// Main alphanumeric block key codes (`KeypadKeys`, #1074).
     private static let mainBlockKeyCodes: [String: UInt32] = [
         "a": 0, "s": 1, "d": 2, "f": 3, "h": 4, "g": 5,
         "z": 6, "x": 7, "c": 8, "v": 9, "b": 11, "q": 12,
@@ -159,16 +117,9 @@ public struct KeyCombo: Hashable, Sendable {
         "[": 33, "i": 34, "p": 35, "l": 37, "j": 38,
         "'": 39, "k": 40, ";": 41, "\\": 42, ",": 43,
         "/": 44, "n": 45, "m": 46, ".": 47, "`": 50,
-        // Word aliases for punctuation (skhd / AeroSpace
-        // convention); the symbol forms above still work.
         "semicolon": 41, "comma": 43, "period": 47,
         "slash": 44, "backslash": 42, "quote": 39,
         "apostrophe": 39, "grave": 50, "backtick": 50,
-        // ISO boards only: the extra key an ANSI board does
-        // not have. Bindable like any other — the preview draws
-        // it (`KeyboardMatrix`), and a key drawn as free that
-        // `parse` cannot name is a key the user is invited to
-        // bind and then cannot.
         "section": 10, "iso_section": 10,
         "minus": 27, "equal": 24, "leftbracket": 33,
         "rightbracket": 30,

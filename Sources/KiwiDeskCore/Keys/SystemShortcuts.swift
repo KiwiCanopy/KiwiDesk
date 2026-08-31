@@ -1,17 +1,6 @@
 import Foundation
 
-/// A reserved macOS shortcut, as a **case rather than a display
-/// string** (#96). `L()` is `@MainActor` — it drives SwiftUI and
-/// publishes — while this file is actor-free pure logic exercised
-/// by non-`@MainActor` tests (§2.6), so Core names the shortcut
-/// and the GUI localizes it at its own boundary. That is the same
-/// canonical → label split `KeybindingCatalog` already uses, and
-/// it keeps these names out of English-only limbo.
-///
-/// The GUI's `localizedName` switch is exhaustive, so **adding a
-/// case here is a compile error until it has a string** — the
-/// parity guard is the compiler, not a hand-listed test that
-/// could itself be forgotten (§5).
+/// Reserved macOS system shortcut identifiers (#96, `KeybindingCatalog`).
 public enum SystemShortcut: Sendable, CaseIterable {
     case spotlight
     case appSwitcher
@@ -27,50 +16,23 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case screenshot
     case screenshotSelection
     case screenshotTools
-    // The ⌥⌘ family (#1075). Added when size took that base:
-    // the map had no ⌥⌘ entry at all, so nothing warned a user
-    // binding one and the board drew them free. Zoom's three are
-    // gated on Accessibility ▸ Zoom ▸ "Use keyboard shortcuts to
-    // zoom" and ship OFF, but a gated shortcut still wins when
-    // it is on, and `RegisterEventHotKey` fails silently.
-    // Measured from `com.apple.symbolichotkeys` (ids 15/19/17,
-    // 52, 65) on macOS 26.6, 2026-08-28.
+    // ⌥⌘ zoom & system shortcuts (`com.apple.symbolichotkeys`, #1075).
     case zoomToggle
     case zoomIn
     case zoomOut
     case dockHiding
     case finderSearch
-    // The one ⌃⌥ chord macOS reserves (#1094). ⌃⌥ is otherwise
-    // the quiet base #270 chose it for — measured with NO
-    // bindings across sixteen installed apps (2026-08-29) — but
-    // "quiet" is not "empty", and this entry is the difference.
-    // `SizeLayerSeedTests.noSeededRowShadowsTheSystem` checks
-    // SEEDED rows only — and only those its fixture generates,
-    // so widen that fixture rather than trusting its green. A
-    // chord nothing seeds is invisible to every guard: before
-    // this case, a user binding ⌃⌥space themselves got no
-    // warning and a silently dead hotkey.
-    // Measured from `com.apple.symbolichotkeys` id 61 ("Select
-    // next source in Input menu", enabled) on macOS 26.6.
+    // ⌃⌥ input source shortcut (`SizeLayerSeedTests`, #270, #1094).
     case inputSourceNext
-    // The ⌃⌥⌘ family (#1094 review). Measured from
-    // `com.apple.symbolichotkeys` ids 21/25/26 on macOS 26.6,
-    // 2026-08-29 — all three ship DISABLED, gated on
-    // Accessibility, which is exactly the shape that made the
-    // ⌥⌘ Zoom trio invisible to a reputation-based list one rung
-    // up this ladder. `⌃⌥⌘8` is a SEEDED row (move-to-space-8
-    // and follow), so this entry makes an existing collision
-    // visible rather than introducing one.
+    // ⌃⌥⌘ accessibility contrast shortcuts (#1094 review).
     case invertColors
     case increaseContrast
     case decreaseContrast
 }
 
-/// Reserved macOS shortcuts KiwiDesk shouldn't shadow, used by
-/// `KeybindingConflicts` to flag rows that clash with the
-/// system rather than another row.
+/// System shortcut conflict mappings (`KeybindingConflicts`).
 public enum SystemShortcuts {
-    /// Known system shortcuts keyed by the parsed combo.
+    /// Known system shortcuts keyed by parsed key combination.
     public static let map: [KeyCombo: SystemShortcut] = build([
         ("command+space", .spotlight),
         ("command+tab", .appSwitcher),
@@ -111,22 +73,8 @@ public enum SystemShortcuts {
 }
 
 extension SystemShortcut {
-    /// Does macOS ship this chord's shortcut switched OFF?
-    ///
-    /// Measured from `com.apple.symbolichotkeys` on macOS 26.6
-    /// (2026-08-29): the Zoom trio and the Accessibility display
-    /// trio are `enabled = false` out of the box, gated behind an
-    /// Accessibility setting.
-    ///
-    /// A `switch` and not a `Set` for the reason this file's own
-    /// enum docstring gives: a new case must not be able to ship
-    /// without an answer here. A hand-listed set would treat the
-    /// next dormant Accessibility chord as ENABLED by omission,
-    /// silently — the compiler is the parity guard (§5).
-    ///
-    /// It reads the SHIPPED default, never the live setting, so
-    /// it is wrong for a user who has turned one on — see #1105,
-    /// which replaces it with a live read and deletes this.
+    /// Whether shortcut is shipped disabled by default
+    /// (`com.apple.symbolichotkeys`, #1105).
     public var shipsDisabled: Bool {
         switch self {
         case .zoomToggle, .zoomIn, .zoomOut,

@@ -1,12 +1,8 @@
 import AppKit
 import CoreGraphics
 
-/// `AnimationEngine`'s per-frame stepping: the `DisplayLink`
-/// callback that advances every animation on one display, the
-/// idle notification that fires when the last one ends, and the
-/// pixel rounding they share. Split out of `AnimationEngine.swift`
-/// to keep that file under the size ceiling; the main type keeps
-/// the stores, the knobs and the `animate` entry point.
+/// Per-frame stepping and watchdog progression for `AnimationEngine`
+/// (#611, `.claude/rules/input-and-animation.md`).
 extension AnimationEngine {
     func tick(display: DisplayID, dt: TimeInterval) {
         guard var perWindow = animations[display],
@@ -23,15 +19,7 @@ extension AnimationEngine {
                         + "snapped to its target"
                 )
             }
-            // The settle watchdog (#611): an animation that never
-            // satisfies `settled` never leaves `animations`, and
-            // `onAllAnimationsEnded` only fires at zero — so one
-            // stuck window kills the signal for the session. It
-            // belongs here rather than in any consumer, because a
-            // consumer cannot rescue itself: its arming path is
-            // behind the same dead signal. Full argument, and what
-            // the bound is worth, in
-            // `.claude/rules/input-and-animation.md`.
+            // Settle watchdog force-settles stuck animations (#611).
             if !settled, animation.isOverdue {
                 animation.forceSettle()
                 settled = true
@@ -42,33 +30,13 @@ extension AnimationEngine {
                 )
             }
             if settled {
-                // Exact target, unrounded: layout output is
-                // the source of truth for the final frame.
                 apply(id, animation.frame, true)
                 perWindow[id] = nil
                 clearState(id)
                 onWindowSettled(id, animation.frame)
                 onAnimationEnd(id)
             } else {
-                // Stepwise size, split per axis (issue #45).
-                // A shrinking axis takes its target size on the
-                // first frame — mid-flight overlap clears at
-                // once (siblings yielding room to a newly
-                // opened window) — unless this animation was
-                // started as a plain resize (#593), where nothing
-                // is instantly sized and the shared edge may slide.
-                // The grow direction follows the active
-                // `sizePolicy`: `.throttledSmooth` (#47, the
-                // default) resamples the spring each tick (or at a
-                // capped rate); `.midSlide` (the legacy fallback)
-                // instead lands a single size-set mid-flight, where
-                // the ongoing slide masks the jump.
-                // Interpolating per tick would instead make slow
-                // AX responders (Electron/WebKit) re-lay-out
-                // continuously and fall seconds behind, stranding
-                // the window mid-size — the cap bounds that load.
-                // Pure moves keep the sizes equal, so no resize is
-                // emitted.
+                // Stepwise size stepping per axis (#45, #47, #593).
                 let held =
                     heldSize[id]
                     ?? Self.rounded(animation.frame).size
@@ -86,9 +54,6 @@ extension AnimationEngine {
                 sizeElapsed[id] = stepped.elapsed
                 let size = stepped.size
                 let previous = heldSize[id]
-                // `heldSize` stays UNROUNDED: it feeds the next
-                // tick's `target <= held` direction test, and
-                // rounding it would perturb that comparison.
                 heldSize[id] = size
                 let frame = CGRect(
                     x: animation.frame.origin.x.rounded(),
@@ -96,20 +61,6 @@ extension AnimationEngine {
                     width: size.width.rounded(),
                     height: size.height.rounded()
                 )
-                // Whether to SET the size is asked of the rounded
-                // sizes, which are what actually reach the window.
-                // A sub-pixel delta does not render but still
-                // costs a blocking AX round-trip — the waste this
-                // type's header says it skips. Without a sizing
-                // promise the question never arose: a shrinking
-                // axis emits the exact target, a stable value, so
-                // the flag fell false after frame 1. A promised
-                // pass hands back a fresh sub-pixel spring value
-                // every tick, so an
-                // unrounded compare marked the entire convergence
-                // tail as a resize — 13 of 36 frames byte-identical
-                // to their predecessor, each one a forced content
-                // reflow on a slow-AX app.
                 let setSize =
                     previous.map {
                         $0.width.rounded() != frame.width
@@ -129,28 +80,21 @@ extension AnimationEngine {
         }
     }
 
-    /// Fires `onAllAnimationsEnded` when nothing animates
-    /// anymore, on any display.
+    /// Fires `onAllAnimationsEnded` when all display animations finish.
     func notifyIfIdle() {
         if activeCount == 0 {
             onAllAnimationsEnded()
         }
     }
 
-    /// Whether a rect can actually be animated to and applied.
-    /// Pure, so it is `nonisolated` and directly testable.
+    /// Validates finite, positive renderable frame boundaries.
     nonisolated static func isRenderable(_ frame: CGRect) -> Bool {
         frame.origin.x.isFinite && frame.origin.y.isFinite
             && frame.width.isFinite && frame.height.isFinite
-            // A negative extent is as unrenderable as a NaN one,
-            // and the stability suite already rejects it — the
-            // production guard should not admit a shape the tests
-            // call nonsense.
             && frame.width > 0 && frame.height > 0
     }
 
-    /// Internal, not private: a same-module extension cannot
-    /// reach a `private static` across files.
+    /// Rounds rect components to nearest integer points.
     static func rounded(_ frame: CGRect) -> CGRect {
         CGRect(
             x: frame.origin.x.rounded(),

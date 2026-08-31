@@ -1,25 +1,7 @@
 import Foundation
 
-/// Which side of the slot edge a drag visual's stroke is laid
-/// on. Lua-only since #754 — the GUI never offered it for the
-/// focus ring (which has no alignment concept at all), so a
-/// control for two of the three strokes could not be made
-/// symmetric, and at 1–3 pt the choice moves a stroke by half
-/// its width. `drag.set_ghost_border_alignment` and its
-/// drop-zone twin stay fully settable, per stroke, unclamped.
-///
-/// Lay a drag marker `.inside`. Both markers answer one
-/// question — where will this window land — and inside, the
-/// stroke's outer edge IS the slot boundary, so the marker
-/// describes the target exactly; outside it overstates the
-/// landing area by the stroke width on every side, and two
-/// adjacent markers meet once the gap falls to twice it. The
-/// focus ring outsets for a reason that does not reach here:
-/// it surrounds a real window whose pixels must not be
-/// covered, which a marker drawn over a target region has
-/// none of. Both shipped defaults below are `.inside`, pinned
-/// by `SettingsCodingTests`; the argument is in
-/// docs/design-decisions.md.
+/// Border alignment options for drag visual strokes
+/// (#754, `SettingsCodingTests`, `docs/design-decisions.md`).
 public enum BorderAlignment: String, Sendable, Codable,
     Equatable, CaseIterable
 {
@@ -27,45 +9,22 @@ public enum BorderAlignment: String, Sendable, Codable,
     case outside
 }
 
-/// Style of one drag visual (ghost or drop zone): an on/off
-/// switch plus an independently toggle-able border and fill,
-/// each with its own hex color ("#RRGGBB" or "#RRGGBBAA").
+/// Visual styling configuration for drag-and-drop ghost and drop-zone
+/// indicators.
 public struct DragVisual: Sendable, Equatable, Encodable {
     public var enabled: Bool
     public var border: Bool
     public var borderColor: String
-    /// A *stroke* has a width; a *bar* has a thickness (R6/#406).
-    /// The GUI already drew that distinction — its label is
-    /// "Width" — and only the wire said `border_thickness`, so
-    /// the wire moved to match rather than the other way round.
+    /// Stroke width in points (R6, #406).
     public var borderWidth: CGFloat
     public var borderAlignment: BorderAlignment
     public var fill: Bool
     public var fillColor: String
 
-    /// Ghost (drag origin): a deep emerald. It was the ring's
-    /// yellow-green `#588613` until #511 measured origin against
-    /// target and got **4.7/441** under simulated protanopia —
-    /// worse than the 22 that #470 called "the same colour to a
-    /// protanope". Target is locked (the drop-zone amber is the
-    /// hex `space_bar.focusedItemColor` converged onto), so the
-    /// origin had to move — and what it could not keep was the
-    /// ring's *chroma*. Adding the 3:1-on-both-ends bar from
-    /// `docs/accepted-limitations.md` to the separation floor
-    /// caps the ring's hue family at S0.45, so the ring's own
-    /// S0.75 cannot qualify at any lightness: this could not be a
-    /// darker or lighter `#588613`. At the ghost's S0.40 the
-    /// ring's hue clears the floor by one point (`#799D43`, 61)
-    /// where 150° gives 76. Chroma against separation, not
-    /// impossibility — pinned by
-    /// `DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
-    /// which is the place to re-derive it. So the ghost no longer
-    /// matches the focus ring, deliberately: the ring has no
-    /// partner to separate from, so nothing asks it to move for CVD
-    /// (it later shifted to `#4A9816` for the unrelated moss reason,
-    /// #578 — not this one).
-    /// Defaults mirrored in docs/lua-reference.md (drag colors)
-    /// — change both.
+    /// Default ghost visual styling
+    /// (`DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
+    /// `docs/accepted-limitations.md`, `docs/lua-reference.md`,
+    /// #511, #470, #578).
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,
@@ -76,11 +35,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         fillColor: "#34795740"
     )
 
-    /// Drop zone (drag target): a vivid, darkened amber — the
-    /// other established hue, kept far from the emerald origin so
-    /// the two read apart, including under red-green vision loss
-    /// (#511). Darkened from the old #E8A33D for the same
-    /// reason as the ring: legible over light window content.
+    /// Default drop zone visual styling (#511, `docs/lua-reference.md`).
     public static let dropZoneDefault = DragVisual(
         enabled: true,
         border: true,
@@ -109,9 +64,8 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         self.fillColor = fillColor
     }
 
-    /// `CaseIterable` so the palette color-key reflection
-    /// (#375) can enumerate the two color keys the way it does
-    /// for the bars; the `_color`-suffix filter picks them out.
+    /// Serialization coding keys (`CaseIterable` for palette reflection,
+    /// #375).
     enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
         case border
@@ -122,8 +76,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         case fillColor = "fill_color"
     }
 
-    /// Lenient decoding against the element's own defaults:
-    /// keys missing from a profile keep the default look.
+    /// Decodes visual settings with fallback defaults for missing properties.
     public init(
         from decoder: Decoder,
         defaults: DragVisual
