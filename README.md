@@ -36,7 +36,22 @@ Powerful when you reach for it, never in your way.
 
 </div>
 
-<!-- Add a screenshot or demo GIF here once one is captured. -->
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)"
+    srcset="assets/screenshot-settings-dark.png">
+  <img src="assets/screenshot-settings.png" width="800"
+    alt="KiwiDesk Settings: spaces, gaps and borders, bars, layout defaults, shortcuts and profiles in a native macOS app">
+</picture>
+
+<br><br>
+
+<img src="assets/demo-scrolling.gif" width="800"
+  alt="Windows gliding sideways through the scrolling layout as focus moves between them">
+
+</div>
+
 <!-- Add a short demo video here once one is recorded. -->
 
 > **Status: 1.0, released.** The core (layouts, Lua
