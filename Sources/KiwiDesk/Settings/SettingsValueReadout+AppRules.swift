@@ -23,6 +23,9 @@ extension SettingsValueReadout {
                 new: new.floatRules
             )
         case .floatRulesPattern:
+            // A `[String]` has no `.pattern` leaf for the walk to
+            // book — changes land on the list key; narrating the
+            // same membership diff keeps this key total.
             return appRulesListNotes(
                 census,
                 base: label(
@@ -42,6 +45,7 @@ extension SettingsValueReadout {
                 new: new.ignoreRules
             )
         case .appRulesAdd, .appRulesDelete:
+            // No model path — never booked by the diff.
             return []
         }
     }

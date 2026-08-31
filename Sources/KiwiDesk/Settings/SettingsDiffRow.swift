@@ -8,7 +8,8 @@ struct SettingsDiffRow: Identifiable, Hashable {
     var key: SettingKey
     /// Localized label ("Outer gap", "Monocle · thickness").
     var label: String
-    /// Display strings for scalar before/after values.
+    /// Display strings; nil when the change has no scalar to
+    /// state — the row then renders its `changeNote` alone.
     var oldValue: String?
     var newValue: String?
     /// Localized change description for structural modifications.

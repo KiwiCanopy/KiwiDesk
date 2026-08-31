@@ -3,6 +3,7 @@ import Foundation
 /// Mouse pointer interaction settings (#186).
 public struct MouseSettings: Sendable, Equatable, Codable {
     /// Warps pointer to center of newly-focused window (#186).
+    /// Off by default, matching i3/sway/yabai.
     public var followsFocus = false
 
     private enum CodingKeys: String, CodingKey {

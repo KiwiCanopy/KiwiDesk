@@ -2,6 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Custom arbitrary Lua keybinding management group (#68 §3.6.1).
+/// Raw Lua stays monospaced on purpose: arbitrary Lua IS the
+/// capability, not a serialization leak.
 struct AdvancedLuaGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]

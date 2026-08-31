@@ -1,6 +1,9 @@
 import Foundation
 
-/// Census of all enum types accepted by command API arguments (#1033).
+// Census of all enum types accepted by command API arguments
+// (#1033), declared centrally so one file answers "what enums
+// does the API expose". `CaseIterable` stays at each enum's own
+// declaration — Swift synthesizes `allCases` only there.
 
 extension KiwiNotification: APIChoiceType {}
 
@@ -24,6 +27,8 @@ extension MonocleParams.HideStyle: APIChoiceType {}
 extension TrackParams.Axis: APIChoiceType {}
 extension TrackParams.NewWindowTrack: APIChoiceType {}
 
+// `SpaceBarStyle` spells its vocabulary as typealiases of these,
+// so conforming the `AppBarStyle` types covers both bars.
 extension AppBarEdge: APIChoiceType {}
 extension AppBarStyle.BarAlignment: APIChoiceType {}
 extension AppBarStyle.BackgroundStyle: APIChoiceType {}

@@ -1,7 +1,11 @@
 import CoreGraphics
 
 extension Navigation {
-    /// Returns windows sharing the focused window's overlap pile (#172).
+    /// Returns windows sharing the focused window's overlap pile,
+    /// read from GEOMETRY so one detector serves every layout
+    /// (#172). Connected components of significant overlap, not
+    /// pairwise: a deep pile's ends need not overlap directly. A
+    /// singleton component yields the empty set.
     public static func pileMates(
         of focused: WindowID,
         among slots: [(id: WindowID, frame: CGRect)]
@@ -22,7 +26,10 @@ extension Navigation {
         return component
     }
 
-    /// Checks if two frames overlap by at least 25% of smaller slot area.
+    /// Cascade-mates overlap by ≥ a quarter of the smaller
+    /// slot's area: tiled slots never overlap (0), cascade
+    /// members share all but a 40 pt sliver — both clear it with
+    /// margin.
     private static func piled(_ a: CGRect, _ b: CGRect) -> Bool {
         let intersection = a.intersection(b)
         guard !intersection.isNull else { return false }

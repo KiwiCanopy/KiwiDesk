@@ -1,7 +1,9 @@
 import Foundation
 
-/// Registers reduced hover help delay
-/// (`ToolTipDelayTests`, `docs/design-decisions.md`).
+/// Registers reduced hover help delay (argued in
+/// `docs/design-decisions.md`; band held by `ToolTipDelayTests`).
+/// `register`, never `set`: a user's own `NSInitialToolTipDelay`
+/// must win — overwriting it would be silent.
 enum ToolTipDelay {
     /// AppKit reads this in milliseconds.
     static let key = "NSInitialToolTipDelay"

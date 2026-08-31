@@ -1,6 +1,9 @@
 import Foundation
 
-/// Per-space overrides of StackParams (`StackOverrideTests`, #17).
+/// Per-space overrides of StackParams: optional mirror, nil
+/// inherits (`StackOverrideTests`, #17). `newWindowPlacement` is
+/// excluded — it has its own per-space override via
+/// `new_window_placement_override`.
 public struct StackOverride: Sendable, Equatable {
     public var masterCount: Int?
     public var masterRatio: Double?
@@ -20,6 +23,8 @@ public struct StackOverride: Sendable, Equatable {
             out.masterOrientation = masterOrientation
         }
         if let stackPosition { out.stackPosition = stackPosition }
+        // Merged params hold no override map (see
+        // ScrollingOverride).
         out.override = [:]
         return out
     }

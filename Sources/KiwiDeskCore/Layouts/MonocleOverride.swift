@@ -1,6 +1,9 @@
 import Foundation
 
-/// Per-space overrides of MonocleParams (`MonocleOverrideTests`, #17, #293).
+/// Per-space overrides of MonocleParams: optional mirror, nil
+/// inherits (`MonocleOverrideTests`, #17). `appBar` is excluded —
+/// bar-look overrides land with the app-bar tier; only the
+/// orientation is per-space (#293).
 public struct MonocleOverride: Sendable, Equatable {
     public var orientation: MonocleParams.Orientation?
 
@@ -12,6 +15,8 @@ public struct MonocleOverride: Sendable, Equatable {
     ) -> MonocleParams {
         var out = global
         if let orientation { out.orientation = orientation }
+        // Merged params hold no override map (see
+        // ScrollingOverride).
         out.override = [:]
         return out
     }

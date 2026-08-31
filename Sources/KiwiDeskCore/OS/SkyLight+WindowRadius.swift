@@ -39,8 +39,10 @@ extension SkyLight {
             as: IteratorGetCornerRadiiFn.self
         )
 
-    /// Queries window corner radius via SkyLight, or nil if unavailable
-    /// (#357).
+    /// Queries window corner radius via SkyLight (#357), or nil
+    /// if unavailable — the caller substitutes
+    /// `GeometryUtils.systemWindowCornerRadius` so a failed query
+    /// never blocks a ring.
     static func windowCornerRadius(_ wid: CGWindowID) -> CGFloat? {
         guard let connection,
             let queryWindows = windowQueryWindows,

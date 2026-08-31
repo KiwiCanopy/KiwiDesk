@@ -1,6 +1,10 @@
 import Foundation
 
-/// Reconstructs `[KeyLayer]` from live keybindings (`LuaBindingBody`, #4).
+/// Reconstructs `[KeyLayer]` from live keybindings
+/// (`LuaBindingBody`, #4). A row whose action cannot be recovered
+/// is DROPPED, never emitted with an empty body — an empty body
+/// would overwrite a working binding with a no-op on the next
+/// save.
 @MainActor
 enum KeybindingImporter {
     /// Builds layers from manager reading binding source bodies

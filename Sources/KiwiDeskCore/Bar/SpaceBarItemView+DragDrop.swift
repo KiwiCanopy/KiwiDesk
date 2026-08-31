@@ -3,7 +3,9 @@ import AppKit
 /// Drag-drop hover and spring-sweep feedback rendering for
 /// SpaceBarItemView (#372).
 extension SpaceBarItemView {
-    /// Toggles synthetic drag hover highlight.
+    /// Toggles synthetic drag hover highlight, driven from the AX
+    /// cursor position — tracking areas stay silent while another
+    /// app owns the drag.
     func setDragHover(_ on: Bool) {
         guard isDragHovered != on else { return }
         isDragHovered = on

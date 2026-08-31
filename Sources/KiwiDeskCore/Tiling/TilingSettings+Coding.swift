@@ -2,6 +2,10 @@ import CoreGraphics
 import Foundation
 
 /// Codable conformance for TilingSettings (`SettingsCodingTests`).
+/// Declared HERE with its implementation: declared on the
+/// struct, a gutted extension would let the compiler silently
+/// synthesize camelCase/flat coding — this way it is a compile
+/// error instead.
 extension TilingSettings: Codable {
     enum CodingKeys: String, CodingKey {
         case animations
@@ -154,6 +158,8 @@ extension TilingSettings: Codable {
                 QuitLayoutStyle.self,
                 forKey: .layout
             ) ?? .grid
+        // Clamp on decode: a hand-edited profile can't smuggle a
+        // value past the range the command and GUI enforce.
         let range = QuitGridLayout.targetDepthRange
         quitGridTargetDepth =
             (try quit.decodeIfPresent(
@@ -175,7 +181,9 @@ extension TilingSettings: Codable {
             keyedBy: ResizeKeys.self,
             forKey: .resize
         )
-        // Clamp at decode boundary to ensure resizeStep stays finite (#386).
+        // Clamp at the decode boundary: a hand-edited
+        // `resize.step: 1e300` would trap the `Int(...)` read
+        // sites that assume a sane value (#386).
         let rawStep =
             try resize.decodeIfPresent(
                 CGFloat.self,

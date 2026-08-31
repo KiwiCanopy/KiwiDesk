@@ -131,7 +131,9 @@ enum AppBarCommandSetting {
         ]
     }
 
-    /// Color setting field constructors by wire key (#375).
+    /// Color setting field constructors by wire key. Internal, not
+    /// private: the palette shelf (#375) routes through these same
+    /// validated setters.
     static var colorFields: [String: (String) -> AppBarCommandSetting] {
         [
             "item_color": Self.itemColor,
@@ -165,7 +167,9 @@ enum AppBarCommandSetting {
         return .success(hex)
     }
 
-    /// Parses title character cap (#58).
+    /// Parses title character cap. Mirrors the SpaceBar twin,
+    /// including clamp-as-Double BEFORE `Int(...)` — `Int(1e300)`
+    /// traps, so a config typo would kill the WM (#58).
     private static func titleCap(
         _ args: [JSONValue]
     ) -> Result<AppBarCommandSetting, AppBarSettingError> {

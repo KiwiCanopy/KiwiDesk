@@ -2,8 +2,14 @@ import ApplicationServices
 import CoreGraphics
 
 /// Public Accessibility API window mover and resizer.
+/// Deliberately NOT MainActor: AX set calls are blocking IPC
+/// into the target app and thread-safe, so the animation
+/// pipeline applies frames from a background queue.
 public enum WindowControl {
-    /// Applies frame to AXUIElement via size-position-size sequence.
+    /// Applies frame via size → position → size: apps clamp
+    /// whichever attribute is set first against the other's old
+    /// value, so setting size on both sides of the move
+    /// converges regardless of direction.
     public static func setFrame(
         _ frame: CGRect,
         of element: AXUIElement

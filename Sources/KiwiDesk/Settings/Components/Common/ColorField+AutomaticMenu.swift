@@ -4,8 +4,10 @@ import SwiftUI
 /// Context menu modifier offering "Automatic" reset for adaptive color
 /// wells (#429, #845).
 extension View {
-    /// Context menu and accessibility action resetting color to empty
-    /// sentinel (#429).
+    /// Context menu and accessibility action resetting color to the
+    /// empty "Automatic" sentinel (#429); a no-op wrapper on wells
+    /// with no Automatic concept. Also a named VoiceOver action
+    /// (#678) and keyboard shortcut (#845).
     @ViewBuilder
     func automaticMenu(
         automatic: Bool,

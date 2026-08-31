@@ -1,6 +1,9 @@
 import SwiftUI
 
 /// Hover affordance applying pointing-hand cursor and color lift.
+/// Cursor via `set()`, never push/pop: both call sites can leave
+/// the hierarchy mid-hover and a removed view never delivers the
+/// balancing `onHover(false)`; `onDisappear` restores the arrow.
 private struct LinkHover: ViewModifier {
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion)
@@ -29,7 +32,8 @@ private struct LinkHover: ViewModifier {
     }
 }
 
-/// Pointing-hand cursor on hover without color lift.
+/// Pointing-hand cursor on hover without color lift — same `set()`
+/// + `onDisappear` discipline as `LinkHover`.
 private struct PointingHandCursor: ViewModifier {
     @State private var hovering = false
 

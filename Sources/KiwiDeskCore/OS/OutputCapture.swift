@@ -1,7 +1,9 @@
 import Foundation
 import os
 
-/// Captures stdout and stderr streams asynchronously with stream capping.
+/// Captures stdout and stderr streams asynchronously. Data beyond
+/// `streamCap` is still READ (the pipe stays drained so the
+/// child never blocks) but discarded after the truncation marker.
 final class OutputCapture: Sendable {
     /// Maximum bytes captured per stream (~1 MB).
     static let streamCap = 1_048_576
@@ -23,11 +25,13 @@ final class OutputCapture: Sendable {
     init(_ out: Pipe, _ err: Pipe) {
         self.out = out
         self.err = err
+        // Enter up front: the termination handler can fire before
+        // drain() runs, and an empty group notifies immediately.
         group.enter()
         group.enter()
     }
 
-    /// Starts draining both pipe readability handlers.
+    /// Starts both reads; must be called exactly once.
     func drain() {
         attach(out.fileHandleForReading, to: outBuf)
         attach(err.fileHandleForReading, to: errBuf)

@@ -1,7 +1,9 @@
 import CoreGraphics
 import Foundation
 
-/// Parsed `space_bar.set_*` command setting representation (#293).
+/// Parsed `space_bar.set_*` command setting representation
+/// (#293). Reuses the App Bar's error type: the two parsers speak
+/// one vocabulary and their messages must not drift.
 enum SpaceBarCommandSetting {
     case enabled(Bool)
     case edge(AppBarEdge)
@@ -130,7 +132,9 @@ enum SpaceBarCommandSetting {
         ]
     }
 
-    /// Color setting field constructors by wire key (#375).
+    /// Color setting field constructors by wire key. Internal, not
+    /// private: the palette shelf (#375) routes through these same
+    /// validated setters; see the AppBar twin.
     static var colorFields: [String: (String) -> SpaceBarCommandSetting] {
         [
             "item_color": Self.itemColor,
@@ -155,7 +159,8 @@ enum SpaceBarCommandSetting {
             return .failure("expected milliseconds")
         }
         let range = SpaceBarStyle.springDelayRange
-        // Clamp as Double before Int conversion (#58, #386).
+        // Clamp as Double BEFORE Int(...) — `Int(1e300)` traps, so
+        // a config typo would kill the WM (#58/#386).
         let clamped = min(
             max(value.rounded(), Double(range.lowerBound)),
             Double(range.upperBound)
@@ -190,7 +195,8 @@ enum SpaceBarCommandSetting {
             return .failure("expected a glyph count")
         }
         let range = SpaceBarStyle.glyphCapRange
-        // Clamp as Double before Int conversion (#58).
+        // Clamp as Double BEFORE Int(...) — `Int(1e300)` traps
+        // (#58).
         let clamped = min(
             max(value.rounded(), Double(range.lowerBound)),
             Double(range.upperBound)

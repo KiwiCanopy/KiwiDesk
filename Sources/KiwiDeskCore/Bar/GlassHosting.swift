@@ -1,6 +1,9 @@
 import Foundation
 
-/// Bar item hierarchy hosting mode for liquid glass finishes (#407).
+/// Bar item hierarchy hosting mode for liquid glass finishes
+/// (#407): one `resolve` per render feeds one dispatch, so the
+/// "who tears down whom" invariant lives in ONE place — before
+/// this, every entry point tore down the other modes itself.
 enum GlassHosting: Equatable {
     /// Solid plain plate or per-item boxed fill.
     case plainPlate
@@ -13,7 +16,8 @@ enum GlassHosting: Equatable {
     /// Unsupported OS version (below macOS 26) fallback.
     case none
 
-    /// Resolves single hosting mode for bar render (#407).
+    /// Resolves the single hosting mode for a bar render — one
+    /// authority so the two bars can't drift (#407).
     static func resolve(
         available: Bool,
         glassEnabled: Bool,

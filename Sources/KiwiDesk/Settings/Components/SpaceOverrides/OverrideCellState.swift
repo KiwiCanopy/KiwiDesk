@@ -1,7 +1,9 @@
 import Foundation
 
 /// Override badge and trigger cell display state for space rows
-/// (#458, #678 8a).
+/// (#678 8a). A Floating space may still hold overrides saved for
+/// OTHER layouts; hiding that count would reproduce the haunted
+/// tiler (#458), so it stays visible — grey, don't hide.
 enum OverrideCellState: Equatable {
     /// Tiled space, no overrides: the offer to add. "Customize…"
     case customize

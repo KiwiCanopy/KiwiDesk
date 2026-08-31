@@ -3,10 +3,15 @@ import SwiftUI
 
 /// Header bar identity component and titlebar clearance.
 extension SettingsHeaderBar {
-    /// Inset clearing macOS window control traffic lights.
+    /// 100 − the bar's own 16 pt gutter: the third light ends near
+    /// 78 pt (observed macOS 26) and starting there touched the
+    /// green button. No API publishes this — a look constant that
+    /// breaks silently if Apple moves the buttons.
     static let trafficLightInset: CGFloat = 84
 
-    /// Home identity view with app mark and localized title.
+    /// Home identity view; the 26 pt mark (over the inventory's
+    /// 22) read undersized against the taller bar (owner
+    /// 2026-08-04).
     var identity: some View {
         HStack(spacing: 8) {
             if let mark = BrandAssets.appMark {

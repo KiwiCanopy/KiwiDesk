@@ -3,7 +3,11 @@ import KiwiDeskCore
 
 /// Dynamic height calculation for follows-main monitor arrangement tray.
 extension MonitorArrangement {
-    /// Computes tray height dynamically for chip count and layout width.
+    /// Computes tray height for the chip count: a constant clipped
+    /// the heading once chips wrapped (owner 2026-08-04). Rows
+    /// derive from the same `minChipWidth` the flow layout wraps
+    /// on — a deliberate UPPER bound: too tall is empty space,
+    /// too short clips.
     static func trayHeight(
         chips: Int,
         width: CGFloat

@@ -18,7 +18,10 @@ public struct DisplayID: Hashable, Sendable, Codable,
 public struct Display: Sendable, Equatable {
     public let id: DisplayID
     public var name: String
-    /// Frame in AppKit coordinates (y grows up; see `DeskOrder`, #752).
+    /// Frame in AppKit global coordinates, where y grows UP: the
+    /// screen physically above another has the LARGER `minY`, so
+    /// an ascending sort reads bottom-to-top — two sorters got
+    /// this wrong already (#752; `DeskOrder` negates y for this).
     public var frame: CGRect
     /// Usable area (frame minus menu bar and Dock).
     public var visibleFrame: CGRect

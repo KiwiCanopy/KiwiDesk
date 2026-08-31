@@ -1,6 +1,9 @@
 import Foundation
 
-/// Per-space overrides of TrackParams (`TrackOverrideTests`, #128).
+/// Per-space overrides of TrackParams: optional mirror, nil
+/// inherits (`TrackOverrideTests`, #128). `newWindow`,
+/// `newWindowPosition` and `wrapFocus` are excluded by design —
+/// per-layout behavior, not per-space geometry.
 public struct TrackOverride: Sendable, Equatable {
     public var axis: TrackParams.Axis?
     public var autoTracks: Bool?
@@ -16,6 +19,8 @@ public struct TrackOverride: Sendable, Equatable {
         if let autoTracks { out.autoTracks = autoTracks }
         if let limit { out.limit = limit }
         if let overflowStyle { out.overflowStyle = overflowStyle }
+        // Merged params hold no override map (see
+        // ScrollingOverride).
         out.override = [:]
         return out
     }

@@ -1,7 +1,10 @@
 import AppKit
 import CoreGraphics
 
-/// Visual plate and overlay panel for minimum-size refusal pill (#933).
+/// Visual plate and overlay panel for minimum-size refusal pill
+/// (#933). One panel PER window: a blocked grow pills BOTH ends —
+/// the resized window and the blocking one — so two pills must be
+/// able to stand at once (owner ruling 2026-08-22).
 @MainActor
 final class SizeLimitOverlay {
     private struct Pill {

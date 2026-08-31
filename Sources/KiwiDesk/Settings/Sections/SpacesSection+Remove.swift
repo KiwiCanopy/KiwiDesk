@@ -17,6 +17,9 @@ extension SpacesSection {
     private func neighbourAfterDeleting(
         _ space: SpaceID
     ) -> SpaceID? {
+        // `displayedSpaces`, not `model.config.spaces`: mid-drag
+        // the rows render from `dragOrder`, and the neighbour must
+        // be the one the user can SEE (review 2026-08-11).
         let spaces = displayedSpaces
         guard let index = spaces.firstIndex(of: space) else {
             return nil

@@ -3,7 +3,9 @@ import KiwiDeskCore
 /// Shortcut action label resolution and glyph rendering for settings readout
 /// (#23).
 extension SettingsValueReadout {
-    /// Builds localized action label mapping from catalog definitions.
+    /// Builds localized action labels from the union of BOTH
+    /// sides' space lists and resize steps, so a row keeps its
+    /// name even when the draft also renamed the thing it targets.
     static func shortcutsActionLabels(
         old: GuiConfig,
         new: GuiConfig
@@ -50,7 +52,9 @@ extension SettingsValueReadout {
         return labels
     }
 
-    /// Desktop navigation commands extracted from diff config layers.
+    /// Desktop rows read from the BINDINGS, never a live Desktop
+    /// list: a config records no Desktops, and the diff must name
+    /// a row whatever is plugged in while it is read.
     private static func desktopCommands(
         old: GuiConfig,
         new: GuiConfig

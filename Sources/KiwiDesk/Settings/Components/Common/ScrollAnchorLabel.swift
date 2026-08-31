@@ -2,7 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Localized label mapping for scrolling focus anchor options
-/// (#96, #239, #753).
+/// (#96, #239, #753). Both pickers map
+/// `ScrollingParams.Anchor.allCases` through this, so the on-screen
+/// order IS the enum's declaration order; the label names the
+/// concrete edge for the current orientation — presentation only.
 @MainActor
 enum ScrollAnchorLabel {
     static func text(

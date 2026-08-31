@@ -7,6 +7,9 @@ extension StackSchematic {
     /// (`OverlapStack`).
     func stackSlots(in size: CGSize) -> [Slot] {
         let n = stackWins.count
+        // Unreachable today (`order` carries the incoming window),
+        // but at n == 0 the overflow branch would build a reversed
+        // `Range` and trap — keep the guard.
         guard n > 0 else { return [] }
         let w = size.width
         let h = size.height

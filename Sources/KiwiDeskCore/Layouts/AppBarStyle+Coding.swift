@@ -1,9 +1,14 @@
 import CoreGraphics
 import Foundation
 
-/// AppBarStyle Decodable implementation and CodingKeys (`AppBarParityTests`).
+/// AppBarStyle Decodable implementation and CodingKeys. The
+/// `Codable` conformance stays in `AppBarStyle.swift` so encode
+/// is synthesized there; a property absent from `CodingKeys` is
+/// silently not encoded — `AppBarParityTests` is the net.
 extension AppBarStyle {
-    /// JSON coding keys for AppBarStyle (`AppBarParityTests`).
+    /// JSON keys are the Lua setters minus `set_`. `CaseIterable`
+    /// is load-bearing — `AppBarParityTests` reflects over
+    /// `allCases`; do not drop it as "unused".
     enum CodingKeys: String, CodingKey, CaseIterable {
         case edge
         case alignment

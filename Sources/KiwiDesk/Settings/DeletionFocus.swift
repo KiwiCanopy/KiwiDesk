@@ -1,7 +1,9 @@
 /// Focus return target calculation following row deletion (#816).
 enum DeletionFocus {
-    /// Determines next focus target in list before deletion (next, else
-    /// previous).
+    /// Determines next focus target (next, else previous), read
+    /// from the list BEFORE the mutation — read after, the
+    /// end-of-list case names a row that no longer exists and
+    /// focus falls off (#816).
     static func neighbour<Item: Equatable>(
         after item: Item,
         in list: [Item]

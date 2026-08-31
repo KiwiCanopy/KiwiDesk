@@ -2,7 +2,10 @@ import AppKit
 
 /// Front segment box background and frosted backdrop for SpaceBarOverlay.
 extension SpaceBarOverlay {
-    /// Lays out Boxed fill or per-box glass for front application chip.
+    /// Lays out Boxed fill or per-box glass for the front chip.
+    /// Mirrors `SpaceBarItemView`'s box — keep the two in step on
+    /// any fill/corner change; the radius here resolves from
+    /// `depth`, the chip's from `min(width, height)`.
     func layoutFrontBox(
         _ app: SpaceBarItemView.App,
         from start: CGFloat,

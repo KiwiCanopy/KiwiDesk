@@ -1,7 +1,10 @@
 import Foundation
 
-/// Folds recovered keybinding layers into GuiConfig on shortcut import
-/// (#4, #55).
+/// Folds recovered keybinding layers into GuiConfig on shortcut
+/// import (#4): rows upsert by combo so re-import refreshes, not
+/// duplicates. Sibling `KeyLayerOverride.resolved(onto:)` (#55)
+/// merges the same key with OPPOSITE icon precedence — both are
+/// correct for their direction; do not unify them.
 public enum KeybindingMerge {
     /// Merges every recovered layer into `config` in place.
     public static func merge(

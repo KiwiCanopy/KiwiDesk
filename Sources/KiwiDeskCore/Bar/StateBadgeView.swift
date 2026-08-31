@@ -1,6 +1,10 @@
 import AppKit
 
-/// Metrics for Space Bar badge family sizing (#414).
+/// Metrics for Space Bar badge family sizing (#414): the count
+/// dot and state marks derive from ONE factor of the glyph cell
+/// so the family shrinks together — one home, since a resize
+/// touching one site would silently miss the others. 0.42→0.38,
+/// 8→7 (owner 2026-07-21).
 enum StateBadgeMetrics {
     static let sizeFactor: CGFloat = 0.38
     static let floor: CGFloat = 7
@@ -11,7 +15,9 @@ enum StateBadgeMetrics {
     }
 }
 
-/// Resolved tints for sticky and floating state mark rendering (#429).
+/// Resolved tints for sticky and floating state mark rendering
+/// (#429), carried as data from `KiwiCore` so the Bar subsystem
+/// never reaches into the sticky/floating namespaces itself.
 public struct StateMarkColors: Sendable, Equatable {
     public let sticky: String
     public let floating: String

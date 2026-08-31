@@ -1,6 +1,10 @@
 import Foundation
 
-/// Formats capitalized native endonym for a locale code (e.g. "Deutsch").
+/// Formats a locale's native endonym (never the English exonym),
+/// capitalized FOR THAT LOCALE: `localizedString(forIdentifier:)`
+/// returns running-text casing ("español"), which reads as a bug
+/// in a list; uppercasing with the entry's own locale keeps its
+/// rules in charge and leaves caseless scripts untouched.
 enum LocaleNativeName {
     static func name(for code: String) -> String {
         let locale = Locale(identifier: code)

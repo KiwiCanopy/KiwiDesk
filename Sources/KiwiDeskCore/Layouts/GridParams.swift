@@ -20,7 +20,9 @@ public struct GridParams: Sendable, Equatable, Codable {
     /// Rigid grid dimensions.
     public var columns: Int = 3
     public var rows: Int = 2
-    /// Derives dimensions dynamically from display size and minWindowSize.
+    /// Derives dimensions from the display (as many cells as fit
+    /// at `min_window_size`). Orthogonal to `type`: it caps a
+    /// dynamic grid and fixes a rigid one alike.
     public var autoSize = false
     /// Placement for newly created windows.
     public var newWindowPlacement: SpawnPlacement = .last

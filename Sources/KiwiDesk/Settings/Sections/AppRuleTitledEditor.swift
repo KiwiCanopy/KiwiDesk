@@ -1,7 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Editor for window title matching patterns within an app rule (#68 §3.11).
+/// Editor for window title matching patterns within an app rule
+/// (#68 §3.11). `editingTitles` stays owned by the row — it also
+/// gates this editor's visibility — and is bound here so adding
+/// the first pattern keeps the editor open.
 struct AppRuleTitledEditor: View {
     @ObservedObject var model: SettingsModel
     let app: String

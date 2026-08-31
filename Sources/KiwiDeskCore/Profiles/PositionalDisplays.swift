@@ -9,8 +9,10 @@ public enum PositionalDisplays {
         DisplayID(CGMainDisplayID())
     }
 
-    /// Orders displays with main display first, then secondaries
-    /// left-to-right.
+    /// Orders displays with main first, then secondaries
+    /// left-to-right, remaining ties broken deterministically
+    /// (`minY`, then fingerprint). A nil or absent `mainID` hands
+    /// the main slot to the leftmost — every position resolves.
     public static func ordered(
         _ displays: [Display],
         mainID: DisplayID?

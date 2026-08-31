@@ -63,13 +63,17 @@ extension ApplicationsGroup {
         newApp = nil
     }
 
-    /// True if selected application has all launch behaviors already bound.
+    /// Greys the Add button (grey-don't-hide) — a backstop for the
+    /// "Other…" panel, which can still reach a fully-bound bundle
+    /// the picker list already omits.
     private var newAppFullyBound: Bool {
         guard let app = newApp else { return false }
         return firstAvailableBehavior(for: app.bundleID) == nil
     }
 
     /// Bundle IDs that already carry every launch behavior (#334).
+    /// A per-row re-pick excludes its own row, so an app fully
+    /// bound only BECAUSE of that row stays pickable.
     func fullyBoundBundleIDs(
         excluding id: UUID? = nil
     ) -> Set<String> {

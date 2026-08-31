@@ -1,6 +1,9 @@
 import Foundation
 
-/// Per-space overrides of BspParams (`BspOverrideTests`, #17).
+/// Per-space overrides of BspParams: optional mirror, nil
+/// inherits (`BspOverrideTests`, #17). `newWindowPlacement` is
+/// excluded — it has its own per-space override via
+/// `new_window_placement_override`.
 public struct BspOverride: Sendable, Equatable {
     public var strategy: BspParams.Strategy?
     public var splitRatioH: Double?
@@ -14,6 +17,8 @@ public struct BspOverride: Sendable, Equatable {
         if let strategy { out.strategy = strategy }
         if let splitRatioH { out.splitRatioH = splitRatioH }
         if let splitRatioV { out.splitRatioV = splitRatioV }
+        // Merged params hold no override map (see
+        // ScrollingOverride).
         out.override = [:]
         return out
     }

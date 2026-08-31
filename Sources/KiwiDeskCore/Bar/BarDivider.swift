@@ -2,7 +2,9 @@ import AppKit
 
 /// Shared divider geometry and color rendering for Space Bar.
 enum BarDivider {
-    /// Width of front-app section break divider.
+    /// Width of front-app section break divider — heavier than
+    /// the 1 pt in-chip rule so the boundary reads as a bigger
+    /// separation (QA 2026-07-19).
     static let sectionThickness: CGFloat = 2
 
     /// Returns divider color applying SpaceBarStyle.dividerAlpha.

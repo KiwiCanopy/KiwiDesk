@@ -1,7 +1,11 @@
 import Foundation
 
-/// Interactive-resize session overrides without persisting to config
-/// (#290, #458).
+/// Interactive-resize values for a space with NO authored
+/// override of the field (#458): writing the global visibly
+/// resized every other space. Session-only — dies with the
+/// space, `setMode`, or reload; config layers stay untouched
+/// (#290). Precedence (authored field > session > global) is
+/// structural in `TilingSettings.resolvedBsp/Stack/Scrolling`.
 public struct SessionRatios: Sendable, Equatable {
     /// BSP side-by-side split (`resize("x")`).
     public var splitRatioH: Double?

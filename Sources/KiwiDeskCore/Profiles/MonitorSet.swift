@@ -1,10 +1,15 @@
 import Foundation
 
-/// Monitor setup combination and space-to-monitor pin mapping (#36).
+/// Monitor setup combination and space-to-monitor pin mapping
+/// (#36). `monitors` is compared as a sorted array — a multiset;
+/// two identical monitors must not collapse the way a `Set`
+/// would.
 public struct MonitorSet: Codable, Sendable, Equatable {
     /// Fingerprints (`Name:WxH`) of covered monitors, canonically sorted.
     public private(set) var monitors: [String]
-    /// Explicit fingerprint pin per space.
+    /// Explicit fingerprint pin per space (sparse). Read-only so
+    /// the init-time invariant — pins reference only monitors
+    /// inside the set — cannot be bypassed.
     public private(set) var spaceMonitorMap: [SpaceID: String]
 
     private enum CodingKeys: String, CodingKey {

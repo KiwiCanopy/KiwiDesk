@@ -47,6 +47,9 @@ struct ProfileEditTargetMenu: View {
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
+        // Closed, the menu shows only its VALUE, so VoiceOver
+        // heard a name with no noun — name the control, keep the
+        // value (#812, the App Rules facet shape).
         .accessibilityLabel(
             L("profile_header.menu.ax", "Profile to edit")
         )
@@ -54,6 +57,8 @@ struct ProfileEditTargetMenu: View {
     }
 
     private func requestSelect(_ name: String?) {
+        // Re-picking the open target is a no-op, so it never pops
+        // a pointless discard dialog.
         guard name != model.editingProfile else { return }
         // Confirms discarding pending edits before switching profile
         // (#209, #515).

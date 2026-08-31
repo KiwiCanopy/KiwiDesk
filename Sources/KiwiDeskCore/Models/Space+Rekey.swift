@@ -1,8 +1,12 @@
 import Foundation
 
 extension Space {
-    /// Swaps one window ID for another across all slot/weight state
-    /// (`WindowRekeyParityTests`, #308, #966).
+    /// Swaps one window ID for another in place, preserving array
+    /// position, focus and per-window markers (#308); no-op if
+    /// `old` is absent. Id-keyed fields are guarded by
+    /// `WindowRekeyParityTests` — except `scrollRest.slot.window`
+    /// (#966), a bare id only that suite's text scan sees; it
+    /// migrates so the viewport keeps re-anchoring.
     public mutating func rekey(_ old: WindowID, to new: WindowID) {
         guard let index = windows.firstIndex(of: old) else {
             return

@@ -47,6 +47,7 @@ extension LayoutCard {
                 placement: monocle.newWindowPlacement
             )
         case .gridColumns, .gridRows, .trackLimit:
+            // Drawn by their Auto toggles' `AutoGatedGroup` above.
             EmptyView()
         case .bspOverrideStrategy, .bspOverrideSplitRatioH,
             .bspOverrideSplitRatioV, .stackOverrideMasterCount,

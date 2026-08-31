@@ -2,7 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 extension Color {
-    /// Resolves mark tint from hex or primary for automatic (#429, #793).
+    /// Resolves mark tint from hex, or `.primary` for the empty
+    /// "Automatic" sentinel (#429): `Color(kiwiHex:)` maps empty to
+    /// `.clear`, which would preview a configured mark as a hole
+    /// (#793).
     static func kiwiMark(_ hex: String) -> Color {
         hex.isEmpty ? .primary : Color(kiwiHex: hex)
     }

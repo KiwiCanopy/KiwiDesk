@@ -1,5 +1,7 @@
 /// Home dashboard card offer and display order
-/// (`HomeCardOrderTests`, #678 turn 9).
+/// (`HomeCardOrderTests`, #678 turn 9). The order is STABLE across
+/// mode flips: Power User inserts its cards at their slots rather
+/// than appending, so a card never moves on a segment toggle.
 enum HomeCardOrder {
     /// THIS PROFILE, full (Power User) order.
     static let thisProfile: [SettingsDestination] = [
@@ -12,7 +14,10 @@ enum HomeCardOrder {
         .shortcuts, .profiles, .appRules, .general,
     ]
 
-    /// Single offer predicate for home dashboard cards (#18, #678 turn 9).
+    /// Single offer predicate for home dashboard cards (#18) — no
+    /// hand-negated copies. The `displayCount` axis deliberately
+    /// has NO selection repair: unplugging a display must not yank
+    /// the screen mid-edit; the next Home visit re-derives.
     static func isOffered(
         _ destination: SettingsDestination,
         mode: SettingsMode,

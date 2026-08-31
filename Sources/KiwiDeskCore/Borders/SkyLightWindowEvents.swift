@@ -10,8 +10,11 @@ fileprivate typealias SkyLightNotifyProc =
         UnsafeMutableRawPointer?
     ) -> Void
 
-/// Process-lifetime WindowServer notification pump for focus borders
-/// (#285 Tier 2).
+/// Process-lifetime WindowServer notification pump for focus
+/// borders (#285 Tier 2). Registration has no reliable public
+/// unregister seam, so callbacks never retain a `BorderManager`;
+/// the current manager is a weak sink replaceable after an
+/// in-process stop/start.
 @MainActor
 final class SkyLightWindowEvents {
     enum Kind: UInt32, CaseIterable {
@@ -36,7 +39,9 @@ final class SkyLightWindowEvents {
             }
         }
 
-        /// Indicates whether event represents geometry change.
+        /// Geometry events coalesce with an adjacent one for the
+        /// same window; control events never do, so their order
+        /// against geometry is preserved.
         var isGeometry: Bool {
             self == .move || self == .resize
         }
@@ -171,7 +176,10 @@ final class SkyLightWindowEvents {
         self.manager = manager
     }
 
-    /// Requests WindowServer event notifications for target window IDs.
+    /// Requests notifications for these windows. The private API's
+    /// replacement-vs-additive semantics are undocumented; stale
+    /// deliveries are dropped by the manager, and an empty request
+    /// is a best-effort clear, not a teardown guarantee.
     func watch(_ windows: Set<WindowID>) -> Bool {
         if lastRequested == windows { return true }
         guard let request = Self.requestNotifications else {

@@ -2,6 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Display and editing group for orphaned space shortcuts (#92).
+/// Surfaced, never pruned: the binding revives when its space
+/// returns, so dropping it on save would lose config across a
+/// routine profile/monitor swap.
 struct OrphanedShortcutsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]

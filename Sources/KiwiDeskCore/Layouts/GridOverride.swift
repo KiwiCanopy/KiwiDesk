@@ -1,6 +1,9 @@
 import Foundation
 
-/// Per-space overrides of GridParams (`GridOverrideTests`, #17).
+/// Per-space overrides of GridParams: optional mirror, nil
+/// inherits (`GridOverrideTests`, #17). `newWindowPlacement` is
+/// excluded — it has its own per-space override via
+/// `new_window_placement_override`.
 public struct GridOverride: Sendable, Equatable {
     public var type: GridParams.GridType?
     public var fillEmptyCells: Bool?
@@ -24,6 +27,8 @@ public struct GridOverride: Sendable, Equatable {
         if let columns { out.columns = columns }
         if let rows { out.rows = rows }
         if let autoSize { out.autoSize = autoSize }
+        // Merged params hold no override map (see
+        // ScrollingOverride).
         out.override = [:]
         return out
     }

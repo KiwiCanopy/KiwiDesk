@@ -3,7 +3,10 @@ import AppKit
 /// Drag-drop hit testing and visual feedback for SpaceBarOverlay (#372).
 extension SpaceBarOverlay {
 
-    /// Returns SpaceID whose item contains global screen point, or nil.
+    /// Returns SpaceID whose item contains the CURSOR point, never
+    /// the dragged window's frame — a maximized window can graze
+    /// the bar while its grab point is far away. The whole item
+    /// is one drop well.
     func spaceItem(atGlobal cocoaPoint: CGPoint) -> SpaceID? {
         guard isPanelVisible else { return nil }
         let ax = GeometryUtils.axPoint(cocoaPoint)

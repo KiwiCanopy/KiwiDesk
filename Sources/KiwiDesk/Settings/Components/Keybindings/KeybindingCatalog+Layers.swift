@@ -19,7 +19,9 @@ extension KeybindingCatalog {
         )
     }
 
-    /// Renames a layer across all configuration bindings (#4).
+    /// Renames a layer across all configuration bindings, rewritten
+    /// through `switchLayerCommand` so writer and import classifier
+    /// stay matched byte-for-byte (#4).
     static func renameLayer(
         in layers: [KeyLayer],
         from old: String,

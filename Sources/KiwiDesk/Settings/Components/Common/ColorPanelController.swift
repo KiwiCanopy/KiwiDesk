@@ -1,13 +1,16 @@
 import AppKit
 import KiwiDeskCore
 
-/// Controller for shared `NSColorPanel` presented by `ColorSwatch`.
+/// Controller for the one shared `NSColorPanel`: the last swatch to
+/// `present` owns it, like native color wells handing the panel over.
 @MainActor
 final class ColorPanelController: NSObject {
     static let shared = ColorPanelController()
 
     private var onChange: ((NSColor) -> Void)?
     private lazy var doneAccessory: NSView = makeDoneAccessory()
+    /// Bumped per `present`; a swatch resigns the panel only while
+    /// it still owns it.
     private var activeToken = 0
 
     @discardableResult
@@ -34,10 +37,14 @@ final class ColorPanelController: NSObject {
         dismiss()
     }
 
-    /// Dismisses shared NSColorPanel and clears accessories and callbacks.
+    /// Unconditional teardown so the panel can't write into a
+    /// reloaded config. `activeToken` deliberately NOT reset:
+    /// `present` always advances it, so stale `resign` still no-ops.
     func dismiss() {
         onChange = nil
         let panel = NSColorPanel.shared
+        // Detach our Done bar — the shared panel outlives us and
+        // would show it to any future NSColorPanel user.
         panel.accessoryView = nil
         panel.orderOut(nil)
     }

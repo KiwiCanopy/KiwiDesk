@@ -4,7 +4,11 @@ import Foundation
 /// (`ConfigMigrationRoutingTests`, #938, #939).
 extension ConfigMigration {
     /// Wraps legacy palette array into format document
-    /// (`PaletteDocument`, #939).
+    /// (`PaletteDocument`, #939). ASSUMES any top-level JSON array
+    /// is a legacy palettes file — true only while palettes.json
+    /// is the sole array-rooted routed reader
+    /// (`ConfigMigrationRoutingTests`); a second array-rooted
+    /// shape must give this step a narrower gate.
     @Sendable
     static func migratingLegacyPalettesArray(
         _ data: Data

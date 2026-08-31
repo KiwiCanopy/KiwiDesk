@@ -2,7 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Profile Bars settings section with Space Bar and App Bar cards
-/// (#293, #678).
+/// (#293, #678). No colours here: a colour renders in ONE area —
+/// Advanced Colours — which `SettingsColorSurfaceTests` pins.
 struct BarsSection: View {
     @ObservedObject var model: SettingsModel
 

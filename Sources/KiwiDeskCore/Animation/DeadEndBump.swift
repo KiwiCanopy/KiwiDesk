@@ -11,6 +11,8 @@ public struct DeadEndBump {
     private var vel: [Double]
     private let spring: Spring
 
+    /// Settled when both axes are within this of rest — sub-point
+    /// tails are invisible.
     private static let epsilon = 0.3
 
     public init(
@@ -25,7 +27,9 @@ public struct DeadEndBump {
         self.spring = spring
     }
 
-    /// Re-applies wall impulse preserving velocity (#436).
+    /// Re-applies wall impulse preserving velocity, so a held key
+    /// reads as one sustained press, not restarted animations
+    /// (#436 retarget-in-place).
     public mutating func reimpulse(offset: CGVector) {
         pos = [Double(offset.dx), Double(offset.dy)]
     }

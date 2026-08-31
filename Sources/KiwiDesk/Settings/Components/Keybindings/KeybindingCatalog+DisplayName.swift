@@ -4,6 +4,9 @@ import KiwiDeskCore
 extension KeybindingCatalog {
     /// Resolves localized display name for persisted label
     /// (`KeybindingImportClassifier.navigationLabels`, #96).
+    /// The Desktop half reads the BINDINGS, never a live list —
+    /// the banner must still name a row whose screen is unplugged.
+    /// A label outside the roster returns unchanged.
     @MainActor static func localizedLabel(
         for label: String,
         config: GuiConfig

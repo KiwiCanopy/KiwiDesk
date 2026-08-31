@@ -31,6 +31,8 @@ extension SettingsValueReadout {
             ]
         case .spaceOverrideResetActive, .spaceOverrideResetAll,
             .spacesDelete:
+            // "(action)" ids are skipped by `censusBases()` — no
+            // change ever resolves to them.
             return []
         }
     }

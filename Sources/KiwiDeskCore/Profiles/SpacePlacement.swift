@@ -1,12 +1,17 @@
 import Foundation
 
-/// Space-to-display placement resolution precedence (#36, #53).
+/// The single space→display precedence (#36): explicit pin →
+/// Main role → positional plan (#53). Runtime and GUI Canvas
+/// both resolve through this one pure function, so they cannot
+/// drift.
 public enum SpacePlacement {
     /// Resolution result for a space's display placement.
     public enum Resolution: Equatable, Sendable {
         /// Pinned to a connected display.
         case pinned(Display)
-        /// Pinned to a disconnected display with fallback.
+        /// Pinned to a disconnected display: placement falls
+        /// back, the fingerprint (user intent) is preserved for
+        /// editing UIs.
         case pinnedAbsent(intent: String, fallback: Display)
         /// Main role following active main display.
         case main(Display)
@@ -25,7 +30,9 @@ public enum SpacePlacement {
         }
     }
 
-    /// Resolves target display for a space (`ProfileComposition.Composed`).
+    /// Resolves target display for a space
+    /// (`ProfileComposition.Composed`). Nil only when no display
+    /// is connected — otherwise resolution is total.
     public static func resolve(
         space: SpaceID,
         pins: [SpaceID: String],

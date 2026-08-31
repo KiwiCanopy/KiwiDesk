@@ -1,7 +1,8 @@
 import KiwiDeskCore
 
-/// Help explanations for disabled Gaps & Borders controls
-/// (`GapsAndBordersGateWiringTests`, #678).
+/// Help explanations for disabled Gaps & Borders controls: a
+/// sentence is authored once, HERE, never beside a row —
+/// `GapsAndBordersGateWiringTests` reds on a second copy (#678).
 @MainActor
 enum GapsBordersGateHelp {
     static func sentence(

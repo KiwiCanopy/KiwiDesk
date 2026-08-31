@@ -15,7 +15,9 @@ extension SettingsValueReadout {
             .sorted { $0.raw < $1.raw }
     }
 
-    /// Builds one diff row per touched space for an override field.
+    /// Builds one diff row per touched space; `base` overrides the
+    /// census label for the Lua-only keys whose census text is
+    /// `.none`.
     static func layoutOvr<O, V: Equatable>(
         _ census: SettingKey,
         _ old: [SpaceID: O],

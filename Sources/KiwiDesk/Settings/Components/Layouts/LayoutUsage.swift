@@ -1,6 +1,9 @@
 import KiwiDeskCore
 
-/// Layout usage queries across configured spaces.
+/// Layout usage queries across configured spaces — ONE answer for
+/// the page's three surfaces (strip counts, spaces-using card,
+/// landing layout), which disagreed on the unrecorded-space
+/// default while they were three copies.
 enum LayoutUsage {
     /// Returns profile spaces using mode, defaulting unrecorded spaces
     /// to .bsp.

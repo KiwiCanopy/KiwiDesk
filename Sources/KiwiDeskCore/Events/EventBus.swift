@@ -9,13 +9,18 @@ public enum KiwiNotification: String, CaseIterable, Sendable,
     case focusChange = "focus_change"
     case monitorChange = "monitor_change"
     case desktopChange = "desktop_change"
-    // Lifecycle events carry a `reason` (#40, #913).
+    // Lifecycle events carry a `reason` (#40), spelled by
+    // `WindowAppearReason` / `WindowGoneReason` — the one copy of
+    // that vocabulary, so a value added there (#913) owes no edit
+    // here.
     case windowCreated = "window_created"
     case windowDestroyed = "window_destroyed"
     case windowMovedToSpace = "window_moved_to_space"
 }
 
-/// Fans events out to Lua callbacks and generic sinks.
+/// Fans events out to Lua callbacks and generic sinks. A Lua
+/// callback that errors or times out is logged and disabled — one
+/// bad callback never breaks the event stream.
 @MainActor
 public final class EventBus {
     public typealias Sink =

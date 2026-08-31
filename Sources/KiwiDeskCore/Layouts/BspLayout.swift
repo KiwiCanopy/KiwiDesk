@@ -1,6 +1,9 @@
 import CoreGraphics
 
-/// Binary space partitioning layout over flat window array (#56).
+/// Binary space partitioning layout over flat window array
+/// (dwindle). Two per-space ratio scalars, not per-node ratios —
+/// those need stable split identity, i.e. a tree, which the flat
+/// array forbids (#56).
 public struct BspLayout: LayoutSystem {
     public init() {}
 

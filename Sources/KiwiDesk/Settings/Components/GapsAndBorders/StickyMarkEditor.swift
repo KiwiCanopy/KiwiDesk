@@ -1,7 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Sticky window mark settings editor (`StickyMarkUngatedTests`, #414).
+/// Sticky window mark settings editor (#414). Deliberately ungated
+/// on the Space Bar — the mark survives the bar going off;
+/// `StickyMarkUngatedTests` keeps it ungated.
 struct StickyMarkEditor: View {
     @ObservedObject var model: SettingsModel
 

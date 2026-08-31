@@ -1,11 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Standard settings dropdown row with label and accessibility value
-/// (`AnnouncedValueTests`).
+/// Standard settings dropdown row: `labelsHidden` drops a `.menu`
+/// picker's AX title, so the row NAMES the control and `spokenValue`
+/// gives the choice back as the VALUE (`AnnouncedValueTests`).
 struct DropdownRow<P: View>: View {
     let label: String
-    /// Selected option title spoken as accessibility value.
+    /// Selected option's title, spoken as the value; `nil` only for
+    /// a `Toggle`, whose on/off state survives a label.
     let spokenValue: String?
     /// Optional help popover text (#94).
     var help: String? = nil

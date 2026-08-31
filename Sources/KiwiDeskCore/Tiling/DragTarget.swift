@@ -1,6 +1,10 @@
 import CoreGraphics
 
-/// Cursor-based swap target determination for window dragging (#492).
+/// The drop-target rule shared by live preview and final drop,
+/// so the highlight can never disagree with the drop.
+/// Cursor-keyed, not center-keyed (#492): a big window's center
+/// lags on the origin display long after the pointer — and the
+/// intent — left it.
 enum DragTarget {
     static func swapTarget(
         of id: WindowID,

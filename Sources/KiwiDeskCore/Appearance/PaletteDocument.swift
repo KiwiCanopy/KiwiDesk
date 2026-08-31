@@ -1,6 +1,9 @@
 import Foundation
 
-/// Envelope for palettes.json with schema format versioning (#939).
+/// Envelope for palettes.json with schema format versioning
+/// (#939). The format integer is homed HERE, on the file's ROOT
+/// type — never on `ColorPalette`, which also travels inside
+/// `SetupBundle`, where the bundle's own format governs (#945).
 struct PaletteDocument: Codable {
     /// Format version of palettes.json schema (0 = legacy bare array, #939).
     static let currentFormat = 1

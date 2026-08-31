@@ -9,7 +9,9 @@ extension APIChoiceType {
 }
 
 extension CommandResponse {
-    /// Rejection naming accepted choice values derived from type (#1033).
+    /// Rejection naming accepted choice values (#1033). Takes the
+    /// TYPE, never a message: a call site that cannot spell the
+    /// list cannot spell it wrongly.
     public static func expected<T: APIChoiceType>(
         _ type: T.Type
     ) -> CommandResponse {
