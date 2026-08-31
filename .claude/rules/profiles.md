@@ -289,6 +289,69 @@ already-merged values (the `AppBarStyle.resolved…` pattern).
 Resolution runs before layout math so the layout functions stay
 pure over the flat array.
 
+## The two profile writes mean different things (#1179)
+
+A layout can be changed in two places, and the writes they lead
+to are not the same verb. Keep them apart, in both directions:
+
+- **The quick menu's Keep = a whole-live snapshot.** "Write down
+  what is on screen", every screen at once.
+  `persistProfile(named:modes:)` with a nil `modes` is that
+  meaning, and it is the only thing that turns a temporary
+  layout permanent. **The debt it owes an open draft hangs off
+  the WRITE, not the caller** — `ProfileManager.onCapturedLive`
+  — because `save_profile` from Lua, the CLI or IPC is the same
+  write through another door, and a debt paid at one door only
+  is this issue's failure one channel over.
+- **A Settings Save against the LIVE target = a draft commit.**
+  "Save what I edited." It applies and persists the modes of the
+  spaces the draft actually edited and nothing else —
+  `applyProfileScopedState(from:applyingModesFor:)` scoped, and
+  `persistProfile(named:modes:)` writing the draft's modes.
+
+**The stored-profile Save is the third verb, and it is NOT a
+draft commit.** Editing a stored profile seeds the draft from
+THAT profile's JSON, so its Save is "update this profile", and
+`saveEditedProfile` re-applies it wholesale through
+`reapplyIfInEffect` when it is the one in effect — every mode
+re-asserted, a standing temporary layout included. Whether that
+is right is a question about what editing the running profile
+means, not about #1179's defect, and it is open on that thread:
+scope this claim to the live target rather than reading it as
+covering all three.
+
+**Neither half may be dropped, because each is the other's
+mirror.** A Save that re-asserts the draft's modes wholesale
+destroys a standing temporary layout the save pill never counted
+— that is Revert's meaning wearing a Save label, and it is the
+defect #1179 closes. A Save that captures LIVE instead adopts
+that same temporary layout into the file. Both shipped at once.
+
+**The GUI draft seeds its per-space modes from the SAVED
+profile, never from live.** `overlayLiveProfileState` still
+mirrors live for everything else — which spaces exist, their
+order, pins, the Main role — because those are live's to state
+(#75/#55); the modes are the one field that is not, and that
+split IS the fix. `savedModes` answers `[:]` where no profile is
+readable, and live is then the only truth there is, so an
+unmanaged setup is not silently reset to `.bsp`.
+
+**"Edited" is one predicate, with three readers.**
+`SettingsDraftDiff.editedSpaceModes` answers it for the Save's
+partial apply, for the unsaved-changes popover's rows, and for
+the keep's baseline move (`SettingsModel+KeptLayout`). The save pill is the draft's one
+narrator, so what a Save writes must never exceed what the pill
+counted — and a comparison re-derived beside any reader agrees
+today and disagrees on the release that changes the sparse
+encoding. `SettingsSaveTemporaryLayoutTests` holds the
+behaviour, the mixed case and the source scan; the sparse
+encoding's omitted `.bsp` resolves in one place,
+`GuiConfig.modes(for:)`.
+
+`docs/design-decisions.md` ▸ *Quick-menu layout switch is
+session-only* owns the product half, including the two residues
+this deliberately leaves visible.
+
 ## Applies force or don't, explicitly
 
 `apply(profile:)` / `apply(composed:)` take a **required**

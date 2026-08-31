@@ -106,13 +106,15 @@ extension SettingsValueReadout {
         new: GuiConfig
     ) -> [SettingsDiffRow] {
         let base = L("diff.label.space_mode", "Layout mode")
-        let touched = Set(old.spaceModes.keys)
-            .union(new.spaceModes.keys)
-            .filter {
-                (old.spaceModes[$0] ?? .bsp)
-                    != (new.spaceModes[$0] ?? .bsp)
-            }
-            .sorted { $0.raw < $1.raw }
+        // The one edited-space answer, shared with the diff's
+        // attribution and with the Save's partial apply (#1179):
+        // the pill is the draft's one narrator, so a row it does
+        // not list must not be a row a Save writes.
+        let touched = SettingsDraftDiff.editedSpaceModes(
+            config: new,
+            cleanConfig: old
+        )
+        .sorted { $0.raw < $1.raw }
         return touched.map { space in
             SettingsDiffRow.change(
                 census,

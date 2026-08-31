@@ -82,19 +82,18 @@ extension KiwiCore {
         profile.fallbackSpace = config.fallbackSpace.flatMap {
             config.spaces.contains($0) ? $0 : nil
         }
-        // Dense over the profile's own spaces (mirrors
-        // `buildProfile`): an undeclared space reads as bsp. The
-        // union with `spaceModes.keys` keeps a just-set mode even
-        // if its space hasn't landed in the list yet; `spaces` is
-        // profile-derived (see `overlayProfileState`), so no
-        // live-only space can leak in here.
-        var modes: [SpaceID: LayoutMode] = [:]
-        let declared = Set(config.spaces)
-            .union(config.spaceModes.keys)
-        for space in declared {
-            modes[space] = config.spaceModes[space] ?? .bsp
-        }
-        profile.spaceModes = modes
+        // Dense over the PROFILE's own spaces, which is where
+        // this differs from `buildProfile`'s live ones: `spaces`
+        // is profile-derived here (see `overlayProfileState`),
+        // so no live-only space can leak in, and the union with
+        // `spaceModes.keys` keeps a just-set mode whose space
+        // has not landed in the list yet. The `.bsp` resolution
+        // itself is `GuiConfig.modes(for:)`'s, one copy (#1179).
+        profile.spaceModes = config.modes(
+            for: Array(
+                Set(config.spaces).union(config.spaceModes.keys)
+            )
+        )
         profile.mainSpaces = config.mainSpaces.sorted {
             $0.raw < $1.raw
         }

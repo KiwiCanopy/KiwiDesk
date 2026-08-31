@@ -240,7 +240,11 @@ extension KiwiCore {
         // starter setup from `currentStandard` (#485).
         profiles.adoptStandard(named: composed.sourceName)
         let name = profiles.freeName(base: layout.name)
-        try profiles.save(buildProfile(name: name))
+        // Capture-live: the standard was just adopted onto
+        // live above, so live IS what this profile records.
+        try profiles.save(
+            buildProfile(name: name, modes: nil)
+        )
         // A preset can define more spaces than the first-run seed
         // authored digit shortcuts for; bind the newcomers
         // additively so ⌃⌥N covers them too (#485).

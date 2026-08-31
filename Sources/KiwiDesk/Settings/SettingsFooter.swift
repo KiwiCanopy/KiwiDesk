@@ -26,7 +26,6 @@ struct SettingsFooter: View {
     /// creation lives in Profiles; the pill narrates a draft.
     private var hasWork: Bool {
         model.isDirty || model.profileDirty
-            || model.hasLayoutDrift
     }
 
     var body: some View {
@@ -122,7 +121,7 @@ struct SettingsFooter: View {
             .foregroundStyle(
                 SettingsTheme.savePillInk.opacity(0.8)
             )
-            .disabled(!(model.isDirty || model.hasLayoutDrift))
+            .disabled(!model.isDirty)
             copySlot
             primarySlot
         }
@@ -176,8 +175,9 @@ struct SettingsFooter: View {
     private var saveAsNewMessage: String {
         L(
             "footer.save_as_new.message",
-            "The new profile carries the current tiling "
-                + "and the connected monitor set."
+            "The new profile carries your edits and the "
+                + "connected monitor set. A layout you switched "
+                + "from the menu stays temporary."
         )
     }
 

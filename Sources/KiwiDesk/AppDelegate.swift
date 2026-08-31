@@ -100,16 +100,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 space.map { [.string($0.raw), .string(mode.rawValue)] }
                 ?? [.string(mode.rawValue)]
             _ = self?.core.execute("set_mode", args: args)
-            // Drift-only refresh: a full reload would discard staged edits.
-            self?.dashboardIfCreated?.refreshLayoutDrift()
+            // Nothing to tell Settings: a quick-menu switch is
+            // session-only, and since #1179 the draft narrates
+            // the PROFILE rather than the session.
         }
         statusItem.onSaveLayoutToProfile = { [weak self] in
             guard let self,
                 let name = self.core.profiles.currentName
             else { return }
             do {
-                try self.core.persistProfile(named: name)
-                self.dashboardIfCreated?.refreshLayoutDrift()
+                // Capture-live (#1179); the draft's baseline
+                // follows through `profiles.onCapturedLive`,
+                // which `save_profile` reaches too.
+                try self.core.persistProfile(
+                    named: name,
+                    modes: nil
+                )
             } catch {
                 self.core.onLog("profile save failed: \(error)")
                 self.presentLayoutSaveFailure(error)
@@ -165,6 +171,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.dashboardIfCreated?.refreshProfiles()
         }
         configIssues.model.onRevealProfile = revealProfile
+        core.profiles.onCapturedLive = { [weak self] _ in
+            self?.dashboardIfCreated?.adoptKeptLayout()
+        }
         core.onConfigIssuesChange = { [weak self] issues in
             self?.statusItem?.setConfigError(!issues.isEmpty)
             self?.configIssues.model.issues = issues

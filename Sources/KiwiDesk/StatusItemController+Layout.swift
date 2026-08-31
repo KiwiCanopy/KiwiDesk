@@ -123,26 +123,29 @@ extension StatusItemController {
         }
     }
 
-    /// Save row persisting the ACTIVE space's layout. Deliberately
-    /// not per screen: `persistProfile` is a whole-profile
-    /// operation, so a per-screen save would be a second feature,
-    /// not a second row.
+    /// Keep row, persisting every screen's layout into the
+    /// active profile. Not per screen — `persistProfile` is a
+    /// whole-profile operation — which is also why it arms on
+    /// ANY screen's drift rather than the focused one's
+    /// (#1179; `docs/design-decisions.md` ▸ *Quick-menu layout
+    /// switch is session-only* argues the verb).
     private func addSaveRow(
         to menu: NSMenu,
         info: LayoutMenuInfo
     ) {
-        guard info.activeProfileName != nil else { return }
+        guard let profile = info.activeProfileName else { return }
         menu.addItem(.separator())
         let saveEntry = NSMenuItem(
             title: L(
-                "menu.layout.save",
-                "Save Current Layout to Profile"
+                "menu.layout.keep",
+                "Keep Layout in Profile “%1$@”",
+                profile
             ),
             action: #selector(saveLayoutToProfile(_:)),
             keyEquivalent: ""
         )
         saveEntry.target = self
-        saveEntry.isEnabled = info.activeSpaceHasDrifted
+        saveEntry.isEnabled = info.anyScreenHasDrifted
         menu.addItem(saveEntry)
     }
 

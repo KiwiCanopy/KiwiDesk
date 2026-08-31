@@ -57,18 +57,30 @@ extension KiwiCore {
     }
 
     /// Copies the live profile-scoped state into the model:
-    /// tiling settings, per-space modes, monitor pins, and the
-    /// Main role.
+    /// tiling settings, monitor pins and the Main role from
+    /// live, and the per-space MODES from the saved profile.
+    ///
+    /// The modes are the one field that does NOT come from live
+    /// (#1179): the draft narrates the PROFILE, the quick menu
+    /// narrates the session. Everything else mirrors live
+    /// deliberately — which spaces exist and their ORDER are
+    /// live's to state (#75/#55, below), and pins and the Main
+    /// role travel with them.
     func overlayLiveProfileState(
         _ config: inout GuiConfig
     ) {
         config.settings = tiler.settings
         var modes: [SpaceID: LayoutMode] = [:]
         var live: [SpaceID] = []
+        // SPARSE, so a live space the profile never carried
+        // keeps its live mode rather than being read as `.bsp`
+        // and then written as one (code review, 2026-08-31).
+        let saved = savedProfileModes()
         for space in state.workspaces.allSpaces {
             live.append(space.id)
-            if space.mode != .bsp {
-                modes[space.id] = space.mode
+            let mode = saved?[space.id] ?? space.mode
+            if mode != .bsp {
+                modes[space.id] = mode
             }
         }
         config.spaceModes = modes

@@ -62,9 +62,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.onShowTour = handler
     }
 
-    /// Non-destructive refresh for layout drift captions.
-    func refreshLayoutDrift() {
-        model.refreshLayoutDrift()
+    /// A quick-menu keep just wrote the live layout into the
+    /// profile: move the draft's saved baseline onto it without
+    /// discarding staged edits (#1179).
+    func adoptKeptLayout() {
+        model.adoptKeptLayout()
     }
 
     /// Re-reads saved profiles list without discarding staged edits (#246).

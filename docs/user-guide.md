@@ -321,8 +321,16 @@ the KiwiDesk icon opens the quick menu where you can:
   - When the layout mode has drifted from the profile's saved setting,
     the active layout in the menu displays a secondary
     "not saved to profile" subtitle.
-  - Click **Save Current Layout to Profile** below the separator to persist
-    the new layout (adopts the whole live state into the active profile).
+  - Click **Keep Layout in Profile "‹name›"** below the separator to
+    make it permanent — it writes down what is on screen, every
+    screen at once, into the active profile. The row lights up
+    whenever *any* screen is running a temporary layout, not only
+    the focused one.
+  - Settings does not narrate temporary layouts at all. Its Save
+    saves what you edited there; a temporary layout stays temporary
+    until you keep it, and stays on screen through an unrelated
+    Save. The one exception is a Space whose layout you changed in
+    **Settings → Spaces** — that edit is yours and wins on Save.
   - **With more than one screen connected, the list nests one level
     deeper**: **All Screens** first, then a row per screen named
     after that screen, in the order the screens sit on your desk
@@ -346,9 +354,10 @@ the KiwiDesk icon opens the quick menu where you can:
 
     With a single screen the list stays flat, exactly as before —
     the extra level would only add a click to the control you reach
-    for most. **Save Current Layout to Profile** stays a single
-    action on the active Space and the profile as a whole; it is not
-    per screen.
+    for most. **Keep Layout in Profile** stays a single action on
+    the profile as a whole; it is not per screen, which is also why
+    it arms on any screen's temporary layout rather than the
+    focused screen's alone.
 - **Switch Profile**: Load any saved profile into the current layout.
   A non-clickable **Profile: ‹name›** line appears above the actions
   naming the profile you are currently on — shown only when there is

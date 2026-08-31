@@ -106,9 +106,6 @@ final class SettingsModel: ObservableObject {
     /// Dismissible warning from profile actions (e.g. monitor overlap).
     @Published var profileWarning: String?
 
-    /// Snapshot layout drift; write only via `refreshLayoutDrift()`.
-    @Published var layoutDrift: LayoutDrift?
-
     /// Main screen user Desktops by Mission Control number (#888).
     @Published var mainDesktops: [Int] = []
     /// Active native Space Mission Control number, or nil without SkyLight.

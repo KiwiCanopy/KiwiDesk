@@ -22,24 +22,6 @@ extension SettingsFooter {
             if model.primarySaveAction == .saveGlobalsOnly {
                 caption(pausedScopeCaption)
             }
-            if let drift = model.layoutDrift {
-                caption(
-                    L(
-                        "footer.save.adopts_layout",
-                        "Save also adopts the session layout "
-                            + "(%1$@).",
-                        drift.live.displayName
-                    )
-                )
-                caption(
-                    L(
-                        "footer.revert.restores_layout",
-                        "Revert also restores the profile "
-                            + "layout (%1$@).",
-                        drift.saved.displayName
-                    )
-                )
-            }
         }
     }
 

@@ -110,8 +110,19 @@ extension KiwiCore {
     /// core (settings, modes, pins, Main role) and re-resolves
     /// placement — the in-memory half of a profile save; the
     /// caller persists via `persistProfile(named:)`.
+    ///
+    /// `applyingModesFor` narrows which spaces have their MODE
+    /// re-asserted; nil means every space, which is what a
+    /// profile apply and a backup restore mean. A Settings Save
+    /// passes the spaces the draft actually edited (#1179): a
+    /// whole-profile re-assert there is Revert semantics wearing
+    /// a Save label, and it destroys a standing temporary layout
+    /// the save pill never counted. Everything else in this
+    /// function is unscoped — the space list, the pins, the Main
+    /// role and the settings are the draft's wholesale.
     public func applyProfileScopedState(
-        from config: GuiConfig
+        from config: GuiConfig,
+        applyingModesFor scope: Set<SpaceID>? = nil
     ) {
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet`, so the retile below
@@ -159,7 +170,8 @@ extension KiwiCore {
             orderedBy: config.spaces,
             preferring: config.fallbackSpace
         )
-        for space in state.workspaces.allSpaces {
+        for space in state.workspaces.allSpaces
+        where scope?.contains(space.id) ?? true {
             setSpaceMode(
                 space.id,
                 config.spaceModes[space.id] ?? .bsp
@@ -181,91 +193,6 @@ extension KiwiCore {
         // by ≤2 pt and visibly did nothing (#68).
         retile(force: true)
         emitSpaceChange()
-    }
-
-    /// Cold-boot story for GUI-only spaces (#77): seeds live from
-    /// the sidecar's `spaces` list so a space that lives *only* in
-    /// `gui.json` — no active profile, pin, window, or Lua
-    /// `set_mode` backs it — is present in live and survives the
-    /// next reload (`overlayLiveProfileState` reads live, not the
-    /// sidecar). Runs in `loadConfig` before the first
-    /// `handleMonitorChange` adopts a profile, which then ensures
-    /// its own spaces on top. Only *adds* (never sets modes or
-    /// removes), so a Lua-declared space keeps its mode and no
-    /// live-only space is dropped. Safe against resurrecting a
-    /// profile-pruned space because every authoritative prune
-    /// mirrors live back into the sidecar (`syncGuiSpacesToLive`),
-    /// so its `spaces` list is never stale.
-    func seedGuiSpaces() {
-        guard let config = guiConfigStore.load() else { return }
-        for space in config.spaces {
-            state.workspaces.ensureSpace(space)
-        }
-        state.workspaces.reorder(matching: config.spaces)
-    }
-
-    /// Mirrors the live space set back into `gui.json` after an
-    /// authoritative reconcile changed it (a `load_profile` or an
-    /// in-effect edit that pruned stale spaces), keeping the
-    /// sidecar a faithful copy of live so the cold-boot seed above
-    /// never re-injects a space a profile load dropped (#77).
-    /// GUI-managed only (no sidecar otherwise); writes the store
-    /// directly — NOT `saveGuiConfig`, which would reload the
-    /// config mid-command. A no-op when the list already matches.
-    func syncGuiSpacesToLive() {
-        guard isGuiManaged, var config = guiConfigStore.load()
-        else { return }
-        let live = SpaceID.deduplicated(
-            state.workspaces.allSpaces.map(\.id)
-        )
-        guard config.spaces != live else { return }
-        config.spaces = live
-        try? guiConfigStore.save(config)
-    }
-
-    /// Whether the GUI owns the configuration — the ownership
-    /// discriminator for the three tiling tiers (#36): only a
-    /// GUI-managed config lets the composed Standard own
-    /// tiling on an unmatched monitor change; hand-written or
-    /// hybrid configs (foreign Lua in `init.lua`)
-    /// keep their Lua-declared tiling and get placement-only
-    /// resolution. Mirrors the editor, which demotes itself to
-    /// the raw-Lua fallback on foreign code.
-    public var isGuiManaged: Bool {
-        guiConfigStore.exists && !configHasForeignCode
-    }
-
-    /// Whether `init.lua` holds code that touches the managed
-    /// vocabulary — verbs the GUI
-    /// itself generates. When true the visual editor cannot
-    /// safely co-own the file and falls back to raw Lua mode.
-    /// Harmless custom Lua (e.g. `print`, sketchybar hooks)
-    /// does NOT set this; use `configHasCustomCode` for the
-    /// informational banner.
-    public var configHasForeignCode: Bool {
-        guard
-            let source = try? String(
-                contentsOf: configURL,
-                encoding: .utf8
-            )
-        else { return false }
-        return ManagedConfig.hasForeignCode(source)
-    }
-
-    /// Whether `init.lua` holds any non-blank, non-comment Lua
-    /// (including harmless code that
-    /// does not touch managed vocabulary). Used to show the
-    /// "you also have custom Lua" banner in the visual editor.
-    /// Always `false` when `configHasForeignCode` is `true`
-    /// (the raw editor is shown instead of the banner).
-    public var configHasCustomCode: Bool {
-        guard
-            let source = try? String(
-                contentsOf: configURL,
-                encoding: .utf8
-            )
-        else { return false }
-        return ManagedConfig.hasCustomCode(source)
     }
 
     /// Persists the model and applies it: writes `gui.json`,

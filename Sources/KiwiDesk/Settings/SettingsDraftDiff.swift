@@ -9,6 +9,8 @@ struct SettingsDraftDiff {
     var unattributed: [String] = []
     /// True if raw `init.lua` text differs from baseline.
     var luaChanged = false
+    /// Spaces whose layout MODE the draft edited (#1179).
+    var editedSpaceModes: Set<SpaceID> = []
 
     /// Total count of changed settings, Lua edit, and unattributed paths.
     var total: Int {
@@ -29,6 +31,10 @@ struct SettingsDraftDiff {
         let changedPaths = Set(edited.keys)
             .union(clean.keys)
             .filter { edited[$0] != clean[$0] }
+        diff.editedSpaceModes = editedSpaceModes(
+            config: config,
+            cleanConfig: cleanConfig
+        )
         guard !changedPaths.isEmpty else { return diff }
 
         let bases = censusBases()
@@ -46,6 +52,32 @@ struct SettingsDraftDiff {
         }
         diff.unattributed = orphans.sorted()
         return diff
+    }
+
+    /// The spaces whose layout MODE differs between a draft and
+    /// its baseline — the ONE answer to "which spaces did the
+    /// user edit" (#1179).
+    ///
+    /// Three readers: the Settings Save's partial apply, the
+    /// unsaved-changes popover's rows, and the keep's baseline
+    /// move (`SettingsModel+KeptLayout`).
+    /// `.claude/rules/profiles.md` ▸ "The two profile writes"
+    /// argues why they must not each derive their own.
+    ///
+    /// Dense on both sides through `GuiConfig.modes(for:)`, so
+    /// the sparse encoding's omitted `.bsp` resolves in one
+    /// place.
+    static func editedSpaceModes(
+        config: GuiConfig,
+        cleanConfig: GuiConfig
+    ) -> Set<SpaceID> {
+        let spaces = Array(
+            Set(config.spaceModes.keys)
+                .union(cleanConfig.spaceModes.keys)
+        )
+        let edited = config.modes(for: spaces)
+        let clean = cleanConfig.modes(for: spaces)
+        return Set(spaces.filter { edited[$0] != clean[$0] })
     }
 
     /// True if census id names a model path (`SettingsValueReadoutTests`).

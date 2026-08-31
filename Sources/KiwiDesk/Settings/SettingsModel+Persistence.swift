@@ -24,16 +24,12 @@ extension SettingsModel {
         }
     }
 
-    /// Reverts staged edits and reapplies profile if layout
-    /// drifted (#123). Drift is computed fresh, not from the
-    /// published snapshot, so a switch the UI hasn't caught up
-    /// with still reverts.
+    /// Discards the staged draft. Model-only, as before #123
+    /// and again since #1179: a quick-menu layout switch is the
+    /// session's, not the draft's, so Revert has nothing to say
+    /// about it — ending a temporary layout is the quick menu's
+    /// job (switch back, or Keep).
     func revert() {
-        if computeLayoutDrift() != nil,
-            let activeProfileName = activeProfile
-        {
-            core.reapplyIfInEffect(activeProfileName)
-        }
         reload()
     }
 
