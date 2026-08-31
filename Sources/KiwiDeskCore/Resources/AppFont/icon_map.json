@@ -3415,6 +3415,12 @@
         ]
     },
     {
+        "iconName": ":threema:",
+        "appNames": [
+            "Threema*"
+        ]
+    },
+    {
         "iconName": ":thunderbird:",
         "appNames": [
             "Thunderbird",
