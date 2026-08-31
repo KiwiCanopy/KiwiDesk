@@ -1,19 +1,6 @@
 import CoreGraphics
 
-/// Track layout over the flat array (#128).
-///
-/// Every window sits in exactly one track: break markers
-/// (`Space.trackBreaks`) partition the tiled window list into
-/// consecutive slices — vertical tracks are columns side by
-/// side, horizontal tracks are rows. Track sizes come from
-/// per-head weights (`Space.trackWeights`), window shares
-/// within a track from the per-window `stackWeights` (#67,
-/// verbatim). All session state; the partition is one level of
-/// indexed slicing, never a tree (see 03_Layout).
-///
-/// This dissolves BSP's shared-ratio limitation: `resize`
-/// across the axis grows MY track, along it grows MY share —
-/// every resize has one true target.
+/// Track layout partitioning flat window array into columns/rows (#128, #67).
 public struct TrackLayout: LayoutSystem {
     public init() {}
 
@@ -29,24 +16,6 @@ public struct TrackLayout: LayoutSystem {
             vertical
             ? context.gaps.inner.horizontal
             : context.gaps.inner.vertical
-        // The overflow track (#192): the surplus beyond the normal
-        // capacity folds into ONE far-edge track. Normal capacity
-        // is the fixed `track.set_limit` (auto off) or unlimited
-        // (auto on); the overflow track is the EXTRA column past
-        // it, so a limit of N shows up to N normal tracks + 1
-        // overflow. Geometry always caps the total: if capacity+1
-        // columns can't hold min size, the fit-count reduces (the
-        // limit is display-agnostic; the display decides at render
-        // time), never grows past it.
-        // The render cap folds the surplus past the normal
-        // capacity (`params.normalCap`: fixed `count`, or `.max`
-        // when auto tracks caps by geometry alone) OR the
-        // geometric fit into one far-edge overflow track. The
-        // last slot is the overflow track whenever capacity is
-        // exceeded — even when it holds a single window (the
-        // N+1th track past a fixed limit), so no actual merge is
-        // needed. `foldedPartition` is the one copy of this
-        // assembly, shared with the swap guard and the heal.
         let (counts, _, _, overflowTrack) = Self.foldedPartition(
             of: windows,
             breaks: context.trackBreaks,
@@ -64,19 +33,8 @@ public struct TrackLayout: LayoutSystem {
             (vertical ? usable.width : usable.height)
             - gap * CGFloat(counts.count - 1)
         let total = weights.reduce(0, +)
-        // The min-size cap shares the stack's authority (#44/#67):
-        // when even the merged tracks can't hold min_window_size
-        // (a degenerate span), the whole space cascades —
-        // physics, not a knob. A heavily-weighted track no
-        // longer reaches this check through the session stores:
-        // write-time clamps (#933) refuse one at press time and
-        // the retile-time heal (#944) — which reasons over this
-        // check's own folded partition — shaves one a
-        // membership change left behind. So tripping it here
-        // means the span itself cannot hold the members, a
-        // transient no heal has seen yet, or a traveler's visit
-        // (the heal deliberately reads LOCAL members; its doc
-        // owns why).
+        // Degenerate span cascades if tracks cannot satisfy min_window_size
+        // (#44, #67, #933, #944).
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(span),
@@ -100,9 +58,7 @@ public struct TrackLayout: LayoutSystem {
         )
         var result: [WindowID: CGRect] = [:]
         for (track, range) in Self.ranges(of: counts).enumerated() {
-            // Normal tracks always tile-then-pile; only the
-            // far-edge overflow track honors `overflow_style`
-            // (#192).
+            // Far-edge overflow track honors overflow_style (#192).
             let style: StackParams.OverflowStyle =
                 track == overflowTrack
                 ? params.overflowStyle : .cascadeOverflow
@@ -119,9 +75,7 @@ public struct TrackLayout: LayoutSystem {
         return result
     }
 
-    /// One region per track sized to its weight share of
-    /// `span`, laid consecutively along the axis (columns when
-    /// vertical, rows otherwise) with `gap` between.
+    /// Computes proportional track regions along axis.
     private func proportionalRegions(
         counts: [Int],
         weights: [Double],
@@ -156,17 +110,7 @@ public struct TrackLayout: LayoutSystem {
         return regions
     }
 
-    /// Distributes one track's windows along the axis, sized
-    /// proportionally to their `stackWeights` (#67; absent =
-    /// 1.0). Vertical tracks stack their windows top to
-    /// bottom, horizontal tracks lay them side by side. When
-    /// the smallest share stops fitting `minWindowSize`, the
-    /// track overflows per the caller's `overflowStyle` (#192):
-    /// `cascade_overflow` tiles the fitting prefix and piles the
-    /// rest; `cascade_all` piles every window from the top.
-    /// Normal tracks are always called with `cascade_overflow`;
-    /// only the far-edge overflow track honors the configured
-    /// style.
+    /// Distributes track windows proportionally by `stackWeights` (#67, #192).
     private func trackFrames(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,

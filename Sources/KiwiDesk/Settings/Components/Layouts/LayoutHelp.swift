@@ -1,11 +1,6 @@
 import KiwiDeskCore
 
-/// Shared #94 help copy for layout fields rendered on two
-/// surfaces — a mode's Layout Defaults tab and the per-space
-/// Customize popover — so both read one authored string
-/// (`extract-keys` fails loudly on same-key English drift, but
-/// one authoring point beats two to begin with). Computed, not
-/// stored, so a GUI language switch re-reads the catalog.
+/// Shared localized help text for layout settings across panels (#94).
 enum LayoutHelp {
     @MainActor static var splitStrategy: String {
         L(
@@ -38,12 +33,10 @@ enum LayoutHelp {
         )
     }
 
-    /// Stack's overflow styles. Deliberately NOT reused by
-    /// Track's same-named picker: there the enum governs only
-    /// the far-edge overflow track (and the default flips), so
-    /// this text would describe the wrong thing — hence the
-    /// stack-scoped key under the shared label key. Track's
-    /// own text is on the #94 audit follow-up list.
+    /// Stack overflow styles help text (#94). Deliberately NOT
+    /// reused by Track's same-named picker: there the enum governs
+    /// only the far-edge overflow track and the default flips, so
+    /// this text would describe the wrong thing.
     @MainActor static var stackOverflow: String {
         L(
             "layout_params.overflow.stack.help",
@@ -57,8 +50,7 @@ enum LayoutHelp {
         )
     }
 
-    /// The two #222 arrangement pickers, shared by the Stack
-    /// tab and the per-space Customize rows like the trio above.
+    /// Stack zone position help text (#222).
     @MainActor static var stackPosition: String {
         L(
             "layout_params.stack_position.help",
@@ -70,6 +62,7 @@ enum LayoutHelp {
         )
     }
 
+    /// Master zone orientation help text (#222).
     @MainActor static var masterOrientation: String {
         L(
             "layout_params.master_orientation.help",
@@ -79,18 +72,11 @@ enum LayoutHelp {
         )
     }
 
-    /// Wrap-focus, shared by all three array-order layouts
-    /// (Scrolling, Track, Monocle) — one string since they now
-    /// share the default (off, #257).
-    ///
-    /// Key deviates from the usual `<label-key>.help` derivation:
-    /// the wrap-focus *label* is itself split across pre-existing
-    /// keys (`scroll_grid.wrap_focus` for Scrolling/Monocle,
-    /// `track.wrap_focus` for Track, from #168), so no single
-    /// label key yields one help key. It lives under a neutral
-    /// `layout_params.wrap_focus.help` home instead — unlike
-    /// `trackOverflow`, whose label key `layout_params.overflow`
-    /// does derive cleanly.
+    /// Wrap-focus help for the three array-order layouts (#257).
+    /// Key deviates from `<label-key>.help`: the wrap-focus label
+    /// is itself split across pre-existing keys (#168), so no
+    /// single label key yields one help key — hence the neutral
+    /// `layout_params.wrap_focus.help` home.
     @MainActor static var wrapFocus: String {
         L(
             "layout_params.wrap_focus.help",
@@ -100,11 +86,7 @@ enum LayoutHelp {
         )
     }
 
-    /// Monocle's hide style (#881). Names both reasons to pick
-    /// park in reader terms — a transparent window, a window
-    /// that can't fill the whole screen — and states the cost
-    /// (the visible parked edge), per the popover conventions.
-    /// Option names interpolated from their own keys (#818).
+    /// Monocle hide style help text (#881, #818).
     @MainActor static var monocleHideStyle: String {
         L(
             "monocle.hide_style.help",
@@ -121,13 +103,7 @@ enum LayoutHelp {
         )
     }
 
-    /// Track's far-edge overflow track. Same enum as Stack's
-    /// overflow but it governs only that one track and the
-    /// default flips to Cascade all, so it can't reuse
-    /// `stackOverflow` (see that property's note). The closing
-    /// line clarifies that ordinary tracks overflow too — they
-    /// are always `cascade_overflow` — and only this far-edge
-    /// track is configurable.
+    /// Track far-edge overflow track help text.
     @MainActor static var trackOverflow: String {
         L(
             "layout_params.overflow.track.help",
@@ -145,14 +121,7 @@ enum LayoutHelp {
         )
     }
 
-    /// Scrolling's per-space slot-size override (#290). Names the
-    /// orientation-driven meaning (column width vs row height) and
-    /// what each unit does, so the checkbox's inherited value
-    /// reads clearly.
-    ///
-    /// All four option names are INTERPOLATED from the controls'
-    /// own keys (#818) — see `trackPosition` for why a help
-    /// string never re-types a label it quotes.
+    /// Scrolling slot size override help text (#290, #818).
     @MainActor static var slotSize: String {
         L(
             "space_override.slot_size.help",
@@ -169,10 +138,7 @@ enum LayoutHelp {
         )
     }
 
-    /// Scrolling's focus-shift animation toggle (#290). Its
-    /// static schematic can't demonstrate motion, so the help
-    /// carries the behavior and points at how Scroll duration
-    /// relates.
+    /// Scrolling focus shift animation help text (#290).
     @MainActor static var animateFocusShifts: String {
         L(
             "scroll_grid.animate_focus_shifts.help",
@@ -185,10 +151,8 @@ enum LayoutHelp {
         )
     }
 
-    /// `PlacementPicker`'s default text — every layout tab
-    /// inherits it with the component. Track overrides it
-    /// (below); hoisted here so no `+`-chain sits inside a
-    /// `body` expression (§5 type-checker budget).
+    /// Default new window placement help text (`PlacementPicker`,
+    /// §5 type-checker budget).
     @MainActor static var newWindowPlacement: String {
         L(
             "placement.new_window.help",
@@ -199,17 +163,7 @@ enum LayoutHelp {
         )
     }
 
-    /// Track's Position picker shares `PlacementPicker` but
-    /// places a whole track in own-track mode, so the
-    /// window-centric default above would be wrong there.
-    ///
-    /// The two option names are INTERPOLATED from the picker's
-    /// own keys rather than re-typed (#818): a help string that
-    /// quotes a label is a hand-kept mirror, and every locale
-    /// holds the two as independent strings that must agree
-    /// forever with nothing checking that they do — `de` had
-    /// already drifted to a name not on screen, and `ja` had
-    /// dropped the mapping the sentence exists for.
+    /// Track new window placement help text (#818).
     @MainActor static var trackPosition: String {
         L(
             "track.new_window_position.help",

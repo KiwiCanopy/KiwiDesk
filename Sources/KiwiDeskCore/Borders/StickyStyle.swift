@@ -1,55 +1,18 @@
 import Foundation
 
-/// The sticky-window mark settings (#414), stored
-/// top-level as `sticky` in profile JSON and set from Lua via
-/// `sticky.set_*`. One knob so far: the on-window glyph that
-/// marks a sticky window (`Borders/StickyMarkManager`), a
-/// sibling of the focus border — borders are optional and often
-/// off, so the mark must not ride them.
-///
-/// The setter applies unconditionally: turning the glyph off
-/// with the Space Bar also off is a valid deliberate zero-mark
-/// state (the `dim_factor` precedent), and no surface may clamp
-/// it back. The GUI's own toggle is held to that by
-/// `StickyMarkUngatedTests` — this module cannot see
-/// `Sources/KiwiDesk` and would not otherwise notice the day a
-/// forced-ON gate came back.
+/// Sticky window styling and indicator glyph configuration
+/// (`Borders/StickyMarkManager`, `StickyMarkUngatedTests`, #414).
 public struct StickyStyle: Sendable, Equatable {
-    /// The sticky mark — ONE glyph everywhere (#414): the
-    /// on-window mark and the Space Bar badge both read this,
-    /// so the two surfaces can never drift apart. Lives here
-    /// (the sticky namespace), not in a Bar view, so neither
-    /// subsystem reaches laterally into the other for it.
-    ///
-    /// `infinity` (#429, ui-designer): "always / everywhere" for a
-    /// GLOBAL-sticky window present on every space of every
-    /// monitor, and a single clean stroke that stays crisp at the
-    /// 7–9 pt badge size where the old `square.stack.3d.up.fill`'s
-    /// perspective smeared.
+    /// SF Symbol for global sticky windows (`infinity`, #414, #429).
     public static let symbolName = "infinity"
 
-    /// The DISPLAY-sticky mark (#445): `pin.fill` — "tacked to
-    /// this screen" for a window present on every space of ONE
-    /// monitor. A filled glyph, so it tints from `color` exactly
-    /// like `infinity`. Deliberately the pin: `SpaceAssignmentChip`
-    /// uses the same pin for "bound to one space", the neighbouring
-    /// idea — display-sticky is "bound to one display", so the
-    /// shared family reads as intended, not as a collision.
-    ///
-    /// **A seeded keybinding is named for this glyph (#1094):**
-    /// `⌃⌥P` toggles display-sticky because the user sees a PIN
-    /// on the window, and a mark is language-independent where a
-    /// label is not. So re-picking this symbol is not a private
-    /// rendering choice — it strands that letter's rationale, in
-    /// every catalog at once. The global mark was already
-    /// re-picked once (`square.stack.3d.up.fill` → `infinity`,
-    /// #429), which is why this says so here rather than only at
-    /// the consumer. Re-pick it and re-argue the letter.
+    /// SF Symbol for display-sticky windows (`pin.fill`, #445).
+    /// A seeded keybinding is NAMED for this glyph (`⌃⌥P`, #1094):
+    /// re-picking the symbol strands that letter's rationale in
+    /// every catalog — re-pick it and re-argue the letter.
     public static let displaySymbolName = "pin.fill"
 
-    /// The mark glyph for a scope, or nil for `.none` (no mark).
-    /// One lookup so the on-window mark and the Space Bar badge
-    /// pick the same per-scope glyph.
+    /// Resolves indicator symbol name for given sticky scope.
     public static func symbolName(for scope: StickyScope) -> String? {
         switch scope {
         case .none: return nil
@@ -58,36 +21,21 @@ public struct StickyStyle: Sendable, Equatable {
         }
     }
 
-    /// On-window sticky glyph, on by default: a sticky window
-    /// can look identical to a normal one, and unlike a focus
-    /// border there is no native cue to fall back on.
+    /// Whether on-window sticky mark is visible.
     public var mark = true
 
-    /// The sticky mark's tint (#429). One value the on-window
-    /// mark glyph AND the Space Bar sticky badge both read (the
-    /// "one glyph everywhere" family extends to color), so the
-    /// two surfaces can never drift to different colors. Empty =
-    /// "Automatic": the adaptive `.labelColor` that flips with
-    /// light/dark, resolved via `NSColor.mark(hex:fallback:)` —
-    /// there is no fixed hex for it, so it stays the empty
-    /// sentinel rather than a frozen neutral.
+    /// Hex color string for sticky badge tint (#429).
     public var color = ""
 
     public init() {}
 }
 
-// MARK: - Codable
-
 extension StickyStyle: Codable {
-    /// JSON keys are the Lua setters (`sticky.set_*`) minus the
-    /// `set_` verb — the `sticky` nesting carries the namespace.
     enum CodingKeys: String, CodingKey, CaseIterable {
         case mark
         case color
     }
 
-    /// Manual decoding: profiles saved before a field existed
-    /// must keep loading (missing keys fall back to defaults).
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self

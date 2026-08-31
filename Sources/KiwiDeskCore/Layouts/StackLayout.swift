@@ -1,16 +1,6 @@
 import CoreGraphics
 
-/// Master/Stack layout over the flat array.
-///
-/// The first `masterCount` windows form the master zone,
-/// everything after is the stack zone. The zone boundary is
-/// just an index — no containers (see 03_Layout). Where the
-/// stack zone sits (`stack_position`) and how the master zone
-/// lines up its windows (`master_orientation`) are parameters
-/// (#222); the stack zone's lineup derives from the position
-/// (`StackPosition.stackOrientation`). The default is master
-/// left / stack right (the classic dwm split) with multiple
-/// masters side by side (`master_orientation` `horizontal`).
+/// Master/Stack layout over flat window array (#222).
 public struct StackLayout: LayoutSystem {
     public init() {}
 
@@ -26,17 +16,14 @@ public struct StackLayout: LayoutSystem {
             masterCount: params.masterCount
         )
 
-        // #313: render order for the master zone. Mirrored, the
-        // boundary master sits at the stack seam instead of the
-        // far edge. Applied in the master-only branch too, so
-        // closing the last stack window never reorders masters.
+        // Mirrored master order keeps boundary master at stack seam (#313).
         let masterOrdered =
             Self.mirrorsMasterZone(params)
             ? ArraySlice(master.reversed())
             : master
 
         guard let stack else {
-            // Master only: the full usable region.
+            // Master only: full usable region.
             return zone(
                 masterOrdered,
                 in: usable,
@@ -52,12 +39,7 @@ public struct StackLayout: LayoutSystem {
             : context.gaps.inner.vertical
         let available =
             (horizontal ? usable.width : usable.height) - gap
-        // The cascade is a genuine last resort: only when two
-        // min-size zones cannot coexist at ANY ratio (#44). A
-        // merely extreme master_ratio is clamped to the widest
-        // value that keeps both zones ≥ min_window_size — the
-        // stored config value stays untouched, so it is honored
-        // again on a wider display.
+        // Cascades if min-size zones cannot coexist (#44).
         guard
             let range = SplitDomain.effectiveRatioRange(
                 available: Double(available),
@@ -106,25 +88,7 @@ public struct StackLayout: LayoutSystem {
         return result
     }
 
-    /// #313: whether the master zone lays its slots from the
-    /// stack seam instead of the region's min edge. True when
-    /// the stack *leads* (`left`/`top`) AND the master lineup
-    /// runs *parallel* to the split axis — otherwise the
-    /// boundary master (index `masterCount − 1`) would render
-    /// at the point farthest from the stack, and every boundary
-    /// crossing (minimize-promotion, `promote`/`demote`) would
-    /// teleport across the master zone. A pure render mapping:
-    /// array order and the promote/demote swaps stay untouched,
-    /// and geometric navigation follows the frames. Deliberately
-    /// NOT applied to perpendicular lineups — there every master
-    /// already touches the seam, and reversing would flip the
-    /// natural top-to-bottom (left-to-right) reading for no seam
-    /// gain. Side effect, accepted: in a mirrored zone the
-    /// `cascade_overflow` pile at the trailing end holds the
-    /// array-earliest masters instead of the latest — the pile
-    /// keeps its screen position and downward cascade either
-    /// way. `StackSchematic` mirrors in lockstep via this same
-    /// predicate.
+    /// Whether master zone renders from stack seam (`StackSchematic`, #313).
     public static func mirrorsMasterZone(
         _ params: StackParams
     ) -> Bool {
@@ -138,10 +102,7 @@ public struct StackLayout: LayoutSystem {
         return params.masterOrientation == parallel
     }
 
-    /// The master and stack regions for a split of the usable
-    /// area (#222): the split axis follows `position`
-    /// (`left`/`right` divide the width, `top`/`bottom` the
-    /// height), each zone spanning the full cross axis.
+    /// Master and stack regions for split of usable area (#222).
     static func regions(
         usable: CGRect,
         position: StackParams.StackPosition,
@@ -209,15 +170,8 @@ public struct StackLayout: LayoutSystem {
         }
     }
 
-    /// Distributes windows along one axis of a region — a
-    /// column when `vertical`, a row otherwise (#222) — sized
-    /// proportionally to their `stackWeights` (#67; absent =
-    /// 1.0, so unweighted zones stay even). When the smallest
-    /// weighted share stops fitting, weighting steps aside: as
-    /// many windows as possible stay fully tiled (evenly) and
-    /// only the overflow collapses into a title-bar cascade at
-    /// the zone's trailing end (the pile itself always offsets
-    /// downward — `OverlapStack`).
+    /// Distributes windows along region axis weighted by `stackWeights`
+    /// (#222, #67, `OverlapStack`).
     private func zone(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,
@@ -280,12 +234,7 @@ public struct StackLayout: LayoutSystem {
         return result
     }
 
-    /// Zone overflow: the first `tiled` windows keep at
-    /// least `minWindowSize`, the rest cascade at the zone's
-    /// trailing end with a fixed title-bar offset — the
-    /// block's last window fully visible, the buried ones
-    /// showing their title bars above it. Nothing extends
-    /// past the region.
+    /// Cascades trailing windows when zone exceeds capacity.
     private func overflowZone(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,
@@ -304,16 +253,13 @@ public struct StackLayout: LayoutSystem {
                     : context.gaps.inner.horizontal
             )
         else {
-            // Not even one full window fits above the cascade:
-            // the whole region cascades (emergency fallback).
             return OverlapStack.frames(
                 for: windows,
                 in: region,
                 minSize: context.minWindowSize
             )
         }
-        // Sticky windows keep a fully-tiled slot (#414 v2);
-        // a non-sticky window overflows instead.
+        // Sticky windows keep fully-tiled slot (#414 v2).
         let ordered = OverlapStack.stickyExempt(
             ids,
             tiled: overflow.tiled,

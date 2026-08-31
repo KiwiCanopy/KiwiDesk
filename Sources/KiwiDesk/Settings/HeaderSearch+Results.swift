@@ -1,23 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The header search's RESULT surface — the card hanging below
-/// the field, its rows and the "Made by you" group's caption.
-/// Split from `HeaderSearch` at the §2.1 ceiling when 17a's
-/// collapsed entry landed: the field, its two entries and the
-/// key handling are one job, and the panel below them another.
+/// Header search result dropdown presentation and layout.
 extension HeaderSearch {
-    /// Hung below the field in the field's own coordinate
-    /// space; the offset is the field's height plus the gap —
-    /// a constant, since a `GeometryReader` around the FIELD
-    /// would negotiate the flexible slot and collapse the row.
-    ///
-    /// 380 wide, a card under the field's leading edge — NOT
-    /// the field's width. A full-width panel was tried against
-    /// the line-through-the-panel report and rejected on sight
-    /// once the real cause (the header separator's paint
-    /// order) was fixed (owner, 2026-08-10). The responsive
-    /// pass (17a) owns the final number.
+    /// Search results popup card attached below search field
+    /// (owner 2026-08-10).
     @ViewBuilder var resultPanel: some View {
         if searching, focused || panelHovered {
             resultCard
@@ -39,10 +26,6 @@ extension HeaderSearch {
                     )
                     .strokeBorder(SettingsTheme.hairline)
                 )
-                // 16b dark seam OVER the hairline: the black
-                // shadow below is the panel's lift in light
-                // and is invisible on the dark page — see
-                // `SettingsTheme.planeRing`.
                 .overlay(
                     RoundedRectangle(
                         cornerRadius: SettingsTheme.cardRadius
@@ -55,8 +38,8 @@ extension HeaderSearch {
                 // Without this the shadow halos EVERY
                 // primitive — the hairline ring casts its own
                 // shadow INWARD, reading as a line ghosting
-                // through an opaque panel (#758's lesson, hit
-                // again here; owner report 2026-08-10).
+                // through the panel (#758's lesson, hit again;
+                // owner report 2026-08-10).
                 .compositingGroup()
                 .shadow(
                     color: .black.opacity(0.16),
@@ -81,15 +64,12 @@ extension HeaderSearch {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.vertical, 8)
         } else {
-            // Lazy on purpose: rows compute their value
-            // enrichment when they appear, so a broad query
-            // enriches the ~8 visible rows, never the whole set.
-            // An overlay proposes the FIELD's size, and a
-            // ScrollView adopts whatever it is proposed — so
-            // without an explicit height the whole list
-            // collapses to one clipped row (owner eyeball,
-            // 2026-08-10). The height is the content's own
-            // estimate, capped; past the cap it scrolls.
+            // Lazy on purpose: rows enrich on appear, so a
+            // broad query enriches ~8 visible rows, never the set.
+            // An overlay proposes the FIELD's size and a
+            // ScrollView adopts what it is proposed — without an
+            // explicit height the list collapses to one clipped
+            // row (owner eyeball, 2026-08-10).
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(results.settings) { result in
@@ -107,11 +87,7 @@ extension HeaderSearch {
         }
     }
 
-    /// Estimated content height: two-line rows at ~40 pt, the
-    /// group caption when present, capped at 320 (the shipped
-    /// max) — an estimate is safe because past the cap the list
-    /// scrolls and under it a few points of slack vanish into
-    /// the padding.
+    /// Computes estimated height for dropdown scrollview.
     func panelHeight(
         _ results: SettingsSearchResults
     ) -> CGFloat {
@@ -120,20 +96,12 @@ extension HeaderSearch {
         return min(rows * 40 + header, 320)
     }
 
-    /// The group's caption (spec 11a): the user's own named
-    /// things, below the settings rows.
-    ///
-    /// Named by OWNERSHIP, not by location. A location word is a
-    /// metaphor only English carries here — the group holds a
-    /// Space, a Profile and an App rule — and the literal
-    /// translation collided outright in two catalogs: fr
-    /// "Emplacements" is already the tiling slot, zh 位置 is
-    /// already the "Position" setting label on rows this very
-    /// search indexes. "Item" was unavailable to translate into:
-    /// it is a ruled noun for a bar entry
-    /// (.claude/rules/config-vocabulary.md), and its Romance
-    /// renderings collide the same way. The wire keeps `place` —
-    /// in code the thing is a jump target.
+    /// Caption for user-named entities group (spec 11a). Named by
+    /// OWNERSHIP, not location: the literal translation collided
+    /// in two catalogs (fr "Emplacements" is the tiling slot, zh
+    /// 位置 is the "Position" label), and "Item" is a ruled noun
+    /// for a bar entry (config-vocabulary.md). The wire keeps
+    /// `place`.
     var placesHeader: some View {
         Text(L("search.places", "Made by you"))
             .font(.caption2.weight(.semibold))
@@ -159,9 +127,6 @@ extension HeaderSearch {
         )
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        // The list convention: no fill at rest, a quiet wash
-        // under the pointer (owner, 2026-08-10: rows read
-        // inert without it).
         .rowHoverHighlight()
         .background(
             RoundedRectangle(cornerRadius: 6)
@@ -173,8 +138,7 @@ extension HeaderSearch {
         )
     }
 
-    /// The spotlight dot's VoiceOver twin — empty when unbadged
-    /// (the sidebar's rule, carried whole).
+    /// Accessibility description for profiles spotlight badge.
     func badgeValue(
         for destination: SettingsDestination
     ) -> String {

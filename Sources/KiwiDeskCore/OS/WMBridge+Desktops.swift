@@ -1,21 +1,10 @@
 import Foundation
 
-/// The Desktop half of the bridge: which Desktop a display
-/// shows and switching it (#26), the Desktop lifecycle, names,
-/// and the per-Desktop key/value store. Every id is a
-/// WindowServer space id — a Desktop or a fullscreen space,
-/// never a KiwiDesk space, which the WindowServer knows nothing
-/// about (#884's semantics note).
+/// WindowServer desktop operations bridge extension (#26, #884).
 extension WMBridge {
-    // MARK: - Reads
 
-    /// The full display/spaces model as the WindowServer holds
-    /// it — the same plist `SLSCopyManagedDisplaySpaces` returns.
-    /// Internal on purpose: it is the availability probe (a
-    /// synchronous read that must ANSWER), and the census stays
-    /// `NativeSpaces.allSpaces()`'s — one reader of
-    /// `"Display Identifier"`, `"Current Space"` and the space
-    /// list, which a caller verifying a bridge write reads too.
+    /// Managed display space property list dictionary
+    /// (`NativeSpaces.allSpaces()`).
     static func managedDisplaySpaces() -> [[String: Any]]? {
         let op = make(
             "CopyManagedDisplaySpacesOperation",
@@ -26,8 +15,7 @@ extension WMBridge {
         return field("propertyListArray", of: performSync(op))
     }
 
-    /// The Desktop's name (empty for an unnamed one), or nil
-    /// without the bridge.
+    /// Fetches assigned name for Space ID.
     public static func name(of space: SpaceID) -> String? {
         let op = make(
             "SpaceCopyNameOperation",
@@ -38,10 +26,7 @@ extension WMBridge {
         return field("string", of: performSync(op))
     }
 
-    /// KiwiDesk's own entries in the Desktop's store, keys as the
-    /// caller wrote them — the read half of `setValues(_:of:)`,
-    /// which prefixes on the way in, so this strips on the way
-    /// out. Apple's entries are `values(of:)`'s.
+    /// Reads KiwiDesk namespaced entries stored on the Desktop.
     public static func stamps(of space: SpaceID) -> [String: Any]? {
         guard let values = values(of: space) else { return nil }
         var out: [String: Any] = [:]
@@ -51,11 +36,7 @@ extension WMBridge {
         return out
     }
 
-    /// The Desktop's whole store as the WindowServer holds it —
-    /// Apple's own dictionary (`type`, `id64`, `uuid`,
-    /// `WindowManagerInfo`, …) with KiwiDesk's `valueKeyPrefix`
-    /// keys beside them, prefixed. A caller reading its own
-    /// entries takes `stamps(of:)`.
+    /// Reads full property list dictionary for Space ID.
     public static func values(of space: SpaceID) -> [String: Any]? {
         let op = make(
             "SpaceCopyValuesOperation",
@@ -66,21 +47,12 @@ extension WMBridge {
         return field("propertyListDictionary", of: performSync(op))
     }
 
-    // MARK: - Writes (dispatched, never confirmed — see WMBridge)
-
-    /// Points `displayIdentifier` at `space` (#26) — and that is
-    /// ALL it does (#1023): the WindowServer moves the
-    /// current-space pointer and composites the new space's
-    /// windows, but never hides the old space's, so on its own
-    /// this leaves both Desktops rendering at once while every
-    /// pointer read — `SLSGetActiveSpace`,
-    /// `SLSManagedDisplayGetCurrentSpace`, the managed-display
-    /// plist — reports the switch as landed (device-measured
-    /// 2026-08-26, macOS 26.6.2, both displays). A switching
-    /// caller therefore pairs an accepted dispatch with
-    /// `hideSpaces` of the space that display showed, which is
-    /// the half of the transition the Dock performs and this
-    /// write does not.
+    /// Points the display at `space` (#26) — and that is ALL it
+    /// does (#1023): the WindowServer never hides the old space's
+    /// windows, while every pointer read (`SLSGetActiveSpace`
+    /// included) reports the switch as landed. A switching caller
+    /// pairs an accepted dispatch with `hideSpaces` of the space
+    /// that display showed.
     public static func setCurrentSpace(
         _ space: SpaceID,
         displayIdentifier: String
@@ -100,15 +72,10 @@ extension WMBridge {
     }
 
     /// Removes `spaces`' windows from the compositor — the half
-    /// of a Desktop switch `setCurrentSpace` leaves unperformed
-    /// (#1023). The bare C symbol is a silent no-op from a
-    /// foreign process; this operation is not, and set-then-hide
-    /// measured as a complete switch — pointer moved AND the
-    /// destination's windows composited within ~130 ms — on
-    /// device 2026-08-26 (macOS 26.6.2). No `showSpaces` twin is
-    /// wrapped on purpose: the set itself composites the target,
-    /// measured against both a Dock-hidden and a bridge-hidden
-    /// space, so a show would be a write nothing needs.
+    /// of a switch `setCurrentSpace` leaves unperformed (#1023).
+    /// No `showSpaces` twin on purpose: the set itself composites
+    /// the target (device-measured 2026-08-26), so a show would be
+    /// a write nothing needs.
     public static func hideSpaces(_ spaces: [SpaceID]) -> Bool {
         let op = make(
             "HideSpacesOperation",
@@ -123,10 +90,7 @@ extension WMBridge {
         return performAsync(op)
     }
 
-    /// Creates a real managed Desktop — it joins Mission
-    /// Control's user list (#889 item 1) — and returns its id.
-    /// `values` seeds its key/value store under
-    /// `valueKeyPrefix`.
+    /// Creates managed desktop space in Mission Control (#889 item 1).
     public static func createSpace(
         values: [String: Any] = [:]
     ) -> SpaceID? {
@@ -144,11 +108,7 @@ extension WMBridge {
         return field("spaceID", of: performSync(op))
     }
 
-    /// Destroys a Desktop. Its windows migrate to another
-    /// Desktop — Mission Control's own close semantics, verified
-    /// on device (#889 item 1) — so nothing is lost, but the
-    /// caller decides whether that migration is what the user
-    /// asked for.
+    /// Destroys desktop space, migrating windows (#889 item 1).
     public static func destroySpace(_ space: SpaceID) -> Bool {
         let op = make(
             "SpaceDestroyOperation",
@@ -159,7 +119,7 @@ extension WMBridge {
         return performAsync(op)
     }
 
-    /// Renames a Desktop. Verify by `name(of:)`.
+    /// Renames desktop space.
     public static func setName(
         _ name: String,
         of space: SpaceID
@@ -178,13 +138,7 @@ extension WMBridge {
         return performAsync(op)
     }
 
-    /// Merges `values` into the Desktop's store, every key under
-    /// `valueKeyPrefix`. Survives
-    /// logout, the separate-Spaces mode flip and cable cycles on
-    /// the MAIN display's Desktops (#889 item 3) — but a
-    /// secondary display's Desktop is discarded with its display
-    /// on unplug, values included (item 4), so stamping alone
-    /// cannot carry that identity across a replug.
+    /// Writes custom metadata dictionary to desktop space (#889 items 3 & 4).
     public static func setValues(
         _ values: [String: Any],
         of space: SpaceID

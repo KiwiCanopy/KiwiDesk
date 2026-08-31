@@ -1,16 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One Home card (#678 turn 9): the destination's tile and
-/// title, a small live preview where one exists, and the
-/// current-value subtitle. A plain `Button`, so focus ring and
-/// Return/Space activation come native; VoiceOver reads it as
-/// one element whose value is the answer the card carries.
+/// Settings home grid navigation card (#678 turn 9).
 struct HomeCard: View {
     @ObservedObject var model: SettingsModel
     let destination: SettingsDestination
-    /// The Profiles spotlight dot — state-driven, same rule as
-    /// the old sidebar tile.
     let spotlighted: Bool
     let open: () -> Void
     @State private var hovering = false
@@ -18,11 +12,7 @@ struct HomeCard: View {
     var body: some View {
         Button(action: open) {
             VStack(alignment: .leading, spacing: 0) {
-                // The desktop plate rides ABOVE the title and
-                // outside the reveal wash (#786): full-bleed,
-                // clipped through the card's own corners, so
-                // the card border is the picture's visible
-                // edge (4g).
+                // Full-bleed plate band (#786).
                 if let plate = HomeCardPlate.plate(
                     for: destination,
                     model: model
@@ -32,9 +22,6 @@ struct HomeCard: View {
                 textBand
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            // Two deliberate heights (#786): the profile group
-            // holds the plate band and the whole-app cards sit
-            // shorter.
             .frame(
                 height: tall
                     ? SettingsTheme.cardHeight
@@ -46,13 +33,11 @@ struct HomeCard: View {
                     cornerRadius: SettingsTheme.cardRadius
                 )
             )
-            // The border rides ABOVE the clip, never in the
-            // background: the plate is opaque and full-bleed,
-            // so a background stroke is painted over for the
-            // plate's whole band — which silenced the rest
-            // hairline, the hover accent and the #760
-            // mode-gated frame on every plated card
-            // (ui-designer blocker, 2026-08-09).
+            // Border ABOVE the clip, never in the background:
+            // the plate is opaque and full-bleed, so a background
+            // stroke is painted over — which silenced the rest
+            // hairline, the hover accent and the #760 frame on
+            // every plated card (ui-designer blocker, 2026-08-09).
             .overlay(cardStroke)
             .contentShape(
                 RoundedRectangle(
@@ -66,18 +51,13 @@ struct HomeCard: View {
         .accessibilityValue(axValue)
     }
 
-    /// The one group partition, read where the group order
-    /// already lives — never a second hand-kept list.
     private var tall: Bool {
         HomeCardOrder.thisProfile.contains(destination)
     }
 
     private var textBand: some View {
         VStack(alignment: .leading, spacing: 5) {
-            // Wash on the title band alone (#760): tinting
-            // the whole card would run the accent through
-            // the live preview, briefly misrepresenting the
-            // very colours it renders.
+            // Mode reveal wash restricted to title row (#760).
             titleRow.modeRevealWash(modeGated)
             if let preview = HomeCardPreview.preview(
                 for: destination,
@@ -116,13 +96,8 @@ struct HomeCard: View {
         )
     }
 
-    /// Whether this card would leave the page in Simple — THE
-    /// offer predicate at `.simple`, never a hand-negated copy
-    /// (the one-predicate rule, `HomeCardOrderTests`): the
-    /// Monitors promotion means the same card is mode-gated on a
-    /// laptop and Simple content on a desk, and only the real
-    /// predicate keeps the border stating the same fact as
-    /// presence (#760).
+    /// Whether destination is gated under Simple mode
+    /// (`HomeCardOrderTests`, #760).
     private var modeGated: Bool {
         !HomeCardOrder.isOffered(
             destination,
@@ -158,15 +133,6 @@ struct HomeCard: View {
             .lineLimit(1)
     }
 
-    /// Flat: fill plus a hairline, no shadow — the prototype's
-    /// cards separate by border, which is also what makes them
-    /// survive the dark appearance, where surfaces sit within ten
-    /// points of each other and a shadow reads as dirt.
-    ///
-    /// Hover swaps the hairline for the accent (owner ruled,
-    /// 2026-08-04). It is the border and only the border, so it
-    /// composes with — rather than competes against — the native
-    /// focus ring a keyboard user gets from the plain `Button`.
     private var cardFill: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
             .fill(SettingsTheme.card)
@@ -174,15 +140,7 @@ struct HomeCard: View {
 
     private var cardStroke: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
-            // The mode-gated frame speaks the mode's own
-            // colour — the accent at reduced strength, so
-            // the connection to the active Power User
-            // segment is legible (owner, 2026-08-09: a
-            // darker grey read as "different" but not
-            // "which") while hover keeps the full-strength
-            // accent as its own register on the same edge.
-            // Weight still steps too, so hue never carries
-            // alone.
+            // Accent highlight on hover (owner ruled 2026-08-04, 2026-08-09).
             .strokeBorder(
                 hovering
                     ? SettingsTheme.accent
@@ -198,10 +156,11 @@ struct HomeCard: View {
             .allowsHitTesting(false)
     }
 
+    /// One positional frame, never a hard-coded ", ": the joiner
+    /// between two localized statements is the translator's (CJK
+    /// wants 、/，). VoiceOver hears the mode fact here or nowhere
+    /// (#760), off the segment's own label key.
     private var axValue: String {
-        // One positional frame, not a hard-coded ", " — the
-        // joiner between two localized statements is the
-        // translator's (CJK wants 、/，).
         let base =
             if let shout {
                 L(
@@ -213,11 +172,7 @@ struct HomeCard: View {
             } else {
                 subtitle
             }
-        // Sighted users read the mode fact off the frame's
-        // accent and the header segment; VoiceOver hears it
-        // here or nowhere (#760, ui-designer). Reuses the
-        // segment's own label key, so the spoken word and the
-        // switch cannot drift apart.
+        // Power user mode narration (#760, ui-designer).
         guard modeGated else { return base }
         return L(
             "home.card.ax_value",

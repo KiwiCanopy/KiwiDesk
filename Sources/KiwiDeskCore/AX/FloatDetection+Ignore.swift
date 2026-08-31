@@ -1,35 +1,23 @@
 import ApplicationServices
 import Foundation
 
-/// The ignore half of window classification: windows KiwiDesk
-/// must never manage at all — no tracking, state entry, space
-/// assignment, or events. Split from `FloatDetection.swift`
-/// (file-size ceiling); the float-vs-tile half stays there.
+/// Window ignore classification and layer-scoped panel detection
+/// (`FloatDetection.swift`).
 extension FloatDetection {
     private static let ghosttyBundleID = "com.mitchellh.ghostty"
 
-    /// Apps whose built-in ignore is layer-scoped: only their
-    /// raised-layer panels are ignored, their layer-0 windows
-    /// stay managed. Ghostty's quick terminal (#21); Raycast's
-    /// command bar (#448) — listed as a belt for a dock-icon
-    /// (regular-policy) Raycast, which the generic accessory +
-    /// raised-layer rule below cannot see. Raycast 2 (the
-    /// "Raycast X" beta) ships under its own bundle id.
+    /// Layer-scoped ignored apps: only raised-layer panels are ignored
+    /// (#21, #448).
     private static let layerScopedIgnoredApps: Set<String> = [
         ghosttyBundleID,
         "com.raycast.macos",
         "com.raycast-x.macos",
     ]
 
-    /// Transient macOS UI processes whose windows are overlays,
-    /// not user workspaces. Neither should enter state or receive
-    /// a KiwiDesk focus border (#177).
+    /// System UI overlay processes that should not enter window state (#177).
     private static let ignoredSystemApps: Set<String> = [
         "com.apple.textinputmenuagent",
         "com.apple.textinputswitcher",
-        // Menu-bar popovers (Wi-Fi, Bluetooth, sliders) are
-        // accessory windows that would otherwise be tracked
-        // and shown in the bars.
         "com.apple.controlcenter",
     ]
 
@@ -40,16 +28,8 @@ extension FloatDetection {
         return ignoredSystemApps.contains(bundleID.lowercased())
     }
 
-    /// Windows KiwiDesk must not manage at all — no tracking,
-    /// state entry, space assignment, or events. User rules are
-    /// app-wide. Built-in layer-scoped rules ignore only an
-    /// app's raised-layer panels (#21); `isAccessory` extends
-    /// that to every third-party accessory-policy app (#448):
-    /// a menu-bar app's raised-layer window is a Spotlight/
-    /// Raycast-style command bar or HUD, and merely floating it
-    /// still pins it to a space and drags it across space
-    /// switches. Accessory apps' layer-0 windows (settings,
-    /// pickers) stay managed floats.
+    /// Whether window should be ignored from tracking, state, and borders
+    /// (#21, #448).
     public static func shouldIgnore(
         bundleID: String?,
         layer: Int,
@@ -66,10 +46,7 @@ extension FloatDetection {
                     } == true)
     }
 
-    /// Whether ignore classification for this app depends on
-    /// CGWindow layers (the layer-scoped built-ins and every
-    /// accessory app). User rules match the whole app and need
-    /// no server scan.
+    /// Whether ignore classification depends on CGWindow layer lookup.
     public static func requiresWindowLayers(
         bundleID: String?,
         isAccessory: Bool
@@ -80,9 +57,8 @@ extension FloatDetection {
             } == true
     }
 
-    /// Window-id check for a built-in layer-scoped ignored
-    /// panel. User-ignored apps do not use the panel-dismiss
-    /// focus workaround: every window in those apps is ignored.
+    /// Checks if a window ID corresponds to a built-in layer-scoped
+    /// ignored panel.
     public static func isBuiltInIgnoredPanel(
         bundleID: String?,
         id: WindowID,
@@ -104,10 +80,8 @@ extension FloatDetection {
         )
     }
 
-    /// CGWindow layers of all of an app's windows in ONE
-    /// window-server round trip. Reconcile uses this instead
-    /// of one lookup per window (AGENTS.md: never query the
-    /// window server in a loop).
+    /// Batch queries CGWindow layers for all windows of process `pid`
+    /// in one call (AGENTS.md).
     public static func windowLayers(
         pid: pid_t
     ) -> [WindowID: Int] {
@@ -132,45 +106,20 @@ extension FloatDetection {
         return layers
     }
 
-    /// The panel band: raised CGWindow layers BELOW the main-
-    /// menu/status level. Command bars and quick terminals live
-    /// here (floating 3 … modal panel 8); an accessory app's
-    /// permanent `NSStatusItem` window sits at the status level
-    /// (25) and a popped menu above it — counting those as a
-    /// "visible ignored panel" would distrust every menu-bar
-    /// app's focus reports *forever*, killing focus-follow for
-    /// their managed windows (#448 review). Visibility-scan
-    /// only: the track/reconcile gate is keyed by AX-tracked
-    /// windows, which status items never are. Accepted residue:
-    /// a bar raised to or above the main-menu level (some
-    /// launchers do, to show over native fullscreen) escapes
-    /// the focus-distrust while up — transient, and the bar
-    /// itself still never gets managed (the gate has no band).
+    /// Checks if layer is in the raised panel band: above 0 and
+    /// BELOW main-menu level, the ceiling that keeps status-level
+    /// chrome out of the panel verdict (#448).
     static func isPanelBandLayer(_ layer: Int) -> Bool {
-        // Strictly RAISED: negative (desktop-level) layers are
-        // below normal — a wallpaper utility's permanent
-        // backdrop window must not latch the distrust either.
         layer > 0
             && layer < Int(CGWindowLevelForKey(.mainMenuWindow))
     }
 
-    /// True while the app currently shows an ignored panel on
-    /// screen. While Ghostty's quick terminal is open, AX
-    /// reports the app's *main* window as focused — trusting
-    /// that report would focus-follow to the main window's
-    /// space even though the user is typing into the panel
-    /// (issue #21). Known limit: visibility is a proxy for
-    /// focus — with panel autohide disabled, a genuine main-
-    /// window focus is also distrusted while the panel shows.
-    /// Deliberate: suppressing a follow beats hijacking one.
+    /// Whether process currently displays a visible ignored panel (#21, #448).
     public static func hasVisibleIgnoredPanel(
         pid: pid_t,
         bundleID: String?,
         isAccessory: Bool
     ) -> Bool {
-        // Cheap out before the window-list scan: only apps with
-        // a layer-scoped built-in (or accessory policy, #448)
-        // can show an ignored panel.
         guard
             requiresWindowLayers(
                 bundleID: bundleID,

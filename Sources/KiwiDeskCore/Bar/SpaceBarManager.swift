@@ -1,34 +1,20 @@
 import AppKit
 
-/// One Space Bar per display (#293). Owns a `SpaceBarOverlay`
-/// keyed by `DisplayID`; the driver (`KiwiCore.updateSpaceBar`)
-/// computes the bars, this manager creates, shows, and retires
-/// overlays and routes their click callbacks — the same shape as
-/// `AppBarManager`.
+/// Space Bar overlay manager across displays (#293, `AppBarManager`).
 @MainActor
 public final class SpaceBarManager {
-    /// One display's resolved bar.
+    /// One display's resolved bar configuration.
     public struct Bar {
         public let display: DisplayID
         public let items: [SpaceBarOverlay.Item]
-        /// The trailing front-app segment's app; nil while the
-        /// toggle is off or nothing is focused.
+        /// Trailing front-app segment app data.
         let frontApp: SpaceBarItemView.App?
-        /// WHICH window that segment is about. Carried beside
-        /// the render value rather than inside it: `App` is what
-        /// the overlay draws, and a window id draws nothing.
-        /// The title-refresh gate needs the identity, and asking
-        /// the painted bar is what keeps it from re-deriving the
-        /// driver's guards (`showsTitle(of:)`).
+        /// Window ID associated with the front-app segment
+        /// (`showsTitle(of:)`).
         let frontWindow: WindowID?
         public let strip: CGRect
-        /// The resolved style; its `edge` is the stored
-        /// absolute edge — single source, like the App Bar.
         public let style: SpaceBarStyle
-        /// The sticky / floating badge tints (#429), resolved from
-        /// `StickyStyle`/`FloatingStyle` by `KiwiCore` — carried as
-        /// data so the bar renders the marks without reaching into
-        /// those namespaces.
+        /// Mark indicator colors (#429, `StickyStyle`, `FloatingStyle`).
         let stateMarkColors: StateMarkColors
 
         init(
@@ -50,15 +36,13 @@ public final class SpaceBarManager {
         }
     }
 
-    /// Click hook; wired to `KiwiCore.focusSpace`.
+    /// Selection callback (`KiwiCore.focusSpace`).
     public var onSelectSpace: @MainActor (SpaceID) -> Void = {
         _ in
     }
 
     private var overlays: [DisplayID: SpaceBarOverlay] = [:]
-    /// The bars actually painted — the single source for
-    /// anything that must sit clear of one (the #242 float
-    /// clamp reads the top strips).
+    /// Active visible bars painted on screen.
     private var shownBars: [Bar] = []
 
     public init() {}
@@ -68,10 +52,7 @@ public final class SpaceBarManager {
         Set(shownBars.map(\.display))
     }
 
-    /// Every painted strip as `(display, strip, edge)`. Floats
-    /// must clear a Space Bar exactly like an App Bar (#242,
-    /// all four edges since QA 2026-07-19) — read the painted
-    /// strips, never re-derive.
+    /// Painted strips with display and edge metadata (#242, QA 2026-07-19).
     public var shownStrips:
         [(
             display: DisplayID, strip: CGRect,
@@ -87,30 +68,19 @@ public final class SpaceBarManager {
         }
     }
 
-    /// True when a painted bar's front segment is about `id`.
-    ///
-    /// Deliberately NOT gated on the edge. A vertical bar draws
-    /// no front name (`layoutFrontName` returns early), but
-    /// `SpaceBarOverlay` builds the segment's accessibility
-    /// label from the same title on EVERY edge, so there the
-    /// title is announced rather than drawn — and a title that
-    /// is announced stale is as wrong as one drawn stale. The
-    /// gate treated "not drawn" as "not consumed" until a
-    /// review caught it (2026-08-20); both are consumers.
-    ///
-    /// The toggle and the focus guard come free: the driver
-    /// leaves `frontWindow` nil when `showFrontApp` is off or
-    /// nothing is focused.
+    /// Whether a painted bar's front segment presents title for
+    /// `id` — on either channel, drawn or announced, so it is NOT
+    /// gated on the text edge: announced stale is as wrong as
+    /// drawn stale (review 2026-08-20, #937).
     public func showsTitle(of id: WindowID) -> Bool {
         shownBars.contains { $0.frontWindow == id }
     }
 
-    /// Shows exactly `bars` — one per display — and retires the
-    /// overlays of any display no longer in the set.
+    /// Synchronizes visible bar overlays across displays. The
+    /// validity filter here — not the overlay's identical guard —
+    /// is the one the float clamp depends on; never simplify it
+    /// away as redundant.
     public func sync(_ bars: [Bar]) {
-        // This filter, not the overlay's identical guard, is
-        // the one `shownTopStrips` — and thus the float clamp —
-        // depends on: never "simplify" it away.
         let valid = bars.filter {
             !$0.items.isEmpty
                 && $0.strip.width >= 1 && $0.strip.height >= 1
@@ -133,11 +103,7 @@ public final class SpaceBarManager {
         }
     }
 
-    // MARK: - Drag-drop routing (#372)
-
-    /// The Space whose item contains a global (Cocoa) screen
-    /// point, across every painted bar; nil when the point is on
-    /// no bar. Point-based hit test — see `SpaceBarOverlay`.
+    /// Hit-tests global screen point against space items (#372).
     public func spaceItem(atGlobal point: CGPoint) -> SpaceID? {
         for overlay in overlays.values {
             if let space = overlay.spaceItem(atGlobal: point) {
@@ -147,14 +113,12 @@ public final class SpaceBarManager {
         return nil
     }
 
-    /// Tints `space`'s item with the synthetic drag-hover and
-    /// clears every other bar's items; nil clears all.
+    /// Updates drag-hover highlight state across overlays.
     public func setDragHover(_ space: SpaceID?) {
         overlays.values.forEach { $0.setDragHover(space) }
     }
 
-    /// Starts the pending-spring sweep on `space`'s item — empty
-    /// for `delay`, then filling over `duration`.
+    /// Starts spring-load progress sweep on target space overlay.
     public func beginSpringSweep(
         on space: SpaceID,
         duration: TimeInterval,
@@ -169,28 +133,25 @@ public final class SpaceBarManager {
         }
     }
 
-    /// Clears every hover tint and pending sweep across all bars.
+    /// Clears drag hover and spring sweep visual indicators.
     public func clearDragFeedback() {
         overlays.values.forEach { $0.clearDragFeedback() }
     }
 
-    /// Feeds the live drag cursor to every bar so a dwell over a
-    /// scroll-arrow zone autoscrolls that bar toward its hidden
-    /// Spaces (#385), letting a window reach an off-screen Space.
+    /// Updates drag autoscroll cursor position across overlays (#385).
     public func updateDragAutoScroll(atGlobal point: CGPoint) {
         overlays.values.forEach {
             $0.updateDragAutoScroll(atGlobal: point)
         }
     }
 
-    /// Stops any drag autoscroll across all bars — the drag ended
-    /// or was abandoned.
+    /// Cancels active drag autoscroll across all overlays.
     public func endDragAutoScroll() {
         overlays.values.forEach { $0.cancelDragAutoScroll() }
     }
 
     #if DEBUG
-        /// Test seam: the overlay currently backing a display.
+        /// Test seam: overlay backing a specific display.
         func overlayForTesting(
             _ display: DisplayID
         ) -> SpaceBarOverlay? {

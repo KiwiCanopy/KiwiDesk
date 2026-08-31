@@ -43,13 +43,8 @@ public enum NativeSpaces {
         return space != 0 ? space : nil
     }
 
-    /// The current space of one display (by display UUID).
-    ///
-    /// A POINTER read (`SLSManagedDisplayGetCurrentSpace`): it
-    /// answers the new space ~100 ms after a bridge switch
-    /// whether or not the visual transition was performed, so it
-    /// verifies that a set was accepted — never that the screen
-    /// swapped (#1023's first measurement, 2026-08-26).
+    /// Current space of display by UUID
+    /// (`SLSManagedDisplayGetCurrentSpace`, #1023, 2026-08-26).
     public static func currentSpace(
         displayUUID: String
     ) -> SkyLight.SpaceID? {
@@ -108,12 +103,7 @@ public enum NativeSpaces {
         return result
     }
 
-    // MARK: - Mission Control numbering
-
-    /// The 1-based Mission Control number of a space: its
-    /// position among the user spaces in `allSpaces()` order
-    /// (displays in SkyLight order, spaces left to right).
-    /// Nil for fullscreen/system spaces and unknown ids.
+    /// 1-based Mission Control number of space.
     public static func number(
         of id: SkyLight.SpaceID,
         in spaces: [NativeSpace]
@@ -124,12 +114,7 @@ public enum NativeSpaces {
             .map { $0 + 1 }
     }
 
-    // MARK: - User-space verdict (#670)
-
-    /// Whether `id` is a regular user desktop in `spaces`.
-    /// Unknown ids count as user: standing down (hiding the
-    /// bars, skipping the settle) needs positive evidence of a
-    /// fullscreen/system space, never a lookup miss.
+    /// Whether space is a regular user desktop (#670).
     public static func isUserSpace(
         _ id: SkyLight.SpaceID,
         in spaces: [NativeSpace]
@@ -137,12 +122,7 @@ public enum NativeSpaces {
         spaces.first { $0.id == id }?.isUser ?? true
     }
 
-    /// Whether the active native space is a user desktop.
-    /// True without SkyLight: the single-space fallback must
-    /// keep bars and settles running. The fullscreen verdict
-    /// comes from `isUser` — never from the nil Mission
-    /// Control number, which is indistinguishable from
-    /// "SkyLight unavailable" (#670).
+    /// Whether active native space is a user desktop (`isUser`, #670).
     public static func activeSpaceIsUser() -> Bool {
         #if DEBUG
             if let override = activeSpaceIsUserOverride {
@@ -153,9 +133,7 @@ public enum NativeSpaces {
         return isUserSpace(id, in: allSpaces())
     }
 
-    /// Whether the space currently shown on `display` is a
-    /// user desktop. True when the display UUID or its space
-    /// cannot be resolved (no SkyLight, unplugged display).
+    /// Whether space on display is a user desktop.
     public static func currentSpaceIsUser(
         display: DisplayID
     ) -> Bool {
@@ -171,25 +149,16 @@ public enum NativeSpaces {
     }
 
     #if DEBUG
-        /// Pins the Desktop number for BOTH readers —
-        /// `activeSpaceNumber()` and the snapshot's authority —
-        /// because outside a topology fixture they are the same
-        /// number, and a test pinning one but not the other
-        /// would read the host's WindowServer through the
-        /// unpinned one (#523's crime).
-        ///
-        /// A test that needs the two to DIVERGE leaves this nil
-        /// and pins the topology instead: `spacesOverride`,
+        /// Pins the Desktop number for BOTH readers — outside a
+        /// topology fixture they are the same number, and pinning
+        /// one but not the other reads the host's WindowServer
+        /// through the unpinned one (#523). A test needing them
+        /// to DIVERGE pins the topology instead: `spacesOverride`,
         /// `mainDisplayUUIDOverride` AND `activeSpaceIDOverride`
-        /// — the third because a main display absent from the
-        /// pinned snapshot falls through to `activeSpaceNumber()`,
-        /// which reads the live WindowServer without it (review,
-        /// 2026-08-18).
+        /// (review 2026-08-18).
         public static nonisolated(unsafe) var activeDesktopNumberOverride: Int?
         public static nonisolated(unsafe) var activeSpaceIsUserOverride: Bool?
-        /// Pins the per-display POINTER read for the #1023
-        /// switch-verify — a test firing that deferred check
-        /// would otherwise read the host's WindowServer.
+        /// Override for per-display pointer verification (#1023).
         public static nonisolated(unsafe) var currentSpaceOverride:
             ((String) -> SkyLight.SpaceID?)?
         public static nonisolated(unsafe) var currentSpaceIsUserOverride:
@@ -202,12 +171,7 @@ public enum NativeSpaces {
             ((DisplayID) -> String?)?
     #endif
 
-    /// Mission Control number of the GLOBAL active space, or nil
-    /// without SkyLight (callers treat that as single-space).
-    /// Binding and profile paths do not read this — they consult
-    /// `activeDesktopNumber()` (the main display's Desktop,
-    /// #888), which falls back here when SkyLight cannot answer
-    /// per display.
+    /// Mission Control number of active space (#888).
     public static func activeSpaceNumber() -> Int? {
         #if DEBUG
             if let override = activeDesktopNumberOverride {

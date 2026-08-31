@@ -1,26 +1,11 @@
 import CoreGraphics
 
-/// Emergency fallback shared by BSP, Stack, and Grid.
-///
-/// When a layout would shrink windows below `minWindowSize`,
-/// downsizing halts: windows keep the minimum size and cascade
-/// with a fixed vertical offset so every title bar stays
-/// visible and clickable.
+/// Emergency overflow fallback cascading windows with title bars visible.
 public enum OverlapStack {
     /// Vertical cascade offset keeping title bars reachable.
     public static let offset: CGFloat = 40
 
-    /// Cascades `windows` inside `region`.
-    ///
-    /// `fitToRegion` shrinks each window's height (floored at
-    /// `minSize`) so the whole cascade tries to end at the
-    /// region's bottom edge. The quit grid's cross-row guard
-    /// (#197): its piles keep whatever z-order remains after
-    /// exit, so a pile spilling into the cell row below would
-    /// bury unrelated title bars there. Live piles keep the
-    /// full-region size — their z-order is actively managed
-    /// (`KiwiCore+ZOrder`), so the spill is harmless and the
-    /// bigger windows are worth it.
+    /// Cascades `windows` inside `region` (`KiwiCore+ZOrder`, #197).
     public static func frames(
         for windows: some Collection<WindowID>,
         in region: CGRect,
@@ -48,33 +33,12 @@ public enum OverlapStack {
         return result
     }
 
-    /// Partial-overflow layout along one axis: keep the longest
-    /// fitting prefix of `count` items fully tiled at ≥ `minSize`
-    /// each, and pile the remainder as a **vertical** title-bar
-    /// cascade so the buried ones stay reachable — the
-    /// `cascade_overflow` rule. Returns one rect per item (index
-    /// order), or nil when not even one item fits above the pile
-    /// (the caller then cascades the whole region).
-    ///
-    /// `vertical` = the *tiling* axis: items tile along Y
-    /// (columns of a track / a stack column) when true, along X
-    /// (rows / side-by-side tracks) when false. The buried pile
-    /// is **always** offset downward (Y), matching the shared
-    /// `frames(_:in:minSize:)` cascade and every other layout's
-    /// title-bar-reveal convention — a horizontal offset would
-    /// reveal side slivers, not title bars. So when tiling is
-    /// vertical the pile extends along the primary axis (and
-    /// consumes `minSize + offset*buried` of it, the stack
-    /// column geometry unchanged); when tiling is horizontal the
-    /// pile extends down the cross axis and only reserves a
-    /// `minSize` strip of the primary. The single authority
-    /// behind the stack column overflow and both track axes
-    /// (#128), so the geometry cannot drift between them.
-    ///
-    /// Returns the rects plus the count of fully-tiled leading
-    /// slots — the overflow boundary callers need to keep sticky
-    /// windows out of the buried tail (#414 v2,
-    /// `stickyExempt`).
+    /// Computes partial-overflow frames for tiled and cascaded
+    /// slots (`stickyExempt`, #128, #414 v2). The buried pile is
+    /// ALWAYS offset downward — a horizontal offset would reveal
+    /// side slivers, not title bars — and this is the single
+    /// authority behind the stack column overflow and both track
+    /// axes, so the geometry cannot drift between them.
     public static func overflowFrames(
         count: Int,
         in region: CGRect,
@@ -86,10 +50,6 @@ public enum OverlapStack {
         let primary = vertical ? region.height : region.width
         for tiled in stride(from: count - 1, through: 1, by: -1) {
             let buried = CGFloat(count - tiled - 1)
-            // The pile is vertical: along a vertical tiling axis
-            // it eats `minSize + offset*buried` of the primary;
-            // along a horizontal one it only needs a `minSize`
-            // primary strip (its offset spends the cross axis).
             let cascadePrimary =
                 vertical ? minSize + offset * buried : minSize
             let tileExtent =
@@ -110,8 +70,7 @@ public enum OverlapStack {
                 )
                 pos += tileExtent + gap
             }
-            // Buried items: a vertical title-bar cascade anchored
-            // at the trailing edge of the tiled block.
+            // Buried items cascade at trailing edge.
             for index in 0..<(count - tiled) {
                 let step = CGFloat(index) * offset
                 rects.append(
@@ -135,17 +94,9 @@ public enum OverlapStack {
         return nil
     }
 
-    /// Reorders `ids` so sticky windows keep a fully-tiled slot
-    /// (#414 v2): each sticky id caught in the buried tail
-    /// (index ≥ `tiled`) is clamped to the end of the tiled
-    /// prefix, displacing the trailing non-sticky tiled windows
-    /// into the pile instead. Relative order within each class
-    /// is preserved; with more piled stickies than displaceable
-    /// non-sticky slots, the surplus stays piled (an all-sticky
-    /// overload has no slot to give). Callers zip the result
-    /// with positional rects (`overflowFrames`, a grid's
-    /// last-cell pile), so this must return exactly the input
-    /// ids, only reordered.
+    /// Reorders windows so sticky windows keep fully-tiled slots
+    /// (#414 v2). Callers zip the result with positional rects, so
+    /// this must return exactly the input ids, only reordered.
     public static func stickyExempt(
         _ ids: [WindowID],
         tiled: Int,
@@ -174,8 +125,7 @@ public enum OverlapStack {
         return prefix + promoted + displaced + rest
     }
 
-    /// A tiled rect occupying `[along, along+extent)` on the
-    /// primary axis and the full cross-axis of `region`.
+    /// Tiled rect along primary axis of region.
     private static func rect(
         along: CGFloat,
         extent: CGFloat,

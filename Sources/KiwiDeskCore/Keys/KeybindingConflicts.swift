@@ -1,37 +1,22 @@
 import Foundation
 
-/// Conflict detection for the keybindings tab. Comparisons run
-/// on the parsed `KeyCombo` (key code + modifiers), so they are
-/// independent of how a combo was spelled. Lives in Core (not
-/// the GUI target) since it is pure logic over
-/// `KeyBinding`/`KeyLayer`, with no GUI dependency.
+/// Conflict detection across keybinding layers (#96).
 public enum KeybindingConflicts {
-    /// Whether any row in the set carries a conflict. This is
-    /// the per-layer primitive `hasAnyAcrossLayers` reduces over:
-    /// layers are independent keymaps, so each is checked
-    /// against its own rows only, never across layers.
+    /// Whether any row in layer contains a conflict.
     public static func hasAny(_ bindings: [KeyBinding]) -> Bool {
         bindings.contains { binding in
             conflict(for: binding, in: bindings) != nil
         }
     }
 
-    /// Whether any layer's bindings carry a conflict — drives
-    /// the in-app warning shown after recording a conflicting
-    /// shortcut, adopting a config, or saving from the raw Lua
-    /// editor (see `SettingsModel`).
+    /// Whether any layer contains conflicting keybindings.
     public static func hasAnyAcrossLayers(
         _ layers: [KeyLayer]
     ) -> Bool {
         layers.contains { hasAny($0.bindings) }
     }
 
-    /// Structured conflicts across all layers, for building a
-    /// named, enumerated summary (see `SettingsModel`'s banner
-    /// formatter). One entry per conflicting row; a row that
-    /// duplicates another and *also* shadows a system shortcut
-    /// only reports the first match, since it reduces over
-    /// `conflict(for:in:)` and inherits its branch order.
+    /// Structured conflicts across all layers.
     public static func conflicts(
         in layers: [KeyLayer]
     ) -> [Conflict] {
@@ -42,12 +27,8 @@ public enum KeybindingConflicts {
         }
     }
 
-    /// One row's conflict: its display name and what it clashes
-    /// with, or nil if the row is empty/unique/valid. **The one
-    /// public per-row primitive** — the GUI renders both the row
-    /// tooltip and the banner from this structure, because a
-    /// pre-rendered English sentence could never be translated
-    /// from actor-free Core (#96).
+    /// Evaluates conflict for a single keybinding (#96,
+    /// `SystemShortcuts.map`).
     public static func conflict(
         for binding: KeyBinding,
         in bindings: [KeyBinding]
@@ -81,26 +62,11 @@ public enum KeybindingConflicts {
         return nil
     }
 
-    /// The conflicts an AGGREGATE surface should count — a
-    /// badge, a banner, any "you have N problems" narration.
-    ///
-    /// Drops a clash with a chord macOS ships DISABLED. Those are
-    /// real reservations and a per-ROW surface must still explain
-    /// them, but counting them puts a standing alarm on a seeded
-    /// default (`⌃⌥⌘8` is tier 3's move-to-space-8 AND Invert
-    /// Colors) for every user who has not enabled the feature —
-    /// and a permanent count can never reach zero, so fixing the
-    /// real conflicts refreshes the banner instead of clearing it
-    /// (#1094).
-    ///
-    /// One accessor rather than a filter per surface: there are
-    /// three aggregate readers (card shout, banner, recorder
-    /// note) and the first fix wired only one of them.
-    ///
-    /// `shipsDisabled` reads the shipped default, not the live
-    /// setting, so this is silent for a user who HAS enabled one
-    /// — #1105 replaces it with a live read and this filter goes
-    /// back to being unconditional.
+    /// Actionable conflicts excluding shipped-disabled system
+    /// shortcuts (`⌃⌥⌘8`, #1094; #1105 replaces the shipped-state
+    /// read with a live one). One accessor rather than a filter
+    /// per surface: there are three aggregate readers and the
+    /// first fix wired only one of them.
     public static func actionable(
         in layers: [KeyLayer]
     ) -> [Conflict] {
@@ -112,25 +78,15 @@ public enum KeybindingConflicts {
     }
 }
 
-/// One row's conflict, as structured data (see
-/// `KeybindingConflicts.conflicts(in:)`).
+/// Structured representation of a keybinding conflict (`SystemShortcut`, #96).
 public struct Conflict: Equatable, Sendable {
-    /// What this row clashes with.
+    /// Conflict category and target details.
     public enum Target: Equatable, Sendable {
-        /// A reserved macOS shortcut, as a case the GUI
-        /// localizes (never its English name — see
-        /// `SystemShortcut`, #96).
         case systemShortcut(SystemShortcut)
-        /// Another row in the same layer, by its display name.
         case otherBinding(String)
-        /// The combo itself couldn't be parsed — not a "conflicts
-        /// with X" case, just an invalid shortcut.
         case unrecognized
     }
 
-    /// The conflicting action's display label, or its combo
-    /// string when the row has no label (e.g. an unnamed
-    /// custom binding).
     public let name: String
     public let target: Target
 }

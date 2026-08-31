@@ -1,37 +1,12 @@
 import CoreGraphics
 
-/// The read-back half of `ScrollingLayout`, split at the file
-/// ceiling: what a caller asks the layout ABOUT a row without
-/// materializing its frames. Where either answer needs the row's
-/// geometry it derives it from the same `metrics` the frames come
-/// from, so the two can never disagree about one row — both also
-/// answer a short row without asking for geometry at all.
-///
-/// Neither promises that `windows` is the array
-/// `calculateGeometry` was handed; it is a free parameter here.
-/// `TilingEngine.layoutInput` is what holds the frames, the
-/// persisted rest and the z-order arm to one reading of the
-/// space.
+/// Viewport rest calculations and geometry queries for `ScrollingLayout`
+/// (`TilingEngine.layoutInput`).
 extension ScrollingLayout {
-    /// The viewport rest `calculateGeometry` would compute for
-    /// `windows`, without materializing frames (#66). Lets the
-    /// caller read back the value to persist as the next tile's
-    /// `Space.scrollRest`, so a focus-driven retile can restore
-    /// the "previous offset" input without KiwiCore re-deriving
-    /// the anchor/clamp math itself. The offset travels with the
-    /// slot it was measured against, which is what `follow` reads
-    /// to tell a focus change from a row that moved underneath an
-    /// unchanged focus (#966) — recorded fresh on a pass that
-    /// placed a slot, and carried through unchanged on a pass
-    /// that placed none, where the offset itself is carried too.
-    ///
-    /// A lone window fills the whole area, so `calculateGeometry`
-    /// ignores the offset for it — but this must still *preserve*
-    /// it, not persist 0 (#155): float one of two scrolled
-    /// windows and the row drops to a single tiled window; a 0
-    /// here overwrites the saved offset, so unfloating rebuilds
-    /// the row from home. Returning the prior rest whole keeps
-    /// the viewport where it was.
+    /// Computes viewport rest for `windows` without materializing frames
+    /// (#66, #155, #966).
+    /// Preserves existing offset for single-window spaces and floating focus
+    /// (#141).
     static func viewportRest(
         for windows: [WindowID],
         in context: LayoutContext
@@ -63,15 +38,6 @@ extension ScrollingLayout {
         guard let focus = context.focused,
             let position = metrics.focusedPos
         else {
-            // No slot placed this pass (a floating focus, or
-            // nothing focused): `offset` carried the previous
-            // offset through (#141), so its provenance carries
-            // with it — the same call the `count > 1` arm makes
-            // above. Destroying a measurement that still
-            // describes the offset being returned would hand the
-            // next pan a rest that reads as a focus change, and
-            // #966's drift would come back the moment the row
-            // changed while a float held focus.
             return ScrollRest(
                 offset: value,
                 slot: context.scrollRest?.slot
@@ -89,16 +55,10 @@ extension ScrollingLayout {
         )
     }
 
-    /// Which viewport border a slot at `lead`, `span` wide, is
-    /// resting against — the verdict `ScrollRest.Slot` carries,
-    /// reached HERE because this is where the offset and the
-    /// viewport it was measured in are both in hand (#966).
-    ///
-    /// The leading edge is tested first, so a slot filling the
-    /// viewport — flush at both — records `.leading`. That is
-    /// the ruling rather than an accident of order: the reader's
-    /// eye is anchored at the leading edge, and holding the
-    /// trailing one would shift every line of text under them.
+    /// Evaluates which viewport border a slot rests against
+    /// (#966). Leading is tested first as a RULING: a slot flush
+    /// at both borders records `.leading` — the reader's eye
+    /// anchors at the leading edge.
     static func border(
         lead: CGFloat,
         span: CGFloat,
@@ -111,23 +71,14 @@ extension ScrollingLayout {
         return nil
     }
 
-    /// How near a border counts as resting against it. Every
-    /// value compared through it is the layout's own ideal
-    /// geometry rather than a measured frame, so this absorbs
-    /// accumulated floating-point rounding and nothing wider —
-    /// a slot a VISIBLE distance from the edge must not read as
-    /// flush, or a resize would jump it there.
+    /// Border-flush tolerance. Every compared value is the
+    /// layout's own ideal geometry, so this absorbs accumulated
+    /// rounding and nothing wider — a slot a VISIBLE distance from
+    /// the edge must not read as flush.
     static let edgeTolerance: CGFloat = 0.5
 
-    /// Whether the row is longer than the viewport, so slots pile
-    /// up at the edges and their stacking matters (#150). A row
-    /// that fits entirely shows no overlap, so a swap within it
-    /// cannot scramble the edge piles' z-order — there is nothing
-    /// to restore. A superset of "the swapped pair touches a
-    /// pile": the focus that moved in a swap is always panned
-    /// fully into view, so a per-slot test would gate on the
-    /// other window's transient position; the overflow test is
-    /// cheaper and never misses a real scramble.
+    /// Checks if total row length exceeds viewport along the scrolling axis
+    /// (#150).
     static func rowOverflows(
         for windows: [WindowID],
         in context: LayoutContext

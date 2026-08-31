@@ -1,32 +1,16 @@
 import Foundation
 import KiwiDeskCore
 
-/// The reference builder's bands — one function per band, split
-/// from `ShortcutsReference.swift` at the §2.1 file ceiling when
-/// the Inactive band landed (#820). `build` still owns the order
-/// they run in, and the `rows` closure they share (which consumes
-/// a matched binding) lives there with it.
+/// Reference sheet band construction (#820).
 extension ShortcutsReferenceBuilder {
-    /// Membership twin of the editor's grouping. Row identity
-    /// (label / icon / Lua) is single-sourced from
-    /// `KeybindingCatalog`, so only the *grouping* is mirrored
-    /// here — and a forgotten command degrades to Custom via the
-    /// fallthrough, never vanishes.
-    ///
-    /// Since #678 Phase 3 the editor's grouping has an OWNER —
-    /// the settings census, read through `ShortcutsRowOrder` and
-    /// expanded by `ShortcutsFamilyRows` — and this builder is
-    /// now the copy rather than a peer. It still reads the
-    /// catalog directly, which is why the panel and the editor
-    /// can disagree about ORDER (they did, over the per-space
-    /// move pair) even while agreeing about membership.
-    ///
-    /// **A family added to the census owes this builder a band
-    /// too**, until it consumes the expander. Consuming it is the
-    /// real fix and is available — this is `@MainActor` and
-    /// GUI-side — but it is a behavioural change to the panel and
-    /// belongs in its own change, not in the one that created the
-    /// owner.
+    /// Builds standard control shortcut bands. Membership twin of
+    /// the editor's grouping: row identity is single-sourced from
+    /// `KeybindingCatalog`, only the GROUPING is mirrored, and a
+    /// forgotten command degrades to Custom, never vanishes. A
+    /// family added to the census owes this builder a band too,
+    /// until it consumes the expander (`ShortcutsFamilyRows`,
+    /// #678 Phase 3) — the real fix, but a panel behaviour change
+    /// of its own.
     static func buildControls(
         activeLayer: String,
         spaces: [SpaceID],
@@ -55,9 +39,6 @@ extension ShortcutsReferenceBuilder {
                 desktops.desktops,
                 absent: desktops.absent
             )
-        // Exclude the active layer: you never switch to the layer
-        // you're already in, and the editor's SwitchLayersGroup
-        // filters it out the same way — keep the two in parity.
         let switchLayers =
             layerNames
             .filter { $0 != activeLayer }
@@ -85,14 +66,10 @@ extension ShortcutsReferenceBuilder {
                     )
                 )
             ),
-            // The General band is the census's `generalKeys`
-            // container, minus the panel's own opener — which
-            // `build` already removed from the working set, so
-            // this band holds whatever else that container
-            // grows. Without it a bound Open Settings fell
-            // through to Custom and rendered as raw
-            // `KiwiDesk.open_settings()`, untranslated, in
-            // every locale (#678 item 18).
+            // The census's `generalKeys` container minus the
+            // panel's own opener. Without it a bound Open
+            // Settings fell through to Custom and rendered as raw
+            // untranslated Lua (#678 item 18).
             ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.general",
@@ -110,21 +87,7 @@ extension ShortcutsReferenceBuilder {
         ].filter { !$0.rows.isEmpty }
     }
 
-    /// The Inactive band: bindings whose target Space has left
-    /// the current list (#92's orphans), one surface over (#820).
-    /// The predicate is Settings' own — `OrphanedShortcuts`, the
-    /// pure half of `OrphanedShortcutsGroup` — so the panel and
-    /// the editor cannot disagree about what is inactive, and
-    /// the rows go through the same `rows` closure as every
-    /// preset band, which is what gives them their real name
-    /// ("Go to Space 6") and consumes them before Custom.
-    ///
-    /// Never pruned, and never invisible: the binding is orphaned
-    /// only relative to the current Space set, still fires
-    /// (recreating its Space) and still holds its combo — the
-    /// argument is `OrphanedShortcutsGroup`'s docstring, and the
-    /// panel's own "no bound shortcut is ever invisible" is the
-    /// type docstring above.
+    /// Builds inactive shortcut rows (`OrphanedShortcuts`, #92, #820).
     static func buildInactive(
         _ layer: KeyLayer,
         spaces: [SpaceID],
@@ -140,6 +103,7 @@ extension ShortcutsReferenceBuilder {
         )
     }
 
+    /// Builds application launch shortcut rows (#334, `recomputeOrder`).
     static func buildApps(
         _ layer: KeyLayer,
         consumed: inout Set<UUID>
@@ -159,9 +123,6 @@ extension ShortcutsReferenceBuilder {
                             forBundleID: $0
                         )
                     } ?? binding.label
-                // A trailing badge marks a non-default (Open New)
-                // launch behavior; default rows carry none, so they
-                // render identically to before (#334).
                 let openNew =
                     KeybindingCatalog.appLaunchBehavior(
                         from: binding.lua
@@ -184,14 +145,12 @@ extension ShortcutsReferenceBuilder {
             .sorted { lhs, rhs in
                 let order = lhs.label
                     .localizedCaseInsensitiveCompare(rhs.label)
-                // Two rows for the same app (Open or Focus + Open
-                // New) share a label; the id tiebreaker pins their
-                // order, matching the editor's `recomputeOrder`.
                 if order == .orderedSame { return lhs.id < rhs.id }
                 return order == .orderedAscending
             }
     }
 
+    /// Builds custom shortcut rows for remaining unconsumed bindings.
     static func buildCustom(
         _ layer: KeyLayer,
         consumed: Set<UUID>

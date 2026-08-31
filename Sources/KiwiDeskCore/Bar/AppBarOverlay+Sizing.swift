@@ -1,19 +1,8 @@
 import AppKit
 
-/// Box sizing: every item gets the same slot length — the
-/// configured `item_size`, or a standard length per content
-/// mode when unset (0). The length is clamped between the
-/// icon square (icons never clip) and a quarter of the bar
-/// (single items never balloon). Items that overflow the
-/// strip anyway don't shrink — the bar scrolls instead,
-/// following the focused item (see AppBarOverlay).
-/// Pure math, unit-tested.
+/// Layout math and slot sizing for `AppBarOverlay`.
 extension AppBarOverlay {
-    /// One render pass's derived lengths along the bar axis.
-    /// While the items overflow the strip, the viewport they
-    /// render (and clip) in is inset by the arrow zone plus
-    /// one gap on both ends, so a half-scrolled item is cut
-    /// a gap short of the arrow instead of sliding under it.
+    /// Derived slot lengths and viewport measurements along the bar axis.
     struct Metrics {
         let horizontal: Bool
         let slot: CGFloat
@@ -61,13 +50,11 @@ extension AppBarOverlay {
         )
     }
 
-    /// The auto (`item_size = 0`) slot length: on a horizontal
-    /// bar, the widest item measured at the effective font (so
-    /// slots fit their real titles instead of a fixed guess); a
-    /// vertical bar renders icon-only (QA 2026-07-19), so its
-    /// slot is the icon square — the thickness. The caller
-    /// still clamps this between the icon minimum and a quarter
-    /// of the bar in `slotLength`.
+    /// Measures automatic slot width across items. Measure
+    /// EXACTLY as the item view draws: `.center` alignment alone
+    /// widens an NSTextField cell by ~4 pt, so a raw string
+    /// measurement truncates exactly the item that defined the
+    /// width (QA 2026-07-19, owner 2026-07-20).
     @MainActor
     static func autoSlotWidth(
         items: [Item],
@@ -85,14 +72,6 @@ extension AppBarOverlay {
         let iconSide =
             style.content == .title
             ? 0 : max(thickness - pad * 2, 0)
-        // The uniform slot fits the widest item, so measure every
-        // title and take the max: icon square + gap + text + pads,
-        // mirroring `layoutHorizontal`'s own composition. Measure
-        // through a label configured EXACTLY like the item's own —
-        // notably `.center` alignment, which alone widens the cell
-        // by 4 pt; a left-aligned or raw-string measurement leaves
-        // the widest title's slot those 4 pt short of itself,
-        // tail-truncating exactly the item that defined the width.
         let measure = NSTextField(labelWithString: "")
         measure.alignment = .center
         measure.font = font
@@ -101,9 +80,6 @@ extension AppBarOverlay {
         measure.lineBreakMode = .byTruncatingTail
         return items.reduce(0) { widest, item in
             let text: CGFloat
-            // `showsText`, not `== .icon`: a later text-free
-            // case must stop reserving text width here without
-            // anyone remembering this site.
             if !style.content.showsText {
                 text = 0
             } else {
@@ -114,10 +90,6 @@ extension AppBarOverlay {
             }
             let spacing =
                 iconSide > 0 && text > 0 ? pad / 2 : 0
-            // A grouped item's count badge sits after the text, so
-            // the slot must be wide enough for it too or the widest
-            // title over-truncates (owner 2026-07-20) — same reserve
-            // as `layoutHorizontal`.
             let badge =
                 item.count >= 2 && text > 0
                 ? min(max(thickness * 0.32, 9), 14) + pad
@@ -129,8 +101,7 @@ extension AppBarOverlay {
         }
     }
 
-    /// The shared slot length for one bar layout pass. `autoWidth`
-    /// is the measured/standard length used when `item_size` is 0.
+    /// Shared slot length for bar layout pass.
     nonisolated static func slotLength(
         itemSize: CGFloat,
         content: AppBarStyle.Content,
@@ -139,24 +110,16 @@ extension AppBarOverlay {
         autoWidth: CGFloat
     ) -> CGFloat {
         let requested = itemSize > 0 ? itemSize : autoWidth
-        // When the quarter cap and the icon minimum collide
-        // (a tiny bar), the minimum wins: a clipped icon
-        // looks worse than a bar that has to scroll.
         return max(
             min(requested, axis / 4),
             minimumSlot(thickness: thickness, content: content)
         )
     }
 
-    /// Below this, slots stop being useful: with an icon the
-    /// slot must hold its square (side = thickness − padding,
-    /// plus the padding back — i.e. the thickness itself);
-    /// text-only bars just keep a sliver of legibility.
-    /// Load-bearing beyond looks: icon-bearing slots flooring
-    /// at `thickness` is what makes the measurement's
-    /// `iconSide = thickness - pad*2` equal the layout's
-    /// `min(bounds.height, bounds.width) - pad*2` — the
-    /// slot-fits-widest-title invariant leans on it.
+    /// Minimum usable slot size based on content mode. Icon
+    /// slots floor at `thickness` so measurement's icon side
+    /// equals layout's — the slot-fits-widest-title invariant
+    /// leans on it.
     nonisolated static func minimumSlot(
         thickness: CGFloat,
         content: AppBarStyle.Content
@@ -166,12 +129,7 @@ extension AppBarOverlay {
             : thickness
     }
 
-    /// The scroll offset for an overflowing bar: starts from
-    /// `current` (so manual arrow scrolling sticks) and moves
-    /// just far enough to keep the active slot fully visible,
-    /// `margin` clear of the strip's ends (where the scroll
-    /// arrows sit). Pass a nil index to only clamp. 0 while
-    /// everything fits.
+    /// Scroll offset calculation ensuring focused item remains visible.
     nonisolated static func scrollOffset(
         current: CGFloat,
         activeIndex: Int?,
@@ -199,13 +157,7 @@ extension AppBarOverlay {
         return min(max(offset, 0), total - axis)
     }
 
-    /// Lays the lengths out along the bar axis, `gap` apart,
-    /// in the container's flipped local coordinates (first
-    /// item at the left / top). While everything fits the
-    /// group sits per `alignment` (start/center/end, edge-
-    /// relative); an overflowing group starts at `-offset`
-    /// regardless — once the group scrolls, the three
-    /// alignments collapse to one visual (#293 QA, plan Q1).
+    /// Computes item frames along the bar axis (#293 QA).
     nonisolated static func frames(
         lengths: [CGFloat],
         in bounds: CGRect,

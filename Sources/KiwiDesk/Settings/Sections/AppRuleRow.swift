@@ -2,48 +2,19 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// One app's rules as a **sentence** (turn 14a): "Spotify opens
-/// in media ▾ and floats ▾", with the title patterns as chips
-/// underneath when the float facet asks for them.
-///
-/// The sentence IS the control. The row used to be an app
-/// header over two labelled facet columns — "Space [ media ▾ ]
-/// Float [ Windows titled… ▾ ]" — which reads as a form about
-/// an app rather than as the rule itself, and made the user
-/// assemble the meaning from three fragments. A rule is a
-/// statement about what an app does, so the row states it and
-/// the two menus sit inside the statement where their values
-/// complete it.
-///
-/// The facet values became verb phrases with that move
-/// ("floats", "tiles normally") because a menu inside a
-/// sentence has to read as part of it; "Never" completed
-/// nothing. The labels the values replaced are not lost —
-/// they are the menus' accessibility labels, which is also
-/// what keeps them findable in search, since a sentence has no
-/// visible label for a screen reader or a search index to name
-/// the facet by.
+/// App rule row rendered as an editable natural-language sentence (turn 14a).
 struct AppRuleRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
-    /// The base rules while editing a stored profile (#109):
-    /// non-nil switches the row into override mode. Each facet
-    /// independently dims while it still matches its base.
+    /// Base rules when editing stored profile (#109).
     let overrideBase: [String: SpaceID]?
     let overrideFloatBase: [String]?
-    /// Whether the row is a session draft (added this session,
-    /// no stored facet yet) — deleting one always works, it
-    /// removes the draft itself.
+    /// Whether row is a newly added session draft without saved rules.
     let isDraft: Bool
     let onDelete: () -> Void
-    /// The list's focus key, so a deletion elsewhere can land on
-    /// THIS row (#816). Bound to the space menu below — the
-    /// first control the sentence draws, always present, and
-    /// non-destructive, unlike the trash at the row's end which
-    /// also disables itself in override mode.
+    /// Target for restoring keyboard focus after deletion (#816).
     @FocusState.Binding var returningRow: String?
-    /// Keeps the titled editor visible while it has no
-    /// patterns yet (an empty pattern set stores nothing).
+    /// Keeps titled editor visible while patterns are empty.
     @State private var editingTitles = false
 
     var body: some View {
@@ -61,32 +32,13 @@ struct AppRuleRow: View {
         }
     }
 
-    /// The sentence, in one row: icon, then the frame with the
-    /// app name and the two facet menus dropped into it.
-    ///
-    /// **The word order is the translator's, not this stack's.**
-    /// An earlier cut emitted "opens in" and "and" as separate
-    /// keys between fixed `HStack` positions, which is the harm
-    /// localization.md names — a translation cannot reorder
-    /// pieces stitched together in Swift, and ja/ko are
-    /// verb-final, so no catalog edit could have produced a
-    /// grammatical row. The frame is one key with positional
-    /// specifiers; `SentenceFrame` splits it on those and this
-    /// emits the pieces in whatever order the translation put
-    /// them.
-    ///
-    /// **The stack adds no spacing; the frame's literals own it.**
-    /// A per-segment gap looks harmless in English, whose
-    /// literals already carry their own spaces (`" opens in "`),
-    /// and merely double-spaces the row. It is wrong outright in
-    /// ja and ko, where the literal between two slots begins
-    /// with a particle — `は`, `에` — that must hug the noun it
-    /// attaches to, and a stack gap tears it off. So spacing is
-    /// 0 here and the icon carries its own trailing padding.
-    /// `SentenceFrameTests` pins the other half — `splitsInOrder`
-    /// asserts the literal arrives as `" opens in "`, spaces
-    /// intact, so a splitter that trimmed would strand every
-    /// word against its neighbour.
+    /// Sentence row driven by the localized `SentenceFrame`. The
+    /// word order is the TRANSLATOR's, never this stack's — ja/ko
+    /// are verb-final, so pieces stitched in Swift can never be
+    /// grammatical. Spacing is 0: the frame's literals own it
+    /// (`" opens in "`), and a stack gap would tear a ja/ko
+    /// particle off the noun it hugs (`SentenceFrameTests` pins
+    /// the literals arrive spaces-intact).
     private var sentence: some View {
         HStack(spacing: 0) {
             appIcon
@@ -105,10 +57,9 @@ struct AppRuleRow: View {
         .font(.callout)
     }
 
-    /// The control a slot draws, mapped through
-    /// `SentenceFrame.control(at:)` so the mapping is assertable
-    /// and an unrecognized position draws NOTHING — never the
-    /// last case a `default:` arm happens to name.
+    /// Control mapped via `SentenceFrame.control(at:)`, so an
+    /// unrecognized position draws NOTHING — never the last case a
+    /// `default:` arm happens to name.
     @ViewBuilder
     private func control(at position: Int) -> some View {
         switch SentenceFrame.control(at: position) {
@@ -135,8 +86,6 @@ struct AppRuleRow: View {
         )
     }
 
-    // MARK: - Inheritance (override mode)
-
     private var spaceInherited: Bool {
         guard let base = overrideBase, !isDraft else {
             return false
@@ -156,8 +105,6 @@ struct AppRuleRow: View {
                 )
             )
     }
-
-    // MARK: - Chrome
 
     private var deleteButton: some View {
         Button {
@@ -204,9 +151,7 @@ struct AppRuleRow: View {
         }
     }
 
-    /// The installed bundle for this rule's app, resolved from
-    /// its bundle id — nil (dashed placeholder) when the app
-    /// isn't installed on this machine.
+    /// Application bundle URL resolved by bundle identifier.
     private var appURL: URL? {
         NSWorkspace.shared.urlForApplication(
             withBundleIdentifier: app

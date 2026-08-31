@@ -1,37 +1,14 @@
 import AppKit
 import KiwiDeskCore
 
-/// The three glyph painters the icon state machine dispatches to:
-/// the brand mark, an SF Symbol, and a user-supplied mode icon.
-///
-/// Lifted out of `StatusItemController.swift` when that file
-/// reached §2.1's 350-line ceiling, matching the `+Menu` /
-/// `+Layout` split already beside it.
-///
-/// A NARROW slice on purpose. The state machine itself
-/// (`setWarning`, `setConfigError`, `render` and the stored flags
-/// they drive) stayed behind, because moving it would have meant
-/// widening private stored state to `internal` just to reach it
-/// across a file boundary — paying for a line count with
-/// encapsulation. These three take everything they need as
-/// parameters, so the move costs nothing. `SystemStatusItem`
-/// stayed behind too: `StatusItemSeamGuardTests` pins it to the
-/// controller file BY NAME, and that seal is the point of it.
-///
-/// One cost the cut does pay, stated rather than hidden: these
-/// three were `private` and are now internal, so `render()`'s
-/// precedence chain — warning ▸ config error ▸ mode icon ▸ brand
-/// — is no longer sealed by access control the way it was. They
-/// remain single-caller, and `render()` is still the only thing
-/// that should call them.
+/// Menu bar icon rendering methods for `StatusItemController`
+/// (`StatusItemSeamGuardTests`).
 extension StatusItemController {
-    /// The standard kiwi mark, named for VoiceOver by the caller
-    /// — the starting state and the ready one draw the SAME
-    /// glyph, so the name is the only thing that separates them
-    /// to a reader who cannot see the dimming. The label goes on
-    /// the BUTTON rather than the image: `BrandAssets.menuBarIcon`
-    /// is a shared cached `NSImage`, and re-describing it would
-    /// rename it for every other surface that draws it.
+    /// Renders the brand icon, named for VoiceOver by the caller
+    /// — starting and ready states draw the SAME glyph, so the
+    /// name is what separates them. The label goes on the BUTTON,
+    /// not the image: `BrandAssets.menuBarIcon` is a shared cached
+    /// `NSImage`, and re-describing it renames it everywhere.
     func applyBrandIcon(
         to button: NSStatusBarButton,
         a11y: String
@@ -43,19 +20,15 @@ extension StatusItemController {
             button.image = icon
             button.title = ""
         } else {
-            // Last-ditch: never leave the slot blank.
             button.image = nil
             button.title = a11y
         }
     }
 
-    /// Sets the status button to the SF Symbol `name`, or — if
-    /// that symbol doesn't resolve on this macOS version — a
-    /// visible text fallback, so the menu bar item is never blank.
-    /// A nil image with an empty title leaves an
-    /// invisible-but-clickable slot that reads as a broken app
-    /// (an invalid symbol name — `doc.badge.exclamationmark`,
-    /// which does not exist — once did exactly that).
+    /// Sets status button icon to SF Symbol, or a visible text
+    /// fallback: a nil image with an empty title leaves an
+    /// invisible-but-clickable slot that reads as a broken app (an
+    /// invalid symbol name once did exactly that).
     func setStatusSymbol(
         _ name: String,
         on button: NSStatusBarButton,
@@ -70,31 +43,17 @@ extension StatusItemController {
         button.image = image
         button.title = image == nil ? "⚠︎" : ""
         button.toolTip = tooltip
-        // Same reason as `applyBrandIcon`: name the button, not
-        // the image, so every state announces itself even when
-        // the text fallback is what rendered.
         button.setAccessibilityLabel(a11y)
     }
 
-    /// A mode icon is either an SF Symbol name or a flat
-    /// emoji; emoji fall back to the button title when no
-    /// symbol matches.
-    ///
-    /// It names the button like every other render path, and that
-    /// is load-bearing rather than tidy: an accessibility label on
-    /// an `NSView` PERSISTS until something replaces it, so the
-    /// one path that set none inherited whatever the last one said
-    /// — switch layers after boot and the mark still announced
-    /// "KiwiDesk (starting up)", on a healthy app, indefinitely
-    /// (localization audit, 2026-08-12). Once one path names the
-    /// button, every path owes a name.
-    ///
-    /// The name is the app's, not the layer's: the icon string is
-    /// an SF Symbol identifier or a bare emoji from the user's Lua
-    /// config, and announcing `star.fill` would be worse than
-    /// announcing nothing. Naming the active LAYER needs the
-    /// layer's name at this seam, which is #TBD rather than this
-    /// change set.
+    /// Renders custom layer or mode icon. Naming the button is
+    /// load-bearing: an accessibility label on an `NSView`
+    /// PERSISTS until replaced, so the one path that set none
+    /// announced "starting up" on a healthy app indefinitely
+    /// (localization audit 2026-08-12) — once one path names the
+    /// button, every path owes a name. The name is the app's, not
+    /// the icon string's: announcing `star.fill` would be worse
+    /// than nothing.
     func applyModeIcon(
         _ icon: String,
         to button: NSStatusBarButton
