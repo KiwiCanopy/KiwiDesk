@@ -2,6 +2,46 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.1.2",
+      "tag": "v1.1.2",
+      "date": "2026-08-31",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.1.2",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.1.2/KiwiDesk-1.1.2.dmg",
+      "summary": "Switching a layout from the menu bar and then saving in Settings used to undo the switch — that is fixed, and the menu row that makes a switch permanent now says what it does. BSP also picks a new default split, which changes how untouched setups tile.",
+      "sections": [
+        {
+          "title": "Saving in Settings stopped undoing your layout",
+          "items": [
+            "**Save no longer puts the old layout back.** Switch a Space to Monocle from the menu bar, then open Settings to change a gap and press Save: the Space used to snap back to whatever the profile held, and *that* is what got saved — the switch was destroyed by saving something unrelated. Save now touches only what you changed in Settings, so the gap is saved and the Monocle switch stays on screen, still temporary until you keep it. Changing a Space's layout in Settings itself is a real edit, and that one wins.",
+            "**The menu row is now \"Keep Layout in Profile ‹name›\".** Same action, honest name: a layout switched from the menu bar is temporary until you keep it, which is how macOS words this choice elsewhere.",
+            "**That row lights up whenever any screen is on a temporary layout**, not only the screen you are looking at. It writes the whole profile, so it used to grey itself out while another screen's menu said the layout was unsaved.",
+            "**Settings no longer narrates temporary layouts at all.** The menu bar's \"not saved to profile\" line is now the single place a temporary layout is announced — and Revert went back to being just \"discard my edits\"."
+          ]
+        },
+        {
+          "title": "BSP splits alternately now",
+          "items": [
+            "**New windows alternate horizontally, then vertically, as they nest.** That alternation is what most people mean by BSP; the old default cut each area's longer side, which read as the layout misbehaving rather than as a choice. Both options are still there, in BSP's settings and in `bsp.set_strategy`.",
+            "**This changes how you tile if you never picked a strategy.** If you did pick one — in Settings or in your config — it is stored and nothing moves. Fresh installs and untouched setups get the new default."
+          ]
+        },
+        {
+          "title": "Floating spaces respect your bars",
+          "items": [
+            "**A window in a Floating space is now pushed clear of the App Bar and the Space Bar**, the same as a window you floated by hand. It could previously sit underneath one with its title bar covered, and nothing ever moved it back out."
+          ]
+        },
+        {
+          "title": "Smaller things",
+          "items": [
+            "Settings shows just the version number. The build hash moved to `kiwidesk --version`, which is where support asks for it.",
+            "Release plumbing: the release notes and the update feed publish themselves again, without a hand on the wheel."
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.1.1",
       "tag": "v1.1.1",
       "date": "2026-08-30",
