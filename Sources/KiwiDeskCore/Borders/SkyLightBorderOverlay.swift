@@ -2,7 +2,10 @@ import AppKit
 import CoreFoundation
 import CoreGraphics
 
-/// Focus ring overlay rendered directly via SkyLight window (#285 Tier 2).
+/// Focus ring overlay rendered directly via SkyLight window
+/// (#285 Tier 2). Any failed private operation retires this
+/// backend and lets `BorderOverlay` replay the latest state
+/// through its AppKit panel.
 @MainActor
 final class SkyLightBorderOverlay: BorderOverlayBackend {
     static let borderTags: UInt64 =
@@ -54,6 +57,9 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
         let previous = self.geometry
         let nextScale = screen?.backingScaleFactor ?? 2
         let recreatedForScale = window != 0 && scale != nextScale
+        // Recreate the raw window on a scale change (the
+        // JankyBorders model): the CGContext owns that surface's
+        // pixel density, so mutating it in place is not reliable.
         if recreatedForScale {
             _ = hide()
             destroyWindow()
@@ -105,6 +111,10 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
         guard window != 0, windowNumber == targetWindow,
             let transaction = makeTransaction()
         else { return false }
+        // `SLSTransaction*` mutators return no meaningful status
+        // (JankyBorders fires them and only commits): gating on
+        // `.success` reads a junk register and would falsely
+        // retire this backend. Only `makeTransaction` gates.
         if orderMode == .below {
             // Below-order relies on target window occlusion (#357, #361).
             _ = SkyLight.transactionOrder?(

@@ -1,7 +1,12 @@
 /// Weight feasibility reconciliation operations (`weightedSpan`, #944).
 extension StackLayout {
-    /// Reconciles stored weights to ensure minimum window size constraints
-    /// (`maxColumnTotal`, `minSizeMargin`, #925, #933, #944).
+    /// Reconciles stored weights to fit current membership and
+    /// span (#944; `maxColumnTotal`, `minSizeMargin`, #925/#933).
+    /// Nil when nothing needs healing — no margin: a stored value
+    /// between the margined clamp target and the raw check still
+    /// renders, and shaving it would rewrite a legal weight — and
+    /// nil when no weights can fit: that pile is honest physics.
+    /// Only weights above the waterline cap are shaved.
     public static func healedWeights(
         weights: [Double],
         span: Double,

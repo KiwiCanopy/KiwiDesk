@@ -53,7 +53,11 @@ enum GapsBordersRowOrder {
         .dragAndDrop: dragAndDrop,
     ]
 
-    /// Containers rendered with bespoke SwiftUI views (`gui.md`).
+    /// Containers rendered with bespoke SwiftUI views: the lists
+    /// above record membership for the placement table and search,
+    /// but editing one moves nothing on screen (the edge `gui.md`
+    /// warns about). A container that becomes a real `ForEach`
+    /// leaves this set in the same change.
     static let bespokeContainers: Set<SettingsContainer> = [
         .gaps,
         .borders,

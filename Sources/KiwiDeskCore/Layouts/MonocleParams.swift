@@ -40,6 +40,8 @@ extension MonocleParams: Codable {
         case override
     }
 
+    /// Manual decoding: profiles saved before a field existed
+    /// must keep loading (missing keys fall back to defaults).
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self

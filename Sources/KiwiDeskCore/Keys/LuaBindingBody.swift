@@ -1,7 +1,10 @@
 import Foundation
 
-/// Extracts body text of an inline `function() ... end` literal from Lua
-/// source line ranges (#4).
+/// Extracts body text of an inline `function() ... end` literal
+/// from Lua source line ranges (#4). Two assumptions, true for
+/// GUI-authored configs: a bind to a named handler yields nil
+/// (that row is dropped), and only the FIRST literal on a shared
+/// source line is recovered.
 enum LuaBindingBody {
     /// Extracts and dedents function body within 1-based inclusive line range.
     static func extract(

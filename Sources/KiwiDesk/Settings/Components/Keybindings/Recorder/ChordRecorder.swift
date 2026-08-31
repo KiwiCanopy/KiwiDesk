@@ -1,8 +1,12 @@
 import AppKit
 import KiwiDeskCore
 
-/// Key combination recording engine capturing events on key-down
-/// (#68, #212, `ChordRecorderTests`).
+/// Key combination recording engine: snap-in on key-down (#212,
+/// replacing #68's lock-on-full-release machine). Bare Escape
+/// cancels but Escape WITH modifiers records — ⌃Escape is a
+/// valid hotkey; any click cancels (the field absorbs it); app
+/// deactivation cancels too, since a system chord (⌘Tab) steals
+/// focus mid-recording (`ChordRecorderTests`).
 @MainActor
 final class ChordRecorder {
     enum Outcome {
@@ -41,6 +45,8 @@ final class ChordRecorder {
         keyMonitor = NSEvent.addLocalMonitorForEvents(
             matching: [.keyDown, .keyUp, .flagsChanged]
         ) { [weak self] event in
+            // A nil self must never swallow the app's keys — the
+            // leaked monitor would eat every keystroke.
             guard let self else { return event }
             let kind: EventKind =
                 switch event.type {
@@ -137,6 +143,9 @@ final class ChordRecorder {
             finish(.chord(combo))
             return true
         case .keyUp:
+            // Only releases paired with swallowed keyDowns are
+            // ours — a key held before recording still passes to
+            // its original responder.
             return consumeSuppressedKeyUp(keyCode)
         case .flagsChanged:
             onPreview(Self.modifierSymbols(flags))

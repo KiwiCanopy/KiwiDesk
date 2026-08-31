@@ -20,6 +20,10 @@ struct SettingsRowShape<Label: View, Control: View>: View {
             : AnyLayout(HStackLayout())
         layout {
             label
+                // `nil` when stacked — the modifier stays in the
+                // chain rather than becoming an `if`, which would
+                // wrap the label in `_ConditionalContent` and give
+                // away the identity `AnyLayout` is here to keep.
                 .frame(
                     width: stacked ? nil : labelColumn,
                     alignment: .leading
@@ -29,8 +33,11 @@ struct SettingsRowShape<Label: View, Control: View>: View {
     }
 }
 
-/// Row label container displaying text and optional help button (#94,
-/// `LayoutPreviewPanel`).
+/// Row label container displaying text and optional help button
+/// (#94). The text is drawn, not spoken: every control in this
+/// shape names ITSELF, so read aloud as well the label would be
+/// the same words twice (the `LayoutPreviewPanel` ruling, code
+/// review 2026-08-11, applied at the seam).
 struct SettingsRowLabel: View {
     let label: String
     var help: String? = nil

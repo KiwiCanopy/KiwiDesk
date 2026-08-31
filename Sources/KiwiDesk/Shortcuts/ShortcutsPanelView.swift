@@ -114,6 +114,11 @@ struct ShortcutsPanelView: View {
         }
     }
 
+    /// Settings' own section says the same thing and then adds
+    /// "rebind or remove them here" — which this panel cannot
+    /// offer, so the two captions are deliberately different
+    /// strings rather than one shared key that would lie on one
+    /// surface.
     private var inactiveCaption: String {
         L(
             "shortcuts.panel.inactive.caption",

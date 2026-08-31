@@ -28,6 +28,9 @@ struct FocusBorderEditor: View {
     }
 
     var body: some View {
+        // The header `?` is the gate's live anchor (#527): every
+        // help affordance inside the greyed block is dead, so the
+        // why-off explanation must live outside it.
         SettingsSection(
             SettingsCatalog.gapsAndBorders.focusBorder,
             caption: L(
@@ -56,6 +59,11 @@ struct FocusBorderEditor: View {
             isOn: style.unfocusedEnabled
         )
         Divider()
+        // A noun phrase like its true siblings (Width, Corners),
+        // NOT the "Show X" family — that family gates an element,
+        // this toggles a trait (#358); and the verb form was
+        // ambiguous in German ("Leuchten anzeigen" reads as "show
+        // lamps"). ui-designer verdict 2026-07-26.
         Toggle(
             L("border.glow", "Glow effect"),
             isOn: style.glow
@@ -70,6 +78,10 @@ struct FocusBorderEditor: View {
             title: L("border.glow_size.auto", "Auto glow size"),
             isOn: AutoSentinel.binding(
                 style.glowSize,
+                // Auto is the width-scaled formula's 0 sentinel
+                // (#551); take over from where auto left off — a
+                // fixed restore snapped the ring visibly at
+                // non-default widths.
                 restore: BorderStyle.glowBlur(
                     for: style.wrappedValue.clampedWidth
                 ).rounded()

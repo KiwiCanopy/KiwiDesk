@@ -39,6 +39,10 @@ struct LayoutPreviewPanel: View {
                 )
             )
             .fixedSize()
+            // Drawn, not spoken: it names the slider below, and
+            // the slider says the name itself (code review
+            // 2026-08-11 — the ruling `SettingsRowLabel` applies
+            // at its seam).
             .accessibilityHidden(true)
             SettingsSlider(
                 value: Binding(
@@ -47,6 +51,11 @@ struct LayoutPreviewPanel: View {
                 ),
                 range: countRange,
                 step: 1,
+                // A sibling `Text` names nothing for VoiceOver,
+                // so the slider announced a bare percentage
+                // (#678 turn 20a rule 2). Naming and valuing the
+                // control puts both on the thing adjusted — the
+                // seam every slider takes (#812).
                 label: L(
                     "layout_defaults.preview_windows",
                     "Window count"

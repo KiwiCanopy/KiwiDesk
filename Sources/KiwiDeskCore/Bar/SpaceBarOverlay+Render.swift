@@ -34,6 +34,10 @@ extension SpaceBarOverlay {
             gap: gap,
             frontExtent: front
         )
+        // Pin only while the trailing band leaves the Spaces a
+        // real viewport; a pathological near-full-width app name
+        // falls back to scrolling with the run rather than
+        // collapsing the Spaces to nothing (#409).
         let arrowRoom = 2 * (BarArrowView.zone + gap)
         let pinFront =
             total > axis && frontApp != nil

@@ -1,6 +1,10 @@
 import CoreGraphics
 
-/// Grid layout system supporting dynamic and rigid tiling (`OverlapStack`).
+/// Grid layout system supporting dynamic and rigid tiling.
+/// Both types share one ceiling: `columns`×`rows` (or the
+/// auto-size screen-computed dimensions) is the most cells the
+/// grid splits into — rigid fills it, dynamic balances up to it,
+/// and the excess cascades in the last cell (`OverlapStack`).
 public struct GridLayout: LayoutSystem {
     public init() {}
 
@@ -148,7 +152,11 @@ public struct GridLayout: LayoutSystem {
         return (max(1, cols), max(1, rows))
     }
 
-    /// Resolves grid dimensions bounded by capacity ceiling (#712).
+    /// Resolves grid dimensions bounded by the cap — the cap
+    /// bounds the CEILING, not the growth, so a dynamic grid stays
+    /// tight until it hits it. Public + static because the
+    /// Settings preview needs the whole rule or it subdivides past
+    /// where the real grid stops (#712).
     public static func dimensions(
         count: Int,
         params: GridParams,

@@ -65,7 +65,11 @@ extension APIReference {
         return .object(object)
     }
 
-    /// Serializes APIArgument to JSON (`APIChoice.type`, AGENTS.md §5).
+    /// Serializes APIArgument to JSON. The Swift type's NAME is
+    /// deliberately not on the wire (`APIChoice.type` carries it
+    /// for the terminal): publishing it as a JSON field would make
+    /// a Swift symbol part of the CLI's output contract, and
+    /// AGENTS.md §5 encourages renaming those.
     static func json(for argument: APIArgument) -> JSONValue {
         var object: [String: JSONValue] = [
             "name": .string(argument.name),
@@ -80,7 +84,10 @@ extension APIReference {
         return .object(object)
     }
 
-    /// Suggests closest matching command name across entire surface (#37).
+    /// Suggests closest matching command name across the WHOLE
+    /// surface — deliberately not `suggestion`, which must only
+    /// hint at what the caller's channel can invoke (#37): help is
+    /// a lookup, not an invocation.
     public static func helpSuggestion(
         for unknown: String
     ) -> String? {

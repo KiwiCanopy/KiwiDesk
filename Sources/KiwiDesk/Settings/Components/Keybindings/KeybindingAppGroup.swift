@@ -12,7 +12,10 @@ struct ApplicationsGroup: View {
     var layerName
     @State var newApp: KeybindingCatalog.InstalledApp?
     /// Alphabetical display order snapshotted on section entry
-    /// (#333, `KeyRecorderField`).
+    /// (#333). NOT recomputed on `bindings` mutation: the row's
+    /// control is a `KeyRecorderField` capture, and a live re-sort
+    /// could yank a row from under the cursor mid-record. A new
+    /// row stays at the bottom this session.
     @State private var displayOrder: [UUID] = []
 
     var body: some View {
@@ -20,6 +23,10 @@ struct ApplicationsGroup: View {
             SettingsCatalog.shortcuts.openApplications
         ) {
             if orderedAppIDs.isEmpty {
+                // Worded FROM `shortcuts.app_behavior.help` (#678
+                // Phase 4 pass 9): crossing SPACES is the
+                // distinguishing behaviour, and the two verbs
+                // differ in ten languages (l10n audit 2026-08-11).
                 Text(
                     L(
                         "shortcuts.apps.empty",
@@ -41,6 +48,9 @@ struct ApplicationsGroup: View {
             addRow
         }
         .onAppear(perform: recomputeOrder)
+        // The section view is reused across modes (no per-mode
+        // `.id`), so `onAppear` fires once — re-snapshot on mode
+        // change or later modes render in raw array order.
         .onChange(of: layerName) { _, _ in recomputeOrder() }
     }
 

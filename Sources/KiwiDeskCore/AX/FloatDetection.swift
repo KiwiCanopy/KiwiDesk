@@ -12,7 +12,10 @@ public enum FloatDetection {
         return subrole != kAXStandardWindowSubrole
     }
 
-    /// Evaluates role/subrole and WindowServer layer (layer != 0 floats).
+    /// Evaluates role/subrole and WindowServer layer: layer != 0
+    /// never tiles, even when the subrole momentarily reads
+    /// AXStandardWindow — apps mid-launch report unreliable
+    /// subroles.
     public static func shouldFloat(
         role: String,
         subrole: String,
@@ -26,7 +29,10 @@ public enum FloatDetection {
         serverSnapshot(of: id).layer
     }
 
-    /// Snapshot of window properties from WindowServer (`kCGWindowBounds`).
+    /// Snapshot of window properties from WindowServer
+    /// (`kCGWindowBounds`, CG global top-left coordinates) — one
+    /// round trip shared by ignore/float/helper classification;
+    /// never query the server in a loop.
     public struct WindowServerSnapshot: Sendable {
         public let layer: Int?
         public let alpha: Double?
@@ -62,7 +68,12 @@ public enum FloatDetection {
         )
     }
 
-    /// Detects non-user helper windows on raised layers (#309).
+    /// Detects non-user helper windows on raised layers (#309):
+    /// fully transparent or entirely off-screen. Normal-layer (0)
+    /// windows are never helpers — KiwiDesk itself parks
+    /// inactive-space windows off-screen, and those must stay
+    /// managed. An overlay caught mid fade-in self-heals on the
+    /// next reconcile.
     public static func isInvisibleHelper(
         layer: Int?,
         alpha: Double?,
@@ -94,7 +105,11 @@ public enum FloatDetection {
         return ids.prefix(Int(count)).map { CGDisplayBounds($0) }
     }
 
-    /// Detects unbacked auxiliary proxy windows.
+    /// Detects unbacked auxiliary proxy windows: AX can expose a
+    /// transient proxy with no WindowServer window behind it, and
+    /// managing it draws a fallback border around system UI. Real
+    /// dialogs have a layer; standard windows may be absent
+    /// because they live on another native Space.
     public static func isUnbackedAuxiliary(
         role: String,
         subrole: String,

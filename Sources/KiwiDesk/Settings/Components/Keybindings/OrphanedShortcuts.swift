@@ -1,6 +1,9 @@
 import KiwiDeskCore
 
-/// Determines orphaned catalog commands for deleted spaces (#92, #820).
+/// Determines orphaned catalog commands for deleted spaces
+/// (#92). A third surface asking "is this binding inactive?" asks
+/// HERE rather than re-deriving — two surfaces disagreeing about
+/// what is inactive is the whole defect #820 was.
 enum OrphanedShortcuts {
     /// Reconstructs navigation commands for bindings targeting inactive spaces
     /// (`NavRow`, `SpaceLuaArg`, #92, #820).
@@ -47,6 +50,10 @@ enum OrphanedShortcuts {
         let expander = ShortcutsFamilyRows(
             spaces: [space],
             icons: icons,
+            // The empty Desktop list is deliberate: this card is
+            // the SPACE net, and a Desktop number is not a
+            // `SpaceID` — `KeybindingCatalog.desktopOffer` is how
+            // a Desktop row stays reachable instead.
             desktops: .none,
             resizeStep: 0,
             layerNames: [],

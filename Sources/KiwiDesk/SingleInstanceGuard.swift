@@ -1,8 +1,13 @@
 import AppKit
 import KiwiDeskCore
 
-/// Status reported on duplicate launch; 0 prevents launchd respawn loops
-/// (`ServiceManager.plist`, #341, #1068).
+/// Status reported on duplicate launch; 0 prevents launchd
+/// respawn loops: `KeepAlive { SuccessfulExit: false }` restarts
+/// a crash, and a non-zero "already running" landed in the crash
+/// bucket — respawned forever, stealing focus each attempt
+/// (`ServiceManager.plist`, #341, #1068). The exit code answers
+/// "did this process fail?"; the stderr line answers "did a new
+/// instance start?".
 let secondLaunchExitStatus: Int32 = 0
 
 /// Activates running instance and exits when lock is held

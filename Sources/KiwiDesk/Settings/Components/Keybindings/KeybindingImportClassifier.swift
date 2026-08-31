@@ -4,7 +4,12 @@ import KiwiDeskCore
 /// Reclassifies `.custom` keybindings to `.navigation` or `.application`
 /// via catalog matching (`KeybindingCatalog`, `recoverKeybindings`, #4).
 enum KeybindingImportClassifier {
-    /// Reclassifies custom rows in config in-place (`resize.step`, #58).
+    /// Reclassifies custom rows in config in-place. Pass
+    /// `recoverResizeStep` ONLY on an explicit import, where the
+    /// pulled-in bindings are the source of truth — on a plain
+    /// load-for-edit `resize.step` is already authoritative, and a
+    /// magnitude baked into a stray row must not overwrite it
+    /// (#58 review).
     static func classify(
         _ config: inout GuiConfig,
         recoverResizeStep: Bool = false
@@ -43,6 +48,12 @@ enum KeybindingImportClassifier {
             let command = KeybindingCatalog.switchLayerCommand(name)
             map[command.lua] = command.label
         }
+        // Desktop rows are absent on purpose, matched by SHAPE in
+        // `reclassify`: this map is built from the config, which
+        // records no Desktops — a live list would strand a binding
+        // naming a detached Desktop as raw Lua until the screen
+        // came back. Step-free rows each need an entry or an
+        // imported binding stays Custom (#91).
         for command in KeybindingCatalog.stepFreeCommands {
             map[command.lua] = command.label
         }

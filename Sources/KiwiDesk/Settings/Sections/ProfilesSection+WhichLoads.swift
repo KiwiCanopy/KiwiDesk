@@ -32,6 +32,11 @@ extension ProfilesSection {
     /// Explains active profile resolution verdict for live monitors
     /// (#36, #96).
     private var verdictSentence: String {
+        // Count and verdict from ONE snapshot: reading the count
+        // live beside a snapshotted verdict lets the sentence name
+        // a profile that matched a different display set. The
+        // count phrase, never a bare `%1$d screens` — that frame
+        // renders "1 screens" and no catalog can repair a frame.
         let resolution = model.profileResolution
         let screens = screensPhrase(resolution.screens)
         switch resolution.verdict {

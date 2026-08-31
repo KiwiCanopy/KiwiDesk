@@ -19,8 +19,14 @@ public enum TabReconciler {
         }
     }
 
-    /// Matches vanished and appeared tab windows sharing frame geometry
-    /// (`hasTabGroup`, `AXTabGroup`, #308).
+    /// Matches vanished and appeared tab windows sharing a frame,
+    /// with a tab group on EITHER side (#308): apps expose
+    /// `AXTabGroup` only at 2+ tabs, so the 1↔2 boundary vanishes
+    /// a non-carrier as a carrier appears — requiring both sides
+    /// would miss both. A false merge hides a real window; a false
+    /// split is only today's extra tile. `vanished` should exclude
+    /// minimized windows — a minimize is not a tab close
+    /// (`hasTabGroup`).
     public static func rekeys(
         vanished: [TabWindow],
         appeared: [TabWindow],

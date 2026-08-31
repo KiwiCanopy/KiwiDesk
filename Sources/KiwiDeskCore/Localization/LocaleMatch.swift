@@ -5,8 +5,14 @@ import Foundation
 enum LocaleMatch {
     /// Shipped locale identifier to use, or `nil` for default English (#9).
     ///
-    /// Evaluates candidate tags via exact BCP-47 match and maximal subtag
-    /// reduction (`maximalIdentifier`), then widens bare language fallback.
+    /// Evaluates candidate tags via exact BCP-47 match and
+    /// maximal subtag reduction (`maximalIdentifier`), then widens
+    /// the bare language. The phases are ORDERED, never
+    /// interleaved: widen at each truncation step and `zh-TW` gets
+    /// Simplified — not a coarser fallback, the wrong language.
+    /// English short-circuits to nil wherever it sits: it ships no
+    /// catalog, and falling through would hand an English-first
+    /// user their second language.
     static func best(
         preferences: [String],
         available: [String]

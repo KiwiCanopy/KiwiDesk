@@ -1,8 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Drag-and-drop visuals editor card for ghost and drop zone settings
-/// (`GapsBordersGates`, #68 §3.14, #231, #754).
+/// Drag-and-drop visuals editor card for ghost and drop zone
+/// settings (`GapsBordersGates`, #68 §3.14, #231, #754). Twin
+/// columns, each preview above its own controls; static previews
+/// — no live drag (#123). The colour rows left for Advanced
+/// Colours in #678 Phase 3; what stays is what only a column can
+/// answer.
 struct DragVisualsEditor: View {
     @ObservedObject var model: SettingsModel
 
@@ -56,6 +60,9 @@ struct DragVisualsEditor: View {
         visual: Binding<DragVisual>,
         enabledReason: GapsBordersGates.InertReason?
     ) -> some View {
+        // The header `?` is the gate's live anchor (#527): with
+        // the visual off the column below is dimmed, and help
+        // inside a greyed block is dead.
         SettingsSection(
             control,
             caption: caption,

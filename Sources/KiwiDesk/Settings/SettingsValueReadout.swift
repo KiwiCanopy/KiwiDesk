@@ -1,8 +1,14 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Formats changed settings keys into diff rows for draft review
-/// (`SettingsDraftDiff`, `SettingsValueReadoutTests`, #678 turn 9).
+/// Formats changed settings keys into diff rows for draft
+/// review (`SettingsDraftDiff` stays the attribution authority;
+/// #678 turn 9). Totality is guarded, not promised: every census
+/// key naming a model path must produce a row for a differing
+/// pair or sit in `noReadout` with its reason —
+/// `SettingsValueReadoutTests` reds the key landing in neither,
+/// and a NEW instanced key joins that suite's battery in the
+/// same change.
 @MainActor
 enum SettingsValueReadout {
     /// Returns diff rows describing changes between clean and draft configs.

@@ -31,6 +31,11 @@ public struct MonocleLayout: LayoutSystem {
             }
             return result
         }
+        // Park (#881): the engine HOLDS the shown member across a
+        // float focus (`monocleShownMembers`) so a float taking
+        // focus cannot swap the members beneath it. Each member
+        // parks its OWN effective frame — a full-width park of a
+        // narrower window would push its body past the peek.
         let shown = Self.shownMember(
             anchor: context.focused,
             of: windows

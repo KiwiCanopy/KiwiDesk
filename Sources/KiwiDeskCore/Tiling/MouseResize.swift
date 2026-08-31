@@ -114,6 +114,9 @@ public enum MouseResize {
         mode: LayoutMode,
         isMaster: Bool,
         stackSplitHorizontal: Bool,
+        // Required on purpose (#925 review): a defaulted
+        // discriminator lets a new call site silently classify a
+        // horizontal-track drag with the vertical mapping.
         trackAxisVertical: Bool,
         slot: CGRect,
         frame: CGRect,
@@ -141,6 +144,9 @@ public enum MouseResize {
             }
             return nil
         case .stack:
+            // The ratio drag follows the split axis (#222); the
+            // cross-axis drag snaps back (the #67 weight-drag
+            // exception).
             let change = stackSplitHorizontal ? dw : dh
             guard abs(change) > threshold else { return nil }
             let sign: CGFloat = isMaster ? 1 : -1

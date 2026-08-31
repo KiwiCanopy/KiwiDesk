@@ -76,6 +76,8 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 Bool.self,
                 forKey: .onRelayout
             ) ?? true
+        // `didSet` observers don't fire during init, so clamp the
+        // decoded values explicitly through the same helper.
         durationMS = Self.clampMS(
             try container.decodeIfPresent(
                 Int.self,

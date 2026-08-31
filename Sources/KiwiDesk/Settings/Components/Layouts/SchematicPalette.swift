@@ -1,6 +1,11 @@
 import SwiftUI
 
-/// Color source for schematic layouts (`SettingsTheme.accent`, #712, #786).
+/// Color source for schematic layouts (`SettingsTheme.accent`,
+/// #712, #786). One ENVIRONMENT value carries the substitution —
+/// an init parameter on the schematics would red
+/// `LayoutSchematicCountTests` at every construction site. On the
+/// plate, interiors are NEUTRAL (owner ruled 2026-08-09): the
+/// accent lives on strokes and marks alone.
 struct SchematicPalette: Equatable {
     var accent: Color
     var ink: Color

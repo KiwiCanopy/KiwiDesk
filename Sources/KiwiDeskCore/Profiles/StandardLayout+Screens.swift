@@ -9,8 +9,12 @@ extension StandardLayout {
         return (1...spaceCount).map { SpaceID($0) }
     }
 
-    /// Layout mode for space, falling back to screen's preferred layout or BSP
-    /// (`ScreenClass`).
+    /// Layout mode for space. Where the sparse map says nothing,
+    /// the answer is the SCREEN's own best layout, not a fixed
+    /// `bsp` (owner ruling 2026-08-11): sparse presets on a laptop
+    /// silently handed it BSP, the one layout `ScreenClass` rules
+    /// out there. `shape` nil (a preset card drawn for a screen
+    /// COUNT) keeps the historic `bsp`.
     public func mode(
         of space: SpaceID,
         on shape: ScreenClass?

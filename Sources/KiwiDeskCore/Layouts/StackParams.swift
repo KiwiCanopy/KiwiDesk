@@ -26,7 +26,9 @@ public struct StackParams: Sendable, Equatable, Codable {
             self == .left || self == .right
         }
 
-        /// Inferred orientation for windows in the stack zone (#222).
+        /// Inferred orientation for the stack zone — derived,
+        /// never a free knob (#222): any other combination
+        /// degenerates into slivers.
         public var stackOrientation: Orientation {
             splitsHorizontally ? .vertical : .horizontal
         }
@@ -59,6 +61,8 @@ public struct StackParams: Sendable, Equatable, Codable {
         case override
     }
 
+    /// Manual decoding: profiles saved before a field existed
+    /// must keep loading (missing keys fall back to defaults).
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self

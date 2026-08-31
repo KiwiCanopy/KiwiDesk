@@ -1,7 +1,10 @@
 import Foundation
 
-/// Sparse per-profile app→space rule override
-/// (#109, `AppRuleOverrideTests`).
+/// Sparse per-profile app→space rule override (#109). A stored
+/// nil is a TOMBSTONE (un-pin), unlike `KeyLayerOverride`.
+/// Bespoke on that seam, NOT a generic sparse-override primitive
+/// (AGENTS.md §5, `.claude/rules/parity-tests.md`); guarded by
+/// round-trip + resolve + diff-inverse in `AppRuleOverrideTests`.
 public struct AppRuleOverride: Sendable, Equatable {
     /// Sparse app overrides where stored `nil` indicates a tombstone unpin.
     public var rules: [String: SpaceID?]

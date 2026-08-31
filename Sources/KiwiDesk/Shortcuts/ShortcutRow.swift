@@ -14,8 +14,14 @@ struct ShortcutRow: Identifiable {
     /// Trailing accessory glyph for non-default actions (#334).
     var accessoryIcon: String? = nil
     var accessoryHelp: String = ""
-    /// Whether the action is currently hardware-unavailable
-    /// (`NavCommand.unavailable`).
+    /// Whether the action cannot run for a reason the user's
+    /// HARDWARE owns (a Desktop whose screen is detached). The
+    /// panel DIMS such a row rather than dropping it — the combo
+    /// is still registered and blocks that chord, and hiding it
+    /// breaks "no bound shortcut is ever invisible". NOT the
+    /// Inactive band's case: an inactive Space shortcut still
+    /// fires and recreates its Space; only Mission Control makes
+    /// a Desktop (`NavCommand.unavailable`).
     var unavailable: Bool = false
 }
 

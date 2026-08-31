@@ -36,7 +36,11 @@ struct LuaEditorTab: View {
         }
     }
 
-    /// Adoption confirmation message reflecting dirty state (#515).
+    /// Adoption confirmation message reflecting dirty state.
+    /// Adopt is an eighth discard path (#515 review): it reads the
+    /// original from DISK, never `luaSource`, then reloads — an
+    /// unsaved buffer is dropped, and it keeps its own dialog (one
+    /// gesture, one prompt), so that dialog must say so itself.
     private var adoptMessage: String {
         guard model.isDirty else {
             return L(
@@ -170,6 +174,10 @@ struct LuaSourceEditor: NSViewRepresentable {
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.string = text
+        // An AppKit view re-earns what SwiftUI gives free
+        // (gui.md, #812). The FILENAME verbatim, not a new noun:
+        // a translatable third name for the config file is
+        // Family C drift (localization audit 2026-08-24).
         textView.setAccessibilityLabel("init.lua")
         return scroll
     }

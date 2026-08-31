@@ -1,6 +1,10 @@
 import Foundation
 
-/// Dotted color key definitions for theme palettes (#375, #678).
+/// Dotted color key definitions for theme palettes (#375,
+/// #678). The dotted namespace is load-bearing — bare wire keys
+/// like `fill_color` collide between the two bars — and the
+/// surface is reflection-derived from each struct's color
+/// CodingKeys, so a new color key auto-joins.
 public enum ColorPaletteKeys {
     /// Every settable color path, in a stable order.
     public static var all: [String] {
@@ -34,7 +38,11 @@ public enum ColorPaletteKeys {
             )
     }
 
-    /// Whether path permits empty automatic value (`StickyStyle.color`).
+    /// Whether path permits the empty "Automatic" value
+    /// (`StickyStyle.color`). Derived from the path — a third mark
+    /// struct cannot join the surface without joining this too.
+    /// Without it the surface is one-directional: a palette could
+    /// paint a mark but never hand it back to Automatic.
     public static func allowsAutomatic(_ path: String) -> Bool {
         path.hasSuffix(".color")
     }

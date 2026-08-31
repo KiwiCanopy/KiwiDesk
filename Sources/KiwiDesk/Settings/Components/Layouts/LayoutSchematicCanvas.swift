@@ -20,14 +20,24 @@ struct SchematicCanvas<Content: View>: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    // `axLabel` is the spoken form of this
+                    // drawing; the caption read as well was the
+                    // same fact twice at `.panel` (#812).
                     .accessibilityHidden(true)
             }
         }
         .frame(maxWidth: .infinity)
     }
 
-    /// Bordered mini-screen frame with standard inset and corner radius
-    /// (`LayoutSchematic.inset`, `docs/ui-patterns.md`, #753).
+    /// Bordered mini-screen frame. THE CLIP DOES NOT CROP WHERE A
+    /// READER ASSUMES, and this is where that is written down:
+    /// content is padded by `LayoutSchematic.inset` and only then
+    /// clipped at the border, so a shape left to the clip still
+    /// bleeds into the inset band — a schematic that must not draw
+    /// there skips the drawing instead (#753). Prose in gui.md,
+    /// `docs/ui-patterns.md` and design-decisions CITES THIS SITE
+    /// rather than restating the mechanism. A `nil` width means
+    /// "fill the available width".
     private var screen: some View {
         ZStack {
             content

@@ -30,7 +30,11 @@ public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
     public static let shift = Self(rawValue: UInt32(shiftKey))
 }
 
-/// C callback for Carbon hotkey events (`RegisterEventHotKey`, #1056).
+/// C callback for Carbon hotkey events. Carbon delivers exactly
+/// one pressed and one released event per physical hold — a
+/// registered hot key never auto-repeats — which is what the
+/// hold-to-glide engine builds on (`RegisterEventHotKey`,
+/// #1056).
 private func hotkeyCallback(
     _ handler: EventHandlerCallRef?,
     _ event: EventRef?,
@@ -63,7 +67,10 @@ private func hotkeyCallback(
     return noErr
 }
 
-/// Hotkey registrar reporting key releases for hold-to-glide (#1056).
+/// Hotkey registrar reporting key releases (#1056). Split from
+/// `HotkeyRegistrar` so press-only fakes stay valid; the
+/// hold-to-glide engine arms only when its registrar conforms —
+/// a repeat with no release channel would never stop.
 @MainActor
 public protocol HotkeyReleaseReporting: AnyObject {
     /// Handler invoked on key release.
@@ -140,12 +147,18 @@ public final class CarbonHotkeyCenter {
     }
 
     fileprivate func dispatchRelease(id: UInt32) {
+        // A release for an already-unregistered id is dropped —
+        // `onRelease` consumers key their state by id and must not
+        // hear stale ids.
         guard handlers[id] != nil else { return }
         onRelease(id)
     }
 
-    /// Installs Carbon event handler on first registration
-    /// (`HoldGlideEligibilitySeamTests`, #565).
+    /// Installs the Carbon event handler on first registration —
+    /// reached only from `register`, so construction touches no OS
+    /// state (`HoldGlideEligibilitySeamTests` builds a live center
+    /// bare). Moving this into an initializer would put a Carbon
+    /// handler on the dispatcher in every test run (#565 class).
     private func installHandlerIfNeeded() {
         guard eventHandler == nil else { return }
         var eventTypes = [

@@ -13,7 +13,11 @@ final class RecorderCoordinator: ObservableObject {
     /// Target shortcut row ID to scroll to upon rejection navigation.
     @Published var scrollTarget: String?
 
-    /// Callback fired on transition between idle and armed states (#213).
+    /// Suspends/restores live hotkeys while any recorder is armed
+    /// (#213): testing an existing shortcut mid-capture must not
+    /// fire its action. Fires only on the nil↔armed edge, so
+    /// switching between two fields never bounces the
+    /// registration.
     var onArmedChange: (Bool) -> Void = { _ in }
 
     /// Teardown closure for active event monitor.
@@ -63,7 +67,11 @@ enum RecorderPreflight {
             ? binding.lua : binding.id.uuidString
     }
 
-    /// Evaluates conflicting shortcut bindings (#181 review H2).
+    /// Evaluates conflicting shortcut bindings. A PURE query: it
+    /// runs from chord previews and render passes, so it must
+    /// never mutate the bindings (#181 review H2 — a preview
+    /// keystroke deleted a row). `commit` must look its row up at
+    /// write time, because Steal mutates the array first.
     static func rejection(
         combo: String,
         excluding isOwn: @escaping (KeyBinding) -> Bool,

@@ -42,8 +42,12 @@ enum ConflictText {
 }
 
 extension SystemShortcut {
-    /// Localized macOS system shortcut name
-    /// (`SystemShortcutNamesTests`, #768).
+    /// Localized macOS system shortcut name. The switch is
+    /// exhaustive on purpose: a new Core case cannot ship without
+    /// a string here — the compiler is the parity guard;
+    /// `SystemShortcutNamesTests` only adds that no two cases
+    /// share a name. These are Apple's feature names, so a
+    /// translation follows whatever macOS calls them (#768).
     @MainActor
     var localizedName: String {
         switch self {
@@ -67,6 +71,12 @@ extension SystemShortcut {
             return L("system_shortcut.hide_app", "Hide App")
         case .forceQuit:
             return L("system_shortcut.force_quit", "Force Quit")
+        // These two name APPLE's shortcut rows, so they keep
+        // "Space" while the app says Desktop (#768, owner ruling
+        // 2026-08-12): the string exists so a user can find that
+        // row in System Settings, where macOS says "space" —
+        // renaming it would point at a label not on screen. The
+        // carve-out is written in config-vocabulary.md.
         case .missionControlSpaceLeft:
             return L(
                 "system_shortcut.mission_control_space_left",

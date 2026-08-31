@@ -2,7 +2,10 @@ import AppKit
 
 /// Visual styling and layer color application for `AppBarItemView`.
 extension AppBarItemView {
-    /// Applies active and hover colors to text, icon, and background layers
+    /// Applies active and hover colors to text, icon, and
+    /// background layers. The icon's dim is deliberately the full
+    /// 0.4, NOT the Space Bar's 0.6 middle tier: a binary signal
+    /// with no lower tier to collide with
     /// (`BarAccent.activeUnfocusedAlpha`).
     func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
@@ -67,6 +70,10 @@ extension AppBarItemView {
         return style.hasBox
     }
 
+    // The Settings palette scene (`PaletteSceneThumbnail`, GUI
+    // target) is a schematic twin of this box/accent logic —
+    // keep the two in step when the box or accent rules change
+    // (#793).
     var boxColorHex: String {
         if isHovered { return style.hoverFillColor }
         return style.hasBox ? style.fillColor : "#00000000"

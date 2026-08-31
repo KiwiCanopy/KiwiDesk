@@ -99,7 +99,9 @@ public final class LuaInterpreter {
         return protectedCall(state, argc: 0)
     }
 
-    /// Compiles `body` as a Lua function and returns registry ref
+    /// Compiles `body` as a Lua function and returns a registry
+    /// ref. Not discardable: a discarded `.success` orphans a
+    /// registry slot — release with `release(ref:)`
     /// (`KeybindingManager.reset()`, `KeybindingManager.fire`).
     public func makeFunction(
         body: String
@@ -111,6 +113,10 @@ public final class LuaInterpreter {
         guard luaL_loadstring(state, src) == SHIM_LUA_OK else {
             return .failure(.runtime(popError(state)))
         }
+        // A crafted body can ESCAPE the wrapper
+        // (`end, (…)(), function()`) and execute code during this
+        // pcall, so it runs under the same watchdog deadline as
+        // every other VM entry.
         shim_set_deadline(
             state,
             shim_monotonic_now() + timeout

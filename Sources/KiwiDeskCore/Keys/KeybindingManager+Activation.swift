@@ -4,6 +4,8 @@ import Foundation
 /// (`KeypadKeys`, #1074).
 extension KeybindingManager {
     func deactivate() {
+        // The ids are about to vanish, so no release can ever
+        // arrive to stop a live glide — end it here (#1056).
         holdGlide.cancelRun()
         for id in activeBindings.keys {
             registrar.unregister(id: id)
@@ -31,6 +33,12 @@ extension KeybindingManager {
                 )
                 continue
             }
+            // A keypad digit IS its number-row twin (#1074) — but
+            // register the twin only once the authored key landed,
+            // or the keypad fires a binding the Settings caption
+            // calls ungranted. A twin's OWN refusal is never
+            // reported as the binding's: the shortcut still works
+            // from the row.
             if let twin = KeypadKeys.keypadTwin(
                 of: combo.keyCode
             ) {
@@ -43,7 +51,12 @@ extension KeybindingManager {
         }
     }
 
-    /// Registers physical key for combo (`KeypadKeys`, #1056).
+    /// Registers ONE physical key for combo. Each physical key
+    /// needs its OWN box: the handler carries its registration id,
+    /// filled when `register` returns and never re-derived after
+    /// the fire (#1056 review) — a box shared with the keypad twin
+    /// would hand the second press the first's id, and hold-glide
+    /// keys its whole run by that id (`KeypadKeys`).
     private func registerPhysical(
         code: UInt32,
         combo: KeyCombo,

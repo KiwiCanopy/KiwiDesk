@@ -8,6 +8,9 @@ extension Space {
         of window: WindowID
     ) {
         guard trackBreaks.remove(window) != nil else { return }
+        // Clear the departing head's weight FIRST, so a head at
+        // the array's end (no successor) cannot leave a stale
+        // weight a later edge-open would resurrect (review).
         let weight = trackWeights.removeValue(forKey: window)
         guard let index = windows.firstIndex(of: window),
             index + 1 < windows.count
@@ -99,6 +102,8 @@ extension Space {
         }
         let lead = ranges[min(track, target)]
         let trail = ranges[max(track, target)]
+        // Materialize the implicit index-0 head only when the
+        // exchange moves it (review m1).
         if lead.lowerBound == 0 {
             trackBreaks.insert(tiled[0])
         }

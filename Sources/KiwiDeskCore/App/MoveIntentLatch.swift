@@ -1,11 +1,21 @@
 import Foundation
 
-/// Latch suppressing follow on focus re-reports for windows moved
-/// without follow
-/// (`scheduleFocusFollow`, `handleWindowFocused`, #22, #463, #482, #483).
+/// Latch suppressing follow on focus re-reports for windows
+/// moved without follow (`scheduleFocusFollow`, #22, #463, #482,
+/// #483). Deliberately honor-except-follow, NOT a
+/// revert-and-return sibling of `handleWindowFocused`'s distrust
+/// ladder: a latched report may be a genuine click the latch
+/// cannot tell from the echo, so focus, ring and emit are all
+/// honored — only the space-follow is suppressed. Revert
+/// semantics would eat a real click's focus, a worse residue.
 @MainActor
 final class MoveIntentLatch {
-    /// Age window within which focus follow is suppressed.
+    /// Age window within which focus follow is suppressed:
+    /// Electron/WebKit answer AX lazily (100–300 ms), so the echo
+    /// can trail by several hundred ms; beyond ~1 s a report is a
+    /// user action. Accepted trade: a genuine click on the moved
+    /// window inside the window is not followed once
+    /// (accepted-limitations row).
     static let window: TimeInterval = 1.0
 
     private var stamps: [WindowID: Date] = [:]

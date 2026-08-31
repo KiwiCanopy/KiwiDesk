@@ -18,7 +18,12 @@ struct FloatingSchematic: View {
         reduceMotion ? nil : LayoutSchematic.damping
     }
 
-    /// Windows actually drawn (`LayoutSchematicCountTests`).
+    /// Windows actually drawn. `internal` and asserted directly
+    /// (`LayoutSchematicCountTests`), never left to the source
+    /// scan: a schematic that TAKES the count and draws a constant
+    /// satisfies every substring a scan can look for — the
+    /// mutation `guard-prover` shipped past that suite's first
+    /// cut.
     var drawn: Int { min(max(windows, 1), 3) }
 
     var body: some View {

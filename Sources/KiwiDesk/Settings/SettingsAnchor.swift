@@ -1,6 +1,12 @@
 import KiwiDeskCore
 
-/// Navigation target specification in Settings window (#277, #326).
+/// Navigation target specification in Settings window (#277,
+/// #326). `anchor` is a `SettingsControl.id`, never display text
+/// — the load-bearing decision: label-text anchors were
+/// measured dead one level down (Appearance renders "Color" six
+/// times; text `.id()` churn tears down rows holding uncommitted
+/// `@State` mid-edit). The catalog declaration supplies both
+/// label and id, so the render path stays the one list.
 struct SettingsAnchor: Hashable {
     let destination: SettingsDestination
     /// Local view surface required before revealing target.

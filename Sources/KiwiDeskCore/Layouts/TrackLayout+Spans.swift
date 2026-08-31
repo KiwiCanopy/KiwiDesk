@@ -51,7 +51,11 @@ extension TrackLayout {
         )
     }
 
-    /// Assembles folded track partition for geometry and heal (#944).
+    /// Assembles folded track partition for geometry, the swap
+    /// guard and the heal — ONE assembly (#944). At a SECOND
+    /// consumer of the merge question ("does the fold merge ≥2
+    /// marker tracks"), promote this tuple to a named struct
+    /// carrying that predicate (round-4 architect review).
     public static func foldedPartition(
         of tiled: [WindowID],
         breaks: Set<WindowID>,

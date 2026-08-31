@@ -1,7 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Reset and recovery actions in General ▸ Advanced (#606, #634).
+/// Reset and recovery actions in General ▸ Advanced (#606,
+/// #634). Restore sits AFTER Reset All: Reset All earns its name
+/// by leaving `init.lua` and the palettes standing, and Restore
+/// replaces the palettes too — the widest action comes last, or
+/// the ordering stops telling a user which button is safe.
+/// Danger is signaled by the dialog's destructive role, never a
+/// resting red button (house convention).
 ///
 /// Ladder order progresses from non-destructive to widest impact
 /// (`GeneralSection+Backup`).

@@ -4,7 +4,11 @@ import Foundation
 /// One-shot appearance synchronization between space bar and app bar styles
 /// (`SpaceBarParityTests.copyAppearanceParity`, #293, #678 Phase 2).
 extension SpaceBarStyle {
-    /// JSON key spellings excluded from the copy.
+    /// JSON key spellings excluded from the copy: `edge`
+    /// (placement is not appearance), `enabled` (visibility is
+    /// not), and every `*_color` key (colours are Advanced
+    /// Colours' concern, owner ruling 2026-08-02 — derived by
+    /// suffix so a new shared colour stays out automatically).
     public static let copyAppearanceExclusions: Set<String> = [
         "enabled", "edge",
     ]
@@ -31,8 +35,10 @@ extension SpaceBarStyle {
             .subtracting(sharedColorKeys)
     }
 
-    /// Copies shared appearance fields from AppBarStyle
-    /// (`AppBarStyle.copyAppearance(from:)`).
+    /// Copies shared appearance fields from AppBarStyle — the
+    /// RETIRED forward direction (the shipped button pulls the
+    /// other way, owner flip 2026-08-10). Stays internal as the
+    /// parity suite's seed (`AppBarStyle.copyAppearance(from:)`).
     mutating func copyAppearance(from appBar: AppBarStyle) {
         for key in Self.copyAppearanceKeys {
             copyField(key, from: appBar)

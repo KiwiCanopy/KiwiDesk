@@ -46,8 +46,11 @@ extension ProfilesSection {
         )
     }
 
-    /// Validates uniqueness case-insensitively while permitting
-    /// case-only renames.
+    /// Validates uniqueness case-insensitively (APFS: "a" → "B"
+    /// collides with "b") while permitting case-only self-renames.
+    /// One optimistic mirror is the limit (review 2026-07): a
+    /// second GUI consumer gets a read-only query on the KiwiCore
+    /// facade instead of a copy.
     func canRename(_ typed: String, of old: String) -> Bool {
         let new = typed.trimmed
         guard !new.isEmpty, new != old else { return false }
@@ -67,6 +70,14 @@ extension ProfilesSection {
 
     func commitRename(_ typed: String, of old: String) {
         guard canRename(typed, of: old) else { return }
+        // Rename reloads (core chases the file, the adopted name,
+        // the binding lines), so it discards staged edits like
+        // Load and Delete (#515). One turn later, deliberately:
+        // dismissing the NSPopover and requesting the confirm
+        // sheet in one update can DROP the sheet mid-animation —
+        // Rename becomes a dead click that silently keeps the
+        // edits (both reviewers flagged it independently).
+        // Ordering only; the draft and old name are captured.
         let draft = typed
         renameRequest = nil
         DispatchQueue.main.async {

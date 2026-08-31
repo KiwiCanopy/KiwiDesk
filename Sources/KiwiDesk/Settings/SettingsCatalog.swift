@@ -2,9 +2,14 @@ import KiwiDeskCore
 
 /// Settings control catalog and search index definitions (#277).
 ///
-/// Declarations are grouped in `SettingsCatalog+ThisProfile.swift` and
-/// `SettingsCatalog+WholeApp.swift` (`SettingsCatalogFiles`,
-/// `SettingsCatalogSiteTests`, `docs/accepted-limitations.md`).
+/// Declarations are grouped in `SettingsCatalog+ThisProfile.swift`
+/// and `SettingsCatalog+WholeApp.swift` (`SettingsCatalogFiles`,
+/// `docs/accepted-limitations.md`). Property names are the tokens
+/// the site guards scan for (`SettingsCatalogSiteTests`): unique
+/// across the catalog, and distinctive enough not to collide with
+/// unrelated identifiers. `Mirror` yields declaration order, so
+/// keeping it matching the view's visual order is a discipline,
+/// not a structural guarantee.
 enum SettingsCatalog {
     static let spaces = SpacesControls()
     static let layoutDefaults = LayoutDefaultsControls()

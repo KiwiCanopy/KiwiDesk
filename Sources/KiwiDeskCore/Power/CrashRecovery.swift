@@ -48,10 +48,17 @@ public final class CrashRecovery {
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+        // First autosave immediately: the session file was
+        // already consumed by this launch, so a crash inside the
+        // first interval would lose the arrangement (#633).
         autosave()
     }
 
-    /// Clean shutdown: stops timer and writes session snapshot (#801).
+    /// Clean shutdown: stops timer and writes the session
+    /// snapshot. `preservingSession: true` skips the save — boot
+    /// is the case (#801): a quit mid-scan would write a fraction
+    /// of the desk over the arrangement this launch had not
+    /// restored yet. The crash marker still goes.
     public func shutdownCleanly(
         preservingSession: Bool = false
     ) {

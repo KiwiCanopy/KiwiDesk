@@ -1,7 +1,11 @@
 import AppKit
 
-/// BorderManager ring overlay synchronization and rendering paths
-/// (`FollowSource`, #594, #596).
+/// BorderManager ring overlay synchronization and rendering
+/// paths. Three writers, descending authority while our own
+/// animation drives a window (#594/#596): `apply` is unguarded
+/// (the WS re-read owns the frame), `follow` asks
+/// `FollowSource`, `sync` rebuilds everything but holds an
+/// animating window's geometry.
 extension BorderManager {
     /// Synchronizes overlays to match desired specs and retires unused
     /// overlays (`FollowSource.syncFrame`, #596).
@@ -17,6 +21,12 @@ extension BorderManager {
         for spec in desired {
             specs[spec.window] = spec
             let overlay = overlay(for: spec.window)
+            // Only geometry stands down mid-animation (#596);
+            // create, recolor, re-order and retire run
+            // unconditionally. `screen` MUST derive from this same
+            // rect, not `spec.frame`: it picks the backing scale,
+            // and a held frame paired with the spec's screen
+            // rasterizes the ring at the wrong display's scale.
             let frame = FollowSource.syncFrame(
                 spec: spec.frame,
                 held: overlay.lastRenderedFrame,
@@ -32,6 +42,9 @@ extension BorderManager {
                 screen: screen(for: frame),
                 glowBlur: spec.glowBlur
             )
+            // Re-assert stacking each sync — the target may have
+            // moved in the window order since the ring last
+            // positioned.
             overlay.order(relativeTo: spec.window.raw)
         }
     }

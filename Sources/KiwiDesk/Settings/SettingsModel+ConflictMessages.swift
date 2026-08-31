@@ -14,7 +14,10 @@ extension SettingsModel {
         )
     }
 
-    /// Evaluates conflict state after recording a keybinding combo.
+    /// Evaluates conflict state after recording a combo. An edit
+    /// leaving some OTHER row conflicting only refreshes the
+    /// banner if already shown — an unrelated valid edit must not
+    /// newly pop it open.
     func noteRecordedCombo(
         _ binding: KeyBinding,
         in bindings: [KeyBinding]
@@ -60,6 +63,11 @@ extension SettingsModel {
             return sentence(only)
         }
         let lines = conflicts.map { "– \(bulletLine($0))" }
+        // The separator lives HERE, not on the translatable
+        // string: it was a trailing \n inside the English, and
+        // `merge-keys` trims surrounding whitespace off every
+        // translation — all eleven locales shipped without it. A
+        // structural newline is not copy.
         return L(
             "keybinding.conflict.several",
             "Several shortcuts are conflicting:"

@@ -27,8 +27,12 @@ public enum StandardProfiles {
         commandCenter, visualCreative,
     ]
 
-    /// Layout catalog for live screens, leading with hardware `Starter`
-    /// (#678).
+    /// Layout catalog for live screens, leading with the hardware
+    /// `Starter` (#678). There is exactly ONE Starter and it is
+    /// for the screens you have — a count you are not running
+    /// offers the workflow layouts alone. Never the silent
+    /// `isStandard` fallback: a live-derived setup is a poor thing
+    /// to land in silently on a monitor change (#485).
     public static func all(sizes: [CGSize]) -> [StandardLayout] {
         let starter = StarterSetup.standardLayout(sizes: sizes)
         guard
@@ -49,7 +53,10 @@ public enum StandardProfiles {
         all(sizes: sizes).filter { $0.screenCount == count }
     }
 
-    /// Standard fallback layout for given screen count (#485).
+    /// Standard fallback layout for a screen count (#485). Reads
+    /// `workflows`, not the live catalog: the Starter is never
+    /// `isStandard`, so the silent fallback needs no screen sizes
+    /// and stays answerable anywhere.
     public static func standard(
         for count: Int
     ) -> StandardLayout? {

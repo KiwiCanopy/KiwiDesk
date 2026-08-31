@@ -31,6 +31,9 @@ extension SpaceBarItemView {
                 ofSize: identifierFont
             )
         }
+        // Restyle BEFORE placing: `place` measures each text
+        // glyph to center it, and the glyph fonts are set in
+        // `restyle`.
         restyle()
         var cursor = Self.pad
         place(identifierImage, at: cursor, cell: cell)

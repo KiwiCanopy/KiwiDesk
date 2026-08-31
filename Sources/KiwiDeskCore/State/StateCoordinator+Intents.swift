@@ -31,8 +31,10 @@ extension StateCoordinator {
         }
     }
 
-    /// Saves manual float override into reopen memory keyed by identity
-    /// (#160).
+    /// Saves manual float override into reopen memory keyed by
+    /// identity (#160). An empty title carries no identity — every
+    /// pre-title window of the app would match it — so the
+    /// override is dropped instead of remembered.
     mutating func rememberFloatOverride(
         of window: ManagedWindow
     ) {

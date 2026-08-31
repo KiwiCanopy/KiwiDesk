@@ -1,6 +1,9 @@
 import Foundation
 
 /// Maps API names to structured documentation records (#1033).
+/// Order is the tables' own declaration order, never
+/// alphabetical — flattening it into one alphabetical run is
+/// half of what #1033 was filed about.
 extension APIReference {
     /// Command group section in command listing.
     public struct APIGroup: Sendable, Equatable {
@@ -35,7 +38,11 @@ extension APIReference {
             for alias in entry.aliases { table[alias] = entry }
         }
 
-    /// Core command entries (`APIRecordCensusTests`, `APIRecordFilledTests`).
+    /// Core command entries. A record missing for a name falls
+    /// back to a pending record rather than dropping the command —
+    /// the listing must never be shorter than the API
+    /// (`APIRecordCensusTests` names the missing key,
+    /// `APIRecordFilledTests` asserts no record stays pending).
     static var coreEntries: [APIEntry] {
         var aliases: [String: [String]] = [:]
         var order: [String] = []

@@ -60,7 +60,10 @@ enum KeyboardKeyLabel {
         ComboSymbols.capitalisedGlyph(char)
     }
 
-    /// Modifier scope chip label string (`KeyboardCensus.ModifierLayer`).
+    /// Modifier scope chip label. "No modifier", not "None" — in
+    /// a selection row that reads as clear-the-selection — and
+    /// copy added here reuses this key's noun rather than coining
+    /// a second (`KeyboardCensus.ModifierLayer`).
     @MainActor
     static func chipLabel(
         for layer: KeyboardCensus.ModifierLayer

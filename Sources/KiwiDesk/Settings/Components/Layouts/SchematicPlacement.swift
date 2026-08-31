@@ -5,8 +5,13 @@ import KiwiDeskCore
 /// `LayoutSchematicPlacementTests`, `LayoutSchematicPlacementScanTests`,
 /// `LayoutSchematicTrackEngineTests`).
 enum SchematicPlacement {
-    /// Simulates window insertion into `Space` to determine resulting indices
-    /// for incoming and focused windows (#702).
+    /// Simulates window insertion into a real `Space` to
+    /// determine resulting indices (#702). The answer is an INDEX,
+    /// not the resulting order, so a caller re-performs the insert
+    /// — faithful while `insert` is a positional splice. `focus`
+    /// must index `count`: out of range it would hand back a
+    /// plausible wrong answer, which is #702's own shape one level
+    /// down; the assertion below is the second net.
     static func splice(
         _ placement: SpawnPlacement,
         count: Int,

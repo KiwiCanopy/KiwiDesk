@@ -10,12 +10,19 @@ public final class DisplayLinkDriver {
     private var lastTimestamp: CFTimeInterval?
     private let onTick: Tick
 
-    /// Sink for starved-clock diagnostics (`core-boundaries.md`, #1084).
+    /// Sink for starved-clock diagnostics. Defaults LIVE
+    /// (`CoreLog.write`) so EVERY driver reports — there are two
+    /// construction sites riding the same run loop, and a
+    /// bump-only period would otherwise be silent
+    /// (`core-boundaries.md`, #1084).
     var onLog: @MainActor (String) -> Void = CoreLog.write
 
     private let displayID: CGDirectDisplayID
 
-    /// Threshold for detecting frame clock stalls (100ms).
+    /// Stall threshold. Well past a frame at any rate this runs
+    /// at (120 Hz is 8 ms, ProMotion's slowest is 42 ms): a gap
+    /// this size is not a rate change, it is the clock not being
+    /// serviced.
     nonisolated private static let stallThreshold: TimeInterval = 0.1
 
     public private(set) var isRunning = false
@@ -57,6 +64,9 @@ public final class DisplayLinkDriver {
         guard isRunning else { return }
         isRunning = false
         link?.isPaused = true
+        // The next start measures from its own first tick: a
+        // deliberate pause is not a stall, and reporting the idle
+        // span would out-rank every real entry (review, #1084).
         lastTimestamp = nil
     }
 

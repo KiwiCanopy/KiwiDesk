@@ -11,6 +11,10 @@ extension StatusItemController {
             keyEquivalent: ""
         )
         parent.image = symbol("rectangle.3.group")
+        // Manual enablement (#802): auto-enable would re-enable
+        // the save row at display time. The cost is the other half
+        // of the switch — every row here states `isEnabled`, since
+        // a nil-action row is no longer disabled for free.
         let submenu = NSMenu()
         submenu.autoenablesItems = false
         let info = layoutInfoProvider()
@@ -58,7 +62,11 @@ extension StatusItemController {
         return item
     }
 
-    /// Submenu item targeting all connected screens simultaneously.
+    /// Submenu item targeting all connected screens at once. It
+    /// carries NO checkmark, deliberately: a tick would claim
+    /// "every screen is already running this" — the current state
+    /// of a thing that has no single state. The per-screen rows
+    /// are where the answer is.
     private func everyScreenItem(
         _ screens: [LayoutMenuInfo.Screen]
     ) -> NSMenuItem {
@@ -115,8 +123,10 @@ extension StatusItemController {
         }
     }
 
-    /// Save row persisting active space layout into active profile
-    /// (`persistProfile`).
+    /// Save row persisting the ACTIVE space's layout. Deliberately
+    /// not per screen: `persistProfile` is a whole-profile
+    /// operation, so a per-screen save would be a second feature,
+    /// not a second row.
     private func addSaveRow(
         to menu: NSMenu,
         info: LayoutMenuInfo
@@ -147,6 +157,11 @@ extension StatusItemController {
         case .space(let id):
             onSetLayoutMode(target.mode, id)
         case .everyScreen(let asBuilt):
+            // The INTERSECTION of what the menu offered and what
+            // is connected now: a screen unplugged since the menu
+            // opened must not be written to, and one that appeared
+            // since must not join an action taken against a menu
+            // that never listed it.
             let live = Set(layoutInfoProvider().screens.map(\.space))
             for space in asBuilt where live.contains(space) {
                 onSetLayoutMode(target.mode, space)

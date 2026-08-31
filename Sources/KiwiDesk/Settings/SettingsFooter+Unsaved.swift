@@ -4,7 +4,12 @@ import SwiftUI
 /// Leading readout and unsaved-changes diff popover for `SettingsFooter`
 /// (#516, `SettingsDiffRowSource`).
 extension SettingsFooter {
-    /// Readout displaying change count and drift/scope captions (#516).
+    /// Readout displaying change count and drift/scope captions
+    /// (#516 keeps them visible, never hover-only). The N is the
+    /// ROW count of the very list the popover renders — one
+    /// source: `draftChangeCount` counts distinct settings, and a
+    /// per-instance family made the pill say "1" over a three-row
+    /// list (owner 2026-08-10).
     var leadingReadout: some View {
         let rows = SettingsDiffRowSource.rows(for: model)
         return VStack(alignment: .leading, spacing: 2) {
@@ -101,6 +106,10 @@ extension SettingsFooter {
 
     func countLine(count: Int) -> String {
         guard count > 0 else {
+            // The docked footer's own key, kept through the pill
+            // rewrite: identical English, ten shipped translations
+            // (review 2026-08-10 caught the re-mint discarding
+            // them).
             return L(
                 "footer.unsaved_changes",
                 "Unsaved changes"

@@ -12,7 +12,10 @@ extension SpaceBarStyle {
     /// Valid drag-drop dwell bounds in milliseconds.
     public static let springDelayRange = 1000...4000
 
-    /// Valid glyph-cap bounds (#376).
+    /// Valid glyph-cap bounds (#376): floor 1 (a lone glyph +
+    /// "+n", the PR #381 "0 is toggle-only" idiom), ceiling 12. A
+    /// fixed clamp, never fit-derived — a display-dependent cap
+    /// would break the bar's uniform model.
     public static let glyphCapRange = 1...12
 
     /// Clamped glyph cap value (`glyphCapRange`).
@@ -49,7 +52,10 @@ extension SpaceBarStyle {
         return min(base, max(depth - 8, 8))
     }
 
-    /// Scaled font size for app glyphs based on identifier size.
+    /// Scaled font size for app glyphs — a ratio of ONE ladder,
+    /// so item glyphs, front-app glyph and identifier can never
+    /// desync (two formulas rendered the same app at visibly
+    /// different sizes, QA 2026-07-19).
     public func glyphFontSize(
         forDepth depth: CGFloat
     ) -> CGFloat {

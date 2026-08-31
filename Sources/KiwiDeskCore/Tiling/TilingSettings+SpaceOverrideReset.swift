@@ -1,6 +1,9 @@
 import Foundation
 
-/// Per-space layout override inspection and reset operations (#290).
+/// Per-space layout override inspection and reset operations
+/// (#290). The `LayoutMode` switches are exhaustive, so a new
+/// layout is a compile error until handled — forget-proof
+/// without a hand-mirrored parity test.
 extension TilingSettings {
     /// Overridable layouts excluding floating mode (`LayoutMode.allCases`).
     static var overridableLayouts: [LayoutMode] {

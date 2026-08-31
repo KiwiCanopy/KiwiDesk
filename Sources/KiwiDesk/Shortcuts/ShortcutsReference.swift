@@ -15,11 +15,24 @@ enum ShortcutsReferenceBuilder {
         resizeStep: Int,
         layerNames: [String]
     ) -> ShortcutsReference {
+        // Drop the panel's own opener from the working set BEFORE
+        // any band builds, so the suppression holds by
+        // construction. Scoped to callers entering HERE: the §2.1
+        // split cost the band builders `private`, so a caller
+        // invoking one directly would re-leak the seeded ⌃⌥K row
+        // `ShortcutsSelfRowTests` pins — a band builder is
+        // `build`'s to call.
         var layer = layer
         layer.bindings.removeAll {
             $0.lua == ShortcutsOpenBinding.lua
         }
 
+        // Keyed by row identity (UUID), never `lua`: two bindings
+        // can share a command's Lua with different combos (vim
+        // keys + arrows). Keying by `lua` would consume the whole
+        // command on the first match and drop the second from
+        // every band — invisible, breaking "never drop a bound
+        // shortcut". By id, the twin falls through to Custom.
         var consumed = Set<UUID>()
 
         func bound(_ lua: String) -> KeyBinding? {
@@ -48,6 +61,11 @@ enum ShortcutsReferenceBuilder {
             }
         }
 
+        // Widened by the layer's own bindings, so a bound Desktop
+        // row keeps its name instead of falling through to Custom
+        // as raw Lua (the General band's #678 item 18 defect).
+        // What the widening adds is exactly what is NOT attached,
+        // so it is also the dim set.
         let offer = KeybindingCatalog.desktopOffer(
             live: desktops,
             bindings: layer.bindings

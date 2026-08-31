@@ -20,8 +20,12 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// Destinations scoped to the active profile (`SettingsSearchTests`,
-    /// `HomeCardOrderTests`).
+    /// Destinations scoped to the active profile. The order is
+    /// load-bearing: search groups results by destination in it,
+    /// so the colour pair sits AFTER the things it paints
+    /// (`SettingsSearchTests`), and Advanced Colors directly after
+    /// its Simple twin so the pair reads as a family
+    /// (`HomeCardOrderTests` pins the shared membership).
     static let thisProfile: [SettingsDestination] = [
         .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
         .bars, .colors, .advancedColors, .behavior,
@@ -91,6 +95,10 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .bars: return .pink
         case .behavior: return .orange
         case .profiles:
+            // The brand green ITSELF, read from the theme — this
+            // shipped as RGB floats with a "keep in sync" comment,
+            // the shape that never gets kept in sync
+            // (`SettingsThemeTokenTests` pins the token).
             return SettingsTheme.accent
         case .shortcuts:
             return Color(
@@ -103,8 +111,11 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Whether destination is visible when editing a stored profile
-    /// (#18, #109).
+    /// Whether destination is visible when editing a stored
+    /// profile (#18): only General is a global surface a profile
+    /// edit never writes. App Rules joined when its Space facet
+    /// grew a per-profile override (#109) — the Float facet stays
+    /// global and renders disabled there.
     var visibleWhileEditingStoredProfile: Bool {
         self != .general
     }

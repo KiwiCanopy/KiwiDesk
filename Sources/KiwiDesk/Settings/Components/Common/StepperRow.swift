@@ -15,7 +15,11 @@ struct StepperRow: View {
     let help: String?
     @State private var text: String
     @FocusState private var focused: Bool
-    /// Parse and clamp on keystrokes rather than solely on blur/commit.
+    /// Parse and clamp on keystrokes rather than solely on
+    /// blur/commit — for a row whose adjacent action reads `value`
+    /// directly: clicking that action on macOS doesn't blur the
+    /// field, so the action would use the last committed value
+    /// while a newer number sits unread onscreen.
     let liveCommit: Bool
 
     init(
@@ -58,6 +62,10 @@ struct StepperRow: View {
             }
             TextField("", text: $text)
                 .labelsHidden()
+                // The field is its own control beside the arrows,
+                // and an empty title names it nothing — it said
+                // only its digits (#812). Same name as the arrows;
+                // its value is the text itself.
                 .accessibilityLabel(label)
                 .frame(width: 48)
                 .multilineTextAlignment(.trailing)
@@ -91,6 +99,9 @@ struct StepperRow: View {
                 Spacer()
             }
         }
+        // Keep the field in step with arrow taps and external
+        // changes — but never mid-edit, or a background write
+        // would discard the user's partial entry.
         .onChange(of: value) { _, now in
             if !focused { text = "\(now)" }
         }

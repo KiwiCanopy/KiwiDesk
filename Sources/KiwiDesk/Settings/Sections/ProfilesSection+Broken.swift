@@ -2,7 +2,12 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Unreadable profile rows in App ▸ Profiles
-/// (`ProfileBrokenText`, #171, #246).
+/// (`ProfileBrokenText`, #171, #246). Deliberately absent from
+/// the census, Reveal included (#678 Phase 4 pass 6): a row that
+/// exists only while a file is broken cannot be a search result
+/// without stranding whoever picks it on a healthy install — the
+/// route in is the config-error badge, present exactly when
+/// these rows are.
 extension ProfilesSection {
     @ViewBuilder var brokenGroup: some View {
         SettingsGroupHeader(
@@ -43,9 +48,15 @@ extension ProfilesSection {
             }
             .buttonStyle(.borderless)
             .focused($returningRow, equals: name)
+            // The Config Issues panel's own key, not a second
+            // one: it labels this exact action on this exact file
+            // (code review 2026-08-11).
             .iconButtonAffordance(
                 L("config_issues.reveal", "Reveal in Finder")
             )
+            // Same `reload()` tail as the healthy-row Delete, so
+            // the same discard gate (#515) — found by the
+            // structural guard, not the audit.
             Button {
                 model.discardingEdits(
                     message: L(

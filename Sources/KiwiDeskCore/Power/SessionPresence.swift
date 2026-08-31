@@ -4,9 +4,13 @@ import Foundation
 /// Snapshot of macOS login session state (#835,
 /// `CGSessionCopyCurrentDictionary`).
 ///
-/// Records `kCGSessionOnConsoleKey` and `CGSSessionScreenIsLocked` for
-/// wake/unlock diagnostic replay. Screen lock status decodes to `nil` when key
-/// is absent.
+/// Records `kCGSessionOnConsoleKey` and `CGSSessionScreenIsLocked`
+/// for wake/unlock diagnostic replay. `onConsole` cannot stand in
+/// for `screenLocked`: fast user switching flips it and locking
+/// does not (observed 2026-08-13, macOS 26.6.1). The lock key is
+/// present ONLY while locked, so absence decodes to `nil`, never
+/// `false` — a diagnostic that guesses is worse than one that
+/// says it does not know.
 public struct SessionPresence: Sendable, Equatable {
     /// Whether this session owns the console, or `nil` if unreadable.
     public let onConsole: Bool?
@@ -46,8 +50,10 @@ public struct SessionPresence: Sendable, Equatable {
         return (raw as? NSNumber)?.boolValue
     }
 
-    /// Diagnostic description for logging
-    /// (core-boundaries.md ▸ #96, `onLog`).
+    /// Diagnostic description for logging (core-boundaries.md ▸
+    /// #96, `onLog`). Says "lock not reported" rather than
+    /// "unlocked" on nil: writing "unlocked" would hand the next
+    /// reader a conclusion the read did not make.
     var summary: String {
         let lock: String
         switch screenLocked {

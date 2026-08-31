@@ -10,6 +10,10 @@ struct HelpButton: View {
     /// Accessible subject label (#251).
     var subject: String? = nil
     @State private var shown = false
+    /// The transient popover already dismisses on this very
+    /// click's mouse-down; without the stamp the mouse-up action
+    /// would immediately reopen it — the button unable to ever
+    /// close its own popover.
     @State private var dismissed = Date.distantPast
 
     private static let textWidth: CGFloat = 260
@@ -42,6 +46,9 @@ struct HelpButton: View {
             subject.map { L("help.button.for", "Help: %1$@", $0) }
                 ?? L("help.button", "Help")
         )
+        // A short action hint, not the content: `.help` already
+        // exposes the full text, and duplicating it here would
+        // announce it twice per focus pass.
         .accessibilityHint(
             L(
                 "help.button.hint",

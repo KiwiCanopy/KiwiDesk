@@ -1,6 +1,10 @@
 import AppKit
 
-/// Space Bar overflow scroll chrome and drag autoscroll (#385, #409).
+/// Space Bar overflow scroll chrome and drag autoscroll (#385,
+/// #409). The arrow zones structurally exclude every item's hit
+/// frame (`recordHitFrames`), so the autoscroll and the
+/// drop-spring govern disjoint zones and never contend — no
+/// shared dwell state, no coordination flag.
 extension SpaceBarOverlay {
     /// Scroll geometry cached each render for the autoscroll path.
     struct ScrollGeom {

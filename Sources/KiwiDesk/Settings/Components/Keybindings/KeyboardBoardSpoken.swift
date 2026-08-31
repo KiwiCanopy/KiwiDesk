@@ -1,8 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// VoiceOver accessibility summary view for keyboard matrix preview (#812,
-/// `localization.md`).
+/// VoiceOver accessibility summary for the keyboard board (#812):
+/// ONE element, one description — the picture's meaning, not its
+/// pixels. The sentences read the SAME predicates the caps draw
+/// from, so the spoken board cannot disagree with the drawn one.
+/// Separate sentences joined with a space: a frame may withhold
+/// only its LAST argument (`localization.md`).
 struct SpokenKeyboardBoard: View {
     let type: KeyboardMatrix.PhysicalType
     let claims: [UInt32: [KeyboardCensus.ModifierLayer]]
@@ -154,7 +158,10 @@ enum KeyboardBoardSpoken {
         }
     }
 
-    /// Joins names using application locale list formatting (#812).
+    /// Joins names using the APP's locale, never the system's:
+    /// `ListFormatter`'s class method joins in `Locale.current`,
+    /// which put a German "und" inside an English sentence on a
+    /// German Mac (owner, #812 session 3).
     @MainActor
     private static func join(_ names: [String]) -> String {
         let formatter = ListFormatter()

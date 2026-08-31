@@ -30,7 +30,12 @@ struct ProfilesControls: Sendable {
 }
 
 struct ShortcutsControls: Sendable {
-    /// Layer definition and switching control card (`LayersCard`).
+    /// Layer definition and switching card. A `SettingsControl`,
+    /// not a `SettingsDrawer`: since the 2026-08-04 owner ruling
+    /// the card is always open when shown at all and withholds
+    /// itself entirely when not (`LayersCard`) — a drawer
+    /// declaration would promise a disclosure that no longer
+    /// exists.
     let layersCard = SettingsControl(
         "shortcuts.section.layers",
         "Layers"
@@ -83,6 +88,10 @@ struct AppRulesControls: Sendable {
 }
 
 struct GeneralControls: Sendable {
+    // Grouped by the RULE they share, not by topic: none is
+    // part of a profile and none is touched by Save — the heading
+    // says so, or Revert appears to undo them and does not (6b
+    // audit, fourth finding).
     let appliesImmediatelyCard = SettingsControl(
         "general.applies_immediately.title",
         "Applies immediately"

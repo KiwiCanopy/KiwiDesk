@@ -8,8 +8,11 @@ import Foundation
 extension StateCoordinator {
     /// Space the window should join when landing on display (#1010).
     ///
-    /// Floating (#444, #412) and sticky windows (#445, #1008, #890) stand
-    /// down.
+    /// Floating (#444, #412) and sticky windows (#445, #1008,
+    /// #890) stand down. The window is PASSED rather than looked
+    /// up so the create fold can hand in the record STATE holds
+    /// (#671's rule): the float and sticky restores run before it
+    /// asks.
     func screenHome(
         of window: ManagedWindow,
         leaving home: SpaceID?,

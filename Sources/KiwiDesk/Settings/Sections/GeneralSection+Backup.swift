@@ -107,7 +107,12 @@ extension GeneralSection {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
-        // Dialog presenting pending restore bundle (#843).
+        // Built from the bundle it will apply, handed over by
+        // `presenting:` (#843's shape). Its own dialog rather than
+        // the shared `discardingEdits` gate: that gate fires only
+        // while `isDirty`, and this must confirm every time — the
+        // message names BOTH consequences, saved data replaced and
+        // unsaved draft dropped.
         .confirmationDialog(
             L(
                 "general.advanced.backup.restore.confirm.title",

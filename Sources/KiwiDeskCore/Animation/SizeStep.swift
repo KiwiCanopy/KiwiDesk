@@ -5,9 +5,13 @@ import Foundation
 public enum SizePolicy: String, Sendable, Equatable,
     CaseIterable
 {
-    /// Single size-set at halfway point for slow-AX applications.
+    /// Single size-set at halfway point for slow-AX apps — a
+    /// Lua-selectable escape hatch, and deaf to `BatchSizing` by
+    /// definition: its whole contract is that one size-set.
     case midSlide = "mid_slide"
-    /// Continuous spring-interpolated sizing throttled by rateHz (#47, #593).
+    /// Continuous spring-interpolated sizing throttled by rateHz
+    /// (#47, #593). `nil` rate means per display TICK (60 or
+    /// 120 Hz), matching the position channel.
     case throttledSmooth = "smooth"
 }
 
@@ -74,7 +78,10 @@ enum SizeStep {
         }
     }
 
-    /// Single axis calculation under `.throttledSmooth` (`Spring.step`).
+    /// Single axis calculation under `.throttledSmooth`
+    /// (`Spring.step`). An axis not moving at all lands in the
+    /// shrinking arm under both branches and returns the same
+    /// value — a pure move still emits no resize.
     private static func smoothAxis(
         held: CGFloat,
         target: CGFloat,

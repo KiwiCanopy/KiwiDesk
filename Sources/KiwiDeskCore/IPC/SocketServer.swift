@@ -119,6 +119,9 @@ public final class SocketServer {
     ) -> [String] {
         var events: Set<KiwiNotification> = []
         var unknown: [String] = []
+        // `seen` rather than `unknown.contains`: the 1 MB frame
+        // can carry ~150k names, and a linear scan per name is
+        // quadratic work on the main queue.
         var seen: Set<String> = []
         for arg in args {
             let name = arg.stringValue ?? "<non-string>"
@@ -129,6 +132,11 @@ public final class SocketServer {
             }
         }
         if !unknown.isEmpty {
+            // Capped: names are client-supplied on an
+            // unauthenticated socket, so an unbounded join lets
+            // any local process write a line of any length into
+            // the unified log. The RETURNED list is deliberately
+            // uncapped — it echoes only what this client sent.
             let listed = unknown.prefix(5).joined(separator: ", ")
             let rest = unknown.count > 5 ? ", …" : ""
             onLog(
@@ -138,6 +146,12 @@ public final class SocketServer {
                         : "; ignored")
             )
         }
+        // Empty filter means "everything" only for the request
+        // that means it — NO arguments. Letting it also catch a
+        // subscribe made entirely of typos handed back the whole
+        // firehose. Asked of `args`, never reconstructed from the
+        // accumulators above (review): they are equivalent only
+        // while every argument lands in one of them.
         let wanted =
             args.isEmpty
             ? Set(KiwiNotification.allCases)

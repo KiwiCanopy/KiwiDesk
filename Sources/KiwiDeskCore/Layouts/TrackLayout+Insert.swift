@@ -2,8 +2,11 @@ import Foundation
 
 /// Spawn-time insertion into a track space (#128, #188, #437).
 extension Space {
-    /// Inserts a window per track rules, supporting fill-then-spill
-    /// (#128, #188, #192, #437, `WorkspaceManager.add`).
+    /// Inserts a window per track rules, supporting
+    /// fill-then-spill (#128, #188, #192, #437,
+    /// `WorkspaceManager.add`). `spillCapacity == nil` disables
+    /// the spill — the explicit-placement path (`move_to_space`
+    /// travelers), which must not be relocated.
     public mutating func insertIntoTrack(
         _ window: WindowID,
         rule: TrackParams.NewWindowTrack,

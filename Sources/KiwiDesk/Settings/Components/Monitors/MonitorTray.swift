@@ -3,8 +3,11 @@ import KiwiDeskCore
 
 /// Positioning logic for "Follows main display" monitor tray (#678 Phase 3).
 enum MonitorTray {
-    /// Positions and normalizes monitor tray relative to main display card
-    /// (`SettingsModel.mainDisplay`).
+    /// Positions and normalizes the tray relative to the main
+    /// display card. An id matching no card yields NO tray rather
+    /// than a tray on some other display: a fallback would be a
+    /// second derivation of which display is main —
+    /// `SettingsModel.mainDisplay` exists to be the only copy.
     static func fold(
         cards: [MonitorArrangement.Drawn],
         main: DisplayID?,

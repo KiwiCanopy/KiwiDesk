@@ -17,7 +17,12 @@ extension AppBarStyle {
         content.rendered(horizontal: edge.isHorizontal)
     }
 
-    /// Supported title character cap range (8...80), shared across both bars.
+    /// Title-cap bounds, shared by both bars. 8 at the floor —
+    /// below it every title collapses to its first word and stops
+    /// telling two windows apart; 80 at the ceiling — the slot
+    /// clamps to a quarter of the bar long before that. A fixed
+    /// clamp, never fit-derived: a display-dependent cap resolves
+    /// differently per screen.
     public static let titleCapRange = 8...80
 
     /// Title cap clamped to `titleCapRange`.
@@ -28,7 +33,10 @@ extension AppBarStyle {
         )
     }
 
-    /// Truncates title to character cap with trailing ellipsis.
+    /// Truncates title to the cap, tail-first. Counts
+    /// **Characters**, not UTF-16 units, so an emoji costs one the
+    /// way the reader sees it; the ellipsis is not counted against
+    /// the cap, which answers "how much title".
     public static func cappedTitle(
         _ title: String,
         to cap: Int

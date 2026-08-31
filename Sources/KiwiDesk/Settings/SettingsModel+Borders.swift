@@ -18,8 +18,14 @@ extension SettingsModel {
         )
     }
 
-    /// Master corner style binding
-    /// (`GapsBordersGates.agreedCornerStyle`, #754).
+    /// Master corner style binding — OPTIONAL, nil while the two
+    /// stored halves disagree (`GapsBordersGates.agreedCornerStyle`
+    /// resolves it; `SegmentedPicker` renders no selection, #754).
+    /// The getter never stores, and a pick is idempotent:
+    /// re-affirming a segment must change nothing, or "opening
+    /// this page rewrites nothing" lasts only until a stray tap —
+    /// Rounded writes the system radius only where there is no
+    /// rounding to keep; Square writes 0 outright.
     var borderCornersMaster: Binding<BorderStyle.CornerStyle?> {
         Binding(
             get: {
