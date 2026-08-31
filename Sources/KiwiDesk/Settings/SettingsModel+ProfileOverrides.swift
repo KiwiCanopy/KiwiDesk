@@ -1,17 +1,10 @@
 import Foundation
 import KiwiDeskCore
 
-/// The stored-profile editing surface of the dashboard model
-/// (#18, #55 phase 7): the non-adopting save actions and the
-/// Shortcuts tab's override-layer baseline/affordance helpers.
-/// The edit-layer reload path lives in
-/// `SettingsModel+EditTarget.swift` (#64).
+/// Stored-profile save actions and override affordances
+/// (#18, #55 phase 7, #64).
 extension SettingsModel {
-    /// Save copy as… (#82): duplicates the edited stored
-    /// profile under `requested` — including the pending
-    /// edit-session changes — and makes the copy the new edit
-    /// target. Non-adopting: the live layout, `gui.json`, and
-    /// `init.lua` stay untouched.
+    /// Duplicates edited stored profile as a new copy target (#82).
     func saveEditedProfileCopy(named requested: String) {
         guard let source = editingProfile else { return }
         let trimmed = requested.trimmingCharacters(
@@ -24,10 +17,6 @@ extension SettingsModel {
                 to: trimmed,
                 with: config
             )
-            // The copy is a fresh, non-active profile, so it is
-            // its own stored edit target — assign it directly
-            // (bypassing the discard-confirm round-trip
-            // `selectEditTarget` would run) and reload onto it.
             target = .storedProfile(created)
             reload()
         } catch {
@@ -40,9 +29,7 @@ extension SettingsModel {
         }
     }
 
-    /// Writes the edited tiling into the stored profile without
-    /// switching the live layout, then hot-reloads it only if it
-    /// is the layout currently on screen (#18).
+    /// Overwrites stored profile with staged configuration (#18).
     func saveEditedProfile() {
         guard let name = editingProfile else { return }
         do {
@@ -60,11 +47,7 @@ extension SettingsModel {
         reload()
     }
 
-    // MARK: - Override-layer Shortcuts affordance (#55)
-
-    /// The selected layer's base rows for the Shortcuts tab's
-    /// override affordance; nil during live editing, empty
-    /// when the layer only exists in the profile.
+    /// Base keybinding rows for Shortcuts override affordance (#55).
     func overrideBaseRows(layer name: String) -> [KeyBinding]? {
         guard let base = profileEditingBaseLayers else {
             return nil
@@ -72,9 +55,7 @@ extension SettingsModel {
         return base.first { $0.name == name }?.bindings ?? []
     }
 
-    /// True while the edited profile's shortcuts diverge from
-    /// the base — drives the "overrides base keybindings"
-    /// indicator (#55 phase 7).
+    /// Indicates whether edited profile keys diverge from base (#55 phase 7).
     var editedProfileOverridesKeys: Bool {
         guard let base = profileEditingBaseLayers else {
             return false
@@ -85,9 +66,7 @@ extension SettingsModel {
         ) != nil
     }
 
-    /// True while the edited profile's app rules diverge from
-    /// the base — drives the "overrides base app rules"
-    /// indicator (#109), the shortcuts twin above.
+    /// Indicates whether edited profile app rules diverge from base (#109).
     var editedProfileOverridesAppRules: Bool {
         guard let appBase = profileEditingBaseAppRules,
             let floatBase = profileEditingBaseFloatRules

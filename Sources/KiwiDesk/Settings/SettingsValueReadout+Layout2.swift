@@ -1,20 +1,9 @@
 import KiwiDeskCore
 
-/// The Layout area's row builders and value formatters, shared
-/// by the global dispatch (`+Layout`) and the per-space override
-/// expansion (`+Layout3`/`+Layout4`). Where one picker owns an
-/// option's words, the labeller REUSES that picker's key
-/// verbatim — key and English — so the diff and the row it
-/// points at cannot drift apart in any locale. Orientation is
-/// the deliberate exception: TWO picker families spell it
-/// (`layout_params.orientation.*` for stack master, and
-/// `scroll_grid.horizontal`/`vertical` for scrolling, grid and
-/// monocle), so one diff key cannot match both and
-/// `diff.value.orientation.*` stays the diff's own pair.
+/// Layout area diff row builders and value formatters
+/// (`SettingsValueReadout`).
 extension SettingsValueReadout {
-    // MARK: - Row builders
-
-    /// One scalar row: the census label plus the formatted pair.
+    /// Formats scalar layout diff row.
     static func layoutRow<V>(
         _ census: SettingKey,
         _ old: V,
@@ -31,8 +20,7 @@ extension SettingsValueReadout {
         ]
     }
 
-    /// The pre-formatted variant (anchor, slot size — values
-    /// whose words need more than the value itself).
+    /// Formats pre-rendered text diff row.
     static func layoutTextRow(
         _ census: SettingKey,
         _ old: String,
@@ -40,8 +28,6 @@ extension SettingsValueReadout {
     ) -> [SettingsDiffRow] {
         layoutRow(census, old, new) { $0 }
     }
-
-    // MARK: - Option labels (the pickers' own words)
 
     static func layoutStrategy(
         _ value: BspParams.Strategy
@@ -78,8 +64,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// One pair for every orientation-shaped enum (stack master,
-    /// scrolling, monocle) — the pickers all say these two words.
+    /// Localized axis label for orientation-shaped layout properties.
     static func layoutAxisWord(vertical: Bool) -> String {
         vertical
             ? L("diff.value.orientation.vertical", "Vertical")
@@ -118,8 +103,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// Monocle's hide style (#881), in the picker row's own
-    /// option words.
+    /// Localized monocle hide style option text (#881).
     static func layoutHideStyle(
         _ value: MonocleParams.HideStyle
     ) -> String {
@@ -145,8 +129,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// Grid's Arrange words (#217): the GUI names the window
-    /// arrangement, not the geometric wire vocabulary.
+    /// Localized grid arrange option text (#217).
     static func layoutGridArrange(
         _ value: GridParams.SplitDirection
     ) -> String {
@@ -164,8 +147,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// Track's Arrange words: a vertical track is a column
-    /// (#217 pattern), so the labels cross the wire's axis.
+    /// Localized track axis arrange option text (#217).
     static func layoutTrackAxis(
         _ value: TrackParams.Axis
     ) -> String {
@@ -198,11 +180,7 @@ extension SettingsValueReadout {
         String(value)
     }
 
-    // MARK: - Scrolling's axis-relative pieces
-
-    /// The anchor's words come from the shared picker labeller,
-    /// so Top/Left follow the orientation exactly as the
-    /// segmented control spells them (#239, #753).
+    /// Localized scroll anchor text (`ScrollAnchorLabel`, #239, #753).
     static func layoutAnchorText(
         _ anchor: ScrollingParams.Anchor,
         vertical: Bool
@@ -214,13 +192,10 @@ extension SettingsValueReadout {
         if case .points = size {
             return L("diff.value.slot_unit.points", "Points")
         }
-        // `.auto` presents as Percent, exactly as the unit
-        // picker renders a stored auto (`SlotSizeRows.sizeUnit`).
         return L("diff.value.slot_unit.percent", "Percent")
     }
 
-    /// `.auto` reads as the orientation standard's percentage —
-    /// what the slot-size slider itself shows for a stored auto.
+    /// Formats scroll slot size value as points or percent (`ScrollSize`).
     static func layoutSlotValue(
         _ size: ScrollSize,
         vertical: Bool
@@ -239,16 +214,15 @@ extension SettingsValueReadout {
         }
     }
 
-    /// The slot-size row's dynamic label, reusing the row's own
-    /// keys so the diff and the slider agree per orientation.
+    /// Localized slot size row label based on scroll orientation.
     static func layoutSlotLabel(vertical: Bool) -> String {
         vertical
             ? L("slot_size.row_height", "Row height")
             : L("slot_size.column_width", "Column width")
     }
 
-    /// A space's resolved scroll orientation (override beats the
-    /// global) — which words its anchor and slot rows then use.
+    /// Resolves effective scroll orientation for a space
+    /// (`TilingSettings`, `SpaceID`).
     static func layoutSpaceVertical(
         _ settings: TilingSettings,
         _ space: SpaceID

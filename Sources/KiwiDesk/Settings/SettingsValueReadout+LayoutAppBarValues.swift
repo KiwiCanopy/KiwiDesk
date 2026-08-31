@@ -1,22 +1,10 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// The per-layout override rows' value formatters and row
-/// shape, split from `SettingsValueReadout+LayoutAppBar.swift`
-/// so neither file crosses the size ceiling (the
-/// `SettingKey+BordersText` shape). Internal rather than
-/// private because the switch consuming them lives in that
-/// sibling file; the `layoutBar` prefix keeps them scoped to
-/// this key slice.
-///
-/// Every formatter here takes the OPTIONAL stored override:
-/// nil is "inherit the global style", shown as the core's
-/// `unset` "—", so a gained override reads "— → 44 pt".
+/// Value formatters for layout App Bar overrides in diff readout
+/// (`SettingsValueReadout`).
 extension SettingsValueReadout {
-    /// One row, labelled "Monocle · Thickness": the layout's
-    /// display name plus the global twin's census label, since
-    /// the override keys themselves are surfaceless
-    /// (GUI_REMOVED) and carry no row text of their own.
+    /// Formats diff row for per-layout App Bar override key.
     static func layoutBarRow(
         _ census: SettingKey,
         _ mode: LayoutMode,
@@ -37,9 +25,8 @@ extension SettingsValueReadout {
         ]
     }
 
-    /// The label the Bars editor's own option list renders for
-    /// a set override; the fallback is unreachable while those
-    /// lists stay exhaustive (their own docs hold them to it).
+    /// Resolves override option label from options list or falls back to unset
+    /// dash.
     static func layoutBarChoice<T: Equatable>(
         _ value: T?,
         _ options: [(T, String)]
@@ -57,17 +44,14 @@ extension SettingsValueReadout {
         value.map(points) ?? unset
     }
 
-    /// `0` is the auto sentinel on the size sliders, exactly as
-    /// on the global style — an override CAN pin a layout back
-    /// to auto, so a set 0 reads "Automatic" (the shared
-    /// `autoPoints`) rather than "0 pt".
+    /// Formats points or "Automatic" for 0 sentinel (`autoPoints`).
     static func layoutBarAutoPoints(
         _ value: CGFloat?
     ) -> String {
         value.map(autoPoints) ?? unset
     }
 
-    /// Corner roundness is stored 0–100; the GUI row reads %.
+    /// Formats 0–100 corner roundness as percentage string.
     static func layoutBarRoundness(
         _ value: CGFloat?
     ) -> String {
@@ -75,21 +59,17 @@ extension SettingsValueReadout {
         return percent(Double(value) / 100)
     }
 
-    /// A bare number, for the Lua-only dim factor (no GUI row,
-    /// so no unit to borrow — the stored fraction shows as is).
+    /// Formats bare numeric value for Lua-only overrides.
     static func layoutBarNumber(_ value: CGFloat?) -> String {
         value.map(trimmed) ?? unset
     }
 
-    /// A whole-number override (the title cap). Its own overload
-    /// rather than a `CGFloat` conversion at each call site, so
-    /// an unset override still reads as the inherit dash.
+    /// Formats whole integer count or unset dash.
     static func layoutBarCount(_ value: Int?) -> String {
         value.map { trimmed(Double($0)) } ?? unset
     }
 
-    /// A set override's hex through the shared `hexDisplay`;
-    /// unset inherits, so it reads as the dash.
+    /// Formats hex color string via hexDisplay or returns unset dash.
     static func layoutBarHex(_ raw: String?) -> String {
         raw.map(hexDisplay) ?? unset
     }

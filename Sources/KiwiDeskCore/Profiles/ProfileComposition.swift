@@ -1,13 +1,6 @@
 import Foundation
 
-/// Composes the fallback layout when no saved profile matches
-/// the connected monitors (#53).
-///
-/// Resolution is *total* in both directions: every space gets a
-/// screen (positional default) and every screen gets content —
-/// screens beyond the Standard's plan each receive one extra
-/// monocle space (the honest "no plan yet" default). There is
-/// deliberately no near-match adaptation of user profiles.
+/// Composes fallback layout when no saved profile matches monitors (#53).
 public enum ProfileComposition {
     /// A fully resolved fallback layout for a live monitor set.
     public struct Composed: Sendable, Equatable {
@@ -22,10 +15,8 @@ public enum ProfileComposition {
         public let settings: TilingSettings
     }
 
-    /// Builds the fallback for the connected displays: the
-    /// closest ≤N Standard, positionally mapped, plus one
-    /// monocle space per uncovered extra screen. Nil only when
-    /// no display is connected.
+    /// Builds fallback composition for connected displays from closest
+    /// Standard layout.
     public static func compose(
         displays: [Display],
         mainID: DisplayID?
@@ -42,9 +33,8 @@ public enum ProfileComposition {
         )
     }
 
-    /// Composes a specific built-in layout (a GUI Preset being
-    /// applied, or the count's Standard) onto the connected
-    /// displays, monocle-filling any screens beyond its plan.
+    /// Composes specific built-in layout onto displays
+    /// (`StandardLayout+Screens`).
     public static func compose(
         layout: StandardLayout,
         displays: [Display],
@@ -54,8 +44,6 @@ public enum ProfileComposition {
             displays,
             mainID: mainID
         )
-        // spaceCount > 0 keeps the composer total even for a
-        // (hypothetical) degenerate catalog entry.
         guard !ordered.isEmpty, layout.spaceCount > 0 else {
             return nil
         }
@@ -65,15 +53,6 @@ public enum ProfileComposition {
         var assignment: [SpaceID: DisplayID] = [:]
         for space in layout.plannedSpaces {
             spaces.append(space)
-            // Both sparse fallbacks — unlisted mode is bsp,
-            // unlisted screen is main, clamped into the live
-            // display count — belong to the layout and are read
-            // through its accessors, so the Settings preset card
-            // cannot answer them differently
-            // (`StandardLayout+Screens`).
-            // Screen FIRST, so an unlisted mode can be answered
-            // by the display the space actually lands on rather
-            // than by a fixed `bsp` (owner ruling, 2026-08-11).
             let position = layout.screen(
                 of: space,
                 screens: ordered.count
@@ -84,8 +63,6 @@ public enum ProfileComposition {
             )
             assignment[space] = ordered[position].id
         }
-        // Monocle-fill: screens the Standard doesn't cover each
-        // get one fresh space, numbered on after the last one.
         var next = layout.spaceCount + 1
         for position in layout.screenCount..<ordered.count {
             let space = SpaceID(next)

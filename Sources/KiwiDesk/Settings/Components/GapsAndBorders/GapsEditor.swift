@@ -1,22 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Gaps, uniform-first (#68 §3.14): one Outer and one Inner
-/// slider for the everyday "more/less breathing room" action,
-/// each with a per-edge/per-axis disclosure holding the six
-/// individual sliders. When stored values differ per edge the
-/// group renders pre-expanded and the master slider disables
-/// itself, so a carefully tuned asymmetric setup can't be
-/// blindly overwritten. All six values stay individually
-/// settable.
+/// Uniform and per-edge gap configuration editor
+/// (`GapsBordersGates`, #68 §3.14).
 struct GapsEditor: View {
     @ObservedObject var model: SettingsModel
     @State private var outerExpanded = false
     @State private var innerExpanded = false
 
-    /// The drawers' catalog declarations — the same values the
-    /// index enumerates, so a reveal targeting an edge row knows
-    /// its drawer by construction.
+    /// Drawers catalog declarations for gap edge controls.
     private var perEdge: SettingsDrawer<GapEdgeControls> {
         SettingsCatalog.gapsAndBorders.gapsPerEdge
     }
@@ -31,10 +23,6 @@ struct GapsEditor: View {
 
     var body: some View {
         SettingsSection(SettingsCatalog.gapsAndBorders.gapsCard) {
-            // The gap miniature moved to the detail PANEL
-            // (`GapsBordersPanelPreview`, #678 redesign spec) — the
-            // column beside these rows is where the draft is
-            // watched now.
             masterRow(
                 label: L("gaps.outer", "Outer gap"),
                 unified: outerUnified,
@@ -97,8 +85,6 @@ struct GapsEditor: View {
         }
     }
 
-    // MARK: - Master rows
-
     private func masterReadout(
         _ unified: Binding<CGFloat>,
         _ mixed: Bool
@@ -138,9 +124,6 @@ struct GapsEditor: View {
                     )
                     .foregroundStyle(.secondary)
                     .font(.body.monospacedDigit())
-                    // The other word-valued readout (see
-                    // `PtSlider`): a longer locale shrinks rather
-                    // than wrapping and growing the row's height.
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                     .help(
@@ -154,8 +137,6 @@ struct GapsEditor: View {
         }
     }
 
-    // MARK: - Mixed-state plumbing
-
     private var outer: Gaps.Outer {
         model.config.settings.gapsGlobal.outer
     }
@@ -164,10 +145,6 @@ struct GapsEditor: View {
         model.config.settings.gapsGlobal.inner
     }
 
-    // The master slider is inert while its edges / axes differ.
-    // The predicate is the census's, resolved once in
-    // `GapsBordersGates`, so the view never re-derives "differ"
-    // beside the gate that declares it (#678, gui.md).
     private var outerMixed: Bool {
         gates.inertReason(for: .gaps(.outer)) != nil
     }
@@ -176,8 +153,7 @@ struct GapsEditor: View {
         gates.inertReason(for: .gaps(.inner)) != nil
     }
 
-    /// The master slider: reads the shared value, writes every
-    /// edge — only enabled while the edges agree.
+    /// Master slider binding updating all outer edges simultaneously.
     private var outerUnified: Binding<CGFloat> {
         Binding(
             get: { outer.top },
@@ -206,8 +182,7 @@ struct GapsEditor: View {
         )
     }
 
-    /// Pre-expanded while the values are mixed (there is no
-    /// master value to show), collapsible again once unified.
+    /// Automatically expands disclosure when edge values differ.
     private var outerDisclosure: Binding<Bool> {
         Binding(
             get: { outerExpanded || outerMixed },
@@ -223,16 +198,7 @@ struct GapsEditor: View {
     }
 }
 
-// MARK: - GapRow
-
-/// A slider row for a single gap value (0–100 pt). Takes its
-/// catalog descriptor, so the row is a search anchor by existing
-/// — the first drawer-interior controls the catalog reaches
-/// (#277); a reveal expands the drawer (`SettingsDisclosure`)
-/// and lands here. Self-anchoring, so it takes `.searchAnchored`
-/// whole: the wash covers the same rect as the scroll target
-/// because, unlike a section card, there is no expanded content
-/// below the label to tint by accident.
+/// Slider row for individual gap dimensions (`SettingsDisclosure`, #277).
 private struct GapRow: View {
     let control: SettingsControl
     @Binding var value: CGFloat

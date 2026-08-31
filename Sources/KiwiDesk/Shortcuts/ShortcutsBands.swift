@@ -1,10 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One reference row: an optional leading glyph, the label, and
-/// the right-aligned key-combo glyphs. Pure signage — no hover
-/// highlight, no pointer cursor, no button chrome — so it never
-/// reads as an editable control (rebinding lives in Settings).
+/// Shortcut reference row display (`ShortcutRow`).
 struct ShortcutRowView: View {
     let row: ShortcutRow
 
@@ -31,14 +28,7 @@ struct ShortcutRowView: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
         }
-        // Custom rows carry the full Lua as a tooltip since the
-        // label truncates.
         .help(row.monospaced ? row.label : "")
-        // A row whose Desktop is not attached reads at the same
-        // strength as a working one otherwise, which is the
-        // panel implying a key that does nothing. Same 0.55 the
-        // editor's rows dim to, so one concept looks like itself
-        // on both surfaces.
         .opacity(row.unavailable ? 0.55 : 1)
         .accessibilityHint(
             row.unavailable
@@ -52,9 +42,6 @@ struct ShortcutRowView: View {
 
     @ViewBuilder private var leadingGlyph: some View {
         if let glyph = row.glyph {
-            // #294 App Font ligature, following the panel's
-            // text color like every glyph surface. Fixed slot
-            // width keeps the label indent uniform.
             Text(glyph)
                 .font(
                     Font(
@@ -75,16 +62,12 @@ struct ShortcutRowView: View {
             IconGlyphLabel(icon: icon)
                 .foregroundStyle(.secondary)
         } else {
-            // Reserve the slot so a row with no glyph aligns its
-            // label with the ones that have one — uniform indent
-            // across the whole panel.
             Color.clear
         }
     }
 }
 
-/// A titled subgroup inside the Controls band (Focus, Move
-/// Windows, …): a secondary subheading over its rows.
+/// Titled subgroup container for shortcut rows (`ShortcutSubgroup`).
 struct ShortcutSubgroupView: View {
     let subgroup: ShortcutSubgroup
 
@@ -98,9 +81,7 @@ struct ShortcutSubgroupView: View {
     }
 }
 
-/// A band header: a bold signage label over a hairline divider —
-/// deliberately lighter than a boxed settings card, which would
-/// imply the rows are actionable.
+/// Band section header view.
 struct ShortcutsBandHeader: View {
     let title: String
 
@@ -113,10 +94,7 @@ struct ShortcutsBandHeader: View {
     }
 }
 
-/// The Controls band: subgroups bin-packed across two
-/// height-balanced columns, never splitting a subgroup — so a
-/// row's position is a function of what it is, not of how many
-/// other rows exist (glance-lookup stays stable).
+/// Two-column balanced shortcut controls band.
 struct ControlsBand: View {
     let subgroups: [ShortcutSubgroup]
 
@@ -125,9 +103,6 @@ struct ControlsBand: View {
         HStack(alignment: .top, spacing: 32) {
             column(split.left)
             if split.right.isEmpty {
-                // Keep a solo column at half width so its rows don't
-                // stretch across the whole panel with a ballooning
-                // label↔combo gap.
                 Color.clear.frame(maxWidth: .infinity)
             } else {
                 column(split.right)
@@ -144,9 +119,7 @@ struct ControlsBand: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// Greedy height balance over whole subgroups: each is placed
-    /// in the currently-shorter column. Height ≈ rows + the
-    /// subheading.
+    /// Balances subgroups across two columns by cumulative row count.
     static func balance(
         _ groups: [ShortcutSubgroup]
     ) -> (left: [ShortcutSubgroup], right: [ShortcutSubgroup]) {
@@ -168,9 +141,7 @@ struct ControlsBand: View {
     }
 }
 
-/// The Apps band: uniform icon + name + combo tiles in a two-
-/// column grid, alphabetical — free wrap is fine here since there
-/// is no subgroup structure to protect.
+/// Grid band for application-specific shortcuts.
 struct AppsBand: View {
     let rows: [ShortcutRow]
 

@@ -1,20 +1,6 @@
 import Foundation
 
-/// Per-space overrides of `ScrollingParams` (issue #17). Every
-/// field is an *optional* mirror of the global scrolling params:
-/// nil inherits the global value (gray in the GUI), a value
-/// overrides just that field for one space (black). Stored
-/// sparsely under `layout.scroll.override[space_id]` and resolved
-/// with `resolved(onto:)` — the same optional-mirror shape as
-/// `LayoutAppBar`, but keyed by space instead of by layout.
-///
-/// Mirror-parity is guarded by a reflection-based test
-/// (`ScrollingOverrideTests`) per AGENTS.md §5: adding a
-/// user-tunable field to `ScrollingParams` without mirroring it
-/// here turns that test red. `newWindowPlacement` is excluded (it
-/// already has a per-space override via
-/// `new_window_placement_override`); `appBar` look overrides land
-/// with the per-space app-bar tier.
+/// Per-space overrides of ScrollingParams (`ScrollingOverrideTests`, #17).
 public struct ScrollingOverride: Sendable, Equatable {
     public var slotSize: ScrollSize?
     public var anchor: ScrollingParams.Anchor?
@@ -22,11 +8,7 @@ public struct ScrollingOverride: Sendable, Equatable {
 
     public init() {}
 
-    /// `global` (the layout's own params) with every non-nil
-    /// override applied on top, per field. Cross-field clamps
-    /// that depend on the merged result (e.g. the bar edge vs
-    /// the effective orientation) run downstream on the resolved
-    /// params, so this stays a straight per-field merge.
+    /// Merges non-nil override fields onto global ScrollingParams.
     public func resolved(
         onto global: ScrollingParams
     ) -> ScrollingParams {
@@ -34,26 +16,17 @@ public struct ScrollingOverride: Sendable, Equatable {
         if let slotSize { out.slotSize = slotSize }
         if let anchor { out.anchor = anchor }
         if let orientation { out.orientation = orientation }
-        // The merged, per-space params carry no override map of
-        // their own — layout math never reads it, and it would
-        // duplicate every space's overrides into each snapshot.
         out.override = [:]
         return out
     }
 
-    /// True when no field is set — a fully-inherited space needs
-    /// no stored override (drives sparse encoding).
+    /// True when no override field is set.
     public var isEmpty: Bool {
         slotSize == nil && anchor == nil && orientation == nil
     }
 }
 
-// MARK: - Codable
-
 extension ScrollingOverride: Codable {
-    /// Same JSON spelling as the `ScrollingParams` fields (the
-    /// `scroll.set_*` setters). Only set overrides are written;
-    /// inherited fields stay absent.
     enum CodingKeys: String, CodingKey {
         case slotSize = "slot_size"
         case anchor

@@ -1,15 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The data half of a Home card (#678 turn 9): "a card is an
-/// answer, not a door" — every subtitle states current values
-/// read from the draft, so "is my gap 8 or 10?" is answered
-/// without opening anything. Each subtitle is ONE localized
-/// frame with positional specifiers, never sibling views
-/// stitched around a value.
+/// Subtitle and readout derivation for Home navigation cards (#678 turn 9).
 @MainActor
 enum HomeCardContent {
-    /// The card's current-value line.
+    /// Formats current-value summary line for destination card.
     static func subtitle(
         for destination: SettingsDestination,
         model: SettingsModel
@@ -87,10 +82,6 @@ enum HomeCardContent {
                 model.config.spacePins.count
             )
         case .behavior:
-            // Answers the mouse-resize choice rather than
-            // naming it — a card is an answer — and spells out
-            // what the quit count counts, so the frame is
-            // translatable without guessing.
             if settings.mouseResize == .layout {
                 return L(
                     "home.card.behavior.subtitle_layout",
@@ -165,19 +156,13 @@ enum HomeCardContent {
         }
     }
 
-    /// The one thing allowed to shout, and it shouts ON the
-    /// card: the Shortcuts conflict count. Glyph + text at the
-    /// call site — hue alone dies under red-green loss beside
-    /// this app's green key caps.
+    /// Formats actionable shortcut conflict count badge
+    /// (`KeybindingConflicts`, #1094).
     static func conflictShout(
         for destination: SettingsDestination,
         model: SettingsModel
     ) -> String? {
         guard destination == .shortcuts else { return nil }
-        // Aggregate surface: count only what the user should
-        // act on. `KeybindingConflicts.actionable` is the one
-        // copy of that policy — the banner and the recorder note
-        // read it too (#1094).
         let count = KeybindingConflicts.actionable(
             in: model.config.layers
         ).count
@@ -192,10 +177,7 @@ enum HomeCardContent {
         )
     }
 
-    // MARK: - Derivations
-
-    /// Distinct layout modes across the declared spaces, using
-    /// the same `?? .bsp` default the Spaces list renders with.
+    /// Distinct layout modes across declared spaces.
     private static func layoutsInUse(
         _ model: SettingsModel
     ) -> Int {
@@ -206,8 +188,7 @@ enum HomeCardContent {
         ).count
     }
 
-    /// Default-layer bindings — the number the Shortcuts area
-    /// lists at rest.
+    /// Bound shortcuts count on default layer.
     private static func boundCount(
         _ model: SettingsModel
     ) -> Int {
@@ -223,9 +204,7 @@ enum HomeCardContent {
             + model.config.floatRules.count
     }
 
-    /// The census's own answer to "how many individual
-    /// colours", so the card can never disagree with the area
-    /// it opens.
+    /// Census count of individual color settings.
     private static var advancedColourCount: Int {
         SettingKey.allCases.filter {
             $0.placement.area == .advancedColours
@@ -240,8 +219,8 @@ enum HomeCardContent {
             .first { $0.0 == edge }?.1 ?? ""
     }
 
-    /// The current GUI language's endonym, through the one
-    /// shared derivation the General picker also renders with.
+    /// Native display name for currently effective locale
+    /// (`LocaleNativeName`).
     private static var languageName: String {
         LocaleNativeName.name(
             for: LocalizationManager.shared.effectiveLocale
@@ -251,9 +230,7 @@ enum HomeCardContent {
 }
 
 extension AnimationSettings {
-    /// The derived master switch: any per-event animation on.
-    /// One derivation for the Motion card's master toggle and
-    /// the Home card's subtitle, so the two cannot disagree.
+    /// True when any event animation is enabled.
     var anyEnabled: Bool {
         onSpaceChange || onWindowResize || onWindowSwap
             || onRelayout

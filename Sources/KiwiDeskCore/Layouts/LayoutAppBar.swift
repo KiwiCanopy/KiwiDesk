@@ -1,15 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// A layout's own bar settings, nested as `app_bar` under the
-/// layout (`layout.monocle.app_bar`, `layout.scroll.app_bar`).
-///
-/// `enabled` is the only always-present, layout-specific value —
-/// whether this layout shows a bar at all. Every look field is
-/// an *optional override*: nil means "inherit the global
-/// `AppBarStyle`" (shown gray in the GUI), a value means "override
-/// it just for this layout" (shown black). `resolved(with:)`
-/// merges the two into the concrete style the bar renders with.
+/// Per-layout App Bar settings and overrides (`AppBarStyle`).
 public struct LayoutAppBar: Sendable, Equatable {
     public typealias BackgroundStyle = AppBarStyle.BackgroundStyle
     public typealias BackgroundFit =
@@ -17,11 +9,9 @@ public struct LayoutAppBar: Sendable, Equatable {
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Content = AppBarStyle.Content
 
-    /// Whether this layout shows the bar. Per-layout, never
-    /// inherited — monocle and scrolling default it on.
+    /// Whether this layout displays an App Bar.
     public var enabled = true
 
-    // Optional overrides of the global AppBarStyle. Nil inherits.
     public var edge: AppBarEdge?
     public var alignment: AppBarStyle.BarAlignment?
     public var thickness: CGFloat?
@@ -49,17 +39,11 @@ public struct LayoutAppBar: Sendable, Equatable {
 
     public init() {}
 
-    /// The concrete style this layout's bar renders with:
-    /// `base` (the global style) with every non-nil override
-    /// applied on top.
+    /// Merges layout-specific overrides onto base global AppBarStyle.
     public func resolved(with base: AppBarStyle) -> AppBarStyle {
         var out = base
         if let edge { out.edge = edge }
         if let alignment { out.alignment = alignment }
-        // Clamp here too: an override decoded straight from a
-        // hand-edited profile skips the command-path floor, and
-        // `resolved(with:)` is the single funnel producing the
-        // effective style — so the `minThickness` invariant holds.
         if let thickness {
             out.thickness = max(AppBarStyle.minThickness, thickness)
         }
@@ -106,17 +90,10 @@ public struct LayoutAppBar: Sendable, Equatable {
     }
 }
 
-// MARK: - Codable
-
 extension LayoutAppBar: Codable {
-    /// Same JSON spelling as `AppBarStyle` (the Lua setters), plus
-    /// `enabled`. Only `enabled` and the set overrides are
-    /// written; inherited fields stay absent.
     typealias CodingKeys = Key
 
-    /// `CaseIterable` is load-bearing: the parity test
-    /// (`AppBarParityTests`) reflects over `allCases` to prove
-    /// every field has a key — do not drop it as "unused".
+    /// JSON coding keys for LayoutAppBar (`AppBarParityTests`).
     enum Key: String, CodingKey, CaseIterable {
         case enabled
         case edge

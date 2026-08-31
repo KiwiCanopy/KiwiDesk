@@ -1,19 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Scrolling and Grid row builders (see `LayoutCard+Rows`
-/// for the dispatch and the shared bindings).
+/// Scrolling and Grid layout settings row builders (`LayoutCard+Rows`).
 extension LayoutCard {
-    /// The scroll axis runs top↔bottom when vertical, so the slot
-    /// size reads as a row *height* and the anchor ends as
-    /// top/bottom — labels swap accordingly (frontend only; the
-    /// stored `slot_size` and anchor enum are
-    /// orientation-neutral).
+    /// Indicates whether scrolling orientation is vertical.
     var isVertical: Bool {
         model.config.settings.scrolling.orientation == .vertical
     }
-
-    // MARK: - Scrolling
 
     var scrollOrientationRow: some View {
         SegmentedPicker(
@@ -32,11 +25,7 @@ extension LayoutCard {
         )
     }
 
-    /// Every anchor the enum declares, labelled by
-    /// `ScrollAnchorLabel` — which owns the axis-relative
-    /// Top/Left branch and is shared with the per-space override
-    /// row, so a fifth anchor appears in both without an edit
-    /// here.
+    /// Focus anchor segmented picker (`ScrollAnchorLabel`).
     var scrollAnchorRow: some View {
         SegmentedPicker(
             L("scroll_grid.focus_anchor", "Focus anchor"),
@@ -84,11 +73,7 @@ extension LayoutCard {
         )
     }
 
-    /// The scrolling-specific animation pair (#68 §3.5): the
-    /// on/off switch and its magnitude sit together, and the
-    /// census places both in this area rather than in Colours &
-    /// Animations — a scroll's timing is the scroll's, not the
-    /// app's.
+    /// Focus shift animation toggle for scrolling layout (#68 §3.5).
     var animateFocusShiftsRow: some View {
         ToggleRow(
             label: L(
@@ -114,8 +99,6 @@ extension LayoutCard {
         )
     }
 
-    // MARK: - Grid
-
     var gridTypeRow: some View {
         SegmentedPicker(
             L("scroll_grid.grid_type", "Grid type"),
@@ -130,12 +113,7 @@ extension LayoutCard {
         )
     }
 
-    /// "Arrange: Columns first / Rows first" (#217) — the GUI
-    /// label only; the Lua/JSON `split_direction`
-    /// (horizontal/vertical) wire vocabulary is unchanged. "Split
-    /// direction" read ambiguously (divider-axis vs stack-axis
-    /// camps); "Columns first / Rows first" names the window
-    /// arrangement under both models.
+    /// Split direction arrange row ("Columns first / Rows first", #217).
     var gridArrangeRow: some View {
         SegmentedPicker(
             L("scroll_grid.arrange", "Arrange"),
@@ -168,23 +146,13 @@ extension LayoutCard {
         )
     }
 
-    /// The pair's shared verdict — asked once, so the grey and
-    /// its sentence are one decision. Columns and Rows carry the
-    /// same census gate, so either key answers for both.
+    /// Shared inert reason for grid dimension controls.
     var gridDimensionsReason: LayoutDefaultsGates.InertReason? {
         gates.inertReason(for: .layout(.gridColumns))
     }
 
-    /// The Auto-size toggle gating the Columns/Rows steppers, via
-    /// the shared `AutoGatedGroup` (#233). A behaviour modifier
-    /// like Fill empty cells — not a mode switch — so it reads as
-    /// a plain toggle; on, it greys the steppers (visible but
-    /// disabled, #171), the screen supplying the dimensions.
-    ///
-    /// The group's inertness comes from the resolver rather than
-    /// from `isOn`, so the pair greys on exactly what the census
-    /// says gates it — a space that overrides auto-size OFF keeps
-    /// the global dimensions live (#520, #527).
+    /// Auto-sized grid group gating column/row steppers
+    /// (`AutoGatedGroup`, #171, #233, #520, #527).
     var gridDimensionsGroup: some View {
         AutoGatedGroup(
             title: L("scroll_grid.auto_size", "Auto-size grid"),

@@ -1,19 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Track row builders (see `LayoutCard+Rows` for the
-/// dispatch and the shared bindings).
+/// Track layout settings row builders (`LayoutCard+Rows`).
 extension LayoutCard {
-    /// "Arrange: Columns / Rows" (#217 pattern, applied to
-    /// Track): "horizontal/vertical" is ambiguous for a two-axis
-    /// subdivision layout, so the GUI label names the window
-    /// arrangement instead. GUI label only — the Lua/JSON
-    /// `track.axis` wire stays geometric, which is unambiguous in
-    /// a scripting context (see design-decisions "geometric wire,
-    /// presentational label"). Reuses Grid's shared
-    /// `scroll_grid.arrange` label; Track's options are bare
-    /// "Columns"/"Rows" (no fill-order "first" — Track has no
-    /// growth semantic, unlike Grid).
+    /// Track arrange row (Columns / Rows, #217).
     var trackArrangeRow: some View {
         SegmentedPicker(
             L("scroll_grid.arrange", "Arrange"),
@@ -31,12 +21,8 @@ extension LayoutCard {
         )
     }
 
-    /// How the far-edge **overflow track** renders (#192): the
-    /// track that collects the surplus when more tracks exist
-    /// than fit side by side. `cascade_all` (the default) piles
-    /// its windows from the top; `cascade_overflow` tiles the
-    /// fitting ones and piles the rest. Normal tracks are always
-    /// `cascade_overflow`. Reuses stack's `overflow_style` labels.
+    /// Overflow track rendering style picker
+    /// (`TrackParams.OverflowStyle`, #192).
     var trackOverflowRow: some View {
         SegmentedPicker(
             L("layout_params.overflow", "Overflow"),
@@ -74,27 +60,13 @@ extension LayoutCard {
         )
     }
 
-    /// The limit row's verdict, asked once so the grey and its
-    /// sentence are one decision.
+    /// Track limit inert reason derived from layout gates.
     var trackLimitReason: LayoutDefaultsGates.InertReason? {
         gates.inertReason(for: .layout(.trackLimit))
     }
 
-    /// The auto-track-limit toggle gating the Track limit
-    /// stepper, through the same `AutoGatedGroup` the Grid
-    /// dimensions use. On (the default), tracks open and collapse
-    /// with the window count and the stepper greys; off pins the
-    /// limit.
-    ///
-    /// Labelled "Auto track limit", not "Automatic tracks"
-    /// (R6/#406, ui-designer): no track is itself automatic —
-    /// only HOW MANY exist is — so the label names the field it
-    /// gates, matching the other `AutoGatedGroup` pairs ("Auto
-    /// item size" over "Item size").
-    ///
-    /// The pair used to be a hand-built toggle-plus-caption above
-    /// a separately-`disabled` stepper, which is this component's
-    /// job spelled a third way (#233's whole argument).
+    /// Auto track limit group gating track limit stepper
+    /// (`AutoGatedGroup`, #233, #406).
     var trackLimitGroup: some View {
         AutoGatedGroup(
             title: L("track.auto_tracks", "Auto track limit"),

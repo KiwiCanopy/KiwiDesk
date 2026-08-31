@@ -1,25 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One bound application's row: what it draws, what picking an
-/// app on it does, and the two paths that write a combo into it.
-/// Split from `KeybindingAppGroup` at the §2.1 ceiling (l10n
-/// round, 2026-08-11), on the same seam as `+AddRow` and
-/// `+Behavior`: the group owns the LIST — its order, its lookups,
-/// its add-row — and this owns one row of it.
-///
-/// Everything a row alone needs came WITH it and stayed
-/// `private`. What the group still holds is what the list also
-/// uses: `pickBundleFromPanel` (the add-row's "Other…" escape
-/// too) and `remove` / the two environment values, which the
-/// list's own wiring reads.
+/// Application shortcut row component (`KeybindingAppGroup`, `KeyBinding`).
 extension ApplicationsGroup {
     func row(
         _ binding: Binding<KeyBinding>
     ) -> some View {
         HStack {
-            // Tighter than the row's ambient spacing so "app + how
-            // to open it" reads as one unit (ui-designer, #334).
             HStack(spacing: 6) {
                 appMenu(binding)
                 behaviorMenu(binding)
@@ -43,8 +30,6 @@ extension ApplicationsGroup {
                             $0.id == id
                         },
                         bindings: $bindings,
-                        // Id-based (#68 review M2): Steal
-                        // mutates the array before this runs.
                         commit: {
                             _ = record(
                                 $0,
@@ -57,7 +42,6 @@ extension ApplicationsGroup {
                 onClear: {
                     let id = binding.wrappedValue.id
                     binding.wrappedValue.combo = ""
-                    // Live target: unregister now (#123).
                     _ = model.liveApplyRecorded(
                         layerName: layerName,
                         bindingID: id,
@@ -104,16 +88,10 @@ extension ApplicationsGroup {
                     assign(binding, app: app)
                 }
             },
-            // Drop apps every behavior of which is already bound on
-            // *other* rows — re-picking to one could only duplicate
-            // (this row excluded, so its own app stays pickable).
             exclude: fullyBoundBundleIDs(
                 excluding: binding.wrappedValue.id
             )
         )
-        // Hug the content: the row's `Spacer()` pins the recorder
-        // to the trailing edge, so the picker's width doesn't gate
-        // recorder alignment — no fixed column needed.
         .fixedSize()
     }
 
@@ -122,12 +100,6 @@ extension ApplicationsGroup {
         app: KeybindingCatalog.InstalledApp
     ) {
         let id = binding.wrappedValue.id
-        // Decline a re-pick onto an app every behavior of which is
-        // already bound on *other* rows — any assignment would
-        // duplicate. The picker hides these, but the "Other…"
-        // escape bypasses that list, so guard at this choke point
-        // (mirrors the add-row's `addApplication` bail — #334
-        // review).
         let taken = KeybindingCatalog.takenBehaviors(
             for: app.bundleID,
             in: bindings,
@@ -136,10 +108,6 @@ extension ApplicationsGroup {
         guard taken.count < AppLaunchBehavior.allCases.count else {
             return
         }
-        // Keep the row's launch behavior across a re-pick when it's
-        // still free for the new app, else take the first free one —
-        // so a re-pick can't silently collide with another row's
-        // app+behavior.
         let current =
             KeybindingCatalog.appLaunchBehavior(
                 from: binding.wrappedValue.lua
@@ -178,8 +146,7 @@ extension ApplicationsGroup {
         )
     }
 
-    /// Looks the row up by id at write time — safe after any
-    /// structural mutation of the bindings array.
+    /// Records shortcut combo lookup by ID (`UUID`).
     @discardableResult
     private func record(
         _ combo: String,

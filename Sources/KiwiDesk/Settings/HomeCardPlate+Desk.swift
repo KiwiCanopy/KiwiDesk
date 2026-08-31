@@ -1,28 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The desk tiles of the Home card plates (#786): Monitors
-/// and Behaviour. Split from HomeCardPlate+Scene.swift at
-/// the file-size ceiling; the container, palette and
-/// dispatch stay in HomeCardPlate.swift.
+/// Monitors and Behavior illustration tiles for Home card plates (#786).
 
-/// The Monitors picture, small: the real display set through
-/// the one arrangement maths (`MonitorArrangement.layout`,
-/// chip-less), CENTRED in the plate — the layout anchors its
-/// union at the origin, which read as a lone display shoved
-/// into a corner (owner, 2026-08-09). Each display sits on a
-/// stand derived from the #758 share tokens — shares only; the
-/// point clamps belong to the area picture's card sizes — with
-/// the main display in the palette accent carrying two window
-/// pips where its card has room for them.
+/// Monitors home card tile previewing live display arrangement
+/// (`MonitorArrangement`, #758).
 struct HomeCardMonitorsTile: View {
     @ObservedObject var model: SettingsModel
     @Environment(\.schematicPalette) private var palette
 
-    /// The mini stand band under each display card.
     private static let standBand: CGFloat = 8
-    /// Below this card width the pips are dropped, not clipped
-    /// — a thumbnail drops a fact it has no room to render.
     private static let pipFloor: CGFloat = 26
 
     var body: some View {
@@ -45,7 +32,7 @@ struct HomeCardMonitorsTile: View {
         }
     }
 
-    /// The delta that centres the drawn union in the canvas.
+    /// Computes offset centering display layout union in canvas.
     private func centering(
         _ layout: MonitorArrangement.Layout,
         in canvas: CGSize
@@ -102,9 +89,7 @@ struct HomeCardMonitorsTile: View {
         .offset(x: rect.minX, y: rect.minY)
     }
 
-    /// Stand shares from the #758 tokens, unclamped: the mini
-    /// display is far below `monitorStandMin`, where the floor
-    /// would draw a plinth wider than the screen.
+    /// Stand shares from token scaling (#758).
     private func neck(width: CGFloat) -> some View {
         let foot = width * SettingsTheme.monitorStandScale
         return VStack(spacing: 0) {
@@ -141,12 +126,8 @@ struct HomeCardMonitorsTile: View {
     }
 }
 
-/// The Behaviour picture (owner ruled the prototype's pictogram
-/// in, 2026-08-09), made honest: two panes with the divider the
-/// mouse drags between them. The divider answers the REAL
-/// mouse-resize choice — accented with drag handles while a
-/// drag resizes neighbours, a quiet ghost while it snaps back —
-/// so the tile derives from the draft like every other plate.
+/// Behavior home card tile previewing mouse divider resize style
+/// (`TilingSettings`).
 struct HomeCardBehaviorTile: View {
     let settings: TilingSettings
     @Environment(\.schematicPalette) private var palette

@@ -1,18 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// `GridSchematic`'s cell geometry, split out to keep the
-/// schematic under the file ceiling (AGENTS.md §2). Pure
-/// rect math over the mini canvas; the view side and the
-/// capacity rule stay in `GridSchematic.swift`.
+/// Cell layout and geometry math for Grid schematic preview (`GridSchematic`).
 extension GridSchematic {
-    /// Cell rects for the windows in `ids` (drawn in array order,
-    /// mirroring `GridLayout`'s fill: columns-first row-major,
-    /// rows-first column-major), plus any trailing empty cell. The
-    /// last window spans the leftover when fill-empty-cells is on,
-    /// and windows past the grid's capacity — which BOTH types have,
-    /// since a dynamic grid balances only up to the same ceiling —
-    /// cascade in the last cell.
+    /// Computes cell rects and kinds for windows in grid layout
+    /// (`GridLayout`).
     func gridCells(
         _ size: CGSize,
         cols: Int,
@@ -38,22 +30,14 @@ extension GridSchematic {
                 ? (slot % cols, slot / cols)
                 : (slot / rows, slot % rows)
         }
-        // The engine's OVERFLOW branch lays its tiled prefix out
-        // row-major unconditionally — it does not consult
-        // `splitDirection` there, unlike its normal fill
-        // (`GridLayout.calculateGeometry`). Mirror that rather
-        // than the fill order, or a rows-first grid past capacity
-        // draws the focus in a cell the engine never puts it in.
+        // Mirror engine's row-major overflow layout
+        // (`GridLayout.calculateGeometry`).
         func overflowAt(_ i: Int) -> (Int, Int) {
             (i % cols, i / cols)
         }
         var cells: [(CGRect, CellKind)] = []
         let overflowing = ids.count > capacity
-        // Past capacity the engine tiles `capacity - 1` windows
-        // and sends the rest to `OverlapStack` in the last cell.
-        // Drawing them at one rect is what made the cell darken
-        // instead of pile (#712), so each gets its own offset —
-        // and `.piled` so it renders opaque.
+        // OverlapStack overflow rendering in last cell (#712).
         let tiled = overflowing ? capacity - 1 : ids.count
         for (i, id) in ids.prefix(tiled).enumerated() {
             let (c, r) = overflowing ? overflowAt(i) : at(i)
@@ -77,15 +61,8 @@ extension GridSchematic {
         return cells
     }
 
-    /// The cascade inside the last cell, **bounded by that cell**.
-    ///
-    /// A pile whose reveals outrun the cell height marches out of
-    /// it and is cut by the canvas clip, so the picture shows
-    /// fewer windows than the caption claims — panel scale at
-    /// 1 × 6 with twelve windows drew three of them off-canvas.
-    /// Only as many tiles as fit are drawn; a `+N` chip on the
-    /// front one carries the rest, which is what
-    /// `SchematicMoreChip` is for.
+    /// Computes cascading cell stack in last cell
+    /// (`LayoutSchematic.cascadeOffset`, `SchematicMoreChip`).
     func pileCells(
         in cell: CGRect,
         ids: [Int]

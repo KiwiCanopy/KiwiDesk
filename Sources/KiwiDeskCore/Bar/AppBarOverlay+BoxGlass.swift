@@ -1,24 +1,15 @@
 import AppKit
 
-/// Per-box Liquid Glass (piece 2). Under `boxed + liquid_glass`
-/// each item gets its own frosted `NSGlassEffectView` hosting the
-/// item as its `contentView`, instead of the single shared plate —
-/// so the "boxed" shape survives the glass finish. Drag/reflow
-/// operates on the glass box (`draggableView`), and the scroll
-/// arrows get frosted backdrop boxes so they match. Colorless on
-/// macOS 26.5.2 (tint shifts luminance only). Container-merge (so
-/// adjacent boxes fuse) is a remaining refinement.
+/// Per-item frosted glass rendering and lifecycle for App Bar
+/// (`GlassPlate`, #408).
 extension AppBarOverlay {
-    /// The resolved style wants per-box glass: the glass finish over
-    /// the boxed shape. (Plain + glass keeps the single plate.)
+    /// Indicates whether styling specifies per-box glass.
     func wantsBoxGlass(_ style: AppBarStyle) -> Bool {
         style.glassEnabled && style.backgroundStyle == .boxed
     }
 
-    /// Hosts each item in its own glass box at `frames[i]`, tinted
-    /// by Fill and rounded against the bar's cross `depth`. The item
-    /// is auto-sized to the glass bounds, so the box frame — not the
-    /// item's own frame — carries the layout here.
+    /// Hosts each item view in an individual glass plate
+    /// (`GlassPlate`, `GlassTint`, #408).
     func updateBoxGlasses(
         frames: [CGRect],
         style: AppBarStyle,
@@ -40,9 +31,6 @@ extension AppBarOverlay {
                 tintHex: style.fillColor,
                 animated: animated
             )
-            // Colored backdrop behind the box so the glass refracts
-            // a hue (#408); hidden with the box, or when the Fill is
-            // transparent (clear glass).
             let tint = boxTints[i]
             if tinted && !itemViews[i].isHidden {
                 GlassTint.apply(
@@ -59,8 +47,7 @@ extension AppBarOverlay {
         }
     }
 
-    /// Grows / shrinks the glass-box pool to `n`. Boxes live inside
-    /// `itemContainer` so they clip and scroll with the run.
+    /// Adjusts size of box glass and tint views pool.
     private func syncBoxGlassCount(_ n: Int) {
         while boxGlasses.count > n {
             let glass = boxGlasses.removeLast()
@@ -72,18 +59,13 @@ extension AppBarOverlay {
             guard let glass = GlassPlate.make() else { break }
             itemContainer.addSubview(glass)
             boxGlasses.append(glass)
-            // One tint backdrop per box, kept parallel (#408).
             boxTints.append(NSView())
         }
     }
 
-    /// Frosted backdrop boxes behind the visible scroll arrows, so
-    /// they match the items. The arrows stay on top and interactive
-    /// (their own box is set transparent in `layoutArrows`); a
-    /// backdrop is enough since they need no `contentView` hosting.
+    /// Updates frosted glass backdrops behind scroll arrows
+    /// (`BarArrowView`, #408).
     func updateArrowGlasses(style: AppBarStyle) {
-        // The arrows ride the panel content (itemContainer's
-        // superview), the same layer they sit in when unglassed.
         guard let content = itemContainer.superview else { return }
         updateArrowGlass(
             &backArrowGlass,
@@ -117,8 +99,6 @@ extension AppBarOverlay {
         glass = box
         if box.superview !== content {
             content.addSubview(box, positioned: .below, relativeTo: arrow)
-            // Dummy content so a backdrop glass frosts (see the front
-            // segment); the arrow paints its chevron above it.
             GlassPlate.setContent(box, NSView())
         }
         box.isHidden = false
@@ -131,8 +111,6 @@ extension AppBarOverlay {
             cornerRadius: radius,
             tintHex: style.fillColor
         )
-        // Colored backdrop so the arrow glass tints with the boxes
-        // (#408), or hidden for a transparent Fill (clear glass).
         let backdrop = tint ?? NSView()
         tint = backdrop
         if GlassTint.wanted(style.fillColor) {
@@ -148,10 +126,7 @@ extension AppBarOverlay {
         }
     }
 
-    /// The view drag moves for `item`: its glass box while per-box
-    /// glass hosts it, else the item itself. Both ride
-    /// `itemContainer`, so the drag/reflow math is coordinate-
-    /// identical either way.
+    /// Returns the target view for drag operations (`AppBarItemView`).
     func draggableView(for item: AppBarItemView) -> NSView {
         guard let i = itemViews.firstIndex(of: item),
             i < boxGlasses.count,
@@ -160,10 +135,7 @@ extension AppBarOverlay {
         return boxGlasses[i]
     }
 
-    /// Returns every hosted item to `itemContainer` and tears the
-    /// glass boxes down (glass off, or the shape left `boxed`).
-    /// Uses `holds` per the reparent-restore gotcha, so no item is
-    /// left trapped inside a hidden glass wrapper.
+    /// Detaches items from glass wrappers and tears down box glass views.
     func teardownBoxGlasses() {
         backArrowGlass?.isHidden = true
         forwardArrowGlass?.isHidden = true

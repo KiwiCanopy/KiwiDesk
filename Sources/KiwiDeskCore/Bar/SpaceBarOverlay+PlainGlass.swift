@@ -1,11 +1,7 @@
 import AppKit
 
-/// Plain + Liquid Glass hug for the Space Bar (piece 1, App Bar
-/// twin). The frosted plate hugs the run — Space items AND the
-/// trailing front-app segment — when it fits, instead of spanning
-/// the viewport. Driven at the end of `render`: hugging places the
-/// run run-local, which needs the laid-out frames. On overflow the
-/// run scrolls and fills the strip, so the plate spans the viewport.
+/// Liquid Glass plate hosting and positioning for SpaceBarOverlay
+/// (`GlassPlate`, #408, #409).
 extension SpaceBarOverlay {
     func updatePlainGlass(
         panel: NSPanel,
@@ -30,12 +26,6 @@ extension SpaceBarOverlay {
         plate.isHidden = false
         let radius = style.resolvedCornerRadius(forThickness: depth)
         if overflow && pinnedFront {
-            // The front segment is pinned OUTSIDE the scrolling
-            // viewport (#409), so the plate can't just host the item
-            // viewport — it would leave the pinned app on bare panel.
-            // Span the whole strip as a frosted backdrop under BOTH
-            // the scrolling items and the pinned segment (siblings
-            // above it), so the app sits on one continuous plate.
             spanBackdrop(
                 plate: plate,
                 content: content,
@@ -63,8 +53,7 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// Every view that rides the run: the Space items plus the loose
-    /// front-app segment views. Moved together into the run wrapper.
+    /// Views participating in the glass run hierarchy.
     private var glassRunViews: [NSView] {
         var views: [NSView] = itemViews
         views += [
@@ -74,8 +63,7 @@ extension SpaceBarOverlay {
         return views
     }
 
-    /// Overflow / fallback: host the whole item viewport at its
-    /// frame — the scrolling run fills the strip, nothing to hug.
+    /// Hosts item container in glass plate spanning the entire viewport.
     private func spanViewport(
         plate: NSView,
         viewport: CGRect,
@@ -100,14 +88,8 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Pinned overflow (#409): the plate spans the WHOLE strip as a
-    /// frosted backdrop (empty content frosts as true glass — the
-    /// `frontGlass` precedent), sitting below both the scrolling
-    /// item viewport and the pinned front segment (siblings above
-    /// it), so the pinned app rides one continuous plate instead of
-    /// bare panel. It does NOT host the items: a hosted view is
-    /// auto-sized to the glass bounds, which would break the scroll
-    /// clip. The items keep their own `itemContainer`.
+    /// Spans glass plate as backdrop under items and pinned front segment
+    /// (#409).
     private func spanBackdrop(
         plate: NSView,
         content: NSView,
@@ -117,8 +99,6 @@ extension SpaceBarOverlay {
         style: SpaceBarStyle
     ) {
         returnRunToContainer()
-        // Release the item viewport back to a plain sibling if a
-        // prior render hosted it (leaving span/hug hosting).
         if GlassPlate.holds(plate, itemContainer) {
             GlassPlate.detach(plate)
             content.addSubview(
@@ -148,9 +128,8 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Solid colored backdrop behind the glass plate so the near-
-    /// colorless glass refracts a hue (#408); hidden for a
-    /// transparent Fill (clear glass). Tracks the plate's frame.
+    /// Applies optional colored backdrop tint behind glass plate
+    /// (`GlassTint`, #408).
     private func applyPlateTint(
         plate: NSView,
         frame: CGRect,
@@ -172,10 +151,7 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// Hug: the glass takes the plate frame and hosts a run wrapper
-    /// with the run (items + front segment) placed run-local — each
-    /// view's viewport frame shifted into the plate's space, so it
-    /// stays visually put while the plate shrinks to hug it.
+    /// Shrinks glass plate to hug run items and front segment.
     private func hugRun(
         plate: NSView,
         content: NSView,
@@ -218,7 +194,7 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Returns the run views to `itemContainer` (leaving hug mode).
+    /// Restores run subviews to `itemContainer`.
     func returnRunToContainer() {
         guard let run = glassRun else { return }
         for view in glassRunViews where view.superview === run {
@@ -226,8 +202,7 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// Tears the run wrapper down: run back to `itemContainer`, the
-    /// wrapper detached from the plate (glass off / shape changed).
+    /// Detaches glass run wrapper and reparents views to item container.
     func teardownGlassRun() {
         guard let run = glassRun else { return }
         returnRunToContainer()

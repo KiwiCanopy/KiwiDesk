@@ -2,40 +2,17 @@ import CoreGraphics
 import Foundation
 
 extension BorderStyle {
-    /// The glow bloom's blur radius (pt) — and the amount the
-    /// overlay frame grows on every side so the halo isn't
-    /// clipped. Scaled with the (clamped) ring width so the
-    /// bloom reads as a proportional aura at every width (#533,
-    /// ui-designer verdict): a fixed blur swamps a hairline ring
-    /// and vanishes against a thick one. `0.8` is the
-    /// device-calibrated ratio (4 pt bloom on the default 5 pt
-    /// ring); the floor keeps a hairline ring's halo present,
-    /// the cap stops the overlay surface ballooning past
-    /// diminishing visual returns. `BorderGeometryTests` pins
-    /// the three calibration points. The automatic DEFAULT —
-    /// an explicit `glow_size` overrides it (#551), resolved by
-    /// `resolvedGlowBlur`; this formula stays the derived face
-    /// of the `0 = automatic` sentinel.
+    /// Derives default glow blur radius (pt) from border width
+    /// (`BorderGeometryTests`, #533, #551).
     public static func glowBlur(for width: CGFloat) -> CGFloat {
         min(12, max(2, 0.8 * width))
     }
 
-    /// The glow bloom's color, derived from a ring color (#358).
-    /// A bloom is a FILL, not a thin stroke, so it is freed from the
-    /// stroke-legibility limit that keeps `focusedColor` deliberately
-    /// dark — brighten it into a vivid halo. Hue is preserved (a blue
-    /// ring blooms blue, never a muddy blue-green); saturation is
-    /// floored and lightness lifted (the #358 designer formula:
-    /// `s ← max(s, 0.80)`, `l ← clamp(l + 0.25, 0.55…0.72)`).
-    /// Derived, never stored — it cannot drift from the ring color
-    /// and adds no profile-JSON key. Parse failure returns the input.
+    /// Derives brightened glow bloom hex color from ring color (#358).
     public static func glowColor(from hex: String) -> String {
         guard let c = DragVisual.parseHex(hex) else { return hex }
         var (h, s, l) = rgbToHSL(r: c.red, g: c.green, b: c.blue)
-        // Floor saturation only for a color that HAS a hue — an
-        // achromatic ring (grey/white/black, hue 0) must bloom grey,
-        // not a spurious pink from flooring saturation onto hue-0.
-        // (A white `focused_color` ships in the Monochrome palette.)
+        // Floor saturation only when hue exists (achromatic blooms stay grey).
         if s > 0 { s = max(s, 0.80) }
         l = min(0.72, max(0.55, l + 0.25))
         let (r, g, b) = hslToRGB(h: h, s: s, l: l)
