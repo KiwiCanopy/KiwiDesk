@@ -7328,7 +7328,7 @@ optional.** (Same ruling.) Two consequences fall out of drawing
 a string the user edits, and both are load-bearing rather than
 polish.
 
-`app_bar.set_title_cap` (8–80, default 25) exists because App
+`app_bar.set_title_cap` (8–80, default 10) exists because App
 Bar slots are **uniform and measured from the widest item**
 (`AppBarOverlay.autoSlotWidth`). On that same sample the app
 names ran 6–20 characters and the titles to 57. One long title

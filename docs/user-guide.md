@@ -1617,7 +1617,7 @@ rest; the rest behind **Style**):
   bar on screen sits on a vertical edge; your choice returns
   when one moves back to a horizontal edge.
 - **Title length**: how many characters of a title an item
-  shows before it's shortened at the end (8–80, default 25).
+  shows before it's shortened at the end (8–80, default 10).
   Worth knowing why it matters: every item on a bar is the same
   size, and on **auto** item size that size comes from the
   widest item — so one long title widens *every* slot until the
@@ -1818,7 +1818,7 @@ shortcut) and **Show front app** — a trailing segment with the
 focused window of the Space each display currently shows: its
 app's icon, then that window's **title** (its app's name
 instead if it reports no title yet). Icon-only on vertical bars.
-**Title length** caps that title (8–80 characters, default 25)
+**Title length** caps that title (8–80 characters, default 10)
 and is greyed while the segment is off. **Spring delay** sets
 how long a dragged window must hover a Space before the view
 springs to it (default 1.5 s, 1–4 s).

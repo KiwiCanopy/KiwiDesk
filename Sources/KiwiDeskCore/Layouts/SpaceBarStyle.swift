@@ -46,7 +46,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Trailing front-app segment; off by default (ui-designer verdict 6).
     public var showFrontApp = false
     /// Front-segment character limit to prevent layout shifts. Default 25.
-    public var titleCap = 25
+    public var titleCap = 10
     /// Hides empty spaces except current; off by default (verdict 4).
     public var hideEmpty = false
     /// Sticky/floating state badges on space items (#414). Default true.
