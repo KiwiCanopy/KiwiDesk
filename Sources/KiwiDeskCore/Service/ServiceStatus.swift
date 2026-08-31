@@ -1,6 +1,10 @@
 import Foundation
 
-/// Structured launchd service status for kiwidesk service agent (#96, #576).
+/// Structured launchd service status (#576) — a machine value,
+/// never a re-parsed CLI sentence (#96). `isLoaded` is the job
+/// registered with launchd (RunAtLoad ⇒ auto-starts at login);
+/// `pid` exists only while running, so loaded with no pid is
+/// the quit-but-registered idle case (#341).
 public struct ServiceStatus: Equatable, Sendable {
     public let isLoaded: Bool
     public let pid: Int32?

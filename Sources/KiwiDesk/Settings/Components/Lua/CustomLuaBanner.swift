@@ -1,7 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Informational banner shown when init.lua contains custom Lua (#55).
+/// Informational banner shown when init.lua contains custom Lua
+/// outside the GUI's managed vocabulary. Such code coexists
+/// safely: the app saves to gui.json and never touches
+/// init.lua (#55).
 struct CustomLuaBanner: View {
     var body: some View {
         Label {
@@ -15,6 +18,8 @@ struct CustomLuaBanner: View {
                 )
             )
         } icon: {
+            // `ink2`, not `.blue`: a raw system hue in a
+            // green-tinted window — neutral info, not a link.
             Image(systemName: "info.circle")
                 .foregroundStyle(SettingsTheme.ink2)
         }

@@ -10,7 +10,11 @@ public enum Direction: String, Sendable, Codable, CaseIterable {
 
 /// Geometric window navigation (`focus left`, `swap right`).
 public enum Navigation {
-    /// Returns nearest candidate in `direction` with cross-axis overlap.
+    /// Nearest candidate whose center lies in `direction`.
+    /// Candidates must overlap the origin on the cross axis —
+    /// otherwise a full-height master would jump diagonally
+    /// into the stack — and lateral offset is penalized so
+    /// straight neighbors beat diagonal ones.
     public static func neighbor(
         from origin: CGRect,
         in direction: Direction,

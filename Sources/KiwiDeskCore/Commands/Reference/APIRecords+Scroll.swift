@@ -1,6 +1,8 @@
 import Foundation
 
-/// `scroll.*` — scrolling layout command records (#1033).
+/// `scroll.*` — scrolling layout command records (#1033). The
+/// largest exemplar group: one of every argument shape the
+/// surface has.
 extension APIReference {
     static let scrollRecords: [String: APIRecord] = [
         "set_slot_size": APIRecord(

@@ -10,7 +10,10 @@ struct KeyRecorderRejectionRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            // Visual cue for conflict state (WCAG 1.4.1).
+            // Shape cue beside the red text — the conflict must
+            // not read by colour alone (WCAG 1.4.1); hidden from
+            // VoiceOver, the text states it. `danger`, not
+            // `.red`: system red sinks on the theme's dark card.
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(SettingsTheme.danger)
                 .accessibilityHidden(true)

@@ -5,7 +5,9 @@ import SwiftUI
 struct AppSelector: View {
     /// Bundle identifier of chosen app (`AppRef`).
     @Binding var name: String
-    /// Bundle IDs to omit from the picker.
+    /// Bundle IDs to omit — App Rules passes the apps that
+    /// already have a rule row, since each app carries at most
+    /// one (its space + float facets live on that single row).
     var exclude: Set<String> = []
     @State private var custom = false
 

@@ -22,6 +22,9 @@ struct FlowLayout: Layout {
         let rows = arrange(subviews, in: bounds.width).rows
         for row in rows {
             for item in row.items {
+                // Clamp to the row width so a lone item wider
+                // than the bounds truncates instead of spilling
+                // past the container's edge.
                 subviews[item.index].place(
                     at: CGPoint(
                         x: bounds.minX + item.x,

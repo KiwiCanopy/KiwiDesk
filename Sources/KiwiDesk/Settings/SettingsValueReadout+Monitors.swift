@@ -28,7 +28,10 @@ extension SettingsValueReadout {
         }
     }
 
-    /// One row per re-pinned space using stored fingerprint strings.
+    /// One row per re-pinned space, showing the stored
+    /// `name:WxH` fingerprint verbatim: no fingerprint→name
+    /// helper exists, and a parser here would be a second copy
+    /// of the fingerprint grammar.
     private static func monitorsPinRows(
         _ census: SettingKey,
         old: [SpaceID: String],

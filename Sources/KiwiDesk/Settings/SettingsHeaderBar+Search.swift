@@ -2,7 +2,10 @@ import KiwiDeskCore
 
 /// Search context builder for SettingsHeaderBar (#678).
 extension SettingsHeaderBar {
-    /// Constructs SettingsSearchContext from in-memory state.
+    /// Constructs SettingsSearchContext from state already in
+    /// memory — nothing on the search path touches AX, the
+    /// session or the filesystem (spec 11a). Palettes are absent
+    /// by type; the argument lives on the Kind enum.
     var searchContext: SettingsSearchContext {
         SettingsSearchContext(
             editingStoredProfile: model.editingStoredProfile,

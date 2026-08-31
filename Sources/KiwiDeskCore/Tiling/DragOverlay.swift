@@ -1,6 +1,9 @@
 import AppKit
 
-/// Visual drag feedback overlay showing ghost slot and drop zone highlights.
+/// Visual drag feedback overlay showing ghost slot and drop
+/// zone highlights. Both are borderless click-through panels
+/// that never take focus or join the window cycle; frames are
+/// AX coordinates, flipped at the AppKit boundary.
 @MainActor
 public final class DragOverlay {
     private var ghost: NSPanel?

@@ -1,7 +1,12 @@
 import Carbon.HIToolbox
 import Foundation
 
-/// Resolves virtual key codes to base characters via UCKeyTranslate (#23).
+/// Resolves virtual key codes to base characters on the ACTIVE
+/// layout via UCKeyTranslate (#23) — no modifier state, so the
+/// base glyph (modifiers render separately). Nil for keys with
+/// no printable base; `ComboSymbols` then uses a fixed glyph.
+/// The ASCII-capable layout is the fallback for input sources
+/// (some IMEs) that expose no Unicode layout data.
 enum LayoutKeyGlyph {
     static func char(for keyCode: UInt32) -> String? {
         guard let source = currentSource() ?? asciiSource()

@@ -1,7 +1,10 @@
 import SwiftUI
 
-/// View modifier that dims chrome elements when window is inactive
-/// (#297, #678).
+/// Dims hand-built chrome while the window is inactive (#297,
+/// #678): a plain alpha fade that keeps the hue, never a
+/// desaturate — grayscale reads as "disabled". Keyed to
+/// `.inactive` ONLY: `.active` (window not key while the shared
+/// color panel is up) must not dim.
 struct InactiveDimmed: ViewModifier {
     /// Shared crossfade animation.
     static let fade = Animation.easeInOut(duration: 0.15)

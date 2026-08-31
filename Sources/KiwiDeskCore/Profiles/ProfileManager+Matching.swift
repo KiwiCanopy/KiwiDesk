@@ -2,7 +2,10 @@ import Foundation
 
 /// Monitor-set profile matching queries for ProfileManager.
 extension ProfileManager {
-    /// Matches live monitor set against stored profiles in priority order.
+    /// Matches a live monitor set: exact stored set (sorted
+    /// arrays) → the count's default user profile → none (the
+    /// caller composes the Standard). Ties resolve
+    /// alphabetically.
     public func match(fingerprints: [String]) -> ProfileMatch {
         let profiles = allProfiles()
         if let exact = profiles.first(where: {

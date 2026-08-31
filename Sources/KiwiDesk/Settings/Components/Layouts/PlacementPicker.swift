@@ -5,9 +5,13 @@ import SwiftUI
 /// (BSP, Stack, Scrolling, Grid).
 struct PlacementPicker: View {
     @Binding var placement: SpawnPlacement
-    /// Row label (defaults to "New window").
+    /// Row label; defaults to "New window". Track passes
+    /// "Position" — its own/focused mode row above makes a
+    /// second "New window" read wrong.
     var label: String? = nil
-    /// Help override string.
+    /// Help override for callers whose picker means something
+    /// else — Track positions a whole track in own-track mode,
+    /// so the window-centric default would lie there.
     var help: String? = nil
 
     var body: some View {

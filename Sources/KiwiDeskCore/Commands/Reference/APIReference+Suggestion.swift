@@ -2,14 +2,19 @@ import Foundation
 
 /// Command typo suggestion provider for APIReference.
 extension APIReference {
-    /// Returns closest dispatchable command suggestion for typo, if any.
+    /// Closest known command for a typo — dispatchable names
+    /// only: this path is reached from the CLI/IPC socket too,
+    /// where a Lua-only name would be a dead-end hint.
     public static func suggestion(
         for unknown: String
     ) -> String? {
         closest(to: unknown, among: dispatchable)
     }
 
-    /// Finds nearest candidate within edit distance limit (#1033).
+    /// Nearest candidate within a typo's worth of edits. Shared
+    /// with `helpSuggestion` (#1033): the two differ in WHAT
+    /// they may point at, never in how near counts — two copies
+    /// of the threshold would drift into two ideas of a typo.
     static func closest<C: Sequence<String>>(
         to unknown: String,
         among candidates: C

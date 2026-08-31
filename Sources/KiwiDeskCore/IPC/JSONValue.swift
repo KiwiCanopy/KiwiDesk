@@ -96,7 +96,12 @@ public indirect enum JSONValue: Codable, Sendable, Equatable {
 }
 
 extension Double {
-    /// Safe Int conversion guarding against NaN/infinity traps (#386).
+    /// Safe Int conversion: nil unless finite and in `Int`'s
+    /// range. `Int(1e300)`, `Int(.nan)` and `Int(.infinity)`
+    /// all trap, so any raw Double→Int on caller-supplied
+    /// config/IPC numbers must route through here (#386).
+    /// `Double(Int.max)` rounds up to 2^63, so the upper bound
+    /// is a strict `<`.
     public var finiteInt: Int? {
         guard isFinite,
             self >= Double(Int.min),

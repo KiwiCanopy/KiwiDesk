@@ -18,7 +18,9 @@ public struct FloatRules: Sendable, Equatable {
         }
     }
 
-    /// Canonical identity used by profile sparse diffs.
+    /// Canonical identity used by profile sparse diffs: bundle
+    /// ids compare case-insensitively, while title fragments
+    /// keep their case-sensitive matching semantics.
     public static func normalizedRule(_ rule: String) -> String {
         let parts = rule.split(separator: ":", maxSplits: 1)
         guard parts.count == 2 else { return rule.lowercased() }

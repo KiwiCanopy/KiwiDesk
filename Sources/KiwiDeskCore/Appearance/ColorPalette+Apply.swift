@@ -1,6 +1,10 @@
 import Foundation
 
-/// One-shot application of ColorPalette onto TilingSettings (#375).
+/// One-shot application of ColorPalette onto TilingSettings
+/// (#375). Each color routes through the SAME validated field
+/// setter the per-key `set_*_color` commands use, so a palette
+/// can never set a color a command couldn't. Invalid hex or
+/// unknown path = skipped, never fatal.
 extension ColorPalette {
     /// Overwrites `settings`' colors with this palette's, in place (sparse).
     public func apply(to settings: inout TilingSettings) {

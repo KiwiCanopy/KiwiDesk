@@ -8,7 +8,11 @@ enum AppFontGlyphMap {
         let appNames: [String]
     }
 
-    /// Loads bundled icon map as a flat dictionary, or nil on failure.
+    /// Loads bundled icon map as a flat dictionary. Nil is a
+    /// build defect (the shipped-resource test fails); at
+    /// runtime it only degrades to image rendering, never a
+    /// crash. Upstream lists localized app names as plain
+    /// `appNames` members, so no locale handling is needed.
     static func loadBundled() -> [String: String]? {
         guard
             let url = Bundle.kiwiDeskCore.url(

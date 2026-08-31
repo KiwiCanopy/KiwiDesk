@@ -1,6 +1,10 @@
 import Foundation
 
-/// Window, Space, and Desktop movement command records (#884, #888, #1033).
+/// Window, Space, and Desktop movement command records (#1033).
+/// The three Desktop verbs are the `.desktop` argument's only
+/// home, and why that kind exists: a Desktop number is Mission
+/// Control's, counted globally across screens, while a Space
+/// id is KiwiDesk's own string (#884/#888).
 extension APIReference {
     static let coreWindowRecords: [String: APIRecord] = [
         "focus": APIRecord(

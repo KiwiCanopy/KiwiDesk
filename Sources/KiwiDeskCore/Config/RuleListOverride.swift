@@ -1,6 +1,8 @@
 import Foundation
 
-/// Sparse override for a list of normalized string rules.
+/// Sparse override for a list of normalized string rules: a
+/// `true` value adds a rule, `nil` is a tombstone removing an
+/// inherited rule; `false` and empty keys are ignored.
 public struct RuleListOverride: Sendable, Equatable {
     public var rules: [String: Bool?]
 
@@ -20,7 +22,11 @@ public struct RuleListOverride: Sendable, Equatable {
         }
     }
 
-    /// Applies sparse override to base rule list with normalized sorting.
+    /// Applies the override to a base list. Base rules keep
+    /// their order; new rules append in normalized sort order,
+    /// so output is independent of dictionary iteration. When
+    /// raw keys normalize to one identity, a tombstone wins
+    /// over an addition.
     public func resolved(
         onto base: [String],
         normalizing: (String) -> String
@@ -46,7 +52,8 @@ public struct RuleListOverride: Sendable, Equatable {
         return result
     }
 
-    /// Builds sparse override producing `edited` from `base`.
+    /// Builds the sparse override whose resolution produces
+    /// `edited`; nil when the edited list inherits the base set.
     public static func diff(
         base: [String],
         edited: [String],

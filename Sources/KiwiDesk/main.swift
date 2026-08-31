@@ -6,10 +6,14 @@ if CommandLine.arguments.count > 1 {
     exit(runCLI(CommandLine.arguments))
 }
 
-// Runs as accessory menu bar app (docs/design-decisions.md).
+// Holds `.accessory` for its whole life — content windows come
+// forward through `NSApp.forceFront`, never a policy flip
+// ("Permanent accessory mode", docs/design-decisions.md).
 let app = NSApplication.shared
 
-// Single-instance lock held for process lifetime (#196).
+// Single-instance lock held for process lifetime (#196). Must
+// run before the delegate exists: a second KiwiCore would
+// clobber the running instance's IPC socket.
 let instanceLock = SingleInstanceLock(
     path: SingleInstanceLock.defaultPath
 )

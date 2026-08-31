@@ -1,6 +1,11 @@
 import Foundation
 
-/// GUI language preference stored in UserDefaults (#9).
+/// GUI language preference stored in `UserDefaults`, NOT
+/// `gui.json` (#9): a language change is documented as
+/// side-effect-free and must never create a sidecar — that
+/// would flip `KiwiCore.isGuiManaged` and hand config
+/// ownership to the structured loader for a hand-written-Lua
+/// user who only wanted a different language.
 public enum LocalizationPreference {
     /// The `UserDefaults` key. `nil`/absent means "System default".
     public static let key = "language"

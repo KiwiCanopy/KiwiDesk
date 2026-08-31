@@ -26,7 +26,9 @@ struct SpaceNameField: View {
     var body: some View {
         TextField("", text: $draft)
             .textFieldStyle(.roundedBorder)
-            // Accessible label for nameless field (#812).
+            // Accessible label for the nameless field (#812) —
+            // the DIFF ROW's key, not a twin: one key cannot
+            // disagree with itself across ten locales.
             .accessibilityLabel(
                 L("diff.label.space_name", "Space name")
             )

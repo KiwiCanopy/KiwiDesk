@@ -8,7 +8,10 @@ extension HomeCardPlate {
         + 0.7152 * (0x25 / 255.0)
         + 0.0722 * (0x1A / 255.0)
 
-    /// Returns whether hex color meets contrast floor against plate luminance.
+    /// Whether a user hex can be seen on the plate at all: its
+    /// alpha-composited luminance must sit a floor's width from
+    /// the plate's own, in EITHER direction — a near-plate dark
+    /// and a translucent wisp both fail.
     static func plateLegible(_ hex: String) -> Bool {
         guard let c = rgba(hex) else { return false }
         let lum =

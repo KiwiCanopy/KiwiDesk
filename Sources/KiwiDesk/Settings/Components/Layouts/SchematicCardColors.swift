@@ -1,6 +1,11 @@
 import SwiftUI
 
-/// Card fan schematic window coloring rules (`SchematicFocusStrokeTests`).
+/// Card-fan schematic window colours (Monocle's fan, Floating's
+/// pile). One statement of the fallback ladder (plate palette →
+/// theme → family constant): what would be duplicated is the
+/// RULE, and a copy drifting on one arm paints the two
+/// schematics differently side by side.
+/// `SchematicFocusStrokeTests` needles both call sites.
 enum SchematicCardColors {
     static func fill(
         front: Bool,

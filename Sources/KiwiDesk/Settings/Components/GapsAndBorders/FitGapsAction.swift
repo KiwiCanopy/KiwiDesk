@@ -2,7 +2,9 @@ import Accessibility
 import KiwiDeskCore
 import SwiftUI
 
-/// Focus Border gap transformation action controls (#295).
+/// Focus Border gap transformation action controls (#295). The
+/// extra spacing is a transient action parameter; only the
+/// calculated gap values join the staged profile.
 struct FitGapsAction: View {
     @ObservedObject var model: SettingsModel
     @State private var extraSpacing = 0

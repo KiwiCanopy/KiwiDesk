@@ -1,6 +1,10 @@
 import CoreGraphics
 
-/// Remapping real border-width band to preview scales (#702, #786).
+/// The ONE remap from the real border-width band onto a
+/// preview's smaller span (#786): the same real width must carry
+/// the same perceived weight on every picture, and two textual
+/// copies disagree on the next retune with every test green
+/// (#702's class).
 enum BorderPreviewScale {
     /// Width band `BorderStyle.clampedWidth` can produce.
     static let real: ClosedRange<CGFloat> = 1...20

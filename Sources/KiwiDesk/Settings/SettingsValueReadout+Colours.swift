@@ -1,6 +1,9 @@
 import KiwiDeskCore
 
-/// Colours & Animations settings diff readout generators.
+/// Colours & Animations settings diff readout generators. The
+/// palette rows are ACTIONS — they mutate the palette store,
+/// not the draft config — so none stores a value a draft diff
+/// could state.
 extension SettingsValueReadout {
     static func coloursRows(
         _ key: ColoursKey,

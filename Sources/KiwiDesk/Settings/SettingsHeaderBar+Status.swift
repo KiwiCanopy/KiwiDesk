@@ -2,6 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Status row and profile warning views for SettingsHeaderBar.
+/// Takes NO traffic-light inset: it sits below the lights, so
+/// it keeps the bar's ordinary gutter and stays aligned with
+/// the content column beneath.
 extension SettingsHeaderBar {
 
     var showDivergence: Bool {

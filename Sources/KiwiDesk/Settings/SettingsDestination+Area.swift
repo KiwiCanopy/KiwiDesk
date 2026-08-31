@@ -1,4 +1,8 @@
-/// Destination to census area bijection (`DestinationAreaParityTests`, #678).
+/// Destination ↔ census-area bridge (#678): the destination is
+/// the navigation identity, the area the census's placement
+/// vocabulary. One exhaustive map each way;
+/// `DestinationAreaParityTests` pins the bijection so a new
+/// case on either side reds instead of missing a card.
 extension SettingsDestination {
     /// The census area this destination renders.
     var area: SettingsArea {

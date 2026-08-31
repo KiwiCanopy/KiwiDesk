@@ -1,6 +1,8 @@
 import Foundation
 
 /// `app_bar.*` — global App Bar style command records (#1033).
+/// An exemplar group: colour setters show `.color`, pickers a
+/// `.choice` reading its decoder's cases.
 extension APIReference {
     static let appBarRecords: [String: APIRecord] = [
         "set_edge": APIRecord(

@@ -1,6 +1,9 @@
 import Foundation
 
 /// Overlay and single-setting command records (#1033).
+/// `sticky.set_color` / `floating.set_color` also accept an
+/// empty string, clearing the mark colour — that belongs in
+/// the summary, not in a new argument kind.
 extension APIReference {
     static let dragRecords: [String: APIRecord] = [
         "set_ghost_enabled": APIRecord(

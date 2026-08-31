@@ -1,10 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Layout mode SF Symbol glyphs and curated tab ordering (#68 §6.3, #204).
+/// Layout mode SF Symbol glyphs and curated tab ordering
+/// (#68 §6.3, #204). The glyph is never the only signifier — it
+/// always accompanies the label.
 extension LayoutMode {
-    /// Ordered placement layouts for tab strip and search indexing
-    /// (#90, #204).
+    /// Ordered placement layouts — NOT `allCases` order, and
+    /// without Floating (#204). One home: the tab strip renders
+    /// it and search indexes it, so the two can't drift (#90).
     static let placementTabs: [LayoutMode] = [
         .bsp, .stack, .scrolling, .grid, .monocle, .track,
     ]

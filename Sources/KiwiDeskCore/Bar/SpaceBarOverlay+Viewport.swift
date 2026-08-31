@@ -2,7 +2,8 @@ import AppKit
 
 /// Viewport placement and hit-frame tracking for SpaceBarOverlay.
 extension SpaceBarOverlay {
-    /// Positions clipping viewport and returns frame.
+    /// Positions the clipping viewport and returns the rect so
+    /// the glass plate can adopt it as its `contentView` frame.
     @discardableResult
     func placeItemContainer(
         inset: CGFloat,
