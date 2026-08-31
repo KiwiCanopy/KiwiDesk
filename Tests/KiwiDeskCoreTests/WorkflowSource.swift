@@ -100,7 +100,7 @@ func workflowStep(
     )
     let start = try #require(
         lines.firstIndex { $0.contains("- name: \(name)") },
-        "release.yml has no step named \(name)"
+        "no step named \(name) in this workflow"
     )
     var end = lines.count
     for index in (start + 1)..<lines.count {
