@@ -9,14 +9,21 @@ extension ZOrderDrain {
         /// Whether remaining raises issue unverified after budget exhaustion.
         let spendsBudgetOnUnverifiedTail: Bool
 
-        /// Live restore policy
+        /// Live restore policy: ISSUES its tail unverified —
+        /// the stamp ledger records each raise, so an unverified
+        /// landing is still accounted for, and a live session gets
+        /// its stacking right eventually
         /// (`zOrderRestoresInFlight`, `zOrderQueue`, #684).
         static let restore = Policy(
             budget: 0.4,
             spendsBudgetOnUnverifiedTail: true
         )
 
-        /// Teardown restack policy for application termination
+        /// Teardown restack policy: DROPS its tail — issuing is
+        /// not free (blocking AX on the main actor after the
+        /// budget is spent), and a quit that hangs is worse than a
+        /// quit that stacks imperfectly. Ceiling: the budget plus
+        /// at most one blocking raise per group
         /// (#688, code review 2026-08-03).
         static let teardown = Policy(
             budget: 1.0,

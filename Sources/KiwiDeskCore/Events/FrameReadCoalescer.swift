@@ -2,9 +2,13 @@ import ApplicationServices
 import CoreGraphics
 import Foundation
 
-/// Coalesces asynchronous AX frame reads off the main actor (#618, 2026-08).
-/// Dispatches per-PID serial reads to prevent blocking the main thread
-/// (`FrameApplier`).
+/// Coalesces asynchronous AX frame reads off the main actor
+/// (#618). Per-PID serial reads keep one slow app from blocking
+/// the main thread (`FrameApplier`). Two residuals are accepted:
+/// an event can deliver after its window's destroy, and
+/// `trackedFrames` can lag by one read — draining pending reads
+/// before a reconcile would re-block the main actor, the cost
+/// this type exists to remove.
 @MainActor
 final class FrameReadCoalescer {
     enum Kind: Hashable, Sendable {
@@ -103,7 +107,9 @@ final class FrameReadCoalescer {
         queue(for: pid).async(execute: work)
     }
 
-    /// Returns per-PID serial queue, or main queue for own process
+    /// Returns per-PID serial queue — or the MAIN queue for the
+    /// own process: an AX read against ourselves from a background
+    /// queue deadlocks against the main actor answering it
     /// (`FrameApplier`).
     private func queue(for pid: pid_t) -> DispatchQueue {
         if pid == getpid() {

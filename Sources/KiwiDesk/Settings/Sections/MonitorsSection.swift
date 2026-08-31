@@ -36,7 +36,11 @@ struct MonitorsSection: View {
         )
     }
 
-    /// Renders placement canvas or unavailable state (`SettingKey+Monitors`).
+    /// Renders placement canvas or unavailable state. ONE gate
+    /// consult, not two: the cards carry no gate of their own
+    /// (`SettingKey+Monitors`) — the `else` is the banner's
+    /// complement by construction, never an inverted copy that
+    /// can drift.
     @ViewBuilder private func placementCard(
         rows: MonitorsFamilyRows,
         gates: MonitorsGates
@@ -90,8 +94,12 @@ struct MonitorsSection: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// Note shown when display ratios are clamped
-    /// (`MonitorArrangement.perceptibleClamp`).
+    /// Note shown when display ratios are clamped — said rather
+    /// than left to be noticed: a picture that quietly lies about
+    /// proportion reads as a wrong arrangement. Shown only while
+    /// the difference is visible
+    /// (`MonitorArrangement.perceptibleClamp` keeps it off the
+    /// common two-display desk).
     private var clampedNote: String {
         L(
             "monitors.picture.clamped",
@@ -100,8 +108,12 @@ struct MonitorsSection: View {
         )
     }
 
-    /// Note shown when multiple displays share identical hardware
-    /// fingerprints.
+    /// Note shown when displays share one fingerprint (same model
+    /// and resolution) — which is what a pin is stored against, so
+    /// KiwiDesk genuinely cannot tell them apart; the picture
+    /// would otherwise show the same spaces on both cards
+    /// unexplained. "Some", not "two": true of any duplicate
+    /// count.
     private var ambiguousNote: String {
         L(
             "monitors.picture.ambiguous",

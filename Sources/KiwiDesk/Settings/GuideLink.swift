@@ -2,7 +2,13 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// Embedded documentation link component (#1019, `SupportLinks`).
+/// The app's one pointer at the written guide (#1019). The label
+/// is a NOUN — the sentence carries the verb, so a translation
+/// places the destination wherever its word order wants.
+/// `LinkedCaption`, not a SwiftUI `Link`: a `.link` run gets no
+/// pointing-hand cursor. No network preflight — the browser
+/// reports its own failure, and a wrong "you are offline" beside
+/// a live link is worse (`SupportLinks` makes the same trade).
 struct GuideLink: View {
     /// Font point size and ink color for link prose (`LinkedCaption`).
     var pointSize: CGFloat = NSFont.preferredFont(

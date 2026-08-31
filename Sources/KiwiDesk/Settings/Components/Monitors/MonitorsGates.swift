@@ -1,8 +1,13 @@
 import KiwiDeskCore
 
-/// Evaluates visibility and gating rules for the Monitors settings area
-/// (#678 Phase 3, turn 13b, `ShortcutsGates.onlyDefaultLayer`, `gui.md`,
-/// `MonitorsGateTests`).
+/// Evaluates visibility and gating rules for the Monitors area
+/// (#678 Phase 3, turn 13b, `MonitorsGateTests`). Every gate here
+/// SURFACES rather than greys — not an exception to "grey don't
+/// hide" (gui.md): a picture of unattached monitors has nothing
+/// to dim, so the banner takes the picture's place and says so.
+/// The picture's own rows carry NO gate on purpose: one tag on
+/// both the banner and the rows it replaces would declare one
+/// condition with two opposite meanings.
 struct MonitorsGates {
     /// Whether dashboard is editing stored profile rather than live config
     /// (#18).

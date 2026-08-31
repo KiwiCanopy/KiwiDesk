@@ -1,6 +1,9 @@
 import AppKit
 
-/// Interactive indicator bar item view representing an open window.
+/// Interactive indicator bar item view representing an open
+/// window. A collapsed GROUP item is inert to per-window verbs:
+/// it stands for several windows, so a single-window action has
+/// no one referent.
 final class AppBarItemView: NSView {
     let iconView = NSImageView()
     /// SketchyBar font ligature icon label (#294, #901).

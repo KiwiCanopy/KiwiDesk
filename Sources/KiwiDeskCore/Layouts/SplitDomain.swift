@@ -27,8 +27,14 @@ public enum SplitDomain {
         return (low / available)...(1 - high / available)
     }
 
-    /// Clamps interactive ratio write to prevent cascade (#933,
-    /// `stack.set_master_ratio`, `bsp.set_ratio_*`).
+    /// Clamps interactive ratio write to prevent cascade (#933).
+    /// Never pushes the value back across `base` — no invisible
+    /// ratchet — and a nil-range span is deliberately uncapped.
+    /// The config verbs (`stack.set_master_ratio`,
+    /// `bsp.set_ratio_*`) bypass this: a stored value too extreme
+    /// for this display is honored again on a wider one. Callers
+    /// pass the raw screen span; the per-region render clamp is
+    /// the depth-complete net beneath this cap.
     public static func cappedRatioWrite(
         _ proposed: Double,
         base: Double,

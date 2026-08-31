@@ -9,7 +9,14 @@ extension SpacesSection {
         dragOrder ?? model.config.spaces
     }
 
-    /// Reorder drag handle view with hover cursor affordance.
+    /// Reorder drag handle with hover cursor affordance. Cursor
+    /// changes use `set()`, never push/pop (gui.md): hover
+    /// enter/exit and drag start/end interleave in ways a stack
+    /// cannot balance — a mid-drag exit would pop the closed
+    /// hand. While a drag is live, hover stops driving the
+    /// cursor; `hoveredHandle` keeps the drag-start handle, which
+    /// stays truthful because retargeting keeps the row under the
+    /// pointer.
     func dragHandle(_ space: SpaceID) -> some View {
         Image(systemName: "line.3.horizontal")
             .foregroundStyle(.secondary)
@@ -28,6 +35,11 @@ extension SpacesSection {
                 (inside ? NSCursor.openHand : .arrow).set()
             }
             .onDisappear {
+                // A row removed under the pointer never delivers
+                // the balancing onHover(false), and a cancelled
+                // drag (window resigning key) skips onEnded —
+                // drop the stale state, restore the earned
+                // cursor, and flush the in-flight order.
                 guard
                     hoveredHandle == space || dragged == space
                 else { return }
@@ -70,7 +82,11 @@ extension SpacesSection {
         }
     }
 
-    /// Evaluates vertical pointer crossing against candidate row midpoint.
+    /// Swaps only once the pointer crosses the candidate row's
+    /// MIDPOINT — plain band containment oscillates with
+    /// variable-height rows: after a short row passes a tall one,
+    /// the pointer can still sit inside the tall row's new band
+    /// and the next movement swaps them straight back.
     private func retarget(_ space: SpaceID, at y: CGFloat) {
         var order = dragOrder ?? model.config.spaces
         guard
@@ -101,12 +117,18 @@ extension SpacesSection {
         dampingFraction: 0.86
     )
 
-    /// Animation respecting system Reduce Motion setting.
+    /// The spring, or nothing under Reduce Motion — ONE decision
+    /// for both the per-swap shuffle and the drop settle: a
+    /// reorder that springs at one and snaps at the other reads
+    /// as a stutter. Rows still move; they arrive rather than
+    /// travel.
     var reorderAnimation: Animation? {
         reduceMotion ? nil : Self.reorderSpring
     }
 
-    /// Commits in-flight reorder to configuration model.
+    /// Commits in-flight reorder to the model, exactly once per
+    /// drag. No-op when nothing moved, so a plain click never
+    /// dirties the profile.
     func commitDragOrder() {
         if let order = dragOrder, order != model.config.spaces {
             model.config.spaces = order

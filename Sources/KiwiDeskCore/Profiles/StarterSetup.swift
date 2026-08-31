@@ -34,7 +34,10 @@ public enum StarterSetup {
         let mode: LayoutMode
     }
 
-    /// Generates space slots from screen sizes (review 2026-08-11).
+    /// THE one walk (review 2026-08-11): space numbering was once
+    /// written twice, and the two had to agree or a space took its
+    /// mode from one screen and its pin from another, silently.
+    /// Every map below derives from this.
     static func slots(_ sizes: [CGSize]) -> [Slot] {
         var slots: [Slot] = []
         var number = 1
@@ -60,7 +63,9 @@ public enum StarterSetup {
         (1...max(1, spaceCount(sizes: sizes))).map { SpaceID($0) }
     }
 
-    /// Explicit layout mode mapping per space.
+    /// A mode for EVERY space, never a sparse diff against the
+    /// fallback: each layout was chosen for its screen, so a
+    /// changed global fallback must not silently move one.
     public static func spaceModes(
         sizes: [CGSize]
     ) -> [SpaceID: LayoutMode] {
@@ -71,8 +76,10 @@ public enum StarterSetup {
         return modes
     }
 
-    /// Positional secondary screen assignment mapping (omits main screen
-    /// index 0).
+    /// Positional secondary screen assignment (unlisted ⇒ main).
+    /// Not re-derivable by arithmetic — the blocks are unequal, so
+    /// there is no `(n - 1) / 5`; anything needing a space's
+    /// screen reads this map.
     public static func spaceScreens(
         sizes: [CGSize]
     ) -> [SpaceID: Int] {

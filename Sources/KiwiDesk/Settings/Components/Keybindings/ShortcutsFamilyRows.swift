@@ -1,7 +1,11 @@
 import KiwiDeskCore
 
 /// Expands a keybinding family into renderable command rows
-/// (#678 Phase 3, `ShortcutsCensusRenderTests`).
+/// (#678 Phase 3). The switch is exhaustive over `ShortcutsKey`
+/// on purpose: a census family without an expansion fails to
+/// compile. `nil` means "not a NavRow list" (a bespoke container),
+/// never "unhandled" — WHICH families may answer nil is enumerated
+/// in `ShortcutsCensusRenderTests`, not counted here.
 @MainActor
 struct ShortcutsFamilyRows {
     /// Active spaces for per-space family expansion.
@@ -19,6 +23,9 @@ struct ShortcutsFamilyRows {
 
     func rows(for key: SettingKey) -> [NavCommand]? {
         guard case .shortcuts(let family) = key else {
+            // Only `ShortcutsKey` carries keybinding rows;
+            // `.behaviour(.resizeFeedback)` shares the container
+            // but is an ordinary toggle drawn by the card.
             return nil
         }
         return rows(for: family)
@@ -110,6 +117,9 @@ struct ShortcutsFamilyRows {
             )
         else { return rows(for: key) ?? [] }
         let columns = run.map { rows(for: $0) ?? [] }
+        // Ragged columns cannot happen — every family in a run
+        // expands over the same instance list — but truncating to
+        // the shortest beats trapping on a subscript if one does.
         let depth = columns.map(\.count).min() ?? 0
         return (0..<depth).flatMap { row in
             columns.map { $0[row] }

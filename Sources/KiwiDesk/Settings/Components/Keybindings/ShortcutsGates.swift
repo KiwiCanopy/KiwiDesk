@@ -1,7 +1,12 @@
 import KiwiDeskCore
 
-/// Resolves Shortcuts census gates (#678 Phase 3, `LayersCard`,
-/// `ShortcutsGateTests`).
+/// Resolves Shortcuts census gates (#678 Phase 3). This area's
+/// one gate SURFACES rather than greys: non-nil means "not yet at
+/// rest" (withheld behind the offer), so there is no inline
+/// sentence and no `GateHelp` companion. `LayersCard` asks this
+/// rather than re-deriving — a renderer whose predicate silently
+/// disagreed once hid a user's own configured layers
+/// (`ShortcutsGateTests`).
 struct ShortcutsGates {
     let config: GuiConfig
 
@@ -17,6 +22,9 @@ struct ShortcutsGates {
         switch key {
         case .shortcuts(.layers), .shortcuts(.layersIcon),
             .shortcuts(.switchToLayer):
+            // `default` always exists, so a SECOND entry is what
+            // "the user configured a layer" means — presence, not
+            // a count.
             return config.layers.count > 1 ? nil : .onlyDefaultLayer
         default:
             assertionFailure(
@@ -34,7 +42,10 @@ struct ShortcutsGates {
         .shortcuts(.switchToLayer),
     ]
 
-    /// Gated keys resolved dynamically in view state (`ShortcutsHeader`).
+    /// Gated keys resolved dynamically in view state: Import's
+    /// and Restore Defaults' gates are live-editor questions no
+    /// saved `GuiConfig` can answer, so `ShortcutsHeader` keeps
+    /// them. Naming them keeps the gap deliberate.
     static let resolvedElsewhere: Set<SettingKey> = [
         .shortcuts(.`import`),
         .shortcuts(.restoreDefaults),

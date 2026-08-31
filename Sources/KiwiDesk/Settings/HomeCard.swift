@@ -33,7 +33,11 @@ struct HomeCard: View {
                     cornerRadius: SettingsTheme.cardRadius
                 )
             )
-            // Border drawn above clip to preserve plate stroke (2026-08-09).
+            // Border ABOVE the clip, never in the background:
+            // the plate is opaque and full-bleed, so a background
+            // stroke is painted over — which silenced the rest
+            // hairline, the hover accent and the #760 frame on
+            // every plated card (ui-designer blocker, 2026-08-09).
             .overlay(cardStroke)
             .contentShape(
                 RoundedRectangle(
@@ -120,6 +124,8 @@ struct HomeCard: View {
         }
     }
 
+    /// Glyph + text, warning ink — never hue alone (the
+    /// red-on-green protanopia lesson).
     private func shoutBadge(_ text: String) -> some View {
         Label(text, systemImage: "exclamationmark.triangle.fill")
             .font(.caption.weight(.semibold))
@@ -150,6 +156,10 @@ struct HomeCard: View {
             .allowsHitTesting(false)
     }
 
+    /// One positional frame, never a hard-coded ", ": the joiner
+    /// between two localized statements is the translator's (CJK
+    /// wants 、/，). VoiceOver hears the mode fact here or nowhere
+    /// (#760), off the segment's own label key.
     private var axValue: String {
         let base =
             if let shout {

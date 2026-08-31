@@ -90,7 +90,10 @@ extension SpaceOverrideRows {
                 ).map(SpacesGateHelp.sentence) ?? ""
             )
         )
-        // Remote gate anchor sits outside GreyOut (#841).
+        // Remote gate anchor sits OUTSIDE the GreyOut (#841): it
+        // is the one thing here that must stay clickable while the
+        // rows above are inert — a pointer inside the dimmed
+        // subtree is exactly the dead end the rule names.
         remoteGateReference(
             for: .layout(.gridOverrideColumns)
         )
@@ -141,6 +144,10 @@ extension SpaceOverrideRows {
                 \.limit
             ),
             global: g.track.limit,
+            // 1-based: `nil` is the inherit sentinel, so a stored
+            // 0 would be a real value resolving to ONE track while
+            // Lua's 0 means automatic — two meanings for one field
+            // (audit finding 20, #406).
             range: 1...10
         )
         .modifier(
@@ -195,6 +202,11 @@ extension SpaceOverrideRows {
         {
             CrossReferenceRow(
                 prose: prose,
+                // The destination's OWN title, never a fresh
+                // breadcrumb key: it already carries translations,
+                // and `SidebarCrossReferenceTests` requires each
+                // locale to name the destination as that locale
+                // renders it.
                 linkTitle: SettingsDestination.layoutDefaults
                     .title,
                 destination: .layoutDefaults

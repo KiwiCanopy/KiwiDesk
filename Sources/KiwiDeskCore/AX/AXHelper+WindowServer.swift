@@ -54,8 +54,11 @@ extension AXHelper {
         )
     }
 
-    /// Front-to-back stacking order across all visible window layers
-    /// (`FloatDetection.shouldFloat`, #418, #684).
+    /// Front-to-back stacking order across ALL visible window
+    /// layers deliberately — overlays and panels interleave with
+    /// layer-0 windows, and a layer-filtered read reordered them
+    /// (`FloatDetection.shouldFloat`, #418, #684). Returns ids,
+    /// never counts: the caller's census keys on identity.
     public static func onScreenStackingOrder() -> [WindowID] {
         guard
             let list = CGWindowListCopyWindowInfo(

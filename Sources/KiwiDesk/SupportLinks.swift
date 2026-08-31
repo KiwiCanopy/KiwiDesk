@@ -13,14 +13,24 @@ enum SupportLinks {
         string: "https://github.com/KiwiCanopy/KiwiDesk"
     )!
 
-    /// GitHub Releases changelog URL (`docs/design-decisions.md`, #570).
+    /// GitHub Releases — KiwiDesk's changelog (#570). Linked for
+    /// the NOTES, not as a download: `docs/design-decisions.md` ▸
+    /// "No distribution channel without an update path" governs
+    /// what a surface promotes — do not retitle this to
+    /// "Download" or point it at a release asset.
     static let releases = URL(
         string:
             "https://github.com/KiwiCanopy/KiwiDesk/releases"
     )!
 
-    /// User guide URL routed by active locale
-    /// (`GuideLinkRouteTests`, `site.yml`, #1019).
+    /// User guide URL routed by active locale (#1019). `/guide/`,
+    /// not `/docs/user-guide/` — the single-page newcomer guide,
+    /// for a reader who just finished the tour. A path is treated
+    /// as localized only once its site route exists; everything
+    /// else falls back to English — a live English page beats a
+    /// 404. A locale gaining a route does NOT red: stale-to-
+    /// English is the safe direction (`GuideLinkRouteTests`,
+    /// `check_guide_routes`, `site.yml`).
     @MainActor static var guide: URL {
         guide(for: localizedRoute)
     }

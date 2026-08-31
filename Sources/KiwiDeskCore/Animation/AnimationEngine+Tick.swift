@@ -94,7 +94,10 @@ extension AnimationEngine {
             && frame.width > 0 && frame.height > 0
     }
 
-    /// Rounds rect components to nearest integer points.
+    /// Rounds rect components to nearest integer points. Settle
+    /// compares ROUNDED frames: comparing raw spring output to a
+    /// rounded applied frame kept animations alive for dozens of
+    /// extra frames chasing sub-point deltas.
     static func rounded(_ frame: CGRect) -> CGRect {
         CGRect(
             x: frame.origin.x.rounded(),

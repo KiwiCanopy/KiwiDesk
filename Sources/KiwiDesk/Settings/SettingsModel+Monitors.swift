@@ -2,8 +2,13 @@ import KiwiDeskCore
 
 /// Monitor layout model extension for `SettingsModel` (#678 turn 13b).
 extension SettingsModel {
-    /// Computes resolved screen placement for all spaces (`SpacePlacement`,
-    /// #53, `ProfileComposition`).
+    /// Computes resolved placement for ALL spaces in one
+    /// composition pass (#53, `SpacePlacement`): per-space calls
+    /// re-composed the whole profile per card — quadratic exactly
+    /// where this surface is most alive. One divergence from the
+    /// runtime: a pin to a disconnected monitor renders as pinned
+    /// (the user's intent), while the runtime places the space on
+    /// the fallback display.
     func resolutions() -> [SpaceID: SpaceResolution] {
         let mainID = PositionalDisplays.liveMainID
         let assignment =
@@ -28,7 +33,10 @@ extension SettingsModel {
     }
 
     /// Monitors area row expansion model (`MonitorsFamilyRows`,
-    /// #678 turn 13b).
+    /// #678 turn 13b). Frames are read LIVE off Core, never
+    /// snapshotted onto the model: `SettingsWindowController`
+    /// republishes on a display change, and a cached arrangement
+    /// is what would go stale behind it.
     var monitorRows: MonitorsFamilyRows {
         MonitorsFamilyRows(
             spaces: config.spaces,
@@ -70,6 +78,9 @@ extension SettingsModel {
     }
 
     /// Active main display (`PositionalDisplays.liveMainID`).
+    /// ONE derivation, because the picture reads it twice — the
+    /// tray and the "main" badge; a second derivation by
+    /// fingerprint produced two answers on a twin-monitor desk.
     var mainDisplay: Display? {
         let mainID = PositionalDisplays.liveMainID
         return displays.first { $0.id == mainID }

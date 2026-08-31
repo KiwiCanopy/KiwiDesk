@@ -3,14 +3,18 @@ import Foundation
 /// Configuration or profile validation issue surfaced to the GUI
 /// (#68, #39, #31).
 public struct ConfigIssue: Sendable, Equatable, Identifiable {
-    /// Issue condition structure rendered by GUI
+    /// Issue condition structure rendered by the GUI: Core names
+    /// the condition, never a sentence — a Core-rendered English
+    /// copy could not re-render on a language switch
     /// (`ConfigIssueText`, #96, #601).
     public enum Kind: Sendable, Equatable {
         /// Profile JSON decoding failure with root cause (`ProfileBrokenText`,
         /// `config-vocabulary.md`, #246, architect review 2026-08-11).
         case profileBroken(ProfileBrokenCause)
         case luaVMUnavailable
-        /// Lua execution error containing interpreter output.
+        /// Lua execution error containing interpreter output —
+        /// stays English by rule: CLI/IPC and interpreter text is
+        /// never localized (`core-boundaries.md`).
         case luaError(String)
         case guiConfigUnreadable
         /// Unknown API function call with optional fuzzy match

@@ -10,7 +10,11 @@ extension StateCoordinator {
         let bundleID: String?
     }
 
-    /// Records window minimization in chronological order
+    /// Records window minimization, newest last. Call while the
+    /// window snapshot is still live — the destroy fold erases it
+    /// a few lines later. The `removeAll` is not redundant with
+    /// the create fold's prune: `WindowManager.rekey` also makes
+    /// an id non-nil without passing through that fold
     /// (`EventLoop+AppObservation`).
     mutating func rememberMinimized(_ id: WindowID) {
         guard let window = windows[id] else { return }
@@ -38,6 +42,8 @@ extension StateCoordinator {
     }
 
     /// Returns most recently minimized window ID for bundle ID.
+    /// Advisory: the caller must verify the id is still among the
+    /// app's minimized windows and fall back when it is not.
     func lastMinimized(bundleID: String) -> WindowID? {
         minimizeOrder.last { $0.bundleID == bundleID }?.id
     }

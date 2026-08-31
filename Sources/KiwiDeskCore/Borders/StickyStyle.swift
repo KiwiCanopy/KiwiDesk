@@ -6,8 +6,10 @@ public struct StickyStyle: Sendable, Equatable {
     /// SF Symbol for global sticky windows (`infinity`, #414, #429).
     public static let symbolName = "infinity"
 
-    /// SF Symbol for display-sticky windows
-    /// (`pin.fill`, `⌃⌥P`, #445, #1094).
+    /// SF Symbol for display-sticky windows (`pin.fill`, #445).
+    /// A seeded keybinding is NAMED for this glyph (`⌃⌥P`, #1094):
+    /// re-picking the symbol strands that letter's rationale in
+    /// every catalog — re-pick it and re-argue the letter.
     public static let displaySymbolName = "pin.fill"
 
     /// Resolves indicator symbol name for given sticky scope.

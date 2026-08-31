@@ -149,8 +149,13 @@ public enum NativeSpaces {
     }
 
     #if DEBUG
-        /// Overrides for testing native spaces topology
-        /// (#523, review 2026-08-18).
+        /// Pins the Desktop number for BOTH readers — outside a
+        /// topology fixture they are the same number, and pinning
+        /// one but not the other reads the host's WindowServer
+        /// through the unpinned one (#523). A test needing them
+        /// to DIVERGE pins the topology instead: `spacesOverride`,
+        /// `mainDisplayUUIDOverride` AND `activeSpaceIDOverride`
+        /// (review 2026-08-18).
         public static nonisolated(unsafe) var activeDesktopNumberOverride: Int?
         public static nonisolated(unsafe) var activeSpaceIsUserOverride: Bool?
         /// Override for per-display pointer verification (#1023).

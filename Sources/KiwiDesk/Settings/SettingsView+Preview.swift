@@ -40,11 +40,18 @@ extension SettingsView {
                     close: { previewShown = false }
                 )
             }
+            // A new area gets a NEW card: the structural
+            // position is identical across a destination change,
+            // so without this the card's `@State` travel survives
+            // it (code review 2026-08-11).
             .id(destination)
         }
     }
 
-    /// Floating button offering to open preview on narrow widths.
+    /// Floating button offering to open the preview on narrow
+    /// widths — present whenever the area HAS a preview and none
+    /// is on screen, so the capability never disappears silently:
+    /// 17a drops the preview's column, never the preview.
     @ViewBuilder func showPreviewOffer(
         _ width: SettingsWidthClass
     ) -> some View {
@@ -60,7 +67,11 @@ extension SettingsView {
         }
     }
 
-    /// Preview offer chip view (owner 2026-08-11).
+    /// Preview offer chip (owner 2026-08-11). The accent is on
+    /// the border, never the words. A plain-styled chip rather
+    /// than a `.bordered` button because a bordered one takes the
+    /// tint on its LABEL — exactly the pairing the seal exists to
+    /// prevent.
     private var showPreviewLabel: some View {
         HStack(spacing: 6) {
             Image(systemName: "sidebar.trailing")

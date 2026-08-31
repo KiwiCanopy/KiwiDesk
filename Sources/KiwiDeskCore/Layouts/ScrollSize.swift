@@ -1,7 +1,11 @@
 import CoreGraphics
 import Foundation
 
-/// Scrolling slot size along scroll axis (points, fraction, or auto).
+/// Scrolling slot size along the scroll axis (points, fraction,
+/// or auto). `.auto` is a resolved default, never an inheritance
+/// sentinel: a future per-space override layer must model
+/// inheritance as `ScrollSize?` (`nil` = inherit) — do not
+/// overload `.auto` for it.
 public enum ScrollSize: Sendable, Equatable {
     /// Resolved orientation standard at layout time.
     case auto
@@ -28,7 +32,10 @@ public enum ScrollSize: Sendable, Equatable {
         .fraction(min(max(value, minFraction), maxFraction))
     }
 
-    /// Standard fraction of available width for auto horizontal scrolling.
+    /// `auto` + horizontal: a fraction, not points — a fixed pt
+    /// count drifted across display sizes. Near-full on purpose:
+    /// the 5% sliver of neighbour peeking in is what tells the
+    /// user the space scrolls at all.
     public static let autoHorizontalFraction: Double = 0.95
     /// Standard fraction of available height for automatic vertical scrolling.
     public static let autoVerticalFraction: Double = 0.95
@@ -69,7 +76,9 @@ public enum ScrollSize: Sendable, Equatable {
         }
     }
 
-    /// Formats fraction as percentage string for Lua/JSON encoding.
+    /// Formats fraction as percentage string for Lua/JSON
+    /// encoding. 2-decimal precision, trimmed, so a half percent
+    /// round-trips exactly — unlike a bare `Int(...)` cast.
     public static func percentString(_ fraction: Double) -> String {
         var text = String(format: "%.2f", fraction * 100)
         while text.hasSuffix("0") { text.removeLast() }

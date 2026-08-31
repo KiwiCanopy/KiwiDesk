@@ -28,7 +28,11 @@ public struct AppliedEffects: Sendable {
         let bundleID: String?
         let space: SpaceID?
         let focusLost: Bool
-        /// Window index in tiled slot order prior to removal (#674).
+        /// Window index in tiled slot order prior to removal
+        /// (#674). Scoped to the `focusLost` path: the index is
+        /// framed with the home space as active, which matches
+        /// reality only there — a consumer on a background-space
+        /// removal inherits a counterfactual frame; re-derive.
         let tiledSlot: Int?
     }
 }

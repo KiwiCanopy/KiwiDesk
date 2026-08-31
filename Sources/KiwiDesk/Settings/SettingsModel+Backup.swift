@@ -15,7 +15,11 @@ extension SettingsModel {
             + ".json"
     }
 
-    /// Writes a backup archive to the user-selected save path
+    /// Writes a backup archive to the user-selected save path.
+    /// Returns the failure rather than swallowing it: a backup
+    /// that silently did not happen is worse than one that says
+    /// so. Refuses BEFORE the panel — a dialog for an export that
+    /// will fail on the first read should never open
     /// (`code-reviewer`, 2026-08-17).
     func exportBackup() -> SetupBundleError? {
         if core.guiConfigStore.exists,
@@ -52,6 +56,10 @@ extension SettingsModel {
         }
         do {
             let bundle = try core.readBackup(at: url)
+            // Refuse HERE, not after the confirm: both the
+            // decoded bundle and the destination are in hand, and
+            // `isGuiManaged` needs no dialog to answer
+            // (`architect-reviewer`, 2026-08-17).
             if bundle.config != nil, !core.isGuiManaged {
                 return .failure(.luaOwnsThisMac)
             }
@@ -61,7 +69,12 @@ extension SettingsModel {
         }
     }
 
-    /// Applies confirmed backup archive and reloads settings (`reload()`).
+    /// Applies a confirmed backup. A write failing AFTER the
+    /// originals are in the Trash is the one class the pre-flight
+    /// read cannot catch, so it must not be swallowed — and
+    /// `reload()` runs either way: the files changed even on the
+    /// failing path, and an editor describing the old ones would
+    /// be lying.
     func restoreBackup(_ bundle: SetupBundle) -> SetupBundleError? {
         defer { reload() }
         do {
@@ -69,6 +82,8 @@ extension SettingsModel {
                 from: bundle,
                 trash: KiwiCore.moveToTrash
             )
+            // A partial restore is not a failure, but must not
+            // read as unqualified success either.
             lastRestoreOutcome = outcome.isClean ? nil : outcome
             return nil
         } catch {

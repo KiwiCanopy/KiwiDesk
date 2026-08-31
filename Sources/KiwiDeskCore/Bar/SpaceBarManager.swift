@@ -68,13 +68,18 @@ public final class SpaceBarManager {
         }
     }
 
-    /// Whether a painted bar's front segment presents title for `id`
-    /// (review 2026-08-20).
+    /// Whether a painted bar's front segment presents title for
+    /// `id` — on either channel, drawn or announced, so it is NOT
+    /// gated on the text edge: announced stale is as wrong as
+    /// drawn stale (review 2026-08-20, #937).
     public func showsTitle(of id: WindowID) -> Bool {
         shownBars.contains { $0.frontWindow == id }
     }
 
-    /// Synchronizes visible bar overlays across displays.
+    /// Synchronizes visible bar overlays across displays. The
+    /// validity filter here — not the overlay's identical guard —
+    /// is the one the float clamp depends on; never simplify it
+    /// away as redundant.
     public func sync(_ bars: [Bar]) {
         let valid = bars.filter {
             !$0.items.isEmpty

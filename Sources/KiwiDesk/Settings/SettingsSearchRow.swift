@@ -15,6 +15,9 @@ struct SettingsSearchRow: View {
     let reveal: (SettingsSearchResult) -> Void
 
     var body: some View {
+        // ONE read per body evaluation, shared by the visible
+        // column and the AX sentence — the readout walks the
+        // draft, so the row must not run it twice per repaint.
         let shownValue = shownValue
         HStack(spacing: 8) {
             SidebarTile(
@@ -45,6 +48,10 @@ struct SettingsSearchRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(axLabel(shownValue))
         .accessibilityValue(badgeValue)
+        // A tap gesture under a combined element is not reliably
+        // reachable by VoiceOver's activate, and no `Button`
+        // supplies the trait — both explicit, or the reveal is
+        // mouse-only for AX users.
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { reveal(result) }
     }
@@ -73,7 +80,11 @@ struct SettingsSearchRow: View {
         }
     }
 
-    /// Joined breadcrumb path segments for result item.
+    /// Joined breadcrumb path segments. Elision is by SEGMENT,
+    /// never `.truncationMode(.middle)` on the joined string: the
+    /// first segment decides what gets selected and the last is
+    /// the nearest context, so the middle is what is safe to
+    /// drop.
     private var breadcrumb: String? {
         switch result {
         case .destination:

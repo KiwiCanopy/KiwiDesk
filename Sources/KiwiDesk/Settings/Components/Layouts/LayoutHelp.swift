@@ -33,7 +33,10 @@ enum LayoutHelp {
         )
     }
 
-    /// Stack overflow styles help text (#94).
+    /// Stack overflow styles help text (#94). Deliberately NOT
+    /// reused by Track's same-named picker: there the enum governs
+    /// only the far-edge overflow track and the default flips, so
+    /// this text would describe the wrong thing.
     @MainActor static var stackOverflow: String {
         L(
             "layout_params.overflow.stack.help",
@@ -69,7 +72,11 @@ enum LayoutHelp {
         )
     }
 
-    /// Wrap-focus behavior help text for array layouts (#257, #168).
+    /// Wrap-focus help for the three array-order layouts (#257).
+    /// Key deviates from `<label-key>.help`: the wrap-focus label
+    /// is itself split across pre-existing keys (#168), so no
+    /// single label key yields one help key — hence the neutral
+    /// `layout_params.wrap_focus.help` home.
     @MainActor static var wrapFocus: String {
         L(
             "layout_params.wrap_focus.help",

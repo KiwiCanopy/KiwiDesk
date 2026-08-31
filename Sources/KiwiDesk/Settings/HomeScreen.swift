@@ -13,8 +13,12 @@ struct HomeScreen: View {
     /// Current window width classification band (17a).
     @Environment(\.settingsWidth) private var band
 
-    /// Adaptive grid column layout up to 4 columns
-    /// (owner rulings 2026-08-10, 17a).
+    /// Adaptive grid column count, capped at four with the cards
+    /// GROWING into a big screen (owner 2026-08-10): `.adaptive`
+    /// cannot say "at most four AND growing", so the count derives
+    /// from measured width, with 17a's band as the ceiling —
+    /// without it the fit alone reaches four at ~1040 and Home
+    /// would step on a threshold of its own.
     private func columns(
         for width: CGFloat,
         band: SettingsWidthClass

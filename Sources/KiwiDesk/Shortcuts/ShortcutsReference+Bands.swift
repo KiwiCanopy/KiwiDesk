@@ -3,8 +3,14 @@ import KiwiDeskCore
 
 /// Reference sheet band construction (#820).
 extension ShortcutsReferenceBuilder {
-    /// Builds standard control shortcut bands (`KeybindingCatalog`,
-    /// `ShortcutsFamilyRows`, #678 Phase 3).
+    /// Builds standard control shortcut bands. Membership twin of
+    /// the editor's grouping: row identity is single-sourced from
+    /// `KeybindingCatalog`, only the GROUPING is mirrored, and a
+    /// forgotten command degrades to Custom, never vanishes. A
+    /// family added to the census owes this builder a band too,
+    /// until it consumes the expander (`ShortcutsFamilyRows`,
+    /// #678 Phase 3) — the real fix, but a panel behaviour change
+    /// of its own.
     static func buildControls(
         activeLayer: String,
         spaces: [SpaceID],
@@ -60,6 +66,10 @@ extension ShortcutsReferenceBuilder {
                     )
                 )
             ),
+            // The census's `generalKeys` container minus the
+            // panel's own opener. Without it a bound Open
+            // Settings fell through to Custom and rendered as raw
+            // untranslated Lua (#678 item 18).
             ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.general",

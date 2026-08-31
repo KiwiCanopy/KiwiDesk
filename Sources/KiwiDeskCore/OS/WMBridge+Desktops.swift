@@ -47,8 +47,12 @@ extension WMBridge {
         return field("propertyListDictionary", of: performSync(op))
     }
 
-    /// Sets active space on display identifier
-    /// (`SLSGetActiveSpace`, #26, #1023).
+    /// Points the display at `space` (#26) — and that is ALL it
+    /// does (#1023): the WindowServer never hides the old space's
+    /// windows, while every pointer read (`SLSGetActiveSpace`
+    /// included) reports the switch as landed. A switching caller
+    /// pairs an accepted dispatch with `hideSpaces` of the space
+    /// that display showed.
     public static func setCurrentSpace(
         _ space: SpaceID,
         displayIdentifier: String
@@ -67,8 +71,11 @@ extension WMBridge {
         return performAsync(op)
     }
 
-    /// Hides windows of specified spaces from compositor
-    /// (#1023, device test 2026-08-26).
+    /// Removes `spaces`' windows from the compositor — the half
+    /// of a switch `setCurrentSpace` leaves unperformed (#1023).
+    /// No `showSpaces` twin on purpose: the set itself composites
+    /// the target (device-measured 2026-08-26), so a show would be
+    /// a write nothing needs.
     public static func hideSpaces(_ spaces: [SpaceID]) -> Bool {
         let op = make(
             "HideSpacesOperation",

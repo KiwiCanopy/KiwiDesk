@@ -1,8 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Keybinding layer management card container
-/// (`KeybindingGroups.swift`, `ShortcutsRowOrder.bespokeContainers`).
+/// Keybinding layer management card — a bespoke container
+/// (`ShortcutsRowOrder.bespokeContainers`). Config presence
+/// expands the simple surface: a configured layer is the user's
+/// own setup, so the card is AT REST the moment one exists, in
+/// both modes. Getting this backwards hides a user's own
+/// configuration — an earlier draft shipped exactly that by
+/// reading the tier as `.showMore`.
 struct LayersCard: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -16,8 +21,11 @@ struct LayersCard: View {
             .inertReason(for: .shortcuts(.switchToLayer)) == nil
     }
 
-    /// Whether layers card is offered in given settings mode
-    /// (owner ruling 2026-08-04, `SpaceOverrideOffer`, #678 8c, #816).
+    /// Whether the card is offered: an always-open card, or no
+    /// card at all (owner ruling 2026-08-04) — absent until earned
+    /// by having a layer or Power User (`SpaceOverrideOffer`,
+    /// #678 8c). Static so the STRIP inside asks the same
+    /// predicate rather than keeping a second copy (#816).
     static func isOffered(
         config: GuiConfig,
         mode: SettingsMode

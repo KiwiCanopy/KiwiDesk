@@ -16,7 +16,9 @@ enum CoreLog {
         category: "core"
     )
 
-    /// Writes diagnostic line to unified log (`LogSeamSinkTests`, #624).
+    /// Writes diagnostic line to unified log. The `KiwiDesk: `
+    /// prefix is load-bearing: capture tooling greps for it, so
+    /// changing it breaks log capture (`LogSeamSinkTests`, #624).
     static func write(_ message: String) {
         logger.log(
             "KiwiDesk: \(message, privacy: .public)"

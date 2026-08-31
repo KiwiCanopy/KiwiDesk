@@ -32,8 +32,13 @@ struct AppRuleRow: View {
         }
     }
 
-    /// Sentence row layout driven by localized `SentenceFrame`
-    /// (`SentenceFrameTests`).
+    /// Sentence row driven by the localized `SentenceFrame`. The
+    /// word order is the TRANSLATOR's, never this stack's — ja/ko
+    /// are verb-final, so pieces stitched in Swift can never be
+    /// grammatical. Spacing is 0: the frame's literals own it
+    /// (`" opens in "`), and a stack gap would tear a ja/ko
+    /// particle off the noun it hugs (`SentenceFrameTests` pins
+    /// the literals arrive spaces-intact).
     private var sentence: some View {
         HStack(spacing: 0) {
             appIcon
@@ -52,7 +57,9 @@ struct AppRuleRow: View {
         .font(.callout)
     }
 
-    /// Control mapped via `SentenceFrame.control(at:)`.
+    /// Control mapped via `SentenceFrame.control(at:)`, so an
+    /// unrecognized position draws NOTHING — never the last case a
+    /// `default:` arm happens to name.
     @ViewBuilder
     private func control(at position: Int) -> some View {
         switch SentenceFrame.control(at: position) {

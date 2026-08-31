@@ -27,7 +27,9 @@ struct MonocleSchematic: View {
     /// Visible fan depth; collapsed under park hide style (#881).
     var fanDepth: Int { parked ? 0 : depth }
 
-    /// Whether parked mini pile is rendered at panel scale (#753).
+    /// Whether parked mini pile is rendered at panel scale
+    /// (#753). Internal, not private, so the caption guard asserts
+    /// the arithmetic rather than scanning for the input.
     var drawsParkedPile: Bool {
         parked && scale == .panel && depth > 0
     }
@@ -107,6 +109,9 @@ struct MonocleSchematic: View {
                     cornerRadius: LayoutSchematic.corner
                 )
                 .strokeBorder(
+                    // The front card IS monocle's focus mark, so
+                    // it consults the honesty stroke like every
+                    // active tile (code review 2026-08-10).
                     edge(front: front),
                     lineWidth: front ? 1.5 : 1
                 )

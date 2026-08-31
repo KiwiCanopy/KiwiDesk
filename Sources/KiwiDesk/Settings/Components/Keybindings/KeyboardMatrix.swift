@@ -62,8 +62,12 @@ enum KeyboardMatrix {
         spaceRow,
     ]
 
-    /// ISO matrix rows (swaps `kVK_ANSI_Grave` and `kVK_ISO_Section`,
-    /// owner 2026-08-10).
+    /// ISO rows. The two odd keycodes SWAP position vs ANSI:
+    /// 10 (`kVK_ISO_Section`) sits left of `1` and 50
+    /// (`kVK_ANSI_Grave`) beside the left shift — positions swap,
+    /// not labels, so reusing the ANSI order draws both glyphs in
+    /// the wrong place, which is how this first shipped (owner
+    /// 2026-08-10, German ISO board).
     private static let isoRows: [[Key]] = [
         [Key(10)] + digitRow,
         [Key(48, 1.5)] + qwertyRow + [Key(36, 1.5)],
@@ -74,6 +78,9 @@ enum KeyboardMatrix {
         spaceRow,
     ]
 
+    /// Digits and trailing punctuation. The LEADING key is not
+    /// here: it is 50 on ANSI and 10 on ISO (see `isoRows`), so
+    /// each board prepends its own.
     private static let digitRow: [Key] = [
         Key(18), Key(19), Key(20), Key(21), Key(23),
         Key(22), Key(26), Key(28), Key(25), Key(29), Key(27),
@@ -95,6 +102,9 @@ enum KeyboardMatrix {
         Key(46), Key(43), Key(47), Key(44),
     ]
 
+    /// Modifier row. `nil` caps are the keys no `KeyCombo` can
+    /// name — a combo carries modifiers in `HotkeyModifiers`, so
+    /// ⌃⌥⌘⇧ have no key code to bind.
     private static let spaceRow: [Key] = [
         Key(nil, 1.25, legend: "⌃"),
         Key(nil, 1.25, legend: "⌥"),
@@ -105,7 +115,10 @@ enum KeyboardMatrix {
         Key(123), Key(126), Key(125), Key(124),
     ]
 
-    /// Set of unique keycodes rendered on matrix board (`KeyCombo.keyCodes`).
+    /// Unique keycodes the board draws — derived from the rows,
+    /// never from `KeyCombo.keyCodes`, whose aliases would count
+    /// `escape` twice and whose entries include codes no row
+    /// shows; the panel's "free" tally counts these.
     static func drawnCodes(for type: PhysicalType) -> Set<UInt32> {
         Set(rows(for: type).flatMap { $0 }.compactMap(\.code))
     }

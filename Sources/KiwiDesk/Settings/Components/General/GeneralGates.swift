@@ -13,7 +13,12 @@ struct GeneralGates {
         case cannotRegister(LoginItemUnavailable)
     }
 
-    /// Evaluates inert reason for setting key (#1071).
+    /// Evaluates inert reason for setting key. Order matters:
+    /// cannot-register is the harder stop, and the service already
+    /// launches KiwiDesk at login (`RunAtLoad`), so the login item
+    /// would be a second launcher racing it (#1071). Fail-OPEN on
+    /// an unowned gate: a live row the user can ignore beats a
+    /// dead one they cannot explain.
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {
@@ -31,7 +36,9 @@ struct GeneralGates {
         }
     }
 
-    /// Gated keys resolved directly by `GeneralGates`.
+    /// Gated keys resolved directly by `GeneralGates`. Data, so
+    /// the guard asserts the split against the census — a new
+    /// gated row landing in neither set reds.
     static let resolved: Set<SettingKey> = [
         .general(.startAtLogin)
     ]

@@ -6,7 +6,10 @@ import Foundation
 /// Resolves keypad digits to row codes so `KeyCombo`, `SystemShortcuts`,
 /// and Settings stay unified (`KeypadKeysTests`).
 public enum KeypadKeys {
-    /// Keypad digit tuple: (pad key code, number row key code, string legend)
+    /// Keypad digit tuple: (pad key code, number row key code,
+    /// string legend). Three columns, not two plus a derivation —
+    /// Apple's code numbering skips 90, so deriving the legend
+    /// would let one edited row shift every legend at once
     /// (`KeypadKeysTests`, `kVK_ANSI_Keypad*`).
     public typealias Digit = (
         pad: UInt32, row: UInt32, legend: String

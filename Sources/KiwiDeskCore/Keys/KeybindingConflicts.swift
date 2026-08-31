@@ -62,8 +62,11 @@ public enum KeybindingConflicts {
         return nil
     }
 
-    /// Actionable conflicts excluding shipped-disabled system shortcuts
-    /// (`⌃⌥⌘8`, #1094, #1105).
+    /// Actionable conflicts excluding shipped-disabled system
+    /// shortcuts (`⌃⌥⌘8`, #1094; #1105 replaces the shipped-state
+    /// read with a live one). One accessor rather than a filter
+    /// per surface: there are three aggregate readers and the
+    /// first fix wired only one of them.
     public static func actionable(
         in layers: [KeyLayer]
     ) -> [Conflict] {

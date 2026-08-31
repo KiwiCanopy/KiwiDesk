@@ -26,10 +26,14 @@ protocol AppObserving: AnyObject {
     var onNotification: @MainActor (String, AXUIElement) -> Void {
         get set
     }
-    /// Whether any app-level notification failed registration (#675).
+    /// Whether any app-level notification failed registration —
+    /// a fresh launch can refuse the adds, leaving a deaf observer
+    /// that looks installed (#675).
     var needsRegistrationRepair: Bool { get }
     func observe(window: AXUIElement)
-    /// Re-attempts failed app-level notification registrations (#675).
+    /// Re-attempts failed app-level notification registrations.
+    /// Reconciles call this opportunistically; the census-gated
+    /// adoption-heal sweep is the guaranteed backstop (#675).
     func repairRegistration()
     func invalidate()
 }

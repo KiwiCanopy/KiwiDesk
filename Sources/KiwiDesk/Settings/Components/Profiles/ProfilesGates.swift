@@ -8,7 +8,9 @@ struct ProfilesGates {
     let editingStoredProfile: Bool
     /// Current count of connected physical displays.
     let connectedScreens: Int
-    /// Specific screen count required by preset, or nil for non-preset rows.
+    /// Preset row's OWN screen count; nil on every other row — a
+    /// `presetsApply` resolve with nil is a caller that forgot to
+    /// pass it, which asserts rather than silently (not) greying.
     var presetScreens: Int?
 
     /// Reason why a setting control is currently disabled/inert.
@@ -18,7 +20,11 @@ struct ProfilesGates {
         case screenCountMismatch(screens: Int)
     }
 
-    /// Evaluates inert reason for setting key (`everyGatedRowIsResolved`).
+    /// Evaluates inert reason for setting key. Fail-OPEN on a
+    /// gate this type does not own — loud in debug, live in
+    /// release: a live row the user can ignore beats a dead one
+    /// they cannot explain. `everyGatedRowIsResolved` keeps that
+    /// arm unreachable rather than merely believed to be.
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {

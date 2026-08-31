@@ -1,7 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Facet dropdown menus and mutations within `AppRuleRow` sentence.
+/// Facet dropdown menus and mutations within `AppRuleRow`'s
+/// sentence. The values are VERB PHRASES — each completes the
+/// sentence it sits in. Each menu carries the facet's old label
+/// as its accessibility label, which also keeps
+/// `app_rules.space` / `app_rules.float` authored at a call site
+/// the key scanner can see, or they are pruned from every locale.
 extension AppRuleRow {
     /// Space assignment dropdown menu (`app_rules.space`, #678 Phase 4,
     /// turn 20a rule 3).
@@ -41,6 +46,8 @@ extension AppRuleRow {
             Button(neverLabel) { setNever() }
             Button(allLabel) { setAll() }
             Button(titledLabel) {
+                // Re-selecting the active choice must not wipe
+                // the pattern list (#68 review m3).
                 if floatFacet != .titled {
                     setNever()
                 }
@@ -55,6 +62,9 @@ extension AppRuleRow {
         .accessibilityLabel(L("app_rules.float", "Float"))
         .accessibilityValue(floatLabel)
         .help(
+            // The catalog string carries Markdown for the `?`
+            // popover; a tooltip renders none, so strip the
+            // markers as `HelpButton` does for its own fallback.
             floatHelp.replacingOccurrences(of: "**", with: "")
         )
     }
@@ -82,6 +92,9 @@ extension AppRuleRow {
         L("app_rules.float.titled", "floats when titled…")
     }
 
+    /// The resting VALUE drops the menu item's ellipsis: an
+    /// ellipsis promises further UI — right on a choice opening
+    /// the pattern editor, wrong inside a statement.
     private var restingTitledLabel: String {
         L("app_rules.float.titled.resting", "floats when titled")
     }

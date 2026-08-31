@@ -106,7 +106,9 @@ extension FloatDetection {
         return layers
     }
 
-    /// Checks if layer is in raised panel band below main-menu level (#448).
+    /// Checks if layer is in the raised panel band: above 0 and
+    /// BELOW main-menu level, the ceiling that keeps status-level
+    /// chrome out of the panel verdict (#448).
     static func isPanelBandLayer(_ layer: Int) -> Bool {
         layer > 0
             && layer < Int(CGWindowLevelForKey(.mainMenuWindow))

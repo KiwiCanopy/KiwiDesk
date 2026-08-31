@@ -21,10 +21,12 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     public var fill: Bool
     public var fillColor: String
 
-    /// Default ghost visual styling
-    /// (`DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
-    /// `docs/accepted-limitations.md`, `docs/lua-reference.md`,
-    /// #511, #470, #578).
+    /// Default ghost visual styling; the hue argument is
+    /// re-derivable via
+    /// `DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`
+    /// (`docs/accepted-limitations.md`, #511, #470, #578).
+    /// Defaults mirrored in docs/lua-reference.md (drag colors) —
+    /// change both.
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,

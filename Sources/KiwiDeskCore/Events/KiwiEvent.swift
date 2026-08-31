@@ -8,8 +8,11 @@ public enum KiwiEvent: Sendable {
     case windowCreated(ManagedWindow)
     /// Window left layout (distinguishes user minimize from window close).
     case windowDestroyed(WindowID, wasMinimized: Bool)
-    /// Window hidden because its owner application was hidden
-    /// (`WindowGoneReason.hidden`, #913).
+    /// Window hidden because its owner app hid — its own case,
+    /// not a `windowDestroyed` flag: the public reason must not
+    /// say `closed` (`WindowGoneReason.hidden`), and the
+    /// close-return raise stands down, since macOS picks the next
+    /// frontmost itself on a hide (#913).
     case windowHidden(WindowID)
     case windowMoved(WindowID, CGRect)
     case windowResized(WindowID, CGRect)

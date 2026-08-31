@@ -50,8 +50,11 @@ extension AppBarOverlay {
         )
     }
 
-    /// Measures automatic slot width across items
-    /// (QA 2026-07-19, owner 2026-07-20).
+    /// Measures automatic slot width across items. Measure
+    /// EXACTLY as the item view draws: `.center` alignment alone
+    /// widens an NSTextField cell by ~4 pt, so a raw string
+    /// measurement truncates exactly the item that defined the
+    /// width (QA 2026-07-19, owner 2026-07-20).
     @MainActor
     static func autoSlotWidth(
         items: [Item],
@@ -113,7 +116,10 @@ extension AppBarOverlay {
         )
     }
 
-    /// Minimum usable slot size based on content mode.
+    /// Minimum usable slot size based on content mode. Icon
+    /// slots floor at `thickness` so measurement's icon side
+    /// equals layout's — the slot-fits-widest-title invariant
+    /// leans on it.
     nonisolated static func minimumSlot(
         thickness: CGFloat,
         content: AppBarStyle.Content

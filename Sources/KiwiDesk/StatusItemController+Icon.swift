@@ -4,8 +4,11 @@ import KiwiDeskCore
 /// Menu bar icon rendering methods for `StatusItemController`
 /// (`StatusItemSeamGuardTests`).
 extension StatusItemController {
-    /// Renders standard brand icon on status button
-    /// (`BrandAssets.menuBarIcon`).
+    /// Renders the brand icon, named for VoiceOver by the caller
+    /// — starting and ready states draw the SAME glyph, so the
+    /// name is what separates them. The label goes on the BUTTON,
+    /// not the image: `BrandAssets.menuBarIcon` is a shared cached
+    /// `NSImage`, and re-describing it renames it everywhere.
     func applyBrandIcon(
         to button: NSStatusBarButton,
         a11y: String
@@ -22,7 +25,10 @@ extension StatusItemController {
         }
     }
 
-    /// Sets status button icon to SF Symbol with text fallback.
+    /// Sets status button icon to SF Symbol, or a visible text
+    /// fallback: a nil image with an empty title leaves an
+    /// invisible-but-clickable slot that reads as a broken app (an
+    /// invalid symbol name once did exactly that).
     func setStatusSymbol(
         _ name: String,
         on button: NSStatusBarButton,
@@ -40,8 +46,14 @@ extension StatusItemController {
         button.setAccessibilityLabel(a11y)
     }
 
-    /// Renders custom layer or mode icon on status button
-    /// (localization audit 2026-08-12).
+    /// Renders custom layer or mode icon. Naming the button is
+    /// load-bearing: an accessibility label on an `NSView`
+    /// PERSISTS until replaced, so the one path that set none
+    /// announced "starting up" on a healthy app indefinitely
+    /// (localization audit 2026-08-12) — once one path names the
+    /// button, every path owes a name. The name is the app's, not
+    /// the icon string's: announcing `star.fill` would be worse
+    /// than nothing.
     func applyModeIcon(
         _ icon: String,
         to button: NSStatusBarButton

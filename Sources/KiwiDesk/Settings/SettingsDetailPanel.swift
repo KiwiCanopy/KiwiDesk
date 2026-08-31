@@ -1,8 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Destinations supporting the side live-preview panel (#678, #793, #795,
-/// owner rulings 2026-08-09, 2026-08-16).
+/// Destinations supporting the side live-preview panel (#678).
+/// DATA, not a scattered condition: the two-column mount, the
+/// pill's centring offset and the tests all consult this one set.
+/// An area with nothing to show hides the panel and takes the
+/// full width — absence is a stated verdict. General is
+/// deliberately NOT here (#795, owner 2026-08-16): its diff list
+/// would be a structural zero. Advanced Colours joined in #793;
+/// the extension motion is a case here plus a branch below.
 enum SettingsDetailPanelOffer {
     static let offering: Set<SettingsDestination> = [
         .gapsAndBorders, .bars, .colors, .layoutDefaults,
@@ -34,6 +40,10 @@ struct SettingsDetailPanel: View {
                 .padding(.bottom, 18)
             }
             .scrollIndicators(.hidden)
+            // VoiceOver lands on the scroll view as a bare
+            // "scroll area" before interacting into it (owner,
+            // #812 session 2); the header sentence names what the
+            // reader is about to enter.
             .accessibilityLabel(headerSentence)
         }
         .padding(.horizontal, 22)
@@ -88,11 +98,19 @@ struct SettingsDetailPanel: View {
                 mode: model.nav.layoutModeTab ?? .bsp
             )
         default:
+            // Unreachable while the mount consults
+            // `SettingsDetailPanelOffer` — the guard suite pins
+            // that every offering destination has a branch here.
             EmptyView()
         }
     }
 
     private var diffList: some View {
+        // One rows array feeds the heading's N, the list and the
+        // elsewhere remainder — a count a user can cross-check
+        // against a visible list must BE that list's count (owner
+        // 2026-08-10: `draftChangeCount` said "1" over a
+        // three-row family).
         let all = SettingsDiffRowSource.rows(for: model)
         let rows = SettingsDiffRowSource.areaRows(
             all,

@@ -35,6 +35,11 @@ extension HeaderSearch {
                         lineWidth: 1
                     )
                 )
+                // Without this the shadow halos EVERY
+                // primitive — the hairline ring casts its own
+                // shadow INWARD, reading as a line ghosting
+                // through the panel (#758's lesson, hit again;
+                // owner report 2026-08-10).
                 .compositingGroup()
                 .shadow(
                     color: .black.opacity(0.16),
@@ -59,6 +64,12 @@ extension HeaderSearch {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.vertical, 8)
         } else {
+            // Lazy on purpose: rows enrich on appear, so a
+            // broad query enriches ~8 visible rows, never the set.
+            // An overlay proposes the FIELD's size and a
+            // ScrollView adopts what it is proposed — without an
+            // explicit height the list collapses to one clipped
+            // row (owner eyeball, 2026-08-10).
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(results.settings) { result in
@@ -85,7 +96,12 @@ extension HeaderSearch {
         return min(rows * 40 + header, 320)
     }
 
-    /// Caption for user-named entities group (spec 11a).
+    /// Caption for user-named entities group (spec 11a). Named by
+    /// OWNERSHIP, not location: the literal translation collided
+    /// in two catalogs (fr "Emplacements" is the tiling slot, zh
+    /// 位置 is the "Position" label), and "Item" is a ruled noun
+    /// for a bar entry (config-vocabulary.md). The wire keeps
+    /// `place`.
     var placesHeader: some View {
         Text(L("search.places", "Made by you"))
             .font(.caption2.weight(.semibold))

@@ -25,6 +25,11 @@ struct LayoutDefaultsSection: View {
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
+        // Land on the most-used layout, then leave the selection
+        // alone — latched by writing the model once, or `selected`
+        // would keep re-deriving `initialMode` and adding a space
+        // elsewhere could move this page under the user. Cleared
+        // by `SettingsNavigation.resetSurfaces()` per visit.
         .onAppear {
             if model.nav.layoutModeTab == nil {
                 model.nav.layoutModeTab = initialMode
@@ -58,6 +63,9 @@ struct LayoutDefaultsSection: View {
     private func generalRow(_ key: SettingKey) -> some View {
         switch key {
         case .behaviour(.minWindowSize):
+            // Label hidden (#275): the section header already
+            // names this sole control (Dock "Size" pattern);
+            // `label` still carries the accessibility name.
             StepperRow(
                 label: L(
                     "layout_defaults.min_window_size",

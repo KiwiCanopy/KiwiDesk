@@ -52,7 +52,11 @@ public struct KeyCombo: Hashable, Sendable {
         return left == right
     }
 
-    /// Formats key code and modifiers into readable combo string.
+    /// Formats key code and modifiers into a readable combo
+    /// string (`"control+option+r"`; `parse` round-trips it).
+    /// Carbon hotkeys cannot tell left from right modifiers (that
+    /// needs an event tap + Input Monitoring, which KiwiDesk
+    /// avoids), so the two sides are deliberately unified.
     public static func comboString(
         keyCode: UInt32,
         command: Bool,
@@ -100,7 +104,10 @@ public struct KeyCombo: Hashable, Sendable {
         return keyCodes.first { $0.value == code }?.key
     }
 
-    /// Mapping of key names to virtual key codes (`KeyboardMatrix`, `Carbon`).
+    /// Name→code map — never read it as a key list: aliases
+    /// collapse onto one code, so enumerating physical keys means
+    /// de-duplicating by VALUE. Carries no order, row or width;
+    /// geometry is the caller's (`KeyboardMatrix`).
     public static let keyCodes: [String: UInt32] =
         mainBlockKeyCodes.merging(KeypadKeys.names) { main, _ in
             main
@@ -120,6 +127,10 @@ public struct KeyCombo: Hashable, Sendable {
         "semicolon": 41, "comma": 43, "period": 47,
         "slash": 44, "backslash": 42, "quote": 39,
         "apostrophe": 39, "grave": 50, "backtick": 50,
+        // ISO boards only. Bindable like any other key — the
+        // preview draws it, and a key drawn as free that `parse`
+        // cannot name is a key the user is invited to bind and
+        // then cannot.
         "section": 10, "iso_section": 10,
         "minus": 27, "equal": 24, "leftbracket": 33,
         "rightbracket": 30,

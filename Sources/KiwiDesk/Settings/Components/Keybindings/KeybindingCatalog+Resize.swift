@@ -12,7 +12,11 @@ extension KeybindingCatalog {
             ]
     }
 
-    /// Step-independent floating and sticky commands (review 2026-08-10).
+    /// Step-independent floating and sticky commands — THE one
+    /// copy (review 2026-08-10): the import classifier's label map
+    /// and the banner's roster both consume this list; as two
+    /// hand-mirrors, a drifted command classified with an English
+    /// label the banner interpolated untranslated.
     static let stepFreeCommands: [NavCommand] = [
         toggleFloating,
         makeFloating,
@@ -25,7 +29,9 @@ extension KeybindingCatalog {
         openSettings,
     ]
 
-    /// Resize row family identifiers (#678 Phase 3).
+    /// Resize row family identifiers (#678 Phase 3). Named, not
+    /// positional: indexing into `resizeAndFloat` would silently
+    /// re-point a family at its neighbour on any row insertion.
     enum ResizeRow: CaseIterable {
         case growWidth
         case shrinkWidth
@@ -174,7 +180,11 @@ extension KeybindingCatalog {
         }
     )
 
-    /// Parses single-axis resize magnitude and label from Lua (#56, #58).
+    /// Parses single-axis resize magnitude and label from Lua
+    /// (#56, #58). A SHAPE match, not byte-for-byte: a config
+    /// whose step differs from the current one still lands in
+    /// Size & float, and its magnitude reads back into
+    /// `resize.step`.
     static func resizeShape(
         from lua: String
     ) -> (label: String, step: Int)? {

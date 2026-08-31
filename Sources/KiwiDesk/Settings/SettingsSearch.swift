@@ -33,6 +33,10 @@ enum SettingsSearchResult: Identifiable, Equatable {
 
 /// User-named settings search target (spec 11a, `PaletteStore`).
 struct SettingsSearchPlace: Identifiable, Equatable {
+    /// No `.palette` case, deliberately: `PaletteStore` is
+    /// stateless and file-backed, so palette names have no
+    /// in-memory production source yet — a kind nothing can feed
+    /// is a seam without a consumer. It joins WITH the cache seam.
     enum Kind: String, CaseIterable {
         case space, profile, appRule
     }
@@ -52,6 +56,9 @@ struct SettingsSearchContext {
     var profiles: [String] = []
     var appRules: [String] = []
 
+    /// Exhaustive by construction: a new `Kind` fails to compile
+    /// here (and in `Kind.destination`) before it can ship as a
+    /// kind no context feeds (architect review 2026-08-10).
     func names(of kind: SettingsSearchPlace.Kind) -> [String] {
         switch kind {
         case .space: return spaces
@@ -158,6 +165,11 @@ enum SettingsSearch {
         let kinds = Kind.allCases.map { kind in
             (kind, context.names(of: kind), kind.destination)
         }
+        // No reachability filter, on purpose: every place kind
+        // lands on a destination #18 never hides, so a filter
+        // would be dead code no test can red (guard-prover,
+        // 2026-08-10). A NEW kind whose destination can be
+        // withheld owes the filter back — with a test that reds.
         let matched = kinds.flatMap { kind, names, destination in
             names.filter { $0.searchMatches(query) }
                 .map {

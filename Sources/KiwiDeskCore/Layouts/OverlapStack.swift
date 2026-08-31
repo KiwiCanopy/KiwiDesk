@@ -33,8 +33,12 @@ public enum OverlapStack {
         return result
     }
 
-    /// Computes partial-overflow frames for tiled and cascaded slots
-    /// (`stickyExempt`, #128, #414 v2).
+    /// Computes partial-overflow frames for tiled and cascaded
+    /// slots (`stickyExempt`, #128, #414 v2). The buried pile is
+    /// ALWAYS offset downward — a horizontal offset would reveal
+    /// side slivers, not title bars — and this is the single
+    /// authority behind the stack column overflow and both track
+    /// axes, so the geometry cannot drift between them.
     public static func overflowFrames(
         count: Int,
         in region: CGRect,
@@ -90,8 +94,9 @@ public enum OverlapStack {
         return nil
     }
 
-    /// Reorders windows to ensure sticky windows retain fully-tiled slots
-    /// (#414 v2).
+    /// Reorders windows so sticky windows keep fully-tiled slots
+    /// (#414 v2). Callers zip the result with positional rects, so
+    /// this must return exactly the input ids, only reordered.
     public static func stickyExempt(
         _ ids: [WindowID],
         tiled: Int,

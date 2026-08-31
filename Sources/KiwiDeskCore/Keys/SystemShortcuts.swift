@@ -1,6 +1,11 @@
 import Foundation
 
-/// Reserved macOS system shortcut identifiers (#96, `KeybindingCatalog`).
+/// Reserved macOS shortcuts as cases, never display strings
+/// (#96): `L()` is `@MainActor` while this file is actor-free, so
+/// Core names the shortcut and the GUI localizes it. The GUI's
+/// `localizedName` switch is exhaustive — a new case cannot ship
+/// without a string; the compiler is the parity guard (§5,
+/// `KeybindingCatalog`).
 public enum SystemShortcut: Sendable, CaseIterable {
     case spotlight
     case appSwitcher
@@ -16,15 +21,25 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case screenshot
     case screenshotSelection
     case screenshotTools
-    // ⌥⌘ zoom & system shortcuts (`com.apple.symbolichotkeys`, #1075).
+    // ⌥⌘ family (#1075). Zoom's three ship OFF behind an
+    // Accessibility setting, but a gated shortcut still wins when
+    // on, and `RegisterEventHotKey` fails silently
+    // (`com.apple.symbolichotkeys`, macOS 26.6).
     case zoomToggle
     case zoomIn
     case zoomOut
     case dockHiding
     case finderSearch
-    // ⌃⌥ input source shortcut (`SizeLayerSeedTests`, #270, #1094).
+    // The one ⌃⌥ chord macOS reserves (#1094): "quiet" (#270)
+    // is not "empty". `SizeLayerSeedTests` checks SEEDED rows
+    // only, and only those its fixture generates — widen the
+    // fixture rather than trusting its green; a chord nothing
+    // seeds is invisible to every guard.
     case inputSourceNext
-    // ⌃⌥⌘ accessibility contrast shortcuts (#1094 review).
+    // ⌃⌥⌘ trio (#1094 review): all three ship DISABLED behind
+    // Accessibility — the same shape that hid the Zoom trio from
+    // a reputation-based list. `⌃⌥⌘8` is a SEEDED row, so this
+    // makes an existing collision visible.
     case invertColors
     case increaseContrast
     case decreaseContrast
@@ -73,8 +88,12 @@ public enum SystemShortcuts {
 }
 
 extension SystemShortcut {
-    /// Whether shortcut is shipped disabled by default
-    /// (`com.apple.symbolichotkeys`, #1105).
+    /// Whether macOS ships this chord's shortcut switched OFF
+    /// (`com.apple.symbolichotkeys`, macOS 26.6). A `switch`, not
+    /// a `Set`: a new case must not ship without an answer here —
+    /// a hand-listed set would read the next dormant chord as
+    /// ENABLED by omission. Reads the SHIPPED default, never the
+    /// live setting; #1105 replaces it with a live read.
     public var shipsDisabled: Bool {
         switch self {
         case .zoomToggle, .zoomIn, .zoomOut,

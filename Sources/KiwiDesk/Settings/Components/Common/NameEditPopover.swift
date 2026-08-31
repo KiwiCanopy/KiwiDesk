@@ -1,8 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Reusable popover for naming and renaming operations
-/// (#375, #843, code review 2026-08-12).
+/// Reusable popover for naming and renaming operations (#375).
+/// It OWNS the name it edits: seeding parent `@State` in the tick
+/// that presents left the confirm disabled against a stale
+/// capture (#843), and the item's fresh id per presentation is
+/// what keeps this `@State` fresh — a reused name turns Save into
+/// a silent overwrite (code review 2026-08-12). The validity rule
+/// stays the CALLER's; this view never re-derives it.
 struct NameEditPopover: View {
     let seed: String
     /// Placeholder and accessibility label (#812).
@@ -48,6 +53,11 @@ struct NameEditPopover: View {
             }
             HStack {
                 Spacer()
+                // SYSTEM prominent style on purpose: its
+                // disabled state is flat grey, and this button's
+                // disabled state is what #843 was about —
+                // `kiwiProminentButton()` draws disabled and
+                // pressed alike.
                 Button(confirmLabel(name), action: confirm)
                     .buttonStyle(.borderedProminent)
                     .disabled(!isValid(name))

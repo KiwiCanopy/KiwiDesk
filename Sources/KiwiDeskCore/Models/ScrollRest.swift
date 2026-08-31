@@ -10,7 +10,12 @@ public struct ScrollRest: Sendable, Equatable {
         public var window: WindowID
         /// Window position along scroll axis in the row.
         public var position: CGFloat
-        /// Border slot rested against when offset was measured (#966).
+        /// Border the slot rested against when the offset was
+        /// measured (#966). A VERDICT, not the geometry behind
+        /// it: a bar toggle or screen change moves the viewport
+        /// between passes, so a recorded span would be compared
+        /// against a viewport the slot never sat in — and the
+        /// both-borders precedence stays at ONE altitude.
         public var restingOn: Border?
 
         public init(
@@ -41,7 +46,11 @@ public struct ScrollRest: Sendable, Equatable {
     }
 
     /// Constructs rest state with measured focus slot
-    /// (`ScrollSlotDomain`, #966).
+    /// (`ScrollSlotDomain`, #966). `restingOn` takes no default on
+    /// purpose: it is the one field nothing can cross-check, and a
+    /// verdict defaulting to something plausible is how a producer
+    /// records a constant unnoticed. A hand-seeded rest takes
+    /// `ScrollRest(offset:)` instead.
     public init(
         offset: CGFloat,
         focus window: WindowID,

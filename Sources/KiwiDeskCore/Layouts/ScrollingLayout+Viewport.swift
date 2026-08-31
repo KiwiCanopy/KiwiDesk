@@ -55,8 +55,10 @@ extension ScrollingLayout {
         )
     }
 
-    /// Evaluates if slot rests against leading or trailing viewport border
-    /// (#966).
+    /// Evaluates which viewport border a slot rests against
+    /// (#966). Leading is tested first as a RULING: a slot flush
+    /// at both borders records `.leading` — the reader's eye
+    /// anchors at the leading edge.
     static func border(
         lead: CGFloat,
         span: CGFloat,
@@ -69,7 +71,10 @@ extension ScrollingLayout {
         return nil
     }
 
-    /// Floating-point tolerance for border flush detection (0.5 pt).
+    /// Border-flush tolerance. Every compared value is the
+    /// layout's own ideal geometry, so this absorbs accumulated
+    /// rounding and nothing wider — a slot a VISIBLE distance from
+    /// the edge must not read as flush.
     static let edgeTolerance: CGFloat = 0.5
 
     /// Checks if total row length exceeds viewport along the scrolling axis
