@@ -190,6 +190,11 @@ menus, checkboxes, and buttons are skipped. Turn on **System
 Settings ▸ Keyboard ▸ Keyboard navigation** and Tab reaches every
 control.
 
+Opening an area puts focus on the page itself, so the next Tab
+reaches that page's first control instead of walking the header.
+The **← Home** chip is still there — Shift-Tab reaches it, and
+**⌘[** or Escape goes back without any tabbing at all.
+
 Leave it off and the keyboard paths here still *run*, they just
 have nowhere to land: deleting a space moves focus to the next
 row's layout picker, and with keyboard navigation off a pop-up

@@ -69,49 +69,56 @@ extension SettingsView {
             }
             // Single reader across all sections (#277).
             ScrollViewReader { proxy in
-                detail(model.destination)
-                    // Every section's root is a scroll view,
-                    // which VoiceOver lands on as a bare "scroll
-                    // area" (owner, #812 session 2) — the area's
-                    // title names it.
-                    .accessibilityLabel(model.destination?.title ?? "")
-                    .frame(
-                        maxWidth: SettingsTheme.contentMaxWidth
-                    )
-                    .frame(
-                        maxWidth: .infinity,
-                        alignment: .center
-                    )
-                    // Animated surface reflow on mode switch (#760).
-                    .animation(
-                        reduceMotion
-                            ? nil
-                            : .easeOut(
-                                duration: SettingsReveal.scroll
-                            ),
-                        value: model.settingsMode
-                    )
-                    .contentMargins(
-                        .top,
-                        SettingsMetrics.paneInset,
-                        for: .scrollContent
-                    )
-                    .environment(\.settingsFlash, model.nav.flash)
-                    .environment(
-                        \.settingsRevealTarget,
-                        model.nav.revealTarget
-                    )
-                    .onChange(of: model.nav.pendingScroll) {
-                        _,
-                        anchor in
-                        reveal(anchor, proxy: proxy)
-                    }
-                    .onAppear {
-                        reveal(
-                            model.nav.pendingScroll,
-                            proxy: proxy
+                // Hoisted so the label cannot resolve empty: this
+                // is now the arrival focus stop (#996), and a
+                // nameless one is worse than the presses it saves.
+                if let destination = model.destination {
+                    detail(destination)
+                        .focusable()
+                        .focused($contentFocused)
+                        // Every section's root is a scroll view,
+                        // which VoiceOver lands on as a bare
+                        // "scroll area" (owner, #812 session 2) —
+                        // the area's title names it.
+                        .accessibilityLabel(destination.title)
+                        .frame(
+                            maxWidth: SettingsTheme.contentMaxWidth
                         )
-                    }
+                        .frame(
+                            maxWidth: .infinity,
+                            alignment: .center
+                        )
+                        // Animated surface reflow on mode switch (#760).
+                        .animation(
+                            reduceMotion
+                                ? nil
+                                : .easeOut(
+                                    duration: SettingsReveal.scroll
+                                ),
+                            value: model.settingsMode
+                        )
+                        .contentMargins(
+                            .top,
+                            SettingsMetrics.paneInset,
+                            for: .scrollContent
+                        )
+                        .environment(\.settingsFlash, model.nav.flash)
+                        .environment(
+                            \.settingsRevealTarget,
+                            model.nav.revealTarget
+                        )
+                        .onChange(of: model.nav.pendingScroll) {
+                            _,
+                            anchor in
+                            reveal(anchor, proxy: proxy)
+                        }
+                        .onAppear {
+                            reveal(
+                                model.nav.pendingScroll,
+                                proxy: proxy
+                            )
+                        }
+                }
             }
         }
     }

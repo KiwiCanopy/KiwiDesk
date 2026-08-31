@@ -12,7 +12,7 @@ import Testing
 /// convention, so the small wiring/squash pair below is a
 /// deliberate copy of that file's.
 ///
-/// The header needle spans the WHOLE `onChange` closure,
+/// The raise needle spans the WHOLE `onChange` closure,
 /// including its key: #998 shipped as a wiring keyed on
 /// `destination != nil`, which fires on Home→area and never on
 /// area→area (a cross-reference, a search pick into another
@@ -20,20 +20,33 @@ import Testing
 /// destination on one navigation path. A needle on the
 /// assignment alone would have stayed green through exactly
 /// that.
+///
+/// The push pair moved out of `SettingsHeaderBar` in #996: the
+/// destination is the content pane, so the raise has to live on
+/// `structuredShell` rather than on the pane it focuses —
+/// `onChange` does not fire on a view's first appearance, and
+/// the pane is CREATED by the Home→area transition, so the same
+/// closure hung there would state nothing on exactly the
+/// navigation #998 was about. The needle names the shell file
+/// for that reason, and moving it back is the regression.
 extension KeyboardActionParityTests {
     @Test("the shell states its two focus destinations")
     func shellStatesItsFocusDestinations() throws {
         let wirings: [ShellWiring] = [
             ShellWiring(
-                "SettingsHeaderBar.swift",
-                ".focused($backChipFocused)",
-                "the back chip is the push destination — an "
-                    + "unattached @FocusState moves focus nowhere"
+                "SettingsView+Detail.swift",
+                ".focusable() .focused($contentFocused)",
+                "the content pane is the push destination (#996) "
+                    + "— and BOTH halves: an unattached "
+                    + "@FocusState moves focus nowhere, and a "
+                    + "container that never took `.focusable()` "
+                    + "cannot be assigned to in the first place, "
+                    + "which is the half a Button gave free"
             ),
             ShellWiring(
-                "SettingsHeaderBar.swift",
-                ".onChange(of: destination) { _, now in "
-                    + "if now != nil { backChipFocused = true } }",
+                "SettingsView.swift",
+                ".onChange(of: model.destination) { _, now in "
+                    + "if now != nil { contentFocused = true } }",
                 "and the raise is keyed on the VALUE: keyed on "
                     + "`destination != nil` it fires on Home→area "
                     + "only, so an area→area navigation destroys "

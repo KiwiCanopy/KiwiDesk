@@ -875,14 +875,24 @@ claim; the obligations a change here takes on:
   behaviour the rule exists to prevent, and invisible to a
   source-needle guard, which is why the wirings in
   `KeyboardActionParityTests` are keyed on their use sites.
-  The shell states two of these itself (push focuses the back
-  chip, return restores `nav.homeReturnFocus`); a sub-view the
-  shell cannot see states its own, and a deletion reads its
+  The shell states two of these itself (push focuses the
+  CONTENT PANE, return restores `nav.homeReturnFocus`); a
+  sub-view the shell cannot see states its own, and a deletion
+  reads its
   neighbour through the one `DeletionFocus.neighbour` rule
   (#816, PR #842) — BEFORE the mutation, or it names whichever
   row slid into the gap. Naming a destination is a different
   claim from focus arriving there, and on a machine without
   keyboard navigation the two outcomes look identical.
+- **A shell statement hangs on the view that OUTLIVES the
+  transition, never on the one the transition builds** (#996).
+  `onChange` does not fire on a view's first appearance, so a
+  raise hung on the pane it focuses states nothing on the one
+  navigation that creates that pane — #998's defect at the
+  opposite polarity. That is why the arrival raise sits on
+  `structuredShell` rather than beside the `.focused` it drives,
+  which reads like the tidier placement and is the broken one.
+  `KeyboardActionParityTests+Shell` pins the raise to that chain.
 
 ## Colour (#678 turn 16b)
 

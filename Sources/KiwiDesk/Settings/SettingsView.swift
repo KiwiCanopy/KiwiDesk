@@ -10,6 +10,10 @@ struct SettingsView: View {
     /// Preview card state per mount; nil follows width class default
     /// (`DetailPanelTests`).
     @State var previewShown: Bool?
+    /// Arrival destination: the pane the raise below focuses, and
+    /// the one element that is also the area's named target
+    /// (#996). Non-private — `contentColumn` is in an extension.
+    @FocusState var contentFocused: Bool
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
 
@@ -112,6 +116,17 @@ struct SettingsView: View {
         .ignoresSafeArea(.container, edges: .top)
         .onExitCommand {
             if selection != nil { selection = nil }
+        }
+        // Arrival focus, stated by the SHELL: the pane is created
+        // by this very transition, so the same `onChange` hung on
+        // the pane would never fire on Home→area (#996). Keyed on
+        // the VALUE, never `destination != nil`, or an area→area
+        // navigation states nothing (#998); `now != nil` leaves
+        // the pop to `HomeScreen`'s own restore. A reveal into the
+        // destination already showing moves no focus, deliberately
+        // — the user is there and the keyboard stays put.
+        .onChange(of: model.destination) { _, now in
+            if now != nil { contentFocused = true }
         }
         .environment(\.settingsNavigate) { destination in
             // Third #18 enforcement point beside the grid's offer
