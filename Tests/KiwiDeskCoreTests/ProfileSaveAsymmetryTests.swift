@@ -90,7 +90,7 @@ struct ProfileSaveAsymmetryTests {
         attachDisplay(core)
         try saveWork(core, layers: layersOverride)
 
-        try core.persistProfile(named: "Work")
+        try core.persistProfile(named: "Work", modes: nil)
 
         let saved = try core.profiles.read(name: "Work")
         #expect(saved.layers == layersOverride)
@@ -105,7 +105,7 @@ struct ProfileSaveAsymmetryTests {
         )
         try saveWork(core, appRules: rules)
 
-        try core.persistProfile(named: "Work")
+        try core.persistProfile(named: "Work", modes: nil)
 
         let saved = try core.profiles.read(name: "Work")
         #expect(saved.appRules == rules)
@@ -127,7 +127,7 @@ struct ProfileSaveAsymmetryTests {
             ignoreRules: ignores
         )
 
-        try core.persistProfile(named: "Work")
+        try core.persistProfile(named: "Work", modes: nil)
 
         let saved = try core.profiles.read(name: "Work")
         #expect(saved.floatRules == floats)
@@ -137,7 +137,7 @@ struct ProfileSaveAsymmetryTests {
     @Test("buildProfile never fabricates the override diffs")
     func buildProfileHasNoDiffs() {
         let core = makeCore()
-        let built = core.buildProfile(name: "Work")
+        let built = core.buildProfile(name: "Work", modes: nil)
         #expect(built.layers == nil)
         #expect(built.appRules == nil)
         #expect(built.floatRules == nil)

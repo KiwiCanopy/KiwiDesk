@@ -124,16 +124,11 @@ extension StatusItemController {
     }
 
     /// Keep row, persisting every screen's layout into the
-    /// active profile. Deliberately not per screen:
-    /// `persistProfile` is a whole-profile operation, so a
-    /// per-screen keep would be a second feature, not a second
-    /// row — which is also why it arms on ANY screen's drift
-    /// rather than the focused one's (#1179).
-    ///
-    /// "Keep", not "Save": since #1179 the Settings pill is the
-    /// only Save, and this row is the one lightweight exit from
-    /// a temporary layout — macOS's own Keep pattern for a
-    /// change that is undone unless you say otherwise.
+    /// active profile. Not per screen — `persistProfile` is a
+    /// whole-profile operation — which is also why it arms on
+    /// ANY screen's drift rather than the focused one's
+    /// (#1179; `docs/design-decisions.md` ▸ *Quick-menu layout
+    /// switch is session-only* argues the verb).
     private func addSaveRow(
         to menu: NSMenu,
         info: LayoutMenuInfo

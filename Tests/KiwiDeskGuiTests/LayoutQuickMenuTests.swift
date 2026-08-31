@@ -26,7 +26,7 @@ struct LayoutQuickMenuTests {
         return (makeTestModel(core: core), core)
     }
 
-    private func makeController(
+    func makeController(
         _ core: KiwiCore
     ) -> StatusItemController {
         let controller = StatusItemController(
@@ -69,7 +69,7 @@ struct LayoutQuickMenuTests {
         )
     }
 
-    private func saveRow(in submenu: NSMenu) -> NSMenuItem? {
+    func saveRow(in submenu: NSMenu) -> NSMenuItem? {
         submenu.items.first {
             $0.action
                 == #selector(

@@ -110,7 +110,9 @@ extension SettingsModel {
         do {
             try core.persistProfile(
                 named: name,
-                modesFrom: config
+                modes: config.modes(
+                    for: core.state.workspaces.allSpaces.map(\.id)
+                )
             )
         } catch {
             profileWarning = L(

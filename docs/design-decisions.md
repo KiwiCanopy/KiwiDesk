@@ -5035,16 +5035,14 @@ whole design (#1179).**
   to keep. It never captures live either, which would adopt a
   temporary layout nobody asked to keep.
 
-Both halves used to be wrong at once. Save re-applied the draft
-over live and then captured live back, so pressing Save with a
-temporary layout standing **restored the previous layout and
-saved that** — Save behaving exactly like Revert, destroying the
-change it advertised. And the draft seeded its per-space modes
-from LIVE, so an unrelated Save could silently write a temporary
-layout into the file. The draft now seeds its modes from the
-SAVED profile; live still supplies which spaces exist, their
-order, their pins and the Main role, because those are live's to
-state.
+Each half fails in a way the other hides. A Save that re-applies
+the draft over live and then captures live back **restores the
+previous layout and saves that** — Save behaving exactly like
+Revert, destroying the change it advertised. A draft that seeds
+its per-space modes from LIVE writes a temporary layout into the
+file on any unrelated Save. So the draft seeds its modes from the
+SAVED profile, and live supplies only what is live's to state:
+which spaces exist, their order, their pins and the Main role.
 
 "Edited" is one predicate — `SettingsDraftDiff`'s attribution,
 the same seam the save pill's count and the unsaved-changes

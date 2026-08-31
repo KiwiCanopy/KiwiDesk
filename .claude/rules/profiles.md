@@ -299,11 +299,22 @@ to are not the same verb. Keep them apart, in both directions:
   `persistProfile(named:)` with no `modesFrom` is that meaning,
   and it is the only thing that turns a temporary layout
   permanent.
-- **A Settings Save = a draft commit.** "Save what I edited." It
-  applies and persists the modes of the spaces the draft
-  actually edited and nothing else —
+- **A Settings Save against the LIVE target = a draft commit.**
+  "Save what I edited." It applies and persists the modes of the
+  spaces the draft actually edited and nothing else —
   `applyProfileScopedState(from:applyingModesFor:)` scoped, and
-  `persistProfile(named:modesFrom:)` writing the draft's modes.
+  `persistProfile(named:modes:)` writing the draft's modes.
+
+**The stored-profile Save is the third verb, and it is NOT a
+draft commit.** Editing a stored profile seeds the draft from
+THAT profile's JSON, so its Save is "update this profile", and
+`saveEditedProfile` re-applies it wholesale through
+`reapplyIfInEffect` when it is the one in effect — every mode
+re-asserted, a standing temporary layout included. Whether that
+is right is a question about what editing the running profile
+means, not about #1179's defect, and it is open on that thread:
+scope this claim to the live target rather than reading it as
+covering all three.
 
 **Neither half may be dropped, because each is the other's
 mirror.** A Save that re-asserts the draft's modes wholesale
@@ -322,9 +333,9 @@ readable, and live is then the only truth there is, so an
 unmanaged setup is not silently reset to `.bsp`.
 
 **"Edited" is one predicate, with three readers.**
-`SettingsDraftDiff.editedSpaceModes` answers it for the diff's
-own attribution, for the Save's partial apply, and for the
-unsaved-changes popover's rows. The save pill is the draft's one
+`SettingsDraftDiff.editedSpaceModes` answers it for the Save's
+partial apply, for the unsaved-changes popover's rows, and for
+the keep's baseline move (`SettingsModel+KeptLayout`). The save pill is the draft's one
 narrator, so what a Save writes must never exceed what the pill
 counted — and a comparison re-derived beside any reader agrees
 today and disagrees on the release that changes the sparse

@@ -175,8 +175,9 @@ struct SettingsFooter: View {
     private var saveAsNewMessage: String {
         L(
             "footer.save_as_new.message",
-            "The new profile carries the current tiling "
-                + "and the connected monitor set."
+            "The new profile carries your edits and the "
+                + "connected monitor set. A layout you switched "
+                + "from the menu stays temporary."
         )
     }
 

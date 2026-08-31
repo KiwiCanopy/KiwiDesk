@@ -322,7 +322,6 @@
   "footer.save": "저장",
   "footer.save.globals_only": "레이아웃과 화면은 일시 정지 상태로 유지되며, ‘%1$@’은(는) 그 밖의 모든 항목에 적용됩니다.",
   "footer.save_a_copy_as": "새로운 프로필로 저장…",
-  "footer.save_as_new.message": "새로운 프로필에는 현재 타일 배치와 연결된 모니터 구성이 담깁니다.",
   "footer.save_as_new.title": "새로운 프로필로 저장",
   "footer.save_as_new_profile": "새로운 프로필로 저장…",
   "footer.save_copy": "사본 저장",

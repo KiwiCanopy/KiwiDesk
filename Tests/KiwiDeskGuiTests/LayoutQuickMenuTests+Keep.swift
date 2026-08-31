@@ -87,7 +87,7 @@ extension LayoutQuickMenuTests {
         #expect(model.isDirty)
 
         core.state.workspaces.setMode(SpaceID("1"), .monocle)
-        try core.persistProfile(named: "test-profile")
+        try core.persistProfile(named: "test-profile", modes: nil)
         model.adoptKeptLayout()
 
         // The baseline moved onto the kept layout...
@@ -121,7 +121,7 @@ extension LayoutQuickMenuTests {
         #expect(model.isDirty)
 
         core.state.workspaces.setMode(SpaceID("1"), .monocle)
-        try core.persistProfile(named: "test-profile")
+        try core.persistProfile(named: "test-profile", modes: nil)
         model.adoptKeptLayout()
 
         #expect(
@@ -130,5 +130,79 @@ extension LayoutQuickMenuTests {
         )
         #expect(model.config.spaceModes[SpaceID("1")] == .stack)
         #expect(model.isDirty)
+    }
+
+    @Test("The Keep row arms on a NON-focused screen's drift")
+    func keepArmsOnAnyScreensDrift() throws {
+        // Condition 1 of the ruling, and it needs two screens by
+        // construction: on one screen `anyScreenHasDrifted` and
+        // `activeSpaceHasDrifted` agree, so a single-screen
+        // fixture cannot tell the new predicate from the old one
+        // (code + architect review, 2026-08-31). The verb writes
+        // the WHOLE profile, so a row greyed while another
+        // screen's submenu says "not saved to profile" was
+        // refusing to do what it was about to do.
+        let (_, core) = makeModel()
+        let controller = makeController(core)
+
+        let frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "A",
+                frame: frame,
+                visibleFrame: frame
+            )
+        )
+        let second = CGRect(x: 100, y: 0, width: 100, height: 100)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(2),
+                name: "B",
+                frame: second,
+                visibleFrame: second
+            )
+        )
+        core.state.workspaces.ensureSpace(SpaceID("1"))
+        core.state.workspaces.ensureSpace(SpaceID("2"))
+        let profile = Profile(
+            name: "two-screens",
+            monitorSets: [
+                MonitorSet(monitors: ["A:100x100", "B:100x100"])
+            ],
+            spaces: [SpaceID("1"), SpaceID("2")],
+            spaceModes: [SpaceID("1"): .bsp, SpaceID("2"): .bsp],
+            settings: TilingSettings()
+        )
+        try core.profiles.save(profile)
+        _ = core.execute(
+            "load_profile",
+            args: [.string("two-screens")]
+        )
+
+        // Assigned AFTER the load: `load_profile` re-resolves
+        // space-to-display placement, so an assignment made
+        // before it does not survive.
+        core.state.workspaces.assign(SpaceID("1"), to: DisplayID(1))
+        core.state.workspaces.assign(SpaceID("2"), to: DisplayID(2))
+
+        // The FOCUSED screen's space matches the profile...
+        core.state.workspaces.activate(SpaceID("1"))
+        core.state.workspaces.setMode(SpaceID("1"), .bsp)
+        let cleanMenu = try #require(
+            controller.layoutItem().submenu
+        )
+        let clean = try #require(saveRow(in: cleanMenu))
+        #expect(!clean.isEnabled)
+
+        // ...and the OTHER screen's does not.
+        core.state.workspaces.setMode(SpaceID("2"), .monocle)
+        let info = LayoutMenuInfo.current(from: core)
+        #expect(!info.activeSpaceHasDrifted)
+        let armedMenu = try #require(
+            controller.layoutItem().submenu
+        )
+        let armed = try #require(saveRow(in: armedMenu))
+        #expect(armed.isEnabled)
     }
 }

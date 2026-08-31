@@ -149,7 +149,7 @@ struct ProfileSpaceOrderTests {
         core.applyProfileScopedState(from: config)
 
         // The LIVE save path must capture the display order.
-        try core.persistProfile(named: "reordered")
+        try core.persistProfile(named: "reordered", modes: nil)
         let saved = try core.profiles.read(name: "reordered")
         #expect(saved.spaces == config.spaces)
     }

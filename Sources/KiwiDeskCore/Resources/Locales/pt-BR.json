@@ -322,7 +322,6 @@
   "footer.save": "Salvar",
   "footer.save.globals_only": "O layout e as telas continuam pausados; “%1$@” cobre todo o restante.",
   "footer.save_a_copy_as": "Salvar como novo perfil…",
-  "footer.save_as_new.message": "O novo perfil leva a disposição lado a lado atual e o conjunto de monitores conectados.",
   "footer.save_as_new.title": "Salvar como novo perfil",
   "footer.save_as_new_profile": "Salvar como novo perfil…",
   "footer.save_copy": "Salvar cópia",

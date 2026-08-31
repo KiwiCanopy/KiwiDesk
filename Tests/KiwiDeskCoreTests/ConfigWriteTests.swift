@@ -184,7 +184,7 @@ struct ConfigWriteTests {
         config.settings.bsp.splitRatioV = 1.0 / 6.0
         config.settings.stack.masterRatio = 2.0 / 7.0
         core.applyProfileScopedState(from: config)
-        try core.persistProfile(named: "ratios")
+        try core.persistProfile(named: "ratios", modes: nil)
         let saved = try core.profiles.read(name: "ratios")
         #expect(saved.settings.bsp.splitRatioH == 1.0 / 3.0)
         #expect(saved.settings.bsp.splitRatioV == 1.0 / 6.0)

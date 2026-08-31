@@ -322,7 +322,6 @@
   "footer.save": "Enregistrer",
   "footer.save.globals_only": "La disposition et les écrans restent en pause ; « %1$@ » couvre tout le reste.",
   "footer.save_a_copy_as": "Enregistrer comme nouveau profil…",
-  "footer.save_as_new.message": "Le nouveau profil reprend la mosaïque actuelle et l'ensemble de moniteurs connectés.",
   "footer.save_as_new.title": "Enregistrer comme nouveau profil",
   "footer.save_as_new_profile": "Enregistrer comme nouveau profil…",
   "footer.save_copy": "Enregistrer une copie",

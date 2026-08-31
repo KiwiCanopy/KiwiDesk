@@ -150,49 +150,56 @@ struct SettingsSaveTemporaryLayoutTests {
         #expect(try savedMode(core, Self.kept) == .bsp)
     }
 
-    @Test("One predicate answers edited, for all three readers")
-    func oneEditedPredicate() throws {
-        // The ruling's obligation 1, as a source scan: the save
-        // path and the unsaved popover must READ
-        // `SettingsDraftDiff.editedSpaceModes`, never re-derive
-        // the comparison beside it. The popover did exactly
-        // that until #1179 — a set that agreed by luck, and
-        // would have disagreed on the release that changed the
-        // sparse encoding.
+    @Test("The popover lists exactly the spaces a Save writes")
+    func popoverRowsMatchTheDiff() throws {
+        // The ruling's obligation 1, held BEHAVIOURALLY rather
+        // than by a source needle. A scan for the call was
+        // fail-open by spelling twice over (guard-prover,
+        // 2026-08-31): a re-derivation written `?? LayoutMode
+        // .bsp` missed the needle, and a comment naming the
+        // symbol satisfied the positive clause with no call in
+        // the file at all.
         //
-        // The needle is the CALL, because the behavioural tests
-        // above cannot see a re-derivation that happens to
-        // agree; and the count is pinned so a fourth reader
-        // arrives deliberately rather than by copy.
-        let root = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
-        for file in [
-            "SettingsModel+Profiles.swift",
-            "SettingsValueReadout+Spaces.swift",
-            "SettingsModel+KeptLayout.swift",
-        ] {
-            let source = try String(
-                contentsOf: root.appendingPathComponent(file),
-                encoding: .utf8
+        // What cannot be spelled around: the unsaved-changes
+        // popover's ROWS and the set a Save writes come from one
+        // answer, so changing either alone reds this. The pill
+        // is the draft's one narrator — a space a Save writes
+        // that the popover never listed is the failure.
+        let (model, core) = try makeSeeded()
+        _ = core
+
+        core.state.workspaces.setMode(Self.kept, .monocle)
+        model.config.spaceModes[Self.edited] = .stack
+        model.config.settings.minWindowSize = 321
+
+        let diff = SettingsDraftDiff.between(
+            config: model.config,
+            cleanConfig: model.cleanConfig,
+            luaSource: model.luaSource,
+            cleanLuaSource: model.cleanLuaSource
+        )
+        let listed = Set(
+            SettingsValueReadout.rows(
+                for: .spaces(.spaceModes),
+                old: model.cleanConfig,
+                new: model.config
             )
-            #expect(
-                source.contains("editedSpaceModes"),
-                "\(file) no longer reads the one edited answer"
-            )
-            // And does not re-derive it beside the read: the
-            // comparison this replaced, in either direction.
-            #expect(
-                !source.contains("spaceModes[$0] ?? .bsp"),
-                "\(file) re-derives the edited-space set"
-            )
-        }
+            .compactMap { row in
+                SpaceID(
+                    String(
+                        row.id.split(separator: "#").last ?? ""
+                    )
+                )
+            }
+        )
+        #expect(listed == diff.editedSpaceModes)
+        // Non-empty, or the equality above is two empty sets:
+        // the temp on `kept` is deliberately NOT in either.
+        #expect(listed == [Self.edited])
     }
 
-    @Test("The apply's scope IS the diff's edited set")
-    func applyScopeComesFromTheDiff() throws {
+    @Test("The edited set names only spaces whose mode moved")
+    func editedSetIsExactlyTheChangedModes() throws {
         // The ruling's own obligation 1: apply and persist
         // consult `SettingsDraftDiff`'s attribution — the same
         // seam the pill count and the unsaved popover read — and
@@ -216,5 +223,35 @@ struct SettingsSaveTemporaryLayoutTests {
         // space — a scope taken from "anything changed" would
         // have swept both.
         #expect(diff.total > 1)
+    }
+
+    @Test("A capture-live write tells the draft; a commit does not")
+    func onlyCaptureLiveNotifiesTheDraft() throws {
+        // The debt is owed by the WRITE, not by the menu row
+        // (architect review, 2026-08-31): `save_profile` from
+        // Lua, the CLI or IPC is a second capture-live path, and
+        // with Settings open it would otherwise leave the
+        // draft's baseline on the pre-save modes for the next
+        // Save to write back — this issue's own failure, one
+        // channel over.
+        let (model, core) = try makeSeeded()
+        var captured: [String] = []
+        core.onProfileCapturedLive = { captured.append($0) }
+
+        // The command path pays it...
+        #expect(
+            core.execute(
+                "save_profile",
+                args: [.string("test-profile")]
+            ).isSuccess
+        )
+        #expect(captured == ["test-profile"])
+
+        // ...and a draft commit does not: it wrote the draft's
+        // own modes, so the baseline is already right.
+        captured = []
+        model.config.settings.minWindowSize = 321
+        model.updateActiveProfile()
+        #expect(captured.isEmpty)
     }
 }

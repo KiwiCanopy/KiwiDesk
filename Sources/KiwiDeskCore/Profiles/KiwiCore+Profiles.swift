@@ -25,7 +25,8 @@ extension KiwiCore {
         switch command {
         case "save_profile":
             return namedProfileCommand(args) { name in
-                try self.persistProfile(named: name)
+                // Capture-live, like the quick menu's Keep.
+                try self.persistProfile(named: name, modes: nil)
             }
         case "load_profile":
             return namedProfileCommand(args) { name in
@@ -148,16 +149,17 @@ extension KiwiCore {
     /// carrying only the live monitor set. The live space order
     /// from `allSpaces` is captured as the profile's stored
     /// order (#75) so the Spaces list round-trips unchanged.
+    /// `modes` is REQUIRED — see `persistProfile`. Dense over
+    /// the LIVE spaces either way, which is only correct because
+    /// the caller has already reconciled them (a GUI save runs
+    /// `applyProfileScopedState` first).
     func buildProfile(
         name: String,
-        modesFrom draft: GuiConfig? = nil
+        modes overrides: [SpaceID: LayoutMode]?
     ) -> Profile {
         let liveSpaces = state.workspaces.allSpaces.map(\.id)
-        // Dense either way. A draft's `spaceModes` is sparse and
-        // `modes(for:)` is the one place that omission resolves
-        // to `.bsp`; nil means capture what is on screen (#1179).
         let modes =
-            draft?.modes(for: liveSpaces)
+            overrides
             ?? Dictionary(
                 uniqueKeysWithValues:
                     state.workspaces.allSpaces.map {
@@ -193,22 +195,23 @@ extension KiwiCore {
     /// a different screen count is refused — that state needs
     /// "save as new" (#36).
     ///
-    /// `modesFrom` makes the per-space MODES come from a draft
-    /// instead of from live. Nil is the capture-live meaning the
-    /// quick menu's Keep verb wants — "write down what is on
-    /// screen". A Settings Save passes its draft, because that
-    /// write means "commit what I edited", and a standing
-    /// temporary layout is not in it (#1179).
+    /// `modes` is REQUIRED so every call site chooses (the
+    /// `forceRetile` pattern, §5). Nil means capture live — the
+    /// Keep verb's "write down what is on screen". A Settings
+    /// Save passes its draft's modes, dense over the live
+    /// spaces, because that write commits what was edited and a
+    /// standing temporary layout is not in it (#1179).
     public func persistProfile(
         named name: String,
-        modesFrom draft: GuiConfig? = nil
+        modes: [SpaceID: LayoutMode]?
     ) throws {
         guard var existing = try? profiles.read(name: name)
         else {
             try profiles.save(
-                buildProfile(name: name, modesFrom: draft)
+                buildProfile(name: name, modes: modes)
             )
             refreshConfigIssues()
+            if modes == nil { onProfileCapturedLive(name) }
             return
         }
         let live = liveMonitorSet()
@@ -218,7 +221,7 @@ extension KiwiCore {
                 live: live.monitors.count
             )
         }
-        let fresh = buildProfile(name: name, modesFrom: draft)
+        let fresh = buildProfile(name: name, modes: modes)
         existing.spaces = fresh.spaces
         existing.fallbackSpace = fresh.fallbackSpace
         existing.spaceModes = fresh.spaceModes
@@ -229,6 +232,7 @@ extension KiwiCore {
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).
         refreshConfigIssues()
+        if modes == nil { onProfileCapturedLive(name) }
     }
 
     // The non-adopting edit writes (`overwriteProfile`,
@@ -287,53 +291,5 @@ extension KiwiCore {
                     && $0.set(matching: live) != nil
             }
             .map(\.name)
-    }
-
-    /// Saved layout mode for the active space under the active
-    /// profile. nil when no profile is active or its JSON is
-    /// unreadable — "unknown", never a phantom `.bsp` that
-    /// would fake drift; an absent entry (a readable profile
-    /// without the space) is the genuine `.bsp` default.
-    public func savedModeForActiveSpace() -> LayoutMode? {
-        guard let space = activeSpace else { return nil }
-        // Expressed through the batch rather than beside it: the
-        // two carried the same `?? .bsp` default and the same
-        // unknown-vs-default distinction, kept in agreement by
-        // prose alone. `profiles.md` already rules that an
-        // unlisted mode should follow the screen rather than a
-        // fixed bsp (`SparseModeFallbackTests`), and that change
-        // would otherwise have to be made twice — with the menu
-        // showing phantom drift on whichever path was missed
-        // (`architect-reviewer`, 2026-08-17).
-        return savedModes(for: [space.id])[space.id]
-    }
-
-    /// Saved layout modes for `spaces` under the active profile,
-    /// read in **one** pass (#752).
-    ///
-    /// The quick menu asks about every connected screen's shown
-    /// space at once, and the single-space call above re-reads the
-    /// profile JSON per question — three screens would be three
-    /// file reads on every menu open. One read answers all of
-    /// them.
-    ///
-    /// A space **absent** from the returned dictionary is
-    /// "unknown", exactly as a nil from the call above is: no
-    /// active profile, or JSON that would not decode. A space
-    /// absent from a *readable* profile is the genuine `.bsp`
-    /// default and comes back as `.bsp` — so the two conditions
-    /// stay distinguishable, which is what keeps a phantom drift
-    /// off the menu.
-    public func savedModes(
-        for spaces: [SpaceID]
-    ) -> [SpaceID: LayoutMode] {
-        guard let name = profiles.currentName,
-            let profile = try? profiles.read(name: name)
-        else { return [:] }
-        var modes: [SpaceID: LayoutMode] = [:]
-        for space in spaces {
-            modes[space] = profile.spaceModes[space] ?? .bsp
-        }
-        return modes
     }
 }

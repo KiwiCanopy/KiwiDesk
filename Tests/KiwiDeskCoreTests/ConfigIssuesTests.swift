@@ -121,7 +121,7 @@ struct ConfigIssuesTests {
             core.configIssues.map(\.source)
                 == ["broken.json"]
         )
-        try core.persistProfile(named: "broken")
+        try core.persistProfile(named: "broken", modes: nil)
         #expect(core.configIssues.isEmpty)
     }
 

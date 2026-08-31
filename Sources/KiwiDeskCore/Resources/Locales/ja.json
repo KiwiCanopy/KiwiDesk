@@ -322,7 +322,6 @@
   "footer.save": "保存",
   "footer.save.globals_only": "レイアウトと画面は一時停止のままです。「%1$@」はそれ以外のすべてに適用されます。",
   "footer.save_a_copy_as": "新規プロファイルとして保存…",
-  "footer.save_as_new.message": "新しいプロファイルには、現在のタイル配置と接続中のモニタ構成が引き継がれます。",
   "footer.save_as_new.title": "新規プロファイルとして保存",
   "footer.save_as_new_profile": "新規プロファイルとして保存…",
   "footer.save_copy": "コピーを保存",

@@ -1,30 +1,22 @@
 import KiwiDeskCore
 
-/// What the quick menu's Keep verb owes an open Settings draft
-/// (#1179, condition 3).
+/// What a Keep owes an open Settings draft (#1179).
 extension SettingsModel {
-    /// Moves the draft's saved BASELINE onto the layout the keep
-    /// just wrote, leaving every staged edit staged.
+    /// Moves the draft's saved BASELINE onto the layout a keep
+    /// just wrote, leaving every staged edit staged (#1179).
     ///
-    /// Without this the next Settings Save silently reverts the
-    /// kept layout: the draft's modes seed from the saved
-    /// profile, so a space the user never touched would still
-    /// hold the mode the profile had BEFORE the keep, and
-    /// committing the draft would write it back — the same
-    /// Save-behaves-like-Revert class this issue closes, one
-    /// verb along.
-    ///
-    /// A space the user HAS edited keeps its staged mode and
-    /// stays counted as edited: the baseline moves under it, the
-    /// edit does not.
+    /// Live drafts only: a draft editing a STORED profile holds
+    /// that profile's modes, and the keep wrote the ACTIVE one's
+    /// — writing them in would show one profile's layout while
+    /// editing another, and `saveEditedProfile` would then
+    /// commit it. The retired drift path carried the same guard.
     func adoptKeptLayout() {
-        let edited = SettingsDraftDiff.between(
+        guard target == .live else { return }
+        let edited = SettingsDraftDiff.editedSpaceModes(
             config: config,
-            cleanConfig: cleanConfig,
-            luaSource: luaSource,
-            cleanLuaSource: cleanLuaSource
-        ).editedSpaceModes
-        let saved = core.loadGuiConfig().spaceModes
+            cleanConfig: cleanConfig
+        )
+        let saved = core.savedProfileModes() ?? [:]
         for space in Set(config.spaces)
             .union(cleanConfig.spaces)
             .union(saved.keys)
