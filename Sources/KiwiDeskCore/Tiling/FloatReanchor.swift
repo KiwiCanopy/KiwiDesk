@@ -1,17 +1,9 @@
 import CoreGraphics
 
 /// Proportional re-anchoring for floating windows crossing displays
-/// (`FloatNudge`, #444).
+/// (`FloatNudge`, #444). Who is eligible is `EffectiveFloat`'s
+/// question, not this type's (#1178).
 public enum FloatReanchor {
-    /// Determines if window crossing to target mode requires re-anchoring
-    /// (`LayoutMode`, #498).
-    public static func eligible(
-        isFloating: Bool,
-        targetMode: LayoutMode?
-    ) -> Bool {
-        isFloating || targetMode == .floating
-    }
-
     /// Computes target frame proportionally repositioned and optionally scaled
     /// (`FloatNudge.confine`,
     /// `TilingSettings.floatScaleOnDisplayChange`, #502).

@@ -159,11 +159,22 @@ extension KiwiCore {
     /// frame directly.
     func clampFloatsClearOfBars() {
         for space in spacesWithShownBars {
-            guard let windows = state.workspaces[space]?.windows
+            guard let workspace = state.workspaces[space]
             else { continue }
-            for id in windows {
+            for id in workspace.windows {
                 guard let window = state.windows[id],
-                    window.isFloating
+                    // A native-fullscreen window keeps its slot
+                    // but lives on its own macOS Space (#670) —
+                    // it reaches this sweep only now that a
+                    // floating-MODE space's members do, and a
+                    // size fit at a fullscreen app is the frame
+                    // set the stash already refuses.
+                    !window.isFullscreen,
+                    // EFFECTIVE float, never the flag (#1178).
+                    EffectiveFloat.applies(
+                        isFloating: window.isFloating,
+                        mode: workspace.mode
+                    )
                 else { continue }
                 // One fold over every strip, one apply: the
                 // per-strip loop this replaces re-read the same

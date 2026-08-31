@@ -51,7 +51,8 @@ struct SpaceTransitionTests {
             in: bounds,
             corner: .bottomRight,
             force: true,
-            animated: true
+            animated: true,
+            capturesOriginal: window.isFloating
         )
         #expect(
             engine.animation.isAnimating(window: WindowID(1))
@@ -83,7 +84,8 @@ struct SpaceTransitionTests {
             in: bounds,
             corner: .bottomRight,
             force: true,
-            animated: true
+            animated: true,
+            capturesOriginal: window.isFloating
         )
         // An event retile (or the 300 ms settle) landing
         // mid-exit re-parks instantly; it must not cancel the
@@ -92,7 +94,8 @@ struct SpaceTransitionTests {
             window,
             in: bounds,
             corner: .bottomRight,
-            force: true
+            force: true,
+            capturesOriginal: window.isFloating
         )
         #expect(
             engine.animation.isAnimating(window: WindowID(1))
@@ -113,7 +116,8 @@ struct SpaceTransitionTests {
             in: bounds,
             corner: .bottomRight,
             force: true,
-            animated: true
+            animated: true,
+            capturesOriginal: window.isFloating
         )
         // A different target (display topology changed the
         // optimal corner) is a real re-park: the stale slide
@@ -122,7 +126,8 @@ struct SpaceTransitionTests {
             window,
             in: bounds,
             corner: .bottomLeft,
-            force: true
+            force: true,
+            capturesOriginal: window.isFloating
         )
         #expect(
             !engine.animation.isAnimating(window: WindowID(1))

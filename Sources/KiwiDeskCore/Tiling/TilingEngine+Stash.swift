@@ -178,8 +178,10 @@ extension TilingEngine {
                     // own flag (#500): its layout places nothing
                     // on return, so without a capture nothing
                     // would ever bring them back from the corner.
-                    capturesOriginal: window.isFloating
-                        || space.mode == .floating
+                    capturesOriginal: EffectiveFloat.applies(
+                        isFloating: window.isFloating,
+                        mode: space.mode
+                    )
                 )
             }
         }
@@ -195,19 +197,20 @@ extension TilingEngine {
     /// nil: a later forced re-stash (whose state frame is
     /// already the AX echo of the corner) must not overwrite
     /// the original.
-    /// `capturesOriginal` overrides the default `isFloating`
-    /// capture gate (#500): `stashInactive` passes the
-    /// EFFECTIVE-float verdict — flag OR floating-mode space —
-    /// since a floating layout places nothing on return and the
-    /// restore pass is such a window's only way back. Nil keeps
-    /// the flag-only default for direct callers.
+    /// `capturesOriginal` is REQUIRED so every call site chooses
+    /// (the `forceRetile` pattern, §5): `stashInactive` passes
+    /// the EFFECTIVE-float verdict — flag OR floating-mode space
+    /// (#500/#1178) — since a floating layout places nothing on
+    /// return and the restore pass is such a window's only way
+    /// back. A flag-only default would silently come back
+    /// through the next caller that omitted it.
     func stash(
         _ window: ManagedWindow,
         in bounds: CGRect,
         corner: HideCorner,
         force: Bool,
         animated: Bool = false,
-        capturesOriginal: Bool? = nil
+        capturesOriginal: Bool
     ) {
         let target = Self.stashFrame(
             window.frame,
@@ -217,7 +220,7 @@ extension TilingEngine {
         if !force, Self.close(window.frame, to: target) {
             return
         }
-        if capturesOriginal ?? window.isFloating,
+        if capturesOriginal,
             stashedFrames[window.id] == nil
         {
             stashedFrames[window.id] = window.frame

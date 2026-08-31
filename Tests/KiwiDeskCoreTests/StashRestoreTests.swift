@@ -43,7 +43,13 @@ struct StashCaptureTests {
     func capturesFloatingOnce() {
         let engine = TilingEngine()
         let window = makeWindow(1, floating: true)
-        engine.stash(window, in: bounds, corner: .bottomRight, force: true)
+        engine.stash(
+            window,
+            in: bounds,
+            corner: .bottomRight,
+            force: true,
+            capturesOriginal: window.isFloating
+        )
         #expect(
             engine.stashedFrames[WindowID(1)] == window.frame
         )
@@ -53,7 +59,13 @@ struct StashCaptureTests {
     func reStashKeepsOriginal() {
         let engine = TilingEngine()
         let window = makeWindow(1, floating: true)
-        engine.stash(window, in: bounds, corner: .bottomRight, force: true)
+        engine.stash(
+            window,
+            in: bounds,
+            corner: .bottomRight,
+            force: true,
+            capturesOriginal: window.isFloating
+        )
         // The AX echo of the stash updated state: the window
         // now reads at the corner. A later forced retile
         // re-stashes it — the capture must survive.
@@ -67,7 +79,8 @@ struct StashCaptureTests {
             echoed,
             in: bounds,
             corner: .bottomRight,
-            force: true
+            force: true,
+            capturesOriginal: echoed.isFloating
         )
         #expect(
             engine.stashedFrames[WindowID(1)] == window.frame
@@ -81,7 +94,8 @@ struct StashCaptureTests {
             makeWindow(1, floating: false),
             in: bounds,
             corner: .bottomRight,
-            force: true
+            force: true,
+            capturesOriginal: false
         )
         #expect(engine.stashedFrames.isEmpty)
     }
