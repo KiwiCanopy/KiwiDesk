@@ -56,10 +56,7 @@ public indirect enum JSONValue: Codable, Sendable, Equatable {
         case .string(let s):
             return s
         case .number(let n):
-            // A whole number prints without the ".0", but only
-            // via the Int path when it actually fits — `Int(1e300)`
-            // traps (#386), so an out-of-range whole number falls
-            // back to the Double formatting.
+            // Whole numbers omit trailing ".0" when in Int range (#386).
             if n == n.rounded(), let i = n.finiteInt {
                 return String(i)
             }
@@ -99,13 +96,7 @@ public indirect enum JSONValue: Codable, Sendable, Equatable {
 }
 
 extension Double {
-    /// Safe `Int` conversion: nil unless the value is finite and
-    /// inside `Int`'s range. `Int(1e300)`, `Int(.nan)`, and
-    /// `Int(.infinity)` all trap, so any raw `Double → Int` on
-    /// caller-supplied config/IPC numbers must route through here
-    /// (#386). `Double(Int.max)` rounds up to 2^63, so the upper
-    /// bound is a strict `<` — every value it admits is a
-    /// representable `Int`.
+    /// Safe Int conversion guarding against NaN/infinity traps (#386).
     public var finiteInt: Int? {
         guard isFinite,
             self >= Double(Int.min),

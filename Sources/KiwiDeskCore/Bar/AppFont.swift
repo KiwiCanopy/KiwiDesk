@@ -1,18 +1,12 @@
 import AppKit
 import CoreText
 
-/// The vendored SketchyBar App Font (#294): process-scoped
-/// registration plus font access. Assets live in
-/// `Resources/AppFont/` (see its `UPSTREAM.md`); refresh them
-/// with `scripts/update-app-font.sh`, never by hand.
+/// Vendored SketchyBar App Font registration and access (#294).
 public enum AppFont {
     /// PostScript name of the vendored glyph font.
     public static let fontName = "sketchybar-app-font"
 
-    /// One-shot process-scope registration. `.process` scope
-    /// shadows nothing outside the app — no user install, no
-    /// Font Book entry, no conflict with a copy the user
-    /// already installed for sketchybar itself.
+    /// Process-scope font registration state.
     static let registered: Bool = {
         guard
             let url = Bundle.kiwiDeskCore.url(

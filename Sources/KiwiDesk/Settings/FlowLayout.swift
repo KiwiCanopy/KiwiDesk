@@ -1,9 +1,6 @@
 import SwiftUI
 
-/// A left-aligned layout that flows subviews across the available
-/// width and wraps to the next line when the current one is full.
-/// Used for chip palettes (e.g. draggable spaces) where a fixed
-/// grid would waste space.
+/// Left-aligned wrapping flow layout for chips and palettes.
 struct FlowLayout: Layout {
     var spacing: CGFloat = 6
 
@@ -25,11 +22,6 @@ struct FlowLayout: Layout {
         let rows = arrange(subviews, in: bounds.width).rows
         for row in rows {
             for item in row.items {
-                // Clamp to the row width so a lone item wider
-                // than the bounds (the first-in-row case that
-                // arrange can't wrap) truncates to fit instead
-                // of overflowing — otherwise a trailing control
-                // spills past the container's edge.
                 subviews[item.index].place(
                     at: CGPoint(
                         x: bounds.minX + item.x,
@@ -43,8 +35,6 @@ struct FlowLayout: Layout {
             }
         }
     }
-
-    // MARK: - Arrangement
 
     private struct Item {
         let index: Int

@@ -1,10 +1,6 @@
 import Foundation
 
-/// Display bookkeeping — which display a space is assigned to
-/// and what each display shows. Split from `WorkspaceManager`
-/// for the file ceiling (§2.1); the backing maps (`order`,
-/// `displays`, `spaceDisplay`, `secondaryShown`) stay declared
-/// there and are internal for exactly this file's sake.
+/// Display tracking and space assignment for WorkspaceManager.
 extension WorkspaceManager {
     public var allDisplays: [Display] {
         Array(displays.values)

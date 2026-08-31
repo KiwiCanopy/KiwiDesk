@@ -1,13 +1,6 @@
 import Foundation
 
-/// `app_bar.*` — the global App Bar style (#1033).
-///
-/// **An exemplar group: every record here is written.** The
-/// color setters show the `.color` shape, the pickers show a
-/// `.choice` reading its decoder's cases, and the rest are bare
-/// numbers. `monocle.set_app_bar_*` and `scroll.set_app_bar_*`
-/// are the same fields as per-layout overrides, so a record
-/// there says the same thing about the same value.
+/// `app_bar.*` — global App Bar style command records (#1033).
 extension APIReference {
     static let appBarRecords: [String: APIRecord] = [
         "set_edge": APIRecord(

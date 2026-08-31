@@ -1,26 +1,15 @@
 import Foundation
 
-/// Did-you-mean suggestion for an unknown command, split from
-/// `APIReference.swift` for the 350-line file ceiling.
+/// Command typo suggestion provider for APIReference.
 extension APIReference {
-    /// A close known command for a typo, if any. Suggests only
-    /// dispatchable names — the unknown-command path is reached
-    /// from the CLI/IPC socket too, where a Lua-only name would
-    /// be a dead-end hint.
+    /// Returns closest dispatchable command suggestion for typo, if any.
     public static func suggestion(
         for unknown: String
     ) -> String? {
         closest(to: unknown, among: dispatchable)
     }
 
-    /// The nearest of `candidates` within a typo's worth of
-    /// edits, or nil.
-    ///
-    /// Shared with `helpSuggestion`, which searches a wider set
-    /// for a different reason (#1033): the two differ in WHAT
-    /// they may point at, never in how near counts as near, and
-    /// two copies of that threshold would drift into two
-    /// different ideas of a typo.
+    /// Finds nearest candidate within edit distance limit (#1033).
     static func closest<C: Sequence<String>>(
         to unknown: String,
         among candidates: C

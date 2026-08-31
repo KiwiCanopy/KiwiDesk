@@ -1,12 +1,7 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Global App Bar rows: every key narrates the one
-/// `AppBarStyle` field its census id names. Enum-valued rows
-/// reuse the option labels the Bars editor renders
-/// (`AppBarOptions`), the auto-sentinel size sliders read
-/// "Automatic" at 0 the way the GUI's slider readout does, and
-/// a colour shows its stored hex verbatim.
+/// Global App Bar settings diff readout generators (`AppBarOptions`).
 extension SettingsValueReadout {
     static func appBarRows(
         _ key: AppBarKey,

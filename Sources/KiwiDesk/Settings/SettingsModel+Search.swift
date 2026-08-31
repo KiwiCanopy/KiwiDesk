@@ -1,15 +1,8 @@
 import KiwiDeskCore
 
-/// The model half of the search rework (#678 turn 11): the value
-/// enrichment read and the one-line mode-switch confirmation.
+/// Search enrichment and mode-switch confirmation for SettingsModel (#678).
 extension SettingsModel {
-    /// Enrichment: the current value of a census key as the diff
-    /// rows would narrate it — `SettingsValueReadout` with the
-    /// draft on both sides, so the "new" column IS the current
-    /// value and search cannot name a value two ways. Reads the
-    /// staged config in memory, nothing else. Nil where the key
-    /// has no scalar to state (families, actions, added/removed
-    /// rows).
+    /// Returns staged value for census key formatted via SettingsValueReadout.
     func searchValue(for key: SettingKey) -> String? {
         SettingsValueReadout.rows(
             for: key,
@@ -20,11 +13,8 @@ extension SettingsModel {
         .newValue
     }
 
-    /// Shows the one-line confirmation after a search pick
-    /// flipped the window into Power User mode (4c): the flip
-    /// itself is `ensureModeAdmits`' and stays silent; this line
-    /// is the only mention. Self-clears; a second flip
-    /// supersedes the first.
+    /// Displays self-clearing confirmation when search flips to
+    /// Power User mode.
     func noteSearchModeSwitch(
         _ destination: SettingsDestination
     ) {

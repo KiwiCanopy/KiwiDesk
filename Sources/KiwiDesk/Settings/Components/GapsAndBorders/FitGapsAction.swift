@@ -2,10 +2,7 @@ import Accessibility
 import KiwiDeskCore
 import SwiftUI
 
-/// Focus Border's opt-in gap transformation (#295). The extra
-/// spacing is a transient action parameter; only the calculated
-/// gap values join the staged profile. A local result and status
-/// make that two-step transaction explicit before the footer Save.
+/// Focus Border gap transformation action controls (#295).
 struct FitGapsAction: View {
     @ObservedObject var model: SettingsModel
     @State private var extraSpacing = 0

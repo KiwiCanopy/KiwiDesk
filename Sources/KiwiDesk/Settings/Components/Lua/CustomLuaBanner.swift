@@ -1,12 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Informational banner shown in the visual editor when
-/// `init.lua` contains custom Lua that does NOT touch the
-/// GUI's managed vocabulary (app rules, keybindings, etc.).
-/// Such code coexists safely — the app saves to `gui.json`
-/// and never touches `init.lua` (#55), so there is no
-/// conflict with what the visual editor owns.
+/// Informational banner shown when init.lua contains custom Lua (#55).
 struct CustomLuaBanner: View {
     var body: some View {
         Label {
@@ -20,9 +15,6 @@ struct CustomLuaBanner: View {
                 )
             )
         } icon: {
-            // `ink2`, not `.blue`: a raw system hue in a
-            // green-tinted window, and the note is neutral
-            // information, not a link (dark pass).
             Image(systemName: "info.circle")
                 .foregroundStyle(SettingsTheme.ink2)
         }

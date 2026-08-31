@@ -1,13 +1,6 @@
 import KiwiDeskCore
 
-/// Per-layout App Bar override rows (`LayoutAppBar`, Monocle
-/// and Scrolling). Every look field is a nullable override —
-/// nil inherits the global style — so each row narrates three
-/// states: a set value takes the same formatter as its global
-/// twin, an inherited side shows the core's `unset` "—", and a
-/// gained override reads "— → 44 pt". The value formatters and
-/// the row shape live in
-/// `SettingsValueReadout+LayoutAppBarValues.swift`.
+/// Per-layout App Bar override diff row generators (`LayoutAppBar`).
 extension SettingsValueReadout {
     static func layoutAppBarRows(
         _ key: LayoutAppBarKey,

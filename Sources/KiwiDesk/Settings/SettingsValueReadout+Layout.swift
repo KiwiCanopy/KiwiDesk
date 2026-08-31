@@ -1,12 +1,6 @@
 import KiwiDeskCore
 
-/// Layout Defaults rows — the six layouts' global parameters.
-/// Every value narrates the unit its own Settings row shows:
-/// ratios as the slider's percentage readout, the slot size in
-/// its picked unit, enum options in the pickers' own words
-/// (`SettingsValueReadout+Layout2` holds those formatters). The
-/// per-space override keys expand to one row per touched space
-/// in `SettingsValueReadout+Layout3`.
+/// Layout Defaults settings diff readout generators.
 extension SettingsValueReadout {
     static func layoutRows(
         _ key: LayoutKey,

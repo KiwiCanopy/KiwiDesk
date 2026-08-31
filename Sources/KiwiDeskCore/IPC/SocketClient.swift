@@ -7,10 +7,7 @@ public enum SocketError: Error, Equatable {
     case closed
 }
 
-/// Blocking UNIX-socket client used by the CLI process.
-///
-/// Deliberately synchronous BSD sockets: the CLI sends one
-/// request and reads one line (or streams events forever).
+/// Blocking UNIX domain socket client for CLI process.
 public final class SocketClient {
     private let fd: Int32
     private var buffer = Data()
@@ -53,14 +50,8 @@ public final class SocketClient {
             }
         }
         guard result == 0 else {
-            // Do NOT close here: every stored property is
-            // initialized by now, so a throwing class init still
-            // runs deinit, whose close would then be the SECOND
-            // close of this fd. Under concurrent fd churn the
-            // number gets recycled — and a guarded reissue turns
-            // the double close into an EXC_GUARD process kill
-            // (#489: the test-runner crash). deinit owns the one
-            // and only close.
+            // Do NOT close here (#489): throwing init runs deinit,
+            // avoiding double-close EXC_GUARD crashes on recycled fds.
             throw SocketError.connectFailed(
                 String(cString: strerror(errno))
             )

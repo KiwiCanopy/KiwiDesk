@@ -1,13 +1,6 @@
 import AppKit
 
-/// Visual feedback while a tiled window is dragged: a ghost
-/// outline over the dragged window's own slot (where it snaps
-/// back, and where the displaced window would move) and a
-/// filled highlight over the slot a drop would swap with.
-///
-/// Both visuals are borderless, click-through panels that
-/// never take focus or appear in the window cycle. Frames are
-/// taken in AX coordinates and flipped at the AppKit boundary.
+/// Visual drag feedback overlay showing ghost slot and drop zone highlights.
 @MainActor
 public final class DragOverlay {
     private var ghost: NSPanel?
@@ -23,7 +16,7 @@ public final class DragOverlay {
         dropZone?.isVisible ?? false
     }
 
-    /// Marks the dragged window's home slot (AX coords).
+    /// Marks the dragged window's home slot in AX coordinates.
     public func showGhost(
         at frame: CGRect,
         style: DragVisual,
@@ -35,7 +28,7 @@ public final class DragOverlay {
         place(panel, at: adjustedFrame(frame, style: style))
     }
 
-    /// Marks the swap target's slot (AX coords).
+    /// Marks the swap target's slot in AX coordinates.
     public func showDropZone(
         at frame: CGRect,
         style: DragVisual,
@@ -73,8 +66,6 @@ public final class DragOverlay {
         hideGhost()
         hideDropZone()
     }
-
-    // MARK: - Panels
 
     private func place(_ panel: NSPanel, at frame: CGRect) {
         panel.setFrame(

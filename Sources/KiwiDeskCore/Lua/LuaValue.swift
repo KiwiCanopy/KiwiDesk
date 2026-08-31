@@ -11,9 +11,7 @@ public indirect enum LuaValue: Sendable, Equatable {
     case array([LuaValue])
     /// Keyed table (string keys only when bridging).
     case table([String: LuaValue])
-    /// A Lua function captured as a registry reference.
-    /// Call via `LuaInterpreter.call(ref:args:)`; release
-    /// with `release(ref:)` when done.
+    /// Lua function captured as a registry reference.
     case functionRef(Int32)
 
     public var stringValue: String? {

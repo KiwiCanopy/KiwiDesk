@@ -1,13 +1,7 @@
 import Foundation
 
-/// The settings half of the space-reference maintenance
-/// (#13/#68): ONE definition each for renaming and removing a
-/// space across every per-space map — gap and placement
-/// overrides, space icons, and each layout's own override map
-/// (#17 — previously orphaned by a rename; deletion previously
-/// orphaned all of them). `SpaceMapParityTests` discovers the
-/// maps by reflection, so a new per-space map that misses
-/// either list fails red instead of silently orphaning.
+/// Space rename/remove migration across per-space maps
+/// (`SpaceMapParityTests`, #13, #17, #68).
 extension TilingSettings {
     /// Migrates every per-space map keyed by `from` to `to`.
     public mutating func renameSpace(

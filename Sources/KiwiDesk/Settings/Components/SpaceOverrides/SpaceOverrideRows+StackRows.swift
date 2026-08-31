@@ -1,12 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Stack per-space override rows, split out of
-/// `SpaceOverrideRows` when the #222 arrangement rows grew them
-/// past the base file's line budget (same seam as
-/// `SpaceOverrideRows+ModeRows.swift`). `g` and
-/// `binding(_:_:_:)` are internal on the base type; this builder
-/// is called from its `modeRows` switch.
+/// Stack per-space override rows for SpaceOverrideRows (#222).
 extension SpaceOverrideRows {
     @ViewBuilder
     var stackRows: some View {

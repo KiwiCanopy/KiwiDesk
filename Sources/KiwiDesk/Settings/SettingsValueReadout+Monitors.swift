@@ -1,9 +1,6 @@
 import KiwiDeskCore
 
-/// Monitors rows: the space→monitor pin map and the Main-role
-/// set. The banner, the orphan-clear action and the read-only
-/// fingerprints drawer name no model path, so the diff never
-/// books them.
+/// Monitors settings diff readout generators.
 extension SettingsValueReadout {
     static func monitorsRows(
         _ key: MonitorsKey,
@@ -31,12 +28,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// One row per re-pinned space. Values are the stored
-    /// `name:WxH` fingerprint — the same string the area's
-    /// fingerprints drawer shows; no fingerprint→display-name
-    /// helper exists to resolve a prettier one from a bare
-    /// string, and inventing a parser here would be a second
-    /// copy of the fingerprint grammar.
+    /// One row per re-pinned space using stored fingerprint strings.
     private static func monitorsPinRows(
         _ census: SettingKey,
         old: [SpaceID: String],
@@ -57,9 +49,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// A structural note per space that joined or left the
-    /// Main role, labelled by the census's own follows-main
-    /// text plus the space's name.
+    /// Diff rows for spaces joining or leaving the follows-main set.
     private static func monitorsMainRows(
         _ census: SettingKey,
         old: Set<SpaceID>,

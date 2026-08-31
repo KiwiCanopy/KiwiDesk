@@ -1,10 +1,6 @@
 import Foundation
 
-/// Reads and writes the GUI's `gui.json` sidecar — the visual
-/// editor's source of truth. `init.lua`'s managed block is
-/// regenerated from it; the sidecar additionally captures what
-/// live Lua state can't reconstruct (keybinding actions, mode
-/// icons).
+/// Reads and writes GUI configuration sidecar `gui.json`.
 public struct GuiConfigStore {
     let url: URL
 
@@ -16,9 +12,7 @@ public struct GuiConfigStore {
         FileManager.default.fileExists(atPath: url.path)
     }
 
-    /// Loads the sidecar, or nil if it is absent or unreadable.
-    /// Migrates older format sidecars through `ConfigMigration`
-    /// first and writes back the migrated bytes.
+    /// Loads sidecar with ConfigMigration migration, or nil on failure.
     public func load() -> GuiConfig? {
         guard var data = try? Data(contentsOf: url) else {
             return nil

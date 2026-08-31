@@ -1,13 +1,8 @@
 import Foundation
 
-/// Monitor-set matching over the stored profiles, split
-/// from ProfileManager.swift (file-size ceiling): pure
-/// queries — no state, no writes.
+/// Monitor-set profile matching queries for ProfileManager.
 extension ProfileManager {
-    /// Finds the profile for a live monitor set: exact stored
-    /// set (sorted-array comparison) → the count's default user
-    /// profile → none (caller composes the Standard). Ties
-    /// resolve alphabetically (profiles come pre-sorted).
+    /// Matches live monitor set against stored profiles in priority order.
     public func match(fingerprints: [String]) -> ProfileMatch {
         let profiles = allProfiles()
         if let exact = profiles.first(where: {

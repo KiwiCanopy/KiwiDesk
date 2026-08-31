@@ -1,11 +1,8 @@
 import KiwiDeskCore
 
-/// Live-vs-saved layout drift for the active space (#123),
-/// split from SettingsModel.swift (file-size ceiling): a
-/// transient snapshot from direct comparison — never latched,
-/// never routed through `isDirty`/`profileDirty`.
+/// Live vs saved layout drift detection for active space (#123).
 extension SettingsModel {
-    /// nil = no drift.
+    /// Live vs saved layout modes (nil = no drift).
     struct LayoutDrift: Equatable {
         let live: LayoutMode
         let saved: LayoutMode
@@ -13,11 +10,7 @@ extension SettingsModel {
 
     var hasLayoutDrift: Bool { layoutDrift != nil }
 
-    /// Recomputes the drift snapshot without reseeding `config`
-    /// — safe mid-edit; the quick menu calls it after a
-    /// session-only layout switch or save. External `set_mode`
-    /// (hotkey/Lua/CLI) refreshes on the next window `show()`.
-    /// The only writer of `layoutDrift`.
+    /// Recomputes drift snapshot without reseeding config.
     func refreshLayoutDrift() {
         layoutDrift = computeLayoutDrift()
     }

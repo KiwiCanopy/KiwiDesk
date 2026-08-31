@@ -1,11 +1,7 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Gaps-area rows. The per-edge keys narrate their own point
-/// value; the two master rows narrate the unified value the
-/// slider shows, reading "mixed" the way `GapsEditor` does when
-/// the edges disagree; the Lua-only per-space override expands
-/// to a row per touched space.
+/// Gaps settings diff readout generators.
 extension SettingsValueReadout {
     static func gapsRows(
         _ key: GapsKey,

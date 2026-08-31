@@ -1,14 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// This Profile ▸ Behavior (#68 §3.2): mouse-resize mode and
-/// what happens on quit — per-profile data, labeled as such by
-/// the sidebar group (the old General tab presented them without
-/// any scope cue).
-///
-/// The animation toggles left in #678 Phase 3: the census places
-/// every one of them in Colours & Animations, and half a card on each
-/// page is an area the render-parity guard cannot see whole.
+/// Profile Behavior settings section (#68 §3.2, #678 Phase 3).
 struct BehaviorSection: View {
     @ObservedObject var model: SettingsModel
 

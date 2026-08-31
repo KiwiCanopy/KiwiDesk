@@ -1,10 +1,7 @@
 import AppKit
 import ApplicationServices
 
-/// Polls Accessibility permission and reports transitions.
-///
-/// Used by the onboarding wizard (waiting for the user to grant
-/// permission) and at runtime to detect mid-session revocation.
+/// Polls Accessibility permission status and fires on state transitions.
 @MainActor
 public final class PermissionMonitor {
     /// Fired on every transition (granted <-> revoked).
