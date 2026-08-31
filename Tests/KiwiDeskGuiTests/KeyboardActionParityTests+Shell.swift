@@ -138,6 +138,75 @@ extension KeyboardActionParityTests {
     }
 }
 
+extension KeyboardActionParityTests {
+    /// WHERE the raise hangs, read as DEPTH rather than as
+    /// adjacency.
+    ///
+    /// The neighbour in the needle above pins the pair's order,
+    /// which catches the raise moving on its own. It does not
+    /// catch the pair moving TOGETHER onto the `selection == nil`
+    /// branch — adjacency survives that, and the raise is then
+    /// hung on the subtree the Home→area transition tears down,
+    /// which is #996/#998's defect exactly (`guard-prover`,
+    /// 2026-09-01; a refactor that moves "the Home behaviours
+    /// onto Home" moves both). What tells the two placements
+    /// apart is nesting: the raise must sit on the chain that
+    /// OUTLIVES both branches, never inside the closure that
+    /// builds them.
+    @Test("the raise hangs outside the branch it focuses")
+    func raiseHangsOnTheOuterChain() throws {
+        let dir = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+        let files = try SourceScan.swiftSources(under: dir)
+        let file = try #require(
+            files.first {
+                $0.lastPathComponent == "SettingsView.swift"
+            },
+            "SettingsView.swift is gone"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        let shell = try #require(
+            SourceScan.declarationBody(
+                after: "private func structuredShell(",
+                in: source
+            ),
+            Comment(
+                rawValue:
+                    "`structuredShell` is gone — the shell that "
+                    + "outlives both branches is where the raise "
+                    + "belongs"
+            )
+        )
+        let branches = try #require(
+            SourceScan.declarationBody(
+                after: "chrome(width)",
+                in: shell
+            ),
+            "`chrome(width) { … }` is gone from structuredShell"
+        )
+        let raise = squashedShell(".onChange(of: model.destination)")
+        #expect(
+            squashedShell(shell).contains(raise),
+            "the arrival raise left structuredShell entirely"
+        )
+        #expect(
+            !squashedShell(branches).contains(raise),
+            Comment(
+                rawValue:
+                    "the arrival raise is INSIDE "
+                    + "`chrome(width) { … }` — it is hung on one "
+                    + "of the two branches the navigation swaps, "
+                    + "so on Home→area it fires from the subtree "
+                    + "being torn down and states nothing. It "
+                    + "belongs on the chain outside that closure, "
+                    + "which outlives both (#996)"
+            )
+        )
+    }
+}
+
 /// Whitespace-free source, so a needle survives the formatter
 /// wrapping a call across lines — this file's copy of the main
 /// file's private `squashed` (per-file helpers, tests.md).
