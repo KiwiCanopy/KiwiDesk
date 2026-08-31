@@ -1,9 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// Renders an icon string: an SF Symbol if the string names
-/// one, otherwise the literal character(s); a placeholder
-/// symbol when empty.
+/// Renders SF Symbol or text glyph for an icon string with placeholder
+/// fallback.
 struct IconGlyphLabel: View {
     let icon: String
     var placeholder: String?

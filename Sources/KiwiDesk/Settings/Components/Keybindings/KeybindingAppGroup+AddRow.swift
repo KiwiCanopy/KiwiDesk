@@ -1,12 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Open applications add-row: pick an app, then commit it —
-/// mirroring App Rules, so a new binding always lands with an app
-/// identity (its shortcut is recorded afterward in the row). Apps
-/// that already carry every launch behavior are dropped from the
-/// picker and the Add button greys, so re-adding can only ever
-/// produce a *distinct* behavior, never a duplicate (#334).
+/// Add-row view and application binding creation for ApplicationsGroup (#334).
 extension ApplicationsGroup {
     var addRow: some View {
         HStack {
@@ -26,8 +21,6 @@ extension ApplicationsGroup {
                         newApp = app
                     }
                 },
-                // Drop apps that already carry every launch
-                // behavior — re-adding could only duplicate (#334).
                 exclude: fullyBoundBundleIDs()
             )
             // Hug the content, like the per-row picker.
@@ -70,20 +63,13 @@ extension ApplicationsGroup {
         newApp = nil
     }
 
-    /// The picked add-row app already has every launch behavior
-    /// bound — adding it again would only duplicate. Greys the Add
-    /// button (grey-don't-hide) instead of silently no-opping. A
-    /// backstop for the "Other…" panel, which can still reach a
-    /// fully-bound bundle the picker list already omits.
+    /// True if selected application has all launch behaviors already bound.
     private var newAppFullyBound: Bool {
         guard let app = newApp else { return false }
         return firstAvailableBehavior(for: app.bundleID) == nil
     }
 
-    /// Bundle ids that already carry every launch behavior, hidden
-    /// from the app pickers (#334). The add-row passes no exclusion;
-    /// a per-row re-pick excludes its own row, so an app fully bound
-    /// only *because of that row* stays pickable.
+    /// Bundle IDs that already carry every launch behavior (#334).
     func fullyBoundBundleIDs(
         excluding id: UUID? = nil
     ) -> Set<String> {

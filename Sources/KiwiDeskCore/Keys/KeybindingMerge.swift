@@ -1,16 +1,7 @@
 import Foundation
 
-/// Folds recovered keybinding layers into an edited `GuiConfig`
-/// for the GUI's "Import current shortcuts" (#4): layers are
-/// matched by name (appended when new) and rows upserted by their
-/// combo, so re-importing refreshes an existing shortcut instead
-/// of duplicating it. Pure and Core-typed, so the dedup logic the
-/// import depends on is unit-tested without the SwiftUI layer.
-///
-/// Sibling keyed merge: `KeyLayerOverride.resolved(onto:)` (#55
-/// profile override) merges by the same name×combo key but with
-/// the OPPOSITE icon precedence (override-wins). Both are
-/// correct for their direction — do not unify them.
+/// Folds recovered keybinding layers into GuiConfig on shortcut import
+/// (#4, #55).
 public enum KeybindingMerge {
     /// Merges every recovered layer into `config` in place.
     public static func merge(
@@ -22,9 +13,7 @@ public enum KeybindingMerge {
         }
     }
 
-    /// Folds one recovered layer into `config` — updating the
-    /// same-named layer's rows, or appending the layer when new. An
-    /// existing layer keeps its icon unless it had none.
+    /// Folds one recovered layer into config, preserving existing layer icons.
     private static func merge(
         _ recovered: KeyLayer,
         into config: inout GuiConfig

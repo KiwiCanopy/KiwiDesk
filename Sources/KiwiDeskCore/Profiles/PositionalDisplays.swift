@@ -1,29 +1,16 @@
 import CoreGraphics
 import Foundation
 
-/// Hardware-agnostic monitor ordering for the built-in default
-/// layouts (#53).
-///
-/// User profiles pin spaces to fingerprints; the built-ins can't
-/// (they must work on any hardware), so they address monitors
-/// *positionally*: "main display", "second display", … resolved
-/// against the live setup. Main is whatever macOS says is main
-/// (`CGMainDisplayID`), secondaries follow in physical order
-/// (left to right), which is unambiguous by construction.
+/// Positional monitor ordering for hardware-agnostic space layout defaults
+/// (#53).
 public enum PositionalDisplays {
-    /// The current main display's id (the screen with the menu
-    /// bar). Pure CoreGraphics — safe off the AX path.
+    /// ID of current main display (menu bar display).
     public static var liveMainID: DisplayID {
         DisplayID(CGMainDisplayID())
     }
 
-    /// Orders displays positionally: the main display first,
-    /// then secondaries left-to-right (`frame.minX`), ties
-    /// broken top-to-bottom and finally by fingerprint so the
-    /// order is deterministic for identical coordinates.
-    ///
-    /// When `mainID` is nil or not present, the leftmost display
-    /// takes the main slot — every position still resolves.
+    /// Orders displays with main display first, then secondaries
+    /// left-to-right.
     public static func ordered(
         _ displays: [Display],
         mainID: DisplayID?

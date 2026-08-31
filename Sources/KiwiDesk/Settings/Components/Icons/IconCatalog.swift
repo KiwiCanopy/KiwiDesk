@@ -1,8 +1,6 @@
 import Foundation
 
-/// One pickable glyph: an SF Symbol name or an emoji, with
-/// keyword tags so search matches meaning, not just the
-/// symbol's literal name (#68 §6.4).
+/// Curated glyph and search tag pair for icon picker (#68 §6.4).
 struct IconChoice: Identifiable, Hashable {
     let glyph: String
     /// Space-separated search tags.
@@ -20,12 +18,7 @@ struct IconChoice: Identifiable, Hashable {
     }
 }
 
-/// The curated icon catalog shared by mode icons and space
-/// icons — one vocabulary, one component (§6.4/§6.5). SF
-/// Symbols render from macOS itself (nothing is bundled); the
-/// system catalog isn't enumerable at runtime, but any valid
-/// symbol name typed into the search appears as a result (the
-/// exact-name escape hatch).
+/// Curated SF Symbol and emoji catalog for modes and spaces (#68 §6.4).
 enum IconCatalog {
     static let symbols: [IconChoice] = [
         // Web / communication

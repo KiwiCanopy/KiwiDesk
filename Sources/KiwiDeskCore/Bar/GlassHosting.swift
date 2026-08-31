@@ -1,34 +1,19 @@
 import Foundation
 
-/// The single mode naming where a bar item lives for one render
-/// (#407). A bar item physically sits in one of these parentings
-/// depending on the resolved style; before #407 no value named the
-/// current/target mode, so every entry point independently tore
-/// down the *other* modes. Now one `resolve` per render feeds one
-/// dispatch (`prepareGlassHosting` tears down the non-target modes,
-/// `installGlassHosting` installs the target), so the "who tears
-/// down whom" invariant lives in one place. Shared by both bars.
+/// Bar item hierarchy hosting mode for liquid glass finishes (#407).
 enum GlassHosting: Equatable {
-    /// No glass finish: the solid `plain` plate or the per-item
-    /// `boxed` fill. Items ride `itemContainer` on the panel.
+    /// Solid plain plate or per-item boxed fill.
     case plainPlate
-    /// Plain + glass, the run fits: the glass hugs the run wrapper.
+    /// Plain glass hugging run wrapper.
     case plainGlassHug
-    /// Plain + glass, the run overflows: the glass spans the
-    /// scrolling item viewport (`itemContainer`).
+    /// Plain glass spanning scrolling viewport.
     case plainGlassSpan
-    /// Boxed + glass: each item hosted in its own glass box.
+    /// Boxed glass per item.
     case boxGlass
-    /// Below macOS 26 — glass can't render, so nothing is hosted.
-    /// Same parenting as `plainPlate` (items in `itemContainer`);
-    /// named apart so the dispatch documents the below-26 reality.
+    /// Unsupported OS version (below macOS 26) fallback.
     case none
 
-    /// The one hosting mode for this render. `available` is the OS
-    /// gate (`glassAvailable`); `glassEnabled` the resolved finish;
-    /// `boxed` the shape; `overflow` whether the run scrolls (only
-    /// splits plain + glass into hug vs span). One authority so the
-    /// two bars can't drift on the decision.
+    /// Resolves single hosting mode for bar render (#407).
     static func resolve(
         available: Bool,
         glassEnabled: Bool,

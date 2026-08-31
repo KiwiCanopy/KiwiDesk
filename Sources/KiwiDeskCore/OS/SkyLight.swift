@@ -1,13 +1,8 @@
 import CoreFoundation
 import Foundation
 
-/// Runtime bridge to the private SkyLight framework.
-///
-/// Symbols are resolved with `dlsym` instead of `@_silgen_name`:
-/// a linked private symbol that disappears in a macOS update
-/// would crash the app at launch, while a failed lookup here
-/// simply yields `nil` and the caller falls back to the public
-/// Accessibility API. See AGENTS.md guardrails.
+/// Runtime bridge resolving private SkyLight SPI symbols dynamically
+/// via dlsym.
 public enum SkyLight {
     public typealias ConnectionID = Int32
     public typealias SpaceID = UInt64
@@ -19,9 +14,7 @@ public enum SkyLight {
             RTLD_LAZY
         )
 
-    /// Whether the framework loaded — the precondition for
-    /// resolving anything in it, `WMBridge`'s ObjC classes
-    /// included.
+    /// Whether the framework loaded.
     static var isLoaded: Bool { handle != nil }
 
     /// Resolves one C function pointer, or nil if unavailable.
@@ -31,8 +24,6 @@ public enum SkyLight {
         }
         return unsafeBitCast(sym, to: T.self)
     }
-
-    // MARK: - Resolved functions
 
     public typealias MainConnectionFn =
         @convention(c) () -> ConnectionID
@@ -66,8 +57,6 @@ public enum SkyLight {
         as: DisplayCurrentSpaceFn.self
     )
 
-    // MARK: - Display suppression
-
     public typealias DisableUpdateFn =
         @convention(c) (ConnectionID) -> Int32
     public typealias ReenableUpdateFn =
@@ -97,9 +86,7 @@ public enum SkyLight {
         return cid != 0 ? cid : nil
     }
 
-    /// Freezes window-server compositing so multiple AX
-    /// frame-sets composite as one visual update. No-op
-    /// when SkyLight symbols didn't resolve.
+    /// Freezes window-server compositing for batched visual updates.
     public static func suppressDisplay() {
         guard let cid = connection,
             let fn = disableUpdate

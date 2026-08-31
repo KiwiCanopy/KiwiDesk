@@ -1,17 +1,8 @@
 import CoreGraphics
 
-/// Pure spring state for the dead-end rubber-band (#436).
-///
-/// A directional focus/swap that finds no window beyond the wall
-/// gets a wordless "nope, nothing there": the focus ring offsets a
-/// few points *toward* the wall and springs back with a small
-/// overshoot — the scroll-overscroll idiom, not the login-shake.
-/// Two independent scalar springs (dx, dy) pull the offset back to
-/// zero after an initial impulse. All math is over plain scalars —
-/// no AX, no AppKit — so it is unit-testable and the animator layer
-/// only feeds the resulting offset to the ring overlay.
+/// Pure spring state for dead-end rubber-band animation (#436).
 public struct DeadEndBump {
-    /// Peak offset toward the wall, in points — a nudge, not a move.
+    /// Peak offset toward the wall, in points.
     public static let defaultAmplitude: CGFloat = 8
     public static let minAmplitude: CGFloat = 1
     public static let maxAmplitude: CGFloat = 20
@@ -20,8 +11,6 @@ public struct DeadEndBump {
     private var vel: [Double]
     private let spring: Spring
 
-    /// Settled when both axes are within this of rest at
-    /// negligible speed. Sub-point tails are invisible.
     private static let epsilon = 0.3
 
     public init(
@@ -36,11 +25,7 @@ public struct DeadEndBump {
         self.spring = spring
     }
 
-    /// Re-applies the impulse toward the wall while keeping the
-    /// current velocity, so a key held against the wall reads as one
-    /// sustained press rather than a stack of restarted animations
-    /// (#436 retarget-in-place). A fresh dead-end on the other axis
-    /// simply overwrites that axis and lets the stale one decay.
+    /// Re-applies wall impulse preserving velocity (#436).
     public mutating func reimpulse(offset: CGVector) {
         pos = [Double(offset.dx), Double(offset.dy)]
     }

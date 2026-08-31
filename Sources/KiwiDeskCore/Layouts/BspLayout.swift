@@ -1,11 +1,6 @@
 import CoreGraphics
 
-/// Binary space partitioning over a flat array (dwindle style):
-/// the first window claims the split ratio of the region, the
-/// rest recurse into the remainder. Side-by-side splits use
-/// `splitRatioH`, stacked splits `splitRatioV` (#56) — two
-/// per-space scalars, not per-node ratios (those need stable
-/// split identity, i.e. a tree, which the flat array forbids).
+/// Binary space partitioning layout over flat window array (#56).
 public struct BspLayout: LayoutSystem {
     public init() {}
 

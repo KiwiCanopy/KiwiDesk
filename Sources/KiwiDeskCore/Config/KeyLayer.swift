@@ -1,13 +1,11 @@
 import Foundation
 
-/// One keybinding layer: a named set of shortcut rows plus an
-/// optional menu bar indicator (SF Symbol name or flat emoji).
+/// Keybinding layer model representing shortcuts and optional bar icon.
 public struct KeyLayer: Codable, Equatable, Sendable,
     Identifiable
 {
     public var name: String
-    /// SF Symbol name (`arrow.left.and.right`) or emoji
-    /// (`📐`). Nil for the default layer's standard icon.
+    /// SF Symbol name or emoji icon. Nil for default layer.
     public var icon: String?
     public var bindings: [KeyBinding]
 
@@ -23,7 +21,7 @@ public struct KeyLayer: Codable, Equatable, Sendable,
         self.bindings = bindings
     }
 
-    /// The always-present default layer (`KiwiDesk.bind`).
+    /// The default keybinding layer (`default`).
     public static let defaultLayer = KeyLayer(
         name: KeyLayer.defaultName
     )
@@ -32,12 +30,11 @@ public struct KeyLayer: Codable, Equatable, Sendable,
     public var isDefault: Bool { name == Self.defaultName }
 }
 
-/// One shortcut row: a key combo bound to a Lua action.
+/// Shortcut row binding a key combo to a Lua action string.
 public struct KeyBinding: Codable, Equatable, Sendable,
     Identifiable
 {
-    /// How the action was authored — display only; the writer
-    /// only consumes `lua`.
+    /// Authoring category for display in settings UI.
     public enum Kind: String, Codable, Sendable {
         case navigation
         case application
@@ -47,8 +44,7 @@ public struct KeyBinding: Codable, Equatable, Sendable,
     public var id = UUID()
     /// Key combo string (`"alt+h"`); empty while unrecorded.
     public var combo: String
-    /// The Lua statement(s) run on trigger — the body placed
-    /// inside `function() ... end`.
+    /// Lua action executed on key trigger.
     public var lua: String
     public var kind: Kind
     /// Row label shown in the editor (nav name / app name).
@@ -101,9 +97,7 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         try container.encode(label, forKey: .label)
     }
 
-    /// `id` is a transient row handle (not persisted), so it is
-    /// excluded from equality — two rows with the same content
-    /// are equal even across a save/load cycle.
+    /// Compares equality of binding content ignoring transient UUID.
     public static func == (
         lhs: KeyBinding,
         rhs: KeyBinding
@@ -112,13 +106,7 @@ public struct KeyBinding: Codable, Equatable, Sendable,
             && lhs.kind == rhs.kind && lhs.label == rhs.label
     }
 
-    /// Semantic identity for the override cascade (#55):
-    /// combo + lua only. `kind` and `label` are display-only
-    /// metadata — the GUI import classifier may upgrade them
-    /// (`.custom` → `.navigation`, label filled), and that
-    /// must never read as divergence from the base, or an
-    /// unchanged edit session would persist spurious profile
-    /// overrides.
+    /// Semantic identity comparison for profile override cascades (#55).
     public func sameAction(as other: KeyBinding) -> Bool {
         combo == other.combo && lua == other.lua
     }

@@ -1,16 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Layout Defaults row builders — one per census row, keyed
-/// by the census case, so a row moves between layouts by moving
-/// its placement. Split across files for the ceiling; this one
-/// holds the dispatch plus BSP, Stack and Monocle.
-///
-/// The Auto pairs (Grid's auto-size, Track's auto limit) render
-/// at the AUTO key as one `AutoGatedGroup`, with the value key
-/// an `EmptyView` arm: the census keeps them as two gated rows
-/// and the GUI composes the pair, the same shape the Bars area
-/// uses for its Auto sliders.
+/// Layout Defaults row builders for BSP, Stack, and Monocle settings
+/// (`LayoutCard`).
 extension LayoutCard {
     @ViewBuilder func layoutRow(_ key: LayoutKey) -> some View {
         switch key {
@@ -55,9 +47,6 @@ extension LayoutCard {
                 placement: monocle.newWindowPlacement
             )
         case .gridColumns, .gridRows, .trackLimit:
-            // Drawn by their Auto toggles' `AutoGatedGroup`
-            // above — the census keeps them as their own gated
-            // rows, the GUI composes the pair.
             EmptyView()
         case .bspOverrideStrategy, .bspOverrideSplitRatioH,
             .bspOverrideSplitRatioV, .stackOverrideMasterCount,
@@ -73,19 +62,12 @@ extension LayoutCard {
             .monocleOverrideOrientation, .trackOverrideAxis,
             .trackOverrideLimit, .trackOverrideOverflowStyle,
             .trackOverrideAutoTracks:
-            // Per-space overrides (Spaces & Layouts) and the two
-            // Lua-only ones. If a census move brings one here,
-            // the render-parity guard forces it into an order
-            // list and it lands on this arm — fail loud in debug
-            // rather than draw nothing.
             let _ = assertionFailure(
                 "unrendered Layout Defaults row: \(key.rawValue)"
             )
             EmptyView()
         }
     }
-
-    // MARK: - Bindings
 
     var bsp: Binding<BspParams> { $model.config.settings.bsp }
     var stack: Binding<StackParams> {
@@ -101,8 +83,6 @@ extension LayoutCard {
     var track: Binding<TrackParams> {
         $model.config.settings.track
     }
-
-    // MARK: - BSP
 
     var bspStrategyRow: some View {
         SegmentedPicker(
@@ -215,9 +195,7 @@ extension LayoutCard {
         )
     }
 
-    /// Shared by Stack and Track — the far-edge overflow track
-    /// piles the same two ways a stack zone does, which is why
-    /// the labels are one pair rather than two.
+    /// Shared overflow options for Stack and Track layouts.
     var overflowOptions: [(String, StackParams.OverflowStyle)] {
         [
             (
@@ -232,8 +210,6 @@ extension LayoutCard {
             ),
         ]
     }
-
-    // MARK: - Monocle
 
     var monocleOrientationRow: some View {
         SegmentedPicker(

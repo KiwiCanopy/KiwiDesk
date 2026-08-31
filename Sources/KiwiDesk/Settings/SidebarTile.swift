@@ -1,11 +1,9 @@
 import SwiftUI
 
-/// A System-Settings-style icon tile: white glyph on a flat
-/// rounded-rect color (§6.1).
+/// System-Settings-style icon tile with optional badge dot.
 struct SidebarTile: View {
     let destination: SettingsDestination
-    /// Accent dot on the tile's top-trailing corner — the
-    /// native "something to look at in this section" cue.
+    /// Accent dot on tile corner for notifications.
     var badged = false
 
     var body: some View {

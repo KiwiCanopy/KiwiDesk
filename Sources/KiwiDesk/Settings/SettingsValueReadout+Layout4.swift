@@ -1,14 +1,8 @@
 import KiwiDeskCore
 
-/// The Layout override expansion machinery (`+Layout3` is the
-/// per-key dispatch): the touched-space filter, the generic
-/// field expander, and the two scrolling rows whose words are
-/// axis-relative and so need the space's resolved orientation.
+/// Layout override readout expansion helpers for SettingsValueReadout.
 extension SettingsValueReadout {
-    /// The spaces whose value for one override FIELD differs —
-    /// an entry whose other fields changed books no row here, so
-    /// each override key narrates only its own edits. Sorted by
-    /// name for a stable row order.
+    /// Returns sorted spaces where the specific override field changed.
     static func layoutTouched<O, V: Equatable>(
         _ old: [SpaceID: O],
         _ new: [SpaceID: O],
@@ -21,10 +15,7 @@ extension SettingsValueReadout {
             .sorted { $0.raw < $1.raw }
     }
 
-    /// One row per touched space: "Master ratio · Work", the
-    /// missing side reading as unset. `base` overrides the
-    /// census label for the two Lua-only keys whose census text
-    /// is `.none`.
+    /// Builds one diff row per touched space for an override field.
     static func layoutOvr<O, V: Equatable>(
         _ census: SettingKey,
         _ old: [SpaceID: O],
@@ -47,10 +38,7 @@ extension SettingsValueReadout {
         }
     }
 
-    // MARK: - Scrolling's axis-relative override rows
-
-    /// The anchor's words are axis-relative (Top/Left), so each
-    /// side reads its own resolved orientation for the space.
+    /// Axis-relative anchor override diff rows for scrolling layout.
     static func layoutAnchorOvrRows(
         _ census: SettingKey,
         old: TilingSettings,
@@ -87,10 +75,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// Slot-size overrides: the value AND the base label are
-    /// axis-relative, so the label follows the DRAFT's resolved
-    /// orientation for the space and each side's value reads in
-    /// that side's own unit.
+    /// Axis-relative slot size override diff rows for scrolling layout.
     static func layoutSlotOvrRows(
         _ census: SettingKey,
         old: TilingSettings,

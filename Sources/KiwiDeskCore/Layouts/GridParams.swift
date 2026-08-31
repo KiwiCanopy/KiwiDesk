@@ -1,8 +1,6 @@
 import Foundation
 
-/// Grid tuning: layout type, empty-space filling, split
-/// direction, and the rigid grid's dimensions. Split out of
-/// `LayoutParams` for file size.
+/// Configuration parameters for Grid layout.
 public struct GridParams: Sendable, Equatable, Codable {
     public enum GridType: String, Sendable, Codable, CaseIterable {
         case dynamic
@@ -22,16 +20,11 @@ public struct GridParams: Sendable, Equatable, Codable {
     /// Rigid grid dimensions.
     public var columns: Int = 3
     public var rows: Int = 2
-    /// When set, the grid's dimensions come from the display —
-    /// as many columns/rows as fit at `min_window_size` — instead
-    /// of the typed `columns`/`rows`. Orthogonal to `type`: it
-    /// caps a dynamic grid and fixes a rigid one alike.
+    /// Derives dimensions dynamically from display size and minWindowSize.
     public var autoSize = false
-    /// Grids read as ordered cells: appending keeps every
-    /// existing cell in place.
+    /// Placement for newly created windows.
     public var newWindowPlacement: SpawnPlacement = .last
-    /// Per-space overrides (`layout.grid.override[space_id]`),
-    /// resolved via `TilingSettings.resolvedGrid(for:)`.
+    /// Per-space overrides resolved via `TilingSettings.resolvedGrid(for:)`.
     public var override: [SpaceID: GridOverride] = [:]
 
     public init() {}

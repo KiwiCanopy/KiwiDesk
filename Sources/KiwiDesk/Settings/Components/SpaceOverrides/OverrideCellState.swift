@@ -1,22 +1,7 @@
 import Foundation
 
-/// What a space row's override cell reads, resolved purely from
-/// the space's total saved-override count and whether its mode is
-/// Floating (owner ruling 2026-08-04, #678 8a).
-///
-/// The count is the SUM across every layout
-/// (`overrideFieldCount(for:)`) — the scannable "how much custom
-/// config does this Space carry" signal, which the pushed editor
-/// then splits into active-layout rows and a dormant drawer.
-///
-/// Floating carries no *active* overrides, but a Floating space
-/// may still hold overrides saved for OTHER layouts. Hiding that
-/// count would reproduce the "haunted tiler" (#458): a Floating
-/// space silently carrying tiling overrides the user cannot see,
-/// which reactivate the moment the space switches back. So the
-/// count stays visible and the cell stays a way into the editor —
-/// "grey, don't hide" (§2.7). Only a Floating space with nothing
-/// parked is genuinely inert.
+/// Override badge and trigger cell display state for space rows
+/// (#458, #678 8a).
 enum OverrideCellState: Equatable {
     /// Tiled space, no overrides: the offer to add. "Customize…"
     case customize

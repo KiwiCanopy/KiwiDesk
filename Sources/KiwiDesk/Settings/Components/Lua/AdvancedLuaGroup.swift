@@ -1,10 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Lua bindings (#68 §3.6.1) — the old "Custom
-/// Bindings", renamed and collapsed by its host. Raw Lua stays
-/// monospaced on purpose: arbitrary Lua *is* the capability
-/// here, not a serialization leak.
+/// Custom arbitrary Lua keybinding management group (#68 §3.6.1).
 struct AdvancedLuaGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]

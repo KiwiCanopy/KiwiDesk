@@ -1,11 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// One parsed `space_bar.set_*` assignment (#293). Sibling of
-/// `AppBarCommandSetting` with a single apply switch — the Space
-/// Bar is global-only, so there is no override variant. Reuses
-/// the App Bar's error type: the two parsers speak the same
-/// vocabulary and their messages must not drift.
+/// Parsed `space_bar.set_*` command setting representation (#293).
 enum SpaceBarCommandSetting {
     case enabled(Bool)
     case edge(AppBarEdge)
@@ -38,8 +34,7 @@ enum SpaceBarCommandSetting {
     case groupBadgeColor(String)
     case groupBadgeTextColor(String)
 
-    /// Parses a setter `field` (the command name minus
-    /// `space_bar.set_`) and its args.
+    /// Parses a setter field and its arguments into SpaceBarCommandSetting.
     static func parse(
         field: String,
         args: [JSONValue]
@@ -135,9 +130,7 @@ enum SpaceBarCommandSetting {
         ]
     }
 
-    /// Wire-key → color-field constructor. Internal (not private)
-    /// so the palette shelf (#375) can route a color path through
-    /// the same validated field setters; see the AppBar twin.
+    /// Color setting field constructors by wire key (#375).
     static var colorFields: [String: (String) -> SpaceBarCommandSetting] {
         [
             "item_color": Self.itemColor,
@@ -152,9 +145,7 @@ enum SpaceBarCommandSetting {
         ]
     }
 
-    /// Milliseconds, clamped to the Space Bar's valid dwell
-    /// range — a stored out-of-range value can't spring instantly
-    /// or hang.
+    /// Parses dwell spring delay in milliseconds (#58, #386).
     private static func springDelay(
         _ args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
@@ -164,8 +155,7 @@ enum SpaceBarCommandSetting {
             return .failure("expected milliseconds")
         }
         let range = SpaceBarStyle.springDelayRange
-        // Clamp as Double BEFORE Int(...) — `Int(1e300)` traps,
-        // so a config typo would otherwise kill the WM (#58/#386).
+        // Clamp as Double before Int conversion (#58, #386).
         let clamped = min(
             max(value.rounded(), Double(range.lowerBound)),
             Double(range.upperBound)
@@ -173,10 +163,7 @@ enum SpaceBarCommandSetting {
         return .success(.springDelay(Int(clamped)))
     }
 
-    /// Front-segment title length in characters. Mirrors
-    /// `glyphCap` below, including the
-    /// clamp-as-Double-BEFORE-`Int(...)` order (#58), and reads
-    /// the range both bars share.
+    /// Parses title character cap (#58).
     private static func titleCap(
         _ args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
@@ -193,9 +180,7 @@ enum SpaceBarCommandSetting {
         return .success(.titleCap(Int(clamped)))
     }
 
-    /// App-group glyph count, clamped to the Space Bar's valid
-    /// cap range (#376) — a stored out-of-range value can't
-    /// render an empty item or an unscannable row.
+    /// Parses app glyph count cap (#58, #376).
     private static func glyphCap(
         _ args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
@@ -205,8 +190,7 @@ enum SpaceBarCommandSetting {
             return .failure("expected a glyph count")
         }
         let range = SpaceBarStyle.glyphCapRange
-        // Clamp as Double BEFORE Int(...) — `Int(1e300)` traps,
-        // so a config typo would otherwise kill the WM (#58).
+        // Clamp as Double before Int conversion (#58).
         let clamped = min(
             max(value.rounded(), Double(range.lowerBound)),
             Double(range.upperBound)
@@ -234,8 +218,7 @@ enum SpaceBarCommandSetting {
         return .success(hex)
     }
 
-    /// Writes the value into the global style — the only apply
-    /// target (no per-layout mirror).
+    /// Applies setting value to SpaceBarStyle.
     func apply(to style: inout SpaceBarStyle) {
         switch self {
         case .enabled(let value): style.enabled = value

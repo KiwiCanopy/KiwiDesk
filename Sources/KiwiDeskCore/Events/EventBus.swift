@@ -1,7 +1,6 @@
 import Foundation
 
-/// Events external tools can subscribe to (SketchyBar,
-/// JankyBorders, Hammerspoon) via socket or Lua callbacks.
+/// Events external tools can subscribe to via socket or Lua callbacks.
 public enum KiwiNotification: String, CaseIterable, Sendable,
     Codable
 {
@@ -10,24 +9,13 @@ public enum KiwiNotification: String, CaseIterable, Sendable,
     case focusChange = "focus_change"
     case monitorChange = "monitor_change"
     case desktopChange = "desktop_change"
-    // Lifecycle events carry a `reason` (#40), spelled by
-    // `WindowAppearReason` / `WindowGoneReason` — the one copy
-    // of that vocabulary, so a value added there (`.hidden`,
-    // #913) does not owe an edit here. The old
-    // `window_minimized` event was retired into
-    // `reason: minimized` (pre-release, no compat alias per
-    // AGENTS §5).
+    // Lifecycle events carry a `reason` (#40, #913).
     case windowCreated = "window_created"
     case windowDestroyed = "window_destroyed"
     case windowMovedToSpace = "window_moved_to_space"
 }
 
-/// Fans events out to Lua callbacks and generic sinks (the
-/// socket server registers one sink per subscriber).
-///
-/// Per the sandbox rules, a Lua callback that errors or times
-/// out is logged and disabled — one bad callback never breaks
-/// the event stream.
+/// Fans events out to Lua callbacks and generic sinks.
 @MainActor
 public final class EventBus {
     public typealias Sink =
@@ -40,8 +28,6 @@ public final class EventBus {
     private var sinks: [UUID: Sink] = [:]
 
     public init() {}
-
-    // MARK: - Subscriptions
 
     /// Registers a Lua callback (`KiwiDesk.on(event, fn)`).
     public func on(_ event: KiwiNotification, ref: Int32) {
@@ -71,8 +57,6 @@ public final class EventBus {
         }
         luaCallbacks = [:]
     }
-
-    // MARK: - Emission
 
     /// Notifies sinks (JSON payload) and Lua callbacks
     /// (positional arguments, e.g. `(space_id, mode)`).

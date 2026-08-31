@@ -1,16 +1,7 @@
 import KiwiDeskCore
 
-/// The inline sentence each `GapsBordersGates.InertReason`
-/// renders — the "why you can't edit this" a greyed row or block
-/// shows on hover. Split from the resolver so the resolver stays
-/// assertable off the main actor; the reason and its sentence are
-/// one decision, never two that can disagree (#678, gui.md).
-///
-/// A sentence is authored once, here, and never beside a row —
-/// `GapsAndBordersGateWiringTests` reds on a second copy. When a
-/// sentence's MEANING moves, its key is dropped in the same
-/// change set (localization.md) rather than left to render a
-/// fluent translation of what the row no longer does.
+/// Help explanations for disabled Gaps & Borders controls
+/// (`GapsAndBordersGateWiringTests`, #678).
 @MainActor
 enum GapsBordersGateHelp {
     static func sentence(

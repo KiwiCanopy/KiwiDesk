@@ -1,30 +1,17 @@
 import KiwiDeskCore
 
-/// One display-ready row of the draft diff (#678 turn 9, digest
-/// §1.1): the label the census names the setting by, and the
-/// old → new values where the readout can state them. Three
-/// surfaces render these rows — the detail panel's "CHANGED IN
-/// THIS DRAFT" list, Home's unsaved-changes popover, and (pass
-/// 6) nothing else claims them — all through
-/// `SettingsDiffRowsView`, so the draft has one row vocabulary.
+/// Display-ready row of the draft diff (`SettingsDiffRowsView`, #678 turn 9).
 struct SettingsDiffRow: Identifiable, Hashable {
-    /// Stable identity: the census id, plus an instance
-    /// discriminator where one key draws several rows (a
-    /// per-space override books one row per touched space).
+    /// Stable identity: census id plus instance discriminator.
     var id: String
-    /// The census key the row belongs to — the jump target's
-    /// anchor and the popover's area grouping both read it.
+    /// Census key the row belongs to.
     var key: SettingKey
-    /// Composed, localized ("Outer gap", "Monocle · thickness").
+    /// Localized label ("Outer gap", "Monocle · thickness").
     var label: String
-    /// Display strings. Nil when the change has no scalar to
-    /// state (an added space, an edited binding list) — the row
-    /// then renders its `changeNote` alone.
+    /// Display strings for scalar before/after values.
     var oldValue: String?
     var newValue: String?
-    /// The valueless rows' one-word narration ("Added",
-    /// "Removed", "Edited"), localized. Nil when the value pair
-    /// carries the story.
+    /// Localized change description for structural modifications.
     var changeNote: String?
 
     /// A plain value-pair row.

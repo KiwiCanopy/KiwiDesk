@@ -1,20 +1,9 @@
 import KiwiDeskCore
 
-/// Which spaces run which layout — the one answer three
-/// surfaces on this page need: the strip's per-tile count, the
-/// spaces-using card's list, and the landing layout the page
-/// opens on.
-///
-/// It is one function because the three disagreed while it was
-/// three: two read `config.spaces` and defaulted an unrecorded
-/// space to `.bsp` (the reading every other surface in the app
-/// uses), while the landing counted `spaceModes.values` alone —
-/// so a profile of untouched spaces plus one Grid space landed
-/// the reader on Grid while the strip beside them said BSP had
-/// the spaces.
+/// Layout usage queries across configured spaces.
 enum LayoutUsage {
-    /// The profile's spaces on `mode`, in the user's own order.
-    /// A space with no recorded mode runs the default.
+    /// Returns profile spaces using mode, defaulting unrecorded spaces
+    /// to .bsp.
     static func spaces(
         on mode: LayoutMode,
         in config: GuiConfig

@@ -1,17 +1,6 @@
 import Foundation
 
-/// Per-space overrides of `TrackParams` (#128). Every field is
-/// an *optional* mirror of the global track params: nil inherits
-/// the global value, a value overrides just that field for one
-/// space. Stored sparsely under `layout.track.override[space_id]`
-/// and resolved with `resolved(onto:)` — the same optional-mirror
-/// shape as `StackOverride`.
-///
-/// Mirror-parity is guarded by a reflection-based test
-/// (`TrackOverrideTests`) per AGENTS.md §5. `newWindow`,
-/// `newWindowPosition`, and `wrapFocus` are excluded by design:
-/// all three are per-layout behavior, not per-space geometry
-/// (the `ScrollingOverride` precedent for `wrapFocus`).
+/// Per-space overrides of TrackParams (`TrackOverrideTests`, #128).
 public struct TrackOverride: Sendable, Equatable {
     public var axis: TrackParams.Axis?
     public var autoTracks: Bool?
@@ -20,33 +9,25 @@ public struct TrackOverride: Sendable, Equatable {
 
     public init() {}
 
-    /// `global` (the layout's own params) with every non-nil
-    /// override applied on top, per field.
+    /// Merges overrides onto global TrackParams.
     public func resolved(onto global: TrackParams) -> TrackParams {
         var out = global
         if let axis { out.axis = axis }
         if let autoTracks { out.autoTracks = autoTracks }
         if let limit { out.limit = limit }
         if let overflowStyle { out.overflowStyle = overflowStyle }
-        // Merged params hold no override map (see ScrollingOverride).
         out.override = [:]
         return out
     }
 
-    /// True when no field is set — a fully-inherited space needs
-    /// no stored override (drives sparse encoding).
+    /// True when no field is set (drives sparse encoding).
     public var isEmpty: Bool {
         axis == nil && autoTracks == nil && limit == nil
             && overflowStyle == nil
     }
 }
 
-// MARK: - Codable
-
 extension TrackOverride: Codable {
-    /// Same JSON spelling as the `TrackParams` fields (the
-    /// `track.set_*` setters). Only set overrides are written;
-    /// inherited fields stay absent.
     enum CodingKeys: String, CodingKey {
         case axis
         case autoTracks = "auto_tracks"

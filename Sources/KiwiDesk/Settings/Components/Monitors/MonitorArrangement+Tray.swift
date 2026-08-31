@@ -1,25 +1,9 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// How tall the follows-main tray has to be for what it holds.
-/// Split from `MonitorArrangement` when the derivation took
-/// that file past the §2.1 ceiling — it is the one piece of
-/// that arithmetic which reasons about CHIPS rather than about
-/// displays.
+/// Dynamic height calculation for follows-main monitor arrangement tray.
 extension MonitorArrangement {
-    /// The tray's height for `chips` spaces at `width`.
-    ///
-    /// A CONSTANT 52 was wrong the moment a fourth space followed
-    /// main: the chips wrap, and the box did not grow, so the
-    /// second row pushed the tray's own heading out of the top of
-    /// it (owner, 2026-08-04). Rows are derived from the same
-    /// `minChipWidth` the flow layout wraps on, so the box and its
-    /// contents agree by construction rather than by a guess.
-    ///
-    /// The row count is an UPPER bound, deliberately: real chips
-    /// are usually wider than the minimum, so this can reserve a
-    /// row that ends up unused. A tray one row too tall is a
-    /// little empty space; one row too short clips a heading.
+    /// Computes tray height dynamically for chip count and layout width.
     static func trayHeight(
         chips: Int,
         width: CGFloat

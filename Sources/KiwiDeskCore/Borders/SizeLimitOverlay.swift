@@ -1,15 +1,7 @@
 import AppKit
 import CoreGraphics
 
-/// Visual plate and panel for the minimum-size refusal pill (#933).
-///
-/// Flashed at the top-center of a window when a resize attempt
-/// runs into an effective minimum size (`min_window_size` or an
-/// app-enforced `EffectiveSizeBound`). Holds one panel PER
-/// window: a blocked grow pills BOTH ends — the resized window
-/// explains why nothing moved, the blocking window marks itself
-/// at its minimum — so two pills must be able to stand at once
-/// (owner ruling, 2026-08-22).
+/// Visual plate and overlay panel for minimum-size refusal pill (#933).
 @MainActor
 final class SizeLimitOverlay {
     private struct Pill {
@@ -27,7 +19,7 @@ final class SizeLimitOverlay {
 
     init() {}
 
-    /// Flashes the size-limit pill on `window` at `frame` (AX coordinates).
+    /// Flashes size-limit pill on window frame in AX coordinates (#933).
     func flash(
         window: CGWindowID,
         frame: CGRect,

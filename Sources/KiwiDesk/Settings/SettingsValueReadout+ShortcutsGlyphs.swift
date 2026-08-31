@@ -1,20 +1,9 @@
 import KiwiDeskCore
 
-/// The Shortcuts readout's naming half, split from
-/// `SettingsValueReadout+Shortcuts.swift` for the file-size
-/// target (AGENTS.md §2.1): a binding's row label resolved the
-/// way the area's own rows resolve it — the `KeybindingCatalog`
-/// command for its Lua, the app display name for an app row —
-/// and its combo rendered through the recorder's own
-/// `ComboSymbols` + `LayoutKeyGlyph` pipeline (#23), never a
-/// second combo renderer.
+/// Shortcut action label resolution and glyph rendering for settings readout
+/// (#23).
 extension SettingsValueReadout {
-    /// Lua action → localized row label, built from the same
-    /// catalog builders the editor and the ⌃⌥K panel render
-    /// from. Space-targeting commands come from the union of
-    /// both sides' space lists and resize commands from both
-    /// sides' steps, so a row keeps its name even when the
-    /// draft also renamed the thing it targets.
+    /// Builds localized action label mapping from catalog definitions.
     static func shortcutsActionLabels(
         old: GuiConfig,
         new: GuiConfig
@@ -61,10 +50,7 @@ extension SettingsValueReadout {
         return labels
     }
 
-    /// Every Desktop row either side of the diff names, built
-    /// from the BINDINGS rather than from a live Desktop list:
-    /// a config records no Desktops, and a diff must name a row
-    /// whatever is plugged in while it is read.
+    /// Desktop navigation commands extracted from diff config layers.
     private static func desktopCommands(
         old: GuiConfig,
         new: GuiConfig
@@ -80,10 +66,7 @@ extension SettingsValueReadout {
             + KeybindingCatalog.moveToDesktop(desktops.desktops)
     }
 
-    /// The binding's row label as the Shortcuts area shows it:
-    /// catalog command label, else the app's display name, else
-    /// the stored editor label, else the raw Lua — the same
-    /// ladder the ⌃⌥K panel's bands fall through.
+    /// Resolves display label for keybinding.
     static func shortcutsBindingLabel(
         _ binding: KeyBinding,
         labels: [String: String]
@@ -102,10 +85,7 @@ extension SettingsValueReadout {
         return binding.lua
     }
 
-    /// The recorder's own combo rendering (#23): native glyphs
-    /// mapped through the active keyboard layout, the raw
-    /// string on a parse failure, the unset dash while
-    /// unrecorded.
+    /// Formats shortcut combo string into native glyphs (#23).
     static func shortcutsCombo(_ combo: String) -> String {
         guard !combo.isEmpty else { return unset }
         guard let parsed = KeyCombo.parse(combo) else {

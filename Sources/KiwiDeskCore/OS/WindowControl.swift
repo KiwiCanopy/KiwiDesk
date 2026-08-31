@@ -1,23 +1,9 @@
 import ApplicationServices
 import CoreGraphics
 
-/// Moves and resizes windows of other applications.
-///
-/// This is the safe fallback path via the public Accessibility
-/// API. A SkyLight fast path (window-server-side transactions)
-/// will be added on top later; the public surface stays the
-/// same so callers never care which path executed.
-///
-/// Deliberately NOT MainActor: AX set calls are blocking IPC
-/// into the target app and are thread-safe, so the animation
-/// pipeline applies frames from a background queue.
+/// Public Accessibility API window mover and resizer.
 public enum WindowControl {
-    /// Applies a frame to a window element.
-    ///
-    /// Size → position → size: apps clamp whichever attribute
-    /// is set first against the other's old value, so setting
-    /// size on both sides of the move converges regardless of
-    /// direction.
+    /// Applies frame to AXUIElement via size-position-size sequence.
     public static func setFrame(
         _ frame: CGRect,
         of element: AXUIElement

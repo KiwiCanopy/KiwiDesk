@@ -1,12 +1,7 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// The Borders rows' value formatters and row shape, split
-/// from `SettingsValueReadout+Borders.swift` so neither file
-/// crosses the size ceiling (the `SettingKey+BordersText`
-/// shape). Internal rather than private because the switch
-/// consuming them lives in that sibling file; the `borders`
-/// prefix keeps them scoped to this key slice.
+/// Borders section value formatters for SettingsValueReadout.
 extension SettingsValueReadout {
     static func bordersRow(
         _ census: SettingKey,
@@ -47,8 +42,7 @@ extension SettingsValueReadout {
         bordersRow(census, hexDisplay(old), hexDisplay(new))
     }
 
-    /// Empty is the mark tints' stored "Automatic" sentinel —
-    /// shown the way the colour well's own hex field prints it.
+    /// Mark tint diff row formatting automatic sentinel.
     static func bordersAutoHexRow(
         _ census: SettingKey,
         _ old: String,
@@ -78,8 +72,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// Lua-only (#367): no GUI option list to reuse, so the
-    /// labels are the diff's own.
+    /// Border draw order label (#367).
     static func bordersDrawOrderLabel(
         _ order: BorderStyle.DrawOrder
     ) -> String {
@@ -91,7 +84,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// Lua-only (#754): no GUI option list to reuse either.
+    /// Border alignment label (#754).
     static func bordersAlignmentLabel(
         _ alignment: BorderAlignment
     ) -> String {
@@ -109,9 +102,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// The width master's display value: the shared width while
-    /// the three strokes agree, "mixed" once a Lua edit split
-    /// them — matching the acknowledgement the card's `?` makes.
+    /// Shared border width or mixed if strokes differ.
     static func bordersUnifiedWidth(
         _ settings: TilingSettings
     ) -> String {
@@ -128,11 +119,7 @@ extension SettingsValueReadout {
         return points(first)
     }
 
-    /// The corner shape all three strokes agree on — read from
-    /// `GapsBordersGates.agreedCornerStyle`, the one copy of
-    /// that comparison — or "mixed" while the ring's style and
-    /// the drag pair's radius disagree (the card's picker shows
-    /// no segment there).
+    /// Unified corner shape across strokes (`GapsBordersGates`).
     static func bordersAgreedCorner(
         _ settings: TilingSettings
     ) -> String {

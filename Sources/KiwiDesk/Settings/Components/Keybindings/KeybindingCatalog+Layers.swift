@@ -1,21 +1,10 @@
 import AppKit
 import KiwiDeskCore
 
-/// The layer-switching half of the catalog: the row that
-/// switches to a named layer, and the pure rename that
-/// rewrites those rows across a config.
-///
-/// Split from `KeybindingCatalog.swift` on §2's file-size
-/// limit, on the seam the file already marked. Both halves
-/// stay the single authority for the Lua they author, which
-/// is what keeps the writer and the import classifier
-/// matching byte-for-byte (#4).
+/// Layer switching command generation and rename refactoring (#4).
 extension KeybindingCatalog {
 
-    /// The Change-Layers row that switches to `name`. The one
-    /// authority for this Lua so the writer (`SwitchLayersGroup`)
-    /// and the import classifier match byte-for-byte — a drift
-    /// here would silently demote imports to Custom (#4).
+    /// Authors layer switch command matching import classifier syntax (#4).
     static func switchLayerCommand(_ name: String) -> NavCommand {
         NavCommand(
             label: "Switch to \(name)",
@@ -30,11 +19,7 @@ extension KeybindingCatalog {
         )
     }
 
-    /// Renames a layer across `layers`: the layer itself plus
-    /// every switch-layer row targeting it, rewritten through
-    /// `switchLayerCommand` so writer and import classifier
-    /// keep matching byte-for-byte (#4). Pure — the tested
-    /// core of the Shortcuts header's rename.
+    /// Renames a layer across all configuration bindings (#4).
     static func renameLayer(
         in layers: [KeyLayer],
         from old: String,

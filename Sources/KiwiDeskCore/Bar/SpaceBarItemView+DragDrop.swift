@@ -1,25 +1,16 @@
 import AppKit
 
-/// Drag-drop feedback for one Space item (#372): the synthetic
-/// hover tint during a window drag and the pending-spring ring
-/// sweep. The dwell timing and the decision to spring live on the
-/// driver side; this view only renders the two cues.
+/// Drag-drop hover and spring-sweep feedback rendering for
+/// SpaceBarItemView (#372).
 extension SpaceBarItemView {
-
-    /// Lights (or clears) the synthetic drag-hover tint — the
-    /// same `hoverFillColor` an ordinary mouse hover shows, driven
-    /// from the AX cursor position because tracking areas stay
-    /// silent while another app owns the drag.
+    /// Toggles synthetic drag hover highlight.
     func setDragHover(_ on: Bool) {
         guard isDragHovered != on else { return }
         isDragHovered = on
         restyle()
     }
 
-    /// Starts the ring sweep: a `highlightColor` stroke filling
-    /// 0→1 over `duration`, sitting on top of the hover tint as
-    /// the "this will become active" cue. Reuses the active
-    /// indicator's ring vocabulary (2 pt, `highlightColor`).
+    /// Starts spring-loaded ring sweep animation (#372).
     func beginSpringSweep(
         duration: TimeInterval,
         delay: TimeInterval

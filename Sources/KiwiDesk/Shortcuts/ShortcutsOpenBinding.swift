@@ -1,23 +1,11 @@
 import KiwiDeskCore
 
-/// The bindable "open the shortcuts panel" action (#330). One
-/// place owns its Lua body so the catalog row, the quick-menu combo
-/// display, and the panel's footer hint all speak of the same
-/// binding — and a rename can't drift them apart.
+/// Binding definitions and glyph rendering for opening shortcuts panel (#330).
 enum ShortcutsOpenBinding {
-    /// The Lua the catalog binds and the classifier recognizes.
+    /// Lua statement for opening shortcuts panel.
     static let lua = "KiwiDesk.show_shortcuts()"
 
-    /// The combo currently bound to open the panel, rendered as
-    /// native glyphs (`⌃⌥K`) via the same `ComboSymbols` + layout
-    /// path the editor and reference panel use — so it reads
-    /// identically everywhere. Nil when nothing is bound, or when
-    /// the live snapshot is unavailable (paused / init.lua-owned):
-    /// there is no live combo to advertise then.
-    ///
-    /// Read from the RESOLVED active layer (post profile-override),
-    /// not raw `gui.json` — the displayed combo must match what
-    /// Carbon actually has installed.
+    /// Formatted glyphs for shortcuts panel hotkey (`ComboSymbols`, #330).
     @MainActor static func comboGlyphs(core: KiwiCore) -> String? {
         guard let parsed = combo(core: core) else { return nil }
         return ComboSymbols.render(

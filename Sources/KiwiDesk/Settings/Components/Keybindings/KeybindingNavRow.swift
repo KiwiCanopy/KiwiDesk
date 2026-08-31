@@ -1,13 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A single catalog row: label plus a recorder that upserts a
-/// `.navigation` binding keyed by the command's Lua. The
-/// preflight hard-blocks combos already held by another row
-/// (#34); the row id feeds "Go to" (#68 §3.6.2).
-///
-/// Extracted from `KeybindingGroups` (the shared row every
-/// section composes) to keep that file under the size ceiling.
+/// Single navigation shortcut row with label and recorder field
+/// (#34, #68 §3.6.2).
 struct NavRow: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]

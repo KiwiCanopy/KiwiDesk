@@ -1,20 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The profile edit-target dropdown (#18): pick the live config
-/// or a saved profile to edit in place — editing a non-loaded
-/// profile never switches the running layout. A borderless menu
-/// (title + chevron, no pill). Saving lives in the footer.
+/// Profile edit-target dropdown menu (#18, #94, #251, #259).
 struct ProfileEditTargetMenu: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        // The menu isn't an icon-only control, so its "why"
-        // rides a label-adjacent `?` popover (#94/#259), not a
-        // hover-only `.help()` a user finds by accident. One `?`
-        // in this shared header → subject omitted (#251). The
-        // live `statusText` caption still carries the dynamic
-        // per-target state beneath.
         HStack(spacing: 4) {
             menu
             HelpButton(
@@ -56,10 +47,6 @@ struct ProfileEditTargetMenu: View {
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
-        // The closed menu shows only its VALUE (the profile's
-        // name), so VoiceOver heard a name with no noun; the
-        // pair below names the control and keeps the value
-        // (#812, the App Rules facet shape).
         .accessibilityLabel(
             L("profile_header.menu.ax", "Profile to edit")
         )
@@ -67,14 +54,9 @@ struct ProfileEditTargetMenu: View {
     }
 
     private func requestSelect(_ name: String?) {
-        // A `nil` name is Live (`editingProfile == nil`); any
-        // name — the loaded profile included (#209) — is that
-        // stored target. Re-picking the open one is a no-op, so
-        // it never pops a pointless discard dialog.
         guard name != model.editingProfile else { return }
-        // This menu was the original discard-confirm site; it
-        // now shares the dashboard-wide gate (#515) so the six
-        // other discard paths cannot drift from it.
+        // Confirms discarding pending edits before switching profile
+        // (#209, #515).
         model.discardingEdits(
             message: L(
                 "discard.switch_profile.message",
@@ -126,11 +108,8 @@ struct ProfileEditTargetMenu: View {
     }
 
     private var title: String {
-        // Override mode gets a distinct closed-menu form, so
-        // "MyProfile — overrides" can't be mistaken for Live
-        // with MyProfile loaded — which shows the bare name and
-        // would otherwise collide when editing the loaded
-        // profile (#209).
+        // Override form distinguishes editing stored copy from loaded live
+        // layout (#209).
         if let editing = model.editingProfile {
             return L(
                 "profile_header.title.overrides",
