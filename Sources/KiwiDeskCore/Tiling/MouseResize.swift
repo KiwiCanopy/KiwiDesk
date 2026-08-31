@@ -1,38 +1,29 @@
 import CoreGraphics
 
-/// What a mouse resize of a tiled window does.
+/// Mouse resize handling strategy for tiled windows.
 public enum MouseResizeMode: String, Sendable, Codable, CaseIterable {
-    /// Adjust the layout like the `resize` command: neighbors
-    /// give or take space (default).
+    /// Adjust layout parameter based on drag (default).
     case layout
-    /// Animate the window back into its slot.
+    /// Animate window back into layout slot.
     case snapBack = "snap_back"
 }
 
-/// A mouse resize translated into a layout parameter change.
+/// Layout parameter adjustment derived from mouse resize (#56, #128).
 public enum ResizeAdjustment: Equatable, Sendable {
-    /// BSP side-by-side split ratio delta (width drag, #56).
     case bspRatioH(CGFloat)
-    /// BSP stacked split ratio delta (height drag, #56).
     case bspRatioV(CGFloat)
     case masterRatio(CGFloat)
     case scrollWidth(CGFloat)
-    /// Track layout delta across tracks (track weight, #128).
     case trackAcross(CGFloat)
-    /// Track layout delta along a track (window share, #128).
     case trackAlong(CGFloat)
 }
 
-/// Pure translation of mouse resizes into the same parameter
-/// changes the `resize` command makes, so both paths share one
-/// per-layout behavior. Pure so it is fully testable.
+/// Translates mouse resizes into layout adjustments (#56, #122, #128).
 public enum MouseResize {
-    /// Size deltas beyond this are a resize gesture; smaller
-    /// ones are app-side clamping noise (character grids).
+    /// Minimum size delta to qualify as intentional resize gesture.
     public static let threshold: CGFloat = 10
 
-    /// Whether a settled drag changed the window's size, as
-    /// opposed to only moving it.
+    /// Whether frame difference exceeds resize threshold.
     public static func isResize(
         from slot: CGRect,
         to frame: CGRect
@@ -41,13 +32,7 @@ public enum MouseResize {
             || abs(frame.height - slot.height) > threshold
     }
 
-    /// Drops size changes made by dragging an OUTER edge —
-    /// one with no neighbor slot on the far side. There is
-    /// nobody to trade space with there: the window would
-    /// snap back to its slot origin and the freed area would
-    /// reappear on the OPPOSITE side, growing neighbors the
-    /// user never dragged. Returns the frame with such axis
-    /// changes reverted to the slot's size.
+    /// Drops size changes from dragging an outer edge lacking neighbors.
     public static func keepingInnerEdgeChanges(
         slot: CGRect,
         frame: CGRect,
@@ -94,9 +79,7 @@ public enum MouseResize {
         return result
     }
 
-    /// Whether a point sits in the band around a rect's
-    /// border — where resize drags start (the resize cursor
-    /// zone extends a few points to both sides of the edge).
+    /// Whether a point lies in the resize border band of a rect.
     public static func nearEdge(
         _ point: CGPoint,
         of rect: CGRect,
@@ -114,13 +97,7 @@ public enum MouseResize {
             && !inner.contains(point)
     }
 
-    /// The side of the first BSP split a slot sits on, as the
-    /// direction the shared ratio must move for that slot's
-    /// region to GROW: +1 first (left/top), -1 second. The
-    /// midpoint rule is a heuristic (deep slots under extreme
-    /// ratios can misread), so the mouse and keyboard paths
-    /// (#122) share this one authority — never re-derive the
-    /// comparison.
+    /// Direction (+1 / -1) to move BSP ratio to grow target slot (#122).
     public static func bspSide(
         slot: CGRect,
         bounds: CGRect,
@@ -131,23 +108,12 @@ public enum MouseResize {
             : (slot.midY <= bounds.midY ? 1 : -1)
     }
 
-    /// The layout change a resize gesture asks for, or nil
-    /// when the layout has no parameter for that axis (the
-    /// window snaps back).
-    ///
-    /// Signs follow the dragged window's perspective: growing
-    /// a master grows the master zone; growing a stack window
-    /// shrinks it. BSP infers the side of the first split
-    /// from the slot's position; a width drag moves the
-    /// side-by-side ratio, a height drag the stacked one (#56).
+    /// Translates frame change into layout parameter adjustment
+    /// (#56, #222, #925).
     public static func translate(
         mode: LayoutMode,
         isMaster: Bool,
         stackSplitHorizontal: Bool,
-        // Required on purpose (#925 review): a defaulted
-        // discriminator lets a new call site silently
-        // classify a horizontal-track drag with the
-        // vertical mapping (across/along swapped).
         trackAxisVertical: Bool,
         slot: CGRect,
         frame: CGRect,
@@ -175,9 +141,6 @@ public enum MouseResize {
             }
             return nil
         case .stack:
-            // The ratio drag follows the split axis (#222);
-            // the cross-axis drag snaps back (the #67
-            // weight-drag exception above).
             let change = stackSplitHorizontal ? dw : dh
             guard abs(change) > threshold else { return nil }
             let sign: CGFloat = isMaster ? 1 : -1

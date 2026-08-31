@@ -1,26 +1,14 @@
 import Foundation
 
-/// Walks the name tables and pairs each name with its record
-/// (#1033).
-///
-/// Order is the tables' own declaration order, not alphabetical:
-/// `commands` reads navigation → Spaces → windows → settings →
-/// profiles, which is how someone scanning the listing wants to
-/// meet them. Flattening that into one alphabetical run is half
-/// of what #1033 was filed about.
+/// Maps API names to structured documentation records (#1033).
 extension APIReference {
-    /// One group of the listing, in print order.
+    /// Command group section in command listing.
     public struct APIGroup: Sendable, Equatable {
         public let name: String
         public let entries: [APIEntry]
     }
 
-    /// Every command, grouped: the `KiwiDesk` table first, then
-    /// the namespace tables alphabetically.
-    ///
-    /// Stored, not computed: the tables it walks are compile-time
-    /// constants, and `help` asks for the listing and then looks
-    /// one name up in it.
+    /// All command groups in display order.
     public static let groups: [APIGroup] =
         [APIGroup(name: coreGroup, entries: coreEntries)]
         + namespaces.keys.sorted().map { table in
@@ -30,34 +18,24 @@ extension APIReference {
             )
         }
 
-    /// Every command in every group, flattened.
+    /// Flattened list of all command entries.
     public static let entries: [APIEntry] = groups.flatMap(
         \.entries
     )
 
-    /// The entry a caller named — `focus`, `scroll.set_anchor`,
-    /// or an alias such as `list_commands`. Nil when nothing
-    /// answers to it.
+    /// Looks up command entry by canonical name or alias.
     public static func entry(named name: String) -> APIEntry? {
         entriesByName[name]
     }
 
-    /// Every name an entry answers to, including aliases.
+    /// Name and alias lookup index for fast entry resolution.
     private static let entriesByName: [String: APIEntry] =
         entries.reduce(into: [:]) { table, entry in
             table[entry.qualifiedName] = entry
             for alias in entry.aliases { table[alias] = entry }
         }
 
-    /// The `KiwiDesk` table: the dispatcher verbs in declaration
-    /// order, then `subscribe` (socket-only), then the Lua-only
-    /// entry points.
-    ///
-    /// A record missing for a name falls back to a pending record
-    /// rather than dropping the command from the listing — the
-    /// listing must never be shorter than the API. Both guards
-    /// see it: `APIRecordCensusTests` names the missing key, and
-    /// `APIRecordFilledTests` asserts that no record is pending.
+    /// Core command entries (`APIRecordCensusTests`, `APIRecordFilledTests`).
     static var coreEntries: [APIEntry] {
         var aliases: [String: [String]] = [:]
         var order: [String] = []
@@ -106,7 +84,7 @@ extension APIReference {
         return result
     }
 
-    /// One namespace table's entries, in its declared order.
+    /// Namespace table command entries in declaration order.
     static func namespaceEntries(of table: String) -> [APIEntry] {
         let records = namespaceRecords[table] ?? [:]
         return (namespaces[table] ?? []).map { function in
@@ -121,20 +99,12 @@ extension APIReference {
         }
     }
 
-    /// The record a name falls back to when its table has none.
-    ///
-    /// One home rather than four spellings of the construction:
-    /// it is deliberately NOT a factory on `APIRecord`, which is
-    /// what `.todo()` was and what invited a record table to
-    /// call it. Nothing can legitimately reach this — the census
-    /// is what keeps it unreachable, not the compiler — and a
-    /// command dropped from the listing is the worse failure.
+    /// Fallback record when documentation is pending
+    /// (`APIRecord.pendingSummary`).
     private static let pendingRecord = APIRecord(
         APIRecord.pendingSummary
     )
 
-    /// The one command reachable over the socket that has no
-    /// `KiwiDesk` table function — `dispatchable` inserts it by
-    /// hand, and so does the census.
+    /// Socket-only command without a KiwiDesk table mapping.
     public static let socketOnlyCommand = "subscribe"
 }

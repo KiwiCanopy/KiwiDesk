@@ -1,24 +1,10 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Upgrades imported `.custom` keybinding rows to `.navigation`
-/// or `.application` by exact-matching the `KeybindingCatalog`, so
-/// a recovered shortcut lands in the section that authored it with
-/// its proper label. Only the GUI knows the catalog, so this runs
-/// GUI-side after Core's `recoverKeybindings` (#4). Rows matching
-/// nothing stay `.custom` and show in Custom Bindings.
+/// Reclassifies `.custom` keybindings to `.navigation` or `.application`
+/// via catalog matching (`KeybindingCatalog`, `recoverKeybindings`, #4).
 enum KeybindingImportClassifier {
-    /// Reclassifies every `.custom` row in `config` in place,
-    /// rebuilding the navigation and change-layer commands the
-    /// keybindings tab would generate from the config's own
-    /// spaces and layer names.
-    /// `recoverResizeStep` reads a recovered Grow/Shrink magnitude
-    /// back into `resize.step` (#58) — pass it ONLY on an explicit
-    /// import, where the pulled-in bindings are the source of
-    /// truth. A plain load-for-edit leaves it `false`: there
-    /// `resize.step` is already authoritative (from tiler/profile
-    /// settings), so a magnitude baked into a stray `.custom` row
-    /// must not overwrite it (#58 review).
+    /// Reclassifies custom rows in config in-place (`resize.step`, #58).
     static func classify(
         _ config: inout GuiConfig,
         recoverResizeStep: Bool = false
@@ -35,16 +21,12 @@ enum KeybindingImportClassifier {
                 }
             }
         }
-        // Grow and Shrink carry the same magnitude, so the last
-        // recovered row wins harmlessly; untouched when the import
-        // has no resize row (keeps the default).
         if recoverResizeStep, let recoveredStep {
             config.settings.resizeStep = CGFloat(recoveredStep)
         }
     }
 
-    /// Lua action → label for every navigation and change-layer
-    /// command the keybindings tab can produce for this config.
+    /// Maps Lua actions to labels (`stepFreeCommands`, #91, #221).
     private static func navigationLabels(
         for config: GuiConfig
     ) -> [String: String] {
@@ -61,35 +43,13 @@ enum KeybindingImportClassifier {
             let command = KeybindingCatalog.switchLayerCommand(name)
             map[command.lua] = command.label
         }
-        // The Desktop rows are absent here on purpose and are
-        // matched by shape in `reclassify`, exactly as a resize
-        // of any step is: this map is built from the config,
-        // which records no Desktops, so a live list would be
-        // the only source — and a binding naming a Desktop that
-        // is not attached right now would then stay `.custom`
-        // and read as raw Lua until the screen came back.
-        // Step-independent Size & float rows: not in any
-        // navigation group and matched by no shape rule, so each
-        // needs its own entry or an imported binding stays Custom
-        // (#91). `toggle_floating` is the bindable one (#221);
-        // `make_floating` is kept for recognition only so a
-        // hand-written one still classifies. The list is
-        // `stepFreeCommands` — the ONE copy the banner's
-        // localizedLabel roster also consumes, so a command
-        // this map can assign is always one that roster can
-        // translate back (review 2026-08-10).
         for command in KeybindingCatalog.stepFreeCommands {
             map[command.lua] = command.label
         }
         return map
     }
 
-    /// Reclassifies one `.custom` row, returning a recovered
-    /// Grow/Shrink magnitude when the row is a resize of any step
-    /// (so `classify` can read it back into `resize.step`, #58).
-    /// Resize is checked first — before the exact-match map — so
-    /// a magnitude differing from the current step still upgrades
-    /// out of Custom.
+    /// Reclassifies single binding row, returning recovered resize step (#58).
     @discardableResult
     private static func reclassify(
         _ binding: inout KeyBinding,

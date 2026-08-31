@@ -1,75 +1,36 @@
 import Foundation
 
-/// Per-trigger animation toggles (issue #11), replacing the
-/// removed global `enable_animations`. Each trigger animates by
-/// default except the space switch; "off" snaps that trigger
-/// instantly. The instant resize/swap paths re-assert size via
-/// the EUI-bracketed size→position→size set (issue #50), so an
-/// un-animated landing is reliable on most apps — a few
-/// grid-snapping apps still clamp it.
-///
-/// JSON shape follows the one-vocabulary rule (AGENTS.md §5):
-/// `animations.set_on_space_change` → `animations.on_space_change`
-/// `animations.set_duration` → `animations.duration`
-/// `animations.set_scroll_duration` → `animations.scroll_duration`
+/// Per-trigger animation configuration and duration settings (#11, #50).
 public struct AnimationSettings: Sendable, Equatable, Codable {
-    /// Animate windows flying in from / out to the stash corner
-    /// on a KiwiDesk **virtual** space switch. Off by default:
-    /// many long-distance animations at once mean one blocking
-    /// AX call per window per frame, which stutters on slow
-    /// responders. Does not affect the native macOS desktop
-    /// slide (that is the OS's own, governed by Reduce Motion).
+    /// Animate virtual space switches (off by default for performance).
     public var onSpaceChange = false
 
-    /// Animate the layout sliding as focus moves within a
-    /// Scrolling space. On by default — it is a position-only
-    /// slide, so it is safe on slow-AX apps.
+    /// Animate scrolling layout viewport shifts.
     public var onScrolling = true
 
-    /// Animate window resizes (split-ratio changes, mouse
-    /// resize settle). On by default. The instant path now
-    /// re-asserts size via the EUI-bracketed size→position→size
-    /// set, so "off" lands reliably on most apps — but a few
-    /// grid-snapping apps still clamp an un-animated resize.
+    /// Animate window resizes and split-ratio changes.
     public var onWindowResize = true
 
-    /// Animate window swaps (exchanging two tiles). On by
-    /// default; "off" snaps the two windows into place.
+    /// Animate window swap transitions.
     public var onWindowSwap = true
 
-    /// Animate the layout reflow — tiles rearranging when a
-    /// window opens or closes, the mode switches, or a gap /
-    /// layout parameter changes. On by default; "off" snaps the
-    /// whole layout. Named to avoid the `layout_change` event.
+    /// Animate layout reflow upon window open/close or mode changes.
     public var onRelayout = true
 
-    /// General spring animation duration (ms). Clamped 50–1000
-    /// here (the single clamp authority) so a persisted or
-    /// hand-edited value can never diverge from what the engine
-    /// runs. Synced to the engine on profile apply. Default 150.
-    /// Lua: `animations.set_duration`.
+    /// Spring animation duration in milliseconds (50–1000 ms).
     public var durationMS = 150 {
         didSet { durationMS = Self.clampMS(durationMS) }
     }
 
-    /// Scrolling-layout focus-shift animation duration (ms),
-    /// clamped 50–1000. Separate from `durationMS` so each
-    /// knob tunes its own trigger. Synced on profile apply.
-    /// Lua: `animations.set_scroll_duration` (issue #51).
-    ///
-    /// Called a *duration* rather than a speed since #1020:
-    /// it is the time the shift takes, so raising it makes the
-    /// scroll slower. The stored key moved with the name and
-    /// owes `ConfigMigration` a crossing (AGENTS.md §5).
+    /// Scrolling layout shift duration in milliseconds
+    /// (50–1000 ms, #51, #1020, `ConfigMigration`).
     public var scrollDurationMS = 150 {
         didSet {
             scrollDurationMS = Self.clampMS(scrollDurationMS)
         }
     }
 
-    /// The supported animation-duration range (ms). Kept in
-    /// lockstep with `AnimationEngine`'s clamp; a value written
-    /// here and mirrored onto the engine lands identically.
+    /// Clamps duration within supported range (50–1000 ms).
     static func clampMS(_ ms: Int) -> Int {
         min(max(ms, 50), 1000)
     }
@@ -86,9 +47,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
 
     public init() {}
 
-    /// A profile saved before one of these keys existed (or a
-    /// hand-written partial object) keeps the missing default,
-    /// matching `TilingSettings`' missing-keys contract.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
@@ -118,8 +76,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 Bool.self,
                 forKey: .onRelayout
             ) ?? true
-        // `didSet` observers don't fire during init, so clamp
-        // the decoded values explicitly through the same helper.
         durationMS = Self.clampMS(
             try container.decodeIfPresent(
                 Int.self,

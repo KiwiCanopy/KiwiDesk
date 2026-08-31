@@ -1,41 +1,18 @@
 import CoreGraphics
 import Foundation
 
-/// What macOS says about the login session at one instant.
+/// Snapshot of macOS login session state (#835,
+/// `CGSessionCopyCurrentDictionary`).
 ///
-/// Read where the wake/unlock replay decides (#835): a
-/// lock → lid → unlock cycle produces two rest events and two
-/// return events, and the open question is whether the replay
-/// fires while the screen is still locked. Nothing branches on
-/// this — it is carried into the log so the next failing cycle
-/// answers that instead of a predicate chosen in advance.
-///
-/// Both facts come from the public
-/// `CGSessionCopyCurrentDictionary()`, so there is no private
-/// symbol here and nothing to fall back from. What differs is
-/// the two keys:
-///
-/// - `kCGSessionOnConsoleKey` is public and always present. It
-///   reports whether this session owns the console, which **fast
-///   user switching** flips and locking the screen does not
-///   (observed 2026-08-13, macOS 26.6.1: `1` on an unlocked
-///   session). It therefore cannot stand in for `screenLocked`,
-///   which is the whole reason both are recorded.
-/// - `CGSSessionScreenIsLocked` has no public constant, and macOS
-///   adds it to the dictionary **only while the screen is
-///   locked** — the same observation shows the key absent
-///   entirely when unlocked. An absent key is thus not
-///   distinguishable from an unlocked screen by reading alone, so
-///   it decodes to `nil` rather than to `false`. A diagnostic
-///   that guesses is worse than one that says it does not know.
+/// Records `kCGSessionOnConsoleKey` and `CGSSessionScreenIsLocked` for
+/// wake/unlock diagnostic replay. Screen lock status decodes to `nil` when key
+/// is absent.
 public struct SessionPresence: Sendable, Equatable {
-    /// Whether this session owns the console, or `nil` when the
-    /// session dictionary could not be read at all.
+    /// Whether this session owns the console, or `nil` if unreadable.
     public let onConsole: Bool?
 
-    /// Whether the screen is locked, or `nil` when macOS did not
-    /// report the key — see the type's note on why that is not
-    /// the same as `false`.
+    /// Whether the screen is locked, or `nil` when key is absent from session
+    /// dict.
     public let screenLocked: Bool?
 
     public init(onConsole: Bool?, screenLocked: Bool?) {
@@ -43,12 +20,9 @@ public struct SessionPresence: Sendable, Equatable {
         self.screenLocked = screenLocked
     }
 
-    /// The key with no public constant; see the type's note.
     private static let lockedKey = "CGSSessionScreenIsLocked"
 
-    /// The live read — the one host touch, kept to a single
-    /// statement so everything a test would want to exercise is
-    /// in the dictionary initializer below.
+    /// Live system session presence snapshot.
     public static func live() -> SessionPresence {
         SessionPresence(
             session: CGSessionCopyCurrentDictionary()
@@ -56,10 +30,7 @@ public struct SessionPresence: Sendable, Equatable {
         )
     }
 
-    /// Decodes one session dictionary. Every field is optional so
-    /// a dictionary macOS stops publishing — or never returns at
-    /// all — degrades to "unknown" rather than to a confident
-    /// wrong answer.
+    /// Decodes presence from session dictionary.
     init(session: [String: Any]?) {
         self.init(
             onConsole: Self.flag(session, kCGSessionOnConsoleKey),
@@ -75,17 +46,8 @@ public struct SessionPresence: Sendable, Equatable {
         return (raw as? NSNumber)?.boolValue
     }
 
-    /// One log-ready clause, e.g. `screen locked, on console`.
-    ///
-    /// Internal: a pre-rendered English clause on a public Core
-    /// type is what a GUI would reach for, and rendering a Core
-    /// sentence in the GUI is the one thing core-boundaries.md
-    /// ▸ #96 bans. Its only consumer is `onLog`.
-    ///
-    /// Says "lock not reported" rather than "unlocked" on the
-    /// `nil` case on purpose: on this machine the two are the
-    /// same observation, and writing "unlocked" would hand the
-    /// next reader a conclusion the read did not make.
+    /// Diagnostic description for logging
+    /// (core-boundaries.md ▸ #96, `onLog`).
     var summary: String {
         let lock: String
         switch screenLocked {

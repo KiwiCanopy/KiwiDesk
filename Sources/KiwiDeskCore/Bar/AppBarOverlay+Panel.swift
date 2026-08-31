@@ -1,7 +1,6 @@
 import AppKit
 
-/// Panel plumbing: the non-activating panel, the clipping
-/// item viewport inside it, and per-render container styling.
+/// Panel plumbing and view container styling for AppBarOverlay.
 extension AppBarOverlay {
     /// Flipped so the first item sits at the visual top of
     /// vertical bars.
@@ -9,10 +8,7 @@ extension AppBarOverlay {
         override var isFlipped: Bool { true }
     }
 
-    /// `plain` and `material` draw their shared plate as its
-    /// own view (`updatePlainPlate` / the glass-hosting dispatch)
-    /// so it can hug the run (`background_fit`); `boxed` boxes
-    /// each item. The container itself never paints.
+    /// Configures container layer properties (`background_fit`).
     func styleContainer(
         _ panel: NSPanel,
         style: AppBarStyle,
@@ -23,14 +19,10 @@ extension AppBarOverlay {
         }
         layer.masksToBounds = true
         layer.cornerRadius = 0
-        // The container never paints: the fill is drawn per item
-        // (Boxed) or as a shared plate (Plain / Material glass).
         layer.backgroundColor = NSColor.clear.cgColor
     }
 
-    /// Shows / sizes `plain`'s shared fill plate at
-    /// `plateFrame`, else hides it. Rounds against the real
-    /// (clamped) cross depth, like the glass plate.
+    /// Updates plain shared background plate geometry and style.
     func updatePlainPlate(
         _ panel: NSPanel,
         style: AppBarStyle,
@@ -38,8 +30,6 @@ extension AppBarOverlay {
         plateFrame: CGRect,
         animated: Bool = false
     ) {
-        // Solid Plain plate: the Plain shape without the glass
-        // finish (Plain + glass draws the glass plate instead).
         guard style.backgroundStyle == .plain, !style.glassEnabled,
             let content = panel.contentView
         else {
@@ -57,9 +47,6 @@ extension AppBarOverlay {
             )
         }
         plate.isHidden = false
-        // Ease alongside the items (same animation group): a
-        // snapping hug plate pops while the items it wraps are
-        // still sliding. Fresh plates take their frame direct.
         if animated, plate.frame != .zero,
             plate.frame != plateFrame
         {
@@ -75,8 +62,7 @@ extension AppBarOverlay {
             NSColor(kiwiHex: style.fillColor).cgColor
     }
 
-    /// The one hosting mode for this render (#407), from the
-    /// resolved style and whether the run overflows.
+    /// Resolves glass hosting mode (#407).
     func glassHosting(
         _ style: AppBarStyle,
         overflow: Bool
@@ -89,15 +75,8 @@ extension AppBarOverlay {
         )
     }
 
-    /// Teardown half of the one glass-hosting dispatch (#407): run
-    /// once per render, *before* the item loop, so the items sit in
-    /// the container the target mode expects while their frames are
-    /// laid out. It tears down every mode except `mode`; the target
-    /// itself is installed post-loop by `installGlassHosting`, which
-    /// needs those frames (per-box and plain-glass both place items
-    /// from them). The solid plain plate self-gates in
-    /// `updatePlainPlate`. Keeps the `GlassPlate.holds` idempotency:
-    /// the target's parenting is left in place across renders.
+    /// Prepares container hierarchy for glass hosting before item layout
+    /// (`GlassPlate.holds`, #407).
     func prepareGlassHosting(
         _ mode: GlassHosting,
         panel: NSPanel,
@@ -117,20 +96,13 @@ extension AppBarOverlay {
         guard let content = panel.contentView else { return }
         switch mode {
         case .boxGlass:
-            // Per-box glass keeps its boxes; hand the item run back
-            // so the boxes can reparent items out of it, unwind any
-            // plain-glass run, and hide the single plate.
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
             glassTint?.isHidden = true
         case .plainGlassHug, .plainGlassSpan:
-            // The run + single plate are hosted post-loop by
-            // `updatePlainGlass`; only the boxes must go first.
             teardownBoxGlasses()
         case .plainPlate, .none:
-            // No glass: unwind boxes and run, restore the plain
-            // hierarchy, and hide the glass plate.
             teardownBoxGlasses()
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
@@ -139,10 +111,7 @@ extension AppBarOverlay {
         }
     }
 
-    /// Install half of the one glass-hosting dispatch (#407): run
-    /// once per render, *after* the item loop, to host the target
-    /// mode from the laid-out `frames`. The teardown of the other
-    /// modes already happened in `prepareGlassHosting`.
+    /// Installs target glass hosting mode from computed frames (#407).
     func installGlassHosting(
         _ mode: GlassHosting,
         panel: NSPanel,

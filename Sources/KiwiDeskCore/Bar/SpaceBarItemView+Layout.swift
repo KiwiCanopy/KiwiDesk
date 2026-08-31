@@ -1,26 +1,17 @@
 import AppKit
 
-/// Slot layout for one Space item: the identifier glyph leads
-/// (left on a horizontal bar, top on a vertical one), the app
-/// glyphs follow along the bar axis. Pixel-rounded so glyphs
-/// never land on half pixels.
+/// Slot layout implementation for `SpaceBarItemView`.
 extension SpaceBarItemView {
     /// Cross-axis padding inside the slot.
     static let pad: CGFloat = 4
 
-    /// Square cell length each glyph (identifier or app)
-    /// occupies along the bar axis, derived from the cross
-    /// depth.
+    /// Cell dimension for glyphs along the bar axis.
     var cellLength: CGFloat {
         let depth = horizontal ? bounds.height : bounds.width
         return max(depth - Self.pad * 2, 8)
     }
 
-    /// The slot length an item with `appCount` glyphs wants
-    /// along the bar axis: identifier cell + the divider rule
-    /// (when glyphs follow) + one cell per app glyph (+ one for
-    /// the "+n" overflow badge) + padding. The overlay uses
-    /// this for auto sizing.
+    /// Computes requested slot length for given app count and overflow badge.
     static func autoLength(
         appCount: Int,
         overflow: Int = 0,
@@ -36,16 +27,10 @@ extension SpaceBarItemView {
         super.layout()
         let cell = cellLength
         if case .text = spaceGlyph {
-            // Emoji/character identifiers use the system font;
-            // App Font ligatures are app glyphs, never
-            // identifiers.
             identifierLabel.font = .systemFont(
                 ofSize: identifierFont
             )
         }
-        // Restyle BEFORE placing: `place` measures each text
-        // glyph to center it vertically, and the glyph fonts
-        // are set in `restyle` (bounds are already final here).
         restyle()
         var cursor = Self.pad
         place(identifierImage, at: cursor, cell: cell)
@@ -80,8 +65,6 @@ extension SpaceBarItemView {
             cursor += cell
         }
         if overflow > 0 {
-            // The "+n" badge occupies its own trailing slot,
-            // centered like a glyph.
             layoutBadge(
                 overflowBadge,
                 onCellAt: cursor,
@@ -93,10 +76,7 @@ extension SpaceBarItemView {
         layoutAccent()
     }
 
-    /// A count badge hugging its glyph cell's top-trailing
-    /// corner (flipped coordinates), or centered in the cell
-    /// for the overflow slot. Circle grows for multi-digit
-    /// counts — same shape as the App Bar's badge.
+    /// Positions count badge on cell corner or centered for overflow.
     private func layoutBadge(
         _ badge: NSTextField,
         onCellAt offset: CGFloat,
@@ -104,12 +84,6 @@ extension SpaceBarItemView {
         centered: Bool = false
     ) {
         guard !badge.isHidden else { return }
-        // The overflow "+n" fills its cell like a glyph, so it reads
-        // as the run's final icon rather than a small detached dot
-        // (owner/designer 2026-07-20). A per-app count stays the
-        // small corner dot (the shared badge-family size, QA
-        // 2026-07-19 — the 0.5-of-cell badge read oversized next to
-        // small glyphs).
         let base =
             centered
             ? cell * 0.8 : StateBadgeMetrics.side(cell: cell)
@@ -118,8 +92,6 @@ extension SpaceBarItemView {
             weight: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
-        // Capped at the cell so a "+42" on a thin bar squeezes
-        // rather than clipping top/bottom under masksToBounds.
         let diameter = min(
             max(base, textWidth + 2),
             cell + 2
@@ -159,11 +131,7 @@ extension SpaceBarItemView {
         badge.layer?.cornerRadius = diameter / 2
     }
 
-    /// The state badges (#414) on one glyph cell: sticky hugs
-    /// the top-LEADING corner, floating the bottom-leading —
-    /// the count badge owns top-trailing. Same footprint as the
-    /// corner count dot, no circle plate (a state mark, not a
-    /// count).
+    /// Positions sticky and floating state badges on glyph cell (#414).
     private func layoutStateBadges(
         at index: Int,
         onCellAt offset: CGFloat,
@@ -184,9 +152,6 @@ extension SpaceBarItemView {
                 width: cell,
                 height: cell
             )
-        // Flipped coordinates: minY is the visual top.
-        // Overhang matching the count badge (#414): sticky
-        // hugs top-leading, floating hugs bottom-leading.
         if index < stickyBadgeViews.count,
             !stickyBadgeViews[index].isHidden
         {
@@ -238,12 +203,7 @@ extension SpaceBarItemView {
                 width: cell,
                 height: cell
             )
-        // AppKit draws text from the frame's TOP, so a text
-        // glyph (App Font ligature, character identifier)
-        // handed the whole square cell reads top-aligned.
-        // Shrink to its measured height, centered — the
-        // `AppBarItemView+GlyphSlot` midY idiom. Images
-        // center natively and keep the full cell.
+        // Center text glyph vertically (`AppBarItemView+GlyphSlot`).
         if let field = view as? NSTextField {
             let height = ceil(
                 field.cell?.cellSize.height ?? 0
@@ -263,10 +223,8 @@ extension SpaceBarItemView {
     private func layoutAccent() {
         switch style.activeIndicator {
         case .outline:
-            // Boxed hugs the box; plain/material insets to the
-            // App Bar's capsule ring (ui-designer 2026-07-14) —
-            // a full-bounds square poked past the shared plate's
-            // rounded corners in hug mode (QA 2026-07-19).
+            // Boxed hugs the box; unboxed insets (`BarAccent.capsuleInset`,
+            // QA 2026-07-19).
             accent.frame =
                 style.hasBox
                 ? bounds
@@ -275,10 +233,7 @@ extension SpaceBarItemView {
                     dy: BarAccent.capsuleInset
                 )
         case .edgeMark:
-            // On the window-facing side of the slot: a top bar
-            // faces down, a left bar right, and so on. The view
-            // is flipped (y grows down), so a top bar's mark
-            // sits at maxY.
+            // Positions edge indicator on window-facing side of slot.
             let mark: CGFloat = 3
             switch style.edge {
             case .top:

@@ -1,26 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Floating schematic (#828).
-///
-/// Floating drew **nothing** — `LayoutSchematicView` answered it
-/// with an `EmptyView`, on the argument that a mode with no tiling
-/// geometry has no picture. That argument is `MonocleSchematic`'s
-/// too, and Monocle answers it by drawing its *model* instead of a
-/// layout. Floating has one as well, and it is the one fact a user
-/// needs: the windows stay where they were put, overlapping, and
-/// the shortcuts still work. Drawn nowhere, the mode read as a
-/// broken tile in the tour's strip and as a blank in Settings'
-/// own "Choose a layout" row (owner, on device, 2026-08-12).
-///
-/// **It takes no settings, and that is the honest part.** Nothing
-/// here derives from `TilingSettings`, because Floating has no
-/// knob to derive from — the count is the only input, and it moves
-/// the number of loose windows and nothing else.
+/// Floating layout preview schematic showing overlapping windows (#828).
 struct FloatingSchematic: View {
-    /// Windows on screen. Capped for the same reason Monocle caps
-    /// its fan: past three the cards march off the canvas and say
-    /// nothing the third did not.
+    /// Window count clamped to schematic rendering bounds.
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
     @Environment(\.schematicFocusStroke) private var focusStroke
@@ -29,20 +12,13 @@ struct FloatingSchematic: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    /// The restage damping, gated on Reduce Motion (#1069) —
-    /// the arrangement still redraws, it just stops travelling.
-    /// The ternary is spelled here rather than folded into
-    /// `LayoutSchematic.damping`; that file says why.
+    /// Restage animation damping gated on Reduce Motion
+    /// (`LayoutSchematic.damping`, #1069).
     private var damping: Animation? {
         reduceMotion ? nil : LayoutSchematic.damping
     }
 
-    /// Windows actually drawn. `internal` and asserted directly
-    /// (`LayoutSchematicCountTests`), never left to the source
-    /// scan: a schematic that TAKES the count and draws a
-    /// constant satisfies every substring a scan can look for
-    /// while answering nothing — the mutation `guard-prover`
-    /// shipped past that suite's first cut.
+    /// Windows actually drawn (`LayoutSchematicCountTests`).
     var drawn: Int { min(max(windows, 1), 3) }
 
     var body: some View {
@@ -77,14 +53,12 @@ struct FloatingSchematic: View {
         }
     }
 
-    /// The family's fallback ladder, stated once in
-    /// `SchematicCardColors` — the two card-fan schematics drew
-    /// byte-identical copies of it for a day, and what they were
-    /// copying was the rule rather than a value.
+    /// Card background fill (`SchematicCardColors`).
     private func fill(front: Bool) -> Color {
         SchematicCardColors.fill(front: front, palette: palette)
     }
 
+    /// Card border stroke (`SchematicCardColors`).
     private func edge(front: Bool) -> Color {
         SchematicCardColors.edge(
             front: front,
@@ -93,11 +67,7 @@ struct FloatingSchematic: View {
         )
     }
 
-    /// Overlapping, not tiled: each window sits offset from the
-    /// one behind it, and the frontmost carries the focus stroke
-    /// the rest of the family uses — a floating window can be
-    /// focused like any other, and drawing it otherwise would say
-    /// the mode is outside the app's own focus model.
+    /// Renders overlapping window rectangle.
     private func window(front: Bool) -> some View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
             .fill(fill(front: front))
@@ -112,10 +82,6 @@ struct FloatingSchematic: View {
             )
     }
 
-    /// The caption carries what the frame cannot: that nothing
-    /// moves a window here except the user, and that the keys
-    /// still work — which is the question a user actually has
-    /// about a space the tiler leaves alone.
     private var caption: String {
         L(
             "layout.schematic.floating.caption",

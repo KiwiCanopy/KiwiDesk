@@ -1,25 +1,10 @@
 import CoreGraphics
 
-/// The track weight paths' shared parameter derivation
-/// (#933/#944): which gaps and outer pair each axis subtracts,
-/// stated ONCE. Split from `TrackLayout+Domain` for file size.
-///
-/// Three sites divide a weighted track span — the interactive
-/// clamps (`resizeTrackWeight` / `resizeTrackShare`) and the
-/// retile-time heal (`healTrackSessionWeights`) — and before
-/// this file each hand-copied the axis→gap selection beside its
-/// own call. That is the exact drift `weightedSpan`'s doc
-/// blames for #925, one level up: a future change to track gap
-/// accounting that updates the clamps and forgets the heal
-/// leaves the heal reasoning over a different span and silently
-/// rewriting legal weights on every retile — worse than a
-/// drifted clamp, which only refuses a press.
+/// Shared parameter derivations for track layout weight paths
+/// (`StackLayout.weightedSpan`, `TrackLayout+Domain`, #925, #933, #944).
 extension TrackLayout {
-    /// The gap-adjusted span the per-track head weights divide
-    /// ACROSS the axis (columns' widths / rows' heights).
-    /// `region` is the raw layout-region dimension on that axis
-    /// (the resize dispatch's `span`; `bounds.width` for
-    /// vertical tracks).
+    /// Gap-adjusted span divided across track axis
+    /// (`StackLayout.weightedSpan`).
     public static func acrossSpan(
         region: Double,
         gaps: Gaps,
@@ -42,9 +27,8 @@ extension TrackLayout {
         )
     }
 
-    /// The gap-adjusted span one track's per-window shares
-    /// divide ALONG the axis — `acrossSpan`'s orthogonal, with
-    /// the gap and outer pairs swapped accordingly.
+    /// Gap-adjusted span divided along track axis
+    /// (`StackLayout.weightedSpan`).
     public static func alongSpan(
         region: Double,
         gaps: Gaps,
@@ -67,26 +51,7 @@ extension TrackLayout {
         )
     }
 
-    /// The render's folded partition, assembled ONCE (#944
-    /// review round 2): marker tracks counted uncapped, folded
-    /// through `overflowCap` to the effective render cap.
-    /// Consumed by `calculateGeometry`, the `track.swap` guard,
-    /// and the retile-time heal — which hand-mirrored this
-    /// assembly at three sites until the round caught the
-    /// fourth-copy drift risk (a fold-rule change updating the
-    /// render and forgetting the heal re-opens the exact defect
-    /// the folded heal fixed). `geoCap` stays a parameter: the
-    /// three sites legitimately source their context
-    /// differently (the render's full context, the swap guard's
-    /// live `layoutInput` with a headless fallback, the heal's
-    /// minimal probe), and that split is each site's own doc's
-    /// to argue. At a SECOND consumer of the merge question —
-    /// "does the fold merge ≥2 marker tracks, not a lone N+1th
-    /// slot" (`markers > cap`, today ruled once, in the swap
-    /// guard) — promote this tuple to a named struct carrying
-    /// that predicate as a member: a tuple cannot, which is why
-    /// the guard holds it as a comment (round-4 architect
-    /// review).
+    /// Assembles folded track partition for geometry and heal (#944).
     public static func foldedPartition(
         of tiled: [WindowID],
         breaks: Set<WindowID>,
@@ -115,13 +80,7 @@ extension TrackLayout {
         )
     }
 
-    /// The id a track's weight is keyed under: the first LOCAL
-    /// member of the slice. A tiled-sticky traveler heading a
-    /// track (#414 v2) is not in `space.windows`, so an entry
-    /// under its id could never be pruned (orphan; recycled-id
-    /// hazard, #308) — the weight writers key past it, and a
-    /// track with NO local member takes no write at all. One
-    /// copy for the clamp and the heal, like the spans above.
+    /// Resolves local head window ID for track weight keying (#308, #414).
     public static func localHead(
         ofTrack range: Range<Int>,
         tiled: [WindowID],

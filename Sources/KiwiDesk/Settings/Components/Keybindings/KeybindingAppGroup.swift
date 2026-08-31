@@ -2,32 +2,17 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// Section 2 — Open applications: launch hotkeys. Each row picks
-/// an installed app (or any bundle via "Other…"), a launch
-/// behavior (Open or Focus / Open New, #334), and a combo. The
-/// default action pulls the app into the current space, launching
-/// it if needed.
+/// Launch hotkeys group for applications (#334).
 struct ApplicationsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
-    /// Read by the row in `+Row` (dimming) and by the recorders
-    /// there (the live-apply seam), so neither is `private`.
     @Environment(\.keybindingOverrideBase)
     var overrideBase
     @Environment(\.keybindingLayerName)
     var layerName
-    /// The app chosen in the add-row but not yet committed — the
-    /// row only enters the list once an app is picked, so no
-    /// app-less placeholder can exist (matches App Rules). Read by
-    /// the add-row in `+AddRow`, so not `private`.
     @State var newApp: KeybindingCatalog.InstalledApp?
-    /// Alphabetical display order snapshotted on section entry and
-    /// mode change (#333). NOT recomputed on `bindings` mutation:
-    /// the row's control is a `KeyRecorderField` capture, so a live
-    /// re-sort could yank a row out from under the cursor
-    /// mid-record. A committed *new* row stays at the bottom this
-    /// session and takes its alpha slot next entry; re-picking an
-    /// app keeps the row's id, so it holds its existing slot.
+    /// Alphabetical display order snapshotted on section entry
+    /// (#333, `KeyRecorderField`).
     @State private var displayOrder: [UUID] = []
 
     var body: some View {
@@ -35,17 +20,6 @@ struct ApplicationsGroup: View {
             SettingsCatalog.shortcuts.openApplications
         ) {
             if orderedAppIDs.isEmpty {
-                // What holds instead of the empty list (#678
-                // Phase 4 pass 9, turn 18): what a binding here
-                // changes is what the emptiness leaves the reader
-                // wondering about. Worded FROM
-                // `shortcuts.app_behavior.help`, authoritative
-                // for the Open or Focus default a new row gets —
-                // crossing SPACES is the distinguishing
-                // behaviour, "brings it forward" is plain
-                // activation, and the two would take different
-                // verbs in ten languages (l10n audit,
-                // 2026-08-11).
                 Text(
                     L(
                         "shortcuts.apps.empty",
@@ -67,17 +41,11 @@ struct ApplicationsGroup: View {
             addRow
         }
         .onAppear(perform: recomputeOrder)
-        // The section view is reused across keybinding modes (no
-        // per-mode `.id`), so `onAppear` fires once — re-snapshot
-        // when the mode changes or later modes would render in raw
-        // array order. Recording is invalidated on mode switch, so
-        // re-sorting here can't yank an in-flight recorder.
         .onChange(of: layerName) { _, _ in recomputeOrder() }
     }
 
-    /// Application-binding ids in the snapshot's alpha order, with
-    /// any added since (absent from the snapshot) kept in array
-    /// order at the bottom for this session (#333).
+    /// Application binding IDs in snapshot alpha order with new rows
+    /// appended (#333).
     private var orderedAppIDs: [UUID] {
         let appIDs =
             bindings
@@ -104,9 +72,6 @@ struct ApplicationsGroup: View {
             .map(\.id)
     }
 
-    /// A stable, id-keyed binding into `bindings` — resolved at
-    /// access time so it survives any structural mutation of the
-    /// array (add / remove / Steal reorder).
     private func bindingFor(_ id: UUID) -> Binding<KeyBinding>? {
         guard bindings.contains(where: { $0.id == id }) else {
             return nil
@@ -126,9 +91,7 @@ struct ApplicationsGroup: View {
         )
     }
 
-    /// The "Other…" escape hatch: pick any app bundle by file,
-    /// returning it as an `InstalledApp` (nil on cancel). Shared
-    /// by the per-row re-pick and the add-row (in `+AddRow`).
+    /// Presents open panel to select custom application bundle.
     func pickBundleFromPanel()
         -> KeybindingCatalog.InstalledApp?
     {
@@ -150,14 +113,8 @@ struct ApplicationsGroup: View {
         )
     }
 
-    /// Deleting a row must unregister its hotkey, exactly as the
-    /// recorder's `onClear` in `+Row` does (#517). Without this the row
-    /// vanishes while its shortcut keeps firing until Save or
-    /// Revert — `liveApplyRecorded` rebuilds the running table
-    /// from its own session copy, which never saw the removal.
-    /// No-op off the live target, where nothing is registered.
-    /// Called by the row's trash button in `+Row`, so not
-    /// `private`.
+    /// Removes binding and unregisters active hotkey
+    /// (#517, `liveApplyRecorded`).
     func remove(_ id: UUID) {
         bindings.removeAll { $0.id == id }
         _ = model.liveApplyRecorded(

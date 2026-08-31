@@ -1,25 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// General ▸ Advanced: export a backup, and restore one (#606).
+/// General ▸ Advanced: backup export and restore actions (#606).
 ///
-/// **The two rows do not sit together, and that is the design.**
-/// `GeneralSection+Reset` states the drawer's invariant and
-/// enumerates it — an ascending-severity ladder, hatches last. So
-/// Export sits with the read-only tools above the ladder, while
-/// **Restore is the ladder's final rung, after Reset All
-/// Settings**: it is the most destructive action in the drawer.
-/// The proof is in that file's own doc comment, which is why this
-/// is not a taste call — Reset All is *named* "Reset All Settings"
-/// rather than "Total reset" because "once `init.lua` and the
-/// palettes visibly survive, a total-reset label would read as a
-/// lie". Palettes surviving is that action's stated ceiling, and
-/// Restore replaces them.
-///
-/// The cost is that the two halves of one feature are apart, so
-/// someone who exported scrolls past two destructive rows to find
-/// the way back. Accepted: the alternative inverts the one
-/// invariant that tells a user which button is safe to click.
+/// Follows ascending severity ordering defined in `GeneralSection+Reset`.
 extension GeneralSection {
     // MARK: - Export (read-only, above the ladder)
 
@@ -123,16 +107,7 @@ extension GeneralSection {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
-        // Built from the bundle it will apply, handed over by
-        // `presenting:` rather than read from parent state in the
-        // same tick (#843's shape, in the chrome that has it).
-        //
-        // Its own dialog rather than the shared `discardingEdits`
-        // gate, for the reason `resetAllRow` gives: that gate only
-        // fires while `isDirty`, and this must confirm every time.
-        // The message names BOTH consequences — the saved data
-        // replaced and the unsaved draft dropped — where Reset
-        // All's names only the first.
+        // Dialog presenting pending restore bundle (#843).
         .confirmationDialog(
             L(
                 "general.advanced.backup.restore.confirm.title",
@@ -153,12 +128,6 @@ extension GeneralSection {
                 pendingRestore = nil
             }
             Button(
-                // `spaces.delete_confirm.cancel`, not
-                // `discard.cancel`, for the reason and with the
-                // accepted coupling `resetAllRow` documents —
-                // stated there once rather than paraphrased
-                // here, a paraphrase of it having already
-                // shipped a wrong locale count.
                 L("spaces.delete_confirm.cancel", "Cancel"),
                 role: .cancel
             ) { pendingRestore = nil }
@@ -178,9 +147,7 @@ extension GeneralSection {
         }
     }
 
-    /// The dialog is presented exactly while a bundle is waiting,
-    /// so the two cannot disagree — one source of truth, not a
-    /// Bool shadowing an Optional.
+    /// Presents confirmation dialog while pending restore bundle exists.
     private var restoreConfirmBinding: Binding<Bool> {
         Binding(
             get: { pendingRestore != nil },

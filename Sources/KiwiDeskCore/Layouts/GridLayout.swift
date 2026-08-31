@@ -1,14 +1,6 @@
 import CoreGraphics
 
-/// Grid layout: dynamic (auto-balanced, square-ish) or rigid
-/// (fixed user-defined columns x rows).
-///
-/// Both types share one ceiling. `columns`x`rows` (or, with
-/// `auto_size`, the screen-computed dimensions) is the most
-/// cells the grid ever splits into: a rigid grid always fills
-/// it, a dynamic grid auto-balances *up to* it. Past capacity
-/// the excess windows cascade in the last cell — the same
-/// `OverlapStack` overflow either type falls back to.
+/// Grid layout system supporting dynamic and rigid tiling (`OverlapStack`).
 public struct GridLayout: LayoutSystem {
     public init() {}
 
@@ -71,14 +63,8 @@ public struct GridLayout: LayoutSystem {
         var result: [WindowID: CGRect] = [:]
         let capacity = columns * rows
 
-        // Overflow: excess windows beyond the capped capacity
-        // stack in the last cell. Dynamic reaches here only once
-        // the balanced arrangement is clamped to the cap; rigid
-        // whenever the fixed grid fills up.
         if count > capacity {
-            // Sticky windows keep a fully-tiled cell (#414 v2):
-            // one caught past the cap trades places with the
-            // last non-sticky tiled window, which piles instead.
+            // Sticky windows preserve a fully-tiled cell (#414 v2).
             let ordered = OverlapStack.stickyExempt(
                 windows,
                 tiled: capacity - 1,
@@ -108,10 +94,7 @@ public struct GridLayout: LayoutSystem {
 
         let fillLast =
             params.type == .dynamic && params.fillEmptyCells
-        // Both grid types honour the arrange order (#217): columns
-        // first fills row-major (across a row, then down), rows
-        // first column-major (down a column, then across). It is a
-        // fill-order setting, not only a dynamic-growth one.
+        // Both grid types honor arrangement order (#217).
         let columnFirst =
             params.splitDirection == .horizontal
 
@@ -119,11 +102,9 @@ public struct GridLayout: LayoutSystem {
             let col: Int
             let row: Int
             if columnFirst {
-                // Row-major filling.
                 col = index % columns
                 row = index / columns
             } else {
-                // Column-major filling.
                 col = index / rows
                 row = index % rows
             }
@@ -147,11 +128,7 @@ public struct GridLayout: LayoutSystem {
         return result
     }
 
-    /// The grid's cell ceiling: the screen-computed dimensions
-    /// when `auto_size` is on, otherwise the typed `columns` x
-    /// `rows`. Auto-size fits as many min-size cells as each
-    /// axis allows, so a landscape monitor yields more columns
-    /// than rows.
+    /// Computes cell capacity ceiling under auto-size or fixed parameters.
     func capDimensions(
         params: GridParams,
         usable: CGRect,
@@ -171,22 +148,7 @@ public struct GridLayout: LayoutSystem {
         return (max(1, cols), max(1, rows))
     }
 
-    /// Grid dimensions (columns x rows) for a window count,
-    /// bounded by the `cap`. Rigid uses the cap verbatim;
-    /// dynamic auto-balances a square-ish arrangement clamped to
-    /// the cap — the cap bounds the ceiling, not the growth, so a
-    /// dynamic grid stays tight until it hits it. When the
-    /// balanced arrangement's orientation fights the cap's (a
-    /// wide balance against a tall cap), the unpinned axis grows
-    /// to use the cap's full capacity before the count overflows.
-    ///
-    /// Public and `static` for the same reason `balanced` is: the
-    /// Settings preview needs the *whole* rule, not just the
-    /// balance, or it draws a grid that keeps subdividing past
-    /// the point the real one stops (#712). It takes the cap as a
-    /// parameter and touches no screen, so exposing it hands out
-    /// no state — the caller supplies the ceiling, which is the
-    /// one part that IS screen-derived (`capDimensions`).
+    /// Resolves grid dimensions bounded by capacity ceiling (#712).
     public static func dimensions(
         count: Int,
         params: GridParams,
@@ -212,22 +174,11 @@ public struct GridLayout: LayoutSystem {
         }
     }
 
-    /// Ceiling of `a / b` for positive integers.
     private static func ceilDiv(_ a: Int, _ b: Int) -> Int {
         (a + b - 1) / b
     }
 
-    /// The square-ish auto-balanced arrangement for a window
-    /// count, before any cap. Column-first (horizontal split)
-    /// grows columns first: 1x1, 2x1, 2x2, 3x2, 3x3, …;
-    /// row-first mirrors it.
-    ///
-    /// Public because the Settings preview balances its own
-    /// window count through it (#678 turn 10) rather than
-    /// reproducing the arithmetic: a preview holding a private
-    /// copy of this rule is a picture of the layout that stops
-    /// agreeing with it the day the rule changes. Pure and
-    /// screen-free, so exposing it hands out no state.
+    /// Auto-balanced column/row count for window count (#678 turn 10).
     public static func balanced(
         count: Int,
         splitDirection: GridParams.SplitDirection

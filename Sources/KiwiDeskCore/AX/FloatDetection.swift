@@ -1,12 +1,9 @@
 import ApplicationServices
 import Foundation
 
-/// Classifies windows from AX and CGWindow signals: float
-/// instead of tile, or ignore entirely (never managed).
+/// Classifies windows from AX and CGWindow signals for tiling or floating.
 public enum FloatDetection {
-    /// Subroles that identify auxiliary windows (dialogs,
-    /// panels, PIP overlays). Everything that is not a
-    /// standard window floats by default.
+    /// Subroles identifying auxiliary windows (dialogs, panels, PIP overlays).
     public static func shouldFloat(
         role: String,
         subrole: String
@@ -15,11 +12,7 @@ public enum FloatDetection {
         return subrole != kAXStandardWindowSubrole
     }
 
-    /// Subrole check plus the window's CGWindow layer. Normal
-    /// windows live on layer 0; panels and overlays (Ghostty's
-    /// quick terminal: layer 3) sit higher and never tile, even
-    /// when their subrole momentarily reads AXStandardWindow
-    /// (apps mid-launch report unreliable subroles).
+    /// Evaluates role/subrole and WindowServer layer (layer != 0 floats).
     public static func shouldFloat(
         role: String,
         subrole: String,
@@ -28,16 +21,12 @@ public enum FloatDetection {
         layer != 0 || shouldFloat(role: role, subrole: subrole)
     }
 
-    /// CGWindow layer of a window, nil if the system does not
-    /// list it (e.g. another native Space).
+    /// Returns CGWindow layer for window ID, or nil if unlisted.
     public static func windowLayer(of id: WindowID) -> Int? {
         serverSnapshot(of: id).layer
     }
 
-    /// One window's WindowServer signals — layer, alpha, and
-    /// bounds (CG global, top-left-origin coordinates) — read in
-    /// a single round trip, so ignore/float/helper classification
-    /// shares one snapshot (never query the server in a loop).
+    /// Snapshot of window properties from WindowServer (`kCGWindowBounds`).
     public struct WindowServerSnapshot: Sendable {
         public let layer: Int?
         public let alpha: Double?
@@ -73,19 +62,7 @@ public enum FloatDetection {
         )
     }
 
-    /// #309: a clearly-non-user helper window — a *raised-layer*
-    /// window that is fully transparent or entirely off every
-    /// display (CodexBar's 20×20 alpha-0 lifecycle keepalive at
-    /// (-5000, 6116)). Such a window must never be tracked: a
-    /// tracked float still earns a Space assignment and an App
-    /// Bar slot, so the menu-bar app reads as an open app.
-    /// Normal-layer (0) windows are never helpers — KiwiDesk
-    /// itself parks inactive-space windows off-screen at the
-    /// peek corner, and those must stay managed. Track-time
-    /// classification: a genuine overlay caught mid fade-in
-    /// (alpha still 0) self-heals — it stays untracked for one
-    /// beat and the next reconcile pass re-tracks it once
-    /// visible.
+    /// Detects non-user helper windows on raised layers (#309).
     public static func isInvisibleHelper(
         layer: Int?,
         alpha: Double?,
@@ -100,9 +77,7 @@ public enum FloatDetection {
         return !displays.contains { $0.intersects(bounds) }
     }
 
-    /// CG global bounds of every active display — the coordinate
-    /// space `kCGWindowBounds` reports in (top-left origin, no
-    /// Cocoa flip needed).
+    /// CG global bounds of all active displays.
     public static func activeDisplayBounds() -> [CGRect] {
         var count: UInt32 = 0
         guard
@@ -119,12 +94,7 @@ public enum FloatDetection {
         return ids.prefix(Int(count)).map { CGDisplayBounds($0) }
     }
 
-    /// AX can expose a transient proxy as an auxiliary window even
-    /// though no matching WindowServer window exists. Managing that
-    /// proxy creates a floating state entry and an AppKit fallback
-    /// border around system UI shown at the same location. Real
-    /// dialogs and panels have a layer; standard windows may be
-    /// absent because they live on another native Space.
+    /// Detects unbacked auxiliary proxy windows.
     public static func isUnbackedAuxiliary(
         role: String,
         subrole: String,
@@ -133,9 +103,7 @@ public enum FloatDetection {
         layer == nil && shouldFloat(role: role, subrole: subrole)
     }
 
-    /// Full decision for a live AX element, including user
-    /// rules. PIP windows (subrole AXFloatingWindow) float
-    /// automatically via the subrole check.
+    /// Evaluates if AX element should float using window rules (`FloatRules`).
     @MainActor
     public static func shouldFloat(
         element: AXUIElement,
@@ -152,9 +120,7 @@ public enum FloatDetection {
         )
     }
 
-    /// Variant for callers that already read the WindowServer layer.
-    /// Tracking uses it to keep ignore and float classification on
-    /// the same snapshot instead of making two server round trips.
+    /// Float decision given cached WindowServer layer (`FloatRules`).
     @MainActor
     public static func shouldFloat(
         element: AXUIElement,
@@ -175,9 +141,7 @@ public enum FloatDetection {
 }
 
 extension AXHelper {
-    /// Detects macOS native tabs (Finder, Terminal, Safari).
-    /// A tab group is a single `NSWindow` and is treated as
-    /// ONE tiling unit — tabs are never split apart.
+    /// Detects macOS native tab group (`AXTabGroup`).
     @MainActor
     public static func hasNativeTabs(
         _ element: AXUIElement

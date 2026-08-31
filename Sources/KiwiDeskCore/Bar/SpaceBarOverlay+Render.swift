@@ -1,15 +1,8 @@
 import AppKit
 
-/// The Space Bar's one layout pass. Split from `SpaceBarOverlay`
-/// for file size (§2): the stored views/state and the show/hide
-/// surface stay in the main file; the render composition — item
-/// run, scroll viewport, the pinned front segment (#409), the
-/// glass hosting, and the arrows — lives here.
+/// Layout and rendering passes for `SpaceBarOverlay` (#407, #409).
 extension SpaceBarOverlay {
-    /// One layout pass over the last shown state. `show()`
-    /// follows the active Space into view; a manual arrow or
-    /// autoscroll re-renders without that adjustment so it isn't
-    /// snapped straight back (the App Bar's `followingFocus`).
+    /// Executes one layout pass over the last shown state.
     func render(followingActive: Bool) {
         guard let state = lastShown else { return }
         let (items, frontApp, strip, style, stateMarkColors) = state
@@ -30,15 +23,6 @@ extension SpaceBarOverlay {
                     depth: depth
                 )
         }
-        // While the whole run fits, items plus the trailing front
-        // segment align as ONE run (an end-aligned bar ends at the
-        // rim including the segment) — the segment is the run's
-        // tail, unchanged. When the run OVERFLOWS, the segment is
-        // pinned to the trailing rim in a fixed band and only the
-        // Spaces scroll behind the arrows (#409), so the front app
-        // never scrolls out of view. The overflow threshold still
-        // weighs items + segment together, so the bar starts
-        // scrolling at exactly the same width as before.
         let front = frontExtent(
             frontApp,
             depth: depth,
@@ -50,18 +34,10 @@ extension SpaceBarOverlay {
             gap: gap,
             frontExtent: front
         )
-        // Pin only when the trailing band still leaves the Spaces a
-        // real viewport (room for both arrow zones); a pathological
-        // near-full-width app name falls back to scrolling with the
-        // run rather than collapsing the Spaces to nothing.
         let arrowRoom = 2 * (BarArrowView.zone + gap)
         let pinFront =
             total > axis && frontApp != nil
             && front < axis - arrowRoom
-        // Pinned: the segment owns the trailing `front` band, so the
-        // Spaces scroll in the axis that remains and the segment
-        // leaves the scrolled run. Not pinned: the segment rides the
-        // run as its tail, exactly as before.
         let scrolledFront = pinFront ? 0 : front
         let spacesAxis = pinFront ? axis - front : axis
         let scrolledTotal = Self.runTotal(
@@ -100,21 +76,12 @@ extension SpaceBarOverlay {
             pad: SpaceBarItemView.pad,
             scrollOffset: scrollOffset
         )
-        // The shared plate (plain fill / glass) hugs or spans
-        // per `background_fit`. With no arrow inset the
-        // viewport is the strip, so viewport-local run
-        // coordinates are already strip-local; while inset > 0
-        // the plate is full anyway.
         let runStart: CGFloat
         if let first = metrics.itemFrames.first {
             runStart = horizontal ? first.minX : first.minY
         } else {
             runStart = metrics.frontStart
         }
-        // A pinned segment (#409) means the run fills the strip
-        // (Spaces + arrows + segment), so the shared plate spans it
-        // — nothing to hug, and the pinned segment must sit on the
-        // same continuous plate as the Spaces.
         let plateFrame =
             pinFront
             ? CGRect(
@@ -132,9 +99,6 @@ extension SpaceBarOverlay {
                 horizontal: horizontal,
                 fit: style.backgroundFit
             )
-        // The one hosting mode for this render (#407): prepared
-        // (non-target teardown) here, then installed post-passes
-        // once the item frames are laid out.
         let hosting = glassHosting(style, overflow: inset > 0)
         prepareGlassHosting(
             hosting,
@@ -166,20 +130,10 @@ extension SpaceBarOverlay {
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
             }
-            // Only the run's outer items meet a rounded plate end.
-            // The trailing end is the front-app segment's when one
-            // trails, so the last Space item clips its trailing
-            // corner only without a front app.
             view.isFirstInRun = index == 0
             view.isLastInRun =
                 index == items.count - 1 && frontApp == nil
         }
-        // Host the segment in the panel content (outside the
-        // clipping viewport) while pinned, so it stays put as the
-        // Spaces scroll; in the viewport as the run's tail while it
-        // fits. Pinned, its divider sits one `gap` past where the
-        // forward arrow ends (`spacesAxis`), mirroring the run-tail
-        // spacing; the name may still reach the strip rim.
         frontHost = pinFront ? panel.contentView : itemContainer
         renderFrontSegment(
             frontApp,
@@ -189,10 +143,6 @@ extension SpaceBarOverlay {
             style: style,
             horizontal: horizontal
         )
-        // Install the target hosting from the now-laid-out item
-        // frames (per-box glass and the plain-glass run both position
-        // from them, so this runs after the item + front passes).
-        // #407: one dispatch, no per-mode branching at the call site.
         installGlassHosting(
             hosting,
             panel: panel,
@@ -226,7 +176,7 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// The index of the active Space, for scroll-follow.
+    /// Index of the active Space for scroll-follow navigation.
     private func activeIndex(_ items: [Item]) -> Int? {
         items.firstIndex(where: \.active)
     }

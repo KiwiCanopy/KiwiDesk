@@ -1,28 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The pill's leading readout and the unsaved-changes popover
-/// it opens (turn 9's third view of the draft, moved here from
-/// the header chip — owner 2026-08-10). Split from
-/// `SettingsFooter` when the popover took the file past the
-/// §2.1 target: this half is the draft narration, the other is
-/// the verbs, and they change for different reasons.
+/// Leading readout and unsaved-changes diff popover for `SettingsFooter`
+/// (#516, `SettingsDiffRowSource`).
 extension SettingsFooter {
-
-    /// The pill's first words: the change count with the edit
-    /// target's name, plus — stacked small beneath — whichever
-    /// scope caption applies (#516 keeps the paused scope and
-    /// the drift adoption VISIBLE, never a hover-only fact).
-    /// While the draft has attributed rows the count line is a
-    /// BUTTON opening the diff popover (`countButton`); at zero
-    /// rows there is no list to open, so it stays plain text.
-    ///
-    /// The N is the ROW count of the very list the popover
-    /// renders — one source, so the sentence and the list it
-    /// opens cannot disagree. `draftChangeCount` counts distinct
-    /// SETTINGS, and a per-instance family (three space modes
-    /// changed = one census key, three rows) made the pill say
-    /// "1" over a three-row list (owner, 2026-08-10).
+    /// Readout displaying change count and drift/scope captions (#516).
     var leadingReadout: some View {
         let rows = SettingsDiffRowSource.rows(for: model)
         return VStack(alignment: .leading, spacing: 2) {
@@ -56,16 +38,7 @@ extension SettingsFooter {
         }
     }
 
-    /// The count line as the popover's opener. Plain style on
-    /// the pill's own ink — the pill is dark chrome in both
-    /// modes, so the accent-label guards' bordered machinery
-    /// has no business here; the chevron is what says
-    /// "clickable" at rest, and hover confirms it with the
-    /// pill-ink wash + pointing hand (owner 2026-08-10 — the
-    /// search rows set the expectation). The shared
-    /// `hoverHighlight` chip is `Color.primary`-based, which
-    /// inverts with the appearance; on a pill that is dark in
-    /// BOTH modes the wash must ride the fixed pill ink.
+    /// Button opening the unsaved-changes popover.
     private func countButton(count: Int) -> some View {
         Button {
             unsavedPopoverShown = true
@@ -97,11 +70,8 @@ extension SettingsFooter {
         }
     }
 
-    /// The popover view of the one draft (turn 9): every change
-    /// as a labelled old → new row, each a jump to the control
-    /// that changed. It renders the SAME rows as the panel's
-    /// diff list — one renderer, so the two views of the draft
-    /// cannot disagree.
+    /// Popover listing individual uncommitted setting diffs
+    /// (`SettingsDiffJump`).
     private var unsavedPopover: some View {
         ScrollView {
             SettingsDiffRowsView(
@@ -131,10 +101,6 @@ extension SettingsFooter {
 
     func countLine(count: Int) -> String {
         guard count > 0 else {
-            // The docked footer's own key, kept through the
-            // pill rewrite: identical English, same meaning
-            // class, ten shipped translations (review
-            // 2026-08-10 caught the re-mint discarding them).
             return L(
                 "footer.unsaved_changes",
                 "Unsaved changes"
@@ -168,8 +134,7 @@ extension SettingsFooter {
             )
     }
 
-    /// What the pill says as it appears (#812): the countless
-    /// form, with the edit target where there is one.
+    /// Spoken VoiceOver description when pill appears (#812).
     var appearanceSentence: String {
         guard let target = editTargetName else {
             return countLine(count: 0)
@@ -181,18 +146,13 @@ extension SettingsFooter {
         )
     }
 
-    /// The banner above stays the authoritative naming of the
-    /// edit target; this is the pill's short echo of it.
     private var editTargetName: String? {
         if model.editingLua { return "init.lua" }
         return model.editingProfile ?? model.activeProfile
     }
 }
 
-/// The count button's hover confirmation: the pill-ink wash and
-/// the pointing hand. Not the shared `hoverHighlight` chip on
-/// purpose — that one paints `Color.primary`, which flips with
-/// the appearance, and this sits on chrome that is dark in both.
+/// Hover highlight on pill dark chrome (#1069).
 private struct PillHoverWash: ViewModifier {
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion)
@@ -205,10 +165,6 @@ private struct PillHoverWash: ViewModifier {
             .background(
                 RoundedRectangle(cornerRadius: 6)
                     .fill(
-                        // 0.14 eyeball-confirmed on the dark
-                        // plate (owner 2026-08-10) — above the
-                        // light-surface chips' 0.06/0.12
-                        // ladder, below chalk.
                         SettingsTheme.savePillInk.opacity(
                             hovering ? 0.14 : 0
                         )
@@ -216,8 +172,6 @@ private struct PillHoverWash: ViewModifier {
             )
             .padding(.horizontal, -6)
             .padding(.vertical, -3)
-            // The wash still appears and leaves; Reduce Motion
-            // drops only its fade (#1069).
             .animation(
                 reduceMotion ? nil : .easeOut(duration: 0.12),
                 value: hovering

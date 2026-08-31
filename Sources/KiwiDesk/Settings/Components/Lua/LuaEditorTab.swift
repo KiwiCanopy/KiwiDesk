@@ -1,16 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The integrated Lua editor. Shown when init.lua holds code
-/// the visual editor can't represent (foreign code touching
-/// managed vocabulary), or when the user opts to edit raw Lua.
-/// Edits here write the whole file verbatim.
+/// Raw Lua configuration editor tab and adoption interface (#68 §3.12).
 struct LuaEditorTab: View {
     @ObservedObject var model: SettingsModel
     @State private var confirmingAdopt = false
 
-    /// A muted, darker green so the action reads as inviting
-    /// without shouting over the footer's Save button.
     private let adoptGreen = Color(
         red: 0.16,
         green: 0.45,
@@ -20,9 +15,6 @@ struct LuaEditorTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             header
-            // Dirty tracking rides `luaSource`'s own didSet
-            // in the model — a live baseline comparison, not
-            // a latched flag.
             LuaSourceEditor(text: $model.luaSource)
         }
         .padding(16)
@@ -44,14 +36,7 @@ struct LuaEditorTab: View {
         }
     }
 
-    /// Adopt is an eighth discard path (#515 review): it reads
-    /// the original from **disk**, never `luaSource`, then
-    /// reloads — so an unsaved buffer is dropped. It keeps its
-    /// own dialog rather than stacking the shared discard gate
-    /// on top (one gesture, one prompt), so that dialog has to
-    /// say so itself. The adopt help's "Nothing is lost" is
-    /// about the on-disk commented backup and was silently
-    /// false for the buffer.
+    /// Adoption confirmation message reflecting dirty state (#515).
     private var adoptMessage: String {
         guard model.isDirty else {
             return L(
@@ -71,9 +56,6 @@ struct LuaEditorTab: View {
 
     @ViewBuilder private var header: some View {
         if model.forcedLuaEditor {
-            // The Adopt action lives with the content it
-            // migrates (#68 §3.12) — it is not a save verb,
-            // so it left the footer.
             HStack(spacing: 8) {
                 Label {
                     Text(foreignCodeCaption)
@@ -96,9 +78,6 @@ struct LuaEditorTab: View {
                 )
                 .foregroundStyle(.secondary)
                 Spacer()
-                // The mirror image of "Edit init.lua directly":
-                // `reload()` re-seeds from disk, so unsaved Lua
-                // is dropped. Same gate (#515).
                 Button(
                     L(
                         "lua_editor.back_to_visual",
@@ -153,20 +132,11 @@ struct LuaEditorTab: View {
         .tint(adoptGreen)
     }
 
-    /// The destination is INTERPOLATED from its own title rather
-    /// than re-typed (#818): a sentence that names a pane as
-    /// literal text is a hand-kept mirror, and every locale holds
-    /// the two as independent strings that must agree forever
-    /// with nothing checking that they do — `it` had already
-    /// drifted to «sezione Abbreviazioni» while the pane reads
-    /// "Scorciatoie".
+    /// Adoption help description interpolating shortcut pane title
+    /// (#515, #818).
     private var adoptHelpBody: String {
         L(
             "lua_editor.adopt_help.body",
-            // Was "Nothing is lost: …", which is true of the
-            // FILE and false of an unsaved editor buffer — and
-            // this popover sits beside the Adopt dialog that now
-            // says the opposite when dirty (#515 review).
             "Your init.lua isn't deleted: it's kept as a "
                 + "commented-out backup in the new file. "
                 + "Gaps, layouts, rules, and "
@@ -179,8 +149,7 @@ struct LuaEditorTab: View {
     }
 }
 
-/// A monospaced, scrollable text editor backed by NSTextView so
-/// large configs stay responsive and tabs indent properly.
+/// Monospaced text editor wrapped around NSTextView (`gui.md`, #812).
 struct LuaSourceEditor: NSViewRepresentable {
     @Binding var text: String
 
@@ -201,13 +170,6 @@ struct LuaSourceEditor: NSViewRepresentable {
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.string = text
-        // An AppKit view re-earns what a SwiftUI control gives
-        // free (gui.md); a bare `NSTextView` is an unnamed text
-        // area (#812). The FILENAME, verbatim, not a new noun:
-        // the surrounding copy already calls this "init.lua"
-        // throughout, and a translatable third name for the
-        // config file is Family C drift (localization audit,
-        // 2026-08-24).
         textView.setAccessibilityLabel("init.lua")
         return scroll
     }

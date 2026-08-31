@@ -1,32 +1,11 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Turns a changed census key into display-ready diff rows
-/// (#678 turn 9, digest §1.1): the per-key half the
-/// count-only chip deliberately shipped without, built here so
-/// the panel's "CHANGED IN THIS DRAFT" list and Home's popover
-/// can state old → new instead of only that something changed.
-///
-/// `SettingsDraftDiff` stays the attribution authority — it
-/// says WHICH settings changed; this type only narrates a key
-/// it is handed. An instanced key (a per-space override, an
-/// app rule) expands to one row per touched instance, labelled
-/// through the census key's own label plus the instance —
-/// which is why the return is a list.
-///
-/// Totality is guarded, not promised: every census key whose
-/// id names a model path (`SettingsDraftDiff.namesModelPath`)
-/// must produce at least one row for a config pair that
-/// differs on that path, or sit in `noReadout` with its
-/// reason — `SettingsValueReadoutTests` reds the key that
-/// lands in neither. Scalar keys are proven generically;
-/// instanced families each by a named mutation in that suite's
-/// battery — a NEW instanced key joins the battery in the same
-/// change, and the battery is the list.
+/// Formats changed settings keys into diff rows for draft review
+/// (`SettingsDraftDiff`, `SettingsValueReadoutTests`, #678 turn 9).
 @MainActor
 enum SettingsValueReadout {
-    /// Rows for one changed key. `old` is the clean baseline,
-    /// `new` the draft.
+    /// Returns diff rows describing changes between clean and draft configs.
     static func rows(
         for key: SettingKey,
         old: GuiConfig,
@@ -64,28 +43,24 @@ enum SettingsValueReadout {
         }
     }
 
-    /// Census keys with a model path but no diff narration, and
-    /// why not — the readout totality guard's one exemption
-    /// list. Internal-only storage never reaches the diff
-    /// (`SettingsDraftDiff` counts it, the popover shows its
-    /// area's rows); keys land here only with an argument.
+    /// Census keys exempt from diff narration (`SettingsValueReadoutTests`).
     static let noReadout: Set<SettingKey> = []
 }
 
 // MARK: - Shared value formatting
 
 extension SettingsValueReadout {
-    /// "8 pt" — the unit frame every point-valued row shares.
+    /// Formats point value string (e.g. "8 pt").
     static func points(_ value: CGFloat) -> String {
         L("diff.value.points", "%1$@ pt", trimmed(value))
     }
 
-    /// "150 ms".
+    /// Formats millisecond duration string (e.g. "150 ms").
     static func milliseconds(_ value: Double) -> String {
         L("diff.value.milliseconds", "%1$@ ms", trimmed(value))
     }
 
-    /// "50%" — unspaced, matching the sliders' own readout.
+    /// Formats percentage string (e.g. "50%").
     static func percent(_ fraction: Double) -> String {
         L(
             "diff.value.percent",
@@ -94,34 +69,28 @@ extension SettingsValueReadout {
         )
     }
 
-    /// A stored hex, shown verbatim: uppercased, leading "#".
-    /// The one copy — Borders, both bars and the per-layout
-    /// override rows all render a colour through it.
+    /// Formats hex color string with leading `#`.
     static func hexDisplay(_ hex: String) -> String {
         let digits =
             hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
         return "#" + digits.uppercased()
     }
 
-    /// `0` is the stored auto sentinel on the size sliders
-    /// (glow size #551, the bars' item/font sizes) — the GUI's
-    /// slider readout prints "Automatic" there, so this does
-    /// too. The one copy for every auto-at-0 row.
+    /// Formats points with `0` as "Automatic" (#551).
     static func autoPoints(_ value: CGFloat) -> String {
         value == 0
             ? L("settings.readout.auto", "Automatic")
             : points(value)
     }
 
-    /// Localized On / Off — toggles narrate their state, never
-    /// true/false.
+    /// Formats boolean toggle state.
     static func onOff(_ value: Bool) -> String {
         value
             ? L("diff.value.on", "On")
             : L("diff.value.off", "Off")
     }
 
-    /// A bare number, `.0` trimmed.
+    /// Strips trailing `.0` on numbers.
     static func trimmed(_ value: CGFloat) -> String {
         trimmed(Double(value))
     }
@@ -133,7 +102,7 @@ extension SettingsValueReadout {
         return String(format: "%.2f", value)
     }
 
-    /// "Monocle · thickness" — the instanced-row label frame.
+    /// Formats label for an instanced row (e.g. "Monocle · thickness").
     static func instanceLabel(
         _ base: String,
         _ instance: String
@@ -146,13 +115,11 @@ extension SettingsValueReadout {
         )
     }
 
-    /// The unset side of a pair that gained or lost its value —
-    /// the prototype's "— → 44 pt".
+    /// Placeholder for unset value.
     static var unset: String {
         L("diff.value.unset", "—")
     }
 
-    /// Structural one-worders for rows without a scalar pair.
     static var addedNote: String {
         L("diff.note.added", "Added")
     }
@@ -163,8 +130,7 @@ extension SettingsValueReadout {
         L("diff.note.edited", "Edited")
     }
 
-    /// The census label for a key, or its id as the visible
-    /// last resort (`SettingsCensusLabel` argues the chain).
+    /// Resolves human-readable label for key (`SettingsCensusLabel`).
     static func label(for key: SettingKey) -> String {
         SettingsCensusLabel.label(for: key) ?? key.id
     }

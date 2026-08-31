@@ -2,9 +2,7 @@ import Carbon.HIToolbox
 import KiwiDeskCore
 import SwiftUI
 
-/// One scope chip: "All", or one modifier combination. Single
-/// select — the board shows one thing at a time, which is what
-/// let the stripe palette (and its colour-vision ceiling) go.
+/// Modifier scope selection chip for virtual keyboard.
 struct ScopeChip: View {
     let label: String
     let isOn: Bool
@@ -36,9 +34,7 @@ struct ScopeChip: View {
     }
 }
 
-/// The name macOS gives the active input source ("German"), read
-/// and never stored — which is what the panel's "from macOS"
-/// suffix claims to the user.
+/// Reads localized keyboard layout name from active TIS input source.
 enum KeyboardInputSource {
     static func localizedName() -> String? {
         guard
@@ -57,35 +53,14 @@ enum KeyboardInputSource {
     }
 }
 
-/// The label for a key with no printable character. `ComboSymbols`
-/// owns the glyphs a COMBO renders; a board also draws keys no
-/// combo names, so the fallbacks live beside the board.
+/// Generates labels and fallbacks for physical keycaps (`ComboSymbols`).
 enum KeyboardKeyLabel {
-    /// A keycap prints its letter capitalised. The rule is
-    /// `ComboSymbols.capitalisedGlyph`'s — the board and every
-    /// combo-rendering surface must agree about what a key is
-    /// called, so there is one copy of it and this is a
-    /// forwarder, not a second implementation.
+    /// Capped key glyph (`ComboSymbols.capitalisedGlyph`).
     static func capped(_ char: String) -> String {
         ComboSymbols.capitalisedGlyph(char)
     }
 
-    /// What a modifier chip shows. Every other chip is pure
-    /// symbol; the bare-key one has no symbol to show, so it is
-    /// the row's one word.
-    ///
-    /// "No modifier", not "plain key", and the reasons are the
-    /// row's rather than the phrase's: every sibling chip names a
-    /// modifier COMBINATION, so a label naming a *key* answers a
-    /// different question than the chips beside it. Copy added
-    /// here reuses this key's noun for a modifier rather than
-    /// coining a second, which is drift a translator pays for
-    /// twice: this is the only `en.json` value containing the
-    /// word, so a second noun means every catalog coins one
-    /// more. Not "None" either —
-    /// in a multi-select row that reads as *clear the selection*.
-    /// The chip is not where a user learns the option exists: it
-    /// only appears once the draft already has such a binding.
+    /// Modifier scope chip label string (`KeyboardCensus.ModifierLayer`).
     @MainActor
     static func chipLabel(
         for layer: KeyboardCensus.ModifierLayer
@@ -95,8 +70,7 @@ enum KeyboardKeyLabel {
             : layer.label
     }
 
-    /// Mac symbols, because this is a Mac keyboard and the user
-    /// reads these shapes on the hardware in front of them.
+    /// Functional key symbols for macOS keyboard hardware.
     static let functional: [UInt32: String] = [
         36: "↩", 48: "⇥", 49: "space", 51: "⌫", 53: "⎋",
         123: "←", 124: "→", 125: "↓", 126: "↑",
@@ -107,16 +81,8 @@ enum KeyboardKeyLabel {
         return KeyCombo.keyName(for: code)?.uppercased() ?? ""
     }
 
-    /// Whether a translated character is something a cap can
-    /// actually print.
-    ///
-    /// `UCKeyTranslate` answers for an arrow or a delete with a
-    /// **private-use** character (`NSUpArrowFunctionKey` and its
-    /// family live at U+F700), which is neither empty nor
-    /// whitespace — so a nil-or-empty test passes it straight
-    /// through and the cap draws a blank. That is what shipped:
-    /// every arrow, and `⌫`, silently unlabelled while the
-    /// fallback table that names them sat unreached.
+    /// Tests whether scalar is printable, excluding private-use
+    /// (`UCKeyTranslate`, `NSUpArrowFunctionKey`).
     static func isPrintable(_ char: String) -> Bool {
         guard let scalar = char.unicodeScalars.first,
             char.unicodeScalars.count == 1
@@ -130,9 +96,8 @@ enum KeyboardKeyLabel {
 }
 
 extension KeyboardMatrix.PhysicalType {
-    /// Named, never translated: ANSI / ISO / JIS are the
-    /// industry's own names for the physical shapes and macOS
-    /// shows them untranslated too.
+    /// Display name for keyboard hardware layout
+    /// (`KeyboardMatrix.PhysicalType`).
     var label: String {
         switch self {
         case .ansi: return "ANSI"

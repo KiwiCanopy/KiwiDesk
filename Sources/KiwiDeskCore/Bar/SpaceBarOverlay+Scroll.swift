@@ -1,45 +1,24 @@
 import AppKit
 
-/// Whole-bar overflow for the Space Bar (#385): the scroll arrows,
-/// their layout and click handling, and the drag autoscroll that
-/// lets a window be dropped onto a Space scrolled off the strip.
-///
-/// The arrow zones are chrome that structurally excludes every
-/// item's hit frame (see `recordHitFrames`), so a drag cursor is
-/// over an arrow XOR over a Space item, never both. The autoscroll
-/// (this file) and the drop-spring (`SpaceBarDropCoordinator`)
-/// therefore govern disjoint zones and never contend — no shared
-/// dwell state, no coordination flag.
+/// Space Bar overflow scroll chrome and drag autoscroll (#385, #409).
 extension SpaceBarOverlay {
     /// Scroll geometry cached each render for the autoscroll path.
     struct ScrollGeom {
         let strip: CGRect
-        /// Arrow-zone inset (> 0 only while overflowing).
         let inset: CGFloat
         let horizontal: Bool
-        /// Distance one click / autoscroll tick shifts the bar.
         let step: CGFloat
-        /// The largest valid scroll offset (`total − viewport`).
         let maxOffset: CGFloat
-        /// The Spaces region's trailing edge along the axis (#409):
-        /// the strip length, or `strip − front band` while the front
-        /// segment is pinned. The forward arrow sits one zone inside
-        /// it, and `arrowHit` bounds the forward zone by it.
+        /// Trailing edge bound along axis (#409).
         let trailingAxis: CGFloat
     }
 
-    /// Quiet dwell over an arrow before the first autoscroll tick,
-    /// then the tick interval. Proposed defaults (#385) — worth a
-    /// feel-test pass, like #372's spring dwell, before treated as
-    /// settled; not user-configurable (no new knob).
+    /// Autoscroll timing parameters (#372, #385).
     nonisolated static let autoScrollInitialDelay: TimeInterval =
         0.2
     nonisolated static let autoScrollInterval: TimeInterval = 0.3
 
-    // MARK: - Arrow layout
-
-    /// Places the two scroll arrows over the strip's ends, shown
-    /// only toward hidden items, and caches the scroll geometry.
+    /// Configures scroll arrows based on overflow and scroll offset (#409).
     func layoutArrows(
         strip: CGRect,
         inset: CGFloat,
@@ -61,9 +40,6 @@ extension SpaceBarOverlay {
             horizontal
             ? CGRect(x: 0, y: 0, width: zone, height: strip.height)
             : CGRect(x: 0, y: 0, width: strip.width, height: zone)
-        // The forward arrow sits at the Spaces region's trailing
-        // edge — the strip rim, or one front band in while the front
-        // segment is pinned there (#409).
         forwardArrow.frame =
             horizontal
             ? CGRect(
@@ -110,21 +86,13 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Shifts the bar by `delta` and re-renders without following
-    /// the active Space, so a manual scroll isn't snapped back.
-    /// `render` re-clamps the offset to the valid range.
+    /// Shifts bar offset and re-renders without forcing active follow.
     func scroll(by delta: CGFloat) {
         scrollOffset += delta
         render(followingActive: false)
     }
 
-    // MARK: - Drag autoscroll
-
-    /// Feeds the live drag cursor (Cocoa, bottom-left global) so a
-    /// dwell over an arrow zone autoscrolls the bar toward the
-    /// hidden Spaces. Off the strip or off the arrows, stops any
-    /// running autoscroll. Drives the arrow's synthetic hover too
-    /// — a foreign AX drag delivers no `mouseEntered` (#385).
+    /// Updates drag autoscroll state based on cursor position (#385).
     func updateDragAutoScroll(atGlobal cocoaPoint: CGPoint) {
         guard isPanelVisible, let geom = scrollGeom else {
             cancelDragAutoScroll()
@@ -146,15 +114,13 @@ extension SpaceBarOverlay {
             trailingAxis: geom.trailingAxis,
             horizontal: geom.horizontal
         )
-        // Only a direction that still has hidden items counts —
-        // the matching arrow is visible exactly then.
         let direction = scrollableDirection(hit, geom: geom)
         backArrow.setDragHover(direction == .back)
         forwardArrow.setDragHover(direction == .forward)
         setAutoScrollDirection(direction)
     }
 
-    /// Stops any autoscroll and clears the arrows' drag hover.
+    /// Cancels active autoscroll task and clears drag hovers.
     func cancelDragAutoScroll() {
         autoScrollTask?.cancel()
         autoScrollTask = nil
@@ -163,8 +129,6 @@ extension SpaceBarOverlay {
         forwardArrow.setDragHover(false)
     }
 
-    /// The scroll direction the hit implies, but only if the bar
-    /// can still move that way; nil otherwise.
     private func scrollableDirection(
         _ hit: ScrollArrow?,
         geom: ScrollGeom
@@ -185,10 +149,6 @@ extension SpaceBarOverlay {
         autoScrollTask?.cancel()
         autoScrollTask = nil
         guard direction != nil else { return }
-        // Dwell, then tick every interval until the direction is
-        // cleared (cursor left the arrow), the drag ends (task
-        // cancelled), or the bar can't scroll further. Mirrors the
-        // drop coordinator's `dwellTask`.
         autoScrollTask = Task { [weak self] in
             try? await Task.sleep(
                 nanoseconds: nanos(Self.autoScrollInitialDelay)
@@ -204,9 +164,6 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// One autoscroll step; returns whether to keep ticking. Stops
-    /// (returns false) once the bar is clamped at the far end —
-    /// the arrow it was hovering has now hidden.
     private func autoScrollTick() -> Bool {
         guard let direction = autoScrollDirection,
             let geom = scrollGeom

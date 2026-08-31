@@ -30,11 +30,7 @@ public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
     public static let shift = Self(rawValue: UInt32(shiftKey))
 }
 
-/// C entry point for Carbon hotkey events. Fires on the main
-/// event dispatcher, for the pressed AND the released kind —
-/// Carbon delivers exactly one of each per physical hold (a
-/// registered hot key never auto-repeats), which is what the
-/// hold-to-glide engine builds on (#1056).
+/// C callback for Carbon hotkey events (`RegisterEventHotKey`, #1056).
 private func hotkeyCallback(
     _ handler: EventHandlerCallRef?,
     _ event: EventRef?,
@@ -67,24 +63,15 @@ private func hotkeyCallback(
     return noErr
 }
 
-/// A registrar that also reports hot key RELEASES (#1056).
-/// Split from `HotkeyRegistrar` so the many press-only fakes in
-/// the test trees stay valid; the hold-to-glide engine arms
-/// only when its registrar conforms, because a repeat with no
-/// release channel would never stop.
+/// Hotkey registrar reporting key releases for hold-to-glide (#1056).
 @MainActor
 public protocol HotkeyReleaseReporting: AnyObject {
-    /// Called with the registration id whose key was released.
-    /// One call per physical release.
+    /// Handler invoked on key release.
     var onRelease: @MainActor (UInt32) -> Void { get set }
 }
 
-/// Registers system-wide keyboard shortcuts via the Carbon API.
-///
-/// Shortcuts are intercepted by the system directly — KiwiDesk
-/// never needs the global "Input Monitoring" (keylogger)
-/// permission. Event taps are reserved for mouse drag tracking
-/// only (see AGENTS.md guardrails).
+/// Registers global keyboard shortcuts using Carbon APIs without AX
+/// keylogging.
 @MainActor
 public final class CarbonHotkeyCenter {
     private var handlers: [UInt32: () -> Void] = [:]
@@ -92,8 +79,8 @@ public final class CarbonHotkeyCenter {
     private var nextID: UInt32 = 1
     private var eventHandler: EventHandlerRef?
 
-    /// The release fan-out (`HotkeyReleaseReporting`, #1056).
-    /// One consumer slot — `KeybindingManager` owns it.
+    /// Release callback handler (`HotkeyReleaseReporting`,
+    /// `KeybindingManager`, #1056).
     public var onRelease: @MainActor (UInt32) -> Void = { _ in }
 
     /// Four-char code "KIWI" tagging our hotkey registrations.
@@ -107,8 +94,7 @@ public final class CarbonHotkeyCenter {
 
     public init() {}
 
-    /// Registers a hotkey; returns its ID, or nil on failure
-    /// (e.g. the combination is taken by the system).
+    /// Registers a hotkey; returns its ID or nil on failure.
     public func register(
         keyCode: UInt32,
         modifiers: HotkeyModifiers,
@@ -154,20 +140,12 @@ public final class CarbonHotkeyCenter {
     }
 
     fileprivate func dispatchRelease(id: UInt32) {
-        // A release for an id already unregistered is dropped
-        // with the handler lookup — `onRelease` consumers key
-        // their own state by id and must not hear stale ids.
         guard handlers[id] != nil else { return }
         onRelease(id)
     }
 
-    /// Reached only from `register` — construction touches no
-    /// OS state, and `HoldGlideEligibilitySeamTests` leans on that by
-    /// building a live center bare to pin the production
-    /// release channel. Moving this install into an
-    /// initializer would put a Carbon event handler on the
-    /// dispatcher target in every test run (the #565 class)
-    /// through the one construction the test trees permit.
+    /// Installs Carbon event handler on first registration
+    /// (`HoldGlideEligibilitySeamTests`, #565).
     private func installHandlerIfNeeded() {
         guard eventHandler == nil else { return }
         var eventTypes = [
