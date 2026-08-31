@@ -1,21 +1,8 @@
 import CoreGraphics
 import Foundation
 
-/// The Space Bar's look and behavior (#293): one bar per display
-/// listing that display's Spaces, layout-independent. Stored
-/// top-level as `space_bar` in profile JSON, set from Lua via
-/// `space_bar.set_*`.
-///
-/// Deliberately **global-only** — the bar exists outside every
-/// layout, so there is no per-layout override mirror (and no
-/// parity surface for one). `enabled` lives here for the same
-/// reason: no layout owns the bar.
-///
-/// The two-accent model is the bar's signature: `itemColor`
-/// paints inactive spaces, `activeItemColor` the active space's
-/// identifier and glyphs, and `focusedItemColor` the focused
-/// window — its glyph inside the active space AND the front-app
-/// segment (spaces.lua's `space_focused_window`).
+/// The Space Bar's look and behavior (#293): global per-display bar listing
+/// that display's Spaces. Stored as `space_bar` in profile JSON.
 public struct SpaceBarStyle: Sendable, Equatable {
     public typealias BackgroundStyle = AppBarStyle.BackgroundStyle
     public typealias BackgroundFit =
@@ -23,155 +10,70 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Alignment = AppBarStyle.BarAlignment
 
-    /// On by default (QA 2026-07-19): the bar is the only
-    /// surface where KiwiDesk's Spaces are visible at
-    /// all — without it a new user may never discover the
-    /// concept. macOS's own Spaces have Mission Control; ours
-    /// have only this.
+    /// On by default (QA 2026-07-19) to surface Spaces discoverability.
     public var enabled = true
-    /// The absolute screen edge the bar occupies. When it
-    /// matches the App Bar's edge, the Space Bar is always
-    /// screen-facing and the App Bar window-facing (space-first
-    /// reservation) — never a conflict.
-    ///
-    /// Top by default (#660), under the menu bar, with the App
-    /// Bar on the bottom beside the Dock.
+    /// Absolute screen edge occupied (top by default, #660).
     public var edge: AppBarEdge = .top
-    /// Item-group placement along the bar (#293 QA); one
-    /// shared default with the App Bar — the bar's pre-QA
-    /// de-facto start anchoring was an omission, not a
-    /// decision.
+    /// Item-group placement along the bar (center by default, #293 QA).
     public var alignment: Alignment = .center
-    /// Depth of the reserved strip (pt); aligned with the App
-    /// Bar default.
+    /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
-    /// Box length along the bar (pt); 0 (default) = auto.
+    /// Box length along the bar (pt); 0 = auto.
     public var itemSize: CGFloat = 0
     /// Spacing between space boxes (pt).
     public var itemGap: CGFloat = 6
-    /// 0 (default) = auto: text scales with the bar thickness.
+    /// Font size (pt); 0 = auto scale with thickness.
     public var fontSize: CGFloat = 0
-    /// Max app-group glyphs rendered per Space item (#376);
-    /// grouping runs first, then this cap, and any further groups
-    /// fold into the trailing "+n" badge. Read through
-    /// `resolvedGlyphCap`, which clamps to `glyphCapRange`.
-    /// Default 5 (the shipped #293 value).
+    /// Max app-group glyphs per Space item before "+n" badge (#376).
+    /// Default 5.
     public var glyphCap = 5
-    /// How app glyphs are drawn (#294): the native app image or
-    /// a monochrome App Font glyph following the bar's text
-    /// colors. Apps without a resolvable image fall back to the
-    /// App Font `Default` glyph either way.
+    /// App icon rendering mode: native image or App Font glyph (#294).
     public var iconSource: BarAppIconSource = .appImage
-    /// Plain by default, like the App Bar (#660).
+    /// Plain by default, matching App Bar (#660).
     public var backgroundStyle: BackgroundStyle = .plain
-    /// Liquid Glass finish (macOS 26+), orthogonal to the shape —
-    /// see `AppBarStyle.liquidGlass`. Ignored below 26.
+    /// Liquid Glass finish (macOS 26+). Ignored on older versions.
     public var liquidGlass: Bool = false
-    /// Hug by default, like the App Bar (QA 2026-07-19).
+    /// Background fit (hug by default, QA 2026-07-19).
     public var backgroundFit: BackgroundFit = .hug
     public var activeIndicator: ActiveIndicator = .outline
-    /// Corner rounding as a percentage (0–100) of thickness/2,
-    /// like the App Bar.
+    /// Corner rounding percentage (0–100) of thickness / 2.
     public var cornerRoundness: CGFloat = 50
-    /// Opacity (0.05–1) of everything on an INACTIVE space — the
-    /// outer dim tier. Lua-only (`set_dim_factor`, no GUI); default
-    /// = `BarAccent.untintedAlpha`.
+    /// Opacity (0.05–1) on inactive spaces (`BarAccent.untintedAlpha`).
     public var dimFactor: CGFloat = BarAccent.untintedAlpha
-    /// Opacity (0.05–1) of an UNFOCUSED window's glyph on the
-    /// ACTIVE space — the middle dim tier. Lua-only
-    /// (`set_active_dim_factor`); default =
-    /// `BarAccent.activeUnfocusedAlpha`. Independent of `dimFactor`
-    /// (Lua may invert the ladder; the GUI is the curated gate).
+    /// Opacity (0.05–1) of unfocused glyph on active space.
     public var activeDimFactor: CGFloat =
         BarAccent.activeUnfocusedAlpha
-    /// Trailing `| <front app>` segment (spaces.lua's front_app);
-    /// off by default (ui-designer verdict 6).
+    /// Trailing front-app segment; off by default (ui-designer verdict 6).
     public var showFrontApp = false
-    /// Longest front-segment title drawn, in characters; read
-    /// through `resolvedTitleCap`, which clamps to
-    /// `AppBarStyle.titleCapRange` (the shared range, aliased
-    /// rather than re-declared like `BackgroundStyle` above).
-    ///
-    /// The segment cannot CLIP without it — `layoutFrontName`
-    /// already tail-truncates to the remaining viewport. The cap
-    /// exists because the render pass folds the segment's
-    /// estimated length into its alignment total
-    /// (`SpaceBarOverlay+Render`), so under `center` or `end` a
-    /// growing title slides the whole Space run sideways, and a
-    /// title grows on every keystroke.
+    /// Front-segment character limit to prevent layout shifts. Default 25.
     public var titleCap = 25
-    /// Hides empty spaces except the current one (verdict 4);
-    /// off by default.
+    /// Hides empty spaces except current; off by default (verdict 4).
     public var hideEmpty = false
-    /// Sticky/floating state badges on space items (#414):
-    /// sticky top-left, floating bottom-left (top-right stays
-    /// the group count). On by default and Lua-only
-    /// (`set_sticky_badge`, no GUI toggle) — in the bar there
-    /// is otherwise no way to tell tiled from floating, and a
-    /// sticky window is invisible state. Space Bar only; the
-    /// App Bar shows no state badges.
+    /// Sticky/floating state badges on space items (#414). Default true.
     public var stickyBadge = true
-    /// Drag-drop spring dwell (#372): how long a dragged window
-    /// must hover a Space item before the visible space springs
-    /// to it, in milliseconds. Read through `resolvedSpringDelay`,
-    /// which clamps to `springDelayRange`. Default 1500 (1.5 s).
-    /// (Named without the `MS` suffix so the reflected field name
-    /// snakes to the `spring_delay` key the parity guard expects.)
+    /// Drag-drop hover dwell before space spring switch (ms, #372).
+    /// Default 1500.
     public var springDelay = 1500
-    /// Inactive spaces: identifier + glyphs (muted tier).
-    /// KiwiCanopy theme; defaults mirrored as examples in
-    /// docs/lua-reference.md (Space Bar colors) — change both.
+    /// Inactive spaces accent color (#EAF3EE66).
     public var itemColor = "#EAF3EE66"
-    /// The active space's accent (identifier + its glyphs).
+    /// Active space accent color (#8DB354).
     public var activeItemColor = "#8DB354"
-    /// The focused window's accent, on two surfaces: its glyph
-    /// inside the active space, and the front-app segment (glyph
-    /// + name). Deliberately NOT the group-count badge's text —
-    /// that is ink on an independently chosen chip rather than on
-    /// the bar plate, so it keeps `groupBadgeTextColor` and lets
-    /// the alpha ladder carry focus (#470). A
-    /// genuinely different hue, not a tint of the active-space
-    /// color, so the two states read apart (QA 2026-07-19).
-    ///
-    /// Converged onto the palette in #470 by reusing the amber
-    /// the rebrand had *already* ratified for the drag drop-zone
-    /// (`DragVisual.dropZoneDefault`) rather than inventing a
-    /// hue: same H36 as the old `#E8A33D`, dropped L57% → L40%.
-    /// Here the **lightness** is load-bearing, not the hue: an
-    /// amber against a green primary is the axis red-green vision
-    /// loss erases, so keep that gap if this is retuned — a
-    /// lighter amber loses it. What survives the loss generally is
-    /// lightness *or* blue↔yellow, and #511's Kiwi Neon takes the
-    /// second road (green primary → cyan focused, near-equal
-    /// lightness); that road is closed here only because the
-    /// default's amber is fixed by the drag drop-zone above.
-    /// (`SpaceBarAccentSeparationTests` pins the floor,
-    /// docs/design-decisions.md carries the numbers.) Accepted
-    /// trade: focused now reads darker than the active green, not
-    /// brighter. Default mirrored in docs/lua-reference.md.
+    /// Focused window accent color on space bar and front-app segment (#470,
+    /// #511, QA 2026-07-19; `SpaceBarAccentSeparationTests`).
     public var focusedItemColor = "#C2790A"
     /// Hover tint on non-active space items.
     public var hoverFillColor = "#AACB5D80"
     public var hoverItemColor = "#EAF3EE"
-    /// The fill under the items — a box per Space (Boxed), one
-    /// shared plate (Plain), or the Liquid Glass tint (Material).
-    /// A cool-dark surface under the kiwi accent, 70% opaque to
-    /// match the App Bar (#660, retuned by #755 — the argument
-    /// is on `AppBarStyle.fillColor`).
+    /// Plate background fill (#14201CB3, #660, retuned by #755).
     public var fillColor = "#14201CB3"
     public var highlightColor = "#8DB354"
-    /// Count badges (grouped duplicates and the "+n" overflow),
-    /// shown in these colors on the active space and muted from
-    /// `itemColor` on inactive ones. Neutral grey by default for
-    /// the reason `AppBarStyle.groupBadgeColor` carries (#955) —
-    /// the two bars' badges are one idiom and move together.
+    /// Group count badge colors (#955).
     public var groupBadgeColor = "#636366"
     public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}
 
-    /// Liquid Glass paints only where the platform renders it —
-    /// false below macOS 26 even if `liquidGlass` is stored true.
+    /// True if Liquid Glass is enabled and supported on this platform.
     public var glassEnabled: Bool {
         liquidGlass && AppBarStyle.glassAvailable
     }
@@ -181,35 +83,17 @@ public struct SpaceBarStyle: Sendable, Equatable {
         backgroundStyle == .boxed && !glassEnabled
     }
 
-    /// `AppBarStyle.plateSpans`' twin — same rule, same
-    /// consult set (the Settings previews; the live bar
-    /// resolves through `BarPlate.frame`). Kept per struct
-    /// because each preview reads the style it draws.
+    /// Whether plate background spans entire screen width.
     public var plateSpans: Bool {
         !hasBox && backgroundFit == .full
     }
 
 }
 
-// MARK: - Codable
-
-/// The conformance is declared here, in the type's own file,
-/// because Swift only synthesizes `encode(to:)` where the
-/// conformance sits — a cross-file `extension … : Codable` would
-/// force a hand-written encode, i.e. exactly the mirrored field
-/// list `.claude/rules/parity-tests.md` says to avoid. The keys
-/// and the sparse decode live in `SpaceBarStyle+Coding.swift`.
-///
-/// This is the **opposite** placement from
-/// `TilingSettings+Coding.swift`, deliberately, and the two
-/// should not be "harmonized": that type hand-writes its encode,
-/// so it can keep the conformance next to the implementation and
-/// warns against a gutted extension re-synthesizing camelCase.
-/// `SpaceBarStyle` relies on synthesis instead, so its
-/// conformance has to stay here. The residual hazard — deleting
-/// or renaming `CodingKeys` in the other file would let both
-/// sides silently re-synthesize camelCase — is backstopped by
-/// `SpaceBarParityTests` (which references
-/// `CodingKeys.allCases`, so it stops compiling) and
-/// `SettingsCodingTests` (which pins the snake_case keys).
+/// Synthesized Codable conformance must stay in the type's own
+/// file (cross-file conformances get no synthesized `encode`,
+/// forcing the mirrored list parity-tests.md bans). The OPPOSITE
+/// placement from `TilingSettings+Coding` is deliberate — do not
+/// harmonize; `SpaceBarParityTests` and `SettingsCodingTests`
+/// backstop the residual hazard.
 extension SpaceBarStyle: Codable {}

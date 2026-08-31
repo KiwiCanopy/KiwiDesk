@@ -1,21 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The pushed per-space override editor (#678 8b), replacing the
-/// #205 Customize popover. The popover capped the editing surface
-/// at 392 pt — "the app's narrowest editing surface," by its own
-/// docstring — which a side-by-side live preview cannot fit; the
-/// full pane can. This is a view-state branch of `SpacesSection`
-/// driven by `model.nav.spaceOverridesFocus`, not a
-/// `SettingsSurface`: the override controls are per-space and
-/// uncataloged, so there is nothing for search or the #326 bridge
-/// to reveal — the breadcrumb's back segment is the whole
-/// navigation.
-///
-/// This chrome owns the header — the breadcrumb, the title, and
-/// the active-layout reset (top-right, the destructive action that
-/// concerns the rows below it) — while `SpaceOverrideRows` draws
-/// the rows card and the dormant "saved for other layouts" card.
+/// Pushed per-space override editor (#678 8b, #205, #326, #794).
 extension SpacesSection {
     @ViewBuilder
     func overridesEditor(_ space: SpaceID) -> some View {
@@ -39,15 +25,7 @@ extension SpacesSection {
         }
     }
 
-    /// The rows and, BENEATH them, the reset that acts on them.
-    ///
-    /// The button used to ride the header's trailing edge, which
-    /// put it at the far side of the PANE while the rows cap at
-    /// 520 — a lone control floating in a void with the card
-    /// squeezed to the left of it (owner, on device,
-    /// 2026-08-16). Under the column it reads as that column's
-    /// action, which is what it is, and the header goes back to
-    /// being a title.
+    /// Override rows and reset button (owner 2026-08-16, #291, #794).
     @ViewBuilder
     private func overridesBody(
         _ space: SpaceID,
@@ -61,61 +39,30 @@ extension SpacesSection {
                     space: space,
                     pendingResetAll: $pendingResetAll
                 )
-                // The 520 pt cap is GONE, and with it the
-                // reason it existed: it reserved the rest of
-                // the pane for the live preview that used to
-                // sit beside these rows, and #794 moved that
-                // preview into the detail panel. What was left
-                // was a card squeezed to 520 in a pane three
-                // times as wide, truncating its own inherited
-                // readouts — "folgt Scrolling-Standards ·
-                // Hor…" — with the space to finish the sentence
-                // sitting empty beside it (owner, on device,
-                // 2026-08-16). Widening the OVERRIDE column to
-                // fit German took another 24 pt off the same
-                // text.
-                //
-                // Still BOUNDED, at 700 rather than 520: the
-                // `.menu` picker exception (#291) is argued in
-                // `docs/ui-patterns.md` from these rows sitting
-                // in a bounded column, and a width fix has no
-                // business retiring a settled control ruling as
-                // a side effect. 700 finishes the readout and
-                // leaves that argument standing.
+                // Bounded at 700, deliberately: the `.menu`
+                // picker exception (#291) is argued from these
+                // rows sitting in a bounded column, and a width
+                // fix has no business retiring a settled control
+                // ruling as a side effect.
                 .frame(maxWidth: 700, alignment: .leading)
-                // Win the width negotiation, so no preview can
-                // overconstrain the HStack and spill its frame
-                // over these rows' trailing checkboxes — which
-                // silently swallowed clicks on a scrolling
-                // space until any re-render settled the layout.
+                // Win the width negotiation, or a preview can
+                // overconstrain the HStack and spill over these
+                // rows' trailing checkboxes — which silently
+                // swallowed clicks until a re-render settled.
                 .layoutPriority(1)
-                // The live preview LEFT in #794: the
-                // detail panel now draws the Space whose
-                // editor is open (`SpacesPanelPreview`
-                // reads `nav.spaceOverridesFocus`), and
-                // one screen must not state one fact
-                // twice — the migration rule every other
-                // panel area already follows.
             }
-            // Under the rows it acts on, left-aligned with them
-            // rather than pinned to the pane's far edge.
             resetActiveButton(space, mode: mode, gates: gates)
         }
     }
 
-    /// `‹ Spaces › <space> › Overrides` — the first crumb is a
-    /// standard `Button` back to the list, so it keeps focus,
-    /// keyboard activation and VoiceOver for free; there is only
-    /// one back target, since the per-space editor has no
-    /// intermediate space page.
+    /// Breadcrumb navigation with back button (#678 Phase 4 turn 20a).
     private func overridesBreadcrumb(_ space: SpaceID) -> some View {
         HStack(spacing: 6) {
             Button {
-                // State the return destination BEFORE the pop, so
-                // the list is built with it already set — a focus
-                // assigned after the branch swaps has no view to
-                // land on yet and is dropped (#678 Phase 4 pass
-                // 10, turn 20a rule 4).
+                // State the return destination BEFORE the pop —
+                // a focus assigned after the branch swaps has no
+                // view to land on and is dropped (#678 Phase 4
+                // pass 10, turn 20a rule 4).
                 returningRow = space
                 model.nav.spaceOverridesFocus = nil
             } label: {
@@ -125,12 +72,6 @@ extension SpacesSection {
                 )
             }
             .focused($overridesBackFocused)
-            // `.borderless` takes its label colour from the tint
-            // too, so this crumb read green while the shell's own
-            // back chip — same gesture, same chevron — is ink
-            // (`SettingsHeaderBar.backChip`). The chevron carries
-            // "this one goes back"; the colour was carrying it
-            // twice, in the one hue reserved for fills.
             .buttonStyle(.borderless)
             .neutralButtonLabel()
             crumbSeparator
@@ -145,12 +86,9 @@ extension SpacesSection {
         .lineLimit(1)
         .padding(.horizontal, SettingsMetrics.paneInset)
         .padding(.vertical, 10)
-        // Entering the sub-view puts focus on its back button —
+        // Entering the sub-view puts focus on the back button —
         // never inside the rows, which would strand a keyboard
-        // user one Shift-Tab short of the only way out. On the
-        // crumb rather than the editor's root so it fires when
-        // this view is built, which is the moment the branch
-        // swaps.
+        // user one Shift-Tab short of the only way out.
         .onAppear { overridesBackFocused = true }
     }
 
@@ -158,11 +96,7 @@ extension SpacesSection {
         Text(verbatim: "›").foregroundStyle(.tertiary)
     }
 
-    /// The title and the active-layout reset. The reset lives here
-    /// rather than in the footer (#678 8b): it acts on the rows
-    /// directly below it, so it reads as their action; the dormant
-    /// card's `Reset all…` stays with the *other* layouts it
-    /// concerns.
+    /// Header with title and active layout fraction (#678 8b).
     private func overridesHeader(
         _ space: SpaceID,
         mode: LayoutMode,
@@ -184,8 +118,6 @@ extension SpacesSection {
             )
             .font(.title2)
             .fontWeight(.semibold)
-            // The active layout's set-vs-total fraction; Floating
-            // has no override fields (capacity 0) so it shows none.
             if capacity > 0 {
                 Text(
                     L(
@@ -221,9 +153,6 @@ extension SpacesSection {
             model.config.settings.resetOverride(mode, for: space)
         }
         .buttonStyle(.bordered)
-        // "Grey, don't hide" (§2.7): the reset is furniture of the
-        // active section, greyed when the layout has nothing to
-        // reset, with the reason on hover.
         .disabled(reason != nil)
         .help(reason.map(SpacesGateHelp.sentence) ?? "")
     }

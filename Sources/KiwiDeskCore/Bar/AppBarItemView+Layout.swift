@@ -1,7 +1,6 @@
 import AppKit
 
-/// Slot layout: icon and name centered as one group, font
-/// scaled with the bar thickness, name-only truncation.
+/// Slot layout: icon and name centered as one group, scaled with thickness.
 extension AppBarItemView {
     override func layout() {
         super.layout()
@@ -15,15 +14,9 @@ extension AppBarItemView {
         layoutBadge()
     }
 
-    /// The group-count badge: a filled circle just after the
-    /// content, growing into a larger circle for multi-digit counts.
+    /// Group-count badge layout (QA 2026-07-19, owner 2026-07-20, #411).
     private func layoutBadge() {
         guard !badge.isHidden else { return }
-        // 0.32/9: same QA 2026-07-19 shrink decision as the
-        // Space Bar badge (whose numbers differ deliberately —
-        // it scales off the glyph cell, this off the slot) —
-        // the 0.38 ratio with a 10pt floor read oversized next
-        // to small icons.
         let baseHeight = min(
             max(
                 min(bounds.width, bounds.height) * 0.32,
@@ -35,15 +28,8 @@ extension AppBarItemView {
             ofSize: baseHeight * 0.9,
             weight: .bold
         )
-        // Ensure text fits centered; width must equal height
-        // to maintain a proper circle. We add minimal horizontal
-        // padding to keep the badge tight around the text.
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
         let diameter = max(baseHeight, textWidth + 2)
-        // With a name shown, sit just after it at its top corner —
-        // not over it (overlapping text reads badly). Icon- or
-        // glyph-only: overlap the top-right corner like a
-        // notification badge (owner 2026-07-20). Clamped to the slot.
         let x: CGFloat
         let y: CGFloat
         if !label.isHidden, label.frame.width > 0 {
@@ -57,16 +43,6 @@ extension AppBarItemView {
             x = box.maxX - diameter / 2
             y = box.minY - diameter / 2
         }
-        // Keep the corner badge clear of the item's rounded corner
-        // (#411): the badge overlaps the top-trailing corner, and the
-        // rounding cuts it — hard under any glass finish (the item is
-        // the glass's clipped contentView), and off the rounded box
-        // otherwise. Inset it by the MINIMAL amount that nestles the
-        // circle tangent-inside the corner arc: for a badge radius r
-        // in a corner radius R, that's `(R - r)(1 - 1/√2)` off the
-        // top and trailing edges (0 when the badge already spans the
-        // arc). Every mode, so the placement stays consistent; square
-        // corners (radius 0) keep the flush overlap.
         let corner = style.resolvedCornerRadius(
             forThickness: crossThickness
         )
@@ -84,16 +60,10 @@ extension AppBarItemView {
         badge.layer?.cornerRadius = diameter / 2
     }
 
-    /// Shared with the overlay's natural-width measurement.
     nonisolated static let contentPadding: CGFloat = 4
-    /// The slot's own leading/trailing inset — a touch wider
-    /// than the inner content padding (manual QA 2026-07-18);
-    /// shared with the natural-width measurement so widening
-    /// it can never re-truncate the widest name.
+    /// Slot leading/trailing inset (manual QA 2026-07-18).
     nonisolated static let edgePadding: CGFloat = 6
 
-    /// The style's own ladder (`resolvedFontSize`), fed this
-    /// item's live cross dimension.
     private var effectiveFontSize: CGFloat {
         style.resolvedFontSize(
             forThickness: horizontal
@@ -101,9 +71,8 @@ extension AppBarItemView {
         )
     }
 
-    /// Icon and name sit centered in the slot as one group;
-    /// when space runs out, only the title shrinks — the icon
-    /// always survives.
+    /// Icon and name layout for horizontal bar (manual QA 2026-07-18,
+    /// owner 2026-07-20).
     private func layoutHorizontal() {
         let pad = Self.contentPadding
         let edge = Self.edgePadding
@@ -120,29 +89,15 @@ extension AppBarItemView {
                 min(bounds.height, bounds.width) - pad * 2,
                 0
             )
-        // Horizontal-only path, so the raw preference IS the
-        // rendered content here. One predicate for both the
-        // measurement and the layout below: they answered
-        // `== .icon` separately until a review found the pair
-        // (2026-08-20), which is two ways for a later text-free
-        // content to draw text into a slot measured without it.
         let showText = style.content.showsText
-        // The cell itself knows how much room the text needs;
-        // measuring the raw string undershoots the cell's own
-        // padding and truncates titles that would have fit.
         var textSize =
             showText
             ? (label.cell?.cellSize ?? .zero)
             : .zero
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
-        // Half a pad: the full pad read too airy between icon
-        // and text (manual QA 2026-07-18).
         var spacing: CGFloat =
             side > 0 && showText ? pad / 2 : 0
-        // A grouped item reserves room after the text for its count
-        // badge, so the badge sits beside the text instead of
-        // clamping over it (owner 2026-07-20).
         let badgeReserve: CGFloat =
             count >= 2 && showText
             ? min(max(min(bounds.height, bounds.width) * 0.32, 9), 14)
@@ -157,21 +112,10 @@ extension AppBarItemView {
             spacing = 0
         }
         label.isHidden = !showText || textSize.width == 0
-        // Fold the badge's own footprint (a 2 pt gap + the circle)
-        // into the centering so a grouped item's badge doesn't crowd
-        // the trailing edge — icon + name + badge center as one
-        // group, so the trailing gap matches the leading one (owner
-        // 2026-07-20). Only when the name shows: an icon-only badge
-        // overlaps the corner instead (see `layoutBadge`), and the
-        // slot already reserved this room (`badgeReserve`), so the
-        // shift never re-truncates the text.
         let badgeExtent: CGFloat =
             badgeReserve > 0 && textSize.width > 0
             ? badgeReserve - pad + 2
             : 0
-        // The edge floor exists for text; an icon-only item at
-        // the minimum slot keeps the tighter pad so its glyph
-        // box can't poke past the trailing border.
         var x = max(
             (bounds.width - side - spacing - textSize.width
                 - badgeExtent) / 2,
@@ -196,26 +140,14 @@ extension AppBarItemView {
         )
     }
 
-    /// Vertical bars render icon-only (QA 2026-07-19): titles
-    /// letter-stack terribly and rotated text is not native, so
-    /// `Content.rendered(horizontal:)` collapses the preference
-    /// to `.icon` and no title is drawn here.
-    ///
-    /// This pass hides the label ITSELF, and must: item views
-    /// are reused across renders (`AppBarOverlay` reconfigures
-    /// survivors in place), so a view that laid out horizontally
-    /// arrives here still showing a title, with a stale string
-    /// and a stale frame. `layoutHorizontal` is the only other
-    /// writer of `label.isHidden`, and it does not run on this
-    /// path. `configure` used to hide it too — a write that
-    /// looked redundant from every horizontal fixture and was
-    /// deleted as such, which is how this became a real defect
-    /// for one commit (`AppBarGlyphLayoutTests
-    /// .verticalReuseHidesLabel`).
-    ///
-    /// Hidden BEFORE the `side` guard: an item too small for an
-    /// icon slot returns early, and must not keep a title on the
-    /// way out.
+    /// Vertical bar icon-only layout (QA 2026-07-19). This pass
+    /// hides the label ITSELF, and must: item views are reused
+    /// across renders, so one that laid out horizontally arrives
+    /// still showing a stale title — the hide looked redundant
+    /// from every horizontal fixture and was deleted once, a real
+    /// defect for one commit
+    /// (`AppBarGlyphLayoutTests.verticalReuseHidesLabel`). Hidden
+    /// BEFORE the `side` guard, which can return early.
     private func layoutVertical() {
         label.isHidden = true
         let pad = Self.contentPadding
@@ -246,10 +178,7 @@ extension AppBarItemView {
         }
     }
 
-    /// A boxed ring hugs the box (flush, same corner radius); a
-    /// plain ring insets a couple points and reads as a capsule
-    /// outline — a clean native selection mark that keeps `plain`
-    /// boxless (ui-designer 2026-07-14).
+    /// Outline selection ring (ui-designer 2026-07-14, owner 2026-07-20).
     private func layoutRing() {
         if style.hasBox {
             accent.frame = bounds
@@ -258,12 +187,6 @@ extension AppBarItemView {
                     forThickness: crossThickness
                 )
         } else {
-            // The plain ring tracks the shared plate's roundness
-            // and stays concentric with it: inner radius = the
-            // plate's resolved corner radius minus the ring inset
-            // (owner 2026-07-20). Deriving it from the ring's own
-            // shrunk frame only matched at max roundness and bowed
-            // off the corner below it.
             let inset = BarAccent.capsuleInset
             accent.frame = bounds.insetBy(dx: inset, dy: inset)
             accent.layer?.cornerRadius = max(
@@ -275,11 +198,7 @@ extension AppBarItemView {
         }
     }
 
-    /// A ~3pt bar spanning the slot's full window-facing edge
-    /// (flipped coordinates: y grows downward): a top bar faces
-    /// down, a bottom bar up, a left bar right, a right bar left.
-    /// Full-width, no corner inset — matching the Space Bar's mark
-    /// (owner call 2026-07-20).
+    /// Edge mark layout (owner call 2026-07-20).
     private func layoutEdgeMark() {
         accent.layer?.cornerRadius = 0
         let thickness: CGFloat = 3
@@ -314,5 +233,4 @@ extension AppBarItemView {
             )
         }
     }
-
 }

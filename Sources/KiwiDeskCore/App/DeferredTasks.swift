@@ -1,115 +1,58 @@
 import Foundation
 
-/// Owns KiwiCore's deferred one-shot settle tasks, keyed so a
-/// reschedule self-cancels the prior run and teardown can cancel
-/// everything at once instead of hand-listing fields (#49) — the
-/// hand-kept cancel list is how a missing cancel slipped through
-/// review once already (#48).
-///
-/// Only the store/cancel/sleep protocol lives here; the settle
-/// bodies stay closures at the call sites because their delays,
-/// guard predicates, and post-work genuinely differ (AGENTS.md
-/// §2.4). Bodies run on the main actor and should capture the
-/// core weakly, as the call sites do.
+/// Owns KiwiCore's deferred one-shot settle tasks with self-cancelling keys
+/// (#48, #49).
 @MainActor
 final class DeferredTasks {
-    /// One slot per deferred job; scheduling a key replaces
-    /// (cancels) whatever that key was still waiting on.
+    /// Distinct slots for deferred jobs (cancel-and-replace per slot).
     enum Key: Hashable, CaseIterable {
-        /// Deferred switch to a hidden window's Space
-        /// (`scheduleFocusFollow`).
         case focusFollow
-        /// One-shot startup sweep re-tracking windows the cold
-        /// AX scan missed (`scheduleStartupSweep`) — and, once it
-        /// has fired, each of its own chunks (#801): the pass is
-        /// one job, so re-using its slot is what makes
-        /// `cancelAll()` stop a sweep mid-flight.
+        /// One-shot startup sweep re-tracking windows
+        /// (`scheduleStartupSweep`, #801).
         case startupSweep
-        /// The next chunk of the startup scan (`driveBootScan`,
-        /// #801). The scan hands the run loop back between
-        /// chunks; this is what brings it back.
+        /// Chunked startup scan (`driveBootScan`, #801).
         case bootScan
-        /// The next app whose boot work a per-app budget cut
-        /// short (`drainDeferredBootApps`, #803) — one per turn,
-        /// so completing them cannot re-block the run loop.
+        /// Deferred app boot processing (`drainDeferredBootApps`, #803).
         case deferredBootApps
-        /// One-shot layout re-assert after a virtual-space
-        /// switch (`scheduleSpaceSettle`).
         case spaceSettle
-        /// One-shot focus re-assert after a no-follow
-        /// `move_to_space` (`scheduleMoveSettle`, #482/#483).
+        /// Focus re-assert after no-follow `move_to_space` (#482, #483).
         case moveSettle
-        /// Layout + focus re-assert after a native desktop
-        /// switch (`settleAfterDesktopSwitch`).
         case desktopSettle
-        /// Reaps the window a no-follow `move_to_desktop` sent
-        /// to another Desktop (`scheduleDesktopMoveReap`): no OS
-        /// switch follows such a move, so nothing else is
-        /// guaranteed to notice the window left.
         case desktopMoveReap
-        /// Adopts the window a FOLLOW sent to a hidden Desktop
-        /// once the reveal has composited it (`departEagerly`,
-        /// #1023). A separate slot from `desktopMoveReap`
-        /// deliberately: the keys are cancel-and-replace, the
-        /// two verbs are one keystroke apart, and whichever
-        /// fired second would silently drop the other's reap —
-        /// a stale slot for the no-follow, a permanently
-        /// unadopted window for the follow.
+        /// Adopts window sent to hidden desktop by follow (#1023).
+        /// A separate slot from `desktopMoveReap` deliberately:
+        /// keys are cancel-and-replace and the two verbs are one
+        /// keystroke apart — whichever fired second would silently
+        /// drop the other's reap.
         case desktopFollowReap
-        /// Re-queries the display's current space a beat after a
-        /// Desktop-switch dispatch and logs a pointer that never
-        /// moved (`scheduleDesktopSwitchVerify`, #1023) — the
-        /// write applies asynchronously, so the honest re-query
-        /// cannot be synchronous.
+        /// Verifies desktop switch dispatch (#1023).
         case desktopSwitchVerify
-        /// Re-asserts every desired focus ring's VISIBILITY and
-        /// stacking after a drag/drop or animated transition
-        /// (`scheduleBorderDropReconcile`) — early on purpose, and
-        /// geometry-free while a window animates.
         case borderDropSettle
-        /// Re-syncs ring AND mark GEOMETRY from real window state
-        /// a grace after the last animation ends
-        /// (`scheduleBorderResync`, #596). A separate slot from
-        /// `borderDropSettle` deliberately: they run at different
-        /// delays for different reasons, so sharing one would let
-        /// whichever landed second cancel the other — silently
-        /// dropping either the un-hide or the sticky mark's heal.
+        /// Re-syncs border and mark geometry after animations
+        /// (#596). A separate slot from `borderDropSettle`
+        /// deliberately: different delays for different reasons,
+        /// and sharing one would let whichever landed second
+        /// cancel the other.
         case borderResync
-        /// Coalesced re-raise of the float layer after focus lands
-        /// on a tiled window (`raiseFloatsAbove`) — a burst of focus
-        /// changes collapses to one raise for the final target.
         case floatRaise
-        /// Self-rearming adoption-heal sweep re-adopting windows
-        /// every event path missed (`scheduleAdoptionHeal`,
-        /// #675).
+        /// Adoption-heal sweep for unhandled windows (#675).
         case adoptionHeal
-        /// One-shot re-track of windows the transient filters
-        /// dropped mid-launch (`scheduleTransientRetrack`,
-        /// #675).
+        /// Re-tracks windows dropped mid-launch (#675).
         case transientRetrack
-        /// Re-render of the bars after a drawn window title
-        /// changed (`handleTitleChangedForBars`). The one slot
-        /// here whose reschedule is the POINT rather than a
-        /// correctness guard: a title event arrives as fast as a
-        /// keystroke, and cancel-and-replace is what turns a
-        /// burst into one refresh when it stops.
+        /// Bar re-render on a drawn title change — the one slot
+        /// whose reschedule is the POINT: cancel-and-replace turns
+        /// a keystroke-rate burst into one refresh when it stops.
         case barTitleRefresh
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]
     private var burstStarts: [Key: ContinuousClock.Instant] = [:]
 
-    /// Runs `body` after `delay` unless the key is rescheduled
-    /// or cancelled first. Cancellation is checked once, after
-    /// the sleep: `body` is synchronous main-actor code, so a
-    /// cancel cannot interleave with it once it has started.
-    /// `body` is retained until it fires or is cancelled, so
-    /// capture the core weakly (see the type doc) — a strong
-    /// capture would pin it for the pending delay.
-    ///
-    /// When `maxWait` is provided, continuous reschedules within
-    /// a burst will not delay execution past `maxWait` from the
-    /// burst's initial schedule (#900).
+    /// Schedules `body` after `delay` (bounded by `maxWait` across
+    /// bursts, #900). Cancellation is checked once, after the
+    /// sleep — `body` is synchronous main-actor code, so a cancel
+    /// cannot interleave once it starts. `body` is retained until
+    /// it fires: capture the core weakly.
     func schedule(
         _ key: Key,
         after delay: Duration,
@@ -145,9 +88,7 @@ final class DeferredTasks {
         }
     }
 
-    /// Whether `key` has work pending — the seam a test reads to
-    /// prove a path ARMED its deferred work, without waiting the
-    /// delay out or letting the body reach the machine.
+    /// True if `key` has work scheduled.
     func isScheduled(_ key: Key) -> Bool { tasks[key] != nil }
 
     func cancel(_ key: Key) {
@@ -156,18 +97,15 @@ final class DeferredTasks {
         burstStarts[key] = nil
     }
 
-    /// The task currently stored for a key — lets tests pin the
-    /// cancel-and-replace claims (identity + `isCancelled`).
-    /// Not a pending-check: a fired body leaves its *finished*
-    /// task in the slot (bounded — one per key — and inert), so
-    /// this stays non-nil after firing; only `cancel`/`cancelAll`
-    /// clear the slot.
+    /// The task stored for a key — for pinning cancel-and-replace
+    /// claims. NOT a pending-check: a fired body leaves its
+    /// finished task in the slot, so this stays non-nil after
+    /// firing; only `cancel`/`cancelAll` clear it.
     func task(for key: Key) -> Task<Void, Never>? {
         tasks[key]
     }
 
-    /// Cancels every pending task — the one call teardown makes,
-    /// so `stop()` cannot forget a newly added key.
+    /// Cancels all pending tasks on teardown.
     func cancelAll() {
         for task in tasks.values { task.cancel() }
         tasks.removeAll()

@@ -1,65 +1,23 @@
 import AppKit
 
-/// One Space in the Space Bar (#293): the space's identifier
-/// glyph followed by a compact row (horizontal bar) or column
-/// (vertical bar) of app glyphs for the windows currently in
-/// that space. Click focuses the space; app glyphs are
-/// informational in v1 — never nested click targets.
-///
-/// Two-accent rendering: inactive spaces draw everything in
-/// `itemColor`; the active space draws identifier + glyphs in
-/// `activeItemColor`, and the focused window's glyph in
-/// `focusedItemColor`. Emoji identifiers and native app images
-/// stay untinted — shape (the active indicator) carries the
-/// active state there.
+/// Space item view in Space Bar with identifier and app glyphs (#293).
 final class SpaceBarItemView: NSView {
-    /// The space identifier, resolved by the driver.
+    /// Space identifier glyph representation.
     enum Identifier: Equatable {
-        /// A template SF Symbol, tinted by space state.
         case symbol(String)
-        /// Emoji or single character; emoji render untinted.
         case text(String, tinted: Bool)
     }
 
-    /// One app glyph in the space's row — one slot per
-    /// adjacent same-app run (#293 stage 2), wearing a count
-    /// badge when the run holds several windows. No
-    /// focused-inside expansion: glyphs aren't click targets,
-    /// so a group containing the focused window just takes the
-    /// focused accent.
+    /// App glyph run in space item (#293 stage 2, #294, #414, #445).
     struct App: Equatable {
         let name: String
-        /// The window title the FRONT SEGMENT draws, already
-        /// capped, or nil to fall back to `name`. Only the front
-        /// segment ever carries one: a Space item is a run of
-        /// app glyphs with no text at all, so its `App` values
-        /// leave this nil. Resolved by the driver
-        /// (`KiwiCore.frontApp`), like the glyph.
-        ///
-        /// Separate from `name` on purpose — `name` still
-        /// resolves the App Font glyph
-        /// (`appFont.glyph(forAppName:)`) and names the app for
-        /// accessibility, neither of which a title can do.
         var title: String?
         let icon: NSImage?
-        /// App Font ligature; non-nil replaces `icon` and
-        /// follows the text-color ladder (#294).
         let glyph: String?
         let focused: Bool
-        /// Windows behind this glyph; > 1 shows a count badge.
         let count: Int
-        /// State badges (#414): aggregates over the run — an
-        /// explicit "at least one" signal, honest for a group
-        /// (badge inheritance). Sticky wears the top-left
-        /// badge, floating the bottom-left; the group count
-        /// keeps top-right. Space Bar only — in the bar there
-        /// is otherwise no way to tell these states apart.
         var sticky = false
         var floating = false
-        /// The sticky SCOPE the badge glyph reflects (#445):
-        /// `.global` → `infinity`, `.display` → `pin.fill`. The
-        /// run's first sticky member wins (badge inheritance); a
-        /// mixed run is rare and either glyph reads as "sticky".
         var stickyScope: StickyScope = .none
     }
 
@@ -71,29 +29,15 @@ final class SpaceBarItemView: NSView {
         return tf
     }()
     var appViews: [NSView] = []
-    /// One count badge per glyph slot (hidden below 2).
     var badgeViews: [NSTextField] = []
-    /// Per-slot state badges (#414): sticky top-left, floating
-    /// bottom-left — the count badge's circular plate wearing a
-    /// symbol, so all three corners read as one badge family.
     var stickyBadgeViews: [StateBadgeView] = []
     var floatingBadgeViews: [StateBadgeView] = []
-    /// The "+n" overflow badge, its own trailing slot.
     let overflowBadge = SpaceBarItemView.makeBadge()
-    /// The identifier↔glyphs rule (QA 2026-07-19) — the front
-    /// segment's divider, reused inside the item. Hidden on
-    /// empty spaces (nothing to separate).
+    /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
     let accent = NSView()
-    /// Rounds/clips only the active mark to the item's corner
-    /// without clipping the item itself — so the mark cuts on the
-    /// curve while corner badges stay whole (owner 2026-07-20).
-    /// Flipped to match the item, so the accent's y math is unchanged.
+    /// Active mark corner clip (owner 2026-07-20).
     let accentClip = AppBarOverlay.FlippedView()
-    /// Whether this item sits at the run's leading / trailing end.
-    /// Under Plain the shared plate rounds only there. The trailing
-    /// end may be the front-app segment's, not the last item's, so
-    /// the overlay sets `isLastInRun` false when a front app trails.
     var isFirstInRun = false
     var isLastInRun = false
 
@@ -104,31 +48,20 @@ final class SpaceBarItemView: NSView {
     )
     private(set) var apps: [App] = []
     private(set) var overflow = 0
-    /// The focused window is hidden past the cap (its glyph isn't
-    /// visible) — the "+n" tints to signal focus is behind it (#376).
+    /// True if focused window is in overflow (#376).
     private(set) var focusInOverflow = false
     private(set) var isActive = false
     private(set) var isHovered = false
-    /// Synthetic hover during a window drag (#372). Tracking
-    /// areas stay silent while another app owns the drag loop,
-    /// so the driver sets this from the AX cursor position; it
-    /// routes through the same `hoverFillColor` path as `isHovered`.
-    /// Mutated via `setDragHover` (SpaceBarItemView+DragDrop).
+    /// Drag hover state (#372).
     var isDragHovered = false
-    /// The pending-spring sweep ring (#372): a stroke that fills
-    /// 0→1 over the dwell, layered on top of the hover tint.
+    /// Spring sweep ring (#372).
     let springRing = CAShapeLayer()
     var horizontal = true
     var style = SpaceBarStyle()
-    /// The sticky / floating badge tints (#429), resolved by
-    /// `KiwiCore`; the state badges' glyphs read these instead of
-    /// the count badge's `groupBadgeColor` family.
+    /// State mark colors (#429).
     var stateMarkColors = StateMarkColors(sticky: "", floating: "")
     var onSelect: (SpaceID) -> Void = { _ in }
 
-    /// Flipped so the identifier leads at the visual top on
-    /// vertical bars and glyphs read in flat-array order (same
-    /// convention as `AppBarOverlay.FlippedView`).
     override var isFlipped: Bool { true }
 
     override init(frame: CGRect) {
@@ -150,8 +83,7 @@ final class SpaceBarItemView: NSView {
         layer?.addSublayer(springRing)
     }
 
-    /// The App Bar's badge shape: a filled circle around a
-    /// bold centered count (`IndicatorBarBadgeCell`).
+    /// Creates badge label with circular indicator background.
     static func makeBadge() -> NSTextField {
         let tf = NSTextField(labelWithString: "")
         let cell = IndicatorBarBadgeCell(textCell: "")
@@ -167,16 +99,10 @@ final class SpaceBarItemView: NSView {
         return tf
     }
 
-    /// The floating badge's mark, read from the style that owns
-    /// it (`FloatingStyle.symbolName`) — the sticky mark is
-    /// shared with the on-window mark the same way, see
-    /// `StickyStyle.symbolName`.
     static let floatingSymbol = FloatingStyle.symbolName
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
-
-    // MARK: - Interaction
 
     override func mouseDown(with event: NSEvent) {
         guard !isActive else { return }
@@ -208,8 +134,6 @@ final class SpaceBarItemView: NSView {
         restyle()
     }
 
-    // MARK: - Configuration
-
     func configure(
         space: SpaceID,
         spaceGlyph: Identifier,
@@ -221,10 +145,6 @@ final class SpaceBarItemView: NSView {
         overflow: Int = 0,
         focusInOverflow: Bool = false
     ) {
-        // A pooled view reused for a different Space drops any
-        // drag-drop cues it was showing for the old one — a stale
-        // hover tint or half-swept spring ring would otherwise
-        // paint on the wrong item (#372, review).
         if self.space != space {
             cancelSpringSweep()
             isDragHovered = false
@@ -238,9 +158,6 @@ final class SpaceBarItemView: NSView {
         self.horizontal = horizontal
         self.style = style
         self.stateMarkColors = stateMarkColors
-        // Hover is NOT reset here: a retile under the pointer
-        // (focus changes are frequent) must not drop the tint —
-        // mouseExited still fires when the pointer leaves.
         syncAppViews()
         restyle()
         needsLayout = true
@@ -250,8 +167,6 @@ final class SpaceBarItemView: NSView {
     }
 
     private var axLabel: String {
-        // Windows, not visible slots: grouped and past-the-cap
-        // windows still count.
         let windows =
             apps.reduce(0) { $0 + $1.count } + overflow
         let name = L(
@@ -273,10 +188,6 @@ final class SpaceBarItemView: NSView {
             )
     }
 
-    /// One subview per app: a text field for App Font glyphs, an
-    /// image view otherwise. Recreating (not pooling) is
-    /// load-bearing: `styleApps` never re-sets an image view's
-    /// `image`, so naive reuse would show stale icons.
     private func syncAppViews() {
         appViews.forEach { $0.removeFromSuperview() }
         badgeViews.forEach { $0.removeFromSuperview() }
@@ -319,7 +230,4 @@ final class SpaceBarItemView: NSView {
             return badge
         }
     }
-
-    // Styling lives in SpaceBarItemView+Style.swift;
-    // layout in SpaceBarItemView+Layout.swift.
 }

@@ -1,20 +1,7 @@
 import Foundation
 
-// MARK: - KeyLayerOverride
-
-/// Sparse per-profile keybinding override (#55). nil (absent)
-/// inherits the base `layers` (gui.json) entirely; present, it
-/// shadows the base by layer name then by combo — the override's
-/// binding for a combo wins, base combos it does not mention
-/// survive (the switch-key-trap safeguard, O4 soft). A layer the
-/// base lacks is appended. Every base layer the override does not
-/// mention passes through unchanged, so the default layer and any
-/// profile-switch binding are never dropped.
-///
-/// Keyed merge (layer name × combo), NOT a struct field-mirror —
-/// so no reflection parity net applies (AGENTS.md §5); guarded
-/// instead by a round-trip + resolve + default-layer-invariant
-/// test in `KeyLayerOverrideTests`.
+/// Sparse per-profile keybinding override (#55; tested in
+/// `KeyLayerOverrideTests`).
 public struct KeyLayerOverride: Sendable, Equatable {
     /// Sparse: only layers that diverge from the base.
     public var layers: [KeyLayer]
@@ -23,52 +10,27 @@ public struct KeyLayerOverride: Sendable, Equatable {
         self.layers = layers
     }
 
-    /// True when no layer diverges — a fully-inherited profile
-    /// needs no stored override (drives sparse encoding).
+    /// True when no layer diverges.
     public var isEmpty: Bool { layers.isEmpty }
 
-    /// How many things this override actually overrides, for the
-    /// GUI's per-profile count (#678 turn 13a).
-    ///
-    /// Not `layers.flatMap(\.bindings).count`: `diff` emits a
-    /// layer with NO bindings when only its icon diverges, so
-    /// summing bindings returns 0 for an override that
-    /// `isEmpty` calls non-empty — and a profile row that then
-    /// drops its "N shortcut overrides" segment tells the user
-    /// the profile owns nothing here, which is the one reading
-    /// that count exists to prevent. So a diverging layer
-    /// contributes at least itself. The invariant to keep is
-    /// `isEmpty == (overrideCount == 0)`; anything that can
-    /// diverge without a binding must keep counting.
+    /// Count of things this override overrides (#678 turn 13a).
+    /// Not `flatMap(\.bindings).count`: `diff` emits a layer with
+    /// NO bindings when only its icon diverges, so a diverging
+    /// layer contributes at least itself. The invariant to keep is
+    /// `isEmpty == (overrideCount == 0)`.
     public var overrideCount: Int {
         layers.reduce(0) { $0 + max($1.bindings.count, 1) }
     }
 
-    /// Resolves this override onto `base`, producing the merged
-    /// layer list. Returns `base` unchanged when empty.
-    ///
-    /// Merge rule (O4 soft base layer):
-    /// - For each override layer matching a base layer by `name`:
-    ///   per-combo merge (override wins IN PLACE, so the base
-    ///   row order survives for GUI rendering; base combos not
-    ///   in the override survive). Override `icon` wins when
-    ///   non-nil; otherwise the base icon is kept.
-    /// - An override layer absent from `base` is appended.
-    /// - Base layers not in the override pass through unchanged
-    ///   (default layer and switch-key bindings always survive).
-    ///
-    /// Sibling keyed merge: `KeybindingMerge` (GUI shortcut
-    /// import) folds by the same name×combo key but with the
-    /// OPPOSITE icon precedence (existing-wins). Both are
-    /// correct for their direction — do not unify them.
+    /// Merges this override onto `base` (O4 soft: override wins
+    /// per combo IN PLACE, unmentioned base combos and layers
+    /// survive). `KeybindingMerge` folds by the same key with the
+    /// OPPOSITE icon precedence — both are correct for their
+    /// direction, do not unify them.
     public func resolved(
         onto base: [KeyLayer]
     ) -> [KeyLayer] {
         guard !isEmpty else { return base }
-        // Index override layers by name for O(n) lookup. The
-        // assignment is last-wins, but duplicate names cannot
-        // reach here: decode sanitizes them FIRST-wins
-        // (`KeyLayer.normalized`), and `diff` keys by name.
         var overrideByName: [String: KeyLayer] = [:]
         for layer in layers {
             overrideByName[layer.name] = layer
@@ -77,15 +39,10 @@ public struct KeyLayerOverride: Sendable, Equatable {
         var consumed: Set<String> = []
         for baseLayer in base {
             guard let over = overrideByName[baseLayer.name] else {
-                // Not in override — pass through unchanged.
                 result.append(baseLayer)
                 continue
             }
-            // Merge bindings in base order: an overridden
-            // combo replaces its base row in place (the GUI
-            // renders resolved layers — rows must not jump);
-            // combos new to the layer append at the end. EVERY
-            // matching base row is replaced — a hand-edited
+            // EVERY matching base row is replaced — a hand-edited
             // duplicate base combo must not let a stale copy
             // outlive the override (registration is last-wins).
             var merged = baseLayer.bindings
@@ -109,7 +66,6 @@ public struct KeyLayerOverride: Sendable, Equatable {
             )
             consumed.insert(baseLayer.name)
         }
-        // Append override layers absent from base.
         for layer in layers
         where !consumed.contains(layer.name) {
             result.append(layer)
@@ -118,29 +74,12 @@ public struct KeyLayerOverride: Sendable, Equatable {
     }
 }
 
-// MARK: - Diff (inverse of resolved)
-
 extension KeyLayerOverride {
-    /// Inverse of `resolved(onto:)`: the sparse override that,
-    /// resolved onto `base`, yields `edited`. Rows matching a
-    /// base row SEMANTICALLY (`sameAction`: combo + lua —
-    /// display-only kind/label differences from the GUI
-    /// classifier never read as divergence) are inherited and
-    /// omitted; a row whose combo is absent from base or whose
-    /// action diverges is included. A layer absent from base is
-    /// included whole. An edited icon differing from the base
-    /// icon is carried (nil inherits — CLEARING a base icon
-    /// per profile is therefore not expressible; it reverts,
-    /// like row deletion). Returns nil when nothing diverges —
-    /// a fully-inherited profile stores no override (O3
-    /// sparse; an empty override is never persisted).
-    ///
-    /// DELETIONS are not expressible (O4 soft: base rows the
-    /// override does not mention always survive) — a base row
-    /// missing from `edited` is simply absent from the diff
-    /// and reappears on resolve. The editor treats deleting an
-    /// inherited row as revert, never removal; rebind to a
-    /// no-op to disable a combo in one profile. No tombstones.
+    /// Inverse of `resolved(onto:)` — nil when nothing diverges.
+    /// DELETIONS are not expressible (O4 soft: unmentioned base
+    /// rows always survive): the editor treats deleting an
+    /// inherited row as revert, never removal — rebind to a no-op
+    /// to disable a combo in one profile. No tombstones.
     public static func diff(
         base: [KeyLayer],
         edited: [KeyLayer]
@@ -152,7 +91,6 @@ extension KeyLayerOverride {
         var layers: [KeyLayer] = []
         for layer in edited {
             guard let baseLayer = baseByName[layer.name] else {
-                // New layer: carried whole.
                 layers.append(layer)
                 continue
             }
@@ -182,16 +120,8 @@ extension KeyLayerOverride {
     }
 }
 
-// MARK: - Codable
-
 extension KeyLayerOverride: Codable {
-    /// Transparent to [KeyLayer]: encode/decode as a bare JSON
-    /// array, matching the `GuiConfig.layers` shape so both
-    /// surfaces share one vocabulary (AGENTS.md §5).
-    /// Decoded input is untrusted (hand-edited profile JSON,
-    /// #31): duplicate names and a default-layer icon are
-    /// normalized away. Sparse flavor — a default entry is
-    /// never inserted (absence means inherit).
+    /// Decodes normalized sparse layer list (#31).
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         layers = KeyLayer.normalized(
@@ -205,17 +135,9 @@ extension KeyLayerOverride: Codable {
     }
 }
 
-// MARK: - ConfigResolver
-
-/// Thin resolver composing the base and profile keybinding
-/// tiers (O1, AGENTS.md §5). Tiling tiers are unchanged:
-/// `apply()` replaces base, `TilingSettings.resolvedX(for:)`
-/// handles per-space — those are not re-implemented here.
+/// Resolver composing base and profile keybinding tiers.
 public enum ConfigResolver {
-    /// Returns the effective layer list: `base` (from gui.json)
-    /// when `profile` is nil or empty; keyed name×combo merge
-    /// otherwise. Mirrors `reapplyActiveProfileState` ordering
-    /// — declarative Lua is the seed, profile wins.
+    /// Returns effective layers merging `profile` onto `base`.
     public static func resolvedLayers(
         base: [KeyLayer],
         profile: KeyLayerOverride?

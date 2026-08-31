@@ -1,30 +1,15 @@
 import Foundation
 
-/// Applies `KiwiEvent`s to the state managers.
-///
-/// This is the single write path for KiwiDesk's internal state:
-/// the event loop produces events, the coordinator folds them into
-/// `WindowManager` and `WorkspaceManager`. Pure and synchronous,
-/// so the full pipeline is unit-testable without AX access.
+/// Applies `KiwiEvent`s to the state managers (`WindowManager`,
+/// `WorkspaceManager`). Pure and synchronous write path.
 public struct StateCoordinator: Sendable {
-    // internal(set), like `workspaces`: the intent split
-    // (`+Intents.swift`) mutates it from its own file.
     public internal(set) var windows = WindowManager()
     public internal(set) var workspaces = WorkspaceManager()
 
-    /// `app_rules` from init.lua: new windows of these apps go
-    /// to a fixed space instead of the active one.
+    /// `app_rules` routing new windows of these apps to a fixed space.
     public var appRules: [String: SpaceID] = [:]
 
-    /// `new_window_placement` per layout mode. Mirrored from
-    /// the tiler settings before each event (KiwiCore) — which
-    /// also seeds `.monocle` from `MonocleParams` — so it
-    /// survives profile loads and live commands. This
-    /// compile-time literal omits monocle (seeded at runtime)
-    /// and floating (no tiled slot); both fall back to
-    /// `.afterFocused` before the first event. Defaults derive
-    /// from the params structs so unit tests see production
-    /// behavior.
+    /// `new_window_placement` per layout mode, mirrored from tiler settings.
     public var spawnPlacements: [LayoutMode: SpawnPlacement] = [
         .bsp: BspParams().newWindowPlacement,
         .stack: StackParams().newWindowPlacement,
@@ -32,105 +17,34 @@ public struct StateCoordinator: Sendable {
         .grid: GridParams().newWindowPlacement,
     ]
 
-    /// Per-space `new_window_placement_override`: beats the
-    /// layout's spawn placement, like the gap override.
+    /// Per-space `new_window_placement_override`.
     public var spawnOverride: [SpaceID: SpawnPlacement] = [:]
 
-    /// The track layout's params (#128), mirrored from the
-    /// tiler settings like `spawnPlacements`: a new **tiled**
-    /// window in a track space follows `new_window`/`count`
-    /// instead of a `SpawnPlacement` (the flat-index vocabulary
-    /// cannot say "own track"). A floating window still takes
-    /// the `SpawnPlacement` path (it has no track slot), so its
-    /// array position — and thus which track it would join if
-    /// it later tiles — honors the placement override as in
-    /// every other mode.
+    /// Track layout params (#128) governing new tiled track allocations.
     public var trackParams = TrackParams()
 
-    /// Per-space fill-then-spill capacity (#437), mirrored from the
-    /// tiler before each event like `trackParams`: how many windows
-    /// a track holds at `min_window_size` before a `focused_track`
-    /// spawn spills into a new track beside the focused one. The
-    /// number is geometry-derived (the space's display), computed
-    /// where the geometry lives (`TilingEngine.trackCapacities`) so
-    /// this state core stays pure. An absent entry (unknown display)
-    /// makes the spawn join-and-pile — the same safe fallback a
-    /// traveler takes.
+    /// Per-space fill-then-spill track capacity (#437), geometry-derived.
     public var trackCapacities: [SpaceID: Int] = [:]
 
-    /// The display an ARRIVING window's frame physically sits on
-    /// (#1010), written by KiwiCore before each `.windowCreated`
-    /// because resolving a frame to a screen needs `NSScreen`
-    /// and the AX/AppKit y-flip, neither of which may enter this
-    /// pure core (§2.6). Nil when no screen backs the frame —
-    /// the arrival then resolves exactly as it did before this
-    /// input existed.
-    ///
-    /// Unlike `trackCapacities` and the settings mirrors above,
-    /// this is a **single-event payload**, not a standing mirror:
-    /// it is meaningless outside the one arrival it was resolved
-    /// for, and a stale value would re-home an unrelated window
-    /// across monitors. So the create fold CONSUMES it — reads
-    /// it and clears it — and a producer that forgets to write
-    /// it makes the fold resolve as it always did rather than
-    /// inheriting the last arrival's screen.
+    /// Physical display of an arriving window (#1010), consumed on create.
     public var arrivalDisplay: DisplayID?
 
-    /// Last known space per window. Window ids are stable OS
-    /// ids, so a "created" window with a remembered space is
-    /// one coming back from another native macOS Space (or a
-    /// session restore) and returns there instead of landing
-    /// in the active space. Minimized windows are deliberately
-    /// forgotten: deminiaturize opens in the active space.
-    /// Internal, not private: the create fold lives in
-    /// `StateCoordinator+WindowCreated.swift` (file-ceiling
-    /// split).
+    /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
 
-    /// Windows currently minimized, newest last, each with the
-    /// app that owned it — so a deminiaturize classifies as
-    /// `restored` (#40) and Open or Focus can restore this app's
-    /// most recent one (#673). Lives here beside
-    /// `rememberedSpaces`: both are memory carried across
-    /// tracking gaps, and both go stale the same way, an entry
-    /// for a window closed while minimized lingering because no
-    /// event fires. Slightly weaker than `rememberedSpaces`'
-    /// staleness — these are DEAD ids, so a recycled WindowID
-    /// could inherit one — which is why the create fold prunes
-    /// unconditionally. The payload is advisory; accepted.
-    ///
-    /// `StateCoordinator+Minimize.swift` owns its lifetime and
-    /// argument (internal, not private, for that file-ceiling
-    /// split); `rekey` below reaches in directly, alongside the
-    /// other id-keyed containers it migrates.
+    /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
 
-    /// Explicit `make_floating` / `make_tiled` verdicts per
-    /// tracked window — the only float state worth carrying
-    /// across close/reopen; detection re-derives the rest.
-    /// Internal, not private: the intent logic lives in
-    /// `StateCoordinator+Intents.swift` (file-ceiling split).
+    /// Explicit `make_floating` / `make_tiled` verdicts per window.
     var manualFloatOverrides: [WindowID: Bool] = [:]
 
-    /// Manual float intent of windows that closed (#160).
+    /// Manual float intent remembered across close/reopen (#160).
     /// Keyed by app + title, not `WindowID`: a reopened window
-    /// gets a fresh id, and old ids can be recycled onto
-    /// unrelated windows (`rememberedSpaces` above can key on
-    /// ids because a native-Space return keeps the window
-    /// alive). Two live windows sharing an identity share one
-    /// slot: last close wins, first reopen consumes — at worst
-    /// one misapplied float, corrected with one command. A
-    /// drifted title on reopen misses the same gracefully.
-    /// Unconsumed entries linger for the session, mirroring
-    /// `rememberedSpaces`' lifetime (manual floats are rare).
+    /// gets a fresh id, and old ids can be recycled onto unrelated
+    /// windows. Last close wins, first reopen consumes.
     var rememberedFloating: [WindowIdentity: Bool] = [:]
 
-    /// Sticky intent of windows that closed (#414/#445), mirroring
-    /// `rememberedFloating`'s identity keying and lifetime. A map
-    /// now that sticky carries a SCOPE (`.global` / `.display`):
-    /// an absent identity means "not sticky" (`.none` is never
-    /// stored), so the close of a non-sticky window drops its
-    /// entry (last close wins, like float).
+    /// Sticky intent remembered across window close/reopen (#414, #445).
     var rememberedSticky: [WindowIdentity: StickyScope] = [:]
 
     /// Stable close/reopen identity of a window (#160).
@@ -148,30 +62,20 @@ public struct StateCoordinator: Sendable {
         workspaces.ensureSpace(defaultSpace)
     }
 
-    /// Swaps a window's tracked id in place across every id-keyed
-    /// map this coordinator owns — window snapshot, space slot
-    /// (position + focus + weights), plus the three cross-tracking
-    /// maps below — for a native-tab active-tab change (#308). This
-    /// is the hand-mirrored id-keyed field list AGENTS.md §5 warns
-    /// about: forgetting a map is silent data loss, so
-    /// `WindowRekeyParityTests` discovers every WindowID-keyed
-    /// container by reflection and fails if one still holds `old`.
-    /// `rememberedFloating` is keyed by app+title, not WindowID, so
-    /// it is deliberately untouched. No-op if `old` is untracked.
+    /// Swaps a window ID across every ID-keyed map for native tab
+    /// switches (#308) — the hand-mirrored list §5 warns about, so
+    /// `WindowRekeyParityTests` discovers the containers by
+    /// reflection. `minimizeOrder`'s element is a struct the
+    /// reflection cannot see; the `String(describing:)` scan and
+    /// `MinimizeOrderTests` are its nets (#673).
+    /// `rememberedFloating` is keyed by app+title and deliberately
+    /// untouched.
     mutating func rekey(_ old: WindowID, to new: WindowID) {
         windows.rekey(old, to: new)
         workspaces.rekey(old, to: new)
         if let space = rememberedSpaces.removeValue(forKey: old) {
             rememberedSpaces[new] = space
         }
-        // The minimize record's id is a `var` for exactly this
-        // (#673). Know which half of the parity guard reaches it:
-        // its `windowContainers` reflection cannot — the element
-        // is a struct, not a `WindowID` — so the count pin misses
-        // it, while `rekeyMigratesMinimized`'s
-        // `String(describing:)` scan renders the struct and does
-        // catch a forgotten migration. `MinimizeOrderTests` is
-        // the second net.
         if let index = minimizeOrder.firstIndex(
             where: { $0.id == old }
         ) {
@@ -184,10 +88,7 @@ public struct StateCoordinator: Sendable {
         }
     }
 
-    /// Folds an event into state and returns the facts the write
-    /// erases, for `handle(_:)` to compose its side effects from
-    /// (#166). `@discardableResult` — command and test call sites
-    /// apply purely for the state change.
+    /// Folds an event into state and returns side-effect facts (#166).
     @discardableResult
     public mutating func apply(
         _ event: KiwiEvent
@@ -217,12 +118,7 @@ public struct StateCoordinator: Sendable {
                 effects: &effects
             )
 
-        // A hide folds as a non-minimized destroy exactly
-        // (#913): the window keeps its remembered space, so
-        // unhiding returns it there rather than landing it
-        // wherever the user now stands. What differs is
-        // downstream of the fold — the public reason, and the
-        // close-return raise KiwiCore stands down.
+        // Hides fold as non-minimized destroys to remember space (#913).
         case .windowHidden(let id):
             applyWindowDestroyed(
                 id,
@@ -246,16 +142,11 @@ public struct StateCoordinator: Sendable {
         case .windowTitleChanged(let id, let title):
             let floatBefore = windows[id]?.isFloating
             windows.updateTitle(id, title: title)
-            // Lazy-title apps (Electron/WebKit) are tracked
-            // before their titles arrive, so the create-time
-            // identity match misses; retry once the real
-            // title lands (#160).
+            // Retry lazy-title app overrides once real title lands (#160).
             if let window = windows[id] {
                 restoreFloatOverride(of: window)
                 restoreStickyIntent(of: window)
             }
-            // A late title can restore a remembered float
-            // override — the only title change that retiles.
             if let floatBefore,
                 windows[id]?.isFloating != floatBefore
             {
@@ -263,20 +154,12 @@ public struct StateCoordinator: Sendable {
             }
 
         case .windowFloatChanged(let id, let floating):
-            // A manual override always wins over detection:
-            // the title recheck (#160) makes verdicts flip
-            // routinely for `App:Title` rules, and a flip must
-            // not revert an explicit make_floating/make_tiled
-            // (docs promise re-checks never do).
+            // Manual overrides beat AX detection on title flips (#160).
             guard manualFloatOverrides[id] == nil else { break }
-            // `windows.setFloating` also clears any stale overlay
-            // flag when a window heals back to tiled (#300).
+            // Clears stale overlay flag on return to tiled (#300).
             windows.setFloating(id, floating)
 
         case .windowFullscreenChanged(let id, let fullscreen):
-            // No override layer here (unlike float): fullscreen
-            // is purely AX-detected, so the re-check verdict
-            // always applies.
             windows.setFullscreen(id, fullscreen)
 
         case .windowRekeyed(let old, let new):
@@ -286,15 +169,8 @@ public struct StateCoordinator: Sendable {
             reconcile(displays: displays)
 
         case .desktopChanged:
-            // Handled by KiwiCore (profile binding); the
-            // internal state keys off the AX reconcile that
-            // follows the switch.
             break
         }
         return effects
     }
 }
-
-// `effectiveMembers` / `effectiveTiledMembers` live in
-// `StateCoordinator+EffectiveMembers.swift` (file-ceiling
-// split, #414 v2).

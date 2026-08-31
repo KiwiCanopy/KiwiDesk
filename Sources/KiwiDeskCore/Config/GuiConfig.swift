@@ -1,93 +1,52 @@
 import Foundation
 
-/// The GUI's complete editable configuration.
-/// Split along the profile boundary (#36):
-/// - **Global fields** (spaces, app/float/ignore rules, profile
-///   bindings, keybindings) persist in `gui.json` and apply
-///   directly on reload (#55) — `init.lua` is never generated.
-/// - **Profile-scoped fields** (tiling settings, space modes,
-///   monitor pins, Main role) are held in memory for editing
-///   and persist into the active profile's JSON — never into
-///   the sidecar or `init.lua`, so the two files can't drift.
-///
-/// `init.lua` is the user's own hooks-only Lua; code touching
-/// managed vocabulary flips the raw editor (`ManagedConfig`).
+/// The GUI's editable configuration split across global `gui.json` and
+/// active profile JSON (#36, #55).
 public struct GuiConfig: Codable, Equatable, Sendable {
-    /// Format version of the gui.json schema (#902).
-    /// Format 0 = unversioned legacy.
-    ///
-    /// **Deliberately NOT bumped by the scroll-duration rename
-    /// (#1020)**, though `settings` sits on this type and looks
-    /// like it would carry the renamed key. It does not reach the
-    /// file: `settings` is absent from `CodingKeys`, so it is
-    /// neither encoded nor decoded, and the class doc above says
-    /// why — tiling settings are profile-scoped and persist into
-    /// the active profile's JSON, never into the sidecar. A bump
-    /// here would rewrite every existing `gui.json` for nothing
-    /// and make the previous release refuse one this build wrote.
+    /// Format version of the gui.json schema (#902); 0 =
+    /// unversioned legacy. **Deliberately NOT bumped by the
+    /// scroll-duration rename (#1020)**: `settings` is absent from
+    /// `CodingKeys`, so the renamed key never reaches this file —
+    /// a bump would rewrite every gui.json for nothing and make
+    /// the previous release refuse one this build wrote. That note
+    /// is the ruling `SetupBundle.currentFormat` cites.
     public static let currentFormat = 1
 
     public var format: Int = GuiConfig.currentFormat
-    /// Tunable tiling parameters (gaps, per-layout params,
-    /// drag visuals). Mirrors the running `tiler.settings`;
-    /// profile-scoped.
+    /// Active profile tiling parameters.
     public var settings = TilingSettings()
-    /// The Spaces the user has defined, in display
-    /// order. Drives the space lists across the GUI (layouts,
-    /// navigation shortcuts, app assignment). A space can be
-    /// listed with the default `bsp` mode and no other config.
+    /// User-defined Spaces in display order.
     public var spaces: [SpaceID] = []
-    /// Layout mode per Space (`set_mode`);
-    /// profile-scoped.
+    /// Layout mode per Space (profile-scoped).
     public var spaceModes: [SpaceID: LayoutMode] = [:]
     /// App -> space assignment (`app_rules`).
     public var appRules: [String: SpaceID] = [:]
-    /// Space -> monitor fingerprint pin for the *live*
-    /// arrangement; profile-scoped (stored per monitor set).
+    /// Space -> monitor fingerprint pin (profile-scoped).
     public var spacePins: [SpaceID: String] = [:]
-    /// Spaces assigned the Main role (they follow the current
-    /// main display); profile-scoped, stored once per profile.
+    /// Spaces following the main display (profile-scoped).
     public var mainSpaces: Set<SpaceID> = []
-    /// The explicitly designated rehome target (#68): where
-    /// windows land when a profile switch drops their space.
-    /// Profile-scoped (rides the profile JSON, like the pins);
-    /// nil falls back to the order's first surviving space.
+    /// Explicit fallback space when a profile switch drops spaces (#68).
     public var fallbackSpace: SpaceID?
     /// Windows that never tile (`float_rules`).
     public var floatRules: [String] = []
-    /// Apps never managed (`ignore_rules`); no GUI control (#176).
+    /// Apps never managed (`ignore_rules`, #176).
     public var ignoreRules: [String] = []
-    /// Profile bound per native macOS Space (Mission Control
-    /// number -> profile name).
+    /// Mission Control space number -> profile name.
     public var profileBindings: [Int: String] = [:]
-    /// Keybinding modes; the first is always the default mode.
+    /// Keybinding modes; first is default mode.
     public var layers: [KeyLayer] = [KeyLayer.defaultLayer]
 
     public init() {}
 
-    /// Renames a space everywhere it is referenced (#13): the
-    /// `spaces` list, `spaceModes`, `appRules`, the monitor pin
-    /// and Main-role maps, the fallback-space reference, every
-    /// per-space settings map (`TilingSettings.renameSpace` —
-    /// gaps, placement, icons, layout overrides), and the
-    /// space-targeting Lua inside every
-    /// keybinding. A no-op returning `false` when `from` is
-    /// unknown or `to` already exists (the caller keeps the old
-    /// name); renaming to the same id succeeds trivially.
+    /// Renames a space across all references, overrides, and keybindings
+    /// (#13).
     @discardableResult
     public mutating func renameSpace(
         from: SpaceID,
         to: SpaceID
     ) -> Bool {
         guard from != to else { return true }
-        // An empty name is never a valid space (it would emit a
-        // `[""]` key); reject it as a rename target.
         guard !to.raw.isEmpty else { return false }
-        // `spaces` is the authoritative membership set; the caller's
-        // collision check mirrors this guard. A `to` that lingers as
-        // a key in another surface (hand-edited sidecar) is rare and
-        // gets overwritten below — acceptable given `spaces` gates
-        // what the GUI ever offers.
         guard spaces.contains(from), !spaces.contains(to) else {
             return false
         }
@@ -122,16 +81,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         return true
     }
 
-    /// Deletes a space and every profile-scoped reference it
-    /// holds (#68): the list entry, its mode, monitor pin,
-    /// Main role, fallback designation, and all per-space
-    /// settings maps (`TilingSettings.removeSpace`). Without
-    /// this, a pin or override left behind keeps the space in
-    /// `Profile.declaredSpaces` and the next authoritative
-    /// profile load resurrects it. Deliberately does NOT touch
-    /// `appRules` (unlike `renameSpace`): app rules are
-    /// global, and another profile may still declare a space
-    /// of this name — a per-profile delete must not drop them.
+    /// Deletes a space and all profile-scoped overrides (#68) — a
+    /// pin left behind keeps the space in `Profile.declaredSpaces`
+    /// and the next authoritative load resurrects it. Deliberately
+    /// does NOT touch `appRules` (unlike `renameSpace`): app rules
+    /// are global, and another profile may still declare a space
+    /// of this name.
     public mutating func removeSpace(_ space: SpaceID) {
         spaces.removeAll { $0 == space }
         spaceModes[space] = nil
@@ -141,15 +96,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         settings.removeSpace(space)
     }
 
-    /// Whether deleting `space` would silently drop non-trivial
-    /// per-space work — the destructive-delete confirm gate
-    /// (#205). Counts a monitor pin, the Main role, the fallback
-    /// designation, and any per-space settings override (gap,
-    /// placement, icon, or a layout's own override map). The
-    /// bare layout mode is core identity, not "override work",
-    /// so it is not counted. The settings half probes by
-    /// mutating a copy and comparing, so it can never drift from
-    /// `TilingSettings.removeSpace`'s reflection-guarded map list.
+    /// True if deleting space would drop custom overrides (#205).
+    /// The settings half probes by mutating a copy and comparing,
+    /// so it can never drift from `TilingSettings.removeSpace`'s
+    /// reflection-guarded map list.
     public func carriesOverrides(_ space: SpaceID) -> Bool {
         if spacePins[space] != nil { return true }
         if mainSpaces.contains(space) { return true }
@@ -160,8 +110,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     }
 
     /// Only the global fields persist in the sidecar — the
-    /// profile-scoped ones (settings, modes, pins) round-trip
-    /// through the profile JSON instead (#36).
+    /// profile-scoped ones round-trip through the profile JSON
+    /// instead (#36), which is what lets the two files never
+    /// drift.
     private enum CodingKeys: String, CodingKey {
         case format
         case spaces
@@ -172,9 +123,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case layers
     }
 
-    /// Lenient decoding: a field missing from an older sidecar
-    /// falls back to its default (same policy as profiles).
-    /// Legacy tiling keys in an old sidecar are simply ignored.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
@@ -216,11 +164,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             ) ?? []
         profileBindings =
             try decodeProfileBindings(from: container)
-        // Normalized like the spaces below: a hand-edited
-        // sidecar can carry duplicate mode names or an icon on
-        // the default mode (#31) — cleaned here so invalid
-        // entries never reach the loader or the GUI. Empty
-        // input falls back to [KeyLayer.defaultLayer] as before.
+        // A hand-edited sidecar can carry duplicate mode names or
+        // an icon on the default mode (#31) — normalized here so
+        // invalid entries never reach the loader or the GUI.
         layers = KeyLayer.normalized(
             full: try container.decodeIfPresent(
                 [KeyLayer].self,
@@ -230,21 +176,14 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         dropEmptyNamedSpaces()
     }
 
-    /// Empty space names are blocked at every GUI entry point
-    /// (`SpacesTab` add/rename); this drops any that slipped in
-    /// through a hand-edited sidecar so a `[""]` key never reaches
-    /// the writer. Glyph/symbol names are unaffected.
     private mutating func dropEmptyNamedSpaces() {
         // ONE definition of the reference sites (removeSpace)
-        // instead of a third hand-mirror of the list; only the
-        // appRules *value* filter stays separate — decode-time
-        // sanitization removeSpace rightly skips.
+        // rather than a third hand-mirror; only the appRules VALUE
+        // filter stays separate.
         removeSpace(SpaceID(""))
         appRules = appRules.filter { !$0.value.raw.isEmpty }
     }
 
-    /// JSON object keys are strings; native-space numbers are
-    /// stored as `{"2": "Studio"}`.
     private func decodeProfileBindings(
         from container: KeyedDecodingContainer<CodingKeys>
     ) throws -> [Int: String] {

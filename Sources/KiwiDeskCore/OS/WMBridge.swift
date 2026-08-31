@@ -1,73 +1,29 @@
 import Foundation
 import ObjectiveC
 
-/// Runtime bridge to SkyLight's window-management operation
-/// classes (`SLSBridged*Operation`) — the surface #884 found
-/// and #889 probed: moving windows between Desktops, switching
-/// the visible Desktop, Desktop lifecycle, sticky membership and
-/// the per-Desktop key/value store, all on stock macOS with SIP
-/// on. Which builds carry the classes is os-private-apis.md's
-/// dated fact; nothing here names a cutoff — the nil class
-/// lookup IS the version gate (#889 item 8).
-///
-/// The discipline is `SkyLight`'s, extended from C symbols to
-/// ObjC classes: every class is looked up by name at runtime
-/// (`NSClassFromString` after the framework's `dlopen`), and a
-/// class that does not resolve makes the capability ABSENT —
-/// every entry point answers nil or false, never traps (#889
-/// item 8: an absent class is a nil lookup, verified against
-/// three fake names with the real class as the control).
-///
-/// Three facts every caller has to carry (#889):
-///
-/// - **Performed is not applied.** An asynchronous operation
-///   returns nothing at all, and a synchronous one returns a
-///   result even when the WindowServer silently declined
-///   (edge reservation performed under every mask and moved
-///   nothing). A write is verified by a re-query or by state
-///   the caller owns — never by this API's return value.
-/// - **The bridge exists only while AppKit is genuinely loaded**
-///   (#884's bisection): its load-time init registers the
-///   delegate the operations dispatch to. Free in the app,
-///   binding on any harness — which is one reason tests reach
-///   this type only through `classResolverOverride`.
-/// - **No Accessibility trust is needed** for reads or writes;
-///   AppKit-loaded is the only gate.
-///
-/// The `SLSBridged` prefix is spelled ONCE, here, and the
-/// operation names are joined to it at lookup — so every
-/// bridge call in the tree goes through this file, which
-/// `WMBridgeSeamTests` pins by scanning for the prefix.
-///
-/// Main-actor, like every AppKit interaction (AGENTS.md §2.6):
-/// the operations dispatch through AppKit's registered delegate,
-/// #889 probed them on the main thread only, and the first
-/// `isAvailable` read is a live WindowServer round trip inside
-/// a once-initialiser — a hop to main from inside that lock
-/// while main waited on the same lock would deadlock.
+/// Runtime bridge to SkyLight's `SLSBridged*Operation`
+/// window-management classes (#884, #889); `WMBridgeSeamTests`
+/// pins that every bridge call routes through this file.
+/// Main-actor deliberately: #889 probed the operations on the
+/// main thread only, and the first `isAvailable` read is a live
+/// WindowServer round trip inside a once-initialiser — a hop to
+/// main from inside that lock while main waited on it would
+/// deadlock.
 @MainActor
 public enum WMBridge {
     public typealias SpaceID = SkyLight.SpaceID
 
-    /// The one spelling of the class-name prefix (see the type
-    /// doc). Joined to an operation's short name at lookup.
+    /// Prefix joined to short operation names at runtime lookup.
     static let classPrefix = "SLSBridged"
 
-    /// Every custom key KiwiDesk writes into a Desktop's store
-    /// carries this prefix — the store is Apple's own dictionary
-    /// (`type`, `id64`, `WindowManagerInfo`, …) and a bare key
-    /// would sit beside theirs (#889 item 3). The wrapper owns
-    /// it: a caller passes BARE keys, `setValues` and
-    /// `createSpace` prefix them, `stamps(of:)` strips them — one
-    /// shape each way, so a caller never spells the prefix.
-    ///
-    /// A STORED value (AGENTS.md §5): the WindowServer persists
-    /// these keys across logout and mode flips, so a change to
-    /// this string owes a re-stamp crossing for every Desktop
-    /// carrying the old one — never a reader lenient to both.
+    /// Stored desktop-store key prefix (#889 item 3). A STORED
+    /// value (AGENTS.md §5): the WindowServer persists these keys
+    /// across logout, so a change to this string owes a re-stamp
+    /// crossing for every Desktop carrying the old one — never a
+    /// reader lenient to both.
     public static let valueKeyPrefix = "kiwidesk."
 
-    /// `values` with every key under `valueKeyPrefix`.
+    /// Transforms dictionary keys under `valueKeyPrefix`.
     static func namespaced(_ values: [String: Any]) -> NSDictionary {
         var out: [String: Any] = [:]
         for (key, value) in values {
@@ -77,20 +33,11 @@ public enum WMBridge {
     }
 
     #if DEBUG
-        /// Test seam: answers every class lookup instead of the
-        /// ObjC runtime, so a suite can hand the plumbing fake
-        /// operation classes — or nil, to prove the absent
-        /// capability degrades rather than traps — without
-        /// touching the machine's WindowServer.
+        /// Test seam for injecting mocked operation classes.
         public static var classResolverOverride: ((String) -> AnyClass?)?
     #endif
 
-    /// Whether the bridge is usable in THIS process: the
-    /// framework loaded, the operation classes resolve, and a
-    /// synchronous read answers — which is what proves the
-    /// delegate is registered, i.e. that AppKit is really
-    /// loaded. A GUI surface offering a bridge feature gates on
-    /// this predicate and greys with a reason when it is false.
+    /// True if framework is loaded and operation classes resolve (#884, #889).
     public static var isAvailable: Bool {
         #if DEBUG
             if classResolverOverride != nil {
@@ -106,11 +53,7 @@ public enum WMBridge {
         managedDisplaySpaces() != nil
     }
 
-    // MARK: - Class resolution
-
-    /// The class for one operation, by its short name
-    /// (`"SpaceCreateOperation"`), or nil when the capability is
-    /// absent on this macOS.
+    /// Resolves class for operation short name, or nil if unavailable.
     static func resolve(_ operation: String) -> AnyClass? {
         #if DEBUG
             if let override = classResolverOverride {
@@ -121,14 +64,10 @@ public enum WMBridge {
         return NSClassFromString(classPrefix + operation)
     }
 
-    // MARK: - Message sending
-
-    /// `objc_msgSend`, typed per call below. The bridge's
-    /// initialisers take C scalars (`unsigned long long` space
-    /// ids, `unsigned int` option masks) that `perform(_:with:)`
-    /// cannot pass, and its asynchronous `perform…` returns
-    /// VOID — read through `perform(_:)` that is a stale
-    /// register, not a result.
+    /// `objc_msgSend`, typed per call: the initialisers take C
+    /// scalars `perform(_:with:)` cannot pass, and the async
+    /// `perform…` returns VOID — read through `perform(_:)` that
+    /// is a stale register, not a result.
     private nonisolated(unsafe) static let send: UnsafeMutableRawPointer? =
         dlsym(dlopen(nil, RTLD_LAZY), "objc_msgSend")
 
@@ -163,16 +102,11 @@ public enum WMBridge {
         "performWithWMBridgeDelegate"
     )
 
-    /// `objc_msgSend` as one of the signatures above.
     static func sender<T>(as type: T.Type) -> T? {
         send.map { unsafeBitCast($0, to: T.self) }
     }
 
-    /// Allocates and initialises one operation: `build` receives
-    /// the `+alloc`ed instance and the initialiser selector and
-    /// returns the initialised object (`-init…` consumes the
-    /// allocation, so the pair nets +1 and is taken retained).
-    /// Nil when the class or the runtime is unavailable.
+    /// Allocates and initializes operation object.
     static func make(
         _ operation: String,
         initializer: String,
@@ -188,10 +122,7 @@ public enum WMBridge {
         )?.takeRetainedValue()
     }
 
-    /// Performs a SYNCHRONOUS operation and returns its result
-    /// object (an `SLSBridgedWindowManagementOperation*Result`,
-    /// read by key), or nil when the delegate is absent — the
-    /// AppKit-not-loaded case, or a bridge that refused.
+    /// Executes synchronous operation returning result object.
     static func performSync(_ operation: AnyObject?) -> NSObject? {
         guard let operation,
             let perform = sender(as: SyncPerformFn.self)
@@ -200,8 +131,7 @@ public enum WMBridge {
             .takeUnretainedValue() as? NSObject
     }
 
-    /// Dispatches an ASYNCHRONOUS operation. True means it was
-    /// handed to the bridge — nothing more (see the type doc).
+    /// Dispatches asynchronous operation to bridge (#889).
     static func performAsync(_ operation: AnyObject?) -> Bool {
         guard let operation,
             let perform = sender(as: AsyncPerformFn.self)
@@ -210,12 +140,10 @@ public enum WMBridge {
         return true
     }
 
-    /// One typed field of a result object, by its declared
-    /// property name (`spaceID`, `numbers`, `string`, …). A
-    /// result that no longer declares the key answers nil — the
-    /// key is the same release-churn surface as the class, and
-    /// `value(forKey:)` on an unknown key raises an ObjC
-    /// exception Swift cannot catch, which is a trap.
+    /// Reads a typed field from a result object, only where the
+    /// selector is supported: `value(forKey:)` on an unknown key
+    /// raises an ObjC exception Swift cannot catch — a trap, and
+    /// the key is the same release-churn surface as the class.
     static func field<T>(_ key: String, of result: NSObject?) -> T? {
         guard let result,
             result.responds(to: NSSelectorFromString(key))

@@ -2,23 +2,8 @@ import ApplicationServices
 import CoreGraphics
 import Foundation
 
-/// Applies animation frames to real windows without ever
-/// blocking the animation clock.
-///
-/// AX frame-setting is synchronous IPC into the target app
-/// (1–20 ms per call), so frames run on one serial queue *per
-/// application*: a slow app only delays its own windows,
-/// never other apps' frames or the display link. Per window,
-/// only the newest frame is kept — while one is waiting to be
-/// applied, later frames overwrite it, so a slow app skips
-/// intermediate steps instead of falling behind (and the
-/// final frame is always the one that lands).
-///
-/// While an app's windows animate, its
-/// `AXEnhancedUserInterface` is switched off: with it on,
-/// AppKit performs extra work per frame-set that makes moves
-/// visibly stutter. It is restored when the app's last
-/// animation ends (see AGENTS.md guardrails).
+/// Applies animation frames to real windows via per-app queues without
+/// blocking the clock.
 @MainActor
 final class FrameApplier {
     var elementProvider: @MainActor (WindowID) -> AXUIElement? =
@@ -31,45 +16,30 @@ final class FrameApplier {
     private let recent = RecentApplies()
     private let instantTargets = InstantTargets()
 
-    /// How long after one of our own frame-sets a window's
-    /// move events are still considered self-inflicted. AX
-    /// echoes arrive asynchronously, usually well under this.
+    /// Grace period for ignoring self-inflicted AX frame echoes.
     private static let echoGrace: TimeInterval = 1.0
 
-    /// Whether we set this window's frame within the echo
-    /// grace period. Used to tell the AX echoes of our own
-    /// frame-sets apart from user drags — without this, the
-    /// echo of a settled animation reads as a drag end (and in
-    /// stack layouts, where all slots overlap, that fake drop
-    /// swaps windows and retriggers itself forever).
+    /// True if window's frame was set within the echo grace —
+    /// tells our own AX echoes apart from user drags. Without it
+    /// a settled animation's echo reads as a drag end, and in
+    /// stack layouts (all slots overlap) that fake drop swaps
+    /// windows and retriggers itself forever.
     func didRecentlySetFrame(_ id: WindowID) -> Bool {
         recent.isRecent(id, within: Self.echoGrace)
     }
 
-    /// The frame a recent `applyInstant` commanded for this
-    /// window, while its echo may still be in flight (#881):
-    /// the steady-state overlay syncs prefer it over the
-    /// echo-fed state frame, so a ring moves at monocle park's
-    /// instant focus switch instead of a whole echo behind it.
-    /// Cleared by the first self-echo (`clearInstantTarget` —
-    /// reality reported, and an app may have clamped the ask)
-    /// or by the echo grace expiring.
+    /// Commanded frame from recent `applyInstant` while echo is in flight
+    /// (#881).
     func instantTarget(_ id: WindowID) -> CGRect? {
         instantTargets.frame(id, within: Self.echoGrace)
     }
 
-    /// The window's first self-echo arrived: the echo-fed state
-    /// frame is now the better truth, so the stamp retires
-    /// early rather than shadowing a clamped answer for the
-    /// rest of the grace.
+    /// Retires instant target stamp upon arrival of first self-echo.
     func clearInstantTarget(_ id: WindowID) {
         instantTargets.clear(id)
     }
 
-    // MARK: - Animation lifecycle (EUI management)
-
-    /// Marks a window as animating; disables the app's
-    /// EnhancedUserInterface while any of its windows move.
+    /// Marks window animating and disables app EnhancedUserInterface.
     func beginAnimating(_ id: WindowID) {
         guard animatingPid[id] == nil,
             let element = elementProvider(id),
@@ -82,9 +52,7 @@ final class FrameApplier {
         }
     }
 
-    /// Ends a window's animation (settled or cancelled) and
-    /// restores EnhancedUserInterface when it was the app's
-    /// last moving window.
+    /// Ends window animation and restores EnhancedUserInterface if last.
     func endAnimating(_ id: WindowID) {
         guard let pid = animatingPid.removeValue(forKey: id)
         else { return }
@@ -95,13 +63,7 @@ final class FrameApplier {
         }
     }
 
-    // MARK: - Frame application
-
-    /// Hands one frame to the target app's queue. `setSize`
-    /// marks the rare frames that change size (a size step and
-    /// the final frame); all others apply position
-    /// only — a single AX call that never forces the app to
-    /// re-lay-out its content.
+    /// Dispatches frame to target app queue (position-only unless `setSize`).
     func apply(_ id: WindowID, _ frame: CGRect, setSize: Bool) {
         guard let element = elementProvider(id) else { return }
         guard
@@ -132,36 +94,21 @@ final class FrameApplier {
                     of: entry.element
                 )
             }
-            // Stamped after the AX call: echoes trail it.
             recent.record(id)
         }
     }
 
-    /// Applies a frame instantly (no spring), AeroSpace-style:
-    /// on the app's serial queue, drop `AXEnhancedUserInterface`
-    /// around the set so an EUI-on app does not animate the move
-    /// itself — which stutters and can clamp or swallow the
-    /// frame — then restore whatever it was. `WindowControl`'s
-    /// size→position→size order lands the window in one pass, so
-    /// no settle frame is needed. Reading the live EUI state
-    /// (rather than a cached flag) means that if a sibling
-    /// window of the same app is still spring-animating — and so
-    /// already holds EUI off — this leaves it off for that
-    /// animation to restore.
-    ///
-    /// This deliberately does NOT participate in the `pidCounts`
-    /// ref-counting that `begin/endAnimating` use: every EUI
-    /// toggle and frame-set for a pid is enqueued from the main
-    /// actor onto the one serial `queue(for: pid)`, so the live
-    /// read observes the correct interleaved state without a
-    /// lock. Callers must `animation.cancel(window:)` before an
-    /// instant set (as `retile` and `stashInactive` do) so a
-    /// window is never spring-animated and instant-set at once.
+    /// Applies a frame instantly, dropping EUI around the set
+    /// (#881). Deliberately outside the `begin/endAnimating`
+    /// ref-count: every EUI toggle and frame-set for a pid rides
+    /// the one serial queue, so the live read observes the correct
+    /// interleaved state. Callers must `animation.cancel(window:)`
+    /// first (as `retile` and `stashInactive` do) so a window is
+    /// never spring-animated and instant-set at once.
     func applyInstant(_ id: WindowID, _ frame: CGRect) {
-        // Recorded before the element guard, at enqueue time:
-        // the overlay sync wants the commanded frame this same
-        // turn (#881), and a stamp for a window whose element
-        // is gone expires unread.
+        // Recorded before the element guard, at enqueue time: the
+        // overlay sync wants the commanded frame this same turn
+        // (#881); a stamp for a gone window expires unread.
         instantTargets.record(id, frame: frame)
         guard let element = elementProvider(id) else { return }
         guard
@@ -186,25 +133,13 @@ final class FrameApplier {
                     enabled: true
                 )
             }
-            // Stamped after the AX calls: echoes trail them.
             recent.record(id)
         }
     }
 
-    // MARK: - Internals
-
     private func queue(for pid: pid_t) -> DispatchQueue {
-        // Frame-sets for our own windows must run on the main
-        // queue: an in-process AX call never crosses to the AX
-        // server — HIServices runs the AppKit window move
-        // synchronously on the calling thread, and AppKit traps
-        // off the main thread. Since #678 Phase 5 this is no
-        // longer the exceptional path it was written for (a
-        // floating Settings window, nudged): the Settings window
-        // tiles, so an animated retile drives it every tick. It
-        // is still one in-process window whose move AppKit
-        // performs synchronously — the same work the main queue
-        // would do at the end of the tick anyway.
+        // Own process runs on main queue to prevent AppKit thread traps
+        // (#678 Phase 5).
         if pid == getpid() {
             return DispatchQueue.main
         }
@@ -219,10 +154,8 @@ final class FrameApplier {
         return queue
     }
 
-    /// EUI toggles ride the same per-app queue as the frames,
-    /// so off → frames → on ordering is guaranteed. Queues are
-    /// kept for the app's lifetime; one idle queue per app is
-    /// cheaper than risking two queues racing AX calls.
+    /// EUI toggles ride the same per-app queue as the frames, so
+    /// off → frames → on ordering is guaranteed.
     private func setEUI(pid: pid_t, enabled: Bool) {
         queue(for: pid).async {
             AXHelper.setEnhancedUserInterface(
@@ -240,10 +173,7 @@ final class FrameApplier {
     }
 }
 
-/// Commanded instant-set targets whose echoes may still be in
-/// flight (#881) — `RecentApplies`' shape, carrying the frame.
-/// Written on the main actor at enqueue time (`applyInstant`),
-/// read from the main actor.
+/// Instant-set target frames awaiting AX echo (#881).
 private final class InstantTargets: @unchecked Sendable {
     private typealias Entry = (frame: CGRect, at: TimeInterval)
     private let lock = NSLock()
@@ -280,8 +210,7 @@ private final class InstantTargets: @unchecked Sendable {
     }
 }
 
-/// When each window's frame was last set by us. Written from
-/// the per-app queues, read from the main actor.
+/// Recent frame application timestamps for echo suppression.
 private final class RecentApplies: @unchecked Sendable {
     private let lock = NSLock()
     private var stamps: [WindowID: TimeInterval] = [:]
@@ -308,9 +237,7 @@ private final class RecentApplies: @unchecked Sendable {
     }
 }
 
-/// Latest pending frame per window, shared between the main
-/// actor (producer) and the per-app queues (consumers).
-/// AXUIElement is thread-safe; the lock guards the dictionary.
+/// Pending frames per window shared across threads.
 private final class PendingFrames: @unchecked Sendable {
     struct Entry {
         let element: AXUIElement
@@ -321,9 +248,8 @@ private final class PendingFrames: @unchecked Sendable {
     private let lock = NSLock()
     private var entries: [WindowID: Entry] = [:]
 
-    /// Stores the newest frame for a window. Returns true when
-    /// an apply is already scheduled (the caller must not
-    /// schedule another). A pending size change survives being
+    /// Stores the newest frame; returns true when an apply is
+    /// already scheduled. A pending size change survives being
     /// overwritten by a position-only frame.
     func put(_ id: WindowID, _ entry: Entry) -> Bool {
         lock.lock()
