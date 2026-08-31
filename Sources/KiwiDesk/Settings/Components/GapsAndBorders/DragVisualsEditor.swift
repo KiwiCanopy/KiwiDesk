@@ -1,22 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Drag-and-drop visuals (#68 §3.14, restructured #231, #754):
-/// Ghost | Drop-zone as two side-by-side columns inside the
-/// Drag & drop card. Each column leads with its own live
-/// preview and puts its controls directly beneath, so tuning a
-/// column's border width never scrolls its preview off-screen —
-/// the whole reason the previews were split out of one shared
-/// strip. Genuinely distinct runtime visuals users routinely
-/// want different, edited by comparison, so twin columns state
-/// the pairing once (the System-Settings Displays/Desktop
-/// pattern). Static previews — no live drag (#123).
-///
-/// Both border WIDTHS and the shared corner radius left for the
-/// Borders card in #754, where two rows now decide them for all
-/// three strokes at once; the two alignment pickers left the GUI
-/// entirely there (GUI_REMOVED_2026-08). What stays in a column
-/// is what only that column can answer.
+/// Drag-and-drop visuals editor card for ghost and drop zone
+/// settings (`GapsBordersGates`, #68 §3.14, #231, #754). Twin
+/// columns, each preview above its own controls; static previews
+/// — no live drag (#123). The colour rows left for Advanced
+/// Colours in #678 Phase 3; what stays is what only a column can
+/// answer.
 struct DragVisualsEditor: View {
     @ObservedObject var model: SettingsModel
 
@@ -63,17 +53,7 @@ struct DragVisualsEditor: View {
         }
     }
 
-    /// One self-contained column: preview leads, its controls
-    /// below.
-    ///
-    /// It no longer narrows the label axis (#231's
-    /// `dragColumnLabelColumn`, pushed in through the
-    /// environment). That existed so a half-width column could
-    /// still hold a slider with real travel, and #754 took the
-    /// last slider out — what remains is toggles, which draw
-    /// their own labels and never read the axis. The metric
-    /// itself stays: Advanced Colours' twin drag columns pass
-    /// it directly as `labelWidth:`.
+    /// Renders individual column with gated controls (#527).
     private func column(
         control: SettingsControl,
         caption: String,
@@ -81,18 +61,14 @@ struct DragVisualsEditor: View {
         enabledReason: GapsBordersGates.InertReason?
     ) -> some View {
         // The header `?` is the gate's live anchor (#527): with
-        // the visual off the column below the Enabled toggle is
-        // dimmed, and help inside a greyed block is dead.
+        // the visual off the column below is dimmed, and help
+        // inside a greyed block is dead.
         SettingsSection(
             control,
             caption: caption,
             subsection: true,
             help: enabledReason.map(GapsBordersGateHelp.sentence)
         ) {
-            // The ghost preview moved to the detail PANEL
-            // (`GapsBordersPanelPreview`) — one screen must
-            // not state one fact twice; the Advanced Colours
-            // mirror keeps its own mount.
             DragVisualControls(
                 visual: visual,
                 enabledReason: enabledReason
@@ -102,21 +78,12 @@ struct DragVisualsEditor: View {
     }
 }
 
-/// The border + fill switches shared by ghost and drop zone —
-/// whether each part is drawn at all, which is the one question
-/// only this column can answer. The two COLOUR rows left in
-/// #678 Phase 3 for Advanced Colours; the border WIDTH left in
-/// #754 for the shared master, which is why Border no longer
-/// gates anything below it here.
+/// Border and fill toggle switches for drag ghost and drop zone
+/// (`GreyOut`, #171, #520, #754).
 struct DragVisualControls: View {
     @Binding var visual: DragVisual
     let enabledReason: GapsBordersGates.InertReason?
 
-    /// The one gate the column implies and did not enforce
-    /// (#520): with the visual off nothing it draws exists. The
-    /// column's preview already prints "disabled" beside it, so
-    /// the controls were the only surface still claiming to
-    /// matter. Greyed, never hidden (#171).
     var body: some View {
         Toggle(L("drag.enabled", "Enabled"), isOn: $visual.enabled)
         Divider()

@@ -1,15 +1,10 @@
 import Foundation
 import KiwiDeskCore
 
-/// The keybinding-conflict in-app warning banner — split out of
-/// `SettingsModel.swift` (which owns `keybindingWarning` and the
-/// rest of the model state) to stay under the file-size ceiling.
+/// Keybinding conflict warning banner formatting for SettingsModel.
 extension SettingsModel {
-    /// The banner text, derived live: nil once dismissed —
-    /// and nil once every conflict it named is fixed, however
-    /// it was fixed (clearing a combo or deleting a row never
-    /// passes through the recorder writers below, so the
-    /// banner re-derives instead of latching stale text).
+    /// Live derived banner text reflecting active conflicts
+    /// (`KeybindingConflicts`).
     var liveKeybindingBanner: String? {
         guard keybindingWarning != nil else { return nil }
         return formatConflicts(
@@ -19,15 +14,10 @@ extension SettingsModel {
         )
     }
 
-    /// Called after a `KeyRecorderField.onRecord` commits a new
-    /// combo. Warns (naming every current conflict) if that row
-    /// now conflicts; else clears the banner once the whole
-    /// config has no conflict left, so it doesn't linger once
-    /// the last one is fixed. An edit that leaves some *other*
-    /// row still conflicting only refreshes the banner if it was
-    /// already shown — an unrelated valid edit must not newly
-    /// pop it open. The persistent per-row indicator remains the
-    /// precise, always-live source of truth either way.
+    /// Evaluates conflict state after recording a combo. An edit
+    /// leaving some OTHER row conflicting only refreshes the
+    /// banner if already shown — an unrelated valid edit must not
+    /// newly pop it open.
     func noteRecordedCombo(
         _ binding: KeyBinding,
         in bindings: [KeyBinding]
@@ -47,11 +37,7 @@ extension SettingsModel {
         }
     }
 
-    /// Sets or clears the banner from a whole-config check —
-    /// used by the two batch paths (Adopt, Lua editor save)
-    /// where no single recorder input triggered the check.
-    /// Internal (not `private`): called from `SettingsModel`'s
-    /// own `saveLuaSource()` / `adoptIntoGui()`.
+    /// Updates conflict banner for whole configuration on batch operations.
     func warnIfAnyConflict() {
         let list = KeybindingConflicts.actionable(
             in: config.layers
@@ -60,9 +46,7 @@ extension SettingsModel {
             list.isEmpty ? nil : formatConflicts(list)
     }
 
-    /// The stored English canonical, narrated in the user's
-    /// locale (#96) — instance methods now, because the roster
-    /// lookup needs the config's spaces, layers and step.
+    /// Localized keybinding name lookup (`KeybindingCatalog`, #96).
     private func localized(_ name: String) -> String {
         KeybindingCatalog.localizedLabel(
             for: name,
@@ -70,8 +54,7 @@ extension SettingsModel {
         )
     }
 
-    /// Renders a named, enumerated summary: a single sentence
-    /// for one conflict, or a bulleted list for several.
+    /// Formats single conflict sentence or bulleted list.
     private func formatConflicts(
         _ conflicts: [Conflict]
     ) -> String? {
@@ -80,13 +63,11 @@ extension SettingsModel {
             return sentence(only)
         }
         let lines = conflicts.map { "– \(bulletLine($0))" }
-        // The separator lives here, not on the end of the
-        // translatable string. It used to be a trailing `\n` inside
-        // the English, and `merge-keys` trims surrounding
-        // whitespace off every translation — so all eleven locales
-        // shipped without it and ran this header into the first
-        // bullet. A structural newline is not copy; a catalog is
-        // the wrong place to carry one.
+        // The separator lives HERE, not on the translatable
+        // string: it was a trailing \n inside the English, and
+        // `merge-keys` trims surrounding whitespace off every
+        // translation — all eleven locales shipped without it. A
+        // structural newline is not copy.
         return L(
             "keybinding.conflict.several",
             "Several shortcuts are conflicting:"
@@ -95,11 +76,7 @@ extension SettingsModel {
             + lines.joined(separator: "\n")
     }
 
-    /// The single-conflict sentence, name and target together —
-    /// one template per target kind so a translation can reorder
-    /// the quoted name relative to the rest of the sentence
-    /// (issue #9 review: two `+`-concatenated fragments can't be
-    /// reordered by a translation).
+    /// Formats single conflict explanation sentence (#9).
     private func sentence(_ conflict: Conflict) -> String {
         switch conflict.target {
         case .unrecognized:
@@ -128,8 +105,7 @@ extension SettingsModel {
         }
     }
 
-    /// One bullet line's text (no leading "– ", added by the
-    /// caller).
+    /// Formats bullet point text for individual conflict in list.
     private func bulletLine(_ conflict: Conflict) -> String {
         switch conflict.target {
         case .unrecognized:

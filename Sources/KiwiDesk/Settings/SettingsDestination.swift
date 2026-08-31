@@ -1,11 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The navigation identities (#68 §3.1 → #678 turn 9): one case
-/// per area screen, fronted by a Home card. The two groups make
-/// the profile/global scope split part of the navigation itself
-/// — "This Profile" areas follow the header's edit target,
-/// "Whole App" areas are always live.
+/// Settings navigation destinations (#68, #678 turn 9).
 enum SettingsDestination: String, CaseIterable, Identifiable {
     // This Profile
     case spaces
@@ -24,24 +20,17 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// Advanced Colors sits DIRECTLY after its Simple twin, so
-    /// the pair reads as a family wherever this order surfaces
-    /// (the Power-User grid keeps both; search lists them
-    /// adjacent).
-    ///
-    /// The pair sits AFTER the things it paints, and the order
-    /// is load-bearing beyond taste: search groups its results
-    /// by destination in this order, so a colour page listed
-    /// above Bars would answer "App Bar" with a grid of
-    /// swatches before the App Bar's own card
-    /// (`SettingsSearchTests`). You arrive at colour having
-    /// noticed something on a surface you already know.
-    /// (The GRID's own order is `HomeCardOrder`'s; only set
-    /// membership is shared — `HomeCardOrderTests` pins it.)
+    /// Destinations scoped to the active profile. The order is
+    /// load-bearing: search groups results by destination in it,
+    /// so the colour pair sits AFTER the things it paints
+    /// (`SettingsSearchTests`), and Advanced Colors directly after
+    /// its Simple twin so the pair reads as a family
+    /// (`HomeCardOrderTests` pins the shared membership).
     static let thisProfile: [SettingsDestination] = [
         .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
         .bars, .colors, .advancedColors, .behavior,
     ]
+    /// Destinations scoped globally across the application.
     static let wholeApp: [SettingsDestination] = [
         .profiles, .shortcuts, .appRules, .general,
     ]
@@ -74,16 +63,12 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         }
     }
 
-    /// §6.1 — one glyph per destination, never reused across
-    /// two sidebar items or another surface meaning something
-    /// else (icons are vocabulary).
+    /// SF Symbol icon name for navigation item (§6.1).
     var symbol: String {
         switch self {
         case .spaces: return "squares.below.rectangle"
         case .layoutDefaults: return "rectangle.3.group"
         case .monitors: return "display.2"
-        // The colour pair reads as a family — one paint glyph
-        // each, the deeper one on the deeper page.
         case .colors: return "paintbrush.fill"
         case .advancedColors: return "paintpalette.fill"
         case .gapsAndBorders: return "square.dashed.inset.filled"
@@ -96,21 +81,13 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         }
     }
 
-    /// §6.1 — System-Settings-style tile colors, so the
-    /// sidebar scans by color+shape before reading a label.
+    /// Tile tint color for navigation item (§6.1, `SettingsThemeTokenTests`).
     var tint: Color {
         switch self {
         case .spaces: return .indigo
-        // Deeper teal/green than the system defaults: the
-        // bright `.teal`/`.green` washed the white glyph out.
         case .layoutDefaults:
-            // One of the varied per-section icon tints (System
-            // Settings style), not a brand hue.
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
-        // Colours & Animations inherits Appearance's purple with its
-        // meaning; its Power-User twin takes a deeper violet, so the
-        // pairing is legible by hue before either label is read.
         case .colors: return .purple
         case .advancedColors:
             return Color(red: 0.38, green: 0.20, blue: 0.60)
@@ -118,13 +95,10 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .bars: return .pink
         case .behavior: return .orange
         case .profiles:
-            // The brand green ITSELF, read from the theme — not a
-            // second copy of it. This shipped as RGB floats with
-            // a "keep in sync" comment, which is the shape that
-            // never gets kept in sync: the two would disagree the
-            // first time the accent moved, and nothing would say
-            // so. `SettingsTheme.accent` is pinned by
-            // `SettingsThemeTokenTests`.
+            // The brand green ITSELF, read from the theme — this
+            // shipped as RGB floats with a "keep in sync" comment,
+            // the shape that never gets kept in sync
+            // (`SettingsThemeTokenTests` pins the token).
             return SettingsTheme.accent
         case .shortcuts:
             return Color(
@@ -137,28 +111,21 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Whether the destination is offered while a stored
-    /// profile is being edited (#18): only the Advanced/About
-    /// General section is a global surface a profile edit
-    /// never writes. App Rules joined the editable set when
-    /// its Space facet grew a per-profile override (#109) —
-    /// the Float facet stays global and renders disabled
-    /// there.
+    /// Whether destination is visible when editing a stored
+    /// profile (#18): only General is a global surface a profile
+    /// edit never writes. App Rules joined when its Space facet
+    /// grew a per-profile override (#109) — the Float facet stays
+    /// global and renders disabled there.
     var visibleWhileEditingStoredProfile: Bool {
         self != .general
     }
 
-    /// Whether the profile edit-target header (the toolbar
-    /// picker + the status strip) is shown for this
-    /// destination. Only General is truly profile-agnostic
-    /// (About + the config-file tools).
+    /// Whether destination toolbar displays profile context picker.
     var showsProfileContext: Bool {
         self != .general
     }
 
-    /// The one reachability predicate all #18 enforcement
-    /// points share (sidebar offer, selection repair, navigate
-    /// guard) — one polarity, no hand-negated copies.
+    /// Reachability predicate for profile editing mode (#18).
     func isReachable(editingStoredProfile: Bool) -> Bool {
         !editingStoredProfile
             || visibleWhileEditingStoredProfile

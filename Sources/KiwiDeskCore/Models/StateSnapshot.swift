@@ -1,11 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// Serializable snapshot of the full window management state.
-///
-/// Used by `SleepWakeManager` (restore after sleep/wake and
-/// lock/unlock) and later by crash recovery. Codable so it can
-/// be persisted to disk.
+/// Serializable snapshot of full window management state (`SleepWakeManager`).
 public struct StateSnapshot: Codable, Sendable, Equatable {
     public struct WindowRecord: Codable, Sendable, Equatable {
         public let id: UInt32
@@ -24,17 +20,10 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         public let mode: LayoutMode
         public let windows: [UInt32]
         public let focused: UInt32?
-        /// The track partition (#128), carried so a same-session
-        /// restore (wake/unlock, crash recovery) preserves the
-        /// visible track topology instead of collapsing every
-        /// space to one implicit track — `adopt` re-files each
-        /// window through `remove`+append, which is blind to the
-        /// keyed break markers. Absent (default `[]`) in older
-        /// snapshots and non-track spaces. The per-window
-        /// `stackWeights` are deliberately NOT carried: an even
-        /// re-split degrades gracefully (the pre-existing stack
-        /// behavior), while a lost partition restructures the
-        /// space.
+        /// Track breaks and weights preserved across restore
+        /// (#128). The per-window `stackWeights` are deliberately
+        /// NOT carried: an even re-split degrades gracefully,
+        /// while a lost partition restructures the space.
         public let trackBreaks: [UInt32]
         public let trackWeights: [UInt32: Double]
 
@@ -103,22 +92,12 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
 }
 
 extension StateCoordinator {
-    /// Re-applies a snapshot's arrangement: window order per
-    /// space, focus, and the active space. The array order IS
-    /// the layout order, so without this a restart re-tiles
-    /// windows in AX discovery order (seemingly shuffled).
-    /// Snapshot windows that are not currently tracked (other
-    /// native desktops, minimized) are remembered so they
-    /// return to their space when they reappear.
-    ///
-    /// A snapshot space that no longer exists is skipped, never
-    /// created (#633): the config/profile that loaded before
-    /// this ran is the space-set authority, and an `ensureSpace`
-    /// here resurrected spaces the adopted profile had pruned —
-    /// which `syncGuiSpacesToLive` and the next profile save
-    /// then persisted, corrupting `gui.json` from a restore.
-    /// Windows filed under a skipped space stay where reconcile
-    /// put them.
+    /// Re-applies snapshot state. A snapshot space that no longer
+    /// exists is skipped, never created (#633): the loaded
+    /// config/profile is the space-set authority, and an
+    /// `ensureSpace` here resurrected pruned spaces which the next
+    /// save persisted — corrupting `gui.json` from a restore
+    /// (#128).
     public mutating func adopt(_ snapshot: StateSnapshot) {
         for record in snapshot.spaces {
             let space = SpaceID(record.id)
@@ -136,23 +115,11 @@ extension StateCoordinator {
             {
                 workspaces.focus(WindowID(raw), in: space)
             }
-            // Reinstate the track partition after the re-file
-            // churn wiped it (#128): the `remove`+append loop
-            // above is blind to the keyed break markers, so a
-            // live wake/unlock restore would otherwise collapse
-            // every track space to one implicit track. Dormant
-            // markers on windows not (yet) tracked are harmless
-            // — the partition only spans the tiled list.
-            //
             // Trigger on "the record IS a track space", not on
-            // marker non-emptiness: a track space whose windows
-            // were all merged into one track captures as
-            // empty/empty, and since `restore` re-applies the
-            // mode before this runs (#633), a mode *entry* just
-            // seeded a default partition — the empty write is
-            // what clears the seed back to the captured single
-            // track. Non-track spaces keep the non-empty
-            // trigger for their dormant markers.
+            // marker non-emptiness: an all-merged track space
+            // captures empty/empty, and `restore` re-applies the
+            // mode first (#633) — the empty write clears the
+            // mode-entry seed back to the captured single track.
             if record.mode == .track
                 || !record.trackBreaks.isEmpty
                 || !record.trackWeights.isEmpty
@@ -170,9 +137,6 @@ extension StateCoordinator {
                 }
             }
         }
-        // Same existence gate as the loop above: `activate`
-        // ensures its space, so an unguarded call would
-        // re-create the one space the gate just skipped.
         if let active = snapshot.activeSpace,
             workspaces[SpaceID(active)] != nil
         {

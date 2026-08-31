@@ -1,17 +1,9 @@
 import CoreGraphics
 
-/// Pure resolve helpers split from AppBarStyle.swift (file-size
-/// ceiling) — `SpaceBarStyle+Metrics` is the same seam on the
-/// other bar. The Codable conformance stays with the struct.
+/// Metric resolution helpers for `AppBarStyle` (`SpaceBarStyle+Metrics`).
 extension AppBarStyle {
-    /// The item font ladder: an explicit `font_size` wins;
-    /// auto scales with the bar's cross dimension (its
-    /// thickness), so a fat bar gets readable text and a slim
-    /// one stays inside its strip. One resolution site shared
-    /// by the item view, the slot measurement and the GUI
-    /// preview so they can't drift —
-    /// `SpaceBarStyle.identifierFontSize(forDepth:)` is the
-    /// same shape on the other bar.
+    /// Resolves font size from explicit setting or thickness scaling
+    /// (`SpaceBarStyle.identifierFontSize(forDepth:)`).
     public func resolvedFontSize(
         forThickness thickness: CGFloat
     ) -> CGFloat {
@@ -19,42 +11,21 @@ extension AppBarStyle {
         return min(max(thickness * 0.42, 9), 28)
     }
 
-    /// What THIS bar actually draws — `content` with the
-    /// vertical collapse (`Content.rendered(horizontal:)`)
-    /// folded in against its own `edge`.
-    ///
-    /// The two terms are one question, so they are composed
-    /// once. Asked separately, a change to the collapse rule
-    /// reaches whichever sites remembered to re-spell it: the
-    /// slot measurement and the GUI's two bar gates each had
-    /// their own copy.
-    ///
-    /// A site whose horizontality is NOT this style's edge calls
-    /// `Content.rendered(horizontal:)` directly instead, because
-    /// there the edge is genuinely a parameter: the item view is
-    /// handed one by its overlay, and a Settings preview draws a
-    /// mock bar at whatever edge it is illustrating.
+    /// Rendered content folded with horizontal/vertical collapse
+    /// (`Content.rendered(horizontal:)`).
     public var renderedContent: Content {
         content.rendered(horizontal: edge.isHorizontal)
     }
 
-    /// Valid title-cap bounds, shared by both bars — the Space
-    /// Bar aliases this rather than declaring a second range, the
-    /// way it already shares `BackgroundStyle` and `BarAlignment`.
-    /// 8 at the floor because below it every title collapses to
-    /// its first word and stops telling two windows of one app
-    /// apart, which is the whole point of drawing a title; 80 at
-    /// the ceiling because the slot clamps to a quarter of the bar
-    /// long before that, so a larger number would silently do
-    /// nothing. A fixed clamp, not fit-derived — the same
-    /// reasoning as `glyphCapRange`: a display-dependent cap would
-    /// resolve differently per screen and break the bar's
-    /// otherwise-uniform model.
+    /// Title-cap bounds, shared by both bars. 8 at the floor —
+    /// below it every title collapses to its first word and stops
+    /// telling two windows apart; 80 at the ceiling — the slot
+    /// clamps to a quarter of the bar long before that. A fixed
+    /// clamp, never fit-derived: a display-dependent cap resolves
+    /// differently per screen.
     public static let titleCapRange = 8...80
 
-    /// The title cap clamped to `titleCapRange` — the driver reads
-    /// this so a stored out-of-range value can't blank a title or
-    /// hand the measurement an unbounded string.
+    /// Title cap clamped to `titleCapRange`.
     public var resolvedTitleCap: Int {
         min(
             max(titleCap, Self.titleCapRange.lowerBound),
@@ -62,19 +33,10 @@ extension AppBarStyle {
         )
     }
 
-    /// `title` cut to `cap` characters, tail-first, with an
-    /// ellipsis standing in for what was dropped. The one copy
-    /// both bars call: the App Bar's items and the Space Bar's
-    /// front segment must agree, or the same window reads two
-    /// lengths on one screen.
-    ///
-    /// Counts **Characters**, not UTF-16 units, so an emoji or a
-    /// combining mark costs one the way the reader sees it — a
-    /// ghostty tab titled "◐ app bar title truncation" must not
-    /// spend two of its budget on the leading glyph. The ellipsis
-    /// is not counted against `cap`: the cap answers "how much
-    /// title", and making the marker eat a character of it would
-    /// leave the cap describing something the user cannot see.
+    /// Truncates title to the cap, tail-first. Counts
+    /// **Characters**, not UTF-16 units, so an emoji costs one the
+    /// way the reader sees it; the ellipsis is not counted against
+    /// the cap, which answers "how much title".
     public static func cappedTitle(
         _ title: String,
         to cap: Int

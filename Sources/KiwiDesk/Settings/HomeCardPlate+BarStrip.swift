@@ -2,10 +2,7 @@ import CoreGraphics
 import KiwiDeskCore
 import SwiftUI
 
-/// One bar strip of the fused Bars scene
-/// (`HomeCardBarsTile`), split at the file-size target: the
-/// seat, the plate and the item marks. Everything here derives
-/// from the `BarSpec` the tile read off the real style struct.
+/// Bar strip view component for Home plate bars tile (`HomeCardBarsTile`).
 struct BarStripView: View {
     let spec: HomeCardBarsTile.BarSpec
     let edge: AppBarEdge
@@ -16,22 +13,11 @@ struct BarStripView: View {
     var body: some View {
         Group {
             if spec.spans {
-                // `full`: the plate runs edge-to-edge and the
-                // item run seats INSIDE it.
                 plate
                     .overlay(seated { run })
             } else if spec.boxed {
-                // Boxed draws no shared plate — the run seats
-                // bare on the screen.
                 seated { run }
             } else {
-                // `hug`: the plate wraps the run's LENGTH
-                // plus one gap of air per end (the Dock's
-                // read), and the WRAPPED plate seats. The
-                // CROSS stays the full thickness — fit never
-                // shrinks a bar's cross, so the Thickness
-                // slider moves the plate, not the air around
-                // it.
                 seated {
                     run
                         .padding(
@@ -55,8 +41,7 @@ struct BarStripView: View {
         )
     }
 
-    /// The bare pip's cross size, carved from the strip's
-    /// remapped thickness so both move with the slider.
+    /// Computed cross dimension for bar pips.
     private var pipCross: CGFloat {
         spec.thickness * 0.56
     }
@@ -88,10 +73,7 @@ struct BarStripView: View {
         .padding(vertical ? .vertical : .horizontal, 3 * scale)
     }
 
-    /// The item run's seat along the bar — the style's own
-    /// `alignment`, edge-relative exactly like the real bar's
-    /// (`start` is a top bar's left and a left bar's top, which
-    /// is the stacks' natural reading order).
+    /// Positions item run along the bar according to alignment spec.
     @ViewBuilder
     private func seated(
         @ViewBuilder _ content: () -> some View
@@ -121,12 +103,7 @@ struct BarStripView: View {
 
     // MARK: - Items
 
-    /// A bare pip on the Home plate; at panel scale the item
-    /// carries its identifier in the bar's two-accent model.
-    /// The active item is marked per the style's own
-    /// `active_indicator`: an outline traced at the bar's
-    /// roundness, an accent bar on the window-facing edge, or
-    /// an empty slot.
+    /// Renders individual bar item with active indicator and optional boxing.
     @ViewBuilder
     private func pip(
         _ item: HomeCardBarsTile.BarItem

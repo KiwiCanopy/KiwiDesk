@@ -2,14 +2,8 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The icon chooser (#68 §6.4), one component for mode icons
-/// and space icons: search-first (keywords, not just symbol
-/// names), a Recents row persisted app-wide, an exact-name
-/// escape hatch (any valid SF Symbol name typed into the
-/// search appears as a result), single-character queries offer
-/// "Use as text", and the header previews the selection at its
-/// destination size. The icon stays one string — a symbol
-/// name, an emoji, or a single character; empty = default.
+/// Icon picker for mode and space icons supporting emoji and SF Symbols
+/// (`IconCatalog`, #68 §6.4).
 struct IconPicker: View {
     @Binding var icon: String
     /// How the popover header previews the selection.
@@ -19,9 +13,7 @@ struct IconPicker: View {
     @State private var search = ""
     @State private var tab: IconTab = .emoji
 
-    /// Browse tabs (#68 §6.4): emoji first — space icons are
-    /// the picker's most frequent use and lean emoji. Search
-    /// stays global across both vocabularies.
+    /// Browse tabs for curated emoji and symbol collections (#68 §6.4).
     enum IconTab: String, CaseIterable, Identifiable {
         case emoji = "Emoji"
         case symbols = "Symbols"
@@ -43,10 +35,7 @@ struct IconPicker: View {
     }
 
     enum IconPreview {
-        /// An 18 pt menu-bar mock, light and dark side by
-        /// side — the glyph's job is being legible up there.
         case menuBar
-        /// Row-chip size, for space icons.
         case chip
     }
 
@@ -214,9 +203,8 @@ struct IconPicker: View {
 
     // MARK: - Result sections
 
-    /// Escape hatches ahead of the curated grid: the query as
-    /// a literal SF Symbol name, and a single character (incl.
-    /// emoji) as a text icon.
+    /// Result escape hatches for plain text and raw SF Symbol names
+    /// (#68 §6.4).
     @ViewBuilder private var specialResults: some View {
         let query = search.trimmed
         if !query.isEmpty {
@@ -258,8 +246,6 @@ struct IconPicker: View {
         }
     }
 
-    /// `title` nil renders the bare grid — used for the tab
-    /// grids, where the segmented control already names it.
     @ViewBuilder private func gridSection(
         _ title: String?,
         choices: [IconChoice]
@@ -280,9 +266,7 @@ struct IconPicker: View {
         }
     }
 
-    /// Clearing is a control, not a choice (§6.4): it acts on
-    /// the current selection, so it sits beside the tabs
-    /// instead of posing as a grid cell under Recents.
+    /// Clear button to reset icon to default (#68 §6.4).
     private var clearButton: some View {
         Button {
             icon = ""
@@ -314,9 +298,6 @@ struct IconPicker: View {
         }
         .settingsActionButton()
         .help(glyph)
-        // The glyph's own name (an emoji, or an SF Symbol's
-        // dotted name): a picture button says nothing
-        // otherwise (#812).
         .accessibilityLabel(glyph)
     }
 

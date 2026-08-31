@@ -1,36 +1,12 @@
 import Foundation
 
-/// Extracts the body of a bound `function() ... end` literal from
-/// its source range, so a keybinding's action text can be
-/// recovered from init.lua (#4).
-///
-/// `debug.getinfo` reports only the line range of a function, not
-/// its columns, so the slice for `KiwiDesk.bind("alt+h",
-/// function() KiwiDesk.focus("left") end)` still holds the whole
-/// call. This scanner walks that slice — skipping strings and
-/// comments so their contents never count as syntax — to find the
-/// `function` header, then the matching `end`, and returns the
-/// text between them (dedented; the writer re-indents).
-///
-/// Block depth uses the classic Lua-lexer trick: `function`, `if`,
-/// and `do` each open a block closed by `end`, while `for`/`while`
-/// are opened by their own `do` and so are not counted. This
-/// covers plain literals and multi-statement custom bodies; it
-/// does not evaluate the code, only balances its block keywords.
-///
-/// Two assumptions, both true for GUI-authored configs (each bind
-/// on its own line with an inline literal) and only relevant to
-/// hand-written files adopted once:
-/// - The action is an inline `function() … end` literal. A bind to
-///   a named handler (`KiwiDesk.bind("x", my_handler)`) has no
-///   literal in range and yields nil, so that row is dropped.
-/// - One function literal per source line: `debug.getinfo` reports
-///   the same range for every literal sharing a line, so only the
-///   first is recovered.
+/// Extracts body text of an inline `function() ... end` literal
+/// from Lua source line ranges (#4). Two assumptions, true for
+/// GUI-authored configs: a bind to a named handler yields nil
+/// (that row is dropped), and only the FIRST literal on a shared
+/// source line is recovered.
 enum LuaBindingBody {
-    /// Slices the 1-based inclusive line range out of `source`
-    /// and returns the dedented function body, or nil when the
-    /// range holds no balanced `function ... end`.
+    /// Extracts and dedents function body within 1-based inclusive line range.
     static func extract(
         from source: String,
         firstLine: Int,
@@ -49,10 +25,6 @@ enum LuaBindingBody {
         return body(in: Array(region))
     }
 
-    // MARK: - Scanning
-
-    /// The dedented body between the first `function` header and
-    /// its matching `end` in `chars`.
     private static func body(in chars: [Character]) -> String? {
         guard let paramsEnd = functionParamsEnd(chars) else {
             return nil
@@ -88,8 +60,6 @@ enum LuaBindingBody {
         return nil
     }
 
-    /// The index just past the `)` of the first `function (...)`
-    /// header, skipping any leading call syntax and its strings.
     private static func functionParamsEnd(
         _ chars: [Character]
     ) -> Int? {
@@ -112,8 +82,6 @@ enum LuaBindingBody {
         return nil
     }
 
-    /// The index just past the matching `)` of a `(...)` param
-    /// list beginning at or after `from`.
     private static func paramListEnd(
         _ chars: [Character],
         _ from: Int
@@ -135,11 +103,6 @@ enum LuaBindingBody {
         return nil
     }
 
-    // MARK: - Trivia (strings & comments)
-
-    /// If a string or comment starts at `i`, the index just past
-    /// it; otherwise nil. Keeps keyword-like text inside literals
-    /// from being counted as block syntax.
     private static func skipTrivia(
         _ chars: [Character],
         _ i: Int
@@ -157,8 +120,6 @@ enum LuaBindingBody {
         return nil
     }
 
-    /// A `--` comment: a long bracket if one opens here, else to
-    /// the end of the line.
     private static func skipComment(
         _ chars: [Character],
         _ i: Int
@@ -192,8 +153,6 @@ enum LuaBindingBody {
         return chars.count
     }
 
-    /// The `=` level of a long-bracket opener (`[[`, `[==[`) at
-    /// `i`, and the index just past it — else nil.
     private static func longOpen(
         _ chars: [Character],
         _ i: Int
@@ -232,8 +191,6 @@ enum LuaBindingBody {
         return chars.count
     }
 
-    // MARK: - Words & whitespace
-
     private static func readWord(
         _ chars: [Character],
         _ i: Int
@@ -255,13 +212,6 @@ enum LuaBindingBody {
         c == " " || c == "\t" || c == "\n" || c == "\r"
     }
 
-    /// Trims blank edges, removes the common leading indent, and
-    /// strips each line's trailing whitespace so the writer's
-    /// re-indentation starts from column zero and a one-line
-    /// `function() … end` doesn't keep the space before `end`.
-    /// (Trailing whitespace is only meaningful inside a multi-line
-    /// `[[…]]` string — vanishingly rare in a keybinding body, and
-    /// the user reviews the import before saving.)
     private static func dedent(_ text: String) -> String {
         var lines = text.components(separatedBy: "\n")
         while let first = lines.first, isBlank(first) {
@@ -283,7 +233,6 @@ enum LuaBindingBody {
         .joined(separator: "\n")
     }
 
-    /// `line` without its trailing spaces and tabs.
     private static func trimTrailing(_ line: String) -> String {
         var end = line.endIndex
         while end > line.startIndex {

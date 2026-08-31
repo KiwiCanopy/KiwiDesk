@@ -1,18 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The read-only shortcuts reference panel (#326): a live mirror
-/// of the active key layer's bindings, grouped into Controls /
-/// Apps / Inactive / Custom bands, in that drawn order (#820).
-/// No editing — rebinding stays in Settings, which
-/// the single footer button bridges to. `reference` is nil when
-/// live shortcuts can't be read (config owned by init.lua, or the
-/// engine isn't running).
+/// Read-only shortcuts cheat sheet panel (#326, #820).
 struct ShortcutsPanelView: View {
     let reference: ShortcutsReference?
-    /// The combo bound to open this panel (native glyphs), or nil
-    /// when unbound (#330). Drives the footer hint: the same key
-    /// that opened it also closes it, so it leads the copy.
+    /// Bound dismiss combo string, or nil when unbound (#330).
     let dismissCombo: String?
     let onEdit: () -> Void
 
@@ -32,18 +24,11 @@ struct ShortcutsPanelView: View {
 
     // MARK: - Layer label
 
-    /// The active layer's name, centered in the footer and shown only
-    /// for a non-default layer — the default is the implicit case. It
-    /// sits in the footer rather than a top header so it costs no
-    /// vertical space above the bands.
+    /// Layer name chip for non-default key layers (`KeyLayer.defaultName`).
     @ViewBuilder private var layerLabel: some View {
         if let name = reference?.layerName,
             name != KeyLayer.defaultName
         {
-            // Capsule treatment (the Shortcuts editor's layer-chip
-            // vocabulary) so it reads as state, not chrome — it's the
-            // only layer indicator now. Bounded + truncated so a long
-            // custom name can't collide with the hint or the button.
             Text(name)
                 .font(.caption.weight(.medium))
                 .lineLimit(1)
@@ -104,12 +89,7 @@ struct ShortcutsPanelView: View {
         }
     }
 
-    /// The Inactive band (#820): shortcuts whose target Space has
-    /// left the current list. Dimmed as a block — like Settings'
-    /// own section (#92) — so they read as parked rather than as
-    /// part of the live list, and captioned, since a dimmed row
-    /// that says nothing is a dead end. Sits above Custom because
-    /// these are seeded defaults, not user-authored Lua.
+    /// Inactive shortcuts band for missing spaces (`GreyOut`, #92, #820).
     @ViewBuilder private func inactive(
         _ rows: [ShortcutRow]
     ) -> some View {
@@ -122,9 +102,6 @@ struct ShortcutsPanelView: View {
                     )
                 )
                 VStack(alignment: .leading, spacing: 8) {
-                    // Outside the dimmed subtree: the dim says an
-                    // answer exists, and withholding it there is
-                    // the dead end `GreyOut` was ruled against.
                     Text(inactiveCaption)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -141,7 +118,7 @@ struct ShortcutsPanelView: View {
     /// "rebind or remove them here" — which this panel cannot
     /// offer, so the two captions are deliberately different
     /// strings rather than one shared key that would lie on one
-    /// of the surfaces.
+    /// surface.
     private var inactiveCaption: String {
         L(
             "shortcuts.panel.inactive.caption",
@@ -167,8 +144,7 @@ struct ShortcutsPanelView: View {
         }
     }
 
-    /// Empty-state: a layer with nothing bound, or a config the
-    /// panel can't read live. Distinct messages, same quiet frame.
+    /// Empty state view for unconfigured or Lua-managed setups.
     private func placeholder(unavailable: Bool) -> some View {
         Text(
             unavailable
@@ -190,11 +166,7 @@ struct ShortcutsPanelView: View {
 
     // MARK: - Footer
 
-    /// Bound → lead with the live open-combo ("⌥␣ or Esc to close"),
-    /// the two dismissals worth the characters — the same key that
-    /// opened it is the most self-evident way to close it, and it
-    /// teaches a mouse-opener the shortcut. Unbound → the generic
-    /// hint, which keeps "click away" (#330, #326).
+    /// Dismiss hint text string (#326, #330).
     private var dismissHint: String {
         if let combo = dismissCombo {
             return L(
@@ -211,9 +183,6 @@ struct ShortcutsPanelView: View {
 
     private var footer: some View {
         HStack {
-            // A chromeless panel has no titlebar to teach dismissal,
-            // so the one non-obvious interaction gets a quiet hint on
-            // the idle side, opposite the action button.
             Text(dismissHint)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -227,8 +196,6 @@ struct ShortcutsPanelView: View {
                 )
             }
         }
-        // Centered in the full footer width, independent of the
-        // hint / button widths on either side.
         .overlay(alignment: .center) { layerLabel }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)

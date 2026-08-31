@@ -1,26 +1,14 @@
 import Foundation
 
-/// Renders a `KeyCombo` as the compact macOS-native glyph string
-/// menus use (`⇧⌘,`, `⌃⌥←`): modifier symbols in the canonical
-/// ⌃⌥⇧⌘ order (Command last, adjacent to the key) followed by the
-/// key glyph, with **no `+` separator**.
+/// Formats `KeyCombo` into macOS native glyph string
+/// (`⇧⌘,`, `⌃⌥←`, #23).
 ///
-/// Dropping the separator resolves the combinator ambiguity #23
-/// raises: with no `+` between tokens, any `+` that appears is the
-/// key itself (`⌘+`), never a "together with" combinator.
-///
-/// The glyph for a printable key is resolved through the *active*
-/// keyboard layout by the injected `layoutChar` closure — the GUI
-/// backs it with `UCKeyTranslate`, so a German layout shows `+`
-/// where a US layout shows `]`. Non-printable keys (arrows,
-/// return, function keys) use fixed symbols; when the layout
-/// lookup yields nothing, the US key name falls back to a symbol.
-/// This type is pure and Core-testable — only the injected closure
-/// touches the OS.
+/// Modifiers appear in canonical `⌃⌥⇧⌘` order with no `+` delimiter
+/// (#23). Printable characters resolve via active layout
+/// (`UCKeyTranslate`).
 public enum ComboSymbols {
-    /// The combo as a native glyph string. `layoutChar` maps a
-    /// virtual key code to its base character on the active
-    /// layout, or nil for keys with no printable character.
+    /// Renders combo into native glyph string using provided layout
+    /// translator.
     public static func render(
         _ combo: KeyCombo,
         layoutChar: (UInt32) -> String?
@@ -29,15 +17,8 @@ public enum ComboSymbols {
             + keyGlyph(combo.keyCode, layoutChar)
     }
 
-    /// Modifier symbols in the macOS-canonical ⌃⌥⇧⌘ order.
-    ///
-    /// Public because a modifier set is a thing the GUI names on
-    /// its own, without a key beside it: the keyboard preview's
-    /// chips label one layer each (⌥, ⌃⌥, …) and `render` can
-    /// only ever draw a whole combo. The GUI's own
-    /// `ChordRecorder` is not a second copy of this — it renders
-    /// `NSEvent.ModifierFlags` mid-chord, before a `KeyCombo`
-    /// exists.
+    /// Formats modifiers in canonical macOS `⌃⌥⇧⌘` order
+    /// (`ChordRecorder`).
     public static func modifierSymbols(
         _ modifiers: HotkeyModifiers
     ) -> String {
@@ -49,16 +30,8 @@ public enum ComboSymbols {
         return out
     }
 
-    /// A key's character, capitalised — but only where
-    /// capitalising it stays ONE key's worth of glyph.
-    ///
-    /// German ß uppercases to "SS", so a shortcut on that key
-    /// rendered `⌃⌥SS`: two characters for a key the user's
-    /// keyboard prints as one, in every surface that draws a
-    /// combo (the recorder, the Shortcuts list, the draft diff
-    /// rows, the quick menu). Turkish ı and Greek final sigma
-    /// have the same shape of problem, which is why the rule is
-    /// mechanical rather than a ß special case.
+    /// Capitalises character if character count remains 1
+    /// (avoids German `ß` -> `SS`).
     public static func capitalisedGlyph(_ char: String) -> String {
         let upper = char.uppercased()
         return upper.count == char.count ? upper : char
@@ -78,9 +51,7 @@ public enum ComboSymbols {
         return ""
     }
 
-    /// Fixed glyphs for keys that carry no printable character —
-    /// arrows, editing, whitespace, and function keys. Nil means
-    /// the key is printable and resolves through the layout.
+    /// Returns fixed symbol for non-printable keys (#1074).
     static func specialKeyGlyph(_ code: UInt32) -> String? {
         specials[code]
     }
@@ -88,12 +59,9 @@ public enum ComboSymbols {
     private static let specials: [UInt32: String] = [
         123: "←", 124: "→", 125: "↓", 126: "↑",
         36: "↩", 76: "⌤", 48: "⇥", 49: "␣",
-        // Keypad Clear prints nothing, so without a glyph
-        // here it would fall through to the uppercased key
-        // NAME — a literal "KEYPADCLEAR" in the recorder,
-        // the Shortcuts list and the menu (#1074). Every
-        // other keypad key either prints (`+ − × ÷ . =`,
-        // through `layoutChar`) or is already here (enter).
+        // Keypad Clear prints nothing: without a glyph here it
+        // falls through to the uppercased key NAME — a literal
+        // "KEYPADCLEAR" in the recorder and menus (#1074).
         71: "⌧",
         51: "⌫", 117: "⌦", 53: "⎋",
         115: "↖", 119: "↘", 116: "⇞", 121: "⇟",
@@ -102,9 +70,7 @@ public enum ComboSymbols {
         101: "F9", 109: "F10", 103: "F11", 111: "F12",
     ]
 
-    /// A symbol for a US key name when the active layout gives no
-    /// character (punctuation words → their glyph; a bare letter/
-    /// digit uppercases). Mirrors `KeyCombo.keyName` word aliases.
+    /// Punctuation and named key symbol fallback (`KeyCombo.keyName`).
     static func fallbackGlyph(_ name: String) -> String {
         let symbols: [String: String] = [
             "comma": ",", "period": ".", "slash": "/",

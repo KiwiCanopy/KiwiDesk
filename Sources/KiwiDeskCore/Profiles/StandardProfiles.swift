@@ -1,57 +1,38 @@
 import CoreGraphics
 import Foundation
 
-/// A built-in, hardware-agnostic layout for one screen count
-/// (#53). Two faces: the count's *Standard* resolves silently
-/// when no saved profile matches, and every layout is offered
-/// as an applyable *Preset* in the GUI.
+/// Built-in hardware-agnostic layout specification for a screen count (#53).
 public struct StandardLayout: Sendable, Equatable {
     public let name: String
-    /// How many screens this layout plans for.
+    /// Planned screen count.
     public let screenCount: Int
-    /// The spaces the layout defines, ids "1"…"N".
+    /// Number of defined spaces ("1"..."N").
     public let spaceCount: Int
-    /// Sparse: any space not listed uses the fallback `bsp`.
+    /// Explicit layout mode per space ID (sparse, defaults to `bsp`).
     public let spaceModes: [SpaceID: LayoutMode]
-    /// Positional screen per space (0 = main display, 1 = next
-    /// secondary, …). Sparse: unlisted spaces sit on main.
+    /// Screen index assignment per space ID (sparse, defaults to main).
     public let spaceScreens: [SpaceID: Int]
-    /// The count's silent-fallback default ("Standard").
+    /// Whether this is the default standard layout for its screen count.
     public let isStandard: Bool
-    /// Tuning flavor applied with the layout (gaps etc.).
+    /// Associated tiling settings.
     public let settings: TilingSettings
 }
 
-/// The shipped per-count layouts. Never deletable; a count with
-/// no saved user profile falls back to its Standard.
+/// Catalog of shipped standard layouts and live hardware presets (#53, #485).
 public enum StandardProfiles {
-    /// The hardware-agnostic layouts, ordered by screen count.
-    /// These plan for a screen COUNT and nothing else, so they are
-    /// the same on every Mac — the silent-fallback Standards are
-    /// among them.
+    /// Workflows planned purely by screen count.
     public static let workflows: [StandardLayout] = [
         developer, minimalist, focusStack,
         dualDeveloper, coderAndMonitor,
         commandCenter, visualCreative,
     ]
 
-    /// The catalog for a live setup: the `Starter` derived from
-    /// these screens, leading its own count, then the workflow
-    /// layouts.
-    ///
-    /// **There is exactly one Starter, and it is for the screens
-    /// you have.** It used to be three — one per screen count —
-    /// because the ladder planned for a count in the abstract.
-    /// Since #678 Phase 4 pass 11 the setup is chosen from the
-    /// screens' actual shapes, and a preset planning for "two
-    /// screens" could not answer *which* two. So a count you are
-    /// not running offers the workflow layouts alone, which is
-    /// what "For other setups" now means.
-    ///
-    /// Never the silent `isStandard` fallback: a setup derived
-    /// from live hardware is a poor thing to land in silently on
-    /// a monitor change — `composeMonitorChangeFallback` asks for
-    /// it by name when the user is on that baseline (#485).
+    /// Layout catalog for live screens, leading with the hardware
+    /// `Starter` (#678). There is exactly ONE Starter and it is
+    /// for the screens you have — a count you are not running
+    /// offers the workflow layouts alone. Never the silent
+    /// `isStandard` fallback: a live-derived setup is a poor thing
+    /// to land in silently on a monitor change (#485).
     public static func all(sizes: [CGSize]) -> [StandardLayout] {
         let starter = StarterSetup.standardLayout(sizes: sizes)
         guard
@@ -64,8 +45,7 @@ public enum StandardProfiles {
         return catalog
     }
 
-    /// The layouts planning for exactly `count` screens, on a
-    /// setup whose live screens are `sizes`.
+    /// Layouts matching exact screen count for given screen sizes.
     public static func layouts(
         for count: Int,
         sizes: [CGSize]
@@ -73,12 +53,10 @@ public enum StandardProfiles {
         all(sizes: sizes).filter { $0.screenCount == count }
     }
 
-    /// The Standard used as fallback for a live screen count:
-    /// the marked default of the closest defined count that is
-    /// less than or equal to `count`. Nil below one screen.
-    /// Reads `workflows`, not the live catalog: the Starter is
-    /// never `isStandard`, so the silent fallback needs no screen
-    /// sizes and stays answerable anywhere.
+    /// Standard fallback layout for a screen count (#485). Reads
+    /// `workflows`, not the live catalog: the Starter is never
+    /// `isStandard`, so the silent fallback needs no screen sizes
+    /// and stays answerable anywhere.
     public static func standard(
         for count: Int
     ) -> StandardLayout? {

@@ -46,12 +46,11 @@ private func trampoline(_ state: OpaquePointer?) -> Int32 {
     return 1
 }
 
-/// Embedded Lua 5.5 VM hosting the user's init.lua.
+/// Embedded Lua 5.5 VM hosting user configuration and scripts.
 ///
-/// Runs on the main actor; runaway scripts are stopped by an
-/// instruction-count hook that enforces `timeout` (default
-/// 500 ms) per entry into the VM. Erroring callbacks are the
-/// caller's job to disable (see EventBus / KeybindingManager).
+/// Runs on MainActor; execution is bounded by an instruction count hook
+/// enforcing `timeout`. Callbacks disable on error (`EventBus`,
+/// `KeybindingManager`).
 @MainActor
 public final class LuaInterpreter {
     /// Budget per VM entry, in seconds.
@@ -63,7 +62,6 @@ public final class LuaInterpreter {
     public init?() {
         guard let created = luaL_newstate() else { return nil }
         shim_luaL_openlibs(created)
-        // Check the deadline every 10k VM instructions.
         shim_enable_timeout_hook(created, 10_000)
         state = created
     }
@@ -73,8 +71,6 @@ public final class LuaInterpreter {
             lua_close(state)
         }
     }
-
-    // MARK: - Running code
 
     @discardableResult
     public func run(_ code: String) -> Result<Void, LuaError> {
@@ -103,18 +99,10 @@ public final class LuaInterpreter {
         return protectedCall(state, argc: 0)
     }
 
-    /// Compiles `body` as a Lua function body and captures the
-    /// result as a registry reference callable via `call(ref:)`.
-    ///
-    /// The body is wrapped as `return function()\n<body>\nend`
-    /// before loading. The returned ref is VM-specific: deliver
-    /// only to `call(ref:)` on this interpreter (AGENTS.md §5).
-    /// Release with `release(ref:)` when done (e.g. in
-    /// `KeybindingManager.reset()`) — a discarded `.success`
-    /// would orphan a registry slot, so the result is not
-    /// discardable. Returns an error when compilation fails —
-    /// caller logs and skips, matching the per-binding failure
-    /// policy in `KeybindingManager.fire`.
+    /// Compiles `body` as a Lua function and returns a registry
+    /// ref. Not discardable: a discarded `.success` orphans a
+    /// registry slot — release with `release(ref:)`
+    /// (`KeybindingManager.reset()`, `KeybindingManager.fire`).
     public func makeFunction(
         body: String
     ) -> Result<Int32, LuaError> {
@@ -125,11 +113,10 @@ public final class LuaInterpreter {
         guard luaL_loadstring(state, src) == SHIM_LUA_OK else {
             return .failure(.runtime(popError(state)))
         }
-        // Run the load chunk to produce the function value
-        // (1 result). A crafted body can ESCAPE the wrapper
-        // (`end, (…)(), function()`) and execute code during
-        // this pcall, so it runs under the same watchdog
-        // deadline as every other VM entry.
+        // A crafted body can ESCAPE the wrapper
+        // (`end, (…)(), function()`) and execute code during this
+        // pcall, so it runs under the same watchdog deadline as
+        // every other VM entry.
         shim_set_deadline(
             state,
             shim_monotonic_now() + timeout
@@ -139,13 +126,12 @@ public final class LuaInterpreter {
         else {
             return .failure(.runtime(popError(state)))
         }
-        // The function sits on the stack top; pop + intern.
         let ref = luaL_ref(state, SHIM_LUA_REGISTRYINDEX)
         return .success(ref)
     }
 
-    /// Calls a Lua function previously captured as a registry
-    /// reference (`LuaValue.functionRef`).
+    /// Calls a Lua function previously captured as a registry reference
+    /// (`LuaValue.functionRef`).
     @discardableResult
     public func call(
         ref: Int32,
@@ -175,13 +161,7 @@ public final class LuaInterpreter {
         luaL_unref(state, SHIM_LUA_REGISTRYINDEX, ref)
     }
 
-    /// The source location of a Lua function captured as a
-    /// registry `ref` — the chunk name plus the 1-based line
-    /// range it spans. Used to recover a keybinding's action
-    /// text from init.lua (#4). `source` is the raw
-    /// `lua_getinfo` name (`"@/path/to/init.lua"` for a file
-    /// chunk); callers strip the `@`. Returns nil for a stale
-    /// ref, a non-function, or a C function.
+    /// Returns chunk name and 1-based line range for function ref (#4).
     public func functionSource(
         ref: Int32
     ) -> (source: String, firstLine: Int, lastLine: Int)? {

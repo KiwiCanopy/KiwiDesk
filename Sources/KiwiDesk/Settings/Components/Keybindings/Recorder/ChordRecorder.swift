@@ -1,34 +1,12 @@
 import AppKit
 import KiwiDeskCore
 
-/// The capture engine behind `KeyRecorderField` (#212):
-/// **snap-in on key-down**. Modifiers can be pressed and
-/// released freely — the preview mirrors what is held — and
-/// the first non-modifier keyDown locks the combo instantly
-/// (that key plus the modifiers held at that moment), the way
-/// the native System Settings shortcut recorder reads.
-/// Correction is re-recording (one click); there is no
-/// release choreography. Replaces the lock-on-full-release
-/// machine (#68), whose burst window, stashed candidate, and
-/// mid-chord correction proved buggier than the model they
-/// enabled.
-///
-/// Rules:
-/// - `flagsChanged` only updates the modifier preview (⌃⌥⇧⌘,
-///   display order). A modifier-only chord is not recordable
-///   (Carbon hotkeys need a base key) — the preview makes
-///   that visible.
-/// - A keyDown locks `held modifiers + key` and finishes. A
-///   key `KeyCombo` cannot represent is swallowed and the
-///   recording continues.
-/// - Bare Escape cancels (Escape WITH modifiers records —
-///   ⌃Escape is a valid hotkey). Any mouse click cancels
-///   (`.clickAway`, so the field can absorb the click on its
-///   own button). App deactivation cancels too — a system
-///   chord (⌘Tab, ⌘⇧4) would steal focus mid-recording.
-///
-/// The state machine (`handle(_:keyCode:flags:)`) is internal
-/// so `ChordRecorderTests` can drive it without `NSEvent`s.
+/// Key combination recording engine: snap-in on key-down (#212,
+/// replacing #68's lock-on-full-release machine). Bare Escape
+/// cancels but Escape WITH modifiers records — ⌃Escape is a
+/// valid hotkey; any click cancels (the field absorbs it); app
+/// deactivation cancels too, since a system chord (⌘Tab) steals
+/// focus mid-recording (`ChordRecorderTests`).
 @MainActor
 final class ChordRecorder {
     enum Outcome {
@@ -56,9 +34,7 @@ final class ChordRecorder {
     var onFinish: (Outcome) -> Void = { _ in }
     var isSuppressingKeyUp: Bool { releaseMonitor != nil }
 
-    /// Installs the event monitors. `preview` receives the
-    /// held-modifier symbols on every change; `finish` fires
-    /// exactly once (teardown resets it to a no-op first).
+    /// Installs event monitors for keyboard and click-away cancellation.
     func start(
         preview: @escaping (String) -> Void,
         finish: @escaping (Outcome) -> Void
@@ -69,8 +45,8 @@ final class ChordRecorder {
         keyMonitor = NSEvent.addLocalMonitorForEvents(
             matching: [.keyDown, .keyUp, .flagsChanged]
         ) { [weak self] event in
-            // A nil self must never swallow the app's keys —
-            // the leaked monitor would eat every keystroke.
+            // A nil self must never swallow the app's keys — the
+            // leaked monitor would eat every keystroke.
             guard let self else { return event }
             let kind: EventKind =
                 switch event.type {
@@ -85,9 +61,6 @@ final class ChordRecorder {
             )
             return swallow ? nil : event
         }
-        // Clicking anywhere cancels (the native recorder
-        // idiom); the event passes through so the click still
-        // lands.
         mouseMonitor = NSEvent.addLocalMonitorForEvents(
             matching: [.leftMouseDown, .rightMouseDown]
         ) { [weak self] event in
@@ -139,11 +112,7 @@ final class ChordRecorder {
         callback(outcome)
     }
 
-    // MARK: - The state machine (testable seam)
-
-    /// Feeds one key event through the snap-in logic. Returns
-    /// whether the event should be swallowed. Internal so
-    /// tests can drive sequences without `NSEvent`.
+    /// State machine processing key events (`ChordRecorderTests`).
     @discardableResult
     func handle(
         _ kind: EventKind,
@@ -155,9 +124,6 @@ final class ChordRecorder {
             let held = flags.intersection([
                 .command, .option, .control, .shift,
             ])
-            // Every swallowed keyDown owns its matching keyUp;
-            // never leak an orphan release to the focused
-            // control after recorder teardown.
             suppressedKeyUps.insert(keyCode)
             if keyCode == 53, held.isEmpty {
                 finish(.cancelled)
@@ -172,16 +138,13 @@ final class ChordRecorder {
                     shift: flags.contains(.shift)
                 )
             else {
-                // Unrepresentable key: swallow it, keep
-                // recording — the preview still shows the
-                // held modifiers.
                 return true
             }
             finish(.chord(combo))
             return true
         case .keyUp:
             // Only releases paired with swallowed keyDowns are
-            // ours. A key held before recording still passes to
+            // ours — a key held before recording still passes to
             // its original responder.
             return consumeSuppressedKeyUp(keyCode)
         case .flagsChanged:
@@ -190,7 +153,7 @@ final class ChordRecorder {
         }
     }
 
-    /// The held modifiers in display order (⌃⌥⇧⌘).
+    /// Formats held modifiers in standard display order (⌃⌥⇧⌘).
     static func modifierSymbols(
         _ flags: NSEvent.ModifierFlags
     ) -> String {
@@ -202,10 +165,7 @@ final class ChordRecorder {
         return symbols
     }
 
-    /// After a lock/cancel tears down the capture monitor, keep
-    /// a narrow keyUp-only monitor until every swallowed press
-    /// releases. Timeout bounds the lifetime if macOS steals a
-    /// release while focus changes.
+    /// Suppresses trailing key-up events following recording completion.
     private func beginReleaseSuppression() {
         guard !suppressedKeyUps.isEmpty else { return }
         if let releaseMonitor {

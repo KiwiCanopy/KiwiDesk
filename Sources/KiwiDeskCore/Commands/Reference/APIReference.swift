@@ -274,24 +274,13 @@ public enum APIReference {
         ],
     ]
 
-    /// Lua-only entry points on the `KiwiDesk` table that
-    /// are not routed through the dispatcher and therefore
-    /// absent from the CLI/IPC socket. Listed here so
-    /// `help()` / `list_commands` cover the full Lua API
-    /// surface. Deliberately excluded from did-you-mean
-    /// (`suggestion`), which must only hint at commands the
-    /// caller's channel can invoke (issue #37).
+    /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).
     public static let luaOnly: [String] = [
         "exec", "bind", "on", "define_layer", "switch_layer",
         "show_shortcuts", "open_settings",
     ]
 
-    /// Command names reachable through the dispatcher (and thus
-    /// the CLI/IPC socket): dispatcher verbs, namespace
-    /// sub-commands, and `subscribe`. This is the did-you-mean
-    /// set — a typo hint must never point at a command the
-    /// caller's channel cannot invoke, so the Lua-only entry
-    /// points are deliberately excluded here (issue #37).
+    /// Command names reachable through dispatcher and CLI/IPC (#37).
     public static var dispatchable: [String] {
         var names = Set(commands.map(\.command))
         for (table, functions) in namespaces {
@@ -303,19 +292,8 @@ public enum APIReference {
         return names.sorted()
     }
 
-    /// Every command name shown by `help()` / `list_commands`,
-    /// sorted — the full Lua-visible surface: everything
-    /// dispatchable plus the Lua-only entry points that bypass
-    /// the dispatcher (`exec`, `bind`, …).
-    ///
-    /// **Not a live door onto the listing.** Since #1033 the
-    /// listing is `APIReference.groups`, and nothing in
-    /// production calls this — `CLIHelpSeamTests` bans the CLI
-    /// from naming it precisely so a second answer to "what
-    /// commands exist" cannot appear. It survives as
-    /// `APIRecordCensusTests`' independent cross-check: computed
-    /// the old way, from the name tables alone, it is what the
-    /// grouped listing is held against.
+    /// Full set of command names for census cross-checking
+    /// (`APIRecordCensusTests`, `CLIHelpSeamTests`, #1033).
     public static var allCommands: [String] {
         Set(dispatchable).union(luaOnly).sorted()
     }

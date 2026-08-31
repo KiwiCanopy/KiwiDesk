@@ -1,38 +1,13 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Where the dashed **Follows main display** tray sits (#678
-/// Phase 3, turn 13b).
-///
-/// The tray is not a fourth card in a row of cards — a space that
-/// follows whichever display is main is a statement ABOUT the
-/// main display, so it hangs directly off it and moves with the
-/// "main" badge. Hanging it off the badge rather than off a fixed
-/// corner is the whole reason it is a placement decision at all.
-///
-/// It goes ABOVE the main display, except where another display
-/// already occupies that band — a laptop under a desk display
-/// puts the main badge on the lower rectangle, and a tray drawn
-/// above it would land on the display above. Then it goes below,
-/// and where BOTH bands are taken (a main display in the middle
-/// of a vertical stack) it drops clear of the whole picture
-/// rather than through a card: a tray drawn over a display is a
-/// worse lie than a tray one row further away.
-///
-/// The picture grows to hold it either way — the tray is part of
-/// the content, so putting it above never clips it off the top of
-/// the pane.
+/// Positioning logic for "Follows main display" monitor tray (#678 Phase 3).
 enum MonitorTray {
-    /// Folds the tray into the laid-out cards, normalizing the
-    /// whole picture back to a (0, 0) origin.
-    ///
-    /// `main` names the display the tray hangs off. An id that
-    /// matches no card yields NO tray rather than a tray on some
-    /// other display: the badge and the tray answer one question,
-    /// and a fallback here would be a second derivation of which
-    /// display is main — the thing `SettingsModel.mainDisplay`
-    /// exists to be the only copy of. In practice the page always
-    /// passes a live id, and the nil case is the empty picture.
+    /// Positions and normalizes the tray relative to the main
+    /// display card. An id matching no card yields NO tray rather
+    /// than a tray on some other display: a fallback would be a
+    /// second derivation of which display is main —
+    /// `SettingsModel.mainDisplay` exists to be the only copy.
     static func fold(
         cards: [MonitorArrangement.Drawn],
         main: DisplayID?,
@@ -55,9 +30,6 @@ enum MonitorTray {
         let bounds = MonitorArrangement.union(
             cards.map(\.rect) + [tray?.rect].compactMap { $0 }
         )
-        // Normalize: the tray above the topmost display puts the
-        // picture's origin at a negative y, and a card cannot be
-        // drawn at one.
         let shift = CGPoint(x: -bounds.minX, y: -bounds.minY)
         return MonitorArrangement.Layout(
             displays: cards.map {
@@ -74,15 +46,7 @@ enum MonitorTray {
         )
     }
 
-    /// The tray's rectangle before normalization: centred on the
-    /// display it hangs off, above it where that band is clear,
-    /// below it where the band above is taken, and clear of the
-    /// whole picture where both are.
-    ///
-    /// Width follows the anchor so the tray reads as belonging to
-    /// it, inset a little so it cannot be mistaken for another
-    /// display, with the card minimum as a floor — a tray
-    /// narrower than one chip is a drop target nothing fits in.
+    /// Computes pre-normalization tray rect avoiding colliding display cards.
     static func rect(
         anchoredTo anchor: CGRect,
         avoiding others: [CGRect],

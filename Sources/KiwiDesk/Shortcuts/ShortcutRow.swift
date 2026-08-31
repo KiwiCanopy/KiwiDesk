@@ -1,87 +1,48 @@
 import Foundation
 import KiwiDeskCore
 
-/// One row in the read-only shortcuts reference: a label, the
-/// rendered key-combo glyph string, and an optional leading glyph
-/// (a space icon) or app bundle id (a real app icon). Pure value
-/// data — the view owns all presentation.
+/// Data representation of a shortcut reference row (`ComboSymbols`).
 struct ShortcutRow: Identifiable {
     let id: String
     let label: String
-    /// The combo rendered as native glyphs (`⌃⌥←`), through the
-    /// same `ComboSymbols` path the editor uses.
     let combo: String
-    /// Leading SF Symbol / emoji glyph (space rows). Nil = none.
     var icon: String? = nil
-    /// App bundle id for a real 20pt icon (Apps band). Nil = none.
     var bundleID: String? = nil
-    /// App Font ligature (#294): set when the bar's icon source
-    /// is Glyphs and this app has one, so the panel's Apps band
-    /// matches the bar. Wins over `bundleID`; nil falls back to
-    /// the bundle icon.
+    /// App Font ligature name overriding bundle icon (#294).
     var glyph: String? = nil
-    /// Custom-Lua rows render their label monospaced.
     var monospaced: Bool = false
-    /// Trailing accessory glyph for a non-default launch behavior
-    /// (#334: Open New). Nil = default row, which renders exactly
-    /// as before. `accessoryHelp` is its hover tooltip.
+    /// Trailing accessory glyph for non-default actions (#334).
     var accessoryIcon: String? = nil
     var accessoryHelp: String = ""
-    /// The row's action cannot run right now, for a reason the
-    /// user's HARDWARE owns — today only a Desktop whose screen
-    /// is not attached.
-    ///
-    /// The panel dims such a row rather than dropping it: the
-    /// combo is still registered and still blocks that chord, so
-    /// hiding it would break the band's own promise that no
-    /// bound shortcut is ever invisible. It is NOT the Inactive
-    /// band's case — an inactive Space shortcut still fires and
-    /// recreates its Space, which this cannot do (only Mission
-    /// Control makes a Desktop), and that band's caption says so
-    /// in every locale.
-    ///
-    /// Pure data, like every other field here: `ShortcutRowView`
-    /// owns what dimming looks like, and the Settings editor
-    /// makes the same statement through
-    /// `NavCommand.unavailable`.
+    /// Whether the action cannot run for a reason the user's
+    /// HARDWARE owns (a Desktop whose screen is detached). The
+    /// panel DIMS such a row rather than dropping it — the combo
+    /// is still registered and blocks that chord, and hiding it
+    /// breaks "no bound shortcut is ever invisible". NOT the
+    /// Inactive band's case: an inactive Space shortcut still
+    /// fires and recreates its Space; only Mission Control makes
+    /// a Desktop (`NavCommand.unavailable`).
     var unavailable: Bool = false
 }
 
-/// A named group of rows inside the Controls band (Focus / Move
-/// Windows / Size & float / Switch modes).
+/// Named subgroup of shortcut rows in the Controls band.
 struct ShortcutSubgroup: Identifiable {
     let title: String
     let rows: [ShortcutRow]
     var id: String { title }
 }
 
-/// The whole read-only reference for one key mode: four bands.
-/// The field order below is the order the BUILDER fills them
-/// (Inactive is consumed before Apps and Custom, so an orphan
-/// cannot fall through to the band that means "user-authored");
-/// the panel DRAWS them Controls, Apps, Inactive, Custom, which
-/// is `ShortcutsPanelView.body(for:)`'s to state and what
-/// `docs/user-guide.md` lists. Empty bands are dropped by the
-/// builder, so an empty band never renders.
+/// Read-only shortcut reference representation for a key mode
+/// (`docs/user-guide.md`, #820).
 struct ShortcutsReference {
-    // `var`, not `let`: post-processing (the #294 glyph pass)
-    // mutates a copy instead of re-initializing memberwise,
-    // which would be one more hand-mirrored field list.
     var layerName: String
     var controls: [ShortcutSubgroup]
-    /// Bindings whose target Space has left the current list
-    /// (#820) — surfaced under their real name, dimmed, never
-    /// pruned and never left to the Custom band.
+    /// Inactive space bindings shown under real names (#820).
     var inactive: [ShortcutRow] = []
     var apps: [ShortcutRow]
     var custom: [ShortcutRow]
 
-    /// True when the active mode has no *listable* bound
-    /// shortcuts — the view shows a "nothing bound yet"
-    /// placeholder. The panel's own opener doesn't count (see
-    /// the builder): a fresh mode holding only the seeded ⌃⌥K
-    /// row reads as empty here while the footer shows the combo
-    /// (when live).
+    /// Whether the reference contains no listable shortcuts.
     var isEmpty: Bool {
         controls.isEmpty && inactive.isEmpty && apps.isEmpty
             && custom.isEmpty

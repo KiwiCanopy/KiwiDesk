@@ -1,31 +1,14 @@
 import CoreGraphics
 import Foundation
 
-/// The one-shot "Copy sizes and style to Space Bar…" action
-/// (#293, rescoped with the #678 Phase 2 Bars page): the Space
-/// Bar takes the App Bar's current values for the structural
-/// fields the two styles share — sizes, background, indicator,
-/// content-adjacent style — then stays fully independent, never
-/// a live inherit.
-///
-/// The copied set is the **CodingKey intersection** of the two
-/// styles minus deliberate exclusions, so a field added to
-/// both styles joins the copy automatically (no hand list to
-/// forget — `SpaceBarParityTests.copyAppearanceParity` pins
-/// this):
-/// - `edge` — placement is not appearance; copying it would
-///   silently relocate the bar onto the App Bar's edge.
-/// - `enabled` — visibility is not appearance. Inert today
-///   (the global `AppBarStyle` has no `enabled` key; the App
-///   Bar's toggle is per-layout), listed so the exclusion is
-///   already in force the day one appears.
-/// - every `*_color` key — colours are the Advanced Colours
-///   area's concern (owner ruling 2026-08-02, with the Bars
-///   redesign): a colours-copy, if it ships at all, lives
-///   there. Derived by suffix, so a new shared colour field
-///   stays out of this copy automatically.
+/// One-shot appearance synchronization between space bar and app bar styles
+/// (`SpaceBarParityTests.copyAppearanceParity`, #293, #678 Phase 2).
 extension SpaceBarStyle {
-    /// JSON key spellings excluded from the copy.
+    /// JSON key spellings excluded from the copy: `edge`
+    /// (placement is not appearance), `enabled` (visibility is
+    /// not), and every `*_color` key (colours are Advanced
+    /// Colours' concern, owner ruling 2026-08-02 — derived by
+    /// suffix so a new shared colour stays out automatically).
     public static let copyAppearanceExclusions: Set<String> = [
         "enabled", "edge",
     ]
@@ -40,9 +23,8 @@ extension SpaceBarStyle {
             .filter { $0.hasSuffix("_color") }
     }
 
-    /// The shared, copyable key spellings (intersection minus
-    /// exclusions minus colours) — the parity test's contract
-    /// surface.
+    /// Shared copyable key spellings
+    /// (`SpaceBarParityTests.copyAppearanceParity`).
     public static var copyAppearanceKeys: Set<String> {
         let ours = Set(CodingKeys.allCases.map(\.stringValue))
         let theirs = Set(
@@ -53,14 +35,10 @@ extension SpaceBarStyle {
             .subtracting(sharedColorKeys)
     }
 
-    /// Copies every shared appearance field from `appBar` —
-    /// the RETIRED forward direction: the shipped button pulls
-    /// the other way (`AppBarStyle.copyAppearance(from:)`,
-    /// owner flip 2026-08-10), and no production path calls
-    /// this any more. It stays, internal, as the parity
-    /// suite's seed and the symmetric statement of the
-    /// contract both directions share; if a Space Bar card
-    /// ever earns its own pull button this is it, re-argued.
+    /// Copies shared appearance fields from AppBarStyle — the
+    /// RETIRED forward direction (the shipped button pulls the
+    /// other way, owner flip 2026-08-10). Stays internal as the
+    /// parity suite's seed (`AppBarStyle.copyAppearance(from:)`).
     mutating func copyAppearance(from appBar: AppBarStyle) {
         for key in Self.copyAppearanceKeys {
             copyField(key, from: appBar)

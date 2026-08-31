@@ -1,79 +1,56 @@
 import Foundation
 
-/// The stack layout's parameters, split from `LayoutParams`
-/// for file size (AGENTS.md §2) when the #222 arrangement
-/// fields joined the ratio/count/overflow trio.
+/// Parameters for the stack/master-stack layout engine (#222).
 public struct StackParams: Sendable, Equatable, Codable {
-    /// What happens when a zone can't give every window
-    /// `minWindowSize`.
+    /// Overflow behavior when windows exceed `minWindowSize`.
     public enum OverflowStyle: String, Sendable, Codable, CaseIterable {
-        /// Only the windows that don't fit cascade at the
-        /// bottom; the rest stay fully tiled.
         case cascadeOverflow = "cascade_overflow"
-        /// The whole zone cascades.
         case cascadeAll = "cascade_all"
     }
 
-    /// How a zone lines up its windows (#222). The overflow
-    /// cascade is NOT affected: piles always offset downward
-    /// so title bars stay visible (`OverlapStack`).
+    /// Linear orientation within a zone (`OverlapStack`, #222).
     public enum Orientation: String, Sendable, Codable, CaseIterable {
-        /// Windows stacked top-to-bottom (a column).
         case vertical
-        /// Windows side by side (a row).
         case horizontal
     }
 
-    /// Where the stack zone sits relative to the master
-    /// (#222). Decides the split axis: `left`/`right` split
-    /// the width, `top`/`bottom` split the height.
+    /// Position of stack zone relative to master zone (#222).
     public enum StackPosition: String, Sendable, Codable, CaseIterable {
         case top
         case right
         case bottom
         case left
 
-        /// True when the master/stack split divides the
-        /// width — the single authority for the split axis,
-        /// shared by the layout math and both resize paths.
+        /// True when the master/stack split divides width.
         public var splitsHorizontally: Bool {
             self == .left || self == .right
         }
 
-        /// The stack zone's lineup, derived — never a free
-        /// knob (design decision on #222): a left/right zone
-        /// is a tall strip, so it stacks vertically; a
-        /// top/bottom zone is wide, so windows sit side by
-        /// side. Any other combination degenerates into
-        /// slivers.
+        /// Inferred orientation for the stack zone — derived,
+        /// never a free knob (#222): any other combination
+        /// degenerates into slivers.
         public var stackOrientation: Orientation {
             splitsHorizontally ? .vertical : .horizontal
         }
     }
 
-    /// Windows 0..<masterCount form the master zone.
+    /// Number of windows in the master zone.
     public var masterCount: Int = 1
-    /// The master zone's share of the split axis.
+    /// Master zone share of split axis.
     public var masterRatio: Double = 0.6
-    /// Zone overflow behavior (applies to both zones).
+    /// Overflow behavior applying to both zones.
     public var overflowStyle: OverflowStyle = .cascadeOverflow
-    /// How the master zone lines up its windows (#222). The
-    /// stack zone has no such knob — its lineup derives from
-    /// `stackPosition` (see `StackPosition.stackOrientation`).
+    /// Master zone layout orientation (#222).
     public var masterOrientation: Orientation = .horizontal
-    /// Where the stack zone sits (#222); `right` is the
-    /// classic dwm arrangement (master left).
+    /// Position of stack zone (#222).
     public var stackPosition: StackPosition = .right
-    /// dwm-style default: `.first` makes the new window the
-    /// master (the last master slides into the stack).
+    /// Spawn placement rule for incoming windows.
     public var newWindowPlacement: SpawnPlacement = .first
-    /// Per-space overrides (`layout.stack.override[space_id]`),
-    /// resolved via `TilingSettings.resolvedStack(for:)`.
+    /// Per-space overrides (`TilingSettings.resolvedStack(for:)`).
     public var override: [SpaceID: StackOverride] = [:]
 
     public init() {}
 
-    /// JSON keys follow the Lua setters (`stack.set_*`).
     private enum CodingKeys: String, CodingKey {
         case masterCount = "master_count"
         case masterRatio = "master_ratio"
@@ -127,8 +104,7 @@ public struct StackParams: Sendable, Equatable, Codable {
             ) ?? [:]
     }
 
-    /// Manual encode so the per-space override map stays sparse
-    /// (absent when empty), unlike the synthesized encode.
+    /// Encodes stack parameters keeping sparse override map structure.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(masterCount, forKey: .masterCount)

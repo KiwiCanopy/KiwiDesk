@@ -1,41 +1,17 @@
 import AppKit
 import KiwiDeskCore
 
-/// The status a second launch reports when the lock is held.
-///
-/// **Zero, and that is load-bearing (#1068).** Declining to
-/// start because another instance already holds the lock is a
-/// job correctly done, not a failure — and launchd reads the
-/// difference. The service plist carries
-/// `KeepAlive { SuccessfulExit: false }`, which exists so a
-/// deliberate quit stays quit while a crash is restarted (#341,
-/// `ServiceManager.plist`). Reporting failure here put
-/// "already running" in the crash bucket: `RunAtLoad` started a
-/// second instance beside a running one, that instance bowed
-/// out non-zero, launchd called it a crash and respawned it one
-/// throttle later — forever, each attempt activating the
-/// running app and taking the user's focus with it.
-///
-/// So the exit code answers "did this process fail?", and the
-/// answer is no. What it no longer answers is "did a new
-/// instance start?" — the stderr line carries that, and a
-/// script shelling out to a bare, argument-less launch reads
-/// THAT rather than the status. (A `kiwidesk <command>`
-/// invocation never reaches here at all: `main.swift` routes
-/// any argument to the CLI and exits before the lock is
-/// touched.)
+/// Status reported on duplicate launch; 0 prevents launchd
+/// respawn loops: `KeepAlive { SuccessfulExit: false }` restarts
+/// a crash, and a non-zero "already running" landed in the crash
+/// bucket — respawned forever, stealing focus each attempt
+/// (`ServiceManager.plist`, #341, #1068). The exit code answers
+/// "did this process fail?"; the stderr line answers "did a new
+/// instance start?".
 let secondLaunchExitStatus: Int32 = 0
 
-/// Second-launch path (#196): another process holds the
-/// single-instance lock. Surface the running instance when it
-/// is identifiable; a bundled (.app) launch that can't be
-/// surfaced gets a notice dialog. Either way the verdict goes
-/// to stderr first — a terminal launch would otherwise look
-/// hung while a dialog waits somewhere behind other windows.
-/// Never force-kills a wedged instance — the user decides that.
-///
-/// Exits `secondLaunchExitStatus`; read its doc before changing
-/// the value, which launchd's respawn policy depends on.
+/// Activates running instance and exits when lock is held
+/// (`main.swift`, #196).
 @MainActor
 func surfaceRunningInstanceAndExit() -> Never {
     fputs(

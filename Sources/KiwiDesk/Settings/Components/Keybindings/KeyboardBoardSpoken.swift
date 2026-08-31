@@ -1,35 +1,18 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The keyboard board as VoiceOver hears it (#812): ONE element,
-/// one description — the picture's meaning, not its pixels.
-///
-/// Drawn, the board is a glance: which keys are green under this
-/// chip. Read key by key it was one bare glyph per key ("A",
-/// "S", "space") with no state at all, since every state lives
-/// in a fill or a ring. And a stop per key is not the fix — a
-/// picture's native spoken form is one description (an image's
-/// description, a chart's summary), and the question a reader
-/// brings here, "what is taken before I record?", is answered by
-/// a list, not a walk (`ui-designer`, 2026-08-24).
-///
-/// The sentences read the SAME predicates the caps draw from —
-/// `KeyboardCensus.state(of:claims:scope:)` for bound and
-/// reserved, `collisions ∪ overwrittenReserved` for the red ring
-/// — so the spoken board cannot disagree with the drawn one, the
-/// way the legend may not point at a mark the frame does not
-/// draw. Separate sentences joined with a space rather than one
-/// frame with optional clauses: two of the three are
-/// conditional, and a frame may withhold only its LAST argument
-/// (localization.md).
+/// VoiceOver accessibility summary for the keyboard board (#812):
+/// ONE element, one description — the picture's meaning, not its
+/// pixels. The sentences read the SAME predicates the caps draw
+/// from, so the spoken board cannot disagree with the drawn one.
+/// Separate sentences joined with a space: a frame may withhold
+/// only its LAST argument (`localization.md`).
 struct SpokenKeyboardBoard: View {
     let type: KeyboardMatrix.PhysicalType
     let claims: [UInt32: [KeyboardCensus.ModifierLayer]]
     let scope: KeyboardCensus.Scope
     let conflicted: Set<UInt32>
 
-    /// The chip row's own word for the scope ("All", "⌘", "No
-    /// modifier"), so the sentence names what the chip row shows.
     private var scopeLabel: String {
         switch scope {
         case .all: return L("keyboard.scope.all", "All")
@@ -45,9 +28,6 @@ struct SpokenKeyboardBoard: View {
             scope: scope,
             conflicted: conflicted
         )
-        // Ignored, not hidden: the plate stays a stop in reading
-        // order between the chips and the tally, where the eye
-        // meets it.
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             KeyboardBoardSpoken.sentence(
@@ -63,10 +43,8 @@ struct SpokenKeyboardBoard: View {
     }
 }
 
-/// The pure half: which keys land in which sentence, in the
-/// board's own order (left to right, top to bottom), and the
-/// sentence itself. View-free so `KeyboardBoardSpokenTests` can
-/// hold it without a window.
+/// Pure accessibility sentence generation for keyboard matrix
+/// (`KeyboardBoardSpokenTests`, `tests.md`).
 enum KeyboardBoardSpoken {
     struct Buckets: Equatable {
         var bound: [String] = []
@@ -88,8 +66,6 @@ enum KeyboardBoardSpoken {
         )
         var out = Buckets()
         for key in rows.joined() {
-            // A code-less cap (⇧, ⌘) has no state and is never
-            // listed.
             guard let code = key.code else { continue }
             let name = spokenName(for: code, glyph: glyph)
             switch KeyboardCensus.state(
@@ -108,8 +84,7 @@ enum KeyboardBoardSpoken {
         return out
     }
 
-    /// One sentence per non-empty bucket; bound always speaks,
-    /// so a chip that claims nothing still says so.
+    /// Assembles localized summary sentence from key categorization buckets.
     @MainActor
     static func sentence(
         buckets: Buckets,
@@ -150,16 +125,7 @@ enum KeyboardBoardSpoken {
         return parts.joined(separator: " ")
     }
 
-    /// The key as the board prints it where that is a letter or
-    /// sign, and as a localized WORD where the board prints a
-    /// symbol — VoiceOver reads "←" as "leftwards arrow" and
-    /// "⎋" however it likes, and the wire names ("left") are
-    /// English (owner, #812 session 3: "left, up, down" inside
-    /// a German sentence). Drawn and spoken agree on WHICH key
-    /// and differ only in rendering. `glyph` is injected so the
-    /// tests never reach the host's input source — a letter
-    /// asserted through `UCKeyTranslate` reds on AZERTY with no
-    /// defect (tests.md ▸ injected seams).
+    /// Resolves spoken name for key code, injecting glyph lookup seam (#812).
     @MainActor
     static func spokenName(
         for code: UInt32,
@@ -175,9 +141,7 @@ enum KeyboardBoardSpoken {
             ?? KeyboardKeyLabel.fallback(for: code)
     }
 
-    /// The spoken word for a key the board prints as a symbol.
-    /// Localized, unlike the `KeyCombo` wire names, and keyed by
-    /// the same codes `KeyboardKeyLabel.functional` draws.
+    /// Localized spoken names for functional keys.
     @MainActor
     private static func functionalWord(_ code: UInt32) -> String? {
         switch code {
@@ -194,14 +158,10 @@ enum KeyboardBoardSpoken {
         }
     }
 
-    /// The list is not a grammatical clause, so no locale has
-    /// to agree with it — but the joiner word is a locale's,
-    /// and it must be the APP's locale, not the system's: the
-    /// class method joins in `Locale.current`, which put a
-    /// German "und" inside an English sentence on a German Mac
-    /// (owner, #812 session 3). The space joining the SENTENCES
-    /// is Swift-owned punctuation; spoken-only today, so a
-    /// visual reuse of `sentence` re-opens that question.
+    /// Joins names using the APP's locale, never the system's:
+    /// `ListFormatter`'s class method joins in `Locale.current`,
+    /// which put a German "und" inside an English sentence on a
+    /// German Mac (owner, #812 session 3).
     @MainActor
     private static func join(_ names: [String]) -> String {
         let formatter = ListFormatter()

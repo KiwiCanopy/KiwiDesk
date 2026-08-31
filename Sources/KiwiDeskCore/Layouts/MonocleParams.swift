@@ -1,58 +1,28 @@
 import CoreGraphics
 import Foundation
 
-/// Monocle tuning: orientation (which focus axis cycles
-/// through the windows) and the indicator bar listing them.
-/// The bar's look is global (`AppBarStyle`); this layout only
-/// carries its own `enabled` + overrides (`bar`).
+/// Monocle layout tuning parameters (`AppBarStyle`, `AppBarHosting`).
 public struct MonocleParams: Sendable, Equatable, AppBarHosting {
-    /// Which focus axis cycles through the monocle windows —
-    /// and, with it, which edges the indicator bar may sit on.
+    /// Focus navigation axis and indicator bar placement.
     public enum Orientation: String, Sendable, Codable, CaseIterable {
-        /// `focus("left"/"right")` cycles; bar on top/bottom.
         case horizontal
-        /// `focus("up"/"down")` cycles; bar on left/right.
         case vertical
     }
 
-    /// How the unfocused members are hidden (#881). Monocle's
-    /// illusion of "one window" has two ways to break: an app
-    /// with a transparent or blurred body shows the stack
-    /// straight through itself, and a width-bound window (#677)
-    /// centers with symmetric gaps the stack shows through with
-    /// no transparency involved. `park` closes both by moving
-    /// the unfocused members out from behind instead of
-    /// ordering them.
+    /// Mechanism for hiding unfocused monocle members (#677, #881).
     public enum HideStyle: String, Sendable, Codable, CaseIterable {
-        /// Every member shares the full frame; only z-order
-        /// hides the unfocused ones. The default.
         case stack
-        /// Unfocused members park at the stash corner (the
-        /// space stash's own geometry and sliver trade), and
-        /// the focus switch snaps instantly.
         case park
     }
 
     public var orientation: Orientation = .horizontal
     public var hideStyle: HideStyle = .stack
-    /// Whether the focus cycle wraps past the ends (#168). Unlike
-    /// Whether moving focus past the last window wraps to the
-    /// first (and the reverse). Defaults **off**, matching the
-    /// other array-order layouts (scrolling/track) — one default
-    /// across all three. Turn it on for carousel-style cycling.
-    /// `swap` never wraps. Per-layout, like the scrolling/track
-    /// wrap toggles.
+    /// Whether focus navigation wraps at cycle ends (#168).
     public var wrapFocus = false
-    /// Where a new window lands in the flat array — and, since
-    /// monocle shows one window at a time, where it sits in the
-    /// focus cycle. `.first` by default: a new window comes to
-    /// the front of the carousel (the stack-master instinct),
-    /// never buried mid-cycle. The same `SpawnPlacement`
-    /// vocabulary every other layout uses.
+    /// Placement for newly spawned windows (`SpawnPlacement`).
     public var newWindowPlacement: SpawnPlacement = .first
     public var appBar = LayoutAppBar()
-    /// Per-space overrides (`layout.monocle.override[space_id]`),
-    /// resolved via `TilingSettings.resolvedMonocle(for:)`.
+    /// Per-space overrides (`TilingSettings.resolvedMonocle(for:)`).
     public var override: [SpaceID: MonocleOverride] = [:]
 
     public init() {}
@@ -109,8 +79,7 @@ extension MonocleParams: Codable {
             ) ?? [:]
     }
 
-    /// Manual encode so the per-space override map stays sparse
-    /// (absent when empty), unlike the synthesized encode.
+    /// Encodes monocle parameters keeping sparse override map structure.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(orientation, forKey: .orientation)

@@ -1,21 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The live preview under a layout's rows (turn 10): the
-/// selected layout's schematic at pane width, with the window
-/// count as a slider the reader drives.
-///
-/// The count is what turns a picture of a layout into a
-/// simulation of one. Cascade overflow and Cascade all draw the
-/// same frame until the stack is deep enough to overflow; a
-/// track limit means nothing until there are more windows than
-/// tracks; a dynamic grid's balance is invisible at a fixed
-/// count. Every one of those becomes a drag of this slider.
-///
-/// The count is view state, deliberately: it is a question the
-/// reader is asking of the preview, not a setting, so it neither
-/// persists nor reaches the config — and it resets per visit,
-/// which is the right default for a question.
+/// Live interactive preview panel for layout mode defaults (#678).
 struct LayoutPreviewPanel: View {
     @ObservedObject var model: SettingsModel
     let mode: LayoutMode
@@ -34,34 +20,18 @@ struct LayoutPreviewPanel: View {
                 )
                 countRow
             }
-            // Read-only, so it watches from the panel beside
-            // the rows rather than sitting among them (owner
-            // 2026-08-10).
             SpacesUsingLayout(model: model, mode: mode)
         }
     }
 
-    /// Hoisted out of the `SettingsSlider` call, which already
-    /// carries a closure-pair `Binding`: a range built inline
-    /// beside it is the type-checker-budget shape gui.md names.
+    /// Hoisted slider range (`LayoutSchematic.windowCountRange`, `gui.md`).
     private var countRange: ClosedRange<Double> {
         let band = LayoutSchematic.windowCountRange
         return Double(band.lowerBound)...Double(band.upperBound)
     }
 
-    /// Label and readout hug their text instead of taking the
-    /// content pane's 210 pt label column: this row lives in
-    /// the 392 pt PANEL now, where that column left the track
-    /// a knob's width of room (owner caught it on screen,
-    /// 2026-08-10) — the slider is the row's point, so it gets
-    /// the flexible middle.
     private var countRow: some View {
         HStack(spacing: 10) {
-            // "Window count", not a bare "Windows": beside a
-            // slider and a numeric readout the short form is
-            // unambiguous on screen, but a translator reading the
-            // key alone cannot tell it from the OS's own name for
-            // a window.
             Text(
                 L(
                     "layout_defaults.preview_windows",
@@ -70,9 +40,9 @@ struct LayoutPreviewPanel: View {
             )
             .fixedSize()
             // Drawn, not spoken: it names the slider below, and
-            // the slider says the name itself. Left visible it
-            // is read once standing alone and again as the
-            // control's name (code review, 2026-08-11).
+            // the slider says the name itself (code review
+            // 2026-08-11 — the ruling `SettingsRowLabel` applies
+            // at its seam).
             .accessibilityHidden(true)
             SettingsSlider(
                 value: Binding(
@@ -81,16 +51,11 @@ struct LayoutPreviewPanel: View {
                 ),
                 range: countRange,
                 step: 1,
-                // The label above is a SIBLING `Text`, which
-                // names nothing as far as VoiceOver is concerned
-                // — so the slider announced a bare percentage,
-                // and the count it was actually setting sat in a
-                // third element beside it (#678 Phase 4 pass 10,
-                // turn 20a rule 2: the preview is skipped, but
-                // the controls that change what it shows are
-                // not). Naming and valuing the control puts both
-                // back on the thing being adjusted — the seam
-                // every slider now takes (#812).
+                // A sibling `Text` names nothing for VoiceOver,
+                // so the slider announced a bare percentage
+                // (#678 turn 20a rule 2). Naming and valuing the
+                // control puts both on the thing adjusted — the
+                // seam every slider takes (#812).
                 label: L(
                     "layout_defaults.preview_windows",
                     "Window count"
@@ -102,8 +67,6 @@ struct LayoutPreviewPanel: View {
                 .frame(minWidth: 24, alignment: .trailing)
                 .foregroundStyle(SettingsTheme.ink2)
                 .font(.body.monospacedDigit())
-                // The readout is the slider's value drawn again
-                // for the eye (`settingsReadout`).
                 .settingsReadout()
         }
     }

@@ -1,43 +1,21 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The contextual-help affordance (#94): a small circled `?`
-/// beside a settings row's label, opening a click popover with
-/// a sentence or two of explanation.
+/// Contextual help button opening an explanatory popover (#94).
 ///
-/// A click popover, not a hover-only tooltip: visible and
-/// discoverable, a real focusable button (keyboard and
-/// VoiceOver reach it), dismissible and re-readable — the
-/// System Settings pattern. `.help` rides along as a cheap
-/// hover fallback. Help is optional reading: a row's label and
-/// options must stay understandable without ever opening it.
-///
-/// Placement rule: the `?` sits IMMEDIATELY AFTER the field's
-/// label text, inside the shared `settingsLabelColumn` frame —
-/// the question is born at the label, so the affordance sits
-/// where the confusion starts. Exceptions (documented in
-/// design-decisions "Shared controls"): unlabeled controls and
-/// the Customize popover's override rows trail instead.
+/// Follows standard placement inside `settingsLabelColumn`.
 struct HelpButton: View {
-    /// The explanation. Inline Markdown (`**bold**`) renders in
-    /// the popover, so a 2–3-option field folds per-option text
-    /// into this one popover (option name bold, one line each)
-    /// instead of hanging a `?` off every segment.
+    /// Markdown-supported explanation text.
     let explanation: String
-    /// Optional field name folded into the VoiceOver label, so
-    /// the rotor reads "Help: Wrap focus" instead of a list of
-    /// indistinguishable "Help" buttons (#251). Omit where one
-    /// `?` is unambiguous in its row.
+    /// Accessible subject label (#251).
     var subject: String? = nil
     @State private var shown = false
     /// The transient popover already dismisses on this very
-    /// click's mouse-down; without the stamp the mouse-up
-    /// action would immediately reopen it, making the button
-    /// unable to ever close its own popover.
+    /// click's mouse-down; without the stamp the mouse-up action
+    /// would immediately reopen it — the button unable to ever
+    /// close its own popover.
     @State private var dismissed = Date.distantPast
 
-    /// Popover text measure — comfortable for 2–4 short lines
-    /// without ballooning over the pane.
     private static let textWidth: CGFloat = 260
 
     var body: some View {
@@ -51,9 +29,6 @@ struct HelpButton: View {
         }
         .buttonStyle(.plain)
         .controlSize(.small)
-        // The same hover chip every icon-only borderless
-        // button here carries — a bare glyph has nothing to
-        // catch the eye drifting past the bordered control.
         .hoverHighlight(cornerRadius: 4, padding: 2)
         .popover(isPresented: $shown, arrowEdge: .bottom) {
             Text(rich)
@@ -71,11 +46,9 @@ struct HelpButton: View {
             subject.map { L("help.button.for", "Help: %1$@", $0) }
                 ?? L("help.button", "Help")
         )
-        // A short action hint, not the content — VoiceOver
-        // reads the explanation inside the popover after
-        // activating, and `.help` above already exposes the
-        // full text; duplicating it here would announce it
-        // twice on every focus pass.
+        // A short action hint, not the content: `.help` already
+        // exposes the full text, and duplicating it here would
+        // announce it twice per focus pass.
         .accessibilityHint(
             L(
                 "help.button.hint",
@@ -84,9 +57,7 @@ struct HelpButton: View {
         )
     }
 
-    /// Markdown-parsed body. `inlineOnlyPreservingWhitespace`
-    /// keeps the hand-authored newlines between per-option
-    /// lines while rendering `**bold**`.
+    /// Markdown-parsed body preserving whitespace formatting.
     private var rich: AttributedString {
         (try? AttributedString(
             markdown: explanation,
@@ -97,10 +68,6 @@ struct HelpButton: View {
         )) ?? AttributedString(explanation)
     }
 
-    /// The hover tooltip carries the same text with the
-    /// Markdown markers stripped. The extra replace only bites
-    /// when the Markdown parse failed and `rich` kept the raw
-    /// markers; a successful parse has none left.
     private var plain: String {
         String(rich.characters)
             .replacingOccurrences(of: "**", with: "")
