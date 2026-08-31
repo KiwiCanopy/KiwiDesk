@@ -558,6 +558,23 @@ editing here:
   deliberately — a fold-rule change that updates the render
   and misses a hand copy re-opens the exact divergence the
   extraction closed.
+- **A float safety NET asks `EffectiveFloat.applies`, never the
+  flag alone** (#1178). `FloatingLayout` assigns no frames, so a
+  `.floating` space's members are unmanaged in exactly the way a
+  flag-floating window is — the bar clamp asked the flag, and
+  those windows got neither a layout frame nor the correction,
+  permanently. A net is a correction that places a window
+  nothing else will (the clamp, the stash capture, the
+  display-crossing re-anchor); a VERB is the user's own ask and
+  keeps the flag until ruled otherwise, which `resize` still
+  does. The mode arm names the space the window is judged ON —
+  the TARGET for a move, the space a drop LANDED in — and a
+  window that is not a member of that space passes nil, or a
+  tiled sticky traveler is clamped against a screen it is not
+  on. Nothing scans for a new bare-flag net, so each one routes
+  deliberately; `EffectiveFloatTests` holds the algebra and
+  `FloatingModeBarClampTests` the two consumers, each blind to
+  the other by construction.
 - **Derive where a float may sit in ONE place, and bound its
   SIZE there rather than its position** (#1091). `KiwiCore.floatBounds` is that derivation — the
   display's visible bounds with every PAINTED strip carved off

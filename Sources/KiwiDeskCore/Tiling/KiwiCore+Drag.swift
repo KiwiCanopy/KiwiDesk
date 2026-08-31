@@ -55,6 +55,27 @@ extension KiwiCore {
         return live == .zero ? fallback : live
     }
 
+    /// Whether the drop leaves `id` where nothing will place it
+    /// — its own float flag, or a space that lays nothing out
+    /// (#1178). The one question the drop's clamp arm asks.
+    ///
+    /// The mode arm names the space the drop LANDED in, and only
+    /// for a window that belongs to it. A tiled sticky traveler
+    /// renders into the active space without being a member of
+    /// it (#414 v2), so answering from its HOME space would
+    /// clamp it against strips on a screen it is not on and skip
+    /// the snap-back that owns it (architect review,
+    /// 2026-08-31). The flag arm is unconditional, as it was.
+    func dropLandsUnmanaged(_ id: WindowID) -> Bool {
+        let landed = activeSpace
+        return EffectiveFloat.applies(
+            isFloating: state.windows[id]?.isFloating == true,
+            mode: landed?.windows.contains(id) == true
+                ? landed?.mode
+                : nil
+        )
+    }
+
     func handleDragEnd(
         _ id: WindowID,
         start: CGRect,
@@ -91,8 +112,8 @@ extension KiwiCore {
         // A floating window is excluded from the layout swap/resize
         // logic below, but a drop that leaves it under a top app bar
         // hides its title bar and makes it ungrabbable — clamp it
-        // back below the strip (#242).
-        if state.windows[id]?.isFloating == true {
+        // back below the strip (#242, #1178).
+        if dropLandsUnmanaged(id) {
             let frame = liveDropFrame(id, fallback: frame)
             let clamped = floatFrameClampedClearOfBars(
                 id,

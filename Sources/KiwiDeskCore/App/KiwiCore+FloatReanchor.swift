@@ -16,7 +16,7 @@ extension KiwiCore {
     /// Re-anchors `id` onto `target`'s display when that differs
     /// from the display its frame sits on — every float-flagged
     /// window, plus any window bound for a floating-MODE space
-    /// (#498, `FloatReanchor.eligible`). No-op for tiled windows
+    /// (#498, `EffectiveFloat`). No-op for tiled windows
     /// bound for tiling spaces (the layout owns their frames),
     /// same-display moves (#412 stash behavior unchanged),
     /// global stickies (visible everywhere, so a membership move
@@ -28,9 +28,9 @@ extension KiwiCore {
     /// resolves the bars.
     func reanchorFloat(_ id: WindowID, to target: SpaceID) {
         guard let window = state.windows[id],
-            FloatReanchor.eligible(
+            EffectiveFloat.applies(
                 isFloating: window.isFloating,
-                targetMode: state.workspaces[target]?.mode
+                mode: state.workspaces[target]?.mode
             ),
             window.stickyScope != .global,
             tiler.dragExemptWindow != id
