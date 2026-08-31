@@ -1,16 +1,9 @@
 import Foundation
 import os
 
-/// Drains a child's stdout and stderr via `readabilityHandler`
-/// and reports both, off the main thread, once both streams hit
-/// EOF. No thread is ever blocked waiting for a pipe; GCD calls
-/// the handler as data arrives. Split out of `ExecLauncher` for
-/// file size.
-///
-/// Each stream is capped at `streamCap` bytes: data beyond the
-/// cap is still read (keeping the pipe drained so the child can
-/// keep writing without blocking) but discarded after the
-/// truncation marker is appended.
+/// Captures stdout and stderr streams asynchronously. Data beyond
+/// `streamCap` is still READ (the pipe stays drained so the
+/// child never blocks) but discarded after the truncation marker.
 final class OutputCapture: Sendable {
     /// Maximum bytes captured per stream (~1 MB).
     static let streamCap = 1_048_576
@@ -32,10 +25,8 @@ final class OutputCapture: Sendable {
     init(_ out: Pipe, _ err: Pipe) {
         self.out = out
         self.err = err
-        // Enter for both streams up front: the termination
-        // handler can fire before drain() runs on the main
-        // actor, and an empty group would notify immediately
-        // with empty output.
+        // Enter up front: the termination handler can fire before
+        // drain() runs, and an empty group notifies immediately.
         group.enter()
         group.enter()
     }
@@ -57,7 +48,6 @@ final class OutputCapture: Sendable {
         handle.readabilityHandler = { [group, buf] fh in
             let chunk = fh.availableData
             if chunk.isEmpty {
-                // EOF: all write ends of the pipe are closed.
                 fh.readabilityHandler = nil
                 group.leave()
                 return

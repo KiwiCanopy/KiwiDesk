@@ -1,25 +1,16 @@
 import AppKit
 
-/// Drag-and-drop reordering: an item (a single window or a
-/// whole group) follows the cursor along the bar axis while
-/// the other items reflow live around the slot it would land
-/// in; dropping reports (from, to) through `onMove`, and the
-/// core rewrites the window order.
+/// Drag-and-drop item reordering and reflow for AppBarOverlay.
 extension AppBarOverlay {
-    /// The dragged item rides along the axis (cross-axis
-    /// pinned), floating above its siblings.
+    /// Moves dragged item view and live reflows sibling slots.
     func dragMoved(
         _ view: AppBarItemView,
         to windowPoint: CGPoint
     ) {
         guard let m = lastMetrics else { return }
-        // Plain + glass hug hosts the items in `glassRun` at the
-        // plate's origin; leave hug mode so the mover and its
-        // siblings share `itemContainer`'s coordinate space.
+        // Leave glass hug mode so the mover and its siblings share
+        // `itemContainer`'s coordinate space.
         spanPlainGlassForDrag()
-        // The mover is the item under `boxed`/`plain`, or its glass
-        // box under per-box glass — both live in `itemContainer`,
-        // so the run coordinate space is the same either way.
         let mover = draggableView(for: view)
         let point = itemContainer.convert(windowPoint, from: nil)
         if itemContainer.subviews.last !== mover {

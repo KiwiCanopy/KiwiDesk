@@ -1,12 +1,7 @@
-/// Which cards Home offers, in which order (#678 turn 9).
-///
-/// The order is the turn-9 frame's and is STABLE across mode
-/// flips: Power User inserts its cards at their slots rather than
-/// appending, so a card never moves when the segment is toggled
-/// — Monitors auto-promoted into Simple sits exactly where Power User
-/// shows it. `HomeCardOrderTests` pins both lists to the
-/// destination groups so a thirteenth destination cannot miss
-/// the grid.
+/// Home dashboard card offer and display order
+/// (`HomeCardOrderTests`, #678 turn 9). The order is STABLE across
+/// mode flips: Power User inserts its cards at their slots rather
+/// than appending, so a card never moves on a segment toggle.
 enum HomeCardOrder {
     /// THIS PROFILE, full (Power User) order.
     static let thisProfile: [SettingsDestination] = [
@@ -19,19 +14,10 @@ enum HomeCardOrder {
         .shortcuts, .profiles, .appRules, .general,
     ]
 
-    /// One offer predicate for every surface that shows or
-    /// lands on a card (the grid, the selection repair, the
-    /// `settingsNavigate` guard, search) — the #18 rule with
-    /// the mode as its second axis. No hand-negated copies.
-    ///
-    /// The `displayCount` axis deliberately has NO selection
-    /// repair: unplugging the second display while standing in
-    /// an auto-promoted Monitors area leaves the user there —
-    /// the area still exists and still edits (its own gates
-    /// handle the missing geometry); only the next Home visit
-    /// re-derives the card offer. Repairing here would yank the
-    /// screen out from under a user mid-edit for a change they
-    /// did not make in Settings.
+    /// Single offer predicate for home dashboard cards (#18) — no
+    /// hand-negated copies. The `displayCount` axis deliberately
+    /// has NO selection repair: unplugging a display must not yank
+    /// the screen mid-edit; the next Home visit re-derives.
     static func isOffered(
         _ destination: SettingsDestination,
         mode: SettingsMode,
@@ -47,7 +33,7 @@ enum HomeCardOrder {
                 ) == .simple)
     }
 
-    /// The grid's two groups under the current state.
+    /// Filters destination group to currently offered cards.
     static func offered(
         _ group: [SettingsDestination],
         mode: SettingsMode,

@@ -1,21 +1,14 @@
 import Foundation
 
-/// The format-stamp half of the crossing (#938), and the one
-/// step that changes a file's SHAPE rather than a value
-/// (#939) - split from `ConfigMigration.swift` for file
-/// size (AGENTS.md 2.1).
+/// Format stamping and document structure migrations
+/// (`ConfigMigrationRoutingTests`, #938, #939).
 extension ConfigMigration {
-    /// Lifts a legacy bare array of color palettes into the wrapped
-    /// document format `{"format": 1, "palettes": [...]}` (#939).
-    ///
-    /// ASSUMES any top-level JSON array is a legacy palettes
-    /// file — true only because palettes.json is the sole
-    /// array-rooted file among the routed readers
-    /// (`ConfigMigrationRoutingTests` is the census; a second
-    /// array-rooted shape must give this step a narrower gate
-    /// on arrival). An array handed to `readBackup` gets
-    /// wrapped and then refused as not-a-bundle — harmless, but
-    /// the assumption is this sentence, not a law.
+    /// Wraps legacy palette array into format document
+    /// (`PaletteDocument`, #939). ASSUMES any top-level JSON array
+    /// is a legacy palettes file — true only while palettes.json
+    /// is the sole array-rooted routed reader
+    /// (`ConfigMigrationRoutingTests`); a second array-rooted
+    /// shape must give this step a narrower gate.
     @Sendable
     static func migratingLegacyPalettesArray(
         _ data: Data
@@ -35,15 +28,7 @@ extension ConfigMigration {
         )
     }
 
-    /// Stamps the target format into `data` if not already
-    /// current (#938).
-    ///
-    /// Shares the envelope with the two rewriting steps
-    /// (`surgicallyApplying`) but differs at the edges in one
-    /// way worth naming: it returns `Data`, never nil, because a
-    /// caller stamps unconditionally and wants the bytes back
-    /// either way. "Nothing changed" therefore reads as
-    /// `?? data` here rather than as a nil the caller inspects.
+    /// Stamps target format integer into JSON document payload (#938).
     static func stamped(_ data: Data) -> Data {
         guard
             let root = try? JSONSerialization.jsonObject(

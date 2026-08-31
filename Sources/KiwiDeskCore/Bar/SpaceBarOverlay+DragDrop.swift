@@ -1,19 +1,12 @@
 import AppKit
 
-/// Drag-drop routing for the Space Bar overlay (#372): the
-/// point-based hit test and the per-item hover / spring-sweep
-/// cues. The dwell timing and the spring decision live on the
-/// driver (`KiwiCore`); the overlay only maps a cursor point to a
-/// Space and forwards the visual cues to the matching item view.
+/// Drag-drop hit testing and visual feedback for SpaceBarOverlay (#372).
 extension SpaceBarOverlay {
 
-    /// The Space whose item contains a global (Cocoa, bottom-
-    /// left) screen point, or nil when the point is off the strip
-    /// or over a gap. Point-based — the cursor location, never
-    /// the dragged window's frame: a maximized window can graze
-    /// the bar while its grab point is far away. Glyphs and the
-    /// "+n" badge are not separate targets; the whole item is one
-    /// drop well.
+    /// Returns SpaceID whose item contains the CURSOR point, never
+    /// the dragged window's frame — a maximized window can graze
+    /// the bar while its grab point is far away. The whole item
+    /// is one drop well.
     func spaceItem(atGlobal cocoaPoint: CGPoint) -> SpaceID? {
         guard isPanelVisible else { return nil }
         let ax = GeometryUtils.axPoint(cocoaPoint)

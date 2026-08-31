@@ -1,12 +1,9 @@
 import KiwiDeskCore
 
-/// Writing the edited config back out: the raw Lua editor's save,
-/// the staged-edit revert, and adopting a hand-written file into
-/// GUI management. Split out of `SettingsModel` for the 350-line
-/// ceiling — the published state stays in the main file, because
-/// `@Published` cannot live in an extension.
+/// Configuration persistence, revert, and GUI adoption actions
+/// for SettingsModel.
 extension SettingsModel {
-    /// Writes the raw Lua editor's buffer to disk and reloads.
+    /// Writes raw Lua editor buffer to disk and reloads runtime state.
     func saveLuaSource() {
         do {
             try luaSource.write(
@@ -14,28 +11,24 @@ extension SettingsModel {
                 atomically: true,
                 encoding: .utf8
             )
-            // The raw file is now authoritative. Its reload
-            // replaces every hotkey, so the recorder snapshot
-            // must not roll the freshly loaded Lua table back.
+            // The reload replaces every hotkey; the recorder
+            // snapshot must not roll the fresh Lua table back.
             liveKeySession = nil
             core.loadConfig()
             reload()
-            // Free-form Lua isn't checked at input time (no
-            // recorder was involved), so set or clear the
-            // banner here from the reloaded config.
+            // Free-form Lua isn't checked at input time, so set or
+            // clear the conflict banner from the reloaded config.
             warnIfAnyConflict()
         } catch {
             core.onLog("settings save failed: \(error)")
         }
     }
 
+    /// Reverts staged edits and reapplies profile if layout
+    /// drifted (#123). Drift is computed fresh, not from the
+    /// published snapshot, so a switch the UI hasn't caught up
+    /// with still reverts.
     func revert() {
-        // Re-applying the profile (restores the saved layout,
-        // prunes stale spaces, force-retiles) is gated on
-        // actual drift — a plain staged-edit revert stays
-        // model-only, as before #123. Computed fresh, not from
-        // the published snapshot, so a switch the UI hasn't
-        // caught up with still reverts.
         if computeLayoutDrift() != nil,
             let activeProfileName = activeProfile
         {
@@ -44,9 +37,8 @@ extension SettingsModel {
         reload()
     }
 
-    /// Migrates a hand-written config into GUI management (the
-    /// old file is kept as a commented backup) and switches to
-    /// the visual editor. See `KiwiCore.adoptConfigIntoGui`.
+    /// Adopts hand-written config into GUI management
+    /// (`KiwiCore.adoptConfigIntoGui`).
     func adoptIntoGui() {
         do {
             try core.adoptConfigIntoGui()

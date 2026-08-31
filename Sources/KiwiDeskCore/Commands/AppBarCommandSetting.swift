@@ -1,9 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// A bar-setter parse failure, carrying the message shown to the
-/// user. String-literal-expressible so parsers can just write
-/// `.failure("expected boolean")`.
+/// Bar setting error with user-facing message.
 struct AppBarSettingError: Error, Equatable,
     ExpressibleByStringInterpolation
 {
@@ -18,10 +16,7 @@ struct AppBarSettingError: Error, Equatable,
     }
 }
 
-/// One parsed bar assignment. Parsing (and its validation) lives
-/// here once; applying it targets either the global `AppBarStyle`
-/// (concrete, via `app_bar.set_*`) or a layout's `LayoutAppBar` (as an
-/// override, via `monocle.set_app_bar_*` / `scroll.set_app_bar_*`).
+/// Parsed App Bar command setting representation.
 enum AppBarCommandSetting {
     case edge(AppBarEdge)
     case alignment(AppBarStyle.BarAlignment)
@@ -48,9 +43,7 @@ enum AppBarCommandSetting {
     case groupBadgeColor(String)
     case groupBadgeTextColor(String)
 
-    /// Parses a setter `field` — the command name minus its
-    /// prefix (`thickness`, `active_style`, `item_color`, …) —
-    /// and its args. `.failure` carries the error message.
+    /// Parses setter field name and arguments.
     static func parse(
         field: String,
         args: [JSONValue]
@@ -138,11 +131,9 @@ enum AppBarCommandSetting {
         ]
     }
 
-    /// Wire-key → color-field constructor. Internal (not private)
-    /// so the palette shelf (#375) can route a color path through
-    /// the same validated field setters instead of re-mapping
-    /// them. Values are validated via `DragVisual.parseHex` before
-    /// this is called.
+    /// Color setting field constructors by wire key. Internal, not
+    /// private: the palette shelf (#375) routes through these same
+    /// validated setters.
     static var colorFields: [String: (String) -> AppBarCommandSetting] {
         [
             "item_color": Self.itemColor,
@@ -176,10 +167,9 @@ enum AppBarCommandSetting {
         return .success(hex)
     }
 
-    /// Mirrors `SpaceBarCommandSetting.glyphCap` — including the
-    /// clamp-as-Double-BEFORE-`Int(...)` order, because
-    /// `Int(1e300)` traps and a config typo would otherwise kill
-    /// the WM (#58).
+    /// Parses title character cap. Mirrors the SpaceBar twin,
+    /// including clamp-as-Double BEFORE `Int(...)` — `Int(1e300)`
+    /// traps, so a config typo would kill the WM (#58).
     private static func titleCap(
         _ args: [JSONValue]
     ) -> Result<AppBarCommandSetting, AppBarSettingError> {
@@ -196,7 +186,7 @@ enum AppBarCommandSetting {
         return .success(.titleCap(Int(clamped)))
     }
 
-    /// Writes the value into the global style (concrete).
+    /// Applies concrete setting to AppBarStyle.
     func apply(to style: inout AppBarStyle) {
         switch self {
         case .edge(let value): style.edge = value

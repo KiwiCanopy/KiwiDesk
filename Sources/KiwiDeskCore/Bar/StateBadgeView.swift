@@ -1,13 +1,10 @@
 import AppKit
 
-/// Shared size for the Space Bar's badge family (#414): the
-/// group-count dot and the sticky/floating state marks all
-/// derive from ONE factor of the glyph cell (floored for
-/// legibility on thin bars), so the three read as one family
-/// and shrink together. One home for the constant so a future
-/// resize can't touch one site and forget the other (§5
-/// mirror hygiene). Trimmed 0.42→0.38 / 8→7 (owner 2026-07-21,
-/// ui-designer consult).
+/// Metrics for Space Bar badge family sizing (#414): the count
+/// dot and state marks derive from ONE factor of the glyph cell
+/// so the family shrinks together — one home, since a resize
+/// touching one site would silently miss the others. 0.42→0.38,
+/// 8→7 (owner 2026-07-21).
 enum StateBadgeMetrics {
     static let sizeFactor: CGFloat = 0.38
     static let floor: CGFloat = 7
@@ -18,13 +15,9 @@ enum StateBadgeMetrics {
     }
 }
 
-/// The two state-mark tints resolved for one bar render (#429):
-/// the raw hex a sticky / floating badge glyph draws in (empty =
-/// "Automatic", resolved to the adaptive `.labelColor` by
-/// `NSColor.mark`). Carried as data from `KiwiCore` — which owns
-/// both `StickyStyle` and `FloatingStyle` — so the Bar subsystem
-/// renders the marks without reaching into the sticky/floating
-/// namespaces itself.
+/// Resolved tints for sticky and floating state mark rendering
+/// (#429), carried as data from `KiwiCore` so the Bar subsystem
+/// never reaches into the sticky/floating namespaces itself.
 public struct StateMarkColors: Sendable, Equatable {
     public let sticky: String
     public let floating: String
@@ -35,14 +28,8 @@ public struct StateMarkColors: Sendable, Equatable {
     }
 }
 
-/// A Space Bar state badge (#414): the count badge's circular
-/// plate wearing a template symbol instead of a count, so the
-/// sticky/floating marks read as the same badge family. Since #429
-/// the fill carries the chosen state color (Automatic falls back
-/// to the count badge's own fill, so the default trio stays
-/// consistent) and the glyph on top is auto-contrasted for
-/// legibility — a filled disc shows its hue far better than a thin
-/// glyph stroke at the 7-9pt badge size (owner + ui-designer).
+/// Space Bar badge view displaying template symbol on circular plate
+/// (#414, #429).
 final class StateBadgeView: NSView {
     let symbol = NSImageView()
 

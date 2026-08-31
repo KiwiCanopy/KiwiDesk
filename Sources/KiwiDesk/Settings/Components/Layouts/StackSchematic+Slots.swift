@@ -1,26 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The stack zone's slot math, split from `StackSchematic` when
-/// the #222 arrangement branches grew it past the line ceiling
-/// (AGENTS.md §2). Pure geometry over the mini canvas; the view
-/// side stays in `StackSchematic.swift`.
+/// Stack zone schematic slot geometry calculations (#222).
 extension StackSchematic {
-    /// `cascade_all` piles every window (always downward, like
-    /// the engine's `OverlapStack`); `cascade_overflow` tiles
-    /// the run along the staged stack orientation and piles the
-    /// surplus at the zone's trailing end. Piled tiles keep
-    /// their extent but overlap by `cascadeOffset`, so only
-    /// their top edge shows above the next.
+    /// Computes stack slot frames for cascade and overflow styles
+    /// (`OverlapStack`).
     func stackSlots(in size: CGSize) -> [Slot] {
         let n = stackWins.count
-        // `order` always carries the incoming window, so the
-        // stack zone is never actually empty and this guard does
-        // not fire today. It stays because the divisions below
-        // are live arithmetic since turn 10 made the count an
-        // input: at n == 0 the overflow branch would build a
-        // reversed `Range` and trap, which is a worse way to
-        // learn that the partition changed.
+        // Unreachable today (`order` carries the incoming window),
+        // but at n == 0 the overflow branch would build a reversed
+        // `Range` and trap — keep the guard.
         guard n > 0 else { return [] }
         let w = size.width
         let h = size.height

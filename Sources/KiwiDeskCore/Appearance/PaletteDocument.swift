@@ -1,24 +1,14 @@
 import Foundation
 
-/// The envelope for `palettes.json` (#939): format versioning
-/// plus the list of user palettes.
-///
-/// The format integer is homed HERE, on the file's ROOT type —
-/// the pattern the siblings set (`Profile`, `GuiConfig`,
-/// `SetupBundle`) — never on `ColorPalette`, which also travels
-/// inside `SetupBundle`, where the bundle's own format governs
-/// (#945 review).
+/// Envelope for palettes.json with schema format versioning
+/// (#939). The format integer is homed HERE, on the file's ROOT
+/// type — never on `ColorPalette`, which also travels inside
+/// `SetupBundle`, where the bundle's own format governs (#945).
 struct PaletteDocument: Codable {
-    /// Format version of the palettes.json schema (#939).
-    /// Format 0 = unversioned legacy bare array.
+    /// Format version of palettes.json schema (0 = legacy bare array, #939).
     static let currentFormat = 1
 
-    /// The format the file actually carried. Normalized to
-    /// `currentFormat` only by a WRITE, never by the decoder: a
-    /// decoder that normalizes makes every format assertion
-    /// read the decoder back instead of the file, which is how
-    /// the save path's stamp went unguarded (#945 review,
-    /// proven by mutation).
+    /// Decoded format version preserved without normalization (#945).
     var format: Int
     var palettes: [ColorPalette]
 

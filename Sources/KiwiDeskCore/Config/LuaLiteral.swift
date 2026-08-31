@@ -1,14 +1,9 @@
 import CoreGraphics
 import Foundation
 
-/// Formats Swift values as Lua source literals for the config
-/// writer. Deterministic output (stable across runs) so the
-/// generated managed block only changes when settings do.
+/// Formats and parses Swift values as Lua source literals for config writer.
 enum LuaLiteral {
-    /// Integers print without a decimal point; fractions use
-    /// Swift's shortest round-trippable form (`0.5`, `0.62`,
-    /// `0.3333333333333333`) so a value survives write→reload
-    /// exactly. Non-finite values fall back to `0`.
+    /// Formats numbers with minimal round-trippable precision.
     static func number(_ value: Double) -> String {
         guard value.isFinite else { return "0" }
         if value.rounded() == value && abs(value) < 1e15 {
@@ -25,7 +20,7 @@ enum LuaLiteral {
         value ? "true" : "false"
     }
 
-    /// A double-quoted, escaped Lua string.
+    /// Returns double-quoted escaped Lua string literal.
     static func string(_ value: String) -> String {
         var escaped = ""
         for character in value {
@@ -41,12 +36,7 @@ enum LuaLiteral {
         return "\"" + escaped + "\""
     }
 
-    /// The exact inverse of `string(_:)`: the value inside a
-    /// canonical quoted literal, or nil when `literal` is not
-    /// in the form this writer emits (unquoted, an escape this
-    /// writer never authors, a dangling backslash). Strict on
-    /// purpose — callers use it to recognize *generated* Lua
-    /// (#92), never to parse arbitrary hand-written source.
+    /// Inverse of string(_:) recognizing canonical quoted literals (#92).
     static func parseString(_ literal: String) -> String? {
         guard literal.count >= 2, literal.hasPrefix("\""),
             literal.hasSuffix("\"")

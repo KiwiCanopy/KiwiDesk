@@ -10,10 +10,11 @@ fileprivate typealias SkyLightNotifyProc =
         UnsafeMutableRawPointer?
     ) -> Void
 
-/// Process-lifetime WindowServer notification pump for focus borders
-/// (#285 Tier 2). Registration has no reliable public unregister seam,
-/// so callbacks never retain a `BorderManager`; the current manager is
-/// a weak sink that can be replaced after an in-process stop/start.
+/// Process-lifetime WindowServer notification pump for focus
+/// borders (#285 Tier 2). Registration has no reliable public
+/// unregister seam, so callbacks never retain a `BorderManager`;
+/// the current manager is a weak sink replaceable after an
+/// in-process stop/start.
 @MainActor
 final class SkyLightWindowEvents {
     enum Kind: UInt32, CaseIterable {
@@ -38,9 +39,9 @@ final class SkyLightWindowEvents {
             }
         }
 
-        /// Geometry events (a move/resize burst) coalesce with an
-        /// adjacent one for the same window; control events never
-        /// do, so their order against geometry is preserved.
+        /// Geometry events coalesce with an adjacent one for the
+        /// same window; control events never do, so their order
+        /// against geometry is preserved.
         var isGeometry: Bool {
             self == .move || self == .resize
         }
@@ -175,13 +176,10 @@ final class SkyLightWindowEvents {
         self.manager = manager
     }
 
-    /// Requests notifications for these target windows. This private
-    /// API's replacement-vs-additive semantics are undocumented;
-    /// `lastRequested` only suppresses an identical repeat. If it is
-    /// additive, stale deliveries continue but the manager drops any
-    /// window it no longer watches (no overlay and not sticky-tracked
-    /// — see `handleSkyLightEvent`). An empty request is therefore a
-    /// best-effort clear, not a teardown guarantee.
+    /// Requests notifications for these windows. The private API's
+    /// replacement-vs-additive semantics are undocumented; stale
+    /// deliveries are dropped by the manager, and an empty request
+    /// is a best-effort clear, not a teardown guarantee.
     func watch(_ windows: Set<WindowID>) -> Bool {
         if lastRequested == windows { return true }
         guard let request = Self.requestNotifications else {

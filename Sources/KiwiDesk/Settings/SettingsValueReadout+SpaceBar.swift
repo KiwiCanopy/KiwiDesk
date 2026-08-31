@@ -1,14 +1,7 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Space Bar rows: every key narrates the one `SpaceBarStyle`
-/// field its census id names. Enum-valued rows reuse the option
-/// labels the Bars editor renders (`AppBarOptions` — the Space
-/// Bar's own pickers already read those lists), the
-/// auto-sentinel size sliders read "Automatic" at 0 the way the
-/// GUI's slider readout does, and a colour shows its stored hex
-/// verbatim. The copy-appearance action stores nothing, so it
-/// draws no row.
+/// Diff row readout generators for SpaceBarStyle census keys.
 extension SettingsValueReadout {
     static func spaceBarRows(
         _ key: SpaceBarKey,
@@ -164,8 +157,6 @@ extension SettingsValueReadout {
     }
 }
 
-// MARK: - Space Bar row shapes
-
 extension SettingsValueReadout {
     private static func spaceBarRow(
         _ census: SettingKey,
@@ -198,8 +189,7 @@ extension SettingsValueReadout {
         spaceBarRow(census, points(old), points(new))
     }
 
-    /// `0` is the stored auto sentinel on the size sliders —
-    /// the shared `autoPoints` reads "Automatic" there.
+    /// Readout for size sliders with 0 as Automatic sentinel.
     private static func spaceBarAutoPointsRow(
         _ census: SettingKey,
         _ old: CGFloat,
@@ -221,9 +211,7 @@ extension SettingsValueReadout {
         )
     }
 
-    /// The label the Bars editor's own option list renders for
-    /// this value; the fallback is unreachable while those lists
-    /// stay exhaustive (their own docs hold them to it).
+    /// Resolves display label from options list.
     private static func spaceBarChoice<T: Equatable>(
         _ value: T,
         _ options: [(T, String)]
@@ -232,8 +220,7 @@ extension SettingsValueReadout {
             ?? String(describing: value)
     }
 
-    /// "1.5 s" — the spring-delay readout unit (`SecondsRow`
-    /// prints seconds at one decimal, so this matches it).
+    /// Formats seconds with one decimal place.
     private static func spaceBarSeconds(_ ms: Int) -> String {
         L(
             "diff.value.seconds",

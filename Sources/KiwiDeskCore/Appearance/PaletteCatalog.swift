@@ -1,22 +1,16 @@
 import Foundation
 
-/// The built-in palettes (#375). "Kiwi (Default)" is derived from
-/// the shipped struct defaults at load — so it always equals a
-/// reset-to-default and never drifts from the real defaults — then
-/// the eight authored palettes come from the bundled resource. The
-/// user-saved palettes live in `PaletteStore`, not here.
+/// Built-in and default color palette provider (#375). The default
+/// is DERIVED from the shipped struct defaults at load, so it
+/// always equals reset-to-default and cannot drift.
 public enum PaletteCatalog {
     /// The name of the always-present default palette.
     public static let defaultName = "Kiwi (Default)"
 
-    /// The neon showcase palette (#358 follow-up). It is color-only
-    /// like every other bundled palette — it does **not** switch the
-    /// focus-ring glow on (that name-check side-effect was retracted
-    /// in #578: it stuck on, being uncleared by later color-only
-    /// palettes). The GUI keys the Neon swatch's "pair with Glow"
-    /// link on this name instead. Must match its `name` in
-    /// `bundled.json`; `ColorPaletteTests` guards that the entry
-    /// exists.
+    /// Neon showcase palette name (#358) — color-only like every
+    /// palette; the glow pairing is a GUI link keyed on this name,
+    /// never a side-effect (#578). Must match `bundled.json`
+    /// (`ColorPaletteTests`).
     public static let neonName = "Kiwi Neon"
 
     /// All nine built-ins, default first.

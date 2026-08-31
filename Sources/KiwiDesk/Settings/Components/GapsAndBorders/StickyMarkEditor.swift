@@ -1,20 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// This Profile ▸ Gaps & Borders ▸ Sticky windows (#414): the
-/// on-window mark's toggle. Sits below the focus border — the
-/// mark is its overlay sibling.
-///
-/// The toggle stands alone: it carries no gate on the Space Bar.
-/// The greying it used to carry asserted a dependency that runs
-/// the wrong way — the mark paints on the window, so it is
-/// exactly what SURVIVES the bar going off. What the greying was
-/// reaching for is timeless rather than live, so it belongs in
-/// the row's `?` help (`docs/ui-patterns.md` ▸ Help &
-/// cross-references, "A concept goes in the `?`"). Why the gate
-/// went, and why no softer warning replaced it, is argued in
-/// `docs/design-decisions.md` under "Sticky has no native cue".
-/// `StickyMarkUngatedTests` is what keeps it ungated.
+/// Sticky window mark settings editor (#414). Deliberately ungated
+/// on the Space Bar — the mark survives the bar going off;
+/// `StickyMarkUngatedTests` keeps it ungated.
 struct StickyMarkEditor: View {
     @ObservedObject var model: SettingsModel
 

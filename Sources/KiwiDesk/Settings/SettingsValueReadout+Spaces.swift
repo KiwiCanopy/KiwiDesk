@@ -1,9 +1,6 @@
 import KiwiDeskCore
 
-/// Spaces rows: the space list itself, the per-space
-/// assignments (mode, icon), the fallback designation, and the
-/// three action keys — which name no model path, so the draft
-/// diff never attributes a change to them.
+/// Spaces settings diff readout rows for SettingsValueReadout.
 extension SettingsValueReadout {
     static func spacesRows(
         _ key: SpacesKey,
@@ -34,17 +31,13 @@ extension SettingsValueReadout {
             ]
         case .spaceOverrideResetActive, .spaceOverrideResetAll,
             .spacesDelete:
-            // Actions: "(action)" ids are skipped by
-            // `SettingsDraftDiff.censusBases()`, so no change
-            // ever resolves to them — nothing to narrate.
+            // "(action)" ids are skipped by `censusBases()` — no
+            // change ever resolves to them.
             return []
         }
     }
 
-    /// The list's own story is structural: one Added/Removed
-    /// note per space that joined or left, and one Edited note
-    /// for a pure reorder (same members, new order) — a scalar
-    /// pair cannot state a permutation.
+    /// Structural diff rows for spaces list changes.
     private static func spacesListRows(
         _ census: SettingKey,
         old: GuiConfig,
@@ -82,11 +75,7 @@ extension SettingsValueReadout {
         return rows
     }
 
-    /// A rename keeps the count and the position
-    /// (`GuiConfig.renameSpace` maps in place), so the pairs
-    /// read positionally: old name → new name. Adds and removes
-    /// are `spaceList`'s story, so a count change leaves nothing
-    /// for this key to say.
+    /// Diff rows for space renames (`GuiConfig.renameSpace`).
     private static func spacesRenameRows(
         _ census: SettingKey,
         old: GuiConfig,
@@ -109,10 +98,8 @@ extension SettingsValueReadout {
             }
     }
 
-    /// Absent means the default `bsp` (the writer strips it —
-    /// `SpacesSection.modeBinding`), so both sides resolve
-    /// before comparing and a row always narrates two mode
-    /// names, never a bare unset.
+    /// Diff rows for space layout mode assignments
+    /// (`SpacesSection.modeBinding`).
     private static func spacesModeRows(
         _ census: SettingKey,
         old: GuiConfig,
@@ -137,9 +124,7 @@ extension SettingsValueReadout {
         }
     }
 
-    /// The icon is its own display (an SF Symbol name, an emoji
-    /// or a single character — #68's grammar), so the value is
-    /// shown verbatim; a cleared entry reads as unset.
+    /// Diff rows for space icon assignments (#68).
     private static func spacesIconRows(
         _ census: SettingKey,
         old: GuiConfig,

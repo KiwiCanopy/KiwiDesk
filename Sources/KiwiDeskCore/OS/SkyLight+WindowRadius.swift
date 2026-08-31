@@ -1,14 +1,7 @@
 import CoreFoundation
 import CoreGraphics
 
-/// Per-window corner-radius query for the focus border (#357). The
-/// ring's rounded corners must match the *actual* radius of each
-/// window, not a fixed guess — a mismatch leaves a visible gap where
-/// our arc and the window's corner diverge. JankyBorders reads the
-/// radius the same way (`SLSWindowQueryWindows` →
-/// `SLSWindowIteratorGetCornerRadii`), falling back to a default when
-/// the window reports none. Every symbol is optional; a failed lookup
-/// falls back to `GeometryUtils.systemWindowCornerRadius`.
+/// Window corner radius dynamic query via SkyLight SPI (#357).
 extension SkyLight {
     typealias WindowQueryWindowsFn =
         @convention(c) (
@@ -46,11 +39,10 @@ extension SkyLight {
             as: IteratorGetCornerRadiiFn.self
         )
 
-    /// The corner radius (pt) SkyLight reports for `wid`, or `nil`
-    /// when unavailable (symbol missing, window not found, or a
-    /// non-positive radius — matching JankyBorders' "> 0" gate). The
-    /// caller substitutes the shared default so a failed query never
-    /// blocks a ring.
+    /// Queries window corner radius via SkyLight (#357), or nil
+    /// if unavailable — the caller substitutes
+    /// `GeometryUtils.systemWindowCornerRadius` so a failed query
+    /// never blocks a ring.
     static func windowCornerRadius(_ wid: CGWindowID) -> CGFloat? {
         guard let connection,
             let queryWindows = windowQueryWindows,
@@ -66,12 +58,8 @@ extension SkyLight {
         else { return nil }
         let targets = [number] as CFArray
 
-        // `takeRetainedValue` on all three: despite the `…Get…` name,
-        // `SLSWindowIteratorGetCornerRadii` returns an **owned** (+1)
-        // array — JankyBorders `CFRelease`s it (`windows.c`), and it is
-        // too widely deployed for that to be an over-release. So one
-        // release (ARC at scope end) is the correct balance; do NOT
-        // switch this to `takeUnretainedValue` — that would leak.
+        // `takeRetainedValue` matches SLS +1 returned ownership;
+        // do not switch to unretained.
         guard
             let query = queryWindows(connection, targets, 0)?
                 .takeRetainedValue(),
@@ -81,8 +69,6 @@ extension SkyLight {
             CFArrayGetCount(radiiRef) > 0
         else { return nil }
 
-        // Radii are whole points (10/12/16 …); JankyBorders reads them
-        // as `sInt32` the same way.
         let first = unsafeBitCast(
             CFArrayGetValueAtIndex(radiiRef, 0),
             to: CFNumber.self

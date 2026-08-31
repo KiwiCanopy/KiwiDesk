@@ -1,25 +1,11 @@
 import CoreGraphics
 
 extension Navigation {
-    /// The windows sharing the focused window's overflow cascade
-    /// (an `OverlapStack` pile), excluding the focused window
-    /// itself; empty when it is not in a pile.
-    ///
-    /// Piles are read from geometry, so the one detector serves
-    /// every geometric layout (grid, stack, bsp) and feeds the
-    /// track layout's array-order skip alike (#172). A layout's
-    /// tiled slots are disjoint — gaps hold them apart — but a
-    /// cascade's members overlap heavily (the 40 pt offset is far
-    /// under any window's min size). Slots are grouped into
-    /// connected components of *significant* overlap; the focused
-    /// window's component is its pile. A singleton component (the
-    /// normal tiled case) yields the empty set, so a caller that
-    /// filters on it is a no-op unless a real cascade exists.
-    ///
-    /// Connected components, not pairwise overlap: a deep pile's
-    /// first and last members need not overlap directly, but each
-    /// overlaps its neighbor, so the chain still binds them into
-    /// one component.
+    /// Returns windows sharing the focused window's overlap pile,
+    /// read from GEOMETRY so one detector serves every layout
+    /// (#172). Connected components of significant overlap, not
+    /// pairwise: a deep pile's ends need not overlap directly. A
+    /// singleton component yields the empty set.
     public static func pileMates(
         of focused: WindowID,
         among slots: [(id: WindowID, frame: CGRect)]
@@ -40,10 +26,10 @@ extension Navigation {
         return component
     }
 
-    /// Whether two slots overlap enough to be cascade-mates: a
-    /// quarter of the smaller slot's area. Tiled slots never
-    /// overlap (they clear this at 0); cascade members clear it
-    /// easily (consecutive members share all but a 40 pt sliver).
+    /// Cascade-mates overlap by ≥ a quarter of the smaller
+    /// slot's area: tiled slots never overlap (0), cascade
+    /// members share all but a 40 pt sliver — both clear it with
+    /// margin.
     private static func piled(_ a: CGRect, _ b: CGRect) -> Bool {
         let intersection = a.intersection(b)
         guard !intersection.isNull else { return false }

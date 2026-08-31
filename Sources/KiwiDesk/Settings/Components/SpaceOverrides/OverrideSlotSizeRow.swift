@@ -1,25 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The one per-space override that is a *pair* of rows, not one
-/// (#290): the scrolling slot size is a unit picker plus its value
-/// control, but a single `ScrollSize?` — so one inherit checkbox
-/// owns both. `OverrideChrome(alignment: .top)` wraps the two-row
-/// `VStack` as its content, so the accent bar and dim state span
-/// the pair and the checkbox lines up with the first row. The rows
-/// themselves are the shared `SlotSizeRows` bound through
-/// `overrideValue`, so inherit shows the resolved global value and
-/// checking seeds it (no jump) — the same seam every other
-/// override row uses, no hand-rolled copy to drift (§5).
+/// Override row pair for scrolling slot size settings (#239, #290, #291).
 struct OverrideSlotSizeRow: View {
     @ObservedObject var model: SettingsModel
-    /// Effective scroll orientation for the space, so the value
-    /// row reads "Column width" horizontally / "Row height"
-    /// vertically off the resolved orientation (#239 pattern).
+    /// Resolved scroll orientation, so the value row reads
+    /// "Column width" / "Row height" off the effective axis (#239).
     let isVertical: Bool
     @Binding var value: ScrollSize?
-    /// The inherited value shown while unchecked and seeded on
-    /// check — the space's resolved (effective) slot size.
+    /// Resolved value shown while unchecked and seeded on check,
+    /// so checking never jumps.
     let global: ScrollSize
 
     var body: some View {

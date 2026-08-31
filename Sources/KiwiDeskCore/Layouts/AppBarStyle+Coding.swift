@@ -1,29 +1,14 @@
 import CoreGraphics
 import Foundation
 
-/// `AppBarStyle`'s wire form, split out of the type's own file at
-/// the 350-line ceiling (AGENTS.md §2.1) — the same arrangement
-/// `SpaceBarStyle+Coding.swift` already carries, and for the same
-/// reason.
-///
-/// The `Codable` conformance deliberately stays in
-/// `AppBarStyle.swift`: Swift only synthesizes `encode(to:)`
-/// where the conformance sits, so keeping it there leaves encode
-/// generated rather than hand-written — one fewer field list to
-/// forget. It is NOT a guarantee that a new stored property
-/// reaches the wire: a property absent from `CodingKeys` below
-/// is silently not encoded, with no error. `AppBarParityTests`
-/// (reflection over `CodingKeys.allCases` against the struct's
-/// fields) is the actual net for that.
-///
-/// Sparse by design — every field falls back to `defaults`, so a
-/// profile written before a field existed still loads.
+/// AppBarStyle Decodable implementation and CodingKeys. The
+/// `Codable` conformance stays in `AppBarStyle.swift` so encode
+/// is synthesized there; a property absent from `CodingKeys` is
+/// silently not encoded — `AppBarParityTests` is the net.
 extension AppBarStyle {
-    /// JSON keys are the Lua setters (`app_bar.set_*`) minus the
-    /// `set_` verb — the `app_bar` nesting carries the namespace.
-    /// `CaseIterable` is load-bearing: the parity test
-    /// (`AppBarParityTests`) reflects over `allCases` to prove
-    /// every field has a key — do not drop it as "unused".
+    /// JSON keys are the Lua setters minus `set_`. `CaseIterable`
+    /// is load-bearing — `AppBarParityTests` reflects over
+    /// `allCases`; do not drop it as "unused".
     enum CodingKeys: String, CodingKey, CaseIterable {
         case edge
         case alignment
@@ -51,8 +36,7 @@ extension AppBarStyle {
         case groupBadgeTextColor = "group_badge_text_color"
     }
 
-    /// Manual decoding: profiles saved before a field existed
-    /// must keep loading (missing keys fall back to defaults).
+    /// Decodes AppBarStyle falling back to defaults for missing keys.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self

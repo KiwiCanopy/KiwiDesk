@@ -1,16 +1,9 @@
 import SwiftUI
 
-/// Link-like hover affordance for controls that don't look
-/// like buttons (the make-default link, the rename pencil):
-/// the pointing-hand cursor plus a secondary→primary color
-/// lift while the mouse is over the view. Cursor changes use
-/// `set()`, never push/pop: both call sites can remove
-/// themselves from the hierarchy mid-hover (make-default
-/// drops its own link, rename rebuilds the row identity) and
-/// a removed view never delivers the balancing
-/// `onHover(false)` — the imbalance the spaces drag handle
-/// fixed the same way. `onDisappear` restores the arrow when
-/// the view vanishes under the pointer.
+/// Hover affordance applying pointing-hand cursor and color lift.
+/// Cursor via `set()`, never push/pop: both call sites can leave
+/// the hierarchy mid-hover and a removed view never delivers the
+/// balancing `onHover(false)`; `onDisappear` restores the arrow.
 private struct LinkHover: ViewModifier {
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion)
@@ -23,8 +16,7 @@ private struct LinkHover: ViewModifier {
                     ? AnyShapeStyle(.primary)
                     : AnyShapeStyle(.secondary)
             )
-            // The colour lift IS the affordance and stays; only
-            // the cross-fade to it stands down (#1069).
+            // Color lift is preserved; fade respects reduceMotion (#1069).
             .animation(
                 reduceMotion ? nil : .easeOut(duration: 0.12),
                 value: hovering
@@ -40,10 +32,8 @@ private struct LinkHover: ViewModifier {
     }
 }
 
-/// Pointing-hand cursor on hover *without* the link color
-/// lift — for clickable controls that aren't text (the color
-/// swatch). Same `set()` + `onDisappear` discipline as
-/// `LinkHover`, so a view removed mid-hover restores the arrow.
+/// Pointing-hand cursor on hover without color lift — same `set()`
+/// + `onDisappear` discipline as `LinkHover`.
 private struct PointingHandCursor: ViewModifier {
     @State private var hovering = false
 

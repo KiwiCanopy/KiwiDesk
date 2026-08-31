@@ -1,26 +1,14 @@
 import Foundation
 
-/// Reconstructs the GUI's `[KeyLayer]` from the live keybindings
-/// (#4). Each bound `(KeyCombo, ref)` becomes a row: the combo is
-/// formatted back to its canonical string, and the action text is
-/// recovered from the source file via `debug.getinfo`'s line
-/// range (`LuaBindingBody`).
-///
-/// Every recovered row is emitted as `.custom` holding the raw
-/// body; the GUI upgrades exact catalog matches to
-/// `.navigation`/`.application` afterwards, since only the GUI
-/// knows that catalog. A row whose action cannot be recovered is
-/// dropped rather than emitted with an empty body — an empty body
+/// Reconstructs `[KeyLayer]` from live keybindings
+/// (`LuaBindingBody`, #4). A row whose action cannot be recovered
+/// is DROPPED, never emitted with an empty body — an empty body
 /// would overwrite a working binding with a no-op on the next
-/// save. Combos alone are never enough (issue #4).
-///
-/// `@MainActor`: reads the main-actor `LuaInterpreter` and
-/// `KeybindingManager`, matching its only caller,
-/// `KiwiCore.recoverKeybindings`.
+/// save.
 @MainActor
 enum KeybindingImporter {
-    /// Builds layers from `manager`, reading each binding's source
-    /// through `interpreter` and `readFile` (path → contents).
+    /// Builds layers from manager reading binding source bodies
+    /// (`KiwiCore.recoverKeybindings`).
     static func layers(
         from manager: KeybindingManager,
         interpreter: LuaInterpreter,

@@ -1,14 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// `TrackSchematic`'s far-edge overflow track, split out to keep
-/// the schematic itself under the file ceiling — the pile's
-/// geometry is self-contained and nothing else in the strip reads
-/// it.
+/// Overflow track layout and slot geometry for TrackSchematic.
 extension TrackSchematic {
-    /// The far-edge overflow track: an always-vertical title-bar
-    /// pile. `cascade_all` piles every window; `cascade_overflow`
-    /// keeps the first tiled and piles the rest.
+    /// Renders cascade or overflow pile in far-edge track.
     var overflowTrack: some View {
         GeometryReader { geo in
             let slots = overflowSlots(geo.size)

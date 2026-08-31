@@ -1,10 +1,6 @@
 import KiwiDeskCore
 
-/// App Rules rows. The app→space map narrates per app as
-/// "— → Mail"-style value pairs of space names; the two rule
-/// lists (float, ignore) narrate membership as structural
-/// notes per entry, the instance being the entry exactly as
-/// stored.
+/// App Rules settings diff readout rows for SettingsValueReadout.
 extension SettingsValueReadout {
     static func appRulesRows(
         _ key: AppRulesKey,
@@ -27,12 +23,9 @@ extension SettingsValueReadout {
                 new: new.floatRules
             )
         case .floatRulesPattern:
-            // The pattern facet edits entries of
-            // `config.floatRules` — a `[String]` has no
-            // `.pattern` leaf for the walk to book, so changes
-            // land on the list key above. Narrating the same
-            // membership diff keeps this key total; the rows
-            // carry the list key's label as their base.
+            // A `[String]` has no `.pattern` leaf for the walk to
+            // book — changes land on the list key; narrating the
+            // same membership diff keeps this key total.
             return appRulesListNotes(
                 census,
                 base: label(
@@ -52,14 +45,12 @@ extension SettingsValueReadout {
                 new: new.ignoreRules
             )
         case .appRulesAdd, .appRulesDelete:
-            // no model path — never booked by the diff
+            // No model path — never booked by the diff.
             return []
         }
     }
 
-    /// One value-pair row per re-ruled app: the space it opens
-    /// in, with the unset dash where the rule appeared or was
-    /// removed.
+    /// Diff rows for application space routing map changes.
     private static func appRulesSpaceRows(
         _ census: SettingKey,
         old: [String: SpaceID],

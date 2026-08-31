@@ -1,18 +1,9 @@
 import Foundation
 
-/// Per-space overrides of `StackParams` (issue #17). Every field
-/// is an *optional* mirror of the global stack params: nil
-/// inherits the global value (gray in the GUI), a value overrides
-/// just that field for one space (black). Stored sparsely under
-/// `layout.stack.override[space_id]` and resolved with
-/// `resolved(onto:)` — the same optional-mirror shape as
-/// `LayoutAppBar`, but keyed by space instead of by layout.
-///
-/// Mirror-parity is guarded by a reflection-based test
-/// (`StackOverrideTests`) per AGENTS.md §5: adding a user-tunable
-/// field to `StackParams` without mirroring it here turns that
-/// test red. `newWindowPlacement` is excluded (it already has a
-/// per-space override via `new_window_placement_override`).
+/// Per-space overrides of StackParams: optional mirror, nil
+/// inherits (`StackOverrideTests`, #17). `newWindowPlacement` is
+/// excluded — it has its own per-space override via
+/// `new_window_placement_override`.
 public struct StackOverride: Sendable, Equatable {
     public var masterCount: Int?
     public var masterRatio: Double?
@@ -22,8 +13,7 @@ public struct StackOverride: Sendable, Equatable {
 
     public init() {}
 
-    /// `global` (the layout's own params) with every non-nil
-    /// override applied on top, per field.
+    /// Merges overrides onto global StackParams.
     public func resolved(onto global: StackParams) -> StackParams {
         var out = global
         if let masterCount { out.masterCount = masterCount }
@@ -33,13 +23,13 @@ public struct StackOverride: Sendable, Equatable {
             out.masterOrientation = masterOrientation
         }
         if let stackPosition { out.stackPosition = stackPosition }
-        // Merged params hold no override map (see ScrollingOverride).
+        // Merged params hold no override map (see
+        // ScrollingOverride).
         out.override = [:]
         return out
     }
 
-    /// True when no field is set — a fully-inherited space needs
-    /// no stored override (drives sparse encoding).
+    /// True when no field is set (drives sparse encoding).
     public var isEmpty: Bool {
         masterCount == nil && masterRatio == nil
             && overflowStyle == nil && masterOrientation == nil
@@ -47,12 +37,7 @@ public struct StackOverride: Sendable, Equatable {
     }
 }
 
-// MARK: - Codable
-
 extension StackOverride: Codable {
-    /// Same JSON spelling as the `StackParams` fields (the
-    /// `stack.set_*` setters). Only set overrides are written;
-    /// inherited fields stay absent.
     enum CodingKeys: String, CodingKey {
         case masterCount = "master_count"
         case masterRatio = "master_ratio"

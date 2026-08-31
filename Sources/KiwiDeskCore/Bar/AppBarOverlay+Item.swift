@@ -1,33 +1,17 @@
 import AppKit
 
-/// One App Bar entry as the driver hands it over. Split from
-/// AppBarOverlay.swift, which sat on the §2.1 file ceiling.
-///
-/// The overlay is a dumb renderer: everything here is already
-/// RESOLVED — the glyph picked over the image (#294), and the
-/// drawn text picked over the app name and capped
-/// (`KiwiCore.barItemText`). Nothing in the render pass decides
-/// what an item says.
+/// Rendered item payload for AppBarOverlay (`KiwiCore.barItemText`, #294).
 extension AppBarOverlay {
     public struct Item {
         public let id: WindowID
-        /// The app's name, used for VoiceOver accessible name
-        /// generation (#901).
+        /// App name for VoiceOver accessibility labeling (#901).
         public let name: String
-        /// The string the item actually draws under a
-        /// text-bearing `Content`: the window's title, already
-        /// capped, with the app name standing in for a collapsed
-        /// group or an empty title. Resolved by the driver
-        /// (`KiwiCore.barItemText`) so the overlay stays a dumb
-        /// renderer, exactly like `glyph`.
+        /// Display text resolved by driver (`KiwiCore.barItemText`).
         public let text: String
         public let icon: NSImage?
-        /// SketchyBar App Font ligature to render instead of
-        /// `icon` (#294); nil = native image. Resolved by the
-        /// driver so the overlay stays a dumb renderer.
+        /// App Font ligature to render instead of icon (#294).
         public let glyph: String?
-        /// Windows behind this item; > 1 for a group of
-        /// adjacent same-app windows (shown as a badge).
+        /// Grouped window count shown as badge.
         public let count: Int
 
         public init(

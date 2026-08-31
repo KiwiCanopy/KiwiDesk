@@ -1,22 +1,21 @@
 import Foundation
 
 /// The single space→display precedence (#36): explicit pin →
-/// Main role → the positional default's plan (#53). Both the
-/// runtime (`resolveSpaceDisplays`) and the GUI Canvas resolve
-/// through this one pure function, so they cannot drift.
+/// Main role → positional plan (#53). Runtime and GUI Canvas
+/// both resolve through this one pure function, so they cannot
+/// drift.
 public enum SpacePlacement {
-    /// How one space's display resolved.
+    /// Resolution result for a space's display placement.
     public enum Resolution: Equatable, Sendable {
-        /// Pinned, and the pinned display is connected.
+        /// Pinned to a connected display.
         case pinned(Display)
         /// Pinned to a disconnected display: placement falls
-        /// back to `fallback`, while the fingerprint (the
-        /// user's intent) is preserved for editing UIs.
+        /// back, the fingerprint (user intent) is preserved for
+        /// editing UIs.
         case pinnedAbsent(intent: String, fallback: Display)
-        /// Main role — follows the current main display.
+        /// Main role following active main display.
         case main(Display)
-        /// The positional default's plan, or main when the
-        /// plan does not cover the space.
+        /// Automatic assignment via positional plan.
         case auto(Display)
 
         /// The display the space effectively lands on.
@@ -31,11 +30,9 @@ public enum SpacePlacement {
         }
     }
 
-    /// Resolves one space. `assignment` is the positional
-    /// default's plan (`ProfileComposition.Composed`'s
-    /// `assignment`), composed once by the caller. Nil only
-    /// when no display is connected — otherwise resolution is
-    /// total.
+    /// Resolves target display for a space
+    /// (`ProfileComposition.Composed`). Nil only when no display
+    /// is connected — otherwise resolution is total.
     public static func resolve(
         space: SpaceID,
         pins: [SpaceID: String],
