@@ -7,7 +7,9 @@ public enum SpaceLuaArg {
         LuaLiteral.string(raw)
     }
 
-    /// Space-targeting Lua function call prefixes with SpaceID arguments.
+    /// Space-targeting Lua call prefixes. Each pattern includes
+    /// the opening paren, so `move_to_space` never matches inside
+    /// `move_to_space_and_follow`.
     static let spaceCalls = [
         "focus_space",
         "move_to_space",
@@ -34,7 +36,10 @@ public enum SpaceLuaArg {
         return nil
     }
 
-    /// Renames SpaceID argument in matching Lua call bodies (#13).
+    /// Renames the SpaceID argument in matching Lua call bodies
+    /// (#13). Only the exact quoted form the catalog emits is
+    /// rewritten — a hand-written bare-number arg stays untouched,
+    /// consistent with such Lua being outside GUI management.
     public static func rename(
         in lua: String,
         from: String,

@@ -27,8 +27,11 @@ extension KeyLayer {
         sanitized(layers)
     }
 
-    /// Sanitizes layer names, deduplicates, and strips icons from default
-    /// layer (#28, #55).
+    /// Sanitizes layer names, deduplicates (FIRST occurrence
+    /// wins — layer identity is the name, deliberately unlike
+    /// combos WITHIN a layer, which are last-wins at
+    /// registration), and strips icons from the default layer
+    /// (#28, #55).
     private static func sanitized(
         _ layers: [KeyLayer]
     ) -> [KeyLayer] {

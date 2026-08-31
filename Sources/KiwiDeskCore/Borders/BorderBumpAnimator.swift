@@ -14,6 +14,10 @@ final class BorderBumpAnimator {
     }
 
     private var active: [WindowID: Active] = [:]
+    // One driver per monitor, the AnimationEngine discipline: a
+    // monitor may hold both drivers at once — each ticks at the
+    // display's own rate, neither is a global timer, so the
+    // one-DisplayLink-per-monitor guardrail holds in intent.
     private var drivers: [DisplayID: DisplayLinkDriver] = [:]
 
     private static let rmDuration: TimeInterval = 0.3
@@ -34,6 +38,8 @@ final class BorderBumpAnimator {
             return
         }
         if var existing = active[window] {
+            // Retarget in place rather than stacking a second
+            // animation, so key-repeat reads as one held press.
             existing.bump.reimpulse(offset: impulse)
             existing.rmElapsed = 0
             active[window] = existing
@@ -53,8 +59,10 @@ final class BorderBumpAnimator {
         startDriver(for: display, screen: screen)
     }
 
-    /// Cancels and flushes all active bump animations
-    /// (`BorderManager.clear()`).
+    /// Cancels and flushes all active bumps
+    /// (`BorderManager.clear()`, display change): a bump's monitor
+    /// may have vanished, and its DisplayLink would otherwise stop
+    /// ticking mid-flight and leak the entry.
     func flushAll() {
         for a in active.values {
             a.overlay?.renderBump(offset: .zero)

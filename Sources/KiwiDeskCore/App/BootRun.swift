@@ -9,7 +9,12 @@ final class BootRun {
 
     private(set) var phase: BootPhase = .idle
 
-    /// Latch indicating whether this launch finished booting.
+    /// Latch indicating whether this launch finished booting — a
+    /// LATCH, not a reading of `phase`: `stop()` publishes
+    /// `.idle`, so a second stop (quit after a mid-boot permission
+    /// revoke) would look "not starting" and write the fraction of
+    /// a desk the interrupted scan collected over the preserved
+    /// session (code review 2026-08-12).
     var reachedReady = false
 
     /// Signpost interval state for boot duration reporting (#672).

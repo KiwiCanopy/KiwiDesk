@@ -1,8 +1,12 @@
 import Foundation
 
 extension StateCoordinator {
-    /// Floating window candidate list for directional focus on space
-    /// (#300, #445, #488).
+    /// Floating window candidates for directional focus (#488).
+    /// Deliberately a FILTER over `effectiveMembers`, never a
+    /// third open-coded copy of its membership rules (§5): a
+    /// membership change there reaches focus reachability for
+    /// free. Never candidates: transient overlays (#300) and
+    /// native-fullscreen windows (#445).
     public func floatingFocusCandidates(
         of space: Space,
         activeSpace: SpaceID? = nil

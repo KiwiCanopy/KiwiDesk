@@ -16,7 +16,10 @@ struct LiveApplyFeedback: Equatable {
     let id = UUID()
 }
 
-/// Runtime session tracking live recorded shortcut mutations.
+/// Recorder-only runtime state. `layers` starts at the clean
+/// Settings baseline and receives combo mutations ONLY, so
+/// staged Lua/app/mode edits cannot hitchhike live; the snapshot
+/// is the disk-independent Revert fallback.
 struct RecorderLiveSession {
     var layers: [KeyLayer]
     let snapshot: LiveKeybindingSnapshot
@@ -114,6 +117,9 @@ extension SettingsModel {
                 L("footer.revert", "Revert")
             )
         case .failure(.superseded):
+            // A newer load already replaced the VM/hotkeys; its
+            // ownership is authoritative — retire the stale
+            // session without replaying old callbacks.
             liveKeySession = nil
         case .failure:
             profileWarning = L(

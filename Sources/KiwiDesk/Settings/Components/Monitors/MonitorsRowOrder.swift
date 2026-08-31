@@ -26,7 +26,12 @@ enum MonitorsRowOrder {
         .monitorFingerprints: monitorFingerprints,
     ]
 
-    /// Containers rendered with custom views rather than generic ForEach.
+    /// Containers rendered as bespoke views — here stronger than
+    /// "hand-drawn": the placement container is a PICTURE whose
+    /// rows are positioned by the real display arrangement, so
+    /// there is no reading order for a `ForEach` to walk. Editing
+    /// a list moves nothing on screen; a container that becomes a
+    /// real `ForEach` leaves this set in the same change.
     static let bespokeContainers: Set<SettingsContainer> = [
         .spacePlacement,
         .pinnedToDisconnectedMonitors,

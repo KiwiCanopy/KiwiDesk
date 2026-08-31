@@ -1,13 +1,19 @@
 import AppKit
 
-/// Resolves app icon glyph ligatures from vendored font map
-/// (`BarAppIconSource`, #293, #294).
+/// Resolves app icon glyph ligatures from the vendored font map
+/// (`BarAppIconSource`, #293, #294). Keyed on app DISPLAY names:
+/// every consumer must feed the same name family (the bar passes
+/// `window.appName`, the panel its row label) — diverge and the
+/// surfaces show different symbols.
 @MainActor
 public final class AppFontResolver {
     /// Injectable for tests; defaults to bundled map.
     private let loader: @Sendable () -> [String: String]?
 
-    /// Callback fired once background map loading completes (`KiwiCore`).
+    /// Callback fired once map loading completes. Owner-only,
+    /// single slot: `KiwiCore` sets it and fans out to every
+    /// surface needing a refresh — never reassign from a
+    /// consumer.
     public var onLoad: @MainActor () -> Void = {}
 
     private var map: [String: String]?
@@ -48,6 +54,9 @@ public final class AppFontResolver {
         guard source == .appFont, AppFont.registered else {
             return nil
         }
+        // Empty ligatures are rejected HERE so no item view ever
+        // needs its own blank-glyph guard — this is the gate, the
+        // loader's dropping of degenerate entries is only hygiene.
         return map?[name].flatMap {
             $0.isEmpty ? nil : $0
         }

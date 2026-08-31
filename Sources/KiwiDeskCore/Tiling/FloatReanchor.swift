@@ -3,8 +3,11 @@ import CoreGraphics
 /// Proportional re-anchoring for floating windows crossing displays
 /// (`FloatNudge`, #444).
 public enum FloatReanchor {
-    /// Determines if window crossing to target mode requires re-anchoring
-    /// (`LayoutMode`, #498).
+    /// Determines if a crossing window needs the re-anchor
+    /// (#498): every float-flagged window, and ANY window bound
+    /// for a floating-MODE space — there the layout assigns no
+    /// frames, so "the retile delivers" never happens and
+    /// membership alone would leave it on the old display.
     public static func eligible(
         isFloating: Bool,
         targetMode: LayoutMode?

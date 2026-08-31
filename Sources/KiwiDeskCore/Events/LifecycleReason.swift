@@ -11,11 +11,16 @@ public enum WindowGoneReason: String, Sendable {
     case closed
     case minimized
     case vanished
-    /// Window application hid explicitly (⌘H, #913).
+    /// Window application hid explicitly (⌘H, #913). Not produced
+    /// by `classify` — a hide is explicit, like a minimize, so the
+    /// `.windowHidden` event carries it directly.
     case hidden
 
-    /// Classifies window disappearance based on minimize flag and desktop
-    /// switch timing.
+    /// Classifies window disappearance: minimize wins (explicit
+    /// AX notification); a destroy inside the settle window reads
+    /// as vanished. A real close in that window misreads as
+    /// vanished — cosmetic, and the dirty-flag + re-query consumer
+    /// pattern self-heals.
     public static func classify(
         wasMinimized: Bool,
         sinceDesktopSwitch: TimeInterval

@@ -21,6 +21,10 @@ extension SettingsValueReadout {
             .toggleSticky, .toggleDisplaySticky, .showShortcuts,
             .openSettings, .switchToLayer, .openApplications,
             .advanced, .`import`, .restoreDefaults:
+            // No model path — these families' bindings book under
+            // `config.layers`. Restore Defaults is an ACTION whose
+            // effect lands there too: the diff narrates the rows
+            // that moved, never the button that moved them.
             return []
         }
     }
@@ -68,6 +72,9 @@ extension SettingsValueReadout {
                 )
             )
         }
+        // A layer reorder or metadata-only edit moves no combo,
+        // so nothing above narrates it — one edited note keeps the
+        // key total for the readout totality guard.
         if rows.isEmpty, old.layers != new.layers {
             rows.append(
                 .note(

@@ -4,8 +4,13 @@ import SwiftUI
 /// Localized caption and VoiceOver labels for Track layout schematic
 /// (`LayoutSchematicCaptionTests`, #708).
 extension TrackSchematic {
-    /// Localized caption describing track layout behavior
-    /// (`LayoutSchematicCaptionTests`, #708).
+    /// Localized caption — only the clauses the frame actually
+    /// draws (#708, `LayoutSchematicCaptionTests`). Two keys per
+    /// arm rather than one with a `%@` hole: the clause is a whole
+    /// sentence in some locales, and a frame whose argument the
+    /// GUI may render EMPTY has to register in
+    /// `WITHHELD_ARGUMENTS` — a heavier contract than two plain
+    /// sentences.
     var caption: String {
         switch (newWindow, drawsOverflowTrack) {
         case (.ownTrack, true):

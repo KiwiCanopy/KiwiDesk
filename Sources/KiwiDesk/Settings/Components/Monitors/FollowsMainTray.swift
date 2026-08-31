@@ -24,6 +24,10 @@ struct FollowsMainTray: View {
             maxHeight: .infinity,
             alignment: .topLeading
         )
+        // NO plate: the tray is a ROLE, not hardware — the card
+        // fill/radius/stroke made it read as a fourth monitor
+        // hovering above the desk. It carries a wash only while a
+        // drop is over it, the cards' own targeting channel.
         .background(
             RoundedRectangle(cornerRadius: 14)
                 .fill(.tint.opacity(targeted ? 0.2 : 0))

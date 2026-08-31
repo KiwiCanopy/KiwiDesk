@@ -24,7 +24,10 @@ extension StateCoordinator {
         rememberedSpaces[id] = .restored(space)
     }
 
-    /// Clears all remembered space associations (`CGWindowID`, #634).
+    /// Clears all remembered space associations (#634): entries
+    /// for windows that no longer exist are the ids a recycled
+    /// `CGWindowID` can inherit, teleporting an unrelated new
+    /// window into an old space.
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
     }

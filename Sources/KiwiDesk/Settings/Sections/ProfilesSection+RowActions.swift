@@ -22,7 +22,10 @@ extension ProfilesSection {
         }
         .settingsActionButton()
         .controlSize(.large)
-        // Focus return target on dismissal (#816).
+        // The row's return destination (#816): Load is the
+        // always-drawn, non-destructive one — "make default" is
+        // conditional, the name opens a rename, and Delete would
+        // put a destructive action under the next keypress.
         .focused($returningRow, equals: summary.name)
         .help(
             summary.matchesLive

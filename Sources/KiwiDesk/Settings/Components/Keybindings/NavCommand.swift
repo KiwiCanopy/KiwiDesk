@@ -11,8 +11,13 @@ struct NavCommand: Identifiable, Hashable {
     var displayLabel: @MainActor () -> String = { "" }
     /// Contextual help closure for limitation tooltip (`NavRow`, #94, #420).
     var help: (@MainActor () -> String)? = nil
-    /// Explanation of why command action cannot run in current environment
-    /// (`keybindingRowStyle`).
+    /// Why this row's ACTION cannot run right now. Not a disabled
+    /// flag: the row stays fully editable — recording a key for a
+    /// Desktop that is away is exactly what a docked-and-undocked
+    /// user is doing; it dims and says why (`keybindingRowStyle`).
+    /// Excluded from `==`/`hash` with `displayLabel` and `help`:
+    /// identity stays label + Lua + icon, which the import
+    /// classifier and `NavRow`'s keying depend on.
     var unavailable: (@MainActor () -> String)? = nil
     var id: String { lua }
 

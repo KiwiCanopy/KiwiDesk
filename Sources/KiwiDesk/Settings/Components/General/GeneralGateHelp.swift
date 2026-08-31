@@ -20,7 +20,14 @@ enum GeneralGateHelp {
                 "Available only when running the KiwiDesk app."
             )
         case .managedByService:
-            // Command string and control label are interpolated (#818, #1071).
+            // Gated so only someone who already used the CLI sees
+            // it (#1071). The command is an ARGUMENT, not prose:
+            // written into the sentence, `service`/`stop` are
+            // words a translator translates — `english_residue`
+            // proved a correct translation would be DISCARDED by
+            // `merge-keys`, while a translated one yields a
+            // command that does not exist. The switch's label is
+            // interpolated per #818.
             return L(
                 "general.login_item.managed_by_service",
                 "KiwiDesk starts at login as a service, which "

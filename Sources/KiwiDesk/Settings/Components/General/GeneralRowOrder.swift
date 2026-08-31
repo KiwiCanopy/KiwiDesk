@@ -30,8 +30,11 @@ enum GeneralRowOrder {
         .advanced: advanced,
     ]
 
-    /// Containers rendered via bespoke view layouts rather than dynamic
-    /// iteration (`gui.md`).
+    /// Containers rendered as bespoke views: the lists record
+    /// membership for the placement table and search, but editing
+    /// one moves nothing on screen (the edge `gui.md` warns
+    /// about). A container that becomes a real `ForEach` leaves
+    /// this set in the same change.
     static let bespokeContainers: Set<SettingsContainer> = [
         .appliesImmediately,
         .about,

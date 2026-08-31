@@ -39,7 +39,9 @@ enum GlassPlate {
             tint.alphaComponent > 0 ? tint : nil
     }
 
-    /// Embeds view into glass contentView.
+    /// Embeds view as the glass's `contentView` — the supported
+    /// usage (Apple: avoid placing the view behind as a sibling);
+    /// only this makes tint and style actually render.
     @MainActor
     static func setContent(_ view: NSView, _ content: NSView) {
         guard #available(macOS 26, *),
@@ -59,8 +61,11 @@ enum GlassPlate {
         glass.contentView = nil
     }
 
-    /// Checks if glass view currently hosts the content view as its
-    /// contentView.
+    /// Checks if the glass hosts `content` as its `contentView`.
+    /// The reparent decision MUST use this, never
+    /// `content.superview`: `NSGlassEffectView` nests content in
+    /// an internal wrapper, so the superview check is always false
+    /// and the content stays trapped in a hidden glass.
     @MainActor
     static func holds(_ view: NSView, _ content: NSView) -> Bool {
         guard #available(macOS 26, *),

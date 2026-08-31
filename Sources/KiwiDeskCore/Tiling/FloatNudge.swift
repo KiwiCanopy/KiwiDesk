@@ -2,7 +2,10 @@ import CoreGraphics
 
 /// Pure geometry calculations for nudging newly floating windows (#412).
 public enum FloatNudge {
-    /// Maximum nudge distance in points.
+    /// Maximum nudge distance. The magnitude is FIXED, never
+    /// proportional to window size: a size-scaled nudge teleports
+    /// a maximized window and barely moves a tiny one; a window
+    /// near the center tapers to ~0 on its own.
     public static let maxDistance: CGFloat = 24
 
     /// Calculates nudged target frame shifted toward visible center in AX

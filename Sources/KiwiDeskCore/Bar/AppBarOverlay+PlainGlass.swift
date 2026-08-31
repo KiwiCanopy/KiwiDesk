@@ -93,7 +93,11 @@ extension AppBarOverlay {
         }
     }
 
-    /// Spans glass plate over viewport during drag reordering.
+    /// Spans glass plate over the viewport during drag reorder: a
+    /// drag beginning while the plate hugs would split the mover
+    /// (reparented to `itemContainer`) from its reflowing siblings
+    /// still in `glassRun` — pre-empt by entering the span state
+    /// the drag already works in; `render()` re-hugs on drop.
     func spanPlainGlassForDrag() {
         guard let plate = glassPlate, let run = glassRun,
             let span = glassDragSpan,

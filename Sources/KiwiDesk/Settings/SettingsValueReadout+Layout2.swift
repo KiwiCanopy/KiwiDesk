@@ -1,7 +1,11 @@
 import KiwiDeskCore
 
-/// Layout area diff row builders and value formatters
-/// (`SettingsValueReadout`).
+/// Layout area diff row builders and value formatters. Where one
+/// picker owns an option's words, the labeller REUSES that
+/// picker's key verbatim so the diff and the row cannot drift in
+/// any locale. Orientation is the deliberate exception: TWO
+/// picker families spell it, so one diff key cannot match both
+/// and `diff.value.orientation.*` stays the diff's own pair.
 extension SettingsValueReadout {
     /// Formats scalar layout diff row.
     static func layoutRow<V>(

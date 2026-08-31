@@ -1,7 +1,10 @@
 import Foundation
 
-/// Settings appearance preference options and UserDefaults persistence
-/// (#96, #678 item 8).
+/// Settings appearance preference (#96, #678 item 8). Stored in
+/// `UserDefaults`, NOT `gui.json`: writing it must never create a
+/// sidecar — that would flip `KiwiCore.isGuiManaged` and hand
+/// config ownership to the structured loader for a user who never
+/// adopted the GUI (`profiles.md`).
 public enum AppearanceChoice: String, CaseIterable, Sendable {
     case system
     case light
@@ -12,7 +15,9 @@ public enum AppearancePreference {
     /// UserDefaults preference key.
     public static let key = "appearance"
 
-    /// Reads persisted appearance choice or falls back to system.
+    /// Reads persisted choice; an unrecognised value reads as
+    /// `.system` rather than trapping — refusing to open Settings
+    /// over a bad preference string is the worse failure.
     public static func read(
         from defaults: UserDefaults = .standard
     ) -> AppearanceChoice {

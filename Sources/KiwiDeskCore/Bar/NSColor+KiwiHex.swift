@@ -1,7 +1,11 @@
 import AppKit
 
 extension NSColor {
-    /// Resolves state-mark color or adaptive fallback for empty string (#429).
+    /// Resolves state-mark color, or the adaptive fallback for
+    /// the empty "Automatic" sentinel (#429). Distinct from
+    /// `init(kiwiHex:)`, whose parse-fail fallback is the accent:
+    /// empty means "adapt with appearance", not "broken", so it
+    /// must land on the adaptive fallback, never the accent.
     static func mark(hex: String, fallback: NSColor) -> NSColor {
         hex.isEmpty ? fallback : NSColor(kiwiHex: hex)
     }
@@ -22,6 +26,10 @@ extension NSColor {
     static func kiwiGlow(hex: String) -> CGColor {
         let base = NSColor(kiwiHex: BorderStyle.glowColor(from: hex))
         let srgb = base.usingColorSpace(.sRGB) ?? base
+        // sRGB-tagged on purpose: the consumer is a
+        // colour-managed CALayer — packing these components into a
+        // GenericRGB colour would gamma-shift the bloom off the
+        // pinned `glowColor` derivation.
         return CGColor(
             srgbRed: srgb.redComponent,
             green: srgb.greenComponent,

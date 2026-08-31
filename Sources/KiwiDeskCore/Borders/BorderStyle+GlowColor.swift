@@ -2,8 +2,12 @@ import CoreGraphics
 import Foundation
 
 extension BorderStyle {
-    /// Derives default glow blur radius (pt) from border width
-    /// (`BorderGeometryTests`, #533, #551).
+    /// Derives the default glow blur radius from ring width:
+    /// `0.8` is the device-calibrated ratio, the floor keeps a
+    /// hairline ring's halo present, the cap stops the overlay
+    /// ballooning (`BorderGeometryTests` pins the three points,
+    /// #533). The automatic DEFAULT — an explicit `glow_size`
+    /// overrides it (#551).
     public static func glowBlur(for width: CGFloat) -> CGFloat {
         min(12, max(2, 0.8 * width))
     }

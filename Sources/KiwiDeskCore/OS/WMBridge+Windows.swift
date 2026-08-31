@@ -3,7 +3,11 @@ import Foundation
 /// Private WindowServer bridge operations for window space movement
 /// (#25, #884).
 extension WMBridge {
-    /// Moves windows to target space asynchronously (#25, #884).
+    /// Moves windows to a target space (#25, device-proven on
+    /// another app's window, #884). A window landing on an
+    /// off-screen Desktop goes DARK to Accessibility until that
+    /// Desktop shows — a caller wanting it in a KiwiDesk space
+    /// keeps a pending assignment for the reveal reconcile.
     public static func moveWindows(
         _ windows: [WindowID],
         to space: SpaceID
@@ -50,7 +54,10 @@ extension WMBridge {
     /// Space membership query option mask (#889 item 5).
     private static let membershipOptions: UInt32 = 7
 
-    /// Queries primary space membership for windows (#889 item 5).
+    /// Queries space membership — SINGLE membership only (#889
+    /// item 5): this never lists a second Desktop a sticky add put
+    /// the window on. Use it for the primary Desktop; sticky
+    /// bookkeeping stays in KiwiDesk's own state.
     public static func spaces(for windows: [WindowID]) -> [SpaceID]? {
         let op = make(
             "CopySpacesForWindowsOperation",

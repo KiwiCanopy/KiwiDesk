@@ -72,6 +72,12 @@ struct HomeFirstRunBanner: View {
             )
         }
         .padding(12)
+        // Card chrome, never the paused bar's amber (failure
+        // outranks welcome). A plain HAIRLINE, not an accent
+        // border: a hovered Home card is card-fill + accent
+        // border, and this banner sits directly above the grid —
+        // an accent here put two pixel-identical boxes meaning
+        // "hovering" and "welcome".
         .background(
             RoundedRectangle(
                 cornerRadius: SettingsTheme.cardRadius

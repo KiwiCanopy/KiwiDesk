@@ -5,7 +5,10 @@ extension APIReference {
     /// Default top-level Lua table name.
     public static let coreGroup = "KiwiDesk"
 
-    /// Unified core command records (`APIRecordCensusTests`).
+    /// Unified core command records. A key in both halves would
+    /// be a duplicated verb the census cannot see through a merge
+    /// — the join keeps the first and `duplicateCoreRecordKeys`
+    /// reds on the overlap instead (`APIRecordCensusTests`).
     public static let coreRecords: [String: APIRecord] =
         coreWindowRecords.merging(coreSettingRecords) { keep, _ in
             keep

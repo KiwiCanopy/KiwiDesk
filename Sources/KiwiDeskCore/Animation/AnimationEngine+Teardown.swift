@@ -11,8 +11,14 @@ extension AnimationEngine {
         }
     }
 
-    /// Stops all animations, optionally snapping windows to targets
-    /// (#207, #611).
+    /// Stops all animations. A TEST drain primitive, not a
+    /// production escape hatch — deliberately unwired in
+    /// `Sources/` (#611): `stop()` tears down differently on
+    /// purpose and non-convergence is the watchdog's job.
+    /// `snapToTargets` is required because `false` is the unsafe
+    /// value — it leaves a window mid-exit-slide (#207)
+    /// half-visible; a required parameter makes forgetting it a
+    /// compiler question.
     public func cancelAll(snapToTargets: Bool) {
         for perWindow in animations.values {
             for (id, animation) in perWindow {

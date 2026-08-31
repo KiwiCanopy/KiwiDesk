@@ -8,7 +8,13 @@ extension HoldGlide {
         stopFrames = startFrames { [weak self] dt in
             self?.glideFrame(dt: dt)
         }
-        // Wall-clock fallback bound in case screen driver halts (#611).
+        // A WALL-CLOCK backstop under the simulated-frame bound
+        // (architect review 2026-08-29): the frame bound is spent
+        // by a clock that can STOP — display sleep or a disconnect
+        // mid-hold freezes `glideElapsed`, leaving the run armed
+        // for the session. It can never truncate a healthy glide:
+        // frame time is at most wall time, so this fires no
+        // earlier than the frame bound would have (#611).
         cancelBackstop = schedule(Self.maxRunSeconds) {
             [weak self] in
             guard let self, self.isGliding else { return }

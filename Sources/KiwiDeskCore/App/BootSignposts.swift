@@ -3,13 +3,20 @@ import os
 
 /// Signpost logging and interval metrics for boot path (`OSSignposter`, #672).
 enum BootSignpost {
-    /// Boot signposter configured with shared subsystem (`KiwiLog.subsystem`).
+    /// Boot signposter. `KiwiLog.subsystem` must stay equal to
+    /// the `.app`'s `CFBundleIdentifier` (scripts/build-app.sh
+    /// writes that one): one subsystem predicate must find the log
+    /// lines and these intervals together — whoever changes either
+    /// changes both.
     static let signposter = OSSignposter(
         subsystem: KiwiLog.subsystem,
         category: "boot"
     )
 
-    /// Threshold in milliseconds for logging slow attach/reconcile spans.
+    /// Threshold for logging slow attach/reconcile spans — the
+    /// FLOOR of the Electron/WebKit lazy-answer band (100–300 ms,
+    /// accessibility.md): a nontrivial warmup is itself boot-cost
+    /// evidence, while fast native apps stay quiet.
     static let slowSpanMs: Int64 = 100
 }
 

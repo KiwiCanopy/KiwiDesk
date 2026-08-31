@@ -1,7 +1,11 @@
 import AppKit
 
 extension BorderManager {
-    /// Rubber-bands focus ring toward boundary for dead-end cue (#436).
+    /// Rubber-bands focus ring toward the boundary (#436). A
+    /// window with no ring gets a TRANSIENT overlay kept in
+    /// `bumpTransients` — never in the `overlays` store `sync`
+    /// owns — so the two lifecycles can never adopt or stomp each
+    /// other.
     func flashDeadEnd(
         window: WindowID,
         frame: CGRect,
@@ -11,6 +15,9 @@ extension BorderManager {
         cornerStyle: BorderStyle.CornerStyle,
         reduceMotion: Bool
     ) {
+        // Inert until the app lifecycle has started: keeps unit
+        // tests and previews from spawning panels + display links
+        // on the many command dead-ends they exercise.
         guard privateRuntimeStarted, let screen = screen(for: frame)
         else { return }
 

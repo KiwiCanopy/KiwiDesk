@@ -54,7 +54,12 @@ extension SkyLightBorderOverlay {
         else { return false }
         context = created.takeRetainedValue()
         self.scale = scale
-        // Pin ring to target window Space for Mission Control visibility.
+        // Pin the ring to its target's Space: unassigned reads as
+        // all-spaces and Mission Control floats it over the
+        // overview. Pinning is the ring's ONLY MC hide now, so if
+        // no space resolves, retire this backend — the AppKit
+        // `.transient` fallback self-hides. No silent unpinned
+        // ring can survive.
         guard
             SkyLight.pinWindow(
                 newID,

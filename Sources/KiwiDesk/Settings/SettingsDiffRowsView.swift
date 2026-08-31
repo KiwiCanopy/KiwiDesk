@@ -37,7 +37,10 @@ struct SettingsDiffRowsView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// Renders old -> new value change readout.
+    /// Renders the old → new readout. Symbolic notation, not a
+    /// sentence — no locale reorders a before/after pair — which
+    /// is why this is a stack and not a positional frame; the
+    /// labels and notes around it stay localized frames.
     @ViewBuilder
     private func valueReadout(
         _ row: SettingsDiffRow
@@ -51,6 +54,9 @@ struct SettingsDiffRowsView: View {
                     .foregroundStyle(SettingsTheme.ink3)
                 Text(verbatim: "→")
                     .foregroundStyle(SettingsTheme.ink3)
+                // The green-emphasis text token, not `accent` (a
+                // full-strength value would read clickable) and
+                // not `accentInk` (dark ink FOR accent fills).
                 Text(row.newValue ?? unsetMark)
                     .fontWeight(.semibold)
                     .foregroundStyle(SettingsTheme.groupHeading)

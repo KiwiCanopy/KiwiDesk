@@ -145,6 +145,10 @@ struct GapsEditor: View {
         model.config.settings.gapsGlobal.inner
     }
 
+    // The master slider is inert while its edges/axes differ.
+    // The predicate is the census's, resolved once in
+    // `GapsBordersGates`, so the view never re-derives "differ"
+    // beside the gate that declares it (#678, gui.md).
     private var outerMixed: Bool {
         gates.inertReason(for: .gaps(.outer)) != nil
     }

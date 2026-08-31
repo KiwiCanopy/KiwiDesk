@@ -2,7 +2,12 @@ import AppKit
 
 /// Colored backdrop behind Liquid Glass surfaces (`NSGlassEffectView`, #408).
 enum GlassTint {
-    /// Render cap for glass backdrop opacity to preserve refraction (#408).
+    /// Render cap for backdrop opacity (#408) — above it the
+    /// solid color crowds out the refraction and "glass" reads as
+    /// a flat plate. A RENDER cap, not a stored-value clamp: the
+    /// `fill_color` keeps whatever alpha the user set (used in
+    /// full by the solid shapes); only the glass backdrop is held
+    /// translucent. Chosen on-device (macOS 26.5.2).
     static let maxAlpha: CGFloat = 0.65
 
     /// Checks if glass tint backdrop is enabled for the given color hex.

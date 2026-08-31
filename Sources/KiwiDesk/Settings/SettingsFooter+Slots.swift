@@ -103,6 +103,10 @@ extension SettingsFooter {
             "footer.default_profile_name",
             "My Setup"
         )
+        // Availability via the facade query, not a local copy of
+        // the collision rule — `canRename` holds the one
+        // sanctioned mirror (review 2026-07); this is the second
+        // consumer that decision reserved for the query.
         var name = base
         var suffix = 2
         while !model.core.isProfileNameFree(name) {

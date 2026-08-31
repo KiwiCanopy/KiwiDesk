@@ -40,8 +40,14 @@ extension SettingsModel {
         }
     }
 
-    /// Triggers user-driven mode switch and activates reveal wash
-    /// (`SettingsReveal`, #760).
+    /// The EXPLICIT flip — the header segment's entry point, and
+    /// deliberately the only one (#760): the wash answers "what
+    /// did the toggle just change", a question only the user's own
+    /// flip asks; `ensureModeAdmits`' implicit promotion calls
+    /// `setSettingsMode` directly, since the search reveal already
+    /// washes its landing. Activation precedes the mode publish so
+    /// inserted views mount with the wash already on; the way back
+    /// to Simple never washes (`SettingsReveal`).
     func flipSettingsMode(
         _ mode: SettingsMode,
         reduceMotion: Bool

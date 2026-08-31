@@ -5,11 +5,19 @@ import SwiftUI
 struct LayoutSchematicView: View {
     let mode: LayoutMode
     let settings: TilingSettings
+    /// No default: a caller that could omit the count would draw
+    /// a different number of windows from its sibling and never
+    /// say so — the drift this type exists to prevent.
     let windows: Int
     let scale: SchematicScale
     @Environment(\.schematicPalette) private var palette
 
-    /// Resolved focus ring highlight color for schematic preview.
+    /// Resolved focus stroke: the draft's REAL
+    /// `border.focused_color` (owner ruled 2026-08-10), set at
+    /// this one mount so strip, panel and Home band cannot
+    /// disagree. Stated residue: off-plate a user-invisible
+    /// focused colour is shown invisible, which is the truth
+    /// about it.
     private var focusStroke: Color? {
         let style = settings.borderStyle
         guard style.enabled else { return nil }

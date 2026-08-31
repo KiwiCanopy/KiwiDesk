@@ -21,7 +21,11 @@ public final class SingleInstanceLock {
             ).path
     }
 
-    /// Acquires non-blocking flock. Returns false if already held (#196).
+    /// Acquires non-blocking flock; false only on real contention
+    /// (#196). I/O failures FAIL OPEN: an unopenable lock file is
+    /// not a second instance, and blocking every launch on a
+    /// permissions oddity would be worse than the pre-lock status
+    /// quo.
     public func acquire() -> Bool {
         guard descriptor < 0 else { return true }
         let directory = (path as NSString)

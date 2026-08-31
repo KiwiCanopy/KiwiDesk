@@ -3,7 +3,12 @@ import Foundation
 /// Policy classifying commands targeting implicit focused window
 /// (`FocusedCommandPolicyTests`, #292).
 public enum FocusedCommandPolicy {
-    /// Dispatcher command names operating on implicit focused window.
+    /// Dispatcher command names operating on the implicit focused
+    /// window. INVARIANT: a focused command must never be named
+    /// `set_*` / `*.set_*` — the parity net treats that spelling
+    /// as a config setter (unrestricted), so a focused command
+    /// named that way would slip the guard WITHOUT failing the
+    /// build. Load-bearing, not incidental.
     public static let focusedCommands: Set<String> = [
         "focus",
         "swap",

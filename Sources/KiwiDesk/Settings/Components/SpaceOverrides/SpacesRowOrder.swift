@@ -44,8 +44,10 @@ enum SpacesRowOrder {
         .perSpaceOverrides: perSpaceOverrides,
     ]
 
-    /// Containers rendered with bespoke custom views rather than generic
-    /// iteration.
+    /// Containers rendered as bespoke views: the lists record
+    /// membership for the placement table and search, but editing
+    /// one moves nothing on screen. A container that becomes a
+    /// real `ForEach` leaves this set in the same change.
     static let bespokeContainers: Set<SettingsContainer> = [
         .spaceList,
         .perSpaceOverrides,

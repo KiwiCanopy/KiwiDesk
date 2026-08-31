@@ -1,11 +1,18 @@
 import Foundation
 import KiwiDeskCore
 
-/// Shortcut reference row glyphs and combo string formatting
-/// (`ShortcutsReferenceBuilder`, #820).
+/// Shortcut reference row glyphs and combo formatting (#820).
+/// Panel-only by INTENT rather than access control: the §2.1
+/// split cost these `private`, so keeping the shared catalog and
+/// editor rows untouched is now an obligation on a future caller,
+/// not something the compiler holds
+/// (`ShortcutsReferenceBuilder`).
 extension ShortcutsReferenceBuilder {
     /// SF Symbol icon name for compass-direction navigation commands.
     static func directionalIcon(for lua: String) -> String? {
+        // A space or layer literally named a direction word would
+        // false-match on the substring — those commands own their
+        // own glyphs, so bail first.
         guard !lua.contains("_space"),
             !lua.contains("switch_layer")
         else { return nil }
@@ -16,7 +23,11 @@ extension ShortcutsReferenceBuilder {
         return nil
     }
 
-    /// Numbered square icon fallback for Space switching commands.
+    /// Numbered square icon fallback for space commands. Do NOT
+    /// route the Space Bar's plain-digit fallback through here or
+    /// this through it: this is a symbol slot with no boxed
+    /// wrapper, so the bar's box-in-a-box problem (QA 2026-07-19)
+    /// does not apply.
     static func spaceFallbackIcon(
         for lua: String
     ) -> String? {

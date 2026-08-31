@@ -1,7 +1,12 @@
 import Foundation
 
-/// Encapsulates legal values of enum-typed arguments derived from Swift types
-/// (`APIChoiceDerivationTests`, #1033).
+/// Legal values of enum-typed arguments, read off the Swift type
+/// (#1033). One file, one initializer, both load-bearing: a
+/// `guard-prover` round defeated an earlier arrangement with a
+/// second initializer in an extension — green tests, drifted
+/// record. The private stored property makes a second initializer
+/// in any other file a compile error, and
+/// `APIChoiceDerivationTests` asks the whole file how many exist.
 public struct APIChoice: Sendable, Equatable {
     /// Private backing container preventing external initializers (#1033).
     private let derived: Derived

@@ -1,6 +1,10 @@
 import Foundation
 
-/// Composes fallback layout when no saved profile matches monitors (#53).
+/// Composes the fallback layout when no saved profile matches
+/// (#53). Resolution is TOTAL in both directions: every space
+/// gets a screen and every screen gets content — extra screens
+/// each receive one monocle space. There is deliberately no
+/// near-match adaptation of user profiles.
 public enum ProfileComposition {
     /// A fully resolved fallback layout for a live monitor set.
     public struct Composed: Sendable, Equatable {
@@ -53,6 +57,11 @@ public enum ProfileComposition {
         var assignment: [SpaceID: DisplayID] = [:]
         for space in layout.plannedSpaces {
             spaces.append(space)
+            // Screen FIRST, so an unlisted mode is answered by
+            // the display the space lands on rather than a fixed
+            // `bsp` (owner ruling 2026-08-11); both sparse
+            // fallbacks are the layout's own accessors
+            // (`StandardLayout+Screens`).
             let position = layout.screen(
                 of: space,
                 screens: ordered.count

@@ -29,6 +29,9 @@ struct ShortcutRowView: View {
                 .foregroundStyle(.secondary)
         }
         .help(row.monospaced ? row.label : "")
+        // Same 0.55 the editor's rows dim to, so one concept
+        // looks like itself on both surfaces — an undimmed
+        // detached-Desktop row implies a key that does nothing.
         .opacity(row.unavailable ? 0.55 : 1)
         .accessibilityHint(
             row.unavailable
@@ -42,6 +45,9 @@ struct ShortcutRowView: View {
 
     @ViewBuilder private var leadingGlyph: some View {
         if let glyph = row.glyph {
+            // #294 App Font ligature, following the panel's text
+            // color; fixed slot width keeps the label indent
+            // uniform.
             Text(glyph)
                 .font(
                     Font(

@@ -2,8 +2,12 @@ import AppKit
 
 /// Shared panel creation and window level constants for bar overlays (#293).
 public enum BarPanel {
-    /// Window level where bar overlays render (`DragOverlay`,
-    /// `ShortcutsPanelController`).
+    /// Window level where bar overlays render. A window that must
+    /// not be covered by a bar derives its level from `aboveLevel`
+    /// rather than writing `.floating` again — spelled apart the
+    /// two drift the day the bars move. The bars' PEERS stay
+    /// peers: `DragOverlay` and `ShortcutsPanelController` render
+    /// at `.floating` of their own accord, deliberately.
     public static let level: NSWindow.Level = .floating
 
     /// Window level one step above bars for modal onboarding overlays (#828).

@@ -1,8 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Subtitle and summary phrase formatting for profile items
-/// (`ProfileSummary`, #678 turn 13a).
+/// Subtitle and summary phrases for profile rows (#678 turn
+/// 13a). Counts only what the profile OWNS: the third segment
+/// counts overrides — the resolved set would say the profile
+/// carries a keybinding set of its own, exactly what a sparse
+/// override is not — and disappears at zero. Two frames rather
+/// than one optional slot, because a frame with an empty argument
+/// leaves its own separator behind in every locale
+/// (`ProfileSummary`).
 extension ProfilesSection {
     func subtitle(_ summary: ProfileSummary) -> String {
         let screens = screensPhrase(summary.count)

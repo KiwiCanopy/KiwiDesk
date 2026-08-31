@@ -1,7 +1,11 @@
 import Foundation
 
 /// Failure reason classification for unreadable profile files
-/// (`ProfileBrokenText`, #96).
+/// (`ProfileBrokenText`, #96). `CaseIterable` so the renderer's
+/// coverage DERIVES: the text suite builds one fixture per case,
+/// and a fourth cause reaches the distinctness assertion instead
+/// of shipping a duplicate sentence green (architect review
+/// 2026-08-11).
 public enum ProfileBrokenCause: Sendable, Equatable, CaseIterable {
     /// File content is not valid JSON syntax.
     case malformedJSON
@@ -25,7 +29,12 @@ extension ProfileManager {
         }
     }
 
-    /// Classifies a decoding or file read error into a broken profile cause.
+    /// Classifies a read failure. `.dataCorrupted` at the ROOT
+    /// (empty coding path) is `JSONSerialization` refusing the
+    /// bytes; the same case deeper in is one value the parser
+    /// reached and rejected — a shape problem. Testing the PATH,
+    /// not the case, keeps a bad date string out of "edited by
+    /// hand".
     static func cause(of error: Error) -> ProfileBrokenCause {
         guard let decoding = error as? DecodingError else {
             return .unreadable

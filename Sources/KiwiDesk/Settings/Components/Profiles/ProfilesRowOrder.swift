@@ -27,8 +27,11 @@ enum ProfilesRowOrder {
         .presets: presets,
     ]
 
-    /// Containers rendered with custom bespoke views expanding dynamic
-    /// instances.
+    /// Containers rendered as bespoke views: each expands one
+    /// census key into a row per live instance, which an
+    /// order-list `ForEach` cannot express. Editing a list moves
+    /// nothing on screen; a container that becomes a real
+    /// `ForEach` leaves this set in the same change.
     static let bespokeContainers: Set<SettingsContainer> = [
         .savedProfiles,
         .profilesPerMacOSSpace,

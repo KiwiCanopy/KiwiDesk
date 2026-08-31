@@ -54,6 +54,10 @@ struct SpacesUsingLayout: View {
         }
     }
 
+    // Hoisted out of `body` for the type-checker: a
+    // `+`-concatenated literal inside a conditional in a
+    // `ViewBuilder` compiles here and dies on the slower CI
+    // runner (gui.md, SwiftUI traps).
     private var emptyProse: String {
         L(
             "layout_defaults.spaces_using.none",
@@ -63,7 +67,11 @@ struct SpacesUsingLayout: View {
         )
     }
 
-    /// Formats override cross-reference prose (`CrossReferenceRowSlotTests`).
+    /// Formats override cross-reference prose. Takes the count
+    /// and is internal so `CrossReferenceRowSlotTests` drives BOTH
+    /// arms with no model — one `contains` over a two-arm helper
+    /// passes with either arm gutted, which guard-prover
+    /// demonstrated against this exact property.
     static func overrideProse(_ overriding: Int) -> String {
         overriding == 1
             ? L(

@@ -3,8 +3,12 @@ import Foundation
 /// Discovers and decodes bundled locale JSON files
 /// (`LocalizationManager`, #9).
 public enum LocaleCatalog {
-    /// Non-English locale codes in `Resources/Locales`
-    /// (`scripts/extract-keys`).
+    /// Non-English locale codes on disk. The `!= "en"` filter is
+    /// intentional: `en.json` is a build-time translator manifest
+    /// (`scripts/extract-keys`), never loaded by the manager —
+    /// English lives inline at call sites, and picking it in the
+    /// language menu uses the inline source, distinct from
+    /// "System default".
     static func availableLocales() -> [String] {
         guard
             let directory = Bundle.kiwiDeskCore.url(

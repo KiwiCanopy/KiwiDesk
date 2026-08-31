@@ -22,7 +22,14 @@ extension SettingsModel {
     var primarySaveAction: PrimarySaveAction {
         if editingLua { return .saveLua }
         if editingStoredProfile { return .updateStoredProfile }
-        // Permission-paused global changes only write gui.json (#516).
+        // Ahead of both profile verbs and only them: those write
+        // no monitor set and must not be rerouted (#516). Asks
+        // `core.isGuiManaged`, never `savedSidecar != nil` — §5
+        // keeps ONE ownership predicate, and a stale non-nil
+        // snapshot would let this save re-create gui.json and
+        // seize ownership from init.lua outside the sanctioned
+        // adopt path. An unknown baseline is not evidence of an
+        // edit.
         if permissionPaused, core.isGuiManaged, globalsChanged {
             return .saveGlobalsOnly
         }

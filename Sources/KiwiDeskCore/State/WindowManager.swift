@@ -85,7 +85,12 @@ public struct WindowManager: Sendable {
         windows[id]?.stickyScope = scope
     }
 
-    /// Sets native fullscreen state for window (`.windowFullscreenChanged`).
+    /// Sets native fullscreen state (`.windowFullscreenChanged`).
+    /// Orthogonal to floating — `setFloating` deliberately does
+    /// NOT touch it: clearing it there would desync the event
+    /// loop's change-only cache and pin a stale verdict until the
+    /// next transition. The reconcile recheck is the single heal
+    /// path.
     public mutating func setFullscreen(
         _ id: WindowID,
         _ fullscreen: Bool

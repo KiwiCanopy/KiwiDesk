@@ -258,6 +258,10 @@ extension SkyLight {
             && transactionSubLevel != nil
             && transactionTransform != nil
             && transactionOrder != nil && transactionCommit != nil
+            // Space-pinning is REQUIRED, not best-effort: it is
+            // the sole mechanism hiding the SkyLight ring in
+            // Mission Control (the old observer is gone). Without
+            // it, retire to the AppKit `.transient` fallback.
             && moveWindowsToManagedSpace != nil
             && copySpacesForWindows != nil
     }
@@ -302,6 +306,8 @@ extension SkyLight {
     }
 
     /// Wraps window ID in CFArray for SkyLight space APIs.
+    /// jankyborders packs the id as a signed-32 `CFNumber`; match
+    /// it.
     private static func windowList(
         _ id: CGWindowID
     ) -> CFArray? {

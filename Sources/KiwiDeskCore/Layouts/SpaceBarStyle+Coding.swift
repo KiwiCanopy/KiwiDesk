@@ -1,8 +1,12 @@
 import CoreGraphics
 import Foundation
 
-/// SpaceBarStyle Decodable implementation and CodingKeys
-/// (`SpaceBarParityTests`).
+/// SpaceBarStyle Decodable implementation and CodingKeys. The
+/// conformance stays in `SpaceBarStyle.swift` because Swift only
+/// synthesizes `encode(to:)` where the conformance sits — one
+/// fewer field list to forget. NOT a guarantee a new property
+/// reaches the wire: one absent from `CodingKeys` is silently not
+/// encoded; `SpaceBarParityTests` is the actual net.
 extension SpaceBarStyle {
     /// JSON coding keys for SpaceBarStyle (`SpaceBarParityTests`).
     enum CodingKeys: String, CodingKey, CaseIterable {

@@ -1,6 +1,13 @@
 import Foundation
 
-/// String matching helpers for Settings search and app pickers.
+/// The app's ONE search-matching predicate, shared by Settings
+/// search and the app picker. `localizedStandardContains`
+/// underneath, plus separator runs flattened on both sides — the
+/// part it does not give you: German renders "Space Bar colors"
+/// as "Space Bar-Farben", so typing `space bar farben` got
+/// nothing. Deliberately NOT fuzzy: substring is predictable, and
+/// a mistype gets no results rather than a confident wrong
+/// answer.
 extension String {
     /// Tests if string matches search query using normalized standard
     /// comparison.

@@ -30,6 +30,8 @@ extension ApplicationsGroup {
                             $0.id == id
                         },
                         bindings: $bindings,
+                        // Id-based (#68 review M2): Steal
+                        // mutates the array before this runs.
                         commit: {
                             _ = record(
                                 $0,
@@ -42,6 +44,7 @@ extension ApplicationsGroup {
                 onClear: {
                     let id = binding.wrappedValue.id
                     binding.wrappedValue.combo = ""
+                    // Live target: unregister now (#123).
                     _ = model.liveApplyRecorded(
                         layerName: layerName,
                         bindingID: id,
@@ -100,6 +103,12 @@ extension ApplicationsGroup {
         app: KeybindingCatalog.InstalledApp
     ) {
         let id = binding.wrappedValue.id
+        // Decline a re-pick onto an app every behavior of which
+        // is bound on OTHER rows — any assignment would duplicate.
+        // The picker hides these, but the "Other…" escape bypasses
+        // that list, so guard at this choke point (#334 review).
+        // Keep the row's behavior across a re-pick when still
+        // free, else take the first free one.
         let taken = KeybindingCatalog.takenBehaviors(
             for: app.bundleID,
             in: bindings,

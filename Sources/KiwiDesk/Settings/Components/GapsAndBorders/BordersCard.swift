@@ -18,6 +18,12 @@ struct BordersCard: View {
         )
     }
 
+    /// A master writes over whatever the strokes hold, and Lua
+    /// can leave them holding three different things. The gap
+    /// masters answer that by greying; these cannot — no
+    /// per-stroke row to send anyone to (`GapsBordersGates`
+    /// carries the argument) — so a `?` appears exactly while the
+    /// disagreement does.
     private var widthHelp: String? {
         gates.strokesDiffer(for: .borders(.borderWidthMaster))
             ? GapsBordersGateHelp.strokesDiffer : nil
@@ -38,12 +44,19 @@ struct BordersCard: View {
     }
 
     @ViewBuilder private var masters: some View {
+        // One domain for all three strokes, starting at 1: a 0
+        // here would be a third way to say "off" that turns off
+        // all three — each stroke already has its own toggle.
         PtSlider(
             label: L("border.width", "Width"),
             value: model.borderWidthMaster,
             range: 1...20,
             help: widthHelp
         )
+        // Optional-valued on purpose: a ring style and a drag
+        // radius that disagree match no segment and the pill hides
+        // itself (`SegmentedPickerUnmatchedTests`); whichever
+        // segment is then tapped ends the disagreement.
         SegmentedPicker(
             L("border.corner_style", "Corners"),
             selection: model.borderCornersMaster,

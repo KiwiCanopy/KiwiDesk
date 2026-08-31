@@ -19,6 +19,10 @@ enum SetupBackupText {
                 "That file isn't a KiwiDesk backup."
             )
         case .newerFormat:
+            // The two version numbers are deliberately NOT
+            // interpolated: they name an internal format, not an
+            // app version a user could act on — the sentence that
+            // helps is the one saying what to do.
             return L(
                 "general.advanced.backup.error.newer",
                 "That backup was made by a newer version of "
@@ -62,7 +66,11 @@ enum SetupBackupText {
         }
     }
 
-    /// Formats skipped item counts summary for partial restore outcome.
+    /// Formats skipped item counts for a partial restore. Counts
+    /// sit LAST behind a label so no locale has to agree with a
+    /// number mid-sentence (`localization.md`) — which is why this
+    /// is two sentences rather than one frame carrying both
+    /// numbers.
     static func sentence(for outcome: RestoreOutcome) -> String {
         var parts: [String] = []
         if !outcome.skippedProfiles.isEmpty {
@@ -96,7 +104,9 @@ enum SetupBackupText {
         )
     }
 
-    /// Alert title for backup or restore failure.
+    /// Alert title — one for every case, because a title that
+    /// changes per cause reads as five different failures of five
+    /// different features.
     static func title(for error: SetupBundleError) -> String {
         switch error {
         case .couldNotWrite, .unreadableSettings,

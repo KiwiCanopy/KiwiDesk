@@ -16,6 +16,9 @@ public struct ScrollingOverride: Sendable, Equatable {
         if let slotSize { out.slotSize = slotSize }
         if let anchor { out.anchor = anchor }
         if let orientation { out.orientation = orientation }
+        // The merged per-space params carry no override map of
+        // their own — layout math never reads it, and it would
+        // duplicate every space's overrides into each snapshot.
         out.override = [:]
         return out
     }

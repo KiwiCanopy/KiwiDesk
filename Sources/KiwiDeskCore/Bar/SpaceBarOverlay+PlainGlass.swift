@@ -88,8 +88,11 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Spans glass plate as backdrop under items and pinned front segment
-    /// (#409).
+    /// Spans the plate as a backdrop under items AND the pinned
+    /// front segment (#409). It does NOT host the items: a hosted
+    /// view is auto-sized to the glass bounds, which would break
+    /// the scroll clip — the items keep their own
+    /// `itemContainer`.
     private func spanBackdrop(
         plate: NSView,
         content: NSView,

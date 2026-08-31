@@ -1,7 +1,13 @@
 import KiwiDeskCore
 
-/// Runtime localized label resolver for census setting keys
-/// (`LocaleCatalog`, #678 turn 9).
+/// Runtime label resolver for census keys (#678 turn 9). A
+/// surface rendering a label AWAY from its owning row cannot
+/// inline the English without becoming a second authoring
+/// surface, so it resolves through the shipped catalogs — the
+/// current locale, then the `en.json` manifest. Loading that
+/// manifest at runtime is a deliberate amendment to its
+/// build-time-only contract, recorded on `LocaleCatalog` and
+/// argued in `docs/design-decisions.md`.
 @MainActor
 enum SettingsCensusLabel {
     /// Bundled English translation manifest cache (`LocaleCatalog`).

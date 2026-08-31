@@ -8,7 +8,11 @@ public protocol SpaceLayoutOverride: Equatable, Sendable {
 }
 
 extension SpaceLayoutOverride {
-    /// Counts number of overridden non-nil fields via reflection (#290).
+    /// Counts overridden fields via reflection (#290) — the §5
+    /// reflection net: a newly added override field is counted
+    /// automatically, no per-layout tally to drift. Each field is
+    /// an Optional: `.some` mirrors one child, nil none, so
+    /// `fieldCount == 0` matches `isEmpty` by construction.
     public var fieldCount: Int {
         var count = 0
         for child in Mirror(reflecting: self).children {

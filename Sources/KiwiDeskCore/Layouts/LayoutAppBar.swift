@@ -44,6 +44,10 @@ public struct LayoutAppBar: Sendable, Equatable {
         var out = base
         if let edge { out.edge = edge }
         if let alignment { out.alignment = alignment }
+        // Clamp here too: an override decoded from a hand-edited
+        // profile skips the command-path floor, and this is the
+        // single funnel producing the effective style — so the
+        // `minThickness` invariant holds.
         if let thickness {
             out.thickness = max(AppBarStyle.minThickness, thickness)
         }
@@ -93,7 +97,9 @@ public struct LayoutAppBar: Sendable, Equatable {
 extension LayoutAppBar: Codable {
     typealias CodingKeys = Key
 
-    /// JSON coding keys for LayoutAppBar (`AppBarParityTests`).
+    /// JSON coding keys. `CaseIterable` is load-bearing:
+    /// `AppBarParityTests` reflects over `allCases` to prove every
+    /// field has a key — do not drop it as "unused".
     enum Key: String, CodingKey, CaseIterable {
         case enabled
         case edge
