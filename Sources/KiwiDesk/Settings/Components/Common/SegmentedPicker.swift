@@ -78,24 +78,19 @@ struct SegmentedPicker<Value: Hashable>: View {
             )
         )
         // ONE Tab stop for the whole control, the way a native
-        // segmented control behaves — the segments opt out below,
-        // and the track takes the stop they gave up (#997).
+        // segmented control behaves — the segments opt out below
+        // (#997).
         .focusable(isEnabled)
         .focused($focused)
         .onChange(of: focused) { _, now in
-            // Refuse click-born focus on macOS 26, the same
-            // refusal `SettingsSlider` carries: without it every
-            // click on a segment draws a keyboard focus ring
-            // (#991's family, which this stop would otherwise
-            // introduce here).
+            // Click-born focus, refused as `SettingsSlider` does:
+            // this stop would otherwise ring on every click.
             guard now, NSEvent.pressedMouseButtons != 0 else {
                 return
             }
             focused = false
         }
-        // ← / → only. ↑ / ↓ are left alone so vertical traversal
-        // still leaves the row, which is what the native control
-        // does too.
+        // ← / → only: ↑ / ↓ must still leave the row.
         .onKeyPress(.leftArrow) { move(-1) }
         .onKeyPress(.rightArrow) { move(1) }
         .accessibilityElement(children: .contain)
@@ -108,19 +103,21 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    /// Moves the SELECTION one segment, which is what a native
-    /// segmented control does on an arrow — a highlight that
-    /// moved without selecting would announce a choice the
-    /// binding never took.
+    /// Moves the SELECTION one segment, as a native segmented
+    /// control does: a highlight that moved without selecting
+    /// would announce a choice the binding never took.
+    ///
+    /// No `isEnabled` guard — the track is `.focusable(isEnabled)`,
+    /// so a disabled control receives no key press to answer.
     private func move(_ direction: Int) -> KeyPress.Result {
-        guard isEnabled,
+        guard
             let next = SegmentedPickerKeys.step(
                 from: selectedIndex,
                 by: direction,
                 count: options.count
             )
         else { return .ignored }
-        // Clamped, so the end segments swallow their own arrow
+        // Clamped, so an end segment swallows its own arrow
         // rather than letting it walk out of the control.
         if next != selectedIndex { select(options[next].value) }
         return .handled
@@ -141,10 +138,8 @@ struct SegmentedPicker<Value: Hashable>: View {
             )
         }
         .buttonStyle(.plain)
-        // The stop this Button gave free is the defect: N
-        // segments cost N Tab stops where the native control
-        // costs one. Click, VoiceOver and `isEnabled` all stay —
-        // only the focus stop goes, to the track (#997).
+        // Only the focus stop goes, to the track; click,
+        // VoiceOver and `isEnabled` stay (#997).
         .focusable(false)
         .onHover { inside in
             updateHover(
