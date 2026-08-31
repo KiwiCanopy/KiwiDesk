@@ -9,10 +9,16 @@ extension GeneralSection {
             VStack(spacing: 10) {
                 aboutBrand
                 VStack(spacing: 4) {
-                    Text(KiwiDeskVersion.displayString)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
+                    Text(
+                        L(
+                            "general.version",
+                            "v%1$@",
+                            KiwiDeskVersion.semantic
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
                     releaseNotesLink
                 }
                 guideLink

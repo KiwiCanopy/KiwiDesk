@@ -128,13 +128,13 @@ enum HomeCardPreview {
             .overlay(content())
     }
 
-    /// Version label matching About pane display.
+    /// Version label, the same frame the About pane renders.
     private static var versionLine: some View {
         Text(
             L(
-                "home.card.general.version",
+                "general.version",
                 "v%1$@",
-                KiwiDeskVersion.displayString
+                KiwiDeskVersion.semantic
             )
         )
         .font(.caption)
