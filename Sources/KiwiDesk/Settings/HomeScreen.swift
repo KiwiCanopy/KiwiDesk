@@ -110,7 +110,14 @@ struct HomeScreen: View {
             // Warm icon cache for ruled apps (#786).
             AppIconCache.shared.warm()
             if let last = model.nav.homeReturnFocus {
-                focusedCard = last
+                // Cleared either way, restored only for a
+                // keyboard pop (#991): a card clicked back to
+                // would otherwise wear a ring no click earned,
+                // and a slot left full leaks into the next
+                // unrelated appear.
+                if model.nav.navigationFromKeyboard {
+                    focusedCard = last
+                }
                 model.nav.homeReturnFocus = nil
             }
         }

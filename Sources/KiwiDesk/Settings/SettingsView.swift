@@ -126,7 +126,13 @@ struct SettingsView: View {
         // destination already showing moves no focus, deliberately
         // — the user is there and the keyboard stays put.
         .onChange(of: model.destination) { _, now in
-            if now != nil { contentFocused = true }
+            // Only when the platform would have moved focus
+            // itself (#991) — a mouse click states nothing, and
+            // Tab then restarts from the top the way it does
+            // everywhere else on macOS.
+            if now != nil, model.nav.navigationFromKeyboard {
+                contentFocused = true
+            }
         }
         .environment(\.settingsNavigate) { destination in
             // Third #18 enforcement point beside the grid's offer

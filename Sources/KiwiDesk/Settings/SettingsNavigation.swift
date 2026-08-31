@@ -37,6 +37,14 @@ struct SettingsNavigation {
     /// Originating card destination when popping back to Home.
     var homeReturnFocus: SettingsDestination?
 
+    /// Whether the navigation that last moved `destination` came
+    /// from the keyboard (#991). Written in ONE place —
+    /// `SettingsModel.destination`'s `didSet`, so a navigation
+    /// path added later cannot forget it — and read by the
+    /// shell's two focus statements, which state a destination
+    /// only when the platform would have moved focus itself.
+    var navigationFromKeyboard = false
+
     /// Resets transient surface selections to default — for window
     /// open and an edit-target switch: moving these off view-local
     /// `@State` (#277) silently promoted a per-visit landing to a
