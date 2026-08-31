@@ -61,7 +61,7 @@ extension KeyboardActionParityTests {
                     + "{ selection = nil } } "
                     + ".onChange(of: model.destination) { _, now in "
                     + "if now != nil, "
-                    + "model.nav.navigationFromKeyboard "
+                    + "model.nav.navigationMovesFocus "
                     + "{ contentFocused = true } }",
                 "and the raise is keyed on the VALUE: keyed on "
                     + "`destination != nil` it fires on Home→area "
@@ -85,7 +85,7 @@ extension KeyboardActionParityTests {
             ShellWiring(
                 "HomeScreen.swift",
                 "if let last = model.nav.homeReturnFocus { "
-                    + "if model.nav.navigationFromKeyboard { "
+                    + "if model.nav.navigationMovesFocus { "
                     + "focusedCard = last } "
                     + "model.nav.homeReturnFocus = nil }",
                 "and the return pays it, once — the whole "
@@ -98,8 +98,8 @@ extension KeyboardActionParityTests {
             ),
             ShellWiring(
                 "SettingsModel.swift",
-                "didSet { nav.navigationFromKeyboard = "
-                    + "SettingsInputSource.isKeyboard }",
+                "didSet { nav.navigationMovesFocus = "
+                    + "SettingsInputSource.movesFocus }",
                 "and the input source is recorded where every "
                     + "navigation path already passes — the "
                     + "destination write itself — so a path added "

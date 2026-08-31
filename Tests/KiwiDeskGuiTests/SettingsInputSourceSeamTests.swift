@@ -76,7 +76,7 @@ struct SettingsInputSourceSeamTests {
             .split(whereSeparator: \.isWhitespace)
             .joined()
             #expect(
-                source.contains("nav.navigationFromKeyboard"),
+                source.contains("nav.navigationMovesFocus"),
                 Comment(
                     rawValue:
                         "\(name) states a focus destination "

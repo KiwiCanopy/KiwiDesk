@@ -37,13 +37,13 @@ struct SettingsNavigation {
     /// Originating card destination when popping back to Home.
     var homeReturnFocus: SettingsDestination?
 
-    /// Whether the navigation that last moved `destination` came
-    /// from the keyboard (#991). Written in ONE place —
-    /// `SettingsModel.destination`'s `didSet`, so a navigation
-    /// path added later cannot forget it — and read by the
-    /// shell's two focus statements, which state a destination
-    /// only when the platform would have moved focus itself.
-    var navigationFromKeyboard = false
+    /// Whether the navigation that last moved `destination`
+    /// would have moved focus on the platform's own (#991).
+    /// Written in ONE place — `SettingsModel.destination`'s
+    /// `didSet` — and meaningful only to a statement fired BY
+    /// that write, so a reader at an unpaired moment would get
+    /// the verdict for whatever navigated last.
+    var navigationMovesFocus = false
 
     /// Resets transient surface selections to default — for window
     /// open and an edit-target switch: moving these off view-local
@@ -52,6 +52,10 @@ struct SettingsNavigation {
     mutating func resetSurfaces() {
         layoutModeTab = nil
         spaceOverridesFocus = nil
+        // The latch is paired with the write that set it, so it
+        // must not outlive the visit — a window re-shown states
+        // no destination rather than one the last visit earned.
+        navigationMovesFocus = false
     }
 
     /// Triggers flash highlight for anchor, returning new token (#277).

@@ -1,30 +1,29 @@
 import AppKit
 
-/// What is driving the navigation happening right now — the ONE
+/// What is driving the navigation happening right now — the one
 /// input-source reading the shell's focus statements share
-/// (#991).
-///
-/// macOS moves keyboard focus for a key press and does not move
-/// it for a click; Tab simply restarts from the top of the window
-/// after a click, which the owner confirmed in System Settings.
-/// Stating a destination on a mouse navigation therefore draws a
-/// focus ring the platform would not have drawn.
-///
-/// The fix belongs HERE and not at the ring: a focus ring is the
-/// user's own accessibility surface — Full Keyboard Access owns
-/// its colour, contrast and size — so `.focusEffectDisabled()` is
-/// the cheap direction `docs/design-decisions.md` ▸ *a focus ring
-/// is the platform's* forbids. Move focus only when the platform
-/// would, and there is nothing focused to ring.
+/// (#991). The argument is `.claude/rules/gui.md` ▸ the keyboard
+/// path.
 enum SettingsInputSource {
-    /// Whether the event macOS is dispatching right now is a key
-    /// press. `.keyDown` is the whole keyboard set that reaches a
-    /// navigation: Space and Return on a focused control, Return
-    /// on a search result, Escape, and ⌘[ all arrive as one. A
-    /// click arrives as a mouse event and a programmatic
-    /// navigation — a deep link, a repair — as no event at all,
-    /// and neither should move focus.
-    @MainActor static var isKeyboard: Bool {
-        NSApp.currentEvent?.type == .keyDown
+    /// Whether the event macOS is dispatching is one that would
+    /// have moved focus on its own.
+    ///
+    /// Refuses a positive MOUSE event and nothing else, which
+    /// fails toward stating a destination. Two traps make the
+    /// obvious `== .keyDown` wrong: VoiceOver presses a control
+    /// through `AXPress` with no `NSEvent` behind it at all, and
+    /// `currentEvent` is the last event RETRIEVED rather than
+    /// one cleared after dispatch — so a test that must see a
+    /// key press states nothing for a screen-reader user, whose
+    /// cursor then follows focus to a view the navigation just
+    /// destroyed.
+    @MainActor static var movesFocus: Bool {
+        switch NSApp.currentEvent?.type {
+        case .leftMouseDown, .leftMouseUp, .rightMouseDown,
+            .rightMouseUp, .otherMouseDown, .otherMouseUp:
+            return false
+        default:
+            return true
+        }
     }
 }

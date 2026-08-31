@@ -48,16 +48,12 @@ final class SettingsModel: ObservableObject {
     var autoStartFlashToken = 0
     /// Active navigation destination screen, or nil for Home grid (#678).
     ///
-    /// The `didSet` is the ONE place the input source is read
-    /// (#991): every navigation path — the cards, the
-    /// cross-reference links, a search hit, the back chip,
-    /// Escape, and the programmatic repairs — arrives through
-    /// this property, so no site has to remember, and the read
-    /// happens while macOS is still dispatching the event that
-    /// caused it. Recorded rather than read at the raise because
-    /// a focus statement need not run in the same turn.
+    /// The `didSet` is the one place the input source is
+    /// recorded (#991): every navigation path already passes
+    /// through this property, and the read is only valid while
+    /// the event that caused it is still being dispatched.
     @Published var destination: SettingsDestination? {
-        didSet { nav.navigationFromKeyboard = SettingsInputSource.isKeyboard }
+        didSet { nav.navigationMovesFocus = SettingsInputSource.movesFocus }
     }
     /// Simple or Power User mode; stored in `SettingsModePreference` (#678).
     @Published var settingsMode: SettingsMode = .simple

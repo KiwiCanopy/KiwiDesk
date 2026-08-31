@@ -117,20 +117,12 @@ struct SettingsView: View {
         .onExitCommand {
             if selection != nil { selection = nil }
         }
-        // Arrival focus, stated by the SHELL: the pane is created
-        // by this very transition, so the same `onChange` hung on
-        // the pane would never fire on Home→area (#996). Keyed on
-        // the VALUE, never `destination != nil`, or an area→area
-        // navigation states nothing (#998); `now != nil` leaves
-        // the pop to `HomeScreen`'s own restore. A reveal into the
-        // destination already showing moves no focus, deliberately
-        // — the user is there and the keyboard stays put.
+        // Stated by the SHELL, which outlives both branches, and
+        // only where the platform would have moved focus itself
+        // (#996, #991). Keyed on the VALUE, or an area→area
+        // navigation states nothing (#998).
         .onChange(of: model.destination) { _, now in
-            // Only when the platform would have moved focus
-            // itself (#991) — a mouse click states nothing, and
-            // Tab then restarts from the top the way it does
-            // everywhere else on macOS.
-            if now != nil, model.nav.navigationFromKeyboard {
+            if now != nil, model.nav.navigationMovesFocus {
                 contentFocused = true
             }
         }
