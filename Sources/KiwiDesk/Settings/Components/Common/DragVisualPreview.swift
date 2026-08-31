@@ -1,22 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Shared by the Gaps & Borders drag editor (structure) and the
-/// Advanced Colours Drag group (tints) — the same recycled-preview
-/// rule as `FocusBorderPreview`, and the #231 twin columns are
-/// reproduced on the colour page for the same reason they exist
-/// here: tuning one column must never scroll its preview away.
-///
-/// One mock window rect rendered with the current visual's
-/// fill, border, and the shared corner radius.
+/// Window tile mock preview for drag visual styling (`DragVisual`, #231).
 struct DragVisualPreview: View {
     let visual: DragVisual
     let cornerRadius: CGFloat
 
     var body: some View {
         ZStack {
-            // A neutral desktop backdrop so translucent
-            // fills read realistically.
             RoundedRectangle(cornerRadius: 6)
                 .fill(Color.secondary.opacity(0.12))
             mock
@@ -32,10 +23,6 @@ struct DragVisualPreview: View {
     }
 
     private var mock: some View {
-        // Remap the full slider ranges onto the preview's
-        // smaller span (the GapPreviewScale
-        // fix, #231): a hard cap made both sliders visibly stop
-        // responding halfway up, reading as "the setting broke."
         let radius = scale(cornerRadius, from: 0...40, to: 0...20)
         let width = scale(
             visual.borderWidth,
@@ -51,13 +38,8 @@ struct DragVisualPreview: View {
             .opacity(visual.enabled ? 1 : 0.25)
     }
 
-    /// Illustrate the footprint each alignment gives at runtime
-    /// (`DragOverlay.adjustedFrame`, #231): inset within the
-    /// tile for `.inside`, sitting outside the tile edge for
-    /// `.outside`. Schematic, not pixel-exact — the point is the
-    /// larger outward footprint, sized to half the (scaled)
-    /// width the slider drives so the difference grows with the
-    /// same number the user is dragging.
+    /// Renders inside/outside border alignment preview
+    /// (`DragOverlay.adjustedFrame`, #231).
     @ViewBuilder private func border(
         radius: CGFloat,
         width: CGFloat
@@ -69,12 +51,7 @@ struct DragVisualPreview: View {
                 RoundedRectangle(cornerRadius: radius)
                     .strokeBorder(color, lineWidth: width)
             case .outside:
-                // Grow the corner radius with the outward offset
-                // (a parallel offset of a rounded rect by d has
-                // radius R + d) so the border's inner corner
-                // stays flush with the tile's rounded corner —
-                // keeping `radius` here left a backdrop sliver in
-                // each corner.
+                // Parallel offset corner radius R + width / 2.
                 RoundedRectangle(cornerRadius: radius + width / 2)
                     .stroke(color, lineWidth: width)
                     .padding(-width / 2)
@@ -82,9 +59,8 @@ struct DragVisualPreview: View {
         }
     }
 
-    /// Linear map of `value` from one closed range onto another,
-    /// clamped to the target range at the ends (mirrors
-    /// `GapPreviewScale`).
+    /// Linear interpolation of value across source/destination ranges
+    /// (`GapPreviewScale`).
     private func scale(
         _ value: CGFloat,
         from src: ClosedRange<CGFloat>,

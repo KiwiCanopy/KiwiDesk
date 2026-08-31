@@ -1,34 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The dashed **Follows main display** tray (#36, redrawn in
-/// #678 Phase 3 turn 13b): a space dropped here tracks whichever
-/// display is currently main instead of freezing a fingerprint.
-///
-/// It is deliberately NOT a fourth card in a row of cards. A
-/// space that follows main is a statement about the MAIN display,
-/// so the tray hangs off that display's rectangle and moves with
-/// the "main" badge — `MonitorTray` owns where it lands. Dashed
-/// rather than solid because the thing it represents is a role,
-/// not a piece of hardware: there is no rectangle on the desk
-/// that corresponds to it.
+/// Drop target tray for Spaces assigned to dynamic main display
+/// (`MonitorTray`, #36, #678).
 struct FollowsMainTray: View {
     @ObservedObject var model: SettingsModel
     let rows: MonitorsFamilyRows
-    /// The tray's drawn size, from the arrangement — it holds
-    /// chips in a fixed band exactly as a card does, so it takes
-    /// the same overflow arithmetic. Without it the tray was the
-    /// one unbounded chip container left, clipping every space
-    /// past its first row along with that space's clear button
-    /// and menu (architect review, 2026-08-04).
     let size: CGSize
     @State private var targeted = false
     @State private var showingOverflow = false
 
     var body: some View {
-        // Two children, one gap, the shared constant — the same
-        // shape the card holds, since the tray runs the card's
-        // capacity arithmetic.
         VStack(
             alignment: .leading,
             spacing: MonitorCardChips.stackSpacing
@@ -42,12 +24,6 @@ struct FollowsMainTray: View {
             maxHeight: .infinity,
             alignment: .topLeading
         )
-        // NO plate. A display is a lit surface on the picture's
-        // well; the tray is a ROLE, and giving it the same fill,
-        // radius and stroke made it read as a fourth monitor
-        // hovering above the desk. It carries a wash only while a
-        // drop is over it, which is the same targeting channel
-        // the cards use.
         .background(
             RoundedRectangle(cornerRadius: 14)
                 .fill(.tint.opacity(targeted ? 0.2 : 0))
@@ -87,9 +63,6 @@ struct FollowsMainTray: View {
             .truncationMode(.tail)
             Spacer(minLength: 0)
         }
-        // Framed, so the height the chip arithmetic subtracts is
-        // TRUE of this header rather than an estimate of an
-        // unsized `.caption2` (code review, 2026-08-04).
         .frame(height: MonitorCardChips.trayHeaderHeight)
     }
 
@@ -100,9 +73,6 @@ struct FollowsMainTray: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         } else {
-            // The tray's header is unsized `.caption2`, shorter
-            // than the card's, so it passes its own rather than
-            // inheriting a number that only happens to be close.
             let split = MonitorCardChips.split(
                 spaces,
                 in: size,
@@ -131,8 +101,8 @@ struct FollowsMainTray: View {
         )
     }
 
-    /// The chips the tray has no room for, reachable rather than
-    /// clipped away — the same offer the display cards make.
+    /// Overflow chip showing popover with remaining spaces
+    /// (`MonitorCardChips`).
     private func overflowChip(
         _ all: [SpaceID],
         _ count: Int

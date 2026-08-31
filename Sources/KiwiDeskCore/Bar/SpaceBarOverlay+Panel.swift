@@ -1,14 +1,8 @@
 import AppKit
 
-/// Panel plumbing for the Space Bar overlay: the non-activating
-/// panel, the clipping item viewport and its scroll arrows inside
-/// it, per-render strip styling, and the item-view pool. The
-/// App Bar's `+Panel` twin.
+/// Panel plumbing and view hierarchy for SpaceBarOverlay (`BarPanel`, #407).
 extension SpaceBarOverlay {
-    /// `plain` and `material` draw their shared plate as its
-    /// own view (`updatePlainPlate` / the glass-hosting dispatch)
-    /// so it can hug the run (`background_fit`); `boxed` boxes
-    /// each item. The container itself never paints.
+    /// Configures base panel container styling.
     func styleContainer(
         _ panel: NSPanel,
         style: SpaceBarStyle,
@@ -19,20 +13,16 @@ extension SpaceBarOverlay {
         }
         layer.masksToBounds = true
         layer.cornerRadius = 0
-        // The container never paints: the fill is drawn per item
-        // (Boxed) or as a shared plate (Plain / Material glass).
         layer.backgroundColor = NSColor.clear.cgColor
     }
 
-    /// Shows / sizes `plain`'s shared fill plate at
-    /// `plateFrame`, else hides it.
+    /// Updates or hides solid plain background plate (`SpaceBarStyle`).
     func updatePlainPlate(
         _ panel: NSPanel,
         style: SpaceBarStyle,
         strip: CGRect,
         plateFrame: CGRect
     ) {
-        // Solid Plain plate: Plain shape without the glass finish.
         guard style.backgroundStyle == .plain, !style.glassEnabled,
             let content = panel.contentView
         else {
@@ -59,8 +49,7 @@ extension SpaceBarOverlay {
             NSColor(kiwiHex: style.fillColor).cgColor
     }
 
-    /// The one hosting mode for this render (#407), from the
-    /// resolved style and whether the run overflows.
+    /// Resolves glass hosting mode for current render pass (#407).
     func glassHosting(
         _ style: SpaceBarStyle,
         overflow: Bool
@@ -73,13 +62,8 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Teardown half of the one glass-hosting dispatch (#407, App Bar
-    /// twin): run once per render, *before* the item + front passes,
-    /// so the run sits in the container the target mode expects while
-    /// frames are laid out. Tears down every mode except `mode`; the
-    /// target is installed post-passes by `installGlassHosting`. The
-    /// front segment rides `itemContainer`, so it is tinted as part of
-    /// the run. The solid plain plate self-gates in `updatePlainPlate`.
+    /// Prepares view hierarchy for target glass hosting mode before layout
+    /// (#407).
     func prepareGlassHosting(
         _ mode: GlassHosting,
         panel: NSPanel,
@@ -97,20 +81,13 @@ extension SpaceBarOverlay {
         guard let content = panel.contentView else { return }
         switch mode {
         case .boxGlass:
-            // Per-box glass keeps its boxes; hand the run back so the
-            // boxes can reparent items out of it, unwind any
-            // plain-glass run, and hide the single plate.
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
             glassTint?.isHidden = true
         case .plainGlassHug, .plainGlassSpan:
-            // The run + single plate are hosted post-passes by
-            // `updatePlainGlass`; only the boxes must go first.
             teardownBoxGlasses()
         case .plainPlate, .none:
-            // No glass: unwind boxes and run, restore the plain
-            // hierarchy, and hide the glass plate.
             teardownBoxGlasses()
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
@@ -119,9 +96,7 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// Install half of the one glass-hosting dispatch (#407, App Bar
-    /// twin): run once per render, *after* the item + front passes,
-    /// to host the target mode from the laid-out `frames`.
+    /// Installs glass views after item layout passes (#407).
     func installGlassHosting(
         _ mode: GlassHosting,
         panel: NSPanel,
@@ -189,10 +164,8 @@ extension SpaceBarOverlay {
         let view = AppBarOverlay.FlippedView()
         view.wantsLayer = true
         panel.contentView = view
-        // Items and the front segment render inside a clipping
-        // viewport so a scrolled item ends a gap short of the
-        // arrows instead of sliding under them (#385); the arrows
-        // sit above it at the strip's ends.
+        // Clipping viewport prevents scrolled items sliding under arrows
+        // (#385).
         itemContainer.wantsLayer = true
         itemContainer.layer?.masksToBounds = true
         view.addSubview(itemContainer)

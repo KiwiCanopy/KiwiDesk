@@ -1,24 +1,14 @@
 import AppKit
 import CoreGraphics
 
-/// Coordinate conversion helpers.
-///
-/// The Accessibility API uses a TOP-left origin (y grows down
-/// from the top of the primary display); Cocoa/NSScreen uses a
-/// BOTTOM-left origin. KiwiDesk works in AX coordinates
-/// everywhere; NSScreen values are flipped at the boundary.
+/// Coordinate conversion helpers between Cocoa bottom-left and AX top-left
+/// origins.
 public enum GeometryUtils {
-    /// The macOS window corner radius (pt) at the current
-    /// release. ONE shared source so the focus border's rounded
-    /// corners (`BorderGeometry`) and the drag visuals'
-    /// corner-radius default (`TilingSettings.dragCornerRadius`)
-    /// can't drift — tune it here when a release changes the
-    /// system radius. macOS/iOS is converging every window on one
-    /// radius, so no per-window detection is worth its cost.
+    /// macOS window corner radius constant (`BorderGeometry`,
+    /// `TilingSettings.dragCornerRadius`).
     public static let systemWindowCornerRadius: CGFloat = 16
 
     /// Flips a rect between Cocoa and AX coordinate systems.
-    /// The operation is its own inverse.
     public static func flip(
         _ rect: CGRect,
         primaryHeight: CGFloat
@@ -43,9 +33,8 @@ public enum GeometryUtils {
         CGPoint(x: point.x, y: primaryHeight - point.y)
     }
 
-    /// A screen's usable area in AX coordinates. When the
-    /// menu bar auto-hides, its reserved strip is reclaimed —
-    /// only user-configured gaps remain at the top.
+    /// A screen's usable area in AX coordinates, reclaiming auto-hidden menu
+    /// bar.
     @MainActor
     public static func axVisibleFrame(
         of screen: NSScreen
@@ -61,10 +50,7 @@ public enum GeometryUtils {
         return flip(visible, primaryHeight: primaryHeight)
     }
 
-    /// True when the macOS menu bar auto-hides on the desktop
-    /// (System Settings > Control Center). visibleFrame keeps
-    /// the menu bar strip reserved even then; windows may use
-    /// it.
+    /// True when the macOS menu bar is configured to auto-hide.
     public static var menuBarAutoHides: Bool {
         let domain = UserDefaults.standard.persistentDomain(
             forName: UserDefaults.globalDomain
@@ -73,11 +59,8 @@ public enum GeometryUtils {
             .boolValue ?? false
     }
 
-    /// Extends a visibleFrame's top edge over the menu bar
-    /// strip (Cocoa coordinates). The notch housing (safeTop)
-    /// stays reserved: WindowServer clamps regular windows
-    /// below it, and fighting that clamp would wobble every
-    /// retile.
+    /// Extends visibleFrame top edge over menu bar while preserving notch
+    /// safeTop.
     static func reclaimingMenuBar(
         _ visible: CGRect,
         screen frame: CGRect,

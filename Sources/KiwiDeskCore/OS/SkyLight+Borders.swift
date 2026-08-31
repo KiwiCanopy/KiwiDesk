@@ -258,31 +258,15 @@ extension SkyLight {
             && transactionSubLevel != nil
             && transactionTransform != nil
             && transactionOrder != nil && transactionCommit != nil
-            // Space-pinning is now REQUIRED, not a best-effort extra:
-            // it is the sole mechanism that hides the SkyLight ring in
-            // Mission Control (the old `MissionControlObserver` that
-            // hid an unpinned ring was removed). Without it, retire to
-            // the AppKit `.transient` fallback, which self-vanishes.
             && moveWindowsToManagedSpace != nil
             && copySpacesForWindows != nil
     }
 
-    /// `SLSCopySpacesForWindows` selector: every space kind
-    /// (user + fullscreen + system), so a window on any space
-    /// answers.
+    /// `SLSCopySpacesForWindows` selector for all space types.
     private static let allSpacesSelector: UInt32 = 0x7
 
-    /// Pins `window` to the space `target` currently occupies (the
-    /// active space when the query yields nothing), so a Mission
-    /// Control swipe leaves the ring behind instead of floating a
-    /// space-unassigned — therefore all-spaces — window over the
-    /// overview (the jankyborders model). Returns whether a space
-    /// resolved and the move was issued; the caller retires the
-    /// SkyLight backend on `false` so an unpinnable ring falls back
-    /// to the AppKit `.transient` renderer instead of floating in
-    /// Mission Control. The symbol `guard`s are defensive (both are
-    /// required by `borderRenderingAvailable`); the space `guard` is
-    /// the one that can actually fire at runtime.
+    /// Pins window to space of target window to prevent floating in
+    /// Mission Control.
     static func pinWindow(
         _ window: CGWindowID,
         toSpaceOf target: CGWindowID,
@@ -300,7 +284,7 @@ extension SkyLight {
         return true
     }
 
-    /// The space `target` sits on, per the WindowServer.
+    /// Queries WindowServer for space hosting target window (`SpaceID`).
     private static func windowSpace(
         _ target: CGWindowID,
         connection: ConnectionID
@@ -317,8 +301,7 @@ extension SkyLight {
         return first.uint64Value
     }
 
-    /// One-window `CFArray` for the space calls. jankyborders
-    /// packs the id as a signed-32 `CFNumber`; match it.
+    /// Wraps window ID in CFArray for SkyLight space APIs.
     private static func windowList(
         _ id: CGWindowID
     ) -> CFArray? {

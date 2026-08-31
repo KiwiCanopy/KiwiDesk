@@ -3,13 +3,8 @@ import Foundation
 import KiwiDeskCore
 import SwiftUI
 
-/// Turn 14c's "You are already set up" beat: Home opens full,
-/// not empty, and the banner says so once — the tour seeded a
-/// real setup, so the first Settings visit needs orientation,
-/// not a wizard. Shows only on Home, only after the tour has
-/// run, and retires permanently on dismiss or on the first
-/// save/revert (`SettingsModel` applies a dirty draft — the
-/// user is past needing it).
+/// First-run onboarding banner state management
+/// (`OnboardingDiscovery.markShown()`).
 enum HomeFirstRunState {
     static let seededKey = "home.firstRunSeeded"
     static let retiredKey = "home.firstRunRetired"
@@ -21,8 +16,7 @@ enum HomeFirstRunState {
             && !defaults.bool(forKey: retiredKey)
     }
 
-    /// The tour's close marks Home's banner pending — same
-    /// moment `OnboardingDiscovery.markShown()` fires.
+    /// Seeds first-run state on onboarding completion.
     static func seed(_ defaults: UserDefaults) {
         defaults.set(true, forKey: seededKey)
     }
@@ -32,14 +26,9 @@ enum HomeFirstRunState {
     }
 }
 
-/// The banner itself: informational card chrome (never the
-/// paused bar's amber — failure outranks welcome and must not
-/// share its surface), a lead line, the replay button and a
-/// permanent dismiss.
+/// First-run banner displayed on Settings Home view (`GuideLink`, #1019).
 struct HomeFirstRunBanner: View {
     @ObservedObject var model: SettingsModel
-    /// Re-renders Home after retire — UserDefaults alone would
-    /// not invalidate the view.
     @Binding var visible: Bool
 
     var body: some View {
@@ -59,14 +48,6 @@ struct HomeFirstRunBanner: View {
                 Text(lede)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
-                // The same pointer the tour's closing card ends
-                // on (#1019), here because a user who closed
-                // the tour after its shortcuts screen — or
-                // finished it months ago — meets that card
-                // never. It follows the lede's "this
-                // is where you come when you want something
-                // different" the way it follows the tour's
-                // "you do not need Settings today".
                 GuideLink(ink: SettingsTheme.ink2)
             }
             Spacer()
@@ -91,19 +72,6 @@ struct HomeFirstRunBanner: View {
             )
         }
         .padding(12)
-        // Card chrome on the card radius — the same box a Home
-        // card is, so the banner reads as belonging to the grid
-        // it sits above rather than as a fourth surface. It
-        // deliberately never takes the paused bar's amber
-        // (failure outranks welcome).
-        //
-        // A plain HAIRLINE, not an accent border: a hovered Home
-        // card is card-fill + card-radius + an accent border, and
-        // this banner sits directly above the grid — so an accent
-        // border here put two pixel-identical boxes on screen
-        // meaning "you are hovering this" and "this is the
-        // welcome beat". The `checkmark.seal` glyph carries the
-        // beat on its own.
         .background(
             RoundedRectangle(
                 cornerRadius: SettingsTheme.cardRadius

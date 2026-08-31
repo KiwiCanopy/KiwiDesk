@@ -1,17 +1,9 @@
 import Foundation
 
-/// The window half of the bridge: moving windows between
-/// Desktops (#25) and the sticky primitive — a window that is a
-/// member of several Desktops at once. Windows are
-/// WindowServer ids (`WindowID.raw`); any app's windows, not
-/// only KiwiDesk's own.
+/// Private WindowServer bridge operations for window space movement
+/// (#25, #884).
 extension WMBridge {
-    /// Moves `windows` to `space` — the #25 move, device-proven
-    /// on another app's window (#884). A window that lands on
-    /// an off-screen Desktop goes dark to Accessibility until
-    /// that Desktop shows, so a caller wanting it in a KiwiDesk
-    /// space keeps a pending assignment for the reveal
-    /// reconcile (#884's semantics note).
+    /// Moves windows to target space asynchronously (#25, #884).
     public static func moveWindows(
         _ windows: [WindowID],
         to space: SpaceID
@@ -30,11 +22,8 @@ extension WMBridge {
         return performAsync(op)
     }
 
-    /// Adds `windows` to every one of `spaces` without removing
-    /// them from where they are — the sticky primitive, proven
-    /// visually (#889 item 5): after the add the window IS on
-    /// screen on the other Desktop. Membership is tracked by the
-    /// CALLER: `spaces(for:)` never reports it (same item).
+    /// Adds windows to spaces without removing from current space
+    /// (#889 item 5).
     public static func addWindows(
         _ windows: [WindowID],
         to spaces: [SpaceID]
@@ -46,8 +35,7 @@ extension WMBridge {
         )
     }
 
-    /// Removes `windows` from `spaces`; the counterpart of
-    /// `addWindows(_:to:)`.
+    /// Removes windows from spaces (#889 item 5).
     public static func removeWindows(
         _ windows: [WindowID],
         from spaces: [SpaceID]
@@ -59,17 +47,10 @@ extension WMBridge {
         )
     }
 
-    /// The option mask `spaces(for:)` queries with — the one
-    /// that answers at all. #889 item 5 tried 0–3 (empty) and 5
-    /// and 7 (one id); the mask is not a knob a caller re-opens
-    /// at a call site.
+    /// Space membership query option mask (#889 item 5).
     private static let membershipOptions: UInt32 = 7
 
-    /// The spaces `windows` belong to, as the bridge reports
-    /// them. **Single membership only**: this never lists a
-    /// second Desktop a sticky add put the window on (#889
-    /// item 5). Use it for the primary Desktop; keep sticky
-    /// bookkeeping in KiwiDesk's own state.
+    /// Queries primary space membership for windows (#889 item 5).
     public static func spaces(for windows: [WindowID]) -> [SpaceID]? {
         let op = make(
             "CopySpacesForWindowsOperation",

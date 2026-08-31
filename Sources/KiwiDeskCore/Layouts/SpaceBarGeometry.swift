@@ -1,34 +1,11 @@
 import CoreGraphics
 
-/// Space-first reservation (#293): the Space Bar's strip is
-/// carved from the display's *original* visible frame, and the
-/// remainder becomes the `bounds` every layout — and the App
-/// Bar's own reservation — operates inside. Layouts never learn
-/// the Space Bar exists, which is what makes every stacking rule
-/// fall out for free:
-///
-/// - Same edge as the App Bar: the App Bar carves its strip from
-///   the already-inset frame, so the Space Bar sits
-///   screen-facing, the App Bar window-facing, and the combined
-///   inset is the sum of both strips.
-/// - Perpendicular edges: the App Bar's strip spans the inset
-///   frame, so it starts inside the Space Bar's inset and the
-///   corners cannot overlap.
+/// Space Bar screen strip reservation and layout bounds arithmetic (#293).
 public enum SpaceBarGeometry {
-    // NOTE: every flow that reads a layout *span* MUST route its
-    // bounds through `TilingSettings.layoutBounds(from:)` (which
-    // wraps `remainingFrame`) — normally via the engine seam,
-    // `TilingEngine.layoutBounds(on:)`. A flow that skips it
-    // re-opens the strip. That is not only the
-    // `settings.context(bounds:)` flows: the resize paths build no
-    // `LayoutContext` yet divide a delta by this span and compare
-    // slots against its midpoint, and read it raw until #537.
-    // `LayoutBoundsRoutingTests` is the enforcement.
+    // Layout span flows must route via TilingSettings.layoutBounds(from:)
+    // (#537, LayoutBoundsRoutingTests).
 
-    /// The strip the bar occupies on `visible` (AX coordinates),
-    /// or nil while the bar is off. Reuses the App Bar's
-    /// edge-generic carve so the two bars can't disagree about
-    /// what an edge means.
+    /// The strip the bar occupies on visible bounds, or nil when disabled.
     public static func strip(
         in visible: CGRect,
         style: SpaceBarStyle
@@ -41,11 +18,7 @@ public enum SpaceBarGeometry {
         )
     }
 
-    /// `visible` minus the bar's strip — the bounds handed to
-    /// `TilingSettings.context(bounds:space:)`. The full frame
-    /// while the bar is off (a disabled bar reserves nothing).
-    /// No inner gap here: the layout's own outer gap applies
-    /// inside the remaining frame.
+    /// Visible bounds minus Space Bar strip handed to layout context.
     public static func remainingFrame(
         in visible: CGRect,
         style: SpaceBarStyle

@@ -1,33 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The per-space override editor's dormant footer (#290, restyled
-/// for the #678 8b pane): the "Saved for other layouts" card — a
-/// summary of overrides saved for layouts OTHER than the active
-/// one, expandable to the per-layout breakdown, with `Reset All`
-/// beside it. Split from `SpaceOverrideRows` to keep the base file
-/// under the line ceiling. The active layout's own reset moved to
-/// the editor header (`SpacesSection+Overrides.swift`); this footer
-/// carries only what concerns the *other* layouts, so the card
-/// reads as one idea.
+/// Dormant layout overrides footer and reset controls (#290, #678 8b).
 extension SpaceOverrideRows {
-    /// Layouts other than the active one that carry saved
-    /// overrides for this space, each with its set-field count.
-    /// Single-sourced from Core (`dormantOverrides`) over the same
-    /// layout list the cell's count sums, so a counted layout can
-    /// never be missing here. Internal so the editor chrome can
-    /// gate the card on it.
+    /// Saved overrides for layouts other than active mode
+    /// (`dormantOverrides`).
     var dormantLayouts: [(mode: LayoutMode, count: Int)] {
         g.dormantOverrides(for: space, active: mode)
     }
 
-    /// The bottom card, present only when dormant values exist. A
-    /// clock glyph + "Saved for other layouts (N)" summary that
-    /// says the values reactivate on a layout switch, a `Show`
-    /// disclosure of the per-layout breakdown (inspection-only —
-    /// no checkbox, accent or edit affordance, which is what reads
-    /// "not editable here"), and the destructive `Reset All`
-    /// (confirmed) that only this card can reach.
+    /// Footer card summarizing and resetting dormant overrides for other
+    /// layouts.
     @ViewBuilder
     var footer: some View {
         let dormant = dormantLayouts
@@ -71,10 +54,7 @@ extension SpaceOverrideRows {
             )
     }
 
-    /// A `DisclosureGroup` labelled `Show`, collapsed by default:
-    /// the per-layout breakdown is inspection-only trivia. Each
-    /// line is a glyph + "<Layout> — N fields", no interactive
-    /// chrome.
+    /// Inspection-only disclosure of dormant layout override counts (#956).
     @ViewBuilder
     private func dormantDisclosure(
         _ dormant: [(mode: LayoutMode, count: Int)]
@@ -93,11 +73,6 @@ extension SpaceOverrideRows {
             }
             .padding(.top, 4)
         }
-        // The one drawer outside `SettingsDisclosure` (it opens
-        // from a popover row, so no reveal can target it) still
-        // takes the house header — otherwise it is the odd
-        // header out, the only one that answers its triangle
-        // alone (#956).
         .disclosureGroupStyle(SettingsDisclosureStyle())
         .font(.caption)
         .foregroundStyle(.secondary)

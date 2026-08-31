@@ -1,11 +1,7 @@
 import AppKit
 
-/// Plain + Liquid Glass hug (piece 1). The single frosted plate
-/// hugs the item run when it fits, instead of spanning the whole
-/// viewport. Driven at the end of `render` because hugging places
-/// the items run-local, which needs their laid-out frames. On
-/// overflow the run scrolls and fills the strip, so the plate falls
-/// back to hosting the whole viewport (nothing to hug there).
+/// Plain Liquid Glass plate layout and item hugging for App Bar
+/// (`GlassPlate`, #408).
 extension AppBarOverlay {
     func updatePlainGlass(
         panel: NSPanel,
@@ -50,8 +46,7 @@ extension AppBarOverlay {
         }
     }
 
-    /// Overflow / fallback: host the whole item viewport at its
-    /// frame — the scrolling run fills the strip, nothing to hug.
+    /// Spans glass plate over full viewport on overflow.
     private func spanViewport(
         plate: NSView,
         viewport: CGRect,
@@ -76,13 +71,7 @@ extension AppBarOverlay {
         )
     }
 
-    /// Solid colored backdrop behind the glass plate so the near-
-    /// colorless glass refracts a hue (#408); hidden for a
-    /// transparent Fill (clear glass). Snaps to the plate's frame —
-    /// the glass plate itself snaps (`GlassPlate.update` un-animated
-    /// in `hugRun`/`spanViewport`, installed outside the animation
-    /// group), so an animated backdrop would lag a color edge past
-    /// the plate on a run-size change. Matches the Space Bar twin.
+    /// Applies solid colored tint backdrop behind glass plate (#408).
     private func applyPlateTint(
         plate: NSView,
         frame: CGRect,
@@ -104,14 +93,7 @@ extension AppBarOverlay {
         }
     }
 
-    /// A reorder drag beginning while the plain+glass plate hugs the
-    /// run would split the mover (reparented to `itemContainer`) from
-    /// its reflowing siblings (still in `glassRun` at the plate's
-    /// origin), shifting the siblings by the run offset for the drag.
-    /// Pre-empt it: hand the items back and span the plate over the
-    /// viewport — the same state overflow renders in, where the drag
-    /// already works. Idempotent (a no-op once the run is empty);
-    /// `render()` re-hugs on drop. Only fires under plain + glass hug.
+    /// Spans glass plate over viewport during drag reordering.
     func spanPlainGlassForDrag() {
         guard let plate = glassPlate, let run = glassRun,
             let span = glassDragSpan,
@@ -125,9 +107,7 @@ extension AppBarOverlay {
         )
     }
 
-    /// Hug: the glass takes the plate frame and hosts a run wrapper
-    /// with the items placed run-local inside it (their viewport
-    /// position shifted into the plate's coordinate space).
+    /// Hugs glass plate around laid out item run.
     private func hugRun(
         plate: NSView,
         content: NSView,
@@ -139,8 +119,6 @@ extension AppBarOverlay {
     ) {
         let run = glassRun ?? AppBarOverlay.FlippedView()
         glassRun = run
-        // Hand the viewport back if it currently rides the plate,
-        // so only the run wrapper does.
         if GlassPlate.holds(plate, itemContainer) {
             GlassPlate.detach(plate)
             content.addSubview(
@@ -171,7 +149,6 @@ extension AppBarOverlay {
             radius: radius,
             hex: style.fillColor
         )
-        // Remember the viewport span so a drag can leave hug mode.
         glassDragSpan = GlassDragSpan(
             viewport: viewport,
             radius: radius,
@@ -179,8 +156,7 @@ extension AppBarOverlay {
         )
     }
 
-    /// Returns any run-hosted items to `itemContainer` (leaving hug
-    /// mode within plain + glass).
+    /// Returns run-hosted items to item container.
     func returnItemsFromGlassRun() {
         guard let run = glassRun else { return }
         for item in itemViews where item.superview === run {
@@ -188,8 +164,7 @@ extension AppBarOverlay {
         }
     }
 
-    /// Tears the run wrapper down: items back to `itemContainer`,
-    /// wrapper detached from the plate (glass off / shape changed).
+    /// Detaches glass run wrapper and restores item hierarchy.
     func teardownGlassRun() {
         guard let run = glassRun else { return }
         returnItemsFromGlassRun()

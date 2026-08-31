@@ -1,14 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The per-row launch-behavior menu for Open applications (#334):
-/// a compact borderless menu (mirroring `AppRuleRow`'s Float facet)
-/// choosing between Open or Focus (`pull_or_spawn`, the default) and
-/// Open New (`spawn_new`). The behavior is derived from and written
-/// back into the binding's `lua` — no persisted field — so the same
-/// app can hold one shortcut per behavior without a new row
-/// primitive: the dropdown greys a behavior already bound for that
-/// app so the pair can't collide, while the other stays reachable.
+/// Launch behavior picker menu for application shortcuts
+/// (`AppLaunchBehavior`, #334).
 extension ApplicationsGroup {
     @ViewBuilder
     func behaviorMenu(
@@ -28,8 +22,6 @@ extension ApplicationsGroup {
                     Button(behaviorLabel(behavior)) {
                         setBehavior(binding, behavior)
                     }
-                    // Can't bind the same app+behavior twice; a
-                    // different behavior for the app stays open.
                     .disabled(
                         behavior != current
                             && behaviorTaken(
@@ -45,8 +37,6 @@ extension ApplicationsGroup {
             .menuStyle(.borderlessButton)
             .neutralMenuLabel()
             .fixedSize()
-            // Value-as-label otherwise (#812): the noun is the
-            // `?`'s subject, and the control owes it too.
             .accessibilityLabel(
                 L("shortcuts.app_behavior", "Launch behavior")
             )
@@ -69,18 +59,11 @@ extension ApplicationsGroup {
                 "Open or Focus"
             )
         case .openNew:
-            // Not bare "Open" — ambiguous under a section already
-            // titled "Open applications".
             return L("shortcuts.app_behavior.open_new", "Open New")
         }
     }
 
-    /// The minimized sentence (#673) is here rather than on its
-    /// own row because it answers a question about *this
-    /// control's* two choices — what Open or Focus does when
-    /// there is nothing on screen to focus. A separate hint would
-    /// be a second explanation of one decision, and the `?`
-    /// popover is where a concept belongs.
+    /// Help explanation text for launch behavior options (#673).
     private var behaviorHelp: String {
         L(
             "shortcuts.app_behavior.help",
@@ -103,8 +86,7 @@ extension ApplicationsGroup {
         )
     }
 
-    /// Rewrites the binding's `lua` to the chosen behavior, keeping
-    /// its bundle id. A no-op when the row carries no app yet.
+    /// Rewrites Lua binding command to selected launch behavior.
     private func setBehavior(
         _ binding: Binding<KeyBinding>,
         _ behavior: AppLaunchBehavior
@@ -120,8 +102,7 @@ extension ApplicationsGroup {
         )
     }
 
-    /// Whether an application row already binds this exact
-    /// app+behavior. `excluding` drops the row being edited.
+    /// Checks if target bundle ID already binds the specified behavior.
     private func behaviorTaken(
         _ behavior: AppLaunchBehavior,
         bundleID: String?,
@@ -135,10 +116,7 @@ extension ApplicationsGroup {
         ).contains(behavior)
     }
 
-    /// The first launch behavior not yet bound for this app, or nil
-    /// when every behavior is already taken. Seeds a newly added row
-    /// so a second binding for the same app lands on a *distinct*
-    /// behavior instead of duplicating the default (#334).
+    /// Finds first unbound launch behavior for the application (#334).
     func firstAvailableBehavior(
         for bundleID: String
     ) -> AppLaunchBehavior? {
@@ -148,11 +126,7 @@ extension ApplicationsGroup {
         )
     }
 
-    /// The borderless-menu signature: primary-ink label + a
-    /// trailing secondary chevron so a bare-text menu still reads
-    /// as "this opens a menu" — byte-for-byte the same treatment as
-    /// `AppRuleRow`'s Float/Space facet menus, so the two sibling
-    /// surfaces stay visually consistent.
+    /// Label view with dropdown chevron (`AppRuleRow`).
     private func behaviorLabelView(
         _ text: String
     ) -> some View {

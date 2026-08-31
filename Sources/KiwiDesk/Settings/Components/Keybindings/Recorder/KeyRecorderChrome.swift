@@ -1,25 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Presentation-only pieces of `KeyRecorderField`, split out
-/// to keep the field under the file-size ceiling: the
-/// engagement halo around the record button and the transient
-/// live-apply caption (#123).
+/// Visual styling and feedback chrome for shortcut recorder field (#123).
 
-/// The record button's stateful-input-well chrome: at rest a
-/// faint recessed fill nudges it toward "field"; while
-/// recording an accent fill + ring extend slightly past the
-/// button so the one armed field among dozens of recorder
-/// rows reads at a glance. This chrome is the WHOLE recording
-/// signal: it fills and strokes from `SettingsTheme.accent`
-/// directly and never reads the tint, and since the accent came
-/// off the recorder's own tint — it was painting the label, not
-/// this — nothing else says a field is armed.
-/// Negative padding keeps the layout footprint
-/// unchanged. Deliberately NOT a rounded pill like
-/// Save/Cancel: System Settings' own Keyboard Shortcuts
-/// recorder reads the same way — a stateful input well, not a
-/// momentary action.
+/// Recording well chrome displaying accent halo when armed
+/// (`SettingsTheme.accent`).
 struct RecorderButtonChrome: ViewModifier {
     let recording: Bool
 
@@ -53,11 +38,8 @@ struct RecorderButtonChrome: ViewModifier {
     }
 }
 
-/// The transient live-apply caption (#123). Green check = the
-/// shortcut is registered and works right now; the denied
-/// branch surfaces a `RegisterEventHotKey` refusal
-/// (system-reserved combo) at record time instead of after a
-/// Save.
+/// Transient feedback caption showing live apply result or system denial
+/// (#123).
 struct LiveApplyCaption: View {
     let feedback: LiveApplyFeedback
 

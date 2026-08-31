@@ -1,23 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A saved profile's one-line subtitle (#678 turn 13a), split
-/// from `ProfilesSection` for the file ceiling.
-///
-/// It counts only what the profile OWNS. "18 shortcuts" would be
-/// the resolved set — the global bindings the profile inherits
-/// plus its own — and reading it on a profile row says the
-/// profile carries a keybinding set of its own, which is exactly
-/// what a sparse override is not. So the third segment counts
-/// *overrides*, and disappears at zero rather than reading
-/// "0 shortcut overrides" on every profile that never touched
-/// one.
-///
-/// The segments are assembled through a positional frame, not
-/// joined in Swift: the separator and the order are the
-/// translator's (`profiles.summary.*`). Two frames rather than one
-/// optional slot, because a frame with an empty argument leaves
-/// its own separator behind in every locale.
+/// Subtitle and summary phrase formatting for profile items
+/// (`ProfileSummary`, #678 turn 13a).
 extension ProfilesSection {
     func subtitle(_ summary: ProfileSummary) -> String {
         let screens = screensPhrase(summary.count)
@@ -39,10 +24,7 @@ extension ProfilesSection {
         )
     }
 
-    /// The monitor names behind "N screens" — the detail the old
-    /// row spent a chip row on. A tooltip keeps it reachable
-    /// without letting the hardware outrank the profile's own
-    /// name; each covered combination is its own line.
+    /// Tooltip text listing associated monitor names.
     func monitorTooltip(_ summary: ProfileSummary) -> String {
         summary.sets
             .map { set in
@@ -52,26 +34,14 @@ extension ProfilesSection {
             .joined(separator: "\n")
     }
 
-    /// The screen-count phrase, as a complete localized unit.
-    ///
-    /// `internal`, not `private`: the "Which profile loads" card
-    /// interpolates the SAME phrase into its verdicts. Authoring
-    /// `"%1$d screens"` into those frames instead reads "1
-    /// screens" on a one-display Mac — the modal setup — in a
-    /// sentence no catalog can repair, because the defect is in
-    /// the frame rather than the translation.
+    /// Localized screen count phrase.
     func screensPhrase(_ count: Int) -> String {
         count == 1
             ? L("profiles.screens.one", "1 screen")
             : L("profiles.screens.many", "%1$d screens", count)
     }
 
-    /// The preset card counts spaces with the SAME two keys
-    /// (`PresetScreenCard.spaceCountPhrase`) — one noun, one
-    /// pair of keys, so the two surfaces cannot drift per
-    /// locale. The keys are what is shared, not this method: an
-    /// extension member of `ProfilesSection` is not something a
-    /// sibling view could call.
+    /// Localized Space count phrase (`PresetScreenCard.spaceCountPhrase`).
     private func spacesPhrase(_ count: Int) -> String {
         count == 1
             ? L("profiles.spaces.one", "1 Space")

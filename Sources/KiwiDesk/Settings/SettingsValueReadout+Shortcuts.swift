@@ -1,14 +1,6 @@
 import KiwiDeskCore
 
-/// Shortcuts-area rows. Every binding lives inside
-/// `config.layers`, so the one bookable key expands to
-/// per-binding narration — "Focus down · ⌥N → ⌥J" through the
-/// recorder's own glyph pipeline (#23), with the unset dash on
-/// an added/removed binding's empty side — plus a structural
-/// note per layer that appeared or vanished. The
-/// `keybinding.*` family keys name no model path of their own:
-/// the diff attribution books their changes under
-/// `config.layers`, which is the `.layers` arm here.
+/// Shortcuts area diff row generation (`GuiConfig`, `KeyLayer`, #23).
 extension SettingsValueReadout {
     static func shortcutsRows(
         _ key: ShortcutsKey,
@@ -29,17 +21,9 @@ extension SettingsValueReadout {
             .toggleSticky, .toggleDisplaySticky, .showShortcuts,
             .openSettings, .switchToLayer, .openApplications,
             .advanced, .`import`, .restoreDefaults:
-            // no model path — never booked by the diff (these
-            // families' bindings book under `config.layers`).
-            // Restore Defaults is an ACTION, and what it does
-            // lands in `config.layers` like any other edit —
-            // so the diff narrates the rows that moved, never
-            // the button that moved them.
             return []
         }
     }
-
-    // MARK: - config.layers
 
     private static func shortcutsLayerRows(
         _ census: SettingKey,
@@ -84,10 +68,6 @@ extension SettingsValueReadout {
                 )
             )
         }
-        // A layer reorder or a metadata-only binding edit
-        // (kind/label upgraded by import) moves no combo, so
-        // nothing above narrates it — one edited note keeps the
-        // key total for the readout totality guard.
         if rows.isEmpty, old.layers != new.layers {
             rows.append(
                 .note(
@@ -100,10 +80,8 @@ extension SettingsValueReadout {
         return rows
     }
 
-    /// Per-binding rows for a layer present on both sides:
-    /// exact-equal rows drop out first, the leftovers pair by
-    /// Lua action (a re-recorded combo), and the unpaired rest
-    /// narrate as bound/unbound against the unset dash.
+    /// Generates per-binding diff rows for key layer
+    /// (`KeyLayer`, `KeyBinding`).
     private static func shortcutsBindingRows(
         _ census: SettingKey,
         layer: KeyLayer,
@@ -123,7 +101,6 @@ extension SettingsValueReadout {
             }) {
                 let successor = additions.remove(at: index)
                 guard successor.combo != binding.combo else {
-                    // kind/label-only upgrade — no combo moved.
                     continue
                 }
                 rows.append(
@@ -139,9 +116,6 @@ extension SettingsValueReadout {
                     )
                 )
             } else {
-                // The enumeration index rides the instance so
-                // DUPLICATE bound/unbound bindings still mint
-                // distinct row ids inside one ForEach.
                 unbound += 1
                 rows.append(
                     shortcutsRow(
@@ -186,8 +160,6 @@ extension SettingsValueReadout {
             binding,
             labels: labels
         )
-        // The default layer is the whole surface at rest, so
-        // only a named layer prefixes its rows.
         let label =
             layer.isDefault
             ? action : instanceLabel(layer.name, action)
@@ -201,10 +173,7 @@ extension SettingsValueReadout {
         )
     }
 
-    /// Counted set difference under full binding equality:
-    /// (old-only, new-only) once every exactly-equal pair is
-    /// consumed — by count, so twin bindings of one action
-    /// (vim keys + arrows) each match once.
+    /// Computes unmatched binding pairs across old and new binding sets.
     private static func shortcutsUnmatched(
         old: [KeyBinding],
         new: [KeyBinding]

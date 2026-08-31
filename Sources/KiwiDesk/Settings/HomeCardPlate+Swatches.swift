@@ -1,14 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The swatch tiles of the Home card plates (#786): Colours &
-/// Motion and Advanced Colours. Split from
-/// `HomeCardPlate.swift` at the file-size target.
+/// Swatch preview tiles for Home card plates (#786).
 
-/// Five circles of the palette's own voices, the primary accent
-/// largest in the middle — a fan of what the user's colours ARE,
-/// not an editor. Read-only fills; the editing surface stays in
-/// Advanced Colours (`SettingsColorSurfaceTests`).
+/// Fan of five color circles previewing active palette
+/// (`SettingsColorSurfaceTests`).
 struct HomeCardColorsTile: View {
     let settings: TilingSettings
     @Environment(\.schematicPalette) private var palette
@@ -28,9 +24,7 @@ struct HomeCardColorsTile: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    /// The five voices, ordered so the Space Bar's active
-    /// accent — the palette's primary — lands on the biggest
-    /// circle.
+    /// Five primary palette colors centered on Space Bar active accent.
     private var hexes: [String] {
         [
             settings.borderStyle.focusedColor,
@@ -41,10 +35,6 @@ struct HomeCardColorsTile: View {
         ]
     }
 
-    /// Every circle takes the light-ink edge, not only the dark
-    /// ones: a swatch near the plate's own colour would
-    /// otherwise vanish, and which swatch that is depends on
-    /// the user's palette.
     private func circle(
         _ hex: String,
         size: CGFloat
@@ -61,13 +51,7 @@ struct HomeCardColorsTile: View {
     }
 }
 
-/// The Advanced Colours answer as a picture: the prototype's
-/// 4×2 grid, drawn from the REAL paths whose shipped defaults
-/// are the prototype's own hexes (owner, 2026-08-09 — the
-/// curated eight over the surface's first eight, which were
-/// all App Bar values and half duplicates; the full ~24 would
-/// be too many). Fixed square-ish cells, centred — infinity
-/// cells stretched to bars at the grid's wide step.
+/// 4x2 grid of representative swatches for Advanced Colors home card (#786).
 struct HomeCardSwatchGridTile: View {
     let settings: TilingSettings
     @Environment(\.schematicPalette) private var palette

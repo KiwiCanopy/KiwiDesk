@@ -1,24 +1,9 @@
 import AppKit
 
-/// A clickable chevron over one end of a scrolling bar, shown
-/// when items are scrolled away in that direction; boxed in the
-/// bar's item color so it stays legible over the item scrolling
-/// away beneath it. Shared by the App Bar and the Space Bar
-/// (#385) — style-agnostic: the driver hands it resolved colors
-/// (`BarArrowColors`), never a concrete bar style.
-///
-/// Feedback has two callers. Ordinary pointer hover swaps the box
-/// to the hover color via `NSTrackingArea`. A window drag over the
-/// Space Bar arrives as a foreign AX-tracked drag that never
-/// delivers `mouseEntered`/`mouseExited`, so the Space Bar drives
-/// the same swap through `setDragHover` (mirroring the item
-/// views' own synthetic-hover path) — otherwise the arrow would
-/// go dark during the one gesture it exists for (#385).
+/// Clickable chevron view for scrolling App Bar and Space Bar ends (#385).
 @MainActor
 final class BarArrowView: NSView {
-    /// Depth of the clickable scroll-arrow zones at a bar's ends;
-    /// doubles as the visibility margin the active item keeps
-    /// clear of them. Shared by both bars.
+    /// Depth of clickable scroll-arrow zones at bar ends.
     nonisolated static let zone: CGFloat = 24
 
     var onClick: () -> Void = {}
@@ -68,9 +53,7 @@ final class BarArrowView: NSView {
         applyColors()
     }
 
-    /// Synthetic hover for a foreign AX drag over the arrow zone
-    /// (#385): the same visual as pointer hover, driven from the
-    /// drag-move path instead of `NSTrackingArea`.
+    /// Synthetic hover state for foreign AX drag gestures (#385).
     func setDragHover(_ hovered: Bool) {
         guard isDragHovered != hovered else { return }
         isDragHovered = hovered
@@ -84,9 +67,6 @@ final class BarArrowView: NSView {
             ofSize: Self.zone * 0.7,
             weight: .bold
         )
-        // The %-resolve against the arrow box's own shorter side:
-        // 100% is a clean capsule, never an overlapping arc — so
-        // no separate pt clamp is needed.
         layer?.cornerRadius =
             max(0, min(colors.cornerRoundness, 100)) / 100
             * (min(bounds.width, bounds.height) / 2)
@@ -111,10 +91,7 @@ final class BarArrowView: NSView {
     }
 }
 
-/// The resolved colors a `BarArrowView` paints with — each bar
-/// derives these from its own style so the view stays
-/// style-agnostic (#385). `cornerRoundness` is the shared 0–100
-/// percentage, resolved against the arrow box's own shorter side.
+/// Resolved colors for BarArrowView rendering across bar types (#385).
 struct BarArrowColors {
     let text: NSColor
     let hoverText: NSColor

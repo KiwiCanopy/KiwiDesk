@@ -1,18 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The one renderer of draft-diff rows (#678 turn 9, digest
-/// §1.1): the detail panel's "CHANGED IN THIS DRAFT" list and
-/// Home's unsaved-changes popover both mount THIS view, so the
-/// draft has one row vocabulary and the two surfaces cannot
-/// drift. Each row is a jump: clicking it opens the owning
-/// area and reveals the control that changed (the prototype's
-/// "each row is clickable" note), through the same anchor
-/// machinery search uses.
+/// Draft diff change list view with navigation jumps
+/// (`SettingsDiffRow`, #678 turn 9).
 struct SettingsDiffRowsView: View {
     var rows: [SettingsDiffRow]
-    /// The mount decides what surrounds the jump (the popover
-    /// dismisses itself first; the panel navigates in place).
     var jump: (SettingsDiffRow) -> Void
 
     var body: some View {
@@ -40,22 +32,12 @@ struct SettingsDiffRowsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        // The search rows' hover treatment (owner 2026-08-10):
-        // a jump row is a full-row button whose list context is
-        // its rest affordance, and without the wash there is
-        // nothing saying which row the pointer is on. The
-        // shared `Color.primary` chip is right here — both
-        // mounts (popover, panel) sit on mode-varying surfaces.
         .rowHoverHighlight()
         .padding(.horizontal, -6)
         .accessibilityElement(children: .combine)
     }
 
-    /// The right-hand half. The old → new pair is symbolic
-    /// notation (two VALUES around an arrow), not a sentence —
-    /// no locale reorders a before/after readout, which is why
-    /// this is a stack and not a positional frame; the labels
-    /// and notes around it stay localized frames as usual.
+    /// Renders old -> new value change readout.
     @ViewBuilder
     private func valueReadout(
         _ row: SettingsDiffRow
@@ -69,11 +51,6 @@ struct SettingsDiffRowsView: View {
                     .foregroundStyle(SettingsTheme.ink3)
                 Text(verbatim: "→")
                     .foregroundStyle(SettingsTheme.ink3)
-                // The green-emphasis text token, not `accent`
-                // (a full-strength value would read clickable)
-                // and not `accentInk` (that is dark ink FOR
-                // accent fills) — the prototype draws the new
-                // value in exactly this deep green.
                 Text(row.newValue ?? unsetMark)
                     .fontWeight(.semibold)
                     .foregroundStyle(SettingsTheme.groupHeading)
@@ -87,15 +64,11 @@ struct SettingsDiffRowsView: View {
     }
 }
 
-/// The jump every mount shares: the census key's area opens and
-/// the row's own control flashes. Pure pairing — the label key
-/// IS the anchor id (`SettingsControl.id` is the `L()` key),
-/// which `SettingsAnchorPairingTests` holds for cataloged rows.
+/// Navigation anchor resolver for settings diff rows
+/// (`SettingsAnchorPairingTests`).
 @MainActor
 enum SettingsDiffJump {
-    /// The anchor for a row, or nil when the key has no
-    /// Settings surface (a Lua-only override) — the jump then
-    /// opens the area alone.
+    /// Resolves target anchor for jumping to changed setting control.
     static func anchor(
         for row: SettingsDiffRow
     ) -> SettingsAnchor? {

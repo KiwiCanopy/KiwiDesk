@@ -10,27 +10,20 @@ enum LiveApplyStatus: Equatable {
     case unavailable
 }
 
-/// Identity-carrying wrapper so re-recording the same row
-/// restarts the transient caption timer.
+/// Transient feedback token for shortcut live apply HUD.
 struct LiveApplyFeedback: Equatable {
     let status: LiveApplyStatus
     let id = UUID()
 }
 
-/// Recorder-only runtime state. `modes` starts at the clean
-/// Settings baseline and receives combo mutations only; staged
-/// Lua/app/mode edits therefore cannot hitchhike live. The
-/// snapshot is the disk-independent Revert fallback.
+/// Runtime session tracking live recorded shortcut mutations.
 struct RecorderLiveSession {
     var layers: [KeyLayer]
     let snapshot: LiveKeybindingSnapshot
 }
 
 extension SettingsModel {
-    /// Suspends/restores the live hotkeys while a recorder is
-    /// armed (#213), so pressing an existing shortcut to test it
-    /// mid-capture can't fire its action. Independent of the edit
-    /// target: the running hotkeys are the live ones either way.
+    /// Suspends or resumes hotkeys while recording shortcut input (#213).
     func setRecorderArmed(_ armed: Bool) {
         if armed {
             core.suspendHotkeysForRecording()
@@ -39,11 +32,7 @@ extension SettingsModel {
         }
     }
 
-    /// Applies one recorder combo mutation on the live target.
-    /// Existing rows keep their clean runtime action even when
-    /// their Lua/app fields have unrelated staged edits. A row
-    /// newly created for this recording carries its current
-    /// action because no earlier runnable action exists.
+    /// Applies recorded keybinding combo to live runtime session.
     func liveApplyRecorded(
         layerName: String,
         bindingID: UUID,
@@ -108,10 +97,7 @@ extension SettingsModel {
         }
     }
 
-    /// Runs before `reload()` reads model state. Persisted state
-    /// wins after Save; if disk/profile state is unreadable, the
-    /// captured in-memory snapshot removes ghost hotkeys. Session
-    /// bookkeeping clears only after one rollback path succeeds.
+    /// Restores saved keybinding state or rolls back to captured snapshot.
     func restoreLiveKeySessionIfNeeded() {
         guard let session = liveKeySession else { return }
         if case .success = core.restoreSavedLiveKeybindings() {
@@ -128,9 +114,6 @@ extension SettingsModel {
                 L("footer.revert", "Revert")
             )
         case .failure(.superseded):
-            // A newer load already replaced the VM/hotkeys;
-            // its ownership is authoritative. Retire the stale
-            // recorder session without replaying old callbacks.
             liveKeySession = nil
         case .failure:
             profileWarning = L(

@@ -1,35 +1,17 @@
 import Foundation
 
-/// A per-space layout override map value (issue #17). Every
-/// layout's override struct is an optional mirror of its global
-/// params: nil inherits the global value, a value overrides just
-/// that field for one space. This marker lets one generic GUI
-/// binding helper drive all five override editors instead of five
-/// near-identical copies — the shared domain concept, kept minimal
-/// per AGENTS.md §2.4 (no heavy generics).
+/// Protocol for per-space layout override parameter maps (#17).
 public protocol SpaceLayoutOverride: Equatable, Sendable {
     init()
-    /// True when no field is set — an empty override is dropped so
-    /// the stored map stays sparse.
+    /// True when no override fields are populated.
     var isEmpty: Bool { get }
 }
 
 extension SpaceLayoutOverride {
-    /// How many fields this override actually sets. Every stored
-    /// property is an optional mirror of a global param, so a
-    /// non-nil child is one overridden field. Discovered by
-    /// reflection rather than hand-listed, so a newly added
-    /// override field is counted automatically (the §5 "reflection
-    /// net"): it drives the `Overrides…` button's saved-field
-    /// count and the dormant-layout disclosure (#290) without a
-    /// per-layout tally that could silently drift.
+    /// Counts number of overridden non-nil fields via reflection (#290).
     public var fieldCount: Int {
         var count = 0
         for child in Mirror(reflecting: self).children {
-            // Each field is an Optional: a `.some` mirrors exactly
-            // one child, `nil` mirrors none — so a non-empty
-            // optional child is one set field. `fieldCount == 0`
-            // therefore matches `isEmpty` by construction.
             let mirror = Mirror(reflecting: child.value)
             if mirror.displayStyle == .optional,
                 !mirror.children.isEmpty
@@ -40,11 +22,7 @@ extension SpaceLayoutOverride {
         return count
     }
 
-    /// How many fields this override COULD set — every optional
-    /// mirror of a global param, set or not. The `N of M set`
-    /// denominator the per-space editor's header shows (#678 8b),
-    /// discovered by the same reflection net as `fieldCount` so a
-    /// new field lifts both together and neither drifts.
+    /// Total override field capacity for the layout mode (#678 8b).
     public var fieldCapacity: Int {
         Mirror(reflecting: self).children.count
     }
@@ -58,11 +36,7 @@ extension MonocleOverride: SpaceLayoutOverride {}
 extension TrackOverride: SpaceLayoutOverride {}
 
 extension LayoutMode {
-    /// How many per-space override fields this layout exposes — the
-    /// `M` in the editor's `N of M set` (#678 8b). Reads the empty
-    /// override's `fieldCapacity`, so it tracks the struct by
-    /// reflection; Floating has no override, hence none. The switch
-    /// is exhaustive, so a new layout must name its override here.
+    /// Total number of override fields exposed by layout mode (#678 8b).
     public var overrideFieldCapacity: Int {
         switch self {
         case .scrolling: return ScrollingOverride().fieldCapacity

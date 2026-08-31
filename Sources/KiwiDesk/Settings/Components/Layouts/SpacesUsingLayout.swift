@@ -1,17 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// "Spaces using <layout>" (turn 10): which of the reader's
-/// spaces the selected layout's rows actually govern, and how
-/// many of those deviate from them. Mounted in the detail
-/// PANEL under the live preview — it is read-only, a fact
-/// about the draft rather than an editor.
-///
-/// The card exists because Layout Defaults edits *defaults*, and
-/// a default with nothing running it is an hour spent on
-/// nothing. It is also where the per-space overrides get named:
-/// the numbers here are the one place the page admits that what
-/// it sets is not necessarily what a given space does.
+/// Read-only display of spaces assigned to selected layout (`LayoutUsage`).
 struct SpacesUsingLayout: View {
     @ObservedObject var model: SettingsModel
     let mode: LayoutMode
@@ -32,12 +22,6 @@ struct SpacesUsingLayout: View {
             if overriding > 0 {
                 CrossReferenceRow(
                     prose: Self.overrideProse(overriding),
-                    // The destination's OWN title, never a second
-                    // copy of it: a link naming a pane the app
-                    // does not call that sends the reader looking
-                    // for something that is not in the sidebar,
-                    // and the ▸-shaped cross-reference guard
-                    // cannot see a one-segment name to catch it.
                     linkTitle: SettingsDestination.spaces.title,
                     destination: .spaces
                 )
@@ -49,16 +33,12 @@ struct SpacesUsingLayout: View {
         LayoutUsage.spaces(on: mode, in: model.config)
     }
 
-    /// How many of those spaces override at least one of this
-    /// layout's parameters, so the rows above are not the whole
-    /// story for them.
+    /// Number of spaces overriding layout parameters.
     private var overriding: Int {
         spaces.filter { overrides(mode).contains($0) }.count
     }
 
-    /// The spaces carrying a per-space override for `mode`. One
-    /// switch over the layouts, so a layout gaining an override
-    /// map has exactly one place to be added.
+    /// Set of spaces with custom overrides for layout mode.
     private func overrides(_ mode: LayoutMode) -> Set<SpaceID> {
         let settings = model.config.settings
         switch mode {
@@ -74,10 +54,6 @@ struct SpacesUsingLayout: View {
         }
     }
 
-    /// Hoisted out of `body` for the type-checker: a
-    /// `+`-concatenated literal inside a conditional inside a
-    /// `ViewBuilder` is the shape that compiles here and dies on
-    /// the slower CI runner (gui.md, SwiftUI traps).
     private var emptyProse: String {
         L(
             "layout_defaults.spaces_using.none",
@@ -87,17 +63,7 @@ struct SpacesUsingLayout: View {
         )
     }
 
-    /// Both forms carry the link as a specifier rather than
-    /// trailing off the end of the sentence — see
-    /// `CrossReferenceRow`, whose fixed-order `HStack` is what
-    /// forced the dangling "… edit them in" these keys used to
-    /// be authored as.
-    ///
-    /// Takes the count rather than reading `overriding`, and is
-    /// internal, so `CrossReferenceRowSlotTests` can drive BOTH
-    /// arms with no model: one `contains` over the whole body of
-    /// a two-arm helper passes with either arm gutted, which
-    /// guard-prover demonstrated against this exact property.
+    /// Formats override cross-reference prose (`CrossReferenceRowSlotTests`).
     static func overrideProse(_ overriding: Int) -> String {
         overriding == 1
             ? L(

@@ -1,34 +1,10 @@
 import CoreGraphics
 import Foundation
 
-/// `SpaceBarStyle`'s wire form, split out of the type's own file
-/// at the 350-line ceiling (AGENTS.md §2.1): the struct keeps the
-/// fields and their rationale, the keys and the decode live here.
-///
-/// It borrows the `+Coding` file name from
-/// `TilingSettings+Coding.swift` but **not** its shape, and the
-/// difference is load-bearing: that type declares its conformance
-/// in the `+Coding` file and hand-writes `encode(to:)` in a third
-/// file. Here the conformance stays in `SpaceBarStyle.swift`,
-/// because Swift only synthesizes `encode(to:)` where the
-/// conformance sits — so encode stays generated rather than
-/// hand-written, one fewer field list to forget. It is NOT a
-/// guarantee that a new stored property reaches the wire: a
-/// property absent from `CodingKeys` below is silently not
-/// encoded, with no error. `SpaceBarParityTests` is the actual
-/// net for that — the same correction its App Bar twin carries.
-///
-/// Sparse by design — a decode falls back to `defaults` per
-/// field, so a profile written before a field existed still
-/// loads. That per-field fallback is a hand-mirrored list, which
-/// is why `SpaceBarParityTests` reflects over
-/// `CodingKeys.allCases` (`.claude/rules/parity-tests.md`).
-
+/// SpaceBarStyle Decodable implementation and CodingKeys
+/// (`SpaceBarParityTests`).
 extension SpaceBarStyle {
-    /// JSON keys are the Lua setters (`space_bar.set_*`) minus
-    /// the `set_` verb. `CaseIterable` is load-bearing: the
-    /// parity test (`SpaceBarParityTests`) reflects over
-    /// `allCases` to prove every field has a key.
+    /// JSON coding keys for SpaceBarStyle (`SpaceBarParityTests`).
     enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
         case edge
@@ -62,8 +38,7 @@ extension SpaceBarStyle {
         case groupBadgeTextColor = "group_badge_text_color"
     }
 
-    /// Manual decoding: profiles saved before a field existed
-    /// must keep loading (missing keys fall back to defaults).
+    /// Decodes SpaceBarStyle falling back to defaults for missing keys.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self

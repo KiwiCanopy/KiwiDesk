@@ -2,10 +2,7 @@ import AppKit
 import CoreFoundation
 import CoreGraphics
 
-/// The raw WindowServer surface behind `SkyLightBorderOverlay`:
-/// window creation, shape, stroke drawing, and teardown. Split
-/// from the transaction/lifecycle half for the 350-line ceiling;
-/// order-agnostic — both `above` and `below` rings share it.
+/// Raw SkyLight WindowServer surface management for border overlay.
 extension SkyLightBorderOverlay {
     func createWindow(frame: CGRect, scale: CGFloat) -> Bool {
         guard
@@ -57,16 +54,7 @@ extension SkyLightBorderOverlay {
         else { return false }
         context = created.takeRetainedValue()
         self.scale = scale
-        // Pin the ring to its target's own space (both orders): a
-        // space-unassigned SkyLight window reads as all-spaces, so
-        // Mission Control would float it over the overview instead
-        // of leaving it behind on the swipe, the way jankyborders'
-        // pinned borders vanish instantly. Pinning is the ring's
-        // ONLY Mission Control hide now that the observer is gone, so
-        // if no space resolves, retire this backend — `update()`
-        // destroys this partial window and the facade falls back to
-        // the AppKit `.transient` ring, which self-hides. No silent
-        // unpinned (floating-in-MC) ring can survive.
+        // Pin ring to target window Space for Mission Control visibility.
         guard
             SkyLight.pinWindow(
                 newID,
@@ -115,21 +103,11 @@ extension SkyLightBorderOverlay {
             origin: .zero,
             size: geometry.overlayFrame.size
         )
-        // The stroke sits `glowMargin` in from the grown frame so
-        // the ring stays put and the extra margin is bloom room
-        // (#358); `glowMargin` is 0 for a plain ring, so this is the
-        // original inset then.
+        // Inset centerline path by glowMargin + lineWidth / 2 (#358).
         let inset = geometry.glowMargin + geometry.lineWidth / 2
         let pathRect = bounds.insetBy(dx: inset, dy: inset)
         context.clear(bounds)
-        // Always the crisp ring: a glow ring never renders here —
-        // the facade swaps it to the AppKit backend (#533), whose
-        // `CAShapeLayer` shadow blooms correctly, because this
-        // WindowServer-backed context drops any shadow colour to
-        // default black-at-low-alpha (grey), and painted-falloff
-        // substitutes banded or clipped on device. If glow
-        // geometry ever does arrive, the inset still holds and
-        // only the bloom is missing.
+        // Draw crisp ring (glow swaps to AppKit backend, #533).
         paintRing(
             context,
             pathRect: pathRect,
@@ -144,17 +122,13 @@ extension SkyLightBorderOverlay {
                 nil
             ) == .success
         else { return false }
-        // Harmless when the window was not frozen; required after a
-        // shape resize so the fresh surface becomes visible at once.
         return SkyLight.windowThaw?(
             connection,
             window
         ) == .success
     }
 
-    /// A plain crisp ring: stroke the centerline path at the full
-    /// line width. The no-glow path, and identical to the pre-#358
-    /// draw.
+    /// Strokes plain crisp ring path at full line width (#358).
     private func paintRing(
         _ context: CGContext,
         pathRect: CGRect,

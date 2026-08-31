@@ -1,21 +1,14 @@
 import AppKit
 
-/// Per-box Liquid Glass for the Space Bar (piece 2, App Bar twin).
-/// Under `boxed + liquid_glass` each Space item gets its own frosted
-/// `NSGlassEffectView` hosting the item as `contentView`, and the
-/// trailing front-app segment gets a backdrop frosted box behind its
-/// loose views (it is non-interactive, so it need not host them).
-/// Colorless on macOS 26.5.2 — a look-first increment; drag-autoscroll
-/// and container-merge follow once the look earns them.
+/// Per-box Liquid Glass layout and backdrop tinting for Space Bar
+/// (`GlassPlate`, #408).
 extension SpaceBarOverlay {
-    /// The resolved style wants per-box glass: the glass finish over
-    /// the boxed shape. (Plain + glass keeps the single plate.)
+    /// Checks if style requires per-box glass rendering.
     func wantsBoxGlass(_ style: SpaceBarStyle) -> Bool {
         style.glassEnabled && style.backgroundStyle == .boxed
     }
 
-    /// Hosts each Space item in its own glass box at `frames[i]`,
-    /// tinted by Fill and rounded against the bar's cross `depth`.
+    /// Hosts each Space item in its own glass box with backdrop tint.
     func updateBoxGlasses(
         frames: [CGRect],
         style: SpaceBarStyle,
@@ -35,9 +28,6 @@ extension SpaceBarOverlay {
                 cornerRadius: radius,
                 tintHex: style.fillColor
             )
-            // Colored backdrop behind the box so the glass refracts
-            // a hue (#408); hidden with the box, or for a transparent
-            // Fill (clear glass).
             let tint = boxTints[i]
             if tinted && !itemViews[i].isHidden {
                 GlassTint.apply(
@@ -64,13 +54,11 @@ extension SpaceBarOverlay {
             guard let glass = GlassPlate.make() else { break }
             itemContainer.addSubview(glass)
             boxGlasses.append(glass)
-            // One tint backdrop per box, kept parallel (#408).
             boxTints.append(NSView())
         }
     }
 
-    /// The front-app segment's backdrop frosted box: sized to `rect`
-    /// (nil hides it), sitting just below the segment's loose views.
+    /// Updates front-app segment frosted backdrop glass box (#408, #409).
     func updateFrontGlass(
         _ rect: CGRect?,
         radius: CGFloat,
@@ -85,10 +73,6 @@ extension SpaceBarOverlay {
             return
         }
         frontGlass = glass
-        // Follow the loose front views to their host (#409): the
-        // clipping viewport as the run's tail, or the panel content
-        // while pinned. Kept just below the divider so the segment's
-        // real views paint over the frosted backdrop.
         let host = frontHost ?? itemContainer
         if glass.superview !== host {
             host.addSubview(
@@ -96,11 +80,6 @@ extension SpaceBarOverlay {
                 positioned: .below,
                 relativeTo: frontDivider
             )
-            // A backdrop glass renders flat without a contentView;
-            // a throwaway empty view makes it frost as true glass,
-            // and the segment's real views paint over it (they sit
-            // above in z, in the same `frontHost` — the viewport, or
-            // the panel content while pinned, #409).
             GlassPlate.setContent(glass, NSView())
         }
         glass.isHidden = false
@@ -110,8 +89,6 @@ extension SpaceBarOverlay {
             cornerRadius: radius,
             tintHex: style.fillColor
         )
-        // Colored backdrop so the front glass tints with the boxes
-        // (#408), or hidden for a transparent Fill (clear glass).
         let tint = frontTint ?? NSView()
         frontTint = tint
         if GlassTint.wanted(style.fillColor) {
@@ -127,9 +104,7 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// Returns every hosted item to `itemContainer` and tears the
-    /// glass boxes down (glass off, or the shape left `boxed`). Uses
-    /// `holds` per the reparent-restore gotcha so no item is trapped.
+    /// Restores hosted items to itemContainer and tears down glass boxes.
     func teardownBoxGlasses() {
         frontGlass?.isHidden = true
         frontTint?.isHidden = true

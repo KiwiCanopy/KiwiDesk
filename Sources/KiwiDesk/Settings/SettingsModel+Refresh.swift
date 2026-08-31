@@ -1,22 +1,8 @@
 import Foundation
 import KiwiDeskCore
 
-/// The dashboard model's backend sync (#678 turn 13a split): the
-/// snapshots `refreshProfiles` takes of live state, and the
-/// keybinding import that seeds the edited config from
-/// `init.lua`.
-///
-/// Split from `SettingsModel.swift` on the file ceiling. The
-/// stored `@Published` properties these write must stay on the
-/// class (an extension cannot hold them), so the seam here is
-/// state vs. the refresh that fills it.
+/// Profile and shortcut refresh operations for SettingsModel (#678 turn 13a).
 extension SettingsModel {
-    // MARK: - Sync with the backend
-
-    // `reload()` and `selectEditTarget` — the single edit-mode
-    // state machine — live in `SettingsModel+EditTarget.swift`
-    // (#64).
-
     func refreshProfiles() {
         profiles = core.profiles.list()
         activeProfile = core.profiles.currentName
@@ -33,13 +19,6 @@ extension SettingsModel {
                 sets: profile.monitorSets.map(\.monitors),
                 isDefault: profile.isDefault,
                 matchesLive: profile.set(matching: live) != nil,
-                // Derived from the SAME `live` read as
-                // `matchesLive`, one line up (#789). The two are
-                // answers about one moment by construction here;
-                // threaded into the sort as a parameter instead,
-                // "one moment" was a comment at the call site
-                // and nothing stopped a second, later
-                // `displays.count` from being read there.
                 matchesConnectedCount: profile.monitorCount
                     == live.count,
                 openingModes: profile.openingModes(),
@@ -51,13 +30,6 @@ extension SettingsModel {
         brokenProfiles = core.profiles.brokenProfiles().map {
             BrokenProfile(name: $0.name, cause: $0.cause)
         }
-        // ONE topology reading for all four: the Desktops the
-        // card offers, the wider list a Desktop shortcut may
-        // target, the one it badges as current, and the
-        // verdict below — which needs the Desktop this pass just
-        // read, since a Desktop binding outranks monitor
-        // matching. Read apart, the card's sentence could pair a
-        // verdict with a later reading of the arrangement (#888).
         let desktops = NativeSpaces.desktopSnapshot()
         mainDesktops = desktops.mainDisplayDesktops
         bindableDesktops = core.bindableDesktops(in: desktops)
@@ -72,14 +44,7 @@ extension SettingsModel {
         refreshLayoutDrift()
     }
 
-    // MARK: - Import live keybindings (#4)
-
-    /// Merges the shortcuts currently active in `init.lua` into
-    /// the edited config: each recovered mode is matched by name
-    /// (created if new), every recovered row upserted by combo,
-    /// and the result reclassified so known actions land in their
-    /// sections. Marks the config dirty so the user reviews the
-    /// import before Save writes it.
+    /// Imports live Lua shortcuts into current config (`KeybindingMerge`, #4).
     func importCurrentShortcuts() {
         var updated = config
         KeybindingMerge.merge(

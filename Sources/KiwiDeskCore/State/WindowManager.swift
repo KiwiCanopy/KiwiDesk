@@ -49,11 +49,8 @@ public struct WindowManager: Sendable {
         return ids
     }
 
-    /// Re-keys a tracked window in place: same snapshot, new id.
-    /// Used when a native tab group's active tab changes (#308).
-    /// The stored `ManagedWindow.id` is immutable, so the entry is
-    /// rebuilt via `withID` (one mirror of the field list, guarded
-    /// by `WindowRekeyParityTests`). No-op if `old` is absent.
+    /// Re-keys tracked window with new ID on tab switch
+    /// (`WindowRekeyParityTests`, #308).
     public mutating func rekey(_ old: WindowID, to new: WindowID) {
         guard let existing = windows.removeValue(forKey: old) else {
             return
@@ -80,9 +77,7 @@ public struct WindowManager: Sendable {
         windows[id]?.title = title
     }
 
-    /// Sets a window's sticky scope (#414/#445). Purely a state
-    /// write — sticky has no detection source and no coupled
-    /// invariant (unlike `setFloating`'s overlay clear below).
+    /// Sets sticky scope on window (`StickyScope`, #414, #445).
     public mutating func setSticky(
         _ id: WindowID,
         _ scope: StickyScope
@@ -90,14 +85,7 @@ public struct WindowManager: Sendable {
         windows[id]?.stickyScope = scope
     }
 
-    /// Applies a re-detected native-fullscreen verdict — the
-    /// fold target of `.windowFullscreenChanged`. Detection-owned
-    /// like the overlay flag, but orthogonal to floating, so
-    /// `setFloating` below deliberately does NOT touch it:
-    /// clearing it there would desync the event loop's
-    /// change-only `detectedFullscreen` cache and pin a stale
-    /// verdict until the next fullscreen transition. The
-    /// reconcile recheck is the single heal path.
+    /// Sets native fullscreen state for window (`.windowFullscreenChanged`).
     public mutating func setFullscreen(
         _ id: WindowID,
         _ fullscreen: Bool
@@ -110,12 +98,7 @@ public struct WindowManager: Sendable {
         _ floating: Bool
     ) {
         windows[id]?.isFloating = floating
-        // A transient overlay always floats, so untiling a window
-        // must clear its overlay flag — the single mutation point
-        // for `isFloating`, so every path (detection self-heal,
-        // make_tiled, remembered-tiled restore) upholds the
-        // invariant overlay ⟹ floating without re-asserting it
-        // (#300). Only track-time init ever sets the flag true.
+        // Untiling clears transient overlay flag to uphold invariant (#300).
         if !floating {
             windows[id]?.isTransientOverlay = false
         }

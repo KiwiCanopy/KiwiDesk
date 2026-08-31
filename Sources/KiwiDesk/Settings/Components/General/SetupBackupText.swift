@@ -1,19 +1,10 @@
 import KiwiDeskCore
 
-/// The GUI's half of the backup seam (#96): Core names the
-/// condition, this renders the sentence.
-///
-/// Core throws `SetupBundleError` cases — structure a test can
-/// match and a locale can translate. A pre-rendered English string
-/// built in Core would be invisible to `scripts/extract-keys` and
-/// untranslatable in every catalog, which is the defect
-/// `core-boundaries.md` exists to prevent.
+/// Localized error and status message rendering for backup bundle operations
+/// (#96).
 @MainActor
 enum SetupBackupText {
-    /// Why a restore could not start, in one sentence.
-    ///
-    /// Total by construction — a new `SetupBundleError` case owes
-    /// an arm here, and the compiler asks for it.
+    /// Formats localized error sentence for SetupBundleError.
     static func sentence(for error: SetupBundleError) -> String {
         switch error {
         case .unreadable:
@@ -28,10 +19,6 @@ enum SetupBackupText {
                 "That file isn't a KiwiDesk backup."
             )
         case .newerFormat:
-            // The two version numbers are deliberately NOT
-            // interpolated. They name an internal format, not the
-            // app version a user could act on, so the sentence
-            // that helps is the one telling them what to do.
             return L(
                 "general.advanced.backup.error.newer",
                 "That backup was made by a newer version of "
@@ -75,12 +62,7 @@ enum SetupBackupText {
         }
     }
 
-    /// What a restore could not take, in one sentence.
-    ///
-    /// Counts sit **last behind a label** so no locale has to
-    /// agree with a number mid-sentence (`localization.md`), which
-    /// is also why this is two sentences rather than one frame
-    /// carrying both numbers.
+    /// Formats skipped item counts summary for partial restore outcome.
     static func sentence(for outcome: RestoreOutcome) -> String {
         var parts: [String] = []
         if !outcome.skippedProfiles.isEmpty {
@@ -106,9 +88,7 @@ enum SetupBackupText {
         return parts.joined(separator: "\n")
     }
 
-    /// The partial-restore alert's title. Not an error title: the
-    /// restore happened, and saying otherwise would send a user
-    /// looking for a failure that is not there.
+    /// Title for partial restore alert.
     static var partialTitle: String {
         L(
             "general.advanced.backup.restore.partial_title",
@@ -116,9 +96,7 @@ enum SetupBackupText {
         )
     }
 
-    /// The alert's title — one for every case, because a title
-    /// that changes per cause reads as five different failures of
-    /// five different features.
+    /// Alert title for backup or restore failure.
     static func title(for error: SetupBundleError) -> String {
         switch error {
         case .couldNotWrite, .unreadableSettings,

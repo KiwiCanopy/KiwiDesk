@@ -1,25 +1,13 @@
 import AppKit
 
-/// The icon slot's occupancy and glyph placement (#294),
-/// split from the main slot layout (file-size ceiling).
-/// Internal, not private: `layoutHorizontal` /
-/// `layoutVertical` call in from their own file.
+/// App Bar item icon slot and font glyph layout (`AppBarItemView`, #294).
 extension AppBarItemView {
-    /// Whether the icon slot is occupied at all — by the app
-    /// image or by an App Font glyph (#294); both share the
-    /// same square.
+    /// True when neither image icon nor font glyph is visible (#294).
     var iconSlotHidden: Bool {
         iconView.isHidden && glyphLabel.isHidden
     }
 
-    /// Places whichever occupant the icon slot has: the image
-    /// fills the square; the glyph (text) works in a box grown
-    /// back to the full cross thickness — the font's glyphs
-    /// carry their own internal margins inside the em, so the
-    /// padded image square reads visibly undersized for them.
-    /// The glyph sizes to its cell, shrinks until the cell fits
-    /// the box's width (a wide ligature must never spill into
-    /// the item padding or the name), and centers pixel-aligned.
+    /// Positions app icon image or App Font glyph within the slot square.
     func layoutIconSlot(in square: CGRect) {
         if glyphLabel.isHidden {
             iconView.frame = square
