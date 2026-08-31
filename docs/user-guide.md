@@ -938,9 +938,13 @@ windows until you Save.
 
 Adjust each mode's defaults:
 
-- **BSP**: split strategy (longest_side or alternating) and the
-  width and height split ratios (0.5 = 50/50 each) — the knobs
-  the per-axis resize shortcuts nudge (#56).
+- **BSP**: split strategy (alternating by default, or
+  longest_side) and the width and height split ratios (0.5 =
+  50/50 each) — the knobs the per-axis resize shortcuts nudge
+  (#56). *Alternating* cuts horizontally then vertically by
+  depth, which is what "BSP" usually means elsewhere;
+  *longest_side* cuts each region's longer side instead, keeping
+  windows square-ish.
 - **Stack**: master count, master ratio (the master zone's share
   of the split), master orientation (how multiple masters line
   up), stack position (which side the stack zone takes — left/

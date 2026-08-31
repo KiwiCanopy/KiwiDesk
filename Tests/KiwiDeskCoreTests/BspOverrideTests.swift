@@ -129,6 +129,11 @@ struct BspOverrideCommandTests {
     @Test("strategy override writes only that space")
     func strategyOverride() {
         let core = makeCore()
+        // Pin the global the untouched-space assertions read
+        // (#660), and pin it AWAY from the value the override
+        // writes: with both on the default the test cannot tell
+        // "only that space" from "every space" (#1181).
+        core.tiler.settings.bsp.strategy = .longestSide
         #expect(
             core.execute(
                 "bsp.set_strategy_override",

@@ -1401,6 +1401,25 @@ would make spawn outcomes monitor-dependent and
 non-deterministic). **This was deliberately revisited for the
 `focused_track` default — see the next entry.**
 
+**BSP alternates by default (#1181, 2026-08-31).** `alternating`
+— horizontal then vertical by depth — rather than
+`longest_side`, which cuts each region's longer side and keeps
+windows square-ish. The alternation *is* the mental model the
+word "BSP" carries for the people who reach for a BSP layout, so
+a new user meeting longest-side placement reads it as the layout
+misbehaving rather than as a policy choice. A default is the
+product's opinion, and this one was reading as wrong to the
+audience the layout is for. Both strategies stay available and
+only the default moved; `bsp.set_strategy` and the per-space
+override are unchanged.
+
+The change reaches existing users, deliberately.
+`BspParams.encode` writes `strategy` unconditionally, so every
+GUI-saved config and profile already pins its own value and is
+untouched — what moves is fresh installs and any config that
+never set the key. That is a behaviour change on update and it
+earns its own release-notes line rather than arriving silently.
+
 **Fill-then-spill is the track default; the spawn-geometry ban is
 relaxed for it (#437, 2026-07-23):** `focused_track` — now the
 default (`own_track` demoted to the ultrawide "one app per column"

@@ -22,7 +22,9 @@ public struct BspParams: Sendable, Equatable, Codable {
         case alternating
     }
 
-    public var strategy: Strategy = .longestSide
+    /// How each region is cut. Defaults to `.alternating`
+    /// (#1181).
+    public var strategy: Strategy = .alternating
     /// Ratio of side-by-side splits (#56).
     public var splitRatioH: Double = 0.5
     /// Ratio of stacked top/bottom splits (#56).
@@ -49,7 +51,7 @@ public struct BspParams: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 Strategy.self,
                 forKey: .strategy
-            ) ?? .longestSide
+            ) ?? .alternating
         splitRatioH =
             try container.decodeIfPresent(
                 Double.self,
