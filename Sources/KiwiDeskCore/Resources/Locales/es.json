@@ -1128,8 +1128,6 @@
   "sticky.caption": "Las ventanas Sticky permanecen visibles en todos los espacios («%1$@», en %2$@).",
   "sticky.color": "Sticky",
   "sticky.color.a11y": "Color de la marca de ventana sticky",
-  "sticky.desktop_reach": "Permanecer visibles en todos los Escritorios",
-  "sticky.desktop_reach.help": "Extiende la promesa de sticky a los Escritorios de macOS: una ventana sticky en todas partes aparece en todos los Escritorios, y una sticky en su pantalla aparece en todos los Escritorios de esa pantalla. Si lo desactivas, una ventana sticky se queda en el Escritorio en el que se encuentra y solo sigue los espacios propios de KiwiDesk.",
   "sticky.display.pill": "Solo se puede mover a otra pantalla",
   "sticky.everywhere.pill": "Las ventanas sticky no se pueden mover a otro espacio",
   "sticky.home.pill": "Solo se puede mover en su espacio de origen %1$@",

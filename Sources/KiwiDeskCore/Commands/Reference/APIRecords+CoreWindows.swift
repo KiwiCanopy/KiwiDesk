@@ -101,11 +101,6 @@ extension APIReference {
             "Flips the focused window between display-sticky and "
                 + "off."
         ),
-        "override_sticky_reach": APIRecord(
-            "Overrides Desktop reach for the focused sticky "
-                + "window; auto follows sticky.set_desktop_reach.",
-            .choice("state", StickyReachOverride.self)
-        ),
         "resize": APIRecord(
             "Resizes the focused window along the x or y axis.",
             .text("axis"),

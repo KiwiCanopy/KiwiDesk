@@ -65,14 +65,8 @@ struct GapsBordersGates {
         .borders(.dragDropZoneFill),
     ]
 
-    /// Declared-but-answered-elsewhere set. The sticky-reach
-    /// row's gate is a SURFACING hide answered by the renderer's
-    /// own `model.canDriveDesktops` (#1145, the liquid-glass
-    /// shape) — a machine capability this saved-config resolver
-    /// cannot read.
-    static let resolvedElsewhere: Set<SettingKey> = [
-        .borders(.stickyDesktopReach)
-    ]
+    /// Declared-but-answered-elsewhere set.
+    static let resolvedElsewhere: Set<SettingKey> = []
 
     /// True if the strokes a shared MASTER row writes currently
     /// disagree. Deliberately NOT an `InertReason`: the gap

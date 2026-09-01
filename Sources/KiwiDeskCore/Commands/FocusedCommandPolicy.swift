@@ -21,7 +21,6 @@ public enum FocusedCommandPolicy {
         "make_unsticky",
         "toggle_sticky",
         "toggle_display_sticky",
-        "override_sticky_reach",
         "move_to_track",
         "track.swap",
         "stack.promote",

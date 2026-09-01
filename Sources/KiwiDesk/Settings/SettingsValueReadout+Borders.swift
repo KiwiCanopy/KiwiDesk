@@ -86,12 +86,6 @@ extension SettingsValueReadout {
                 old.settings.stickyStyle.mark,
                 new.settings.stickyStyle.mark
             )
-        case .stickyDesktopReach:
-            return bordersOnOffRow(
-                census,
-                old.settings.stickyStyle.desktopReach,
-                new.settings.stickyStyle.desktopReach
-            )
         case .stickyColor:
             return bordersAutoHexRow(
                 census,

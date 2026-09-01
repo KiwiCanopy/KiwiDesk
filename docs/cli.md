@@ -245,7 +245,6 @@ item's only appearance in CLI output.
 | | `make_unsticky` | — |
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
-| | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
 | Launch | `pull_or_spawn` | app bundle id (e.g. `com.apple.safari`) — a repeat press while its window is focused cycles the app's windows |
@@ -260,7 +259,6 @@ item's only appearance in CLI output.
 | | `set_resize_feedback` | true\|false (default `true`) — alert sound when a resize hotkey can't act |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_nudge` | true\|false (default `true`) — shove a window toward center when it toggles to floating |
-| | `sticky.set_desktop_reach` | true\|false (default `true`) — sticky windows stay present across macOS Desktops (needs the window-management bridge) |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `quit.set_layout` | `grid` (default) — how windows are spread on quit |

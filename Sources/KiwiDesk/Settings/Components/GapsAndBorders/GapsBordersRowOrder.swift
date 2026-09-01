@@ -31,8 +31,7 @@ enum GapsBordersRowOrder {
     ]
 
     static let stickyWindows: [SettingKey] = [
-        .borders(.stickyMark),
-        .borders(.stickyDesktopReach),
+        .borders(.stickyMark)
     ]
 
     /// Drag-and-drop visual setting keys (#754).

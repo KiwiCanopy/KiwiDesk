@@ -106,9 +106,6 @@ extension KiwiCore {
         resolveSpaceDisplays()
         retile(force: true)
         emitSpaceChange()
-        // #1145: default settings restore `desktop_reach` ON —
-        // re-derive after the topology above settles.
-        refreshStickyReach()
         onLog(
             cleared
                 ? "all settings reset to defaults"

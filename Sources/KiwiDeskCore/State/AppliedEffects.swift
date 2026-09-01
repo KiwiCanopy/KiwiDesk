@@ -22,11 +22,6 @@ public struct AppliedEffects: Sendable {
     /// (`ArrivalScreenHomeTests`, #1010).
     var rehomedToScreenSpace: SpaceID?
 
-    /// Ids `.appTerminated` removed — the windows that died with
-    /// THAT pid, so the reach-ledger forget cannot over-reach a
-    /// minimized or otherwise state-absent live window (#1145).
-    var terminatedWindows: [WindowID] = []
-
     /// Snapshot of facts erased when destroying a tracked window (#674).
     struct RemovedWindow: Sendable {
         let app: String?

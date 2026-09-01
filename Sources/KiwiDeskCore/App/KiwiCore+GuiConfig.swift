@@ -193,11 +193,6 @@ extension KiwiCore {
         // by ≤2 pt and visibly did nothing (#68).
         retile(force: true)
         emitSpaceChange()
-        // #1145: the incoming settings carry `desktop_reach`,
-        // and this IS the Settings toggle's apply path — AFTER
-        // the pins and `resolveSpaceDisplays()`, which is the
-        // topology a 📌 derivation reads.
-        refreshStickyReach()
     }
 
     /// Persists the model and applies it: writes `gui.json`,

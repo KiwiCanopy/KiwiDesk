@@ -41,12 +41,5 @@ func makeTestModel(
     // machine-independent. A suite testing the live-state seam
     // overrides `readSymbolicHotkey` per scenario.
     model.readSymbolicHotkey = { _ in nil }
-    // #1145: pin the bridge capability FALSE, both mirrors — an
-    // earlier bridge suite's `classResolverOverride` can leave
-    // `WMBridge.isAvailable`'s process cache true, so the init's
-    // own read is order-dependent in a full run. A suite testing
-    // the gated surfaces sets both true and resets.
-    model.canDriveDesktops = false
-    SettingsSearchIndex.canDriveDesktops = false
     return model
 }
