@@ -20,9 +20,29 @@ struct AppRulesAddOnSelectTests {
                 "Sources/KiwiDesk/Settings/Components/Common/"
                     + "AppRuleControls.swift"
             )
-        return SourceScan.stripComments(
+        let source = SourceScan.stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
+        // A read that came back empty would satisfy nothing
+        // positive but would fail-open the moment a NEGATIVE
+        // clause joined this suite (`guard-prover`, 2026-09-01).
+        #expect(source.count > 200, "AppRuleControls.swift read empty")
+        return source
+    }
+
+    /// The picker's own modifier chain — everything from the
+    /// `AppPickerButton(` call to the end of the `else` branch.
+    /// Read scoped rather than file-wide because both census
+    /// clauses below were proved green with the label and the
+    /// value moved onto the OTHER branch's controls, which is
+    /// the state they exist to forbid.
+    private func pickerChain() throws -> String {
+        let source = try controls()
+        let start = try #require(
+            source.range(of: "AppPickerButton("),
+            "the picker is gone from AppRuleControls.swift"
+        )
+        return String(source[start.lowerBound...])
     }
 
     private func squashed(_ text: String) -> String {
@@ -31,18 +51,27 @@ struct AppRulesAddOnSelectTests {
 
     @Test("picking an app commits it, with nothing in between")
     func pickCommits() throws {
-        let source = squashed(try controls())
+        // Anchored on what the closure cannot LOSE — a commit
+        // reached from the pick — rather than on its body
+        // verbatim: the first cut pinned the closure's parameter
+        // name, so renaming a local binding red the suite with a
+        // regression message that was false (`guard-prover`,
+        // 2026-09-01).
+        let chain = squashed(try pickerChain())
+        let pick = try #require(
+            chain.range(of: squashed("onPick:")),
+            "the picker states no onPick at all"
+        )
+        let escape = chain.range(of: squashed("escapeLabel:"))
+        let body = String(
+            chain[
+                pick
+                    .upperBound..<(escape?.lowerBound
+                    ?? chain.endIndex)
+            ]
+        )
         #expect(
-            source.contains(
-                squashed(
-                    """
-                    onPick: { app in
-                        name = app.bundleID
-                        onCommit(app.bundleID)
-                    }
-                    """
-                )
-            ),
+            body.contains("onCommit("),
             Comment(
                 rawValue:
                     "the picker no longer commits what it picked "
@@ -90,21 +119,19 @@ struct AppRulesAddOnSelectTests {
     /// here the picker's own accessible name.
     @Test("the census key is still drawn by the add affordance")
     func censusKeyStillRendered() throws {
+        // DERIVED from the census rather than restated beside
+        // it: hand-typed on both sides, the two agree with each
+        // other and with nothing else, and renaming the key reds
+        // here instead of at the drawing site.
+        guard case .key(let key) = AppRulesKey.appRulesAdd.text.label
+        else {
+            Issue.record("appRulesAdd no longer names a key")
+            return
+        }
+        let chain = squashed(try pickerChain())
         #expect(
-            AppRulesKey.appRulesAdd.text
-                == .text("app_rules.add_rule"),
-            "the census still claims this key names the add row"
-        )
-        let source = squashed(try controls())
-        #expect(
-            source.contains(
-                squashed(
-                    """
-                    .accessibilityLabel(
-                        L("app_rules.add_rule", "Add app rule")
-                    )
-                    """
-                )
+            chain.contains(
+                squashed(".accessibilityLabel(L(\"\(key)\"")
             ),
             Comment(
                 rawValue:
@@ -117,7 +144,7 @@ struct AppRulesAddOnSelectTests {
         // Naming a control REPLACES what it announced, so the
         // name owes the value back — here the Button's own text.
         #expect(
-            source.contains(".accessibilityValue("),
+            chain.contains(".accessibilityValue("),
             Comment(
                 rawValue:
                     "the picker is named but not valued — "
