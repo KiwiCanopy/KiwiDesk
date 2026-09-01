@@ -126,29 +126,31 @@ struct AppRulesSection: View {
 
     private var addRow: some View {
         HStack {
-            AppSelector(name: $newApp, exclude: Set(apps))
-            Button {
-                // Lower-cased so a hand-typed mixed-case bundle
-                // id (osascript reports `com.apple.Safari`) keys
-                // the same as the normalized `appBundleID` the
-                // engine and dropdown use — otherwise dedup and
-                // the open-title list silently miss (#262 review).
-                let app = newApp.trimmed.lowercased()
-                guard !app.isEmpty else { return }
-                if !apps.contains(app) {
-                    draftApps.append(app)
-                }
-                newApp = ""
-            } label: {
-                Label(
-                    L("app_rules.add_rule", "Add app rule"),
-                    systemImage: "plus"
-                )
-            }
-            .settingsActionButton()
-            .disabled(newApp.trimmed.isEmpty)
+            AppSelector(
+                name: $newApp,
+                exclude: Set(apps),
+                onCommit: add
+            )
             Spacer()
         }
+    }
+
+    /// Adds the rule the selector committed. Picking an app is
+    /// the whole gesture (#1172), so this runs straight off the
+    /// pick — the picked-but-not-added state it replaces was
+    /// also the one state that drew no icon.
+    private func add(_ picked: String) {
+        // Lower-cased so a hand-typed mixed-case bundle
+        // id (osascript reports `com.apple.Safari`) keys
+        // the same as the normalized `appBundleID` the
+        // engine and dropdown use — otherwise dedup and
+        // the open-title list silently miss (#262 review).
+        let app = picked.trimmed.lowercased()
+        guard !app.isEmpty else { return }
+        if !apps.contains(app) {
+            draftApps.append(app)
+        }
+        newApp = ""
     }
 
     /// Removes app rules and updates focus target (#816, #109, 2026-08-12).

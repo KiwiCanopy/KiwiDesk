@@ -2407,13 +2407,16 @@ app's windows open, and whether they tile — so the row states
 what the app does rather than asking you to assemble it from
 labelled fields.
 
-Click **Add app rule** to add one. Choose an app from the list —
-start typing to filter it by name, and each app shows its icon.
-Apps are remembered by their bundle identifier, so a rule keeps
-working across system-language changes and app renames. For an
-app that isn't installed right now, use **Custom…** and enter
-its bundle identifier by hand (see
-[Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier)).
+Click **Choose app…** and pick one — that adds the rule; there
+is nothing to confirm. Start typing to filter the list by name,
+and each app shows its icon. Apps are remembered by their bundle
+identifier, so a rule keeps working across system-language
+changes and app renames. For an app that isn't installed right
+now, use **Custom…** and type its bundle identifier by hand (see
+[Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier));
+that one path does need confirming, since every keystroke of a
+bundle identifier is a prefix of it — press Return or click the
+checkmark.
 Use a row's trash button to delete it, which removes every rule
 for that app. Rows are ordered alphabetically by the app's
 display name so a long list stays scannable.
