@@ -19,6 +19,22 @@ import ApplicationServices
 /// runs. If it is not, the pair falls back to a destroy + create (the
 /// pre-#308 behavior) — a missed merge, never a wrong one.
 extension EventLoop {
+    /// Grace window after a native-Space change during which no
+    /// reconcile coalesces tabs — a genuine tab switch within it
+    /// falls back to destroy + create (self-healing) — AND the
+    /// removal-distrust gate stands down (#1157): the census
+    /// double-exposes both Desktops while the compositor settles
+    /// (#1023), so retuning this for tab reasons retunes the
+    /// gate's stand-down too.
+    static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
+
+    /// The one derivation of "inside that grace" — the tab
+    /// coalescer and the distrust gate must age the same stamp.
+    func isWithinSpaceSwitchGrace(now: Date = Date()) -> Bool {
+        now.timeIntervalSince(lastDesktopChange)
+            < Self.spaceSwitchCoalesceGrace
+    }
+
     /// True if the app has a tracked native-tab carrier. Used to
     /// route a *non*-carrier window's create/destroy through reconcile
     /// at the 1↔2 tab boundary, where the single remaining/promoted
@@ -82,15 +98,31 @@ extension EventLoop {
                 displayBounds: displayBounds
             )
         }
+        // A window back in the AX list ends its distrust episode
+        // (#1157), so a later absence is refused — and logged —
+        // afresh.
+        removalDistrusted = removalDistrusted.filter {
+            !live.contains($0.key)
+        }
         // Genuine closes: emit the destroy the eager path deferred.
+        // A candidate is checked against ONE census per sweep; a
+        // window the compositor still shows was not closed
+        // (#1157 — the exempt arms are accessibility.md's).
+        let switchGrace = isWithinSpaceSwitchGrace()
+        var onScreen: Set<WindowID>?
         for id in vanishedIDs.sorted(by: { $0.raw < $1.raw })
         where !consumed.contains(id) {
-            elements[pid]?[id] = nil
-            detectedFloating[id] = nil
-            detectedFullscreen[id] = nil
-            ignorePending.remove(id)
-            trackedFrames[id] = nil
-            tabCarriers.remove(id)
+            if !hidden, !switchGrace, !minimized.contains(id) {
+                let census =
+                    onScreen
+                    ?? onScreenNormalWindowIDs()[pid, default: []]
+                onScreen = census
+                if census.contains(id) {
+                    refuseRemoval(id, pid: pid, app: app)
+                    continue
+                }
+            }
+            releaseWindowRegistration(id, pid: pid)
             // A hidden app's whole sweep is a hide (#913):
             // the windows are not gone, their app is, so they
             // must not be reported as closed and must not move
@@ -170,16 +202,15 @@ extension EventLoop {
         element: AXUIElement,
         pid: pid_t
     ) {
-        elements[pid]?[from] = nil
+        // Read the migrating verdicts BEFORE the release clears
+        // the `from` side.
+        let floating = detectedFloating[from]
+        let fullscreen = detectedFullscreen[from]
+        releaseWindowRegistration(from, pid: pid)
         elements[pid, default: [:]][to] = element
-        detectedFloating[to] = detectedFloating[from]
-        detectedFloating[from] = nil
-        detectedFullscreen[to] = detectedFullscreen[from]
-        detectedFullscreen[from] = nil
-        ignorePending.remove(from)
-        trackedFrames[from] = nil
+        detectedFloating[to] = floating
+        detectedFullscreen[to] = fullscreen
         trackedFrames[to] = AXHelper.frame(of: element)
-        tabCarriers.remove(from)
         if AXHelper.hasNativeTabs(element) {
             tabCarriers.insert(to)
         }

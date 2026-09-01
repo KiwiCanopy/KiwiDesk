@@ -5,6 +5,8 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+AppObservation.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+RemovalDistrust.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+Tabs.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
@@ -225,6 +227,47 @@ editing AX code:
   live observer outlives the test, and stays green if either
   registration is deleted. Keep those pinned in
   `HideObserverWiringTests`.
+- **A sweep removal distrusts one missing AX read while the
+  WindowServer still shows the window (#1157).** Under fast
+  focus churn a lazy-AX app transiently UNDER-reports its
+  window list — the #913 defect's mirror image — and the sweep
+  took that absence as a close: a never-closed window lost its
+  slot, close-return raise and all, until the ~20 s adoption
+  heal re-tracked it (log-proven, 2026-08-31). So a non-hidden,
+  non-minimized close candidate is checked against ONE
+  on-screen census before its destroy is emitted, and a listed
+  window is refused. The asymmetry is the rule: **the census
+  may REFUSE a removal, never cause one** — a listed window is
+  composited on the current Desktop, so it exists, while an
+  unlisted one may merely be on another Desktop, which is
+  exactly why #913 bars the census from the hide drop. Keep the
+  hide drop AND `detach` census-free — each is a total answer
+  about the app, not an inference from one missing read (the
+  hide arm is pinned; `detach`'s routing is review's, since the
+  gate lives in the sweep it never reaches). One
+  continuous-absence episode
+  (`removalDistrusted`) logs once and queues BOUNDED follow-up
+  reconciles on the distrust's own one-shot — never the
+  transient-retrack slot, whose part-spent deadline a refusal
+  must not ride, and with `coalesceTabs: false` on the drain
+  (#308's safe direction) — so a TRUE close still compositing
+  at sweep time converges instead of polling. The re-queue
+  bound is argued on `EventLoop.removalRecheckCap`, the delay
+  on `KiwiCore.transientRetrackDelay`. The gate also stands
+  down inside the Desktop-switch grace, where the census is
+  double-exposed (#1023) and would refuse every departed
+  window. Residue, accepted — and recorded in
+  `docs/accepted-limitations.md` in the same change set: the
+  census is layer-0 only, so a raised-layer window keeps the
+  pre-gate behavior; an under-reported window the census also
+  omits is still lost to the heal; a FLAPPING list re-opens the
+  episode per flap, so the log line recurs while the reconcile
+  cost coalesces; and a census that kept listing a truly closed
+  window would keep its tile silently past the first line — the
+  census is trusted as ground truth. `RemovalDistrustTests`
+  pins the refusal, the exempt arms, the switch-grace
+  stand-down, the episode ledger, the one-census cost and the
+  convergence.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Four links

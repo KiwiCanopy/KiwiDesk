@@ -151,6 +151,9 @@ extension KiwiCore {
         eventLoop.onTransientDrop = { [weak self] in
             self?.scheduleTransientRetrack()
         }
+        eventLoop.onRemovalDistrust = { [weak self] in
+            self?.scheduleRemovalRecheck()
+        }
         sleepWake.captureState = { [weak self] in
             self?.state.snapshot()
         }

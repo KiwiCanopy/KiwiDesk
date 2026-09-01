@@ -47,6 +47,10 @@ public final class EventLoop {
     /// the core schedules the one-shot re-track that drains it
     /// (`scheduleTransientRetrack`).
     var onTransientDrop: @MainActor () -> Void = {}
+    /// Fired when a pid joins an idle `pendingRemovalRecheck`
+    /// (#1157); the core schedules the follow-up reconcile that
+    /// drains it (`scheduleRemovalRecheck`).
+    var onRemovalDistrust: @MainActor () -> Void = {}
 
     /// User float rules from the Lua config (`float_rules`).
     /// Assigning does NOT resync `detectedFloating`: rules
@@ -147,6 +151,10 @@ public final class EventLoop {
     /// the "was a carrier" fact for a window that vanishes after a
     /// switch even though its element is gone (#308).
     var tabCarriers: Set<WindowID> = []
+    /// Sweep removals currently refused — absent from the AX
+    /// list, still on-census — as follow-ups spent per
+    /// continuous-absence episode (#1157).
+    var removalDistrusted: [WindowID: Int] = [:]
     /// When the user last switched native Spaces. Tab coalescing is
     /// suppressed for a short window afterward: a space switch shows
     /// the departed space's windows as vanished and the arrived
@@ -156,10 +164,6 @@ public final class EventLoop {
     /// re-key. `reconcileAll` itself passes `coalesceTabs: false`;
     /// this closes the stray-targeted-reconcile residual (#308 review).
     var lastDesktopChange: Date = .distantPast
-    /// Grace window after a native-Space change during which no
-    /// reconcile coalesces tabs. A genuine tab switch within it
-    /// falls back to destroy + create (self-healing), which is rare.
-    static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
     /// Census window ids a heal pass failed to adopt, per pid —
     /// the sweep stays quiet for exactly those ids, so a window
     /// it can never adopt (an ignored layer-0 panel) costs one
@@ -185,6 +189,9 @@ public final class EventLoop {
     /// Pids owed a one-shot re-track for a transient drop
     /// (#675); drained by the scheduled task.
     var pendingRetrack: Set<pid_t> = []
+    /// Pids owed a distrust follow-up reconcile (#1157), on
+    /// its own queue and slot; drained by the scheduled task.
+    var pendingRemovalRecheck: Set<pid_t> = []
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
@@ -327,15 +334,6 @@ public final class EventLoop {
     /// only registers observers that are removed by `stop()` —
     /// never a missed production registration.
     var registersWorkspaceObservers = true
-
-    /// ~1 s: comfortably above the slowest healthy responders
-    /// (Electron/WebKit answer lazily in 100–300 ms,
-    /// accessibility.md) yet it caps an unresponsive app at
-    /// ~1 s per call instead of the ~6 s system default that
-    /// turned one hung helper into a ~60 s boot (#672).
-    /// `StartupAXTimeoutTests` pins the boot applying it before
-    /// the first per-app AX call.
-    static let axMessagingTimeoutSeconds: Float = 1.0
 
     public init() {}
 

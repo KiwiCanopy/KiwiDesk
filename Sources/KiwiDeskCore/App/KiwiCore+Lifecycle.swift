@@ -134,6 +134,32 @@ extension KiwiCore {
         }
     }
 
+    /// One-shot follow-up reconcile for apps whose sweep
+    /// removal was distrusted (#1157) — its own slot, so a
+    /// refusal never rides a transient drop's part-spent
+    /// deadline. `coalesceTabs: false`: the pass can carry a
+    /// Desktop switch's departed windows as vanished beside a
+    /// late arrival at the same tiled frame, the #308 bogus
+    /// re-key — a missed merge is the safe direction.
+    func scheduleRemovalRecheck() {
+        deferred.schedule(
+            .removalRecheck,
+            after: transientRetrackDelay
+        ) { [weak self] in
+            guard let self, self.eventLoop.isRunning
+            else { return }
+            let pids =
+                self.eventLoop.drainPendingRemovalRecheck()
+            for pid in pids {
+                self.eventLoop.reconcile(
+                    pid: pid,
+                    app: AppRef(pid: pid),
+                    coalesceTabs: false
+                )
+            }
+        }
+    }
+
     public func stop() {
         // Retire focus rings first: the gather below moves windows
         // by direct AX (no animation tee), so a ring left up would

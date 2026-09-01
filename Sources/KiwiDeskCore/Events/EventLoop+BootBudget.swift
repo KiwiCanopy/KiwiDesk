@@ -12,6 +12,15 @@ import ApplicationServices
 /// is dropped, its name logged, and the app completed after the
 /// pass — deferral with completion, never abandonment.
 extension EventLoop {
+    /// ~1 s: comfortably above the slowest healthy responders
+    /// (Electron/WebKit answer lazily in 100–300 ms,
+    /// accessibility.md) yet it caps an unresponsive app at
+    /// ~1 s per call instead of the ~6 s system default that
+    /// turned one hung helper into a ~60 s boot (#672).
+    /// `StartupAXTimeoutTests` pins the boot applying it before
+    /// the first per-app AX call.
+    static let axMessagingTimeoutSeconds: Float = 1.0
+
     /// Per-app wall-clock bound for a queued boot step.
     ///
     /// 500 ms sits clear of the healthy band — Electron/WebKit
