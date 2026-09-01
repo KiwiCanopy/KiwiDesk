@@ -32,16 +32,6 @@ enum SettingsSearchIndex {
     /// Locale-keyed search index cache.
     private static var cache = [String: [SettingsSearchIndexRow]]()
 
-    /// The bridge capability, mirrored at model init (#1145):
-    /// this filter cannot reach the core, and the fact is
-    /// process-constant. A changed value (a test scenario)
-    /// drops the cache so the membership moves with it.
-    static var canDriveDesktops = false {
-        didSet {
-            if oldValue != canDriveDesktops { cache = [:] }
-        }
-    }
-
     static func rows() -> [SettingsSearchIndexRow] {
         let locale =
             LocalizationManager.shared.effectiveLocale
@@ -68,13 +58,6 @@ enum SettingsSearchIndex {
             placement.gate?.runtimeConditions ?? []
         let gated = conditions.contains(.liquidGlassUnavailable)
         if gated, !AppBarStyle.glassAvailable { return false }
-        // Bridge-gated rows hide with their surface (#1145) — a
-        // result for one would land on a row nothing draws.
-        if conditions.contains(.desktopBridgeAbsent),
-            !canDriveDesktops
-        {
-            return false
-        }
         return true
     }
 

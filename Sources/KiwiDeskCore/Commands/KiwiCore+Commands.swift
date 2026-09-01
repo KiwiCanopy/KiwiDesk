@@ -60,8 +60,6 @@ extension KiwiCore {
             return toggleFocusedSticky(.global)
         case "toggle_display_sticky":
             return toggleFocusedSticky(.display)
-        case "override_sticky_reach":
-            return setFocusedStickyReach(args)
         case "resize":
             return resize(args)
         case "move_to_track":
@@ -198,9 +196,6 @@ extension KiwiCore {
         }
         state.setSticky(focused, scope)
         retile()
-        // #1145: the Desktop half of the promise — reach follows
-        // the scope, off included (the reconcile retires).
-        refreshStickyReach()
         return .ok()
     }
 

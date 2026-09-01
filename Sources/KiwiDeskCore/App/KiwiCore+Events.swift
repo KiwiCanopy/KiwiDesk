@@ -53,15 +53,11 @@ extension KiwiCore {
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {
-        case .appTerminated:
-            forgetTerminatedStickyReach(effects.terminatedWindows)
         case .displaysChanged:
             tiler.displaysChanged()
             borders.displaysChanged()
             handleMonitorChange()
             emitMonitorChange()
-            // #1145: a replug births fresh Desktops (#889).
-            refreshStickyReach()
         case .windowFocused(let id):
             handleWindowFocused(id, effects: effects)
         case .windowCreated(let window):
@@ -97,9 +93,6 @@ extension KiwiCore {
             // space it activates is the one the arrival settled
             // on. A no-op unless this window is the one owed.
             payFollowedFocus(arrived: window.id)
-            if state.windows[window.id]?.isSticky == true {
-                refreshStickyReach()
-            }
         case .windowMoved(let id, let frame):
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already
@@ -224,7 +217,6 @@ extension KiwiCore {
             }
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)
-            if !wasMinimized { stickyReach.forget(id) }
             // The switch timestamp is set by the
             // .desktopChanged event, which the event loop
             // emits BEFORE the reconcile burst on the same

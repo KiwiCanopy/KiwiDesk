@@ -57,20 +57,19 @@ private func trackedFixture() -> StateCoordinator {
     }
     state.setFloating(old, true)
     state.remember(old, in: SpaceID(1))
-    state.stickyReachOverrides[old] = true
     return state
 }
 
 /// The number of WindowID-keyed containers `trackedFixture`
 /// populates: `WindowManager.windows`, `rememberedSpaces`,
-/// `manualFloatOverrides`, `stickyReachOverrides` (#1145), plus
-/// each space's `windows`, `stackWeights`, `trackBreaks`,
-/// `trackWeights`. Bumping the fixture with a new id-keyed map
-/// must bump this — and then the scan test forces the re-key to
-/// clear it. The fixture's `scrollRest` is deliberately NOT
-/// counted: it holds a bare id, not a container, so reflection
-/// never renders it here (see the limitations above).
-private let expectedContainerCount = 8
+/// `manualFloatOverrides`, plus each space's `windows`,
+/// `stackWeights`, `trackBreaks`, `trackWeights`. Bumping the
+/// fixture with a new id-keyed map must bump this — and then the
+/// scan test forces the re-key to clear it. The fixture's
+/// `scrollRest` is deliberately NOT counted: it holds a bare id,
+/// not a container, so reflection never renders it here (see the
+/// limitations above).
+private let expectedContainerCount = 7
 
 /// `String(describing:)` of every non-empty dictionary, set, or
 /// array whose keys/elements are `WindowID`, reachable by recursing

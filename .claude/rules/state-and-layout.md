@@ -164,23 +164,6 @@ editing here:
   dismissal grace, the click-provenance escape, expiry, the
   re-arm reset); the trade the grace accepts is argued in
   `docs/design-decisions.md`.
-- **Sticky Desktop reach is owned state with ONE machine
-  (#1145).** `KiwiCore+StickyReach.swift` derives every bridge
-  membership and the `StickyReach` ledger reconciles them
-  against the dispatch OUTCOMES — the membership query cannot
-  see a second Desktop (#889 item 5), so nothing verifies by
-  re-query, a refused add re-issues on the next refresh, and a
-  believed-but-never-dispatched membership is the ledger lying
-  to `retire`. Two obligations on a change here: a removal
-  NEVER names the window's own memberships (the `homes` set
-  threaded into `reconcile` — a removal there takes the window
-  off the Desktop it lives on), and a new site that changes a
-  sticky window's scope, home or the toggle joins
-  `StickyReachWiringTests`' register in the same change,
-  because the bridge is deaf under `swift test`, so a deleted
-  hook leaves every behavior suite green
-  (`StickyReachLedgerTests` and its sibling suites own the
-  pure halves).
 - A **native-fullscreen window keeps its `space.windows` slot
   but leaves both tiled-member derivations** (#670) — a layout,
   navigation or z-order consumer of the tiled members routes

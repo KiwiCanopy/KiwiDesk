@@ -109,13 +109,6 @@ extension KiwiCore {
         resolveSpaceDisplays()
         retile(force: forceRetile)
         emitSpaceChange()
-        // #1145: a profile may override `desktop_reach` — after
-        // the pins and space→display resolve a 📌 derivation
-        // reads. Its own topology read on purpose: this door is
-        // also a no-snapshot verb path (`load_profile`), and the
-        // switch handler's threaded pass plus the settle bracket
-        // the redundancy, which the reconcile keeps idempotent.
-        refreshStickyReach()
     }
 
     /// Explicit-load reconcile: drop live spaces whose name isn't
@@ -206,8 +199,6 @@ extension KiwiCore {
         resolveSpaceDisplays()
         retile(force: forceRetile)
         emitSpaceChange()
-        // #1145: same tail as `apply(profile:)`, same reasons.
-        refreshStickyReach()
     }
 
     /// Applies a built-in Preset and materializes it as a real,

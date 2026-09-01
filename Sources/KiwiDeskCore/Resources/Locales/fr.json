@@ -1128,8 +1128,6 @@
   "sticky.caption": "Les fenêtres Sticky restent visibles sur tous les espaces (« %1$@ », dans %2$@).",
   "sticky.color": "Sticky",
   "sticky.color.a11y": "Couleur de la marque de fenêtre sticky",
-  "sticky.desktop_reach": "Rester visible sur tous les bureaux",
-  "sticky.desktop_reach.help": "Étend la promesse Sticky aux bureaux de macOS : une fenêtre Sticky partout apparaît sur tous les bureaux, et une fenêtre Sticky sur son écran apparaît sur tous les bureaux de cet écran. Désactivez cette option et une fenêtre Sticky reste sur le bureau où elle se trouve, en ne suivant que les espaces propres à KiwiDesk.",
   "sticky.display.pill": "Peut uniquement être déplacée vers un autre écran",
   "sticky.everywhere.pill": "Les fenêtres sticky ne peuvent pas être déplacées vers un autre espace",
   "sticky.home.pill": "Peut uniquement être déplacée sur son espace d'origine %1$@",

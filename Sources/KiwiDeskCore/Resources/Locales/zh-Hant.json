@@ -1128,8 +1128,6 @@
   "sticky.caption": "Sticky 視窗會在每個空間都保持可見（請見%2$@中的「%1$@」）。",
   "sticky.color": "Sticky",
   "sticky.color.a11y": "Sticky 視窗標記顏色",
-  "sticky.desktop_reach": "在所有桌面上保持可見",
-  "sticky.desktop_reach.help": "將 Sticky 的承諾延伸到 macOS 桌面：在所有空間 Sticky 的視窗會出現在每個桌面上，僅在其螢幕上 Sticky 的視窗會出現在該螢幕的所有桌面上。關閉後，Sticky 視窗不會離開它所在的桌面，只跟隨 KiwiDesk 自己的空間。",
   "sticky.display.pill": "只能移到不同的顯示器",
   "sticky.everywhere.pill": "Sticky 視窗無法移到其他空間",
   "sticky.home.pill": "只能在它的歸屬空間 %1$@ 中移動",

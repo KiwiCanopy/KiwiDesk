@@ -31,11 +31,6 @@ enum SettingRuntimeGate: Hashable {
     case layersExist
     /// Liquid Glass unavailable on pre-macOS 26 (#390).
     case liquidGlassUnavailable
-    /// The window-management bridge is absent on this macOS
-    /// (#1145) — the row HIDES, per `canDriveDesktops`' ruling:
-    /// no setting or mode reaches the capability, so a grey
-    /// would invite an action with no path.
-    case desktopBridgeAbsent
 }
 
 /// Gating specification for disabled or conditionally surfaced setting rows

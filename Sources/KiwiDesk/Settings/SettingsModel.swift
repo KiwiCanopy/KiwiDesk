@@ -121,13 +121,6 @@ final class SettingsModel: ObservableObject {
     /// Bindable user Desktops snapshot (`KiwiCore.bindableDesktops`, #888).
     @Published var bindableDesktops: [Int] = []
 
-    /// Whether this macOS drives native Desktops (#1145) — read
-    /// once from the core (process-constant, so not published);
-    /// gates the sticky-reach row's SURFACING (hide, never grey
-    /// — `canDriveDesktops`' own ruling). A test flips it to
-    /// surface the gated row.
-    var canDriveDesktops: Bool
-
     /// Transient warning for newly introduced keybinding conflicts.
     @Published var keybindingWarning: String?
 
@@ -171,11 +164,6 @@ final class SettingsModel: ObservableObject {
         self.core = core
         self.config = GuiConfig()
         self.preferences = preferences
-        self.canDriveDesktops = core.canDriveDesktops
-        // The search filter cannot reach the core, and the fact
-        // is process-constant — mirror it once (#1145).
-        SettingsSearchIndex.canDriveDesktops =
-            core.canDriveDesktops
         self.settingsMode = SettingsModePreference.read(
             from: preferences
         )
