@@ -892,7 +892,35 @@ claim; the obligations a change here takes on:
   opposite polarity. That is why the arrival raise sits on
   `structuredShell` rather than beside the `.focused` it drives,
   which reads like the tidier placement and is the broken one.
-  `KeyboardActionParityTests+Shell` pins the raise to that chain.
+  `KeyboardActionParityTests+Shell` pins the raise to that chain,
+  and by DEPTH rather than by order: pinned only by its
+  neighbour, the closure and that neighbour moved together and
+  the guard stayed green (`guard-prover`, 2026-09-01).
+- **A navigation states a focus destination only when the
+  PLATFORM would have moved focus** (#991). macOS moves focus for
+  a key press and not for a click, so stating a destination on a
+  mouse navigation draws a ring the platform would not have
+  drawn. Fix it at the navigation, never at the ring:
+  `.focusEffectDisabled()` answers the user's own Full Keyboard
+  Access settings for them, which
+  `docs/design-decisions.md` ▸ *a focus ring is the platform's*
+  forbids. **Refuse a positive MOUSE event, never require a
+  positive key event**: VoiceOver presses a control through
+  `AXPress` with no `NSEvent` behind it, and `currentEvent` is
+  the last event RETRIEVED rather than one cleared after
+  dispatch — so a test that must see a key press states nothing
+  for a screen-reader user, whose cursor follows focus onto a
+  view the navigation just destroyed. The predicate fails toward
+  stating a destination for that reason. The input source is
+  read in ONE place — the
+  `destination` write every navigation path already passes
+  through — because the risk is not that a READER forgets the
+  condition (there are two, and `SettingsInputSourceSeamTests`
+  counts them) but that a navigation path added later never
+  records it. Store it rather than re-reading at the statement:
+  both statements run after the dispatching event is gone, so
+  asking at the use site reads whatever event is current then,
+  which is the bug rather than the fix.
 
 ## Colour (#678 turn 16b)
 

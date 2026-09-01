@@ -47,7 +47,14 @@ final class SettingsModel: ObservableObject {
     /// Token guarding confirmation fade against rapid changes.
     var autoStartFlashToken = 0
     /// Active navigation destination screen, or nil for Home grid (#678).
-    @Published var destination: SettingsDestination?
+    ///
+    /// The `didSet` is the one place the input source is
+    /// recorded (#991): every navigation path already passes
+    /// through this property, and the read is only valid while
+    /// the event that caused it is still being dispatched.
+    @Published var destination: SettingsDestination? {
+        didSet { nav.navigationMovesFocus = SettingsInputSource.movesFocus }
+    }
     /// Simple or Power User mode; stored in `SettingsModePreference` (#678).
     @Published var settingsMode: SettingsMode = .simple
     /// True during mode-reveal wash; set by explicit flip only (#760).

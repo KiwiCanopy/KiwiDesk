@@ -110,7 +110,12 @@ struct HomeScreen: View {
             // Warm icon cache for ruled apps (#786).
             AppIconCache.shared.warm()
             if let last = model.nav.homeReturnFocus {
-                focusedCard = last
+                // Cleared either way, restored only where the
+                // platform would have moved focus (#991): a slot
+                // left full leaks into the next appear.
+                if model.nav.navigationMovesFocus {
+                    focusedCard = last
+                }
                 model.nav.homeReturnFocus = nil
             }
         }

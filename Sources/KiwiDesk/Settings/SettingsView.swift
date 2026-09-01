@@ -117,16 +117,14 @@ struct SettingsView: View {
         .onExitCommand {
             if selection != nil { selection = nil }
         }
-        // Arrival focus, stated by the SHELL: the pane is created
-        // by this very transition, so the same `onChange` hung on
-        // the pane would never fire on Home→area (#996). Keyed on
-        // the VALUE, never `destination != nil`, or an area→area
-        // navigation states nothing (#998); `now != nil` leaves
-        // the pop to `HomeScreen`'s own restore. A reveal into the
-        // destination already showing moves no focus, deliberately
-        // — the user is there and the keyboard stays put.
+        // Stated by the SHELL, which outlives both branches, and
+        // only where the platform would have moved focus itself
+        // (#996, #991). Keyed on the VALUE, or an area→area
+        // navigation states nothing (#998).
         .onChange(of: model.destination) { _, now in
-            if now != nil { contentFocused = true }
+            if now != nil, model.nav.navigationMovesFocus {
+                contentFocused = true
+            }
         }
         .environment(\.settingsNavigate) { destination in
             // Third #18 enforcement point beside the grid's offer

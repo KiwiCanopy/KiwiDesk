@@ -21,6 +21,18 @@ import Testing
 /// assignment alone would have stayed green through exactly
 /// that.
 ///
+/// The raise needle carries its NEIGHBOUR — `.onExitCommand` —
+/// for the same reason it carries its key. Naming the file alone
+/// says the closure is somewhere in `SettingsView.swift`, and
+/// `guard-prover` (2026-09-01) showed the cost: moved onto the
+/// `selection == nil` branch, the raise fires from the subtree
+/// the Home→area transition is tearing down, states nothing on
+/// exactly that navigation, and the guard stayed green. The
+/// neighbour pins it to `structuredShell`'s own chain, which is
+/// the view that outlives both branches. Reordering that chain
+/// reds this on purpose: read the message, do not chase the
+/// bytes.
+///
 /// The push pair moved out of `SettingsHeaderBar` in #996: the
 /// destination is the content pane, so the raise has to live on
 /// `structuredShell` rather than on the pane it focuses —
@@ -45,13 +57,19 @@ extension KeyboardActionParityTests {
             ),
             ShellWiring(
                 "SettingsView.swift",
-                ".onChange(of: model.destination) { _, now in "
-                    + "if now != nil { contentFocused = true } }",
+                ".onExitCommand { if selection != nil "
+                    + "{ selection = nil } } "
+                    + ".onChange(of: model.destination) { _, now in "
+                    + "if now != nil, "
+                    + "model.nav.navigationMovesFocus "
+                    + "{ contentFocused = true } }",
                 "and the raise is keyed on the VALUE: keyed on "
                     + "`destination != nil` it fires on Home→area "
                     + "only, so an area→area navigation destroys "
                     + "the focused subtree and states nothing "
-                    + "(#998)"
+                    + "(#998) — and it is GATED on the input "
+                    + "source, or a mouse click draws a focus "
+                    + "ring macOS would not have drawn (#991)"
             ),
             ShellWiring(
                 "HomeScreen.swift",
@@ -67,12 +85,28 @@ extension KeyboardActionParityTests {
             ShellWiring(
                 "HomeScreen.swift",
                 "if let last = model.nav.homeReturnFocus { "
-                    + "focusedCard = last "
+                    + "if model.nav.navigationMovesFocus { "
+                    + "focusedCard = last } "
                     + "model.nav.homeReturnFocus = nil }",
                 "and the return pays it, once — the whole "
                     + "closure, so clearing the slot stays beside "
                     + "the restore rather than leaking a stale "
-                    + "card into the next unrelated appear"
+                    + "card into the next unrelated appear, and "
+                    + "the clear stays OUTSIDE the input-source "
+                    + "gate: a mouse pop must not restore focus, "
+                    + "but it must still empty the slot (#991)"
+            ),
+            ShellWiring(
+                "SettingsModel.swift",
+                "didSet { nav.navigationMovesFocus = "
+                    + "SettingsInputSource.movesFocus }",
+                "and the input source is recorded where every "
+                    + "navigation path already passes — the "
+                    + "destination write itself — so a path added "
+                    + "later cannot forget it, and the read "
+                    + "happens while macOS is still dispatching "
+                    + "the event that caused the navigation "
+                    + "(#991)"
             ),
         ]
         let dir = SourceScan.repoRoot(from: #filePath)
@@ -101,6 +135,75 @@ extension KeyboardActionParityTests {
                 )
             )
         }
+    }
+}
+
+extension KeyboardActionParityTests {
+    /// WHERE the raise hangs, read as DEPTH rather than as
+    /// adjacency.
+    ///
+    /// The neighbour in the needle above pins the pair's order,
+    /// which catches the raise moving on its own. It does not
+    /// catch the pair moving TOGETHER onto the `selection == nil`
+    /// branch — adjacency survives that, and the raise is then
+    /// hung on the subtree the Home→area transition tears down,
+    /// which is #996/#998's defect exactly (`guard-prover`,
+    /// 2026-09-01; a refactor that moves "the Home behaviours
+    /// onto Home" moves both). What tells the two placements
+    /// apart is nesting: the raise must sit on the chain that
+    /// OUTLIVES both branches, never inside the closure that
+    /// builds them.
+    @Test("the raise hangs outside the branch it focuses")
+    func raiseHangsOnTheOuterChain() throws {
+        let dir = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+        let files = try SourceScan.swiftSources(under: dir)
+        let file = try #require(
+            files.first {
+                $0.lastPathComponent == "SettingsView.swift"
+            },
+            "SettingsView.swift is gone"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        let shell = try #require(
+            SourceScan.declarationBody(
+                after: "private func structuredShell(",
+                in: source
+            ),
+            Comment(
+                rawValue:
+                    "`structuredShell` is gone — the shell that "
+                    + "outlives both branches is where the raise "
+                    + "belongs"
+            )
+        )
+        let branches = try #require(
+            SourceScan.declarationBody(
+                after: "chrome(width)",
+                in: shell
+            ),
+            "`chrome(width) { … }` is gone from structuredShell"
+        )
+        let raise = squashedShell(".onChange(of: model.destination)")
+        #expect(
+            squashedShell(shell).contains(raise),
+            "the arrival raise left structuredShell entirely"
+        )
+        #expect(
+            !squashedShell(branches).contains(raise),
+            Comment(
+                rawValue:
+                    "the arrival raise is INSIDE "
+                    + "`chrome(width) { … }` — it is hung on one "
+                    + "of the two branches the navigation swaps, "
+                    + "so on Home→area it fires from the subtree "
+                    + "being torn down and states nothing. It "
+                    + "belongs on the chain outside that closure, "
+                    + "which outlives both (#996)"
+            )
+        )
     }
 }
 
