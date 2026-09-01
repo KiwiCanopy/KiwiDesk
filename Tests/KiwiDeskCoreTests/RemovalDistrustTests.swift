@@ -8,14 +8,12 @@ import Testing
 /// A sweep removal distrusts one missing AX read while the
 /// WindowServer still shows the window (#1157).
 ///
-/// The defect this pins: under fast focus churn a lazy-AX app
-/// transiently under-reports its window list, and the sweep read
-/// that absence as a close — a never-closed window lost its slot
-/// (close-return raise and all) until the ~20 s adoption heal
-/// re-tracked it. The gate refuses the removal while the
-/// on-screen census still lists the window, logs once per
-/// continuous-absence episode, and queues a follow-up reconcile
-/// so a TRUE close still compositing at sweep time converges.
+/// The defect this pins is #1157's: the sweep read a lazy-AX
+/// app's transient under-report as a close. The gate refuses the
+/// removal while the on-screen census still lists the window,
+/// logs once per continuous-absence episode, and queues a
+/// follow-up reconcile so a TRUE close still compositing at
+/// sweep time converges.
 ///
 /// Everything drives the funnels through the injected seams
 /// (tests.md); no app is attached to or messaged for real. The
@@ -45,7 +43,7 @@ struct RemovalDistrustTests {
         /// it was asked — the hidden drop must never ask (#913).
         var census: [pid_t: Set<WindowID>] = [:]
         var censusReads = 0
-        var retrackFires = 0
+        var recheckFires = 0
         var logs: [String] = []
         var hiddenEvents: [WindowID] = []
         var destroyed: [(id: WindowID, wasMinimized: Bool)] = []
@@ -73,7 +71,7 @@ struct RemovalDistrustTests {
             box.censusReads += 1
             return box.census
         }
-        loop.onTransientDrop = { box.retrackFires += 1 }
+        loop.onRemovalDistrust = { box.recheckFires += 1 }
         // The under-reporting app answers with a PARTIAL list —
         // that is the whole defect — so the fake list must pair
         // each element with its id in order (the cursor).
@@ -136,11 +134,11 @@ struct RemovalDistrustTests {
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
         // The refusal owes its convergence pass: the pid queued
-        // and the one-shot armed, so a true close still
-        // compositing at sweep time is re-read rather than
+        // and the distrust's own one-shot armed, so a true close
+        // still compositing at sweep time is re-read rather than
         // waiting for the next incidental reconcile.
-        #expect(loop.pendingRetrack.contains(pid))
-        #expect(box.retrackFires == 1)
+        #expect(loop.pendingRemovalRecheck.contains(pid))
+        #expect(box.recheckFires == 1)
         #expect(distrustLines(box) == 1)
     }
 
@@ -156,24 +154,31 @@ struct RemovalDistrustTests {
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
         #expect(box.destroyed.map(\.wasMinimized) == [false])
-        #expect(box.retrackFires == 0)
+        #expect(box.recheckFires == 0)
     }
 
-    @Test("a repeat refusal neither re-queues nor re-logs")
-    func repeatRefusalIsSilent() {
+    @Test("an episode re-queues once, logs once, then goes quiet")
+    func episodeReQueueIsBounded() {
         let (loop, box) = makeLoop()
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [pid: [WindowID(12)]]
         loop.reconcile(pid: pid, app: ref)
-        #expect(loop.drainPendingRetrack() == [pid])
+        #expect(loop.drainPendingRemovalRecheck() == [pid])
+        // The follow-up pass still refuses: it re-queues — the
+        // first queue may have ridden a part-spent deadline, so
+        // the episode is owed one full-delay pass — but never
+        // re-logs.
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.recheckFires == 2)
+        #expect(loop.drainPendingRemovalRecheck() == [pid])
+        // Past the cap the episode goes quiet: a permanently
+        // mismatched app costs a bounded number of follow-ups,
+        // never a per-delay reconcile loop for the session.
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        // Still one fire and one line: the episode is open, so a
-        // permanently mismatched app costs one follow-up total
-        // instead of a 750 ms reconcile loop for the session.
-        #expect(box.retrackFires == 1)
-        #expect(loop.pendingRetrack.isEmpty)
+        #expect(box.recheckFires == 2)
+        #expect(loop.pendingRemovalRecheck.isEmpty)
         #expect(distrustLines(box) == 1)
     }
 
@@ -184,7 +189,7 @@ struct RemovalDistrustTests {
         box.listed = []
         box.census = [pid: [WindowID(12)]]
         loop.reconcile(pid: pid, app: ref)
-        _ = loop.drainPendingRetrack()
+        _ = loop.drainPendingRemovalRecheck()
         // The app answers properly again…
         box.listed = [WindowID(12)]
         loop.reconcile(pid: pid, app: ref)
@@ -194,7 +199,7 @@ struct RemovalDistrustTests {
         box.listed = []
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(box.retrackFires == 2)
+        #expect(box.recheckFires == 2)
         #expect(distrustLines(box) == 2)
     }
 
@@ -258,5 +263,53 @@ struct RemovalDistrustTests {
         #expect(box.censusReads == 0)
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
         #expect(box.destroyed.map(\.wasMinimized) == [true])
+    }
+
+    @Test("one census read serves every candidate in a sweep")
+    func oneCensusReadPerSweep() {
+        let (loop, box) = makeLoop()
+        loop.elements[pid] = [
+            WindowID(11): dummyElement,
+            WindowID(12): dummyElement,
+        ]
+        box.listed = []
+        box.census = [pid: [WindowID(11), WindowID(12)]]
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.destroyed.isEmpty)
+        // The gate's cost bound: a sweep pays the WindowServer
+        // once however many candidates it checks.
+        #expect(box.censusReads == 1)
+    }
+
+    @Test("the gate stands down inside the Desktop-switch grace")
+    func switchGraceStandsTheGateDown() {
+        // During the grace the census double-exposes both
+        // Desktops (#1023), so a departed window would be
+        // refused on every switch; removals keep the pre-gate
+        // behavior there.
+        let (loop, box) = makeLoop()
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        box.listed = []
+        box.census = [pid: [WindowID(12)]]
+        loop.lastDesktopChange = Date()
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.censusReads == 0)
+        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        #expect(box.recheckFires == 0)
+    }
+
+    @Test("a refusal arms the recheck one-shot on a live core")
+    func refusalSchedulesTheRecheck() {
+        // The bootstrap wiring, which no seam-driven test above
+        // can see: deleting `onRemovalDistrust`'s assignment
+        // leaves every other assertion green while the follow-up
+        // silently never comes.
+        let core = makeTestCore()
+        core.eventLoop.refuseRemoval(
+            WindowID(9),
+            pid: 1,
+            app: AppRef(bundleID: "test.kiwi.wire", name: "W")
+        )
+        #expect(core.deferred.isScheduled(.removalRecheck))
     }
 }

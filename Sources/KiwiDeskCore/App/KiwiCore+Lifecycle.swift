@@ -113,11 +113,10 @@ extension KiwiCore {
     }
 
     /// One-shot re-track for windows the transient filters
-    /// dropped mid-launch (#675) and for apps whose sweep
-    /// removal was distrusted (#1157); the stored
+    /// dropped mid-launch (#675); the stored
     /// `transientRetrackDelay` carries the delay and its
     /// argument beside the value. Drains every pid queued since
-    /// the fire was armed (`queueRetrack` arms only from
+    /// the fire was armed (`markTransientDrop` arms only from
     /// idle, so a drip of drops cannot push the deadline back).
     func scheduleTransientRetrack() {
         deferred.schedule(
@@ -130,6 +129,32 @@ extension KiwiCore {
                 self.eventLoop.reconcile(
                     pid: pid,
                     app: AppRef(pid: pid)
+                )
+            }
+        }
+    }
+
+    /// One-shot follow-up reconcile for apps whose sweep
+    /// removal was distrusted (#1157) — its own slot, so a
+    /// refusal never rides a transient drop's part-spent
+    /// deadline. `coalesceTabs: false`: the pass can carry a
+    /// Desktop switch's departed windows as vanished beside a
+    /// late arrival at the same tiled frame, the #308 bogus
+    /// re-key — a missed merge is the safe direction.
+    func scheduleRemovalRecheck() {
+        deferred.schedule(
+            .removalRecheck,
+            after: transientRetrackDelay
+        ) { [weak self] in
+            guard let self, self.eventLoop.isRunning
+            else { return }
+            let pids =
+                self.eventLoop.drainPendingRemovalRecheck()
+            for pid in pids {
+                self.eventLoop.reconcile(
+                    pid: pid,
+                    app: AppRef(pid: pid),
+                    coalesceTabs: false
                 )
             }
         }

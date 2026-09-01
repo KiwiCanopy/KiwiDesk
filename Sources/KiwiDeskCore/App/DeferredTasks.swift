@@ -37,9 +37,13 @@ final class DeferredTasks {
         case floatRaise
         /// Adoption-heal sweep for unhandled windows (#675).
         case adoptionHeal
-        /// Re-tracks windows dropped mid-launch (#675) and
-        /// re-reads an app whose removal was distrusted (#1157).
+        /// Re-tracks windows dropped mid-launch (#675).
         case transientRetrack
+        /// Re-reads an app whose sweep removal was distrusted
+        /// (#1157). A separate slot from `transientRetrack`
+        /// deliberately: a refusal riding a drop's part-spent
+        /// deadline could fire early and strand a true close.
+        case removalRecheck
         /// Bar re-render on a drawn title change — the one slot
         /// whose reschedule is the POINT: cancel-and-replace turns
         /// a keystroke-rate burst into one refresh when it stops.

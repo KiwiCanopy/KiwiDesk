@@ -19,6 +19,11 @@ import ApplicationServices
 /// runs. If it is not, the pair falls back to a destroy + create (the
 /// pre-#308 behavior) — a missed merge, never a wrong one.
 extension EventLoop {
+    /// Grace window after a native-Space change during which no
+    /// reconcile coalesces tabs. A genuine tab switch within it
+    /// falls back to destroy + create (self-healing), which is rare.
+    static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
+
     /// True if the app has a tracked native-tab carrier. Used to
     /// route a *non*-carrier window's create/destroy through reconcile
     /// at the 1↔2 tab boundary, where the single remaining/promoted
@@ -85,16 +90,20 @@ extension EventLoop {
         // A window back in the AX list ends its distrust episode
         // (#1157), so a later absence is refused — and logged —
         // afresh.
-        removalDistrusted.subtract(live)
+        removalDistrusted = removalDistrusted.filter {
+            !live.contains($0.key)
+        }
         // Genuine closes: emit the destroy the eager path deferred.
-        // A non-minimized candidate is checked against ONE
-        // WindowServer census first: a window the compositor still
-        // shows was not closed — the AX list under-reported it
-        // (#1157). The hidden drop never consults the census (#913).
+        // A candidate is checked against ONE census per sweep; a
+        // window the compositor still shows was not closed
+        // (#1157 — the exempt arms are accessibility.md's).
+        let switchGrace =
+            Date().timeIntervalSince(lastDesktopChange)
+            < Self.spaceSwitchCoalesceGrace
         var onScreen: Set<WindowID>?
         for id in vanishedIDs.sorted(by: { $0.raw < $1.raw })
         where !consumed.contains(id) {
-            if !hidden, !minimized.contains(id) {
+            if !hidden, !switchGrace, !minimized.contains(id) {
                 let census =
                     onScreen
                     ?? onScreenNormalWindowIDs()[pid, default: []]
@@ -104,13 +113,7 @@ extension EventLoop {
                     continue
                 }
             }
-            removalDistrusted.remove(id)
-            elements[pid]?[id] = nil
-            detectedFloating[id] = nil
-            detectedFullscreen[id] = nil
-            ignorePending.remove(id)
-            trackedFrames[id] = nil
-            tabCarriers.remove(id)
+            releaseWindowRegistration(id, pid: pid)
             // A hidden app's whole sweep is a hide (#913):
             // the windows are not gone, their app is, so they
             // must not be reported as closed and must not move
@@ -192,7 +195,7 @@ extension EventLoop {
     ) {
         elements[pid]?[from] = nil
         elements[pid, default: [:]][to] = element
-        removalDistrusted.remove(from)
+        removalDistrusted[from] = nil
         detectedFloating[to] = detectedFloating[from]
         detectedFloating[from] = nil
         detectedFullscreen[to] = detectedFullscreen[from]

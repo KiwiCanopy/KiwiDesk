@@ -84,6 +84,9 @@ struct BootAppBudgetTests {
         // window query and warmup at attach, which is the work a
         // budget bounds.
         loop.visiblePIDs = { Set(self.pids) }
+        // The sweep's #1157 census gate must not reach the live
+        // WindowServer from a unit test (tests.md).
+        loop.onScreenNormalWindowIDs = { [:] }
         loop.runningApplications = {
             self.pids.enumerated().map { index, pid in
                 RunningApp(

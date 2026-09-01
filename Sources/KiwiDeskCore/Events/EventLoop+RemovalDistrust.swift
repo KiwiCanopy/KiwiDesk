@@ -1,34 +1,48 @@
 import ApplicationServices
 
-/// The removal-distrust gate (#1157). Under fast focus churn a
-/// lazy-AX app (Electron-class) transiently UNDER-reports its
-/// window list, and the sweep read that absence as a close — the
-/// window lost its slot, the close-return raise fired, and only
-/// the ~20 s adoption heal brought it back. The gate is #913's
-/// mirror image: there the AX list over-reports a hidden app's
-/// windows and `appIsHidden` is the truth; here it under-reports
-/// a live one, and the WindowServer's on-screen census is. The
-/// asymmetry is deliberate and one-way — the census may REFUSE a
-/// removal (a listed window is composited on the current Desktop,
-/// so it exists), but never cause one: it omits other-Desktop
-/// windows exactly as readily as AX does, which is why #913 bars
-/// it from the hide drop. Residue: the census is layer-0 only,
-/// so a raised-layer or fully absent window keeps the old
-/// behavior — the gate is a net, not a guarantee.
+/// The removal-distrust gate (#1157): a sweep close candidate
+/// the on-screen census still shows is refused, because the
+/// census may REFUSE a removal, never cause one. The argument —
+/// the #913 mirror, the asymmetry, the accepted residue — is
+/// accessibility.md's.
 extension EventLoop {
+    /// Follow-up reconciles one episode may queue. 2: the first
+    /// queue can ride an already-armed one-shot's residual
+    /// deadline, so one re-queue guarantees the episode a
+    /// full-delay pass; past it the episode goes quiet rather
+    /// than polling a permanently mismatched app (#1157).
+    static let removalRecheckCap = 2
+
     /// Refuses one sweep removal for a window the census still
     /// shows. The first refusal of a continuous-absence episode
-    /// logs and queues a follow-up reconcile — so a TRUE close
-    /// still compositing at sweep time converges on the retrack
-    /// one-shot instead of waiting for the next incidental pass —
-    /// while later passes of the same episode refuse silently.
+    /// logs; each refusal queues a follow-up reconcile up to
+    /// `removalRecheckCap`, so a TRUE close still compositing
+    /// at sweep time converges on the recheck one-shot instead
+    /// of waiting for the next incidental pass.
     func refuseRemoval(_ id: WindowID, pid: pid_t, app: AppRef) {
-        guard removalDistrusted.insert(id).inserted else { return }
-        onLog(
-            "close distrust: w\(id.raw) of "
-                + "\(app.bundleID ?? app.name) missing from the "
-                + "AX list but still on screen — removal refused"
-        )
-        queueRetrack(pid: pid)
+        let spent = removalDistrusted[id] ?? 0
+        if spent == 0 {
+            onLog(
+                "close distrust: w\(id.raw) of "
+                    + "\(app.bundleID ?? app.name) missing from "
+                    + "the AX list but still on screen — "
+                    + "removal refused"
+            )
+        }
+        guard spent < Self.removalRecheckCap else { return }
+        removalDistrusted[id] = spent + 1
+        let wasIdle = pendingRemovalRecheck.isEmpty
+        pendingRemovalRecheck.insert(pid)
+        if wasIdle {
+            onRemovalDistrust()
+        }
+    }
+
+    /// Hands the pids owed a distrust follow-up to the scheduled
+    /// task and clears the queue (#1157).
+    func drainPendingRemovalRecheck() -> Set<pid_t> {
+        let pids = pendingRemovalRecheck
+        pendingRemovalRecheck = []
+        return pids
     }
 }

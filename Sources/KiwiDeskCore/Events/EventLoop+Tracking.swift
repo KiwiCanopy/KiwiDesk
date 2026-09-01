@@ -162,15 +162,6 @@ extension EventLoop {
             transientRetried[pid, default: []]
                 .insert(id).inserted
         else { return }
-        queueRetrack(pid: pid)
-    }
-
-    /// Queues one delayed reconcile for `pid` on the retrack
-    /// one-shot — shared by the transient drop above and the
-    /// removal-distrust follow-up (#1157). Fires the wire only
-    /// when the queue was empty: later entries ride the armed
-    /// one-shot instead of pushing its deadline back.
-    func queueRetrack(pid: pid_t) {
         let wasIdle = pendingRetrack.isEmpty
         pendingRetrack.insert(pid)
         if wasIdle {

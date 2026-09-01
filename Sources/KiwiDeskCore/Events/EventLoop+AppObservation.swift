@@ -268,12 +268,7 @@ extension EventLoop {
         transientRetried[pid] = nil
         pendingRetrack.remove(pid)
         for id in Array(elements[pid, default: [:]].keys) {
-            detectedFloating[id] = nil
-            detectedFullscreen[id] = nil
-            ignorePending.remove(id)
-            trackedFrames[id] = nil
-            tabCarriers.remove(id)
-            removalDistrusted.remove(id)
+            releaseWindowRegistration(id, pid: pid)
             onEvent(.windowDestroyed(id, wasMinimized: false))
         }
         elements[pid] = nil
