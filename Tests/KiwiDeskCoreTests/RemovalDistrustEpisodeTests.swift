@@ -191,4 +191,32 @@ struct RemovalDistrustEpisodeTests {
         )
         #expect(core.deferred.isScheduled(.removalRecheck))
     }
+
+    @Test("a ridden queue does not spend the episode's cap")
+    func riddenQueueDoesNotSpendTheCap() {
+        // A refusal landing while the one-shot is already armed
+        // rides that deadline; only a fresh arm — a full-delay
+        // pass — counts against `removalRecheckCap`, or an
+        // incidental reconcile could quiet the episode without
+        // it ever getting one.
+        let (loop, box) = makeLoop()
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        box.listed = []
+        box.census = [pid: [WindowID(12)]]
+        loop.reconcile(pid: pid, app: ref)
+        // Un-drained: the next refusal rides the armed one-shot.
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.recheckFires == 1)
+        #expect(loop.drainPendingRemovalRecheck() == [pid])
+        // The ride spent nothing, so a second full-delay arm is
+        // still owed…
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.recheckFires == 2)
+        #expect(loop.drainPendingRemovalRecheck() == [pid])
+        // …and only then is the episode out of arms.
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.recheckFires == 2)
+        #expect(loop.pendingRemovalRecheck.isEmpty)
+        #expect(distrustLines(box) == 1)
+    }
 }

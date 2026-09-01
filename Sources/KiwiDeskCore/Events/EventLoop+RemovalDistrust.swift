@@ -6,22 +6,23 @@ import ApplicationServices
 /// the #913 mirror, the asymmetry, the accepted residue — is
 /// accessibility.md's.
 extension EventLoop {
-    /// Follow-up reconciles one episode may queue. 2: the first
-    /// queue can ride an already-armed one-shot's residual
-    /// deadline, so one re-queue guarantees the episode a
-    /// full-delay pass; past it the episode goes quiet rather
-    /// than polling a permanently mismatched app (#1157).
+    /// Fresh one-shot arms one episode may spend. Every counted
+    /// arm is a full-delay pass — a refusal that rides an
+    /// already-armed one-shot queues without spending — and past
+    /// the cap the episode goes quiet rather than polling a
+    /// permanently mismatched app (#1157).
     static let removalRecheckCap = 2
 
     /// Refuses one sweep removal for a window the census still
     /// shows. The first refusal of a continuous-absence episode
-    /// logs; each refusal queues a follow-up reconcile up to
-    /// `removalRecheckCap`, so a TRUE close still compositing
-    /// at sweep time converges on the recheck one-shot instead
-    /// of waiting for the next incidental pass.
+    /// logs; a refusal queues a follow-up reconcile while the
+    /// episode has arms left (`removalRecheckCap`), so a TRUE
+    /// close still compositing at sweep time converges on the
+    /// recheck one-shot instead of waiting for the next
+    /// incidental pass.
     func refuseRemoval(_ id: WindowID, pid: pid_t, app: AppRef) {
-        let spent = removalDistrusted[id] ?? 0
-        if spent == 0 {
+        let spent = removalDistrusted[id]
+        if spent == nil {
             onLog(
                 "close distrust: w\(id.raw) of "
                     + "\(app.bundleID ?? app.name) missing from "
@@ -29,11 +30,13 @@ extension EventLoop {
                     + "removal refused"
             )
         }
-        guard spent < Self.removalRecheckCap else { return }
-        removalDistrusted[id] = spent + 1
+        let arms = spent ?? 0
+        removalDistrusted[id] = arms
+        guard arms < Self.removalRecheckCap else { return }
         let wasIdle = pendingRemovalRecheck.isEmpty
         pendingRemovalRecheck.insert(pid)
         if wasIdle {
+            removalDistrusted[id] = arms + 1
             onRemovalDistrust()
         }
     }
