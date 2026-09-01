@@ -49,7 +49,15 @@ struct SettingsInputSourceSeamTests {
             )
             .split(whereSeparator: \.isWhitespace)
             .joined()
-            if source.contains("NSApp.currentEvent") {
+            // `currentEvent` bare, not `NSApp.currentEvent`:
+            // the receiver has more than one spelling — `NSApp?`
+            // for nil-safety, `NSApplication.shared` — and a
+            // needle pinned to one of them read EMPTY the moment
+            // the seam gained its `?`, which is this suite's own
+            // near-miss (2026-09-01). The question is who reads
+            // the current event at all, not how they spell the
+            // receiver.
+            if source.contains("currentEvent") {
                 readers.append(file.lastPathComponent)
             }
         }
