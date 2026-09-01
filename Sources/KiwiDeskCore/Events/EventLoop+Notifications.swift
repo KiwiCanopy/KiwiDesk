@@ -145,7 +145,7 @@ extension EventLoop {
                 if note == kAXUIElementDestroyedNotification,
                     tabCarriers.contains(id)
                         || appHasTabCarrier(pid: pid)
-                        || carriedRemoval.carried().contains(id)
+                        || carriedRemovalArmIsOpen(for: id)
                 {
                     // Deferred to reconcile.
                 } else {
@@ -335,6 +335,5 @@ extension EventLoop {
         trackedFrames[id] = nil
         tabCarriers.remove(id)
         removalDistrusted[id] = nil
-        carriedRemoval.arms[id] = nil
     }
 }

@@ -14,15 +14,15 @@ import Testing
 /// sweep read that as a close inside the switch grace — the
 /// window lost its slot, scope and pin, and came back as new.
 /// This suite holds the arm's shape: refused inside the grace on
-/// a bounded census-blind budget, refused outright while the
-/// census shows it, hide and minimize exempt, the state AND the
-/// registration kept, and the same id re-elemented — never
-/// re-created — when the window is listed again.
+/// the #1157 episode's own recheck budget (one ledger, one cap),
+/// refused outright while the census shows it, hide and minimize
+/// exempt, the state AND the registration kept, and the same id
+/// re-elemented — never re-created — when the window is listed
+/// again.
 ///
-/// Harness: `RemovalDistrustTests`' per-file copy, plus an
-/// own-pid loop for the notification arm (`NotificationWindowIDTests`'
-/// shape — `handle` reads the activation policy off the live
-/// process table, and only our own pid passes that gate).
+/// Harness: `RemovalDistrustTests`' per-file copy. The destroy
+/// NOTIFICATION's half of the arm is `CarriedDestroyArmTests`',
+/// split at the tests.md file ceiling.
 @MainActor
 @Suite("Carried-window removal distrust (#1145)")
 struct CarriedRemovalTests {
@@ -137,7 +137,7 @@ struct CarriedRemovalTests {
     @Test("a carried vanish inside the switch grace is refused")
     func carriedVanishInsideGraceIsRefused() {
         let (loop, box) = makeLoop()
-        loop.carriedRemoval.carried = { [WindowID(12)] }
+        loop.carriedWindows = { [WindowID(12)] }
         loop.elements[pid] = [
             WindowID(11): dummyElement,
             WindowID(12): dummyElement,
@@ -150,11 +150,45 @@ struct CarriedRemovalTests {
         // State AND registration kept: the dead element stays
         // registered until the reconcile re-elements the id.
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.carriedRemoval.arms[WindowID(12)] == 1)
+        #expect(loop.removalDistrusted[WindowID(12)] == 1)
         // The refusal rides the distrust's own convergence.
         #expect(loop.pendingRemovalRecheck.contains(pid))
         #expect(box.recheckFires == 1)
         #expect(carriedLines(box) == 1)
+    }
+
+    @Test("outside a switch a carried close is a close")
+    func carriedCloseOutsideTheGraceIsRemoved() {
+        let (loop, box) = makeLoop()
+        loop.carriedWindows = { [WindowID(12)] }
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        box.listed = []
+        box.census = [:]
+        loop.lastDesktopChange = .distantPast
+        loop.reconcile(pid: pid, app: ref)
+        // No switch in flight: ⌘W of a sticky window is a close,
+        // not a beat to wait out.
+        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        #expect(box.recheckFires == 0)
+    }
+
+    @Test("an episode opened in the grace outlives it")
+    func episodeOpenedInTheGraceOutlivesIt() {
+        let (loop, box) = makeLoop()
+        loop.carriedWindows = { [WindowID(12)] }
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        box.listed = []
+        box.census = [:]
+        loop.lastDesktopChange = Date()
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.destroyed.isEmpty)
+        _ = loop.drainPendingRemovalRecheck()
+        // The recheck fires after the grace has aged out; the
+        // open episode keeps the arm ruling it.
+        loop.lastDesktopChange = .distantPast
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.destroyed.isEmpty)
+        #expect(loop.removalDistrusted[WindowID(12)] == 2)
     }
 
     @Test("an uncarried vanish inside the grace keeps the old gate")
@@ -169,58 +203,63 @@ struct CarriedRemovalTests {
         #expect(box.censusReads == 0)
     }
 
-    @Test("the census-blind budget is bounded, then a close is a close")
-    func armsBoundTheBlindRefusal() {
+    @Test("the census-blind budget is the episode's recheck budget")
+    func blindRefusalRidesTheRecheckBudget() {
         let (loop, box) = makeLoop()
-        loop.carriedRemoval.carried = { [WindowID(12)] }
+        loop.carriedWindows = { [WindowID(12)] }
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [:]
         loop.lastDesktopChange = Date()
-        for arm in 1...CarriedRemovalGate.armCap {
+        // Each blind refusal arms the recheck that re-reads it —
+        // the drain stands in for that one-shot firing.
+        for arm in 1...EventLoop.removalRecheckCap {
             loop.reconcile(pid: pid, app: ref)
             #expect(box.destroyed.isEmpty)
-            #expect(loop.carriedRemoval.arms[WindowID(12)] == arm)
+            #expect(loop.removalDistrusted[WindowID(12)] == arm)
+            #expect(box.recheckFires == arm)
+            _ = loop.drainPendingRemovalRecheck()
         }
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
         #expect(loop.elements[pid]?[WindowID(12)] == nil)
-        #expect(loop.carriedRemoval.arms[WindowID(12)] == nil)
+        #expect(loop.removalDistrusted[WindowID(12)] == nil)
         // One episode, one line.
         #expect(carriedLines(box) == 1)
     }
 
-    @Test("a census that shows the window refuses without spending")
-    func censusListedRefusesWithoutSpending() {
+    @Test("a census that shows the window refuses past the budget")
+    func censusListedRefusesPastTheBudget() {
         let (loop, box) = makeLoop()
-        loop.carriedRemoval.carried = { [WindowID(12)] }
+        loop.carriedWindows = { [WindowID(12)] }
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [pid: [WindowID(12)]]
         loop.lastDesktopChange = Date()
-        for _ in 0..<(CarriedRemovalGate.armCap + 2) {
+        for _ in 0..<(EventLoop.removalRecheckCap + 2) {
             loop.reconcile(pid: pid, app: ref)
+            _ = loop.drainPendingRemovalRecheck()
         }
         #expect(box.destroyed.isEmpty)
-        #expect(loop.carriedRemoval.arms[WindowID(12)] == nil)
+        #expect(loop.elements[pid]?[WindowID(12)] != nil)
     }
 
-    @Test("a window back in the list resets its arms")
-    func relistedWindowResetsArms() {
+    @Test("a window back in the list ends its episode")
+    func relistedWindowEndsTheEpisode() {
         let (loop, box) = makeLoop()
-        loop.carriedRemoval.carried = { [WindowID(12)] }
+        loop.carriedWindows = { [WindowID(12)] }
         loop.elements[pid] = [WindowID(12): dummyElement]
-        loop.carriedRemoval.arms[WindowID(12)] = 2
+        loop.removalDistrusted[WindowID(12)] = 2
         box.listed = [WindowID(12)]
         loop.reconcile(pid: pid, app: ref)
-        #expect(loop.carriedRemoval.arms[WindowID(12)] == nil)
+        #expect(loop.removalDistrusted[WindowID(12)] == nil)
         #expect(box.destroyed.isEmpty)
     }
 
     @Test("a hide outranks the carry")
     func hideOutranksTheCarry() {
         let (loop, box) = makeLoop()
-        loop.carriedRemoval.carried = { [WindowID(11), WindowID(12)] }
+        loop.carriedWindows = { [WindowID(11), WindowID(12)] }
         loop.elements[pid] = [
             WindowID(11): dummyElement,
             WindowID(12): dummyElement,
@@ -233,13 +272,13 @@ struct CarriedRemovalTests {
             box.hiddenEvents.sorted { $0.raw < $1.raw }
                 == [WindowID(11), WindowID(12)]
         )
-        #expect(loop.carriedRemoval.arms.isEmpty)
+        #expect(loop.removalDistrusted.isEmpty)
     }
 
     @Test("a minimized carried window is a minimize")
     func minimizeOutranksTheCarry() {
         let (loop, box) = makeLoop()
-        loop.carriedRemoval.carried = { [WindowID(12)] }
+        loop.carriedWindows = { [WindowID(12)] }
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.census = [:]
         loop.reconcileTabsAndSweep(
@@ -252,48 +291,6 @@ struct CarriedRemovalTests {
         )
         #expect(box.censusReads == 0)
         #expect(box.destroyed.map(\.wasMinimized) == [true])
-    }
-
-    @Test("stop forgets the arms")
-    func stopForgetsTheArms() {
-        let (loop, _) = makeLoop()
-        loop.carriedRemoval.arms[WindowID(12)] = 2
-        loop.stop()
-        #expect(loop.carriedRemoval.arms.isEmpty)
-    }
-
-    /// The own-pid loop the notification arm needs: `handle`
-    /// reads the policy off the live process table, which only
-    /// our own pid answers for.
-    private func makeOwnLoop() -> (loop: EventLoop, box: Box, pid: pid_t) {
-        let loop = EventLoop()
-        let box = Box()
-        wire(loop, box)
-        let own = pid_t(getpid())
-        loop.observers[own] = FakeObserver()
-        return (loop, box, own)
-    }
-
-    @Test("a carried window's destroyed element defers to the sweep")
-    func destroyedNotificationDefersToTheSweep() {
-        let (loop, box, own) = makeOwnLoop()
-        let element = dummyElement
-        loop.carriedRemoval.carried = { [WindowID(12)] }
-        loop.elements[own] = [WindowID(12): element]
-        box.listed = []
-        box.census = [:]
-        loop.lastDesktopChange = Date()
-        loop.handle(
-            kAXUIElementDestroyedNotification,
-            element,
-            pid: own,
-            app: AppRef(bundleID: nil, name: "Own")
-        )
-        // No eager destroy: the sweep the arm ran instead refused
-        // the carried vanish and kept the registration.
-        #expect(box.destroyed.isEmpty)
-        #expect(loop.elements[own]?[WindowID(12)] != nil)
-        #expect(loop.carriedRemoval.arms[WindowID(12)] == 1)
     }
 
     @Test("a re-listed window is re-elemented, never re-created")

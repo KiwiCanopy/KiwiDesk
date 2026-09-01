@@ -279,8 +279,12 @@ A Desktop on the same screen changes nothing: the Space you
 left is the Space you come back to. Neither does a **floating**
 or a **sticky** window change Space — a float has no layout to
 carry it anywhere, and a sticky window's home is deliberately
-left where it is (`move_to_space` guards it the same way).
-Same requirement as `focus_desktop`.
+left where it is (`move_to_space` guards it the same way). And
+with **Stay visible across Desktops** on (the default), the move
+holds only until your screen next switches Desktop — a sticky
+window follows you, so it is carried back to wherever you go.
+Pin it out with `override_sticky_reach("off")` first if you
+mean it to stay. Same requirement as `focus_desktop`.
 
 **Example:**
 
@@ -3525,8 +3529,9 @@ global `sticky.set_desktop_reach` toggle — `on` keeps this
 window following you across macOS Desktops even with the toggle
 off, `off` leaves it on the Desktop it lives on even with the
 toggle on, and `auto` clears the pin so the toggle rules again. Session state:
-the pin does not survive the window closing. A no-op on a macOS
-without the window-management bridge.
+the pin does not survive the window closing. Without the
+window-management bridge the pin is recorded but nothing is
+carried.
 
 **Example:**
 
@@ -3585,8 +3590,7 @@ already there. One toggle covers both scopes; a single window
 can be pinned the other way with `override_sticky_reach`. Off, a
 sticky window stays on the Desktop it lives on and follows only
 KiwiDesk's own Spaces there. Inert on a macOS without the
-window-management bridge — the Settings row is not shown there
-either.
+window-management bridge.
 
 **Example:**
 

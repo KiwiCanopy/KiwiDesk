@@ -269,25 +269,26 @@ editing AX code:
   stand-down, the episode ledger, the one-census cost and the
   convergence.
 
-  **The gate has a carried arm (#1145), and it is the one arm
-  that refuses INSIDE the switch grace.** A sticky window the
+  **The gate has a carried arm (#1145), and no other arm may
+  refuse INSIDE the switch grace** — a new one joins
+  `CarriedRemovalTests`' grace clause. A sticky window the
   Desktop reach carries is EXPECTED present after a switch —
   the bridge MOVE puts it on the arriving Desktop — but for the
   transition's beat it is on no reading at all: its AX element
   dies as it leaves the visible Space (TextEdit, device-traced
   2026-09-01) and the census has not composited it yet, so the
   pre-#1145 sweep read the carry as a close and the window came
-  back as new, scope and pin gone. Four obligations. The arm
-  reads the carried set through `EventLoop.carriedRemoval`'s
+  back as new, scope and pin gone. The obligations: the arm
+  reads the carried set through the `EventLoop.carriedWindows`
   seam, never the sticky flag — the core's verdict includes the
   toggle, the pin and the bridge, so a flag read would distrust
   windows nothing is carrying. A census that shows the window
   refuses outright (#1157's own rule); a census that shows
-  nothing refuses on a BOUNDED budget (`CarriedRemovalGate.armCap`,
-  argued there), spent per continuous-absence episode and reset
-  when the window is listed again, so a carried window
-  genuinely closed mid-switch still converges on the distrust's
-  own one-shots. The refusal keeps the STATE AND THE
+  nothing refuses census-blind on the SAME episode ledger and
+  the same cap (`removalDistrusted`, `removalRecheckCap`, whose
+  doc argues the budget against the measured beat) — never a
+  second ledger, or one cap stops arming the recheck the other
+  still counts on. The refusal keeps the STATE AND THE
   REGISTRATION — the dead element stays in `elements` — and the
   destroyed notification for a carried window defers to the
   sweep exactly as a tab carrier's does, because releasing the

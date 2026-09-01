@@ -90,13 +90,17 @@ Every one of the following binds whoever touches them:
   pointer-write switch does not reproduce it; the same item's
   finding that `CopySpacesForWindows` never reports a second
   Desktop still stands, and is now explained rather than a lie.
-  So no caller asserts a second membership and no ledger tracks
-  one. **The MOVE (`MoveWindowsToManagedSpace`) is the one
-  membership write applied cross-app** — `move_to_desktop`
-  ships on it, and sticky reach CARRIES on it at each Desktop
-  switch ([state-and-layout.md](state-and-layout.md)). A future
-  macOS that applies the ADD earns a re-probe with the census
-  as the witness, never a re-read of item 5.
+  So a caller asserts no second membership and keeps no ledger
+  of one; the wrapper's `addWindows`, `removeWindows` and
+  `spaces(for:)` stay as the re-probe surface with no
+  production caller, and a new call site reds in
+  `WMBridgeSeamTests`' per-file spelling map. **The MOVE
+  (`MoveWindowsToManagedSpace`) is the one membership write
+  applied cross-app** — `move_to_desktop` ships on it, and
+  sticky reach CARRIES on it at each Desktop switch
+  ([state-and-layout.md](state-and-layout.md)). A future macOS
+  that applies the ADD earns a re-probe with the census as the
+  witness, never a re-read of item 5.
 - **The space-pointer write performs no transition (#1023).**
   `ManagedDisplaySetCurrentSpaceOperation` moves the pointer and
   composites the target's windows, but never hides the origin's

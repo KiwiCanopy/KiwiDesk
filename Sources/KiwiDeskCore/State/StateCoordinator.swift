@@ -128,6 +128,12 @@ public struct StateCoordinator: Sendable {
                 wasMinimized: wasMinimized,
                 effects: &effects
             )
+            // Only a genuine close drops the reach pin (#1145): a
+            // minimize keeps its id and scope, and a hide — folded
+            // below as a destroy — keeps its window.
+            if !wasMinimized {
+                stickyReachOverrides[id] = nil
+            }
 
         // Hides fold as non-minimized destroys to remember space (#913).
         case .windowHidden(let id):

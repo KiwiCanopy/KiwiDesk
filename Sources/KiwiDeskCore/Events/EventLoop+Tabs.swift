@@ -104,9 +104,6 @@ extension EventLoop {
         removalDistrusted = removalDistrusted.filter {
             !live.contains($0.key)
         }
-        carriedRemoval.arms = carriedRemoval.arms.filter {
-            !live.contains($0.key)
-        }
         // Genuine closes: emit the destroy the eager path deferred.
         // A candidate is checked against ONE census per sweep; a
         // window the compositor still shows was not closed

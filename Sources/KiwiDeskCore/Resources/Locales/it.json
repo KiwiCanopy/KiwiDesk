@@ -1128,7 +1128,7 @@
   "sticky.caption": "Le finestre Sticky restano visibili su tutti gli spazi («%1$@», in %2$@).",
   "sticky.color": "Sticky",
   "sticky.color.a11y": "Colore marcatore finestra Sticky",
-  "sticky.desktop_reach": "Restano visibili su tutte le Scrivanie",
+  "sticky.desktop_reach": "Restare visibili su tutte le Scrivanie",
   "sticky.desktop_reach.help": "Estende la promessa di Sticky alle Scrivanie di macOS: cambia Scrivania e le tue finestre Sticky vengono portate con te, già lì quando arrivi. Se lo disattivi, una finestra Sticky resta sulla Scrivania in cui si trova e segue soltanto gli spazi di KiwiDesk.",
   "sticky.display.pill": "Spostabile solo su altri monitor",
   "sticky.everywhere.pill": "Le finestre Sticky non possono essere spostate in altri spazi",

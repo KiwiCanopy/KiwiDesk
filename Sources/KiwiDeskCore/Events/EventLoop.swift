@@ -155,9 +155,11 @@ public final class EventLoop {
     /// list, still on-census — as follow-ups spent per
     /// continuous-absence episode (#1157).
     var removalDistrusted: [WindowID: Int] = [:]
-    /// The carried-window arm of that gate (#1145) — argued on
-    /// the type, in `EventLoop+RemovalDistrust.swift`.
-    var carriedRemoval = CarriedRemovalGate()
+    /// The windows sticky reach carries (#1145) — the gate's
+    /// carried arm reads it (`EventLoop+RemovalDistrust`). Wired
+    /// in `KiwiCore+Bootstrap`; the empty default keeps every
+    /// harness inert.
+    var carriedWindows: () -> Set<WindowID> = { [] }
     /// When the user last switched native Spaces. Tab coalescing is
     /// suppressed for a short window afterward: a space switch shows
     /// the departed space's windows as vanished and the arrived

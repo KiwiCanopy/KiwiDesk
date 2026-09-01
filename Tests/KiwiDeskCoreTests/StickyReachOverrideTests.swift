@@ -94,16 +94,19 @@ struct StickyReachOverrideTests {
         )
     }
 
-    /// A minimize keeps the id and the scope, so the pin
-    /// survives it; a genuine close drops it — old ids get
-    /// recycled onto unrelated windows.
+    /// A minimize keeps the id and the scope, and a hide keeps
+    /// the window (#913), so the pin survives both; a genuine
+    /// close drops it — old ids get recycled onto unrelated
+    /// windows.
     @Test("only a genuine close drops the pin")
-    func minimizeKeepsThePin() {
+    func minimizeAndHideKeepThePin() {
         defer { reset() }
         let core = makeCore()
         let id = WindowID(1)
         core.state.stickyReachOverrides[id] = false
         core.handle(.windowDestroyed(id, wasMinimized: true))
+        #expect(core.state.stickyReachOverrides[id] == false)
+        core.handle(.windowHidden(id))
         #expect(core.state.stickyReachOverrides[id] == false)
         core.handle(.windowDestroyed(id, wasMinimized: false))
         #expect(core.state.stickyReachOverrides[id] == nil)
@@ -133,6 +136,6 @@ struct StickyReachOverrideTests {
         let core = makeCore()
         core.state.setSticky(WindowID(1), .global)
         #expect(core.stickyReachCarried().isEmpty)
-        #expect(core.eventLoop.carriedRemoval.carried().isEmpty)
+        #expect(core.eventLoop.carriedWindows().isEmpty)
     }
 }

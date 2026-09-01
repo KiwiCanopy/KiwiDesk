@@ -168,16 +168,21 @@ editing here:
   (#1145).** `KiwiCore+StickyReach.swift` MOVES every enabled
   sticky window onto its home screen's current Desktop — from
   the switch handler's one snapshot, and again from the settle
-  as the net — because the bridge move is the one membership
-  write macOS applies cross-app, while the ADD performs and
-  applies nothing ([os-private-apis.md](os-private-apis.md)).
-  So there is no ledger and nothing to retire at quit: where
-  the WindowServer shows the window IS the state, and a re-run
-  is idempotent. Three obligations on a change here. Both
-  scopes carry within the window's HOME screen (#445's
-  primitive) — a window never crosses screens because some
-  OTHER screen switched, and a screen on a fullscreen or system
-  space is no carry target (#670). A verb that changes who is
+  as the net — because the bridge MOVE is the one membership
+  write macOS applies cross-app
+  ([os-private-apis.md](os-private-apis.md) owns why the ADD is
+  not one). Keep the carry ledgerless: where the WindowServer
+  shows the window IS the state, so a pass must stay idempotent
+  for the settle to repeat, quit owes no undo, and a change that
+  adds a membership record to reconcile is the #1205 shape and
+  is refused. Three more obligations. A carry is scoped to the screen the window
+  RENDERS on — #445's `stickyRenderSpace`, 📌 its home screen
+  and ∞ the active space's — so it lands where the retile draws
+  the window and never crosses screens because some OTHER
+  screen switched; the eager pass therefore runs AFTER the
+  switch handler activates the arriving Space, and a screen on
+  a fullscreen or system space is no carry target (#670). A
+  verb that changes who is
   carried (the toggle, the pin, a profile or Settings apply)
   calls the refresh so its windows come to the user NOW; a
   site that merely marks the visible focused window sticky owes

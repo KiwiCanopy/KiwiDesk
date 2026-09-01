@@ -67,7 +67,9 @@ private let bridgeClasses: [String: AnyClass] = [
 /// The #888 fixture: Desktops 1–2 on the main display `UUID-A`
 /// (ids 10, 11), 3–4 on `UUID-B` (ids 20, 21); KiwiDesk space
 /// "1" on display 1 (A), space "5" on display 2 (B). Windows 1
-/// (∞), 2 (📌) and 3 (plain) sit on A; window 4 (∞) on B.
+/// (∞), 2 (📌) and 3 (plain) are homed on A; window 4 (📌) on B.
+/// A ∞ window renders on the ACTIVE space (#445), so its carry
+/// follows the active space's screen; a 📌 window its home's.
 /// Serialized, synchronous bodies — the resolver and the space
 /// overrides are process-global (`DesktopCommandTests`' note).
 @Suite("Sticky reach carry (#1145)", .serialized)
@@ -113,7 +115,7 @@ struct StickyReachCarryTests {
         core.state.workspaces.add(w4, to: SpaceID("5"))
         core.state.setSticky(w1, .global)
         core.state.setSticky(w2, .display)
-        core.state.setSticky(w4, .global)
+        core.state.setSticky(w4, .display)
         core.lastDesktop = 1
         core.desktopMemory.lastDisplaySpaces = [
             "UUID-A": 10, "UUID-B": 20,
@@ -145,6 +147,25 @@ struct StickyReachCarryTests {
         // that screen's current Desktop — never teleported across
         // screens because this one switched.
         #expect(Bridge.targets(of: w4) == [20])
+    }
+
+    @Test("a ∞ window carries with the screen it renders on")
+    func globalStickyFollowsTheActiveSpacesScreen() {
+        let core = makeCore()
+        defer { teardown() }
+        // The user works on B: the active space is B's, so the ∞
+        // window renders there (#445) — and B's switch carries it
+        // to B's arriving Desktop, while the 📌 window homed on A
+        // stays with A's current.
+        core.state.workspaces.activate(SpaceID("5"))
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 21
+        )
+        core.handleDesktopChange()
+        #expect(Bridge.targets(of: w1) == [21])
+        #expect(Bridge.targets(of: w2) == [10])
+        #expect(Bridge.targets(of: w4) == [21])
     }
 
     @Test("the settle carries again, as the eager pass's net")
@@ -201,6 +222,19 @@ struct StickyReachCarryTests {
         core.state.stickyReachOverrides[w3] = true
         core.refreshStickyReach()
         #expect(Bridge.targets(of: w3).isEmpty)
+    }
+
+    @Test("a native-fullscreen sticky window is never carried")
+    func fullscreenWindowIsNotCarried() {
+        let core = makeCore()
+        defer { teardown() }
+        core.state.apply(
+            .windowFullscreenChanged(w1, isFullscreen: true)
+        )
+        core.refreshStickyReach()
+        #expect(Bridge.targets(of: w1).isEmpty)
+        #expect(Bridge.targets(of: w2) == [10])
+        #expect(!core.eventLoop.carriedWindows().contains(w1))
     }
 
     @Test("shared-Spaces mode carries everything with the one list")
@@ -260,15 +294,34 @@ struct StickyReachCarryTests {
         #expect(Bridge.moves.isEmpty)
     }
 
+    @Test("a profile that turns the toggle on carries at once")
+    func profileApplyCarriesNow() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(
+            core.execute("save_profile", args: [.string("Reach")])
+                .isSuccess
+        )
+        core.tiler.settings.stickyStyle.desktopReach = false
+        Bridge.reset()
+        #expect(
+            core.execute("load_profile", args: [.string("Reach")])
+                .isSuccess
+        )
+        #expect(core.tiler.settings.stickyStyle.desktopReach)
+        #expect(Bridge.targets(of: w1) == [10])
+        #expect(Bridge.targets(of: w4) == [20])
+    }
+
     @Test("the carried set is what the removal gate reads")
     func carriedSetFeedsTheRemovalGate() {
         let core = makeCore()
         defer { teardown() }
-        #expect(core.eventLoop.carriedRemoval.carried() == [w1, w2, w4])
+        #expect(core.eventLoop.carriedWindows() == [w1, w2, w4])
         core.state.stickyReachOverrides[w1] = false
-        #expect(core.eventLoop.carriedRemoval.carried() == [w2, w4])
+        #expect(core.eventLoop.carriedWindows() == [w2, w4])
         core.state.setSticky(w2, .none)
-        #expect(core.eventLoop.carriedRemoval.carried() == [w4])
+        #expect(core.eventLoop.carriedWindows() == [w4])
     }
 
     @Test("no bridge, no carry")

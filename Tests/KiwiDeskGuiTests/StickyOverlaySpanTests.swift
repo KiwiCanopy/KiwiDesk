@@ -15,7 +15,8 @@ struct StickyOverlaySpanTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
     /// Both overlay panels, one needle each: the collection
-    /// behavior opens with the spanning flag.
+    /// behavior literal carries the spanning flag — anywhere in
+    /// the bracket, since its order is nothing this guard holds.
     private static let panels = [
         "Sources/KiwiDeskCore/Borders/StickyMarkOverlay.swift",
         "Sources/KiwiDeskCore/Borders/AppKitBorderOverlay.swift",
@@ -30,10 +31,13 @@ struct StickyOverlaySpanTests {
             )
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "\n", with: "")
+            let literal = source.components(
+                separatedBy: "panel.collectionBehavior=["
+            )
+            .dropFirst().first?
+            .components(separatedBy: "]").first
             #expect(
-                source.contains(
-                    "panel.collectionBehavior=[.canJoinAllSpaces,"
-                ),
+                literal?.contains(".canJoinAllSpaces") == true,
                 Comment(
                     rawValue:
                         "\(file) no longer spans Desktops — a "

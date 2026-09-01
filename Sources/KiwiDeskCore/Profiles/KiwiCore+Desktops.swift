@@ -57,11 +57,6 @@ extension KiwiCore {
         let snapshot = NativeSpaces.desktopSnapshot()
         let number = snapshot.authority
         lastDesktopSwitch = Date()
-        // #1145: carry the sticky windows onto the Desktop this
-        // switch revealed — eagerly, so they are there when the
-        // user is. Threaded from the ONE snapshot (profiles.md);
-        // the settle re-runs it as the backstop.
-        refreshStickyReach(spaces: snapshot.spaces)
         // A secondary display switched: the authority is a live
         // number that did not move, and some OTHER display's
         // current Space did. Both halves are read from the ONE
@@ -150,6 +145,13 @@ extension KiwiCore {
                 updateSpaceBar()
             }
         }
+        // #1145: carry the sticky windows onto the Desktop this
+        // switch revealed — eagerly, so they are there when the
+        // user is, and AFTER the arms above activated the
+        // arriving Space, since a ∞ window renders on the active
+        // space and the carry follows the render. Threaded from
+        // the ONE snapshot (profiles.md); the settle is the net.
+        refreshStickyReach(spaces: snapshot.spaces)
         emitDesktopChange(snapshot, changed: changed)
         settleAfterDesktopSwitch(number)
     }

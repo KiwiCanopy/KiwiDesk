@@ -18,12 +18,6 @@ extension StateCoordinator {
             rememberFloatOverride(of: window)
             rememberStickyIntent(of: window)
         }
-        // A minimize keeps its id and its sticky scope, so the
-        // reach pin survives it too; only a genuine close drops
-        // it (#1145 review).
-        if !wasMinimized {
-            stickyReachOverrides[id] = nil
-        }
         let home = workspaces.space(of: id)
         let heldFocus =
             home.map { workspaces[$0]?.focused == id }

@@ -17,15 +17,17 @@ extension KiwiCore {
     }
 
     /// The windows the carry follows. Also the event loop's
-    /// removal gate's reading (`CarriedRemovalGate`): one of
-    /// these is EXPECTED present on the arriving Desktop while
-    /// the switch transition darkens both AX and the census.
+    /// removal gate's reading (`EventLoop.carriedWindows`): one
+    /// of these is EXPECTED present on the arriving Desktop while
+    /// the switch transition darkens both AX and the census. A
+    /// native-fullscreen window keeps its scope but travels
+    /// nowhere (#670) — a move would yank it out of its own space.
     func stickyReachCarried() -> Set<WindowID> {
         guard canDriveDesktops else { return [] }
         return Set(
             state.windows.all
                 .filter {
-                    $0.stickyScope != .none
+                    $0.stickyScope != .none && !$0.isFullscreen
                         && stickyReachEnabled(for: $0.id)
                 }
                 .map(\.id)
@@ -39,28 +41,38 @@ extension KiwiCore {
         refreshStickyReach(spaces: NativeSpaces.allSpaces())
     }
 
-    /// Carries every enabled sticky window onto its home screen's
-    /// CURRENT Desktop — one idempotent pass the switch handler
-    /// runs eagerly and the settle repeats, so a switch the eager
-    /// pass missed self-heals. Both scopes carry within their own
-    /// screen (#445's home-display rule): a window never crosses
+    /// Carries every enabled sticky window onto the CURRENT
+    /// Desktop of the screen it renders on — one idempotent pass
+    /// the switch handler runs eagerly and the settle repeats, so
+    /// a switch the eager pass missed self-heals. The screen is
+    /// #445's render primitive (`stickyRenderSpace`): 📌 its home
+    /// screen, ∞ the active space's — so the carry lands where
+    /// the retile draws the window, and a window never crosses
     /// screens because some OTHER screen switched. A screen
     /// showing a fullscreen or system space carries nothing —
     /// its next user Desktop does (#670).
     func refreshStickyReach(spaces: [NativeSpace]) {
         guard canDriveDesktops else { return }
-        for id in stickyReachCarried().sorted(by: { $0.raw < $1.raw }) {
+        let carried = stickyReachCarried()
+        for window in state.windows.all
+            .filter({ carried.contains($0.id) })
+            .sorted(by: { $0.id.raw < $1.id.raw })
+        {
+            let id = window.id
             guard
-                let uuid = homeDisplayUUID(of: id, in: spaces),
+                let uuid = renderDisplayUUID(of: window, in: spaces),
                 let current = spaces.first(where: {
                     $0.displayUUID == uuid && $0.isCurrent
                         && $0.isUser
                 })
             else { continue }
-            let ok = WMBridge.moveWindows([id], to: current.id)
+            // Performed is not applied (os-private-apis.md): the
+            // Bool is the dispatch, nothing verifies the landing,
+            // and the settle's repeat is the only net.
+            let performed = WMBridge.moveWindows([id], to: current.id)
             onLog(
                 "reach: carry w\(id.raw) -> space \(current.id) "
-                    + "ok=\(ok)"
+                    + "performed=\(performed)"
             )
         }
     }
@@ -92,18 +104,18 @@ extension KiwiCore {
         StickyReachOverride.self
     )
 
-    /// The screen a carry is scoped to — the window's HOME
-    /// display, the primitive the render and stash exemption
-    /// rest on (#445). One display record means shared-Spaces
-    /// mode: everything carries with the one list.
-    private func homeDisplayUUID(
-        of id: WindowID,
+    /// The screen a carry is scoped to — the display of the
+    /// space the window RENDERS on (#445's `stickyRenderSpace`,
+    /// read as `focusAnchor` reads it). One display record means
+    /// shared-Spaces mode: everything carries with the one list.
+    private func renderDisplayUUID(
+        of window: ManagedWindow,
         in spaces: [NativeSpace]
     ) -> String? {
         let uuids = Set(spaces.map(\.displayUUID))
         if uuids.count <= 1 { return uuids.first }
-        return state.homeDisplay(of: id).flatMap {
-            NativeSpaces.displayUUID(for: $0)
-        }
+        return state.stickyRenderSpace(of: window, focused: nil)
+            .flatMap { state.workspaces.display(of: $0) }
+            .flatMap { NativeSpaces.displayUUID(for: $0) }
     }
 }
