@@ -124,6 +124,13 @@ final class SettingsModel: ObservableObject {
     /// Transient warning for newly introduced keybinding conflicts.
     @Published var keybindingWarning: String?
 
+    /// Injectable live read of one symbolic hotkey's `enabled`
+    /// bit (#1105); nil = no plist entry, shipped default
+    /// applies. `makeTestModel` injects `{ _ in nil }` so no
+    /// suite reads the host's `com.apple.symbolichotkeys`.
+    var readSymbolicHotkey: (Int) -> Bool? =
+        SystemShortcutEnablement.liveRead
+
     /// True when macOS Accessibility is missing; drives
     /// `PermissionPausedBanner`.
     @Published var permissionPaused = false

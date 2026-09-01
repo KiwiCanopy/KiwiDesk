@@ -2819,14 +2819,24 @@ macOS's", never "nothing else uses this" — which is why
 [choosing a chord](#choosing-your-own-shortcuts) ends with
 opening the app you'd miss it in.
 
+Some macOS shortcuts are switched off until you enable them —
+the Zoom and Invert Colors chords live behind Accessibility
+settings, for example. KiwiDesk checks whether your Mac
+currently answers the chord: a collision with a shortcut that's
+switched off still shows the row's ⚠️ (so you know what you're
+shadowing if you ever enable it), but it doesn't count toward
+the banner or the Shortcuts card's conflict count — those only
+count collisions that cost you a working shortcut right now.
+
 Click the icon to read the conflict in a popover; hovering it
 shows the same sentence as a tooltip. This indicator updates
 live — no action needed to see it.
 
 When a conflict is introduced (by recording a clashing shortcut,
 adopting a hand-written config, or saving from the raw Lua
-editor), a dismissible banner appears naming every current
-conflict. With exactly one:
+editor), a dismissible banner appears naming every conflict that
+costs you a working shortcut right now (collisions with a
+switched-off macOS chord stay on their rows). With exactly one:
 
 ```
 Shortcut for "Close" is conflicting with the macOS

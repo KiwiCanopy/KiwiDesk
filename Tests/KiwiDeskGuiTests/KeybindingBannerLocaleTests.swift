@@ -101,7 +101,8 @@ struct KeybindingBannerLocaleTests {
     /// dismissing it. `⌃⌥⌘8` is exactly that shape — a SEEDED
     /// row (tier 3's move-to-space-8) against a macOS chord that
     /// ships disabled — which is why aggregate surfaces read
-    /// `KeybindingConflicts.actionable` and not `conflicts`.
+    /// `actionableConflicts()` (#1105's one accessor) and not
+    /// `conflicts`.
     @Test("a dormant macOS chord cannot latch the banner open")
     func dormantChordDoesNotLatchTheBanner() {
         reset()

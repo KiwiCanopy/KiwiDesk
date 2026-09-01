@@ -603,20 +603,6 @@ must keep:
   (`HomeCardContentTests` holds the derivations), previews
   come only from renderers that already ask the real data, and
   only the Shortcuts conflict may shout — glyph + text, never
-
-- **A per-row surface explains; an aggregate surface counts only
-  what the user should act on (#1094).** A ⚠️ on one row and a
-  ring on one key show everything `SystemShortcuts.map` knows,
-  dormant chords included — that is the moment a user asked. A
-  count or a banner reads
-  `KeybindingConflicts.actionable`, which drops a chord macOS
-  ships disabled: `⌃⌥⌘8` is a SEEDED default and also Invert
-  Colors, so counting it alarms every install with 8+ Desktops
-  about a chord that works, and a count that can never reach
-  zero never clears. There are three aggregate readers — card
-  shout, banner, recorder note — and the first fix wired one, so
-  route a new one through that accessor rather than re-deriving
-  the filter.
   hue alone. A profile card's picture rides the desktop plate
   (#786), drawn from the draft in the user's palette through
   the `schematicPalette` environment — never an init
@@ -626,6 +612,28 @@ must keep:
   shape, silence and group parity and the stroke-above-clip
   order; `HomeCardPaletteWiringTests` the per-struct palette
   consults, the floor and the shared border-width remap.
+- **A per-row surface explains; an aggregate surface counts only
+  what the user should act on (#1094, live-read #1105).** A ⚠️
+  on one row and a ring on one key show everything
+  `SystemShortcuts.map` knows, dormant chords included — that is
+  the moment a user asked. A count or a banner reads
+  `SettingsModel.actionableConflicts()`, which drops a chord
+  macOS has switched OFF right now: `⌃⌥⌘8` is a SEEDED default
+  and also Invert Colors, so counting it while dormant alarms
+  every install with 8+ Desktops about a chord that works, and a
+  count that can never reach zero never clears — while a user
+  who HAS enabled Invert Colors owns a live chord and gets the
+  count. The enabled bit is read live from
+  `com.apple.symbolichotkeys` at the GUI boundary
+  (`SystemShortcutEnablement`; Core stays a pure description of
+  chords, and an absent plist entry falls back to the shipped
+  default), injected per model so no suite reads the host.
+  #1094's first fix wired only one of the aggregate readers, so
+  a new aggregate surface routes through that accessor — or
+  `disabledSystemShortcuts()` for the per-shortcut half — rather
+  than re-deriving the filter; `ConflictAccessorRoutingTests`
+  holds every `KiwiDesk`-tree `KeybindingConflicts.` call to its
+  allow-list and pins the seam's live-default polarity.
 - **A new surfacing branch or one-line wiring decision in the
   shell joins `HomeSurfacingTests` in the same change**, keyed
   on its use site — the Monitors lesson, which this shell

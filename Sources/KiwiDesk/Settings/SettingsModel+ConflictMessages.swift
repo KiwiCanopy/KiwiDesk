@@ -3,15 +3,33 @@ import KiwiDeskCore
 
 /// Keybinding conflict warning banner formatting for SettingsModel.
 extension SettingsModel {
+    /// The ONE aggregate conflict read (#1094/#1105). An
+    /// aggregate surface takes this — never a `KeybindingConflicts`
+    /// aggregate directly, which cannot know the live enabled
+    /// state; `ConflictAccessorRoutingTests` holds the family to
+    /// its allow-list.
+    func actionableConflicts() -> [Conflict] {
+        KeybindingConflicts.actionable(
+            in: config.layers,
+            disabledSystemShortcuts: disabledSystemShortcuts()
+        )
+    }
+
+    /// The per-shortcut half of the verdict (#1105): which
+    /// register chords macOS has switched OFF right now. A row
+    /// surface narrating dormancy (#1126) is handed this —
+    /// never the reader or `SystemShortcutEnablement` itself.
+    func disabledSystemShortcuts() -> Set<SystemShortcut> {
+        SystemShortcutEnablement.disabled(
+            reading: readSymbolicHotkey
+        )
+    }
+
     /// Live derived banner text reflecting active conflicts
     /// (`KeybindingConflicts`).
     var liveKeybindingBanner: String? {
         guard keybindingWarning != nil else { return nil }
-        return formatConflicts(
-            KeybindingConflicts.actionable(
-                in: config.layers
-            )
-        )
+        return formatConflicts(actionableConflicts())
     }
 
     /// Evaluates conflict state after recording a combo. An edit
@@ -22,9 +40,7 @@ extension SettingsModel {
         _ binding: KeyBinding,
         in bindings: [KeyBinding]
     ) {
-        let list = KeybindingConflicts.actionable(
-            in: config.layers
-        )
+        let list = actionableConflicts()
         if KeybindingConflicts.conflict(
             for: binding,
             in: bindings
@@ -39,9 +55,7 @@ extension SettingsModel {
 
     /// Updates conflict banner for whole configuration on batch operations.
     func warnIfAnyConflict() {
-        let list = KeybindingConflicts.actionable(
-            in: config.layers
-        )
+        let list = actionableConflicts()
         keybindingWarning =
             list.isEmpty ? nil : formatConflicts(list)
     }

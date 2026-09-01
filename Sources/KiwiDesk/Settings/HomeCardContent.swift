@@ -157,15 +157,13 @@ enum HomeCardContent {
     }
 
     /// Formats actionable shortcut conflict count badge
-    /// (`KeybindingConflicts`, #1094).
+    /// (`KeybindingConflicts`, #1094/#1105).
     static func conflictShout(
         for destination: SettingsDestination,
         model: SettingsModel
     ) -> String? {
         guard destination == .shortcuts else { return nil }
-        let count = KeybindingConflicts.actionable(
-            in: model.config.layers
-        ).count
+        let count = model.actionableConflicts().count
         guard count > 0 else { return nil }
         guard count > 1 else {
             return L("home.card.conflict_one", "1 conflict")

@@ -21,10 +21,10 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case screenshot
     case screenshotSelection
     case screenshotTools
-    // ⌥⌘ family (#1075). Zoom's three ship OFF behind an
-    // Accessibility setting, but a gated shortcut still wins when
-    // on, and `RegisterEventHotKey` fails silently
-    // (`com.apple.symbolichotkeys`, macOS 26.6).
+    // ⌥⌘ family (#1075). The Zoom trio is Accessibility-gated —
+    // enablement lives in the GUI's `SystemShortcutEnablement`
+    // (#1105) — and a live chord makes `RegisterEventHotKey`
+    // fail silently.
     case zoomToggle
     case zoomIn
     case zoomOut
@@ -36,10 +36,10 @@ public enum SystemShortcut: Sendable, CaseIterable {
     // fixture rather than trusting its green; a chord nothing
     // seeds is invisible to every guard.
     case inputSourceNext
-    // ⌃⌥⌘ trio (#1094 review): all three ship DISABLED behind
-    // Accessibility — the same shape that hid the Zoom trio from
-    // a reputation-based list. `⌃⌥⌘8` is a SEEDED row, so this
-    // makes an existing collision visible.
+    // ⌃⌥⌘ trio (#1094 review): Accessibility-gated like the
+    // Zoom trio — the shape a reputation-based list misses.
+    // `⌃⌥⌘8` is a SEEDED row, so this makes an existing
+    // collision visible.
     case invertColors
     case increaseContrast
     case decreaseContrast
@@ -84,28 +84,5 @@ public enum SystemShortcuts {
             }
         }
         return map
-    }
-}
-
-extension SystemShortcut {
-    /// Whether macOS ships this chord's shortcut switched OFF
-    /// (`com.apple.symbolichotkeys`, macOS 26.6). A `switch`, not
-    /// a `Set`: a new case must not ship without an answer here —
-    /// a hand-listed set would read the next dormant chord as
-    /// ENABLED by omission. Reads the SHIPPED default, never the
-    /// live setting; #1105 replaces it with a live read.
-    public var shipsDisabled: Bool {
-        switch self {
-        case .zoomToggle, .zoomIn, .zoomOut,
-            .invertColors, .increaseContrast, .decreaseContrast:
-            return true
-        case .spotlight, .appSwitcher, .quitApp, .closeWindow,
-            .minimize, .hideApp, .forceQuit,
-            .missionControlSpaceLeft, .missionControlSpaceRight,
-            .missionControl, .appWindows, .screenshot,
-            .screenshotSelection, .screenshotTools, .dockHiding,
-            .finderSearch, .inputSourceNext:
-            return false
-        }
     }
 }
