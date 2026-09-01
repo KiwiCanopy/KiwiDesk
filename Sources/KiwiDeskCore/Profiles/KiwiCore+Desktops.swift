@@ -57,6 +57,11 @@ extension KiwiCore {
         let snapshot = NativeSpaces.desktopSnapshot()
         let number = snapshot.authority
         lastDesktopSwitch = Date()
+        // #1145: carry the sticky windows onto the Desktop this
+        // switch revealed — eagerly, so they are there when the
+        // user is. Threaded from the ONE snapshot (profiles.md);
+        // the settle re-runs it as the backstop.
+        refreshStickyReach(spaces: snapshot.spaces)
         // A secondary display switched: the authority is a live
         // number that did not move, and some OTHER display's
         // current Space did. Both halves are read from the ONE
@@ -226,6 +231,10 @@ extension KiwiCore {
         // list, so its app was skipped. Sweep the arrivals now
         // — before the retile below, which then places them.
         eventLoop.reconcileOnScreenArrivals()
+        // #1145: carry again once the switch has settled —
+        // idempotent, and the net under the eager carry in
+        // `handleDesktopChange`.
+        refreshStickyReach()
         // A fullscreen/system space: the retile, z-order
         // restore and refocus stand down (#670) — the refocus
         // would AX-raise the desktop's focused window behind

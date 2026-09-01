@@ -1054,6 +1054,81 @@ Reading an English ruling as a translation instruction is how a
 sweep breaks correct copy.
 
 
+### Sticky reach spans macOS Desktops (#1145)
+
+**[Principle]**
+
+Sticky promises "always with me", and before #1145 that promise
+stopped at the edge of KiwiDesk's own Spaces: a Desktop switch
+left the ∞ window behind. Where the window-management bridge
+exists, both scopes now follow the user across macOS Desktops.
+The rulings:
+
+- **Reach is a carry, never a membership.** The dream was real
+  multi-membership — one window genuinely present on every
+  Desktop — and #1205 shipped it on the bridge's ADD operation,
+  which reports success and applies nothing on macOS 26.6.2:
+  device-probed 2026-09-01 against the compositor's own
+  on-screen census, for our own and a foreign app's window and
+  every argument shape. The earlier "it works" reading was the
+  #1023 gesture-compositing artifact, both Desktops rendering
+  for a second of a swipe. So #1205 was reverted (#1206) and
+  reach re-landed on the one membership write macOS does apply
+  cross-app — the MOVE that `move_to_desktop` ships on. At every
+  Desktop switch KiwiDesk moves each enabled sticky window onto
+  the arriving Desktop of its own screen, eagerly from the
+  switch and again at the settle. To the user it is the same
+  promise: switch, and the window is already there. The one
+  visible difference is Mission Control, which shows a sticky
+  window on one Desktop at a time — the one you are on.
+- **Both scopes carry within their own screen.** ∞ and 📌 differ
+  in which KiwiDesk Spaces a window follows; across Desktops they
+  behave alike — each follows the Desktop switches of the screen
+  it is on and never jumps screens because the OTHER screen
+  switched. Without that a two-screen ∞ window would ping-pong
+  between screens on every swipe. A screen showing a fullscreen
+  app or a system space is no carry target; its next user
+  Desktop is.
+- **One toggle covers both scopes** (`sticky.desktop_reach`,
+  default ON). A per-scope pair was deferred on the evidence
+  rule: nobody has asked for "∞ across Desktops but 📌 not", and
+  the config reshape stays cheap if someone does. Default ON
+  because reach is what the sticky glyphs already promise — a
+  window marked "always with me" that a Desktop switch strands
+  is the surprise, not the reach.
+- **A single window can be pinned against the toggle**
+  (`override_sticky_reach` on/off/auto — the `make_auto`
+  semantics: `auto` clears the pin back to the toggle).
+  Session-scoped: a pin is a judgement about this window now,
+  and old window ids get recycled.
+- **The row hides without the bridge** — *an absent capability
+  is not a greyed one* (its own entry) applies verbatim: no
+  setting or mode reaches the capability, so a grey would
+  invite an action with no path. Owner-confirmed for this row,
+  2026-09-01, on #1145.
+- **Nothing to undo at quit, and nothing to keep.** A carry
+  leaves no membership behind: a sticky window simply stays on
+  whichever Desktop it was last carried to — the one the user
+  was on — so a crash or force-quit strands nothing, and there
+  is no ledger whose loss could. What the model gives up is the
+  spontaneous case: a sticky window sitting on a Desktop the
+  user is NOT on when reach is switched on is fetched by the
+  toggle itself and by the next switch, never on its own.
+- **A carried window's vanish is expected, and the sweep is
+  told so.** For the switch transition's beat a carried window
+  is on no reading KiwiDesk has — its AX element dies as it
+  leaves the visible Space and the compositor has not drawn it
+  on the arriving one yet — and the removal sweep read exactly
+  that as a close, dropping the window's slot, scope and pin.
+  The event loop's removal gate now has a carried arm that
+  refuses the vanish on a bounded budget and re-registers the
+  same window when it is listed again; the engineering half is
+  `.claude/rules/accessibility.md`'s. The trade is an
+  [accepted limitation](accepted-limitations.md): a sticky
+  window closed *during* a switch keeps its tile for a couple
+  of reconcile beats before it goes.
+
+
 ### Layout navigation & overflow models
 
 **[Map]**

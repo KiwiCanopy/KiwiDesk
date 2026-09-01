@@ -155,6 +155,9 @@ public final class EventLoop {
     /// list, still on-census — as follow-ups spent per
     /// continuous-absence episode (#1157).
     var removalDistrusted: [WindowID: Int] = [:]
+    /// The carried-window arm of that gate (#1145) — argued on
+    /// the type, in `EventLoop+RemovalDistrust.swift`.
+    var carriedRemoval = CarriedRemovalGate()
     /// When the user last switched native Spaces. Tab coalescing is
     /// suppressed for a short window afterward: a space switch shows
     /// the departed space's windows as vanished and the arrived
@@ -336,11 +339,4 @@ public final class EventLoop {
     var registersWorkspaceObservers = true
 
     public init() {}
-
-    // Lifecycle (start/stop) lives in `EventLoop+Lifecycle.swift`.
-    // Window tracking (track, recheckFloat) lives in
-    // `EventLoop+Tracking.swift`; the adoption heal (#675) in
-    // `EventLoop+Heal.swift`. Read-only lookups (detectionVerdict,
-    // observes, element, isListed) live in
-    // `EventLoop+Queries.swift`.
 }

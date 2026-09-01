@@ -3424,6 +3424,18 @@ visible everywhere": an ignored window loses tracking, focus
 navigation, borders, and its bar tile; a sticky window stays
 fully managed.
 
+On macOS that exposes the window-management bridge, the same
+promise follows you across **macOS Desktops**
+(`sticky.set_desktop_reach`, default on): switch Desktops and
+your sticky windows are carried along — each follows the Desktop
+switches of the screen it is on, whichever scope it has — and
+they are already there when you arrive. Without the bridge the
+setting is inert and sticky stays scoped to KiwiDesk's own
+Spaces within the current Desktop. A single window can opt out
+(or in) against the toggle with `override_sticky_reach`. Mission
+Control shows a carried window on one Desktop at a time: the one
+you are on.
+
 ### make_sticky
 
 **Expects:** nothing.
@@ -3504,6 +3516,25 @@ KiwiDesk.bind("cmd+alt+d", function()
 end)
 ```
 
+### override_sticky_reach
+
+**Expects:** one of `on`, `off`, `auto`.
+
+**Does:** pins the focused window's Desktop reach against the
+global `sticky.set_desktop_reach` toggle — `on` keeps this
+window following you across macOS Desktops even with the toggle
+off, `off` leaves it on the Desktop it lives on even with the
+toggle on, and `auto` clears the pin so the toggle rules again. Session state:
+the pin does not survive the window closing. A no-op on a macOS
+without the window-management bridge.
+
+**Example:**
+
+```lua
+-- The player follows me everywhere, whatever the toggle says.
+KiwiDesk.override_sticky_reach("on")
+```
+
 ### sticky.set_mark
 
 **Expects:** boolean (default `true`).
@@ -3541,6 +3572,26 @@ shipped look). Any non-empty value must parse as a hex color.
 ```lua
 sticky.set_color("#3D6FE8")  -- a blue sticky mark
 sticky.set_color("")          -- back to Automatic
+```
+
+### sticky.set_desktop_reach
+
+**Expects:** boolean (default `true`).
+
+**Does:** extends the sticky promise across **macOS Desktops**:
+with it on, every sticky window is carried along when its screen
+switches Desktop — switch however you like and the window is
+already there. One toggle covers both scopes; a single window
+can be pinned the other way with `override_sticky_reach`. Off, a
+sticky window stays on the Desktop it lives on and follows only
+KiwiDesk's own Spaces there. Inert on a macOS without the
+window-management bridge — the Settings row is not shown there
+either.
+
+**Example:**
+
+```lua
+sticky.set_desktop_reach(false)
 ```
 
 ### floating.set_color

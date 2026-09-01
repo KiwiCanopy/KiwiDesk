@@ -164,6 +164,30 @@ editing here:
   dismissal grace, the click-provenance escape, expiry, the
   re-arm reset); the trade the grace accepts is argued in
   `docs/design-decisions.md`.
+- **Sticky Desktop reach is a CARRY, never a membership
+  (#1145).** `KiwiCore+StickyReach.swift` MOVES every enabled
+  sticky window onto its home screen's current Desktop — from
+  the switch handler's one snapshot, and again from the settle
+  as the net — because the bridge move is the one membership
+  write macOS applies cross-app, while the ADD performs and
+  applies nothing ([os-private-apis.md](os-private-apis.md)).
+  So there is no ledger and nothing to retire at quit: where
+  the WindowServer shows the window IS the state, and a re-run
+  is idempotent. Three obligations on a change here. Both
+  scopes carry within the window's HOME screen (#445's
+  primitive) — a window never crosses screens because some
+  OTHER screen switched, and a screen on a fullscreen or system
+  space is no carry target (#670). A verb that changes who is
+  carried (the toggle, the pin, a profile or Settings apply)
+  calls the refresh so its windows come to the user NOW; a
+  site that merely marks the visible focused window sticky owes
+  no refresh, since a carry onto the Desktop it is on moves
+  nothing. And a carried window's vanish at the switch is the
+  event loop's to distrust, not this machine's
+  ([accessibility.md](accessibility.md), the carried arm).
+  `StickyReachCarryTests` drives the handler, the settle and
+  the verdicts through the fake bridge; `StickyReachOverrideTests`
+  the pin.
 - A **native-fullscreen window keeps its `space.windows` slot
   but leaves both tiled-member derivations** (#670) — a layout,
   navigation or z-order consumer of the tiled members routes

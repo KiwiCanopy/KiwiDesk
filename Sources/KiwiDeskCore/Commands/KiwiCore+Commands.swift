@@ -60,6 +60,8 @@ extension KiwiCore {
             return toggleFocusedSticky(.global)
         case "toggle_display_sticky":
             return toggleFocusedSticky(.display)
+        case "override_sticky_reach":
+            return setFocusedStickyReach(args)
         case "resize":
             return resize(args)
         case "move_to_track":

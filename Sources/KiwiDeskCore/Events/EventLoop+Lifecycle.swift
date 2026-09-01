@@ -43,6 +43,7 @@ extension EventLoop {
         trackedFrames = [:]
         tabCarriers = []
         removalDistrusted = [:]
+        carriedRemoval.arms = [:]
         pendingRemovalRecheck = []
         healQuiet = [:]
         transientRetried = [:]

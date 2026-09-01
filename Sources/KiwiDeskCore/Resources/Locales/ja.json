@@ -1128,6 +1128,8 @@
   "sticky.caption": "Sticky ウインドウはすべてのスペースで表示され続けます（%2$@の「%1$@」）。",
   "sticky.color": "Sticky",
   "sticky.color.a11y": "Stickyウインドウマークのカラー",
+  "sticky.desktop_reach": "デスクトップをまたいで表示し続ける",
+  "sticky.desktop_reach.help": "Sticky の効果を macOS のデスクトップにも広げます。デスクトップを切り替えると Sticky ウインドウも一緒に運ばれ、移動先に着いたときにはもう表示されています。オフにすると、Sticky ウインドウはいまあるデスクトップにとどまり、KiwiDesk 自身のスペースだけに従います。",
   "sticky.display.pill": "別のディスプレイへ移動可能",
   "sticky.everywhere.pill": "Sticky ウインドウはほかのスペースへ移動できません",
   "sticky.home.pill": "ホームスペース %1$@ 内でのみ移動可能",

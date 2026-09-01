@@ -1128,6 +1128,8 @@
   "sticky.caption": "Sticky 윈도우는 모든 공간에서 계속 표시됩니다(%2$@의 ‘%1$@’).",
   "sticky.color": "Sticky",
   "sticky.color.a11y": "Sticky 윈도우 마크 색상",
+  "sticky.desktop_reach": "모든 데스크탑에서 계속 표시",
+  "sticky.desktop_reach.help": "Sticky의 효과를 macOS 데스크탑까지 확장합니다. 데스크탑을 전환하면 Sticky 윈도우도 함께 옮겨져 도착했을 때 이미 그 자리에 있습니다. 이 옵션을 끄면 Sticky 윈도우는 지금 있는 데스크탑에 머물며 KiwiDesk 자체의 공간만 따라갑니다.",
   "sticky.display.pill": "다른 디스플레이로만 이동 가능",
   "sticky.everywhere.pill": "Sticky 윈도우는 다른 공간으로 이동할 수 없음",
   "sticky.home.pill": "홈 공간 %1$@ 내에서만 이동 가능",

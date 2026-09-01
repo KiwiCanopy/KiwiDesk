@@ -268,6 +268,37 @@ editing AX code:
   pins the refusal, the exempt arms, the switch-grace
   stand-down, the episode ledger, the one-census cost and the
   convergence.
+
+  **The gate has a carried arm (#1145), and it is the one arm
+  that refuses INSIDE the switch grace.** A sticky window the
+  Desktop reach carries is EXPECTED present after a switch —
+  the bridge MOVE puts it on the arriving Desktop — but for the
+  transition's beat it is on no reading at all: its AX element
+  dies as it leaves the visible Space (TextEdit, device-traced
+  2026-09-01) and the census has not composited it yet, so the
+  pre-#1145 sweep read the carry as a close and the window came
+  back as new, scope and pin gone. Four obligations. The arm
+  reads the carried set through `EventLoop.carriedRemoval`'s
+  seam, never the sticky flag — the core's verdict includes the
+  toggle, the pin and the bridge, so a flag read would distrust
+  windows nothing is carrying. A census that shows the window
+  refuses outright (#1157's own rule); a census that shows
+  nothing refuses on a BOUNDED budget (`CarriedRemovalGate.armCap`,
+  argued there), spent per continuous-absence episode and reset
+  when the window is listed again, so a carried window
+  genuinely closed mid-switch still converges on the distrust's
+  own one-shots. The refusal keeps the STATE AND THE
+  REGISTRATION — the dead element stays in `elements` — and the
+  destroyed notification for a carried window defers to the
+  sweep exactly as a tab carrier's does, because releasing the
+  registration makes the window's return a `track`, which emits
+  a create for an id state never lost and re-folds it as new.
+  What makes keeping the corpse safe is the reconcile's
+  re-element: a live id listed under an element not `CFEqual`
+  to its registered one swaps the element in and observes it,
+  with no event (`EventLoop+Reconcile`). Hide and minimize stay
+  exempt — each is a total answer no carry explains.
+  `CarriedRemovalTests` pins every clause.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Four links

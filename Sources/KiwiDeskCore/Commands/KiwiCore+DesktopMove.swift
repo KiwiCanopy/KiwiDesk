@@ -34,9 +34,8 @@ extension KiwiCore {
     /// gates KiwiDesk-space membership, which a Desktop move
     /// does not touch — the re-home above stands down for a
     /// sticky window on exactly that ground): it physically
-    /// leaves, and its scope keeps meaning "every Space of the
-    /// Desktop it is on". Sticky reach ACROSS Desktops is the
-    /// collector's own item (#890), unimplemented either way.
+    /// leaves — and the next Desktop switch carries it back to
+    /// wherever the user goes (#1145), which is the promise.
     func moveToDesktop(
         _ args: [JSONValue],
         follow: Bool

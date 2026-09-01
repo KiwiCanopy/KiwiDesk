@@ -35,6 +35,7 @@ public enum APIReference {
             ("make_unsticky", "make_unsticky"),
             ("toggle_sticky", "toggle_sticky"),
             ("toggle_display_sticky", "toggle_display_sticky"),
+            ("override_sticky_reach", "override_sticky_reach"),
             ("resize", "resize"),
             ("move_to_track", "move_to_track"),
             ("pull_or_spawn", "pull_or_spawn"),
@@ -267,7 +268,7 @@ public enum APIReference {
             "fit_gaps",
         ],
         "sticky": [
-            "set_mark", "set_color",
+            "set_mark", "set_color", "set_desktop_reach",
         ],
         "floating": [
             "set_color"

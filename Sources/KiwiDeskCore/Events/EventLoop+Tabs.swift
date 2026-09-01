@@ -104,6 +104,9 @@ extension EventLoop {
         removalDistrusted = removalDistrusted.filter {
             !live.contains($0.key)
         }
+        carriedRemoval.arms = carriedRemoval.arms.filter {
+            !live.contains($0.key)
+        }
         // Genuine closes: emit the destroy the eager path deferred.
         // A candidate is checked against ONE census per sweep; a
         // window the compositor still shows was not closed
@@ -112,15 +115,34 @@ extension EventLoop {
         var onScreen: Set<WindowID>?
         for id in vanishedIDs.sorted(by: { $0.raw < $1.raw })
         where !consumed.contains(id) {
-            if !hidden, !switchGrace, !minimized.contains(id) {
-                let census =
+            let census = {
+                let read =
                     onScreen
-                    ?? onScreenNormalWindowIDs()[pid, default: []]
-                onScreen = census
-                if census.contains(id) {
-                    refuseRemoval(id, pid: pid, app: app)
-                    continue
-                }
+                    ?? self.onScreenNormalWindowIDs()[
+                        pid,
+                        default: []
+                    ]
+                onScreen = read
+                return read
+            }
+            // A hide is a total answer about the app (#913), and
+            // a minimize is the window's own verdict: neither is
+            // a vanish the carry could explain (#1145).
+            if !hidden, !minimized.contains(id),
+                refusesCarriedRemoval(
+                    id,
+                    pid: pid,
+                    app: app,
+                    census: census
+                )
+            {
+                continue
+            }
+            if !hidden, !switchGrace, !minimized.contains(id),
+                census().contains(id)
+            {
+                refuseRemoval(id, pid: pid, app: app)
+                continue
             }
             releaseWindowRegistration(id, pid: pid)
             // A hidden app's whole sweep is a hide (#913):

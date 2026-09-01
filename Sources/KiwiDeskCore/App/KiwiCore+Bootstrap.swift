@@ -154,6 +154,9 @@ extension KiwiCore {
         eventLoop.onRemovalDistrust = { [weak self] in
             self?.scheduleRemovalRecheck()
         }
+        eventLoop.carriedRemoval.carried = { [weak self] in
+            self?.stickyReachCarried() ?? []
+        }
         sleepWake.captureState = { [weak self] in
             self?.state.snapshot()
         }
