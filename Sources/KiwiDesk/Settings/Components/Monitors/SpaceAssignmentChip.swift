@@ -26,6 +26,7 @@ struct SpaceAssignmentChip: View {
     let kind: SpaceAssignment.Kind
     /// Target displays for move actions in picture order.
     let displays: [Display]
+    @FocusState private var focused: Bool
 
     var body: some View {
         capsule
@@ -42,6 +43,16 @@ struct SpaceAssignmentChip: View {
             .accessibilityLabel(space.raw)
             .accessibilityValue(hint)
             .focusable()
+            .focused($focused)
+            // A click must not ring the chip (#996 ruling,
+            // owner 2026-09-01). Wired here rather than shared:
+            // a modifier handed the binding never fires.
+            .onChange(of: focused) { _, now in
+                guard now, ClickBornFocus.isClickBorn else {
+                    return
+                }
+                focused = false
+            }
             .rowActions { menu }
     }
 
