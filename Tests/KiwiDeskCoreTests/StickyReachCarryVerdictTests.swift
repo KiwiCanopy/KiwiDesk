@@ -72,13 +72,16 @@ private let bridgeClasses: [String: AnyClass] = [
 /// follows the active space's screen; a 📌 window its home's.
 /// Serialized, synchronous bodies — the resolver and the space
 /// overrides are process-global (`DesktopCommandTests`' note).
-/// This half holds WHERE a window is carried; WHO is carried — the
-/// verdicts, the toggle, the profile tails, the gate's reading —
-/// is `StickyReachCarryVerdictTests`', split at the tests.md file
-/// ceiling with a per-file harness copy.
-@Suite("Sticky reach carry (#1145)", .serialized)
+/// WHO sticky reach carries (#1145): the toggle and the per-window
+/// pin decide the set, a pin on a window with no sticky scope
+/// carries nothing, a native-fullscreen window never travels, the
+/// verbs and both profile tails carry at once, and the same set is
+/// what the event loop's removal gate reads. WHERE a window is
+/// carried is `StickyReachCarryTests`'; the fixture and the bridge
+/// fakes are that file's per-file copy (tests.md).
+@Suite("Sticky reach carry verdicts (#1145)", .serialized)
 @MainActor
-struct StickyReachCarryTests {
+struct StickyReachCarryVerdictTests {
     private let w1 = WindowID(1)
     private let w2 = WindowID(2)
     private let w3 = WindowID(3)
@@ -132,130 +135,126 @@ struct StickyReachCarryTests {
         resetAuthorityOverrides()
     }
 
-    @Test("a switch carries every enabled sticky window, per screen")
-    func switchCarriesEnabledStickyWindows() {
+    @Test("the pin and the toggle decide who is carried")
+    func verdictGatesTheCarry() {
         let core = makeCore()
         defer { teardown() }
-        // Main swipes Desktop 1 → 2.
-        NativeSpaces.spacesOverride = authorityTopology(
-            mainCurrent: 11,
-            secondaryCurrent: 20
-        )
-        core.handleDesktopChange()
-        // Both scopes carry onto the arriving Desktop of THEIR
-        // screen; the plain window stays.
-        #expect(Bridge.targets(of: w1) == [11])
-        #expect(Bridge.targets(of: w2) == [11])
-        #expect(Bridge.targets(of: w3).isEmpty)
-        // A window homed on the OTHER screen is normalized onto
-        // that screen's current Desktop — never teleported across
-        // screens because this one switched.
-        #expect(Bridge.targets(of: w4) == [20])
-    }
-
-    @Test("a ∞ window carries with the screen it renders on")
-    func globalStickyFollowsTheActiveSpacesScreen() {
-        let core = makeCore()
-        defer { teardown() }
-        // The user works on B: the active space is B's, so the ∞
-        // window renders there (#445) — and B's switch carries it
-        // to B's arriving Desktop, while the 📌 window homed on A
-        // stays with A's current.
-        core.state.workspaces.activate(SpaceID("5"))
-        NativeSpaces.spacesOverride = authorityTopology(
-            mainCurrent: 10,
-            secondaryCurrent: 21
-        )
-        core.handleDesktopChange()
-        #expect(Bridge.targets(of: w1) == [21])
-        #expect(Bridge.targets(of: w2) == [10])
-        #expect(Bridge.targets(of: w4) == [21])
-    }
-
-    @Test("the settle carries again, as the eager pass's net")
-    func settleCarriesAgain() {
-        let core = makeCore()
-        defer { teardown() }
-        NativeSpaces.spacesOverride = authorityTopology(
-            mainCurrent: 11,
-            secondaryCurrent: 20
-        )
-        core.handleDesktopChange()
-        Bridge.reset()
-        core.desktopSettle(ifStill: core.lastDesktop)
-        #expect(Bridge.targets(of: w1) == [11])
-        #expect(Bridge.targets(of: w2) == [11])
-        #expect(Bridge.targets(of: w4) == [20])
-    }
-
-    @Test("a secondary screen's switch carries only its own windows")
-    func secondarySwitchCarriesItsOwnWindows() {
-        let core = makeCore()
-        defer { teardown() }
-        // B swipes Desktop 3 → 4; A stays on Desktop 1.
-        NativeSpaces.spacesOverride = authorityTopology(
-            mainCurrent: 10,
-            secondaryCurrent: 21
-        )
-        core.handleDesktopChange()
-        #expect(Bridge.targets(of: w4) == [21])
-        #expect(Bridge.targets(of: w1) == [10])
-        #expect(Bridge.targets(of: w2) == [10])
-    }
-
-    @Test("the eager carry runs after the arriving Space is activated")
-    func eagerCarryFollowsTheActivation() {
-        let core = makeCore()
-        defer { teardown() }
-        // The user is on B (active space "5"), and Desktop 2 on the
-        // main screen remembers space "1" (on A). The switch's own
-        // arm re-activates "1", so the ∞ window renders on A after
-        // it — and the carry must read THAT, or it lands on B's
-        // Desktop while the retile draws the window on A.
-        core.state.workspaces.activate(SpaceID("5"))
-        core.desktopMemory.virtualSpaces["UUID-A"] = [2: SpaceID("1")]
-        NativeSpaces.spacesOverride = authorityTopology(
-            mainCurrent: 11,
-            secondaryCurrent: 20
-        )
-        core.handleDesktopChange()
-        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
-        #expect(Bridge.targets(of: w1) == [11])
-        #expect(Bridge.targets(of: w4) == [20])
-    }
-
-    @Test("shared-Spaces mode carries everything with the one list")
-    func sharedSpacesCarriesWithTheOneList() {
-        let core = makeCore()
-        defer { teardown() }
-        // One display record whose identifier is no screen UUID —
-        // the shape "Displays have separate Spaces" OFF produces.
-        core.refreshStickyReach(spaces: [
-            authoritySpace(30, display: "SHARED"),
-            authoritySpace(31, display: "SHARED", current: true),
-        ])
-        #expect(Bridge.targets(of: w1) == [31])
-        #expect(Bridge.targets(of: w2) == [31])
-        #expect(Bridge.targets(of: w4) == [31])
-        #expect(Bridge.targets(of: w3).isEmpty)
-    }
-
-    @Test("a fullscreen or system space is never a carry target")
-    func fullscreenSpaceCarriesNothing() {
-        let core = makeCore()
-        defer { teardown() }
-        core.refreshStickyReach(spaces: [
-            authoritySpace(10, display: "UUID-A"),
-            authoritySpace(
-                40,
-                display: "UUID-A",
-                current: true,
-                isUser: false
-            ),
-            authoritySpace(20, display: "UUID-B", current: true),
-        ])
+        core.state.stickyReachOverrides[w1] = false
+        core.refreshStickyReach()
         #expect(Bridge.targets(of: w1).isEmpty)
+        #expect(Bridge.targets(of: w2) == [10])
+        Bridge.reset()
+        // Toggle off, one pin on: only the pinned window carries.
+        core.tiler.settings.stickyStyle.desktopReach = false
+        core.state.stickyReachOverrides[w1] = true
+        core.refreshStickyReach()
+        #expect(Bridge.targets(of: w1) == [10])
         #expect(Bridge.targets(of: w2).isEmpty)
+        #expect(Bridge.targets(of: w4).isEmpty)
+        // A pin on a window with no sticky scope carries nothing:
+        // reach is the Desktop half of sticky, not a scope of
+        // its own.
+        Bridge.reset()
+        core.state.stickyReachOverrides[w3] = true
+        core.refreshStickyReach()
+        #expect(Bridge.targets(of: w3).isEmpty)
+    }
+
+    @Test("a native-fullscreen sticky window is never carried")
+    func fullscreenWindowIsNotCarried() {
+        let core = makeCore()
+        defer { teardown() }
+        core.state.apply(
+            .windowFullscreenChanged(w1, isFullscreen: true)
+        )
+        core.refreshStickyReach()
+        #expect(Bridge.targets(of: w1).isEmpty)
+        #expect(Bridge.targets(of: w2) == [10])
+        #expect(!core.eventLoop.carriedWindows().contains(w1))
+    }
+
+    @Test("the toggle carries at once; off carries nothing")
+    func toggleCarriesNow() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(
+            core.execute(
+                "sticky.set_desktop_reach",
+                args: [.bool(true)]
+            ).isSuccess
+        )
+        #expect(Bridge.targets(of: w1) == [10])
         #expect(Bridge.targets(of: w4) == [20])
+        Bridge.reset()
+        #expect(
+            core.execute(
+                "sticky.set_desktop_reach",
+                args: [.bool(false)]
+            ).isSuccess
+        )
+        #expect(Bridge.moves.isEmpty)
+    }
+
+    @Test("a profile that turns the toggle on carries at once")
+    func profileApplyCarriesNow() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(
+            core.execute("save_profile", args: [.string("Reach")])
+                .isSuccess
+        )
+        core.tiler.settings.stickyStyle.desktopReach = false
+        Bridge.reset()
+        #expect(
+            core.execute("load_profile", args: [.string("Reach")])
+                .isSuccess
+        )
+        #expect(core.tiler.settings.stickyStyle.desktopReach)
+        #expect(Bridge.targets(of: w1) == [10])
+        #expect(Bridge.targets(of: w4) == [20])
+    }
+
+    @Test("a standard layout's apply carries at once too")
+    func standardApplyCarriesNow() throws {
+        let core = makeCore()
+        defer { teardown() }
+        // The composed apply is the OTHER profile tail — a preset or
+        // the starter seed — and no verb reaches it, so it earns its
+        // own drive: a two-screen layout composed for the fixture's
+        // displays, applied with the toggle off.
+        let sizes = core.state.workspaces.allDisplays.map(\.frame.size)
+        let layout = try #require(
+            StandardProfiles.all(sizes: sizes).first {
+                $0.screenCount == sizes.count
+            }
+        )
+        core.tiler.settings.stickyStyle.desktopReach = false
+        Bridge.reset()
+        _ = try core.applyStandard(layout)
+        #expect(!Bridge.moves.isEmpty)
+    }
+
+    @Test("the carried set is what the removal gate reads")
+    func carriedSetFeedsTheRemovalGate() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(core.eventLoop.carriedWindows() == [w1, w2, w4])
+        core.state.stickyReachOverrides[w1] = false
+        #expect(core.eventLoop.carriedWindows() == [w2, w4])
+        core.state.setSticky(w2, .none)
+        #expect(core.eventLoop.carriedWindows() == [w4])
+    }
+
+    @Test("no bridge, no carry")
+    func absentBridgeCarriesNothing() {
+        let core = makeCore(bridge: false)
+        defer { teardown() }
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 11,
+            secondaryCurrent: 20
+        )
+        core.handleDesktopChange()
+        core.desktopSettle(ifStill: core.lastDesktop)
+        #expect(Bridge.moves.isEmpty)
     }
 }

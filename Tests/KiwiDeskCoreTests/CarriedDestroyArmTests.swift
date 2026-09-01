@@ -126,6 +126,10 @@ struct CarriedDestroyArmTests {
         )
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
         #expect(loop.elements[own]?[WindowID(12)] == nil)
+        // EAGER, not deferred: the eager arm releases the element
+        // before its reconcile, so the sweep finds nothing vanished
+        // and reads no census; a deferral's sweep reads one.
+        #expect(box.censusReads == 0)
     }
 
     @Test("a carried window's destroyed element defers to the sweep")
