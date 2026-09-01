@@ -24,8 +24,10 @@ extension EventLoop {
     /// falls back to destroy + create (self-healing) — AND the
     /// removal-distrust gate stands down (#1157): the census
     /// double-exposes both Desktops while the compositor settles
-    /// (#1023), so retuning this for tab reasons retunes the
-    /// gate's stand-down too.
+    /// (#1023) — AND the gate's carried arm OPENS (#1145), the
+    /// opposite direction: shortening this for tab reasons also
+    /// narrows the beat in which a carried window's destroy
+    /// defers. Three consumers, one stamp.
     static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
 
     /// The one derivation of "inside that grace" — the tab
@@ -112,15 +114,34 @@ extension EventLoop {
         var onScreen: Set<WindowID>?
         for id in vanishedIDs.sorted(by: { $0.raw < $1.raw })
         where !consumed.contains(id) {
-            if !hidden, !switchGrace, !minimized.contains(id) {
-                let census =
+            let census = {
+                let read =
                     onScreen
-                    ?? onScreenNormalWindowIDs()[pid, default: []]
-                onScreen = census
-                if census.contains(id) {
-                    refuseRemoval(id, pid: pid, app: app)
-                    continue
-                }
+                    ?? self.onScreenNormalWindowIDs()[
+                        pid,
+                        default: []
+                    ]
+                onScreen = read
+                return read
+            }
+            // A hide is a total answer about the app (#913), and
+            // a minimize is the window's own verdict: neither is
+            // a vanish the carry could explain (#1145).
+            if !hidden, !minimized.contains(id),
+                refusesCarriedRemoval(
+                    id,
+                    pid: pid,
+                    app: app,
+                    census: census
+                )
+            {
+                continue
+            }
+            if !hidden, !switchGrace, !minimized.contains(id),
+                census().contains(id)
+            {
+                refuseRemoval(id, pid: pid, app: app)
+                continue
             }
             releaseWindowRegistration(id, pid: pid)
             // A hidden app's whole sweep is a hide (#913):

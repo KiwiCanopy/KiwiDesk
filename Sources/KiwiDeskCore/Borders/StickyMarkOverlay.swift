@@ -210,8 +210,11 @@ final class StickyMarkOverlay {
         panel.animationBehavior = .none
         // `.transient` hides the mark in Exposé/Mission Control at
         // the compositor level — it vanishes with the swipe, no
-        // handler lag.
+        // handler lag. `.canJoinAllSpaces` is the bars' recipe: a
+        // carried sticky window (#1145) changes Desktop, and a
+        // single-Desktop panel strands the mark on the origin.
         panel.collectionBehavior = [
+            .canJoinAllSpaces,
             .transient,
             .fullScreenAuxiliary,
             .ignoresCycle,

@@ -145,6 +145,13 @@ extension KiwiCore {
                 updateSpaceBar()
             }
         }
+        // #1145: carry the sticky windows onto the Desktop this
+        // switch revealed — eagerly, so they are there when the
+        // user is, and AFTER the arms above activated the
+        // arriving Space, since a ∞ window renders on the active
+        // space and the carry follows the render. Threaded from
+        // the ONE snapshot (profiles.md); the settle is the net.
+        refreshStickyReach(spaces: snapshot.spaces)
         emitDesktopChange(snapshot, changed: changed)
         settleAfterDesktopSwitch(number)
     }
@@ -226,6 +233,10 @@ extension KiwiCore {
         // list, so its app was skipped. Sweep the arrivals now
         // — before the retile below, which then places them.
         eventLoop.reconcileOnScreenArrivals()
+        // #1145: carry again once the switch has settled —
+        // idempotent, and the net under the eager carry in
+        // `handleDesktopChange`.
+        refreshStickyReach()
         // A fullscreen/system space: the retile, z-order
         // restore and refocus stand down (#670) — the refocus
         // would AX-raise the desktop's focused window behind

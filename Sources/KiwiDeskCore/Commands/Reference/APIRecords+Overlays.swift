@@ -130,6 +130,11 @@ extension APIReference {
                 + "automatic.",
             .color("hex")
         ),
+        "set_desktop_reach": APIRecord(
+            "Carries sticky windows with each macOS Desktop switch "
+                + "(needs the window-management bridge).",
+            .boolean("enabled")
+        ),
     ]
 
     static let floatingRecords: [String: APIRecord] = [

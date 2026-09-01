@@ -128,7 +128,10 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
+        // `.canJoinAllSpaces`: the ring follows a carried sticky
+        // window across Desktops (#1145), the bars' recipe.
         panel.collectionBehavior = [
+            .canJoinAllSpaces,
             .transient,
             .fullScreenAuxiliary,
             .ignoresCycle,

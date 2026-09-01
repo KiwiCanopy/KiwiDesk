@@ -206,9 +206,17 @@ extension EventLoop {
             }
             ignorePending.remove(id)
             live.insert(id)
-            if elements[pid]?[id] == nil {
-                appeared.append((element: element, id: id))
-            } else {
+            if let known = elements[pid]?[id] {
+                // The same window under a fresh AX element — a
+                // carried sticky window's element dies as it
+                // leaves the visible Space and is reborn on the
+                // arriving one (#1145). Re-register the id, no
+                // event: state never lost the window, and a
+                // create here would re-fold it as new.
+                if !CFEqual(known, element) {
+                    elements[pid]?[id] = element
+                    observers[pid]?.observe(window: element)
+                }
                 recheckFloat(
                     element,
                     id: id,
@@ -220,6 +228,8 @@ extension EventLoop {
                 // frame (the vanished side of a tab switch may be a
                 // window that had no tab group of its own — #308).
                 trackedFrames[id] = AXHelper.frame(of: element)
+            } else {
+                appeared.append((element: element, id: id))
             }
         }
         // Also suppress coalescing briefly after a native-Space

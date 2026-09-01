@@ -73,11 +73,34 @@ Every one of the following binds whoever touches them:
   performed under every mask and moved nothing (#889 item 6),
   and `CopyManagedDisplaysOperation` performs and answers nil
   (26.6.1, observed 2026-08-25). A caller verifies a write by a
-  re-query or by state it owns — sticky membership in
-  particular, because `CopySpacesForWindows` never reports a
-  second Desktop (#889 item 5) — and never by the wrapper's
+  re-query or by state it owns, and never by the wrapper's
   return value. The census the re-query reads stays
   `NativeSpaces`' — one reader of the display/spaces model.
+- **Multi-membership is not available: `AddWindowsToSpaces`
+  performs and applies NOTHING (#1145).** Device-probed
+  2026-09-01 on macOS 26.6.2 — our own window and a foreign
+  app's, every argument shape (`NSArray` of `NSNumber`, `NSSet`),
+  against every non-current Desktop — and verified against the
+  compositor's own on-screen census (`CGWindowListCopyWindowInfo`
+  plus `SLSGetActiveSpace`): the operation reports performed
+  every time and the window is present only on the Desktop it
+  physically lives on. #889 item 5's "visual truth test" that
+  read as working was the #1023 gesture-compositing artifact —
+  both Desktops render at once for ~1 s of a swipe — and a
+  pointer-write switch does not reproduce it; the same item's
+  finding that `CopySpacesForWindows` never reports a second
+  Desktop still stands, and is now explained rather than a lie.
+  So a caller asserts no second membership and keeps no ledger
+  of one; the wrapper's `addWindows`, `removeWindows` and
+  `spaces(for:)` stay as the re-probe surface with no
+  production caller, and a new call site reds in
+  `WMBridgeSeamTests`' per-file spelling map. **The MOVE
+  (`MoveWindowsToManagedSpace`) is the one membership write
+  applied cross-app** — `move_to_desktop` ships on it, and
+  sticky reach CARRIES on it at each Desktop switch
+  ([state-and-layout.md](state-and-layout.md)). A future macOS
+  that applies the ADD earns a re-probe with the census as the
+  witness, never a re-read of item 5.
 - **The space-pointer write performs no transition (#1023).**
   `ManagedDisplaySetCurrentSpaceOperation` moves the pointer and
   composites the target's windows, but never hides the origin's

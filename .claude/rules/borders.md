@@ -116,6 +116,17 @@ second cancel the other:
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
 
+## The overlay panels join every Space
+
+Both overlay panels carry `.canJoinAllSpaces` in their
+collection behavior — the bars' recipe, and the reason the
+Space Bar spans Desktops. A sticky window the Desktop reach
+carries (#1145) changes macOS Desktop under its overlays, and a
+single-Desktop panel strands the mark and the ring on the
+origin (device-observed 2026-09-01). Keep the flag on any new
+overlay panel that follows a window; `StickyOverlaySpanTests`
+pins the two that exist.
+
 ## Never gate an overlay pass on the global animation count
 
 `AnimationEngine.activeCount` is a poor proxy for "is *this*

@@ -114,7 +114,14 @@ flowchart LR
     B["AX: a window appears<br/>at the same frame"] --> C
     C -->|yes| R[".windowRekeyed<br/>slot kept, id swapped in place"]
     C -->|no, or Desktop-switch reconcileAll| D["destroy + create<br/>two separate windows"]
+    E["AX: a tracked id is listed<br/>under a fresh element"] --> F["same id re-elemented<br/>no event (a carried sticky<br/>window crossing Desktops)"]
 ```
+
+A Desktop switch is also where `App` carries every reach-enabled
+sticky window onto the arriving Desktop through `WMBridge`
+(#1145), so the reconcile that follows sees those ids vanish and
+return under fresh AX elements — re-registered in place, never
+destroyed and re-created.
 
 ## 2. Command dispatch (`set_*` verbs)
 

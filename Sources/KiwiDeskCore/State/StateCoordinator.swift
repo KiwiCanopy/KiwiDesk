@@ -38,6 +38,11 @@ public struct StateCoordinator: Sendable {
     /// Explicit `make_floating` / `make_tiled` verdicts per window.
     var manualFloatOverrides: [WindowID: Bool] = [:]
 
+    /// Per-window `override_sticky_reach` verdicts (#1145): absent =
+    /// the global `sticky.desktop_reach` toggle rules. Session
+    /// state, dropped on destroy — old ids can be recycled.
+    var stickyReachOverrides: [WindowID: Bool] = [:]
+
     /// Manual float intent remembered across close/reopen (#160).
     /// Keyed by app + title, not `WindowID`: a reopened window
     /// gets a fresh id, and old ids can be recycled onto unrelated
@@ -86,6 +91,11 @@ public struct StateCoordinator: Sendable {
         ) {
             manualFloatOverrides[new] = intent
         }
+        if let reach = stickyReachOverrides.removeValue(
+            forKey: old
+        ) {
+            stickyReachOverrides[new] = reach
+        }
     }
 
     /// Folds an event into state and returns side-effect facts (#166).
@@ -105,6 +115,7 @@ public struct StateCoordinator: Sendable {
             }
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
+                stickyReachOverrides[id] = nil
             }
             forgetMinimized(pid: pid)
 
@@ -117,6 +128,12 @@ public struct StateCoordinator: Sendable {
                 wasMinimized: wasMinimized,
                 effects: &effects
             )
+            // Only a genuine close drops the reach pin (#1145): a
+            // minimize keeps its id and scope, and a hide — folded
+            // below as a destroy — keeps its window.
+            if !wasMinimized {
+                stickyReachOverrides[id] = nil
+            }
 
         // Hides fold as non-minimized destroys to remember space (#913).
         case .windowHidden(let id):

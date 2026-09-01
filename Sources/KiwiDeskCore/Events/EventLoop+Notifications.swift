@@ -138,10 +138,14 @@ extension EventLoop {
                 // app that has one) may be a switch or active-tab
                 // close; leave it tracked and let the reconcile below
                 // coalesce a re-key or emit the real destroy. A
-                // minimize is never a tab close (#308).
+                // minimize is never a tab close (#308). A carried
+                // sticky window's element dies as it leaves the
+                // visible Space (#1145): same deferral, and the
+                // sweep's carried arm rules it.
                 if note == kAXUIElementDestroyedNotification,
                     tabCarriers.contains(id)
                         || appHasTabCarrier(pid: pid)
+                        || carriedRemovalArmIsOpen(for: id)
                 {
                     // Deferred to reconcile.
                 } else {

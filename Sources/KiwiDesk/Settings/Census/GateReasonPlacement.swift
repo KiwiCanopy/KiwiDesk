@@ -84,6 +84,7 @@ extension SettingRuntimeGate {
         case .orphanPinsExist, .monitorsDisconnected,
             .paletteGlowPairing, .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
+            .desktopBridgeAbsent,
             .defaultsToRestore:
             return false
         }
@@ -105,6 +106,7 @@ extension SettingRuntimeGate {
         case .orphanPinsExist, .monitorsDisconnected,
             .paletteGlowPairing, .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
+            .desktopBridgeAbsent,
             .defaultsToRestore:
             return true
         }

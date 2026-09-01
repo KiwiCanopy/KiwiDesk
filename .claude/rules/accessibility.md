@@ -268,6 +268,50 @@ editing AX code:
   pins the refusal, the exempt arms, the switch-grace
   stand-down, the episode ledger, the one-census cost and the
   convergence.
+
+  **The gate has a carried arm (#1145), and no other arm may
+  refuse INSIDE the switch grace** — a new one joins
+  `CarriedRemovalTests`' grace clause. A sticky window the
+  Desktop reach carries is EXPECTED present after a switch —
+  the bridge MOVE puts it on the arriving Desktop — but for the
+  transition's beat it is on no reading at all: its AX element
+  dies as it leaves the visible Space (TextEdit, device-traced
+  2026-09-01) and the census has not composited it yet, so the
+  pre-#1145 sweep read the carry as a close and the window came
+  back as new, scope and pin gone. The obligations: the arm
+  reads the carried set through the `EventLoop.carriedWindows`
+  seam, never the sticky flag — the core's verdict includes the
+  toggle, the pin and the bridge, so a flag read would distrust
+  windows nothing is carrying. A census that shows the window
+  refuses outright (#1157's own rule); a census that shows
+  nothing refuses census-blind on the SAME episode ledger and
+  the same cap (`removalDistrusted`, `removalRecheckCap`, whose
+  doc argues the budget against the measured beat) — never a
+  second ledger, or one cap stops arming the recheck the other
+  still counts on. The arm opens only INSIDE the switch grace,
+  or for a window whose episode is already open — the one
+  `carriedRemovalArmIsOpen` reading the sweep and the destroy
+  deferral share — because a carried window closed with no
+  switch in flight is a close like any other, and every ⌘W of a
+  sticky window would otherwise wait out the budget
+  (`CarriedRemovalTests` ▸ `carriedCloseOutsideTheGraceIsRemoved`,
+  `episodeOpenedInTheGraceOutlivesIt`); the grace is stamped by
+  the switch notification, so a destroy that lands before it
+  takes the ordinary departure — the residue
+  `docs/accepted-limitations.md` records. The refusal keeps the
+  STATE AND THE
+  REGISTRATION — the dead element stays in `elements` — and the
+  destroyed notification for a carried window defers to the
+  sweep exactly as a tab carrier's does, because releasing the
+  registration makes the window's return a `track`, which emits
+  a create for an id state never lost and re-folds it as new.
+  What makes keeping the corpse safe is the reconcile's
+  re-element: a live id listed under an element not `CFEqual`
+  to its registered one swaps the element in and observes it,
+  with no event (`EventLoop+Reconcile`). Hide and minimize stay
+  exempt — each is a total answer no carry explains.
+  `CarriedRemovalTests` pins the sweep's clauses,
+  `CarriedDestroyArmTests` the notification's.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Four links

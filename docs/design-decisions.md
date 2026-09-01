@@ -2968,6 +2968,73 @@ loses the sentences that named its rungs for the same reason: a
 list of modes would be a different sentence on every Mac, so it
 states the rule and the thumbnails show the modes.
 
+### Sticky reach spans macOS Desktops (#1145)
+
+**[Principle]**
+
+Sticky promises "always with me", and before #1145 that promise
+stopped at the edge of KiwiDesk's own Spaces: a Desktop switch
+left the ∞ window behind. Where the window-management bridge
+exists, both scopes now follow the user across macOS Desktops.
+The rulings:
+
+- **Reach is a carry, never a membership.** macOS applies no
+  second Desktop membership for a foreign window — the bridge's
+  ADD reports performed and changes nothing
+  (`.claude/rules/os-private-apis.md` carries the probe), and a
+  version built on it shipped and was reverted (#1205/#1206). So
+  reach is a MOVE: at every Desktop switch KiwiDesk moves each
+  enabled sticky window onto the arriving Desktop of its own
+  screen, eagerly from the switch and again at the settle. Same
+  promise to the user — switch, and the window is already there;
+  the one visible difference is Mission Control, which shows a
+  sticky window on one Desktop at a time.
+- **Both scopes carry within the screen they are shown on.** ∞
+  and 📌 differ in which KiwiDesk Spaces a window follows; across
+  Desktops they behave alike — each follows the Desktop switches
+  of the screen KiwiDesk draws it on (∞ the active space's, 📌
+  its home's, the #445 render rule) and never jumps screens
+  because the OTHER screen switched. Without that a two-screen ∞
+  window would ping-pong between screens on every swipe. A
+  screen showing a fullscreen app or a system space is no carry
+  target, and a native-fullscreen window is never carried; its
+  next user Desktop is.
+- **One toggle covers both scopes** (`sticky.desktop_reach`,
+  default ON). A per-scope pair was deferred on the evidence
+  rule: nobody has asked for "∞ across Desktops but 📌 not", and
+  the config reshape stays cheap if someone does. Default ON
+  because reach is what the sticky glyphs already promise — a
+  window marked "always with me" that a Desktop switch strands
+  is the surprise, not the reach.
+- **A single window can be pinned against the toggle**
+  (`override_sticky_reach` on/off/auto — the `make_auto`
+  semantics: `auto` clears the pin back to the toggle).
+  Session-scoped: a pin is a judgement about this window now,
+  and old window ids get recycled.
+- **The row hides without the bridge** — *an absent capability
+  is not a greyed one* (its own entry) applies verbatim: no
+  setting or mode reaches the capability, so a grey would
+  invite an action with no path.
+- **Nothing to undo at quit, and nothing to keep.** A carry
+  leaves no membership behind: a sticky window simply stays on
+  whichever Desktop it was last carried to — the one the user
+  was on — so a crash or force-quit strands nothing, and there
+  is no ledger whose loss could. What the model gives up is the
+  spontaneous case: a sticky window sitting on a Desktop the
+  user is NOT on when reach is switched on is fetched by the
+  toggle itself and by the next switch, never on its own.
+- **A carried window's vanish is expected, and sticky's promise
+  wins the tie.** For the switch transition's beat a carried
+  window is on no reading KiwiDesk has — and neither is a window
+  that was just closed. The sweep refuses a carried window's
+  vanish for a bounded budget inside a switch rather than
+  dropping its slot, scope and pin (the mechanism is
+  `.claude/rules/accessibility.md`'s); the trade is an
+  [accepted limitation](accepted-limitations.md): a sticky
+  window closed *during* a switch keeps its tile for a couple of
+  reconcile beats before it goes.
+
+
 ## Settings GUI & UX
 
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom
