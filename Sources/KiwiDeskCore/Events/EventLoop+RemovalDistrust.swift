@@ -65,12 +65,9 @@ extension EventLoop {
     /// followed by the recheck that can end it. State AND
     /// registration are kept, so the reconcile that lists the
     /// window again re-elements the same id rather than
-    /// re-creating it. The arm opens only INSIDE the switch grace
-    /// or for an episode that opened there — a carried window
-    /// closed with no switch in flight is a close like any other,
-    /// or every ⌘W of a sticky window would wait out the budget.
-    /// False for a window the carry does not follow, outside that
-    /// window, and past the cap: a genuine close.
+    /// re-creating it. False for a window the carry does not
+    /// follow, outside `carriedRemovalArmIsOpen`'s window, and
+    /// past the cap: a genuine close (accessibility.md, #1145).
     func refusesCarriedRemoval(
         _ id: WindowID,
         pid: pid_t,
@@ -90,8 +87,17 @@ extension EventLoop {
 
     /// Whether the carried arm may rule this window's vanish now:
     /// the carry follows it, and a Desktop switch is in flight or
-    /// its episode opened inside one. The one reading the sweep
-    /// and the destroy notification's deferral share.
+    /// the window already has an open episode — ANY episode, so a
+    /// #1157 census episode on a carried window buys a later
+    /// genuine close up to the cap of blind refusals, bounded and
+    /// converging. The one reading the sweep and the destroy
+    /// notification's deferral share. The grace is stamped by the
+    /// NSWorkspace switch notification; a carried window's
+    /// destroyed element landing BEFORE that stamp takes the
+    /// ordinary departure and returns through the arrival rule
+    /// with its scope restored from the sticky intent memory —
+    /// slot and pin not kept, the residue
+    /// `docs/accepted-limitations.md` records.
     func carriedRemovalArmIsOpen(for id: WindowID) -> Bool {
         carriedWindows().contains(id)
             && (isWithinSpaceSwitchGrace()

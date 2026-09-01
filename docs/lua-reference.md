@@ -282,9 +282,9 @@ carry it anywhere, and a sticky window's home is deliberately
 left where it is (`move_to_space` guards it the same way). And
 with **Stay visible across Desktops** on (the default), the move
 holds only until your screen next switches Desktop — a sticky
-window follows you, so it is carried back to wherever you go.
-Pin it out with `override_sticky_reach("off")` first if you
-mean it to stay. Same requirement as `focus_desktop`.
+window follows you, so at that switch it is carried back onto
+its own screen's current Desktop. Pin it out with
+`override_sticky_reach("off")` first if you mean it to stay. Same requirement as `focus_desktop`.
 
 **Example:**
 

@@ -2968,8 +2968,6 @@ loses the sentences that named its rungs for the same reason: a
 list of modes would be a different sentence on every Mac, so it
 states the rule and the thumbnails show the modes.
 
-## Settings GUI & UX
-
 ### Sticky reach spans macOS Desktops (#1145)
 
 **[Principle]**
@@ -3036,6 +3034,8 @@ The rulings:
   window closed *during* a switch keeps its tile for a couple of
   reconcile beats before it goes.
 
+
+## Settings GUI & UX
 
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom
 
