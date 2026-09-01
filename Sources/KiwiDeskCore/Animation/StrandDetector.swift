@@ -7,6 +7,10 @@ final class StrandDetector {
     /// Reads a window's actual on-screen frame via AX.
     var frameReader: (WindowID) -> CGRect? = { _ in nil }
 
+    /// Capture diagnostic sink — never `NSLog`, which macOS
+    /// redacts in `log show` (#887; core-boundaries.md).
+    var onLog: @MainActor (String) -> Void = CoreLog.write
+
     /// Whether checks run (`KIWIDESK_STRAND_LOG`).
     var isEnabled = false
 
@@ -34,11 +38,9 @@ final class StrandDetector {
             guard let self, let actual = self.frameReader(id)
             else { return }
             if !Self.landed(actual, on: target, within: tolerance) {
-                NSLog(
-                    "KiwiDesk STRAND: window %@ target %@ actual %@",
-                    String(describing: id),
-                    String(describing: target),
-                    String(describing: actual)
+                self.onLog(
+                    "STRAND: window \(id) target \(target) "
+                        + "actual \(actual)"
                 )
             }
         }
