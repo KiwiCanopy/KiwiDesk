@@ -27,11 +27,10 @@ struct SettingsSlider: View {
         .focusable(isEnabled, interactions: .edit)
         .focused($focused)
         .onChange(of: focused) { _, now in
-            // Refuse click-born focus on macOS 26 (`MouseFollowsFocusTests`,
-            // 2026-08-24).
-            guard now, NSEvent.pressedMouseButtons != 0 else {
-                return
-            }
+            // Refuse click-born focus on macOS 26; the predicate
+            // is shared, the wiring is per-site by necessity
+            // (`ClickBornFocus`).
+            guard now, ClickBornFocus.isClickBorn else { return }
             focused = false
         }
         .onKeyPress(.leftArrow) { nudge(-1) }

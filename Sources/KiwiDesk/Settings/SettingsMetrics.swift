@@ -13,7 +13,7 @@ enum SettingsMetrics {
     /// ring (#996). The ring is the platform's and is drawn at
     /// the pane's bounds, so the pane holds it off its own edges
     /// rather than the ring being restyled.
-    static let focusRingInset: CGFloat = 3
+    static let focusRingInset: CGFloat = 6
 
     /// `OverrideChrome` leading padding and checkbox spacing.
     static let overrideRowInset: CGFloat = 8

@@ -86,18 +86,16 @@ extension SettingsView {
                             maxWidth: .infinity,
                             alignment: .center
                         )
-                        // AFTER the frames, never before: applied
-                        // to the pre-layout content the ring is
-                        // drawn round a box the centring then
-                        // clips, losing its leading edge (owner
-                        // eye-confirm, 2026-09-01). The shape is
-                        // stated too — a full-bleed rectangle
-                        // reads as damage rather than as focus,
-                        // and shrinking what is focusable is the
-                        // sanctioned answer where hiding the ring
-                        // is not (docs/design-decisions.md ▸ a
+                        // AFTER the frames, never before: drawn
+                        // round the pre-layout content, the ring
+                        // loses its leading edge to the centring
+                        // that follows (owner, 2026-09-01). The
+                        // shape is stated too — a full-bleed
+                        // rectangle reads as damage rather than
+                        // as focus. Shrinking what is focusable
+                        // is the sanctioned answer where hiding
+                        // the ring is not (design-decisions ▸ a
                         // focus ring is the platform's).
-                        .padding(SettingsMetrics.focusRingInset)
                         .contentShape(
                             .focusEffect,
                             RoundedRectangle(
@@ -108,6 +106,22 @@ extension SettingsView {
                         )
                         .focusable()
                         .focused($contentFocused)
+                        // A click must not ring the pane, and
+                        // the wiring is spelled HERE because a
+                        // modifier handed the binding never
+                        // fires (owner eye-confirm, 2026-09-01).
+                        .onChange(of: contentFocused) { _, now in
+                            guard now, ClickBornFocus.isClickBorn
+                            else { return }
+                            contentFocused = false
+                        }
+                        // LAST, so the ring sits inside it. Pad
+                        // before `.focusable()` and the padded —
+                        // larger — view is the one focused, which
+                        // puts the ring on the window's own edges
+                        // where both sides are clipped away
+                        // (owner, 2026-09-01).
+                        .padding(SettingsMetrics.focusRingInset)
                         // Animated surface reflow on mode switch (#760).
                         .animation(
                             reduceMotion
