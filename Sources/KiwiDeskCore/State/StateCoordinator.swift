@@ -116,6 +116,7 @@ public struct StateCoordinator: Sendable {
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
                 stickyReachOverrides[id] = nil
+                effects.terminatedWindows.append(id)
             }
             forgetMinimized(pid: pid)
 

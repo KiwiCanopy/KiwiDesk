@@ -54,7 +54,7 @@ extension KiwiCore {
         var newlyCreatedWindow: WindowID? = nil
         switch event {
         case .appTerminated:
-            forgetTerminatedStickyReach()
+            forgetTerminatedStickyReach(effects.terminatedWindows)
         case .displaysChanged:
             tiler.displaysChanged()
             borders.displaysChanged()
@@ -224,7 +224,7 @@ extension KiwiCore {
             }
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)
-            stickyReach.forget(id)
+            if !wasMinimized { stickyReach.forget(id) }
             // The switch timestamp is set by the
             // .desktopChanged event, which the event loop
             // emits BEFORE the reconcile burst on the same

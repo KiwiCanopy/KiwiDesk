@@ -56,12 +56,16 @@ struct StickyReachWiringTests {
                 + "refreshStickyReach()}",
             // A replug births fresh Desktops.
             "emitMonitorChange()refreshStickyReach()",
-            // A destroyed window's ledger drops without
-            // dispatch.
-            "stickyReach.forget(id)",
-            // …and a terminated app's whole roster does too.
+            // A genuinely CLOSED window's ledger drops without
+            // dispatch — a minimize keeps it, since the
+            // WindowServer still holds the window and its
+            // memberships (re-review round 3).
+            "if!wasMinimized{stickyReach.forget(id)}",
+            // …and a terminated app drops exactly the ids that
+            // died with its pid, off the fold's own effects.
             "case.appTerminated:"
-                + "forgetTerminatedStickyReach()",
+                + "forgetTerminatedStickyReach("
+                + "effects.terminatedWindows)",
         ],
         "Sources/KiwiDeskCore/App/KiwiCore+RekeyEvent.swift": [
             "ifstate.windows[new]?.isSticky==true{"

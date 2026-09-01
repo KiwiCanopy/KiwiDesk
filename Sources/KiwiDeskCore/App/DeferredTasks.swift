@@ -25,7 +25,12 @@ final class DeferredTasks {
         /// no-follow arm gets no Desktop switch to heal it. Its
         /// own slot: `desktopMoveReap` is cancel-and-replace
         /// bookkeeping for the same verb, and whichever fired
-        /// second would silently drop the other.
+        /// second would silently drop the other. 800 ms =
+        /// `desktopSettle`'s 600 ms post-switch re-track bound
+        /// plus margin — same class of wait, one hop later.
+        /// Single-shot by design: a perform slower than this
+        /// waits for the next Desktop event, which the
+        /// idempotent reconcile makes safe.
         case stickyReachSettle
         case desktopMoveReap
         /// Adopts window sent to hidden desktop by follow (#1023).

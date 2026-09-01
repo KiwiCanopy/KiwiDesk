@@ -43,14 +43,15 @@ extension KiwiCore {
         reconcileStickyReach(wanted: wanted, spaces: spaces)
     }
 
-    /// A terminated app's windows died with it — drop their
-    /// ledgers without dispatching removals at dead ids. A
-    /// HIDDEN window deliberately takes the other road: it
-    /// still exists, so the reconcile's retire removes its
-    /// memberships for real.
-    func forgetTerminatedStickyReach() {
-        for id in stickyReach.asserted.keys
-        where state.windows[id] == nil {
+    /// The one forget rule: only ids the WindowServer itself
+    /// forgot. These are the windows the `.appTerminated` fold
+    /// removed for THAT pid — never "absent from state", which
+    /// also matches a minimized window and anything else still
+    /// alive on the reconcile-retire road (a hide, an
+    /// ignore-ruled window), whose memberships a forget would
+    /// orphan past `retireStickyReach`'s reach.
+    func forgetTerminatedStickyReach(_ ids: [WindowID]) {
+        for id in ids {
             stickyReach.forget(id)
         }
     }
