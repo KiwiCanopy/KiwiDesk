@@ -1912,7 +1912,7 @@ app_bar.set_content("icon_and_title")
 
 ### app_bar.set_title_cap
 
-**Expects:** a character count, 8–80 (default `25`). Values
+**Expects:** a character count, 8–80 (default `10`). Values
 outside the range are clamped.
 
 **Does:** sets how much of a window's title an item shows;
@@ -2426,7 +2426,7 @@ space_bar.set_show_front_app(false)
 
 ### space_bar.set_title_cap
 
-**Expects:** a character count, 8–80 (default `25`). Values
+**Expects:** a character count, 8–80 (default `10`). Values
 outside the range are clamped.
 
 **Does:** sets how much of the focused window's title the

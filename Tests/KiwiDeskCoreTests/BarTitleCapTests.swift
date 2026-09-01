@@ -66,14 +66,25 @@ struct BarTitleCapTests {
     /// range; it says nothing about where the two bars start.
     /// Moving either default was inert across the whole suite
     /// (guard-prover, 2026-08-19), while the commit message,
-    /// `docs/lua-reference.md` and `docs/user-guide.md` all
-    /// state "8-80, default 25" for both — an unguarded number
-    /// restated in three places is what `rule-authoring.md`
-    /// bans.
+    /// `docs/lua-reference.md`, `docs/user-guide.md` and
+    /// `docs/design-decisions.md` all state the range and the
+    /// default for both — an unguarded number restated in four
+    /// places is what `rule-authoring.md` bans.
+    ///
+    /// The number itself is a TASTE call and this is the home
+    /// for its argument (tests.md, #1021). It was 25 until
+    /// #1171. The bars show window TITLES rather than app names
+    /// by default, and 25 characters of a title makes every item
+    /// wide — every item on a bar is sized from the widest, so a
+    /// long default spends the whole bar's width before the user
+    /// has chosen anything. The owner tested 10 against a 12-14
+    /// middle ground and ruled 10 (2026-08-31). Retuning it
+    /// again means moving this pin, the two styles and the four
+    /// prose copies together, which is the point of the pin.
     @Test("Both bars default to the same cap")
     func bothBarsDefaultAlike() {
-        #expect(AppBarStyle().titleCap == 25)
-        #expect(SpaceBarStyle().titleCap == 25)
+        #expect(AppBarStyle().titleCap == 10)
+        #expect(SpaceBarStyle().titleCap == 10)
         #expect(
             AppBarStyle().titleCap == SpaceBarStyle().titleCap,
             "the same window must not read two lengths"

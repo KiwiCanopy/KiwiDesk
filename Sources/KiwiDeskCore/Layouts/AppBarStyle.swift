@@ -23,7 +23,7 @@ public struct AppBarStyle: Sendable, Equatable {
     public var content: Content = .iconAndTitle
     /// Longest title drawn per item before tail-truncation. Default 25
     /// (owner 2026-08-19).
-    public var titleCap = 25
+    public var titleCap = 10
     /// App icon source: native image or SketchyBar App Font glyph (#294).
     public var iconSource: BarAppIconSource = .appImage
     /// Group adjacent windows of the same app with a count badge.
