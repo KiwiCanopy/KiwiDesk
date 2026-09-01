@@ -19,7 +19,22 @@ struct SettingsInputSourceSeamTests {
     /// outside it and is not in scope — it is a menu-bar
     /// behaviour, not a focus destination, and folding it in
     /// would make this suite's subject two different things.
-    @Test("only the seam reads what macOS is dispatching")
+    /// TWO readers, and the pair is the ruling rather than an
+    /// oversight (`architect-reviewer`, 2026-09-01). They ask
+    /// different questions of the same property:
+    ///
+    /// - `SettingsInputSource` — would the platform have moved
+    ///   focus for this NAVIGATION? Refuses a mouse event.
+    /// - `ClickBornFocus` — did the mouse cause this FOCUS
+    ///   CHANGE on a `.focusable()` control? Also weighs the
+    ///   button state, which the first must not, because a
+    ///   navigation may be programmatic while a button is down.
+    ///
+    /// Merging them would refuse programmatic focus, which the
+    /// second must allow. A THIRD entry is the thing to refuse:
+    /// it would mean a view answering the question beside itself
+    /// again, which is what #991 removed.
+    @Test("only the two seams read what macOS is dispatching")
     func oneReaderOfTheCurrentEvent() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
@@ -39,15 +54,17 @@ struct SettingsInputSourceSeamTests {
             }
         }
         #expect(
-            readers == ["SettingsInputSource.swift"],
+            readers.sorted() == [
+                "ClickBornFocus.swift", "SettingsInputSource.swift",
+            ],
             Comment(
                 rawValue:
-                    "the current event is read in \(readers) — "
-                    + "#991's fix is a seam every focus "
-                    + "destination consults, and a second reader "
-                    + "beside a view is the per-site condition "
-                    + "the issue refused. Route it through "
-                    + "`SettingsInputSource`."
+                    "the current event is read in "
+                    + "\(readers.sorted()) — it has exactly two "
+                    + "homes, one per question (see this test's "
+                    + "docstring). A reader beside a VIEW is the "
+                    + "per-site condition #991 refused; route it "
+                    + "through whichever of the two it is asking."
             )
         )
     }
