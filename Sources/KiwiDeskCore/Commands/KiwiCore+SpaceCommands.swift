@@ -140,6 +140,16 @@ extension KiwiCore {
         _ window: WindowID,
         to target: SpaceID
     ) {
+        // #1145: a sticky window reaching this choke point is a
+        // cross-display re-home (the move gate refused the
+        // rest), so its 📌 wanted Desktops move with it. defer:
+        // the re-derivation wants the NEW membership, whichever
+        // arm below writes it.
+        defer {
+            if state.windows[window]?.isSticky == true {
+                refreshStickyReach()
+            }
+        }
         let floating = state.windows[window]?.isFloating == true
         guard !floating,
             state.workspaces[target]?.mode == .track

@@ -29,7 +29,34 @@ struct StickyMarkEditor: View {
                 isOn: $model.config.settings.stickyStyle.mark,
                 help: Self.markHelp
             )
+            // #1145: HIDDEN without the bridge — the
+            // liquid-glass shape; `canDriveDesktops`' docstring
+            // owns why this is never a grey.
+            if model.canDriveDesktops {
+                ToggleRow(
+                    label: L(
+                        "sticky.desktop_reach",
+                        "Stay visible across Desktops"
+                    ),
+                    isOn: $model.config.settings.stickyStyle
+                        .desktopReach,
+                    help: Self.reachHelp
+                )
+            }
         }
+    }
+
+    private static var reachHelp: String {
+        L(
+            "sticky.desktop_reach.help",
+            "Extends the sticky promise to macOS Desktops: a "
+                + "window that is sticky everywhere appears on "
+                + "every Desktop, and one that is sticky on its "
+                + "screen appears on all of that screen's "
+                + "Desktops. Turn this off and a sticky window "
+                + "stays within the Desktop it lives on, "
+                + "following only KiwiDesk's own Spaces."
+        )
     }
 
     /// Hoisted out of `body` for the type-checker: a

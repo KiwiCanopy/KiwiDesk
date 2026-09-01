@@ -27,6 +27,15 @@ extension KiwiCore {
             }
             tiler.settings.stickyStyle.mark = flag
             return .ok()
+        case "desktop_reach":
+            guard let flag = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.stickyStyle.desktopReach = flag
+            // Both directions take effect now: ON asserts, OFF
+            // retires through the same reconcile (#1145).
+            refreshStickyReach()
+            return .ok()
         case "color":
             return setMarkColor(args) {
                 tiler.settings.stickyStyle.color = $0

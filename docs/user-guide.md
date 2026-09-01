@@ -1496,6 +1496,17 @@ pill appears on the sticky window when you drag *another* window
 onto its slot: the sticky one is the one that can't move, so it's
 the one that explains why.
 
+Where your macOS supports it, the sticky promise reaches across
+**macOS Desktops** too: a sticky-everywhere window is present on
+every Desktop, and a sticky-on-this-screen window on all of that
+screen's Desktops — switch Desktops however you like and the
+window is already there. The reach has its own switch, **Stay
+visible across Desktops**, beside the mark toggle in Gaps &
+Borders; it only appears on a macOS that can drive Desktops.
+Power users can pin a single window the other way with
+`override_sticky_reach` in Lua. Quitting KiwiDesk returns every
+sticky window to the Desktop it lives on.
+
 Because a sticky window can look identical to a normal one,
 KiwiDesk draws a small mark in its top-right
 corner. **Show mark on sticky windows** (on by default) turns

@@ -1128,6 +1128,8 @@
   "sticky.caption": "Sticky-Fenster bleiben auf jedem Space sichtbar (%1$@, in %2$@).",
   "sticky.color": "Sticky",
   "sticky.color.a11y": "Markierungsfarbe für Sticky-Fenster",
+  "sticky.desktop_reach": "Auf allen Schreibtischen sichtbar bleiben",
+  "sticky.desktop_reach.help": "Erweitert das Sticky-Versprechen auf die Schreibtische von macOS: Ein Fenster, das überall Sticky ist, erscheint auf jedem Schreibtisch, und eines, das auf seinem Bildschirm Sticky ist, erscheint auf allen Schreibtischen dieses Bildschirms. Schaltest du das aus, bleibt ein Sticky-Fenster auf dem Schreibtisch, auf dem es sich befindet, und folgt nur KiwiDesks eigenen Spaces.",
   "sticky.display.pill": "Kann nur auf ein anderes Display verschoben werden",
   "sticky.everywhere.pill": "Sticky-Fenster können nicht auf einen anderen Space verschoben werden",
   "sticky.home.pill": "Kann nur auf seinem Heimat-Space %1$@ verschoben werden",

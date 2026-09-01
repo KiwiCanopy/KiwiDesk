@@ -18,6 +18,7 @@ enum BordersKey: String, CaseIterable, Hashable {
     case borderFitGaps = "(action) border.fit_gaps"
     case stickyMark = "settings.stickyStyle.mark"
     case stickyColor = "settings.stickyStyle.color"
+    case stickyDesktopReach = "settings.stickyStyle.desktopReach"
     case dragCornerRadius = "settings.dragCornerRadius"
     case dragGhostEnabled = "settings.dragGhost.enabled"
     case dragGhostBorder = "settings.dragGhost.border"
@@ -92,6 +93,15 @@ extension BordersKey {
                 .gapsAndBorders,
                 .stickyWindows,
                 .showMore
+            )
+        case .stickyDesktopReach:
+            // HIDDEN without the bridge (#1145) — the
+            // liquid-glass shape, not a grey.
+            return .row(
+                .gapsAndBorders,
+                .stickyWindows,
+                .showMore,
+                gate: .runtime(.desktopBridgeAbsent)
             )
         case .dragGhostEnabled, .dragDropZoneEnabled:
             return .row(.gapsAndBorders, .dragAndDrop, .atRest)

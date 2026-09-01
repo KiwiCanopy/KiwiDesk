@@ -34,9 +34,8 @@ extension KiwiCore {
     /// gates KiwiDesk-space membership, which a Desktop move
     /// does not touch — the re-home above stands down for a
     /// sticky window on exactly that ground): it physically
-    /// leaves, and its scope keeps meaning "every Space of the
-    /// Desktop it is on". Sticky reach ACROSS Desktops is the
-    /// collector's own item (#890), unimplemented either way.
+    /// leaves, its WindowServer home migrates, and the reach
+    /// refresh below re-derives its memberships (#1145).
     func moveToDesktop(
         _ args: [JSONValue],
         follow: Bool
@@ -53,6 +52,21 @@ extension KiwiCore {
                 return .fail("the Desktop bridge refused the move")
             }
             rehomeAcrossScreens(focused, to: target)
+            // #1145: the moved window's home migrated — possibly
+            // INTO an asserted space — so the ledger re-derives
+            // now, and AGAIN once the async move has performed:
+            // until then the home query still answers the
+            // ORIGIN, and the no-follow arm gets no Desktop
+            // switch to heal a global sticky's re-add there.
+            if state.windows[focused]?.isSticky == true {
+                refreshStickyReach()
+                deferred.schedule(
+                    .stickyReachSettle,
+                    after: .milliseconds(800)
+                ) { [weak self] in
+                    self?.refreshStickyReach()
+                }
+            }
             if follow {
                 let outcome = switchDesktop(
                     to: target,

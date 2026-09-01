@@ -201,25 +201,25 @@ public final class KiwiCore {
     /// `KiwiCore+WakeFocus.swift` is the one machine mutating it.
     var wakeFocusHealArmedAt: Date?
 
-    /// Hands key focus to the desktop (Finder) when a move without
-    /// follow empties the focused display's space (#446). macOS has
-    /// no native "focus the empty desktop", so the moved — now
-    /// stashed offscreen — window would otherwise keep key focus.
-    /// Injectable and `nil` by default so unit tests observe the
-    /// yield without a live Finder; `start()` installs the real
-    /// activation.
+    /// Hands key focus to Finder when a no-follow move empties
+    /// the focused display's space (#446) — the moved, now-stashed
+    /// window would otherwise keep key focus. nil by default so
+    /// unit tests observe the yield; `start()` wires the real one.
     var desktopFocusYield: (@MainActor () -> Void)?
 
     /// Every machine touch Open or Focus's already-running branch
-    /// makes (#673) — app lookup, window census, deminiaturize,
-    /// activate. Declared and argued as a bundle in
-    /// `KiwiCore+LaunchRestore.swift`, all four live by default.
+    /// makes (#673), declared and argued as a bundle in
+    /// `KiwiCore+LaunchRestore.swift`; all four live by default.
     var openOrFocus = OpenOrFocusSeams()
 
     /// The ignored-panel distrust (#21/#244/#951) — the state's
     /// own docs, and the one state machine mutating it, live in
     /// `KiwiCore+IgnoredPanel.swift`.
     var ignoredPanel = IgnoredPanelDistrust()
+
+    /// Desktop-reach ledger — owned state (#1145, #889 item 5);
+    /// `KiwiCore+StickyReach.swift` is the one machine driving it.
+    var stickyReach = StickyReach()
 
     /// #958 steal debt; `KiwiCore+AccessibilityReturn.swift`.
     var accessibilityReturn: AccessibilityReturnDebt?

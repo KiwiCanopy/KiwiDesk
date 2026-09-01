@@ -73,6 +73,9 @@ struct WMBridgeSeamTests {
             "KiwiDeskCore/App/KiwiCore+Accessors.swift": 1,
             "KiwiDeskCore/Commands/KiwiCore+DesktopMove.swift": 1,
             "KiwiDeskCore/Commands/KiwiCore+DesktopSwitch.swift": 2,
+            // #1145 sticky reach: the membership pair plus the
+            // primary-space query its removals exclude by.
+            "KiwiDeskCore/App/KiwiCore+StickyReach.swift": 3,
         ],
     ]
 
@@ -121,6 +124,58 @@ struct WMBridgeSeamTests {
         }
     }
 
+    /// Scanner files whose only `WMBridge.` spellings are the
+    /// scan strings they match production against — this file
+    /// (the needle itself) and the #1145 wiring register. The
+    /// stated trade (rule-authoring.md): an exempt file gaining
+    /// a REAL bridge call goes unseen here, so an entry may name
+    /// only a suite that reads source rather than driving a
+    /// core. `scanExemptEntriesAreLive` keeps each entry honest:
+    /// a renamed or needle-free file reds rather than exempting
+    /// nothing.
+    private static let scanExempt: Set<String> = [
+        "WMBridgeSeamTests.swift",
+        "StickyReachWiringTests.swift",
+    ]
+
+    /// The exemption's own liveness — replacing the vacuous
+    /// `!reached.contains(self)` a path-keyed exclusion once
+    /// carried: every exempt entry must name a file that exists
+    /// in the test trees AND spells the needle, or the entry is
+    /// exempting nothing and reds here.
+    @Test("every scan exemption names a live needle-bearing file")
+    func scanExemptEntriesAreLive() throws {
+        for name in Self.scanExempt {
+            var found = false
+            for tree in Self.testTrees {
+                for file in try SourceScan.swiftSources(
+                    under: tree
+                )
+                where file.lastPathComponent == name {
+                    found = true
+                    let source = try String(
+                        contentsOf: file,
+                        encoding: .utf8
+                    )
+                    #expect(
+                        source.contains("WMBridge."),
+                        Comment(
+                            rawValue:
+                                "\(name) no longer spells the "
+                                + "needle — drop its exemption."
+                        )
+                    )
+                }
+            }
+            #expect(
+                found,
+                Comment(
+                    rawValue: "\(name) is exempt but not found"
+                )
+            )
+        }
+    }
+
     @Test("Tests reach the bridge only through the resolver seam")
     func testsReachTheBridgeThroughTheSeam() throws {
         let needle = "WMBridge."
@@ -129,7 +184,7 @@ struct WMBridgeSeamTests {
         var strays: [String] = []
         for tree in Self.testTrees {
             for file in try SourceScan.swiftSources(under: tree)
-            where file.path != #filePath {
+            where !Self.scanExempt.contains(file.lastPathComponent) {
                 let source = SourceScan.stripComments(
                     try String(contentsOf: file, encoding: .utf8)
                 )
@@ -140,10 +195,11 @@ struct WMBridgeSeamTests {
                 }
             }
         }
-        // Non-vacuous: the plumbing suite itself must be seen —
-        // and this file must not be, or the exclusion is dead.
+        // Non-vacuous: the plumbing suite itself must be seen.
+        // The exemption's own liveness is
+        // `scanExemptEntriesAreLive` — an exclusion keyed on the
+        // same name it would assert about cannot check itself.
         #expect(reached.contains("WMBridgeTests.swift"))
-        #expect(!reached.contains("WMBridgeSeamTests.swift"))
         #expect(
             strays.isEmpty,
             """

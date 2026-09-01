@@ -73,9 +73,16 @@ struct SettingsCodingTests {
         // `sticky.set_color` → `sticky.color` (#429); default is
         // the empty "Automatic" sentinel (adaptive label color).
         let sticky = try object(root["sticky"])
-        #expect(Set(sticky.keys) == ["mark", "color"])
+        #expect(
+            Set(sticky.keys)
+                == ["mark", "color", "desktop_reach"]
+        )
         #expect(sticky["mark"] as? Bool == true)
         #expect(sticky["color"] as? String == "")
+        // `sticky.set_desktop_reach` → `sticky.desktop_reach`
+        // (#1145); default ON — the sticky promise spans
+        // Desktops wherever the bridge exists.
+        #expect(sticky["desktop_reach"] as? Bool == true)
         // `floating.set_color` → `floating.color` (#429): the
         // sticky mark's sibling namespace, also Automatic by
         // default.

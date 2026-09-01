@@ -166,6 +166,10 @@ extension KiwiCore {
         // sit stranded over the scattered desktop.
         borders.stop()
         stickyMarks.clear()
+        // Take back every asserted Desktop membership while the
+        // bridge is still reachable (#1145) — after this stop,
+        // nothing is left to undo them.
+        retireStickyReach()
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         gatherWindows()
