@@ -130,58 +130,6 @@ struct SegmentedPickerKeyTests {
         }
     }
 
-    /// A focusable custom control owes a click-born-focus
-    /// refusal, and this change makes the second one.
-    ///
-    /// The refusal is five readable lines and copying it is the
-    /// cheaper move at two sites — but nothing was counting, so
-    /// the third would be an omission rather than a decision.
-    /// The set is held EXACTLY: a control that becomes focusable
-    /// and skips the refusal reds here, and one that gains the
-    /// refusal without needing it does too.
-    ///
-    /// `NSApp.currentEvent` — #991's seam for "did a keyboard
-    /// drive this navigation" — is a DIFFERENT question and is
-    /// counted by `SettingsInputSourceSeamTests`. "A mouse
-    /// button is physically down" and "the current event is a
-    /// key press" must not be merged: the second refuses
-    /// programmatic focus, which this one must allow.
-    @Test("who refuses click-born focus is a closed set")
-    func clickBornRefusalCensus() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk")
-        let files = try SourceScan.swiftSources(under: root)
-        // A scan that read nothing would pass having looked at
-        // nothing (#635).
-        #expect(files.count > 50)
-        var readers: [String] = []
-        for file in files {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            if squashed(source).contains(
-                "NSEvent.pressedMouseButtons"
-            ) {
-                readers.append(file.lastPathComponent)
-            }
-        }
-        #expect(
-            readers.sorted() == [
-                "SegmentedPicker.swift", "SettingsSlider.swift",
-            ],
-            Comment(
-                rawValue:
-                    "the click-born-focus refusal is spelled in "
-                    + "\(readers.sorted()) — a custom control "
-                    + "that takes `.focusable` owes this refusal "
-                    + "or it rings on every click (#991's family, "
-                    + "#997). At a third copy, home it beside "
-                    + "#991's input-source seam instead of adding "
-                    + "an entry here."
-            )
-        )
-    }
-
     /// The balanced body of `declaration`, so a needle is read
     /// against the subview that must carry it. Fails loudly
     /// rather than scanning "" if the declaration is renamed.

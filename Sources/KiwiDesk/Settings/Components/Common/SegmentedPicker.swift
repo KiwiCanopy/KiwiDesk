@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 /// Capsule segmented picker with animated sliding accent pill (#68).
@@ -83,11 +82,9 @@ struct SegmentedPicker<Value: Hashable>: View {
         .focusable(isEnabled)
         .focused($focused)
         .onChange(of: focused) { _, now in
-            // Click-born focus, refused as `SettingsSlider` does:
-            // this stop would otherwise ring on every click.
-            guard now, NSEvent.pressedMouseButtons != 0 else {
-                return
-            }
+            // This stop would otherwise ring on every click
+            // (`ClickBornFocus`).
+            guard now, ClickBornFocus.isClickBorn else { return }
             focused = false
         }
         // ← / → only: ↑ / ↓ must still leave the row.
