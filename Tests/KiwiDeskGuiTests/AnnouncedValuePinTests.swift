@@ -172,9 +172,12 @@ struct AnnouncedValuePinTests {
                 ".focusable(isEnabled, interactions: .edit)"
             )
         )
-        // The click-focus refusal (#812 session 3): focus
-        // arriving with a mouse button down is handed back.
-        #expect(source.contains("NSEvent.pressedMouseButtons"))
+        // The click-focus refusal (#812 session 3): focus the
+        // mouse caused is handed back. The predicate moved to
+        // the shared `ClickBornFocus` when a third control
+        // needed it (#996) — the wiring stays here, since a
+        // modifier handed the `FocusState` binding never fires.
+        #expect(source.contains("ClickBornFocus.isClickBorn"))
         for key in ["leftArrow", "rightArrow", "upArrow", "downArrow"] {
             #expect(
                 source.contains(".onKeyPress(.\(key))"),
