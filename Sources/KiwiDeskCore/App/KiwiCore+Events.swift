@@ -53,6 +53,8 @@ extension KiwiCore {
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {
+        case .appTerminated:
+            forgetTerminatedStickyReach()
         case .displaysChanged:
             tiler.displaysChanged()
             borders.displaysChanged()
@@ -95,7 +97,6 @@ extension KiwiCore {
             // space it activates is the one the arrival settled
             // on. A no-op unless this window is the one owed.
             payFollowedFocus(arrived: window.id)
-            // #1145: a restored sticky intent reaches now.
             if state.windows[window.id]?.isSticky == true {
                 refreshStickyReach()
             }
@@ -223,7 +224,6 @@ extension KiwiCore {
             }
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)
-            // #1145: no removal dispatch at a dead id.
             stickyReach.forget(id)
             // The switch timestamp is set by the
             // .desktopChanged event, which the event loop

@@ -54,9 +54,18 @@ extension KiwiCore {
             rehomeAcrossScreens(focused, to: target)
             // #1145: the moved window's home migrated — possibly
             // INTO an asserted space — so the ledger re-derives
-            // now rather than at the next Desktop event.
+            // now, and AGAIN once the async move has performed:
+            // until then the home query still answers the
+            // ORIGIN, and the no-follow arm gets no Desktop
+            // switch to heal a global sticky's re-add there.
             if state.windows[focused]?.isSticky == true {
                 refreshStickyReach()
+                deferred.schedule(
+                    .stickyReachSettle,
+                    after: .milliseconds(800)
+                ) { [weak self] in
+                    self?.refreshStickyReach()
+                }
             }
             if follow {
                 let outcome = switchDesktop(

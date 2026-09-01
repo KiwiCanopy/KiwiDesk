@@ -35,8 +35,6 @@ extension KiwiCore {
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = profile.settings
-        // #1145: a profile may override `desktop_reach`.
-        refreshStickyReach()
         // An EXPLICIT apply reseeds the session resize layer
         // (#458): the incoming settings are the new truth, and
         // a session shadow would make the profile's ratios
@@ -111,6 +109,13 @@ extension KiwiCore {
         resolveSpaceDisplays()
         retile(force: forceRetile)
         emitSpaceChange()
+        // #1145: a profile may override `desktop_reach` — after
+        // the pins and space→display resolve a 📌 derivation
+        // reads. Its own topology read on purpose: this door is
+        // also a no-snapshot verb path (`load_profile`), and the
+        // switch handler's threaded pass plus the settle bracket
+        // the redundancy, which the reconcile keeps idempotent.
+        refreshStickyReach()
     }
 
     /// Explicit-load reconcile: drop live spaces whose name isn't
@@ -171,8 +176,6 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         tiler.settings = composed.settings
-        // #1145: a composed profile may override `desktop_reach`.
-        refreshStickyReach()
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
             clearSessionRatios { $0 = SessionRatios() }
@@ -203,6 +206,8 @@ extension KiwiCore {
         resolveSpaceDisplays()
         retile(force: forceRetile)
         emitSpaceChange()
+        // #1145: same tail as `apply(profile:)`, same reasons.
+        refreshStickyReach()
     }
 
     /// Applies a built-in Preset and materializes it as a real,

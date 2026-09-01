@@ -80,9 +80,6 @@ extension KiwiCore {
         spacePins = [:]
         mainSpaces = []
         tiler.settings = TilingSettings()
-        // #1145: the default settings restore `desktop_reach`
-        // ON; the reconcile re-derives against whatever stood.
-        refreshStickyReach()
         // Live spaces down to the first-launch set before the
         // reload's seed reads them; windows are forwarded, so
         // nothing is stranded in a pruned space. The target
@@ -109,6 +106,9 @@ extension KiwiCore {
         resolveSpaceDisplays()
         retile(force: true)
         emitSpaceChange()
+        // #1145: default settings restore `desktop_reach` ON —
+        // re-derive after the topology above settles.
+        refreshStickyReach()
         onLog(
             cleared
                 ? "all settings reset to defaults"

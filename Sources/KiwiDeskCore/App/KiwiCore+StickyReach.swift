@@ -43,6 +43,18 @@ extension KiwiCore {
         reconcileStickyReach(wanted: wanted, spaces: spaces)
     }
 
+    /// A terminated app's windows died with it — drop their
+    /// ledgers without dispatching removals at dead ids. A
+    /// HIDDEN window deliberately takes the other road: it
+    /// still exists, so the reconcile's retire removes its
+    /// memberships for real.
+    func forgetTerminatedStickyReach() {
+        for id in stickyReach.asserted.keys
+        where state.windows[id] == nil {
+            stickyReach.forget(id)
+        }
+    }
+
     /// Teardown (#1145): take every asserted membership back —
     /// quitting must not leave windows parked on Desktops with
     /// nothing left to undo it. The empty want retires through

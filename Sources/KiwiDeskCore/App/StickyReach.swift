@@ -15,7 +15,12 @@ public enum StickyReachOverride: String, CaseIterable, Sendable {
 /// reconciled by diff. `KiwiCore+StickyReach.swift` is the one
 /// machine driving it.
 struct StickyReach {
-    /// Space memberships this app holds asserted, per window.
+    /// Space memberships this app holds asserted, per window —
+    /// plus, after a home migrated INTO an asserted space, that
+    /// retained home itself (see `reconcile`): such an entry is
+    /// kept so the membership stays reclaimable, at the cost of
+    /// one home resolution per refresh pass for as long as the
+    /// window lives.
     private(set) var asserted: [WindowID: Set<SkyLight.SpaceID>] = [:]
 
     /// Reconciles the ledger against `wanted`, dispatching adds

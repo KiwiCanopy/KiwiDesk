@@ -18,6 +18,15 @@ final class DeferredTasks {
         /// Focus re-assert after no-follow `move_to_space` (#482, #483).
         case moveSettle
         case desktopSettle
+        /// Re-derives sticky Desktop reach after a no-follow
+        /// `move_to_desktop`'s async move settles (#1145): the
+        /// eager refresh reads the ORIGIN as the window's home
+        /// until the WindowServer performs the move, and the
+        /// no-follow arm gets no Desktop switch to heal it. Its
+        /// own slot: `desktopMoveReap` is cancel-and-replace
+        /// bookkeeping for the same verb, and whichever fired
+        /// second would silently drop the other.
+        case stickyReachSettle
         case desktopMoveReap
         /// Adopts window sent to hidden desktop by follow (#1023).
         /// A separate slot from `desktopMoveReap` deliberately:

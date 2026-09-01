@@ -249,7 +249,13 @@ struct StickyReachWantedTests {
 @Suite("Sticky reach override verb", .serialized)
 @MainActor
 struct StickyReachOverrideTests {
+    /// Saved so `reset()` restores rather than clears — another
+    /// suite's installed resolver must survive this one
+    /// (tests.md ▸ process-global state).
+    private static var priorResolver: ((String) -> AnyClass?)?
+
     private func makeCore() -> KiwiCore {
+        Self.priorResolver = WMBridge.classResolverOverride
         WMBridge.classResolverOverride = { _ in nil }
         let core = makeTestCore(
             configDirectory: FileManager.default
@@ -271,7 +277,8 @@ struct StickyReachOverrideTests {
     }
 
     private func reset() {
-        WMBridge.classResolverOverride = nil
+        WMBridge.classResolverOverride = Self.priorResolver
+        Self.priorResolver = nil
     }
 
     @Test("on, off and auto write the focused window's verdict")

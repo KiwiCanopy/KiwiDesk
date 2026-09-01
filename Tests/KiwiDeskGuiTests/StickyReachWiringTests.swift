@@ -59,6 +59,9 @@ struct StickyReachWiringTests {
             // A destroyed window's ledger drops without
             // dispatch.
             "stickyReach.forget(id)",
+            // …and a terminated app's whole roster does too.
+            "case.appTerminated:"
+                + "forgetTerminatedStickyReach()",
         ],
         "Sources/KiwiDeskCore/App/KiwiCore+RekeyEvent.swift": [
             "ifstate.windows[new]?.isSticky==true{"
@@ -81,18 +84,28 @@ struct StickyReachWiringTests {
         ],
         "Sources/KiwiDeskCore/App/KiwiCore+GuiConfig.swift": [
             // The Settings Save path replaces the settings —
-            // this IS the row's apply (#1145 review blocker).
-            "tiler.settings=config.settings"
-                + "refreshStickyReach()"
+            // this IS the row's apply (#1145 review blocker) —
+            // and the refresh sits at the TAIL, after the pins
+            // and `resolveSpaceDisplays()` a 📌 derivation
+            // reads (re-review round 2).
+            "resolveSpaceDisplays()retile(force:true)"
+                + "emitSpaceChange()refreshStickyReach()"
         ],
         "Sources/KiwiDeskCore/Profiles/KiwiCore+ProfileResolution.swift": [
-            "tiler.settings=profile.settings"
+            // Both apply tails, distinguished by the override
+            // re-registration each runs first — the profile one
+            // passes the profile's tiers, the composed one nils.
+            "profileIgnoreRules:profile.ignoreRules)"
+                + "resolveSpaceDisplays()"
+                + "retile(force:forceRetile)emitSpaceChange()"
                 + "refreshStickyReach()",
-            "tiler.settings=composed.settings"
+            "profileIgnoreRules:nil)resolveSpaceDisplays()"
+                + "retile(force:forceRetile)emitSpaceChange()"
                 + "refreshStickyReach()",
         ],
         "Sources/KiwiDeskCore/App/KiwiCore+Reset.swift": [
-            "tiler.settings=TilingSettings()"
+            "loadConfig()resolveSpaceDisplays()"
+                + "retile(force:true)emitSpaceChange()"
                 + "refreshStickyReach()"
         ],
         "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceCommands.swift": [
@@ -104,9 +117,12 @@ struct StickyReachWiringTests {
         ],
         "Sources/KiwiDeskCore/Commands/KiwiCore+DesktopMove.swift": [
             // A Desktop move migrates the window's home —
-            // possibly INTO an asserted space.
+            // possibly INTO an asserted space — and the async
+            // move outruns the eager pass, so a deferred settle
+            // re-derives once it lands (re-review round 2).
             "ifstate.windows[focused]?.isSticky==true{"
-                + "refreshStickyReach()}"
+                + "refreshStickyReach()"
+                + "deferred.schedule(.stickyReachSettle,"
         ],
     ]
 
