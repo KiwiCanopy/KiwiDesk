@@ -273,6 +273,7 @@ extension EventLoop {
             ignorePending.remove(id)
             trackedFrames[id] = nil
             tabCarriers.remove(id)
+            removalDistrusted.remove(id)
             onEvent(.windowDestroyed(id, wasMinimized: false))
         }
         elements[pid] = nil

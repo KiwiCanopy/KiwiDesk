@@ -113,10 +113,11 @@ extension KiwiCore {
     }
 
     /// One-shot re-track for windows the transient filters
-    /// dropped mid-launch (#675); the stored
+    /// dropped mid-launch (#675) and for apps whose sweep
+    /// removal was distrusted (#1157); the stored
     /// `transientRetrackDelay` carries the delay and its
     /// argument beside the value. Drains every pid queued since
-    /// the fire was armed (`markTransientDrop` arms only from
+    /// the fire was armed (`queueRetrack` arms only from
     /// idle, so a drip of drops cannot push the deadline back).
     func scheduleTransientRetrack() {
         deferred.schedule(

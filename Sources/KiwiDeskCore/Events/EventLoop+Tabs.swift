@@ -82,9 +82,29 @@ extension EventLoop {
                 displayBounds: displayBounds
             )
         }
+        // A window back in the AX list ends its distrust episode
+        // (#1157), so a later absence is refused — and logged —
+        // afresh.
+        removalDistrusted.subtract(live)
         // Genuine closes: emit the destroy the eager path deferred.
+        // A non-minimized candidate is checked against ONE
+        // WindowServer census first: a window the compositor still
+        // shows was not closed — the AX list under-reported it
+        // (#1157). The hidden drop never consults the census (#913).
+        var onScreen: Set<WindowID>?
         for id in vanishedIDs.sorted(by: { $0.raw < $1.raw })
         where !consumed.contains(id) {
+            if !hidden, !minimized.contains(id) {
+                let census =
+                    onScreen
+                    ?? onScreenNormalWindowIDs()[pid, default: []]
+                onScreen = census
+                if census.contains(id) {
+                    refuseRemoval(id, pid: pid, app: app)
+                    continue
+                }
+            }
+            removalDistrusted.remove(id)
             elements[pid]?[id] = nil
             detectedFloating[id] = nil
             detectedFullscreen[id] = nil
@@ -172,6 +192,7 @@ extension EventLoop {
     ) {
         elements[pid]?[from] = nil
         elements[pid, default: [:]][to] = element
+        removalDistrusted.remove(from)
         detectedFloating[to] = detectedFloating[from]
         detectedFloating[from] = nil
         detectedFullscreen[to] = detectedFullscreen[from]

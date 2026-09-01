@@ -324,5 +324,6 @@ extension EventLoop {
         detectedFullscreen[id] = nil
         trackedFrames[id] = nil
         tabCarriers.remove(id)
+        removalDistrusted.remove(id)
     }
 }

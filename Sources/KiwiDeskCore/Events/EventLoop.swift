@@ -42,10 +42,9 @@ public final class EventLoop {
         _ in
     }
 
-    /// Fired when a transient filter drops a window mid-launch
-    /// (#675). The pid is already queued in `pendingRetrack`;
-    /// the core schedules the one-shot re-track that drains it
-    /// (`scheduleTransientRetrack`).
+    /// Fired when a pid joins an idle `pendingRetrack` (#675
+    /// transient drop, #1157 distrust follow-up); the core
+    /// schedules the one-shot (`scheduleTransientRetrack`).
     var onTransientDrop: @MainActor () -> Void = {}
 
     /// User float rules from the Lua config (`float_rules`).
@@ -147,6 +146,9 @@ public final class EventLoop {
     /// the "was a carrier" fact for a window that vanishes after a
     /// switch even though its element is gone (#308).
     var tabCarriers: Set<WindowID> = []
+    /// Sweep removals currently refused — absent from the AX
+    /// list, still on-census; one entry per episode (#1157).
+    var removalDistrusted: Set<WindowID> = []
     /// When the user last switched native Spaces. Tab coalescing is
     /// suppressed for a short window afterward: a space switch shows
     /// the departed space's windows as vanished and the arrived
@@ -182,8 +184,8 @@ public final class EventLoop {
     /// the retry so a permanent invisible helper (#309) cannot
     /// schedule forever (#675).
     var transientRetried: [pid_t: Set<WindowID>] = [:]
-    /// Pids owed a one-shot re-track for a transient drop
-    /// (#675); drained by the scheduled task.
+    /// Pids owed a one-shot follow-up reconcile (#675 drop,
+    /// #1157 distrust); drained by the scheduled task.
     var pendingRetrack: Set<pid_t> = []
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?

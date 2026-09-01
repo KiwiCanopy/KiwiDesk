@@ -219,6 +219,31 @@ editing AX code:
   observer guard. The `track` refusal is pinned in
   `HiddenAppTrackNeedleTests` (`SourceScan`), because no behavior
   test can reach it without live AX.
+- **A sweep removal distrusts one missing AX read while the
+  WindowServer still shows the window (#1157).** Under fast
+  focus churn a lazy-AX app transiently UNDER-reports its
+  window list — the #913 defect's mirror image — and the sweep
+  took that absence as a close: a never-closed window lost its
+  slot, close-return raise and all, until the ~20 s adoption
+  heal re-tracked it (log-proven, 2026-08-31). So a non-hidden,
+  non-minimized close candidate is checked against ONE
+  on-screen census before its destroy is emitted, and a listed
+  window is refused. The asymmetry is the rule: **the census
+  may REFUSE a removal, never cause one** — a listed window is
+  composited on the current Desktop, so it exists, while an
+  unlisted one may merely be on another Desktop, which is
+  exactly why #913 bars the census from the hide drop (that
+  path stays census-free, as does `detach`, whose removals are
+  a total answer about the app). One continuous-absence episode
+  (`removalDistrusted`) logs once and queues one follow-up
+  reconcile on the transient-retrack one-shot, so a TRUE close
+  still compositing at sweep time converges in ~750 ms instead
+  of polling — a permanently mismatched app costs one follow-up
+  total. Residue, accepted: the census is layer-0 only, so a
+  raised-layer window keeps the pre-gate behavior, and an
+  under-reported window the census also omits is still lost to
+  the heal. `RemovalDistrustTests` pins the refusal, both
+  exempt arms, the episode ledger and the convergence.
   What `HiddenAppWindowTests` cannot reach is the pair of
   workspace notifications that fire that arm at all: it drives
   the arm directly, with `registersWorkspaceObservers` off so no
