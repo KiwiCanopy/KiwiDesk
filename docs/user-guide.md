@@ -2834,8 +2834,9 @@ live — no action needed to see it.
 
 When a conflict is introduced (by recording a clashing shortcut,
 adopting a hand-written config, or saving from the raw Lua
-editor), a dismissible banner appears naming every current
-conflict. With exactly one:
+editor), a dismissible banner appears naming every conflict that
+costs you a working shortcut right now (collisions with a
+switched-off macOS chord stay on their rows). With exactly one:
 
 ```
 Shortcut for "Close" is conflicting with the macOS

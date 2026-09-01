@@ -21,10 +21,10 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case screenshot
     case screenshotSelection
     case screenshotTools
-    // ⌥⌘ family (#1075). Zoom's three ship OFF behind an
-    // Accessibility setting, but a gated shortcut still wins when
-    // on, and `RegisterEventHotKey` fails silently
-    // (`com.apple.symbolichotkeys`, macOS 26.6).
+    // ⌥⌘ family (#1075). The Zoom trio is Accessibility-gated —
+    // enablement lives in the GUI's `SystemShortcutEnablement`
+    // (#1105) — and a live chord makes `RegisterEventHotKey`
+    // fail silently.
     case zoomToggle
     case zoomIn
     case zoomOut
@@ -36,10 +36,10 @@ public enum SystemShortcut: Sendable, CaseIterable {
     // fixture rather than trusting its green; a chord nothing
     // seeds is invisible to every guard.
     case inputSourceNext
-    // ⌃⌥⌘ trio (#1094 review): all three ship DISABLED behind
-    // Accessibility — the same shape that hid the Zoom trio from
-    // a reputation-based list. `⌃⌥⌘8` is a SEEDED row, so this
-    // makes an existing collision visible.
+    // ⌃⌥⌘ trio (#1094 review): Accessibility-gated like the
+    // Zoom trio — the shape a reputation-based list misses.
+    // `⌃⌥⌘8` is a SEEDED row, so this makes an existing
+    // collision visible.
     case invertColors
     case increaseContrast
     case decreaseContrast

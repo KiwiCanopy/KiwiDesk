@@ -3,19 +3,25 @@ import KiwiDeskCore
 
 /// Keybinding conflict warning banner formatting for SettingsModel.
 extension SettingsModel {
-    /// The ONE aggregate conflict read (#1094/#1105): every
-    /// surface that counts or lists conflicts — card shout,
-    /// banner, recorder note — takes this, never
-    /// `KeybindingConflicts.actionable` directly, so no reader
-    /// can forget the live enabled-state the verdict needs.
-    /// `ConflictAccessorRoutingTests` pins the routing.
+    /// The ONE aggregate conflict read (#1094/#1105). An
+    /// aggregate surface takes this — never a `KeybindingConflicts`
+    /// aggregate directly, which cannot know the live enabled
+    /// state; `ConflictAccessorRoutingTests` holds the family to
+    /// its allow-list.
     func actionableConflicts() -> [Conflict] {
         KeybindingConflicts.actionable(
             in: config.layers,
-            disabledSystemShortcuts:
-                SystemShortcutEnablement.disabled(
-                    reading: readSymbolicHotkey
-                )
+            disabledSystemShortcuts: disabledSystemShortcuts()
+        )
+    }
+
+    /// The per-shortcut half of the verdict (#1105): which
+    /// register chords macOS has switched OFF right now. A row
+    /// surface narrating dormancy (#1126) is handed this —
+    /// never the reader or `SystemShortcutEnablement` itself.
+    func disabledSystemShortcuts() -> Set<SystemShortcut> {
+        SystemShortcutEnablement.disabled(
+            reading: readSymbolicHotkey
         )
     }
 

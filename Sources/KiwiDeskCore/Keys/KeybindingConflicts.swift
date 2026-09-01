@@ -67,7 +67,7 @@ public enum KeybindingConflicts {
     /// state, so the caller reads it — the GUI's one accessor is
     /// `SettingsModel.actionableConflicts()`, which threads the
     /// live `com.apple.symbolichotkeys` read; this type stays a
-    /// pure description of chords (§2.6).
+    /// pure description of chords (#96 split).
     public static func actionable(
         in layers: [KeyLayer],
         disabledSystemShortcuts: Set<SystemShortcut>

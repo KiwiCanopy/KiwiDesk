@@ -3,18 +3,15 @@ import KiwiDeskCore
 
 /// The live half of a system-shortcut conflict verdict (#1105):
 /// whether macOS currently ANSWERS a chord `SystemShortcuts.map`
-/// records. Lives at the GUI boundary on purpose — Core stays a
-/// pure description of chords (§2.6), and the machine read is
-/// injected per `SettingsModel` (`readSymbolicHotkey`), inert in
-/// tests via `makeTestModel`.
+/// records. GUI-boundary on purpose (core-boundaries.md #96;
+/// tests.md's injected-seam row) — reached only through
+/// `SettingsModel`'s accessors and `readSymbolicHotkey` seam.
 enum SystemShortcutEnablement {
     /// Reads one hotkey id's `enabled` bit from
-    /// `com.apple.symbolichotkeys`; nil = the plist has no entry
-    /// for that id, so the shipped default applies. An ordinary
-    /// per-user preference read — no private API, no permission.
-    /// Read live per verdict, so a toggle made while Settings is
-    /// open is honored on the next recompute — one recompute
-    /// stale at worst, accepted per #1105.
+    /// `com.apple.symbolichotkeys`; nil = no plist entry, the
+    /// shipped default applies. A cached reader sees external
+    /// writes (measured 2026-09-01); the staleness ruling is
+    /// `docs/design-decisions.md` ▸ `⌃⌥⌘8` (#1105).
     static func liveRead(_ id: Int) -> Bool? {
         guard
             let table = CFPreferencesCopyAppValue(
