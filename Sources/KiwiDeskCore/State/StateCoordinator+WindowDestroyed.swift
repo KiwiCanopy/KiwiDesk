@@ -18,6 +18,7 @@ extension StateCoordinator {
             rememberFloatOverride(of: window)
             rememberStickyIntent(of: window)
         }
+        stickyReachOverrides[id] = nil
         let home = workspaces.space(of: id)
         let heldFocus =
             home.map { workspaces[$0]?.focused == id }

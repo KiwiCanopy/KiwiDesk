@@ -1176,6 +1176,41 @@ design (v2 non-goal; see [Accepted limitations](accepted-limitations.md)). A **n
 adding a row above must also state which pile class it produces,
 so the sticky exemption is reconciled with it.
 
+**Sticky reach spans macOS Desktops, under ONE toggle (#1145).**
+Sticky promises "always with me", and before #1145 that promise
+stopped at the edge of KiwiDesk's own Spaces: a Desktop switch
+left the ∞ window behind. Where the window-management bridge
+exists, both scopes now deepen — global → every Desktop, display
+→ its screen's Desktops — via real WindowServer multi-membership
+(#889 item 5's proven primitive). The rulings:
+
+- **One toggle covers both scopes** (`sticky.desktop_reach`,
+  default ON). A per-scope pair was deferred on the evidence
+  rule: nobody has asked for "∞ across Desktops but 📌 not", and
+  the config reshape stays cheap if someone does. Default ON
+  because reach is what the sticky glyphs already promise — a
+  window marked "always with me" that a Desktop switch strands
+  is the surprise, not the reach.
+- **A single window can be pinned against the toggle**
+  (`override_sticky_reach` on/off/auto — the `make_auto`
+  tri-state shape). Session-scoped: a pin is a judgement about
+  this window now, and old window ids get recycled.
+- **The row hides without the bridge** — *an absent capability
+  is not a greyed one* (its own entry) applies verbatim: no
+  setting or mode reaches the capability, so a grey would
+  invite an action with no path. Owner-confirmed for this row,
+  2026-09-01, on #1145.
+- **KiwiDesk owns the bookkeeping, and quitting takes the
+  memberships back.** The membership query never reports a
+  second Desktop (#889 item 5), so what was asserted lives in
+  an owned ledger, re-asserted idempotently at each Desktop
+  settle — and `stop()` retires it all, because a multi-Desktop
+  window with no KiwiDesk left to undo it would be a promise
+  nobody is keeping. The one deliberate residue: a window's OWN
+  Desktop membership is never touched — removals exclude it, or
+  an unsticky would take the window off the Desktop it lives
+  on.
+
 The **focus border** (#278) is a cross-layout overlay that
 deliberately opts OUT of the pile-dedup model above: with
 `border.unfocused_enabled`, every tiled window gets its own ring,

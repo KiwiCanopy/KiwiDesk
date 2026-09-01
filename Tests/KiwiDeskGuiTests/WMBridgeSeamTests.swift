@@ -73,6 +73,9 @@ struct WMBridgeSeamTests {
             "KiwiDeskCore/App/KiwiCore+Accessors.swift": 1,
             "KiwiDeskCore/Commands/KiwiCore+DesktopMove.swift": 1,
             "KiwiDeskCore/Commands/KiwiCore+DesktopSwitch.swift": 2,
+            // #1145 sticky reach: the membership pair plus the
+            // primary-space query its removals exclude by.
+            "KiwiDeskCore/App/KiwiCore+StickyReach.swift": 3,
         ],
     ]
 

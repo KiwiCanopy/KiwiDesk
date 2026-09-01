@@ -60,5 +60,13 @@ extension KiwiCore {
         dragCrossing.rekey(old: old, new: new)
         cancelDrag(old)
         revertLiveCrossing(new)
+        // #1145: memberships stay with the OLD NSWindow (now a
+        // background tab), so the refresh both retires the old
+        // id — gone from state, gone from wanted — and asserts
+        // the new one. Scope survives the fold's re-key, so one
+        // gate reads both.
+        if state.windows[new]?.isSticky == true {
+            refreshStickyReach()
+        }
     }
 }

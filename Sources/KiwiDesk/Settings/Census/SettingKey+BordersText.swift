@@ -29,6 +29,11 @@ extension BordersKey {
             return .text("border.fit_gaps.action")
         case .stickyMark:
             return .text("sticky.mark", help: "sticky.mark.help")
+        case .stickyDesktopReach:
+            return .text(
+                "sticky.desktop_reach",
+                help: "sticky.desktop_reach.help"
+            )
         case .stickyColor:
             return .text("sticky.color")
         case .dragGhostEnabled, .dragDropZoneEnabled:

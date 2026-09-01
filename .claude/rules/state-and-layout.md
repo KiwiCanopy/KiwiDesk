@@ -164,7 +164,21 @@ editing here:
   dismissal grace, the click-provenance escape, expiry, the
   re-arm reset); the trade the grace accepts is argued in
   `docs/design-decisions.md`.
-- A **native-fullscreen window keeps its `space.windows` slot
+- **Sticky Desktop reach is owned state with ONE machine
+  (#1145).** `KiwiCore+StickyReach.swift` derives, reconciles
+  and dispatches every bridge membership off the `StickyReach`
+  ledger; the membership query cannot see a second Desktop
+  (#889 item 5), so nothing verifies by re-query — the ledger
+  is believed and re-asserted idempotently at the Desktop
+  settle. Two obligations on a change here: a removal NEVER
+  names the window's own home space (the dispatch-side
+  `windowServerHome` exclusion — a removal there takes the
+  window off the Desktop it lives on), and a new site that
+  needs a refresh joins `StickyReachWiringTests`' register in
+  the same change, because the bridge is deaf under
+  `swift test`, so a deleted hook leaves every behavior suite
+  green (`StickyReachLedgerTests` and its sibling suites own
+  the pure halves).
   but leaves both tiled-member derivations** (#670) — a layout,
   navigation or z-order consumer of the tiled members routes
   through `localTiledMembers` / `effectiveTiledMembers` and

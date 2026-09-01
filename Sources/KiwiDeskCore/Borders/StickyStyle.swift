@@ -27,6 +27,12 @@ public struct StickyStyle: Sendable, Equatable {
     /// Hex color string for sticky badge tint (#429).
     public var color = ""
 
+    /// Whether sticky windows reach across macOS Desktops
+    /// (#1145): ∞ present on every Desktop, 📌 on its screen's.
+    /// Inert without the bridge (`canDriveDesktops`); the
+    /// `override_sticky_reach` per-window override outranks it.
+    public var desktopReach = true
+
     public init() {}
 }
 
@@ -34,6 +40,7 @@ extension StickyStyle: Codable {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case mark
         case color
+        case desktopReach = "desktop_reach"
     }
 
     public init(from decoder: Decoder) throws {
@@ -51,5 +58,10 @@ extension StickyStyle: Codable {
                 String.self,
                 forKey: .color
             ) ?? defaults.color
+        desktopReach =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .desktopReach
+            ) ?? defaults.desktopReach
     }
 }

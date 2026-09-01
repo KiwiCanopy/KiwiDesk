@@ -1128,6 +1128,8 @@
   "sticky.caption": "As janelas Sticky permanecem visíveis em todos os espaços (“%1$@”, em %2$@).",
   "sticky.color": "Sticky",
   "sticky.color.a11y": "Cor da marca de janela Sticky",
+  "sticky.desktop_reach": "Permanecer visíveis em todas as Mesas",
+  "sticky.desktop_reach.help": "Estende a promessa do Sticky às Mesas do macOS: uma janela Sticky em todos os lugares aparece em todas as Mesas, e uma Sticky na sua tela aparece em todas as Mesas dessa tela. Desative isto e uma janela Sticky permanece na Mesa em que está, acompanhando apenas os espaços do próprio KiwiDesk.",
   "sticky.display.pill": "Movível apenas para outros monitores",
   "sticky.everywhere.pill": "Janelas Sticky não podem ser movidas para outros espaços",
   "sticky.home.pill": "Movível apenas para seu espaço de origem %1$@",
