@@ -74,8 +74,6 @@ extension SettingsView {
                 // nameless one is worse than the presses it saves.
                 if let destination = model.destination {
                     detail(destination)
-                        .focusable()
-                        .focused($contentFocused)
                         // Every section's root is a scroll view,
                         // which VoiceOver lands on as a bare
                         // "scroll area" (owner, #812 session 2) —
@@ -88,6 +86,28 @@ extension SettingsView {
                             maxWidth: .infinity,
                             alignment: .center
                         )
+                        // AFTER the frames, never before: applied
+                        // to the pre-layout content the ring is
+                        // drawn round a box the centring then
+                        // clips, losing its leading edge (owner
+                        // eye-confirm, 2026-09-01). The shape is
+                        // stated too — a full-bleed rectangle
+                        // reads as damage rather than as focus,
+                        // and shrinking what is focusable is the
+                        // sanctioned answer where hiding the ring
+                        // is not (docs/design-decisions.md ▸ a
+                        // focus ring is the platform's).
+                        .padding(SettingsMetrics.focusRingInset)
+                        .contentShape(
+                            .focusEffect,
+                            RoundedRectangle(
+                                cornerRadius:
+                                    SettingsTheme.cardRadius,
+                                style: .continuous
+                            )
+                        )
+                        .focusable()
+                        .focused($contentFocused)
                         // Animated surface reflow on mode switch (#760).
                         .animation(
                             reduceMotion

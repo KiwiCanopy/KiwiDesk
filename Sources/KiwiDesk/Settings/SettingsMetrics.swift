@@ -9,6 +9,12 @@ enum SettingsMetrics {
     /// Gutter around destination pane scrolling content.
     static let paneInset: CGFloat = 16
 
+    /// Inset between the pane's content and its arrival focus
+    /// ring (#996). The ring is the platform's and is drawn at
+    /// the pane's bounds, so the pane holds it off its own edges
+    /// rather than the ring being restyled.
+    static let focusRingInset: CGFloat = 3
+
     /// `OverrideChrome` leading padding and checkbox spacing.
     static let overrideRowInset: CGFloat = 8
 
