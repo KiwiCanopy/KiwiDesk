@@ -214,6 +214,12 @@ With it on, a slider takes focus like any other control and the
 arrow keys step it: ← / ↓ down one step, → / ↑ up one — the same
 step the readout beside it counts in.
 
+A segmented control — the **Simple | Power User** switch, and
+every pick-one strip in the panes — costs one Tab stop for the
+whole control rather than one per segment, and ← / → move the
+choice. ↑ / ↓ are left alone, so they still carry you out of the
+row.
+
 Where a row carries extra moves behind a right-click (renaming a
 palette, exporting it, deleting it, or reordering spaces), press
 **⌃.** (**Control-Period**) on the focused row or item to open its

@@ -12,6 +12,13 @@ import Testing
 /// this chain is told what it broke instead of shipping it.
 @Suite("Arrival focus ring (#996)")
 struct ArrivalRingTests {
+    /// The pane's OWN chain, scoped to `contentColumn`.
+    ///
+    /// Read file-wide, both order tests answer against whichever
+    /// `.focusable()` comes first in the file: with an earlier
+    /// one present, `paddingFollowsFocusable` goes FAIL-OPEN on
+    /// the shipped bug and `focusableFollowsLayout` goes
+    /// false-red on a correct chain (`guard-prover`, 2026-09-01).
     private func pane() throws -> String {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
@@ -21,7 +28,31 @@ struct ArrivalRingTests {
             try String(contentsOf: file, encoding: .utf8)
         )
         #expect(source.count > 200, "the pane file read empty")
-        return source.split(whereSeparator: \.isWhitespace).joined()
+        let scope = try #require(
+            SourceScan.declarationBody(
+                after: "private var contentColumn: some View",
+                in: source
+            ),
+            "`contentColumn` is gone from the pane file"
+        )
+        let squashed =
+            scope
+            .split(whereSeparator: \.isWhitespace).joined()
+        // Scoping answers an earlier `.focusable()` in the FILE;
+        // a second one inside this scope reproduces both failure
+        // modes, so the scope holds exactly one.
+        #expect(
+            squashed.components(separatedBy: ".focusable()").count
+                == 2,
+            Comment(
+                rawValue:
+                    "`contentColumn` declares more than one "
+                    + "`.focusable()`, so the order tests below "
+                    + "answer against whichever comes first "
+                    + "rather than against the pane's (#996)"
+            )
+        )
+        return squashed
     }
 
     /// The ring is drawn at the FOCUSED view's bounds, so padding
@@ -84,57 +115,78 @@ struct ArrivalRingTests {
         )
     }
 
-    /// Who refuses click-born focus, held as a closed set.
+    /// Every control that OPTS INTO focus owes the refusal.
     ///
-    /// A control that takes `.focusable()` and skips the refusal
-    /// rings on every click — the defect #991 exists to remove,
-    /// re-entering through a control rather than through a
-    /// navigation. An entry here is a decision; a missing one is
-    /// an omission nothing else would report.
+    /// Derived from the population, not from a list of the
+    /// compliant: a list agrees only with itself, so adding a
+    /// CORRECT control reds it (a speed bump) while adding an
+    /// INCORRECT one — `.focusable()` with no refusal — leaves it
+    /// green, which is the harm. `guard-prover` (2026-09-01)
+    /// found one already in the tree that way.
+    ///
+    /// An exemption names what makes it right, the idiom
+    /// `ReduceMotionGateTests` and `ActivationPolicySeamTests`
+    /// already use here.
     @Test("every focusable custom control refuses a click")
     func clickRefusalCensus() throws {
+        let allowed: [String: String] = [
+            "SpaceAssignmentChip.swift":
+                "UNRULED, not exempt: a drag-source chip whose "
+                + "click-born ring nobody has judged yet. It "
+                + "predates the refusal and is recorded here so "
+                + "the question is visible rather than absent — "
+                + "rule it, then either add the refusal or "
+                + "replace this with the reason it does not."
+        ]
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
         let files = try SourceScan.swiftSources(under: root)
         #expect(files.count > 50)
-        var consults: [String] = []
         var raw: [String] = []
         for file in files {
+            let name = file.lastPathComponent
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
             .split(whereSeparator: \.isWhitespace).joined()
-            if source.contains("ClickBornFocus.isClickBorn") {
-                consults.append(file.lastPathComponent)
-            }
             if source.contains("NSEvent.pressedMouseButtons") {
-                raw.append(file.lastPathComponent)
+                raw.append(name)
             }
-        }
-        #expect(
-            consults.sorted() == [
-                "SettingsSlider.swift", "SettingsView+Detail.swift",
-            ],
-            Comment(
-                rawValue:
-                    "the click-born refusal is consulted by "
-                    + "\(consults.sorted()) — a `.focusable()` "
-                    + "control that skips it draws a ring on "
-                    + "every click (#991, #996)"
+            // `.focusable(false)` is an opt-OUT: it removes a
+            // stop rather than taking one, so it owes nothing.
+            let optsIn =
+                source.contains(".focusable(")
+                && source.replacingOccurrences(
+                    of: ".focusable(false)",
+                    with: ""
+                ).contains(".focusable(")
+            guard optsIn, allowed[name] == nil else { continue }
+            #expect(
+                source.contains("ClickBornFocus.isClickBorn"),
+                Comment(
+                    rawValue:
+                        "\(name) takes `.focusable(` and never "
+                        + "refuses click-born focus, so it draws "
+                        + "a keyboard ring on every click — the "
+                        + "defect #991 removes, re-entering "
+                        + "through a control. Consult "
+                        + "`ClickBornFocus.isClickBorn`, or add "
+                        + "an `allowed` entry saying what makes "
+                        + "this control different."
+                )
             )
-        )
-        // And the reading itself has ONE home: a hand-rolled copy
-        // beside a view is how the predicate drifts, and it took
-        // two spellings to get right.
+        }
+        // And the reading itself has ONE home per question: a
+        // hand-rolled copy beside a view is how it drifts, and it
+        // took two spellings to get right — the button state
+        // alone misses a click completed on mouse-up.
         #expect(
-            raw == ["ClickBornFocus.swift"],
+            raw.sorted() == ["ClickBornFocus.swift"],
             Comment(
                 rawValue:
                     "`NSEvent.pressedMouseButtons` is read in "
-                    + "\(raw) — route it through "
-                    + "`ClickBornFocus.isClickBorn`, which also "
-                    + "reads the current event, a case the button "
-                    + "state alone misses (#996)"
+                    + "\(raw.sorted()) — route it through "
+                    + "`ClickBornFocus.isClickBorn` (#996)"
             )
         )
     }

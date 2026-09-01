@@ -9,6 +9,7 @@ struct SegmentedPicker<Value: Hashable>: View {
     private let help: String?
     @Namespace private var pillSpace
     @State private var hoveredIndex: Int?
+    @FocusState private var focused: Bool
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
@@ -75,6 +76,20 @@ struct SegmentedPicker<Value: Hashable>: View {
                 lineWidth: 0.5
             )
         )
+        // ONE Tab stop for the whole control, the way a native
+        // segmented control behaves — the segments opt out below
+        // (#997).
+        .focusable(isEnabled)
+        .focused($focused)
+        .onChange(of: focused) { _, now in
+            // This stop would otherwise ring on every click
+            // (`ClickBornFocus`).
+            guard now, ClickBornFocus.isClickBorn else { return }
+            focused = false
+        }
+        // ← / → only: ↑ / ↓ must still leave the row.
+        .onKeyPress(.leftArrow) { move(-1) }
+        .onKeyPress(.rightArrow) { move(1) }
         .accessibilityElement(children: .contain)
         // Group value announcement for accessibility (#812, 2026-08-24).
         .accessibilityValue(
@@ -83,6 +98,26 @@ struct SegmentedPicker<Value: Hashable>: View {
         .onChange(of: isEnabled) { _, now in
             if !now { hoveredIndex = nil }
         }
+    }
+
+    /// Moves the SELECTION one segment, as a native segmented
+    /// control does: a highlight that moved without selecting
+    /// would announce a choice the binding never took.
+    ///
+    /// No `isEnabled` guard — the track is `.focusable(isEnabled)`,
+    /// so a disabled control receives no key press to answer.
+    private func move(_ direction: Int) -> KeyPress.Result {
+        guard
+            let next = SegmentedPickerKeys.step(
+                from: selectedIndex,
+                by: direction,
+                count: options.count
+            )
+        else { return .ignored }
+        // Clamped, so an end segment swallows its own arrow
+        // rather than letting it walk out of the control.
+        if next != selectedIndex { select(options[next].value) }
+        return .handled
     }
 
     private func segment(
@@ -100,6 +135,9 @@ struct SegmentedPicker<Value: Hashable>: View {
             )
         }
         .buttonStyle(.plain)
+        // Only the focus stop goes, to the track; click,
+        // VoiceOver and `isEnabled` stay (#997).
+        .focusable(false)
         .onHover { inside in
             updateHover(
                 inside: inside,
