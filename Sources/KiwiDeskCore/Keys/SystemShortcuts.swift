@@ -86,26 +86,3 @@ public enum SystemShortcuts {
         return map
     }
 }
-
-extension SystemShortcut {
-    /// Whether macOS ships this chord's shortcut switched OFF
-    /// (`com.apple.symbolichotkeys`, macOS 26.6). A `switch`, not
-    /// a `Set`: a new case must not ship without an answer here —
-    /// a hand-listed set would read the next dormant chord as
-    /// ENABLED by omission. Reads the SHIPPED default, never the
-    /// live setting; #1105 replaces it with a live read.
-    public var shipsDisabled: Bool {
-        switch self {
-        case .zoomToggle, .zoomIn, .zoomOut,
-            .invertColors, .increaseContrast, .decreaseContrast:
-            return true
-        case .spotlight, .appSwitcher, .quitApp, .closeWindow,
-            .minimize, .hideApp, .forceQuit,
-            .missionControlSpaceLeft, .missionControlSpaceRight,
-            .missionControl, .appWindows, .screenshot,
-            .screenshotSelection, .screenshotTools, .dockHiding,
-            .finderSearch, .inputSourceNext:
-            return false
-        }
-    }
-}

@@ -3,15 +3,27 @@ import KiwiDeskCore
 
 /// Keybinding conflict warning banner formatting for SettingsModel.
 extension SettingsModel {
+    /// The ONE aggregate conflict read (#1094/#1105): every
+    /// surface that counts or lists conflicts — card shout,
+    /// banner, recorder note — takes this, never
+    /// `KeybindingConflicts.actionable` directly, so no reader
+    /// can forget the live enabled-state the verdict needs.
+    /// `ConflictAccessorRoutingTests` pins the routing.
+    func actionableConflicts() -> [Conflict] {
+        KeybindingConflicts.actionable(
+            in: config.layers,
+            disabledSystemShortcuts:
+                SystemShortcutEnablement.disabled(
+                    reading: readSymbolicHotkey
+                )
+        )
+    }
+
     /// Live derived banner text reflecting active conflicts
     /// (`KeybindingConflicts`).
     var liveKeybindingBanner: String? {
         guard keybindingWarning != nil else { return nil }
-        return formatConflicts(
-            KeybindingConflicts.actionable(
-                in: config.layers
-            )
-        )
+        return formatConflicts(actionableConflicts())
     }
 
     /// Evaluates conflict state after recording a combo. An edit
@@ -22,9 +34,7 @@ extension SettingsModel {
         _ binding: KeyBinding,
         in bindings: [KeyBinding]
     ) {
-        let list = KeybindingConflicts.actionable(
-            in: config.layers
-        )
+        let list = actionableConflicts()
         if KeybindingConflicts.conflict(
             for: binding,
             in: bindings
@@ -39,9 +49,7 @@ extension SettingsModel {
 
     /// Updates conflict banner for whole configuration on batch operations.
     func warnIfAnyConflict() {
-        let list = KeybindingConflicts.actionable(
-            in: config.layers
-        )
+        let list = actionableConflicts()
         keybindingWarning =
             list.isEmpty ? nil : formatConflicts(list)
     }

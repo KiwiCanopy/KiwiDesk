@@ -255,11 +255,12 @@ struct HomeCardContentTests {
         #expect(line.contains("\(expected)"))
     }
 
-    /// A macOS chord that ships DISABLED must not put a standing
-    /// badge on the card (#1094). `⌃⌥⌘8` is seeded — tier 3's
-    /// move-to-space-8 — and is also Invert Colors, so counting
-    /// it would shout on every install with 8+ Desktops about a
-    /// chord that works for everyone who has not enabled it.
+    /// A macOS chord the machine has DISABLED must not put a
+    /// standing badge on the card (#1094, live-read #1105).
+    /// `⌃⌥⌘8` is seeded — tier 3's move-to-space-8 — and is also
+    /// Invert Colors, which ships OFF, so counting it would
+    /// shout on every install with 8+ Desktops about a chord
+    /// that works for everyone who has not enabled it.
     ///
     /// The ROW keeps its warning: this asserts the shout is
     /// silent AND that `KeybindingConflicts` still reports the
@@ -286,12 +287,44 @@ struct HomeCardContentTests {
                 in: layer.bindings
             ) != nil
         )
-        // …and the card stays quiet about it.
+        // …and the card stays quiet about it —
+        // `makeTestModel`'s reader answers nil, so the shipped
+        // default (Invert Colors OFF) rules the verdict.
         #expect(
             HomeCardContent.conflictShout(
                 for: .shortcuts,
                 model: model
             ) == nil
+        )
+    }
+
+    /// The other population, the one the static set was wrong
+    /// for (#1105): a user who HAS enabled Invert Colors owns a
+    /// live `⌃⌥⌘8`, so the seeded row is genuinely dead and the
+    /// card says so.
+    @Test("an enabled macOS chord shouts")
+    func enabledSystemChordShouts() {
+        pinEnglish()
+        let model = model()
+        var layer = KeyLayer.defaultLayer
+        layer.bindings = [
+            KeyBinding(
+                combo: "control+option+command+8",
+                lua: "KiwiDesk.move_to_space_and_follow(\"8\")",
+                kind: .navigation,
+                label: "Move to Space 8 & follow"
+            )
+        ]
+        model.config.layers = [layer]
+        // The machine answers: Invert Colors (id 21) is ON.
+        model.readSymbolicHotkey = { id in
+            id == 21 ? true : nil
+        }
+        #expect(
+            HomeCardContent.conflictShout(
+                for: .shortcuts,
+                model: model
+            ) == L("home.card.conflict_one", "1 conflict")
         )
     }
 

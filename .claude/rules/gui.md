@@ -605,18 +605,26 @@ must keep:
   only the Shortcuts conflict may shout — glyph + text, never
 
 - **A per-row surface explains; an aggregate surface counts only
-  what the user should act on (#1094).** A ⚠️ on one row and a
-  ring on one key show everything `SystemShortcuts.map` knows,
-  dormant chords included — that is the moment a user asked. A
-  count or a banner reads
-  `KeybindingConflicts.actionable`, which drops a chord macOS
-  ships disabled: `⌃⌥⌘8` is a SEEDED default and also Invert
-  Colors, so counting it alarms every install with 8+ Desktops
-  about a chord that works, and a count that can never reach
-  zero never clears. There are three aggregate readers — card
-  shout, banner, recorder note — and the first fix wired one, so
-  route a new one through that accessor rather than re-deriving
-  the filter.
+  what the user should act on (#1094, live-read #1105).** A ⚠️
+  on one row and a ring on one key show everything
+  `SystemShortcuts.map` knows, dormant chords included — that is
+  the moment a user asked. A count or a banner reads
+  `SettingsModel.actionableConflicts()`, which drops a chord
+  macOS has switched OFF right now: `⌃⌥⌘8` is a SEEDED default
+  and also Invert Colors, so counting it while dormant alarms
+  every install with 8+ Desktops about a chord that works, and a
+  count that can never reach zero never clears — while a user
+  who HAS enabled Invert Colors owns a live chord and gets the
+  count. The enabled bit is read live from
+  `com.apple.symbolichotkeys` at the GUI boundary
+  (`SystemShortcutEnablement`; Core stays a pure description of
+  chords, and an absent plist entry falls back to the shipped
+  default), injected per model so no suite reads the host.
+  There are three aggregate readers — card shout, banner,
+  recorder note — and the first fix wired one, so route a new
+  one through that accessor rather than re-deriving the filter;
+  `ConflictAccessorRoutingTests` pins the routing and the seam's
+  live-default polarity.
   hue alone. A profile card's picture rides the desktop plate
   (#786), drawn from the draft in the user's palette through
   the `schematicPalette` environment — never an init

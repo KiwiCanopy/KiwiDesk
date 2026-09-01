@@ -32,8 +32,14 @@ func makeTestModel(
             scratch.removePersistentDomain(forName: name)
             return scratch
         }()
-    return SettingsModel(
+    let model = SettingsModel(
         core: core ?? makeTestCore(),
         preferences: domain
     )
+    // #1105: never read the host's com.apple.symbolichotkeys —
+    // nil answers mean shipped defaults, so verdicts here are
+    // machine-independent. A suite testing the live-state seam
+    // overrides `readSymbolicHotkey` per scenario.
+    model.readSymbolicHotkey = { _ in nil }
+    return model
 }

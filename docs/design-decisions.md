@@ -5526,6 +5526,17 @@ and because moving it is not available, the digits being space
 POSITIONS rather than names. What the ruling buys is the register
 entry: the chord is now in `SystemShortcuts.map`, so the editor
 can say why, where before the failure was mute on both sides.
+Since #1105 the verdict stops guessing at that population split:
+aggregate surfaces (count, banner) read the machine's own
+`com.apple.symbolichotkeys` enabled bit live, so a user who
+turns Invert Colors on sees the collision counted while everyone
+else stays unalarmed — a static "ships disabled" set was wrong
+for exactly the people the warning matters to, and silent about
+being wrong. The read is an ordinary preference read at the GUI
+boundary; a toggle made while Settings is open is honored on the
+next recompute, one recompute stale at worst — accepted, since
+the alternative is refresh machinery for a state that changes at
+most once per user, ever.
 `SizeLayerSeedTests` ▸ `knownShadows` is the one copy of that
 exemption, and it reds if the chord ever stops being reserved. The two
 rungs carrying the most traffic take no *app* collision at all —

@@ -62,18 +62,20 @@ public enum KeybindingConflicts {
         return nil
     }
 
-    /// Actionable conflicts excluding shipped-disabled system
-    /// shortcuts (`⌃⌥⌘8`, #1094; #1105 replaces the shipped-state
-    /// read with a live one). One accessor rather than a filter
-    /// per surface: there are three aggregate readers and the
-    /// first fix wired only one of them.
+    /// Actionable conflicts excluding system shortcuts macOS has
+    /// switched OFF (`⌃⌥⌘8`, #1094/#1105). The set is machine
+    /// state, so the caller reads it — the GUI's one accessor is
+    /// `SettingsModel.actionableConflicts()`, which threads the
+    /// live `com.apple.symbolichotkeys` read; this type stays a
+    /// pure description of chords (§2.6).
     public static func actionable(
-        in layers: [KeyLayer]
+        in layers: [KeyLayer],
+        disabledSystemShortcuts: Set<SystemShortcut>
     ) -> [Conflict] {
         conflicts(in: layers).filter { conflict in
             guard case .systemShortcut(let s) = conflict.target
             else { return true }
-            return !s.shipsDisabled
+            return !disabledSystemShortcuts.contains(s)
         }
     }
 }
