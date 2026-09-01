@@ -17,8 +17,12 @@ enum SettingsInputSource {
     /// key press states nothing for a screen-reader user, whose
     /// cursor then follows focus to a view the navigation just
     /// destroyed.
+    ///
+    /// `NSApp` is an implicitly-unwrapped optional and is nil in
+    /// a process with no `NSApplication` — a test host included,
+    /// where it traps rather than returning nil (crash, 2026-09-01).
     @MainActor static var movesFocus: Bool {
-        switch NSApp.currentEvent?.type {
+        switch NSApp?.currentEvent?.type {
         case .leftMouseDown, .leftMouseUp, .rightMouseDown,
             .rightMouseUp, .otherMouseDown, .otherMouseUp:
             return false
