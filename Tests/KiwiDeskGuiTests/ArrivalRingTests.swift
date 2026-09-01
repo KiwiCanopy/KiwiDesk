@@ -129,15 +129,10 @@ struct ArrivalRingTests {
     /// already use here.
     @Test("every focusable custom control refuses a click")
     func clickRefusalCensus() throws {
-        let allowed: [String: String] = [
-            "SpaceAssignmentChip.swift":
-                "UNRULED, not exempt: a drag-source chip whose "
-                + "click-born ring nobody has judged yet. It "
-                + "predates the refusal and is recorded here so "
-                + "the question is visible rather than absent — "
-                + "rule it, then either add the refusal or "
-                + "replace this with the reason it does not."
-        ]
+        // Empty, and that is the claim: every control
+        // that opts into focus refuses a click. An entry here
+        // must say what makes its control different.
+        let allowed: [String: String] = [:]
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
         let files = try SourceScan.swiftSources(under: root)
