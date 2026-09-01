@@ -35,6 +35,8 @@ extension KiwiCore {
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = profile.settings
+        // #1145: a profile may override `desktop_reach`.
+        refreshStickyReach()
         // An EXPLICIT apply reseeds the session resize layer
         // (#458): the incoming settings are the new truth, and
         // a session shadow would make the profile's ratios
@@ -169,6 +171,8 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         tiler.settings = composed.settings
+        // #1145: a composed profile may override `desktop_reach`.
+        refreshStickyReach()
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
             clearSessionRatios { $0 = SessionRatios() }

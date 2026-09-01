@@ -3427,7 +3427,7 @@ fully managed.
 On macOS that exposes the window-management bridge, the same
 promise spans **macOS Desktops** (`sticky.set_desktop_reach`,
 default on): a global sticky window is present on every Desktop,
-a display sticky one on all of its screen's Desktops. Without
+one sticky on its screen on all of that screen's Desktops. Without
 the bridge the setting is inert and sticky stays scoped to
 KiwiDesk's own Spaces within the current Desktop. A single
 window can opt out (or in) against the toggle with
@@ -3579,7 +3579,8 @@ sticky.set_color("")          -- back to Automatic
 
 **Does:** extends the sticky promise across **macOS Desktops**:
 with it on, a global sticky window is present on every Desktop
-and a display sticky window on all of its screen's Desktops —
+and a window sticky on its screen on all of that screen's
+Desktops —
 switch Desktops however you like and the window is already
 there. One toggle covers both scopes; a single window can be
 pinned the other way with `override_sticky_reach`. Off, a

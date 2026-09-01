@@ -9,81 +9,87 @@ public enum StickyReachOverride: String, CaseIterable, Sendable {
     case auto
 }
 
-/// The owned-state ledger behind sticky Desktop reach (#1145).
-///
-/// `AddWindowsToSpacesOperation` gives a sticky window real
-/// multi-Desktop presence, but no query can verify or undo it:
+/// The owned-state ledger behind sticky Desktop reach (#1145):
 /// `CopySpacesForWindows` never reports a second membership
-/// (#889 item 5), so what this app asserted is tracked HERE and
-/// reconciled by diff — os-private-apis.md's verify-by-owned-
-/// state rule. Pure bookkeeping: the caller derives what is
-/// WANTED and dispatches what `reconcile` returns
-/// (`KiwiCore+StickyReach.swift`).
+/// (#889 item 5), so asserted memberships are tracked here and
+/// reconciled by diff. `KiwiCore+StickyReach.swift` is the one
+/// machine driving it.
 struct StickyReach {
-    /// Space memberships this app has asserted, per window.
+    /// Space memberships this app holds asserted, per window.
     private(set) var asserted: [WindowID: Set<SkyLight.SpaceID>] = [:]
 
-    /// One reconcile's dispatch work.
-    struct Step: Equatable {
-        var add: [WindowID: Set<SkyLight.SpaceID>] = [:]
-        var remove: [WindowID: Set<SkyLight.SpaceID>] = [:]
-        var isEmpty: Bool { add.isEmpty && remove.isEmpty }
+    /// Reconciles the ledger against `wanted`, dispatching adds
+    /// and removals through the handed closures and folding
+    /// their outcomes back in:
+    /// - only an ACCEPTED add is recorded — a refused one
+    ///   re-issues on the next refresh;
+    /// - a refused removal stays asserted, for the same reason;
+    /// - a removal inside `homes` — the window's own
+    ///   WindowServer memberships — is never dispatched AND
+    ///   stays asserted, so a home that migrated into an
+    ///   asserted space is still reclaimable if it later
+    ///   migrates away;
+    /// - a window absent from `wanted` retires through the same
+    ///   arms, which is how unsticky, the toggle, an override
+    ///   and a re-key all take effect (#1145).
+    mutating func reconcile(
+        wanted: [WindowID: Set<SkyLight.SpaceID>],
+        homes: [WindowID: Set<SkyLight.SpaceID>],
+        add: (WindowID, Set<SkyLight.SpaceID>) -> Bool,
+        remove: (WindowID, Set<SkyLight.SpaceID>) -> Bool
+    ) {
+        for (id, want) in wanted {
+            reconcileWindow(
+                id,
+                want: want,
+                home: homes[id] ?? [],
+                add: add,
+                remove: remove
+            )
+        }
+        for (id, _) in asserted where wanted[id] == nil {
+            reconcileWindow(
+                id,
+                want: [],
+                home: homes[id] ?? [],
+                add: add,
+                remove: remove
+            )
+        }
     }
 
-    /// Diffs `wanted` against the ledger: additions for what is
-    /// wanted and not asserted, removals for what is asserted
-    /// and no longer wanted — a window absent from `wanted`
-    /// retires wholesale, which is how unsticky, a narrowed
-    /// scope, an override and the global toggle all take effect
-    /// through one door. The ledger is updated as if the step
-    /// succeeds: performed is not applied and nothing can
-    /// re-query (#889), so believing our own asks — and
-    /// re-asserting idempotently on every refresh — is the
-    /// design, not an oversight.
-    mutating func reconcile(
-        wanted: [WindowID: Set<SkyLight.SpaceID>]
-    ) -> Step {
-        var step = Step()
-        for (id, spaces) in wanted {
-            let have = asserted[id] ?? []
-            let add = spaces.subtracting(have)
-            let drop = have.subtracting(spaces)
-            if !add.isEmpty { step.add[id] = add }
-            if !drop.isEmpty { step.remove[id] = drop }
-            asserted[id] = spaces.isEmpty ? nil : spaces
+    private mutating func reconcileWindow(
+        _ id: WindowID,
+        want: Set<SkyLight.SpaceID>,
+        home: Set<SkyLight.SpaceID>,
+        add: (WindowID, Set<SkyLight.SpaceID>) -> Bool,
+        remove: (WindowID, Set<SkyLight.SpaceID>) -> Bool
+    ) {
+        var held = asserted[id] ?? []
+        let toAdd = want.subtracting(held).subtracting(home)
+        if !toAdd.isEmpty, add(id, toAdd) {
+            held.formUnion(toAdd)
         }
-        for (id, have) in asserted where wanted[id] == nil {
-            if !have.isEmpty { step.remove[id] = have }
-            asserted[id] = nil
+        let toDrop = held.subtracting(want).subtracting(home)
+        if !toDrop.isEmpty, remove(id, toDrop) {
+            held.subtract(toDrop)
         }
-        return step
+        asserted[id] = held.isEmpty ? nil : held
     }
 
     /// Drops a gone window's ledger without dispatch — the
     /// WindowServer already forgot the window with its
-    /// memberships, and a removal aimed at a dead id is work
-    /// for nothing.
+    /// memberships.
     mutating func forget(_ id: WindowID) {
         asserted[id] = nil
     }
 
-    /// Every membership the ledger still holds, for teardown:
-    /// quitting must not leave windows parked on every Desktop
-    /// with nothing left to undo it.
-    mutating func drainAll() -> [WindowID: Set<SkyLight.SpaceID>] {
-        defer { asserted = [:] }
-        return asserted
-    }
-
-    /// The Desktops a sticky window is WANTED on (#1145): its
-    /// scope's user Desktops, minus the space the window
-    /// actually lives on — `exclude` — because that membership
-    /// is the WindowServer's, not ours, and a removal that
-    /// named it would take the window off its own Desktop.
+    /// The Desktops a sticky window is WANTED on: its scope's
+    /// user Desktops. The caller excludes the window's own
+    /// memberships via `reconcile`'s `homes`.
     static func wantedSpaces(
         scope: StickyScope,
         homeDisplayUUID: String?,
-        excluding exclude: Set<SkyLight.SpaceID>,
         in spaces: [NativeSpace]
     ) -> Set<SkyLight.SpaceID> {
         let pool: [NativeSpace]
@@ -93,11 +99,21 @@ struct StickyReach {
         case .global:
             pool = spaces.filter(\.isUser)
         case .display:
-            guard let homeDisplayUUID else { return [] }
-            pool = spaces.filter {
-                $0.isUser && $0.displayUUID == homeDisplayUUID
+            // Shared-Spaces mode carries ONE display record
+            // whose identifier is not a screen UUID (the shape
+            // `desktopSnapshot()`'s authority falls back on) —
+            // one list means 📌 and ∞ coincide.
+            let uuids = Set(spaces.map(\.displayUUID))
+            if uuids.count <= 1 {
+                pool = spaces.filter(\.isUser)
+            } else {
+                guard let homeDisplayUUID else { return [] }
+                pool = spaces.filter {
+                    $0.isUser
+                        && $0.displayUUID == homeDisplayUUID
+                }
             }
         }
-        return Set(pool.map(\.id)).subtracting(exclude)
+        return Set(pool.map(\.id))
     }
 }

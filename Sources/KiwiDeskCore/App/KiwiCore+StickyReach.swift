@@ -7,9 +7,9 @@ import Foundation
 /// `canDriveDesktops`; absent bridge, the whole feature is
 /// inert and the GUI row is not shown.
 extension KiwiCore {
-    /// The effective per-window verdict: the `override_sticky_reach`
-    /// override outranks the global `sticky.desktop_reach`
-    /// toggle.
+    /// The effective per-window verdict: the
+    /// `override_sticky_reach` pin outranks the global
+    /// `sticky.desktop_reach` toggle.
     func stickyReachEnabled(for id: WindowID) -> Bool {
         state.stickyReachOverrides[id]
             ?? tiler.settings.stickyStyle.desktopReach
@@ -23,10 +23,9 @@ extension KiwiCore {
     }
 
     /// Recomputes every sticky window's wanted memberships and
-    /// dispatches the ledger diff. Idempotent by design —
-    /// re-running after a Desktop switch is how a Desktop born
-    /// since the last refresh gains its travelers, and nothing
-    /// can query membership instead (#889 item 5).
+    /// reconciles the ledger — the adds re-issue anything a
+    /// past dispatch refused, so re-running after a Desktop
+    /// switch is how a fresh Desktop gains its travelers.
     func refreshStickyReach(spaces: [NativeSpace]) {
         guard canDriveDesktops else { return }
         var wanted: [WindowID: Set<SkyLight.SpaceID>] = [:]
@@ -38,35 +37,28 @@ extension KiwiCore {
             wanted[window.id] = StickyReach.wantedSpaces(
                 scope: window.stickyScope,
                 homeDisplayUUID: homeDisplayUUID(of: window.id),
-                excluding: windowServerHome(
-                    of: window.id,
-                    in: spaces
-                ),
                 in: spaces
             )
         }
-        dispatchStickyReach(
-            stickyReach.reconcile(wanted: wanted),
-            spaces: spaces
-        )
+        reconcileStickyReach(wanted: wanted, spaces: spaces)
     }
 
     /// Teardown (#1145): take every asserted membership back —
     /// quitting must not leave windows parked on Desktops with
-    /// nothing left to undo it. Routed through the one dispatch
-    /// door so the home-space exclusion applies here too.
+    /// nothing left to undo it. The empty want retires through
+    /// the one reconcile door, home exclusion included.
     func retireStickyReach() {
-        guard canDriveDesktops else { return }
-        let held = stickyReach.drainAll()
-        guard !held.isEmpty else { return }
-        dispatchStickyReach(
-            StickyReach.Step(add: [:], remove: held),
+        guard canDriveDesktops,
+            !stickyReach.asserted.isEmpty
+        else { return }
+        reconcileStickyReach(
+            wanted: [:],
             spaces: NativeSpaces.allSpaces()
         )
     }
 
-    /// `override_sticky_reach` (#1145): pins or clears the focused
-    /// window's Desktop-reach override.
+    /// `override_sticky_reach` (#1145): pins or clears the
+    /// focused window's Desktop-reach verdict.
     func setFocusedStickyReach(
         _ args: [JSONValue]
     ) -> CommandResponse {
@@ -92,6 +84,31 @@ extension KiwiCore {
         StickyReachOverride.self
     )
 
+    /// One reconcile pass: the home set is resolved ONCE per
+    /// window — wanted and retiring alike — and handed to the
+    /// ledger, which excludes it from adds and removals both.
+    private func reconcileStickyReach(
+        wanted: [WindowID: Set<SkyLight.SpaceID>],
+        spaces: [NativeSpace]
+    ) {
+        var homes: [WindowID: Set<SkyLight.SpaceID>] = [:]
+        for id in Set(wanted.keys)
+            .union(stickyReach.asserted.keys)
+        {
+            homes[id] = windowServerHome(of: id, in: spaces)
+        }
+        stickyReach.reconcile(
+            wanted: wanted,
+            homes: homes,
+            add: { id, adds in
+                WMBridge.addWindows([id], to: Array(adds))
+            },
+            remove: { id, drops in
+                WMBridge.removeWindows([id], from: Array(drops))
+            }
+        )
+    }
+
     /// The display UUID `wantedSpaces` scopes 📌 to — the
     /// window's HOME display, the same primitive the render and
     /// stash exemption rest on (#445).
@@ -103,12 +120,8 @@ extension KiwiCore {
 
     /// The memberships the WindowServer owns for this window —
     /// its primary space by query, or the home display's
-    /// current space where the query answers nothing. Excluded
-    /// from every add AND every removal: a removal naming the
-    /// space a window lives on takes it off its own Desktop,
-    /// and the primary can migrate INTO an asserted space when
-    /// the user moves the window (so the add-side exclusion
-    /// alone is not enough).
+    /// current space where the query answers nothing. #1146
+    /// promotes this as the named cross-Desktop seam.
     private func windowServerHome(
         of id: WindowID,
         in spaces: [NativeSpace]
@@ -128,20 +141,5 @@ extension KiwiCore {
                 }
                 .map(\.id)
         )
-    }
-
-    private func dispatchStickyReach(
-        _ step: StickyReach.Step,
-        spaces: [NativeSpace]
-    ) {
-        for (id, adds) in step.add where !adds.isEmpty {
-            _ = WMBridge.addWindows([id], to: Array(adds))
-        }
-        for (id, drops) in step.remove {
-            let keep = windowServerHome(of: id, in: spaces)
-            let safe = drops.subtracting(keep)
-            guard !safe.isEmpty else { continue }
-            _ = WMBridge.removeWindows([id], from: Array(safe))
-        }
     }
 }

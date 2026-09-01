@@ -4,13 +4,12 @@ import Testing
 @testable import KiwiDesk
 
 /// The register of #1145's production wirings — the
-/// `FollowFocusSeamTests` shape: the ledger and the wanted-set
-/// derivation are unit-tested, but every hook that CALLS the
-/// refresh, and the bridge dispatch itself, reaches no unit test
-/// (the bridge is deaf under `swift test`), so deleting any one
-/// of them leaves `StickyReachTests` fully green while the
-/// feature silently stops at that seam. A new refresh site joins
-/// this map in the same change.
+/// `FollowFocusSeamTests` shape: the ledger is unit-tested, but
+/// every hook that CALLS the refresh, and the bridge dispatch
+/// itself, reaches no unit test (the bridge is deaf under
+/// `swift test`), so deleting any one of them leaves the ledger
+/// suites fully green while the feature silently stops at that
+/// seam. A new refresh site joins this map in the same change.
 @Suite("Sticky reach wiring")
 struct StickyReachWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -19,23 +18,27 @@ struct StickyReachWiringTests {
     /// runs THROUGH neighbouring statements, the neighbours are
     /// glue locating the hook (tests.md: a contiguous needle is
     /// not a value pin) — the assertion is that the refresh
-    /// sits at that seam.
+    /// sits at that seam. This file is named in
+    /// `WMBridgeSeamTests.scanExempt`: the bridge tokens below
+    /// are scan strings, never calls.
     private static let needles: [String: [String]] = [
         "Sources/KiwiDeskCore/App/KiwiCore+StickyReach.swift": [
-            // The dispatch pair, and the removal-side exclusion
-            // of the window's own home — a removal naming the
-            // space a window lives on takes it off its own
-            // Desktop. The bridge token is split so the
-            // `WMBridgeSeamTests` test-tree scan keeps watching
-            // THIS file for a real bridge call while these scan
-            // strings stay invisible to it.
-            "WMBridge" + ".addWindows([id],to:Array(adds))",
-            "letsafe=drops.subtracting(keep)",
-            "WMBridge" + ".removeWindows([id],from:Array(safe))",
+            // The dispatch closures hand the ledger the REAL
+            // bridge ops, and their Bool outcomes fold back in.
+            "add:{id,addsinWMBridge.addWindows([id],"
+                + "to:Array(adds))}",
+            "remove:{id,dropsinWMBridge.removeWindows([id],"
+                + "from:Array(drops))}",
+            // One home set per window per pass, wanted and
+            // retiring alike.
+            "homes[id]=windowServerHome(of:id,in:spaces)",
             // Both entry points gate on the capability.
             "funcrefreshStickyReach(){guardcanDriveDesktops",
             "funcrefreshStickyReach(spaces:[NativeSpace]){"
                 + "guardcanDriveDesktops",
+            // The override verb applies its write immediately.
+            "state.stickyReachOverrides[focused]=nil}"
+                + "refreshStickyReach()",
         ],
         "Sources/KiwiDeskCore/Profiles/KiwiCore+Desktops.swift": [
             // The eager refresh threads the handler's ONE
@@ -65,12 +68,45 @@ struct StickyReachWiringTests {
             "retireStickyReach()"
         ],
         "Sources/KiwiDeskCore/Commands/KiwiCore+Commands.swift": [
-            // The scope verbs apply the Desktop half too.
+            // The scope verbs apply the Desktop half too — the
+            // needle runs THROUGH the refresh, since a call
+            // deleted after the retile leaves every suite green.
             "state.setSticky(focused,scope)retile()"
+                + "refreshStickyReach()"
         ],
         "Sources/KiwiDeskCore/Commands/KiwiCore+StickyCommands.swift": [
-            // The toggle takes effect in both directions.
+            // The toggle takes effect in both directions, NOW.
             "stickyStyle.desktopReach=flag"
+                + "refreshStickyReach()"
+        ],
+        "Sources/KiwiDeskCore/App/KiwiCore+GuiConfig.swift": [
+            // The Settings Save path replaces the settings —
+            // this IS the row's apply (#1145 review blocker).
+            "tiler.settings=config.settings"
+                + "refreshStickyReach()"
+        ],
+        "Sources/KiwiDeskCore/Profiles/KiwiCore+ProfileResolution.swift": [
+            "tiler.settings=profile.settings"
+                + "refreshStickyReach()",
+            "tiler.settings=composed.settings"
+                + "refreshStickyReach()",
+        ],
+        "Sources/KiwiDeskCore/App/KiwiCore+Reset.swift": [
+            "tiler.settings=TilingSettings()"
+                + "refreshStickyReach()"
+        ],
+        "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceCommands.swift": [
+            // A cross-display re-home moves a 📌 window's
+            // wanted Desktops with it — deferred so the
+            // re-derivation reads the NEW membership.
+            "defer{ifstate.windows[window]?.isSticky==true{"
+                + "refreshStickyReach()}}"
+        ],
+        "Sources/KiwiDeskCore/Commands/KiwiCore+DesktopMove.swift": [
+            // A Desktop move migrates the window's home —
+            // possibly INTO an asserted space.
+            "ifstate.windows[focused]?.isSticky==true{"
+                + "refreshStickyReach()}"
         ],
     ]
 
@@ -97,27 +133,6 @@ struct StickyReachWiringTests {
         }
     }
 
-    /// The scope verbs' refresh sits AFTER the retile — one
-    /// contiguous needle, since the two statements' order is the
-    /// hook (the refresh reads the state the verb just wrote).
-    @Test("the sticky verbs refresh after their retile")
-    func verbsRefresh() throws {
-        let url = Self.root.appendingPathComponent(
-            "Sources/KiwiDeskCore/Commands/KiwiCore+Commands.swift"
-        )
-        let source = SourceScan.stripComments(
-            try String(contentsOf: url, encoding: .utf8)
-        )
-        .replacingOccurrences(of: " ", with: "")
-        .replacingOccurrences(of: "\n", with: "")
-        #expect(
-            source.contains(
-                "state.setSticky(focused,scope)retile()"
-                    + "refreshStickyReach()"
-            )
-        )
-    }
-
     /// The Settings row is the one surfacing branch the resolver
     /// cannot see (gui.md's `surfacingBranchesAreDrawn` class):
     /// hidden without the bridge, never greyed.
@@ -136,6 +151,29 @@ struct StickyReachWiringTests {
             source.contains(
                 "ifmodel.canDriveDesktops{ToggleRow(label:L("
                     + "\"sticky.desktop_reach\","
+            )
+        )
+    }
+
+    /// The capability-PRESENT branch of the search filter — the
+    /// mirrors are pinned false everywhere else, so without
+    /// this the true side is exercised by nothing (#1145
+    /// review). Process-global: sets the static and resets.
+    @Test("the search index carries the row when the bridge is up")
+    @MainActor
+    func searchIndexesTheRowWithTheBridge() {
+        let before = SettingsSearchIndex.canDriveDesktops
+        defer { SettingsSearchIndex.canDriveDesktops = before }
+        SettingsSearchIndex.canDriveDesktops = false
+        #expect(
+            !SettingsSearchIndex.indexes(
+                .borders(.stickyDesktopReach)
+            )
+        )
+        SettingsSearchIndex.canDriveDesktops = true
+        #expect(
+            SettingsSearchIndex.indexes(
+                .borders(.stickyDesktopReach)
             )
         )
     }

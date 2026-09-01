@@ -129,6 +129,10 @@ extension KiwiCore {
         // animates at the incoming duration, not a stale one
         // (#51 review).
         tiler.settings = config.settings
+        // #1145: the incoming settings carry `desktop_reach` —
+        // this IS the Settings toggle's apply path, both
+        // directions.
+        refreshStickyReach()
         // A GUI save is an explicit apply (§5): reseed the
         // session resize layer so an edited Layout Defaults
         // ratio visibly applies on every space (#458).

@@ -124,6 +124,18 @@ struct WMBridgeSeamTests {
         }
     }
 
+    /// Scanner files whose only `WMBridge.` spellings are the
+    /// scan strings they match production against — this file
+    /// (the needle itself) and the #1145 wiring register. The
+    /// stated trade (rule-authoring.md): an exempt file gaining
+    /// a REAL bridge call goes unseen here, so an entry may name
+    /// only a suite that reads source rather than driving a
+    /// core.
+    private static let scanExempt: Set<String> = [
+        "WMBridgeSeamTests.swift",
+        "StickyReachWiringTests.swift",
+    ]
+
     @Test("Tests reach the bridge only through the resolver seam")
     func testsReachTheBridgeThroughTheSeam() throws {
         let needle = "WMBridge."
@@ -132,7 +144,7 @@ struct WMBridgeSeamTests {
         var strays: [String] = []
         for tree in Self.testTrees {
             for file in try SourceScan.swiftSources(under: tree)
-            where file.path != #filePath {
+            where !Self.scanExempt.contains(file.lastPathComponent) {
                 let source = SourceScan.stripComments(
                     try String(contentsOf: file, encoding: .utf8)
                 )
