@@ -4,7 +4,6 @@ import SwiftUI
 /// Unified settings header bar for Home and area screens (#678).
 struct SettingsHeaderBar: View {
     @ObservedObject var model: SettingsModel
-    @FocusState private var backChipFocused: Bool
     @State private var searchExpanded = false
     @Environment(\.settingsWidth) private var width
     @Environment(\.accessibilityReduceMotion)
@@ -48,12 +47,6 @@ struct SettingsHeaderBar: View {
         .padding(.bottom, 18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(SettingsTheme.card)
-        // Keyed on the VALUE, never `destination != nil`: an
-        // area→area navigation keeps that Boolean true, so a
-        // Boolean-keyed raise never fires there (#998).
-        .onChange(of: destination) { _, now in
-            if now != nil { backChipFocused = true }
-        }
         .onChange(of: destination) { _, _ in
             searchExpanded = false
         }
@@ -118,7 +111,6 @@ struct SettingsHeaderBar: View {
             .contentShape(ChipMetrics.shape)
         }
         .buttonStyle(.plain)
-        .focused($backChipFocused)
         .keyboardShortcut("[", modifiers: .command)
         .accessibilityLabel(L("home.back", "Home"))
     }

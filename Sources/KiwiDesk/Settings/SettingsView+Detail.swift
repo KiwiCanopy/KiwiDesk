@@ -69,49 +69,90 @@ extension SettingsView {
             }
             // Single reader across all sections (#277).
             ScrollViewReader { proxy in
-                detail(model.destination)
-                    // Every section's root is a scroll view,
-                    // which VoiceOver lands on as a bare "scroll
-                    // area" (owner, #812 session 2) — the area's
-                    // title names it.
-                    .accessibilityLabel(model.destination?.title ?? "")
-                    .frame(
-                        maxWidth: SettingsTheme.contentMaxWidth
-                    )
-                    .frame(
-                        maxWidth: .infinity,
-                        alignment: .center
-                    )
-                    // Animated surface reflow on mode switch (#760).
-                    .animation(
-                        reduceMotion
-                            ? nil
-                            : .easeOut(
-                                duration: SettingsReveal.scroll
-                            ),
-                        value: model.settingsMode
-                    )
-                    .contentMargins(
-                        .top,
-                        SettingsMetrics.paneInset,
-                        for: .scrollContent
-                    )
-                    .environment(\.settingsFlash, model.nav.flash)
-                    .environment(
-                        \.settingsRevealTarget,
-                        model.nav.revealTarget
-                    )
-                    .onChange(of: model.nav.pendingScroll) {
-                        _,
-                        anchor in
-                        reveal(anchor, proxy: proxy)
-                    }
-                    .onAppear {
-                        reveal(
-                            model.nav.pendingScroll,
-                            proxy: proxy
+                // Hoisted so the label cannot resolve empty: this
+                // is now the arrival focus stop (#996), and a
+                // nameless one is worse than the presses it saves.
+                if let destination = model.destination {
+                    detail(destination)
+                        // Every section's root is a scroll view,
+                        // which VoiceOver lands on as a bare
+                        // "scroll area" (owner, #812 session 2) —
+                        // the area's title names it.
+                        .accessibilityLabel(destination.title)
+                        .frame(
+                            maxWidth: SettingsTheme.contentMaxWidth
                         )
-                    }
+                        .frame(
+                            maxWidth: .infinity,
+                            alignment: .center
+                        )
+                        // AFTER the frames, never before: drawn
+                        // round the pre-layout content, the ring
+                        // loses its leading edge to the centring
+                        // that follows (owner, 2026-09-01). The
+                        // shape is stated too — a full-bleed
+                        // rectangle reads as damage rather than
+                        // as focus. Shrinking what is focusable
+                        // is the sanctioned answer where hiding
+                        // the ring is not (design-decisions ▸ a
+                        // focus ring is the platform's).
+                        .contentShape(
+                            .focusEffect,
+                            RoundedRectangle(
+                                cornerRadius:
+                                    SettingsTheme.cardRadius,
+                                style: .continuous
+                            )
+                        )
+                        .focusable()
+                        .focused($contentFocused)
+                        // A click must not ring the pane, and
+                        // the wiring is spelled HERE because a
+                        // modifier handed the binding never
+                        // fires (owner eye-confirm, 2026-09-01).
+                        .onChange(of: contentFocused) { _, now in
+                            guard now, ClickBornFocus.isClickBorn
+                            else { return }
+                            contentFocused = false
+                        }
+                        // LAST, so the ring sits inside it. Pad
+                        // before `.focusable()` and the padded —
+                        // larger — view is the one focused, which
+                        // puts the ring on the window's own edges
+                        // where both sides are clipped away
+                        // (owner, 2026-09-01).
+                        .padding(SettingsMetrics.focusRingInset)
+                        // Animated surface reflow on mode switch (#760).
+                        .animation(
+                            reduceMotion
+                                ? nil
+                                : .easeOut(
+                                    duration: SettingsReveal.scroll
+                                ),
+                            value: model.settingsMode
+                        )
+                        .contentMargins(
+                            .top,
+                            SettingsMetrics.paneInset,
+                            for: .scrollContent
+                        )
+                        .environment(\.settingsFlash, model.nav.flash)
+                        .environment(
+                            \.settingsRevealTarget,
+                            model.nav.revealTarget
+                        )
+                        .onChange(of: model.nav.pendingScroll) {
+                            _,
+                            anchor in
+                            reveal(anchor, proxy: proxy)
+                        }
+                        .onAppear {
+                            reveal(
+                                model.nav.pendingScroll,
+                                proxy: proxy
+                            )
+                        }
+                }
             }
         }
     }
