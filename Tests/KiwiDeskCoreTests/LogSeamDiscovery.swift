@@ -61,6 +61,7 @@ extension KeybindingManager: LogSeamOwner {}
 extension ProfileManager: LogSeamOwner {}
 extension SleepWakeManager: LogSeamOwner {}
 extension SocketServer: LogSeamOwner {}
+extension StrandDetector: LogSeamOwner {}
 // `KiwiCore` deliberately does not conform. It is the sink these
 // forward *into*, not a seam, and it is exempted by identity
 // below rather than by name — see `SeamWalk.exempt`.
