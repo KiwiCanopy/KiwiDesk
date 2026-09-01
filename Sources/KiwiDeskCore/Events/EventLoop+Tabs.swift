@@ -20,9 +20,20 @@ import ApplicationServices
 /// pre-#308 behavior) — a missed merge, never a wrong one.
 extension EventLoop {
     /// Grace window after a native-Space change during which no
-    /// reconcile coalesces tabs. A genuine tab switch within it
-    /// falls back to destroy + create (self-healing), which is rare.
+    /// reconcile coalesces tabs — a genuine tab switch within it
+    /// falls back to destroy + create (self-healing) — AND the
+    /// removal-distrust gate stands down (#1157): the census
+    /// double-exposes both Desktops while the compositor settles
+    /// (#1023), so retuning this for tab reasons retunes the
+    /// gate's stand-down too.
     static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
+
+    /// The one derivation of "inside that grace" — the tab
+    /// coalescer and the distrust gate must age the same stamp.
+    func isWithinSpaceSwitchGrace(now: Date = Date()) -> Bool {
+        now.timeIntervalSince(lastDesktopChange)
+            < Self.spaceSwitchCoalesceGrace
+    }
 
     /// True if the app has a tracked native-tab carrier. Used to
     /// route a *non*-carrier window's create/destroy through reconcile
@@ -97,9 +108,7 @@ extension EventLoop {
         // A candidate is checked against ONE census per sweep; a
         // window the compositor still shows was not closed
         // (#1157 — the exempt arms are accessibility.md's).
-        let switchGrace =
-            Date().timeIntervalSince(lastDesktopChange)
-            < Self.spaceSwitchCoalesceGrace
+        let switchGrace = isWithinSpaceSwitchGrace()
         var onScreen: Set<WindowID>?
         for id in vanishedIDs.sorted(by: { $0.raw < $1.raw })
         where !consumed.contains(id) {
@@ -193,17 +202,15 @@ extension EventLoop {
         element: AXUIElement,
         pid: pid_t
     ) {
-        elements[pid]?[from] = nil
+        // Read the migrating verdicts BEFORE the release clears
+        // the `from` side.
+        let floating = detectedFloating[from]
+        let fullscreen = detectedFullscreen[from]
+        releaseWindowRegistration(from, pid: pid)
         elements[pid, default: [:]][to] = element
-        removalDistrusted[from] = nil
-        detectedFloating[to] = detectedFloating[from]
-        detectedFloating[from] = nil
-        detectedFullscreen[to] = detectedFullscreen[from]
-        detectedFullscreen[from] = nil
-        ignorePending.remove(from)
-        trackedFrames[from] = nil
+        detectedFloating[to] = floating
+        detectedFullscreen[to] = fullscreen
         trackedFrames[to] = AXHelper.frame(of: element)
-        tabCarriers.remove(from)
         if AXHelper.hasNativeTabs(element) {
             tabCarriers.insert(to)
         }

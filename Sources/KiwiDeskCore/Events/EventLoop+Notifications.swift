@@ -307,8 +307,11 @@ extension EventLoop {
 
     /// Releases one window's registration — the ONE copy of the
     /// destroy cleanup, called by the destroy arm above, the
-    /// sweep's genuine-close loop, `detach`'s per-window loop
-    /// (#1157 made all three one copy), and by a
+    /// sweep's genuine-close loop, `detach`'s per-window loop,
+    /// the rekey's `from` side (#1157 made those one copy — and
+    /// clearing `ignorePending` here is part of that fix: a
+    /// recycled id must not inherit a stale #21 grace entry),
+    /// and by a
     /// path that KNOWS the window left rather than observing it
     /// leave (#1023's eager departure: a follow onto a hidden
     /// Desktop). A state-only removal is not enough there: the

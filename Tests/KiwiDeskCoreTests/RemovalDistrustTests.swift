@@ -9,11 +9,12 @@ import Testing
 /// WindowServer still shows the window (#1157).
 ///
 /// The defect this pins is #1157's: the sweep read a lazy-AX
-/// app's transient under-report as a close. The gate refuses the
-/// removal while the on-screen census still lists the window,
-/// logs once per continuous-absence episode, and queues a
-/// follow-up reconcile so a TRUE close still compositing at
-/// sweep time converges.
+/// app's transient under-report as a close. This half holds the
+/// gate's ARMS — who is checked against the census, who is
+/// exempt (hidden, minimized, the Desktop-switch grace), and the
+/// one-census cost bound. The episode ledger, its bounds and the
+/// wiring are `RemovalDistrustEpisodeTests`', split at the
+/// tests.md file ceiling.
 ///
 /// Everything drives the funnels through the injected seams
 /// (tests.md); no app is attached to or messaged for real. The
@@ -157,68 +158,6 @@ struct RemovalDistrustTests {
         #expect(box.recheckFires == 0)
     }
 
-    @Test("an episode re-queues once, logs once, then goes quiet")
-    func episodeReQueueIsBounded() {
-        let (loop, box) = makeLoop()
-        loop.elements[pid] = [WindowID(12): dummyElement]
-        box.listed = []
-        box.census = [pid: [WindowID(12)]]
-        loop.reconcile(pid: pid, app: ref)
-        #expect(loop.drainPendingRemovalRecheck() == [pid])
-        // The follow-up pass still refuses: it re-queues — the
-        // first queue may have ridden a part-spent deadline, so
-        // the episode is owed one full-delay pass — but never
-        // re-logs.
-        loop.reconcile(pid: pid, app: ref)
-        #expect(box.recheckFires == 2)
-        #expect(loop.drainPendingRemovalRecheck() == [pid])
-        // Past the cap the episode goes quiet: a permanently
-        // mismatched app costs a bounded number of follow-ups,
-        // never a per-delay reconcile loop for the session.
-        loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.isEmpty)
-        #expect(box.recheckFires == 2)
-        #expect(loop.pendingRemovalRecheck.isEmpty)
-        #expect(distrustLines(box) == 1)
-    }
-
-    @Test("a window back in the AX list re-opens the episode")
-    func relistingEndsTheEpisode() {
-        let (loop, box) = makeLoop()
-        loop.elements[pid] = [WindowID(12): dummyElement]
-        box.listed = []
-        box.census = [pid: [WindowID(12)]]
-        loop.reconcile(pid: pid, app: ref)
-        _ = loop.drainPendingRemovalRecheck()
-        // The app answers properly again…
-        box.listed = [WindowID(12)]
-        loop.reconcile(pid: pid, app: ref)
-        #expect(loop.removalDistrusted.isEmpty)
-        // …so the next under-report is a fresh episode: refused,
-        // logged and queued anew.
-        box.listed = []
-        loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.isEmpty)
-        #expect(box.recheckFires == 2)
-        #expect(distrustLines(box) == 2)
-    }
-
-    @Test("a true close converges once the census drops it")
-    func trueCloseConverges() {
-        let (loop, box) = makeLoop()
-        loop.elements[pid] = [WindowID(12): dummyElement]
-        box.listed = []
-        box.census = [pid: [WindowID(12)]]
-        loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.isEmpty)
-        // The compositor finishes tearing the window down; the
-        // queued follow-up's reconcile now removes it.
-        box.census = [:]
-        loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(loop.removalDistrusted.isEmpty)
-    }
-
     @Test("the hidden drop never consults the census")
     func hiddenDropSkipsTheGate() {
         let (loop, box) = makeLoop()
@@ -298,18 +237,4 @@ struct RemovalDistrustTests {
         #expect(box.recheckFires == 0)
     }
 
-    @Test("a refusal arms the recheck one-shot on a live core")
-    func refusalSchedulesTheRecheck() {
-        // The bootstrap wiring, which no seam-driven test above
-        // can see: deleting `onRemovalDistrust`'s assignment
-        // leaves every other assertion green while the follow-up
-        // silently never comes.
-        let core = makeTestCore()
-        core.eventLoop.refuseRemoval(
-            WindowID(9),
-            pid: 1,
-            app: AppRef(bundleID: "test.kiwi.wire", name: "W")
-        )
-        #expect(core.deferred.isScheduled(.removalRecheck))
-    }
 }
