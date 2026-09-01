@@ -28,7 +28,10 @@ enum ClickBornFocus {
     /// focus change is observed.
     @MainActor static var isClickBorn: Bool {
         if NSEvent.pressedMouseButtons != 0 { return true }
-        switch NSApp.currentEvent?.type {
+        // `NSApp?`, never `NSApp`: it is implicitly unwrapped
+        // and nil in a process with no `NSApplication`, where
+        // the force-unwrap traps (crash, 2026-09-01).
+        switch NSApp?.currentEvent?.type {
         case .leftMouseDown, .leftMouseUp, .rightMouseDown,
             .rightMouseUp, .otherMouseDown, .otherMouseUp:
             return true
