@@ -45,7 +45,7 @@ struct AnnouncedValueTests {
         "ProfileHeader.swift": 1,
         "KeybindingAppGroup+Behavior.swift": 1,
         // #1209: the export row's range menu, named by the range
-        // key because the row's label names the export.
+        // key because the button beside it names the export.
         "GeneralSection+LogExport.swift": 1,
     ]
 

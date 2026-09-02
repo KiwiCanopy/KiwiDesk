@@ -674,10 +674,11 @@ those too.
 ## Exporting the Log
 
 If something misbehaves and you want to report it, **General ▸
-Advanced** has an **Export log** row above the recovery actions.
-Pick a time range — the last 15 minutes, the last hour, or since
-KiwiDesk started — press **Export…**, and choose where to save the
-file (Downloads is suggested). Saving is the whole result — no
+Advanced** has an **Export Log…** button above the recovery
+actions, with a time-range menu beside it — the last 15 minutes,
+the last hour, or since KiwiDesk started. Pick the range, press
+the button, and choose where to save the file (Downloads is
+suggested). Saving is the whole result — no
 message follows a successful export, and the file is in the place
 you chose. If you can make the problem happen again, do that
 first: the range counts back from now, and "since KiwiDesk

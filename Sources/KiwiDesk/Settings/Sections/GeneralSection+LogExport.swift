@@ -3,19 +3,40 @@ import SwiftUI
 
 /// General ▸ Advanced: the log export (#1209) — rung zero of the
 /// recovery ladder, the first thing a user in trouble should do,
-/// because it changes nothing. One settings row (owner ruling
-/// 2026-09-02): the label and its help on the left, the range menu
-/// and the export button together on the right, the caption below.
+/// because it changes nothing. The sibling action rows' shape
+/// (owner ruling 2026-09-02): the button first, the range menu it
+/// takes beside it, then the help mark, the caption below.
 extension GeneralSection {
     @ViewBuilder var exportLogRows: some View {
         VStack(alignment: .leading, spacing: 4) {
-            SettingsRowShape {
-                SettingsRowLabel(
-                    label: L(
-                        "general.advanced.log.export",
-                        "Export log"
-                    ),
-                    help: L(
+            HStack(spacing: 6) {
+                Button {
+                    let choice = logRange
+                    Task { await model.exportLog(choice) }
+                } label: {
+                    Label(
+                        L("general.advanced.log.export", "Export Log…"),
+                        systemImage: "doc.text.magnifyingglass"
+                    )
+                }
+                .settingsActionButton()
+                // Named for VoiceOver by the range key: nothing
+                // visible names the menu, the button names the
+                // export.
+                Picker("", selection: $logRange) {
+                    ForEach(SettingsModel.LogExportRange.allCases) {
+                        Text($0.title).tag($0)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .fixedSize()
+                .accessibilityLabel(
+                    L("general.advanced.log.range", "Time range")
+                )
+                .accessibilityValue(logRange.title)
+                HelpButton(
+                    explanation: L(
                         "general.advanced.log.export.help",
                         "If you can make the problem happen again, "
                             + "do that first, then export — the range "
@@ -24,47 +45,18 @@ extension GeneralSection {
                             + "macOS log; it names the apps and "
                             + "windows it managed in that time, so "
                             + "glance through it before attaching."
+                    ),
+                    subject: L(
+                        "general.advanced.log.export",
+                        "Export Log…"
                     )
                 )
-            } control: {
-                HStack(spacing: 8) {
-                    // Named for VoiceOver by the range key: the row's
-                    // visible label names the export, not the menu.
-                    Picker("", selection: $logRange) {
-                        ForEach(
-                            SettingsModel.LogExportRange.allCases
-                        ) {
-                            Text($0.title).tag($0)
-                        }
-                    }
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .controlSize(.large)
-                    .accessibilityLabel(
-                        L("general.advanced.log.range", "Time range")
-                    )
-                    .accessibilityValue(logRange.title)
-                    Button {
-                        let choice = logRange
-                        Task { await model.exportLog(choice) }
-                    } label: {
-                        Label(
-                            L(
-                                "general.advanced.log.export.button",
-                                "Export…"
-                            ),
-                            systemImage: "doc.text.magnifyingglass"
-                        )
-                    }
-                    .settingsActionButton()
-                    // Always drawn, faded when idle (gui.md ▸ grey,
-                    // don't hide).
-                    ProgressView()
-                        .controlSize(.small)
-                        .opacity(model.isExportingLog ? 1 : 0)
-                        .accessibilityHidden(!model.isExportingLog)
-                    Spacer()
-                }
+                // Always drawn, faded when idle (gui.md ▸ grey,
+                // don't hide).
+                ProgressView()
+                    .controlSize(.small)
+                    .opacity(model.isExportingLog ? 1 : 0)
+                    .accessibilityHidden(!model.isExportingLog)
             }
             Text(
                 L(
