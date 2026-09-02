@@ -44,6 +44,9 @@ struct AnnouncedValueTests {
         "DesktopsGroup.swift": 1,
         "ProfileHeader.swift": 1,
         "KeybindingAppGroup+Behavior.swift": 1,
+        // #1209: the export row's range menu, named by the range
+        // key because the row's label names the export.
+        "GeneralSection+LogExport.swift": 1,
     ]
 
     @Test("a named picker or menu gives its value back")

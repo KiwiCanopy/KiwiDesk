@@ -74,9 +74,9 @@ body:
         - `kiwidesk get_layout_info` (current layout details)
 
         Then the log: if you can make the problem happen again, do
-        that first. Open KiwiDesk Settings ▸ General ▸ Advanced,
-        pick a **Time range** that reaches back to before it
-        happened, press **Export Log…**, and **attach the file**
+        that first. Open KiwiDesk Settings ▸ General ▸ Advanced, and
+        on the **Export log** row pick a time range that reaches
+        back to before it happened, press **Export…**, and **attach the file**
         here (drag it into this field) instead of pasting fragments.
         Can't open Settings? The same export from a terminal is in
         the CLI reference: https://kiwidesk.app/docs/cli/#exporting-the-log

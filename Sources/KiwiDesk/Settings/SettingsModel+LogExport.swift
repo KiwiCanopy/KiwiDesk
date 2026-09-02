@@ -71,6 +71,13 @@ extension SettingsModel {
         panel.allowedContentTypes = [.plainText]
         panel.nameFieldStringValue = LogExport.defaultFilename()
         panel.canCreateDirectories = true
+        // Downloads, not Documents: the file's next stop is a
+        // browser's attach dialog (owner ruling 2026-09-02).
+        panel.directoryURL =
+            FileManager.default.urls(
+                for: .downloadsDirectory,
+                in: .userDomainMask
+            ).first
         guard panel.runModal() == .OK, let url = panel.url else {
             return
         }
