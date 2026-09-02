@@ -7,11 +7,14 @@ import Testing
 /// per-space lists and an owner map — no WindowServer.
 @Suite("Desktop census")
 struct DesktopCensusTests {
+    /// Space 30 is CURRENT and non-user (a fullscreen space):
+    /// never shown, never read.
     private let spaces: [NativeSpace] = [
         authoritySpace(1, display: "UUID-A", current: true),
         authoritySpace(4, display: "UUID-A"),
         authoritySpace(9, display: "UUID-A", isUser: false),
         authoritySpace(20, display: "UUID-B", current: true),
+        authoritySpace(30, display: "UUID-C", current: true, isUser: false),
     ]
 
     /// Windows per space: `all` includes the parked ones.
@@ -89,6 +92,21 @@ struct DesktopCensusTests {
         )
         #expect(!census.isAway(WindowID(7)))
         #expect(census.hosts[WindowID(7)]?.space == 20)
+    }
+
+    /// The mirror fixture: the SHOWN space listed first, so a
+    /// last-writer-wins builder would lose it.
+    @Test("a shown host listed first is kept over a later unshown one")
+    func shownHostListedFirstWins() throws {
+        let census = try #require(
+            DesktopCensus.build(
+                spaces: spaces,
+                owners: [WindowID(7): 100],
+                list: lister([1: ([7], [7]), 4: ([7], [7])])
+            )
+        )
+        #expect(!census.isAway(WindowID(7)))
+        #expect(census.hosts[WindowID(7)]?.space == 1)
     }
 
     @Test("an unreadable space list is no census at all")
