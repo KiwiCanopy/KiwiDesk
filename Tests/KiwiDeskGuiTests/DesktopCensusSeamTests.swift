@@ -104,8 +104,34 @@ struct DesktopCensusSeamTests {
                 !source.contains("DesktopCensus")
                     && !source.contains("desktopCensus")
                     && !source.contains("awayWindows")
-                    && !source.contains("readCensus"),
+                    && !source.contains("readCensus")
+                    && !source.contains("readWindowSpace")
+                    && !source.contains("WindowSpaceReading")
+                    && !source.contains("windowSpaceReading("),
                 .init(rawValue: "Events/\(file) reads the per-Desktop census")
+            )
+        }
+    }
+
+    /// Both compositor doors default LIVE, so every suite built
+    /// on `makeTestCore` inherits the host's WindowServer unless
+    /// the factory pins them — and a fixture id can be a real
+    /// window there. Both twins carry both pins.
+    @Test("makeTestCore pins both compositor doors")
+    func testCorePinsBothDoors() throws {
+        let twins = ["KiwiDeskCoreTests", "KiwiDeskGuiTests"].map {
+            Self.tests.appendingPathComponent("\($0)/TestCore.swift")
+        }
+        for twin in twins {
+            let source = try SourceScan.strippedSource(at: twin)
+            #expect(
+                source.contains(
+                    "desktopMemory.readWindowSpace = { _ in .unavailable }"
+                )
+                    && source.contains(
+                        "desktopMemory.readCensus = { _ in nil }"
+                    ),
+                .init(rawValue: "\(twin.lastPathComponent) misses a pin")
             )
         }
     }

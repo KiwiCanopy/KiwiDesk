@@ -39,9 +39,13 @@ extension SkyLight {
 
     /// The windows `space` hosts, every owner — nil when the
     /// symbol or the connection is absent OR the call answers
-    /// nothing: a failed read is "cannot tell", never an empty
+    /// NULL: a failed read is "cannot tell", never an empty
     /// Desktop, or a census built on it would prune every away
-    /// window there as closed.
+    /// window there as closed. Trade: were an EMPTY Desktop to
+    /// answer NULL rather than an empty array, the whole census
+    /// would answer nil and nothing would prune — the safe
+    /// direction; on device (2026-09-02) a Desktop with no
+    /// document windows still answered a non-empty array.
     static func windows(
         on space: SpaceID,
         includingParked: Bool

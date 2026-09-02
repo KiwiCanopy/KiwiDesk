@@ -79,9 +79,10 @@ extension KiwiCore {
     }
 
     /// Arms the periodic re-read; self-re-arming while the
-    /// ledger is non-empty AND a census could be read, so an
-    /// empty ledger — or a Mac whose list symbol is absent —
-    /// costs nothing.
+    /// ledger is non-empty AND the last read answered, so an
+    /// empty ledger costs nothing and a failed read does not
+    /// poll — the next vanish, boot seed or Desktop settle
+    /// re-arms it.
     func scheduleAwayCensus() {
         guard !state.awayWindows.isEmpty else { return }
         deferred.schedule(
@@ -160,8 +161,9 @@ extension KiwiCore {
     }
 
     /// An app's away windows, spaces in canonical order and by
-    /// rank inside each, unfiled entries last. `bundleID`
-    /// arrives lowercased (the command's normalization).
+    /// rank inside each; parked and unfiled entries last, by id.
+    /// `bundleID` arrives lowercased (the command's
+    /// normalization).
     func awayWindows(bundleID: String) -> [AwayWindow] {
         let entries = state.awayWindows.values.filter {
             $0.appBundleID?.lowercased() == bundleID

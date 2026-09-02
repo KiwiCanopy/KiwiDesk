@@ -247,7 +247,7 @@ editing here:
   `AwayLedgerTests` pins the writers, the enders and the merge;
   `SpaceBarAwayTests` the bar; `OpenOrFocusReachTests` the reach
   and the ring; `AwayBootSeedTests` the boot filing order;
-  `LifecycleEventTests` the classification through the handler.
+  `GoneReasonEventTests` the classification through the handler.
   The ruling is on the issue and in `docs/design-decisions.md`.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
