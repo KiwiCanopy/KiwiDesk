@@ -19,12 +19,13 @@ extension KiwiCore {
     /// How long a window stays IN FLIGHT after its stamp — a
     /// dispatched move, or our own switch of its screen (#1213) —
     /// the removal gate's carried arm reads it
-    /// (`stickyReachInFlight`). The AX element dies ~1 s after
-    /// the switch on TextEdit (device, 2026-09-01) and ~2 s on an
-    /// Electron app (Claude, device, 2026-09-02, the trace that
-    /// retired the switch-grace gate); the distrust's recheck
-    /// budget (`EventLoop.removalRecheckCap`) comes on top. Five
-    /// seconds covers both with margin.
+    /// (`stickyReachInFlight`). The stamp precedes every measured
+    /// death: a native element ~250 ms BEFORE the switch
+    /// notification (TextEdit, device 2026-09-02, #1213), an
+    /// Electron one ~2 s after it (Claude, device 2026-09-02, the
+    /// trace that retired the switch-grace gate); the distrust's
+    /// recheck budget (`EventLoop.removalRecheckCap`) comes on
+    /// top. Five seconds covers both with margin.
     /// The trade: ⌘W of a sticky window inside those seconds waits
     /// out the recheck budget before its tile goes.
     static let inFlightWindow: TimeInterval = 5
@@ -62,9 +63,8 @@ extension KiwiCore {
 
     /// Stamps every window the carry WILL move on `displayUUID`
     /// as in flight at our own switch dispatch, before any
-    /// notification: a native app's element dies ~250 ms before
-    /// it (TextEdit, device 2026-09-02, #1213). `spaces` is the
-    /// dispatching verb's own reading (profiles.md).
+    /// notification (#1213, the argument on `inFlightWindow`).
+    /// `spaces` is the dispatching verb's own reading (profiles.md).
     func stampStickyReachInFlight(
         forSwitchOn displayUUID: String,
         in spaces: [NativeSpace]

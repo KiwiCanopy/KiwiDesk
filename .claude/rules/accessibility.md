@@ -305,8 +305,9 @@ editing AX code:
   bridge-driven switch (TextEdit, device 2026-09-02), so
   `switchDesktop` stamps every window the carry will move — the
   switched screen's, by #445's render screen, read off the verb's
-  own topology — behind the accepted set, and only there
-  (`StickyReachDispatchStampTests`, `StickyReachDispatchSeamTests`).
+  own topology and never re-read (profiles.md) — behind the
+  accepted set, and only there (`StickyReachDispatchStampTests`,
+  `StickyReachDispatchSeamTests`).
   A GESTURE switch promises nothing — no dispatch of ours precedes
   it — so a window whose element dies before the handler carried
   it was never in flight and takes the ordinary departure — the

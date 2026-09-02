@@ -243,11 +243,16 @@ struct DesktopSwitchGuardTests {
         defer { teardown() }
         let box = Box()
         core.onLog = { box.lines.append($0) }
+        // Built from the suite's own topology, so the reading
+        // and the scalars cannot disagree (review round 2).
         let target = KiwiCore.DesktopTarget(
             space: 11,
             displayIdentifier: "UUID-A",
             originSpace: 10,
-            spaces: []
+            spaces: authorityTopology(
+                mainCurrent: 10,
+                secondaryCurrent: 20
+            )
         )
         // The display never left space 10 — the set was dropped
         // somewhere past the bridge.

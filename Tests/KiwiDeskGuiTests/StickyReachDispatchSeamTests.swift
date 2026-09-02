@@ -22,28 +22,43 @@ struct StickyReachDispatchSeamTests {
 
     @Test("the stamp is called exactly once, from the switch dispatch")
     func stampIsCalledOnceFromTheDispatch() throws {
+        // The bare call: exactly TWO sites — the declaration in
+        // the machine's file and one caller in the dispatch — so a
+        // second caller anywhere, the machine's own file included,
+        // reds (review round 2: a file-wide exemption left a
+        // settle promising a flight nothing dispatched unscanned).
         let needle = "stampStickyReachInFlight("
-        // The declaration is the machine's own site; every other
-        // one is a caller.
-        let callers = try SourceScan.identifierSites(
+        let sites = try SourceScan.identifierSites(
             of: needle,
             under: Self.core
-        ).filter {
-            $0.file.lastPathComponent != "KiwiCore+StickyReach.swift"
-        }
-        #expect(
-            callers.count == 1,
-            """
-            expected exactly one caller of `\(needle)`, found \
-            \(callers.count): \
-            \(callers.map(\.site).joined(separator: ", "))
-            """
         )
         #expect(
-            callers.allSatisfy {
+            sites.count == 2,
+            """
+            expected the declaration plus one caller of \
+            `\(needle)`, found \(sites.count): \
+            \(sites.map(\.site).joined(separator: ", "))
+            """
+        )
+        let declarations = try SourceScan.identifierSites(
+            of: "func " + needle,
+            under: Self.core
+        )
+        #expect(declarations.count == 1)
+        #expect(
+            declarations.allSatisfy {
                 $0.file.lastPathComponent
-                    == "KiwiCore+DesktopSwitch.swift"
+                    == "KiwiCore+StickyReach.swift"
             }
+        )
+        let callers = sites.filter { site in
+            !declarations.contains {
+                $0.file == site.file && $0.line == site.line
+            }
+        }
+        #expect(
+            callers.map(\.file.lastPathComponent)
+                == ["KiwiCore+DesktopSwitch.swift"]
         )
     }
 
@@ -70,6 +85,10 @@ struct StickyReachDispatchSeamTests {
             body.range(of: "stampStickyReachInFlight(")
         )
         #expect(switchStamp.upperBound <= flightStamp.lowerBound)
+        // And it takes the verb's ONE reading (profiles.md): the
+        // behaviour suites seed the same topology into the live
+        // read, so only the shape can hold this.
+        #expect(body.contains("in: target.spaces"))
     }
 
     /// The ledger has ONE writer file: the dispatch stamp made a

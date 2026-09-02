@@ -186,11 +186,13 @@ editing here:
   refresh, since a carry onto the Desktop it is on moves nothing. And a
   carried window's vanish at the switch is the event loop's to distrust,
   not this machine's ([accessibility.md](accessibility.md), the carried
-  arm) — what this machine owes that arm is the in-flight stamp: per
-  dispatched move, and from `switchDesktop` for every window a switch
-  WE dispatch will carry, before any notification (#1213,
-  `StickyReachDispatchStampTests`; why the stamp must precede the
-  notification is the carried arm's). `StickyReachCarryTests` drives the handler, the settle and the
+  arm) — what this machine owes that arm is the in-flight stamp,
+  written by this file alone (`StickyReachDispatchSeamTests` ▸
+  `ledgerHasOneWriterFile`): per dispatched move, and from
+  `switchDesktop` for every window a switch WE dispatch will carry,
+  before any notification (#1213, `StickyReachDispatchStampTests`;
+  why the stamp must precede the notification is the carried arm's).
+  `StickyReachCarryTests` drives the handler, the settle and the
   verdicts through the fake bridge; `StickyReachOverrideTests` the pin.
 - A **native-fullscreen window keeps its `space.windows` slot
   but leaves both tiled-member derivations** (#670) — a layout,
