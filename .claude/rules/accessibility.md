@@ -299,8 +299,15 @@ editing AX code:
   sticky window nothing moved is a close like any other, so ⌘W
   outside a carry never waits out the budget
   (`CarriedRemovalTests` ▸ `notInFlightIsAClose`,
-  `armIgnoresTheSwitchGrace`). A window whose element dies
-  BEFORE the switch handler carried it was never in flight and
+  `armIgnoresTheSwitchGrace`). A switch WE dispatch promises the
+  flight before the OS says a word (#1213): a native app's
+  element dies ~250 ms BEFORE the switch notification on a
+  bridge-driven switch, so `switchDesktop` stamps every window
+  the carry will move — the switched screen's, by #445's render
+  screen — behind the accepted set, and only there
+  (`StickyReachDispatchStampTests`, `StickyReachDispatchSeamTests`).
+  A GESTURE switch has no intent stamp, so a window whose element
+  dies before the handler carried it there was never in flight and
   takes the ordinary departure — the residue
   `docs/accepted-limitations.md` records. The refusal keeps the
   STATE AND THE

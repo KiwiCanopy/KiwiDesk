@@ -72,6 +72,10 @@ extension KiwiCore {
             _ = WMBridge.hideSpaces([origin])
         }
         lastDesktopSwitch = Date()
+        // Behind the accepted set, like the stamp above: the
+        // carry's in-flight promise for the windows THIS switch
+        // will move (#1213) — a refused set moves nothing.
+        stampStickyReachInFlight(forSwitchOn: target.displayIdentifier)
         scheduleDesktopSwitchVerify(target, verb: verb)
         return .switched
     }
