@@ -28,7 +28,10 @@ extension KiwiCore {
     /// nothing — and a standing follow (#1007) outranks it: the
     /// verb named its window. Only a window GONE from state is
     /// owed: one still present (a carried sticky, #1145) never
-    /// departed, so the vacancy rule cannot prefer it.
+    /// departed, so the vacancy rule cannot prefer it. Reached
+    /// for EVERY user-Desktop arrival only because
+    /// `virtualSpaceTarget` falls back to the first space
+    /// (`DesktopFocusMemoryTests` ▸ the unremembered pass-through).
     func oweDesktopFocus(for desktop: Int, key: String) {
         desktopMemory.returnFocus.forget()
         guard

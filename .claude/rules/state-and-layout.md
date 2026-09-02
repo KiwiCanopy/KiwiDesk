@@ -185,15 +185,12 @@ editing here:
   (ruled residue). `ReturningFocusFoldTests` pins the fold and
   `DesktopFocusMemoryTests` the path through the real handler, so
   a DELETED site reds there; `ReturningFocusSeamTests` is the
-  register of the wirings — each site singular and in its named
-  file, the recorder inside the departure arm beside
-  `rememberVirtualSpace` and nowhere else, the mirror in the
-  create block beside `arrivalDisplay`, the retire ahead of the
-  record, the settle's read ahead of its refocus — which is what
-  the register adds: a site MOVED or DOUBLED still pays in a
-  fixture whose burst runs after the handler returns. Add a site
-  there in the same change. The ruling is on the issue and in
-  `docs/design-decisions.md`.
+  register of the wirings' placement and order, which is what it
+  adds: a site MOVED or DOUBLED still pays in a fixture whose
+  burst runs after the handler returns. Add a site there in the
+  same change; the follow's own register pins that the follow
+  instance never calls `forget()`. The ruling is on the issue and
+  in `docs/design-decisions.md`.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

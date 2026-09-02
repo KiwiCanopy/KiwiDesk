@@ -126,9 +126,10 @@ struct FollowFocusIntentTests {
     /// The drain is keyed to the arriving window, so an
     /// unrelated arrival inside the drain window leaves the debt
     /// standing rather than paying it to the wrong window. That
-    /// keying replaced an explicit `clear()`: recording only
+    /// keying is why the FOLLOW never calls `forget()` (which the
+    /// Desktop return's instance owns, #1207): recording only
     /// after an accepted switch means there is no refused switch
-    /// to compensate for.
+    /// to compensate for — `FollowFocusSeamTests` pins the zero.
     @Test("another window's arrival does not pay the debt")
     func anotherArrivalDoesNotPay() {
         let intent = FollowFocusIntent()

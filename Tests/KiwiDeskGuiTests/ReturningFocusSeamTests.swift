@@ -14,7 +14,8 @@ import Testing
 /// walked off), the mirror moved out of the create block, the
 /// settle's refocus no longer gated on the debt, the payer
 /// reduced to the state stamp (the narration survives), the
-/// re-key deleted.
+/// re-key deleted, the retire moved behind the record, the
+/// follow's precedence read a second time or not at all.
 ///
 /// Each needle is pinned by EXACT COUNT and to its file, because
 /// this seam fails in both directions: a second recorder would

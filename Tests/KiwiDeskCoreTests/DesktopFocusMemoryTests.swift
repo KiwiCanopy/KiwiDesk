@@ -244,7 +244,10 @@ struct DesktopFocusMemoryTests {
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == focused)
         // Moved on before the window re-listed: Desktop 2
-        // remembers nothing, and the last return's debt goes.
+        // remembers nothing — no Space either, so the retire is
+        // reached through the target's first-space fallback —
+        // and the last return's debt goes.
+        core.desktopMemory.virtualSpaces = [:]
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 11,
             secondaryCurrent: 20
