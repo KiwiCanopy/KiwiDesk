@@ -136,6 +136,20 @@ struct ReturningFocusFoldTests {
         #expect(state.workspaces[home]?.focused == first)
     }
 
+    /// The provenance half of that clause: a `.restored` memory
+    /// is KiwiDesk's own filing from a snapshot, never an observed
+    /// departure, so it holds no vacancy either — only a window
+    /// the destroy fold saw leave THIS space does.
+    @Test("a restored memory for the owed window holds no vacancy")
+    func restoredMemoryHoldsNothing() {
+        var state = makeDesktop()
+        depart(&state)
+        state.rememberedSpaces[owed] = .restored(home)
+        state.returningFocus = owed
+        state.apply(.windowCreated(makeWindow(first)))
+        #expect(state.workspaces[home]?.focused == first)
+    }
+
     @Test("a fresh spawn carrying the owed id is not a payment")
     func freshSpawnIsNotAPayment() {
         var state = StateCoordinator()
