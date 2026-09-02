@@ -59,10 +59,7 @@ extension KiwiCore {
             focusWindow(id, warp: false)
             return
         }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         // Everything below resolves against the active space's
         // params (#17): base value, master classification, and
         // the write target all follow the space's own override,
@@ -206,10 +203,7 @@ extension KiwiCore {
             let inMaster =
                 window.map {
                     StackLayout.partition(
-                        state.effectiveTiledMembers(
-                            of: space,
-                            activeSpace: activeSpace?.id
-                        ),
+                        state.effectiveTiledMembers(of: space),
                         masterCount: stack.masterCount
                     ).master.contains($0)
                 } ?? true

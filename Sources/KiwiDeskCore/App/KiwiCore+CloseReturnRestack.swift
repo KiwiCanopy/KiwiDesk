@@ -36,10 +36,7 @@ extension KiwiCore {
         fromRemovedSlot slot: Int?
     ) {
         guard let slot, let space = activeSpace else { return }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: space.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard !tiled.isEmpty,
             let targetIndex = tiled.firstIndex(of: target)
         else { return }

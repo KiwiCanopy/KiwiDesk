@@ -234,6 +234,23 @@ editing here:
   dismissal grace, the click-provenance escape, expiry, the
   re-arm reset); the trade the grace accepts is argued in
   `docs/design-decisions.md`.
+- **The sticky render verdict is DERIVED, never handed in
+  (#1225).** `StateCoordinator.stickyRenderSpace(of:)` and the
+  three derivations over it — `effectiveTiledMembers`,
+  `effectiveMembers`, `floatingFocusCandidates` — read
+  `workspaces.activeSpace` themselves. They used to take it as an
+  argument, and across 25 production call sites not one wanted a
+  different Space: a caller passing something else was never
+  configuring the predicate, it was lying to it. #1214 handed each
+  display's own shown Space in and every screen's bar was told a ∞
+  window rendered on it, twice over (the glyph strip, then the
+  `+n` tint) before the argument came out. So a new consumer takes
+  the verdict as it is, and a site that believes it needs a
+  counterfactual frame — "this row as it would look if that Space
+  were active" — states what reads the answer, because the one
+  site that had that shape was computing a row no layout ever drew
+  (`AppliedEffects.RemovedWindow.tiledSlot`, whose contract still
+  scopes it to the `focusLost` path where the two coincide).
 - **Sticky Desktop reach is a CARRY, never a membership (#1145).**
   `KiwiCore+StickyReach.swift` MOVES every enabled sticky window onto
   the current Desktop of the screen it RENDERS on — from the switch

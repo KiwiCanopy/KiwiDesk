@@ -25,10 +25,7 @@ extension KiwiCore {
         // floating member. A traveler (#414 v2) resolves too —
         // moot while its swap no-ops, but the two boundary
         // derivations in this file must not contradict.
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard let indexA = tiled.firstIndex(of: a),
             let indexB = tiled.firstIndex(of: b)
         else { return false }

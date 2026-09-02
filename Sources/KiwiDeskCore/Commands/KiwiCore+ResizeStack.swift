@@ -23,10 +23,7 @@ extension KiwiCore {
         space: Space
     ) -> CommandResponse {
         let stack = tiler.settings.resolvedStack(for: space)
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         let splitAxis =
             stack.stackPosition.splitsHorizontally ? "x" : "y"
         guard axis != splitAxis else {

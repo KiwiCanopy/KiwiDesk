@@ -47,10 +47,7 @@ struct ScrollingStickyAnchorTests {
             Issue.record("Expected space")
             return nil
         }
-        let tiled = state.effectiveTiledMembers(
-            of: s1,
-            activeSpace: "1"
-        )
+        let tiled = state.effectiveTiledMembers(of: s1)
         return state.focusAnchor(of: s1, tiled: tiled)
     }
 
@@ -119,10 +116,7 @@ struct ScrollingStickyAnchorTests {
             return
         }
         // space2 is inactive, so its members are local-only.
-        let tiled = state.effectiveTiledMembers(
-            of: s2,
-            activeSpace: "1"
-        )
+        let tiled = state.effectiveTiledMembers(of: s2)
         #expect(
             state.focusAnchor(of: s2, tiled: tiled)
                 == WindowID(50)

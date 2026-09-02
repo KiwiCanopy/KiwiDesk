@@ -59,10 +59,7 @@ extension KiwiCore {
         let floor =
             activeSpace.map { space in
                 Self.raiseFloor(
-                    tiled: state.effectiveTiledMembers(
-                        of: space,
-                        activeSpace: space.id
-                    ),
+                    tiled: state.effectiveTiledMembers(of: space),
                     excluding: focused
                 )
             } ?? []

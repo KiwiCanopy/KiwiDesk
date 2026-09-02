@@ -62,10 +62,7 @@ extension TilingEngine {
         // comes off the visible frame before any layout — or
         // the App Bar — sees its bounds.
         let bounds = layoutBounds(on: screen)
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: state.workspaces.activeSpace
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         var context = settings.context(
             bounds: bounds,
             space: space,

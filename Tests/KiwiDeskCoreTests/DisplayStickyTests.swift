@@ -66,7 +66,7 @@ struct DisplayStickyRenderTests {
         let window = state.windows[WindowID(1)]!
         // Home space 1 is shown on display A, so it renders there.
         #expect(
-            state.stickyRenderSpace(of: window, focused: "1") == "1"
+            state.stickyRenderSpace(of: window) == "1"
         )
     }
 
@@ -76,10 +76,7 @@ struct DisplayStickyRenderTests {
         // Display B shows space 5; the display sticky lives on A,
         // so B's layout must not inject it.
         let s5 = state.workspaces[SpaceID("5")]!
-        let tiled = state.effectiveTiledMembers(
-            of: s5,
-            activeSpace: "1"
-        )
+        let tiled = state.effectiveTiledMembers(of: s5)
         #expect(!tiled.contains(WindowID(1)))
         #expect(tiled == [WindowID(9)])
     }
@@ -93,16 +90,16 @@ struct DisplayStickyRenderTests {
         state.workspaces.activate(SpaceID("2"))
         let window = state.windows[WindowID(1)]!
         #expect(
-            state.stickyRenderSpace(of: window, focused: "2") == "2"
+            state.stickyRenderSpace(of: window) == "2"
         )
         let s2 = state.workspaces[SpaceID("2")]!
         #expect(
-            state.effectiveTiledMembers(of: s2, activeSpace: "2")
+            state.effectiveTiledMembers(of: s2)
                 .contains(WindowID(1))
         )
         let s5 = state.workspaces[SpaceID("5")]!
         #expect(
-            !state.effectiveTiledMembers(of: s5, activeSpace: "2")
+            !state.effectiveTiledMembers(of: s5)
                 .contains(WindowID(1))
         )
     }
@@ -114,7 +111,7 @@ struct DisplayStickyRenderTests {
         var window = state.windows[WindowID(1)]!
         // Home space 1 is focused → renders on 1.
         #expect(
-            state.stickyRenderSpace(of: window, focused: "1") == "1"
+            state.stickyRenderSpace(of: window) == "1"
         )
         // Focus display B (space 5): a GLOBAL sticky follows the
         // focused display, so its render space becomes 5 — unlike
@@ -122,7 +119,7 @@ struct DisplayStickyRenderTests {
         state.workspaces.activate(SpaceID("5"))
         window = state.windows[WindowID(1)]!
         #expect(
-            state.stickyRenderSpace(of: window, focused: "5") == "5"
+            state.stickyRenderSpace(of: window) == "5"
         )
     }
 }

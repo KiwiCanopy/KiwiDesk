@@ -79,10 +79,7 @@ extension KiwiCore {
         // (#1214): handing each display's own shown space in as
         // if it were the focused one told EVERY screen's bar
         // that a ∞ window rendered there.
-        let members = state.effectiveMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let members = state.effectiveMembers(of: space)
         // Transient overlays (a popup's AX windows, a launcher
         // panel) are dropped HERE, before grouping and the cap,
         // so no slot is reserved for a glyph nobody draws — the

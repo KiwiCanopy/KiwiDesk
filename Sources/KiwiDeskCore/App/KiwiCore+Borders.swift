@@ -78,10 +78,7 @@ extension KiwiCore {
         // same `focusAnchor` the App Bar / Scrolling / Monocle already
         // read (#431), so a keyboard focus that lands on a traveler
         // moves the ring onto it too — not only a mouse click.
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         let travelers = tiled.filter { !space.windows.contains($0) }
         let floating = Set(
             space.windows.filter {

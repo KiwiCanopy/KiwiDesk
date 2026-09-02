@@ -169,7 +169,7 @@ extension KiwiCore {
     ) -> String? {
         let uuids = Set(spaces.map(\.displayUUID))
         if uuids.count <= 1 { return uuids.first }
-        return state.stickyRenderSpace(of: window, focused: nil)
+        return state.stickyRenderSpace(of: window)
             .flatMap { state.workspaces.display(of: $0) }
             .flatMap { NativeSpaces.displayUUID(for: $0) }
     }

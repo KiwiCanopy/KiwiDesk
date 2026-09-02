@@ -109,10 +109,7 @@ extension KiwiCore {
         // `activeSpace.focused` (`raiseSequentially`), so a
         // traveler skips it and the raise stands, while a local
         // focus re-asserts as before.
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard let focused = state.focusAnchor(of: space, tiled: tiled),
             state.windows[focused]?.isFloating == false
         else { return }
@@ -216,10 +213,7 @@ extension KiwiCore {
         // cascade to re-raise is its stack zone — raw
         // `space.windows` would misplace the boundary past any
         // floating member and miss travelers entirely.
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard tiled.count > boundary else { return }
         // Frame-ordered, not array-ordered: the zone cascade's
         // rendered order can differ from the array once
@@ -242,10 +236,7 @@ extension KiwiCore {
     /// so the piles read as the row receding to the left and
     /// to the right of the viewport.
     private func restoreScrollingZOrder(_ space: Space) {
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard tiled.count > 1 else { return }
         // Anchor, not `space.focused` — see restoreTrackZOrder.
         // The pile split follows the traveler's slot too: it is

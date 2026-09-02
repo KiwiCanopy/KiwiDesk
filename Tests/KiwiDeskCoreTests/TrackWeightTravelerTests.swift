@@ -75,10 +75,7 @@ struct TrackWeightTravelerTests {
         core.state.workspaces.add(WindowID(9), to: SpaceID("2"))
         let s1 = core.state.workspaces[space]!
         #expect(
-            core.state.effectiveTiledMembers(
-                of: s1,
-                activeSpace: space
-            ).contains(WindowID(9))
+            core.state.effectiveTiledMembers(of: s1).contains(WindowID(9))
         )
         #expect(
             !core.state.localTiledMembers(of: s1)

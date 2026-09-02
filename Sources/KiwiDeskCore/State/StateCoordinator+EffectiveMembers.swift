@@ -20,21 +20,17 @@ extension StateCoordinator {
     /// Injects tiled-sticky travelers on active space at home-derived indices
     /// (#414 v2, #445).
     public func effectiveTiledMembers(
-        of space: Space,
-        activeSpace: SpaceID? = nil
+        of space: Space
     ) -> [WindowID] {
-        let focused = activeSpace ?? workspaces.activeSpace
         // Local sticky rendering elsewhere drops from local layout (#445).
         var members = localTiledMembers(of: space).filter { id in
             guard let window = windows[id], window.isSticky
             else { return true }
-            return stickyRenderSpace(of: window, focused: focused)
-                == space.id
+            return stickyRenderSpace(of: window) == space.id
         }
         // Offset by already-placed travelers to preserve ascending order.
         for (placed, traveler)
-            in tiledStickyTravelers(into: space, focused: focused)
-            .enumerated()
+            in tiledStickyTravelers(into: space).enumerated()
         {
             members.insert(
                 traveler.id,
@@ -48,20 +44,24 @@ extension StateCoordinator {
     }
 
     /// The single space a sticky window renders on currently (#445).
-    /// Global follows focused space; display follows home monitor's active
-    /// space.
-    func stickyRenderSpace(
-        of window: ManagedWindow,
-        focused: SpaceID?
-    ) -> SpaceID? {
+    /// Global follows the focused space; display follows its home
+    /// monitor's active space.
+    ///
+    /// The focused space is DERIVED here rather than taken as an
+    /// argument (#1225). Every caller wanted the one active space,
+    /// and a caller that passed something else was not configuring
+    /// this predicate — it was lying to it: #1214 handed each
+    /// display's own shown space in, so every screen's bar was
+    /// told a global sticky rendered on it.
+    func stickyRenderSpace(of window: ManagedWindow) -> SpaceID? {
         switch window.stickyScope {
         case .none:
             return nil
         case .global:
-            return focused ?? workspaces.activeSpace
+            return workspaces.activeSpace
         case .display:
             guard let display = homeDisplay(of: window.id) else {
-                return focused ?? workspaces.activeSpace
+                return workspaces.activeSpace
             }
             return workspaces.activeSpace(on: display)
         }
@@ -111,8 +111,7 @@ extension StateCoordinator {
         if tiled.contains(last) { return last }
         if let window = windows[last], window.isSticky,
             window.isFloating,
-            stickyRenderSpace(of: window, focused: nil)
-                == space.id
+            stickyRenderSpace(of: window) == space.id
         {
             return last
         }
@@ -130,14 +129,9 @@ extension StateCoordinator {
     /// Space Bar membership including injected travelers and pruned stickies
     /// (#414 v2, #488, #445). Fullscreen stickies stay home (#670).
     public func effectiveMembers(
-        of space: Space,
-        activeSpace: SpaceID? = nil
+        of space: Space
     ) -> [WindowID] {
-        let focused = activeSpace ?? workspaces.activeSpace
-        let injected = effectiveTiledMembers(
-            of: space,
-            activeSpace: focused
-        )
+        let injected = effectiveTiledMembers(of: space)
         var result: [WindowID] = []
         var next = 0
         for id in space.windows {
@@ -151,8 +145,7 @@ extension StateCoordinator {
                 continue
             }
             if let window = windows[id], window.isSticky,
-                stickyRenderSpace(of: window, focused: focused)
-                    != space.id
+                stickyRenderSpace(of: window) != space.id
             {
                 continue
             }
@@ -172,8 +165,7 @@ extension StateCoordinator {
             .filter {
                 $0.isSticky && $0.isFloating && !$0.isFullscreen
                     && !space.windows.contains($0.id)
-                    && stickyRenderSpace(of: $0, focused: focused)
-                        == space.id
+                    && stickyRenderSpace(of: $0) == space.id
             }
             .map(\.id)
             .sorted { $0.raw < $1.raw }
@@ -182,15 +174,13 @@ extension StateCoordinator {
 
     /// Tiled-sticky windows homed elsewhere with derived home index (#670).
     private func tiledStickyTravelers(
-        into space: Space,
-        focused: SpaceID?
+        into space: Space
     ) -> [(id: WindowID, homeIndex: Int)] {
         windows.all
             .filter {
                 $0.isSticky && !$0.isFloating && !$0.isFullscreen
                     && !space.windows.contains($0.id)
-                    && stickyRenderSpace(of: $0, focused: focused)
-                        == space.id
+                    && stickyRenderSpace(of: $0) == space.id
             }
             .compactMap { window -> (WindowID, Int)? in
                 guard

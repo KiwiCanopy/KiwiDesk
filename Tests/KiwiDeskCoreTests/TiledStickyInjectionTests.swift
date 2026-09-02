@@ -62,10 +62,7 @@ struct TiledStickyInjectionTests {
             Issue.record("Expected space")
             return
         }
-        let tiled = state.effectiveTiledMembers(
-            of: s1,
-            activeSpace: "1"
-        )
+        let tiled = state.effectiveTiledMembers(of: s1)
         #expect(
             tiled == [
                 WindowID(1), WindowID(2), WindowID(50),
@@ -85,10 +82,7 @@ struct TiledStickyInjectionTests {
             Issue.record("Expected space")
             return
         }
-        let tiled = state.effectiveTiledMembers(
-            of: s1,
-            activeSpace: "1"
-        )
+        let tiled = state.effectiveTiledMembers(of: s1)
         #expect(tiled == [WindowID(1), WindowID(50)])
     }
 
@@ -111,10 +105,7 @@ struct TiledStickyInjectionTests {
             Issue.record("Expected space")
             return
         }
-        let tiled = state.effectiveTiledMembers(
-            of: s1,
-            activeSpace: "1"
-        )
+        let tiled = state.effectiveTiledMembers(of: s1)
         // Both derive home index 0; equal-index travelers keep
         // ascending id order (reversed insertion in
         // `effectiveTiledMembers`).
@@ -148,10 +139,7 @@ struct TiledStickyInjectionTests {
             Issue.record("Expected space")
             return
         }
-        let tiled = state.effectiveTiledMembers(
-            of: s1,
-            activeSpace: "1"
-        )
+        let tiled = state.effectiveTiledMembers(of: s1)
         #expect(
             tiled == [WindowID(1), WindowID(20), WindowID(30)]
         )
@@ -171,10 +159,7 @@ struct TiledStickyInjectionTests {
             Issue.record("Expected space")
             return
         }
-        let tiled = state.effectiveTiledMembers(
-            of: s2,
-            activeSpace: "2"
-        )
+        let tiled = state.effectiveTiledMembers(of: s2)
         #expect(tiled == [WindowID(2)])
     }
 
@@ -219,11 +204,11 @@ struct TiledStickyInjectionTests {
             return
         }
         #expect(
-            state.effectiveTiledMembers(of: s1, activeSpace: "1")
+            state.effectiveTiledMembers(of: s1)
                 == [WindowID(1), WindowID(50), WindowID(2)]
         )
         #expect(
-            state.effectiveMembers(of: s1, activeSpace: "1")
+            state.effectiveMembers(of: s1)
                 == [
                     WindowID(1), WindowID(9), WindowID(50),
                     WindowID(2),

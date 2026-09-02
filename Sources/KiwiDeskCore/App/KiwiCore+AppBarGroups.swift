@@ -30,10 +30,7 @@ extension KiwiCore {
         }
         return state.focusAnchor(
             of: space,
-            tiled: state.effectiveTiledMembers(
-                of: space,
-                activeSpace: activeSpace?.id
-            )
+            tiled: state.effectiveTiledMembers(of: space)
         )
     }
 
@@ -51,10 +48,7 @@ extension KiwiCore {
         in space: Space,
         grouping: Bool
     ) -> [[WindowID]] {
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard grouping else {
             return tiled.map { [$0] }
         }
