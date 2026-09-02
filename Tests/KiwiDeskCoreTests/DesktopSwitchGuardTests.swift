@@ -246,7 +246,8 @@ struct DesktopSwitchGuardTests {
         let target = KiwiCore.DesktopTarget(
             space: 11,
             displayIdentifier: "UUID-A",
-            originSpace: 10
+            originSpace: 10,
+            spaces: []
         )
         // The display never left space 10 — the set was dropped
         // somewhere past the bridge.

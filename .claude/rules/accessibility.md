@@ -302,14 +302,15 @@ editing AX code:
   `armIgnoresTheSwitchGrace`). A switch WE dispatch promises the
   flight before the OS says a word (#1213): a native app's
   element dies ~250 ms BEFORE the switch notification on a
-  bridge-driven switch, so `switchDesktop` stamps every window
-  the carry will move — the switched screen's, by #445's render
-  screen — behind the accepted set, and only there
+  bridge-driven switch (TextEdit, device 2026-09-02), so
+  `switchDesktop` stamps every window the carry will move — the
+  switched screen's, by #445's render screen, read off the verb's
+  own topology — behind the accepted set, and only there
   (`StickyReachDispatchStampTests`, `StickyReachDispatchSeamTests`).
-  A GESTURE switch has no intent stamp, so a window whose element
-  dies before the handler carried it there was never in flight and
-  takes the ordinary departure — the residue
-  `docs/accepted-limitations.md` records. The refusal keeps the
+  A GESTURE switch promises nothing — no dispatch of ours precedes
+  it — so a window whose element dies before the handler carried
+  it was never in flight and takes the ordinary departure — the
+  residue `docs/accepted-limitations.md` records. The refusal keeps the
   STATE AND THE
   REGISTRATION — the dead element stays in `elements` — and the
   destroyed notification for a carried window defers to the

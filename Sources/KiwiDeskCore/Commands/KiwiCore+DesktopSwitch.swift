@@ -75,7 +75,10 @@ extension KiwiCore {
         // Behind the accepted set, like the stamp above: the
         // carry's in-flight promise for the windows THIS switch
         // will move (#1213) — a refused set moves nothing.
-        stampStickyReachInFlight(forSwitchOn: target.displayIdentifier)
+        stampStickyReachInFlight(
+            forSwitchOn: target.displayIdentifier,
+            in: target.spaces
+        )
         scheduleDesktopSwitchVerify(target, verb: verb)
         return .switched
     }

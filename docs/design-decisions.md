@@ -3030,11 +3030,11 @@ The rulings:
   vanish for a bounded budget while the carry holds it in flight
   rather than dropping its slot, scope and pin (the mechanism is
   `.claude/rules/accessibility.md`'s). A switch KiwiDesk itself
-  dispatches promises that flight before the OS says a word,
-  because a native app's element dies before the switch
-  notification ([#1213](https://github.com/KiwiCanopy/KiwiDesk/issues/1213));
-  a gesture switch cannot, and the trade is an
-  [accepted limitation](accepted-limitations.md), stated there.
+  dispatches promises that flight at dispatch, before the OS says
+  a word ([#1213](https://github.com/KiwiCanopy/KiwiDesk/issues/1213));
+  a gesture switch has no dispatch of ours to promise from, and
+  the trade is an [accepted limitation](accepted-limitations.md),
+  stated there.
 
 
 ## Settings GUI & UX

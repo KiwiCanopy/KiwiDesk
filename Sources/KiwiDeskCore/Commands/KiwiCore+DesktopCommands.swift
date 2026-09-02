@@ -53,6 +53,10 @@ extension KiwiCore {
         /// because the pointer write performs no transition of
         /// its own (#1023). Nil when the snapshot cannot say.
         let originSpace: SkyLight.SpaceID?
+        /// The topology the target resolved in, threaded so the
+        /// dispatch asks it every question (#888) — the sticky
+        /// reach stamp classifies render screens off it (#1213).
+        let spaces: [NativeSpace]
 
         /// Whether the Desktop is already the one its screen
         /// shows — a switch to it is a no-op. Derived, so a
@@ -76,7 +80,8 @@ extension KiwiCore {
         return DesktopTarget(
             space: space.id,
             displayIdentifier: space.displayUUID,
-            originSpace: snapshot.currentSpaces[space.displayUUID]
+            originSpace: snapshot.currentSpaces[space.displayUUID],
+            spaces: snapshot.spaces
         )
     }
 

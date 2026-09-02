@@ -249,7 +249,7 @@ struct StickyReachCarryVerdictTests {
         core.state.stickyReachOverrides[w1] = false
         #expect(core.eventLoop.carriedWindows() == [w2, w4])
         // And the stamp ages out past the in-flight window.
-        core.stickyReachCarriedAt[w2] = Date(
+        core.stickyReachInFlightAt[w2] = Date(
             timeIntervalSinceNow: -KiwiCore.inFlightWindow - 1
         )
         #expect(core.eventLoop.carriedWindows() == [w4])

@@ -22,21 +22,25 @@ struct StickyReachDispatchSeamTests {
 
     @Test("the stamp is called exactly once, from the switch dispatch")
     func stampIsCalledOnceFromTheDispatch() throws {
-        let needle = "stampStickyReachInFlight(forSwitchOn:"
-        let sites = try SourceScan.identifierSites(
+        let needle = "stampStickyReachInFlight("
+        // The declaration is the machine's own site; every other
+        // one is a caller.
+        let callers = try SourceScan.identifierSites(
             of: needle,
             under: Self.core
+        ).filter {
+            $0.file.lastPathComponent != "KiwiCore+StickyReach.swift"
+        }
+        #expect(
+            callers.count == 1,
+            """
+            expected exactly one caller of `\(needle)`, found \
+            \(callers.count): \
+            \(callers.map(\.site).joined(separator: ", "))
+            """
         )
         #expect(
-            sites.count == 1,
-            """
-            expected exactly one `\(needle)`, found \
-            \(sites.count): \
-            \(sites.map(\.site).joined(separator: ", "))
-            """
-        )
-        #expect(
-            sites.allSatisfy {
+            callers.allSatisfy {
                 $0.file.lastPathComponent
                     == "KiwiCore+DesktopSwitch.swift"
             }
@@ -63,8 +67,36 @@ struct StickyReachDispatchSeamTests {
             body.range(of: "lastDesktopSwitch = Date()")
         )
         let flightStamp = try #require(
-            body.range(of: "stampStickyReachInFlight(forSwitchOn:")
+            body.range(of: "stampStickyReachInFlight(")
         )
         #expect(switchStamp.upperBound <= flightStamp.lowerBound)
+    }
+
+    /// The ledger has ONE writer file: the dispatch stamp made a
+    /// second writer possible, and a third one elsewhere would
+    /// promise a flight the machine's own verdicts never ruled.
+    @Test("the in-flight ledger is touched only by its machine")
+    func ledgerHasOneWriterFile() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "stickyReachInFlightAt",
+            under: Self.core
+        )
+        #expect(!sites.isEmpty)
+        let allowed: Set<String> = [
+            // The declaration.
+            "KiwiCore.swift",
+            // Every read and write.
+            "KiwiCore+StickyReach.swift",
+        ]
+        #expect(
+            sites.allSatisfy {
+                allowed.contains($0.file.lastPathComponent)
+            },
+            .init(
+                rawValue: "`stickyReachInFlightAt` touched outside "
+                    + "its machine: "
+                    + sites.map(\.site).joined(separator: ", ")
+            )
+        )
     }
 }

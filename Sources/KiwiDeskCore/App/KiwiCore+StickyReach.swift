@@ -16,9 +16,9 @@ extension KiwiCore {
             ?? tiler.settings.stickyStyle.desktopReach
     }
 
-    /// How long a carried window counts as IN FLIGHT after its
-    /// move was dispatched — or after OUR OWN switch of its screen
-    /// was (#1213) — the removal gate's carried arm reads it
+    /// How long a window stays IN FLIGHT after its stamp — a
+    /// dispatched move, or our own switch of its screen (#1213) —
+    /// the removal gate's carried arm reads it
     /// (`stickyReachInFlight`). The AX element dies ~1 s after
     /// the switch on TextEdit (device, 2026-09-01) and ~2 s on an
     /// Electron app (Claude, device, 2026-09-02, the trace that
@@ -53,27 +53,23 @@ extension KiwiCore {
     /// sticky window closed with no carry in flight is a close.
     func stickyReachInFlight() -> Set<WindowID> {
         let now = Date()
-        stickyReachCarriedAt = stickyReachCarriedAt.filter {
+        stickyReachInFlightAt = stickyReachInFlightAt.filter {
             now.timeIntervalSince($0.value) < Self.inFlightWindow
         }
-        return Set(stickyReachCarriedAt.keys)
+        return Set(stickyReachInFlightAt.keys)
             .intersection(stickyReachCarried())
     }
 
-    /// Stamps every window the carry WILL move as in flight the
-    /// moment our own switch of `displayUUID` is dispatched
-    /// (#1213) — before any notification. A native app's element
-    /// dies ~250 ms BEFORE the OS switch notification on a
-    /// bridge-driven switch (TextEdit, device 2026-09-02), and
-    /// with the last carry's stamp aged out the arm was closed:
-    /// the vanish read as a close and the handler then found
-    /// nothing left to carry. The switch is our own action on
-    /// exactly these windows, so its stamp is honest; the
-    /// handler's carry re-stamps at the notification. A gesture
-    /// switch has no intent stamp (accepted-limitations.md).
-    func stampStickyReachInFlight(forSwitchOn displayUUID: String) {
+    /// Stamps every window the carry WILL move on `displayUUID`
+    /// as in flight at our own switch dispatch, before any
+    /// notification: a native app's element dies ~250 ms before
+    /// it (TextEdit, device 2026-09-02, #1213). `spaces` is the
+    /// dispatching verb's own reading (profiles.md).
+    func stampStickyReachInFlight(
+        forSwitchOn displayUUID: String,
+        in spaces: [NativeSpace]
+    ) {
         guard canDriveDesktops else { return }
-        let spaces = NativeSpaces.allSpaces()
         let carried = stickyReachCarried()
         let now = Date()
         let stamped = state.windows.all
@@ -82,7 +78,7 @@ extension KiwiCore {
             .map(\.id)
             .sorted { $0.raw < $1.raw }
         guard !stamped.isEmpty else { return }
-        for id in stamped { stickyReachCarriedAt[id] = now }
+        for id in stamped { stickyReachInFlightAt[id] = now }
         onLog(
             "reach: in flight for the dispatched switch: "
                 + stamped.map { "w\($0.raw)" }.joined(separator: " ")
@@ -128,7 +124,7 @@ extension KiwiCore {
             // In flight only for a move that was DISPATCHED: a
             // refused one moved nothing, so nothing is expected
             // to vanish and ⌘W must not wait on it.
-            if performed { stickyReachCarriedAt[id] = Date() }
+            if performed { stickyReachInFlightAt[id] = Date() }
             onLog(
                 "reach: carry w\(id.raw) -> space \(current.id) "
                     + "performed=\(performed)"

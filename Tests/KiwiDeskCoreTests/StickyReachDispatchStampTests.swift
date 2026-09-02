@@ -66,18 +66,12 @@ private let bridgeClasses: [String: AnyClass] = [
 
 // MARK: - Suite
 
-/// Our own switch dispatch promises the carry's flight (#1213).
-///
-/// On a bridge-driven switch a native app's AX element dies
-/// ~250 ms BEFORE the OS switch notification (TextEdit, device
-/// 2026-09-02); with the last carry's stamp aged out, the removal
-/// gate's carried arm was closed, the vanish read as a close and
-/// the switch handler then found nothing to carry. So
+/// Our own switch dispatch promises the carry's flight (#1213):
 /// `switchDesktop` stamps every window the carry WILL move as in
 /// flight the moment the bridge accepts the set — before any
-/// notification, before any move — scoped to the screen that
-/// switches, the way the carry itself is scoped (#445's render
-/// screen). A refused set moves nothing and promises nothing.
+/// notification or move — scoped to the switching screen the way
+/// the carry is (#445's render screen); a refused set promises
+/// nothing. The argument is accessibility.md's carried arm.
 ///
 /// The fixture is `StickyReachCarryVerdictTests`': Desktops 1–2
 /// on `UUID-A` (ids 10, 11), 3–4 on `UUID-B` (ids 20, 21); space
@@ -160,10 +154,14 @@ struct StickyReachDispatchStampTests {
         // handler fires on the OS notification, which no test
         // sends — so nothing was moved.
         #expect(Bridge.moves.isEmpty)
+        // The WHOLE line: a prefix match stays green when the
+        // stamp names a window the carry never ruled (guard-prover,
+        // 2026-09-02) — the reader re-intersects with the verdict,
+        // so this line is the one witness of the stamp's own set.
         #expect(
-            box.lines.contains {
-                $0.contains("in flight for the dispatched switch: w1 w2")
-            }
+            box.lines.contains(
+                "reach: in flight for the dispatched switch: w1 w2"
+            )
         )
     }
 

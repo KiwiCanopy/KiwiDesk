@@ -157,7 +157,8 @@ struct DesktopCommandTests {
                 == .init(
                     space: 11,
                     displayIdentifier: "UUID-A",
-                    originSpace: 10
+                    originSpace: 10,
+                    spaces: snapshot.spaces
                 )
         )
         // isCurrent is DERIVED (origin == space), so the two
@@ -171,7 +172,8 @@ struct DesktopCommandTests {
                 == .init(
                     space: 20,
                     displayIdentifier: "UUID-B",
-                    originSpace: 20
+                    originSpace: 20,
+                    spaces: snapshot.spaces
                 )
         )
         #expect(
