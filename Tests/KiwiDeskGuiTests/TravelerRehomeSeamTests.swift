@@ -82,6 +82,10 @@ struct TravelerRehomeSeamTests {
             "the traveler's fit consults the refusal memo"
         )
         #expect(
+            net.contains("forgetSizeBound("),
+            "the re-home invalidates the size ledger (#677)"
+        )
+        #expect(
             source.contains("commandedFrame("),
             "the base is the commanded frame, never the echo"
         )

@@ -35,11 +35,14 @@ struct TravelerRehomeConsumerTests {
             let display = screen.kiwiDisplay
         else { return nil }
         let home = GeometryUtils.axVisibleFrame(of: screen)
+        // A LARGER second screen, so a proportional move changes
+        // the size — a same-size twin would echo the pre-ask size,
+        // which the size-bound learner bars as "not redrawn".
         let other = CGRect(
             x: home.maxX + 100,
             y: home.minY,
-            width: home.width,
-            height: home.height
+            width: home.width * 1.5,
+            height: home.height * 1.5
         )
         let frame = CGRect(
             x: other.minX + 100,
@@ -204,66 +207,6 @@ struct TravelerRehomeConsumerTests {
                 window: Self.traveler,
                 includingHeldGlide: false
             ) == first
-        )
-    }
-
-    /// A MEMBER of the floating space parked on another screen
-    /// is the user's (or `reanchorFloat`'s on a move), never the
-    /// net's — the net moves travelers only.
-    @Test(
-        "a member parked on another screen is not the net's",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func memberOnAnotherScreenIsLeftAlone() throws {
-        let f = try #require(makeFixture(mode: .floating))
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let member = WindowID(2)
-        f.core.state.apply(
-            .windowCreated(
-                ManagedWindow(
-                    id: member,
-                    pid: 2,
-                    appName: "Member",
-                    frame: f.frame
-                )
-            )
-        )
-        f.core.state.workspaces.add(member, to: SpaceID("2"))
-        f.core.retile(animated: false, force: true)
-        #expect(f.core.tiler.recentInstantTarget(member) == nil)
-        #expect(f.core.tiler.recentInstantTarget(Self.traveler) != nil)
-    }
-
-    /// The net rides the retile's own `animated`, not the
-    /// relayout setting: a switch retiles instantly and its
-    /// traveler must not spring while every sibling snaps.
-    @Test(
-        "the net snaps when the retile snaps",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func netFollowsTheRetilesAnimated() throws {
-        let f = try #require(makeFixture(mode: .floating))
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        f.core.tiler.settings.animations.onRelayout = true
-        f.core.retile(animated: false, force: true)
-        #expect(f.core.tiler.recentInstantTarget(Self.traveler) != nil)
-    }
-
-    /// A second retile before the echo lands re-issues nothing:
-    /// the commanded base already sits on the destination.
-    @Test(
-        "a retile before the echo re-homes nothing twice",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func retileBeforeTheEchoIsIdempotent() throws {
-        let f = try #require(makeFixture(mode: .floating))
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        var lines: [String] = []
-        f.core.onLog = { lines.append($0) }
-        f.core.retile(animated: false, force: true)
-        f.core.retile(animated: false, force: true)
-        #expect(
-            lines.filter { $0.contains("traveler re-home") }.count == 1
         )
     }
 

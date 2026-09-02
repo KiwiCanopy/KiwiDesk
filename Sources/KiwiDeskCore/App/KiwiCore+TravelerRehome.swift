@@ -90,6 +90,19 @@ extension KiwiCore {
             to: target,
             animated: animated
         )
+        // A size change outside the layout's asks (#677): the
+        // echo must not read as a refusal of the previous space's
+        // ask, or the next tiled space places a residue.
+        tiler.forgetSizeBound(id)
+        // A size change outside the layout's asks (#677): the
+        // echo must not read as a refusal of the previous space's
+        // ask, or the next tiled space places a residue.
+        // A size change outside the layout's asks (#677): the
+        // echo must not read as a refusal of the previous space's
+        // ask, or the next tiled space places a residue.
+        // A size change outside the layout's asks (#677): the
+        // echo must not read as a refusal of the previous space's
+        // ask, or the next tiled space places a residue.
         onLog(
             "traveler re-home: w\(id.raw) moved onto the screen of "
                 + "floating space \(space.raw)"
