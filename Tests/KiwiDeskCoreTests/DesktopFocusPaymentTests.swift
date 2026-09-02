@@ -183,6 +183,28 @@ struct DesktopFocusPaymentTests {
         #expect(!box.lines.contains { $0.contains("owing focus") })
     }
 
+    /// The other ordering of the OS restore (CI, 2026-09-02):
+    /// the handler owes first, THEN a returning window is
+    /// reported focused. That report is ground truth; the owed
+    /// window's later arrival must not pay over it.
+    @Test("a focus honored after the owe retires the debt")
+    func honoredAfterOweRetiresTheDebt() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        arrive(first, in: core)
+        core.handle(.windowFocused(first))
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+        #expect(
+            box.lines.contains { $0.contains("debt to w1 retired") }
+        )
+        arrive(focused, in: core)
+        #expect(core.state.workspaces[home]?.focused == first)
+        #expect(!box.lines.contains { $0.contains("focus paid") })
+    }
+
     @Test("the owed window's arrival pays the debt, once")
     func arrivalPaysTheDebt() {
         let (core, box) = makeCore()
