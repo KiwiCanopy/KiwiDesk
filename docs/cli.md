@@ -298,7 +298,7 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `quit.set_layout` | `grid` (default) — how windows are spread on quit |
 | | `quit.set_grid_target_depth` | 1–20 (default 5) — quit-grid density target (windows per cell before the grid grows) |
-| | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, desktop, exec_running}`; `desktop` is the main screen's current Desktop) |
+| | `get_state` | — (returns `{active_space, spaces, windows, away_windows, monitor_count, desktop, exec_running}`; `desktop` is the main screen's current Desktop; `away_windows` lists the windows on Desktops no screen shows, each with `id`, `app`, `bundle_id`, `space_id` and `desktop`, and each space object carries its own `away_windows` ids) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
 | Profiles | `save_profile` | name (updates in place when it exists) |
@@ -488,7 +488,8 @@ change, so bars can drop stale icons immediately:
 {"event": "window_destroyed",
  "data": {"window_id": 4711, "app": "Ghostty",
           "space_id": "2", "reason": "closed",
-          "bundle_id": "com.mitchellh.ghostty"}}
+          "bundle_id": "com.mitchellh.ghostty",
+          "desktop": null}}
 ```
 
 `window_created` carries the space the window was placed in
@@ -507,15 +508,25 @@ lifecycle; the `reason` field says why the set changed:
   (only minimized; it will come back as `restored`),
   `hidden` (its app was hidden, with ⌘H or by hiding itself
   as its last window closed; the window is untouched and
-  comes back as `returned`), `vanished` (its macOS Desktop
-  was switched away; it returns as `returned`).
+  comes back as `returned`), `vanished` (the window is on a
+  macOS Desktop no screen is showing; it returns as
+  `returned`). A `vanished` payload also carries `desktop`,
+  the Mission Control number of the Desktop holding the
+  window, where the Desktop can be read; every other reason —
+  and a Mac without SkyLight — sends `null`.
 
 A macOS Desktop switch thus fires a burst of `vanished`
 destroys and a burst of `returned` creates — filter on
-`reason` to ignore them. Caveat: a window closed *while its
-Desktop is off-screen* already emitted `vanished` and never
-gets a corrective `closed`; consumers that filter `vanished`
-must also refresh their state on `desktop_change`.
+`reason` to ignore them. The reason is read off the
+WindowServer, not a timer: a window it still hosts on an
+unshown Desktop is `vanished`, one it hosts nowhere is
+`closed`, whenever the destroy lands. A window closed *while
+its Desktop is off-screen* is reported `closed` when KiwiDesk
+next reads the Desktops — at the next Desktop switch, or
+within about five seconds while any window is away — so a
+consumer sees two destroys for that window, `vanished` then
+`closed`, and refreshing on `desktop_change` remains the safe
+pattern.
 
 `window_moved_to_space` fires when a window is explicitly
 moved to another space (`move_to_space`,

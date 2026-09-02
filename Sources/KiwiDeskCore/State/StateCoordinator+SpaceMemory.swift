@@ -51,10 +51,19 @@ extension StateCoordinator {
         }
     }
 
+    /// Retires a window closed while away (#1146): the ledger
+    /// entry and the two #1207 records it was read with.
+    mutating func forgetAway(_ id: WindowID) {
+        awayWindows[id] = nil
+        rememberedSpaces[id] = nil
+        departedSlots[id] = nil
+    }
+
     /// Clears all remembered space associations (`CGWindowID`, #634).
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
         departedSlots = [:]
+        awayWindows = [:]
     }
 
     /// Retrieves remembered space identifier for untracked window.

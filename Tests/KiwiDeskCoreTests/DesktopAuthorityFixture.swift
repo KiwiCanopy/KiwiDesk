@@ -117,5 +117,4 @@ func resetAuthorityOverrides() {
     NativeSpaces.spacesOverride = nil
     NativeSpaces.mainDisplayUUIDOverride = nil
     NativeSpaces.displayUUIDOverride = nil
-    NativeSpaces.windowSpaceOverride = nil
 }

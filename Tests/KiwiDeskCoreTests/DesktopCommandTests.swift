@@ -301,13 +301,17 @@ struct DesktopCommandTests {
         #expect(core.deferred.isScheduled(.desktopMoveReap))
         // The latch: the moved window can keep OS key focus.
         #expect(core.moveLatch.isLatched(WindowID(7)))
-        // The switch window: the removal reads as `vanished`.
+        // The switch window: without a compositor answer the
+        // removal reads as `vanished` off the stamp (#1146 keeps
+        // the timer as the no-SkyLight fallback).
         #expect(core.lastDesktopSwitch > before)
         #expect(
             WindowGoneReason.classify(
                 wasMinimized: false,
-                sinceDesktopSwitch: Date()
-                    .timeIntervalSince(core.lastDesktopSwitch)
+                presence: .unknown(
+                    sinceDesktopSwitch: Date()
+                        .timeIntervalSince(core.lastDesktopSwitch)
+                )
             ) == .vanished
         )
     }

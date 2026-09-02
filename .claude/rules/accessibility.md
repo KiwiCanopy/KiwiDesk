@@ -267,7 +267,16 @@ editing AX code:
   census is trusted as ground truth. `RemovalDistrustTests`
   pins the refusal, the exempt arms, the switch-grace
   stand-down, the episode ledger, the one-census cost and the
-  convergence.
+  convergence. **The per-Desktop census (#1146) does not change
+  this rule** — it is DOWNSTREAM of the removal: the destroy
+  handler classifies `vanished` / `closed` on it and files the
+  away ledger from it after the sweep decided, and no arm of the
+  sweep, the heal or the carried gate reads it
+  (`DesktopCensusSeamTests` ▸ `sweepStaysCensusBlind`). A window
+  the sweep removed and the census still hosts on an unshown
+  Desktop is exactly the `vanished` that rule promised; one it
+  hosts on a SHOWN Desktop was a close in teardown or the
+  under-report the gate already refused.
 
   **The gate has a carried arm (#1145), which never reads the
   switch grace, and no other arm may refuse INSIDE that grace**

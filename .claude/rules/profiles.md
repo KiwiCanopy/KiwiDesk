@@ -176,7 +176,12 @@ The returning-focus memory that sits beside this one
 (`KiwiCore+DesktopFocusMemory.swift`, #1207) is
 [state-and-layout.md](state-and-layout.md)'s — keyed by the
 WindowServer's own native Space id, never by a Desktop number
-read here.
+read here. `DesktopMemory` also carries the two compositor seams
+the away ledger reads through — `readCensus` and
+`readWindowSpace` (#1146), [os-private-apis.md](os-private-apis.md)'s
+— which `makeTestCore` pins to "no compositor"
+(`DesktopCensusSeamTests` ▸ `testCorePinsBothDoors`); a suite
+wanting a verdict states it on the instance.
 
 Two obligations fall out for a **switch handler**. Take ONE
 snapshot and answer every question from it — which Desktop is

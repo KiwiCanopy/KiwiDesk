@@ -41,9 +41,9 @@ struct DesktopFocusPaymentTests {
         NativeSpaces.activeSpaceIDOverride = 10
         NativeSpaces.activeSpaceIsUserOverride = true
         pinTwoDisplays()
-        NativeSpaces.windowSpaceOverride = { _ in 10 }
         WMBridge.classResolverOverride = { _ in nil }
         let core = makeAuthorityCore()
+        core.desktopMemory.readWindowSpace = { _ in .hosted(10) }
         connectAuthority(
             core,
             [

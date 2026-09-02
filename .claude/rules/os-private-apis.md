@@ -101,6 +101,32 @@ Every one of the following binds whoever touches them:
   ([state-and-layout.md](state-and-layout.md)). A future macOS
   that applies the ADD earns a re-probe with the census as the
   witness, never a re-read of item 5.
+- **The per-Desktop window list is one `dlsym` symbol, read
+  through one builder, reached through one seam (#1146).**
+  `SLSCopyWindowsWithOptionsAndTags` (`SkyLight+WindowCensus.swift`,
+  whose docstring carries the option semantics and the device
+  measurement — read them there, never restate them) answers
+  which windows a native Space hosts from a foreign connection.
+  `NativeSpaces.desktopCensus(spaces:)` is the one builder,
+  intersecting the per-Desktop lists with the layer-0 owner map
+  `AXHelper.allNormalWindowOwners()` reads; a production
+  consumer reads it ONLY through `DesktopMemory.readCensus`, the
+  one door a test pins too (`DesktopCensusSeamTests`, whose
+  `testCorePinsBothDoors` holds that `makeTestCore` pins it and
+  the per-window `readWindowSpace` to "no compositor"), because
+  the builder reads the host's WindowServer under a suite. **Nil is absent, never
+  faked**: a consumer answers a nil census with its pre-#1146
+  behavior (`AwayLedgerTests` ▸ `noCensusIsNoVerdict`,
+  `AwayBootSeedTests` ▸ `noCensusSeedsNothing`,
+  `LifecycleReasonTests`' `.unknown` clauses), and a new
+  consumer owes that clause. Two readings that must not be
+  confused: **"gone" is the SPACE LIST being empty**
+  (`SLSCopySpacesForWindows` answering `[]`, or the id on no
+  Desktop's list) — never absence from
+  `CGWindowListCopyWindowInfo(.optionAll)`, for the reason on
+  `allNormalWindowOwners`' docstring. And the census is
+  downstream of the removal: the sweep never reads it
+  ([accessibility.md](accessibility.md)).
 - **The space-pointer write performs no transition (#1023).**
   `ManagedDisplaySetCurrentSpaceOperation` moves the pointer and
   composites the target's windows, but never hides the origin's

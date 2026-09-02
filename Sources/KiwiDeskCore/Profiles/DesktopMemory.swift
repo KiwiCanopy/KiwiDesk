@@ -20,6 +20,20 @@ final class DesktopMemory {
     /// docs/cli.md).
     var lastDisplaySpaces: [String: SkyLight.SpaceID] = [:]
 
+    /// The per-Desktop census (#1146) against the caller's one
+    /// topology reading — live by default, replaced by a test;
+    /// the one door production reads it through
+    /// (`DesktopCensusSeamTests`).
+    var readCensus: @MainActor ([NativeSpace]) -> DesktopCensus? =
+        NativeSpaces.desktopCensus(spaces:)
+
+    /// The compositor's word on ONE window at its destroy
+    /// (#1146) — the gone classifier's read, live by default and
+    /// pinned to `.unavailable` by `makeTestCore`, since a
+    /// fixture id can be a real window on the host.
+    var readWindowSpace: @MainActor (WindowID) -> WindowSpaceReading =
+        NativeSpaces.windowSpaceReading(of:)
+
     /// Seeds display space readings from desktop snapshot at boot.
     func seed(_ snapshot: DesktopSnapshot) {
         lastDisplaySpaces = snapshot.currentSpaces

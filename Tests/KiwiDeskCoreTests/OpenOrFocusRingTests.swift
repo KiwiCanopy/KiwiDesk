@@ -104,14 +104,14 @@ struct OpenOrFocusRingTests {
         // over that report.
         defer { resetAuthorityOverrides() }
         NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
-        NativeSpaces.windowSpaceOverride = {
-            $0 == WindowID(10) ? 11 : 10
-        }
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 10,
             secondaryCurrent: 20
         )
         let core = makeCore()
+        core.desktopMemory.readWindowSpace = {
+            .hosted($0 == WindowID(10) ? 11 : 10)
+        }
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
 

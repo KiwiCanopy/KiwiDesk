@@ -26,31 +26,41 @@ struct FollowFocusSeamTests {
         "Sources/KiwiDeskCore"
     )
 
-    /// needle → the file that may carry it.
+    /// needle → the files that may carry it, each exactly once.
     ///
     /// A map rather than three tests: they are one fact — the
-    /// record is written, drained and re-keyed, each in one
-    /// place — and a reader who adds a fourth site should meet
-    /// the list rather than a fourth copy of the same assertion.
-    private static let wirings: [(String, String)] = [
-        // The recorder: only a follow whose switch HAPPENED owes
-        // a focus, so this is inside `moveToDesktop`'s follow
-        // branch behind its `.switched` gate.
-        ("followFocus.record(", "KiwiCore+DesktopMove.swift"),
+    /// record is written, drained and re-keyed, each in a named
+    /// place — and a reader who adds a site should meet the list
+    /// rather than a fourth copy of the same assertion.
+    private static let wirings: [(String, [String])] = [
+        // The recorders: only a follow whose switch HAPPENED owes
+        // a focus, so each sits behind a `.switched` gate — the
+        // verb's follow branch in `moveToDesktop`, and the
+        // Open-or-Focus reach onto an away window (#1146), which
+        // is a follow by the same rule: the press named the window.
+        (
+            "followFocus.record(",
+            ["KiwiCore+DesktopMove.swift", "KiwiCore+LaunchReach.swift"]
+        ),
         // The drain, at the ARRIVAL — the moment the window
         // re-materializes, which is when it becomes addressable
         // again. Keyed to that window rather than to the reveal,
         // so no unrelated switch can pay the debt. It lives
         // inside `payFollowedFocus(arrived:)`, whose one caller
         // is the `.windowCreated` arm — pinned below.
-        ("followFocus.claim(", "KiwiCore+DisplayFocus.swift"),
+        ("followFocus.claim(", ["KiwiCore+DisplayFocus.swift"]),
         // A guard-prover round on the parked branch deleted this
         // and found every guard green — the rekey tests spend
         // themselves on BEHAVIOUR, which cannot see whether
         // anything calls it. A re-key mid-flight otherwise
         // leaves the debt naming a dead id and the follow
         // silently drops (#308).
-        ("followFocus.rekey(", "KiwiCore+RekeyEvent.swift"),
+        ("followFocus.rekey(", ["KiwiCore+RekeyEvent.swift"]),
+        // A window gone for good can never arrive to be paid
+        // (#1146): the one id-keyed retire, in `retireAwayDebts`,
+        // which the census prune and the app's exit both reach —
+        // never the bare `forget()` pinned below.
+        ("followFocus.retire(", ["KiwiCore+AwayWindows.swift"]),
     ]
 
     /// The follow's debt has ONE reader beyond its payer — the
@@ -78,31 +88,22 @@ struct FollowFocusSeamTests {
         )
     }
 
-    @Test("each wiring exists exactly once, in its own file")
+    @Test("each wiring exists exactly once per named file")
     func wiringsAreSingular() throws {
-        for (needle, file) in Self.wirings {
+        for (needle, files) in Self.wirings {
             let sites = try SourceScan.identifierSites(
                 of: needle,
                 under: Self.core
             )
+            let found = sites.map(\.file.lastPathComponent)
             #expect(
-                sites.count == 1,
+                sites.count == files.count
+                    && Set(found) == Set(files),
                 """
-                expected exactly one `\(needle)`, found \
-                \(sites.count): \
+                expected `\(needle)` once in each of \
+                \(files.joined(separator: ", ")), found \
                 \(sites.map(\.site).joined(separator: ", "))
                 """
-            )
-            #expect(
-                sites.allSatisfy {
-                    $0.file.lastPathComponent == file
-                },
-                .init(
-                    rawValue: "`\(needle)` belongs in \(file), "
-                        + "found in "
-                        + sites.map(\.site)
-                        .joined(separator: ", ")
-                )
             )
         }
     }

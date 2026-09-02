@@ -214,6 +214,50 @@ editing here:
   change; the follow's own register pins that the follow
   instance never calls `forget()`. The ruling is on the issue and
   in `docs/design-decisions.md`.
+- **A window on an away Desktop is KNOWN, in a ledger beside
+  the state — never a member (#1146).** `StateCoordinator
+  .awayWindows` (pid, app, bundle id, native Space) is written
+  on a compositor-confirmed `vanished` (`KiwiCore.handleWindowGone`)
+  and by the boot seed (`seedAwayWindows`) — a new FILING goes
+  through one of those two, never an assignment beside a call
+  site (review's: nothing scans for one). The enders differ by
+  what they mean: the RETURN pays whatever named the window (the
+  create fold and the arrival arms), the #634 reset forgets the
+  memory with everything else (`forgetDesktopFocus`), and the two
+  enders for a window GONE FOR GOOD — the census prune
+  (`pruneAwayWindow`) and the app's exit (the `.appTerminated`
+  pre-fold in `KiwiCore+Events.swift`) — retire what still names
+  it through the one `retireAwayDebts(of:)`: the #1207 memory
+  and BOTH arrival debts (`AwayLedgerTests` ▸ `pruneRetiresDebts`,
+  `exitRetiresDebts`); a new gone-for-good ender takes the same
+  call. The departure's space and rank stay in #1207's two
+  records, and the three are read together. An
+  entry ENDS on the return (the create fold), on a census that
+  no longer hosts the id (`refreshAwayWindows`, which emits the
+  corrective `closed` — at the Desktop settle and on the 5 s
+  `awayCensus` task while the ledger is non-empty), on the app's
+  exit, on the #634 reset with `rememberedSpaces`, and moves on
+  a re-key (`WindowRekeyParityTests`' fixture populates it, so the
+  reflection scan discovers the container; `AwayLedgerTests` ▸
+  `rekeyFollows` holds the move). A prune retires all three
+  records through the one `StateCoordinator.forgetAway`.
+  A reader that needs a Space's row as it WILL return takes
+  `withAwayMembers(_:of:)` — the fold's own rank insert — never
+  a hand merge; a reader keyed by app takes
+  `awayWindows(bundleID:)`. An entry with NO Space (a boot-found
+  window nothing has filed) is UNFILED: every reader carries the
+  skip branch — the bar draws it nowhere, `awayMembers(of:)`
+  omits it, `get_state` lists it only at the top level — and a
+  new reader owes the same branch. What the ledger must never
+  become: a member of `space.windows` with a flag (every
+  `space.windows` consumer would gain an exclusion, and the
+  return-by-rank fold above would be reworked), or a reason for
+  the sweep to remove anything ([accessibility.md](accessibility.md)).
+  `AwayLedgerTests` pins the writers, the enders and the merge;
+  `SpaceBarAwayTests` the bar; `OpenOrFocusReachTests` the reach
+  and the ring; `AwayBootSeedTests` the boot filing order;
+  `GoneReasonEventTests` the classification through the handler.
+  The ruling is on the issue and in `docs/design-decisions.md`.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

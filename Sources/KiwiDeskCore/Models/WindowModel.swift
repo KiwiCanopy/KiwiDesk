@@ -99,3 +99,50 @@ public struct ManagedWindow: Sendable, Equatable {
         )
     }
 }
+
+/// A window the compositor hosts on a Desktop nobody shows
+/// (#1146): the facts the departure fold erased, kept beside the
+/// pure state so the Space Bar, Open-or-Focus and the gone
+/// classifier can name it. Its KiwiDesk space and rank stay in
+/// `rememberedSpaces` / `departedSlots` (#1207) — an entry with
+/// none there is UNFILED: known, drawn nowhere.
+public struct AwayWindow: Sendable, Equatable {
+    public let id: WindowID
+    public let pid: pid_t
+    public let appName: String
+    public let appBundleID: String?
+    /// The native Space hosting it at the last reading.
+    public var nativeSpace: SkyLight.SpaceID
+    /// Up on that Desktop at the last reading; a window parked
+    /// (minimized) while away draws nowhere, as one minimized
+    /// here does.
+    public var isUp: Bool
+
+    public init(
+        id: WindowID,
+        pid: pid_t,
+        appName: String,
+        appBundleID: String?,
+        nativeSpace: SkyLight.SpaceID,
+        isUp: Bool = true
+    ) {
+        self.id = id
+        self.pid = pid
+        self.appName = appName
+        self.appBundleID = appBundleID
+        self.nativeSpace = nativeSpace
+        self.isUp = isUp
+    }
+
+    /// The same entry under a new id (#308 re-key).
+    public func withID(_ newID: WindowID) -> AwayWindow {
+        AwayWindow(
+            id: newID,
+            pid: pid,
+            appName: appName,
+            appBundleID: appBundleID,
+            nativeSpace: nativeSpace,
+            isUp: isUp
+        )
+    }
+}

@@ -53,6 +53,11 @@ extension KiwiCore {
         // both helpers argue their consumer.
         let preEventFrame = preEventFrame(of: event)
         let goneWindowPID = goneWindowPID(of: event)
+        // An exiting app's away entries are gone for good (#1146);
+        // read before the fold drops them.
+        if case .appTerminated(let pid) = event {
+            retireAwayDebts(ofExitedApp: pid)
+        }
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {
@@ -223,22 +228,12 @@ extension KiwiCore {
             }
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)
-            // The switch timestamp is set by the
-            // .desktopChanged event, emitted BEFORE the reconcile
-            // burst (#40) — but an app's own observer can fold its
-            // windows before the notification, so this stamp can
-            // be the previous switch's (#1207).
-            let reason = WindowGoneReason.classify(
-                wasMinimized: wasMinimized,
-                sinceDesktopSwitch: Date()
-                    .timeIntervalSince(lastDesktopSwitch)
-            )
-            emitWindowDestroyed(
+            // Classified on the compositor's word, and an away
+            // window joins the ledger (#1146).
+            handleWindowGone(
                 id,
-                app: effects.removedWindow?.app,
-                bundleID: effects.removedWindow?.bundleID,
-                space: effects.removedWindow?.space,
-                reason: reason
+                wasMinimized: wasMinimized,
+                effects: effects
             )
         case .windowHidden(let id):
             // Same forgetting as a destroy — the id can be

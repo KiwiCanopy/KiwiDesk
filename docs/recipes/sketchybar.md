@@ -64,7 +64,7 @@ any of them to keep sketchybar in sync:
 | `monitor_change` | `monitor_count` | Monitors connect or disconnect |
 | `desktop_change` | `desktop`, `monitor` | A macOS Desktop switches on some screen (`monitor` 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears (`new`/`returned`/`restored`) |
-| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window disappears (`closed`/`minimized`/`hidden`/`vanished`) |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` | A managed window disappears (`closed`/`minimized`/`hidden`/`vanished`); `desktop` names the Desktop holding a `vanished` window, else `nil` |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` | See caveats |
 
 **Caveats:**
@@ -73,11 +73,13 @@ any of them to keep sketchybar in sync:
   window set*, not app lifecycle — deminiaturizing and macOS
   Desktop switches also fire them. Filter on the `reason`
   argument to ignore the artifacts (`vanished`/`returned`
-  bursts on every Mission Control round-trip). If you do
-  filter, keep a `desktop_change` handler that re-queries
-  state: a window closed while its Desktop was off-screen was
-  already emitted as `vanished` and never gets a corrective
-  `closed`.
+  bursts on every Mission Control round-trip). A window closed
+  while its Desktop was off-screen sends its corrective
+  `closed` when KiwiDesk next reads the Desktops — at the next
+  Desktop switch, or within about five seconds — so it fires
+  two destroys, `vanished` then `closed`. Keep a
+  `desktop_change` handler that re-queries state anyway: it is
+  the shape that stays right whatever a consumer filters.
 - `space` in Lua callbacks is always a string (the space id).
   A window on an unknown space receives `""` (empty string
   instead of nil, so the argument list doesn't truncate). In
@@ -418,10 +420,11 @@ Wire up the events to trigger sketchybar updates:
 
 ```lua
 -- Fire kiwidesk_update on all relevant events.
--- desktop_change is not optional: a window closed while
--- its Desktop was off-screen never gets a corrective event,
--- so the Mission Control round-trip must re-query (see the
--- caveats above).
+-- desktop_change stays in the list: a window closed while
+-- its Desktop was off-screen is reported closed only when
+-- KiwiDesk next reads the Desktops, so the Mission Control
+-- round-trip re-queries rather than waiting (see the caveats
+-- above).
 for _, event in ipairs({
     "space_change",
     "layout_change",

@@ -134,7 +134,18 @@ bounded debt that the `.windowCreated` fold pays at that window's
 own arrival, holding the vacancy against earlier re-tracks and
 standing the 600 ms settle's refocus down until it is paid; and
 each departed window carries its slot so the row re-forms in the
-order it left (#1207).
+order it left (#1207). The departed window itself is not
+forgotten: the destroy handler asks the WindowServer which
+Desktop hosts it (`OS`, the per-Desktop census — two private
+list reads per user Desktop, up and parked, nil where the symbol
+is absent), reports
+`vanished` or `closed` on that answer rather than a timer, and
+files a `vanished` window in the away ledger beside the state
+(`StateCoordinator.awayWindows`, #1146). The Space Bar draws
+the ledger's windows under their Space by rank, Open-or-Focus
+reaches one over the bridge, and a census at the Desktop settle
+— and every five seconds while the ledger is non-empty — prunes
+a window closed while away with a corrective `closed`.
 
 ## 2. Command dispatch (`set_*` verbs)
 

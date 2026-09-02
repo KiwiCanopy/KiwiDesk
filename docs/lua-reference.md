@@ -3634,10 +3634,11 @@ to the app's **next** window — space order (the order spaces were
 created, the same order the Space Bar lists them), then slot
 order within a space, wrapping around — so repeat presses cycle
 through all of the app's windows. With a single window a repeat
-press changes nothing. The cycle covers the windows KiwiDesk
-currently tracks; the app's windows on another macOS
-Desktop are untracked while you are away and rejoin the cycle
-when you return to that Desktop — see
+press changes nothing. The ring includes the app's windows that
+are up on other macOS Desktops, each at the rank it holds in its
+Space's row; cycling onto one switches to that Desktop and
+focuses it. That switch needs the Desktop bridge — without it
+the ring is the windows KiwiDesk currently tracks, see
 [Accepted limitations](accepted-limitations.md).
 
 If the app has **nothing on screen** — typically every one of its
@@ -3648,8 +3649,13 @@ were already parked before it launched, say) there is no such
 record and the app's own window order decides. While any window
 is still visible, minimized windows are left alone: the shortcut
 focuses and cycles the visible ones and never pulls a window back
-out of the Dock. A window on another macOS Desktop does
-not count as on screen — see
+out of the Dock. A window up on another macOS Desktop counts: when nothing of
+the app is up on the Desktop you are looking at but a window is
+up on another one, the shortcut switches to that Desktop and
+focuses it instead of un-parking anything, and the restore runs
+only when nothing is up anywhere. On a Mac without the Desktop
+bridge, or where the per-Desktop window list cannot be read, the
+old behaviour stands — see
 [Accepted limitations](accepted-limitations.md).
 
 **Example:**
@@ -4074,7 +4080,7 @@ end)
 | `monitor_change` | `monitor_count` |
 | `desktop_change` | `desktop` (Desktop number now current on the screen that switched), `monitor` (that screen's positional number; 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
-| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` (the Desktop number holding a `vanished` window, else `nil`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
 
 The window lifecycle events fire even when focus does not change (a
@@ -4114,8 +4120,10 @@ says which kind of change fired:
   (it will come back as `"restored"`), `"hidden"` (its app was
   hidden, with cmd+H or by hiding itself as its last window
   closed; the window is untouched and comes back as
-  `"returned"`), `"vanished"` (its macOS Desktop was switched
-  away; it comes back as `"returned"`).
+  `"returned"`), `"vanished"` (the window is on a macOS Desktop
+  no screen is showing; it comes back as `"returned"`, and the
+  sixth argument, `desktop`, names the Desktop holding it where
+  the Desktop can be read — `nil` on a Mac without SkyLight).
 
 So a bar callback that only cares about real lifecycle filters in
 one line:
@@ -4130,11 +4138,15 @@ KiwiDesk.on("window_destroyed",
     end)
 ```
 
-One caveat: a window closed *while its macOS Desktop is
-off-screen* already emitted `"vanished"` at switch time and never
-gets a corrective `"closed"`. If you filter on reasons, also
-refresh on `desktop_change` — the re-query pattern in the
-sketchybar recipe does this already.
+The reason is read off the WindowServer rather than a timer,
+so a fast app folding its windows before the switch is noticed
+still reports `"vanished"`. A window closed *while its macOS
+Desktop is off-screen* is reported `"closed"` when KiwiDesk next
+reads the Desktops — at the next Desktop switch, or within about
+five seconds while any window is away — so such a window fires
+two destroys, `"vanished"` then `"closed"`. Refreshing on
+`desktop_change` — the re-query pattern in the sketchybar recipe —
+remains the safe shape for a consumer that keeps its own list.
 
 ## External Commands
 
@@ -4947,13 +4959,19 @@ KiwiDesk.debug_log("hello from init.lua")
 
 **Does:** returns a table with the current window and space state.
 Fields: `active_space` (current space id or `nil`), `spaces` (array of
-space objects), `windows` (array of window objects), `monitor_count`,
+space objects), `windows` (array of window objects), `away_windows`
+(array of the windows on Desktops no screen shows, each with `id`,
+`app`, `bundle_id`, `space_id` — `nil` for a window found at boot
+that no Space has filed yet — and `desktop`, its Mission Control
+number), `monitor_count`,
 `desktop` (the main screen's current Desktop — the number
 bindings fire on), `exec_running` (count of `KiwiDesk.exec`
 children still running).
 
 Each space object has: `id`, `mode`, `windows` (array of window ids),
-`focused` (focused window id or `nil`), and — only while a stack
+`focused` (focused window id or `nil`), `away_windows` (ids of the
+space's windows that are on a Desktop no screen shows, in the order
+they will return in), and — only while a stack
 column carries an uneven `resize("y")` split — `stack_weights`
 (window id → session weight, #67). Track spaces additionally
 carry `track_breaks` (ids of the windows that start a track,

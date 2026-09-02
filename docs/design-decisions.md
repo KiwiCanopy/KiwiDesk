@@ -3130,6 +3130,101 @@ the real handlers, and
 honored report and nowhere in the switch handler, the settle's
 stand-down, the payer's raise.
 
+### A window on an away Desktop is known, not gone (#1146)
+
+**[Principle]**
+
+KiwiDesk used to know only the windows it could see. A window on
+a macOS Desktop no screen was showing was evicted from state at
+the switch, and everything downstream guessed: the gone reason
+was a timer that read the *previous* switch for a fast app's
+departure ([#40](https://github.com/KiwiCanopy/KiwiDesk/issues/40),
+falsified by [#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)'s
+trace), the Space Bar under-counted and *Hide empty Spaces*
+dropped the whole item, and Open or Focus un-parked a local
+window beside one that was up one Desktop away
+([#673](https://github.com/KiwiCanopy/KiwiDesk/issues/673)'s
+accepted residue). The WindowServer knows all of it — one
+private list per Desktop answers which windows a Desktop hosts
+and whether each is up or parked, in well under a millisecond
+per Desktop (the measurement sits on the primitive's docstring,
+`SkyLight+WindowCensus.swift`) — so the ruling is that a window
+on an away Desktop is **known**,
+and the choices, each argued against its alternative:
+
+- **A ledger beside the state, never members in it.** The
+  visible-only state stays exactly what
+  [#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)
+  left it — departed windows evicted, remembered by space and
+  rank — and a compositor-confirmed `vanished` writes one entry
+  beside it (pid, app, bundle id, native Space). Keeping away
+  windows as members with a flag was the alternative: every
+  consumer of a space's row would gain an exclusion, the
+  return-by-rank fold would be reworked, and the removal-distrust
+  machine would need a third state. The ledger reaches its
+  consumers explicitly — the gone classifier, the Space Bar, Open
+  or Focus, `get_state` — and nothing else changes.
+- **The gone reason reads the compositor, and the timer is the
+  fallback, not a peer.** Hosted on a user Desktop nobody shows
+  is `vanished`; hosted nowhere is `closed`; hosted on a shown
+  Desktop while the app no longer lists it is `closed` too — a
+  teardown or an under-report, either way not one gesture away.
+  The settle timer decides only where SkyLight cannot answer, so
+  a Mac without the symbol keeps the pre-#1146 behavior rather
+  than a fake. And "gone" is *the space list is empty*, never
+  absence from `CGWindowListCopyWindowInfo(.optionAll)` — why
+  not is on `AXHelper.allNormalWindowOwners`' docstring.
+- **A window that dies while away gets its corrective `closed`.**
+  The ledger is re-read against one census at the Desktop settle
+  and every five seconds while it is non-empty; an entry the
+  WindowServer no longer hosts is reported `closed`, a second
+  destroy for an id that already sent `vanished`. The documented
+  consumer pattern — events as dirty flags plus a re-query —
+  already tolerates it, and a consumer filtering on `closed` was
+  otherwise never told at all.
+- **The Space Bar draws away windows exactly like present ones.**
+  Under their Space, by the rank they will return in, same
+  glyph, no dim tier, no badge, never the focus tint. The item
+  answers "what does this Space hold", and a Space holds its
+  windows wherever macOS is showing them; a dim tier already
+  means *unfocused* in the bar, and a new mark would need a
+  legend. *Hide empty Spaces* keeps a Space with away members.
+- **Open or Focus reaches an away window over the bridge, and
+  owes it the focus the way a follow does.** Nothing up on a
+  shown Desktop but a window up on an away one is a Desktop
+  switch plus a debt paid at the window's arrival
+  ([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)'s
+  shape, the same `FollowFocusIntent`), never an un-park and
+  never a duplicate launch; the cycle ring holds each Space's
+  row with its away windows in rank order, so the key walks what
+  the bar shows. Without the bridge the branch stands down and
+  `activate()` runs, as before — a faked switch was refused
+  under [the bridge is not a SIP escape hatch](#the-window-management-bridge-is-not-a-sip-escape-hatch).
+- **Boot records what it can attribute, unfiled where it must.**
+  A window on an away Desktop at boot is filed under the session
+  snapshot's space, else the Desktop's remembered Space, else
+  recorded with no Space at all — known to the classifier and to
+  Open or Focus, drawn on no bar until its reveal files it
+  through the newcomer rules. Dropping it until shown was the
+  alternative, and it would have kept the cold-boot duplicate
+  launch the issue names.
+- **The sweep keeps its one-way trust.** The on-screen census may
+  refuse a removal, never cause one
+  ([#1157](https://github.com/KiwiCanopy/KiwiDesk/issues/1157)),
+  and the per-Desktop census is downstream of that decision: it
+  classifies and files what the sweep already removed, and no
+  arm of the sweep, the heal or the carried-window gate reads it.
+  A carried sticky window ([#1145](#sticky-reach-spans-macos-desktops-1145))
+  is present, never in the ledger.
+
+What this deliberately does not do: make a Desktop return faster.
+The windows are still re-adopted through Accessibility at the
+app's own pace; what changes is what KiwiDesk knows while they
+are away. Clicking a Space whose windows are all away still
+switches KiwiDesk's Space and not the Desktop holding them —
+that coordination is
+[#1148](https://github.com/KiwiCanopy/KiwiDesk/issues/1148)'s.
+
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
 **[Rationale]**
@@ -6215,7 +6310,9 @@ minimize is a parking decision — the user said "not now" about
 that window — and a focus gesture must not undo it. So the
 shortcut works the visible windows only, and reaches into the
 Dock in the single case where the alternative is doing nothing
-at all: the app is running with nothing on screen, where
+at all: the app is running with nothing up on any Desktop (since
+[#1146](https://github.com/KiwiCanopy/KiwiDesk/issues/1146) a
+window up on an away Desktop is reached instead), where
 `activate()` brings it forward showing an empty screen. It then
 restores the *most recently* minimized window — the one parked
 last is the likeliest one wanted back, and it is an order the

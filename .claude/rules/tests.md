@@ -609,7 +609,13 @@ reads (`CGSessionCopyCurrentDictionary`) per
 `WakeSessionPresenceWiringTests` run — one in the suite's
 `.enabled(if:)` trait and one through the seam it asserts on
 (#835), whose docstring owns why a session-less host SKIPs that
-suite rather than reds it. **The host text-metric read is
+suite rather than reds it; and, since #1146 (2026-09-03), one
+read-only `SLSCopyManagedDisplaySpaces` plist read per
+`.windowDestroyed` a core suite folds without pinning
+`NativeSpaces.spacesOverride` — the gone classifier's topology,
+which decides nothing on its own while `makeTestCore` pins the
+per-window read to "no compositor" (`DesktopCensusSeamTests` ▸
+`testCorePinsBothDoors`). **The host text-metric read is
 back** — `PresetGridFloorTests` lays out an `NSButton` per
 shipped catalog and calls `sizeToFit()`, so a run takes host
 font metrics once per catalog per measured key (#862, 2026-08-17).

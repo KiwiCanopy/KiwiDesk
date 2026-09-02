@@ -25,7 +25,8 @@ extension KiwiCore {
                     + "focus honored on w\(id.raw)"
             )
         }
-        guard let native = NativeSpaces.nativeSpace(of: id)
+        // The compositor's one door (#1146): the seam a test pins.
+        guard case .hosted(let native) = desktopMemory.readWindowSpace(id)
         else { return }
         desktopMemory.honoredFocus[space, default: [:]][native] = id
     }
@@ -94,6 +95,16 @@ extension KiwiCore {
     func forgetDesktopFocus() {
         desktopMemory.honoredFocus = [:]
         desktopMemory.returnFocus.forget()
+    }
+
+    /// A window closed while away (#1146) leaves the memory too,
+    /// or the next return owes a debt to a window that is gone.
+    func retireDesktopFocus(of id: WindowID) {
+        for (space, entries) in desktopMemory.honoredFocus {
+            for (native, owed) in entries where owed == id {
+                desktopMemory.honoredFocus[space]?[native] = nil
+            }
+        }
     }
 
     /// A native-tab re-key (#308) follows in the memory and the

@@ -122,24 +122,6 @@ struct LifecycleEventTests {
         )
     }
 
-    @Test("a destroy right after a native switch is vanished")
-    func vanished() {
-        let core = makeCore()
-        core.eventLoop.onEvent(.windowCreated(window(4)))
-        core.lastDesktopSwitch = Date()
-        var events: [(KiwiNotification, JSONValue)] = []
-        core.bus.addSink { event, data in
-            events.append((event, data))
-        }
-        core.eventLoop.onEvent(
-            .windowDestroyed(WindowID(4), wasMinimized: false)
-        )
-        #expect(
-            reason(of: .windowDestroyed, in: events)
-                == .string("vanished")
-        )
-    }
-
     @Test("deminiaturize fires window_created reason restored")
     func restored() {
         let core = makeCore()

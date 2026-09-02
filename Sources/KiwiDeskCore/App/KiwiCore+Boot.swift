@@ -193,6 +193,9 @@ extension KiwiCore {
         // armed the pass that heals it (#836).
         defersWindowRuleReconcileToSweep = false
         scheduleAdoptionHeal()
+        // The full cross-Desktop model (#1146): after the
+        // restore filed what the snapshot knows.
+        seedAwayWindows()
         drainDeferredBootApps()
         closeBootInterval()
         logBootSummary()

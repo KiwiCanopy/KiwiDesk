@@ -39,11 +39,11 @@ struct DesktopFocusMemoryTests {
         NativeSpaces.activeSpaceIDOverride = 10
         NativeSpaces.activeSpaceIsUserOverride = true
         pinTwoDisplays()
-        // Every window lives on Desktop 1 (native 10) unless a
-        // test says otherwise.
-        NativeSpaces.windowSpaceOverride = { _ in 10 }
         WMBridge.classResolverOverride = { _ in nil }
         let core = makeAuthorityCore()
+        // Every window lives on Desktop 1 (native 10) unless a
+        // test says otherwise.
+        core.desktopMemory.readWindowSpace = { _ in .hosted(10) }
         connectAuthority(
             core,
             [
@@ -191,7 +191,9 @@ struct DesktopFocusMemoryTests {
         let (core, box) = makeCore()
         defer { teardown() }
         let other = WindowID(7)
-        NativeSpaces.windowSpaceOverride = { $0 == other ? 11 : 10 }
+        core.desktopMemory.readWindowSpace = {
+            .hosted($0 == other ? 11 : 10)
+        }
         leaveDesktop1(core)
         arrive(other, in: core)
         core.handle(.windowFocused(other))
