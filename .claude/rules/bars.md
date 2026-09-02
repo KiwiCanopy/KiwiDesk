@@ -5,10 +5,13 @@ paths:
   # exact site where the drawn/announced split has twice been
   # reasoned about wrongly — this file must load there too.
   - "Sources/KiwiDeskCore/App/KiwiCore+BarTitles.swift"
-  # The per-display drivers answer the sticky presence question,
-  # and that is where #1214 substituted each screen's own shown
-  # Space for the focused one — this file must load there too.
+  # Both bars are built per display, and that is where #1214
+  # substituted each screen's own shown Space for the focused
+  # one — the two drivers and the item builders they call must
+  # load this file too.
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBar.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+AppBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBarGroups.swift"
 ---
 
@@ -64,20 +67,25 @@ the current Space of both screens while the layout drew it on one
 
 Obligations:
 
-- A bar derivation answering *which windows are present* — the
-  glyph strip's members, a focus anchor, a traveler injection —
-  passes the one active Space (`activeSpace?.id`, what
-  `KiwiCore.barGroups` and the layout already pass), never
-  `currentSpace(on:)` and never a per-item flag standing in for
-  it. Nothing scans for a fresh per-display substitution, so each
-  new derivation owes the routing deliberately.
-- `currentSpace(on:)` stays right for what it NAMES — which item
-  draws as active, which one `hide_empty` keeps, whose focused
-  window the front-app segment shows — so the fix is never to
-  retire the read, only to stop it answering a question about
-  rendering.
-- `SpaceBarBadgeTests` ▸ `globalStickyStaysOnTheActiveScreen`
-  pins the two-screen half from the driver, on both sides of a
-  switch; the single-screen sibling beside it stays blind to the
-  defect by construction, which is why the pin is a second test
-  rather than an added expectation.
+- A bar derivation answering *which windows are present*, or
+  *which one holds the SYSTEM focus* — the glyph strip's members,
+  a focus anchor, a traveler injection, the `+n` badge's tint —
+  passes `activeSpace?.id`, never `currentSpace(on:)` and never a
+  per-item flag standing in for it. Nothing scans for a fresh
+  per-display substitution, so each new derivation owes the
+  routing deliberately.
+- `currentSpace(on:)` is not retired and must not be: it answers
+  *which Space is this screen showing*, which is the right
+  question for the item that draws as active, for the space a
+  bar is BUILT for, and for chrome coverage. So a new read of it
+  **states which of the two questions it is answering**, in a
+  word beside the call — the two are one token apart and read
+  identically at a glance, which is how #1214 shipped and how
+  the `+n` tint beside it shipped a second time.
+- `SpaceBarStickyScreenTests` pins the two-screen half from the
+  driver: the ∞ arm on both sides of a switch, the 📌 arm that
+  refuses the over-broad "prune every sticky off an unfocused
+  screen" fix, and the `+n` tint. The single-screen suites stay
+  blind to all three by construction — one display makes the
+  shown Space and the active Space the same value — which is why
+  these are their own file rather than added expectations.
