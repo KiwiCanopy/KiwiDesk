@@ -60,6 +60,15 @@ final class FollowFocusIntent {
         pending = nil
     }
 
+    /// Retires the debt only where it names `id` — a window that
+    /// closed while away (#1146) can never arrive to be paid, and
+    /// a debt left standing would hold the settle's refocus down
+    /// for nothing. Any other debt is untouched.
+    func retire(_ id: WindowID) {
+        guard pending?.window == id else { return }
+        pending = nil
+    }
+
     /// Follows a native-tab re-key (#308). Diagnosis is narrated
     /// at the two ends (recorder logs the debt, payer logs the
     /// payment) — a trace carrying the first without the second is

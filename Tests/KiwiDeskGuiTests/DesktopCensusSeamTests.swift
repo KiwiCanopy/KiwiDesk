@@ -69,6 +69,39 @@ struct DesktopCensusSeamTests {
         )
     }
 
+    /// The per-window door: the raw read lives behind the seam's
+    /// default alone, and production asks the seam in exactly the
+    /// two places that classify or remember a window's Space.
+    @Test("production reads a window's Space through the seam")
+    func windowSpaceReadsThroughTheSeam() throws {
+        // Unqualified: the one call sits inside the extension.
+        let raw = try SourceScan.identifierSites(
+            of: "nativeSpace(of:",
+            under: Self.sources
+        )
+        #expect(
+            raw.map(\.file.lastPathComponent) == ["NativeSpaces+Census.swift"],
+            .init(rawValue: "found " + raw.map(\.site).joined(separator: ", "))
+        )
+        let readers = try SourceScan.identifierSites(
+            of: "desktopMemory.readWindowSpace(",
+            under: Self.core
+        )
+        let files = Set(readers.map(\.file.lastPathComponent))
+        #expect(
+            readers.count == 2
+                && files == [
+                    "KiwiCore+GoneReason.swift",
+                    "KiwiCore+DesktopFocusMemory.swift",
+                ],
+            .init(
+                rawValue: "expected the classifier and the focus "
+                    + "memory, found "
+                    + readers.map(\.site).joined(separator: ", ")
+            )
+        )
+    }
+
     @Test("a test never calls the builder")
     func testsReachTheCensusThroughTheSeam() throws {
         let sites = try SourceScan.identifierSites(

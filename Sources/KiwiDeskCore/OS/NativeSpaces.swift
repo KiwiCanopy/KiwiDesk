@@ -169,22 +169,16 @@ public enum NativeSpaces {
         public static nonisolated(unsafe) var mainDisplayUUIDOverride: String?
         public static nonisolated(unsafe) var displayUUIDOverride:
             ((DisplayID) -> String?)?
-        /// Override for the per-window native Space read (#1207).
-        public static nonisolated(unsafe) var windowSpaceOverride:
-            ((WindowID) -> SkyLight.SpaceID?)?
     #endif
 
     /// The native Space the WindowServer hosts `window` on — the
     /// compositor's answer, independent of any notification's
-    /// timing (#1207). Nil without SkyLight.
+    /// timing (#1207). Nil without SkyLight. Production reads it
+    /// through `DesktopMemory.readWindowSpace` alone (#1146,
+    /// `DesktopCensusSeamTests`), which a test pins per core.
     public static func nativeSpace(
         of window: WindowID
     ) -> SkyLight.SpaceID? {
-        #if DEBUG
-            if let override = windowSpaceOverride {
-                return override(window)
-            }
-        #endif
         guard let connection = SkyLight.connection else { return nil }
         return SkyLight.windowSpace(
             window.raw,

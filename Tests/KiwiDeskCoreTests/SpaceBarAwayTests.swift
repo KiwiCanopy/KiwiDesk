@@ -69,17 +69,19 @@ struct SpaceBarAwayTests {
             core.state.windows.upsert(window(id))
             core.state.workspaces.add(WindowID(id), to: "2")
         }
+        // Mail sits BETWEEN the two Safari windows by rank, so an
+        // appended merge would group Safari as one run of two.
         core.state.departedSlots[WindowID(1)] = 0
         core.state.departedSlots[WindowID(3)] = 2
-        park(core, 2, in: "2", rank: 1)
-        park(core, 4, app: "Mail", in: "2", rank: 3)
+        park(core, 2, app: "Mail", in: "2", rank: 1)
+        park(core, 4, in: "2", rank: 3)
         let space = core.state.workspaces["2"]!
         let (apps, _, _) = core.spaceBarApps(
             in: space,
             style: core.tiler.settings.spaceBarStyle
         )
-        #expect(apps.map(\.name) == ["Safari", "Mail"])
-        #expect(apps.map(\.count) == [3, 1])
+        #expect(apps.map(\.name) == ["Safari", "Mail", "Safari"])
+        #expect(apps.map(\.count) == [1, 1, 2])
     }
 
     @Test("hide_empty keeps a Space whose windows are all away")

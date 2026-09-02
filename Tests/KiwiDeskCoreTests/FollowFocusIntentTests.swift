@@ -100,6 +100,16 @@ struct FollowFocusIntentTests {
         #expect(intent.claim(at: t0, if: payable) == nil)
     }
 
+    @Test("retire drops only a debt naming that window")
+    func retireIsKeyed() {
+        let intent = FollowFocusIntent()
+        intent.record(WindowID(7))
+        intent.retire(WindowID(8))
+        #expect(intent.owed() == WindowID(7))
+        intent.retire(WindowID(7))
+        #expect(intent.owed() == nil)
+    }
+
     @Test("a re-keyed window keeps the debt and its clock")
     func rekeyKeepsTheDebt() {
         let intent = FollowFocusIntent()

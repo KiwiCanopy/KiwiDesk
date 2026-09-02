@@ -43,6 +43,14 @@ extension KiwiCore {
         guard let census = desktopMemory.readCensus(spaces) else {
             return false
         }
+        fold(census)
+        return true
+    }
+
+    /// Folds ONE census into the ledger — the reading every
+    /// consumer of the ledger then sees, so a keystroke and the
+    /// bar never disagree about a window's Desktop or parking.
+    func fold(_ census: DesktopCensus) {
         var redrawn = false
         for entry in state.awayWindows.values.sorted(by: {
             $0.id.raw < $1.id.raw
@@ -58,13 +66,30 @@ extension KiwiCore {
         }
         // The bar drew what changed; nothing else retiles.
         if redrawn { updateSpaceBar() }
-        return true
+    }
+
+    /// Retires what still names a window that is gone for good:
+    /// the #1207 focus memory and both arrival debts — a debt to
+    /// a window that can never arrive would hold the settle's
+    /// refocus down for nothing.
+    func retireAwayDebts(of id: WindowID) {
+        retireDesktopFocus(of: id)
+        desktopMemory.returnFocus.retire(id)
+        followFocus.retire(id)
+    }
+
+    /// The app's exit ends its entries (the state fold) and
+    /// what named them (#1146).
+    func retireAwayDebts(ofExitedApp pid: pid_t) {
+        for entry in state.awayWindows.values where entry.pid == pid {
+            retireAwayDebts(of: entry.id)
+        }
     }
 
     private func pruneAwayWindow(_ entry: AwayWindow) {
         let space = state.rememberedSpace(of: entry.id)
         state.forgetAway(entry.id)
-        retireDesktopFocus(of: entry.id)
+        retireAwayDebts(of: entry.id)
         onLog(
             "away: w\(entry.id.raw) (\(entry.appName)) closed "
                 + "while its Desktop was away"

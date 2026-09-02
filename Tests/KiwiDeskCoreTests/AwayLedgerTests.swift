@@ -185,6 +185,42 @@ struct AwayLedgerTests {
         #expect(core.desktopMemory.honoredFocus["1"]?[4] == nil)
     }
 
+    @Test("a prune retires both arrival debts naming the window")
+    func pruneRetiresDebts() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(7)))
+        core.eventLoop.onEvent(.windowCreated(window(8)))
+        for id: UInt32 in [7, 8] {
+            core.eventLoop.onEvent(
+                .windowDestroyed(WindowID(id), wasMinimized: false)
+            )
+        }
+        core.followFocus.record(WindowID(7))
+        core.desktopMemory.returnFocus.record(WindowID(8))
+        core.desktopMemory.readCensus = { _ in self.census(hosting: [8]) }
+        core.refreshAwayWindows()
+        #expect(core.followFocus.owed() == nil)
+        // The other window's debt is untouched.
+        #expect(core.desktopMemory.returnFocus.owed() == WindowID(8))
+    }
+
+    @Test("an exiting app's away windows retire their debts")
+    func exitRetiresDebts() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(7)))
+        core.eventLoop.onEvent(
+            .windowDestroyed(WindowID(7), wasMinimized: false)
+        )
+        core.desktopMemory.honoredFocus["1"] = [4: WindowID(7)]
+        core.desktopMemory.returnFocus.record(WindowID(7))
+        core.eventLoop.onEvent(.appTerminated(pid: 100))
+        #expect(core.state.awayWindows.isEmpty)
+        #expect(core.desktopMemory.honoredFocus["1"]?[4] == nil)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+    }
+
     @Test("the app's exit and the arrangement reset drop the entries")
     func exitAndResetDrop() {
         defer { resetAuthorityOverrides() }

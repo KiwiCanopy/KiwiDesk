@@ -24,7 +24,11 @@ extension KiwiCore {
         guard let census = desktopMemory.readCensus(snapshot.spaces) else {
             return nil
         }
-        let windows = away.compactMap { entry -> (AwayWindow, Int)? in
+        // One reading for the keystroke AND the ledger the ring
+        // and the bar read (#1146): fold before deciding.
+        fold(census)
+        let windows = awayWindows(bundleID: bundleID).compactMap {
+            entry -> (AwayWindow, Int)? in
             guard let host = census.hosts[entry.id],
                 host.isUp, census.isAway(entry.id),
                 let number = snapshot.number(of: host.space)

@@ -218,11 +218,14 @@ editing here:
   the state — never a member (#1146).** `StateCoordinator
   .awayWindows` (pid, app, bundle id, native Space) is written
   on a compositor-confirmed `vanished` (`KiwiCore.handleWindowGone`)
-  and by the boot seed (`seedAwayWindows`) — a NEW writer joins
-  `KiwiCore+AwayWindows.swift`, which owns every write, rather
-  than assigning beside a call site; the departure's space and
-  rank stay in #1207's two records, and the three are read
-  together. An
+  and by the boot seed (`seedAwayWindows`) — a new FILING goes
+  through one of those two, never an assignment beside a call
+  site (review's: nothing scans for one); the enders live in
+  `State/` and `KiwiCore+AwayWindows.swift`, and an ender that
+  drops an entry also retires what still names it through
+  `retireAwayDebts(of:)` — the #1207 memory and BOTH arrival
+  debts; the departure's space and rank stay in #1207's two
+  records, and the three are read together. An
   entry ENDS on the return (the create fold), on a census that
   no longer hosts the id (`refreshAwayWindows`, which emits the
   corrective `closed` — at the Desktop settle and on the 5 s

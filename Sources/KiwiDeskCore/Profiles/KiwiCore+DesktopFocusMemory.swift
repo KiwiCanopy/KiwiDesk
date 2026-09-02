@@ -25,7 +25,8 @@ extension KiwiCore {
                     + "focus honored on w\(id.raw)"
             )
         }
-        guard let native = NativeSpaces.nativeSpace(of: id)
+        // The compositor's one door (#1146): the seam a test pins.
+        guard case .hosted(let native) = desktopMemory.readWindowSpace(id)
         else { return }
         desktopMemory.honoredFocus[space, default: [:]][native] = id
     }

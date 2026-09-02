@@ -56,6 +56,10 @@ struct FollowFocusSeamTests {
         // leaves the debt naming a dead id and the follow
         // silently drops (#308).
         ("followFocus.rekey(", ["KiwiCore+RekeyEvent.swift"]),
+        // A window closed while away can never arrive to be paid
+        // (#1146): the one retire, id-keyed, in the ledger's
+        // prune — never the bare `forget()` pinned below.
+        ("followFocus.retire(", ["KiwiCore+AwayWindows.swift"]),
     ]
 
     /// The follow's debt has ONE reader beyond its payer — the

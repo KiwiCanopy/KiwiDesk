@@ -35,17 +35,6 @@ public struct DesktopCensus: Sendable, Equatable {
         return !shown.contains(host.space)
     }
 
-    /// The away windows a process owns, up ones first, by id.
-    public func awayWindows(pid: pid_t) -> [WindowID] {
-        hosts
-            .filter { $0.value.pid == pid && isAway($0.key) }
-            .sorted {
-                ($0.value.isUp ? 0 : 1, $0.key.raw)
-                    < ($1.value.isUp ? 0 : 1, $1.key.raw)
-            }
-            .map(\.key)
-    }
-
     /// Builds the census from the topology and two readers —
     /// pure, so `DesktopCensusTests` needs no WindowServer. A
     /// window listed on more than one Desktop (an all-spaces
@@ -131,10 +120,7 @@ extension NativeSpaces {
     /// reads as `closed` — accepted, since a closed window is the
     /// common case and the ledger cannot file what it cannot host.
     public static var canReadWindowSpaces: Bool {
-        #if DEBUG
-            if windowSpaceOverride != nil { return true }
-        #endif
-        return SkyLight.connection != nil
+        SkyLight.connection != nil
             && SkyLight.copySpacesForWindows != nil
     }
 }

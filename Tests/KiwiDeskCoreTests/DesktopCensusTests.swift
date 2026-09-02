@@ -117,22 +117,4 @@ struct DesktopCensusTests {
         ) { _, _ in nil }
         #expect(census == nil)
     }
-
-    @Test("a process's away windows come up first, then by id")
-    func awayWindowsOrdered() throws {
-        let census = try #require(
-            DesktopCensus.build(
-                spaces: spaces,
-                owners: [
-                    WindowID(7): 100, WindowID(5): 100,
-                    WindowID(6): 100, WindowID(8): 200,
-                ],
-                list: lister([4: ([5, 6, 7, 8], [6, 7, 8])])
-            )
-        )
-        #expect(
-            census.awayWindows(pid: 100)
-                == [WindowID(6), WindowID(7), WindowID(5)]
-        )
-    }
 }

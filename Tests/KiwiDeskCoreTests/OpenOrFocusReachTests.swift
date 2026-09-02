@@ -209,6 +209,8 @@ struct OpenOrFocusReachTests {
         press(core)
         #expect(Bridge.switches.isEmpty)
         #expect(core.followFocus.owed() == nil)
+        // Not away ⇒ nothing up anywhere ⇒ the un-park runs.
+        #expect(touches.restored == [WindowID(9)])
         #expect(touches.activated == [pid])
     }
 

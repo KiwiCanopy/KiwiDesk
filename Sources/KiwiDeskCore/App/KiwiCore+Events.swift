@@ -53,6 +53,11 @@ extension KiwiCore {
         // both helpers argue their consumer.
         let preEventFrame = preEventFrame(of: event)
         let goneWindowPID = goneWindowPID(of: event)
+        // An exiting app's away entries are gone for good (#1146);
+        // read before the fold drops them.
+        if case .appTerminated(let pid) = event {
+            retireAwayDebts(ofExitedApp: pid)
+        }
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {
