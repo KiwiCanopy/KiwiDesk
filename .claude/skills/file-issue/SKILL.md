@@ -36,6 +36,21 @@ Then:
 gh issue create --title "<prefix> <title>" --body-file <file>
 ```
 
+### An undecided feature request
+
+A feature request the owner has not ruled in or out — filed to
+record the idea, not to schedule it — takes the `needs-feedback`
+label (the feature twin of `needs-evidence`) and opens its body
+with the line that tells a visitor what to do:
+
+```
+> **Not scheduled.** Leave a 👍 on this issue if you want it — it
+> is picked up when demand shows (label `needs-feedback`).
+```
+
+Owner ruling 2026-09-02 (#1222 is the first). It still gets a
+Type, Priority (`Low`) and Effort like any other issue.
+
 ## 2. Set the Type
 
 Set it explicitly — `Bug`, `Feature`, or `Task`, matching the
