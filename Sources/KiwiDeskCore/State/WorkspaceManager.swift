@@ -159,6 +159,18 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.insert(window, after: anchor)
     }
 
+    /// Adds a returning window at its remembered rank (#1207).
+    public mutating func add(
+        _ window: WindowID,
+        to id: SpaceID,
+        rank: Int,
+        ranks: [WindowID: Int]
+    ) {
+        remove(window)
+        ensureSpace(id)
+        spaces[id]?.insert(window, rank: rank, ranks: ranks)
+    }
+
     /// Adds window according to layout spawn placement policy.
     public mutating func add(
         _ window: WindowID,

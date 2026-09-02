@@ -172,6 +172,12 @@ them against one two-screen arrangement where they differ, and
 `KiwiCore.bindableDesktops(in:)` is where the list meets the
 capability.
 
+The returning-focus memory that sits beside this one
+(`KiwiCore+DesktopFocusMemory.swift`, #1207) is
+[state-and-layout.md](state-and-layout.md)'s — keyed by the
+WindowServer's own native Space id, never by a Desktop number
+read here.
+
 Two obligations fall out for a **switch handler**. Take ONE
 snapshot and answer every question from it — which Desktop is
 authoritative, which displays changed, whether a display's

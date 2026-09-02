@@ -45,6 +45,9 @@ extension KiwiCore {
                 TilingEngine.screen(
                     containing: window.frame
                 )?.kiwiDisplay?.id
+            // The Desktop return's owed focus, mirrored in the
+            // same way (#1207).
+            state.returningFocus = desktopMemory.returnFocus.owed()
         }
         // Read BEFORE the fold below overwrites/removes them —
         // both helpers argue their consumer.
@@ -93,6 +96,9 @@ extension KiwiCore {
             // space it activates is the one the arrival settled
             // on. A no-op unless this window is the one owed.
             payFollowedFocus(arrived: window.id)
+            // #1207: the Desktop return's owed focus, paid where
+            // the fold said it returned.
+            payReturningFocus(arrived: window.id, effects: effects)
         case .windowMoved(let id, let frame):
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already
@@ -218,10 +224,10 @@ extension KiwiCore {
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)
             // The switch timestamp is set by the
-            // .desktopChanged event, which the event loop
-            // emits BEFORE the reconcile burst on the same
-            // run-loop turn — so vanish classification is
-            // ordering, not a race (#40).
+            // .desktopChanged event, emitted BEFORE the reconcile
+            // burst (#40) — but an app's own observer can fold its
+            // windows before the notification, so this stamp can
+            // be the previous switch's (#1207).
             let reason = WindowGoneReason.classify(
                 wasMinimized: wasMinimized,
                 sinceDesktopSwitch: Date()

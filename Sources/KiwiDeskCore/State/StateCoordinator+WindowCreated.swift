@@ -16,6 +16,8 @@ extension StateCoordinator {
         // Screen wins on multi-monitor Desktop moves (#1010).
         let arrival = arrivalDisplay
         arrivalDisplay = nil
+        let owed = returningFocus
+        returningFocus = nil
         let remembered = rememberedSpaces[window.id]
         let preferred = arrivalScreenHome(
             of: windows[window.id],
@@ -53,6 +55,17 @@ extension StateCoordinator {
                         && !window.isFullscreen
                 }
             )
+        } else if case .departed(target)? = remembered,
+            let slot = departedSlots[window.id]
+        {
+            // A return takes the slot it left, ranked against the
+            // members already back (#1207).
+            workspaces.add(
+                window.id,
+                to: target,
+                rank: slot,
+                ranks: departedSlots
+            )
         } else {
             workspaces.add(
                 window.id,
@@ -78,9 +91,24 @@ extension StateCoordinator {
         // cleared it); and it beats the `focused == nil` arm, so
         // an overlay spawning into a focusless space leaves it
         // nil — a popup is not a settle target.
-        if windows[window.id]?.isTransientOverlay != true,
-            !effects.hadRememberedSpace
-                || workspaces[target]?.focused == nil
+        // A Desktop return's owed window takes the focus when it
+        // RETURNS, and while it is still departed no other
+        // returning window claims the vacancy (#1207).
+        let owedHere =
+            owed.map {
+                $0 != window.id
+                    && rememberedSpaces[$0] == .departed(target)
+                    && windows[$0] == nil
+            } ?? false
+        guard windows[window.id]?.isTransientOverlay != true
+        else { return }
+        if effects.hadRememberedSpace, owed == window.id,
+            target == workspaces.activeSpace
+        {
+            workspaces.focus(window.id, in: target)
+            effects.paidReturningFocus = true
+        } else if !effects.hadRememberedSpace
+            || (workspaces[target]?.focused == nil && !owedHere)
         {
             workspaces.focus(window.id, in: target)
         }

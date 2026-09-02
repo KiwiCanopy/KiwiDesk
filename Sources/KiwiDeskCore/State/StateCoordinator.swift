@@ -29,8 +29,18 @@ public struct StateCoordinator: Sendable {
     /// Physical display of an arriving window (#1010), consumed on create.
     public var arrivalDisplay: DisplayID?
 
+    /// The window a Desktop return still owes its focus (#1207),
+    /// mirrored in before each create like `arrivalDisplay`.
+    public var returningFocus: WindowID?
+
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
+
+    /// The slot a departed window held (#1207): a return re-inserts
+    /// by this rank, so a Desktop's row comes back in the order it
+    /// left rather than in re-track order. Kept after the return so
+    /// later arrivals rank against it; rewritten at each departure.
+    var departedSlots: [WindowID: Int] = [:]
 
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
@@ -80,6 +90,9 @@ public struct StateCoordinator: Sendable {
         workspaces.rekey(old, to: new)
         if let space = rememberedSpaces.removeValue(forKey: old) {
             rememberedSpaces[new] = space
+        }
+        if let slot = departedSlots.removeValue(forKey: old) {
+            departedSlots[new] = slot
         }
         if let index = minimizeOrder.firstIndex(
             where: { $0.id == old }

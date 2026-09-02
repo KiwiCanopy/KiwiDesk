@@ -118,6 +118,10 @@ extension KiwiCore {
                 )
             {
                 state.workspaces.activate(target)
+                oweReturningFocus(
+                    for: target,
+                    native: snapshot.mainCurrentSpace
+                )
                 // Never animate here: this desktop's windows
                 // just (re)appeared, there is nothing to fly
                 // around.
@@ -254,7 +258,15 @@ extension KiwiCore {
         // arbitrary stacking; put the overlapping
         // layouts' z-order back before handing focus over.
         scheduleZOrderRestore()
-        if let focused = activeSpace?.focused,
+        // #1207: a return still owing its focus to a window not
+        // yet re-listed stands this refocus down — raising
+        // `Space.focused` here is the first-in-row jump.
+        if let owed = desktopMemory.returnFocus.owed() {
+            onLog(
+                "desktop return: focus owed to w\(owed.raw), "
+                    + "settle refocus stands down"
+            )
+        } else if let focused = activeSpace?.focused,
             state.windows[focused]?.isFullscreen != true
         {
             // The instant retile above already placed the

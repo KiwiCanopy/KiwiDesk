@@ -53,6 +53,31 @@ struct FollowFocusSeamTests {
         ("followFocus.rekey(", "KiwiCore+RekeyEvent.swift"),
     ]
 
+    /// The follow's debt has ONE reader beyond its payer — the
+    /// Desktop return's precedence (#1207), pinned in
+    /// `ReturningFocusSeamTests`' register rather than here.
+    /// And it is never FORGOTTEN: `forget()` is the return's
+    /// (#1207) — the follow records only after a `.switched`
+    /// outcome, so there is no refused switch to retire, and a
+    /// forget on this instance would drop a debt the reveal is
+    /// about to pay. A count over the tree, the fail-open-safe
+    /// form of a negative clause (tests.md, #1021).
+    @Test("the follow never forgets its debt")
+    func theFollowNeverForgets() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "followFocus.forget(",
+            under: Self.core
+        )
+        #expect(
+            sites.isEmpty,
+            .init(
+                rawValue: "the follow's debt is drained, never "
+                    + "forgotten — found "
+                    + sites.map(\.site).joined(separator: ", ")
+            )
+        )
+    }
+
     @Test("each wiring exists exactly once, in its own file")
     func wiringsAreSingular() throws {
         for (needle, file) in Self.wirings {

@@ -175,6 +175,23 @@ public struct Space: Sendable, Equatable {
         }
     }
 
+    /// Inserts window before the first member ranked above it,
+    /// else last — so members returning in any order rebuild the
+    /// order their ranks describe (#1207). A member with no rank
+    /// (a spawn, a carried sticky) is passed over.
+    public mutating func insert(
+        _ window: WindowID,
+        rank: Int,
+        ranks: [WindowID: Int]
+    ) {
+        guard !windows.contains(window) else { return }
+        let index =
+            windows.firstIndex { member in
+                ranks[member].map { $0 > rank } ?? false
+            } ?? windows.count
+        windows.insert(window, at: index)
+    }
+
     /// Inserts window per layout spawn placement rule.
     public mutating func insert(
         _ window: WindowID,
