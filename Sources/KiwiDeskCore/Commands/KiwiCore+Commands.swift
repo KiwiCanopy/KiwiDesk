@@ -253,58 +253,6 @@ extension KiwiCore {
 
     // `resize` lives in `KiwiCore+Resize.swift` (#56/#67).
 
-    // MARK: - Launching
-
-    private func launch(
-        _ args: [JSONValue],
-        newInstance: Bool
-    ) -> CommandResponse {
-        guard
-            let bundleID = args.first?.stringValue?.lowercased()
-        else {
-            return .fail("expected app bundle id")
-        }
-        // Already focused: advance to the app's next window
-        // (#637) — checked first, off tracked state alone, so
-        // the repeat press cycles instead of re-activating.
-        if !newInstance,
-            cycleToNextWindow(bundleID: bundleID)
-        {
-            return .ok()
-        }
-        // Pull an existing instance forward, matched by bundle
-        // id (locale- and rename-proof, unlike the display
-        // name — see AppRef). Through `openOrFocus`, whose four
-        // seams are this branch's every touch of the machine.
-        if !newInstance,
-            let pid = openOrFocus.runningAppPID(bundleID)
-        {
-            // `activate` does not deminiaturize, so an app with
-            // nothing on screen came forward showing nothing at
-            // all (#673). Restore one first — BEFORE the
-            // activate, so the app comes forward with a window
-            // already on its way up rather than a beat behind —
-            // and leave the rest parked. Which one, and why only
-            // one, is argued in `KiwiCore+LaunchRestore.swift`.
-            restoreOneMinimizedIfNothingVisible(
-                pid: pid,
-                bundleID: bundleID
-            )
-            openOrFocus.activate(pid)
-            return .ok()
-        }
-        // Not running (or `newInstance`): LaunchServices resolves
-        // the bundle id to its install location — finding apps the
-        // old /Applications path scan missed (Finder in
-        // CoreServices, apps in ~/Applications). Seamed like the
-        // branch above, so no test can launch a real app by naming
-        // one that happens to be installed.
-        guard openOrFocus.openApp(bundleID, newInstance) else {
-            return .fail("app not found: \(bundleID)")
-        }
-        return .ok()
-    }
-
     // MARK: - Modes and gaps
 
     private func setMode(

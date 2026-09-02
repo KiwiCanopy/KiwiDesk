@@ -223,22 +223,12 @@ extension KiwiCore {
             }
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)
-            // The switch timestamp is set by the
-            // .desktopChanged event, emitted BEFORE the reconcile
-            // burst (#40) — but an app's own observer can fold its
-            // windows before the notification, so this stamp can
-            // be the previous switch's (#1207).
-            let reason = WindowGoneReason.classify(
-                wasMinimized: wasMinimized,
-                sinceDesktopSwitch: Date()
-                    .timeIntervalSince(lastDesktopSwitch)
-            )
-            emitWindowDestroyed(
+            // Classified on the compositor's word, and an away
+            // window joins the ledger (#1146).
+            handleWindowGone(
                 id,
-                app: effects.removedWindow?.app,
-                bundleID: effects.removedWindow?.bundleID,
-                space: effects.removedWindow?.space,
-                reason: reason
+                wasMinimized: wasMinimized,
+                effects: effects
             )
         case .windowHidden(let id):
             // Same forgetting as a destroy — the id can be

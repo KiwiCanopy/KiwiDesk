@@ -20,6 +20,13 @@ final class DesktopMemory {
     /// docs/cli.md).
     var lastDisplaySpaces: [String: SkyLight.SpaceID] = [:]
 
+    /// The per-Desktop census (#1146) against the caller's one
+    /// topology reading — live by default, replaced by a test;
+    /// the one door production reads it through
+    /// (`DesktopCensusSeamTests`).
+    var readCensus: @MainActor ([NativeSpace]) -> DesktopCensus? =
+        NativeSpaces.desktopCensus(spaces:)
+
     /// Seeds display space readings from desktop snapshot at boot.
     func seed(_ snapshot: DesktopSnapshot) {
         lastDisplaySpaces = snapshot.currentSpaces

@@ -48,6 +48,9 @@ final class DeferredTasks {
         /// whose reschedule is the POINT: cancel-and-replace turns
         /// a keystroke-rate burst into one refresh when it stops.
         case barTitleRefresh
+        /// Re-reads the away ledger against one per-Desktop
+        /// census while it is non-empty (#1146).
+        case awayCensus
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]

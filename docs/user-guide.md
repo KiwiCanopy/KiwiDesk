@@ -1757,7 +1757,10 @@ three-step ladder — the focused app full strength, its
 neighbors slightly dimmed — so the focused app reads even
 though native icons take no tint (App Font glyphs use the
 Focused item color instead). Click a Space to switch to it;
-glyphs are informational.
+glyphs are informational. A Space keeps listing the windows
+it holds on a macOS Desktop you are not looking at, in the
+order they come back in, so switching Desktops never empties
+an item — and *Hide empty Spaces* keeps such a Space too.
 
 A transient overlay gets **no glyph** — a context menu, a
 submenu or a launcher panel surfaces as a window of its app, and
@@ -3064,8 +3067,11 @@ Each row has an action. Built-in actions live under headings:
   behavior** menu: *Open or Focus* (the default — pull a running
   instance into the current space, or launch it if it isn't
   running; pressing again while its window is focused cycles
-  through the app's other windows; and when the app has nothing
-  on screen at all, it restores one minimized window rather than
+  through the app's other windows, the ones on other macOS
+  Desktops included; when the app's only open window sits on a
+  Desktop you are not looking at, the shortcut switches to that
+  Desktop and focuses it; and when the app has nothing open
+  anywhere, it restores one minimized window rather than
   coming forward empty) or *Open New* (always launch a fresh
   instance). You can
   add the same app twice to bind one shortcut per behavior; the

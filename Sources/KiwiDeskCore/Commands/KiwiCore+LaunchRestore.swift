@@ -163,7 +163,20 @@ extension KiwiCore {
         pid: pid_t,
         bundleID: String
     ) {
-        let census = openOrFocus.census(pid)
+        restoreOneMinimizedIfNothingVisible(
+            pid: pid,
+            bundleID: bundleID,
+            census: openOrFocus.census(pid)
+        )
+    }
+
+    /// The same, on a census the caller already read (#1146:
+    /// `launch` reads it once for the reach and the restore).
+    func restoreOneMinimizedIfNothingVisible(
+        pid: pid_t,
+        bundleID: String,
+        census: AppWindowCensus
+    ) {
         guard census.visible == 0,
             let target = minimizedRestoreTarget(
                 among: census.minimized,

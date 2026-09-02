@@ -73,7 +73,11 @@ extension KiwiCore {
         // item (its home's included) — so one glyph always sits
         // where the user is, instead of cloning onto every item
         // at once.
-        let members = state.effectiveMembers(of: space)
+        // Away windows join the row by rank (#1146).
+        let members = withAwayMembers(
+            state.effectiveMembers(of: space),
+            of: space.id
+        )
         // Transient overlays (a popup's AX windows, a launcher
         // panel) are dropped HERE, before grouping and the cap,
         // so no slot is reserved for a glyph nobody draws — the
@@ -81,11 +85,11 @@ extension KiwiCore {
         // (#300, #683), never a widening of tracking or of the
         // ignore gate.
         let pairs = members.compactMap { id -> (WindowID, String, Bool)? in
-            guard let window = state.windows[id],
-                !window.isTransientOverlay
+            guard let member = spaceBarMember(id),
+                !member.isTransientOverlay
             else { return nil }
-            let isSpecial = window.isFloating || window.isSticky
-            return (id, window.appName, isSpecial)
+            let isSpecial = member.isFloating || member.isSticky
+            return (id, member.appName, isSpecial)
         }
         let windows = pairs.map { $0.0 }
         let groups = Self.adjacentRuns(
@@ -123,11 +127,11 @@ extension KiwiCore {
         style: SpaceBarStyle
     ) -> SpaceBarItemView.App? {
         guard let first = group.first,
-            let window = state.windows[first]
+            let member = spaceBarMember(first)
         else { return nil }
-        let name = window.appName
+        let name = member.appName
         let icon = NSRunningApplication(
-            processIdentifier: window.pid
+            processIdentifier: member.pid
         )?.icon
         var glyph = appFont.glyph(
             forAppName: name,
@@ -148,6 +152,7 @@ extension KiwiCore {
                     source: .appFont
                 )
         }
+        let members = group.compactMap(spaceBarMember)
         return SpaceBarItemView.App(
             name: name,
             icon: icon,
@@ -160,17 +165,12 @@ extension KiwiCore {
             count: group.count,
             // Badge inheritance (#414): a group aggregates its
             // children's states — an "at least one" signal.
-            sticky: group.contains {
-                state.windows[$0]?.isSticky == true
-            },
-            floating: group.contains {
-                state.windows[$0]?.isFloating == true
-            },
+            sticky: members.contains(where: \.isSticky),
+            floating: members.contains(where: \.isFloating),
             // The run's first sticky member picks the badge glyph
             // (#445): global → infinity, display → pin.fill.
-            stickyScope: group.compactMap {
-                state.windows[$0]
-            }.first(where: \.isSticky)?.stickyScope ?? .none
+            stickyScope: members.first(where: \.isSticky)?
+                .stickyScope ?? .none
         )
     }
 

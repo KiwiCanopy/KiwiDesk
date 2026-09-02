@@ -101,6 +101,31 @@ Every one of the following binds whoever touches them:
   ([state-and-layout.md](state-and-layout.md)). A future macOS
   that applies the ADD earns a re-probe with the census as the
   witness, never a re-read of item 5.
+- **The per-Desktop window list is one `dlsym` symbol, read
+  through one builder, reached through one seam (#1146).**
+  `SLSCopyWindowsWithOptionsAndTags` (`SkyLight+WindowCensus.swift`)
+  answers which windows a native Space hosts from a foreign
+  connection — `0x2` the windows UP on it, `0x7` those plus the
+  parked (minimized, hidden-app) ones — device-probed 2026-09-02
+  on macOS 26.6.2 at ~0.1 ms per Desktop, and a parked window's
+  Space is readable through `SLSCopySpacesForWindows` too (the
+  lead `docs/accepted-limitations.md`'s Open-or-Focus row used
+  to name). `NativeSpaces.desktopCensus(spaces:)` is the one
+  builder, intersecting the per-Desktop lists with the layer-0
+  owner map `AXHelper.allNormalWindowOwners()` reads off
+  `CGWindowListCopyWindowInfo(.optionAll)`; a production
+  consumer reads it ONLY through `DesktopMemory.readCensus`,
+  and a test through `NativeSpaces.desktopCensusOverride`
+  (`DesktopCensusSeamTests`), because the builder reads the
+  host's WindowServer under a suite. Nil is absent, never faked:
+  every consumer keeps its pre-#1146 behavior on a nil census.
+  Two readings that must not be confused: **"gone" is the SPACE
+  LIST being empty** (`SLSCopySpacesForWindows` answering `[]`,
+  or the id on no Desktop's list) — `.optionAll` still lists a
+  closed window for a while afterwards (device, 2026-09-02), so
+  its absence proves nothing and its presence proves less. And
+  the census is downstream of the removal: the sweep never reads
+  it ([accessibility.md](accessibility.md)).
 - **The space-pointer write performs no transition (#1023).**
   `ManagedDisplaySetCurrentSpaceOperation` moves the pointer and
   composites the target's windows, but never hides the origin's

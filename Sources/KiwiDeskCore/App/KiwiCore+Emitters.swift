@@ -147,8 +147,13 @@ extension KiwiCore {
         app: String?,
         bundleID: String?,
         space: SpaceID?,
-        reason: WindowGoneReason
+        reason: WindowGoneReason,
+        desktop: Int? = nil
     ) {
+        // `desktop` names the Mission Control Desktop a
+        // `vanished` window went to (#1146); nil otherwise.
+        let desktopValue: JSONValue =
+            desktop.map { .number(Double($0)) } ?? .null
         bus.emit(
             .windowDestroyed,
             data: .object([
@@ -158,6 +163,7 @@ extension KiwiCore {
                     ?? .null,
                 "reason": .string(reason.rawValue),
                 "bundle_id": bundleValue(bundleID),
+                "desktop": desktopValue,
             ]),
             luaArgs: [
                 .number(Double(id.raw)),
@@ -165,6 +171,7 @@ extension KiwiCore {
                 .string(space?.raw ?? ""),
                 .string(reason.rawValue),
                 .string(bundleID ?? ""),
+                desktop.map { LuaValue.number(Double($0)) } ?? .none,
             ]
         )
     }

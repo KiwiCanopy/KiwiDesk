@@ -10,6 +10,9 @@ extension StateCoordinator {
         effects.appearedWasMinimized = forgetMinimized(window.id)
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
+        // Back on a shown Desktop: the away ledger's entry ends
+        // (#1146).
+        awayWindows[window.id] = nil
         windows.upsert(window)
         restoreFloatOverride(of: window)
         restoreStickyIntent(of: window)

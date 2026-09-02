@@ -42,6 +42,14 @@ public struct StateCoordinator: Sendable {
     /// later arrivals rank against it; rewritten at each departure.
     var departedSlots: [WindowID: Int] = [:]
 
+    /// Windows the compositor hosts on a Desktop nobody shows
+    /// (#1146) — the away LEDGER, beside the visible-only state:
+    /// written only on a compositor-confirmed `vanished`, ended
+    /// by the return, a census that no longer hosts the id, the
+    /// app's exit, the #634 reset, and moved by a re-key. Its
+    /// space and rank are the two records above.
+    var awayWindows: [WindowID: AwayWindow] = [:]
+
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
 
@@ -94,6 +102,9 @@ public struct StateCoordinator: Sendable {
         if let slot = departedSlots.removeValue(forKey: old) {
             departedSlots[new] = slot
         }
+        if let away = awayWindows.removeValue(forKey: old) {
+            awayWindows[new] = away.withID(new)
+        }
         if let index = minimizeOrder.firstIndex(
             where: { $0.id == old }
         ) {
@@ -131,6 +142,7 @@ public struct StateCoordinator: Sendable {
                 stickyReachOverrides[id] = nil
             }
             forgetMinimized(pid: pid)
+            awayWindows = awayWindows.filter { $0.value.pid != pid }
 
         case .windowCreated(let window):
             applyWindowCreated(window, effects: &effects)

@@ -55,6 +55,7 @@ extension StateCoordinator {
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
         departedSlots = [:]
+        awayWindows = [:]
     }
 
     /// Retrieves remembered space identifier for untracked window.

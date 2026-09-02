@@ -214,6 +214,36 @@ editing here:
   change; the follow's own register pins that the follow
   instance never calls `forget()`. The ruling is on the issue and
   in `docs/design-decisions.md`.
+- **A window on an away Desktop is KNOWN, in a ledger beside
+  the state — never a member (#1146).** `StateCoordinator
+  .awayWindows` (pid, app, bundle id, native Space) is written
+  by two writers only: `KiwiCore.handleWindowGone`, on a
+  compositor-confirmed `vanished`, and the boot seed
+  (`seedAwayWindows`); the departure's space and rank stay in
+  #1207's two records, and the three are read together. An
+  entry ENDS on the return (the create fold), on a census that
+  no longer hosts the id (`refreshAwayWindows`, which emits the
+  corrective `closed` — at the Desktop settle and on the 5 s
+  `awayCensus` task while the ledger is non-empty), on the app's
+  exit, on the #634 reset with `rememberedSpaces`, and moves on
+  a re-key (`WindowRekeyParityTests` discovers the container).
+  A reader that needs a Space's row as it WILL return takes
+  `withAwayMembers(_:of:)` — the fold's own rank insert — never
+  a hand merge; a reader keyed by app takes
+  `awayWindows(bundleID:)`. An entry with NO Space (a boot-found
+  window nothing has filed) is UNFILED: every reader carries the
+  skip branch — the bar draws it nowhere, `awayMembers(of:)`
+  omits it, `get_state` lists it only at the top level — and a
+  new reader owes the same branch. What the ledger must never
+  become: a member of `space.windows` with a flag (every
+  `space.windows` consumer would gain an exclusion, and the
+  return-by-rank fold above would be reworked), or a reason for
+  the sweep to remove anything ([accessibility.md](accessibility.md)).
+  `AwayLedgerTests` pins the writers, the enders and the merge;
+  `SpaceBarAwayTests` the bar; `OpenOrFocusReachTests` the reach
+  and the ring; `AwayBootSeedTests` the boot filing order;
+  `LifecycleEventTests` the classification through the handler.
+  The ruling is on the issue and in `docs/design-decisions.md`.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

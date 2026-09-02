@@ -6,6 +6,19 @@ public enum DesktopSwitch {
     public static let settle: TimeInterval = 1
 }
 
+/// What the compositor says about a window that just left the AX
+/// list (#1146) — the fact `WindowGoneReason.classify` decides
+/// from, in place of the #40 timer that read the PREVIOUS switch
+/// for a fast app's departure (#1207's trace).
+public enum GonePresence: Sendable, Equatable {
+    /// No compositor answer (no SkyLight): the timer decides.
+    case unknown(sinceDesktopSwitch: TimeInterval)
+    /// The WindowServer hosts the window on no Space.
+    case gone
+    /// Hosted on `space`; `shown` when some display shows it.
+    case hosted(space: SkyLight.SpaceID, shown: Bool)
+}
+
 /// Reason classification for window departure from visible set (#40, #913).
 public enum WindowGoneReason: String, Sendable {
     case closed
@@ -14,15 +27,25 @@ public enum WindowGoneReason: String, Sendable {
     /// Window application hid explicitly (⌘H, #913).
     case hidden
 
-    /// Classifies window disappearance based on minimize flag and desktop
-    /// switch timing.
+    /// Minimized wins; a window hosted on a user Desktop nobody
+    /// shows is one gesture away (`vanished`); hosted nowhere,
+    /// or on a Desktop the user is looking at while its app no
+    /// longer lists it, it is `closed`. Without a compositor
+    /// answer the settle timer decides, as before #1146.
     public static func classify(
         wasMinimized: Bool,
-        sinceDesktopSwitch: TimeInterval
+        presence: GonePresence
     ) -> WindowGoneReason {
         if wasMinimized { return .minimized }
-        return sinceDesktopSwitch <= DesktopSwitch.settle
-            ? .vanished : .closed
+        switch presence {
+        case .unknown(let sinceDesktopSwitch):
+            return sinceDesktopSwitch <= DesktopSwitch.settle
+                ? .vanished : .closed
+        case .gone:
+            return .closed
+        case .hosted(_, let shown):
+            return shown ? .closed : .vanished
+        }
     }
 }
 

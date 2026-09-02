@@ -45,6 +45,37 @@ extension AXHelper {
         return ids
     }
 
+    /// Every layer-0 document window on ANY Desktop with its
+    /// owning pid (#1146) — the id → owner map a per-Desktop
+    /// census intersects its space lists with. Not a presence
+    /// read: a closed window lingers here for a while (device,
+    /// 2026-09-02), so "exists" is the space list's answer.
+    public static func allNormalWindowOwners() -> [WindowID: pid_t] {
+        guard
+            let list = CGWindowListCopyWindowInfo(
+                [.optionAll, .excludeDesktopElements],
+                kCGNullWindowID
+            ) as? [[String: Any]]
+        else { return [:] }
+        var owners: [WindowID: pid_t] = [:]
+        for info in list {
+            guard
+                let pid =
+                    (info[kCGWindowOwnerPID as String]
+                    as? NSNumber)?.int32Value,
+                let layer =
+                    (info[kCGWindowLayer as String]
+                    as? NSNumber)?.intValue,
+                layer == 0,
+                let raw =
+                    (info[kCGWindowNumber as String]
+                    as? NSNumber)?.uint32Value
+            else { continue }
+            owners[WindowID(raw)] = pid
+        }
+        return owners
+    }
+
     /// PIDs owning at least one layer-0 document window (#662, #672).
     public static func pidsWithNormalWindows() -> Set<pid_t> {
         Set(

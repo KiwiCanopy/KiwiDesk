@@ -63,6 +63,13 @@ extension KiwiCore {
                 "focused": space.focused.map {
                     .number(Double($0.raw))
                 } ?? .null,
+                // The space's windows on Desktops nobody shows
+                // (#1146), by the rank they return in.
+                "away_windows": .array(
+                    awayMembers(of: space.id).map {
+                        .number(Double($0.raw))
+                    }
+                ),
             ]
             // Session-only stack weights (#67), surfaced so
             // resize("y") state is inspectable from the CLI;
@@ -121,12 +128,34 @@ extension KiwiCore {
                 "floating": .bool(window.isFloating),
             ])
         }
+        // Every away window, the unfiled ones included (#1146);
+        // `desktop` is its Mission Control number, resolved
+        // against one topology reading.
+        let topology = NativeSpaces.allSpaces()
+        let away = state.awayWindows.values
+            .sorted { $0.id.raw < $1.id.raw }
+            .map { entry in
+                JSONValue.object([
+                    "id": .number(Double(entry.id.raw)),
+                    "app": .string(entry.appName),
+                    "bundle_id": entry.appBundleID.map {
+                        .string($0)
+                    } ?? .null,
+                    "space_id": state.rememberedSpace(of: entry.id)
+                        .map { .string($0.raw) } ?? .null,
+                    "desktop": NativeSpaces.number(
+                        of: entry.nativeSpace,
+                        in: topology
+                    ).map { .number(Double($0)) } ?? .null,
+                ])
+            }
         return .object([
             "active_space": state.workspaces.activeSpace.map {
                 .string($0.raw)
             } ?? .null,
             "spaces": .array(spaces),
             "windows": .array(windows),
+            "away_windows": .array(away),
             "monitor_count": .number(
                 Double(state.workspaces.allDisplays.count)
             ),

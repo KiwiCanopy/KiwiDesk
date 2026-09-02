@@ -30,6 +30,10 @@ public struct AppliedEffects: Sendable {
     struct RemovedWindow: Sendable {
         let app: String?
         let bundleID: String?
+        /// The owner, for the away ledger's entry (#1146) — which
+        /// a transient overlay (#300) never gets.
+        let pid: pid_t?
+        let isTransientOverlay: Bool
         let space: SpaceID?
         let focusLost: Bool
         /// Window index in tiled slot order prior to removal

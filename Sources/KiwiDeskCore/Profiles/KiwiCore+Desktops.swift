@@ -241,6 +241,8 @@ extension KiwiCore {
         // idempotent, and the net under the eager carry in
         // `handleDesktopChange`.
         refreshStickyReach()
+        // #1146: a window closed while its Desktop was away.
+        refreshAwayWindows()
         // A fullscreen/system space: the retile, z-order
         // restore and refocus stand down (#670) — the refocus
         // would AX-raise the desktop's focused window behind
