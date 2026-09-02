@@ -4,12 +4,13 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The returning-focus debt's PAYMENT through the real handlers
-/// (#1207): the owed window's arrival pays it once, the settle
-/// stands its refocus down while it is unpaid, an unpaid arrival
-/// drops it, and the reset and a re-key reach it. The memory half
-/// — what is remembered and what is owed — is
-/// `DesktopFocusMemoryTests`, split at the tests.md file ceiling
-/// with a per-file fixture copy.
+/// (#1207), and the KEY the owe reads: the owed window's arrival
+/// pays it once, the settle stands its refocus down while it is
+/// unpaid, an unpaid arrival drops it, the reset and a re-key
+/// reach it, and the owe reads exactly the (space, native Space)
+/// entry the snapshot names. The memory half — what is remembered
+/// — is `DesktopFocusMemoryTests`, split at the tests.md file
+/// ceiling with a per-file fixture copy.
 ///
 /// The #888 fixture: Desktops 1–2 on the main display `UUID-A`
 /// (ids 10, 11), 3–4 on `UUID-B` (ids 20, 21); KiwiDesk space
@@ -120,6 +121,66 @@ struct DesktopFocusPaymentTests {
                 ManagedWindow(id: id, pid: 1, appName: "App")
             )
         )
+    }
+
+    /// The owe reads the snapshot's MAIN-display Space, threaded
+    /// from the handler's one reading — never the global active
+    /// Space, which under separate Spaces can be a secondary
+    /// screen's (profiles.md ▸ thread the value).
+    @Test("the owe reads the snapshot's main Space, not the global one")
+    func oweReadsTheSnapshotsMainSpace() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 20
+        )
+        // The user's focus sits on the secondary screen.
+        NativeSpaces.activeSpaceIDOverride = 20
+        core.handle(.desktopChanged)
+        #expect(core.desktopMemory.returnFocus.owed() == focused)
+    }
+
+    /// Shared mode ("Displays have separate Spaces" off): the main
+    /// display carries a synthetic identifier the per-display map
+    /// never lists, so the arriving native Space takes the global
+    /// fallback the Desktop number already takes — or the memory
+    /// is silently inert for every shared-mode user.
+    @Test("shared mode owes through the global fallback")
+    func sharedModeOwesThroughTheFallback() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        NativeSpaces.mainDisplayUUIDOverride = "UUID-X"
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == focused)
+    }
+
+    /// Two Desktops showing one space keep their own entries: the
+    /// other Desktop's focus is never this Desktop's debt.
+    @Test("another Desktop's entry for the same space is not owed")
+    func perDesktopKeying() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        core.desktopMemory.honoredFocus = [home: [11: focused]]
+        destroyAll(core)
+        core.lastDesktop = 2
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+        #expect(!box.lines.contains { $0.contains("owing focus") })
+    }
+
+    @Test("another space's memory is not owed")
+    func perSpaceKeying() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        core.desktopMemory.honoredFocus = [SpaceID("2"): [10: focused]]
+        destroyAll(core)
+        core.lastDesktop = 2
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+        #expect(!box.lines.contains { $0.contains("owing focus") })
     }
 
     @Test("the owed window's arrival pays the debt, once")

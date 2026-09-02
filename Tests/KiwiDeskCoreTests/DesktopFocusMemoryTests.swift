@@ -208,47 +208,6 @@ struct DesktopFocusMemoryTests {
         )
     }
 
-    /// Shared mode ("Displays have separate Spaces" off): the main
-    /// display carries a synthetic identifier the per-display map
-    /// never lists, so the arriving native Space takes the global
-    /// fallback the Desktop number already takes — or the memory
-    /// is silently inert for every shared-mode user.
-    @Test("shared mode owes through the global fallback")
-    func sharedModeOwesThroughTheFallback() {
-        let (core, _) = makeCore()
-        defer { teardown() }
-        leaveDesktop1(core)
-        NativeSpaces.mainDisplayUUIDOverride = "UUID-X"
-        returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == focused)
-    }
-
-    /// Two Desktops showing one space keep their own entries: the
-    /// other Desktop's focus is never this Desktop's debt.
-    @Test("another Desktop's entry for the same space is not owed")
-    func perDesktopKeying() {
-        let (core, box) = makeCore()
-        defer { teardown() }
-        core.desktopMemory.honoredFocus = [home: [11: focused]]
-        destroyAll(core)
-        core.lastDesktop = 2
-        returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == nil)
-        #expect(!box.lines.contains { $0.contains("owing focus") })
-    }
-
-    @Test("another space's memory is not owed")
-    func perSpaceKeying() {
-        let (core, box) = makeCore()
-        defer { teardown() }
-        core.desktopMemory.honoredFocus = [SpaceID("2"): [10: focused]]
-        destroyAll(core)
-        core.lastDesktop = 2
-        returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == nil)
-        #expect(!box.lines.contains { $0.contains("owing focus") })
-    }
-
     /// A window the carry kept (#1145) is present through the
     /// switch: it never departed, so it is owed nothing.
     @Test("a window that never departed is owed nothing")
