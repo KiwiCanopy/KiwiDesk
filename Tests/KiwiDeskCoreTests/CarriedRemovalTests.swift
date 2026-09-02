@@ -13,12 +13,14 @@ import Testing
 /// Space and the census has not composited it yet. The pre-#1145
 /// sweep read that as a close inside the switch grace — the
 /// window lost its slot, scope and pin, and came back as new.
-/// This suite holds the arm's shape: refused inside the grace on
-/// the #1157 episode's own recheck budget (one ledger, one cap),
-/// refused outright while the census shows it, hide and minimize
-/// exempt, the state AND the registration kept, and the same id
-/// re-elemented — never re-created — when the window is listed
-/// again.
+/// This suite holds the arm's shape: a window the carry holds IN
+/// FLIGHT (the seam's reading — the switch grace says nothing) is
+/// refused census-blind on the #1157 episode's own recheck budget
+/// (one ledger, one cap), refused outright while the census shows
+/// it, hide and minimize exempt, the state AND the registration
+/// kept, and the same id re-elemented — never re-created — when
+/// the window is listed again. A carried window NOT in flight is
+/// a close like any other.
 ///
 /// Harness: `RemovalDistrustTests`' per-file copy. The destroy
 /// NOTIFICATION's half of the arm is `CarriedDestroyArmTests`',
@@ -134,8 +136,8 @@ struct CarriedRemovalTests {
         }
     }
 
-    @Test("a carried vanish inside the switch grace is refused")
-    func carriedVanishInsideGraceIsRefused() {
+    @Test("an in-flight carried vanish is refused")
+    func inFlightVanishIsRefused() {
         let (loop, box) = makeLoop()
         loop.carriedWindows = { [WindowID(12)] }
         loop.elements[pid] = [
@@ -157,38 +159,36 @@ struct CarriedRemovalTests {
         #expect(carriedLines(box) == 1)
     }
 
-    @Test("outside a switch a carried close is a close")
-    func carriedCloseOutsideTheGraceIsRemoved() {
+    @Test("a carried window not in flight is a close")
+    func notInFlightIsAClose() {
         let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(12)] }
-        loop.elements[pid] = [WindowID(12): dummyElement]
-        box.listed = []
-        box.census = [:]
-        loop.lastDesktopChange = .distantPast
-        loop.reconcile(pid: pid, app: ref)
-        // No switch in flight: ⌘W of a sticky window is a close,
-        // not a beat to wait out.
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(box.recheckFires == 0)
-    }
-
-    @Test("an episode opened in the grace outlives it")
-    func episodeOpenedInTheGraceOutlivesIt() {
-        let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(12)] }
+        // Sticky and enabled, but nothing moved it: the seam
+        // answers empty, so ⌘W is a close, not a beat to wait out
+        // — even right after a Desktop switch.
+        loop.carriedWindows = { [] }
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [:]
         loop.lastDesktopChange = Date()
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.isEmpty)
-        _ = loop.drainPendingRemovalRecheck()
-        // The recheck fires after the grace has aged out; the
-        // open episode keeps the arm ruling it.
+        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+        #expect(box.recheckFires == 0)
+    }
+
+    @Test("the arm never reads the switch grace")
+    func armIgnoresTheSwitchGrace() {
+        let (loop, box) = makeLoop()
+        loop.carriedWindows = { [WindowID(12)] }
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        box.listed = []
+        box.census = [:]
+        // A slow app's element dies well after the 0.75 s grace
+        // (device, 2026-09-02); the in-flight reading is what
+        // keeps the window.
         loop.lastDesktopChange = .distantPast
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(loop.removalDistrusted[WindowID(12)] == 2)
+        #expect(loop.removalDistrusted[WindowID(12)] == 1)
     }
 
     @Test("an uncarried vanish inside the grace keeps the old gate")

@@ -269,9 +269,10 @@ editing AX code:
   stand-down, the episode ledger, the one-census cost and the
   convergence.
 
-  **The gate has a carried arm (#1145), and no other arm may
-  refuse INSIDE the switch grace** — a new one joins
-  `CarriedRemovalTests`' grace clause. A sticky window the
+  **The gate has a carried arm (#1145), which never reads the
+  switch grace, and no other arm may refuse INSIDE that grace**
+  — a new one joins `CarriedRemovalTests`' grace clause. A
+  sticky window the
   Desktop reach carries is EXPECTED present after a switch —
   the bridge MOVE puts it on the arriving Desktop — but for the
   transition's beat it is on no reading at all: its AX element
@@ -288,15 +289,18 @@ editing AX code:
   the same cap (`removalDistrusted`, `removalRecheckCap`, whose
   doc argues the budget against the measured beat) — never a
   second ledger, or one cap stops arming the recheck the other
-  still counts on. The arm opens only INSIDE the switch grace,
-  or for a window whose episode is already open — the one
-  `carriedRemovalArmIsOpen` reading the sweep and the destroy
-  deferral share — because a carried window closed with no
-  switch in flight is a close like any other, and every ⌘W of a
-  sticky window would otherwise wait out the budget
-  (`CarriedRemovalTests` ▸ `carriedCloseOutsideTheGraceIsRemoved`,
-  `episodeOpenedInTheGraceOutlivesIt`); the grace is stamped by
-  the switch notification, so a destroy that lands before it
+  still counts on. The arm opens only for a window the carry
+  holds IN FLIGHT — moved within `KiwiCore.inFlightWindow`, the
+  seam's own reading, the one `carriedRemovalArmIsOpen` the
+  sweep and the destroy deferral share — and NEVER on the
+  switch grace: a slow app's element dies ~2 s after the switch
+  (Claude, device 2026-09-02 — gating on the 0.75 s grace read
+  that as a close and the window came back unsticky), while a
+  sticky window nothing moved is a close like any other, so ⌘W
+  outside a carry never waits out the budget
+  (`CarriedRemovalTests` ▸ `notInFlightIsAClose`,
+  `armIgnoresTheSwitchGrace`). A window whose element dies
+  BEFORE the switch handler carried it was never in flight and
   takes the ordinary departure — the residue
   `docs/accepted-limitations.md` records. The refusal keeps the
   STATE AND THE

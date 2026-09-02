@@ -234,15 +234,42 @@ struct StickyReachCarryVerdictTests {
         #expect(!Bridge.moves.isEmpty)
     }
 
-    @Test("the carried set is what the removal gate reads")
-    func carriedSetFeedsTheRemovalGate() {
+    @Test("the removal gate reads the windows a carry holds in flight")
+    func inFlightSetFeedsTheRemovalGate() {
         let core = makeCore()
         defer { teardown() }
+        // Sticky and enabled is not enough: nothing is in flight
+        // until a pass MOVES it, so a switch alone opens no arm.
+        #expect(core.stickyReachCarried() == [w1, w2, w4])
+        #expect(core.eventLoop.carriedWindows().isEmpty)
+        core.refreshStickyReach()
         #expect(core.eventLoop.carriedWindows() == [w1, w2, w4])
+        // A pin flipped off leaves the flight: the gate must not
+        // keep a window nothing will carry back.
         core.state.stickyReachOverrides[w1] = false
         #expect(core.eventLoop.carriedWindows() == [w2, w4])
-        core.state.setSticky(w2, .none)
+        // And the stamp ages out past the in-flight window.
+        core.stickyReachCarriedAt[w2] = Date(
+            timeIntervalSinceNow: -KiwiCore.inFlightWindow - 1
+        )
         #expect(core.eventLoop.carriedWindows() == [w4])
+    }
+
+    @Test("a move the bridge could not dispatch leaves nothing in flight")
+    func unperformedMoveIsNotInFlight() {
+        let core = makeCore()
+        defer { teardown() }
+        // The probe answers (the bridge is present) but the move
+        // class does not resolve: `moveWindows` answers false and
+        // nothing was moved, so the removal gate must not wait on
+        // a vanish that cannot come.
+        WMBridge.classResolverOverride = { name in
+            name == "MoveWindowsToManagedSpaceOperation"
+                ? nil : bridgeClasses[name]
+        }
+        core.refreshStickyReach()
+        #expect(Bridge.moves.isEmpty)
+        #expect(core.eventLoop.carriedWindows().isEmpty)
     }
 
     @Test("no bridge, no carry")

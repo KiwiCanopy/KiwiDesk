@@ -217,6 +217,10 @@ public final class KiwiCore {
     /// `KiwiCore+IgnoredPanel.swift`.
     var ignoredPanel = IgnoredPanelDistrust()
 
+    /// When each sticky window was last carried (#1145); the
+    /// in-flight window is argued in `KiwiCore+StickyReach`.
+    var stickyReachCarriedAt: [WindowID: Date] = [:]
+
     /// #958 steal debt; `KiwiCore+AccessibilityReturn.swift`.
     var accessibilityReturn: AccessibilityReturnDebt?
 

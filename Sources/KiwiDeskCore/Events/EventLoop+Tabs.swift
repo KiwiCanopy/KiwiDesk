@@ -24,10 +24,9 @@ extension EventLoop {
     /// falls back to destroy + create (self-healing) — AND the
     /// removal-distrust gate stands down (#1157): the census
     /// double-exposes both Desktops while the compositor settles
-    /// (#1023) — AND the gate's carried arm OPENS (#1145), the
-    /// opposite direction: shortening this for tab reasons also
-    /// narrows the beat in which a carried window's destroy
-    /// defers. Three consumers, one stamp.
+    /// (#1023), so retuning this for tab reasons retunes the
+    /// gate's stand-down too. The gate's carried arm (#1145) reads
+    /// the carry's own in-flight stamp, never this one.
     static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
 
     /// The one derivation of "inside that grace" — the tab

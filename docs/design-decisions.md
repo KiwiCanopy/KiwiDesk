@@ -3027,12 +3027,10 @@ The rulings:
   wins the tie.** For the switch transition's beat a carried
   window is on no reading KiwiDesk has — and neither is a window
   that was just closed. The sweep refuses a carried window's
-  vanish for a bounded budget inside a switch rather than
-  dropping its slot, scope and pin (the mechanism is
+  vanish for a bounded budget while the carry holds it in flight
+  rather than dropping its slot, scope and pin (the mechanism is
   `.claude/rules/accessibility.md`'s); the trade is an
-  [accepted limitation](accepted-limitations.md): a sticky
-  window closed *during* a switch keeps its tile for a couple of
-  reconcile beats before it goes.
+  [accepted limitation](accepted-limitations.md), stated there.
 
 
 ## Settings GUI & UX

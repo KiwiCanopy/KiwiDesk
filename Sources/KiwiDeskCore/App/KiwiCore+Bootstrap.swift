@@ -155,7 +155,7 @@ extension KiwiCore {
             self?.scheduleRemovalRecheck()
         }
         eventLoop.carriedWindows = { [weak self] in
-            self?.stickyReachCarried() ?? []
+            self?.stickyReachInFlight() ?? []
         }
         sleepWake.captureState = { [weak self] in
             self?.state.snapshot()
