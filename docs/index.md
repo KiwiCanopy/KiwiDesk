@@ -13,7 +13,10 @@ in the Settings app, or in Lua (`~/.config/KiwiDesk/init.lua`).
 Seven layouts ship out of the box — **bsp**, **stack**,
 **scrolling** (PaperWM-style), **monocle**, **grid**, **track**,
 and **floating** — with per-space overrides, profiles that follow
-your monitor setup, and integration with macOS Desktops.
+your monitor setup, and integration with macOS Desktops. Every
+layout is fully reconfigurable: each carries its own optional
+parameters, so the shape it opens in is yours to set as the
+default, globally or per space.
 
 ## Where to go
 

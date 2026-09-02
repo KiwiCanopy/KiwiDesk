@@ -80,6 +80,15 @@ that list:
 Switching layouts instantly rearranges the same window list with a
 different formula — no tree surgery, no lost state.
 
+**Every layout is fully reconfigurable.** Each one carries its own
+optional parameters — `bsp`'s split ratios and strategy, `stack`'s
+master count, ratio and side, `scrolling`'s column width and
+direction, `grid`'s dimensions and fill, `track`'s per-track sizes
+— so the shape a layout opens in is yours to set, once, as the
+default. Tune them in the Settings app or in Lua, globally or per
+space; most tiling window managers give you a layout's formula and
+nothing to bend it with.
+
 ## Key Features
 
 - **Spaces**: Instant per-space window hiding on top of macOS's own
