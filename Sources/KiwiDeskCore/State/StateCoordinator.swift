@@ -29,6 +29,13 @@ public struct StateCoordinator: Sendable {
     /// Physical display of an arriving window (#1010), consumed on create.
     public var arrivalDisplay: DisplayID?
 
+    /// The window a Desktop return still owes its focus (#1207),
+    /// mirrored in before each create like `arrivalDisplay` and
+    /// consumed by the fold: the owed window takes the focus when
+    /// it RETURNS, and while it is still departed no other
+    /// returning window may claim the vacancy it left.
+    public var returningFocus: WindowID?
+
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
 

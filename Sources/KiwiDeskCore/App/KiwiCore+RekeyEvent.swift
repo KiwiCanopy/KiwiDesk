@@ -36,6 +36,7 @@ extension KiwiCore {
         // its re-report can arrive under the fresh id.
         moveLatch.rekey(old: old, new: new)
         followFocus.rekey(old: old, new: new)
+        rekeyDesktopFocus(old: old, new: new)
         // A stashed floating window's captured frame must
         // follow the re-key too, or the restore sweep drops
         // it and the window stays parked at the stash

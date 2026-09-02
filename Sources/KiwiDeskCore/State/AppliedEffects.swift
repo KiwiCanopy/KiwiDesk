@@ -22,6 +22,10 @@ public struct AppliedEffects: Sendable {
     /// (`ArrivalScreenHomeTests`, #1010).
     var rehomedToScreenSpace: SpaceID?
 
+    /// Whether the create paid a Desktop return's owed focus
+    /// (`ReturningFocusFoldTests`, #1207).
+    var paidReturningFocus = false
+
     /// Snapshot of facts erased when destroying a tracked window (#674).
     struct RemovedWindow: Sendable {
         let app: String?

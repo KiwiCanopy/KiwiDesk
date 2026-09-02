@@ -45,6 +45,9 @@ extension KiwiCore {
                 TilingEngine.screen(
                     containing: window.frame
                 )?.kiwiDisplay?.id
+            // The Desktop return's owed focus, mirrored in the
+            // same way (#1207).
+            state.returningFocus = desktopMemory.returnFocus.owed()
         }
         // Read BEFORE the fold below overwrites/removes them —
         // both helpers argue their consumer.
@@ -93,6 +96,9 @@ extension KiwiCore {
             // space it activates is the one the arrival settled
             // on. A no-op unless this window is the one owed.
             payFollowedFocus(arrived: window.id)
+            // #1207: the Desktop return's owed focus, paid where
+            // the fold said it returned.
+            payReturningFocus(arrived: window.id, effects: effects)
         case .windowMoved(let id, let frame):
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already

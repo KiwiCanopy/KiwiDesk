@@ -16,6 +16,8 @@ extension StateCoordinator {
         // Screen wins on multi-monitor Desktop moves (#1010).
         let arrival = arrivalDisplay
         arrivalDisplay = nil
+        let owed = returningFocus
+        returningFocus = nil
         let remembered = rememberedSpaces[window.id]
         let preferred = arrivalScreenHome(
             of: windows[window.id],
@@ -78,9 +80,28 @@ extension StateCoordinator {
         // cleared it); and it beats the `focused == nil` arm, so
         // an overlay spawning into a focusless space leaves it
         // nil — a popup is not a settle target.
-        if windows[window.id]?.isTransientOverlay != true,
-            !effects.hadRememberedSpace
-                || workspaces[target]?.focused == nil
+        // A Desktop return's owed window takes the focus when it
+        // RETURNS, even beside a non-nil focus — the carried
+        // sticky the departure walked it onto (#1207) — and while
+        // the owed window is still departed from this space, the
+        // vacancy is spoken for: no other returning window may
+        // claim it, or the first re-track wins the focus macOS
+        // just restored to the owed one.
+        let owedHere =
+            owed.map {
+                $0 != window.id
+                    && rememberedSpaces[$0]?.space == target
+                    && windows[$0] == nil
+            } ?? false
+        guard windows[window.id]?.isTransientOverlay != true
+        else { return }
+        if effects.hadRememberedSpace, owed == window.id,
+            target == workspaces.activeSpace
+        {
+            workspaces.focus(window.id, in: target)
+            effects.paidReturningFocus = true
+        } else if !effects.hadRememberedSpace
+            || (workspaces[target]?.focused == nil && !owedHere)
         {
             workspaces.focus(window.id, in: target)
         }

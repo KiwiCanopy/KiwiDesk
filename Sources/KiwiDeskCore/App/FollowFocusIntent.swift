@@ -13,7 +13,10 @@ import Foundation
 /// this one OWES an asked one). Before minting a third such
 /// ledger (#890's pending no-follow assignment), weigh extending
 /// this — the per-window record, time bound and rekey transfer
-/// carry over; the drain key and cardinality do NOT.
+/// carry over; the drain key and cardinality do NOT. The Desktop
+/// return's debt (#1207, `DesktopMemory.returnFocus`) is a second
+/// INSTANCE: same drain key (the arriving window), same
+/// cardinality (one pending), so nothing was minted.
 @MainActor
 final class FollowFocusIntent {
     /// Maximum duration focus debt remains claimable (5.0s, #1007).
@@ -46,6 +49,20 @@ final class FollowFocusIntent {
         }
         guard isPayable(pending.window) else { return nil }
         self.pending = nil
+        return pending.window
+    }
+
+    /// The live debt, unpaid: nil once expired (which clears it)
+    /// or absent. A READ for the arrival fold's mirror and the
+    /// settle's stand-down (#1207); `claim` is the one payer.
+    func owed(at now: Date = Date()) -> WindowID? {
+        guard let pending else { return nil }
+        guard
+            now.timeIntervalSince(pending.at) < Self.drainWindow
+        else {
+            self.pending = nil
+            return nil
+        }
         return pending.window
     }
 
