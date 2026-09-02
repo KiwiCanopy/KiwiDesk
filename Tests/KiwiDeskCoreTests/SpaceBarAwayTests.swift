@@ -111,8 +111,7 @@ struct SpaceBarAwayTests {
         core.state.awayWindows[WindowID(7)]?.isUp = false
         let (apps, _, _) = core.spaceBarApps(
             in: core.state.workspaces["2"]!,
-            style: core.tiler.settings.spaceBarStyle,
-            isCurrent: false
+            style: core.tiler.settings.spaceBarStyle
         )
         #expect(apps.isEmpty)
     }
