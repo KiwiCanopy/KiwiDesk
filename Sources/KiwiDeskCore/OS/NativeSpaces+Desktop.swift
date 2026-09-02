@@ -8,6 +8,10 @@ public struct DesktopSnapshot: Sendable {
     public let authority: Int?
     /// UUID of the main screen.
     public let mainUUID: String?
+    /// The main screen's current native Space — the id `authority`
+    /// is numbered from, with the same global fallback where the
+    /// topology cannot name the main screen (#1207).
+    public let mainCurrentSpace: SkyLight.SpaceID?
     /// Each screen's current Space ID keyed by display UUID.
     public let currentSpaces: [String: SkyLight.SpaceID]
     /// Raw native spaces in this snapshot.
@@ -79,6 +83,8 @@ extension NativeSpaces {
             },
             uniquingKeysWith: { first, _ in first }
         )
+        let mainCurrent =
+            uuid.flatMap { current[$0] } ?? activeSpaceID()
         let authority: Int? = {
             #if DEBUG
                 if let override = activeDesktopNumberOverride {
@@ -93,6 +99,7 @@ extension NativeSpaces {
         return DesktopSnapshot(
             authority: authority,
             mainUUID: uuid,
+            mainCurrentSpace: mainCurrent,
             currentSpaces: current,
             spaces: spaces
         )

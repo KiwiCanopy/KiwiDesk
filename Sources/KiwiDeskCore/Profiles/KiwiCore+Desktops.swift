@@ -120,9 +120,7 @@ extension KiwiCore {
                 state.workspaces.activate(target)
                 oweReturningFocus(
                     for: target,
-                    native: snapshot.mainUUID.flatMap {
-                        snapshot.currentSpaces[$0]
-                    }
+                    native: snapshot.mainCurrentSpace
                 )
                 // Never animate here: this desktop's windows
                 // just (re)appeared, there is nothing to fly

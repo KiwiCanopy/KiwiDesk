@@ -161,8 +161,10 @@ editing here:
   that beats the handler would be stamped with the Desktop being
   LEFT (log, 2026-09-02; the same measurement is the #40 caveat
   on `WindowGoneReason.classify`'s stamp). The arrival arm owes
-  the target space's entry for the native Space the snapshot
-  shows on the main display as
+  the target space's entry for the snapshot's `mainCurrentSpace`
+  — the main display's current native Space, with the global
+  fallback where the topology cannot name that display (shared
+  mode) — as
   `DesktopMemory.returnFocus`, a second `FollowFocusIntent`
   INSTANCE (same drain key, the arriving window; same
   cardinality), only for a window GONE from state: a present one

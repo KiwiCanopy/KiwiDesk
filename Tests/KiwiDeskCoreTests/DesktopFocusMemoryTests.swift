@@ -208,6 +208,21 @@ struct DesktopFocusMemoryTests {
         )
     }
 
+    /// Shared mode ("Displays have separate Spaces" off): the main
+    /// display carries a synthetic identifier the per-display map
+    /// never lists, so the arriving native Space takes the global
+    /// fallback the Desktop number already takes — or the memory
+    /// is silently inert for every shared-mode user.
+    @Test("shared mode owes through the global fallback")
+    func sharedModeOwesThroughTheFallback() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        NativeSpaces.mainDisplayUUIDOverride = "UUID-X"
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == focused)
+    }
+
     /// Two Desktops showing one space keep their own entries: the
     /// other Desktop's focus is never this Desktop's debt.
     @Test("another Desktop's entry for the same space is not owed")
