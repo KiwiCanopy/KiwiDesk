@@ -13,6 +13,7 @@ extension StateCoordinator {
             rememberMinimized(id)
         } else if let space = workspaces.space(of: id) {
             rememberedSpaces[id] = .departed(space)
+            rememberDepartedSlot(of: id, in: space)
         }
         if let window = windows[id] {
             rememberFloatOverride(of: window)

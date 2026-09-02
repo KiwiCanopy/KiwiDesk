@@ -55,6 +55,17 @@ extension StateCoordinator {
                         && !window.isFullscreen
                 }
             )
+        } else if case .departed(target)? = remembered,
+            let slot = departedSlots[window.id]
+        {
+            // A return takes the slot it left, ranked against the
+            // members already back (#1207).
+            workspaces.add(
+                window.id,
+                to: target,
+                rank: slot,
+                ranks: departedSlots
+            )
         } else {
             workspaces.add(
                 window.id,

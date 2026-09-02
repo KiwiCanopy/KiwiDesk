@@ -24,9 +24,32 @@ extension StateCoordinator {
         rememberedSpaces[id] = .restored(space)
     }
 
+    /// Records the slot `id` holds as it departs `space` (#1207):
+    /// its index today, raised past every sibling that already
+    /// departed this space ahead of it — a burst folds one window
+    /// at a time, so the index alone would read 0 for each.
+    mutating func rememberDepartedSlot(
+        of id: WindowID,
+        in space: SpaceID
+    ) {
+        guard
+            var rank = workspaces[space]?.windows.firstIndex(of: id)
+        else { return }
+        let departed = departedSlots.filter { entry in
+            entry.key != id
+                && windows[entry.key] == nil
+                && rememberedSpaces[entry.key] == .departed(space)
+        }
+        for sibling in departed.values.sorted() where sibling <= rank {
+            rank += 1
+        }
+        departedSlots[id] = rank
+    }
+
     /// Clears all remembered space associations (`CGWindowID`, #634).
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
+        departedSlots = [:]
     }
 
     /// Retrieves remembered space identifier for untracked window.

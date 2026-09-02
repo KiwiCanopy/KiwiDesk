@@ -149,18 +149,21 @@ editing here:
   `Space.focused` down the departing windows to nil — or onto a
   carried sticky window (#1145), the one member that stays — so
   on the return the first re-track used to take the vacancy
-  (#636's nil arm) and the settle asserted it. The focus is
-  remembered per (main display, Desktop) in
-  `DesktopMemory.focusedWindows`, written by the switch handler's
-  DEPARTURE arm beside `rememberVirtualSpace` from the same
-  snapshot key — before the burst, which is the one moment the
-  fact is still in state — and only a non-nil focus overwrites.
-  The arrival arm owes it as `DesktopMemory.returnFocus`, a
-  second `FollowFocusIntent` INSTANCE (same drain key, the
-  arriving window; same cardinality), only for a window GONE from
-  state: a present one never departed and is owed nothing, which
-  is how the restore never prefers the carried sticky. The
-  `.windowCreated` fold takes the debt mirrored in as
+  (#636's nil arm) and the settle asserted it. Each space's last
+  HONORED focus is remembered in `DesktopMemory.honoredFocus`,
+  written at the focus REPORT (`handleWindowFocused`, after the
+  honored verdict) and never by a fold or the switch handler: the
+  device showed a fast app's own AX observer folding its windows
+  BEFORE the switch notification, so a handler-time read
+  remembers a focus the walk already moved (log, 2026-09-02).
+  The arrival arm owes the target space's entry as
+  `DesktopMemory.returnFocus`, a second `FollowFocusIntent`
+  INSTANCE (same drain key, the arriving window; same
+  cardinality), only for a window GONE from state: a present one
+  — a carried sticky, or a window macOS restored and KiwiDesk
+  already honored — needs nothing, which is how the restore
+  never prefers the sticky and never yanks a focus the OS got
+  right. The `.windowCreated` fold takes the debt mirrored in as
   `returningFocus` (the `arrivalDisplay` pattern) and rules two
   clauses: the owed RETURNING window takes the focus even beside
   a non-nil one — and into the ACTIVE space only
@@ -169,26 +172,32 @@ editing here:
   returning window may claim the vacancy. The arrival arm
   RETIRES the last return's debt before deciding whether to owe
   a new one — a debt lives from one return to the next, never
-  across a Desktop that owes nothing — and owes nothing while a
+  across a return that owes nothing — and owes nothing while a
   follow (#1007) stands: the verb named its window, and two
   debts paid on one arm would let the last re-list win. The
   payer runs in the `.windowCreated` arm, where the owed window's
-  arrival ENDS the debt either way — raised with the
-  settle's own shape (`refocusRetile: false, warp: true`), so the
-  state pick becomes the OS's and the arrival retile pans to it;
-  `desktopSettle` stands its refocus down while the debt is owed
-  — raising `Space.focused` there IS the first-in-row jump — and
-  an unpaid debt expires at the follow's bound, macOS's own
-  restored focus standing (the accepted-limitations row); the
-  #634 arrangement reset forgets the memory with
-  `rememberedSpaces`. The secondary-display arm records nothing
+  arrival ENDS the debt either way — raised with the settle's own
+  shape (`refocusRetile: false, warp: true`), so the state pick
+  becomes the OS's and the arrival retile pans to it, or dropped
+  where the fold declined; `desktopSettle` stands its refocus
+  down while the debt is owed — raising `Space.focused` there IS
+  the first-in-row jump — and an unpaid debt expires at the
+  follow's bound, macOS's own restored focus standing (the
+  accepted-limitations row); the #634 arrangement reset forgets
+  the memory with `rememberedSpaces`. The ROW comes back too: a
+  departed window carries its slot in `departedSlots`, and the
+  fold re-inserts a `.departed` return by RANK against the
+  members already back — never at the index, which a later slot
+  already back would overtake (`ReturningSlotFoldTests`). The
+  secondary-display arm activates no space and so owes nothing
   (ruled residue). `ReturningFocusFoldTests` pins the fold and
-  `DesktopFocusMemoryTests` the path through the real handler, so
+  `DesktopFocusMemoryTests` / `DesktopFocusPaymentTests` the path
+  through the real handlers, so
   a DELETED site reds there; `ReturningFocusSeamTests` is the
   register of the wirings' placement and order, which is what it
   adds: a site MOVED or DOUBLED still pays in a fixture whose
-  burst runs after the handler returns. Add a site there in the
-  same change; the follow's own register pins that the follow
+  events arrive in one order. Add a site there in the same
+  change; the follow's own register pins that the follow
   instance never calls `forget()`. The ruling is on the issue and
   in `docs/design-decisions.md`.
 - **The ignored-panel distrust mutates through its ONE state

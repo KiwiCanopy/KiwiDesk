@@ -36,6 +36,12 @@ public struct StateCoordinator: Sendable {
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
 
+    /// The slot a departed window held (#1207): a return re-inserts
+    /// by this rank, so a Desktop's row comes back in the order it
+    /// left rather than in re-track order. Kept after the return so
+    /// later arrivals rank against it; rewritten at each departure.
+    var departedSlots: [WindowID: Int] = [:]
+
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
 
@@ -184,6 +190,9 @@ public struct StateCoordinator: Sendable {
             windows.setFullscreen(id, fullscreen)
 
         case .windowRekeyed(let old, let new):
+            if let slot = departedSlots.removeValue(forKey: old) {
+                departedSlots[new] = slot
+            }
             rekey(old, to: new)
 
         case .displaysChanged(let displays):

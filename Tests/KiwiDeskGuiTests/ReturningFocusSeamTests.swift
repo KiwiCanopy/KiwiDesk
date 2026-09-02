@@ -10,8 +10,8 @@ import Testing
 /// remember→owe→pay path through the real handler. What neither
 /// can see is the SHAPE each wiring must keep — a violation that
 /// leaves the behavior suites green: the recorder moved into the
-/// arrival arm (it would then read a focus the burst already
-/// walked off), the mirror moved out of the create block, the
+/// switch handler (it would then read a focus a fast app's
+/// destroys already walked off), the mirror moved out of the create block, the
 /// settle's refocus no longer gated on the debt, the payer
 /// reduced to the state stamp (the narration survives), the
 /// re-key deleted, the retire moved behind the record, the
@@ -46,7 +46,9 @@ struct ReturningFocusSeamTests {
         ("rekeyDesktopFocus(old: old, new: new)", "KiwiCore+RekeyEvent.swift"),
         // The arrival arm owes; the mirror hands the fold the
         // owed window; the payer is called once, by the arrival.
-        ("oweDesktopFocus(for:", "KiwiCore+Desktops.swift"),
+        // The recorder: the honored focus REPORT, and nowhere
+        // else — never a fold, never the switch handler.
+        ("rememberHonoredFocus(id)", "KiwiCore+FocusEvents.swift"),
         // The precedence: a standing follow (#1007) is read once,
         // where the return decides whether to owe.
         ("followFocus.owed(", memoryFile),
@@ -148,7 +150,7 @@ struct ReturningFocusSeamTests {
         )
         guard
             let owe = SourceScan.declarationBody(
-                after: "func oweDesktopFocus",
+                after: "func oweReturningFocus",
                 in: source
             ),
             let forget = owe.range(of: "returnFocus.forget()"),
@@ -163,13 +165,11 @@ struct ReturningFocusSeamTests {
         )
     }
 
-    /// The recorder runs in the DEPARTURE arm — beside the Space
-    /// memory's own write, from the same snapshot key, before the
-    /// handler returns and the burst folds the departed windows.
-    /// Recorded anywhere later it reads a focus the walk already
-    /// moved, which is the defect itself.
-    @Test("the focus is remembered in the departure arm")
-    func rememberedInTheDepartureArm() throws {
+    /// The owe runs in the switch handler's ARRIVAL arm, once,
+    /// after the arriving space is activated — the one place that
+    /// knows both the target and the Desktop number.
+    @Test("the owe runs once, in the arrival arm")
+    func theOweRunsInTheArrivalArm() throws {
         let source = try SourceScan.strippedSource(
             at: Self.core
                 .appendingPathComponent("Profiles")
@@ -180,31 +180,71 @@ struct ReturningFocusSeamTests {
                 after: "func handleDesktopChange",
                 in: source
             ),
-            let departure = SourceScan.declarationBody(
-                after: "if let last = lastDesktop, last != number",
-                in: handler
-            )
+            let activate = handler.range(
+                of: "state.workspaces.activate(target)"
+            ),
+            let owe = handler.range(of: "oweReturningFocus(")
         else {
             Issue.record(
-                "handleDesktopChange no longer gates a departure"
+                "handleDesktopChange no longer activates and owes"
             )
             return
         }
         #expect(
-            departure.contains("rememberDesktopFocus("),
-            "the recorder belongs INSIDE the departure arm"
+            activate.lowerBound < owe.lowerBound,
+            "the owe follows the activation of the arriving space"
+        )
+        let rest = source.replacingOccurrences(of: handler, with: "")
+        #expect(
+            !rest.contains("oweReturningFocus("),
+            "the owe lives in the handler and nowhere else"
+        )
+        let sites = try SourceScan.identifierSites(
+            of: "oweReturningFocus(",
+            under: Self.core
+        )
+        // The definition and its one call.
+        #expect(sites.count == 2)
+    }
+
+    /// The recorder runs at the honored focus REPORT — after the
+    /// handler has ruled the report honored, and never inside the
+    /// switch handler: the device showed a fast app's destroys
+    /// folding BEFORE the notification, so a handler-time read
+    /// remembers a focus the walk already moved.
+    @Test("the focus is remembered at the honored report, not the switch")
+    func rememberedAtTheHonoredReport() throws {
+        let events = try SourceScan.strippedSource(
+            at: Self.core
+                .appendingPathComponent("App")
+                .appendingPathComponent("KiwiCore+FocusEvents.swift")
+        )
+        guard
+            let handler = SourceScan.declarationBody(
+                after: "func handleWindowFocused",
+                in: events
+            ),
+            let honored = handler.range(of: "honored; "),
+            let record = handler.range(of: "rememberHonoredFocus(")
+        else {
+            Issue.record(
+                "handleWindowFocused no longer narrates and records"
+            )
+            return
+        }
+        #expect(
+            honored.lowerBound < record.lowerBound,
+            "the record follows the honored verdict"
+        )
+        let desktops = try SourceScan.strippedSource(
+            at: Self.core
+                .appendingPathComponent("Profiles")
+                .appendingPathComponent("KiwiCore+Desktops.swift")
         )
         #expect(
-            departure.contains("rememberVirtualSpace("),
-            "the recorder sits beside the Space memory's write"
-        )
-        let rest = handler.replacingOccurrences(
-            of: departure,
-            with: ""
-        )
-        #expect(
-            !rest.contains("rememberDesktopFocus("),
-            "the recorder may exist only inside the departure arm"
+            !desktops.contains("honoredFocus[")
+                && !desktops.contains("rememberHonoredFocus("),
+            "the switch handler records nothing"
         )
     }
 

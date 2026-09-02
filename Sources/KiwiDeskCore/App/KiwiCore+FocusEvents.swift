@@ -279,6 +279,7 @@ extension KiwiCore {
                 + "before \(honoredBefore), "
                 + "selfEcho=\(selfEcho)"
         )
+        rememberHonoredFocus(id)
         emitFocusChange(id)
         // Move the focus ring to the newly focused window.
         // Static layouts don't retile on focus (below), so

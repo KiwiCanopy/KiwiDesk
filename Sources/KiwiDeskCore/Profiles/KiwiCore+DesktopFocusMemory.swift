@@ -1,42 +1,57 @@
 import Foundation
 
-/// The per-Desktop focus memory (#1207): what a Desktop had
-/// focused when the user left it, remembered BEFORE the departure
-/// fold walks `Space.focused` down the gone windows, and paid back
-/// at that window's ARRIVAL on the return — never at the settle,
-/// which runs before a slow app re-lists. Keyed like the Space
-/// memory (`KiwiCore+DesktopMemory`, #888); every entry point
-/// takes the KEY, the way that file's do.
+/// The returning-focus memory (#1207): each space's last honored
+/// focus per Desktop, recorded at the focus REPORT — never at the
+/// departure, whose destroys can precede the switch handler
+/// (device log 2026-09-02: an app's own AX observer folded its
+/// windows before the notification arrived) — and paid back at
+/// that window's ARRIVAL on the return, never at the settle,
+/// which runs before a slow app re-lists.
 extension KiwiCore {
-    /// Records the outgoing Desktop's focused window under `key`.
-    /// A nil focus records nothing — an unpaid return must not
-    /// overwrite a good entry.
-    func rememberDesktopFocus(
-        of space: SpaceID,
-        leaving desktop: Int,
-        key: String
-    ) {
-        guard let focused = state.workspaces[space]?.focused
+    /// Records an honored focus under the window's space and the
+    /// Desktop believed current — stale for a report that beat
+    /// the switch handler, which `oweReturningFocus` re-stamps.
+    func rememberHonoredFocus(_ id: WindowID) {
+        guard let space = state.workspaces.space(of: id)
         else { return }
-        desktopMemory
-            .focusedWindows[key, default: [:]][desktop] = focused
+        desktopMemory.honoredFocus[space, default: [:]][
+            lastDesktop ?? 0
+        ] = id
+        desktopMemory.lastHonored = (id, Date())
     }
 
-    /// Owes the arriving Desktop its remembered focus. The last
-    /// return's debt is retired first — a debt lives from one
-    /// return to the next, never across a Desktop that owes
-    /// nothing — and a standing follow (#1007) outranks it: the
-    /// verb named its window. Only a window GONE from state is
-    /// owed: one still present (a carried sticky, #1145) never
-    /// departed, so the vacancy rule cannot prefer it. Reached
-    /// for EVERY user-Desktop arrival only because
-    /// `virtualSpaceTarget` falls back to the first space
-    /// (`DesktopFocusMemoryTests` ▸ the unremembered pass-through).
-    func oweDesktopFocus(for desktop: Int, key: String) {
+    /// Owes the arriving `target` its remembered focus for Desktop
+    /// `number`. The last return's debt is retired first — a debt
+    /// lives from one return to the next, never across a return
+    /// that owes nothing. A focus honored SINCE the previous
+    /// switch that is present and focused is macOS's own restore:
+    /// it is re-stamped under this Desktop and nothing is owed. A
+    /// standing follow (#1007) outranks the memory: the verb named
+    /// its window. Only a window GONE from state is owed: a
+    /// carried sticky (#1145) never departed and never needs it,
+    /// so the vacancy rule cannot prefer it. Reached for EVERY
+    /// user-Desktop arrival only because `virtualSpaceTarget`
+    /// falls back to the first space (`DesktopFocusMemoryTests` ▸
+    /// the unremembered pass-through).
+    func oweReturningFocus(
+        for target: SpaceID,
+        number: Int?,
+        since previousSwitch: Date
+    ) {
         desktopMemory.returnFocus.forget()
+        guard let number else { return }
+        if let honored = desktopMemory.lastHonored,
+            honored.at > previousSwitch,
+            state.windows[honored.window] != nil,
+            state.workspaces[target]?.focused == honored.window
+        {
+            desktopMemory.honoredFocus[target, default: [:]][number] =
+                honored.window
+            return
+        }
         guard
-            let remembered = desktopMemory.focusedWindows[key]?[
-                desktop
+            let remembered = desktopMemory.honoredFocus[target]?[
+                number
             ],
             state.windows[remembered] == nil
         else { return }
@@ -50,7 +65,7 @@ extension KiwiCore {
         desktopMemory.returnFocus.record(remembered)
         onLog(
             "desktop return: owing focus to w\(remembered.raw) "
-                + "when Desktop \(desktop) re-lists it"
+                + "when Desktop \(number) re-lists it"
         )
     }
 
@@ -81,7 +96,8 @@ extension KiwiCore {
     /// The #634 arrangement reset: the memory is id-keyed like
     /// `rememberedSpaces` and goes with it, debt included.
     func forgetDesktopFocus() {
-        desktopMemory.focusedWindows = [:]
+        desktopMemory.honoredFocus = [:]
+        desktopMemory.lastHonored = nil
         desktopMemory.returnFocus.forget()
     }
 
@@ -89,10 +105,13 @@ extension KiwiCore {
     /// debt alike, or a returning tab carrier is owed a dead id.
     func rekeyDesktopFocus(old: WindowID, new: WindowID) {
         desktopMemory.returnFocus.rekey(old: old, new: new)
-        for (key, entries) in desktopMemory.focusedWindows {
+        for (space, entries) in desktopMemory.honoredFocus {
             for (desktop, id) in entries where id == old {
-                desktopMemory.focusedWindows[key]?[desktop] = new
+                desktopMemory.honoredFocus[space]?[desktop] = new
             }
+        }
+        if desktopMemory.lastHonored?.window == old {
+            desktopMemory.lastHonored?.window = new
         }
     }
 }

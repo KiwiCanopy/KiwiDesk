@@ -3060,16 +3060,21 @@ principle: an operation that names a window owes the window,
 never a bookkeeping entry about it). Three choices fall out of
 it, each argued against its alternative:
 
-- **The focus is remembered per Desktop BEFORE the departure
-  fold**, beside the Space the Desktop remembers and under the
-  same (main display, Mission Control number) key
-  ([#888](https://github.com/KiwiCanopy/KiwiDesk/issues/888)'s
-  authority rules). The switch notification goes out before the
-  reconcile burst
-  ([#40](https://github.com/KiwiCanopy/KiwiDesk/issues/40)), so
-  that is the one moment the fact is still true in state. Only a
-  real focus overwrites — a Desktop left before its owed window
-  came back must not erase a good entry with nil.
+- **The focus is remembered at the focus REPORT, per space —
+  never at the departure.** The first cut wrote the memory in
+  the switch handler, on the premise that the switch
+  notification precedes the reconcile burst
+  ([#40](https://github.com/KiwiCanopy/KiwiDesk/issues/40)).
+  The device disproved it on the first eyeball: an app whose own
+  Accessibility observer reports fast folds its windows as
+  destroys *before* the notification arrives, so the handler read
+  a focus the walk had already moved and the return paid the
+  wrong window — over the very focus macOS had just restored. So
+  the memory is written where the fact is born, at every honored
+  focus report, under the space the window sits in; nothing a
+  departure does can reach it, and a return owes only a window
+  that is actually gone — one macOS restored and KiwiDesk already
+  honored needs no payment.
 - **The debt is paid at the owed window's own ARRIVAL, never at
   the settle.** The jump happens at the switch, when the first
   re-track claims the vacancy; the 600 ms settle is a second leg
@@ -3091,6 +3096,12 @@ it, each argued against its alternative:
   being preferred: it never departed, so it is never owed
   anything and holds no vacancy — there is no fallback pick to
   prefer it with.
+- **The row comes back as it left.** A Desktop departure erases
+  slot order too, and re-track order is per-app and arbitrary, so
+  the same fix carries each departed window's slot and re-inserts
+  a return by rank against the members already back — by rank
+  rather than at the index, because with only the last window
+  back an index insert would put an earlier one behind it.
 - **One debt at a time, and the follow's first.** A debt lives
   from one return to the next: the arrival arm retires the last
   one before deciding whether to owe again, because passing
@@ -3108,7 +3119,8 @@ limitation](accepted-limitations.md), as is the secondary
 screen's Desktop return, whose switch arm has neither the
 departing Space nor the previous Desktop number in hand.
 `ReturningFocusFoldTests` pins the fold, `DesktopFocusMemoryTests`
-the remember→owe→pay path through the real handler, and
+and `DesktopFocusPaymentTests` the remember→owe→pay path through
+the real handlers, and
 `ReturningFocusSeamTests` the wirings — the recorder in the
 departure arm, the settle's stand-down, the payer's raise.
 
