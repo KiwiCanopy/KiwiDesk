@@ -94,6 +94,23 @@ struct OpenOrFocusRingTests {
     /// must not steal the focus the OS just reported (#636).
     @Test("Re-track after the focus report keeps the ring")
     func reTrackDoesNotStealReportedFocus() {
+        // The returning-focus memory (#1207) records under each
+        // window's native Space and owes at the switch: pinned —
+        // Desktop 2's windows on native 10, Desktop 1's on 11 —
+        // so this reads no host's SkyLight (it passed locally and
+        // failed on CI on that read alone, 2026-09-02) AND reaches
+        // the owe: the memory owes the window focused last (30),
+        // the OS then reports 20, and 30's arrival must not pay
+        // over that report.
+        defer { resetAuthorityOverrides() }
+        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
+        NativeSpaces.windowSpaceOverride = {
+            $0 == WindowID(10) ? 11 : 10
+        }
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 20
+        )
         let core = makeCore()
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
@@ -105,6 +122,10 @@ struct OpenOrFocusRingTests {
         core.handle(.windowFocused(WindowID(30)))
 
         // Leave for desktop 1: both vanish, its window appears.
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 11,
+            secondaryCurrent: 20
+        )
         core.handle(.desktopChanged)
         core.handle(
             .windowDestroyed(WindowID(20), wasMinimized: false)
@@ -118,7 +139,14 @@ struct OpenOrFocusRingTests {
         // Shortcut: macOS switches back. Activation notification
         // first — the aimed window is re-tracked and reported
         // focused — then the bulk reconcile re-tracks the rest.
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 20
+        )
         core.handle(.desktopChanged)
+        #expect(
+            core.desktopMemory.returnFocus.owed() == WindowID(30)
+        )
         core.handle(.windowCreated(window(20, pid: 100)))
         core.handle(.windowFocused(WindowID(20)))
         core.handle(.windowCreated(window(30, pid: 300)))
