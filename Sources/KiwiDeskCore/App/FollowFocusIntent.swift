@@ -1,27 +1,15 @@
 import Foundation
 
 /// A focus one operation owes a window, paid at that window's
-/// ARRIVAL. An intent, not a focus call: macOS attaches focus to
-/// a WINDOW, and when the debt is recorded the window sits on an
-/// unshown Desktop where AX does not list it. Two instances drain
-/// on the one `.windowCreated` arm — `KiwiCore.followFocus`, what
-/// `move_to_desktop_and_follow` owes the window it sent away
-/// (#1007, `FollowFocusIntentTests`), and
-/// `DesktopMemory.returnFocus`, what a Desktop return owes the
-/// window the user left focused (#1207) — same drain key (the
-/// arriving window), same cardinality (one pending), so nothing
-/// was minted. The follow OUTRANKS the return: the verb named its
-/// window, so the arrival arm owes no return while a follow
-/// stands. Bounded deliberately — an unpaid debt must not fire
-/// minutes later. It needs no say in the close-return raise: the
-/// #1023 eager fold already stands that down via
-/// `EventLoop.eagerDepartureInFlight`. Declared beside
-/// `moveLatch` — one verb's bookkeeping answering opposite
-/// questions (that one SUPPRESSES an unasked follow, #482/#483;
-/// this one OWES an asked one). Before minting a third such
-/// ledger (#890's pending no-follow assignment), weigh a third
-/// instance — the per-window record, time bound and rekey
-/// transfer carry over; the drain key and cardinality may not.
+/// ARRIVAL — an intent, not a focus call, since the window sits
+/// on an unshown Desktop where AX does not list it. Two
+/// instances drain on the one `.windowCreated` arm:
+/// `KiwiCore.followFocus` (`move_to_desktop_and_follow`, #1007)
+/// and `DesktopMemory.returnFocus` (a Desktop return, #1207) —
+/// same drain key, the arriving window; same cardinality, one
+/// pending — and the follow outranks the return. Bounded: an
+/// unpaid debt must not fire minutes later. A third such ledger
+/// weighs a third instance before minting (#890).
 @MainActor
 final class FollowFocusIntent {
     /// Maximum duration focus debt remains claimable (5.0s, #1007).
