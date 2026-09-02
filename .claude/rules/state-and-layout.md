@@ -144,6 +144,44 @@ editing here:
   any one of them leaves `FollowFocusIntentTests` fully green
   while the follow silently stops carrying focus. The ruling is
   `docs/design-decisions.md`'s.
+- **A Desktop switch is not a close (#1207).** Leaving a Desktop
+  folds its windows as destroys, and the close-return walk moves
+  `Space.focused` down the departing windows to nil — or onto a
+  carried sticky window (#1145), the one member that stays — so
+  on the return the first re-track used to take the vacancy
+  (#636's nil arm) and the settle asserted it. The focus is
+  remembered per (main display, Desktop) in
+  `DesktopMemory.focusedWindows`, written by the switch handler's
+  DEPARTURE arm beside `rememberVirtualSpace` from the same
+  snapshot key — before the burst, which is the one moment the
+  fact is still in state — and only a non-nil focus overwrites.
+  The arrival arm owes it as `DesktopMemory.returnFocus`, a
+  second `FollowFocusIntent` INSTANCE (same drain key, the
+  arriving window; same cardinality), only for a window GONE from
+  state: a present one never departed and is owed nothing, which
+  is how the restore never prefers the carried sticky. The
+  `.windowCreated` fold takes the debt mirrored in as
+  `returningFocus` (the `arrivalDisplay` pattern) and rules two
+  clauses: the owed RETURNING window takes the focus even beside
+  a non-nil one, and while it is still `.departed` from that
+  space no other returning window may claim the vacancy. The
+  payer runs in the `.windowCreated` arm and raises with the
+  settle's own shape (`refocusRetile: false, warp: true`), so the
+  state pick becomes the OS's and the arrival retile pans to it;
+  `desktopSettle` stands its refocus down while the debt is owed
+  — raising `Space.focused` there IS the first-in-row jump — and
+  an unpaid debt expires at the follow's bound, macOS's own
+  restored focus standing (the accepted-limitations row). Option
+  A — not walking `focused` on a Desktop departure — is rejected:
+  `focused` must name a member, and the walk is harmless once the
+  memory outranks it. The secondary-display arm records nothing
+  (ruled residue). `ReturningFocusFoldTests` pins the fold,
+  `DesktopFocusMemoryTests` the path through the real handler,
+  and `ReturningFocusSeamTests` is the register of the wirings —
+  add a site there in the same change, since deleting any one of
+  them leaves the behaviour suites green while the return
+  silently jumps again. The ruling is on the issue and in
+  `docs/design-decisions.md`.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

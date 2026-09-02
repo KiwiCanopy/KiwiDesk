@@ -123,6 +123,16 @@ sticky window onto the arriving Desktop through `WMBridge`
 return under fresh AX elements — re-registered in place, never
 destroyed and re-created.
 
+Every other window of the left Desktop *is* destroyed and
+re-created by that reconcile, and the destroy fold walks
+`Space.focused` off it exactly as a close would. So the switch
+handler in `Profiles` remembers the Desktop's focused window
+before the burst — per (main display, Desktop), beside the Space
+it remembers — and the return owes it as a bounded debt that the
+`.windowCreated` fold pays at that window's own arrival, holding
+the vacancy against earlier re-tracks and standing the 600 ms
+settle's refocus down until it is paid (#1207).
+
 ## 2. Command dispatch (`set_*` verbs)
 
 User intent — a hotkey, a CLI call, or a Lua statement — becomes a

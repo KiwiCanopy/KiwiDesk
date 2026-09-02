@@ -3037,6 +3037,72 @@ The rulings:
   stated there.
 
 
+### A Desktop switch is not a close (#1207)
+
+**[Principle]**
+
+Leaving a macOS Desktop makes every window on it vanish from
+Accessibility, and KiwiDesk's reconcile folds each vanish as a
+destroy — the same fold a close takes, because at that altitude
+the two are the same reading. A close hands focus to the next
+window (close-return, above), so a Desktop departure walks
+`Space.focused` down the departing windows to nil, and on the
+return the first window to re-list took the empty slot: focus
+jumped to first-in-row, and a scrolling layout panned to it, at
+the moment macOS had just restored the window you actually left
+([#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)).
+
+The ruling is that the departure is **not** a close and the
+return owes the user the window they left, the way a follow owes
+its window
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)'s
+principle: an operation that names a window owes the window,
+never a bookkeeping entry about it). Three choices fall out of
+it, each argued against its alternative:
+
+- **The focus is remembered per Desktop BEFORE the departure
+  fold**, beside the Space the Desktop remembers and under the
+  same (main display, Mission Control number) key
+  ([#888](https://github.com/KiwiCanopy/KiwiDesk/issues/888)'s
+  authority rules). The switch notification goes out before the
+  reconcile burst
+  ([#40](https://github.com/KiwiCanopy/KiwiDesk/issues/40)), so
+  that is the one moment the fact is still true in state. Only a
+  real focus overwrites — a Desktop left before its owed window
+  came back must not erase a good entry with nil.
+- **The debt is paid at the owed window's own ARRIVAL, never at
+  the settle.** The jump happens at the switch, when the first
+  re-track claims the vacancy; the 600 ms settle is a second leg
+  that used to *assert* the wrong pick, and it runs before a slow
+  app re-lists at all (TextEdit re-lists about a second after the
+  switch). So the create fold takes the owed window mirrored in
+  and does two things: the owed window takes the focus when it
+  returns — even beside a window the walk landed on — and while
+  it is still away no *other* returning window may take the
+  vacancy it left. The settle stands its refocus down while the
+  debt is unpaid. Paying is a raise with the settle's own shape,
+  so the state's pick becomes macOS's, and the arrival's own
+  retile pans a scrolling viewport to it.
+- **The walk is kept.** Not walking `Space.focused` on a Desktop
+  departure was the other option and is rejected: `focused` must
+  always name a member, and the walk is harmless once the memory
+  outranks it. That is also what keeps a carried sticky window
+  ([sticky reach](#sticky-reach-spans-macos-desktops-1145)) from
+  being preferred: it never departed, so it is never owed
+  anything and holds no vacancy — there is no fallback pick to
+  prefer it with.
+
+The debt is bounded at five seconds, like the follow's; a window
+that never re-lists within it leaves macOS's own restored focus
+standing, which is the [accepted
+limitation](accepted-limitations.md), as is the secondary
+screen's Desktop return, whose switch arm has neither the
+departing Space nor the previous Desktop number in hand.
+`ReturningFocusFoldTests` pins the fold, `DesktopFocusMemoryTests`
+the remember→owe→pay path through the real handler, and
+`ReturningFocusSeamTests` the wirings — the recorder in the
+departure arm, the settle's stand-down, the payer's raise.
+
 ## Settings GUI & UX
 
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom

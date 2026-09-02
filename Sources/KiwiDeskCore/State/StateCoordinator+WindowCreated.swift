@@ -90,7 +90,7 @@ extension StateCoordinator {
         let owedHere =
             owed.map {
                 $0 != window.id
-                    && rememberedSpaces[$0]?.space == target
+                    && rememberedSpaces[$0] == .departed(target)
                     && windows[$0] == nil
             } ?? false
         guard windows[window.id]?.isTransientOverlay != true

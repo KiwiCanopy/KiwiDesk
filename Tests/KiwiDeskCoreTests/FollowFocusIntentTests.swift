@@ -63,6 +63,31 @@ struct FollowFocusIntentTests {
         #expect(intent.claim(at: t0, if: payable) == nil)
     }
 
+    /// `owed` is the second instance's READ (#1207): the fold's
+    /// mirror and the settle's stand-down ask whether a debt
+    /// stands without paying it, and an expired one reads as
+    /// absent — and is dropped, so a later drain cannot pay it.
+    @Test("owed reads the live debt without paying it")
+    func owedReadsWithoutPaying() {
+        let intent = FollowFocusIntent()
+        #expect(intent.owed(at: t0) == nil)
+        intent.record(moved, at: t0)
+        #expect(intent.owed(at: t0) == moved)
+        #expect(intent.claim(at: t0, if: payable) == moved)
+        #expect(intent.owed(at: t0) == nil)
+    }
+
+    @Test("an expired debt reads as absent and is dropped")
+    func owedDropsAnExpiredDebt() {
+        let intent = FollowFocusIntent()
+        intent.record(moved, at: t0)
+        let late = t0.addingTimeInterval(
+            FollowFocusIntent.drainWindow + 0.01
+        )
+        #expect(intent.owed(at: late) == nil)
+        #expect(intent.claim(at: t0, if: payable) == nil)
+    }
+
     @Test("a re-keyed window keeps the debt and its clock")
     func rekeyKeepsTheDebt() {
         let intent = FollowFocusIntent()

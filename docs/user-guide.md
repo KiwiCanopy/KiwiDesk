@@ -3187,9 +3187,13 @@ Bindings edited here are stored in `gui.json`
 (`profile_bindings`); a hand-written config declares them in
 `init.lua` with `bind_profile_to_desktop` instead. Each
 Desktop your main screen shows also remembers which space it was
-on — return to it and you land on the same space. (If the profile
-changed in between and that space no longer exists, you land on
-the first space instead.)
+on — and which window you had focused: return to it and you land
+on both, the same space with the same window focused and, in a
+scrolling layout, still in view. (If the profile changed in
+between and that space no longer exists, you land on the first
+space instead. A window that takes more than a few seconds to
+come back keeps whatever macOS itself focused — see
+[Accepted limitations](accepted-limitations.md).)
 
 Where macOS exposes its window-management bridge — present on
 macOS 26.6.1, checked 2026-08-18; KiwiDesk looks for it at
