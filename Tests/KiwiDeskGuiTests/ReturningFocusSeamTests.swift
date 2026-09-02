@@ -46,6 +46,9 @@ struct ReturningFocusSeamTests {
         // The arrival arm owes; the mirror hands the fold the
         // owed window; the payer is called once, by the arrival.
         ("oweDesktopFocus(for:", "KiwiCore+Desktops.swift"),
+        // The precedence: a standing follow (#1007) is read once,
+        // where the return decides whether to owe.
+        ("followFocus.owed(", memoryFile),
         ("state.returningFocus =", "KiwiCore+Events.swift"),
         ("payReturningFocus(arrived:", "KiwiCore+Events.swift"),
     ]
@@ -104,6 +107,58 @@ struct ReturningFocusSeamTests {
                     + sites.map(\.site)
                     .joined(separator: ", ")
             )
+        )
+    }
+
+    /// The #634 arrangement reset forgets the memory beside
+    /// `rememberedSpaces`, the id-keyed map it mirrors: after a
+    /// reset every stale entry is "gone from state" and would be
+    /// owed on the next return.
+    @Test("the arrangement reset forgets the memory")
+    func theResetForgetsTheMemory() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.core
+                .appendingPathComponent("App")
+                .appendingPathComponent("KiwiCore+Reset.swift")
+        )
+        guard
+            let reset = SourceScan.declarationBody(
+                after: "func discardSavedArrangement",
+                in: source
+            )
+        else {
+            Issue.record("discardSavedArrangement missing")
+            return
+        }
+        #expect(reset.contains("state.forgetRememberedSpaces()"))
+        #expect(reset.contains("forgetDesktopFocus()"))
+    }
+
+    /// A debt lives from one return to the next: the arrival arm
+    /// retires the last one BEFORE it decides whether to owe, or
+    /// a Desktop that owes nothing inherits the previous return's
+    /// hold on its vacancy and settle.
+    @Test("the last debt is retired before a new one is owed")
+    func theLastDebtIsRetiredFirst() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.core
+                .appendingPathComponent("Profiles")
+                .appendingPathComponent(Self.memoryFile)
+        )
+        guard
+            let owe = SourceScan.declarationBody(
+                after: "func oweDesktopFocus",
+                in: source
+            ),
+            let forget = owe.range(of: "returnFocus.forget()"),
+            let record = owe.range(of: "returnFocus.record(")
+        else {
+            Issue.record("oweDesktopFocus no longer forgets and records")
+            return
+        }
+        #expect(
+            forget.lowerBound < record.lowerBound,
+            "the retire precedes the decision to owe"
         )
     }
 

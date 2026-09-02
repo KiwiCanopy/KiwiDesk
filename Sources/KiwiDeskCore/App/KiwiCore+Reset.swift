@@ -4,16 +4,17 @@ import Foundation
 /// arrangement (tier 1) and Reset All Settings (tier 2).
 extension KiwiCore {
     /// Tier 1: forget every saved window arrangement — both
-    /// snapshot files, a wake snapshot held for replay, and the
-    /// in-memory remembered window→space map — without touching
-    /// any setting. The files regenerate from live state (the
-    /// crash marker on the next autosave, the session file at
-    /// the next clean quit), which is the point: current state,
-    /// never a stale capture.
+    /// snapshot files, a wake snapshot held for replay, the
+    /// in-memory remembered window→space map and the per-Desktop
+    /// focus memory (#1207) — without touching any setting. The
+    /// files regenerate from live state (the crash marker on the
+    /// next autosave, the session file at the next clean quit),
+    /// which is the point: current state, never a stale capture.
     public func discardSavedArrangement() {
         crash.discardSavedSnapshots()
         sleepWake.dropHeldSnapshot()
         state.forgetRememberedSpaces()
+        forgetDesktopFocus()
         onLog("saved window arrangement discarded")
     }
 

@@ -88,6 +88,18 @@ struct FollowFocusIntentTests {
         #expect(intent.claim(at: t0, if: payable) == nil)
     }
 
+    /// `forget` retires a debt unpaid (#1207): a Desktop return
+    /// owes the window of THAT return, so the arrival arm forgets
+    /// the last return's before deciding whether to owe again.
+    @Test("a forgotten debt is gone")
+    func forgetRetiresTheDebt() {
+        let intent = FollowFocusIntent()
+        intent.record(moved, at: t0)
+        intent.forget()
+        #expect(intent.owed(at: t0) == nil)
+        #expect(intent.claim(at: t0, if: payable) == nil)
+    }
+
     @Test("a re-keyed window keeps the debt and its clock")
     func rekeyKeepsTheDebt() {
         let intent = FollowFocusIntent()

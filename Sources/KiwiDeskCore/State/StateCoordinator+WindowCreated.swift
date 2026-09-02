@@ -81,12 +81,8 @@ extension StateCoordinator {
         // an overlay spawning into a focusless space leaves it
         // nil — a popup is not a settle target.
         // A Desktop return's owed window takes the focus when it
-        // RETURNS, even beside a non-nil focus — the carried
-        // sticky the departure walked it onto (#1207) — and while
-        // the owed window is still departed from this space, the
-        // vacancy is spoken for: no other returning window may
-        // claim it, or the first re-track wins the focus macOS
-        // just restored to the owed one.
+        // RETURNS, and while it is still departed no other
+        // returning window claims the vacancy (#1207).
         let owedHere =
             owed.map {
                 $0 != window.id

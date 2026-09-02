@@ -163,24 +163,36 @@ editing here:
   `.windowCreated` fold takes the debt mirrored in as
   `returningFocus` (the `arrivalDisplay` pattern) and rules two
   clauses: the owed RETURNING window takes the focus even beside
-  a non-nil one, and while it is still `.departed` from that
-  space no other returning window may claim the vacancy. The
-  payer runs in the `.windowCreated` arm and raises with the
+  a non-nil one — and into the ACTIVE space only
+  (`ReturningFocusFoldTests` ▸ `returnIntoInactiveSpaceIsNotPaid`)
+  — and while it is still `.departed` from that space no other
+  returning window may claim the vacancy. The arrival arm
+  RETIRES the last return's debt before deciding whether to owe
+  a new one — a debt lives from one return to the next, never
+  across a Desktop that owes nothing — and owes nothing while a
+  follow (#1007) stands: the verb named its window, and two
+  debts paid on one arm would let the last re-list win. The
+  payer runs in the `.windowCreated` arm, where the owed window's
+  arrival ENDS the debt either way — raised with the
   settle's own shape (`refocusRetile: false, warp: true`), so the
   state pick becomes the OS's and the arrival retile pans to it;
   `desktopSettle` stands its refocus down while the debt is owed
   — raising `Space.focused` there IS the first-in-row jump — and
   an unpaid debt expires at the follow's bound, macOS's own
-  restored focus standing (the accepted-limitations row). Option
-  A — not walking `focused` on a Desktop departure — is rejected:
-  `focused` must name a member, and the walk is harmless once the
-  memory outranks it. The secondary-display arm records nothing
-  (ruled residue). `ReturningFocusFoldTests` pins the fold,
-  `DesktopFocusMemoryTests` the path through the real handler,
-  and `ReturningFocusSeamTests` is the register of the wirings —
-  add a site there in the same change, since deleting any one of
-  them leaves the behaviour suites green while the return
-  silently jumps again. The ruling is on the issue and in
+  restored focus standing (the accepted-limitations row); the
+  #634 arrangement reset forgets the memory with
+  `rememberedSpaces`. The secondary-display arm records nothing
+  (ruled residue). `ReturningFocusFoldTests` pins the fold and
+  `DesktopFocusMemoryTests` the path through the real handler, so
+  a DELETED site reds there; `ReturningFocusSeamTests` is the
+  register of the wirings — each site singular and in its named
+  file, the recorder inside the departure arm beside
+  `rememberVirtualSpace` and nowhere else, the mirror in the
+  create block beside `arrivalDisplay`, the retire ahead of the
+  record, the settle's read ahead of its refocus — which is what
+  the register adds: a site MOVED or DOUBLED still pays in a
+  fixture whose burst runs after the handler returns. Add a site
+  there in the same change. The ruling is on the issue and in
   `docs/design-decisions.md`.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and

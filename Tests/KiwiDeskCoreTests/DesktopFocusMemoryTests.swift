@@ -232,6 +232,82 @@ struct DesktopFocusMemoryTests {
         )
     }
 
+    /// A debt lives from one return to the next. Passing through
+    /// Desktop 1 before its window re-lists must not hold Desktop
+    /// 2's vacancy and settle on a window that cannot arrive
+    /// there.
+    @Test("a return that owes nothing retires the last return's debt")
+    func returnRetiresTheLastDebt() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        // Moved on before the window re-listed: Desktop 2
+        // remembers nothing, and the last return's debt goes.
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 11,
+            secondaryCurrent: 20
+        )
+        NativeSpaces.activeSpaceIDOverride = 11
+        core.handle(.desktopChanged)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+        box.lines = []
+        core.desktopSettle(ifStill: core.lastDesktop)
+        #expect(
+            !box.lines.contains {
+                $0.contains("settle refocus stands down")
+            }
+        )
+    }
+
+    /// The verb named its window (#1007): while a follow's debt
+    /// stands, the return owes nothing, or whichever re-lists
+    /// last would win the focus.
+    @Test("a standing follow outranks the return")
+    func followOutranksTheReturn() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        core.followFocus.record(WindowID(7))
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+        #expect(
+            box.lines.contains { $0.contains("a follow owes w7") }
+        )
+    }
+
+    /// The drain key is the window: its arrival ends the debt
+    /// even where the fold declined to pay it, so the settle is
+    /// not held for a window already back.
+    @Test("the owed window arriving unpaid drops the debt")
+    func unpaidArrivalDropsTheDebt() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        returnToDesktop1(core)
+        // Its space is no longer the active one when it re-lists.
+        core.state.workspaces.ensureSpace(SpaceID("2"))
+        core.state.workspaces.activate(SpaceID("2"))
+        arrive(focused, in: core)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+        #expect(
+            box.lines.contains { $0.contains("focus debt dropped") }
+        )
+        #expect(!box.lines.contains { $0.contains("focus paid") })
+    }
+
+    @Test("the arrangement reset forgets the memory and the debt")
+    func resetForgetsTheMemory() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        returnToDesktop1(core)
+        core.discardSavedArrangement()
+        #expect(core.desktopMemory.focusedWindows.isEmpty)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+    }
+
     @Test("a native-tab re-key follows in the memory and the debt")
     func rekeyFollows() {
         let (core, _) = makeCore()

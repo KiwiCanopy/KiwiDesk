@@ -3045,7 +3045,7 @@ Leaving a macOS Desktop makes every window on it vanish from
 Accessibility, and KiwiDesk's reconcile folds each vanish as a
 destroy — the same fold a close takes, because at that altitude
 the two are the same reading. A close hands focus to the next
-window (close-return, above), so a Desktop departure walks
+window, so a Desktop departure walks
 `Space.focused` down the departing windows to nil, and on the
 return the first window to re-list took the empty slot: focus
 jumped to first-in-row, and a scrolling layout panned to it, at
@@ -3091,6 +3091,15 @@ it, each argued against its alternative:
   being preferred: it never departed, so it is never owed
   anything and holds no vacancy — there is no fallback pick to
   prefer it with.
+- **One debt at a time, and the follow's first.** A debt lives
+  from one return to the next: the arrival arm retires the last
+  one before deciding whether to owe again, because passing
+  through a Desktop before its window re-lists must not hold the
+  *next* Desktop's vacancy and settle on a window that cannot
+  arrive there. And a return owes nothing while a
+  `move_to_desktop_and_follow` is owed: the verb named its
+  window, and paying both on one arrival would let whichever
+  re-lists last win — the explicit verb losing to a restore.
 
 The debt is bounded at five seconds, like the follow's; a window
 that never re-lists within it leaves macOS's own restored focus
