@@ -16,14 +16,16 @@ extension KiwiCore {
             ?? tiler.settings.stickyStyle.desktopReach
     }
 
-    /// How long a carried window counts as IN FLIGHT after its
-    /// move was dispatched — the removal gate's carried arm reads
-    /// it (`stickyReachInFlight`). The AX element dies ~1 s after
-    /// the switch on TextEdit (device, 2026-09-01) and ~2 s on an
-    /// Electron app (Claude, device, 2026-09-02, the trace that
-    /// retired the switch-grace gate); the distrust's recheck
-    /// budget (`EventLoop.removalRecheckCap`) comes on top. Five
-    /// seconds covers both with margin.
+    /// How long a window stays IN FLIGHT after its stamp — a
+    /// dispatched move, or our own switch of its screen (#1213) —
+    /// the removal gate's carried arm reads it
+    /// (`stickyReachInFlight`). The stamp precedes every measured
+    /// death: a native element ~250 ms BEFORE the switch
+    /// notification (TextEdit, device 2026-09-02, #1213), an
+    /// Electron one ~2 s after it (Claude, device 2026-09-02, the
+    /// trace that retired the switch-grace gate); the distrust's
+    /// recheck budget (`EventLoop.removalRecheckCap`) comes on
+    /// top. Five seconds covers both with margin.
     /// The trade: ⌘W of a sticky window inside those seconds waits
     /// out the recheck budget before its tile goes.
     static let inFlightWindow: TimeInterval = 5
@@ -52,11 +54,35 @@ extension KiwiCore {
     /// sticky window closed with no carry in flight is a close.
     func stickyReachInFlight() -> Set<WindowID> {
         let now = Date()
-        stickyReachCarriedAt = stickyReachCarriedAt.filter {
+        stickyReachInFlightAt = stickyReachInFlightAt.filter {
             now.timeIntervalSince($0.value) < Self.inFlightWindow
         }
-        return Set(stickyReachCarriedAt.keys)
+        return Set(stickyReachInFlightAt.keys)
             .intersection(stickyReachCarried())
+    }
+
+    /// Stamps every window the carry WILL move on `displayUUID`
+    /// as in flight at our own switch dispatch, before any
+    /// notification (#1213, the argument on `inFlightWindow`).
+    /// `spaces` is the dispatching verb's own reading (profiles.md).
+    func stampStickyReachInFlight(
+        forSwitchOn displayUUID: String,
+        in spaces: [NativeSpace]
+    ) {
+        guard canDriveDesktops else { return }
+        let carried = stickyReachCarried()
+        let now = Date()
+        let stamped = state.windows.all
+            .filter { carried.contains($0.id) }
+            .filter { renderDisplayUUID(of: $0, in: spaces) == displayUUID }
+            .map(\.id)
+            .sorted { $0.raw < $1.raw }
+        guard !stamped.isEmpty else { return }
+        for id in stamped { stickyReachInFlightAt[id] = now }
+        onLog(
+            "reach: in flight for the dispatched switch: "
+                + stamped.map { "w\($0.raw)" }.joined(separator: " ")
+        )
     }
 
     /// Convenience for a caller holding no topology — a verb, a
@@ -98,7 +124,7 @@ extension KiwiCore {
             // In flight only for a move that was DISPATCHED: a
             // refused one moved nothing, so nothing is expected
             // to vanish and ⌘W must not wait on it.
-            if performed { stickyReachCarriedAt[id] = Date() }
+            if performed { stickyReachInFlightAt[id] = Date() }
             onLog(
                 "reach: carry w\(id.raw) -> space \(current.id) "
                     + "performed=\(performed)"
