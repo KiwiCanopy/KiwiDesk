@@ -205,6 +205,29 @@ struct DesktopFocusPaymentTests {
         #expect(!box.lines.contains { $0.contains("focus paid") })
     }
 
+    /// KiwiDesk's own raise echoes — the departure's close-return
+    /// raise onto a carried sticky, the z-order restore's
+    /// re-assert — are not a choice the memory yields to.
+    @Test("a self-echo does not retire the debt")
+    func selfEchoDoesNotRetireTheDebt() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        leaveDesktop1(core)
+        returnToDesktop1(core)
+        arrive(first, in: core)
+        // KiwiDesk raises `first` itself; the report is its echo.
+        // Stamped as `focusWindow` stamps a real raise — a fake
+        // window has no element to raise.
+        core.outstandingSelfRaises.insert(first)
+        core.selfRaiseStamps[first] = Date()
+        core.handle(.windowFocused(first))
+        #expect(
+            box.lines.contains { $0.contains("selfEcho=true") }
+        )
+        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        #expect(!box.lines.contains { $0.contains("retired") })
+    }
+
     @Test("the owed window's arrival pays the debt, once")
     func arrivalPaysTheDebt() {
         let (core, box) = makeCore()

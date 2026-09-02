@@ -48,7 +48,10 @@ struct ReturningFocusSeamTests {
         // owed window; the payer is called once, by the arrival.
         // The recorder: the honored focus REPORT, and nowhere
         // else — never a fold, never the switch handler.
-        ("rememberHonoredFocus(id)", "KiwiCore+FocusEvents.swift"),
+        (
+            "rememberHonoredFocus(id, selfEcho: selfEcho)",
+            "KiwiCore+FocusEvents.swift"
+        ),
         // The precedence: a standing follow (#1007) is read once,
         // where the return decides whether to owe.
         ("followFocus.owed(", memoryFile),
@@ -85,11 +88,6 @@ struct ReturningFocusSeamTests {
         }
     }
 
-    /// The debt is READ in exactly two places: the mirror before
-    /// the create fold and the settle's stand-down. A third
-    /// reader would be a new moment nominated as "pay or hold",
-    /// which is the judgement this fix rests on; one fewer is a
-    /// fold that never learns the debt, or a settle that raises
     /// The debt is READ in exactly three places: the mirror
     /// before the create fold, the settle's stand-down, and the
     /// honored-focus retire (a focus honored in the active space
@@ -119,6 +117,58 @@ struct ReturningFocusSeamTests {
                     + sites.map(\.site)
                     .joined(separator: ", ")
             )
+        )
+    }
+
+    /// The #634 arrangement reset forgets the memory beside
+    /// `rememberedSpaces`, the id-keyed map it mirrors: after a
+    /// reset every stale entry is "gone from state" and would be
+    /// owed on the next return.
+    @Test("the arrangement reset forgets the memory")
+    func theResetForgetsTheMemory() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.core
+                .appendingPathComponent("App")
+                .appendingPathComponent("KiwiCore+Reset.swift")
+        )
+        guard
+            let reset = SourceScan.declarationBody(
+                after: "func discardSavedArrangement",
+                in: source
+            )
+        else {
+            Issue.record("discardSavedArrangement missing")
+            return
+        }
+        #expect(reset.contains("state.forgetRememberedSpaces()"))
+        #expect(reset.contains("forgetDesktopFocus()"))
+    }
+
+    /// A debt lives from one return to the next: the arrival arm
+    /// retires the last one BEFORE it decides whether to owe, or
+    /// a Desktop that owes nothing inherits the previous return's
+    /// hold on its vacancy and settle.
+    @Test("the last debt is retired before a new one is owed")
+    func theLastDebtIsRetiredFirst() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.core
+                .appendingPathComponent("Profiles")
+                .appendingPathComponent(Self.memoryFile)
+        )
+        guard
+            let owe = SourceScan.declarationBody(
+                after: "func oweReturningFocus",
+                in: source
+            ),
+            let forget = owe.range(of: "returnFocus.forget()"),
+            let record = owe.range(of: "returnFocus.record(")
+        else {
+            Issue.record("oweDesktopFocus no longer forgets and records")
+            return
+        }
+        #expect(
+            forget.lowerBound < record.lowerBound,
+            "the retire precedes the decision to owe"
         )
     }
 

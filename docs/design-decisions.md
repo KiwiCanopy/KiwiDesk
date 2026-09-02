@@ -3110,9 +3110,10 @@ against its alternative:
   through a Desktop before its window re-lists must not hold the
   *next* Desktop's vacancy and settle on a window that cannot
   arrive there. And a focus the OS or the user lands on a window
-  of the arriving space while the debt stands retires it: that
-  report is the truth the memory was only standing in for, and
-  the owed window's later arrival must not pay over it. And a return owes nothing while a
+  of the arriving space while the debt stands retires it — never
+  one of KiwiDesk's own raises echoing back: that report is the
+  truth the memory was only standing in for, and the owed
+  window's later arrival must not pay over it. And a return owes nothing while a
   `move_to_desktop_and_follow` is owed: the verb named its
   window, and paying both on one arrival would let whichever
   re-lists last win — the explicit verb losing to a restore.

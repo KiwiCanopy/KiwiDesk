@@ -171,13 +171,18 @@ editing here:
   — a carried sticky, or a window macOS restored and KiwiDesk
   already honored — needs nothing, which is how the restore
   never prefers the sticky and never yanks a focus the OS got
-  right; and a focus HONORED in the active space while the debt
-  stands RETIRES it (`rememberHonoredFocus`, the third reader of
-  the debt) — the report is the OS's or the user's own choice,
-  and the owed window's later arrival must not pay over it (CI,
-  2026-09-02: `OpenOrFocusRingTests` ▸ the re-track after the
-  focus report). The payment claims BEFORE it raises, so its own
-  echo finds nothing to retire. The `.windowCreated` fold takes the debt mirrored in as
+  right;
+  and a focus HONORED on a window rendered in the active space
+  while the debt stands RETIRES it (`rememberHonoredFocus`, the
+  third reader of the debt) — the report is the OS's or the
+  user's own choice, which the memory was only standing in for,
+  and the owed window's later arrival must not pay over it —
+  never on KiwiDesk's own raise echo (`selfEcho`: the departure's
+  close-return raise onto a carried sticky, the z-order restore's
+  re-assert), or the carried sticky is preferred after all
+  (`DesktopFocusPaymentTests`, `OpenOrFocusRingTests` ▸ the
+  re-track after the focus report, which is CI's ordering of the
+  same case). The `.windowCreated` fold takes the debt mirrored in as
   `returningFocus` (the `arrivalDisplay` pattern) and rules two
   clauses: the owed RETURNING window takes the focus even beside
   a non-nil one — and into the ACTIVE space only

@@ -9,15 +9,16 @@ extension KiwiCore {
     /// Records an honored focus under the window's space and the
     /// native Space it is on — the compositor's answer, so a report
     /// that beats the switch handler lands under the right key.
-    func rememberHonoredFocus(_ id: WindowID) {
-        guard let space = state.workspaces.space(of: id) else { return }
-        // A focus honored in the active space while a return's
-        // debt stands is the user's or the OS's own choice: the
-        // memory yields, or the owed window's arrival pays over
-        // it (CI, 2026-09-02). The payment claims BEFORE it
-        // raises, so its own echo finds nothing to retire.
-        if let owed = desktopMemory.returnFocus.owed(),
-            space == state.workspaces.activeSpace
+    func rememberHonoredFocus(_ id: WindowID, selfEcho: Bool) {
+        guard let space = state.workspaces.space(of: id),
+            let window = state.windows[id]
+        else { return }
+        // A focus the OS or the user lands on a window rendered
+        // in the active space while a debt stands retires it —
+        // never KiwiDesk's own raise echo (#1207).
+        if !selfEcho,
+            let owed = desktopMemory.returnFocus.owed(),
+            window.isSticky || space == state.workspaces.activeSpace
         {
             desktopMemory.returnFocus.forget()
             onLog(
