@@ -78,8 +78,8 @@ body:
         pick a **Time range** that reaches back to before it
         happened, press **Export Log…**, and **attach the file**
         here (drag it into this field) instead of pasting fragments.
-        From a terminal, the same export is
-        `/usr/bin/log show --last 15m --predicate 'subsystem == "com.kiwicanopy.kiwidesk"' --style compact > ~/Desktop/kiwidesk-log.txt`
+        Can't open Settings? The same export from a terminal is in
+        the CLI reference: https://kiwidesk.app/docs/cli/#exporting-the-log
       placeholder: |
         ## kiwidesk get_state
         { "spaces": {...}, ... }

@@ -4,8 +4,8 @@ import Foundation
 /// the `/usr/bin/log show` query a bug report needs — the
 /// subsystem, a time range, compact style — written to a file the
 /// user chose. It changes nothing about how the log is WRITTEN;
-/// `CoreLog` owns that. The Settings export button and any CLI
-/// take their arguments from the one derivation here.
+/// `CoreLog` owns that. The Settings export button takes its
+/// arguments from the one derivation here.
 public struct LogExport: Sendable {
     /// How far back the export reaches.
     public enum Range: Equatable, Sendable {
@@ -76,11 +76,18 @@ public struct LogExport: Sendable {
         return arguments
     }
 
-    /// Runs the query and writes every line to `destination`.
-    public func export(_ range: Range, to destination: URL) throws
-        -> Outcome
+    /// Runs the query and writes every line to `destination`. A
+    /// runner that cannot even start the tool is named here as
+    /// `toolFailed`, so the GUI meets no unnamed error.
+    public func export(_ range: Range, to destination: URL)
+        throws(Failure) -> Outcome
     {
-        let result = try run(Self.arguments(for: range))
+        let result: ToolResult
+        do {
+            result = try run(Self.arguments(for: range))
+        } catch {
+            throw Failure.toolFailed(status: -1, stderr: "\(error)")
+        }
         guard result.status == 0 else {
             throw Failure.toolFailed(
                 status: result.status,
@@ -143,8 +150,18 @@ public struct LogExport: Sendable {
         process.standardOutput = out
         process.standardError = err
         try process.run()
+        // Both pipes drained at once: a tool that fills stderr's
+        // buffer before closing stdout would otherwise block both
+        // sides forever.
+        let group = DispatchGroup()
+        nonisolated(unsafe) var stderr = Data()
+        group.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            stderr = err.fileHandleForReading.readDataToEndOfFile()
+            group.leave()
+        }
         let stdout = out.fileHandleForReading.readDataToEndOfFile()
-        let stderr = err.fileHandleForReading.readDataToEndOfFile()
+        group.wait()
         process.waitUntilExit()
         return ToolResult(
             status: process.terminationStatus,

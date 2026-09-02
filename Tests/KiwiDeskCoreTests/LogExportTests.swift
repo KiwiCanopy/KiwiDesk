@@ -51,6 +51,10 @@ struct LogExportTests {
             LogExport.arguments(for: .last(1)).suffix(2)
                 == ["--last", "1m"]
         )
+        #expect(
+            LogExport.arguments(for: .last(0)).suffix(2)
+                == ["--last", "1m"]
+        )
         var parts = DateComponents()
         parts.year = 2026
         parts.month = 9
@@ -80,6 +84,7 @@ struct LogExportTests {
     @Test("a range the store answers nothing for writes no file")
     func emptyRangeWritesNothing() throws {
         let url = scratch()
+        defer { try? FileManager.default.removeItem(at: url) }
         let export = fake(Self.header)
         #expect(try export.export(.last(60), to: url) == .empty)
         #expect(!FileManager.default.fileExists(atPath: url.path))

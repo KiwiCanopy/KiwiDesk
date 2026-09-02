@@ -30,7 +30,6 @@ extension GeneralSection {
                     )
                 }
                 .settingsActionButton()
-                .disabled(model.isExportingLog)
                 HelpButton(
                     explanation: L(
                         "general.advanced.log.export.help",
@@ -44,9 +43,8 @@ extension GeneralSection {
                     ),
                     subject: L("general.advanced.log.export", "Export Log…")
                 )
-                // Always drawn, faded when idle: a spinner that
-                // appears and vanishes is a layout jump and a
-                // conditional the hiding guard refuses.
+                // Always drawn, faded when idle (gui.md ▸ grey,
+                // don't hide).
                 ProgressView()
                     .controlSize(.small)
                     .opacity(model.isExportingLog ? 1 : 0)

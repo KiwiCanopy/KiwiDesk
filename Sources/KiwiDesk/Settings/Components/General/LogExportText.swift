@@ -2,8 +2,8 @@ import Foundation
 import KiwiDeskCore
 
 /// What stopped a log export (#1209) — Core's cases, the GUI's
-/// sentences (#96). `writeFailed` reuses the backup export's
-/// write sentence: same meaning, ten translations saved.
+/// sentences (#96). `writeFailed` shares `common.error.write_failed`
+/// with the backup export (localization.md ▸ shared keys).
 enum LogExportProblem: Equatable {
     /// The store answered no KiwiDesk line for the range.
     case empty
@@ -58,10 +58,9 @@ enum LogExportText {
                     + "moment."
             )
         case .writeFailed(let url):
-            // The backup export's write sentence, deliberately
-            // shared (`SetupBackupText`).
+            // Shared with `SetupBackupText.couldNotWrite`.
             return L(
-                "general.advanced.backup.error.write_failed",
+                "common.error.write_failed",
                 "KiwiDesk couldn't write “%1$@”. Try somewhere "
                     + "else, like your Desktop.",
                 url.lastPathComponent

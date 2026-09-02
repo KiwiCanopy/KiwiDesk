@@ -222,7 +222,7 @@ item's only appearance in CLI output.
 
 ## Exporting the Log
 
-KiwiDesk writes every diagnostic line to the macOS unified log
+KiwiDesk writes its diagnostic lines to the macOS unified log
 under its own subsystem, at default level and with the text
 public — so the shipped app's log is readable on any Mac with no
 debug build and no extra permission. To hand it over with a bug
@@ -244,11 +244,14 @@ named `log` is common. To watch live while reproducing:
 /usr/bin/log stream --predicate 'subsystem == "com.kiwicanopy.kiwidesk"' --style compact
 ```
 
-The subsystem filter is the right one: filtering on the word
-"KiwiDesk" misses the system daemons' lines a report sometimes
-needs and catches unrelated apps mentioning the name. (`kiwidesk
-debug_log <message>` WRITES a marker line into this same log,
-which is useful to bracket a repro; it exports nothing.)
+The subsystem filter keeps the file to what KiwiDesk itself
+wrote — exact, and public text — which is what an attachable
+report wants. It deliberately excludes other processes' lines
+(the privacy daemon's Accessibility verdicts, the WindowServer);
+a maintainer who needs those widens to a word filter on
+"KiwiDesk", which also catches unrelated apps mentioning the
+name. (`kiwidesk debug_log [message]` WRITES a marker line into
+this same log, useful to bracket a repro; it exports nothing.)
 
 ## Commands
 
