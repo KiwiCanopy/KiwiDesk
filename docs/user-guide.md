@@ -3068,12 +3068,13 @@ Each row has an action. Built-in actions live under headings:
   instance into the current space, or launch it if it isn't
   running; pressing again while its window is focused cycles
   through the app's other windows, the ones on other macOS
-  Desktops included; when the app's only open window sits on a
-  Desktop you are not looking at, the shortcut switches to that
-  Desktop and focuses it; and when the app has nothing open
-  anywhere, it restores one minimized window rather than
-  coming forward empty) or *Open New* (always launch a fresh
-  instance). You can
+  Desktops included; when nothing of the app is up on the
+  Desktop you are looking at but a window is up on another one,
+  the shortcut switches to that Desktop and focuses it (where
+  macOS exposes the Desktop bridge; otherwise the app just
+  comes forward); and when the app has nothing open anywhere,
+  it restores one minimized window rather than coming forward
+  empty) or *Open New* (always launch a fresh instance). You can
   add the same app twice to bind one shortcut per behavior; the
   menu greys a behavior already bound for that app so the two can't
   collide. Rows are sorted alphabetically by app name (settled when

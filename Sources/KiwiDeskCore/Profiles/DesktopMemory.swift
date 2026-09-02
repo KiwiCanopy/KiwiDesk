@@ -27,6 +27,13 @@ final class DesktopMemory {
     var readCensus: @MainActor ([NativeSpace]) -> DesktopCensus? =
         NativeSpaces.desktopCensus(spaces:)
 
+    /// The compositor's word on ONE window at its destroy
+    /// (#1146) — the gone classifier's read, live by default and
+    /// pinned to `.unavailable` by `makeTestCore`, since a
+    /// fixture id can be a real window on the host.
+    var readWindowSpace: @MainActor (WindowID) -> WindowSpaceReading =
+        NativeSpaces.windowSpaceReading(of:)
+
     /// Seeds display space readings from desktop snapshot at boot.
     func seed(_ snapshot: DesktopSnapshot) {
         lastDisplaySpaces = snapshot.currentSpaces

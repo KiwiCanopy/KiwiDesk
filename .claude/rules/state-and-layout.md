@@ -217,16 +217,21 @@ editing here:
 - **A window on an away Desktop is KNOWN, in a ledger beside
   the state — never a member (#1146).** `StateCoordinator
   .awayWindows` (pid, app, bundle id, native Space) is written
-  by two writers only: `KiwiCore.handleWindowGone`, on a
-  compositor-confirmed `vanished`, and the boot seed
-  (`seedAwayWindows`); the departure's space and rank stay in
-  #1207's two records, and the three are read together. An
+  on a compositor-confirmed `vanished` (`KiwiCore.handleWindowGone`)
+  and by the boot seed (`seedAwayWindows`) — a NEW writer joins
+  `KiwiCore+AwayWindows.swift`, which owns every write, rather
+  than assigning beside a call site; the departure's space and
+  rank stay in #1207's two records, and the three are read
+  together. An
   entry ENDS on the return (the create fold), on a census that
   no longer hosts the id (`refreshAwayWindows`, which emits the
   corrective `closed` — at the Desktop settle and on the 5 s
   `awayCensus` task while the ledger is non-empty), on the app's
   exit, on the #634 reset with `rememberedSpaces`, and moves on
-  a re-key (`WindowRekeyParityTests` discovers the container).
+  a re-key (`WindowRekeyParityTests`' fixture populates it, so the
+  reflection scan discovers the container; `AwayLedgerTests` ▸
+  `rekeyFollows` holds the move). A prune retires all three
+  records through the one `StateCoordinator.forgetAway`.
   A reader that needs a Space's row as it WILL return takes
   `withAwayMembers(_:of:)` — the fold's own rank insert — never
   a hand merge; a reader keyed by app takes

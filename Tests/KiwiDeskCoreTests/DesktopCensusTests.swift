@@ -30,7 +30,6 @@ struct DesktopCensusTests {
             DesktopCensus.build(
                 spaces: spaces,
                 owners: [WindowID(7): 100, WindowID(8): 100],
-                ownPID: 1,
                 list: lister([1: ([8], [8]), 4: ([7], [7])])
             )
         )
@@ -46,7 +45,6 @@ struct DesktopCensusTests {
             DesktopCensus.build(
                 spaces: spaces,
                 owners: [WindowID(7): 100],
-                ownPID: 1,
                 list: lister([4: ([7], [])])
             )
         )
@@ -60,20 +58,6 @@ struct DesktopCensusTests {
             DesktopCensus.build(
                 spaces: spaces,
                 owners: [:],
-                ownPID: 1,
-                list: lister([4: ([7], [7])])
-            )
-        )
-        #expect(census.hosts.isEmpty)
-    }
-
-    @Test("our own windows are never in the census")
-    func ownProcessIsSkipped() throws {
-        let census = try #require(
-            DesktopCensus.build(
-                spaces: spaces,
-                owners: [WindowID(7): 42],
-                ownPID: 42,
                 list: lister([4: ([7], [7])])
             )
         )
@@ -86,7 +70,6 @@ struct DesktopCensusTests {
             DesktopCensus.build(
                 spaces: spaces,
                 owners: [WindowID(7): 100],
-                ownPID: 1,
                 list: lister([9: ([7], [7])])
             )
         )
@@ -101,7 +84,6 @@ struct DesktopCensusTests {
             DesktopCensus.build(
                 spaces: spaces,
                 owners: [WindowID(7): 100],
-                ownPID: 1,
                 list: lister([4: ([7], [7]), 20: ([7], [7])])
             )
         )
@@ -114,7 +96,6 @@ struct DesktopCensusTests {
         let census = DesktopCensus.build(
             spaces: spaces,
             owners: [WindowID(7): 100],
-            ownPID: 1
         ) { _, _ in nil }
         #expect(census == nil)
     }
@@ -128,7 +109,6 @@ struct DesktopCensusTests {
                     WindowID(7): 100, WindowID(5): 100,
                     WindowID(6): 100, WindowID(8): 200,
                 ],
-                ownPID: 1,
                 list: lister([4: ([5, 6, 7, 8], [6, 7, 8])])
             )
         )

@@ -51,6 +51,11 @@ final class DeferredTasks {
         /// Re-reads the away ledger against one per-Desktop
         /// census while it is non-empty (#1146).
         case awayCensus
+        /// Adopts the window an Open-or-Focus reach switched to
+        /// (#1146). Its own slot for `desktopFollowReap`'s reason:
+        /// a follow and a reach are one keystroke apart, and
+        /// cancel-and-replace would drop whichever fired first.
+        case awayReachReap
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]

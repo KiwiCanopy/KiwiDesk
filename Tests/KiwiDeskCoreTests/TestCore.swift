@@ -106,5 +106,13 @@ func makeTestCore(
     // the focused ring in every border suite. Pin "no own key
     // window"; the stand-down suites inject their own reading.
     core.eventLoop.ownKeyWindow = { nil }
+    // Same class, sixth time (#1146): the compositor reads behind
+    // the gone classifier and the away ledger default LIVE, and
+    // a fixture id can be a real CGWindowID on the host — one
+    // hosted on an unshown Desktop would read `vanished`, file
+    // the ledger and arm a live census. Pin "no compositor"; a
+    // suite that wants a verdict states it on `desktopMemory`.
+    core.desktopMemory.readWindowSpace = { _ in .unavailable }
+    core.desktopMemory.readCensus = { _ in nil }
     return core
 }

@@ -113,19 +113,25 @@ public struct AwayWindow: Sendable, Equatable {
     public let appBundleID: String?
     /// The native Space hosting it at the last reading.
     public var nativeSpace: SkyLight.SpaceID
+    /// Up on that Desktop at the last reading; a window parked
+    /// (minimized) while away draws nowhere, as one minimized
+    /// here does.
+    public var isUp: Bool
 
     public init(
         id: WindowID,
         pid: pid_t,
         appName: String,
         appBundleID: String?,
-        nativeSpace: SkyLight.SpaceID
+        nativeSpace: SkyLight.SpaceID,
+        isUp: Bool = true
     ) {
         self.id = id
         self.pid = pid
         self.appName = appName
         self.appBundleID = appBundleID
         self.nativeSpace = nativeSpace
+        self.isUp = isUp
     }
 
     /// The same entry under a new id (#308 re-key).
@@ -135,7 +141,8 @@ public struct AwayWindow: Sendable, Equatable {
             pid: pid,
             appName: appName,
             appBundleID: appBundleID,
-            nativeSpace: nativeSpace
+            nativeSpace: nativeSpace,
+            isUp: isUp
         )
     }
 }

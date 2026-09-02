@@ -3146,8 +3146,10 @@ window beside one that was up one Desktop away
 ([#673](https://github.com/KiwiCanopy/KiwiDesk/issues/673)'s
 accepted residue). The WindowServer knows all of it — one
 private list per Desktop answers which windows a Desktop hosts
-and whether each is up or parked, in a tenth of a millisecond —
-so the ruling is that a window on an away Desktop is **known**,
+and whether each is up or parked, in well under a millisecond
+per Desktop (the measurement sits on the primitive's docstring,
+`SkyLight+WindowCensus.swift`) — so the ruling is that a window
+on an away Desktop is **known**,
 and the choices, each argued against its alternative:
 
 - **A ledger beside the state, never members in it.** The
@@ -3159,8 +3161,9 @@ and the choices, each argued against its alternative:
   windows as members with a flag was the alternative: every
   consumer of a space's row would gain an exclusion, the
   return-by-rank fold would be reworked, and the removal-distrust
-  machine would need a third state. The ledger reaches four
-  consumers explicitly and nothing else changes.
+  machine would need a third state. The ledger reaches its
+  consumers explicitly — the gone classifier, the Space Bar, Open
+  or Focus, `get_state` — and nothing else changes.
 - **The gone reason reads the compositor, and the timer is the
   fallback, not a peer.** Hosted on a user Desktop nobody shows
   is `vanished`; hosted nowhere is `closed`; hosted on a shown
@@ -3169,9 +3172,8 @@ and the choices, each argued against its alternative:
   The settle timer decides only where SkyLight cannot answer, so
   a Mac without the symbol keeps the pre-#1146 behavior rather
   than a fake. And "gone" is *the space list is empty*, never
-  absence from `CGWindowListCopyWindowInfo(.optionAll)`, which
-  lists a closed window for a while afterwards (device,
-  2026-09-02).
+  absence from `CGWindowListCopyWindowInfo(.optionAll)` — why
+  not is on `AXHelper.allNormalWindowOwners`' docstring.
 - **A window that dies while away gets its corrective `closed`.**
   The ledger is re-read against one census at the Desktop settle
   and every five seconds while it is non-empty; an entry the
@@ -6308,7 +6310,9 @@ minimize is a parking decision — the user said "not now" about
 that window — and a focus gesture must not undo it. So the
 shortcut works the visible windows only, and reaches into the
 Dock in the single case where the alternative is doing nothing
-at all: the app is running with nothing on screen, where
+at all: the app is running with nothing up on any Desktop (since
+[#1146](https://github.com/KiwiCanopy/KiwiDesk/issues/1146) a
+window up on an away Desktop is reached instead), where
 `activate()` brings it forward showing an empty screen. It then
 restores the *most recently* minimized window — the one parked
 last is the likeliest one wanted back, and it is an order the

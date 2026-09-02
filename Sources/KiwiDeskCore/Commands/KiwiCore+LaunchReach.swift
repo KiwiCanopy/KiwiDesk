@@ -69,7 +69,7 @@ extension KiwiCore {
     /// window that composites after the settle's arrival sweep.
     private func scheduleReachReap(pid: pid_t) {
         deferred.schedule(
-            .desktopFollowReap,
+            .awayReachReap,
             after: .milliseconds(700)
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning else { return }

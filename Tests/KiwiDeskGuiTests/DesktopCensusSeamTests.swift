@@ -3,8 +3,8 @@ import Testing
 
 /// The per-Desktop census's seams (#1146): the private symbol is
 /// spelled once, in the OS lane; a production reader reaches the
-/// census through `DesktopMemory.readCensus` and a test through
-/// the override, never the builder; and the sweep that decides
+/// census through `DesktopMemory.readCensus`, the one door a
+/// test pins too, never the builder; and the sweep that decides
 /// removals never reads it — the on-screen census may REFUSE a
 /// removal, never cause one (#1157), and the per-Desktop one is
 /// downstream of that decision.
@@ -84,24 +84,28 @@ struct DesktopCensusSeamTests {
         )
     }
 
-    /// The one-way trust: the files that decide a removal read
-    /// the on-screen census only.
-    @Test("the sweep never reads the per-Desktop census")
+    /// The one-way trust: no file of the event loop — the sweep,
+    /// the heal, the carried gate, the boot passes — reads the
+    /// per-Desktop census or the ledger. Every file under
+    /// `Events/`, asserted non-empty so a moved directory cannot
+    /// pass vacuously.
+    @Test("the event loop never reads the per-Desktop census")
     func sweepStaysCensusBlind() throws {
-        for file in [
-            "Events/EventLoop+Tabs.swift",
-            "Events/EventLoop+Reconcile.swift",
-            "Events/EventLoop+RemovalDistrust.swift",
-            "Events/EventLoop+Heal.swift",
-        ] {
+        let events = Self.core.appendingPathComponent("Events")
+        let files = try FileManager.default
+            .contentsOfDirectory(atPath: events.path)
+            .filter { $0.hasSuffix(".swift") }
+        #expect(!files.isEmpty)
+        for file in files {
             let source = try SourceScan.strippedSource(
-                at: Self.core.appendingPathComponent(file)
+                at: events.appendingPathComponent(file)
             )
             #expect(
                 !source.contains("DesktopCensus")
                     && !source.contains("desktopCensus")
-                    && !source.contains("awayWindows"),
-                .init(rawValue: "\(file) reads the per-Desktop census")
+                    && !source.contains("awayWindows")
+                    && !source.contains("readCensus"),
+                .init(rawValue: "Events/\(file) reads the per-Desktop census")
             )
         }
     }

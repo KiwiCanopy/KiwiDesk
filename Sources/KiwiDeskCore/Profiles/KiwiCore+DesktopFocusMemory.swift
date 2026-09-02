@@ -96,6 +96,16 @@ extension KiwiCore {
         desktopMemory.returnFocus.forget()
     }
 
+    /// A window closed while away (#1146) leaves the memory too,
+    /// or the next return owes a debt to a window that is gone.
+    func retireDesktopFocus(of id: WindowID) {
+        for (space, entries) in desktopMemory.honoredFocus {
+            for (native, owed) in entries where owed == id {
+                desktopMemory.honoredFocus[space]?[native] = nil
+            }
+        }
+    }
+
     /// A native-tab re-key (#308) follows in the memory and the
     /// debt alike, or a returning tab carrier is owed a dead id.
     func rekeyDesktopFocus(old: WindowID, new: WindowID) {

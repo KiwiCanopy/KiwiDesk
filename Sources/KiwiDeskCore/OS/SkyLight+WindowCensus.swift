@@ -38,7 +38,10 @@ extension SkyLight {
     }
 
     /// The windows `space` hosts, every owner — nil when the
-    /// symbol or the connection is absent.
+    /// symbol or the connection is absent OR the call answers
+    /// nothing: a failed read is "cannot tell", never an empty
+    /// Desktop, or a census built on it would prune every away
+    /// window there as closed.
     static func windows(
         on space: SpaceID,
         includingParked: Bool
@@ -58,7 +61,7 @@ extension SkyLight {
                 &setTags,
                 &clearTags
             )?.takeRetainedValue() as? [NSNumber]
-        else { return [] }
+        else { return nil }
         return list.map(\.uint32Value)
     }
 }

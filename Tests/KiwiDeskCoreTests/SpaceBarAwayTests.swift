@@ -104,6 +104,19 @@ struct SpaceBarAwayTests {
         #expect(pruned.map(\.space) == ["1"])
     }
 
+    @Test("a window parked while away draws nowhere, like one parked here")
+    func parkedAwayDrawsNowhere() {
+        let core = makeCore()
+        park(core, 7, in: "2", rank: 0)
+        core.state.awayWindows[WindowID(7)]?.isUp = false
+        let (apps, _, _) = core.spaceBarApps(
+            in: core.state.workspaces["2"]!,
+            style: core.tiler.settings.spaceBarStyle,
+            isCurrent: false
+        )
+        #expect(apps.isEmpty)
+    }
+
     @Test("an unfiled entry draws under no Space")
     func unfiledDrawsNowhere() {
         let core = makeCore()

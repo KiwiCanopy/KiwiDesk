@@ -143,6 +143,7 @@ extension KiwiCore {
                     } ?? .null,
                     "space_id": state.rememberedSpace(of: entry.id)
                         .map { .string($0.raw) } ?? .null,
+                    "up": .bool(entry.isUp),
                     "desktop": NativeSpaces.number(
                         of: entry.nativeSpace,
                         in: topology

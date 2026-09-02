@@ -21,6 +21,14 @@ extension KiwiCore {
             presence: presence
         )
         var desktop: Int?
+        if case .hosted(let space, true) = presence, !wasMinimized {
+            // The eyeball's question (#1146): a fast app folding
+            // before the pointer moved would land here.
+            onLog(
+                "gone: w\(id.raw) still hosted on shown space "
+                    + "\(space) — closed"
+            )
+        }
         if reason == .vanished,
             case .hosted(let space, _) = presence
         {
@@ -50,19 +58,21 @@ extension KiwiCore {
         of id: WindowID,
         spaces: [NativeSpace]
     ) -> GonePresence {
-        guard NativeSpaces.canReadWindowSpaces, !spaces.isEmpty
-        else {
-            return .unknown(
-                sinceDesktopSwitch: Date()
-                    .timeIntervalSince(lastDesktopSwitch)
-            )
-        }
-        guard let space = NativeSpaces.nativeSpace(of: id) else {
+        let unknown = GonePresence.unknown(
+            sinceDesktopSwitch: Date()
+                .timeIntervalSince(lastDesktopSwitch)
+        )
+        guard !spaces.isEmpty else { return unknown }
+        switch desktopMemory.readWindowSpace(id) {
+        case .unavailable:
+            return unknown
+        case .gone:
             return .gone
+        case .hosted(let space):
+            let shown = spaces.contains {
+                $0.id == space && $0.isCurrent
+            }
+            return .hosted(space: space, shown: shown)
         }
-        let shown = spaces.contains {
-            $0.id == space && $0.isCurrent
-        }
-        return .hosted(space: space, shown: shown)
     }
 }

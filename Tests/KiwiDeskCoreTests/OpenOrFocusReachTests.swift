@@ -54,12 +54,32 @@ private let bridgeClasses: [String: AnyClass] = [
     "HideSpacesOperation": FakeHideSpaces.self,
 ]
 
-/// What Open or Focus did to the machine.
+/// How the fake bridge answers: every class, only the
+/// availability probe (so a switch is REFUSED), or nothing.
+private enum BridgeShape {
+    case present
+    case refusing
+    case absent
+
+    func resolve(_ name: String) -> AnyClass? {
+        switch self {
+        case .present: bridgeClasses[name]
+        case .refusing:
+            name == "CopyManagedDisplaySpacesOperation"
+                ? bridgeClasses[name] : nil
+        case .absent: nil
+        }
+    }
+}
+
+/// What Open or Focus did to the machine, and the census the
+/// core reads — one box per core, captured by its seams.
 @MainActor
 private final class Touches {
     var activated: [pid_t] = []
     var restored: [WindowID] = []
     var opened: [String] = []
+    var hosts: [WindowID: DesktopCensus.Host] = [:]
 }
 
 // MARK: - Suite
@@ -77,7 +97,9 @@ struct OpenOrFocusReachTests {
     private let pid: pid_t = 100
     private let bundle = "app.test.safari"
 
-    private func makeCore(bridge: Bool = true) -> (KiwiCore, Touches) {
+    private func makeCore(
+        bridge: BridgeShape = .present
+    ) -> (KiwiCore, Touches) {
         Bridge.reset()
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 10,
@@ -85,23 +107,31 @@ struct OpenOrFocusReachTests {
         )
         NativeSpaces.activeSpaceIDOverride = 10
         pinTwoDisplays()
-        WMBridge.classResolverOverride = { name in
-            bridge ? bridgeClasses[name] : nil
-        }
+        WMBridge.classResolverOverride = { bridge.resolve($0) }
         let core = makeTestCore()
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
         let touches = Touches()
         core.openOrFocus.runningAppPID = { _ in self.pid }
         core.openOrFocus.census = { _ in
-            KiwiCore.AppWindowCensus(visible: 0, minimized: [WindowID(9)])
+            KiwiCore.AppWindowCensus(
+                visible: 0,
+                minimized: [WindowID(9)]
+            )
         }
-        core.openOrFocus.deminiaturize = { _, id in touches.restored.append(id)
+        core.openOrFocus.deminiaturize = { _, id in
+            touches.restored.append(id)
         }
         core.openOrFocus.activate = { touches.activated.append($0) }
         core.openOrFocus.openApp = { id, _ in
             touches.opened.append(id)
             return true
+        }
+        core.desktopMemory.readCensus = { spaces in
+            DesktopCensus(
+                hosts: touches.hosts,
+                shown: Set(spaces.filter(\.isCurrent).map(\.id))
+            )
         }
         return (core, touches)
     }
@@ -111,69 +141,83 @@ struct OpenOrFocusReachTests {
         resetAuthorityOverrides()
     }
 
-    /// Files `id` as away on space 11 (Desktop 2), in space "1".
+    /// Files `id` as away in space "1", hosted on `space` (11 =
+    /// Desktop 2 by default).
     private func park(
         _ core: KiwiCore,
+        _ touches: Touches,
         _ id: UInt32,
         rank: Int,
-        up: Bool = true
+        up: Bool = true,
+        space: UInt64 = 11
     ) {
         core.state.awayWindows[WindowID(id)] = AwayWindow(
             id: WindowID(id),
             pid: pid,
             appName: "Safari",
             appBundleID: bundle,
-            nativeSpace: 11
+            nativeSpace: space
         )
         core.state.rememberedSpaces[WindowID(id)] = .departed("1")
         core.state.departedSlots[WindowID(id)] = rank
-        var hosts = core.readDesktopCensusHosts
-        hosts[WindowID(id)] = DesktopCensus.Host(space: 11, pid: pid, isUp: up)
-        core.readDesktopCensusHosts = hosts
+        touches.hosts[WindowID(id)] = DesktopCensus.Host(
+            space: space,
+            pid: pid,
+            isUp: up
+        )
     }
 
-    @Test(
-        "nothing up here, a window up away: switched and owed"
-    )
+    private func press(_ core: KiwiCore) {
+        #expect(
+            core.execute("pull_or_spawn", args: [.string(bundle)])
+                .isSuccess
+        )
+    }
+
+    @Test("nothing up here, a window up away: switched and owed")
     func reaches() {
         let (core, touches) = makeCore()
         defer { teardown() }
-        park(core, 7, rank: 0)
-        #expect(
-            core.execute("pull_or_spawn", args: [.string(bundle)]).isSuccess
-        )
+        park(core, touches, 7, rank: 0)
+        press(core)
         #expect(Bridge.switches.map(\.0) == [11])
         #expect(core.followFocus.owed() == WindowID(7))
         #expect(touches.restored.isEmpty)
         #expect(touches.activated.isEmpty)
-        #expect(core.deferred.isScheduled(.desktopFollowReap))
+        #expect(core.deferred.isScheduled(.awayReachReap))
     }
 
-    @Test(
-        "a parked away window is not reached; the un-park runs"
-    )
+    @Test("a parked away window is not reached; the un-park runs")
     func parkedAwayIsNotReached() {
         let (core, touches) = makeCore()
         defer { teardown() }
-        park(core, 7, rank: 0, up: false)
-        #expect(
-            core.execute("pull_or_spawn", args: [.string(bundle)]).isSuccess
-        )
+        park(core, touches, 7, rank: 0, up: false)
+        press(core)
         #expect(Bridge.switches.isEmpty)
         #expect(core.followFocus.owed() == nil)
-        // The un-park runs: the app has nothing up anywhere.
         #expect(touches.restored == [WindowID(9)])
+        #expect(touches.activated == [pid])
+    }
+
+    /// A stale entry the census has since re-homed onto a shown
+    /// Desktop is not away, whatever the ledger last recorded.
+    @Test("an entry hosted on a shown Desktop is not reached")
+    func staleEntryOnShownDesktopIsNotReached() {
+        let (core, touches) = makeCore()
+        defer { teardown() }
+        park(core, touches, 7, rank: 0, space: 10)
+        press(core)
+        #expect(Bridge.switches.isEmpty)
+        #expect(core.followFocus.owed() == nil)
         #expect(touches.activated == [pid])
     }
 
     @Test("without the bridge the pre-#1146 path runs")
     func noBridgeActivates() {
-        let (core, touches) = makeCore(bridge: false)
+        let (core, touches) = makeCore(bridge: .absent)
         defer { teardown() }
-        park(core, 7, rank: 0)
-        #expect(
-            core.execute("pull_or_spawn", args: [.string(bundle)]).isSuccess
-        )
+        park(core, touches, 7, rank: 0)
+        press(core)
         #expect(Bridge.switches.isEmpty)
         #expect(core.followFocus.owed() == nil)
         // A window UP away still counts as up: no un-park.
@@ -188,18 +232,13 @@ struct OpenOrFocusReachTests {
         core.openOrFocus.census = { _ in
             KiwiCore.AppWindowCensus(visible: 1, minimized: [])
         }
-        park(core, 7, rank: 0)
-        #expect(
-            core.execute("pull_or_spawn", args: [.string(bundle)]).isSuccess
-        )
+        park(core, touches, 7, rank: 0)
+        press(core)
         #expect(Bridge.switches.isEmpty)
         #expect(touches.activated == [pid])
     }
 
-    @Test("the cycle ring holds the away window by rank and reaches it")
-    func cycleReaches() {
-        let (core, touches) = makeCore()
-        defer { teardown() }
+    private func trackTwo(_ core: KiwiCore) {
         for id: UInt32 in [1, 3] {
             core.state.windows.upsert(
                 ManagedWindow(
@@ -213,12 +252,17 @@ struct OpenOrFocusReachTests {
         }
         core.state.departedSlots[WindowID(1)] = 0
         core.state.departedSlots[WindowID(3)] = 2
-        park(core, 2, rank: 1)
         core.state.workspaces.focus(WindowID(1), in: "1")
         core.frontmostPIDProvider = { self.pid }
-        #expect(
-            core.execute("pull_or_spawn", args: [.string(bundle)]).isSuccess
-        )
+    }
+
+    @Test("the cycle ring holds the away window by rank and reaches it")
+    func cycleReaches() {
+        let (core, touches) = makeCore()
+        defer { teardown() }
+        trackTwo(core)
+        park(core, touches, 2, rank: 1)
+        press(core)
         // 1 → 2: the away window is next by rank, so the press
         // reaches it rather than focusing 3.
         #expect(Bridge.switches.map(\.0) == [11])
@@ -226,48 +270,32 @@ struct OpenOrFocusReachTests {
         #expect(touches.activated.isEmpty)
     }
 
+    /// The bridge is present but declines the switch: the press
+    /// falls through to the plain activate rather than dying in
+    /// the cycle. (A `guard canDriveDesktops` inside the reach is
+    /// defence in depth this fixture cannot see — an absent
+    /// resolver refuses through the bridge's own nil anyway.)
+    @Test("a refused reach falls through to the activate")
+    func refusedReachFallsThrough() {
+        let (core, touches) = makeCore(bridge: .refusing)
+        defer { teardown() }
+        trackTwo(core)
+        park(core, touches, 2, rank: 1)
+        press(core)
+        #expect(Bridge.switches.isEmpty)
+        #expect(core.followFocus.owed() == nil)
+        #expect(core.state.workspaces["1"]?.focused == WindowID(1))
+        #expect(touches.activated == [pid])
+    }
+
     @Test("without the bridge the ring is the tracked windows alone")
     func noBridgeRingIsTracked() {
-        let (core, _) = makeCore(bridge: false)
+        let (core, touches) = makeCore(bridge: .absent)
         defer { teardown() }
-        for id: UInt32 in [1, 3] {
-            core.state.windows.upsert(
-                ManagedWindow(
-                    id: WindowID(id),
-                    pid: pid,
-                    appName: "Safari",
-                    appBundleID: bundle
-                )
-            )
-            core.state.workspaces.add(WindowID(id), to: "1")
-        }
-        park(core, 2, rank: 1)
-        core.state.workspaces.focus(WindowID(1), in: "1")
-        core.frontmostPIDProvider = { self.pid }
-        #expect(
-            core.execute("pull_or_spawn", args: [.string(bundle)]).isSuccess
-        )
+        trackTwo(core)
+        park(core, touches, 2, rank: 1)
+        press(core)
         #expect(core.state.workspaces["1"]?.focused == WindowID(3))
         #expect(core.followFocus.owed() == nil)
     }
-}
-
-extension KiwiCore {
-    /// The census the suite's core reads — a stored host map the
-    /// seam answers from, keyed like the real one.
-    fileprivate var readDesktopCensusHosts: [WindowID: DesktopCensus.Host] {
-        get { Self.censusHosts[ObjectIdentifier(self)] ?? [:] }
-        set {
-            Self.censusHosts[ObjectIdentifier(self)] = newValue
-            desktopMemory.readCensus = { spaces in
-                DesktopCensus(
-                    hosts: newValue,
-                    shown: Set(spaces.filter(\.isCurrent).map(\.id))
-                )
-            }
-        }
-    }
-
-    private nonisolated(unsafe) static var censusHosts:
-        [ObjectIdentifier: [WindowID: DesktopCensus.Host]] = [:]
 }

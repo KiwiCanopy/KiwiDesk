@@ -34,27 +34,37 @@ extension KiwiCore {
     /// WindowServer no longer hosts is a window closed while
     /// away — pruned, and reported `closed` the way its close
     /// would have been had the Desktop been shown. A no-op
-    /// without a census (absent, never faked).
-    func refreshAwayWindows() {
-        guard !state.awayWindows.isEmpty else { return }
+    /// without a census (absent, never faked); returns whether
+    /// one was read, which is what keeps the task armed.
+    @discardableResult
+    func refreshAwayWindows() -> Bool {
+        guard !state.awayWindows.isEmpty else { return false }
         let spaces = NativeSpaces.allSpaces()
-        guard let census = desktopMemory.readCensus(spaces) else { return }
+        guard let census = desktopMemory.readCensus(spaces) else {
+            return false
+        }
+        var redrawn = false
         for entry in state.awayWindows.values.sorted(by: {
             $0.id.raw < $1.id.raw
         }) {
             guard let host = census.hosts[entry.id] else {
                 pruneAwayWindow(entry)
+                redrawn = true
                 continue
             }
+            if entry.isUp != host.isUp { redrawn = true }
             state.awayWindows[entry.id]?.nativeSpace = host.space
+            state.awayWindows[entry.id]?.isUp = host.isUp
         }
+        // The bar drew what changed; nothing else retiles.
+        if redrawn { updateSpaceBar() }
+        return true
     }
 
     private func pruneAwayWindow(_ entry: AwayWindow) {
         let space = state.rememberedSpace(of: entry.id)
-        state.awayWindows[entry.id] = nil
-        state.rememberedSpaces[entry.id] = nil
-        state.departedSlots[entry.id] = nil
+        state.forgetAway(entry.id)
+        retireDesktopFocus(of: entry.id)
         onLog(
             "away: w\(entry.id.raw) (\(entry.appName)) closed "
                 + "while its Desktop was away"
@@ -69,7 +79,9 @@ extension KiwiCore {
     }
 
     /// Arms the periodic re-read; self-re-arming while the
-    /// ledger is non-empty, so an empty ledger costs nothing.
+    /// ledger is non-empty AND a census could be read, so an
+    /// empty ledger — or a Mac whose list symbol is absent —
+    /// costs nothing.
     func scheduleAwayCensus() {
         guard !state.awayWindows.isEmpty else { return }
         deferred.schedule(
@@ -77,8 +89,9 @@ extension KiwiCore {
             after: Self.awayCensusInterval
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning else { return }
-            self.refreshAwayWindows()
-            self.scheduleAwayCensus()
+            if self.refreshAwayWindows() {
+                self.scheduleAwayCensus()
+            }
         }
     }
 
@@ -114,7 +127,8 @@ extension KiwiCore {
                 pid: host.pid,
                 appName: ref.name,
                 appBundleID: ref.bundleID,
-                nativeSpace: host.space
+                nativeSpace: host.space,
+                isUp: host.isUp
             )
             if state.rememberedSpace(of: id) == nil,
                 let number = NativeSpaces.number(of: host.space, in: spaces),
@@ -132,10 +146,13 @@ extension KiwiCore {
     }
 
     /// The away members of `space`, in the order the row would
-    /// come back (#1207's rank), unfiled entries excluded.
+    /// come back (#1207's rank); unfiled and parked entries
+    /// excluded — a window minimized while away draws nowhere,
+    /// as one minimized here does.
     func awayMembers(of space: SpaceID) -> [WindowID] {
-        state.awayWindows.keys
-            .filter { state.rememberedSpace(of: $0) == space }
+        state.awayWindows.values
+            .filter { $0.isUp && state.rememberedSpace(of: $0.id) == space }
+            .map(\.id)
             .sorted {
                 (state.departedSlots[$0] ?? .max, $0.raw)
                     < (state.departedSlots[$1] ?? .max, $1.raw)
@@ -186,12 +203,14 @@ extension KiwiCore {
                 members.append(id)
                 continue
             }
-            let index =
-                members.firstIndex { member in
-                    state.departedSlots[member].map { $0 > rank }
-                        ?? false
-                } ?? members.count
-            members.insert(id, at: index)
+            members.insert(
+                id,
+                at: Space.rankedInsertionIndex(
+                    rank: rank,
+                    in: members,
+                    ranks: state.departedSlots
+                )
+            )
         }
         return members
     }

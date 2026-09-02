@@ -15,8 +15,8 @@ struct AwayLedgerTests {
             authoritySpace(1, display: "UUID-A", current: true),
             authoritySpace(4, display: "UUID-A"),
         ]
-        NativeSpaces.windowSpaceOverride = { _ in 4 }
         let core = makeAuthorityCore()
+        core.desktopMemory.readWindowSpace = { _ in .hosted(4) }
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
         return core
@@ -67,7 +67,7 @@ struct AwayLedgerTests {
     func closeRecordsNothing() {
         defer { resetAuthorityOverrides() }
         let core = makeCore()
-        NativeSpaces.windowSpaceOverride = { _ in nil }
+        core.desktopMemory.readWindowSpace = { _ in .gone }
         core.eventLoop.onEvent(.windowCreated(window(7)))
         core.eventLoop.onEvent(
             .windowDestroyed(WindowID(7), wasMinimized: false)
@@ -138,7 +138,7 @@ struct AwayLedgerTests {
         #expect(events.filter { $0.0 == .windowDestroyed }.count == 1)
     }
 
-    @Test("no census leaves the ledger as it is")
+    @Test("no census leaves the ledger as it is and disarms the task")
     func noCensusIsNoVerdict() {
         defer { resetAuthorityOverrides() }
         let core = makeCore()
@@ -147,8 +147,42 @@ struct AwayLedgerTests {
             .windowDestroyed(WindowID(7), wasMinimized: false)
         )
         core.desktopMemory.readCensus = { _ in nil }
-        core.refreshAwayWindows()
+        #expect(core.refreshAwayWindows() == false)
         #expect(core.state.awayWindows[WindowID(7)] != nil)
+    }
+
+    @Test(
+        "a census updates parked, and a prune retires the focus memory"
+    )
+    func refreshUpdatesParkedAndRetiresFocus() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(7)))
+        core.eventLoop.onEvent(.windowCreated(window(8)))
+        core.desktopMemory.honoredFocus["1"] = [4: WindowID(8)]
+        for id: UInt32 in [7, 8] {
+            core.eventLoop.onEvent(
+                .windowDestroyed(WindowID(id), wasMinimized: false)
+            )
+        }
+        var parked = census(hosting: [7])
+        parked = DesktopCensus(
+            hosts: [
+                WindowID(7): DesktopCensus.Host(
+                    space: 4,
+                    pid: 100,
+                    isUp: false
+                )
+            ],
+            shown: parked.shown
+        )
+        core.desktopMemory.readCensus = { _ in parked }
+        #expect(core.refreshAwayWindows() == true)
+        #expect(core.state.awayWindows[WindowID(7)]?.isUp == false)
+        // Parked: known, drawn under no Space.
+        #expect(core.awayMembers(of: "1").isEmpty)
+        // Pruned: gone from the #1207 focus memory too.
+        #expect(core.desktopMemory.honoredFocus["1"]?[4] == nil)
     }
 
     @Test("the app's exit and the arrangement reset drop the entries")

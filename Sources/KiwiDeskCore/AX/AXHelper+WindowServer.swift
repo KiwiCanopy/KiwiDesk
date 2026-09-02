@@ -20,27 +20,11 @@ extension AXHelper {
     public static func onScreenNormalWindowIDs()
         -> [pid_t: Set<WindowID>]
     {
-        guard
-            let list = CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly, .excludeDesktopElements],
-                kCGNullWindowID
-            ) as? [[String: Any]]
-        else { return [:] }
         var ids: [pid_t: Set<WindowID>] = [:]
-        for info in list {
-            guard
-                let pid =
-                    (info[kCGWindowOwnerPID as String]
-                    as? NSNumber)?.int32Value,
-                let layer =
-                    (info[kCGWindowLayer as String]
-                    as? NSNumber)?.intValue,
-                layer == 0,
-                let raw =
-                    (info[kCGWindowNumber as String]
-                    as? NSNumber)?.uint32Value
-            else { continue }
-            ids[pid, default: []].insert(WindowID(raw))
+        for row in normalWindowRows(
+            options: [.optionOnScreenOnly, .excludeDesktopElements]
+        ) {
+            ids[row.pid, default: []].insert(row.id)
         }
         return ids
     }
@@ -51,29 +35,12 @@ extension AXHelper {
     /// read: a closed window lingers here for a while (device,
     /// 2026-09-02), so "exists" is the space list's answer.
     public static func allNormalWindowOwners() -> [WindowID: pid_t] {
-        guard
-            let list = CGWindowListCopyWindowInfo(
-                [.optionAll, .excludeDesktopElements],
-                kCGNullWindowID
-            ) as? [[String: Any]]
-        else { return [:] }
-        var owners: [WindowID: pid_t] = [:]
-        for info in list {
-            guard
-                let pid =
-                    (info[kCGWindowOwnerPID as String]
-                    as? NSNumber)?.int32Value,
-                let layer =
-                    (info[kCGWindowLayer as String]
-                    as? NSNumber)?.intValue,
-                layer == 0,
-                let raw =
-                    (info[kCGWindowNumber as String]
-                    as? NSNumber)?.uint32Value
-            else { continue }
-            owners[WindowID(raw)] = pid
-        }
-        return owners
+        Dictionary(
+            normalWindowRows(
+                options: [.optionAll, .excludeDesktopElements]
+            ).map { ($0.id, $0.pid) },
+            uniquingKeysWith: { first, _ in first }
+        )
     }
 
     /// PIDs owning at least one layer-0 document window (#662, #672).
@@ -110,6 +77,15 @@ extension AXHelper {
     private static func normalWindowOwners(
         options: CGWindowListOption
     ) -> [pid_t] {
+        normalWindowRows(options: options).map(\.pid)
+    }
+
+    /// The one parse of a WindowServer list into its layer-0
+    /// document windows — id and owner — every counting read
+    /// above derives from.
+    private static func normalWindowRows(
+        options: CGWindowListOption
+    ) -> [(id: WindowID, pid: pid_t)] {
         guard
             let list = CGWindowListCopyWindowInfo(
                 options,
@@ -124,9 +100,12 @@ extension AXHelper {
                 let layer =
                     (info[kCGWindowLayer as String]
                     as? NSNumber)?.intValue,
-                layer == 0
+                layer == 0,
+                let raw =
+                    (info[kCGWindowNumber as String]
+                    as? NSNumber)?.uint32Value
             else { return nil }
-            return pid
+            return (WindowID(raw), pid)
         }
     }
 }

@@ -136,8 +136,9 @@ standing the 600 ms settle's refocus down until it is paid; and
 each departed window carries its slot so the row re-forms in the
 order it left (#1207). The departed window itself is not
 forgotten: the destroy handler asks the WindowServer which
-Desktop hosts it (`OS`, the per-Desktop census — one private
-list read per Desktop, `absent` where the symbol is), reports
+Desktop hosts it (`OS`, the per-Desktop census — two private
+list reads per user Desktop, up and parked, nil where the symbol
+is absent), reports
 `vanished` or `closed` on that answer rather than a timer, and
 files a `vanished` window in the away ledger beside the state
 (`StateCoordinator.awayWindows`, #1146). The Space Bar draws

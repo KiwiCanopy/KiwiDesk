@@ -34,13 +34,16 @@ extension KiwiCore {
             // Nothing up here but a window up on an away Desktop
             // (#1146): reach it rather than un-park or duplicate.
             // The reach owes the focus at the arrival; a refused
-            // or absent bridge falls through to the activate.
-            let reach = awayReach(bundleID: bundleID)
-            if census.visible == 0, let first = reach?.windows.first,
+            // or absent bridge falls through to the activate. Read
+            // only where nothing is up here — the un-park below
+            // runs only there too.
+            let reach =
+                census.visible == 0 ? awayReach(bundleID: bundleID) : nil
+            if let reach, let first = reach.windows.first,
                 reachAwayWindow(
                     first.window,
                     desktop: first.desktop,
-                    snapshot: reach!.snapshot,
+                    snapshot: reach.snapshot,
                     verb: "pull_or_spawn"
                 )
             {

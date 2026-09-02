@@ -185,11 +185,27 @@ public struct Space: Sendable, Equatable {
         ranks: [WindowID: Int]
     ) {
         guard !windows.contains(window) else { return }
-        let index =
-            windows.firstIndex { member in
-                ranks[member].map { $0 > rank } ?? false
-            } ?? windows.count
-        windows.insert(window, at: index)
+        windows.insert(
+            window,
+            at: Self.rankedInsertionIndex(
+                rank: rank,
+                in: windows,
+                ranks: ranks
+            )
+        )
+    }
+
+    /// Where a member of `rank` goes in `members`: before the
+    /// first one ranked above it, else last. The one copy the
+    /// fold and the away-member merge (#1146) share.
+    public static func rankedInsertionIndex(
+        rank: Int,
+        in members: [WindowID],
+        ranks: [WindowID: Int]
+    ) -> Int {
+        members.firstIndex { member in
+            ranks[member].map { $0 > rank } ?? false
+        } ?? members.count
     }
 
     /// Inserts window per layout spawn placement rule.

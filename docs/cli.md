@@ -512,7 +512,8 @@ lifecycle; the `reason` field says why the set changed:
   macOS Desktop no screen is showing; it returns as
   `returned`). A `vanished` payload also carries `desktop`,
   the Mission Control number of the Desktop holding the
-  window; every other reason sends `null`.
+  window, where the Desktop can be read; every other reason —
+  and a Mac without SkyLight — sends `null`.
 
 A macOS Desktop switch thus fires a burst of `vanished`
 destroys and a burst of `returned` creates — filter on

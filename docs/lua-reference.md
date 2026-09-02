@@ -3634,10 +3634,11 @@ to the app's **next** window — space order (the order spaces were
 created, the same order the Space Bar lists them), then slot
 order within a space, wrapping around — so repeat presses cycle
 through all of the app's windows. With a single window a repeat
-press changes nothing. The cycle covers the windows KiwiDesk
-currently tracks; the app's windows on another macOS
-Desktop are untracked while you are away and rejoin the cycle
-when you return to that Desktop — see
+press changes nothing. The ring includes the app's windows that
+are up on other macOS Desktops, each at the rank it holds in its
+Space's row; cycling onto one switches to that Desktop and
+focuses it. That switch needs the Desktop bridge — without it
+the ring is the windows KiwiDesk currently tracks, see
 [Accepted limitations](accepted-limitations.md).
 
 If the app has **nothing on screen** — typically every one of its
@@ -3648,8 +3649,13 @@ were already parked before it launched, say) there is no such
 record and the app's own window order decides. While any window
 is still visible, minimized windows are left alone: the shortcut
 focuses and cycles the visible ones and never pulls a window back
-out of the Dock. A window on another macOS Desktop does
-not count as on screen — see
+out of the Dock. A window up on another macOS Desktop counts: when nothing of
+the app is up on the Desktop you are looking at but a window is
+up on another one, the shortcut switches to that Desktop and
+focuses it instead of un-parking anything, and the restore runs
+only when nothing is up anywhere. On a Mac without the Desktop
+bridge, or where the per-Desktop window list cannot be read, the
+old behaviour stands — see
 [Accepted limitations](accepted-limitations.md).
 
 **Example:**
@@ -4116,7 +4122,8 @@ says which kind of change fired:
   closed; the window is untouched and comes back as
   `"returned"`), `"vanished"` (the window is on a macOS Desktop
   no screen is showing; it comes back as `"returned"`, and the
-  sixth argument, `desktop`, names the Desktop holding it).
+  sixth argument, `desktop`, names the Desktop holding it where
+  the Desktop can be read — `nil` on a Mac without SkyLight).
 
 So a bar callback that only cares about real lifecycle filters in
 one line:
