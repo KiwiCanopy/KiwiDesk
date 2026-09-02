@@ -13,7 +13,8 @@ extension SettingsValueReadout {
             .advancedEditLua, .advancedDiscardArrangement,
             .advancedResetAll, .onboardingDiscoveryShown,
             .iconPickerRecents, .onboardingOpenAtLogin,
-            .advancedExportBackup, .advancedRestoreBackup:
+            .advancedExportBackup, .advancedRestoreBackup,
+            .advancedExportLogRange, .advancedExportLog:
             // Non-model keys produce no diff rows.
             return []
         }

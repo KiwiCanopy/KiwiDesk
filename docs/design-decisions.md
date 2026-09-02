@@ -8478,6 +8478,13 @@ of it, rather than separate rulings:
   tier-2 wipe confirms every time, through its own dialog —
   never the staged-edit discard gate, which only fires while
   dirty.
+- **Export Log…** sits above the ladder as its rung zero
+  (#1209): it changes nothing, so it is the first thing a user in
+  trouble should do, and the bug report template sends them
+  there before any hatch. It reads the log macOS already keeps
+  for a chosen range — presets only, since a custom range asks
+  the reporter for a number they cannot know, and the next-larger
+  preset is a superset the maintainer trims for free.
 
 ### Out of scope, on purpose
 

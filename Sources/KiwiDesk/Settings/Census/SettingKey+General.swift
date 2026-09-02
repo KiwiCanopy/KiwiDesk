@@ -13,6 +13,8 @@ enum GeneralKey: String, CaseIterable, Hashable {
     case advancedResetAll = "(action) general.advanced.reset_all"
     case advancedExportBackup =
         "(action) general.advanced.backup.export"
+    case advancedExportLogRange = "(action) general.advanced.log.range"
+    case advancedExportLog = "(action) general.advanced.log.export"
     case advancedRestoreBackup =
         "(action) general.advanced.backup.restore"
     case onboardingDiscoveryShown = "UserDefaults.onboarding.discoveryShown"
@@ -41,7 +43,8 @@ extension GeneralKey {
             return .row(.general, .about, .atRest)
         case .advancedConfigFile, .advancedEditLua,
             .advancedDiscardArrangement, .advancedResetAll,
-            .advancedExportBackup, .advancedRestoreBackup:
+            .advancedExportBackup, .advancedRestoreBackup,
+            .advancedExportLogRange, .advancedExportLog:
             return .row(.general, .advanced, .showMore)
         case .onboardingDiscoveryShown, .iconPickerRecents:
             return .internalOnly
@@ -86,6 +89,14 @@ extension GeneralKey {
                 "general.advanced.backup.export",
                 caption: "general.advanced.backup.export.caption",
                 help: "general.advanced.backup.export.help"
+            )
+        case .advancedExportLogRange:
+            return .text("general.advanced.log.range")
+        case .advancedExportLog:
+            return .text(
+                "general.advanced.log.export",
+                caption: "general.advanced.log.export.caption",
+                help: "general.advanced.log.export.help"
             )
         case .advancedRestoreBackup:
             return .text(

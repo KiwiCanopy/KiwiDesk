@@ -671,6 +671,20 @@ All Settings, because it is the most far-reaching action there:
 Reset All leaves your palettes alone, and a restore replaces
 those too.
 
+## Exporting the Log
+
+If something misbehaves and you want to report it, **General ▸
+Advanced** has an **Export Log…** button above the recovery
+actions. Pick a **Time range** — the last 15 minutes, the last
+hour, or since KiwiDesk started — then press the button and
+choose where to save the file. If you can make the problem happen
+again, do that first: the range counts back from now. The file
+holds only what KiwiDesk itself wrote to the macOS log, so it is
+safe to attach to an issue — glance through it first, since it
+names the apps and windows KiwiDesk managed in that time. It
+changes nothing about your setup. The same export from a terminal
+is in the [CLI reference](cli.md#exporting-the-log).
+
 ## When Things Act Up: Discard & Reset
 
 Below the export and above the restore, **General ▸ Advanced**

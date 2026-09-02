@@ -21,6 +21,13 @@ final class SettingsModel: ObservableObject {
     }
     /// True while foreign Lua forces the raw editor.
     @Published var forcedLuaEditor = false
+    /// The log query the Advanced export runs (#1209) — a seam so
+    /// a GUI test never spawns `/usr/bin/log`.
+    var logExport = LogExport()
+    /// The export in progress and its problem, on the model so a
+    /// user who navigates away mid-run still meets the outcome.
+    @Published var isExportingLog = false
+    @Published var logExportProblem: LogExportProblem?
     /// True when init.lua has harmless custom Lua (coexistence banner).
     /// Always false when `forcedLuaEditor` is true.
     @Published var hasCustomLua = false

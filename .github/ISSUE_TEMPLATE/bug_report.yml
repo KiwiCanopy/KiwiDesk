@@ -73,12 +73,13 @@ body:
         - `kiwidesk get_state` (print as JSON)
         - `kiwidesk get_layout_info` (current layout details)
 
-        Then export the log for the stretch that covers the problem
-        and **attach the file** (drag it into this field) instead
-        of pasting fragments — reach back to just before it
-        happened (`--last 15m`, `--last 2h`):
+        Then the log: if you can make the problem happen again, do
+        that first. Open KiwiDesk Settings ▸ General ▸ Advanced,
+        pick a **Time range** that reaches back to before it
+        happened, press **Export Log…**, and **attach the file**
+        here (drag it into this field) instead of pasting fragments.
+        From a terminal, the same export is
         `/usr/bin/log show --last 15m --predicate 'subsystem == "com.kiwicanopy.kiwidesk"' --style compact > ~/Desktop/kiwidesk-log.txt`
-        This works on the shipped app, no debug build needed.
       placeholder: |
         ## kiwidesk get_state
         { "spaces": {...}, ... }
@@ -87,7 +88,7 @@ body:
         { "layout": "bsp", ... }
 
         ## Log
-        (attached: kiwidesk-log.txt, --last 15m)
+        (attached: KiwiDesk-log-….txt, Last 15 minutes)
 
   - type: checkboxes
     id: other_tools
