@@ -153,8 +153,7 @@ extension KiwiCore {
                 }
                 let (apps, overflow, focusHidden) = spaceBarApps(
                     in: space,
-                    style: style,
-                    isCurrent: id == current
+                    style: style
                 )
                 if style.hideEmpty, apps.isEmpty,
                     id != current
@@ -185,8 +184,7 @@ extension KiwiCore {
     /// badge).
     func spaceBarApps(
         in space: Space,
-        style: SpaceBarStyle,
-        isCurrent: Bool = true
+        style: SpaceBarStyle
     ) -> (
         apps: [SpaceBarItemView.App],
         overflow: Int,
@@ -195,15 +193,20 @@ extension KiwiCore {
         // One pass: ids and names stay index-aligned with no
         // unreachable "?" fallback. Sticky glyphs TRAVEL with
         // the user (#414 QA): a sticky window is listed only
-        // under the CURRENT space's item — appended there when
-        // homed elsewhere, pruned from every inactive item
-        // (including its home's) — so one glyph always sits
-        // where the user is, instead of cloning onto every
-        // item at once.
-        let activeID = isCurrent ? space.id : activeSpace?.id
+        // under the item of the space it RENDERS on — appended
+        // there when homed elsewhere, pruned from every other
+        // item (its home's included) — so one glyph always sits
+        // where the user is, instead of cloning onto every item
+        // at once.
+        //
+        // That render verdict is asked with the ONE active
+        // space, the same value the layout and the App Bar pass
+        // (#1214): handing each display's own shown space in as
+        // if it were the focused one told EVERY screen's bar
+        // that a ∞ window rendered there.
         let members = state.effectiveMembers(
             of: space,
-            activeSpace: activeID
+            activeSpace: activeSpace?.id
         )
         // Transient overlays (a popup's AX windows, a launcher
         // panel) are dropped HERE, before grouping and the cap,
