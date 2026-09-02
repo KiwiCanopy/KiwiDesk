@@ -686,8 +686,9 @@ editing here:
   retile, through the one `FloatReanchor.target` and the one
   `GeometryUtils.rect(mostlyContaining:among:)` it shares with
   `screen(containing:)`, from the COMMANDED frame (never the
-  in-flight echo), clamped clear of the strips painted for the
-  render space (the home-keyed clamp never sees a traveler); a
+  in-flight echo), fitted and clamped through the render-space
+  arm of the one float region (`floatBounds(on:)`, since the
+  home-keyed nets never see a traveler); a
   same-display floating target moves nothing and a tiled target
   keeps the layout's placement (`TravelerRehomeTests`,
   `TravelerRehomeSeamTests`). The frame is transient by ruling:

@@ -58,8 +58,9 @@ struct TravelerRehomeSeamTests {
         #expect(source.contains("EffectiveFloat.applies("))
         #expect(source.contains("TravelerRehome.target("))
         #expect(
-            source.contains("paintedStrips(forSpace: space)"),
-            "the net clamps against the RENDER space's strips"
+            source.contains("floatFrameFittedClearOfBars(")
+                && source.contains("space: space"),
+            "the net fits and clamps through the RENDER space arm"
         )
         #expect(
             source.contains("commandedFrame("),

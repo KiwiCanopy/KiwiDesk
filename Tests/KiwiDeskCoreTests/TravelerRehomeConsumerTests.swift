@@ -133,6 +133,41 @@ struct TravelerRehomeConsumerTests {
         #expect(commanded.minY >= strip.maxY)
     }
 
+    /// The SIZE half (#1091): a traveler taller than the region
+    /// between the render screen's bars is fitted into it, or the
+    /// position clamp pushes it past the opposite edge.
+    @Test(
+        "an oversized traveler is fitted into the render region",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func oversizedTravelerIsFitted() throws {
+        let f = try #require(makeFixture(mode: .floating))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        f.core.tiler.settings.spaceBarStyle.enabled = true
+        f.core.tiler.settings.spaceBarStyle.edge = .top
+        f.core.tiler.settings.spaceBarStyle.thickness = 40
+        f.core.tiler.settings.floatScaleOnDisplayChange = false
+        f.core.updateSpaceBar()
+        _ = try #require(f.core.spaceBars.shownStrips.first?.1)
+        let region = try #require(f.core.floatBounds(on: SpaceID("2")))
+        let tall = CGRect(
+            x: f.other.minX,
+            y: f.other.minY,
+            width: f.other.width,
+            height: f.other.height + 400
+        )
+        f.core.state.apply(.windowMoved(Self.traveler, tall))
+        f.core.retile(animated: false, force: true)
+        let commanded = try #require(
+            f.core.tiler.recentInstantTarget(Self.traveler)
+        )
+        // The SIZE is bounded by the region; the position is
+        // only pushed clear of the bar (by the ring inset), the
+        // way the home-keyed net leaves position to the user.
+        #expect(commanded.height <= region.height)
+        #expect(commanded.minY >= region.minY)
+    }
+
     /// With the relayout animation on, a retile mid-flight reads
     /// the commanded frame, never the in-flight echo — or each
     /// pass re-scales the traveler from wherever it currently is.
@@ -152,14 +187,17 @@ struct TravelerRehomeConsumerTests {
             )
         )
         #expect(first == expected(f))
-        // An in-flight echo: the window is halfway across.
-        let halfway = CGRect(
-            x: (f.frame.minX + first.minX) / 2,
-            y: (f.frame.minY + first.minY) / 2,
-            width: (f.frame.width + first.width) / 2,
-            height: (f.frame.height + first.height) / 2
+        // An in-flight echo one tenth of the way: still mostly on
+        // the SOURCE screen, so an echo-fed base would compute a
+        // second, smaller target.
+        let early = CGRect(
+            x: f.frame.minX + (first.minX - f.frame.minX) / 10,
+            y: f.frame.minY + (first.minY - f.frame.minY) / 10,
+            width: f.frame.width + (first.width - f.frame.width) / 10,
+            height: f.frame.height
+                + (first.height - f.frame.height) / 10
         )
-        f.core.state.apply(.windowMoved(Self.traveler, halfway))
+        f.core.state.apply(.windowMoved(Self.traveler, early))
         f.core.retile(animated: true, force: true)
         #expect(
             f.core.tiler.animation.commandedFrame(

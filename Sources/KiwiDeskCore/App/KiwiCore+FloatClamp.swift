@@ -18,14 +18,17 @@ import CoreGraphics
 /// bar.
 extension KiwiCore {
     /// `frame` nudged clear of every bar painted for the
-    /// window's own space, or returned unchanged when that
-    /// space shows none. Callers with a fresher read than state
-    /// (a fresh drop, a resize target) pass their own frame in.
+    /// window's own space — or for `space`, the one a traveler
+    /// RENDERS on (#1217) — or returned unchanged when that space
+    /// shows none. Callers with a fresher read than state (a
+    /// fresh drop, a resize target) pass their own frame in.
     func floatFrameClampedClearOfBars(
         _ id: WindowID,
-        frame: CGRect
+        frame: CGRect,
+        space rendering: SpaceID? = nil
     ) -> CGRect {
-        guard let space = state.workspaces.space(of: id)
+        guard
+            let space = rendering ?? state.workspaces.space(of: id)
         else { return frame }
         var result = frame
         let inset = floatRingInset
@@ -114,10 +117,13 @@ extension KiwiCore {
     /// wobble the window.
     func floatFrameFittedClearOfBars(
         _ id: WindowID,
-        frame: CGRect
+        frame: CGRect,
+        space rendering: SpaceID? = nil
     ) -> CGRect {
         var result = frame
-        if let region = floatBounds(of: id) {
+        if let region = rendering.map(floatBounds(on:))
+            ?? floatBounds(of: id)
+        {
             let slack = AppBarGeometry.clampTolerance
             // Floored at the window's effective minimum, and the
             // FLOOR wins the contradiction (code review,
@@ -147,7 +153,11 @@ extension KiwiCore {
                 )
             }
         }
-        return floatFrameClampedClearOfBars(id, frame: result)
+        return floatFrameClampedClearOfBars(
+            id,
+            frame: result,
+            space: rendering
+        )
     }
 
     /// Re-asserts the bar clamp for every floating window under

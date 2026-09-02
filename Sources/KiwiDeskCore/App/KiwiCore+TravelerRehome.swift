@@ -64,23 +64,25 @@ extension KiwiCore {
             ?? tiler.recentInstantTarget(id)
             ?? window.frame
         guard
-            var target = TravelerRehome.target(
+            let moved = TravelerRehome.target(
                 frame: base,
                 screens: screens,
                 destination: destination,
                 scaleSize: tiler.settings.floatScaleOnDisplayChange
             )
         else { return }
-        // Clear of the strips painted for the RENDER space —
-        // the home-keyed clamp never sees a traveler (#242).
-        for (strip, edge) in paintedStrips(forSpace: space) {
-            target = AppBarGeometry.clampClear(
-                target,
-                of: strip,
-                edge: edge,
-                inset: floatRingInset
-            )
-        }
+        // Fitted and clamped for the RENDER space (#1091/#242):
+        // the home-keyed nets never see a traveler. A refused fit
+        // falls back to the position clamp alone.
+        let fitted = floatFrameFittedClearOfBars(
+            id,
+            frame: moved,
+            space: space
+        )
+        let target =
+            shouldIssueFloatFit(id, current: window.frame, fitted: fitted)
+            ? fitted
+            : floatFrameClampedClearOfBars(id, frame: moved, space: space)
         tiler.forgetStash(id)
         tiler.applyFrame(
             id,
