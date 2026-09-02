@@ -11,7 +11,6 @@ extension KiwiCore {
     func rehomeFloatingTravelers(animated: Bool) {
         let screens = tiler.allScreenBounds()
         guard !screens.isEmpty else { return }
-        let active = state.workspaces.activeSpace
         for display in state.workspaces.displays.keys {
             guard
                 let spaceID = state.workspaces.activeSpace(
@@ -22,10 +21,10 @@ extension KiwiCore {
             else { continue }
             let destination = tiler.visibleBounds(screen)
             let members = Set(space.windows)
-            let travelers = state.effectiveTiledMembers(
-                of: space,
-                activeSpace: active
-            ).filter { !members.contains($0) }
+            let travelers =
+                state
+                .effectiveTiledMembers(of: space)
+                .filter { !members.contains($0) }
             for id in travelers {
                 rehomeTraveler(
                     id,

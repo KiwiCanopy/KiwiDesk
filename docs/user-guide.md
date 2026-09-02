@@ -1766,10 +1766,14 @@ open. They are left out of the count behind the `+n` badge too,
 the same way they never take a focus ring.
 
 A sticky window's glyph **travels with you**: it is listed
-under the Space you are currently on — joining that item when
-you switch, pruned from the item of the Space you left (its
-home included) — so one badged glyph always sits where the
-window actually is: with you.
+under one Space only — joining that item when you switch,
+pruned from the item of the Space it left (its home included)
+— so one badged glyph always sits where the window actually
+is. On two screens that is the Space the window *renders* on:
+a sticky-everywhere (∞) window follows the Space you are
+focused on, so it is listed on that screen's bar and on no
+other, while a sticky-on-this-screen (📌) window stays under
+the current Space of its own screen.
 
 Window state shows on the glyphs as small corner badges:
 **sticky** windows wear a badge on the glyph's top-left,

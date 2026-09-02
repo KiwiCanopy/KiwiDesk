@@ -106,16 +106,10 @@ struct FullscreenLayoutExemptionTests {
         let home = state.workspaces[SpaceID(1)]!
         let away = state.workspaces[SpaceID(2)]!
         #expect(
-            state.effectiveMembers(
-                of: home,
-                activeSpace: SpaceID(2)
-            ).contains(w2)
+            state.effectiveMembers(of: home).contains(w2)
         )
         #expect(
-            !state.effectiveMembers(
-                of: away,
-                activeSpace: SpaceID(2)
-            ).contains(w2)
+            !state.effectiveMembers(of: away).contains(w2)
         )
     }
 
@@ -137,16 +131,10 @@ struct FullscreenLayoutExemptionTests {
         let home = state.workspaces[SpaceID(1)]!
         let away = state.workspaces[SpaceID(2)]!
         #expect(
-            state.effectiveMembers(
-                of: home,
-                activeSpace: SpaceID(2)
-            ).contains(w2)
+            state.effectiveMembers(of: home).contains(w2)
         )
         #expect(
-            !state.effectiveMembers(
-                of: away,
-                activeSpace: SpaceID(2)
-            ).contains(w2)
+            !state.effectiveMembers(of: away).contains(w2)
         )
     }
 }

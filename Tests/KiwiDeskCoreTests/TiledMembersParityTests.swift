@@ -43,10 +43,7 @@ struct TiledMembersParityTests {
         let oldDerivation = space.windows.filter {
             state.windows[$0]?.isFloating == false
         }
-        let helperOutput = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: spaceID
-        )
+        let helperOutput = state.effectiveTiledMembers(of: space)
 
         #expect(helperOutput == oldDerivation)
         #expect(helperOutput == [WindowID(1), WindowID(2)])
@@ -77,10 +74,7 @@ struct TiledMembersParityTests {
         let oldDerivation = space.windows.filter {
             state.windows[$0]?.isFloating == false
         }
-        let helperOutput = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: spaceID
-        )
+        let helperOutput = state.effectiveTiledMembers(of: space)
 
         #expect(helperOutput == oldDerivation)
         #expect(helperOutput == [WindowID(1), WindowID(3)])
@@ -114,10 +108,7 @@ struct TiledMembersParityTests {
         }
 
         // Active space1: the traveler tiles in at home index 0.
-        let s1Tiled = state.effectiveTiledMembers(
-            of: s1,
-            activeSpace: space1
-        )
+        let s1Tiled = state.effectiveTiledMembers(of: s1)
         #expect(s1Tiled == [WindowID(2), WindowID(1)])
         // The injection is derived, never stored: the space's
         // own array is untouched.
@@ -130,10 +121,7 @@ struct TiledMembersParityTests {
         // window's flat-array membership in space2 is untouched
         // (derivation only); its home INDEX still derives from the
         // full local list, so the space1 injection above is intact.
-        let s2Tiled = state.effectiveTiledMembers(
-            of: s2,
-            activeSpace: space1
-        )
+        let s2Tiled = state.effectiveTiledMembers(of: s2)
         #expect(s2Tiled == [])
         #expect(s2.windows == [WindowID(2)])
     }
@@ -158,10 +146,7 @@ struct TiledMembersParityTests {
             Issue.record("Expected space to exist")
             return
         }
-        let tiled = state.effectiveTiledMembers(
-            of: s1,
-            activeSpace: space1
-        )
+        let tiled = state.effectiveTiledMembers(of: s1)
         #expect(tiled == [WindowID(1)])
     }
 
@@ -195,17 +180,11 @@ struct TiledMembersParityTests {
         }
 
         // Active space1: sticky w2 homed elsewhere travels to space1
-        let s1Members = state.effectiveMembers(
-            of: s1,
-            activeSpace: space1
-        )
+        let s1Members = state.effectiveMembers(of: s1)
         #expect(s1Members == [WindowID(1), WindowID(3), WindowID(2)])
 
         // Inactive space2: sticky w2 is pruned (traveled to space1)
-        let s2Members = state.effectiveMembers(
-            of: s2,
-            activeSpace: space1
-        )
+        let s2Members = state.effectiveMembers(of: s2)
         #expect(s2Members.isEmpty)
     }
 }

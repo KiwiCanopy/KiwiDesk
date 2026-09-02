@@ -50,10 +50,7 @@ extension KiwiCore {
         // window is always local (a focused traveler is refused
         // above), and translating the gauge to the local array is
         // the non-home-reorder non-goal's territory.
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard let index = tiled.firstIndex(of: focused) else {
             return .fail("no focused tiled window")
         }

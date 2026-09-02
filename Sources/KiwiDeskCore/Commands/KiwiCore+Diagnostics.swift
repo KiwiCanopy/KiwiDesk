@@ -9,10 +9,7 @@ extension KiwiCore {
     /// missed them; "0 tiled" means wrong float verdicts.
     func logSpaceContents(_ id: SpaceID) {
         guard let space = state.workspaces[id] else { return }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         onLog(
             "space \(id.raw): \(space.windows.count) windows, "
                 + "\(tiled.count) tiled"

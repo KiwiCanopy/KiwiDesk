@@ -306,10 +306,8 @@ struct FloatingFocusCandidateTests {
         core.state.workspaces.add(WindowID(4), to: "2")
         let space = core.state.workspaces[SpaceID("1")]!
         #expect(
-            core.state.floatingFocusCandidates(
-                of: space,
-                activeSpace: space.id
-            ) == [WindowID(2), WindowID(4)]
+            core.state.floatingFocusCandidates(of: space)
+                == [WindowID(2), WindowID(4)]
         )
     }
 }

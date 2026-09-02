@@ -24,10 +24,7 @@ extension KiwiCore {
         // traveler (every press recomputes from the stale
         // origin, so it re-targets the traveler or dead-ends)
         // and flashing the dead-end cue on the wrong ring.
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: space.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard
             let focused = state.focusAnchor(
                 of: space,
@@ -254,10 +251,7 @@ extension KiwiCore {
         case .down where !horizontal: step = 1
         default: return nil
         }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard let index = tiled.firstIndex(of: focused)
         else { return nil }
         let targetIndex = index + step

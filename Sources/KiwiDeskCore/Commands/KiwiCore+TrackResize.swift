@@ -18,10 +18,7 @@ extension KiwiCore {
         space: Space
     ) -> CommandResponse {
         let params = tiler.settings.resolvedTrack(for: space.id)
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard let index = tiled.firstIndex(of: window)
         else { return .fail("no focused tiled window") }
         let counts = TrackLayout.counts(

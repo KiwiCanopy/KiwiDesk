@@ -26,17 +26,14 @@ extension KiwiCore {
         swapping: Bool
     ) -> WindowID? {
         guard !swapping else { return nil }
-        let candidates = state.floatingFocusCandidates(
-            of: space,
-            activeSpace: space.id
-        )
-        .filter { $0 != focused }
-        .compactMap { id -> (WindowID, CGRect)? in
-            guard let frame = state.windows[id]?.frame,
-                !frame.isEmpty
-            else { return nil }
-            return (id, frame)
-        }
+        let candidates = state.floatingFocusCandidates(of: space)
+            .filter { $0 != focused }
+            .compactMap { id -> (WindowID, CGRect)? in
+                guard let frame = state.windows[id]?.frame,
+                    !frame.isEmpty
+                else { return nil }
+                return (id, frame)
+            }
         return Navigation.neighbor(
             from: origin,
             in: direction,

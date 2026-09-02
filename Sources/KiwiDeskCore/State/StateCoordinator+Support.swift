@@ -14,8 +14,7 @@ extension StateCoordinator {
         let home = workspaces.space(of: id)
         let tiledSlot = home.flatMap { space in
             workspaces[space].flatMap {
-                effectiveTiledMembers(of: $0, activeSpace: space)
-                    .firstIndex(of: id)
+                effectiveTiledMembers(of: $0).firstIndex(of: id)
             }
         }
         return AppliedEffects.RemovedWindow(

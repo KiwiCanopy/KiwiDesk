@@ -5,6 +5,13 @@ paths:
   # exact site where the drawn/announced split has twice been
   # reasoned about wrongly — this file must load there too.
   - "Sources/KiwiDeskCore/App/KiwiCore+BarTitles.swift"
+  # Both bars are built per display, and each reads the focus
+  # for itself — #1214 shipped that reading wrong twice, in the
+  # drivers and in the item builders they call.
+  - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBar.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+AppBar.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+AppBarGroups.swift"
 ---
 
 # Bars (App Bar & Space Bar overlays)
@@ -45,3 +52,42 @@ Obligations:
   debounce (`KiwiCore+BarTitles`), never by consumers
   pre-filtering on content — the old `showsText` gate was that
   pre-filter, and it is what dropped the announced channel.
+
+## A per-display bar answers the SHOWN question, never the render one
+
+A bar is built per display, so a per-display value sits in easy
+reach of every derivation inside it. #1214 reached for one: the
+Space Bar handed each screen's own shown Space into #445's render
+verdict as if it were the focused one, and every screen's bar was
+told a ∞ window rendered there while the layout drew it on one.
+The `+n` badge's focus tint beside it was the same substitution a
+second time.
+
+The presence half is no longer policed here at all: the
+derived-verdict obligation in
+[state-and-layout.md](state-and-layout.md) owns it (#1225), and
+this file would only be a second copy to rot. What is left is the
+reading a bar still makes for itself:
+
+- A bar derivation answering *which window holds the SYSTEM
+  focus* — the glyph tint, the `+n` badge's — reads
+  `workspaces.lastFocused` and gates on the active Space, never
+  on the display's own shown one and never on a Space's
+  remembered `focused` slot. Those diverge on an injected ∞
+  traveler, which holds `lastFocused` and can never be the
+  membership-guarded `space.focused` (#431), and that is the one
+  case the `+n` tint exists for.
+- `currentSpace(on:)` answers *which Space is this screen
+  showing*: the item that draws as active, the Space a bar is
+  BUILT for, chrome coverage. It is a bare alias of
+  `activeSpace(on:)`, so a new read states which of the two
+  questions it means in a word beside the call — they are one
+  token apart and read identically at a glance.
+- `SpaceBarStickyScreenTests` pins the two-screen half from the
+  driver: the ∞ arm on both sides of a switch, the 📌 arm that
+  refuses the over-broad "prune every sticky off an unfocused
+  screen" fix, and the `+n` tint — which on 2026-09-02 was the
+  only test in the tree that redded when that gate was reverted.
+  The single-screen suites
+  stay blind to all three by construction, which is why they are
+  their own file rather than added expectations.

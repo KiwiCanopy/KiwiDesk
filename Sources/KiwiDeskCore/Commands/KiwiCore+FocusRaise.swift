@@ -91,10 +91,7 @@ extension KiwiCore {
         let previousFocused = activeSpace.flatMap { sp in
             state.focusAnchor(
                 of: sp,
-                tiled: state.effectiveTiledMembers(
-                    of: sp,
-                    activeSpace: sp.id
-                )
+                tiled: state.effectiveTiledMembers(of: sp)
             )
         }
         let space = state.workspaces.space(of: id)
@@ -262,10 +259,7 @@ extension KiwiCore {
         guard let space = activeSpace, let previous else {
             return false
         }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: space.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard let targetIndex = tiled.firstIndex(of: target),
             let previousIndex = tiled.firstIndex(of: previous)
         else { return false }

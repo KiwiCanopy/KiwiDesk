@@ -59,10 +59,11 @@ struct AppBarStickyDragTests {
         let space = try #require(core.activeSpace)
         // The bar lists the traveler at its injected slot...
         #expect(
-            core.state.effectiveTiledMembers(
-                of: space,
-                activeSpace: space.id
-            ) == [WindowID(4), WindowID(1), WindowID(2), WindowID(3)]
+            core.state.effectiveTiledMembers(of: space)
+                == [
+                    WindowID(4), WindowID(1), WindowID(2),
+                    WindowID(3),
+                ]
         )
         // ...but dragging local A (bar slot 1) to the end
         // rewrites only the local array: every local survives,

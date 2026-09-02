@@ -150,10 +150,7 @@ extension KiwiCore {
         deltaSign: Double
     ) {
         let stack = tiler.settings.resolvedStack(for: space)
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         let (master, stackZone) = StackLayout.partition(
             tiled,
             masterCount: stack.masterCount
@@ -220,10 +217,7 @@ extension KiwiCore {
             axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
         let horizontal = axis == "x"
         let slots = tiler.calculatedFrames(state: state)
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         var firstSide: [WindowID] = []
         var secondSide: [WindowID] = []
         if let screen = TilingEngine.screen(

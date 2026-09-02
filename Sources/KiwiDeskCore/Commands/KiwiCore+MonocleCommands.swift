@@ -122,10 +122,7 @@ extension KiwiCore {
         case .down where !horizontal: step = 1
         default: return nil
         }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.effectiveTiledMembers(of: space)
         guard let index = tiled.firstIndex(of: focused)
         else { return nil }
         // A lone tiled window has nothing to cycle: fall
