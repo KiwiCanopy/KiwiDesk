@@ -125,30 +125,35 @@ struct SpaceBarStickyScreenTests {
         #expect(try item(core, dell, "3").apps.map(\.name) == ["Note"])
     }
 
-    /// The `+n` badge tints for a focus hidden past the cap, and
-    /// that is the SYSTEM focus — so a screen the user is not on
-    /// must not claim it off its Space's own remembered slot,
-    /// where no glyph on that same bar is tinted either (#1214,
-    /// the sibling substitution three lines below the filed one).
+    /// The `+n` badge tints for the SYSTEM focus hidden past the
+    /// cap (#376), so only the item whose Space is the ACTIVE
+    /// one may claim it — the sibling substitution three lines
+    /// below the filed one, and the state that separates them is
+    /// a focus still sitting on the screen the user just left.
     @Test("A second screen's +n never claims the focus")
     func overflowFocusIsTheActiveScreens() throws {
         let core = twoScreenCore()
-        // Give the Dell's Space a second app and a remembered
-        // focus on it, then return the user to the built-in.
+        // Term joins the Dell's Space and takes the focus; the
+        // user then moves to the built-in WITHOUT focusing
+        // anything there, so the system focus is still a window
+        // hidden past the Dell's cap while Space 1 is active.
         core.state.workspaces.activate(SpaceID("3"))
         core.state.apply(.windowCreated(window(5, app: "Term")))
         core.state.apply(.windowFocused(WindowID(5)))
         core.state.workspaces.activate(SpaceID("1"))
-        core.state.apply(.windowFocused(WindowID(2)))
         var style = SpaceBarStyle()
         style.glyphCap = 1
         let away = try item(core, dell, "3", style)
         #expect(away.overflow == 1)
         #expect(!away.focusInOverflow)
-        // The active screen keeps the signal: Mail holds the
-        // focus and sits past the same cap.
+        // Nor does the active screen claim it: the focus is not
+        // behind ITS badge either, so neither bar tints.
         let here = try item(core, built, "1", style)
         #expect(here.overflow == 1)
-        #expect(here.focusInOverflow)
+        #expect(!here.focusInOverflow)
+        // Follow the focus back to the Dell: now that Space is
+        // the active one and the badge does carry the signal.
+        core.state.workspaces.activate(SpaceID("3"))
+        #expect(try item(core, dell, "3", style).focusInOverflow)
     }
 }

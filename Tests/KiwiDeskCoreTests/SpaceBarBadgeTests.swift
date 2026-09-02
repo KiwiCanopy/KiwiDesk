@@ -140,4 +140,37 @@ struct SpaceBarBadgeTests {
             restored.apps.map(\.name) == ["Web", "Mail"]
         )
     }
+
+    /// The `+n` tint reads the SYSTEM focus, like the glyphs
+    /// beside it: an injected ∞ traveler holds `lastFocused` and
+    /// can never be the membership-guarded `space.focused`
+    /// (#431), so asking the slot showed nothing at all in the
+    /// one case #376's tint exists for.
+    @Test("A traveler hidden past the cap tints the +n")
+    func travelerFocusTintsTheOverflow() throws {
+        let core = seededCore()
+        core.state.workspaces.assign(SpaceID("2"), to: display)
+        // Window 3 is third in its home row, so it injects at
+        // index 2 — past a cap of 2.
+        core.state.apply(.windowCreated(window(3, app: "Term")))
+        core.state.setSticky(WindowID(3), .global)
+        core.state.workspaces.activate(SpaceID("2"))
+        core.state.apply(.windowCreated(window(4, app: "Note")))
+        core.state.apply(.windowCreated(window(5, app: "Zed")))
+        core.state.apply(.windowFocused(WindowID(4)))
+        core.state.apply(.windowFocused(WindowID(3)))
+        var style = SpaceBarStyle()
+        style.glyphCap = 2
+        let item = try #require(
+            core.spaceBarItems(display: display, style: style)
+                .first { $0.space == SpaceID("2") }
+        )
+        // The traveler is the hidden one, and it holds the
+        // system focus while the Space's own slot stays on a
+        // visible member.
+        #expect(item.apps.map(\.name) == ["Note", "Zed"])
+        #expect(item.overflow == 1)
+        #expect(core.state.workspaces[SpaceID("2")]?.focused == WindowID(4))
+        #expect(item.focusInOverflow)
+    }
 }

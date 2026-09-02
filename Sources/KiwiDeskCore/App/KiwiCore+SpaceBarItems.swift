@@ -13,6 +13,9 @@ extension KiwiCore {
         display: DisplayID,
         style: SpaceBarStyle
     ) -> [SpaceBarOverlay.Item] {
+        // SHOWN, not focused: which Space this screen is
+        // displaying. The presence and focus questions below
+        // take the one active Space instead (#1214).
         let current = state.workspaces.currentSpace(on: display)
         return state.workspaces.spaces(on: display)
             .compactMap { id in
@@ -105,16 +108,24 @@ extension KiwiCore {
             spaceBarApp(group: group, space: space, style: style)
         }
         // The focused window can be hidden past the cap: the "+n"
-        // then tints to signal focus is behind it (#376).
+        // then tints to signal focus is behind it (#376). It
+        // reads the SYSTEM focus, like every glyph beside it —
+        // an injected ∞ traveler holds `lastFocused` and can
+        // never be the membership-guarded `space.focused`
+        // (#431), so asking the slot left the one case this
+        // tint exists for showing nothing at all.
         let focusHidden =
-            space.focused.map { focus in
+            state.workspaces.lastFocused.map { focus in
                 hidden.contains { $0.contains(focus) }
             } ?? false
         return (apps, hidden.reduce(0) { $0 + $1.count }, focusHidden)
     }
 
-    /// One glyph slot for a same-app run. Not `private`: the
-    /// front-app segment builds its single-window slot with it.
+    /// One glyph slot for a same-app run. Internal rather
+    /// than `private` because the front-app segment builds
+    /// its single-window slot with it, across the file
+    /// split — the bar has two parts, and the segment sits
+    /// with the driver that assembles them.
     func spaceBarApp(
         group: [WindowID],
         space: Space,

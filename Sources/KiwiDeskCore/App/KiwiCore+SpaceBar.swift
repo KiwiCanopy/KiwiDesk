@@ -96,6 +96,9 @@ extension KiwiCore {
         style: SpaceBarStyle
     ) -> (window: WindowID, app: SpaceBarItemView.App)? {
         guard style.showFrontApp,
+            // SHOWN, not focused (#1214): the segment names
+            // what this screen is displaying, which is the
+            // question this read answers.
             let current = state.workspaces.currentSpace(
                 on: display
             ),
