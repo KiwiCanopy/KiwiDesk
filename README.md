@@ -54,24 +54,7 @@ Powerful when you reach for it, never in your way.
 
 <!-- Add a short demo video here once one is recorded. -->
 
-> **Status: 1.0, released.** The core (layouts, Lua
-> config, CLI, profiles, per-Desktop profiles, per-space window
-> hiding) and the SwiftUI Settings app are complete and in daily
-> use.
-> Install it with the Homebrew cask below, or download the
-> signed, notarized `.dmg` from
-> [kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com/) —
-> it is the same build either way, and KiwiDesk keeps itself up
-> to date from there. That the download waited for a build which
-> could update itself is
-> [No distribution channel without an update path](https://kiwidesk.kiwicanopy.com/docs/design-decisions/#no-distribution-channel-without-an-update-path).
-> KiwiDesk is
-> distributed directly and **not** through the Mac App Store —
-> see [Distribution](https://kiwidesk.kiwicanopy.com/docs/design-decisions/#distribution-direct-download-not-the-mac-app-store)
-> for why.
-
-KiwiDesk is a modular, high-performance tiling window manager for
-macOS, written in Swift and configured in Lua. It combines robust
+KiwiDesk is written in Swift and configured in Lua. It pairs robust
 window tracking with smooth, spring-based animations, runs as an
 ordinary app with no kernel extension, and **never requires
 disabling System Integrity Protection**.
@@ -103,36 +86,32 @@ different formula — no tree surgery, no lost state.
   Desktops.
 - **GUI, CLI & Lua**: SwiftUI Settings app for simple tweaks; CLI &
   sandboxed Lua 5.5 VM for advanced workflows.
-- **Modal Layers & Hotkeys**: Vim-style hotkey layers (`define_layer`) and
-  smart app switching (`pull_or_spawn`) via Carbon — zero Input Monitoring needed.
-- **Cascading Profiles**: Display- or Desktop-bound profiles with inherited
-  defaults and sparse overrides.
-- **Sticky Windows**: Pin a window so it stays with you across spaces, or
-  just across one screen. It carries an on-window mark and a Space Bar
-  badge, and where a layout tiles some windows and piles the rest, a
-  sticky one keeps a real tile.
+- **Modal Layers & Hotkeys**: Vim-style hotkey layers (`define_layer`)
+  and smart app switching (`pull_or_spawn`) via Carbon — zero Input
+  Monitoring needed.
+- **Cascading Profiles**: Display- or Desktop-bound profiles with
+  inherited defaults and sparse overrides.
+- **Sticky Windows**: Pin a window so it follows you across Desktops,
+  or just across one screen — with a real tile, not a floating pile.
 - **Visual Overlays & IPC**: Customizable focus rings, App/Space Bar
   overlays, and UNIX socket JSON event streams (`kiwidesk subscribe`).
-- **Smooth & Lightweight**: 60/120 Hz DisplayLink spring animations, zero
-  SIP modifications, and localized out of the box.
-- **Accessible**: The Settings app is built to be driven entirely by
-  keyboard and narrates itself fully under VoiceOver — every control
-  announces its name *and* its value, areas expose rotor headings, and
-  even the keyboard-shortcut preview describes itself in words. Full
-  keyboard reach needs macOS's own **Keyboard navigation** setting; the
-  [user guide](docs/user-guide.md#using-settings-from-the-keyboard)
-  has the details.
+- **Smooth & Lightweight**: 60/120 Hz DisplayLink spring animations,
+  zero SIP modifications, and localized out of the box.
+- **Accessible**: Settings is fully keyboard-driven and narrates
+  itself under VoiceOver — every control announces its name *and* its
+  value. See the
+  [user guide](https://kiwidesk.kiwicanopy.com/docs/user-guide/#using-settings-from-the-keyboard).
 
 ## Solving macOS Papercuts
 
-- **No Green-Button Desktop Isolation**: The `monocle` layout maximizes
-  windows on the *current space* without kicking you to a far-right Desktop.
-- **No `⌘Tab` Black Holes**: `pull_or_spawn` opens the app, pulls its windows front-and-center, or cycles through all open windows of that app on repeated presses.
-- **Zero Layout Amnesia**: Moving windows between spaces automatically tiles
-  them into the target layout grid instead of forcing manual micro-resizing.
-- **Predictable Spatial Memory**: KiwiDesk's spaces stay in fixed,
-  predictable slots rather than macOS automatically shuffling your
-  Desktops around.
+- **No green-button exile**: `monocle` maximizes a window on the
+  *current* space instead of throwing it onto a far-right Desktop.
+- **No `⌘Tab` black holes**: `pull_or_spawn` opens the app, pulls its
+  windows front-and-center, then cycles them on repeated presses.
+- **Zero layout amnesia**: windows moved between spaces tile
+  themselves into the target layout — no manual micro-resizing.
+- **Predictable spatial memory**: spaces stay in fixed slots rather
+  than macOS reshuffling your Desktops.
 
 ## Installation
 
@@ -142,45 +121,14 @@ Requirements: macOS 14 or later, on Apple silicon.
 brew install --cask kiwicanopy/tap/kiwidesk
 ```
 
-Or **[download the `.dmg`](https://kiwidesk.kiwicanopy.com/)** and
-drag KiwiDesk into your Applications folder. It is the same
-signed, notarized app; what the cask adds is a link putting the
-`kiwidesk` CLI on your `PATH` — see [the CLI guide](docs/cli.md)
-for making that link yourself after a `.dmg` install.
+Or **[download the `.dmg`](https://kiwidesk.kiwicanopy.com/)** — the
+same signed, notarized app; the cask additionally puts the `kiwidesk`
+CLI on your `PATH`. Either way KiwiDesk keeps itself up to date.
 
-The cask installs the app and puts the `kiwidesk` CLI on your
-`PATH`. It ships from this project's own tap
-([`KiwiCanopy/homebrew-tap`](https://github.com/KiwiCanopy/homebrew-tap));
-the fully-qualified token above taps it for you, so there is no
-separate `brew tap` step. The shorter `brew install --cask
-kiwidesk` would need acceptance into homebrew-cask itself, which
-has not been applied for.
-
-Later builds install themselves. KiwiDesk checks for new releases
-in the background and offers you the update, so there is nothing
-to run. Upgrade an older copy through Homebrew once to reach a
-version that can do this, and it takes over from there — the
-[user guide](docs/user-guide.md#the-status-bar-quick-menu) has the
-detail.
-
-> Releases are signed with a stable Developer ID and notarized. If
-> windows stop being managed after an upgrade, re-approve KiwiDesk
-> in **System Settings › Privacy & Security › Accessibility**.
-
-On first launch, an onboarding wizard walks you through granting
-the Accessibility permission KiwiDesk needs to manage windows.
-
-KiwiDesk starts at login by default — first-run setup ticks it,
-and **Settings ▸ General ▸ Start at login** is the switch. To
-have it relaunched after a crash as well, install the LaunchAgent
-that does both:
-
-```sh
-kiwidesk service start
-```
-
-Run one or the other, not both — [the CLI guide](docs/cli.md)
-explains why.
+On first launch a wizard walks you through the Accessibility
+permission, then tiles your windows straight away. Everything past
+that — Settings, the CLI, Lua — is in the
+**[Quick Start](https://kiwidesk.kiwicanopy.com/docs/user-guide/)**.
 
 ### Building from source
 
@@ -193,24 +141,6 @@ cd KiwiDesk
 swift build -c release
 .build/release/KiwiDesk           # run the app
 ```
-
-## Quick Start
-
-The CLI is the same binary — `kiwidesk` from the cask, or
-`.build/release/KiwiDesk` from a source build:
-
-```sh
-kiwidesk set_mode monocle        # current space → monocle
-kiwidesk focus left              # move focus
-kiwidesk set_gap_global 12       # breathing room
-kiwidesk help                    # list every command
-```
-
-Everyday settings live in the **Settings** app. Prefer Lua?
-The config file `~/.config/KiwiDesk/init.lua` is created
-all-commented on first launch — see the
-[Lua reference](https://kiwidesk.kiwicanopy.com/docs/lua-reference/)
-for the full API.
 
 ## Documentation
 
@@ -252,8 +182,8 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ---
 
-KiwiDesk is free and always will be. If it saves you time, a
-⭐ on this repo is the one thing that helps other people find it.
+KiwiDesk is free. If you like it, leave a ⭐ — it is the one
+thing that helps other people find it.
 
 <div align="center">
 <br>
