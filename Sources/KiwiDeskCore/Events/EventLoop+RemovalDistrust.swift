@@ -86,22 +86,14 @@ extension EventLoop {
     }
 
     /// Whether the carried arm may rule this window's vanish now:
-    /// the carry follows it, and a Desktop switch is in flight or
-    /// the window already has an open episode — ANY episode, so a
-    /// #1157 census episode on a carried window buys a later
-    /// genuine close up to the cap of blind refusals, bounded and
-    /// converging. The one reading the sweep and the destroy
-    /// notification's deferral share. The grace is stamped by the
-    /// NSWorkspace switch notification; a carried window's
-    /// destroyed element landing BEFORE that stamp takes the
-    /// ordinary departure and returns through the arrival rule
-    /// with its scope restored from the sticky intent memory —
-    /// slot and pin not kept, the residue
-    /// `docs/accepted-limitations.md` records.
+    /// the carry has this window IN FLIGHT — moved within
+    /// `KiwiCore.inFlightWindow`, the seam's own reading. Never
+    /// the switch grace: a slow app's element dies well after it
+    /// (device, 2026-09-02), and a switch alone says nothing about
+    /// a window nobody moved. The one reading the sweep and the
+    /// destroy notification's deferral share.
     func carriedRemovalArmIsOpen(for id: WindowID) -> Bool {
         carriedWindows().contains(id)
-            && (isWithinSpaceSwitchGrace()
-                || removalDistrusted[id] != nil)
     }
 
     /// Hands the pids owed a distrust follow-up to the scheduled

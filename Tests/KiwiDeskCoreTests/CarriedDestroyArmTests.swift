@@ -7,9 +7,10 @@ import Testing
 
 /// The destroy NOTIFICATION's half of the carried-window arm
 /// (#1145): a carried window's element dies as it leaves the
-/// visible Space, and inside a switch that destroy defers to the
-/// sweep — exactly as a tab carrier's does — while outside one it
-/// is the eager close it always was. Split from
+/// visible Space, and while the carry holds the window in flight
+/// that destroy defers to the sweep — exactly as a tab carrier's
+/// does — while a window nothing moved takes the eager close it
+/// always did. Split from
 /// `CarriedRemovalTests` at the tests.md file ceiling; the harness
 /// is that file's per-file copy, on our OWN pid, because `handle`
 /// reads the activation policy off the live process table and
@@ -110,14 +111,15 @@ struct CarriedDestroyArmTests {
         return (loop, box, own)
     }
 
-    @Test("outside a switch a carried destroy is eager")
-    func destroyedNotificationOutsideTheGraceIsEager() {
+    @Test("a carried window not in flight destroys eagerly")
+    func destroyedNotificationNotInFlightIsEager() {
         let (loop, box, own) = makeOwnLoop()
         let element = dummyElement
-        loop.carriedWindows = { [WindowID(12)] }
+        // Sticky, enabled, but nothing moved it — the seam is empty.
+        loop.carriedWindows = { [] }
         loop.elements[own] = [WindowID(12): element]
         box.listed = []
-        loop.lastDesktopChange = .distantPast
+        loop.lastDesktopChange = Date()
         loop.handle(
             kAXUIElementDestroyedNotification,
             element,

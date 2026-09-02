@@ -16,12 +16,20 @@ extension KiwiCore {
             ?? tiler.settings.stickyStyle.desktopReach
     }
 
-    /// The windows the carry follows. Also the event loop's
-    /// removal gate's reading (`EventLoop.carriedWindows`): one
-    /// of these is EXPECTED present on the arriving Desktop while
-    /// the switch transition darkens both AX and the census. A
+    /// How long a carried window counts as IN FLIGHT after its
+    /// move was dispatched — the removal gate's carried arm reads
+    /// it (`stickyReachInFlight`). The AX element dies ~1 s after
+    /// the switch on TextEdit (device, 2026-09-01) and ~2 s on an
+    /// Electron app (Claude, device, 2026-09-02, the trace that
+    /// retired the switch-grace gate); the distrust's recheck
+    /// budget adds ~1.5 s. Five seconds covers both with margin.
+    /// The trade: ⌘W of a sticky window inside those seconds waits
+    /// out the recheck budget before its tile goes.
+    static let inFlightWindow: TimeInterval = 5
+
+    /// The windows the carry follows — those a pass moves. A
     /// native-fullscreen window keeps its scope but travels
-    /// nowhere (#670) — a move would yank it out of its own space.
+    /// nowhere (#670): a move would yank it out of its own space.
     func stickyReachCarried() -> Set<WindowID> {
         guard canDriveDesktops else { return [] }
         return Set(
@@ -32,6 +40,22 @@ extension KiwiCore {
                 }
                 .map(\.id)
         )
+    }
+
+    /// The carried windows still in flight — moved within
+    /// `inFlightWindow` and still enabled. The event loop's
+    /// removal gate reads this through `EventLoop.carriedWindows`:
+    /// one of these is EXPECTED present on the arriving Desktop
+    /// while the switch transition darkens both AX and the census,
+    /// and NOTHING else is — a switch alone opens no arm, so a
+    /// sticky window closed with no carry in flight is a close.
+    func stickyReachInFlight() -> Set<WindowID> {
+        let now = Date()
+        stickyReachCarriedAt = stickyReachCarriedAt.filter {
+            now.timeIntervalSince($0.value) < Self.inFlightWindow
+        }
+        return Set(stickyReachCarriedAt.keys)
+            .intersection(stickyReachCarried())
     }
 
     /// Convenience for a caller holding no topology — a verb, a
@@ -70,6 +94,7 @@ extension KiwiCore {
             // Bool is the dispatch, nothing verifies the landing,
             // and the settle's repeat is the only net.
             let performed = WMBridge.moveWindows([id], to: current.id)
+            stickyReachCarriedAt[id] = Date()
             onLog(
                 "reach: carry w\(id.raw) -> space \(current.id) "
                     + "performed=\(performed)"
