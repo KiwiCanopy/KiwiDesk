@@ -18,6 +18,8 @@ enum GeneralRowOrder {
         .general(.advancedConfigFile),
         .general(.advancedEditLua),
         .general(.advancedExportBackup),
+        .general(.advancedExportLogRange),
+        .general(.advancedExportLog),
         .general(.advancedDiscardArrangement),
         .general(.advancedResetAll),
         .general(.advancedRestoreBackup),

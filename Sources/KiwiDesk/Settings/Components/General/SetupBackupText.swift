@@ -54,7 +54,7 @@ enum SetupBackupText {
             )
         case .couldNotWrite(let name):
             return L(
-                "general.advanced.backup.error.write_failed",
+                "common.error.write_failed",
                 "KiwiDesk couldn't write “%1$@”. Try somewhere "
                     + "else, like your Desktop.",
                 name

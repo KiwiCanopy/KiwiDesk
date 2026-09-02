@@ -72,8 +72,14 @@ body:
         Paste the output of these commands (one per block):
         - `kiwidesk get_state` (print as JSON)
         - `kiwidesk get_layout_info` (current layout details)
-        - `log show --predicate 'eventMessage contains[c] "KiwiDesk"'`
-        (copy lines mentioning KiwiDesk)
+
+        Then the log: if you can make the problem happen again, do
+        that first. Open KiwiDesk Settings ▸ General ▸ Advanced, pick
+        a time range beside **Export Log…** that reaches back to
+        before it happened, press the button, and **attach the file**
+        here (drag it into this field) instead of pasting fragments.
+        Can't open Settings? The same export from a terminal is in
+        the CLI reference: https://kiwidesk.app/docs/cli/#exporting-the-log
       placeholder: |
         ## kiwidesk get_state
         { "spaces": {...}, ... }
@@ -81,8 +87,8 @@ body:
         ## kiwidesk get_layout_info
         { "layout": "bsp", ... }
 
-        ## System log (KiwiDesk filter)
-        [timestamp] ...
+        ## Log
+        (attached: KiwiDesk-log-….txt, Last 15 minutes)
 
   - type: checkboxes
     id: other_tools

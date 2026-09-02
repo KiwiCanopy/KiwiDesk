@@ -17,6 +17,8 @@ struct GeneralSection: View {
     /// Core names the condition, `SetupBackupText` writes the
     /// sentence (#96).
     @State var backupError: SetupBundleError?
+    /// The log export's range (#1209) — per-mount, never stored.
+    @State var logRange: SettingsModel.LogExportRange = .last15Minutes
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
@@ -193,6 +195,8 @@ struct GeneralSection: View {
                     .foregroundStyle(.secondary)
                 Divider()
                 exportBackupRow
+                Divider()
+                exportLogRows
                 resetLadder
             }
             .padding(.top, 8)
@@ -213,6 +217,14 @@ struct GeneralSection: View {
         ) { _ in
         } message: { outcome in
             Text(SetupBackupText.sentence(for: outcome))
+        }
+        .alert(
+            model.logExportProblem.map(LogExportText.title) ?? "",
+            isPresented: logExportProblemBinding,
+            presenting: model.logExportProblem
+        ) { _ in
+        } message: { problem in
+            Text(LogExportText.sentence(for: problem))
         }
     }
 

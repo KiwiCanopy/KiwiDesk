@@ -210,10 +210,13 @@ struct SettingsSearchIndexTests {
                 // not an anchor going missing.
                 .shortcuts: 13,
                 .appRules: 3,
-                // 9: the backup pair and the other General rows
-                // have no #277 catalog anchor. (The deleted
-                // install inventory card was anchored).
-                .general: 9,
+                // 11: the backup pair and the other General rows
+                // have no #277 catalog anchor (the deleted
+                // install inventory card was anchored), and the
+                // log export's two rows — the range menu and the
+                // button — joined the same way in #1209: new
+                // census rows landing, not an anchor going missing.
+                .general: 11,
             ]
         )
     }
