@@ -3030,9 +3030,7 @@ The rulings:
   vanish for a bounded budget while the carry holds it in flight
   rather than dropping its slot, scope and pin (the mechanism is
   `.claude/rules/accessibility.md`'s); the trade is an
-  [accepted limitation](accepted-limitations.md): a sticky
-  window closed *during* a switch keeps its tile for a couple of
-  reconcile beats before it goes.
+  [accepted limitation](accepted-limitations.md), stated there.
 
 
 ## Settings GUI & UX

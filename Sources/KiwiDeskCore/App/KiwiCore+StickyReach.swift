@@ -22,7 +22,8 @@ extension KiwiCore {
     /// the switch on TextEdit (device, 2026-09-01) and ~2 s on an
     /// Electron app (Claude, device, 2026-09-02, the trace that
     /// retired the switch-grace gate); the distrust's recheck
-    /// budget adds ~1.5 s. Five seconds covers both with margin.
+    /// budget (`EventLoop.removalRecheckCap`) comes on top. Five
+    /// seconds covers both with margin.
     /// The trade: ⌘W of a sticky window inside those seconds waits
     /// out the recheck budget before its tile goes.
     static let inFlightWindow: TimeInterval = 5
@@ -94,7 +95,10 @@ extension KiwiCore {
             // Bool is the dispatch, nothing verifies the landing,
             // and the settle's repeat is the only net.
             let performed = WMBridge.moveWindows([id], to: current.id)
-            stickyReachCarriedAt[id] = Date()
+            // In flight only for a move that was DISPATCHED: a
+            // refused one moved nothing, so nothing is expected
+            // to vanish and ⌘W must not wait on it.
+            if performed { stickyReachCarriedAt[id] = Date() }
             onLog(
                 "reach: carry w\(id.raw) -> space \(current.id) "
                     + "performed=\(performed)"

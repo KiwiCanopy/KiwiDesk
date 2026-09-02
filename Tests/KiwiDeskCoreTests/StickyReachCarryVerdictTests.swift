@@ -255,6 +255,23 @@ struct StickyReachCarryVerdictTests {
         #expect(core.eventLoop.carriedWindows() == [w4])
     }
 
+    @Test("a move the bridge could not dispatch leaves nothing in flight")
+    func unperformedMoveIsNotInFlight() {
+        let core = makeCore()
+        defer { teardown() }
+        // The probe answers (the bridge is present) but the move
+        // class does not resolve: `moveWindows` answers false and
+        // nothing was moved, so the removal gate must not wait on
+        // a vanish that cannot come.
+        WMBridge.classResolverOverride = { name in
+            name == "MoveWindowsToManagedSpaceOperation"
+                ? nil : bridgeClasses[name]
+        }
+        core.refreshStickyReach()
+        #expect(Bridge.moves.isEmpty)
+        #expect(core.eventLoop.carriedWindows().isEmpty)
+    }
+
     @Test("no bridge, no carry")
     func absentBridgeCarriesNothing() {
         let core = makeCore(bridge: false)

@@ -269,9 +269,10 @@ editing AX code:
   stand-down, the episode ledger, the one-census cost and the
   convergence.
 
-  **The gate has a carried arm (#1145), and no other arm may
-  refuse INSIDE the switch grace** — a new one joins
-  `CarriedRemovalTests`' grace clause. A sticky window the
+  **The gate has a carried arm (#1145), which never reads the
+  switch grace, and no other arm may refuse INSIDE that grace**
+  — a new one joins `CarriedRemovalTests`' grace clause. A
+  sticky window the
   Desktop reach carries is EXPECTED present after a switch —
   the bridge MOVE puts it on the arriving Desktop — but for the
   transition's beat it is on no reading at all: its AX element
