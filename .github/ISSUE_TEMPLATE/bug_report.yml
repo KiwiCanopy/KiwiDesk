@@ -72,8 +72,13 @@ body:
         Paste the output of these commands (one per block):
         - `kiwidesk get_state` (print as JSON)
         - `kiwidesk get_layout_info` (current layout details)
-        - `log show --predicate 'eventMessage contains[c] "KiwiDesk"'`
-        (copy lines mentioning KiwiDesk)
+
+        Then export the log for the stretch that covers the problem
+        and **attach the file** (drag it into this field) instead
+        of pasting fragments — reach back to just before it
+        happened (`--last 15m`, `--last 2h`):
+        `/usr/bin/log show --last 15m --predicate 'subsystem == "com.kiwicanopy.kiwidesk"' --style compact > ~/Desktop/kiwidesk-log.txt`
+        This works on the shipped app, no debug build needed.
       placeholder: |
         ## kiwidesk get_state
         { "spaces": {...}, ... }
@@ -81,8 +86,8 @@ body:
         ## kiwidesk get_layout_info
         { "layout": "bsp", ... }
 
-        ## System log (KiwiDesk filter)
-        [timestamp] ...
+        ## Log
+        (attached: kiwidesk-log.txt, --last 15m)
 
   - type: checkboxes
     id: other_tools

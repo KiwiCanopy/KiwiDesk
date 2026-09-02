@@ -220,6 +220,36 @@ when the login item is *also* on — telling you two mechanisms
 will start KiwiDesk, and to run one. These strings are the login
 item's only appearance in CLI output.
 
+## Exporting the Log
+
+KiwiDesk writes every diagnostic line to the macOS unified log
+under its own subsystem, at default level and with the text
+public — so the shipped app's log is readable on any Mac with no
+debug build and no extra permission. To hand it over with a bug
+report, export the last stretch to a file:
+
+```sh
+/usr/bin/log show --last 15m \
+  --predicate 'subsystem == "com.kiwicanopy.kiwidesk"' \
+  --style compact > ~/Desktop/kiwidesk-log.txt
+```
+
+Reach back to just before the problem happened — `--last 15m`,
+`--last 2h`, or `--start "2026-09-02 09:40:00"` for an exact
+window — and attach the file to the issue rather than pasting
+fragments. `/usr/bin/log`, spelled out, because a shell alias
+named `log` is common. To watch live while reproducing:
+
+```sh
+/usr/bin/log stream --predicate 'subsystem == "com.kiwicanopy.kiwidesk"' --style compact
+```
+
+The subsystem filter is the right one: filtering on the word
+"KiwiDesk" misses the system daemons' lines a report sometimes
+needs and catches unrelated apps mentioning the name. (`kiwidesk
+debug_log <message>` WRITES a marker line into this same log,
+which is useful to bracket a repro; it exports nothing.)
+
 ## Commands
 
 | Category | Command | Arguments |
