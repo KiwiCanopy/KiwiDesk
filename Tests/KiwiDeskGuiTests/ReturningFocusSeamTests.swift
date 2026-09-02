@@ -43,8 +43,9 @@ struct ReturningFocusSeamTests {
         // A re-key mid-flight otherwise leaves the debt naming a
         // dead id and the return silently drops (#308).
         ("desktopMemory.returnFocus.rekey(", memoryFile),
-        // A window closed while away can never arrive (#1146):
-        // the id-keyed retire, in the ledger's prune alone.
+        // A window gone for good can never arrive (#1146): the
+        // id-keyed retire in `retireAwayDebts`, reached by the
+        // census prune and the app's exit.
         ("desktopMemory.returnFocus.retire(", "KiwiCore+AwayWindows.swift"),
         ("rekeyDesktopFocus(old: old, new: new)", "KiwiCore+RekeyEvent.swift"),
         // The arrival arm owes; the mirror hands the fold the

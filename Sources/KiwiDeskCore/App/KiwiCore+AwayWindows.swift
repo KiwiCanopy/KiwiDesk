@@ -43,21 +43,27 @@ extension KiwiCore {
         guard let census = desktopMemory.readCensus(spaces) else {
             return false
         }
-        fold(census)
+        fold(census, pruning: true)
         return true
     }
 
     /// Folds ONE census into the ledger — the reading every
     /// consumer of the ledger then sees, so a keystroke and the
     /// bar never disagree about a window's Desktop or parking.
-    func fold(_ census: DesktopCensus) {
+    /// `pruning: false` updates hosts and parking only: a prune
+    /// emits a `window_destroyed` synchronously, which a command
+    /// in flight must not do mid-dispatch (a Lua handler may
+    /// `execute` back in) — the settle and the task prune.
+    func fold(_ census: DesktopCensus, pruning: Bool) {
         var redrawn = false
         for entry in state.awayWindows.values.sorted(by: {
             $0.id.raw < $1.id.raw
         }) {
             guard let host = census.hosts[entry.id] else {
-                pruneAwayWindow(entry)
-                redrawn = true
+                if pruning {
+                    pruneAwayWindow(entry)
+                    redrawn = true
+                }
                 continue
             }
             if entry.isUp != host.isUp { redrawn = true }

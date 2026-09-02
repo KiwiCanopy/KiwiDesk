@@ -220,11 +220,17 @@ editing here:
   on a compositor-confirmed `vanished` (`KiwiCore.handleWindowGone`)
   and by the boot seed (`seedAwayWindows`) — a new FILING goes
   through one of those two, never an assignment beside a call
-  site (review's: nothing scans for one); the enders live in
-  `State/` and `KiwiCore+AwayWindows.swift`, and an ender that
-  drops an entry also retires what still names it through
-  `retireAwayDebts(of:)` — the #1207 memory and BOTH arrival
-  debts; the departure's space and rank stay in #1207's two
+  site (review's: nothing scans for one). The enders differ by
+  what they mean: the RETURN pays whatever named the window (the
+  create fold and the arrival arms), the #634 reset forgets the
+  memory with everything else (`forgetDesktopFocus`), and the two
+  enders for a window GONE FOR GOOD — the census prune
+  (`pruneAwayWindow`) and the app's exit (the `.appTerminated`
+  pre-fold in `KiwiCore+Events.swift`) — retire what still names
+  it through the one `retireAwayDebts(of:)`: the #1207 memory
+  and BOTH arrival debts (`AwayLedgerTests` ▸ `pruneRetiresDebts`,
+  `exitRetiresDebts`); a new gone-for-good ender takes the same
+  call. The departure's space and rank stay in #1207's two
   records, and the three are read together. An
   entry ENDS on the return (the create fold), on a census that
   no longer hosts the id (`refreshAwayWindows`, which emits the

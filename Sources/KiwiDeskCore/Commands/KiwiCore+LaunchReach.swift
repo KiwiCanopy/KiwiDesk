@@ -25,8 +25,9 @@ extension KiwiCore {
             return nil
         }
         // One reading for the keystroke AND the ledger the ring
-        // and the bar read (#1146): fold before deciding.
-        fold(census)
+        // and the bar read (#1146): fold before deciding — hosts
+        // and parking only, never a prune's emit mid-command.
+        fold(census, pruning: false)
         let windows = awayWindows(bundleID: bundleID).compactMap {
             entry -> (AwayWindow, Int)? in
             guard let host = census.hosts[entry.id],

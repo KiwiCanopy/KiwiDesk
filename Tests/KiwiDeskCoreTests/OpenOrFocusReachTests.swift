@@ -200,13 +200,21 @@ struct OpenOrFocusReachTests {
     }
 
     /// A stale entry the census has since re-homed onto a shown
-    /// Desktop is not away, whatever the ledger last recorded.
+    /// Desktop is not away, whatever the ledger last recorded —
+    /// and the press folds the census into the ledger first.
     @Test("an entry hosted on a shown Desktop is not reached")
     func staleEntryOnShownDesktopIsNotReached() {
         let (core, touches) = makeCore()
         defer { teardown() }
-        park(core, touches, 7, rank: 0, space: 10)
+        park(core, touches, 7, rank: 0)
+        core.state.awayWindows[WindowID(7)]?.nativeSpace = 11
+        touches.hosts[WindowID(7)] = DesktopCensus.Host(
+            space: 10,
+            pid: pid,
+            isUp: true
+        )
         press(core)
+        #expect(core.state.awayWindows[WindowID(7)]?.nativeSpace == 10)
         #expect(Bridge.switches.isEmpty)
         #expect(core.followFocus.owed() == nil)
         // Not away ⇒ nothing up anywhere ⇒ the un-park runs.
