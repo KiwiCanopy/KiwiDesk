@@ -105,6 +105,17 @@ struct LayoutBoundsRoutingTests {
         // region no bar occupies whenever an empty bar is
         // suppressed.
         "App/KiwiCore+FloatRegion.swift": 1,
+        // The traveler re-home (#1217), a float NET on the same
+        // grounds: its destination is the display a floating
+        // space renders on, a containment box for a window the
+        // layout never places — no span, no midpoint — and the
+        // render space's PAINTED strips are clamped inside the
+        // net, so routing through `layoutBounds` would move a
+        // traveler out of a region no bar occupies. It compares
+        // this SIZE read against the TOPOLOGY seam's rects
+        // (`allScreenBounds`), equal in production; a fixture
+        // pinning one must pin the other in step.
+        "App/KiwiCore+TravelerRehome.swift": 1,
     ]
 
     @Test("Only the allowlisted files read raw display bounds")

@@ -4,6 +4,24 @@ import CoreGraphics
 /// Coordinate conversion helpers between Cocoa bottom-left and AX top-left
 /// origins.
 public enum GeometryUtils {
+    /// The rect in `rects` that `frame` overlaps most, nil when it
+    /// overlaps none — the one copy of the rule
+    /// `TilingEngine.screen(containing:)` and the traveler
+    /// re-home (#1217) share.
+    public static func rect(
+        mostlyContaining frame: CGRect,
+        among rects: [CGRect]
+    ) -> CGRect? {
+        func overlap(_ rect: CGRect) -> CGFloat {
+            let shared = rect.intersection(frame)
+            return shared.isNull ? 0 : shared.width * shared.height
+        }
+        return
+            rects
+            .filter { overlap($0) > 0 }
+            .max { overlap($0) < overlap($1) }
+    }
+
     /// macOS window corner radius constant (`BorderGeometry`,
     /// `TilingSettings.dragCornerRadius`).
     public static let systemWindowCornerRadius: CGFloat = 16

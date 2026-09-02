@@ -230,14 +230,15 @@ extension TilingEngine {
     /// frame overlaps no screen (a stashed corner may barely
     /// graze one; callers fall back to main).
     static func screen(containing frame: CGRect) -> NSScreen? {
-        func overlap(_ screen: NSScreen) -> CGFloat {
-            let r = GeometryUtils.axVisibleFrame(of: screen)
-                .intersection(frame)
-            return r.isNull ? 0 : r.width * r.height
-        }
-        return NSScreen.screens
-            .filter { overlap($0) > 0 }
-            .max { overlap($0) < overlap($1) }
+        let screens = NSScreen.screens
+        let rects = screens.map(GeometryUtils.axVisibleFrame)
+        guard
+            let rect = GeometryUtils.rect(
+                mostlyContaining: frame,
+                among: rects
+            )
+        else { return nil }
+        return zip(screens, rects).first { $0.1 == rect }?.0
     }
 
     /// Applies one frame through the shared animate-or-instant

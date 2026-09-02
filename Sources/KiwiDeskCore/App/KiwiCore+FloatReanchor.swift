@@ -20,7 +20,8 @@ extension KiwiCore {
     /// bound for tiling spaces (the layout owns their frames),
     /// same-display moves (#412 stash behavior unchanged),
     /// global stickies (visible everywhere, so a membership move
-    /// never needs to teleport one), and a window mid-drag (the
+    /// never needs to teleport one — a RENDER change is
+    /// `rehomeFloatingTravelers`'s, #1217), and a window mid-drag (the
     /// pointer owns its placement — the spring-drop exclusion,
     /// generalized; the quick chip drop is unaffected, its
     /// exemption clears before `moveWindow` runs). Callers run

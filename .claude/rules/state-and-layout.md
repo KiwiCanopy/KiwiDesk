@@ -667,14 +667,32 @@ editing here:
   nothing else will (the clamp, the stash capture, the
   display-crossing re-anchor); a VERB is the user's own ask and
   keeps the flag until ruled otherwise, which `resize` still
-  does. The mode arm names the space the window is judged ON —
-  the TARGET for a move, the space a drop LANDED in — and a
-  window that is not a member of that space passes nil, or a
-  tiled sticky traveler is clamped against a screen it is not
-  on. Nothing scans for a new bare-flag net, so each one routes
-  deliberately; `EffectiveFloatTests` holds the algebra and
-  `FloatingModeBarClampTests` the two consumers, each blind to
-  the other by construction.
+  does. **The mode arm names the space whose SCREEN the
+  correction targets** — the TARGET for a move, the space a drop
+  LANDED in, the RENDER space for the traveler re-home whose
+  destination is that screen — and a correction whose strips are
+  the HOME space's passes nil for a window that is not a member
+  there, or a tiled sticky traveler is clamped against a screen
+  it is not on. Nothing scans for a new bare-flag net, so each
+  one routes deliberately, and the predicate must be the DECISION
+  rather than a decoration beside a hand-spelled `.floating`
+  check; `EffectiveFloatTests` holds the algebra and the consumer
+  suites — `FloatingModeBarClampTests`, `TravelerRehomeConsumerTests`
+  — hold the nets, each blind to the algebra by construction. The
+  traveler re-home (#1217): `FloatingLayout` draws nothing, so a
+  tiled sticky traveler rendering on a floating-mode space of
+  ANOTHER display kept the frame its previous space gave it —
+  `KiwiCore+TravelerRehome` moves it onto that display from the
+  retile, through the one `FloatReanchor.target` and the one
+  `GeometryUtils.rect(mostlyContaining:among:)` it shares with
+  `screen(containing:)`, from the COMMANDED frame (never the
+  in-flight echo), fitted and clamped through the render-space
+  arm of the one float region (`floatBounds(on:)`, since the
+  home-keyed nets never see a traveler); a
+  same-display floating target moves nothing and a tiled target
+  keeps the layout's placement (`TravelerRehomeTests`,
+  `TravelerRehomeSeamTests`). The frame is transient by ruling:
+  the next tiled space on that screen re-tiles the traveler.
 - **Derive where a float may sit in ONE place, and bound its
   SIZE there rather than its position** (#1091). `KiwiCore.floatBounds` is that derivation — the
   display's visible bounds with every PAINTED strip carved off

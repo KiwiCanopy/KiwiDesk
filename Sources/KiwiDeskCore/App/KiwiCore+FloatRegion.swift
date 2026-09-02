@@ -82,7 +82,15 @@ extension KiwiCore {
     /// (#531), never `GeometryUtils.axVisibleFrame` — a direct
     /// call reds `VisibleBoundsRoutingTests`.
     func floatBounds(of id: WindowID) -> CGRect? {
-        guard let space = state.workspaces.space(of: id),
+        guard let space = state.workspaces.space(of: id)
+        else { return nil }
+        return floatBounds(on: space)
+    }
+
+    /// The region a float may occupy on `space` — the arm a
+    /// traveler takes for the space it RENDERS on (#1217).
+    func floatBounds(on space: SpaceID) -> CGRect? {
+        guard
             let screen = TilingEngine.screen(
                 for: space,
                 in: state
