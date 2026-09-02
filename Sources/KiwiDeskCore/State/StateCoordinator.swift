@@ -91,6 +91,9 @@ public struct StateCoordinator: Sendable {
         if let space = rememberedSpaces.removeValue(forKey: old) {
             rememberedSpaces[new] = space
         }
+        if let slot = departedSlots.removeValue(forKey: old) {
+            departedSlots[new] = slot
+        }
         if let index = minimizeOrder.firstIndex(
             where: { $0.id == old }
         ) {
@@ -190,9 +193,6 @@ public struct StateCoordinator: Sendable {
             windows.setFullscreen(id, fullscreen)
 
         case .windowRekeyed(let old, let new):
-            if let slot = departedSlots.removeValue(forKey: old) {
-                departedSlots[new] = slot
-            }
             rekey(old, to: new)
 
         case .displaysChanged(let displays):

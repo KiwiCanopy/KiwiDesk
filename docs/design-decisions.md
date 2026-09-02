@@ -3057,8 +3057,8 @@ return owes the user the window they left, the way a follow owes
 its window
 ([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)'s
 principle: an operation that names a window owes the window,
-never a bookkeeping entry about it). Three choices fall out of
-it, each argued against its alternative:
+never a bookkeeping entry about it). The choices, each argued
+against its alternative:
 
 - **The focus is remembered at the focus REPORT, per space —
   never at the departure.** The first cut wrote the memory in
@@ -3071,10 +3071,12 @@ it, each argued against its alternative:
   a focus the walk had already moved and the return paid the
   wrong window — over the very focus macOS had just restored. So
   the memory is written where the fact is born, at every honored
-  focus report, under the space the window sits in; nothing a
-  departure does can reach it, and a return owes only a window
-  that is actually gone — one macOS restored and KiwiDesk already
-  honored needs no payment.
+  focus report, under the space the window sits in and the native
+  Space the WindowServer hosts it on — the compositor's answer,
+  which no notification's timing can stale; nothing a departure
+  does can reach it, and a return owes only a window that is
+  actually gone — one macOS restored and KiwiDesk already honored
+  needs no payment.
 - **The debt is paid at the owed window's own ARRIVAL, never at
   the settle.** The jump happens at the switch, when the first
   re-track claims the vacancy; the 600 ms settle is a second leg
@@ -3121,8 +3123,9 @@ departing Space nor the previous Desktop number in hand.
 `ReturningFocusFoldTests` pins the fold, `DesktopFocusMemoryTests`
 and `DesktopFocusPaymentTests` the remember→owe→pay path through
 the real handlers, and
-`ReturningFocusSeamTests` the wirings — the recorder in the
-departure arm, the settle's stand-down, the payer's raise.
+`ReturningFocusSeamTests` the wirings — the recorder at the
+honored report and nowhere in the switch handler, the settle's
+stand-down, the payer's raise.
 
 ## Settings GUI & UX
 

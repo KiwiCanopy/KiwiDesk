@@ -225,9 +225,11 @@ extension KiwiCore {
             forgetGoneWindow(id, pid: goneWindowPID)
             // The switch timestamp is set by the
             // .desktopChanged event, which the event loop
-            // emits BEFORE the reconcile burst on the same
-            // run-loop turn — so vanish classification is
-            // ordering, not a race (#40).
+            // emits BEFORE the reconcile burst (#40) — but not
+            // before an app's OWN observer folds its windows:
+            // measured 2026-09-02, a fast app's destroys landed
+            // before the notification (#1207), so the stamp
+            // read here can be the previous switch's.
             let reason = WindowGoneReason.classify(
                 wasMinimized: wasMinimized,
                 sinceDesktopSwitch: Date()

@@ -40,6 +40,7 @@ struct DesktopFocusPaymentTests {
         NativeSpaces.activeSpaceIDOverride = 10
         NativeSpaces.activeSpaceIsUserOverride = true
         pinTwoDisplays()
+        NativeSpaces.windowSpaceOverride = { _ in 10 }
         WMBridge.classResolverOverride = { _ in nil }
         let core = makeAuthorityCore()
         connectAuthority(
@@ -206,7 +207,7 @@ struct DesktopFocusPaymentTests {
         returnToDesktop1(core)
         let fresh = WindowID(9)
         core.handle(.windowRekeyed(focused, fresh))
-        #expect(core.desktopMemory.honoredFocus[home]?[1] == fresh)
+        #expect(core.desktopMemory.honoredFocus[home]?[10] == fresh)
         #expect(core.desktopMemory.returnFocus.owed() == fresh)
     }
 }

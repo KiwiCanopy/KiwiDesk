@@ -152,11 +152,17 @@ editing here:
   (#636's nil arm) and the settle asserted it. Each space's last
   HONORED focus is remembered in `DesktopMemory.honoredFocus`,
   written at the focus REPORT (`handleWindowFocused`, after the
-  honored verdict) and never by a fold or the switch handler: the
-  device showed a fast app's own AX observer folding its windows
-  BEFORE the switch notification, so a handler-time read
-  remembers a focus the walk already moved (log, 2026-09-02).
-  The arrival arm owes the target space's entry as
+  honored verdict) under the native Space the WindowServer hosts
+  the window on (`NativeSpaces.nativeSpace(of:)`) — never by a
+  fold, never by the switch handler, and never under a cached
+  Desktop: the device showed a fast app's own AX observer folding
+  its windows BEFORE the switch notification, so a handler-time
+  read remembers a focus the walk already moved, and a report
+  that beats the handler would be stamped with the Desktop being
+  LEFT (log, 2026-09-02; the same measurement is the #40 caveat
+  on `WindowGoneReason.classify`'s stamp). The arrival arm owes
+  the target space's entry for the native Space the snapshot
+  shows on the main display as
   `DesktopMemory.returnFocus`, a second `FollowFocusIntent`
   INSTANCE (same drain key, the arriving window; same
   cardinality), only for a window GONE from state: a present one

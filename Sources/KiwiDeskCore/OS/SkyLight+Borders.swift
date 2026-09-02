@@ -285,7 +285,7 @@ extension SkyLight {
     }
 
     /// Queries WindowServer for space hosting target window (`SpaceID`).
-    private static func windowSpace(
+    static func windowSpace(
         _ target: CGWindowID,
         connection: ConnectionID
     ) -> SpaceID? {

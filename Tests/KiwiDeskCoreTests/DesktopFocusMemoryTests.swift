@@ -3,11 +3,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The returning-focus memory through the real focus handler, the
-/// real switch handler, the fold and the settle (#1207): an
-/// honored focus is remembered per space, the return owes it, the
-/// owed window's arrival pays it, and the settle stands its
-/// refocus down while the debt is unpaid.
+/// The returning-focus memory through the real focus handler and
+/// the real switch handler (#1207): an honored focus is remembered
+/// under its space and the native Space the WindowServer hosts the
+/// window on, and the return owes it only when it is gone. The
+/// payment half is `DesktopFocusPaymentTests`, split at the
+/// tests.md file ceiling with a per-file fixture copy.
 ///
 /// The #888 fixture: Desktops 1–2 on the main display `UUID-A`
 /// (ids 10, 11), 3–4 on `UUID-B` (ids 20, 21); KiwiDesk space
@@ -38,6 +39,9 @@ struct DesktopFocusMemoryTests {
         NativeSpaces.activeSpaceIDOverride = 10
         NativeSpaces.activeSpaceIsUserOverride = true
         pinTwoDisplays()
+        // Every window lives on Desktop 1 (native 10) unless a
+        // test says otherwise.
+        NativeSpaces.windowSpaceOverride = { _ in 10 }
         WMBridge.classResolverOverride = { _ in nil }
         let core = makeAuthorityCore()
         connectAuthority(
@@ -119,13 +123,13 @@ struct DesktopFocusMemoryTests {
         )
     }
 
-    @Test("an honored focus is remembered under its space")
+    @Test("an honored focus is remembered under its space and Desktop")
     func honoredFocusIsRemembered() {
         let (core, _) = makeCore()
         defer { teardown() }
-        #expect(core.desktopMemory.honoredFocus[home]?[1] == focused)
+        #expect(core.desktopMemory.honoredFocus[home]?[10] == focused)
         core.handle(.windowFocused(first))
-        #expect(core.desktopMemory.honoredFocus[home]?[1] == first)
+        #expect(core.desktopMemory.honoredFocus[home]?[10] == first)
     }
 
     /// The device log's ordering: the departure's destroys fold
@@ -137,7 +141,7 @@ struct DesktopFocusMemoryTests {
         defer { teardown() }
         leaveDesktop1(core, destroysFirst: true)
         #expect(core.state.workspaces[home]?.focused == nil)
-        #expect(core.desktopMemory.honoredFocus[home]?[1] == focused)
+        #expect(core.desktopMemory.honoredFocus[home]?[10] == focused)
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == focused)
     }
@@ -156,25 +160,52 @@ struct DesktopFocusMemoryTests {
 
     /// macOS restores its own key window at the switch, and an
     /// app that re-lists before the handler runs has that focus
-    /// HONORED already. The return then owes nothing — paying the
+    /// HONORED already — stamped where the WindowServer says the
+    /// window is, never where the stale handler state says. The
+    /// return then finds it present and owes nothing; paying the
     /// memory over it is the yank the device showed.
-    @Test("a focus honored before the handler owes nothing")
+    @Test("a focus honored before the handler is stamped where it is")
     func honoredBeforeHandlerOwesNothing() {
         let (core, box) = makeCore()
         defer { teardown() }
         leaveDesktop1(core)
         arrive(first, in: core)
         core.handle(.windowFocused(first))
+        #expect(core.desktopMemory.honoredFocus[home]?[10] == first)
+        #expect(core.desktopMemory.honoredFocus[home]?[11] == nil)
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == nil)
         #expect(!box.lines.contains { $0.contains("owing focus") })
         #expect(core.state.workspaces[home]?.focused == first)
-        // Re-stamped under the Desktop it really belongs to: the
-        // next return owes THAT window, not the stale entry.
-        #expect(core.desktopMemory.honoredFocus[home]?[1] == first)
         leaveDesktop1(core)
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == first)
+    }
+
+    /// The other Desktop's window, honored there and still present
+    /// at the return because its app folds slowly, is NOT the
+    /// arriving Desktop's restore: it was stamped under its own
+    /// native Space, so the remembered window is still owed.
+    @Test("a slow-folding window of the left Desktop is not mistaken")
+    func slowFoldOfTheLeftDesktopIsNotMistaken() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        let other = WindowID(7)
+        NativeSpaces.windowSpaceOverride = { $0 == other ? 11 : 10 }
+        leaveDesktop1(core)
+        arrive(other, in: core)
+        core.handle(.windowFocused(other))
+        #expect(core.desktopMemory.honoredFocus[home]?[11] == other)
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == focused)
+        core.handle(.windowDestroyed(other, wasMinimized: false))
+        arrive(first, in: core)
+        #expect(core.state.workspaces[home]?.focused == nil)
+        arrive(focused, in: core)
+        #expect(core.state.workspaces[home]?.focused == focused)
+        #expect(
+            box.lines.contains { $0.contains("focus paid to w1") }
+        )
     }
 
     /// Two Desktops showing one space keep their own entries: the
@@ -183,9 +214,40 @@ struct DesktopFocusMemoryTests {
     func perDesktopKeying() {
         let (core, box) = makeCore()
         defer { teardown() }
-        core.desktopMemory.honoredFocus = [home: [2: focused]]
+        core.desktopMemory.honoredFocus = [home: [11: focused]]
         destroyAll(core)
         core.lastDesktop = 2
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+        #expect(!box.lines.contains { $0.contains("owing focus") })
+    }
+
+    @Test("another space's memory is not owed")
+    func perSpaceKeying() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        core.desktopMemory.honoredFocus = [SpaceID("2"): [10: focused]]
+        destroyAll(core)
+        core.lastDesktop = 2
+        returnToDesktop1(core)
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+        #expect(!box.lines.contains { $0.contains("owing focus") })
+    }
+
+    /// A window the carry kept (#1145) is present through the
+    /// switch: it never departed, so it is owed nothing.
+    @Test("a window that never departed is owed nothing")
+    func presentWindowIsNotOwed() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: carried, pid: 1, appName: "App")
+            )
+        )
+        core.handle(.windowFocused(carried))
+        leaveDesktop1(core)
+        #expect(core.state.workspaces[home]?.focused == carried)
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == nil)
         #expect(!box.lines.contains { $0.contains("owing focus") })
@@ -216,38 +278,6 @@ struct DesktopFocusMemoryTests {
         #expect(
             box.lines.contains { $0.contains("focus paid to w1") }
         )
-    }
-
-    @Test("another space's memory is not owed")
-    func perSpaceKeying() {
-        let (core, box) = makeCore()
-        defer { teardown() }
-        core.desktopMemory.honoredFocus = [SpaceID("2"): [1: focused]]
-        destroyAll(core)
-        core.lastDesktop = 2
-        returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == nil)
-        #expect(!box.lines.contains { $0.contains("owing focus") })
-    }
-
-    /// A window the carry kept (#1145) is present through the
-    /// switch: it never departed, so it is owed nothing — which
-    /// is how the restore never prefers it.
-    @Test("a window that never departed is owed nothing")
-    func presentWindowIsNotOwed() {
-        let (core, box) = makeCore()
-        defer { teardown() }
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(id: carried, pid: 1, appName: "App")
-            )
-        )
-        core.handle(.windowFocused(carried))
-        leaveDesktop1(core)
-        #expect(core.state.workspaces[home]?.focused == carried)
-        returnToDesktop1(core)
-        #expect(core.desktopMemory.returnFocus.owed() == nil)
-        #expect(!box.lines.contains { $0.contains("owing focus") })
     }
 
     /// A debt lives from one return to the next. Passing through
@@ -293,5 +323,4 @@ struct DesktopFocusMemoryTests {
             box.lines.contains { $0.contains("a follow owes w7") }
         )
     }
-
 }

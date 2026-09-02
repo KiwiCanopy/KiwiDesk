@@ -56,7 +56,6 @@ extension KiwiCore {
     func handleDesktopChange() {
         let snapshot = NativeSpaces.desktopSnapshot()
         let number = snapshot.authority
-        let previousSwitch = lastDesktopSwitch
         lastDesktopSwitch = Date()
         // A secondary display switched: the authority is a live
         // number that did not move, and some OTHER display's
@@ -121,8 +120,9 @@ extension KiwiCore {
                 state.workspaces.activate(target)
                 oweReturningFocus(
                     for: target,
-                    number: number,
-                    since: previousSwitch
+                    native: snapshot.mainUUID.flatMap {
+                        snapshot.currentSpaces[$0]
+                    }
                 )
                 // Never animate here: this desktop's windows
                 // just (re)appeared, there is nothing to fly

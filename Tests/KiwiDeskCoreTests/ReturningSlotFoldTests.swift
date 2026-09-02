@@ -73,6 +73,41 @@ struct ReturningSlotFoldTests {
         )
     }
 
+    /// A member that never departs is ranked by where it sits at
+    /// each departure, so the returns fall in around it.
+    @Test("a member that stayed keeps its place")
+    func stayerKeepsItsPlace() {
+        var state = StateCoordinator()
+        let stayer = WindowID(9)
+        for id in [stayer, a, b] {
+            state.apply(.windowCreated(makeWindow(id)))
+            state.apply(.windowFocused(id))
+        }
+        // A stale rank from some earlier departure.
+        state.departedSlots[stayer] = 5
+        for id in [a, b] {
+            state.apply(.windowDestroyed(id, wasMinimized: false))
+        }
+        state.apply(.windowCreated(makeWindow(b)))
+        state.apply(.windowCreated(makeWindow(a)))
+        #expect(state.workspaces[home]?.windows == [stayer, a, b])
+    }
+
+    /// Ranks are as fresh as the space's last departure: a row
+    /// re-ordered after a return, departing one window, comes back
+    /// in the NEW order — never the rank of an earlier departure.
+    @Test("a re-ordered row departing one window keeps the new order")
+    func reorderedRowKeepsTheNewOrder() {
+        var state = makeDepartedRow()
+        for id in [a, b, c, d] {
+            state.apply(.windowCreated(makeWindow(id)))
+        }
+        state.workspaces.withSpace(home) { $0.windows = [b, a, c, d] }
+        state.apply(.windowDestroyed(a, wasMinimized: false))
+        state.apply(.windowCreated(makeWindow(a)))
+        #expect(state.workspaces[home]?.windows == [b, a, c, d])
+    }
+
     @Test("a minimize records no slot")
     func minimizeRecordsNoSlot() {
         var state = StateCoordinator()

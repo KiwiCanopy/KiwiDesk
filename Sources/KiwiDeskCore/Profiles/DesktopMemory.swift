@@ -6,19 +6,10 @@ final class DesktopMemory {
     /// Remembered Space ID per native Desktop number and display UUID.
     var virtualSpaces: [String: [Int: SpaceID]] = [:]
 
-    /// Each space's last HONORED focus per Desktop (#1207),
-    /// written at every honored focus report and never by a fold:
-    /// a Desktop departure's destroys can precede the switch
-    /// handler, so a handler-time read sees `Space.focused`
-    /// already walked. Two Desktops showing one space keep their
-    /// own entries; a report that beat the handler is stamped
-    /// with the Desktop being left and re-stamped at the arrival.
-    var honoredFocus: [SpaceID: [Int: WindowID]] = [:]
-
-    /// The most recent honored focus and when (#1207): a focus
-    /// honored SINCE the last switch is macOS's own restore, which
-    /// the return keeps rather than paying the memory over it.
-    var lastHonored: (window: WindowID, at: Date)?
+    /// Each space's last honored focus per native Space it was
+    /// honored ON (#1207) — written at the focus report, never by
+    /// a fold or the switch handler.
+    var honoredFocus: [SpaceID: [SkyLight.SpaceID: WindowID]] = [:]
 
     /// The focus a Desktop return owes its remembered window,
     /// paid at that window's ARRIVAL (#1207) — the #1007 shape,

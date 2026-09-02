@@ -125,13 +125,16 @@ destroyed and re-created.
 
 Every other window of the left Desktop *is* destroyed and
 re-created by that reconcile, and the destroy fold walks
-`Space.focused` off it exactly as a close would. So the switch
-handler in `Profiles` remembers the Desktop's focused window
-before the burst — per (main display, Desktop), beside the Space
-it remembers — and the return owes it as a bounded debt that the
-`.windowCreated` fold pays at that window's own arrival, holding
-the vacancy against earlier re-tracks and standing the 600 ms
-settle's refocus down until it is paid (#1207).
+`Space.focused` off it exactly as a close would — and a fast
+app's destroys can land before the switch notification does. So
+the focus handler in `App` remembers each space's last honored
+focus at the report, under the native Space the WindowServer
+hosts the window on; the switch handler's return owes it as a
+bounded debt that the `.windowCreated` fold pays at that window's
+own arrival, holding the vacancy against earlier re-tracks and
+standing the 600 ms settle's refocus down until it is paid; and
+each departed window carries its slot so the row re-forms in the
+order it left (#1207).
 
 ## 2. Command dispatch (`set_*` verbs)
 
