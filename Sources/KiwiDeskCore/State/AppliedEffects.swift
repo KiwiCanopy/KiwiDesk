@@ -33,15 +33,11 @@ public struct AppliedEffects: Sendable {
         let space: SpaceID?
         let focusLost: Bool
         /// Window index in tiled slot order prior to removal
-        /// (#674). Still scoped to the `focusLost` path, where the
-        /// removed window WAS the active space's focused slot, so
-        /// its home is the active space. The frame is no longer
-        /// counterfactual outside that scope (#1225 derives it
-        /// from the real active space rather than pretending the
-        /// home space is active), but a background-space removal
-        /// is now told honestly that a traveler renders
-        /// elsewhere — which is not the row such a consumer is
-        /// asking about either. Re-derive.
+        /// (#674), in the real active-space frame. Honored on the
+        /// `focusLost` path, where the removed window WAS the
+        /// active space's focused slot and its home is therefore
+        /// that space; a consumer on any other removal is reading
+        /// a row it did not ask about, so re-derive (#1225).
         let tiledSlot: Int?
     }
 }

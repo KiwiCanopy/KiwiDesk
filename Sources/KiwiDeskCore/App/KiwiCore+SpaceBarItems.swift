@@ -73,12 +73,6 @@ extension KiwiCore {
         // item (its home's included) — so one glyph always sits
         // where the user is, instead of cloning onto every item
         // at once.
-        //
-        // That render verdict is asked with the ONE active
-        // space, the same value the layout and the App Bar pass
-        // (#1214): handing each display's own shown space in as
-        // if it were the focused one told EVERY screen's bar
-        // that a ∞ window rendered there.
         let members = state.effectiveMembers(of: space)
         // Transient overlays (a popup's AX windows, a launcher
         // panel) are dropped HERE, before grouping and the cap,

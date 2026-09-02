@@ -63,11 +63,11 @@ told a ∞ window rendered there while the layout drew it on one.
 The `+n` badge's focus tint beside it was the same substitution a
 second time.
 
-The render verdict no longer takes that argument —
-`StateCoordinator.stickyRenderSpace` derives the active Space
-itself (#1225) — so the presence half of this is unrepresentable
-rather than policed here. What is left is the reading a bar still
-makes for itself:
+The presence half is no longer policed here at all: the
+derived-verdict obligation in
+[state-and-layout.md](state-and-layout.md) owns it (#1225), and
+this file would only be a second copy to rot. What is left is the
+reading a bar still makes for itself:
 
 - A bar derivation answering *which window holds the SYSTEM
   focus* — the glyph tint, the `+n` badge's — reads
@@ -86,7 +86,8 @@ makes for itself:
 - `SpaceBarStickyScreenTests` pins the two-screen half from the
   driver: the ∞ arm on both sides of a switch, the 📌 arm that
   refuses the over-broad "prune every sticky off an unfocused
-  screen" fix, and the `+n` tint (its sole guard — a full run
-  under that mutation reds one test). The single-screen suites
+  screen" fix, and the `+n` tint — which on 2026-09-02 was the
+  only test in the tree that redded when that gate was reverted.
+  The single-screen suites
   stay blind to all three by construction, which is why they are
   their own file rather than added expectations.
