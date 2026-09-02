@@ -3130,8 +3130,6 @@ the real handlers, and
 honored report and nowhere in the switch handler, the settle's
 stand-down, the payer's raise.
 
-## Settings GUI & UX
-
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
 **[Rationale]**
@@ -3157,6 +3155,8 @@ target keeps today's layout placement. The frame is transient by
 ruling: the next tiled space on that screen re-tiles the window,
 and a remembered per-window float frame is a separate decision,
 ruled only if the transience shows on a device.
+
+## Settings GUI & UX
 
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom
 

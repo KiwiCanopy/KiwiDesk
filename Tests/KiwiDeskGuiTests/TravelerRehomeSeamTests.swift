@@ -13,7 +13,7 @@ struct TravelerRehomeSeamTests {
     @Test("the net runs from the retile, once")
     func theNetRunsFromTheRetile() throws {
         let sites = try SourceScan.identifierSites(
-            of: "rehomeFloatingTravelers()",
+            of: "rehomeFloatingTravelers(",
             under: Self.core
         )
         let calls = sites.filter {
@@ -29,6 +29,25 @@ struct TravelerRehomeSeamTests {
         )
     }
 
+    /// The "screen a frame mostly sits on" rule has ONE home,
+    /// shared by `TilingEngine.screen(containing:)` and the pure
+    /// decision — a second copy is where the two would drift.
+    @Test("the overlap rule has one home")
+    func theOverlapRuleHasOneHome() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "GeometryUtils.rect(",
+            under: Self.core
+        )
+        let files = Set(sites.map(\.file.lastPathComponent))
+        #expect(
+            files == ["TilingEngine+Layout.swift", "TravelerRehome.swift"],
+            .init(
+                rawValue: "expected the two consumers, found "
+                    + sites.map(\.site).joined(separator: ", ")
+            )
+        )
+    }
+
     @Test("the net asks the one predicate and the one math")
     func theNetRoutesThroughTheSeams() throws {
         let source = try SourceScan.strippedSource(
@@ -39,9 +58,20 @@ struct TravelerRehomeSeamTests {
         #expect(source.contains("EffectiveFloat.applies("))
         #expect(source.contains("TravelerRehome.target("))
         #expect(
+            source.contains("paintedStrips(forSpace: space)"),
+            "the net clamps against the RENDER space's strips"
+        )
+        #expect(
+            source.contains("commandedFrame("),
+            "the base is the commanded frame, never the echo"
+        )
+        #expect(
             !source.contains("isFloating ||")
-                && !source.contains("== .floating ||"),
-            "a NET never re-spells the float predicate (#1178)"
+                && !source.contains("== .floating"),
+            """
+            a NET never re-spells the float predicate, nor \
+            hand-checks the mode beside it (#1178)
+            """
         )
     }
 }

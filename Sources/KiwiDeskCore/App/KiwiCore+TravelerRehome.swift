@@ -3,12 +3,12 @@ import CoreGraphics
 
 /// The traveler re-home net (#1217): a floating-mode space draws
 /// no frames, so a tiled sticky traveler rendering on one from
-/// another display kept the frame its previous space gave it. A
-/// NET, so it asks `EffectiveFloat.applies` with the RENDER space
-/// as the mode arm (#1178); the math is `FloatReanchor`'s and the
-/// delivery `reanchorFloat`'s sticky arm.
+/// another display is moved onto that display from the retile,
+/// clear of the strips painted there. A NET, so it asks
+/// `EffectiveFloat.applies` with the RENDER space as the mode arm
+/// (#1178).
 extension KiwiCore {
-    func rehomeFloatingTravelers() {
+    func rehomeFloatingTravelers(animated: Bool) {
         let screens = tiler.allScreenBounds()
         guard !screens.isEmpty else { return }
         let active = state.workspaces.activeSpace
@@ -18,11 +18,7 @@ extension KiwiCore {
                     on: display
                 ),
                 let space = state.workspaces[spaceID],
-                space.mode == .floating,
-                let screen = TilingEngine.screen(
-                    for: spaceID,
-                    in: state
-                )
+                let screen = TilingEngine.screen(for: display)
             else { continue }
             let destination = tiler.visibleBounds(screen)
             let members = Set(space.windows)
@@ -36,7 +32,8 @@ extension KiwiCore {
                     onto: destination,
                     mode: space.mode,
                     screens: screens,
-                    space: spaceID
+                    space: spaceID,
+                    animated: animated
                 )
             }
         }
@@ -47,7 +44,8 @@ extension KiwiCore {
         onto destination: CGRect,
         mode: LayoutMode,
         screens: [CGRect],
-        space: SpaceID
+        space: SpaceID,
+        animated: Bool
     ) {
         guard let window = state.windows[id],
             EffectiveFloat.applies(
@@ -56,24 +54,39 @@ extension KiwiCore {
             ),
             tiler.dragExemptWindow != id
         else { return }
-        // A just-commanded frame outranks the echo-fed state one,
-        // so a retile before the echo lands compares the move
-        // already made and moves nothing twice.
-        let base = tiler.recentInstantTarget(id) ?? window.frame
+        // The commanded frame outranks the echo-fed state one, so
+        // a retile mid-flight compares the move already made.
+        let base =
+            tiler.animation.commandedFrame(
+                window: id,
+                includingHeldGlide: false
+            )
+            ?? tiler.recentInstantTarget(id)
+            ?? window.frame
         guard
-            let target = TravelerRehome.target(
+            var target = TravelerRehome.target(
                 frame: base,
                 screens: screens,
                 destination: destination,
                 scaleSize: tiler.settings.floatScaleOnDisplayChange
             )
         else { return }
+        // Clear of the strips painted for the RENDER space —
+        // the home-keyed clamp never sees a traveler (#242).
+        for (strip, edge) in paintedStrips(forSpace: space) {
+            target = AppBarGeometry.clampClear(
+                target,
+                of: strip,
+                edge: edge,
+                inset: floatRingInset
+            )
+        }
         tiler.forgetStash(id)
         tiler.applyFrame(
             id,
             from: window.frame,
             to: target,
-            animated: tiler.settings.animations.onRelayout
+            animated: animated
         )
         onLog(
             "traveler re-home: w\(id.raw) moved onto the screen of "

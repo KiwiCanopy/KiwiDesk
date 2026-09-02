@@ -1517,13 +1517,6 @@ onto its slot: the sticky one is the one that can't move, so it's
 the one that explains why.
 
 Where your macOS supports it, the sticky promise reaches across
-A **globally sticky** window follows the space you focus onto
-its screen — and when that space is in floating mode on another
-screen, KiwiDesk moves the window there at the size it last had,
-scaled to the screen (the same scaling a floating window gets
-when it crosses screens), rather than leaving it behind on the
-old screen. The next tiled space on that screen tiles it again.
-
 **macOS Desktops** too: switch Desktops and your sticky windows
 come along — sticky-everywhere and sticky-on-this-screen alike
 follow the Desktop switches of the screen they are on, and are
@@ -1533,6 +1526,13 @@ already there when you arrive. The reach has its own switch,
 Power users can pin a single window the other way with
 `override_sticky_reach` in Lua. Mission Control shows a sticky
 window on one Desktop at a time — the one you are on.
+
+A **globally sticky** window follows the space you focus onto
+its screen — and when that space is in floating mode on another
+screen, KiwiDesk moves the window there at the size it last had,
+scaled to the screen (the same scaling a floating window gets
+when it crosses screens), rather than leaving it behind on the
+old screen. The next tiled space on that screen tiles it again.
 
 Because a sticky window can look identical to a normal one,
 KiwiDesk draws a small mark in its top-right

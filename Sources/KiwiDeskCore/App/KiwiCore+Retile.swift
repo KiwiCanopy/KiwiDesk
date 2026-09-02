@@ -100,6 +100,9 @@ extension KiwiCore {
         clampFloatsClearOfBars()
         // A tiled sticky traveler on a floating-mode space of
         // another display gets no frame from the layout (#1217).
-        rehomeFloatingTravelers()
+        rehomeFloatingTravelers(
+            animated: animated
+                ?? tiler.settings.animations.onRelayout
+        )
     }
 }

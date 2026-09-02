@@ -13,10 +13,10 @@ public enum TravelerRehome {
         scaleSize: Bool
     ) -> CGRect? {
         guard
-            let source =
-                screens
-                .filter({ overlap($0, frame) > 0 })
-                .max(by: { overlap($0, frame) < overlap($1, frame) }),
+            let source = GeometryUtils.rect(
+                mostlyContaining: frame,
+                among: screens
+            ),
             source != destination
         else { return nil }
         return FloatReanchor.target(
@@ -25,13 +25,5 @@ public enum TravelerRehome {
             to: destination,
             scaleSize: scaleSize
         )
-    }
-
-    private static func overlap(
-        _ screen: CGRect,
-        _ frame: CGRect
-    ) -> CGFloat {
-        let shared = screen.intersection(frame)
-        return shared.isNull ? 0 : shared.width * shared.height
     }
 }

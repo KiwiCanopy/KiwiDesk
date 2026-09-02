@@ -98,6 +98,77 @@ struct TravelerRehomeConsumerTests {
         #expect(f.home.contains(commanded))
     }
 
+    /// The moved frame is clamped clear of the strips painted on
+    /// the RENDER screen: the home-keyed clamp never sees a
+    /// traveler, so without this arm it lands under the target's
+    /// bar (#242).
+    @Test(
+        "the moved frame clears the render screen's bar",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func movedFrameClearsTheBar() throws {
+        let f = try #require(makeFixture(mode: .floating))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        f.core.tiler.settings.spaceBarStyle.enabled = true
+        f.core.tiler.settings.spaceBarStyle.edge = .top
+        f.core.tiler.settings.spaceBarStyle.thickness = 40
+        f.core.updateSpaceBar()
+        let strip = try #require(
+            f.core.spaceBars.shownStrips.first?.1,
+            "no bar painted — the clause would pass vacuously"
+        )
+        // Sit at the very top of the other screen so the naive
+        // proportional target lands under the strip.
+        let top = CGRect(
+            x: f.other.minX + 100,
+            y: f.other.minY,
+            width: 400,
+            height: 300
+        )
+        f.core.state.apply(.windowMoved(Self.traveler, top))
+        f.core.retile(animated: false, force: true)
+        let commanded = try #require(
+            f.core.tiler.recentInstantTarget(Self.traveler)
+        )
+        #expect(commanded.minY >= strip.maxY)
+    }
+
+    /// With the relayout animation on, a retile mid-flight reads
+    /// the commanded frame, never the in-flight echo — or each
+    /// pass re-scales the traveler from wherever it currently is.
+    @Test(
+        "a retile mid-animation moves nothing twice",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func midAnimationRetileIsIdempotent() throws {
+        let f = try #require(makeFixture(mode: .floating))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        f.core.tiler.settings.animations.onRelayout = true
+        f.core.retile(animated: true, force: true)
+        let first = try #require(
+            f.core.tiler.animation.commandedFrame(
+                window: Self.traveler,
+                includingHeldGlide: false
+            )
+        )
+        #expect(first == expected(f))
+        // An in-flight echo: the window is halfway across.
+        let halfway = CGRect(
+            x: (f.frame.minX + first.minX) / 2,
+            y: (f.frame.minY + first.minY) / 2,
+            width: (f.frame.width + first.width) / 2,
+            height: (f.frame.height + first.height) / 2
+        )
+        f.core.state.apply(.windowMoved(Self.traveler, halfway))
+        f.core.retile(animated: true, force: true)
+        #expect(
+            f.core.tiler.animation.commandedFrame(
+                window: Self.traveler,
+                includingHeldGlide: false
+            ) == first
+        )
+    }
+
     @Test(
         "a traveler already on the floating space's screen stays",
         .enabled(if: NSScreen.main != nil)
