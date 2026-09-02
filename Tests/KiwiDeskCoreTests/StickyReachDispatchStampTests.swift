@@ -142,26 +142,56 @@ struct StickyReachDispatchStampTests {
         defer { teardown() }
         let box = Box()
         core.onLog = { box.lines.append($0) }
+        // A reach-off sticky window on the same screen: the
+        // display filter admits it, only the carry's verdict
+        // excludes it — the one shape that tells the stamp's
+        // own set from the reader's re-intersection
+        // (guard-prover, 2026-09-02).
+        core.state.stickyReachOverrides[w2] = false
         #expect(core.eventLoop.carriedWindows().isEmpty)
         #expect(
             core.execute("focus_desktop", args: [.number(2)]).isSuccess
         )
-        // The ∞ window renders on the active space's screen (A)
-        // and the 📌 window is homed there; the plain window and
-        // B's 📌 window are not this switch's to carry.
-        #expect(core.eventLoop.carriedWindows() == [w1, w2])
+        // The ∞ window renders on the active space's screen (A);
+        // the pinned-off 📌 window, the plain window and B's 📌
+        // window are not this switch's to carry.
+        #expect(core.eventLoop.carriedWindows() == [w1])
         // The dispatch's OWN stamp: no carry has run — the
         // handler fires on the OS notification, which no test
         // sends — so nothing was moved.
         #expect(Bridge.moves.isEmpty)
-        // The WHOLE line: a prefix match stays green when the
-        // stamp names a window the carry never ruled (guard-prover,
-        // 2026-09-02) — the reader re-intersects with the verdict,
-        // so this line is the one witness of the stamp's own set.
+        // The WHOLE line: the reader re-intersects with the
+        // verdict, so this line is the one witness of the
+        // stamp's own set.
         #expect(
             box.lines.contains(
-                "reach: in flight for the dispatched switch: w1 w2"
+                "reach: in flight for the dispatched switch: w1"
             )
+        )
+    }
+
+    /// The stamp classifies off the verb's ONE reading (profiles.md):
+    /// a target whose reading names no screen stamps nothing, even
+    /// while the live topology still holds two displays — a stamp
+    /// re-reading `NativeSpaces.allSpaces()` would stamp w1 w2 here.
+    @Test("the stamp reads the target's topology, never the live one")
+    func stampReadsTheTargetsTopology() {
+        let core = makeCore()
+        defer { teardown() }
+        let box = Box()
+        core.onLog = { box.lines.append($0) }
+        let target = KiwiCore.DesktopTarget(
+            space: 11,
+            displayIdentifier: "UUID-A",
+            originSpace: 10,
+            spaces: []
+        )
+        _ = core.switchDesktop(to: target, verb: "focus_desktop")
+        #expect(core.eventLoop.carriedWindows().isEmpty)
+        #expect(
+            !box.lines.contains {
+                $0.contains("in flight for the dispatched switch")
+            }
         )
     }
 
