@@ -57,10 +57,29 @@ struct TravelerRehomeSeamTests {
         )
         #expect(source.contains("EffectiveFloat.applies("))
         #expect(source.contains("TravelerRehome.target("))
+        guard
+            let net = SourceScan.declarationBody(
+                after: "private func rehomeTraveler",
+                in: source
+            )
+        else {
+            Issue.record("rehomeTraveler missing")
+            return
+        }
+        // Both the fit and the fallback clamp take the render
+        // arm — two `space: space` inside the net's own body, so
+        // the outer `space: spaceID` cannot satisfy this.
         #expect(
-            source.contains("floatFrameFittedClearOfBars(")
-                && source.contains("space: space"),
+            net.contains("floatFrameFittedClearOfBars(")
+                && net.components(separatedBy: "space: space")
+                    .count >= 3,
             "the net fits and clamps through the RENDER space arm"
+        )
+        // The fit is memo-gated like the home net's (#1091): an
+        // app that refused a size is not re-asked every retile.
+        #expect(
+            net.contains("shouldIssueFloatFit("),
+            "the traveler's fit consults the refusal memo"
         )
         #expect(
             source.contains("commandedFrame("),
