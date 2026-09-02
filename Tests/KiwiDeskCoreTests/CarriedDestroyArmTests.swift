@@ -116,10 +116,16 @@ struct CarriedDestroyArmTests {
         let (loop, box, own) = makeOwnLoop()
         let element = dummyElement
         // Sticky, enabled, but nothing moved it — the seam is empty.
+        // Outside the switch grace on purpose: inside it the
+        // deferred sweep also reads no census (the #1157 gate
+        // stands down there), so only here does the census read
+        // tell the eager path from a deferral. The in-grace half
+        // of "not in flight is a close" is the sweep suite's
+        // `notInFlightIsAClose`.
         loop.carriedWindows = { [] }
         loop.elements[own] = [WindowID(12): element]
         box.listed = []
-        loop.lastDesktopChange = Date()
+        loop.lastDesktopChange = .distantPast
         loop.handle(
             kAXUIElementDestroyedNotification,
             element,
