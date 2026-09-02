@@ -674,7 +674,17 @@ editing here:
   on. Nothing scans for a new bare-flag net, so each one routes
   deliberately; `EffectiveFloatTests` holds the algebra and
   `FloatingModeBarClampTests` the two consumers, each blind to
-  the other by construction.
+  the other by construction. The traveler re-home (#1217) is the
+  third net: `FloatingLayout` draws nothing, so a tiled sticky
+  traveler rendering on a floating-mode space of ANOTHER display
+  kept the frame its previous space gave it — `KiwiCore+TravelerRehome`
+  moves it onto that display from the retile, through the one
+  `FloatReanchor.target` and asking `EffectiveFloat.applies` with
+  the RENDER space as the mode arm; a same-display floating target
+  moves nothing and a tiled target keeps the layout's placement
+  (`TravelerRehomeTests`, `TravelerRehomeConsumerTests`,
+  `TravelerRehomeSeamTests`). The frame is transient by ruling:
+  the next tiled space on that screen re-tiles the traveler.
 - **Derive where a float may sit in ONE place, and bound its
   SIZE there rather than its position** (#1091). `KiwiCore.floatBounds` is that derivation — the
   display's visible bounds with every PAINTED strip carved off

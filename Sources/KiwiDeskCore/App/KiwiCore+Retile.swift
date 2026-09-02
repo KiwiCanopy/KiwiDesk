@@ -98,5 +98,8 @@ extension KiwiCore {
         // after `updateAppBar()`: the clamp reads the strips it
         // just painted (#242).
         clampFloatsClearOfBars()
+        // A tiled sticky traveler on a floating-mode space of
+        // another display gets no frame from the layout (#1217).
+        rehomeFloatingTravelers()
     }
 }

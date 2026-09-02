@@ -3132,6 +3132,32 @@ stand-down, the payer's raise.
 
 ## Settings GUI & UX
 
+### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
+
+**[Rationale]**
+
+A globally sticky window renders on the space you focus
+([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445)),
+and on a tiled space that means the layout places it — on
+whichever screen the space lives. A floating-mode space places
+nothing, so a ∞ window entering one on *another* screen kept the
+frame its previous space drew, physically on the old screen while
+the Space Bar already listed it on the new one
+([#1217](https://github.com/KiwiCanopy/KiwiDesk/issues/1217)).
+That is a correction that places a window nothing else will — the
+definition of a float *net*
+([#1178](https://github.com/KiwiCanopy/KiwiDesk/issues/1178)) —
+so it runs from the retile and asks the one float predicate with
+the render space as the space the window is judged on. The frame
+it takes is the one it last had, moved onto the target screen
+proportionally through the same re-anchor a floating window gets
+when it crosses screens, honouring the same scale setting; a
+floating space on the *same* screen moves nothing, and a tiled
+target keeps today's layout placement. The frame is transient by
+ruling: the next tiled space on that screen re-tiles the window,
+and a remembered per-window float frame is a separate decision,
+ruled only if the transience shows on a device.
+
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom
 
 **[Principle]**
