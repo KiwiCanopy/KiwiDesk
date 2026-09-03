@@ -101,6 +101,10 @@ export default defineConfig({
           items: [
             { label: "Overview", slug: "docs" },
             { label: "User Guide", slug: "docs/user-guide" },
+            {
+              label: "Spaces & Desktops",
+              slug: "docs/spaces-and-desktops",
+            },
           ],
         },
         {
