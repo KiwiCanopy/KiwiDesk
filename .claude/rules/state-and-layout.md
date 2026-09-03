@@ -241,20 +241,25 @@ editing here:
   reflection scan discovers the container; `AwayLedgerTests` ▸
   `rekeyFollows` holds the move). A prune retires all three
   records through the one `StateCoordinator.forgetAway`.
-  A reader that needs a Space's row as it WILL return takes
-  `withAwayMembers(_:of:)` — the fold's own rank insert — never
-  a hand merge; a reader keyed by app takes
+  **The ledger is reach and bookkeeping, never a bar row**
+  (#1228): the Space Bar draws the Desktop in front of the user,
+  so `spaceBarApps` reads `state.effectiveMembers` alone and a
+  new bar derivation that merges the ledger is the bug, not a
+  feature. A reader that needs a Space's row as it WILL return
+  takes `withAwayMembers(_:of:)` — the fold's own rank insert —
+  never a hand merge; a reader keyed by app takes
   `awayWindows(bundleID:)`. An entry with NO Space (a boot-found
   window nothing has filed) is UNFILED: every reader carries the
-  skip branch — the bar draws it nowhere, `awayMembers(of:)`
-  omits it, `get_state` lists it only at the top level — and a
-  new reader owes the same branch. What the ledger must never
+  skip branch — `awayMembers(of:)` omits it, `get_state` lists it
+  only at the top level — and a new reader owes the same branch. What the ledger must never
   become: a member of `space.windows` with a flag (every
   `space.windows` consumer would gain an exclusion, and the
   return-by-rank fold above would be reworked), or a reason for
   the sweep to remove anything ([accessibility.md](accessibility.md)).
   `AwayLedgerTests` pins the writers, the enders and the merge;
-  `SpaceBarAwayTests` the bar; `OpenOrFocusReachTests` the reach
+  `SpaceBarAwayTests` the bar's ABSENCE of them (#1228, with the
+  positive row assertions that keep it from passing on an empty
+  bar); `OpenOrFocusReachTests` the reach
   and the ring; `AwayBootSeedTests` the boot filing order;
   `GoneReasonEventTests` the classification through the handler.
   The ruling is on the issue and in `docs/design-decisions.md`.

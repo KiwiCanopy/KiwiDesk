@@ -3182,13 +3182,29 @@ and the choices, each argued against its alternative:
   consumer pattern — events as dirty flags plus a re-query —
   already tolerates it, and a consumer filtering on `closed` was
   otherwise never told at all.
-- **The Space Bar draws away windows exactly like present ones.**
-  Under their Space, by the rank they will return in, same
-  glyph, no dim tier, no badge, never the focus tint. The item
-  answers "what does this Space hold", and a Space holds its
-  windows wherever macOS is showing them; a dim tier already
-  means *unfocused* in the bar, and a new mark would need a
-  legend. *Hide empty Spaces* keeps a Space with away members.
+- **The Space Bar draws the Desktop in front of you — away
+  windows are absent.** There are two kinds of "not on screen
+  right now", and the bar owns only one: a window KiwiDesk
+  *parked* (it is in Space 2 while Space 1 shows) is KiwiDesk's
+  to draw and always has been, while a window sitting on another
+  macOS Desktop is macOS's business. That is exactly the
+  `windows` / `awayWindows` split, so the bar reads the visible
+  state alone. *Hide empty Spaces* hides a Space holding only
+  away windows.
+
+  Drawing them was tried first
+  ([#1146](https://github.com/KiwiCanopy/KiwiDesk/issues/1146))
+  on the reasoning that a Space holds its windows wherever macOS
+  is showing them. On device that reads as a lie: the bar is
+  always on screen, so it is taken as a picture of *here*, and a
+  glyph identical to a present one makes a click's consequence —
+  a Desktop switch — invisible. Marking them instead was refused
+  on its own terms: a dim tier already means *unfocused* in the
+  bar, and any new mark needs a legend. The knowledge is not
+  wasted — Open or Focus still reaches an away window, and the
+  place to *see* everything is an overview panel summoned
+  deliberately, not a strip that is always there
+  ([#1228](https://github.com/KiwiCanopy/KiwiDesk/issues/1228)).
 - **Open or Focus reaches an away window over the bridge, and
   owes it the focus the way a follow does.** Nothing up on a
   shown Desktop but a window up on an away one is a Desktop
