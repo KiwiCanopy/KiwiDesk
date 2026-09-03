@@ -3589,6 +3589,14 @@ profile-shaped arms. The alternative, an honest sentence for
 drift that cannot be itemised (option 2), was reserved for a
 residue that did not materialise.
 
+A drift row says what is missing and names the button that fixes
+it, in its OWN words: the header's sentences were borrowed at
+first and read as "Profile · Built-in layout — save as a profile
+to make it yours" (owner, 2026-09-03), because a header narrates
+a status line while a row narrates a change beside a label. The
+button is interpolated rather than quoted, so the row names what
+is actually on screen.
+
 Two consequences are deliberate. A stored profile's draft
 carries no drift row and summons no pill for drift: the header
 hides divergence while a profile is on the table, because the

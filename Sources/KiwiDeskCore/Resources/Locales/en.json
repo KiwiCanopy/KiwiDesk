@@ -241,6 +241,8 @@
   "destination.profiles": "Profiles",
   "destination.shortcuts": "Shortcuts",
   "destination.spaces": "Spaces",
+  "diff.drift.built_in": "No profile covers these screens — a built-in layout is arranging them. %1$@ to keep it.",
+  "diff.drift.no_match": "No saved profile covers these screens. %1$@ to keep this setup.",
   "diff.drift.profile": "Profile",
   "diff.drift.screens": "Screens",
   "diff.drift.screens.unsaved": "This screen setup isn't saved in “%1$@” yet.",

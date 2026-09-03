@@ -89,13 +89,17 @@ struct SettingsDriftRowsTests {
             SettingsDiffRowSource.rows(for: model).first
         )
         #expect(row.key == .profiles(.profilesLoad))
+        // The row's OWN sentence, naming what is missing and the
+        // button that fixes it — never the header's status line.
+        let note = try #require(row.changeNote)
+        #expect(note.contains("built-in layout"))
         #expect(
-            row.changeNote
-                == L(
-                    "profile_header.status.built_in",
-                    "Built-in layout — save as a profile to "
-                        + "make it yours."
+            note.contains(
+                L(
+                    "footer.save_as_new_profile",
+                    "Save as New Profile…"
                 )
+            )
         )
         let anchor = try #require(SettingsDiffJump.anchor(for: row))
         #expect(anchor.destination == .profiles)
@@ -114,12 +118,15 @@ struct SettingsDriftRowsTests {
             SettingsDiffRowSource.rows(for: model).first
         )
         #expect(row.key == .profiles(.profilesLoad))
+        let note = try #require(row.changeNote)
+        #expect(note.contains("No saved profile"))
         #expect(
-            row.changeNote
-                == L(
-                    "profile_header.status.no_match",
-                    "No profile matches this monitor setup."
+            note.contains(
+                L(
+                    "footer.save_as_new_profile",
+                    "Save as New Profile…"
                 )
+            )
         )
         #expect(SettingsDiffJump.anchor(for: row)?.anchor == nil)
     }
