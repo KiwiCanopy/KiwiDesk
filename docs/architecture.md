@@ -141,11 +141,12 @@ list reads per user Desktop, up and parked, nil where the symbol
 is absent), reports
 `vanished` or `closed` on that answer rather than a timer, and
 files a `vanished` window in the away ledger beside the state
-(`StateCoordinator.awayWindows`, #1146). The Space Bar draws
-the ledger's windows under their Space by rank, Open-or-Focus
-reaches one over the bridge, and a census at the Desktop settle
-— and every five seconds while the ledger is non-empty — prunes
-a window closed while away with a corrective `closed`.
+(`StateCoordinator.awayWindows`, #1146). The ledger is reach and
+bookkeeping, never a bar row — the Space Bar draws the Desktop in
+front of the user (#1228) — so Open-or-Focus reaches a ledger
+window over the bridge, and a census at the Desktop settle — and
+every five seconds while the ledger is non-empty — prunes a
+window closed while away with a corrective `closed`.
 
 ## 2. Command dispatch (`set_*` verbs)
 

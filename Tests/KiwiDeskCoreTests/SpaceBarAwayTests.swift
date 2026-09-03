@@ -3,10 +3,14 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The Space Bar draws a Space's away windows (#1146) under it,
-/// by the rank they will return in, with the same glyph as a
-/// present one — never the focus tint — and `hide_empty` keeps
-/// a Space that holds only away windows.
+/// The Space Bar draws the Desktop in front of the user (#1228):
+/// a window KiwiDesk parked is its to draw, one sitting on
+/// another macOS Desktop is macOS's and is absent — and
+/// `hide_empty` drops a Space holding only away windows.
+///
+/// Every case asserts the row that REMAINS, not just the absence:
+/// a suite expecting emptiness everywhere would pass on a bar
+/// that drew nothing at all.
 @MainActor
 @Suite("Space Bar away members")
 struct SpaceBarAwayTests {
@@ -28,6 +32,16 @@ struct SpaceBarAwayTests {
         )
     }
 
+    private func add(
+        _ core: KiwiCore,
+        _ id: UInt32,
+        app: String = "Safari",
+        to space: SpaceID
+    ) {
+        core.state.windows.upsert(window(id, app: app))
+        core.state.workspaces.add(WindowID(id), to: space)
+    }
+
     /// Files `id` as away in `space` at `rank`.
     private func park(
         _ core: KiwiCore,
@@ -47,46 +61,47 @@ struct SpaceBarAwayTests {
         core.state.departedSlots[WindowID(id)] = rank
     }
 
-    @Test("an away window draws under its Space")
-    func awayDraws() {
+    @Test("an away window is absent, its sibling draws")
+    func awayAbsentSiblingDraws() {
         let core = makeCore()
+        add(core, 1, to: "2")
         park(core, 7, in: "2", rank: 0)
-        let space = core.state.workspaces["2"]!
         let (apps, overflow, _) = core.spaceBarApps(
-            in: space,
+            in: core.state.workspaces["2"]!,
             style: core.tiler.settings.spaceBarStyle
         )
+        // Same app name: a merged away member would group with
+        // the present one and read `count == 2` here.
         #expect(apps.map(\.name) == ["Safari"])
         #expect(apps.first?.count == 1)
-        #expect(apps.first?.focused == false)
         #expect(overflow == 0)
     }
 
-    @Test("an away window groups with an adjacent present one by rank")
-    func awayGroupsByRank() {
+    @Test("an away member never splits a present run")
+    func awayNeverSplitsRun() {
         let core = makeCore()
-        for id: UInt32 in [1, 3] {
-            core.state.windows.upsert(window(id))
-            core.state.workspaces.add(WindowID(id), to: "2")
-        }
-        // Mail sits BETWEEN the two Safari windows by rank, so an
-        // appended merge would group Safari as one run of two.
+        add(core, 1, to: "2")
+        add(core, 3, to: "2")
+        // The present pair must carry ranks too, or the merge
+        // APPENDS and the split this case is named for cannot
+        // happen (guard-prover, 2026-09-03).
         core.state.departedSlots[WindowID(1)] = 0
         core.state.departedSlots[WindowID(3)] = 2
+        // Ranked BETWEEN the two, so a merge breaks the run into
+        // Safari · Mail · Safari.
         park(core, 2, app: "Mail", in: "2", rank: 1)
-        park(core, 4, in: "2", rank: 3)
-        let space = core.state.workspaces["2"]!
         let (apps, _, _) = core.spaceBarApps(
-            in: space,
+            in: core.state.workspaces["2"]!,
             style: core.tiler.settings.spaceBarStyle
         )
-        #expect(apps.map(\.name) == ["Safari", "Mail", "Safari"])
-        #expect(apps.map(\.count) == [1, 1, 2])
+        #expect(apps.map(\.name) == ["Safari"])
+        #expect(apps.map(\.count) == [2])
     }
 
-    @Test("hide_empty keeps a Space whose windows are all away")
-    func hideEmptyKeeps() {
+    @Test("hide_empty drops an all-away Space")
+    func hideEmptyDrops() {
         let core = makeCore()
+        core.state.workspaces.ensureSpace("3")
         var style = core.tiler.settings.spaceBarStyle
         style.hideEmpty = true
         core.tiler.settings.spaceBarStyle = style
@@ -96,44 +111,21 @@ struct SpaceBarAwayTests {
             frame: CGRect(x: 0, y: 0, width: 100, height: 100)
         )
         core.state.workspaces.upsertDisplay(display)
-        core.state.workspaces.assign(SpaceID("1"), to: display.id)
-        core.state.workspaces.assign(SpaceID("2"), to: display.id)
-        park(core, 7, in: "2", rank: 0)
+        for id in ["1", "2", "3"] as [SpaceID] {
+            core.state.workspaces.assign(id, to: display.id)
+        }
+        add(core, 1, to: "2")
+        park(core, 7, in: "3", rank: 0)
+        // The ACTIVE Space is exempt from hide_empty whatever it
+        // holds, so the pair that decides this case is 2 against
+        // 3: 2 stays on its present window, 3 goes because all it
+        // holds is on another Desktop. Asserting 1 alone would
+        // pass on a bar that drew nothing (guard-prover,
+        // 2026-09-03).
         let items = core.spaceBarItems(display: DisplayID(1), style: style)
         #expect(items.map(\.space) == ["1", "2"])
-        core.state.awayWindows[WindowID(7)] = nil
-        let pruned = core.spaceBarItems(display: DisplayID(1), style: style)
-        #expect(pruned.map(\.space) == ["1"])
-    }
-
-    @Test("a window parked while away draws nowhere, like one parked here")
-    func parkedAwayDrawsNowhere() {
-        let core = makeCore()
-        park(core, 7, in: "2", rank: 0)
-        core.state.awayWindows[WindowID(7)]?.isUp = false
-        let (apps, _, _) = core.spaceBarApps(
-            in: core.state.workspaces["2"]!,
-            style: core.tiler.settings.spaceBarStyle
+        #expect(
+            items.first { $0.space == "2" }?.apps.map(\.name) == ["Safari"]
         )
-        #expect(apps.isEmpty)
-    }
-
-    @Test("an unfiled entry draws under no Space")
-    func unfiledDrawsNowhere() {
-        let core = makeCore()
-        core.state.awayWindows[WindowID(7)] = AwayWindow(
-            id: WindowID(7),
-            pid: 100,
-            appName: "Safari",
-            appBundleID: "app.safari",
-            nativeSpace: 4
-        )
-        for id in ["1", "2"] as [SpaceID] {
-            let (apps, _, _) = core.spaceBarApps(
-                in: core.state.workspaces[id]!,
-                style: core.tiler.settings.spaceBarStyle
-            )
-            #expect(apps.isEmpty)
-        }
     }
 }

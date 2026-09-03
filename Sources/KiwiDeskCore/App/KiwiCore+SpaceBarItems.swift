@@ -73,11 +73,10 @@ extension KiwiCore {
         // item (its home's included) — so one glyph always sits
         // where the user is, instead of cloning onto every item
         // at once.
-        // Away windows join the row by rank (#1146).
-        let members = withAwayMembers(
-            state.effectiveMembers(of: space),
-            of: space.id
-        )
+        // The bar draws the Desktop in front of the user: a
+        // window KiwiDesk parked is ours to show, one sitting on
+        // another macOS Desktop is macOS's (#1228).
+        let members = state.effectiveMembers(of: space)
         // Transient overlays (a popup's AX windows, a launcher
         // panel) are dropped HERE, before grouping and the cap,
         // so no slot is reserved for a glyph nobody draws — the
@@ -85,7 +84,7 @@ extension KiwiCore {
         // (#300, #683), never a widening of tracking or of the
         // ignore gate.
         let pairs = members.compactMap { id -> (WindowID, String, Bool)? in
-            guard let member = spaceBarMember(id),
+            guard let member = state.windows[id],
                 !member.isTransientOverlay
             else { return nil }
             let isSpecial = member.isFloating || member.isSticky
@@ -127,7 +126,7 @@ extension KiwiCore {
         style: SpaceBarStyle
     ) -> SpaceBarItemView.App? {
         guard let first = group.first,
-            let member = spaceBarMember(first)
+            let member = state.windows[first]
         else { return nil }
         let name = member.appName
         let icon = NSRunningApplication(
@@ -152,7 +151,7 @@ extension KiwiCore {
                     source: .appFont
                 )
         }
-        let members = group.compactMap(spaceBarMember)
+        let members = group.compactMap { state.windows[$0] }
         return SpaceBarItemView.App(
             name: name,
             icon: icon,
