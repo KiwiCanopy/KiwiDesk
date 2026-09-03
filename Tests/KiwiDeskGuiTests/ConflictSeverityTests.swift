@@ -23,8 +23,9 @@ struct ConflictSeverityTests {
         )
     }
 
-    /// ⌘W is Close Window in `SystemShortcuts.map`; ⌃⌥⌘8 is
-    /// Invert Colors, one of the chords that ships OFF.
+    /// ⌘Space is Spotlight, a symbolic hotkey that ships ON; ⌘W
+    /// is Close Window, a register chord with no symbolic id;
+    /// ⌃⌥⌘8 is Invert Colors, one of the chords that ships OFF.
     private func conflict(
         _ combo: String,
         in others: [KeyBinding] = []
@@ -36,12 +37,24 @@ struct ConflictSeverityTests {
         )
     }
 
-    @Test("a live macOS chord reads dead")
-    func liveSystemChordIsDead() throws {
+    /// Measured 2026-09-03 (#1126): macOS answers an enabled
+    /// symbolic hotkey before the binding hears the press.
+    @Test("a live symbolic hotkey reads dead")
+    func liveSymbolicHotkeyIsDead() throws {
+        let spotlight = try #require(conflict("command+space"))
+        let severity = ConflictSeverity.of(spotlight, disabled: [])
+        #expect(severity == .dead(.spotlight))
+        #expect(severity.isDead)
+    }
+
+    /// A register chord with no symbolic id (⌘W) has no measured
+    /// press precedence, so it is a collision, never a death.
+    @Test("a register chord outside the symbolic table is reserved")
+    func hardWiredChordIsReserved() throws {
         let closeWindow = try #require(conflict("command+w"))
         let severity = ConflictSeverity.of(closeWindow, disabled: [])
-        #expect(severity == .dead(.closeWindow))
-        #expect(severity.isDead)
+        #expect(severity == .reserved(.closeWindow))
+        #expect(!severity.isDead)
     }
 
     /// The population the static set was wrong for, both ways
@@ -66,12 +79,12 @@ struct ConflictSeverityTests {
     /// being off says nothing about this chord.
     @Test("another chord's disablement does not soften this one")
     func disablementIsPerShortcut() throws {
-        let closeWindow = try #require(conflict("command+w"))
+        let spotlight = try #require(conflict("command+space"))
         let severity = ConflictSeverity.of(
-            closeWindow,
+            spotlight,
             disabled: [.invertColors, .zoomToggle]
         )
-        #expect(severity == .dead(.closeWindow))
+        #expect(severity == .dead(.spotlight))
     }
 
     /// One of two duplicate rows fires (the layer is one
@@ -130,13 +143,13 @@ struct ConflictSeverityTests {
                 disabled: []
             ) == nil
         )
-        let commandW = row("command+w", "Focus window left")
+        let commandSpace = row("command+space", "Focus window left")
         #expect(
             ConflictText.severity(
-                for: commandW,
-                in: [commandW],
+                for: commandSpace,
+                in: [commandSpace],
                 disabled: []
-            ) == .dead(.closeWindow)
+            ) == .dead(.spotlight)
         )
     }
 }

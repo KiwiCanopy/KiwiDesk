@@ -51,10 +51,13 @@ enum ConflictText {
                 )
             )
         case .dead(let shortcut):
-            // Who answers a chord both hold is UNMEASURED
-            // (plan/1126-probe-2026-09-03.md): the cost sentence
-            // waits for the press test, so this stays the
-            // shipped collision wording.
+            return L(
+                "keybinding.conflict.tooltip.system_dead",
+                "Won't work: macOS answers this shortcut first, "
+                    + "for %1$@.",
+                shortcut.localizedName
+            )
+        case .reserved(let shortcut):
             return L(
                 "keybinding.conflict.tooltip.system",
                 "Conflicts with macOS: %1$@",

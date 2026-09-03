@@ -5874,9 +5874,11 @@ frontmost while windows are being thrown between Spaces.
 than accidental (#1094).** It is tier 3's move-to-space-8 chord
 AND macOS's Invert Colors (`symbolichotkeys` id 21, read
 2026-08-29 on macOS 26.6). Unlike the Finder rows this one is not
-recoverable: `RegisterEventHotKey` fails silently against a live
-system chord, so for a user who turns Invert Colors on the row
-does nothing and says nothing. It stays bound anyway, because
+recoverable: the WindowServer delivers a press of an ENABLED
+symbolic hotkey to macOS's own handler and KiwiDesk never hears
+it (measured 2026-09-03 on ⌘Space and ⌃↑; the registration itself
+is accepted — #1126), so for a user who turns Invert Colors on
+the row does nothing and says nothing. It stays bound anyway, because
 Invert Colors ships DISABLED — dropping the row would take a
 working shortcut from everyone to spare the few who enable it —
 and because moving it is not available, the digits being space
@@ -6030,9 +6032,10 @@ on macOS 26.6 (2026-08-28), the chords whose modifiers are exactly
 out, 19), `\` (23), `D` (Dock hiding, 52) and `space` (Finder
 search, 65). So **`⌥⌘8` is a digit and it is macOS's**, which an
 earlier `4`/`5` + `7`/`8` draft of this very layer had taken for
-Grow height — dead or double-firing for every user with Zoom's
-keyboard shortcuts on, and `RegisterEventHotKey` refuses it
-silently. Zoom's three are gated on Accessibility ▸ Zoom ▸ "Use
+Grow height — dead for every user with Zoom's keyboard shortcuts
+on, since macOS answers an enabled symbolic hotkey first and the
+row is never told (#1126; the registration is accepted, which is
+why nothing said so). Zoom's three are gated on Accessibility ▸ Zoom ▸ "Use
 keyboard shortcuts to zoom" and ship off, which is exactly why a
 reputation-based enumeration missed them. `SystemShortcuts.map`
 now carries the `⌥⌘` family, so the app warns instead of the
@@ -6049,9 +6052,10 @@ would take tab switching away system-wide.
 A KiwiDesk resize verb was bound to `⌘P` — VS Code's Go to File —
 and pressed with VS Code frontmost: KiwiDesk fired and Quick Open
 did not. So the order is macOS's own chords, then KiwiDesk, then
-app menus: `RegisterEventHotKey` FAILS against a live system
-hotkey (which is why `⌥⌘8` was refused above), and WINS against an
-app's own. It matters because every collision in this section is
+app menus: a live symbolic hotkey is answered by macOS before
+KiwiDesk hears the press (measured 2026-09-03, ⌘Space and ⌃↑ —
+`RegisterEventHotKey` accepts the chord regardless, #1126), and
+KiwiDesk WINS against an app's own. It matters because every collision in this section is
 a real cost to the user rather than a theoretical one — the app
 loses the chord, silently, and the criterion below exists to rank
 which of those losses are tolerable. Never `esc`, `space`,

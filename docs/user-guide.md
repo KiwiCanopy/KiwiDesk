@@ -2753,10 +2753,10 @@ reasoning behind the shipped chords, for when you want to know
 *why* a combo is a good or a bad idea before you commit to it.
 
 **Three things can claim a chord, and they do not lose it the
-same way.** macOS itself wins outright: when a combo is already a
-live system shortcut, KiwiDesk's registration is refused by the OS
-and the row simply never fires — no error, and nothing at press
-time. KiwiDesk wins against an app's own menu shortcut: bind one,
+same way.** macOS itself wins outright: when a combo is one of
+macOS's own switched-on shortcuts, macOS answers the press before
+KiwiDesk hears it and the row simply never fires — no error, and
+nothing at press time. KiwiDesk wins against an app's own menu shortcut: bind one,
 and the app stops seeing it while KiwiDesk is running. So a
 collision with macOS costs you the KiwiDesk shortcut, and a
 collision with an app costs you the app's.

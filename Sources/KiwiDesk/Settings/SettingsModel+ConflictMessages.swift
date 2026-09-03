@@ -110,6 +110,21 @@ extension SettingsModel {
                 localized(who)
             )
         case .systemShortcut(let shortcut):
+            // A live symbolic hotkey is DEAD, measured (#1126);
+            // a register chord outside that table keeps the
+            // collision wording until its precedence is.
+            if case .dead = ConflictSeverity.of(
+                conflict,
+                disabled: disabledSystemShortcuts()
+            ) {
+                return L(
+                    "keybinding.conflict.system_dead",
+                    "Shortcut for \"%1$@\" won't work: macOS "
+                        + "answers it first, for \"%2$@\".",
+                    localized(conflict.name),
+                    shortcut.localizedName
+                )
+            }
             return L(
                 "keybinding.conflict.system",
                 "Shortcut for \"%1$@\" is conflicting with "
@@ -138,6 +153,18 @@ extension SettingsModel {
                 localized(who)
             )
         case .systemShortcut(let shortcut):
+            if case .dead = ConflictSeverity.of(
+                conflict,
+                disabled: disabledSystemShortcuts()
+            ) {
+                return L(
+                    "keybinding.conflict.bullet.system_dead",
+                    "\"%1$@\" won't work — macOS answers "
+                        + "\"%2$@\" first",
+                    localized(conflict.name),
+                    shortcut.localizedName
+                )
+            }
             return L(
                 "keybinding.conflict.bullet.system",
                 "\"%1$@\" with the macOS shortcut \"%2$@\"",

@@ -7,19 +7,24 @@ import SwiftUI
 /// machine state the GUI reads (#1105), so the severity is derived
 /// here, at the boundary, never in `KeybindingConflicts`.
 ///
-/// The precedence is measured, not folklore
-/// (`docs/design-decisions.md` ▸ "Size is not a positional
-/// verb"): `RegisterEventHotKey` FAILS against a live macOS
-/// chord, so that row never fires; a layer is one `[KeyCombo:
-/// ref]` table, so of two rows on one chord exactly one fires.
+/// The precedence is measured, not folklore (#1126, 2026-09-03):
+/// an ENABLED symbolic hotkey is answered by macOS before the
+/// binding hears the press, so that row never fires; a layer is
+/// one `[KeyCombo: ref]` table, so of two rows on one chord
+/// exactly one fires. A register chord with NO symbolic id (⌘W,
+/// ⌘Tab, …) has no measured precedence yet, so it stays a
+/// collision rather than a death.
 enum ConflictSeverity: Equatable {
-    /// macOS holds the chord and has it switched on: the
-    /// registration is refused and the row never fires.
+    /// A symbolic hotkey macOS has switched on: the press goes
+    /// to macOS and the row never fires.
     case dead(SystemShortcut)
     /// macOS holds the chord but has it switched off (the Zoom
     /// and Invert Colors families): the row works until the
     /// user turns that feature on.
     case dormant(SystemShortcut)
+    /// A register chord macOS answers outside the symbolic
+    /// table — who wins the press is unmeasured (#1126).
+    case reserved(SystemShortcut)
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
     case duplicate(String)
@@ -35,8 +40,9 @@ enum ConflictSeverity: Equatable {
     ) -> ConflictSeverity {
         switch conflict.target {
         case .systemShortcut(let shortcut):
-            return disabled.contains(shortcut)
-                ? .dormant(shortcut) : .dead(shortcut)
+            if disabled.contains(shortcut) { return .dormant(shortcut) }
+            return shortcut.symbolicHotkey == nil
+                ? .reserved(shortcut) : .dead(shortcut)
         case .otherBinding(let who):
             return .duplicate(who)
         case .unrecognized:

@@ -44,7 +44,8 @@ enum SystemShortcutEnablement {
 extension SystemShortcut {
     /// Apple's `AppleSymbolicHotKeys` id and the state macOS
     /// ships when the plist has no entry for it; nil = not a
-    /// symbolic hotkey at all (hard-wired, always on). Ids
+    /// symbolic hotkey at all — an app accelerator or a system
+    /// chord whose press precedence is UNMEASURED (#1126). Ids
     /// verified against each entry's key parameters (keycode +
     /// modifier mask), 2026-09-01, macOS 26.6.2 — an id names
     /// the FEATURE, so a user who rebinds a system chord drifts
