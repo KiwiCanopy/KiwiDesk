@@ -36,6 +36,12 @@ struct ShortcutsSection: View {
                     model.overrideBaseRows(layer: selected)
                 )
                 .environment(\.keybindingLayerName, selected)
+                // One live read per section render (#1105), so
+                // every row narrates the same verdict (#1126).
+                .environment(
+                    \.disabledSystemShortcuts,
+                    model.disabledSystemShortcuts()
+                )
                 .environmentObject(coordinator)
             }
             .onChange(of: coordinator.scrollTarget) {

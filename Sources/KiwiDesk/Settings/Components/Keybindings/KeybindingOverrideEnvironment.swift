@@ -10,7 +10,24 @@ private struct KeybindingLayerNameKey: EnvironmentKey {
     static let defaultValue = KeyLayer.defaultName
 }
 
+/// The switched-off system shortcuts (#1105), read ONCE per
+/// section render and handed down — never one read per row.
+///
+/// The empty default is NOT the shipped reading: six chords ship
+/// disabled, so a row rendered outside `ShortcutsSection` would
+/// over-report `.dead`. What keeps that unreachable is that
+/// every recorder mount descends from the one wiring site, which
+/// `ConflictRowTreatmentTests` pins (#1126).
+private struct DisabledSystemShortcutsKey: EnvironmentKey {
+    static let defaultValue: Set<SystemShortcut> = []
+}
+
 extension EnvironmentValues {
+    var disabledSystemShortcuts: Set<SystemShortcut> {
+        get { self[DisabledSystemShortcutsKey.self] }
+        set { self[DisabledSystemShortcutsKey.self] = newValue }
+    }
+
     /// Base bindings for selected layer during profile override editing; nil
     /// during live editing.
     var keybindingOverrideBase: [KeyBinding]? {

@@ -17,10 +17,11 @@ extension ApplicationsGroup {
                     ? L("shortcuts.choose_app", "Choose app…")
                     : binding.wrappedValue.label,
                 combo: binding.wrappedValue.combo,
-                conflict: ConflictText.tooltip(
+                reading: ConflictText.reading(
                     for: binding.wrappedValue,
                     in: bindings,
-                    config: model.config
+                    config: model.config,
+                    disabled: disabledSystemShortcuts
                 ),
                 preflight: { combo in
                     RecorderPreflight.rejection(

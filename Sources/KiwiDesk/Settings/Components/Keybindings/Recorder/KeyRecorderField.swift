@@ -12,7 +12,11 @@ struct KeyRecorderField: View {
     /// row announced its value as its name (#812).
     let name: String
     let combo: String
-    var conflict: String?
+    /// The conflict's tier AND its sentence, or nil where there
+    /// is none (#1126). A `let` with no default on purpose: the
+    /// memberwise init then REQUIRES it, so a new mount cannot
+    /// render the old chrome by forgetting it.
+    let reading: ConflictReading?
     /// KiwiDesk-collision check run before committing; nil commits
     /// unconditionally.
     var preflight: ((String) -> RecorderRejection?)? = nil
@@ -47,10 +51,11 @@ struct KeyRecorderField: View {
                 recordButton
                 clearButton
             }
+            deadCaption
             if let rejection = liveRejection {
                 rejectionRow(rejection)
             }
-            if let liveFeedback {
+            if let liveFeedback, showsFeedback(liveFeedback) {
                 LiveApplyCaption(feedback: liveFeedback)
             }
         }
@@ -110,9 +115,14 @@ struct KeyRecorderField: View {
         .controlSize(.regular)
         .tint(buttonTint)
         .foregroundStyle(buttonTint)
-        .modifier(RecorderButtonChrome(recording: recording))
+        .modifier(
+            RecorderButtonChrome(recording: recording, dead: isDead)
+        )
         .help(Self.recordHelp)
         .accessibilityLabel(name)
+        // The cost is announced ONCE, by the badge that precedes
+        // this button in the row (#1126) — a second copy here
+        // read the same sentence on two adjacent VoiceOver stops.
         .accessibilityValue(label)
     }
 

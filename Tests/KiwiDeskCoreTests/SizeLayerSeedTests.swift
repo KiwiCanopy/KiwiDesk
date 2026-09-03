@@ -114,11 +114,12 @@ struct SizeLayerSeedTests {
     /// "⌥⌘ is free" is a claim about macOS, not about the seed,
     /// and uniqueness *within* the seed cannot see it. An earlier
     /// draft of this layer put Grow height on `⌥⌘8`, which is
-    /// macOS's Zoom toggle — `RegisterEventHotKey` refuses it and
+    /// macOS's Zoom toggle — macOS answers that press first and
     /// says nothing, so the row would simply never fire for a
-    /// user with Zoom's keyboard shortcuts on. This holds every
-    /// seeded row against the register of reserved chords, which
-    /// now carries the ⌥⌘ family.
+    /// user with Zoom's keyboard shortcuts on (#1126: the
+    /// registration is accepted, which is why nothing said so).
+    /// This holds every seeded row against the register of
+    /// reserved chords, which now carries the ⌥⌘ family.
     @Test("No seeded row shadows a reserved macOS chord")
     func noSeededRowShadowsTheSystem() throws {
         #expect(

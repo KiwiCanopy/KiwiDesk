@@ -2753,10 +2753,10 @@ reasoning behind the shipped chords, for when you want to know
 *why* a combo is a good or a bad idea before you commit to it.
 
 **Three things can claim a chord, and they do not lose it the
-same way.** macOS itself wins outright: when a combo is already a
-live system shortcut, KiwiDesk's registration is refused by the OS
-and the row simply never fires — no error, and nothing at press
-time. KiwiDesk wins against an app's own menu shortcut: bind one,
+same way.** macOS itself wins outright: when a combo is one of
+macOS's own switched-on shortcuts, macOS answers the press before
+KiwiDesk hears it and the row simply never fires — no error, and
+nothing at press time. KiwiDesk wins against an app's own menu shortcut: bind one,
 and the app stops seeing it while KiwiDesk is running. So a
 collision with macOS costs you the KiwiDesk shortcut, and a
 collision with an app costs you the app's.
@@ -2848,7 +2848,7 @@ a committed recording — and a clear, and deleting a whole row —
 takes effect immediately: press a combo recorded in the
 runtime-active layer and it works, no Save needed, and a deleted
 row's combo stops working the moment its row disappears. A brief caption reports the exact outcome:
-"Active now", updated for an inactive layer, refused by macOS,
+"Active now", updated for an inactive layer, not granted,
 shadowed by the active profile, or unable to compile/apply. The
 change is still *unsaved*: the pill's Save persists the base
 shortcut configuration globally in `gui.json`; profile-specific
@@ -2884,6 +2884,20 @@ count collisions that cost you a working shortcut right now.
 Click the icon to read the conflict in a popover; hovering it
 shows the same sentence as a tooltip. This indicator updates
 live — no action needed to see it.
+
+A collision with a macOS shortcut that is switched on is louder,
+because that row is dead: macOS answers the press first and
+KiwiDesk never hears it. The chord is outlined in red, a caption
+under it says *Won't work: macOS answers this shortcut first, for
+Spotlight* (or whichever feature), and the banner says the same.
+A collision with a switched-off macOS shortcut keeps the quiet
+⚠️ and a tooltip saying it is off right now. A collision with a
+shortcut every app carries — ⌘W, ⌘Q, ⌘H, ⌘M — is the reverse
+case: your row works and every app loses that item's shortcut
+while it is bound, and the ⚠️ says so. Two of your own rows
+on one chord get the ⚠️ with "only one of the two will fire" — a
+layer holds one action per chord, so the other is silent until
+you clear it.
 
 When a conflict is introduced (by recording a clashing shortcut,
 adopting a hand-written config, or saving from the raw Lua

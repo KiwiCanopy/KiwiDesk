@@ -634,6 +634,25 @@ must keep:
   than re-deriving the filter; `ConflictAccessorRoutingTests`
   holds every `KiwiDesk`-tree `KeybindingConflicts.` call to its
   allow-list and pins the seam's live-default polarity.
+- **Since #1126 the row reads that same bit to pick its TIER,
+  and two obligations fall out of it.** A row surface takes the
+  disabled set from the `\.disabledSystemShortcuts` environment
+  value, wired ONCE per section render — never
+  `model.disabledSystemShortcuts()` per row, which is N+1 live
+  preference copies and lets two lines of one banner disagree.
+  And a surface narrating a system conflict picks its wording
+  through `ConflictSeverity.of` rather than re-branching on
+  `Conflict.target`, because the tier is not in the target: an
+  enabled symbolic hotkey is DEAD (macOS answers the press
+  first — measured, `docs/design-decisions.md` ▸ Shortcuts), a
+  disabled one merely dormant, and a chord every app's menus
+  carry is won by KiwiDesk with the apps paying. The tier and
+  its sentence reach a row as ONE `ConflictReading`, a `let`
+  with no default so the memberwise init requires it — two
+  parameters let a mount draw the outline without the words,
+  which is hue alone. `ConflictRowTreatmentTests` pins the
+  wiring; `ConflictSeverityTests` ▸ `classesArePartitioned`
+  holds the two chord facts disjoint.
 - **A new surfacing branch or one-line wiring decision in the
   shell joins `HomeSurfacingTests` in the same change**, keyed
   on its use site — the Monitors lesson, which this shell

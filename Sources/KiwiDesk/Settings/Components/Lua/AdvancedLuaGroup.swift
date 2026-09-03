@@ -9,6 +9,8 @@ struct AdvancedLuaGroup: View {
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)
     private var overrideBase
+    @Environment(\.disabledSystemShortcuts)
+    private var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
     private var layerName
 
@@ -52,10 +54,11 @@ struct AdvancedLuaGroup: View {
                     )
                     : binding.wrappedValue.lua,
                 combo: binding.wrappedValue.combo,
-                conflict: ConflictText.tooltip(
+                reading: ConflictText.reading(
                     for: binding.wrappedValue,
                     in: bindings,
-                    config: model.config
+                    config: model.config,
+                    disabled: disabledSystemShortcuts
                 ),
                 preflight: { combo in
                     RecorderPreflight.rejection(

@@ -1,40 +1,120 @@
 import KiwiDeskCore
 import SwiftUI
 
+/// A row's whole reading of its conflict: the tier that decides
+/// how it is DRAWN and the sentence that says it, minted
+/// together (#1126). ONE value, because two parameters let a
+/// mount pass the tier without the words — a red outline saying
+/// nothing, which is hue alone.
+struct ConflictReading: Equatable {
+    let severity: ConflictSeverity
+    let sentence: String
+}
+
 /// Keybinding conflict tooltip and localized system shortcut names (#96).
 enum ConflictText {
-    /// Tooltip text for conflicting keybinding row (`KeybindingCatalog`, #96).
+    /// The row's reading of its conflict (#1126), or nil when
+    /// the row has none. `disabled` is the section's one live
+    /// read (`\.disabledSystemShortcuts`).
+    static func severity(
+        for binding: KeyBinding,
+        in bindings: [KeyBinding],
+        disabled: Set<SystemShortcut>
+    ) -> ConflictSeverity? {
+        KeybindingConflicts.conflict(
+            for: binding,
+            in: bindings
+        ).map { ConflictSeverity.of($0, disabled: disabled) }
+    }
+
+    /// The tier and its sentence in one value — what every row
+    /// surface takes.
+    @MainActor
+    static func reading(
+        for binding: KeyBinding,
+        in bindings: [KeyBinding],
+        config: GuiConfig,
+        disabled: Set<SystemShortcut>
+    ) -> ConflictReading? {
+        guard
+            let severity = severity(
+                for: binding,
+                in: bindings,
+                disabled: disabled
+            )
+        else { return nil }
+        return ConflictReading(
+            severity: severity,
+            sentence: sentence(for: severity, config: config)
+        )
+    }
+
+    /// Tooltip text for a conflicting keybinding row — the
+    /// COST, not just the collision (#1126; `KeybindingCatalog`,
+    /// #96).
     @MainActor
     static func tooltip(
         for binding: KeyBinding,
         in bindings: [KeyBinding],
-        config: GuiConfig
+        config: GuiConfig,
+        disabled: Set<SystemShortcut>
     ) -> String? {
-        guard
-            let conflict = KeybindingConflicts.conflict(
-                for: binding,
-                in: bindings
-            )
-        else { return nil }
-        switch conflict.target {
+        reading(
+            for: binding,
+            in: bindings,
+            config: config,
+            disabled: disabled
+        )?.sentence
+    }
+
+    /// What each tier says. The argument for the tiers is
+    /// `docs/design-decisions.md` ▸ Shortcuts (#1126).
+    @MainActor
+    static func sentence(
+        for severity: ConflictSeverity,
+        config: GuiConfig
+    ) -> String {
+        switch severity {
         case .unrecognized:
             return L(
                 "keybinding.conflict.tooltip.unrecognized",
                 "Not a recognized shortcut."
             )
-        case .otherBinding(let who):
+        case .duplicate(let who):
             return L(
                 "keybinding.conflict.tooltip.other_binding",
-                "Already bound in this layer: %1$@",
+                "Also bound in this layer to %1$@ — only one "
+                    + "of the two will fire.",
                 KeybindingCatalog.localizedLabel(
                     for: who,
                     config: config
                 )
             )
-        case .systemShortcut(let shortcut):
+        case .dead(let shortcut):
+            return L(
+                "keybinding.conflict.tooltip.system_dead",
+                "Won't work: macOS answers this shortcut first, "
+                    + "for %1$@.",
+                shortcut.localizedName
+            )
+        case .shadowsApps(let shortcut):
+            return L(
+                "keybinding.conflict.tooltip.shadows_apps",
+                "Takes %1$@ away from every app while it is "
+                    + "bound here.",
+                shortcut.localizedName
+            )
+        case .reserved(let shortcut):
             return L(
                 "keybinding.conflict.tooltip.system",
                 "Conflicts with macOS: %1$@",
+                shortcut.localizedName
+            )
+        case .dormant(let shortcut):
+            return L(
+                "keybinding.conflict.tooltip.system_off",
+                "macOS reserves this shortcut for %1$@, which "
+                    + "is switched off right now.",
                 shortcut.localizedName
             )
         }

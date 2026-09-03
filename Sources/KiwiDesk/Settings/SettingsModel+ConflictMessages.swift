@@ -73,10 +73,17 @@ extension SettingsModel {
         _ conflicts: [Conflict]
     ) -> String? {
         guard let only = conflicts.first else { return nil }
+        // ONE live read for the whole banner (#1126): the set is
+        // machine state, and a read per conflict is both N+1
+        // preference copies and a chance for two lines of one
+        // banner to disagree.
+        let disabled = disabledSystemShortcuts()
         guard conflicts.count > 1 else {
-            return sentence(only)
+            return sentence(only, disabled: disabled)
         }
-        let lines = conflicts.map { "– \(bulletLine($0))" }
+        let lines = conflicts.map {
+            "– \(bulletLine($0, disabled: disabled))"
+        }
         // The separator lives HERE, not on the translatable
         // string: it was a trailing \n inside the English, and
         // `merge-keys` trims surrounding whitespace off every
@@ -91,7 +98,10 @@ extension SettingsModel {
     }
 
     /// Formats single conflict explanation sentence (#9).
-    private func sentence(_ conflict: Conflict) -> String {
+    private func sentence(
+        _ conflict: Conflict,
+        disabled: Set<SystemShortcut>
+    ) -> String {
         switch conflict.target {
         case .unrecognized:
             return L(
@@ -103,12 +113,39 @@ extension SettingsModel {
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.other_binding",
-                "Shortcut for \"%1$@\" is conflicting with "
-                    + "\"%2$@\".",
+                "Shortcut for \"%1$@\" is also bound to "
+                    + "\"%2$@\" — only one of the two will "
+                    + "fire.",
                 localized(conflict.name),
                 localized(who)
             )
         case .systemShortcut(let shortcut):
+            // A live symbolic hotkey is DEAD, measured (#1126);
+            // a register chord outside that table keeps the
+            // collision wording until its precedence is.
+            switch ConflictSeverity.of(
+                conflict,
+                disabled: disabled
+            ) {
+            case .dead:
+                return L(
+                    "keybinding.conflict.system_dead",
+                    "Shortcut for \"%1$@\" won't work: macOS "
+                        + "answers it first, for \"%2$@\".",
+                    localized(conflict.name),
+                    shortcut.localizedName
+                )
+            case .shadowsApps:
+                return L(
+                    "keybinding.conflict.system_shadows_apps",
+                    "Shortcut for \"%1$@\" takes \"%2$@\" away "
+                        + "from every app.",
+                    localized(conflict.name),
+                    shortcut.localizedName
+                )
+            case .dormant, .reserved, .duplicate, .unrecognized:
+                break
+            }
             return L(
                 "keybinding.conflict.system",
                 "Shortcut for \"%1$@\" is conflicting with "
@@ -120,7 +157,10 @@ extension SettingsModel {
     }
 
     /// Formats bullet point text for individual conflict in list.
-    private func bulletLine(_ conflict: Conflict) -> String {
+    private func bulletLine(
+        _ conflict: Conflict,
+        disabled: Set<SystemShortcut>
+    ) -> String {
         switch conflict.target {
         case .unrecognized:
             return L(
@@ -131,11 +171,34 @@ extension SettingsModel {
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.bullet.with",
-                "\"%1$@\" with \"%2$@\"",
+                "\"%1$@\" and \"%2$@\" share a shortcut — "
+                    + "only one will fire",
                 localized(conflict.name),
                 localized(who)
             )
         case .systemShortcut(let shortcut):
+            switch ConflictSeverity.of(
+                conflict,
+                disabled: disabled
+            ) {
+            case .dead:
+                return L(
+                    "keybinding.conflict.bullet.system_dead",
+                    "\"%1$@\" won't work — macOS answers "
+                        + "\"%2$@\" first",
+                    localized(conflict.name),
+                    shortcut.localizedName
+                )
+            case .shadowsApps:
+                return L(
+                    "keybinding.conflict.bullet.system_shadows_apps",
+                    "\"%1$@\" takes \"%2$@\" away from every app",
+                    localized(conflict.name),
+                    shortcut.localizedName
+                )
+            case .dormant, .reserved, .duplicate, .unrecognized:
+                break
+            }
             return L(
                 "keybinding.conflict.bullet.system",
                 "\"%1$@\" with the macOS shortcut \"%2$@\"",

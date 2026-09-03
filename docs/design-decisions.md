@@ -5708,8 +5708,21 @@ as `alt+j` and `option+j` cannot evade the block. A
 macOS system-shortcut collision instead commits with a
 persistent ⚠ — shadowing one can be intentional, and the row is
 the reference surface, warning on every registered chord whether
-macOS currently answers it or not; only the aggregate surfaces
-consult the live enabled state (the ⌃⌥⌘8 ruling below, #1105).
+macOS currently answers it or not; the aggregate surfaces consult
+the live enabled state to decide what COUNTS (the ⌃⌥⌘8 ruling
+below, #1105), and since #1126 the row reads the same bit to pick
+its TIER: a symbolic hotkey macOS has on is a dead row — outlined
+chord, worded caption, "won't work" — because the press goes to
+macOS and the row never fires (measured 2026-09-03); one macOS
+has off keeps the quiet ⚠ and says it is off; a chord every app's
+menus carry (⌘W, ⌘Q, ⌘H, ⌘M) is the reverse — KiwiDesk wins it,
+measured on ⌘W and ⌘P, so the row says every app loses that item;
+and the two system-level chords outside the table (⌘Tab, ⌥⌘Esc)
+keep the collision wording, their precedence being unmeasured. The treatment is deliberately smaller than a
+tinted row: outline plus caption already carry the fact in two
+channels, a red ground would be a new register needing its own
+inks, and a filled badge has no ink that clears 4.5:1 in both
+modes (ui-designer, 2026-09-03).
 Conflict surfaces
 (the banner and the "Assigned to…" row) re-derive from live
 bindings on every render, so fixing the conflict anywhere —
@@ -5852,8 +5865,9 @@ on it — `⌃⌥space` switches the input source
 macOS 26.6). Nothing is seeded there, and `SystemShortcuts.map`
 carries it so a user who binds it is warned rather than left with
 a silently dead hotkey (#1094). `⌘⌥` was rejected because it
-collides with always-on system shortcuts (Force Quit, Dock,
-Hide/Minimize) — **narrowed by #1075 below**, which measures the
+collides with chords macOS and every app's menus already hold
+(Force Quit, Dock, Hide/Minimize — the last two are app
+accelerators KiwiDesk would take away rather than lose, #1126) — **narrowed by #1075 below**, which measures the
 base and opens it to digits under a stated boundary.
 Directions bind the arrow keys, which never compose a character on
 any layout. The set lives in the **base `gui.json`
@@ -5874,9 +5888,11 @@ frontmost while windows are being thrown between Spaces.
 than accidental (#1094).** It is tier 3's move-to-space-8 chord
 AND macOS's Invert Colors (`symbolichotkeys` id 21, read
 2026-08-29 on macOS 26.6). Unlike the Finder rows this one is not
-recoverable: `RegisterEventHotKey` fails silently against a live
-system chord, so for a user who turns Invert Colors on the row
-does nothing and says nothing. It stays bound anyway, because
+recoverable: the WindowServer delivers a press of an ENABLED
+symbolic hotkey to macOS's own handler and KiwiDesk never hears
+it (measured 2026-09-03 on ⌘Space and ⌃↑; the registration itself
+is accepted — #1126), so for a user who turns Invert Colors on
+the row does nothing and says nothing. It stays bound anyway, because
 Invert Colors ships DISABLED — dropping the row would take a
 working shortcut from everyone to spare the few who enable it —
 and because moving it is not available, the digits being space
@@ -6030,9 +6046,10 @@ on macOS 26.6 (2026-08-28), the chords whose modifiers are exactly
 out, 19), `\` (23), `D` (Dock hiding, 52) and `space` (Finder
 search, 65). So **`⌥⌘8` is a digit and it is macOS's**, which an
 earlier `4`/`5` + `7`/`8` draft of this very layer had taken for
-Grow height — dead or double-firing for every user with Zoom's
-keyboard shortcuts on, and `RegisterEventHotKey` refuses it
-silently. Zoom's three are gated on Accessibility ▸ Zoom ▸ "Use
+Grow height — dead for every user with Zoom's keyboard shortcuts
+on, since macOS answers an enabled symbolic hotkey first and the
+row is never told (#1126; the registration is accepted, which is
+why nothing said so). Zoom's three are gated on Accessibility ▸ Zoom ▸ "Use
 keyboard shortcuts to zoom" and ship off, which is exactly why a
 reputation-based enumeration missed them. `SystemShortcuts.map`
 now carries the `⌥⌘` family, so the app warns instead of the
@@ -6049,9 +6066,10 @@ would take tab switching away system-wide.
 A KiwiDesk resize verb was bound to `⌘P` — VS Code's Go to File —
 and pressed with VS Code frontmost: KiwiDesk fired and Quick Open
 did not. So the order is macOS's own chords, then KiwiDesk, then
-app menus: `RegisterEventHotKey` FAILS against a live system
-hotkey (which is why `⌥⌘8` was refused above), and WINS against an
-app's own. It matters because every collision in this section is
+app menus: a live symbolic hotkey is answered by macOS before
+KiwiDesk hears the press (measured 2026-09-03, ⌘Space and ⌃↑ —
+`RegisterEventHotKey` accepts the chord regardless, #1126), and
+KiwiDesk WINS against an app's own. It matters because every collision in this section is
 a real cost to the user rather than a theoretical one — the app
 loses the chord, silently, and the criterion below exists to rank
 which of those losses are tolerable. Never `esc`, `space`,

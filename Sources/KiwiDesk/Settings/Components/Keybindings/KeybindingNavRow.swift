@@ -11,6 +11,8 @@ struct NavRow: View {
     private var overrideBase
     @Environment(\.keybindingLayerName)
     private var layerName
+    @Environment(\.disabledSystemShortcuts)
+    private var disabledSystemShortcuts
 
     var body: some View {
         HStack {
@@ -39,7 +41,7 @@ struct NavRow: View {
             KeyRecorderField(
                 name: command.resolvedLabel,
                 combo: index.map { bindings[$0].combo } ?? "",
-                conflict: conflict,
+                reading: reading,
                 preflight: preflight,
                 onRecord: record,
                 onClear: clear
@@ -70,12 +72,13 @@ struct NavRow: View {
         }
     }
 
-    private var conflict: String? {
+    private var reading: ConflictReading? {
         guard let index else { return nil }
-        return ConflictText.tooltip(
+        return ConflictText.reading(
             for: bindings[index],
             in: bindings,
-            config: model.config
+            config: model.config,
+            disabled: disabledSystemShortcuts
         )
     }
 
