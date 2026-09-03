@@ -4590,9 +4590,10 @@ if a display change ever makes that Desktop the main screen's.
 With the option off, or with one screen, the main screen's
 Desktop is the global one and everything reads as before.
 
-KiwiDesk never moves windows between Desktops — windows stay on
-their Desktop, and KiwiDesk manages the ones on the Desktop you're
-looking at.
+KiwiDesk moves a window between Desktops only when you ask it to,
+with `move_to_desktop` or `move_to_desktop_and_follow` above.
+Nothing else does: a window stays on its Desktop, and KiwiDesk
+arranges the ones on the Desktop you're looking at.
 
 Each Desktop the main screen shows also remembers which
 KiwiDesk space it was showing: switch away and back, and you
