@@ -3562,6 +3562,38 @@ the contrast the platform's had: the search field's accent at
 which is the floor any second one starts from. (#833, owner
 ruling 2026-08-12.)
 
+### The save pill counts what the header claims (#1197)
+
+**[Rationale]**
+
+The pill's leading readout is the ROW COUNT of the list it opens
+(owner 2026-08-10), and that list was built from the draft's
+`GuiConfig` alone. But the pill appears for `profileDirty` too —
+the live profile has no monitor set for the connected screens, a
+built-in layout is composing, the matched profile was deleted —
+and none of that is a config leaf. So the header said *Unsaved
+monitor changes*, the pill said *Unsaved changes*, and clicking
+the pill opened nothing: two surfaces reporting unsaved state
+with different ideas of what "unsaved" covers.
+
+The ruling is to **extend the diff source, not to reword the
+zero-row branch**. Drift becomes rows in the same list
+(`SettingsDiffRowSource.driftRows`), under the same predicate the
+header's ⚠ row uses, each anchored where the drift is visible —
+the Monitors fingerprints row for a screen setup the profile
+lacks, the Saved profiles card for a layout nothing has saved —
+so the popover jumps to it like any other diff row. The zero-row
+branch keeps its wording and stops being reachable while another
+surface reports unsaved state, which was the whole contradiction.
+The residue the ruling names (option 2, an honest sentence for
+drift that cannot be itemised) was not needed: every arm of the
+header's ladder has a row and an anchor.
+
+What stays deliberate: a stored profile's draft carries no drift
+row, because the header hides divergence while one is being
+edited — the drift belongs to the live target, not the profile
+on the table.
+
 ### The header search is a field, not a button that opens one
 
 **[Trade-off]**

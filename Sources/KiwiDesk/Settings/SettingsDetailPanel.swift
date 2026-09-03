@@ -210,6 +210,10 @@ enum SettingsDiffRowSource {
                 )
             )
         }
+        // Drift the header claims but no config leaf carries
+        // (#1197) — ONE list, so the footer's N is still the
+        // count of the list it opens.
+        rows += driftRows(for: model)
         return rows
     }
 

@@ -2268,7 +2268,12 @@ with context; there is no separate fourth button:
   active profile exists it writes to that profile and
   adds/refreshes the connected monitor set; it is greyed out if
   the connected screen count differs from the profile's count
-  ("this profile is for 2 screens"). When you are on a transient
+  ("this profile is for 2 screens"). A screen setup the active
+  profile has no set for is itself an unsaved change: it appears
+  in the pill's list as a **Screens** row that jumps to the
+  Monitors area, and Save takes it up with everything else — so
+  the header's *Unsaved monitor changes* and the pill's count
+  always agree. When you are on a transient
   layout or a built-in Standard, the same slot instead reads
   **Save as New Profile…** and creates a real profile from
   scratch — the naming sheet arrives pre-filled with a unique
