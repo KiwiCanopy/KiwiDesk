@@ -10,7 +10,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// a bump would rewrite every gui.json for nothing and make
     /// the previous release refuse one this build wrote. That note
     /// is the ruling `SetupBundle.currentFormat` cites.
-    public static let currentFormat = 1
+    ///
+    /// **2 (#1147)**: `profile_bindings` values became objects,
+    /// which IS a `CodingKeys` key of this file, so the step is
+    /// dead without the bump.
+    public static let currentFormat = 2
 
     public var format: Int = GuiConfig.currentFormat
     /// Active profile tiling parameters.
@@ -50,8 +54,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var floatRules: [String] = []
     /// Apps never managed (`ignore_rules`, #176).
     public var ignoreRules: [String] = []
-    /// Mission Control space number -> profile name.
-    public var profileBindings: [Int: String] = [:]
+    /// Desktop -> the profile it selects (#1147). Keyed by the
+    /// Desktop's own stamp where it carries one, so a binding
+    /// survives a renumber; by its Mission Control number where
+    /// it does not (no bridge on this macOS, or a stamp declined).
+    public var profileBindings: [DesktopKey: DesktopBinding] = [:]
     /// Keybinding modes; first is default mode.
     public var layers: [KeyLayer] = [KeyLayer.defaultLayer]
 
@@ -203,19 +210,18 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         appRules = appRules.filter { !$0.value.raw.isEmpty }
     }
 
+    /// Strict, per AGENTS.md §5: format 1's `"2": "Work"` is
+    /// rewritten once by `ConfigMigration`, never read leniently
+    /// here — a lenient reader never ends, so nothing would ever
+    /// signal that the last file carrying the retired shape is
+    /// gone.
     private func decodeProfileBindings(
         from container: KeyedDecodingContainer<CodingKeys>
-    ) throws -> [Int: String] {
-        let raw =
-            try container.decodeIfPresent(
-                [String: String].self,
-                forKey: .profileBindings
-            ) ?? [:]
-        var mapped: [Int: String] = [:]
-        for (key, value) in raw {
-            if let number = Int(key) { mapped[number] = value }
-        }
-        return mapped
+    ) throws -> [DesktopKey: DesktopBinding] {
+        try container.decodeIfPresent(
+            [DesktopKey: DesktopBinding].self,
+            forKey: .profileBindings
+        ) ?? [:]
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -227,12 +233,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(appRules, forKey: .appRules)
         try container.encode(floatRules, forKey: .floatRules)
         try container.encode(ignoreRules, forKey: .ignoreRules)
-        var bindings: [String: String] = [:]
-        for (number, name) in profileBindings {
-            bindings[String(number)] = name
-        }
         try container.encode(
-            bindings,
+            profileBindings,
             forKey: .profileBindings
         )
         try container.encode(layers, forKey: .layers)

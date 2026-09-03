@@ -55,8 +55,15 @@ extension KiwiCore {
             desktopMemory.stampAttempts.insert(space.id)
             minted[space.id] = identity
         }
-        guard !minted.isEmpty else { return snapshot }
-        return snapshot.stamping(minted)
+        let stamped =
+            minted.isEmpty ? snapshot : snapshot.stamping(minted)
+        // The re-key rides HERE rather than at each of the four
+        // callers: a binding must move to the stamp in the same
+        // reading that produced it, and a caller that forgot
+        // would leave the entry keyed by a number for the life of
+        // the session with nothing to say so (#1147).
+        reconcileDesktopBindings(in: stamped)
+        return stamped
     }
 
     /// The live stamp write — the ONE production bridge call on

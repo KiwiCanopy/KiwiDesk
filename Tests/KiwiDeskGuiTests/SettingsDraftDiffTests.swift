@@ -36,7 +36,12 @@ struct SettingsDraftDiffTests {
         config.fallbackSpace = "work"
         config.floatRules = ["Info"]
         config.ignoreRules = ["Helper"]
-        config.profileBindings = [1: "Desk"]
+        config.profileBindings = [
+            .number(1): DesktopBinding(
+                profile: "Desk",
+                desktop: 1
+            )
+        ]
         return config
     }
 

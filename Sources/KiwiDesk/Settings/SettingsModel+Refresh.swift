@@ -33,9 +33,20 @@ extension SettingsModel {
         let desktops = NativeSpaces.desktopSnapshot()
         mainDesktops = desktops.mainDisplayDesktops
         bindableDesktops = core.bindableDesktops(in: desktops)
+        // The GUI never mints (#1147): it reads the stamps the
+        // Core's own callers wrote, and a Desktop still unstamped
+        // joins under its number like everything else.
+        desktopKeys = Dictionary(
+            desktops.spaces.filter(\.isUser).compactMap { space in
+                desktops.number(of: space.id).flatMap { number in
+                    desktops.key(of: space.id).map { (number, $0) }
+                }
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
         currentDesktop = desktops.authority
         let resolved = core.profileVerdict(
-            activeDesktop: currentDesktop
+            activeDesktop: desktops.mainCurrentKey
         )
         profileResolution = ProfileResolution(
             verdict: resolved.verdict,

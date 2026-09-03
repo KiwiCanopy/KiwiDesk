@@ -8,6 +8,14 @@ import Testing
 /// (os-private-apis.md) and the topology only through
 /// `spacesOverride`, so nothing here touches the host's
 /// WindowServer. `.serialized`: both are process-global.
+///
+/// **The two clauses that assert nothing was written cannot tell
+/// a refusal from an unwired writer**, and they lean on
+/// `stampsAndFoldsIn` in this suite for that (`guard-prover`,
+/// 2026-09-03): deleting `makeCore`'s take-back of the live
+/// writer reds the positive clauses and leaves both negatives
+/// green. Read neither one on its own as covering the refusal it
+/// names.
 @MainActor
 @Suite("Desktop stamping (#1147)", .serialized)
 struct DesktopStampingTests {

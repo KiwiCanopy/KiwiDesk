@@ -35,6 +35,14 @@ public struct DesktopSnapshot: Sendable {
         NativeSpaces.key(of: space, in: spaces)
     }
 
+    /// The binding authority as a key (#1147): the Desktop the
+    /// MAIN display is showing. `authority` is the same Desktop
+    /// as a Mission Control number, which is what a row is
+    /// labelled with and never what state is filed under.
+    public var mainCurrentKey: DesktopKey? {
+        mainCurrentSpace.flatMap { key(of: $0) }
+    }
+
     /// The Desktop a key names in THIS topology, or nil while it
     /// is absent — its display unplugged, or the Desktop itself
     /// deleted. Absence is never proof it is gone for good, so a

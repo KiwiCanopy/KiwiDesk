@@ -71,7 +71,7 @@ extension KiwiCore {
     /// over, so a caller cannot pair the verdict with a second,
     /// later read of the same thing.
     public func profileVerdict(
-        activeDesktop: Int?
+        activeDesktop: DesktopKey?
     ) -> (verdict: ProfileVerdict, screens: Int) {
         let displays = state.workspaces.allDisplays
         return (
@@ -81,18 +81,25 @@ extension KiwiCore {
     }
 
     private func verdict(
-        activeDesktop: Int?,
+        activeDesktop: DesktopKey?,
         displays: [Display]
     ) -> ProfileVerdict {
         // A binding whose profile cannot be read falls THROUGH
         // to matching, exactly as the live path does — the
         // verdict must not name a profile that would fail to
         // load.
+        //
+        // The sentence names the binding's own Mission Control
+        // projection, since that is the only name for a Desktop
+        // a reader has (#1147); the lookup is by key.
         if let desktop = activeDesktop,
             let bound = desktopBindings[desktop],
-            (try? profiles.read(name: bound)) != nil
+            (try? profiles.read(name: bound.profile)) != nil
         {
-            return .boundToDesktop(name: bound, desktop: desktop)
+            return .boundToDesktop(
+                name: bound.profile,
+                desktop: bound.desktop
+            )
         }
         switch profiles.match(
             fingerprints: displays.map(\.fingerprint)

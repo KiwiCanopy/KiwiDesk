@@ -123,9 +123,10 @@ extension KiwiCore {
         // the config just (re)declared. Window-rule reconcile
         // stays deferred until this final profile wins. A
         // config load holds no switch snapshot, so it reads the
-        // authority live (#888).
+        // authority live (#888) — reading rather than stamping,
+        // the way every non-ruled caller does (#1147).
         applyDesktopBinding(
-            desktop: NativeSpaces.activeDesktopNumber()
+            for: NativeSpaces.desktopSnapshot().mainCurrentKey
         )
         defersWindowRuleReconcile = false
         // The rule owner/profile just changed: re-sync every app

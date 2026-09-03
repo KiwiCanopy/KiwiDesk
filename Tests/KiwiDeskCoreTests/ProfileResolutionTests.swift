@@ -188,14 +188,34 @@ struct MonitorChangeTests {
             "save_profile",
             args: [.string("Desk Two")]
         )
+        // The whole topology, not the number override (#1147):
+        // the verb files the binding under the Desktop the
+        // snapshot names, and the monitor-change handler looks it
+        // up the same way — an `activeDesktopNumber` pin reaches
+        // neither.
+        NativeSpaces.spacesOverride = [
+            NativeSpace(
+                id: 10,
+                displayUUID: "UUID-A",
+                isCurrent: false
+            ),
+            NativeSpace(
+                id: 11,
+                displayUUID: "UUID-A",
+                isCurrent: true
+            ),
+        ]
+        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
+        NativeSpaces.activeSpaceIDOverride = 11
+        defer {
+            NativeSpaces.spacesOverride = nil
+            NativeSpaces.mainDisplayUUIDOverride = nil
+            NativeSpaces.activeSpaceIDOverride = nil
+        }
         core.execute(
             "bind_profile_to_desktop",
             args: [.number(2), .string("Desk Two")]
         )
-        NativeSpaces.activeDesktopNumberOverride = 2
-        defer {
-            NativeSpaces.activeDesktopNumberOverride = nil
-        }
 
         core.handleMonitorChange()
         #expect(core.profiles.currentName == "Desk Two")

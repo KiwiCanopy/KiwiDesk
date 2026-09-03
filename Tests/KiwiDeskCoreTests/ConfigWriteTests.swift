@@ -46,7 +46,9 @@ private func richConfig() -> GuiConfig {
     config.appRules = ["spotify": SpaceID("music")]
     config.floatRules = ["Calculator", "Finder:Get Info"]
     config.ignoreRules = ["io.tailscale.ipn.macos"]
-    config.profileBindings = [2: "Studio"]
+    config.profileBindings = [
+        .number(2): DesktopBinding(profile: "Studio", desktop: 2)
+    ]
     config.layers = [
         KeyLayer(
             name: "default",
@@ -126,7 +128,9 @@ struct ConfigWriteTests {
                 == .floating
         )
         #expect(core.state.appRules["spotify"] == SpaceID("music"))
-        #expect(core.desktopBindings[2] == "Studio")
+        #expect(
+            core.desktopBindings[.number(2)]?.profile == "Studio"
+        )
         #expect(core.keys.icon(for: "resize") == "📐")
         let combo = KeyCombo.parse("alt+h")
         #expect(combo != nil)

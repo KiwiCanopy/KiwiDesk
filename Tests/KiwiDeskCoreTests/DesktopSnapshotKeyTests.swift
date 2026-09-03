@@ -23,11 +23,17 @@ struct DesktopSnapshotKeyTests {
                 isCurrent: true,
                 identity: stamp
             ),
+            // Carrying a stamp on purpose: with no identity on
+            // it, `key(of:)`'s own `isUser` guard and the
+            // `isUser` filter inside `number(of:in:)` are two
+            // nets in front of the same answer, and neither is
+            // provable alone (`guard-prover`, 2026-09-03).
             NativeSpace(
                 id: 9,
                 displayUUID: "MAIN",
                 isCurrent: false,
-                isUser: false
+                isUser: false,
+                identity: DesktopIdentity(raw: "STAMP-FULL")
             ),
             NativeSpace(
                 id: 4,
@@ -65,7 +71,10 @@ struct DesktopSnapshotKeyTests {
 
     /// A fullscreen or system space is no Desktop, so it files
     /// nothing — the stamping pass and every consumer read the
-    /// same `isUser` verdict (#670).
+    /// same `isUser` verdict (#670). The fixture stamps that
+    /// space so this reads the verdict rather than the numbering:
+    /// a space with no identity would answer nil through the
+    /// number filter alone.
     @Test("a non-user space keys nothing")
     func nonUserKeysNil() {
         #expect(snapshot().key(of: 9) == nil)

@@ -292,10 +292,10 @@ public final class KiwiCore {
     /// captured back on save. nil falls back to the space
     /// order's first survivor on a profile-switch reconcile.
     var fallbackSpace: SpaceID?
-    /// Profile bound per native macOS Space, keyed by the
-    /// Mission Control number (1-based). Populated by
-    /// `bind_profile_to_desktop`.
-    public internal(set) var desktopBindings: [Int: String] = [:]
+    /// Profile bound per macOS Desktop, keyed by the Desktop
+    /// itself (#1147). Populated by `bind_profile_to_desktop`.
+    public internal(set) var desktopBindings: [DesktopKey: DesktopBinding] =
+        [:]
 
     /// Log line consumer (GUI console later; syslog now) — the
     /// sink every Core seam is wired to forward *into*.

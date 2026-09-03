@@ -128,6 +128,13 @@ final class SettingsModel: ObservableObject {
     /// Bindable user Desktops snapshot (`KiwiCore.bindableDesktops`, #888).
     @Published var bindableDesktops: [Int] = []
 
+    /// Each present Desktop's durable key by its Mission Control
+    /// number (#1147) — the join a Profiles row resolves its
+    /// binding through, from the same snapshot as `mainDesktops`.
+    /// A number absent here names no Desktop right now, which is
+    /// what makes a binding on it dormant.
+    @Published var desktopKeys: [Int: DesktopKey] = [:]
+
     /// Whether this macOS drives native Desktops (#1145) — read
     /// once from the core (process-constant, so not published);
     /// gates the sticky-reach row's SURFACING (hide, never grey

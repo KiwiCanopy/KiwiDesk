@@ -144,7 +144,21 @@ struct DesktopsGroup: View {
             // `docs/design-decisions.md` bans — and the store is
             // valid and already effective, which "grey, don't
             // hide" does not describe (ui-designer, 2026-08-18).
-            if !model.mainDesktops.contains(number) {
+            //
+            // A Desktop that is not there AT ALL — its screen
+            // unplugged, or the Desktop deleted — is the same
+            // ruling one step further: the record is kept
+            // (absence is never proof it is gone), the row is
+            // labelled with the number it was last seen at, and
+            // the badge says why nothing will fire.
+            if model.desktopKeys[number] == nil {
+                BadgeChip(
+                    label: L(
+                        "desktops.absent",
+                        "not present"
+                    )
+                )
+            } else if !model.mainDesktops.contains(number) {
                 BadgeChip(
                     label: L(
                         "desktops.not_on_main",
@@ -183,19 +197,37 @@ struct DesktopsGroup: View {
         )
     }
 
-    /// Desktops to list from `ProfilesFamilyRows.desktops`.
+    /// Desktops to list from `ProfilesFamilyRows.desktops`. A
+    /// bound Desktop enters by its own last-seen NUMBER — the
+    /// projection — since a key names no row a user could read.
     private var spaceNumbers: [Int] {
         ProfilesFamilyRows.desktops(
             onMain: model.mainDesktops,
-            bound: model.config.profileBindings.keys
+            bound: model.config.profileBindings.values.map(
+                \.desktop
+            )
         )
+    }
+
+    /// The key the row's binding is filed under (#1147): the
+    /// Desktop this number names right now, else the key an
+    /// existing record already carries — a dormant Desktop's
+    /// display is unplugged and the record must stay reachable —
+    /// else the number itself, for a row about to be bound.
+    private func key(_ number: Int) -> DesktopKey {
+        if let live = model.desktopKeys[number] { return live }
+        let dormant = model.config.profileBindings.first {
+            $0.value.desktop == number
+        }
+        return dormant?.key ?? .number(number)
     }
 
     /// Available profiles for the dropdown, always including the
     /// current binding even if its file has since been deleted.
     private func options(_ number: Int) -> [String] {
         var names = model.profiles
-        if let bound = model.config.profileBindings[number],
+        if let bound = model.config.profileBindings[key(number)]?
+            .profile,
             !names.contains(bound)
         {
             names.append(bound)
@@ -205,8 +237,22 @@ struct DesktopsGroup: View {
 
     private func binding(_ number: Int) -> Binding<String?> {
         Binding(
-            get: { model.config.profileBindings[number] },
-            set: { model.config.profileBindings[number] = $0 }
+            get: {
+                model.config.profileBindings[key(number)]?.profile
+            },
+            set: { profile in
+                let slot = key(number)
+                guard let profile else {
+                    model.config.profileBindings[slot] = nil
+                    return
+                }
+                model.config.profileBindings[slot] = DesktopBinding(
+                    profile: profile,
+                    desktop: number,
+                    display: model.config.profileBindings[slot]?
+                        .display
+                )
+            }
         )
     }
 }

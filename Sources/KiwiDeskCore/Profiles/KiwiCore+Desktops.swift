@@ -24,20 +24,34 @@ extension KiwiCore {
         else {
             return .fail("expected profile name")
         }
-        desktopBindings[number] = profile
+        // A verb, not a switch: no snapshot in hand, so this is
+        // the one reading of the topology on this path — stamped,
+        // so the Desktop being bound carries an identity before
+        // anything files under it (#1147).
+        let snapshot = stampedDesktopSnapshot()
+        // The DECLARATION stays a Mission Control number — the
+        // only name for a Desktop a user has (#1149) — and the
+        // binding is FILED under whichever Desktop that number
+        // names right now. A number naming no Desktop yet files
+        // as a number and pins when that Desktop appears, which
+        // is the "takes effect when it next activates" this verb
+        // always had.
+        let desktop = snapshot.space(numbered: number)
+        desktopBindings[
+            desktop.flatMap { snapshot.key(of: $0.id) }
+                ?? .number(number)
+        ] = DesktopBinding(
+            profile: profile,
+            desktop: number,
+            display: desktop?.displayUUID
+        )
         if !profiles.list().contains(profile) {
             onLog(
                 "bind_profile_to_desktop: profile "
                     + "'\(profile)' does not exist (yet)"
             )
         }
-        // A verb, not a switch: no snapshot in hand, so this is
-        // the one reading of the topology on this path — stamped,
-        // so the Desktop being bound carries an identity before
-        // anything files under it (#1147).
-        applyDesktopBinding(
-            desktop: stampedDesktopSnapshot().authority
-        )
+        applyDesktopBinding(for: snapshot.mainCurrentKey)
         return .ok()
     }
 
@@ -64,9 +78,7 @@ extension KiwiCore {
         // The arriving Desktop, answered from the SAME snapshot
         // (#1147): its stamp where it carries one, its Mission
         // Control number where it does not.
-        let key = snapshot.mainCurrentSpace.flatMap {
-            snapshot.key(of: $0)
-        }
+        let key = snapshot.mainCurrentKey
         lastDesktopSwitch = Date()
         // A secondary display switched: the authority is a live
         // Desktop that did not move, and some OTHER display's
@@ -120,7 +132,7 @@ extension KiwiCore {
             updateAppBar()
             updateSpaceBar()
         } else {
-            applyDesktopBinding(desktop: number)
+            applyDesktopBinding(for: key)
             if let key, let target = virtualSpaceTarget(for: key) {
                 state.workspaces.activate(target)
                 oweReturningFocus(
@@ -305,22 +317,24 @@ extension KiwiCore {
     /// caller means "no authoritative Desktop", which no-ops, so
     /// the live read belongs to the no-argument convenience
     /// alone.
-    func applyDesktopBinding(desktop: Int?) {
-        guard let number = desktop,
-            let name = desktopBindings[number],
-            name != profiles.currentName
+    func applyDesktopBinding(for desktop: DesktopKey?) {
+        guard let desktop,
+            let binding = desktopBindings[desktop],
+            binding.profile != profiles.currentName
         else { return }
+        // The LOG names the number, which is the only name for a
+        // Desktop the user has; the lookup above never does.
         do {
-            let profile = try profiles.load(name: name)
+            let profile = try profiles.load(name: binding.profile)
             apply(profile: profile, forceRetile: false)
             onLog(
-                "Desktop \(number): loaded profile "
-                    + "'\(name)'"
+                "Desktop \(binding.desktop): loaded profile "
+                    + "'\(binding.profile)'"
             )
         } catch {
             onLog(
-                "Desktop \(number): cannot load "
-                    + "profile '\(name)': \(error)"
+                "Desktop \(binding.desktop): cannot load "
+                    + "profile '\(binding.profile)': \(error)"
             )
         }
     }

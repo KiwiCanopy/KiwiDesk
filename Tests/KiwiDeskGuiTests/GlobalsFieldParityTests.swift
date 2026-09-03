@@ -32,7 +32,12 @@ struct GlobalsFieldParityTests {
         config.appRules = ["com.example.app": SpaceID("beta")]
         config.floatRules = ["com.example.floaty"]
         config.ignoreRules = ["com.example.ignored"]
-        config.profileBindings = [3: "Desk"]
+        config.profileBindings = [
+            .number(3): DesktopBinding(
+                profile: "Desk",
+                desktop: 3
+            )
+        ]
         config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,

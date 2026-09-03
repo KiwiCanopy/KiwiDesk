@@ -43,7 +43,12 @@ struct GuiConfigParityTests {
         config.appRules = ["Mail": SpaceID("a")]
         config.floatRules = ["Calculator"]
         config.ignoreRules = ["io.tailscale.ipn.macos"]
-        config.profileBindings = [2: "Studio"]
+        config.profileBindings = [
+            .number(2): DesktopBinding(
+                profile: "Studio",
+                desktop: 2
+            )
+        ]
         config.layers = [
             KeyLayer(
                 name: "default",

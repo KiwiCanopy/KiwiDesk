@@ -23,22 +23,29 @@ extension SettingsValueReadout {
         }
     }
 
-    /// One row per re-bound native Space, valued by profile
-    /// name with the unset dash for a binding that appeared or
-    /// was cleared.
+    /// One row per re-bound Desktop, valued by profile name with
+    /// the unset dash for a binding that appeared or was cleared.
+    ///
+    /// Diffed by KEY and NARRATED by the number each record was
+    /// last seen at (#1147) — a key is not a name any reader has,
+    /// and two keys for one number cannot happen: the row's own
+    /// resolve files under exactly one.
     private static func profilesBindingRows(
         _ census: SettingKey,
-        old: [Int: String],
-        new: [Int: String]
+        old: [DesktopKey: DesktopBinding],
+        new: [DesktopKey: DesktopBinding]
     ) -> [SettingsDiffRow] {
         let base = L(
             "diff.label.profile_binding",
             "Profile binding"
         )
         let touched = Set(old.keys).union(new.keys)
-            .filter { old[$0] != new[$0] }
-            .sorted()
-        return touched.map { number in
+            .filter { old[$0]?.profile != new[$0]?.profile }
+            .map { key in
+                (key, new[key]?.desktop ?? old[key]?.desktop ?? 0)
+            }
+            .sorted { $0.1 < $1.1 }
+        return touched.map { key, number in
             // The area's own per-instance frame, reused so the
             // diff names a native Space exactly the way the
             // Profiles rows do (#768: macOS's are Desktops).
@@ -51,8 +58,8 @@ extension SettingsValueReadout {
                 census,
                 instance: String(number),
                 label: instanceLabel(base, desktop),
-                old: old[number] ?? unset,
-                new: new[number] ?? unset
+                old: old[key]?.profile ?? unset,
+                new: new[key]?.profile ?? unset
             )
         }
     }
