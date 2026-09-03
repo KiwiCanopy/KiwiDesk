@@ -905,7 +905,6 @@
   "profiles.which_loads.none": "In questo momento: %1$@ → nessun profilo e nessun layout predefinito corrispondono.",
   "profiles.which_loads.placement_only": "In questo momento: %1$@ → la tua configurazione Lua mantiene il layout; il %2$@ predefinito dispone solo gli spazi sugli schermi.",
   "profiles.which_loads.placement_only_profile": "In questo momento: %1$@ → %2$@ mantiene il layout; il %3$@ predefinito dispone solo gli spazi sugli schermi.",
-  "profiles.which_loads.rule": "Un profilo associato alla Scrivania attiva viene caricato per primo. Altrimenti KiwiDesk sceglie il profilo il cui numero di schermi corrisponde, preferendo quello segnato come predefinito.",
   "profiles.which_loads.standard": "In questo momento: %1$@ → il %2$@ predefinito (nessun profilo salvato corrisponde).",
   "profiles.which_loads.title": "Quale profilo viene caricato",
   "resize.boundary_reached": "Non c'è più posto per aumentare la dimensione",

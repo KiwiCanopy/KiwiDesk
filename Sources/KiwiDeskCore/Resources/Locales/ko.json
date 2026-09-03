@@ -905,7 +905,6 @@
   "profiles.which_loads.none": "현재: %1$@ → 일치하는 프로필 및 내장 레이아웃 없음.",
   "profiles.which_loads.placement_only": "현재: %1$@ → 사용자의 Lua 설정이 레이아웃을 유지하며, 내장된 %2$@은(는) 공간을 화면에 배치하기만 합니다.",
   "profiles.which_loads.placement_only_profile": "현재: %1$@ → %2$@이(가) 레이아웃을 유지하며, 내장된 %3$@은(는) 공간을 화면에 배치하기만 합니다.",
-  "profiles.which_loads.rule": "활성 데스크탑에 바인딩된 프로필이 먼저 로드됩니다. 그렇지 않으면 KiwiDesk는 화면 수가 일치하는 프로필을 선택하며, 기본값으로 표시된 프로필을 선호합니다.",
   "profiles.which_loads.standard": "현재: %1$@ → 내장된 %2$@ (일치하는 저장된 프로필 없음).",
   "profiles.which_loads.title": "로드되는 프로필",
   "resize.boundary_reached": "더 늘릴 자리가 없습니다",

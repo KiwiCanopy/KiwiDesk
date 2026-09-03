@@ -905,7 +905,6 @@
   "profiles.which_loads.none": "当前：%1$@ → 没有匹配的描述文件或内置布局。",
   "profiles.which_loads.placement_only": "当前：%1$@ → 你的 Lua 配置保持布局；内置 %2$@ 仅在屏幕上布置空间。",
   "profiles.which_loads.placement_only_profile": "当前：%1$@ → %2$@ 保持布局；内置 %3$@ 仅在屏幕上布置空间。",
-  "profiles.which_loads.rule": "绑定到活动桌面的描述文件优先载入。否则 KiwiDesk 会选择显示器数量匹配的描述文件，并优先选择标记为默认的那个。",
   "profiles.which_loads.standard": "当前：%1$@ → 内置 %2$@（没有匹配的已保存描述文件）。",
   "profiles.which_loads.title": "哪个描述文件会载入",
   "resize.boundary_reached": "已无增大尺寸的余地",

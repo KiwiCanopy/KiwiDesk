@@ -905,7 +905,6 @@
   "profiles.which_loads.none": "Actuellement : %1$@ → aucun profil ni disposition intégrée ne correspond.",
   "profiles.which_loads.placement_only": "Actuellement : %1$@ → votre config Lua conserve la disposition ; la disposition intégrée %2$@ ne fait que placer les espaces sur les écrans.",
   "profiles.which_loads.placement_only_profile": "Actuellement : %1$@ → %2$@ conserve la disposition ; la disposition intégrée %3$@ ne fait que placer les espaces sur les écrans.",
-  "profiles.which_loads.rule": "Un profil associé au Bureau actif se charge en premier. Sinon, KiwiDesk choisit le profil dont le nombre d'écrans correspond, en préférant celui marqué par défaut.",
   "profiles.which_loads.standard": "Actuellement : %1$@ → la disposition intégrée %2$@ (aucun profil enregistré ne correspond).",
   "profiles.which_loads.title": "Quel profil se charge",
   "resize.boundary_reached": "Plus de place pour agrandir",

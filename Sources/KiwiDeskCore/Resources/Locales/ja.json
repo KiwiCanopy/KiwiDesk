@@ -905,7 +905,6 @@
   "profiles.which_loads.none": "現在: %1$@ → 一致するプロファイルおよび組み込みレイアウトはありません。",
   "profiles.which_loads.placement_only": "現在: %1$@ → Lua設定がレイアウトを保持します。組み込みの%2$@はスペースを画面に配置するだけです。",
   "profiles.which_loads.placement_only_profile": "現在: %1$@ → %2$@がレイアウトを保持します。組み込みの%3$@はスペースを画面に配置するだけです。",
-  "profiles.which_loads.rule": "アクティブなデスクトップに割り当てられたプロファイルが最優先で読み込まれます。それ以外の場合、KiwiDeskは画面数が一致するプロファイルを選択し、デフォルトに指定されたものを優先します。",
   "profiles.which_loads.standard": "現在: %1$@ → 組み込みの%2$@（一致する保存済みプロファイルなし）。",
   "profiles.which_loads.title": "読み込まれるプロファイル",
   "resize.boundary_reached": "これ以上広げる余地がありません",

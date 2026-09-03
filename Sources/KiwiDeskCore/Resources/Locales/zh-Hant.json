@@ -905,7 +905,6 @@
   "profiles.which_loads.none": "目前：%1$@ → 沒有相符的描述檔或內建佈局。",
   "profiles.which_loads.placement_only": "目前：%1$@ → 你的 Lua 設定保持佈局；內建 %2$@ 僅在螢幕上放置空間。",
   "profiles.which_loads.placement_only_profile": "目前：%1$@ → %2$@ 保持佈局；內建 %3$@ 僅在螢幕上放置空間。",
-  "profiles.which_loads.rule": "綁定至使用中桌面的描述檔優先載入。否則 KiwiDesk 選擇螢幕數量相符的描述檔，並優先選擇標記為預設的描述檔。",
   "profiles.which_loads.standard": "目前：%1$@ → 內建 %2$@（沒有相符的已儲存描述檔）。",
   "profiles.which_loads.title": "哪個描述檔會載入",
   "resize.boundary_reached": "已無增加尺寸的餘地",

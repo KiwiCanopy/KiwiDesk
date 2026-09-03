@@ -905,7 +905,6 @@
   "profiles.which_loads.none": "Ahora mismo: %1$@ → ningún perfil ni diseño integrado coinciden.",
   "profiles.which_loads.placement_only": "Ahora mismo: %1$@ → tu configuración de Lua mantiene el diseño; el %2$@ integrado solo coloca espacios en pantallas.",
   "profiles.which_loads.placement_only_profile": "Ahora mismo: %1$@ → %2$@ mantiene el diseño; el %3$@ integrado solo coloca espacios en pantallas.",
-  "profiles.which_loads.rule": "El perfil asignado al Escritorio activo se carga primero. De lo contrario, KiwiDesk elige el perfil cuyo número de pantallas coincida, prefiriendo el marcado como predeterminado.",
   "profiles.which_loads.standard": "Ahora mismo: %1$@ → el %2$@ integrado (ningún perfil guardado coincide).",
   "profiles.which_loads.title": "Qué perfil se carga",
   "resize.boundary_reached": "No queda sitio para agrandar",

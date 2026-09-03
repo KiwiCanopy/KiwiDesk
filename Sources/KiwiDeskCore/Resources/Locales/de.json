@@ -905,7 +905,6 @@
   "profiles.which_loads.none": "Aktuell: %1$@ → kein Profil und kein integriertes Layout passt.",
   "profiles.which_loads.placement_only": "Aktuell: %1$@ → deine Lua-Konfiguration behält das Layout; das integrierte %2$@ verteilt nur Spaces auf Bildschirme.",
   "profiles.which_loads.placement_only_profile": "Aktuell: %1$@ → %2$@ behält das Layout; das integrierte %3$@ verteilt nur Spaces auf Bildschirme.",
-  "profiles.which_loads.rule": "Ein an den aktiven Schreibtisch gebundenes Profil wird zuerst geladen. Andernfalls wählt KiwiDesk das Profil mit passender Bildschirmanzahl und bevorzugt das als Standard markierte.",
   "profiles.which_loads.standard": "Aktuell: %1$@ → das integrierte %2$@ (kein gespeichertes Profil passt).",
   "profiles.which_loads.title": "Welches Profil geladen wird",
   "resize.boundary_reached": "Kein Platz mehr zum Vergrößern",
