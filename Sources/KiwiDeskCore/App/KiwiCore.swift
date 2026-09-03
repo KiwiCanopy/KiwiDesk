@@ -269,10 +269,10 @@ public final class KiwiCore {
     /// it sent away (#1007) — the type doc carries the argument.
     let followFocus = FollowFocusIntent()
 
-    /// The MAIN display's current native Desktop (Mission
-    /// Control number, #888) — the binding authority — and the
-    /// per-display Space memory restored on returning to one.
-    var lastDesktop: Int?
+    /// The MAIN display's current native Desktop (#888) — the
+    /// binding authority, and the per-Desktop Space memory
+    /// restored on returning to one. Keyed, not numbered (#1147).
+    var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
     /// When the last native desktop switch happened; focus
     /// events during the transition must not change spaces.

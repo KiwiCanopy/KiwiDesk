@@ -147,6 +147,23 @@ public enum NativeSpaces {
             .map { $0 + 1 }
     }
 
+    /// The durable key `id` files under (#1147) — the array
+    /// form of `DesktopSnapshot.key(of:)`, for a caller holding
+    /// the topology rather than a snapshot. Both spell the
+    /// verdict once, here.
+    public static func key(
+        of id: SkyLight.SpaceID,
+        in spaces: [NativeSpace]
+    ) -> DesktopKey? {
+        guard let native = spaces.first(where: { $0.id == id }),
+            native.isUser
+        else { return nil }
+        if let identity = native.identity {
+            return .identity(identity)
+        }
+        return number(of: id, in: spaces).map(DesktopKey.number)
+    }
+
     /// Whether space is a regular user desktop (#670).
     public static func isUserSpace(
         _ id: SkyLight.SpaceID,

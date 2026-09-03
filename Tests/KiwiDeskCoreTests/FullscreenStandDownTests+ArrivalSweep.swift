@@ -74,7 +74,7 @@ extension FullscreenStandDownTests {
         defer { NativeSpaces.activeSpaceIsUserOverride = nil }
         // A superseded settle (rapid switches) does nothing,
         // the sweep included.
-        core.desktopSettle(ifStill: (core.lastDesktop ?? 0) + 1)
+        core.desktopSettle(ifStill: .number(9_999))
         #expect(box.queried.isEmpty)
         core.desktopSettle(ifStill: core.lastDesktop)
         #expect(box.queried == [showing])

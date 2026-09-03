@@ -3,8 +3,13 @@ import Foundation
 /// Per-display native Desktop bookkeeping for Space switching (#888).
 @MainActor
 final class DesktopMemory {
-    /// Remembered Space ID per native Desktop number and display UUID.
-    var virtualSpaces: [String: [Int: SpaceID]] = [:]
+    /// The Space each Desktop was last showing, keyed by the
+    /// Desktop itself (#1147). It was keyed by (main display
+    /// UUID, Mission Control number) until a `DesktopKey` could
+    /// name the Desktop: the partition existed because a number
+    /// means nothing without saying whose numbering it is, and
+    /// an identity means the same thing on every arrangement.
+    var virtualSpaces: [DesktopKey: SpaceID] = [:]
 
     /// Each space's last honored focus per native Space it was
     /// honored ON (#1207) — written at the focus report, never by

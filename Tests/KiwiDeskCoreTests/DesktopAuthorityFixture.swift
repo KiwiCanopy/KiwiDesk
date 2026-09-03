@@ -53,13 +53,15 @@ func authoritySpace(
     _ id: UInt64,
     display: String,
     current: Bool = false,
-    isUser: Bool = true
+    isUser: Bool = true,
+    identity: DesktopIdentity? = nil
 ) -> NativeSpace {
     NativeSpace(
         id: id,
         displayUUID: display,
         isCurrent: current,
-        isUser: isUser
+        isUser: isUser,
+        identity: identity
     )
 }
 

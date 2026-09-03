@@ -150,9 +150,6 @@ extension KiwiCore {
             eventLoop.runningApplications().map { ($0.pid, $0.ref) },
             uniquingKeysWith: { first, _ in first }
         )
-        let key = Self.virtualSpaceMemoryKey(
-            mainUUID: NativeSpaces.mainDisplayUUID()
-        )
         var seeded = 0
         for (id, host) in census.hosts.sorted(by: {
             $0.key.raw < $1.key.raw
@@ -173,8 +170,8 @@ extension KiwiCore {
                 isUp: host.isUp
             )
             if state.rememberedSpace(of: id) == nil,
-                let number = NativeSpaces.number(of: host.space, in: spaces),
-                let space = desktopMemory.virtualSpaces[key]?[number],
+                let key = NativeSpaces.key(of: host.space, in: spaces),
+                let space = desktopMemory.virtualSpaces[key],
                 state.workspaces[space] != nil
             {
                 state.remember(id, in: space)

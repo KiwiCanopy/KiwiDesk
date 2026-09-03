@@ -36,7 +36,7 @@ struct SecondarySwitchTests {
             args: [.number(1), .string("Bound")]
         )
         core.execute("load_profile", args: [.string("Loaded")])
-        core.lastDesktop = 1
+        core.lastDesktop = .number(1)
         core.desktopMemory.lastDisplaySpaces = [
             "UUID-A": 10, "UUID-B": 20,
         ]
@@ -78,8 +78,7 @@ struct SecondarySwitchTests {
         // And the outgoing Desktop remembered its Space, keyed
         // under the main display.
         #expect(
-            core.desktopMemory.virtualSpaces["UUID-A"]?[1]
-                != nil
+            core.desktopMemory.virtualSpaces[.number(1)] != nil
         )
     }
 
@@ -95,14 +94,14 @@ struct SecondarySwitchTests {
     /// handler and `desktopSettle` stand down. Same shape
     /// without SkyLight, where every switch answers nil. That is
     /// the #670 conflation: the fullscreen verdict is `isUser`,
-    /// never the nil Mission Control number.
+    /// never the nil Desktop.
     @Test("The secondary verdict, including its nil case")
     func secondaryVerdict() {
         // A secondary display moved while the authority held.
         #expect(
             KiwiCore.isSecondarySwitch(
-                authority: 1,
-                lastAuthority: 1,
+                authority: .number(1),
+                lastAuthority: .number(1),
                 changed: ["UUID-B"],
                 mainUUID: "UUID-A"
             )
@@ -111,8 +110,8 @@ struct SecondarySwitchTests {
         // though it also changed a Space.
         #expect(
             !KiwiCore.isSecondarySwitch(
-                authority: 2,
-                lastAuthority: 1,
+                authority: .number(2),
+                lastAuthority: .number(1),
                 changed: ["UUID-A"],
                 mainUUID: "UUID-A"
             )
@@ -120,8 +119,8 @@ struct SecondarySwitchTests {
         // Nothing diffed — a repeated notification.
         #expect(
             !KiwiCore.isSecondarySwitch(
-                authority: 1,
-                lastAuthority: 1,
+                authority: .number(1),
+                lastAuthority: .number(1),
                 changed: [],
                 mainUUID: "UUID-A"
             )
@@ -136,8 +135,8 @@ struct SecondarySwitchTests {
         // 2026-08-18).
         #expect(
             !KiwiCore.isSecondarySwitch(
-                authority: 1,
-                lastAuthority: 1,
+                authority: .number(1),
+                lastAuthority: .number(1),
                 changed: ["UUID-A"],
                 mainUUID: "UUID-A"
             )
@@ -154,11 +153,11 @@ struct SecondarySwitchTests {
             )
         )
         // And nil never counts as "unchanged" against a live
-        // previous number either.
+        // previous Desktop either.
         #expect(
             !KiwiCore.isSecondarySwitch(
                 authority: nil,
-                lastAuthority: 1,
+                lastAuthority: .number(1),
                 changed: ["UUID-B"],
                 mainUUID: "UUID-A"
             )

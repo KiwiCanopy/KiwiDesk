@@ -229,18 +229,16 @@ struct DesktopBindingTests {
 
     @Test("Desktops restore their last virtual space")
     func virtualSpaceMemory() {
-        // Pin the memory key (#888): the real key is the host's
-        // main-display UUID.
-        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
-        defer { NativeSpaces.mainDisplayUUIDOverride = nil }
         let core = makeCore()
         core.state.workspaces.ensureSpace(SpaceID(2))
         // Unknown desktop: default to the first space.
-        #expect(core.virtualSpaceTarget(for: 3) == SpaceID(1))
-        core.desktopMemory.virtualSpaces["UUID-A"] = [
-            3: SpaceID(2)
-        ]
-        #expect(core.virtualSpaceTarget(for: 3) == SpaceID(2))
+        #expect(
+            core.virtualSpaceTarget(for: .number(3)) == SpaceID(1)
+        )
+        core.desktopMemory.virtualSpaces[.number(3)] = SpaceID(2)
+        #expect(
+            core.virtualSpaceTarget(for: .number(3)) == SpaceID(2)
+        )
     }
 
     @Test("Invalid arguments fail")

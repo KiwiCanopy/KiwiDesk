@@ -61,47 +61,52 @@ extension KiwiCore {
         // question below is still answered from this ONE reading.
         let snapshot = stampedDesktopSnapshot()
         let number = snapshot.authority
+        // The arriving Desktop, answered from the SAME snapshot
+        // (#1147): its stamp where it carries one, its Mission
+        // Control number where it does not.
+        let key = snapshot.mainCurrentSpace.flatMap {
+            snapshot.key(of: $0)
+        }
         lastDesktopSwitch = Date()
         // A secondary display switched: the authority is a live
-        // number that did not move, and some OTHER display's
+        // Desktop that did not move, and some OTHER display's
         // current Space did. Both halves are read from the ONE
         // snapshot, so no mode read and no display count is
         // needed — shared mode carries one managed display, which
         // cannot produce an "other display" diff, and a single
         // display cannot either.
         //
-        // `number != nil` is load-bearing: `nil == nil` is
+        // `key != nil` is load-bearing: `nil == nil` is
         // satisfied by a main display sitting on a
         // fullscreen/system space AND by SkyLight being
         // unavailable, which is exactly the conflation #670 bans
         // deciding on (state-and-layout.md — the verdict is
-        // `isUser`, never the nil number). Nil falls through to
+        // `isUser`, never the nil Desktop). Nil falls through to
         // the main arm, whose fullscreen branch stands down the
         // way it did before #888 (review, 2026-08-18).
         let changed = switchedDisplays(in: snapshot)
         let secondarySwitch = Self.isSecondarySwitch(
-            authority: number,
+            authority: key,
             lastAuthority: lastDesktop,
             changed: changed,
             mainUUID: snapshot.mainUUID
         )
-        // Every question below is answered from `snapshot` — the
-        // memory key included, so the Space a Desktop is
-        // remembered under and the Desktop that was
-        // authoritative come from ONE reading (review round 2).
-        let memoryKey = Self.virtualSpaceMemoryKey(
-            mainUUID: snapshot.mainUUID
-        )
-        if let last = lastDesktop, last != number,
+        // Every question below is answered from `snapshot`, so
+        // the Space a Desktop is remembered under and the Desktop
+        // that was authoritative come from ONE reading (review
+        // round 2).
+        //
+        // The Desktop being LEFT is not resolved here at all: its
+        // key was taken from the snapshot of the switch that
+        // ARRIVED on it, and re-deriving it from a number in the
+        // topology we have already left is the renumber #1147
+        // closes.
+        if let leaving = lastDesktop, leaving != key,
             let active = state.workspaces.activeSpace
         {
-            rememberVirtualSpace(
-                active,
-                leaving: last,
-                key: memoryKey
-            )
+            rememberVirtualSpace(active, leaving: leaving)
         }
-        lastDesktop = number
+        lastDesktop = key
         if secondarySwitch {
             // A secondary display's Desktop switched: the
             // binding authority is unmoved, so the profile and
@@ -116,12 +121,7 @@ extension KiwiCore {
             updateSpaceBar()
         } else {
             applyDesktopBinding(desktop: number)
-            if let number,
-                let target = virtualSpaceTarget(
-                    for: number,
-                    key: memoryKey
-                )
-            {
+            if let key, let target = virtualSpaceTarget(for: key) {
                 state.workspaces.activate(target)
                 oweReturningFocus(
                     for: target,
@@ -162,11 +162,11 @@ extension KiwiCore {
         // the ONE snapshot (profiles.md); the settle is the net.
         refreshStickyReach(spaces: snapshot.spaces)
         emitDesktopChange(snapshot, changed: changed)
-        settleAfterDesktopSwitch(number)
+        settleAfterDesktopSwitch(key)
     }
 
     /// Whether this switch belongs to a secondary display: the
-    /// authority is a live number that did not move, and some
+    /// authority is a live Desktop that did not move, and some
     /// display OTHER than the main one changed its Space.
     ///
     /// A pure decision, so it is assertable without a
@@ -179,14 +179,14 @@ extension KiwiCore {
     /// fullscreen/system space AND by SkyLight being unavailable,
     /// which is the conflation #670 bans deciding on
     /// (state-and-layout.md: the fullscreen verdict is `isUser`,
-    /// never the nil Mission Control number). Without it, a
+    /// never the nil Desktop). Without it, a
     /// fullscreen main display took this arm and force-retiled
     /// where the pre-#888 handler — and `desktopSettle` —
     /// deliberately stand down, and a host without SkyLight
     /// force-retiled on every switch (review, 2026-08-18).
     static func isSecondarySwitch(
-        authority: Int?,
-        lastAuthority: Int?,
+        authority: DesktopKey?,
+        lastAuthority: DesktopKey?,
         changed: [String],
         mainUUID: String?
     ) -> Bool {
@@ -223,19 +223,19 @@ extension KiwiCore {
     /// task either no-op'd on the `lastDesktop` guard or
     /// (switch away and back inside the delay) fired an early
     /// settle mid-reconcile — and `stop()` can now cancel it.
-    private func settleAfterDesktopSwitch(_ number: Int?) {
+    private func settleAfterDesktopSwitch(_ desktop: DesktopKey?) {
         deferred.schedule(
             .desktopSettle,
             after: .milliseconds(600)
         ) { [weak self] in
-            self?.desktopSettle(ifStill: number)
+            self?.desktopSettle(ifStill: desktop)
         }
     }
 
     /// The settle body, split out so tests can fire it without
     /// waiting out the 600 ms schedule.
-    func desktopSettle(ifStill number: Int?) {
-        guard lastDesktop == number else { return }
+    func desktopSettle(ifStill desktop: DesktopKey?) {
+        guard lastDesktop == desktop else { return }
         // The switch's `reconcileAll` is census-gated (#1037),
         // and that census can beat the compositor: a window
         // still landing when the notification fired was on no

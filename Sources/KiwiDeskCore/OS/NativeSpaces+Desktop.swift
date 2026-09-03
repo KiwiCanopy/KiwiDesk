@@ -32,13 +32,7 @@ public struct DesktopSnapshot: Sendable {
     /// Control number. Nil for a space that is no Desktop —
     /// a fullscreen or system space keys nothing.
     public func key(of space: SkyLight.SpaceID) -> DesktopKey? {
-        guard let native = spaces.first(where: { $0.id == space }),
-            native.isUser
-        else { return nil }
-        if let identity = native.identity {
-            return .identity(identity)
-        }
-        return number(of: space).map(DesktopKey.number)
+        NativeSpaces.key(of: space, in: spaces)
     }
 
     /// The Desktop a key names in THIS topology, or nil while it

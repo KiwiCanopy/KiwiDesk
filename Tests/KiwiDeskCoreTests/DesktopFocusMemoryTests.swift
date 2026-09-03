@@ -61,7 +61,7 @@ struct DesktopFocusMemoryTests {
                 )
             )
         }
-        core.lastDesktop = 1
+        core.lastDesktop = .number(1)
         core.desktopMemory.lastDisplaySpaces = [
             "UUID-A": 10, "UUID-B": 20,
         ]
