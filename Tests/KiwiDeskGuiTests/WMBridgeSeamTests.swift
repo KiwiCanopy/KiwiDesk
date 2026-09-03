@@ -82,6 +82,9 @@ struct WMBridgeSeamTests {
             // second time off the bridge — which is the one
             // thing that crossing rule cannot survive.
             "KiwiDeskCore/Models/DesktopKey.swift": 1,
+            // #1147: the one stamp WRITE. Reads never come here
+            // — they ride the plist the snapshot already parses.
+            "KiwiDeskCore/Profiles/KiwiCore+DesktopIdentity.swift": 1,
         ],
     ]
 

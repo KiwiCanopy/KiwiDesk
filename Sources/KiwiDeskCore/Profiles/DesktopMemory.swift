@@ -16,6 +16,18 @@ final class DesktopMemory {
     /// a second instance: per-window record, bound, rekey.
     let returnFocus = FollowFocusIntent()
 
+    /// Desktops whose stamp write was dispatched and not yet
+    /// confirmed by a later snapshot (#1147). Written by
+    /// `stampedDesktopSnapshot` alone; the deferred verify is
+    /// argued there.
+    var stampAttempts: Set<SkyLight.SpaceID> = []
+
+    /// Desktops that did not keep a stamp this process. One
+    /// attempt each: a write the WindowServer dropped is not
+    /// retried in a loop, and every consumer falls back to the
+    /// Mission Control number for them.
+    var unstampable: Set<SkyLight.SpaceID> = []
+
     /// Last observed native Space ID per display (`KiwiCore+BootSeams`,
     /// docs/cli.md).
     var lastDisplaySpaces: [String: SkyLight.SpaceID] = [:]
