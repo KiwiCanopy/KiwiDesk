@@ -22,6 +22,14 @@ final class DesktopMemory {
     /// argued there.
     var stampAttempts: Set<SkyLight.SpaceID> = []
 
+    /// The stamp write (#1147) — live by default and the one
+    /// door production writes through, so a test never reaches
+    /// the host's real Desktops with a fixture space id. Returns
+    /// whether the write was DISPATCHED; whether it landed is
+    /// the next snapshot's verdict.
+    var writeStamp: @MainActor (SkyLight.SpaceID, DesktopIdentity) -> Bool =
+        KiwiCore.liveStampWrite
+
     /// Desktops that did not keep a stamp this process. One
     /// attempt each: a write the WindowServer dropped is not
     /// retried in a loop, and every consumer falls back to the

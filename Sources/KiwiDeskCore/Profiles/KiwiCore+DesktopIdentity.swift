@@ -50,17 +50,30 @@ extension KiwiCore {
                 canDriveDesktops
             else { continue }
             let identity = DesktopIdentity.mint()
-            guard
-                WMBridge.setValues(
-                    [DesktopIdentity.storeKey: identity.raw],
-                    of: space.id
-                )
+            guard desktopMemory.writeStamp(space.id, identity)
             else { continue }
             desktopMemory.stampAttempts.insert(space.id)
             minted[space.id] = identity
         }
         guard !minted.isEmpty else { return snapshot }
         return snapshot.stamping(minted)
+    }
+
+    /// The live stamp write — the ONE production bridge call on
+    /// this path, and the reason it is a seam rather than an
+    /// inline call: a fixture space id IS a real Desktop id on
+    /// the host (Desktop 1 is id 1), so an unpinned suite that
+    /// switches Desktops would stamp the developer's own
+    /// (tests.md; `makeTestCore` pins it, and the stamping suite
+    /// takes it back with the bridge itself faked).
+    static func liveStampWrite(
+        _ space: SkyLight.SpaceID,
+        _ identity: DesktopIdentity
+    ) -> Bool {
+        WMBridge.setValues(
+            [DesktopIdentity.storeKey: identity.raw],
+            of: space
+        )
     }
 }
 

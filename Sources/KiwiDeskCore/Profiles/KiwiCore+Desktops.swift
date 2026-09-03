@@ -32,9 +32,11 @@ extension KiwiCore {
             )
         }
         // A verb, not a switch: no snapshot in hand, so this is
-        // the one live read of the authority on this path.
+        // the one reading of the topology on this path — stamped,
+        // so the Desktop being bound carries an identity before
+        // anything files under it (#1147).
         applyDesktopBinding(
-            desktop: NativeSpaces.activeDesktopNumber()
+            desktop: stampedDesktopSnapshot().authority
         )
         return .ok()
     }
@@ -54,7 +56,10 @@ extension KiwiCore {
     /// reach that arm, so their flow is exactly the pre-#888
     /// one.
     func handleDesktopChange() {
-        let snapshot = NativeSpaces.desktopSnapshot()
+        // Stamped (#1147): a Desktop the user just created is
+        // stamped at the first switch that shows it, and every
+        // question below is still answered from this ONE reading.
+        let snapshot = stampedDesktopSnapshot()
         let number = snapshot.authority
         lastDesktopSwitch = Date()
         // A secondary display switched: the authority is a live

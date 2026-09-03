@@ -81,7 +81,12 @@ extension KiwiCore {
         // per-display Spaces it diffs against. Seeding only the
         // first left the session's opening switch diffing against
         // an empty snapshot.
-        let desktops = NativeSpaces.desktopSnapshot()
+        //
+        // Stamped (#1147): boot is where a Desktop that has
+        // never met KiwiDesk gets its identity, so the first
+        // binding resolve of the session already has one to file
+        // under rather than a number a renumber can move.
+        let desktops = stampedDesktopSnapshot()
         lastDesktop = desktops.authority
         desktopMemory.seed(desktops)
         // Cheap and off-main; kicked here so the first glyph bar

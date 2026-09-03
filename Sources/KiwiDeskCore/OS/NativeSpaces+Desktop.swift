@@ -27,6 +27,42 @@ public struct DesktopSnapshot: Sendable {
         spaces.first { number(of: $0.id) == wanted }
     }
 
+    /// The durable key this Desktop's state files under
+    /// (#1147): its stamp where it carries one, else its Mission
+    /// Control number. Nil for a space that is no Desktop —
+    /// a fullscreen or system space keys nothing.
+    public func key(of space: SkyLight.SpaceID) -> DesktopKey? {
+        guard let native = spaces.first(where: { $0.id == space }),
+            native.isUser
+        else { return nil }
+        if let identity = native.identity {
+            return .identity(identity)
+        }
+        return number(of: space).map(DesktopKey.number)
+    }
+
+    /// The Desktop a key names in THIS topology, or nil while it
+    /// is absent — its display unplugged, or the Desktop itself
+    /// deleted. Absence is never proof it is gone for good, so a
+    /// consumer holds such a record dormant rather than pruning
+    /// it (#1147 ▸ the #1230 contract, rule 3).
+    public func space(for key: DesktopKey) -> NativeSpace? {
+        switch key {
+        case .identity(let identity):
+            return spaces.first { $0.identity == identity }
+        case .number(let wanted):
+            return space(numbered: wanted)
+        }
+    }
+
+    /// The key of the Desktop this display is SHOWING — the
+    /// per-display read #1230 keys its Space sets by, written
+    /// here so that lane adds no second one. Never the binding
+    /// authority, which is the main screen's alone (#888).
+    public func currentKey(on uuid: String) -> DesktopKey? {
+        currentSpaces[uuid].flatMap { key(of: $0) }
+    }
+
     /// Mission Control numbers of MAIN screen's user Desktops (#888).
     public var mainDisplayDesktops: [Int] {
         guard let mainUUID,

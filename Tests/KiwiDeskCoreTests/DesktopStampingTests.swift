@@ -12,13 +12,19 @@ import Testing
 @Suite("Desktop stamping (#1147)", .serialized)
 struct DesktopStampingTests {
     private func makeCore() -> KiwiCore {
-        makeTestCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-stamp-\(UUID().uuidString)"
                 )
         )
+        // This suite is ABOUT the write, so it takes the live
+        // writer back from `makeTestCore`'s refusing pin — with
+        // the bridge faked below, so the host's WindowServer is
+        // still never reached.
+        core.desktopMemory.writeStamp = KiwiCore.liveStampWrite
+        return core
     }
 
     /// The bridge answers, and every `SpaceSetValues` is captured.
