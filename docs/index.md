@@ -23,6 +23,10 @@ default, globally or per space.
 - **[User Guide](user-guide.md)** — the Settings app: layouts,
   profiles, shortcuts, monitors, and the visual editor. Start
   here if you configure KiwiDesk through the app.
+- **[Spaces & Desktops](spaces-and-desktops.md)** — how your
+  screens, macOS's Desktops, profiles and KiwiDesk's own Spaces
+  fit together. Read this if a Desktop switch ever landed you
+  somewhere you did not expect.
 - **[Lua Reference](lua-reference.md)** — the complete
   `init.lua` API, every setting in *expects → does → example*
   form. Start here if you hand-write your config.

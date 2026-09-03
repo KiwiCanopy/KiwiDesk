@@ -15,6 +15,7 @@ different behavior.
 | `docs/index.md` | The docs landing map — and, because it also carries install and upgrade prose, it is a **second home for claims `README.md` makes**. Change one, check the other in the same change set: an upgrade claim was corrected in the README and left standing here (#661's branch), which is what an unowned page does |
 | `docs/lua-reference.md` | Lua config & behavior, in *expects → does → example* form |
 | `docs/user-guide.md` | The Settings app & GUI flows |
+| `docs/spaces-and-desktops.md` | How screens, macOS Desktops, profiles and KiwiDesk Spaces relate — the user-facing mental model, not a flow and not a pipeline |
 | `docs/cli.md` | Commands, events, IPC |
 | `docs/recipes/` | Integration recipes |
 | `docs/architecture.md` | End-to-end pipelines at directory altitude |
