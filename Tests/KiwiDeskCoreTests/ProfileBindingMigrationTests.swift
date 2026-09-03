@@ -82,9 +82,28 @@ struct ProfileBindingMigrationTests {
         #expect(entry["profile"] as? String == "Desk")
     }
 
-    /// A crossing must END: a file already in the new shape is
-    /// not rewritten, so its mtime never moves and a second pass
-    /// is a no-op.
+    /// The STEP's own idempotence, called directly.
+    ///
+    /// Through `migrated` this is unreachable: a file at the
+    /// current format short-circuits on `needsMigration` before
+    /// any step runs, and a file below it is rewritten by the
+    /// format stamp whatever the steps do. So the gate rescues
+    /// the claim either way, and the step's own guard goes
+    /// unguarded (`guard-prover`, 2026-09-04 — the
+    /// rule-authoring.md "unrelated net" shape).
+    @Test("the step rewrites nothing that is already an object")
+    func stepIsIdempotent() {
+        let already = json(
+            #"{"profile_bindings":{"2":{"profile":"W","desktop":2}}}"#
+        )
+        #expect(
+            ConfigMigration.migratingProfileBindingStrings(already)
+                == nil
+        )
+    }
+
+    /// And the gate above it: a file already at the current
+    /// format is not rewritten at all, so its mtime never moves.
     @Test("a migrated file is not migrated again")
     func migrationEnds() throws {
         let data = json(

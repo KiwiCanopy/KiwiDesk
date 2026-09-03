@@ -193,16 +193,23 @@ struct MonitorChangeTests {
         // snapshot names, and the monitor-change handler looks it
         // up the same way — an `activeDesktopNumber` pin reaches
         // neither.
+        // STAMPED, deliberately: in an all-unstamped topology
+        // `mainCurrentKey` IS `.number(authority)`, so a lookup
+        // that went back to the number would be the same value
+        // and this clause could not see it (`guard-prover`,
+        // 2026-09-04).
         NativeSpaces.spacesOverride = [
             NativeSpace(
                 id: 10,
                 displayUUID: "UUID-A",
-                isCurrent: false
+                isCurrent: false,
+                identity: DesktopIdentity(raw: "STAMP-1")
             ),
             NativeSpace(
                 id: 11,
                 displayUUID: "UUID-A",
-                isCurrent: true
+                isCurrent: true,
+                identity: DesktopIdentity(raw: "STAMP-2")
             ),
         ]
         NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
