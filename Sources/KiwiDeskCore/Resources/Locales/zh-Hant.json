@@ -241,6 +241,8 @@
   "destination.profiles": "描述檔",
   "destination.shortcuts": "快速鍵",
   "destination.spaces": "空間",
+  "diff.drift.built_in": "沒有描述檔涵蓋這些螢幕 — 目前由內建佈局排列視窗。如需保留此佈局，請使用「%1$@」。",
+  "diff.drift.no_match": "沒有已儲存的描述檔涵蓋這些螢幕。如需保留目前的設定，請使用「%1$@」。",
   "diff.drift.profile": "描述檔",
   "diff.drift.screens": "螢幕",
   "diff.drift.screens.unsaved": "此螢幕組態尚未儲存到「%1$@」。",

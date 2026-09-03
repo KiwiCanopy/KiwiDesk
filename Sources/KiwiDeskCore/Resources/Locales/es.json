@@ -241,6 +241,8 @@
   "destination.profiles": "Perfiles",
   "destination.shortcuts": "Atajos",
   "destination.spaces": "Espacios",
+  "diff.drift.built_in": "Ningún perfil abarca estas pantallas — un diseño integrado las está organizando. Usa «%1$@» para conservarlo.",
+  "diff.drift.no_match": "Ningún perfil guardado abarca estas pantallas. Usa «%1$@» para conservar esta configuración.",
   "diff.drift.profile": "Perfil",
   "diff.drift.screens": "Pantallas",
   "diff.drift.screens.unsaved": "Esta configuración de pantallas aún no está guardada en «%1$@».",
