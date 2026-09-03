@@ -97,6 +97,30 @@ struct ConflictSeverityTests {
         #expect(severity == .dead(.spotlight))
     }
 
+    /// The door all three row surfaces take must THREAD the
+    /// live set, not merely accept it: dropping the argument on
+    /// the floor inside `severity` left every other clause here
+    /// green (guard-prover, 2026-09-03), which is the whole
+    /// #1105 dormant/dead split going unwatched.
+    @Test("the severity door honours the disabled set it is given")
+    func doorThreadsTheDisabledSet() {
+        let row = row("control+option+command+8", "Move to Space 8")
+        #expect(
+            ConflictText.severity(
+                for: row,
+                in: [row],
+                disabled: [.invertColors]
+            ) == .dormant(.invertColors)
+        )
+        #expect(
+            ConflictText.severity(
+                for: row,
+                in: [row],
+                disabled: []
+            ) == .dead(.invertColors)
+        )
+    }
+
     /// The two chord facts encode one partition, and `of` reads
     /// the symbolic id FIRST: an accelerator that gained an id
     /// would read `.dead` and `.shadowsApps` would go unreachable
