@@ -220,7 +220,20 @@ editing here:
   on a compositor-confirmed `vanished` (`KiwiCore.handleWindowGone`)
   and by the boot seed (`seedAwayWindows`) — a new FILING goes
   through one of those two, never an assignment beside a call
-  site (review's: nothing scans for one). The enders differ by
+  site (review's: nothing scans for one). **The BOOT SEED admits
+  only a window that is UP** (#1234, `AwayBootSeedTests` ▸
+  `skipsParked`, `allParkedArmsNothing`): every reader requires
+  it, so a parked entry serves nobody, and it can only LEAK —
+  nothing tracks such a window, so no return ends it, and the
+  compositor still hosts it, so no prune does either. An immortal
+  entry keeps the 5 s census armed for the life of the process,
+  which is why this is a leak with a cost rather than clutter.
+  The gone handler needs no such clause and carries no guard for
+  one: it writes only for a window that WAS tracked, and a
+  tracked window that is minimized stays tracked, so it never
+  reaches that path parked. A THIRD writer would owe the seed's
+  clause and a case of its own — the two above see
+  `seedAwayWindows` alone (measured, `guard-prover` 2026-09-03). The enders differ by
   what they mean: the RETURN pays whatever named the window (the
   create fold and the arrival arms), the #634 reset forgets the
   memory with everything else (`forgetDesktopFocus`), and the two

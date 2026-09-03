@@ -7,8 +7,8 @@ import Testing
 /// The boot census (#1146): a window of an observed app on a
 /// Desktop nobody shows joins the ledger — filed under the
 /// snapshot's space, else the Desktop's remembered Space, else
-/// unfiled — and an unobserved app's, a tracked one and one on a
-/// shown Desktop do not.
+/// unfiled — and an unobserved app's, a tracked one, one on a
+/// shown Desktop and a PARKED one do not.
 @MainActor
 @Suite("Boot seeds the away ledger", .serialized)
 struct AwayBootSeedTests {
@@ -108,6 +108,53 @@ struct AwayBootSeedTests {
         // No snapshot, no Desktop memory: unfiled.
         #expect(core.state.rememberedSpace(of: WindowID(7)) == nil)
         #expect(core.deferred.isScheduled(.awayCensus))
+    }
+
+    @Test("a parked window is not seeded")
+    func skipsParked() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.desktopMemory.readCensus = { _ in
+            DesktopCensus(
+                hosts: [
+                    WindowID(7): DesktopCensus.Host(
+                        space: 4,
+                        pid: self.observed,
+                        isUp: false
+                    ),
+                    WindowID(8): self.host(4, pid: self.observed),
+                ],
+                shown: [1]
+            )
+        }
+        core.seedAwayWindows()
+        // The UP sibling proves the fixture reaches the seed at
+        // all, so the skip is a decision rather than an empty run.
+        #expect(Set(core.state.awayWindows.keys) == [WindowID(8)])
+    }
+
+    @Test("an all-parked census leaves the task unarmed")
+    func allParkedArmsNothing() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.desktopMemory.readCensus = { _ in
+            DesktopCensus(
+                hosts: [
+                    WindowID(7): DesktopCensus.Host(
+                        space: 4,
+                        pid: self.observed,
+                        isUp: false
+                    )
+                ],
+                shown: [1]
+            )
+        }
+        core.seedAwayWindows()
+        // The reported harm (#1234): a seeded parked window can
+        // never be pruned, so the ledger never empties and the
+        // 5 s census re-arms for the life of the process.
+        #expect(core.state.awayWindows.isEmpty)
+        #expect(!core.deferred.isScheduled(.awayCensus))
     }
 
     @Test("the snapshot's space files it, else the Desktop's remembered Space")

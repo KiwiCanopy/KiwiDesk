@@ -126,11 +126,23 @@ extension KiwiCore {
     }
 
     /// The boot census (#1146): every layer-0 window of an
-    /// observed app that sits on a Desktop nobody shows joins
+    /// observed app that sits UP on a Desktop nobody shows joins
     /// the ledger, filed under the session snapshot's space
     /// where the id is in it (`.restored`, #1010), else the
     /// Desktop's remembered Space, else UNFILED — known to the
     /// classifier and Open-or-Focus, filed at its reveal.
+    ///
+    /// **A PARKED window is not seeded (#1234)**, which applies
+    /// at boot the rule the runtime already applies: every
+    /// consumer requires `isUp` — `awayMembers(of:)` filters on
+    /// it and the reach re-reads it from its own census — so a
+    /// parked entry can serve nobody, and "minimized while away
+    /// is not reachable" is #1146's own ruled residue. It could
+    /// only ever LEAK: nothing tracks such a window, so no
+    /// return ends its entry, and the compositor still hosts it,
+    /// so no prune does either. Six immortal entries on the dev
+    /// machine kept the 5 s census armed for the life of the
+    /// process (the probe is on the issue).
     func seedAwayWindows() {
         let spaces = NativeSpaces.allSpaces()
         guard let census = desktopMemory.readCensus(spaces) else { return }
@@ -146,6 +158,7 @@ extension KiwiCore {
             $0.key.raw < $1.key.raw
         }) {
             guard census.isAway(id),
+                host.isUp,
                 state.windows[id] == nil,
                 state.awayWindows[id] == nil,
                 eventLoop.observes(pid: host.pid),
