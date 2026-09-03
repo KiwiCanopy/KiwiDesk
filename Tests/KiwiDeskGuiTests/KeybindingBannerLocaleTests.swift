@@ -66,7 +66,8 @@ struct KeybindingBannerLocaleTests {
         let tooltip = ConflictText.tooltip(
             for: bindings[0],
             in: bindings,
-            config: model.config
+            config: model.config,
+            disabled: []
         )
         // Pinned non-nil first: `?.contains != true` alone
         // passes on a vanished tooltip (guard-prover's

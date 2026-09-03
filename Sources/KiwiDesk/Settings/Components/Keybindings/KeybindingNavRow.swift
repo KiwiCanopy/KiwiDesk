@@ -11,6 +11,8 @@ struct NavRow: View {
     private var overrideBase
     @Environment(\.keybindingLayerName)
     private var layerName
+    @Environment(\.disabledSystemShortcuts)
+    private var disabledSystemShortcuts
 
     var body: some View {
         HStack {
@@ -75,7 +77,8 @@ struct NavRow: View {
         return ConflictText.tooltip(
             for: bindings[index],
             in: bindings,
-            config: model.config
+            config: model.config,
+            disabled: disabledSystemShortcuts
         )
     }
 

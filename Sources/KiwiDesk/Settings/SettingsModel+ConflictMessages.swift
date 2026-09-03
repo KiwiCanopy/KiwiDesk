@@ -103,8 +103,9 @@ extension SettingsModel {
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.other_binding",
-                "Shortcut for \"%1$@\" is conflicting with "
-                    + "\"%2$@\".",
+                "Shortcut for \"%1$@\" is also bound to "
+                    + "\"%2$@\" — only one of the two will "
+                    + "fire.",
                 localized(conflict.name),
                 localized(who)
             )
@@ -131,7 +132,8 @@ extension SettingsModel {
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.bullet.with",
-                "\"%1$@\" with \"%2$@\"",
+                "\"%1$@\" and \"%2$@\" share a shortcut — "
+                    + "only one will fire",
                 localized(conflict.name),
                 localized(who)
             )

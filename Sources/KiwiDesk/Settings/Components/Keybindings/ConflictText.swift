@@ -3,38 +3,68 @@ import SwiftUI
 
 /// Keybinding conflict tooltip and localized system shortcut names (#96).
 enum ConflictText {
-    /// Tooltip text for conflicting keybinding row (`KeybindingCatalog`, #96).
+    /// The row's reading of its conflict (#1126), or nil when
+    /// the row has none. `disabled` is the section's one live
+    /// read (`\.disabledSystemShortcuts`).
+    static func severity(
+        for binding: KeyBinding,
+        in bindings: [KeyBinding],
+        disabled: Set<SystemShortcut>
+    ) -> ConflictSeverity? {
+        KeybindingConflicts.conflict(
+            for: binding,
+            in: bindings
+        ).map { ConflictSeverity.of($0, disabled: disabled) }
+    }
+
+    /// Tooltip text for a conflicting keybinding row — the
+    /// COST, not just the collision (#1126; `KeybindingCatalog`,
+    /// #96).
     @MainActor
     static func tooltip(
         for binding: KeyBinding,
         in bindings: [KeyBinding],
-        config: GuiConfig
+        config: GuiConfig,
+        disabled: Set<SystemShortcut>
     ) -> String? {
         guard
-            let conflict = KeybindingConflicts.conflict(
+            let severity = severity(
                 for: binding,
-                in: bindings
+                in: bindings,
+                disabled: disabled
             )
         else { return nil }
-        switch conflict.target {
+        switch severity {
         case .unrecognized:
             return L(
                 "keybinding.conflict.tooltip.unrecognized",
                 "Not a recognized shortcut."
             )
-        case .otherBinding(let who):
+        case .duplicate(let who):
             return L(
                 "keybinding.conflict.tooltip.other_binding",
-                "Already bound in this layer: %1$@",
+                "Also bound in this layer to %1$@ — only one "
+                    + "of the two will fire.",
                 KeybindingCatalog.localizedLabel(
                     for: who,
                     config: config
                 )
             )
-        case .systemShortcut(let shortcut):
+        case .dead(let shortcut):
+            // Who answers a chord both hold is UNMEASURED
+            // (plan/1126-probe-2026-09-03.md): the cost sentence
+            // waits for the press test, so this stays the
+            // shipped collision wording.
             return L(
                 "keybinding.conflict.tooltip.system",
                 "Conflicts with macOS: %1$@",
+                shortcut.localizedName
+            )
+        case .dormant(let shortcut):
+            return L(
+                "keybinding.conflict.tooltip.system_off",
+                "macOS reserves this shortcut for %1$@, which "
+                    + "is switched off right now.",
                 shortcut.localizedName
             )
         }

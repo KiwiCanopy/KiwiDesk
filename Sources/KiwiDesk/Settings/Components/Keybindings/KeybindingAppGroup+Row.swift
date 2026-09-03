@@ -20,7 +20,8 @@ extension ApplicationsGroup {
                 conflict: ConflictText.tooltip(
                     for: binding.wrappedValue,
                     in: bindings,
-                    config: model.config
+                    config: model.config,
+                    disabled: disabledSystemShortcuts
                 ),
                 preflight: { combo in
                     RecorderPreflight.rejection(

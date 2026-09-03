@@ -8,6 +8,8 @@ struct ApplicationsGroup: View {
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)
     var overrideBase
+    @Environment(\.disabledSystemShortcuts)
+    var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
     var layerName
     @State var newApp: KeybindingCatalog.InstalledApp?
