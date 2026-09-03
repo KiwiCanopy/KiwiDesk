@@ -53,11 +53,23 @@ extension KeyRecorderField {
                     isPresented: $conflictPopoverShown,
                     arrowEdge: .bottom
                 ) {
+                    // `fixedSize` before the frame, the idiom
+                    // `HelpButton` already uses: without it the
+                    // sentence takes an ideal-width proposal and
+                    // TRUNCATES to one line instead of wrapping
+                    // (owner, on device 2026-09-03).
                     Text(sentence)
                         .font(.callout)
                         .foregroundStyle(SettingsTheme.ink)
+                        .fixedSize(
+                            horizontal: false,
+                            vertical: true
+                        )
+                        .frame(
+                            maxWidth: 320,
+                            alignment: .leading
+                        )
                         .padding(14)
-                        .frame(maxWidth: 320)
                 }
             }
         }
