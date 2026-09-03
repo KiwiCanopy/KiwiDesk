@@ -86,7 +86,19 @@ struct DesktopBindingDraftTests {
                 == "Work"
         )
         #expect(model.config.profileBindings[.number(1)] == nil)
-        #expect(!model.isDirty)
+        // The BASELINE moved with the draft, compared as state
+        // rather than read off `isDirty`: nothing on this path
+        // recomputes that flag, so an assertion on it is answered
+        // by its own initializer whatever the adopt did
+        // (`guard-prover`, 2026-09-04). Left behind, the window
+        // would nag about a change the user never made.
+        #expect(
+            model.config.profileBindings
+                == model.cleanConfig.profileBindings
+        )
+        // …and the sidecar baseline too, which is the reader that
+        // decides whether Save is offered at all.
+        #expect(!model.globalsChanged)
     }
 
     /// The mirror, and the reason this is not simply "always take
