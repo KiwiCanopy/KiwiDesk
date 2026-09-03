@@ -8281,6 +8281,43 @@ direction in chat):
 
 **[Principle]**
 
+**A Desktop is its stamp, not its number
+([#1147](https://github.com/KiwiCanopy/KiwiDesk/issues/1147)).**
+Mission Control's Desktop number is a *position* — `index + 1`
+over the space list — so it moves whenever a Desktop is added,
+deleted or dragged, and whenever a screen is plugged in or out.
+Keying durable per-Desktop state by that number means the state
+silently re-points to a different Desktop, with no event to
+notice and nothing on screen to show it. KiwiDesk therefore
+mints a private identifier into each Desktop's own settings and
+keys by that; the number survives only as the label a row is
+drawn with, refreshed from each reading.
+
+Three alternatives were measured and rejected. Apple's own space
+`uuid` is the *name* field (`SpaceCopyName`) and is empty on the
+primordial Desktop, so it is neither ours to write nor always
+there. The internal `id64` looks stable and is not: unplugging a
+screen fuses its first Desktop into the current one and destroys
+that container, and reconnecting mints a **new** `id64` —
+measured 1452 → 1454 → 1456 over two rounds on one machine. And
+doing nothing leaves the silent-wrong-Desktop failure, whose
+stake rises sharply with
+[#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230),
+where a Desktop's whole persisted Space set rides on the same
+key.
+
+What makes the stamp work is that a Desktop's value dictionary
+is a record macOS persists to `com.apple.spaces.plist`, keys it
+does not recognise included — so the stamp survives reboots, an
+OS update, the append that follows an unplug, and the rebuild
+that follows a replug. That is undocumented behaviour, and the
+design degrades to the status quo rather than breaking if it
+ever stops: a Desktop that comes back unstamped falls back to
+its Mission Control number, which is what every binding used
+before this. A Desktop the user genuinely deletes takes its
+stamp with it and its binding goes dormant — kept, badged, and
+never fired for the Desktop that inherited its number.
+
 **A profile row counts what the profile OWNS, never what it
 resolves to.** A profile carries a *sparse diff* over the global
 config — its own keybindings are the rows it overrides, not the

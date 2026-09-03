@@ -52,6 +52,36 @@ extension SettingsModel {
             verdict: resolved.verdict,
             screens: resolved.screens
         )
+        adoptRekeyedBindings()
+    }
+
+    /// Take Core's re-keyed bindings into an UNEDITED draft
+    /// (#1147).
+    ///
+    /// Core rewrites the sidecar's `profile_bindings` when a
+    /// renumber moves a binding onto its Desktop's stamp. A
+    /// Settings window open across that rewrite holds a draft
+    /// seeded from the OLD sidecar, and its Save would put the
+    /// number keys back — where the next snapshot re-keys them to
+    /// whichever Desktop now holds that number, which is the
+    /// silent wrong-Desktop this lane removes, arriving through
+    /// the GUI instead.
+    ///
+    /// Only an UNTOUCHED draft is re-seeded: a user who has
+    /// edited a binding owns that value, and their edit must
+    /// survive a refresh. The clean baseline moves with it, so
+    /// adopting Core's rewrite never reads as a pending change.
+    private func adoptRekeyedBindings() {
+        guard let saved = core.guiConfigStore.load(),
+            saved.profileBindings != cleanConfig.profileBindings,
+            config.profileBindings == cleanConfig.profileBindings
+        else { return }
+        let wasSuppressed = suppressDirty
+        suppressDirty = true
+        config.profileBindings = saved.profileBindings
+        suppressDirty = wasSuppressed
+        cleanConfig.profileBindings = saved.profileBindings
+        savedSidecar?.profileBindings = saved.profileBindings
     }
 
     /// Imports live Lua shortcuts into current config (`KeybindingMerge`, #4).

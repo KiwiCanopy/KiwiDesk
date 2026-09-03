@@ -193,5 +193,40 @@ Every one of the following binds whoever touches them:
   persists (item 3 again), so §5's crossing rule binds it: a
   change to the string owes a one-shot re-stamp of every
   Desktop carrying the old one, never a reader lenient to both.
+- **A Desktop's value dictionary IS a record macOS persists**,
+  and that — not the bridge — is what makes an identity stamp
+  work (#1147, measured on the owner's Mac 2026-09-03, two
+  unplug/replug rounds). A key written through
+  `SpaceSetValuesOperation` lands in
+  `~/Library/Preferences/com.apple.spaces.plist` beside Apple's
+  own `id64`, `type`, `uuid` and `wsid`, and macOS round-trips
+  keys it does not recognise. Three consequences, each measured
+  rather than reasoned:
+  - the stamp survives logout, reboot and an OS update (the
+    2026-08-18 canary, still on Desktop 1 sixteen days later);
+  - it survives an unplug, which APPENDS a screen's surviving
+    Desktops to the remaining one at new numbers, containers
+    intact;
+  - it survives the replug REBUILD. The first Desktop of an
+    unplugged screen fuses into the current one and its
+    container dies; on reconnect macOS mints a **new `id64`**
+    and restores the archived record — our key included — onto
+    it (1452 → 1454 → 1456 across two rounds). **So `id64` is a
+    runtime handle, never an identity**, and a durable map must
+    not key by it.
+
+  What this leans on is undocumented: that macOS keeps unknown
+  keys in that record rather than filtering them. Write no code
+  that would break if it stopped — and nothing does today,
+  because a Desktop that comes back unstamped is marked
+  unstampable for the session and every consumer falls back to
+  its Mission Control number, which is the pre-#1147 behaviour.
+  Degrading to the status quo is the design's answer here;
+  keep it that way.
+
+  Apple's own `uuid` is persisted identically and IS stable, and
+  is still not usable: it is `SpaceCopyName` — the Desktop's
+  name — so naming a Desktop would move it, and it is EMPTY on
+  the primordial Desktop. Never write it.
 - No Accessibility trust is needed for any bridge operation
   (#889 item 2); do not add a permission prompt for one.

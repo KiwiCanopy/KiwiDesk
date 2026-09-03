@@ -114,6 +114,40 @@ Desktop your main screen's.
 With a single screen there is no distinction to make — the main
 screen's Desktop is simply *the* Desktop.
 
+## A binding follows its Desktop, not its number
+
+Mission Control numbers Desktops by **position**, so the numbers
+move constantly: add a Desktop before a bound one, delete one,
+drag them around in Mission Control, plug a screen in or unplug
+it, and everything after the change is renumbered.
+
+A binding is not stored against that number. KiwiDesk writes a
+small private identifier into each Desktop's own settings the
+first time it sees it, and the binding is filed under **that**.
+So a Desktop keeps its profile when the numbers shift, and the
+Desktop that inherits its old number does not inherit its
+profile. The card's rows re-label themselves to the new numbers,
+because the number is still how you and macOS name a Desktop —
+it is just no longer how KiwiDesk finds one.
+
+Deleting the Desktop deletes the identifier with it. That
+binding then shows a *not present* badge and does nothing until
+you point it somewhere else — it is never fired for a different
+Desktop.
+
+**Unplugging a screen is the interesting case**, because macOS
+does something specific: the first Desktop of the unplugged
+screen merges into the one you are on and is gone, and the rest
+move over to the remaining screen at new numbers. Their
+identifiers travel with them, so their bindings keep working.
+The merged one goes quiet — and on plugging the screen back in,
+macOS restores it, identifier and all, and its binding comes
+back with it.
+
+On a Mac where KiwiDesk cannot write the identifier, bindings
+key by the Mission Control number, which is the behaviour
+described above minus the protection.
+
 ## "Displays have separate Spaces" decides the nesting
 
 This macOS switch (System Settings ▸ Desktop & Dock) changes
