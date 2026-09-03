@@ -3216,13 +3216,24 @@ and the choices, each argued against its alternative:
   `activate()` runs, as before — a faked switch was refused
   under [the bridge is not a SIP escape hatch](#the-window-management-bridge-is-not-a-sip-escape-hatch).
 - **Boot records what it can attribute, unfiled where it must.**
-  A window on an away Desktop at boot is filed under the session
-  snapshot's space, else the Desktop's remembered Space, else
-  recorded with no Space at all — known to the classifier and to
-  Open or Focus, drawn on no bar until its reveal files it
-  through the newcomer rules. Dropping it until shown was the
-  alternative, and it would have kept the cold-boot duplicate
-  launch the issue names.
+  A window UP on an away Desktop at boot is filed under the
+  session snapshot's space, else the Desktop's remembered Space,
+  else recorded with no Space at all — known to the classifier
+  and to Open or Focus, filed at its reveal through the newcomer
+  rules. Dropping it until shown was the alternative, and it
+  would have kept the cold-boot duplicate launch the issue names.
+
+  **A parked window is not recorded at all**
+  ([#1234](https://github.com/KiwiCanopy/KiwiDesk/issues/1234)),
+  which is the runtime's own rule applied at boot: every reader
+  of the ledger requires the window to be up, so a parked entry
+  serves nobody, and "minimized while away is not reachable" is
+  already this feature's accepted residue. Recording one could
+  only leak — nothing tracks such a window, so no return ends its
+  entry, and the compositor still hosts it, so no prune does
+  either. An immortal entry is not merely untidy: the ledger's
+  five-second census re-arms while it is non-empty, so a handful
+  of them poll the compositor for the life of the process.
 - **The sweep keeps its one-way trust.** The on-screen census may
   refuse a removal, never cause one
   ([#1157](https://github.com/KiwiCanopy/KiwiDesk/issues/1157)),
