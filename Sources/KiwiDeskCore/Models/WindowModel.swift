@@ -102,8 +102,8 @@ public struct ManagedWindow: Sendable, Equatable {
 
 /// A window the compositor hosts on a Desktop nobody shows
 /// (#1146): the facts the departure fold erased, kept beside the
-/// pure state so the Space Bar, Open-or-Focus and the gone
-/// classifier can name it. Its KiwiDesk space and rank stay in
+/// pure state so Open-or-Focus and the gone classifier can name
+/// it — no bar draws it (#1228). Its KiwiDesk space and rank stay in
 /// `rememberedSpaces` / `departedSlots` (#1207) — an entry with
 /// none there is UNFILED: known, drawn nowhere.
 public struct AwayWindow: Sendable, Equatable {
@@ -114,8 +114,8 @@ public struct AwayWindow: Sendable, Equatable {
     /// The native Space hosting it at the last reading.
     public var nativeSpace: SkyLight.SpaceID
     /// Up on that Desktop at the last reading; a window parked
-    /// (minimized) while away draws nowhere, as one minimized
-    /// here does.
+    /// (minimized) while away is not reached, as one minimized
+    /// here is not.
     public var isUp: Bool
 
     public init(

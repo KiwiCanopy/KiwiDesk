@@ -69,6 +69,15 @@ derived-verdict obligation in
 this file would only be a second copy to rot. What is left is the
 reading a bar still makes for itself:
 
+- **A bar derivation reads `state.windows`, never the away
+  ledger** (#1228). The bar draws the Desktop in front of the
+  user: a window KiwiDesk parked is its to draw, a window macOS
+  is showing on another Desktop is not. The obligation and its
+  two residues are
+  [state-and-layout.md](state-and-layout.md)'s — this line
+  exists because that file does not load when you edit
+  `Bar/**`, and the next new bar surface (#1229's overview
+  panel) is written here.
 - A bar derivation answering *which window holds the SYSTEM
   focus* — the glyph tint, the `+n` badge's — reads
   `workspaces.lastFocused` and gates on the active Space, never

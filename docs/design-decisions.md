@@ -3140,8 +3140,7 @@ the switch, and everything downstream guessed: the gone reason
 was a timer that read the *previous* switch for a fast app's
 departure ([#40](https://github.com/KiwiCanopy/KiwiDesk/issues/40),
 falsified by [#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)'s
-trace), the Space Bar under-counted and *Hide empty Spaces*
-dropped the whole item, and Open or Focus un-parked a local
+trace), and Open or Focus un-parked a local
 window beside one that was up one Desktop away
 ([#673](https://github.com/KiwiCanopy/KiwiDesk/issues/673)'s
 accepted residue). The WindowServer knows all of it — one

@@ -82,8 +82,13 @@ struct SpaceBarAwayTests {
         let core = makeCore()
         add(core, 1, to: "2")
         add(core, 3, to: "2")
-        // Ranked BETWEEN the two, so a merge would break the run
-        // into Safari · Mail · Safari.
+        // The present pair must carry ranks too, or the merge
+        // APPENDS and the split this case is named for cannot
+        // happen (guard-prover, 2026-09-03).
+        core.state.departedSlots[WindowID(1)] = 0
+        core.state.departedSlots[WindowID(3)] = 2
+        // Ranked BETWEEN the two, so a merge breaks the run into
+        // Safari · Mail · Safari.
         park(core, 2, app: "Mail", in: "2", rank: 1)
         let (apps, _, _) = core.spaceBarApps(
             in: core.state.workspaces["2"]!,
@@ -96,6 +101,7 @@ struct SpaceBarAwayTests {
     @Test("hide_empty drops an all-away Space")
     func hideEmptyDrops() {
         let core = makeCore()
+        core.state.workspaces.ensureSpace("3")
         var style = core.tiler.settings.spaceBarStyle
         style.hideEmpty = true
         core.tiler.settings.spaceBarStyle = style
@@ -105,13 +111,21 @@ struct SpaceBarAwayTests {
             frame: CGRect(x: 0, y: 0, width: 100, height: 100)
         )
         core.state.workspaces.upsertDisplay(display)
-        core.state.workspaces.assign(SpaceID("1"), to: display.id)
-        core.state.workspaces.assign(SpaceID("2"), to: display.id)
-        add(core, 1, to: "1")
-        park(core, 7, in: "2", rank: 0)
-        // Space 1 stays because it holds a present window; 2 goes
-        // because everything it holds is on another Desktop.
+        for id in ["1", "2", "3"] as [SpaceID] {
+            core.state.workspaces.assign(id, to: display.id)
+        }
+        add(core, 1, to: "2")
+        park(core, 7, in: "3", rank: 0)
+        // The ACTIVE Space is exempt from hide_empty whatever it
+        // holds, so the pair that decides this case is 2 against
+        // 3: 2 stays on its present window, 3 goes because all it
+        // holds is on another Desktop. Asserting 1 alone would
+        // pass on a bar that drew nothing (guard-prover,
+        // 2026-09-03).
         let items = core.spaceBarItems(display: DisplayID(1), style: style)
-        #expect(items.map(\.space) == ["1"])
+        #expect(items.map(\.space) == ["1", "2"])
+        #expect(
+            items.first { $0.space == "2" }?.apps.map(\.name) == ["Safari"]
+        )
     }
 }

@@ -179,7 +179,7 @@ struct AwayLedgerTests {
         core.desktopMemory.readCensus = { _ in parked }
         #expect(core.refreshAwayWindows() == true)
         #expect(core.state.awayWindows[WindowID(7)]?.isUp == false)
-        // Parked: known, drawn under no Space.
+        // Parked: known, but not a row the reach walks.
         #expect(core.awayMembers(of: "1").isEmpty)
         // Pruned: gone from the #1207 focus memory too.
         #expect(core.desktopMemory.honoredFocus["1"]?[4] == nil)

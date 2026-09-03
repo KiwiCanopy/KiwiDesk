@@ -251,18 +251,32 @@ editing here:
   `awayWindows(bundleID:)`. An entry with NO Space (a boot-found
   window nothing has filed) is UNFILED: every reader carries the
   skip branch — `awayMembers(of:)` omits it, `get_state` lists it
-  only at the top level — and a new reader owes the same branch. What the ledger must never
-  become: a member of `space.windows` with a flag (every
-  `space.windows` consumer would gain an exclusion, and the
-  return-by-rank fold above would be reworked), or a reason for
-  the sweep to remove anything ([accessibility.md](accessibility.md)).
+  only at the top level — and a new reader owes the same branch.
+  What the ledger must never become: a member of `space.windows`
+  with a flag (every `space.windows` consumer would gain an
+  exclusion, and the return-by-rank fold above would be
+  reworked), or a reason for the sweep to remove anything
+  ([accessibility.md](accessibility.md)).
   `AwayLedgerTests` pins the writers, the enders and the merge;
-  `SpaceBarAwayTests` the bar's ABSENCE of them (#1228, with the
-  positive row assertions that keep it from passing on an empty
-  bar); `OpenOrFocusReachTests` the reach
-  and the ring; `AwayBootSeedTests` the boot filing order;
+  `SpaceBarAwayTests` the bar's ABSENCE of them (#1228);
+  `OpenOrFocusReachTests` the reach and the ring;
+  `AwayBootSeedTests` the boot filing order;
   `GoneReasonEventTests` the classification through the handler.
   The ruling is on the issue and in `docs/design-decisions.md`.
+  **Two residues on that #1228 clause, both measured by
+  `guard-prover` 2026-09-03 and neither closable by a scan.**
+  First, `SpaceBarAwayTests` pins `spaceBarApps` and nothing
+  else: a merge added in another bar derivation — a new item
+  builder, the front-app segment, #1229's overview panel — reds
+  nothing, so each new author owes the branch deliberately.
+  Second, the bar is kept clean at TWO independent points — the
+  member list (`state.effectiveMembers`, which never yields an
+  away id) and the resolution (`state.windows[id]`, which drops
+  one) — so EITHER alone suffices and restoring only one is
+  invisible: re-wrapping the member list in `withAwayMembers`
+  left all three cases green until the away-resolving lookup
+  came back too. A reviewer reading a half-revert as harmless is
+  the failure mode; the pair is the guard, not either half.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

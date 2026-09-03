@@ -4,8 +4,9 @@ import Foundation
 /// `StateCoordinator.awayWindows`, beside the visible-only state.
 /// An entry is written on a compositor-confirmed `vanished` and
 /// at the boot census, pruned by a census that no longer hosts
-/// the id (the corrective `closed`), and read by the Space Bar,
-/// Open-or-Focus and `get_state`. The argument is
+/// the id (the corrective `closed`), and read by Open-or-Focus
+/// and `get_state` — never the Space Bar, which draws the
+/// Desktop in front of the user (#1228). The argument is
 /// state-and-layout.md's.
 extension KiwiCore {
     /// The cadence the ledger is re-read at while non-empty.
@@ -48,30 +49,27 @@ extension KiwiCore {
     }
 
     /// Folds ONE census into the ledger — the reading every
-    /// consumer of the ledger then sees, so a keystroke and the
-    /// bar never disagree about a window's Desktop or parking.
+    /// consumer of the ledger then sees, so a keystroke and
+    /// `get_state` never disagree about a window's Desktop or
+    /// parking.
     /// `pruning: false` updates hosts and parking only: a prune
     /// emits a `window_destroyed` synchronously, which a command
     /// in flight must not do mid-dispatch (a Lua handler may
     /// `execute` back in) — the settle and the task prune.
+    /// Nothing here redraws: no bar reads the ledger (#1228),
+    /// and a prune's own `window_destroyed` is what a consumer
+    /// hears.
     func fold(_ census: DesktopCensus, pruning: Bool) {
-        var redrawn = false
         for entry in state.awayWindows.values.sorted(by: {
             $0.id.raw < $1.id.raw
         }) {
             guard let host = census.hosts[entry.id] else {
-                if pruning {
-                    pruneAwayWindow(entry)
-                    redrawn = true
-                }
+                if pruning { pruneAwayWindow(entry) }
                 continue
             }
-            if entry.isUp != host.isUp { redrawn = true }
             state.awayWindows[entry.id]?.nativeSpace = host.space
             state.awayWindows[entry.id]?.isUp = host.isUp
         }
-        // The bar drew what changed; nothing else retiles.
-        if redrawn { updateSpaceBar() }
     }
 
     /// Retires what still names a window that is gone for good:
@@ -132,8 +130,7 @@ extension KiwiCore {
     /// the ledger, filed under the session snapshot's space
     /// where the id is in it (`.restored`, #1010), else the
     /// Desktop's remembered Space, else UNFILED — known to the
-    /// classifier and Open-or-Focus, drawn on no bar until its
-    /// reveal files it.
+    /// classifier and Open-or-Focus, filed at its reveal.
     func seedAwayWindows() {
         let spaces = NativeSpaces.allSpaces()
         guard let census = desktopMemory.readCensus(spaces) else { return }
@@ -179,8 +176,8 @@ extension KiwiCore {
 
     /// The away members of `space`, in the order the row would
     /// come back (#1207's rank); unfiled and parked entries
-    /// excluded — a window minimized while away draws nowhere,
-    /// as one minimized here does.
+    /// excluded — a window minimized while away is not reached,
+    /// as one minimized here is not.
     func awayMembers(of space: SpaceID) -> [WindowID] {
         state.awayWindows.values
             .filter { $0.isUp && state.rememberedSpace(of: $0.id) == space }
@@ -222,8 +219,10 @@ extension KiwiCore {
 extension KiwiCore {
     /// `base` with the space's away members inserted by the rank
     /// they will return in — the fold's own insert
-    /// (`Space.insert(_:rank:ranks:)`), so a bar item and the
-    /// Open-or-Focus ring read the row as the return rebuilds it.
+    /// (`Space.insert(_:rank:ranks:)`), so the Open-or-Focus ring
+    /// walks the row as the return will rebuild it. NOT for a bar
+    /// derivation: the bar draws the Desktop in front of the user
+    /// (#1228).
     func withAwayMembers(
         _ base: [WindowID],
         of space: SpaceID
