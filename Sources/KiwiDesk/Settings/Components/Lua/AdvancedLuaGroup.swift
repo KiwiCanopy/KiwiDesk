@@ -60,6 +60,11 @@ struct AdvancedLuaGroup: View {
                     config: model.config,
                     disabled: disabledSystemShortcuts
                 ),
+                severity: ConflictText.severity(
+                    for: binding.wrappedValue,
+                    in: bindings,
+                    disabled: disabledSystemShortcuts
+                ),
                 preflight: { combo in
                     RecorderPreflight.rejection(
                         combo: combo,

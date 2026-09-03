@@ -42,6 +42,7 @@ struct NavRow: View {
                 name: command.resolvedLabel,
                 combo: index.map { bindings[$0].combo } ?? "",
                 conflict: conflict,
+                severity: severity,
                 preflight: preflight,
                 onRecord: record,
                 onClear: clear
@@ -70,6 +71,15 @@ struct NavRow: View {
         return !base.contains {
             $0.kind == .navigation && $0.lua == command.lua
         }
+    }
+
+    private var severity: ConflictSeverity? {
+        guard let index else { return nil }
+        return ConflictText.severity(
+            for: bindings[index],
+            in: bindings,
+            disabled: disabledSystemShortcuts
+        )
     }
 
     private var conflict: String? {

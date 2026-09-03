@@ -13,6 +13,8 @@ struct KeyRecorderField: View {
     let name: String
     let combo: String
     var conflict: String?
+    /// The conflict's reading (#1126); `nil` where there is none.
+    var severity: ConflictSeverity? = nil
     /// KiwiDesk-collision check run before committing; nil commits
     /// unconditionally.
     var preflight: ((String) -> RecorderRejection?)? = nil
@@ -47,6 +49,7 @@ struct KeyRecorderField: View {
                 recordButton
                 clearButton
             }
+            deadCaption
             if let rejection = liveRejection {
                 rejectionRow(rejection)
             }
@@ -110,10 +113,23 @@ struct KeyRecorderField: View {
         .controlSize(.regular)
         .tint(buttonTint)
         .foregroundStyle(buttonTint)
-        .modifier(RecorderButtonChrome(recording: recording))
+        .modifier(
+            RecorderButtonChrome(recording: recording, dead: isDead)
+        )
         .help(Self.recordHelp)
         .accessibilityLabel(name)
-        .accessibilityValue(label)
+        // A named control is valued (#812); a dead row's value
+        // carries its cost, since the name may not (#1126).
+        .accessibilityValue(
+            isDead && conflict != nil
+                ? L(
+                    "home.card.ax_value",
+                    "%1$@, %2$@",
+                    label,
+                    conflict ?? ""
+                )
+                : label
+        )
     }
 
     @MainActor private static let recordHelp = L(

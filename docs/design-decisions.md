@@ -5708,8 +5708,19 @@ as `alt+j` and `option+j` cannot evade the block. A
 macOS system-shortcut collision instead commits with a
 persistent ⚠ — shadowing one can be intentional, and the row is
 the reference surface, warning on every registered chord whether
-macOS currently answers it or not; only the aggregate surfaces
-consult the live enabled state (the ⌃⌥⌘8 ruling below, #1105).
+macOS currently answers it or not; the aggregate surfaces consult
+the live enabled state to decide what COUNTS (the ⌃⌥⌘8 ruling
+below, #1105), and since #1126 the row reads the same bit to pick
+its TIER: a symbolic hotkey macOS has on is a dead row — outlined
+chord, worded caption, "won't work" — because the press goes to
+macOS and the row never fires (measured 2026-09-03); one macOS
+has off keeps the quiet ⚠ and says it is off; a register chord
+with no symbolic id keeps the collision wording, its precedence
+being unmeasured. The treatment is deliberately smaller than a
+tinted row: outline plus caption already carry the fact in two
+channels, a red ground would be a new register needing its own
+inks, and a filled badge has no ink that clears 4.5:1 in both
+modes (ui-designer, 2026-09-03).
 Conflict surfaces
 (the banner and the "Assigned to…" row) re-derive from live
 bindings on every render, so fixing the conflict anywhere —

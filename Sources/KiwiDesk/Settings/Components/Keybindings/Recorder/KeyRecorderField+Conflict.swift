@@ -8,7 +8,16 @@ import SwiftUI
 /// reachable by mouse, and the banner at the top of the section
 /// stays the dismissible whole-config summary. Split from
 /// `KeyRecorderField.swift`, which sits at the §2.1 ceiling.
+///
+/// A DEAD row (#1126) says so in the flow, not only in the
+/// popover: the chord outlined in `danger`, a worded caption in
+/// the recorder's own caption slot, and the badge in `danger`
+/// too — three channels, none of them colour alone
+/// (`ConflictRowTreatmentTests`).
 extension KeyRecorderField {
+    /// Whether the row cannot fire as things stand.
+    var isDead: Bool { severity?.isDead == true }
+
     var conflictBadge: some View {
         iconSlot {
             if let conflict {
@@ -19,7 +28,11 @@ extension KeyRecorderField {
                         systemName:
                             "exclamationmark.triangle.fill"
                     )
-                    .foregroundStyle(SettingsTheme.warningInk)
+                    .foregroundStyle(
+                        isDead
+                            ? SettingsTheme.danger
+                            : SettingsTheme.warningInk
+                    )
                 }
                 .buttonStyle(.plain)
                 .pointingHandCursor()
@@ -36,6 +49,22 @@ extension KeyRecorderField {
                         .frame(maxWidth: 320)
                 }
             }
+        }
+    }
+
+    /// The dead row's caption: the same sentence the badge
+    /// carries, in the flow (`KeyRecorderRejectionRow`'s idiom).
+    /// Hidden from VoiceOver — the record button's value already
+    /// speaks it, and the badge's label does too.
+    @ViewBuilder var deadCaption: some View {
+        if isDead, let conflict {
+            HStack(spacing: 4) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                Text(conflict)
+            }
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.danger)
+            .accessibilityHidden(true)
         }
     }
 }
