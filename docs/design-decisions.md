@@ -5865,8 +5865,9 @@ on it — `⌃⌥space` switches the input source
 macOS 26.6). Nothing is seeded there, and `SystemShortcuts.map`
 carries it so a user who binds it is warned rather than left with
 a silently dead hotkey (#1094). `⌘⌥` was rejected because it
-collides with always-on system shortcuts (Force Quit, Dock,
-Hide/Minimize) — **narrowed by #1075 below**, which measures the
+collides with chords macOS and every app's menus already hold
+(Force Quit, Dock, Hide/Minimize — the last two are app
+accelerators KiwiDesk would take away rather than lose, #1126) — **narrowed by #1075 below**, which measures the
 base and opens it to digits under a stated boundary.
 Directions bind the arrow keys, which never compose a character on
 any layout. The set lives in the **base `gui.json`

@@ -97,6 +97,26 @@ struct ConflictSeverityTests {
         #expect(severity == .dead(.spotlight))
     }
 
+    /// The two chord facts encode one partition, and `of` reads
+    /// the symbolic id FIRST: an accelerator that gained an id
+    /// would read `.dead` and `.shadowsApps` would go unreachable
+    /// with every suite still green. Derived over `allCases`, so
+    /// a new case joins it for free.
+    @Test("the accelerator and symbolic classes do not overlap")
+    func classesArePartitioned() {
+        #expect(
+            SystemShortcut.allCases
+                .filter(\.isUniversalAccelerator)
+                .allSatisfy { $0.symbolicHotkey == nil }
+        )
+        // …and the filter is not vacuous.
+        #expect(
+            SystemShortcut.allCases.contains(where: {
+                $0.isUniversalAccelerator
+            })
+        )
+    }
+
     /// One of two duplicate rows fires (the layer is one
     /// `[KeyCombo: ref]` table), so a duplicate is never DEAD
     /// — the loud treatment is reserved for a row that cannot

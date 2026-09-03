@@ -54,15 +54,10 @@ struct AdvancedLuaGroup: View {
                     )
                     : binding.wrappedValue.lua,
                 combo: binding.wrappedValue.combo,
-                conflict: ConflictText.tooltip(
+                reading: ConflictText.reading(
                     for: binding.wrappedValue,
                     in: bindings,
                     config: model.config,
-                    disabled: disabledSystemShortcuts
-                ),
-                severity: ConflictText.severity(
-                    for: binding.wrappedValue,
-                    in: bindings,
                     disabled: disabledSystemShortcuts
                 ),
                 preflight: { combo in

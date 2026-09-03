@@ -20,16 +20,22 @@ struct ConflictRowTreatmentTests {
     private static let needles: [String: [String]] = [
         "Recorder/KeyRecorderChrome.swift": [
             // The dead outline is drawn on the REST shape only,
-            // in `danger`, gated on the flag.
+            // in `danger`, gated on the flag. The geometry in
+            // this needle is GLUE holding it contiguous through
+            // the gate AND the stroke (tests.md ▸ a drawn
+            // VALUE) — not an assertion about the radius, and
+            // `lineWidth` is deliberately outside it.
             "}elseifdead{RoundedRectangle(cornerRadius:5)"
                 + ".strokeBorder(SettingsTheme.danger,"
         ],
         "Recorder/KeyRecorderField+Conflict.swift": [
             // The caption exists only for a dead row and speaks
-            // the same sentence the badge carries.
-            "ifisDead,letconflict{HStack(spacing:4){"
+            // the same sentence the badge carries. Spacing and
+            // font are glue, as above.
+            "ifisDead,letsentence=conflictSentence{"
+                + "HStack(spacing:4){"
                 + "Image(systemName:\"exclamationmark.triangle.fill\")"
-                + "Text(conflict)}.font(.caption)"
+                + "Text(sentence)}.font(.caption)"
                 + ".foregroundStyle(SettingsTheme.danger)",
             // The badge reads the same flag.
             "isDead?SettingsTheme.danger:SettingsTheme.warningInk",
@@ -39,14 +45,19 @@ struct ConflictRowTreatmentTests {
             "RecorderButtonChrome(recording:recording,dead:isDead)",
             // …the caption is mounted under the field…
             "clearButton}deadCaption",
-            // …and a named control is valued with its cost (#812).
-            ".accessibilityValue(isDead&&conflict!=nil?L(",
+            // …a dead row never also claims "Active now"…
+            "ifletliveFeedback,showsFeedback(liveFeedback){",
+            // …and the tier and its sentence arrive as ONE
+            // value, declared `let` with no default so the
+            // memberwise init REQUIRES it: widening this to a
+            // defaulted `var` is what would let a new mount
+            // render the old chrome unseen.
+            "letreading:ConflictReading?",
         ],
-        // Every recorder mount hands the severity down — a row
-        // that passes only the tooltip renders the old chrome.
-        "KeybindingNavRow.swift": ["severity:severity,"],
+        // Every recorder mount mints that one value.
+        "KeybindingNavRow.swift": ["reading:reading,"],
         "KeybindingAppGroup+Row.swift": [
-            "severity:ConflictText.severity("
+            "reading:ConflictText.reading("
         ],
     ]
 
@@ -86,6 +97,6 @@ struct ConflictRowTreatmentTests {
         )
         .replacingOccurrences(of: " ", with: "")
         .replacingOccurrences(of: "\n", with: "")
-        #expect(source.contains("severity:ConflictText.severity("))
+        #expect(source.contains("reading:ConflictText.reading("))
     }
 }

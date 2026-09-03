@@ -4,7 +4,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A registrar that refuses configured key codes — simulates
-/// `RegisterEventHotKey` declining a system-reserved combo.
+/// `RegisterEventHotKey` returning nil, which happens for a
+/// chord already registered IN THIS PROCESS (a keypad twin
+/// against its authored key). It is NOT a macOS collision:
+/// `eventHotKeyExistsErr` is intra-process only (#1126).
 @MainActor
 private final class DenyingRegistrar: HotkeyRegistrar {
     var deniedKeyCodes: Set<UInt32> = []

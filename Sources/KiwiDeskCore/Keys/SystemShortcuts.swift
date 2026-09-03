@@ -23,8 +23,9 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case screenshotTools
     // ⌥⌘ family (#1075). The Zoom trio is Accessibility-gated —
     // enablement lives in the GUI's `SystemShortcutEnablement`
-    // (#1105) — and a live chord makes `RegisterEventHotKey`
-    // fail silently.
+    // (#1105) — and while one is ON, macOS answers the press
+    // before the binding hears it (#1126; the registration
+    // itself is accepted).
     case zoomToggle
     case zoomIn
     case zoomOut

@@ -41,8 +41,7 @@ struct NavRow: View {
             KeyRecorderField(
                 name: command.resolvedLabel,
                 combo: index.map { bindings[$0].combo } ?? "",
-                conflict: conflict,
-                severity: severity,
+                reading: reading,
                 preflight: preflight,
                 onRecord: record,
                 onClear: clear
@@ -73,18 +72,9 @@ struct NavRow: View {
         }
     }
 
-    private var severity: ConflictSeverity? {
+    private var reading: ConflictReading? {
         guard let index else { return nil }
-        return ConflictText.severity(
-            for: bindings[index],
-            in: bindings,
-            disabled: disabledSystemShortcuts
-        )
-    }
-
-    private var conflict: String? {
-        guard let index else { return nil }
-        return ConflictText.tooltip(
+        return ConflictText.reading(
             for: bindings[index],
             in: bindings,
             config: model.config,

@@ -73,10 +73,17 @@ extension SettingsModel {
         _ conflicts: [Conflict]
     ) -> String? {
         guard let only = conflicts.first else { return nil }
+        // ONE live read for the whole banner (#1126): the set is
+        // machine state, and a read per conflict is both N+1
+        // preference copies and a chance for two lines of one
+        // banner to disagree.
+        let disabled = disabledSystemShortcuts()
         guard conflicts.count > 1 else {
-            return sentence(only)
+            return sentence(only, disabled: disabled)
         }
-        let lines = conflicts.map { "– \(bulletLine($0))" }
+        let lines = conflicts.map {
+            "– \(bulletLine($0, disabled: disabled))"
+        }
         // The separator lives HERE, not on the translatable
         // string: it was a trailing \n inside the English, and
         // `merge-keys` trims surrounding whitespace off every
@@ -91,7 +98,10 @@ extension SettingsModel {
     }
 
     /// Formats single conflict explanation sentence (#9).
-    private func sentence(_ conflict: Conflict) -> String {
+    private func sentence(
+        _ conflict: Conflict,
+        disabled: Set<SystemShortcut>
+    ) -> String {
         switch conflict.target {
         case .unrecognized:
             return L(
@@ -115,7 +125,7 @@ extension SettingsModel {
             // collision wording until its precedence is.
             switch ConflictSeverity.of(
                 conflict,
-                disabled: disabledSystemShortcuts()
+                disabled: disabled
             ) {
             case .dead:
                 return L(
@@ -133,7 +143,7 @@ extension SettingsModel {
                     localized(conflict.name),
                     shortcut.localizedName
                 )
-            default:
+            case .dormant, .reserved, .duplicate, .unrecognized:
                 break
             }
             return L(
@@ -147,7 +157,10 @@ extension SettingsModel {
     }
 
     /// Formats bullet point text for individual conflict in list.
-    private func bulletLine(_ conflict: Conflict) -> String {
+    private func bulletLine(
+        _ conflict: Conflict,
+        disabled: Set<SystemShortcut>
+    ) -> String {
         switch conflict.target {
         case .unrecognized:
             return L(
@@ -166,7 +179,7 @@ extension SettingsModel {
         case .systemShortcut(let shortcut):
             switch ConflictSeverity.of(
                 conflict,
-                disabled: disabledSystemShortcuts()
+                disabled: disabled
             ) {
             case .dead:
                 return L(
@@ -183,7 +196,7 @@ extension SettingsModel {
                     localized(conflict.name),
                     shortcut.localizedName
                 )
-            default:
+            case .dormant, .reserved, .duplicate, .unrecognized:
                 break
             }
             return L(

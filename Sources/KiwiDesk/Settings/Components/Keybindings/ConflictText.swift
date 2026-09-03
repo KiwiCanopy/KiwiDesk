@@ -1,6 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
+/// A row's whole reading of its conflict: the tier that decides
+/// how it is DRAWN and the sentence that says it, minted
+/// together (#1126). ONE value, because two parameters let a
+/// mount pass the tier without the words — a red outline saying
+/// nothing, which is hue alone.
+struct ConflictReading: Equatable {
+    let severity: ConflictSeverity
+    let sentence: String
+}
+
 /// Keybinding conflict tooltip and localized system shortcut names (#96).
 enum ConflictText {
     /// The row's reading of its conflict (#1126), or nil when
@@ -17,6 +27,28 @@ enum ConflictText {
         ).map { ConflictSeverity.of($0, disabled: disabled) }
     }
 
+    /// The tier and its sentence in one value — what every row
+    /// surface takes.
+    @MainActor
+    static func reading(
+        for binding: KeyBinding,
+        in bindings: [KeyBinding],
+        config: GuiConfig,
+        disabled: Set<SystemShortcut>
+    ) -> ConflictReading? {
+        guard
+            let severity = severity(
+                for: binding,
+                in: bindings,
+                disabled: disabled
+            )
+        else { return nil }
+        return ConflictReading(
+            severity: severity,
+            sentence: sentence(for: severity, config: config)
+        )
+    }
+
     /// Tooltip text for a conflicting keybinding row — the
     /// COST, not just the collision (#1126; `KeybindingCatalog`,
     /// #96).
@@ -27,13 +59,21 @@ enum ConflictText {
         config: GuiConfig,
         disabled: Set<SystemShortcut>
     ) -> String? {
-        guard
-            let severity = severity(
-                for: binding,
-                in: bindings,
-                disabled: disabled
-            )
-        else { return nil }
+        reading(
+            for: binding,
+            in: bindings,
+            config: config,
+            disabled: disabled
+        )?.sentence
+    }
+
+    /// What each tier says. The argument for the tiers is
+    /// `docs/design-decisions.md` ▸ Shortcuts (#1126).
+    @MainActor
+    static func sentence(
+        for severity: ConflictSeverity,
+        config: GuiConfig
+    ) -> String {
         switch severity {
         case .unrecognized:
             return L(

@@ -63,20 +63,3 @@ enum ConflictSeverity: Equatable {
         return false
     }
 }
-
-/// The switched-off system shortcuts, read ONCE per section
-/// render and handed down (#1105 asked for one read per surface,
-/// not one per row). Defaults empty — a row rendered outside the
-/// Shortcuts section reads every register chord as live, which
-/// is the shipped-default reading for a host that has toggled
-/// nothing.
-private struct DisabledSystemShortcutsKey: EnvironmentKey {
-    static let defaultValue: Set<SystemShortcut> = []
-}
-
-extension EnvironmentValues {
-    var disabledSystemShortcuts: Set<SystemShortcut> {
-        get { self[DisabledSystemShortcutsKey.self] }
-        set { self[DisabledSystemShortcutsKey.self] = newValue }
-    }
-}

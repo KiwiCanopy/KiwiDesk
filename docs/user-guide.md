@@ -2848,7 +2848,7 @@ a committed recording — and a clear, and deleting a whole row —
 takes effect immediately: press a combo recorded in the
 runtime-active layer and it works, no Save needed, and a deleted
 row's combo stops working the moment its row disappears. A brief caption reports the exact outcome:
-"Active now", updated for an inactive layer, refused by macOS,
+"Active now", updated for an inactive layer, not granted,
 shadowed by the active profile, or unable to compile/apply. The
 change is still *unsaved*: the pill's Save persists the base
 shortcut configuration globally in `gui.json`; profile-specific

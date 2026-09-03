@@ -10,17 +10,28 @@ import SwiftUI
 /// `KeyRecorderField.swift`, which sits at the §2.1 ceiling.
 ///
 /// A DEAD row (#1126) says so in the flow, not only in the
-/// popover: the chord outlined in `danger`, a worded caption in
-/// the recorder's own caption slot, and the badge in `danger`
-/// too — three channels, none of them colour alone
+/// popover: the chord outlined in `danger`, a worded caption,
+/// and the badge in `danger` too. Every channel reads the ONE
+/// `reading`, so none can draw without the words
 /// (`ConflictRowTreatmentTests`).
 extension KeyRecorderField {
     /// Whether the row cannot fire as things stand.
-    var isDead: Bool { severity?.isDead == true }
+    var isDead: Bool { reading?.severity.isDead == true }
+
+    /// The sentence every channel shows.
+    var conflictSentence: String? { reading?.sentence }
+
+    /// A dead row is never "Active now" (#1126): the outline and
+    /// caption say macOS answers the chord, so the live-apply
+    /// success caption would contradict them in the same column.
+    func showsFeedback(_ feedback: LiveApplyFeedback) -> Bool {
+        if case .applied = feedback.status, isDead { return false }
+        return true
+    }
 
     var conflictBadge: some View {
         iconSlot {
-            if let conflict {
+            if let sentence = conflictSentence {
                 Button {
                     conflictPopoverShown = true
                 } label: {
@@ -36,13 +47,13 @@ extension KeyRecorderField {
                 }
                 .buttonStyle(.plain)
                 .pointingHandCursor()
-                .help(conflict)
-                .accessibilityLabel(conflict)
+                .help(sentence)
+                .accessibilityLabel(sentence)
                 .popover(
                     isPresented: $conflictPopoverShown,
                     arrowEdge: .bottom
                 ) {
-                    Text(conflict)
+                    Text(sentence)
                         .font(.callout)
                         .foregroundStyle(SettingsTheme.ink)
                         .padding(14)
@@ -57,10 +68,10 @@ extension KeyRecorderField {
     /// Hidden from VoiceOver — the record button's value already
     /// speaks it, and the badge's label does too.
     @ViewBuilder var deadCaption: some View {
-        if isDead, let conflict {
+        if isDead, let sentence = conflictSentence {
             HStack(spacing: 4) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                Text(conflict)
+                Text(sentence)
             }
             .font(.caption)
             .foregroundStyle(SettingsTheme.danger)
