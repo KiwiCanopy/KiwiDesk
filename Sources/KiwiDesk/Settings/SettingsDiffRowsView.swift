@@ -78,7 +78,9 @@ enum SettingsDiffJump {
         var anchor = SettingsAnchor(
             destination: SettingsDestination(area: area)
         )
-        if case .key(let labelKey) = row.key.text.label {
+        if !row.jumpsToAreaRoot,
+            case .key(let labelKey) = row.key.text.label
+        {
             anchor.anchor = labelKey
         }
         return anchor

@@ -1,15 +1,9 @@
 import KiwiDeskCore
 
-/// The rows the footer owes for drift the header already claims
-/// (#1197): a screen setup the active profile stores no set for,
-/// a built-in layout nothing has saved, a deleted match. None of
-/// it lives in the draft `GuiConfig`, so `SettingsDraftDiff`
-/// cannot see it; it is read off the model's resolution state
-/// under the SAME predicate the header's ⚠ row uses
-/// (`SettingsHeaderBar.showDivergence`), so the pill's count and
-/// the header's claim cannot disagree — the contradiction this
-/// closes. Each row anchors where the drift is visible: the
-/// Monitors fingerprints row, or the Saved profiles card.
+/// The rows the pill owes for `SettingsModel.profileDrift`
+/// (#1197) — one per verdict, so the pill counts what the header
+/// claims. `docs/design-decisions.md` ▸ *The save pill counts
+/// what the header claims* argues the shape.
 extension SettingsDiffRowSource {
     /// The instance discriminator of every drift row — keeps it
     /// apart from a config row on the same census key.
@@ -18,11 +12,9 @@ extension SettingsDiffRowSource {
     static func driftRows(
         for model: SettingsModel
     ) -> [SettingsDiffRow] {
-        guard model.profileDirty, !model.editingStoredProfile
-        else { return [] }
-        // The same ladder as `SettingsHeaderBar.statusText`,
-        // minus the editing arms the guard above excludes.
-        if model.activeStandard != nil {
+        guard let drift = model.profileDrift else { return [] }
+        switch drift {
+        case .builtIn:
             return [
                 profileRow(
                     L(
@@ -32,8 +24,7 @@ extension SettingsDiffRowSource {
                     )
                 )
             ]
-        }
-        if let name = model.activeProfile {
+        case .screensUnsaved(let name):
             return [
                 SettingsDiffRow.note(
                     .monitors(.fingerprints),
@@ -51,23 +42,28 @@ extension SettingsDiffRowSource {
                         )
                 )
             ]
-        }
-        return [
-            profileRow(
-                L(
-                    "profile_header.status.no_match",
-                    "No profile matches this monitor setup."
+        case .noMatch:
+            return [
+                profileRow(
+                    L(
+                        "profile_header.status.no_match",
+                        "No profile matches this monitor setup."
+                    )
                 )
-            )
-        ]
+            ]
+        }
     }
 
+    /// Jumps to the Profiles ROOT: no control renders the
+    /// composing Standard, and the Saved profiles card's one
+    /// anchored control is Load, the verb that replaces a layout.
     private static func profileRow(_ note: String) -> SettingsDiffRow {
         SettingsDiffRow.note(
             .profiles(.profilesLoad),
             instance: driftInstance,
             label: L("diff.drift.profile", "Profile"),
-            note: note
+            note: note,
+            areaRoot: true
         )
     }
 }

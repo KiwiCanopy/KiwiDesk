@@ -3567,32 +3567,37 @@ ruling 2026-08-12.)
 **[Rationale]**
 
 The pill's leading readout is the ROW COUNT of the list it opens
-(owner 2026-08-10), and that list was built from the draft's
-`GuiConfig` alone. But the pill appears for `profileDirty` too —
-the live profile has no monitor set for the connected screens, a
-built-in layout is composing, the matched profile was deleted —
-and none of that is a config leaf. So the header said *Unsaved
-monitor changes*, the pill said *Unsaved changes*, and clicking
-the pill opened nothing: two surfaces reporting unsaved state
-with different ideas of what "unsaved" covers.
+(owner 2026-08-10), so every reason the pill appears must be a
+row in that list. Two reasons exist: a draft config leaf, which
+`SettingsDraftDiff` attributes to a census row, and live drift —
+the active profile storing no monitor set for the connected
+screens, a built-in layout composing, a matched profile deleted
+— which is model state, not a leaf. A pill summoned by the
+second while its list was built from the first alone said
+*Unsaved changes* over nothing, and the header, deriving the
+same fact on its own, said *Unsaved monitor changes* beside it.
 
-The ruling is to **extend the diff source, not to reword the
-zero-row branch**. Drift becomes rows in the same list
-(`SettingsDiffRowSource.driftRows`), under the same predicate the
-header's ⚠ row uses, each anchored where the drift is visible —
-the Monitors fingerprints row for a screen setup the profile
-lacks, the Saved profiles card for a layout nothing has saved —
-so the popover jumps to it like any other diff row. The zero-row
-branch keeps its wording and stops being reachable while another
-surface reports unsaved state, which was the whole contradiction.
-The residue the ruling names (option 2, an honest sentence for
-drift that cannot be itemised) was not needed: every arm of the
-header's ladder has a row and an anchor.
+The ruling is **one verdict, three readers, not three
+predicates**: `SettingsModel.profileDrift` decides whether and
+how the live target drifts, and the header's status line, the
+pill's presence and the pill's drift rows all switch on it.
+Extending the diff source (the owner's option 1) rather than
+rewording the zero-row branch keeps the count honest and gives
+each drift an anchor — the Monitors fingerprints row for a
+screen setup the profile lacks, the Profiles root for the two
+profile-shaped arms. The alternative, an honest sentence for
+drift that cannot be itemised (option 2), was reserved for a
+residue that did not materialise.
 
-What stays deliberate: a stored profile's draft carries no drift
-row, because the header hides divergence while one is being
-edited — the drift belongs to the live target, not the profile
-on the table.
+Two consequences are deliberate. A stored profile's draft
+carries no drift row and summons no pill for drift: the header
+hides divergence while a profile is on the table, because the
+drift belongs to the live target, not the file being edited.
+And the profile-shaped rows jump to the Profiles ROOT rather
+than a control: nothing renders the composing Standard, and the
+Saved profiles card's one anchored control is Load — the verb
+that replaces a layout — which is the wrong thing to flash under
+a note that says *save as a profile*.
 
 ### The header search is a field, not a button that opens one
 

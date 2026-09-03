@@ -641,11 +641,18 @@ must keep:
 - The mode pick persists via `SettingsModePreference`
   (`UserDefaults`, absent = Simple, never `gui.json`); the
   save pill's unsaved count (the header carries none — the
-  pill is the draft's one narrator) comes from
-  `SettingsDraftDiff` via the popover's own row list, and that
-  diff's every-leaf attribution net (`SettingsDraftDiffTests`)
-  is what a new `GuiConfig` or `TilingSettings` field reds
-  until its census row exists. A surface stating an N beside
+  pill is the draft's one narrator) is the ROW COUNT of the
+  popover's own list, `SettingsDiffRowSource.rows(for:)`, and
+  **every reason the pill appears owes a row in that list**: a
+  config leaf through `SettingsDraftDiff`, whose every-leaf
+  attribution net (`SettingsDraftDiffTests`) is what a new
+  `GuiConfig` or `TilingSettings` field reds until its census
+  row exists, and live drift through the ONE
+  `SettingsModel.profileDrift` verdict the header's status line,
+  the pill's presence and `driftRows` all read — a surface
+  deriving that predicate for itself is how the pill came to
+  say "Unsaved changes" over an empty list (#1197,
+  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`). A surface stating an N beside
   a visible list derives the N from that list's rows, never
   from the settings count — a per-instance family made the
   two disagree on sight (owner 2026-08-10).

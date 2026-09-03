@@ -7,9 +7,7 @@ import SwiftUI
 /// the content column beneath.
 extension SettingsHeaderBar {
 
-    var showDivergence: Bool {
-        model.profileDirty && !model.editingStoredProfile
-    }
+    var showDivergence: Bool { model.liveDrift }
 
     func statusRow(_ text: String) -> some View {
         HStack(spacing: 6) {
@@ -72,18 +70,35 @@ extension SettingsHeaderBar {
                     + "switch your layout."
             )
         }
-        if model.activeStandard != nil {
+        // The drift arms read the ONE verdict the pill's rows
+        // read (#1197): a deleted match used to say "update the
+        // profile" here with no profile to update.
+        switch model.profileDrift {
+        case .builtIn:
             return L(
                 "profile_header.status.built_in",
                 "Built-in layout — save as a profile to "
                     + "make it yours."
             )
-        }
-        if model.profileDirty {
+        case .screensUnsaved:
             return L(
                 "profile_header.status.unsaved_monitor",
                 "Unsaved monitor changes — update the "
                     + "profile to keep them."
+            )
+        case .noMatch:
+            return L(
+                "profile_header.status.no_match",
+                "No profile matches this monitor setup."
+            )
+        case nil:
+            break
+        }
+        if model.activeStandard != nil {
+            return L(
+                "profile_header.status.built_in",
+                "Built-in layout — save as a profile to "
+                    + "make it yours."
             )
         }
         if model.activeProfile == nil {
