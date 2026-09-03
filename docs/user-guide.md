@@ -2891,7 +2891,10 @@ KiwiDesk never hears it. The chord is outlined in red, a caption
 under it says *Won't work: macOS answers this shortcut first, for
 Spotlight* (or whichever feature), and the banner says the same.
 A collision with a switched-off macOS shortcut keeps the quiet
-⚠️ and a tooltip saying it is off right now. Two of your own rows
+⚠️ and a tooltip saying it is off right now. A collision with a
+shortcut every app carries — ⌘W, ⌘Q, ⌘H, ⌘M — is the reverse
+case: your row works and every app loses that item's shortcut
+while it is bound, and the ⚠️ says so. Two of your own rows
 on one chord get the ⚠️ with "only one of the two will fire" — a
 layer holds one action per chord, so the other is silent until
 you clear it.

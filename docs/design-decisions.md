@@ -5714,9 +5714,11 @@ below, #1105), and since #1126 the row reads the same bit to pick
 its TIER: a symbolic hotkey macOS has on is a dead row — outlined
 chord, worded caption, "won't work" — because the press goes to
 macOS and the row never fires (measured 2026-09-03); one macOS
-has off keeps the quiet ⚠ and says it is off; a register chord
-with no symbolic id keeps the collision wording, its precedence
-being unmeasured. The treatment is deliberately smaller than a
+has off keeps the quiet ⚠ and says it is off; a chord every app's
+menus carry (⌘W, ⌘Q, ⌘H, ⌘M) is the reverse — KiwiDesk wins it,
+measured on ⌘W and ⌘P, so the row says every app loses that item;
+and the two system-level chords outside the table (⌘Tab, ⌥⌘Esc)
+keep the collision wording, their precedence being unmeasured. The treatment is deliberately smaller than a
 tinted row: outline plus caption already carry the fact in two
 channels, a red ground would be a new register needing its own
 inks, and a filled badge has no ink that clears 4.5:1 in both

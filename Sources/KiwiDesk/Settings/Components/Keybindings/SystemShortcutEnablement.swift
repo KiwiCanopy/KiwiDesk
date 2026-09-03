@@ -42,6 +42,27 @@ enum SystemShortcutEnablement {
 }
 
 extension SystemShortcut {
+    /// A chord every app's own menus carry (Close, Quit, Hide,
+    /// Minimize). KiwiDesk WINS it — measured on ⌘W and ⌘P
+    /// (#1126, #1075) — so the cost is every app's, not the
+    /// row's. False for a symbolic hotkey and for the two
+    /// system-level chords (⌘Tab, ⌥⌘Esc) whose press precedence
+    /// is unmeasured. A `switch` for the parity idiom's reason.
+    var isUniversalAccelerator: Bool {
+        switch self {
+        case .closeWindow, .quitApp, .hideApp, .minimize:
+            return true
+        case .spotlight, .appSwitcher, .forceQuit,
+            .missionControlSpaceLeft, .missionControlSpaceRight,
+            .missionControl, .appWindows, .screenshot,
+            .screenshotSelection, .screenshotTools, .zoomToggle,
+            .zoomIn, .zoomOut, .dockHiding, .finderSearch,
+            .inputSourceNext, .invertColors, .increaseContrast,
+            .decreaseContrast:
+            return false
+        }
+    }
+
     /// Apple's `AppleSymbolicHotKeys` id and the state macOS
     /// ships when the plist has no entry for it; nil = not a
     /// symbolic hotkey at all — an app accelerator or a system

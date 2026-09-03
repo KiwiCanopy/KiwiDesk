@@ -57,6 +57,13 @@ enum ConflictText {
                     + "for %1$@.",
                 shortcut.localizedName
             )
+        case .shadowsApps(let shortcut):
+            return L(
+                "keybinding.conflict.tooltip.shadows_apps",
+                "Takes %1$@ away from every app while it is "
+                    + "bound here.",
+                shortcut.localizedName
+            )
         case .reserved(let shortcut):
             return L(
                 "keybinding.conflict.tooltip.system",

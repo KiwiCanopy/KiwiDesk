@@ -113,10 +113,11 @@ extension SettingsModel {
             // A live symbolic hotkey is DEAD, measured (#1126);
             // a register chord outside that table keeps the
             // collision wording until its precedence is.
-            if case .dead = ConflictSeverity.of(
+            switch ConflictSeverity.of(
                 conflict,
                 disabled: disabledSystemShortcuts()
             ) {
+            case .dead:
                 return L(
                     "keybinding.conflict.system_dead",
                     "Shortcut for \"%1$@\" won't work: macOS "
@@ -124,6 +125,16 @@ extension SettingsModel {
                     localized(conflict.name),
                     shortcut.localizedName
                 )
+            case .shadowsApps:
+                return L(
+                    "keybinding.conflict.system_shadows_apps",
+                    "Shortcut for \"%1$@\" takes \"%2$@\" away "
+                        + "from every app.",
+                    localized(conflict.name),
+                    shortcut.localizedName
+                )
+            default:
+                break
             }
             return L(
                 "keybinding.conflict.system",
@@ -153,10 +164,11 @@ extension SettingsModel {
                 localized(who)
             )
         case .systemShortcut(let shortcut):
-            if case .dead = ConflictSeverity.of(
+            switch ConflictSeverity.of(
                 conflict,
                 disabled: disabledSystemShortcuts()
             ) {
+            case .dead:
                 return L(
                     "keybinding.conflict.bullet.system_dead",
                     "\"%1$@\" won't work — macOS answers "
@@ -164,6 +176,15 @@ extension SettingsModel {
                     localized(conflict.name),
                     shortcut.localizedName
                 )
+            case .shadowsApps:
+                return L(
+                    "keybinding.conflict.bullet.system_shadows_apps",
+                    "\"%1$@\" takes \"%2$@\" away from every app",
+                    localized(conflict.name),
+                    shortcut.localizedName
+                )
+            default:
+                break
             }
             return L(
                 "keybinding.conflict.bullet.system",

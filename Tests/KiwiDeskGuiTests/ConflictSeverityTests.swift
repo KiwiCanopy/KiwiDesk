@@ -47,13 +47,23 @@ struct ConflictSeverityTests {
         #expect(severity.isDead)
     }
 
-    /// A register chord with no symbolic id (⌘W) has no measured
-    /// press precedence, so it is a collision, never a death.
-    @Test("a register chord outside the symbolic table is reserved")
-    func hardWiredChordIsReserved() throws {
+    /// ⌘W is every app's Close, and KiwiDesk wins it (measured
+    /// 2026-09-03): the row works, the apps lose the item.
+    @Test("an app accelerator shadows apps, never dead")
+    func appAcceleratorShadowsApps() throws {
         let closeWindow = try #require(conflict("command+w"))
         let severity = ConflictSeverity.of(closeWindow, disabled: [])
-        #expect(severity == .reserved(.closeWindow))
+        #expect(severity == .shadowsApps(.closeWindow))
+        #expect(!severity.isDead)
+    }
+
+    /// ⌘Tab is system-level and outside the symbolic table, with
+    /// no measured precedence: a collision, never a death.
+    @Test("a system-level chord outside the table is reserved")
+    func systemLevelChordIsReserved() throws {
+        let appSwitcher = try #require(conflict("command+tab"))
+        let severity = ConflictSeverity.of(appSwitcher, disabled: [])
+        #expect(severity == .reserved(.appSwitcher))
         #expect(!severity.isDead)
     }
 

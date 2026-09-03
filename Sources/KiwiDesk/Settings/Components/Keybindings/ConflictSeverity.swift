@@ -11,9 +11,9 @@ import SwiftUI
 /// an ENABLED symbolic hotkey is answered by macOS before the
 /// binding hears the press, so that row never fires; a layer is
 /// one `[KeyCombo: ref]` table, so of two rows on one chord
-/// exactly one fires. A register chord with NO symbolic id (⌘W,
-/// ⌘Tab, …) has no measured precedence yet, so it stays a
-/// collision rather than a death.
+/// exactly one fires; a chord every app's menus carry (⌘W) is
+/// WON by KiwiDesk, so the app loses it. ⌘Tab and ⌥⌘Esc have no
+/// measured precedence yet, so they stay a collision.
 enum ConflictSeverity: Equatable {
     /// A symbolic hotkey macOS has switched on: the press goes
     /// to macOS and the row never fires.
@@ -22,8 +22,11 @@ enum ConflictSeverity: Equatable {
     /// and Invert Colors families): the row works until the
     /// user turns that feature on.
     case dormant(SystemShortcut)
-    /// A register chord macOS answers outside the symbolic
-    /// table — who wins the press is unmeasured (#1126).
+    /// A chord every app's menus carry: the row works and every
+    /// app loses that item's shortcut while it is bound.
+    case shadowsApps(SystemShortcut)
+    /// A system-level chord outside the symbolic table (⌘Tab,
+    /// ⌥⌘Esc) — who wins the press is unmeasured (#1126).
     case reserved(SystemShortcut)
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
@@ -41,8 +44,9 @@ enum ConflictSeverity: Equatable {
         switch conflict.target {
         case .systemShortcut(let shortcut):
             if disabled.contains(shortcut) { return .dormant(shortcut) }
-            return shortcut.symbolicHotkey == nil
-                ? .reserved(shortcut) : .dead(shortcut)
+            if shortcut.symbolicHotkey != nil { return .dead(shortcut) }
+            return shortcut.isUniversalAccelerator
+                ? .shadowsApps(shortcut) : .reserved(shortcut)
         case .otherBinding(let who):
             return .duplicate(who)
         case .unrecognized:
