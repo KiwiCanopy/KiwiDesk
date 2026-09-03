@@ -23,7 +23,10 @@ extension SettingsModel {
         profileDirty && !editingStoredProfile
     }
 
-    /// The drift's shape, nil without `liveDrift`.
+    /// The drift's shape, nil without `liveDrift`. The Standard
+    /// arm leads only by convention: `ProfileManager` clears the
+    /// other whenever it sets one, so both-set is unreachable
+    /// and the order decides nothing (guard-prover, 2026-09-03).
     var profileDrift: ProfileDrift? {
         guard liveDrift else { return nil }
         if activeStandard != nil { return .builtIn }
