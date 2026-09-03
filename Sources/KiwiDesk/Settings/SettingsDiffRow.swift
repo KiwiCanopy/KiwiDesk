@@ -14,6 +14,10 @@ struct SettingsDiffRow: Identifiable, Hashable {
     var newValue: String?
     /// Localized change description for structural modifications.
     var changeNote: String?
+    /// The jump lands on the area's root rather than the key's
+    /// labelled control — for a row whose subject no control
+    /// renders (#1197).
+    var jumpsToAreaRoot = false
 
     /// A plain value-pair row.
     static func change(
@@ -38,7 +42,8 @@ struct SettingsDiffRow: Identifiable, Hashable {
         _ key: SettingKey,
         instance: String? = nil,
         label: String,
-        note: String
+        note: String,
+        areaRoot: Bool = false
     ) -> SettingsDiffRow {
         SettingsDiffRow(
             id: rowID(key, instance: instance),
@@ -46,7 +51,8 @@ struct SettingsDiffRow: Identifiable, Hashable {
             label: label,
             oldValue: nil,
             newValue: nil,
-            changeNote: note
+            changeNote: note,
+            jumpsToAreaRoot: areaRoot
         )
     }
 

@@ -24,8 +24,10 @@ struct SettingsFooter: View {
     /// Anything that gives a verb meaning. The creation offer on
     /// a fully clean setup deliberately does NOT summon the pill —
     /// creation lives in Profiles; the pill narrates a draft.
+    /// The drift half is the header's own predicate (#1197), so
+    /// the pill never claims what no surface itemises.
     private var hasWork: Bool {
-        model.isDirty || model.profileDirty
+        model.isDirty || model.liveDrift
     }
 
     var body: some View {

@@ -3562,6 +3562,51 @@ the contrast the platform's had: the search field's accent at
 which is the floor any second one starts from. (#833, owner
 ruling 2026-08-12.)
 
+### The save pill counts what the header claims (#1197)
+
+**[Rationale]**
+
+The pill's leading readout is the ROW COUNT of the list it opens
+(owner 2026-08-10), so every reason the pill appears must be a
+row in that list. Two reasons exist: a draft config leaf, which
+`SettingsDraftDiff` attributes to a census row, and live drift —
+the active profile storing no monitor set for the connected
+screens, a built-in layout composing, a matched profile deleted
+— which is model state, not a leaf. A pill summoned by the
+second while its list was built from the first alone said
+*Unsaved changes* over nothing, and the header, deriving the
+same fact on its own, said *Unsaved monitor changes* beside it.
+
+The ruling is **one verdict, three readers, not three
+predicates**: `SettingsModel.profileDrift` decides whether and
+how the live target drifts, and the header's status line, the
+pill's presence and the pill's drift rows all switch on it.
+Extending the diff source (the owner's option 1) rather than
+rewording the zero-row branch keeps the count honest and gives
+each drift an anchor — the Monitors fingerprints row for a
+screen setup the profile lacks, the Profiles root for the two
+profile-shaped arms. The alternative, an honest sentence for
+drift that cannot be itemised (option 2), was reserved for a
+residue that did not materialise.
+
+A drift row says what is missing and names the button that fixes
+it, in its OWN words: the header's sentences were borrowed at
+first and read as "Profile · Built-in layout — save as a profile
+to make it yours" (owner, 2026-09-03), because a header narrates
+a status line while a row narrates a change beside a label. The
+button is interpolated rather than quoted, so the row names what
+is actually on screen.
+
+Two consequences are deliberate. A stored profile's draft
+carries no drift row and summons no pill for drift: the header
+hides divergence while a profile is on the table, because the
+drift belongs to the live target, not the file being edited.
+And the profile-shaped rows jump to the Profiles ROOT rather
+than a control: nothing renders the composing Standard, and the
+Saved profiles card's one anchored control is Load — the verb
+that replaces a layout — which is the wrong thing to flash under
+a note that says *save as a profile*.
+
 ### The header search is a field, not a button that opens one
 
 **[Trade-off]**
