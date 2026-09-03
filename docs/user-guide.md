@@ -2188,10 +2188,10 @@ be read at all.
 
 ### Which Profile Loads
 
-The card states the rule — *a profile bound to the active Desktop
-loads first; otherwise KiwiDesk picks the profile whose screen count
-matches, preferring the one marked default* — and then answers it for
-your machine right now, naming which of the four ways it resolved:
+The card answers it for your machine right now — *"Right now: 2
+screens → Desk (these exact monitors)"* — naming which of the four
+ways it resolved. Its **?** carries the whole ladder, which is what
+the answer is read against:
 
 - a **Desktop binding**, which outranks everything below it. If you
   bound a profile to the Desktop your main screen is on, that is

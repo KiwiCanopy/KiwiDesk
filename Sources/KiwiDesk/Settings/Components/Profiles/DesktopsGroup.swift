@@ -56,15 +56,16 @@ struct DesktopsGroup: View {
     private var helpText: String {
         L(
             "desktops.help",
-            "Only Desktops on your main screen can be bound, "
-                + "because macOS's \"Displays have separate "
-                + "Spaces\" gives every screen its own Desktops "
-                + "by default. Turn it off, in System Settings ▸ "
-                + "Desktop & Dock, and every Desktop is shared "
-                + "across your screens instead — all of them "
-                + "bindable, at the cost of each screen's own "
-                + "menu bar, its own Dock, and fullscreen windows "
-                + "that no longer blank the others."
+            "Only a Desktop on your main screen selects a "
+                + "profile, because macOS's \"Displays have "
+                + "separate Spaces\" gives every screen its own "
+                + "Desktops by default. Turn it off, in System "
+                + "Settings ▸ Desktop & Dock, and every Desktop "
+                + "is shared across your screens instead — all "
+                + "of them able to select one, at the cost of "
+                + "each screen's own menu bar, its own Dock, and "
+                + "fullscreen windows that no longer blank the "
+                + "others."
         )
     }
 

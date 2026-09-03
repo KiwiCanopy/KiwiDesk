@@ -7,7 +7,8 @@ import SwiftUI
 extension ProfilesSection {
     @ViewBuilder var whichProfileLoads: some View {
         SettingsSection(
-            SettingsCatalog.profiles.whichProfileLoads
+            SettingsCatalog.profiles.whichProfileLoads,
+            help: ladderHelp
         ) {
             Text(rulesSentence)
                 .font(.callout)
@@ -19,13 +20,35 @@ extension ProfilesSection {
         }
     }
 
+    /// The card is a live DIAGNOSTIC, so its flow line states
+    /// only the premise the verdict below is read against
+    /// (#1241). The ladder itself is a concept and lives in the
+    /// `?` — `ui-patterns.md` ▸ a concept goes in the help. The
+    /// old line stated two of the four rungs as if they were
+    /// the rule, which is the half-a-rule-stated-confidently
+    /// shape `docs/design-decisions.md` rules against.
     private var rulesSentence: String {
         L(
             "profiles.which_loads.rule",
-            "A profile bound to the active Desktop loads first. "
-                + "Otherwise KiwiDesk picks the profile whose "
-                + "screen count matches, preferring the one "
-                + "marked default."
+            "KiwiDesk runs one profile across your whole desk."
+        )
+    }
+
+    /// The whole ladder, in order, naming the card that sets the
+    /// binding — interpolated, never quoted (#818), which is
+    /// also what anchors "Desktop" to macOS for a reader who has
+    /// not met the word yet.
+    private var ladderHelp: String {
+        L(
+            "profiles.which_loads.help",
+            "A profile bound to the Desktop your main screen is "
+                + "on wins outright; set those bindings in "
+                + "%1$@, just below. With no such binding, "
+                + "KiwiDesk takes a profile saved for exactly "
+                + "these screens, then the one marked default "
+                + "for this many screens, and finally a built-in "
+                + "layout if nothing you saved fits.",
+            L("desktops.title", "Profiles per macOS Desktop")
         )
     }
 
