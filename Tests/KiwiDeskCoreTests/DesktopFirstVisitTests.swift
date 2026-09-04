@@ -17,9 +17,22 @@ import Testing
 @Suite("First-visit Space pick (#1230)", .serialized)
 @MainActor
 struct DesktopFirstVisitTests {
+    /// **Connects both displays.** Without them
+    /// `display(forUUID:)` answers nil, the main-arm narrowing
+    /// falls through to every Space, and every case below passes
+    /// for the wrong reason — which is what the first draft of
+    /// this suite did (code review, 2026-09-04).
     private func core() -> KiwiCore {
-        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
-        return makeAuthorityCore()
+        let core = makeAuthorityCore()
+        connectAuthority(
+            core,
+            [
+                authorityDisplay(1, "A"),
+                authorityDisplay(2, "B", x: 100),
+            ]
+        )
+        pinTwoDisplays()
+        return core
     }
 
     /// A Desktop the snapshot lists, so its memory counts.
@@ -116,5 +129,31 @@ struct DesktopFirstVisitTests {
             core.virtualSpaceTarget(for: .number(4), in: snapshot)
                 == SpaceID(1)
         )
+    }
+
+    /// The main arm picks among the Spaces on ITS OWN screen.
+    /// Activating one that lays out on the other display parks
+    /// this screen on what it already showed and moves the active
+    /// Space to the wrong one, taking the focus debt and the
+    /// retile with it.
+    @Test("The main arm picks only its own display's Spaces")
+    func mainArmPicksItsOwnDisplaysSpaces() {
+        defer { resetAuthorityOverrides() }
+        let core = core()
+        // 1 lives on the main display, 2 and 3 on the secondary.
+        core.state.workspaces.assign(SpaceID(1), to: DisplayID(1))
+        for id in [SpaceID(2), SpaceID(3)] {
+            core.state.workspaces.ensureSpace(id)
+            core.state.workspaces.assign(id, to: DisplayID(2))
+        }
+        let snapshot = authoritySnapshot()
+        // Space 1 is the main display's only one and is active,
+        // so nothing is free THERE — the answer must still be a
+        // main-display Space rather than 2 or 3.
+        let target = core.virtualSpaceTarget(
+            for: .number(4),
+            in: snapshot
+        )
+        #expect(target == SpaceID(1))
     }
 }

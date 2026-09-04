@@ -2666,11 +2666,12 @@ spaces held, filed when you switch away and restored when you
 return. Window ids only, never window state — about sixty
 integers across three profiles, written once per switch.
 
-Its counterpart is deliberately NOT stored: which DESKTOP a
-window is on is the WindowServer's fact, and KiwiDesk reads it
-rather than copying it, because a copy can disagree and every
-disagreement is a window that vanishes or appears twice. The
-profile record has no such hazard — nothing outside KiwiDesk
+Its counterpart is deliberately NOT stored, and the reason is
+WHEN each record is authoritative rather than who owns the fact.
+A window's Desktop is read from the compositor continuously, so
+a stored copy would be read while the thing it copies is still
+moving, and every disagreement is a window that vanishes or
+appears twice. The profile record has no such hazard — nothing outside KiwiDesk
 has an opinion about which of its spaces a window sits in.
 (#1230)
 
@@ -2703,9 +2704,11 @@ copy of live *as of the last authoritative reconcile*: every
 explicit prune — a `load_profile` (including a scripted
 Lua/CLI one) or an in-place edit — writes the live set back.
 Hardware-driven applies (monitor change, Desktop
-binding) deliberately don't prune or mirror (the
-no-shuffle-on-reconnect rule), so between such an event and
-the next reconcile the list may lag; the cold-boot seed and
+binding) never MIRROR, and since #1230 they prune exactly when
+they change the profile — re-applying the live one still shuffles
+nothing, which is what the no-shuffle-on-reconnect rule was
+protecting. So between such an event and the next reconcile the
+list may lag; the cold-boot seed and
 the next prune re-converge it. The one place `gui.json` seeds
 *into* live is cold boot — a space that lives only in the
 sidecar (no profile, pin, window, or `set_mode` backs it) is

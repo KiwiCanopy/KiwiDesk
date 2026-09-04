@@ -146,6 +146,10 @@ struct ProfilePartitioningTests {
         core.apply(profile: a, forceRetile: false)
         #expect(members(core, "1").contains(WindowID(1)))
         #expect(core.state.workspaces["Work"] == nil)
+        // The landing itself, which the title names: A's prune
+        // forwards w9 into its fallback, and A's own record does
+        // not move it back out.
+        #expect(members(core, "1").contains(WindowID(9)))
     }
 
     /// The other half: a window in a Space the incoming profile

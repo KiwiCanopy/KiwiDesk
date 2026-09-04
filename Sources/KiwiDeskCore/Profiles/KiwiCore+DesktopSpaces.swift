@@ -35,13 +35,15 @@ import Foundation
 /// cursor. Four records, three subjects, no duplication.
 ///
 /// **The obligation that falls out:** a new per-`Space` field is
-/// keyed by `WindowID` or it is SHARED across Desktops. The
-/// fields that are not so keyed today are `scrollRest` and
-/// `sessionRatios`; #1230 measured `scrollRest`'s collision
-/// unobservable because the #1207 refocus re-anchors the viewport
-/// before it is drawn. Should either bite, the fix is a staleness
-/// rule at the one context build — never a Desktop-keyed map,
-/// which is the refused store by the back door.
+/// keyed by `WindowID` or it is SHARED across Desktops — read
+/// `Space`'s stored properties for which are which rather than
+/// trusting a list here, which rots silently. #1230 measured the
+/// one collision that exists today, `scrollRest`'s, as
+/// unobservable: the #1207 refocus re-anchors the viewport before
+/// it is drawn. Should a shared field ever bite, the fix is a
+/// staleness rule at the one context build — never a
+/// Desktop-keyed map, which is the refused store by the back
+/// door.
 ///
 /// **Every entry point takes the Desktop's KEY rather than
 /// reading the topology.** A switch handler holds a
@@ -230,38 +232,20 @@ extension KiwiCore {
         }
     }
 
-    /// The Desktop memory as the FILE should carry it (#1230).
+    /// Re-keys the session's Desktop-keyed state onto this
+    /// topology's keys, on the same reading the bindings re-key
+    /// on (#1147's `keyMoves`, which that lane made generic FOR
+    /// this one).
     ///
-    /// Read at every sidecar write through
-    /// `GuiConfigStore.liveDesktopSpaces`, so a caller handing
-    /// back a config it loaded earlier cannot write a stale map
-    /// over what the session learned. The `.number` entries are
-    /// dropped by the encoder rather than here — one rule, one
-    /// place — so this hands over everything.
-    func persistedDesktopSpaces() -> [DesktopKey: SpaceID]? {
-        guard desktopMemory.spaceMemoryEstablished else {
-            return nil
-        }
-        return desktopMemory.virtualSpaces
-    }
-
-    /// Seeds the memory from a loaded config (#1230).
-    ///
-    /// MERGED, live winning: a reload mid-session must not
-    /// discard the `.number` entries this session learned, which
-    /// the file never carries.
-    func adoptPersistedDesktopSpaces(
-        _ stored: [DesktopKey: SpaceID]
-    ) {
-        desktopMemory.virtualSpaces.merge(stored) { live, _ in
-            live
-        }
-        desktopMemory.spaceMemoryEstablished = true
-    }
-
-    /// Re-keys the Space memory onto this topology's keys, on the
-    /// same reading the bindings re-key on (#1147's `keyMoves`,
-    /// which that lane made generic FOR this one).
+    /// **Every holder, not just the map.** `lastDesktop` carries
+    /// the same key and is compared across snapshots by
+    /// `isSecondarySwitch`, so leaving it behind reproduces the
+    /// defect one holder over: the next switch compares
+    /// `.identity(x)` against `.number(n)` for ONE Desktop,
+    /// reads a secondary swipe as a main one, files a phantom
+    /// departure and lands the main display on the wrong Space
+    /// (code review, 2026-09-04). A new Desktop-keyed field owes
+    /// itself a line here.
     ///
     /// Without it the memory is written under one key and read
     /// under another. `stampedDesktopSnapshot` returns the
@@ -273,6 +257,11 @@ extension KiwiCore {
     /// so the pick actively AVOIDED the Space it was left on:
     /// #1230's own defect, on every freshly created Desktop.
     func reconcileDesktopSpaceMemory(in snapshot: DesktopSnapshot) {
+        // The two holders are INDEPENDENT: an empty map is the
+        // ordinary state on the switch that first stamps a
+        // Desktop, and gating the cursor's re-key on the map's
+        // early return is how it was missed the first time.
+        rekeyLastDesktop(in: snapshot)
         let result = Self.keyMoves(
             in: desktopMemory.virtualSpaces,
             snapshot: snapshot
@@ -288,6 +277,19 @@ extension KiwiCore {
         desktopMemory.virtualSpaces = out
     }
 
+    /// The other holder of a `DesktopKey` across snapshots.
+    /// Resolved through the topology rather than compared as a
+    /// value: two keys can name ONE Desktop while it is being
+    /// stamped, and `isSecondarySwitch` decides on that
+    /// comparison.
+    private func rekeyLastDesktop(in snapshot: DesktopSnapshot) {
+        guard let last = lastDesktop,
+            let space = snapshot.space(for: last),
+            let now = snapshot.key(of: space.id), now != last
+        else { return }
+        lastDesktop = now
+    }
+
     /// Forgets which Space each Desktop was showing (#634).
     ///
     /// A CLEARED memory rather than an absent one: the map became
@@ -296,5 +298,31 @@ extension KiwiCore {
     func forgetDesktopSpaceMemory() {
         desktopMemory.virtualSpaces = [:]
         desktopMemory.spaceMemoryEstablished = true
+    }
+
+    /// Writes the Desktop→Space memory to `gui.json` (#1230).
+    ///
+    /// Nothing else does at a moment that matters: the eight
+    /// sidecar writers are all user actions, so without this the
+    /// memory reached disk only if the user happened to save
+    /// something after their last swipe. Called at QUIT, where
+    /// the session file is already written, and at the discard,
+    /// which must not be re-adopted at the next boot.
+    ///
+    /// **Only where KiwiDesk owns the config.** A Lua-owned setup
+    /// has no sidecar to write, so the memory stays session-only
+    /// there — a limitation of config ownership rather than a
+    /// gap, and `docs/spaces-and-desktops.md` says so.
+    func persistDesktopSpaceMemory() {
+        guard isGuiManaged, desktopMemory.spaceMemoryEstablished,
+            var live = guiConfigStore.load()
+        else { return }
+        // The STORE, never `saveGuiConfig` — that reloads the
+        // whole config, which at quit would rebuild the Lua VM
+        // the stop is tearing down. The write-time stamp fills
+        // `desktopSpaces` in, so this hands the file back
+        // unchanged otherwise.
+        live.desktopSpaces = persistedDesktopSpaces() ?? [:]
+        try? guiConfigStore.save(live)
     }
 }

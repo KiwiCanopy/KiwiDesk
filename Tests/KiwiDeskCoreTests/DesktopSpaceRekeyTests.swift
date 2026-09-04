@@ -36,6 +36,16 @@ struct DesktopSpaceRekeyTests {
         return NativeSpaces.desktopSnapshot()
     }
 
+    /// Pins the topology, then takes the ONE snapshot production
+    /// takes — so these cases exercise the WIRING, not the
+    /// re-key in isolation.
+    private func stampedSnapshotForTest(
+        _ core: KiwiCore
+    ) -> DesktopSnapshot {
+        _ = stampedSnapshot()
+        return core.stampedDesktopSnapshot()
+    }
+
     @Test("A number entry moves to the Desktop's stamp")
     func numberEntryRekeys() {
         defer { resetAuthorityOverrides() }
@@ -135,5 +145,32 @@ struct DesktopSpaceRekeyTests {
                 == SpaceID(3)
         )
         #expect(core.desktopMemory.virtualSpaces[.number(1)] == nil)
+    }
+
+    /// `lastDesktop` holds the same key and is compared ACROSS
+    /// snapshots by `isSecondarySwitch`. Left un-re-keyed, the
+    /// switch after a Desktop is stamped compares `.identity(x)`
+    /// against `.number(n)` for ONE Desktop, reads a secondary
+    /// swipe as a main one, and lands the main display on the
+    /// wrong Space — the same defect, one holder over.
+    @Test("The last Desktop re-keys with the memory")
+    func lastDesktopRekeys() {
+        defer { resetAuthorityOverrides() }
+        let core = makeAuthorityCore()
+        core.lastDesktop = .number(1)
+        _ = stampedSnapshotForTest(core)
+        #expect(core.lastDesktop == .identity(stamp))
+    }
+
+    /// And a `lastDesktop` this topology cannot name is left
+    /// alone rather than nilled — dormancy, as for the map.
+    @Test("A dormant last Desktop is left alone")
+    func dormantLastDesktopSurvives() {
+        defer { resetAuthorityOverrides() }
+        let core = makeAuthorityCore()
+        let absent = DesktopIdentity(raw: "STAMP-GONE-2")
+        core.lastDesktop = .identity(absent)
+        _ = stampedSnapshotForTest(core)
+        #expect(core.lastDesktop == .identity(absent))
     }
 }

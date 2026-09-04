@@ -23,6 +23,13 @@ extension KiwiCore {
         // seed wrote it straight back.
         state.profilePartitioning.reset()
         forgetDesktopSpaceMemory()
+        // The Desktop→Space map is the one record here that
+        // outlives the process (#1230), so the discard has to
+        // reach `gui.json` — otherwise a quit right after
+        // "Discard Saved Window Arrangement" re-adopts it at the
+        // next boot. The other records' files are deleted
+        // eagerly above for the same reason.
+        persistDesktopSpaceMemory()
         onLog("saved window arrangement discarded")
     }
 

@@ -4609,8 +4609,9 @@ activates" means Desktop N became current on the main screen**
 (the screen with the menu bar). With macOS's "Displays have
 separate Spaces" on, each screen switches Desktops on its own —
 a swipe on a secondary screen retiles that screen's arrived
-windows and reports itself on `desktop_change`
-(`monitor` ≥ 2), but never selects a profile. A Desktop that
+windows, moves that screen onto its own Desktop's space, and
+reports itself on `desktop_change` (`monitor` ≥ 2) — but never
+selects a profile. A Desktop that
 lives on a secondary screen can carry a binding, and it fires
 if a display change ever makes that Desktop the main screen's.
 With the option off, or with one screen, the main screen's

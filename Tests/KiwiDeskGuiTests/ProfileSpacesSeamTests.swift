@@ -7,11 +7,12 @@ import Testing
 /// stay one door.
 ///
 /// The doors answer different questions and are deliberately not
-/// merged: `profilePartitioning` is a STORE (which Space a window
-/// sat in under a given profile — KiwiDesk's own fact, which
-/// nothing else records), while `virtualSpaces` is a one-`SpaceID`
-/// cursor and the Desktop partition itself is never stored at all,
-/// because a window's Desktop is the WindowServer's. A consumer
+/// merged: `profilePartitioning` is a STORE, written as a profile
+/// goes inactive and read as it returns, while `virtualSpaces` is
+/// a one-`SpaceID` cursor and the Desktop partition itself is
+/// never stored at all. `KiwiCore+DesktopSpaces.swift` carries
+/// the discriminator — WHEN a record is authoritative — and
+/// `state-and-layout.md` bans restating the weaker form. A consumer
 /// that reaches past either door re-derives a rule that has an
 /// owner, which is how the two came to disagree before #1230.
 ///
@@ -49,7 +50,8 @@ struct ProfileSpacesSeamTests {
         // reaching the map themselves.
         "virtualSpaces": [
             "Profiles/DesktopMemory.swift": 1,
-            "Profiles/KiwiCore+DesktopSpaces.swift": 9,
+            "Profiles/KiwiCore+DesktopSpaces.swift": 7,
+            "Profiles/KiwiCore+DesktopSpacePersistence.swift": 2,
             "App/KiwiCore+AwayWindows.swift": 1,
         ],
     ]
@@ -107,12 +109,12 @@ struct ProfileSpacesSeamTests {
     }
 
     /// The refused design, pinned NEGATIVELY: no stored map
-    /// anywhere is keyed by `DesktopKey` except the two that are
-    /// named here. #1230 refused a per-Desktop Space CONTENTS
-    /// store because a window's Desktop is a fact KiwiDesk READS
-    /// and does not own, so a copy read while the compositor is
-    /// still mutating it can disagree — and every disagreement
-    /// loses or duplicates a window.
+    /// anywhere is keyed by `DesktopKey` except the ones named
+    /// here, each by an exact count. #1230 refused a
+    /// per-Desktop Space CONTENTS store because that record
+    /// would be read while the compositor is still moving what
+    /// it copies — and every disagreement loses or duplicates a
+    /// window.
     ///
     /// Located by the KEY rather than by the value's spelling.
     /// The first draft listed five literal type shapes, so a
@@ -127,15 +129,21 @@ struct ProfileSpacesSeamTests {
         // Every `[DesktopKey: …]` declaration KiwiDesk may hold,
         // with what each one stores. A new entry is a new durable
         // per-Desktop record and owes the argument above.
-        let allowed: [String: String] = [
-            "Profiles/DesktopMemory.swift": "the Space CURSOR",
-            "App/KiwiCore.swift": "the profile BINDINGS",
-            "Config/GuiConfig.swift": "the cursor, persisted",
-            "Config/GuiConfigStore.swift": "the write-time stamp",
+        // Path → (how many `[DesktopKey:` it declares, what it
+        // stores). The COUNT is load-bearing: membership alone
+        // let a second declaration into an already-listed file —
+        // `DesktopMemory.swift` being the obvious home for the
+        // refused store — pass green, which is the fail-open a
+        // negative clause must not have.
+        let allowed: [String: (Int, String)] = [
+            "Profiles/DesktopMemory.swift": (1, "the Space CURSOR"),
+            "App/KiwiCore.swift": (1, "the profile BINDINGS"),
+            "Config/GuiConfig.swift": (5, "the cursor, persisted"),
+            "Config/GuiConfigStore.swift": (1, "the write stamp"),
             "Profiles/KiwiCore+DesktopBindings.swift":
-                "the shared re-key, generic over the value",
-            "Profiles/KiwiCore+DesktopSpaces.swift":
-                "the cursor's door",
+                (9, "the shared re-key, generic over the value"),
+            "Profiles/KiwiCore+DesktopSpacePersistence.swift":
+                (2, "the cursor, read and adopted"),
         ]
         let root = coreRoot
         let prefix = root.path + "/"
@@ -158,15 +166,32 @@ struct ProfileSpacesSeamTests {
         #expect(found.count >= 4)
         for file in found.keys.sorted() {
             #expect(
-                allowed[file] != nil,
+                allowed[file]?.0 == found[file],
                 Comment(
                     rawValue:
-                        "\(file) declares a Desktop-keyed map. "
-                        + "If it stores Space CONTENTS it is the "
+                        "\(file) declares "
+                        + "\(found[file] ?? 0) Desktop-keyed "
+                        + "map(s), expected "
+                        + "\(allowed[file]?.0 ?? 0). If one "
+                        + "stores Space CONTENTS it is the "
                         + "design #1230 refused "
                         + "(KiwiCore+DesktopSpaces.swift carries "
-                        + "the argument); otherwise add it here "
+                        + "the argument); otherwise re-pin here "
                         + "and say what it stores."
+                )
+            )
+        }
+        // The inverse, as the suite above it has: a pinned entry
+        // that vanished leaves an unfalsifiable line, and a
+        // mistyped root would pass every clause above.
+        for (file, expected) in allowed {
+            #expect(
+                found[file] == expected.0,
+                Comment(
+                    rawValue:
+                        "\(file) no longer declares "
+                        + "\(expected.0) Desktop-keyed map(s) "
+                        + "— drop or re-pin its entry"
                 )
             )
         }

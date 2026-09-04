@@ -5,12 +5,12 @@ import Foundation
 /// `ProfileSpacesSeamTests` pins that `profilePartitioning` is
 /// reached only from here and its four enders.
 ///
-/// The Desktop axis is `KiwiCore+DesktopSpaces.swift`, and the
-/// two are deliberately separate: a window's Desktop is the
-/// WindowServer's fact and is never stored, while its Space under
-/// a given profile is KiwiDesk's own and must be. Different
-/// subjects that merely rhyme — folding them would give the
-/// stored half the unstored half's lifetime.
+/// The Desktop axis is `KiwiCore+DesktopSpaces.swift`, which
+/// carries the argument for why one is stored and the other
+/// never is — the discriminator being WHEN a record is
+/// authoritative. Different subjects that merely rhyme: folding
+/// them would give the stored half the unstored half's
+/// lifetime.
 extension KiwiCore {
     /// Files the outgoing profile's partitioning before the space
     /// set is rebuilt. Returns whether this apply is a CHANGE, so

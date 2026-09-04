@@ -107,7 +107,8 @@ KiwiDesk runs **one** profile across the whole desk, so exactly
 one screen holds the trigger: a binding fires when its Desktop
 becomes current on your **main** screen — the one with the menu
 bar. A swipe on a secondary screen re-tiles the windows that
-arrived with it and never selects a profile
+arrived with it and moves that screen onto its own Desktop's
+Space, but never selects a profile
 ([#888](https://github.com/KiwiCanopy/KiwiDesk/issues/888)).
 
 A Desktop you bound that is not on your main screen keeps its

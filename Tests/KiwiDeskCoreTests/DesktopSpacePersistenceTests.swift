@@ -186,4 +186,39 @@ struct DesktopSpacePersistenceWiringTests {
             core.guiConfigSeed().desktopSpaces
         #expect(seeded[.identity(stamp)] == SpaceID(5))
     }
+
+    /// The write TRIGGER. Nothing else writes `gui.json` at a
+    /// moment that matters — the eight writers are user actions —
+    /// so without this the memory reached disk only if the user
+    /// happened to save something after their last swipe, and
+    /// "survives quitting" was true by luck.
+    @Test("Quitting writes the Desktop memory")
+    func quitPersistsTheMemory() throws {
+        let core = makeCore()
+        try core.guiConfigStore.save(GuiConfig())
+        core.rememberVirtualSpace(
+            SpaceID(6),
+            leaving: .identity(stamp)
+        )
+        core.persistDesktopSpaceMemory()
+        #expect(
+            core.guiConfigStore.load()?
+                .desktopSpaces[.identity(stamp)] == SpaceID(6)
+        )
+    }
+
+    /// A Lua-owned setup has no sidecar to write, so the memory
+    /// stays session-only there — config ownership, not a gap.
+    @Test("A Lua-owned config is not written")
+    func luaOwnedConfigIsNotWritten() {
+        let core = makeCore()
+        core.rememberVirtualSpace(
+            SpaceID(6),
+            leaving: .identity(stamp)
+        )
+        // No sidecar on disk: `isGuiManaged` is false and the
+        // load finds nothing, so this must not create one.
+        core.persistDesktopSpaceMemory()
+        #expect(core.guiConfigStore.load() == nil)
+    }
 }

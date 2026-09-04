@@ -35,19 +35,23 @@ editing here:
   WindowServer's" — does NOT hold and must not be restated: the
   away ledger's `AwayWindow.nativeSpace` is a stored copy of a
   WindowServer fact, admitted because a census reconciles it
-  continuously. That is the ONE such ledger; a second owes the
-  same reconciliation and the argument for why it needs to exist
-  at all. `ProfileSpacesSeamTests` pins one door per axis and
-  pins every `[DesktopKey: …]` map against a named register, so
-  a new one has to argue for itself;
+  continuously. That is the one such WINDOW→Desktop ledger; a
+  second owes the same reconciliation and the argument for why it
+  needs to exist at all. (`lastDisplaySpaces` copies a compositor
+  reading too, and is re-read each switch rather than
+  reconciled.) `ProfileSpacesSeamTests` pins one door per axis,
+  and pins every `[DesktopKey: …]` map in `KiwiDeskCore` against
+  a named register so a new one has to argue for itself — the
+  GUI's own binding rows are outside that scan;
   `KiwiCore+DesktopSpaces.swift` carries the argument.
 - It follows that **a new per-`Space` field is keyed by
   `WindowID` or it is SHARED across Desktops** — the Desktop
   partition is emergent from window residence, and a per-window
-  record partitions by Desktop for free. `Space`'s own doc is
-  where the current split is recorded; do not restate a count
-  here, which is true the day it is written and silently false
-  after (#614).
+  record partitions by Desktop for free. Do not restate which
+  fields are which — here or in a docstring — since that list is
+  true the day it is written and silently false after (#614);
+  read `Models/SpaceModel.swift`'s stored properties, the only
+  statement of it that cannot disagree with itself.
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through
@@ -230,8 +234,12 @@ editing here:
   fold re-inserts a `.departed` return by RANK against the
   members already back — never at the index, which a later slot
   already back would overtake (`ReturningSlotFoldTests`). The
-  secondary-display arm activates no space and so owes nothing
-  (ruled residue). `ReturningFocusFoldTests` pins the fold and
+  secondary-display arm owes nothing — not because it activates
+  no Space, which stopped being true in #1230, but because the
+  debt is recorded per SPACE at the focus report and paid by the
+  create fold, while that arm moves a DISPLAY
+  (`SecondaryDisplaySpaceTests`; `accepted-limitations.md`
+  carries the residue). `ReturningFocusFoldTests` pins the fold and
   `DesktopFocusMemoryTests` / `DesktopFocusPaymentTests` the path
   through the real handlers, so
   a DELETED site reds there; `ReturningFocusSeamTests` is the
