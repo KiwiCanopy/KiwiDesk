@@ -1,10 +1,26 @@
 import CoreGraphics
 import KiwiDeskCore
 
+/// One row of the Desktop bindings card: which Desktop it acts
+/// on, the Mission Control number it is LABELLED with, and
+/// whether that Desktop is in any current reading (#1147).
+struct DesktopRow: Hashable {
+    let key: DesktopKey
+    let number: Int
+    /// No reading names this Desktop — its screen is unplugged,
+    /// or it was deleted. The record is kept either way.
+    let isDormant: Bool
+}
+
 /// Instance representing expanded row in Profiles census (#678).
 enum ProfilesRowInstance: Hashable {
     case profile(String)
-    case desktop(Int)
+    /// By the DESKTOP, never its Mission Control number (#1147):
+    /// a dormant record and a live Desktop can carry the same
+    /// number, and identifying a row by it makes the dormant one
+    /// unreachable — the exact post-renumber case this lane is
+    /// about (architect review, 2026-09-04).
+    case desktop(DesktopKey)
     /// By the stable English `StandardLayout.name` — identity must
     /// not move with the GUI language.
     case preset(String)
@@ -16,8 +32,10 @@ struct ProfilesFamilyRows {
     let profiles: [ProfileSummary]
     /// Main display Mission Control desktops (#888).
     let mainDesktops: [Int]
-    /// Desktops currently bound by settings.
-    let boundDesktops: [Int]
+    /// Each present Desktop's key by its Mission Control number.
+    let desktopKeys: [Int: DesktopKey]
+    /// The bindings as the draft currently holds them.
+    let bindings: [DesktopKey: DesktopBinding]
     let presets: [StandardLayout]
 
     func rows(for key: SettingKey) -> [ProfilesRowInstance]? {
@@ -44,15 +62,47 @@ struct ProfilesFamilyRows {
         return summaries.sorted { key($0) < key($1) }
     }
 
-    /// Union of main screen desktops and already-bound desktops
-    /// (#888). Takes the NUMBERS, never a count — main's Desktops
-    /// can be 3 and 4, and `1...n` would renumber them (owner QA,
-    /// 2026-08-18).
+    /// The card's rows: every Desktop on the main screen, every
+    /// bound Desktop wherever it lives, and every binding whose
+    /// Desktop no reading can name (#888, #1147).
+    ///
+    /// Takes the NUMBERS for the live half, never a count —
+    /// main's Desktops can be 3 and 4, and `1...n` would renumber
+    /// them (owner QA, 2026-08-18). A DORMANT record gets a row
+    /// of its own even where a live Desktop already holds the
+    /// number it was last seen at, because otherwise the two
+    /// collapse and the record is unreachable.
     static func desktops(
         onMain: some Collection<Int>,
-        bound: some Collection<Int>
-    ) -> [Int] {
-        Array(Set(onMain).union(bound)).sorted()
+        keys: [Int: DesktopKey],
+        bindings: [DesktopKey: DesktopBinding]
+    ) -> [DesktopRow] {
+        let live = Set(onMain).union(
+            keys.filter { bindings[$0.value] != nil }.keys
+        )
+        var rows = live.compactMap { number in
+            keys[number].map {
+                DesktopRow(key: $0, number: number, isDormant: false)
+            }
+        }
+        // A number with no Desktop behind it at all: the topology
+        // is unreadable (no SkyLight), so the row still has to be
+        // offered under the key it would bind.
+        rows += live.filter { keys[$0] == nil }.map {
+            DesktopRow(key: .number($0), number: $0, isDormant: false)
+        }
+        let present = Set(keys.values)
+        rows += bindings.filter { !present.contains($0.key) }.map {
+            DesktopRow(
+                key: $0.key,
+                number: $0.value.desktop,
+                isDormant: true
+            )
+        }
+        return rows.sorted {
+            ($0.number, $0.isDormant ? 1 : 0)
+                < ($1.number, $1.isDormant ? 1 : 0)
+        }
     }
 
     /// Presets matching screen count, including starter derivation (#678).
@@ -87,9 +137,10 @@ struct ProfilesFamilyRows {
         case .profileBindings:
             return Self.desktops(
                 onMain: mainDesktops,
-                bound: boundDesktops
+                keys: desktopKeys,
+                bindings: bindings
             )
-            .map(ProfilesRowInstance.desktop)
+            .map { ProfilesRowInstance.desktop($0.key) }
         case .presetsApply, .presetsLayouts:
             return presets.map {
                 ProfilesRowInstance.preset($0.name)

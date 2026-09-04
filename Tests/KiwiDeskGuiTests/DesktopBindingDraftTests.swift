@@ -101,6 +101,49 @@ struct DesktopBindingDraftTests {
         #expect(!model.globalsChanged)
     }
 
+    /// Ownership is PER ENTRY: a user who edited one binding
+    /// while Core re-keyed another keeps their edit AND takes the
+    /// re-key. All-or-nothing let every untouched entry Save back
+    /// under its old number key (architect review, 2026-09-04).
+    @Test("one edited binding does not block the rest adopting")
+    func adoptionIsPerEntry() throws {
+        defer { reset() }
+        pin()
+        let model = makeModel()
+        var stale = GuiConfig()
+        stale.profileBindings = [
+            .number(1): DesktopBinding(profile: "Work", desktop: 1),
+            .number(2): DesktopBinding(profile: "Play", desktop: 2),
+        ]
+        seed(model, stale)
+        // The user re-points Desktop 2 …
+        model.config.profileBindings[.number(2)] = DesktopBinding(
+            profile: "Edited",
+            desktop: 2
+        )
+        // … while Core re-keys Desktop 1 onto its stamp.
+        var rekeyed = stale
+        rekeyed.profileBindings = [
+            .identity(stamp): DesktopBinding(
+                profile: "Work",
+                desktop: 1
+            ),
+            .number(2): DesktopBinding(profile: "Play", desktop: 2),
+        ]
+        try model.core.guiConfigStore.save(rekeyed)
+
+        model.refreshProfiles()
+        #expect(
+            model.config.profileBindings[.identity(stamp)]?.profile
+                == "Work"
+        )
+        #expect(model.config.profileBindings[.number(1)] == nil)
+        #expect(
+            model.config.profileBindings[.number(2)]?.profile
+                == "Edited"
+        )
+    }
+
     /// The mirror, and the reason this is not simply "always take
     /// the sidecar": a binding the user edited is theirs, and a
     /// refresh must not throw it away.

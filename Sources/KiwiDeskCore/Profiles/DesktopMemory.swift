@@ -1,6 +1,10 @@
 import Foundation
 
-/// Per-display native Desktop bookkeeping for Space switching (#888).
+/// Per-Desktop bookkeeping for Space switching (#888) and for
+/// the identity each Desktop is filed under (#1147) — the Space
+/// memory, the focus a return owes, the compositor seams the away
+/// ledger reads through, and the stamp write with its one-attempt
+/// ledger.
 @MainActor
 final class DesktopMemory {
     /// The Space each Desktop was last showing, keyed by the

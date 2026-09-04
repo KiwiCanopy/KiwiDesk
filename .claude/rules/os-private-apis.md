@@ -217,10 +217,10 @@ Every one of the following binds whoever touches them:
 
   What this leans on is undocumented: that macOS keeps unknown
   keys in that record rather than filtering them. Write no code
-  that would break if it stopped — and nothing does today,
-  because a Desktop that comes back unstamped is marked
-  unstampable for the session and every consumer falls back to
-  its Mission Control number, which is the pre-#1147 behaviour.
+  that would break if it stopped. As of #1147 nothing does: a
+  Desktop that comes back unstamped is marked unstampable for the
+  session and every consumer falls back to its Mission Control
+  number, which is the pre-#1147 behaviour.
   Degrading to the status quo is the design's answer here;
   keep it that way.
 

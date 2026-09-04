@@ -35,6 +35,21 @@ public struct DesktopSnapshot: Sendable {
         NativeSpaces.key(of: space, in: spaces)
     }
 
+    /// Each user Desktop's key by its Mission Control number —
+    /// the join a per-Desktop row resolves through (#1147). Here
+    /// rather than beside a consumer, so the GUI reads the same
+    /// derivation `key(of:)` and the re-key already use.
+    public var keysByNumber: [Int: DesktopKey] {
+        Dictionary(
+            spaces.filter(\.isUser).compactMap { space in
+                number(of: space.id).flatMap { n in
+                    key(of: space.id).map { (n, $0) }
+                }
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
+    }
+
     /// The binding authority as a key (#1147): the Desktop the
     /// MAIN display is showing. `authority` is the same Desktop
     /// as a Mission Control number, which is what a row is

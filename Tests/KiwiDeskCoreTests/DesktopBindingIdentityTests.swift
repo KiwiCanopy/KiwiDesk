@@ -161,6 +161,40 @@ struct DesktopBindingIdentityTests {
         )
     }
 
+    /// The sidecar follows the re-key — and this is the arm no
+    /// suite reached before, because `makeTestCore`'s empty
+    /// config directory leaves `isGuiManaged` false and skips it
+    /// entirely (code review, 2026-09-04).
+    ///
+    /// It also pins what the follow must NOT do: write back the
+    /// live profile state `loadGuiConfig()` overlays. A Desktop
+    /// switch is neither of the two ruled profile writes
+    /// (profiles.md), so the sidecar's own spaces survive it.
+    @Test("the sidecar follows the re-key, and nothing else")
+    func sidecarFollowsTheRekey() throws {
+        defer { reset() }
+        pin(topologyA(current: 10), current: 10)
+        let core = makeCore()
+        var stored = GuiConfig()
+        stored.profileBindings = [
+            .number(2): DesktopBinding(profile: "Work", desktop: 2)
+        ]
+        stored.spaces = [SpaceID("stored-only")]
+        try core.guiConfigStore.save(stored)
+        core.desktopBindings = stored.profileBindings
+
+        _ = core.stampedDesktopSnapshot()
+
+        let after = try #require(core.guiConfigStore.load())
+        #expect(after.profileBindings[.number(2)] == nil)
+        #expect(
+            after.profileBindings[.identity(stampB)]?.profile
+                == "Work"
+        )
+        // The live space list never entered the file.
+        #expect(after.spaces == [SpaceID("stored-only")])
+    }
+
     /// A record whose Desktop is not in the topology is DORMANT:
     /// kept, and still labelled with the number it was last seen
     /// at. Absence is never proof it is gone — the owner's probe

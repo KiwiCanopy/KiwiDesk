@@ -36,9 +36,10 @@ public struct DesktopIdentity: Hashable, Sendable, Codable {
 /// stamp write was declined this session.
 ///
 /// **#1230 keys a Desktop's whole Space set by this**, so the
-/// stored spelling below is a stored value in that lane too; the
-/// contract is `plan/1147-desktop-identity.md` ▸ #1230 contract
-/// while that file lives, and this doc after it.
+/// stored spelling below is a stored value in that lane too —
+/// its crossing is #1147's to own. The obligations a second
+/// consumer takes on are `.claude/rules/profiles.md` ▸ "A
+/// Desktop is keyed by its stamp, never by its number".
 public enum DesktopKey: Hashable, Sendable {
     case identity(DesktopIdentity)
     case number(Int)

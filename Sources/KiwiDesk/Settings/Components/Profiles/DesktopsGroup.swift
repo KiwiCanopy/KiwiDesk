@@ -86,11 +86,11 @@ struct DesktopsGroup: View {
         let help =
             reason.map(ProfilesGateHelp.sentence) ?? ""
         Group {
-            if spaceNumbers.isEmpty {
+            if desktopRows.isEmpty {
                 emptyHint
             } else {
-                ForEach(spaceNumbers, id: \.self) { number in
-                    spaceRow(number)
+                ForEach(desktopRows, id: \.key) { row in
+                    spaceRow(row)
                 }
             }
         }
@@ -114,8 +114,9 @@ struct DesktopsGroup: View {
 
     // MARK: - Rows
 
-    private func spaceRow(_ number: Int) -> some View {
-        HStack {
+    private func spaceRow(_ row: DesktopRow) -> some View {
+        let number = row.number
+        return HStack {
             Image(systemName: DesktopGlyph.symbol)
                 .foregroundStyle(.secondary)
             Text(
@@ -151,11 +152,25 @@ struct DesktopsGroup: View {
             // (absence is never proof it is gone), the row is
             // labelled with the number it was last seen at, and
             // the badge says why nothing will fire.
-            if model.desktopKeys[number] == nil {
+            if row.isDormant {
                 BadgeChip(
                     label: L(
                         "desktops.absent",
                         "not present"
+                    )
+                )
+                // The badge alone can read as "your binding is
+                // lost", which is the one thing this must not
+                // mean — the sibling pin badge pairs a help for
+                // the same reason.
+                .help(
+                    L(
+                        "desktops.absent.help",
+                        "This Desktop isn't in Mission Control "
+                            + "right now — its screen is "
+                            + "unplugged, or it was closed. The "
+                            + "profile stays here and loads "
+                            + "again if that Desktop comes back."
                     )
                 )
             } else if !model.mainDesktops.contains(number) {
@@ -167,15 +182,15 @@ struct DesktopsGroup: View {
                 )
             }
             Spacer()
-            profileMenu(number)
+            profileMenu(row.key)
         }
     }
 
-    private func profileMenu(_ number: Int) -> some View {
-        Picker("", selection: binding(number)) {
+    private func profileMenu(_ key: DesktopKey) -> some View {
+        Picker("", selection: binding(key)) {
             Text(L("desktops.none", "None"))
                 .tag(String?.none)
-            ForEach(options(number), id: \.self) { name in
+            ForEach(options(key), id: \.self) { name in
                 Text(name).tag(String?.some(name))
             }
         }
@@ -192,42 +207,28 @@ struct DesktopsGroup: View {
             )
         )
         .accessibilityValue(
-            binding(number).wrappedValue
+            binding(key).wrappedValue
                 ?? L("desktops.none", "None")
         )
     }
 
-    /// Desktops to list from `ProfilesFamilyRows.desktops`. A
-    /// bound Desktop enters by its own last-seen NUMBER — the
-    /// projection — since a key names no row a user could read.
-    private var spaceNumbers: [Int] {
+    /// Rows from the one derivation the census shares
+    /// (`ProfilesFamilyRows.desktops`), which gives a dormant
+    /// record a row of its OWN even where a live Desktop holds
+    /// the number it was last seen at.
+    private var desktopRows: [DesktopRow] {
         ProfilesFamilyRows.desktops(
             onMain: model.mainDesktops,
-            bound: model.config.profileBindings.values.map(
-                \.desktop
-            )
+            keys: model.desktopKeys,
+            bindings: model.config.profileBindings
         )
-    }
-
-    /// The key the row's binding is filed under (#1147): the
-    /// Desktop this number names right now, else the key an
-    /// existing record already carries — a dormant Desktop's
-    /// display is unplugged and the record must stay reachable —
-    /// else the number itself, for a row about to be bound.
-    private func key(_ number: Int) -> DesktopKey {
-        if let live = model.desktopKeys[number] { return live }
-        let dormant = model.config.profileBindings.first {
-            $0.value.desktop == number
-        }
-        return dormant?.key ?? .number(number)
     }
 
     /// Available profiles for the dropdown, always including the
     /// current binding even if its file has since been deleted.
-    private func options(_ number: Int) -> [String] {
+    private func options(_ key: DesktopKey) -> [String] {
         var names = model.profiles
-        if let bound = model.config.profileBindings[key(number)]?
-            .profile,
+        if let bound = model.config.profileBindings[key]?.profile,
             !names.contains(bound)
         {
             names.append(bound)
@@ -235,21 +236,26 @@ struct DesktopsGroup: View {
         return names
     }
 
-    private func binding(_ number: Int) -> Binding<String?> {
+    private func binding(_ key: DesktopKey) -> Binding<String?> {
         Binding(
             get: {
-                model.config.profileBindings[key(number)]?.profile
+                model.config.profileBindings[key]?.profile
             },
             set: { profile in
-                let slot = key(number)
                 guard let profile else {
-                    model.config.profileBindings[slot] = nil
+                    model.config.profileBindings[key] = nil
                     return
                 }
-                model.config.profileBindings[slot] = DesktopBinding(
+                // The projection is refreshed from the reading
+                // this row was built from, never invented.
+                let number =
+                    desktopRows.first { $0.key == key }?.number
+                    ?? model.config.profileBindings[key]?.desktop
+                    ?? key.number ?? 0
+                model.config.profileBindings[key] = DesktopBinding(
                     profile: profile,
                     desktop: number,
-                    display: model.config.profileBindings[slot]?
+                    display: model.config.profileBindings[key]?
                         .display
                 )
             }

@@ -8293,28 +8293,23 @@ mints a private identifier into each Desktop's own settings and
 keys by that; the number survives only as the label a row is
 drawn with, refreshed from each reading.
 
-Three alternatives were measured and rejected. Apple's own space
-`uuid` is the *name* field (`SpaceCopyName`) and is empty on the
-primordial Desktop, so it is neither ours to write nor always
-there. The internal `id64` looks stable and is not: unplugging a
-screen fuses its first Desktop into the current one and destroys
-that container, and reconnecting mints a **new** `id64` —
-measured 1452 → 1454 → 1456 over two rounds on one machine. And
-doing nothing leaves the silent-wrong-Desktop failure, whose
-stake rises sharply with
+Three alternatives were measured and rejected, so none is
+re-proposed. Apple's own space `uuid` is the *name* field, so it
+is not ours to write, and it is absent on the primordial Desktop.
+The internal `id64` looks stable and is not — a screen's Desktops
+are destroyed and rebuilt around a disconnect. And doing nothing
+leaves the silent-wrong-Desktop failure, whose stake rises
+sharply with
 [#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230),
 where a Desktop's whole persisted Space set rides on the same
-key.
+key. The measurements behind all three, and the persistence
+mechanism the stamp rests on, are `.claude/rules/os-private-apis.md`'s
+to hold.
 
-What makes the stamp work is that a Desktop's value dictionary
-is a record macOS persists to `com.apple.spaces.plist`, keys it
-does not recognise included — so the stamp survives reboots, an
-OS update, the append that follows an unplug, and the rebuild
-that follows a replug. That is undocumented behaviour, and the
-design degrades to the status quo rather than breaking if it
-ever stops: a Desktop that comes back unstamped falls back to
-its Mission Control number, which is what every binding used
-before this. A Desktop the user genuinely deletes takes its
+The design degrades rather than breaking if macOS ever stops
+carrying the stamp: a Desktop that comes back unstamped falls
+back to its Mission Control number, which is what every binding
+used before this. A Desktop the user genuinely deletes takes its
 stamp with it and its binding goes dormant — kept, badged, and
 never fired for the Desktop that inherited its number.
 

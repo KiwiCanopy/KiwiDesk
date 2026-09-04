@@ -743,7 +743,11 @@ hand, but it is documented here for backup and transparency.
   "app_rules": { "com.spotify.client": "music" },
   "float_rules": [ "com.apple.calculator" ],
   "ignore_rules": [ "eu.exelban.Stats" ],
-  "profile_bindings": { "1": "Developer" },
+  "profile_bindings": {
+    "9C1F2A44-3B0E-4E7D-9A21-6D5C8B7E0143": {
+      "profile": "Developer", "desktop": 1
+    }
+  },
   "layers": [
     { "name": "default", "bindings": [...] }
   ]
@@ -766,10 +770,27 @@ Each field:
 - **`ignore_rules`**: array of bundle identifiers. Matching apps
   are never tracked or managed. This power-user field has no
   Settings control, but Settings preserves it when saving.
-- **`profile_bindings`**: object mapping macOS Desktop numbers
-  (as Mission Control counts them) to profile names. When that
-  Desktop becomes current on your main screen, the bound
-  profile loads. Updated in the Profiles section.
+- **`profile_bindings`**: object mapping a **Desktop
+  identifier** to the profile that Desktop selects. When that
+  Desktop becomes current on your main screen, the bound profile
+  loads. Updated in the Profiles section.
+
+  The key is the private identifier KiwiDesk stamps into the
+  Desktop itself, not its Mission Control number — that is what
+  keeps a binding on the Desktop you meant when Mission Control
+  renumbers, and it is why the key is unreadable. The number
+  lives in `desktop` beside the profile, as the label the
+  Profiles card draws the row with and the number a binding
+  reports while its Desktop is away; nothing is looked up by it.
+  A `display` field may sit alongside, recording the screen the
+  Desktop was last seen on. See
+  [A binding follows its Desktop, not its number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
+
+  On a Mac where the stamp cannot be written, the key is the
+  Mission Control number instead and bindings behave as they did
+  before. A `gui.json` written by an earlier build, where this
+  field read `{ "1": "Developer" }`, is rewritten to the new
+  shape once on load — nothing to do by hand.
 - **`layers`**: array of keybinding layers — named alternate
   shortcut sets, only one of which fires at a time. Each layer is
   an object with:
@@ -3191,6 +3212,18 @@ Its dropdown keeps working, so you can change or clear it; the
 badge is there because a binding on it cannot fire while that
 Desktop lives on another screen. It becomes live again if a screen
 change makes that Desktop your main screen's.
+
+A Desktop that is not there at all — deleted, or gone with an
+unplugged screen — carries a **not present** badge instead. That
+row is labelled with the number the Desktop was last seen at and
+nothing fires for it; what to do about one is in
+[Accepted limitations](accepted-limitations.md).
+
+Rows also re-label themselves when Mission Control renumbers: a
+binding stays on the Desktop you gave it, not on the number that
+Desktop happened to have. Why, and what a screen you unplug does
+to it, is
+[A binding follows its Desktop, not its number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 
 The **?** on the card explains the macOS setting behind all of
 this, and what sharing Desktops across screens would cost.

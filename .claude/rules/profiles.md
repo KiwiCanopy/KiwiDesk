@@ -143,10 +143,13 @@ memory today, a whole Space set under #1230 — is filed under
 WindowServer record where it carries one, its Mission Control
 number where it does not. **The number is a projection**, kept on
 `DesktopBinding.desktop` so a row can be labelled and a dormant
-record can say where it was last seen; nothing resolves through
-it. Why the number cannot be the key, and why `id64` cannot
-either, is `docs/design-decisions.md` ▸ Profiles; the persistence
-mechanism it rests on is
+record can say where it was last seen. **Never resolve a binding
+through it** — a lookup by number answers for whichever Desktop
+holds that number now, which is the defect this section exists to
+close (`DesktopBindingIdentityTests` ▸
+`theNumberDoesNotCarryTheBinding`). Why the number cannot be the
+key, and why `id64` cannot either, is `docs/design-decisions.md`
+▸ Profiles; the persistence mechanism it rests on is
 [os-private-apis.md](os-private-apis.md).
 
 The obligations that fall on a change here:
@@ -160,22 +163,38 @@ The obligations that fall on a change here:
 - **Only the four ruled callers MINT** — the boot seed,
   `handleDesktopChange`, `handleMonitorChange` and
   `bind_profile_to_desktop`, all through
-  `KiwiCore.stampedDesktopSnapshot()`. Every other path READS,
-  so a query never writes to the WindowServer, and the GUI never
-  mints at all.
+  `KiwiCore.stampedDesktopSnapshot()`; the list is here, so a
+  fifth has the other four on screen. **Every other path READS**:
+  do not reach `stampedDesktopSnapshot()` from a query, a
+  refresh or the GUI, or a read starts writing to the
+  WindowServer. Nothing scans for this — the seam guard
+  (`DesktopStampSeamTests`) holds where the WRITE lives, not who
+  calls it — so a new caller owes the choice deliberately.
 - **The re-key rides `stampedDesktopSnapshot`**, not its callers:
   a binding must move to the stamp in the same reading that
   produced it, and a caller that forgot would leave an entry
   keyed by a number for the session with nothing to say so
-  (`reconcileDesktopBindings`). It rewrites the sidecar's OWN map
-  — never adopting the runtime one, which in a hybrid config also
-  holds init.lua's bindings (`KiwiCore+ProfileRename`'s rule).
+  (`reconcileDesktopBindings`; `DesktopBindingIdentityTests` ▸
+  `numberEntryRekeys`). It rewrites the sidecar's OWN map — never
+  adopting the runtime one, which in a hybrid config also holds
+  init.lua's bindings (`KiwiCore+ProfileRename`'s rule).
 - **A record whose Desktop no reading can name is DORMANT, never
   pruned.** Absence is not proof: an unplugged screen's Desktops
   come back with their stamps, and one destroyed on the unplug is
   restored on the replug. Pruning on absence would delete a
   binding the user gets back in ten seconds
   (`DesktopBindingIdentityTests`).
+- **State the `.number` fallback's cost where it is worse than
+  before, never as parity.** `virtualSpaces` was keyed
+  `[main display UUID: [number: SpaceID]]` and is now
+  `[DesktopKey: SpaceID]`. For a stamped Desktop that is
+  strictly better; for the `.number` fallback it is weaker than
+  pre-#1147, since one number under two arrangements now
+  collides on one entry. Accepted: the memory is session-only,
+  so the collision costs at most one wrong Space on the first
+  return after a display change, and it heals at the next
+  departure. A consumer that PERSISTS a `.number` key does not
+  inherit that trade and owes its own answer (#1230).
 - **The write is a seam** (`DesktopMemory.writeStamp`), live in
   production and pinned to a refusal by both `makeTestCore`
   twins: a fixture space id IS a real Desktop id on the host, and

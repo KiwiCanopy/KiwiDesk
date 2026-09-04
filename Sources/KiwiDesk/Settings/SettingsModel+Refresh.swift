@@ -34,16 +34,9 @@ extension SettingsModel {
         mainDesktops = desktops.mainDisplayDesktops
         bindableDesktops = core.bindableDesktops(in: desktops)
         // The GUI never mints (#1147): it reads the stamps the
-        // Core's own callers wrote, and a Desktop still unstamped
-        // joins under its number like everything else.
-        desktopKeys = Dictionary(
-            desktops.spaces.filter(\.isUser).compactMap { space in
-                desktops.number(of: space.id).flatMap { number in
-                    desktops.key(of: space.id).map { (number, $0) }
-                }
-            },
-            uniquingKeysWith: { first, _ in first }
-        )
+        // Core's own callers wrote, through the snapshot's own
+        // join rather than a second copy of it.
+        desktopKeys = desktops.keysByNumber
         currentDesktop = desktops.authority
         let resolved = core.profileVerdict(
             activeDesktop: desktops.mainCurrentKey
@@ -73,12 +66,28 @@ extension SettingsModel {
     /// adopting Core's rewrite never reads as a pending change.
     private func adoptRekeyedBindings() {
         guard let saved = core.guiConfigStore.load(),
-            saved.profileBindings != cleanConfig.profileBindings,
-            config.profileBindings == cleanConfig.profileBindings
+            saved.profileBindings != cleanConfig.profileBindings
         else { return }
+        // PER ENTRY, not per map: ownership is per binding, so a
+        // user who edited ONE row while Core re-keyed another
+        // would otherwise Save every untouched entry back under
+        // its old number key — the wrong-Desktop this closes,
+        // re-entering through the GUI (architect review,
+        // 2026-09-04).
+        let edited = config.profileBindings.filter {
+            cleanConfig.profileBindings[$0.key] != $0.value
+        }
+        let dropped = cleanConfig.profileBindings.keys.filter {
+            config.profileBindings[$0] == nil
+        }
+        var adopted = saved.profileBindings
+        for (key, value) in edited { adopted[key] = value }
+        for key in dropped where edited[key] == nil {
+            adopted[key] = nil
+        }
         let wasSuppressed = suppressDirty
         suppressDirty = true
-        config.profileBindings = saved.profileBindings
+        config.profileBindings = adopted
         suppressDirty = wasSuppressed
         cleanConfig.profileBindings = saved.profileBindings
         savedSidecar?.profileBindings = saved.profileBindings

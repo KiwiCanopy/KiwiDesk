@@ -221,6 +221,7 @@
   "config_issues.unknown_call_suggestion": "Unknown call '%1$@' — did you mean '%2$@'?",
   "custom_lua_banner.text": "Your init.lua also has custom Lua. It doesn’t conflict with the visual editor, and the app never modifies init.lua.",
   "desktops.absent": "not present",
+  "desktops.absent.help": "This Desktop isn't in Mission Control right now — its screen is unplugged, or it was closed. The profile stays here and loads again if that Desktop comes back.",
   "desktops.current": "current",
   "desktops.desktop": "Desktop %1$d",
   "desktops.empty": "No native macOS Desktops detected. Add Desktops in Mission Control to bind profiles.",

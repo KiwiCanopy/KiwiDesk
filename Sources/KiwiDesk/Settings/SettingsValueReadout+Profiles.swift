@@ -27,9 +27,10 @@ extension SettingsValueReadout {
     /// the unset dash for a binding that appeared or was cleared.
     ///
     /// Diffed by KEY and NARRATED by the number each record was
-    /// last seen at (#1147) — a key is not a name any reader has,
-    /// and two keys for one number cannot happen: the row's own
-    /// resolve files under exactly one.
+    /// last seen at (#1147) — a key is not a name any reader has.
+    /// The census INSTANCE is the key, not the number: a dormant
+    /// record and a live Desktop can both project one number, and
+    /// two rows sharing an instance would collapse in the diff.
     private static func profilesBindingRows(
         _ census: SettingKey,
         old: [DesktopKey: DesktopBinding],
@@ -56,7 +57,7 @@ extension SettingsValueReadout {
             )
             return .change(
                 census,
-                instance: String(number),
+                instance: key.stored,
                 label: instanceLabel(base, desktop),
                 old: old[key]?.profile ?? unset,
                 new: new[key]?.profile ?? unset

@@ -133,25 +133,87 @@ struct ProfilesFamilyRowsTests {
         #expect(ordered.map(\.name) == ["Solo", "Desk"])
     }
 
-    /// The MAIN screen's Desktops, plus any number already bound
+    /// Live Desktops by `.number` and no bindings — the shape
+    /// every clause below reuses.
+    private func liveKeys(_ numbers: Int...) -> [Int: DesktopKey] {
+        Dictionary(
+            uniqueKeysWithValues: numbers.map { ($0, .number($0)) }
+        )
+    }
+
+    private func rows(
+        onMain: [Int],
+        keys: [Int: DesktopKey],
+        bindings: [DesktopKey: DesktopBinding] = [:]
+    ) -> [Int] {
+        ProfilesFamilyRows.desktops(
+            onMain: onMain,
+            keys: keys,
+            bindings: bindings
+        )
+        .map(\.number)
+    }
+
+    /// The MAIN screen's Desktops, plus any Desktop already bound
     /// (#888) — a binding on another screen's Desktop, or on a
     /// now-absent one, stays visible and clearable rather than
     /// silently lost.
     @Test("desktops union the main screen's and the bound")
     func desktopsUnionBindings() {
         #expect(
-            ProfilesFamilyRows.desktops(
+            rows(
                 onMain: [1, 2],
-                bound: [5]
+                keys: liveKeys(1, 2, 5),
+                bindings: [
+                    .number(5): DesktopBinding(
+                        profile: "P",
+                        desktop: 5
+                    )
+                ]
             ) == [1, 2, 5]
         )
-        // A bound number that is also on main appears once.
+        // A bound Desktop that is also on main appears once.
         #expect(
-            ProfilesFamilyRows.desktops(
+            rows(
                 onMain: [1, 2, 3],
-                bound: [2]
+                keys: liveKeys(1, 2, 3),
+                bindings: [
+                    .number(2): DesktopBinding(
+                        profile: "P",
+                        desktop: 2
+                    )
+                ]
             ) == [1, 2, 3]
         )
+    }
+
+    /// A DORMANT record keeps a row of its own even where a live
+    /// Desktop holds the number it was last seen at (#1147).
+    ///
+    /// This is the post-renumber case the lane exists for —
+    /// delete a Desktop in the middle and a later one inherits
+    /// its number — and collapsing the two made the record
+    /// unreachable: no row, no badge, and the picker editing the
+    /// live Desktop's binding instead (three reviewers,
+    /// 2026-09-04).
+    @Test("a dormant record does not collapse into a live row")
+    func dormantKeepsItsOwnRow() {
+        let gone = DesktopKey.identity(DesktopIdentity(raw: "GONE"))
+        let listed = ProfilesFamilyRows.desktops(
+            onMain: [1, 2, 3],
+            keys: liveKeys(1, 2, 3),
+            bindings: [
+                gone: DesktopBinding(profile: "P", desktop: 3)
+            ]
+        )
+        #expect(listed.count == 4)
+        #expect(listed.map(\.number) == [1, 2, 3, 3])
+        // The live row first, the dormant one after it, and only
+        // the dormant one badged.
+        #expect(listed[2].key == .number(3))
+        #expect(!listed[2].isDormant)
+        #expect(listed[3].key == gone)
+        #expect(listed[3].isDormant)
     }
 
     /// The main screen's Desktops carry GLOBAL Mission Control
@@ -163,36 +225,40 @@ struct ProfilesFamilyRowsTests {
     @Test("a non-contiguous main screen keeps its own numbers")
     func desktopsAreNotRenumbered() {
         #expect(
-            ProfilesFamilyRows.desktops(
-                onMain: [3, 4],
-                bound: []
-            ) == [3, 4]
+            rows(onMain: [3, 4], keys: liveKeys(3, 4)) == [3, 4]
         )
         #expect(
-            ProfilesFamilyRows.desktops(
+            rows(
                 onMain: [3, 4],
-                bound: [1]
+                keys: liveKeys(1, 3, 4),
+                bindings: [
+                    .number(1): DesktopBinding(
+                        profile: "P",
+                        desktop: 1
+                    )
+                ]
             ) == [1, 3, 4]
         )
     }
 
     /// No detected desktops is not "1 desktop": with SkyLight
     /// unavailable there are none to offer and only bound
-    /// numbers show.
-    @Test("no detected desktops lists only bound numbers")
+    /// records show, at the numbers they were last seen at.
+    @Test("no detected desktops lists only bound records")
     func desktopsWithNonePresent() {
         #expect(
-            ProfilesFamilyRows.desktops(
+            rows(
                 onMain: [],
-                bound: [4]
+                keys: [:],
+                bindings: [
+                    .number(4): DesktopBinding(
+                        profile: "P",
+                        desktop: 4
+                    )
+                ]
             ) == [4]
         )
-        #expect(
-            ProfilesFamilyRows.desktops(
-                onMain: [],
-                bound: [Int]()
-            ).isEmpty
-        )
+        #expect(rows(onMain: [], keys: [:]).isEmpty)
     }
 
     /// The two preset lists partition the catalog: every preset

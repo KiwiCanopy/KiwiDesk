@@ -51,18 +51,33 @@ extension KiwiCore {
             else { continue }
             let identity = DesktopIdentity.mint()
             guard desktopMemory.writeStamp(space.id, identity)
-            else { continue }
+            else {
+                // A REFUSED dispatch is one attempt too, or this
+                // re-mints and re-dispatches on every snapshot
+                // for the life of the process.
+                desktopMemory.unstampable.insert(space.id)
+                continue
+            }
             desktopMemory.stampAttempts.insert(space.id)
             minted[space.id] = identity
         }
         let stamped =
             minted.isEmpty ? snapshot : snapshot.stamping(minted)
         // The re-key rides HERE rather than at each of the four
-        // callers: a binding must move to the stamp in the same
-        // reading that produced it, and a caller that forgot
-        // would leave the entry keyed by a number for the life of
-        // the session with nothing to say so (#1147).
-        reconcileDesktopBindings(in: stamped)
+        // callers: a caller that forgot would leave an entry
+        // keyed by a number for the life of the session with
+        // nothing to say so (#1147).
+        //
+        // It reconciles against `snapshot`, the CONFIRMED
+        // reading, never the optimistic one this returns. A stamp
+        // just dispatched is not yet applied (#884/#889), and
+        // moving a binding onto an identity the WindowServer
+        // never kept would file it under a key no later reading
+        // can name: dormant forever, never pruned, and silently
+        // firing for nothing. The move waits for the call that
+        // CONFIRMS the stamp — which is the same deferred verify
+        // this whole file is built on (code review, 2026-09-04).
+        reconcileDesktopBindings(in: snapshot)
         return stamped
     }
 
