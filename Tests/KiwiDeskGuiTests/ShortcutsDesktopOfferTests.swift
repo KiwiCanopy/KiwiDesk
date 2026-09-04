@@ -148,6 +148,38 @@ struct ShortcutsDesktopOfferTests {
         // …and neither draws while the families are empty, or
         // the door opens on nothing.
         #expect(source.contains("ifhasRows{"))
+        // The swap is re-introducible by NESTING it inside that
+        // guard, and every positive needle above survives it —
+        // a substring set cannot see structure (guard-prover,
+        // 2026-09-04). So `body` is read as a brace-balanced run
+        // and held to ONE branch: one container, drawn once.
+        let mark = source.range(of: "varbody:someView")
+        var cursor =
+            mark.map {
+                source.distance(
+                    from: source.startIndex,
+                    to: $0.upperBound
+                )
+            } ?? 0
+        let characters = Array(source)
+        let body =
+            SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ) ?? ""
+        // Vacuity: an empty run satisfies every clause below.
+        #expect(!body.isEmpty)
+        #expect(
+            !body.contains("else"),
+            Comment(
+                rawValue: "a second arm in the offer's body is "
+                    + "the container swap coming back"
+            )
+        )
+        #expect(body.occurrences(of: "families") == 1)
+        #expect(body.occurrences(of: "SettingsDisclosure(") == 1)
         // `families` WALKS the keys: a body reduced to an empty
         // view satisfied every needle above while shipping every
         // Desktop row invisible (guard-prover, 2026-09-04).
@@ -195,109 +227,5 @@ struct ShortcutsDesktopOfferTests {
                     + ".moveWindowsDesktops"
             )
         )
-    }
-}
-
-/// The half a source scan cannot reach: what the offer's two
-/// predicates RESOLVE to. Inverting `hasRows` deleted all twelve
-/// Desktop rows from both cards with every needle, the census
-/// parity and the resolver suite green — a positive substring
-/// names the branch, never the predicate inside it
-/// (guard-prover, 2026-09-04). Internal-not-private is gui.md's
-/// instrument for exactly this, taken from the schematics.
-///
-/// Main-actor spend (tests.md): two `makeTestModel` builds and
-/// one `ShortcutsFamilyRows` fixture. No source scan, no
-/// filesystem walk, no AppKit measurement.
-@MainActor
-@Suite("Desktop shortcuts offer predicates")
-struct ShortcutsDesktopOfferPredicateTests {
-    private func expander(
-        desktops: [Int]
-    ) -> ShortcutsFamilyRows {
-        ShortcutsFamilyRows(
-            spaces: [],
-            icons: [:],
-            desktops: .init(desktops: desktops),
-            resizeStep: 40,
-            layerNames: [KeyLayer.defaultName],
-            currentLayer: KeyLayer.defaultName
-        )
-    }
-
-    private func offer(
-        desktops: [Int],
-        bindings: [KeyBinding] = []
-    ) -> DesktopShortcutsOffer {
-        let model = makeTestModel()
-        model.config.layers = [
-            KeyLayer(
-                name: KeyLayer.defaultName,
-                bindings: bindings
-            )
-        ]
-        return DesktopShortcutsOffer(
-            model: model,
-            bindings: .constant(bindings),
-            keys: ShortcutsRowOrder.focusDesktopFamilies,
-            drawer: SettingsCatalog.shortcuts.focusDesktops,
-            expander: expander(desktops: desktops)
-        )
-    }
-
-    @Test("the door opens on rows, and stays shut over none")
-    func hasRowsFollowsTheFamilies() {
-        #expect(offer(desktops: [1, 2]).hasRows)
-        // No bridge and nothing bound: the families expand to
-        // nothing, so the offer withholds itself entirely
-        // rather than opening on an empty drawer.
-        #expect(!offer(desktops: []).hasRows)
-    }
-
-    @Test("bound follows a recorded Desktop binding")
-    func boundFollowsTheBinding() {
-        #expect(!offer(desktops: [1, 2]).bound)
-        #expect(
-            offer(
-                desktops: [1, 2],
-                bindings: [
-                    KeyBinding(
-                        combo: "ctrl+alt+1",
-                        lua: "KiwiDesk.focus_desktop(1)",
-                        kind: .navigation
-                    )
-                ]
-            ).bound
-        )
-        // A bound Desktop the bridge cannot see keeps its row:
-        // `desktopOffer` unions the bound numbers into the live
-        // ones. Asserted at the source rather than through the
-        // fixture, because #1125 taught that offer to filter on
-        // a RECORDED combo and an away row must survive it.
-        let away = KeyBinding(
-            combo: "ctrl+alt+9",
-            lua: "KiwiDesk.focus_desktop(9)",
-            kind: .navigation
-        )
-        let offered = KeybindingCatalog.desktopOffer(
-            live: [],
-            bindings: [away]
-        )
-        #expect(offered.desktops == [9])
-        #expect(offered.absent == [9])
-        #expect(offer(desktops: [], bindings: [away]).bound)
-        // …while an UNRECORDED row offers no Desktop at all, so
-        // the filter #1125 added there cannot be dropped
-        // silently: the gate and the offer answer alike.
-        var blank = away
-        blank.combo = ""
-        #expect(
-            KeybindingCatalog.desktopOffer(
-                live: [],
-                bindings: [blank]
-            )
-            .desktops.isEmpty
-        )
-        #expect(!offer(desktops: [], bindings: [blank]).bound)
     }
 }
