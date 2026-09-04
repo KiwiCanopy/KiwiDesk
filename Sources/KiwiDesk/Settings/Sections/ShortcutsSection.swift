@@ -14,10 +14,24 @@ struct ShortcutsSection: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @ObservedObject var model: SettingsModel
-    @State private var selected = KeyLayer.defaultName
     @State private var advancedExpanded = false
     @StateObject private var coordinator =
         RecorderCoordinator()
+
+    /// The selected layer lives on `nav` rather than here
+    /// (#1127): the live preview panel is this section's
+    /// sibling, so it can only learn the layer from the model.
+    /// Cleared per visit by `SettingsNavigation.resetSurfaces()`.
+    private var selection: Binding<String> {
+        Binding(
+            get: { selected },
+            set: { model.nav.shortcutsLayer = $0 }
+        )
+    }
+
+    private var selected: String {
+        model.nav.shortcutsLayerSelection
+    }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -79,7 +93,7 @@ struct ShortcutsSection: View {
     @ViewBuilder private var header: some View {
         KeybindingConflictBanner(model: model)
         overrideBanner
-        ShortcutsHeader(model: model, selected: $selected)
+        ShortcutsHeader(model: model, selected: selection)
         // LayersCard leads section (owner ruling 2026-08-04).
         layersCard
     }
@@ -88,7 +102,7 @@ struct ShortcutsSection: View {
         LayersCard(
             model: model,
             bindings: bindingsBinding,
-            selected: $selected,
+            selected: selection,
             expander: expander
         )
     }
@@ -284,7 +298,9 @@ struct ShortcutsSection: View {
         if !model.config.layers.contains(
             where: { $0.name == selected }
         ) {
-            selected = KeyLayer.defaultName
+            // Nil rather than the name: `nav`'s own coalescing
+            // is the one place the landing is decided (#1127).
+            model.nav.shortcutsLayer = nil
         }
     }
 }

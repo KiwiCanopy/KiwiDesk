@@ -28,6 +28,22 @@ enum KeyboardCensus {
         case cantBind
     }
 
+    /// The one keybinding layer the board draws (#1127;
+    /// `docs/design-decisions.md` argues why one and not the
+    /// union). A name no layer answers to falls back rather than
+    /// drawing nothing — the strip's selection outlives a rename
+    /// by a frame, and an empty board reads "everything is free".
+    static func shown(
+        _ name: String,
+        in layers: [KeyLayer]
+    ) -> [KeyLayer] {
+        let match =
+            layers.first { $0.name == name }
+            ?? layers.first { $0.isDefault }
+            ?? layers.first
+        return match.map { [$0] } ?? []
+    }
+
     /// Parses non-empty key bindings across layers (`KeyCombo.parse`).
     static func combos(in layers: [KeyLayer]) -> [KeyCombo] {
         layers

@@ -12,6 +12,9 @@ struct SpokenKeyboardBoard: View {
     let claims: [UInt32: [KeyboardCensus.ModifierLayer]]
     let scope: KeyboardCensus.Scope
     let conflicted: Set<UInt32>
+    /// The keybinding layer the caps were counted over, or nil
+    /// while there is only one (#1127).
+    let layerLabel: String?
 
     private var scopeLabel: String {
         switch scope {
@@ -37,7 +40,8 @@ struct SpokenKeyboardBoard: View {
                     scope: scope,
                     conflicted: conflicted
                 ),
-                scopeLabel: scopeLabel
+                scopeLabel: scopeLabel,
+                layerLabel: layerLabel
             )
         )
     }
@@ -88,22 +92,34 @@ enum KeyboardBoardSpoken {
     @MainActor
     static func sentence(
         buckets: Buckets,
-        scopeLabel: String
+        scopeLabel: String,
+        layerLabel: String?
     ) -> String {
         var parts = [
             L(
                 "keyboard.ax.board",
                 "Keyboard preview, showing %1$@.",
                 scopeLabel
-            ),
+            )
+        ]
+        if let layerLabel {
+            parts.append(
+                L(
+                    "keyboard.ax.layer",
+                    "In the \u{201C}%1$@\u{201D} layer.",
+                    layerLabel
+                )
+            )
+        }
+        parts.append(
             buckets.bound.isEmpty
                 ? L("keyboard.ax.bound_none", "No keys bound.")
                 : L(
                     "keyboard.ax.bound",
                     "Bound: %1$@.",
                     join(buckets.bound)
-                ),
-        ]
+                )
+        )
         if !buckets.reserved.isEmpty {
             parts.append(
                 L(

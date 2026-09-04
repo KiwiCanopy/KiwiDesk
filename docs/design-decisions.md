@@ -8919,9 +8919,9 @@ of it, rather than separate rulings:
   scope for now; the reserved slot is additive, so their later
   arrival won't re-layout the section.
 - **The keyboard preview shows one modifier at a time** (#678
-  pass 5). "KEYBOARD · WHAT'S TAKEN" opens on **All** — every key
-  any binding claims, lit in one colour — and a chip narrows it
-  to a single modifier combination. It is deliberately not a
+  pass 5). The board opens on **All** — every key the shown
+  layer's bindings claim, lit in one colour — and a chip narrows
+  it to a single modifier combination. It is deliberately not a
   multi-select overlay of several combinations at once, and the
   reason is that such an overlay must encode identity as HUE:
   one colour per combination, drawn as a stripe on the key. Hue
@@ -8940,6 +8940,29 @@ of it, rather than separate rulings:
   Seeing two combinations at once was never the conflict signal;
   conflicts are per layer and `KeybindingConflicts` reports them
   separately.
+- **And it shows one keybinding LAYER at a time** (#1127), on
+  the note the ruling above ends on: layers are alternate keymaps
+  and only one of them fires, so a key claimed in another layer
+  is no constraint on this one. The census
+  already refuses to call that a conflict; a board folded over
+  every layer contradicts that in ink, reading a key as claimed
+  while you edit a layer where it is free — and the board's whole
+  question is *is this key free HERE*. Showing the other layers'
+  claims at reduced strength was weighed and refused: it answers
+  a question ("taken elsewhere") the user cannot act on while
+  binding, and it buys that with a second visual language on a
+  board whose two channels are already spoken for. What the
+  scoping costs is that the picture now changes under a strip
+  click, so the panel names the layer it is drawing — in the
+  caption, and in the spoken description — whenever there is more
+  than one to choose from. The two are one channel each, not the
+  same fact twice: the caption is what a sighted reader has (the
+  board cannot speak to them), and the board's own description is
+  what a VoiceOver reader has, since a picture must describe
+  itself rather than lean on prose beside it. So the caption
+  ANNOUNCES the layer-free sentence — the layer is drawn, not
+  said twice in adjacent elements — which is the stand-down the
+  fill legend beside it already takes.
 - **The board states two facts in two channels**: the FILL says
   what your config has done with a key (bound, free), and a RING
   warns about it — dashed amber where macOS owns the key under

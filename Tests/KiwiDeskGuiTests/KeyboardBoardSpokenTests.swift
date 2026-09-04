@@ -99,7 +99,8 @@ struct KeyboardBoardSpokenTests {
         LocalizationManager.shared.select("en")
         let empty = KeyboardBoardSpoken.sentence(
             buckets: .init(),
-            scopeLabel: "All"
+            scopeLabel: "All",
+            layerLabel: nil
         )
         #expect(
             empty == "Keyboard preview, showing All. No keys bound."
@@ -110,11 +111,39 @@ struct KeyboardBoardSpokenTests {
                 reserved: ["space"],
                 conflict: ["W"]
             ),
-            scopeLabel: "⌘"
+            scopeLabel: "⌘",
+            layerLabel: nil
         )
         #expect(full.hasPrefix("Keyboard preview, showing ⌘. Bound: Q"))
         #expect(full.contains("macOS owns: space."))
         #expect(full.hasSuffix("Conflict: W."))
+    }
+
+    /// The drawing moved to ONE keybinding layer (#1127), so the
+    /// sentence moves with it: a board that changes under a
+    /// strip click and never says which layer it changed to is
+    /// the same defect a sighted reader has, with no caption to
+    /// fall back on. Withheld while there is only one layer,
+    /// where naming it is noise.
+    @Test("the sentence names the layer it was taken over")
+    func sentenceNamesTheLayer() {
+        LocalizationManager.shared.select("en")
+        let named = KeyboardBoardSpoken.sentence(
+            buckets: .init(bound: ["Q"]),
+            scopeLabel: "All",
+            layerLabel: "media"
+        )
+        #expect(
+            named == "Keyboard preview, showing All. In the "
+                + "\u{201C}media\u{201D} layer. Bound: Q."
+        )
+        #expect(
+            !KeyboardBoardSpoken.sentence(
+                buckets: .init(bound: ["Q"]),
+                scopeLabel: "All",
+                layerLabel: nil
+            ).contains("layer")
+        )
     }
 
     /// The two locale seams of the spoken form, pinned by
@@ -179,6 +208,9 @@ struct KeyboardBoardSpokenTests {
             source.occurrences(of: "SpokenKeyboardBoard(") == 1
         )
         #expect(source.occurrences(of: "KeyboardBoard(") == 1)
+        // …and hands it the layer, so the spoken form says what
+        // the caps were counted over (#1127).
+        #expect(source.contains("layerLabel: layerLabel"))
         #expect(
             source.contains("fillLegend.accessibilityHidden(true)")
         )

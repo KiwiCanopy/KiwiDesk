@@ -71,6 +71,19 @@ to invert the dim ladder).
   carry no duplicate preview (`DetailPanelTests` holds the
   migration and the offer set; the argument is in
   `docs/design-decisions.md` ▸ two columns).
+- **That panel is the section's SIBLING, so a selection the
+  section owns reaches it on `nav` — never through an
+  environment the section applies.** The two columns are mounted
+  beside each other, so `.environment(…)` written inside a
+  section's own body is invisible one column over: the keyboard
+  board drew every layer at once for as long as it shipped
+  because the panel could not see `\.keybindingLayerName`
+  (#1127). Give the selection one coalesced reading on
+  `SettingsNavigation` and have both columns take it — a reader
+  spelling the landing itself is how the `layoutModeTab` pair
+  came to answer two different defaults.
+  `KeyboardLayerWiringTests` is the guard, keyed on the use
+  sites; a second panel taking a section-owned value joins it.
 - **A picture whose object is NOT the draft goes in a sheet, and
   writes nothing** (#859). Choose the container by whose object the
   picture is — draft → the panel, anything the user is not editing

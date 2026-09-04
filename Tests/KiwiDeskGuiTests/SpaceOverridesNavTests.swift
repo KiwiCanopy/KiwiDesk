@@ -15,11 +15,16 @@ struct SpaceOverridesNavTests {
     func resetClearsOverrideFocus() {
         var nav = SettingsNavigation()
         nav.spaceOverridesFocus = SpaceID("code")
-        // Pinned alongside the mode tab it sits beside, so a reset
-        // that forgot one of the two would still red here.
+        // Pinned alongside the surfaces it sits beside. The
+        // REGISTER — that no per-visit field is forgotten — is
+        // `SettingsNavigationResetTests`' by reflection since
+        // #1127; these two stay because this suite's subject is
+        // the pushed editor and they are what it opens beside.
         nav.layoutModeTab = .stack
+        nav.shortcutsLayer = "media"
         nav.resetSurfaces()
         #expect(nav.spaceOverridesFocus == nil)
         #expect(nav.layoutModeTab == nil)
+        #expect(nav.shortcutsLayer == nil)
     }
 }
