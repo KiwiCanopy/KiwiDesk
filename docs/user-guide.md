@@ -2988,8 +2988,20 @@ for a fill, a key-shaped ring for a ring:
   it. The entry sits in the legend only while a red ring is
   actually on the board.
 
-Under the legend, **Keys taken: N** counts the distinct keys the
-shown scope claims, and a **Keyboard layout** row reports what
+Directly under the board, **Keys taken: N** counts the distinct
+keys the shown scope claims — and that same line answers for one
+key when you point at it. Hover a key and it names every action
+on it in the shown scope, chord first: *⌃⌥J — Focus left*. A key
+nothing claims says so; one macOS owns names what it owns it for,
+which is what the dashed ring is about. Nothing else moves — the
+line is always in the same place, and only its text changes.
+
+It earns its keep on a **red** key. The ring tells you two of
+your bindings collide and cannot tell you which two; hovering
+names both and repeats the cost in the same words the row's own
+warning uses.
+
+Below that, a **Keyboard layout** row reports what
 the board resolved — the physical shape (ANSI, ISO or JIS) and
 the active input source, e.g. *ISO · German*, "from macOS".
 
@@ -3007,7 +3019,12 @@ words rather than a key at a time: which combination it is
 showing, which layer (where you have more than one), then the
 bound keys, the keys macOS owns under that combination, and any
 conflicts — the same facts the fills and rings draw, read from
-the same census.
+the same census. Each conflict is then read out in full, naming
+the actions that clash and what it costs you, because that is
+the one thing the picture cannot be made to say. The hover
+reading itself is not announced: it repeats what the board has
+already described, and the per-key detail is on the shortcut
+rows beside it, which are ordinary focusable rows.
 
 ### Keyboard Modifiers & Keys
 

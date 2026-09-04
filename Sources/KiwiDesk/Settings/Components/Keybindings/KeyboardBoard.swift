@@ -7,6 +7,10 @@ struct KeyboardBoard: View {
     let claims: [UInt32: [KeyboardCensus.ModifierLayer]]
     let scope: KeyboardCensus.Scope
     let conflicted: Set<UInt32>
+    /// The key under the pointer, or nil on leaving one (#798).
+    /// A closure rather than a binding: the board owns no hover
+    /// state, so a rebuilt cap cannot strand a stale key here.
+    var onHover: ((UInt32?) -> Void)?
 
     var body: some View {
         GeometryReader { geometry in
@@ -87,6 +91,12 @@ struct KeyboardBoard: View {
             legend: key.legend
         )
         .frame(width: max(width, 0), height: unit)
+        .onHover { inside in
+            guard let onHover else { return }
+            // A legend cap (⇪, ⇧) carries no code and reads as
+            // leaving: the slot answers for keys, not chrome.
+            onHover(inside ? key.code : nil)
+        }
     }
 
     private func state(

@@ -8963,6 +8963,38 @@ of it, rather than separate rulings:
   ANNOUNCES the layer-free sentence — the layer is drawn, not
   said twice in adjacent elements — which is the stand-down the
   fill legend beside it already takes.
+- **Hovering a key answers "what is on it", in the tally's own
+  slot — and there is no per-key keyboard route** (#798). The
+  board says which keys are taken and cannot say what takes
+  them; the row list beside it can, but only by scrolling away
+  from the picture. The strip replaces the tally line rather
+  than adding a fifth line under a board that already carries
+  four, because "what is taken" and "what is taken HERE" are one
+  question at two grains. A popover was refused: anchored to a
+  19pt cap it covers the neighbouring caps, which are exactly
+  what a reader asking "if I hold ⌃⌥, what is left?" is looking
+  at. Reserved height comes from the sets the legend already
+  gates on, so a user with no conflicts pays for no dead air.
+
+  **The keyboard obligation is discharged by the ROW LIST, not
+  by a twin affordance**, and that is the ruling worth keeping.
+  The rule is *no information is pointer-only*, not *every
+  pointer affordance has a key twin* — every action on a key is
+  already on a focusable, searchable row one column over.
+  Making ~60 caps focusable was refused outright: it is the
+  per-mark reading the board's one-element shape exists to
+  replace, and 60 Tab stops in one panel fails the north-star's
+  first term before it reaches accessibility. A cursor moving
+  inside one focusable board was refused too — VoiceOver owns
+  the arrow keys once an element is focused, and the board
+  cannot take focus at all on a Mac that has not turned
+  keyboard navigation on, which is the default. What the change
+  spends its accessibility budget on instead is the CONFLICT
+  clause of the spoken sentence, which names the clashing
+  actions and their cost: the one reading a screen-reader user
+  cannot assemble from the board today. The stated loss is that
+  a keyboard user cannot sweep the board to browse; browsing is
+  the list's job, and the picture's job is the glance.
 - **The board states two facts in two channels**: the FILL says
   what your config has done with a key (bound, free), and a RING
   warns about it — dashed amber where macOS owns the key under

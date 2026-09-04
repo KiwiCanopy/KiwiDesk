@@ -15,6 +15,11 @@ struct SpokenKeyboardBoard: View {
     /// The keybinding layer the caps were counted over, or nil
     /// while there is only one (#1127).
     let layerLabel: String?
+    var onHover: ((UInt32?) -> Void)?
+    /// One sentence per conflicted key, from the same reading
+    /// the drawn slot renders (#798) — so the two channels
+    /// cannot disagree about which bindings clash.
+    var conflictDetail: [String] = []
 
     private var scopeLabel: String {
         switch scope {
@@ -29,7 +34,8 @@ struct SpokenKeyboardBoard: View {
             type: type,
             claims: claims,
             scope: scope,
-            conflicted: conflicted
+            conflicted: conflicted,
+            onHover: onHover
         )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
@@ -41,7 +47,8 @@ struct SpokenKeyboardBoard: View {
                     conflicted: conflicted
                 ),
                 scopeLabel: scopeLabel,
-                layerLabel: layerLabel
+                layerLabel: layerLabel,
+                conflictDetail: conflictDetail
             )
         )
     }
@@ -93,7 +100,8 @@ enum KeyboardBoardSpoken {
     static func sentence(
         buckets: Buckets,
         scopeLabel: String,
-        layerLabel: String?
+        layerLabel: String?,
+        conflictDetail: [String] = []
     ) -> String {
         var parts = [
             L(
@@ -137,6 +145,13 @@ enum KeyboardBoardSpoken {
                     join(buckets.conflict)
                 )
             )
+            // The one reading a VoiceOver user cannot assemble
+            // from the board (#798): the ring says two bindings
+            // clash and cannot say which two. Scoped to this
+            // bucket deliberately — folding every bound key's
+            // action into `Bound:` makes the one description a
+            // wall and costs the sentence its job.
+            parts.append(contentsOf: conflictDetail)
         }
         return parts.joined(separator: " ")
     }

@@ -73,6 +73,31 @@ enum KeyboardCensus {
         return out.mapValues { $0.sorted() }
     }
 
+    /// One key's bindings under the selected modifier layers
+    /// (#798), in the chip strip's own order.
+    ///
+    /// Beside `claims` and over the same arguments on purpose: a
+    /// second fold written in the view is how the strip comes to
+    /// name an action on a key the fill says is free.
+    static func bindings(
+        on code: UInt32,
+        in layers: [KeyLayer],
+        selected: Set<ModifierLayer>
+    ) -> [(layer: ModifierLayer, binding: KeyBinding)] {
+        layers.flatMap(\.bindings)
+            .compactMap { binding in
+                guard let combo = KeyCombo.parse(binding.combo),
+                    combo.keyCode == code
+                else { return nil }
+                let layer = ModifierLayer(
+                    modifiers: combo.modifiers
+                )
+                guard selected.contains(layer) else { return nil }
+                return (layer, binding)
+            }
+            .sorted { $0.0 < $1.0 }
+    }
+
     /// Filter scope for keyboard preview.
     enum Scope: Hashable {
         case all
