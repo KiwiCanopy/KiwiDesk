@@ -31,12 +31,14 @@ struct ProfileSpacesSeamTests {
     private let allowed: [String: [String: Int]] = [
         // The profile axis. The three enders are the writes
         // outside the door: a re-key, a rename, a delete, plus
-        // the #634 reset. The door's seventh site is the SAVE's
-        // adoption (#1246) — `persistProfile` reaches it through
-        // `adoptSavedProfile` rather than naming the store.
+        // the #634 reset. This map pins where the store may be
+        // NAMED; which save exits owe an adopt is the separate
+        // `profileWriteSitesAreCounted` below, because a call to
+        // `adoptSavedProfile` names no store and is invisible
+        // here (#1246).
         "profilePartitioning": [
             "State/StateCoordinator.swift": 1,
-            "Profiles/KiwiCore+ProfileSpaces.swift": 7,
+            "Profiles/KiwiCore+ProfileSpaces.swift": 8,
             "App/KiwiCore+RekeyEvent.swift": 1,
             "App/KiwiCore+Reset.swift": 1,
             "Profiles/KiwiCore+ProfileRename.swift": 1,
@@ -209,5 +211,47 @@ struct ProfileSpacesSeamTests {
                 )
             )
         }
+    }
+
+    /// Every `profiles.save(` in Core owes the partitioning an
+    /// adopt beside it: `ProfileManager.save` makes its argument
+    /// current, and the live slot has to move with it or the
+    /// next switch files nothing for the profile just written
+    /// (#1246, `ProfileSaveAdoptionTests`).
+    ///
+    /// This counts the SITES, which is what the obligation
+    /// attaches to — it cannot read whether a given site adopts,
+    /// and does not claim to. A fourth exit reds the count and
+    /// makes its author come here, which is the whole job: the
+    /// third exit (`applyStandard`) shipped un-adopted and no
+    /// suite noticed, because there was nothing to red.
+    private let saveExits: [String: Int] = [
+        "Profiles/KiwiCore+Profiles.swift": 2,
+        "Profiles/KiwiCore+ProfileResolution.swift": 1,
+    ]
+
+    @Test("Every profile write site is a known one")
+    func profileWriteSitesAreCounted() throws {
+        let root = coreRoot
+        let prefix = root.path + "/"
+        var counts: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let hits = source.occurrences(of: "profiles.save(")
+            guard hits > 0 else { continue }
+            let key =
+                file.path.hasPrefix(prefix)
+                ? String(file.path.dropFirst(prefix.count))
+                : file.path
+            counts[key] = hits
+        }
+        let stray =
+            "a profiles.save( site moved or appeared; every one "
+            + "owes the partitioning an adopt beside it "
+            + "(adoptSavedProfile / adoptStandardSave, #1246) — "
+            + "add it, then pin the site here"
+        #expect(counts == saveExits, Comment(rawValue: stray))
     }
 }

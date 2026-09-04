@@ -55,7 +55,7 @@ extension KiwiCore {
     }
 
     /// Files the outgoing profile's arrangement, then hands the
-    /// live slot to `name`. Every profile WRITE calls this:
+    /// live slot to `name`. A profile WRITE calls this:
     /// `ProfileManager.save` adopts `currentName`, and the
     /// partitioning's own slot has to move with it (#1230/#1246).
     func adoptSavedProfile(_ name: String) {
@@ -63,6 +63,15 @@ extension KiwiCore {
             state.workspaces.allSpaces,
             handingLiveTo: name
         )
+    }
+
+    /// The preset exit. `apply(composed:)` has already filed the
+    /// outgoing profile and stood the slot down BEFORE the
+    /// compose rearranged live, so this only claims the slot —
+    /// filing here would record the Standard's arrangement under
+    /// the outgoing profile's name (#1230/#1246).
+    func adoptStandardSave(_ name: String) {
+        state.profilePartitioning.adoptLive(name)
     }
 
     /// Puts the incoming profile's own windows back in its own

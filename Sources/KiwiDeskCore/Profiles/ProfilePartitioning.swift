@@ -131,7 +131,18 @@ struct ProfilePartitioning: Sendable {
         if liveProfile == old { liveProfile = new }
     }
 
-    /// Reset All Settings (#634).
+    /// Forgets every profile's arrangement but keeps naming the
+    /// live one. The #634 tier-1 discard is NOT an adoption
+    /// reset — `ProfileManager.currentName` survives it — so
+    /// nilling the slot there would leave a live profile the
+    /// slot does not name, which is #1246's defect exactly.
+    mutating func forgetRecords() {
+        byProfile = [:]
+    }
+
+    /// Reset All Settings (#634). Forgets the records AND the
+    /// live slot, so only for a caller that resets adoption
+    /// beside it, or the slot outlives `currentName`.
     mutating func reset() {
         byProfile = [:]
         liveProfile = nil

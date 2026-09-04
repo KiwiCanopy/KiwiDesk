@@ -21,7 +21,7 @@ extension KiwiCore {
         // it here "discard the saved arrangement" left the one
         // record that survives a restart standing, and the next
         // seed wrote it straight back.
-        state.profilePartitioning.reset()
+        state.profilePartitioning.forgetRecords()
         forgetDesktopSpaceMemory()
         // The Desktop→Space map is the one record here that
         // outlives the process (#1230), so the discard has to

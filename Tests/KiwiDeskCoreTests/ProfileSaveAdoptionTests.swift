@@ -134,4 +134,38 @@ struct ProfileSaveAdoptionTests {
             core.state.profilePartitioning.liveProfile == name
         )
     }
+
+    /// The #634 tier-1 discard forgets saved arrangements but is
+    /// NOT an adoption reset — `ProfileManager.currentName`
+    /// survives it. Nilling the live slot there manufactured
+    /// #1246 from a GUI button: the next write filed nothing for
+    /// the profile still named current, so returning to it
+    /// restored nothing.
+    @Test("Discarding arrangements keeps naming the live profile")
+    func discardKeepsTheLiveSlot() throws {
+        let core = makeCore()
+        live(core, [1, 2])
+        core.state.workspaces.add(WindowID(1), to: "1")
+        core.state.workspaces.add(WindowID(2), to: "2")
+        try core.persistProfile(named: "A", modes: nil)
+        #expect(core.profiles.currentName == "A")
+
+        core.discardSavedArrangement()
+        #expect(core.profiles.currentName == "A")
+        #expect(
+            core.state.profilePartitioning.liveProfile == "A"
+        )
+
+        // A's arrangement is still filed by the next write, so
+        // the round trip below survives the discard.
+        try core.persistProfile(named: "B", modes: nil)
+        let b = try core.profiles.read(name: "B")
+        let a = try core.profiles.read(name: "A")
+        core.apply(profile: b, forceRetile: false)
+        core.state.workspaces.add(WindowID(2), to: "1")
+
+        core.apply(profile: a, forceRetile: false)
+        #expect(members(core, "1") == [WindowID(1)])
+        #expect(members(core, "2") == [WindowID(2)])
+    }
 }
