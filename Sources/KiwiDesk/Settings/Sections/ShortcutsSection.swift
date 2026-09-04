@@ -298,7 +298,9 @@ struct ShortcutsSection: View {
         if !model.config.layers.contains(
             where: { $0.name == selected }
         ) {
-            model.nav.shortcutsLayer = KeyLayer.defaultName
+            // Nil rather than the name: `nav`'s own coalescing
+            // is the one place the landing is decided (#1127).
+            model.nav.shortcutsLayer = nil
         }
     }
 }

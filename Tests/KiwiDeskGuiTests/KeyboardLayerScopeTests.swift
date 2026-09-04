@@ -163,7 +163,6 @@ struct KeyboardLayerWiringTests {
         // and the caption ANNOUNCES the layer-free sentence,
         // the board's own description having said it already.
         #expect(panel.contains("layerLabel:layerLabel"))
-        #expect(panel.contains("Text(caption)"))
         // Contiguous from the `Text` it names: the modifier is
         // right for THIS view and wrong on any other, and moved
         // onto a sibling it passed a whole-file `contains`
@@ -175,11 +174,11 @@ struct KeyboardLayerWiringTests {
                 "Text(caption).accessibilityLabel(draftCaption)"
             )
         )
-        // The naming condition is the gate's, asked not counted.
+        // The naming condition is the gate's one reading,
+        // asked rather than counted.
         #expect(
             panel.contains(
-                "ShortcutsGates(config:model.config)"
-                    + ".inertReason(for:.shortcuts(.switchToLayer))"
+                "ShortcutsGates(config:model.config).layersExist"
             )
         )
     }
@@ -252,8 +251,7 @@ struct KeyboardLayerWiringTests {
         )
         #expect(
             header.contains(
-                "ShortcutsGates(config:model.config)"
-                    + ".inertReason(for:.shortcuts(.switchToLayer))"
+                "ShortcutsGates(config:model.config).layersExist"
             )
         )
         #expect(header.occurrences(of: "layers.count") == 0)
@@ -266,6 +264,12 @@ struct KeyboardLayerWiringTests {
 /// the token is passed at the call site, leaves "the label is
 /// always nil" green on both channels at once — which is #1127's
 /// second claim regressing whole (guard-prover, 2026-09-04).
+///
+/// The properties are internal rather than private and asserted
+/// directly — gui.md's instrument for exactly this, taken from
+/// the schematics' count-derived quantities: a preview that
+/// takes an input and draws a constant satisfies every substring
+/// a scan can look for while answering nothing.
 ///
 /// Main-actor spend (tests.md): two `makeTestModel` builds, each
 /// minting a scratch defaults domain and a test core, and four

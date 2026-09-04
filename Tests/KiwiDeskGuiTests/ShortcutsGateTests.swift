@@ -100,6 +100,32 @@ struct ShortcutsGateTests {
         }
     }
 
+    /// The named reading four surfaces take, and its polarity.
+    /// Written against the CASE, so a second `InertReason` — a
+    /// mode withhold, a Lua-owned withhold — leaves "the user
+    /// has a layer to choose between" true, where a `== nil`
+    /// spelling would silently stop the preview caption and the
+    /// header naming their layer for an unrelated reason
+    /// (architect re-review 2026-09-04).
+    @Test("layersExist answers the count, not the withhold")
+    func layersExistIsCaseWise() {
+        func exist(_ layers: [String]) -> Bool {
+            ShortcutsGates(config: config(layers: layers))
+                .layersExist
+        }
+        #expect(!exist([KeyLayer.defaultName]))
+        #expect(exist([KeyLayer.defaultName, "resize"]))
+        // A tripwire, deliberately: while `.onlyDefaultLayer`
+        // is the only case the two spellings agree, so nothing
+        // else can red on the polarity. Adding a case reds
+        // HERE — check every `layersExist` reader means "the
+        // count" and not "the withhold", then extend this.
+        #expect(
+            ShortcutsGates.InertReason.allCases
+                == [.onlyDefaultLayer]
+        )
+    }
+
     /// Every gated row the area declares is either resolved from
     /// the config here or deliberately resolved elsewhere — never
     /// simply unhandled. Derived from the census, so a new gate
@@ -145,8 +171,7 @@ struct ShortcutsGateTests {
         .joined()
         #expect(
             source.contains(
-                "ShortcutsGates(config:model.config)"
-                    + ".inertReason(for:.shortcuts(.switchToLayer))"
+                "ShortcutsGates(config:model.config).layersExist"
             ),
             Comment(
                 rawValue:

@@ -31,14 +31,13 @@ struct ShortcutsHeader: View {
         }
     }
 
-    /// Names the active layer once there is a choice — the
-    /// census gate's own condition, asked rather than counted
-    /// (#1127): the preview panel names the same layer under the
-    /// same rule, and two copies of it grey apart on a retune.
+    /// Names the active layer once there is a choice — the one
+    /// `layersExist` reading, asked rather than counted (#1127).
+    /// Only the CONDITION is shared with the preview panel: this
+    /// names the selection, the panel the layer it drew, which
+    /// differ for the frame between a delete and the repair.
     @ViewBuilder private var editingLabel: some View {
-        if ShortcutsGates(config: model.config)
-            .inertReason(for: .shortcuts(.switchToLayer)) == nil
-        {
+        if ShortcutsGates(config: model.config).layersExist {
             Text(
                 L(
                     "shortcuts.editing_layer",

@@ -11,7 +11,7 @@ struct ShortcutsGates {
     let config: GuiConfig
 
     /// Reason why a Shortcuts setting is withheld or gated.
-    enum InertReason: Hashable {
+    enum InertReason: Hashable, CaseIterable {
         /// Only default layer configured (`.layersExist`).
         case onlyDefaultLayer
     }
@@ -32,6 +32,17 @@ struct ShortcutsGates {
             )
             return nil
         }
+    }
+
+    /// Whether the user has a layer to CHOOSE between — the one
+    /// spelling of that question (#1127). Written against the
+    /// case rather than against nil: a second `InertReason`
+    /// arriving for some other cause would otherwise stop the
+    /// preview caption and the header naming their layer, for a
+    /// reason that has nothing to do with how many there are.
+    var layersExist: Bool {
+        inertReason(for: .shortcuts(.switchToLayer))
+            != .onlyDefaultLayer
     }
 
     /// Gated keys resolved directly from `GuiConfig`

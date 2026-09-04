@@ -27,10 +27,7 @@ struct KeyboardPreviewPanel: View {
     /// gateless placement resolves nil and names a lone layer
     /// (#816, #1127).
     var layerLabel: String? {
-        guard
-            ShortcutsGates(config: model.config)
-                .inertReason(for: .shortcuts(.switchToLayer))
-                == nil
+        guard ShortcutsGates(config: model.config).layersExist
         else { return nil }
         return shown.first?.name
     }

@@ -17,8 +17,7 @@ struct LayersCard: View {
 
     /// Whether configured layers exist (`ShortcutsGates`).
     private var layersExist: Bool {
-        ShortcutsGates(config: model.config)
-            .inertReason(for: .shortcuts(.switchToLayer)) == nil
+        ShortcutsGates(config: model.config).layersExist
     }
 
     /// Whether the card is offered: an always-open card, or no
@@ -30,8 +29,7 @@ struct LayersCard: View {
         config: GuiConfig,
         mode: SettingsMode
     ) -> Bool {
-        ShortcutsGates(config: config)
-            .inertReason(for: .shortcuts(.switchToLayer)) == nil
+        ShortcutsGates(config: config).layersExist
             || mode == .powerUser
     }
 
