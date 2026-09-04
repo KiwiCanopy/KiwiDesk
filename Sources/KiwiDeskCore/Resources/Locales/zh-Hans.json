@@ -220,6 +220,8 @@
   "config_issues.unknown_call": "未知调用“%1$@”。",
   "config_issues.unknown_call_suggestion": "未知调用“%1$@”——你是指“%2$@”吗？",
   "custom_lua_banner.text": "你的 init.lua 中还包含自定的 Lua 代码。它不会与可视化编辑器冲突，App 也绝不会修改 init.lua。",
+  "desktops.absent": "未检测到",
+  "desktops.absent.help": "调度中心目前没有此桌面：它所在的屏幕未连接，或者它已被关闭。描述文件的关联仍会保留，该桌面回来后会再次载入。",
   "desktops.current": "当前",
   "desktops.desktop": "桌面 %1$d",
   "desktops.empty": "未检测到 macOS 原生桌面。请在调度中心添加桌面以关联描述文件。",
