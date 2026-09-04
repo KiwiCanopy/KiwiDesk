@@ -32,13 +32,13 @@ extension SettingsValueReadout {
                     new: points(after.resizeStep)
                 )
             ]
-        case .resizeFeedback:
+        case .refusalSound:
             return [
                 behaviourToggleRow(
                     census,
                     label: label(for: census),
-                    old: before.resizeFeedback,
-                    new: after.resizeFeedback
+                    old: before.refusalSound,
+                    new: after.refusalSound
                 )
             ]
         case .swapSkipsCascade:

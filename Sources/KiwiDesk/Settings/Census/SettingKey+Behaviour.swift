@@ -3,7 +3,7 @@
 enum BehaviourKey: String, CaseIterable, Hashable {
     case minWindowSize = "settings.minWindowSize"
     case resizeStep = "settings.resizeStep"
-    case resizeFeedback = "settings.resizeFeedback"
+    case refusalSound = "settings.refusalSound"
     case swapSkipsCascade = "settings.swapSkipsCascade"
     case floatNudge = "settings.floatNudge"
     case floatScaleOnDisplayChange = "settings.floatScaleOnDisplayChange"
@@ -22,8 +22,10 @@ extension BehaviourKey {
         case .resizeStep, .swapSkipsCascade, .floatNudge,
             .floatScaleOnDisplayChange, .placementOverride, .quitLayout:
             return .luaOnly
-        case .resizeFeedback:
-            return .row(.shortcuts, .sizeAndFloat, .showMore)
+        case .refusalSound:
+            // Left Shortcuts ▸ Size & float with #1255: the cue
+            // is app-wide now, not a resize setting.
+            return .row(.behaviour, .cues, .atRest)
         case .quitGridTargetDepth:
             return .row(.behaviour, .onQuit, .atRest)
         case .mouseResize, .mouseFollowsFocus:
@@ -40,8 +42,11 @@ extension BehaviourKey {
         case .resizeStep, .swapSkipsCascade, .floatNudge,
             .floatScaleOnDisplayChange, .placementOverride, .quitLayout:
             return .none
-        case .resizeFeedback:
-            return .text("shortcuts.size_float.feedback")
+        case .refusalSound:
+            return .text(
+                "behavior.cues.sound",
+                help: "behavior.cues.sound.help"
+            )
         case .quitGridTargetDepth:
             return .text(
                 "behavior.quit.target_depth",

@@ -2136,6 +2136,51 @@ mark, and the copy mirrors the floor's
 names none, so the press is a silent stop.
 
 **A bound may refuse a press only if it was learned from a read
+**A refusal DRAWS; the sound is an addition to the drawing, and
+cannot fire without one (#1255).** [Principle] Two refusals cued
+by sound alone — a resize press in a layout with no resizing
+(monocle, grid, floating), and one on a zone axis that does not
+exist. Both were invisible with the toggle off, and invisible to
+anyone who does not hear it; the first is the most reachable
+refusal in the feature, not an edge, since any resize press in
+those three layouts arrives there. Meanwhile the size-limit and
+sticky families drew pills and said nothing. One idea, four
+shapes.
+
+So: every refusal draws, and `refusal.sound` adds the system
+alert to the drawing. The call sits on the pill-DRAWING seam
+rather than on the refusal funnel, and that placement is the
+invariant rather than a detail — a sound that cannot fire
+without a pill can never re-create the defect this removed. It
+is load-bearing for the sticky family, whose pill is gated on
+`sticky.mark`: with the mark off those refusals draw nothing, so
+they must say nothing, where a funnel-level sound would have
+made them audible-but-invisible.
+
+**The setting is OFF by default, and the migration is what
+delivers that.** The old default was `true` and the encoder
+wrote the key unconditionally, so every saved config carries an
+explicit `true` recording what a save did rather than what
+anyone chose — the cue was audible in two situations, one
+reachable only by height-resizing the master of a stack, and the
+owner could not trigger it in three attempts while looking for
+it. Widening it from that to every refusal while keeping the
+stored value would have made every existing install noisier at
+limits it currently hits silently. So the one-shot crossing
+drops the retired key rather than carrying it, and absence
+decodes as off.
+
+It lives in Behaviour rather than General, and that is a
+STORAGE decision wearing a placement question: every row in
+General is a `UserDefaults` preference, a live service toggle or
+an action, so a draft-and-Save row there would be the only one
+that does not do what it was just told. Keeping it in the draft
+config is what preserves the Lua verb and lets it travel in
+profiles and backups — the GUI curates, Lua is open — and
+Behaviour is where app-wide draft behaviour already lives. The
+cost, stated: Behaviour is Power-User-only, so a Simple user
+gets the pill and not the switch.
+
 that could tell a refusal from latency (#1083).** [Principle]
 The clamp above rests entirely on the bound being true. It was
 not: the learner was confirming bounds from redraw latency, and

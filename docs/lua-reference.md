@@ -627,23 +627,34 @@ config only, with no Settings toggle.
 KiwiDesk.set_float_scale_on_display_change(false)
 ```
 
-### set_resize_feedback
+### set_refusal_sound
 
-**Expects:** `true` or `false` (default `true`).
+**Expects:** `true` or `false` (default `false`).
 
-**Does:** whether a resize hotkey that cannot act in the active
-layout (monocle, grid, a floating space) plays the system alert
-sound (#184). The no-op itself is correct — those layouts have
-no resize target — but silent failure at the keyboard reads as
-"KiwiDesk ignored me"; the beep is the standard macOS answer.
+**Does:** whether a blocked action's on-window message also
+plays the system alert sound (#184, widened #1255). Every
+refusal draws — a size limit reached, a layout with nothing to
+resize, a zone with no such axis, a sticky window that cannot be
+swapped — and this adds sound to the drawing. It cannot sound
+without drawing: the call sits on the pill itself, so a refusal
+whose pill is switched off stays silent rather than becoming
+audible-but-invisible.
+
 Only hotkey fires cue; the same command over CLI/IPC stays
-silent (scripted callers branch on the error JSON). The GUI
-twin lives under Shortcuts ▸ Size & float.
+silent (scripted callers branch on the error JSON), and a held
+chord sounds once per hold rather than once per frame. The GUI
+twin lives under Behaviour ▸ When an action can't apply.
+
+Stored as `refusal.sound`. A config written before #1255 carries
+the retired `resize.feedback`, which the one-shot migration
+drops — the value is not carried across, since the old default
+was written into every saved file and records what a save did
+rather than what anyone chose.
 
 **Example:**
 
 ```lua
-KiwiDesk.set_resize_feedback(false)
+KiwiDesk.set_refusal_sound(true)
 ```
 
 ### Space Identity
@@ -3849,11 +3860,11 @@ and flashes a pill. Shrinking pins the same way, which is what
 keeps grow and shrink reversible at an edge. Tiled windows
 only resize in bsp, stack, scrolling, and track layouts —
 monocle, grid, and the floating layout report "not supported",
-and when that failure comes from a **hotkey** press KiwiDesk
-plays the system alert sound so the no-op is perceivable at
-the keyboard (the Cmd+Z-with-nothing-to-undo idiom; #184).
-Mute it with `set_resize_feedback(false)` — CLI and IPC
-callers never hear it, they read the error JSON.
+and a **hotkey** press there flashes a pill saying the layout
+has no resizing (#1255) — the no-op is correct, but a silent
+one at the keyboard reads as "KiwiDesk ignored me". Add the
+system alert sound to it with `set_refusal_sound(true)` — CLI
+and IPC callers never hear it, they read the error JSON.
 
 Distinct from that no-target alert (#933): a resize a size
 limit **truncates** — a shrink reaching the focused window's

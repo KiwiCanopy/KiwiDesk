@@ -14,7 +14,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// **2 (#1147)**: `profile_bindings` values became objects,
     /// which IS a `CodingKeys` key of this file, so the step is
     /// dead without the bump.
-    public static let currentFormat = 2
+    public static let currentFormat = 3
 
     public var format: Int = GuiConfig.currentFormat
     /// Active profile tiling parameters.

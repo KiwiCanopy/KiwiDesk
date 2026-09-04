@@ -8,7 +8,7 @@ public struct Profile: Codable, Sendable, Equatable {
     /// `needsMigration` short-circuits on it, and the retired key
     /// decodes to the DEFAULT rather than failing, so leaving this
     /// at 1 loses the user's tuned value silently.
-    public static let currentFormat = 2
+    public static let currentFormat = 3
 
     public var format: Int
     public var name: String

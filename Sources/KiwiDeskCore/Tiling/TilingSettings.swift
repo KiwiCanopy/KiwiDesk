@@ -28,7 +28,7 @@ public struct TilingSettings: Sendable, Equatable {
     /// because nobody chose the old value: it was audible in two
     /// rare cases, one of them reachable only by height-resizing
     /// a stack master.
-    public var resizeFeedback = false
+    public var refusalSound = false
     /// Directional swap in cascade targets outer neighbor
     /// (`swap.skips_cascade`, #172).
     public var swapSkipsCascade = true

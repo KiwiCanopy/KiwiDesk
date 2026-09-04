@@ -167,7 +167,6 @@ struct SizeFloatGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let expander: ShortcutsFamilyRows
-    @State private var moreExpanded = false
 
     var body: some View {
         SettingsSection(
@@ -187,43 +186,6 @@ struct SizeFloatGroup: View {
             Text(sizeFloatCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            moreDisclosure
-        }
-    }
-
-    private var moreDisclosure: some View {
-        SettingsDisclosure(
-            SettingsCatalog.shortcuts.sizeFloatMore,
-            isExpanded: $moreExpanded,
-            scrollHoisted: true
-        ) {
-            ForEach(
-                ShortcutsRowOrder.sizeAndFloatMore,
-                id: \.id
-            ) { key in
-                moreRow(key)
-            }
-            .padding(.top, 8)
-        }
-    }
-
-    @ViewBuilder private func moreRow(
-        _ key: SettingKey
-    ) -> some View {
-        switch key {
-        case .behaviour(.resizeFeedback):
-            Toggle(
-                L(
-                    "shortcuts.size_float.feedback",
-                    "Alert sound when resize can't apply"
-                ),
-                isOn: $model.config.settings.resizeFeedback
-            )
-        default:
-            let _ = assertionFailure(
-                "unrendered Shortcuts census key: \(key.id)"
-            )
-            EmptyView()
         }
     }
 

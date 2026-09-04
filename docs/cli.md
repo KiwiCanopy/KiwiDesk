@@ -290,7 +290,7 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `set_gap_override` | space, size |
 | | `set_min_window_size` | pt (default 300) |
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
-| | `set_resize_feedback` | true\|false (default `true`) — alert sound when a resize hotkey can't act |
+| | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_nudge` | true\|false (default `true`) — shove a window toward center when it toggles to floating |
 | | `sticky.set_desktop_reach` | true\|false (default `true`) — sticky windows follow you across macOS Desktops (needs the window-management bridge) |
@@ -396,9 +396,9 @@ the slot along its own scroll axis for either `x` or `y`. In a
 track space the axis across the tracks resizes the focused
 window's track, the axis along them its share within the track
 (#128; session-scoped weights too). monocle, grid, and floating
-reply "not supported" — from a hotkey that failure also plays
-the system alert sound (`set_resize_feedback`, default on;
-CLI/IPC callers stay silent).
+reply "not supported" — from a hotkey that failure flashes a
+pill, and adds the system alert sound if `set_refusal_sound` is
+on (default off; CLI/IPC callers stay silent).
 
 ### Applying Ignore Rules
 

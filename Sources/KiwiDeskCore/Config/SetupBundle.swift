@@ -19,7 +19,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// deliberately did not move);
     /// 4 = the Desktop-binding objects (#1147), which reach a
     /// bundle because it carries `config` inline.
-    public static let currentFormat = 4
+    public static let currentFormat = 5
 
     public let format: Int
 

@@ -7,16 +7,16 @@ import Foundation
 /// base value and write target follow the space's own override,
 /// never the global — so a CLI resize can't shift other spaces.
 extension KiwiCore {
-    /// `KiwiDesk.set_resize_feedback(bool)` (#184, widened
+    /// `KiwiDesk.set_refusal_sound(bool)` (#184, widened
     /// #1255): mute or restore the sound every refusal pill
     /// carries. No retile — pure behavior toggle.
-    func setResizeFeedback(
+    func setRefusalSound(
         _ args: [JSONValue]
     ) -> CommandResponse {
         guard let on = args.first?.boolValue else {
             return .fail("expected a boolean")
         }
-        tiler.settings.resizeFeedback = on
+        tiler.settings.refusalSound = on
         return .ok()
     }
 

@@ -41,7 +41,7 @@ extension APIReference {
                 + "points.",
             .integer("points")
         ),
-        "set_resize_feedback": APIRecord(
+        "set_refusal_sound": APIRecord(
             "Plays an alert sound when a keyboard resize cannot "
                 + "act.",
             .boolean("enabled")

@@ -21,36 +21,36 @@ private func makeCore() -> KiwiCore {
 @Suite("Unsupported-resize feedback (#184)", .serialized)
 @MainActor
 struct ResizeFeedbackTests {
-    @Test("set_resize_feedback toggles and validates")
+    @Test("set_refusal_sound toggles and validates")
     func toggle() {
         let core = makeCore()
         // OFF by default since #1255: the pill is the primary
         // cue and the sound is switched on, so widening it to
         // every refusal makes no upgrade noisier.
-        #expect(!core.tiler.settings.resizeFeedback)
+        #expect(!core.tiler.settings.refusalSound)
         // Both directions, which the old cut never had — it
         // only ever drove the flag toward its non-default.
         #expect(
             core.execute(
-                "set_resize_feedback",
+                "set_refusal_sound",
                 args: [.bool(true)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.resizeFeedback)
+        #expect(core.tiler.settings.refusalSound)
         #expect(
             core.execute(
-                "set_resize_feedback",
+                "set_refusal_sound",
                 args: [.bool(false)]
             ).isSuccess
         )
-        #expect(!core.tiler.settings.resizeFeedback)
+        #expect(!core.tiler.settings.refusalSound)
         #expect(
             !core.execute(
-                "set_resize_feedback",
+                "set_refusal_sound",
                 args: [.string("loud")]
             ).isSuccess
         )
-        #expect(!core.tiler.settings.resizeFeedback)
+        #expect(!core.tiler.settings.refusalSound)
     }
 
     @Test("CLI resize failure stays a plain error response")

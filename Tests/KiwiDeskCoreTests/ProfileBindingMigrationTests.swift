@@ -104,11 +104,18 @@ struct ProfileBindingMigrationTests {
 
     /// And the gate above it: a file already at the current
     /// format is not rewritten at all, so its mtime never moves.
+    ///
+    /// The stamp is DERIVED, never spelled: written as a literal
+    /// it reds on every deliberate format bump — #1255's did —
+    /// while catching no regression, since the subject here is
+    /// the gate rather than which integer is current
+    /// (tests.md ▸ #1021).
     @Test("a migrated file is not migrated again")
     func migrationEnds() throws {
         let data = json(
             """
-            {"format":2,"profile_bindings":\
+            {"format":\(GuiConfig.currentFormat),\
+            "profile_bindings":\
             {"2":{"profile":"Work","desktop":2}}}
             """
         )

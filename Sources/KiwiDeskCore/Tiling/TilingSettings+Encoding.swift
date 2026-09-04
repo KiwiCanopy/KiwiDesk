@@ -74,7 +74,11 @@ extension TilingSettings {
             forKey: .resize
         )
         try resize.encode(resizeStep, forKey: .step)
-        try resize.encode(resizeFeedback, forKey: .feedback)
+        var refusal = container.nestedContainer(
+            keyedBy: RefusalKeys.self,
+            forKey: .refusal
+        )
+        try refusal.encode(refusalSound, forKey: .sound)
         var quit = container.nestedContainer(
             keyedBy: QuitKeys.self,
             forKey: .quit
