@@ -168,7 +168,7 @@ struct DesktopsGroup: View {
                         "desktops.absent.help",
                         "This Desktop isn't in Mission Control "
                             + "right now — its screen is "
-                            + "unplugged, or it was closed. The "
+                            + "unplugged, or it was removed. The "
                             + "profile stays here and loads "
                             + "again if that Desktop comes back."
                     )

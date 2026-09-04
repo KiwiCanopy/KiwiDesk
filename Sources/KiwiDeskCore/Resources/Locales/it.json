@@ -221,7 +221,7 @@
   "config_issues.unknown_call_suggestion": "Chiamata sconosciuta «%1$@»: intendevi «%2$@»?",
   "custom_lua_banner.text": "Il tuo init.lua contiene anche codice Lua personalizzato. Non va in conflitto con l'editor visuale e l'app non modifica mai init.lua.",
   "desktops.absent": "assente",
-  "desktops.absent.help": "Questa Scrivania al momento non è in Mission Control — il suo schermo non è collegato, oppure è stata chiusa. Il profilo resta associato qui e viene caricato di nuovo se quella Scrivania ricompare.",
+  "desktops.absent.help": "Questa Scrivania al momento non è in Mission Control — il suo schermo non è collegato, oppure è stata rimossa. Il profilo resta associato qui e viene caricato di nuovo se quella Scrivania ricompare.",
   "desktops.current": "attuale",
   "desktops.desktop": "Scrivania %1$d",
   "desktops.empty": "Nessuna Scrivania nativa di macOS rilevata. Aggiungi Scrivanie in Mission Control per associare i profili.",

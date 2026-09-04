@@ -221,7 +221,7 @@
   "config_issues.unknown_call_suggestion": "未知呼叫「%1$@」——你是指「%2$@」嗎？",
   "custom_lua_banner.text": "你的 init.lua 另外還有自訂 Lua。它不會與視覺化編輯器衝突，而且此 App 從不修改 init.lua。",
   "desktops.absent": "未偵測到",
-  "desktops.absent.help": "Mission Control 目前沒有此桌面：它所在的螢幕未連接，或者它已被關閉。描述檔的綁定仍會保留，該桌面回來後會再次載入。",
+  "desktops.absent.help": "Mission Control 目前沒有此桌面：它所在的螢幕未連接，或者它已被移除。描述檔的綁定仍會保留，該桌面回來後會再次載入。",
   "desktops.current": "目前",
   "desktops.desktop": "桌面 %1$d",
   "desktops.empty": "未偵測到 macOS 原生桌面。請在 Mission Control 中加入桌面以綁定描述檔。",

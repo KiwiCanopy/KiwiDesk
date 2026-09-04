@@ -221,7 +221,7 @@
   "config_issues.unknown_call_suggestion": "알 수 없는 호출 ‘%1$@’입니다. ‘%2$@’을(를) 의도했나요?",
   "custom_lua_banner.text": "init.lua에는 사용자가 작성한 Lua도 있습니다. 비주얼 편집기와 충돌하지 않으며, 앱이 init.lua를 수정하는 일은 없습니다.",
   "desktops.absent": "존재하지 않음",
-  "desktops.absent.help": "이 데스크탑은 지금 Mission Control에 없습니다. 화면이 연결되지 않았거나 데스크탑이 닫혔기 때문입니다. 프로필 바인딩은 여기에 그대로 남아 있으며, 해당 데스크탑이 돌아오면 다시 불러옵니다.",
+  "desktops.absent.help": "이 데스크탑은 지금 Mission Control에 없습니다. 화면이 연결되지 않았거나 데스크탑이 제거되었기 때문입니다. 프로필 바인딩은 여기에 그대로 남아 있으며, 해당 데스크탑이 돌아오면 다시 불러옵니다.",
   "desktops.current": "현재",
   "desktops.desktop": "데스크탑 %1$d",
   "desktops.empty": "macOS 자체의 데스크탑이 감지되지 않았습니다. 프로필을 바인딩하려면 Mission Control에서 데스크탑을 추가하십시오.",
