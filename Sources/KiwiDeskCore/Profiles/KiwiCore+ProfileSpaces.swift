@@ -22,9 +22,11 @@ extension KiwiCore {
             to: profile.name
         )
         guard switching else {
-            // Seeds the live slot on the session's first apply;
-            // a re-apply of the live profile re-seeds to itself,
-            // which is what makes it a no-op.
+            // A re-apply of the LIVE profile, or the session's
+            // first: file nothing and restore nothing, so neither
+            // a monitor reconnect nor boot can revert what is
+            // already on screen. Seeding the slot here is what
+            // makes the NEXT apply a switch.
             state.profilePartitioning.adoptLive(profile.name)
             return false
         }
@@ -81,6 +83,19 @@ extension KiwiCore {
             )
         else { return }
         let declared = profile.declaredSpaces
+        // `WorkspaceManager.add` calls `remove` first, which nils
+        // both focus trackers when the moved window holds them
+        // (`moveWindow` re-establishes focus for exactly this
+        // reason). Restoring the profile's arrangement must not
+        // cost the focus ring its anchor or destroy the one-deep
+        // close-return candidate (bars.md, borders.md), so they
+        // are captured and re-asserted around the moves.
+        let heldFocus = state.workspaces.lastFocused
+        let heldCandidate = state.workspaces.focusReturnCandidate
+        var heldSpaceFocus: [SpaceID: WindowID] = [:]
+        for space in state.workspaces.allSpaces {
+            heldSpaceFocus[space.id] = space.focused
+        }
         var moved = 0
         for space in SpaceID.numericLexicalSorted(
             Array(remembered.keys)
@@ -90,10 +105,24 @@ extension KiwiCore {
             else { continue }
             for window in remembered[space] ?? []
             where state.windows[window] != nil {
+                let from = state.workspaces.space(of: window)
                 state.workspaces.add(window, to: space)
+                // A float crossing displays must re-anchor
+                // (#444): membership alone never moves it, since
+                // no layout frame is computed for a float. The
+                // same pairing `pruneSpaces` makes twenty lines
+                // away, and every other cross-space move site.
+                if from != space {
+                    reanchorFloat(window, to: space)
+                }
                 moved += 1
             }
         }
+        state.workspaces.restoreFocusTrackers(
+            lastFocused: heldFocus,
+            candidate: heldCandidate,
+            spaceFocus: heldSpaceFocus
+        )
         if moved > 0 {
             onLog(
                 "profile '\(profile.name)': restored \(moved) "

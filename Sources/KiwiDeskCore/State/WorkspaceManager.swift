@@ -260,6 +260,36 @@ public struct WorkspaceManager: Sendable {
         lastFocused = window
     }
 
+    /// Re-asserts the focus trackers a batch of `add` calls
+    /// cleared (#1230).
+    ///
+    /// `remove` nils `lastFocused` and `focusReturnCandidate`
+    /// whenever the moved window holds them, which is right for a
+    /// window LEAVING and wrong for one being re-homed inside the
+    /// same state. A caller moving many windows at once restores
+    /// them here rather than reaching the fields, which the
+    /// seal keeps inside this file.
+    ///
+    /// Each value is re-asserted only where it still names a
+    /// window state holds, and a Space's focus only where that
+    /// Space still exists — a prune may have dropped it.
+    public mutating func restoreFocusTrackers(
+        lastFocused: WindowID?,
+        candidate: WindowID?,
+        spaceFocus: [SpaceID: WindowID]
+    ) {
+        for (id, focused) in spaceFocus
+        where spaces[id]?.windows.contains(focused) == true {
+            spaces[id]?.focused = focused
+        }
+        if let lastFocused, space(of: lastFocused) != nil {
+            self.lastFocused = lastFocused
+        }
+        if let candidate, space(of: candidate) != nil {
+            focusReturnCandidate = candidate
+        }
+    }
+
     /// Mutates space in place.
     public mutating func withSpace(
         _ id: SpaceID,

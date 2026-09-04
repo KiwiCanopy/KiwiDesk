@@ -197,7 +197,7 @@ extension KiwiCore {
             config.spaces = starterSpaces()
         }
         config.profileBindings = desktopBindings
-        config.desktopSpaces = persistedDesktopSpaces()
+        config.desktopSpaces = persistedDesktopSpaces() ?? [:]
         seedDefaultShortcuts(&config)
         return config
     }

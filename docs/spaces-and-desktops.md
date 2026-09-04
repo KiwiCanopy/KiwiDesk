@@ -41,9 +41,10 @@ layout modes, gaps, borders and rules. Load a profile yourself
 and its Space list becomes the authority: a Space it does not
 define is dropped and the windows it held move to the profile's
 fallback Space (`set_fallback_space`). A profile that arrives on
-its own — from a Desktop binding or a monitor change — is
-gentler: it brings its Spaces and applies its settings, and
-leaves the Spaces you already had in place.
+its own — from a Desktop binding or a monitor change — does the
+same: any profile CHANGE makes the incoming Space list the
+authority. Re-applying the profile that is already live changes
+nothing, which is what keeps a monitor reconnect harmless.
 
 Every Space sits on a screen. In Settings the **Monitors**
 section is a picture of your desk: drag a Space chip onto the
@@ -62,8 +63,10 @@ Every Desktop remembers which Space it was on. Switch away and
 back and you land on the same Space, with the same windows in
 the same order, and the same one focused — as long as they come
 back promptly ([accepted limitations](accepted-limitations.md)
-has the case where they do not). That memory survives quitting
-KiwiDesk.
+has the case where they do not). That memory is written into
+your settings file, so it survives quitting KiwiDesk — on a Mac
+where KiwiDesk can give a Desktop an identity of its own, which
+is what makes one nameable across restarts at all.
 
 **Your windows stay with their Desktop.** They belong to the
 macOS Desktop they are on, so a Space holds whatever of its
@@ -71,9 +74,10 @@ windows are on the Desktop you are looking at. Switch Desktop and
 the same Space shows you that Desktop's windows instead — nothing
 is moved, and nothing is lost.
 
-A Desktop you have never visited takes a Space **no other Desktop
-is showing**, so a fresh Desktop starts on one of its own rather
-than landing on a Space whose windows are all somewhere else.
+A Desktop you have never visited takes a Space no other Desktop
+is **showing or remembers**, so a fresh Desktop starts on one of
+its own rather than landing on a Space whose windows are all
+somewhere else.
 When every Space is spoken for it falls back to the first, since
 a Desktop always has to show something.
 
@@ -81,7 +85,7 @@ With **Displays have separate Spaces** on, each screen switches
 Desktops on its own, and each moves only its own Space — swiping
 the external screen leaves the built-in one alone.
 
-## A binding gives a Desktop a different Space SET
+## A binding gives a Desktop a different set of Spaces
 
 Bind a profile to a Desktop — the **Profiles per macOS Desktop**
 card in Settings, or `bind_profile_to_desktop(2, "Creator
@@ -95,10 +99,7 @@ Desktops bound to different profiles offer you different lists,
 while two bound to the same profile offer the same list and still
 keep their own windows in it.
 
-**Desktops without a binding keep whatever profile is active** —
-they still each keep their own Space and their own windows, which
-is the section above; what a binding adds is a different *set* of
-Spaces, with its own names, layouts and settings.
+**Desktops without a binding keep whatever profile is active.**
 
 ## The main screen chooses the profile
 
@@ -205,7 +206,9 @@ name resolves in.
 So switching profiles no longer merges them together. KiwiDesk
 files which Space each window was in under the profile you are
 leaving, and puts them back when you return. A window the
-incoming profile has never seen lands in its **fallback space**.
+incoming profile has never seen stays where it is when that
+profile declares the Space it is sitting in, and lands in the
+profile's **fallback Space** when it does not.
 
 The full rules are in the [Lua reference](lua-reference.md)
 ▸ *Space Reconciliation*.

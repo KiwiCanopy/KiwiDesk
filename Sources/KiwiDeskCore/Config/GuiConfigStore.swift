@@ -24,9 +24,12 @@ public struct GuiConfigStore {
     /// it feeds. A caller that held a store across time would
     /// stamp a stale map — nothing does, and nothing should.
     ///
-    /// Empty by default, and empty means "do not stamp", so a
-    /// test writing a config gets exactly what it passed.
-    public var liveDesktopSpaces: [DesktopKey: SpaceID] = [:]
+    /// nil means "nothing to stamp" — a test writing a config
+    /// gets exactly what it passed. An EMPTY map is not nil: it
+    /// is a cleared memory, and treating the two alike made the
+    /// map unclearable through its own write path, so a discard
+    /// left the file's copy standing for the next boot to adopt.
+    public var liveDesktopSpaces: [DesktopKey: SpaceID]?
 
     public init(directory: URL) {
         self.url = directory.appendingPathComponent("gui.json")
@@ -55,7 +58,7 @@ public struct GuiConfigStore {
 
     public func save(_ config: GuiConfig) throws {
         var config = config
-        if !liveDesktopSpaces.isEmpty {
+        if let liveDesktopSpaces {
             config.desktopSpaces = liveDesktopSpaces
         }
         try FileManager.default.createDirectory(

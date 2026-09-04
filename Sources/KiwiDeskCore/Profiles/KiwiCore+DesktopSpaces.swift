@@ -8,15 +8,23 @@ import Foundation
 /// negatively.
 ///
 /// **Per-Desktop Space CONTENTS are never stored, and this is the
-/// canonical argument.** A window's Desktop is the WindowServer's
-/// fact — read through `DesktopMemory.readCensus` /
-/// `readWindowSpace`, recorded as `AwayWindow.nativeSpace`. A
-/// `[DesktopKey: SpaceSet]` map would be a second opinion about
-/// it, and every de-sync is a window that vanishes or appears
-/// twice. It would also owe its own prune, re-key, #634 reset,
-/// dormancy rule and migration — the four enders `forgetAway`
-/// already owns for the same facts — while retiring none of the
-/// records below.
+/// canonical argument.** The discriminator is WHEN a record is
+/// authoritative. A window's Desktop is read from the compositor
+/// continuously (`DesktopMemory.readCensus` / `readWindowSpace`),
+/// so a `[DesktopKey: SpaceSet]` copy would be read while the
+/// thing it copies is still moving — and every disagreement is a
+/// window that vanishes or appears twice. It would also owe its
+/// own prune, re-key, #634 reset, dormancy rule and migration —
+/// the enders `forgetAway` already owns for the same facts —
+/// while retiring none of the records below.
+///
+/// "KiwiDesk's own fact versus the WindowServer's" is the WEAKER
+/// form and does not hold: `AwayWindow.nativeSpace` is a stored
+/// copy of a WindowServer fact, admitted because the #1146
+/// census reconciles it continuously. `ProfilePartitioning`
+/// (`KiwiCore+ProfileSpaces.swift`) is the other side — written
+/// as a profile goes inactive, read as it returns, so store and
+/// live truth are never both authoritative.
 ///
 /// The partition is EMERGENT instead, and measured to work
 /// (#1230's probe): `rememberedSpaces` and `departedSlots` are
@@ -27,13 +35,13 @@ import Foundation
 /// cursor. Four records, three subjects, no duplication.
 ///
 /// **The obligation that falls out:** a new per-`Space` field is
-/// keyed by `WindowID` or it is SHARED across Desktops. Five of
-/// `Space`'s six layout fields already are; `scrollRest` is the
-/// exception, and #1230 measured its collision unobservable
-/// because the #1207 refocus re-anchors the viewport before it is
-/// drawn. Should that ever bite, the fix is a staleness rule at
-/// the one context build — never a Desktop-keyed map, which is
-/// the refused store by the back door.
+/// keyed by `WindowID` or it is SHARED across Desktops. The
+/// fields that are not so keyed today are `scrollRest` and
+/// `sessionRatios`; #1230 measured `scrollRest`'s collision
+/// unobservable because the #1207 refocus re-anchors the viewport
+/// before it is drawn. Should either bite, the fix is a staleness
+/// rule at the one context build — never a Desktop-keyed map,
+/// which is the refused store by the back door.
 ///
 /// **Every entry point takes the Desktop's KEY rather than
 /// reading the topology.** A switch handler holds a
@@ -50,6 +58,7 @@ extension KiwiCore {
         leaving desktop: DesktopKey
     ) {
         desktopMemory.virtualSpaces[desktop] = space
+        desktopMemory.spaceMemoryEstablished = true
     }
 
     /// The Space a Desktop should show: the one it showed last,
@@ -74,9 +83,21 @@ extension KiwiCore {
         for desktop: DesktopKey,
         in snapshot: DesktopSnapshot
     ) -> SpaceID? {
-        virtualSpaceTarget(
+        // Narrowed to the MAIN display's Spaces for the same
+        // reason the secondary arm narrows to its own: activating
+        // a Space that lays out on the other screen parks this
+        // display on what it already showed and moves the active
+        // Space to the wrong screen, taking the focus debt and
+        // the retile with it. Falls back to every Space so the
+        // answer stays TOTAL where no display is known.
+        let main = display(forUUID: snapshot.mainUUID)
+        let onMain = main.map { state.workspaces.spaces(on: $0) }
+        let candidates =
+            (onMain?.isEmpty == false)
+            ? onMain! : state.workspaces.allSpaces.map(\.id)
+        return virtualSpaceTarget(
             for: desktop,
-            among: state.workspaces.allSpaces.map(\.id),
+            among: candidates,
             in: snapshot
         )
     }
@@ -217,8 +238,11 @@ extension KiwiCore {
     /// over what the session learned. The `.number` entries are
     /// dropped by the encoder rather than here — one rule, one
     /// place — so this hands over everything.
-    func persistedDesktopSpaces() -> [DesktopKey: SpaceID] {
-        desktopMemory.virtualSpaces
+    func persistedDesktopSpaces() -> [DesktopKey: SpaceID]? {
+        guard desktopMemory.spaceMemoryEstablished else {
+            return nil
+        }
+        return desktopMemory.virtualSpaces
     }
 
     /// Seeds the memory from a loaded config (#1230).
@@ -232,5 +256,45 @@ extension KiwiCore {
         desktopMemory.virtualSpaces.merge(stored) { live, _ in
             live
         }
+        desktopMemory.spaceMemoryEstablished = true
+    }
+
+    /// Re-keys the Space memory onto this topology's keys, on the
+    /// same reading the bindings re-key on (#1147's `keyMoves`,
+    /// which that lane made generic FOR this one).
+    ///
+    /// Without it the memory is written under one key and read
+    /// under another. `stampedDesktopSnapshot` returns the
+    /// CONFIRMED reading, so a Desktop stamped this session keys
+    /// by its NUMBER for exactly one call — the call that files
+    /// its departure — and by its identity forever after. Every
+    /// later return then missed, and `spacesShownElsewhere` read
+    /// that Desktop's own orphaned entry as another Desktop's,
+    /// so the pick actively AVOIDED the Space it was left on:
+    /// #1230's own defect, on every freshly created Desktop.
+    func reconcileDesktopSpaceMemory(in snapshot: DesktopSnapshot) {
+        let result = Self.keyMoves(
+            in: desktopMemory.virtualSpaces,
+            snapshot: snapshot
+        )
+        guard !result.moves.isEmpty || !result.drops.isEmpty
+        else { return }
+        var out = desktopMemory.virtualSpaces
+        for key in result.drops { out[key] = nil }
+        for (from, to) in result.moves {
+            out[to] = out[from]
+            out[from] = nil
+        }
+        desktopMemory.virtualSpaces = out
+    }
+
+    /// Forgets which Space each Desktop was showing (#634).
+    ///
+    /// A CLEARED memory rather than an absent one: the map became
+    /// durable in #1230, so the discard must reach the file, and
+    /// only an established memory is stamped into a write.
+    func forgetDesktopSpaceMemory() {
+        desktopMemory.virtualSpaces = [:]
+        desktopMemory.spaceMemoryEstablished = true
     }
 }

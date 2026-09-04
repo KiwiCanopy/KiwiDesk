@@ -49,7 +49,7 @@ struct ProfileSpacesSeamTests {
         // reaching the map themselves.
         "virtualSpaces": [
             "Profiles/DesktopMemory.swift": 1,
-            "Profiles/KiwiCore+DesktopSpaces.swift": 5,
+            "Profiles/KiwiCore+DesktopSpaces.swift": 9,
             "App/KiwiCore+AwayWindows.swift": 1,
         ],
     ]
@@ -106,47 +106,69 @@ struct ProfileSpacesSeamTests {
         }
     }
 
-    /// The refused design, pinned NEGATIVELY: no map anywhere
-    /// keys Space CONTENTS by a Desktop. #1230 refused that store
-    /// because a window's Desktop is the WindowServer's fact and a
-    /// copy of it can de-sync, losing or duplicating a window —
-    /// and the cheap way back to it is a `[DesktopKey: …]` of
-    /// window lists added beside the cursor.
+    /// The refused design, pinned NEGATIVELY: no stored map
+    /// anywhere is keyed by `DesktopKey` except the two that are
+    /// named here. #1230 refused a per-Desktop Space CONTENTS
+    /// store because a window's Desktop is a fact KiwiDesk READS
+    /// and does not own, so a copy read while the compositor is
+    /// still mutating it can disagree — and every disagreement
+    /// loses or duplicates a window.
     ///
-    /// Located by the type pair rather than by a name, since the
-    /// name is whatever its author picks.
-    @Test("No map keys Space contents by Desktop")
+    /// Located by the KEY rather than by the value's spelling.
+    /// The first draft listed five literal type shapes, so a
+    /// named wrapper — `[DesktopKey: DesktopWorkspaces]`, the
+    /// likeliest thing anyone would actually write — sailed
+    /// through green while the suite read as pinning the
+    /// refusal. tests.md forbids exactly that in a negative
+    /// clause: locate the subject by something it cannot lose,
+    /// and a Desktop-keyed store cannot lose its key.
+    @Test("Only the ruled maps are keyed by Desktop")
     func noDesktopKeyedContentsStore() throws {
+        // Every `[DesktopKey: …]` declaration KiwiDesk may hold,
+        // with what each one stores. A new entry is a new durable
+        // per-Desktop record and owes the argument above.
+        let allowed: [String: String] = [
+            "Profiles/DesktopMemory.swift": "the Space CURSOR",
+            "App/KiwiCore.swift": "the profile BINDINGS",
+            "Config/GuiConfig.swift": "the cursor, persisted",
+            "Config/GuiConfigStore.swift": "the write-time stamp",
+            "Profiles/KiwiCore+DesktopBindings.swift":
+                "the shared re-key, generic over the value",
+            "Profiles/KiwiCore+DesktopSpaces.swift":
+                "the cursor's door",
+        ]
         let root = coreRoot
-        var offenders: [String] = []
+        let prefix = root.path + "/"
+        var found: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: root) {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            for needle in [
-                "[DesktopKey: [SpaceID: [WindowID]]]",
-                "[DesktopKey: [WindowID]]",
-                "[DesktopKey: Space]",
-                "[DesktopKey: [SpaceID: Space]]",
-                "[DesktopKey: WorkspaceManager]",
-            ] where source.contains(needle) {
-                offenders.append(
-                    "\(file.lastPathComponent) declares "
-                        + "\(needle)"
-                )
-            }
+            let hits = source.occurrences(of: "[DesktopKey:")
+            guard hits > 0 else { continue }
+            let key =
+                file.path.hasPrefix(prefix)
+                ? String(file.path.dropFirst(prefix.count))
+                : file.path
+            found[key] = hits
         }
-        #expect(
-            offenders.isEmpty,
-            Comment(
-                rawValue:
-                    "a per-Desktop Space CONTENTS store is the "
-                    + "design #1230 refused — the Desktop "
-                    + "partition is emergent from window "
-                    + "residence (KiwiCore+DesktopSpaces.swift "
-                    + "carries the argument): "
-                    + offenders.joined(separator: ", ")
+        // Vacuity pin: a mistyped root would find nothing and
+        // pass, which is the fail-open this clause exists to
+        // avoid.
+        #expect(found.count >= 4)
+        for file in found.keys.sorted() {
+            #expect(
+                allowed[file] != nil,
+                Comment(
+                    rawValue:
+                        "\(file) declares a Desktop-keyed map. "
+                        + "If it stores Space CONTENTS it is the "
+                        + "design #1230 refused "
+                        + "(KiwiCore+DesktopSpaces.swift carries "
+                        + "the argument); otherwise add it here "
+                        + "and say what it stores."
+                )
             )
-        )
+        }
     }
 }

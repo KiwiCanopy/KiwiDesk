@@ -75,6 +75,10 @@ extension KiwiCore {
         // keyed by a number for the life of the session with
         // nothing to say so (#1147).
         reconcileDesktopBindings(in: snapshot)
+        // Same reason, same reading: the Space memory is filed
+        // under the key this snapshot answers to, or a freshly
+        // stamped Desktop loses the Space it was left on (#1230).
+        reconcileDesktopSpaceMemory(in: snapshot)
         return snapshot
     }
 

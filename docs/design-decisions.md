@@ -2723,9 +2723,11 @@ whole display setup, so with macOS's "Displays have separate
 Spaces" on — the macOS **default** — "Desktop N activates" needs
 one display to answer for it. #888 ruled that display to be the
 main one (the screen with the menu bar): a swipe on the main
-display selects profiles, a swipe on a secondary display never
-does, and each Desktop the main screen shows keeps the
-per-Desktop Space memory. Shared mode and a single display are
+display selects profiles and a swipe on a secondary display never
+does. That is the PROFILE half, and it stands. The Space half
+moved in #1230: every Desktop keeps its own Space memory now,
+each screen's included, and a secondary swipe moves that screen
+onto its own Desktop's Space without touching the profile. Shared mode and a single display are
 degenerate cases — the main screen's Desktop IS the global one —
 so their behavior is unchanged, and the precedent was already in
 the tree: the starter setup is "named by the main screen".

@@ -15,6 +15,10 @@ import Testing
 /// EMPTY: the round trip destroyed the arrangement, because
 /// `ensureSpace` name-matched profile B's `1` onto profile A's
 /// and `pruneSpaces` forwarded the rest away for good.
+///
+/// WHICH applies count as a switch is
+/// `ProfileSwitchClassificationTests`'; the enders are
+/// `ProfilePartitioningEnderTests`'.
 @Suite("Per-profile Space partitioning (#1230)", .serialized)
 @MainActor
 struct ProfilePartitioningTests {
@@ -30,18 +34,15 @@ struct ProfilePartitioningTests {
 
     private func profile(
         _ name: String,
-        spaces: [SpaceID],
-        modes: [SpaceID: LayoutMode] = [:]
+        spaces: [SpaceID]
     ) -> Profile {
-        var resolved = modes
-        for space in spaces where resolved[space] == nil {
-            resolved[space] = .bsp
-        }
+        var modes: [SpaceID: LayoutMode] = [:]
+        for space in spaces { modes[space] = .bsp }
         return Profile(
             name: name,
             monitorSets: [],
             spaces: spaces,
-            spaceModes: resolved,
+            spaceModes: modes,
             settings: TilingSettings()
         )
     }
@@ -87,8 +88,6 @@ struct ProfilePartitioningTests {
         }
 
         core.apply(profile: b, forceRetile: false)
-        // Space 3 is not B's, so its windows forwarded — that half
-        // is unchanged and deliberate.
         #expect(core.state.workspaces["3"] == nil)
 
         core.apply(profile: a, forceRetile: false)
@@ -102,8 +101,7 @@ struct ProfilePartitioningTests {
         )
     }
 
-    /// The identity ruling: B's `1` is not A's `1`. A window put
-    /// into B's `1` must not still be in A's `1` on the way back.
+    /// The identity ruling: B's `1` is not A's `1`.
     @Test("Two profiles' same-named Spaces are different Spaces")
     func sameNameIsNotSameSpace() {
         let core = makeCore()
@@ -115,8 +113,6 @@ struct ProfilePartitioningTests {
         core.state.workspaces.add(WindowID(2), to: "2")
 
         core.apply(profile: b, forceRetile: false)
-        // In B, w2's Space does not exist, so it forwards into
-        // B's own `1` alongside w1.
         #expect(members(core, "1") == [WindowID(1), WindowID(2)])
 
         core.apply(profile: a, forceRetile: false)
@@ -124,10 +120,17 @@ struct ProfilePartitioningTests {
         #expect(members(core, "2") == [WindowID(2)])
     }
 
+    // MARK: - The landing rule
+
     /// A window the incoming profile has never seen stays where
-    /// the prune put it — its `fallback_space`. The ruled landing
-    /// rule, and the reason the restore runs AFTER the prune.
-    @Test("An unknown window lands in the profile's fallback")
+    /// the prune put it. Where its Space is one the profile does
+    /// NOT declare, that is the fallback — and the reason the
+    /// restore runs after the prune.
+    ///
+    /// Scoped deliberately: the declared-Space case is the test
+    /// below, and the title used to generalise past what this
+    /// body exercises (docs review, 2026-09-04).
+    @Test("An undeclared Space's window lands in the fallback")
     func unknownWindowLandsInFallback() {
         let core = makeCore()
         live(core, [1, 9])
@@ -137,35 +140,33 @@ struct ProfilePartitioningTests {
         core.apply(profile: a, forceRetile: false)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.apply(profile: b, forceRetile: false)
-        // Opened while B was up, so A remembers nothing of it.
+        // Opened while B was up, in a Space A does NOT declare.
         core.state.workspaces.add(WindowID(9), to: "Work")
 
         core.apply(profile: a, forceRetile: false)
         #expect(members(core, "1").contains(WindowID(1)))
-        // w9 has no home in A: it rehomed at the prune and the
-        // restore left it there rather than inventing one.
-        #expect(!members(core, "1").isEmpty)
         #expect(core.state.workspaces["Work"] == nil)
     }
 
-    /// A re-apply of the LIVE profile is not a switch: nothing is
-    /// filed and nothing is restored, so a monitor reconnect
-    /// cannot revert the user's own moves.
-    @Test("Re-applying the live profile changes nothing")
-    func sameProfileReapplyIsIdentity() {
+    /// The other half: a window in a Space the incoming profile
+    /// DOES declare stays put rather than being swept.
+    @Test("A window in a declared Space is not swept")
+    func declaredSpaceWindowStays() {
         let core = makeCore()
-        live(core, [1, 2])
+        live(core, [1, 9])
+        var b = profile("B", spaces: ["1", "Work"])
+        b.fallbackSpace = "Work"
         let a = profile("A", spaces: ["1", "2"])
         core.apply(profile: a, forceRetile: false)
         core.state.workspaces.add(WindowID(1), to: "1")
-        core.state.workspaces.add(WindowID(2), to: "2")
-        // The user then moves w2 across.
-        core.state.workspaces.add(WindowID(2), to: "1")
+        core.apply(profile: b, forceRetile: false)
+        core.state.workspaces.add(WindowID(9), to: "1")
 
         core.apply(profile: a, forceRetile: false)
-        #expect(members(core, "1") == [WindowID(1), WindowID(2)])
-        #expect(members(core, "2").isEmpty)
+        #expect(members(core, "1").contains(WindowID(9)))
     }
+
+    // MARK: - What a restore must not cost
 
     /// A remembered id whose window has gone is skipped, not
     /// inserted: a phantom in the row would outlive the window.
@@ -188,10 +189,9 @@ struct ProfilePartitioningTests {
     }
 
     /// A window away on another Desktop while the profile
-    /// switches must not re-create the Space it left. `add`
-    /// ensures its target, so without the guard the returning
-    /// window leaks a Space into a profile that never declared
-    /// one.
+    /// switches must not re-create the Space it left: `add`
+    /// ensures its target, so the returning window would leak a
+    /// Space into a profile that never declared one.
     @Test("A returning window does not re-create a dropped Space")
     func returningWindowDoesNotLeakASpace() {
         let core = makeCore()
@@ -200,15 +200,12 @@ struct ProfilePartitioningTests {
         let b = profile("B", spaces: ["1"])
         core.apply(profile: a, forceRetile: false)
         core.state.workspaces.add(WindowID(1), to: "2")
-        // It departs for another Desktop, then the profile
-        // switches while it is away — dropping Space "2".
         core.state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         core.apply(profile: b, forceRetile: false)
         #expect(core.state.workspaces["2"] == nil)
 
-        // And now it comes back.
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: WindowID(1), pid: 1, appName: "A1")
@@ -216,8 +213,41 @@ struct ProfilePartitioningTests {
         )
         #expect(core.state.workspaces["2"] == nil)
         #expect(
-            core.state.workspaces["1"]?.windows
-                == [WindowID(1)]
+            core.state.workspaces["1"]?.windows == [WindowID(1)]
+        )
+    }
+
+    /// The restore moves windows with `add`, whose `remove` half
+    /// nils both focus trackers when the moved window holds them.
+    /// Left uncorrected, every profile switch back whose set
+    /// contains the focused window darkens the focus ring and the
+    /// App Bar's focused item until the next AX report, and
+    /// destroys the one-deep close-return candidate.
+    @Test("A restore keeps the focus trackers")
+    func restoreKeepsFocusTrackers() {
+        let core = makeCore()
+        live(core, [1, 2])
+        let a = profile("A", spaces: ["1", "2"])
+        let b = profile("B", spaces: ["1", "2"])
+        core.apply(profile: a, forceRetile: false)
+        core.state.workspaces.add(WindowID(1), to: "1")
+        core.state.workspaces.add(WindowID(2), to: "2")
+
+        core.apply(profile: b, forceRetile: false)
+        // In B the user moves w1 across and works in it, so it
+        // holds the focus at the moment A's restore moves it
+        // back — which is when `add`'s `remove` half would nil
+        // the trackers.
+        core.state.workspaces.add(WindowID(1), to: "2")
+        core.state.workspaces.focus(WindowID(2), in: "2")
+        core.state.workspaces.focus(WindowID(1), in: "2")
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+
+        core.apply(profile: a, forceRetile: false)
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        #expect(
+            core.state.workspaces.focusReturnCandidate
+                == WindowID(2)
         )
     }
 
@@ -249,51 +279,7 @@ struct ProfilePartitioningTests {
 
         core.apply(profile: b, forceRetile: false)
         core.apply(profile: a, forceRetile: false)
-        // A gets ITS arrangement back, not the Standard's.
         #expect(members(core, "1") == [WindowID(1)])
         #expect(members(core, "2") == [WindowID(2)])
-    }
-
-    // MARK: - The enders
-
-    @Test("A renamed profile keeps its partitioning")
-    func renameFollowsThePartitioning() {
-        var store = ProfilePartitioning()
-        store.adoptLive("A")
-        store.record(
-            [Space(id: "1", windows: [WindowID(1)])],
-            handingLiveTo: "B"
-        )
-        store.rename("A", to: "A2")
-        #expect(store.remembered(for: "A") == nil)
-        #expect(
-            store.remembered(for: "A2")?["1"] == [WindowID(1)]
-        )
-    }
-
-    @Test("A re-key moves the id in every profile's record")
-    func rekeyReachesEveryProfile() {
-        var store = ProfilePartitioning()
-        store.adoptLive("A")
-        store.record(
-            [Space(id: "1", windows: [WindowID(1)])],
-            handingLiveTo: "B"
-        )
-        store.rekey(WindowID(1), to: WindowID(77))
-        #expect(
-            store.remembered(for: "A")?["1"] == [WindowID(77)]
-        )
-    }
-
-    @Test("Deleting a profile forgets its partitioning")
-    func deleteForgets() {
-        var store = ProfilePartitioning()
-        store.adoptLive("A")
-        store.record(
-            [Space(id: "1", windows: [WindowID(1)])],
-            handingLiveTo: "B"
-        )
-        store.forget("A")
-        #expect(store.remembered(for: "A") == nil)
     }
 }

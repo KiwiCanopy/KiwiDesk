@@ -122,20 +122,27 @@ extension KiwiCore {
         lastDesktop = key
         if secondarySwitch {
             // A secondary display's Desktop switched: the
-            // binding authority is unmoved, so the profile and
-            // the active Space stand down. The windows that
-            // arrived with the switch still need placing now —
-            // the 600 ms settle would otherwise be the first
-            // full pass — and the bars re-sync so a fullscreen
-            // arrival retires that display's panels (#670's
-            // per-display verdicts).
-            // #1230 ruling 3: the display that switched shows the
-            // Space ITS arriving Desktop should — before the
-            // retile, which is what draws the result.
+            // binding authority is unmoved, so the PROFILE stands
+            // down. The Space that display shows does not —
+            // #1230 ruling 3 moves it onto the one its arriving
+            // Desktop should show, before the retile that draws
+            // the result. The windows that arrived still need
+            // placing now (the 600 ms settle would otherwise be
+            // the first full pass), and the bars re-sync so a
+            // fullscreen arrival retires that display's panels
+            // (#670's per-display verdicts).
+            let before = state.workspaces.activeSpace
             moveSwitchedDisplaySpaces(diff, in: snapshot)
             retile(animated: false, force: true)
             updateAppBar()
             updateSpaceBar()
+            // Swiping the display that HOLDS the active Space
+            // moves it, and a silent active-Space change is one
+            // Lua and the CLI cannot see — the main arm emits for
+            // the same reason.
+            if state.workspaces.activeSpace != before {
+                emitSpaceChange()
+            }
         } else {
             applyDesktopBinding(in: snapshot)
             if let key,

@@ -15,9 +15,14 @@ extension KiwiCore {
         sleepWake.dropHeldSnapshot()
         state.forgetRememberedSpaces()
         forgetDesktopFocus()
-        // #1230: the per-profile partitioning is a saved
-        // arrangement too, and this is one of its three enders.
+        // #1230: both of this lane's records are saved
+        // arrangements. The Desktop→Space map became DURABLE in
+        // the same lane (`GuiConfig.desktopSpaces`), so without
+        // it here "discard the saved arrangement" left the one
+        // record that survives a restart standing, and the next
+        // seed wrote it straight back.
         state.profilePartitioning.reset()
+        forgetDesktopSpaceMemory()
         onLog("saved window arrangement discarded")
     }
 

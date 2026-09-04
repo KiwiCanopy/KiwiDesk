@@ -14,14 +14,13 @@ import Foundation
 /// permanently (measured 2026-09-04; `ProfilePartitioningTests`
 /// is that measurement).
 ///
-/// This is a store, and #1230 refused one for the DESKTOP axis on
-/// the ground that a window's Desktop is the WindowServer's fact
-/// and a copy of it can de-sync. The profile axis is the
-/// opposite case: which KiwiDesk Space a window sat in under
-/// profile A is a fact nothing outside KiwiDesk has an opinion
-/// about, so there is no second source of truth to disagree with.
-/// See `KiwiCore+DesktopSpaces.swift` for the axis that must
-/// never be stored.
+/// This is a store, and #1230 refused one for the DESKTOP axis.
+/// The discriminator is WHEN the record is authoritative: this
+/// one is written as a profile goes inactive and read as it comes
+/// back, so it and live truth are never both authoritative and
+/// cannot disagree. The refused one would have been read while
+/// the compositor was still moving what it copied. See
+/// `KiwiCore+DesktopSpaces.swift` for that argument in full.
 ///
 /// Window ids only, never window state (#1230 ruling 4): ~60
 /// integers at 20 windows across 3 profiles, written once per
@@ -51,7 +50,24 @@ struct ProfilePartitioning: Sendable {
     /// older than the live ones, so restoring would revert the
     /// user's own moves.
     func isSwitch(to profile: String) -> Bool {
-        liveProfile != nil && liveProfile != profile
+        if let liveProfile { return liveProfile != profile }
+        // No live profile means one of two things, and they must
+        // not be conflated. The session's FIRST apply has nothing
+        // to replace — pruning there would drop the Spaces the
+        // boot restore just rebuilt. A Standard handing the slot
+        // back is the other, and there the incoming profile has a
+        // record to put back, which is what tells them apart.
+        return hasRecord(for: profile)
+    }
+
+    /// Whether this profile has an arrangement to put back. A
+    /// built-in Standard hands the live slot back as nil, so
+    /// "no live profile" must not read as "not a switch" — the
+    /// apply after a Standard would otherwise skip the restore
+    /// and fall back to the pre-#1230 name-match for that one
+    /// apply.
+    func hasRecord(for profile: String) -> Bool {
+        byProfile[profile] != nil
     }
 
     /// Files the live Spaces under the profile they belong to and

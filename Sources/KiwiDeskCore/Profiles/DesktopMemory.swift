@@ -15,6 +15,16 @@ final class DesktopMemory {
     /// an identity means the same thing on every arrangement.
     var virtualSpaces: [DesktopKey: SpaceID] = [:]
 
+    /// Whether the map above is the session's own answer yet
+    /// (#1230). It becomes durable through `gui.json`, and every
+    /// sidecar write stamps it in — so a write taken BEFORE the
+    /// config has been read would erase the file's copy with an
+    /// empty map that means "nothing established", not "nothing
+    /// remembered". Set by the load, by the first departure
+    /// filed, and by the discard, which is a cleared memory
+    /// rather than an absent one.
+    var spaceMemoryEstablished = false
+
     /// Each space's last honored focus per native Space it was
     /// honored ON (#1207) — written at the focus report, never by
     /// a fold or the switch handler.

@@ -117,7 +117,7 @@ struct DesktopSpacePersistenceWiringTests {
     @Test("A reload keeps this session's number entries")
     func reloadKeepsNumberEntries() throws {
         let core = makeCore()
-        core.desktopMemory.virtualSpaces[.number(4)] = SpaceID(3)
+        core.rememberVirtualSpace(SpaceID(3), leaving: .number(4))
         var config = GuiConfig()
         config.desktopSpaces = [.identity(stamp): SpaceID(2)]
         try core.guiConfigStore.save(config)
@@ -140,8 +140,10 @@ struct DesktopSpacePersistenceWiringTests {
         // A config held from before the Desktop was ever shown.
         var stale = GuiConfig()
         stale.desktopSpaces = [:]
-        core.desktopMemory.virtualSpaces[.identity(stamp)] =
-            SpaceID(7)
+        core.rememberVirtualSpace(
+            SpaceID(7),
+            leaving: .identity(stamp)
+        )
         try core.guiConfigStore.save(stale)
         #expect(
             core.guiConfigStore.load()?
@@ -149,11 +151,37 @@ struct DesktopSpacePersistenceWiringTests {
         )
     }
 
+    /// A cleared memory must reach the file. "Empty means do not
+    /// stamp" made the map unclearable through its own write
+    /// path: a discard left the file's copy standing and the next
+    /// boot adopted it back.
+    @Test("A cleared memory clears the file")
+    func clearedMemoryClearsTheFile() throws {
+        let core = makeCore()
+        core.rememberVirtualSpace(
+            SpaceID(4),
+            leaving: .identity(stamp)
+        )
+        try core.guiConfigStore.save(GuiConfig())
+        #expect(
+            core.guiConfigStore.load()?.desktopSpaces.isEmpty
+                == false
+        )
+        core.discardSavedArrangement()
+        try core.guiConfigStore.save(GuiConfig())
+        #expect(
+            core.guiConfigStore.load()?.desktopSpaces.isEmpty
+                == true
+        )
+    }
+
     @Test("The seeded config carries the live memory")
     func seedCarriesTheMemory() {
         let core = makeCore()
-        core.desktopMemory.virtualSpaces[.identity(stamp)] =
-            SpaceID(5)
+        core.rememberVirtualSpace(
+            SpaceID(5),
+            leaving: .identity(stamp)
+        )
         let seeded: [DesktopKey: SpaceID] =
             core.guiConfigSeed().desktopSpaces
         #expect(seeded[.identity(stamp)] == SpaceID(5))

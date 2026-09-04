@@ -141,6 +141,31 @@ struct SecondaryDisplaySpaceTests {
         #expect(core.state.workspaces.activeSpace == SpaceID(1))
     }
 
+    /// Swiping the display that holds the ACTIVE Space moves it
+    /// rather than writing `secondaryShown` — the map's own
+    /// invariant is that the active display is never a key there.
+    @Test("Swiping the focused screen moves the active Space")
+    func focusedScreenMovesTheActiveSpace() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        // Focus sits on display B.
+        core.state.workspaces.activate(SpaceID(3))
+        #expect(core.state.workspaces.activeSpace == SpaceID(3))
+        let arriving = snapshot(secondaryCurrent: 21)
+        core.moveSwitchedDisplaySpaces(
+            DisplaySwitch(
+                changed: ["UUID-B"],
+                previous: ["UUID-A": 10, "UUID-B": 20]
+            ),
+            in: arriving
+        )
+        #expect(core.state.workspaces.activeSpace == SpaceID(4))
+        #expect(
+            core.state.workspaces.secondaryShown[DisplayID(2)]
+                == nil
+        )
+    }
+
     /// A Space that does not live on the display is refused, and
     /// the assertion reads `secondaryShown` ITSELF rather than
     /// what `activeSpace(on:)` answers.

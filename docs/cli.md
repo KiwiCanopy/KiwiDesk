@@ -562,9 +562,11 @@ numbering a display argument takes), and the active profile:
 
 With "Displays have separate Spaces" on, each screen switches
 Desktops on its own, so watch `monitor` to tell them apart:
-only a switch on the main screen (`monitor: 1`) selects
-profiles or moves the active Space — a secondary screen's
-swipe reports its Desktop and changes nothing else. With the
+only a switch on the main screen (`monitor: 1`) selects a
+profile. A secondary screen's swipe reports its Desktop and
+moves that screen onto the Space its arriving Desktop should
+show — which emits `space_change` too when that screen is the
+one holding the active Space. With the
 option off, or with a single screen, `monitor` is always 1.
 
 ## Raw IPC Protocol
