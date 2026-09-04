@@ -76,15 +76,30 @@ struct ProfileRenameTests {
         #expect(core.profiles.currentName == "desk")
     }
 
+    /// The suite's bindings, spelled the way it reads them:
+    /// filed under each Desktop's number and labelled with it.
+    private func bound(
+        _ pairs: (Int, String)...
+    ) -> [DesktopKey: DesktopBinding] {
+        Dictionary(
+            uniqueKeysWithValues: pairs.map {
+                (
+                    DesktopKey.number($0.0),
+                    DesktopBinding(profile: $0.1, desktop: $0.0)
+                )
+            }
+        )
+    }
+
     @Test("rename chases native-Space bindings")
     func bindingChase() throws {
         let core = makeCore()
         save(core, "desk")
-        core.desktopBindings = [2: "desk", 3: "other"]
+        core.desktopBindings = bound((2, "desk"), (3, "other"))
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.desktopBindings
-                == [2: "studio", 3: "other"]
+                == bound((2, "studio"), (3, "other"))
         )
     }
 
@@ -93,13 +108,13 @@ struct ProfileRenameTests {
         let core = makeCore()
         save(core, "desk")
         var config = GuiConfig()
-        config.profileBindings = [2: "desk"]
+        config.profileBindings = bound((2, "desk"))
         try core.guiConfigStore.save(config)
-        core.desktopBindings = [2: "desk"]
+        core.desktopBindings = bound((2, "desk"))
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.guiConfigStore.load()?.profileBindings
-                == [2: "studio"]
+                == bound((2, "studio"))
         )
     }
 
@@ -107,7 +122,7 @@ struct ProfileRenameTests {
     func noSidecarCreated() throws {
         let core = makeCore()
         save(core, "desk")
-        core.desktopBindings = [2: "desk"]
+        core.desktopBindings = bound((2, "desk"))
         try core.renameProfile(from: "desk", to: "studio")
         #expect(!core.guiConfigStore.exists)
     }
@@ -117,16 +132,16 @@ struct ProfileRenameTests {
         let core = makeCore()
         save(core, "desk")
         var config = GuiConfig()
-        config.profileBindings = [2: "desk"]
+        config.profileBindings = bound((2, "desk"))
         try core.guiConfigStore.save(config)
         // Space 3 exists only in the runtime map, as if
         // init.lua registered it — the follow must not
         // materialize it into gui.json.
-        core.desktopBindings = [2: "desk", 3: "luaOnly"]
+        core.desktopBindings = bound((2, "desk"), (3, "luaOnly"))
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.guiConfigStore.load()?.profileBindings
-                == [2: "studio"]
+                == bound((2, "studio"))
         )
     }
 
@@ -161,15 +176,15 @@ struct ProfileRenameTests {
         let core = makeCore()
         save(core, "desk")
         var config = GuiConfig()
-        config.profileBindings = [2: "other"]
+        config.profileBindings = bound((2, "other"))
         // Marker: a follow-up save would overwrite the
         // stored spaces with the live list.
         config.spaces = [SpaceID("zed")]
         try core.guiConfigStore.save(config)
-        core.desktopBindings = [2: "other"]
+        core.desktopBindings = bound((2, "other"))
         try core.renameProfile(from: "desk", to: "studio")
         let sidecar = core.guiConfigStore.load()
-        #expect(sidecar?.profileBindings == [2: "other"])
+        #expect(sidecar?.profileBindings == bound((2, "other")))
         #expect(sidecar?.spaces == [SpaceID("zed")])
     }
 }

@@ -220,6 +220,8 @@
   "config_issues.unknown_call": "不明な呼び出し「%1$@」です。",
   "config_issues.unknown_call_suggestion": "不明な呼び出し「%1$@」です。「%2$@」ではありませんか？",
   "custom_lua_banner.text": "init.luaにはカスタムのLuaも含まれています。ビジュアルエディタと競合することはなく、Appがinit.luaを変更することもありません。",
+  "desktops.absent": "未検出",
+  "desktops.absent.help": "このデスクトップは現在Mission Controlにありません。画面が接続されていないか、デスクトップが削除されたためです。プロファイルの割り当てはここに残り、そのデスクトップが戻れば再び読み込まれます。",
   "desktops.current": "現在",
   "desktops.desktop": "デスクトップ%1$d",
   "desktops.empty": "macOSネイティブのデスクトップが検出されませんでした。プロファイルを割り当てるには、Mission Controlでデスクトップを追加してください。",

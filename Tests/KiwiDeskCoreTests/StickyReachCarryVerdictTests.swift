@@ -123,7 +123,7 @@ struct StickyReachCarryVerdictTests {
         core.state.setSticky(w1, .global)
         core.state.setSticky(w2, .display)
         core.state.setSticky(w4, .display)
-        core.lastDesktop = 1
+        core.lastDesktop = .number(1)
         core.desktopMemory.lastDisplaySpaces = [
             "UUID-A": 10, "UUID-B": 20,
         ]

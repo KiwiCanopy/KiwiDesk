@@ -1,10 +1,19 @@
 import Foundation
 
-/// Per-display native Desktop bookkeeping for Space switching (#888).
+/// Per-Desktop bookkeeping for Space switching (#888) and for
+/// the identity each Desktop is filed under (#1147) — the Space
+/// memory, the focus a return owes, the compositor seams the away
+/// ledger reads through, and the stamp write with its one-attempt
+/// ledger.
 @MainActor
 final class DesktopMemory {
-    /// Remembered Space ID per native Desktop number and display UUID.
-    var virtualSpaces: [String: [Int: SpaceID]] = [:]
+    /// The Space each Desktop was last showing, keyed by the
+    /// Desktop itself (#1147). It was keyed by (main display
+    /// UUID, Mission Control number) until a `DesktopKey` could
+    /// name the Desktop: the partition existed because a number
+    /// means nothing without saying whose numbering it is, and
+    /// an identity means the same thing on every arrangement.
+    var virtualSpaces: [DesktopKey: SpaceID] = [:]
 
     /// Each space's last honored focus per native Space it was
     /// honored ON (#1207) — written at the focus report, never by
@@ -15,6 +24,26 @@ final class DesktopMemory {
     /// paid at that window's ARRIVAL (#1207) — the #1007 shape,
     /// a second instance: per-window record, bound, rekey.
     let returnFocus = FollowFocusIntent()
+
+    /// Desktops whose stamp write was dispatched and not yet
+    /// confirmed by a later snapshot (#1147). Written by
+    /// `stampedDesktopSnapshot` alone; the deferred verify is
+    /// argued there.
+    var stampAttempts: Set<SkyLight.SpaceID> = []
+
+    /// The stamp write (#1147) — live by default and the one
+    /// door production writes through, so a test never reaches
+    /// the host's real Desktops with a fixture space id. Returns
+    /// whether the write was DISPATCHED; whether it landed is
+    /// the next snapshot's verdict.
+    var writeStamp: @MainActor (SkyLight.SpaceID, DesktopIdentity) -> Bool =
+        KiwiCore.liveStampWrite
+
+    /// Desktops that did not keep a stamp this process. One
+    /// attempt each: a write the WindowServer dropped is not
+    /// retried in a loop, and every consumer falls back to the
+    /// Mission Control number for them.
+    var unstampable: Set<SkyLight.SpaceID> = []
 
     /// Last observed native Space ID per display (`KiwiCore+BootSeams`,
     /// docs/cli.md).

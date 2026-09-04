@@ -162,7 +162,7 @@ struct AwayBootSeedTests {
         defer { resetAuthorityOverrides() }
         let core = makeCore()
         core.state.remember(WindowID(7), in: "2")
-        core.rememberVirtualSpace("1", leaving: 2)
+        core.rememberVirtualSpace("1", leaving: .number(2))
         core.desktopMemory.readCensus = { _ in
             DesktopCensus(
                 hosts: [

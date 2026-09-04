@@ -32,9 +32,9 @@ extension KiwiCore {
     ) throws {
         try profiles.rename(from: old, to: new)
         var chased = false
-        for (number, name) in desktopBindings
-        where name == old {
-            desktopBindings[number] = new
+        for (key, binding) in desktopBindings
+        where binding.profile == old {
+            desktopBindings[key]?.profile = new
             chased = true
         }
         guard chased, guiConfigStore.load() != nil else {
@@ -46,9 +46,9 @@ extension KiwiCore {
         // which must not materialize into gui.json (deleting
         // the Lua line would then resurrect the binding).
         var live = loadGuiConfig()
-        for (number, name) in live.profileBindings
-        where name == old {
-            live.profileBindings[number] = new
+        for (key, binding) in live.profileBindings
+        where binding.profile == old {
+            live.profileBindings[key]?.profile = new
         }
         do {
             try saveGuiConfig(live)

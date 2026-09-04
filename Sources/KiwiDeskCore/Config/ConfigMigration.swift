@@ -35,6 +35,7 @@ public enum ConfigMigration {
         migratingLegacyPalettesArray,
         migratingRetiredBarContent,
         migratingRetiredScrollSpeed,
+        migratingProfileBindingStrings,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939).

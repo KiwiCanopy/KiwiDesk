@@ -122,11 +122,29 @@ final class SettingsModel: ObservableObject {
 
     /// Main screen user Desktops by Mission Control number (#888).
     @Published var mainDesktops: [Int] = []
+    /// The Desktop the main screen is showing, as a key (#1147) —
+    /// what the *current* badge is decided by. The number below
+    /// cannot decide it: a dormant record and a live Desktop can
+    /// carry the same one, and both rows then claim to be current
+    /// (owner device QA, 2026-09-04).
+    @Published var currentDesktopKey: DesktopKey?
     /// Active native Space Mission Control number, or nil without SkyLight.
     @Published var currentDesktop: Int?
 
     /// Bindable user Desktops snapshot (`KiwiCore.bindableDesktops`, #888).
     @Published var bindableDesktops: [Int] = []
+
+    /// Each present Desktop's durable key by its Mission Control
+    /// number (#1147) — the join a Profiles row resolves its
+    /// binding through, from the same snapshot as `mainDesktops`.
+    /// A number absent here names no Desktop right now, which is
+    /// what makes a binding on it dormant.
+    @Published var desktopKeys: [Int: DesktopKey] = [:]
+
+    /// Every key the topology answers to (#1147) — Core's own
+    /// presence verdict as data, so a row builder never
+    /// re-derives dormancy per key shape.
+    @Published var presentDesktopKeys: Set<DesktopKey> = []
 
     /// Whether this macOS drives native Desktops (#1145) — read
     /// once from the core (process-constant, so not published);

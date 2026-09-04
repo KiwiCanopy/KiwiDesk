@@ -61,7 +61,7 @@ struct DesktopFocusPaymentTests {
                 )
             )
         }
-        core.lastDesktop = 1
+        core.lastDesktop = .number(1)
         core.desktopMemory.lastDisplaySpaces = [
             "UUID-A": 10, "UUID-B": 20,
         ]
@@ -165,7 +165,7 @@ struct DesktopFocusPaymentTests {
         defer { teardown() }
         core.desktopMemory.honoredFocus = [home: [11: focused]]
         destroyAll(core)
-        core.lastDesktop = 2
+        core.lastDesktop = .number(2)
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == nil)
         #expect(!box.lines.contains { $0.contains("owing focus") })
@@ -177,7 +177,7 @@ struct DesktopFocusPaymentTests {
         defer { teardown() }
         core.desktopMemory.honoredFocus = [SpaceID("2"): [10: focused]]
         destroyAll(core)
-        core.lastDesktop = 2
+        core.lastDesktop = .number(2)
         returnToDesktop1(core)
         #expect(core.desktopMemory.returnFocus.owed() == nil)
         #expect(!box.lines.contains { $0.contains("owing focus") })

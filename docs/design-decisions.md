@@ -8281,6 +8281,38 @@ direction in chat):
 
 **[Principle]**
 
+**A Desktop is its stamp, not its number
+([#1147](https://github.com/KiwiCanopy/KiwiDesk/issues/1147)).**
+Mission Control's Desktop number is a *position* — `index + 1`
+over the space list — so it moves whenever a Desktop is added,
+deleted or dragged, and whenever a screen is plugged in or out.
+Keying durable per-Desktop state by that number means the state
+silently re-points to a different Desktop, with no event to
+notice and nothing on screen to show it. KiwiDesk therefore
+mints a private identifier into each Desktop's own settings and
+keys by that; the number survives only as the label a row is
+drawn with, refreshed from each reading.
+
+Three alternatives were measured and rejected, so none is
+re-proposed. Apple's own space `uuid` is the *name* field, so it
+is not ours to write, and it is absent on the primordial Desktop.
+The internal `id64` looks stable and is not — a screen's Desktops
+are destroyed and rebuilt around a disconnect. And doing nothing
+leaves the silent-wrong-Desktop failure, whose stake rises
+sharply with
+[#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230),
+where a Desktop's whole persisted Space set rides on the same
+key. The measurements behind all three, and the persistence
+mechanism the stamp rests on, are `.claude/rules/os-private-apis.md`'s
+to hold.
+
+The design degrades rather than breaking if macOS ever stops
+carrying the stamp: a Desktop that comes back unstamped falls
+back to its Mission Control number, which is what every binding
+used before this. A Desktop the user genuinely deletes takes its
+stamp with it and its binding goes dormant — kept, badged, and
+never fired for the Desktop that inherited its number.
+
 **A profile row counts what the profile OWNS, never what it
 resolves to.** A profile carries a *sparse diff* over the global
 config — its own keybindings are the rows it overrides, not the

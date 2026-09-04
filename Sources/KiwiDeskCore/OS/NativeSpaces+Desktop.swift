@@ -27,6 +27,96 @@ public struct DesktopSnapshot: Sendable {
         spaces.first { number(of: $0.id) == wanted }
     }
 
+    /// The durable key this Desktop's state files under
+    /// (#1147): its stamp where it carries one, else its Mission
+    /// Control number. Nil for a space that is no Desktop —
+    /// a fullscreen or system space keys nothing.
+    public func key(of space: SkyLight.SpaceID) -> DesktopKey? {
+        NativeSpaces.key(of: space, in: spaces)
+    }
+
+    /// Each user Desktop's key by its Mission Control number —
+    /// the join a per-Desktop row resolves through (#1147). Here
+    /// rather than beside a consumer, so the GUI reads the same
+    /// derivation `key(of:)` and the re-key already use.
+    public var keysByNumber: [Int: DesktopKey] {
+        Dictionary(
+            spaces.filter(\.isUser).compactMap { space in
+                number(of: space.id).flatMap { n in
+                    key(of: space.id).map { (n, $0) }
+                }
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
+    }
+
+    /// The binding authority as a key (#1147): the Desktop the
+    /// MAIN display is showing. `authority` is the same Desktop
+    /// as a Mission Control number, which is what a row is
+    /// labelled with and never what state is filed under.
+    public var mainCurrentKey: DesktopKey? {
+        mainCurrentSpace.flatMap { key(of: $0) }
+    }
+
+    /// BOTH keys a Desktop can be filed under (#1147): its stamp,
+    /// and the Mission Control number it was filed at before the
+    /// re-key moved it — most specific first.
+    ///
+    /// The two coexist for one reading. A Desktop stamped this
+    /// instant answers by number until the write is confirmed,
+    /// and the records filed against it move at that same call —
+    /// so between the boot stamp and the first switch, the plist
+    /// says identity while the config still says number. Every
+    /// reader of a per-Desktop record asks for both, or it misses
+    /// a binding that exists (architect review, 2026-09-04).
+    public func keys(of space: SkyLight.SpaceID) -> [DesktopKey] {
+        guard let native = spaces.first(where: { $0.id == space }),
+            native.isUser
+        else { return [] }
+        let number = number(of: space).map(DesktopKey.number)
+        guard let identity = native.identity else {
+            return number.map { [$0] } ?? []
+        }
+        return [.identity(identity)] + (number.map { [$0] } ?? [])
+    }
+
+    /// Every key this topology answers to — the presence half of
+    /// `space(for:)`, as DATA a consumer can be handed.
+    ///
+    /// A consumer asking "is this record dormant" takes this
+    /// rather than re-deriving the verdict per key shape at its
+    /// own call site: that copy diverged once, and #1230 moves
+    /// the rule here without touching a copy in a row builder.
+    public var presentKeys: Set<DesktopKey> {
+        var out: Set<DesktopKey> = []
+        for space in spaces where space.isUser {
+            for key in keys(of: space.id) { out.insert(key) }
+        }
+        return out
+    }
+
+    /// The Desktop a key names in THIS topology, or nil while it
+    /// is absent — its display unplugged, or the Desktop itself
+    /// deleted. Absence is never proof it is gone for good, so a
+    /// consumer holds such a record dormant rather than pruning
+    /// it (#1147 ▸ the #1230 contract, rule 3).
+    public func space(for key: DesktopKey) -> NativeSpace? {
+        switch key {
+        case .identity(let identity):
+            return spaces.first { $0.identity == identity }
+        case .number(let wanted):
+            return space(numbered: wanted)
+        }
+    }
+
+    /// The key of the Desktop this display is SHOWING — the
+    /// per-display read #1230 keys its Space sets by, written
+    /// here so that lane adds no second one. Never the binding
+    /// authority, which is the main screen's alone (#888).
+    public func currentKey(on uuid: String) -> DesktopKey? {
+        currentSpaces[uuid].flatMap { key(of: $0) }
+    }
+
     /// Mission Control numbers of MAIN screen's user Desktops (#888).
     public var mainDisplayDesktops: [Int] {
         guard let mainUUID,

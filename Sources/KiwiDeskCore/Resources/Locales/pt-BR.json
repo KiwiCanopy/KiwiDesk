@@ -220,6 +220,8 @@
   "config_issues.unknown_call": "Chamada desconhecida “%1$@”.",
   "config_issues.unknown_call_suggestion": "Chamada desconhecida “%1$@” — você quis dizer “%2$@”?",
   "custom_lua_banner.text": "Seu init.lua também tem Lua personalizado. Ele não entra em conflito com o editor visual, e o app nunca modifica o init.lua.",
+  "desktops.absent": "ausente",
+  "desktops.absent.help": "Esta Mesa não está no Mission Control no momento — a tela dela não está conectada, ou ela foi removida. O perfil continua vinculado aqui e é carregado de novo se essa Mesa retornar.",
   "desktops.current": "atual",
   "desktops.desktop": "Mesa %1$d",
   "desktops.empty": "Nenhuma Mesa nativa do macOS detectada. Adicione Mesas no Mission Control para vincular perfis.",

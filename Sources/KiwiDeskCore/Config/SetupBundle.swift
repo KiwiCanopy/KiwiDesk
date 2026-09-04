@@ -16,8 +16,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 2 = the bar-content rename (owner ruling 2026-08-19);
     /// 3 = the scroll-duration rename, on `[Profile]` alone
     /// (#1020 — `GuiConfig.currentFormat` carries why its half
-    /// deliberately did not move).
-    public static let currentFormat = 3
+    /// deliberately did not move);
+    /// 4 = the Desktop-binding objects (#1147), which reach a
+    /// bundle because it carries `config` inline.
+    public static let currentFormat = 4
 
     public let format: Int
 

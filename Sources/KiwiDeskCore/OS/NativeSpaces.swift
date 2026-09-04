@@ -9,17 +9,25 @@ public struct NativeSpace: Sendable, Equatable {
     /// False for fullscreen-app and system spaces, which
     /// Mission Control does not count as desktops.
     public let isUser: Bool
+    /// KiwiDesk's stamp on this Desktop, if it carries one
+    /// (#1147). Read from the SAME plist the topology comes
+    /// from — the bridge writes it, nothing reads it back
+    /// through the bridge — so every snapshot carries identities
+    /// at no extra cost.
+    public let identity: DesktopIdentity?
 
     public init(
         id: SkyLight.SpaceID,
         displayUUID: String,
         isCurrent: Bool,
-        isUser: Bool = true
+        isUser: Bool = true,
+        identity: DesktopIdentity? = nil
     ) {
         self.id = id
         self.displayUUID = displayUUID
         self.isCurrent = isCurrent
         self.isUser = isUser
+        self.identity = identity
     }
 }
 
@@ -75,6 +83,16 @@ public enum NativeSpaces {
         guard let displays = array as? [[String: Any]] else {
             return []
         }
+        return parse(displays)
+    }
+
+    /// The plist walk, split out so a test feeds a dictionary
+    /// rather than the host's WindowServer (#1147). Position in
+    /// the array is the Mission Control order; the ids are not
+    /// sorted and never were.
+    public static func parse(
+        _ displays: [[String: Any]]
+    ) -> [NativeSpace] {
         var result: [NativeSpace] = []
         for display in displays {
             let uuid =
@@ -95,12 +113,27 @@ public enum NativeSpaces {
                         id: id,
                         displayUUID: uuid,
                         isCurrent: id == current,
-                        isUser: type == 0
+                        isUser: type == 0,
+                        identity: identity(in: space)
                     )
                 )
             }
         }
         return result
+    }
+
+    /// KiwiDesk's stamp on one space dictionary. Only the key
+    /// `DesktopIdentity.plistKey` names — every other
+    /// `kiwidesk.` entry belongs to something else and is not
+    /// this read's business.
+    private static func identity(
+        in space: [String: Any]
+    ) -> DesktopIdentity? {
+        guard
+            let raw = space[DesktopIdentity.plistKey] as? String,
+            !raw.isEmpty
+        else { return nil }
+        return DesktopIdentity(raw: raw)
     }
 
     /// 1-based Mission Control number of space.
@@ -112,6 +145,23 @@ public enum NativeSpaces {
             .filter(\.isUser)
             .firstIndex { $0.id == id }
             .map { $0 + 1 }
+    }
+
+    /// The durable key `id` files under (#1147) — the array
+    /// form of `DesktopSnapshot.key(of:)`, for a caller holding
+    /// the topology rather than a snapshot. Both spell the
+    /// verdict once, here.
+    public static func key(
+        of id: SkyLight.SpaceID,
+        in spaces: [NativeSpace]
+    ) -> DesktopKey? {
+        guard let native = spaces.first(where: { $0.id == id }),
+            native.isUser
+        else { return nil }
+        if let identity = native.identity {
+            return .identity(identity)
+        }
+        return number(of: id, in: spaces).map(DesktopKey.number)
     }
 
     /// Whether space is a regular user desktop (#670).

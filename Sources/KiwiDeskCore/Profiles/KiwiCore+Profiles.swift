@@ -245,9 +245,11 @@ extension KiwiCore {
     /// (#18).
     public func isProfileInEffect(_ name: String) -> Bool {
         if profiles.currentName == name { return true }
-        guard let active = NativeSpaces.activeDesktopNumber()
-        else { return false }
-        return desktopBindings[active] == name
+        // A query, so it READS the topology rather than stamping
+        // it, and asks under both of the Desktop's keys (#1147).
+        return mainDesktopBinding(
+            in: NativeSpaces.desktopSnapshot()
+        )?.profile == name
     }
 
     /// Re-applies `name` to the live layout after an in-effect

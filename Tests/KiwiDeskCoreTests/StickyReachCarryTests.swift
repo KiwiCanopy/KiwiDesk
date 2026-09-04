@@ -120,7 +120,7 @@ struct StickyReachCarryTests {
         core.state.setSticky(w1, .global)
         core.state.setSticky(w2, .display)
         core.state.setSticky(w4, .display)
-        core.lastDesktop = 1
+        core.lastDesktop = .number(1)
         core.desktopMemory.lastDisplaySpaces = [
             "UUID-A": 10, "UUID-B": 20,
         ]
@@ -213,7 +213,7 @@ struct StickyReachCarryTests {
         // it — and the carry must read THAT, or it lands on B's
         // Desktop while the retile draws the window on A.
         core.state.workspaces.activate(SpaceID("5"))
-        core.desktopMemory.virtualSpaces["UUID-A"] = [2: SpaceID("1")]
+        core.desktopMemory.virtualSpaces[.number(2)] = SpaceID("1")
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 11,
             secondaryCurrent: 20

@@ -75,6 +75,16 @@ struct WMBridgeSeamTests {
             "KiwiDeskCore/Commands/KiwiCore+DesktopSwitch.swift": 2,
             // #1145 sticky reach: the one carry MOVE.
             "KiwiDeskCore/App/KiwiCore+StickyReach.swift": 1,
+            // #1147: the store PREFIX, not an operation. The
+            // identity's read door is the plain WindowServer
+            // plist, so the full key is joined here once from
+            // the wrapper's own constant rather than spelled a
+            // second time off the bridge — which is the one
+            // thing that crossing rule cannot survive.
+            "KiwiDeskCore/Models/DesktopKey.swift": 1,
+            // #1147: the one stamp WRITE. Reads never come here
+            // — they ride the plist the snapshot already parses.
+            "KiwiDeskCore/Profiles/KiwiCore+DesktopIdentity.swift": 1,
         ],
     ]
 

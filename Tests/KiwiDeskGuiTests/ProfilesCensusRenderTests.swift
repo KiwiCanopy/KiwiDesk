@@ -171,7 +171,9 @@ struct ProfilesCensusRenderTests {
         let expander = ProfilesFamilyRows(
             profiles: [summary("Desk"), summary("Laptop")],
             mainDesktops: [1, 2, 3],
-            boundDesktops: [],
+            desktopKeys: [1: .number(1), 2: .number(2), 3: .number(3)],
+            presentKeys: [.number(1), .number(2), .number(3)],
+            bindings: [:],
             presets: StandardProfiles.all(sizes: censusSizes)
         )
         let placed = SettingKey.allCases.filter {
@@ -220,7 +222,12 @@ struct ProfilesCensusRenderTests {
         let expander = ProfilesFamilyRows(
             profiles: [summary("Desk"), summary("Laptop")],
             mainDesktops: [1, 2, 3],
-            boundDesktops: [7],
+            desktopKeys: [1: .number(1), 2: .number(2), 3: .number(3)],
+            presentKeys: [.number(1), .number(2), .number(3)],
+            bindings: [
+                .identity(DesktopIdentity(raw: "GONE")):
+                    DesktopBinding(profile: "Desk", desktop: 7)
+            ],
             presets: StandardProfiles.layouts(
                 for: 1,
                 sizes: censusSizes
@@ -230,14 +237,17 @@ struct ProfilesCensusRenderTests {
             expander.rows(for: .profiles(.profilesLoad))
                 == [.profile("Desk"), .profile("Laptop")]
         )
-        // Present desktops UNION the bound ones — the absent 7
-        // is listed, which is the only way its binding can be
-        // read or cleared.
+        // Present desktops UNION the bound ones — the binding
+        // whose Desktop is GONE is listed at the number it was
+        // last seen at, which is the only way it can be read or
+        // cleared. Keyed by its identity, so it keeps a row of
+        // its own even when a live Desktop later holds 7.
         #expect(
             expander.rows(for: .profiles(.profileBindings))
                 == [
-                    .desktop(1), .desktop(2), .desktop(3),
-                    .desktop(7),
+                    .desktop(.number(1)), .desktop(.number(2)),
+                    .desktop(.number(3)),
+                    .desktop(.identity(DesktopIdentity(raw: "GONE"))),
                 ]
         )
         // BOTH of the card's actions expand per preset (#859).
@@ -280,7 +290,9 @@ struct ProfilesCensusRenderTests {
         let expander = ProfilesFamilyRows(
             profiles: [summary("Desk")],
             mainDesktops: [1],
-            boundDesktops: [],
+            desktopKeys: [1: .number(1)],
+            presentKeys: [.number(1)],
+            bindings: [:],
             presets: []
         )
         #expect(

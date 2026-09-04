@@ -220,6 +220,8 @@
   "config_issues.unknown_call": "Unbekannter Aufruf „%1$@“.",
   "config_issues.unknown_call_suggestion": "Unbekannter Aufruf „%1$@“ — meintest du „%2$@“?",
   "custom_lua_banner.text": "Deine init.lua enthält eigenen Code. Das stört den visuellen Editor nicht — deine Datei wird niemals von der App überschrieben.",
+  "desktops.absent": "nicht vorhanden",
+  "desktops.absent.help": "Dieser Schreibtisch ist gerade nicht in Mission Control — sein Bildschirm ist nicht angeschlossen, oder er wurde entfernt. Das Profil bleibt hier verknüpft und wird wieder geladen, wenn dieser Schreibtisch zurückkommt.",
   "desktops.current": "aktuell",
   "desktops.desktop": "Schreibtisch %1$d",
   "desktops.empty": "Keine nativen macOS-Schreibtische erkannt. Füge in Mission Control Schreibtische hinzu, um Profile zu verknüpfen.",

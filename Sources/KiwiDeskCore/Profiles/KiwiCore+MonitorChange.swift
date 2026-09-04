@@ -32,9 +32,13 @@ extension KiwiCore {
         // A native-Space binding wins over matching (#7); a
         // binding that fails to load falls through to matching.
         // The Desktop that counts is the main display's (#888).
-        if let number = NativeSpaces.activeDesktopNumber(),
-            let boundName = desktopBindings[number]
-        {
+        //
+        // ONE stamped reading (#1147): a display that just
+        // returned brings Desktops macOS created fresh, which are
+        // stamped here before the binding resolves against them.
+        let desktops = stampedDesktopSnapshot()
+        if let binding = mainDesktopBinding(in: desktops) {
+            let boundName = binding.profile
             do {
                 let bound = try profiles.load(name: boundName)
                 apply(profile: bound, forceRetile: false)

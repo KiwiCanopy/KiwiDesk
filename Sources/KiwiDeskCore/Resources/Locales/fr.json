@@ -220,6 +220,8 @@
   "config_issues.unknown_call": "Appel inconnu « %1$@ ».",
   "config_issues.unknown_call_suggestion": "Appel inconnu « %1$@ » — vouliez-vous dire « %2$@ » ?",
   "custom_lua_banner.text": "Votre init.lua contient aussi du Lua personnalisé. Il n'entre pas en conflit avec l'éditeur visuel, et l'app ne modifie jamais init.lua.",
+  "desktops.absent": "absent",
+  "desktops.absent.help": "Ce Bureau n'est pas dans Mission Control pour le moment — son écran n'est pas connecté, ou il a été supprimé. Le profil y reste associé et se recharge si ce Bureau revient.",
   "desktops.current": "actuel",
   "desktops.desktop": "Bureau %1$d",
   "desktops.empty": "Aucun bureau natif macOS détecté. Ajoutez des bureaux dans Mission Control pour y associer des profils.",

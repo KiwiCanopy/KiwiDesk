@@ -21,7 +21,12 @@ public enum WMBridge {
     /// across logout, so a change to this string owes a re-stamp
     /// crossing for every Desktop carrying the old one — never a
     /// reader lenient to both.
-    public static let valueKeyPrefix = "kiwidesk."
+    /// `nonisolated`: the READ door is the plain WindowServer
+    /// plist, parsed off the main actor (#1147), so a
+    /// main-actor-bound constant would force the prefix to be
+    /// spelled a second time there — which is the one thing the
+    /// crossing rule above cannot survive.
+    public nonisolated static let valueKeyPrefix = "kiwidesk."
 
     /// Transforms dictionary keys under `valueKeyPrefix`.
     static func namespaced(_ values: [String: Any]) -> NSDictionary {

@@ -114,5 +114,14 @@ func makeTestCore(
     // suite that wants a verdict states it on `desktopMemory`.
     core.desktopMemory.readWindowSpace = { _ in .unavailable }
     core.desktopMemory.readCensus = { _ in nil }
+    // Same class, seventh time (#1147): the Desktop stamp write
+    // defaults LIVE, and a fixture space id is a real Desktop id
+    // on the host — Desktop 1 is id 1 — so any suite that boots a
+    // core or switches Desktops would stamp the developer's own
+    // Desktops through the real bridge. Pin "the write is
+    // refused", which is exactly the bridge-absent host; the
+    // stamping suite takes the live writer back explicitly, with
+    // the bridge itself faked.
+    core.desktopMemory.writeStamp = { _, _ in false }
     return core
 }

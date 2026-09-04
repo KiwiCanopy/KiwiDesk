@@ -61,9 +61,9 @@ extension KiwiCore {
     /// `composeMonitorChangeFallback` are the same calls, in the
     /// same order, over the same state.
     ///
-    /// `activeDesktop` is passed in rather than read from
-    /// `NativeSpaces` so this stays a pure query over injected
-    /// state, testable without a WindowServer.
+    /// The active binding is passed in rather than resolved here,
+    /// so this stays a pure query over injected state, testable
+    /// without a WindowServer.
     ///
     /// COST: `match` scans the profile directory and decodes
     /// every profile, so this is a refresh-time query, never a
@@ -71,28 +71,37 @@ extension KiwiCore {
     /// over, so a caller cannot pair the verdict with a second,
     /// later read of the same thing.
     public func profileVerdict(
-        activeDesktop: Int?
+        activeBinding: DesktopBinding?
     ) -> (verdict: ProfileVerdict, screens: Int) {
         let displays = state.workspaces.allDisplays
         return (
-            verdict(activeDesktop: activeDesktop, displays: displays),
+            verdict(activeBinding: activeBinding, displays: displays),
             displays.count
         )
     }
 
     private func verdict(
-        activeDesktop: Int?,
+        activeBinding: DesktopBinding?,
         displays: [Display]
     ) -> ProfileVerdict {
         // A binding whose profile cannot be read falls THROUGH
         // to matching, exactly as the live path does — the
         // verdict must not name a profile that would fail to
         // load.
-        if let desktop = activeDesktop,
-            let bound = desktopBindings[desktop],
-            (try? profiles.read(name: bound)) != nil
+        //
+        // The sentence names the binding's own Mission Control
+        // projection, since that is the only name for a Desktop a
+        // reader has (#1147). The binding is RESOLVED by the
+        // caller — through `mainDesktopBinding`, which asks under
+        // both of a Desktop's keys — so this stays a pure query
+        // over injected state.
+        if let bound = activeBinding,
+            (try? profiles.read(name: bound.profile)) != nil
         {
-            return .boundToDesktop(name: bound, desktop: desktop)
+            return .boundToDesktop(
+                name: bound.profile,
+                desktop: bound.desktop
+            )
         }
         switch profiles.match(
             fingerprints: displays.map(\.fingerprint)

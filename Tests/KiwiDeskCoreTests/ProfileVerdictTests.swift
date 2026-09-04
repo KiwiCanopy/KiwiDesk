@@ -69,7 +69,7 @@ struct ProfileVerdictTests {
             profile("Other", monitors: ["Absent:1x1"], isDefault: true)
         )
         #expect(
-            core.profileVerdict(activeDesktop: nil).verdict
+            core.profileVerdict(activeBinding: nil).verdict
                 == .exactMonitors(name: "Desk")
         )
     }
@@ -85,7 +85,7 @@ struct ProfileVerdictTests {
             )
         )
         #expect(
-            core.profileVerdict(activeDesktop: nil).verdict
+            core.profileVerdict(activeBinding: nil).verdict
                 == .countDefault(name: "Fallback")
         )
     }
@@ -99,7 +99,7 @@ struct ProfileVerdictTests {
         try core.saveGuiConfig(GuiConfig())
         #expect(core.isGuiManaged)
         #expect(
-            core.profileVerdict(activeDesktop: nil).verdict
+            core.profileVerdict(activeBinding: nil).verdict
                 == .builtInStandard(name: "Developer")
         )
     }
@@ -116,7 +116,7 @@ struct ProfileVerdictTests {
         let core = core()
         #expect(!core.isGuiManaged)
         #expect(
-            core.profileVerdict(activeDesktop: nil).verdict
+            core.profileVerdict(activeBinding: nil).verdict
                 == .placementOnlyStandard(
                     name: "Developer",
                     activeProfile: nil
@@ -129,7 +129,7 @@ struct ProfileVerdictTests {
     @Test("the verdict carries the screens it reasoned over")
     func verdictCarriesItsScreenCount() {
         #expect(
-            core().profileVerdict(activeDesktop: nil).screens == 1
+            core().profileVerdict(activeBinding: nil).screens == 1
         )
     }
 
@@ -145,9 +145,18 @@ struct ProfileVerdictTests {
         try core.profiles.save(
             profile("Bound", monitors: ["Absent:1x1"])
         )
-        core.desktopBindings = [2: "Bound"]
+        core.desktopBindings = [
+            .number(2): DesktopBinding(
+                profile: "Bound",
+                desktop: 2
+            )
+        ]
         #expect(
-            core.profileVerdict(activeDesktop: 2).verdict
+            core.profileVerdict(
+                activeBinding: core.desktopBindings[
+                    .number(2)
+                ]
+            ).verdict
                 == .boundToDesktop(name: "Bound", desktop: 2)
         )
     }
@@ -161,9 +170,18 @@ struct ProfileVerdictTests {
         try core.profiles.save(
             profile("Bound", monitors: ["Absent:1x1"])
         )
-        core.desktopBindings = [2: "Bound"]
+        core.desktopBindings = [
+            .number(2): DesktopBinding(
+                profile: "Bound",
+                desktop: 2
+            )
+        ]
         #expect(
-            core.profileVerdict(activeDesktop: 1).verdict
+            core.profileVerdict(
+                activeBinding: core.desktopBindings[
+                    .number(1)
+                ]
+            ).verdict
                 == .exactMonitors(name: "Desk")
         )
     }
@@ -177,9 +195,18 @@ struct ProfileVerdictTests {
         let core = core()
         let live = liveFingerprints(core)
         try core.profiles.save(profile("Desk", monitors: live))
-        core.desktopBindings = [2: "Deleted"]
+        core.desktopBindings = [
+            .number(2): DesktopBinding(
+                profile: "Deleted",
+                desktop: 2
+            )
+        ]
         #expect(
-            core.profileVerdict(activeDesktop: 2).verdict
+            core.profileVerdict(
+                activeBinding: core.desktopBindings[
+                    .number(2)
+                ]
+            ).verdict
                 == .exactMonitors(name: "Desk")
         )
     }

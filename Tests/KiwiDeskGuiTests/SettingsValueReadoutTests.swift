@@ -143,7 +143,10 @@ struct SettingsValueReadoutTests {
         )
 
         edited = clean
-        edited.profileBindings[2] = "Desk"
+        edited.profileBindings[.number(2)] = DesktopBinding(
+            profile: "Desk",
+            desktop: 2
+        )
         expectRows(
             .profiles(.profileBindings),
             clean,

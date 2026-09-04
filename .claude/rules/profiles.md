@@ -135,6 +135,69 @@ change here:
   invisible to a sum-and-clamp assertion, and both shipped
   (`StarterAllocationTests`).
 
+## A Desktop is keyed by its stamp, never by its number (#1147)
+
+Durable per-Desktop state — `profile_bindings` and the Space
+memory today, a whole Space set under #1230 — is filed under
+`DesktopKey`: the identity KiwiDesk stamps into the Desktop's own
+WindowServer record where it carries one, its Mission Control
+number where it does not. **The number is a projection**, kept on
+`DesktopBinding.desktop` so a row can be labelled and a dormant
+record can say where it was last seen. **Never resolve a binding
+through it** — a lookup by number answers for whichever Desktop
+holds that number now, which is the defect this section exists to
+close (`DesktopBindingIdentityTests` ▸
+`theNumberDoesNotCarryTheBinding`). Why the number cannot be the
+key, and why `id64` cannot either, is `docs/design-decisions.md`
+▸ Profiles; the persistence mechanism it rests on is
+[os-private-apis.md](os-private-apis.md).
+
+The obligations that fall on a change here:
+
+- **Take the key from the snapshot in hand, never a second
+  read** — `snapshot.key(of:)`, `space(for:)`, `currentKey(on:)`,
+  or `mainCurrentKey` for the binding authority. That is #888's
+  one-reading rule, and the reason a switch handler remembers the
+  Desktop it LEFT as a key (`KiwiCore.lastDesktop`) rather than
+  re-deriving a number in the topology it has already left.
+- **Only the four ruled callers MINT** — the boot seed,
+  `handleDesktopChange`, `handleMonitorChange` and
+  `bind_profile_to_desktop`, all through
+  `KiwiCore.stampedDesktopSnapshot()`; the list is here, so a
+  fifth has the other four on screen. **Every other path READS**:
+  do not reach `stampedDesktopSnapshot()` from a query, a
+  refresh or the GUI, or a read starts writing to the
+  WindowServer. Nothing scans for this — the seam guard
+  (`DesktopStampSeamTests`) holds where the WRITE lives, not who
+  calls it — so a new caller owes the choice deliberately.
+- **The re-key rides `stampedDesktopSnapshot`**, not its callers:
+  a binding must move to the stamp in the same reading that
+  produced it, and a caller that forgot would leave an entry
+  keyed by a number for the session with nothing to say so
+  (`reconcileDesktopBindings`; `DesktopBindingIdentityTests` ▸
+  `numberEntryRekeys`). It rewrites the sidecar's OWN map — never
+  adopting the runtime one, which in a hybrid config also holds
+  init.lua's bindings (`KiwiCore+ProfileRename`'s rule).
+- **A record whose Desktop no reading can name is DORMANT, never
+  pruned.** Absence is not proof: an unplugged screen's Desktops
+  come back with their stamps, and one destroyed on the unplug is
+  restored on the replug. Pruning on absence would delete a
+  binding the user gets back in ten seconds
+  (`DesktopBindingIdentityTests`).
+- **Never carry the `.number` fallback's collision into a
+  PERSISTED map.** A number means nothing without saying whose
+  numbering it is, so two arrangements collide on one entry;
+  `virtualSpaces` accepts that (it is session-only, the cost is
+  at most one wrong Space on the first return after a display
+  change, and it heals at the next departure), and a map that
+  outlives the session does not inherit the trade and owes its
+  own answer (#1230).
+- **The write is a seam** (`DesktopMemory.writeStamp`), live in
+  production and pinned to a refusal by both `makeTestCore`
+  twins: a fixture space id IS a real Desktop id on the host, and
+  the write is one macOS persists
+  (`DesktopStampSeamTests`, tests.md ▸ machine touch).
+
 ## The active Desktop is the MAIN display's (#888)
 
 A binding, profile-selection or Desktop-memory path reads the

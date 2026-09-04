@@ -196,11 +196,7 @@ extension KiwiCore {
         if config.spaces.isEmpty {
             config.spaces = starterSpaces()
         }
-        var bindings: [Int: String] = [:]
-        for (number, name) in desktopBindings {
-            bindings[number] = name
-        }
-        config.profileBindings = bindings
+        config.profileBindings = desktopBindings
         seedDefaultShortcuts(&config)
         return config
     }

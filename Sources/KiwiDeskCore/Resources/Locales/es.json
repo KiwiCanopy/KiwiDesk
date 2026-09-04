@@ -220,6 +220,8 @@
   "config_issues.unknown_call": "Llamada desconocida «%1$@».",
   "config_issues.unknown_call_suggestion": "Llamada desconocida «%1$@»: ¿querías decir «%2$@»?",
   "custom_lua_banner.text": "Tu init.lua también contiene Lua propio. No entra en conflicto con el editor visual, y la app nunca modifica init.lua.",
+  "desktops.absent": "ausente",
+  "desktops.absent.help": "Este Escritorio no está ahora mismo en Mission Control — su pantalla no está conectada, o se eliminó. El perfil sigue asociado aquí y vuelve a cargarse si ese Escritorio regresa.",
   "desktops.current": "actual",
   "desktops.desktop": "Escritorio %1$d",
   "desktops.empty": "No se ha detectado ningún Escritorio nativo de macOS. Añade Escritorios en Mission Control para asociar perfiles.",

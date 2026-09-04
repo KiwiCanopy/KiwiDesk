@@ -269,10 +269,10 @@ public final class KiwiCore {
     /// it sent away (#1007) — the type doc carries the argument.
     let followFocus = FollowFocusIntent()
 
-    /// The MAIN display's current native Desktop (Mission
-    /// Control number, #888) — the binding authority — and the
-    /// per-display Space memory restored on returning to one.
-    var lastDesktop: Int?
+    /// The MAIN display's current native Desktop (#888) — the
+    /// binding authority, and the per-Desktop Space memory
+    /// restored on returning to one. Keyed, not numbered (#1147).
+    var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
     /// When the last native desktop switch happened; focus
     /// events during the transition must not change spaces.
@@ -292,10 +292,10 @@ public final class KiwiCore {
     /// captured back on save. nil falls back to the space
     /// order's first survivor on a profile-switch reconcile.
     var fallbackSpace: SpaceID?
-    /// Profile bound per native macOS Space, keyed by the
-    /// Mission Control number (1-based). Populated by
-    /// `bind_profile_to_desktop`.
-    public internal(set) var desktopBindings: [Int: String] = [:]
+    /// Profile bound per macOS Desktop, keyed by the Desktop
+    /// itself (#1147). Populated by `bind_profile_to_desktop`.
+    public internal(set) var desktopBindings: [DesktopKey: DesktopBinding] =
+        [:]
 
     /// Log line consumer (GUI console later; syslog now) — the
     /// sink every Core seam is wired to forward *into*.

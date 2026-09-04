@@ -174,11 +174,17 @@ struct StashCornerTests {
     }
 }
 
+/// `.serialized` because the topology pin below is
+/// process-global. The verb resolves the Desktop it is given in
+/// a live snapshot (#1147), so a fixture that pinned nothing
+/// would file the binding against the developer's own Desktops
+/// and record their display UUID in the row.
 @Suite("Native space profile binding", .serialized)
 @MainActor
 struct DesktopBindingTests {
     private func makeCore() -> KiwiCore {
-        makeTestCore(
+        pinDesktops()
+        return makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
@@ -187,8 +193,30 @@ struct DesktopBindingTests {
         )
     }
 
+    /// Three unstamped Desktops on one screen, the second
+    /// current — so every number this suite binds names a real
+    /// Desktop and every key it files under is `.number`.
+    private func pinDesktops() {
+        NativeSpaces.spacesOverride = (10...12).map {
+            NativeSpace(
+                id: $0,
+                displayUUID: "UUID-A",
+                isCurrent: $0 == 11
+            )
+        }
+        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
+        NativeSpaces.activeSpaceIDOverride = 11
+    }
+
+    private func resetDesktops() {
+        NativeSpaces.spacesOverride = nil
+        NativeSpaces.mainDisplayUUIDOverride = nil
+        NativeSpaces.activeSpaceIDOverride = nil
+    }
+
     @Test("bind_profile_to_desktop records the binding")
     func bind() {
+        defer { resetDesktops() }
         let core = makeCore()
         core.execute(
             "save_profile",
@@ -199,22 +227,33 @@ struct DesktopBindingTests {
             args: [.number(2), .string("Coding")]
         )
         #expect(response.isSuccess)
-        #expect(core.desktopBindings == [2: "Coding"])
+        #expect(
+            core.desktopBindings == [
+                .number(2): DesktopBinding(
+                    profile: "Coding",
+                    desktop: 2
+                )
+            ]
+        )
     }
 
     @Test("CLI-style string arguments are accepted")
     func stringArgs() {
+        defer { resetDesktops() }
         let core = makeCore()
         let response = core.execute(
             "bind_profile_to_desktop",
             args: [.string("3"), .string("Studio")]
         )
         #expect(response.isSuccess)
-        #expect(core.desktopBindings[3] == "Studio")
+        #expect(
+            core.desktopBindings[.number(3)]?.profile == "Studio"
+        )
     }
 
     @Test("Rebinding a space replaces the previous profile")
     func rebind() {
+        defer { resetDesktops() }
         let core = makeCore()
         core.execute(
             "bind_profile_to_desktop",
@@ -224,27 +263,34 @@ struct DesktopBindingTests {
             "bind_profile_to_desktop",
             args: [.number(1), .string("New")]
         )
-        #expect(core.desktopBindings == [1: "New"])
+        #expect(
+            core.desktopBindings == [
+                .number(1): DesktopBinding(
+                    profile: "New",
+                    desktop: 1
+                )
+            ]
+        )
     }
 
     @Test("Desktops restore their last virtual space")
     func virtualSpaceMemory() {
-        // Pin the memory key (#888): the real key is the host's
-        // main-display UUID.
-        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
-        defer { NativeSpaces.mainDisplayUUIDOverride = nil }
+        defer { resetDesktops() }
         let core = makeCore()
         core.state.workspaces.ensureSpace(SpaceID(2))
         // Unknown desktop: default to the first space.
-        #expect(core.virtualSpaceTarget(for: 3) == SpaceID(1))
-        core.desktopMemory.virtualSpaces["UUID-A"] = [
-            3: SpaceID(2)
-        ]
-        #expect(core.virtualSpaceTarget(for: 3) == SpaceID(2))
+        #expect(
+            core.virtualSpaceTarget(for: .number(3)) == SpaceID(1)
+        )
+        core.desktopMemory.virtualSpaces[.number(3)] = SpaceID(2)
+        #expect(
+            core.virtualSpaceTarget(for: .number(3)) == SpaceID(2)
+        )
     }
 
     @Test("Invalid arguments fail")
     func invalidArgs() {
+        defer { resetDesktops() }
         let core = makeCore()
         #expect(
             !core.execute(

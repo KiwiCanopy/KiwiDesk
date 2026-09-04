@@ -4419,6 +4419,17 @@ as before. In a hand-written config the call lives in
 in `gui.json` (`profile_bindings`) and edited in the Profiles
 section instead.
 
+**The number names the Desktop; it does not key the binding.**
+Mission Control renumbers on every add, delete, reorder and
+display change, so KiwiDesk resolves the number you pass to the
+Desktop it currently names and files the binding against that
+Desktop instead — see
+[Spaces and Desktops](spaces-and-desktops.md). A number naming
+no Desktop yet is remembered as a number and attaches when that
+Desktop appears. Because `init.lua` is re-read on every load,
+a call there is re-resolved each time: if the Desktop you meant
+has moved, edit the number to match what Mission Control shows.
+
 **Example:**
 
 ```lua
