@@ -991,6 +991,8 @@
   "shortcuts.choose_app": "App wählen…",
   "shortcuts.delete_layer": "Ebene löschen",
   "shortcuts.desktop_away": "Ausgegraute Zeilen zielen auf einen Schreibtisch, der zurzeit auf keinem Bildschirm liegt. Ihre Kurzbefehle bleiben gespeichert und funktionieren wieder, sobald er zurück ist.",
+  "shortcuts.desktops.focus": "Zu einem macOS-Schreibtisch wechseln",
+  "shortcuts.desktops.move": "Fenster auf einen macOS-Schreibtisch verschieben",
   "shortcuts.editing_layer": "Ebene „%1$@“ wird bearbeitet",
   "shortcuts.go_to_desktop": "Gehe zu Schreibtisch",
   "shortcuts.go_to_space": "Gehe zu Space",

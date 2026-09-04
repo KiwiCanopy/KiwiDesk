@@ -102,6 +102,25 @@ enum SettingsSearchIndex {
         }
     }
 
+    /// Catalog declarations whose SURFACE is bridge-gated
+    /// (#1125): the census path refuses these at `indexes`, and a
+    /// catalog control carries no gate of its own, so the refusal
+    /// is spelled here. Data rather than a condition — a third
+    /// one joins it with its reason, and its entry is what says
+    /// the row would land on a page drawing nothing.
+    ///
+    /// The two Desktop offers are the ONLY search-reachable name
+    /// their families have (the rows are `.dynamic`), so an
+    /// unfiltered entry is not a stray hit: it is the door to a
+    /// capability, offered on a Mac that has none.
+    static var bridgeGatedControls: Set<String> {
+        [
+            SettingsCatalog.shortcuts.focusDesktops.control.id,
+            SettingsCatalog.shortcuts.moveWindowsDesktops.control
+                .id,
+        ]
+    }
+
     /// Catalog controls no census row landed on, derived from the
     /// two lists so a control is a search row exactly once however
     /// it is declared.
@@ -111,6 +130,12 @@ enum SettingsSearchIndex {
         claimed: Set<String>
     ) -> [SettingsSearchIndexRow] {
         entries.filter { !claimed.contains($0.control.id) }
+            .filter {
+                canDriveDesktops
+                    || !bridgeGatedControls.contains(
+                        $0.control.id
+                    )
+            }
             .map { entry in
                 var path = [destination.title]
                 if let surface =

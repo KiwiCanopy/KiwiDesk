@@ -991,6 +991,8 @@
   "shortcuts.choose_app": "Elegir aplicación…",
   "shortcuts.delete_layer": "Eliminar capa",
   "shortcuts.desktop_away": "Las filas atenuadas apuntan a un Escritorio que ahora mismo no está en ninguna pantalla. Sus atajos siguen guardados y vuelven a funcionar cuando regrese.",
+  "shortcuts.desktops.focus": "Ir a un Escritorio de macOS",
+  "shortcuts.desktops.move": "Mover ventanas a un Escritorio de macOS",
   "shortcuts.editing_layer": "Editando la capa «%1$@»",
   "shortcuts.go_to_desktop": "Ir al Escritorio",
   "shortcuts.go_to_space": "Ir al espacio",

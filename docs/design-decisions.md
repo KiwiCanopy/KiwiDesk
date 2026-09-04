@@ -5668,9 +5668,20 @@ rather than KiwiDesk's, and they scale per Desktop — so a
 four-Desktop Mac drew twelve rows about a thing a first-run user
 has never met, in the area whose own ordering already says
 KiwiDesk's Spaces lead and a Desktop row is the escape into
-macOS's. They now sit behind a disclosure until one is bound,
-and at rest in both modes once one is, which is the paragraph
-above applied to a capability rather than to a layer.
+macOS's. They sit behind a disclosure in each card, which stays
+mounted and simply OPENS on arrival once one is bound — in both
+modes, which is the paragraph above applied to a capability
+rather than to a layer.
+
+The drawer stays rather than giving way to a bare list, and that
+is not a detail: the flip would fire at the instant the user
+records their first Desktop combo, inside the open drawer, with
+the recorder focused — so the control they committed with would
+be torn down by their own commit, and on a keyboard-navigation
+Mac focus would fall to the top of the window. The reverse is
+worse still, clearing the last binding shutting a door on rows
+being edited. A permanent drawer also gives the title, the
+search anchor and a future `?` one home instead of two.
 
 Three things this is NOT, each considered and refused. It is not
 a **mode** gate: mode depth is per area and Shortcuts is a
@@ -5684,7 +5695,12 @@ labels, so no search index can name them, and hiding them
 outright would leave a capability nothing on the screen and
 nothing in search could reach. The disclosure IS the door, which
 is why it is a catalog declaration — that makes the offer itself
-a search result even though its rows can never be.
+a search result even though its rows can never be. Which also
+means the door must not be offered where it leads nowhere: on a
+Mac whose window-management bridge is absent the families draw
+nothing, so the two declarations are refused by the search index
+on that same capability, the way a bridge-gated census row
+already is.
 
 **Overrides always resolve; the Simple/Power User mode never
 changes what runs.** There is no stored flag deciding whether a profile's

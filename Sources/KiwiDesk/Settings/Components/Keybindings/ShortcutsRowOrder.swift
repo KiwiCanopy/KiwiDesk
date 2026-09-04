@@ -25,15 +25,19 @@ enum ShortcutsRowOrder {
     ]
 
     /// The Desktop families, last in each group and behind their
-    /// own offer until one is bound (#1125). KiwiDesk's own
+    /// own offer until one is bound (#1125). Named apart from
+    /// the catalog's `focusDesktops` / `moveWindowsDesktops`
+    /// drawers: `SettingsCatalogSiteTests` greps a bare
+    /// `.<name>`, so a byte-identical name here would satisfy
+    /// the dead-declaration guard on this mention alone. KiwiDesk's own
     /// Spaces lead — a Desktop row is the escape into macOS's
     /// arrangement — which is what `focusAtRest`'s ordering
     /// already said and this extends from ORDER into VISIBILITY.
-    static let focusDesktops: [SettingKey] = [
+    static let focusDesktopFamilies: [SettingKey] = [
         .shortcuts(.focusDesktop)
     ]
 
-    static let moveWindowsDesktops: [SettingKey] = [
+    static let moveWindowsDesktopFamilies: [SettingKey] = [
         .shortcuts(.moveToDesktop),
         .shortcuts(.moveToDesktopFollow),
     ]

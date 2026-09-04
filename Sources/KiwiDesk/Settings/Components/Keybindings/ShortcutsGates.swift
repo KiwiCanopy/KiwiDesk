@@ -62,7 +62,7 @@ struct ShortcutsGates {
 
     private var desktopBindingExists: Bool {
         config.layers.flatMap(\.bindings)
-            .contains(KeybindingCatalog.recordsDesktop)
+            .contains(where: KeybindingCatalog.recordsDesktop)
     }
 
     /// Gated keys resolved directly from `GuiConfig`

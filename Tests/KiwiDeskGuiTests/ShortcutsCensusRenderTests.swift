@@ -62,7 +62,7 @@ struct ShortcutsCensusRenderTests {
             "focus"
         )
         pin(
-            ShortcutsRowOrder.focusDesktops,
+            ShortcutsRowOrder.focusDesktopFamilies,
             .focus,
             .immediate,
             "focus desktops"
@@ -79,7 +79,7 @@ struct ShortcutsCensusRenderTests {
             "move windows"
         )
         pin(
-            ShortcutsRowOrder.moveWindowsDesktops,
+            ShortcutsRowOrder.moveWindowsDesktopFamilies,
             .moveWindows,
             .immediate,
             "move windows desktops"
@@ -220,6 +220,14 @@ struct ShortcutsCensusRenderTests {
             ("luaBindingsMore", .luaBindings),
             ("luaBindingsAtRest", .luaBindings),
             ("defaultShortcutsAtRest", .defaultShortcuts),
+            // Walked by `DesktopShortcutsOffer`, which takes its
+            // list as a `keys:` PARAMETER rather than walking it
+            // here — so `isWalked` reads the `ForEach` inside
+            // that view. Without these two rows the register
+            // silently stops being the census of this area's
+            // order lists (#1125, architect + code review).
+            ("focusDesktopFamilies", .focus),
+            ("moveWindowsDesktopFamilies", .moveWindows),
         ]
         // Vacuity: the scan must have read something, and every
         // list named must exist in the source it read.
@@ -231,9 +239,16 @@ struct ShortcutsCensusRenderTests {
                 Comment(rawValue: "unknown order list \(name)")
             )
         }
+        // Squeezed once: a parameter mount is wrapped across
+        // lines by the formatter, so the needle for it cannot
+        // be matched against the source as written.
+        let squeezed = rendered.split(
+            whereSeparator: \.isWhitespace
+        )
+        .joined()
         var walked: Set<SettingsContainer> = []
         for (name, container) in lists
-        where isWalked(name, in: rendered) {
+        where isWalked(name, in: rendered, squeezed: squeezed) {
             walked.insert(container)
         }
         let all = Set(lists.map(\.1))
@@ -250,10 +265,19 @@ struct ShortcutsCensusRenderTests {
     /// Whether a `ForEach(` anywhere in `source` walks the named
     /// order list. Matched within the `ForEach`'s own balanced
     /// parentheses so an unrelated mention nearby cannot count.
+    ///
+    /// A list handed to a view as a parameter counts as walked
+    /// too (#1125): `DesktopShortcutsOffer(keys:)` puts the
+    /// `ForEach` one file over, and reading only the literal
+    /// walk would classify a rendered container as bespoke.
     private func isWalked(
         _ list: String,
-        in source: String
+        in source: String,
+        squeezed: String
     ) -> Bool {
+        if squeezed.contains("keys:ShortcutsRowOrder.\(list)") {
+            return true
+        }
         let characters = Array(source)
         let needle = Array("ForEach")
         var index = 0

@@ -991,6 +991,8 @@
   "shortcuts.choose_app": "Choisir l'application…",
   "shortcuts.delete_layer": "Supprimer le calque",
   "shortcuts.desktop_away": "Les lignes grisées visent un Bureau qui n'est sur aucun écran pour le moment. Leurs raccourcis restent enregistrés et fonctionnent à nouveau dès son retour.",
+  "shortcuts.desktops.focus": "Aller à un Bureau macOS",
+  "shortcuts.desktops.move": "Déplacer les fenêtres vers un Bureau macOS",
   "shortcuts.editing_layer": "Modification du calque « %1$@ »",
   "shortcuts.go_to_desktop": "Aller au Bureau",
   "shortcuts.go_to_space": "Aller à l'espace",
