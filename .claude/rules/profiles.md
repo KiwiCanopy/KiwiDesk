@@ -184,17 +184,14 @@ The obligations that fall on a change here:
   restored on the replug. Pruning on absence would delete a
   binding the user gets back in ten seconds
   (`DesktopBindingIdentityTests`).
-- **State the `.number` fallback's cost where it is worse than
-  before, never as parity.** `virtualSpaces` was keyed
-  `[main display UUID: [number: SpaceID]]` and is now
-  `[DesktopKey: SpaceID]`. For a stamped Desktop that is
-  strictly better; for the `.number` fallback it is weaker than
-  pre-#1147, since one number under two arrangements now
-  collides on one entry. Accepted: the memory is session-only,
-  so the collision costs at most one wrong Space on the first
-  return after a display change, and it heals at the next
-  departure. A consumer that PERSISTS a `.number` key does not
-  inherit that trade and owes its own answer (#1230).
+- **Never carry the `.number` fallback's collision into a
+  PERSISTED map.** A number means nothing without saying whose
+  numbering it is, so two arrangements collide on one entry;
+  `virtualSpaces` accepts that (it is session-only, the cost is
+  at most one wrong Space on the first return after a display
+  change, and it heals at the next departure), and a map that
+  outlives the session does not inherit the trade and owes its
+  own answer (#1230).
 - **The write is a seam** (`DesktopMemory.writeStamp`), live in
   production and pinned to a refusal by both `makeTestCore`
   twins: a fixture space id IS a real Desktop id on the host, and

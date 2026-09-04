@@ -38,12 +38,11 @@ extension KiwiCore {
         // always had.
         let desktop = snapshot.space(numbered: number)
         desktopBindings[
-            desktop.flatMap { confirmedKey(of: $0.id, in: snapshot) }
+            desktop.flatMap { snapshot.key(of: $0.id) }
                 ?? .number(number)
         ] = DesktopBinding(
             profile: profile,
-            desktop: number,
-            display: desktop?.displayUUID
+            desktop: number
         )
         if !profiles.list().contains(profile) {
             onLog(
@@ -51,7 +50,7 @@ extension KiwiCore {
                     + "'\(profile)' does not exist (yet)"
             )
         }
-        applyDesktopBinding(for: snapshot.mainCurrentKey)
+        applyDesktopBinding(in: snapshot)
         return .ok()
     }
 
@@ -132,7 +131,7 @@ extension KiwiCore {
             updateAppBar()
             updateSpaceBar()
         } else {
-            applyDesktopBinding(for: key)
+            applyDesktopBinding(in: snapshot)
             if let key, let target = virtualSpaceTarget(for: key) {
                 state.workspaces.activate(target)
                 oweReturningFocus(
@@ -317,9 +316,8 @@ extension KiwiCore {
     /// caller means "no authoritative Desktop", which no-ops, so
     /// the live read belongs to the no-argument convenience
     /// alone.
-    func applyDesktopBinding(for desktop: DesktopKey?) {
-        guard let desktop,
-            let binding = desktopBindings[desktop],
+    func applyDesktopBinding(in snapshot: DesktopSnapshot) {
+        guard let binding = mainDesktopBinding(in: snapshot),
             binding.profile != profiles.currentName
         else { return }
         // The LOG names the number, which is the only name for a

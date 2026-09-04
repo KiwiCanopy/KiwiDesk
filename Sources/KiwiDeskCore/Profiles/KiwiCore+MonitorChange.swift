@@ -37,9 +37,7 @@ extension KiwiCore {
         // returned brings Desktops macOS created fresh, which are
         // stamped here before the binding resolves against them.
         let desktops = stampedDesktopSnapshot()
-        if let key = desktops.mainCurrentKey,
-            let binding = desktopBindings[key]
-        {
+        if let binding = mainDesktopBinding(in: desktops) {
             let boundName = binding.profile
             do {
                 let bound = try profiles.load(name: boundName)

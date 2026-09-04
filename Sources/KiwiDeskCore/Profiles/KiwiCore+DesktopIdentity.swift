@@ -9,13 +9,22 @@ import Foundation
 /// measurement rather than a preference** (probe P3,
 /// 2026-09-03): the plist shows a freshly written key only after
 /// ~7 ms, so an immediate re-read reports every fresh stamp as
-/// failed. The write therefore mints the identity into the
-/// snapshot it RETURNS — we know what we wrote — and the next
-/// call confirms it against the WindowServer. A Desktop still
-/// unstamped there is unstampable for this process and every
-/// consumer falls back to its number. No polling: it would spend
-/// the main actor every handler shares, to learn what the next
-/// read tells us for nothing.
+/// failed. No polling either — it would spend the main actor
+/// every handler shares to learn what the next read gives for
+/// nothing. The next call confirms the write instead, and a
+/// Desktop still unstamped there is unstampable for this process.
+///
+/// **So this returns the CONFIRMED reading, never an optimistic
+/// one.** A dispatched write is not an applied one (#884/#889),
+/// and a snapshot carrying identities the WindowServer has not
+/// acknowledged hands every caller a key no later reading can
+/// name: `lastDesktop`, the Space memory and a fresh binding
+/// would each file under an orphan. A Desktop stamped this
+/// instant therefore keys by its NUMBER for exactly one call and
+/// by its identity forever after — which is the same fallback a
+/// bridgeless host lives on permanently, so it is a path already
+/// walked rather than a special case (architect review,
+/// 2026-09-04).
 extension KiwiCore {
     /// The topology, with every user Desktop stamped that can be.
     ///
@@ -61,40 +70,12 @@ extension KiwiCore {
             desktopMemory.stampAttempts.insert(space.id)
             minted[space.id] = identity
         }
-        let stamped =
-            minted.isEmpty ? snapshot : snapshot.stamping(minted)
         // The re-key rides HERE rather than at each of the four
         // callers: a caller that forgot would leave an entry
         // keyed by a number for the life of the session with
         // nothing to say so (#1147).
-        //
-        // It reconciles against `snapshot`, the CONFIRMED
-        // reading, never the optimistic one this returns. A stamp
-        // just dispatched is not yet applied (#884/#889), and
-        // moving a binding onto an identity the WindowServer
-        // never kept would file it under a key no later reading
-        // can name: dormant forever, never pruned, and silently
-        // firing for nothing. The move waits for the call that
-        // CONFIRMS the stamp — which is the same deferred verify
-        // this whole file is built on (code review, 2026-09-04).
         reconcileDesktopBindings(in: snapshot)
-        return stamped
-    }
-
-    /// The key `space` files under, CONFIRMED: a stamp this
-    /// process dispatched but no reading has shown is not one
-    /// yet (#884/#889), and filing against it would orphan the
-    /// record under a key no later reading can name. Such a
-    /// Desktop keys by its number and is re-keyed by the
-    /// reconcile once the stamp lands.
-    func confirmedKey(
-        of space: SkyLight.SpaceID,
-        in snapshot: DesktopSnapshot
-    ) -> DesktopKey? {
-        guard !desktopMemory.stampAttempts.contains(space) else {
-            return snapshot.number(of: space).map(DesktopKey.number)
-        }
-        return snapshot.key(of: space)
+        return snapshot
     }
 
     /// The live stamp write — the ONE production bridge call on
@@ -111,35 +92,6 @@ extension KiwiCore {
         WMBridge.setValues(
             [DesktopIdentity.storeKey: identity.raw],
             of: space
-        )
-    }
-}
-
-extension DesktopSnapshot {
-    /// This snapshot with identities we just wrote folded in —
-    /// the read door cannot see them yet (P3's ~7 ms), and a
-    /// caller must not resolve the same topology two ways inside
-    /// one handler.
-    func stamping(
-        _ minted: [SkyLight.SpaceID: DesktopIdentity]
-    ) -> DesktopSnapshot {
-        DesktopSnapshot(
-            authority: authority,
-            mainUUID: mainUUID,
-            mainCurrentSpace: mainCurrentSpace,
-            currentSpaces: currentSpaces,
-            spaces: spaces.map { space in
-                guard let identity = minted[space.id] else {
-                    return space
-                }
-                return NativeSpace(
-                    id: space.id,
-                    displayUUID: space.displayUUID,
-                    isCurrent: space.isCurrent,
-                    isUser: space.isUser,
-                    identity: identity
-                )
-            }
         )
     }
 }

@@ -141,6 +141,14 @@ struct ProfilesFamilyRowsTests {
         )
     }
 
+    /// The present set Core would hand in: both keys of every
+    /// live Desktop.
+    private func present(
+        _ keys: [Int: DesktopKey]
+    ) -> Set<DesktopKey> {
+        Set(keys.values).union(keys.keys.map { .number($0) })
+    }
+
     private func rows(
         onMain: [Int],
         keys: [Int: DesktopKey],
@@ -149,6 +157,7 @@ struct ProfilesFamilyRowsTests {
         ProfilesFamilyRows.desktops(
             onMain: onMain,
             keys: keys,
+            present: present(keys),
             bindings: bindings
         )
         .map(\.number)
@@ -188,20 +197,19 @@ struct ProfilesFamilyRowsTests {
     }
 
     /// A DORMANT record keeps a row of its own even where a live
-    /// Desktop holds the number it was last seen at (#1147).
-    ///
-    /// This is the post-renumber case the lane exists for —
-    /// delete a Desktop in the middle and a later one inherits
-    /// its number — and collapsing the two made the record
-    /// unreachable: no row, no badge, and the picker editing the
-    /// live Desktop's binding instead (three reviewers,
-    /// 2026-09-04).
+    /// Desktop holds the number it was last seen at (#1147) —
+    /// the post-renumber case the lane exists for. Collapsing
+    /// the two made the record unreachable: no row, no badge,
+    /// and the picker editing the live Desktop's binding
+    /// instead (three reviewers, 2026-09-04).
     @Test("a dormant record does not collapse into a live row")
     func dormantKeepsItsOwnRow() {
         let gone = DesktopKey.identity(DesktopIdentity(raw: "GONE"))
+        let keys = liveKeys(1, 2, 3)
         let listed = ProfilesFamilyRows.desktops(
             onMain: [1, 2, 3],
-            keys: liveKeys(1, 2, 3),
+            keys: keys,
+            present: present(keys),
             bindings: [
                 gone: DesktopBinding(profile: "P", desktop: 3)
             ]

@@ -23,6 +23,26 @@ struct BindingMove {
 }
 
 extension KiwiCore {
+    /// The binding on the Desktop the MAIN screen is showing,
+    /// under EITHER of that Desktop's keys (#1147) — the one
+    /// resolver every reader of a Desktop binding takes.
+    ///
+    /// Asking under one key alone misses a binding that exists
+    /// for the reading between a Desktop's first stamp and the
+    /// re-key that follows it, which every upgrading user passes
+    /// through once (architect review, 2026-09-04).
+    public func mainDesktopBinding(
+        in snapshot: DesktopSnapshot
+    ) -> DesktopBinding? {
+        guard let space = snapshot.mainCurrentSpace else {
+            return nil
+        }
+        return snapshot.keys(of: space)
+            .lazy
+            .compactMap { self.desktopBindings[$0] }
+            .first
+    }
+
     /// Re-keys and re-projects every binding this topology can
     /// name, rewriting the sidecar exactly when something moved.
     func reconcileDesktopBindings(in snapshot: DesktopSnapshot) {
@@ -80,16 +100,23 @@ extension KiwiCore {
     /// cannot name is dormant and is left exactly as it is —
     /// absence is never proof it is gone (#1147 ▸ #1230 contract,
     /// rule 3).
-    static func bindingMoves(
-        in bindings: [DesktopKey: DesktopBinding],
+    /// Where each KEY of a per-Desktop map goes in this topology
+    /// — generic over the value, so #1230's Space sets re-key
+    /// through the same rule rather than a hand copy of it.
+    ///
+    /// The drop clause is why this is shared rather than copied:
+    /// it took a correctness fix of its own, and a second hand
+    /// copy would not have got it (architect review,
+    /// 2026-09-04).
+    static func keyMoves<Value>(
+        in map: [DesktopKey: Value],
         snapshot: DesktopSnapshot
-    ) -> (moves: [DesktopKey: BindingMove], drops: Set<DesktopKey>) {
-        var moves: [DesktopKey: BindingMove] = [:]
+    ) -> (moves: [DesktopKey: DesktopKey], drops: Set<DesktopKey>) {
+        var moves: [DesktopKey: DesktopKey] = [:]
         var drops: Set<DesktopKey> = []
-        for (key, binding) in bindings {
+        for key in map.keys {
             guard let space = snapshot.space(for: key),
-                let now = snapshot.key(of: space.id),
-                let number = snapshot.number(of: space.id)
+                let now = snapshot.key(of: space.id), now != key
             else { continue }
             // A `.number` entry whose Desktop is ALREADY filed
             // under its stamp is removed rather than moved: both
@@ -99,17 +126,35 @@ extension KiwiCore {
             // its stamp — a session where the write is refused,
             // or a macOS with no bridge — applying a stale
             // profile in its stead (code review, 2026-09-04).
-            if now != key, bindings[now] != nil {
+            if map[now] != nil {
                 drops.insert(key)
                 continue
             }
+            moves[key] = now
+        }
+        return (moves, drops)
+    }
+
+    /// The key moves above, plus the binding-specific projection
+    /// refresh — the Mission Control number a row is labelled
+    /// with, which only this map carries.
+    static func bindingMoves(
+        in bindings: [DesktopKey: DesktopBinding],
+        snapshot: DesktopSnapshot
+    ) -> (moves: [DesktopKey: BindingMove], drops: Set<DesktopKey>) {
+        let keys = keyMoves(in: bindings, snapshot: snapshot)
+        var moves: [DesktopKey: BindingMove] = [:]
+        for (key, binding) in bindings where !keys.drops.contains(key) {
+            let now = keys.moves[key] ?? key
+            guard let space = snapshot.space(for: key),
+                let number = snapshot.number(of: space.id)
+            else { continue }
             var updated = binding
             updated.desktop = number
-            updated.display = space.displayUUID
             guard now != key || updated != binding else { continue }
             moves[key] = BindingMove(key: now, binding: updated)
         }
-        return (moves, drops)
+        return (moves, keys.drops)
     }
 
     /// Applies the moves, removing a key only where it actually

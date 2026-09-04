@@ -231,8 +231,7 @@ struct DesktopBindingTests {
             core.desktopBindings == [
                 .number(2): DesktopBinding(
                     profile: "Coding",
-                    desktop: 2,
-                    display: "UUID-A"
+                    desktop: 2
                 )
             ]
         )
@@ -268,8 +267,7 @@ struct DesktopBindingTests {
             core.desktopBindings == [
                 .number(1): DesktopBinding(
                     profile: "New",
-                    desktop: 1,
-                    display: "UUID-A"
+                    desktop: 1
                 )
             ]
         )

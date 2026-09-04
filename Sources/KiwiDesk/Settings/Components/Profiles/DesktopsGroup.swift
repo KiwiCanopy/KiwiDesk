@@ -220,6 +220,7 @@ struct DesktopsGroup: View {
         ProfilesFamilyRows.desktops(
             onMain: model.mainDesktops,
             keys: model.desktopKeys,
+            present: model.presentDesktopKeys,
             bindings: model.config.profileBindings
         )
     }
@@ -276,9 +277,7 @@ struct DesktopsGroup: View {
                     ?? key.number ?? 0
                 model.config.profileBindings[key] = DesktopBinding(
                     profile: profile,
-                    desktop: number,
-                    display: model.config.profileBindings[key]?
-                        .display
+                    desktop: number
                 )
             }
         )

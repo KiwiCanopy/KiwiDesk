@@ -34,6 +34,8 @@ struct ProfilesFamilyRows {
     let mainDesktops: [Int]
     /// Each present Desktop's key by its Mission Control number.
     let desktopKeys: [Int: DesktopKey]
+    /// Every key the topology answers to (`DesktopSnapshot`).
+    let presentKeys: Set<DesktopKey>
     /// The bindings as the draft currently holds them.
     let bindings: [DesktopKey: DesktopBinding]
     let presets: [StandardLayout]
@@ -75,44 +77,37 @@ struct ProfilesFamilyRows {
     static func desktops(
         onMain: some Collection<Int>,
         keys: [Int: DesktopKey],
+        present: Set<DesktopKey>,
         bindings: [DesktopKey: DesktopBinding]
     ) -> [DesktopRow] {
-        // A Desktop is BOUND under either of its two possible
-        // keys: its stamp, or the number it was filed under
-        // before Core re-keyed it. Between the boot stamp and the
-        // reading that confirms it, every upgrading user sits in
-        // exactly that state.
-        let bound: (Int, DesktopKey) -> Bool = { number, key in
-            bindings[key] != nil || bindings[.number(number)] != nil
-        }
+        // A Desktop is BOUND under either of its keys — its
+        // stamp, or the number it was filed at before Core
+        // re-keyed it — which coexist for one reading.
         let live = Set(onMain).union(
-            keys.filter { bound($0.key, $0.value) }.keys
+            keys.filter { number, key in
+                bindings[key] != nil
+                    || bindings[.number(number)] != nil
+            }
+            .keys
         )
         var rows = live.compactMap { number in
             keys[number].map {
                 DesktopRow(key: $0, number: number, isDormant: false)
             }
         }
-        // DORMANT mirrors Core's own `space(for:)`, per key shape:
-        // an identity is present when some Desktop carries it, a
-        // number when that Desktop exists. Testing membership of
-        // the identities alone badged a `.number` record whose
-        // Desktop is on screen and merely stamped since (code
-        // review, 2026-09-04).
-        let identities = Set(keys.values)
-        rows += bindings.filter { record in
-            switch record.key {
-            case .identity: return !identities.contains(record.key)
-            case .number(let n): return keys[n] == nil
+        // DORMANT is Core's own verdict, handed in — never a
+        // second copy switching on `DesktopKey`'s cases here. The
+        // copy diverged once already this round, and #1230 moves
+        // Core's rule without touching a copy in a row builder
+        // (architect review, 2026-09-04).
+        rows += bindings.filter { !present.contains($0.key) }
+            .map {
+                DesktopRow(
+                    key: $0.key,
+                    number: $0.value.desktop,
+                    isDormant: true
+                )
             }
-        }
-        .map {
-            DesktopRow(
-                key: $0.key,
-                number: $0.value.desktop,
-                isDormant: true
-            )
-        }
         return rows.sorted {
             ($0.number, $0.isDormant ? 1 : 0)
                 < ($1.number, $1.isDormant ? 1 : 0)
@@ -152,6 +147,7 @@ struct ProfilesFamilyRows {
             return Self.desktops(
                 onMain: mainDesktops,
                 keys: desktopKeys,
+                present: presentKeys,
                 bindings: bindings
             )
             .map { ProfilesRowInstance.desktop($0.key) }

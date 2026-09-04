@@ -125,9 +125,7 @@ extension KiwiCore {
         // config load holds no switch snapshot, so it reads the
         // authority live (#888) — reading rather than stamping,
         // the way every non-ruled caller does (#1147).
-        applyDesktopBinding(
-            for: NativeSpaces.desktopSnapshot().mainCurrentKey
-        )
+        applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
         defersWindowRuleReconcile = false
         // The rule owner/profile just changed: re-sync every app
         // once against the FINAL effective rules. Without this,

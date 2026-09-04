@@ -77,26 +77,27 @@ struct DesktopStampingTests {
         )
     }
 
-    /// The deferred verify in one assertion: the write is
-    /// dispatched AND the returned snapshot already carries the
-    /// identity, because the read door cannot see it for ~7 ms.
-    @Test("an unstamped Desktop is stamped, and the snapshot says so")
-    func stampsAndFoldsIn() throws {
+    /// The deferred verify in one clause: the write is dispatched,
+    /// and the returned snapshot does NOT carry the identity —
+    /// dispatched is not applied (#884/#889), so a snapshot
+    /// asserting it would hand every caller a key no later
+    /// reading can name. That fold shipped and was removed
+    /// (architect review, 2026-09-04).
+    @Test("a stamp is dispatched, and not claimed until it lands")
+    func stampsWithoutClaiming() throws {
         defer { reset() }
         pin([space(1), space(4)])
         let core = makeCore()
         withBridge {
             let snapshot = core.stampedDesktopSnapshot()
             #expect(Written.values.count == 2)
-            let stamped = snapshot.spaces.compactMap(\.identity)
-            #expect(stamped.count == 2)
-            // What was written IS what the snapshot reports.
-            let sent = Set(
-                Written.values.compactMap {
-                    $0[DesktopIdentity.plistKey] as? String
-                }
+            #expect(
+                snapshot.spaces.allSatisfy { $0.identity == nil }
             )
-            #expect(sent == Set(stamped.map(\.raw)))
+            // …so every consumer keys by the number for exactly
+            // this reading, the same fallback a bridgeless host
+            // lives on permanently.
+            #expect(snapshot.key(of: 1) == .number(1))
             // The pass hands over the BARE key and the wrapper
             // namespaces it (#889), so what actually lands is the
             // very key the plist read door looks for — the two

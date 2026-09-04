@@ -37,9 +37,10 @@ extension SettingsModel {
         // Core's own callers wrote, through the snapshot's own
         // join rather than a second copy of it.
         desktopKeys = desktops.keysByNumber
+        presentDesktopKeys = desktops.presentKeys
         currentDesktop = desktops.authority
         let resolved = core.profileVerdict(
-            activeDesktop: desktops.mainCurrentKey
+            activeBinding: core.mainDesktopBinding(in: desktops)
         )
         profileResolution = ProfileResolution(
             verdict: resolved.verdict,

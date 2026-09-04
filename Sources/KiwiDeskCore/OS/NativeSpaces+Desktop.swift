@@ -58,6 +58,43 @@ public struct DesktopSnapshot: Sendable {
         mainCurrentSpace.flatMap { key(of: $0) }
     }
 
+    /// BOTH keys a Desktop can be filed under (#1147): its stamp,
+    /// and the Mission Control number it was filed at before the
+    /// re-key moved it — most specific first.
+    ///
+    /// The two coexist for one reading. A Desktop stamped this
+    /// instant answers by number until the write is confirmed,
+    /// and the records filed against it move at that same call —
+    /// so between the boot stamp and the first switch, the plist
+    /// says identity while the config still says number. Every
+    /// reader of a per-Desktop record asks for both, or it misses
+    /// a binding that exists (architect review, 2026-09-04).
+    public func keys(of space: SkyLight.SpaceID) -> [DesktopKey] {
+        guard let native = spaces.first(where: { $0.id == space }),
+            native.isUser
+        else { return [] }
+        let number = number(of: space).map(DesktopKey.number)
+        guard let identity = native.identity else {
+            return number.map { [$0] } ?? []
+        }
+        return [.identity(identity)] + (number.map { [$0] } ?? [])
+    }
+
+    /// Every key this topology answers to — the presence half of
+    /// `space(for:)`, as DATA a consumer can be handed.
+    ///
+    /// A consumer asking "is this record dormant" takes this
+    /// rather than re-deriving the verdict per key shape at its
+    /// own call site: that copy diverged once, and #1230 moves
+    /// the rule here without touching a copy in a row builder.
+    public var presentKeys: Set<DesktopKey> {
+        var out: Set<DesktopKey> = []
+        for space in spaces where space.isUser {
+            for key in keys(of: space.id) { out.insert(key) }
+        }
+        return out
+    }
+
     /// The Desktop a key names in THIS topology, or nil while it
     /// is absent — its display unplugged, or the Desktop itself
     /// deleted. Absence is never proof it is gone for good, so a

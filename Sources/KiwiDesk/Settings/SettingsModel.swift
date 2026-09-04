@@ -135,6 +135,11 @@ final class SettingsModel: ObservableObject {
     /// what makes a binding on it dormant.
     @Published var desktopKeys: [Int: DesktopKey] = [:]
 
+    /// Every key the topology answers to (#1147) — Core's own
+    /// presence verdict as data, so a row builder never
+    /// re-derives dormancy per key shape.
+    @Published var presentDesktopKeys: Set<DesktopKey> = []
+
     /// Whether this macOS drives native Desktops (#1145) — read
     /// once from the core (process-constant, so not published);
     /// gates the sticky-reach row's SURFACING (hide, never grey
