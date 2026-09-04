@@ -17,6 +17,15 @@ enum ResizeRefusal: Equatable {
     /// app-enforced maximum (#1055) — the app refuses to get
     /// bigger, so growing the slot further only overshoots.
     case ownMaximum(WindowID)
+    /// The zone the focused window sits in has no parameter on
+    /// the asked axis at all (#1255) — a horizontal master zone
+    /// divides widths, so a height press has nothing to move.
+    /// Not a limit reached: a limit that does not exist.
+    case noAxisHere(WindowID)
+    /// The space's layout has no resizing at all (#1255) —
+    /// monocle, grid and floating. The most reachable refusal
+    /// there is, and until now the one cued by sound alone.
+    case layoutHasNoResize(WindowID)
 }
 
 /// The effective-minimum resolution and the shared clamped

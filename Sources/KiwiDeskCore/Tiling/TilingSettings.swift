@@ -15,7 +15,20 @@ public struct TilingSettings: Sendable, Equatable {
     public var resizeStep: CGFloat = 50
     /// Sound alert when resize hotkey cannot act in layout (`resize.feedback`,
     /// #184).
-    public var resizeFeedback = true
+    /// Whether a refusal pill also sounds (#1255). OFF by
+    /// default (owner ruling 2026-09-05): the pill is the
+    /// primary cue and the sound is an addition you switch on,
+    /// so widening it from one near-unreachable case to every
+    /// refusal makes no upgrade noisier.
+    ///
+    /// The DEFAULT alone does not deliver that: the encoder
+    /// writes this key unconditionally, so every saved config
+    /// carries an explicit `true` from the old default and would
+    /// keep sounding. The one-shot migration carries it — safe
+    /// because nobody chose the old value: it was audible in two
+    /// rare cases, one of them reachable only by height-resizing
+    /// a stack master.
+    public var resizeFeedback = false
     /// Directional swap in cascade targets outer neighbor
     /// (`swap.skips_cascade`, #172).
     public var swapSkipsCascade = true

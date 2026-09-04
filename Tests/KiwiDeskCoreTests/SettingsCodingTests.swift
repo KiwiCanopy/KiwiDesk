@@ -120,11 +120,15 @@ struct SettingsCodingTests {
         let icons = try object(space["icon"])
         #expect(icons["2"] as? String == "globe")
         // `set_resize_step` → `resize.step` (#58);
-        // `set_resize_feedback` → `resize.feedback` (#184),
-        // on by default.
+        // `set_resize_feedback` → `resize.feedback` (#184).
+        // The KEY is this suite's subject, so the flag is
+        // asserted present and Boolean rather than pinned to a
+        // value a ruling may retune — #1255 flipped its default
+        // and reddened this line for no regression (tests.md
+        // ▸ a source clause pins the SHAPE).
         let resize = try object(root["resize"])
         #expect(resize["step"] as? Double == 50)
-        #expect(resize["feedback"] as? Bool == true)
+        #expect(resize["feedback"] as? Bool != nil)
         #expect(root["mouse_resize"] as? String == "layout")
         // Toggles (issue #11) and duration knobs (issue #51).
         // Keys mirror the Lua names per the one-vocabulary rule.

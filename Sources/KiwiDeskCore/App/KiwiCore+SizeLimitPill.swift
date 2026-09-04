@@ -17,6 +17,31 @@ extension KiwiCore {
             frame: frame,
             text: text
         )
+        soundRefusal()
+    }
+
+    /// The audible half of a refusal (#1255): a drawn pill may
+    /// also sound, which is what the toggle has always claimed
+    /// to control and now does.
+    ///
+    /// Called from the pill-DRAWING seams rather than from the
+    /// refusal funnels, and that placement is the invariant: a
+    /// sound that cannot fire without a pill can never
+    /// re-create the defect this replaced — a refusal audible
+    /// but invisible. It matters most for the sticky family,
+    /// whose pill is gated on `sticky.mark`: with the mark off
+    /// those refusals draw nothing, and so must say nothing.
+    ///
+    /// The hotkey-fire gate is inherited deliberately (#184): a
+    /// resize driven from the CLI or IPC must not make the
+    /// user's Mac beep at a script. And every caller has already
+    /// ended a held run, so a chord sounds ONCE per hold rather
+    /// than per frame — which is what makes sounding a real
+    /// refusal safe where sounding every `.fail` never was.
+    func soundRefusal() {
+        guard keys.isFiring, tiler.settings.resizeFeedback
+        else { return }
+        NSSound.beep()
     }
 
     /// The one entry every size-limit cue takes to reach the
@@ -29,6 +54,46 @@ extension KiwiCore {
     private func cueResizeRefusal(_ refusal: ResizeRefusal) {
         keys.noteResizeRefusal()
         borders.onResizeRefusal(refusal)
+    }
+
+    /// The zone has no parameter on the asked axis (#1255): a
+    /// refusal like any other, so it draws and sounds through
+    /// the one funnel. It replaces `cueUnsupportedCommand`,
+    /// which cued by SOUND ALONE and so was the one refusal a
+    /// user could not see — invisible with the toggle off, and
+    /// invisible to anyone who does not hear it.
+    func refuseAxisAbsent(_ window: WindowID, axis: String) {
+        cueResizeRefusal(.noAxisHere(window))
+        flashSizeLimitPill(
+            window,
+            text: axis == "y"
+                ? L(
+                    "resize.no_height_here",
+                    "This zone divides widths, not heights"
+                )
+                : L(
+                    "resize.no_width_here",
+                    "This zone divides heights, not widths"
+                )
+        )
+    }
+
+    /// The layout has no resizing at all (#1255): monocle, grid
+    /// and floating. A correct no-op — macOS's own full-screen
+    /// exposes no resize either — but a perceivable one, and it
+    /// is the MOST reachable refusal in the feature, not the
+    /// least: any resize press in one of those three arrives
+    /// here. It cued by sound alone until now.
+    func refuseResizeUnsupported(in space: Space) {
+        guard let window = space.focused else { return }
+        cueResizeRefusal(.layoutHasNoResize(window))
+        flashSizeLimitPill(
+            window,
+            text: L(
+                "resize.layout_has_none",
+                "This layout has no resizing"
+            )
+        )
     }
 
     /// Triggers both the DeadEndBump rubber-band on the focus ring

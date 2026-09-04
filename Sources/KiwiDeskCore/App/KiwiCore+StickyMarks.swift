@@ -42,6 +42,7 @@ extension KiwiCore {
         guard tiler.settings.stickyStyle.mark,
             let home = state.workspaces.space(of: id)
         else { return }
+        soundRefusal()
         stickyMarks.flash(
             id,
             format: L(
@@ -104,6 +105,7 @@ extension KiwiCore {
     /// swap is refused outright), so it appears at once.
     func flashStickyCannotPile(_ id: WindowID) {
         guard tiler.settings.stickyStyle.mark else { return }
+        soundRefusal()
         stickyMarks.flash(
             id,
             format: L(
@@ -181,6 +183,7 @@ extension KiwiCore {
                 "sticky.everywhere.pill",
                 "Sticky windows can't be moved to another Space"
             )
+        soundRefusal()
         stickyMarks.flash(
             id,
             format: format,

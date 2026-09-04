@@ -195,7 +195,7 @@ extension TilingSettings: Codable {
             try resize.decodeIfPresent(
                 Bool.self,
                 forKey: .feedback
-            ) ?? true
+            ) ?? false
     }
 
     private mutating func decodeSpace(

@@ -80,7 +80,7 @@ extension KiwiCore {
         let weightAxis =
             orientation == .vertical ? "y" : "x"
         guard axis == weightAxis else {
-            cueUnsupportedCommand()
+            refuseAxisAbsent(focused, axis: axis)
             return .fail(
                 "no \(axis) parameter for this arrangement"
             )

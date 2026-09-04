@@ -12,18 +12,30 @@ private func makeCore() -> KiwiCore {
     return makeTestCore(configDirectory: directory)
 }
 
-/// The unsupported-resize cue (#184). The beep itself is an
-/// AppKit side effect; what the tests pin is the seam around
-/// it: the toggle's storage and validation, the CLI contract
-/// staying an error response, and the hotkey-origin flag
-/// defaulting off outside a fire (so command-path callers can
-/// never cue).
+/// The refusal cue's audible half (#184, widened #1255). The
+/// beep itself is an AppKit side effect; what the tests pin is
+/// the seam around it: the toggle's storage and validation, the
+/// CLI contract staying an error response, and the
+/// hotkey-origin flag defaulting off outside a fire (so
+/// command-path callers can never cue).
 @Suite("Unsupported-resize feedback (#184)", .serialized)
 @MainActor
 struct ResizeFeedbackTests {
     @Test("set_resize_feedback toggles and validates")
     func toggle() {
         let core = makeCore()
+        // OFF by default since #1255: the pill is the primary
+        // cue and the sound is switched on, so widening it to
+        // every refusal makes no upgrade noisier.
+        #expect(!core.tiler.settings.resizeFeedback)
+        // Both directions, which the old cut never had — it
+        // only ever drove the flag toward its non-default.
+        #expect(
+            core.execute(
+                "set_resize_feedback",
+                args: [.bool(true)]
+            ).isSuccess
+        )
         #expect(core.tiler.settings.resizeFeedback)
         #expect(
             core.execute(
