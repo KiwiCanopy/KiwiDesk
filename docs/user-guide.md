@@ -2724,8 +2724,8 @@ you can drive KiwiDesk before configuring anything:
 | --- | --- |
 | Focus window left / down / up / right | `⌃⌥←` `⌃⌥↓` `⌃⌥↑` `⌃⌥→` |
 | Go to space | `⌃⌥1` … `⌃⌥9`, then `⌃⌥0` for the tenth |
-| Swap with window left / down / up / right | `⌃⌥⇧←` `⌃⌥⇧↓` `⌃⌥⇧↑` `⌃⌥⇧→` |
 | Move to space | `⌃⌥⇧1` … `⌃⌥⇧9`, `⌃⌥⇧0` |
+| Swap with window left / down / up / right | `⌃⌥⌘←` `⌃⌥⌘↓` `⌃⌥⌘↑` `⌃⌥⌘→` |
 | Move to space and follow | `⌃⌥⌘1` … `⌃⌥⌘9`, `⌃⌥⌘0` |
 | Grow / Shrink width | `⌥⌘2` / `⌥⌘1` |
 | Grow / Shrink height | `⌥⌘5` / `⌥⌘4` |
@@ -2734,8 +2734,10 @@ you can drive KiwiDesk before configuring anything:
 | Toggle sticky on this screen | `⌃⌥P` |
 
 The **movement** defaults are built on **Control-Option**
-(`⌃⌥`), escalating through `⌃⌥⇧` — act on the window rather than
-the focus — to `⌃⌥⌘`, which does both. **Resizing has a layer of
+(`⌃⌥`): the bare base moves your focus, and adding a modifier
+acts on the window instead. `⇧` sends it to a space; `⌘` is the
+stronger of the two — swap it with a neighbour, or send it to a
+space and go along. **Resizing has a layer of
 its own, `⌥⌘`**: changing a window's size isn't a movement, and
 it's the one shortcut you hold down, which `⌥⌘` takes as a single
 thumb roll.
@@ -3059,8 +3061,8 @@ Each row has an action. Built-in actions live under headings:
   have — on every screen, since these act on whichever screen
   the Desktop lives on. They ship **unbound**: the three digit
   tiers (`⌃⌥`, `⌃⌥⇧`, `⌃⌥⌘`) go to spaces, the arrows to focus
-  and swap, and `⌥⌘` to resizing, so KiwiDesk offers the rows
-  and leaves the keys to you. They
+  and swapping, and `⌥⌘` to resizing, so KiwiDesk offers the
+  rows and leaves the keys to you. They
   appear only where macOS exposes the window-management bridge
   they need — see [macOS Desktops](#macos-desktops-mission-control) —
   and a row you bound keeps its place if that Desktop later
