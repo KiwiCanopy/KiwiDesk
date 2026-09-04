@@ -38,7 +38,7 @@ extension KiwiCore {
         // always had.
         let desktop = snapshot.space(numbered: number)
         desktopBindings[
-            desktop.flatMap { snapshot.key(of: $0.id) }
+            desktop.flatMap { confirmedKey(of: $0.id, in: snapshot) }
                 ?? .number(number)
         ] = DesktopBinding(
             profile: profile,

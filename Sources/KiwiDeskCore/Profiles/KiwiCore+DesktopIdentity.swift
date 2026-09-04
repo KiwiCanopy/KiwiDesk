@@ -81,6 +81,22 @@ extension KiwiCore {
         return stamped
     }
 
+    /// The key `space` files under, CONFIRMED: a stamp this
+    /// process dispatched but no reading has shown is not one
+    /// yet (#884/#889), and filing against it would orphan the
+    /// record under a key no later reading can name. Such a
+    /// Desktop keys by its number and is re-keyed by the
+    /// reconcile once the stamp lands.
+    func confirmedKey(
+        of space: SkyLight.SpaceID,
+        in snapshot: DesktopSnapshot
+    ) -> DesktopKey? {
+        guard !desktopMemory.stampAttempts.contains(space) else {
+            return snapshot.number(of: space).map(DesktopKey.number)
+        }
+        return snapshot.key(of: space)
+    }
+
     /// The live stamp write — the ONE production bridge call on
     /// this path, and the reason it is a seam rather than an
     /// inline call: a fixture space id IS a real Desktop id on

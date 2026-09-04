@@ -77,22 +77,36 @@ struct ProfilesFamilyRows {
         keys: [Int: DesktopKey],
         bindings: [DesktopKey: DesktopBinding]
     ) -> [DesktopRow] {
+        // A Desktop is BOUND under either of its two possible
+        // keys: its stamp, or the number it was filed under
+        // before Core re-keyed it. Between the boot stamp and the
+        // reading that confirms it, every upgrading user sits in
+        // exactly that state.
+        let bound: (Int, DesktopKey) -> Bool = { number, key in
+            bindings[key] != nil || bindings[.number(number)] != nil
+        }
         let live = Set(onMain).union(
-            keys.filter { bindings[$0.value] != nil }.keys
+            keys.filter { bound($0.key, $0.value) }.keys
         )
         var rows = live.compactMap { number in
             keys[number].map {
                 DesktopRow(key: $0, number: number, isDormant: false)
             }
         }
-        // A number with no Desktop behind it at all: the topology
-        // is unreadable (no SkyLight), so the row still has to be
-        // offered under the key it would bind.
-        rows += live.filter { keys[$0] == nil }.map {
-            DesktopRow(key: .number($0), number: $0, isDormant: false)
+        // DORMANT mirrors Core's own `space(for:)`, per key shape:
+        // an identity is present when some Desktop carries it, a
+        // number when that Desktop exists. Testing membership of
+        // the identities alone badged a `.number` record whose
+        // Desktop is on screen and merely stamped since (code
+        // review, 2026-09-04).
+        let identities = Set(keys.values)
+        rows += bindings.filter { record in
+            switch record.key {
+            case .identity: return !identities.contains(record.key)
+            case .number(let n): return keys[n] == nil
+            }
         }
-        let present = Set(keys.values)
-        rows += bindings.filter { !present.contains($0.key) }.map {
+        .map {
             DesktopRow(
                 key: $0.key,
                 number: $0.value.desktop,

@@ -236,12 +236,34 @@ struct DesktopsGroup: View {
         return names
     }
 
+    /// A live Desktop's record may still sit under the number it
+    /// was filed at before Core re-keyed it, so a row looks under
+    /// both of its keys — otherwise the picker reads empty for a
+    /// binding the user can see on the row above.
+    private func twin(_ key: DesktopKey) -> DesktopKey? {
+        guard case .identity = key,
+            let number = desktopRows.first(where: { $0.key == key })?
+                .number
+        else { return nil }
+        return .number(number)
+    }
+
     private func binding(_ key: DesktopKey) -> Binding<String?> {
         Binding(
             get: {
                 model.config.profileBindings[key]?.profile
+                    ?? twin(key).flatMap {
+                        model.config.profileBindings[$0]?.profile
+                    }
             },
             set: { profile in
+                // Writing settles the ambiguity rather than
+                // leaving two records for one Desktop, which
+                // Core's drop rule would later resolve by
+                // deleting the edit.
+                if let twin = twin(key) {
+                    model.config.profileBindings[twin] = nil
+                }
                 guard let profile else {
                     model.config.profileBindings[key] = nil
                     return

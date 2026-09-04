@@ -161,6 +161,43 @@ struct DesktopBindingIdentityTests {
         )
     }
 
+    /// The move waits for the reading that CONFIRMS the stamp,
+    /// never the optimistic one (#884/#889): a stamp the
+    /// WindowServer drops would otherwise file the binding under
+    /// a key no later reading can name — dormant forever, firing
+    /// for nothing. Reverting `reconcileDesktopBindings(in:)` to
+    /// the returned snapshot reds this and nothing else (code
+    /// review, 2026-09-04).
+    @Test("a fresh stamp does not move a binding until it lands")
+    func rekeyWaitsForConfirmation() {
+        defer { reset() }
+        // Desktop 2 carries NO stamp yet, so this call mints one.
+        pin(
+            [
+                desk(10, stampA, current: 10),
+                desk(20, nil, current: 10),
+            ],
+            current: 10
+        )
+        let core = makeCore()
+        core.desktopMemory.writeStamp = { _, _ in true }
+        core.desktopBindings = [
+            .number(2): DesktopBinding(profile: "Work", desktop: 2)
+        ]
+        _ = core.stampedDesktopSnapshot()
+        // Dispatched, not applied: the binding has not moved.
+        #expect(core.desktopBindings[.number(2)] != nil)
+
+        // The WindowServer kept it; the NEXT reading moves it.
+        pin(topologyA(current: 10), current: 10)
+        _ = core.stampedDesktopSnapshot()
+        #expect(core.desktopBindings[.number(2)] == nil)
+        #expect(
+            core.desktopBindings[.identity(stampB)]?.profile
+                == "Work"
+        )
+    }
+
     /// The sidecar follows the re-key — and this is the arm no
     /// suite reached before, because `makeTestCore`'s empty
     /// config directory leaves `isGuiManaged` false and skips it

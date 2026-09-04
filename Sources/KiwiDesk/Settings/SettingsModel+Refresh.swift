@@ -82,9 +82,7 @@ extension SettingsModel {
         }
         var adopted = saved.profileBindings
         for (key, value) in edited { adopted[key] = value }
-        for key in dropped where edited[key] == nil {
-            adopted[key] = nil
-        }
+        for key in dropped { adopted[key] = nil }
         let wasSuppressed = suppressDirty
         suppressDirty = true
         config.profileBindings = adopted

@@ -33,6 +33,12 @@ extension KiwiCore {
         guard !result.moves.isEmpty || !result.drops.isEmpty else {
             return
         }
+        for key in result.drops {
+            onLog(
+                "desktop bindings: dropped '\(key.stored)', "
+                    + "superseded by the same Desktop's stamp"
+            )
+        }
         desktopBindings = Self.applying(result, to: desktopBindings)
         // The STORE's own value, never `loadGuiConfig()` — that
         // overlays live profile state (spaces, pins, modes,
