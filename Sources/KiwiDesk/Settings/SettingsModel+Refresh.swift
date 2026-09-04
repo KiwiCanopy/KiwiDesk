@@ -39,6 +39,7 @@ extension SettingsModel {
         desktopKeys = desktops.keysByNumber
         presentDesktopKeys = desktops.presentKeys
         currentDesktop = desktops.authority
+        currentDesktopKey = desktops.mainCurrentKey
         let resolved = core.profileVerdict(
             activeBinding: core.mainDesktopBinding(in: desktops)
         )

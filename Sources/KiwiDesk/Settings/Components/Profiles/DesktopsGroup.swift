@@ -127,7 +127,10 @@ struct DesktopsGroup: View {
                 )
             )
             .fontWeight(.medium)
-            if number == model.currentDesktop {
+            // By the DESKTOP, never its number: a dormant record
+            // and a live Desktop can share one, and both rows
+            // then claim to be current (owner device QA).
+            if row.key == model.currentDesktopKey {
                 BadgeChip(
                     label: L("desktops.current", "current")
                 )

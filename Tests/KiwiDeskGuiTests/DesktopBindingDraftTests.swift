@@ -101,6 +101,58 @@ struct DesktopBindingDraftTests {
         #expect(!model.globalsChanged)
     }
 
+    /// The *current* badge is decided by the DESKTOP. A dormant
+    /// record and a live Desktop can carry the same Mission
+    /// Control number — delete a Desktop and a later one inherits
+    /// it — and a number comparison then lights BOTH rows, which
+    /// is what the owner's device round caught (2026-09-04).
+    @Test("only the live Desktop is current, never its dormant twin")
+    func currentIsKeyedByDesktop() {
+        defer { reset() }
+        pin()
+        let model = makeModel()
+        model.currentDesktop = 1
+        model.currentDesktopKey = .identity(stamp)
+        model.mainDesktops = [1]
+        model.desktopKeys = [1: .identity(stamp)]
+        model.presentDesktopKeys = [.identity(stamp), .number(1)]
+        let ghost = DesktopKey.identity(DesktopIdentity(raw: "GONE"))
+        model.config.profileBindings = [
+            ghost: DesktopBinding(profile: "Old", desktop: 1)
+        ]
+        let rows = ProfilesFamilyRows.desktops(
+            onMain: model.mainDesktops,
+            keys: model.desktopKeys,
+            present: model.presentDesktopKeys,
+            bindings: model.config.profileBindings
+        )
+        // Two rows, one number, and exactly one of them current.
+        #expect(rows.map(\.number) == [1, 1])
+        #expect(
+            rows.filter { $0.key == model.currentDesktopKey }.count
+                == 1
+        )
+        #expect(rows.first { $0.isDormant }?.key == ghost)
+    }
+
+    /// …and that the VIEW asks that question, not the number's.
+    /// The rows above cannot see which comparison the badge
+    /// makes, and the badge is where the defect rendered.
+    @Test("the current badge compares the Desktop, not the number")
+    func currentBadgeIsKeyed() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/"
+                        + "Profiles/DesktopsGroup.swift"
+                )
+        )
+        #expect(
+            source.contains("row.key == model.currentDesktopKey")
+        )
+        #expect(!source.contains("number == model.currentDesktop"))
+    }
+
     /// Ownership is PER ENTRY: a user who edited one binding
     /// while Core re-keyed another keeps their edit AND takes the
     /// re-key. All-or-nothing let every untouched entry Save back
