@@ -45,7 +45,9 @@ struct SettingsCatalogSiteTests {
         // search index can reach it — a bare `Link` is
         // invisible to an index derived from the census plus
         // the catalog.
-        #expect(names.count == 62)
+        // 64 since #1125: the two Desktop offers, the doors the
+        // withheld families are reached through.
+        #expect(names.count == 64)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

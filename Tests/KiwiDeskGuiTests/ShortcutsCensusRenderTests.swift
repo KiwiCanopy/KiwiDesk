@@ -48,7 +48,12 @@ struct ShortcutsCensusRenderTests {
 
     // MARK: - The action containers
 
-    @Test("Focus renders exactly the census's at-rest families")
+    /// Two tiers per group since #1125: the Desktop families are
+    /// `.immediate` — an OFFER until one is bound, then at rest
+    /// in both modes — so each group's list pair must partition
+    /// its container, or a family drops off the screen with the
+    /// census still naming its place.
+    @Test("Focus renders exactly the census's two tiers")
     func focusTier() {
         pin(
             ShortcutsRowOrder.focusAtRest,
@@ -56,16 +61,28 @@ struct ShortcutsCensusRenderTests {
             .atRest,
             "focus"
         )
+        pin(
+            ShortcutsRowOrder.focusDesktops,
+            .focus,
+            .immediate,
+            "focus desktops"
+        )
         #expect(censusRows(.focus, .showMore).isEmpty)
     }
 
-    @Test("Move windows renders exactly the census's families")
+    @Test("Move windows renders exactly the census's two tiers")
     func moveWindowsTier() {
         pin(
             ShortcutsRowOrder.moveWindowsAtRest,
             .moveWindows,
             .atRest,
             "move windows"
+        )
+        pin(
+            ShortcutsRowOrder.moveWindowsDesktops,
+            .moveWindows,
+            .immediate,
+            "move windows desktops"
         )
         #expect(censusRows(.moveWindows, .showMore).isEmpty)
     }

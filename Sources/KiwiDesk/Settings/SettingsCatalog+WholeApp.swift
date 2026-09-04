@@ -48,6 +48,18 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.move_windows",
         "Move windows"
     )
+    /// The Desktop families' offer in each group (#1125): the
+    /// door to a capability the rows themselves are withheld
+    /// behind, and — the rows carrying dynamic labels no search
+    /// index can name — the only one search can offer either.
+    let focusDesktops = SettingsDrawer(
+        "shortcuts.desktops.focus",
+        "Go to a macOS Desktop"
+    )
+    let moveWindowsDesktops = SettingsDrawer(
+        "shortcuts.desktops.move",
+        "Move windows to a macOS Desktop"
+    )
     let sizeFloat = SettingsControl(
         "shortcuts.section.size_float",
         "Size & float"

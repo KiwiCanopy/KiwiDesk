@@ -112,6 +112,13 @@ struct FocusGroup: View {
                     expander: expander
                 )
             }
+            DesktopShortcutsOffer(
+                model: model,
+                bindings: $bindings,
+                keys: ShortcutsRowOrder.focusDesktops,
+                drawer: SettingsCatalog.shortcuts.focusDesktops,
+                expander: expander
+            )
         }
     }
 }
@@ -136,6 +143,14 @@ struct MoveWindowsGroup: View {
                     expander: expander
                 )
             }
+            DesktopShortcutsOffer(
+                model: model,
+                bindings: $bindings,
+                keys: ShortcutsRowOrder.moveWindowsDesktops,
+                drawer: SettingsCatalog.shortcuts
+                    .moveWindowsDesktops,
+                expander: expander
+            )
         }
     }
 }

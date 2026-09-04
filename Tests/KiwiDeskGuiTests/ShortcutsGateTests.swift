@@ -100,30 +100,130 @@ struct ShortcutsGateTests {
         }
     }
 
-    /// The named reading four surfaces take, and its polarity.
-    /// Written against the CASE, so a second `InertReason` — a
-    /// mode withhold, a Lua-owned withhold — leaves "the user
-    /// has a layer to choose between" true, where a `== nil`
-    /// spelling would silently stop the preview caption and the
-    /// header naming their layer for an unrelated reason
-    /// (architect re-review 2026-09-04).
-    @Test("layersExist answers the count, not the withhold")
-    func layersExistIsCaseWise() {
-        func exist(_ layers: [String]) -> Bool {
-            ShortcutsGates(config: config(layers: layers))
-                .layersExist
-        }
-        #expect(!exist([KeyLayer.defaultName]))
-        #expect(exist([KeyLayer.defaultName, "resize"]))
-        // A tripwire, deliberately: while `.onlyDefaultLayer`
-        // is the only case the two spellings agree, so nothing
-        // else can red on the polarity. Adding a case reds
-        // HERE — check every `layersExist` reader means "the
-        // count" and not "the withhold", then extend this.
+    /// The two named readings, and that they stay independent.
+    /// Each is written against its OWN case rather than against
+    /// nil, so a third `InertReason` cannot silently stop the
+    /// preview caption naming its layer, or shut the Desktop
+    /// offer, for an unrelated cause (architect re-review
+    /// 2026-09-04). With two live cases this is a real test
+    /// rather than the tripwire it started as.
+    @Test("each named reading answers its own question")
+    func namedReadingsAreCaseWise() {
+        var layered = config(layers: [KeyLayer.defaultName, "resize"])
+        #expect(ShortcutsGates(config: layered).layersExist)
         #expect(
-            ShortcutsGates.InertReason.allCases
-                == [.onlyDefaultLayer]
+            !ShortcutsGates(config: layered).desktopBindingsExist,
+            "a layer is not a Desktop binding"
         )
+        var desktop = config(layers: [KeyLayer.defaultName])
+        desktop.layers[0].bindings = [
+            KeyBinding(
+                combo: "ctrl+alt+1",
+                lua: "KiwiDesk.focus_desktop(1)",
+                kind: .navigation
+            )
+        ]
+        #expect(ShortcutsGates(config: desktop).desktopBindingsExist)
+        #expect(
+            !ShortcutsGates(config: desktop).layersExist,
+            "a Desktop binding is not a layer"
+        )
+        layered.layers[0].bindings = desktop.layers[0].bindings
+        #expect(ShortcutsGates(config: layered).layersExist)
+        #expect(ShortcutsGates(config: layered).desktopBindingsExist)
+        // Both cases are spoken for above; a THIRD reds here —
+        // check what each named reading should answer for it
+        // before extending, since neither is written against nil.
+        #expect(
+            Set(ShortcutsGates.InertReason.allCases)
+                == [.onlyDefaultLayer, .noDesktopBinding]
+        )
+    }
+
+    /// The Desktop offer's boundary (#1125). The seed authors no
+    /// Desktop binding, so a fresh install answers "withheld" —
+    /// the row is an offer, not a setting.
+    @Test("a bound Desktop shortcut brings its families to rest")
+    func desktopBindingBoundary() {
+        func reason(
+            _ bindings: [KeyBinding]
+        ) -> ShortcutsGates.InertReason? {
+            var config = GuiConfig()
+            config.layers = [
+                KeyLayer(
+                    name: KeyLayer.defaultName,
+                    bindings: bindings
+                )
+            ]
+            return ShortcutsGates(config: config)
+                .inertReason(for: .shortcuts(.focusDesktop))
+        }
+        func binding(
+            _ combo: String,
+            _ lua: String
+        ) -> KeyBinding {
+            KeyBinding(combo: combo, lua: lua, kind: .navigation)
+        }
+        #expect(reason([]) == .noDesktopBinding)
+        // A Space verb is not a Desktop verb — the two families
+        // sit side by side in the same group, and the offer must
+        // not open on the wrong one.
+        #expect(
+            reason([binding("ctrl+alt+1", "KiwiDesk.focus_space('1')")])
+                == .noDesktopBinding
+        )
+        #expect(
+            reason([
+                binding("ctrl+alt+1", "KiwiDesk.focus_desktop(1)")
+            ]) == nil
+        )
+        // …and the two other verbs count for the same offer.
+        #expect(
+            reason([
+                binding(
+                    "ctrl+alt+2",
+                    "KiwiDesk.move_to_desktop(2)"
+                )
+            ]) == nil
+        )
+        // An UNRECORDED row is not a binding: clearing a row
+        // deletes it, so an empty combo is one nobody finished.
+        #expect(
+            reason([binding("", "KiwiDesk.focus_desktop(1)")])
+                == .noDesktopBinding
+        )
+    }
+
+    /// The offer is the AREA's, not the layer's: the rows are per
+    /// layer, but a user who bound a Desktop verb anywhere has
+    /// met the concept, and hiding the families while they edit
+    /// another layer would make the offer flicker under the
+    /// strip.
+    @Test("a binding in any layer opens the offer")
+    func desktopBindingCountsAcrossLayers() {
+        var config = GuiConfig()
+        config.layers = [
+            KeyLayer(name: KeyLayer.defaultName),
+            KeyLayer(
+                name: "media",
+                bindings: [
+                    KeyBinding(
+                        combo: "ctrl+alt+3",
+                        lua: "KiwiDesk.move_to_desktop_and_follow(3)",
+                        kind: .navigation
+                    )
+                ]
+            ),
+        ]
+        for key: SettingKey in [
+            .shortcuts(.focusDesktop), .shortcuts(.moveToDesktop),
+            .shortcuts(.moveToDesktopFollow),
+        ] {
+            #expect(
+                ShortcutsGates(config: config)
+                    .inertReason(for: key) == nil
+            )
+        }
     }
 
     /// Every gated row the area declares is either resolved from
@@ -148,6 +248,72 @@ struct ShortcutsGateTests {
         #expect(
             ShortcutsGates.resolved
                 .isDisjoint(with: ShortcutsGates.resolvedElsewhere)
+        )
+    }
+
+    /// A SURFACING gate leaves nothing behind to prove it was
+    /// drawn: the resolver's own suite, the census parity and
+    /// the family expansion all pass whether or not the `if`
+    /// was ever written (the Monitors lesson). So the branches
+    /// are needled through their BODIES, keyed on the use site.
+    @Test("the Desktop offer draws both of its branches")
+    func desktopOfferBranchesAreDrawn() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/"
+                    + "Keybindings/DesktopShortcutsOffer.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        // The verdict is the resolver's, never counted here.
+        #expect(
+            source.contains(
+                "ShortcutsGates(config:model.config)"
+                    + ".inertReason(for:$0)==nil"
+            )
+        )
+        // At rest when bound…
+        #expect(source.contains("ifbound{families}else{"))
+        // …behind the drawer when not, and the drawer is the
+        // door: an offer that draws nothing here withholds a
+        // capability with no way back to it.
+        #expect(
+            source.contains(
+                "SettingsDisclosure(drawer,isExpanded:$expanded)"
+                    + "{families}"
+            )
+        )
+        // …and neither branch draws while the families are
+        // empty, or the door opens on nothing.
+        #expect(source.contains("ifhasRows{"))
+        // Both groups mount it, with their own family list.
+        let groups = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Keybindings/KeybindingGroups.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        #expect(
+            groups.occurrences(of: "DesktopShortcutsOffer(") == 2
+        )
+        #expect(
+            groups.contains(
+                "keys:ShortcutsRowOrder.focusDesktops"
+            )
+        )
+        #expect(
+            groups.contains(
+                "keys:ShortcutsRowOrder.moveWindowsDesktops"
+            )
         )
     }
 

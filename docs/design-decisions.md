@@ -5660,6 +5660,32 @@ exist yet", which is a runtime gate rather than a depth. That is
 what `SettingTier.immediate` is for, and why an `.immediate` row
 without a gate is meaningless.
 
+**And the same tier answers the question one step earlier: a row
+for a concept the app has not introduced is an OFFER, not a
+setting** (#1125). The Desktop shortcut families are the worked
+case. Nothing seeds them, a **Desktop** is macOS's arrangement
+rather than KiwiDesk's, and they scale per Desktop — so a
+four-Desktop Mac drew twelve rows about a thing a first-run user
+has never met, in the area whose own ordering already says
+KiwiDesk's Spaces lead and a Desktop row is the escape into
+macOS's. They now sit behind a disclosure until one is bound,
+and at rest in both modes once one is, which is the paragraph
+above applied to a capability rather than to a layer.
+
+Three things this is NOT, each considered and refused. It is not
+a **mode** gate: mode depth is per area and Shortcuts is a
+Simple area, so the depth does not exist to spend. It is not
+gated on **how many Desktops the Mac has** — that gates on the
+machine where the honest condition is the user's own intent, and
+a three-Desktop user who does not want KiwiDesk driving them is
+the common case rather than the exception. And it is not a
+withhold with no door: the rows carry dynamic per-Desktop
+labels, so no search index can name them, and hiding them
+outright would leave a capability nothing on the screen and
+nothing in search could reach. The disclosure IS the door, which
+is why it is a catalog declaration — that makes the offer itself
+a search result even though its rows can never be.
+
 **Overrides always resolve; the Simple/Power User mode never
 changes what runs.** There is no stored flag deciding whether a profile's
 shortcut overrides apply — an early draft of the redesign

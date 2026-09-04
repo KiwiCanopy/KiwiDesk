@@ -40,6 +40,13 @@ struct SettingsCatalogArgumentTests {
         // future DIRECT mounts, which is where a duplicate id
         // would actually come from.
         "GapsEditor.swift: control",
+        // The Desktop offer takes its drawer as a parameter so
+        // one view can serve both shortcut groups (#1125); the
+        // two mounts pass `focusDesktops` / `moveWindowsDesktops`
+        // as dotted catalog references, which the sweep in
+        // `SettingsCatalogSiteTests` still covers. They never
+        // co-render — each group mounts its own.
+        "DesktopShortcutsOffer.swift: drawer",
     ]
 
     /// Sanctioned literal-`L()` `SettingsSection` titles —

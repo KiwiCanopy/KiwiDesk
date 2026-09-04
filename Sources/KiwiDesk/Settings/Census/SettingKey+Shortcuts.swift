@@ -41,11 +41,30 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.layersExist)
             )
-        case .focusDir, .goToSpace, .focusDesktop:
+        case .focusDir, .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveWindowToTrack, .swapWithTrack, .moveToSpace,
-            .moveToSpaceFollow, .moveToDesktop, .moveToDesktopFollow:
+            .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
+        // An OFFER until the user takes it (#1125): a Desktop is
+        // macOS's arrangement rather than KiwiDesk's, the seed
+        // binds none of these, and they scale per Desktop — so
+        // they sit behind their own disclosure until one is
+        // bound, and at rest in BOTH modes once one is.
+        case .focusDesktop:
+            return .row(
+                .shortcuts,
+                .focus,
+                .immediate,
+                gate: .runtime(.desktopBindingsExist)
+            )
+        case .moveToDesktop, .moveToDesktopFollow:
+            return .row(
+                .shortcuts,
+                .moveWindows,
+                .immediate,
+                gate: .runtime(.desktopBindingsExist)
+            )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleSticky, .toggleDisplaySticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)

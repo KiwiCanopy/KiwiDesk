@@ -1,7 +1,7 @@
 import KiwiDeskCore
 
 /// Resolves Shortcuts census gates (#678 Phase 3). This area's
-/// one gate SURFACES rather than greys: non-nil means "not yet at
+/// gates SURFACE rather than grey: non-nil means "not yet at
 /// rest" (withheld behind the offer), so there is no inline
 /// sentence and no `GateHelp` companion. `LayersCard` asks this
 /// rather than re-deriving — a renderer whose predicate silently
@@ -14,6 +14,8 @@ struct ShortcutsGates {
     enum InertReason: Hashable, CaseIterable {
         /// Only default layer configured (`.layersExist`).
         case onlyDefaultLayer
+        /// No Desktop shortcut bound yet (`.desktopBindingsExist`).
+        case noDesktopBinding
     }
 
     /// Evaluates inert reason for setting key.
@@ -26,6 +28,10 @@ struct ShortcutsGates {
             // "the user configured a layer" means — presence, not
             // a count.
             return config.layers.count > 1 ? nil : .onlyDefaultLayer
+        case .shortcuts(.focusDesktop),
+            .shortcuts(.moveToDesktop),
+            .shortcuts(.moveToDesktopFollow):
+            return desktopBindingExists ? nil : .noDesktopBinding
         default:
             assertionFailure(
                 "ShortcutsGates does not own \(key.id)"
@@ -45,12 +51,29 @@ struct ShortcutsGates {
             != .onlyDefaultLayer
     }
 
+    /// Whether any layer RECORDS a Desktop verb (#1125) — named,
+    /// because the offer is the area's while the rows are per
+    /// family: a consumer reading one family's verdict and
+    /// applying it to its siblings encodes that positionally.
+    var desktopBindingsExist: Bool {
+        inertReason(for: .shortcuts(.focusDesktop))
+            != .noDesktopBinding
+    }
+
+    private var desktopBindingExists: Bool {
+        config.layers.flatMap(\.bindings)
+            .contains(KeybindingCatalog.recordsDesktop)
+    }
+
     /// Gated keys resolved directly from `GuiConfig`
     /// (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
         .shortcuts(.layers),
         .shortcuts(.layersIcon),
         .shortcuts(.switchToLayer),
+        .shortcuts(.focusDesktop),
+        .shortcuts(.moveToDesktop),
+        .shortcuts(.moveToDesktopFollow),
     ]
 
     /// Gated keys resolved dynamically in view state: Import's
