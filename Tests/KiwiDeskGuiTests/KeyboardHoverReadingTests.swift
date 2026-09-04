@@ -18,49 +18,129 @@ import Testing
 @Suite("Keyboard hover reading")
 struct KeyboardHoverReadingTests {
     private typealias Layer = KeyboardCensus.ModifierLayer
+    private let ctrlOpt = Layer(modifiers: [.control, .option])
+    private let command = Layer(modifiers: .command)
+    /// j = 38, space = 49.
+    private let j: UInt32 = 38
 
-    private func layer(
-        _ combos: [(String, String)],
-        name: String = KeyLayer.defaultName
-    ) -> KeyLayer {
-        KeyLayer(
-            name: name,
-            bindings: combos.map {
-                KeyBinding(
-                    combo: $0.0,
-                    lua: $0.1,
-                    kind: .navigation,
-                    label: "row"
-                )
-            }
-        )
+    private func layers(
+        _ combos: [(String, String)]
+    ) -> [KeyLayer] {
+        [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: combos.map {
+                    KeyBinding(
+                        combo: $0.0,
+                        lua: "KiwiDesk.focus(\"left\")",
+                        kind: .navigation,
+                        label: $0.1
+                    )
+                }
+            )
+        ]
     }
 
-    private func config(_ layers: [KeyLayer]) -> GuiConfig {
+    private func config(_ l: [KeyLayer]) -> GuiConfig {
         var c = GuiConfig()
-        c.layers = layers
+        c.layers = l
         return c
     }
 
-    /// j = 38 in the matrix.
-    private let j: UInt32 = 38
+    private func read(
+        _ code: UInt32,
+        _ l: [KeyLayer],
+        scope: KeyboardCensus.Scope,
+        selected: Set<Layer>
+    ) -> KeyboardHoverReading {
+        KeyboardHoverReading.of(
+            code,
+            in: l,
+            scope: scope,
+            selected: selected,
+            config: config(l),
+            disabled: []
+        )
+    }
 
     @Test("a claimed key names its chord and its action")
     func claimNamesTheAction() {
         LocalizationManager.shared.select("en")
-        let layers = [
-            layer([("ctrl+alt+j", "KiwiDesk.focus(\"left\")")])
-        ]
-        let reading = KeyboardHoverReading.of(
+        let l = layers([("ctrl+alt+j", "Focus left")])
+        let r = read(
             j,
-            in: layers,
-            selected: [Layer(modifiers: [.control, .option])],
-            config: config(layers),
-            disabled: [],
-            labels: ["KiwiDesk.focus(\"left\")": "Focus left"]
+            l,
+            scope: .one(ctrlOpt),
+            selected: [ctrlOpt]
         )
-        #expect(reading.claims.count == 1)
-        #expect(reading.lines == ["⌃⌥J — Focus left"])
+        #expect(r.claims.count == 1)
+        #expect(r.lines == ["⌃⌥J — Focus left"])
+    }
+
+    /// A bare binding has no chord to show, and the chip's PROSE
+    /// is not one: `chipLabel` reads "No modifier", which welded
+    /// itself onto the key and shipped "No modifierJ — Focus
+    /// left" (localization audit, #798).
+    @Test("a bare-modifier binding shows the key alone")
+    func bareChordIsNotProse() {
+        LocalizationManager.shared.select("en")
+        let l = layers([("j", "Focus left")])
+        let bare = Layer(modifiers: [])
+        let r = read(j, l, scope: .one(bare), selected: [bare])
+        #expect(r.lines == ["J — Focus left"])
+    }
+
+    /// Every fixture here used to put its bindings on ONE key,
+    /// so the fold's `keyCode == code` filter was never
+    /// exercised — dropping it made hovering any key name every
+    /// action in the scope, green (guard-prover, 2026-09-05).
+    @Test("a key names its own bindings, not the scope's")
+    func claimsBelongToTheHoveredKey() {
+        LocalizationManager.shared.select("en")
+        // j = 38, k = 40, same layer.
+        let l = layers([
+            ("ctrl+alt+j", "Focus left"),
+            ("ctrl+alt+k", "Focus right"),
+        ])
+        let r = read(
+            j,
+            l,
+            scope: .one(ctrlOpt),
+            selected: [ctrlOpt]
+        )
+        #expect(r.lines == ["⌃⌥J — Focus left"])
+        #expect(!r.lines.joined().contains("Focus right"))
+    }
+
+    /// The documented order is the chip strip's, and only a
+    /// fixture whose layers DIFFER can pin it: two claims in one
+    /// layer swap under any sort, so the previous collision
+    /// fixture proved order-sensitivity, not order.
+    @Test("claims read in the chip strip's order")
+    func claimsFollowTheChipOrder() {
+        LocalizationManager.shared.select("en")
+        // The strip leads with the FEWEST modifiers held, so ⌘
+        // (one) precedes ⌃⌥ (two) whatever order they were
+        // authored in — which is why this fixture authors them
+        // the other way round.
+        let l = layers([
+            ("ctrl+alt+j", "Focus left"),
+            ("cmd+j", "Command action"),
+        ])
+        let r = read(
+            j,
+            l,
+            scope: .all,
+            selected: [ctrlOpt, command]
+        )
+        #expect(r.claims.count == 2)
+        #expect(r.lines[0] == "⌘J — Command action")
+        #expect(r.lines[1] == "⌃⌥J — Focus left")
+        // …and that IS the strip's own order, not a coincidence.
+        #expect(
+            KeyboardCensus.layers(in: l).map(\.label)
+                == ["⌘", "⌃⌥"]
+        )
     }
 
     /// The scope the fills read is the scope the words read: a
@@ -70,91 +150,98 @@ struct KeyboardHoverReadingTests {
     @Test("a claim outside the shown scope is not named")
     func claimsFollowTheScope() {
         LocalizationManager.shared.select("en")
-        let layers = [
-            layer([("cmd+j", "KiwiDesk.focus(\"left\")")])
-        ]
-        let reading = KeyboardHoverReading.of(
+        let l = layers([("cmd+j", "Focus left")])
+        let r = read(
             j,
-            in: layers,
-            selected: [Layer(modifiers: [.control, .option])],
-            config: config(layers),
-            disabled: [],
-            labels: [:]
+            l,
+            scope: .one(ctrlOpt),
+            selected: [ctrlOpt]
         )
-        #expect(reading.claims.isEmpty)
-        #expect(reading.lines == ["J — not bound"])
+        #expect(r.claims.isEmpty)
+        #expect(r.lines == ["J — not bound"])
     }
 
-    /// The whole point of the feature (#798): the ring says two
+    /// The whole point of the feature: the ring says two
     /// bindings clash and cannot say WHICH two. The cost
     /// sentence is `ConflictText`'s verbatim — #1126 forbids a
-    /// second wording beside it — so this asserts the join, not
-    /// the copy.
-    @Test("a collision names both actions and its cost")
+    /// second wording — so this asserts the join and the
+    /// PLACEMENT: each cost sits under its own claim.
+    @Test("a collision names both actions, each with its cost")
     func collisionNamesBothSides() {
         LocalizationManager.shared.select("en")
-        let layers = [
-            layer([
-                ("ctrl+alt+j", "KiwiDesk.focus(\"left\")"),
-                ("ctrl+alt+j", "KiwiDesk.swap(\"left\")"),
-            ])
-        ]
-        let reading = KeyboardHoverReading.of(
+        let l = layers([
+            ("ctrl+alt+j", "Focus left"),
+            ("ctrl+alt+j", "Swap left"),
+        ])
+        let r = read(
             j,
-            in: layers,
-            selected: [Layer(modifiers: [.control, .option])],
-            config: config(layers),
-            disabled: [],
-            labels: [
-                "KiwiDesk.focus(\"left\")": "Focus left",
-                "KiwiDesk.swap(\"left\")": "Swap left",
-            ]
+            l,
+            scope: .one(ctrlOpt),
+            selected: [ctrlOpt]
         )
-        #expect(reading.claims.count == 2)
-        #expect(reading.lines.count > 2)
-        #expect(reading.lines[0] == "⌃⌥J — Focus left")
-        #expect(reading.lines[1] == "⌃⌥J — Swap left")
-        // …and the cost, from the one place it is worded.
+        #expect(r.claims.count == 2)
         let expected = ConflictText.reading(
-            for: layers[0].bindings[0],
-            in: layers[0].bindings,
-            config: config(layers),
+            for: l[0].bindings[0],
+            in: l[0].bindings,
+            config: config(l),
             disabled: []
         )?.sentence
         #expect(expected != nil)
-        #expect(reading.lines.contains(expected ?? "—"))
+        // Claim, its cost, claim, its cost — never both costs
+        // orphaned at the bottom.
+        #expect(r.lines.count == 4)
+        #expect(r.lines[0] == "⌃⌥J — Focus left")
+        #expect(r.lines[1] == expected)
+        #expect(r.lines[2] == "⌃⌥J — Swap left")
     }
 
-    /// A free key macOS owns explains its own dashed ring, from
-    /// the same map the ring draws from.
-    @Test("a reserved free key names macOS's owner")
+    /// A free key macOS owns explains its own dashed ring — and
+    /// names the CHORD, since the reservation is a combination
+    /// rather than a key.
+    @Test("a reserved free key names the chord and its owner")
     func reservedKeyNamesItsOwner() {
         LocalizationManager.shared.select("en")
-        // ⌘Space is Spotlight's, and nothing of ours claims it.
-        let command = Layer(modifiers: .command)
-        let reading = KeyboardHoverReading.of(
+        let l = layers([])
+        let r = read(
             49,
-            in: [layer([])],
-            selected: [command],
-            config: config([layer([])]),
-            disabled: [],
-            labels: [:]
+            l,
+            scope: .one(command),
+            selected: [command]
         )
-        #expect(reading.claims.isEmpty)
-        #expect(reading.freeOwner != nil)
-        #expect(reading.lines.count == 1)
-        #expect(reading.lines[0].contains("space"))
+        #expect(r.freeOwner != nil)
+        #expect(r.lines.count == 1)
+        #expect(r.lines[0].hasPrefix("⌘space — macOS owns this:"))
+    }
+
+    /// The blocker this suite exists to hold: under `.all` the
+    /// board draws NO reserved mark — macOS reserves a
+    /// combination, not a key — so the words must say nothing
+    /// about macOS either. `.all` is the panel's default scope,
+    /// so this was the reading most users would have met.
+    @Test("under All the words claim no reservation")
+    func allScopeNamesNoOwner() {
+        LocalizationManager.shared.select("en")
+        let l = layers([])
+        let r = read(
+            49,
+            l,
+            scope: .all,
+            selected: [command]
+        )
+        #expect(r.freeOwner == nil)
+        #expect(r.lines == ["space — not bound"])
     }
 }
 
 /// The slot's reservation, asserted as ARITHMETIC (gui.md: a
 /// count-driven preview is guarded by its arithmetic, never by a
-/// scan for the input). A constant here nudges the panel under
-/// the pointer on the COMMON case — a seeded install puts three
-/// claims on a digit under `.all`.
+/// scan for the input) — and as a COUNT, not an inequality: the
+/// first cut compared `ringed > plain` and stayed green while
+/// the reservation understated a collision by half, which is the
+/// case the feature exists for (code review, #798).
 ///
-/// Main-actor spend (tests.md): one `makeTestModel`, no scan, no
-/// filesystem walk.
+/// Main-actor spend (tests.md): one `makeTestModel` per case, no
+/// scan, no filesystem walk.
 @MainActor
 @Suite("Keyboard slot reservation")
 struct KeyboardSlotHeightTests {
@@ -169,7 +256,8 @@ struct KeyboardSlotHeightTests {
                     KeyBinding(
                         combo: $0,
                         lua: "KiwiDesk.focus(\"left\")",
-                        kind: .navigation
+                        kind: .navigation,
+                        label: "Focus left"
                     )
                 }
             )
@@ -177,31 +265,44 @@ struct KeyboardSlotHeightTests {
         return KeyboardPreviewPanel(model: model)
     }
 
-    @Test("the reservation follows the deepest key on the board")
-    func heightFollowsTheDeepestKey() {
-        let one = panel(["ctrl+alt+j"])
-        let three = panel([
-            "ctrl+alt+1", "ctrl+alt+shift+1", "ctrl+alt+cmd+1",
-        ])
-        #expect(three.slotHeight > one.slotHeight)
-        // Three claims on one key is the seeded shape, so the
-        // reservation must clear three lines, not two.
-        #expect(three.slotHeight >= one.slotHeight * 3)
+    @Test("the reservation counts the deepest key's own lines")
+    func heightCountsTheDeepestReading() {
+        LocalizationManager.shared.select("en")
+        #expect(panel(["ctrl+alt+j"]).deepestReading == 1)
+        // Three claims on one key — the seeded digit shape.
+        #expect(
+            panel([
+                "ctrl+alt+1", "ctrl+alt+shift+1",
+                "ctrl+alt+cmd+1",
+            ]).deepestReading == 3
+        )
+        // A collision is a claim AND a cost per claim: two
+        // bindings on one chord is FOUR lines, not two. Counting
+        // claims alone read 1 here, because `claims` dedupes the
+        // layer set.
+        #expect(
+            panel(["ctrl+alt+j", "ctrl+alt+j"])
+                .deepestReading == 4
+        )
     }
 
-    @Test("a conflict ring reserves its cost sentence too")
-    func conflictAddsItsLine() {
-        let plain = panel(["ctrl+alt+j"])
-        // Two bindings on ONE combo is the red ring, and the
-        // reading carries the cost under the two claims.
-        let ringed = panel(["ctrl+alt+j", "ctrl+alt+j"])
-        #expect(ringed.slotHeight > plain.slotHeight)
+    @Test("the reservation follows the count, in points")
+    func heightIsTheCountTimesALine() {
+        LocalizationManager.shared.select("en")
+        let one = panel(["ctrl+alt+j"])
+        #expect(
+            one.slotHeight
+                == CGFloat(one.deepestReading)
+                * KeyboardPreviewPanel.slotLine
+        )
     }
 
     @Test("an empty board still reserves a line")
     func emptyBoardKeepsTheTally() {
+        LocalizationManager.shared.select("en")
         // The slot always says something — the tally — so a
         // floor of zero would collapse it on a fresh profile.
+        #expect(panel([]).deepestReading == 1)
         #expect(panel([]).slotHeight > 0)
     }
 }

@@ -282,7 +282,7 @@ struct KeyboardPreviewPanel: View {
         )
     }
 
-    var overwritesReserved: Bool {
+    private var overwritesReserved: Bool {
         !KeyboardCensus.overwrittenReserved(
             claims: claims,
             scope: liveScope

@@ -2992,9 +2992,13 @@ Directly under the board, **Keys taken: N** counts the distinct
 keys the shown scope claims — and that same line answers for one
 key when you point at it. Hover a key and it names every action
 on it in the shown scope, chord first: *⌃⌥J — Focus left*. A key
-nothing claims says so; one macOS owns names what it owns it for,
-which is what the dashed ring is about. Nothing else moves — the
-line is always in the same place, and only its text changes.
+nothing claims says so, and — once you have picked a chip — one
+macOS owns names what it owns it for, which is what the dashed
+ring is about. Under **All** it says neither, for the same
+reason the board draws no dashed rings there: macOS reserves a
+*combination*, so there is nothing to report until you choose
+one. Nothing else moves — the line is always in the same place,
+and only its text changes.
 
 It earns its keep on a **red** key. The ring tells you two of
 your bindings collide and cannot tell you which two; hovering

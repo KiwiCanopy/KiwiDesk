@@ -19,6 +19,21 @@ struct KeyboardHoverWiringTests {
         "KeyboardPreviewPanel+Slot.swift",
     ]
 
+    private static func source(_ file: String) throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Keybindings/\(file)"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+    }
+
     private static func panelSource() throws -> String {
         var joined = ""
         for file in panelFiles {
@@ -47,15 +62,32 @@ struct KeyboardHoverWiringTests {
         let panel = try Self.panelSource()
         // Vacuity: an unreadable half is an empty needle set.
         #expect(!panel.isEmpty)
+        // CONTIGUOUS from the capture to the builder it feeds:
+        // a whole-file substring was satisfied by a plausible
+        // sibling read elsewhere in the file while the builder
+        // took `disabled: []` — green, and every dormant chord
+        // narrated as dead (guard-prover, 2026-09-05). The
+        // geometry between the two is glue holding the needle
+        // contiguous, not an assertion (tests.md).
+        // CONTIGUOUS from the capture to the builder it feeds:
+        // a whole-file substring was satisfied by a plausible
+        // sibling read elsewhere in the file while the builder
+        // took `disabled: []` — green, and every dormant chord
+        // narrated as dead (guard-prover, 2026-09-05). What sits
+        // between the two is glue holding the needle contiguous,
+        // not an assertion (tests.md).
+        let carried =
+            "letdisabled=model.disabledSystemShortcuts()"
+            + "letlayers=shownletscope=liveScope"
+            + "letselection=selectedletconfig=model.config"
+            + "return{codeinKeyboardHoverReading.of("
+            + "code,in:layers,scope:scope,selected:selection,"
+            + "config:config,disabled:disabled)}"
         #expect(
-            panel.contains("disabled:model.disabledSystemShortcuts()")
-        )
-        #expect(
-            !panel.contains("\\.disabledSystemShortcuts"),
+            panel.contains(carried),
             Comment(
-                rawValue: "the panel cannot see the section's "
-                    + "environment — it would answer the empty "
-                    + "default and narrate dormant as dead"
+                rawValue: "the reader no longer carries the live "
+                    + "read into the builder it feeds"
             )
         )
     }
@@ -69,10 +101,22 @@ struct KeyboardHoverWiringTests {
         #expect(
             panel.occurrences(of: "KeyboardHoverReading.of(") == 1
         )
-        // …the drawn half, and the spoken half.
-        #expect(panel.contains("hoverReading(hovered)"))
-        #expect(panel.contains("hoverReading($0)?.lines"))
+        // …the drawn half, and the spoken half, both through
+        // the ONE reader closure — which is also what holds the
+        // live preference read to once per panel render.
+        #expect(panel.contains("liveReading(hovered).lines"))
+        #expect(panel.contains("read($0).lines"))
         #expect(panel.contains("conflictDetail:conflictDetail"))
+        #expect(
+            panel.occurrences(
+                of: "model.disabledSystemShortcuts()"
+            ) == 1,
+            Comment(
+                rawValue: "one live read per panel render — a "
+                    + "second call is a preference sweep per "
+                    + "ringed key, per body evaluation"
+            )
+        )
     }
 
     /// The slot announces the TALLY under the pointer as well:
@@ -114,5 +158,36 @@ struct KeyboardHoverWiringTests {
     func tallyHasOneHome() throws {
         let panel = try Self.panelSource()
         #expect(panel.occurrences(of: "keyboard.tally") == 1)
+    }
+
+    /// The hover CHANNEL, which nothing watched: `onHover` is an
+    /// optional closure with a nil default at both hops, so
+    /// deleting either wiring compiles silently and the slot
+    /// never leaves the tally — the feature dead on screen with
+    /// every suite green (guard-prover, 2026-09-05).
+    ///
+    /// tests.md's inverted-seam rule: a seam that defaults INERT
+    /// and is opted into owes a TWO-SIDED guard, so losing the
+    /// wiring reds as loudly as duplicating it.
+    @Test("the hover channel is wired at every hop")
+    func hoverChannelIsWired() throws {
+        let panel = try Self.panelSource()
+        #expect(panel.contains("onHover:{hovered=$0}"))
+        #expect(panel.occurrences(of: "onHover:{hovered=$0}") == 1)
+
+        let spoken = try Self.source("KeyboardBoardSpoken.swift")
+        #expect(spoken.contains("onHover:onHover"))
+
+        // …and the POLARITY at the cap: reporting the code on
+        // the way out strands the slot on the last key touched,
+        // which is the `NSCursor` class this clears.
+        let board = try Self.source("KeyboardBoard.swift")
+        #expect(
+            board.contains("onHover(inside?key.code:nil)"),
+            Comment(
+                rawValue: "a cap that never reports leaving "
+                    + "strands the reading on it"
+            )
+        )
     }
 }

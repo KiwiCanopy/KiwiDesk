@@ -19,7 +19,10 @@ struct SpokenKeyboardBoard: View {
     /// One sentence per conflicted key, from the same reading
     /// the drawn slot renders (#798) — so the two channels
     /// cannot disagree about which bindings clash.
-    var conflictDetail: [String] = []
+    /// Required, not defaulted: a mount that took the ring
+    /// without the words would draw an outline saying nothing,
+    /// which is #1126's harm in a new place.
+    let conflictDetail: [String]
 
     private var scopeLabel: String {
         switch scope {
@@ -101,7 +104,7 @@ enum KeyboardBoardSpoken {
         buckets: Buckets,
         scopeLabel: String,
         layerLabel: String?,
-        conflictDetail: [String] = []
+        conflictDetail: [String]
     ) -> String {
         var parts = [
             L(

@@ -1,12 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The board's status slot (#798) — split from the panel at the
-/// §2.1 ceiling when the hover reading landed, not at the hard
-/// limit. The slot is the panel's, so it stays an extension
-/// rather than a view of its own: it reads `shown`, `selected`,
-/// `claims` and `liveScope`, and a separate view would take all
-/// four as parameters that could drift from the caps.
+/// The board's status slot (#798) — split from the panel at
+/// §2.1's target, not at the hard ceiling. The slot is the
+/// panel's, so it stays an extension rather than a view of its
+/// own: it reads `shown`, `selected`, `claims` and `liveScope`,
+/// and a separate view would take all four as parameters that
+/// could drift from the caps.
 extension KeyboardPreviewPanel {
     /// One slot, two readings: the tally at rest, the hovered
     /// key's actions under the pointer (#798). Bimodal rather
@@ -38,78 +38,103 @@ extension KeyboardPreviewPanel {
         .accessibilityLabel(tallyText)
     }
 
-    /// Every conflicted key read aloud, through the SAME
-    /// builder the pointer uses — the spoken half of #798's
-    /// answer to "the ring cannot say which two".
-    var conflictDetail: [String] {
-        let ringed = collisions.union(
-            KeyboardCensus.overwrittenReserved(
-                claims: claims,
-                scope: liveScope
-            )
-        )
-        return ringed.sorted().flatMap {
-            hoverReading($0)?.lines ?? []
-        }
+    var slotLines: [String] {
+        guard let hovered else { return [tallyText] }
+        return liveReading(hovered).lines
     }
 
-    var slotLines: [String] {
-        guard let hovered, let reading = hoverReading(hovered)
-        else { return [tallyText] }
-        return reading.lines
+    /// Every ringed key read aloud, through the SAME builder the
+    /// pointer uses and over the ONE ringed set the caps are
+    /// drawn from — the spoken half of #798's answer to "the
+    /// ring cannot say which two".
+    ///
+    /// Intersected with the keys the board actually DRAWS: a
+    /// binding on an F-key or the keypad rings nothing on this
+    /// picture, so a sentence about it would describe a cap that
+    /// is not here.
+    var conflictDetail: [String] {
+        let read = reader
+        return ringedKeys.intersection(drawnCodes).sorted()
+            .flatMap { read($0).lines }
+    }
+
+    /// The keys the board rings, from the census's one
+    /// derivation — never a second union beside the drawing.
+    var ringedKeys: Set<UInt32> {
+        KeyboardCensus.ringedKeys(
+            in: shown,
+            selected: selected,
+            scope: liveScope
+        )
+    }
+
+    private var drawnCodes: Set<UInt32> {
+        Set(
+            KeyboardMatrix.rows(
+                for: KeyboardMatrix.PhysicalType.current()
+            )
+            .joined()
+            .compactMap(\.code)
+        )
     }
 
     /// Reserved from what the slot can ACTUALLY be asked to
     /// draw, never a constant: under `.all` a seeded install
     /// already puts three claims on a digit (`⌃⌥1` go-to-Space,
     /// `⌃⌥⇧1` move-to-Space, `⌃⌥⌘1` follow), so a fixed
-    /// two-line reservation nudges the panel on the COMMON
-    /// case. The deepest key in the shown scope sets the floor,
-    /// plus a line per conflict sentence it would carry.
+    /// two-line reservation nudges the panel on the COMMON case.
     ///
-    /// It is a floor, not a cap: a reading longer than this
-    /// grows the slot rather than truncating, because a
-    /// half-said conflict is worse than a nudge.
+    /// Measured from the READINGS rather than from a claim
+    /// count: a ringed key draws a cost sentence under each
+    /// claim, so two bindings on one chord is four lines, not
+    /// two — counting claims understated exactly the case the
+    /// feature exists for (code review, #798).
+    ///
+    /// A floor, not a cap: a longer reading grows the slot
+    /// rather than truncating, because a half-said conflict is
+    /// worse than a nudge.
     var slotHeight: CGFloat {
         CGFloat(max(deepestReading, 1)) * Self.slotLine
     }
 
-    /// Lines the deepest key under the shown scope would draw.
-    private var deepestReading: Int {
-        let ringed = collisions.union(
-            KeyboardCensus.overwrittenReserved(
-                claims: claims,
-                scope: liveScope
-            )
-        )
-        let deepestClaim =
-            claims.values.map(\.count).max() ?? 1
-        // A ringed key adds its cost sentence under the claims.
-        return deepestClaim + (ringed.isEmpty ? 0 : 1)
+    /// Lines the deepest key on the board would draw.
+    var deepestReading: Int {
+        let read = reader
+        return claims.keys.map { read($0).lines.count }.max() ?? 1
     }
 
-    /// One caption line at the panel's own metrics.
-    private static let slotLine: CGFloat = 15
-
-    func hoverReading(
-        _ code: UInt32
-    ) -> KeyboardHoverReading? {
-        KeyboardHoverReading.of(
-            code,
-            in: shown,
-            selected: selected,
-            config: model.config,
-            // One live read per PANEL render (#1105 bans one per
-            // ROW): the panel is the section's sibling, so the
-            // `disabledSystemShortcuts` environment it wires
-            // never reaches here and would answer the empty
-            // DEFAULT — narrating a dormant chord as dead.
-            disabled: model.disabledSystemShortcuts(),
-            labels: SettingsValueReadout.shortcutsActionLabels(
-                old: model.config,
-                new: model.config
+    /// ONE live preference read and one config capture per panel
+    /// render, closed over for every key the slot and the spoken
+    /// clause ask about.
+    ///
+    /// #1105 bans one read per ROW; this was one per RINGED KEY
+    /// on every body evaluation — a full `AppleSymbolicHotKeys`
+    /// sweep per cap the pointer crossed (code review, #798).
+    ///
+    /// The read is taken HERE because the panel is the section's
+    /// SIBLING: the `disabledSystemShortcuts` environment the
+    /// section wires never reaches this column and would answer
+    /// the empty DEFAULT, narrating a dormant chord as dead.
+    private var reader: (UInt32) -> KeyboardHoverReading {
+        let disabled = model.disabledSystemShortcuts()
+        let layers = shown
+        let scope = liveScope
+        let selection = selected
+        let config = model.config
+        return { code in
+            KeyboardHoverReading.of(
+                code,
+                in: layers,
+                scope: scope,
+                selected: selection,
+                config: config,
+                disabled: disabled
             )
-        )
+        }
+    }
+
+    func liveReading(_ code: UInt32) -> KeyboardHoverReading {
+        reader(code)
     }
 
     var tallyText: String {
@@ -117,4 +142,6 @@ extension KeyboardPreviewPanel {
         return L("keyboard.tally", "Keys taken: %1$d", taken)
     }
 
+    /// One caption line at the panel's own metrics.
+    static let slotLine: CGFloat = 15
 }
