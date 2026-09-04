@@ -4628,7 +4628,9 @@ and you land on the same space with the same windows hidden. A
 Desktop is remembered by an identity KiwiDesk gives it rather
 than by its Mission Control number, so the memory survives
 display changes and renumbering, and those identity-keyed
-entries are written to `gui.json` and survive a restart.
+entries are written to `gui.json` and survive a restart — which
+means a config KiwiDesk owns. A hand-written `init.lua` setup has
+no sidecar to write, so the memory is session-only there.
 
 A Desktop you haven't visited yet takes a space no other Desktop
 is showing or remembers, falling back to the first when they are

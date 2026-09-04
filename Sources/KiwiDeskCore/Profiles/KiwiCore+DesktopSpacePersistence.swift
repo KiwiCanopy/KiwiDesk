@@ -31,9 +31,65 @@ extension KiwiCore {
     func adoptPersistedDesktopSpaces(
         _ stored: [DesktopKey: SpaceID]
     ) {
-        desktopMemory.virtualSpaces.merge(stored) { live, _ in
-            live
+        // REPLACE once established, never merge. A merge returns
+        // every key absent from live, so a memory the user just
+        // discarded is resurrected by the next config load — and
+        // the `.number` entries a merge was protecting are the
+        // encoder's business already, which is this file's own
+        // one-rule-one-place argument.
+        if desktopMemory.spaceMemoryEstablished {
+            for (key, space) in stored
+            where desktopMemory.virtualSpaces[key] == nil
+                && key.isIdentity == false
+            {
+                desktopMemory.virtualSpaces[key] = space
+            }
+            return
         }
+        desktopMemory.virtualSpaces = stored
         desktopMemory.spaceMemoryEstablished = true
+    }
+
+    /// Forgets which Space each Desktop was showing (#634).
+    ///
+    /// A CLEARED memory rather than an absent one: the map became
+    /// durable in #1230, so the discard must reach the file, and
+    /// only an established memory is stamped into a write.
+    func forgetDesktopSpaceMemory() {
+        desktopMemory.virtualSpaces = [:]
+        desktopMemory.spaceMemoryEstablished = true
+    }
+
+    /// Writes the Desktop→Space memory to `gui.json` (#1230).
+    ///
+    /// Nothing else does at a moment that matters: the eight
+    /// sidecar writers are all user actions, so without this the
+    /// memory reached disk only if the user happened to save
+    /// something after their last swipe. Called at QUIT, where
+    /// the session file is already written, and at the discard,
+    /// which must not be re-adopted at the next boot.
+    ///
+    /// **Only where KiwiDesk owns the config.** A Lua-owned setup
+    /// has no sidecar to write, so the memory stays session-only
+    /// there — a limitation of config ownership rather than a
+    /// gap, and `docs/spaces-and-desktops.md` says so.
+    func persistDesktopSpaceMemory() {
+        guard isGuiManaged, desktopMemory.spaceMemoryEstablished,
+            var live = guiConfigStore.load()
+        else { return }
+        // The STORE, never `saveGuiConfig` — that reloads the
+        // whole config, which at quit would rebuild the Lua VM
+        // the stop is tearing down. The write-time stamp fills
+        // `desktopSpaces` in, so this hands the file back
+        // unchanged otherwise.
+        // No assignment here: `GuiConfigStore.save` stamps the
+        // live memory in, and doing it twice is the two-mechanism
+        // shape that produced the restore bug. This site exists
+        // for the MOMENT, not for the value.
+        do {
+            try guiConfigStore.save(live)
+        } catch {
+            onLog("desktop spaces: write failed: \(error)")
+        }
     }
 }

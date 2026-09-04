@@ -281,7 +281,7 @@ struct StickyReachCarryVerdictTests {
             secondaryCurrent: 20
         )
         core.handleDesktopChange()
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(Bridge.moves.isEmpty)
     }
 }

@@ -276,7 +276,7 @@ struct DesktopFocusMemoryTests {
         switchMain(core, to: 11)
         #expect(core.desktopMemory.returnFocus.owed() == nil)
         box.lines = []
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(
             !box.lines.contains {
                 $0.contains("settle refocus stands down")

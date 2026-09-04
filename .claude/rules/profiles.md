@@ -200,7 +200,11 @@ The obligations that fall on a change here:
   writes `.identity` entries alone and drops the numbers, since a
   persisted wrong number never heals where an in-memory one does
   (`DesktopSpacePersistenceTests`). A further map that outlives
-  the session owes the same answer.
+  the session owes the same answer — and the answer is not always
+  "drop": `profileBindings` PERSISTS its `.number` entries on
+  purpose, because there the number is one the USER declared and
+  pins when that Desktop appears, where the Space memory's is one
+  KiwiDesk inferred from a reading that had not landed yet.
 - **The write is a seam** (`DesktopMemory.writeStamp`), live in
   production and pinned to a refusal by both `makeTestCore`
   twins: a fixture space id IS a real Desktop id on the host, and

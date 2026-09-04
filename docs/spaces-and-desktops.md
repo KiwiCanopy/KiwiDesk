@@ -64,9 +64,11 @@ back and you land on the same Space, with the same windows in
 the same order, and the same one focused — as long as they come
 back promptly ([accepted limitations](accepted-limitations.md)
 has the case where they do not). That memory is written into
-your settings file, so it survives quitting KiwiDesk — on a Mac
-where KiwiDesk can give a Desktop an identity of its own, which
-is what makes one nameable across restarts at all.
+`gui.json`, so it survives quitting KiwiDesk — where KiwiDesk
+owns your config, and on a Mac where it can give a Desktop an
+identity of its own, which is what makes one nameable across
+restarts at all. A hand-written `init.lua` setup keeps the
+memory for the session only.
 
 **Your windows stay with their Desktop.** They belong to the
 macOS Desktop they are on, so a Space holds whatever of its

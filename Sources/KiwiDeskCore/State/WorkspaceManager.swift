@@ -273,7 +273,15 @@ public struct WorkspaceManager: Sendable {
     /// Each value is re-asserted only where it still names a
     /// window state holds, and a Space's focus only where that
     /// Space still exists — a prune may have dropped it.
-    public mutating func restoreFocusTrackers(
+    ///
+    /// Residue, stated so it is not re-derived: a window moved
+    /// BETWEEN Spaces ends focused in neither — its old Space's
+    /// focus went to a successor, and its new Space's held focus
+    /// is restored over it — while `lastFocused` still names it.
+    /// Correct for the restore, which moves windows back to
+    /// Spaces that already had their own focus; weigh it before
+    /// reusing this for a mover with different intent.
+    mutating func restoreFocusTrackers(
         lastFocused: WindowID?,
         candidate: WindowID?,
         spaceFocus: [SpaceID: WindowID]

@@ -175,16 +175,23 @@ struct DesktopSpacePersistenceWiringTests {
         )
     }
 
-    @Test("The seeded config carries the live memory")
-    func seedCarriesTheMemory() {
+    /// A SAVED seed carries the live memory — asserted on the
+    /// file rather than on `guiConfigSeed()`'s return, because
+    /// the seed is also the no-sidecar fallback for readers and
+    /// only a WRITE stamps the memory in. One mechanism, and the
+    /// outcome is what matters.
+    @Test("A saved seed carries the live memory")
+    func savedSeedCarriesTheMemory() throws {
         let core = makeCore()
         core.rememberVirtualSpace(
             SpaceID(5),
             leaving: .identity(stamp)
         )
-        let seeded: [DesktopKey: SpaceID] =
-            core.guiConfigSeed().desktopSpaces
-        #expect(seeded[.identity(stamp)] == SpaceID(5))
+        try core.guiConfigStore.save(core.guiConfigSeed())
+        #expect(
+            core.guiConfigStore.load()?
+                .desktopSpaces[.identity(stamp)] == SpaceID(5)
+        )
     }
 
     /// The write TRIGGER. Nothing else writes `gui.json` at a

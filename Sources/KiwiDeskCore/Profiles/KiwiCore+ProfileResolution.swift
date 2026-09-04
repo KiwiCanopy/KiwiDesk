@@ -22,9 +22,14 @@ extension KiwiCore {
     /// AX-echo lag can't wobble windows.
     ///
     /// Growth threshold (review 2026-07): two classification
-    /// Bools is the ceiling. A THIRD would be the point to
-    /// fold them into one apply-intent value (.userExplicit /
-    /// .hardwareEvent) — do not add Bool #3. The session
+    /// Bools is the ceiling, and #1230 reached it without adding
+    /// one — the prune now has two independent causes
+    /// (`pruneStaleSpaces || switching`) while only the flag
+    /// syncs the sidecar, and `switching` itself answers three
+    /// states. Read the threshold as SPENT: the next
+    /// classification folds these into one apply-intent value
+    /// (.userExplicit / .hardwareEvent) rather than joining
+    /// them. The session
     /// ratio-layer clear (#458) rides this same classification;
     /// an eventual fold carries it along.
     func apply(

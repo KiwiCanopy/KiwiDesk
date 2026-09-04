@@ -12,10 +12,21 @@ extension KiwiCore {
     /// focus to the restored space — the OS may have focused
     /// a stashed window during the transition. Keyed (#49):
     /// rapid switches keep only the latest settle — a stale
-    /// task either no-op'd on the `lastDesktop` guard or
+    /// task either no-op'd on the staleness guard or
     /// (switch away and back inside the delay) fired an early
     /// settle mid-reconcile — and `stop()` can now cancel it.
-    func settleAfterDesktopSwitch(_ desktop: DesktopKey?) {
+    ///
+    /// **Carries the native Space id, never a `DesktopKey`**
+    /// (#1230). A key is re-keyed at any mint — a monitor
+    /// change or `bind_profile_to_desktop`, not only a switch —
+    /// so a settle scheduled under `.number(n)` for a
+    /// just-stamped Desktop would compare against
+    /// `.identity(x)` 600 ms later and stand the WHOLE settle
+    /// down: the arrival sweep, the sticky re-carry, the away
+    /// census re-arm, the retile, the z-order restore and the
+    /// refocus. The native id names the same Desktop under both
+    /// spellings and never moves.
+    func settleAfterDesktopSwitch(_ desktop: SkyLight.SpaceID?) {
         deferred.schedule(
             .desktopSettle,
             after: .milliseconds(600)
@@ -26,8 +37,12 @@ extension KiwiCore {
 
     /// The settle body, split out so tests can fire it without
     /// waiting out the 600 ms schedule.
-    func desktopSettle(ifStill desktop: DesktopKey?) {
-        guard lastDesktop == desktop else { return }
+    ///
+    /// Compared against `desktopMemory.lastDesktopSpace` rather than
+    /// `lastDesktop`, for the re-key reason above — core-owned,
+    /// so this reads no machine state.
+    func desktopSettle(ifStill desktop: SkyLight.SpaceID?) {
+        guard desktopMemory.lastDesktopSpace == desktop else { return }
         // The switch's `reconcileAll` is census-gated (#1037),
         // and that census can beat the compositor: a window
         // still landing when the notification fired was on no

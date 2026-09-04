@@ -50,8 +50,8 @@ struct ProfileSpacesSeamTests {
         // reaching the map themselves.
         "virtualSpaces": [
             "Profiles/DesktopMemory.swift": 1,
-            "Profiles/KiwiCore+DesktopSpaces.swift": 7,
-            "Profiles/KiwiCore+DesktopSpacePersistence.swift": 2,
+            "Profiles/KiwiCore+DesktopSpaces.swift": 6,
+            "Profiles/KiwiCore+DesktopSpacePersistence.swift": 5,
             "App/KiwiCore+AwayWindows.swift": 1,
         ],
     ]
@@ -138,12 +138,12 @@ struct ProfileSpacesSeamTests {
         let allowed: [String: (Int, String)] = [
             "Profiles/DesktopMemory.swift": (1, "the Space CURSOR"),
             "App/KiwiCore.swift": (1, "the profile BINDINGS"),
-            "Config/GuiConfig.swift": (5, "the cursor, persisted"),
-            "Config/GuiConfigStore.swift": (1, "the write stamp"),
+            "Config/GuiConfig.swift":
+                (2, "both, persisted in the sidecar"),
+            "Config/GuiConfigStore.swift":
+                (1, "the cursor's write-time stamp"),
             "Profiles/KiwiCore+DesktopBindings.swift":
-                (9, "the shared re-key, generic over the value"),
-            "Profiles/KiwiCore+DesktopSpacePersistence.swift":
-                (2, "the cursor, read and adopted"),
+                (2, "the shared re-key's moves and drops"),
         ]
         let root = coreRoot
         let prefix = root.path + "/"
@@ -152,7 +152,19 @@ struct ProfileSpacesSeamTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            let hits = source.occurrences(of: "[DesktopKey:")
+            // A stored DECLARATION, not a mention: a signature
+            // or a decode line names the type without holding
+            // one, and counting those made an ordinary refactor
+            // red this clause with a re-typed number as the fix.
+            let lines = source.split(separator: "\n")
+            let hits =
+                lines
+                .filter { line in
+                    line.contains("[DesktopKey:")
+                        && (line.contains("var ")
+                            || line.contains("let "))
+                }
+                .count
             guard hits > 0 else { continue }
             let key =
                 file.path.hasPrefix(prefix)
@@ -163,7 +175,7 @@ struct ProfileSpacesSeamTests {
         // Vacuity pin: a mistyped root would find nothing and
         // pass, which is the fail-open this clause exists to
         // avoid.
-        #expect(found.count >= 4)
+        #expect(found.count >= 4)  // vacuity pin
         for file in found.keys.sorted() {
             #expect(
                 allowed[file]?.0 == found[file],

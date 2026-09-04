@@ -107,7 +107,7 @@ struct FullscreenStandDownTests {
 
         NativeSpaces.activeSpaceIsUserOverride = false
         defer { NativeSpaces.activeSpaceIsUserOverride = nil }
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         // Stood down: no retile, no refocus behind the
         // fullscreen app.
         #expect(core.state.workspaces.lastFocused == nil)
@@ -115,7 +115,7 @@ struct FullscreenStandDownTests {
         // Back on a user desktop the same settle refocuses —
         // proving the gate, not a broken settle body.
         NativeSpaces.activeSpaceIsUserOverride = true
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.state.workspaces.lastFocused == w1)
     }
 
@@ -138,7 +138,7 @@ struct FullscreenStandDownTests {
         )
         NativeSpaces.activeSpaceIsUserOverride = true
         defer { NativeSpaces.activeSpaceIsUserOverride = nil }
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.state.workspaces.lastFocused == nil)
     }
 
@@ -162,7 +162,7 @@ struct FullscreenStandDownTests {
         // stand-down settle's own bar sync is what retires the
         // panels painted over the fullscreen app.
         NativeSpaces.activeSpaceIsUserOverride = false
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.appBars.shownStrips.isEmpty)
     }
 

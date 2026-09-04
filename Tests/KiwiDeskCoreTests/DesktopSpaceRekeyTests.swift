@@ -173,4 +173,28 @@ struct DesktopSpaceRekeyTests {
         _ = stampedSnapshotForTest(core)
         #expect(core.lastDesktop == .identity(absent))
     }
+
+    /// The settle outlives the reading that scheduled it, so it
+    /// carries the NATIVE id rather than a key. A key is
+    /// re-keyed at any mint — a monitor change or a binding, not
+    /// only a switch — and a settle that compared keys would
+    /// stand the whole thing down after its Desktop was stamped:
+    /// the arrival sweep, the sticky carry, the away census, the
+    /// retile, the z-order restore and the refocus.
+    ///
+    /// A holder is not always a FIELD; this one lived in a
+    /// captured closure argument, which a search for
+    /// declarations does not see.
+    @Test("The settle survives its Desktop being stamped")
+    func settleSurvivesAStamp() {
+        defer { resetAuthorityOverrides() }
+        let core = makeAuthorityCore()
+        core.lastDesktop = .number(1)
+        core.desktopMemory.lastDesktopSpace = 10
+        let scheduled = core.desktopMemory.lastDesktopSpace
+        _ = stampedSnapshotForTest(core)
+        // The key moved; what the settle compares did not.
+        #expect(core.lastDesktop == .identity(stamp))
+        #expect(core.desktopMemory.lastDesktopSpace == scheduled)
+    }
 }

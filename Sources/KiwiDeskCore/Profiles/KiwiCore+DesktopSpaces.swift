@@ -68,11 +68,14 @@ extension KiwiCore {
     /// showing (#1230), so a fresh Desktop stops landing on a
     /// Space whose windows are all somewhere else.
     ///
-    /// A remembered SpaceID foreign to the CURRENT space set
-    /// falls back too (#888): the binding apply just before this
-    /// read may have swapped profiles, and a stale id would
-    /// activate a Space the new profile does not have — missing
-    /// and stale take the same exit.
+    /// A remembered SpaceID the candidates do not carry falls
+    /// back too, for either of two reasons: it is foreign to the
+    /// current space set (#888 — the binding apply just before
+    /// this read may have swapped profiles, and a stale id would
+    /// activate a Space the new profile does not have), or it
+    /// lays out on ANOTHER screen than the one asking. Missing,
+    /// stale and off-screen take the same exit; the entry itself
+    /// is left alone, since the Desktop may yet return to it.
     ///
     /// **TOTAL wherever it was total before.** The switch arm
     /// reads `if let key, let target = virtualSpaceTarget(...)`,
@@ -237,15 +240,18 @@ extension KiwiCore {
     /// on (#1147's `keyMoves`, which that lane made generic FOR
     /// this one).
     ///
-    /// **Every holder, not just the map.** `lastDesktop` carries
+    /// **The map is not the only holder.** `lastDesktop` carries
     /// the same key and is compared across snapshots by
     /// `isSecondarySwitch`, so leaving it behind reproduces the
     /// defect one holder over: the next switch compares
     /// `.identity(x)` against `.number(n)` for ONE Desktop,
     /// reads a secondary swipe as a main one, files a phantom
     /// departure and lands the main display on the wrong Space
-    /// (code review, 2026-09-04). A new Desktop-keyed field owes
-    /// itself a line here.
+    /// (code review, 2026-09-04). A new holder of a `DesktopKey`
+    /// owes itself a line here — and a holder is not always a
+    /// FIELD: the settle's pending closure captured one, which a
+    /// search for declarations does not see, so it carries the
+    /// native Space id instead (`KiwiCore+DesktopSettle.swift`).
     ///
     /// Without it the memory is written under one key and read
     /// under another. `stampedDesktopSnapshot` returns the
@@ -290,39 +296,4 @@ extension KiwiCore {
         lastDesktop = now
     }
 
-    /// Forgets which Space each Desktop was showing (#634).
-    ///
-    /// A CLEARED memory rather than an absent one: the map became
-    /// durable in #1230, so the discard must reach the file, and
-    /// only an established memory is stamped into a write.
-    func forgetDesktopSpaceMemory() {
-        desktopMemory.virtualSpaces = [:]
-        desktopMemory.spaceMemoryEstablished = true
-    }
-
-    /// Writes the Desktop→Space memory to `gui.json` (#1230).
-    ///
-    /// Nothing else does at a moment that matters: the eight
-    /// sidecar writers are all user actions, so without this the
-    /// memory reached disk only if the user happened to save
-    /// something after their last swipe. Called at QUIT, where
-    /// the session file is already written, and at the discard,
-    /// which must not be re-adopted at the next boot.
-    ///
-    /// **Only where KiwiDesk owns the config.** A Lua-owned setup
-    /// has no sidecar to write, so the memory stays session-only
-    /// there — a limitation of config ownership rather than a
-    /// gap, and `docs/spaces-and-desktops.md` says so.
-    func persistDesktopSpaceMemory() {
-        guard isGuiManaged, desktopMemory.spaceMemoryEstablished,
-            var live = guiConfigStore.load()
-        else { return }
-        // The STORE, never `saveGuiConfig` — that reloads the
-        // whole config, which at quit would rebuild the Lua VM
-        // the stop is tearing down. The write-time stamp fills
-        // `desktopSpaces` in, so this hands the file back
-        // unchanged otherwise.
-        live.desktopSpaces = persistedDesktopSpaces() ?? [:]
-        try? guiConfigStore.save(live)
-    }
 }

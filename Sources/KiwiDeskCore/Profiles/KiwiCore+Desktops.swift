@@ -120,6 +120,7 @@ extension KiwiCore {
             rememberVirtualSpace(active, leaving: leaving)
         }
         lastDesktop = key
+        desktopMemory.lastDesktopSpace = snapshot.mainCurrentSpace
         if secondarySwitch {
             // A secondary display's Desktop switched: the
             // binding authority is unmoved, so the PROFILE stands
@@ -191,7 +192,7 @@ extension KiwiCore {
         // the ONE snapshot (profiles.md); the settle is the net.
         refreshStickyReach(spaces: snapshot.spaces)
         emitDesktopChange(snapshot, changed: changed)
-        settleAfterDesktopSwitch(key)
+        settleAfterDesktopSwitch(snapshot.mainCurrentSpace)
     }
 
     /// Whether this switch belongs to a secondary display: the

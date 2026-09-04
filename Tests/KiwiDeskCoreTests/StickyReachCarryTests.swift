@@ -182,7 +182,7 @@ struct StickyReachCarryTests {
         )
         core.handleDesktopChange()
         Bridge.reset()
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(Bridge.targets(of: w1) == [11])
         #expect(Bridge.targets(of: w2) == [11])
         #expect(Bridge.targets(of: w4) == [20])
