@@ -136,6 +136,6 @@ struct DesktopMemoryTests {
         let core = makeAuthorityCore()
         let snapshot = NativeSpaces.desktopSnapshot()
         core.desktopMemory.seed(snapshot)
-        #expect(core.switchedDisplays(in: snapshot).isEmpty)
+        #expect(core.switchedDisplays(in: snapshot).changed.isEmpty)
     }
 }

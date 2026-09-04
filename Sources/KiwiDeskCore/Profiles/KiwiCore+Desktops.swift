@@ -64,8 +64,9 @@ extension KiwiCore {
     /// `NativeSpaces.activeDesktopNumber`). With "Displays have
     /// separate Spaces" on, a swipe on a secondary display fires
     /// this handler too — that arm reconciles and retiles the
-    /// arrived windows but never selects a profile or moves the
-    /// active Space. Shared mode and a single display never
+    /// arrived windows and moves THAT display onto the Space its
+    /// arriving Desktop should show (#1230), while the profile
+    /// still stands down. Shared mode and a single display never
     /// reach that arm, so their flow is exactly the pre-#888
     /// one.
     func handleDesktopChange() {
@@ -95,7 +96,8 @@ extension KiwiCore {
         // `isUser`, never the nil Desktop). Nil falls through to
         // the main arm, whose fullscreen branch stands down the
         // way it did before #888 (review, 2026-08-18).
-        let changed = switchedDisplays(in: snapshot)
+        let diff = switchedDisplays(in: snapshot)
+        let changed = diff.changed
         let secondarySwitch = Self.isSecondarySwitch(
             authority: key,
             lastAuthority: lastDesktop,
@@ -127,6 +129,10 @@ extension KiwiCore {
             // full pass — and the bars re-sync so a fullscreen
             // arrival retires that display's panels (#670's
             // per-display verdicts).
+            // #1230 ruling 3: the display that switched shows the
+            // Space ITS arriving Desktop should — before the
+            // retile, which is what draws the result.
+            moveSwitchedDisplaySpaces(diff, in: snapshot)
             retile(animated: false, force: true)
             updateAppBar()
             updateSpaceBar()
@@ -221,91 +227,15 @@ extension KiwiCore {
     /// the first one just wrote (review, 2026-08-18).
     func switchedDisplays(
         in snapshot: DesktopSnapshot
-    ) -> [String] {
+    ) -> DisplaySwitch {
         let previous = desktopMemory.lastDisplaySpaces
         desktopMemory.lastDisplaySpaces = snapshot.currentSpaces
-        return
-            snapshot.currentSpaces
-            .filter { $0.value != previous[$0.key] }
-            .keys.sorted()
-    }
-
-    /// The post-switch AX reconcile re-tracks this desktop's
-    /// windows over the next few hundred ms; afterwards,
-    /// re-assert the layout (stashing included) and hand
-    /// focus to the restored space — the OS may have focused
-    /// a stashed window during the transition. Keyed (#49):
-    /// rapid switches keep only the latest settle — a stale
-    /// task either no-op'd on the `lastDesktop` guard or
-    /// (switch away and back inside the delay) fired an early
-    /// settle mid-reconcile — and `stop()` can now cancel it.
-    private func settleAfterDesktopSwitch(_ desktop: DesktopKey?) {
-        deferred.schedule(
-            .desktopSettle,
-            after: .milliseconds(600)
-        ) { [weak self] in
-            self?.desktopSettle(ifStill: desktop)
-        }
-    }
-
-    /// The settle body, split out so tests can fire it without
-    /// waiting out the 600 ms schedule.
-    func desktopSettle(ifStill desktop: DesktopKey?) {
-        guard lastDesktop == desktop else { return }
-        // The switch's `reconcileAll` is census-gated (#1037),
-        // and that census can beat the compositor: a window
-        // still landing when the notification fired was on no
-        // list, so its app was skipped. Sweep the arrivals now
-        // — before the retile below, which then places them.
-        eventLoop.reconcileOnScreenArrivals()
-        // #1145: carry again once the switch has settled —
-        // idempotent, and the net under the eager carry in
-        // `handleDesktopChange`.
-        refreshStickyReach()
-        // #1146: a window closed while its Desktop was away; the
-        // settle also re-arms the cadence a failed read disarmed.
-        if refreshAwayWindows() { scheduleAwayCensus() }
-        // A fullscreen/system space: the retile, z-order
-        // restore and refocus stand down (#670) — the refocus
-        // would AX-raise the desktop's focused window behind
-        // the fullscreen app. The bars must still sync: the
-        // panels join every Space by construction, the switch
-        // handler skipped its retile on the nil number, so
-        // this sync is what retires them (review 2026-08-03).
-        guard NativeSpaces.activeSpaceIsUser() else {
-            updateAppBar()
-            updateSpaceBar()
-            return
-        }
-        retile(animated: false, force: true)
-        // The switch rebuilt this desktop's windows with
-        // arbitrary stacking; put the overlapping
-        // layouts' z-order back before handing focus over.
-        scheduleZOrderRestore()
-        // #1207: a return still owing its focus to a window not
-        // yet re-listed stands this refocus down — raising
-        // `Space.focused` here is the first-in-row jump.
-        if let owed = desktopMemory.returnFocus.owed() {
-            onLog(
-                "desktop return: focus owed to w\(owed.raw), "
-                    + "settle refocus stands down"
-            )
-        } else if let focused = activeSpace?.focused,
-            state.windows[focused]?.isFullscreen != true
-        {
-            // The instant retile above already placed the
-            // windows; re-tiling on focus would fly them
-            // from stale frames (issue #11). A fullscreen
-            // window can still hold the focused slot (the
-            // fold never clears it, #670 review) — raising
-            // it would switch the user to its Space, so it
-            // is the one focus this settle never re-asserts.
-            focusWindow(
-                focused,
-                refocusRetile: false,
-                warp: true
-            )
-        }
+        return DisplaySwitch(
+            changed: snapshot.currentSpaces
+                .filter { $0.value != previous[$0.key] }
+                .keys.sorted(),
+            previous: previous
+        )
     }
 
     /// Loads the profile bound to the active Desktop — the MAIN

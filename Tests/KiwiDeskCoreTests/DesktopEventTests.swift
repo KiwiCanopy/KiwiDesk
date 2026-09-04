@@ -52,7 +52,7 @@ struct DesktopEventTests {
         let snapshot = NativeSpaces.desktopSnapshot()
         core.emitDesktopChange(
             snapshot,
-            changed: core.switchedDisplays(in: snapshot)
+            changed: core.switchedDisplays(in: snapshot).changed
         )
     }
 

@@ -103,6 +103,28 @@ public struct WorkspaceManager: Sendable {
         activeSpace = id
     }
 
+    /// Shows `id` on `display` (#1230, the secondary-display
+    /// Desktop switch). Lives here because `WorkspaceMapSealTests`
+    /// pins `secondaryShown` to the two `WorkspaceManager*` files:
+    /// a stray write strands exactly the entries `assign(_:to:)`'s
+    /// filter exists to drop.
+    ///
+    /// Refuses a space that does not live on that display — the
+    /// same rule `activeSpace(on:)` reads with, since one space on
+    /// two screens is the state that self-healing exists for. When
+    /// the display holds the ACTIVE space the switch moves that
+    /// instead, so the map's own invariant (the active display is
+    /// never a key here) survives a swipe on the focused screen.
+    public mutating func show(_ id: SpaceID, on display: DisplayID) {
+        ensureSpace(id)
+        guard spaceDisplay[id] == display else { return }
+        if activeSpace.flatMap({ spaceDisplay[$0] }) == display {
+            activate(id)
+            return
+        }
+        secondaryShown[display] = id
+    }
+
     /// Active space shown on specified display.
     public func activeSpace(on display: DisplayID) -> SpaceID? {
         if let active = activeSpace, spaceDisplay[active] == display {

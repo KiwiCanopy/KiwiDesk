@@ -74,9 +74,25 @@ extension KiwiCore {
         for desktop: DesktopKey,
         in snapshot: DesktopSnapshot
     ) -> SpaceID? {
-        let spaces = state.workspaces.allSpaces
+        virtualSpaceTarget(
+            for: desktop,
+            among: state.workspaces.allSpaces.map(\.id),
+            in: snapshot
+        )
+    }
+
+    /// The same decision over a narrowed candidate list — a
+    /// secondary display picks among the Spaces that lay out on
+    /// IT (#1230, ruling 3), or the swipe would show that screen
+    /// a Space belonging to the other one. One copy of the rule,
+    /// two candidate sets.
+    func virtualSpaceTarget(
+        for desktop: DesktopKey,
+        among candidates: [SpaceID],
+        in snapshot: DesktopSnapshot
+    ) -> SpaceID? {
         if let remembered = desktopMemory.virtualSpaces[desktop],
-            spaces.contains(where: { $0.id == remembered })
+            candidates.contains(remembered)
         {
             return remembered
         }
@@ -85,11 +101,11 @@ extension KiwiCore {
             in: snapshot
         )
         let declared = currentDeclaredSpaces()
-        let free = spaces.first {
-            !taken.contains($0.id)
-                && (declared?.contains($0.id) ?? true)
+        let free = candidates.first {
+            !taken.contains($0)
+                && (declared?.contains($0) ?? true)
         }
-        return free?.id ?? spaces.first?.id
+        return free ?? candidates.first
     }
 
     /// The Spaces a Desktop other than `desktop` is showing.
@@ -147,6 +163,49 @@ extension KiwiCore {
                     + "a candidate"
             )
             return nil
+        }
+    }
+
+    /// Moves a display that switched Desktop onto the Space that
+    /// Desktop should show (#1230, ruling 3).
+    ///
+    /// Measured 2026-09-04 on two screens: before this, a swipe on
+    /// a secondary display emitted `desktop_change` for that
+    /// monitor and moved no Space at all, so the screen kept
+    /// showing the Space its PREVIOUS Desktop had — the confusion
+    /// this issue removes, one screen over.
+    ///
+    /// The profile deliberately stands down: it stays the main
+    /// screen's (#888). Only the Space this screen shows moves.
+    ///
+    /// The departing Desktop is resolved from the reading
+    /// `switchedDisplays` already took, never a second one — that
+    /// function stamps the memory as it diffs, so asking again
+    /// would compare against what the first call just wrote.
+    func moveSwitchedDisplaySpaces(
+        _ diff: DisplaySwitch,
+        in snapshot: DesktopSnapshot
+    ) {
+        for uuid in diff.changed where uuid != snapshot.mainUUID {
+            guard let display = display(forUUID: uuid) else {
+                continue
+            }
+            if let left = diff.previous[uuid],
+                let leaving = snapshot.key(of: left),
+                let shown = state.workspaces.activeSpace(
+                    on: display
+                )
+            {
+                rememberVirtualSpace(shown, leaving: leaving)
+            }
+            guard let arriving = snapshot.currentKey(on: uuid),
+                let target = virtualSpaceTarget(
+                    for: arriving,
+                    among: state.workspaces.spaces(on: display),
+                    in: snapshot
+                )
+            else { continue }
+            state.workspaces.show(target, on: display)
         }
     }
 }

@@ -287,3 +287,13 @@ public struct Space: Sendable, Equatable {
         windows.insert(window, at: clamped)
     }
 }
+
+/// One reading of which displays changed Desktop, and what each
+/// was showing before (#1230). Returned as a pair because
+/// `switchedDisplays` stamps the memory as it diffs: a second
+/// call would compare against what the first just wrote, so the
+/// departing value has to travel with the arriving one.
+public struct DisplaySwitch: Sendable {
+    public let changed: [String]
+    public let previous: [String: SkyLight.SpaceID]
+}

@@ -178,8 +178,8 @@ struct SecondarySwitchTests {
         )
         let snapshot = NativeSpaces.desktopSnapshot()
         #expect(
-            core.switchedDisplays(in: snapshot) == ["UUID-B"]
+            core.switchedDisplays(in: snapshot).changed == ["UUID-B"]
         )
-        #expect(core.switchedDisplays(in: snapshot).isEmpty)
+        #expect(core.switchedDisplays(in: snapshot).changed.isEmpty)
     }
 }
