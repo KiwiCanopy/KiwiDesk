@@ -2629,6 +2629,51 @@ default on) is Lua-only with no Settings toggle.
 
 **[Principle]**
 
+**A space's name is its identity; the PROFILE is the scope
+that name resolves in.** Two profiles may each declare a
+space called `1`, and they are different spaces holding
+different windows — but `focus_space 1` still takes a bare
+name, resolved against the profile you are in, the way it
+already resolves against the Desktop you are on.
+
+The alternative shapes were both worse. Giving a space an
+opaque identity and demoting the name to a label breaks
+`focus_space 1`, app rules, keybindings and every stored
+key, and hides identity from the user entirely. Making the
+pair (name, icon) the identity — considered because the icon
+also changes what you see — is worse still: changing an icon
+would SPLIT a space.
+
+What made the icon look contradictory was not the icon. A
+space's mode (`space_modes`) and its icon (`space.icon`) were
+both stored per profile while the space itself was global, so
+two profiles' `1` shared windows while disagreeing about how
+to draw them. Giving the space the same scope as its own mode
+and icon is what removes the contradiction, and it needs no
+new concept. (#1230)
+
+**A profile switch restores that profile's partitioning; it
+does not merge by name.** Before #1230, `ensureSpace` matched
+the incoming profile's spaces onto the live ones by name, and
+`pruneSpaces` forwarded the rest to the fallback — so
+switching profiles and back merged an arrangement away
+permanently. Measured 2026-09-04: a profile holding five
+windows in space 1 and three in space 3 came back with all
+eight in space 1 and space 3 empty.
+
+Each profile now carries its own record of which windows its
+spaces held, filed when you switch away and restored when you
+return. Window ids only, never window state — about sixty
+integers across three profiles, written once per switch.
+
+Its counterpart is deliberately NOT stored: which DESKTOP a
+window is on is the WindowServer's fact, and KiwiDesk reads it
+rather than copying it, because a copy can disagree and every
+disagreement is a window that vanishes or appears twice. The
+profile record has no such hazard — nothing outside KiwiDesk
+has an opinion about which of its spaces a window sits in.
+(#1230)
+
 **The fallback space is an explicit choice, not "whichever
 row is first".** When a profile switch drops a space, its
 windows need a home. Tying that to the first list row (the

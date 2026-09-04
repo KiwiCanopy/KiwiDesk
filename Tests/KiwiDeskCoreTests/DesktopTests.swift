@@ -278,13 +278,20 @@ struct DesktopBindingTests {
         defer { resetDesktops() }
         let core = makeCore()
         core.state.workspaces.ensureSpace(SpaceID(2))
-        // Unknown desktop: default to the first space.
+        NativeSpaces.spacesOverride = []
+        let snapshot = NativeSpaces.desktopSnapshot()
+        // An unremembered Desktop steps OVER a Space another
+        // Desktop is already showing (#1230): space 1 is the
+        // active one here, so the fresh Desktop takes 2 rather
+        // than landing on a Space whose windows are elsewhere.
         #expect(
-            core.virtualSpaceTarget(for: .number(3)) == SpaceID(1)
+            core.virtualSpaceTarget(for: .number(3), in: snapshot)
+                == SpaceID(2)
         )
         core.desktopMemory.virtualSpaces[.number(3)] = SpaceID(2)
         #expect(
-            core.virtualSpaceTarget(for: .number(3)) == SpaceID(2)
+            core.virtualSpaceTarget(for: .number(3), in: snapshot)
+                == SpaceID(2)
         )
     }
 

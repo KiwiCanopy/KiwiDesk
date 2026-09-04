@@ -21,6 +21,28 @@ editing here:
 
 - Windows live in a **flat `[WindowID]` array per space**. Do not
   introduce tree or container structures into state or layout code.
+- **Never store which Space a window holds PER DESKTOP; do store
+  it per PROFILE (#1230).** The two axes look alike and are
+  opposites. A window's Desktop is the WindowServer's fact —
+  KiwiDesk reads it (`DesktopMemory.readCensus`,
+  `readWindowSpace`, `AwayWindow.nativeSpace`), so a
+  `[DesktopKey: …]` map of window lists is a second opinion that
+  can disagree, and every disagreement loses or duplicates a
+  window; it would also owe its own prune, re-key, #634 reset and
+  dormancy rule, the enders `forgetAway` already owns. Which
+  Space a window sat in under a given PROFILE is KiwiDesk's own
+  fact that nothing else records, so it must be stored or a
+  profile round trip merges the arrangement away — which shipped
+  until #1230. `ProfileSpacesSeamTests` pins one door each and
+  pins the refused Desktop-keyed store negatively;
+  `KiwiCore+DesktopSpaces.swift` carries the argument.
+- It follows that **a new per-`Space` field is keyed by
+  `WindowID` or it is SHARED across Desktops** — the Desktop
+  partition is emergent from window residence, and a per-window
+  record partitions by Desktop for free. Five of `Space`'s six
+  layout fields already are; `scrollRest` is the exception, and
+  #1230 measured its collision unobservable because the #1207
+  refocus re-anchors the viewport before it is drawn.
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through

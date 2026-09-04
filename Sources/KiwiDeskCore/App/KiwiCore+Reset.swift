@@ -15,6 +15,9 @@ extension KiwiCore {
         sleepWake.dropHeldSnapshot()
         state.forgetRememberedSpaces()
         forgetDesktopFocus()
+        // #1230: the per-profile partitioning is a saved
+        // arrangement too, and this is one of its three enders.
+        state.profilePartitioning.reset()
         onLog("saved window arrangement discarded")
     }
 

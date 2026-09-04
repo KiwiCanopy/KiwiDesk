@@ -30,7 +30,7 @@ extension StateCoordinator {
         effects.rehomedToScreenSpace = preferred
         let target =
             preferred
-            ?? remembered?.space
+            ?? livingRememberedSpace(remembered)
             ?? window.appBundleID.flatMap { appRules[$0] }
             ?? workspaces.activeSpace
         guard let target else { return }
@@ -115,6 +115,29 @@ extension StateCoordinator {
         {
             workspaces.focus(window.id, in: target)
         }
+    }
+
+    /// The remembered Space, unless a DEPARTED window's Space no
+    /// longer exists (#1230).
+    ///
+    /// `workspaces.add` ensures its target, so a window returning
+    /// from an away Desktop would silently re-create the Space it
+    /// left into a profile that does not declare it — a Space
+    /// switching profiles just dropped. Falling through instead
+    /// lands it the ordinary way, which is what the profile's
+    /// `fallback_space` is for.
+    ///
+    /// `.restored` is deliberately NOT gated: the session restore
+    /// files a window under its Space before that Space is
+    /// rebuilt (#1010), so requiring it to exist would strand
+    /// every restored window in the active Space instead.
+    private func livingRememberedSpace(
+        _ remembered: SpaceMemory?
+    ) -> SpaceID? {
+        guard case .departed(let space)? = remembered else {
+            return remembered?.space
+        }
+        return workspaces[space] == nil ? nil : space
     }
 
     /// Screen home for arrivals crossing displays (#1010) — the

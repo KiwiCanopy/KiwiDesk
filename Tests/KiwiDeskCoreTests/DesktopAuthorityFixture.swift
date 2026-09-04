@@ -120,3 +120,18 @@ func resetAuthorityOverrides() {
     NativeSpaces.mainDisplayUUIDOverride = nil
     NativeSpaces.displayUUIDOverride = nil
 }
+
+/// A snapshot over the pinned topology, for the readers that take
+/// one (#1230's `virtualSpaceTarget`). Sets `spacesOverride`, so
+/// the caller's `resetAuthorityOverrides()` clears it.
+@MainActor
+func authoritySnapshot(
+    mainCurrent: UInt64 = 10,
+    secondaryCurrent: UInt64 = 20
+) -> DesktopSnapshot {
+    NativeSpaces.spacesOverride = authorityTopology(
+        mainCurrent: mainCurrent,
+        secondaryCurrent: secondaryCurrent
+    )
+    return NativeSpaces.desktopSnapshot()
+}

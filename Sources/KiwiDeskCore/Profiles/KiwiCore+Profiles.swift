@@ -52,6 +52,10 @@ extension KiwiCore {
         case "delete_profile":
             return namedProfileCommand(args) { name in
                 try self.profiles.delete(name: name)
+                // #1230: a deleted profile's partitioning has
+                // nothing left to describe. Before the monitor
+                // change, which may apply another profile.
+                self.state.profilePartitioning.forget(name)
                 self.handleMonitorChange()
                 // A broken profile's issue clears with it.
                 self.refreshConfigIssues()

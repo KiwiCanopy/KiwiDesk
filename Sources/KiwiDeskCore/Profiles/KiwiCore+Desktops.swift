@@ -132,7 +132,12 @@ extension KiwiCore {
             updateSpaceBar()
         } else {
             applyDesktopBinding(in: snapshot)
-            if let key, let target = virtualSpaceTarget(for: key) {
+            if let key,
+                let target = virtualSpaceTarget(
+                    for: key,
+                    in: snapshot
+                )
+            {
                 state.workspaces.activate(target)
                 oweReturningFocus(
                     for: target,

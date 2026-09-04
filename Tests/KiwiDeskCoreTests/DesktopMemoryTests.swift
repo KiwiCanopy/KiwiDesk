@@ -21,11 +21,19 @@ struct DesktopMemoryTests {
         let core = makeAuthorityCore()
         core.state.workspaces.ensureSpace(SpaceID(2))
         core.desktopMemory.virtualSpaces[.number(3)] = SpaceID(9)
+        let snapshot = authoritySnapshot()
         // Space "9" is no profile's — the binding apply that
-        // precedes this read may have swapped the space set —
-        // so stale takes the same exit as missing.
+        // precedes this read may have swapped the space set — so
+        // stale takes the same exit as missing. Asserted as that
+        // EQUIVALENCE rather than against a value: #1230 changed
+        // what the exit answers, and the rule it must keep is
+        // that both take it (tests.md ▸ pin the shape).
         #expect(
-            core.virtualSpaceTarget(for: .number(3)) == SpaceID(1)
+            core.virtualSpaceTarget(for: .number(3), in: snapshot)
+                == core.virtualSpaceTarget(
+                    for: .number(99),
+                    in: snapshot
+                )
         )
     }
 
@@ -41,8 +49,14 @@ struct DesktopMemoryTests {
         core.desktopMemory.virtualSpaces[.number(4)] = SpaceID(2)
         core.desktopMemory.virtualSpaces[.identity(stamp)] =
             SpaceID(2)
+        let snapshot = authoritySnapshot()
+        // Never the neighbour's Space — and since #1230 a Space
+        // another Desktop is showing is exactly what the fallback
+        // now steps over, so this reads as "not 2" rather than as
+        // a pinned answer.
         #expect(
-            core.virtualSpaceTarget(for: .number(3)) == SpaceID(1)
+            core.virtualSpaceTarget(for: .number(3), in: snapshot)
+                != SpaceID(2)
         )
     }
 
@@ -56,13 +70,24 @@ struct DesktopMemoryTests {
         NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
         let core = makeAuthorityCore()
         core.state.workspaces.ensureSpace(SpaceID(2))
-        core.rememberVirtualSpace(SpaceID(2), leaving: .identity(stamp))
+        // Three Spaces, and the stamp remembers the LAST one: with
+        // two, the #1230 fallback also answers "2" and the
+        // assertion could not tell a read of the stamp's entry
+        // from a fallback that happened to agree.
+        core.state.workspaces.ensureSpace(SpaceID(3))
+        core.rememberVirtualSpace(SpaceID(3), leaving: .identity(stamp))
+        let snapshot = authoritySnapshot()
         #expect(
-            core.virtualSpaceTarget(for: .identity(stamp))
-                == SpaceID(2)
+            core.virtualSpaceTarget(
+                for: .identity(stamp),
+                in: snapshot
+            ) == SpaceID(3)
         )
+        // The number reaches no entry, so it takes the fallback
+        // rather than the stamp's memory.
         #expect(
-            core.virtualSpaceTarget(for: .number(3)) == SpaceID(1)
+            core.virtualSpaceTarget(for: .number(3), in: snapshot)
+                != SpaceID(3)
         )
     }
 
@@ -86,10 +111,13 @@ struct DesktopMemoryTests {
         let core = makeAuthorityCore()
         core.state.workspaces.ensureSpace(SpaceID(2))
         core.rememberVirtualSpace(SpaceID(2), leaving: .identity(stamp))
+        let snapshot = authoritySnapshot()
         NativeSpaces.mainDisplayUUIDOverride = "UUID-B"
         #expect(
-            core.virtualSpaceTarget(for: .identity(stamp))
-                == SpaceID(2)
+            core.virtualSpaceTarget(
+                for: .identity(stamp),
+                in: snapshot
+            ) == SpaceID(2)
         )
     }
 

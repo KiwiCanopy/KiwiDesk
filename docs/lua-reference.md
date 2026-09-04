@@ -4439,17 +4439,27 @@ KiwiDesk.bind_profile_to_desktop(2, "Creator Studio")
 
 ### Space Reconciliation
 
-**Switching profiles reconciles your spaces.** Explicitly loading a
-profile makes its space set authoritative: a space is matched to the
-new profile **by name** (not position), so a window in a space whose
-name also exists in the new profile stays put — regardless of any
-layout difference. A space whose name the new profile doesn't define
-is dropped, and any windows it held are forwarded to the profile's
-fallback space.
+**Every profile owns its own spaces.** Two profiles can each define
+a space called `1` — or `Work` — and they are different spaces, each
+with its own windows. The name is still how you address a space
+(`focus_space 1` means "space 1 of the profile I'm in"); the profile
+is simply the scope that name resolves in.
 
-This reconcile happens only on an explicit `load_profile`; automatic
-applies on a monitor change or a Desktop binding leave your
-spaces untouched.
+**Switching profiles remembers where your windows were.** When you
+switch away, KiwiDesk files which space each window was in under the
+profile you are leaving; when you switch back, it puts them back.
+Switch to another profile and return, and your arrangement returns
+with you.
+
+Windows the incoming profile has never seen — opened while another
+profile was up — land in its **fallback space**, the same setting
+that has always answered "where does a window go when its space is
+gone".
+
+This happens on any profile change: an explicit `load_profile`, and a
+Desktop binding swapping profiles under you. Re-applying the profile
+that is *already* live changes nothing, so a monitor reconnect never
+disturbs your layout.
 
 ### Profile Monitor Sets
 
