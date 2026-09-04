@@ -35,6 +35,23 @@ extension KiwiCore {
         return true
     }
 
+    /// A built-in Standard is not a profile and has no
+    /// partitioning of its own, so entering one files the
+    /// OUTGOING profile's and leaves the live slot empty.
+    ///
+    /// Without this, profile A → Standard → profile B records the
+    /// STANDARD's arrangement under A's name: the live slot would
+    /// still read "A" when B arrives, and what it files is
+    /// whatever is on screen by then.
+    func recordOutgoingPartitioningForStandard() {
+        guard state.profilePartitioning.liveProfile != nil
+        else { return }
+        state.profilePartitioning.record(
+            state.workspaces.allSpaces,
+            handingLiveTo: nil
+        )
+    }
+
     /// Puts the incoming profile's own windows back in its own
     /// Spaces.
     ///

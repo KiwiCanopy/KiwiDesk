@@ -33,7 +33,7 @@ struct ProfileSpacesSeamTests {
         // the #634 reset.
         "profilePartitioning": [
             "State/StateCoordinator.swift": 1,
-            "Profiles/KiwiCore+ProfileSpaces.swift": 4,
+            "Profiles/KiwiCore+ProfileSpaces.swift": 6,
             "App/KiwiCore+RekeyEvent.swift": 1,
             "App/KiwiCore+Reset.swift": 1,
             "Profiles/KiwiCore+ProfileRename.swift": 1,

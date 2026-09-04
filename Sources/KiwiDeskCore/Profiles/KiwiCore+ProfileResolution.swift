@@ -193,6 +193,11 @@ extension KiwiCore {
         composed: ProfileComposition.Composed,
         forceRetile: Bool
     ) {
+        // #1230: a Standard is not a profile — file whatever
+        // profile was live and hand the slot back, or its
+        // arrangement is what gets recorded under that profile's
+        // name at the next switch.
+        recordOutgoingPartitioningForStandard()
         tiler.settings = composed.settings
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {

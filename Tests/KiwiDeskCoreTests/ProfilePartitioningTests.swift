@@ -221,6 +221,39 @@ struct ProfilePartitioningTests {
         )
     }
 
+    /// A built-in Standard is not a profile. Going A → Standard
+    /// → B must file A's OWN arrangement, not the one the
+    /// Standard left on screen by the time B arrives.
+    @Test("A Standard hands the live slot back")
+    func standardDoesNotStealAProfilesRecord() {
+        let core = makeCore()
+        live(core, [1, 2])
+        let a = profile("A", spaces: ["1", "2"])
+        let b = profile("B", spaces: ["1", "2"])
+        core.apply(profile: a, forceRetile: false)
+        core.state.workspaces.add(WindowID(1), to: "1")
+        core.state.workspaces.add(WindowID(2), to: "2")
+
+        core.apply(
+            composed: ProfileComposition.Composed(
+                sourceName: "Std",
+                spaces: ["1", "2"],
+                spaceModes: ["1": .bsp, "2": .bsp],
+                assignment: [:],
+                settings: TilingSettings()
+            ),
+            forceRetile: false
+        )
+        // The Standard rearranges what is on screen.
+        core.state.workspaces.add(WindowID(2), to: "1")
+
+        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: a, forceRetile: false)
+        // A gets ITS arrangement back, not the Standard's.
+        #expect(members(core, "1") == [WindowID(1)])
+        #expect(members(core, "2") == [WindowID(2)])
+    }
+
     // MARK: - The enders
 
     @Test("A renamed profile keeps its partitioning")

@@ -59,7 +59,7 @@ struct ProfilePartitioning: Sendable {
     /// restore re-adds in this order.
     mutating func record(
         _ spaces: [Space],
-        handingLiveTo next: String
+        handingLiveTo next: String?
     ) {
         if let live = liveProfile {
             byProfile[live] = Dictionary(
