@@ -50,6 +50,13 @@ public struct StateCoordinator: Sendable {
     /// a re-key. Its space and rank are the two records above.
     var awayWindows: [WindowID: AwayWindow] = [:]
 
+    /// What each PROFILE's Spaces held when it was last live
+    /// (#1230) — the record the three above cannot make, because
+    /// a profile switch moves no window out of state. Reached
+    /// only through `KiwiCore+ProfileSpaces.swift`; its enders
+    /// are a profile deleted, a profile renamed, and #634.
+    var profilePartitioning = ProfilePartitioning()
+
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
 

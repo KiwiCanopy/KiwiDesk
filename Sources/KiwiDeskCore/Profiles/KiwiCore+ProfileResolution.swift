@@ -22,9 +22,14 @@ extension KiwiCore {
     /// AX-echo lag can't wobble windows.
     ///
     /// Growth threshold (review 2026-07): two classification
-    /// Bools is the ceiling. A THIRD would be the point to
-    /// fold them into one apply-intent value (.userExplicit /
-    /// .hardwareEvent) — do not add Bool #3. The session
+    /// Bools is the ceiling, and #1230 reached it without adding
+    /// one — the prune now has two independent causes
+    /// (`pruneStaleSpaces || switching`) while only the flag
+    /// syncs the sidecar, and `switching` itself answers three
+    /// states. Read the threshold as SPENT: the next
+    /// classification folds these into one apply-intent value
+    /// (.userExplicit / .hardwareEvent) rather than joining
+    /// them. The session
     /// ratio-layer clear (#458) rides this same classification;
     /// an eventual fold carries it along.
     func apply(
@@ -32,6 +37,11 @@ extension KiwiCore {
         pruneStaleSpaces: Bool = false,
         forceRetile: Bool
     ) {
+        // #1230: file the OUTGOING profile's partitioning before
+        // anything rebuilds the space set, and learn in one
+        // answer whether this apply is a profile CHANGE — which
+        // gates both the prune below and the restore after it.
+        let switching = recordOutgoingPartitioning(before: profile)
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = profile.settings
@@ -61,18 +71,32 @@ extension KiwiCore {
         state.workspaces.reorder(
             matching: profile.orderedSpaces
         )
-        if pruneStaleSpaces {
+        // A profile CHANGE always replaces the space set (#1230):
+        // name-matching into the outgoing profile's Spaces is what
+        // made two profiles' `1` the same Space, and merged an
+        // arrangement away for good. Derived, not a third
+        // classification Bool — the growth threshold above stands.
+        if pruneStaleSpaces || switching {
             pruneSpaces(
                 keeping: declared,
                 orderedBy: profile.orderedSpaces,
                 preferring: profile.fallbackSpace
             )
+        }
+        if pruneStaleSpaces {
             // An authoritative reconcile just fixed the live space
             // set — mirror it into the sidecar so the cold-boot
             // seed can't re-inject a space this prune dropped
-            // (#77). No-op when not GUI-managed.
+            // (#77). No-op when not GUI-managed. A switch-driven
+            // prune deliberately does NOT sync: the sidecar is the
+            // user's managed config, and a Desktop binding
+            // swapping profiles under them must not rewrite it.
             syncGuiSpacesToLive()
         }
+        // #1230: and now put this profile's own windows back into
+        // its own Spaces. After the prune, so what the profile has
+        // never seen is already in its `fallback_space`.
+        if switching { restorePartitioning(of: profile) }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
@@ -174,6 +198,11 @@ extension KiwiCore {
         composed: ProfileComposition.Composed,
         forceRetile: Bool
     ) {
+        // #1230: a Standard is not a profile — file whatever
+        // profile was live and hand the slot back, or its
+        // arrangement is what gets recorded under that profile's
+        // name at the next switch.
+        recordOutgoingPartitioningForStandard()
         tiler.settings = composed.settings
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
@@ -253,59 +282,12 @@ extension KiwiCore {
         try profiles.save(
             buildProfile(name: name, modes: nil)
         )
+        adoptStandardSave(name)
         // A preset can define more spaces than the first-run seed
         // authored digit shortcuts for; bind the newcomers
         // additively so ⌃⌥N covers them too (#485).
         topUpDigitShortcuts()
         return name
-    }
-
-    /// Total space→display resolution (#36): every space gets
-    /// a screen via the shared `SpacePlacement` precedence,
-    /// written into workspace state so the GUI renders the
-    /// resolved mapping.
-    func resolveSpaceDisplays(
-        mainID: DisplayID = PositionalDisplays.liveMainID
-    ) {
-        let displays = state.workspaces.allDisplays
-        // The one unresolvable state; resolve() below can then
-        // never return nil.
-        guard !displays.isEmpty else { return }
-        let assignment =
-            ProfileComposition.compose(
-                displays: displays,
-                mainID: mainID
-            )?.assignment ?? [:]
-        var relocated: [SpaceID] = []
-        for space in state.workspaces.allSpaces {
-            guard
-                let resolved = SpacePlacement.resolve(
-                    space: space.id,
-                    pins: spacePins,
-                    mainSpaces: mainSpaces,
-                    displays: displays,
-                    mainID: mainID,
-                    assignment: assignment
-                )
-            else { continue }
-            let previous = state.workspaces.display(of: space.id)
-            state.workspaces.assign(
-                space.id,
-                to: resolved.display.id
-            )
-            if let previous, previous != resolved.display.id {
-                relocated.append(space.id)
-            }
-        }
-        // Every space-relocation path funnels through this
-        // resolve — monitor re-dock, profile apply, config
-        // reload, pin displacement — so the cross-display float
-        // re-anchor lives HERE (#444 review), not per verb. A
-        // first-ever assignment (`previous == nil`, boot) is not
-        // a relocation.
-        for space in relocated {
-            reanchorFloats(of: space)
-        }
     }
 
     /// Re-applies the active profile (or recomposes the active

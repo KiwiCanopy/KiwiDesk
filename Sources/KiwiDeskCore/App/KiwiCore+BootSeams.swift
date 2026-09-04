@@ -88,6 +88,7 @@ extension KiwiCore {
         // under rather than a number a renumber can move.
         let desktops = stampedDesktopSnapshot()
         lastDesktop = desktops.mainCurrentKey
+        desktopMemory.lastDesktopSpace = desktops.mainCurrentSpace
         desktopMemory.seed(desktops)
         // Cheap and off-main; kicked here so the first glyph bar
         // never renders an image-fallback frame.

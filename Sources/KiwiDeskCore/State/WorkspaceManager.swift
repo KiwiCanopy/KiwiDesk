@@ -103,6 +103,28 @@ public struct WorkspaceManager: Sendable {
         activeSpace = id
     }
 
+    /// Shows `id` on `display` (#1230, the secondary-display
+    /// Desktop switch). Lives here because `WorkspaceMapSealTests`
+    /// pins `secondaryShown` to the two `WorkspaceManager*` files:
+    /// a stray write strands exactly the entries `assign(_:to:)`'s
+    /// filter exists to drop.
+    ///
+    /// Refuses a space that does not live on that display — the
+    /// same rule `activeSpace(on:)` reads with, since one space on
+    /// two screens is the state that self-healing exists for. When
+    /// the display holds the ACTIVE space the switch moves that
+    /// instead, so the map's own invariant (the active display is
+    /// never a key here) survives a swipe on the focused screen.
+    public mutating func show(_ id: SpaceID, on display: DisplayID) {
+        ensureSpace(id)
+        guard spaceDisplay[id] == display else { return }
+        if activeSpace.flatMap({ spaceDisplay[$0] }) == display {
+            activate(id)
+            return
+        }
+        secondaryShown[display] = id
+    }
+
     /// Active space shown on specified display.
     public func activeSpace(on display: DisplayID) -> SpaceID? {
         if let active = activeSpace, spaceDisplay[active] == display {
@@ -236,6 +258,44 @@ public struct WorkspaceManager: Sendable {
         }
         spaces[id]?.focused = window
         lastFocused = window
+    }
+
+    /// Re-asserts the focus trackers a batch of `add` calls
+    /// cleared (#1230).
+    ///
+    /// `remove` nils `lastFocused` and `focusReturnCandidate`
+    /// whenever the moved window holds them, which is right for a
+    /// window LEAVING and wrong for one being re-homed inside the
+    /// same state. A caller moving many windows at once restores
+    /// them here rather than reaching the fields, which the
+    /// seal keeps inside this file.
+    ///
+    /// Each value is re-asserted only where it still names a
+    /// window state holds, and a Space's focus only where that
+    /// Space still exists — a prune may have dropped it.
+    ///
+    /// Residue, stated so it is not re-derived: a window moved
+    /// BETWEEN Spaces ends focused in neither — its old Space's
+    /// focus went to a successor, and its new Space's held focus
+    /// is restored over it — while `lastFocused` still names it.
+    /// Correct for the restore, which moves windows back to
+    /// Spaces that already had their own focus; weigh it before
+    /// reusing this for a mover with different intent.
+    mutating func restoreFocusTrackers(
+        lastFocused: WindowID?,
+        candidate: WindowID?,
+        spaceFocus: [SpaceID: WindowID]
+    ) {
+        for (id, focused) in spaceFocus
+        where spaces[id]?.windows.contains(focused) == true {
+            spaces[id]?.focused = focused
+        }
+        if let lastFocused, space(of: lastFocused) != nil {
+            self.lastFocused = lastFocused
+        }
+        if let candidate, space(of: candidate) != nil {
+            focusReturnCandidate = candidate
+        }
     }
 
     /// Mutates space in place.

@@ -95,6 +95,13 @@ extension KiwiCore {
             )
         }
 
+        // BEFORE the write (#1230): every sidecar write stamps
+        // the live Desktop→Space memory in, so discarding after
+        // it would put the DESTINATION's map into the file the
+        // reload below then adopts — the destination's
+        // arrangement surviving a confirmed replace, which is
+        // exactly what the discard exists to prevent.
+        discardSavedArrangement()
         let outcome = try writeIncoming(bundle)
 
         // Adoption is the one piece of live profile state the
@@ -111,8 +118,8 @@ extension KiwiCore {
         // dead ids into the remembered-space map. The snapshot
         // rightly does not TRAVEL in a bundle; that is a different
         // question from whether the destination's own survives a
-        // confirmed replace, and it must not.
-        discardSavedArrangement()
+        // confirmed replace, and it must not. Discarded above,
+        // before the write that would otherwise carry it.
 
         // Reload first, THEN apply — the order the adopt path
         // already uses, and for its stated reason: the reload

@@ -184,14 +184,27 @@ The obligations that fall on a change here:
   restored on the replug. Pruning on absence would delete a
   binding the user gets back in ten seconds
   (`DesktopBindingIdentityTests`).
+- **A per-Desktop record here is a STORE, and which ones may
+  exist is [state-and-layout.md](state-and-layout.md)'s
+  ▸ "Never store which Space a window holds PER DESKTOP".** That
+  rule governs `ProfilePartitioning`, the Space cursor and
+  anything keyed by `DesktopKey`, all of which live in this
+  directory — while its own `paths:` glob does not reach here, so
+  it never loads at the seam it governs. Read it before adding a
+  Desktop-keyed map; the argument is not restated here.
 - **Never carry the `.number` fallback's collision into a
   PERSISTED map.** A number means nothing without saying whose
   numbering it is, so two arrangements collide on one entry;
-  `virtualSpaces` accepts that (it is session-only, the cost is
-  at most one wrong Space on the first return after a display
-  change, and it heals at the next departure), and a map that
-  outlives the session does not inherit the trade and owes its
-  own answer (#1230).
+  `virtualSpaces` accepted that while it was session-only, and
+  #1230 answered it when the map became durable: the encoder
+  writes `.identity` entries alone and drops the numbers, since a
+  persisted wrong number never heals where an in-memory one does
+  (`DesktopSpacePersistenceTests`). A further map that outlives
+  the session owes the same answer — and the answer is not always
+  "drop": `profileBindings` PERSISTS its `.number` entries on
+  purpose, because there the number is one the USER declared and
+  pins when that Desktop appears, where the Space memory's is one
+  KiwiDesk inferred from a reading that had not landed yet.
 - **The write is a seam** (`DesktopMemory.writeStamp`), live in
   production and pinned to a refusal by both `makeTestCore`
   twins: a fixture space id IS a real Desktop id on the host, and
@@ -254,7 +267,7 @@ writes under — because two readings taken moments apart can
 disagree about which display switched. That means **threading
 the value, not re-reading the seam**: a helper the handler calls
 takes the answer as a parameter (`applyDesktopBinding(desktop:)`,
-`virtualSpaceTarget(for:key:)`, the emit's `mainUUID`), and the
+`virtualSpaceTarget(for:in:)`, the emit's `mainUUID`), and the
 no-argument conveniences beside them exist for callers that hold
 no snapshot — a Lua/CLI verb, a config load. Nothing scans for
 a helper that reads its own answer back, so each new one owes

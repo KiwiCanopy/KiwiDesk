@@ -114,7 +114,11 @@ struct ReturningFocusSeamTests {
             sites.count == 3
                 && files == [
                     "KiwiCore+Events.swift",
-                    "KiwiCore+Desktops.swift",
+                    // The settle moved here when
+                    // `KiwiCore+Desktops.swift` hit the §2.1
+                    // ceiling (#1230); same reader, same
+                    // moment.
+                    "KiwiCore+DesktopSettle.swift",
                     Self.memoryFile,
                 ],
             .init(
@@ -269,7 +273,7 @@ struct ReturningFocusSeamTests {
         let source = try SourceScan.strippedSource(
             at: Self.core
                 .appendingPathComponent("Profiles")
-                .appendingPathComponent("KiwiCore+Desktops.swift")
+                .appendingPathComponent("KiwiCore+DesktopSettle.swift")
         )
         guard
             let settle = SourceScan.declarationBody(

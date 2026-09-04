@@ -204,6 +204,14 @@ extension KiwiCore {
         } else {
             crash.shutdownCleanly()
         }
+        // #1230: which Space each Desktop was showing is the one
+        // record here that has to outlive the process, and the
+        // session file above does not carry it — it holds the
+        // CURRENT Desktop's Spaces alone, so every other
+        // Desktop's windows are filed at the next boot from this
+        // map. Beside the session write for that reason, and
+        // after it, so a throw there cannot cost both.
+        persistDesktopSpaceMemory()
         // A stop mid-boot leaves the readiness signal up
         // otherwise: `deferred.cancelAll()` above killed the
         // chunk continuation, so nothing else would ever publish

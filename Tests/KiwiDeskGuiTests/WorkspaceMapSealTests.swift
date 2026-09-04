@@ -35,13 +35,20 @@ struct WorkspaceMapSealTests {
     /// Per needle: every file allowed to name it, by path under
     /// `Sources/KiwiDeskCore`, with today's exact count (comments
     /// stripped). Keyed by path so same-named files never pool.
+    /// `WorkspaceManager.swift`'s counts rose with #1230's
+    /// `show(_:on:)` — the secondary-display Desktop switch's
+    /// write. It is in THIS file rather than at the switch
+    /// handler precisely because of this seal: the write pairs
+    /// with a same-display check and with the active-display
+    /// case, and a caller spelling either itself is the stranded
+    /// entry `assign(_:to:)`'s filter exists to drop.
     private let allowed: [String: [String: Int]] = [
         "spaceDisplay": [
-            "State/WorkspaceManager.swift": 6,
+            "State/WorkspaceManager.swift": 8,
             "State/WorkspaceManager+Displays.swift": 6,
         ],
         "secondaryShown": [
-            "State/WorkspaceManager.swift": 6,
+            "State/WorkspaceManager.swift": 7,
             "State/WorkspaceManager+Displays.swift": 3,
         ],
     ]

@@ -15,6 +15,24 @@ final class DesktopMemory {
     /// an identity means the same thing on every arrangement.
     var virtualSpaces: [DesktopKey: SpaceID] = [:]
 
+    /// Whether the map above is the session's own answer yet
+    /// (#1230). It becomes durable through `gui.json`, and every
+    /// sidecar write stamps it in — so a write taken BEFORE the
+    /// config has been read would erase the file's copy with an
+    /// empty map that means "nothing established", not "nothing
+    /// remembered". Set by the load, by the first departure
+    /// filed, and by the discard, which is a cleared memory
+    /// rather than an absent one.
+    var spaceMemoryEstablished = false
+
+    /// The Desktop the last switch arrived on, by its NATIVE id
+    /// (#1230) — the same Desktop `KiwiCore.lastDesktop` names by
+    /// key. A key is re-keyed at any mint, so anything outliving
+    /// one reading compares on this: the 600 ms settle's pending
+    /// closure would otherwise stand the whole settle down once
+    /// its Desktop was stamped.
+    var lastDesktopSpace: SkyLight.SpaceID?
+
     /// Each space's last honored focus per native Space it was
     /// honored ON (#1207) — written at the focus report, never by
     /// a fold or the switch handler.

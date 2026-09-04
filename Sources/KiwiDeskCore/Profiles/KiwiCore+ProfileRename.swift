@@ -31,6 +31,9 @@ extension KiwiCore {
         to new: String
     ) throws {
         try profiles.rename(from: old, to: new)
+        // #1230: the partitioning is keyed by profile NAME, so it
+        // follows the rename or the profile loses its own Spaces.
+        state.profilePartitioning.rename(old, to: new)
         var chased = false
         for (key, binding) in desktopBindings
         where binding.profile == old {

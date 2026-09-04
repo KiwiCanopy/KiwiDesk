@@ -37,6 +37,10 @@ extension KiwiCore {
         moveLatch.rekey(old: old, new: new)
         followFocus.rekey(old: old, new: new)
         rekeyDesktopFocus(old: old, new: new)
+        // #1230: every profile's remembered partitioning too, not
+        // just the live one — a tab switched while another profile
+        // is up must still be found when this one comes back.
+        state.profilePartitioning.rekey(old, to: new)
         // A stashed floating window's captured frame must
         // follow the re-key too, or the restore sweep drops
         // it and the window stays parked at the stash

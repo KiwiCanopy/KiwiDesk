@@ -915,9 +915,9 @@ edit it and pick an SF Symbol, emoji, or single character. The icon
 appears in the Monitors and Shortcuts sections as a visual aid.
 
 To **mark a space as the fallback** for profile switches, right-click
-a space and pick **Make Fallback**. When you load a profile, any
-windows in spaces the new profile doesn't define are moved to this
-fallback space instead of being hidden. Without an explicit choice,
+a space and pick **Make Fallback**. Whenever the profile changes,
+any windows in spaces the new profile doesn't define are moved to
+this fallback space instead of being hidden. Without an explicit choice,
 windows land in the first space of the profile's list.
 
 ## Layout Defaults
@@ -3259,12 +3259,13 @@ flowchart TD
 Bindings edited here are stored in `gui.json`
 (`profile_bindings`); a hand-written config declares them in
 `init.lua` with `bind_profile_to_desktop` instead. Each
-Desktop your main screen shows also remembers which space it was
-on — and which window you had focused: return to it and you land
-on both, the same space with the same window focused and, in a
-scrolling layout, still in view. (If the profile changed in
-between and that space no longer exists, you land on the first
-space instead. A window that takes more than a few seconds to
+Desktop also remembers which space it was on — every screen's,
+not only the main one's — so returning to it lands you on that
+space. Your main screen's Desktops remember **which window you
+had focused** as well: return and it is focused again, and in a
+scrolling layout still in view. (If the profile changed in
+between and that space no longer exists, you land on one no
+other Desktop is showing or remembers. A window that takes more than a few seconds to
 come back keeps whatever macOS itself focused — see
 [Accepted limitations](accepted-limitations.md).)
 

@@ -26,12 +26,19 @@ struct GuiConfigParityTests {
         // (SettingsModel+Profiles), `guiConfigSeed`,
         // `applyStructuredRules` / `applyProfileScopedState`,
         // the round-trip below — and only then this list.
+        //
+        // `desktopSpaces` (#1230) deliberately skips ONE of
+        // those: `copyGlobals`. It is runtime memory rather than
+        // an edited setting, so counting it would light the save
+        // pill on every Desktop swipe. It is stamped at the write
+        // instead (`GuiConfigStore.liveDesktopSpaces`), which is
+        // why no caller has to carry it.
         #expect(
             fields == [
                 "format", "settings", "spaces", "spaceModes",
                 "appRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
-                "profileBindings", "layers",
+                "profileBindings", "desktopSpaces", "layers",
             ]
         )
     }
@@ -48,6 +55,10 @@ struct GuiConfigParityTests {
                 profile: "Studio",
                 desktop: 2
             )
+        ]
+        config.desktopSpaces = [
+            .identity(DesktopIdentity(raw: "RT-STAMP")):
+                SpaceID("b")
         ]
         config.layers = [
             KeyLayer(
@@ -72,6 +83,7 @@ struct GuiConfigParityTests {
         #expect(back.floatRules == config.floatRules)
         #expect(back.ignoreRules == config.ignoreRules)
         #expect(back.profileBindings == config.profileBindings)
+        #expect(back.desktopSpaces == config.desktopSpaces)
         #expect(back.layers == config.layers)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.

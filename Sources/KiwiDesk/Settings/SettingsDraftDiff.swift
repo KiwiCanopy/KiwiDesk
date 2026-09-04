@@ -176,7 +176,8 @@ struct SettingsDraftDiff {
         let mirror = Mirror(reflecting: config)
         for child in mirror.children {
             guard let name = child.label,
-                name != "settings", name != "format"
+                name != "settings",
+                !GuiConfig.undraftedFields.contains(name)
             else { continue }
             walk(
                 child.value,

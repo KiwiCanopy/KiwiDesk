@@ -13,7 +13,13 @@ import Foundation
 /// hooks-only, owned by the user.
 extension KiwiCore {
     public var guiConfigStore: GuiConfigStore {
-        GuiConfigStore(directory: configDirectory)
+        var store = GuiConfigStore(directory: configDirectory)
+        // #1230: read here so every write stamps the CURRENT
+        // Desktop memory — the accessor runs immediately before
+        // the save it feeds, and most callers hand back a config
+        // they loaded earlier.
+        store.liveDesktopSpaces = persistedDesktopSpaces()
+        return store
     }
 
     /// The base keybinding modes every profile override

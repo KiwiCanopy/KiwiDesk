@@ -59,8 +59,34 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// survives a renumber; by its Mission Control number where
     /// it does not (no bridge on this macOS, or a stamp declined).
     public var profileBindings: [DesktopKey: DesktopBinding] = [:]
+    /// The Space each Desktop was last showing (#1230), so a
+    /// restart does not re-scatter them.
+    ///
+    /// **Identity-keyed entries only** — a `.number` key is the
+    /// bridge-absent fallback, and a number means nothing without
+    /// saying whose numbering it is, so two arrangements collide
+    /// on one entry. `virtualSpaces` accepts that in memory
+    /// because a wrong answer heals at the next departure; once
+    /// persisted it does not, so the encoder drops them
+    /// (profiles.md ▸ "Never carry the `.number` fallback's
+    /// collision into a PERSISTED map").
+    public var desktopSpaces: [DesktopKey: SpaceID] = [:]
     /// Keybinding modes; first is default mode.
     public var layers: [KeyLayer] = [KeyLayer.defaultLayer]
+
+    /// Fields that ride `gui.json` without being settings the
+    /// user DRAFTS — the Settings walk, the census guard and the
+    /// save pill all skip them, so the reason lives here rather
+    /// than three times.
+    ///
+    /// `format` is file metadata. `desktopSpaces` is runtime
+    /// Desktop memory (#1230): it changes every time you swipe a
+    /// Desktop, so counting it as a config change would light the
+    /// save pill constantly, and it is stamped at the write
+    /// (`GuiConfigStore.liveDesktopSpaces`) rather than drafted.
+    public static let undraftedFields: Set<String> = [
+        "format", "desktopSpaces",
+    ]
 
     public init() {}
 
@@ -146,6 +172,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
         case profileBindings = "profile_bindings"
+        case desktopSpaces = "desktop_spaces"
         case layers
     }
 
@@ -190,6 +217,14 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             ) ?? []
         profileBindings =
             try decodeProfileBindings(from: container)
+        // Additive since #1230: a file written before it decodes
+        // to empty, which IS "no Desktop remembers a Space yet",
+        // so no format bump and no migration.
+        desktopSpaces =
+            try container.decodeIfPresent(
+                [DesktopKey: SpaceID].self,
+                forKey: .desktopSpaces
+            ) ?? [:]
         // A hand-edited sidecar can carry duplicate mode names or
         // an icon on the default mode (#31) — normalized here so
         // invalid entries never reach the loader or the GUI.
@@ -236,6 +271,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(
             profileBindings,
             forKey: .profileBindings
+        )
+        try container.encode(
+            desktopSpaces.filter { $0.key.isIdentity },
+            forKey: .desktopSpaces
         )
         try container.encode(layers, forKey: .layers)
     }

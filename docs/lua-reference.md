@@ -4338,8 +4338,8 @@ end)
 - `save_profile` persists the current layout (gaps, modes,
   parameters, animations, window positions, and optionally a sparse
   keybinding override).
-- `load_profile` switches to the named profile and reconciles spaces
-  by name.
+- `load_profile` switches to the named profile and makes its space
+  list the authority (see *Space Reconciliation*).
 - `delete_profile` removes the profile; deleting the last profile of
   a count reverts that count to its built-in Standard.
 - `set_default_profile` marks a profile as the fallback for its
@@ -4439,17 +4439,32 @@ KiwiDesk.bind_profile_to_desktop(2, "Creator Studio")
 
 ### Space Reconciliation
 
-**Switching profiles reconciles your spaces.** Explicitly loading a
-profile makes its space set authoritative: a space is matched to the
-new profile **by name** (not position), so a window in a space whose
-name also exists in the new profile stays put — regardless of any
-layout difference. A space whose name the new profile doesn't define
-is dropped, and any windows it held are forwarded to the profile's
-fallback space.
+**Every profile owns its own spaces.** Two profiles can each define
+a space called `1` — or `Work` — and they are different spaces, each
+with its own windows. The name is still how you address a space
+(`focus_space 1` means "space 1 of the profile I'm in"); the profile
+is simply the scope that name resolves in.
 
-This reconcile happens only on an explicit `load_profile`; automatic
-applies on a monitor change or a Desktop binding leave your
-spaces untouched.
+**Switching profiles remembers where your windows were.** When you
+switch away, KiwiDesk files which space each window was in under the
+profile you are leaving; when you switch back, it puts them back.
+Switch to another profile and return, and your arrangement returns
+with you.
+
+A window the incoming profile has never seen — opened while
+another profile was up — stays where it is when that profile
+declares the space it is sitting in, and lands in the profile's
+**fallback space** when it does not: the same setting that has
+always answered "where does a window go when its space is gone".
+
+This happens on any profile CHANGE — an explicit `load_profile`, a
+Desktop binding swapping profiles under you, or a monitor change
+that resolves a different profile. Re-applying the profile that is
+*already* live changes nothing, so a reconnect that lands on the
+same profile leaves your layout alone.
+
+The record is per session: it is what makes switching away and
+back lossless while KiwiDesk runs, and it is not written to disk.
 
 ### Profile Monitor Sets
 
@@ -4594,8 +4609,9 @@ activates" means Desktop N became current on the main screen**
 (the screen with the menu bar). With macOS's "Displays have
 separate Spaces" on, each screen switches Desktops on its own —
 a swipe on a secondary screen retiles that screen's arrived
-windows and reports itself on `desktop_change`
-(`monitor` ≥ 2), but never selects a profile. A Desktop that
+windows, moves that screen onto its own Desktop's space, and
+reports itself on `desktop_change` (`monitor` ≥ 2) — but never
+selects a profile. A Desktop that
 lives on a secondary screen can carry a binding, and it fires
 if a display change ever makes that Desktop the main screen's.
 With the option off, or with one screen, the main screen's
@@ -4606,14 +4622,20 @@ with `move_to_desktop` or `move_to_desktop_and_follow` above.
 Nothing else does: a window stays on its Desktop, and KiwiDesk
 arranges the ones on the Desktop you're looking at.
 
-Each Desktop the main screen shows also remembers which
-KiwiDesk space it was showing: switch away and back, and you
-land on the same space with the same windows hidden. The memory
-is kept per screen, so it survives display changes without ever
-answering for the wrong arrangement, and a remembered space that
-the (possibly just-swapped) profile no longer has falls back to
-the first space — the same start a Desktop you haven't visited
-yet gets.
+Each Desktop remembers which KiwiDesk space it was showing —
+every screen's, not only the main one's: switch away and back,
+and you land on the same space with the same windows hidden. A
+Desktop is remembered by an identity KiwiDesk gives it rather
+than by its Mission Control number, so the memory survives
+display changes and renumbering, and those identity-keyed
+entries are written to `gui.json` and survive a restart — which
+means a config KiwiDesk owns. A hand-written `init.lua` setup has
+no sidecar to write, so the memory is session-only there.
+
+A Desktop you haven't visited yet takes a space no other Desktop
+is showing or remembers, falling back to the first when they are
+all spoken for. A remembered space the (possibly just-swapped)
+profile no longer has takes that same exit.
 
 ## Animations, Sleep & Wake
 

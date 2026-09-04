@@ -235,7 +235,7 @@ struct DesktopFocusPaymentTests {
         leaveDesktop1(core)
         returnToDesktop1(core)
         arrive(first, in: core)
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(
             box.lines.contains {
                 $0.contains("settle refocus stands down")
@@ -243,7 +243,7 @@ struct DesktopFocusPaymentTests {
         )
         arrive(focused, in: core)
         box.lines = []
-        core.desktopSettle(ifStill: core.lastDesktop)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(
             !box.lines.contains {
                 $0.contains("settle refocus stands down")

@@ -1,0 +1,257 @@
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// #1230's two axes each have ONE door, and this pins that they
+/// stay one door.
+///
+/// The doors answer different questions and are deliberately not
+/// merged: `profilePartitioning` is a STORE, written as a profile
+/// goes inactive and read as it returns, while `virtualSpaces` is
+/// a one-`SpaceID` cursor and the Desktop partition itself is
+/// never stored at all. `KiwiCore+DesktopSpaces.swift` carries
+/// the discriminator — WHEN a record is authoritative — and
+/// `state-and-layout.md` bans restating the weaker form. A consumer
+/// that reaches past either door re-derives a rule that has an
+/// owner, which is how the two came to disagree before #1230.
+///
+/// Counts are pinned per file with comments stripped, the
+/// `WorkspaceMapSealTests` shape. A new reader adds itself here
+/// and says why.
+@Suite("The #1230 Space doors stay one door each")
+struct ProfileSpacesSeamTests {
+    private var coreRoot: URL {
+        SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+    }
+
+    /// Per needle: every file allowed to name it, by path under
+    /// `Sources/KiwiDeskCore`, with today's exact count.
+    private let allowed: [String: [String: Int]] = [
+        // The profile axis. The three enders are the writes
+        // outside the door: a re-key, a rename, a delete, plus
+        // the #634 reset. This map pins where the store may be
+        // NAMED; which save exits owe an adopt is the separate
+        // `profileWriteSitesAreCounted` below, because a call to
+        // `adoptSavedProfile` names no store and is invisible
+        // here (#1246).
+        "profilePartitioning": [
+            "State/StateCoordinator.swift": 1,
+            "Profiles/KiwiCore+ProfileSpaces.swift": 8,
+            "App/KiwiCore+RekeyEvent.swift": 1,
+            "App/KiwiCore+Reset.swift": 1,
+            "Profiles/KiwiCore+ProfileRename.swift": 1,
+            "Profiles/KiwiCore+Profiles.swift": 1,
+        ],
+        // The Desktop axis' cursor. `KiwiCore+AwayWindows` reads
+        // it to file a boot-census window under the Space its
+        // Desktop was showing (#1146) — the one reader outside
+        // the door, and it reads rather than writes.
+        // The door grew #1230's persistence pair, so the
+        // sidecar's three sites — the load, the seed and the
+        // write-time stamp — name it through here rather than
+        // reaching the map themselves.
+        "virtualSpaces": [
+            "Profiles/DesktopMemory.swift": 1,
+            "Profiles/KiwiCore+DesktopSpaces.swift": 6,
+            "Profiles/KiwiCore+DesktopSpacePersistence.swift": 5,
+            "App/KiwiCore+AwayWindows.swift": 1,
+        ],
+    ]
+
+    @Test("Each store is named only where its door lives")
+    func storesStayBehindTheirDoors() throws {
+        let root = coreRoot
+        let prefix = root.path + "/"
+        var counts: [String: [String: Int]] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let key =
+                file.path.hasPrefix(prefix)
+                ? String(file.path.dropFirst(prefix.count))
+                : file.path
+            for needle in allowed.keys {
+                let hits = source.occurrences(of: needle)
+                guard hits > 0 else { continue }
+                counts[needle, default: [:]][key] = hits
+            }
+        }
+        for (needle, files) in counts {
+            for (file, count) in files.sorted(
+                by: { $0.key < $1.key }
+            ) {
+                let stray =
+                    "\(file) names \(needle) \(count) time(s); "
+                    + "go through the door "
+                    + "(KiwiCore+ProfileSpaces for the profile "
+                    + "axis, KiwiCore+DesktopSpaces for the "
+                    + "Desktop one), or justify and pin it here"
+                #expect(
+                    allowed[needle]?[file] == count,
+                    Comment(rawValue: stray)
+                )
+            }
+        }
+        // The inverse: a pinned count that vanished leaves an
+        // unfalsifiable entry, and a mistyped root would pass
+        // vacuously without it.
+        for (needle, files) in allowed {
+            for (file, expected) in files {
+                let vanished =
+                    "\(file) no longer names \(needle) "
+                    + "\(expected) time(s) — drop or re-pin "
+                    + "its entry"
+                #expect(
+                    counts[needle]?[file] == expected,
+                    Comment(rawValue: vanished)
+                )
+            }
+        }
+    }
+
+    /// The refused design, pinned NEGATIVELY: no stored map
+    /// anywhere is keyed by `DesktopKey` except the ones named
+    /// here, each by an exact count. #1230 refused a
+    /// per-Desktop Space CONTENTS store because that record
+    /// would be read while the compositor is still moving what
+    /// it copies — and every disagreement loses or duplicates a
+    /// window.
+    ///
+    /// Located by the KEY rather than by the value's spelling.
+    /// The first draft listed five literal type shapes, so a
+    /// named wrapper — `[DesktopKey: DesktopWorkspaces]`, the
+    /// likeliest thing anyone would actually write — sailed
+    /// through green while the suite read as pinning the
+    /// refusal. tests.md forbids exactly that in a negative
+    /// clause: locate the subject by something it cannot lose,
+    /// and a Desktop-keyed store cannot lose its key.
+    @Test("Only the ruled maps are keyed by Desktop")
+    func noDesktopKeyedContentsStore() throws {
+        // Every `[DesktopKey: …]` declaration KiwiDesk may hold,
+        // with what each one stores. A new entry is a new durable
+        // per-Desktop record and owes the argument above.
+        // Path → (how many `[DesktopKey:` it declares, what it
+        // stores). The COUNT is load-bearing: membership alone
+        // let a second declaration into an already-listed file —
+        // `DesktopMemory.swift` being the obvious home for the
+        // refused store — pass green, which is the fail-open a
+        // negative clause must not have.
+        let allowed: [String: (Int, String)] = [
+            "Profiles/DesktopMemory.swift": (1, "the Space CURSOR"),
+            "App/KiwiCore.swift": (1, "the profile BINDINGS"),
+            "Config/GuiConfig.swift":
+                (2, "both, persisted in the sidecar"),
+            "Config/GuiConfigStore.swift":
+                (1, "the cursor's write-time stamp"),
+            "Profiles/KiwiCore+DesktopBindings.swift":
+                (2, "the shared re-key's moves and drops"),
+        ]
+        let root = coreRoot
+        let prefix = root.path + "/"
+        var found: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            // A stored DECLARATION, not a mention: a signature
+            // or a decode line names the type without holding
+            // one, and counting those made an ordinary refactor
+            // red this clause with a re-typed number as the fix.
+            let lines = source.split(separator: "\n")
+            let hits =
+                lines
+                .filter { line in
+                    line.contains("[DesktopKey:")
+                        && (line.contains("var ")
+                            || line.contains("let "))
+                }
+                .count
+            guard hits > 0 else { continue }
+            let key =
+                file.path.hasPrefix(prefix)
+                ? String(file.path.dropFirst(prefix.count))
+                : file.path
+            found[key] = hits
+        }
+        // Vacuity pin: a mistyped root would find nothing and
+        // pass, which is the fail-open this clause exists to
+        // avoid.
+        #expect(found.count >= 4)  // vacuity pin
+        for file in found.keys.sorted() {
+            #expect(
+                allowed[file]?.0 == found[file],
+                Comment(
+                    rawValue:
+                        "\(file) declares "
+                        + "\(found[file] ?? 0) Desktop-keyed "
+                        + "map(s), expected "
+                        + "\(allowed[file]?.0 ?? 0). If one "
+                        + "stores Space CONTENTS it is the "
+                        + "design #1230 refused "
+                        + "(KiwiCore+DesktopSpaces.swift carries "
+                        + "the argument); otherwise re-pin here "
+                        + "and say what it stores."
+                )
+            )
+        }
+        // The inverse, as the suite above it has: a pinned entry
+        // that vanished leaves an unfalsifiable line, and a
+        // mistyped root would pass every clause above.
+        for (file, expected) in allowed {
+            #expect(
+                found[file] == expected.0,
+                Comment(
+                    rawValue:
+                        "\(file) no longer declares "
+                        + "\(expected.0) Desktop-keyed map(s) "
+                        + "— drop or re-pin its entry"
+                )
+            )
+        }
+    }
+
+    /// Every `profiles.save(` in Core owes the partitioning an
+    /// adopt beside it: `ProfileManager.save` makes its argument
+    /// current, and the live slot has to move with it or the
+    /// next switch files nothing for the profile just written
+    /// (#1246, `ProfileSaveAdoptionTests`).
+    ///
+    /// This counts the SITES, which is what the obligation
+    /// attaches to — it cannot read whether a given site adopts,
+    /// and does not claim to. A fourth exit reds the count and
+    /// makes its author come here, which is the whole job: the
+    /// third exit (`applyStandard`) shipped un-adopted and no
+    /// suite noticed, because there was nothing to red.
+    private let saveExits: [String: Int] = [
+        "Profiles/KiwiCore+Profiles.swift": 2,
+        "Profiles/KiwiCore+ProfileResolution.swift": 1,
+    ]
+
+    @Test("Every profile write site is a known one")
+    func profileWriteSitesAreCounted() throws {
+        let root = coreRoot
+        let prefix = root.path + "/"
+        var counts: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let hits = source.occurrences(of: "profiles.save(")
+            guard hits > 0 else { continue }
+            let key =
+                file.path.hasPrefix(prefix)
+                ? String(file.path.dropFirst(prefix.count))
+                : file.path
+            counts[key] = hits
+        }
+        let stray =
+            "a profiles.save( site moved or appeared; every one "
+            + "owes the partitioning an adopt beside it "
+            + "(adoptSavedProfile / adoptStandardSave, #1246) — "
+            + "add it, then pin the site here"
+        #expect(counts == saveExits, Comment(rawValue: stray))
+    }
+}
