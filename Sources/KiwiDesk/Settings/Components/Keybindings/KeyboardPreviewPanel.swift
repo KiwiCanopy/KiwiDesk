@@ -4,13 +4,35 @@ import SwiftUI
 /// Keyboard shortcut allocation preview panel (#678, #812).
 ///
 /// Visualizes bound and available keys across modifier layers
-/// via `KeyboardCensus`.
+/// via `KeyboardCensus`, for the ONE keybinding layer the strip
+/// has selected (#1127) — the panel is a sibling of the section,
+/// so the layer arrives on `nav` rather than through the
+/// `keybindingLayerName` environment the rows read.
 struct KeyboardPreviewPanel: View {
     @ObservedObject var model: SettingsModel
     @State private var scope: KeyboardCensus.Scope = .all
 
+    /// The drawn layer, and the one every derivation below reads:
+    /// a census taken over the whole set answers "is this key
+    /// bound anywhere", where the board exists to answer "is it
+    /// free HERE".
+    private var shown: [KeyLayer] {
+        KeyboardCensus.shown(
+            model.nav.shortcutsLayer ?? KeyLayer.defaultName,
+            in: model.config.layers
+        )
+    }
+
+    /// The layer's name, or nil while it is the only one there
+    /// is — naming a choice nobody can make is noise, and the
+    /// header states it under the same condition.
+    private var layerLabel: String? {
+        guard model.config.layers.count > 1 else { return nil }
+        return shown.first?.name
+    }
+
     private var layers: [KeyboardCensus.ModifierLayer] {
-        KeyboardCensus.layers(in: model.config.layers)
+        KeyboardCensus.layers(in: shown)
     }
 
     private var liveScope: KeyboardCensus.Scope {
@@ -26,7 +48,7 @@ struct KeyboardPreviewPanel: View {
 
     private var claims: [UInt32: [KeyboardCensus.ModifierLayer]] {
         KeyboardCensus.claims(
-            in: model.config.layers,
+            in: shown,
             selected: selected
         )
     }
@@ -38,20 +60,34 @@ struct KeyboardPreviewPanel: View {
                 type: KeyboardMatrix.PhysicalType.current(),
                 claims: claims,
                 scope: liveScope,
-                conflicted: collisions
+                conflicted: collisions,
+                layerLabel: layerLabel
             )
             fillLegend.accessibilityHidden(true)
             tallySentence
             layoutRow
-            Text(
-                L(
-                    "panel.caption.draft",
-                    "Shows your draft, not the saved profile."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.ink3)
+            Text(caption)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink3)
         }
+    }
+
+    /// The board names what it draws: once the layer scopes the
+    /// picture, a board that changes under a strip click is
+    /// legible only if it says which layer it changed to (#1127).
+    private var caption: String {
+        guard let layerLabel else {
+            return L(
+                "panel.caption.draft",
+                "Shows your draft, not the saved profile."
+            )
+        }
+        return L(
+            "panel.caption.draft_layer",
+            "Shows the \u{201C}%1$@\u{201D} layer in your "
+                + "draft, not the saved profile.",
+            layerLabel
+        )
     }
 
     // MARK: - Chips
@@ -224,7 +260,7 @@ struct KeyboardPreviewPanel: View {
 
     private var collisions: Set<UInt32> {
         KeyboardCensus.collisions(
-            in: model.config.layers,
+            in: shown,
             scope: liveScope
         )
     }

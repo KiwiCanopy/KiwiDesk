@@ -8940,6 +8940,22 @@ of it, rather than separate rulings:
   Seeing two combinations at once was never the conflict signal;
   conflicts are per layer and `KeybindingConflicts` reports them
   separately.
+- **And it shows one keybinding LAYER at a time** (#1127), for
+  the reason its sibling ruling gives one level down: layers are
+  alternate keymaps and only one of them fires, so a key claimed
+  in another layer is no constraint on this one. The census
+  already refuses to call that a conflict; a board folded over
+  every layer contradicts that in ink, reading a key as claimed
+  while you edit a layer where it is free — and the board's whole
+  question is *is this key free HERE*. Showing the other layers'
+  claims at reduced strength was weighed and refused: it answers
+  a question ("taken elsewhere") the user cannot act on while
+  binding, and it buys that with a second visual language on a
+  board whose two channels are already spoken for. What the
+  scoping costs is that the picture now changes under a strip
+  click, so the panel names the layer it is drawing — in the
+  caption, and in the spoken description — whenever there is more
+  than one to choose from.
 - **The board states two facts in two channels**: the FILL says
   what your config has done with a key (bound, free), and a RING
   warns about it — dashed amber where macOS owns the key under

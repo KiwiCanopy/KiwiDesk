@@ -2946,6 +2946,14 @@ which keys your bindings have already claimed, updating as you
 record, clear, and delete. It shows your *draft*, not the saved
 profile — the panel's caption says so.
 
+It also shows **one layer at a time**: the board is drawn for the
+layer the strip has selected, so switching layers redraws it and
+answers *is this key free in this layer?* A key claimed only by
+another layer is not marked here — layers are alternate keymaps
+and only one of them fires, so a binding elsewhere is not in your
+way. Once you have more than one layer, the panel's caption names
+the one it is drawing.
+
 The board shows **one modifier combination at a time**. Chips
 above it list every combination your bindings use (⌃⌥, ⌃⌥⇧, …; a
 binding with no modifier at all appears as **No modifier**).
@@ -2993,7 +3001,8 @@ your bindings.
 
 With VoiceOver, the board is one element that describes itself
 in words rather than a key at a time: which
-combination it is showing, then the bound keys, the keys macOS
+combination it is showing, which layer (where you have more than
+one), then the bound keys, the keys macOS
 owns under that combination, and any conflicts — the same facts
 the fills and rings draw, read from the same census.
 

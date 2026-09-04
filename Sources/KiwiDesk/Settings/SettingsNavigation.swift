@@ -31,6 +31,13 @@ struct SettingsNavigation {
     /// able to set and clear it.
     var layoutModeTab: LayoutMode?
 
+    /// Selected keybinding layer in Shortcuts — on the model
+    /// rather than the section's `@State` (#1127), because the
+    /// live preview panel is the section's SIBLING: the
+    /// `keybindingLayerName` environment the rows read never
+    /// reaches it.
+    var shortcutsLayer: String?
+
     /// Active space ID for pushed space overrides editor (#678).
     var spaceOverridesFocus: SpaceID?
 
@@ -51,6 +58,7 @@ struct SettingsNavigation {
     /// process-lifetime one.
     mutating func resetSurfaces() {
         layoutModeTab = nil
+        shortcutsLayer = nil
         spaceOverridesFocus = nil
         // The latch is paired with the write that set it, so it
         // must not outlive the visit — a window re-shown states
