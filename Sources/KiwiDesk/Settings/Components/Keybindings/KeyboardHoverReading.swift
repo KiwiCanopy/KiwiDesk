@@ -24,22 +24,19 @@ struct KeyboardHoverReading: Equatable {
 
     var claims: [Claim] = []
     /// Set where the key is free and the board draws it as
-    /// macOS's: the owner, and the chord that owns it.
-    var freeOwner: (chord: String, name: String)?
+    /// macOS's: the owner macOS uses that chord for.
+    var freeOwner: String?
+    /// The chord the shown scope names, empty under `.all`.
+    /// Every line carries it where there is one to carry: a
+    /// chip has fixed a chord, so "X — not bound" would answer
+    /// about the bare key rather than the combination the user
+    /// is asking about (owner, 2026-09-05).
+    var scopeChord: String = ""
     /// The key as the board's spoken form names it — a localized
     /// word for the nine functional keys ("space", "left"), the
     /// cap's character otherwise. Deliberately the SPOKEN name,
     /// not the drawn glyph: this goes in a sentence.
     var keyName: String
-
-    static func == (
-        a: KeyboardHoverReading,
-        b: KeyboardHoverReading
-    ) -> Bool {
-        a.claims == b.claims && a.keyName == b.keyName
-            && a.freeOwner?.chord == b.freeOwner?.chord
-            && a.freeOwner?.name == b.freeOwner?.name
-    }
 
     /// Lines the slot draws, in order — each claim followed by
     /// its own cost, so a two-claim collision does not orphan
@@ -63,17 +60,17 @@ struct KeyboardHoverReading: Equatable {
             return L(
                 "keyboard.hover.free",
                 "%1$@ — not bound",
-                keyName
+                scopeChord + keyName
             )
         }
-        // Names the CHORD macOS owns, not the bare key: the
-        // reservation is a combination, and a line saying
-        // "space — macOS owns this" would be false of the key.
+        // The CHORD macOS owns, never the bare key: a
+        // reservation is a combination, so "space — macOS owns
+        // this" would be false of the key itself.
         return L(
             "keyboard.hover.reserved",
             "%1$@ — macOS owns this: %2$@",
-            freeOwner.chord + keyName,
-            freeOwner.name
+            scopeChord + keyName,
+            freeOwner
         )
     }
 }
@@ -131,15 +128,8 @@ extension KeyboardHoverReading {
         return KeyboardHoverReading(
             claims: claims,
             freeOwner: claims.isEmpty
-                ? owner.map {
-                    (
-                        chord: KeyboardCensus.chordLabel(
-                            of: scope
-                        ),
-                        name: $0.localizedName
-                    )
-                }
-                : nil,
+                ? owner?.localizedName : nil,
+            scopeChord: KeyboardCensus.chordLabel(of: scope),
             keyName: KeyboardBoardSpoken.spokenName(for: code)
         )
     }

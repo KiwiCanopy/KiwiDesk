@@ -158,7 +158,11 @@ struct KeyboardHoverReadingTests {
             selected: [ctrlOpt]
         )
         #expect(r.claims.isEmpty)
-        #expect(r.lines == ["J — not bound"])
+        // The chip has fixed a chord, so the free line names it
+        // too — a bare "J — not bound" answers about the key
+        // rather than the combination being asked about (owner,
+        // 2026-09-05).
+        #expect(r.lines == ["⌃⌥J — not bound"])
     }
 
     /// The whole point of the feature: the ring says two
@@ -211,6 +215,7 @@ struct KeyboardHoverReadingTests {
         #expect(r.freeOwner != nil)
         #expect(r.lines.count == 1)
         #expect(r.lines[0].hasPrefix("⌘space — macOS owns this:"))
+        #expect(r.scopeChord == "⌘")
     }
 
     /// The blocker this suite exists to hold: under `.all` the
@@ -229,6 +234,8 @@ struct KeyboardHoverReadingTests {
             selected: [command]
         )
         #expect(r.freeOwner == nil)
+        // …and under All there is no single chord to name, so
+        // the key stands alone. The two halves of one rule.
         #expect(r.lines == ["space — not bound"])
     }
 }
