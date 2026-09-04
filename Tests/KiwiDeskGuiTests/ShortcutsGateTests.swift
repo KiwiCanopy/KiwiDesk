@@ -100,29 +100,43 @@ struct ShortcutsGateTests {
         }
     }
 
-    /// The named reading four surfaces take, and its polarity.
-    /// Written against the CASE, so a second `InertReason` — a
-    /// mode withhold, a Lua-owned withhold — leaves "the user
-    /// has a layer to choose between" true, where a `== nil`
-    /// spelling would silently stop the preview caption and the
-    /// header naming their layer for an unrelated reason
-    /// (architect re-review 2026-09-04).
-    @Test("layersExist answers the count, not the withhold")
-    func layersExistIsCaseWise() {
-        func exist(_ layers: [String]) -> Bool {
-            ShortcutsGates(config: config(layers: layers))
-                .layersExist
-        }
-        #expect(!exist([KeyLayer.defaultName]))
-        #expect(exist([KeyLayer.defaultName, "resize"]))
-        // A tripwire, deliberately: while `.onlyDefaultLayer`
-        // is the only case the two spellings agree, so nothing
-        // else can red on the polarity. Adding a case reds
-        // HERE — check every `layersExist` reader means "the
-        // count" and not "the withhold", then extend this.
+    /// The two named readings, and that they stay independent.
+    /// Each is written against its OWN case rather than against
+    /// nil, so a third `InertReason` cannot silently stop the
+    /// preview caption naming its layer, or shut the Desktop
+    /// offer, for an unrelated cause (architect re-review
+    /// 2026-09-04). With two live cases this is a real test
+    /// rather than the tripwire it started as.
+    @Test("each named reading answers its own question")
+    func namedReadingsAreCaseWise() {
+        var layered = config(layers: [KeyLayer.defaultName, "resize"])
+        #expect(ShortcutsGates(config: layered).layersExist)
         #expect(
-            ShortcutsGates.InertReason.allCases
-                == [.onlyDefaultLayer]
+            !ShortcutsGates(config: layered).desktopBindingsExist,
+            "a layer is not a Desktop binding"
+        )
+        var desktop = config(layers: [KeyLayer.defaultName])
+        desktop.layers[0].bindings = [
+            KeyBinding(
+                combo: "ctrl+alt+1",
+                lua: "KiwiDesk.focus_desktop(1)",
+                kind: .navigation
+            )
+        ]
+        #expect(ShortcutsGates(config: desktop).desktopBindingsExist)
+        #expect(
+            !ShortcutsGates(config: desktop).layersExist,
+            "a Desktop binding is not a layer"
+        )
+        layered.layers[0].bindings = desktop.layers[0].bindings
+        #expect(ShortcutsGates(config: layered).layersExist)
+        #expect(ShortcutsGates(config: layered).desktopBindingsExist)
+        // Both cases are spoken for above; a THIRD reds here —
+        // check what each named reading should answer for it
+        // before extending, since neither is written against nil.
+        #expect(
+            Set(ShortcutsGates.InertReason.allCases)
+                == [.onlyDefaultLayer, .noDesktopBinding]
         )
     }
 

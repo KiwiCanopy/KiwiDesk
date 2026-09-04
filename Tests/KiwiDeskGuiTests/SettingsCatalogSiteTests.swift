@@ -17,6 +17,20 @@ struct SettingsCatalogSiteTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
+    /// Files that NAME a declaration without drawing it. The
+    /// search index and its synonym table key their entries on a
+    /// control's id, so a mention there proves the declaration is
+    /// REGISTERED, never that anything renders it — and a
+    /// registration standing in for a render is this guard going
+    /// fail-open: pointing a mount at the wrong drawer left it
+    /// green once both files mentioned the orphan (guard-prover,
+    /// 2026-09-04, #1125). A file that only registers joins this
+    /// list; one that draws must not.
+    private let registryOnly: Set<String> = [
+        "SettingsSearchIndex.swift",
+        "SettingsSearchSynonyms.swift",
+    ]
+
     /// A declaration nobody references is a dead search entry — a
     /// reveal on it scrolls nowhere and flashes nothing. Every
     /// catalog property name must appear (dotted) somewhere under
@@ -25,9 +39,9 @@ struct SettingsCatalogSiteTests {
     func catalogDeclarationsAreReferenced() throws {
         var rendered = ""
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where !SourceScan.isCatalogFile(
-            file.lastPathComponent
-        ) {
+        where !SourceScan.isCatalogFile(file.lastPathComponent)
+            && !registryOnly.contains(file.lastPathComponent)
+        {
             rendered += SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -45,7 +59,9 @@ struct SettingsCatalogSiteTests {
         // search index can reach it — a bare `Link` is
         // invisible to an index derived from the census plus
         // the catalog.
-        #expect(names.count == 62)
+        // 64 since #1125: the two Desktop offers, the doors the
+        // withheld families are reached through.
+        #expect(names.count == 64)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

@@ -991,6 +991,8 @@
   "shortcuts.choose_app": "선택 app…",
   "shortcuts.delete_layer": "레이어 삭제",
   "shortcuts.desktop_away": "흐리게 표시된 행은 현재 어느 화면에도 없는 데스크탑을 가리킵니다. 단축키는 그대로 저장되며 해당 데스크탑이 돌아오면 다시 작동합니다.",
+  "shortcuts.desktops.focus": "macOS 데스크탑으로 이동",
+  "shortcuts.desktops.move": "윈도우를 macOS 데스크탑으로 이동",
   "shortcuts.editing_layer": "‘%1$@’ 레이어 편집 중",
   "shortcuts.go_to_desktop": "데스크탑으로 이동",
   "shortcuts.go_to_space": "공간으로 이동",

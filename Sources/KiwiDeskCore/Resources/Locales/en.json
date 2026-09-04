@@ -992,6 +992,8 @@
   "shortcuts.choose_app": "Choose app…",
   "shortcuts.delete_layer": "Delete layer",
   "shortcuts.desktop_away": "Dimmed rows target a Desktop that isn't on any screen right now. Their shortcuts stay recorded and work again when it comes back.",
+  "shortcuts.desktops.focus": "Go to a macOS Desktop",
+  "shortcuts.desktops.move": "Move windows to a macOS Desktop",
   "shortcuts.editing_layer": "Editing the “%1$@” layer",
   "shortcuts.go_to_desktop": "Go to Desktop",
   "shortcuts.go_to_space": "Go to Space",

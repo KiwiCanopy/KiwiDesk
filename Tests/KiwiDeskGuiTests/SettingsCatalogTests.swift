@@ -73,7 +73,10 @@ struct SettingsCatalogTests {
         // 68 since #1019: General ▸ About gains the Guide
         // link as a declaration, so a search for it reaches
         // the app's one permanent route to the guide.
-        #expect(allEntries.count == 68)
+        // 70 since #1125: the two Desktop offers, one per
+        // shortcut group — and they are the only search rows
+        // those families have, their own labels being dynamic.
+        #expect(allEntries.count == 70)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

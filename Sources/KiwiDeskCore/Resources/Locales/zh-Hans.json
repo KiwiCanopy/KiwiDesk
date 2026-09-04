@@ -991,6 +991,8 @@
   "shortcuts.choose_app": "选择 App…",
   "shortcuts.delete_layer": "删除层",
   "shortcuts.desktop_away": "变暗的行指向当前不在任何屏幕上的桌面。它们的快捷键仍然保留，该桌面回来后即可再次使用。",
+  "shortcuts.desktops.focus": "前往 macOS 桌面",
+  "shortcuts.desktops.move": "将窗口移动到 macOS 桌面",
   "shortcuts.editing_layer": "正在编辑“%1$@”层",
   "shortcuts.go_to_desktop": "前往桌面",
   "shortcuts.go_to_space": "前往空间",

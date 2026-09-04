@@ -991,6 +991,8 @@
   "shortcuts.choose_app": "選択 app…",
   "shortcuts.delete_layer": "レイヤーを削除",
   "shortcuts.desktop_away": "淡色表示の行は、現在どの画面にもないデスクトップを指しています。ショートカットは保存されたままで、そのデスクトップが戻ると再び機能します。",
+  "shortcuts.desktops.focus": "macOSのデスクトップへ移動",
+  "shortcuts.desktops.move": "ウインドウをmacOSのデスクトップに移動",
   "shortcuts.editing_layer": "「%1$@」レイヤーを編集中",
   "shortcuts.go_to_desktop": "デスクトップへ移動",
   "shortcuts.go_to_space": "スペースへ移動",

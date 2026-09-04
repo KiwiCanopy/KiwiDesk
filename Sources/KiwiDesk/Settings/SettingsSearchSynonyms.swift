@@ -6,10 +6,26 @@ enum SettingsSearchSynonyms {
     /// Synonym terms for unmodeled catalog items (#1019,
     /// `SettingsSearchIndexTests`).
     static func catalogTerms(for id: String) -> [String] {
-        guard id == SettingsCatalog.general.guideLink.id else {
-            return []
+        if id == SettingsCatalog.general.guideLink.id {
+            return ["help", "docs", "documentation", "manual"]
         }
-        return ["help", "docs", "documentation", "manual"]
+        // The two Desktop offers are the whole search surface
+        // for their families (#1125), so the vocabulary a user
+        // arrives with has to reach them: Apple names the
+        // container "Mission Control", and the retired nouns are
+        // what other tilers call a Desktop.
+        if id
+            == SettingsCatalog.shortcuts.focusDesktops.control
+            .id
+            || id
+                == SettingsCatalog.shortcuts.moveWindowsDesktops
+                .control.id
+        {
+            return [
+                "mission control", "workspace", "virtual desktop",
+            ]
+        }
+        return []
     }
 
     /// Alternate vocabulary terms for census setting keys.

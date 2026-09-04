@@ -2841,6 +2841,27 @@ hidden. And nothing outside Shortcuts changes: this is not
 Settings ▸ General ▸ Advanced ▸ **Reset All Settings**, which
 wipes the whole configuration.
 
+### macOS Desktop Shortcuts
+
+The Focus and Move windows cards each end with a closed row —
+**Go to a macOS Desktop** and **Move windows to a macOS
+Desktop**. Open it and the per-Desktop rows are there, one per
+Desktop you have, the same as any other shortcut row.
+
+They start closed because a **Desktop** is macOS's own
+arrangement rather than KiwiDesk's, nothing is seeded onto them,
+and there is one row per Desktop per verb — so on a fresh install
+they were a dozen rows about a thing the app has not introduced
+you to yet. Bind one and both rows open by themselves whenever
+you come back to Shortcuts, in Simple mode as well: once it is
+part of your setup it is not an offer any more. (They stay
+rows you can collapse — opening is a starting point, not a
+setting.)
+
+If your Mac cannot drive Desktops at all, the offer does not
+appear — see
+[macOS Desktops](#macos-desktops-mission-control).
+
 ### Recording a Shortcut
 
 Click an empty row or the **Edit** pencil on an existing row. Click

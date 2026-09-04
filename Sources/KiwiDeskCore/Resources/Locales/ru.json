@@ -991,6 +991,8 @@
   "shortcuts.choose_app": "Выбрать приложение…",
   "shortcuts.delete_layer": "Удалить слой",
   "shortcuts.desktop_away": "Затенённые строки указывают на Рабочий стол, которого сейчас нет ни на одном экране. Их сочетания клавиш сохраняются и снова заработают, когда он вернётся.",
+  "shortcuts.desktops.focus": "Перейти на Рабочий стол macOS",
+  "shortcuts.desktops.move": "Переместить окна на Рабочий стол macOS",
   "shortcuts.editing_layer": "Редактируется слой «%1$@»",
   "shortcuts.go_to_desktop": "Перейти на Рабочий стол",
   "shortcuts.go_to_space": "Перейти в пространство",

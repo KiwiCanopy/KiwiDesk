@@ -29,6 +29,9 @@ enum SettingRuntimeGate: Hashable {
     case defaultsToRestore
     /// Non-default layer exists in configuration.
     case layersExist
+    /// A Desktop shortcut is bound (#1125) — the rows are an
+    /// OFFER until one is, the seed authoring none of them.
+    case desktopBindingsExist
     /// Liquid Glass unavailable on pre-macOS 26 (#390).
     case liquidGlassUnavailable
     /// The window-management bridge is absent on this macOS
