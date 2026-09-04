@@ -282,6 +282,9 @@ extension KiwiCore {
         try profiles.save(
             buildProfile(name: name, modes: nil)
         )
+        // The third save exit, and the slot is nil here because
+        // `apply(composed:)` handed it back (#1246).
+        adoptSavedProfile(name)
         // A preset can define more spaces than the first-run seed
         // authored digit shortcuts for; bind the newcomers
         // additively so ⌃⌥N covers them too (#485).

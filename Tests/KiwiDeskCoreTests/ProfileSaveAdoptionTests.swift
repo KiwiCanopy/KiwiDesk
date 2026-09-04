@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -9,12 +10,13 @@ import Testing
 /// `liveProfile` has to follow it, or the profile you just saved
 /// has no record of its own arrangement to come back to.
 ///
-/// The sequence below is the device round of 2026-09-04, which
-/// is where this was found: the arrangement under QA_A came back
-/// as QA_B's. It starts where a real user starts — on a built-in
-/// Standard, with no profile applied — which is exactly the path
-/// `ProfilePartitioningTests`' fixtures skip by applying a
-/// profile first.
+/// The first test is the device round of 2026-09-04, which is
+/// where this was found: the arrangement under QA_A came back as
+/// QA_B's. It starts with no profile ever applied — the state
+/// `ProfilePartitioningTests`' fixtures skip by applying one
+/// first. `applyStandard` is the third write exit and gets its
+/// own test, because that is the door the first-run Starter seed
+/// and every Settings "Apply preset" take.
 ///
 /// WHICH applies count as a switch is
 /// `ProfileSwitchClassificationTests`'.
@@ -101,6 +103,35 @@ struct ProfileSaveAdoptionTests {
         try core.persistProfile(named: "B", modes: nil)
         #expect(
             core.state.profilePartitioning.liveProfile == "B"
+        )
+    }
+
+    /// The third `profiles.save` exit. `applyStandard` composes,
+    /// adopts the standard, then saves a NEW profile — and
+    /// `apply(composed:)` has just handed the live slot back to
+    /// nil, so without the adopt the preset a first-run user is
+    /// seeded with never files its arrangement.
+    @Test("Applying a Standard adopts the profile it saves")
+    func applyingAStandardAdoptsItsSavedProfile() throws {
+        let core = makeCore()
+        live(core, [1, 2])
+        core.state.workspaces.add(WindowID(1), to: "1")
+        core.state.workspaces.add(WindowID(2), to: "2")
+
+        let screen = Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
+        core.state.workspaces.upsertDisplay(screen)
+        let name = try core.applyStandard(
+            StarterSetup.standardLayout(
+                displays: [screen],
+                mainID: DisplayID(1)
+            )
+        )
+        #expect(
+            core.state.profilePartitioning.liveProfile == name
         )
     }
 }
