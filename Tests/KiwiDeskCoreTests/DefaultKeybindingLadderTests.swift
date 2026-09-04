@@ -48,6 +48,68 @@ struct DefaultKeybindingLadderTests {
         #expect(shifted > 0, "no ⇧ row seeded at all")
     }
 
+    /// The ladder's POSITIONAL grammar, retuned by #1176: an
+    /// arrow carries a window verb and rides either the bare
+    /// base (focus) or the ⌘ tier (swap) — never ⇧, which after
+    /// the retune qualifies digits alone. Nothing pinned the
+    /// swap chord's base before this: moving it off ⌃⌥⇧ passed
+    /// the whole suite.
+    ///
+    /// Derived per row rather than hand-listed, and stated as
+    /// which BASES an arrow may take, so it reds on a verb
+    /// changing tier and stays green when a new arrow verb joins
+    /// a tier that already carries one.
+    @Test("an arrow rides the base or the ⌘ tier, never ⇧")
+    func arrowsRideTheirOwnTiers() {
+        let rows = DefaultKeybindings.bindings(
+            spaces: spaces(9),
+            resizeStep: 50
+        )
+        let arrows: Set<UInt32> = [123, 124, 125, 126]
+        let base: HotkeyModifiers = [.control, .option]
+        var seen = 0
+        var shifted = 0
+        for row in rows {
+            guard let combo = KeyCombo.parse(row.combo) else {
+                continue
+            }
+            if combo.modifiers.contains(.shift) {
+                shifted += 1
+                #expect(
+                    !arrows.contains(combo.keyCode),
+                    Comment(
+                        rawValue: "⇧ on an arrow — \(row.combo) "
+                            + "(\(row.label)); after #1176 it "
+                            + "qualifies digits alone"
+                    )
+                )
+            }
+            guard arrows.contains(combo.keyCode) else { continue }
+            seen += 1
+            #expect(
+                combo.modifiers == base
+                    || combo.modifiers == base.union(.command),
+                Comment(
+                    rawValue: "arrow off its tiers — "
+                        + "\(row.combo) (\(row.label))"
+                )
+            )
+        }
+        // Non-vacuity on both arms: a builder seeding no arrow
+        // row, or no ⇧ row, satisfies the loops above having
+        // guarded nothing.
+        #expect(seen > 0, "no arrow row seeded at all")
+        #expect(shifted > 0, "no ⇧ row seeded at all")
+        // …and both tiers are actually in use, or "either tier"
+        // is one tier wearing a disjunction.
+        let bases = Set(
+            rows.compactMap { KeyCombo.parse($0.combo) }
+                .filter { arrows.contains($0.keyCode) }
+                .map(\.modifiers)
+        )
+        #expect(bases == [base, base.union(.command)])
+    }
+
     @Test("sticky seeds ⌃⌥S global and ⌃⌥P screen-scoped")
     func stickyToggleLetters() {
         let rows = DefaultKeybindings.bindings(

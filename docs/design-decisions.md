@@ -6032,8 +6032,10 @@ swap, move and follow all place a window in the flat array;
 resize changes a weight or a scroll-slot domain instead. Parking
 it on tier 3 made `⌘` mean two unrelated things at once — resize
 with an arrow, "and follow" with a digit — so the ladder could
-not be stated in one sentence. Moving it off restores that: `⌘`
-now means "and follow", full stop.
+not be stated in one sentence. Moving it off restored that, and
+#1176 below then gave `⌘` a second POSITIONAL sense on purpose:
+what it may not carry is a verb from another idea, which resize
+was.
 
 The ladder is **two bases plus one key**, and what divides them
 is not taxonomy: **`⌥⌘` carries the verbs you HOLD, `⌃⌥` the
@@ -6051,6 +6053,50 @@ window verb at all.
 Stated that way the rule **predicts**, which is what makes it a
 rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
+
+**Swap rides `⌃⌥⌘`, and `⇧` keeps the digits (#1176, owner
+ruling 2026-08-31).** `⌃⌥⇧`+arrows is a three-modifier claw on
+one hand; `⌃⌥⌘`+arrows is markedly easier, and it was free of
+KiwiDesk's own verbs since the size layer left. The cost is
+stated plainly: `⇧` stops being the uniform "act on the window"
+qualifier across arrows AND digits, and `⌃⌥⌘` stops meaning only
+"and follow". What replaces it is still one sentence — `⇧` sends
+the window to a space, `⌘` is the stronger step: swap it with a
+neighbour, or send it and go along — so the ladder is retuned
+rather than muddled. Ergonomics beat grammar purity here because
+the grammar survives the change in a form a user can still say
+out loud.
+
+**What the collision measure actually says, and the artefact it
+nearly shipped.** `SystemShortcuts.map` carries no `⌃⌥⌘`+arrow
+entry, and it is necessary and not sufficient (#1098), so the
+app menus were enumerated over the AX menu-bar tree of every
+running application (the probe is in `plan/`). Measured
+2026-09-04, macOS 26.6, ten running apps: neither `⌃⌥⌘`+arrows
+nor the `⌃⌥⇧`+arrows it retires is claimed by any app's SHIPPED
+menu defaults. So the retune neither buys nor costs an app-menu
+collision, and rests on the ergonomics alone.
+
+Two blind spots, both paid for by getting this wrong first. The
+sweep reads EFFECTIVE accelerators, so it cannot tell a shipped
+default from the reader's own override: the one `⌃⌥⌘`+arrow hit
+it returned was a developer's own terminal config, not Ghostty's
+default (`super+alt`+arrow), which the app's own
+`+list-keybinds` settles in a second. Check a hit against the
+app's defaults before recording it as one.
+
+And the first pass reported every one of the ten apps claiming
+`⌃⌥⇧`+arrows — an artefact worth recording, because the trap is
+invisible and this file had already warned about it one section
+up. `AXMenuItemCmdModifiers`
+encodes `fn` in a bit the AX headers do not document (16), so a
+reader checking only shift/option/control/command sees macOS's
+`fn⌃⌥⇧` quarter-tile rows as a plain `⌃⌥⇧` collision, in every
+app, because macOS injects that submenu everywhere. **Decode
+that bit, or the sweep invents a collision with the system's own
+window tiling.** The known-truth check that settles it: Window ▸
+Move & Resize ▸ Left reads `mods=28`, which is `fn` + control +
+"no command" and matches Apple's own documented `fn⌃←`.
 
 **`⇧` has one meaning, and a toggle does not qualify (#1094).**
 `⌃⌥⇧S` spent `⇧` on "a broader scope" while the ladder

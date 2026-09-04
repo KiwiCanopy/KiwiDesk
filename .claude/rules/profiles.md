@@ -53,11 +53,20 @@ because two real clients now remove drift — see
   stay on the base tier as mnemonic letters
   (`SizeLayerSeedTests`, `DefaultKeybindingsTests`).
 - **Never spend `⇧` on anything but "act on the window".** It
-  qualifies a positional row — an arrow or a digit — so a
-  lettered toggle never carries it: `⌃⌥⇧S` did, and it was the
-  one chord in the seed a user who had learned the ladder read
-  wrong (#1094, `DefaultKeybindingsTests` ▸
-  `shiftNeverQualifiesALetter`). Which letter each sticky scope
+  qualifies a positional row, so a lettered toggle never carries
+  it: `⌃⌥⇧S` did, and it was the one chord in the seed a user
+  who had learned the ladder read wrong (#1094,
+  `DefaultKeybindingsTests` ▸ `shiftNeverQualifiesALetter`).
+  Since #1176 the positional row it qualifies is a DIGIT — `⇧`
+  sends the window to a space, and the arrows escalate to `⌘`
+  instead, which now reads "act on the window, and stronger":
+  swap on the arrows beside move-and-follow on the digits. So
+  `⌘` on the ladder no longer means only "and follow", and the
+  tier an arrow may ride is derived per row rather than
+  restated (`DefaultKeybindingLadderTests` ▸
+  `arrowsRideTheirOwnTiers`). The ergonomics ruling behind the
+  swap, and the collision measure that turned out to endorse
+  it, are `docs/design-decisions.md`'s. Which letter each sticky scope
   takes, why the screen-scoped one is named for a mark rather
   than a label, and why `D` was refused, are argued in
   `docs/design-decisions.md` ▸ "Size is not a positional verb" —

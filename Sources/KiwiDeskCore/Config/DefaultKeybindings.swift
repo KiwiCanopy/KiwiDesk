@@ -30,21 +30,21 @@ public enum DefaultKeybindings {
         for (digit, space) in numbered(spaces) {
             rows.append(focusSpaceRow(digit: digit, space: space))
         }
-        // Tier 2 — ⌃⌥⇧: swap window / move to space
+        // Tier 2 — ⌃⌥⇧: move to space
+        for (digit, space) in numbered(spaces) {
+            rows.append(moveSpaceRow(digit: digit, space: space))
+        }
+        // Tier 3 — ⌃⌥⌘: swap window / move to space and follow
         for (dir, phrase) in directions {
             rows.append(
                 KeyBinding(
-                    combo: "control+option+shift+\(dir)",
+                    combo: "control+option+command+\(dir)",
                     lua: "KiwiDesk.swap(\"\(dir)\")",
                     kind: .navigation,
                     label: "Swap with window \(phrase)"
                 )
             )
         }
-        for (digit, space) in numbered(spaces) {
-            rows.append(moveSpaceRow(digit: digit, space: space))
-        }
-        // Tier 3 — ⌃⌥⌘: move to space and follow
         for (digit, space) in numbered(spaces) {
             rows.append(followSpaceRow(digit: digit, space: space))
         }
