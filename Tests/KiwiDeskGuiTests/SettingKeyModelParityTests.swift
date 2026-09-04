@@ -175,7 +175,8 @@ struct SettingKeyModelParityTests {
         var fields: Set<String> = []
         for child in Mirror(reflecting: GuiConfig()).children {
             guard let name = child.label,
-                name != "settings", name != "format"
+                name != "settings",
+                !GuiConfig.undraftedFields.contains(name)
             else { continue }
             fields.insert(name)
         }

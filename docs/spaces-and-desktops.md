@@ -56,46 +56,49 @@ screens, two Spaces are on show at once. The Spaces no screen is
 showing are parked (see [Parking is not a Desktop
 move](#parking-is-not-a-desktop-move)).
 
-## A Desktop remembers a Space; it does not own one
+## Every Desktop keeps its own Space, and its own windows
 
-Every Desktop your main screen shows remembers which Space it
-was on. Switch away and back and you land on the same Space,
-with the same window focused — as long as that window comes back
-promptly ([accepted
-limitations](accepted-limitations.md) has the case where it does
-not).
+Every Desktop remembers which Space it was on. Switch away and
+back and you land on the same Space, with the same windows in
+the same order, and the same one focused — as long as they come
+back promptly ([accepted limitations](accepted-limitations.md)
+has the case where they do not). That memory survives quitting
+KiwiDesk.
 
-That memory is a bookmark, not ownership. Nothing about a Space
-belongs to a Desktop, and two Desktops can perfectly well
-remember the same Space. Where the Desktop has no memory yet —
-or where it remembers a Space the profile now loaded does not
-have — you land on the **first** Space in the list instead.
+**Your windows stay with their Desktop.** They belong to the
+macOS Desktop they are on, so a Space holds whatever of its
+windows are on the Desktop you are looking at. Switch Desktop and
+the same Space shows you that Desktop's windows instead — nothing
+is moved, and nothing is lost.
 
-This is the single most surprising consequence today: switch to
-a fresh Desktop and you can land on "Space 1" while every window
-of Space 1 is back on the Desktop you just left. It is not a
-bug in the memory; the two Desktops are genuinely sharing one
-set of Spaces, because nothing has given the new Desktop a set
-of its own. Which is what the next section is for — and what
-[#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230)
-changes.
+A Desktop you have never visited takes a Space **no other Desktop
+is showing**, so a fresh Desktop starts on one of its own rather
+than landing on a Space whose windows are all somewhere else.
+When every Space is spoken for it falls back to the first, since
+a Desktop always has to show something.
 
-## A Desktop gets a different Space set only through a binding
+With **Displays have separate Spaces** on, each screen switches
+Desktops on its own, and each moves only its own Space — swiping
+the external screen leaves the built-in one alone.
+
+## A binding gives a Desktop a different Space SET
 
 Bind a profile to a Desktop — the **Profiles per macOS Desktop**
 card in Settings, or `bind_profile_to_desktop(2, "Creator
 Studio")` in Lua — and activating that Desktop loads that
-profile, with its Spaces, layouts and settings. That is the one
-way a Desktop comes to show different Spaces from its
-neighbours, and it works by pointing at a different profile:
-two Desktops bound to the *same* profile still share one set of
-Spaces.
+profile, with its Spaces, layouts and settings.
 
-**Desktops without a binding keep whatever profile is active.**
-That is why the model looks flatter than it is: on a machine
-with no bindings, every Desktop shows the one profile's Spaces,
-and Desktops appear to have nothing to do with Spaces at all.
-A binding is what makes the difference visible.
+Every Desktop already keeps its own Space and its own windows
+(the section above). What a binding changes is *which Spaces
+exist at all* — their names, count, layouts and settings — so two
+Desktops bound to different profiles offer you different lists,
+while two bound to the same profile offer the same list and still
+keep their own windows in it.
+
+**Desktops without a binding keep whatever profile is active** —
+they still each keep their own Space and their own windows, which
+is the section above; what a binding adds is a different *set* of
+Spaces, with its own names, layouts and settings.
 
 ## The main screen chooses the profile
 
@@ -192,13 +195,17 @@ Space holding only those. It stays reachable all the same:
 *Open or Focus* finds such a window, switches to its Desktop and
 gives it the focus.
 
-## What changes next
+## Every profile keeps its own arrangement
 
-The relationship above is today's, and one part of it is due to
-change: [#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230)
-keys the Space set by the pair *(Desktop, profile)*, so two
-Desktops running the same profile stop sharing one set of Spaces
-and each get their own. Everything else on this page — Spaces
-belonging to a profile, the main screen choosing it, parking,
-the two nestings — is unaffected. This page is rewritten in that
-change set.
+Two profiles can each define a Space called `1` — or `Work` — and
+they are different Spaces holding different windows. The name is
+still how you address one; the profile is simply the scope that
+name resolves in.
+
+So switching profiles no longer merges them together. KiwiDesk
+files which Space each window was in under the profile you are
+leaving, and puts them back when you return. A window the
+incoming profile has never seen lands in its **fallback space**.
+
+The full rules are in the [Lua reference](lua-reference.md)
+▸ *Space Reconciliation*.

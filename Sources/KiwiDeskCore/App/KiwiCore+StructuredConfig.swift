@@ -121,6 +121,9 @@ extension KiwiCore {
             ignoreRules: ignoreRules
         )
         desktopBindings = config.profileBindings
+        // #1230: what each Desktop was showing, so a restart does
+        // not re-scatter them.
+        adoptPersistedDesktopSpaces(config.desktopSpaces)
     }
 
     func captureGlobalWindowRuleBase(from config: GuiConfig) {

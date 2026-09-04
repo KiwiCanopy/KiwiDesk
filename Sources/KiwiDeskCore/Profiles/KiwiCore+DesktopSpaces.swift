@@ -208,4 +208,29 @@ extension KiwiCore {
             state.workspaces.show(target, on: display)
         }
     }
+
+    /// The Desktop memory as the FILE should carry it (#1230).
+    ///
+    /// Read at every sidecar write through
+    /// `GuiConfigStore.liveDesktopSpaces`, so a caller handing
+    /// back a config it loaded earlier cannot write a stale map
+    /// over what the session learned. The `.number` entries are
+    /// dropped by the encoder rather than here — one rule, one
+    /// place — so this hands over everything.
+    func persistedDesktopSpaces() -> [DesktopKey: SpaceID] {
+        desktopMemory.virtualSpaces
+    }
+
+    /// Seeds the memory from a loaded config (#1230).
+    ///
+    /// MERGED, live winning: a reload mid-session must not
+    /// discard the `.number` entries this session learned, which
+    /// the file never carries.
+    func adoptPersistedDesktopSpaces(
+        _ stored: [DesktopKey: SpaceID]
+    ) {
+        desktopMemory.virtualSpaces.merge(stored) { live, _ in
+            live
+        }
+    }
 }

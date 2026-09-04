@@ -44,6 +44,16 @@ public enum DesktopKey: Hashable, Sendable {
     case identity(DesktopIdentity)
     case number(Int)
 
+    /// Whether this key names the Desktop's own stamp rather
+    /// than a Mission Control number. Read where a PERSISTED map
+    /// must drop the number fallback (#1230): a number collides
+    /// across arrangements and, unlike the session-only case,
+    /// a wrong persisted answer never heals.
+    public var isIdentity: Bool {
+        if case .identity = self { return true }
+        return false
+    }
+
     /// The stored spelling: the UUID for an identity, the decimal
     /// for a number. Parsed back by SHAPE, so the two can never
     /// collide — a Mission Control number is never a UUID.

@@ -43,9 +43,13 @@ struct ProfileSpacesSeamTests {
         // it to file a boot-census window under the Space its
         // Desktop was showing (#1146) — the one reader outside
         // the door, and it reads rather than writes.
+        // The door grew #1230's persistence pair, so the
+        // sidecar's three sites — the load, the seed and the
+        // write-time stamp — name it through here rather than
+        // reaching the map themselves.
         "virtualSpaces": [
             "Profiles/DesktopMemory.swift": 1,
-            "Profiles/KiwiCore+DesktopSpaces.swift": 3,
+            "Profiles/KiwiCore+DesktopSpaces.swift": 5,
             "App/KiwiCore+AwayWindows.swift": 1,
         ],
     ]
