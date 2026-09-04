@@ -214,6 +214,8 @@ extension KiwiCore {
             try profiles.save(
                 buildProfile(name: name, modes: modes)
             )
+            // #1230: the save adopts, so the live slot does too.
+            adoptSavedProfile(name)
             refreshConfigIssues()
             if modes == nil { profiles.onCapturedLive(name) }
             return
@@ -233,6 +235,7 @@ extension KiwiCore {
         existing.settings = fresh.settings
         existing.savedAt = .now
         try profiles.save(existing)
+        adoptSavedProfile(name)
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).
         refreshConfigIssues()

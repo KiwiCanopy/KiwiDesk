@@ -54,6 +54,31 @@ extension KiwiCore {
         )
     }
 
+    /// A SAVE adopts too, so the live slot follows it (#1230).
+    ///
+    /// `ProfileManager.save` sets `currentName`, which is what
+    /// makes the saved profile the current one — but the
+    /// partitioning tracks the live slot separately, because
+    /// `currentName` cannot answer "which profile do the live
+    /// Spaces represent" at apply time. Left un-adopted, saving
+    /// your arrangement as a profile and then switching away
+    /// files NOTHING for it: the switch is not a switch, because
+    /// the slot never named it. Measured on the device
+    /// 2026-09-04 — arrange, `save_profile A`, `save_profile B`,
+    /// `load_profile B`, rearrange, `load_profile A` returned
+    /// B's arrangement (#1246).
+    ///
+    /// Files whatever WAS live first: at the moment of a
+    /// capture-live save the two arrangements are identical, so
+    /// the outgoing profile's record is written from the same
+    /// Spaces rather than lost.
+    func adoptSavedProfile(_ name: String) {
+        state.profilePartitioning.record(
+            state.workspaces.allSpaces,
+            handingLiveTo: name
+        )
+    }
+
     /// Puts the incoming profile's own windows back in its own
     /// Spaces.
     ///

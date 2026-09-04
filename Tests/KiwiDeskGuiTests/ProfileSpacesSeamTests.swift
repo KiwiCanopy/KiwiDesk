@@ -31,10 +31,12 @@ struct ProfileSpacesSeamTests {
     private let allowed: [String: [String: Int]] = [
         // The profile axis. The three enders are the writes
         // outside the door: a re-key, a rename, a delete, plus
-        // the #634 reset.
+        // the #634 reset. The door's seventh site is the SAVE's
+        // adoption (#1246) — `persistProfile` reaches it through
+        // `adoptSavedProfile` rather than naming the store.
         "profilePartitioning": [
             "State/StateCoordinator.swift": 1,
-            "Profiles/KiwiCore+ProfileSpaces.swift": 6,
+            "Profiles/KiwiCore+ProfileSpaces.swift": 7,
             "App/KiwiCore+RekeyEvent.swift": 1,
             "App/KiwiCore+Reset.swift": 1,
             "Profiles/KiwiCore+ProfileRename.swift": 1,
