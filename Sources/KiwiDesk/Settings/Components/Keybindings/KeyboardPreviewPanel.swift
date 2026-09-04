@@ -22,9 +22,10 @@ struct KeyboardPreviewPanel: View {
     }
 
     /// The layer's name, or nil while it is the only one there
-    /// is. The condition is the census gate's, asked rather than
-    /// counted: a second copy names a layer on a screen with no
-    /// strip the day the gate is retuned (#816, #1127).
+    /// is — the census gate's condition, so the answer belongs
+    /// to `.switchToLayer`'s `gate:` entry and flips with it: a
+    /// gateless placement resolves nil and names a lone layer
+    /// (#816, #1127).
     var layerLabel: String? {
         guard
             ShortcutsGates(config: model.config)
@@ -69,14 +70,16 @@ struct KeyboardPreviewPanel: View {
             fillLegend.accessibilityHidden(true)
             tallySentence
             layoutRow
+            // Announced without the layer: the board's one
+            // description already named it (#1127). Adjacent to
+            // the `Text` on purpose — the guard's needle runs
+            // through both, and a modifier that wanders onto a
+            // sibling view restores the double announcement
+            // while a whole-file scan stays green.
             Text(caption)
+                .accessibilityLabel(draftCaption)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink3)
-                // The board's one description already named the
-                // layer, so the drawn half says it and the
-                // spoken half stands down — `fillLegend`'s move
-                // one notch softer (#1127).
-                .accessibilityLabel(draftCaption)
         }
     }
 

@@ -31,9 +31,14 @@ struct ShortcutsHeader: View {
         }
     }
 
-    /// Label indicating active layer when multiple layers exist.
+    /// Names the active layer once there is a choice — the
+    /// census gate's own condition, asked rather than counted
+    /// (#1127): the preview panel names the same layer under the
+    /// same rule, and two copies of it grey apart on a retune.
     @ViewBuilder private var editingLabel: some View {
-        if model.config.layers.count > 1 {
+        if ShortcutsGates(config: model.config)
+            .inertReason(for: .shortcuts(.switchToLayer)) == nil
+        {
             Text(
                 L(
                     "shortcuts.editing_layer",

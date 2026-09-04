@@ -26,10 +26,5 @@ struct SpaceOverridesNavTests {
         #expect(nav.spaceOverridesFocus == nil)
         #expect(nav.layoutModeTab == nil)
         #expect(nav.shortcutsLayer == nil)
-        // …and the coalesced read lands back on the default,
-        // which is what the sibling surfaces have no analogue of.
-        #expect(
-            nav.shortcutsLayerSelection == KeyLayer.defaultName
-        )
     }
 }

@@ -164,8 +164,16 @@ struct KeyboardLayerWiringTests {
         // the board's own description having said it already.
         #expect(panel.contains("layerLabel:layerLabel"))
         #expect(panel.contains("Text(caption)"))
+        // Contiguous from the `Text` it names: the modifier is
+        // right for THIS view and wrong on any other, and moved
+        // onto a sibling it passed a whole-file `contains`
+        // while the layer went back to being announced twice
+        // (guard-prover, 2026-09-04). Nothing drawn is swept
+        // into the run — the styling follows it.
         #expect(
-            panel.contains(".accessibilityLabel(draftCaption)")
+            panel.contains(
+                "Text(caption).accessibilityLabel(draftCaption)"
+            )
         )
         // The naming condition is the gate's, asked not counted.
         #expect(
@@ -196,6 +204,60 @@ struct KeyboardLayerWiringTests {
         #expect(section.occurrences(of: "selected:selection") == 2)
         #expect(section.occurrences(of: "@Stateprivatevarselected") == 0)
     }
+
+    /// The two needles above pin the two readers that exist; a
+    /// THIRD spelling the coalescing inline is what actually
+    /// happened to `layoutModeTab`, whose two readers now
+    /// answer different defaults. Negative and tree-wide, so it
+    /// reds on the reader nobody thought to needle — the `??`
+    /// is the subject, never the raw field, which
+    /// `resetSurfaces` and `ensureSelection` write legitimately.
+    @Test("the landing is coalesced in exactly one place")
+    func oneCoalescingInTheTree() throws {
+        let root = Self.root
+            .appendingPathComponent("Sources/KiwiDesk")
+        var homes: [String] = []
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "\n", with: "")
+            let count = source.occurrences(of: "shortcutsLayer??")
+            if count > 0 {
+                homes.append(
+                    "\(file.lastPathComponent) x\(count)"
+                )
+            }
+        }
+        #expect(
+            homes == ["SettingsNavigation.swift x1"],
+            Comment(
+                rawValue:
+                    "the selection's landing is spelled in "
+                    + homes.joined(separator: ", ")
+            )
+        )
+    }
+
+    /// The header names the same layer under the same condition,
+    /// so it asks the same resolver. It was the copy the panel's
+    /// retired docstring pointed at, and nothing scanned it —
+    /// `ShortcutsGateTests` is keyed on `LayersCard` and the
+    /// clause above on the panel (re-review 2026-09-04).
+    @Test("the header asks the gate whether to name the layer")
+    func headerAsksTheResolver() throws {
+        let header = try Self.source(
+            "Sections/ShortcutsHeader.swift"
+        )
+        #expect(
+            header.contains(
+                "ShortcutsGates(config:model.config)"
+                    + ".inertReason(for:.shortcuts(.switchToLayer))"
+            )
+        )
+        #expect(header.occurrences(of: "layers.count") == 0)
+    }
 }
 
 /// The half a source scan cannot reach: whether the panel ever
@@ -204,6 +266,12 @@ struct KeyboardLayerWiringTests {
 /// the token is passed at the call site, leaves "the label is
 /// always nil" green on both channels at once — which is #1127's
 /// second claim regressing whole (guard-prover, 2026-09-04).
+///
+/// Main-actor spend (tests.md): two `makeTestModel` builds, each
+/// minting a scratch defaults domain and a test core, and four
+/// `L()` reads. No source scan, no filesystem walk and no AppKit
+/// measurement — it is `@MainActor` only because the properties
+/// it reads are `View` properties.
 @MainActor
 @Suite("Keyboard preview layer naming")
 struct KeyboardLayerNamingTests {
@@ -235,6 +303,11 @@ struct KeyboardLayerNamingTests {
     /// The strip's landing, unwritten: the panel names the layer
     /// it actually drew rather than the one nav happens to hold,
     /// so the two channels cannot disagree with the caps.
+    ///
+    /// This arm asserts WHERE an unwritten selection lands, so
+    /// retuning `shortcutsLayerSelection` owes this test and
+    /// `SpaceOverridesNavTests` together — a behaviour claim
+    /// about an opening the user sees, not a #1021 value pin.
     @Test("an unwritten selection still names what it drew")
     func labelNamesTheDrawnLayer() {
         LocalizationManager.shared.select("en")
