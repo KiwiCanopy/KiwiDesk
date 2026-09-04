@@ -28,15 +28,11 @@ enum KeyboardCensus {
         case cantBind
     }
 
-    /// The one keybinding layer the board draws (#1127).
-    ///
-    /// Layers are alternate keymaps and only one fires at a
-    /// time, so a key claimed elsewhere is no constraint here —
-    /// the census already refuses to call that a conflict, and
-    /// drawing it would put back as ink what that ruling refuses
-    /// in words. A name no layer answers to falls back rather
-    /// than drawing nothing: the strip's selection can outlive a
-    /// renamed or deleted layer.
+    /// The one keybinding layer the board draws (#1127;
+    /// `docs/design-decisions.md` argues why one and not the
+    /// union). A name no layer answers to falls back rather than
+    /// drawing nothing — the strip's selection outlives a rename
+    /// by a frame, and an empty board reads "everything is free".
     static func shown(
         _ name: String,
         in layers: [KeyLayer]

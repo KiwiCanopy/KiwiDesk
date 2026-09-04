@@ -2947,21 +2947,24 @@ record, clear, and delete. It shows your *draft*, not the saved
 profile — the panel's caption says so.
 
 It also shows **one layer at a time**: the board is drawn for the
-layer the strip has selected, so switching layers redraws it and
-answers *is this key free in this layer?* A key claimed only by
-another layer is not marked here — layers are alternate keymaps
-and only one of them fires, so a binding elsewhere is not in your
-way. Once you have more than one layer, the panel's caption names
-the one it is drawing.
+layer selected in the layer chips at the top of the area, so
+switching layers redraws it and answers *is this key free in this
+layer?* A key claimed only by another layer is not marked here —
+layers are alternate keymaps and only one of them fires, so a
+binding elsewhere is not in your way. Once you have more than one
+layer, the panel's caption names the one it is drawing.
 
-The board shows **one modifier combination at a time**. Chips
-above it list every combination your bindings use (⌃⌥, ⌃⌥⇧, …; a
-binding with no modifier at all appears as **No modifier**).
-**All** — the opening view — lights every key any binding claims;
-click a chip to narrow the board to that combination and answer
-the question you actually have while binding: *if I hold ⌃⌥, what
-is left?* A chip exists only while some binding uses its
-combination, so clearing your last ⌘ shortcut removes the ⌘ chip.
+Within that layer, the board shows **one modifier combination at
+a time**. Chips above it list every combination that layer's
+bindings use (⌃⌥, ⌃⌥⇧, …; a binding with no modifier at all
+appears as **No modifier**). **All** — the opening view — lights
+every key any binding in the layer claims; click a chip to narrow
+the board to that combination and answer the question you
+actually have while binding: *if I hold ⌃⌥, what is left?* A chip
+exists only while some binding uses its combination, so clearing
+your last ⌘ shortcut removes the ⌘ chip — and so does switching
+to a layer with no ⌘ binding, which drops the board back to
+**All**.
 
 Each legend entry is drawn the way the board draws it — a fill
 for a fill, a key-shaped ring for a ring:
@@ -2999,12 +3002,12 @@ you, but a shortcut stays on its physical key — switching input
 sources changes the characters on the caps, not which key fires
 your bindings.
 
-With VoiceOver, the board is one element that describes itself
-in words rather than a key at a time: which
-combination it is showing, which layer (where you have more than
-one), then the bound keys, the keys macOS
-owns under that combination, and any conflicts — the same facts
-the fills and rings draw, read from the same census.
+With VoiceOver, the board is one element that describes itself in
+words rather than a key at a time: which combination it is
+showing, which layer (where you have more than one), then the
+bound keys, the keys macOS owns under that combination, and any
+conflicts — the same facts the fills and rings draw, read from
+the same census.
 
 ### Keyboard Modifiers & Keys
 

@@ -13,8 +13,7 @@ struct SpokenKeyboardBoard: View {
     let scope: KeyboardCensus.Scope
     let conflicted: Set<UInt32>
     /// The keybinding layer the caps were counted over, or nil
-    /// while there is only one (#1127). The drawing moved to one
-    /// layer, so the sentence moves with it.
+    /// while there is only one (#1127).
     let layerLabel: String?
 
     private var scopeLabel: String {

@@ -30,7 +30,7 @@ struct ShortcutsSection: View {
     }
 
     private var selected: String {
-        model.nav.shortcutsLayer ?? KeyLayer.defaultName
+        model.nav.shortcutsLayerSelection
     }
 
     var body: some View {

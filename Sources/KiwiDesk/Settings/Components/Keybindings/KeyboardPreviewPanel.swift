@@ -12,22 +12,25 @@ struct KeyboardPreviewPanel: View {
     @ObservedObject var model: SettingsModel
     @State private var scope: KeyboardCensus.Scope = .all
 
-    /// The drawn layer, and the one every derivation below reads:
-    /// a census taken over the whole set answers "is this key
-    /// bound anywhere", where the board exists to answer "is it
-    /// free HERE".
-    private var shown: [KeyLayer] {
+    /// The drawn layer — the one array every derivation below
+    /// folds over (#1127).
+    var shown: [KeyLayer] {
         KeyboardCensus.shown(
-            model.nav.shortcutsLayer ?? KeyLayer.defaultName,
+            model.nav.shortcutsLayerSelection,
             in: model.config.layers
         )
     }
 
     /// The layer's name, or nil while it is the only one there
-    /// is — naming a choice nobody can make is noise, and the
-    /// header states it under the same condition.
-    private var layerLabel: String? {
-        guard model.config.layers.count > 1 else { return nil }
+    /// is. The condition is the census gate's, asked rather than
+    /// counted: a second copy names a layer on a screen with no
+    /// strip the day the gate is retuned (#816, #1127).
+    var layerLabel: String? {
+        guard
+            ShortcutsGates(config: model.config)
+                .inertReason(for: .shortcuts(.switchToLayer))
+                == nil
+        else { return nil }
         return shown.first?.name
     }
 
@@ -69,24 +72,31 @@ struct KeyboardPreviewPanel: View {
             Text(caption)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink3)
+                // The board's one description already named the
+                // layer, so the drawn half says it and the
+                // spoken half stands down — `fillLegend`'s move
+                // one notch softer (#1127).
+                .accessibilityLabel(draftCaption)
         }
     }
 
     /// The board names what it draws: once the layer scopes the
     /// picture, a board that changes under a strip click is
     /// legible only if it says which layer it changed to (#1127).
-    private var caption: String {
-        guard let layerLabel else {
-            return L(
-                "panel.caption.draft",
-                "Shows your draft, not the saved profile."
-            )
-        }
+    var caption: String {
+        guard let layerLabel else { return draftCaption }
         return L(
             "panel.caption.draft_layer",
             "Shows the \u{201C}%1$@\u{201D} layer in your "
                 + "draft, not the saved profile.",
             layerLabel
+        )
+    }
+
+    private var draftCaption: String {
+        L(
+            "panel.caption.draft",
+            "Shows your draft, not the saved profile."
         )
     }
 

@@ -57,6 +57,18 @@ struct KeyboardLayerScopeTests {
             KeyboardCensus.shown("gone", in: pair).map(\.name)
                 == [KeyLayer.defaultName]
         )
+        // Order is the config file's own, and `KeybindingMerge`
+        // APPENDS a recovered default — so a fixture with the
+        // default at index 0 cannot tell "prefer the default"
+        // from "take the first" (guard-prover, 2026-09-04).
+        let appended = [
+            layer("media", ["ctrl+alt+k"]),
+            layer(KeyLayer.defaultName, ["ctrl+alt+j"]),
+        ]
+        #expect(
+            KeyboardCensus.shown("gone", in: appended)
+                .map(\.name) == [KeyLayer.defaultName]
+        )
         let noDefault = [layer("media", ["ctrl+alt+k"])]
         #expect(
             KeyboardCensus.shown("gone", in: noDefault)
@@ -121,12 +133,13 @@ struct KeyboardLayerWiringTests {
         )
         // The layer arrives from the model, the panel being the
         // section's sibling — the `keybindingLayerName`
-        // environment the rows read never reaches it.
+        // environment the rows read never reaches it. WHERE the
+        // selection lands is `nav`'s and may be retuned there;
+        // this pins only that the panel takes its reading.
         #expect(
             panel.contains(
-                "KeyboardCensus.shown(model.nav.shortcutsLayer"
-                    + "??KeyLayer.defaultName,"
-                    + "in:model.config.layers)"
+                "KeyboardCensus.shown(model.nav."
+                    + "shortcutsLayerSelection,"
             )
         )
         // Every fold that decides a mark or a tally, by count:
@@ -146,9 +159,21 @@ struct KeyboardLayerWiringTests {
         #expect(
             panel.occurrences(of: "in:model.config.layers") == 1
         )
-        // The board names what it draws, on both channels.
+        // The board names what it draws, on both channels —
+        // and the caption ANNOUNCES the layer-free sentence,
+        // the board's own description having said it already.
         #expect(panel.contains("layerLabel:layerLabel"))
         #expect(panel.contains("Text(caption)"))
+        #expect(
+            panel.contains(".accessibilityLabel(draftCaption)")
+        )
+        // The naming condition is the gate's, asked not counted.
+        #expect(
+            panel.contains(
+                "ShortcutsGates(config:model.config)"
+                    + ".inertReason(for:.shortcuts(.switchToLayer))"
+            )
+        )
     }
 
     /// The write the panel's read depends on: with the selection
@@ -164,11 +189,62 @@ struct KeyboardLayerWiringTests {
         )
         #expect(
             section.contains(
-                "model.nav.shortcutsLayer??KeyLayer.defaultName"
+                "model.nav.shortcutsLayerSelection"
             )
         )
         // Both strip mounts take that binding, not a local one.
         #expect(section.occurrences(of: "selected:selection") == 2)
         #expect(section.occurrences(of: "@Stateprivatevarselected") == 0)
+    }
+}
+
+/// The half a source scan cannot reach: whether the panel ever
+/// RESOLVES a name to put in front of the reader. Pinning that
+/// the sentence builds correctly when handed a label, and that
+/// the token is passed at the call site, leaves "the label is
+/// always nil" green on both channels at once — which is #1127's
+/// second claim regressing whole (guard-prover, 2026-09-04).
+@MainActor
+@Suite("Keyboard preview layer naming")
+struct KeyboardLayerNamingTests {
+    private func model(_ names: [String]) -> SettingsModel {
+        let model = makeTestModel()
+        model.config.layers = names.map { KeyLayer(name: $0) }
+        return model
+    }
+
+    @Test("the sole layer is not named, a chosen one is")
+    func labelFollowsTheLayerCount() {
+        LocalizationManager.shared.select("en")
+        let alone = model([KeyLayer.defaultName])
+        let panel = KeyboardPreviewPanel(model: alone)
+        #expect(panel.layerLabel == nil)
+        #expect(
+            panel.caption
+                == "Shows your draft, not the saved profile."
+        )
+
+        let two = model([KeyLayer.defaultName, "media"])
+        two.nav.shortcutsLayer = "media"
+        let named = KeyboardPreviewPanel(model: two)
+        #expect(named.layerLabel == "media")
+        #expect(named.caption.contains("media"))
+        #expect(named.shown.map(\.name) == ["media"])
+    }
+
+    /// The strip's landing, unwritten: the panel names the layer
+    /// it actually drew rather than the one nav happens to hold,
+    /// so the two channels cannot disagree with the caps.
+    @Test("an unwritten selection still names what it drew")
+    func labelNamesTheDrawnLayer() {
+        LocalizationManager.shared.select("en")
+        let two = model([KeyLayer.defaultName, "media"])
+        let panel = KeyboardPreviewPanel(model: two)
+        #expect(panel.layerLabel == KeyLayer.defaultName)
+        two.nav.shortcutsLayer = "gone"
+        #expect(
+            KeyboardPreviewPanel(model: two).layerLabel
+                == KeyLayer.defaultName
+        )
     }
 }

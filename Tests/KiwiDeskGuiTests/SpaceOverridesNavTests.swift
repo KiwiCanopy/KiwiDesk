@@ -15,11 +15,21 @@ struct SpaceOverridesNavTests {
     func resetClearsOverrideFocus() {
         var nav = SettingsNavigation()
         nav.spaceOverridesFocus = SpaceID("code")
-        // Pinned alongside the mode tab it sits beside, so a reset
-        // that forgot one of the two would still red here.
+        // Pinned alongside the surfaces it sits beside, so a
+        // reset that forgot one of the three would still red
+        // here — each is a per-visit landing that reads as a
+        // process-lifetime one the moment it survives a reset
+        // (the Shortcuts layer joined them in #1127).
         nav.layoutModeTab = .stack
+        nav.shortcutsLayer = "media"
         nav.resetSurfaces()
         #expect(nav.spaceOverridesFocus == nil)
         #expect(nav.layoutModeTab == nil)
+        #expect(nav.shortcutsLayer == nil)
+        // …and the coalesced read lands back on the default,
+        // which is what the sibling surfaces have no analogue of.
+        #expect(
+            nav.shortcutsLayerSelection == KeyLayer.defaultName
+        )
     }
 }
