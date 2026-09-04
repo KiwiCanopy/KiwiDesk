@@ -73,6 +73,46 @@ enum KeyboardCensus {
         return out.mapValues { $0.sorted() }
     }
 
+    /// One key's bindings under the selected modifier layers
+    /// (#798), in the chip strip's own order.
+    ///
+    /// Beside `claims` and over the same arguments on purpose: a
+    /// second fold written in the view is how the strip comes to
+    /// name an action on a key the fill says is free.
+    static func bindings(
+        on code: UInt32,
+        in layers: [KeyLayer],
+        selected: Set<ModifierLayer>
+    ) -> [(layer: ModifierLayer, binding: KeyBinding)] {
+        layers.flatMap(\.bindings).enumerated()
+            .compactMap {
+                offset,
+                binding -> (
+                    offset: Int, layer: ModifierLayer,
+                    binding: KeyBinding
+                )? in
+                guard let combo = KeyCombo.parse(binding.combo),
+                    combo.keyCode == code
+                else { return nil }
+                let layer = ModifierLayer(
+                    modifiers: combo.modifiers
+                )
+                guard selected.contains(layer) else { return nil }
+                return (offset, layer, binding)
+            }
+            .sorted {
+                // By LAYER, so the reading matches the chip
+                // strip; position only breaks a tie, since
+                // `sorted(by:)` is not documented stable and a
+                // COLLISION is two claims in one layer — the
+                // case this exists for.
+                $0.layer == $1.layer
+                    ? $0.offset < $1.offset
+                    : $0.layer < $1.layer
+            }
+            .map { (layer: $0.layer, binding: $0.binding) }
+    }
+
     /// Filter scope for keyboard preview.
     enum Scope: Hashable {
         case all
@@ -160,6 +200,55 @@ enum KeyboardCensus {
                 }
                 .map(\.keyCode)
         )
+    }
+
+    /// Every key the board RINGS under the shown scope (#798):
+    /// an own-layer collision, or a binding over a macOS
+    /// reservation. One derivation, because the ring, the words
+    /// under the pointer and the spoken conflict clause must
+    /// name the same keys or the picture and its description
+    /// disagree.
+    static func ringedKeys(
+        in layers: [KeyLayer],
+        selected: Set<ModifierLayer>,
+        scope: Scope
+    ) -> Set<UInt32> {
+        collisions(in: layers, scope: scope)
+            .union(
+                overwrittenReserved(
+                    claims: claims(in: layers, selected: selected),
+                    scope: scope
+                )
+            )
+    }
+
+    /// The chord the shown scope names, empty under `.all` —
+    /// where there is no single combination to name.
+    static func chordLabel(of scope: Scope) -> String {
+        guard case .one(let layer) = scope else { return "" }
+        return layer.label
+    }
+
+    /// What macOS uses a key for under the SHOWN scope, or nil
+    /// where the board draws no reserved mark (#798).
+    ///
+    /// Keyed on `scope`, never on the selected set: `.all` draws
+    /// no reserved marks by ruling — macOS reserves a
+    /// COMBINATION, so the answer has no meaning until a chip
+    /// picks one — and a sentence naming an owner there is the
+    /// words asserting what the picture refuses to draw.
+    static func reservedOwner(
+        of code: UInt32,
+        scope: Scope
+    ) -> SystemShortcut? {
+        guard case .one(let layer) = scope,
+            reservedKeys(scope: scope).contains(code)
+        else { return nil }
+        let combo = SystemShortcuts.map.keys.first {
+            $0.keyCode == code
+                && ModifierLayer(modifiers: $0.modifiers) == layer
+        }
+        return combo.flatMap { SystemShortcuts.map[$0] }
     }
 
     /// User bindings conflicting with macOS reservations.

@@ -100,7 +100,8 @@ struct KeyboardBoardSpokenTests {
         let empty = KeyboardBoardSpoken.sentence(
             buckets: .init(),
             scopeLabel: "All",
-            layerLabel: nil
+            layerLabel: nil,
+            conflictDetail: []
         )
         #expect(
             empty == "Keyboard preview, showing All. No keys bound."
@@ -112,7 +113,8 @@ struct KeyboardBoardSpokenTests {
                 conflict: ["W"]
             ),
             scopeLabel: "⌘",
-            layerLabel: nil
+            layerLabel: nil,
+            conflictDetail: []
         )
         #expect(full.hasPrefix("Keyboard preview, showing ⌘. Bound: Q"))
         #expect(full.contains("macOS owns: space."))
@@ -131,7 +133,8 @@ struct KeyboardBoardSpokenTests {
         let named = KeyboardBoardSpoken.sentence(
             buckets: .init(bound: ["Q"]),
             scopeLabel: "All",
-            layerLabel: "media"
+            layerLabel: "media",
+            conflictDetail: []
         )
         #expect(
             named == "Keyboard preview, showing All. In the "
@@ -141,9 +144,41 @@ struct KeyboardBoardSpokenTests {
             !KeyboardBoardSpoken.sentence(
                 buckets: .init(bound: ["Q"]),
                 scopeLabel: "All",
-                layerLabel: nil
+                layerLabel: nil,
+                conflictDetail: []
             ).contains("layer")
         )
+    }
+
+    /// The clause the accessibility budget was spent on (#798):
+    /// the ring says two bindings clash and cannot say WHICH
+    /// two, so the spoken form names them. It was deletable at
+    /// either hop with every suite green — this suite never
+    /// passed the parameter, so its default blinded it by
+    /// construction (guard-prover, 2026-09-05), which is why the
+    /// parameter now has no default at all.
+    @Test("the conflict clause carries the readings it was given")
+    func conflictDetailReachesTheSentence() {
+        LocalizationManager.shared.select("en")
+        let said = KeyboardBoardSpoken.sentence(
+            buckets: .init(bound: ["J"], conflict: ["J"]),
+            scopeLabel: "⌃⌥",
+            layerLabel: nil,
+            conflictDetail: [
+                "⌃⌥J — Focus left", "⌃⌥J — Swap left",
+            ]
+        )
+        #expect(said.contains("Conflict: J."))
+        #expect(said.hasSuffix("⌃⌥J — Focus left ⌃⌥J — Swap left"))
+        // …and nothing is appended where the board rings none:
+        // the clause rides the conflict bucket, not the board.
+        let quiet = KeyboardBoardSpoken.sentence(
+            buckets: .init(bound: ["J"]),
+            scopeLabel: "⌃⌥",
+            layerLabel: nil,
+            conflictDetail: ["⌃⌥J — Focus left"]
+        )
+        #expect(!quiet.contains("Focus left"))
     }
 
     /// The two locale seams of the spoken form, pinned by

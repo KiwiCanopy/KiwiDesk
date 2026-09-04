@@ -11,6 +11,11 @@ import SwiftUI
 struct KeyboardPreviewPanel: View {
     @ObservedObject var model: SettingsModel
     @State private var scope: KeyboardCensus.Scope = .all
+    /// The key under the pointer (#798). Cleared whenever the
+    /// board is rebuilt beneath it — a cap replaced under the
+    /// pointer never delivers `onHover(false)`, the class of the
+    /// `NSCursor` push/pop trap.
+    @State var hovered: UInt32?
 
     /// The drawn layer — the one array every derivation below
     /// folds over (#1127).
@@ -36,18 +41,18 @@ struct KeyboardPreviewPanel: View {
         KeyboardCensus.layers(in: shown)
     }
 
-    private var liveScope: KeyboardCensus.Scope {
+    var liveScope: KeyboardCensus.Scope {
         if case .one(let layer) = scope, !layers.contains(layer) {
             return .all
         }
         return scope
     }
 
-    private var selected: Set<KeyboardCensus.ModifierLayer> {
+    var selected: Set<KeyboardCensus.ModifierLayer> {
         KeyboardCensus.inScope(liveScope, among: layers)
     }
 
-    private var claims: [UInt32: [KeyboardCensus.ModifierLayer]] {
+    var claims: [UInt32: [KeyboardCensus.ModifierLayer]] {
         KeyboardCensus.claims(
             in: shown,
             selected: selected
@@ -55,6 +60,20 @@ struct KeyboardPreviewPanel: View {
     }
 
     var body: some View {
+        board
+            // A cap replaced under the pointer never reports
+            // leaving, so a scope click or a layer switch would
+            // strand the slot on a key the pointer is no longer
+            // on — in a scope where it may not even be claimed.
+            .onChange(of: liveScope) { _, _ in hovered = nil }
+            .onChange(of: model.nav.shortcutsLayerSelection) {
+                _,
+                _ in
+                hovered = nil
+            }
+    }
+
+    private var board: some View {
         VStack(alignment: .leading, spacing: 12) {
             chips
             SpokenKeyboardBoard(
@@ -62,10 +81,12 @@ struct KeyboardPreviewPanel: View {
                 claims: claims,
                 scope: liveScope,
                 conflicted: collisions,
-                layerLabel: layerLabel
+                layerLabel: layerLabel,
+                onHover: { hovered = $0 },
+                conflictDetail: conflictDetail
             )
+            statusSlot
             fillLegend.accessibilityHidden(true)
-            tallySentence
             layoutRow
             // Announced without the layer: the board's one
             // description already named it (#1127). Adjacent to
@@ -198,20 +219,6 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Sentence and layout row
 
-    private var tallySentence: some View {
-        let taken = KeyboardCensus.takenKeyCount(claims: claims)
-        return Text(
-            L(
-                "keyboard.tally",
-                "Keys taken: %1$d",
-                taken
-            )
-        )
-        .font(.caption)
-        .foregroundStyle(SettingsTheme.ink2)
-        .fixedSize(horizontal: false, vertical: true)
-    }
-
     private var layoutRow: some View {
         HStack(spacing: 0) {
             ForEach(
@@ -268,7 +275,7 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Derived
 
-    private var collisions: Set<UInt32> {
+    var collisions: Set<UInt32> {
         KeyboardCensus.collisions(
             in: shown,
             scope: liveScope

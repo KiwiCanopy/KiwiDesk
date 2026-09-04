@@ -71,9 +71,10 @@ to invert the dim ladder).
   carry no duplicate preview (`DetailPanelTests` holds the
   migration and the offer set; the argument is in
   `docs/design-decisions.md` ▸ two columns).
-- **That panel is the section's SIBLING, so a selection the
-  section owns reaches it on `nav` — never through an
-  environment the section applies.** The two columns are mounted
+- **That panel is the section's SIBLING, so it reads NOTHING
+  from an environment the section applies** — a selection the
+  section owns reaches it on `nav`, and live machine state is
+  read at the panel itself, once per panel render.** The two columns are mounted
   beside each other, so `.environment(…)` written inside a
   section's own body is invisible one column over: the keyboard
   board drew every layer at once for as long as it shipped
@@ -82,8 +83,17 @@ to invert the dim ladder).
   `SettingsNavigation` and have both columns take it — a reader
   spelling the landing itself is how the `layoutModeTab` pair
   came to answer two different defaults.
-  `KeyboardLayerWiringTests` is the guard, keyed on the use
-  sites; a second panel taking a section-owned value joins it.
+  Which answer a value takes is decided by what it IS: a
+  selection is navigation state and parks on `nav`; a live
+  preference read would go stale parked there, so it is taken
+  fresh (#798 — the second instance, where the environment
+  would have answered the EMPTY default and narrated a dormant
+  chord as dead). A per-render read is not the N+1 #1105 bans:
+  that rule forbids one read per ROW, and the panel is one
+  surface. `KeyboardLayerWiringTests` guards the selection half
+  and `KeyboardHoverWiringTests` the live-read half, both keyed
+  on the use sites; a third panel taking a section-owned value
+  joins whichever it is.
 - **A picture whose object is NOT the draft goes in a sheet, and
   writes nothing** (#859). Choose the container by whose object the
   picture is — draft → the panel, anything the user is not editing
