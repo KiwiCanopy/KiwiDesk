@@ -1325,6 +1325,27 @@ indistinguishable from "SkyLight unavailable" — and unavailable
 must keep the single-Desktop fallback fully alive, so a lookup
 miss always counts as a Desktop.
 
+"Without a destroy" is AppKit's transition, not every app's
+([#1272](https://github.com/KiwiCanopy/KiwiDesk/issues/1272)).
+Zen — Firefox behind it — orders the real window out for the
+transition's beat on both ends: for about half a second it is on
+neither the app's Accessibility window list nor the on-screen
+census, while the compositor already hosts it on the fullscreen
+Space (entering) or back on the Desktop (leaving). Read as a
+close, that beat cost the window its slot and handed the focus
+to a neighbor on every exit. So the reconcile sweep's
+removal-distrust gate has a fullscreen arm beside its carried
+one: a vanish of a window last read in fullscreen, or one the
+compositor hosts on a fullscreen Space, is refused for the same
+bounded recheck budget, and the window comes back through the
+membership change above rather than as a new arrival. "Still
+hosted" alone is deliberately not the signal — a closed window
+lingers on its Desktop's Space for a while, so only the
+fullscreen half of the reading tells the transition from a
+close; the residue, a window closed *while* fullscreen dropping a
+budget late, is in
+[Accepted Limitations](accepted-limitations.md).
+
 The ring's **rendering backend is opportunistic, not architectural**
 (#285): when the complete runtime-linked SkyLight drawing and event
 surface resolves, an SLS window follows WindowServer move/resize/order
@@ -3499,8 +3520,10 @@ and the choices, each argued against its alternative:
   refuse a removal, never cause one
   ([#1157](https://github.com/KiwiCanopy/KiwiDesk/issues/1157)),
   and the per-Desktop census is downstream of that decision: it
-  classifies and files what the sweep already removed, and no
-  arm of the sweep, the heal or the carried-window gate reads it.
+  classifies and files what the sweep already removed; the one
+  arm that reaches the compositor from the sweep, the fullscreen
+  arm ([#1272](https://github.com/KiwiCanopy/KiwiDesk/issues/1272)),
+  may only refuse a removal, never cause one.
   A carried sticky window ([#1145](#sticky-reach-spans-macos-desktops-1145))
   is present, never in the ledger.
 

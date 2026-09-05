@@ -121,7 +121,7 @@ extension EventLoop {
         // Native fullscreen suppresses the focus ring (a ring
         // around a display-filling window shows only at the
         // corners); snapshot it here, refresh on reconcile.
-        window.isFullscreen = AXHelper.isFullscreen(element)
+        window.isFullscreen = readFullscreen(element)
         detectedFloating[window.id] = window.isFloating
         detectedFullscreen[window.id] = window.isFullscreen
         elements[pid, default: [:]][window.id] = element
@@ -212,7 +212,7 @@ extension EventLoop {
         _ element: AXUIElement,
         id: WindowID
     ) {
-        let fullscreen = AXHelper.isFullscreen(element)
+        let fullscreen = readFullscreen(element)
         guard detectedFullscreen[id] != fullscreen else { return }
         detectedFullscreen[id] = fullscreen
         onEvent(

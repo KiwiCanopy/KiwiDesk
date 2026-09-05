@@ -157,6 +157,9 @@ extension KiwiCore {
         eventLoop.carriedWindows = { [weak self] in
             self?.stickyReachInFlight() ?? []
         }
+        eventLoop.fullscreenSpaceHosts = { [weak self] id in
+            self?.windowIsOnFullscreenSpace(id) ?? false
+        }
         sleepWake.captureState = { [weak self] in
             self?.state.snapshot()
         }

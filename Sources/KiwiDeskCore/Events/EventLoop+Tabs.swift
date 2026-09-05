@@ -25,8 +25,8 @@ extension EventLoop {
     /// removal-distrust gate stands down (#1157): the census
     /// double-exposes both Desktops while the compositor settles
     /// (#1023), so retuning this for tab reasons retunes the
-    /// gate's stand-down too. The gate's carried arm (#1145) reads
-    /// the carry's own in-flight stamp, never this one.
+    /// gate's stand-down too. The gate's expected-absence arms
+    /// (#1145, #1272) read their own signals, never this one.
     static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
 
     /// The one derivation of "inside that grace" — the tab
@@ -125,9 +125,10 @@ extension EventLoop {
             }
             // A hide is a total answer about the app (#913), and
             // a minimize is the window's own verdict: neither is
-            // a vanish the carry could explain (#1145).
+            // a vanish an expected-absence arm could explain
+            // (#1145, #1272).
             if !hidden, !minimized.contains(id),
-                refusesCarriedRemoval(
+                refusesExpectedRemoval(
                     id,
                     pid: pid,
                     app: app,

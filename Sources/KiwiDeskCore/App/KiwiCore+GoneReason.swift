@@ -66,6 +66,21 @@ extension KiwiCore {
         )
     }
 
+    /// The compositor hosts `id` on a native fullscreen Space —
+    /// the removal gate's fullscreen ENTER arm, read through
+    /// `EventLoop.fullscreenSpaceHosts` (#1272). The classifier's
+    /// own answer (`gonePresence`) against ONE topology reading;
+    /// a Space that reading does not list is a user one, so an
+    /// unreadable host never refuses a removal. Priced per
+    /// vanished window: the two reads `handleWindowGone` pays a
+    /// moment later anyway.
+    func windowIsOnFullscreenSpace(_ id: WindowID) -> Bool {
+        let spaces = NativeSpaces.allSpaces()
+        let presence = gonePresence(of: id, spaces: spaces)
+        guard case .hosted(let space, _) = presence else { return false }
+        return !NativeSpaces.isUserSpace(space, in: spaces)
+    }
+
     /// The compositor's answer for a window that just left the
     /// AX list. `spaces` is the caller's one topology reading
     /// (profiles.md). A Space the topology does not list reads

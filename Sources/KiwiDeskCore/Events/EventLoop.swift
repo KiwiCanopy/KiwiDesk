@@ -12,31 +12,16 @@ import ApplicationServices
 public final class EventLoop {
     public var onEvent: @MainActor (KiwiEvent) -> Void = { _ in }
 
-    /// Fired when Ghostty reports its built-in ignored quick-
-    /// terminal panel as its focused window. No `.windowFocused`
-    /// is emitted for the panel
-    /// itself (issue #21), but the panel being active is a
-    /// signal KiwiCore keeps: when the panel is dismissed the
-    /// app re-reports its managed main window as focused, and
-    /// that stale report must not follow focus to the main
-    /// window's space (issue #244). Carries the app's pid.
-    ///
-    /// Relies on AX reporting the panel *element* as focused at
-    /// least once while it is up (the untracked-window branch in
-    /// EventLoop+Notifications / EventLoop+Apps): that is when
-    /// the pid is flagged. Confirmed for Ghostty's quick
-    /// terminal by manual pass; a future ignored-panel app that
-    /// only ever re-reports its main window would not flag, and
-    /// the dismiss follow would return (the pre-fix behavior).
-    ///
-    /// A SECOND consumer rides this signal (#958): the
-    /// accessibility-steal return arms off the bundle id when
-    /// the flagged panel is VoiceOver's control process — so a
-    /// retune of the generic ignored-panel classification
-    /// (`FloatDetection.isBuiltInIgnoredPanel` and the layer
-    /// band behind it) that stops flagging
-    /// `com.apple.universalaccesscontrol` silently disarms
-    /// that return too, with no test on the OS side to red.
+    /// Fired when an app reports an ignored panel (Ghostty's quick
+    /// terminal, VoiceOver's control process) as its focused
+    /// window, with the pid and bundle id. No `.windowFocused` is
+    /// emitted for the panel (#21); the core arms the dismiss
+    /// distrust (#244) and the accessibility-steal return (#958)
+    /// off it. Relies on AX reporting the panel ELEMENT focused at
+    /// least once while it is up — an app that only re-reports its
+    /// main window never flags, and a retune of
+    /// `FloatDetection.isBuiltInIgnoredPanel` that stops flagging
+    /// VoiceOver disarms #958's return with no OS-side test to red.
     public var onIgnoredPanelFocus: @MainActor (pid_t, String?) -> Void = {
         _,
         _ in
@@ -79,27 +64,11 @@ public final class EventLoop {
     }
 
     /// KiwiDesk's own active key or modal window, nil when the
-    /// process holds none — the ONE seam both stand-downs read:
-    /// the #929/#935 close-return raise (via
-    /// `closeReturnRaiseStandsDown(after:)`) and the #933
-    /// focused-ring suppression. When an own progress window
-    /// closes to yield to an own alert (Sparkle's flow), the
-    /// destroy fold re-points state focus at the background
-    /// survivor and no focus event re-points it at the alert —
-    /// so the anchor goes stale (the own-window census is
-    /// `OwnWindowTiling`'s doc).
-    ///
-    /// One reading, two facets, read by DIFFERENT stand-downs
-    /// on purpose (#935): the ring reads `number` — ANY own key
-    /// window makes the anchor stale, and the number rather
-    /// than a Bool is what lets an own key window that IS the
-    /// anchor (the Settings window) keep its ring — while the
-    /// raise reads `isDialog`, the narrower class a raise could
-    /// actually submerge (`classifiesAsOwnDialog` carries the
-    /// classification's argument). One closure resolves both so
-    /// the two stand-downs can never disagree about WHICH
-    /// window is key — only the ruled facet differs. Injected
-    /// in tests.
+    /// process holds none — the ONE seam the #929/#935 close-return
+    /// stand-down and the #933 ring suppression share, so the two
+    /// can never disagree about WHICH window is key: the ring reads
+    /// `number`, the raise the narrower `isDialog` (borders.md;
+    /// `classifiesAsOwnDialog`). Injected in tests.
     var ownKeyWindow: () -> OwnKeyWindowReading? = {
         EventLoop.ownKeyWindowReading()
     }
@@ -161,6 +130,11 @@ public final class EventLoop {
     /// to `KiwiCore.stickyReachInFlight`; the empty default keeps
     /// every harness inert.
     var carriedWindows: () -> Set<WindowID> = { [] }
+    /// The compositor hosts this window on a native fullscreen
+    /// Space — the removal gate's fullscreen ENTER arm (#1272).
+    /// Wired in `KiwiCore+Bootstrap`; the false default keeps
+    /// every harness inert.
+    var fullscreenSpaceHosts: (WindowID) -> Bool = { _ in false }
     /// When the user last switched native Spaces. Tab coalescing is
     /// suppressed for a short window afterward: a space switch shows
     /// the departed space's windows as vanished and the arrived
@@ -291,6 +265,11 @@ public final class EventLoop {
     /// AX window list of an app — `attach`'s snapshot and
     /// `reconcile`'s live list.
     var axWindows: (pid_t) -> [AXUIElement] = AXHelper.windows
+
+    /// A window's native-fullscreen reading — `track`'s snapshot
+    /// and `recheckFullscreen`'s change-only re-read (#670); a
+    /// test drives both directions of the flag through it (#1272).
+    var readFullscreen: (AXUIElement) -> Bool = AXHelper.isFullscreen
 
     /// Activation policy for a pid a reconcile only knows by
     /// number.
