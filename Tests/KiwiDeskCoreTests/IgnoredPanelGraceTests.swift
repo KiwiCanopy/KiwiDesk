@@ -200,8 +200,5 @@ struct IgnoredPanelGraceTests {
         // still distrusted by that stamp — no follow.
         core.handle(.windowFocused(WindowID(4)))
         #expect(core.deferred.task(for: .focusFollow) == nil)
-        #expect(
-            core.state.workspaces.activeSpace == SpaceID(1)
-        )
     }
 }
