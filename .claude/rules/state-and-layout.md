@@ -865,6 +865,48 @@ editing here:
   deliberately — a fold-rule change that updates the render
   and misses a hand copy re-opens the exact divergence the
   extraction closed.
+  And **a refusal names a window the write could have MOVED**
+  (#1259). The own-minimum wording is owed only to a focused
+  window ON the side that could not shrink, so a writer STATES
+  that (`focusedIsBinding`, the one discriminator
+  `reportResizeRefusal` takes) from its own partition rather
+  than inferring it from the gesture's direction — including
+  the case where the focused window is in NO group of it, which
+  every writer has: a stack zone and a track partition the
+  TILED members, and a native-fullscreen or elsewhere-rendering
+  focus is not one (#670/#445), while bsp's sides are
+  geometric and a window spanning the whole tiled extent on the
+  axis sits above every split of that orientation, so no ratio
+  move can resize it. That window is dropped from both sides by
+  the one `MouseResize.bspSides` authority — which also keeps
+  its floor out of the CAP, where it blocked a write no window
+  on the split was constraining — and the binding side is then
+  read off the WRITE's own direction, never the focused
+  window's side, which says nothing when the window is on
+  neither.
+  The empty case is the CUE's alone, and the write is not part
+  of it: a ratio is a stored per-space value whose caps protect
+  the REGION rather than the windows currently in it, so an
+  empty or unsplit space still records what a later split opens
+  at (#383/#44/#458, `SessionRatioTests`, whose cases drive
+  exactly that: a change that refuses the write to silence an
+  "invisible ratchet" reds them). Two obligations on
+  the cue there, because the sentence it draws is a claim about
+  the arrangement rather than a limit reached: it is owed on the
+  FIRST press rather than whenever the clamp happens to bite,
+  and `noAxisHere` says the OTHER axis divides — so a space that
+  divides neither, one window or an overflow pile, stands down
+  wordless instead, that silence being #1258's to close rather
+  than this rule's to fill with a false sentence.
+  A new writer of this shape states which kind of partition it
+  has; `ResizeRefusalTargetingTests` holds the verdicts, one
+  per arm, bsp and stack alike.
+  The classification models the FIRST split of an orientation,
+  which is what the shared scalar makes reachable: a deeper
+  split reusing it is not separately classified, so at depth ≥
+  2 a participant can still be named on the wrong side of it
+  (pre-existing, and the same under-clamp the cap already
+  documents).
 - **A float safety NET asks `EffectiveFloat.applies`, never the
   flag alone** (#1178). `FloatingLayout` assigns no frames, so a
   `.floating` space's members are unmanaged in exactly the way a

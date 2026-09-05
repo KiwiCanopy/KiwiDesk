@@ -164,13 +164,7 @@ extension KiwiCore {
                 axis: "x",
                 span: Double(bounds.width),
                 space: space,
-                focused: window,
-                deltaSign: bspDragSign(
-                    ratioDelta: Double(delta),
-                    axis: "x",
-                    space: space,
-                    window: window
-                )
+                focused: window
             )
         case .bspRatioV(let delta):
             let base =
@@ -181,13 +175,7 @@ extension KiwiCore {
                 axis: "y",
                 span: Double(bounds.height),
                 space: space,
-                focused: window,
-                deltaSign: bspDragSign(
-                    ratioDelta: Double(delta),
-                    axis: "y",
-                    space: space,
-                    window: window
-                )
+                focused: window
             )
         case .masterRatio(let delta):
             let stack =
@@ -255,36 +243,5 @@ extension KiwiCore {
         case nil:
             break
         }
-    }
-
-    /// Whether a BSP ratio delta GROWS (+) or SHRINKS (−) the
-    /// dragged window: a positive ratio move grows the FIRST
-    /// region, so the window's own growth is its side times the
-    /// delta — via the shared `MouseResize.bspSide` authority,
-    /// never a re-derived comparison. Unknown window/slot keeps
-    /// the raw delta (first-region perspective).
-    private func bspDragSign(
-        ratioDelta: Double,
-        axis: String,
-        space: Space,
-        window: WindowID?
-    ) -> Double {
-        guard let window,
-            let slot = tiler.calculatedFrames(
-                state: state
-            )[window],
-            let screen = TilingEngine.screen(
-                for: space.id,
-                in: state
-            )
-        else { return ratioDelta }
-        let side = Double(
-            MouseResize.bspSide(
-                slot: slot,
-                bounds: tiler.layoutBounds(on: screen),
-                horizontal: axis == "x"
-            )
-        )
-        return side * ratioDelta
     }
 }

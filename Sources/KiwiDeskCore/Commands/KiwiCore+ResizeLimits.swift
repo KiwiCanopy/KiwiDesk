@@ -2,69 +2,6 @@ import AppKit
 import CoreGraphics
 import Foundation
 
-/// Which size limit refused (part of) an interactive resize
-/// (#933) — the structure the cues render, and what the test
-/// seam (`BorderManager.onResizeRefusal`) observes, since the
-/// drawn cues are display-gated and invisible headless.
-enum ResizeRefusal: Equatable {
-    /// A shrink stopped at the resized window's own effective
-    /// minimum (`min_window_size`, or its learned app bound).
-    case ownMinimum(WindowID)
-    /// A grow stopped where `anchor` — a neighboring window —
-    /// would drop below ITS effective minimum.
-    case neighborMinimum(anchor: WindowID, focused: WindowID)
-    /// A grow stopped at the resized window's own learned
-    /// app-enforced maximum (#1055) — the app refuses to get
-    /// bigger, so growing the slot further only overshoots.
-    case ownMaximum(WindowID)
-    /// The zone the focused window sits in has no parameter on
-    /// the asked axis at all (#1255) — a horizontal master zone
-    /// divides widths, so a height press has nothing to move.
-    /// Not a limit reached: a limit that does not exist.
-    case noAxisHere(WindowID)
-    /// The space's layout has no resizing at all (#1255) —
-    /// monocle, grid and floating. The most reachable refusal
-    /// there is, and until now the one cued by sound alone.
-    case layoutHasNoResize(WindowID)
-}
-
-extension ResizeRefusal {
-    /// The pill's leading glyph, in one exhaustive switch so a
-    /// new refusal cannot ship wearing another one's symbol
-    /// (#1260, `ResizeRefusalSymbolTests`).
-    ///
-    /// The rule the mapping encodes: **an arrow means a resize
-    /// stopped, a non-arrow means there is no resize here.** It
-    /// is the pill's only non-verbal channel and the only part
-    /// that survives truncation, so it carries the
-    /// impossible/blocked split the sentence spells out —
-    /// readable with no legend, and free, since the slot is
-    /// drawn on every pill either way.
-    ///
-    /// Read off the CASE and never off the text (#96 — Core
-    /// returns structure, the GUI narrates). `.neighborMinimum`
-    /// keeps the SHRINK arrow deliberately: a shrink whose
-    /// group floor is carried by a mate routes through
-    /// `refuseGrowAtNeighborMinimum`, so a direction-derived
-    /// glyph would draw a grow arrow on a shrink gesture.
-    ///
-    /// Every name here is SF Symbols 1.0. That is a
-    /// requirement, not trivia: a symbol added after the macOS
-    /// 14 deployment target resolves on a modern dev host and
-    /// renders nil on the target, leaving an empty gutter and
-    /// no error.
-    var pillSymbol: String {
-        switch self {
-        case .ownMinimum, .neighborMinimum:
-            "arrow.down.right.and.arrow.up.left"
-        case .ownMaximum:
-            "arrow.up.left.and.arrow.down.right"
-        case .noAxisHere, .layoutHasNoResize:
-            "nosign"
-        }
-    }
-}
-
 /// The effective-minimum resolution and the shared clamped
 /// ratio writers used by every interactive resize path —
 /// keyboard (`resize`) and mouse (`applyResizeAdjustment`)
@@ -142,18 +79,27 @@ extension KiwiCore {
 
     /// Renders the refusal for a clamped write: the own-minimum
     /// cue when the binding window IS the resized one (or when
-    /// only the global floor binds on a shrink), the
-    /// neighbor-minimum cue anchored on the binding window
-    /// otherwise — the #435 rule: the pill goes on the window
-    /// that cannot move, not the trier.
+    /// only the global floor binds on the side the focused
+    /// window sits in), the neighbor-minimum cue anchored on
+    /// the binding window otherwise — the #435 rule: the pill
+    /// goes on the window that cannot move, not the trier.
+    ///
+    /// `focusedIsBinding` is the whole discriminator, and it is
+    /// the caller's reading of its OWN partition rather than a
+    /// direction re-derived here (#1259). A grow always runs
+    /// into the other side, and a shrink into the focused
+    /// window's own — unless the focused window takes no part
+    /// in the split being written, which is exactly the case
+    /// where the own-minimum wording names a window whose size
+    /// the write could never have changed.
     func reportResizeRefusal(
         focused: WindowID,
         bindingCarrier: WindowID?,
         fallbackAnchor: WindowID?,
-        shrinking: Bool,
+        focusedIsBinding: Bool,
         axis: String
     ) {
-        if shrinking {
+        if focusedIsBinding {
             if let carrier = bindingCarrier, carrier != focused {
                 // A group-mate's larger floor binds the shrink:
                 // the mate is the window that cannot shrink.
@@ -167,11 +113,11 @@ extension KiwiCore {
             }
             return
         }
-        // A grow cue needs a real neighbor to point at; with no
-        // binding-side member there is nothing being protected
-        // and the cue stands down rather than naming a phantom
-        // (a lone window's ratio still stops at the store
-        // clamp, silently).
+        // The cue needs a real window on the binding side to
+        // point at; with no member there is nothing being
+        // protected and it stands down rather than naming a
+        // phantom (a lone window's ratio still stops at the
+        // store clamp, silently).
         guard let anchor = bindingCarrier ?? fallbackAnchor,
             anchor != focused
         else { return }
@@ -235,7 +181,7 @@ extension KiwiCore {
             fallbackAnchor: bindingZone.first(where: {
                 $0 != focused
             }),
-            shrinking: shrinking,
+            focusedIsBinding: bindingZone.contains(focused),
             axis: axis
         )
     }
@@ -244,50 +190,56 @@ extension KiwiCore {
     /// one authority for the keyboard per-axis resize and the
     /// mouse `.bspRatioH`/`.bspRatioV` adjustments. Sides of
     /// the FIRST split resolve geometrically from the slots via
-    /// the shared `MouseResize.bspSide` authority; each side's
-    /// minimum is the max over its windows' effective minimums
-    /// — a lower bound on what the side truly needs (its
-    /// sub-splits can demand more), so this cap under-clamps
-    /// but never over-clamps, and the per-region render clamp
-    /// stays the net beneath it.
+    /// the shared `MouseResize.bspSides` authority, which also
+    /// drops the windows the split cannot resize (#1259); each
+    /// side's minimum is the max over its windows' effective
+    /// minimums — a lower bound on what the side truly needs
+    /// (its sub-splits can demand more), so this cap
+    /// under-clamps but never over-clamps, and the per-region
+    /// render clamp stays the net beneath it.
+    ///
+    /// This is the one writer whose focused window may be in
+    /// NEITHER group: a stack zone and a track partition every
+    /// member by membership, so their `focusedIsBinding` is a
+    /// membership read. Here it has to be read off a partition
+    /// the window may sit outside of.
+    ///
+    /// The write lands whatever the window population is — the
+    /// ratio is a stored per-space value the caps protect the
+    /// REGION of, not only the windows currently in it
+    /// (#383/#44/#458, `SessionRatioTests`), so an empty or
+    /// unsplit space still records what a later split opens at.
+    /// Only the CUE reads the population.
     func writeCappedBspRatio(
         proposed: Double,
         axis: String,
         span: Double,
         space: Space,
-        focused: WindowID?,
-        deltaSign: Double
+        focused: WindowID?
     ) {
         let bsp = tiler.settings.resolvedBsp(for: space)
         let base =
             axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
         let horizontal = axis == "x"
+        let screen = TilingEngine.screen(for: space.id, in: state)
         let slots = tiler.calculatedFrames(state: state)
         let tiled = state.effectiveTiledMembers(of: space)
-        var firstSide: [WindowID] = []
-        var secondSide: [WindowID] = []
-        if let screen = TilingEngine.screen(
-            for: space.id,
-            in: state
-        ) {
-            let bounds = tiler.layoutBounds(on: screen)
-            for id in tiled {
-                guard let slot = slots[id] else { continue }
-                let side = MouseResize.bspSide(
-                    slot: slot,
-                    bounds: bounds,
-                    horizontal: horizontal
-                )
-                if side > 0 {
-                    firstSide.append(id)
-                } else {
-                    secondSide.append(id)
-                }
-            }
+        // No display to classify against: the caps still hold on
+        // the global floor, and nothing here can name a window.
+        let sides = screen.map { screen in
+            MouseResize.bspSides(
+                of: tiled,
+                slots: slots,
+                bounds: tiler.layoutBounds(on: screen),
+                horizontal: horizontal
+            )
         }
-        let lowMin = effectiveMinSize(of: firstSide, axis: axis)
+        let lowMin = effectiveMinSize(
+            of: sides?.first ?? [],
+            axis: axis
+        )
         let highMin = effectiveMinSize(
-            of: secondSide,
+            of: sides?.second ?? [],
             axis: axis
         )
         let outcome = SplitDomain.cappedRatioWrite(
@@ -297,29 +249,66 @@ extension KiwiCore {
             minLow: lowMin.size,
             minHigh: highMin.size
         )
-        let value = min(max(outcome.value, 0.1), 0.9)
-        if axis == "x" {
-            writeSplitRatioH(value, for: space.id)
-        } else {
-            writeSplitRatioV(value, for: space.id)
+        writeBspRatio(outcome.value, axis: axis, space: space)
+        guard let focused, let sides, let screen else { return }
+        if sides.first.isEmpty, sides.second.isEmpty {
+            // Nothing on this axis answers to the ratio. That is
+            // a fact about the ARRANGEMENT rather than a limit
+            // reached, so it is said on the first press like the
+            // stack path's own no-parameter axis, not once the
+            // clamp happens to bite — and only where the OTHER
+            // axis DOES divide, which is what the sentence
+            // claims. A space too small to split at all — one
+            // window, an overflow pile — divides neither, and
+            // naming an axis there would be the same wrong
+            // sentence #1259 removed; #1258 owns the silence
+            // that leaves.
+            let across = MouseResize.bspSides(
+                of: tiled,
+                slots: slots,
+                bounds: tiler.layoutBounds(on: screen),
+                horizontal: !horizontal
+            )
+            if !across.first.isEmpty || !across.second.isEmpty {
+                refuseAxisAbsent(focused, axis: axis)
+            }
+            return
         }
-        guard outcome.clamped, let focused,
-            deltaSign != 0
-        else { return }
-        let focusedFirst = firstSide.contains(focused)
-        let shrinking = deltaSign < 0
-        let bindingFirst = shrinking ? focusedFirst : !focusedFirst
+        guard outcome.clamped else { return }
+        // A ratio that moved DOWN ran into the low side's
+        // minimum and one that moved UP into the high side's —
+        // read off the write's own direction, since the focused
+        // window's side says nothing when it sits on neither. A
+        // clamped outcome is never a standing-still write, so
+        // the comparison always decides.
+        let bindingFirst = proposed < base
         let binding = bindingFirst ? lowMin : highMin
-        let bindingSide = bindingFirst ? firstSide : secondSide
+        let bindingSide =
+            bindingFirst ? sides.first : sides.second
         reportResizeRefusal(
             focused: focused,
             bindingCarrier: binding.carrier,
             fallbackAnchor: bindingSide.first(where: {
                 $0 != focused
             }),
-            shrinking: shrinking,
+            focusedIsBinding: bindingSide.contains(focused),
             axis: axis
         )
+    }
+
+    /// The per-axis store write both paths above share, with the
+    /// store's own 0.1...0.9 clamp applied once.
+    private func writeBspRatio(
+        _ value: Double,
+        axis: String,
+        space: Space
+    ) {
+        let stored = min(max(value, 0.1), 0.9)
+        if axis == "x" {
+            writeSplitRatioH(stored, for: space.id)
+        } else {
+            writeSplitRatioV(stored, for: space.id)
+        }
     }
 
 }

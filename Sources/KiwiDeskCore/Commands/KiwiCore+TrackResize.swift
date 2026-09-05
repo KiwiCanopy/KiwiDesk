@@ -145,20 +145,26 @@ extension KiwiCore {
                     focused: focused,
                     bindingCarrier: trackMins[track].carrier,
                     fallbackAnchor: nil,
-                    shrinking: true,
+                    // The focused window is a member of the
+                    // track whose floor bound the shrink.
+                    focusedIsBinding: true,
                     axis: acrossAxis
                 )
             } else if delta > 0,
                 let blocked = outcome.blockedByOther
             {
-                let anchor =
-                    trackMins[blocked].carrier
-                    ?? tiled[ranges[blocked]].first(where: {
-                        $0 != focused
-                    })
-                refuseGrowAtNeighborMinimum(
-                    focused,
-                    anchor: anchor ?? focused,
+                // The blocking track is never the focused one,
+                // so this takes the same door as the shrink
+                // above rather than a bare cue beside it — and
+                // stands down where that track holds no local
+                // window to name, instead of anchoring the
+                // focused window on itself.
+                reportResizeRefusal(
+                    focused: focused,
+                    bindingCarrier: trackMins[blocked].carrier,
+                    fallbackAnchor: tiled[ranges[blocked]]
+                        .first(where: { $0 != focused }),
+                    focusedIsBinding: false,
                     axis: acrossAxis
                 )
             }
