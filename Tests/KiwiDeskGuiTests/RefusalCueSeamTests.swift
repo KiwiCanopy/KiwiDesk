@@ -74,9 +74,68 @@ struct RefusalCueSeamTests {
             )
         #expect(drawn > 0)
         #expect(joined.occurrences(of: "soundIfDrawn(") == drawn + 1)
-        // And the speaker is reached only through that gate: one
-        // declaration, one call, both in the same file.
-        #expect(joined.occurrences(of: "soundRefusal()") == 2)
+        // And the speaker is reached only THROUGH that gate. The
+        // count is read off the gate's own body rather than
+        // restated (#1021, guard-prover 2026-09-05): a literal
+        // here is retired by bumping it, which is exactly what a
+        // second caller would do.
+        let gate = try SourceScan.functionBody(
+            of: "soundIfDrawn",
+            in: "KiwiCore+SizeLimitPill.swift",
+            under: "App"
+        )
+        let spoken = gate.occurrences(of: "soundRefusal()")
+        #expect(spoken == 1)
+        #expect(
+            joined.occurrences(of: "soundRefusal()") == spoken + 1,
+            Comment(
+                rawValue: "a caller reached the speaker without "
+                    + "passing a drawing's verdict (the +1 is "
+                    + "its own declaration)"
+            )
+        )
+    }
+
+    /// The other direction, which the count above cannot see: a
+    /// cue site that DRAWS and never offers the sound passes
+    /// every clause there, since dropping the wrapper drops both
+    /// sides of the derivation (guard-prover 2026-09-05).
+    ///
+    /// It matters because that is the direction the toggle's
+    /// usefulness lives in — a refusal silently exempted from
+    /// `refusal.sound` is a switch that does less than it says.
+    @Test("every refusal's own drawing offers the sound")
+    func everyDrawingIsOffered() throws {
+        let pill = try Self.core("App/KiwiCore+SizeLimitPill.swift")
+        let sticky = try Self.core("App/KiwiCore+StickyMarks.swift")
+        // The one deliberate exemption, named by its own
+        // spelling rather than counted: the neighbour-minimum
+        // refusal draws a SECOND pill on the anchor, and one
+        // refusal sounds once.
+        let anchorPill = "flashSizeLimitPill(anchor,"
+        #expect(pill.occurrences(of: anchorPill) == 1)
+        let unsounded =
+            pill.occurrences(of: "flashSizeLimitPill(")
+            - pill.occurrences(of: "funcflashSizeLimitPill(")
+            - pill.occurrences(of: "borders.flashSizeLimitPill(")
+            - pill.occurrences(
+                of: "soundIfDrawn(flashSizeLimitPill("
+            )
+        #expect(
+            unsounded == pill.occurrences(of: anchorPill),
+            Comment(
+                rawValue: "a size refusal draws without offering "
+                    + "the sound — wrap it in soundIfDrawn, or "
+                    + "name it beside the anchor pill"
+            )
+        )
+        // The sticky family has no exemption at all.
+        #expect(
+            sticky.occurrences(of: "stickyMarks.flash(")
+                == sticky.occurrences(
+                    of: "soundIfDrawn(stickyMarks.flash("
+                )
+        )
     }
 
     /// Nothing may sound from a refusal FUNNEL: that is one

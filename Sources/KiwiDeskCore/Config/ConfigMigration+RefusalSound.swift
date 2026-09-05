@@ -48,7 +48,12 @@ extension ConfigMigration {
     /// measurement). Stands down unless the retired spelling
     /// occurs exactly once: a textual delete cannot see which
     /// parent it is under, and the tree walk — which can — is
-    /// the fallback.
+    /// the fallback — and the fallback is CORRECT, never merely
+    /// tolerable: `surgicallyApplying` re-parses whatever this
+    /// returns and uses it only where it agrees with the walk.
+    /// So a widened stand-down costs the user's byte-for-byte
+    /// formatting, never the migration (guard-prover 2026-09-05;
+    /// the walk's own scoping is `ConfigMigrationRoutingTests`').
     static func surgicallyDropped(_ text: String) -> Data? {
         let key = "\"\(retiredResizeFeedbackKey)\""
         guard text.components(separatedBy: key).count == 2
