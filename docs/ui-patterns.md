@@ -504,8 +504,9 @@ solid accent fill that needs no lift. The single custom style
 is the accent fill described below, whose edge is a darker
 shade of its own fill rather than a border in a new colour.
 Class is otherwise expressed through native style + control size:
-`.borderedProminent` regular for the one surface commit
-(popover confirms); `.bordered` large for row
+`.borderedProminent` regular for a surface commit on a
+mode-varying ground (a popover confirm, an editor's apply);
+`.bordered` large for row
 actions (Load, Apply, Customize, Set Gap Values), level with
 large dropdowns; `.bordered` regular for stateful input
 triggers (the shortcut recorder); and `.borderless` regular
@@ -528,8 +529,9 @@ text drawn *on* the accent, and that pairing is one the
 theme's contrast lens measures. Setting it beside each fill by
 hand is two decisions a call site can get half right, so it is
 sealed into one style — `KiwiProminentButtonStyle`, applied as
-`kiwiProminentButton()`, which is what the first-launch tour's
-primary action wears on every screen.
+`kiwiProminentButton()`, which the first-launch tour's primary
+action wears on every screen and the save pill's Save wears for
+the separate reason below.
 
 Reach for it only where a button carries an accent fill; a
 custom style is a cost, not a free recolour. It is the mild

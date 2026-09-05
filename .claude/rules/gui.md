@@ -1018,8 +1018,9 @@ Every surface, border and ink in the Settings tree comes from
   `KeyboardRingSeparationTests` — one authority per pairing) —
   and `SettingsRawColorTests` bans
   fixed hues, RGB literals and fixed white/black outside its
-  reasoned maps, with `SettingsFixedGroundTests` banning
-  hierarchical greys on the FIXED-dark chrome families
+  reasoned maps, with `SettingsFixedGroundTests` banning both
+  hierarchical greys and ambient-inked controls on the
+  FIXED-dark chrome families
   (stem-derived, so a §2.1 split cannot fall out of it) — on
   mode-varying surfaces `.secondary` still self-inverts and
   "prefer a concrete ink" stays a preference.
@@ -1087,18 +1088,30 @@ Every surface, border and ink in the Settings tree comes from
   seal as a finished sweep: a site still on `.borderedProminent`
   is drawing white on the accent, and adopting the seal there is
   its own change and its own eye-confirm.
-- **On a fixed-dark ground a control owns its ink, or it has
-  none.** The hierarchical-grey ban below is one half of this;
-  the control side is the other, and it bites hardest in the
-  state nothing renders in a test — AppKit re-picks an inactive
-  window's control ink against the WINDOW's appearance while
-  the ground stays put, so on the save pill a light-mode
-  `.borderedProminent` measured 1.23:1 enabled and 1.09:1
-  disabled (#1198). A style that draws its own label ink is
-  therefore banned on those families by
-  `SettingsFixedGroundTests`' second arm; `.plain` is not,
-  because it draws none and takes the site's `foregroundStyle`,
-  which is what every other control on the pill does.
+- **Where the ground is fixed, the ink must be fixed too.**
+  The hierarchical-grey ban below is one half of this; the
+  control side is the other, and it bites hardest in the state
+  nothing renders in a test — an inactive window. Owning the
+  ink is NOT the test, which is the trap: `settingsActionButton()`
+  states its own `SettingsTheme.ink`, and `ink`'s light value is
+  byte-identical to `savePill`, so it collapses exactly as
+  AppKit's own pick does. Both spellings are therefore banned on
+  these families by `SettingsFixedGroundTests`'
+  `fixedGroundsBanAmbientButtonInk`, along with the two
+  neutralisations, which carry the same token (#1198;
+  `docs/ui-patterns.md` ▸ the accent-fill exception carries the
+  measurements, and is the one place they are stated).
+- **A `.plain` control on a fixed-dark family states its own
+  ink.** `.plain` draws none, so it is the one legal way through
+  that arm — and a site that then names no `foregroundStyle`
+  inherits the ambient `.primary` and reopens #1198 one control
+  over. No needle can see that, which is why it is written here
+  as an obligation rather than left to the guard.
+- **A new fixed-dark ground token joins `fixedGroundStems` in
+  the same change set.** That list now governs two invariants,
+  and `expectEveryStemMatched` only proves a DECLARED family
+  still matches a file — a plate that never joined is silently
+  outside both bans.
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from

@@ -45,10 +45,8 @@ extension SettingsFooter {
     /// Primary Save action button slot.
     ///
     /// Sealed rather than `.borderedProminent`: the pill is a
-    /// fixed-dark ground, and AppKit re-picks a prominent
-    /// button's ink against the WINDOW's appearance — inactive
-    /// in light mode measured 1.23:1 enabled and 1.09:1
-    /// disabled, against 6.67:1 for the seal (#1198).
+    /// fixed-dark ground and AppKit picks against the window
+    /// (#1198, gui.md).
     @ViewBuilder var primarySlot: some View {
         let save = L("footer.save", "Save")
         switch model.primarySaveAction {

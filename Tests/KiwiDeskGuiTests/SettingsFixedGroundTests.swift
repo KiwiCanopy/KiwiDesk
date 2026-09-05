@@ -11,18 +11,19 @@ import Testing
 /// WINDOW's appearance while the ground never moves, so on
 /// these families they are banned outright — on mode-varying
 /// surfaces they self-invert and gui.md's "prefer a concrete
-/// ink" stays a preference. A button STYLE that draws its own
-/// label ink is the same defect from the control side, which
-/// is the second arm here: AppKit re-picks a prominent
-/// button's ink for an inactive window against that window's
-/// appearance, and on a ground that does not move with it the
-/// two disagree (#1198). Membership is STEM-derived, not a
-/// file list — the §2.1 ceiling keeps splitting exactly these
-/// families (`HomeCardPlate+X`, `SettingsFooter+Y`), and a
-/// hand list let the next split land outside the ban silently
+/// ink" stays a preference. A CONTROL whose ink is picked from
+/// the appearance is the same defect from the other side, and
+/// the second arm here — picked by AppKit, or by a mode-varying
+/// token the site names itself (#1198; `docs/ui-patterns.md`
+/// carries the numbers).
+///
+/// Membership is STEM-derived, not a file list — the §2.1
+/// ceiling keeps splitting exactly these families
+/// (`HomeCardPlate+X`, `SettingsFooter+Y`), and a hand list let
+/// the next split land outside the ban silently
 /// (architect review 2026-08-10; the dark-pass branch split
 /// `+SpacesTile` off and had to remember the entry).
-@Suite("Settings fixed-ground greys")
+@Suite("Settings fixed-ground inks")
 struct SettingsFixedGroundTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
@@ -57,26 +58,31 @@ struct SettingsFixedGroundTests {
         expectEveryStemMatched(matched)
     }
 
-    /// The control-side arm of the same ban.
+    /// The control-side arm of the same ban: a control's ink
+    /// must be FIXED where the ground is, whoever picks it.
     ///
-    /// Every other control on the save pill is `.plain` over an
-    /// explicit `savePillInk`, i.e. it owns its ink. A style
-    /// that picks the ink itself picks it from the window, so
-    /// on a fixed-dark ground the light appearance collapses
-    /// the label into the plate — measured 1.23:1 enabled and
-    /// 1.09:1 disabled before #1198, against 6.67:1 for
-    /// `kiwiProminentButton()`, whose `accentInk` is the same
-    /// in both appearances and every activation state.
+    /// Two ways to fail that, and the needles cover both.
+    /// `.borderedProminent` lets AppKit pick, and it picks
+    /// against the WINDOW's appearance. The neutralisations pick
+    /// for themselves but pick `SettingsTheme.ink`, which is
+    /// mode-VARYING and whose light value is byte-identical to
+    /// `savePill` — 1.00:1 on the pill. Same collapse, opposite
+    /// causes; `docs/ui-patterns.md` carries the measurements.
     ///
-    /// The needles are the spellings that carry an ink of their
-    /// own; `.plain` is absent deliberately, because it draws
-    /// none and inherits the site's `foregroundStyle`.
-    @Test("no ink-picking button style on a fixed-dark ground")
+    /// What the `.plain` omission TRADES: `.plain` draws no ink,
+    /// so it is legal here and the site's own `foregroundStyle`
+    /// carries the obligation — which means a `.plain` control
+    /// that states no ink inherits the ambient `.primary` and
+    /// reproduces the collapse unseen by either arm. That one is
+    /// review's, and gui.md states it as the obligation it is.
+    @Test("no ambient-inked control on a fixed-dark ground")
     func fixedGroundsBanAmbientButtonInk() throws {
         let needles = [
             ".buttonStyle(.borderedProminent)",
             ".buttonStyle(.bordered)",
             ".settingsActionButton()",
+            ".neutralButtonLabel()",
+            ".neutralMenuLabel()",
         ]
         var matched: [String: Int] = [:]
         for (stem, name, source) in try fixedGroundSources() {
@@ -86,8 +92,8 @@ struct SettingsFixedGroundTests {
                     !source.contains(needle),
                     Comment(
                         rawValue:
-                            "\(name) lets \(needle) pick its "
-                            + "label ink on fixed-dark chrome"
+                            "\(name) draws \(needle), whose "
+                            + "ink moves, on fixed-dark chrome"
                     )
                 )
             }
@@ -102,7 +108,9 @@ struct SettingsFixedGroundTests {
         -> [(String, String, String)]
     {
         var result: [(String, String, String)] = []
-        for file in try swiftFiles(under: Self.settingsDir) {
+        for file in try SourceScan.swiftSources(
+            under: Self.settingsDir
+        ) {
             let name = file.lastPathComponent
             guard
                 let stem = fixedGroundStems.first(where: {
@@ -141,17 +149,4 @@ struct SettingsFixedGroundTests {
         }
     }
 
-    private func swiftFiles(under dir: URL) throws -> [URL] {
-        var result: [URL] = []
-        let walker = FileManager.default.enumerator(
-            at: dir,
-            includingPropertiesForKeys: nil
-        )
-        while let next = walker?.nextObject() as? URL {
-            if next.pathExtension == "swift" {
-                result.append(next)
-            }
-        }
-        return result
-    }
 }

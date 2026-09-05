@@ -94,6 +94,16 @@ struct SettingsBorderedSealTests {
     ///   button, so swapping a destructive button for a plain one
     ///   keeps it green while an accent label ships;
     /// - `why` — for the reader.
+    ///
+    /// **One place this map cannot reach**, stated so the two
+    /// guards have a precedence rather than a contradiction: on
+    /// the fixed-dark chrome families `SettingsFixedGroundTests`
+    /// bans `.bordered` and its seal ABSOLUTELY, because there
+    /// the objection is not the accent label but that
+    /// `SettingsTheme.ink` moves with the appearance while the
+    /// ground does not (#1198). An entry added here for such a
+    /// file grants nothing and stays red; the escape is an ink
+    /// that is fixed, never an exemption.
     private let borderedExempt:
         [String: (count: Int, needle: String, why: String)] = [
             "SpacesSection+Overrides.swift": (
