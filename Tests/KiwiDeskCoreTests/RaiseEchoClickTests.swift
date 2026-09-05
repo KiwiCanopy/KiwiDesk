@@ -108,11 +108,8 @@ struct RaiseEchoClickTests {
         #expect(focused(core) == intended)
     }
 
-    /// The veto is ORDER, not freshness (#887 review): a self
-    /// stamp that outlives its echo is still fresh when a later
-    /// restore stamps the same window, and a freshness veto let
-    /// that restore's own echo through — the user's step stolen
-    /// back by KiwiDesk's own drain. Older self stamp: revert.
+    /// The veto is ORDER, not freshness (#887): a self stamp
+    /// older than the z-order stamp is the restore's own echo.
     @Test("A self-raise older than the z-order stamp cannot veto")
     func olderSelfRaiseStampDoesNotVeto() {
         let core = makeCore()

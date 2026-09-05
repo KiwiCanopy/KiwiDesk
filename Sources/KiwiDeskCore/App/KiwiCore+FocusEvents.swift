@@ -66,16 +66,11 @@ extension KiwiCore {
         // holds the intended focus (the raisers skip it), so a
         // deliberate focus (a space switch onto a float; a click
         // on a pile-mate) is unstamped and falls through.
-        // Never for an echo of our OWN focus raise that is NEWER
-        // than the z-order stamp (`selfRaiseVetoesRevert`): a
-        // keyboard focus can land on a window a pile restore
-        // stamped moments earlier, and for a tiled-sticky
-        // traveler `focusBefore` stays on the stale local slot,
-        // so `intended != id` cannot clear it — the revert would
-        // strand the ring off the truly focused window (#431).
-        // Newer only: an older or stale self stamp must not
-        // veto, or the restore's own echo threads both nets —
-        // vetoed here, no self-echo below, honored (#689/#887).
+        // Never for our OWN focus raise's echo when that raise is
+        // NEWER than the z-order stamp (`selfRaiseVetoesRevert`,
+        // #431) — a traveler's `intended != id` cannot clear it.
+        // Newer only, or the restore's own echo threads both
+        // nets (#689/#887).
         //
         // Nor for a report with CLICK provenance (#687): a
         // restore's echoes come from windows the user did not

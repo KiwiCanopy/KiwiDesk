@@ -45,13 +45,9 @@ extension KiwiCore {
     }
 
     /// Whether a live self-raise of `id` vetoes the z-order echo
-    /// revert (#431): only when it is NEWER than the z-order
-    /// stamp — a keyboard focus landing on a window a restore
-    /// stamped earlier. ORDER, not freshness, because stamps
-    /// outlive their echo (#887): an older self-raise beside a
-    /// fresh z-order stamp is the restore's own echo, and a
-    /// freshness veto let that restore steal the user's next
-    /// step back (review, 2026-09-05).
+    /// revert (#431): only when NEWER than the z-order stamp,
+    /// never on freshness — an older one is the restore's own
+    /// echo (#887, docs/design-decisions.md).
     func selfRaiseVetoesRevert(
         _ id: WindowID,
         now: Date
