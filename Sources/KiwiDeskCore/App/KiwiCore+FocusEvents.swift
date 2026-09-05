@@ -41,12 +41,9 @@ extension KiwiCore {
                     + "\(pid)); restoring "
                     + describe(effects.focusBefore)
             )
-            // The report is spurious, but the id could
-            // still carry a fresh self-raise stamp; drop
-            // it so a later genuine focus of this window
-            // is not misread as our own echo (cf.
-            // `forgetGoneWindow`).
-            selfRaiseStamps[id] = nil
+            // The id's self-raise stamp stays: age bounds it,
+            // and the #465 order read needs it as the newer
+            // sibling against the app's next re-report.
             if let before = effects.focusBefore,
                 let space = state.workspaces.space(
                     of: before
@@ -69,15 +66,16 @@ extension KiwiCore {
         // holds the intended focus (the raisers skip it), so a
         // deliberate focus (a space switch onto a float; a click
         // on a pile-mate) is unstamped and falls through.
-        // Never for a FRESH echo of our OWN focus raise
-        // (`freshSelfRaise`): a keyboard focus can land on a
-        // window a pile restore stamped moments earlier, and for
-        // a tiled-sticky traveler `focusBefore` stays on the
-        // stale local slot, so `intended != id` cannot clear it
-        // — the revert would strand the ring off the truly
-        // focused window (#431). Fresh only: a stale stamp must
-        // not veto, or a lazy app's late re-report threads both
-        // nets — vetoed here, no self-echo below, honored (#689).
+        // Never for an echo of our OWN focus raise that is NEWER
+        // than the z-order stamp (`selfRaiseVetoesRevert`): a
+        // keyboard focus can land on a window a pile restore
+        // stamped moments earlier, and for a tiled-sticky
+        // traveler `focusBefore` stays on the stale local slot,
+        // so `intended != id` cannot clear it — the revert would
+        // strand the ring off the truly focused window (#431).
+        // Newer only: an older or stale self stamp must not
+        // veto, or the restore's own echo threads both nets —
+        // vetoed here, no self-echo below, honored (#689/#887).
         //
         // Nor for a report with CLICK provenance (#687): a
         // restore's echoes come from windows the user did not
@@ -97,7 +95,7 @@ extension KiwiCore {
             now.timeIntervalSince(stamp)
                 < Self.zOrderRaiseEchoWindow,
             let intended = effects.focusBefore, intended != id,
-            !freshSelfRaise(id, now: now),
+            !selfRaiseVetoesRevert(id, now: now),
             !recentClickReached(id, now: now)
         {
             onLog(
@@ -188,20 +186,10 @@ extension KiwiCore {
         // StateCoordinator just moved onto the echoed window)
         // would revert to the stale target. Re-assert the
         // intended focus and drop the echo.
-        // A stamp is our echo only while the raise is RECENT:
-        // an already-key raise never echoes (device QA
-        // 2026-08-03), so an unbounded entry classified the
-        // user's NEXT click on that window as our echo, eating
-        // it (#687). And it is NOT consumed here — it expires
-        // by age, like `zOrderRaiseEchoes` (#689): a lazy app
-        // re-reports the window it just lost ~150 ms after its
-        // first echo, after the user's next fast step, and the
-        // consumed entry left that duplicate honored as
-        // deliberate focus — ring, pan and pointer snapped back
-        // to the window just left (#887 device trace,
-        // 2026-08-31). A clickless refocus of the departed
-        // window inside the window is the same documented
-        // trade the z-order ledger takes.
+        // Age-bounded — an already-key raise never echoes, so an
+        // unbounded entry ate the next click (#687) — and NOT
+        // consumed: a lazy app's duplicate report lands after
+        // the user's next step (#887, docs/design-decisions.md).
         let selfEcho = freshSelfRaise(id, now: now)
         // And even a FRESH entry stands down for a report with
         // click provenance (#687): a click that reached the

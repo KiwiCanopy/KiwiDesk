@@ -126,20 +126,12 @@ public final class KiwiCore {
     var pendingFocusRaise: WindowID?
 
     /// When KiwiDesk's own AX raise of each window was issued
-    /// (#152): a focus report for a window raised within
-    /// `selfRaiseEchoWindow` is our echo, not a user action —
-    /// it must not supersede a newer focus nor snap state focus
-    /// back — and the recency bound for the sibling-report
-    /// distrust (#465). Age-compared and pruned on write, NEVER
-    /// consumed by an echo: lazy apps re-report a raised window
-    /// a second time ~150 ms after the first echo, and a
-    /// consumed entry let that duplicate through as deliberate
-    /// focus — the scrolling snap-back (#887, the shape #689
-    /// fixed for `zOrderRaiseEchoes`). An already-key raise
-    /// echoes never, so nothing here may wait on one (#687).
-    /// Cleared on destroy and rekeyed on a tab switch (ids
-    /// reused); the classification lives in
-    /// `handleWindowFocused`.
+    /// (#152): a report for a window raised within
+    /// `selfRaiseEchoWindow` is our echo, not a user action, and
+    /// the #465 sibling distrust ranks by it. Age-pruned on
+    /// write and NEVER consumed by an echo (#887, like
+    /// `zOrderRaiseEchoes`); cleared on destroy and rekeyed on a
+    /// tab switch. The classification is `handleWindowFocused`'s.
     var selfRaiseStamps: [WindowID: Date] = [:]
 
     /// Last left press, AX coords: the click discriminator for

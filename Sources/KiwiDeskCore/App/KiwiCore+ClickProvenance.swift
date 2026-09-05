@@ -17,26 +17,49 @@ extension KiwiCore {
     static let zOrderRaiseEchoWindow: TimeInterval = 1.0
 
     /// How long after KiwiDesk's own focus raise a report for
-    /// that window is still its echo — the duplicate included
-    /// (#887: a lazy app's second report trails the first by
-    /// ~150 ms and lands after the user's next step). Sized like
-    /// `zOrderRaiseEchoWindow`, for the same reason (lazy AX
-    /// answers trail by several hundred ms); beyond ~1 s a
-    /// report is a user action, not our raise's echo.
+    /// that window is still its echo, a lazy app's ~150 ms
+    /// duplicate included (#887). Sized like
+    /// `zOrderRaiseEchoWindow`; beyond ~1 s a report is a user
+    /// action.
     static let selfRaiseEchoWindow: TimeInterval = 1.0
 
-    /// Whether `id` carries a LIVE self-raise: a stamp
-    /// `selfRaiseStamps` says is recent. The one shape that may
-    /// veto the raise-echo revert (#431) and classify a report
-    /// as our own echo — a stale stamp is neither (#687/#689
-    /// QA). Read, never consumed (#887).
+    /// `id`'s self-raise stamp while it is LIVE, nil once past
+    /// `selfRaiseEchoWindow` — the one freshness reading every
+    /// consumer takes (#687/#689). Read, never consumed (#887).
+    func selfRaiseStamp(
+        _ id: WindowID,
+        now: Date
+    ) -> Date? {
+        guard let stamp = selfRaiseStamps[id],
+            now.timeIntervalSince(stamp) < Self.selfRaiseEchoWindow
+        else { return nil }
+        return stamp
+    }
+
+    /// Whether a report for `id` is our own focus raise's echo.
     func freshSelfRaise(
         _ id: WindowID,
         now: Date
     ) -> Bool {
-        selfRaiseStamps[id].map {
-            now.timeIntervalSince($0) < Self.selfRaiseEchoWindow
-        } == true
+        selfRaiseStamp(id, now: now) != nil
+    }
+
+    /// Whether a live self-raise of `id` vetoes the z-order echo
+    /// revert (#431): only when it is NEWER than the z-order
+    /// stamp — a keyboard focus landing on a window a restore
+    /// stamped earlier. ORDER, not freshness, because stamps
+    /// outlive their echo (#887): an older self-raise beside a
+    /// fresh z-order stamp is the restore's own echo, and a
+    /// freshness veto let that restore steal the user's next
+    /// step back (review, 2026-09-05).
+    func selfRaiseVetoesRevert(
+        _ id: WindowID,
+        now: Date
+    ) -> Bool {
+        guard let own = selfRaiseStamp(id, now: now) else {
+            return false
+        }
+        return own > (zOrderRaiseEchoes[id] ?? .distantPast)
     }
 
     /// Whether a left click within the echo window actually

@@ -459,6 +459,27 @@ editing here:
   double-target correction clicks into — the monocle arm
   shipped that way twice (#689). `ZOrderMonocleArmTests` and
   `ZOrderFocusJumpTests` pin one arm each.
+- **An echo ledger is age-bounded and NEVER consumed by its
+  echo** — `zOrderRaiseEchoes` (#689) and `selfRaiseStamps`
+  (#887) alike. A lazy app reports a raised window's focus
+  twice, ~150 ms apart, and the duplicate lands after the
+  user's next step; a stamp the first echo consumed left it
+  honored as deliberate focus — ring, pan and pointer snapping
+  back (#887 device trace, 2026-08-31, on the very ledger the
+  #689 fix left consuming). With nothing consumed, a reader
+  telling "our raise" from "theirs" asks the ORDER of the
+  stamps, never their presence: the #465 sibling distrust fires
+  for a sibling raised AFTER the reported window
+  (`siblingRaiseOutranks`), and a self-raise vetoes the z-order
+  revert only when NEWER than the z-order stamp
+  (`selfRaiseVetoesRevert`) — a presence test threads the
+  restore's own echo past both nets. A ledger is cleared where
+  its id dies (`forgetGoneWindow`) and rekeyed on a tab switch,
+  and the freshness reading is `selfRaiseStamp(_:now:)`'s
+  alone. `SelfRaiseDuplicateEchoTests`, `RaiseEchoClickTests`
+  and `ActivationReReportTests` hold the three arms, and a
+  fourth ledger of this shape joins this bullet rather than
+  earning its own consume.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

@@ -46,12 +46,11 @@ extension KiwiCore {
             return false
         }
         let own = selfRaiseStamps[id] ?? .distantPast
-        return selfRaiseStamps.contains {
-            $0.key != id
-                && state.windows[$0.key]?.pid == pid
-                && $0.value > own
-                && now.timeIntervalSince($0.value)
-                    < Self.selfRaiseEchoWindow
+        return selfRaiseStamps.keys.contains { sibling in
+            sibling != id
+                && state.windows[sibling]?.pid == pid
+                && selfRaiseStamp(sibling, now: now)
+                    .map { $0 > own } == true
         }
     }
 

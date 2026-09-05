@@ -108,6 +108,32 @@ struct RaiseEchoClickTests {
         #expect(focused(core) == intended)
     }
 
+    /// The veto is ORDER, not freshness (#887 review): a self
+    /// stamp that outlives its echo is still fresh when a later
+    /// restore stamps the same window, and a freshness veto let
+    /// that restore's own echo through — the user's step stolen
+    /// back by KiwiDesk's own drain. Older self stamp: revert.
+    @Test("A self-raise older than the z-order stamp cannot veto")
+    func olderSelfRaiseStampDoesNotVeto() {
+        let core = makeCore()
+        let (intended, top, _) = makePile(core)
+        core.selfRaiseStamps[top] = Date(timeIntervalSinceNow: -0.5)
+        core.handle(.windowFocused(top))
+        #expect(focused(core) == intended)
+    }
+
+    /// The #431 arm the order keeps: a keyboard focus landing
+    /// on a window a restore stamped EARLIER is a newer self
+    /// stamp, and the revert must not undo it.
+    @Test("A self-raise newer than the z-order stamp vetoes")
+    func newerSelfRaiseStampVetoes() {
+        let core = makeCore()
+        let (_, top, _) = makePile(core)
+        core.selfRaiseStamps[top] = Date(timeIntervalSinceNow: 0.1)
+        core.handle(.windowFocused(top))
+        #expect(focused(core) == top)
+    }
+
     @Test("A click that reached the window escapes the revert")
     func clickOnReportedWindowIsHonored() {
         let core = makeCore()

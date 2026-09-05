@@ -225,6 +225,23 @@ struct AccessibilityReturnTests {
         #expect(core.accessibilityReturn == nil)
     }
 
+    /// The in-window verdict, stated (#887): a yield landing on
+    /// a window KiwiDesk raised inside `selfRaiseEchoWindow` is
+    /// our own raise's fallout — honored, not returned — and the
+    /// debt stands unspent for the next report.
+    @Test("A yield inside the raise's echo window is not returned")
+    func yieldInsideEchoWindowIsNotReturned() {
+        let core = makeCore()
+        core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(
+            core.state.workspaces[SpaceID(1)]?.focused
+                == WindowID(2)
+        )
+        #expect(core.accessibilityReturn != nil)
+    }
+
     @Test("A stale unconsumed debt is replaced, not kept")
     func staleDebtIsReplaced() {
         // The renewal guard refuses only a LIVE debt: one that
