@@ -62,11 +62,13 @@ extension BorderManager {
         text: String
     ) -> Bool {
         guard privateRuntimeStarted else { return false }
-        sizeLimitOverlay.flash(
+        // The overlay declines a second time, on a window too
+        // narrow to hold a legible pill — reported rather than
+        // swallowed, or the caller sounds at nothing (#1255).
+        return sizeLimitOverlay.flash(
             window: window.raw,
             frame: frame,
             text: text
         )
-        return true
     }
 }

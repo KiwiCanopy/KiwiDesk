@@ -18,33 +18,58 @@ final class SizeLimitOverlay {
     private static let holdDuration: TimeInterval = 1.4
     private static let fadeDuration: TimeInterval = 0.2
     private static let pillHeight: CGFloat = 26
-    private static let pillPadding: CGFloat = 20
+    nonisolated static let pillPadding: CGFloat = 20
 
     init() {}
 
-    /// Flashes size-limit pill on window frame in AX coordinates (#933).
+    /// The pill's drawn width for a window of `frame` carrying
+    /// text of `textWidth`, or nil where the window is too
+    /// narrow to draw one at all.
+    ///
+    /// Pure and `static` so the decline is checkable without a
+    /// screen (`SizeLimitPillWidthTests`): the caller sounds on
+    /// what this reports, so a decline invisible to a test is a
+    /// refusal that beeps at nothing (#1255, ui-designer
+    /// 2026-09-05).
+    nonisolated static func pillWidth(
+        frame: CGRect,
+        textWidth: CGFloat
+    ) -> CGFloat? {
+        let width = min(
+            frame.width - 24,
+            max(textWidth + pillPadding, 120)
+        )
+        return width > 40 ? width : nil
+    }
+
+    /// Flashes size-limit pill on window frame in AX coordinates
+    /// (#933). Returns whether one actually appeared — the
+    /// caller's refusal sound follows this, never the fact that
+    /// it asked (#1255).
+    @discardableResult
     func flash(
         window: CGWindowID,
         frame: CGRect,
         text: String
-    ) {
+    ) -> Bool {
         var pill = pills[window] ?? makePill()
         pill.hideWork?.cancel()
         pill.hideWork = nil
 
         pill.plate.setText(text)
         let textSize = pill.plate.fittingSize
-        let pillWidth = min(
-            frame.width - 24,
-            max(textSize.width + Self.pillPadding, 120)
-        )
         // The hide timer was already cancelled above, so a bare
         // return here would strand a showing pill at alpha 1
         // forever — fade it out instead of leaving it.
-        guard pillWidth > 40 else {
+        guard
+            let pillWidth = Self.pillWidth(
+                frame: frame,
+                textWidth: textSize.width
+            )
+        else {
             pills[window] = pill
             fadeOut(window)
-            return
+            return false
         }
 
         let pillRect = CGRect(
@@ -75,6 +100,7 @@ final class SizeLimitOverlay {
             deadline: .now() + Self.holdDuration,
             execute: work
         )
+        return true
     }
 
     private func fadeOut(_ window: CGWindowID) {
