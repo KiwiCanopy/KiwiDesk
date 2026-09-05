@@ -45,13 +45,28 @@ extension KiwiCore {
         guard let pid = state.windows[id]?.pid else {
             return false
         }
-        let own = selfRaiseStamps[id] ?? .distantPast
+        let own = selfRaiseStamp(id, now: now) ?? .distantPast
         return selfRaiseStamps.keys.contains { sibling in
             sibling != id
                 && state.windows[sibling]?.pid == pid
                 && selfRaiseStamp(sibling, now: now)
                     .map { $0 > own } == true
         }
+    }
+
+    /// Whether a placement of `id` lies (partly) outside the
+    /// visible bounds of the screen its space lays out on (#1161)
+    /// — the scrolling void past an edge, where an app that clamps
+    /// itself on-screen answers with a focus of its own. Read off
+    /// the one `visibleBounds` seam (#531).
+    func placementCrossesEdge(
+        _ placed: CGRect,
+        of id: WindowID
+    ) -> Bool {
+        guard let space = state.workspaces.space(of: id),
+            let screen = TilingEngine.screen(for: space, in: state)
+        else { return false }
+        return !tiler.visibleBounds(screen).contains(placed)
     }
 
     /// Whether a left click landed inside `id`'s frame within

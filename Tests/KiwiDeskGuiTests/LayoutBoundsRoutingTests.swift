@@ -74,6 +74,10 @@ struct LayoutBoundsRoutingTests {
     private let allowed: [String: Int] = [
         // The hook's own declaration.
         "Tiling/TilingEngine.swift": 1,
+        // A containment box, not a span (#1161): whether a
+        // placement lies past the screen's edge, which is what
+        // the placement-bounce distrust keys on.
+        "App/KiwiCore+FocusDistrust.swift": 1,
         // The `layoutBounds(on:)` seam — the one legitimate
         // consumer, and what every span reads through — plus the
         // neighbor scan's own-screen rect (#878): adjacency

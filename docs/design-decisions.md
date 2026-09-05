@@ -1561,6 +1561,108 @@ let a bar click forge the escape for a stamped window under the
 strip. The painted strips (`shownStrips`, the #242 authority)
 are the mask.
 
+### A placement bounce is the app's answer, not the user's (#1161)
+
+**[Rationale]**
+
+The Android Emulator's Qt shell answers being placed past a
+screen edge by focusing itself. Measured 2026-09-05, 3 of 3
+trials with the pan as the only input: a scrolling pan asks it to
+sit at x = 1665 on a 1728-wide screen, and 0.8–1.5 s later its
+window reports focus and the app activates; a Space switch that
+parks it at the stash corner does the same 1 s later, the window
+refusing the corner. Never once did it happen on the pan with
+the window floating, where the pan does not move it. That focus
+report has the same shape as a cmd-tab: clickless, no self-raise
+stamp, a different window than the one the user just reached.
+Honoring it panned the row back to the emulator, warped the
+pointer onto it, and — from a hidden Space — flew the user back
+to the Space they had just left.
+
+The distrust keys on **placement**, not on activation: the
+`TilingEngine.placements` ledger records where KiwiDesk last put
+each window, stamped at the two frame leaves the retile, the
+stash and the App-level placers share, age-bounded like every
+echo ledger and never consumed. It is a further record of "where
+we put it" beside the applier's instant target, the animation's
+target and the learner's asks, kept because none of them lives
+long enough — the bounce lands after every one has retired.
+
+The placements ledger is read by **geometry** rather than by an
+ordering of stamps — there is no second placement stamp to rank
+against — and the verdict is a clickless focus report within the
+placement window, arriving after focus moved on, for a window in
+the ledger. In the **active scrolling Space** the live entry is
+the whole verdict, and that took four device sittings to accept:
+the emulator complied within 9 pt of a pan into the void and
+bounced regardless, so "the window is not where we put it"
+discriminated nothing; it bounced after a pan that left it
+on-screen, so "past the edge" discriminated nothing; it bounced
+after a focus command stepped off it with its size bound learned
+and no frame asked of it, so "the app refused the size it was
+asked" discriminated nothing and read as a bare mismatch it also
+matched every window whose resize echo had not landed (the #1049
+lesson, one subsystem over); and it bounced after a click onto a
+neighbour panned the row. Every discriminator narrower than "we
+moved it, or stepped off it, inside the window" honored a bounce
+on the device, and each honored bounce cost more than a pan back:
+it left KiwiDesk's focus anchor on a window the OS did not front,
+the split in which the foreground preflight refuses every focus
+shortcut until the app reports again. So the row prices one trade
+instead of four: a cmd-tab onto a scrolling window a pan just
+moved is bounced for the window. The focus command records the
+window it left in the same ledger — an entry a later pan's
+placement carries rather than erases — so the displacement shares
+the ledger's prune, renewal bound, forget and rekey instead of
+earning a ledger of its own. Anywhere else — the corner a hidden
+Space's windows are parked in, monocle's park, a scrolling Space
+that is not the active one — a clickless focus is how a user
+*reaches* an off-screen window, so the placement must lie past
+the edge and the window must have **refused** it by position,
+which the emulator does at the stash corner and a window that
+went where it was parked does not.
+
+The discriminator is forgeable by construction: a cmd-tab onto a
+scrolling window a pan moved inside the placement window, or back
+onto the one the user stepped off inside it, is bounced too. A
+distrust **renews** the placement, because the emulator retries
+every half second or so and its third retry landed past a window
+that started at the pan — but through the ledger's own `renew`
+door, which extends the window only while the placement itself is
+younger than it. The forgeability is why the chain must end: the
+report that renews is one the predicate cannot tell from a
+cmd-tab, so an unbounded renewal let a user's own repeated
+attempts extend their lockout forever, and the documented escape
+("try again after two seconds") became one only a user who stops
+trying could reach. Bounded at the placement, an app that keeps
+reacting is still bounced for up to twice the window, and a
+keyboard user is honored by then. That is the ruled trade; a
+click is always honored.
+The #465 sibling distrust's carve-out for a visible same-display
+sibling is narrowed by this: such a sibling placed into the
+scrolling void is bounced like any other window.
+
+State stays on the intended window and it is re-asserted with a
+direct, unstamped raise — the #465 sibling-distrust shape. The
+state-only ruling of the raise-echo revert above does not reach
+here, and the reason is what makes it a ruling rather than a
+habit: there a drain is in flight and its closing re-assert is
+the one owner of putting OS focus back, so reverting state alone
+is transient by construction. A placement bounce has no sequence
+and no closing re-assert — a state-only revert would leave
+keystrokes on the app's window and the ring on the user's,
+permanently — so this one raises; the raise moves nothing, so it
+provokes no second bounce, and the ledger is never consumed, so
+the app's repeat is bounced the same way. The distrust runs
+below the z-order revert on purpose: a restore's echo keeps the
+state-only revert its sequence owns.
+
+An activation gate — "an app that activates with no input is not
+focus" — is the wrong shape: cmd-tab is also clickless
+activation, KiwiDesk has no keyboard provenance for system
+chords, and the measurement shows the trigger is our own
+frame-set, not activation in general.
+
 ### An ignored panel's dismissal is a race; provenance ends it
 
 **[Rationale]**

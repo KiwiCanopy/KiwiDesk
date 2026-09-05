@@ -128,8 +128,9 @@ public final class KiwiCore {
     /// When KiwiDesk's own AX raise of each window was issued
     /// (#152): a report for a window raised within
     /// `selfRaiseEchoWindow` is our echo, not a user action, and
-    /// the #465 sibling distrust ranks by it. Age-pruned on
-    /// write and NEVER consumed by an echo (#887, like
+    /// the #465 sibling distrust ranks by it. Minted ONLY through
+    /// `stampSelfRaise`, which prunes by age; NEVER consumed by
+    /// an echo (#887, like
     /// `zOrderRaiseEchoes`); cleared on destroy and rekeyed on a
     /// tab switch. The classification is `handleWindowFocused`'s.
     var selfRaiseStamps: [WindowID: Date] = [:]

@@ -131,7 +131,9 @@ struct ScrollingDeferredRaiseTests {
         core.execute("focus", args: [.string("left")])
         #expect(core.pendingFocusRaise == WindowID(4))
         // The user clicks window 1 mid-pan: the OS raised it
-        // itself; a stale raise must not steal focus back.
+        // itself; a stale raise must not steal focus back. The
+        // click is what tells it from the pan's own echo (#1161).
+        core.lastLeftClick = (Date(), CGPoint.zero, WindowID(1))
         core.eventLoop.onEvent(.windowFocused(WindowID(1)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
@@ -208,6 +210,10 @@ struct ScrollingDeferredRaiseTests {
         // misclassification guard — never suppress a real focus
         // change the user asked for).
         core.selfRaiseStamps = [:]
+        // The click's provenance (#687): without it a clickless
+        // report for a window the pan just placed past the edge
+        // is #1161's bounce, which this test does not read.
+        core.lastLeftClick = (Date(), CGPoint.zero, WindowID(2))
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)

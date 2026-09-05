@@ -47,17 +47,7 @@ extension KiwiCore {
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
         {
-            // Stamp what we raised so its focus echoes — every
-            // one of them, a lazy app sends two (#887) — can be
-            // told apart from a user's click (#152), and for the
-            // sibling-report distrust (#465 QA). Pruned by age so
-            // never-echoed raises cannot accrete.
-            let now = Date()
-            selfRaiseStamps = selfRaiseStamps.filter {
-                now.timeIntervalSince($0.value)
-                    < Self.selfRaiseEchoWindow
-            }
-            selfRaiseStamps[id] = now
+            stampSelfRaise(id, now: Date())
             AXHelper.raise(element, pid: window.pid)
         }
     }
@@ -94,6 +84,11 @@ extension KiwiCore {
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)
+        }
+        if let previous = previousFocused, previous != id,
+            let frame = state.windows[previous]?.frame
+        {
+            tiler.placements.noteDisplaced(previous, frame: frame)
         }
         // Scrolling defers the raise until the pan settles when
         // this focus change leaves the target's own frame where
