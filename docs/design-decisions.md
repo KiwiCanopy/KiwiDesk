@@ -2163,14 +2163,18 @@ sticky families drew pills and said nothing. One idea, four
 shapes.
 
 So: every refusal draws, and `refusal.sound` adds the system
-alert to the drawing. The call sits on the pill-DRAWING seam
-rather than on the refusal funnel, and that placement is the
-invariant rather than a detail — a sound that cannot fire
-without a pill can never re-create the defect this removed. It
-is load-bearing for the sticky family, whose pill is gated on
-`sticky.mark`: with the mark off those refusals draw nothing, so
-they must say nothing, where a funnel-level sound would have
-made them audible-but-invisible.
+alert to the drawing. The sound is gated on what the drawing
+REPORTED, not on the drawing having been asked for, and that is
+the invariant rather than a detail — a sound that cannot fire
+without a pill can never re-create the defect this removed.
+Asking is not appearing: both primitives decline silently, the
+size pill without the private runtime and the sticky mark
+without an overlay, so each returns whether it drew and one gate
+turns that verdict into sound. It is load-bearing for the sticky
+family, whose pill is gated on `sticky.mark`: with the mark off
+those refusals draw nothing, so they must say nothing, where a
+sound placed one level up — on the refusal funnel, or beside the
+drawing call — would have made them audible-but-invisible.
 
 **The setting is OFF by default, and the DECODER is what
 delivers that** — the retired `resize.feedback` is no longer
@@ -2180,13 +2184,15 @@ The migration is hygiene: it ends the file in the new shape,
 because a dead entry left in a saved config reads as a choice
 somebody made. Nobody did — the old default was `true` and the
 encoder wrote the key unconditionally, so an explicit value
-records what a save did rather than what anyone chose — the cue was audible in two situations, one
-reachable only by height-resizing the master of a stack, and the
-owner could not trigger it in three attempts while looking for
-it. Widening it from that to every refusal while keeping the
-stored value would have made every existing install noisier at
-limits it currently hits silently. So the crossing drops the
-retired key rather than carrying it.
+records what a save did rather than what anyone chose.
+
+Nor is the stored value worth carrying. The old cue was audible
+in two situations, one reachable only by height-resizing the
+master of a stack, and the owner could not trigger it in three
+attempts while looking for it. Widening that to every refusal
+while keeping the stored `true` would have made every existing
+install noisier at limits it currently hits silently. So the
+crossing drops the retired key rather than carrying it.
 
 It lives in Behaviour rather than General, and that is a
 STORAGE decision wearing a placement question: every row in

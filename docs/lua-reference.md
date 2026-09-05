@@ -636,9 +636,10 @@ plays the system alert sound (#184, widened #1255). Every
 refusal draws — a size limit reached, a layout with nothing to
 resize, a zone with no such axis, a sticky window that cannot be
 swapped — and this adds sound to the drawing. It cannot sound
-without drawing: the call sits on the pill itself, so a refusal
-whose pill is switched off stays silent rather than becoming
-audible-but-invisible.
+without drawing: each refusal sounds on what its drawing
+REPORTED, so one that could not draw — a sticky mark switched
+off, a window with no overlay — stays silent rather than
+becoming audible-but-invisible.
 
 Only hotkey fires cue; the same command over CLI/IPC stays
 silent (scripted callers branch on the error JSON), and a held
@@ -3860,11 +3861,12 @@ and flashes a pill. Shrinking pins the same way, which is what
 keeps grow and shrink reversible at an edge. Tiled windows
 only resize in bsp, stack, scrolling, and track layouts —
 monocle, grid, and the floating layout report "not supported",
-and a **hotkey** press there flashes a pill saying the layout
-has no resizing (#1255) — the no-op is correct, but a silent
-one at the keyboard reads as "KiwiDesk ignored me". Add the
-system alert sound to it with `set_refusal_sound(true)` — CLI
-and IPC callers never hear it, they read the error JSON.
+and that failure flashes a pill on the focused window saying the
+layout has no resizing (#1255) — the no-op is correct, but a
+silent one at the keyboard reads as "KiwiDesk ignored me". Add
+the system alert sound to it with `set_refusal_sound(true)`;
+only a hotkey fire sounds, so CLI and IPC callers see the pill
+and read the error JSON without hearing anything.
 
 Distinct from that no-target alert (#933): a resize a size
 limit **truncates** — a shrink reaching the focused window's
