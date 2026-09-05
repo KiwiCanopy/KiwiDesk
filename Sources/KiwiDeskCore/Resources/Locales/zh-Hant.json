@@ -333,6 +333,7 @@
   "footer.save": "儲存",
   "footer.save.globals_only": "佈局與螢幕維持暫停；「%1$@」涵蓋其餘所有項目。",
   "footer.save_a_copy_as": "儲存為新描述檔…",
+  "footer.save_as_new.message": "新描述檔包含你的編輯內容與目前連接的螢幕組態。從選單切換的佈局保持為暫時狀態。",
   "footer.save_as_new.title": "儲存為新描述檔",
   "footer.save_as_new_profile": "儲存為新描述檔…",
   "footer.save_copy": "儲存副本",

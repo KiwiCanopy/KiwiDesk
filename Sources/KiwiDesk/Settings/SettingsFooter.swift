@@ -178,8 +178,8 @@ struct SettingsFooter: View {
         L(
             "footer.save_as_new.message",
             "The new profile carries your edits and the "
-                + "connected monitor set. A layout you switched "
-                + "from the menu stays temporary."
+                + "connected screen setup. A layout you "
+                + "switched from the menu stays temporary."
         )
     }
 

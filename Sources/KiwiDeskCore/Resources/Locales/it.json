@@ -333,6 +333,7 @@
   "footer.save": "Salva",
   "footer.save.globals_only": "Layout e schermi restano in pausa; «%1$@» copre tutto il resto.",
   "footer.save_a_copy_as": "Salva come nuovo profilo…",
+  "footer.save_as_new.message": "Il nuovo profilo include le tue modifiche e la configurazione di schermi collegata. Un layout cambiato dal menu rimane temporaneo.",
   "footer.save_as_new.title": "Salva come nuovo profilo",
   "footer.save_as_new_profile": "Salva come nuovo profilo…",
   "footer.save_copy": "Salva copia",
