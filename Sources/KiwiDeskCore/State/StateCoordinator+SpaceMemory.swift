@@ -51,6 +51,32 @@ extension StateCoordinator {
         }
     }
 
+    /// Re-files a departure the destroy fold just recorded under
+    /// the Space an explicit Desktop-move target named (#1150).
+    /// The one writer of `rememberedSpaces` OUTSIDE a fold, and
+    /// safe as one because it runs in the same synchronous arm
+    /// as that fold, before any reader: `forgetGoneWindow` reads
+    /// nothing of it, and the away ledger files the NATIVE Space.
+    /// The `.departed` memory takes the name and the slot rank is
+    /// dropped, a rank meaning something only in the Space it was
+    /// taken in; rankless, the create fold's spawn placement is
+    /// the authority for where the return lands, and the away
+    /// merge (`withAwayMembers`) previews it LAST, which may
+    /// differ. False, and a no-op, for anything but a `.departed`
+    /// record — a minimize, a close, a `.restored` filing.
+    @discardableResult
+    mutating func redirectDeparture(
+        of id: WindowID,
+        to space: SpaceID
+    ) -> Bool {
+        guard case .departed? = rememberedSpaces[id] else {
+            return false
+        }
+        rememberedSpaces[id] = .departed(space)
+        departedSlots[id] = nil
+        return true
+    }
+
     /// Retires a window closed while away (#1146): the ledger
     /// entry and the two #1207 records it was read with.
     mutating func forgetAway(_ id: WindowID) {

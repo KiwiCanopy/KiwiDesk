@@ -134,7 +134,10 @@ bounded debt that the `.windowCreated` fold pays at that window's
 own arrival, holding the vacancy against earlier re-tracks and
 standing the 600 ms settle's refocus down until it is paid; and
 each departed window carries its slot so the row re-forms in the
-order it left (#1207). The departed window itself is not
+order it left (#1207); and a Desktop move that named a Space is
+paid there too — the pending name replaces the departing
+window's remembered Space, so the arrival files it where the
+user said (#1150). The departed window itself is not
 forgotten: the destroy handler asks the WindowServer which
 Desktop hosts it (`OS`, the per-Desktop census — two private
 list reads per user Desktop, up and parked, nil where the symbol

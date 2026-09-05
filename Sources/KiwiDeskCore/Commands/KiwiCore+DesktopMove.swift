@@ -31,11 +31,13 @@ extension KiwiCore {
     /// carries the ruling.
     ///
     /// A **sticky** window is not refused (`stickyMoveRefused`
-    /// gates KiwiDesk-space membership, which a Desktop move
-    /// does not touch — the re-home above stands down for a
+    /// gates KiwiDesk-space membership, which a bare Desktop
+    /// move does not touch — the re-home above stands down for a
     /// sticky window on exactly that ground): it physically
     /// leaves — and the next Desktop switch carries it back to
-    /// wherever the user goes (#1145), which is the promise.
+    /// wherever the user goes (#1145), which is the promise. An
+    /// explicit `space:` IS a membership write, so it takes that
+    /// one gate before anything moves (#1150).
     func moveToDesktop(
         _ args: [JSONValue],
         follow: Bool
@@ -47,11 +49,35 @@ extension KiwiCore {
             guard let focused = focusedWindowID else {
                 return .fail("no focused window")
             }
+            let explicit: SpaceID?
+            switch resolveSpaceTarget(args, for: target) {
+            case .refused(let response):
+                return response
+            case .none:
+                explicit = nil
+            case .space(let space, let landing):
+                guard
+                    !stickyMoveRefused(
+                        focused,
+                        to: space,
+                        landingOn: landing
+                    )
+                else {
+                    return .fail("a sticky window keeps its Space")
+                }
+                explicit = space
+            }
             guard WMBridge.moveWindows([focused], to: target.space)
             else {
                 return .fail("the Desktop bridge refused the move")
             }
-            rehomeAcrossScreens(focused, to: target)
+            // An explicit Space outranks the screen-home rule:
+            // the user named the destination (#1150).
+            if let explicit {
+                fileExplicitly(focused, in: explicit, target: target)
+            } else {
+                rehomeAcrossScreens(focused, to: target)
+            }
             if follow {
                 let outcome = switchDesktop(
                     to: target,
@@ -192,19 +218,9 @@ extension KiwiCore {
             "move_to_desktop: crossing screens — homing "
                 + "w\(window.raw) to space \(destination.raw)"
         )
-        addFocusedToSpace(window, to: destination)
-        state.workspaces.focus(window, in: destination)
-        // The membership change is a `window_moved_to_space`
-        // like any other — `from` read BEFORE the move, or
-        // subscribers are told the window came from where it
-        // just went.
-        emitWindowMovedToSpace(
-            window,
-            app: managed.appName,
-            bundleID: managed.appBundleID,
-            from: from,
-            to: destination
-        )
+        // `from` read BEFORE the move, or subscribers are told
+        // the window came from where it just went.
+        fileMembership(window, into: destination, from: from)
         retile(animated: true)
     }
 

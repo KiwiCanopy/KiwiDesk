@@ -133,10 +133,15 @@ extension KiwiCore {
     /// home space. When exactly one of from/target has no assigned
     /// display (a target space not yet shown on any monitor), they
     /// compare unequal and the move is ALLOWED: a not-yet-placed
-    /// space is treated as elsewhere, re-homing on first show.
+    /// space is treated as elsewhere, re-homing on first show — a
+    /// caller that KNOWS where the target will lay out passes it
+    /// as `landingOn`, so the gate answers the placement the route
+    /// is about to write rather than a nil the ledger has not
+    /// filled (#1150).
     func stickyMoveRefused(
         _ window: WindowID,
-        to target: SpaceID
+        to target: SpaceID,
+        landingOn display: DisplayID? = nil
     ) -> Bool {
         guard let sticky = state.windows[window], sticky.isSticky
         else { return false }
@@ -148,7 +153,8 @@ extension KiwiCore {
             return true
         case .display:
             let fromDisplay = state.homeDisplay(of: window)
-            let toDisplay = state.workspaces.display(of: target)
+            let toDisplay =
+                display ?? state.workspaces.display(of: target)
             guard fromDisplay == toDisplay else { return false }
             // On a single monitor "display" and "global" coincide —
             // there is no other display to move to — so the negative

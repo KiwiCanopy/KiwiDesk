@@ -251,13 +251,13 @@ public final class KiwiCore {
     var adoptionHealInterval: Duration = .seconds(5)
     var transientRetrackDelay: Duration = .milliseconds(750)
 
-    /// Windows just moved without follow, whose focus re-reports
-    /// must not space-follow (#482/#483) — see the type doc.
+    /// Three departure ledgers, each type doc carrying its own
+    /// argument: the no-follow move latch (#482/#483), the focus a
+    /// follow owes the window it sent away (#1007), and the Space
+    /// an explicit `space:` names for a hidden Desktop (#1150).
     let moveLatch = MoveIntentLatch()
-
-    /// The focus a `move_to_desktop_and_follow` owes the window
-    /// it sent away (#1007) — the type doc carries the argument.
     let followFocus = FollowFocusIntent()
+    let pendingSpace = PendingSpaceAssignment()
 
     /// The MAIN display's current native Desktop (#888) — the
     /// binding authority, and the per-Desktop Space memory

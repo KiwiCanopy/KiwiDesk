@@ -263,8 +263,8 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
 | | `focus_desktop` | Desktop number (Mission Control's) |
-| | `move_to_desktop` | Desktop number — moves the focused window, you stay |
-| | `move_to_desktop_and_follow` | Desktop number — moves the focused window, switches there, and leaves keyboard focus on the window |
+| | `move_to_desktop` | Desktop number, [space id] — moves the focused window, you stay; the Space it joins when it lands, if given |
+| | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window, switches there, and leaves keyboard focus on the window; the Space it joins when it lands, if given |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] |
@@ -539,6 +539,13 @@ back before release emits once per crossing). A
 screen** emits it too: the window joins the space that screen
 shows, or the layout would carry it back to the screen it left
 ([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
+`move_to_desktop` with a **named Space** emits it as well when
+that Desktop is the one its screen is already showing —
+`to_space_id` is the Space you named. When the Desktop is hidden
+there is no `window_moved_to_space` at all: the window is
+reported `vanished` and comes back with `window_created`,
+`reason: returned`, already in the named Space
+([#1150](https://github.com/KiwiCanopy/KiwiDesk/issues/1150)).
 Bulk reassignments (profile load, session restore) stay silent:
 
 ```json

@@ -3410,6 +3410,63 @@ switches KiwiDesk's Space and not the Desktop holding them —
 that coordination is
 [#1148](https://github.com/KiwiCanopy/KiwiDesk/issues/1148)'s.
 
+### A Desktop move's explicit Space is paid at the departure (#1150)
+
+**[Rationale]**
+
+`move_to_desktop(3, "mail")` names where the window should be
+*when it gets there*, and a window sent to a hidden Desktop is
+not there yet: macOS shows another Desktop's windows to nobody,
+so the window leaves KiwiDesk's state at the move and joins it
+again at the reveal, through the create fold's ordinary rules.
+Writing the membership eagerly at the command would put a record
+in front of that fold — the arrival would then find a member it
+was about to file, and every reconcile between the move and the
+reveal would be reconciling a window no screen shows (the
+arrival-semantics ruling on
+[#890](https://github.com/KiwiCanopy/KiwiDesk/issues/890)). So
+the name is a **pending assignment**: recorded at the command
+(`PendingSpaceAssignment`), paid at the window's DEPARTURE, where
+the destroy fold has just written the Space it left as its
+remembered Space and the name replaces that record
+(`redirectDeparture`). The arrival then needs nothing new — the
+remembered-space rule lands the window where the user said. A
+Desktop its screen already shows produces no departure, so that
+route files the window at once, the way `move_to_space` does;
+the two routes split on the same `isCurrent` gate the
+cross-screen re-home splits on, and the explicit name outranks
+that re-home, since the user named the destination.
+
+A Space assigned to another screen than the Desktop's is
+**refused** rather than honored: the layout carries a window to
+its Space's screen, and macOS re-assigns the window's Desktop to
+match its frame, so honoring it would undo the move within a
+second — the #1010 defect, asked for by name. A Space no screen
+owns yet, a fresh one included, has no settled screen while more
+than one is connected — the layout falls back to the screen
+holding the key window, the placement resolve to the menu bar's,
+and the two disagree exactly when the user is working on the
+secondary screen — so it is refused there, with the pin hint,
+and accepted on one screen, where every reading agrees. It is
+deliberately **not** assigned to the Desktop's screen on the
+user's behalf: a runtime assignment outside the pins is undone
+by the next placement resolve (a profile apply, a monitor
+change), after which the window sits on a secondary screen's
+Desktop while its Space lays out elsewhere, the same undo a
+beat later. A parse writes nothing, so a refused move leaves no
+empty Space behind. And the explicit
+Space is a membership write where a bare Desktop move is not, so
+it takes the one sticky gate `move_to_space` takes, with that
+gate's own asymmetry (#445: a global sticky refuses any Space, a
+display sticky refuses a same-screen one and re-homes across
+screens) — told where the Space will lay out, since an unowned
+one reads as "elsewhere" to it — and where it refuses, the whole
+command is refused rather than half of it done. The remembered
+slot goes with the re-filing: a rank means something only in the
+Space it was taken in, so a window filed into a different Space
+returns by the arrival's ordinary placement rather than at its
+old index (#1207).
+
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
 **[Rationale]**

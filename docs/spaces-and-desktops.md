@@ -185,11 +185,12 @@ listed in `get_state`. Parking is how a Space is hidden; it is
 never how a window changes Desktop.
 
 The only things that move a window between Desktops are macOS
-itself and the two verbs that ask it to: `move_to_desktop(n)`
-and `move_to_desktop_and_follow(n)`. A window sent to another
-Desktop leaves KiwiDesk's view — macOS shows another Desktop's
-windows to nobody — and rejoins its Space when that Desktop is
-next shown. It is reported gone with `reason: vanished`, the
+itself and the two verbs that ask it to: `move_to_desktop(n[,
+space])` and `move_to_desktop_and_follow(n[, space])`. A window
+sent to another Desktop leaves KiwiDesk's view — macOS shows
+another Desktop's windows to nobody — and rejoins its Space when
+that Desktop is next shown, or the Space you named, when you
+named one. It is reported gone with `reason: vanished`, the
 same value a plain Desktop swipe produces.
 
 KiwiDesk keeps knowing it is there, but does not draw it. The

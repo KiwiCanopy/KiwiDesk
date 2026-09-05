@@ -120,6 +120,66 @@ extension KiwiCore {
         return .target(target)
     }
 
+    /// A move verb's optional second argument: the KiwiDesk Space
+    /// the window joins when it lands (#1150), with the screen it
+    /// will lay out on — carried here so the sticky gate is handed
+    /// the value the parse ruled on rather than re-deriving it.
+    enum SpaceTargetResolution {
+        case none
+        case space(SpaceID, landing: DisplayID?)
+        case refused(CommandResponse)
+    }
+
+    /// Parses the composed `space:` target of a Desktop MOVE
+    /// (#1150) — absent for the one-argument form. A Space
+    /// assigned to a screen other than the Desktop's is refused
+    /// up front: the layout carries a window to its Space's
+    /// screen, and macOS then re-assigns its Desktop to match,
+    /// which undoes the move within a second (#1010). A Space no
+    /// screen owns yet has no settled screen while more than one
+    /// is connected — the layout falls back to the key window's
+    /// screen, the placement resolve to the menu bar's — so it is
+    /// refused with the pin hint there and accepted on ONE
+    /// screen, where every reading agrees; never hand-assigned,
+    /// since the next placement resolve would move it back and
+    /// re-open the same undo. A parse writes nothing: the route
+    /// creates the Space once the bridge accepted, so a refused
+    /// move leaves no empty Space behind.
+    func resolveSpaceTarget(
+        _ args: [JSONValue],
+        for target: DesktopTarget
+    ) -> SpaceTargetResolution {
+        guard args.count > 1 else { return .none }
+        guard let raw = args[1].stringValue, !raw.isEmpty else {
+            return .refused(.fail("expected space id"))
+        }
+        let space = SpaceID(raw)
+        let screens = state.workspaces.allDisplays
+        if let assigned = state.workspaces.display(of: space) {
+            if let screen = display(forUUID: target.displayIdentifier),
+                assigned != screen
+            {
+                return .refused(
+                    .fail(
+                        "space \(raw) lays out on another screen "
+                            + "than that Desktop's"
+                    )
+                )
+            }
+            return .space(space, landing: assigned)
+        }
+        guard screens.count <= 1 else {
+            return .refused(
+                .fail(
+                    "space \(raw) is on no screen yet — pin it to "
+                        + "that Desktop's screen first "
+                        + "(pin_space_to_display)"
+                )
+            )
+        }
+        return .space(space, landing: screens.first?.id)
+    }
+
     /// `focus_desktop <n>` (#26): switches the Desktop's screen
     /// to it. The OS notification that follows runs the same
     /// switch handling a swipe does — binding, Space memory,
