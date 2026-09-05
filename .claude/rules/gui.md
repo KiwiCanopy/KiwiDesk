@@ -1088,6 +1088,16 @@ Every surface, border and ink in the Settings tree comes from
   seal as a finished sweep: a site still on `.borderedProminent`
   is drawing white on the accent, and adopting the seal there is
   its own change and its own eye-confirm.
+- **A state on the accent seal is a FILL swap, never an opacity
+  over the ground.** A translucent state composites against
+  whatever the button sits on, so one modifier pressed darker on
+  the tour's page and lighter on the save pill and drained the
+  label the seal exists to keep readable — the #1198 defect one
+  layer in. Each state names its own opaque token, which is what
+  lets the style promise a ratio it can measure;
+  `KiwiProminentButtonStateTests` holds the spelling and the
+  rest > pressed > disabled rank, and `AccentStateSeparationTests`
+  holds the one colour-vision pair a user reads.
 - **Where the ground is fixed, the ink must be fixed too.**
   The hierarchical-grey ban below is one half of this; the
   control side is the other, and it bites hardest in the state

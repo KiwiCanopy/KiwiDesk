@@ -53,11 +53,12 @@ struct NameEditPopover: View {
             }
             HStack {
                 Spacer()
-                // SYSTEM prominent style on purpose: its
-                // disabled state is flat grey, and this button's
-                // disabled state is what #843 was about —
-                // `kiwiProminentButton()` draws disabled and
-                // pressed alike.
+                // SYSTEM prominent style pending its own
+                // adoption. #843's reason expired with #1198 —
+                // the seal now draws a distinct disabled fill —
+                // but moving this one overturns
+                // `docs/ui-patterns.md`'s class ruling, so it
+                // takes its own change and eye-confirm.
                 Button(confirmLabel(name), action: confirm)
                     .buttonStyle(.borderedProminent)
                     .disabled(!isValid(name))

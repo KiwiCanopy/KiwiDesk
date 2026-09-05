@@ -544,6 +544,18 @@ style *drew* — the pressed and disabled appearances have to be
 redrawn, which this one does through the fill rather than the
 label, so a click never dims the ink it has to keep readable.
 
+Each of the three states is its own **opaque** token —
+`accent`, `accentPressed`, `accentDisabled` — with the ink held
+at `accentInk` throughout. Opaque is the load-bearing word: a
+state drawn as an opacity composites against whatever the button
+sits on, which made the same press read darker on the tour's
+page and lighter on the save pill. Disabled drains the hue
+rather than merely dimming it, because a control that keeps its
+accent has not been greyed — it measures 3.74:1 for the label
+and stays a visible control on every ground the seal is drawn
+on, while separating from the live fill by 78 under protanopia,
+well past the 60 this app holds colour pairs to.
+
 **On a ground that does not move with the appearance, the seal
 stops being a preference.** The save pill is dark in both
 modes, and an inactive window makes AppKit re-pick a prominent
