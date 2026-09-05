@@ -2,11 +2,13 @@ import AppKit
 import CoreGraphics
 
 extension KiwiCore {
-    /// Flashes the minimum-size refusal pill on `window`
-    /// (#933) with `text`.
+    /// Flashes the refusal pill on `window` (#933) with `text`,
+    /// and the glyph `refusal`'s own case picks (#1260) — the
+    /// two channels come from one value so they cannot disagree.
     @discardableResult
     private func flashSizeLimitPill(
         _ window: WindowID,
+        _ refusal: ResizeRefusal,
         text: String
     ) -> Bool {
         guard
@@ -16,7 +18,8 @@ extension KiwiCore {
         return borders.flashSizeLimitPill(
             window: window,
             frame: frame,
-            text: text
+            text: text,
+            symbol: refusal.pillSymbol
         )
     }
 
@@ -68,10 +71,12 @@ extension KiwiCore {
     /// user could not see — invisible with the toggle off, and
     /// invisible to anyone who does not hear it.
     func refuseAxisAbsent(_ window: WindowID, axis: String) {
-        cueResizeRefusal(.noAxisHere(window))
+        let refusal = ResizeRefusal.noAxisHere(window)
+        cueResizeRefusal(refusal)
         soundIfDrawn(
             flashSizeLimitPill(
                 window,
+                refusal,
                 text: axis == "y"
                     ? L(
                         "resize.no_height_here",
@@ -97,10 +102,12 @@ extension KiwiCore {
     /// nothing to sound beside it.
     func refuseResizeUnsupported(in space: Space) {
         guard let window = space.focused else { return }
-        cueResizeRefusal(.layoutHasNoResize(window))
+        let refusal = ResizeRefusal.layoutHasNoResize(window)
+        cueResizeRefusal(refusal)
         soundIfDrawn(
             flashSizeLimitPill(
                 window,
+                refusal,
                 text: L(
                     "resize.layout_has_none",
                     "This layout has no resizing"
@@ -115,12 +122,14 @@ extension KiwiCore {
     /// Fires on the first attempt the clamp truncates — landing
     /// ON the minimum included — not only once already there.
     func refuseShrinkAtMinimum(_ window: WindowID, axis: String) {
-        cueResizeRefusal(.ownMinimum(window))
+        let refusal = ResizeRefusal.ownMinimum(window)
+        cueResizeRefusal(refusal)
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
         soundIfDrawn(
             flashSizeLimitPill(
                 window,
+                refusal,
                 text: L(
                     "resize.min_size_reached",
                     "Minimum window size reached"
@@ -136,12 +145,14 @@ extension KiwiCore {
     /// to mark, and the bump stays on the gesture that hit the
     /// wall.
     func refuseGrowAtMaximum(_ window: WindowID, axis: String) {
-        cueResizeRefusal(.ownMaximum(window))
+        let refusal = ResizeRefusal.ownMaximum(window)
+        cueResizeRefusal(refusal)
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
         soundIfDrawn(
             flashSizeLimitPill(
                 window,
+                refusal,
                 text: L(
                     "resize.max_size_reached",
                     "Maximum window size reached"
@@ -171,12 +182,14 @@ extension KiwiCore {
     /// as structure, since #96 bars deciding that from the
     /// sentence.
     func refuseGrowAtBoundary(_ window: WindowID, axis: String) {
-        cueResizeRefusal(.ownMaximum(window))
+        let refusal = ResizeRefusal.ownMaximum(window)
+        cueResizeRefusal(refusal)
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
         soundIfDrawn(
             flashSizeLimitPill(
                 window,
+                refusal,
                 text: L(
                     "resize.boundary_reached",
                     "No room left to grow"
@@ -202,14 +215,17 @@ extension KiwiCore {
         anchor: WindowID,
         axis: String
     ) {
-        cueResizeRefusal(
-            .neighborMinimum(anchor: anchor, focused: focused)
+        let refusal = ResizeRefusal.neighborMinimum(
+            anchor: anchor,
+            focused: focused
         )
+        cueResizeRefusal(refusal)
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(focused, direction: direction)
         soundIfDrawn(
             flashSizeLimitPill(
                 focused,
+                refusal,
                 text: L(
                     "resize.neighbor_min_size",
                     "Neighboring window at its minimum size"
@@ -218,9 +234,12 @@ extension KiwiCore {
         )
         // The blocker's pill draws but does NOT sound: this is
         // one refusal wearing two pills, and one press that
-        // beeps twice reads as two failures (#1255).
+        // beeps twice reads as two failures (#1255). It carries
+        // the SAME glyph, which is the one refusal being worn
+        // twice rather than two different ones (#1260).
         flashSizeLimitPill(
             anchor,
+            refusal,
             text: L(
                 "resize.min_size_reached",
                 "Minimum window size reached"

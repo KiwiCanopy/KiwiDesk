@@ -2194,6 +2194,41 @@ while keeping the stored `true` would have made every existing
 install noisier at limits it currently hits silently. So the
 crossing drops the retired key rather than carrying it.
 
+**An arrow means a resize stopped; a non-arrow means there is
+no resize here (#1260).** [Principle] The pill carries two kinds
+of message, and they ask for different things of the reader:
+*structural* — the parameter does not exist and never will, so
+stop trying on this layout — and *contingent*, a bound reached
+that something could get past. The distinction rides the glyph
+because that channel is already drawn on every pill, so encoding
+it costs no width and taxes the common case not at all; and
+because the glyph is the part that survives truncation, which is
+exactly the narrow band where the sentence has stopped being
+readable.
+
+The symbol is read off the `ResizeRefusal` case in one
+exhaustive switch, never off the text — #96's rule, and the
+compiler is then the forget-proofing, so no scan is owed.
+`.neighborMinimum` keeps the SHRINK arrow deliberately: a shrink
+whose group floor is carried by a mate routes through the
+neighbour cue, so a direction-derived glyph would draw a grow
+arrow on a shrink gesture. And every name must predate the
+deployment target — a symbol added later resolves on a modern
+dev host and renders nil on the target, leaving an empty gutter
+and no error anywhere.
+
+Colour was refused, and in principle rather than in practice.
+`ColorVision.separation` measures a pair against a KNOWN ground,
+and this pill is a `.hudWindow` blur over whatever third-party
+window sits behind it — there is no pair to measure, which is
+the same reason the marks default to Automatic rather than a
+brand hue. A warning triangle was refused for its semantics: a
+layout with no resize parameter is a fact about the layout the
+user chose, not a fault, and the triangle would fire on the most
+reachable refusal in the feature — a warning on the commonest
+path becomes chrome, and spends an alarm vocabulary reserved for
+a real conflict.
+
 It lives in Behaviour rather than General, and that is a
 STORAGE decision wearing a placement question: every row in
 General is a `UserDefaults` preference, a live service toggle or

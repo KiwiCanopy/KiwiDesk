@@ -28,6 +28,43 @@ enum ResizeRefusal: Equatable {
     case layoutHasNoResize(WindowID)
 }
 
+extension ResizeRefusal {
+    /// The pill's leading glyph, in one exhaustive switch so a
+    /// new refusal cannot ship wearing another one's symbol
+    /// (#1260, `ResizeRefusalSymbolTests`).
+    ///
+    /// The rule the mapping encodes: **an arrow means a resize
+    /// stopped, a non-arrow means there is no resize here.** It
+    /// is the pill's only non-verbal channel and the only part
+    /// that survives truncation, so it carries the
+    /// impossible/blocked split the sentence spells out —
+    /// readable with no legend, and free, since the slot is
+    /// drawn on every pill either way.
+    ///
+    /// Read off the CASE and never off the text (#96 — Core
+    /// returns structure, the GUI narrates). `.neighborMinimum`
+    /// keeps the SHRINK arrow deliberately: a shrink whose
+    /// group floor is carried by a mate routes through
+    /// `refuseGrowAtNeighborMinimum`, so a direction-derived
+    /// glyph would draw a grow arrow on a shrink gesture.
+    ///
+    /// Every name here is SF Symbols 1.0. That is a
+    /// requirement, not trivia: a symbol added after the macOS
+    /// 14 deployment target resolves on a modern dev host and
+    /// renders nil on the target, leaving an empty gutter and
+    /// no error.
+    var pillSymbol: String {
+        switch self {
+        case .ownMinimum, .neighborMinimum:
+            "arrow.down.right.and.arrow.up.left"
+        case .ownMaximum:
+            "arrow.up.left.and.arrow.down.right"
+        case .noAxisHere, .layoutHasNoResize:
+            "nosign"
+        }
+    }
+}
+
 /// The effective-minimum resolution and the shared clamped
 /// ratio writers used by every interactive resize path —
 /// keyboard (`resize`) and mouse (`applyResizeAdjustment`)

@@ -59,7 +59,8 @@ extension BorderManager {
     func flashSizeLimitPill(
         window: WindowID,
         frame: CGRect,
-        text: String
+        text: String,
+        symbol: String
     ) -> Bool {
         guard privateRuntimeStarted else { return false }
         // The overlay declines a second time, on a window too
@@ -68,7 +69,8 @@ extension BorderManager {
         return sizeLimitOverlay.flash(
             window: window.raw,
             frame: frame,
-            text: text
+            text: text,
+            symbol: symbol
         )
     }
 }

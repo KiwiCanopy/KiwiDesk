@@ -50,13 +50,15 @@ final class SizeLimitOverlay {
     func flash(
         window: CGWindowID,
         frame: CGRect,
-        text: String
+        text: String,
+        symbol: String
     ) -> Bool {
         var pill = pills[window] ?? makePill()
         pill.hideWork?.cancel()
         pill.hideWork = nil
 
         pill.plate.setText(text)
+        pill.plate.setSymbol(symbol)
         let textSize = pill.plate.fittingSize
         // The hide timer was already cancelled above, so a bare
         // return here would strand a showing pill at alpha 1
@@ -209,9 +211,13 @@ private final class SizeLimitPillPlate: NSVisualEffectView {
         layer?.cornerRadius = 13
         layer?.masksToBounds = true
 
-        icon.image = NSImage(
-            systemSymbolName: "arrow.down.right.and.arrow.up.left",
-            accessibilityDescription: nil
+        // Sized explicitly, matching `StickyMarkPlate`: with no
+        // configuration the symbol renders at the default point
+        // size and scales down into a 12 pt box, which draws a
+        // dense glyph like `nosign` too thin to read (#1260).
+        icon.symbolConfiguration = NSImage.SymbolConfiguration(
+            pointSize: 11,
+            weight: .semibold
         )
         icon.contentTintColor = .secondaryLabelColor
         icon.imageScaling = .scaleProportionallyDown
@@ -227,6 +233,15 @@ private final class SizeLimitPillPlate: NSVisualEffectView {
 
     func setText(_ text: String) {
         label.stringValue = text
+    }
+
+    /// The leading glyph, chosen by the refusal's own case
+    /// (`ResizeRefusal.pillSymbol`).
+    func setSymbol(_ name: String) {
+        icon.image = NSImage(
+            systemSymbolName: name,
+            accessibilityDescription: nil
+        )
     }
 
     override var fittingSize: NSSize {
