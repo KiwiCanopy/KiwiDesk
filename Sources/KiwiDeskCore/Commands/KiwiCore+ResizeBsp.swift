@@ -47,7 +47,7 @@ extension KiwiCore {
 
     /// Which way the shared BSP ratio must move so "grow"
     /// grows the FOCUSED window — the mouse path's side rule,
-    /// via the shared authority (`MouseResize.bspSide`).
+    /// via the shared authority (`BspSplit.side`).
     /// Unknown focus (none, or floating — no slot) keeps +1,
     /// the first-region direction (the pre-#122 behavior).
     /// Assumes `space` IS the active space: the slot lookup
@@ -71,7 +71,7 @@ extension KiwiCore {
         // midpoint it is compared against has to be the region's
         // — a Space Bar on a leading edge shifts it.
         return Double(
-            MouseResize.bspSide(
+            BspSplit.side(
                 slot: slot,
                 bounds: tiler.layoutBounds(on: screen),
                 horizontal: axis == "x"

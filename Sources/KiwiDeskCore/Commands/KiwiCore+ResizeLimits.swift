@@ -190,7 +190,7 @@ extension KiwiCore {
     /// one authority for the keyboard per-axis resize and the
     /// mouse `.bspRatioH`/`.bspRatioV` adjustments. Sides of
     /// the FIRST split resolve geometrically from the slots via
-    /// the shared `MouseResize.bspSides` authority, which also
+    /// the shared `BspSplit.sides` authority, which also
     /// drops the windows the split cannot resize (#1259); each
     /// side's minimum is the max over its windows' effective
     /// minimums — a lower bound on what the side truly needs
@@ -227,7 +227,7 @@ extension KiwiCore {
         // No display to classify against: the caps still hold on
         // the global floor, and nothing here can name a window.
         let sides = screen.map { screen in
-            MouseResize.bspSides(
+            BspSplit.sides(
                 of: tiled,
                 slots: slots,
                 bounds: tiler.layoutBounds(on: screen),
@@ -263,7 +263,7 @@ extension KiwiCore {
             // naming an axis there would be the same wrong
             // sentence #1259 removed; #1258 owns the silence
             // that leaves.
-            let across = MouseResize.bspSides(
+            let across = BspSplit.sides(
                 of: tiled,
                 slots: slots,
                 bounds: tiler.layoutBounds(on: screen),

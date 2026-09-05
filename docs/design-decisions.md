@@ -2049,7 +2049,7 @@ region genuinely too narrow for two min-size windows at any ratio.
 some nested windows cannot grow. Accepted, by architecture.**
 Since #122, `resize` infers its sign from the focused window's
 slot (the same screen-midpoint side rule a mouse drag uses,
-shared as one authority — `MouseResize.bspSide`), so "grow"
+shared as one authority — `BspSplit.side`), so "grow"
 grows the focused window's side instead of always the left/top
 region. What it deliberately does **not** do is give every
 window a growable boundary: all same-orientation splits still
