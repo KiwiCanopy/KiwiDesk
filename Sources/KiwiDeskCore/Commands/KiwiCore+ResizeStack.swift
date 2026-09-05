@@ -26,37 +26,6 @@ extension KiwiCore {
         let tiled = state.effectiveTiledMembers(of: space)
         let splitAxis =
             stack.stackPosition.splitsHorizontally ? "x" : "y"
-        // An EMPTY stack zone divides nothing on EITHER axis
-        // (#1258): the layout hands master the whole region and
-        // ignores `masterRatio`, so a split-axis press moved a
-        // ratio nothing renders — silently — while the other
-        // axis drew "this zone divides widths, not heights",
-        // false about both. Measured: six shrinks on a
-        // one-window space, five "Minimum window size reached"
-        // pills on a window filling the screen.
-        let (masterZone, stackZone) = StackLayout.partition(
-            tiled,
-            masterCount: stack.masterCount
-        )
-        let zoneEmpty = stackZone?.isEmpty ?? true
-        if zoneEmpty, let focused = space.focused {
-            // The master's own weights still divide it when it
-            // holds more than one window, and that is the other
-            // axis from the split.
-            let column = StackLayout.column(
-                containing: focused,
-                in: tiled,
-                masterCount: stack.masterCount
-            )
-            let weightsDivide = (column?.count ?? 0) > 1
-            refuseNothingToDivide(
-                focused,
-                otherAxisDivides: axis == splitAxis
-                    ? weightsDivide : false
-            )
-            return .fail("the stack zone is empty")
-        }
-        _ = masterZone
         guard axis != splitAxis else {
             // Unknown focus keeps the master-grows direction
             // (the pre-#67 behavior).
@@ -111,7 +80,31 @@ extension KiwiCore {
         let weightAxis =
             orientation == .vertical ? "y" : "x"
         guard axis == weightAxis else {
-            refuseAxisAbsent(focused, axis: axis)
+            // "This zone divides widths, not heights" claims the
+            // OTHER axis divides. Where the zone holds one
+            // window and the split has no second zone, neither
+            // does — and that sentence was false at the most
+            // ordinary arrangement there is, a single window
+            // (#1258, review).
+            let column = StackLayout.column(
+                containing: focused,
+                in: tiled,
+                masterCount: stack.masterCount
+            )
+            let (_, stackZone) = StackLayout.partition(
+                tiled,
+                masterCount: stack.masterCount
+            )
+            let weightsDivide = (column?.count ?? 0) > 1
+            let splitDivides = !(stackZone?.isEmpty ?? true)
+            if !weightsDivide, !splitDivides {
+                refuseNothingToDivide(
+                    focused,
+                    otherAxisDivides: false
+                )
+            } else {
+                refuseAxisAbsent(focused, axis: axis)
+            }
             return .fail(
                 "no \(axis) parameter for this arrangement"
             )
@@ -119,11 +112,20 @@ extension KiwiCore {
         guard let focusOffset = column.firstIndex(of: focused),
             column.count > 1
         else {
-            // The zone's weights have nothing to divide (#1258)
-            // — but the master/stack split still does, this
-            // branch being reachable only with both zones
-            // populated (the empty-zone arm returned above).
-            refuseNothingToDivide(focused, otherAxisDivides: true)
+            // The zone's weights have nothing to divide (#1258).
+            // Whether the SPLIT does is derived, never assumed:
+            // it divides only with both zones populated, and a
+            // literal `true` here silently became false the
+            // moment the empty-zone verdict moved (review).
+            let (master, stackZone) = StackLayout.partition(
+                tiled,
+                masterCount: stack.masterCount
+            )
+            refuseNothingToDivide(
+                focused,
+                otherAxisDivides: !master.isEmpty
+                    && !(stackZone?.isEmpty ?? true)
+            )
             return .fail("focused window is alone in its column")
         }
         // The step math (delta → weight change, grow cap,

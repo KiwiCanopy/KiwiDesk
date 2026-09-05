@@ -106,7 +106,7 @@ struct ResizeNeighborLimitTests {
             args: [.string("x"), .number(-500)]
         )
         #expect(res.isSuccess)
-        #expect(refusals == [.ownMinimum(WindowID(1))])
+        #expect(refusals == [.ownMinimum(WindowID(1), axis: "x")])
     }
 
     @Test("A clamped track shrink stays tiled — no overflow pile")
@@ -143,7 +143,8 @@ struct ResizeNeighborLimitTests {
             refusals == [
                 .neighborMinimum(
                     anchor: WindowID(2),
-                    focused: WindowID(1)
+                    focused: WindowID(1),
+                    axis: "x"
                 )
             ]
         )
@@ -192,7 +193,8 @@ struct ResizeNeighborLimitTests {
             refusals == [
                 .neighborMinimum(
                     anchor: WindowID(3),
-                    focused: WindowID(2)
+                    focused: WindowID(2),
+                    axis: "x"
                 )
             ]
         )
@@ -287,7 +289,11 @@ struct ResizeNeighborLimitTests {
         }
         #expect(
             refusals.allSatisfy {
-                $0 == .nothingToDivide(WindowID(1))
+                $0
+                    == .nothingToDivide(
+                        WindowID(1),
+                        otherAxisDivides: false
+                    )
             },
             "a grow with no neighbour must never name one"
         )
@@ -325,7 +331,8 @@ struct ResizeNeighborLimitTests {
             refusals == [
                 .neighborMinimum(
                     anchor: WindowID(2),
-                    focused: WindowID(1)
+                    focused: WindowID(1),
+                    axis: "x"
                 )
             ]
         )

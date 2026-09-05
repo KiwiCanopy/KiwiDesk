@@ -53,25 +53,37 @@ public enum BspSplit {
             slots[id].map { (id: id, slot: $0) }
         }
         // A region too small for two minimum-size windows makes
-        // the layout give up and PILE them (`OverlapStack`).
-        // A piled window's size answers to no ratio, so it takes
+        // the layout give up and PILE them (`OverlapStack`). A
+        // piled window's size answers to no ratio, so it takes
         // no part in the split — the same verdict as a full-span
         // one, and reached separately because the extent test
         // cannot see it: the cascade offsets each copy, so the
-        // union outgrows every slot on the offset axis and the
-        // whole pile reads as participants. Dropped ONE BY ONE
-        // rather than disabling the space, since a pile deep in
-        // the tree leaves its ancestors dividing normally
+        // union outgrows every slot and the whole pile reads as
+        // participants.
+        //
+        // Through the ONE pile detector (#172), never a bare
+        // `intersects` beside it: `Navigation.piled` requires a
+        // quarter of the smaller slot's area precisely so that
+        // a rounding-sized overlap — or a negative inner gap,
+        // which `set_gap_global(-10)` allows — is not read as a
+        // pile and does not silently switch classification off
         // (#1258, review).
-        let piled = Set(
-            placed.filter { one in
-                placed.contains {
-                    $0.id != one.id && $0.slot.intersects(one.slot)
-                }
-            }.map(\.id)
-        )
         let extent = placed.reduce(CGRect.null) {
             $0.union($1.slot)
+        }
+        let framed = placed.map { (id: $0.id, frame: $0.slot) }
+        // `pileMates` EXCLUDES the window asked about, so a
+        // non-empty answer IS the pile — and the window that
+        // asked belongs to it.
+        var piled: Set<WindowID> = []
+        for one in placed where !piled.contains(one.id) {
+            let mates = Navigation.pileMates(
+                of: one.id,
+                among: framed
+            )
+            guard !mates.isEmpty else { continue }
+            piled.formUnion(mates)
+            piled.insert(one.id)
         }
         let whole = horizontal ? extent.width : extent.height
         var first: [WindowID] = []

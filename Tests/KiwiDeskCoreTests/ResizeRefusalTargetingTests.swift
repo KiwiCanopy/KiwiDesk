@@ -121,7 +121,8 @@ struct ResizeRefusalTargetingTests {
             refusals == [
                 .neighborMinimum(
                     anchor: WindowID(2),
-                    focused: WindowID(1)
+                    focused: WindowID(1),
+                    axis: "y"
                 )
             ]
         )
@@ -155,7 +156,8 @@ struct ResizeRefusalTargetingTests {
             refusals == [
                 .neighborMinimum(
                     anchor: WindowID(2),
-                    focused: WindowID(1)
+                    focused: WindowID(1),
+                    axis: "y"
                 )
             ]
         )
@@ -184,7 +186,7 @@ struct ResizeRefusalTargetingTests {
         // FIRST press. Gated on the clamp instead, this press
         // says nothing and the next few silently walk the ratio.
         core.execute("resize", args: [.string("y"), .number(-10)])
-        #expect(refusals == [.noAxisHere(WindowID(1))])
+        #expect(refusals == [.noAxisHere(WindowID(1), axis: "y")])
     }
 
     @Test("A space that divides neither axis names no axis")
@@ -208,8 +210,8 @@ struct ResizeRefusalTargetingTests {
         }
         #expect(
             refusals == [
-                .nothingToDivide(WindowID(1)),
-                .nothingToDivide(WindowID(1)),
+                .nothingToDivide(WindowID(1), otherAxisDivides: false),
+                .nothingToDivide(WindowID(1), otherAxisDivides: false),
             ]
         )
         // The WRITE still lands, cue or no cue: the ratio is a
@@ -263,7 +265,8 @@ struct ResizeRefusalTargetingTests {
             refusals == [
                 .neighborMinimum(
                     anchor: WindowID(3),
-                    focused: WindowID(1)
+                    focused: WindowID(1),
+                    axis: "x"
                 )
             ]
         )
@@ -281,6 +284,6 @@ struct ResizeRefusalTargetingTests {
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         core.execute("resize", args: [.string("y"), .number(-200)])
-        #expect(refusals == [.ownMinimum(WindowID(2))])
+        #expect(refusals == [.ownMinimum(WindowID(2), axis: "y")])
     }
 }

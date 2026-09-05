@@ -5,8 +5,14 @@ import Testing
 /// resize path can return either cues the user or is named here
 /// as one only a machine reads.
 ///
-/// A hand-listed set of arms is what let the fifth silent site
-/// survive the change that went looking for it — #1258 shipped
+/// Scope, stated because the suite's name over-promises: it
+/// reads `.fail`-SHAPED refusals. A path that refuses by
+/// returning `.ok()` after a write nothing renders is invisible
+/// here — which is exactly the shape of the fifth site #1258
+/// found, so this register is one net rather than the net.
+///
+/// A hand-listed set of arms is what let that site survive the
+/// change that went looking for it — #1258 shipped
 /// with four wirings and a census in an issue comment, and the
 /// empty-stack-zone case was found by review afterwards, drawing
 /// "Minimum window size reached" on a window filling the screen.
@@ -14,15 +20,20 @@ import Testing
 /// resize path reds this until its author says which it is.
 @Suite("Resize refusal census (#1258)")
 struct ResizeRefusalCensusTests {
-    /// The files a resize verb can refuse from.
-    static let paths = [
-        "Sources/KiwiDeskCore/Commands/KiwiCore+Resize.swift",
-        "Sources/KiwiDeskCore/Commands/KiwiCore+ResizeBsp.swift",
-        "Sources/KiwiDeskCore/Commands/KiwiCore+ResizeStack.swift",
-        "Sources/KiwiDeskCore/Commands/KiwiCore+ResizeFloating.swift",
-        "Sources/KiwiDeskCore/Commands/KiwiCore+ResizeScrollSlot.swift",
-        "Sources/KiwiDeskCore/Commands/KiwiCore+TrackResize.swift",
-    ]
+    /// The directory every resize verb refuses from. DERIVED
+    /// rather than hand-listed: a register whose roots are typed
+    /// out is a register a new file joins silently, which is the
+    /// failure this suite exists to close one level down
+    /// (gui.md's root-coverage convention).
+    static let directory = "Sources/KiwiDeskCore/Commands"
+
+    /// A file is in scope when it names a resize verb — every
+    /// `KiwiCore+Resize*` and the track's own writer file, plus
+    /// the shared writers, which refuse too.
+    static func inScope(_ name: String) -> Bool {
+        name.hasSuffix(".swift")
+            && (name.contains("Resize") || name.contains("Ratio"))
+    }
 
     /// Every refusal a resize path returns, by the FIRST literal
     /// of its message, and what the user gets. `nil` means the
@@ -41,8 +52,6 @@ struct ResizeRefusalCensusTests {
             "noAxisHere — the other axis divides (#1255)",
         "focused window is alone in its column":
             "nothingToDivide — the column has one member (#1258)",
-        "the stack zone is empty":
-            "nothingToDivide — neither axis divides (#1258)",
         "only one track":
             "nothingToDivide — the track set has one member (#1258)",
         "the focused window fills its track along ":
@@ -56,7 +65,11 @@ struct ResizeRefusalCensusTests {
         "no active space":
             "nothing on screen to draw a pill on",
         "no focused tiled window":
-            "no window to draw the pill on",
+            "the focus takes no part in this layout — a "
+            + "native-fullscreen (#670) or elsewhere-rendering "
+            + "sticky (#445) window, which effectiveTiledMembers "
+            + "drops. It HAS a frame to draw on; what it lacks "
+            + "is a partition to be refused from",
         "unknown window":
             "the id is gone; nothing to draw on",
         "track has no local window":
@@ -76,32 +89,68 @@ struct ResizeRefusalCensusTests {
         return text
     }
 
-    /// The first string literal of each `.fail(` in a file.
-    private func refusals(in text: String) -> [String] {
+    /// The first string literal of each `.fail(` in a file, and
+    /// what it could not read.
+    ///
+    /// The literal must open IMMEDIATELY after the paren: a
+    /// `.fail(reason)` taking a variable would otherwise harvest
+    /// the next literal anywhere downstream and file an
+    /// unrelated sentence under a classified key — measured
+    /// green on a probe (guard-prover). Those are counted as
+    /// `opaque` instead, and one is a red: the register cannot
+    /// classify what it cannot read.
+    private func refusals(
+        in text: String
+    ) -> (literals: [String], opaque: Int) {
         var found: [String] = []
+        var opaque = 0
         var rest = Substring(text)
         while let hit = rest.range(of: ".fail(") {
             rest = rest[hit.upperBound...]
-            guard let open = rest.firstIndex(of: "\"") else { break }
-            let after = rest.index(after: open)
-            guard let close = rest[after...].firstIndex(of: "\"")
+            let head = rest.drop(while: { $0 == " " || $0 == "\n" })
+            guard head.first == "\"" else {
+                opaque += 1
+                continue
+            }
+            let after = head.index(after: head.startIndex)
+            guard let close = head[after...].firstIndex(of: "\"")
             else { break }
-            found.append(String(rest[after..<close]))
-            rest = rest[close...]
+            found.append(String(head[after..<close]))
+            rest = head[close...]
         }
-        return found
+        return (found, opaque)
     }
 
     @Test("Every resize refusal is cued or argued")
     func everyRefusalIsClassified() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(Self.directory)
+        let names = try FileManager.default
+            .contentsOfDirectory(atPath: root.path)
+            .filter(Self.inScope)
+            .sorted()
+        // Fail shut on the walk itself.
+        #expect(names.count >= 6, "resize files not found")
         var seen: Set<String> = []
-        for path in Self.paths {
-            for message in refusals(in: try source(path)) {
+        for name in names {
+            let text = try source(
+                "\(Self.directory)/\(name)"
+            )
+            let read = refusals(in: text)
+            #expect(
+                read.opaque == 0,
+                """
+                \(name) refuses with a message this register \
+                cannot read — it must be a literal, or the \
+                register silently files someone else's sentence.
+                """
+            )
+            for message in read.literals {
                 seen.insert(message)
                 #expect(
                     Self.classified[message] != nil,
                     """
-                    \(path) refuses with "\(message)" and this \
+                    \(name) refuses with "\(message)" and this \
                     register does not say what the user gets. \
                     Cue it, or add it with the reason it stays \
                     wordless (#1258).
@@ -120,7 +169,7 @@ struct ResizeRefusalCensusTests {
                 """
             )
         }
-        // The scan itself must have found something.
-        #expect(seen.count >= 12)
+        // Non-vacuity, derived rather than a hand-carried floor.
+        #expect(seen.count == Self.classified.count)
     }
 }

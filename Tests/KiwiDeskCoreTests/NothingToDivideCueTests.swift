@@ -18,7 +18,10 @@ import Testing
 struct NothingToDivideCueTests {
     /// Pinned display (#531), gaps (#660) and the minimum every
     /// clamp below is measured against.
-    private func makeCore() -> KiwiCore {
+    private func makeCore(
+        width: CGFloat = 1200,
+        height: CGFloat = 800
+    ) -> KiwiCore {
         let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
@@ -27,7 +30,7 @@ struct NothingToDivideCueTests {
                 )
         )
         core.tiler.visibleBounds = { _ in
-            CGRect(x: 0, y: 0, width: 1200, height: 800)
+            CGRect(x: 0, y: 0, width: width, height: height)
         }
         core.tiler.settings.gapsGlobal = Gaps(
             outer: Gaps.Outer(
@@ -95,7 +98,15 @@ struct NothingToDivideCueTests {
                 args: [.string("y"), .number(-100)]
             )
         }
-        #expect(seen == [.nothingToDivide(WindowID(2))])
+        #expect(
+            seen == [
+                .nothingToDivide(
+                    WindowID(2),
+                    // The master/stack split still divides.
+                    otherAxisDivides: true
+                )
+            ]
+        )
     }
 
     @Test("A lone track's across-axis press says so")
@@ -113,7 +124,16 @@ struct NothingToDivideCueTests {
                 args: [.string("x"), .number(-100)]
             )
         }
-        #expect(seen == [.nothingToDivide(WindowID(1))])
+        #expect(
+            seen == [
+                .nothingToDivide(
+                    WindowID(1),
+                    // Two windows share that one track, so the
+                    // along axis does divide.
+                    otherAxisDivides: true
+                )
+            ]
+        )
     }
 
     @Test("A window filling its track says so along the axis")
@@ -132,7 +152,15 @@ struct NothingToDivideCueTests {
                 args: [.string("y"), .number(-100)]
             )
         }
-        #expect(seen == [.nothingToDivide(WindowID(1))])
+        #expect(
+            seen == [
+                .nothingToDivide(
+                    WindowID(1),
+                    // A second track exists to resize across.
+                    otherAxisDivides: true
+                )
+            ]
+        )
     }
 
     @Test("A bsp space that divides neither axis says so")
@@ -155,8 +183,14 @@ struct NothingToDivideCueTests {
         }
         #expect(
             seen == [
-                .nothingToDivide(WindowID(1)),
-                .nothingToDivide(WindowID(1)),
+                .nothingToDivide(
+                    WindowID(1),
+                    otherAxisDivides: false
+                ),
+                .nothingToDivide(
+                    WindowID(1),
+                    otherAxisDivides: false
+                ),
             ]
         )
     }
@@ -182,36 +216,56 @@ struct NothingToDivideCueTests {
         }
         #expect(
             seen == [
-                .nothingToDivide(WindowID(1)),
-                .nothingToDivide(WindowID(1)),
+                .nothingToDivide(
+                    WindowID(1),
+                    otherAxisDivides: false
+                ),
+                .nothingToDivide(
+                    WindowID(1),
+                    otherAxisDivides: false
+                ),
             ]
         )
     }
 
     @Test("An overflow pile answers to no ratio")
     func bspOverflowPileDividesNothing() {
-        // Four windows on this display drive the third split
-        // below `min_window_size`, so the layout gives up and
-        // piles them. A pile answers to neither ratio, and the
-        // extent test cannot see it — the cascade offsets each
-        // copy, so the union outgrows every slot and the pile
-        // reads as participants (code review, 2026-09-05).
-        let core = makeCore()
-        let sp = space(core, windows: 4, mode: "bsp")
+        // A display too narrow for two minimum-size windows
+        // makes the layout give up and pile them, and a pile
+        // answers to neither ratio. The extent test cannot see
+        // that — the cascade offsets each copy, so the union
+        // outgrows every slot and the pile reads as
+        // participants — which is why the drop exists.
+        //
+        // The pile is the WHOLE space on purpose. A pile at a
+        // leaf leaves its ancestors dividing normally, so no
+        // refusal is emitted at all and an assertion there
+        // watches nothing (guard-prover, 2026-09-05: the first
+        // version of this test could not red, and deleting the
+        // drop left the whole suite green).
+        let core = makeCore(width: 500, height: 800)
+        _ = space(core, windows: 2, mode: "bsp")
         let frames = core.tiler.calculatedFrames(state: core.state)
-        let piled = frames[WindowID(3)]!
-            .intersects(frames[WindowID(4)]!)
+        let piled = frames[WindowID(1)]!
+            .intersects(frames[WindowID(2)]!)
         #expect(piled, "fixture no longer piles — retune it")
-        core.state.workspaces.focus(WindowID(3), in: sp.id)
         let seen = refusals(core) {
             core.execute(
                 "resize",
                 args: [.string("x"), .number(-300)]
             )
         }
-        // Whatever it says, it must not claim an axis divides:
-        // a piled window answers to neither.
-        #expect(!seen.contains(.noAxisHere(WindowID(3))))
+        // Equality, not absence: without the drop this is
+        // `.noAxisHere`, the false sentence — and only the
+        // verdict tells the two apart.
+        #expect(
+            seen == [
+                .nothingToDivide(
+                    WindowID(1),
+                    otherAxisDivides: false
+                )
+            ]
+        )
     }
 
     @Test("A divided axis is untouched by the new cue")
@@ -229,6 +283,6 @@ struct NothingToDivideCueTests {
                 args: [.string("y"), .number(-200)]
             )
         }
-        #expect(seen == [.ownMinimum(WindowID(2))])
+        #expect(seen == [.ownMinimum(WindowID(2), axis: "y")])
     }
 }
