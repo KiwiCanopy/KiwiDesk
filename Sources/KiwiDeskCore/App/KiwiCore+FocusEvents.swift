@@ -213,8 +213,8 @@ extension KiwiCore {
             return
         }
         // A placement bounce (#1161): the app answering where we
-        // just PUT its window, in a cmd-tab's shape —
-        // `placementBounce` carries the argument, both arms. Above
+        // just PUT its window, in a cmd-tab's shape — the ruling is
+        // in docs/design-decisions.md, both arms. Above
         // the #958 return, which stays last, and BELOW the z-order
         // revert on purpose: a restore's echo keeps its state-only
         // revert, its sequence's closing re-assert owning OS focus.
@@ -225,7 +225,8 @@ extension KiwiCore {
             reassertAgainstPlacementBounce(
                 id,
                 intended: intended,
-                placed: placed
+                placed: placed,
+                now: now
             )
             return
         }

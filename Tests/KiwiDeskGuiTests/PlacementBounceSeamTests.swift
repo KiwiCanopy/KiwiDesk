@@ -31,21 +31,17 @@ struct PlacementBounceSeamTests {
         // the app being on its way out.
         ("animation.animate(", ["TilingEngine+Layout.swift"]),
         ("applier.applyInstant(", ["TilingEngine.swift"]),
-        // The stamps at those leaves, spelled per leaf so the
-        // renewal below is not counted among them.
+        // The stamps at those leaves — generic, so a stamp spelled
+        // anywhere else is a third site rather than invisible; the
+        // distrust goes through the ledger's bounded `renew` door,
+        // never a stamp, or the chain of renewals has no end.
         (
-            "placements.stamp(id, target: target)",
-            ["TilingEngine+Layout.swift"]
+            "placements.stamp(",
+            ["TilingEngine+Layout.swift", "TilingEngine.swift"]
         ),
-        ("placements.stamp(id, target: frame)", ["TilingEngine.swift"]),
+        ("placements.renew(", ["KiwiCore+PlacementBounce.swift"]),
         // The handler consults the verdict once and answers once.
         ("placementBounce(id, now:", ["KiwiCore+FocusEvents.swift"]),
-        // A distrust RENEWS the placement: the third retry must
-        // not outlive a window that started at the pan.
-        (
-            "placements.stamp(id, target: placed)",
-            ["KiwiCore+PlacementBounce.swift"]
-        ),
         (
             "reassertAgainstPlacementBounce(",
             ["KiwiCore+FocusEvents.swift", "KiwiCore+PlacementBounce.swift"]
@@ -89,6 +85,47 @@ struct PlacementBounceSeamTests {
                 """
             )
         }
+    }
+
+    /// The self ledger has one MINTER: `stampSelfRaise`, which
+    /// prunes to the longer of the two readings' windows. A raise
+    /// assigning the dictionary beside it would retain the 1 s
+    /// window and drop the stamp the placement bounce's late echo
+    /// is told by, with nothing red. Write sites are counted over
+    /// comment-stripped source: the minter's prune and stamp, the
+    /// gone clear, the rekey's remove and retarget.
+    @Test("the self ledger's write sites are the ruled ones")
+    func selfLedgerWriteSites() throws {
+        let allowed: [String: Int] = [
+            "KiwiCore+ClickProvenance.swift": 2,
+            "KiwiCore+CloseReturnRestack.swift": 1,
+            "KiwiCore+RekeyEvent.swift": 2,
+            "KiwiCore.swift": 1,
+        ]
+        let pattern =
+            #"selfRaiseStamps(\[[^\]]*\])?\s*(=(?!=)|\.removeValue|:)"#
+        let writes = try NSRegularExpression(pattern: pattern)
+        var found: [String: Int] = [:]
+        let walker = FileManager.default.enumerator(
+            at: Self.core,
+            includingPropertiesForKeys: nil
+        )
+        while let url = walker?.nextObject() as? URL {
+            guard url.pathExtension == "swift" else { continue }
+            let source = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            let range = NSRange(
+                source.startIndex...,
+                in: source
+            )
+            let count = writes.numberOfMatches(
+                in: source,
+                range: range
+            )
+            if count > 0 { found[url.lastPathComponent] = count }
+        }
+        #expect(found == allowed, "found \(found)")
     }
 
     /// The re-assert is a RAISE, not a state-only revert: a

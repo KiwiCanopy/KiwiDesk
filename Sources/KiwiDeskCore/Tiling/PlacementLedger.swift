@@ -10,7 +10,9 @@ import Foundation
 /// never consumed, like every echo ledger (state-and-layout.md);
 /// written at the two leaves every placement goes through
 /// (`TilingEngine.applyFrame` / `setFrame`), so the retile, the
-/// stash and every App-level placer stamp alike. A fifth record
+/// stash and every App-level placer stamp alike, and RENEWED —
+/// never re-stamped — by a distrust through `renew`, which ends
+/// at a ceiling measured from the placement itself. A fifth record
 /// of "where we put it" beside `InstantTargets` (cleared on the
 /// first echo), the animation's target (dead at the settle), the
 /// glide base and the learner's asks — kept because none of them
@@ -25,8 +27,11 @@ struct PlacementLedger {
     /// trade (accepted-limitations.md).
     static let echoWindow: TimeInterval = 2.0
 
-    private var entries: [WindowID: (target: CGRect, at: Date)] =
-        [:]
+    /// `placed` is when KiwiDesk put the window there; `stamped`
+    /// is that, or the last renewal.
+    private var entries:
+        [WindowID: (target: CGRect, placed: Date, stamped: Date)] =
+            [:]
 
     /// Records a placement, pruning expired entries so windows
     /// that are placed once and never focused cannot accrete.
@@ -36,16 +41,31 @@ struct PlacementLedger {
         at now: Date = Date()
     ) {
         entries = entries.filter {
-            now.timeIntervalSince($0.value.at) < Self.echoWindow
+            now.timeIntervalSince($0.value.stamped) < Self.echoWindow
         }
-        entries[id] = (target, now)
+        entries[id] = (target, now, now)
     }
 
-    /// The frame KiwiDesk gave `id` within the echo window, nil
-    /// once past it. Read, never consumed.
+    /// Extends a live entry's window from `now` — a distrust is
+    /// proof the app is still reacting — but only while the
+    /// PLACEMENT itself is younger than the window, so a chain
+    /// of renewals ends at most `2 × echoWindow` after KiwiDesk
+    /// last placed the window, whoever caused the reports
+    /// (#1161, `PlacementLedgerTests`).
+    mutating func renew(_ id: WindowID, at now: Date = Date()) {
+        guard let entry = entries[id],
+            now.timeIntervalSince(entry.stamped) < Self.echoWindow,
+            now.timeIntervalSince(entry.placed) < Self.echoWindow
+        else { return }
+        entries[id] = (entry.target, entry.placed, now)
+    }
+
+    /// The frame KiwiDesk gave `id` within the echo window of its
+    /// placement or last renewal, nil once past it. Read, never
+    /// consumed.
     func recent(_ id: WindowID, at now: Date = Date()) -> CGRect? {
         guard let entry = entries[id],
-            now.timeIntervalSince(entry.at) < Self.echoWindow
+            now.timeIntervalSince(entry.stamped) < Self.echoWindow
         else { return nil }
         return entry.target
     }

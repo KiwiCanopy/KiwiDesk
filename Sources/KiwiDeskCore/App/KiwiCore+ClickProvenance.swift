@@ -45,11 +45,10 @@ extension KiwiCore {
     }
 
     /// Whether KiwiDesk raised `id` within the PLACEMENT window
-    /// — the self ledger's second liveness reading (#1161). A
-    /// scrolling step raises the window it pans onto, and the
-    /// emulator's last echo of that raise lands ~1.3 s later
-    /// (device, 2026-09-05 19:25): past `selfRaiseEchoWindow`,
-    /// inside the placement's. Read by `placementBounce` alone.
+    /// — the self ledger's second, longer liveness reading, read
+    /// by `placementBounce` alone (#1161): a late echo of our own
+    /// raise outlives `selfRaiseEchoWindow`, and widening that
+    /// window would widen three other trades with it.
     func raisedWithinPlacementWindow(
         _ id: WindowID,
         now: Date
@@ -59,15 +58,12 @@ extension KiwiCore {
             < PlacementLedger.echoWindow
     }
 
-    /// The self ledger's one writer: stamps `id` as raised by us
-    /// so its echoes — every one of them, a lazy app sends two
-    /// (#887) — are told from a click (#152) and rank the #465
-    /// sibling distrust. Pruned by age so never-echoed raises
-    /// cannot accrete, RETAINING the longer of the two readers'
-    /// windows — the placement bounce reads past
-    /// `selfRaiseEchoWindow` (#1161), and a step between the
-    /// raise and its late echo would otherwise prune the stamp
-    /// that names it.
+    /// The self ledger's one MINTER (`PlacementBounceSeamTests`
+    /// holds the write sites): stamps `id` as raised by us, and
+    /// prunes by age so never-echoed raises cannot accrete —
+    /// retaining the LONGER of the two readings' windows, or a
+    /// raise between a stamp and its late echo drops the stamp
+    /// that names it (#1161).
     func stampSelfRaise(_ id: WindowID, now: Date) {
         let retained = max(
             Self.selfRaiseEchoWindow,

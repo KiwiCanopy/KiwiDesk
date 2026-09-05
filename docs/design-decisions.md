@@ -1588,51 +1588,66 @@ we put it" beside the applier's instant target, the animation's
 target and the learner's asks, kept because none of them lives
 long enough — the bounce lands after every one has retired.
 
-The verdict is **geometric** rather than an ordering of stamps:
-there is no second stamp to rank against. A clickless focus
-report within the placement window, arriving after focus moved
-on, is distrusted where the placement lies past a screen edge.
-In a **scrolling** Space's row that is the whole verdict — the
-emulator complied within 9 pt of the pan and bounced regardless,
-so "the window is not where we put it" is no discriminator in
-the void — and the row has a second bounce the void does not
-show: stepping off the emulator re-asks it its slot's width, it
-refuses the **size** and bounces a quarter second later, on an
-on-screen placement. A window sliding to an on-screen slot keeps
-its size, so a refused size is that case's discriminator, and
-the size-bound learner stops re-asking a twice-refused size, so
-the stamps — and the bounces — stop with it. And the row has a
-third: a step onto the emulator and off again leaves it placed
-on-screen and complying, and its last echo of the raise that
-step issued lands at ~1.3 s — past the 1 s self-echo window,
-inside the placement's (measured 2026-09-05, both directions).
-The self ledger therefore gets a second liveness reading, the
-placement window's, read by the placement bounce alone: our own
-raise inside the placement window is that case's discriminator.
-The 1 s window itself is not widened — the #465 sibling trade,
-the accessibility return and the mouse-warp hold all read it,
-and each would double its own trade for a bounce only the
-scrolling row has. The ledger's one writer retains stamps for
-the longer window, or a second step between the raise and its
-late echo prunes the stamp that names it. Anywhere else, a
-clickless focus is how a user *reaches* an off-screen window —
-the corner a hidden Space's windows are parked in, monocle's
-park — so the placement must lie past the edge and the window
-must have **refused** it by position, which the emulator does at
-the stash corner and a window that went where it was parked does
-not. The discriminators are forgeable by construction: a cmd-tab
-onto a scrolling window still sliding out past the edge, or onto
-one whose app refuses the asked size before its bound is
-learned, or back onto a scrolling window the user stepped off
-inside the placement window, is bounced for that window too.
-And a distrust
-**renews** that window: the emulator retries every half second
-or so, and its third retry landed past a window that started at
-the pan — the bounce is proof the app is still reacting, so an
-app that keeps bouncing keeps being bounced until it has been
-quiet for two seconds, while a window that never bounces still
-expires at two. That is the ruled trade; a click is always
-honored.
+The placements ledger is read by **geometry** rather than by an
+ordering of stamps — there is no second placement stamp to rank
+against — and the verdict is a clickless focus report within the
+placement window, arriving after focus moved on, for which one of
+the ruled discriminators holds. In the **active scrolling Space**
+the row admits three, and each answers a case the others cannot.
+*Past the screen's edge*: the emulator complied within 9 pt of
+the pan and bounced regardless, so "the window is not where we
+put it" discriminates nothing in the void, and the placement
+alone is the verdict there. *The app has answered the asked size
+with a refusal*: stepping off the emulator re-asks it its slot's
+width, it refuses and bounces a quarter second later, on-screen
+— and the discriminator is the size-bound learner's answer, its
+candidate or confirmed bound, never a bare mismatch between the
+state frame and the ask, because an echo that has not landed
+yet produces the same mismatch for every window a retile just
+resized (the #1049 lesson, one subsystem over); a candidate is
+seeded only by an echo, so lag never reads as refusal, and the
+learner stops re-asking a twice-refused size, so the stamps and
+the bounces stop with it. *KiwiDesk itself raised the window
+inside the placement window*: a step onto the emulator and off
+again leaves it placed on-screen and complying, and its last echo
+of the raise that step issued lands past the 1 s self-echo
+window, inside the placement's. The self ledger therefore takes a
+second liveness reading, the placement window's, read by the
+placement bounce alone; the 1 s window is not widened, since the
+#465 sibling trade, the accessibility return and the mouse-warp
+hold all read it and each would double its own trade for a bounce
+only the scrolling row has. That reading is a presence test on a
+ledger the #887 ruling says must be read by order — deliberately:
+#887 governs telling OUR raise from THEIRS, and this asks only
+whether we raised the window at all, the restore's-own-echo
+hazard having been consumed by the self-echo gate above it. And
+since every raise must mint its stamp for the reading to see it,
+the ledger has one minter, which retains stamps for the longer of
+the two windows. Anywhere else — the corner a hidden Space's
+windows are parked in, monocle's park, a scrolling Space that is
+not the active one — a clickless focus is how a user *reaches* an
+off-screen window, so the placement must lie past the edge and
+the window must have **refused** it by position, which the
+emulator does at the stash corner and a window that went where it
+was parked does not.
+
+The discriminators are forgeable by construction: a cmd-tab onto
+a scrolling window still sliding out past the edge, onto one whose
+app has refused the asked size, or back onto a scrolling window
+the user left inside the placement window, is bounced too. A
+distrust **renews** the placement, because the emulator retries
+every half second or so and its third retry landed past a window
+that started at the pan — but through the ledger's own `renew`
+door, which extends the window only while the placement itself is
+younger than it. The forgeability is why the chain must end: the
+report that renews is one the predicate cannot tell from a
+cmd-tab, so an unbounded renewal let a user's own repeated
+attempts extend their lockout forever, and the documented escape
+("try again after two seconds") became one only a user who stops
+trying could reach. Bounded at the placement, an app that keeps
+reacting is still bounced for up to twice the window, and a
+keyboard user is honored by then. That is the ruled trade; a
+click is always honored.
 The #465 sibling distrust's carve-out for a visible same-display
 sibling is narrowed by this: such a sibling placed into the
 scrolling void is bounced like any other window.

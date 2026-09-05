@@ -52,8 +52,11 @@ extension SizeBoundLearner {
     /// overlay pin ONLY (#677 device QA): rendering may trust a
     /// single refusal because a wrong render self-corrects at
     /// settle, so the ring stops riding out on the second probe
-    /// instead of the third. Geometry must not consume this — a
-    /// wrong candidate would misplace real windows.
+    /// instead of the third — and for the placement bounce's
+    /// size arm (#1161), on the same ground: a wrong candidate
+    /// costs one clickless focus, which the next click or two
+    /// seconds heal. Geometry must not consume this — a wrong
+    /// candidate would misplace real windows.
     func candidateBound(
         for id: WindowID
     ) -> EffectiveSizeBound? {

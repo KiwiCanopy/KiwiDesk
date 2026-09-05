@@ -45,7 +45,7 @@ extension KiwiCore {
         guard let pid = state.windows[id]?.pid else {
             return false
         }
-        let own = selfRaiseStamps[id] ?? .distantPast
+        let own = selfRaiseStamp(id, now: now) ?? .distantPast
         return selfRaiseStamps.keys.contains { sibling in
             sibling != id
                 && state.windows[sibling]?.pid == pid

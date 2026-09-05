@@ -125,10 +125,10 @@ struct PlacementBounceTests {
         #expect(focused(core) == target)
     }
 
-    /// The on-screen bounce (device, 19:03): stepping off the
-    /// emulator re-asks it its slot's width, it refuses the SIZE
-    /// and bounces a quarter second later. A refused size is the
-    /// discriminator — a sliding window keeps its size.
+    /// The on-screen bounce: stepping off the emulator re-asks it
+    /// its slot's width, it refuses the SIZE and bounces. Refused
+    /// means the learner holds the app's ANSWER to that ask — a
+    /// candidate seeded by its echo — never a bare mismatch.
     @Test("A refused size on an on-screen placement is distrusted")
     func refusedSizeOnscreenIsDistrusted() {
         let core = makeCore()
@@ -137,9 +137,27 @@ struct PlacementBounceTests {
         // arm can fire — 823 wide would straddle the edge and
         // pass on the edge arm instead (guard-prover, 2026-09-05).
         let asked = CGRect(x: 800, y: 100, width: 500, height: 300)
+        core.tiler.boundLearner.recordAsk(target, size: asked.size)
+        _ = core.tiler.boundLearner.observe(
+            target,
+            currentSize: CGSize(width: 400, height: 300),
+            settledRead: false
+        )
         core.tiler.placements.stamp(target, target: asked)
         core.handle(.windowFocused(target))
         #expect(focused(core) == other)
+    }
+
+    /// A size the app has not answered yet is an echo in flight,
+    /// not a refusal — the #1049 lesson, one subsystem over.
+    @Test("An unanswered size ask is honored")
+    func unansweredSizeIsHonored() {
+        let core = makeCore()
+        let (target, _) = makeFixture(core)
+        let asked = CGRect(x: 800, y: 100, width: 500, height: 300)
+        core.tiler.placements.stamp(target, target: asked)
+        core.handle(.windowFocused(target))
+        #expect(focused(core) == target)
     }
 
     /// A distrusted bounce RENEWS the placement's window, so an
