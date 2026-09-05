@@ -3926,6 +3926,21 @@ window additionally names the reason while the blocking
 neighbor marks itself at its minimum. Keyboard
 and mouse resizes share these clamps and cues.
 
+In **bsp**, the window that cannot shrink is often not the one
+you are resizing (#1259). A window holding the whole height —
+the first window, when the layout splits side by side — cannot
+change height at all; that press moves the split *between its
+neighbours* instead, and when one of them reaches its minimum
+the pill goes on that neighbour, while the focused window reads
+"Neighboring window at its minimum size" like any other blocked
+grow. Where the arrangement has no split on that axis at all —
+two windows side by side, asked for height — the press says so
+on the first try ("This zone divides widths, not heights"),
+since nothing is being reached there; the stored ratio still
+records what a later split on that axis will open at. A space
+too small to divide either way — a single window — says nothing
+at all, there being no axis to name.
+
 **Held, the chord glides (#1056, retimed #1082).** A hotkey
 whose press ran exactly one command — a successful `resize` —
 keeps applying while you hold it: one precise step on the press,
