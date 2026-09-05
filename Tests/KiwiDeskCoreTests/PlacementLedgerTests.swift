@@ -88,14 +88,26 @@ struct PlacementLedgerTests {
         let t1 = t0.addingTimeInterval(window * 0.5)
         ledger.stamp(id, target: frame, at: t1)
         #expect(ledger.recentDisplacement(id, at: t1))
-        // The displacement ages on its own clock: a chain of
-        // placements cannot carry it past the ceiling.
-        let t2 = t0.addingTimeInterval(window * 1.9)
-        ledger.stamp(id, target: frame, at: t2)
+        // The displacement ages on its own clock: an UNBROKEN
+        // chain of placements — each inside the previous entry's
+        // window, so nothing prunes — carries it, and only the
+        // ceiling refuses it at the end (guard-prover, 2026-09-05:
+        // a chain with a gap passed on the prune instead).
+        ledger.stamp(
+            id,
+            target: frame,
+            at: t0.addingTimeInterval(window * 1.4)
+        )
+        #expect(
+            ledger.recentDisplacement(
+                id,
+                at: t0.addingTimeInterval(window * 1.9)
+            )
+        )
         #expect(
             !ledger.recentDisplacement(
                 id,
-                at: t2.addingTimeInterval(window * 0.2)
+                at: t0.addingTimeInterval(window * 2.05)
             )
         )
     }

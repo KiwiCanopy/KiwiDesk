@@ -106,7 +106,8 @@ struct PlacementBounceSeamTests {
             "KiwiCore.swift": 1,
         ]
         let pattern =
-            #"selfRaiseStamps(\[.*\])?\s*(=(?!=)|\.(removeValue|"#
+            #"selfRaiseStamps(\[(?:[^\[\]]|\[[^\[\]]*\])*\])?"#
+            + #"\s*(=(?!=)|\.(removeValue|"#
             + #"updateValue|removeAll|merge|filter\b.*\)\s*$)|:)"#
         let writes = try NSRegularExpression(pattern: pattern)
         var found: [String: Int] = [:]

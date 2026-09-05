@@ -74,6 +74,16 @@ private func focused(_ core: KiwiCore) -> WindowID? {
 @Suite("Placement bounce — the displacement (#1161)", .serialized)
 @MainActor
 struct PlacementDisplacementTests {
+    /// The suite discriminates only while `onscreen` lies inside
+    /// the pinned bounds; retune either and every test here rides
+    /// the edge arm instead (guard-prover, 2026-09-05).
+    @Test("The fixture's placement sits inside the pinned bounds")
+    func fixtureIsOnScreen() {
+        let core = makeCore()
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        #expect(core.tiler.visibleBounds(screen).contains(onscreen))
+    }
+
     @Test("A window a focus command moved off is distrusted")
     func displacedWindowIsDistrusted() {
         let core = makeCore()
