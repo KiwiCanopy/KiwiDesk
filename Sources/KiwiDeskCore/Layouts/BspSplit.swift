@@ -52,6 +52,24 @@ public enum BspSplit {
         let placed = windows.compactMap { id in
             slots[id].map { (id: id, slot: $0) }
         }
+        // A region too small for two minimum-size windows makes
+        // the layout give up and PILE them (`OverlapStack`).
+        // A piled window's size answers to no ratio, so it takes
+        // no part in the split — the same verdict as a full-span
+        // one, and reached separately because the extent test
+        // cannot see it: the cascade offsets each copy, so the
+        // union outgrows every slot on the offset axis and the
+        // whole pile reads as participants. Dropped ONE BY ONE
+        // rather than disabling the space, since a pile deep in
+        // the tree leaves its ancestors dividing normally
+        // (#1258, review).
+        let piled = Set(
+            placed.filter { one in
+                placed.contains {
+                    $0.id != one.id && $0.slot.intersects(one.slot)
+                }
+            }.map(\.id)
+        )
         let extent = placed.reduce(CGRect.null) {
             $0.union($1.slot)
         }
@@ -59,6 +77,7 @@ public enum BspSplit {
         var first: [WindowID] = []
         var second: [WindowID] = []
         for (id, slot) in placed {
+            guard !piled.contains(id) else { continue }
             let own = horizontal ? slot.width : slot.height
             guard own < whole - spanTolerance else { continue }
             let side = side(

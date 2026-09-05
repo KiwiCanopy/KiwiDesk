@@ -275,7 +275,13 @@ extension KiwiCore {
                 // Neither axis divides: one window, or a pile.
                 // #1259 left this wordless deliberately; #1258
                 // is the string that fills it.
-                refuseNothingToDivide(focused)
+                // Reached only when the ACROSS axis is empty
+                // too, so there is no other axis to send the
+                // user to.
+                refuseNothingToDivide(
+                    focused,
+                    otherAxisDivides: false
+                )
             }
             return
         }

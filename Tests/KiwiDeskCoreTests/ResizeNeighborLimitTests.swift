@@ -252,12 +252,15 @@ struct ResizeNeighborLimitTests {
         )
     }
 
-    @Test("A grow with no neighbor cues nothing")
-    func lonelyGrowCuesNothing() {
+    @Test("A grow with no neighbor names no neighbor")
+    func lonelyGrowNamesNoNeighbor() {
         // One stack window: the stack zone is empty, so the
         // ratio cap still protects the region (the #383/#44
-        // global floor) but there is no neighbor to blame — a
-        // cue here would name a phantom window.
+        // global floor) but there is no neighbor to blame — and
+        // naming a phantom is still barred. It was WORDLESS
+        // until #1258, which answers the same arrangement with
+        // the fact that is true of it: the zone this axis
+        // divides has one member.
         let core = makeCore()
         core.state.apply(
             .windowCreated(
@@ -282,7 +285,13 @@ struct ResizeNeighborLimitTests {
                 args: [.string("x"), .number(600)]
             )
         }
-        #expect(refusals.isEmpty)
+        #expect(
+            refusals.allSatisfy {
+                $0 == .nothingToDivide(WindowID(1))
+            },
+            "a grow with no neighbour must never name one"
+        )
+        #expect(!refusals.isEmpty)
     }
 
     @Test("A stack ratio grow is blocked by the stack zone's minimum")

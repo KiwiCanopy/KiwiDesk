@@ -20,13 +20,22 @@ enum ResizeRefusal: Equatable {
     /// divides widths, so a height press has nothing to move.
     /// Not a limit reached: a limit that does not exist.
     case noAxisHere(WindowID)
-    /// The focused window is the only one in the group the
-    /// asked axis divides (#1258) — alone in its stack column,
-    /// alone in its track, the only window in a bsp space. The
-    /// parameter exists and there is simply nothing to move it
+    /// The group the asked axis divides holds ONE member
+    /// (#1258) — a stack column, a stack space with an empty
+    /// stack zone, a track, a track set, a bsp space of one.
+    /// The parameter exists and there is nothing to move it
     /// against, which is why this is not `noAxisHere`: that one
     /// says the OTHER axis divides, and here the count is the
     /// reason rather than the arrangement.
+    ///
+    /// It has no consumer that ACTS on it — the test that
+    /// `refuseGrowAtBoundary` sets for owing a case — and is
+    /// owed anyway for the other reason that doc leaves
+    /// implicit: the seam is OBSERVED. Every one of these five
+    /// sites is unreachable headless except through
+    /// `onResizeRefusal`, so a case is what makes "the right
+    /// window was told the right thing" testable at all
+    /// (#96 bars deciding it from the sentence).
     case nothingToDivide(WindowID)
     /// The space's layout has no resizing at all (#1255) —
     /// monocle, grid and floating. The most reachable refusal

@@ -85,9 +85,11 @@ struct CoreLocalizationBoundaryTests {
         // `SizeLimitOverlay`. #1255 added three more — the two
         // no-axis-here readings and the layout-has-no-resizing
         // one — which is what gave the two sound-only refusals
-        // something to draw. Same caveat as `+StickyMarks` if
-        // the overlays ever move out of Core.
-        "App/KiwiCore+SizeLimitPill.swift": 9,
+        // something to draw, and #1258 the two nothing-to-divide
+        // readings, which gave five silent ones the same. Same
+        // caveat as `+StickyMarks` if the overlays ever move out
+        // of Core.
+        "App/KiwiCore+SizeLimitPill.swift": 10,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901), drawn by Core.

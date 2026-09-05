@@ -3937,15 +3937,16 @@ grow. Where the arrangement has no split on that axis at all —
 two windows side by side, asked for height — the press says so
 on the first try ("This zone divides widths, not heights"),
 since nothing is being reached there; the stored ratio still
-records what a later split on that axis will open at. A space
-too small to divide either way — a single window — says "This
-window fills its zone" (#1258): the parameter exists, there is
-simply nothing on this axis to move it against. The same
-sentence answers a stack window alone in its column, a window
-that fills its own track, and a space whose windows all share
-one track. The CLI and IPC callers still get the longer,
-layout-specific error text — a transient pill cannot spend that
-many words, and a machine contract can.
+records what a later split on that axis will open at. Where the group an axis divides holds only ONE member, the
+press says so instead (#1258) — "Nothing to divide here — try
+the other axis" where the other one does divide, and "This zone
+has nothing to divide" where neither does. That covers a stack
+window alone in its column, a stack space with an empty stack
+zone, a space whose windows share one track, a window that
+fills its own track, and a bsp space of one. The CLI and IPC
+callers still get the longer, layout-specific error text — a
+transient pill cannot spend that many words, and a machine
+contract can.
 
 **Held, the chord glides (#1056, retimed #1082).** A hotkey
 whose press ran exactly one command — a successful `resize` —

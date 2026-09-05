@@ -894,18 +894,26 @@ editing here:
   the cue there, because the sentence it draws is a claim about
   the arrangement rather than a limit reached: it is owed on the
   FIRST press rather than whenever the clamp happens to bite,
-  and `noAxisHere` says the OTHER axis divides — so a space that
-  divides neither, one window or an overflow pile, takes
-  `nothingToDivide` instead (#1258), the count being the reason
-  rather than the arrangement. That case is not bsp's alone: a
-  stack window alone in its column, a window filling its own
-  track and a space with a single track are the same statement,
-  and they take the same one, which claims nothing about the
-  other axis because at some of those sites it works and at
-  others it does not. Layout-specific guidance stays in the
-  CLI/IPC error string, which is a machine contract and may be
-  long where a transient pill may not (`NothingToDivideCueTests`
-  holds one arm per site plus the divided-axis pin).
+  and `noAxisHere` says the OTHER axis divides, so a group with
+  ONE member takes `nothingToDivide` instead (#1258) — the count
+  is the reason there, not the arrangement, and the sentence
+  says which of the two it is because the caller states whether
+  the other axis divides.
+  Two obligations on that judgement, both learned the same way.
+  **Judge it on what the layout DREW, never on a member count**:
+  a bsp region too small for two minimum-size windows piles them
+  and answers to no ratio at all, which a cardinality test
+  cannot see, and the extent test cannot either — the pile's
+  cascade offsets each copy, so the union outgrows every slot
+  and the whole pile reads as a participant. And **a refusal
+  that draws nothing is a claim that nobody needed telling**, so
+  every `.fail` a resize path returns is either cued or named in
+  `ResizeRefusalCensusTests`' register with the reason it stays
+  wordless — derived from source, because a hand-listed set of
+  arms is exactly what let a fifth silent site survive the
+  change that went looking for it (`NothingToDivideCueTests`
+  holds an arm per site, the census holds the ones nobody has
+  thought of yet).
   A new writer of this shape states which kind of partition it
   has; `ResizeRefusalTargetingTests` holds the verdicts, one
   per arm, bsp and stack alike.

@@ -90,29 +90,38 @@ extension KiwiCore {
         )
     }
 
-    /// The focused window is alone in the group this axis
-    /// divides (#1258) — the resize has a parameter but nothing
-    /// to move it against. Silent before this, at four sites
-    /// across three layouts, which read as "the shortcut is
-    /// broken" rather than "there is one window here".
+    /// The group the asked axis divides has ONE member (#1258)
+    /// — the parameter exists and there is nothing to move it
+    /// against. Silent at five sites across three layouts
+    /// before this, which reads as a broken shortcut.
     ///
-    /// One sentence for all four deliberately: it states the
-    /// fact the user can see (this window fills its zone) and
-    /// claims nothing about the other axis, which sometimes
-    /// works and sometimes does not. The layout-specific
-    /// guidance stays in the CLI/IPC error string, which is a
-    /// machine contract and free to be long (core-boundaries).
-    func refuseNothingToDivide(_ window: WindowID) {
+    /// `otherAxisDivides` picks the sentence, and the caller
+    /// answers it from its own partition: where the other axis
+    /// does divide, the useful thing to say is which way to
+    /// press, and where neither does there is nothing to point
+    /// at. Neither sentence describes GEOMETRY — at the
+    /// single-track site the window visibly shares its track
+    /// with others, and only the COUNT is common to all five.
+    func refuseNothingToDivide(
+        _ window: WindowID,
+        otherAxisDivides: Bool
+    ) {
         let refusal = ResizeRefusal.nothingToDivide(window)
         cueResizeRefusal(refusal)
         soundIfDrawn(
             flashSizeLimitPill(
                 window,
                 refusal,
-                text: L(
-                    "resize.fills_its_zone",
-                    "This window fills its zone"
-                )
+                text: otherAxisDivides
+                    ? L(
+                        "resize.divide_other_axis",
+                        "Nothing to divide here — try the "
+                            + "other axis"
+                    )
+                    : L(
+                        "resize.nothing_to_divide",
+                        "This zone has nothing to divide"
+                    )
             )
         )
     }
