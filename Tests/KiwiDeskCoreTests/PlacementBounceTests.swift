@@ -125,41 +125,6 @@ struct PlacementBounceTests {
         #expect(focused(core) == target)
     }
 
-    /// The on-screen bounce: stepping off the emulator re-asks it
-    /// its slot's width, it refuses the SIZE and bounces. Refused
-    /// means the learner holds the app's ANSWER to that ask — a
-    /// candidate seeded by its echo — never a bare mismatch.
-    @Test("A refused size on an on-screen placement is distrusted")
-    func refusedSizeOnscreenIsDistrusted() {
-        let core = makeCore()
-        let (target, other) = makeFixture(core)
-        // Wholly on screen (bounds end at 1440), so only the size
-        // arm can fire — 823 wide would straddle the edge and
-        // pass on the edge arm instead (guard-prover, 2026-09-05).
-        let asked = CGRect(x: 800, y: 100, width: 500, height: 300)
-        core.tiler.boundLearner.recordAsk(target, size: asked.size)
-        _ = core.tiler.boundLearner.observe(
-            target,
-            currentSize: CGSize(width: 400, height: 300),
-            settledRead: false
-        )
-        core.tiler.placements.stamp(target, target: asked)
-        core.handle(.windowFocused(target))
-        #expect(focused(core) == other)
-    }
-
-    /// A size the app has not answered yet is an echo in flight,
-    /// not a refusal — the #1049 lesson, one subsystem over.
-    @Test("An unanswered size ask is honored")
-    func unansweredSizeIsHonored() {
-        let core = makeCore()
-        let (target, _) = makeFixture(core)
-        let asked = CGRect(x: 800, y: 100, width: 500, height: 300)
-        core.tiler.placements.stamp(target, target: asked)
-        core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
-    }
-
     /// A distrusted bounce RENEWS the placement's window, so an
     /// app retrying past the original window is still bounced.
     @Test("A distrusted bounce renews the placement window")
@@ -167,19 +132,23 @@ struct PlacementBounceTests {
         let core = makeCore()
         let (target, other) = makeFixture(core)
         let now = Date()
-        // Near expiry ON PURPOSE: stamped fresh, the read below
-        // holds with no renewal at all (guard-prover, 2026-09-05).
+        // Placed 0.8 s ago and read 1.5 s from now: past the window
+        // without the renewal, inside it with one — and the
+        // renewal is refused only once the placement is 2 s old,
+        // so a slow runner has 1.2 s of headroom (guard-prover and
+        // review, 2026-09-05). Stamped fresh, the read below would
+        // hold with no renewal at all.
         core.tiler.placements.stamp(
             target,
             target: offscreen,
             at: now.addingTimeInterval(
-                -PlacementLedger.echoWindow + 0.2
+                -PlacementLedger.echoWindow + 1.2
             )
         )
         core.handle(.windowFocused(target))
         #expect(focused(core) == other)
         // Without the renewal this read would be nil already.
-        let later = now.addingTimeInterval(1)
+        let later = now.addingTimeInterval(1.5)
         #expect(core.tiler.placements.recent(target, at: later) != nil)
         core.handle(.windowFocused(target))
         #expect(focused(core) == other)

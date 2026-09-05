@@ -1,12 +1,13 @@
 import CoreGraphics
 import Foundation
 
-/// Where KiwiDesk last PUT each window, and when (#1161). The
-/// focus pipeline's placement-echo distrust reads it: some apps
-/// answer being placed past a screen edge by clamping themselves
-/// back and focusing themselves — the Android Emulator's Qt
-/// shell, measured 2026-09-05 at 0.8–1.5 s after the pan — and
-/// that report has the exact shape of a cmd-tab. Age-bounded and
+/// Where KiwiDesk last PUT each window, and when — and when a
+/// focus command last LEFT it (#1161). The focus pipeline's
+/// placement-echo distrust reads it: some apps answer being
+/// placed past a screen edge, or losing focus to our raise, by
+/// focusing themselves — the Android Emulator's Qt shell,
+/// measured 2026-09-05 at 0.7–1.5 s after either — and that
+/// report has the exact shape of a cmd-tab. Age-bounded and
 /// never consumed, like every echo ledger (state-and-layout.md);
 /// written at the two leaves every placement goes through
 /// (`TilingEngine.applyFrame` / `setFrame`), so the retile, the
@@ -27,11 +28,19 @@ struct PlacementLedger {
     /// trade (accepted-limitations.md).
     static let echoWindow: TimeInterval = 2.0
 
-    /// `placed` is when KiwiDesk put the window there; `stamped`
-    /// is that, or the last renewal.
-    private var entries:
-        [WindowID: (target: CGRect, placed: Date, stamped: Date)] =
-            [:]
+    private struct Entry {
+        var target: CGRect
+        /// When KiwiDesk put the window there, or left it.
+        var placed: Date
+        /// `placed`, or the last renewal.
+        var stamped: Date
+        /// When a focus command last moved focus OFF the window;
+        /// kept across a later placement, since the pan that
+        /// follows a step is what moves the window.
+        var displaced: Date?
+    }
+
+    private var entries: [WindowID: Entry] = [:]
 
     /// Records a placement, pruning expired entries so windows
     /// that are placed once and never focused cannot accrete.
@@ -40,10 +49,36 @@ struct PlacementLedger {
         target: CGRect,
         at now: Date = Date()
     ) {
+        prune(at: now)
+        entries[id] = Entry(
+            target: target,
+            placed: now,
+            stamped: now,
+            displaced: entries[id]?.displaced
+        )
+    }
+
+    /// Records that a focus command moved focus off `id`, which
+    /// sat at `frame` — the second event an app answers with a
+    /// focus of its own. Restarts the window like a placement.
+    mutating func noteDisplaced(
+        _ id: WindowID,
+        frame: CGRect,
+        at now: Date = Date()
+    ) {
+        prune(at: now)
+        entries[id] = Entry(
+            target: entries[id]?.target ?? frame,
+            placed: now,
+            stamped: now,
+            displaced: now
+        )
+    }
+
+    private mutating func prune(at now: Date) {
         entries = entries.filter {
             now.timeIntervalSince($0.value.stamped) < Self.echoWindow
         }
-        entries[id] = (target, now, now)
     }
 
     /// Extends a live entry's window from `now` — a distrust is
@@ -54,10 +89,23 @@ struct PlacementLedger {
     /// (#1161, `PlacementLedgerTests`).
     mutating func renew(_ id: WindowID, at now: Date = Date()) {
         guard let entry = entries[id],
-            now.timeIntervalSince(entry.stamped) < Self.echoWindow,
             now.timeIntervalSince(entry.placed) < Self.echoWindow
         else { return }
-        entries[id] = (entry.target, entry.placed, now)
+        entries[id].map { _ in entries[id]?.stamped = now }
+    }
+
+    /// Whether a focus command moved focus off `id` inside its
+    /// live window — the displacement itself no older than the
+    /// renewal ceiling.
+    func recentDisplacement(
+        _ id: WindowID,
+        at now: Date = Date()
+    ) -> Bool {
+        guard let entry = entries[id],
+            let displaced = entry.displaced,
+            now.timeIntervalSince(entry.stamped) < Self.echoWindow
+        else { return false }
+        return now.timeIntervalSince(displaced) < 2 * Self.echoWindow
     }
 
     /// The frame KiwiDesk gave `id` within the echo window of its

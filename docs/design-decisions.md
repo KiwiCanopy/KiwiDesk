@@ -1597,33 +1597,36 @@ the row admits three, and each answers a case the others cannot.
 *Past the screen's edge*: the emulator complied within 9 pt of
 the pan and bounced regardless, so "the window is not where we
 put it" discriminates nothing in the void, and the placement
-alone is the verdict there. *The app has answered the asked size
-with a refusal*: stepping off the emulator re-asks it its slot's
-width, it refuses and bounces a quarter second later, on-screen
-— and the discriminator is the size-bound learner's answer, its
-candidate or confirmed bound, never a bare mismatch between the
-state frame and the ask, because an echo that has not landed
-yet produces the same mismatch for every window a retile just
-resized (the #1049 lesson, one subsystem over); a candidate is
-seeded only by an echo, so lag never reads as refusal, and the
-learner stops re-asking a twice-refused size, so the stamps and
-the bounces stop with it. *KiwiDesk itself raised the window
-inside the placement window*: a step onto the emulator and off
-again leaves it placed on-screen and complying, and its last echo
-of the raise that step issued lands past the 1 s self-echo
-window, inside the placement's. The self ledger therefore takes a
-second liveness reading, the placement window's, read by the
-placement bounce alone; the 1 s window is not widened, since the
-#465 sibling trade, the accessibility return and the mouse-warp
-hold all read it and each would double its own trade for a bounce
-only the scrolling row has. That reading is a presence test on a
-ledger the #887 ruling says must be read by order — deliberately:
-#887 governs telling OUR raise from THEIRS, and this asks only
-whether we raised the window at all, the restore's-own-echo
-hazard having been consumed by the self-echo gate above it. And
-since every raise must mint its stamp for the reading to see it,
-the ledger has one minter, which retains stamps for the longer of
-the two windows. Anywhere else — the corner a hidden Space's
+alone is the verdict there. *A focus command moved focus off the
+window inside the window*: stepping off the emulator after
+sitting on it, with its size bound already learned so that no
+retile asks it anything, it still focuses itself 0.7 s later —
+the trigger is the loss of focus to our raise, not a frame ask,
+which is why "the app refused the size it was asked" was the
+wrong discriminator twice over: it named a frame ask that is not
+there once the bound is learned, and read as a bare mismatch it
+also matched every window whose resize echo had not landed yet
+(the #1049 lesson, one subsystem over). The focus command records
+the window it left in the placement ledger itself — an entry a
+later pan's placement carries rather than erases — so the
+displacement shares the ledger's prune, renewal bound, forget and
+rekey instead of earning a ledger of its own. *KiwiDesk itself
+raised the window inside the placement window*: a step onto the
+emulator and off again leaves it placed on-screen and complying,
+and its last echo of the raise that step issued lands past the
+1 s self-echo window, inside the placement's. The self ledger
+therefore takes a second liveness reading, the placement
+window's, read by the placement bounce alone; the 1 s window is
+not widened, since the #465 sibling trade, the accessibility
+return and the mouse-warp hold all read it and each would double
+its own trade for a bounce only the scrolling row has. That
+reading is a presence test on a ledger the #887 ruling says must
+be read by order — deliberately: #887 governs telling OUR raise
+from THEIRS, and this asks only whether we raised the window at
+all, the restore's-own-echo hazard having been consumed by the
+self-echo gate above it. And since every raise must mint its
+stamp for the reading to see it, the ledger has one minter, which
+retains stamps for the longer of the two windows. Anywhere else — the corner a hidden Space's
 windows are parked in, monocle's park, a scrolling Space that is
 not the active one — a clickless focus is how a user *reaches* an
 off-screen window, so the placement must lie past the edge and
@@ -1632,9 +1635,9 @@ emulator does at the stash corner and a window that went where it
 was parked does not.
 
 The discriminators are forgeable by construction: a cmd-tab onto
-a scrolling window still sliding out past the edge, onto one whose
-app has refused the asked size, or back onto a scrolling window
-the user left inside the placement window, is bounced too. A
+a scrolling window still sliding out past the edge, onto one
+KiwiDesk focused inside the placement window, or back onto the
+scrolling window the user stepped off inside it, is bounced too. A
 distrust **renews** the placement, because the emulator retries
 every half second or so and its third retry landed past a window
 that started at the pan — but through the ledger's own `renew`

@@ -85,6 +85,11 @@ extension KiwiCore {
         if let space {
             state.workspaces.focus(id, in: space)
         }
+        if let previous = previousFocused, previous != id,
+            let frame = state.windows[previous]?.frame
+        {
+            tiler.placements.noteDisplaced(previous, frame: frame)
+        }
         // Scrolling defers the raise until the pan settles when
         // this focus change leaves the target's own frame where
         // it already is (#143/#878): a stationary target is

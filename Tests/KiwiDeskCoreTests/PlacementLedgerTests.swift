@@ -59,6 +59,47 @@ struct PlacementLedgerTests {
         )
     }
 
+    @Test("A displacement lives like a placement and is renewable")
+    func displacementIsRenewable() {
+        var ledger = PlacementLedger()
+        let t0 = Date()
+        ledger.noteDisplaced(id, frame: frame, at: t0)
+        #expect(ledger.recentDisplacement(id, at: t0))
+        ledger.renew(id, at: t0.addingTimeInterval(window * 0.75))
+        #expect(
+            ledger.recentDisplacement(
+                id,
+                at: t0.addingTimeInterval(window * 1.5)
+            )
+        )
+        #expect(
+            !ledger.recentDisplacement(
+                id,
+                at: t0.addingTimeInterval(window * 1.8)
+            )
+        )
+    }
+
+    @Test("A placement carries the displacement, a renewal too")
+    func placementCarriesTheDisplacement() {
+        var ledger = PlacementLedger()
+        let t0 = Date()
+        ledger.noteDisplaced(id, frame: frame, at: t0)
+        let t1 = t0.addingTimeInterval(window * 0.5)
+        ledger.stamp(id, target: frame, at: t1)
+        #expect(ledger.recentDisplacement(id, at: t1))
+        // The displacement ages on its own clock: a chain of
+        // placements cannot carry it past the ceiling.
+        let t2 = t0.addingTimeInterval(window * 1.9)
+        ledger.stamp(id, target: frame, at: t2)
+        #expect(
+            !ledger.recentDisplacement(
+                id,
+                at: t2.addingTimeInterval(window * 0.2)
+            )
+        )
+    }
+
     @Test("A new placement restarts the ceiling")
     func stampRestartsTheCeiling() {
         var ledger = PlacementLedger()

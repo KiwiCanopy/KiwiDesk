@@ -556,17 +556,20 @@ editing here:
   App-level placers share, so a NEW placement path routes through
   one of them rather than writing a frame beside them (the quit
   teardown's direct `WindowControl.setFrame` is the one ruled
-  exception: the app is exiting, no focus report follows) — and
-  read by `KiwiCore.placementBounce`, which `handleWindowFocused`
+  exception: the app is exiting, no focus report follows) — with
+  the window a focus command moved focus OFF noted in the same
+  ledger by the one `focusWindow` path (`noteDisplaced`, kept
+  across the pan's later placement), and read by
+  `KiwiCore.placementBounce`, which `handleWindowFocused`
   consults ABOVE the focus-follow and BELOW the z-order revert.
   It fires for a clickless report, after focus moved on: in the
   ACTIVE scrolling Space on any of three discriminators — the
-  placement lay past the screen's edge; the app has ANSWERED the
-  size asked with a refusal, read off the learner's candidate or
-  confirmed bound and never off a bare frame mismatch, which an
-  echo not yet landed produces too (the #1049 lesson); or
-  KiwiDesk itself raised the window inside the placement window
-  (the self ledger's longer reading, above) — and anywhere else
+  placement lay past the screen's edge; KiwiDesk itself raised
+  the window inside the placement window (the self ledger's
+  longer reading, above); or a focus command moved focus off it
+  inside the window, the app answering the loss with nothing
+  asked of it — never a bare size mismatch, which an echo not yet
+  landed produces too (the #1049 lesson) — and anywhere else
   only where the placement lay past the edge AND the window
   refused it by origin, a clickless focus being how a user
   reaches a parked window. It re-asserts the intended window with
@@ -578,12 +581,14 @@ editing here:
   discriminators are FORGEABLE, unlike #465's ordering, and the
   trade is priced in `docs/accepted-limitations.md`. Its forget
   and rekey pair with the other ledgers' by hand, which review
-  checks; `PlacementBounceTests` holds the two arms, the answered
-  size against the unanswered one, the renewal, the click escape
-  and the bound, `PlacementBounceRaiseTests` the raise reading
-  and its minter's retention, `PlacementBounceSeamTests` the two
-  leaves, the renew door, the consult, the write-site census and
-  the raise. A fourth ledger joins this bullet rather than
+  checks; `PlacementBounceTests` holds the two arms, the renewal,
+  the click escape and the bound, `PlacementBounceRaiseTests` the
+  raise reading and its minter's retention,
+  `PlacementDisplacementTests` the displacement, its wiring and
+  the size mismatch that discriminates nothing,
+  `PlacementBounceSeamTests` the two leaves, the renew door, the
+  one displacement recorder, the consult, the write-site census
+  and the raise. A fourth ledger joins this bullet rather than
   earning its own consume.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop

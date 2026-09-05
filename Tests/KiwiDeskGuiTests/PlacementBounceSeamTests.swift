@@ -40,6 +40,9 @@ struct PlacementBounceSeamTests {
             ["TilingEngine+Layout.swift", "TilingEngine.swift"]
         ),
         ("placements.renew(", ["KiwiCore+PlacementBounce.swift"]),
+        // The one focus command path records the window it left;
+        // a second recorder would double the trade's reach.
+        ("placements.noteDisplaced(", ["KiwiCore+FocusRaise.swift"]),
         // The handler consults the verdict once and answers once.
         ("placementBounce(id, now:", ["KiwiCore+FocusEvents.swift"]),
         (
@@ -103,7 +106,8 @@ struct PlacementBounceSeamTests {
             "KiwiCore.swift": 1,
         ]
         let pattern =
-            #"selfRaiseStamps(\[[^\]]*\])?\s*(=(?!=)|\.removeValue|:)"#
+            #"selfRaiseStamps(\[.*\])?\s*(=(?!=)|\.(removeValue|"#
+            + #"updateValue|removeAll|merge|filter\b.*\)\s*$)|:)"#
         let writes = try NSRegularExpression(pattern: pattern)
         var found: [String: Int] = [:]
         let walker = FileManager.default.enumerator(
