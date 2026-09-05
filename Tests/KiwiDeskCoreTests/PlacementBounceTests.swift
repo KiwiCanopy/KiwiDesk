@@ -62,8 +62,9 @@ private func makeFixture(
 /// focus of its own. Straddling, not wholly outside: `contains`
 /// must read it as crossing, and `intersects` would not.
 private let offscreen = CGRect(x: 1200, y: 100, width: 400, height: 300)
-/// A frame wholly on screen, where a window that is not there
-/// yet is merely sliding — never a bounce.
+/// A frame wholly on screen — the flipped on-screen test can tell
+/// the collapsed arm from the edge arm only while this stays
+/// inside the pinned bounds (`fixtureIsOnScreen`).
 private let onscreen = CGRect(x: 800, y: 100, width: 400, height: 300)
 
 @MainActor
@@ -154,8 +155,17 @@ struct PlacementBounceTests {
         #expect(focused(core) == other)
     }
 
-    /// An ON-screen placement the window has not reached is a
-    /// slide, not a bounce: a cmd-tab onto it is honored.
+    /// The flipped on-screen test below tells the collapsed arm
+    /// from the edge arm only while `onscreen` lies inside the
+    /// pinned bounds; retune either alone and it passes on both
+    /// (guard-prover, 2026-09-05).
+    @Test("The fixture's on-screen placement sits inside the bounds")
+    func fixtureIsOnScreen() {
+        let core = makeCore()
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        #expect(core.tiler.visibleBounds(screen).contains(onscreen))
+    }
+
     /// The ruled trade (device 21:03): the emulator bounces after
     /// any pan that moves it, on screen or off, so in the active
     /// scrolling row a live placement is the whole verdict — a
@@ -264,6 +274,10 @@ struct PlacementBounceTests {
     func compliantStashFollows() {
         let core = makeCore()
         let (target, _) = makeFixture(core)
+        // A SCROLLING destination: the hidden arm must hold on the
+        // active-Space gate alone, not on the mode gate (guard-prover,
+        // 2026-09-05 — a bsp destination left that clause inert).
+        core.state.workspaces.ensureSpace(SpaceID(2), mode: .scrolling)
         core.moveWindow(target, to: SpaceID(2), follow: false)
         core.moveLatch.stamp(
             target,
