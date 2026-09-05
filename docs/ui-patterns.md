@@ -505,7 +505,7 @@ is the accent fill described below, whose edge is a darker
 shade of its own fill rather than a border in a new colour.
 Class is otherwise expressed through native style + control size:
 `.borderedProminent` regular for the one surface commit
-(the save pill's Save, popover confirms); `.bordered` large for row
+(popover confirms); `.bordered` large for row
 actions (Load, Apply, Customize, Set Gap Values), level with
 large dropdowns; `.bordered` regular for stateful input
 triggers (the shortcut recorder); and `.borderless` regular
@@ -542,10 +542,23 @@ style *drew* — the pressed and disabled appearances have to be
 redrawn, which this one does through the fill rather than the
 label, so a click never dims the ink it has to keep readable.
 
+**On a ground that does not move with the appearance, the seal
+stops being a preference.** The save pill is dark in both
+modes, and an inactive window makes AppKit re-pick a prominent
+button's ink against the *window's* appearance rather than the
+plate the button actually sits on: in light mode the label and
+the fill both collapse into the plate, measured **1.23:1**
+enabled and **1.09:1** disabled, against the seal's 6.67:1 in
+every appearance and every activation state. That is why the
+pill's Save wears the seal, and why every other control on that
+plate already sets its own ink (#1198). In dark mode the two
+appearances agree and the same button reads at 11.48:1, which
+is how this shipped.
+
 This convention is written for the next prominent button, not
-as the record of a finished sweep: Settings' own prominent
-buttons still take the system style, and moving one onto the
-seal is its own change and its own eye-confirm.
+as the record of a finished sweep: Settings' remaining
+prominent buttons still take the system style, and moving one
+onto the seal is its own change and its own eye-confirm.
 
 **A recording shortcut field wears an accent halo.** The
 armed recorder among dozens of identical rows gets an accent

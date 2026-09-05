@@ -43,24 +43,30 @@ extension SettingsFooter {
     }
 
     /// Primary Save action button slot.
+    ///
+    /// Sealed rather than `.borderedProminent`: the pill is a
+    /// fixed-dark ground, and AppKit re-picks a prominent
+    /// button's ink against the WINDOW's appearance — inactive
+    /// in light mode measured 1.23:1 enabled and 1.09:1
+    /// disabled, against 6.67:1 for the seal (#1198).
     @ViewBuilder var primarySlot: some View {
         let save = L("footer.save", "Save")
         switch model.primarySaveAction {
         case .saveLua:
             Button(save) { model.saveLuaSource() }
                 .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
+                .kiwiProminentButton()
                 .disabled(!model.isDirty)
         case .updateStoredProfile:
             Button(save) { model.saveEditedProfile() }
                 .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
+                .kiwiProminentButton()
                 .disabled(!model.isDirty)
         case .updateActiveProfile:
             // Update blocked while permission is paused (#335).
             Button(save) { model.updateActiveProfile() }
                 .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
+                .kiwiProminentButton()
                 .disabled(
                     model.profileSaveBlockedReason != nil
                         || !model.updateEnabled
@@ -75,7 +81,7 @@ extension SettingsFooter {
             // Saves globals only when permission paused (#516).
             Button(save) { model.saveGlobalsWhilePaused() }
                 .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
+                .kiwiProminentButton()
                 .disabled(!model.isDirty)
         case .saveAsNewProfile:
             // Blocked while permission paused (#335).
@@ -89,7 +95,7 @@ extension SettingsFooter {
                 namingNewProfile = true
             }
             .keyboardShortcut("s")
-            .buttonStyle(.borderedProminent)
+            .kiwiProminentButton()
             .disabled(model.profileSaveBlockedReason != nil)
             .help(model.profileSaveBlockedReason ?? "")
         }

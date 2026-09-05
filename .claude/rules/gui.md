@@ -1087,6 +1087,18 @@ Every surface, border and ink in the Settings tree comes from
   seal as a finished sweep: a site still on `.borderedProminent`
   is drawing white on the accent, and adopting the seal there is
   its own change and its own eye-confirm.
+- **On a fixed-dark ground a control owns its ink, or it has
+  none.** The hierarchical-grey ban below is one half of this;
+  the control side is the other, and it bites hardest in the
+  state nothing renders in a test — AppKit re-picks an inactive
+  window's control ink against the WINDOW's appearance while
+  the ground stays put, so on the save pill a light-mode
+  `.borderedProminent` measured 1.23:1 enabled and 1.09:1
+  disabled (#1198). A style that draws its own label ink is
+  therefore banned on those families by
+  `SettingsFixedGroundTests`' second arm; `.plain` is not,
+  because it draws none and takes the site's `foregroundStyle`,
+  which is what every other control on the pill does.
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from
