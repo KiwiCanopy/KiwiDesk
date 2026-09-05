@@ -475,11 +475,12 @@ editing here:
   (`selfRaiseVetoesRevert`) — a presence test threads the
   restore's own echo past both nets. A ledger is cleared where
   its id dies (`forgetGoneWindow`) and rekeyed on a tab switch,
-  and a CONSUMER reads a stamp's liveness through
-  `selfRaiseStamp(_:now:)` rather than comparing the stamp
-  itself — the writer's prune in `raiseWindow` is the one other
-  comparison, and nothing scans for a third, so a new reader
-  owes the routing deliberately. `SelfRaiseDuplicateEchoTests`,
+  and a CONSUMER of the self ledger reads a stamp's liveness
+  through `selfRaiseStamp(_:now:)` rather than comparing the
+  stamp itself — the writer's prune compares, and the two click
+  readers borrow the constant as a click window, neither of
+  which is a stamp read; nothing scans for a new one, so a new
+  reader owes the routing deliberately. `SelfRaiseDuplicateEchoTests`,
   `RaiseEchoClickTests` and `ActivationReReportTests` hold the
   three arms, and a third ledger of this shape joins this bullet
   rather than earning its own consume.

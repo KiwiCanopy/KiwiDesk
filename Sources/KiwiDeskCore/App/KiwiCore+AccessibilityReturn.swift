@@ -41,7 +41,9 @@ struct AccessibilityReturnDebt {
 ///   second steal needs a second panel flag.
 /// - A yield landing on a window KiwiDesk raised within
 ///   `selfRaiseEchoWindow` is our own raise's fallout, not
-///   returned — and the debt is left STANDING for the next
+///   returned — the CALLER's gate (`!selfEcho` in
+///   `handleWindowFocused`), the one let-out this file does not
+///   implement — and the debt is left STANDING for the next
 ///   report, not spent (#887, `AccessibilityReturnTests`).
 ///
 /// The accepted trade: a deliberate clickless focus of another
