@@ -3933,10 +3933,13 @@ change height at all; that press moves the split *between its
 neighbours* instead, and when one of them reaches its minimum
 the pill goes on that neighbour, while the focused window reads
 "Neighboring window at its minimum size" like any other blocked
-grow. Where an axis has no split at all — two windows side by
-side, asked for height — the press says so instead ("This zone
-divides widths, not heights"): there is no limit being reached,
-only a knob that does not exist here.
+grow. Where the arrangement has no split on that axis at all —
+two windows side by side, asked for height — the press says so
+on the first try ("This zone divides widths, not heights"),
+since nothing is being reached there; the stored ratio still
+records what a later split on that axis will open at. A space
+too small to divide either way — a single window — says nothing
+at all, there being no axis to name.
 
 **Held, the chord glides (#1056, retimed #1082).** A hotkey
 whose press ran exactly one command — a successful `resize` —

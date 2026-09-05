@@ -200,10 +200,16 @@ extension KiwiCore {
     ///
     /// This is the one writer whose focused window may be in
     /// NEITHER group: a stack zone and a track partition every
-    /// member by membership, and every member's extent moves
-    /// with the parameter, so their `focusedIsBinding` follows
-    /// the gesture's direction. Here it has to be read off the
-    /// partition itself.
+    /// member by membership, so their `focusedIsBinding` is a
+    /// membership read. Here it has to be read off a partition
+    /// the window may sit outside of.
+    ///
+    /// The write lands whatever the window population is — the
+    /// ratio is a stored per-space value the caps protect the
+    /// REGION of, not only the windows currently in it
+    /// (#383/#44/#458, `SessionRatioTests`), so an empty or
+    /// unsplit space still records what a later split opens at.
+    /// Only the CUE reads the population.
     func writeCappedBspRatio(
         proposed: Double,
         axis: String,
@@ -215,13 +221,15 @@ extension KiwiCore {
         let base =
             axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
         let horizontal = axis == "x"
-        let sides = TilingEngine.screen(
-            for: space.id,
-            in: state
-        ).map { screen in
+        let screen = TilingEngine.screen(for: space.id, in: state)
+        let slots = tiler.calculatedFrames(state: state)
+        let tiled = state.effectiveTiledMembers(of: space)
+        // No display to classify against: the caps still hold on
+        // the global floor, and nothing here can name a window.
+        let sides = screen.map { screen in
             MouseResize.bspSides(
-                of: state.effectiveTiledMembers(of: space),
-                slots: tiler.calculatedFrames(state: state),
+                of: tiled,
+                slots: slots,
                 bounds: tiler.layoutBounds(on: screen),
                 horizontal: horizontal
             )
@@ -241,28 +249,36 @@ extension KiwiCore {
             minLow: lowMin.size,
             minHigh: highMin.size
         )
-        let value = min(max(outcome.value, 0.1), 0.9)
-        if axis == "x" {
-            writeSplitRatioH(value, for: space.id)
-        } else {
-            writeSplitRatioV(value, for: space.id)
-        }
-        // No display to classify against: the cap still protects
-        // the region, but nothing here can name a window.
-        guard outcome.clamped, let focused, let sides else {
-            return
-        }
+        writeBspRatio(outcome.value, axis: axis, space: space)
+        guard let focused, let sides, let screen else { return }
         if sides.first.isEmpty, sides.second.isEmpty {
-            // Every tiled window spans this axis, so the ratio
-            // divides nothing here — a limit that does not
-            // exist rather than one reached (#1259/#1255).
-            refuseAxisAbsent(focused, axis: axis)
+            // Nothing on this axis answers to the ratio. That is
+            // a fact about the ARRANGEMENT rather than a limit
+            // reached, so it is said on the first press like the
+            // stack path's own no-parameter axis, not once the
+            // clamp happens to bite — and only where the OTHER
+            // axis DOES divide, which is what the sentence
+            // claims. A space too small to split at all — one
+            // window, an overflow pile — divides neither, and
+            // naming an axis there would be the same wrong
+            // sentence #1259 removed; #1258 owns the silence
+            // that leaves.
+            let across = MouseResize.bspSides(
+                of: tiled,
+                slots: slots,
+                bounds: tiler.layoutBounds(on: screen),
+                horizontal: !horizontal
+            )
+            if !across.first.isEmpty || !across.second.isEmpty {
+                refuseAxisAbsent(focused, axis: axis)
+            }
             return
         }
+        guard outcome.clamped else { return }
         // A ratio that moved DOWN ran into the low side's
         // minimum and one that moved UP into the high side's —
-        // read off the write itself, since the focused window's
-        // own side says nothing when it sits on neither. A
+        // read off the write's own direction, since the focused
+        // window's side says nothing when it sits on neither. A
         // clamped outcome is never a standing-still write, so
         // the comparison always decides.
         let bindingFirst = proposed < base
@@ -278,6 +294,21 @@ extension KiwiCore {
             focusedIsBinding: bindingSide.contains(focused),
             axis: axis
         )
+    }
+
+    /// The per-axis store write both paths above share, with the
+    /// store's own 0.1...0.9 clamp applied once.
+    private func writeBspRatio(
+        _ value: Double,
+        axis: String,
+        space: Space
+    ) {
+        let stored = min(max(value, 0.1), 0.9)
+        if axis == "x" {
+            writeSplitRatioH(stored, for: space.id)
+        } else {
+            writeSplitRatioV(stored, for: space.id)
+        }
     }
 
 }
