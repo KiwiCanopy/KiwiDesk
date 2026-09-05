@@ -212,41 +212,17 @@ extension KiwiCore {
             }
             return
         }
-        // A placement bounce (#1161): the app is answering
-        // where KiwiDesk just PUT it — the Android Emulator
-        // clamps itself back from past the screen edge and
-        // focuses itself 0.8–1.5 s after the pan — and that
-        // report has a cmd-tab's shape. Two discriminators: we
-        // placed the window PAST a screen edge, and it is NOT
-        // there — a window still sliding to an on-screen slot,
-        // or sitting where we put it, keeps its clickless
-        // refocus honored. The #465 shape: state stays on the intended
-        // window, re-asserted DIRECT and unstamped so the
-        // ping-pong is bounded by the placement's own window.
+        // A placement bounce (#1161): the app answering where we
+        // just PUT its window, in a cmd-tab's shape —
+        // `placementBounce` carries the argument, both arms. Above
+        // the #958 return, which stays last, and BELOW the z-order
+        // revert on purpose: a restore's echo keeps its state-only
+        // revert, its sequence's closing re-assert owning OS focus.
         if !selfEcho,
             let intended = effects.focusBefore, intended != id,
-            state.workspaces.space(of: id)
-                == state.workspaces.activeSpace,
-            let placed = tiler.placements.recent(id, at: now),
-            placementCrossesEdge(placed, of: id),
-            let actual = state.windows[id]?.frame,
-            !TilingEngine.close(actual, to: placed),
-            !recentClickReached(id, now: now)
+            placementBounce(id, now: now)
         {
-            onLog(
-                "focus: w\(id.raw) placement bounce distrusted; "
-                    + "re-asserting w\(intended.raw)"
-            )
-            if let space = state.workspaces.space(of: intended) {
-                state.workspaces.focus(intended, in: space)
-            }
-            if let window = state.windows[intended],
-                let element = eventLoop.element(for: intended)
-            {
-                AXHelper.raise(element, pid: window.pid)
-            }
-            updateBorders()
-            updateStickyMarks()
+            reassertAgainstPlacementBounce(id, intended: intended)
             return
         }
         // The accessibility-steal return (#958): LAST among

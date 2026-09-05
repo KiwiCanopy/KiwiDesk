@@ -536,18 +536,31 @@ editing here:
   which is a stamp read; nothing scans for a new one, so a new
   reader owes the routing deliberately. `SelfRaiseDuplicateEchoTests`,
   `RaiseEchoClickTests` and `ActivationReReportTests` hold the
-  three arms. The THIRD ledger of this shape is
-  `TilingEngine.placements` (#1161): stamped at the two leaves
-  every placement goes through (`applyFrame` / `setFrame`), read
-  by the placement-bounce distrust in `handleWindowFocused`,
-  which fires only for a window on the ACTIVE space that was
-  placed PAST a screen edge (`placementCrossesEdge`, off the one
-  `visibleBounds` seam) and is NOT there — the discriminators a
-  cmd-tab cannot forge; an on-screen slot is honored and a
-  stashed window's clickless focus is the follow's — and
-  re-asserts the intended window with a direct raise
-  (`PlacementBounceTests`, whose retile case pins the stamping).
-  A fourth joins this bullet rather than earning its own consume.
+  three arms. One ledger of this shape answers by GEOMETRY
+  instead of order, there being no second stamp to rank against:
+  `TilingEngine.placements` (#1161), stamped at `applyFrame` and
+  `setFrame` — the two leaves the retile, the stash and the
+  App-level placers share, so a NEW placement path routes through
+  one of them rather than writing a frame beside them (the quit
+  teardown's direct `WindowControl.setFrame` is the one ruled
+  exception: the app is exiting, no focus report follows) — and
+  read by `KiwiCore.placementBounce`, which `handleWindowFocused`
+  consults ABOVE the focus-follow and BELOW the z-order revert.
+  It fires for a clickless report, after focus moved on, of a
+  window placed past its screen's edge: in the scrolling void the
+  placement alone (the emulator complied within 9 pt and bounced
+  regardless), anywhere else only where the window REFUSED the
+  placement by origin — a clickless focus is how a user reaches a
+  parked window — and it re-asserts the intended window with a
+  direct raise, since no sequence's closing re-assert will. These
+  discriminators are FORGEABLE, unlike #465's ordering: a cmd-tab
+  onto a scrolling window still sliding out is bounced too, the
+  ruled trade (`docs/accepted-limitations.md`). Its forget and
+  rekey pair with the other ledgers' by hand, which review checks;
+  `PlacementBounceTests` holds both arms, the click escape and the
+  bound, `PlacementBounceSeamTests` the two leaves, the consult
+  and the raise. A fourth ledger joins this bullet rather than
+  earning its own consume.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

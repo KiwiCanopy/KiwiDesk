@@ -49,13 +49,11 @@ private func makeFixture(
         "set_mode",
         args: [.string(space.raw), .string("scrolling")]
     )
-    // The windows sit where the layout put them, as their AX
-    // echoes would leave them — a report from a window KiwiDesk
-    // placed past an edge that is NOT there is #1161's bounce,
-    // which is not what this suite reads.
-    for (id, frame) in core.tiler.calculatedFrames(state: core.state) {
-        core.state.apply(.windowMoved(id, frame))
-    }
+    // The pan that laid the row out is long past: a clickless
+    // report for a scrolling window KiwiDesk placed past an edge
+    // within the last two seconds is #1161's bounce, not what
+    // this suite reads.
+    core.tiler.placements = PlacementLedger()
     core.state.workspaces.focus(other, in: space)
     return (target, other)
 }

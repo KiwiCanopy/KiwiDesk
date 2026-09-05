@@ -1566,42 +1566,70 @@ are the mask.
 **[Rationale]**
 
 The Android Emulator's Qt shell answers being placed past a
-screen edge — a scrolling pan asking it to sit at x = −264, or
-1520 on a 1728-wide screen — by clamping its window back
-on-screen and focusing itself, 0.8–1.5 s after the pan (measured
-2026-09-05, 3/3 deterministic with the pan as the only input;
-never once with the window floating, where KiwiDesk does not
-move it). That focus report has the same shape as a cmd-tab:
-clickless, no self-raise stamp, a different window than the one
-the user just reached. Honoring it pans the row back to the
-emulator and warps the pointer onto it — the app has chosen the
-user's focus.
+screen edge by focusing itself. Measured 2026-09-05, 3 of 3
+trials with the pan as the only input: a scrolling pan asks it to
+sit at x = 1665 on a 1728-wide screen, and 0.8–1.5 s later its
+window reports focus and the app activates; a Space switch that
+parks it at the stash corner does the same 1 s later, the window
+refusing the corner. Never once did it happen on the pan with
+the window floating, where the pan does not move it. That focus
+report has the same shape as a cmd-tab: clickless, no self-raise
+stamp, a different window than the one the user just reached.
+Honoring it panned the row back to the emulator, warped the
+pointer onto it, and — from a hidden Space — flew the user back
+to the Space they had just left.
 
 The distrust keys on **placement**, not on activation: the
 `TilingEngine.placements` ledger records where KiwiDesk last put
-each window, stamped at the two leaves every placement goes
-through, so the retile, the stash and every App-level placer are
-covered alike. A clickless focus report within two seconds of a
-placement, arriving after focus moved on, is distrusted **only
-where the placement lies past a screen edge and the window is
-not there** — the app fought a placement into the void, which a
-user cannot have done from the keyboard. An on-screen slot, and a
-window sitting where it was placed, keep their clickless refocus
-honored, so the trade is narrow: a cmd-tab onto a window still
-sliding out past the edge, or onto an app that clamps itself, is
-bounced until the placement is two seconds old.
+each window, stamped at the two frame leaves the retile, the
+stash and the App-level placers share, age-bounded like every
+echo ledger and never consumed. It is a further record of "where
+we put it" beside the applier's instant target, the animation's
+target and the learner's asks, kept because none of them lives
+long enough — the bounce lands after every one has retired.
+
+The verdict is **geometric** rather than an ordering of stamps:
+there is no second stamp to rank against. A clickless focus
+report within the placement window, arriving after focus moved
+on, is distrusted where the placement lies past a screen edge.
+In a **scrolling** Space's void that is the whole verdict — the
+emulator complied within 9 pt of the pan and bounced regardless,
+so "the window is not where we put it" is no discriminator
+there. Anywhere else, a clickless focus is how a user *reaches*
+an off-screen window — the corner a hidden Space's windows are
+parked in, monocle's park — so the window must also have
+**refused** the placement, its origin off the placement's, which
+the emulator does at the stash corner and a window that went
+where it was parked does not. The discriminators are forgeable
+by construction: a cmd-tab onto a scrolling window still sliding
+out past the edge is bounced for the placement window too, and
+the bound is two seconds after KiwiDesk *last* placed the
+window, since an app that keeps being re-placed is re-stamped by
+every retile. That is the ruled trade; a click is always honored.
+The #465 sibling distrust's carve-out for a visible same-display
+sibling is narrowed by this: such a sibling placed into the
+scrolling void is bounced like any other window.
+
 State stays on the intended window and it is re-asserted with a
-direct, unstamped raise — the #465 sibling-distrust shape —
-because the app genuinely took key focus and a state-only revert
-would split keystrokes from the ring; the raise moves nothing,
-so it provokes no second bounce, and the ledger is never
-consumed, so the app's repeat is bounced the same way.
+direct, unstamped raise — the #465 sibling-distrust shape. The
+state-only ruling of the raise-echo revert above does not reach
+here, and the reason is what makes it a ruling rather than a
+habit: there a drain is in flight and its closing re-assert is
+the one owner of putting OS focus back, so reverting state alone
+is transient by construction. A placement bounce has no sequence
+and no closing re-assert — a state-only revert would leave
+keystrokes on the app's window and the ring on the user's,
+permanently — so this one raises; the raise moves nothing, so it
+provokes no second bounce, and the ledger is never consumed, so
+the app's repeat is bounced the same way. The distrust runs
+below the z-order revert on purpose: a restore's echo keeps the
+state-only revert its sequence owns.
 
 An activation gate — "an app that activates with no input is not
-focus" — was the issue's first hypothesis and is the wrong
-shape: cmd-tab is also clickless activation, KiwiDesk has no
-keyboard provenance for system chords, and the measurement shows
-the trigger is our own frame-set, not activation in general.
+focus" — is the wrong shape: cmd-tab is also clickless
+activation, KiwiDesk has no keyboard provenance for system
+chords, and the measurement shows the trigger is our own
+frame-set, not activation in general.
 
 ### An ignored panel's dismissal is a race; provenance ends it
 
