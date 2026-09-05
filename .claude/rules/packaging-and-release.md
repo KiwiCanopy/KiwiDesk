@@ -499,9 +499,10 @@ and locale checks with it.
 `main` and on PRs targeting it. Both jobs are gated on a `changes`
 job, so a change confined to `.github/ci-ignore.txt`'s list leaves
 them skipped. A red build blocks merging. The release build runs
-as a separate, non-blocking job (#532) — when to run it locally
-instead is decided by the `verify-gate` skill, which owns that
-call.
+as a separate job (#532), required on `main` exactly like the
+build-lint-test one — `scripts/protect-main.sh`'s `CONTEXTS`
+names both — and when to run it locally as well is decided by
+the `verify-gate` skill, which owns that call.
 
 **`ci.yml` filters by exclusion; `site.yml` filters by
 inclusion.** Keep it that way. The site build's inputs are a
