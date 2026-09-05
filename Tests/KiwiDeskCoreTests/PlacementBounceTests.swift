@@ -133,7 +133,10 @@ struct PlacementBounceTests {
     func refusedSizeOnscreenIsDistrusted() {
         let core = makeCore()
         let (target, other) = makeFixture(core)
-        let asked = CGRect(x: 800, y: 100, width: 823, height: 300)
+        // Wholly on screen (bounds end at 1440), so only the size
+        // arm can fire — 823 wide would straddle the edge and
+        // pass on the edge arm instead (guard-prover, 2026-09-05).
+        let asked = CGRect(x: 800, y: 100, width: 500, height: 300)
         core.tiler.placements.stamp(target, target: asked)
         core.handle(.windowFocused(target))
         #expect(focused(core) == other)
@@ -146,6 +149,8 @@ struct PlacementBounceTests {
         let core = makeCore()
         let (target, other) = makeFixture(core)
         let now = Date()
+        // Near expiry ON PURPOSE: stamped fresh, the read below
+        // holds with no renewal at all (guard-prover, 2026-09-05).
         core.tiler.placements.stamp(
             target,
             target: offscreen,

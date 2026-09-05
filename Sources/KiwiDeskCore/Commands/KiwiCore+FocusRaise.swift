@@ -47,17 +47,7 @@ extension KiwiCore {
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
         {
-            // Stamp what we raised so its focus echoes — every
-            // one of them, a lazy app sends two (#887) — can be
-            // told apart from a user's click (#152), and for the
-            // sibling-report distrust (#465 QA). Pruned by age so
-            // never-echoed raises cannot accrete.
-            let now = Date()
-            selfRaiseStamps = selfRaiseStamps.filter {
-                now.timeIntervalSince($0.value)
-                    < Self.selfRaiseEchoWindow
-            }
-            selfRaiseStamps[id] = now
+            stampSelfRaise(id, now: Date())
             AXHelper.raise(element, pid: window.pid)
         }
     }

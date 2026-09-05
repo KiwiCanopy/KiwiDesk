@@ -44,6 +44,41 @@ extension KiwiCore {
         selfRaiseStamp(id, now: now) != nil
     }
 
+    /// Whether KiwiDesk raised `id` within the PLACEMENT window
+    /// — the self ledger's second liveness reading (#1161). A
+    /// scrolling step raises the window it pans onto, and the
+    /// emulator's last echo of that raise lands ~1.3 s later
+    /// (device, 2026-09-05 19:25): past `selfRaiseEchoWindow`,
+    /// inside the placement's. Read by `placementBounce` alone.
+    func raisedWithinPlacementWindow(
+        _ id: WindowID,
+        now: Date
+    ) -> Bool {
+        guard let stamp = selfRaiseStamps[id] else { return false }
+        return now.timeIntervalSince(stamp)
+            < PlacementLedger.echoWindow
+    }
+
+    /// The self ledger's one writer: stamps `id` as raised by us
+    /// so its echoes — every one of them, a lazy app sends two
+    /// (#887) — are told from a click (#152) and rank the #465
+    /// sibling distrust. Pruned by age so never-echoed raises
+    /// cannot accrete, RETAINING the longer of the two readers'
+    /// windows — the placement bounce reads past
+    /// `selfRaiseEchoWindow` (#1161), and a step between the
+    /// raise and its late echo would otherwise prune the stamp
+    /// that names it.
+    func stampSelfRaise(_ id: WindowID, now: Date) {
+        let retained = max(
+            Self.selfRaiseEchoWindow,
+            PlacementLedger.echoWindow
+        )
+        selfRaiseStamps = selfRaiseStamps.filter {
+            now.timeIntervalSince($0.value) < retained
+        }
+        selfRaiseStamps[id] = now
+    }
+
     /// Whether a live self-raise of `id` vetoes the z-order echo
     /// revert (#431): only when NEWER than the z-order stamp,
     /// never on freshness — an older one is the restore's own

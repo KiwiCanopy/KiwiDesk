@@ -50,6 +50,25 @@ struct PlacementBounceSeamTests {
             "reassertAgainstPlacementBounce(",
             ["KiwiCore+FocusEvents.swift", "KiwiCore+PlacementBounce.swift"]
         ),
+        // The self ledger's second liveness reading is the
+        // scrolling arm's third disjunct, and its one writer is
+        // what `raiseWindow` stamps through — a prune spelled at
+        // the raise again would retain the 1 s window and drop
+        // the stamp the late echo is told by.
+        (
+            "raisedWithinPlacementWindow(",
+            [
+                "KiwiCore+ClickProvenance.swift",
+                "KiwiCore+PlacementBounce.swift",
+            ]
+        ),
+        (
+            "stampSelfRaise(",
+            [
+                "KiwiCore+ClickProvenance.swift",
+                "KiwiCore+FocusRaise.swift",
+            ]
+        ),
     ]
 
     @Test("each wiring exists exactly once per named file")

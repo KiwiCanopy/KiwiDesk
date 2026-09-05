@@ -17,7 +17,11 @@ extension KiwiCore {
     /// complied within 9 pt of a pan into the void and bounced
     /// regardless — or the app REFUSED the size asked, which a
     /// window sliding to an on-screen slot never does and the
-    /// emulator does on every re-ask (device, 2026-09-05 19:03).
+    /// emulator does on every re-ask (device, 2026-09-05 19:03) —
+    /// or KiwiDesk RAISED the window within the placement window:
+    /// a step onto it and off again leaves it placed on-screen
+    /// and complying, and its last echo of our raise lands past
+    /// `selfRaiseEchoWindow` (device, 2026-09-05 19:25).
     /// Anywhere else — the stash corner of a hidden Space,
     /// monocle's park, where a clickless focus is how a user
     /// REACHES an off-screen window — the placement lies past the
@@ -37,7 +41,9 @@ extension KiwiCore {
             let sizeRefused =
                 abs(actual.width - placed.width) > tolerance
                 || abs(actual.height - placed.height) > tolerance
-            return crossesEdge || sizeRefused ? placed : nil
+            let raisedByUs = raisedWithinPlacementWindow(id, now: now)
+            return crossesEdge || sizeRefused || raisedByUs
+                ? placed : nil
         }
         let originRefused =
             abs(actual.minX - placed.minX) > tolerance

@@ -1601,7 +1601,20 @@ refuses the **size** and bounces a quarter second later, on an
 on-screen placement. A window sliding to an on-screen slot keeps
 its size, so a refused size is that case's discriminator, and
 the size-bound learner stops re-asking a twice-refused size, so
-the stamps — and the bounces — stop with it. Anywhere else, a
+the stamps — and the bounces — stop with it. And the row has a
+third: a step onto the emulator and off again leaves it placed
+on-screen and complying, and its last echo of the raise that
+step issued lands at ~1.3 s — past the 1 s self-echo window,
+inside the placement's (measured 2026-09-05, both directions).
+The self ledger therefore gets a second liveness reading, the
+placement window's, read by the placement bounce alone: our own
+raise inside the placement window is that case's discriminator.
+The 1 s window itself is not widened — the #465 sibling trade,
+the accessibility return and the mouse-warp hold all read it,
+and each would double its own trade for a bounce only the
+scrolling row has. The ledger's one writer retains stamps for
+the longer window, or a second step between the raise and its
+late echo prunes the stamp that names it. Anywhere else, a
 clickless focus is how a user *reaches* an off-screen window —
 the corner a hidden Space's windows are parked in, monocle's
 park — so the placement must lie past the edge and the window
@@ -1610,7 +1623,9 @@ the stash corner and a window that went where it was parked does
 not. The discriminators are forgeable by construction: a cmd-tab
 onto a scrolling window still sliding out past the edge, or onto
 one whose app refuses the asked size before its bound is
-learned, is bounced for the placement window too. And a distrust
+learned, or back onto a scrolling window the user stepped off
+inside the placement window, is bounced for that window too.
+And a distrust
 **renews** that window: the emulator retries every half second
 or so, and its third retry landed past a window that started at
 the pan — the bounce is proof the app is still reacting, so an

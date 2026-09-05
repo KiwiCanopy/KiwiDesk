@@ -530,11 +530,17 @@ editing here:
   restore's own echo past both nets. A ledger is cleared where
   its id dies (`forgetGoneWindow`) and rekeyed on a tab switch,
   and a CONSUMER of the self ledger reads a stamp's liveness
-  through `selfRaiseStamp(_:now:)` rather than comparing the
-  stamp itself — the writer's prune compares, and the two click
-  readers borrow the constant as a click window, neither of
-  which is a stamp read; nothing scans for a new one, so a new
-  reader owes the routing deliberately. `SelfRaiseDuplicateEchoTests`,
+  through one of its TWO readings — `selfRaiseStamp(_:now:)`,
+  the 1 s echo window every distrust ranks by, or
+  `raisedWithinPlacementWindow(_:now:)`, the placement window's,
+  read by the placement bounce alone (#1161) — rather than
+  comparing the stamp itself; the ledger's one writer,
+  `stampSelfRaise(_:now:)`, prunes to the LONGER of the two so a
+  step between a raise and its late echo cannot drop the stamp
+  that names it, and the two click readers borrow the 1 s
+  constant as a click window, which is not a stamp read; nothing
+  scans for a new reading, so a new reader owes the routing
+  deliberately. `SelfRaiseDuplicateEchoTests`,
   `RaiseEchoClickTests` and `ActivationReReportTests` hold the
   three arms. One ledger of this shape answers by GEOMETRY
   instead of order, there being no second stamp to rank against:
@@ -550,7 +556,10 @@ editing here:
   scrolling row where the placement lay past the screen's edge
   (the emulator complied within 9 pt and bounced regardless) OR
   the window refused the SIZE asked (the on-screen bounce, which
-  a sliding window's kept size tells apart), anywhere else only
+  a sliding window's kept size tells apart) OR KiwiDesk RAISED
+  the window inside the placement window (a step onto it and off
+  again, whose last echo outlives the 1 s self-echo window — the
+  self ledger's second reading, above), anywhere else only
   where the placement lay past the edge AND the window refused it
   by origin — a clickless focus is how a user reaches a parked
   window — and it re-asserts the intended window with a direct
