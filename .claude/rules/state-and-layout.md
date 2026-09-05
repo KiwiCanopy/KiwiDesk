@@ -546,16 +546,21 @@ editing here:
   exception: the app is exiting, no focus report follows) — and
   read by `KiwiCore.placementBounce`, which `handleWindowFocused`
   consults ABOVE the focus-follow and BELOW the z-order revert.
-  It fires for a clickless report, after focus moved on, of a
-  window placed past its screen's edge: in the scrolling void the
-  placement alone (the emulator complied within 9 pt and bounced
-  regardless), anywhere else only where the window REFUSED the
-  placement by origin — a clickless focus is how a user reaches a
-  parked window — and it re-asserts the intended window with a
-  direct raise, since no sequence's closing re-assert will. These
-  discriminators are FORGEABLE, unlike #465's ordering: a cmd-tab
-  onto a scrolling window still sliding out is bounced too, the
-  ruled trade (`docs/accepted-limitations.md`). Its forget and
+  It fires for a clickless report, after focus moved on: in a
+  scrolling row where the placement lay past the screen's edge
+  (the emulator complied within 9 pt and bounced regardless) OR
+  the window refused the SIZE asked (the on-screen bounce, which
+  a sliding window's kept size tells apart), anywhere else only
+  where the placement lay past the edge AND the window refused it
+  by origin — a clickless focus is how a user reaches a parked
+  window — and it re-asserts the intended window with a direct
+  raise, since no sequence's closing re-assert will, RENEWING the
+  placement as it does, since the bounce is proof the app is
+  still reacting and its retries outlive a window started at the
+  pan. These discriminators are FORGEABLE, unlike #465's
+  ordering: a cmd-tab onto a scrolling window still sliding out,
+  or onto one refusing its asked size, is bounced too, the ruled
+  trade (`docs/accepted-limitations.md`). Its forget and
   rekey pair with the other ledgers' by hand, which review checks;
   `PlacementBounceTests` holds both arms, the click escape and the
   bound, `PlacementBounceSeamTests` the two leaves, the consult

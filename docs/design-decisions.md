@@ -1592,20 +1592,32 @@ The verdict is **geometric** rather than an ordering of stamps:
 there is no second stamp to rank against. A clickless focus
 report within the placement window, arriving after focus moved
 on, is distrusted where the placement lies past a screen edge.
-In a **scrolling** Space's void that is the whole verdict — the
+In a **scrolling** Space's row that is the whole verdict — the
 emulator complied within 9 pt of the pan and bounced regardless,
-so "the window is not where we put it" is no discriminator
-there. Anywhere else, a clickless focus is how a user *reaches*
-an off-screen window — the corner a hidden Space's windows are
-parked in, monocle's park — so the window must also have
-**refused** the placement, its origin off the placement's, which
-the emulator does at the stash corner and a window that went
-where it was parked does not. The discriminators are forgeable
-by construction: a cmd-tab onto a scrolling window still sliding
-out past the edge is bounced for the placement window too, and
-the bound is two seconds after KiwiDesk *last* placed the
-window, since an app that keeps being re-placed is re-stamped by
-every retile. That is the ruled trade; a click is always honored.
+so "the window is not where we put it" is no discriminator in
+the void — and the row has a second bounce the void does not
+show: stepping off the emulator re-asks it its slot's width, it
+refuses the **size** and bounces a quarter second later, on an
+on-screen placement. A window sliding to an on-screen slot keeps
+its size, so a refused size is that case's discriminator, and
+the size-bound learner stops re-asking a twice-refused size, so
+the stamps — and the bounces — stop with it. Anywhere else, a
+clickless focus is how a user *reaches* an off-screen window —
+the corner a hidden Space's windows are parked in, monocle's
+park — so the placement must lie past the edge and the window
+must have **refused** it by position, which the emulator does at
+the stash corner and a window that went where it was parked does
+not. The discriminators are forgeable by construction: a cmd-tab
+onto a scrolling window still sliding out past the edge, or onto
+one whose app refuses the asked size before its bound is
+learned, is bounced for the placement window too. And a distrust
+**renews** that window: the emulator retries every half second
+or so, and its third retry landed past a window that started at
+the pan — the bounce is proof the app is still reacting, so an
+app that keeps bouncing keeps being bounced until it has been
+quiet for two seconds, while a window that never bounces still
+expires at two. That is the ruled trade; a click is always
+honored.
 The #465 sibling distrust's carve-out for a visible same-display
 sibling is narrowed by this: such a sibling placed into the
 scrolling void is bounced like any other window.

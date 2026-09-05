@@ -220,9 +220,13 @@ extension KiwiCore {
         // revert, its sequence's closing re-assert owning OS focus.
         if !selfEcho,
             let intended = effects.focusBefore, intended != id,
-            placementBounce(id, now: now)
+            let placed = placementBounce(id, now: now)
         {
-            reassertAgainstPlacementBounce(id, intended: intended)
+            reassertAgainstPlacementBounce(
+                id,
+                intended: intended,
+                placed: placed
+            )
             return
         }
         // The accessibility-steal return (#958): LAST among

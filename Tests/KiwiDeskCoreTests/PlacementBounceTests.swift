@@ -125,6 +125,43 @@ struct PlacementBounceTests {
         #expect(focused(core) == target)
     }
 
+    /// The on-screen bounce (device, 19:03): stepping off the
+    /// emulator re-asks it its slot's width, it refuses the SIZE
+    /// and bounces a quarter second later. A refused size is the
+    /// discriminator — a sliding window keeps its size.
+    @Test("A refused size on an on-screen placement is distrusted")
+    func refusedSizeOnscreenIsDistrusted() {
+        let core = makeCore()
+        let (target, other) = makeFixture(core)
+        let asked = CGRect(x: 800, y: 100, width: 823, height: 300)
+        core.tiler.placements.stamp(target, target: asked)
+        core.handle(.windowFocused(target))
+        #expect(focused(core) == other)
+    }
+
+    /// A distrusted bounce RENEWS the placement's window, so an
+    /// app retrying past the original window is still bounced.
+    @Test("A distrusted bounce renews the placement window")
+    func distrustRenewsTheWindow() {
+        let core = makeCore()
+        let (target, other) = makeFixture(core)
+        let now = Date()
+        core.tiler.placements.stamp(
+            target,
+            target: offscreen,
+            at: now.addingTimeInterval(
+                -PlacementLedger.echoWindow + 0.2
+            )
+        )
+        core.handle(.windowFocused(target))
+        #expect(focused(core) == other)
+        // Without the renewal this read would be nil already.
+        let later = now.addingTimeInterval(1)
+        #expect(core.tiler.placements.recent(target, at: later) != nil)
+        core.handle(.windowFocused(target))
+        #expect(focused(core) == other)
+    }
+
     /// An ON-screen placement the window has not reached is a
     /// slide, not a bounce: a cmd-tab onto it is honored.
     @Test("An on-screen placement not yet reached is honored")
@@ -208,6 +245,10 @@ struct PlacementBounceTests {
         let core = makeCore()
         let (target, other) = makeFixture(core)
         core.moveWindow(target, to: SpaceID(2), follow: false)
+        // LOAD-BEARING: a fresh move latch (#482) suppresses the
+        // follow by itself, and this test would then pass while
+        // watching nothing (guard-prover, 2026-09-05). Age it out
+        // so the verdict below is the bounce's alone.
         core.moveLatch.stamp(
             target,
             at: Date(

@@ -31,13 +31,21 @@ struct PlacementBounceSeamTests {
         // the app being on its way out.
         ("animation.animate(", ["TilingEngine+Layout.swift"]),
         ("applier.applyInstant(", ["TilingEngine.swift"]),
-        // The stamps at those leaves.
+        // The stamps at those leaves, spelled per leaf so the
+        // renewal below is not counted among them.
         (
-            "placements.stamp(",
-            ["TilingEngine+Layout.swift", "TilingEngine.swift"]
+            "placements.stamp(id, target: target)",
+            ["TilingEngine+Layout.swift"]
         ),
+        ("placements.stamp(id, target: frame)", ["TilingEngine.swift"]),
         // The handler consults the verdict once and answers once.
         ("placementBounce(id, now:", ["KiwiCore+FocusEvents.swift"]),
+        // A distrust RENEWS the placement: the third retry must
+        // not outlive a window that started at the pan.
+        (
+            "placements.stamp(id, target: placed)",
+            ["KiwiCore+PlacementBounce.swift"]
+        ),
         (
             "reassertAgainstPlacementBounce(",
             ["KiwiCore+FocusEvents.swift", "KiwiCore+PlacementBounce.swift"]

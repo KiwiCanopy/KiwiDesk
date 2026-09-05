@@ -167,6 +167,10 @@ struct SelfRaiseDuplicateEchoTests {
         core.state.workspaces.focus(target, in: space)
         core.selfRaiseStamps[target] = Date()
         core.handle(.windowFocused(target))
+        // The honored report retiled; this fixture echoes no
+        // frames, so the un-echoed slot would read as a refused
+        // placement (#1161). The pan is long past here.
+        core.tiler.placements = PlacementLedger()
         core.state.workspaces.focus(other, in: space)
         core.selfRaiseStamps[target] = Date(
             timeIntervalSinceNow: -KiwiCore.selfRaiseEchoWindow - 1
