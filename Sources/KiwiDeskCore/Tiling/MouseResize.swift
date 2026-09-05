@@ -97,70 +97,6 @@ public enum MouseResize {
             && !inner.contains(point)
     }
 
-    /// Direction (+1 / -1) to move BSP ratio to grow target slot (#122).
-    public static func bspSide(
-        slot: CGRect,
-        bounds: CGRect,
-        horizontal: Bool
-    ) -> CGFloat {
-        horizontal
-            ? (slot.midX <= bounds.midX ? 1 : -1)
-            : (slot.midY <= bounds.midY ? 1 : -1)
-    }
-
-    /// How far a slot's extent may fall short of the tiled
-    /// extent and still count as spanning it: the layout's own
-    /// arithmetic, so sub-point rounding is the only gap to
-    /// absorb. A window that really is split off is short by an
-    /// inner gap plus a min-size share, never by a point.
-    private static let spanTolerance: CGFloat = 1
-
-    /// Sorts tiled slots onto the two sides of the first split
-    /// on one axis, DROPPING the windows that take no part in
-    /// it (#1259): a slot spanning the whole tiled extent lies
-    /// above every split of that orientation, so no ratio move
-    /// can change its size. It belongs to neither side, and a
-    /// side that counts it can come back naming it as the
-    /// window that cannot move — which tells the user the wrong
-    /// window is stuck.
-    ///
-    /// The extent is the UNION of the slots rather than the
-    /// layout region: the tiling fills its region, so the union
-    /// is the same number already inset by the outer gaps,
-    /// which the region is not. `bounds` stays the region for
-    /// the side comparison itself (#537).
-    public static func bspSides(
-        of windows: some Sequence<WindowID>,
-        slots: [WindowID: CGRect],
-        bounds: CGRect,
-        horizontal: Bool
-    ) -> (first: [WindowID], second: [WindowID]) {
-        let placed = windows.compactMap { id in
-            slots[id].map { (id: id, slot: $0) }
-        }
-        let extent = placed.reduce(CGRect.null) {
-            $0.union($1.slot)
-        }
-        let whole = horizontal ? extent.width : extent.height
-        var first: [WindowID] = []
-        var second: [WindowID] = []
-        for (id, slot) in placed {
-            let own = horizontal ? slot.width : slot.height
-            guard own < whole - spanTolerance else { continue }
-            let side = bspSide(
-                slot: slot,
-                bounds: bounds,
-                horizontal: horizontal
-            )
-            if side > 0 {
-                first.append(id)
-            } else {
-                second.append(id)
-            }
-        }
-        return (first, second)
-    }
-
     /// Translates frame change into layout parameter adjustment
     /// (#56, #222, #925).
     public static func translate(
@@ -180,7 +116,7 @@ public enum MouseResize {
         switch mode {
         case .bsp:
             if abs(dw) >= abs(dh), abs(dw) > threshold {
-                let side = bspSide(
+                let side = BspSplit.side(
                     slot: slot,
                     bounds: bounds,
                     horizontal: true
@@ -188,7 +124,7 @@ public enum MouseResize {
                 return .bspRatioH(side * dw / bounds.width)
             }
             if abs(dh) > threshold {
-                let side = bspSide(
+                let side = BspSplit.side(
                     slot: slot,
                     bounds: bounds,
                     horizontal: false

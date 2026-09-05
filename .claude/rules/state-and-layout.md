@@ -878,7 +878,7 @@ editing here:
   geometric and a window spanning the whole tiled extent on the
   axis sits above every split of that orientation, so no ratio
   move can resize it. That window is dropped from both sides by
-  the one `MouseResize.bspSides` authority — which also keeps
+  the one `BspSplit.sides` authority — which also keeps
   its floor out of the CAP, where it blocked a write no window
   on the split was constraining — and the binding side is then
   read off the WRITE's own direction, never the focused

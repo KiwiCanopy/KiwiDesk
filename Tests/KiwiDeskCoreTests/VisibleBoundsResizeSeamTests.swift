@@ -84,7 +84,7 @@ struct VisibleBoundsResizeSeamTests {
     @Test("The BSP resize sign reads the injected bounds")
     func bspFocusSignFollowsInjectedBounds() {
         // `bspFocusSign` classifies the focused slot as the first
-        // or second region via `MouseResize.bspSide`, which is
+        // or second region via `BspSplit.side`, which is
         // `slot.midX <= bounds.midX ? 1 : -1`. Growing the right
         // window must lower the shared ratio (#122).
         //
