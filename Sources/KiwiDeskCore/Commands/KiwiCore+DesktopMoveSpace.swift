@@ -13,15 +13,15 @@ extension KiwiCore {
     /// (#444). A HIDDEN Desktop is the arrival's: the name is
     /// recorded and paid at the departure (`PendingSpaceAssignment`),
     /// never written into the membership here, which the reveal
-    /// reconcile would fight (#890 ▸ arrival semantics). The Space
-    /// is brought into existence here, after the bridge accepted,
-    /// so the arrival's `livingRememberedSpace` can honor it.
+    /// reconcile would fight (#890 ▸ arrival semantics). Neither
+    /// route creates the Space here: the shown one's filing does,
+    /// and the hidden one's CLAIM does at the departure, so an
+    /// expired name leaves no empty Space behind.
     func fileExplicitly(
         _ window: WindowID,
         in space: SpaceID,
         target: DesktopTarget
     ) {
-        state.workspaces.ensureSpace(space)
         guard target.isCurrent else {
             pendingSpace.record(window, space: space)
             onLog(
@@ -30,23 +30,13 @@ extension KiwiCore {
             )
             return
         }
-        guard let managed = state.windows[window] else { return }
         let from = state.workspaces.space(of: window)
         guard from != space else { return }
         onLog(
             "move_to_desktop: w\(window.raw) filed into space "
                 + "\(space.raw) on the shown Desktop"
         )
-        addFocusedToSpace(window, to: space)
-        reanchorFloat(window, to: space)
-        state.workspaces.focus(window, in: space)
-        emitWindowMovedToSpace(
-            window,
-            app: managed.appName,
-            bundleID: managed.appBundleID,
-            from: from,
-            to: space
-        )
+        fileMembership(window, into: space, from: from)
         retile(animated: true)
     }
 }

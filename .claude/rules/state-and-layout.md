@@ -169,27 +169,38 @@ editing here:
   #1150's review found them disagreeing), so it is refused with
   the pin hint, never hand-assigned, because the next
   `resolveSpaceDisplays` would move it back and re-open the same
-  undo. Which screen a Space lands on travels ON the resolution
-  (`SpaceTargetResolution.space(_:landing:)`), so the gate is
-  handed the value the parse ruled on rather than re-deriving
-  it. The route creates the Space after the bridge accepted
-  (`fileExplicitly`), never the parse, or a refused move leaves
-  an empty Space; and `livingRememberedSpace` drops a record
-  whose Space is gone. At the ARRIVAL the #1010 screen-home net
-  still outranks the name — a Space moved to another screen
-  between the command and the reveal is exactly what that net
-  exists for. The explicit Space is a MEMBERSHIP write where a
-  bare Desktop move is not, so it takes `stickyMoveRefused`
-  before anything moves — handed the screen the Space WILL lay
-  out on (the gate's `landingOn`), since the gate reads a nil
-  assignment as "elsewhere" — and re-anchors
-  a float on the shown route, as `moveWindow` does. The ledger is bounded and per window, rekeyed on a tab
-  switch; a new route that produces a departure claims through
-  the gone handler rather than beside it, and
+  undo. Carry the screen a Space lands on ON the resolution
+  (`SpaceTargetResolution.space(_:landing:)`) and hand it to the
+  sticky gate as `landingOn` — the gate reads a nil assignment
+  as "elsewhere", so the thread is load-bearing exactly where
+  the carried value and the ledger read disagree
+  (`DesktopMoveSpaceGateTests` ▸ the single-screen landing case
+  is that arrangement; the assigned case cannot red it). Create
+  the Space where it is FILED — the shown route's filing, the
+  hidden route's CLAIM at the departure — never at the parse or
+  the record, or a refused move or an expired name leaves an
+  empty Space (`DesktopMoveSpaceTargetTests` ▸ the bridge
+  refusal and the expired name); `livingRememberedSpace` drops a
+  record whose Space is gone. At the ARRIVAL the #1010
+  screen-home net outranks the name — a Space moved to another
+  screen between the command and the reveal is what that net
+  exists for — and a change that lets the name win owes that
+  suite's arrival-precedence case a new verdict. The explicit
+  Space is a MEMBERSHIP write where a bare Desktop move is not:
+  it takes `stickyMoveRefused` before anything moves, and every
+  membership filing — this route, `moveWindow`, the #1010
+  re-home — goes through the one `fileMembership` (add, float
+  re-anchor, focus stamp, emit), never a hand copy of that list,
+  which is how the re-anchor went missing once; no fixture can
+  see a float cross fake screens, so `PendingSpaceSeamTests`
+  counts the callers. The ledger is bounded and per window,
+  rekeyed on a tab switch; a new route that produces a departure
+  claims through the gone handler rather than beside it, and
   `PendingSpaceSeamTests` is the register of those wirings.
-  `DesktopMoveSpaceTargetTests` drives both routes, the homing,
-  the refusals and the control through the real dispatch and
-  fold; `PendingSpaceAssignmentTests` holds the record.
+  `DesktopMoveSpaceTargetTests` drives both routes and the
+  control through the real dispatch and fold,
+  `DesktopMoveSpaceGateTests` the refusals and the gate;
+  `PendingSpaceAssignmentTests` holds the record.
 - **A follow owes the window it sent away a focus, and pays it
   at the ARRIVAL** (#1007). `move_to_desktop_and_follow` onto a
   Desktop nobody is showing cannot focus the window at the moment

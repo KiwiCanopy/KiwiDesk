@@ -19,6 +19,10 @@ extension KiwiCore {
         // replaces the remembered Space, and the arrival's
         // ordinary rule lands the window in it.
         if let space = pendingSpace.claim(id) {
+            // Created at the claim, never at the record: the
+            // arrival's `livingRememberedSpace` needs it to
+            // exist, and an expired name must leave nothing.
+            state.workspaces.ensureSpace(space)
             state.redirectDeparture(of: id, to: space)
             onLog(
                 "move_to_desktop: w\(id.raw) departed — filed "

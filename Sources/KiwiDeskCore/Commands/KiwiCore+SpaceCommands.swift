@@ -127,6 +127,44 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// The ONE membership filing every re-home shares (#1150
+    /// review — a third hand copy shipped with its re-anchor
+    /// missing): add, the float re-anchor, the focus stamp, the
+    /// `window_moved_to_space`. Callers keep their own focus
+    /// policy and retile. A same-space re-file (a Space Bar drop
+    /// on the current space, a redundant move) stays
+    /// geometry-neutral and emits nothing: the window may sit on
+    /// another display than its membership by USER choice, and
+    /// placement always wins (review).
+    ///
+    /// The float re-anchor (#444): membership alone never moves a
+    /// float — no layout frame is recomputed for one — so a
+    /// display crossing translates it; the caller's retile
+    /// delivers. The focus stamp (#22): the moved window becomes
+    /// the target's focus so the FIRST focus of that space raises
+    /// it; without it `focusSpace` finds no focus to hand over and
+    /// the space renders empty until a later focus event.
+    func fileMembership(
+        _ window: WindowID,
+        into target: SpaceID,
+        from: SpaceID?
+    ) {
+        addFocusedToSpace(window, to: target)
+        if from != target {
+            reanchorFloat(window, to: target)
+        }
+        state.workspaces.focus(window, in: target)
+        if from != target {
+            emitWindowMovedToSpace(
+                window,
+                app: state.windows[window]?.appName ?? "",
+                bundleID: state.windows[window]?.appBundleID,
+                from: from,
+                to: target
+            )
+        }
+    }
+
     /// Files a window into a target space honoring that space's
     /// layout: a track-mode target routes through the track
     /// `new_window` rule (#128) so an incoming window opens its
@@ -211,33 +249,7 @@ extension KiwiCore {
         // whether the moved window currently holds OS key focus.
         // Only then must an emptied origin yield focus (#446).
         let movedHeldFocus = state.workspaces.lastFocused == window
-        addFocusedToSpace(window, to: target)
-        // A float crossing displays must re-anchor (#444):
-        // membership alone never moves it — no layout frame is
-        // recomputed for a float. The retile below delivers.
-        // Same-space re-files (a Space Bar drop on the current
-        // space, a redundant move) stay geometry-neutral: the
-        // window may sit on another display than its membership
-        // by USER choice, and placement always wins (review).
-        if from != target {
-            reanchorFloat(window, to: target)
-        }
-        // The moved window becomes the target space's focus, so
-        // the FIRST focus of that space raises it. Without this,
-        // `focusSpace` finds no focus to hand over and the window
-        // is un-stashed frame-wise but never brought forward —
-        // the space renders empty until a later focus event
-        // stamps the focus and a second switch surfaces it (#22).
-        state.workspaces.focus(window, in: target)
-        if from != target {
-            emitWindowMovedToSpace(
-                window,
-                app: state.windows[window]?.appName ?? "",
-                bundleID: state.windows[window]?.appBundleID,
-                from: from,
-                to: target
-            )
-        }
+        fileMembership(window, into: target, from: from)
         if !follow {
             // A no-follow move must not be turned into a follow
             // by the OS dropping the origin refocus raise below

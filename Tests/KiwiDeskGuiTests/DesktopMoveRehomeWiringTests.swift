@@ -125,15 +125,17 @@ struct DesktopMoveRehomeWiringTests {
         // the match (§2.4).
         #expect(scope.contains("display(forUUID:"))
         #expect(scope.contains("target.displayIdentifier"))
-        // Membership only: the verb owns its own focus policy,
-        // so the full `moveWindow` command must not appear here.
-        #expect(scope.contains("addFocusedToSpace("))
+        // Membership only, through the ONE filing every re-home
+        // shares (#1150 review: a hand copy of the step list
+        // shipped with its re-anchor missing) — it carries the
+        // add and the #22 focus stamp — while the verb keeps its
+        // own focus policy, so the full `moveWindow` command must
+        // not appear here.
+        #expect(scope.contains("fileMembership(window, into:"))
         #expect(!scope.contains("moveWindow("))
-        // …plus the destination focus stamp `moveWindow` makes
-        // for the #22 reason, and the retile: with `isCurrent`
-        // the follow's `switchDesktop` stands down, so nothing
-        // else reflows the destination screen.
-        #expect(scope.contains("state.workspaces.focus("))
+        // …plus the retile: with `isCurrent` the follow's
+        // `switchDesktop` stands down, so nothing else reflows
+        // the destination screen.
         #expect(scope.contains("retile("))
     }
 }

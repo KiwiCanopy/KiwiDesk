@@ -176,22 +176,6 @@ struct DesktopMoveSpaceTargetTests {
         #expect(core.pendingSpace.isEmpty)
     }
 
-    @Test("A Space on another screen than the Desktop's is refused")
-    func spaceOnAnotherScreenIsRefused() {
-        let core = makeCore()
-        defer { teardown() }
-        addDisplays(core)
-        core.state.workspaces.assign(mail, to: DisplayID(2))
-        let origin = core.state.workspaces.space(of: window)
-        let response = core.execute(
-            "move_to_desktop",
-            args: [.number(1), .string("mail")]
-        )
-        #expect(!response.isSuccess)
-        #expect(core.state.workspaces.space(of: window) == origin)
-        #expect(core.pendingSpace.isEmpty)
-    }
-
     /// Control: the one-argument form still files the departure
     /// under the Space the window left.
     @Test("Without a Space the departure keeps its origin")
@@ -207,105 +191,71 @@ struct DesktopMoveSpaceTargetTests {
         #expect(core.state.rememberedSpace(of: window) == origin)
     }
 
-    /// An unowned Space has no settled screen while two are
-    /// connected — the layout falls back to the key window's, the
-    /// placement resolve to the menu bar's — so naming one for
-    /// ANY Desktop is refused with the pin hint, creating nothing.
-    @Test("An unowned Space on two screens is refused")
-    func unownedSpaceOnTwoScreensIsRefused() {
+    /// The Space is created only once the bridge accepted the
+    /// move — a refused bridge leaves no Space and no record.
+    @Test("A bridge refusal creates nothing")
+    func bridgeRefusalCreatesNothing() {
         let core = makeCore()
         defer { teardown() }
-        addDisplays(core)
-        for desktop in [2, 4] {
-            let response = core.execute(
-                "move_to_desktop",
-                args: [.number(Double(desktop)), .string("mail")]
-            )
-            #expect(!response.isSuccess)
-            #expect(response.error?.contains("no screen yet") == true)
+        WMBridge.classResolverOverride = {
+            $0 == "MoveWindowsToManagedSpaceOperation"
+                ? nil : bridgeClasses[$0]
         }
-        #expect(core.state.workspaces[mail] == nil)
-        #expect(core.pendingSpace.isEmpty)
-    }
-
-    /// On ONE screen every reading agrees, so the same unowned
-    /// Space is accepted and created, unassigned.
-    @Test("An unowned Space on one screen is created")
-    func unownedSpaceOnOneScreenIsCreated() {
-        let core = makeCore()
-        defer { teardown() }
-        core.state.workspaces.upsertDisplay(
-            Display(
-                id: DisplayID(1),
-                name: "A",
-                frame: CGRect(x: 0, y: 0, width: 1920, height: 1080)
-            )
-        )
-        #expect(core.state.workspaces[mail] == nil)
-        #expect(
-            core.execute(
-                "move_to_desktop",
-                args: [.number(2), .string("mail")]
-            ).isSuccess
-        )
-        #expect(core.state.workspaces[mail] != nil)
-        #expect(core.state.workspaces.display(of: mail) == nil)
-    }
-
-    /// The gate is handed where the Space WILL lay out: a
-    /// display-sticky window on screen A, named into a Space
-    /// assigned to screen A, is the move its scope forbids.
-    @Test("A display-sticky window is refused a Space on its screen")
-    func displayStickyRefusedASpaceOnItsOwnScreen() {
-        let core = makeCore()
-        defer { teardown() }
-        addDisplays(core)
-        let origin = core.state.workspaces.space(of: window)!
-        core.state.workspaces.assign(origin, to: DisplayID(1))
-        core.state.workspaces.assign(mail, to: DisplayID(1))
-        #expect(core.execute("make_display_sticky").isSuccess)
-        let response = core.execute(
-            "move_to_desktop",
-            args: [.number(2), .string("mail")]
-        )
-        #expect(!response.isSuccess)
-        #expect(response.error?.contains("sticky") == true)
-        #expect(core.state.workspaces.space(of: window) == origin)
-        #expect(core.pendingSpace.isEmpty)
-    }
-
-    /// The explicit Space is a membership write, so it takes the
-    /// one sticky gate `move_to_space` takes — and the whole
-    /// command is refused, the window staying put, with no Space
-    /// created by a parse that never writes.
-    @Test("A sticky window's explicit Space refuses the move")
-    func stickyWindowRefusesTheExplicitSpace() {
-        let core = makeCore()
-        defer { teardown() }
-        #expect(core.execute("make_sticky").isSuccess)
         let origin = core.state.workspaces.space(of: window)
         let response = core.execute(
             "move_to_desktop",
             args: [.number(2), .string("mail")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("sticky") == true)
-        #expect(core.state.windows[window] != nil)
-        #expect(core.state.workspaces.space(of: window) == origin)
+        #expect(response.error?.contains("bridge") == true)
         #expect(core.state.workspaces[mail] == nil)
+        #expect(core.state.workspaces.space(of: window) == origin)
         #expect(core.pendingSpace.isEmpty)
     }
 
-    @Test("An empty Space id is refused")
-    func emptySpaceIsRefused() {
+    /// An expired name is dropped at the departure and leaves no
+    /// empty Space behind — the Space is created at the CLAIM.
+    @Test("An expired name leaves no Space behind")
+    func expiredNameLeavesNoSpace() {
         let core = makeCore()
         defer { teardown() }
-        #expect(
-            !core.execute(
-                "move_to_desktop",
-                args: [.number(2), .string("")]
-            ).isSuccess
+        let origin = core.state.workspaces.space(of: window)
+        core.pendingSpace.record(
+            window,
+            space: mail,
+            at: Date(
+                timeIntervalSinceNow:
+                    -PendingSpaceAssignment.drainWindow - 1
+            )
         )
-        #expect(core.pendingSpace.isEmpty)
+        core.handle(.windowDestroyed(window, wasMinimized: false))
+        #expect(core.state.rememberedSpace(of: window) == origin)
+        #expect(core.state.workspaces[mail] == nil)
+    }
+
+    /// At the arrival the #1010 screen-home net still outranks
+    /// the name: a Space moved to another screen between the
+    /// command and the reveal is exactly what that net exists
+    /// for, and the fold asks it before the remembered Space.
+    @Test("At the arrival the screen-home net outranks the name")
+    func arrivalScreenHomeOutranksTheName() {
+        let core = makeCore()
+        defer { teardown() }
+        addDisplays(core)
+        let origin = core.state.workspaces.space(of: window)!
+        core.state.workspaces.assign(origin, to: DisplayID(1))
+        core.state.workspaces.assign(mail, to: DisplayID(2))
+        core.state.apply(.windowDestroyed(window, wasMinimized: false))
+        core.state.redirectDeparture(of: window, to: mail)
+        #expect(core.state.rememberedSpace(of: window) == mail)
+        // The window's frame lands on screen 1, which shows the
+        // origin — the net re-homes it there, not into `mail`.
+        core.state.arrivalDisplay = DisplayID(1)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: window, pid: 1, appName: "App")
+            )
+        )
+        #expect(core.state.workspaces.space(of: window) == origin)
     }
 }

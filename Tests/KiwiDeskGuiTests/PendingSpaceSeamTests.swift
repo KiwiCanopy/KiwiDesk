@@ -36,6 +36,20 @@ struct PendingSpaceSeamTests {
         // eager departure and the reap's reconcile both reach it.
         ("pendingSpace.claim(", ["KiwiCore+GoneReason.swift"]),
         ("pendingSpace.rekey(", ["KiwiCore+RekeyEvent.swift"]),
+        // The one membership filing (add, float re-anchor, focus
+        // stamp, emit) — a third hand copy of that list shipped
+        // with its re-anchor missing, and no fixture can see a
+        // float cross fake screens, so the WIRING is the guard.
+        // The needle is the call shape, which the definition
+        // line does not match.
+        (
+            "fileMembership(window, into:",
+            [
+                "KiwiCore+SpaceCommands.swift",
+                "KiwiCore+DesktopMove.swift",
+                "KiwiCore+DesktopMoveSpace.swift",
+            ]
+        ),
     ]
 
     @Test("each wiring exists exactly once per named file")

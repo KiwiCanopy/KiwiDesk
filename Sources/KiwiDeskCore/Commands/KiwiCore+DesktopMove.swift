@@ -218,19 +218,9 @@ extension KiwiCore {
             "move_to_desktop: crossing screens — homing "
                 + "w\(window.raw) to space \(destination.raw)"
         )
-        addFocusedToSpace(window, to: destination)
-        state.workspaces.focus(window, in: destination)
-        // The membership change is a `window_moved_to_space`
-        // like any other — `from` read BEFORE the move, or
-        // subscribers are told the window came from where it
-        // just went.
-        emitWindowMovedToSpace(
-            window,
-            app: managed.appName,
-            bundleID: managed.appBundleID,
-            from: from,
-            to: destination
-        )
+        // `from` read BEFORE the move, or subscribers are told
+        // the window came from where it just went.
+        fileMembership(window, into: destination, from: from)
         retile(animated: true)
     }
 
