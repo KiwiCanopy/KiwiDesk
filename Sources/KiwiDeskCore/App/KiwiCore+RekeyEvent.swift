@@ -25,6 +25,7 @@ extension KiwiCore {
         ) {
             zOrderRaiseEchoes[new] = stamp
         }
+        tiler.placements.rekey(old: old, new: new)
         if pendingFocusRaise == old {
             pendingFocusRaise = new
         }

@@ -212,6 +212,24 @@ extension KiwiCore {
             }
             return
         }
+        // A placement bounce (#1161): the app answering where we
+        // just PUT its window, in a cmd-tab's shape — the ruling is
+        // in docs/design-decisions.md, both arms. Above
+        // the #958 return, which stays last, and BELOW the z-order
+        // revert on purpose: a restore's echo keeps its state-only
+        // revert, its sequence's closing re-assert owning OS focus.
+        if !selfEcho,
+            let intended = effects.focusBefore, intended != id,
+            let placed = placementBounce(id, now: now)
+        {
+            reassertAgainstPlacementBounce(
+                id,
+                intended: intended,
+                placed: placed,
+                now: now
+            )
+            return
+        }
         // The accessibility-steal return (#958): LAST among
         // the consumes — a report an earlier machine claims is
         // our raises' fallout must not spend the one-shot debt

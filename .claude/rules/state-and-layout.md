@@ -530,14 +530,53 @@ editing here:
   restore's own echo past both nets. A ledger is cleared where
   its id dies (`forgetGoneWindow`) and rekeyed on a tab switch,
   and a CONSUMER of the self ledger reads a stamp's liveness
-  through `selfRaiseStamp(_:now:)` rather than comparing the
-  stamp itself — the writer's prune compares, and the two click
-  readers borrow the constant as a click window, neither of
-  which is a stamp read; nothing scans for a new one, so a new
-  reader owes the routing deliberately. `SelfRaiseDuplicateEchoTests`,
+  through `selfRaiseStamp(_:now:)` rather than comparing the stamp
+  itself; every raise MINTS its stamp through the one
+  `stampSelfRaise(_:now:)` — `PlacementBounceSeamTests` ▸ the
+  write-site census holds the minter, the gone clear and the
+  rekey as the only writers — while the two click readers borrow
+  the constant as a click window, which is not a stamp read;
+  nothing scans for a new reading, so a new reader owes the
+  routing deliberately. `SelfRaiseDuplicateEchoTests`,
   `RaiseEchoClickTests` and `ActivationReReportTests` hold the
-  three arms, and a third ledger of this shape joins this bullet
-  rather than earning its own consume.
+  three arms. One ledger of this shape answers by GEOMETRY
+  instead of order, there being no second stamp to rank against:
+  `TilingEngine.placements` (#1161), stamped at `applyFrame` and
+  `setFrame` — the two leaves the retile, the stash and the
+  App-level placers share, so a NEW placement path routes through
+  one of them rather than writing a frame beside them (the quit
+  teardown's direct `WindowControl.setFrame` is the one ruled
+  exception: the app is exiting, no focus report follows) — with
+  the window a focus command moved focus OFF noted in the same
+  ledger by the one `focusWindow` path (`noteDisplaced`, kept
+  across the pan's later placement), and read by
+  `KiwiCore.placementBounce`, which `handleWindowFocused`
+  consults ABOVE the focus-follow and BELOW the z-order revert.
+  It fires for a clickless report, after focus moved on: in the
+  ACTIVE scrolling Space on the live entry ALONE — a pan that
+  moved the window, on screen or off, or a focus command that
+  stepped off it — because every narrower discriminator honored
+  a bounce on the device (the argument is the design-decisions
+  entry; a narrower arm owes a device sitting that shows the
+  case it exempts is not one the app answers) — and anywhere else
+  only where the placement lay past the edge AND the window
+  refused it by origin, a clickless focus being how a user
+  reaches a parked window. It re-asserts the intended window with
+  a direct raise, since no sequence's closing re-assert will, and
+  RENEWS the placement through the ledger's one `renew` door —
+  never a stamp — whose chain ends at a ceiling measured from the
+  placement itself, so a user's own retries cannot extend their
+  lockout past twice the window (`PlacementLedgerTests`). These
+  discriminators are FORGEABLE, unlike #465's ordering, and the
+  trade is priced in `docs/accepted-limitations.md`. Its forget
+  and rekey pair with the other ledgers' by hand, which review
+  checks; `PlacementBounceTests` holds the two arms, the on-screen
+  placement bounced, the renewal, the click escape and the bound,
+  `PlacementDisplacementTests` the displacement and its wiring,
+  `PlacementBounceSeamTests` the two leaves, the renew door, the
+  one displacement recorder, the consult, the write-site census
+  and the raise. A fourth ledger joins this bullet rather than
+  earning its own consume.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

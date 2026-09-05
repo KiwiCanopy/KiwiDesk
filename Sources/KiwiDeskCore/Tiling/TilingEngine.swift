@@ -63,6 +63,9 @@ public final class TilingEngine {
     /// only the layout loop may record asks there, and a float
     /// never enters the layout. `FloatFitLedger` argues it.
     var floatFitLedger = FloatFitLedger()
+    /// Where each window was last placed (#1161) — the type doc
+    /// carries the argument; stamped in `applyFrame`/`setFrame`.
+    var placements = PlacementLedger()
 
     /// Test seam for the observe gate above: whether one of our
     /// own frame-sets for this window is recent enough that its
@@ -337,6 +340,7 @@ public final class TilingEngine {
     /// cleanly instead of triggering the app's own move
     /// animation (which stutters on slow-AX apps).
     public func setFrame(_ id: WindowID, _ frame: CGRect) {
+        placements.stamp(id, target: frame)
         applier.applyInstant(id, frame)
     }
 }

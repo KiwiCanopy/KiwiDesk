@@ -44,6 +44,16 @@ extension KiwiCore {
         selfRaiseStamp(id, now: now) != nil
     }
 
+    /// The self ledger's one MINTER (`PlacementBounceSeamTests`
+    /// holds the write sites): stamps `id` as raised by us, and
+    /// prunes by age so never-echoed raises cannot accrete.
+    func stampSelfRaise(_ id: WindowID, now: Date) {
+        selfRaiseStamps = selfRaiseStamps.filter {
+            now.timeIntervalSince($0.value) < Self.selfRaiseEchoWindow
+        }
+        selfRaiseStamps[id] = now
+    }
+
     /// Whether a live self-raise of `id` vetoes the z-order echo
     /// revert (#431): only when NEWER than the z-order stamp,
     /// never on freshness — an older one is the restore's own

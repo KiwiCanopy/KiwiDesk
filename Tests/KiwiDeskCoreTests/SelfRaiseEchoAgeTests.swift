@@ -49,6 +49,11 @@ private func makeFixture(
         "set_mode",
         args: [.string(space.raw), .string("scrolling")]
     )
+    // The pan that laid the row out is long past: a clickless
+    // report for a scrolling window KiwiDesk placed past an edge
+    // within the last two seconds is #1161's bounce, not what
+    // this suite reads.
+    core.tiler.placements = PlacementLedger()
     core.state.workspaces.focus(other, in: space)
     return (target, other)
 }
@@ -162,6 +167,9 @@ struct SelfRaiseDuplicateEchoTests {
         core.state.workspaces.focus(target, in: space)
         core.selfRaiseStamps[target] = Date()
         core.handle(.windowFocused(target))
+        // The honored report retiled and stamped every window's
+        // placement (#1161); the pan is long past here.
+        core.tiler.placements = PlacementLedger()
         core.state.workspaces.focus(other, in: space)
         core.selfRaiseStamps[target] = Date(
             timeIntervalSinceNow: -KiwiCore.selfRaiseEchoWindow - 1
