@@ -137,7 +137,15 @@ struct ScrollingFixedSpanCueTests {
             "resize",
             args: [.string("x"), .number(50)]
         )
-        #expect(refusals == [.ownMaximum(WindowID(1))])
+        #expect(
+            refusals == [
+                .ownMaximum(
+                    WindowID(1),
+                    axis: "x",
+                    atBoundary: false
+                )
+            ]
+        )
         let live = try #require(core.state.workspaces[space])
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)
@@ -213,7 +221,7 @@ struct ScrollingFixedSpanCueTests {
             .slotSize
             .editablePoints(along: 1200, horizontal: true)
         #expect(stored == 300)
-        #expect(refusals == [.ownMinimum(WindowID(1))])
+        #expect(refusals == [.ownMinimum(WindowID(1), axis: "x")])
     }
 
     @Test("The shrink below a fixed span clamps and cues")
@@ -279,7 +287,7 @@ struct ScrollingFixedSpanCueTests {
             "resize",
             args: [.string("x"), .number(-50)]
         )
-        #expect(refusals == [.ownMinimum(WindowID(1))])
+        #expect(refusals == [.ownMinimum(WindowID(1), axis: "x")])
         let live = try #require(core.state.workspaces[space])
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)

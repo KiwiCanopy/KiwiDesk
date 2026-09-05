@@ -78,16 +78,20 @@ struct CoreLocalizationBoundaryTests {
         // become real violations, with no compiler event to say
         // so. Re-check this entry if that move happens.
         "App/KiwiCore+StickyMarks.swift": 4,
-        // The refusal pills (#933, #1055, #1091, widened #1255)
-        // are the same shape: a `KiwiCore` extension authoring
-        // the own-minimum, neighbor-minimum, own-maximum and
-        // no-room-to-grow sentences it hands to the Core-drawn
-        // `SizeLimitOverlay`. #1255 added three more — the two
-        // no-axis-here readings and the layout-has-no-resizing
-        // one — which is what gave the two sound-only refusals
-        // something to draw. Same caveat as `+StickyMarks` if
-        // the overlays ever move out of Core.
-        "App/KiwiCore+SizeLimitPill.swift": 8,
+        // The refusal pills (#933, #1055, #1091, widened #1255,
+        // #1258) are the same shape as `+StickyMarks`: sentences
+        // authored in Core for the Core-drawn `SizeLimitOverlay`,
+        // never handed across the #96 seam. Since #1258 they are
+        // authored in ONE renderer keyed by the refusal's own
+        // case rather than in whichever `refuse*` function a call
+        // site picked — which is why the count sits on the type's
+        // file and the funnel's file holds none: own-minimum,
+        // neighbor-minimum, the two own-maximum readings (learned
+        // bound and screen edge), the two no-axis-here readings,
+        // the two nothing-to-divide readings, and
+        // layout-has-no-resizing. Same caveat as `+StickyMarks`
+        // if the overlays ever move out of Core.
+        "Commands/ResizeRefusal+Rendering.swift": 9,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901), drawn by Core.

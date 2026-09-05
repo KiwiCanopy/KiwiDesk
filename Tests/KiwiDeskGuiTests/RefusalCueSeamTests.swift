@@ -109,10 +109,12 @@ struct RefusalCueSeamTests {
         let pill = try Self.core("App/KiwiCore+SizeLimitPill.swift")
         let sticky = try Self.core("App/KiwiCore+StickyMarks.swift")
         // The one deliberate exemption, named by its own
-        // spelling rather than counted: the neighbour-minimum
-        // refusal draws a SECOND pill on the anchor, and one
-        // refusal sounds once.
-        let anchorPill = "flashSizeLimitPill(anchor,"
+        // spelling rather than counted: a paired refusal draws a
+        // SECOND pill on the window that cannot move, and one
+        // refusal sounds once. Since #1258 the pairing is the
+        // renderer's (`ResizeRefusal.secondPill`), so the
+        // exemption is one site rather than one per refusal.
+        let anchorPill = "flashSizeLimitPill(second.window,"
         #expect(pill.occurrences(of: anchorPill) == 1)
         let unsounded =
             pill.occurrences(of: "flashSizeLimitPill(")
@@ -138,23 +140,61 @@ struct RefusalCueSeamTests {
         )
     }
 
-    /// Nothing may sound from a refusal FUNNEL: that is one
-    /// indirection above the drawing, where neither primitive has
-    /// decided whether it can draw.
-    @Test("no refusal funnel sounds on its own")
-    func funnelsStaySilent() throws {
-        let pill = try Self.core("App/KiwiCore+SizeLimitPill.swift")
-        #expect(!pill.isEmpty)
+    /// The funnel may not reach the speaker except through a
+    /// drawing's own verdict.
+    ///
+    /// Until #1258 this read "nothing may sound from a funnel at
+    /// all", because the funnel sat one indirection ABOVE the
+    /// drawing and neither primitive had decided whether it
+    /// could draw. The redesign made the funnel the drawing site
+    /// itself — one place where a refusal becomes a pill, a
+    /// bump and a sound — so the shape to hold is no longer
+    /// "silent" but "never ahead of the verdict": every sound in
+    /// that body is `soundIfDrawn` over a drawing call, and the
+    /// bare speaker appears nowhere in it.
+    @Test("the funnel never sounds ahead of its drawing")
+    func funnelSoundsOnlyOnAVerdict() throws {
+        // Whitespace-stripped like every other needle here: the
+        // funnel's call spans four lines.
+        let body = Self.stripped(
+            try SourceScan.functionBody(
+                of: "cueResizeRefusal",
+                in: "KiwiCore+SizeLimitPill.swift",
+                under: "App"
+            )
+        )
+        #expect(!body.isEmpty)
         #expect(
-            pill.contains(
-                "funccueResizeRefusal(_refusal:ResizeRefusal){"
-                    + "keys.noteResizeRefusal()"
-                    + "borders.onResizeRefusal(refusal)}"
-            ),
+            !body.contains("soundRefusal()"),
             Comment(
-                rawValue: "the refusal funnel gained a cue of "
-                    + "its own — it runs before the drawing "
-                    + "decided whether to draw"
+                rawValue: "the funnel reached the speaker "
+                    + "directly, ahead of any drawing's verdict"
+            )
+        )
+        // Every offer it makes is over a drawing call, so the
+        // verdict passed is the drawing's own.
+        #expect(
+            body.occurrences(of: "soundIfDrawn(")
+                == body.occurrences(
+                    of: "soundIfDrawn(flashSizeLimitPill("
+                ),
+            Comment(
+                rawValue: "the funnel offered the sound on "
+                    + "something other than a drawing's return"
+            )
+        )
+        #expect(body.occurrences(of: "soundIfDrawn(") == 1)
+        // And it still BUMPS. The rubber-band moved from five
+        // call sites to one derived property, and deleting the
+        // call here left the whole suite green — the derivation
+        // has its own test, but nothing could see the funnel
+        // stop reading it (guard-prover, 2026-09-05).
+        #expect(
+            body.contains("ifletdirection=refusal.bumpDirection{")
+                && body.contains("flashDeadEnd("),
+            Comment(
+                rawValue: "the funnel stopped bouncing the ring "
+                    + "on a refusal that reached a limit (#436)"
             )
         )
     }

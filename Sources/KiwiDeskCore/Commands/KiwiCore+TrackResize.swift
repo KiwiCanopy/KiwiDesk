@@ -40,6 +40,7 @@ extension KiwiCore {
                 delta: delta,
                 span: span,
                 space: space,
+                window: window,
                 tiled: tiled,
                 ranges: ranges,
                 track: track
@@ -50,6 +51,7 @@ extension KiwiCore {
             span: span,
             space: space,
             focused: window,
+            tracks: ranges.count,
             column: tiled[ranges[track]]
         )
     }
@@ -83,11 +85,30 @@ extension KiwiCore {
         delta: Double,
         span: Double,
         space: Space,
+        // The window this gesture is ABOUT: the mouse path
+        // drags one that need not be `space.focused`, and a
+        // refusal names the window that cannot move (#435).
+        window: WindowID,
         tiled: [WindowID],
         ranges: [Range<Int>],
         track: Int
     ) -> CommandResponse {
         guard ranges.count > 1 else {
+            // One track spans the axis, so its weight divides
+            // nothing (#1258). The along axis still divides
+            // when that single track holds more than one
+            // window — which is why the sentence cannot be
+            // about the WINDOW filling anything: here it does
+            // not. Names the window this call was handed: the
+            // mouse path drags a window that need not be the
+            // focus (#435 — the pill goes on the window that
+            // cannot move).
+            refuseNothingToDivide(
+                window,
+                otherAxisDivides: ranges.first.map {
+                    tiled[$0].count > 1
+                } ?? false
+            )
             return .fail("only one track")
         }
         let weights = ranges.map {
@@ -196,6 +217,9 @@ extension KiwiCore {
         span: Double,
         space: Space,
         focused: WindowID,
+        // Whether the ACROSS axis divides, which is the press
+        // to send the user to when this one cannot (#1258).
+        tracks: Int,
         column: ArraySlice<WindowID>
     ) -> CommandResponse {
         // The share write keys per-window state by id: a
@@ -218,6 +242,10 @@ extension KiwiCore {
             // track, so this fires on every along-axis resize —
             // phrase it as "use the other axis", not an error
             // about tracks the user never authored (#183).
+            refuseNothingToDivide(
+                focused,
+                otherAxisDivides: tracks > 1
+            )
             return .fail(
                 "the focused window fills its track along "
                     + "this axis — resize across the tracks "

@@ -82,7 +82,20 @@ editing here:
     funnel is what ends a held run, so a cue beside it pills
     once per FRAME instead of once per hold. The suite holds
     every `refuse*` function to the funnel and the funnel as
-    the one `borders.onResizeRefusal` caller. The gate on that
+    the one `borders.onResizeRefusal` caller.
+    **Since #1258 the funnel also DRAWS, bumps and sounds**, so
+    a new refusal adds a CASE and a sentence, never a body: the
+    case carries what the drawing decides from (its axis, its
+    discriminators), `ResizeRefusal+Rendering` maps case →
+    glyph, sentence and the paired second pill, and a `refuse*`
+    function names a case and nothing else. The shape earns its
+    keep by making a wrong choice READABLE — a sentence chosen
+    inside a `refuse*` body was a wrong CALL rather than a wrong
+    value, which no test could see, and five review rounds each
+    found one. So a discriminator added to a case owes an
+    assertion on BOTH its values; `NothingToDivideCueTests` and
+    `RefusalCueSeamTests` (▸ the funnel never sounds ahead of
+    its drawing) are where those live. The gate on that
     funnel is `isFiring || isGliding`, not `isFiring` alone: a
     glide runs outside any binding fire, so dropping the second
     term makes the cue unreachable exactly where the hold needs

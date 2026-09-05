@@ -24,7 +24,16 @@ struct ResizeRefusalSymbolTests {
     @Test("no resize here is never drawn as an arrow")
     func structuralRefusalsCarryNoArrow() {
         for refusal: ResizeRefusal in [
-            .noAxisHere(window), .layoutHasNoResize(window),
+            .noAxisHere(window, axis: "y"),
+            .layoutHasNoResize(window),
+            // #1258's case joins the non-arrow arm: it says a
+            // limit does not exist. Added to the array in the
+            // same change as the case, because a case missing
+            // from here can wear a grow arrow — or a symbol that
+            // renders nil on the deployment target — and nothing
+            // reds (guard-prover, 2026-09-05).
+            .nothingToDivide(window, otherAxisDivides: false),
+            .nothingToDivide(window, otherAxisDivides: true),
         ] {
             #expect(!refusal.pillSymbol.contains("arrow"))
         }
@@ -35,8 +44,17 @@ struct ResizeRefusalSymbolTests {
     @Test("a stopped resize is always an arrow")
     func boundedRefusalsCarryAnArrow() {
         for refusal: ResizeRefusal in [
-            .ownMinimum(window), .ownMaximum(window),
-            .neighborMinimum(anchor: other, focused: window),
+            .ownMinimum(window, axis: "y"),
+            .ownMaximum(
+                window,
+                axis: "y",
+                atBoundary: false
+            ),
+            .neighborMinimum(
+                anchor: other,
+                focused: window,
+                axis: "y"
+            ),
         ] {
             #expect(refusal.pillSymbol.contains("arrow"))
         }
@@ -47,8 +65,12 @@ struct ResizeRefusalSymbolTests {
     @Test("shrink and grow are mirrored, not shared")
     func minimumAndMaximumDiffer() {
         #expect(
-            ResizeRefusal.ownMinimum(window).pillSymbol
-                != ResizeRefusal.ownMaximum(window).pillSymbol
+            ResizeRefusal.ownMinimum(window, axis: "y").pillSymbol
+                != ResizeRefusal.ownMaximum(
+                    window,
+                    axis: "y",
+                    atBoundary: false
+                ).pillSymbol
         )
         // A neighbour's floor is a MINIMUM binding, and the pair
         // routes a shrink through it — a direction-derived glyph
@@ -56,9 +78,10 @@ struct ResizeRefusalSymbolTests {
         #expect(
             ResizeRefusal.neighborMinimum(
                 anchor: other,
-                focused: window
+                focused: window,
+                axis: "y"
             ).pillSymbol
-                == ResizeRefusal.ownMinimum(window).pillSymbol
+                == ResizeRefusal.ownMinimum(window, axis: "y").pillSymbol
         )
     }
 
@@ -69,9 +92,18 @@ struct ResizeRefusalSymbolTests {
     @Test("every symbol resolves to an image")
     func everySymbolResolves() {
         for refusal: ResizeRefusal in [
-            .ownMinimum(window), .ownMaximum(window),
-            .neighborMinimum(anchor: other, focused: window),
-            .noAxisHere(window), .layoutHasNoResize(window),
+            .ownMinimum(window, axis: "y"),
+            .ownMaximum(
+                window,
+                axis: "y",
+                atBoundary: false
+            ),
+            .neighborMinimum(
+                anchor: other,
+                focused: window,
+                axis: "y"
+            ),
+            .noAxisHere(window, axis: "y"), .layoutHasNoResize(window),
         ] {
             #expect(
                 NSImage(

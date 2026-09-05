@@ -121,7 +121,8 @@ struct ResizeRefusalTargetingTests {
             refusals == [
                 .neighborMinimum(
                     anchor: WindowID(2),
-                    focused: WindowID(1)
+                    focused: WindowID(1),
+                    axis: "y"
                 )
             ]
         )
@@ -155,7 +156,8 @@ struct ResizeRefusalTargetingTests {
             refusals == [
                 .neighborMinimum(
                     anchor: WindowID(2),
-                    focused: WindowID(1)
+                    focused: WindowID(1),
+                    axis: "y"
                 )
             ]
         )
@@ -184,15 +186,18 @@ struct ResizeRefusalTargetingTests {
         // FIRST press. Gated on the clamp instead, this press
         // says nothing and the next few silently walk the ratio.
         core.execute("resize", args: [.string("y"), .number(-10)])
-        #expect(refusals == [.noAxisHere(WindowID(1))])
+        #expect(refusals == [.noAxisHere(WindowID(1), axis: "y")])
     }
 
-    @Test("A space that divides neither axis says nothing")
-    func noSplitAtAllStandsDown() {
+    @Test("A space that divides neither axis names no axis")
+    func noSplitAtAllNamesNoAxis() {
         // One window: the ratio divides nothing on EITHER axis,
         // so "this zone divides widths, not heights" would be
-        // false about both. The press is refused wordlessly —
-        // the silence #1258 owns, not a sentence that lies.
+        // false about both. #1259 left it wordless and #1258
+        // filled it with the sentence that does not name an
+        // axis at all — whichever way that is worded, this case
+        // must never take `noAxisHere`, which is the claim the
+        // arrangement cannot support.
         let core = makeCore()
         let space = makeBspSpace(core, count: 1)
         var refusals: [ResizeRefusal] = []
@@ -203,7 +208,12 @@ struct ResizeRefusalTargetingTests {
                 args: [.string(axis), .number(-200)]
             )
         }
-        #expect(refusals.isEmpty)
+        #expect(
+            refusals == [
+                .nothingToDivide(WindowID(1), otherAxisDivides: false),
+                .nothingToDivide(WindowID(1), otherAxisDivides: false),
+            ]
+        )
         // The WRITE still lands, cue or no cue: the ratio is a
         // stored per-space value that outlives the window
         // population, and the space opens its first split at
@@ -215,15 +225,24 @@ struct ResizeRefusalTargetingTests {
         )
     }
 
-    @Test("A stack focus in neither zone is not at its minimum")
-    func stackFocusOutsideBothZonesNamesTheZone() {
+    @Test("A stack focus in neither zone is told nothing")
+    func stackFocusOutsideBothZonesStandsDown() {
         // The sibling writer's arm of the same rule. A
         // native-fullscreen window keeps its slot but leaves the
         // tiled derivations (#670), so the master/stack
         // partition places the focused window in NEITHER zone —
         // and a window the layout is not sizing cannot be at the
-        // minimum the write ran into. The zone that binds names
-        // itself instead.
+        // minimum the write ran into.
+        //
+        // #1259 pinned the neighbouring zone being NAMED here,
+        // as the honest reading of "not its own minimum". #1258
+        // overruled that: a window in no partition is owed no
+        // sentence about one, which is what the refusal census
+        // already said of the same arrangement and what the path
+        // did before either lane touched it. The clause that
+        // matters — never `.ownMinimum` on a window whose size
+        // the write could not change — is what both verdicts
+        // share, and it is what this test still holds.
         let core = makeCore()
         for id: UInt32 in 1...3 {
             core.state.apply(
@@ -251,14 +270,7 @@ struct ResizeRefusalTargetingTests {
         // is truncated — a shrink the range still admits cues
         // nothing at all, in stack as anywhere else.
         core.execute("resize", args: [.string("x"), .number(-600)])
-        #expect(
-            refusals == [
-                .neighborMinimum(
-                    anchor: WindowID(3),
-                    focused: WindowID(1)
-                )
-            ]
-        )
+        #expect(refusals.isEmpty)
     }
 
     @Test("A participating window still reads its own minimum")
@@ -273,6 +285,6 @@ struct ResizeRefusalTargetingTests {
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         core.execute("resize", args: [.string("y"), .number(-200)])
-        #expect(refusals == [.ownMinimum(WindowID(2))])
+        #expect(refusals == [.ownMinimum(WindowID(2), axis: "y")])
     }
 }

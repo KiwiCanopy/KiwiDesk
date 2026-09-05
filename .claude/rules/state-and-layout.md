@@ -864,7 +864,7 @@ editing here:
   resize end call the one set of clamped writers — the
   `writeCapped*` family, named by that prefix rather than by a
   file, since it has already outgrown one
-  (`KiwiCore+ResizeLimits` and `KiwiCore+ResizeScrollSlot`) —
+  (`KiwiCore+RatioWriters` and `KiwiCore+ResizeScrollSlot`) —
   never a raw `writeSlotSize`,
   `writeSplitRatio*`, `writeMasterRatio` or `stackWeights`
   write from a resize path, which is exactly how the mouse
@@ -933,10 +933,29 @@ editing here:
   the cue there, because the sentence it draws is a claim about
   the arrangement rather than a limit reached: it is owed on the
   FIRST press rather than whenever the clamp happens to bite,
-  and `noAxisHere` says the OTHER axis divides — so a space that
-  divides neither, one window or an overflow pile, stands down
-  wordless instead, that silence being #1258's to close rather
-  than this rule's to fill with a false sentence.
+  and `noAxisHere` says the OTHER axis divides, so a group with
+  ONE member takes `nothingToDivide` instead (#1258) — the count
+  is the reason there, not the arrangement, and the sentence
+  says which of the two it is because the caller states whether
+  the other axis divides.
+  Two obligations on that judgement, both learned the same way.
+  **Judge it on what the layout DREW, never on a member count**:
+  a bsp region too small for two minimum-size windows piles them
+  and answers to no ratio at all, which a cardinality test
+  cannot see, and the extent test cannot either — the pile's
+  cascade offsets each copy, so the union outgrows every slot
+  and the whole pile reads as a participant. And **a refusal
+  that draws nothing is a claim that nobody needed telling**, so
+  every `.fail` a resize path returns is either cued or named in
+  `ResizeRefusalCensusTests`' register with the reason it stays
+  wordless — derived from source, because a hand-listed set of
+  arms is exactly what let a fifth silent site survive the
+  change that went looking for it. That census reads
+  `.fail`-SHAPED refusals only, and the residue is this rule's
+  own subject: a path that refuses by returning `.ok()` after a
+  write nothing renders is invisible to it, which is the shape
+  two of #1258's own sites now have, so `NothingToDivideCueTests`'
+  per-site arms are their only net.
   A new writer of this shape states which kind of partition it
   has; `ResizeRefusalTargetingTests` holds the verdicts, one
   per arm, bsp and stack alike.

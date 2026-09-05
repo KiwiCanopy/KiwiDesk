@@ -202,6 +202,18 @@ synonym:
   right now. `stack.set_master_count` is a retained exception —
   the user names how many windows are masters, and it shipped
   that way.
+- **zone** — three ruled senses, and no fourth without an
+  argument: the stack layout's master/stack **zones**
+  (`layout_params.stack_position.help`), the drag **drop zone**
+  (`drag.drop_zone`), and — since #1255/#1258 — the region an
+  axis divides, in the resize refusal pills ("This zone divides
+  widths, not heights", "This zone has nothing to divide"),
+  which is layout-agnostic and so covers bsp and track where
+  neither layout has zones of its own. Do not coin *region* or
+  *area* for that third sense: `area` is spoken for by
+  `SettingsArea`, and the reason `zone` was struck off the
+  Space-rename candidates is that it already meant two things
+  (`docs/design-decisions.md`).
 - **style** — names WHERE or HOW something is drawn, not what
   the drawn thing is called (`background_style`).
 - **layer** — a named alternate keybinding set; only the active

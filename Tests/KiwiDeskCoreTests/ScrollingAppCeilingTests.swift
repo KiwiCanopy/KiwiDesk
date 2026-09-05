@@ -130,7 +130,11 @@ struct ScrollingAppCeilingTests {
         // The slot stopped ON the ceiling — from below it, a
         // grow still reaches the maximum itself.
         #expect(try slotPoints(core, space) == 715)
-        #expect(refusals == [.ownMaximum(WindowID(1))])
+        #expect(
+            refusals == [
+                .ownMaximum(WindowID(1), axis: "x", atBoundary: false)
+            ]
+        )
     }
 
     @Test("A grow below the maximum still grows, silently")
@@ -233,7 +237,11 @@ struct ScrollingAppCeilingTests {
         #expect(try slotPoints(core, space) == before)
         // The app IS at its maximum, so the refusal still says
         // so — the wordless case is the viewport's alone.
-        #expect(refusals == [.ownMaximum(WindowID(1))])
+        #expect(
+            refusals == [
+                .ownMaximum(WindowID(1), axis: "x", atBoundary: false)
+            ]
+        )
     }
 
     @Test("The ceiling never reduces the shared slot")
@@ -256,7 +264,11 @@ struct ScrollingAppCeilingTests {
             args: [.string("x"), .number(400)]
         )
         #expect(try slotPoints(core, space) == 900)
-        #expect(refusals == [.ownMaximum(WindowID(1))])
+        #expect(
+            refusals == [
+                .ownMaximum(WindowID(1), axis: "x", atBoundary: false)
+            ]
+        )
     }
 
     @Test("A single refused ask does not bind the write")

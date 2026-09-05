@@ -10,6 +10,13 @@ import CoreGraphics
 /// read: BSP is a dwindle over the flat array with two shared
 /// ratio scalars (AGENTS.md §5), so a split's shape exists only
 /// in the frames it produced.
+///
+/// It lives in `Tiling/` beside `MouseResize` and `Navigation`
+/// rather than in `Layouts/`, because it is resize
+/// CLASSIFICATION over frames a layout already produced, not a
+/// layout algorithm — and it reads the one pile detector, which
+/// `Layouts/` may not (its rule is pure functions over the flat
+/// array).
 public enum BspSplit {
     /// Direction (+1 / -1) to move BSP ratio to grow target slot (#122).
     public static func side(
@@ -52,13 +59,51 @@ public enum BspSplit {
         let placed = windows.compactMap { id in
             slots[id].map { (id: id, slot: $0) }
         }
-        let extent = placed.reduce(CGRect.null) {
-            $0.union($1.slot)
+        // A region too small for two minimum-size windows makes
+        // the layout give up and PILE them (`OverlapStack`). A
+        // piled window's size answers to no ratio, so it takes
+        // no part in the split — the same verdict as a full-span
+        // one, and reached separately because the extent test
+        // cannot see it: the cascade offsets each copy, so the
+        // union outgrows every slot and the whole pile reads as
+        // participants.
+        //
+        // Through the ONE pile detector (#172), never a bare
+        // `intersects` beside it: `Navigation.piled` requires a
+        // quarter of the smaller slot's area precisely so that
+        // a rounding-sized overlap — or a negative inner gap,
+        // which `set_gap_global(-10)` allows — is not read as a
+        // pile and does not silently switch classification off
+        // (#1258, review).
+        let framed = placed.map { (id: $0.id, frame: $0.slot) }
+        // `pileMates` EXCLUDES the window asked about, so a
+        // non-empty answer IS the pile — and the window that
+        // asked belongs to it.
+        var piled: Set<WindowID> = []
+        for one in placed where !piled.contains(one.id) {
+            let mates = Navigation.pileMates(
+                of: one.id,
+                among: framed
+            )
+            guard !mates.isEmpty else { continue }
+            piled.formUnion(mates)
+            piled.insert(one.id)
         }
+        // The union is taken over the slots that are still in
+        // play. A pile cascades downward at full region height,
+        // so including it stretches the union past the region
+        // and a genuinely full-span window then reads as a
+        // participant — #1259's own defect, arriving through the
+        // pile (review, 2026-09-05).
+        let extent =
+            placed
+            .filter { !piled.contains($0.id) }
+            .reduce(CGRect.null) { $0.union($1.slot) }
         let whole = horizontal ? extent.width : extent.height
         var first: [WindowID] = []
         var second: [WindowID] = []
         for (id, slot) in placed {
+            guard !piled.contains(id) else { continue }
             let own = horizontal ? slot.width : slot.height
             guard own < whole - spanTolerance else { continue }
             let side = side(
