@@ -5,29 +5,24 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The carried-window arm of the removal-distrust gate (#1145).
+/// The fullscreen arm of the removal-distrust gate (#1272): a
+/// native fullscreen transition orders the window out for a beat
+/// on ENTER and EXIT while the compositor keeps it, and the sweep
+/// read that as a close (the argument is accessibility.md's). This
+/// suite holds the arm's shape: open on the loop's own last
+/// fullscreen reading (EXIT) or the `fullscreenSpaceHosts` seam
+/// (ENTER), refused census-blind on the #1157 episode's own
+/// recheck budget (one ledger, one cap), refused outright while
+/// the census shows it, never reading the switch grace, hide and
+/// minimize exempt, the state AND the registration kept, and the
+/// re-listed window's flag flip reported as a fullscreen CHANGE
+/// in either direction, never a create.
 ///
-/// A window sticky reach carries is EXPECTED present on the
-/// arriving Desktop, but for the switch transition's beat it is
-/// on no reading: its AX element dies as it leaves the visible
-/// Space and the census has not composited it yet. The pre-#1145
-/// sweep read that as a close inside the switch grace — the
-/// window lost its slot, scope and pin, and came back as new.
-/// This suite holds the arm's shape: a window the carry holds IN
-/// FLIGHT (the seam's reading — the switch grace says nothing) is
-/// refused census-blind on the #1157 episode's own recheck budget
-/// (one ledger, one cap), refused outright while the census shows
-/// it, hide and minimize exempt, the state AND the registration
-/// kept, and the same id re-elemented — never re-created — when
-/// the window is listed again. A carried window NOT in flight is
-/// a close like any other.
-///
-/// Harness: `RemovalDistrustTests`' per-file copy. The destroy
-/// NOTIFICATION's half of the arm is `CarriedDestroyArmTests`',
-/// split at the tests.md file ceiling.
+/// Harness: `CarriedRemovalTests`' per-file copy. The destroy
+/// NOTIFICATION's half of the arm is `FullscreenDestroyArmTests`'.
 @MainActor
-@Suite("Carried-window removal distrust (#1145)")
-struct CarriedRemovalTests {
+@Suite("Fullscreen-transition removal distrust (#1272)")
+struct FullscreenRemovalTests {
     private final class FakeObserver: AppObserving {
         var onNotification: @MainActor (String, AXUIElement) -> Void = {
             _,
@@ -52,15 +47,15 @@ struct CarriedRemovalTests {
         var hiddenEvents: [WindowID] = []
         var destroyed: [(id: WindowID, wasMinimized: Bool)] = []
         var created: [WindowID] = []
+        var fullscreenChanges: [(id: WindowID, isFullscreen: Bool)] = []
+        var fullscreenRead = false
     }
 
-    private let pid: pid_t = 909_920
+    private let pid: pid_t = 909_930
     private var ref: AppRef {
-        AppRef(bundleID: "test.kiwi.carried", name: "Carried")
+        AppRef(bundleID: "test.kiwi.fullscreen", name: "Fullscreen")
     }
 
-    /// Wires every seam; `attach` is the caller's, so the own-pid
-    /// arm can register its observer directly instead.
     private func wire(_ loop: EventLoop, _ box: Box) {
         loop.onLog = { box.logs.append($0) }
         loop.registersWorkspaceObservers = false
@@ -87,6 +82,7 @@ struct CarriedRemovalTests {
             return box.listed[box.cursor]
         }
         loop.appIsHidden = { _ in box.hidden }
+        loop.readFullscreen = { _ in box.fullscreenRead }
         loop.onEvent = { event in
             switch event {
             case .windowDestroyed(let id, let wasMinimized):
@@ -97,6 +93,10 @@ struct CarriedRemovalTests {
                 box.hiddenEvents.append(id)
             case .windowCreated(let window):
                 box.created.append(window.id)
+            case .windowFullscreenChanged(let id, let isFullscreen):
+                box.fullscreenChanges.append(
+                    (id: id, isFullscreen: isFullscreen)
+                )
             default:
                 break
             }
@@ -118,58 +118,77 @@ struct CarriedRemovalTests {
         return (loop, box)
     }
 
-    /// An inert AX value for seeding `elements` directly.
+    /// An inert AX value for seeding `elements` directly; the
+    /// fullscreen reading comes from the injected reader, never
+    /// from it.
     private var dummyElement: AXUIElement {
         AXUIElementCreateApplication(pid)
     }
 
-    /// A second, distinct inert value — the window's element
-    /// reborn on the arriving Desktop.
-    private var freshElement: AXUIElement {
-        AXUIElementCreateApplication(pid + 1)
-    }
-
-    private func carriedLines(_ box: Box) -> Int {
+    private func fullscreenLines(_ box: Box) -> Int {
         box.logs.count {
             $0.hasPrefix("close distrust:")
-                && $0.contains("carried across Desktops")
+                && $0.contains("native fullscreen transition")
         }
     }
 
-    @Test("an in-flight carried vanish is refused")
-    func inFlightVanishIsRefused() {
+    @Test("the exit beat is refused on the loop's last reading")
+    func exitVanishIsRefused() {
         let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(12)] }
         loop.elements[pid] = [
             WindowID(11): dummyElement,
             WindowID(12): dummyElement,
         ]
+        // Listed in fullscreen since; now ordered out, and the
+        // compositor already has it back on the Desktop, which
+        // the seam does not report.
+        loop.detectedFullscreen[WindowID(12)] = true
+        loop.fullscreenSpaceHosts = { _ in false }
         box.listed = [WindowID(11)]
         box.census = [:]
-        loop.lastDesktopChange = Date()
+        loop.lastDesktopChange = .distantPast
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
         // State AND registration kept: the dead element stays
         // registered until the reconcile re-elements the id.
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
         #expect(loop.removalDistrusted[WindowID(12)] == 1)
-        // The refusal rides the distrust's own convergence.
         #expect(loop.pendingRemovalRecheck.contains(pid))
         #expect(box.recheckFires == 1)
-        #expect(carriedLines(box) == 1)
+        #expect(fullscreenLines(box) == 1)
     }
 
-    @Test("a carried window not in flight is a close")
-    func notInFlightIsAClose() {
+    @Test("the enter beat is refused on the compositor's word")
+    func enterVanishIsRefused() {
         let (loop, box) = makeLoop()
-        // Sticky and enabled, but nothing moved it: the seam
-        // answers empty, so ⌘W is a close, not a beat to wait out
-        // — even right after a Desktop switch.
-        loop.carriedWindows = { [] }
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        // Never read in fullscreen — the transition just began —
+        // but the compositor already hosts it on the fullscreen
+        // Space it minted.
+        loop.detectedFullscreen[WindowID(12)] = false
+        loop.fullscreenSpaceHosts = { $0 == WindowID(12) }
+        box.listed = []
+        box.census = [:]
+        loop.lastDesktopChange = .distantPast
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.destroyed.isEmpty)
+        #expect(loop.elements[pid]?[WindowID(12)] != nil)
+        #expect(loop.removalDistrusted[WindowID(12)] == 1)
+        #expect(fullscreenLines(box) == 1)
+    }
+
+    @Test("a window no arm expects is a close")
+    func neitherArmIsAClose() {
+        let (loop, box) = makeLoop()
+        // Read as a plain window, and hosted on a user Desktop —
+        // which a closed window also is for a while, so the seam
+        // stays false and the close lands.
+        loop.detectedFullscreen[WindowID(12)] = false
+        loop.fullscreenSpaceHosts = { _ in false }
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [:]
-        loop.lastDesktopChange = Date()
+        loop.lastDesktopChange = .distantPast
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
         #expect(box.recheckFires == 0)
@@ -178,47 +197,26 @@ struct CarriedRemovalTests {
     @Test("the arm never reads the switch grace")
     func armIgnoresTheSwitchGrace() {
         let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(12)] }
+        loop.detectedFullscreen[WindowID(12)] = true
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [:]
-        // A slow app's element dies well after the 0.75 s grace
-        // (device, 2026-09-02); the in-flight reading is what
-        // keeps the window.
-        loop.lastDesktopChange = .distantPast
+        // A fullscreen exit's sweep can run inside the grace —
+        // the switch notification may land first — where the
+        // census clause stands down; the arm must not.
+        loop.lastDesktopChange = Date()
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
         #expect(loop.removalDistrusted[WindowID(12)] == 1)
     }
 
-    @Test("an uncarried vanish inside the grace keeps the old gate")
-    func uncarriedVanishInsideGraceIsRemoved() {
-        let (loop, box) = makeLoop()
-        // Both expected-absence arms closed (#1145, #1272): inside
-        // the grace the census clause stands down and nothing
-        // else refuses.
-        loop.carriedWindows = { [] }
-        loop.detectedFullscreen[WindowID(12)] = false
-        loop.fullscreenSpaceHosts = { _ in false }
-        loop.elements[pid] = [WindowID(12): dummyElement]
-        box.listed = []
-        box.census = [pid: [WindowID(12)]]
-        loop.lastDesktopChange = Date()
-        loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.id) == [WindowID(12)])
-        #expect(box.censusReads == 0)
-    }
-
     @Test("the census-blind budget is the episode's recheck budget")
     func blindRefusalRidesTheRecheckBudget() {
         let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(12)] }
+        loop.detectedFullscreen[WindowID(12)] = true
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [:]
-        loop.lastDesktopChange = Date()
-        // Each blind refusal arms the recheck that re-reads it —
-        // the drain stands in for that one-shot firing.
         for arm in 1...EventLoop.removalRecheckCap {
             loop.reconcile(pid: pid, app: ref)
             #expect(box.destroyed.isEmpty)
@@ -226,22 +224,23 @@ struct CarriedRemovalTests {
             #expect(box.recheckFires == arm)
             _ = loop.drainPendingRemovalRecheck()
         }
+        // Past the cap: a window closed WHILE fullscreen takes its
+        // ordinary removal, late by the budget.
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
         #expect(loop.elements[pid]?[WindowID(12)] == nil)
         #expect(loop.removalDistrusted[WindowID(12)] == nil)
-        // One episode, one line.
-        #expect(carriedLines(box) == 1)
+        #expect(loop.detectedFullscreen[WindowID(12)] == nil)
+        #expect(fullscreenLines(box) == 1)
     }
 
     @Test("a census that shows the window refuses past the budget")
     func censusListedRefusesPastTheBudget() {
         let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(12)] }
+        loop.detectedFullscreen[WindowID(12)] = true
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [pid: [WindowID(12)]]
-        loop.lastDesktopChange = Date()
         for _ in 0..<(EventLoop.removalRecheckCap + 2) {
             loop.reconcile(pid: pid, app: ref)
             _ = loop.drainPendingRemovalRecheck()
@@ -250,41 +249,64 @@ struct CarriedRemovalTests {
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
     }
 
-    @Test("a window back in the list ends its episode")
-    func relistedWindowEndsTheEpisode() {
+    @Test("a re-listed window leaves fullscreen as a change, not a create")
+    func relistedWindowReportsTheExit() {
         let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(12)] }
+        loop.detectedFullscreen[WindowID(12)] = true
         loop.elements[pid] = [WindowID(12): dummyElement]
-        loop.removalDistrusted[WindowID(12)] = 2
+        loop.removalDistrusted[WindowID(12)] = 1
         box.listed = [WindowID(12)]
+        box.fullscreenRead = false
         loop.reconcile(pid: pid, app: ref)
         #expect(loop.removalDistrusted[WindowID(12)] == nil)
         #expect(box.destroyed.isEmpty)
+        #expect(box.created.isEmpty)
+        // The recheck re-reads the element out of fullscreen:
+        // #670's exit path re-places the kept slot.
+        #expect(box.fullscreenChanges.map(\.id) == [WindowID(12)])
+        #expect(box.fullscreenChanges.map(\.isFullscreen) == [false])
+        #expect(loop.detectedFullscreen[WindowID(12)] == false)
     }
 
-    @Test("a hide outranks the carry")
-    func hideOutranksTheCarry() {
+    @Test("a re-listed window enters fullscreen as a change, not a create")
+    func relistedWindowReportsTheEnter() {
         let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(11), WindowID(12)] }
-        loop.elements[pid] = [
-            WindowID(11): dummyElement,
-            WindowID(12): dummyElement,
-        ]
+        // Refused on the compositor's word; now listed again, in
+        // fullscreen — the reading the EXIT arm will key on.
+        loop.detectedFullscreen[WindowID(12)] = false
+        loop.fullscreenSpaceHosts = { $0 == WindowID(12) }
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        loop.removalDistrusted[WindowID(12)] = 1
+        box.listed = [WindowID(12)]
+        box.fullscreenRead = true
+        loop.reconcile(pid: pid, app: ref)
+        #expect(loop.removalDistrusted[WindowID(12)] == nil)
+        #expect(box.destroyed.isEmpty)
+        #expect(box.created.isEmpty)
+        #expect(box.fullscreenChanges.map(\.id) == [WindowID(12)])
+        #expect(box.fullscreenChanges.map(\.isFullscreen) == [true])
+        #expect(loop.detectedFullscreen[WindowID(12)] == true)
+    }
+
+    @Test("a hide outranks the arm")
+    func hideOutranksTheArm() {
+        let (loop, box) = makeLoop()
+        loop.detectedFullscreen[WindowID(12)] = true
+        loop.fullscreenSpaceHosts = { _ in true }
+        loop.elements[pid] = [WindowID(12): dummyElement]
         box.hidden = true
-        box.census = [pid: [WindowID(11), WindowID(12)]]
+        box.census = [pid: [WindowID(12)]]
         loop.reconcile(pid: pid, app: ref)
         #expect(box.censusReads == 0)
-        #expect(
-            box.hiddenEvents.sorted { $0.raw < $1.raw }
-                == [WindowID(11), WindowID(12)]
-        )
+        #expect(box.hiddenEvents == [WindowID(12)])
         #expect(loop.removalDistrusted.isEmpty)
     }
 
-    @Test("a minimized carried window is a minimize")
-    func minimizeOutranksTheCarry() {
+    @Test("a minimized window is a minimize")
+    func minimizeOutranksTheArm() {
         let (loop, box) = makeLoop()
-        loop.carriedWindows = { [WindowID(12)] }
+        loop.detectedFullscreen[WindowID(12)] = true
+        loop.fullscreenSpaceHosts = { _ in true }
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.census = [:]
         loop.reconcileTabsAndSweep(
@@ -297,28 +319,5 @@ struct CarriedRemovalTests {
         )
         #expect(box.censusReads == 0)
         #expect(box.destroyed.map(\.wasMinimized) == [true])
-    }
-
-    @Test("a re-listed window is re-elemented, never re-created")
-    func relistedWindowIsReElemented() {
-        let (loop, box) = makeLoop()
-        let dead = dummyElement
-        let reborn = freshElement
-        #expect(!CFEqual(dead, reborn))
-        loop.elements[pid] = [WindowID(12): dead]
-        loop.axWindows = { _ in [reborn] }
-        loop.resolveWindowID = { _ in WindowID(12) }
-        let observer = loop.observers[pid] as? FakeObserver
-        loop.reconcile(pid: pid, app: ref)
-        // Same id, fresh element, observed anew — and no create,
-        // which would re-fold a window state never lost.
-        #expect(
-            loop.elements[pid]?[WindowID(12)].map {
-                CFEqual($0, reborn)
-            } == true
-        )
-        #expect(observer?.observed.count == 1)
-        #expect(box.created.isEmpty)
-        #expect(box.destroyed.isEmpty)
     }
 }

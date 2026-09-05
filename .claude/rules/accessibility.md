@@ -272,16 +272,23 @@ editing AX code:
   handler classifies `vanished` / `closed` on it and files the
   away ledger from it after the sweep decided, and no arm of the
   sweep, the heal or the carried gate reads it
-  (`DesktopCensusSeamTests` ▸ `sweepStaysCensusBlind`). A window
+  (`DesktopCensusSeamTests` ▸ `sweepStaysCensusBlind`, a textual
+  scan of `Events/`). The fullscreen arm (#1272) is the one
+  consumer that scan cannot see — it reaches the compositor
+  through a closure — and it may only ever REFUSE a removal,
+  never cause one: the seam's default is closed and its one
+  wiring is pinned by `FullscreenSpaceSeamTests`, so a new
+  compositor read in the sweep owes the same two guards. A window
   the sweep removed and the census still hosts on an unshown
   Desktop is exactly the `vanished` that rule promised; one it
   hosts on a SHOWN Desktop was a close in teardown or the
   under-report the gate already refused.
 
-  **The gate has a carried arm (#1145), which never reads the
-  switch grace, and no other arm may refuse INSIDE that grace**
-  — a new one joins `CarriedRemovalTests`' grace clause. A
-  sticky window the
+  **The gate has two expected-absence arms — carried (#1145)
+  and fullscreen (#1272) — which never read the switch grace;
+  inside it only the census clause stands down, and a new arm
+  joins `CarriedRemovalTests`' grace clause CLOSED**, so a vanish
+  no arm expects is still removed there. A sticky window the
   Desktop reach carries is EXPECTED present after a switch —
   the bridge MOVE puts it on the arriving Desktop — but for the
   transition's beat it is on no reading at all: its AX element
@@ -334,6 +341,51 @@ editing AX code:
   exempt — each is a total answer no carry explains.
   `CarriedRemovalTests` pins the sweep's clauses,
   `CarriedDestroyArmTests` the notification's.
+
+  **The fullscreen arm (#1272) refuses the beat a native
+  fullscreen transition orders the window out for, on BOTH
+  ends.** #670 rests on "moved off the Desktop without a
+  destroy", and AppKit's own transition keeps that: the element
+  stays listed and `recheckFullscreen` flips the flag. Zen
+  (Firefox) does not: for a beat on ENTER and on EXIT alike the
+  real window is absent from the app's AX list AND the on-screen
+  census while the compositor keeps it — already on the
+  fullscreen Space on ENTER, already back on the Desktop on EXIT
+  (device log, 2026-09-05, four cycles). A targeted reconcile in
+  that beat swept it, the census had nothing to refuse on, the
+  switch grace had not opened because the switch notification
+  lags the compositor (#1207's ordering), and the gone
+  classifier — hosted on a SHOWN Space — could only say
+  `closed`: the slot lost, the close-return raise moving the
+  user to a neighbor, the window back as new. The obligations:
+  the arm opens on the loop's OWN last reading for the EXIT
+  (`detectedFullscreen`, true only for a window listed in
+  fullscreen since) and on the compositor's word for the ENTER
+  through the ONE `EventLoop.fullscreenSpaceHosts` seam, wired
+  in `KiwiCore+Bootstrap` to `windowIsOnFullscreenSpace` — the
+  gone classifier's own door (`desktopMemory.readWindowSpace`,
+  #1146) judged by `NativeSpaces.isUserSpace`, a Space the
+  topology does not list reading as a user one
+  (`FullscreenSpaceSeamTests` pins the wiring, since the false
+  default keeps every ENTER a close with every other suite
+  green). **"Still hosted" alone is never the signal**: the
+  same `gone: … still hosted on shown space — closed` line
+  fires for ordinary closes across Finder, TextEdit, VS Code and
+  qemu in that log, because a closed window lingers on its
+  Desktop's Space — only the FULLSCREEN half of the reading
+  tells the transition from a close, and a compositor read may
+  still only refuse (#1157). The refusal is the carried arm's
+  exactly — outright while the census shows the window,
+  census-blind on the SAME ledger and cap otherwise, the destroy
+  notification deferring to the sweep on the one
+  `expectedAbsence` reading, state and registration kept — and
+  the re-listed window's exit is a `.windowFullscreenChanged`,
+  never a create, so #670's exit path re-places the kept slot.
+  Hide and minimize stay exempt. Residue, recorded in
+  `docs/accepted-limitations.md`: a window closed WHILE
+  fullscreen takes its removal one recheck budget late.
+  `FullscreenRemovalTests` pins the sweep's clauses,
+  `FullscreenDestroyArmTests` the notification's.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Four links

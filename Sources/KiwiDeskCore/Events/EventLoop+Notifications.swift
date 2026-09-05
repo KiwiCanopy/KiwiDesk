@@ -140,12 +140,13 @@ extension EventLoop {
                 // coalesce a re-key or emit the real destroy. A
                 // minimize is never a tab close (#308). A carried
                 // sticky window's element dies as it leaves the
-                // visible Space (#1145): same deferral, and the
-                // sweep's carried arm rules it.
+                // visible Space (#1145) and a fullscreen transition
+                // orders the window out (#1272): same deferral, and
+                // the sweep's expected-absence arms rule it.
                 if note == kAXUIElementDestroyedNotification,
                     tabCarriers.contains(id)
                         || appHasTabCarrier(pid: pid)
-                        || carriedRemovalArmIsOpen(for: id)
+                        || expectedAbsence(of: id) != nil
                 {
                     // Deferred to reconcile.
                 } else {
