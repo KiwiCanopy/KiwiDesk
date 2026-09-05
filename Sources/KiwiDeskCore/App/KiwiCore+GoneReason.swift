@@ -18,12 +18,14 @@ extension KiwiCore {
         // departure the fold just recorded (#1150): the name
         // replaces the remembered Space, and the arrival's
         // ordinary rule lands the window in it.
-        if let space = pendingSpace.claim(id) {
-            // Created at the claim, never at the record: the
-            // arrival's `livingRememberedSpace` needs it to
-            // exist, and an expired name must leave nothing.
-            state.workspaces.ensureSpace(space)
+        if let space = pendingSpace.claim(id),
             state.redirectDeparture(of: id, to: space)
+        {
+            // Created at the claim, and only for a departure
+            // the redirect took: the arrival's
+            // `livingRememberedSpace` needs it to exist, and an
+            // expired name or a minimize must leave nothing.
+            state.workspaces.ensureSpace(space)
             onLog(
                 "move_to_desktop: w\(id.raw) departed — filed "
                     + "under space \(space.raw)"

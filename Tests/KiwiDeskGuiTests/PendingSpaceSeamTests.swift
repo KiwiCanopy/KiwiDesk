@@ -41,16 +41,41 @@ struct PendingSpaceSeamTests {
         // with its re-anchor missing, and no fixture can see a
         // float cross fake screens, so the WIRING is the guard.
         // The needle is the call shape, which the definition
-        // line does not match.
+        // line does not match — it binds the callers' `window`
+        // spelling, so it counts these four and a fifth spelled
+        // otherwise is not seen; `filingReanchors` below holds
+        // the step the copies lost.
         (
             "fileMembership(window, into:",
             [
                 "KiwiCore+SpaceCommands.swift",
                 "KiwiCore+DesktopMove.swift",
                 "KiwiCore+DesktopMoveSpace.swift",
+                "KiwiCore+SpaceBarDrop.swift",
             ]
         ),
     ]
+
+    /// The helper's callers are counted above; nothing else pins
+    /// that the helper still carries the #444 re-anchor, which no
+    /// fixture can see cross fake screens.
+    @Test("the one filing re-anchors a float")
+    func filingReanchors() throws {
+        let file = Self.core.appendingPathComponent(
+            "Commands/KiwiCore+SpaceCommands.swift"
+        )
+        // Comments stripped, so a docstring naming the step
+        // cannot satisfy the needle (rule-authoring.md).
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        let filing = SourceScan.declarationBody(
+            after: "func fileMembership(",
+            in: source
+        )
+        #expect(filing != nil)
+        #expect(filing?.contains("reanchorFloat(") == true)
+    }
 
     @Test("each wiring exists exactly once per named file")
     func wiringsAreSingular() throws {

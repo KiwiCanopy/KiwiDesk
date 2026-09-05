@@ -101,16 +101,11 @@ extension KiwiCore {
         if stickyMoveRefused(window, to: target) { return false }
         tiler.dragExemptWindow = window
         let from = state.workspaces.space(of: window)
+        // The one filing (#1150); its float re-anchor stands
+        // down on the drag-exempt window, so the pointer keeps
+        // owning the placement.
         if from != target {
-            addFocusedToSpace(window, to: target)
-            state.workspaces.focus(window, in: target)
-            emitWindowMovedToSpace(
-                window,
-                app: state.windows[window]?.appName ?? "",
-                bundleID: state.windows[window]?.appBundleID,
-                from: from,
-                to: target
-            )
+            fileMembership(window, into: target, from: from)
         }
         state.workspaces.activate(target)
         retile(animated: false, force: true)

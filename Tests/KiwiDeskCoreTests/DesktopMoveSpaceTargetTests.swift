@@ -233,6 +233,20 @@ struct DesktopMoveSpaceTargetTests {
         #expect(core.state.workspaces[mail] == nil)
     }
 
+    /// A departure the redirect does not take — a minimize, which
+    /// the fold records as no remembered Space — creates nothing:
+    /// the Space is made only for a filing that happened.
+    @Test("A minimized departure with a pending name creates nothing")
+    func minimizedDepartureCreatesNothing() {
+        let core = makeCore()
+        defer { teardown() }
+        core.pendingSpace.record(window, space: mail)
+        core.handle(.windowDestroyed(window, wasMinimized: true))
+        #expect(core.state.workspaces[mail] == nil)
+        #expect(core.state.rememberedSpace(of: window) == nil)
+        #expect(core.pendingSpace.isEmpty)
+    }
+
     /// At the arrival the #1010 screen-home net still outranks
     /// the name: a Space moved to another screen between the
     /// command and the reveal is exactly what that net exists
@@ -248,6 +262,11 @@ struct DesktopMoveSpaceTargetTests {
         core.state.apply(.windowDestroyed(window, wasMinimized: false))
         core.state.redirectDeparture(of: window, to: mail)
         #expect(core.state.rememberedSpace(of: window) == mail)
+        // `mail` exists, so the name is OUTRANKED below rather
+        // than dropped by `livingRememberedSpace` — the fold's
+        // fallback is the origin too, and only this tells the
+        // two apart (guard-prover, 2026-09-05).
+        #expect(core.state.workspaces[mail] != nil)
         // The window's frame lands on screen 1, which shows the
         // origin — the net re-homes it there, not into `mail`.
         core.state.arrivalDisplay = DisplayID(1)

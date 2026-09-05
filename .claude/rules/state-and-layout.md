@@ -189,11 +189,12 @@ editing here:
   Space is a MEMBERSHIP write where a bare Desktop move is not:
   it takes `stickyMoveRefused` before anything moves, and every
   membership filing — this route, `moveWindow`, the #1010
-  re-home — goes through the one `fileMembership` (add, float
-  re-anchor, focus stamp, emit), never a hand copy of that list,
-  which is how the re-anchor went missing once; no fixture can
-  see a float cross fake screens, so `PendingSpaceSeamTests`
-  counts the callers. The ledger is bounded and per window,
+  re-home, the Space Bar spring drop — goes through the one
+  `fileMembership` (add, float re-anchor, focus stamp, emit),
+  never a hand copy of that list, which is how the re-anchor went
+  missing once; no fixture can see a float cross fake screens, so
+  `PendingSpaceSeamTests` counts the callers and pins the
+  re-anchor inside the helper. The ledger is bounded and per window,
   rekeyed on a tab switch; a new route that produces a departure
   claims through the gone handler rather than beside it, and
   `PendingSpaceSeamTests` is the register of those wirings.

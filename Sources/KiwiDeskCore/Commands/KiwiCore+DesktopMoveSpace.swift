@@ -30,6 +30,7 @@ extension KiwiCore {
             )
             return
         }
+        guard state.windows[window] != nil else { return }
         let from = state.workspaces.space(of: window)
         guard from != space else { return }
         onLog(

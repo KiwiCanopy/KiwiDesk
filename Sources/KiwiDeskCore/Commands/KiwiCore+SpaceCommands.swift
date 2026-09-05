@@ -127,23 +127,12 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The ONE membership filing every re-home shares (#1150
-    /// review — a third hand copy shipped with its re-anchor
-    /// missing): add, the float re-anchor, the focus stamp, the
-    /// `window_moved_to_space`. Callers keep their own focus
-    /// policy and retile. A same-space re-file (a Space Bar drop
-    /// on the current space, a redundant move) stays
-    /// geometry-neutral and emits nothing: the window may sit on
-    /// another display than its membership by USER choice, and
-    /// placement always wins (review).
-    ///
-    /// The float re-anchor (#444): membership alone never moves a
-    /// float — no layout frame is recomputed for one — so a
-    /// display crossing translates it; the caller's retile
-    /// delivers. The focus stamp (#22): the moved window becomes
-    /// the target's focus so the FIRST focus of that space raises
-    /// it; without it `focusSpace` finds no focus to hand over and
-    /// the space renders empty until a later focus event.
+    /// The ONE membership filing (#1150): add, the #444 float
+    /// re-anchor, the #22 focus stamp, `window_moved_to_space` —
+    /// callers keep their own focus policy and retile. A
+    /// same-space re-file is geometry-neutral and emits nothing:
+    /// the window may sit on another display than its membership
+    /// by USER choice, and placement always wins.
     func fileMembership(
         _ window: WindowID,
         into target: SpaceID,

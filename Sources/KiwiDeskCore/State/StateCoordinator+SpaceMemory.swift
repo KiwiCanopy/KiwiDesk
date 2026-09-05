@@ -62,15 +62,19 @@ extension StateCoordinator {
     /// taken in; rankless, the create fold's spawn placement is
     /// the authority for where the return lands, and the away
     /// merge (`withAwayMembers`) previews it LAST, which may
-    /// differ. A no-op for anything but a `.departed` record — a
-    /// minimize, a close, a `.restored` filing.
+    /// differ. False, and a no-op, for anything but a `.departed`
+    /// record — a minimize, a close, a `.restored` filing.
+    @discardableResult
     mutating func redirectDeparture(
         of id: WindowID,
         to space: SpaceID
-    ) {
-        guard case .departed? = rememberedSpaces[id] else { return }
+    ) -> Bool {
+        guard case .departed? = rememberedSpaces[id] else {
+            return false
+        }
         rememberedSpaces[id] = .departed(space)
         departedSlots[id] = nil
+        return true
     }
 
     /// Retires a window closed while away (#1146): the ledger
