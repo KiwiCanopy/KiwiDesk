@@ -193,6 +193,78 @@ struct ConfigMigrationRoutingTests {
         )
     }
 
+    /// The retired `resize.feedback` drop stays scoped to one
+    /// group and one key.
+    ///
+    /// This walk is narrower than #1020's — it drops `feedback`
+    /// only under a parent named `resize` — but a scope has two
+    /// halves and both can widen. A SECOND `resize` group
+    /// anywhere in the config would hand the walk a parent it
+    /// was never told about, and a second `"feedback"` key
+    /// declared inside the existing one would be eaten silently.
+    @Test("The refusal-sound drop stays scoped to one group")
+    func refusalFeedbackDropStaysScoped() throws {
+        let root = coreRoot
+        let prefix = root.path + "/"
+        // The group the walk lands on: one CodingKey
+        // declaration, plus the migration's own literal, which
+        // is the parent it matches rather than a key of its own.
+        let allowedGroup: Set<String> = [
+            "Tiling/TilingSettings+Coding.swift",
+            "Config/ConfigMigration+RefusalSound.swift",
+        ]
+        // The retired key: only the migration retiring it may
+        // still name it, and only as its retired-key constant.
+        let allowedRetired: Set<String> = [
+            "Config/ConfigMigration+RefusalSound.swift"
+        ]
+        var group: Set<String> = []
+        var retired: Set<String> = []
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let key =
+                file.path.hasPrefix(prefix)
+                ? String(file.path.dropFirst(prefix.count))
+                : file.path
+            // A CodingKey named `resize` — the JSON group the
+            // walk lands on. Unrelated enums spell the same
+            // case, so the file has to be a coding one, and the
+            // boundary keeps `resizeEcho` out.
+            let declares =
+                source.range(
+                    of: "case resize(?![A-Za-z0-9_])",
+                    options: .regularExpression
+                ) != nil && source.contains("CodingKey")
+            if declares || source.contains("key == \"resize\"") {
+                group.insert(key)
+            }
+            if source.contains("\"feedback\"") {
+                retired.insert(key)
+            }
+        }
+        #expect(!group.isEmpty)
+        #expect(
+            group == allowedGroup,
+            Comment(
+                rawValue:
+                    "`resize` groups: \(group.sorted()) — a "
+                    + "second one is a parent the drop was never "
+                    + "scoped to, or this map owes it an entry"
+            )
+        )
+        #expect(
+            retired == allowedRetired,
+            Comment(
+                rawValue:
+                    "`feedback` still named in: "
+                    + "\(retired.sorted()) — the key is retired; "
+                    + "only the migration may name it"
+            )
+        )
+    }
+
     /// `content` is a bar-content key and nothing else.
     ///
     /// `ConfigMigration`'s walk rewrites by KEY at any depth, and

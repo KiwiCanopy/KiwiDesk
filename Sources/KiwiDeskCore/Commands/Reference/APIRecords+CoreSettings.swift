@@ -42,8 +42,8 @@ extension APIReference {
             .integer("points")
         ),
         "set_refusal_sound": APIRecord(
-            "Plays an alert sound when a keyboard resize cannot "
-                + "act.",
+            "Also plays an alert sound whenever a blocked "
+                + "keyboard action draws its refusal pill.",
             .boolean("enabled")
         ),
         "set_new_window_placement_override": APIRecord(

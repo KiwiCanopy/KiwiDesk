@@ -17,6 +17,22 @@ struct RefusalSoundMigrationTests {
         Data(text.utf8)
     }
 
+    /// A PROFILE-shaped root: `TilingSettings` reaches disk in
+    /// this shape and in the bundle that carries profiles
+    /// inline, never in gui.json, so a fixture stamped like one
+    /// would be routed at `GuiConfig.currentFormat` and prove
+    /// nothing about the file the key actually sits in.
+    private func profile(_ settings: String, format: Int = 1)
+        -> Data
+    {
+        json(
+            """
+            {"format":\(format),"monitor_sets":{},\
+            "settings":\(settings)}
+            """
+        )
+    }
+
     private func root(_ data: Data) throws -> [String: Any] {
         try #require(
             JSONSerialization.jsonObject(with: data)
@@ -26,10 +42,9 @@ struct RefusalSoundMigrationTests {
 
     @Test("the retired key is dropped, and nothing else moves")
     func dropsTheRetiredKey() throws {
-        let data = json(
+        let data = profile(
             """
-            {"format":1,"settings":{"resize":\
-            {"feedback":true,"step":75}}}
+            {"resize":{"feedback":true,"step":75}}
             """
         )
         let out = try #require(ConfigMigration.migrated(data))
@@ -52,11 +67,7 @@ struct RefusalSoundMigrationTests {
     /// from one near-unreachable case to every refusal.
     @Test("a stored true does not survive as the new default")
     func doesNotCarryTheOldValue() throws {
-        let data = json(
-            """
-            {"format":1,"settings":{"resize":{"feedback":true}}}
-            """
-        )
+        let data = profile(#"{"resize":{"feedback":true}}"#)
         let out = try #require(ConfigMigration.migrated(data))
         let settings = try #require(
             root(out)["settings"] as? [String: Any]
@@ -83,7 +94,8 @@ struct RefusalSoundMigrationTests {
     func scopedToTheResizeGroup() throws {
         let data = json(
             """
-            {"format":1,"other":{"feedback":true},\
+            {"format":1,"monitor_sets":{},\
+            "other":{"feedback":true},\
             "settings":{"resize":{"feedback":true}}}
             """
         )
@@ -96,31 +108,68 @@ struct RefusalSoundMigrationTests {
 
     /// The trap `ConfigMigration`'s own docstring names: a step
     /// is dead on arrival unless the format stamp reaches it.
-    /// `TilingSettings` encodes into all three shapes, so all
-    /// three had to move — and a file stamped at the OLD current
-    /// format must still be migrated, which is what a missing
-    /// bump would break.
+    ///
+    /// It reaches the shapes that actually CARRY the key, and
+    /// no further. `TilingSettings` encodes into profiles and
+    /// into bundles; `GuiConfig.CodingKeys` declares no
+    /// `settings`, so gui.json never held `resize.feedback` and
+    /// bumping it would stamp every gui.json for nothing — which
+    /// the previous release then refuses wholesale, taking the
+    /// spaces, rules, layers and Desktop bindings beside it
+    /// (code review, #1255; the cost is `GuiConfig`'s own
+    /// docstring's).
     @Test("the step reaches every shape that carries settings")
     func everyShapeIsStamped() {
-        #expect(GuiConfig.currentFormat >= 3)
         #expect(Profile.currentFormat >= 3)
         #expect(SetupBundle.currentFormat >= 5)
-        let stale = json(
+        // …and gui.json is deliberately NOT stamped, which is
+        // checkable rather than remembered: the key cannot be
+        // there if the container never declares it.
+        let gui = try? JSONEncoder().encode(GuiConfig())
+        let root =
+            gui.flatMap {
+                try? JSONSerialization.jsonObject(with: $0)
+            } as? [String: Any]
+        #expect(root?["settings"] == nil)
+        for stale in [
+            profile(#"{"resize":{"feedback":true}}"#),
+            json(
+                """
+                {"format":1,"writtenBy":"1.2.0","profiles":[\
+                {"settings":{"resize":{"feedback":true}}}]}
+                """
+            ),
+        ] {
+            #expect(ConfigMigration.needsMigration(stale))
+            #expect(ConfigMigration.migrated(stale) != nil)
+        }
+    }
+
+    /// The drop is a text edit, so the rest of the user's file
+    /// survives byte for byte — a re-serialized document re-encodes
+    /// every Double (`ConfigMigration+Surgical`'s docstring carries
+    /// the measurement), which is damage this step never came for.
+    @Test("a neighbouring Double keeps its own spelling")
+    func neighbouringDoublesSurvive() throws {
+        let data = profile(
             """
-            {"format":2,"settings":{"resize":{"feedback":true}}}
+            {"resize":{"feedback":true},"animations":{"gap":0.4}}
             """
         )
-        #expect(ConfigMigration.needsMigration(stale))
-        #expect(ConfigMigration.migrated(stale) != nil)
+        let out = try #require(ConfigMigration.migrated(data))
+        let text = try #require(String(data: out, encoding: .utf8))
+        #expect(text.contains("0.4"))
+        #expect(!text.contains("0.40000"))
+        #expect(!text.contains("feedback"))
     }
 
     @Test("a file without the key is not rewritten")
     func untouchedFileStaysUntouched() {
-        let data = json(
+        let data = profile(
             """
-            {"format":\(GuiConfig.currentFormat),\
-            "settings":{"resize":{"step":50}}}
-            """
+            {"resize":{"step":50}}
+            """,
+            format: Profile.currentFormat
         )
         #expect(ConfigMigration.migrated(data) == nil)
     }

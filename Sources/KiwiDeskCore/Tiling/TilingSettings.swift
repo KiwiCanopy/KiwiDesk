@@ -13,21 +13,19 @@ public struct TilingSettings: Sendable, Equatable {
     /// reads this — the bound row's own literal delta drives an
     /// actual resize.
     public var resizeStep: CGFloat = 50
-    /// Sound alert when resize hotkey cannot act in layout (`resize.feedback`,
-    /// #184).
-    /// Whether a refusal pill also sounds (#1255). OFF by
+    /// Whether a refusal pill also sounds (`refusal.sound`,
+    /// #1255, retiring #184's `resize.feedback`). OFF by
     /// default (owner ruling 2026-09-05): the pill is the
     /// primary cue and the sound is an addition you switch on,
     /// so widening it from one near-unreachable case to every
     /// refusal makes no upgrade noisier.
     ///
-    /// The DEFAULT alone does not deliver that: the encoder
-    /// writes this key unconditionally, so every saved config
-    /// carries an explicit `true` from the old default and would
-    /// keep sounding. The one-shot migration carries it — safe
-    /// because nobody chose the old value: it was audible in two
-    /// rare cases, one of them reachable only by height-resizing
-    /// a stack master.
+    /// The default is what delivers it: the retired
+    /// `resize.feedback` is no longer decoded at all, so a saved
+    /// `true` is an unknown key and every config lands here. The
+    /// migration drops that key as hygiene rather than to change
+    /// the value — a dead entry sitting in a saved file reads as
+    /// a choice nobody made.
     public var refusalSound = false
     /// Directional swap in cascade targets outer neighbor
     /// (`swap.skips_cascade`, #172).

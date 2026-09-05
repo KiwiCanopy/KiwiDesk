@@ -2136,6 +2136,21 @@ mark, and the copy mirrors the floor's
 names none, so the press is a silent stop.
 
 **A bound may refuse a press only if it was learned from a read
+that could tell a refusal from latency (#1083).** [Principle]
+The clamp above rests entirely on the bound being true. It was
+not: the learner was confirming bounds from redraw latency, and
+the pill was then asserting limits that did not exist.
+
+Measured on the owner's Mac at load average 9.7 (2026-08-28,
+macOS 26.6.2): sixteen bound confirmations in eight minutes of
+ordinary use, at least fourteen false. Each sat at the window's
+own pre-press width, one resize step apart (984, 954, 924, 894),
+with heights all equal to the slot's — the layout's own geometry
+recorded as the app's limit. Two different windows confirmed an
+identical bound 44 ms apart. Resizing stopped, the pill named a
+limit the window was nowhere near, and dragging the edge by hand
+worked, which is what proved the app imposed nothing.
+
 **A refusal DRAWS; the sound is an addition to the drawing, and
 cannot fire without one (#1255).** [Principle] Two refusals cued
 by sound alone — a resize press in a layout with no resizing
@@ -2157,18 +2172,21 @@ is load-bearing for the sticky family, whose pill is gated on
 they must say nothing, where a funnel-level sound would have
 made them audible-but-invisible.
 
-**The setting is OFF by default, and the migration is what
-delivers that.** The old default was `true` and the encoder
-wrote the key unconditionally, so every saved config carries an
-explicit `true` recording what a save did rather than what
-anyone chose — the cue was audible in two situations, one
+**The setting is OFF by default, and the DECODER is what
+delivers that** — the retired `resize.feedback` is no longer
+declared, so a stored `true` is an unknown key and every config
+lands on the new default whether or not the migration has run.
+The migration is hygiene: it ends the file in the new shape,
+because a dead entry left in a saved config reads as a choice
+somebody made. Nobody did — the old default was `true` and the
+encoder wrote the key unconditionally, so an explicit value
+records what a save did rather than what anyone chose — the cue was audible in two situations, one
 reachable only by height-resizing the master of a stack, and the
 owner could not trigger it in three attempts while looking for
 it. Widening it from that to every refusal while keeping the
 stored value would have made every existing install noisier at
-limits it currently hits silently. So the one-shot crossing
-drops the retired key rather than carrying it, and absence
-decodes as off.
+limits it currently hits silently. So the crossing drops the
+retired key rather than carrying it.
 
 It lives in Behaviour rather than General, and that is a
 STORAGE decision wearing a placement question: every row in
@@ -2180,21 +2198,6 @@ profiles and backups — the GUI curates, Lua is open — and
 Behaviour is where app-wide draft behaviour already lives. The
 cost, stated: Behaviour is Power-User-only, so a Simple user
 gets the pill and not the switch.
-
-that could tell a refusal from latency (#1083).** [Principle]
-The clamp above rests entirely on the bound being true. It was
-not: the learner was confirming bounds from redraw latency, and
-the pill was then asserting limits that did not exist.
-
-Measured on the owner's Mac at load average 9.7 (2026-08-28,
-macOS 26.6.2): sixteen bound confirmations in eight minutes of
-ordinary use, at least fourteen false. Each sat at the window's
-own pre-press width, one resize step apart (984, 954, 924, 894),
-with heights all equal to the slot's — the layout's own geometry
-recorded as the app's limit. Two different windows confirmed an
-identical bound 44 ms apart. Resizing stopped, the pill named a
-limit the window was nowhere near, and dragging the edge by hand
-worked, which is what proved the app imposed nothing.
 
 The cause is that an echo reporting the pre-ask frame is the
 same bytes whether the app refused or has merely not redrawn

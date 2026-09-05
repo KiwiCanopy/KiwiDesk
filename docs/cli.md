@@ -396,9 +396,11 @@ the slot along its own scroll axis for either `x` or `y`. In a
 track space the axis across the tracks resizes the focused
 window's track, the axis along them its share within the track
 (#128; session-scoped weights too). monocle, grid, and floating
-reply "not supported" — from a hotkey that failure flashes a
-pill, and adds the system alert sound if `set_refusal_sound` is
-on (default off; CLI/IPC callers stay silent).
+reply "not supported" — that failure flashes a pill on the
+focused window whatever issued it, and adds the system alert
+sound when `set_refusal_sound` is on (default off) and a hotkey
+was what fired: a CLI or IPC caller reads the error reply and
+never hears one.
 
 ### Applying Ignore Rules
 

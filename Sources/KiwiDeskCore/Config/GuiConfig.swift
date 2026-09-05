@@ -9,12 +9,15 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// `CodingKeys`, so the renamed key never reaches this file —
     /// a bump would rewrite every gui.json for nothing and make
     /// the previous release refuse one this build wrote. That note
-    /// is the ruling `SetupBundle.currentFormat` cites.
+    /// is the ruling `SetupBundle.currentFormat` cites, and the
+    /// one the `resize.feedback` retirement took again (#1255,
+    /// `RefusalSoundMigrationTests`) — `settings` is still
+    /// absent, so that key was never here either.
     ///
     /// **2 (#1147)**: `profile_bindings` values became objects,
     /// which IS a `CodingKeys` key of this file, so the step is
     /// dead without the bump.
-    public static let currentFormat = 3
+    public static let currentFormat = 2
 
     public var format: Int = GuiConfig.currentFormat
     /// Active profile tiling parameters.

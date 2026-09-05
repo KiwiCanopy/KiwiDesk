@@ -120,8 +120,7 @@ struct SettingsCodingTests {
         let space = try object(root["space"])
         let icons = try object(space["icon"])
         #expect(icons["2"] as? String == "globe")
-        // `set_resize_step` → `resize.step` (#58);
-        // `set_refusal_sound` → `resize.feedback` (#184).
+        // `set_resize_step` → `resize.step` (#58).
         let resize = try object(root["resize"])
         #expect(resize["step"] as? Double == 50)
         // `set_refusal_sound` → `refusal.sound` (#1255): its own
@@ -273,7 +272,7 @@ struct SettingsCodingTests {
         settings.floatNudge = false
         settings.floatScaleOnDisplayChange = false
         settings.resizeStep = 75
-        settings.refusalSound = false
+        settings.refusalSound = true
         settings.dragGhost.enabled = false
         settings.dragDropZone.fillColor = "#11223344"
         settings.dragCornerRadius = 22

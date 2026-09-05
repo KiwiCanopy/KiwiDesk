@@ -4,33 +4,25 @@ import CoreGraphics
 extension KiwiCore {
     /// Flashes the minimum-size refusal pill on `window`
     /// (#933) with `text`.
+    @discardableResult
     private func flashSizeLimitPill(
         _ window: WindowID,
         text: String
-    ) {
+    ) -> Bool {
         guard
             let frame = tiler.calculatedFrames(state: state)[window]
                 ?? state.windows[window]?.frame
-        else { return }
-        borders.flashSizeLimitPill(
+        else { return false }
+        return borders.flashSizeLimitPill(
             window: window,
             frame: frame,
             text: text
         )
-        soundRefusal()
     }
 
     /// The audible half of a refusal (#1255): a drawn pill may
     /// also sound, which is what the toggle has always claimed
     /// to control and now does.
-    ///
-    /// Called from the pill-DRAWING seams rather than from the
-    /// refusal funnels, and that placement is the invariant: a
-    /// sound that cannot fire without a pill can never
-    /// re-create the defect this replaced — a refusal audible
-    /// but invisible. It matters most for the sticky family,
-    /// whose pill is gated on `sticky.mark`: with the mark off
-    /// those refusals draw nothing, and so must say nothing.
     ///
     /// The hotkey-fire gate is inherited deliberately (#184): a
     /// resize driven from the CLI or IPC must not make the
@@ -42,6 +34,19 @@ extension KiwiCore {
         guard keys.isFiring, tiler.settings.refusalSound
         else { return }
         NSSound.beep()
+    }
+
+    /// The one gate between a drawing and its sound: pass what
+    /// the drawing RETURNED, never the fact that it was asked
+    /// (#1255, `RefusalCueSeamTests`). Both primitives decline
+    /// silently — no `privateRuntimeStarted`, no mark overlay —
+    /// and a sound outrunning its pill is the invisible-refusal
+    /// defect this change removed. It matters most for the
+    /// sticky family, whose pill is gated on `sticky.mark`: with
+    /// the mark off those refusals draw nothing, and say
+    /// nothing.
+    func soundIfDrawn(_ drew: Bool) {
+        if drew { soundRefusal() }
     }
 
     /// The one entry every size-limit cue takes to reach the
@@ -64,17 +69,19 @@ extension KiwiCore {
     /// invisible to anyone who does not hear it.
     func refuseAxisAbsent(_ window: WindowID, axis: String) {
         cueResizeRefusal(.noAxisHere(window))
-        flashSizeLimitPill(
-            window,
-            text: axis == "y"
-                ? L(
-                    "resize.no_height_here",
-                    "This zone divides widths, not heights"
-                )
-                : L(
-                    "resize.no_width_here",
-                    "This zone divides heights, not widths"
-                )
+        soundIfDrawn(
+            flashSizeLimitPill(
+                window,
+                text: axis == "y"
+                    ? L(
+                        "resize.no_height_here",
+                        "This zone divides widths, not heights"
+                    )
+                    : L(
+                        "resize.no_width_here",
+                        "This zone divides heights, not widths"
+                    )
+            )
         )
     }
 
@@ -84,14 +91,20 @@ extension KiwiCore {
     /// is the MOST reachable refusal in the feature, not the
     /// least: any resize press in one of those three arrives
     /// here. It cued by sound alone until now.
+    ///
+    /// An empty space cues nothing: every refusal is drawn ON a
+    /// window, so with no focus there is nothing to draw and
+    /// nothing to sound beside it.
     func refuseResizeUnsupported(in space: Space) {
         guard let window = space.focused else { return }
         cueResizeRefusal(.layoutHasNoResize(window))
-        flashSizeLimitPill(
-            window,
-            text: L(
-                "resize.layout_has_none",
-                "This layout has no resizing"
+        soundIfDrawn(
+            flashSizeLimitPill(
+                window,
+                text: L(
+                    "resize.layout_has_none",
+                    "This layout has no resizing"
+                )
             )
         )
     }
@@ -105,11 +118,13 @@ extension KiwiCore {
         cueResizeRefusal(.ownMinimum(window))
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
-        flashSizeLimitPill(
-            window,
-            text: L(
-                "resize.min_size_reached",
-                "Minimum window size reached"
+        soundIfDrawn(
+            flashSizeLimitPill(
+                window,
+                text: L(
+                    "resize.min_size_reached",
+                    "Minimum window size reached"
+                )
             )
         )
     }
@@ -124,11 +139,13 @@ extension KiwiCore {
         cueResizeRefusal(.ownMaximum(window))
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
-        flashSizeLimitPill(
-            window,
-            text: L(
-                "resize.max_size_reached",
-                "Maximum window size reached"
+        soundIfDrawn(
+            flashSizeLimitPill(
+                window,
+                text: L(
+                    "resize.max_size_reached",
+                    "Maximum window size reached"
+                )
             )
         )
     }
@@ -157,11 +174,13 @@ extension KiwiCore {
         cueResizeRefusal(.ownMaximum(window))
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(window, direction: direction)
-        flashSizeLimitPill(
-            window,
-            text: L(
-                "resize.boundary_reached",
-                "No room left to grow"
+        soundIfDrawn(
+            flashSizeLimitPill(
+                window,
+                text: L(
+                    "resize.boundary_reached",
+                    "No room left to grow"
+                )
             )
         )
     }
@@ -188,13 +207,18 @@ extension KiwiCore {
         )
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(focused, direction: direction)
-        flashSizeLimitPill(
-            focused,
-            text: L(
-                "resize.neighbor_min_size",
-                "Neighboring window at its minimum size"
+        soundIfDrawn(
+            flashSizeLimitPill(
+                focused,
+                text: L(
+                    "resize.neighbor_min_size",
+                    "Neighboring window at its minimum size"
+                )
             )
         )
+        // The blocker's pill draws but does NOT sound: this is
+        // one refusal wearing two pills, and one press that
+        // beeps twice reads as two failures (#1255).
         flashSizeLimitPill(
             anchor,
             text: L(

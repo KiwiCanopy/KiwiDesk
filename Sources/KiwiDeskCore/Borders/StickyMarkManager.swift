@@ -120,17 +120,23 @@ public final class StickyMarkManager {
     }
 
     /// Flashes expanded home-space reorder hint (#421).
+    /// Returns whether a pill was actually DRAWN (#1255): a
+    /// window with no mark overlay silently draws nothing, and
+    /// the refusal's sound follows the drawing.
+    @discardableResult
     public func flash(
         _ id: WindowID,
         format: String,
         mark: SpaceMark,
         delay: TimeInterval
-    ) {
-        overlays[id]?.flash(
+    ) -> Bool {
+        guard let overlay = overlays[id] else { return false }
+        overlay.flash(
             format: format,
             mark: mark,
             delay: delay
         )
+        return true
     }
 
     /// Removes and hides all active marks.

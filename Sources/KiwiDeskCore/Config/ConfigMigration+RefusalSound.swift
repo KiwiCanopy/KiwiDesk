@@ -5,17 +5,21 @@ import Foundation
 ///
 /// The setting stopped being a resize one — every refusal that
 /// draws a pill may now sound — so it moved to `refusal.sound`
-/// and its default flipped OFF. That flip is why this DROPS the
-/// old key rather than carrying its value across: the encoder
-/// wrote `feedback` unconditionally, so every saved config holds
-/// an explicit `true` nobody chose, and carrying it would hand a
-/// widened cue to installs that never asked for one.
+/// and its default flipped OFF.
 ///
-/// Dropping is a complete crossing here because absence decodes
-/// as the new default: `decodeRefusal` returns early with no
-/// `refusal` group, leaving the property at `false`, and the next
-/// save writes the new key. So the file ENDS in the new shape
-/// rather than being read leniently forever.
+/// This step changes no VALUE, and saying otherwise would
+/// mislead the next rename: `ResizeKeys` no longer declares
+/// `feedback`, so a stored `true` is an unknown key the decoder
+/// ignores, and the OFF default lands with or without this run.
+/// What it does is end the file in the new shape — a dead entry
+/// left in a saved config reads as a choice somebody made, and
+/// the encoder wrote that entry into every file unconditionally
+/// under the old default, so nobody did.
+///
+/// Carrying the value was refused for that reason: an explicit
+/// `true` records what a save did, not what a user chose, and
+/// the cue widened from one near-unreachable case to every
+/// refusal.
 extension ConfigMigration {
     /// The retired key, spelled here rather than derived: a
     /// historical step must keep naming what it was written to
@@ -34,8 +38,33 @@ extension ConfigMigration {
             data,
             gate: { $0.range(of: needle) != nil },
             rewriting: withoutResizeFeedback,
-            editing: { _ in nil }
+            editing: surgicallyDropped
         )
+    }
+
+    /// Surgically deletes the entry from raw JSON text, so a
+    /// user's file keeps its own formatting and its Doubles keep
+    /// their precision (the envelope's docstring carries the
+    /// measurement). Stands down unless the retired spelling
+    /// occurs exactly once: a textual delete cannot see which
+    /// parent it is under, and the tree walk — which can — is
+    /// the fallback.
+    static func surgicallyDropped(_ text: String) -> Data? {
+        let key = "\"\(retiredResizeFeedbackKey)\""
+        guard text.components(separatedBy: key).count == 2
+        else { return nil }
+        let entry = key + "\\s*:\\s*(true|false)"
+        for pattern in [
+            entry + "\\s*,\\s*", "\\s*,\\s*" + entry, entry,
+        ] {
+            let out = text.replacingOccurrences(
+                of: pattern,
+                with: "",
+                options: .regularExpression
+            )
+            if out != text { return out.data(using: .utf8) }
+        }
+        return nil
     }
 
     /// Tree walker dropping the retired key under a `resize`

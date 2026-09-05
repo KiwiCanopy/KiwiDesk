@@ -76,10 +76,12 @@ enum ShortcutsRowOrder {
         .shortcuts(.toggleDisplaySticky),
     ]
 
-    /// Empty since #1255 took the sound cue to Behaviour: the
-    /// drawer it filled is gone with it, so this list holds the
-    /// area's promise that a `.showMore` tier here would need
-    /// one built again.
+    /// Size & float's `.showMore` tier, empty since #1255 took
+    /// its one row to Behaviour. Kept rather than deleted: a
+    /// census key authored at this tier reds
+    /// `ShortcutsCensusRenderTests` against this list, which is
+    /// what says the drawer has to be built again before that
+    /// key can draw.
     static let sizeAndFloatMore: [SettingKey] = []
 
     /// Open applications group order.
