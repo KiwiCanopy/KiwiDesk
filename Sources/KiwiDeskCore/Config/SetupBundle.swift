@@ -18,8 +18,11 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// (#1020 — `GuiConfig.currentFormat` carries why its half
     /// deliberately did not move);
     /// 4 = the Desktop-binding objects (#1147), which reach a
-    /// bundle because it carries `config` inline.
-    public static let currentFormat = 4
+    /// bundle because it carries `config` inline;
+    /// 5 = the retired `resize.feedback` drop (#1255), on
+    /// `[Profile]` alone again — the same split #1020 took, and
+    /// for the same reason.
+    public static let currentFormat = 5
 
     public let format: Int
 

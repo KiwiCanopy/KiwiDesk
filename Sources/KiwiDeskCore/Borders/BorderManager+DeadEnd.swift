@@ -52,16 +52,25 @@ extension BorderManager {
     }
 
     /// Flashes the minimum-size refusal pill on `window` (#933).
+    /// Returns whether a pill was actually DRAWN (#1255): the
+    /// refusal's sound follows the drawing, so a caller cannot
+    /// tell "I asked" from "it appeared" without this.
+    @discardableResult
     func flashSizeLimitPill(
         window: WindowID,
         frame: CGRect,
-        text: String
-    ) {
-        guard privateRuntimeStarted else { return }
-        sizeLimitOverlay.flash(
+        text: String,
+        symbol: String
+    ) -> Bool {
+        guard privateRuntimeStarted else { return false }
+        // The overlay declines a second time, on a window too
+        // narrow to hold a legible pill — reported rather than
+        // swallowed, or the caller sounds at nothing (#1255).
+        return sizeLimitOverlay.flash(
             window: window.raw,
             frame: frame,
-            text: text
+            text: text,
+            symbol: symbol
         )
     }
 }

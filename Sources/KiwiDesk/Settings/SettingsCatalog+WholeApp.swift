@@ -64,11 +64,6 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.size_float",
         "Size & float"
     )
-    /// Secondary size & float settings drawer.
-    let sizeFloatMore = SettingsDrawer(
-        "shortcuts.size_float.more",
-        "Resize feedback"
-    )
     let openApplications = SettingsControl(
         "shortcuts.section.open_applications",
         "Open applications"

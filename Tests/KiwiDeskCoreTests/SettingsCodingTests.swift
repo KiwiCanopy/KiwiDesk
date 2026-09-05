@@ -32,7 +32,8 @@ struct SettingsCodingTests {
                 "gap",
                 "layout", "min_window_size", "mouse",
                 "mouse_resize", "new_window_placement_override", "quit",
-                "floating", "resize", "space", "space_bar",
+                "floating", "refusal", "resize", "space",
+                "space_bar",
                 "sticky", "swap_skips_cascade",
             ]
         )
@@ -119,12 +120,17 @@ struct SettingsCodingTests {
         let space = try object(root["space"])
         let icons = try object(space["icon"])
         #expect(icons["2"] as? String == "globe")
-        // `set_resize_step` → `resize.step` (#58);
-        // `set_resize_feedback` → `resize.feedback` (#184),
-        // on by default.
+        // `set_resize_step` → `resize.step` (#58).
         let resize = try object(root["resize"])
         #expect(resize["step"] as? Double == 50)
-        #expect(resize["feedback"] as? Bool == true)
+        // `set_refusal_sound` → `refusal.sound` (#1255): its own
+        // group, the cue having stopped being a resize setting.
+        // Asserted present and Boolean rather than pinned to a
+        // value a ruling may retune (tests.md ▸ a clause pins
+        // the SHAPE).
+        let refusal = try object(root["refusal"])
+        #expect(refusal["sound"] as? Bool != nil)
+        #expect(resize["feedback"] == nil)
         #expect(root["mouse_resize"] as? String == "layout")
         // Toggles (issue #11) and duration knobs (issue #51).
         // Keys mirror the Lua names per the one-vocabulary rule.
@@ -266,7 +272,7 @@ struct SettingsCodingTests {
         settings.floatNudge = false
         settings.floatScaleOnDisplayChange = false
         settings.resizeStep = 75
-        settings.resizeFeedback = false
+        settings.refusalSound = true
         settings.dragGhost.enabled = false
         settings.dragDropZone.fillColor = "#11223344"
         settings.dragCornerRadius = 22

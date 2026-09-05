@@ -2151,6 +2151,95 @@ identical bound 44 ms apart. Resizing stopped, the pill named a
 limit the window was nowhere near, and dragging the edge by hand
 worked, which is what proved the app imposed nothing.
 
+**A refusal DRAWS; the sound is an addition to the drawing, and
+cannot fire without one (#1255).** [Principle] Two refusals cued
+by sound alone — a resize press in a layout with no resizing
+(monocle, grid, floating), and one on a zone axis that does not
+exist. Both were invisible with the toggle off, and invisible to
+anyone who does not hear it; the first is the most reachable
+refusal in the feature, not an edge, since any resize press in
+those three layouts arrives there. Meanwhile the size-limit and
+sticky families drew pills and said nothing. One idea, four
+shapes.
+
+So: every refusal draws, and `refusal.sound` adds the system
+alert to the drawing. The sound is gated on what the drawing
+REPORTED, not on the drawing having been asked for, and that is
+the invariant rather than a detail — a sound that cannot fire
+without a pill can never re-create the defect this removed.
+Asking is not appearing: both primitives decline silently, the
+size pill without the private runtime and the sticky mark
+without an overlay, so each returns whether it drew and one gate
+turns that verdict into sound. It is load-bearing for the sticky
+family, whose pill is gated on `sticky.mark`: with the mark off
+those refusals draw nothing, so they must say nothing, where a
+sound placed one level up — on the refusal funnel, or beside the
+drawing call — would have made them audible-but-invisible.
+
+**The setting is OFF by default, and the DECODER is what
+delivers that** — the retired `resize.feedback` is no longer
+declared, so a stored `true` is an unknown key and every config
+lands on the new default whether or not the migration has run.
+The migration is hygiene: it ends the file in the new shape,
+because a dead entry left in a saved config reads as a choice
+somebody made. Nobody did — the old default was `true` and the
+encoder wrote the key unconditionally, so an explicit value
+records what a save did rather than what anyone chose.
+
+Nor is the stored value worth carrying. The old cue was audible
+in two situations, one reachable only by height-resizing the
+master of a stack, and the owner could not trigger it in three
+attempts while looking for it. Widening that to every refusal
+while keeping the stored `true` would have made every existing
+install noisier at limits it currently hits silently. So the
+crossing drops the retired key rather than carrying it.
+
+**An arrow means a resize stopped; a non-arrow means there is
+no resize here (#1260).** [Principle] The pill carries two kinds
+of message, and they ask for different things of the reader:
+*structural* — the parameter does not exist and never will, so
+stop trying on this layout — and *contingent*, a bound reached
+that something could get past. The distinction rides the glyph
+because that channel is already drawn on every pill, so encoding
+it costs no width and taxes the common case not at all; and
+because the glyph is the part that survives truncation, which is
+exactly the narrow band where the sentence has stopped being
+readable.
+
+The symbol is read off the `ResizeRefusal` case in one
+exhaustive switch, never off the text — #96's rule, and the
+compiler is then the forget-proofing, so no scan is owed.
+`.neighborMinimum` keeps the SHRINK arrow deliberately: a shrink
+whose group floor is carried by a mate routes through the
+neighbour cue, so a direction-derived glyph would draw a grow
+arrow on a shrink gesture. And every name must predate the
+deployment target — a symbol added later resolves on a modern
+dev host and renders nil on the target, leaving an empty gutter
+and no error anywhere.
+
+Colour was refused, and in principle rather than in practice.
+`ColorVision.separation` measures a pair against a KNOWN ground,
+and this pill is a `.hudWindow` blur over whatever third-party
+window sits behind it — there is no pair to measure, which is
+the same reason the marks default to Automatic rather than a
+brand hue. A warning triangle was refused for its semantics: a
+layout with no resize parameter is a fact about the layout the
+user chose, not a fault, and the triangle would fire on the most
+reachable refusal in the feature — a warning on the commonest
+path becomes chrome, and spends an alarm vocabulary reserved for
+a real conflict.
+
+It lives in Behaviour rather than General, and that is a
+STORAGE decision wearing a placement question: every row in
+General is a `UserDefaults` preference, a live service toggle or
+an action, so a draft-and-Save row there would be the only one
+that does not do what it was just told. Keeping it in the draft
+config is what preserves the Lua verb and lets it travel in
+profiles and backups — the GUI curates, Lua is open — and
+Behaviour is where app-wide draft behaviour already lives. The
+cost, stated: Behaviour is Power-User-only, so a Simple user
+gets the pill and not the switch.
+
 The cause is that an echo reporting the pre-ask frame is the
 same bytes whether the app refused or has merely not redrawn
 yet, and under load the second is ordinary for ANY app — this

@@ -193,7 +193,10 @@ struct SettingsSearchIndexTests {
                 .bars: 36,
                 .colors: 12,
                 .advancedColors: 25,
-                .behavior: 3,
+                // 4 since #1255: the refusal sound moved here
+                // from Shortcuts ▸ Size & float, the cue having
+                // stopped being a resize setting.
+                .behavior: 4,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the
@@ -208,7 +211,8 @@ struct SettingsSearchIndexTests {
                 // shortcuts.restore_defaults` joined the same
                 // way in #1116 — a new census row landing,
                 // not an anchor going missing.
-                .shortcuts: 13,
+                // 12 since #1255 — the same row leaving.
+                .shortcuts: 12,
                 .appRules: 3,
                 // 11: the backup pair and the other General rows
                 // have no #277 catalog anchor (the deleted

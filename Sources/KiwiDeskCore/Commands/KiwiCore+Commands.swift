@@ -90,8 +90,8 @@ extension KiwiCore {
             return setFloatScaleOnDisplayChange(args)
         case "set_resize_step":
             return setResizeStep(args)
-        case "set_resize_feedback":
-            return setResizeFeedback(args)
+        case "set_refusal_sound":
+            return setRefusalSound(args)
         case "help", "list_commands":
             // With a name, one record; without, the whole
             // surface grouped (#1033). The argument used to be

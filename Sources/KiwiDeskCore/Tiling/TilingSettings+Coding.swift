@@ -27,6 +27,7 @@ extension TilingSettings: Codable {
         case mouse
         case mouseResize = "mouse_resize"
         case quit
+        case refusal
         case resize
         case space
     }
@@ -41,8 +42,13 @@ extension TilingSettings: Codable {
     }
 
     enum ResizeKeys: String, CodingKey {
-        case feedback
         case step
+    }
+
+    /// The refusal cue's own group (#1255): the sound is no
+    /// longer a resize setting, so it does not sit under one.
+    enum RefusalKeys: String, CodingKey {
+        case sound
     }
 
     enum DragKeys: String, CodingKey {
@@ -142,6 +148,7 @@ extension TilingSettings: Codable {
         try decodeDrag(from: container)
         try decodeSpace(from: container)
         try decodeResize(from: container)
+        try decodeRefusal(from: container)
         try decodeQuit(from: container)
     }
 
@@ -191,11 +198,21 @@ extension TilingSettings: Codable {
             ) ?? 50
         resizeStep =
             rawStep.isFinite ? min(max(rawStep, 1), 10_000) : 50
-        resizeFeedback =
-            try resize.decodeIfPresent(
+    }
+
+    private mutating func decodeRefusal(
+        from container: Container
+    ) throws {
+        guard container.contains(.refusal) else { return }
+        let refusal = try container.nestedContainer(
+            keyedBy: RefusalKeys.self,
+            forKey: .refusal
+        )
+        refusalSound =
+            try refusal.decodeIfPresent(
                 Bool.self,
-                forKey: .feedback
-            ) ?? true
+                forKey: .sound
+            ) ?? false
     }
 
     private mutating func decodeSpace(

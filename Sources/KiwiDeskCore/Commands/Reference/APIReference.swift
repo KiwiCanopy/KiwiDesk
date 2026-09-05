@@ -55,8 +55,8 @@ public enum APIReference {
             ),
             ("set_resize_step", "set_resize_step"),
             (
-                "set_resize_feedback",
-                "set_resize_feedback"
+                "set_refusal_sound",
+                "set_refusal_sound"
             ),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),

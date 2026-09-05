@@ -2081,7 +2081,30 @@ you can re-apply anywhere.
 
 The **Behavior** section (in the **This Profile** group; its
 card appears in **Power User** mode) adjusts
-mouse interaction and what happens on quit.
+mouse interaction, the cue a blocked action gives back, and what
+happens on quit.
+
+### When an Action Can't Apply
+
+When KiwiDesk refuses something — a window already at its
+smallest, a grow with no room left, a layout with nothing to
+resize, a sticky window that can't be swapped — it flashes a
+short message on the window saying which. That always happens.
+
+**Play a sound when an action can't apply** (default off) adds
+the system alert sound to that message. It is off because the
+message is the cue and the sound is an addition; switch it on
+and you hear it the moment you toggle it, so you can judge it
+without saving first.
+
+Two things it deliberately does not do. It never sounds without
+showing something — if a cue is switched off elsewhere (the
+sticky mark, say), its refusal stays silent rather than becoming
+a beep with nothing on screen. And it never fires for a command
+sent over the CLI or IPC: a script that hits a limit reads the
+error in its response, and your Mac stays quiet.
+
+Held shortcuts sound once per hold, not once per frame.
 
 ### Mouse & Window Behavior
 
@@ -3124,11 +3147,12 @@ Each row has an action. Built-in actions live under headings:
   there does nothing at all, because only Mission Control can
   make a Desktop.
 - **Size & float** — the per-axis Grow/Shrink rows, Make
-  floating, the resize step, and **Alert sound when resize
-  can't apply** (default on, behind the card's **Resize
-  feedback** disclosure): a resize shortcut pressed in a
+  floating and the resize step. A resize shortcut pressed in a
   layout without a resize target (monocle, grid, a floating
-  space) plays the system alert instead of failing silently.
+  space) flashes a message on the window rather than failing
+  silently; the sound that used to accompany that lives in
+  **Behaviour ▸ When an action can't apply** now, because it
+  applies to every blocked action rather than to resizing.
   Held, a resize shortcut glides: the first press is one
   precise step; keep holding and, after your Mac's own
   key-repeat delay, the window starts resizing smoothly instead

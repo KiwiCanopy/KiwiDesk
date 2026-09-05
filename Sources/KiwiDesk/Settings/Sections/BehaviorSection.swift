@@ -1,3 +1,4 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
 
@@ -9,9 +10,51 @@ struct BehaviorSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 mouseSection
+                cuesSection
                 quitSection
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+        }
+    }
+
+    /// The refusal cue's audible half (#1255). A draft setting
+    /// like its neighbours here, so it lands on Save — but it
+    /// PREVIEWS on switch-on, the way macOS's own alert-sound
+    /// picker does: this area draws no live preview panel, and a
+    /// sound is the one cue a panel could not show anyway.
+    /// Nothing is applied by the preview; the draft still saves.
+    private var cuesSection: some View {
+        SettingsSection(SettingsCatalog.behavior.cuesCard) {
+            Toggle(
+                // The card title already states the condition,
+                // so the label names only what is switched —
+                // "When an action can't apply ▸ Play a sound
+                // when an action can't apply" read as a stutter
+                // in every catalog, the English being the title
+                // with four words in front of it.
+                L(
+                    "behavior.cues.sound",
+                    "Play the system alert sound"
+                ),
+                isOn: Binding(
+                    get: { model.config.settings.refusalSound },
+                    set: { on in
+                        model.config.settings.refusalSound = on
+                        if on { NSSound.beep() }
+                    }
+                )
+            )
+            Text(
+                L(
+                    "behavior.cues.sound.help",
+                    "A blocked action always shows a message on "
+                        + "the window — at a size limit, or where "
+                        + "the layout has nothing to resize. This "
+                        + "adds the system alert sound to it."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 

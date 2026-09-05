@@ -23,9 +23,8 @@ struct ShortcutsFamilyRows {
 
     func rows(for key: SettingKey) -> [NavCommand]? {
         guard case .shortcuts(let family) = key else {
-            // Only `ShortcutsKey` carries keybinding rows;
-            // `.behaviour(.resizeFeedback)` shares the container
-            // but is an ordinary toggle drawn by the card.
+            // Only `ShortcutsKey` carries keybinding rows; a
+            // key from another area is drawn by its own card.
             return nil
         }
         return rows(for: family)

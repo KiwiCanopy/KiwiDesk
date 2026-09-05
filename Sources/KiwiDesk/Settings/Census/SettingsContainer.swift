@@ -20,6 +20,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case monocle
     case motion
     case mouse
+    case cues
     case moveWindows
     case onQuit
     case openApplications
@@ -53,7 +54,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .setting(.borders(.borderEnabled))
         case .motion:
             return .runtime(.reduceMotion)
-        case .about, .advanced, .borders, .bsp,
+        case .about, .advanced, .borders, .bsp, .cues,
             .defaultShortcuts, .dragAndDrop,
             .focus, .gaps, .general, .generalKeys, .grid,
             .appliesImmediately, .layers, .luaBindings,

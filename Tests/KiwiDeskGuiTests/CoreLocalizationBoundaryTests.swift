@@ -78,13 +78,16 @@ struct CoreLocalizationBoundaryTests {
         // become real violations, with no compiler event to say
         // so. Re-check this entry if that move happens.
         "App/KiwiCore+StickyMarks.swift": 4,
-        // The resize refusal pills (#933, #1055, #1091) are the
-        // same shape: a `KiwiCore` extension authoring the
-        // own-minimum, neighbor-minimum, own-maximum and
+        // The refusal pills (#933, #1055, #1091, widened #1255)
+        // are the same shape: a `KiwiCore` extension authoring
+        // the own-minimum, neighbor-minimum, own-maximum and
         // no-room-to-grow sentences it hands to the Core-drawn
-        // `SizeLimitOverlay`. Same caveat as `+StickyMarks` if
+        // `SizeLimitOverlay`. #1255 added three more — the two
+        // no-axis-here readings and the layout-has-no-resizing
+        // one — which is what gave the two sound-only refusals
+        // something to draw. Same caveat as `+StickyMarks` if
         // the overlays ever move out of Core.
-        "App/KiwiCore+SizeLimitPill.swift": 5,
+        "App/KiwiCore+SizeLimitPill.swift": 8,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901), drawn by Core.

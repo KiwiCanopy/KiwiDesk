@@ -57,7 +57,6 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.advanced),
             .shortcuts(.import),
             .shortcuts(.restoreDefaults),
-            .behaviour(.resizeFeedback),
         ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {
@@ -294,18 +293,20 @@ struct ShortcutsFamilyRowsTests {
         )
     }
 
-    /// The census key that is NOT a keybinding: Size & float's
-    /// drawer row is a `TilingSettings` toggle, so it has no
-    /// expansion and the card draws it directly. Pinned because
-    /// `nil` here means two different things elsewhere (a
-    /// hand-drawn container) and only this one is a non-shortcut.
-    @Test("the resize-feedback row carries no keybinding rows")
+    /// A census key from ANOTHER area carries no keybinding
+    /// rows. Pinned because `nil` here means two different
+    /// things — a hand-drawn Shortcuts container, or a key that
+    /// was never a shortcut — and only the second is checkable
+    /// by kind. (It used to be pinned through the refusal-sound
+    /// toggle, which shared the Size & float card until #1255
+    /// moved it to Behaviour; the invariant outlived the row.)
+    @Test("a key from another area carries no keybinding rows")
     @MainActor
-    func resizeFeedbackIsNotAFamily() {
+    func foreignKeyIsNotAFamily() {
         #expect(
-            fixture().rows(for: .behaviour(.resizeFeedback))
-                == nil
+            fixture().rows(for: .behaviour(.refusalSound)) == nil
         )
+        #expect(fixture().rows(for: .general(.language)) == nil)
     }
 
     /// Pins the display-independent inputs every expansion

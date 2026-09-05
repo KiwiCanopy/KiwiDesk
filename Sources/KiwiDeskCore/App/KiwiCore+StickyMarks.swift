@@ -42,14 +42,16 @@ extension KiwiCore {
         guard tiler.settings.stickyStyle.mark,
             let home = state.workspaces.space(of: id)
         else { return }
-        stickyMarks.flash(
-            id,
-            format: L(
-                "sticky.home.pill",
-                "Can only be moved in its home Space %1$@"
-            ),
-            mark: homeSpaceMark(home),
-            delay: snapBackSettleDelay
+        soundIfDrawn(
+            stickyMarks.flash(
+                id,
+                format: L(
+                    "sticky.home.pill",
+                    "Can only be moved in its home Space %1$@"
+                ),
+                mark: homeSpaceMark(home),
+                delay: snapBackSettleDelay
+            )
         )
     }
 
@@ -104,14 +106,16 @@ extension KiwiCore {
     /// swap is refused outright), so it appears at once.
     func flashStickyCannotPile(_ id: WindowID) {
         guard tiler.settings.stickyStyle.mark else { return }
-        stickyMarks.flash(
-            id,
-            format: L(
-                "sticky.pile.pill",
-                "Sticky windows can't be moved to the pile"
-            ),
-            mark: .text(""),
-            delay: 0.05
+        soundIfDrawn(
+            stickyMarks.flash(
+                id,
+                format: L(
+                    "sticky.pile.pill",
+                    "Sticky windows can't be moved to the pile"
+                ),
+                mark: .text(""),
+                delay: 0.05
+            )
         )
     }
 
@@ -181,11 +185,13 @@ extension KiwiCore {
                 "sticky.everywhere.pill",
                 "Sticky windows can't be moved to another Space"
             )
-        stickyMarks.flash(
-            id,
-            format: format,
-            mark: .text(""),
-            delay: 0.05
+        soundIfDrawn(
+            stickyMarks.flash(
+                id,
+                format: format,
+                mark: .text(""),
+                delay: 0.05
+            )
         )
     }
 

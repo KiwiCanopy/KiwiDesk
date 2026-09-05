@@ -36,6 +36,7 @@ public enum ConfigMigration {
         migratingRetiredBarContent,
         migratingRetiredScrollSpeed,
         migratingProfileBindingStrings,
+        migratingRetiredResizeFeedback,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939).

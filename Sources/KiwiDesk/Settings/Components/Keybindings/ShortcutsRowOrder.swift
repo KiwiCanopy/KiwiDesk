@@ -76,10 +76,13 @@ enum ShortcutsRowOrder {
         .shortcuts(.toggleDisplaySticky),
     ]
 
-    /// Unsupported resize sound cue setting.
-    static let sizeAndFloatMore: [SettingKey] = [
-        .behaviour(.resizeFeedback)
-    ]
+    /// Size & float's `.showMore` tier, empty since #1255 took
+    /// its one row to Behaviour. Kept rather than deleted: a
+    /// census key authored at this tier reds
+    /// `ShortcutsCensusRenderTests` against this list, which is
+    /// what says the drawer has to be built again before that
+    /// key can draw.
+    static let sizeAndFloatMore: [SettingKey] = []
 
     /// Open applications group order.
     static let openApplicationsAtRest: [SettingKey] = [
