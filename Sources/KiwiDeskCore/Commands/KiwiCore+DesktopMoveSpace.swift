@@ -4,20 +4,6 @@ import Foundation
 /// `KiwiCore+DesktopMove.swift` at the §2.1 target; the verb's
 /// parse stays in `KiwiCore+DesktopCommands.swift`.
 extension KiwiCore {
-    /// Where `space` lays out once the move is accepted: its
-    /// assigned screen, else the Desktop's — which the parse has
-    /// already required to be the main screen, the layout's
-    /// fallback for an unowned Space. What the sticky gate is
-    /// handed as `landingOn`, so it judges the placement the route
-    /// writes rather than a nil the ledger has not filled.
-    func explicitSpaceDisplay(
-        _ space: SpaceID,
-        for target: DesktopTarget
-    ) -> DisplayID? {
-        state.workspaces.display(of: space)
-            ?? display(forUUID: target.displayIdentifier)
-    }
-
     /// Files the focused window into the Space the user named,
     /// split by the same gate as the screen-home rule
     /// (`rehomeAcrossScreens`). A Desktop its screen ALREADY shows

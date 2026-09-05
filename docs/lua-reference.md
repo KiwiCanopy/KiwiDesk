@@ -306,10 +306,10 @@ is refused up front: the layout would carry the window back to
 that screen, and macOS would then move it to a Desktop there,
 undoing the move
 ([#1150](https://github.com/KiwiCanopy/KiwiDesk/issues/1150)).
-A Space that is on **no screen yet** lays out on the main screen,
-so it can only be named for one of the main screen's Desktops;
-for a Desktop elsewhere, name a Space that lays out on that
-screen, or `pin_space_to_display` one there first. A **sticky**
+A Space that is on **no screen yet** can only be named while
+one screen is connected; with more, which screen it would lay
+out on is not settled, so name a Space that lays out on that
+Desktop's screen, or `pin_space_to_display` one there first. A **sticky**
 window takes the same guard `move_to_space` does: a window sticky
 *everywhere* refuses any Space, and one sticky *to a screen*
 refuses a Space on that screen while a Space on another screen

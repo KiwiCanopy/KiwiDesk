@@ -207,32 +207,40 @@ struct DesktopMoveSpaceTargetTests {
         #expect(core.state.rememberedSpace(of: window) == origin)
     }
 
-    /// An unassigned Space lays out on the MAIN screen, so a
-    /// fresh Space named for a secondary screen's Desktop would
-    /// carry the window back there (#1010 by another door) — and
-    /// a hand assignment is reverted by the next placement
-    /// resolve, so the parse refuses instead, creating nothing.
-    @Test("An unowned Space for a secondary screen's Desktop is refused")
-    func unownedSpaceForASecondaryDesktopIsRefused() {
+    /// An unowned Space has no settled screen while two are
+    /// connected — the layout falls back to the key window's, the
+    /// placement resolve to the menu bar's — so naming one for
+    /// ANY Desktop is refused with the pin hint, creating nothing.
+    @Test("An unowned Space on two screens is refused")
+    func unownedSpaceOnTwoScreensIsRefused() {
         let core = makeCore()
         defer { teardown() }
         addDisplays(core)
-        let response = core.execute(
-            "move_to_desktop",
-            args: [.number(4), .string("mail")]
-        )
-        #expect(!response.isSuccess)
+        for desktop in [2, 4] {
+            let response = core.execute(
+                "move_to_desktop",
+                args: [.number(Double(desktop)), .string("mail")]
+            )
+            #expect(!response.isSuccess)
+            #expect(response.error?.contains("no screen yet") == true)
+        }
         #expect(core.state.workspaces[mail] == nil)
         #expect(core.pendingSpace.isEmpty)
     }
 
-    /// The same unowned Space for a MAIN screen's Desktop lays out
-    /// where that Desktop is, so it is accepted and created there.
-    @Test("An unowned Space for a main-screen Desktop is created")
-    func unownedSpaceForAMainDesktopIsCreated() {
+    /// On ONE screen every reading agrees, so the same unowned
+    /// Space is accepted and created, unassigned.
+    @Test("An unowned Space on one screen is created")
+    func unownedSpaceOnOneScreenIsCreated() {
         let core = makeCore()
         defer { teardown() }
-        addDisplays(core)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "A",
+                frame: CGRect(x: 0, y: 0, width: 1920, height: 1080)
+            )
+        )
         #expect(core.state.workspaces[mail] == nil)
         #expect(
             core.execute(
@@ -245,10 +253,8 @@ struct DesktopMoveSpaceTargetTests {
     }
 
     /// The gate is handed where the Space WILL lay out: a
-    /// display-sticky window on the main screen, named into an
-    /// unowned Space that lays out on that same screen, is the
-    /// move its scope forbids — invisible to a gate reading the
-    /// Space's nil assignment.
+    /// display-sticky window on screen A, named into a Space
+    /// assigned to screen A, is the move its scope forbids.
     @Test("A display-sticky window is refused a Space on its screen")
     func displayStickyRefusedASpaceOnItsOwnScreen() {
         let core = makeCore()
@@ -256,14 +262,16 @@ struct DesktopMoveSpaceTargetTests {
         addDisplays(core)
         let origin = core.state.workspaces.space(of: window)!
         core.state.workspaces.assign(origin, to: DisplayID(1))
+        core.state.workspaces.assign(mail, to: DisplayID(1))
         #expect(core.execute("make_display_sticky").isSuccess)
         let response = core.execute(
             "move_to_desktop",
             args: [.number(2), .string("mail")]
         )
         #expect(!response.isSuccess)
+        #expect(response.error?.contains("sticky") == true)
         #expect(core.state.workspaces.space(of: window) == origin)
-        #expect(core.state.workspaces[mail] == nil)
+        #expect(core.pendingSpace.isEmpty)
     }
 
     /// The explicit Space is a membership write, so it takes the
@@ -281,6 +289,7 @@ struct DesktopMoveSpaceTargetTests {
             args: [.number(2), .string("mail")]
         )
         #expect(!response.isSuccess)
+        #expect(response.error?.contains("sticky") == true)
         #expect(core.state.windows[window] != nil)
         #expect(core.state.workspaces.space(of: window) == origin)
         #expect(core.state.workspaces[mail] == nil)

@@ -55,20 +55,17 @@ extension KiwiCore {
                 return response
             case .none:
                 explicit = nil
-            case .space(let space):
-                explicit = space
-            }
-            if let explicit,
-                stickyMoveRefused(
-                    focused,
-                    to: explicit,
-                    landingOn: explicitSpaceDisplay(
-                        explicit,
-                        for: target
+            case .space(let space, let landing):
+                guard
+                    !stickyMoveRefused(
+                        focused,
+                        to: space,
+                        landingOn: landing
                     )
-                )
-            {
-                return .fail("a sticky window keeps its Space")
+                else {
+                    return .fail("a sticky window keeps its Space")
+                }
+                explicit = space
             }
             guard WMBridge.moveWindows([focused], to: target.space)
             else {

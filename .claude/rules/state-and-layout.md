@@ -163,11 +163,16 @@ editing here:
   re-home. A Space assigned to another screen than the
   Desktop's is REFUSED at the parse — the layout would carry
   the window back (#1010) — and a Space no screen owns yet is
-  accepted only for a MAIN-screen Desktop, since an unowned
-  Space lays out on the main screen: refused with the pin hint
-  elsewhere, never hand-assigned, because the next
+  accepted on ONE screen only: with more it has no settled
+  screen (the layout falls back to the key window's, the
+  placement resolve to the menu bar's — two readings, and
+  #1150's review found them disagreeing), so it is refused with
+  the pin hint, never hand-assigned, because the next
   `resolveSpaceDisplays` would move it back and re-open the same
-  undo. The route creates the Space after the bridge accepted
+  undo. Which screen a Space lands on travels ON the resolution
+  (`SpaceTargetResolution.space(_:landing:)`), so the gate is
+  handed the value the parse ruled on rather than re-deriving
+  it. The route creates the Space after the bridge accepted
   (`fileExplicitly`), never the parse, or a refused move leaves
   an empty Space; and `livingRememberedSpace` drops a record
   whose Space is gone. At the ARRIVAL the #1010 screen-home net
@@ -176,8 +181,8 @@ editing here:
   exists for. The explicit Space is a MEMBERSHIP write where a
   bare Desktop move is not, so it takes `stickyMoveRefused`
   before anything moves — handed the screen the Space WILL lay
-  out on (`explicitSpaceDisplay`, the gate's `landingOn`), since
-  the gate reads a nil assignment as "elsewhere" — and re-anchors
+  out on (the gate's `landingOn`), since the gate reads a nil
+  assignment as "elsewhere" — and re-anchors
   a float on the shown route, as `moveWindow` does. The ledger is bounded and per window, rekeyed on a tab
   switch; a new route that produces a departure claims through
   the gone handler rather than beside it, and

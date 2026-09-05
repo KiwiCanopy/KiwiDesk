@@ -3422,15 +3422,19 @@ A Space assigned to another screen than the Desktop's is
 its Space's screen, and macOS re-assigns the window's Desktop to
 match its frame, so honoring it would undo the move within a
 second — the #1010 defect, asked for by name. A Space no screen
-owns yet, a fresh one included, lays out on the main screen, so
-it is accepted for a main-screen Desktop and refused, with the
-pin hint, for any other — and deliberately **not** assigned to
-the Desktop's screen on the user's behalf: a runtime assignment
-outside the pins is undone by the next placement resolve (a
-profile apply, a monitor change), after which the window sits on
-a secondary screen's Desktop while its Space lays out on the
-main one, the same undo a beat later. A parse writes nothing,
-so a refused move leaves no empty Space behind. And the explicit
+owns yet, a fresh one included, has no settled screen while more
+than one is connected — the layout falls back to the screen
+holding the key window, the placement resolve to the menu bar's,
+and the two disagree exactly when the user is working on the
+secondary screen — so it is refused there, with the pin hint,
+and accepted on one screen, where every reading agrees. It is
+deliberately **not** assigned to the Desktop's screen on the
+user's behalf: a runtime assignment outside the pins is undone
+by the next placement resolve (a profile apply, a monitor
+change), after which the window sits on a secondary screen's
+Desktop while its Space lays out elsewhere, the same undo a
+beat later. A parse writes nothing, so a refused move leaves no
+empty Space behind. And the explicit
 Space is a membership write where a bare Desktop move is not, so
 it takes the one sticky gate `move_to_space` takes, with that
 gate's own asymmetry (#445: a global sticky refuses any Space, a
