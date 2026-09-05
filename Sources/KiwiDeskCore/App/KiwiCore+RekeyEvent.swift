@@ -36,6 +36,7 @@ extension KiwiCore {
         // its re-report can arrive under the fresh id.
         moveLatch.rekey(old: old, new: new)
         followFocus.rekey(old: old, new: new)
+        pendingSpace.rekey(old: old, new: new)
         rekeyDesktopFocus(old: old, new: new)
         // #1230: every profile's remembered partitioning too, not
         // just the live one — a tab switched while another profile

@@ -263,8 +263,8 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
 | | `focus_desktop` | Desktop number (Mission Control's) |
-| | `move_to_desktop` | Desktop number — moves the focused window, you stay |
-| | `move_to_desktop_and_follow` | Desktop number — moves the focused window, switches there, and leaves keyboard focus on the window |
+| | `move_to_desktop` | Desktop number, [space id] — moves the focused window, you stay; the Space it joins when it lands, if given |
+| | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window, switches there, and leaves keyboard focus on the window |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] |

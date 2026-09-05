@@ -120,6 +120,50 @@ extension KiwiCore {
         return .target(target)
     }
 
+    /// A move verb's optional second argument: the KiwiDesk Space
+    /// the window joins when it lands (#1150).
+    enum SpaceTargetResolution {
+        case none
+        case space(SpaceID)
+        case refused(CommandResponse)
+    }
+
+    /// Parses the composed `space:` target of a Desktop MOVE
+    /// (#1150) — absent for the one-argument form. A Space
+    /// assigned to a screen other than the Desktop's is refused
+    /// up front: the layout carries a window to its Space's
+    /// screen, and macOS then re-assigns its Desktop to match,
+    /// which undoes the move within a second (#1010). An
+    /// unassigned Space, or one the screen cannot be named for,
+    /// is accepted — `screenHome` stands down for it too. A
+    /// Space that does not exist yet is created, as
+    /// `move_to_space` creates one, so the arrival's
+    /// remembered-space rule can honor it (`livingRememberedSpace`
+    /// drops a `.departed` record whose Space is gone).
+    func resolveSpaceTarget(
+        _ args: [JSONValue],
+        for target: DesktopTarget
+    ) -> SpaceTargetResolution {
+        guard args.count > 1 else { return .none }
+        guard let raw = args[1].stringValue, !raw.isEmpty else {
+            return .refused(.fail("expected space id"))
+        }
+        let space = SpaceID(raw)
+        if let assigned = state.workspaces.display(of: space),
+            let screen = display(forUUID: target.displayIdentifier),
+            assigned != screen
+        {
+            return .refused(
+                .fail(
+                    "space \(raw) lays out on another screen than "
+                        + "that Desktop's"
+                )
+            )
+        }
+        state.workspaces.ensureSpace(space)
+        return .space(space)
+    }
+
     /// `focus_desktop <n>` (#26): switches the Desktop's screen
     /// to it. The OS notification that follows runs the same
     /// switch handling a swipe does — binding, Space memory,

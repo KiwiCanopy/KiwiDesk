@@ -51,6 +51,21 @@ extension StateCoordinator {
         }
     }
 
+    /// Re-files a departure the destroy fold just recorded under
+    /// the Space an explicit Desktop-move target named (#1150):
+    /// the `.departed` memory takes the name and the slot rank is
+    /// dropped, a rank meaning something only in the Space it was
+    /// taken in. A no-op for anything but a `.departed` record —
+    /// a minimize, a close, a `.restored` filing.
+    mutating func redirectDeparture(
+        of id: WindowID,
+        to space: SpaceID
+    ) {
+        guard case .departed? = rememberedSpaces[id] else { return }
+        rememberedSpaces[id] = .departed(space)
+        departedSlots[id] = nil
+    }
+
     /// Retires a window closed while away (#1146): the ledger
     /// entry and the two #1207 records it was read with.
     mutating func forgetAway(_ id: WindowID) {

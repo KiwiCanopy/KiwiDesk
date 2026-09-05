@@ -14,6 +14,17 @@ extension KiwiCore {
         wasMinimized: Bool,
         effects: AppliedEffects
     ) {
+        // An explicit Desktop-move target is paid HERE, at the
+        // departure the fold just recorded (#1150): the name
+        // replaces the remembered Space, and the arrival's
+        // ordinary rule lands the window in it.
+        if let space = pendingSpace.claim(id) {
+            state.redirectDeparture(of: id, to: space)
+            onLog(
+                "move_to_desktop: w\(id.raw) departed — filed "
+                    + "under space \(space.raw)"
+            )
+        }
         let spaces = NativeSpaces.allSpaces()
         let presence = gonePresence(of: id, spaces: spaces)
         let reason = WindowGoneReason.classify(

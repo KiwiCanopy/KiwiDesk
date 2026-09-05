@@ -3390,6 +3390,41 @@ switches KiwiDesk's Space and not the Desktop holding them —
 that coordination is
 [#1148](https://github.com/KiwiCanopy/KiwiDesk/issues/1148)'s.
 
+### A Desktop move's explicit Space is paid at the departure (#1150)
+
+**[Rationale]**
+
+`move_to_desktop(3, "mail")` names where the window should be
+*when it gets there*, and a window sent to a hidden Desktop is
+not there yet: macOS shows another Desktop's windows to nobody,
+so the window leaves KiwiDesk's state at the move and joins it
+again at the reveal, through the create fold's ordinary rules.
+Writing the membership eagerly at the command would put a record
+in front of that fold — the arrival would then find a member it
+was about to file, and every reconcile between the move and the
+reveal would be reconciling a window no screen shows (the
+arrival-semantics ruling on
+[#890](https://github.com/KiwiCanopy/KiwiDesk/issues/890)). So
+the name is a **pending assignment**: recorded at the command
+(`PendingSpaceAssignment`), paid at the window's DEPARTURE, where
+the destroy fold has just written the Space it left as its
+remembered Space and the name replaces that record
+(`redirectDeparture`). The arrival then needs nothing new — the
+remembered-space rule lands the window where the user said. A
+Desktop its screen already shows produces no departure, so that
+route files the window at once, the way `move_to_space` does;
+the two routes split on the same `isCurrent` gate the
+cross-screen re-home splits on, and the explicit name outranks
+that re-home, since the user named the destination.
+
+A Space assigned to another screen than the Desktop's is
+**refused** rather than honored: the layout carries a window to
+its Space's screen, and macOS re-assigns the window's Desktop to
+match its frame, so honoring it would undo the move within a
+second — the #1010 defect, asked for by name. An unassigned
+Space is accepted, because the screen-home predicate stands down
+for it as well.
+
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
 **[Rationale]**

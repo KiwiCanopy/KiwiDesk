@@ -189,7 +189,8 @@ itself and the two verbs that ask it to: `move_to_desktop(n)`
 and `move_to_desktop_and_follow(n)`. A window sent to another
 Desktop leaves KiwiDesk's view — macOS shows another Desktop's
 windows to nobody — and rejoins its Space when that Desktop is
-next shown. It is reported gone with `reason: vanished`, the
+next shown, or the Space you named as the verb's second
+argument. It is reported gone with `reason: vanished`, the
 same value a plain Desktop swipe produces.
 
 KiwiDesk keeps knowing it is there, but does not draw it. The

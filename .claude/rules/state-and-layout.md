@@ -148,6 +148,28 @@ editing here:
   the two production wirings reach no unit test and are pinned
   by `ArrivalDisplayWiringTests` and
   `DesktopMoveRehomeWiringTests`.
+- **An explicit `space:` on a Desktop move is a PENDING
+  assignment, paid at the DEPARTURE (#1150)** — never an eager
+  membership write for a hidden target, which the reveal
+  reconcile would fight (#890's arrival ruling). The command
+  records the name (`PendingSpaceAssignment`), the gone handler
+  claims it and re-files the departure the fold just recorded
+  (`StateCoordinator.redirectDeparture`, which also drops the
+  #1207 slot rank, meaningful only in the Space it was taken
+  in), and the arrival's remembered-space rule pays it; a
+  Desktop its screen ALREADY shows files NOW through
+  `addFocusedToSpace`, on the same `isCurrent` gate the #1010
+  re-home splits on, and the explicit name outranks that
+  re-home. A Space assigned to another screen than the
+  Desktop's is REFUSED at the parse — the layout would carry
+  the window back (#1010) — and a Space that does not exist yet
+  is created there, or `livingRememberedSpace` drops the record
+  at the arrival. The ledger is bounded and per window, rekeyed
+  on a tab switch; a new route that produces a departure claims
+  through the gone handler rather than beside it.
+  `DesktopMoveSpaceTargetTests` drives both routes, the refusal
+  and the control through the real dispatch and fold;
+  `PendingSpaceAssignmentTests` holds the record.
 - **A follow owes the window it sent away a focus, and pays it
   at the ARRIVAL** (#1007). `move_to_desktop_and_follow` onto a
   Desktop nobody is showing cannot focus the window at the moment

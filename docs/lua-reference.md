@@ -252,7 +252,9 @@ KiwiDesk.focus_desktop(2)
 
 ### move_to_desktop
 
-**Expects:** a macOS Desktop number.
+**Expects:** a macOS Desktop number, and optionally a space
+identifier — the KiwiDesk Space the window should join when it
+gets there.
 
 **Does:** moves the focused window to that Desktop **without
 following** it — you stay where you are. macOS shows another
@@ -286,15 +288,30 @@ window follows you, so at that switch it is carried back onto
 its own screen's current Desktop. Pin it out with
 `override_sticky_reach("off")` first if you mean it to stay. Same requirement as `focus_desktop`.
 
+**Naming the Space** finishes the verb: `move_to_desktop(3,
+"mail")` sends the window to Desktop 3 *and* files it into the
+`mail` Space, which is created if it does not exist yet. When
+Desktop 3 is hidden, the filing happens as the window leaves —
+it rejoins `mail` when that Desktop is next shown, instead of
+the Space it was in. When Desktop 3 is already on screen, the
+window joins `mail` at once, exactly as `move_to_space("mail")`
+would. A Space that lays out on **another screen** than that
+Desktop's is refused up front: the layout would carry the window
+back to that screen, and macOS would then move it to a Desktop
+there, undoing the move
+([#1150](https://github.com/KiwiCanopy/KiwiDesk/issues/1150)).
+
 **Example:**
 
 ```lua
 KiwiDesk.move_to_desktop(3)
+KiwiDesk.move_to_desktop(3, "mail")
 ```
 
 ### move_to_desktop_and_follow
 
-**Expects:** a macOS Desktop number.
+**Expects:** a macOS Desktop number, and optionally a space
+identifier, as `move_to_desktop` takes.
 
 **Does:** moves the focused window to that Desktop **and**
 switches you there with it.
@@ -319,13 +336,17 @@ and a Desktop that screen already shows switches nothing — the
 window still moves, and focus still goes with it.
 
 The window itself is placed by the cross-screen rule above — on
-another screen it joins the Space that screen shows. Same
+another screen it joins the Space that screen shows — unless you
+name a Space, which wins the same way it does for
+`move_to_desktop`: the window is filed into it as it leaves, and
+the focus you are handed at the arrival is in that Space. Same
 requirement as `focus_desktop`.
 
 **Example:**
 
 ```lua
 KiwiDesk.move_to_desktop_and_follow(3)
+KiwiDesk.move_to_desktop_and_follow(3, "mail")
 ```
 
 ### move_space_to_display
