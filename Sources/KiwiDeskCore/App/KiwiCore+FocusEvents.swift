@@ -42,12 +42,11 @@ extension KiwiCore {
                     + describe(effects.focusBefore)
             )
             // The report is spurious, but the id could
-            // still be an outstanding self-raise; drop
+            // still carry a fresh self-raise stamp; drop
             // it so a later genuine focus of this window
-            // is not misread as our own echo (cf. the
-            // .windowDestroyed cleanup in
-            // KiwiCore+Events.swift).
-            outstandingSelfRaises.remove(id)
+            // is not misread as our own echo (cf.
+            // `forgetGoneWindow`).
+            selfRaiseStamps[id] = nil
             if let before = effects.focusBefore,
                 let space = state.workspaces.space(
                     of: before
@@ -70,52 +69,30 @@ extension KiwiCore {
         // holds the intended focus (the raisers skip it), so a
         // deliberate focus (a space switch onto a float; a click
         // on a pile-mate) is unstamped and falls through.
-        // Never consumed for an echo of our OWN focus raise
-        // (`outstandingSelfRaises`): a keyboard focus can land
-        // on a window a pile restore stamped moments earlier,
-        // and for a tiled-sticky traveler `focusBefore` stays
-        // on the stale local slot (the membership guard keeps
-        // `space.focused` off travelers), so `intended != id`
-        // cannot clear it — the revert would undo a deliberate
-        // focus and strand the ring off the truly focused
-        // window (#431). The self-echo path below consumes the
-        // outstanding entry; the stamp expires on its own.
+        // Never for a FRESH echo of our OWN focus raise
+        // (`freshSelfRaise`): a keyboard focus can land on a
+        // window a pile restore stamped moments earlier, and for
+        // a tiled-sticky traveler `focusBefore` stays on the
+        // stale local slot, so `intended != id` cannot clear it
+        // — the revert would strand the ring off the truly
+        // focused window (#431). Fresh only: a stale stamp must
+        // not veto, or a lazy app's late re-report threads both
+        // nets — vetoed here, no self-echo below, honored (#689).
         //
         // Nor for a report with CLICK provenance (#687): a
         // restore's echoes come from windows the user did not
         // click, so a fresh click that reached the reported
-        // window is proof no echo can forge — without the
-        // escape, the first click after a restack was consumed
-        // (state reverted while macOS kept the click's focus,
-        // splitting keystrokes from ring and pan until the
-        // next focus event). The revert itself stays
-        // state-only either way: OS focus during a sequence is
-        // owned by its closing re-assert (the
-        // `performZOrderSequence` completion), and
-        // re-asserting per echo would fight the drain
-        // mid-sequence — see docs/design-decisions.md.
-        // The stamp is NOT consumed here — it expires by age.
-        // Lazy apps (Electron-class) re-report a raised window
-        // a second time hundreds of ms after the first echo;
-        // consume-on-first left that duplicate unstamped, and
-        // it was honored as deliberate focus — the ring, pan
-        // and pointer snapped back to the pile-mate ~0.5 s
-        // after a bar click (#689 device trace, 2026-08-03).
-        // The deliberate-refocus case consumption used to
-        // protect now has real discriminators: a click escapes
-        // on provenance (#687), a command routes through the
-        // self-raise path — only a clickless app/cmd-tab focus
-        // inside the window is eaten, the documented trade.
-        // The self-raise veto below respects only a FRESH
-        // outstanding entry: the #431 case it protects — a
-        // keyboard focus landing on a window a restore stamped
-        // — is by definition a fresh raise. A STALE entry (a
-        // no-echo re-assert's leftover) must not veto this
-        // revert, or a lazy app's late re-report of a stamped
-        // pile-mate threads BOTH nets: the stale entry blocks
-        // the ledger here, and the age bound below rightly says
-        // it is no self-echo — honored, and the ring, pan and
-        // pointer snap back (#689 device trace, 2026-08-03).
+        // window is proof no echo can forge. The revert itself
+        // stays state-only either way: OS focus during a
+        // sequence is owned by its closing re-assert
+        // (`performZOrderSequence`), and re-asserting per echo
+        // would fight the drain — docs/design-decisions.md.
+        // The stamp is NOT consumed — it expires by age: lazy
+        // apps re-report a raised window a second time hundreds
+        // of ms after the first echo, and consume-on-first
+        // honored that duplicate as deliberate focus (#689).
+        // Only a clickless app/cmd-tab focus inside the window
+        // is eaten, the documented trade.
         if let stamp = zOrderRaiseEchoes[id],
             now.timeIntervalSince(stamp)
                 < Self.zOrderRaiseEchoWindow,
@@ -162,15 +139,13 @@ extension KiwiCore {
         // distrusted sibling (cmd-tab, in-app cross-display
         // cycle) inside the ~1 s window is the accepted trade —
         // the next focus event follows normally.
-        if !outstandingSelfRaises.contains(id),
-            let pid = state.windows[id]?.pid,
-            state.windows[id]?.isSticky != true,
-            selfRaiseStamps.contains(where: {
-                $0.key != id
-                    && state.windows[$0.key]?.pid == pid
-                    && now.timeIntervalSince($0.value)
-                        < Self.selfRaiseSiblingWindow
-            }),
+        // The echo of our OWN raise of `id` is exempt: a stamp
+        // is never consumed (#887), so "not raised by us" is
+        // read as ORDER — the sibling's raise must be the newer
+        // one (`siblingRaiseOutranks`), or a step A→B within
+        // the window would distrust B's own echo.
+        if state.windows[id]?.isSticky != true,
+            siblingRaiseOutranks(id, now: now),
             distrustsSiblingSpace(of: id),
             !recentClickInside(id, now: now)
         {
@@ -212,15 +187,22 @@ extension KiwiCore {
         // forward-immediate — the echo (and the state focus
         // StateCoordinator just moved onto the echoed window)
         // would revert to the stale target. Re-assert the
-        // intended focus and drop the echo. Consume the id
-        // from the outstanding set either way.
-        // An outstanding entry is our echo only while the raise
-        // is RECENT (`selfRaiseStamps`): an already-key raise
-        // never echoes (device QA 2026-08-03), so an unbounded
-        // entry classified the user's NEXT click on that window
-        // as our echo, eating it (#687). Consumed either way.
+        // intended focus and drop the echo.
+        // A stamp is our echo only while the raise is RECENT:
+        // an already-key raise never echoes (device QA
+        // 2026-08-03), so an unbounded entry classified the
+        // user's NEXT click on that window as our echo, eating
+        // it (#687). And it is NOT consumed here — it expires
+        // by age, like `zOrderRaiseEchoes` (#689): a lazy app
+        // re-reports the window it just lost ~150 ms after its
+        // first echo, after the user's next fast step, and the
+        // consumed entry left that duplicate honored as
+        // deliberate focus — ring, pan and pointer snapped back
+        // to the window just left (#887 device trace,
+        // 2026-08-31). A clickless refocus of the departed
+        // window inside the window is the same documented
+        // trade the z-order ledger takes.
         let selfEcho = freshSelfRaise(id, now: now)
-        outstandingSelfRaises.remove(id)
         // And even a FRESH entry stands down for a report with
         // click provenance (#687): a click that reached the
         // reported window is a user action our raise cannot

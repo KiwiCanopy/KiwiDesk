@@ -209,14 +209,14 @@ struct AccessibilityReturnTests {
         // the debt survives for the genuine yield.
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        core.outstandingSelfRaises.insert(WindowID(2))
         core.selfRaiseStamps[WindowID(2)] = Date()
         core.handle(.windowFocused(WindowID(2)))
         // The echo was honored as our own raise's fallout —
         // and the debt is intact.
         #expect(core.accessibilityReturn != nil)
-        // The genuine yield — no stamps left (the handle above
-        // consumed the outstanding entry) — is returned.
+        // The genuine yield — the stamp aged out (an echo never
+        // consumes one, #887) — is returned.
+        core.selfRaiseStamps[WindowID(2)] = nil
         core.handle(.windowFocused(WindowID(2)))
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused

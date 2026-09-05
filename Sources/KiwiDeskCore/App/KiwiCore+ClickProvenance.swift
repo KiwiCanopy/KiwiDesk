@@ -16,25 +16,27 @@ extension KiwiCore {
     /// provenance (#687). Tunable.
     static let zOrderRaiseEchoWindow: TimeInterval = 1.0
 
-    /// Sized like `zOrderRaiseEchoWindow`, for the same reason
-    /// (lazy AX answers trail by several hundred ms); beyond
-    /// ~1 s a report is a user action, not our raise's echo.
-    static let selfRaiseSiblingWindow: TimeInterval = 1.0
+    /// How long after KiwiDesk's own focus raise a report for
+    /// that window is still its echo — the duplicate included
+    /// (#887: a lazy app's second report trails the first by
+    /// ~150 ms and lands after the user's next step). Sized like
+    /// `zOrderRaiseEchoWindow`, for the same reason (lazy AX
+    /// answers trail by several hundred ms); beyond ~1 s a
+    /// report is a user action, not our raise's echo.
+    static let selfRaiseEchoWindow: TimeInterval = 1.0
 
-    /// Whether `id` carries a LIVE self-raise: an outstanding
-    /// entry whose raise `selfRaiseStamps` says is recent. The
-    /// one shape that may veto the raise-echo revert (#431) and
-    /// classify a report as our own echo — a stale entry (a
-    /// no-echo raise's leftover) is neither (#687/#689 QA).
+    /// Whether `id` carries a LIVE self-raise: a stamp
+    /// `selfRaiseStamps` says is recent. The one shape that may
+    /// veto the raise-echo revert (#431) and classify a report
+    /// as our own echo — a stale stamp is neither (#687/#689
+    /// QA). Read, never consumed (#887).
     func freshSelfRaise(
         _ id: WindowID,
         now: Date
     ) -> Bool {
-        outstandingSelfRaises.contains(id)
-            && selfRaiseStamps[id].map {
-                now.timeIntervalSince($0)
-                    < Self.selfRaiseSiblingWindow
-            } == true
+        selfRaiseStamps[id].map {
+            now.timeIntervalSince($0) < Self.selfRaiseEchoWindow
+        } == true
     }
 
     /// Whether a left click within the echo window actually

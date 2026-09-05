@@ -75,6 +75,37 @@ struct ActivationReReportTests {
         #expect(core.state.workspaces.activeSpace == SpaceID(1))
     }
 
+    /// Stamps are never consumed (#887), so "not our raise" is
+    /// read as ORDER: a sibling raised AFTER the reported window
+    /// distrusts its report, one raised BEFORE does not — the
+    /// report is then our own newer raise's echo, and eating it
+    /// would fight a step A→B inside the window.
+    @Test("A sibling raise older than the report's own does not distrust")
+    func olderSiblingRaiseDoesNotSuppress() {
+        let core = makeCore()
+        seedHiddenSibling(core)
+        core.selfRaiseStamps[WindowID(2)] = Date(
+            timeIntervalSinceNow: -0.5
+        )
+        core.selfRaiseStamps[WindowID(1)] = Date()
+        core.handle(.windowFocused(WindowID(1)))
+        #expect(core.deferred.task(for: .focusFollow) != nil)
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+    }
+
+    @Test("A sibling raise newer than the report's own distrusts")
+    func newerSiblingRaiseSuppresses() {
+        let core = makeCore()
+        seedHiddenSibling(core)
+        core.selfRaiseStamps[WindowID(1)] = Date(
+            timeIntervalSinceNow: -0.5
+        )
+        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.handle(.windowFocused(WindowID(1)))
+        #expect(core.deferred.task(for: .focusFollow) == nil)
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+    }
+
     /// Control: with no recent same-app raise, the same report
     /// schedules the normal cmd-tab focus-follow — the
     /// suppression is provenance-scoped, not a blanket mute.
@@ -99,7 +130,7 @@ struct ActivationReReportTests {
 
     /// An EXPIRED stamp never suppresses (review): a raise that
     /// emitted no echo must not poison the app's hidden windows
-    /// beyond `selfRaiseSiblingWindow` — a later cmd-tab to the
+    /// beyond `selfRaiseEchoWindow` — a later cmd-tab to the
     /// sibling follows normally.
     @Test("An expired raise stamp does not suppress the follow")
     func expiredStampDoesNotSuppress() {
@@ -107,7 +138,7 @@ struct ActivationReReportTests {
         seedHiddenSibling(core)
         core.selfRaiseStamps[WindowID(2)] = Date(
             timeIntervalSinceNow:
-                -KiwiCore.selfRaiseSiblingWindow - 1
+                -KiwiCore.selfRaiseEchoWindow - 1
         )
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) != nil)

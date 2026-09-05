@@ -67,7 +67,7 @@ extension KiwiCore {
     /// apart — revives its learning instead of re-running the
     /// whole dance. Nil (owner unknowable) forgets outright.
     func forgetGoneWindow(_ id: WindowID, pid: pid_t?) {
-        outstandingSelfRaises.remove(id)
+        selfRaiseStamps[id] = nil
         zOrderRaiseEchoes[id] = nil
         if let pid {
             tiler.stashSizeBoundOnGone(id, pid: pid)

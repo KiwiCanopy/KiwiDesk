@@ -125,23 +125,21 @@ public final class KiwiCore {
     /// target raises (see runPendingFocusRaise).
     var pendingFocusRaise: WindowID?
 
-    /// Window ids KiwiDesk's own AX raises issued but whose
-    /// focus echoes have not yet landed (#152). A matching echo
-    /// is self-inflicted, not a user action: it must not
-    /// supersede a newer focus nor snap state focus back. A set
-    /// — two can be outstanding at once (#158). An entry counts
-    /// as an echo only while `selfRaiseStamps` says the raise
-    /// is RECENT: an already-key raise echoes never, and an
-    /// unbounded entry ate the next click on that window (#687
-    /// device QA). Removed on echo and destroy (ids reused);
-    /// the classification lives in `handleWindowFocused`.
-    var outstandingSelfRaises: Set<WindowID> = []
-
-    /// When each self-raise was issued — the recency bound for
-    /// the sibling-report distrust (#465) and for the self-echo
-    /// classification itself (#687). Age-compared and pruned on
-    /// write, never consumed, so a raise that never echoes
-    /// cannot poison anything forever.
+    /// When KiwiDesk's own AX raise of each window was issued
+    /// (#152): a focus report for a window raised within
+    /// `selfRaiseEchoWindow` is our echo, not a user action —
+    /// it must not supersede a newer focus nor snap state focus
+    /// back — and the recency bound for the sibling-report
+    /// distrust (#465). Age-compared and pruned on write, NEVER
+    /// consumed by an echo: lazy apps re-report a raised window
+    /// a second time ~150 ms after the first echo, and a
+    /// consumed entry let that duplicate through as deliberate
+    /// focus — the scrolling snap-back (#887, the shape #689
+    /// fixed for `zOrderRaiseEchoes`). An already-key raise
+    /// echoes never, so nothing here may wait on one (#687).
+    /// Cleared on destroy and rekeyed on a tab switch (ids
+    /// reused); the classification lives in
+    /// `handleWindowFocused`.
     var selfRaiseStamps: [WindowID: Date] = [:]
 
     /// Last left press, AX coords: the click discriminator for

@@ -90,18 +90,20 @@ struct RaiseEchoClickTests {
     }
 
     /// The veto is age-bounded (#689 device trace): a STALE
-    /// outstanding entry — a no-echo re-assert's leftover —
+    /// self-raise stamp — a no-echo re-assert's leftover —
     /// must not block the ledger revert, or a lazy app's late
-    /// re-report threads both nets (the stale entry vetoes the
+    /// re-report threads both nets (the stale stamp vetoes the
     /// ledger; the age bound rightly says it is no self-echo)
     /// and focus snaps back to the pile-mate.
-    @Test("A stale self-raise entry cannot veto the revert")
-    func staleSelfRaiseEntryDoesNotVeto() {
+    @Test("A stale self-raise stamp cannot veto the revert")
+    func staleSelfRaiseStampDoesNotVeto() {
         let core = makeCore()
         let (intended, top, _) = makePile(core)
-        // Outstanding but never echoed and long unstamped —
+        // Stamped, never echoed, and past the echo window —
         // the shape a no-echo raise leaves behind.
-        core.outstandingSelfRaises.insert(top)
+        core.selfRaiseStamps[top] = Date(
+            timeIntervalSinceNow: -KiwiCore.selfRaiseEchoWindow - 1
+        )
         core.handle(.windowFocused(top))
         #expect(focused(core) == intended)
     }

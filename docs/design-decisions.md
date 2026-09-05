@@ -1527,13 +1527,26 @@ window is eaten — strictly better than the pre-#418 permanent
 poisoning.
 
 Two corollaries from the same device QA. **Every echo ledger is
-age-bounded, `outstandingSelfRaises` included**: raising an
-already-key window — the restore's closing re-assert does
-exactly that — emits no echo at all, so an unbounded entry sat
-unconsumed forever and classified the user's *next* click on
-that window as KiwiDesk's own raise echo; an entry counts as an
-echo only while `selfRaiseStamps` says the raise is recent, and
-even a fresh one stands down for click provenance. **A press a
+age-bounded, the focus raise's `selfRaiseStamps` included**:
+raising an already-key window — the restore's closing re-assert
+does exactly that — emits no echo at all, so an unbounded entry
+sat unconsumed forever and classified the user's *next* click on
+that window as KiwiDesk's own raise echo; a stamp counts as an
+echo only while it is recent, and even a fresh one stands down
+for click provenance. And the same ledger is **never consumed by
+its echo either** — the scrolling snap-back
+([#887](https://github.com/KiwiCanopy/KiwiDesk/issues/887),
+device trace 2026-08-31): every fast navigate step made the
+departed app report its window's focus twice, the duplicate
+~150 ms after the first and after the user's next step, and a
+stamp consumed by the first echo left that duplicate honored as
+deliberate focus — ring, pan and pointer snapping back to the
+window just left. The stamp expires by age, exactly as the
+z-order ledger's does, and the sibling distrust that used to ask
+"not our raise?" of a consumed set now asks it of *order*: a
+same-app sibling raised **after** the reported window distrusts
+its report, one raised before does not, or a step A→B inside
+the window would eat B's own echo. **A press a
 bar absorbed resolves no window**: the bar is KiwiDesk's own
 overlay, absent from state, and resolving through it handed the
 window beneath a provenance it never earned — which would also
