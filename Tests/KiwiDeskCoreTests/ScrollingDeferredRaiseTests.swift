@@ -153,18 +153,17 @@ struct ScrollingDeferredRaiseTests {
         core.pendingFocusRaise = WindowID(3)
         // The immediate raise of 2 from the previous step now
         // echoes back mid-pan (its AX focus notification lands).
-        // The stamp rides along as `raiseWindow` writes it: the
-        // echo classification is age-bounded (#687 device QA),
-        // so an unstamped entry would model a raise that never
-        // echoed, not this fresh one.
-        core.outstandingSelfRaises = [WindowID(2)]
+        // The stamp as `raiseWindow` writes it: the echo
+        // classification is age-bounded (#687 device QA).
         core.selfRaiseStamps[WindowID(2)] = Date()
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         // The stale self-echo neither clears the pending raise nor
         // snaps state focus back to 2.
         #expect(core.pendingFocusRaise == WindowID(3))
         #expect(core.activeSpace?.focused == WindowID(3))
-        #expect(!core.outstandingSelfRaises.contains(WindowID(2)))
+        // And the stamp survives the echo (#887): the app's
+        // duplicate report must classify the same way.
+        #expect(core.selfRaiseStamps[WindowID(2)] != nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.activeSpace?.focused == WindowID(3))
     }
@@ -183,7 +182,6 @@ struct ScrollingDeferredRaiseTests {
         // focus: two self-raises outstanding at once. The single
         // slot (#152) only remembered the last, so 2's stale echo
         // was misread as a user click and stole focus back.
-        core.outstandingSelfRaises = [WindowID(2), WindowID(4)]
         // Stamps as `raiseWindow` writes them — the echo
         // classification is age-bounded (#687 device QA).
         core.selfRaiseStamps[WindowID(2)] = Date()
@@ -191,7 +189,6 @@ struct ScrollingDeferredRaiseTests {
         core.state.workspaces.focus(WindowID(4), in: space)
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.activeSpace?.focused == WindowID(4))
-        #expect(!core.outstandingSelfRaises.contains(WindowID(2)))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -206,11 +203,11 @@ struct ScrollingDeferredRaiseTests {
         guard startDummyPan(core) else { return }
         core.state.workspaces.focus(WindowID(3), in: space)
         core.pendingFocusRaise = WindowID(3)
-        // No self-raise outstanding: a genuine user click on 2
+        // No self-raise stamped: a genuine user click on 2
         // mid-pan must still supersede the pending raise (the
         // misclassification guard — never suppress a real focus
         // change the user asked for).
-        core.outstandingSelfRaises = []
+        core.selfRaiseStamps = [:]
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)

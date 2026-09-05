@@ -209,20 +209,37 @@ struct AccessibilityReturnTests {
         // the debt survives for the genuine yield.
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        core.outstandingSelfRaises.insert(WindowID(2))
         core.selfRaiseStamps[WindowID(2)] = Date()
         core.handle(.windowFocused(WindowID(2)))
         // The echo was honored as our own raise's fallout —
         // and the debt is intact.
         #expect(core.accessibilityReturn != nil)
-        // The genuine yield — no stamps left (the handle above
-        // consumed the outstanding entry) — is returned.
+        // The genuine yield — the stamp aged out (an echo never
+        // consumes one, #887) — is returned.
+        core.selfRaiseStamps[WindowID(2)] = nil
         core.handle(.windowFocused(WindowID(2)))
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(1)
         )
         #expect(core.accessibilityReturn == nil)
+    }
+
+    /// The in-window verdict, stated (#887): a yield landing on
+    /// a window KiwiDesk raised inside `selfRaiseEchoWindow` is
+    /// our own raise's fallout — honored, not returned — and the
+    /// debt stands unspent for the next report.
+    @Test("A yield inside the raise's echo window is not returned")
+    func yieldInsideEchoWindowIsNotReturned() {
+        let core = makeCore()
+        core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
+        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(
+            core.state.workspaces[SpaceID(1)]?.focused
+                == WindowID(2)
+        )
+        #expect(core.accessibilityReturn != nil)
     }
 
     @Test("A stale unconsumed debt is replaced, not kept")

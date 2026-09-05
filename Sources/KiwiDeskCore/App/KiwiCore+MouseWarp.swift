@@ -99,7 +99,7 @@ extension KiwiCore {
             let mouseMade =
                 lastLeftClick.map {
                     now.timeIntervalSince($0.at)
-                        < Self.selfRaiseSiblingWindow
+                        < Self.selfRaiseEchoWindow
                 } == true
             if !mouseMade {
                 pendingMouseWarp = id

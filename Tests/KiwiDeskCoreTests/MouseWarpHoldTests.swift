@@ -257,7 +257,7 @@ struct MouseWarpHoldTests {
         core.zOrderRestoresInFlight = 1
         core.lastLeftClick = (
             Date().addingTimeInterval(
-                -KiwiCore.selfRaiseSiblingWindow - 0.1
+                -KiwiCore.selfRaiseEchoWindow - 0.1
             ),
             CGPoint(x: 700, y: 500),
             nil

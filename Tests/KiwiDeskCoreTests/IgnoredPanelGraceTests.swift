@@ -171,4 +171,34 @@ struct IgnoredPanelGraceTests {
         #expect(core.ignoredPanel.active.contains(5))
         #expect(core.ignoredPanel.dismissDeadline == nil)
     }
+
+    /// The consume keeps the window's self-raise stamp (#887):
+    /// age bounds it, and the #465 order read needs it as the
+    /// newer sibling — a consume that dropped it let the panel
+    /// app's next hidden-sibling re-report through to the follow.
+    @Test("The consume keeps the self-raise stamp for the order read")
+    func consumeKeepsSelfRaiseStamp() {
+        let core = makeCore()
+        addWindow(core, 1, pid: 1)
+        addWindow(core, 3, pid: 3)
+        addWindow(core, 4, pid: 3)
+        core.moveWindow(WindowID(4), to: SpaceID(2), follow: false)
+        core.moveLatch.stamp(
+            WindowID(4),
+            at: Date(
+                timeIntervalSinceNow: -MoveIntentLatch.window - 1
+            )
+        )
+        core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
+        // KiwiDesk raised the panel app's main window, then the
+        // quick terminal took and dropped focus.
+        core.selfRaiseStamps[WindowID(3)] = Date()
+        core.armIgnoredPanel(3)
+        core.handle(.windowFocused(WindowID(3)))
+        #expect(core.selfRaiseStamps[WindowID(3)] != nil)
+        // The app's stale re-report of its hidden sibling is
+        // still distrusted by that stamp — no follow.
+        core.handle(.windowFocused(WindowID(4)))
+        #expect(core.deferred.task(for: .focusFollow) == nil)
+    }
 }
