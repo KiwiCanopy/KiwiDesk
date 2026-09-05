@@ -40,8 +40,7 @@ extension KiwiCore {
             axis: axis,
             span: span,
             space: space,
-            focused: space.focused,
-            deltaSign: delta
+            focused: space.focused
         )
         return .ok()
     }

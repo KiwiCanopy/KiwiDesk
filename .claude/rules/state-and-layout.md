@@ -865,6 +865,28 @@ editing here:
   deliberately — a fold-rule change that updates the render
   and misses a hand copy re-opens the exact divergence the
   extraction closed.
+  And **a refusal names a window the write could have MOVED**
+  (#1259). A stack zone and a track partition their members by
+  MEMBERSHIP, and every member's extent moves with the
+  parameter — so the focused window is always in one group and
+  the binding one follows the gesture's direction. A GEOMETRIC
+  partition (bsp's two sides) has neither property: a window
+  spanning the whole tiled extent on the axis sits above every
+  split of that orientation, so no ratio move can resize it. It
+  is dropped from both sides by the one `MouseResize.bspSides`
+  authority — which also keeps its floor out of the CAP, where
+  it blocked a write no window on the split was constraining —
+  the binding side is then read off the ratio's own direction
+  (`proposed < base`) rather than off the focused window's
+  side, which says nothing when the focused window is on
+  neither, and the own-minimum wording is owed only to a
+  focused window ON the binding side (`focusedIsBinding`, the
+  one discriminator `reportResizeRefusal` takes). Where NO
+  window participates, the axis has no split at all and the cue
+  is `noAxisHere` — a limit that does not exist rather than one
+  the trier reached. A third writer of this shape states which
+  kind of partition it has; `BspRefusalParticipationTests`
+  holds the four verdicts.
 - **A float safety NET asks `EffectiveFloat.applies`, never the
   flag alone** (#1178). `FloatingLayout` assigns no frames, so a
   `.floating` space's members are unmanaged in exactly the way a

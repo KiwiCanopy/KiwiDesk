@@ -145,7 +145,9 @@ extension KiwiCore {
                     focused: focused,
                     bindingCarrier: trackMins[track].carrier,
                     fallbackAnchor: nil,
-                    shrinking: true,
+                    // The focused window is a member of the
+                    // track whose floor bound the shrink.
+                    focusedIsBinding: true,
                     axis: acrossAxis
                 )
             } else if delta > 0,
