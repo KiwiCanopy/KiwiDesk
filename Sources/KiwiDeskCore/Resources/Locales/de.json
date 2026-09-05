@@ -333,6 +333,7 @@
   "footer.save": "Sichern",
   "footer.save.globals_only": "Layout und Bildschirme bleiben pausiert; „%1$@“ deckt alles andere ab.",
   "footer.save_a_copy_as": "Als neues Profil speichern…",
+  "footer.save_as_new.message": "Das neue Profil übernimmt deine Änderungen und das angeschlossene Bildschirm-Setup. Ein über das Menü gewechseltes Layout bleibt temporär.",
   "footer.save_as_new.title": "Als neues Profil speichern",
   "footer.save_as_new_profile": "Als neues Profil speichern…",
   "footer.save_copy": "Kopie speichern",

@@ -333,6 +333,7 @@
   "footer.save": "저장",
   "footer.save.globals_only": "레이아웃과 화면은 일시 정지 상태로 유지되며, ‘%1$@’은(는) 그 밖의 모든 항목에 적용됩니다.",
   "footer.save_a_copy_as": "새로운 프로필로 저장…",
+  "footer.save_as_new.message": "새 프로필에는 편집 내용과 연결된 화면 구성이 포함됩니다. 메뉴에서 전환한 레이아웃은 임시 상태로 유지됩니다.",
   "footer.save_as_new.title": "새로운 프로필로 저장",
   "footer.save_as_new_profile": "새로운 프로필로 저장…",
   "footer.save_copy": "사본 저장",

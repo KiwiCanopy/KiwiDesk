@@ -333,6 +333,7 @@
   "footer.save": "Guardar",
   "footer.save.globals_only": "El diseño y las pantallas siguen en pausa; «%1$@» abarca todo lo demás.",
   "footer.save_a_copy_as": "Guardar como nuevo perfil…",
+  "footer.save_as_new.message": "El nuevo perfil incluye tus cambios y la configuración de pantallas conectada. Un diseño cambiado desde el menú sigue siendo temporal.",
   "footer.save_as_new.title": "Guardar como perfil nuevo",
   "footer.save_as_new_profile": "Guardar como perfil nuevo…",
   "footer.save_copy": "Guardar copia",

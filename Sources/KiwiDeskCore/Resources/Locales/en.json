@@ -333,7 +333,7 @@
   "footer.save": "Save",
   "footer.save.globals_only": "Layout and screens stay paused; %1$@ covers everything else.",
   "footer.save_a_copy_as": "Save as new profile…",
-  "footer.save_as_new.message": "The new profile carries your edits and the connected monitor set. A layout you switched from the menu stays temporary.",
+  "footer.save_as_new.message": "The new profile carries your edits and the connected screen setup. A layout you switched from the menu stays temporary.",
   "footer.save_as_new.title": "Save as new profile",
   "footer.save_as_new_profile": "Save as New Profile…",
   "footer.save_copy": "Save copy",

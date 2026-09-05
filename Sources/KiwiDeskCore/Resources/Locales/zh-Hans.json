@@ -333,6 +333,7 @@
   "footer.save": "保存",
   "footer.save.globals_only": "布局和屏幕仍处于暂停状态；“%1$@”会涵盖其余所有内容。",
   "footer.save_a_copy_as": "存储为新描述文件…",
+  "footer.save_as_new.message": "新描述文件包含你的修改和当前连接的屏幕组合。从菜单切换的布局保持为临时状态。",
   "footer.save_as_new.title": "存储为新描述文件",
   "footer.save_as_new_profile": "存储为新描述文件…",
   "footer.save_copy": "保存副本",
