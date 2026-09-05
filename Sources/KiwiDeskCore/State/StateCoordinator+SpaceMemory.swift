@@ -55,8 +55,11 @@ extension StateCoordinator {
     /// the Space an explicit Desktop-move target named (#1150):
     /// the `.departed` memory takes the name and the slot rank is
     /// dropped, a rank meaning something only in the Space it was
-    /// taken in. A no-op for anything but a `.departed` record —
-    /// a minimize, a close, a `.restored` filing.
+    /// taken in. Rankless, the create fold's spawn placement is
+    /// the authority for where the return lands; the away merge
+    /// (`withAwayMembers`) previews it LAST, and may differ. A
+    /// no-op for anything but a `.departed` record — a minimize,
+    /// a close, a `.restored` filing.
     mutating func redirectDeparture(
         of id: WindowID,
         to space: SpaceID

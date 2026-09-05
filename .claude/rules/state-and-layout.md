@@ -162,19 +162,26 @@ editing here:
   re-home splits on, and the explicit name outranks that
   re-home. A Space assigned to another screen than the
   Desktop's is REFUSED at the parse — the layout would carry
-  the window back (#1010) — while a Space no screen owns yet is
-  created and ASSIGNED to the Desktop's screen by the route
-  (`homeExplicitSpace`), after the bridge accepted and never at
-  the parse: an unassigned Space lays out on the MAIN screen,
-  so accepting it as it stands is the same undo, and
-  `livingRememberedSpace` drops a record whose Space is gone. The
-  explicit Space is a MEMBERSHIP write where a bare Desktop move
-  is not, so it takes `stickyMoveRefused` before anything moves
-  and re-anchors a float on the shown route, as `moveWindow`
-  does. The ledger is bounded and per window, rekeyed on a tab
+  the window back (#1010) — and a Space no screen owns yet is
+  accepted only for a MAIN-screen Desktop, since an unowned
+  Space lays out on the main screen: refused with the pin hint
+  elsewhere, never hand-assigned, because the next
+  `resolveSpaceDisplays` would move it back and re-open the same
+  undo. The route creates the Space after the bridge accepted
+  (`fileExplicitly`), never the parse, or a refused move leaves
+  an empty Space; and `livingRememberedSpace` drops a record
+  whose Space is gone. At the ARRIVAL the #1010 screen-home net
+  still outranks the name — a Space moved to another screen
+  between the command and the reveal is exactly what that net
+  exists for. The explicit Space is a MEMBERSHIP write where a
+  bare Desktop move is not, so it takes `stickyMoveRefused`
+  before anything moves — handed the screen the Space WILL lay
+  out on (`explicitSpaceDisplay`, the gate's `landingOn`), since
+  the gate reads a nil assignment as "elsewhere" — and re-anchors
+  a float on the shown route, as `moveWindow` does. The ledger is bounded and per window, rekeyed on a tab
   switch; a new route that produces a departure claims through
   the gone handler rather than beside it, and
-  `PendingSpaceSeamTests` is the register of the three wirings.
+  `PendingSpaceSeamTests` is the register of those wirings.
   `DesktopMoveSpaceTargetTests` drives both routes, the homing,
   the refusals and the control through the real dispatch and
   fold; `PendingSpaceAssignmentTests` holds the record.

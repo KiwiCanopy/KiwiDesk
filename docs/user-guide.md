@@ -2885,6 +2885,12 @@ If your Mac cannot drive Desktops at all, the offer does not
 appear — see
 [macOS Desktops](#macos-desktops-mission-control).
 
+Each row sends the window to the Desktop and nothing more.
+Naming the KiwiDesk Space it lands in is a second argument,
+available from Lua and the CLI — `move_to_desktop(3, "mail")`,
+see the [Lua reference](lua-reference.md#move_to_desktop) —
+because a shortcut row binds one action, not a composition.
+
 ### Recording a Shortcut
 
 Click an empty row or the **Edit** pencil on an existing row. Click

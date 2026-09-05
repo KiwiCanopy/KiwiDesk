@@ -58,7 +58,16 @@ extension KiwiCore {
             case .space(let space):
                 explicit = space
             }
-            if let explicit, stickyMoveRefused(focused, to: explicit) {
+            if let explicit,
+                stickyMoveRefused(
+                    focused,
+                    to: explicit,
+                    landingOn: explicitSpaceDisplay(
+                        explicit,
+                        for: target
+                    )
+                )
+            {
                 return .fail("a sticky window keeps its Space")
             }
             guard WMBridge.moveWindows([focused], to: target.space)
@@ -135,71 +144,6 @@ extension KiwiCore {
             departWithoutFollowing(focused)
             return .ok()
         }
-    }
-
-    /// The composed `space:` target's two routes (#1150), split by
-    /// the same gate as the screen-home rule below. A Desktop its
-    /// screen ALREADY shows produces no departure, so the window
-    /// is filed NOW — `rehomeAcrossScreens`'s own steps, with the
-    /// user's Space in place of the shown one. A HIDDEN Desktop is
-    /// the arrival's: the name is recorded and paid at the
-    /// departure (`PendingSpaceAssignment`), never written into
-    /// the membership here, which the reveal reconcile would
-    /// fight (#890 ▸ arrival semantics).
-    private func fileExplicitly(
-        _ window: WindowID,
-        in space: SpaceID,
-        target: DesktopTarget
-    ) {
-        homeExplicitSpace(space, on: target)
-        guard target.isCurrent else {
-            pendingSpace.record(window, space: space)
-            onLog(
-                "move_to_desktop: w\(window.raw) will join space "
-                    + "\(space.raw) when it departs"
-            )
-            return
-        }
-        guard let managed = state.windows[window] else { return }
-        let from = state.workspaces.space(of: window)
-        guard from != space else { return }
-        onLog(
-            "move_to_desktop: w\(window.raw) filed into space "
-                + "\(space.raw) on the shown Desktop"
-        )
-        addFocusedToSpace(window, to: space)
-        // A float crossing displays re-anchors (#444), as
-        // `moveWindow` does — membership alone never moves it.
-        reanchorFloat(window, to: space)
-        state.workspaces.focus(window, in: space)
-        emitWindowMovedToSpace(
-            window,
-            app: managed.appName,
-            bundleID: managed.appBundleID,
-            from: from,
-            to: space
-        )
-        retile(animated: true)
-    }
-
-    /// Brings the named Space into existence and, where no screen
-    /// owns it yet, assigns it to the Desktop's (#1150): an
-    /// unassigned Space lays out on the MAIN screen
-    /// (`TilingEngine.screen(for:in:)`), so a fresh Space named
-    /// for a secondary screen's Desktop would carry the window
-    /// back there — the #1010 undo by another door. After the
-    /// bridge accepted, never at the parse. A screen the
-    /// topology cannot name leaves the Space unassigned, which is
-    /// the single-screen case.
-    private func homeExplicitSpace(
-        _ space: SpaceID,
-        on target: DesktopTarget
-    ) {
-        state.workspaces.ensureSpace(space)
-        guard state.workspaces.display(of: space) == nil,
-            let screen = display(forUUID: target.displayIdentifier)
-        else { return }
-        state.workspaces.assign(space, to: screen)
     }
 
     /// The KiwiDesk-space half of a move onto ANOTHER screen's

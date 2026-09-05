@@ -134,9 +134,13 @@ extension KiwiCore {
     /// up front: the layout carries a window to its Space's
     /// screen, and macOS then re-assigns its Desktop to match,
     /// which undoes the move within a second (#1010). A Space no
-    /// screen owns yet is accepted and HOMED by the route once the
-    /// bridge accepted the move (`homeExplicitSpace`) — a parse
-    /// writes nothing, so a refused move leaves no empty Space.
+    /// screen owns yet lays out on the MAIN screen, so it is
+    /// accepted only for a Desktop of the main screen and refused
+    /// with the pin hint elsewhere — never hand-assigned, since
+    /// the next placement resolve would move it back and re-open
+    /// the same undo. A parse writes nothing: the route creates
+    /// the Space once the bridge accepted, so a refused move
+    /// leaves no empty Space behind.
     func resolveSpaceTarget(
         _ args: [JSONValue],
         for target: DesktopTarget
@@ -146,14 +150,26 @@ extension KiwiCore {
             return .refused(.fail("expected space id"))
         }
         let space = SpaceID(raw)
-        if let assigned = state.workspaces.display(of: space),
-            let screen = display(forUUID: target.displayIdentifier),
-            assigned != screen
+        if let assigned = state.workspaces.display(of: space) {
+            if let screen = display(forUUID: target.displayIdentifier),
+                assigned != screen
+            {
+                return .refused(
+                    .fail(
+                        "space \(raw) lays out on another screen "
+                            + "than that Desktop's"
+                    )
+                )
+            }
+        } else if let main = NativeSpaces.mainDisplayUUID(),
+            target.displayIdentifier != main
         {
             return .refused(
                 .fail(
-                    "space \(raw) lays out on another screen than "
-                        + "that Desktop's"
+                    "space \(raw) is on no screen yet and would lay "
+                        + "out on the main one — pin it to that "
+                        + "Desktop's screen first "
+                        + "(pin_space_to_display)"
                 )
             )
         }

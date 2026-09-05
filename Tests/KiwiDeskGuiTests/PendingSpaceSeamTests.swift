@@ -27,7 +27,10 @@ struct PendingSpaceSeamTests {
     /// needle → the files that may carry it, each exactly once.
     private static let wirings: [(String, [String])] = [
         // The recorder: the hidden route of `fileExplicitly`.
-        ("pendingSpace.record(", ["KiwiCore+DesktopMove.swift"]),
+        (
+            "pendingSpace.record(",
+            ["KiwiCore+DesktopMoveSpace.swift"]
+        ),
         // The claim, at the DEPARTURE the gone handler
         // classifies — downstream of every removal, so the
         // eager departure and the reap's reconcile both reach it.

@@ -277,9 +277,10 @@ monitor — so without this the move undoes itself about a second
 later, whether the Desktop was hidden or already on screen
 ([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
 
-A Desktop on the same screen changes nothing: the Space you
-left is the Space you come back to. Neither does a **floating**
-or a **sticky** window change Space — a float has no layout to
+**Given only a Desktop number**, a Desktop on the same screen
+changes nothing: the Space you left is the Space you come back
+to. Neither does a **floating** or a **sticky** window change
+Space — a float has no layout to
 carry it anywhere, and a sticky window's home is deliberately
 left where it is (`move_to_space` guards it the same way). And
 with **Stay visible across Desktops** on (the default), the move
@@ -290,20 +291,34 @@ its own screen's current Desktop. Pin it out with
 
 **Naming the Space** finishes the verb: `move_to_desktop(3,
 "mail")` sends the window to Desktop 3 *and* files it into the
-`mail` Space — created on that Desktop's screen if it does not
-exist yet. When
-Desktop 3 is hidden, the filing happens as the window leaves —
-it rejoins `mail` when that Desktop is next shown, instead of
-the Space it was in. When Desktop 3 is already on screen, the
-window joins `mail` at once, exactly as `move_to_space("mail")`
-would. A Space that lays out on **another screen** than that
-Desktop's is refused up front: the layout would carry the window
-back to that screen, and macOS would then move it to a Desktop
-there, undoing the move
+`mail` Space, created if it does not exist yet. When Desktop 3
+is hidden, the filing happens as the window leaves — it rejoins
+`mail` when that Desktop is next shown, instead of the Space it
+was in; it is *in* `mail` then, which need not be the Space that
+screen is showing, so it may sit parked until you switch to it.
+When Desktop 3 is already on screen, the window joins `mail` at
+once, exactly as `move_to_space("mail")` would. A **floating**
+window is filed too — unlike a bare Desktop move, which leaves a
+float's Space alone — and on a Desktop already on screen it is
+re-anchored onto that screen the way `move_to_space` re-anchors
+one. A Space **assigned to another screen** than that Desktop's
+is refused up front: the layout would carry the window back to
+that screen, and macOS would then move it to a Desktop there,
+undoing the move
 ([#1150](https://github.com/KiwiCanopy/KiwiDesk/issues/1150)).
-A **sticky** window cannot be given a Space this way, exactly
-as `move_to_space` refuses it — the whole command is refused, so
-the window stays where it is.
+A Space that is on **no screen yet** lays out on the main screen,
+so it can only be named for one of the main screen's Desktops;
+for a Desktop elsewhere, name a Space that lays out on that
+screen, or `pin_space_to_display` one there first. A **sticky**
+window takes the same guard `move_to_space` does: a window sticky
+*everywhere* refuses any Space, and one sticky *to a screen*
+refuses a Space on that screen while a Space on another screen
+re-homes it
+([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445)) —
+where it refuses, the whole command is refused, and the window
+does not change Desktop either. The second argument is Lua's and
+the CLI's; the Shortcuts editor's Desktop rows bind the
+one-argument form.
 
 **Example:**
 
@@ -342,9 +357,9 @@ window still moves, and focus still goes with it.
 The window itself is placed by the cross-screen rule above — on
 another screen it joins the Space that screen shows — unless you
 name a Space, which wins the same way it does for
-`move_to_desktop`: the window is filed into it as it leaves, and
-the focus you are handed at the arrival is in that Space. Same
-requirement as `focus_desktop`.
+`move_to_desktop` — filed as the window leaves, or at once when
+that Desktop is already on screen — and the focus you are handed
+is in that Space. Same requirement as `focus_desktop`.
 
 **Example:**
 

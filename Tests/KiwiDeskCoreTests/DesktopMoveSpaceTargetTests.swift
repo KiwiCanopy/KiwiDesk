@@ -209,10 +209,27 @@ struct DesktopMoveSpaceTargetTests {
 
     /// An unassigned Space lays out on the MAIN screen, so a
     /// fresh Space named for a secondary screen's Desktop would
-    /// carry the window back there (#1010 by another door): the
-    /// route homes it once the bridge accepted.
-    @Test("A new Space is homed to the Desktop's screen")
-    func newSpaceIsHomedToTheDesktopsScreen() {
+    /// carry the window back there (#1010 by another door) — and
+    /// a hand assignment is reverted by the next placement
+    /// resolve, so the parse refuses instead, creating nothing.
+    @Test("An unowned Space for a secondary screen's Desktop is refused")
+    func unownedSpaceForASecondaryDesktopIsRefused() {
+        let core = makeCore()
+        defer { teardown() }
+        addDisplays(core)
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(4), .string("mail")]
+        )
+        #expect(!response.isSuccess)
+        #expect(core.state.workspaces[mail] == nil)
+        #expect(core.pendingSpace.isEmpty)
+    }
+
+    /// The same unowned Space for a MAIN screen's Desktop lays out
+    /// where that Desktop is, so it is accepted and created there.
+    @Test("An unowned Space for a main-screen Desktop is created")
+    func unownedSpaceForAMainDesktopIsCreated() {
         let core = makeCore()
         defer { teardown() }
         addDisplays(core)
@@ -220,13 +237,33 @@ struct DesktopMoveSpaceTargetTests {
         #expect(
             core.execute(
                 "move_to_desktop",
-                args: [.number(4), .string("mail")]
+                args: [.number(2), .string("mail")]
             ).isSuccess
         )
         #expect(core.state.workspaces[mail] != nil)
-        #expect(
-            core.state.workspaces.display(of: mail) == DisplayID(2)
+        #expect(core.state.workspaces.display(of: mail) == nil)
+    }
+
+    /// The gate is handed where the Space WILL lay out: a
+    /// display-sticky window on the main screen, named into an
+    /// unowned Space that lays out on that same screen, is the
+    /// move its scope forbids — invisible to a gate reading the
+    /// Space's nil assignment.
+    @Test("A display-sticky window is refused a Space on its screen")
+    func displayStickyRefusedASpaceOnItsOwnScreen() {
+        let core = makeCore()
+        defer { teardown() }
+        addDisplays(core)
+        let origin = core.state.workspaces.space(of: window)!
+        core.state.workspaces.assign(origin, to: DisplayID(1))
+        #expect(core.execute("make_display_sticky").isSuccess)
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(2), .string("mail")]
         )
+        #expect(!response.isSuccess)
+        #expect(core.state.workspaces.space(of: window) == origin)
+        #expect(core.state.workspaces[mail] == nil)
     }
 
     /// The explicit Space is a membership write, so it takes the

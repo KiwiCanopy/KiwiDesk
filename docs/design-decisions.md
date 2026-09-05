@@ -3422,16 +3422,26 @@ A Space assigned to another screen than the Desktop's is
 its Space's screen, and macOS re-assigns the window's Desktop to
 match its frame, so honoring it would undo the move within a
 second — the #1010 defect, asked for by name. A Space no screen
-owns yet, a fresh one included, is not refused but **homed**:
-created and assigned to the Desktop's screen once the bridge has
-accepted the move, never at the parse — an unassigned Space lays
-out on the main screen, so accepting it as it stands would carry
-the window there by the same door, while a parse that wrote
-state would leave an empty Space behind every refused move. And
-the explicit Space is a membership write where a bare Desktop
-move is not, so it takes the one sticky gate `move_to_space`
-takes: a sticky window keeps its Space, and the whole command is
-refused rather than half of it done.
+owns yet, a fresh one included, lays out on the main screen, so
+it is accepted for a main-screen Desktop and refused, with the
+pin hint, for any other — and deliberately **not** assigned to
+the Desktop's screen on the user's behalf: a runtime assignment
+outside the pins is undone by the next placement resolve (a
+profile apply, a monitor change), after which the window sits on
+a secondary screen's Desktop while its Space lays out on the
+main one, the same undo a beat later. A parse writes nothing,
+so a refused move leaves no empty Space behind. And the explicit
+Space is a membership write where a bare Desktop move is not, so
+it takes the one sticky gate `move_to_space` takes, with that
+gate's own asymmetry (#445: a global sticky refuses any Space, a
+display sticky refuses a same-screen one and re-homes across
+screens) — told where the Space will lay out, since an unowned
+one reads as "elsewhere" to it — and where it refuses, the whole
+command is refused rather than half of it done. The remembered
+slot goes with the re-filing: a rank means something only in the
+Space it was taken in, so a window filed into a different Space
+returns by the arrival's ordinary placement rather than at its
+old index (#1207).
 
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
