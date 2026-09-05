@@ -156,13 +156,17 @@ struct PlacementBounceTests {
 
     /// An ON-screen placement the window has not reached is a
     /// slide, not a bounce: a cmd-tab onto it is honored.
-    @Test("An on-screen placement not yet reached is honored")
-    func onscreenPlacementIsHonored() {
+    /// The ruled trade (device 21:03): the emulator bounces after
+    /// any pan that moves it, on screen or off, so in the active
+    /// scrolling row a live placement is the whole verdict — a
+    /// cmd-tab onto a window a pan just moved is bounced too.
+    @Test("An on-screen placement in the active row is distrusted")
+    func onscreenPlacementIsDistrusted() {
         let core = makeCore()
-        let (target, _) = makeFixture(core)
+        let (target, other) = makeFixture(core)
         core.tiler.placements.stamp(target, target: onscreen)
         core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
+        #expect(focused(core) == other)
     }
 
     @Test("A placement past the echo window is honored")

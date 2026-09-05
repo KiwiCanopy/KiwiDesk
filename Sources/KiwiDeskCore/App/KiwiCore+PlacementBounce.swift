@@ -12,38 +12,31 @@ extension KiwiCore {
     /// The placement a clickless report for `id` is its app's
     /// reaction to, nil where it is not: an entry of ours within
     /// `PlacementLedger.echoWindow`, no click reached the window,
-    /// and one of two arms. In the ACTIVE scrolling Space any of
-    /// three discriminators: the placement lies past the screen's
-    /// edge; KiwiDesk itself raised the window inside the window
-    /// (the self ledger's longer reading); or a focus command
-    /// moved focus OFF the window inside it — the app answering
-    /// the loss, which no frame ask precedes once its size bound
-    /// is learned. Anywhere else — where a clickless focus is how
-    /// a user REACHES a parked window — the placement lies past
-    /// the edge AND the window refused it by origin.
+    /// and one of two arms. In the ACTIVE scrolling Space the live
+    /// entry IS the verdict — a pan that moved the window, on
+    /// screen or off, or a focus command that left it: the app
+    /// answers either, and where it landed discriminates nothing
+    /// (docs/design-decisions.md carries the measurements).
+    /// Anywhere else — where a clickless focus is how a user
+    /// REACHES a parked window — the placement lies past the edge
+    /// AND the window refused it by origin.
     func placementBounce(_ id: WindowID, now: Date) -> CGRect? {
         guard let placed = tiler.placements.recent(id, at: now),
             !recentClickReached(id, now: now),
             let actual = state.windows[id]?.frame
         else { return nil }
-        let tolerance = TilingEngine.retileTolerance
-        let crossesEdge = placementCrossesEdge(placed, of: id)
         if let space = state.workspaces.space(of: id),
             space == state.workspaces.activeSpace,
             state.workspaces[space]?.mode == .scrolling
         {
-            let raisedByUs = raisedWithinPlacementWindow(id, now: now)
-            let displaced = tiler.placements.recentDisplacement(
-                id,
-                at: now
-            )
-            return crossesEdge || raisedByUs || displaced
-                ? placed : nil
+            return placed
         }
+        let tolerance = TilingEngine.retileTolerance
         let originRefused =
             abs(actual.minX - placed.minX) > tolerance
             || abs(actual.minY - placed.minY) > tolerance
-        return crossesEdge && originRefused ? placed : nil
+        return placementCrossesEdge(placed, of: id) && originRefused
+            ? placed : nil
     }
 
     /// Keeps state on `intended` and re-asserts it with a DIRECT,

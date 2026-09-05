@@ -120,18 +120,6 @@ struct PlacementDisplacementTests {
         #expect(focused(core) == other)
     }
 
-    /// A bare size mismatch is an echo not yet landed as often
-    /// as a refusal (the #1049 lesson), and discriminates nothing.
-    @Test("A size mismatch alone is honored")
-    func sizeMismatchAloneIsHonored() {
-        let core = makeCore()
-        let (target, _) = makeFixture(core)
-        let asked = CGRect(x: 800, y: 100, width: 500, height: 300)
-        core.tiler.placements.stamp(target, target: asked)
-        core.handle(.windowFocused(target))
-        #expect(focused(core) == target)
-    }
-
     @Test("A click on the displaced window escapes")
     func clickEscapes() {
         let core = makeCore()

@@ -530,22 +530,12 @@ editing here:
   restore's own echo past both nets. A ledger is cleared where
   its id dies (`forgetGoneWindow`) and rekeyed on a tab switch,
   and a CONSUMER of the self ledger reads a stamp's liveness
-  through one of its TWO readings rather than comparing the stamp
-  itself — `selfRaiseStamp(_:now:)`, the shorter echo window every
-  distrust ranks by, or `raisedWithinPlacementWindow(_:now:)`, the
-  placement window's, read by the placement bounce alone (#1161).
-  The order-not-presence rule above binds a reader telling OUR
-  raise from THEIRS; the placement bounce asks a different
-  question — did we raise this window at all inside the placement
-  window — and takes presence deliberately, the #887 hazard (a
-  restore's own echo) being what the `!selfEcho` gate above it
-  already consumed. Every raise MINTS its stamp through the one
-  `stampSelfRaise(_:now:)`, which prunes to the LONGER window any
-  reading takes, or a raise between a stamp and its late echo
-  drops the stamp that names it — `PlacementBounceSeamTests` ▸
-  the write-site census holds the minter, the gone clear and the
-  rekey as the only writers; the two click readers borrow the
-  shorter constant as a click window, which is not a stamp read;
+  through `selfRaiseStamp(_:now:)` rather than comparing the stamp
+  itself; every raise MINTS its stamp through the one
+  `stampSelfRaise(_:now:)` — `PlacementBounceSeamTests` ▸ the
+  write-site census holds the minter, the gone clear and the
+  rekey as the only writers — while the two click readers borrow
+  the constant as a click window, which is not a stamp read;
   nothing scans for a new reading, so a new reader owes the
   routing deliberately. `SelfRaiseDuplicateEchoTests`,
   `RaiseEchoClickTests` and `ActivationReReportTests` hold the
@@ -563,13 +553,12 @@ editing here:
   `KiwiCore.placementBounce`, which `handleWindowFocused`
   consults ABOVE the focus-follow and BELOW the z-order revert.
   It fires for a clickless report, after focus moved on: in the
-  ACTIVE scrolling Space on any of three discriminators — the
-  placement lay past the screen's edge; KiwiDesk itself raised
-  the window inside the placement window (the self ledger's
-  longer reading, above); or a focus command moved focus off it
-  inside the window, the app answering the loss with nothing
-  asked of it — never a bare size mismatch, which an echo not yet
-  landed produces too (the #1049 lesson) — and anywhere else
+  ACTIVE scrolling Space on the live entry ALONE — a pan that
+  moved the window, on screen or off, or a focus command that
+  stepped off it — because every narrower discriminator honored
+  a bounce on the device (the argument is the design-decisions
+  entry; a narrower arm owes a device sitting that shows the
+  case it exempts is not one the app answers) — and anywhere else
   only where the placement lay past the edge AND the window
   refused it by origin, a clickless focus being how a user
   reaches a parked window. It re-asserts the intended window with
@@ -581,11 +570,9 @@ editing here:
   discriminators are FORGEABLE, unlike #465's ordering, and the
   trade is priced in `docs/accepted-limitations.md`. Its forget
   and rekey pair with the other ledgers' by hand, which review
-  checks; `PlacementBounceTests` holds the two arms, the renewal,
-  the click escape and the bound, `PlacementBounceRaiseTests` the
-  raise reading and its minter's retention,
-  `PlacementDisplacementTests` the displacement, its wiring and
-  the size mismatch that discriminates nothing,
+  checks; `PlacementBounceTests` holds the two arms, the on-screen
+  placement bounced, the renewal, the click escape and the bound,
+  `PlacementDisplacementTests` the displacement and its wiring,
   `PlacementBounceSeamTests` the two leaves, the renew door, the
   one displacement recorder, the consult, the write-site census
   and the raise. A fourth ledger joins this bullet rather than

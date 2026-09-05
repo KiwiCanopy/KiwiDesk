@@ -131,7 +131,9 @@ struct ScrollingDeferredRaiseTests {
         core.execute("focus", args: [.string("left")])
         #expect(core.pendingFocusRaise == WindowID(4))
         // The user clicks window 1 mid-pan: the OS raised it
-        // itself; a stale raise must not steal focus back.
+        // itself; a stale raise must not steal focus back. The
+        // click is what tells it from the pan's own echo (#1161).
+        core.lastLeftClick = (Date(), CGPoint.zero, WindowID(1))
         core.eventLoop.onEvent(.windowFocused(WindowID(1)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)

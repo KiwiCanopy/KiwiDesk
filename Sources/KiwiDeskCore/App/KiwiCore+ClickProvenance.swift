@@ -44,33 +44,12 @@ extension KiwiCore {
         selfRaiseStamp(id, now: now) != nil
     }
 
-    /// Whether KiwiDesk raised `id` within the PLACEMENT window
-    /// — the self ledger's second, longer liveness reading, read
-    /// by `placementBounce` alone (#1161): a late echo of our own
-    /// raise outlives `selfRaiseEchoWindow`, and widening that
-    /// window would widen three other trades with it.
-    func raisedWithinPlacementWindow(
-        _ id: WindowID,
-        now: Date
-    ) -> Bool {
-        guard let stamp = selfRaiseStamps[id] else { return false }
-        return now.timeIntervalSince(stamp)
-            < PlacementLedger.echoWindow
-    }
-
     /// The self ledger's one MINTER (`PlacementBounceSeamTests`
     /// holds the write sites): stamps `id` as raised by us, and
-    /// prunes by age so never-echoed raises cannot accrete —
-    /// retaining the LONGER of the two readings' windows, or a
-    /// raise between a stamp and its late echo drops the stamp
-    /// that names it (#1161).
+    /// prunes by age so never-echoed raises cannot accrete.
     func stampSelfRaise(_ id: WindowID, now: Date) {
-        let retained = max(
-            Self.selfRaiseEchoWindow,
-            PlacementLedger.echoWindow
-        )
         selfRaiseStamps = selfRaiseStamps.filter {
-            now.timeIntervalSince($0.value) < retained
+            now.timeIntervalSince($0.value) < Self.selfRaiseEchoWindow
         }
         selfRaiseStamps[id] = now
     }

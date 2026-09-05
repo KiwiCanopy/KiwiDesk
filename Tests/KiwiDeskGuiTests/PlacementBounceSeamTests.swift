@@ -49,18 +49,8 @@ struct PlacementBounceSeamTests {
             "reassertAgainstPlacementBounce(",
             ["KiwiCore+FocusEvents.swift", "KiwiCore+PlacementBounce.swift"]
         ),
-        // The self ledger's second liveness reading is the
-        // scrolling arm's third disjunct, and its one writer is
-        // what `raiseWindow` stamps through — a prune spelled at
-        // the raise again would retain the 1 s window and drop
-        // the stamp the late echo is told by.
-        (
-            "raisedWithinPlacementWindow(",
-            [
-                "KiwiCore+ClickProvenance.swift",
-                "KiwiCore+PlacementBounce.swift",
-            ]
-        ),
+        // The self ledger's one minter is what `raiseWindow`
+        // stamps through.
         (
             "stampSelfRaise(",
             [
@@ -90,11 +80,9 @@ struct PlacementBounceSeamTests {
         }
     }
 
-    /// The self ledger has one MINTER: `stampSelfRaise`, which
-    /// prunes to the longer of the two readings' windows. A raise
-    /// assigning the dictionary beside it would retain the 1 s
-    /// window and drop the stamp the placement bounce's late echo
-    /// is told by, with nothing red. Write sites are counted over
+    /// The self ledger has one MINTER: `stampSelfRaise`. A raise
+    /// assigning the dictionary beside it would skip the prune
+    /// with nothing red. Write sites are counted over
     /// comment-stripped source: the minter's prune and stamp, the
     /// gone clear, the rekey's remove and retarget.
     @Test("the self ledger's write sites are the ruled ones")
