@@ -24,7 +24,16 @@ struct ResizeRefusalSymbolTests {
     @Test("no resize here is never drawn as an arrow")
     func structuralRefusalsCarryNoArrow() {
         for refusal: ResizeRefusal in [
-            .noAxisHere(window, axis: "y"), .layoutHasNoResize(window),
+            .noAxisHere(window, axis: "y"),
+            .layoutHasNoResize(window),
+            // #1258's case joins the non-arrow arm: it says a
+            // limit does not exist. Added to the array in the
+            // same change as the case, because a case missing
+            // from here can wear a grow arrow — or a symbol that
+            // renders nil on the deployment target — and nothing
+            // reds (guard-prover, 2026-09-05).
+            .nothingToDivide(window, otherAxisDivides: false),
+            .nothingToDivide(window, otherAxisDivides: true),
         ] {
             #expect(!refusal.pillSymbol.contains("arrow"))
         }

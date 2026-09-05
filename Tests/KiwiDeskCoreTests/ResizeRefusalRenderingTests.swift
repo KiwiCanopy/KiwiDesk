@@ -130,6 +130,71 @@ struct ResizeRefusalRenderingTests {
         #expect(texts.allSatisfy { !$0.isEmpty })
     }
 
+    @Test("Each case draws its own sentence, not a neighbour's")
+    func sentencesSitOnTheRightCases() {
+        // The distinctness test above cannot see a SWAP — two
+        // cases exchanging sentences keeps every text unique and
+        // ships green (guard-prover, 2026-09-05), while a user
+        // reads "this zone divides widths" about a space that
+        // divides nothing. Only naming them catches it.
+        //
+        // This is the one place the English is asserted, so it
+        // pins the locale FIRST (#740): `L()` resolves the
+        // HOST's language, and a German dev machine would
+        // otherwise fail a green tree.
+        LocalizationManager.shared.select("en")
+        #expect(
+            ResizeRefusal.ownMinimum(window, axis: "y").pillText
+                == "Minimum window size reached"
+        )
+        #expect(
+            ResizeRefusal.neighborMinimum(
+                anchor: other,
+                focused: window,
+                axis: "y"
+            ).pillText == "Neighboring window at its minimum size"
+        )
+        #expect(
+            ResizeRefusal.ownMaximum(
+                window,
+                axis: "y",
+                atBoundary: false
+            ).pillText == "Maximum window size reached"
+        )
+        #expect(
+            ResizeRefusal.ownMaximum(
+                window,
+                axis: "y",
+                atBoundary: true
+            ).pillText == "No room left to grow"
+        )
+        #expect(
+            ResizeRefusal.noAxisHere(window, axis: "y").pillText
+                == "This zone divides widths, not heights"
+        )
+        #expect(
+            ResizeRefusal.noAxisHere(window, axis: "x").pillText
+                == "This zone divides heights, not widths"
+        )
+        #expect(
+            ResizeRefusal.nothingToDivide(
+                window,
+                otherAxisDivides: false
+            ).pillText == "This zone has nothing to divide"
+        )
+        #expect(
+            ResizeRefusal.nothingToDivide(
+                window,
+                otherAxisDivides: true
+            ).pillText
+                == "Nothing to divide here — try the other axis"
+        )
+        #expect(
+            ResizeRefusal.layoutHasNoResize(window).pillText
+                == "This layout has no resizing"
+        )
+    }
+
     @Test("Only a paired refusal marks a second window")
     func theSecondPillIsThePairsAlone() {
         // #435: the window that cannot move is marked, and it

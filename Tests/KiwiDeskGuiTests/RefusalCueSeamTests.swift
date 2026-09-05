@@ -184,6 +184,19 @@ struct RefusalCueSeamTests {
             )
         )
         #expect(body.occurrences(of: "soundIfDrawn(") == 1)
+        // And it still BUMPS. The rubber-band moved from five
+        // call sites to one derived property, and deleting the
+        // call here left the whole suite green — the derivation
+        // has its own test, but nothing could see the funnel
+        // stop reading it (guard-prover, 2026-09-05).
+        #expect(
+            body.contains("ifletdirection=refusal.bumpDirection{")
+                && body.contains("flashDeadEnd("),
+            Comment(
+                rawValue: "the funnel stopped bouncing the ring "
+                    + "on a refusal that reached a limit (#436)"
+            )
+        )
     }
 
     /// The sound-only seam is gone: both of its cases draw now.
