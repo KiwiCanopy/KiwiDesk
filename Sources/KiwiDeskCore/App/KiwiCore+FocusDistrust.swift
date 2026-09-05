@@ -54,6 +54,21 @@ extension KiwiCore {
         }
     }
 
+    /// Whether a placement of `id` lies (partly) outside the
+    /// visible bounds of the screen its space lays out on (#1161)
+    /// — the scrolling void past an edge, where an app that clamps
+    /// itself on-screen answers with a focus of its own. Read off
+    /// the one `visibleBounds` seam (#531).
+    func placementCrossesEdge(
+        _ placed: CGRect,
+        of id: WindowID
+    ) -> Bool {
+        guard let space = state.workspaces.space(of: id),
+            let screen = TilingEngine.screen(for: space, in: state)
+        else { return false }
+        return !tiler.visibleBounds(screen).contains(placed)
+    }
+
     /// Whether a left click landed inside `id`'s frame within
     /// the sibling-distrust window — the discriminator that
     /// tells a genuine cross-display click from an activation

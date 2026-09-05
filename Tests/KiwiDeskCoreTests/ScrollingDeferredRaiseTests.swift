@@ -208,6 +208,10 @@ struct ScrollingDeferredRaiseTests {
         // misclassification guard — never suppress a real focus
         // change the user asked for).
         core.selfRaiseStamps = [:]
+        // The click's provenance (#687): without it a clickless
+        // report for a window the pan just placed past the edge
+        // is #1161's bounce, which this test does not read.
+        core.lastLeftClick = (Date(), CGPoint.zero, WindowID(2))
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)

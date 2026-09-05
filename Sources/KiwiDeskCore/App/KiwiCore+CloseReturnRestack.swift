@@ -69,6 +69,7 @@ extension KiwiCore {
     func forgetGoneWindow(_ id: WindowID, pid: pid_t?) {
         selfRaiseStamps[id] = nil
         zOrderRaiseEchoes[id] = nil
+        tiler.placements.forget(id)
         if let pid {
             tiler.stashSizeBoundOnGone(id, pid: pid)
         } else {

@@ -536,8 +536,18 @@ editing here:
   which is a stamp read; nothing scans for a new one, so a new
   reader owes the routing deliberately. `SelfRaiseDuplicateEchoTests`,
   `RaiseEchoClickTests` and `ActivationReReportTests` hold the
-  three arms, and a third ledger of this shape joins this bullet
-  rather than earning its own consume.
+  three arms. The THIRD ledger of this shape is
+  `TilingEngine.placements` (#1161): stamped at the two leaves
+  every placement goes through (`applyFrame` / `setFrame`), read
+  by the placement-bounce distrust in `handleWindowFocused`,
+  which fires only for a window on the ACTIVE space that was
+  placed PAST a screen edge (`placementCrossesEdge`, off the one
+  `visibleBounds` seam) and is NOT there — the discriminators a
+  cmd-tab cannot forge; an on-screen slot is honored and a
+  stashed window's clickless focus is the follow's — and
+  re-asserts the intended window with a direct raise
+  (`PlacementBounceTests`, whose retile case pins the stamping).
+  A fourth joins this bullet rather than earning its own consume.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

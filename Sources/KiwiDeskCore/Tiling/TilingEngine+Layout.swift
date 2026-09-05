@@ -261,6 +261,7 @@ extension TilingEngine {
         isNewWindow: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
+        placements.stamp(id, target: target)
         if animated,
             let screen = Self.screen(containing: target)
                 ?? NSScreen.main

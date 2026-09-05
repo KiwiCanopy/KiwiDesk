@@ -1561,6 +1561,48 @@ let a bar click forge the escape for a stamped window under the
 strip. The painted strips (`shownStrips`, the #242 authority)
 are the mask.
 
+### A placement bounce is the app's answer, not the user's (#1161)
+
+**[Rationale]**
+
+The Android Emulator's Qt shell answers being placed past a
+screen edge — a scrolling pan asking it to sit at x = −264, or
+1520 on a 1728-wide screen — by clamping its window back
+on-screen and focusing itself, 0.8–1.5 s after the pan (measured
+2026-09-05, 3/3 deterministic with the pan as the only input;
+never once with the window floating, where KiwiDesk does not
+move it). That focus report has the same shape as a cmd-tab:
+clickless, no self-raise stamp, a different window than the one
+the user just reached. Honoring it pans the row back to the
+emulator and warps the pointer onto it — the app has chosen the
+user's focus.
+
+The distrust keys on **placement**, not on activation: the
+`TilingEngine.placements` ledger records where KiwiDesk last put
+each window, stamped at the two leaves every placement goes
+through, so the retile, the stash and every App-level placer are
+covered alike. A clickless focus report within two seconds of a
+placement, arriving after focus moved on, is distrusted **only
+where the placement lies past a screen edge and the window is
+not there** — the app fought a placement into the void, which a
+user cannot have done from the keyboard. An on-screen slot, and a
+window sitting where it was placed, keep their clickless refocus
+honored, so the trade is narrow: a cmd-tab onto a window still
+sliding out past the edge, or onto an app that clamps itself, is
+bounced until the placement is two seconds old.
+State stays on the intended window and it is re-asserted with a
+direct, unstamped raise — the #465 sibling-distrust shape —
+because the app genuinely took key focus and a state-only revert
+would split keystrokes from the ring; the raise moves nothing,
+so it provokes no second bounce, and the ledger is never
+consumed, so the app's repeat is bounced the same way.
+
+An activation gate — "an app that activates with no input is not
+focus" — was the issue's first hypothesis and is the wrong
+shape: cmd-tab is also clickless activation, KiwiDesk has no
+keyboard provenance for system chords, and the measurement shows
+the trigger is our own frame-set, not activation in general.
+
 ### An ignored panel's dismissal is a race; provenance ends it
 
 **[Rationale]**
