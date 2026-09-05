@@ -187,12 +187,15 @@ struct ResizeRefusalTargetingTests {
         #expect(refusals == [.noAxisHere(WindowID(1))])
     }
 
-    @Test("A space that divides neither axis says nothing")
-    func noSplitAtAllStandsDown() {
+    @Test("A space that divides neither axis names no axis")
+    func noSplitAtAllNamesNoAxis() {
         // One window: the ratio divides nothing on EITHER axis,
         // so "this zone divides widths, not heights" would be
-        // false about both. The press is refused wordlessly —
-        // the silence #1258 owns, not a sentence that lies.
+        // false about both. #1259 left it wordless and #1258
+        // filled it with the sentence that does not name an
+        // axis at all — whichever way that is worded, this case
+        // must never take `noAxisHere`, which is the claim the
+        // arrangement cannot support.
         let core = makeCore()
         let space = makeBspSpace(core, count: 1)
         var refusals: [ResizeRefusal] = []
@@ -203,7 +206,12 @@ struct ResizeRefusalTargetingTests {
                 args: [.string(axis), .number(-200)]
             )
         }
-        #expect(refusals.isEmpty)
+        #expect(
+            refusals == [
+                .nothingToDivide(WindowID(1)),
+                .nothingToDivide(WindowID(1)),
+            ]
+        )
         // The WRITE still lands, cue or no cue: the ratio is a
         // stored per-space value that outlives the window
         // population, and the space opens its first split at

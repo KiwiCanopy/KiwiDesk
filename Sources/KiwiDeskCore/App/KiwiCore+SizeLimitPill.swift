@@ -90,6 +90,33 @@ extension KiwiCore {
         )
     }
 
+    /// The focused window is alone in the group this axis
+    /// divides (#1258) — the resize has a parameter but nothing
+    /// to move it against. Silent before this, at four sites
+    /// across three layouts, which read as "the shortcut is
+    /// broken" rather than "there is one window here".
+    ///
+    /// One sentence for all four deliberately: it states the
+    /// fact the user can see (this window fills its zone) and
+    /// claims nothing about the other axis, which sometimes
+    /// works and sometimes does not. The layout-specific
+    /// guidance stays in the CLI/IPC error string, which is a
+    /// machine contract and free to be long (core-boundaries).
+    func refuseNothingToDivide(_ window: WindowID) {
+        let refusal = ResizeRefusal.nothingToDivide(window)
+        cueResizeRefusal(refusal)
+        soundIfDrawn(
+            flashSizeLimitPill(
+                window,
+                refusal,
+                text: L(
+                    "resize.fills_its_zone",
+                    "This window fills its zone"
+                )
+            )
+        )
+    }
+
     /// The layout has no resizing at all (#1255): monocle, grid
     /// and floating. A correct no-op — macOS's own full-screen
     /// exposes no resize either — but a perceivable one, and it

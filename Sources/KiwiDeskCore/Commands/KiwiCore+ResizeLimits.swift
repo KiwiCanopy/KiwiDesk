@@ -271,6 +271,11 @@ extension KiwiCore {
             )
             if !across.first.isEmpty || !across.second.isEmpty {
                 refuseAxisAbsent(focused, axis: axis)
+            } else {
+                // Neither axis divides: one window, or a pile.
+                // #1259 left this wordless deliberately; #1258
+                // is the string that fills it.
+                refuseNothingToDivide(focused)
             }
             return
         }

@@ -88,6 +88,8 @@ extension KiwiCore {
         guard let focusOffset = column.firstIndex(of: focused),
             column.count > 1
         else {
+            // The zone's weights have nothing to divide (#1258).
+            refuseNothingToDivide(focused)
             return .fail("focused window is alone in its column")
         }
         // The step math (delta → weight change, grow cap,

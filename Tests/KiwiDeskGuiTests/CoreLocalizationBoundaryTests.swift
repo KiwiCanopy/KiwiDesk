@@ -87,7 +87,7 @@ struct CoreLocalizationBoundaryTests {
         // one — which is what gave the two sound-only refusals
         // something to draw. Same caveat as `+StickyMarks` if
         // the overlays ever move out of Core.
-        "App/KiwiCore+SizeLimitPill.swift": 8,
+        "App/KiwiCore+SizeLimitPill.swift": 9,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901), drawn by Core.

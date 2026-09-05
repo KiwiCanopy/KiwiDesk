@@ -3938,8 +3938,14 @@ two windows side by side, asked for height — the press says so
 on the first try ("This zone divides widths, not heights"),
 since nothing is being reached there; the stored ratio still
 records what a later split on that axis will open at. A space
-too small to divide either way — a single window — says nothing
-at all, there being no axis to name.
+too small to divide either way — a single window — says "This
+window fills its zone" (#1258): the parameter exists, there is
+simply nothing on this axis to move it against. The same
+sentence answers a stack window alone in its column, a window
+that fills its own track, and a space whose windows all share
+one track. The CLI and IPC callers still get the longer,
+layout-specific error text — a transient pill cannot spend that
+many words, and a machine contract can.
 
 **Held, the chord glides (#1056, retimed #1082).** A hotkey
 whose press ran exactly one command — a successful `resize` —

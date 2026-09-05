@@ -88,6 +88,11 @@ extension KiwiCore {
         track: Int
     ) -> CommandResponse {
         guard ranges.count > 1 else {
+            // One track spans the axis, so its weight divides
+            // nothing (#1258).
+            if let focused = space.focused {
+                refuseNothingToDivide(focused)
+            }
             return .fail("only one track")
         }
         let weights = ranges.map {
@@ -217,7 +222,12 @@ extension KiwiCore {
             // In default 1D track (#181) every window fills its
             // track, so this fires on every along-axis resize —
             // phrase it as "use the other axis", not an error
-            // about tracks the user never authored (#183).
+            // about tracks the user never authored (#183). The
+            // PILL says the shorter thing (#1258): the actionable
+            // half needs the layout's vocabulary, which the CLI
+            // string is free to spend and a transient overlay is
+            // not.
+            refuseNothingToDivide(focused)
             return .fail(
                 "the focused window fills its track along "
                     + "this axis — resize across the tracks "

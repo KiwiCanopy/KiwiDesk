@@ -20,6 +20,14 @@ enum ResizeRefusal: Equatable {
     /// divides widths, so a height press has nothing to move.
     /// Not a limit reached: a limit that does not exist.
     case noAxisHere(WindowID)
+    /// The focused window is the only one in the group the
+    /// asked axis divides (#1258) — alone in its stack column,
+    /// alone in its track, the only window in a bsp space. The
+    /// parameter exists and there is simply nothing to move it
+    /// against, which is why this is not `noAxisHere`: that one
+    /// says the OTHER axis divides, and here the count is the
+    /// reason rather than the arrangement.
+    case nothingToDivide(WindowID)
     /// The space's layout has no resizing at all (#1255) —
     /// monocle, grid and floating. The most reachable refusal
     /// there is, and until now the one cued by sound alone.
@@ -57,7 +65,7 @@ extension ResizeRefusal {
             "arrow.down.right.and.arrow.up.left"
         case .ownMaximum:
             "arrow.up.left.and.arrow.down.right"
-        case .noAxisHere, .layoutHasNoResize:
+        case .noAxisHere, .layoutHasNoResize, .nothingToDivide:
             "nosign"
         }
     }

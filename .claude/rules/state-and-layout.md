@@ -895,9 +895,17 @@ editing here:
   the arrangement rather than a limit reached: it is owed on the
   FIRST press rather than whenever the clamp happens to bite,
   and `noAxisHere` says the OTHER axis divides — so a space that
-  divides neither, one window or an overflow pile, stands down
-  wordless instead, that silence being #1258's to close rather
-  than this rule's to fill with a false sentence.
+  divides neither, one window or an overflow pile, takes
+  `nothingToDivide` instead (#1258), the count being the reason
+  rather than the arrangement. That case is not bsp's alone: a
+  stack window alone in its column, a window filling its own
+  track and a space with a single track are the same statement,
+  and they take the same one, which claims nothing about the
+  other axis because at some of those sites it works and at
+  others it does not. Layout-specific guidance stays in the
+  CLI/IPC error string, which is a machine contract and may be
+  long where a transient pill may not (`NothingToDivideCueTests`
+  holds one arm per site plus the divided-axis pin).
   A new writer of this shape states which kind of partition it
   has; `ResizeRefusalTargetingTests` holds the verdicts, one
   per arm, bsp and stack alike.
