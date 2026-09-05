@@ -133,13 +133,10 @@ extension KiwiCore {
     /// assigned to a screen other than the Desktop's is refused
     /// up front: the layout carries a window to its Space's
     /// screen, and macOS then re-assigns its Desktop to match,
-    /// which undoes the move within a second (#1010). An
-    /// unassigned Space, or one the screen cannot be named for,
-    /// is accepted — `screenHome` stands down for it too. A
-    /// Space that does not exist yet is created, as
-    /// `move_to_space` creates one, so the arrival's
-    /// remembered-space rule can honor it (`livingRememberedSpace`
-    /// drops a `.departed` record whose Space is gone).
+    /// which undoes the move within a second (#1010). A Space no
+    /// screen owns yet is accepted and HOMED by the route once the
+    /// bridge accepted the move (`homeExplicitSpace`) — a parse
+    /// writes nothing, so a refused move leaves no empty Space.
     func resolveSpaceTarget(
         _ args: [JSONValue],
         for target: DesktopTarget
@@ -160,7 +157,6 @@ extension KiwiCore {
                 )
             )
         }
-        state.workspaces.ensureSpace(space)
         return .space(space)
     }
 

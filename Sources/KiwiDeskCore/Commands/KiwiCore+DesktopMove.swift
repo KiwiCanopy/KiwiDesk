@@ -31,11 +31,13 @@ extension KiwiCore {
     /// carries the ruling.
     ///
     /// A **sticky** window is not refused (`stickyMoveRefused`
-    /// gates KiwiDesk-space membership, which a Desktop move
-    /// does not touch — the re-home above stands down for a
+    /// gates KiwiDesk-space membership, which a bare Desktop
+    /// move does not touch — the re-home above stands down for a
     /// sticky window on exactly that ground): it physically
     /// leaves — and the next Desktop switch carries it back to
-    /// wherever the user goes (#1145), which is the promise.
+    /// wherever the user goes (#1145), which is the promise. An
+    /// explicit `space:` IS a membership write, so it takes that
+    /// one gate before anything moves (#1150).
     func moveToDesktop(
         _ args: [JSONValue],
         follow: Bool
@@ -55,6 +57,9 @@ extension KiwiCore {
                 explicit = nil
             case .space(let space):
                 explicit = space
+            }
+            if let explicit, stickyMoveRefused(focused, to: explicit) {
+                return .fail("a sticky window keeps its Space")
             }
             guard WMBridge.moveWindows([focused], to: target.space)
             else {
@@ -146,6 +151,7 @@ extension KiwiCore {
         in space: SpaceID,
         target: DesktopTarget
     ) {
+        homeExplicitSpace(space, on: target)
         guard target.isCurrent else {
             pendingSpace.record(window, space: space)
             onLog(
@@ -162,6 +168,9 @@ extension KiwiCore {
                 + "\(space.raw) on the shown Desktop"
         )
         addFocusedToSpace(window, to: space)
+        // A float crossing displays re-anchors (#444), as
+        // `moveWindow` does — membership alone never moves it.
+        reanchorFloat(window, to: space)
         state.workspaces.focus(window, in: space)
         emitWindowMovedToSpace(
             window,
@@ -171,6 +180,26 @@ extension KiwiCore {
             to: space
         )
         retile(animated: true)
+    }
+
+    /// Brings the named Space into existence and, where no screen
+    /// owns it yet, assigns it to the Desktop's (#1150): an
+    /// unassigned Space lays out on the MAIN screen
+    /// (`TilingEngine.screen(for:in:)`), so a fresh Space named
+    /// for a secondary screen's Desktop would carry the window
+    /// back there — the #1010 undo by another door. After the
+    /// bridge accepted, never at the parse. A screen the
+    /// topology cannot name leaves the Space unassigned, which is
+    /// the single-screen case.
+    private func homeExplicitSpace(
+        _ space: SpaceID,
+        on target: DesktopTarget
+    ) {
+        state.workspaces.ensureSpace(space)
+        guard state.workspaces.display(of: space) == nil,
+            let screen = display(forUUID: target.displayIdentifier)
+        else { return }
+        state.workspaces.assign(space, to: screen)
     }
 
     /// The KiwiDesk-space half of a move onto ANOTHER screen's

@@ -290,7 +290,8 @@ its own screen's current Desktop. Pin it out with
 
 **Naming the Space** finishes the verb: `move_to_desktop(3,
 "mail")` sends the window to Desktop 3 *and* files it into the
-`mail` Space, which is created if it does not exist yet. When
+`mail` Space — created on that Desktop's screen if it does not
+exist yet. When
 Desktop 3 is hidden, the filing happens as the window leaves —
 it rejoins `mail` when that Desktop is next shown, instead of
 the Space it was in. When Desktop 3 is already on screen, the
@@ -300,6 +301,9 @@ Desktop's is refused up front: the layout would carry the window
 back to that screen, and macOS would then move it to a Desktop
 there, undoing the move
 ([#1150](https://github.com/KiwiCanopy/KiwiDesk/issues/1150)).
+A **sticky** window cannot be given a Space this way, exactly
+as `move_to_space` refuses it — the whole command is refused, so
+the window stays where it is.
 
 **Example:**
 

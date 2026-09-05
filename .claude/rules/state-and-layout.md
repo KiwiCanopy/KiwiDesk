@@ -162,14 +162,22 @@ editing here:
   re-home splits on, and the explicit name outranks that
   re-home. A Space assigned to another screen than the
   Desktop's is REFUSED at the parse — the layout would carry
-  the window back (#1010) — and a Space that does not exist yet
-  is created there, or `livingRememberedSpace` drops the record
-  at the arrival. The ledger is bounded and per window, rekeyed
-  on a tab switch; a new route that produces a departure claims
-  through the gone handler rather than beside it.
-  `DesktopMoveSpaceTargetTests` drives both routes, the refusal
-  and the control through the real dispatch and fold;
-  `PendingSpaceAssignmentTests` holds the record.
+  the window back (#1010) — while a Space no screen owns yet is
+  created and ASSIGNED to the Desktop's screen by the route
+  (`homeExplicitSpace`), after the bridge accepted and never at
+  the parse: an unassigned Space lays out on the MAIN screen,
+  so accepting it as it stands is the same undo, and
+  `livingRememberedSpace` drops a record whose Space is gone. The
+  explicit Space is a MEMBERSHIP write where a bare Desktop move
+  is not, so it takes `stickyMoveRefused` before anything moves
+  and re-anchors a float on the shown route, as `moveWindow`
+  does. The ledger is bounded and per window, rekeyed on a tab
+  switch; a new route that produces a departure claims through
+  the gone handler rather than beside it, and
+  `PendingSpaceSeamTests` is the register of the three wirings.
+  `DesktopMoveSpaceTargetTests` drives both routes, the homing,
+  the refusals and the control through the real dispatch and
+  fold; `PendingSpaceAssignmentTests` holds the record.
 - **A follow owes the window it sent away a focus, and pays it
   at the ARRIVAL** (#1007). `move_to_desktop_and_follow` onto a
   Desktop nobody is showing cannot focus the window at the moment

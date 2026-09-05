@@ -207,6 +207,49 @@ struct DesktopMoveSpaceTargetTests {
         #expect(core.state.rememberedSpace(of: window) == origin)
     }
 
+    /// An unassigned Space lays out on the MAIN screen, so a
+    /// fresh Space named for a secondary screen's Desktop would
+    /// carry the window back there (#1010 by another door): the
+    /// route homes it once the bridge accepted.
+    @Test("A new Space is homed to the Desktop's screen")
+    func newSpaceIsHomedToTheDesktopsScreen() {
+        let core = makeCore()
+        defer { teardown() }
+        addDisplays(core)
+        #expect(core.state.workspaces[mail] == nil)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(4), .string("mail")]
+            ).isSuccess
+        )
+        #expect(core.state.workspaces[mail] != nil)
+        #expect(
+            core.state.workspaces.display(of: mail) == DisplayID(2)
+        )
+    }
+
+    /// The explicit Space is a membership write, so it takes the
+    /// one sticky gate `move_to_space` takes — and the whole
+    /// command is refused, the window staying put, with no Space
+    /// created by a parse that never writes.
+    @Test("A sticky window's explicit Space refuses the move")
+    func stickyWindowRefusesTheExplicitSpace() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(core.execute("make_sticky").isSuccess)
+        let origin = core.state.workspaces.space(of: window)
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(2), .string("mail")]
+        )
+        #expect(!response.isSuccess)
+        #expect(core.state.windows[window] != nil)
+        #expect(core.state.workspaces.space(of: window) == origin)
+        #expect(core.state.workspaces[mail] == nil)
+        #expect(core.pendingSpace.isEmpty)
+    }
+
     @Test("An empty Space id is refused")
     func emptySpaceIsRefused() {
         let core = makeCore()

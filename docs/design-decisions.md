@@ -3421,9 +3421,17 @@ A Space assigned to another screen than the Desktop's is
 **refused** rather than honored: the layout carries a window to
 its Space's screen, and macOS re-assigns the window's Desktop to
 match its frame, so honoring it would undo the move within a
-second — the #1010 defect, asked for by name. An unassigned
-Space is accepted, because the screen-home predicate stands down
-for it as well.
+second — the #1010 defect, asked for by name. A Space no screen
+owns yet, a fresh one included, is not refused but **homed**:
+created and assigned to the Desktop's screen once the bridge has
+accepted the move, never at the parse — an unassigned Space lays
+out on the main screen, so accepting it as it stands would carry
+the window there by the same door, while a parse that wrote
+state would leave an empty Space behind every refused move. And
+the explicit Space is a membership write where a bare Desktop
+move is not, so it takes the one sticky gate `move_to_space`
+takes: a sticky window keeps its Space, and the whole command is
+refused rather than half of it done.
 
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
