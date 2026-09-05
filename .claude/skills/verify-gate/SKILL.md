@@ -56,19 +56,17 @@ its **exit code** decides.
 The release build enables the optimizer and stricter concurrency
 diagnostics (e.g. non-Sendable captures in `@Sendable` closures)
 that the debug build silently misses. CI runs it as a parallel
-job on every PR (#532), so it is **not** a mandatory local step.
+job on every PR (#532), and that job is a **required status
+check** on `main` — `scripts/protect-main.sh`'s `CONTEXTS` is
+the one copy of which checks are (#487) — so a red release build
+cannot merge. It is therefore **not** a mandatory local step.
 
 Run it locally when the change touches concurrency, `@Sendable`
 boundaries, or `Sendable` conformances — there the ~2min buys
 back a PR round-trip. Otherwise skip it and let CI catch it, and
-say in the report that it was skipped and why.
-
-CI **reports** this job, it does not **block** on it (required
-status checks need branch protection, which this plan does not
-offer for a private repo — #487). So when you skip it locally,
-say in the report that the `Release Build` job must be read
-before merging — and run it locally anyway for anything landing
-without a PR.
+say in the report that it was skipped and why. Run it locally
+anyway for anything landing without a PR, where no check gates
+the push.
 
 ## Report
 
