@@ -125,23 +125,13 @@ public final class KiwiCore {
     /// target raises (see runPendingFocusRaise).
     var pendingFocusRaise: WindowID?
 
-    /// Window ids KiwiDesk's own AX raises issued but whose
-    /// focus echoes have not yet landed (#152). A matching echo
-    /// is self-inflicted, not a user action: it must not
-    /// supersede a newer focus nor snap state focus back. A set
-    /// — two can be outstanding at once (#158). An entry counts
-    /// as an echo only while `selfRaiseStamps` says the raise
-    /// is RECENT: an already-key raise echoes never, and an
-    /// unbounded entry ate the next click on that window (#687
-    /// device QA). Removed on echo and destroy (ids reused);
-    /// the classification lives in `handleWindowFocused`.
-    var outstandingSelfRaises: Set<WindowID> = []
-
-    /// When each self-raise was issued — the recency bound for
-    /// the sibling-report distrust (#465) and for the self-echo
-    /// classification itself (#687). Age-compared and pruned on
-    /// write, never consumed, so a raise that never echoes
-    /// cannot poison anything forever.
+    /// When KiwiDesk's own AX raise of each window was issued
+    /// (#152): a report for a window raised within
+    /// `selfRaiseEchoWindow` is our echo, not a user action, and
+    /// the #465 sibling distrust ranks by it. Age-pruned on
+    /// write and NEVER consumed by an echo (#887, like
+    /// `zOrderRaiseEchoes`); cleared on destroy and rekeyed on a
+    /// tab switch. The classification is `handleWindowFocused`'s.
     var selfRaiseStamps: [WindowID: Date] = [:]
 
     /// Last left press, AX coords: the click discriminator for

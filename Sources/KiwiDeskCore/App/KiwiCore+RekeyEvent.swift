@@ -15,9 +15,6 @@ extension KiwiCore {
         old: WindowID,
         new: WindowID
     ) {
-        if outstandingSelfRaises.remove(old) != nil {
-            outstandingSelfRaises.insert(new)
-        }
         if let stamp = selfRaiseStamps.removeValue(
             forKey: old
         ) {

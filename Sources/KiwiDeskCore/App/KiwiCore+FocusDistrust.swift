@@ -30,6 +30,30 @@ extension KiwiCore {
         return echoDisplay != activeDisplay
     }
 
+    /// Whether a same-app sibling of `id` carries a fresh
+    /// self-raise stamp NEWER than `id`'s own (#465): the shape
+    /// of an activation re-report — raising B activates the
+    /// app, which re-reports its old window A. Order, not mere
+    /// presence, because stamps are never consumed (#887): after
+    /// a fast step A→B both are fresh, and B's own echo must
+    /// not be distrusted for A's older raise. An unstamped `id`
+    /// ranks below any fresh sibling.
+    func siblingRaiseOutranks(
+        _ id: WindowID,
+        now: Date
+    ) -> Bool {
+        guard let pid = state.windows[id]?.pid else {
+            return false
+        }
+        let own = selfRaiseStamps[id] ?? .distantPast
+        return selfRaiseStamps.keys.contains { sibling in
+            sibling != id
+                && state.windows[sibling]?.pid == pid
+                && selfRaiseStamp(sibling, now: now)
+                    .map { $0 > own } == true
+        }
+    }
+
     /// Whether a left click landed inside `id`'s frame within
     /// the sibling-distrust window — the discriminator that
     /// tells a genuine cross-display click from an activation
@@ -41,7 +65,7 @@ extension KiwiCore {
     ) -> Bool {
         guard let click = lastLeftClick,
             now.timeIntervalSince(click.at)
-                < Self.selfRaiseSiblingWindow,
+                < Self.selfRaiseEchoWindow,
             let frame = state.windows[id]?.frame
         else { return false }
         return frame.contains(click.point)

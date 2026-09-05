@@ -19,8 +19,8 @@ private func makeCore() -> KiwiCore {
 }
 
 /// Two windows in a scrolling space (the mode whose deferred
-/// raise gives the self-echo revert its teeth), focus on `other`,
-/// and `target` carrying an outstanding self-raise entry.
+/// raise gives the self-echo revert its teeth), focus on `other`;
+/// each test stamps `target` as its case needs.
 @MainActor
 private func makeFixture(
     _ core: KiwiCore
@@ -50,7 +50,6 @@ private func makeFixture(
         args: [.string(space.raw), .string("scrolling")]
     )
     core.state.workspaces.focus(other, in: space)
-    core.outstandingSelfRaises.insert(target)
     return (target, other)
 }
 
@@ -61,16 +60,16 @@ private func focused(_ core: KiwiCore) -> WindowID? {
 
 /// The self-echo revert's age bound (#687 device QA): a raise of
 /// an already-key window emits NO echo — the restore's closing
-/// re-assert does exactly that — so its `outstandingSelfRaises`
-/// entry sat unconsumed forever, and the user's next click on
-/// that window was classified as KiwiDesk's own raise echo and
-/// reverted. It was the last unbounded ledger; the entry is our
-/// echo only while `selfRaiseStamps` says the raise is recent.
+/// re-assert does exactly that — so an unbounded ledger entry
+/// sat unconsumed forever, and the user's next click on that
+/// window was classified as KiwiDesk's own raise echo and
+/// reverted. A report is our echo only while `selfRaiseStamps`
+/// says the raise is recent.
 @Suite("Self-raise echo age bound (#687)", .serialized)
 @MainActor
 struct SelfRaiseEchoAgeTests {
-    @Test("A stale outstanding entry cannot eat a focus report")
-    func staleEntryReportIsHonored() {
+    @Test("An unstamped focus report is honored")
+    func unstampedReportIsHonored() {
         let core = makeCore()
         let (target, _) = makeFixture(core)
         // No selfRaiseStamps entry at all — the raise is older
@@ -78,8 +77,17 @@ struct SelfRaiseEchoAgeTests {
         // looks once anything else has raised since.
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
-        // Consumed either way — the set must not accrete.
-        #expect(!core.outstandingSelfRaises.contains(target))
+    }
+
+    @Test("A stamp past the echo window is no self-echo")
+    func expiredStampReportIsHonored() {
+        let core = makeCore()
+        let (target, _) = makeFixture(core)
+        core.selfRaiseStamps[target] = Date(
+            timeIntervalSinceNow: -KiwiCore.selfRaiseEchoWindow - 1
+        )
+        core.handle(.windowFocused(target))
+        #expect(focused(core) == target)
     }
 
     /// The arm this bound must NOT loosen: a recent raise's echo
@@ -107,6 +115,70 @@ struct SelfRaiseEchoAgeTests {
         )
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
+    }
+}
+
+/// The scrolling snap-back (#887 device trace, 2026-08-31): a
+/// lazy app reports a raised window's focus TWICE, the duplicate
+/// ~150 ms after the first. Under fast navigation the duplicate
+/// lands after the user's next step, and a stamp consumed by the
+/// first echo left it unstamped — honored as deliberate focus,
+/// so ring, pan and pointer snapped back to the window just
+/// left. The stamp expires by age alone, the shape #689 gave
+/// `zOrderRaiseEchoes`.
+@Suite("Self-raise stamps outlive the first echo (#887)", .serialized)
+@MainActor
+struct SelfRaiseDuplicateEchoTests {
+    /// The trace's shape: focus `target` (stamped, first echo
+    /// honored), step to `other`, then `target`'s duplicate.
+    @Test("The departed window's duplicate echo is dropped")
+    func duplicateEchoAfterNextStepIsDropped() {
+        let core = makeCore()
+        let (target, other) = makeFixture(core)
+        let space = core.state.workspaces.space(of: target)!
+        // Step 1: `target` was raised; its first echo lands with
+        // state focus already on it — honored, stamp kept.
+        core.state.workspaces.focus(target, in: space)
+        core.selfRaiseStamps[target] = Date()
+        core.handle(.windowFocused(target))
+        #expect(focused(core) == target)
+        #expect(core.selfRaiseStamps[target] != nil)
+        // Step 2: the user moves on to `other` (raised, stamped).
+        core.state.workspaces.focus(other, in: space)
+        core.selfRaiseStamps[other] = Date()
+        // The departed app's duplicate report lands now.
+        core.handle(.windowFocused(target))
+        #expect(focused(core) == other)
+    }
+
+    /// The bound the fix must keep (#687): a stale stamp is a
+    /// user action, and the duplicate of a raise older than the
+    /// window is honored like any other report.
+    @Test("A duplicate past the window is honored")
+    func duplicatePastWindowIsHonored() {
+        let core = makeCore()
+        let (target, other) = makeFixture(core)
+        let space = core.state.workspaces.space(of: target)!
+        core.state.workspaces.focus(target, in: space)
+        core.selfRaiseStamps[target] = Date()
+        core.handle(.windowFocused(target))
+        core.state.workspaces.focus(other, in: space)
+        core.selfRaiseStamps[target] = Date(
+            timeIntervalSinceNow: -KiwiCore.selfRaiseEchoWindow - 1
+        )
+        core.handle(.windowFocused(target))
+        #expect(focused(core) == target)
+    }
+
+    /// Ids are reused: a stamp that survived its echoes must
+    /// not reach the id's next tenant.
+    @Test("A gone window's stamp is forgotten")
+    func goneWindowForgetsStamp() {
+        let core = makeCore()
+        let (target, _) = makeFixture(core)
+        core.selfRaiseStamps[target] = Date()
+        core.handle(.windowDestroyed(target, wasMinimized: false))
+        #expect(core.selfRaiseStamps[target] == nil)
     }
 }
 

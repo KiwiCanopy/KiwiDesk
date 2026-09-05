@@ -16,25 +16,46 @@ extension KiwiCore {
     /// provenance (#687). Tunable.
     static let zOrderRaiseEchoWindow: TimeInterval = 1.0
 
-    /// Sized like `zOrderRaiseEchoWindow`, for the same reason
-    /// (lazy AX answers trail by several hundred ms); beyond
-    /// ~1 s a report is a user action, not our raise's echo.
-    static let selfRaiseSiblingWindow: TimeInterval = 1.0
+    /// How long after KiwiDesk's own focus raise a report for
+    /// that window is still its echo, a lazy app's ~150 ms
+    /// duplicate included (#887). Sized like
+    /// `zOrderRaiseEchoWindow`; beyond ~1 s a report is a user
+    /// action.
+    static let selfRaiseEchoWindow: TimeInterval = 1.0
 
-    /// Whether `id` carries a LIVE self-raise: an outstanding
-    /// entry whose raise `selfRaiseStamps` says is recent. The
-    /// one shape that may veto the raise-echo revert (#431) and
-    /// classify a report as our own echo — a stale entry (a
-    /// no-echo raise's leftover) is neither (#687/#689 QA).
+    /// `id`'s self-raise stamp while it is LIVE, nil once past
+    /// `selfRaiseEchoWindow` — the one freshness reading every
+    /// consumer takes (#687/#689). Read, never consumed (#887).
+    func selfRaiseStamp(
+        _ id: WindowID,
+        now: Date
+    ) -> Date? {
+        guard let stamp = selfRaiseStamps[id],
+            now.timeIntervalSince(stamp) < Self.selfRaiseEchoWindow
+        else { return nil }
+        return stamp
+    }
+
+    /// Whether a report for `id` is our own focus raise's echo.
     func freshSelfRaise(
         _ id: WindowID,
         now: Date
     ) -> Bool {
-        outstandingSelfRaises.contains(id)
-            && selfRaiseStamps[id].map {
-                now.timeIntervalSince($0)
-                    < Self.selfRaiseSiblingWindow
-            } == true
+        selfRaiseStamp(id, now: now) != nil
+    }
+
+    /// Whether a live self-raise of `id` vetoes the z-order echo
+    /// revert (#431): only when NEWER than the z-order stamp,
+    /// never on freshness — an older one is the restore's own
+    /// echo (#887, docs/design-decisions.md).
+    func selfRaiseVetoesRevert(
+        _ id: WindowID,
+        now: Date
+    ) -> Bool {
+        guard let own = selfRaiseStamp(id, now: now) else {
+            return false
+        }
+        return own > (zOrderRaiseEchoes[id] ?? .distantPast)
     }
 
     /// Whether a left click within the echo window actually

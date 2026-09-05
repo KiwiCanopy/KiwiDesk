@@ -39,6 +39,12 @@ struct AccessibilityReturnDebt {
 ///   navigation, cmd-tab) later than that is never fought.
 /// - One shot per steal: the consume clears the debt, so a
 ///   second steal needs a second panel flag.
+/// - A yield landing on a window KiwiDesk raised within
+///   `selfRaiseEchoWindow` is our own raise's fallout, not
+///   returned — the CALLER's gate (`!selfEcho` in
+///   `handleWindowFocused`), the one let-out this file does not
+///   implement — and the debt is left STANDING for the next
+///   report, not spent (#887, `AccessibilityReturnTests`).
 ///
 /// The accepted trade: a deliberate clickless focus of another
 /// app within the grace of a VoiceOver start is returned once;

@@ -47,18 +47,15 @@ extension KiwiCore {
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
         {
-            // Remember what we raised so its focus echo can be
-            // told apart from a user's click (#152). A set: a
-            // forward-immediate raise can fire while a backward
-            // raise is still unechoed (#158).
-            outstandingSelfRaises.insert(id)
-            // Stamp for the sibling-report distrust (#465 QA),
-            // pruning expired entries so the dictionary cannot
-            // grow with never-echoed raises.
+            // Stamp what we raised so its focus echoes — every
+            // one of them, a lazy app sends two (#887) — can be
+            // told apart from a user's click (#152), and for the
+            // sibling-report distrust (#465 QA). Pruned by age so
+            // never-echoed raises cannot accrete.
             let now = Date()
             selfRaiseStamps = selfRaiseStamps.filter {
                 now.timeIntervalSince($0.value)
-                    < Self.selfRaiseSiblingWindow
+                    < Self.selfRaiseEchoWindow
             }
             selfRaiseStamps[id] = now
             AXHelper.raise(element, pid: window.pid)
