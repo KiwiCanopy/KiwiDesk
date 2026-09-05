@@ -225,15 +225,24 @@ struct ResizeRefusalTargetingTests {
         )
     }
 
-    @Test("A stack focus in neither zone is not at its minimum")
-    func stackFocusOutsideBothZonesNamesTheZone() {
+    @Test("A stack focus in neither zone is told nothing")
+    func stackFocusOutsideBothZonesStandsDown() {
         // The sibling writer's arm of the same rule. A
         // native-fullscreen window keeps its slot but leaves the
         // tiled derivations (#670), so the master/stack
         // partition places the focused window in NEITHER zone —
         // and a window the layout is not sizing cannot be at the
-        // minimum the write ran into. The zone that binds names
-        // itself instead.
+        // minimum the write ran into.
+        //
+        // #1259 pinned the neighbouring zone being NAMED here,
+        // as the honest reading of "not its own minimum". #1258
+        // overruled that: a window in no partition is owed no
+        // sentence about one, which is what the refusal census
+        // already said of the same arrangement and what the path
+        // did before either lane touched it. The clause that
+        // matters — never `.ownMinimum` on a window whose size
+        // the write could not change — is what both verdicts
+        // share, and it is what this test still holds.
         let core = makeCore()
         for id: UInt32 in 1...3 {
             core.state.apply(
@@ -261,15 +270,7 @@ struct ResizeRefusalTargetingTests {
         // is truncated — a shrink the range still admits cues
         // nothing at all, in stack as anywhere else.
         core.execute("resize", args: [.string("x"), .number(-600)])
-        #expect(
-            refusals == [
-                .neighborMinimum(
-                    anchor: WindowID(3),
-                    focused: WindowID(1),
-                    axis: "x"
-                )
-            ]
-        )
+        #expect(refusals.isEmpty)
     }
 
     @Test("A participating window still reads its own minimum")

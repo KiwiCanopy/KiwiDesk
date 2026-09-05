@@ -3943,10 +3943,12 @@ the other axis" where the other one does divide, and "This zone
 has nothing to divide" where neither does. That covers a stack
 window alone in its column, a stack space with an empty stack
 zone, a space whose windows share one track, a window that
-fills its own track, and a bsp space of one. The CLI and IPC
-callers still get the longer, layout-specific error text — a
-transient pill cannot spend that many words, and a machine
-contract can.
+fills its own track, and a bsp space of one. Where the press
+still returns an error — the stack and track cases — CLI and IPC
+callers get the longer, layout-specific text, since a machine
+contract can spend words a transient pill cannot; the two ratio
+cases report success, because the ratio is stored either way and
+only the cue reads how many windows are there to divide.
 
 **Held, the chord glides (#1056, retimed #1082).** A hotkey
 whose press ran exactly one command — a successful `resize` —

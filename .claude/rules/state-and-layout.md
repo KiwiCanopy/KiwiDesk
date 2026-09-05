@@ -825,7 +825,7 @@ editing here:
   resize end call the one set of clamped writers — the
   `writeCapped*` family, named by that prefix rather than by a
   file, since it has already outgrown one
-  (`KiwiCore+ResizeLimits` and `KiwiCore+ResizeScrollSlot`) —
+  (`KiwiCore+RatioWriters` and `KiwiCore+ResizeScrollSlot`) —
   never a raw `writeSlotSize`,
   `writeSplitRatio*`, `writeMasterRatio` or `stackWeights`
   write from a resize path, which is exactly how the mouse
@@ -911,9 +911,12 @@ editing here:
   `ResizeRefusalCensusTests`' register with the reason it stays
   wordless — derived from source, because a hand-listed set of
   arms is exactly what let a fifth silent site survive the
-  change that went looking for it (`NothingToDivideCueTests`
-  holds an arm per site, the census holds the ones nobody has
-  thought of yet).
+  change that went looking for it. That census reads
+  `.fail`-SHAPED refusals only, and the residue is this rule's
+  own subject: a path that refuses by returning `.ok()` after a
+  write nothing renders is invisible to it, which is the shape
+  two of #1258's own sites now have, so `NothingToDivideCueTests`'
+  per-site arms are their only net.
   A new writer of this shape states which kind of partition it
   has; `ResizeRefusalTargetingTests` holds the verdicts, one
   per arm, bsp and stack alike.

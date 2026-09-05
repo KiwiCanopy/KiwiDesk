@@ -163,38 +163,6 @@ struct NothingToDivideCueTests {
         )
     }
 
-    @Test("A bsp space that divides neither axis says so")
-    func bspSingleWindow() {
-        // #1259 left this wordless on purpose — naming an axis
-        // would have been false about both. This is the string
-        // that fills it.
-        let core = makeCore()
-        _ = space(core, windows: 1, mode: "bsp")
-        // BOTH axes: gating the cue on one of them left this
-        // suite green while half the wiring was dead
-        // (guard-prover, 2026-09-05).
-        let seen = refusals(core) {
-            for axis in ["x", "y"] {
-                core.execute(
-                    "resize",
-                    args: [.string(axis), .number(-200)]
-                )
-            }
-        }
-        #expect(
-            seen == [
-                .nothingToDivide(
-                    WindowID(1),
-                    otherAxisDivides: false
-                ),
-                .nothingToDivide(
-                    WindowID(1),
-                    otherAxisDivides: false
-                ),
-            ]
-        )
-    }
-
     @Test("A stack space with an empty stack zone says so")
     func stackWithEmptyStackZone() {
         // The fifth site, and the issue's own headline
@@ -228,61 +196,67 @@ struct NothingToDivideCueTests {
         )
     }
 
-    @Test("An overflow pile answers to no ratio")
-    func bspOverflowPileDividesNothing() {
-        // A display too narrow for two minimum-size windows
-        // makes the layout give up and pile them, and a pile
-        // answers to neither ratio. The extent test cannot see
-        // that — the cascade offsets each copy, so the union
-        // outgrows every slot and the pile reads as
-        // participants — which is why the drop exists.
-        //
-        // The pile is the WHOLE space on purpose. A pile at a
-        // leaf leaves its ancestors dividing normally, so no
-        // refusal is emitted at all and an assertion there
-        // watches nothing (guard-prover, 2026-09-05: the first
-        // version of this test could not red, and deleting the
-        // drop left the whole suite green).
-        let core = makeCore(width: 500, height: 800)
-        _ = space(core, windows: 2, mode: "bsp")
-        let frames = core.tiler.calculatedFrames(state: core.state)
-        let piled = frames[WindowID(1)]!
-            .intersects(frames[WindowID(2)]!)
-        #expect(piled, "fixture no longer piles — retune it")
+    @Test("An empty stack zone still points at the weights")
+    func stackEmptyZoneWithDividingWeights() {
+        // The sixth answer, and the reason the verdict rides the
+        // case at all: two masters with a VERTICAL orientation
+        // divide "y" between them while the split divides
+        // nothing, so this arrangement is owed the other
+        // sentence. Asserting only the `false` answer left the
+        // `true` one unread — a wrong constant there would have
+        // shipped green (review, 2026-09-05).
+        let core = makeCore()
+        let sp = space(core, windows: 2, mode: "stack")
+        core.execute(
+            "stack.set_master_count",
+            args: [.number(2)]
+        )
+        core.execute(
+            "stack.set_master_orientation",
+            args: [.string("vertical")]
+        )
+        core.state.workspaces.focus(WindowID(1), in: sp.id)
         let seen = refusals(core) {
             core.execute(
                 "resize",
-                args: [.string("x"), .number(-300)]
+                args: [.string("x"), .number(-400)]
             )
         }
-        // Equality, not absence: without the drop this is
-        // `.noAxisHere`, the false sentence — and only the
-        // verdict tells the two apart.
         #expect(
             seen == [
                 .nothingToDivide(
                     WindowID(1),
-                    otherAxisDivides: false
+                    otherAxisDivides: true
                 )
             ]
         )
     }
 
-    @Test("A divided axis is untouched by the new cue")
-    func aRealSplitStillReportsItsLimit() {
-        // The regression pin: three bsp windows, focus one that
-        // IS in the vertical split, shrink to its floor. The
-        // group has something to divide, so the limit cue is
-        // the one that fires.
+    @Test("A focus outside the layout is owed no sentence")
+    func focusOutsideTheTiledMembersStandsDown() {
+        // A native-fullscreen window keeps its slot but leaves
+        // the tiled derivations (#670), so it takes part in no
+        // partition — and an arrangement sentence about a
+        // partition it is not in would be the wrong window told
+        // the wrong thing. It was silent before #1258 because an
+        // empty partition never clamps; it stays silent.
         let core = makeCore()
-        let sp = space(core, windows: 3, mode: "bsp")
-        core.state.workspaces.focus(WindowID(2), in: sp.id)
-        let seen = refusals(core) {
-            core.execute(
-                "resize",
-                args: [.string("y"), .number(-200)]
+        let sp = space(core, windows: 2, mode: "stack")
+        core.state.workspaces.focus(WindowID(1), in: sp.id)
+        core.state.apply(
+            .windowFullscreenChanged(
+                WindowID(1),
+                isFullscreen: true
             )
+        )
+        let seen = refusals(core) {
+            for axis in ["x", "y"] {
+                core.execute(
+                    "resize",
+                    args: [.string(axis), .number(-600)]
+                )
+            }
         }
-        #expect(seen == [.ownMinimum(WindowID(2), axis: "y")])
+        #expect(seen.isEmpty)
     }
 }

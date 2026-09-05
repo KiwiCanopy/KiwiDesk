@@ -89,14 +89,25 @@ extension ResizeRefusal {
         }
     }
 
-    /// Whether the focus ring rubber-bands (#436). A limit
-    /// REACHED bumps — the gesture hit a wall — while a limit
-    /// that does not exist has no wall to bounce off.
-    var bumps: Bool {
+    /// Which way the focus ring rubber-bands (#436), or nil
+    /// where it does not: a limit REACHED bumps — the gesture
+    /// hit a wall — while a limit that does not exist has no
+    /// wall to bounce off.
+    ///
+    /// ONE property rather than a `bumps` flag the caller pairs
+    /// with `axis`, because that pair must agree and disagrees
+    /// silently: a case that bumps but names no axis drops the
+    /// rubber-band with nothing to red, which is the same
+    /// identity-split defect this type was reshaped to close,
+    /// one level down (review, 2026-09-05).
+    var bumpDirection: Direction? {
         switch self {
-        case .ownMinimum, .ownMaximum, .neighborMinimum: true
+        case .ownMinimum(_, let axis), .ownMaximum(_, let axis, _):
+            axis == "y" ? .down : .right
+        case .neighborMinimum(_, _, let axis):
+            axis == "y" ? .down : .right
         case .noAxisHere, .nothingToDivide, .layoutHasNoResize:
-            false
+            nil
         }
     }
 }

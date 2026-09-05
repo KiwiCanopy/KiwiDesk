@@ -10,6 +10,13 @@ import CoreGraphics
 /// read: BSP is a dwindle over the flat array with two shared
 /// ratio scalars (AGENTS.md §5), so a split's shape exists only
 /// in the frames it produced.
+///
+/// It lives in `Tiling/` beside `MouseResize` and `Navigation`
+/// rather than in `Layouts/`, because it is resize
+/// CLASSIFICATION over frames a layout already produced, not a
+/// layout algorithm — and it reads the one pile detector, which
+/// `Layouts/` may not (its rule is pure functions over the flat
+/// array).
 public enum BspSplit {
     /// Direction (+1 / -1) to move BSP ratio to grow target slot (#122).
     public static func side(
@@ -68,9 +75,6 @@ public enum BspSplit {
         // which `set_gap_global(-10)` allows — is not read as a
         // pile and does not silently switch classification off
         // (#1258, review).
-        let extent = placed.reduce(CGRect.null) {
-            $0.union($1.slot)
-        }
         let framed = placed.map { (id: $0.id, frame: $0.slot) }
         // `pileMates` EXCLUDES the window asked about, so a
         // non-empty answer IS the pile — and the window that
@@ -85,6 +89,16 @@ public enum BspSplit {
             piled.formUnion(mates)
             piled.insert(one.id)
         }
+        // The union is taken over the slots that are still in
+        // play. A pile cascades downward at full region height,
+        // so including it stretches the union past the region
+        // and a genuinely full-span window then reads as a
+        // participant — #1259's own defect, arriving through the
+        // pile (review, 2026-09-05).
+        let extent =
+            placed
+            .filter { !piled.contains($0.id) }
+            .reduce(CGRect.null) { $0.union($1.slot) }
         let whole = horizontal ? extent.width : extent.height
         var first: [WindowID] = []
         var second: [WindowID] = []

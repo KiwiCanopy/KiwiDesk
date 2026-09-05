@@ -53,7 +53,11 @@ extension KiwiCore {
         if drew { soundRefusal() }
     }
 
-    /// **The one entry every resize refusal takes** (#1258).
+    /// **The one entry every resize refusal takes** (#1258),
+    /// and `private` on purpose: that makes the builders below
+    /// provably the entry set, rather than leaving two doors
+    /// open for the next author to add a ninth builder AND a
+    /// direct call.
     /// Every `refuse*` function below builds a case and hands it
     /// here; none of them draws, bumps or sounds itself, because
     /// a per-function body is where a wrong sentence and a
@@ -65,14 +69,11 @@ extension KiwiCore {
     /// production caller of `borders.onResizeRefusal`, which is
     /// what makes "a cue stops the run" structural rather than a
     /// line to remember.
-    func cueResizeRefusal(_ refusal: ResizeRefusal) {
+    private func cueResizeRefusal(_ refusal: ResizeRefusal) {
         keys.noteResizeRefusal()
         borders.onResizeRefusal(refusal)
-        if refusal.bumps, let axis = refusal.axis {
-            flashDeadEnd(
-                refusal.window,
-                direction: axis == "y" ? .down : .right
-            )
+        if let direction = refusal.bumpDirection {
+            flashDeadEnd(refusal.window, direction: direction)
         }
         soundIfDrawn(
             flashSizeLimitPill(

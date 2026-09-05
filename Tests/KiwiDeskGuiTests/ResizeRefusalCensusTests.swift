@@ -30,6 +30,13 @@ struct ResizeRefusalCensusTests {
     /// A file is in scope when it names a resize verb — every
     /// `KiwiCore+Resize*` and the track's own writer file, plus
     /// the shared writers, which refuse too.
+    ///
+    /// What it trades: this is a FILENAME predicate, so a
+    /// `Commands/` file that refuses a resize under some other
+    /// name escapes it silently. That is a weaker claim than
+    /// "derived", and the honest one — scoping by content would
+    /// have to decide what a resize refusal looks like, which is
+    /// the question the register itself exists to answer.
     static func inScope(_ name: String) -> Bool {
         name.hasSuffix(".swift")
             && (name.contains("Resize") || name.contains("Ratio"))

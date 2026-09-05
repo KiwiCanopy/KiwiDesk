@@ -2,10 +2,11 @@ import AppKit
 import CoreGraphics
 import Foundation
 
-/// The effective-minimum resolution and the shared clamped
-/// ratio writers used by every interactive resize path —
-/// keyboard (`resize`) and mouse (`applyResizeAdjustment`)
-/// alike, so the two cannot drift apart (#933; parity rule).
+/// The effective size resolution every interactive resize path
+/// measures against, and the one place a clamped write decides
+/// WHICH window its refusal names (#933/#435). The capped
+/// writers that call them moved to `KiwiCore+RatioWriters`
+/// when this file met the size ceiling.
 extension KiwiCore {
     /// The quantum for "the clamp truncated the request" on the
     /// point-valued paths (float, scrolling slot): AX frames

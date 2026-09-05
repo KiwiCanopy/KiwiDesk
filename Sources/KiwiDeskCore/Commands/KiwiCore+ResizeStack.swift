@@ -86,16 +86,20 @@ extension KiwiCore {
             // does — and that sentence was false at the most
             // ordinary arrangement there is, a single window
             // (#1258, review).
-            let column = StackLayout.column(
-                containing: focused,
-                in: tiled,
-                masterCount: stack.masterCount
-            )
             let (_, stackZone) = StackLayout.partition(
                 tiled,
                 masterCount: stack.masterCount
             )
-            let weightsDivide = (column?.count ?? 0) > 1
+            // Weights the KEYBOARD cannot reach do not count as
+            // "the other axis divides": where the zone's weight
+            // axis IS the split axis, `guard axis != splitAxis`
+            // above routes that press to the master ratio and
+            // the weights are unreachable. Counting them made
+            // the two axes contradict each other at the default
+            // arrangement — y saying "widths divide", x saying
+            // "nothing divides" (review, 2026-09-05).
+            let weightsDivide =
+                weightAxis != splitAxis && column.count > 1
             let splitDivides = !(stackZone?.isEmpty ?? true)
             if !weightsDivide, !splitDivides {
                 refuseNothingToDivide(
@@ -117,14 +121,13 @@ extension KiwiCore {
             // it divides only with both zones populated, and a
             // literal `true` here silently became false the
             // moment the empty-zone verdict moved (review).
-            let (master, stackZone) = StackLayout.partition(
+            let (_, zone) = StackLayout.partition(
                 tiled,
                 masterCount: stack.masterCount
             )
             refuseNothingToDivide(
                 focused,
-                otherAxisDivides: !master.isEmpty
-                    && !(stackZone?.isEmpty ?? true)
+                otherAxisDivides: !(zone?.isEmpty ?? true)
             )
             return .fail("focused window is alone in its column")
         }
