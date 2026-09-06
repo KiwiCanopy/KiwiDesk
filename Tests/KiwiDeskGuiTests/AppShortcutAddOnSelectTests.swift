@@ -114,12 +114,20 @@ struct AppShortcutAddOnSelectTests {
     /// The confirm step is gone, and stays gone.
     @Test("no second press stands between the pick and the row")
     func noConfirmStep() throws {
-        let body = try declarationBody(
-            "varaddRow:someView",
-            in: squashed(
+        // The WHOLE add-row file, plus the body that mounts it:
+        // `guard-prover` evaded a body-only scan twice, once with
+        // the button extracted to a computed property the body
+        // merely references, once with it placed beside `addRow`
+        // in the group's own body — both render a confirm press
+        // (2026-09-06).
+        let body =
+            squashed(
                 try source("KeybindingAppGroup+AddRow.swift")
             )
-        )
+            + (try declarationBody(
+                "varbody:someView",
+                in: squashed(try source("KeybindingAppGroup.swift"))
+            ))
         // A STANDALONE `Button`, so `AppPickerButton` is not a
         // match — and every spelling of one, since `Button{`
         // alone let `Button(action:)`, `Button("…")` and
@@ -171,34 +179,69 @@ struct AppShortcutAddOnSelectTests {
         // the suite with a message that was false — the lesson
         // `AppRulesAddOnSelectTests` already records from its
         // own guard-prover round.
-        for (file, function) in [
-            ("KeybindingAppGroup+AddRow.swift", "funcadd("),
-            ("KeybindingAppGroup+Row.swift", "privatefuncassign("),
+        // Anchored on the branch's own CONDITION, never on "the
+        // first `else{`": `guard-prover` put an EARLIER guard
+        // above the real one, whose window swallowed a
+        // `refuse(` while the fully-bound branch returned bare —
+        // the whole suite green on exactly the regression this
+        // clause exists for. It also false-redded on a
+        // behaviour-free `if/else` inserted above (2026-09-06).
+        // A condition is what the branch cannot lose.
+        for (file, function, condition) in [
+            (
+                "KeybindingAppGroup+AddRow.swift", "funcadd(",
+                "firstAvailableBehavior(for:app.bundleID)"
+            ),
+            (
+                "KeybindingAppGroup+Row.swift",
+                "privatefuncassign(",
+                "AppLaunchBehavior.allCases.count"
+            ),
         ] {
             let body = try declarationBody(
                 function,
                 in: squashed(try source(file))
             )
-            let guardClause = try #require(
-                body.range(of: "else{").map {
-                    String(body[$0.upperBound...].prefix(60))
+            let at = try #require(
+                body.range(of: condition),
+                Comment(
+                    rawValue:
+                        "\(file)'s \(function) no longer asks "
+                        + "`\(condition)` — the refusal has no "
+                        + "branch to live in"
+                )
+            )
+            let rest = Array(String(body[at.upperBound...]))
+            let needle = Array("else{")
+            let elseAt = try #require(
+                (0..<max(0, rest.count - needle.count)).first {
+                    Array(rest[$0..<($0 + needle.count)]) == needle
                 },
                 Comment(
                     rawValue:
-                        "\(file)'s \(function) no longer guards "
-                        + "the no-behavior case at all"
+                        "\(file)'s no-behavior case no longer "
+                        + "guards at all"
+                )
+            )
+            var cursor = elseAt + needle.count - 1
+            let branch = try #require(
+                SourceScan.balanced(
+                    rest,
+                    from: &cursor,
+                    open: "{",
+                    close: "}"
                 )
             )
             #expect(
-                guardClause.contains("refuse("),
+                branch.contains("refuse("),
                 Comment(
                     rawValue:
                         "\(file)'s no-behavior branch returns "
                         + "without recording a refusal "
-                        + "(`\(guardClause.prefix(40))`) — an "
-                        + "\u{201C}Other\u{2026}\u{201D} pick of "
-                        + "a fully-bound app would create nothing "
-                        + "and say nothing"
+                        + "(`\(branch.prefix(50))`) — an "
+                        + "\u{201C}Other\u{2026}\u{201D} pick "
+                        + "of a fully-bound app would create "
+                        + "nothing and say nothing"
                 )
             )
             // Both routes RETIRE it too, or the channel this
@@ -245,8 +288,16 @@ struct AppShortcutAddOnSelectTests {
     @Test("the refusal draws at the picker that raised it")
     func refusalDrawsAtItsOwnPicker() throws {
         let row = squashed(try source("KeybindingAppGroup+Row.swift"))
+        // Scoped to `rowNotice`, which is what DRAWS: read
+        // file-wide, the needled spelling survived in a
+        // non-drawing site while `rowNotice` regressed to the
+        // add row's key, so every row painted the add row's
+        // refusal (`guard-prover`, 2026-09-06).
         #expect(
-            row.contains("allBoundNotice(for:binding.wrappedValue.id)"),
+            try declarationBody("funcrowNotice(", in: row)
+                .contains(
+                    "allBoundNotice(for:binding.wrappedValue.id)"
+                ),
             Comment(
                 rawValue:
                     "a row no longer asks for ITS refusal — the "
