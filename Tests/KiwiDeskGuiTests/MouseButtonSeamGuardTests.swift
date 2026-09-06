@@ -22,10 +22,15 @@ import Testing
 /// census in `ArrivalRingTests` routes focusable controls
 /// through `ClickBornFocus` and defers the home question here.
 ///
-/// Stated residue: the needle is ONE spelling of the host read.
-/// A second reading of the same fact through another API
-/// (`CGEventSource.buttonState`) is invisible to it — widen the
-/// matcher before excusing a site that takes one.
+/// Stated residue, both of it. The needle is ONE spelling of the
+/// host read: a second reading of the same fact through another
+/// API (`CGEventSource.buttonState`) is invisible to it — widen
+/// the matcher before excusing a site that takes one. And a
+/// census answers WHERE the read lives, never what reads it, so
+/// a `pressedButtons` default gutted to a constant beside a read
+/// left elsewhere in the file passes; no behavioural test can
+/// close that, since the live default answers whatever the host
+/// does (guard-prover, 2026-09-06).
 @Suite("The live mouse-button read stays behind its seam")
 struct MouseButtonSeamGuardTests {
     private static let root = SourceScan.repoRoot(
