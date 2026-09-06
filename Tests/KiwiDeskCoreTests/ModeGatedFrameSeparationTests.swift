@@ -171,11 +171,19 @@ struct ModeGatedFrameSeparationTests {
         let card = try token("card", in: source)
         let hover = try token("cardHover", in: source)
         let alpha = try opacity(in: source)
-        for (a, ground) in [
-            (accent.light, card.light),
-            (accent.dark, card.dark),
-            (accent.light, hover.light),
-            (accent.dark, hover.dark),
+        // Each ground is NAMED, not just spelled: the two
+        // hexes go identical exactly when a retune collapses
+        // one ground onto another, which is the failure this
+        // clause is for — so the hex alone stops identifying
+        // the arm at the moment it matters (guard-prover,
+        // 2026-09-06). The separation prints undivided for the
+        // same reason: truncating 55.7 to 55 reads as further
+        // from the floor than it is.
+        for (name, a, ground) in [
+            ("card light", accent.light, card.light),
+            ("card dark", accent.dark, card.dark),
+            ("cardHover light", accent.light, hover.light),
+            ("cardHover dark", accent.dark, hover.dark),
         ] {
             let stroke = try frame(
                 accent: a,
@@ -189,10 +197,10 @@ struct ModeGatedFrameSeparationTests {
                 sep >= ColorVision.separationFloor,
                 Comment(
                     rawValue:
-                        "mode-gated frame vs the \(ground) it "
-                        + "sits on separates \(Int(sep)) — under "
-                        + "the floor; the marking sinks into its "
-                        + "own card"
+                        "mode-gated frame vs \(name) "
+                        + "(\(ground)) separates \(sep) — under "
+                        + "the floor; the marking sinks into the "
+                        + "card it marks"
                 )
             )
         }
