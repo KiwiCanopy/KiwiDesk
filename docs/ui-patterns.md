@@ -1110,11 +1110,13 @@ toggles, sliders, and fields keep system hover. Ambiguous
 icon-only borderless actions use the shared adaptive chip
 (`0.06` rest → `0.12` hover); custom full-row picker entries
 use a hover-only `0.06` fill; unselected custom segments and
-mode chips lift their existing fill by about `0.05`; a draggable
-token chip lifts its own rest fill by `0.06`, whichever that
-is — so the one with no rest fill gains exactly the hover-only
-wash above, and the kind channel (outline versus fill) is not
-spent on discoverability. No scale,
+mode chips lift their existing fill by about `0.05`. A draggable
+token chip is the one case stated as an ORDER rather than a
+step, because its kinds are drawn apart by outline-versus-fill
+and hover must not spend that channel: the outlined kind's
+*hover* fill stays below the filled kind's *rest* fill, and the
+edge carries the rest of the lift — which is also the only
+channel the outlined kind has, having no fill to raise. No scale,
 movement, shadow, or pointing-hand cursor on ordinary buttons
 (the hand remains link-only). Disabled controls never react;
 under Reduce Motion the color change is immediate. Every such

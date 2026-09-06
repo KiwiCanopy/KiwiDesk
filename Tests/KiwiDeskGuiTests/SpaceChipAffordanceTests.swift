@@ -37,6 +37,47 @@ struct SpaceChipAffordanceTests {
             .joined()
     }
 
+    /// `declaration`'s own balanced body, so a clause asks the
+    /// subject rather than the file.
+    ///
+    /// Every evasion `guard-prover` found in the first draft
+    /// (2026-09-06) was the same fault: a file-scoped needle
+    /// satisfied — or broken — by a neighbour. A tinted capsule
+    /// somewhere else reported the marker; a hover chip on the
+    /// CARD satisfied the marker's presence clause.
+    private func scope(
+        _ declaration: String,
+        in source: String,
+        open: Character = "{",
+        close: Character = "}"
+    ) throws -> String {
+        let text = Array(source)
+        let marker = Array(declaration)
+        let head = try #require(
+            (0...(text.count - marker.count)).first {
+                Array(text[$0..<($0 + marker.count)]) == marker
+            },
+            Comment(rawValue: "no `\(declaration)` to scan")
+        )
+        // Past the signature to the declaration's own opener —
+        // a `func` carries a parameter list between the two.
+        var cursor = head + marker.count
+        while cursor < text.count, text[cursor] != open {
+            cursor += 1
+        }
+        return try #require(
+            SourceScan.balanced(
+                text,
+                from: &cursor,
+                open: open,
+                close: close
+            ),
+            Comment(
+                rawValue: "`\(declaration)` has no balanced body"
+            )
+        )
+    }
+
     /// The edge is one weight for every kind.
     ///
     /// A chip's KIND is carried by fill-vs-outline and its glyph;
@@ -44,56 +85,85 @@ struct SpaceChipAffordanceTests {
     /// is the same for all three. The pinned chip used to draw
     /// the FAINTER edge at half a point — a half-pixel at 1x, so
     /// on exactly the external screens this page is about its
-    /// perimeter could vanish. A `lineWidth` that varies by kind
-    /// is that defect returning, whatever the number.
-    @Test("the chip's edge weight does not vary by kind")
+    /// perimeter could vanish.
+    ///
+    /// What it TRADES: only the INLINE `lineWidth: kind …`
+    /// spelling reds. A width behind a computed property — the
+    /// shape the two alphas themselves took — passes, because a
+    /// scan cannot follow it. The alphas are guarded by value
+    /// instead, in `SpaceChipTintTests`; a width moved there
+    /// would owe the same.
+    @Test("every edge draws at one literal weight")
     func edgeWeightIsUniform() throws {
         let source = try squashed("SpaceAssignmentChip.swift")
-        let stroke = try #require(
-            source.range(of: "Capsule().strokeBorder("),
-            Comment(
-                rawValue:
-                    "the chip no longer draws a closed edge — "
-                    + "the rest half of the affordance"
-            )
-        )
-        let tail = balanced(from: stroke.upperBound, in: source)
-        #expect(
-            !tail.contains("lineWidth:kind"),
-            Comment(
-                rawValue:
-                    "the chip's edge weight varies by kind "
-                    + "again (`\(tail)`) — the kind belongs in "
-                    + "the alpha, and a sub-point edge "
-                    + "disappears at 1x"
-            )
-        )
-    }
-
-    /// The argument list from `start` up to the paren that
-    /// CLOSES it.
-    ///
-    /// A `prefix(while: != ")")` stops at the first `)`, which
-    /// here belongs to the nested `.opacity(` — so the scan
-    /// never reached `lineWidth:` and the clause above passed
-    /// on a restored defect. Found by mutating it (2026-09-06);
-    /// the depth count is what makes the needle reach its own
-    /// argument.
-    private func balanced(
-        from start: String.Index,
-        in source: String
-    ) -> String {
-        var depth = 1
-        var out = ""
-        for character in source[start...] {
-            if character == "(" { depth += 1 }
-            if character == ")" {
-                depth -= 1
-                if depth == 0 { break }
+        let text = Array(source)
+        let marker = Array("Capsule().strokeBorder")
+        var widths: [String] = []
+        var index = 0
+        while index + marker.count <= text.count {
+            guard Array(text[index..<(index + marker.count)]) == marker
+            else {
+                index += 1
+                continue
             }
-            out.append(character)
+            var cursor = index + marker.count
+            let args = try #require(
+                SourceScan.balanced(
+                    text,
+                    from: &cursor,
+                    open: "(",
+                    close: ")"
+                )
+            )
+            let key = "lineWidth:"
+            let at = try #require(
+                args.range(of: key),
+                Comment(rawValue: "a stroke with no width: \(args)")
+            )
+            widths.append(
+                String(
+                    args[at.upperBound...]
+                        .prefix { $0 != "," }
+                )
+            )
+            index = cursor
         }
-        return out
+        #expect(
+            !widths.isEmpty,
+            Comment(
+                rawValue:
+                    "the chip draws no closed edge at all — the "
+                    + "rest half of the affordance"
+            )
+        )
+        // EVERY stroke, and each width a bare literal: an
+        // expression is how a kind gets back in, whether it
+        // spells `kind`, hides behind a computed property or
+        // wears a pair of parentheses — all three of which
+        // `guard-prover` walked past a `lineWidth:kind` needle
+        // with (2026-09-06). A second overlay draws on TOP of
+        // the first, so one stroke is not the population.
+        for width in widths {
+            #expect(
+                Double(width) != nil,
+                Comment(
+                    rawValue:
+                        "an edge width is the expression "
+                        + "`\(width)` rather than a constant — a "
+                        + "kind-varying weight draws a sub-point "
+                        + "perimeter that vanishes at 1x"
+                )
+            )
+        }
+        #expect(
+            Set(widths).count == 1,
+            Comment(
+                rawValue:
+                    "the chip draws edges at \(Set(widths)) — one "
+                    + "weight for every kind, the kind moving the "
+                    + "alpha instead"
+            )
+        )
     }
 
     /// The `+n` marker is not dressed as a chip.
@@ -104,25 +174,44 @@ struct SpaceChipAffordanceTests {
     /// thing and any rest cue the chips gained was diluted by a
     /// neighbour mimicking it. Routed through the shared
     /// adaptive chip instead — the seam, never which alpha.
-    @Test("the +n marker takes the shared chip, not the chip's")
+    @Test("the +n marker draws no tint of its own")
     func overflowMarkerIsNotAChip() throws {
         for file in ["DisplayCard.swift", "FollowsMainTray.swift"] {
-            let source = try squashed(file)
+            let body = try scope(
+                "privatefuncoverflowChip",
+                in: try squashed(file)
+            )
+            // CONTIGUOUS, and `padding:0` is the load-bearing
+            // half: the default 4 widens the marker past the
+            // column `MonitorCardChips.markerWidth` reserves,
+            // and that suite's needle stays green through it
+            // because it reads the inner frame.
             #expect(
-                source.contains(".hoverHighlight("),
+                body.contains(
+                    ".hoverHighlight(cornerRadius:MonitorCardChips"
+                        + ".chipHeight/2,padding:0)"
+                ),
                 Comment(
                     rawValue:
                         "\(file)'s `+n` marker no longer takes "
-                        + "the shared adaptive chip"
+                        + "the shared adaptive chip at the "
+                        + "padding its reserved column allows"
                 )
             )
+            // The invariant is that the marker wears NO tint —
+            // not that one spelling of a tinted capsule is
+            // absent. `guard-prover` respelled the same costume
+            // as `.background(_:in:)` and walked past a
+            // `Capsule().fill(.tint.opacity(` needle, while an
+            // unrelated capsule elsewhere in the file reported
+            // the marker for a fill it never drew (2026-09-06).
             #expect(
-                !source.contains("Capsule().fill(.tint.opacity("),
+                !body.contains(".tint"),
                 Comment(
                     rawValue:
-                        "\(file) draws a tinted capsule fill "
-                        + "again — that is the drag source's "
-                        + "costume, and this marker is a button"
+                        "\(file)'s `+n` marker draws a tint — "
+                        + "that is the drag source's costume, and "
+                        + "this marker opens a popover"
                 )
             )
         }
@@ -182,21 +271,41 @@ struct SpaceChipAffordanceTests {
                     + "the badge is attached to"
             )
         )
-        // …and the badge really is outside that view: inside
-        // `capsule` the explicit preview would carry it anyway.
-        let capsule = try #require(
-            source.range(of: "privatevarcapsule:someView{")
-        )
-        let badge = try #require(
-            source.range(of: "overlay(alignment:.topTrailing)")
-        )
+        // Asked of `body`, not of `capsule`: an indirection
+        // between them (`capsule` returning a view that carries
+        // the badge) leaves `capsule`'s own text clean while the
+        // ⓧ is back in the preview, which is how `guard-prover`
+        // beat the first shape of this clause (2026-09-06). The
+        // badge has exactly one home, and it is the chain the
+        // preview is NOT taken from.
+        let body = try scope("varbody:someView", in: source)
         #expect(
-            badge.lowerBound < capsule.lowerBound,
+            body.contains(
+                ".overlay(alignment:.topTrailing){clearBadge}"
+            ),
             Comment(
                 rawValue:
-                    "the clear badge moved back inside the "
-                    + "dragged view, so the preview carries it"
+                    "the clear badge is no longer applied in "
+                    + "`body` — wherever it went, the dragged "
+                    + "view may now carry it"
+            )
+        )
+        #expect(
+            !(try scope("privatevarcapsule:someView", in: source))
+                .contains("clearBadge"),
+            Comment(
+                rawValue:
+                    "the clear badge is inside `capsule` again, "
+                    + "so the drag preview carries it"
             )
         )
     }
+
+    /// `declaration`'s own balanced body, so a clause asks the
+    /// subject rather than the file.
+    ///
+    /// Every evasion `guard-prover` found in the first draft
+    /// (2026-09-06) was the same fault: a file-scoped needle
+    /// satisfied — or broken — by a neighbour. A tinted capsule
+    /// somewhere else reported the marker; a hover chip on the
 }

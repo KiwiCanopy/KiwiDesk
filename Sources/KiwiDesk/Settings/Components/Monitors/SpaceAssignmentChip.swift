@@ -92,7 +92,16 @@ struct SpaceAssignmentChip: View {
         .padding(.leading, 8)
         .padding(.trailing, kind == .auto ? 8 : 14)
         .padding(.vertical, 3)
-        .background(Capsule().fill(.tint.opacity(fillAlpha)))
+        .background(
+            Capsule().fill(
+                .tint.opacity(
+                    SpaceChipTint.fill(
+                        auto: isAuto,
+                        hovering: hovering
+                    )
+                )
+            )
+        )
         // ONE weight for every kind, the kind moving the alpha
         // alone: a closed full-perimeter edge is what makes a
         // chip read as a piece lying on the plate rather than
@@ -101,16 +110,20 @@ struct SpaceAssignmentChip: View {
         // edge at half a point, which is a half-pixel at 1x.
         .overlay(
             Capsule().strokeBorder(
-                .tint.opacity(strokeAlpha),
+                .tint.opacity(
+                    SpaceChipTint.stroke(
+                        auto: isAuto,
+                        hovering: hovering
+                    )
+                ),
                 lineWidth: 1
             )
         )
-        // A CONCRETE ink, not `.secondary`: hierarchical inks are
+        // A CONCRETE ink, not `.secondary`: a hierarchical ink is
         // derived from the container's foreground, and this chip
-        // renders under the card's drop wash and inside a
-        // popover, so the one kind that was already faintest
-        // dimmed further exactly while being dragged onto
-        // (gui.md ▸ prefer a concrete ink).
+        // renders inside two overflow popovers as well as the
+        // card, so the faintest kind dimmed further wherever an
+        // ancestor set one (gui.md ▸ prefer a concrete ink).
         .foregroundStyle(
             kind == .auto
                 ? AnyShapeStyle(SettingsTheme.ink2)
@@ -118,34 +131,7 @@ struct SpaceAssignmentChip: View {
         )
     }
 
-    /// Rest fill by kind, lifted on hover.
-    ///
-    /// Outline-vs-fill is the ruled KIND channel, so hover must
-    /// not spend it: an `.auto` chip's hover fill stays clearly
-    /// under a pinned chip's REST fill, or a hovered automatic
-    /// chip starts impersonating a pinned one.
-    private var fillAlpha: Double {
-        switch (kind == .auto, hovering) {
-        case (true, false): return 0
-        case (true, true): return 0.10
-        case (false, false): return 0.15
-        case (false, true): return 0.30
-        }
-    }
-
-    /// The edge carries most of the hover, because it is the
-    /// channel a filled and an unfilled chip share — and the
-    /// automatic chip, which has no fill to lift, is the one
-    /// most worth dragging (#1240, owner 2026-09-06: the first
-    /// pass lifted the fill alone and read as nothing).
-    private var strokeAlpha: Double {
-        switch (kind == .auto, hovering) {
-        case (true, false): return 0.65
-        case (true, true): return 1.0
-        case (false, false): return 0.6
-        case (false, true): return 0.95
-        }
-    }
+    private var isAuto: Bool { kind == .auto }
 
     /// Clear-pin button overlay on trailing-top corner (#758).
     @ViewBuilder private var clearBadge: some View {

@@ -8929,20 +8929,19 @@ needs, which is why the restored route is a chord and a hidden
 anchor rather than a control shape that takes the drag (the
 argument lives on `SpaceAssignmentChip`; the ruling is ▸ The
 row menu's keyboard route, #845). The
-clear affordance never participates in the chip's layout: the ⓧ
-rides the trailing-top corner as an overlay rather than an
-in-flow slot, and hover may change only its tint, never its
-presence or any metric. (It is not free of the layout, and this
-sentence used to claim it was: a chip that HAS a badge reserves
-6 pt more trailing padding to sit under it, so the kinds do not
-measure identically. The flow arithmetic absorbs that because
-`minChipWidth` is the narrowest chip and capacity is an upper
-bound — the correction is #1240's, which found the sentence
-read as licence to assume equal metrics.)
+clear affordance never takes a slot in the chip's FLOW — the ⓧ
+rides the trailing-top corner as an overlay, and hover may
+change only its tint, never its presence or any metric —
 because the chips are sized by a flow layout whose arithmetic
 (`MonitorCardChips.minChipWidth`) must hold for both states,
 and both a hover-revealed button and an in-flow trailing slot
-have shipped and died of that measurement. Decoration may ride
+have shipped and died of that measurement. It is not free of
+the layout, though: a chip that HAS a badge reserves 6 pt more
+trailing padding to sit under it, which that arithmetic absorbs
+because `minChipWidth` is the narrowest chip and capacity is an
+upper bound. This passage used to say the two kinds "measure
+identically", which #1240 found reading as licence to assume
+equal metrics. Decoration may ride
 the accent (the main card's bloom); the answer never rides hue
 alone (the "main" badge).
 
