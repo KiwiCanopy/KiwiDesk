@@ -114,15 +114,24 @@ home, routed through the seam, applied exactly once.
 Obligations:
 
 - **A new bar surface animates through `BarMotion`**, never
-  beside it. `BarMotionSeamTests` holds that: the
-  motion-starting AppKit and Core Animation spellings appear
-  under `Bar/` only in `BarMotion.swift`, its `allowed` map is
-  the one copy of who is exempt, and a second clause holds the
-  wrappers to consulting their own decisions — deleting the gate
-  inside a shared helper ungates every caller at once while the
-  routing clause stays green, which is the failure
-  [gui.md](gui.md) ▸ the Reduce Motion gate rejected an
-  abstraction over.
+  beside it. `BarMotionSeamTests` holds that, and it scans ALL
+  of `Sources/KiwiDeskCore` rather than the bar paths: a bar
+  surface lands wherever it lands — #1229's overview panel is
+  the next one — and a guard scoped to the directories bar code
+  occupies TODAY cannot see the one that arrives outside them.
+  Its `allowed` map is the one copy of who is exempt, and a
+  ruling that fires on nothing reds, so an entry cannot outlive
+  its site.
+- **A member added to `BarMotion` owes a census entry** naming
+  the gate its body reaches, and one that starts motion may not
+  be censused as starting none. That clause is the fail-shut
+  half: the routing clause exempts the home file by design, so
+  without it a fourth ungated wrapper is invisible to every test
+  in both suites — which is where a hand-listed case list left
+  it (guard-prover). Deleting the gate inside a shared helper
+  ungates every caller at once while the routing clause stays
+  green, which is the failure [gui.md](gui.md) ▸ the Reduce
+  Motion gate rejected an abstraction over.
 - **A decision takes the flag as an argument**, so it is
   assertable: `BarMotionTests` pins the collapsed group
   duration, the frame write that lands instead of travelling and

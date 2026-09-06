@@ -201,6 +201,16 @@ argument (the dead-end bump takes one from
 ships ungated, and no suite in the tree will say so; review is
 the whole net.
 
+One thing IS held, and it is narrower than it looks: the three
+overlay files that animate today are ruled entries in
+`BarMotionSeamTests`' `allowed` map, which scans all of Core —
+so a FOURTH file here that starts motion reds until someone
+rules it, and a ruling whose file stops animating reds too. What
+that map cannot see is a second ungated starter added to one of
+the three already in it, which an entry exempts wholesale. So
+the obligation above is the net for the inside of those files,
+and the map is the net for the next one.
+
 ## Exercising the fallback path
 
 `KIWIDESK_NO_WS_TRACKING=<anything>` keeps `skyLightActive` false
