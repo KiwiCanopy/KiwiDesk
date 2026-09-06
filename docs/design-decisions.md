@@ -6777,6 +6777,84 @@ deleting it would lose config across a routine monitor swap.
 The rows stay live at runtime by design; only their
 *visibility* was broken. (#92)
 
+**The reference panel scrolls, and says so — in words, in the
+footer.** The panel is a glance surface but not a small one: the
+seeded keymap grows three rows per Space, so a stock setup runs
+to more rows than fit under the height ceiling
+`ShortcutsPanelController.resize` derives from the screen. It
+may therefore exceed the viewport, and the fold is cued by a
+line in the footer drawn only when `resize`'s own verdict says
+the content clipped — `overflows(fitting:ceiling:)`, one home,
+handed to the view rather than re-derived by it, so the cue
+cannot disagree with the clamp that causes it.
+
+**The platform's own indicator was tried first and does not
+work.** `.scrollIndicators(.visible)` shipped for one commit
+and was measured on device (macOS 26.6.2, 2026-09-07,
+`AppleShowScrollBars` unset — *Automatically* — 46 bound
+shortcuts, ~45 rows against ~20 that fit): the overlay scroller
+still appeared only during a gesture. Apple documents the
+visibility as depending on "user preference behaviors in
+macOS", so the modifier is expressed intent the platform may
+decline, and here it declines. It is unobservable in all three
+preference states — under *Automatically* with a trackpad it
+loses to the auto-hide, with a mouse macOS already draws a
+legacy scroller, and under *Always* the scroller is permanent
+anyway — so it was removed rather than left as a hedge.
+
+**Why words, and why in the footer: a partial row is not a fold
+cue when a terminator sits under it.** The fold cuts a row in
+half, which looks like a hint that the list continues — and is
+not, because immediately below it sit a full-width `Divider()`
+and a footer carrying a hint and a button. A hard rule plus
+chrome is the strongest "this is the bottom" signal a panel
+has, and it cancels the cut above it. That is why no further
+geometry at the fold can win: it would have to argue against a
+terminator two points below. The answer is to put the words ON
+the terminator — make the thing that says *finished* be the
+thing that says *there is more*.
+
+The line is imperative rather than positional ("Scroll for more
+shortcuts"), so it needs no scroll offset to stay honest;
+tracking the offset would mean `onScrollGeometryChange`, which
+is macOS 15 against this project's macOS 14 floor, so it would
+ship the static cue as its fallback anyway. It names its object
+because *Scrolling* is one of KiwiDesk's layout modes and its
+verbs can be on screen in the same panel.
+
+Two rejections worth keeping. A **bottom fade** cannot be
+judged here at all: the panel's ground is `.regularMaterial`
+over a clear window, so a gradient fades the last rows toward
+the user's wallpaper — there is no colour to fade to, its
+lightness is unmeasurable, and the colour-vision clauses
+therefore have no answer. It also removes information on a
+surface whose only job is to be read.
+
+And **`scrollerStyle = .legacy` is refused on ownership, not on
+preference.** It is a per-`NSScrollView` property, it writes no
+user default, and *Automatically* is a delegation rather than a
+vote against legacy scrollers — so a preference argument would
+not carry. What decides it is that KiwiDesk does not own this
+scroll view — it is SwiftUI's
+private backing, reachable only by walking the hosting
+hierarchy for a class SwiftUI does not promise to keep. That is
+the same species of bet `.scrollIndicators(.visible)` just
+lost, and it fails *silently*: the traversal returns nil, no
+cue is drawn, and nothing says so — which means the words are
+owed as its fallback, and once the words exist the traversal
+buys nothing. `flashScrollers()` dies the same way, plus
+transience. The door is open by ownership: if this panel is
+ever rebuilt as an `NSViewRepresentable` over a scroll view it
+constructs, `.legacy` becomes legitimate and is re-argued then.
+
+Making the content *fit* (#1294) lowers how often the fold
+appears and cannot retire the cue — 45 rows do not fit under a
+720 pt ceiling at any column count, and an install with many
+app or raw-Lua rows overflows any fixed size. The cue is
+permanent, not a stopgap. The asymmetry that issue would
+exploit — the panel's height derives from the screen while its
+width is a literal 760 — is its own ruling if taken.
+
 **The reference panel never lists its own opener.** The
 `show_shortcuts` binding (⌃⌥K, seeded per layer since #602) is
 dropped from the panel builder's working set and renders in no

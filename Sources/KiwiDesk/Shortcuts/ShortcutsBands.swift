@@ -76,6 +76,7 @@ struct ShortcutSubgroupView: View {
             Text(subgroup.title)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
+                .accessibilityAddTraits(.isHeader)
             ForEach(subgroup.rows) { ShortcutRowView(row: $0) }
         }
     }
@@ -89,6 +90,7 @@ struct ShortcutsBandHeader: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.headline)
+                .accessibilityAddTraits(.isHeader)
             Divider()
         }
     }

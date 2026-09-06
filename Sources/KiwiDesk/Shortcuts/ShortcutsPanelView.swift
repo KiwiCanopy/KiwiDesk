@@ -6,6 +6,9 @@ struct ShortcutsPanelView: View {
     let reference: ShortcutsReference?
     /// Bound dismiss combo string, or nil when unbound (#330).
     let dismissCombo: String?
+    /// Whether the content clipped, from the controller's own
+    /// clamp — never re-derived here (#1292).
+    let overflows: Bool
     let onEdit: () -> Void
 
     var body: some View {
@@ -58,6 +61,12 @@ struct ShortcutsPanelView: View {
                 }
                 .padding(20)
             }
+            // VoiceOver lands on the scroll view as a bare
+            // "scroll area" before interacting into it
+            // (`SettingsDetailPanel`, #812).
+            .accessibilityLabel(
+                L("shortcuts.panel.ax_label", "Shortcuts reference")
+            )
         } else {
             placeholder(unavailable: reference == nil)
         }
@@ -181,12 +190,41 @@ struct ShortcutsPanelView: View {
         )
     }
 
+    /// Says the list continues, on the one thing that otherwise
+    /// says it ends (#1292). Worded rather than positional, so
+    /// it stays true at any scroll offset.
+    @ViewBuilder private var scrollCue: some View {
+        if overflows {
+            HStack(spacing: 4) {
+                Image(systemName: "chevron.down")
+                    .accessibilityHidden(true)
+                Text(
+                    L(
+                        "shortcuts.panel.scroll_hint",
+                        "Scroll for more shortcuts"
+                    )
+                )
+            }
+        }
+    }
+
+    /// The chip is a SIBLING, not an overlay: a second caption
+    /// line widens the leading slot in every locale, and an
+    /// overlay would draw the chip on top of it. Only the
+    /// captions flex — a second flexible child would halve the
+    /// footer and cap the cue at ~208pt beside a wide chip,
+    /// which `ru` overruns (#1292).
     private var footer: some View {
-        HStack {
-            Text(dismissHint)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Spacer()
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                scrollCue
+                Text(dismissHint)
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            layerLabel
+                .layoutPriority(1)
             Button(action: onEdit) {
                 Text(
                     L(
@@ -196,7 +234,6 @@ struct ShortcutsPanelView: View {
                 )
             }
         }
-        .overlay(alignment: .center) { layerLabel }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
     }

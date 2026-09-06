@@ -887,6 +887,19 @@ Monitors card it opens a popover holding every chip, each
 working as it does on the card, because a chip that is merely
 counted has lost its clear button and its menu.
 
+**"+N" governs a bounded container that cannot scroll; content
+past the fold of a SCROLLING container is cued in words
+instead** (#1292). The ⌃⌥K reference panel is the worked case,
+and the reason is that N is not reachable there: its bands are
+non-uniform (headers, a caption, two-column layouts), the fold
+cuts *through* a row rather than between rows, and the
+controller knows heights rather than rows. Any N would be an
+estimate wearing a precise shape, which is worse than words —
+so the panel says "Scroll for more shortcuts" and counts
+nothing. Note the affordance clause above is satisfied either
+way: that panel is read-only, so the hidden items have no
+controls to lose and a label is admissible.
+
 The middle clause is arithmetic, so it is code rather than
 prose: `OverflowSplit.shown(of:fitting:withMarker:)` is the one
 statement of it, and a surface that caps a run routes through it
