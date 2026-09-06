@@ -42,7 +42,8 @@ extension ResizeRefusal {
             "arrow.down.right.and.arrow.up.left"
         case .ownMaximum:
             "arrow.up.left.and.arrow.down.right"
-        case .noAxisHere, .layoutHasNoResize, .nothingToDivide:
+        case .noAxisHere, .layoutHasNoResize, .nothingToDivide,
+            .windowIsFullscreen:
             "nosign"
         }
     }
@@ -94,6 +95,11 @@ extension ResizeRefusal {
             L(
                 "resize.layout_has_none",
                 "This layout has no resizing"
+            )
+        case .windowIsFullscreen:
+            L(
+                "resize.window_fullscreen",
+                "Full-screen windows can't be resized"
             )
         }
     }

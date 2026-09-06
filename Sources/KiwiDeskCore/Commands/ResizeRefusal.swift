@@ -56,6 +56,12 @@ enum ResizeRefusal: Equatable {
     /// set with #1184. The most reachable refusal there is, and
     /// until now the one cued by sound alone.
     case layoutHasNoResize(WindowID)
+    /// The focused window is in native full screen (#1298): it
+    /// fills a macOS Space of its own (#670), so no layout
+    /// places it and no store the resize paths write is about
+    /// it. A fact about the WINDOW rather than the layout, which
+    /// is why `layoutHasNoResize` is the wrong sentence for it.
+    case windowIsFullscreen(WindowID)
 }
 
 extension ResizeRefusal {
@@ -68,7 +74,7 @@ extension ResizeRefusal {
         switch self {
         case .ownMinimum(let id, _), .ownMaximum(let id, _, _),
             .noAxisHere(let id, _), .nothingToDivide(let id, _),
-            .layoutHasNoResize(let id):
+            .layoutHasNoResize(let id), .windowIsFullscreen(let id):
             id
         case .neighborMinimum(_, let focused, _):
             focused
@@ -76,8 +82,9 @@ extension ResizeRefusal {
     }
 
     /// The axis the gesture asked for, where the refusal knows
-    /// it. `layoutHasNoResize` and `nothingToDivide` do not: the
-    /// first refuses every axis and the second names none.
+    /// it. `layoutHasNoResize`, `windowIsFullscreen` and
+    /// `nothingToDivide` do not: the first two refuse every axis
+    /// and the third names none.
     var axis: String? {
         switch self {
         case .ownMinimum(_, let axis), .ownMaximum(_, let axis, _),
@@ -85,7 +92,8 @@ extension ResizeRefusal {
             axis
         case .neighborMinimum(_, _, let axis):
             axis
-        case .nothingToDivide, .layoutHasNoResize:
+        case .nothingToDivide, .layoutHasNoResize,
+            .windowIsFullscreen:
             nil
         }
     }
@@ -107,7 +115,8 @@ extension ResizeRefusal {
             axis == "y" ? .down : .right
         case .neighborMinimum(_, _, let axis):
             axis == "y" ? .down : .right
-        case .noAxisHere, .nothingToDivide, .layoutHasNoResize:
+        case .noAxisHere, .nothingToDivide, .layoutHasNoResize,
+            .windowIsFullscreen:
             nil
         }
     }

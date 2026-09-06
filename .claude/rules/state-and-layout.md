@@ -984,17 +984,24 @@ editing here:
   floating-mode member has no layout answer to give and a frame
   of its own to change, so refusing it while resizing its
   flag-floating neighbour is a difference with nothing behind it
-  (#1184, `FloatingResizeCommandTests`). **A verb that crosses
-  stands down for a native-fullscreen window** (#670): it fills
-  a macOS Space of its own, so there is no frame worth writing —
-  BOTH arms, or the ruling that a mode member answers exactly as
-  a flag-float does fails at that one window, which is the
-  divergence the crossing removed wearing a narrower shape. And
-  the stand-down is the VERB's, never the float ROUTE's: shedding
-  the route drops the press into the layout, where a window
-  nothing places moves its NEIGHBOURS instead — strictly worse
-  than the refused frame set it replaces
-  (`FloatingResizeCommandTests`). **The mode arm names the
+  (#1184, `FloatingResizeCommandTests`). **`resize` refuses a
+  native-fullscreen focus ONCE, ahead of every path, and cues
+  it** (#670/#1298). Full screen is a fact about the WINDOW,
+  never the layout — it fills a macOS Space of its own, so no
+  layout places it and no store a resize path writes is about
+  it — so the guard sits in `resize()` before the float branch,
+  and never per path. A per-path answer is how three paths WROTE
+  for such a focus (bsp's no-slot sign fallback, stack's
+  `inMaster` fallback, scrolling's focus-blind slot write) and
+  moved the NEIGHBOURS while the float route refused silently;
+  a guard inside the float branch alone leaves the tiled paths
+  writing. The refusal is `windowIsFullscreen`, never
+  `layoutHasNoResize`, and it DRAWS — the window has a frame to
+  draw on, and a pill reaches a native full-screen Space (owner,
+  device, 2026-09-07). `FullscreenResizeCommandTests` holds the
+  two float arms and `FullscreenResizeTiledTests` every tiled
+  path, each with a control proving the path writes when the
+  focus is not full screen. **The mode arm names the
   space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose

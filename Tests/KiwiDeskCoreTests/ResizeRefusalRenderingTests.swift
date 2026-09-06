@@ -125,6 +125,7 @@ struct ResizeRefusalRenderingTests {
             .nothingToDivide(window, otherAxisDivides: false),
             .nothingToDivide(window, otherAxisDivides: true),
             .layoutHasNoResize(window),
+            .windowIsFullscreen(window),
         ].map(\.pillText)
         #expect(Set(texts).count == texts.count)
         #expect(texts.allSatisfy { !$0.isEmpty })
@@ -193,6 +194,10 @@ struct ResizeRefusalRenderingTests {
             ResizeRefusal.layoutHasNoResize(window).pillText
                 == "This layout has no resizing"
         )
+        #expect(
+            ResizeRefusal.windowIsFullscreen(window).pillText
+                == "Full-screen windows can't be resized"
+        )
     }
 
     @Test("Only a paired refusal marks a second window")
@@ -226,6 +231,10 @@ struct ResizeRefusalRenderingTests {
         )
         #expect(
             ResizeRefusal.layoutHasNoResize(window).secondPill
+                == nil
+        )
+        #expect(
+            ResizeRefusal.windowIsFullscreen(window).secondPill
                 == nil
         )
     }

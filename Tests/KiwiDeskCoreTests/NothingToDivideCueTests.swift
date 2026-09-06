@@ -232,14 +232,16 @@ struct NothingToDivideCueTests {
         )
     }
 
-    @Test("A focus outside the layout is owed no sentence")
+    @Test("A focus outside the layout is owed no arrangement sentence")
     func focusOutsideTheTiledMembersStandsDown() {
         // A native-fullscreen window keeps its slot but leaves
         // the tiled derivations (#670), so it takes part in no
         // partition — and an arrangement sentence about a
         // partition it is not in would be the wrong window told
         // the wrong thing. It was silent before #1258 because an
-        // empty partition never clamps; it stays silent.
+        // empty partition never clamps; since #1298 it is told
+        // the WINDOW's own fact instead, once per press, and
+        // never a sentence about a zone.
         let core = makeCore()
         let sp = space(core, windows: 2, mode: "stack")
         core.state.workspaces.focus(WindowID(1), in: sp.id)
@@ -257,6 +259,11 @@ struct NothingToDivideCueTests {
                 )
             }
         }
-        #expect(seen.isEmpty)
+        #expect(
+            seen == [
+                .windowIsFullscreen(WindowID(1)),
+                .windowIsFullscreen(WindowID(1)),
+            ]
+        )
     }
 }

@@ -931,6 +931,7 @@
   "resize.neighbor_min_size": "La fenêtre voisine est à sa taille minimale",
   "resize.no_height_here": "Cette zone répartit la largeur, pas la hauteur",
   "resize.no_width_here": "Cette zone répartit la hauteur, pas la largeur",
+  "resize.window_fullscreen": "Les fenêtres en plein écran ne peuvent pas être redimensionnées",
   "scroll_grid.anchor.center": "Centre",
   "scroll_grid.anchor.end_h": "Droite",
   "scroll_grid.anchor.end_v": "Bas",

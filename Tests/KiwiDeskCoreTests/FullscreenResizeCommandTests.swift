@@ -4,7 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// `resize` and a window in NATIVE FULL SCREEN (#670/#1184).
+/// `resize` and a FLOATING window in NATIVE FULL SCREEN
+/// (#670/#1184/#1298) — the two arms the float route used to
+/// refuse silently. The tiled paths are
+/// `FullscreenResizeTiledTests`'.
 ///
 /// Split out of `FloatingResizeCommandTests` at the 350-line
 /// ceiling (tests.md). Its fixture is a copy rather than a
@@ -71,15 +74,11 @@ struct FullscreenResizeCommandTests {
 
     /// A native-fullscreen window is left to its own macOS
     /// Space (#670): it fills one, so the float route has no
-    /// frame worth writing.
-    ///
-    /// The VERB stands down, not the ROUTE, and that distinction
-    /// is the whole of the second case below. Shedding the route
-    /// would drop the press into the layout, where `resizeBsp`
-    /// writes the shared ratio through its unknown-focus
-    /// fallback — so a window nothing places would move its
-    /// NEIGHBOURS, which is worse than the no-op it replaced
-    /// (architect review, 2026-09-06).
+    /// frame worth writing — and since #1298 the refusal is CUED
+    /// (`windowIsFullscreen`), where #1184's arm returned without
+    /// drawing: the window has a frame to draw on, and #1255's
+    /// argument that a silent keyboard refusal reads as being
+    /// ignored applies.
     ///
     /// Both arms refuse, which is #1184's own ruling rather than
     /// a widening of it: a floating-MODE member answers exactly
@@ -98,13 +97,13 @@ struct FullscreenResizeCommandTests {
         expectFullscreenRefused(mode: "floating", flag: false)
     }
 
-    /// The FLAG arm, and the one case a shipped user meets
-    /// differently: a flag-float that goes fullscreen in a
+    /// The FLAG arm: a flag-float that goes fullscreen in a
     /// TILED space used to take the float route and set a frame
-    /// its app refused. It is also where route-vs-verb is
-    /// decided — shedding the route instead lands the press in
-    /// `resizeBsp`, whose unknown-focus fallback writes the
-    /// split ratio and moves the NEIGHBOURS.
+    /// its app refused. The guard sits in `resize()` ahead of
+    /// the float branch (#1298), so this arm meets the same
+    /// refusal the tiled paths do — and the ratio store, which
+    /// the route this window would otherwise fall through to
+    /// writes, stays untouched.
     ///
     /// The ratio is read off the SESSION store, not the global:
     /// a space with no authored override never writes the
@@ -132,6 +131,8 @@ struct FullscreenResizeCommandTests {
         #expect(frames[WindowID(2)] != nil)
 
         frames = [:]
+        var cues: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { cues.append($0) }
         core.state.apply(
             .windowFullscreenChanged(
                 WindowID(2),
@@ -147,6 +148,7 @@ struct FullscreenResizeCommandTests {
             response.error == "the focused window is fullscreen"
         )
         #expect(frames.isEmpty)
+        #expect(cues == [.windowIsFullscreen(WindowID(2))])
         #expect(
             core.state.workspaces[SpaceID("1")]?
                 .sessionRatios.splitRatioH == nil
@@ -154,7 +156,7 @@ struct FullscreenResizeCommandTests {
     }
 
     /// Resizes the focus, marks it fullscreen, resizes again —
-    /// which must refuse, write nothing and say nothing.
+    /// which must refuse, write nothing and cue the one case.
     private func expectFullscreenRefused(
         mode: String,
         flag: Bool
@@ -176,10 +178,6 @@ struct FullscreenResizeCommandTests {
         // Armed only for the refused leg — the successful one
         // above cues nothing either way, so an earlier capture
         // would read empty without this leg running at all.
-        // This is the ONE observer of the arm's wordlessness:
-        // adding a cue to it left all 4836 tests green
-        // (guard-prover, 2026-09-06), and the census register
-        // states that silence as a claim.
         var cues: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { cues.append($0) }
         core.state.apply(
@@ -199,10 +197,8 @@ struct FullscreenResizeCommandTests {
             response.error == "the focused window is fullscreen"
         )
         #expect(frames.isEmpty)
-        // A focus IS present here, so `refuseResizeUnsupported`
-        // would draw if the arm called it — unlike the empty
-        // space, where it early-returns and could never tell.
-        #expect(cues.isEmpty)
+        // The one case, never the layout's: it is not the layout
+        // that refused this one (#1298).
+        #expect(cues == [.windowIsFullscreen(WindowID(2))])
     }
-
 }

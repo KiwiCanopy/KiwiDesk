@@ -933,6 +933,7 @@
   "resize.no_height_here": "This zone divides widths, not heights",
   "resize.no_width_here": "This zone divides heights, not widths",
   "resize.nothing_to_divide": "This zone has nothing to divide",
+  "resize.window_fullscreen": "Full-screen windows can't be resized",
   "scroll_grid.anchor.center": "Center",
   "scroll_grid.anchor.end_h": "Right",
   "scroll_grid.anchor.end_v": "Bottom",

@@ -931,6 +931,7 @@
   "resize.neighbor_min_size": "Соседнее окно достигло минимального размера",
   "resize.no_height_here": "Эта зона делит ширину, а не высоту",
   "resize.no_width_here": "Эта зона делит высоту, а не ширину",
+  "resize.window_fullscreen": "Размер полноэкранных окон изменить нельзя",
   "scroll_grid.anchor.center": "По центру",
   "scroll_grid.anchor.end_h": "Справа",
   "scroll_grid.anchor.end_v": "Снизу",

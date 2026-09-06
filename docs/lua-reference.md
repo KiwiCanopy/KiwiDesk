@@ -3893,13 +3893,15 @@ own float flag — however it got one, whether you toggled it,
 `make_floating` set it, or a `float_rules` entry or KiwiDesk's
 own detection did — **or** any window in a space set to the
 floating layout, which places nothing and so leaves its members
-free-floating in exactly the same way. One exception either
-way: a floating window in **native full screen** fills a macOS
-Space of its own, so `resize` refuses it rather than writing a
-frame the system owns, and refuses outright rather than falling
-through to the layout — so that press moves nothing else
-either. (A *tiled* window in full screen is a separate case this
-did not change: its press still reaches the layout.)
+free-floating in exactly the same way.
+
+A focused window in **native full screen** — floating or tiled,
+whatever the space's layout — is refused before any of this
+(#1298): it fills a macOS Space of its own, so there is no frame
+to write and no layout that places it. The press writes nothing,
+moves no other window, and flashes a pill on the full-screen
+window saying full-screen windows can't be resized; CLI and IPC
+callers read `the focused window is fullscreen`.
 
 The delta is split between **both** edges (#1091): a chord has
 no grabbed edge to anchor on, so a float grows and shrinks

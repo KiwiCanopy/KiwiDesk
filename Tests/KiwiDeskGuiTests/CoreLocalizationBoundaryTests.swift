@@ -91,7 +91,7 @@ struct CoreLocalizationBoundaryTests {
         // the two nothing-to-divide readings, and
         // layout-has-no-resizing. Same caveat as `+StickyMarks`
         // if the overlays ever move out of Core.
-        "Commands/ResizeRefusal+Rendering.swift": 9,
+        "Commands/ResizeRefusal+Rendering.swift": 10,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901), drawn by Core.
