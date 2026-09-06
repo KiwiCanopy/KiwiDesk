@@ -217,6 +217,24 @@ argument, and why the rule is phrased as an obligation on
 controllers rather than as a claim about the process, is
 "Permanent accessory mode" in `docs/design-decisions.md`.
 
+## The Settings raise tells Core first (#1281)
+
+**A raise of a window Core tracks on the active Space goes
+through `KiwiCore.focusWindow` before `NSApp.forceFront`.** A
+bare order-front of the Settings window reports a clickless
+focus, and for two seconds after the row panned it out that is
+the exact shape #1161's placement distrust bounces — the menu
+click "did nothing" while the focus verbs, which set state focus
+first, worked. `SettingsWindowController.coreFocusTarget` is the
+one predicate — tracked, on the active Space, a window number
+AppKit reports as positive — and `focusThroughCore` the one
+caller of the verb in this tree; `SettingsOpenFocusSeamTests`
+pins the branch ORDER and the single call site, and
+`PlacementIntentTests` holds the Core half. A new own window that
+tiles takes the same branch rather than a second `forceFront`.
+The argument is "An own raise is never a bounce" in
+`docs/design-decisions.md`.
+
 ## A window that finishes something already begun comes forward
 
 **It activates at the moment it appears, a window a framework

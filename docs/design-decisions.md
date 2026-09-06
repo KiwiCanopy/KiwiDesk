@@ -1659,6 +1659,29 @@ trying could reach. Bounded at the placement, an app that keeps
 reacting is still bounced for up to twice the window, and a
 keyboard user is honored by then. That is the ruled trade; a
 click is always honored.
+
+**An own raise is never a bounce (#1281).** The trade above is
+priced because the predicate cannot tell the emulator's
+self-focus from a cmd-tab: both are foreign reports of unknown
+provenance. KiwiDesk's own Settings window, raised by its own
+`show()` on a user gesture — the menu bar, the App menu's ⌘,,
+the `open_settings` chord — is not of unknown provenance, and
+for two seconds after the row panned it out a bare order-front
+was bounced exactly like the emulator (measured 2026-09-06, four
+menu clicks, four distrusts, each renewing the window). The
+answer is not an exemption in the predicate, which would be a
+per-process carve-out the own-window rules refuse (#678 item 18),
+but the construction the keyboard verbs already have: the GUI's
+raise branch goes through `KiwiCore.focusWindow` before
+`forceFront`, so state focus is set first and the report arrives
+with `intended == id`, which the distrust never reads. Narrowed
+to a window Core tracks on the ACTIVE Space, because that is the
+one arm a compliant own window can meet — parked elsewhere it
+goes where it was placed, and a clickless report is how it is
+reached. A click on the visible Settings window inside those
+seconds is still bounced: own presses stamp no provenance by
+the #953 rule, and that residue is recorded on #1281 rather than
+carved out here.
 The #465 sibling distrust's carve-out for a visible same-display
 sibling is narrowed by this: such a sibling placed into the
 scrolling void is bounced like any other window.
