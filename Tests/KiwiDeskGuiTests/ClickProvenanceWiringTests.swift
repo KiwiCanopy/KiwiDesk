@@ -15,11 +15,13 @@ import Testing
 /// 1. `armMachineSeams()` wires `stackingOrderProvider`
 ///    to
 ///    `AXHelper.onScreenStackingOrder`.
-/// 2. the left-press stamp resolves `reached` through
-///    `clickReachedWindow(at:)` inside the `lastLeftClick`
-///    assignment — press-time resolution is the fix's load
-///    -bearing choice, so an echo-time refactor must trip this
-///    and re-argue.
+/// 2. the left-press wiring takes the one `stampLeftClick`
+///    (both arms since #1281), and that stamp — in
+///    `KiwiCore+ClickProvenance.swift` — resolves `reached`
+///    through `clickReachedWindow(at:)` inside the
+///    `lastLeftClick` assignment; press-time resolution is the
+///    fix's load-bearing choice, so an echo-time refactor must
+///    trip this and re-argue.
 /// 3. `armMachineSeams()` wires `pointerWarp` to the CoreGraphics
 ///    pointer move (#689 — the same seam class, one function
 ///    over).
@@ -47,9 +49,22 @@ struct ClickProvenanceWiringTests {
             )
     }
 
-    private func strippedSource() throws -> String {
+    private var clickProvenance: URL {
+        SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/App/"
+                    + "KiwiCore+ClickProvenance.swift"
+            )
+    }
+
+    private func strippedSource(
+        _ url: URL? = nil
+    ) throws -> String {
         let source = SourceScan.stripComments(
-            try String(contentsOf: bootSeams, encoding: .utf8)
+            try String(
+                contentsOf: url ?? bootSeams,
+                encoding: .utf8
+            )
         )
         // Fail-shut on the scan itself: an empty read would
         // pass no needle, but say so rather than red twice
@@ -105,7 +120,22 @@ struct ClickProvenanceWiringTests {
 
     @Test("The press stamp resolves reached at press time")
     func pressStampResolvesReached() throws {
-        let source = try strippedSource()
+        // The boot wiring hands the press to the ONE stamp —
+        // the other-app arm here; the own-window arm and the
+        // writer count are `OwnPressProvenanceSeamTests`'.
+        let boot = try strippedSource()
+        let wiredPattern =
+            #"onLeftMouseDown\s*=\s*\{[\s\S]{0,120}?"#
+            + #"stampLeftClick\("#
+        #expect(
+            boot.range(
+                of: wiredPattern,
+                options: .regularExpression
+            ) != nil,
+            "KiwiCore+BootSeams no longer hands the left press "
+                + "to stampLeftClick"
+        )
+        let source = try strippedSource(clickProvenance)
         let pattern =
             #"lastLeftClick\s*=\s*\([\s\S]{0,200}?"#
             + #"clickReachedWindow\(at:"#
