@@ -104,24 +104,28 @@ struct OwnWindowGestureDeliveryTests {
         )
     }
 
-    @Test("Only another app's press reaches the click fan-out")
-    func fanOutHearsOtherAppsAlone() {
+    @Test("The click fan-out hears both arms and carries the origin")
+    func fanOutCarriesTheOrigin() {
         let tracker = MouseTracker()
-        var seen: [CGPoint] = []
-        tracker.onLeftMouseDown = { seen.append($0) }
-        tracker.recordDown(
+        var seen: [(CGPoint, MouseTracker.Press.Origin)] = []
+        tracker.onLeftMouseDown = { seen.append(($0, $1)) }
+        tracker.deliverPress(
             at: CGPoint(x: 1, y: 2),
             from: .otherApp
         )
-        #expect(seen.count == 1)
-        // #446's bar-overlay exemption is built on this fan-out
-        // never hearing a click on one of our own windows; the
-        // click provenance takes the own arm's channel (#1281).
-        tracker.recordDown(
+        tracker.deliverPress(
             at: CGPoint(x: 3, y: 4),
             from: .ownWindow
         )
-        #expect(seen.count == 1)
+        #expect(seen.count == 2)
+        #expect(seen.first?.1 == .otherApp)
+        #expect(seen.last?.1 == .ownWindow)
+        #expect(seen.last?.0 == CGPoint(x: 3, y: 4))
+        // The STORE delivers nothing (#1281): a press reaches the
+        // consumers through `deliverPress` alone, so a consumer
+        // standing down for an own press gates on the ORIGIN.
+        tracker.recordDown(at: .zero, from: .otherApp)
+        #expect(seen.count == 2)
     }
 
     @Test("A release closes only the press its own arm opened")

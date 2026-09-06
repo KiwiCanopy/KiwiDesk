@@ -5,8 +5,9 @@ import Foundation
 /// managed window a left press REACHED, resolved at press time,
 /// and whether a fresh click reached a reported window. Split
 /// from `KiwiCore+FocusEvents.swift` (350-line ceiling); the
-/// press stamp in `KiwiCore+Lifecycle` and the two echo reverts
-/// in `KiwiCore+FocusEvents` are the consumers.
+/// stamp lives here and `KiwiCore+BootSeams` wires both press
+/// arms to it, the echo reverts in `KiwiCore+FocusEvents` read
+/// it.
 extension KiwiCore {
     /// How long after a z-order raise its focus echo may still
     /// arrive and be reverted (#418/#425). Sized to the slowest
@@ -102,8 +103,8 @@ extension KiwiCore {
 
     /// The managed window a left press at `point` (AX coords)
     /// hit: the frontmost stacking entry whose state frame
-    /// contains the point. Called by the `KiwiCore+Lifecycle`
-    /// press stamp, AT PRESS TIME deliberately: provenance is a
+    /// contains the point. Called by `stampLeftClick` above,
+    /// AT PRESS TIME deliberately: provenance is a
     /// press-time fact. Resolving it when the echo arrives read
     /// a stacking a drain may have churned since — a quiet
     /// raise of a same-app sibling reorders above the app's key

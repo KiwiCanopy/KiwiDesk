@@ -10,8 +10,9 @@ import Foundation
 /// windows (tests.md — a test reaches the machine only through a
 /// seam it injects). They are armed in one place so a new one is
 /// missing from a run of near-identical lines rather than from a
-/// hundred-line boot function; `ClickProvenanceWiringTests` pins
-/// the two that no behavior test can red on.
+/// hundred-line boot function; `ClickProvenanceWiringTests` and
+/// `OwnPressProvenanceSeamTests` pin the ones no behavior test
+/// can red on.
 extension KiwiCore {
     func armMachineSeams() {
         // Arm the focused-command foreground guard (#292): from
@@ -63,15 +64,14 @@ extension KiwiCore {
         // the click discriminator for the cross-display sibling
         // distrust (#496) — in AX coordinates, the space window
         // frames live in.
-        mouse.onLeftMouseDown = { [weak self] point in
+        mouse.onLeftMouseDown = { [weak self] point, origin in
             self?.stampLeftClick(at: GeometryUtils.axPoint(point))
-            self?.followDisplayUnderClick(at: point)
-        }
-        // A press in our own tiled window carries the same
-        // provenance (#1281) and nothing else: the display
-        // follow keeps its bar-overlay exemption (#446).
-        mouse.onOwnWindowLeftMouseDown = { [weak self] point in
-            self?.stampLeftClick(at: GeometryUtils.axPoint(point))
+            // The display follow stands down for our own
+            // window's press: its bar-overlay exemption is the
+            // global monitor's blindness (#446, #1281).
+            if origin == .otherApp {
+                self?.followDisplayUnderClick(at: point)
+            }
         }
         // Both memories from ONE reading (#888): the authority
         // the switch handler compares against, and the

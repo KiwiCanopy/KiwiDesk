@@ -132,8 +132,10 @@ struct ClickProvenanceWiringTests {
                 of: wiredPattern,
                 options: .regularExpression
             ) != nil,
-            "KiwiCore+BootSeams no longer hands the left press "
-                + "to stampLeftClick"
+            Comment(
+                rawValue: "KiwiCore+BootSeams no longer hands "
+                    + "the left press to stampLeftClick"
+            )
         )
         let source = try strippedSource(clickProvenance)
         let pattern =

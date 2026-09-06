@@ -4,15 +4,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A click on our own tiled window is a click (#1281). The #687
-/// provenance escape beats every focus distrust for a window the
-/// user pressed — and it did for every other app, because the
-/// global monitor's fan-out stamps `lastLeftClick`, while a press
-/// in the marked own window reached the local arm only, which
-/// stamped nothing: for `PlacementLedger.echoWindow` after the
-/// row panned Settings out, a click on it was #1161's bounce.
-/// `stampLeftClick` is now the ONE stamp both arms take;
-/// `OwnPressProvenanceSeamTests` holds the wiring.
+/// The one press stamp (#1281): `stampLeftClick` resolves the
+/// window a press reached at press time, and that provenance
+/// beats the #1161 placement bounce (#687's escape). Both press
+/// arms take it; `OwnPressProvenanceSeamTests` holds the wiring
+/// and the argument is in `docs/design-decisions.md`.
 @Suite("Own-window click provenance (#1281)", .serialized)
 @MainActor
 struct OwnPressProvenanceTests {
