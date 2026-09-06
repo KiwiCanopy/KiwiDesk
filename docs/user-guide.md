@@ -445,7 +445,13 @@ panel's own close hint. Every layer you create gets the same ⌃⌥K row,
 so the cheat-sheet is always reachable from the keyboard.
 
 The panel always appears centered on the screen under your pointer and
-never remembers a position. Your shortcuts keep working while it is
+never remembers a position. It grows with what you have
+bound, up to a ceiling set by your screen, and **scrolls** past
+that — which on a normal setup it usually does, since the shortcuts
+you get out of the box grow by three rows for every Space. When it
+does, the footer says so — "Scroll for more shortcuts" appears
+above the close hint, because macOS hides a scrollbar until you
+scroll and the panel would otherwise look complete. Your shortcuts keep working while it is
 open — it is a live cheat sheet, so closing a window, switching focus
 or moving one behaves exactly as it does without the panel. Press
 **Esc**, click anywhere outside it, or

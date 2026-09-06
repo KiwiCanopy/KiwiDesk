@@ -74,28 +74,52 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         commanded && appActive && target != nil
     }
 
+    /// Whether the content exceeds the height ceiling — the ONE
+    /// home for that verdict, so the footer's cue cannot
+    /// disagree with the clamp that causes it (#1292).
+    static func overflows(
+        fitting: CGFloat,
+        ceiling: CGFloat
+    ) -> Bool {
+        fitting > ceiling
+    }
+
     func show() {
         let reference = buildReference()
-        let root = ShortcutsPanelView(
-            reference: reference,
-            dismissCombo: ShortcutsOpenBinding.comboGlyphs(
-                core: core
-            ),
-            onEdit: { [weak self] in
-                // A click whose next step is Settings — our own
-                // app — coming forward, not the remembered one,
-                // so it does not yield (#952).
-                self?.close(yieldingActivation: false)
-                self?.onEdit()
-            }
-        )
+        let onEdit: () -> Void = { [weak self] in
+            // A click whose next step is Settings — our own
+            // app — coming forward, not the remembered one,
+            // so it does not yield (#952).
+            self?.close(yieldingActivation: false)
+            self?.onEdit()
+        }
+        let combo = ShortcutsOpenBinding.comboGlyphs(core: core)
+        func view(overflows: Bool) -> ShortcutsPanelView {
+            ShortcutsPanelView(
+                reference: reference,
+                dismissCombo: combo,
+                overflows: overflows,
+                onEdit: onEdit
+            )
+        }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        panel.contentView = NSHostingView(
-            rootView: LocaleScopedRoot { root }
+        // The scoping stays spelled AT the call site: a named
+        // wrapper type reads identically and is invisible to
+        // `HostingRootLocaleScopeTests`, which scans this
+        // initializer — and only this one, not the re-root below.
+        let hosting = NSHostingView(
+            rootView: LocaleScopedRoot { view(overflows: false) }
                 .environmentObject(LocalizationManager.shared)
         )
-        resize(panel)
+        panel.contentView = hosting
+        // Measured without the cue, re-rooted where it clipped;
+        // no second measure (#1292).
+        if resize(panel) {
+            hosting.rootView =
+                LocaleScopedRoot { view(overflows: true) }
+                .environmentObject(LocalizationManager.shared)
+        }
         center(panel)
         let frontmost = NSWorkspace.shared.frontmostApplication
         returnTarget =
@@ -185,8 +209,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     // MARK: - Sizing & placement
 
-    private func resize(_ panel: ShortcutsPanel) {
-        guard let content = panel.contentView else { return }
+    /// Sizes the panel and reports whether it had to clip.
+    private func resize(_ panel: ShortcutsPanel) -> Bool {
+        guard let content = panel.contentView else { return false }
         let fitting = content.fittingSize
         let screen =
             screenUnderPointer()?.visibleFrame.height
@@ -195,6 +220,10 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         let height = min(fitting.height, ceiling)
         panel.setContentSize(
             NSSize(width: fitting.width, height: height)
+        )
+        return Self.overflows(
+            fitting: fitting.height,
+            ceiling: ceiling
         )
     }
 
