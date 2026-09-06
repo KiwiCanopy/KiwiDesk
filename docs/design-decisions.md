@@ -1306,8 +1306,10 @@ The same flag exempts the window from the whole tiled working set
 while it is away (#670): it keeps its slot in `space.windows`
 (fullscreen is not a destroy), but both tiled-member derivations
 drop it, so no layout pass computes a frame for it, no navigation
-step lands on it, no z-order raise targets it, and the
-inactive-space stash never parks it — an AX poke at a window
+step lands on it, no z-order raise targets it, the
+inactive-space stash never parks it, and a `resize` aimed at it
+is refused rather than routed into a layout (#1298) — an AX poke
+at a window
 macOS moved off the Desktop into a Mission Control slot of its
 own either fights the fullscreen app or raises it under the user
 without intent. Exiting fullscreen is a

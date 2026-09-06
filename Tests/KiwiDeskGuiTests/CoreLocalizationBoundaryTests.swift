@@ -88,9 +88,10 @@ struct CoreLocalizationBoundaryTests {
         // file and the funnel's file holds none: own-minimum,
         // neighbor-minimum, the two own-maximum readings (learned
         // bound and screen edge), the two no-axis-here readings,
-        // the two nothing-to-divide readings, and
-        // layout-has-no-resizing. Same caveat as `+StickyMarks`
-        // if the overlays ever move out of Core.
+        // the two nothing-to-divide readings,
+        // layout-has-no-resizing and window-is-fullscreen
+        // (#1298). Same caveat as `+StickyMarks` if the overlays
+        // ever move out of Core.
         "Commands/ResizeRefusal+Rendering.swift": 10,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the

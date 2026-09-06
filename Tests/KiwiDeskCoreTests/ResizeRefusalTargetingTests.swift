@@ -245,9 +245,11 @@ struct ResizeRefusalTargetingTests {
         // Since #1298 the keyboard press never reaches this
         // writer with a full-screen focus — `resize()` refuses
         // and cues `windowIsFullscreen` first
-        // (`FullscreenResizeTiledTests`) — so the WRITER's arm
-        // is driven directly here, as the mouse `.masterRatio`
-        // path still can.
+        // (`FullscreenResizeTiledTests`) — and the mouse
+        // `.masterRatio` drag hands it the DRAGGED window, which
+        // cannot be. So the WRITER's arm is driven directly; the
+        // live focus it still serves is the elsewhere-rendering
+        // sticky (#445), reaching the same guard.
         let core = makeCore()
         for id: UInt32 in 1...3 {
             core.state.apply(

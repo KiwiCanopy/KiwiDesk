@@ -88,8 +88,10 @@ struct ResizeRefusalCensusTests {
             + "elsewhere-rendering sticky (#445) window, which "
             + "effectiveTiledMembers drops. That one HAS a frame "
             + "to draw on; what it lacks is a partition to be "
-            + "refused from. A native-fullscreen focus no longer "
-            + "reaches here — resize() refuses it first (#1298)",
+            + "refused from. A native-fullscreen focus is kept "
+            + "out by resize()'s guard on the keyboard side and "
+            + "the drag pipeline's slot gate on the mouse side "
+            + "(#1298, FullscreenResizeTiledTests)",
         "unknown window":
             "the id is gone; nothing to draw on",
         "track has no local window":

@@ -170,6 +170,48 @@ struct FullscreenResizeTiledTests {
         expectRefused(mode: "track", axis: "y", count: 2)
     }
 
+    /// The MOUSE entry to the same writers: a drop that reads
+    /// as a resize reaches `handleResizeEnd` only for a window
+    /// `calculatedFrames` placed, which a full-screen one is
+    /// not — so the drag pipeline's slot gate is what keeps a
+    /// full-screen window's drop out of the store, and a
+    /// relaxation of it re-opens this defect on the mouse side.
+    /// The control drop writes the ratio; the same drop after
+    /// the flip writes nothing.
+    @Test("a full-screen window's drop moves no store")
+    func dropOfFullscreenWindowWritesNothing() throws {
+        let core = makeCore()
+        let focused = tiledSetup(core, mode: "bsp", count: 2)
+        let slots = core.tiler.calculatedFrames(state: core.state)
+        let slot = try #require(slots[focused])
+        let other = try #require(slots[WindowID(1)])
+        // Widen the edge shared with the neighbour by 200 pt;
+        // an outer edge would snap back rather than resize.
+        var frame = slot
+        if slot.maxX <= other.minX {
+            frame.size.width += 200
+        } else {
+            frame.origin.x -= 200
+            frame.size.width += 200
+        }
+        // Pinned away from every slot: no swap target, and no
+        // other display for the relocate arm to find.
+        core.drag.cursorLocation = {
+            GeometryUtils.axPoint(CGPoint(x: -9000, y: -9000))
+        }
+        let untouched = Stores(core)
+        core.handleDragEnd(focused, start: slot, frame: frame)
+        let written = Stores(core)
+        #expect(written.ratios.splitRatioH != nil)
+        #expect(written != untouched)
+
+        core.state.apply(
+            .windowFullscreenChanged(focused, isFullscreen: true)
+        )
+        core.handleDragEnd(focused, start: slot, frame: frame)
+        #expect(Stores(core) == written)
+    }
+
     /// The layouts with no resize at all cue the window's case
     /// rather than the layout's when the focus is full screen:
     /// it is the window, not the layout, that refuses (#1298).

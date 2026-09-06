@@ -3895,14 +3895,6 @@ own detection did — **or** any window in a space set to the
 floating layout, which places nothing and so leaves its members
 free-floating in exactly the same way.
 
-A focused window in **native full screen** — floating or tiled,
-whatever the space's layout — is refused before any of this
-(#1298): it fills a macOS Space of its own, so there is no frame
-to write and no layout that places it. The press writes nothing,
-moves no other window, and flashes a pill on the full-screen
-window saying full-screen windows can't be resized; CLI and IPC
-callers read `the focused window is fullscreen`.
-
 The delta is split between **both** edges (#1091): a chord has
 no grabbed edge to anchor on, so a float grows and shrinks
 around its own centre rather than from its top-left corner. An
@@ -3922,6 +3914,15 @@ silent one at the keyboard reads as "KiwiDesk ignored me". Add
 the system alert sound to it with `set_refusal_sound(true)`;
 only a hotkey fire sounds, so CLI and IPC callers see the pill
 and read the error JSON without hearing anything.
+
+A focused window in **native full screen** — floating or tiled,
+whatever the space's layout — is refused before either route,
+the float's or the layout's (#1298): it fills a macOS Space of
+its own, so there is no frame to write and no layout that places
+it. The press writes nothing, moves no other window, and flashes
+a pill on the full-screen window saying full-screen windows
+can't be resized; CLI and IPC callers read `the focused window
+is fullscreen`.
 
 Distinct from that no-target alert (#933): a resize a size
 limit **truncates** — a shrink reaching the focused window's

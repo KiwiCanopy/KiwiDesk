@@ -127,10 +127,7 @@ extension KiwiCore {
         cueResizeRefusal(.layoutHasNoResize(window))
     }
 
-    /// The focused window is in native full screen (#1298): a
-    /// fact about the window, refused ONCE in `resize()` ahead
-    /// of every path, so no layout's store moves for a window
-    /// none of them places.
+    /// The focused window is in native full screen (#1298).
     func refuseWindowIsFullscreen(_ window: WindowID) {
         cueResizeRefusal(.windowIsFullscreen(window))
     }

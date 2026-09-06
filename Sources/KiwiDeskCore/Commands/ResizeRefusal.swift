@@ -58,9 +58,7 @@ enum ResizeRefusal: Equatable {
     case layoutHasNoResize(WindowID)
     /// The focused window is in native full screen (#1298): it
     /// fills a macOS Space of its own (#670), so no layout
-    /// places it and no store the resize paths write is about
-    /// it. A fact about the WINDOW rather than the layout, which
-    /// is why `layoutHasNoResize` is the wrong sentence for it.
+    /// places it. A fact about the WINDOW, whatever the layout.
     case windowIsFullscreen(WindowID)
 }
 

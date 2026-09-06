@@ -97,10 +97,8 @@ extension KiwiCore {
         // of the focused verbs use the anchor. See the
         // resize-stays-local row in docs/design-decisions.md.
         // A native-fullscreen focus is refused ONCE, ahead of
-        // every path (#1298): it fills a macOS Space of its own
-        // (#670), so no layout places it and no store below is
-        // about it — the tiled paths' unknown-focus fallbacks
-        // wrote the shared ratio and moved its NEIGHBOURS.
+        // every path (#1298): no layout places it (#670), so no
+        // store below is about it.
         if let focused = space.focused,
             state.windows[focused]?.isFullscreen == true
         {

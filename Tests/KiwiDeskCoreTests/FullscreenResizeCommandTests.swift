@@ -101,9 +101,11 @@ struct FullscreenResizeCommandTests {
     /// TILED space used to take the float route and set a frame
     /// its app refused. The guard sits in `resize()` ahead of
     /// the float branch (#1298), so this arm meets the same
-    /// refusal the tiled paths do — and the ratio store, which
-    /// the route this window would otherwise fall through to
-    /// writes, stays untouched.
+    /// refusal the tiled paths do. The ratio assertion is the
+    /// belt against SHEDDING the route rather than the guard: a
+    /// press that drops into `resizeBsp` writes the split ratio
+    /// through its unknown-focus fallback and moves the
+    /// NEIGHBOURS, which no frame assertion sees.
     ///
     /// The ratio is read off the SESSION store, not the global:
     /// a space with no authored override never writes the
@@ -191,14 +193,12 @@ struct FullscreenResizeCommandTests {
             args: [.string("y"), .number(150)]
         )
         #expect(!response.isSuccess)
-        // Named for the window, never for the layout: it is not
-        // the layout that refused this one.
         #expect(
             response.error == "the focused window is fullscreen"
         )
         #expect(frames.isEmpty)
-        // The one case, never the layout's: it is not the layout
-        // that refused this one (#1298).
+        // Named for the window, never for the layout: it is not
+        // the layout that refused this one (#1298).
         #expect(cues == [.windowIsFullscreen(WindowID(2))])
     }
 }
