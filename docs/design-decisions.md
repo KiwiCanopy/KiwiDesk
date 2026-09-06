@@ -8304,6 +8304,40 @@ per display means per-display content, consistent with every
 other per-display fact in the bar; a secondary display shows
 its own space's remembered focus.
 
+**The bars honour Reduce Motion, and the ring MARKS rather than
+counts down.** (#1078.) A bar is chrome KiwiDesk draws, so it
+owes the same stand-down the Settings window gives: the setting
+asks for less motion from the app, not from one window of it.
+Two rulings shape what "less" costs, because the bars' motion is
+not decoration in either case.
+
+- **An item run LANDS.** A bar whose run changes width is
+  telling you a group expanded or a window closed, and the
+  arrangement is the content — the travel between arrangements
+  is not. This is the ruling the layout schematics already took
+  (#1069): the new frames still appear, so nothing is lost but
+  the slide. A bar is glanceable rather than studied, which
+  argues the same way and more strongly: motion in the corner of
+  the eye is precisely what a Reduce Motion user asked to be rid
+  of.
+- **The spring ring MARKS its item.** The sweep is a countdown,
+  the one piece of bar motion that carries information a static
+  frame cannot, so standing it down does lose something. It
+  keeps what it can: the ring is still drawn, and the quiet
+  pre-delay survives, because a delay is not motion and it is
+  what keeps a quick flick-to-relocate from flashing a loading
+  ring. So the item stays bare for the same half-second and
+  then wears a whole ring for the rest of the dwell — "a
+  hold here will spring" is intact, and only "for this much
+  longer" is gone. The alternative, dropping the ring entirely
+  and leaving the hover tint to say it, was rejected: the tint
+  fires on every item the cursor crosses, so it says *here*
+  rather than *armed*.
+
+The engineering half — one home, `BarMotion`, and the guards
+that keep the bars routed through it — is
+`.claude/rules/bars.md` ▸ the bars start motion in one file.
+
 **Space Bar drag-drop is a two-speed spring, not a blind
 relocate.** (#372.) Dragging a window onto a Space item either
 relocates it (fast drop, `move_to_space`) or, after a 2 s dwell,
@@ -8357,10 +8391,11 @@ The load-bearing details, so they are not relitigated:
   flick-to-relocate never flashes a loading ring; the spring still
   fires at the full dwell, so the sweep fills over
   `dwell − 0.5 s`, and the range floors at 1 s to keep that fill
-  visible. The pre-delay is a `beginTime` offset on the stroke
-  animation, so leaving before it elapses shows nothing. Always-on, no enable toggle; focus-after-drop
-  is not a new setting (`move_to_space_and_follow` already models
-  following). Option-held-drop → follow is a deferred second gear.
+  visible. The pre-delay is carried by the stroke animation
+  itself, so leaving before it elapses shows nothing. Always-on,
+  no enable toggle; focus-after-drop is not a new setting
+  (`move_to_space_and_follow` already models following).
+  Option-held-drop → follow is a deferred second gear.
 
 **Bar alignment is edge-relative, one shared default.**
 (#293 QA.) Both bars place their content run via `alignment` —

@@ -1232,10 +1232,16 @@ does. `Sources/KiwiDeskCore` draws the bars and the border cues
 through AppKit and Core Animation, outside this guard's reach,
 so **a Core animation is gated at its own site or it is
 ungated** — nothing there is covered by being in a tree that
-has a guard. Where each stood in 2026-08 is worth knowing and
-is not a rule: the border cues read
-`accessibilityDisplayShouldReduceMotion` themselves, and the
-bars read no setting at all.
+has a guard. An AppKit frame write carries no animation
+argument to name a gate in, so Core cannot take the per-call
+shape below; the bars take the other one tests.md sanctions —
+one home, gated there, routed through by
+`BarMotionSeamTests` ([bars.md](bars.md), #1078). The border
+cues are the half no guard reaches, so an obligation is all
+there is — and it is stated in the file that loads where it
+binds, [borders.md](borders.md) ▸ a cue's animation names its
+Reduce Motion read at its site, rather than here, where nobody
+editing an overlay would meet it.
 
 **A shared animation constant stays a plain VALUE; the gate is
 spelled at each caller.** Sharing the TUNING is fine — every

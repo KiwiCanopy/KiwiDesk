@@ -100,3 +100,45 @@ reading a bar still makes for itself:
   The single-screen suites
   stay blind to all three by construction, which is why they are
   their own file rather than added expectations.
+
+## The bars start motion in one file, and that file gates it
+
+A bar animation is gated on Reduce Motion, and `BarMotion` is
+where every one of them lives (#1078). `Sources/KiwiDesk`'s gate
+is spelled per call, in the argument, because a SwiftUI
+animation carries one to name; an AppKit frame write does not
+(`view.animator().frame = f` takes no animation argument at
+all), so the bars take the other shape tests.md sanctions — one
+home, routed through the seam, applied exactly once.
+
+Obligations:
+
+- **A new bar surface animates through `BarMotion`**, never
+  beside it. `BarMotionSeamTests` holds that: the
+  motion-starting AppKit and Core Animation spellings appear
+  under `Bar/` only in `BarMotion.swift`, its `allowed` map is
+  the one copy of who is exempt, and a second clause holds the
+  wrappers to consulting their own decisions — deleting the gate
+  inside a shared helper ungates every caller at once while the
+  routing clause stays green, which is the failure
+  [gui.md](gui.md) ▸ the Reduce Motion gate rejected an
+  abstraction over.
+- **A decision takes the flag as an argument**, so it is
+  assertable: `BarMotionTests` pins the collapsed group
+  duration, the frame write that lands instead of travelling and
+  both shapes of the drop ring, and none of them reads the live
+  setting. `BarMotion.isReduced` is the one expression a test
+  cannot reach, deliberately — it is the whole of what is left.
+  **Every entry point takes the same shape** — a `@MainActor`
+  wrapper that reads, a pure decision that is handed the answer
+  — because a second shape beside it owes the seam suite a
+  second clause, and the clause a caller-fed gate needs cannot
+  be the one a wrapper-read gate needs.
+- **The gate drops the MOTION, never the affordance**, and **a
+  DELAY is not motion** — a quiet window before something
+  appears survives the gate at its full length, because
+  shortening it changes what the affordance MEANS rather than
+  how it travels. What a stand-down costs the user is a product
+  ruling and not this file's: `docs/design-decisions.md` ▸ the
+  bars honour Reduce Motion argues the two that `BarMotion`'s
+  decisions implement, and a third is argued there, not here.

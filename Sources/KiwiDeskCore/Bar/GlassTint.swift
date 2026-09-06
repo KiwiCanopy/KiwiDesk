@@ -31,13 +31,7 @@ enum GlassTint {
             )
         }
         backdrop.isHidden = false
-        if animated, backdrop.frame != .zero,
-            backdrop.frame != frame
-        {
-            backdrop.animator().frame = frame
-        } else {
-            backdrop.frame = frame
-        }
+        BarMotion.setFrame(backdrop, to: frame, animated: animated)
         backdrop.layer?.cornerRadius = cornerRadius
         // Cap the backdrop's opacity so the glass keeps its blur;
         // the stored Fill is untouched (see `maxAlpha`).
