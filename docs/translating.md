@@ -106,6 +106,18 @@ the English source. A German translation of the key above is
 free to write `"Nach %1$@ verschieben"` — the placeholder moves,
 the argument doesn't change.
 
+**And what goes in the slot must not have to AGREE with the
+sentence.** A name or a number never does. A word that would —
+an adjective, a participle, a noun in a case the frame sets —
+must not be shared between frames: whoever translates that
+value never sees the frame it lands in, and two frames wanting
+different forms cannot both be served. Such a sentence takes a
+key of its own per resulting sentence. If you are handed a key
+whose whole value is a bare adjective or participle, that is
+this defect and not a translation problem — leave it empty and
+report it. `.claude/rules/localization.md` carries the argument
+and #1110 the worked case.
+
 ## Help texts: bold markers and line breaks
 
 Keys ending in `.help` hold the contextual-help popover copy

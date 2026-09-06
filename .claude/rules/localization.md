@@ -29,6 +29,42 @@ through the `L(key, english, args...)` overload with **positional**
 translation can't reorder pieces stitched together in Swift, and
 many languages need to.
 
+**An interpolated value must not have to AGREE with the sentence
+it lands in.** A name and a number never do (a COUNT carries its
+own bullet further down — nothing may have to agree with that
+either). A word that does — an adjective, a noun in a case the
+frame sets — must not be handed around as one shared value: the
+translator of that value never sees the frame, and two frames
+wanting different cases cannot both be served. Author one key
+per resulting sentence instead. English is where this hides,
+since its adjectives do not inflect and always precede their
+noun, so the call site reads correctly in the one language the
+author checks. Nothing scans for it; what is held is the
+sub-class #1110 fixed, the four track rows, pinned by
+`TrackRowSentenceTests`.
+
+Ask whether the value must change form BETWEEN the frames it
+serves, not whether it is a word. `keybinding.dir.*` next door
+is words and is not this defect: "Focus window %1$@" and "Swap
+with window %1$@" put the value in the same role, so whatever
+form a locale finds serves both (`de` "links", `ru` "слева",
+`ja` "左"). A second frame that puts the value somewhere else
+is what a shared value cannot survive.
+
+#1110 is the worked case: `keybinding.seq.next` / `.prev` —
+"next" / "previous" standing alone — went into "Move window to
+%1$@ track" and "Swap with %1$@ track". Five catalogs rendered a
+row ungrammatically from the day it shipped — `de` "in den
+nächste Track", `it` "sul track successiva", `ja` "トラック 次 に
+移動", `ko` "트랙 다음(으)로 이동", `zh-Hans` "轨道 下一个". `ru`
+paid the other half of the cost, and it is the half worth
+knowing about: no form of «следующий» serves both frames, so
+that catalog escaped by REWRITING the swap row as a coordination
+— "Поменять местами текущий и следующий Track", naming the
+current Track only to dodge the instrumental the natural
+sentence wants. A frame like this does not always ship a visible
+defect; it can instead spend the translator's only way out.
+
 A key joins `common.` only when the same ENGLISH names the same
 ACTION at every call site, **checked at each site rather than
 inferred from the two values being byte-identical**. Identical

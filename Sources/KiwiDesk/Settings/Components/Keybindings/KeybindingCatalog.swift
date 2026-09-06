@@ -83,56 +83,6 @@ enum KeybindingCatalog {
         )
     }
 
-    private static let sequenceSteps = [
-        ("prev", "previous"), ("next", "next"),
-    ]
-
-    /// Translates sequence step argument for display (#95).
-    @MainActor private static func sequencePhrase(
-        _ step: String
-    ) -> String {
-        switch step {
-        case "prev":
-            return L("keybinding.seq.prev", "previous")
-        case "next":
-            return L("keybinding.seq.next", "next")
-        default:
-            return step
-        }
-    }
-
-    /// Move window to previous/next track rows (#185, #128).
-    static let moveToTrackRows: [NavCommand] =
-        sequenceSteps.map { step, phrase in
-            NavCommand(
-                label: "Move window to \(phrase) track",
-                lua: "KiwiDesk.move_to_track(\"\(step)\")",
-                displayLabel: {
-                    L(
-                        "keybinding.move_window_to_track",
-                        "Move window to %1$@ track",
-                        sequencePhrase(step)
-                    )
-                }
-            )
-        }
-
-    /// Swap with previous/next track rows (#182, #188).
-    static let trackSwapRows: [NavCommand] =
-        sequenceSteps.map { step, phrase in
-            NavCommand(
-                label: "Swap with \(phrase) track",
-                lua: "track.swap(\"\(step)\")",
-                displayLabel: {
-                    L(
-                        "keybinding.swap_with_track",
-                        "Swap with %1$@ track",
-                        sequencePhrase(step)
-                    )
-                }
-            )
-        }
-
     /// Interleaved "Move to Space" and "Move to Space & follow" command pairs
     /// (#678 Phase 3, #4).
     static func moveToSpace(
