@@ -6,12 +6,14 @@ import Testing
 /// The mode-gated frame's colour-vision floors (#760): the
 /// Settings mode-gated border draws the accent at
 /// `modeGatedStrokeOpacity`, and that composited stroke must
-/// separate — under protanopia, the strict axis — from BOTH of
-/// its neighbours on the same edge: the plain `hairline` on one
-/// side and hover's full-strength accent on the other. 0.5
-/// measured at exactly the floor against the light hairline,
-/// which is why the shipped value moved to 0.6 (ui-designer,
-/// 2026-08-09).
+/// separate — under protanopia, the strict axis — from the
+/// plain `hairline` it neighbours on the same edge, over BOTH
+/// grounds a card is drawn on: `card` at rest and `cardHover`
+/// under the pointer. 0.5 measured at exactly the floor against
+/// the light hairline, which is why the shipped value moved to
+/// 0.6 (ui-designer, 2026-08-09). The edge's other neighbour
+/// used to be hover's own full-strength accent; #1173 moved the
+/// pointer off this channel entirely.
 ///
 /// Lives in this target because `ColorVision` does; every input
 /// is PARSED from `SettingsTheme.swift` — the hex pairs and the
@@ -146,18 +148,25 @@ struct ModeGatedFrameSeparationTests {
         }
     }
 
-    /// The other neighbour: hover swaps the same edge to the
-    /// FULL accent, so the rest frame must not read as already
-    /// hovered.
-    @Test("the frame separates from hover's full accent")
-    func frameSeparatesFromHover() throws {
+    /// The same floor over the OTHER ground the frame is drawn
+    /// on. Hover no longer touches this edge (#1173 moved the
+    /// pointer to the fill), so "the rest frame reads as
+    /// hovered" is no longer a thing that can happen — what
+    /// replaces it is that a hovered card composites the same
+    /// stroke over `cardHover` instead of `card`, and the
+    /// marking has to keep separating from a plain card's
+    /// hairline there too. A retune of `cardHover` is what this
+    /// catches.
+    @Test("the frame separates from the hairline over hover")
+    func frameSeparatesOverTheHoverGround() throws {
         let source = try themeSource()
         let accent = try token("accent", in: source)
-        let card = try token("card", in: source)
+        let hairline = try token("hairline", in: source)
+        let hover = try token("cardHover", in: source)
         let alpha = try opacity(in: source)
-        for (a, c) in [
-            (accent.light, card.light),
-            (accent.dark, card.dark),
+        for (a, h, c) in [
+            (accent.light, hairline.light, hover.light),
+            (accent.dark, hairline.dark, hover.dark),
         ] {
             let stroke = try frame(
                 accent: a,
@@ -165,15 +174,16 @@ struct ModeGatedFrameSeparationTests {
                 alpha: alpha
             )
             let sep = try #require(
-                ColorVision.separation(stroke, a)
+                ColorVision.separation(stroke, h)
             )
             #expect(
                 sep >= ColorVision.separationFloor,
                 Comment(
                     rawValue:
-                        "mode-gated frame vs hover separates "
-                        + "\(Int(sep)) — the rest frame reads "
-                        + "as hovered"
+                        "mode-gated frame over the hover ground "
+                        + "vs hairline separates \(Int(sep)) — "
+                        + "under the floor; pointing at a marked "
+                        + "card erases its marking"
                 )
             )
         }

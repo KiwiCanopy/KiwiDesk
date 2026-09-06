@@ -8,6 +8,8 @@ struct HomeCard: View {
     let spotlighted: Bool
     let open: () -> Void
     @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     var body: some View {
         Button(action: open) {
@@ -36,13 +38,19 @@ struct HomeCard: View {
             // Border ABOVE the clip, never in the background:
             // the plate is opaque and full-bleed, so a background
             // stroke is painted over — which silenced the rest
-            // hairline, the hover accent and the #760 frame on
-            // every plated card (ui-designer blocker, 2026-08-09).
+            // hairline and the #760 frame on every plated card
+            // (ui-designer blocker, 2026-08-09).
             .overlay(cardStroke)
             .contentShape(
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
                 )
+            )
+            // `HoverChip`'s own duration, so the two hover
+            // idioms in the tree move at one speed.
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.12),
+                value: hovering
             )
         }
         .buttonStyle(.plain)
@@ -133,22 +141,30 @@ struct HomeCard: View {
             .lineLimit(1)
     }
 
+    /// The pointer's channel. On a plated card this lifts the
+    /// text band alone — the plate is opaque and full-bleed, and
+    /// no translucent neutral can lift a fixed-dark plate and a
+    /// mode-varying card at once (ui-designer, 2026-09-06).
     private var cardFill: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
-            .fill(SettingsTheme.card)
+            .fill(
+                hovering
+                    ? SettingsTheme.cardHover
+                    : SettingsTheme.card
+            )
     }
 
+    /// The mode's channel, and only the mode's: hover used to
+    /// draw the full accent on this same edge, which ERASED the
+    /// #760 marking of the card it was pointing at (#1173).
     private var cardStroke: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
-            // Accent highlight on hover (owner ruled 2026-08-04, 2026-08-09).
             .strokeBorder(
-                hovering
-                    ? SettingsTheme.accent
-                    : modeGated
-                        ? SettingsTheme.accent.opacity(
-                            SettingsTheme.modeGatedStrokeOpacity
-                        )
-                        : SettingsTheme.hairline,
+                modeGated
+                    ? SettingsTheme.accent.opacity(
+                        SettingsTheme.modeGatedStrokeOpacity
+                    )
+                    : SettingsTheme.hairline,
                 lineWidth: modeGated
                     ? SettingsTheme.containerStrokeModeGated
                     : SettingsTheme.containerStroke

@@ -177,6 +177,91 @@ struct HomeCardChromeTests {
         )
     }
 
+    /// The channel split (#1173): the border says one thing —
+    /// mode-gated or not — and the fill says the other, pointer
+    /// or not. A state that reads BOTH must not share a
+    /// property with either, which is what shipped: hover drew
+    /// the full accent on the border, so pointing at a
+    /// mode-gated card erased the marking it was pointing at.
+    ///
+    /// The negative half is the load-bearing one, and it is
+    /// located by what `cardStroke` cannot lose — its own
+    /// brace-balanced body, reached through the shared walker —
+    /// never by a spelling inside it: a needle for the retired
+    /// ternary would quietly stop matching on any innocent
+    /// retune and pass over a restored collision.
+    @Test("the pointer draws on the fill, never on the border")
+    func hoverAndMarkingTakeDifferentChannels() throws {
+        #expect(
+            try squashed("HomeCard.swift").contains(
+                ".fill(hovering?SettingsTheme.cardHover"
+                    + ":SettingsTheme.card)"
+            )
+        )
+        let body = try propertyBody("cardStroke")
+        #expect(!body.isEmpty)
+        #expect(
+            !body.contains("hovering"),
+            Comment(
+                rawValue:
+                    "cardStroke reads the pointer again — the "
+                    + "border is the mode's channel alone, or a "
+                    + "hovered card stops stating its mode"
+            )
+        )
+    }
+
+    /// The lift's Reduce Motion gate, named in the argument the
+    /// house rule requires — the gate drops the MOTION, and the
+    /// hover surface itself stays.
+    @Test("the hover lift names its Reduce Motion gate")
+    func hoverLiftNamesItsGate() throws {
+        #expect(
+            try squashed("HomeCard.swift").contains(
+                ".animation(reduceMotion?nil"
+                    + ":.easeOut(duration:0.12),value:hovering)"
+            )
+        )
+    }
+
+    /// The brace-balanced body of a computed property, off the
+    /// same walker `SourceScan.functionBody` uses — that one
+    /// takes `func <name>(` and a Core path, and neither fits a
+    /// `var` in the GUI tree.
+    private func propertyBody(_ name: String) throws -> String {
+        let url = Self.root
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("HomeCard.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        let characters = Array(source)
+        let marker = Array("var \(name):")
+        guard
+            let start = (0...(characters.count - marker.count))
+                .first(where: { index in
+                    Array(
+                        characters[index..<(index + marker.count)]
+                    ) == marker
+                })
+        else {
+            Issue.record("\(name) not found in HomeCard.swift")
+            return ""
+        }
+        var cursor = start + marker.count
+        while cursor < characters.count,
+            characters[cursor] != "{"
+        {
+            cursor += 1
+        }
+        return SourceScan.balanced(
+            characters,
+            from: &cursor,
+            open: "{",
+            close: "}"
+        ) ?? ""
+    }
+
     private func squashed(_ path: String) throws -> String {
         let url = Self.root
             .appendingPathComponent("Sources/KiwiDesk/Settings")
