@@ -72,13 +72,18 @@ struct ResizeRefusalCensusTests {
             "argument parse — a CLI/IPC contract, never a gesture",
         "no active space":
             "nothing on screen to draw a pill on",
-        "no window this layout can resize":
+        "no focused window":
             "a floating space whose members all resize "
             + "themselves (#1184) reached the mode switch, so "
-            + "the focus was absent — nothing to draw on — or "
-            + "native-fullscreen, which the tiled paths refuse "
-            + "wordlessly too (#670): it is not this layout "
-            + "that refused it",
+            + "there was no focus at all: nothing to draw a pill "
+            + "on. This arm's silence is its own — the sibling "
+            + "default: arm DOES cue",
+        "the focused window is fullscreen":
+            "it fills a macOS Space of its own (#670), so the "
+            + "float route has no frame to write. Wordless like "
+            + "the tiled paths' own answer to that window "
+            + "(no focused tiled window): it HAS a frame to draw "
+            + "on, but it was not this layout that refused it",
         "no focused tiled window":
             "the focus takes no part in this layout — a "
             + "native-fullscreen (#670) or elsewhere-rendering "

@@ -20,14 +20,18 @@
 /// predicate (#1184, `FloatingResizeCommandTests`), standing
 /// down for a native-fullscreen window (#670) on both arms —
 /// one arm alone would put the divergence the crossing removed
-/// back at that one window. The float-tier
-/// raise (`KiwiCore+ZOrderFloats`), the Space Bar badge
+/// back at that one window — and it stands the VERB down, not
+/// the float ROUTE, which would drop the press into the layout
+/// and let a window nothing places move its neighbours. Among
+/// the consumers still asking the flag are the float-tier raise
+/// (`KiwiCore+ZOrderFloats`), the Space Bar badge
 /// (`KiwiCore+SpaceBarItems`) and the focus ring
-/// (`KiwiCore+Borders`) ask the flag, and are right to until
-/// each is ruled the same way — #1286, which should re-derive
-/// its own list from the flag's readers rather than trust this
-/// one. Nothing scans for a bare-flag net, so a new one routes
-/// here deliberately.
+/// (`KiwiCore+Borders`); they are right to until each is ruled
+/// the same way. That list is known short, so #1286 re-derives
+/// it from the flag's readers rather than trusting it, and each
+/// verb it rules says WHICH fullscreen stand-down it takes.
+/// Nothing scans for a bare-flag net, so a new one routes here
+/// deliberately.
 ///
 /// Not the negation, either: the drag paths' "is this window a
 /// TILED member of this space" chains chain membership and

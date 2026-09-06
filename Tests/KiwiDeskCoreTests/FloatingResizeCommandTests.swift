@@ -202,47 +202,85 @@ struct FloatingResizeCommandTests {
         )
         #expect(!response.isSuccess)
         #expect(
-            response.error == "no window this layout can resize"
+            response.error == "no focused window"
         )
     }
 
     /// A native-fullscreen window is left to its own macOS
-    /// Space (#670): it fills one, so there is no frame here
-    /// worth writing — the stand-down the float nets that
-    /// widened the same way carry (`clampFloatsClearOfBars`,
-    /// the stash capture).
+    /// Space (#670): it fills one, so the float route has no
+    /// frame worth writing.
     ///
-    /// Both arms, and that is #1184's own ruling rather than a
-    /// widening of it: a floating-MODE member answers exactly
-    /// as a flag-float does, so a stand-down on one arm alone
-    /// would put the divergence back at this one window. The
-    /// flag arm used to write the frame; the paired case below
-    /// is the half nothing held, and a gate tightened to the
-    /// mode arm alone leaves it green.
+    /// The VERB stands down, not the ROUTE, and that distinction
+    /// is the whole of the second case below. Shedding the route
+    /// would drop the press into the layout, where `resizeBsp`
+    /// writes the shared ratio through its unknown-focus
+    /// fallback — so a window nothing places would move its
+    /// NEIGHBOURS, which is worse than the no-op it replaced
+    /// (architect review, 2026-09-06).
     ///
-    /// The negative twin runs first in each, so neither can
-    /// pass for a fixture that never resized at all.
+    /// Both arms refuse, which is #1184's own ruling rather than
+    /// a widening of it: a floating-MODE member answers exactly
+    /// as a flag-float does, so standing one arm down alone puts
+    /// the divergence back at this one window.
+    ///
+    /// The negative twin runs first in each, so none can pass
+    /// for a fixture that never resized at all.
     @Test("a fullscreen member is left to its own Space")
     func fullscreenMemberIsLeftAlone() {
-        expectFullscreenRefused(flagFloating: false)
+        expectFullscreenRefused(mode: "floating", flag: false)
     }
 
     @Test("a fullscreen flag-float is left to it too")
     func fullscreenFlagFloatIsLeftAlone() {
-        expectFullscreenRefused(flagFloating: true)
+        expectFullscreenRefused(mode: "floating", flag: true)
+    }
+
+    /// The one case a shipped user meets differently: a
+    /// flag-float that goes fullscreen in a TILED space used to
+    /// take the float route and set a frame the app refused.
+    /// It must refuse — and above all must not fall through to
+    /// the ratio write, which is what the assertion on the
+    /// untouched ratio holds.
+    @Test("a fullscreen flag-float in bsp writes no ratio")
+    func fullscreenFlagFloatInBspWritesNoRatio() {
+        let core = makeCore()
+        var frames: [WindowID: CGRect] = [:]
+        floatingSetup(core, mode: "bsp") { frames[$0] = $1 }
+        let ratioBefore = core.tiler.settings.bsp.splitRatioH
+        core.state.apply(
+            .windowFullscreenChanged(
+                WindowID(2),
+                isFullscreen: true
+            )
+        )
+        let response = core.execute(
+            "resize",
+            args: [.string("x"), .number(200)]
+        )
+        #expect(!response.isSuccess)
+        #expect(
+            response.error == "the focused window is fullscreen"
+        )
+        #expect(frames.isEmpty)
+        #expect(
+            core.tiler.settings.bsp.splitRatioH == ratioBefore
+        )
     }
 
     /// Resizes the focus, marks it fullscreen, resizes again.
-    /// `flagFloating` picks which arm of the gate carried the
-    /// first resize — the window's own flag, or the space's
-    /// `.floating` mode — and neither may carry the second.
-    private func expectFullscreenRefused(flagFloating: Bool) {
+    /// `flag` picks which arm of the gate carried the first
+    /// resize — the window's own flag, or the space's mode —
+    /// and neither may carry the second.
+    private func expectFullscreenRefused(
+        mode: String,
+        flag: Bool
+    ) {
         let core = makeCore()
         var frames: [WindowID: CGRect] = [:]
-        floatingSetup(core, mode: "floating") {
+        floatingSetup(core, mode: mode) {
             frames[$0] = $1
         }
-        core.state.setFloating(WindowID(2), flagFloating)
+        core.state.setFloating(WindowID(2), flag)
         #expect(
             core.execute(
                 "resize",
@@ -252,6 +290,15 @@ struct FloatingResizeCommandTests {
         #expect(frames[WindowID(2)] != nil)
 
         frames = [:]
+        // Armed only for the refused leg — the successful one
+        // above cues nothing either way, so an earlier capture
+        // would read empty without this leg running at all.
+        // This is the ONE observer of the arm's wordlessness:
+        // adding a cue to it left all 4836 tests green
+        // (guard-prover, 2026-09-06), and the census register
+        // states that silence as a claim.
+        var cues: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { cues.append($0) }
         core.state.apply(
             .windowFullscreenChanged(
                 WindowID(2),
@@ -263,12 +310,16 @@ struct FloatingResizeCommandTests {
             args: [.string("y"), .number(150)]
         )
         #expect(!response.isSuccess)
-        // Named for the focus, never for the layout: this
-        // window is not one the FLOATING layout refused.
+        // Named for the window, never for the layout: it is not
+        // the layout that refused this one.
         #expect(
-            response.error == "no window this layout can resize"
+            response.error == "the focused window is fullscreen"
         )
         #expect(frames.isEmpty)
+        // A focus IS present here, so `refuseResizeUnsupported`
+        // would draw if the arm called it — unlike the empty
+        // space, where it early-returns and could never tell.
+        #expect(cues.isEmpty)
     }
 
     /// Monocle is untouched by #1184: it PLACES its windows, so

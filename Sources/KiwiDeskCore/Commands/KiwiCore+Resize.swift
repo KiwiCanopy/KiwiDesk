@@ -101,22 +101,26 @@ extension KiwiCore {
         // so the ratio paths below (and their unknown-focus
         // fallbacks) never see a floating focus.
         //
-        // A native-fullscreen window fills a macOS Space of its
-        // own (#670), so there is no frame here worth writing.
-        // It stands BOTH arms down, or #1184's ruling — that a
-        // mode member answers exactly as a flag-float does —
-        // fails at this one window.
-        //
         // The EFFECTIVE float, never the flag (#1184), on the
         // membership `space.focused` carries.
         if let focused = space.focused,
             let window = state.windows[focused],
-            !window.isFullscreen,
             EffectiveFloat.applies(
                 isFloating: window.isFloating,
                 mode: space.mode
             )
         {
+            // A native-fullscreen window fills a macOS Space of
+            // its own (#670), so there is no frame worth
+            // writing. The VERB stands down here rather than the
+            // ROUTE: shedding the route would drop this press
+            // into the layout below, where a window nothing
+            // places would move its neighbours (architect
+            // review). Both arms, or #1184's ruling that a mode
+            // member answers as a flag-float does fails here.
+            guard !window.isFullscreen else {
+                return .fail("the focused window is fullscreen")
+            }
             return resizeFloating(
                 focused,
                 axis: axis,
@@ -163,10 +167,11 @@ extension KiwiCore {
                 space: space
             )
         case .floating:
-            // Reached only with no focus this verb can move
-            // (#1184) — the layout itself refuses nothing here,
-            // and the register carries why it stays wordless.
-            return .fail("no window this layout can resize")
+            // Every member resizes itself (#1184), so this arm
+            // is reached only with no focus to move — the
+            // layout refuses nothing. Named for the focus like
+            // its siblings, never for the layout.
+            return .fail("no focused window")
         default:
             // Correct no-op (macOS full-screen/Stage Manager
             // expose no resize either), but perceivable (#184):

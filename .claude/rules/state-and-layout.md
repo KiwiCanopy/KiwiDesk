@@ -986,11 +986,15 @@ editing here:
   flag-floating neighbour is a difference with nothing behind it
   (#1184, `FloatingResizeCommandTests`). **A verb that crosses
   stands down for a native-fullscreen window** (#670): it fills
-  a macOS Space of its own, so no layout places it and there is
-  no frame worth writing — BOTH arms, or the ruling that a mode
-  member answers exactly as a flag-float does fails at that one
-  window, which is the divergence the crossing removed wearing a
-  narrower shape. **The mode arm names the
+  a macOS Space of its own, so there is no frame worth writing —
+  BOTH arms, or the ruling that a mode member answers exactly as
+  a flag-float does fails at that one window, which is the
+  divergence the crossing removed wearing a narrower shape. And
+  the stand-down is the VERB's, never the float ROUTE's: shedding
+  the route drops the press into the layout, where a window
+  nothing places moves its NEIGHBOURS instead — strictly worse
+  than the refused frame set it replaces
+  (`FloatingResizeCommandTests`). **The mode arm names the
   space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose
