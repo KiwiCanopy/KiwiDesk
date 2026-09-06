@@ -114,9 +114,16 @@ struct FullscreenResizeTiledTests {
         core.state.apply(
             .windowFullscreenChanged(focused, isFullscreen: true)
         )
+        // The refused press SHRINKS. Scrolling measures a focus
+        // the engine draws no frame for from the STORE, and a
+        // second grow from the store the control just raised can
+        // stop at the slot domain's own epsilon and write nothing
+        // with the guard gone — a shrink from it always writes,
+        // so the store assertion below is live on every path
+        // (guard-prover, 2026-09-07).
         let response = core.execute(
             "resize",
-            args: [.string(axis), .number(100)]
+            args: [.string(axis), .number(-100)]
         )
         #expect(!response.isSuccess, "\(mode) \(axis)")
         #expect(
