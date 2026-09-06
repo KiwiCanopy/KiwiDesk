@@ -1089,13 +1089,32 @@ pulsing and stays put, so the sentence it belongs to is still
 marked, and the tour's progress row fills the same pips without
 the crossfade between them.
 
+**A drag source is legible at rest, not on hover.** Paint cannot
+say "draggable", and hover arrives only once the pointer is
+already there — so a token you can pick up wears a closed,
+full-perimeter edge at a real weight, which is what makes it
+read as a piece lying on the plate rather than ink printed on
+it. Two obligations follow, and the second is the one that
+actually earns the first: the edge is **one weight for every
+kind** (a kind moves its alpha, never its width — a sub-point
+stroke is a half-pixel at 1x and can vanish on an external
+screen), and **nothing that is not a drag source wears that
+costume.** The Monitors `+n` marker wore the pinned chip's fill
+byte for byte while opening a popover, which is why the page's
+paint meant nothing until it was moved to the shared chip
+(#1240). A rest cue only reads as one if its neighbours lack it.
+
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,
 toggles, sliders, and fields keep system hover. Ambiguous
 icon-only borderless actions use the shared adaptive chip
 (`0.06` rest → `0.12` hover); custom full-row picker entries
 use a hover-only `0.06` fill; unselected custom segments and
-mode chips lift their existing fill by about `0.05`. No scale,
+mode chips lift their existing fill by about `0.05`; a draggable
+token chip lifts its own rest fill by `0.06`, whichever that
+is — so the one with no rest fill gains exactly the hover-only
+wash above, and the kind channel (outline versus fill) is not
+spent on discoverability. No scale,
 movement, shadow, or pointing-hand cursor on ordinary buttons
 (the hand remains link-only). Disabled controls never react;
 under Reduce Motion the color change is immediate. Every such
