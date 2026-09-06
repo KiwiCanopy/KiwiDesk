@@ -33,6 +33,7 @@ struct SettingsThemeWiringTests {
         // one `.tint` is set.
         "page": "SettingsView+Chrome.swift",
         "card": "SettingsHeaderBar.swift",
+        "cardHover": "HomeCard.swift",
         "sunken": "Chips.swift",
         "previewPlate": "HomeCardPlate.swift",
         "plateInk": "HomeCardPlate.swift",

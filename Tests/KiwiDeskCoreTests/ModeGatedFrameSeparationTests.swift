@@ -6,12 +6,14 @@ import Testing
 /// The mode-gated frame's colour-vision floors (#760): the
 /// Settings mode-gated border draws the accent at
 /// `modeGatedStrokeOpacity`, and that composited stroke must
-/// separate — under protanopia, the strict axis — from BOTH of
-/// its neighbours on the same edge: the plain `hairline` on one
-/// side and hover's full-strength accent on the other. 0.5
-/// measured at exactly the floor against the light hairline,
-/// which is why the shipped value moved to 0.6 (ui-designer,
-/// 2026-08-09).
+/// separate — under protanopia, the strict axis — from both the
+/// plain `hairline` it neighbours on the same edge and the
+/// ground it sits on, over `card` at rest and `cardHover` under
+/// the pointer. 0.5 measured at exactly the floor against the
+/// light hairline, which is why the shipped value moved to 0.6
+/// (ui-designer, 2026-08-09). The edge's other neighbour used
+/// to be hover's own full-strength accent; #1173 moved the
+/// pointer off this channel entirely.
 ///
 /// Lives in this target because `ColorVision` does; every input
 /// is PARSED from `SettingsTheme.swift` — the hex pairs and the
@@ -146,34 +148,59 @@ struct ModeGatedFrameSeparationTests {
         }
     }
 
-    /// The other neighbour: hover swaps the same edge to the
-    /// FULL accent, so the rest frame must not read as already
-    /// hovered.
-    @Test("the frame separates from hover's full accent")
-    func frameSeparatesFromHover() throws {
+    /// The frame's OTHER neighbour, and the one a retune can
+    /// actually move. The clause here used to measure against
+    /// hover's own full-strength accent, which #1173 took off
+    /// this edge; measuring against the hairline over the hover
+    /// ground was the obvious replacement and is INERT — the
+    /// stroke carries 60% of the accent whatever it sits on, so
+    /// no in-gamut ground brings it near a near-white hairline
+    /// (guard-prover swept the cube: 83.3 is the reachable
+    /// minimum against a floor of 60).
+    ///
+    /// What can fail is the frame sinking into the GROUND it is
+    /// drawn on, which goes to 0 as the two converge — so this
+    /// measures the stroke against each ground a card offers,
+    /// `card` at rest and `cardHover` under the pointer. It is
+    /// the #1173 invariant stated in colour: a marked card must
+    /// still say so while the pointer is on it.
+    @Test("the frame separates from the ground it sits on")
+    func frameSeparatesFromItsGround() throws {
         let source = try themeSource()
         let accent = try token("accent", in: source)
         let card = try token("card", in: source)
+        let hover = try token("cardHover", in: source)
         let alpha = try opacity(in: source)
-        for (a, c) in [
-            (accent.light, card.light),
-            (accent.dark, card.dark),
+        // Each ground is NAMED, not just spelled: the two
+        // hexes go identical exactly when a retune collapses
+        // one ground onto another, which is the failure this
+        // clause is for — so the hex alone stops identifying
+        // the arm at the moment it matters (guard-prover,
+        // 2026-09-06). The separation prints undivided for the
+        // same reason: truncating 55.7 to 55 reads as further
+        // from the floor than it is.
+        for (name, a, ground) in [
+            ("card light", accent.light, card.light),
+            ("card dark", accent.dark, card.dark),
+            ("cardHover light", accent.light, hover.light),
+            ("cardHover dark", accent.dark, hover.dark),
         ] {
             let stroke = try frame(
                 accent: a,
-                card: c,
+                card: ground,
                 alpha: alpha
             )
             let sep = try #require(
-                ColorVision.separation(stroke, a)
+                ColorVision.separation(stroke, ground)
             )
             #expect(
                 sep >= ColorVision.separationFloor,
                 Comment(
                     rawValue:
-                        "mode-gated frame vs hover separates "
-                        + "\(Int(sep)) — the rest frame reads "
-                        + "as hovered"
+                        "mode-gated frame vs \(name) "
+                        + "(\(ground)) separates \(sep) — under "
+                        + "the floor; the marking sinks into the "
+                        + "card it marks"
                 )
             )
         }

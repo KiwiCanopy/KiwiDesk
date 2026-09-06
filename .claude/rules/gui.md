@@ -751,6 +751,20 @@ must keep:
   `SettingsModeRevealTests` pins the timeline; a new
   mode-gated container passes `modeGated:` to its container
   shape.
+- **A durable marking and a transient pointer state never
+  share a property** (#1173). Hover shipped on the Home card's
+  border, where the #760 marking already lived, so the two
+  differed only in strength — and pointing at a mode-gated card
+  OVERWROTE the channel carrying its marking, which no
+  strength ceiling can fix. Separate them by what they ANSWER,
+  never by degree: the border says what a thing IS, a
+  neutral fill lift says where the pointer is (the idiom
+  `hoverHighlight` and `ShortcutLayerChip` already keep — the
+  accent is reserved for identity and selection). The two then
+  compose instead of one erasing the other.
+  `HomeCardChromeTests` holds the split, its negative half
+  located by `cardStroke`'s brace-balanced body rather than by
+  a spelling a retune may move.
 
 ## Responsive width (#678 turn 17a)
 

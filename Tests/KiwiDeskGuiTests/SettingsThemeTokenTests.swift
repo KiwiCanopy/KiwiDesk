@@ -56,6 +56,15 @@ struct SettingsThemeTokenTests {
         Pin("page", 0xFB_FC_FA, 0x17_1C_19, SettingsTheme.page),
         Pin("card", 0xFF_FF_FF, 0x1E_25_21, SettingsTheme.card),
         Pin("panel", 0xF4_F6_F1, 0x1A_20_1C, SettingsTheme.panel),
+        // The pointer's own surface (#1173): `card` stepped one
+        // notch toward the ground in each appearance, matched by
+        // LIFT rather than by hex.
+        Pin(
+            "cardHover",
+            0xF2_F5_F0,
+            0x28_31_2C,
+            SettingsTheme.cardHover
+        ),
         Pin(
             "sunken",
             0xF4_F7_F1,

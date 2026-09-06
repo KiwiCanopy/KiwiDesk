@@ -91,6 +91,31 @@ struct SettingsThemeContrastTests {
             SettingsTheme.ink,
             on: SettingsTheme.panel
         ),
+        // The Home card under the pointer (#1173). Every ink
+        // the text band draws has to survive the lift — the
+        // band is what a plated card lifts, so this is not a
+        // hypothetical ground.
+        Pairing(
+            "ink on cardHover",
+            SettingsTheme.ink,
+            on: SettingsTheme.cardHover
+        ),
+        Pairing(
+            "ink2 on cardHover",
+            SettingsTheme.ink2,
+            on: SettingsTheme.cardHover
+        ),
+        Pairing(
+            "ink3 on cardHover",
+            SettingsTheme.ink3,
+            on: SettingsTheme.cardHover
+        ),
+        // The shout badge rides the title row, which lifts too.
+        Pairing(
+            "warningInk on cardHover",
+            SettingsTheme.warningInk,
+            on: SettingsTheme.cardHover
+        ),
         Pairing(
             "ink on sunken",
             SettingsTheme.ink,

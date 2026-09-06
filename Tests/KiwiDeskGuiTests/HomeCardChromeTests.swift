@@ -6,7 +6,9 @@ import Testing
 
 /// The Home cards' plate-era chrome (#786): the two deliberate
 /// card heights, the desktop plate's shape and silence, the
-/// plate↔tall-group parity and the stroke-above-clip order.
+/// plate↔tall-group parity and the stroke-above-clip order —
+/// and, since #1173, the channel split gui.md cites this suite
+/// for: which property carries the mode and which the pointer.
 /// The palette hand-off's needle net split to
 /// `HomeCardPaletteWiringTests` at the file ceiling.
 ///
@@ -175,6 +177,85 @@ struct HomeCardChromeTests {
                     + "alignment:.center)"
             )
         )
+    }
+
+    /// The channel split (#1173): the border says one thing —
+    /// mode-gated or not — and the fill says the other, pointer
+    /// or not. A state that reads BOTH must not share a
+    /// property with either, which is what shipped: hover drew
+    /// the full accent on the border, so pointing at a
+    /// mode-gated card erased the marking it was pointing at.
+    ///
+    /// The negative half is the load-bearing one, and it is
+    /// located by what `cardStroke` cannot lose — its own
+    /// brace-balanced body, reached through the shared walker —
+    /// never by a spelling inside it: a needle for the retired
+    /// ternary would quietly stop matching on any innocent
+    /// retune and pass over a restored collision.
+    ///
+    /// What that body-scoped walk TRADES: it sees only what is
+    /// spelled inside `cardStroke`. Hover re-entering through a
+    /// helper property it calls, or through a second
+    /// `.overlay(hoverRing)` appended beside it, passes here —
+    /// and `strokeRidesAboveTheClip` bars neither. That residue
+    /// is review's.
+    @Test("the pointer draws on the fill, never on the border")
+    func hoverAndMarkingTakeDifferentChannels() throws {
+        #expect(
+            try squashed("HomeCard.swift").contains(
+                ".fill(hovering?SettingsTheme.cardHover"
+                    + ":SettingsTheme.card)"
+            )
+        )
+        let body = try propertyBody("cardStroke")
+        #expect(!body.isEmpty)
+        #expect(
+            !body.contains("hovering"),
+            Comment(
+                rawValue:
+                    "cardStroke reads the pointer again — the "
+                    + "border is the mode's channel alone, or a "
+                    + "hovered card stops stating its mode"
+            )
+        )
+    }
+
+    /// The brace-balanced body of a computed property, off the
+    /// same walker `SourceScan.functionBody` uses — that one
+    /// takes `func <name>(` and a Core path, and neither fits a
+    /// `var` in the GUI tree.
+    private func propertyBody(_ name: String) throws -> String {
+        let url = Self.root
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("HomeCard.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        let characters = Array(source)
+        let marker = Array("var \(name):")
+        guard
+            let start = (0...(characters.count - marker.count))
+                .first(where: { index in
+                    Array(
+                        characters[index..<(index + marker.count)]
+                    ) == marker
+                })
+        else {
+            Issue.record("\(name) not found in HomeCard.swift")
+            return ""
+        }
+        var cursor = start + marker.count
+        while cursor < characters.count,
+            characters[cursor] != "{"
+        {
+            cursor += 1
+        }
+        return SourceScan.balanced(
+            characters,
+            from: &cursor,
+            open: "{",
+            close: "}"
+        ) ?? ""
     }
 
     private func squashed(_ path: String) throws -> String {

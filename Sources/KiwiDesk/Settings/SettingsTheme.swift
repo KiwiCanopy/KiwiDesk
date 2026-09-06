@@ -18,6 +18,16 @@ enum SettingsTheme {
     /// Preview column panel background.
     static let panel = token(light: 0xF4_F6_F1, dark: 0x1A_20_1C)
 
+    /// A Home card under the pointer. Opaque rather than an
+    /// alpha over `card` (#1198's rule one layer out), so every
+    /// ink above it is measured against what it actually sits
+    /// on — the floors are `SettingsThemeContrastTests`'
+    /// `cardHover` pairings, `ink3` the tightest (#1173).
+    static let cardHover = token(
+        light: 0xF2_F5_F0,
+        dark: 0x28_31_2C
+    )
+
     /// Disclosure interiors and filled chips.
     static let sunken = token(light: 0xF4_F7_F1, dark: 0x23_2B_26)
 
