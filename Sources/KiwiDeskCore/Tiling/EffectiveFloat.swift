@@ -29,7 +29,8 @@
 /// (`KiwiCore+Borders`); they are right to until each is ruled
 /// the same way. That list is known short, so #1286 re-derives
 /// it from the flag's readers rather than trusting it, and each
-/// verb it rules says WHICH fullscreen stand-down it takes.
+/// verb it rules states its own stand-down — always the verb's,
+/// never the route's.
 /// Nothing scans for a bare-flag net, so a new one routes here
 /// deliberately.
 ///

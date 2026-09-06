@@ -80,10 +80,12 @@ struct ResizeRefusalCensusTests {
             + "default: arm DOES cue",
         "the focused window is fullscreen":
             "it fills a macOS Space of its own (#670), so the "
-            + "float route has no frame to write. Wordless like "
-            + "the tiled paths' own answer to that window "
-            + "(no focused tiled window): it HAS a frame to draw "
-            + "on, but it was not this layout that refused it",
+            + "float route has no frame to write. Wordless is "
+            + "THIS arm's own ruling and derives from no sibling "
+            + "— the window has a frame to draw on, and #1255's "
+            + "argument that a silent keyboard refusal reads as "
+            + "being ignored applies. Open on #1184: cueing it "
+            + "needs copy no case carries yet",
         "no focused tiled window":
             "the focus takes no part in this layout — a "
             + "native-fullscreen (#670) or elsewhere-rendering "

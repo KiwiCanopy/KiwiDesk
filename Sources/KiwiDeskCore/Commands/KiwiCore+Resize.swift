@@ -111,13 +111,9 @@ extension KiwiCore {
             )
         {
             // A native-fullscreen window fills a macOS Space of
-            // its own (#670), so there is no frame worth
-            // writing. The VERB stands down here rather than the
-            // ROUTE: shedding the route would drop this press
-            // into the layout below, where a window nothing
-            // places would move its neighbours (architect
-            // review). Both arms, or #1184's ruling that a mode
-            // member answers as a flag-float does fails here.
+            // its own (#670): no frame worth writing, on either
+            // arm. The VERB stands down here rather than the
+            // ROUTE — state-and-layout.md argues both (#1184).
             guard !window.isFullscreen else {
                 return .fail("the focused window is fullscreen")
             }

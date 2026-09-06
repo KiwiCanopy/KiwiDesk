@@ -3894,10 +3894,12 @@ own float flag — however it got one, whether you toggled it,
 own detection did — **or** any window in a space set to the
 floating layout, which places nothing and so leaves its members
 free-floating in exactly the same way. One exception either
-way: a window in **native full screen** fills a macOS Space of
-its own, so `resize` refuses it rather than writing a frame the
-system owns — and refuses rather than falling through to the
-layout, so a press on it never moves its neighbours.
+way: a floating window in **native full screen** fills a macOS
+Space of its own, so `resize` refuses it rather than writing a
+frame the system owns, and refuses outright rather than falling
+through to the layout — so that press moves nothing else
+either. (A *tiled* window in full screen is a separate case this
+did not change: its press still reaches the layout.)
 
 The delta is split between **both** edges (#1091): a chord has
 no grabbed edge to anchor on, so a float grows and shrinks
