@@ -141,10 +141,9 @@ struct HomeCard: View {
             .lineLimit(1)
     }
 
-    /// The pointer's channel. On a plated card this lifts the
-    /// text band alone — the plate is opaque and full-bleed, and
-    /// no translucent neutral can lift a fixed-dark plate and a
-    /// mode-varying card at once (ui-designer, 2026-09-06).
+    /// The pointer's channel. On a plated card the lift is the
+    /// text band alone: the plate is opaque and full-bleed
+    /// (#1173).
     private var cardFill: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
             .fill(
@@ -154,9 +153,9 @@ struct HomeCard: View {
             )
     }
 
-    /// The mode's channel, and only the mode's: hover used to
-    /// draw the full accent on this same edge, which ERASED the
-    /// #760 marking of the card it was pointing at (#1173).
+    /// The mode's channel, and only the mode's — a pointer
+    /// state on this edge erases the #760 marking of the card
+    /// it points at (#1173).
     private var cardStroke: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
             .strokeBorder(

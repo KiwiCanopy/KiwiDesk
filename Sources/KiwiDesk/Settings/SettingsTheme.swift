@@ -18,14 +18,11 @@ enum SettingsTheme {
     /// Preview column panel background.
     static let panel = token(light: 0xF4_F6_F1, dark: 0x1A_20_1C)
 
-    /// A Home card under the pointer: `card` stepped one notch
-    /// toward the ground below it, lightness only. Opaque rather
-    /// than an alpha over `card` (#1198's rule one layer out), so
-    /// the inks above it are measured against what they actually
-    /// sit on. The light value is bounded by contrast, not taste
-    /// — a notch darker puts `ink3` at exactly the 4.5 floor
-    /// (`SettingsThemeContrastTests`); the dark value matches the
-    /// light LIFT rather than the light hex (#1173).
+    /// A Home card under the pointer. Opaque rather than an
+    /// alpha over `card` (#1198's rule one layer out), so every
+    /// ink above it is measured against what it actually sits
+    /// on — the floors are `SettingsThemeContrastTests`'
+    /// `cardHover` pairings, `ink3` the tightest (#1173).
     static let cardHover = token(
         light: 0xF2_F5_F0,
         dark: 0x28_31_2C

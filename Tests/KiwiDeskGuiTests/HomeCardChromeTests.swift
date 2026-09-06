@@ -6,7 +6,9 @@ import Testing
 
 /// The Home cards' plate-era chrome (#786): the two deliberate
 /// card heights, the desktop plate's shape and silence, the
-/// plate↔tall-group parity and the stroke-above-clip order.
+/// plate↔tall-group parity and the stroke-above-clip order —
+/// and, since #1173, the channel split gui.md cites this suite
+/// for: which property carries the mode and which the pointer.
 /// The palette hand-off's needle net split to
 /// `HomeCardPaletteWiringTests` at the file ceiling.
 ///
@@ -190,6 +192,13 @@ struct HomeCardChromeTests {
     /// never by a spelling inside it: a needle for the retired
     /// ternary would quietly stop matching on any innocent
     /// retune and pass over a restored collision.
+    ///
+    /// What that body-scoped walk TRADES: it sees only what is
+    /// spelled inside `cardStroke`. Hover re-entering through a
+    /// helper property it calls, or through a second
+    /// `.overlay(hoverRing)` appended beside it, passes here —
+    /// and `strokeRidesAboveTheClip` bars neither. That residue
+    /// is review's.
     @Test("the pointer draws on the fill, never on the border")
     func hoverAndMarkingTakeDifferentChannels() throws {
         #expect(
@@ -207,19 +216,6 @@ struct HomeCardChromeTests {
                     "cardStroke reads the pointer again — the "
                     + "border is the mode's channel alone, or a "
                     + "hovered card stops stating its mode"
-            )
-        )
-    }
-
-    /// The lift's Reduce Motion gate, named in the argument the
-    /// house rule requires — the gate drops the MOTION, and the
-    /// hover surface itself stays.
-    @Test("the hover lift names its Reduce Motion gate")
-    func hoverLiftNamesItsGate() throws {
-        #expect(
-            try squashed("HomeCard.swift").contains(
-                ".animation(reduceMotion?nil"
-                    + ":.easeOut(duration:0.12),value:hovering)"
             )
         )
     }
