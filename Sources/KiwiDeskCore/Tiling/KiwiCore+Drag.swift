@@ -22,8 +22,8 @@ extension KiwiCore {
         drag.onDragEnd = { [weak self] id, start, frame in
             self?.handleDragEnd(id, start: start, frame: frame)
         }
-        drag.isMousePressed = {
-            NSEvent.pressedMouseButtons & 1 == 1
+        drag.isMousePressed = { [weak self] in
+            self?.mouse.leftButtonHeld == true
         }
         drag.cursorLocation = { NSEvent.mouseLocation }
         wireSpaceBarDrop()

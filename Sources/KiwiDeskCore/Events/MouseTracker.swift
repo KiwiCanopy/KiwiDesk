@@ -19,6 +19,26 @@ public final class MouseTracker {
     }
 
     public private(set) var press: Press?
+
+    /// Which mouse buttons are down, as a mask — the one home
+    /// in Core for `NSEvent.pressedMouseButtons` (#1103/#1199).
+    /// Live in production; `makeTestCore` pins "nothing held"
+    /// on the core's OWN tracker, so a suite's verdict never
+    /// follows the developer's hand. That pin reaches no tracker
+    /// a suite builds itself — a bare `MouseTracker()` asking
+    /// these reads states the mask first.
+    var pressedButtons: @MainActor () -> Int = {
+        NSEvent.pressedMouseButtons
+    }
+
+    /// The left button alone — drags and mouse resizes are
+    /// left-button gestures.
+    var leftButtonHeld: Bool { pressedButtons() & 1 == 1 }
+
+    /// Any button — a warp must not yank the pointer out of a
+    /// gesture, whichever button started it.
+    var anyButtonHeld: Bool { pressedButtons() != 0 }
+
     private var monitors: [Any] = []
 
     /// Fired once per left press, in Cocoa screen space, with the

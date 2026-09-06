@@ -100,5 +100,21 @@ func makeTestCore(
     // stamping suite takes the live writer back explicitly, with
     // the bridge itself faked.
     core.desktopMemory.writeStamp = { _, _ in false }
+    // Same class, eighth time (#1103/#1199): the mouse-button
+    // read defaults LIVE, and three gesture decisions consult
+    // it — the warp gate, `isResizeGesture` and the drag
+    // pipeline — so a developer holding a button while the
+    // suite ran decided whichever test was running. Pin
+    // "nothing held"; a test that wants the branch states the
+    // mask itself.
+    core.mouse.pressedButtons = { 0 }
+    // Same class, ninth time (#1103) — but PRECAUTIONARY, not
+    // load-bearing like the eighth: `wireDrag` also makes the
+    // drop-target cursor read live and a run reaches it, yet no
+    // assertion today depends on the value, so no hostile cursor
+    // flips a verdict (guard-prover, 2026-09-06). Kept for the
+    // next drag test that forgets its own pin, which the two
+    // pinning it per file are the precedent for.
+    core.drag.cursorLocation = { .zero }
     return core
 }

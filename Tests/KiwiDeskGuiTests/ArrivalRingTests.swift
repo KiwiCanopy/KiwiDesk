@@ -137,16 +137,12 @@ struct ArrivalRingTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
         let files = try SourceScan.swiftSources(under: root)
         #expect(files.count > 50)
-        var raw: [String] = []
         for file in files {
             let name = file.lastPathComponent
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
             .split(whereSeparator: \.isWhitespace).joined()
-            if source.contains("NSEvent.pressedMouseButtons") {
-                raw.append(name)
-            }
             // `.focusable(false)` is an opt-OUT: it removes a
             // stop rather than taking one, so it owes nothing.
             let optsIn =
@@ -171,18 +167,13 @@ struct ArrivalRingTests {
                 )
             )
         }
-        // And the reading itself has ONE home per question: a
-        // hand-rolled copy beside a view is how it drifts, and it
-        // took two spellings to get right — the button state
-        // alone misses a click completed on mouse-up.
-        #expect(
-            raw.sorted() == ["ClickBornFocus.swift"],
-            Comment(
-                rawValue:
-                    "`NSEvent.pressedMouseButtons` is read in "
-                    + "\(raw.sorted()) — route it through "
-                    + "`ClickBornFocus.isClickBorn` (#996)"
-            )
-        )
+        // Where the host read itself may live is
+        // `MouseButtonSeamGuardTests`', over both production
+        // trees (#1103/#1199) — this census owns which controls
+        // must CONSULT `ClickBornFocus`, not who may read the
+        // mask. A hand-rolled copy beside a view is how it
+        // drifts, and it took two spellings to get right: the
+        // button state alone misses a click completed on
+        // mouse-up.
     }
 }
