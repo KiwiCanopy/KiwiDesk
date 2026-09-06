@@ -196,11 +196,9 @@ struct SizeFloatGroup: View {
     /// layout: it renders after SEVEN rows, the four resize ones
     /// plus three toggles.
     ///
-    /// The exception clause carries "floated window" against
-    /// "the floating layout" STRUCTURALLY rather than by the
-    /// word, because ja/ko/zh-Hans render both senses with one
-    /// word and an English-only distinction reduces to a
-    /// tautology there (localization audit, 2026-09-06).
+    /// The exception clause distinguishes the window's state
+    /// from the layout's name by CLAUSE, not by word: three
+    /// catalogs have only one word for both (#1184).
     private var sizeFloatCaption: String {
         L(
             "shortcuts.size_float.layouts_caption",

@@ -1049,6 +1049,7 @@
   "shortcuts.section.open_applications": "アプリを開く",
   "shortcuts.section.size_float": "サイズとフローティング",
   "shortcuts.section.switch_layers": "レイヤーの切り替え",
+  "shortcuts.size_float.layouts_caption": "幅と高さのショートカットはbsp、スタック、スクロール、トラックの各レイアウトでのみ動作し、モノクル、グリッドでは何も起こりません。例外はタイル表示から外れたウインドウです。フローティングにしたウインドウと、フローティングレイアウトのすべてのウインドウは、どのレイアウトでも自分自身のサイズが変わります。幅と高さは独立してサイズ変更されます。スクロールではどちらもスクロール軸に沿ってスロットのサイズを変え、トラックでは一方の軸がウインドウのトラックを、もう一方がその中での取り分をサイズ変更します。",
   "slot_size.column_width": "列の幅",
   "slot_size.percent": "パーセント",
   "slot_size.points": "ポイント",

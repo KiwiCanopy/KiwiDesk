@@ -1049,6 +1049,7 @@
   "shortcuts.section.open_applications": "Ouvrir des applications",
   "shortcuts.section.size_float": "Taille & flottement",
   "shortcuts.section.switch_layers": "Changer de calque",
+  "shortcuts.size_float.layouts_caption": "Les raccourcis de largeur et de hauteur s'appliquent uniquement dans les dispositions bsp, stack, scrolling et track ; ils sont sans effet dans monocle et grid. L'exception est une fenêtre hors de la mosaïque : une fenêtre flottante, comme toute fenêtre de la disposition floating, modifie sa propre taille dans n'importe quelle disposition. La largeur et la hauteur se redimensionnent indépendamment ; scrolling redimensionne son emplacement le long de l'axe de défilement pour les deux, et dans track un axe redimensionne le Track de la fenêtre, l'autre sa part au sein de celui-ci.",
   "slot_size.column_width": "Largeur de colonne",
   "slot_size.percent": "Pourcentage",
   "slot_size.points": "Points",

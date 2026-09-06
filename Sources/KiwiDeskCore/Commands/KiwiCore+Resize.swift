@@ -101,16 +101,20 @@ extension KiwiCore {
         // so the ratio paths below (and their unknown-focus
         // fallbacks) never see a floating focus.
         //
-        // The EFFECTIVE float, never the flag (#1184) — on the
-        // membership `space.focused` carries, which is the mode
-        // arm's premise, and standing that arm down for a
-        // native-fullscreen window, which this space's layout
-        // does not place either way (#670).
+        // A native-fullscreen window fills a macOS Space of its
+        // own (#670), so there is no frame here worth writing.
+        // It stands BOTH arms down, or #1184's ruling — that a
+        // mode member answers exactly as a flag-float does —
+        // fails at this one window.
+        //
+        // The EFFECTIVE float, never the flag (#1184), on the
+        // membership `space.focused` carries.
         if let focused = space.focused,
             let window = state.windows[focused],
+            !window.isFullscreen,
             EffectiveFloat.applies(
                 isFloating: window.isFloating,
-                mode: window.isFullscreen ? nil : space.mode
+                mode: space.mode
             )
         {
             return resizeFloating(
@@ -159,16 +163,9 @@ extension KiwiCore {
                 space: space
             )
         case .floating:
-            // Every member of this space resizes ITSELF (#1184),
-            // so reaching the mode switch at all means there was
-            // no focus this verb could move — none at all, or a
-            // native-fullscreen one the gate stands down for
-            // (#670). Blaming the layout would name a cause that
-            // no longer exists. Wordless for the same reason the
-            // tiled paths are wordless at a fullscreen focus: an
-            // empty space has nothing to draw on, and a window
-            // KiwiDesk may not resize is not refused BY this
-            // layout.
+            // Reached only with no focus this verb can move
+            // (#1184) — the layout itself refuses nothing here,
+            // and the register carries why it stays wordless.
             return .fail("no window this layout can resize")
         default:
             // Correct no-op (macOS full-screen/Stage Manager

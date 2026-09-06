@@ -980,16 +980,17 @@ editing here:
   **a verb the `EffectiveFloat` docstring does not name as ruled
   asks the flag until it is ruled the same way** — one verb at a
   time, that docstring being the one roster and #1286 the open
-  sweep. `resize` is the ruled one (#1184,
-  `FloatingResizeCommandTests`): a floating-mode member has no
-  layout answer to give and a frame of its own to change, so
-  refusing it while resizing its flag-floating neighbour was a
-  difference with nothing behind it. **A verb that crosses
-  stands its MODE arm down for a native-fullscreen window**
-  (#670): that window fills a macOS Space of its own, so a
-  layout placing nothing says nothing about it — the same arm
-  every net that widened here already carries
-  (`clampFloatsClearOfBars`). **The mode arm names the
+  sweep. The reason a verb crosses at all is that a
+  floating-mode member has no layout answer to give and a frame
+  of its own to change, so refusing it while resizing its
+  flag-floating neighbour is a difference with nothing behind it
+  (#1184, `FloatingResizeCommandTests`). **A verb that crosses
+  stands down for a native-fullscreen window** (#670): it fills
+  a macOS Space of its own, so no layout places it and there is
+  no frame worth writing — BOTH arms, or the ruling that a mode
+  member answers exactly as a flag-float does fails at that one
+  window, which is the divergence the crossing removed wearing a
+  narrower shape. **The mode arm names the
   space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose

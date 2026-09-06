@@ -206,22 +206,43 @@ struct FloatingResizeCommandTests {
         )
     }
 
-    /// The mode arm stands down for a native-fullscreen window
-    /// (#670): it fills a macOS Space of its own, so a frame
-    /// write lands on geometry the compositor owns. Only the
-    /// arm #1184 added stands down — the flag arm answered this
-    /// window before it and is not this ruling's to re-rule.
+    /// A native-fullscreen window is left to its own macOS
+    /// Space (#670): it fills one, so there is no frame here
+    /// worth writing — the stand-down the float nets that
+    /// widened the same way carry (`clampFloatsClearOfBars`,
+    /// the stash capture).
     ///
-    /// The negative twin runs first, so the assertion cannot
+    /// Both arms, and that is #1184's own ruling rather than a
+    /// widening of it: a floating-MODE member answers exactly
+    /// as a flag-float does, so a stand-down on one arm alone
+    /// would put the divergence back at this one window. The
+    /// flag arm used to write the frame; the paired case below
+    /// is the half nothing held, and a gate tightened to the
+    /// mode arm alone leaves it green.
+    ///
+    /// The negative twin runs first in each, so neither can
     /// pass for a fixture that never resized at all.
     @Test("a fullscreen member is left to its own Space")
     func fullscreenMemberIsLeftAlone() {
+        expectFullscreenRefused(flagFloating: false)
+    }
+
+    @Test("a fullscreen flag-float is left to it too")
+    func fullscreenFlagFloatIsLeftAlone() {
+        expectFullscreenRefused(flagFloating: true)
+    }
+
+    /// Resizes the focus, marks it fullscreen, resizes again.
+    /// `flagFloating` picks which arm of the gate carried the
+    /// first resize — the window's own flag, or the space's
+    /// `.floating` mode — and neither may carry the second.
+    private func expectFullscreenRefused(flagFloating: Bool) {
         let core = makeCore()
         var frames: [WindowID: CGRect] = [:]
         floatingSetup(core, mode: "floating") {
             frames[$0] = $1
         }
-        core.state.setFloating(WindowID(2), false)
+        core.state.setFloating(WindowID(2), flagFloating)
         #expect(
             core.execute(
                 "resize",

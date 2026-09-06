@@ -17,9 +17,10 @@
 ///
 /// This docstring is the one roster of which verbs are ruled,
 /// and it is the file #1286 moves. `resize` is ruled onto the
-/// predicate (#1184, `FloatingResizeCommandTests`), with its
-/// mode arm standing down for a native-fullscreen window (#670)
-/// the way every net that widened here does. The float-tier
+/// predicate (#1184, `FloatingResizeCommandTests`), standing
+/// down for a native-fullscreen window (#670) on both arms —
+/// one arm alone would put the divergence the crossing removed
+/// back at that one window. The float-tier
 /// raise (`KiwiCore+ZOrderFloats`), the Space Bar badge
 /// (`KiwiCore+SpaceBarItems`) and the focus ring
 /// (`KiwiCore+Borders`) ask the flag, and are right to until
