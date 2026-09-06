@@ -109,6 +109,16 @@ extension EventLoop {
         NSApplication.shared.windows.first { $0.windowNumber == number }
     }
 
+    /// The inverse, for a GUI handing Core one of its own
+    /// windows (#1281): nil where AppKit reports no window
+    /// device, which it does as a number `<= 0`.
+    static func ownWindowID(number: Int) -> WindowID? {
+        guard number > 0, let raw = UInt32(exactly: number) else {
+            return nil
+        }
+        return WindowID(raw)
+    }
+
     /// The *structural* half of the transient-overlay
     /// classification (#300): third-party accessory-app windows
     /// — but never our own (#315). Any own window that reaches

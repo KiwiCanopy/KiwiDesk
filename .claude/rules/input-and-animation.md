@@ -420,7 +420,8 @@ editing here:
   it a test — an untested escape hatch is discovered not to work
   at exactly the moment it is needed.
 - **A press on one of our own windows is recorded per WINDOW,
-  and records the press only (#953).** A **global** monitor
+  and reaches every press consumer with its origin
+  (#953/#1281).** A **global** monitor
   never sees an event routed to our own windows, which left the
   one tiled own window with no recorded press to classify its
   gesture by — so `isResizeGesture`'s trailing-event branch and
@@ -452,17 +453,29 @@ editing here:
     acted on. Provenance also survives an up delivered with no
     window at the end of a frame-resize tracking loop, which a
     mark-gated release would drop.
-  - **Fire `onLeftMouseDown` for a `.otherApp` press alone**
-    (`OwnWindowGestureDeliveryTests`; `OwnPressMonitorSeamTests`
-    is the net beside it, holding the gate to one call site).
-    Argue the stand-down from the press's own origin rather
-    than from which arm called — that fan-out's consumers are
-    built ON the blindness — `followDisplayUnderClick` takes its
-    bar-overlay exemption from it (#446), and `lastLeftClick` is
-    the click provenance the sibling distrust and the
-    ignored-panel escape read (#496, #687, #951). Widening the
-    fan-out is a ruling of its own, not a side effect of making
-    a gesture classifiable.
+  - **The press fan-out hears BOTH arms and carries the press's
+    ORIGIN; a consumer that must stand down for an own-window
+    press gates on the origin, never on which arm called
+    (#1281).** A click beats every focus distrust through
+    `recentClickReached` (#687), and that held for every window
+    but one: the stamp was wired on the global arm alone, and a
+    global monitor never sees a press routed to our own windows,
+    so for `PlacementLedger.echoWindow` after the row panned
+    Settings out a click on it was #1161's bounce. Both arms now
+    deliver through the one `deliverPress` — the local arm
+    INLINE, since provenance is a press-time fact and an enqueued
+    job's order against our own window's AX report is not
+    guaranteed — and the one boot closure takes the one
+    `stampLeftClick` unconditionally while `followDisplayUnderClick`
+    runs for `.otherApp` only, its bar-overlay exemption being the
+    blindness it is built on (#446). Widening what a consumer
+    hears is a ruling at the CONSUMER, never a second channel
+    named by the arm (`OwnWindowGestureDeliveryTests` ▸ the
+    fan-out carries the origin; `OwnPressMonitorSeamTests` holds
+    the fan-out to one call site; `OwnPressProvenanceTests`,
+    `OwnPressProvenanceSeamTests`; `lastLeftClick` has one
+    production writer, `OwnPressProvenanceSeamTests` ▸
+    `oneWriter`).
 
   The delivery half of the same defect — why our own window's
   gesture was not observed at all — is

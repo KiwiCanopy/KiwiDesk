@@ -575,8 +575,12 @@ editing here:
   `PlacementDisplacementTests` the displacement and its wiring,
   `PlacementBounceSeamTests` the two leaves, the renew door, the
   one displacement recorder, the consult, the write-site census
-  and the raise. A fourth ledger joins this bullet rather than
-  earning its own consume.
+  and the raise. A report the focus command already INTENDED is
+  never bounced — `intended != id` is the consult's first clause
+  — and `focusOwnWindow(number:)`, beside the arm, is the door a
+  GUI raise of an own tracked window takes so its report arrives
+  that way (#1281, `PlacementIntentTests`). A fourth ledger joins
+  this bullet rather than earning its own consume.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

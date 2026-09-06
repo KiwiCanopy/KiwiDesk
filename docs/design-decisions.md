@@ -1659,9 +1659,43 @@ trying could reach. Bounded at the placement, an app that keeps
 reacting is still bounced for up to twice the window, and a
 keyboard user is honored by then. That is the ruled trade; a
 click is always honored.
+
 The #465 sibling distrust's carve-out for a visible same-display
 sibling is narrowed by this: such a sibling placed into the
 scrolling void is bounced like any other window.
+
+**An own act is never a bounce (#1281).** The trade above is
+priced because the predicate cannot tell the emulator's
+self-focus from a cmd-tab: both are foreign reports of unknown
+provenance. KiwiDesk's own Settings window is never of unknown
+provenance, in either of the two ways it comes to the front, and
+both were bounced inside the placement window for the same
+reason — the report reached the predicate with nothing on it
+that a foreign report would lack. A CLICK on it: a click is the
+provenance no re-report can forge, which is what makes "a click
+is always honored" a rule rather than a hope, and it had held
+for every window but one, because the stamp that carries it was
+written only from the global monitor's fan-out and a global
+monitor never sees a press routed to our own windows. The
+press fan-out now hears both arms and carries the press's
+origin, so a consumer decides its own stand-down
+(`input-and-animation.md` owns how). A RAISE the GUI
+starts — the menu bar, the App menu (⌘,), the `open_settings`
+chord — is our own deliberate act, so it takes the construction
+the keyboard verbs already have: the GUI's raise branch calls
+`KiwiCore.focusOwnWindow` before `forceFront`, and that door
+issues the focus command first, so state focus is set before the
+report and it arrives with `intended == id`, which the distrust
+never reads. Neither answer is an exemption in the predicate,
+which would be the per-process carve-out the own-window rules
+refuse (#678 item 18); both give the report the provenance it
+was owed. The door lives beside the arm it mirrors and takes the
+arm's own gate — the window's Space is the active one — because
+that is the one arm a compliant own window can meet; parked
+elsewhere it goes where it was placed, and a clickless report is
+how it is reached. It is wider than the arm by the mode on
+purpose: the command is the right raise on any shown Space, so
+an arm that widens later is covered already.
 
 State stays on the intended window and it is re-asserted with a
 direct, unstamped raise — the #465 sibling-distrust shape. The

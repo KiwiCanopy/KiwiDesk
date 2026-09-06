@@ -140,8 +140,9 @@ public final class KiwiCore {
     /// `recentClickInside`) and the raise-echo revert's escape
     /// (#687, `recentClickReached`). `reached` is the managed
     /// window the press hit, resolved AT PRESS TIME
-    /// (`clickReachedWindow` has the argument). Stamped in
-    /// `KiwiCore+Lifecycle` (`ClickProvenanceWiringTests`).
+    /// (`clickReachedWindow` has the argument). Written only by
+    /// `stampLeftClick`, which both press arms take
+    /// (`ClickProvenanceWiringTests`, `OwnPressProvenanceSeamTests`).
     var lastLeftClick: (at: Date, point: CGPoint, reached: WindowID?)?
 
     /// The WindowServer's front-to-back stacking, resolving

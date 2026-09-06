@@ -90,6 +90,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.destination = nil
         model.nav.resetSurfaces()
         if let window {
+            // Core first (#1281): a bare order-front of a window
+            // the row just panned out reports a clickless focus,
+            // which #1161's placement distrust bounces.
+            model.core.focusOwnWindow(number: window.windowNumber)
             NSApp.forceFront(window)
             return
         }

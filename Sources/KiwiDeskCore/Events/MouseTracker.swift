@@ -21,12 +21,15 @@ public final class MouseTracker {
     public private(set) var press: Press?
     private var monitors: [Any] = []
 
-    /// Fired on left-mouse-down in Cocoa screen space (#446).
-    /// **Only a `.otherApp` press reaches it** — the consumers are
-    /// built on a global monitor's blindness to our own windows
-    /// (#446, #496, #687, #951), so the stand-down is argued from
-    /// the press's own provenance.
-    public var onLeftMouseDown: ((CGPoint) -> Void)?
+    /// Fired once per left press, in Cocoa screen space, with the
+    /// press's origin (#446, #1281). A consumer that must stand
+    /// down for an own-window press gates on the origin — the
+    /// display follow (#446) — and the click-provenance stamp
+    /// hears both. Delivered through `deliverPress`, INLINE from
+    /// the local arm: provenance is a press-time fact (#687), and
+    /// an enqueued job's order against our own window's AX report
+    /// is not guaranteed.
+    public var onLeftMouseDown: ((CGPoint, Press.Origin) -> Void)?
 
     public init() {}
 
@@ -37,6 +40,7 @@ public final class MouseTracker {
         ) { [weak self] event in
             let location = event.locationInWindow
             Task { @MainActor in
+                self?.deliverPress(at: location, from: .otherApp)
                 self?.recordDown(at: location, from: .otherApp)
             }
         }
@@ -60,6 +64,9 @@ public final class MouseTracker {
                 Self.tilingWindowPress(of: event)
             }
             if let location {
+                MainActor.assumeIsolated {
+                    self?.deliverPress(at: location, from: .ownWindow)
+                }
                 Task { @MainActor in
                     self?.recordDown(
                         at: location,
@@ -119,7 +126,17 @@ public final class MouseTracker {
         press = nil
     }
 
-    /// Records mouse down in AX space; notifies if otherApp (#446, #953).
+    /// The one fan-out (#1281): both arms deliver through it,
+    /// the local one inline. Separate from the STORE below, whose
+    /// enqueueing orders the four press writes (#953).
+    func deliverPress(
+        at location: CGPoint,
+        from origin: Press.Origin
+    ) {
+        onLeftMouseDown?(location, origin)
+    }
+
+    /// Records mouse down in AX space (#446, #953).
     func recordDown(
         at location: CGPoint,
         from origin: Press.Origin
@@ -129,8 +146,6 @@ public final class MouseTracker {
             downAt: Date(),
             origin: origin
         )
-        guard origin == .otherApp else { return }
-        onLeftMouseDown?(location)
     }
 
     /// Closes the OPEN press, if this arm opened it (#953).
