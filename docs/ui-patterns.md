@@ -1104,6 +1104,35 @@ byte for byte while opening a popover, which is why the page's
 paint meant nothing until it was moved to the shared chip
 (#1240). A rest cue only reads as one if its neighbours lack it.
 
+**Picking from a picker IS the add.** Where a control's whole
+job is to choose a thing that then becomes a row, the choice
+commits it — there is no second button, because a confirm that
+can only ever be pressed once after a selection asks for a
+decision the picker already took. Both the app rules row and the
+app shortcuts row work this way. The typed free-text path is the
+one exception that keeps a commit of its own, because every
+keystroke of an identifier is a prefix of that identifier and no
+moment in it means "this is the one".
+
+That leaves a duty the removed button was carrying, and it has
+to be paid rather than deleted. These pickers exclude the
+entries that cannot be added, but their escape route bypasses
+the exclusion — a typed identifier in the app rules row, a file
+panel in the app shortcuts row — so a pick can still arrive that
+creates nothing. **Where a pick can be refused, the refusal
+speaks as a caption at the picker that refused it**, derived
+from live state so it clears itself the moment the user frees
+what was taken, and announced once for VoiceOver, since the
+refusal can land as a panel dismisses. It is not a dimmed
+control: with the button gone there is nothing left to dim, and
+a dim was never a sentence anyway. It is keyed to the picker
+rather than to the section, or a list of rows prints one
+sentence under every one of them.
+
+Only the app shortcuts row has a refusal today (#1235); the app
+rules row still drops a typed duplicate silently, and owes the
+same channel.
+
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,
 toggles, sliders, and fields keep system hover. Ambiguous

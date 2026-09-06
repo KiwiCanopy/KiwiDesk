@@ -6,6 +6,19 @@ extension ApplicationsGroup {
     func row(
         _ binding: Binding<KeyBinding>
     ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            rowBody(binding)
+            // The refusal draws at the picker that raised it,
+            // keyed by this row's id — so it is one sentence at
+            // the place it is about, never gui.md's caption
+            // stamped under every child of the `ForEach`.
+            rowNotice(binding)
+        }
+    }
+
+    private func rowBody(
+        _ binding: Binding<KeyBinding>
+    ) -> some View {
         HStack {
             HStack(spacing: 6) {
                 appMenu(binding)
@@ -96,6 +109,20 @@ extension ApplicationsGroup {
         .fixedSize()
     }
 
+    /// This row's own refusal, if the last one was raised here.
+    @ViewBuilder func rowNotice(
+        _ binding: Binding<KeyBinding>
+    ) -> some View {
+        if let notice = allBoundNotice(
+            for: binding.wrappedValue.id
+        ) {
+            Text(notice)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
     private func assign(
         _ binding: Binding<KeyBinding>,
         app: KeybindingCatalog.InstalledApp
@@ -106,9 +133,15 @@ extension ApplicationsGroup {
             in: bindings,
             excluding: id
         )
+        // Says why instead of dropping the pick: this row's
+        // picker excludes fully-bound apps, but its "Other…"
+        // panel does not, so it could reach one and do nothing
+        // at all (#1235). One refusal channel, two pick routes.
         guard taken.count < AppLaunchBehavior.allCases.count else {
+            refuse(app, at: id)
             return
         }
+        clearRefusal()
         let current =
             KeybindingCatalog.appLaunchBehavior(
                 from: binding.wrappedValue.lua
