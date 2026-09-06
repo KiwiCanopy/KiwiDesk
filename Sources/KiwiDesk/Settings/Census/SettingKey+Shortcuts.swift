@@ -7,8 +7,10 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
     case swapDir = "keybinding.swap_dir (x4)"
-    case moveWindowToTrack = "keybinding.move_window_to_track (x2)"
-    case swapWithTrack = "keybinding.swap_with_track (x2)"
+    case moveWindowToTrack =
+        "keybinding.move_window_to_{prev,next}_track"
+    case swapWithTrack =
+        "keybinding.swap_with_{prev,next}_track"
     case moveToSpace = "keybinding.move_to_space (x N)"
     case moveToSpaceFollow = "keybinding.move_to_space_follow (x N)"
     case moveToDesktop = "keybinding.move_to_desktop (x N desktops)"
