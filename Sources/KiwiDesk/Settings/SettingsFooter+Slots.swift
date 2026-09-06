@@ -43,24 +43,28 @@ extension SettingsFooter {
     }
 
     /// Primary Save action button slot.
+    ///
+    /// Sealed rather than `.borderedProminent`: the pill is a
+    /// fixed-dark ground and AppKit picks against the window
+    /// (#1198, gui.md).
     @ViewBuilder var primarySlot: some View {
         let save = L("footer.save", "Save")
         switch model.primarySaveAction {
         case .saveLua:
             Button(save) { model.saveLuaSource() }
                 .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
+                .kiwiProminentButton()
                 .disabled(!model.isDirty)
         case .updateStoredProfile:
             Button(save) { model.saveEditedProfile() }
                 .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
+                .kiwiProminentButton()
                 .disabled(!model.isDirty)
         case .updateActiveProfile:
             // Update blocked while permission is paused (#335).
             Button(save) { model.updateActiveProfile() }
                 .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
+                .kiwiProminentButton()
                 .disabled(
                     model.profileSaveBlockedReason != nil
                         || !model.updateEnabled
@@ -75,7 +79,7 @@ extension SettingsFooter {
             // Saves globals only when permission paused (#516).
             Button(save) { model.saveGlobalsWhilePaused() }
                 .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
+                .kiwiProminentButton()
                 .disabled(!model.isDirty)
         case .saveAsNewProfile:
             // Blocked while permission paused (#335).
@@ -89,7 +93,7 @@ extension SettingsFooter {
                 namingNewProfile = true
             }
             .keyboardShortcut("s")
-            .buttonStyle(.borderedProminent)
+            .kiwiProminentButton()
             .disabled(model.profileSaveBlockedReason != nil)
             .help(model.profileSaveBlockedReason ?? "")
         }

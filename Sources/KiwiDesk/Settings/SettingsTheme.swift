@@ -100,6 +100,30 @@ enum SettingsTheme {
         dark: 0x12_25_1A
     )
 
+    /// The accent seal's PRESSED fill — the accent darkened
+    /// toward `accentInk`. Fixed in both modes for the same
+    /// reason `accent` is: the seal's promise is a pair that
+    /// does not move with the appearance, and a state fill that
+    /// moved would keep that promise in one state only (#1198).
+    static let accentPressed = token(
+        light: 0x7E_A2_4D,
+        dark: 0x7E_A2_4D
+    )
+
+    /// The accent seal's DISABLED fill: `ink2`'s own hue and
+    /// saturation lifted to the one lightness that clears 3:1
+    /// against `accentInk` above it AND against every ground the
+    /// seal is drawn on — the near-black save pill and the
+    /// tour's light card alike. Draining the hue is what makes
+    /// it read as unavailable rather than merely dim, and it
+    /// stays OPAQUE so the label is measured against this fill
+    /// rather than against a ground the style cannot know
+    /// (#1198).
+    static let accentDisabled = token(
+        light: 0x6C_7E_75,
+        dark: 0x6C_7E_75
+    )
+
     /// Switch knob riding an accent track.
     static let onAccentKnob = token(
         light: 0xFF_FF_FF,
