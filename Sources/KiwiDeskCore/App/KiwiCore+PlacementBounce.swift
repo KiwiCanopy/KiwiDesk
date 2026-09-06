@@ -39,6 +39,26 @@ extension KiwiCore {
             ? placed : nil
     }
 
+    /// The GUI's raise of an own window Core tracks (#1281): the
+    /// focus command FIRST, so the report arrives intended rather
+    /// than as the clickless focus the arm above bounces. Gated
+    /// like that arm — the window's Space is the active one, kept
+    /// beside it so the two cannot drift — but on any mode: the
+    /// command is the right raise wherever the Space is shown,
+    /// and parked elsewhere a compliant own window is reached by
+    /// its report. Bypasses the #292 preflight on purpose; the
+    /// caller fronts the window regardless. Returns whether Core
+    /// took it; the caller's `forceFront` follows either way.
+    @discardableResult
+    public func focusOwnWindow(number: Int) -> Bool {
+        guard let id = EventLoop.ownWindowID(number: number),
+            let space = state.workspaces.space(of: id),
+            space == state.workspaces.activeSpace
+        else { return false }
+        focusWindow(id, warp: false)
+        return true
+    }
+
     /// Keeps state on `intended` and re-asserts it with a DIRECT,
     /// unstamped raise — the #465 sibling-distrust shape: the app
     /// took key focus, so a state-only revert would split

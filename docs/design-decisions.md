@@ -1660,31 +1660,36 @@ reacting is still bounced for up to twice the window, and a
 keyboard user is honored by then. That is the ruled trade; a
 click is always honored.
 
+The #465 sibling distrust's carve-out for a visible same-display
+sibling is narrowed by this: such a sibling placed into the
+scrolling void is bounced like any other window.
+
 **An own raise is never a bounce (#1281).** The trade above is
 priced because the predicate cannot tell the emulator's
 self-focus from a cmd-tab: both are foreign reports of unknown
 provenance. KiwiDesk's own Settings window, raised by its own
-`show()` on a user gesture — the menu bar, the App menu's ⌘,,
+`show()` on a user gesture — the menu bar, the App menu (⌘,),
 the `open_settings` chord — is not of unknown provenance, and
-for two seconds after the row panned it out a bare order-front
-was bounced exactly like the emulator (measured 2026-09-06, four
-menu clicks, four distrusts, each renewing the window). The
-answer is not an exemption in the predicate, which would be a
-per-process carve-out the own-window rules refuse (#678 item 18),
-but the construction the keyboard verbs already have: the GUI's
-raise branch goes through `KiwiCore.focusWindow` before
-`forceFront`, so state focus is set first and the report arrives
-with `intended == id`, which the distrust never reads. Narrowed
-to a window Core tracks on the ACTIVE Space, because that is the
-one arm a compliant own window can meet — parked elsewhere it
-goes where it was placed, and a clickless report is how it is
-reached. A click on the visible Settings window inside those
-seconds is still bounced: own presses stamp no provenance by
-the #953 rule, and that residue is recorded on #1281 rather than
-carved out here.
-The #465 sibling distrust's carve-out for a visible same-display
-sibling is narrowed by this: such a sibling placed into the
-scrolling void is bounced like any other window.
+inside the window of the pan that scrolled it out a bare
+order-front was bounced exactly like the emulator (measured
+2026-09-06: four menu clicks, four distrusts inside one lockout).
+The answer is not an exemption in the predicate, which would be
+a per-process carve-out the own-window rules refuse (#678 item
+18), but the construction the keyboard verbs already have: the
+GUI's raise branch calls `KiwiCore.focusOwnWindow` before
+`forceFront`, and that door issues the focus command first, so
+state focus is set before the report and it arrives with
+`intended == id`, which the distrust never reads. The door lives
+beside the arm it mirrors and takes the arm's own gate — the
+window's Space is the active one — because that is the one arm a
+compliant own window can meet; parked elsewhere it goes where it
+was placed, and a clickless report is how it is reached. It is
+wider than the arm by the mode on purpose: the command is the
+right raise on any shown Space, so an arm that widens later is
+covered already. A click on the visible Settings window inside
+those seconds is still bounced: own presses stamp no provenance
+by the #953 rule, and that residue is recorded on #1281 rather
+than carved out here.
 
 State stays on the intended window and it is re-asserted with a
 direct, unstamped raise — the #465 sibling-distrust shape. The

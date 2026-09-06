@@ -90,7 +90,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.destination = nil
         model.nav.resetSurfaces()
         if let window {
-            focusThroughCore(window)
+            // Core first (#1281): a bare order-front of a window
+            // the row just panned out reports a clickless focus,
+            // which #1161's placement distrust bounces.
+            model.core.focusOwnWindow(number: window.windowNumber)
             NSApp.forceFront(window)
             return
         }
@@ -145,37 +148,6 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         self.window = window
 
         NSApp.forceFront(window)
-    }
-
-    /// The tracked id the raise branch hands Core, nil where
-    /// Core is not the one to focus it: untracked (first open, a
-    /// closed window), or on a Space other than the active one,
-    /// where a clickless report is how a parked window is
-    /// reached (#1281, `SettingsOpenFocusSeamTests`).
-    static func coreFocusTarget(
-        windowNumber: Int,
-        core: KiwiCore
-    ) -> WindowID? {
-        guard windowNumber > 0 else { return nil }
-        let id = WindowID(UInt32(windowNumber))
-        guard let space = core.state.workspaces.space(of: id),
-            space == core.state.workspaces.activeSpace
-        else { return nil }
-        return id
-    }
-
-    /// Tells Core BEFORE `forceFront` (#1281): a bare order-front
-    /// of a window the row just panned out reports a clickless
-    /// focus, which #1161's placement distrust bounces; through
-    /// the focus command the report arrives already intended.
-    private func focusThroughCore(_ window: NSWindow) {
-        guard
-            let id = Self.coreFocusTarget(
-                windowNumber: window.windowNumber,
-                core: model.core
-            )
-        else { return }
-        model.core.focusWindow(id, warp: false)
     }
 
     /// Disarms recorder and cleans up state on window close (#213, #515).

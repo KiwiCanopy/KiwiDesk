@@ -4,18 +4,24 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// An own raise is never a bounce (#1281): a report of a placed
-/// window the focus command already INTENDED is honored, because
-/// the distrust asks `intended != id`. The GUI's Settings raise
-/// rides this (`SettingsOpenFocusSeamTests`); the negative
-/// control — the same report with no intent — is the second
-/// case here and `PlacementBounceTests`' first.
+/// An own raise is never a bounce (#1281): `focusOwnWindow` is
+/// the door a GUI raise of an own tracked window takes, and it
+/// issues the focus command FIRST, so the report that follows
+/// is one the distrust never reads (`intended == id`). The
+/// negative control — the same report with no intent — is the
+/// last case here and `PlacementBounceTests`' first. The GUI
+/// half, the branch that calls the door before `forceFront`, is
+/// `SettingsOpenFocusSeamTests`.
 @Suite(
     "A placed window the focus command intended (#1281)",
     .serialized
 )
 @MainActor
 struct PlacementIntentTests {
+    private final class Log {
+        var lines: [String] = []
+    }
+
     /// A frame straddling the screen edge (bounds end at
     /// x = 1440) — the scrolling pan's ask the distrust was
     /// measured against.
@@ -69,16 +75,44 @@ struct PlacementIntentTests {
         return (core, target, other)
     }
 
-    @Test("A clickless report of a window focusWindow intended is honored")
-    func intendedReportIsHonored() {
+    /// Asserted on the LOG, not on state: with `intended == id`
+    /// the bounce arm's re-assert would put the same focus back,
+    /// so state alone cannot tell honored from bounced.
+    @Test("The door's report of a placed window is honored")
+    func doorReportIsHonored() {
         let (core, target, _) = makeFixture()
         core.tiler.placements.stamp(target, target: offscreen)
-        core.focusWindow(target, warp: false)
+        #expect(core.focusOwnWindow(number: Int(target.raw)))
         // The command's own pan re-stamped it: the ledger is
-        // LIVE when the report lands, and it is still honored.
+        // LIVE when the report lands.
         #expect(core.tiler.placements.recent(target) != nil)
+        let log = Log()
+        core.onLog = { log.lines.append($0) }
         core.handle(.windowFocused(target))
         #expect(core.activeSpace?.focused == target)
+        #expect(log.lines.contains { $0.contains("w1 (App1) honored") })
+        #expect(
+            !log.lines.contains {
+                $0.contains("placement bounce distrusted")
+            }
+        )
+    }
+
+    /// The door refuses what the distrust's arm would not meet:
+    /// a window on another Space (reached by its report), an
+    /// untracked number, and the `<= 0` AppKit reports for a
+    /// window without a device.
+    @Test("The door takes a tracked window on the active Space only")
+    func doorRefusesTheRest() {
+        let (core, target, other) = makeFixture()
+        let active = core.state.workspaces.activeSpace
+        core.state.workspaces.focus(other, in: active!)
+        _ = core.execute("move_to_space", args: [.string("2")])
+        #expect(core.state.workspaces.space(of: other) != active)
+        #expect(!core.focusOwnWindow(number: Int(other.raw)))
+        #expect(!core.focusOwnWindow(number: 7))
+        #expect(!core.focusOwnWindow(number: 0))
+        #expect(!core.focusOwnWindow(number: -1))
     }
 
     @Test("Without the intent the same report is bounced")
