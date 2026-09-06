@@ -27,11 +27,18 @@ struct SpaceAssignmentChip: View {
     /// Target displays for move actions in picture order.
     let displays: [Display]
     @FocusState private var focused: Bool
+    @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     var body: some View {
         capsule
+            .overlay(alignment: .topTrailing) { clearBadge }
             .fixedSize()
-            .draggable(DraggableSpace(raw: space.raw))
+            // The badge is a REMOVE affordance; snapshotted into
+            // the lifted chip it reads as "release to clear the
+            // pin", which is the opposite of what the drag does.
+            .draggable(DraggableSpace(raw: space.raw)) { capsule }
             .help(
                 L(
                     "monitor_chip.help_full",
@@ -54,6 +61,11 @@ struct SpaceAssignmentChip: View {
                 focused = false
             }
             .rowActions { menu }
+            .onHover { hovering = $0 }
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.12),
+                value: hovering
+            )
     }
 
     private var capsule: some View {
@@ -80,15 +92,17 @@ struct SpaceAssignmentChip: View {
         .padding(.leading, 8)
         .padding(.trailing, kind == .auto ? 8 : 14)
         .padding(.vertical, 3)
-        .background(
-            Capsule().fill(
-                .tint.opacity(kind == .auto ? 0 : 0.15)
-            )
-        )
+        .background(Capsule().fill(.tint.opacity(fillAlpha)))
+        // ONE weight for every kind, the kind moving the alpha
+        // alone: a closed full-perimeter edge is what makes a
+        // chip read as a piece lying on the plate rather than
+        // ink printed on it, which is the rest half of the drag
+        // affordance (#1240). The pinned chip drew the FAINTER
+        // edge at half a point, which is a half-pixel at 1x.
         .overlay(
             Capsule().strokeBorder(
-                .tint.opacity(kind == .auto ? 0.35 : 0.5),
-                lineWidth: kind == .auto ? 1 : 0.5
+                .tint.opacity(kind == .auto ? 0.35 : 0.6),
+                lineWidth: 1
             )
         )
         .foregroundStyle(
@@ -96,7 +110,19 @@ struct SpaceAssignmentChip: View {
                 ? AnyShapeStyle(.secondary)
                 : AnyShapeStyle(.primary)
         )
-        .overlay(alignment: .topTrailing) { clearBadge }
+    }
+
+    /// Rest fill by kind, lifted by the shared chip's hover step.
+    ///
+    /// Outline-vs-fill is the ruled KIND channel, so hover must
+    /// not spend it: `.auto` keeps no rest fill and gains only
+    /// the hover wash, which is both the +0.06 lift and the
+    /// hover-only 0.06 `ui-patterns.md` gives a control with no
+    /// rest fill. Hover CONFIRMS the drag; the caption still
+    /// carries it in words.
+    private var fillAlpha: Double {
+        let rest = kind == .auto ? 0.0 : 0.15
+        return hovering ? rest + 0.06 : rest
     }
 
     /// Clear-pin button overlay on trailing-top corner (#758).

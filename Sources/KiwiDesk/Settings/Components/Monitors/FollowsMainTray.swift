@@ -116,7 +116,15 @@ struct FollowsMainTray: View {
                 .lineLimit(1)
                 .frame(width: MonitorCardChips.markerWidth)
                 .padding(.vertical, 3)
-                .background(Capsule().fill(.tint.opacity(0.15)))
+                // The SHARED adaptive chip, not the pinned
+                // chip's fill: this opens a popover, and wearing
+                // a drag source's costume is what diluted the
+                // chips' own rest cue (#1240). `padding: 0`
+                // keeps it inside the reserved marker column.
+                .hoverHighlight(
+                    cornerRadius: MonitorCardChips.chipHeight / 2,
+                    padding: 0
+                )
         }
         .buttonStyle(.plain)
         .accessibilityLabel(
