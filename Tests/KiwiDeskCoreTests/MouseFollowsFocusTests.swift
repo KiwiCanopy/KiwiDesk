@@ -57,8 +57,6 @@ struct MouseFollowsFocusTests {
 
     @Test("The warp guard chain gates on toggle and space")
     func eligibility() {
-        // NSEvent.pressedMouseButtons is assumed 0 while the
-        // suite runs (nobody is clicking during `swift test`).
         let core = makeCore()
         core.state.apply(
             .windowCreated(
@@ -78,6 +76,31 @@ struct MouseFollowsFocusTests {
         core.zOrderRestoresInFlight = 0
         // A window on no (or an inactive) space never warps.
         #expect(!core.mouseWarpEligible(WindowID(99)))
+    }
+
+    @Test("A held button refuses the warp, whichever it is")
+    func heldButtonRefusesTheWarp() {
+        // Both branches stated, because before #1103/#1199 this
+        // read the host live: the developer's own hand decided
+        // the positive cases above, and the suite passed or
+        // failed with it.
+        let core = makeCore()
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(1), pid: 1, appName: "A")
+            )
+        )
+        let id = WindowID(1)
+        core.tiler.settings.mouse.followsFocus = true
+        #expect(core.mouseWarpEligible(id))
+        // Left, and a button that is not the left one: the warp
+        // stands down for any gesture, not just a drag.
+        core.mouse.pressedButtons = { 1 }
+        #expect(!core.mouseWarpEligible(id))
+        core.mouse.pressedButtons = { 1 << 1 }
+        #expect(!core.mouseWarpEligible(id))
+        core.mouse.pressedButtons = { 0 }
+        #expect(core.mouseWarpEligible(id))
     }
 
     @Test("A partial mouse object keeps the off default")

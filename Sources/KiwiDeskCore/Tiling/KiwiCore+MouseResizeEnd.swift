@@ -14,7 +14,7 @@ extension KiwiCore {
     /// (where resize drags begin; app-initiated resizes like
     /// a zoom button don't match).
     func isResizeGesture(_ id: WindowID) -> Bool {
-        if NSEvent.pressedMouseButtons & 1 == 1 {
+        if mouse.leftButtonHeld {
             return true
         }
         guard let press = mouse.press,

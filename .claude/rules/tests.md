@@ -579,8 +579,29 @@ construction routes. Adding a production type whose
 (live default in production, an injected fake in tests) and a
 needle in one of those guards.
 
+**A production default that reads live host state gets the
+same shape even when no initializer touches the OS.** The
+button mask was read at three Core decision points, so a
+developer using their Mac while the suite ran changed the
+verdict of whichever test happened to be running — the warp
+gate refusing, `isResizeGesture` claiming a gesture, the drag
+pipeline opening a session — and the red moved between suites
+each run, which is what made it read as flakiness rather than
+as a cause (#1103/#1199; four different tests in one
+`MouseWarpHoldTests` session, 2026-08-29, and — pinning the
+mask held to measure it, 2026-09-06 — two more in
+`SizeBoundAnswerChannelTests`, where a claimed gesture opens a
+drag session and the retile issues no frame). `MouseTracker
+.pressedButtons` is the seam, `makeTestCore` pins it to
+"nothing held", and a test that wants a held button states the
+mask (`MouseButtonSeamTests`, `MouseFollowsFocusTests`).
+`MouseButtonSeamGuardTests` holds the read to its two homes —
+a sibling of `MachineTouchTests` because that file is at the
+§2.1 ceiling, the split `StatusItemSeamGuardTests` already
+carries.
+
 Deliberate residue a run does still touch, as audited
-2026-08-21 — a change adding a residue class extends and
+2026-09-06 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
@@ -590,15 +611,8 @@ test` run needs that AGENTS.md §4 calls optional, which is why
 `SparkleKeyDerivationTests` carries an `.enabled(if:)` rather
 than redding a host without it — one inert `true` child when
 `FirstRunSeedTests`' executed hooks fixture fires, scratch
-`UserDefaults` suites cleaned on both sides, live
-`NSEvent.pressedMouseButtons` reads — a human touching the
-mouse mid-run reds `MouseFollowsFocusTests` AND
-`MouseWarpHoldTests`, which #689 split out of it and which
-inherits the same exposure through `mouseWarpEligible`; that
-gate is consulted BEFORE the hold branch, so a click surfaces
-as `pendingMouseWarp == nil` in whichever test was running and
-reads as an unrelated flake (four different tests in that one
-suite, one device-QA session, 2026-08-29) — `GeometryUtils.menuBarAutoHides`, a read-only
+`UserDefaults` suites cleaned on both sides,
+`GeometryUtils.menuBarAutoHides`, a read-only
 global-defaults lookup that only reaches fixtures which didn't
 pin their bounds, and one read-only `NSScreen.screens` read per
 lifecycle suite that drives `EventLoop.beginScan()` with faked

@@ -100,5 +100,14 @@ func makeTestCore(
     // stamping suite takes the live writer back explicitly, with
     // the bridge itself faked.
     core.desktopMemory.writeStamp = { _, _ in false }
+    // Same class, eighth time (#1103/#1199): the mouse-button
+    // read defaults LIVE, and three gesture decisions consult
+    // it — the warp gate, `isResizeGesture` and the drag
+    // pipeline — so a developer holding a button while the
+    // suite runs changed the verdict in whichever test happened
+    // to be running, four different ones in one session. Pin
+    // "nothing held"; a test that wants the branch states the
+    // mask itself.
+    core.mouse.pressedButtons = { 0 }
     return core
 }

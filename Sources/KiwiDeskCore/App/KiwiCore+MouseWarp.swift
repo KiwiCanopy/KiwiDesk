@@ -42,7 +42,7 @@ extension KiwiCore {
     /// owns it.
     func mouseWarpEligible(_ id: WindowID) -> Bool {
         tiler.settings.mouse.followsFocus
-            && NSEvent.pressedMouseButtons == 0
+            && !mouse.anyButtonHeld
             && (state.workspaces.space(of: id)
                 == state.workspaces.activeSpace
                 // A sticky window is visible on EVERY space
