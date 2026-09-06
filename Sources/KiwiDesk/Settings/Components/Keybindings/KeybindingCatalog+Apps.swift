@@ -124,13 +124,7 @@ extension KeybindingCatalog {
             var byID: [String: InstalledApp] = [:]
             var paths: [String: String] = [:]
             for root in roots {
-                let contents =
-                    (try? manager.contentsOfDirectory(
-                        atPath: root
-                    )) ?? []
-                for entry in contents
-                where entry.hasSuffix(".app") {
-                    let path = "\(root)/\(entry)"
+                for path in appPaths(under: root) {
                     let url = URL(fileURLWithPath: path)
                     guard
                         let id = Bundle(url: url)?
@@ -145,6 +139,62 @@ extension KeybindingCatalog {
             }
             return (Array(byID.values), paths)
         }()
+
+    /// Every `.app` under `root`, one folder deep as well as at
+    /// the top (#1279).
+    ///
+    /// A flat `contentsOfDirectory` skipped any directory that is
+    /// not itself a bundle, which silently cost the picker all 19
+    /// of `/System/Applications/Utilities` — Terminal, Activity
+    /// Monitor, Console, Disk Utility — plus every vendor folder
+    /// (`/Applications/TeX`, an Adobe or Setapp folder). Reaching
+    /// one of those meant knowing its bundle identifier.
+    ///
+    /// A bundle's own contents are skipped: what it nests is its
+    /// implementation, not an app a user binds. Depth stops at
+    /// one folder because that is where vendors put them, and an
+    /// unbounded walk of `/Applications` would read every
+    /// resource of every bundle on a path that runs before the
+    /// picker can open.
+    static func appPaths(under root: String) -> [String] {
+        let manager = FileManager.default
+        var found: [String] = []
+        for entry
+            in (try? manager.contentsOfDirectory(atPath: root))
+            ?? []
+        {
+            let path = "\(root)/\(entry)"
+            if entry.hasSuffix(".app") {
+                found.append(path)
+                continue
+            }
+            var isDirectory: ObjCBool = false
+            guard
+                manager.fileExists(
+                    atPath: path,
+                    isDirectory: &isDirectory
+                ), isDirectory.boolValue
+            else { continue }
+            for nested
+                in (try? manager.contentsOfDirectory(atPath: path))
+                ?? [] where nested.hasSuffix(".app")
+            {
+                found.append("\(path)/\(nested)")
+            }
+        }
+        return found
+    }
+
+    #if DEBUG
+        /// The walk, for `AppScanDepthTests`. `#if DEBUG` so a
+        /// production read reds the release build rather than
+        /// waiting for a reviewer (tests.md).
+        static func appPathsForTesting(
+            under root: String
+        ) -> [String] {
+            appPaths(under: root)
+        }
+    #endif
 
     private static var diskApps: [InstalledApp] { diskScan.apps }
 

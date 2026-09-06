@@ -98,7 +98,7 @@ extension ApplicationsGroup {
             onPick: { assign(binding, app: $0) },
             escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
             onEscape: {
-                if let app = pickBundleFromPanel() {
+                if let app = AppBundlePanel.pick() {
                     assign(binding, app: app)
                 }
             },

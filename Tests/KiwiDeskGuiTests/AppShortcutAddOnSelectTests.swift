@@ -49,7 +49,7 @@ struct AppShortcutAddOnSelectTests {
     ) throws -> String {
         try #require(
             SourceScan.declarationBody(
-                of: declaration,
+                after: declaration,
                 in: source
             ),
             Comment(rawValue: "no `\(declaration)` to scan")
@@ -101,7 +101,7 @@ struct AppShortcutAddOnSelectTests {
             )
         )
         #expect(
-            chain.contains("pickBundleFromPanel(){add("),
+            chain.contains("AppBundlePanel.pick(){add("),
             Comment(
                 rawValue:
                     "the \u{201C}Other\u{2026}\u{201D} panel no "

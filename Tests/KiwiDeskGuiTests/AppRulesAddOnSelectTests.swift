@@ -83,34 +83,43 @@ struct AppRulesAddOnSelectTests {
         )
     }
 
-    /// The exception, and the reason it is one: every keystroke
-    /// of `com.apple.Safari` is a prefix of `com.apple.Safari`,
-    /// so free text has no moment that means "this is the app".
-    /// BOTH affordances are pinned — Return alone is invisible,
-    /// and a button alone loses the keyboard.
-    @Test("the typed path keeps a commit, on both channels")
-    func customPathKeepsACommit() throws {
+    /// The exception is GONE, and this is what holds it gone.
+    ///
+    /// The typed bundle-identifier path was the one reason this
+    /// row kept a commit step; #1279 deleted it, so *picking IS
+    /// the add* is unconditional here and on the app shortcuts
+    /// row alike. A user who needs to name an app that is not
+    /// installed writes Lua's `app_rules`, which takes bundle
+    /// identifiers directly.
+    ///
+    /// Stated as the absence it is: a free-text field reaching
+    /// this picker again brings back the second step, the three
+    /// retired keys, and the divergence between the two rows.
+    @Test("no typed path stands beside the picker")
+    func typedPathStaysRetired() throws {
         let source = squashed(try controls())
-        for (needle, why) in [
-            (".onSubmit(commitCustom)", "Return commits"),
-            (
-                "Button(action: commitCustom)",
-                "and a visible confirm commits too, so the only "
-                    + "way to add a typed bundle id is not an "
-                    + "unlabelled key press"
-            ),
-        ] {
+        for needle in ["TextField(", "commitCustom", "custom="] {
             #expect(
-                source.contains(squashed(needle)),
+                !source.contains(needle),
                 Comment(
                     rawValue:
-                        "the custom bundle-id field lost "
-                        + "`\(needle)` — \(why), and without it a "
-                        + "typed identifier is silently discarded "
-                        + "when the field loses focus (#1172)"
+                        "`\(needle)` is back in AppSelector — "
+                        + "the typed identifier path returns the "
+                        + "commit step this row no longer has, "
+                        + "and the App Rules / App Shortcuts "
+                        + "escapes diverge again (#1279)"
                 )
             )
         }
+        // …and the escape that remains is the shared one.
+        #expect(
+            source.contains(squashed("AppBundlePanel.pick()")),
+            Comment(
+                rawValue:
+                    "the App Rules escape no longer browses — "
+                    + "both rows take the one panel since #1279"
+            )
+        )
     }
 
     /// gui.md: a Settings-row change updates its census entry in

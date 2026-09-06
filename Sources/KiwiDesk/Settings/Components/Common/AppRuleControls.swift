@@ -1,13 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// App picker with installed apps list and custom bundle ID text entry.
+/// App picker for the App Rules row.
 ///
-/// Picking from the list IS the add — there is no separate
-/// confirm, because choosing an app already says everything
-/// (#1172). Free text cannot work that way: every keystroke of
-/// `com.apple.Safari` is a prefix of it, so the typed path keeps
-/// a commit and is the one exception the issue rules.
+/// Picking IS the add, unconditionally (#1172, #1279): the typed
+/// bundle-identifier path was the one exception that rule had,
+/// and it is gone. A normal user should not have to type an
+/// identifier, and naming an app that is not installed is what
+/// Lua's `app_rules` is for — approachable by default, powerful
+/// on demand. The escape is now the same file panel the app
+/// shortcuts row offers, so one control behaves one way in both
+/// places.
 struct AppSelector: View {
     /// Bundle identifier of chosen app (`AppRef`).
     @Binding var name: String
@@ -18,88 +21,48 @@ struct AppSelector: View {
     /// Called with the bundle id the user committed. The caller
     /// owns normalisation and dedup; this view only says when.
     let onCommit: (String) -> Void
-    @State private var custom = false
 
     var body: some View {
-        if custom {
-            HStack(spacing: 4) {
-                TextField(
-                    L(
-                        "app_selector.bundle_id",
-                        "Bundle identifier"
-                    ),
-                    text: $name
-                )
-                .textFieldStyle(.roundedBorder)
-                .onSubmit(commitCustom)
-                Button(action: commitCustom) {
-                    Image(systemName: "checkmark.circle")
-                }
-                .buttonStyle(.borderless)
-                .disabled(name.trimmed.isEmpty)
-                .iconButtonAffordance(
-                    L("app_rules.add_rule", "Add app rule")
-                )
-                Button {
-                    custom = false
-                    name = ""
-                } label: {
-                    Image(systemName: "xmark.circle")
-                }
-                .buttonStyle(.borderless)
-                .foregroundStyle(.secondary)
-                .iconButtonAffordance(
-                    L(
-                        "app_selector.clear_custom",
-                        "Clear custom app"
-                    )
-                )
-            }
-        } else {
-            AppPickerButton(
-                placeholder: L(
-                    "shortcuts.choose_app",
-                    "Choose app…"
+        AppPickerButton(
+            placeholder: L(
+                "shortcuts.choose_app",
+                "Choose app…"
+            ),
+            selection: name.isEmpty
+                ? nil
+                : KeybindingCatalog.displayName(
+                    forBundleID: name
                 ),
-                selection: name.isEmpty
-                    ? nil
-                    : KeybindingCatalog.displayName(
-                        forBundleID: name
-                    ),
-                onPick: { app in
+            onPick: { app in
+                name = app.bundleID
+                onCommit(app.bundleID)
+            },
+            escapeLabel: L(
+                "shortcuts.other_ellipsis",
+                "Other…"
+            ),
+            onEscape: {
+                if let app = AppBundlePanel.pick() {
                     name = app.bundleID
                     onCommit(app.bundleID)
-                },
-                escapeLabel: L("app_selector.custom", "Custom…"),
-                onEscape: {
-                    custom = true
-                    name = ""
-                },
-                exclude: exclude
-            )
-            // Hug the content (no fixed column to align with, just
-            // the trailing "+" button) instead of filling the row.
-            .fixedSize()
-            // The picker is the add affordance now that the
-            // button is gone, so it carries the census's name —
-            // and gives back the choice the name replaces, which
-            // for this Button is the text drawn inside it.
-            .accessibilityLabel(
-                L("app_rules.add_rule", "Add app rule")
-            )
-            .accessibilityValue(
-                name.isEmpty
-                    ? L("shortcuts.choose_app", "Choose app…")
-                    : KeybindingCatalog.displayName(
-                        forBundleID: name
-                    )
-            )
-        }
-    }
-
-    private func commitCustom() {
-        guard !name.trimmed.isEmpty else { return }
-        onCommit(name)
-        custom = false
+                }
+            },
+            exclude: exclude
+        )
+        // Hug the content (no fixed column to align with) instead
+        // of filling the row.
+        .fixedSize()
+        // The picker is the add affordance, so it carries the
+        // census's name — and gives back the choice the name
+        // replaces, which for this Button is the text drawn
+        // inside it.
+        .accessibilityLabel(
+            L("app_rules.add_rule", "Add app rule")
+        )
+        .accessibilityValue(
+            name.isEmpty
+                ? L("shortcuts.choose_app", "Choose app…")
+                : KeybindingCatalog.displayName(forBundleID: name)
+        )
     }
 }

@@ -125,33 +125,6 @@ struct ApplicationsGroup: View {
         )
     }
 
-    /// Presents open panel to select custom application bundle.
-    func pickBundleFromPanel()
-        -> KeybindingCatalog.InstalledApp?
-    {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.application]
-        panel.canChooseDirectories = false
-        panel.directoryURL = URL(
-            fileURLWithPath: "/Applications"
-        )
-        // Two nils, one narrated: a cancelled panel is the user
-        // saying no, but a bundle with no identifier is a pick
-        // that silently does nothing — a residue #1235's refusal
-        // channel does NOT cover, stated rather than left to be
-        // rediscovered.
-        guard panel.runModal() == .OK, let url = panel.url,
-            let bundleID = Bundle(url: url)?
-                .bundleIdentifier?.lowercased()
-        else { return nil }
-        return .init(
-            bundleID: bundleID,
-            name: KeybindingCatalog.displayName(
-                forBundleID: bundleID
-            )
-        )
-    }
-
     /// Removes binding and unregisters active hotkey
     /// (#517, `liveApplyRecorded`).
     func remove(_ id: UUID) {

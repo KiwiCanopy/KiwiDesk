@@ -21,7 +21,7 @@ extension ApplicationsGroup {
                     "Other…"
                 ),
                 onEscape: {
-                    if let app = pickBundleFromPanel() {
+                    if let app = AppBundlePanel.pick() {
                         add(app)
                     }
                 },
@@ -90,7 +90,7 @@ extension ApplicationsGroup {
     /// Commits a pick, or records why it could not.
     ///
     /// The refusal has to live somewhere: the picker list omits
-    /// fully-bound apps, but `pickBundleFromPanel()` bypasses
+    /// fully-bound apps, but `AppBundlePanel.pick()` bypasses
     /// that list entirely, so the "Other…" route can still name
     /// one. The greyed Add button used to be the only thing
     /// standing there, and a dim is not a sentence (#1235).
