@@ -54,7 +54,8 @@ struct ResizeRefusalCensusTests {
     static let classified: [String: String] = [
         // Cued — the user sees a pill.
         "resize not supported in ":
-            "layoutHasNoResize — monocle, grid, floating (#1255)",
+            "layoutHasNoResize — monocle and grid (#1255); the "
+            + "floating layout left the set with #1184",
         "no \\(axis) parameter for this arrangement":
             "noAxisHere — the other axis divides (#1255)",
         "focused window is alone in its column":
@@ -71,6 +72,20 @@ struct ResizeRefusalCensusTests {
             "argument parse — a CLI/IPC contract, never a gesture",
         "no active space":
             "nothing on screen to draw a pill on",
+        "no focused window":
+            "a floating space whose members all resize "
+            + "themselves (#1184) reached the mode switch, so "
+            + "there was no focus at all: nothing to draw a pill "
+            + "on. This arm's silence is its own — the sibling "
+            + "default: arm DOES cue",
+        "the focused window is fullscreen":
+            "it fills a macOS Space of its own (#670), so the "
+            + "float route has no frame to write. Wordless is "
+            + "THIS arm's own ruling and derives from no sibling "
+            + "— the window has a frame to draw on, and #1255's "
+            + "argument that a silent keyboard refusal reads as "
+            + "being ignored applies. Open on #1184: cueing it "
+            + "needs copy no case carries yet",
         "no focused tiled window":
             "the focus takes no part in this layout — a "
             + "native-fullscreen (#670) or elsewhere-rendering "
@@ -176,7 +191,12 @@ struct ResizeRefusalCensusTests {
                 """
             )
         }
-        // Non-vacuity, derived rather than a hand-carried floor.
+        // Belt to the two loops above, which already force equal
+        // cardinality between them — it has never redded alone
+        // and cannot (guard-prover, 2026-09-06). The actual
+        // non-vacuity nets are the `names.count` floor and the
+        // empty-read `#require`; this comment used to claim that
+        // job for this line.
         #expect(seen.count == Self.classified.count)
     }
 }

@@ -52,8 +52,9 @@ enum ResizeRefusal: Equatable {
     /// verdict.
     case nothingToDivide(WindowID, otherAxisDivides: Bool)
     /// The space's layout has no resizing at all (#1255) —
-    /// monocle, grid and floating. The most reachable refusal
-    /// there is, and until now the one cued by sound alone.
+    /// monocle and grid, the floating layout having left the
+    /// set with #1184. The most reachable refusal there is, and
+    /// until now the one cued by sound alone.
     case layoutHasNoResize(WindowID)
 }
 

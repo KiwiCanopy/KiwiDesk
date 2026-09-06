@@ -8,15 +8,31 @@
 /// back, which is what makes a net theirs too.
 ///
 /// **A consumer that means effective float asks here: a NET
-/// asks it, a VERB keeps the flag.** A net is a
+/// asks it, and a VERB asks it once ruled.** A net is a
 /// correction that places a window nothing else will — the bar
 /// clamp, the stash capture, the display-crossing re-anchor. A
-/// verb is a user's explicit ask, and whether `resize` should
-/// reach a floating-mode member is a product question this type
-/// does not answer: `KiwiCore+Resize`, `KiwiCore+ZOrderFloats`,
-/// `KiwiCore+SpaceBar` and `KiwiCore+Borders` ask the flag
-/// today and are right to until that is ruled. Nothing scans
-/// for a bare-flag net, so a new one routes here deliberately.
+/// verb is a user's explicit ask, and whether one should reach
+/// a floating-mode member is a product question per verb, which
+/// this type does not answer.
+///
+/// This docstring is the one roster of which verbs are ruled,
+/// and it is the file #1286 moves. `resize` is ruled onto the
+/// predicate (#1184, `FloatingResizeCommandTests`), standing
+/// down for a native-fullscreen window (#670) on both arms —
+/// one arm alone would put the divergence the crossing removed
+/// back at that one window — and it stands the VERB down, not
+/// the float ROUTE, which would drop the press into the layout
+/// and let a window nothing places move its neighbours. Among
+/// the consumers still asking the flag are the float-tier raise
+/// (`KiwiCore+ZOrderFloats`), the Space Bar badge
+/// (`KiwiCore+SpaceBarItems`) and the focus ring
+/// (`KiwiCore+Borders`); they are right to until each is ruled
+/// the same way. That list is known short, so #1286 re-derives
+/// it from the flag's readers rather than trusting it, and each
+/// verb it rules states its own stand-down — always the verb's,
+/// never the route's.
+/// Nothing scans for a bare-flag net, so a new one routes here
+/// deliberately.
 ///
 /// Not the negation, either: the drag paths' "is this window a
 /// TILED member of this space" chains chain membership and

@@ -3160,10 +3160,14 @@ Each row has an action. Built-in actions live under headings:
   there does nothing at all, because only Mission Control can
   make a Desktop.
 - **Size & float** — the per-axis Grow/Shrink rows, Make
-  floating and the resize step. A resize shortcut pressed in a
-  layout without a resize target (monocle, grid, a floating
-  space) flashes a message on the window rather than failing
-  silently; the sound that used to accompany that lives in
+  floating and the resize step. A window outside tiling is the
+  exception to the layout rules below: whether you floated it
+  yourself or it sits in a space set to the Floating layout, a
+  resize shortcut changes that window's own size, in any
+  layout. A resize shortcut pressed in a layout with no resize
+  target (monocle, grid) flashes a message on the window rather
+  than failing silently; the sound that used to accompany that
+  lives in
   **Behaviour ▸ When an action can't apply** now, because it
   applies to every blocked action rather than to resizing.
   Held, a resize shortcut glides: the first press is one

@@ -2091,7 +2091,8 @@ fits the architecture. The Size & float catalog grows from 3 rows
 to 5 (Grow/Shrink × width/height + Make floating), all authored
 from the one shared `resize.step`; scrolling still resizes its
 slot along its own scroll axis whichever axis is passed, and
-monocle/grid/floating stay explicit no-ops. No back-compat alias
+monocle/grid stay explicit no-ops (floating did too until
+[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)). No back-compat alias
 for the old `bsp.set_ratio` / `layout.bsp.ratio` name
 (pre-release, single user). (#56)
 
@@ -2226,8 +2227,10 @@ answer is the `track` layout (#128, shipped), where every
 window sits in exactly one track and every resize has one true
 target. A **floating** focused window is exempt from all of
 this: it resizes itself directly, in every mode (width for x,
-height for y, floored at `min_window_size`). (#122, #124,
-#129)
+height for y, floored at `min_window_size`) — "floating" being
+the *effective* float since
+[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184), whose
+entry below is the ruling's home. (#122, #124, #129)
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
@@ -2331,11 +2334,13 @@ worked, which is what proved the app imposed nothing.
 **A refusal DRAWS; the sound is an addition to the drawing, and
 cannot fire without one (#1255).** [Principle] Two refusals cued
 by sound alone — a resize press in a layout with no resizing
-(monocle, grid, floating), and one on a zone axis that does not
-exist. Both were invisible with the toggle off, and invisible to
-anyone who does not hear it; the first is the most reachable
-refusal in the feature, not an edge, since any resize press in
-those three layouts arrives there. Meanwhile the size-limit and
+(monocle, grid, and the floating layout until
+[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184) gave
+its members a resize of their own), and one on a zone axis that
+does not exist. Both were invisible with the toggle off, and
+invisible to anyone who does not hear it; the first is the most
+reachable refusal in the feature, not an edge, since any resize
+press in a layout that has none arrives there. Meanwhile the size-limit and
 sticky families drew pills and said nothing. One idea, four
 shapes.
 
@@ -2890,6 +2895,31 @@ Fixed, not proportional, is the whole point — recorded
 here so it is not "optimized" back into a size-scaled form. A
 niche polish behavior, so the disable knob (`set_float_nudge`,
 default on) is Lua-only with no Settings toggle.
+
+**`resize` reads the *effective* float, so a floating-mode space
+resizes like a flag-float ([#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)).**
+[Principle] A window can be free-floating two ways: it carries
+the float flag, or it sits in a space set to the floating layout,
+which assigns no frames at all. The gate asked the flag alone, so
+the same window, in the same space, under the same shortcut,
+resized or beeped `resize not supported in floating` depending on
+a flag the user never had to set to get the behavior they were
+looking at. Nothing downstream of the gate distinguishes the two
+either — the region a float may grow into, the symmetric split
+and the pinned edges are all read off geometry, not off the flag
+— so refusing was a difference with no reason behind it.
+
+It is ruled per verb rather than in one sweep, and that is the
+load-bearing half.
+[#1178](https://github.com/KiwiCanopy/KiwiDesk/issues/1178)
+introduced the effective-float predicate for *nets* — corrections
+that place a window nothing else will — and deliberately left
+every *verb* on the flag, because a verb is the user's own ask
+and each one is a separate product question. Resize crosses
+because a floating-mode member has no layout answer to give and a
+frame of its own to change; whether the z-order raise, the Space
+Bar's float badge and the focus ring should follow is a question
+about what each of those *means*, not a consequence of this one.
 
 ### Spaces, profiles & config ownership
 

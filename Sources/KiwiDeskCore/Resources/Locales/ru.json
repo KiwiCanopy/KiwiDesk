@@ -1049,7 +1049,7 @@
   "shortcuts.section.open_applications": "Открытие приложений",
   "shortcuts.section.size_float": "Размер и плавающий режим",
   "shortcuts.section.switch_layers": "Переключение слоёв",
-  "shortcuts.size_float.layouts_caption": "Сочетания клавиш для ширины и высоты действуют только в раскладках bsp, stack, scrolling и track; в monocle, grid и floating они ничего не делают. Ширина и высота меняются независимо; scrolling в обоих случаях меняет размер слота вдоль оси прокрутки, а в track одна ось меняет размер Track окна, другая — его долю внутри него.",
+  "shortcuts.size_float.layouts_caption": "Сочетания клавиш для ширины и высоты действуют только в раскладках bsp, stack, scrolling и track; в monocle и grid они ничего не делают. Исключение — окно вне мозаики: плавающее окно, как и любое окно в раскладке floating, меняет собственный размер в любой раскладке. Ширина и высота меняются независимо; scrolling в обоих случаях меняет размер слота вдоль оси прокрутки, а в track одна ось меняет размер Track окна, другая — его долю внутри него.",
   "slot_size.column_width": "Ширина столбца",
   "slot_size.percent": "Проценты",
   "slot_size.points": "Пункты",

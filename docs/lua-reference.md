@@ -3888,6 +3888,19 @@ larger minimum the app itself enforces, once KiwiDesk has
 learned it (#677). A window already smaller than that just
 shrinks no further.
 
+"Floating" here is the window's *effective* float (#1184): its
+own float flag — however it got one, whether you toggled it,
+`make_floating` set it, or a `float_rules` entry or KiwiDesk's
+own detection did — **or** any window in a space set to the
+floating layout, which places nothing and so leaves its members
+free-floating in exactly the same way. One exception either
+way: a floating window in **native full screen** fills a macOS
+Space of its own, so `resize` refuses it rather than writing a
+frame the system owns, and refuses outright rather than falling
+through to the layout — so that press moves nothing else
+either. (A *tiled* window in full screen is a separate case this
+did not change: its press still reaches the layout.)
+
 The delta is split between **both** edges (#1091): a chord has
 no grabbed edge to anchor on, so a float grows and shrinks
 around its own centre rather than from its top-left corner. An
@@ -3900,9 +3913,9 @@ underneath a bar; when both edges are against it, a grow refuses
 and flashes a pill. Shrinking pins the same way, which is what
 keeps grow and shrink reversible at an edge. Tiled windows
 only resize in bsp, stack, scrolling, and track layouts —
-monocle, grid, and the floating layout report "not supported",
-and that failure flashes a pill on the focused window saying the
-layout has no resizing (#1255) — the no-op is correct, but a
+monocle and grid report "not supported", and that failure
+flashes a pill on the focused window saying the layout has no
+resizing (#1255) — the no-op is correct, but a
 silent one at the keyboard reads as "KiwiDesk ignored me". Add
 the system alert sound to it with `set_refusal_sound(true)`;
 only a hotkey fire sounds, so CLI and IPC callers see the pill

@@ -1049,7 +1049,7 @@
   "shortcuts.section.open_applications": "Apri applicazioni",
   "shortcuts.section.size_float": "Dimensione e float",
   "shortcuts.section.switch_layers": "Cambia livello",
-  "shortcuts.size_float.layouts_caption": "Le scorciatoie per larghezza e altezza valgono solo nei layout bsp, stack, scrolling e track; non hanno effetto in monocle, grid e floating. Larghezza e altezza si ridimensionano in modo indipendente; scrolling ridimensiona il proprio slot lungo l'asse di scorrimento per entrambe, e in track un asse ridimensiona il track della finestra e l'altro la sua porzione al suo interno.",
+  "shortcuts.size_float.layouts_caption": "Le scorciatoie per larghezza e altezza valgono solo nei layout bsp, stack, scrolling e track; non hanno effetto in monocle e grid. L'eccezione è una finestra fuori dall'affiancamento: una finestra fluttuante, come ogni finestra del layout floating, ridimensiona se stessa in qualsiasi layout. Larghezza e altezza si ridimensionano in modo indipendente; scrolling ridimensiona il proprio slot lungo l'asse di scorrimento per entrambe, e in track un asse ridimensiona il track della finestra e l'altro la sua porzione al suo interno.",
   "slot_size.column_width": "Larghezza colonna",
   "slot_size.percent": "Percentuale",
   "slot_size.points": "Punti",

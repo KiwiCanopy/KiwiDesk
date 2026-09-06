@@ -5,8 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `resize` on a floating focused window resizes the window
-/// itself — in every layout mode, including the floating
-/// layout, where tiled resize replies "not supported".
+/// itself — in every layout mode, and since #1184 whether the
+/// float is the window's own flag or the space's `.floating`
+/// mode (`EffectiveFloat.applies`).
 @Suite("Floating keyboard resize", .serialized)
 @MainActor
 struct FloatingResizeCommandTests {
@@ -155,29 +156,70 @@ struct FloatingResizeCommandTests {
         #expect(frames.isEmpty)
     }
 
-    @Test("a tiled focus in the floating layout still fails")
-    func tiledFocusInFloatingLayoutStillFails() {
+    /// #1184: the gate asks the EFFECTIVE float, so a member of
+    /// a floating-mode space resizes even though the user never
+    /// set its flag. It used to refuse here — the same window,
+    /// the same space, the same chord, answering differently
+    /// depending on a flag that changes nothing about how the
+    /// layout treats it.
+    ///
+    /// Asserts the frame rather than only the verdict: a gate
+    /// that succeeded without reaching `resizeFloating` would
+    /// pass on `isSuccess` alone.
+    @Test("an unflagged focus in the floating layout resizes")
+    func unflaggedFocusInFloatingLayoutResizes() {
+        let core = makeCore()
+        var frames: [WindowID: CGRect] = [:]
+        floatingSetup(core, mode: "floating") {
+            frames[$0] = $1
+        }
+        // The very thing the fixture set — this window is
+        // ordinary now, and only the space's mode floats it.
+        core.state.setFloating(WindowID(2), false)
+        let response = core.execute(
+            "resize",
+            args: [.string("y"), .number(150)]
+        )
+        #expect(response.isSuccess)
+        #expect(frames[WindowID(2)]?.height == 650)
+    }
+
+    /// A floating space still refuses where there is no focus
+    /// to move — and names THAT, not the layout, which since
+    /// #1184 refuses nothing. The message is a machine contract
+    /// (core-boundaries.md), so it is pinned rather than
+    /// paraphrased.
+    @Test("an empty floating space refuses, naming the focus")
+    func emptyFloatingSpaceRefusesNamingTheFocus() {
         let core = makeCore()
         core.execute(
             "set_mode",
             args: [.string("1"), .string("floating")]
         )
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(
-                    id: WindowID(1),
-                    pid: 1,
-                    appName: "A"
-                )
-            )
-        )
-        // Created (and auto-focused) but never flagged
-        // floating: the tiled dispatch keeps rejecting the
-        // floating layout.
         let response = core.execute(
             "resize",
             args: [.string("x"), .number(100)]
         )
         #expect(!response.isSuccess)
+        #expect(
+            response.error == "no focused window"
+        )
+    }
+
+    /// Monocle is untouched by #1184: it PLACES its windows, so
+    /// an unflagged member has a layout answer and the refusal
+    /// stands. The widening is the floating layout's alone.
+    @Test("an unflagged focus in monocle still refuses")
+    func unflaggedFocusInMonocleStillRefuses() {
+        let core = makeCore()
+        var frames: [WindowID: CGRect] = [:]
+        floatingSetup(core, mode: "monocle") { frames[$0] = $1 }
+        core.state.setFloating(WindowID(2), false)
+        let response = core.execute(
+            "resize",
+            args: [.string("x"), .number(100)]
+        )
+        #expect(!response.isSuccess)
+        #expect(frames.isEmpty)
     }
 }

@@ -100,9 +100,23 @@ extension KiwiCore {
         // layout mode — it does not participate in the layout,
         // so the ratio paths below (and their unknown-focus
         // fallbacks) never see a floating focus.
+        //
+        // The EFFECTIVE float, never the flag (#1184), on the
+        // membership `space.focused` carries.
         if let focused = space.focused,
-            state.windows[focused]?.isFloating == true
+            let window = state.windows[focused],
+            EffectiveFloat.applies(
+                isFloating: window.isFloating,
+                mode: space.mode
+            )
         {
+            // A native-fullscreen window fills a macOS Space of
+            // its own (#670): no frame worth writing, on either
+            // arm. The VERB stands down here rather than the
+            // ROUTE — state-and-layout.md argues both (#1184).
+            guard !window.isFullscreen else {
+                return .fail("the focused window is fullscreen")
+            }
             return resizeFloating(
                 focused,
                 axis: axis,
@@ -148,6 +162,12 @@ extension KiwiCore {
                 span: span,
                 space: space
             )
+        case .floating:
+            // Every member resizes itself (#1184), so this arm
+            // is reached only with no focus to move — the
+            // layout refuses nothing. Named for the focus like
+            // its siblings, never for the layout.
+            return .fail("no focused window")
         default:
             // Correct no-op (macOS full-screen/Stage Manager
             // expose no resize either), but perceivable (#184):
