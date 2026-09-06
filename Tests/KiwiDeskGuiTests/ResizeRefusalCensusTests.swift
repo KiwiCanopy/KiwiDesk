@@ -191,7 +191,12 @@ struct ResizeRefusalCensusTests {
                 """
             )
         }
-        // Non-vacuity, derived rather than a hand-carried floor.
+        // Belt to the two loops above, which already force equal
+        // cardinality between them — it has never redded alone
+        // and cannot (guard-prover, 2026-09-06). The actual
+        // non-vacuity nets are the `names.count` floor and the
+        // empty-read `#require`; this comment used to claim that
+        // job for this line.
         #expect(seen.count == Self.classified.count)
     }
 }
