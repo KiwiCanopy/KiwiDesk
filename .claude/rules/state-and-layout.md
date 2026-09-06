@@ -976,16 +976,20 @@ editing here:
   those windows got neither a layout frame nor the correction,
   permanently. A net is a correction that places a window
   nothing else will (the clamp, the stash capture, the
-  display-crossing re-anchor); a VERB is the user's own ask and
-  keeps the flag until ruled otherwise, one verb at a time.
-  `resize` is ruled onto the predicate (#1184,
+  display-crossing re-anchor); a VERB is the user's own ask, and
+  **a verb the `EffectiveFloat` docstring does not name as ruled
+  asks the flag until it is ruled the same way** — one verb at a
+  time, that docstring being the one roster and #1286 the open
+  sweep. `resize` is the ruled one (#1184,
   `FloatingResizeCommandTests`): a floating-mode member has no
   layout answer to give and a frame of its own to change, so
   refusing it while resizing its flag-floating neighbour was a
-  difference with nothing behind it. That rules `resize` and
-  nothing beside it — the z-order raise, the Space Bar's float
-  badge and the focus ring each ask what the verb MEANS, which
-  is not a consequence of this one. **The mode arm names the
+  difference with nothing behind it. **A verb that crosses
+  stands its MODE arm down for a native-fullscreen window**
+  (#670): that window fills a macOS Space of its own, so a
+  layout placing nothing says nothing about it — the same arm
+  every net that widened here already carries
+  (`clampFloatsClearOfBars`). **The mode arm names the
   space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose

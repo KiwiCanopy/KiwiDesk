@@ -3889,11 +3889,11 @@ learned it (#677). A window already smaller than that just
 shrinks no further.
 
 "Floating" here is the window's *effective* float (#1184): its
-own `toggle_floating` flag, **or** any window in a space set to
-the floating layout. That layout places nothing, so its members
-are free-floating in exactly the same way — before #1184 the
-same window under the same shortcut answered differently
-depending on a flag you never had to set.
+own float flag — however it got one, whether you toggled it,
+`make_floating` set it, or a `float_rules` entry or KiwiDesk's
+own detection did — **or** any window in a space set to the
+floating layout, which places nothing and so leaves its members
+free-floating in exactly the same way.
 
 The delta is split between **both** edges (#1091): a chord has
 no grabbed edge to anchor on, so a float grows and shrinks
@@ -3908,8 +3908,8 @@ and flashes a pill. Shrinking pins the same way, which is what
 keeps grow and shrink reversible at an edge. Tiled windows
 only resize in bsp, stack, scrolling, and track layouts —
 monocle and grid report "not supported", and that failure
-flashes a pill on the focused window saying the
-layout has no resizing (#1255) — the no-op is correct, but a
+flashes a pill on the focused window saying the layout has no
+resizing (#1255) — the no-op is correct, but a
 silent one at the keyboard reads as "KiwiDesk ignored me". Add
 the system alert sound to it with `set_refusal_sound(true)`;
 only a hotkey fire sounds, so CLI and IPC callers see the pill

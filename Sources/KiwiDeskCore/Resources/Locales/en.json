@@ -1052,7 +1052,7 @@
   "shortcuts.section.open_applications": "Open applications",
   "shortcuts.section.size_float": "Size & float",
   "shortcuts.section.switch_layers": "Switch layers",
-  "shortcuts.size_float.layouts_caption": "Width and height shortcuts only apply in the bsp, stack, scrolling, and track layouts; they are a no-op in monocle and grid. A floating window resizes itself instead, including every window in the floating layout. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.",
+  "shortcuts.size_float.layouts_caption": "Width and height shortcuts only apply in the bsp, stack, scrolling, and track layouts; they are a no-op in monocle and grid. A window outside tiling is the exception: a floated window, and every window in the floating layout, resizes its own frame in any layout. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.",
   "slot_size.column_width": "Column width",
   "slot_size.percent": "Percent",
   "slot_size.points": "Points",

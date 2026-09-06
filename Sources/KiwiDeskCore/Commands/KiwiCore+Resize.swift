@@ -101,20 +101,16 @@ extension KiwiCore {
         // so the ratio paths below (and their unknown-focus
         // fallbacks) never see a floating focus.
         //
-        // EFFECTIVE float, never the flag (#1184): a `.floating`
-        // space places nothing, so its members are unmanaged in
-        // exactly the way a flag-float is, and the same window
-        // under the same chord answered differently depending on
-        // a flag the user never had to set. This is the one VERB
-        // ruled onto the predicate — #1178 ruled the nets and
-        // left every verb on the flag — so its siblings (the
-        // z-order raise, the bar badge, the ring) are each still
-        // their own question.
+        // The EFFECTIVE float, never the flag (#1184) — on the
+        // membership `space.focused` carries, which is the mode
+        // arm's premise, and standing that arm down for a
+        // native-fullscreen window, which this space's layout
+        // does not place either way (#670).
         if let focused = space.focused,
             let window = state.windows[focused],
             EffectiveFloat.applies(
                 isFloating: window.isFloating,
-                mode: space.mode
+                mode: window.isFullscreen ? nil : space.mode
             )
         {
             return resizeFloating(
@@ -162,6 +158,18 @@ extension KiwiCore {
                 span: span,
                 space: space
             )
+        case .floating:
+            // Every member of this space resizes ITSELF (#1184),
+            // so reaching the mode switch at all means there was
+            // no focus this verb could move — none at all, or a
+            // native-fullscreen one the gate stands down for
+            // (#670). Blaming the layout would name a cause that
+            // no longer exists. Wordless for the same reason the
+            // tiled paths are wordless at a fullscreen focus: an
+            // empty space has nothing to draw on, and a window
+            // KiwiDesk may not resize is not refused BY this
+            // layout.
+            return .fail("no window this layout can resize")
         default:
             // Correct no-op (macOS full-screen/Stage Manager
             // expose no resize either), but perceivable (#184):

@@ -184,11 +184,13 @@ struct FloatingResizeCommandTests {
         #expect(frames[WindowID(2)]?.height == 650)
     }
 
-    /// The `default:` arm is still reachable, and this is what
-    /// reaches it: a floating space with nothing focused has no
-    /// window to resize and none to draw a pill on either.
-    @Test("an empty floating space still refuses")
-    func emptyFloatingSpaceStillRefuses() {
+    /// A floating space still refuses where there is no focus
+    /// to move — and names THAT, not the layout, which since
+    /// #1184 refuses nothing. The message is a machine contract
+    /// (core-boundaries.md), so it is pinned rather than
+    /// paraphrased.
+    @Test("an empty floating space refuses, naming the focus")
+    func emptyFloatingSpaceRefusesNamingTheFocus() {
         let core = makeCore()
         core.execute(
             "set_mode",
@@ -200,8 +202,52 @@ struct FloatingResizeCommandTests {
         )
         #expect(!response.isSuccess)
         #expect(
-            response.error == "resize not supported in floating"
+            response.error == "no window this layout can resize"
         )
+    }
+
+    /// The mode arm stands down for a native-fullscreen window
+    /// (#670): it fills a macOS Space of its own, so a frame
+    /// write lands on geometry the compositor owns. Only the
+    /// arm #1184 added stands down — the flag arm answered this
+    /// window before it and is not this ruling's to re-rule.
+    ///
+    /// The negative twin runs first, so the assertion cannot
+    /// pass for a fixture that never resized at all.
+    @Test("a fullscreen member is left to its own Space")
+    func fullscreenMemberIsLeftAlone() {
+        let core = makeCore()
+        var frames: [WindowID: CGRect] = [:]
+        floatingSetup(core, mode: "floating") {
+            frames[$0] = $1
+        }
+        core.state.setFloating(WindowID(2), false)
+        #expect(
+            core.execute(
+                "resize",
+                args: [.string("y"), .number(150)]
+            ).isSuccess
+        )
+        #expect(frames[WindowID(2)] != nil)
+
+        frames = [:]
+        core.state.apply(
+            .windowFullscreenChanged(
+                WindowID(2),
+                isFullscreen: true
+            )
+        )
+        let response = core.execute(
+            "resize",
+            args: [.string("y"), .number(150)]
+        )
+        #expect(!response.isSuccess)
+        // Named for the focus, never for the layout: this
+        // window is not one the FLOATING layout refused.
+        #expect(
+            response.error == "no window this layout can resize"
+        )
+        #expect(frames.isEmpty)
     }
 
     /// Monocle is untouched by #1184: it PLACES its windows, so

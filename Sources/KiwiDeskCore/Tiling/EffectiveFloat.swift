@@ -13,14 +13,20 @@
 /// clamp, the stash capture, the display-crossing re-anchor. A
 /// verb is a user's explicit ask, and whether one should reach
 /// a floating-mode member is a product question per verb, which
-/// this type does not answer. `resize` is ruled onto it (#1184):
-/// the layout places nothing either way, so the same window
-/// under the same chord may not answer differently depending on
-/// a flag the user never had to set. `KiwiCore+ZOrderFloats`,
-/// `KiwiCore+SpaceBar` and `KiwiCore+Borders` ask the flag today
-/// and are right to until each is ruled the same way. Nothing
-/// scans for a bare-flag net, so a new one routes here
-/// deliberately.
+/// this type does not answer.
+///
+/// This docstring is the one roster of which verbs are ruled,
+/// and it is the file #1286 moves. `resize` is ruled onto the
+/// predicate (#1184, `FloatingResizeCommandTests`), with its
+/// mode arm standing down for a native-fullscreen window (#670)
+/// the way every net that widened here does. The float-tier
+/// raise (`KiwiCore+ZOrderFloats`), the Space Bar badge
+/// (`KiwiCore+SpaceBarItems`) and the focus ring
+/// (`KiwiCore+Borders`) ask the flag, and are right to until
+/// each is ruled the same way — #1286, which should re-derive
+/// its own list from the flag's readers rather than trust this
+/// one. Nothing scans for a bare-flag net, so a new one routes
+/// here deliberately.
 ///
 /// Not the negation, either: the drag paths' "is this window a
 /// TILED member of this space" chains chain membership and

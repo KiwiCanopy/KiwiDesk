@@ -2091,7 +2091,8 @@ fits the architecture. The Size & float catalog grows from 3 rows
 to 5 (Grow/Shrink × width/height + Make floating), all authored
 from the one shared `resize.step`; scrolling still resizes its
 slot along its own scroll axis whichever axis is passed, and
-monocle/grid/floating stay explicit no-ops. No back-compat alias
+monocle/grid stay explicit no-ops (floating did too until
+[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)). No back-compat alias
 for the old `bsp.set_ratio` / `layout.bsp.ratio` name
 (pre-release, single user). (#56)
 
@@ -2228,9 +2229,8 @@ target. A **floating** focused window is exempt from all of
 this: it resizes itself directly, in every mode (width for x,
 height for y, floored at `min_window_size`) — "floating" being
 the *effective* float since
-[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184): the
-window's own flag, or any window in a floating-layout space.
-(#122, #124, #129)
+[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184), whose
+entry below is the ruling's home. (#122, #124, #129)
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
@@ -2334,11 +2334,13 @@ worked, which is what proved the app imposed nothing.
 **A refusal DRAWS; the sound is an addition to the drawing, and
 cannot fire without one (#1255).** [Principle] Two refusals cued
 by sound alone — a resize press in a layout with no resizing
-(monocle, grid, floating), and one on a zone axis that does not
-exist. Both were invisible with the toggle off, and invisible to
-anyone who does not hear it; the first is the most reachable
-refusal in the feature, not an edge, since any resize press in
-those three layouts arrives there. Meanwhile the size-limit and
+(monocle, grid, and the floating layout until
+[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184) gave
+its members a resize of their own), and one on a zone axis that
+does not exist. Both were invisible with the toggle off, and
+invisible to anyone who does not hear it; the first is the most
+reachable refusal in the feature, not an edge, since any resize
+press in a layout that has none arrives there. Meanwhile the size-limit and
 sticky families drew pills and said nothing. One idea, four
 shapes.
 
@@ -2918,10 +2920,6 @@ because a floating-mode member has no layout answer to give and a
 frame of its own to change; whether the z-order raise, the Space
 Bar's float badge and the focus ring should follow is a question
 about what each of those *means*, not a consequence of this one.
-The refusal itself is not retired — monocle and grid still have
-nothing to resize, and a floating space with nothing focused
-still reaches it, wordlessly, for want of a window to draw a pill
-on.
 
 ### Spaces, profiles & config ownership
 

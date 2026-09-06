@@ -54,11 +54,8 @@ struct ResizeRefusalCensusTests {
     static let classified: [String: String] = [
         // Cued — the user sees a pill.
         "resize not supported in ":
-            "layoutHasNoResize — monocle and grid (#1255). A "
-            + "floating space reaches it only with nothing "
-            + "focused, where the cue stands down for want of a "
-            + "window to draw on: its members resize themselves "
-            + "(#1184)",
+            "layoutHasNoResize — monocle and grid (#1255); the "
+            + "floating layout left the set with #1184",
         "no \\(axis) parameter for this arrangement":
             "noAxisHere — the other axis divides (#1255)",
         "focused window is alone in its column":
@@ -75,6 +72,13 @@ struct ResizeRefusalCensusTests {
             "argument parse — a CLI/IPC contract, never a gesture",
         "no active space":
             "nothing on screen to draw a pill on",
+        "no window this layout can resize":
+            "a floating space whose members all resize "
+            + "themselves (#1184) reached the mode switch, so "
+            + "the focus was absent — nothing to draw on — or "
+            + "native-fullscreen, which the tiled paths refuse "
+            + "wordlessly too (#670): it is not this layout "
+            + "that refused it",
         "no focused tiled window":
             "the focus takes no part in this layout — a "
             + "native-fullscreen (#670) or elsewhere-rendering "
