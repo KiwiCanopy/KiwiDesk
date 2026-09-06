@@ -593,9 +593,14 @@ mask held to measure it, 2026-09-06 — two more in
 `SizeBoundAnswerChannelTests`, where a claimed gesture opens a
 drag session and the retile issues no frame).
 `MouseTracker.pressedButtons` is the seam; `makeTestCore` pins
-it to "nothing held" — as it does the cursor read `wireDrag`
-also makes live — and a test that wants a held button states
+it to "nothing held" and a test that wants a held button states
 the mask (`MouseButtonSeamTests`, `MouseFollowsFocusTests`).
+The cursor read `wireDrag` also makes live is pinned beside it
+and is PRECAUTIONARY — a run reaches the seam, but no assertion
+depends on the value, so no hostile cursor flips a verdict
+(guard-prover, 2026-09-06); it is kept for the next drag test
+that forgets its own pin, not for a live defect. Do not read
+the two as equals.
 `MouseButtonSeamGuardTests` holds the read to its two homes
 AND both pins into both twins, a deletion from both being
 silent otherwise; it is a sibling of `MachineTouchTests`

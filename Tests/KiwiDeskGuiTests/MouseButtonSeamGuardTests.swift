@@ -89,6 +89,11 @@ struct MouseButtonSeamGuardTests {
     /// answers 0 on a quiet host either way — which is exactly
     /// the run where the defect is invisible. The
     /// `DesktopCensusSeamTests` shape, one subsystem over.
+    ///
+    /// Residue, same class as the read census above: the needles
+    /// are one spelling each, so a pin re-written equivalently
+    /// (`{ CGPoint.zero }`) reads as missing. Fail-closed, and
+    /// the message names the target it is missing from.
     @Test("makeTestCore pins both live mouse reads")
     func testCorePinsBothMouseReads() throws {
         let twins = ["KiwiDeskCoreTests", "KiwiDeskGuiTests"]
@@ -99,6 +104,10 @@ struct MouseButtonSeamGuardTests {
             }
         for twin in twins {
             let source = try SourceScan.strippedSource(at: twin)
+            // Both twins ARE `TestCore.swift`, so the message
+            // names the target directory instead.
+            let target = twin.deletingLastPathComponent()
+                .lastPathComponent
             #expect(
                 source.contains(
                     "mouse.pressedButtons = { 0 }"
@@ -106,10 +115,7 @@ struct MouseButtonSeamGuardTests {
                     && source.contains(
                         "drag.cursorLocation = { .zero }"
                     ),
-                .init(
-                    rawValue:
-                        "\(twin.lastPathComponent) misses a pin"
-                )
+                .init(rawValue: "\(target) misses a pin")
             )
         }
     }

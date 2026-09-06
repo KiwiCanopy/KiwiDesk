@@ -131,10 +131,13 @@ func makeTestCore(
     // "nothing held"; a test that wants the branch states the
     // mask itself.
     core.mouse.pressedButtons = { 0 }
-    // Same class, ninth time (#1103): `wireDrag` also makes the
-    // drop-target cursor read live, and the pointer moves under
-    // a hand that never presses. Two drag suites already pin it
-    // per file; this is the default they were working around.
+    // Same class, ninth time (#1103) — but PRECAUTIONARY, not
+    // load-bearing like the eighth: `wireDrag` also makes the
+    // drop-target cursor read live and a run reaches it, yet no
+    // assertion today depends on the value, so no hostile cursor
+    // flips a verdict (guard-prover, 2026-09-06). Kept for the
+    // next drag test that forgets its own pin, which the two
+    // pinning it per file are the precedent for.
     core.drag.cursorLocation = { .zero }
     return core
 }
