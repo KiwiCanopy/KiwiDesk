@@ -37,44 +37,21 @@ struct SpaceChipAffordanceTests {
             .joined()
     }
 
-    /// `declaration`'s own balanced body, so a clause asks the
-    /// subject rather than the file.
-    ///
-    /// Every evasion `guard-prover` found in the first draft
-    /// (2026-09-06) was the same fault: a file-scoped needle
-    /// satisfied — or broken — by a neighbour. A tinted capsule
-    /// somewhere else reported the marker; a hover chip on the
-    /// CARD satisfied the marker's presence clause.
-    private func scope(
+    /// `declaration`'s own balanced body — the shared scoper,
+    /// which every evasion `guard-prover` found in this suite's
+    /// first draft (2026-09-06) was the absence of: a needle
+    /// read against the FILE is satisfied, or broken, by a
+    /// neighbour.
+    private func declarationBody(
         _ declaration: String,
-        in source: String,
-        open: Character = "{",
-        close: Character = "}"
+        in source: String
     ) throws -> String {
-        let text = Array(source)
-        let marker = Array(declaration)
-        let head = try #require(
-            (0...(text.count - marker.count)).first {
-                Array(text[$0..<($0 + marker.count)]) == marker
-            },
-            Comment(rawValue: "no `\(declaration)` to scan")
-        )
-        // Past the signature to the declaration's own opener —
-        // a `func` carries a parameter list between the two.
-        var cursor = head + marker.count
-        while cursor < text.count, text[cursor] != open {
-            cursor += 1
-        }
-        return try #require(
-            SourceScan.balanced(
-                text,
-                from: &cursor,
-                open: open,
-                close: close
+        try #require(
+            SourceScan.declarationBody(
+                of: declaration,
+                in: source
             ),
-            Comment(
-                rawValue: "`\(declaration)` has no balanced body"
-            )
+            Comment(rawValue: "no `\(declaration)` to scan")
         )
     }
 
@@ -177,7 +154,7 @@ struct SpaceChipAffordanceTests {
     @Test("the +n marker draws no tint of its own")
     func overflowMarkerIsNotAChip() throws {
         for file in ["DisplayCard.swift", "FollowsMainTray.swift"] {
-            let body = try scope(
+            let body = try declarationBody(
                 "privatefuncoverflowChip",
                 in: try squashed(file)
             )
@@ -278,7 +255,7 @@ struct SpaceChipAffordanceTests {
         // beat the first shape of this clause (2026-09-06). The
         // badge has exactly one home, and it is the chain the
         // preview is NOT taken from.
-        let body = try scope("varbody:someView", in: source)
+        let body = try declarationBody("varbody:someView", in: source)
         #expect(
             body.contains(
                 ".overlay(alignment:.topTrailing){clearBadge}"
@@ -291,7 +268,7 @@ struct SpaceChipAffordanceTests {
             )
         )
         #expect(
-            !(try scope("privatevarcapsule:someView", in: source))
+            !(try declarationBody("privatevarcapsule:someView", in: source))
                 .contains("clearBadge"),
             Comment(
                 rawValue:

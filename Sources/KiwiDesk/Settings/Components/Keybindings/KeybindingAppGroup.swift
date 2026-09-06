@@ -12,7 +12,23 @@ struct ApplicationsGroup: View {
     var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
     var layerName
-    @State var newApp: KeybindingCatalog.InstalledApp?
+    /// The last pick that created nothing: WHICH app to ask
+    /// about, and WHERE it was picked. Never the sentence, which
+    /// `allBoundNotice` derives live (#1235).
+    ///
+    /// `row` is nil for the add row. It exists so the caption
+    /// draws at the picker that refused rather than at the
+    /// bottom of the group — a refusal raised from row 2 of
+    /// twenty would otherwise paint below row 20, which for any
+    /// scrolling list is silent for a sighted user (code review
+    /// 2026-09-06). Keyed, so it is still ONE sentence and not
+    /// gui.md's caption stamped under every child.
+    @State var refusal: AppPickRefusal?
+
+    /// The pending announcement, cancelled by the next pick so a
+    /// post cannot land after its sentence stopped being true —
+    /// the shape `SettingsFooter` uses for the same reason.
+    @State var refusalAnnouncement: DispatchWorkItem?
     /// Alphabetical display order snapshotted on section entry
     /// (#333). NOT recomputed on `bindings` mutation: the row's
     /// control is a `KeyRecorderField` capture, and a live re-sort
@@ -53,7 +69,13 @@ struct ApplicationsGroup: View {
         // The section view is reused across modes (no per-mode
         // `.id`), so `onAppear` fires once — re-snapshot on mode
         // change or later modes render in raw array order.
-        .onChange(of: layerName) { _, _ in recomputeOrder() }
+        // A layer switch is a different set of bindings, so the
+        // caption would be unprompted rather than wrong — the
+        // derivation keeps it true either way.
+        .onChange(of: layerName) { _, _ in
+            recomputeOrder()
+            clearRefusal()
+        }
     }
 
     /// Application binding IDs in snapshot alpha order with new rows
@@ -113,6 +135,11 @@ struct ApplicationsGroup: View {
         panel.directoryURL = URL(
             fileURLWithPath: "/Applications"
         )
+        // Two nils, one narrated: a cancelled panel is the user
+        // saying no, but a bundle with no identifier is a pick
+        // that silently does nothing — a residue #1235's refusal
+        // channel does NOT cover, stated rather than left to be
+        // rediscovered.
         guard panel.runModal() == .OK, let url = panel.url,
             let bundleID = Bundle(url: url)?
                 .bundleIdentifier?.lowercased()

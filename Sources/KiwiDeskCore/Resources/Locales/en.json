@@ -998,6 +998,7 @@
   "shortcuts.app_behavior.open_new": "Open New",
   "shortcuts.app_behavior.open_new.badge": "Opens a new instance",
   "shortcuts.app_behavior.open_or_focus": "Open or Focus",
+  "shortcuts.apps.all_bound": "“%1$@” already has a key for each way to open it. Change one of its shortcuts above to give it another.",
   "shortcuts.apps.empty": "No app has a key of its own yet. Add one and its key brings that app's window to the Space you're on, or launches the app if it isn't running.",
   "shortcuts.base_layer_protected": "Base layers can't be removed here",
   "shortcuts.choose_app": "Choose app…",
