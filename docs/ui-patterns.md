@@ -1065,29 +1065,37 @@ family must be focusable so the chord has a target. (#845; the
 seam and its guard are engineering-side, `.claude/rules/gui.md`
 ▸ the keyboard path.)
 
-**Every animation the Settings window and the setup tour play
-honours Reduce Motion.** Their motion — a caption fading in, a
-list springing into its new order after a reorder, the scroll
-that carries you to a search hit, a layout preview or the gaps
-diagram re-flowing as you drag a slider, a hover or focus fade,
-the setup tour's progress row — stands down when macOS
-**System Settings ▸ Accessibility ▸ Reduce Motion** is on. It
-stands down by dropping the *motion*, never the affordance: the
-caption still appears and still leaves, the rows still land in
-their new order, the scroll still arrives at its target, the
-preview still redraws at the arrangement you just staged — they
-simply arrive rather than travel. This is separate from the
-Motion card in Settings, which governs how *managed windows*
-move; the system setting wins over both. (#989, #1069; the
-engineering obligation and its guard are
-`.claude/rules/gui.md` ▸ the Reduce Motion gate.)
+**Every animation KiwiDesk's own chrome plays honours Reduce
+Motion** — the Settings window, the setup tour, and both bars.
+Their motion — a caption fading in, a list springing into its
+new order after a reorder, the scroll that carries you to a
+search hit, a layout preview or the gaps diagram re-flowing as
+you drag a slider, a hover or focus fade, the setup tour's
+progress row, an App Bar's items sliding as its run changes
+width, the Space Bar's drop ring sweeping — stands down when
+macOS **System Settings ▸ Accessibility ▸ Reduce Motion** is on.
+It stands down by dropping the *motion*, never the affordance:
+the caption still appears and still leaves, the rows still land
+in their new order, the scroll still arrives at its target, the
+preview still redraws at the arrangement you just staged, the
+bar's items still show you the run that changed — they simply
+arrive rather than travel. This is separate from the Motion card
+in Settings, which governs how *managed windows* move; the
+system setting wins over both. (#989, #1069, #1078; the
+engineering obligations and their guards are
+`.claude/rules/gui.md` ▸ the Reduce Motion gate and
+`.claude/rules/bars.md` ▸ the bars start motion in one file.)
 
 Nothing is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot pulses to say the app is
 still watching for your answer; under Reduce Motion it stops
 pulsing and stays put, so the sentence it belongs to is still
 marked, and the tour's progress row fills the same pips without
-the crossfade between them.
+the crossfade between them. The Space Bar's spring-load ring is
+the same trade: it still stays away for the first half-second,
+so a quick flick over a Space flashes nothing, and then appears
+whole for the rest of the hold — the item still says a hold
+here will spring, and only the countdown is gone.
 
 **A drag source is legible at rest, not on hover.** Paint cannot
 say "draggable", and hover arrives only once the pointer is

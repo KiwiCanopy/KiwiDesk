@@ -26,13 +26,7 @@ enum GlassPlate {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView
         else { return }
-        if animated, glass.frame != .zero,
-            glass.frame != frame
-        {
-            glass.animator().frame = frame
-        } else {
-            glass.frame = frame
-        }
+        BarMotion.setFrame(glass, to: frame, animated: animated)
         glass.cornerRadius = cornerRadius
         let tint = NSColor(kiwiHex: tintHex)
         glass.tintColor =

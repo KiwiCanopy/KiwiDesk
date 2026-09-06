@@ -177,11 +177,7 @@ public final class AppBarOverlay {
         )
         let depth = edge.isHorizontal ? strip.height : strip.width
         let hosting = glassHosting(style, overflow: m.inset > 0)
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.15
-            context.timingFunction = CAMediaTimingFunction(
-                name: .easeOut
-            )
+        BarMotion.runLayout {
             prepareGlassHosting(
                 hosting,
                 panel: panel,
@@ -196,11 +192,11 @@ public final class AppBarOverlay {
             // would fight that and flicker.
             for (index, view) in itemViews.enumerated()
             where view.superview === itemContainer {
-                if view.frame == .zero {
-                    view.frame = frames[index]
-                } else {
-                    view.animator().frame = frames[index]
-                }
+                BarMotion.setFrame(
+                    view,
+                    to: frames[index],
+                    animated: true
+                )
             }
         }
         for (index, item) in items.enumerated() {

@@ -47,13 +47,7 @@ extension AppBarOverlay {
             )
         }
         plate.isHidden = false
-        if animated, plate.frame != .zero,
-            plate.frame != plateFrame
-        {
-            plate.animator().frame = plateFrame
-        } else {
-            plate.frame = plateFrame
-        }
+        BarMotion.setFrame(plate, to: plateFrame, animated: animated)
         let depth =
             style.edge.isHorizontal ? strip.height : strip.width
         plate.layer?.cornerRadius =
