@@ -100,8 +100,22 @@ extension KiwiCore {
         // layout mode — it does not participate in the layout,
         // so the ratio paths below (and their unknown-focus
         // fallbacks) never see a floating focus.
+        //
+        // EFFECTIVE float, never the flag (#1184): a `.floating`
+        // space places nothing, so its members are unmanaged in
+        // exactly the way a flag-float is, and the same window
+        // under the same chord answered differently depending on
+        // a flag the user never had to set. This is the one VERB
+        // ruled onto the predicate — #1178 ruled the nets and
+        // left every verb on the flag — so its siblings (the
+        // z-order raise, the bar badge, the ring) are each still
+        // their own question.
         if let focused = space.focused,
-            state.windows[focused]?.isFloating == true
+            let window = state.windows[focused],
+            EffectiveFloat.applies(
+                isFloating: window.isFloating,
+                mode: space.mode
+            )
         {
             return resizeFloating(
                 focused,

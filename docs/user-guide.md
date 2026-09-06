@@ -3161,8 +3161,8 @@ Each row has an action. Built-in actions live under headings:
   make a Desktop.
 - **Size & float** — the per-axis Grow/Shrink rows, Make
   floating and the resize step. A resize shortcut pressed in a
-  layout without a resize target (monocle, grid, a floating
-  space) flashes a message on the window rather than failing
+  layout without a resize target (monocle, grid) flashes a
+  message on the window rather than failing
   silently; the sound that used to accompany that lives in
   **Behaviour ▸ When an action can't apply** now, because it
   applies to every blocked action rather than to resizing.

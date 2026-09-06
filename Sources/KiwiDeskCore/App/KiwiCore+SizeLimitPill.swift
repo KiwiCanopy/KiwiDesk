@@ -112,12 +112,14 @@ extension KiwiCore {
         )
     }
 
-    /// The layout has no resizing at all (#1255): monocle, grid
-    /// and floating. A correct no-op — macOS's own full-screen
-    /// exposes no resize either — but a perceivable one, and it
-    /// is the MOST reachable refusal in the feature, not the
-    /// least: any resize press in one of those three arrives
-    /// here. It cued by sound alone until #1255.
+    /// The layout has no resizing at all (#1255): monocle and
+    /// grid. A correct no-op — macOS's own full-screen exposes
+    /// no resize either — but a perceivable one, and it is the
+    /// MOST reachable refusal in the feature, not the least: any
+    /// resize press in either arrives here. It cued by sound
+    /// alone until #1255. The floating layout left this set with
+    /// #1184 — its members resize themselves — and reaches it
+    /// only with nothing focused, which the guard below drops.
     ///
     /// An empty space cues nothing: every refusal is drawn ON a
     /// window, so with no focus there is nothing to draw and

@@ -54,7 +54,11 @@ struct ResizeRefusalCensusTests {
     static let classified: [String: String] = [
         // Cued — the user sees a pill.
         "resize not supported in ":
-            "layoutHasNoResize — monocle, grid, floating (#1255)",
+            "layoutHasNoResize — monocle and grid (#1255). A "
+            + "floating space reaches it only with nothing "
+            + "focused, where the cue stands down for want of a "
+            + "window to draw on: its members resize themselves "
+            + "(#1184)",
         "no \\(axis) parameter for this arrangement":
             "noAxisHere — the other axis divides (#1255)",
         "focused window is alone in its column":

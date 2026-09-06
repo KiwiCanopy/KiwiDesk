@@ -380,7 +380,9 @@ value` and shadows the global for that space only.
 floating focused window resizes itself directly in any mode
 (width for `x`, height for `y`, floored at `min_window_size`),
 splitting the delta between both edges and pinning one that is
-already against the screen edge or a bar (#1091).
+already against the screen edge or a bar (#1091). "Floating" is
+the effective float since #1184: the window's own flag, or any
+window in a floating-layout space, which places nothing.
 For tiled windows: in BSP, `x` moves the side-by-side split
 ratio and `y` the stacked one, independently, each in the
 direction that grows the *focused* window's region (#122).
@@ -395,7 +397,7 @@ per-window shares (accepted, see design-decisions). Scrolling resizes
 the slot along its own scroll axis for either `x` or `y`. In a
 track space the axis across the tracks resizes the focused
 window's track, the axis along them its share within the track
-(#128; session-scoped weights too). monocle, grid, and floating
+(#128; session-scoped weights too). monocle and grid
 reply "not supported" — that failure flashes a pill on the
 focused window whatever issued it, and adds the system alert
 sound when `set_refusal_sound` is on (default off) and a hotkey

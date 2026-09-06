@@ -1049,7 +1049,6 @@
   "shortcuts.section.open_applications": "打開應用程式",
   "shortcuts.section.size_float": "尺寸與浮動",
   "shortcuts.section.switch_layers": "切換層",
-  "shortcuts.size_float.layouts_caption": "寬度與高度快速鍵只適用於 bsp、stack、scrolling 與 track 佈局；在 monocle、grid 與 floating 中沒有作用。寬度與高度各自獨立調整；scrolling 對兩者都是沿捲動軸調整它的位置格，而在 track 中一個軸調整視窗所在的 Track，另一個則調整它在 Track 內所佔的比例。",
   "slot_size.column_width": "欄寬",
   "slot_size.percent": "百分比",
   "slot_size.points": "點",

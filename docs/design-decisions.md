@@ -2226,8 +2226,11 @@ answer is the `track` layout (#128, shipped), where every
 window sits in exactly one track and every resize has one true
 target. A **floating** focused window is exempt from all of
 this: it resizes itself directly, in every mode (width for x,
-height for y, floored at `min_window_size`). (#122, #124,
-#129)
+height for y, floored at `min_window_size`) — "floating" being
+the *effective* float since
+[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184): the
+window's own flag, or any window in a floating-layout space.
+(#122, #124, #129)
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
@@ -2890,6 +2893,35 @@ Fixed, not proportional, is the whole point — recorded
 here so it is not "optimized" back into a size-scaled form. A
 niche polish behavior, so the disable knob (`set_float_nudge`,
 default on) is Lua-only with no Settings toggle.
+
+**`resize` reads the *effective* float, so a floating-mode space
+resizes like a flag-float ([#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)).**
+[Principle] A window can be free-floating two ways: it carries
+the float flag, or it sits in a space set to the floating layout,
+which assigns no frames at all. The gate asked the flag alone, so
+the same window, in the same space, under the same shortcut,
+resized or beeped `resize not supported in floating` depending on
+a flag the user never had to set to get the behavior they were
+looking at. Nothing downstream of the gate distinguishes the two
+either — the region a float may grow into, the symmetric split
+and the pinned edges are all read off geometry, not off the flag
+— so refusing was a difference with no reason behind it.
+
+It is ruled per verb rather than in one sweep, and that is the
+load-bearing half.
+[#1178](https://github.com/KiwiCanopy/KiwiDesk/issues/1178)
+introduced the effective-float predicate for *nets* — corrections
+that place a window nothing else will — and deliberately left
+every *verb* on the flag, because a verb is the user's own ask
+and each one is a separate product question. Resize crosses
+because a floating-mode member has no layout answer to give and a
+frame of its own to change; whether the z-order raise, the Space
+Bar's float badge and the focus ring should follow is a question
+about what each of those *means*, not a consequence of this one.
+The refusal itself is not retired — monocle and grid still have
+nothing to resize, and a floating space with nothing focused
+still reaches it, wordlessly, for want of a window to draw a pill
+on.
 
 ### Spaces, profiles & config ownership
 

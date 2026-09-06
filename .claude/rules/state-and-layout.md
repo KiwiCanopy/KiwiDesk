@@ -977,8 +977,16 @@ editing here:
   permanently. A net is a correction that places a window
   nothing else will (the clamp, the stash capture, the
   display-crossing re-anchor); a VERB is the user's own ask and
-  keeps the flag until ruled otherwise, which `resize` still
-  does. **The mode arm names the space whose SCREEN the
+  keeps the flag until ruled otherwise, one verb at a time.
+  `resize` is ruled onto the predicate (#1184,
+  `FloatingResizeCommandTests`): a floating-mode member has no
+  layout answer to give and a frame of its own to change, so
+  refusing it while resizing its flag-floating neighbour was a
+  difference with nothing behind it. That rules `resize` and
+  nothing beside it — the z-order raise, the Space Bar's float
+  badge and the focus ring each ask what the verb MEANS, which
+  is not a consequence of this one. **The mode arm names the
+  space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose
   destination is that screen — and a correction whose strips are

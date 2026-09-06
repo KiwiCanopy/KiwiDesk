@@ -8,15 +8,19 @@
 /// back, which is what makes a net theirs too.
 ///
 /// **A consumer that means effective float asks here: a NET
-/// asks it, a VERB keeps the flag.** A net is a
+/// asks it, and a VERB asks it once ruled.** A net is a
 /// correction that places a window nothing else will — the bar
 /// clamp, the stash capture, the display-crossing re-anchor. A
-/// verb is a user's explicit ask, and whether `resize` should
-/// reach a floating-mode member is a product question this type
-/// does not answer: `KiwiCore+Resize`, `KiwiCore+ZOrderFloats`,
-/// `KiwiCore+SpaceBar` and `KiwiCore+Borders` ask the flag
-/// today and are right to until that is ruled. Nothing scans
-/// for a bare-flag net, so a new one routes here deliberately.
+/// verb is a user's explicit ask, and whether one should reach
+/// a floating-mode member is a product question per verb, which
+/// this type does not answer. `resize` is ruled onto it (#1184):
+/// the layout places nothing either way, so the same window
+/// under the same chord may not answer differently depending on
+/// a flag the user never had to set. `KiwiCore+ZOrderFloats`,
+/// `KiwiCore+SpaceBar` and `KiwiCore+Borders` ask the flag today
+/// and are right to until each is ruled the same way. Nothing
+/// scans for a bare-flag net, so a new one routes here
+/// deliberately.
 ///
 /// Not the negation, either: the drag paths' "is this window a
 /// TILED member of this space" chains chain membership and
