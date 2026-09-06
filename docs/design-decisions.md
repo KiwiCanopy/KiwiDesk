@@ -5054,15 +5054,32 @@ User segment is the legend, drawn nowhere. Hue still never
 carries alone: the weight step stays, and the strength is
 measured, not felt — 0.5 sat exactly on the CVD separation
 floor against the light hairline; the shipped value clears
-both neighbours on the same edge (the hairline on one side,
-hover's full accent on the other) in both appearances, and
+the hairline it neighbours on that edge over both grounds a
+card is drawn on, in both appearances, and
 `ModeGatedFrameSeparationTests` derives those floors from
 the shipped tokens. The weight stays below the doubling the
 Monitors (1.5→3 pt) and palette (1→2 pt) pairs spend on
-selected/applied — a mode-gated card is present, not picked
-— and hover keeps the full-strength accent as its own
-register, which is also why the frame's strength has a
-ceiling: above it, hover collapses into the rest state.
+selected/applied — a mode-gated card is present, not picked.
+
+**A persistent statement and a transient one never share a
+property.** (#1173.) Hover first took the full-strength
+accent on that same edge, on the reasoning that the marking's
+own strength therefore had a ceiling. Sharing the property
+was the defect, not the strengths: the two states then differ
+only in degree, so a marked card reads as permanently
+hovered — and pointing at a marked card OVERWRITES the one
+channel carrying its marking, which no ceiling can fix,
+because a statement a pointer can delete is not a statement.
+So the channels split by what they answer: the border says
+which mode a card belongs to, the fill says where the pointer
+is (`cardHover`, `card` stepped one notch toward the ground
+in each appearance — opaque, so the inks above it are
+measured against what they actually sit on). The two facts
+compose, which is the whole prize: a marked card under the
+pointer keeps its frame AND lifts. It also returns the Home
+card to the idiom the rest of the tree already keeps — a
+neutral lift for the pointer, the accent reserved for what a
+thing IS.
 
 **Only the user's own flip glows; the implicit promotion
 stays silent.** (#760.) A search or cross-reference landing
