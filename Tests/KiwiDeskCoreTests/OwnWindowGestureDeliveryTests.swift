@@ -114,9 +114,9 @@ struct OwnWindowGestureDeliveryTests {
             from: .otherApp
         )
         #expect(seen.count == 1)
-        // #446's bar-overlay exemption, and the #496/#687/#951
-        // click provenance, are all built on this fan-out never
-        // hearing a click on one of our own windows.
+        // #446's bar-overlay exemption is built on this fan-out
+        // never hearing a click on one of our own windows; the
+        // click provenance takes the own arm's channel (#1281).
         tracker.recordDown(
             at: CGPoint(x: 3, y: 4),
             from: .ownWindow

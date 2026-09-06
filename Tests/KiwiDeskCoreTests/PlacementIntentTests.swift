@@ -113,6 +113,11 @@ struct PlacementIntentTests {
         #expect(!core.focusOwnWindow(number: 7))
         #expect(!core.focusOwnWindow(number: 0))
         #expect(!core.focusOwnWindow(number: -1))
+        // The bridge's own answer, since through the door an
+        // untracked id rescues the sign guard (guard-prover).
+        #expect(EventLoop.ownWindowID(number: 0) == nil)
+        #expect(EventLoop.ownWindowID(number: -1) == nil)
+        #expect(EventLoop.ownWindowID(number: 5) == WindowID(5))
     }
 
     @Test("Without the intent the same report is bounced")

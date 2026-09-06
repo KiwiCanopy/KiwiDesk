@@ -14,20 +14,23 @@ import Testing
 /// branch nor the live resize-vs-move gate could classify its
 /// gesture.
 ///
-/// The local arm must stay press bookkeeping ONLY, and since
-/// the fan-out moved inside `recordDown` that is a property of
+/// The local arm stays out of the `onLeftMouseDown` fan-out —
+/// its click provenance takes its own inline channel since
+/// #1281 (`OwnPressProvenanceSeamTests`) — and since the
+/// fan-out moved inside `recordDown` that is a property of
 /// the press's own `Origin` — held behaviourally by
 /// `OwnWindowGestureDeliveryTests.fanOutHearsOtherAppsAlone`,
 /// which is the primary guard. What survives here is the net
 /// beside it: exactly one `onLeftMouseDown` call site, so a
 /// SECOND one added anywhere — under no gate, or under an
 /// inverted one — cannot slip past the behavioural test by
-/// living somewhere it never looks. The consumers that stand
-/// down are built on a global monitor's blindness to our own
+/// living somewhere it never looks. The consumer that stands
+/// down is built on a global monitor's blindness to our own
 /// windows: `followDisplayUnderClick` takes its bar-overlay
-/// exemption from it (#446), and `lastLeftClick` is the click
-/// provenance the cross-display sibling distrust (#496, #687)
-/// and the ignored-panel escape (#951) read.
+/// exemption from it (#446). `lastLeftClick`, the click
+/// provenance the distrusts read (#496, #687, #951), is stamped
+/// for BOTH arms since #1281 — through the own arm's channel,
+/// never this fan-out.
 @Suite("Own-window press monitor seam (#953)")
 struct OwnPressMonitorSeamTests {
     /// The two axes a monitor installation sits on. Every pair

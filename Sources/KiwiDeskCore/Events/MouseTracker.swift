@@ -22,11 +22,20 @@ public final class MouseTracker {
     private var monitors: [Any] = []
 
     /// Fired on left-mouse-down in Cocoa screen space (#446).
-    /// **Only a `.otherApp` press reaches it** — the consumers are
-    /// built on a global monitor's blindness to our own windows
-    /// (#446, #496, #687, #951), so the stand-down is argued from
-    /// the press's own provenance.
+    /// **Only a `.otherApp` press reaches it** — the display
+    /// follow is built on a global monitor's blindness to our own
+    /// windows (#446), so the stand-down is argued from the
+    /// press's own provenance; the click-provenance stamp hears
+    /// both arms (#1281, below).
     public var onLeftMouseDown: ((CGPoint) -> Void)?
+
+    /// Fired for a press in the marked own window, in Cocoa
+    /// screen space, INLINE from the local arm (#1281): click
+    /// provenance only, never the fan-out above. Inline because
+    /// our own window's AX focus report reaches the run loop
+    /// before an enqueued store would, and provenance is a
+    /// press-time fact (#687).
+    public var onOwnWindowLeftMouseDown: ((CGPoint) -> Void)?
 
     public init() {}
 
@@ -60,6 +69,9 @@ public final class MouseTracker {
                 Self.tilingWindowPress(of: event)
             }
             if let location {
+                MainActor.assumeIsolated {
+                    self?.onOwnWindowLeftMouseDown?(location)
+                }
                 Task { @MainActor in
                     self?.recordDown(
                         at: location,

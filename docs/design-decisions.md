@@ -1686,10 +1686,14 @@ compliant own window can meet; parked elsewhere it goes where it
 was placed, and a clickless report is how it is reached. It is
 wider than the arm by the mode on purpose: the command is the
 right raise on any shown Space, so an arm that widens later is
-covered already. A click on the visible Settings window inside
-those seconds is still bounced: own presses stamp no provenance
-by the #953 rule, and that residue is recorded on #1281 rather
-than carved out here.
+covered already. The click half was the symptom actually
+reported: a click ON the visible Settings window inside those
+seconds was bounced too, because the #953 local monitor recorded
+the press and stamped no provenance — the escape that beats every
+distrust for every other app had never heard our own window. The
+local arm now stamps provenance inline through its own channel
+and the one `stampLeftClick`, and nothing else
+(input-and-animation.md carries the obligation).
 
 State stays on the intended window and it is re-asserted with a
 direct, unstamped raise — the #465 sibling-distrust shape. The

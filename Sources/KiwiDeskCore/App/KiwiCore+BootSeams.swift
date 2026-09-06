@@ -64,17 +64,14 @@ extension KiwiCore {
         // distrust (#496) — in AX coordinates, the space window
         // frames live in.
         mouse.onLeftMouseDown = { [weak self] point in
-            let axPoint = GeometryUtils.axPoint(point)
-            // Resolve which window the press reached NOW, not
-            // when a raise echo asks (#687): press time is when
-            // the fact exists — `clickReachedWindow` carries the
-            // argument.
-            self?.lastLeftClick = (
-                Date(),
-                axPoint,
-                self?.clickReachedWindow(at: axPoint)
-            )
+            self?.stampLeftClick(at: GeometryUtils.axPoint(point))
             self?.followDisplayUnderClick(at: point)
+        }
+        // A press in our own tiled window carries the same
+        // provenance (#1281) and nothing else: the display
+        // follow keeps its bar-overlay exemption (#446).
+        mouse.onOwnWindowLeftMouseDown = { [weak self] point in
+            self?.stampLeftClick(at: GeometryUtils.axPoint(point))
         }
         // Both memories from ONE reading (#888): the authority
         // the switch handler compares against, and the

@@ -420,7 +420,8 @@ editing here:
   it a test — an untested escape hatch is discovered not to work
   at exactly the moment it is needed.
 - **A press on one of our own windows is recorded per WINDOW,
-  and records the press only (#953).** A **global** monitor
+  and stamps click provenance through its own channel
+  (#953/#1281).** A **global** monitor
   never sees an event routed to our own windows, which left the
   one tiled own window with no recorded press to classify its
   gesture by — so `isResizeGesture`'s trailing-event branch and
@@ -456,13 +457,25 @@ editing here:
     (`OwnWindowGestureDeliveryTests`; `OwnPressMonitorSeamTests`
     is the net beside it, holding the gate to one call site).
     Argue the stand-down from the press's own origin rather
-    than from which arm called — that fan-out's consumers are
-    built ON the blindness — `followDisplayUnderClick` takes its
-    bar-overlay exemption from it (#446), and `lastLeftClick` is
-    the click provenance the sibling distrust and the
-    ignored-panel escape read (#496, #687, #951). Widening the
-    fan-out is a ruling of its own, not a side effect of making
-    a gesture classifiable.
+    than from which arm called — that fan-out's consumer is
+    built ON the blindness: `followDisplayUnderClick` takes its
+    bar-overlay exemption from it (#446). Widening the fan-out
+    is a ruling of its own, not a side effect of making a
+    gesture classifiable.
+  - **Stamp click provenance from the local arm's own channel,
+    INLINE, and nothing else (#1281).** A click beats every focus
+    distrust through `recentClickReached` (#687) — for every
+    other app, because the global fan-out stamps `lastLeftClick`;
+    the local arm stamped nothing, so for
+    `PlacementLedger.echoWindow` after the row panned Settings
+    out a click on it was #1161's bounce, the symptom the owner
+    reported. `onOwnWindowLeftMouseDown` fires inline (our own
+    window's AX report reaches the run loop before an enqueued
+    store would, and provenance is a press-time fact), both boot
+    arms take the ONE `stampLeftClick`, and the own arm never
+    reaches `followDisplayUnderClick` (`OwnPressProvenanceTests`,
+    `OwnPressProvenanceSeamTests`; `lastLeftClick` has one
+    production writer).
 
   The delivery half of the same defect — why our own window's
   gesture was not observed at all — is

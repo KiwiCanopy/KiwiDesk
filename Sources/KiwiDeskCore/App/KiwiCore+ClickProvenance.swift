@@ -89,6 +89,17 @@ extension KiwiCore {
         return click.reached == id
     }
 
+    /// The one press stamp (#687/#1281), both monitor arms'.
+    /// Resolves which managed window the press reached NOW —
+    /// press time is when the fact exists.
+    func stampLeftClick(at axPoint: CGPoint) {
+        lastLeftClick = (
+            Date(),
+            axPoint,
+            clickReachedWindow(at: axPoint)
+        )
+    }
+
     /// The managed window a left press at `point` (AX coords)
     /// hit: the frontmost stacking entry whose state frame
     /// contains the point. Called by the `KiwiCore+Lifecycle`
