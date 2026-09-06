@@ -48,7 +48,7 @@ struct SpaceChipAffordanceTests {
     ) throws -> String {
         try #require(
             SourceScan.declarationBody(
-                of: declaration,
+                after: declaration,
                 in: source
             ),
             Comment(rawValue: "no `\(declaration)` to scan")

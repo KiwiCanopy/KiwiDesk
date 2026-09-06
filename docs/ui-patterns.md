@@ -1117,9 +1117,8 @@ moment in it means "this is the one".
 That leaves a duty the removed button was carrying, and it has
 to be paid rather than deleted. These pickers exclude the
 entries that cannot be added, but their escape route bypasses
-the exclusion — a typed identifier in the app rules row, a file
-panel in the app shortcuts row — so a pick can still arrive that
-creates nothing. **Where a pick can be refused, the refusal
+the exclusion — one file panel, the same on both rows since
+#1279 — so a pick can still arrive that creates nothing. **Where a pick can be refused, the refusal
 speaks as a caption at the picker that refused it**, derived
 from live state so it clears itself the moment the user frees
 what was taken, and announced once for VoiceOver, since the
@@ -1129,9 +1128,17 @@ a dim was never a sentence anyway. It is keyed to the picker
 rather than to the section, or a list of rows prints one
 sentence under every one of them.
 
+**One escape, and it browses.** Both rows offer *Other…* and
+neither takes a typed identifier: a person who needs to name an
+app that is not installed writes Lua, which is where
+*powerful on demand* lives, and a GUI control for that case
+costs every other user a second thing to understand (#1279). The
+list itself reaches one folder deep, so browsing is the rare
+fallback rather than the route to Terminal.
+
 Only the app shortcuts row has a refusal today (#1235); the app
-rules row still drops a typed duplicate silently, and owes the
-same channel.
+rules row still drops a duplicate silently, and owes the same
+channel.
 
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,

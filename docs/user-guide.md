@@ -2522,12 +2522,15 @@ Click **Choose app…** and pick one — that adds the rule; there
 is nothing to confirm. Start typing to filter the list by name,
 and each app shows its icon. Apps are remembered by their bundle
 identifier, so a rule keeps working across system-language
-changes and app renames. For an app that isn't installed right
-now, use **Custom…** and type its bundle identifier by hand (see
-[Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier));
-that one path does need confirming, since every keystroke of a
-bundle identifier is a prefix of it — press Return or click the
-checkmark.
+changes and app renames. The list covers your Applications
+folders one level deep, so apps that live in a subfolder —
+Terminal and Activity Monitor in *Utilities*, anything under a
+vendor folder — are there too. For one kept somewhere else
+entirely, use **Other…** and browse to it; that is the same
+escape the app shortcuts list offers. To write a rule for an app
+you have not installed, name it in Lua instead: `app_rules`
+takes bundle identifiers directly (see
+[Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier)).
 Use a row's trash button to delete it, which removes every rule
 for that app. Rows are ordered alphabetically by the app's
 display name so a long list stays scannable.
