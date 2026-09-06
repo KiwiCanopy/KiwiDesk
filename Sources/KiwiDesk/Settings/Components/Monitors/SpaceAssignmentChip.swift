@@ -27,11 +27,18 @@ struct SpaceAssignmentChip: View {
     /// Target displays for move actions in picture order.
     let displays: [Display]
     @FocusState private var focused: Bool
+    @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     var body: some View {
         capsule
+            .overlay(alignment: .topTrailing) { clearBadge }
             .fixedSize()
-            .draggable(DraggableSpace(raw: space.raw))
+            // The badge is a REMOVE affordance; snapshotted into
+            // the lifted chip it reads as "release to clear the
+            // pin", which is the opposite of what the drag does.
+            .draggable(DraggableSpace(raw: space.raw)) { capsule }
             .help(
                 L(
                     "monitor_chip.help_full",
@@ -54,6 +61,11 @@ struct SpaceAssignmentChip: View {
                 focused = false
             }
             .rowActions { menu }
+            .onHover { hovering = $0 }
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.12),
+                value: hovering
+            )
     }
 
     private var capsule: some View {
@@ -82,22 +94,44 @@ struct SpaceAssignmentChip: View {
         .padding(.vertical, 3)
         .background(
             Capsule().fill(
-                .tint.opacity(kind == .auto ? 0 : 0.15)
+                .tint.opacity(
+                    SpaceChipTint.fill(
+                        auto: isAuto,
+                        hovering: hovering
+                    )
+                )
             )
         )
+        // ONE weight for every kind, the kind moving the alpha
+        // alone: a closed full-perimeter edge is what makes a
+        // chip read as a piece lying on the plate rather than
+        // ink printed on it, which is the rest half of the drag
+        // affordance (#1240). The pinned chip drew the FAINTER
+        // edge at half a point, which is a half-pixel at 1x.
         .overlay(
             Capsule().strokeBorder(
-                .tint.opacity(kind == .auto ? 0.35 : 0.5),
-                lineWidth: kind == .auto ? 1 : 0.5
+                .tint.opacity(
+                    SpaceChipTint.stroke(
+                        auto: isAuto,
+                        hovering: hovering
+                    )
+                ),
+                lineWidth: 1
             )
         )
+        // A CONCRETE ink, not `.secondary`: a hierarchical ink is
+        // derived from the container's foreground, and this chip
+        // renders inside two overflow popovers as well as the
+        // card, so the faintest kind dimmed further wherever an
+        // ancestor set one (gui.md ▸ prefer a concrete ink).
         .foregroundStyle(
             kind == .auto
-                ? AnyShapeStyle(.secondary)
+                ? AnyShapeStyle(SettingsTheme.ink2)
                 : AnyShapeStyle(.primary)
         )
-        .overlay(alignment: .topTrailing) { clearBadge }
     }
+
+    private var isAuto: Bool { kind == .auto }
 
     /// Clear-pin button overlay on trailing-top corner (#758).
     @ViewBuilder private var clearBadge: some View {

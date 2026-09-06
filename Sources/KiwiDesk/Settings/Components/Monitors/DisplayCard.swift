@@ -27,8 +27,13 @@ struct DisplayCard: View {
             maxHeight: .infinity,
             alignment: .topLeading
         )
+        // The wash sits UNDER the chips, not over them: it is a
+        // ground signal, and painted on top it dimmed the very
+        // assignments you are dragging onto — worst for the
+        // automatic chip, which has no fill to survive it
+        // (#1240, owner 2026-09-06).
+        .background(dropWash)
         .background(plate)
-        .overlay(dropWash)
         .overlay(border)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         // Main display accent glow (#758, ui-designer 2026-08-09).
@@ -133,7 +138,15 @@ struct DisplayCard: View {
             .lineLimit(1)
             .frame(width: MonitorCardChips.markerWidth)
             .padding(.vertical, 3)
-            .background(Capsule().fill(.tint.opacity(0.15)))
+            // The SHARED adaptive chip, not the pinned chip's
+            // fill: this opens a popover, and wearing a drag
+            // source's costume is what diluted the chips' own
+            // rest cue (#1240). `padding: 0` keeps it inside the
+            // reserved marker column.
+            .hoverHighlight(
+                cornerRadius: MonitorCardChips.chipHeight / 2,
+                padding: 0
+            )
         }
         .buttonStyle(.plain)
         .accessibilityLabel(
@@ -165,7 +178,8 @@ struct DisplayCard: View {
 
     /// Drop targeting is a WASH, not a heavier border: dragging
     /// onto an already-selected card has to change something, and
-    /// two states sharing the border channel changed nothing.
+    /// two states sharing the border channel changed nothing. It
+    /// is laid behind the content — see the call site.
     @ViewBuilder private var dropWash: some View {
         if targeted {
             RoundedRectangle(cornerRadius: 6)
