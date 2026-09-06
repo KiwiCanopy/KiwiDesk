@@ -4,21 +4,31 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The WCAG arithmetic behind `SettingsThemeContrastTests`,
-/// split from it at the §2.1 ceiling when #1198 added the accent
-/// seal's two state fills.
+/// WCAG contrast over `SettingsTheme` tokens, resolved under one
+/// appearance.
 ///
-/// It stays an extension rather than a shared helper: the
-/// pairing list is the census and belongs in one file, while
-/// these are the measurements that list is read through, and
-/// nothing else measures them. `tests.md`'s bar for a shared
-/// test primitive is a named way a divergent copy weakens a
-/// guard — there is no second copy here to diverge.
-extension SettingsThemeContrastTests {
+/// A **stateless primitive** — static functions, no assertions,
+/// no state — shared by `SettingsThemeContrastTests` (which
+/// measures the drawn pairing census) and
+/// `KiwiProminentButtonStateTests` (which measures the accent
+/// seal's three state fills). It was split out of the first at
+/// the §2.1 ceiling when #1198 added the seal's two new fills,
+/// and made shared rather than an extension when that same
+/// change gave it a second consumer.
+///
+/// That is the `ColorVision` argument one family over, and it
+/// is admitted on the same DIVERGENCE ground `tests.md` names:
+/// both suites assert floors on the number this returns, so a
+/// hand-copied linearisation that drifted would move a
+/// threshold a guard rests on without failing anything. The
+/// resolution path matters as much as the arithmetic — it is
+/// the one the token suite pins, so all three suites measure
+/// one truth.
+enum ThemeContrast {
 
     /// Contrast of the ink AS DRAWN — alpha-composited over the
     /// surface first when the render applies an opacity.
-    func contrast(
+    static func contrast(
         _ ink: Color,
         over surface: Color,
         wash: (color: Color, alpha: Double)? = nil,
@@ -56,7 +66,7 @@ extension SettingsThemeContrastTests {
     /// The token's sRGB components as resolved under one
     /// appearance — the same resolution path the token suite
     /// pins, so the two suites measure one truth.
-    func resolved(
+    static func resolved(
         _ color: Color,
         dark: Bool
     ) throws -> (r: Double, g: Double, b: Double) {
@@ -76,7 +86,7 @@ extension SettingsThemeContrastTests {
         )
     }
 
-    func luminance(
+    static func luminance(
         _ rgb: (r: Double, g: Double, b: Double)
     ) -> Double {
         func lin(_ v: Double) -> Double {

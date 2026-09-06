@@ -23,12 +23,28 @@ import Testing
 /// the next split land outside the ban silently
 /// (architect review 2026-08-10; the dark-pass branch split
 /// `+SpacesTile` off and had to remember the entry).
+///
+/// **What the stem model deliberately does not reach**, so a
+/// green here is not read as more than it is: a family qualifies
+/// when its GROUND is fixed-dark, and a file that merely draws a
+/// fixed-dark plate as one element on a mode-varying ground is
+/// outside it — the tour's two `previewPlate` panels and
+/// `BarsPanelPreview` are the shipped cases. Widening the stems
+/// to reach them would ban an ambient ink across whole files
+/// whose ground does move with the appearance, which the
+/// argument above does not support. The ink those three put on
+/// their plates is review's (gui.md states it as the obligation
+/// it is).
 @Suite("Settings fixed-ground inks")
 struct SettingsFixedGroundTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
-    private static var settingsDir: URL {
-        root.appendingPathComponent("Sources/KiwiDesk/Settings")
+    /// `ChromeScanRoots`, not `Settings` alone — the same root
+    /// `SettingsThemeWiringTests` was moved onto in this change:
+    /// the tour draws `previewPlate` too, so a Settings-only
+    /// walk could not see a fixed-dark family landing there.
+    private func chromeSources() throws -> [URL] {
+        try ChromeScanRoots.sources(from: #filePath)
     }
 
     private let fixedGroundStems = [
@@ -108,9 +124,7 @@ struct SettingsFixedGroundTests {
         -> [(String, String, String)]
     {
         var result: [(String, String, String)] = []
-        for file in try SourceScan.swiftSources(
-            under: Self.settingsDir
-        ) {
+        for file in try chromeSources() {
             let name = file.lastPathComponent
             guard
                 let stem = fixedGroundStems.first(where: {

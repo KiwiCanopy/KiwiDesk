@@ -57,43 +57,44 @@ struct AccentStateSeparationTests {
         return "#" + hex
     }
 
-    /// The rest fill against the disabled one — the one pair a
-    /// user actually has to tell apart, since it is the whole
-    /// answer to "does this button do anything".
+    /// Disabled must separate from BOTH live fills.
     ///
-    /// **`accentPressed` is deliberately not measured against
-    /// `accentDisabled`, and this is where that is stated.** The
-    /// two are never a discrimination: no two seal buttons are
-    /// ever on screen together (the tour's pair are `if`/`else`
-    /// branches), and a disabled control cannot enter the
-    /// pressed state, so the colours are never adjacent in space
-    /// or in time. They measure ~62 against a floor of 60, so a
-    /// clause here would red on any innocent retune of the press
-    /// step while catching no regression a user could see —
-    /// tests.md's value-pin trap exactly. What DOES hold the
-    /// press is its rank, which `KiwiProminentButtonStateTests`
-    /// derives from the same tokens.
-    @Test("the disabled fill separates from the live one")
-    func disabledSeparatesFromRest() throws {
+    /// Against `accent` is the pair that carries the meaning —
+    /// the whole answer to "does this button do anything".
+    /// Against `accentPressed` is the thinner one, and it is
+    /// measured because the two ARE co-visible: the preset
+    /// preview sheet's Done wears the seal and is capped well
+    /// under the window, so it can sit pressed beside a save
+    /// pill whose Save is disabled — which is the pill's
+    /// drift-without-edits state, the one #1198 measured. An
+    /// earlier draft of this suite left that clause out on the
+    /// premise that no two seal buttons are ever on screen
+    /// together; review found the premise false.
+    @Test("the disabled fill separates from both live fills")
+    func disabledSeparatesFromLiveFills() throws {
         let source = try themeSource()
-        let accent = try fill("accent", in: source)
         let off = try fill("accentDisabled", in: source)
-        let measured = try #require(
-            ColorVision.separation(accent, off)
-        )
-        #expect(
-            measured >= ColorVision.separationFloor,
-            Comment(
-                rawValue: String(
-                    format:
-                        "accent vs accentDisabled separates by "
-                        + "%.1f under protanopia, under the %.0f "
-                        + "floor — an unavailable button would "
-                        + "still read as available",
-                    measured,
-                    ColorVision.separationFloor
+        for name in ["accent", "accentPressed"] {
+            let live = try fill(name, in: source)
+            let measured = try #require(
+                ColorVision.separation(live, off)
+            )
+            #expect(
+                measured >= ColorVision.separationFloor,
+                Comment(
+                    rawValue: String(
+                        format:
+                            "%@ vs accentDisabled separates by "
+                            + "%.1f under protanopia, under the "
+                            + "%.0f floor — an unavailable "
+                            + "button would still read as "
+                            + "available",
+                        name,
+                        measured,
+                        ColorVision.separationFloor
+                    )
                 )
             )
-        )
+        }
     }
 }

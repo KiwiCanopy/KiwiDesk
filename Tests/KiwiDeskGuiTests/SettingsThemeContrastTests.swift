@@ -255,7 +255,7 @@ struct SettingsThemeContrastTests {
         #expect(!pairings.isEmpty)
         for pairing in pairings {
             for dark in [false, true] {
-                let ratio = try contrast(
+                let ratio = try ThemeContrast.contrast(
                     pairing.ink,
                     over: pairing.surface,
                     wash: pairing.wash,

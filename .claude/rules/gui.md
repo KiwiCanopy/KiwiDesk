@@ -1097,7 +1097,11 @@ Every surface, border and ink in the Settings tree comes from
   lets the style promise a ratio it can measure;
   `KiwiProminentButtonStateTests` holds the spelling and the
   rest > pressed > disabled rank, and `AccentStateSeparationTests`
-  holds the one colour-vision pair a user reads.
+  holds the colour-vision floors. **A new site taking the seal
+  adds the ground it sits on to that first suite's hand-kept
+  list**, the same obligation the contrast suite's pairing list
+  carries — a ground nothing lists is one the disabled fill's
+  legibility is measured on by nobody.
 - **Where the ground is fixed, the ink must be fixed too.**
   The hierarchical-grey ban below is one half of this; the
   control side is the other, and it bites hardest in the state
@@ -1117,11 +1121,19 @@ Every surface, border and ink in the Settings tree comes from
   inherits the ambient `.primary` and reopens #1198 one control
   over. No needle can see that, which is why it is written here
   as an obligation rather than left to the guard.
-- **A new fixed-dark ground token joins `fixedGroundStems` in
-  the same change set.** That list now governs two invariants,
-  and `expectEveryStemMatched` only proves a DECLARED family
-  still matches a file — a plate that never joined is silently
-  outside both bans.
+- **A file family whose GROUND is a fixed-dark token joins
+  `fixedGroundStems` in the same change set.** That list now
+  governs two invariants, and `expectEveryStemMatched` only
+  proves a DECLARED family still matches a file — a family that
+  never joined is silently outside both bans. The list holds
+  file stems, so what joins it is the family, not the token:
+  a file that merely draws a fixed-dark plate as ONE element on
+  a mode-varying ground is deliberately outside the model —
+  widening the stems there would ban an ambient ink across a
+  file whose own ground does move. **Whatever such a file draws
+  ON that plate still states a fixed ink**, and only review can
+  see it; `SettingsFixedGroundTests`' docstring names the
+  shipped cases.
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from

@@ -553,8 +553,10 @@ page and lighter on the save pill. Disabled drains the hue
 rather than merely dimming it, because a control that keeps its
 accent has not been greyed — it measures 3.74:1 for the label
 and stays a visible control on every ground the seal is drawn
-on, while separating from the live fill by 78 under protanopia,
-well past the 60 this app holds colour pairs to.
+on, while clearing the protanopia separation floor this app
+holds every colour pair to — `AccentStateSeparationTests`
+measures that against `ColorVision.separationFloor` rather than
+against a number written down here.
 
 **On a ground that does not move with the appearance, the seal
 stops being a preference.** The save pill is dark in both
