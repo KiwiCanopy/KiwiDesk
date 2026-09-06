@@ -101,28 +101,50 @@ struct SpaceAssignmentChip: View {
         // edge at half a point, which is a half-pixel at 1x.
         .overlay(
             Capsule().strokeBorder(
-                .tint.opacity(kind == .auto ? 0.35 : 0.6),
+                .tint.opacity(strokeAlpha),
                 lineWidth: 1
             )
         )
+        // A CONCRETE ink, not `.secondary`: hierarchical inks are
+        // derived from the container's foreground, and this chip
+        // renders under the card's drop wash and inside a
+        // popover, so the one kind that was already faintest
+        // dimmed further exactly while being dragged onto
+        // (gui.md ▸ prefer a concrete ink).
         .foregroundStyle(
             kind == .auto
-                ? AnyShapeStyle(.secondary)
+                ? AnyShapeStyle(SettingsTheme.ink2)
                 : AnyShapeStyle(.primary)
         )
     }
 
-    /// Rest fill by kind, lifted by the shared chip's hover step.
+    /// Rest fill by kind, lifted on hover.
     ///
     /// Outline-vs-fill is the ruled KIND channel, so hover must
-    /// not spend it: `.auto` keeps no rest fill and gains only
-    /// the hover wash, which is both the +0.06 lift and the
-    /// hover-only 0.06 `ui-patterns.md` gives a control with no
-    /// rest fill. Hover CONFIRMS the drag; the caption still
-    /// carries it in words.
+    /// not spend it: an `.auto` chip's hover fill stays clearly
+    /// under a pinned chip's REST fill, or a hovered automatic
+    /// chip starts impersonating a pinned one.
     private var fillAlpha: Double {
-        let rest = kind == .auto ? 0.0 : 0.15
-        return hovering ? rest + 0.06 : rest
+        switch (kind == .auto, hovering) {
+        case (true, false): return 0
+        case (true, true): return 0.10
+        case (false, false): return 0.15
+        case (false, true): return 0.30
+        }
+    }
+
+    /// The edge carries most of the hover, because it is the
+    /// channel a filled and an unfilled chip share — and the
+    /// automatic chip, which has no fill to lift, is the one
+    /// most worth dragging (#1240, owner 2026-09-06: the first
+    /// pass lifted the fill alone and read as nothing).
+    private var strokeAlpha: Double {
+        switch (kind == .auto, hovering) {
+        case (true, false): return 0.65
+        case (true, true): return 1.0
+        case (false, false): return 0.6
+        case (false, true): return 0.95
+        }
     }
 
     /// Clear-pin button overlay on trailing-top corner (#758).

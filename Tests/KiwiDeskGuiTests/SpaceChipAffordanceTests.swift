@@ -128,6 +128,38 @@ struct SpaceChipAffordanceTests {
         }
     }
 
+    /// The drop wash is a GROUND, so it goes behind the chips.
+    ///
+    /// It exists because the selected card already owns the
+    /// border channel, so drop-targeting needed one of its own —
+    /// that ruling stands. But as an `.overlay` it painted over
+    /// the assignments being dragged onto, and the automatic
+    /// chip has no fill to survive it, so the card dimmed
+    /// exactly what the drag is about (#1240, owner
+    /// 2026-09-06). Layer, not alpha: retuning the wash leaves
+    /// this green.
+    @Test("the drop wash is drawn behind the chips")
+    func dropWashSitsUnderTheContent() throws {
+        let source = try squashed("DisplayCard.swift")
+        #expect(
+            source.contains(".background(dropWash)"),
+            Comment(
+                rawValue:
+                    "the drop wash is no longer a background — "
+                    + "as an overlay it dims the chips the drag "
+                    + "is about"
+            )
+        )
+        #expect(
+            !source.contains(".overlay(dropWash)"),
+            Comment(
+                rawValue:
+                    "the drop wash is an overlay again, so it "
+                    + "paints over the card's own chips"
+            )
+        )
+    }
+
     /// The lifted chip carries no clear button.
     ///
     /// `.draggable` snapshots the view it is applied to. With
