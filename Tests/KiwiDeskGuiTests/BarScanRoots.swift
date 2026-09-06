@@ -18,7 +18,40 @@ import Foundation
 /// every guard built on this in the same edit, and a front
 /// matter that stops parsing empties the list, which each
 /// consumer floors against.
+///
+/// **A floor is not enough, and this is why `expected` exists.**
+/// A fence that stops parsing empties the list and reds every
+/// floor; a front matter that parses and simply says LESS reds
+/// nothing — guard-prover left a live ungated
+/// `NSAnimationContext` in `KiwiCore+SpaceBar.swift`, deleted
+/// that one line from bars.md, and the whole suite went green
+/// with 51 files still scanned. Worse than a plain coverage
+/// hole: bars.md is also what routes a HUMAN to the rule, so the
+/// edit that un-guards the file is the same edit that stops
+/// telling anyone the rule applies to it. `expected` answers
+/// from the TREE instead, so the declared list has to keep up
+/// with the files rather than the other way round.
 enum BarScanRoots {
+    /// The paths the subsystem must reach, read off the file
+    /// system: the bar directory, and every `App/` file whose
+    /// own name says it is bar code. A path here that bars.md
+    /// does not declare reds `coversTheSubsystem`.
+    static func expected(from filePath: String) -> [String] {
+        let repo = SourceScan.repoRoot(from: filePath)
+        let app = "Sources/KiwiDeskCore/App"
+        let named =
+            (try? FileManager.default.contentsOfDirectory(
+                atPath: repo.appendingPathComponent(app).path
+            )) ?? []
+        return ["Sources/KiwiDeskCore/Bar"]
+            + named
+            .filter {
+                $0.hasSuffix(".swift") && $0.contains("Bar")
+            }
+            .map { "\(app)/\($0)" }
+            .sorted()
+    }
+
     /// The declared paths, `/**` stripped, as absolute URLs.
     static func paths(from filePath: String) -> [URL] {
         let repo = SourceScan.repoRoot(from: filePath)

@@ -35,48 +35,6 @@ struct BarMotionSeamTests {
     /// lives in.
     private static let home = "BarMotion.swift"
 
-    /// Ways to start AppKit or Core Animation motion. Type
-    /// spellings, where constructing one IS starting an
-    /// animation, plus the property-style
-    /// `allowsImplicitAnimation`; `NSAnimation` carries
-    /// `NSAnimationContext` too, since `mentions` takes no
-    /// trailing boundary.
-    ///
-    /// `CATransaction` is deliberately absent and
-    /// `setAnimationDuration` — its one motion-starting member —
-    /// stands in for it. The bare type is how motion is turned
-    /// OFF (`begin` / `setDisableActions` / `commit`, which the
-    /// drop ring uses), so watching it would need a permanent
-    /// exemption for those files, and a permanent exemption also
-    /// passes the next real starter there.
-    private static let starters = [
-        "NSAnimation", "NSViewAnimation", "CABasicAnimation",
-        "CAKeyframeAnimation", "CASpringAnimation",
-        "CAAnimationGroup", "CATransition",
-        "allowsImplicitAnimation", "setAnimationDuration",
-    ]
-
-    /// The call-shaped starter, which needs the walk rather than
-    /// a mention: `.animator` with no paren requirement also
-    /// answers for a stored `animator` of our own.
-    private static let animatorCall = ".animator"
-
-    /// SwiftUI's starters, held at ZERO here rather than added
-    /// to `starters`, because the two lists earn different
-    /// answers and merging them would give the wrong one. The
-    /// subsystem is AppKit today; `bars.md` names #1229's
-    /// overview panel as the next bar surface, and if it arrives
-    /// in SwiftUI its animations carry an argument, so they take
-    /// `ReduceMotionGateTests`' per-call gate — NOT a route
-    /// through `BarMotion`, which is what a `starters` entry
-    /// would demand. So the first one to land reds here and its
-    /// author widens that suite's root instead.
-    private static let swiftUIStarters = [
-        "withAnimation", ".animation", ".transaction",
-        "phaseAnimator", "keyframeAnimator", "symbolEffect",
-        "contentTransition",
-    ]
-
     /// Sites ruled to start motion outside `BarMotion`, keyed
     /// `File.swift: spelling`, each naming its ruling. Empty by
     /// design — an entry is a ruling that some bar motion must
@@ -110,7 +68,7 @@ struct BarMotionSeamTests {
             let source = try SourceScan.strippedSource(at: file)
             let text = Array(source)
             var found: [String] = []
-            for spelling in Self.starters
+            for spelling in BarMotionNeedles.starters
             where source.contains(spelling)
                 && SourceScan.mentions(spelling, in: text)
             {
@@ -118,9 +76,9 @@ struct BarMotionSeamTests {
             }
             if !SourceScan.callSites(
                 in: text,
-                for: Self.animatorCall
+                for: BarMotionNeedles.animatorCall
             ).isEmpty {
-                found.append(Self.animatorCall)
+                found.append(BarMotionNeedles.animatorCall)
             }
             for spelling in found {
                 let key = "\(name): \(spelling)"
@@ -169,10 +127,12 @@ struct BarMotionSeamTests {
     @Test("No SwiftUI bar surface ships unscanned")
     func noSwiftUIStarterArrives() throws {
         var found: [String] = []
+        var scanned = 0
         for file in try BarScanRoots.sources(from: #filePath) {
+            scanned += 1
             let source = try SourceScan.strippedSource(at: file)
             let text = Array(source)
-            for spelling in Self.swiftUIStarters
+            for spelling in BarMotionNeedles.swiftUIStarters
             where source.contains(spelling)
                 && !SourceScan.callSites(
                     in: text,
@@ -185,6 +145,11 @@ struct BarMotionSeamTests {
                 )
             }
         }
+        // Its OWN floor, not the sibling's: with bars.md's fence
+        // broken this passed in 0.001 s having scanned nothing,
+        // and borrowed non-vacuity dies the day the clause that
+        // lends it is split out or renamed (guard-prover).
+        #expect(scanned >= 20, "scanned \(scanned) files")
         #expect(
             found.isEmpty,
             """
@@ -192,6 +157,83 @@ struct BarMotionSeamTests {
             way `Sources/KiwiDesk` does and widen \
             ReduceMotionGateTests' root to reach it, rather than \
             routing it through BarMotion: \(found)
+            """
+        )
+    }
+
+    /// The declared roots reach every file the tree says is bar
+    /// code. `BarScanRoots` reads bars.md; this reads the file
+    /// system, and the two are only useful together — a line
+    /// deleted from that front matter parses cleanly, scans one
+    /// file fewer and reds no floor, which guard-prover proved
+    /// by un-guarding a live motion starter that way.
+    @Test("The declared roots cover the subsystem")
+    func coversTheSubsystem() {
+        let declared = Set(
+            BarScanRoots.paths(from: #filePath).map(\.path)
+        )
+        let repo = SourceScan.repoRoot(from: #filePath)
+        let missing = BarScanRoots.expected(from: #filePath)
+            .map { repo.appendingPathComponent($0).path }
+            .filter { !declared.contains($0) }
+        #expect(
+            declared.count >= 2,
+            "bar scan roots did not parse"
+        )
+        #expect(
+            missing.isEmpty,
+            """
+            bar code no declared root reaches — add the path to \
+            .claude/rules/bars.md, which is both this guard's \
+            root list and how a human is routed to the rule: \
+            \(missing)
+            """
+        )
+    }
+
+    /// **Every motion-starting function in the home file is
+    /// gated**, the list read off the file rather than written
+    /// here. The clause below is hand-listed at three entries,
+    /// and `motionHasOneHome` exempts this file by design — so a
+    /// FOURTH wrapper with no gate at all was invisible to both
+    /// suites, which is this guard's own regression shape one
+    /// level in (guard-prover). A function counts as gated if it
+    /// names `isReduced` or is HANDED the answer, which is what
+    /// a pure decision does.
+    @Test("Every motion-starting function in BarMotion is gated")
+    func everyStarterInTheHomeIsGated() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/Bar/\(Self.home)"
+            )
+        let source = try SourceScan.strippedSource(at: file)
+        let names = BarMotionNeedles.functionNames(in: source)
+        var starters = 0
+        var ungated: [String] = []
+        for name in names {
+            let body = try SourceScan.functionBody(
+                of: name,
+                in: Self.home,
+                under: "Bar"
+            )
+            guard BarMotionNeedles.startsMotion(body) else { continue }
+            starters += 1
+            let signature = BarMotionNeedles.signature(of: name, in: source)
+            guard
+                body.contains("isReduced")
+                    || signature.contains("reduceMotion")
+            else {
+                ungated.append(name)
+                continue
+            }
+        }
+        #expect(names.count >= 5, "found \(names.count) funcs")
+        #expect(starters >= 2, "\(starters) starters found")
+        #expect(
+            ungated.isEmpty,
+            """
+            starts motion without reading the setting or being \
+            handed it: \(ungated)
             """
         )
     }
