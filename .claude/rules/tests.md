@@ -591,14 +591,20 @@ as a cause (#1103/#1199; four different tests in one
 `MouseWarpHoldTests` session, 2026-08-29, and — pinning the
 mask held to measure it, 2026-09-06 — two more in
 `SizeBoundAnswerChannelTests`, where a claimed gesture opens a
-drag session and the retile issues no frame). `MouseTracker
-.pressedButtons` is the seam, `makeTestCore` pins it to
-"nothing held", and a test that wants a held button states the
-mask (`MouseButtonSeamTests`, `MouseFollowsFocusTests`).
-`MouseButtonSeamGuardTests` holds the read to its two homes —
-a sibling of `MachineTouchTests` because that file is at the
-§2.1 ceiling, the split `StatusItemSeamGuardTests` already
-carries.
+drag session and the retile issues no frame).
+`MouseTracker.pressedButtons` is the seam; `makeTestCore` pins
+it to "nothing held" — as it does the cursor read `wireDrag`
+also makes live — and a test that wants a held button states
+the mask (`MouseButtonSeamTests`, `MouseFollowsFocusTests`).
+`MouseButtonSeamGuardTests` holds the read to its two homes
+AND both pins into both twins, a deletion from both being
+silent otherwise; it is a sibling of `MachineTouchTests`
+because that file is at the §2.1 ceiling, the split
+`StatusItemSeamGuardTests` already carries. The key-repeat
+delay `HoldGlide.initialDelay` reads is the same shape and
+stays residue: it is a system PREFERENCE rather than hand
+state, so it cannot move a red between runs, and the two
+hold-glide fixtures pin it where it is armed.
 
 Deliberate residue a run does still touch, as audited
 2026-09-06 — a change adding a residue class extends and

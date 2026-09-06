@@ -127,10 +127,14 @@ func makeTestCore(
     // read defaults LIVE, and three gesture decisions consult
     // it — the warp gate, `isResizeGesture` and the drag
     // pipeline — so a developer holding a button while the
-    // suite runs changed the verdict in whichever test happened
-    // to be running, four different ones in one session. Pin
+    // suite ran decided whichever test was running. Pin
     // "nothing held"; a test that wants the branch states the
     // mask itself.
     core.mouse.pressedButtons = { 0 }
+    // Same class, ninth time (#1103): `wireDrag` also makes the
+    // drop-target cursor read live, and the pointer moves under
+    // a hand that never presses. Two drag suites already pin it
+    // per file; this is the default they were working around.
+    core.drag.cursorLocation = { .zero }
     return core
 }

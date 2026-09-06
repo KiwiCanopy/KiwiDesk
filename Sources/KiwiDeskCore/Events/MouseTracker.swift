@@ -22,8 +22,11 @@ public final class MouseTracker {
 
     /// Which mouse buttons are down, as a mask — the one home
     /// in Core for `NSEvent.pressedMouseButtons` (#1103/#1199).
-    /// Live in production; `makeTestCore` pins "nothing held",
-    /// so a suite's verdict never follows the developer's hand.
+    /// Live in production; `makeTestCore` pins "nothing held"
+    /// on the core's OWN tracker, so a suite's verdict never
+    /// follows the developer's hand. That pin reaches no tracker
+    /// a suite builds itself — a bare `MouseTracker()` asking
+    /// these reads states the mask first.
     var pressedButtons: @MainActor () -> Int = {
         NSEvent.pressedMouseButtons
     }

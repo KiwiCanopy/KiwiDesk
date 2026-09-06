@@ -11,14 +11,21 @@ import Testing
 /// directly — the mouse-follows-focus gate, `isResizeGesture`
 /// and the drag pipeline's press check — so a developer using
 /// their Mac while `swift test` ran changed the verdict of
-/// whichever test happened to be running, and the red moved
-/// between suites each time (four different tests in one
-/// `MouseWarpHoldTests` session, 2026-08-29). They now read
-/// `MouseTracker.pressedButtons`, which `makeTestCore` pins.
+/// whichever test happened to be running. They now read
+/// `MouseTracker.pressedButtons`, which `makeTestCore` pins;
+/// `.claude/rules/tests.md` carries the measurements.
 ///
 /// A sibling of `MachineTouchTests` rather than a needle inside
 /// it: that file is at the §2.1 ceiling, and this is the same
-/// split `StatusItemSeamGuardTests` already carries.
+/// split `StatusItemSeamGuardTests` already carries. It is also
+/// the one register of who may read that mask — the Settings
+/// census in `ArrivalRingTests` routes focusable controls
+/// through `ClickBornFocus` and defers the home question here.
+///
+/// Stated residue: the needle is ONE spelling of the host read.
+/// A second reading of the same fact through another API
+/// (`CGEventSource.buttonState`) is invisible to it — widen the
+/// matcher before excusing a site that takes one.
 @Suite("The live mouse-button read stays behind its seam")
 struct MouseButtonSeamGuardTests {
     private static let root = SourceScan.repoRoot(
@@ -45,11 +52,21 @@ struct MouseButtonSeamGuardTests {
                 under: $0
             )
         }
-        // Counted, not just filtered: zero means the scan looks
-        // at the wrong tree or the needle rotted, and a SECOND
-        // read grown *inside* an allowed file is exactly what
-        // the stray filter cannot see.
-        #expect(sites.count == Self.allowed.count)
+        // Counted PER FILE, not as a total: a total stays green
+        // when a read migrates from one allowed home into the
+        // other. One each — zero means the scan looks at the
+        // wrong tree or the needle rotted, and a SECOND read
+        // grown *inside* an allowed file is exactly what the
+        // stray filter below cannot see.
+        for home in Self.allowed {
+            let reads = sites.filter {
+                $0.file.lastPathComponent == home
+            }
+            #expect(
+                reads.count == 1,
+                "\(home) reads the mask \(reads.count) times"
+            )
+        }
         let strays = sites.filter {
             !Self.allowed.contains($0.file.lastPathComponent)
         }
@@ -58,5 +75,37 @@ struct MouseButtonSeamGuardTests {
             strays.isEmpty,
             "live mouse-button read outside the seam: \(listed)"
         )
+    }
+
+    /// The two live host reads `wireDrag` and the seam default
+    /// leave on every core a suite builds. Deleting a pin from
+    /// BOTH twins is otherwise silent: the twins-identical scan
+    /// sees only a one-sided deletion, and a behavioural read
+    /// answers 0 on a quiet host either way — which is exactly
+    /// the run where the defect is invisible. The
+    /// `DesktopCensusSeamTests` shape, one subsystem over.
+    @Test("makeTestCore pins both live mouse reads")
+    func testCorePinsBothMouseReads() throws {
+        let twins = ["KiwiDeskCoreTests", "KiwiDeskGuiTests"]
+            .map {
+                Self.root.appendingPathComponent(
+                    "Tests/\($0)/TestCore.swift"
+                )
+            }
+        for twin in twins {
+            let source = try SourceScan.strippedSource(at: twin)
+            #expect(
+                source.contains(
+                    "mouse.pressedButtons = { 0 }"
+                )
+                    && source.contains(
+                        "drag.cursorLocation = { .zero }"
+                    ),
+                .init(
+                    rawValue:
+                        "\(twin.lastPathComponent) misses a pin"
+                )
+            )
+        }
     }
 }
