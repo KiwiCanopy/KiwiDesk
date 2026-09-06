@@ -141,6 +141,18 @@ struct SettingsThemeTokenTests {
             SettingsTheme.accentInk
         ),
         Pin(
+            "accentPressed",
+            0x7E_A2_4D,
+            0x7E_A2_4D,
+            SettingsTheme.accentPressed
+        ),
+        Pin(
+            "accentDisabled",
+            0x6C_7E_75,
+            0x6C_7E_75,
+            SettingsTheme.accentDisabled
+        ),
+        Pin(
             "onAccentKnob",
             0xFF_FF_FF,
             0x12_25_1A,

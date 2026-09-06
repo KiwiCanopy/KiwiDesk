@@ -46,10 +46,13 @@ struct SettingsThemeWiringTests {
         "ink3": "SettingsSearchField.swift",
         "groupHeading": "HomeScreen.swift",
         "accent": "SettingsView.swift",
-        // First consumer landed in the dark pass: the schematic
-        // "+" badge off-plate (white failed in light on the pale
-        // accent wash).
-        "accentInk": "LayoutSchematicKit.swift",
+        // Re-pointed at the seal (#1198): the schematic "+"
+        // badge was the first consumer, but the seal is the one
+        // that must never lose it — pairing it with the fill is
+        // the whole reason the style exists.
+        "accentInk": "KiwiProminentButton.swift",
+        "accentPressed": "KiwiProminentButton.swift",
+        "accentDisabled": "KiwiProminentButton.swift",
         "warningSurface": "PermissionPausedBanner.swift",
         "warningInk": "SettingsHeaderBar+Status.swift",
         "danger": "KeyRecorderRejectionRow.swift",
@@ -70,9 +73,22 @@ struct SettingsThemeWiringTests {
             + "stays white in both appearances"
     ]
 
-    private var settingsDir: URL {
+    /// `ChromeScanRoots`, not `Settings` alone: the accent seal
+    /// — the most load-bearing consumer `accentInk` has — lives
+    /// in `Onboarding`, so a Settings-only root could not name
+    /// the file that draws it, and a token drawn ONLY there
+    /// could sit in `deferred` and pass having read the wrong
+    /// tree (#1198).
+    private func chromeSources() throws -> [URL] {
+        try ChromeScanRoots.sources(from: #filePath)
+    }
+
+    /// The declaration itself, which every scan excludes and
+    /// the completeness arm reads instead.
+    private var declarationFile: URL {
         SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent(declaration)
     }
 
     private let declaration = "SettingsTheme.swift"
@@ -131,7 +147,7 @@ struct SettingsThemeWiringTests {
     func deferredTokensAreUnused() throws {
         var drawn: [String] = []
         var scanned = 0
-        for file in try SourceScan.swiftSources(under: settingsDir)
+        for file in try chromeSources()
         where file.lastPathComponent != declaration {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
@@ -174,9 +190,7 @@ struct SettingsThemeWiringTests {
     func listsCoverEveryToken() throws {
         let source = SourceScan.stripComments(
             try String(
-                contentsOf: settingsDir.appendingPathComponent(
-                    declaration
-                ),
+                contentsOf: declarationFile,
                 encoding: .utf8
             )
         )
@@ -261,7 +275,7 @@ struct SettingsThemeWiringTests {
         ]
         var offenders: [String] = []
         var scanned = 0
-        for file in try SourceScan.swiftSources(under: settingsDir)
+        for file in try chromeSources()
         where file.lastPathComponent != declaration {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
@@ -293,7 +307,7 @@ struct SettingsThemeWiringTests {
     /// throw rather than fail open, but the message is worth
     /// having.
     private func site(named file: String) throws -> URL {
-        let match = try SourceScan.swiftSources(under: settingsDir)
+        let match = try chromeSources()
             .first { $0.lastPathComponent == file }
         return try #require(
             match,

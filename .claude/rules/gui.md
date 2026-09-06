@@ -1018,8 +1018,9 @@ Every surface, border and ink in the Settings tree comes from
   `KeyboardRingSeparationTests` — one authority per pairing) —
   and `SettingsRawColorTests` bans
   fixed hues, RGB literals and fixed white/black outside its
-  reasoned maps, with `SettingsFixedGroundTests` banning
-  hierarchical greys on the FIXED-dark chrome families
+  reasoned maps, with `SettingsFixedGroundTests` banning both
+  hierarchical greys and ambient-inked controls on the
+  FIXED-dark chrome families
   (stem-derived, so a §2.1 split cannot fall out of it) — on
   mode-varying surfaces `.secondary` still self-inverts and
   "prefer a concrete ink" stays a preference.
@@ -1087,6 +1088,52 @@ Every surface, border and ink in the Settings tree comes from
   seal as a finished sweep: a site still on `.borderedProminent`
   is drawing white on the accent, and adopting the seal there is
   its own change and its own eye-confirm.
+- **A state on the accent seal is a FILL swap, never an opacity
+  over the ground.** A translucent state composites against
+  whatever the button sits on, so one modifier pressed darker on
+  the tour's page and lighter on the save pill and drained the
+  label the seal exists to keep readable — the #1198 defect one
+  layer in. Each state names its own opaque token, which is what
+  lets the style promise a ratio it can measure;
+  `KiwiProminentButtonStateTests` holds the spelling and the
+  rest > pressed > disabled rank, and `AccentStateSeparationTests`
+  holds the colour-vision floors. **A new site taking the seal
+  adds the ground it sits on to that first suite's hand-kept
+  list**, the same obligation the contrast suite's pairing list
+  carries — a ground nothing lists is one the disabled fill's
+  legibility is measured on by nobody.
+- **Where the ground is fixed, the ink must be fixed too.**
+  The hierarchical-grey ban below is one half of this; the
+  control side is the other, and it bites hardest in the state
+  nothing renders in a test — an inactive window. Owning the
+  ink is NOT the test, which is the trap: `settingsActionButton()`
+  states its own `SettingsTheme.ink`, and `ink`'s light value is
+  byte-identical to `savePill`, so it collapses exactly as
+  AppKit's own pick does. Both spellings are therefore banned on
+  these families by `SettingsFixedGroundTests`'
+  `fixedGroundsBanAmbientButtonInk`, along with the two
+  neutralisations, which carry the same token (#1198;
+  `docs/ui-patterns.md` ▸ the accent-fill exception carries the
+  measurements, and is the one place they are stated).
+- **A `.plain` control on a fixed-dark family states its own
+  ink.** `.plain` draws none, so it is the one legal way through
+  that arm — and a site that then names no `foregroundStyle`
+  inherits the ambient `.primary` and reopens #1198 one control
+  over. No needle can see that, which is why it is written here
+  as an obligation rather than left to the guard.
+- **A file family whose GROUND is a fixed-dark token joins
+  `fixedGroundStems` in the same change set.** That list now
+  governs two invariants, and `expectEveryStemMatched` only
+  proves a DECLARED family still matches a file — a family that
+  never joined is silently outside both bans. The list holds
+  file stems, so what joins it is the family, not the token:
+  a file that merely draws a fixed-dark plate as ONE element on
+  a mode-varying ground is deliberately outside the model —
+  widening the stems there would ban an ambient ink across a
+  file whose own ground does move. **Whatever such a file draws
+  ON that plate still states a fixed ink**, and only review can
+  see it; `SettingsFixedGroundTests`' docstring names the
+  shipped cases.
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from
