@@ -85,7 +85,7 @@ struct BarMotionTests {
     @Test("The pending-spring ring marks instead of sweeping")
     func springRingMarks() throws {
         let mark = try #require(
-            BarMotion.springSweep(
+            BarMotion.springAnimation(
                 fill: 1,
                 delay: 0.5,
                 reduceMotion: true
@@ -102,7 +102,7 @@ struct BarMotionTests {
     @Test("The ring sweeps its stroke at full motion")
     func springRingSweeps() throws {
         let sweep = try #require(
-            BarMotion.springSweep(
+            BarMotion.springAnimation(
                 fill: 1,
                 delay: 0.5,
                 reduceMotion: false

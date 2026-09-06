@@ -183,6 +183,24 @@ outlasts it would have the re-sync read a partly-caught-up frame —
 the same pull, one step smaller. That is a reason to keep the
 grace pinned by its test, not a reason to reopen.
 
+## A cue's animation names its Reduce Motion read at its site
+
+The cues honour the setting, and nothing holds them to it. The
+bars next door were routed into one home so a scan could watch
+them (#1078, [bars.md](bars.md) ▸ the bars start motion in one
+file); the cues were left where they are, deliberately — they
+already stand down, so a conversion would remove no defect and
+buy churn. What that leaves is an obligation with no guard
+behind it, which is exactly why it is written down:
+
+**A cue that starts an animation names its Reduce Motion read at
+the site that starts it** — read in the overlay
+(`StickyMarkOverlay`, `SizeLimitOverlay`) or handed in as an
+argument (the dead-end bump takes one from
+`KiwiCore+DeadEndCue`). A new cue that names it in neither place
+ships ungated, and no suite in the tree will say so; review is
+the whole net.
+
 ## Exercising the fallback path
 
 `KIWIDESK_NO_WS_TRACKING=<anything>` keeps `skyLightActive` false

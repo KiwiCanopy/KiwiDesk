@@ -1237,9 +1237,11 @@ argument to name a gate in, so Core cannot take the per-call
 shape below; the bars take the other one tests.md sanctions —
 one home, gated there, routed through by
 `BarMotionSeamTests` ([bars.md](bars.md), #1078). The border
-cues remain the unguarded half, reading
-`accessibilityDisplayShouldReduceMotion` at their own four
-sites.
+cues are the half no guard reaches, so an obligation is all
+there is — and it is stated in the file that loads where it
+binds, [borders.md](borders.md) ▸ a cue's animation names its
+Reduce Motion read at its site, rather than here, where nobody
+editing an overlay would meet it.
 
 **A shared animation constant stays a plain VALUE; the gate is
 spelled at each caller.** Sharing the TUNING is fine — every

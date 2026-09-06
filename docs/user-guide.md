@@ -1848,9 +1848,9 @@ before the ring completes to cancel. Under **Reduce Motion** the
 ring does not sweep: it stays away for the same first
 half-second, then appears whole for the rest of the hold, so the
 item still marks itself as the target and only the countdown is
-gone. The whole item is the target
-(glyphs and the `+n` badge are not separate drop zones), and
-dropping onto the Space a window is already on does nothing.
+gone. The whole item is the target (glyphs and the `+n` badge
+are not separate drop zones), and dropping onto the Space a
+window is already on does nothing.
 
 ```mermaid
 flowchart TD

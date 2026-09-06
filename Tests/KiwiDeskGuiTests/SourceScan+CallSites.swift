@@ -1,9 +1,12 @@
 import Foundation
 
-/// The call-shape walk the two Reduce Motion guards share —
-/// `ReduceMotionGateTests` and `ReduceMotionCensusTests`.
+/// The call-shape walk the Reduce Motion guards share —
+/// `ReduceMotionGateTests` and `ReduceMotionCensusTests` over
+/// `Sources/KiwiDesk`, and `BarMotionSeamTests` over the bar
+/// subsystem, whose census clause needs the same refusals a
+/// tree away (#1078).
 ///
-/// It lives here rather than in either of them because both
+/// It lives here rather than in any of them because they all
 /// need the same two refusals, and a second copy is the drift
 /// this file exists to prevent (`SourceScan`): harden the
 /// whitespace skip in one and not the other, and the slack copy

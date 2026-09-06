@@ -3,24 +3,15 @@ import QuartzCore
 
 /// The bars' one Reduce Motion gate (#1078).
 ///
-/// Core draws the bars through AppKit and Core Animation, which
-/// `ReduceMotionGateTests` cannot reach, so the obligation
-/// `.claude/rules/gui.md` states — a Core animation is gated at
-/// its own site or it is ungated — is met by keeping every
-/// motion-starting call under `Bar/` in this file. What holds
-/// that is a pair: `BarMotionTests` on the decisions below, and
-/// `BarMotionSeamTests` on the routing, since a decision proved
-/// correct in a file nothing calls gates nothing.
-///
-/// The gate drops the MOTION, never the affordance: items land
-/// in their new frames rather than sliding to them, and the
-/// pending-spring ring marks its item instead of sweeping it.
+/// Every motion-starting AppKit and Core Animation call under
+/// `Bar/` lives here, in one shape: a `@MainActor` wrapper reads
+/// the setting and hands it to a pure decision that takes it as
+/// an argument, so the decision is assertable and the read is
+/// the one expression a test cannot reach. The argument, and
+/// what the gate costs the drop ring, are in
+/// `.claude/rules/bars.md` ▸ the bars start motion in one file.
 enum BarMotion {
-    /// Whether the user asked the system for less motion. The
-    /// one read, and the only part of this file a test cannot
-    /// reach: every decision below takes the answer as an
-    /// argument instead, so what is left here is the expression
-    /// that fetches it.
+    /// Whether the user asked the system for less motion.
     @MainActor
     static var isReduced: Bool {
         NSWorkspace.shared
@@ -31,14 +22,15 @@ enum BarMotion {
     /// short enough not to lag a focus change.
     static let slide: TimeInterval = 0.15
 
-    /// The animation group every App Bar relayout runs in. Zero
-    /// under Reduce Motion, so anything inside it that still
-    /// reaches an animator proxy lands instead of travelling.
+    /// Runs `body` in the animation group every App Bar relayout
+    /// uses.
     @MainActor
     static func runLayout(_ body: () -> Void) {
         let reduceMotion = isReduced
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = duration(reduceMotion: reduceMotion)
+            context.duration = duration(
+                reduceMotion: reduceMotion
+            )
             context.timingFunction = CAMediaTimingFunction(
                 name: .easeOut
             )
@@ -46,13 +38,15 @@ enum BarMotion {
         }
     }
 
-    /// The group's duration.
+    /// The group's duration. Zero under Reduce Motion, so
+    /// anything inside it that still reaches an animator proxy
+    /// lands instead of travelling.
     static func duration(reduceMotion: Bool) -> TimeInterval {
         reduceMotion ? 0 : slide
     }
 
-    /// Moves `view` to `frame`, travelling only when the layout
-    /// asked for it and the user has not asked for less.
+    /// Moves `view` to `frame`, travelling only where `travels`
+    /// allows it.
     @MainActor
     static func setFrame(
         _ view: NSView,
@@ -85,24 +79,30 @@ enum BarMotion {
         return current != .zero && current != frame
     }
 
-    /// The pending-spring ring on a Space Bar item: `strokeEnd`
-    /// from empty to whole across `fill`, held empty for `delay`
-    /// first so a quick flick-to-relocate never flashes a
-    /// loading ring (#372).
-    ///
-    /// Under Reduce Motion the ring MARKS instead of sweeping —
-    /// the same trade `WaitingDot` makes. It keeps the quiet
-    /// window, which is a delay and not motion, then appears
-    /// whole for the rest of the dwell: the item still says "a
-    /// hold here will spring", and only the countdown is lost.
-    ///
-    /// The caller has already set the layer's own `strokeEnd` to
-    /// 1, so the mark is a flat 0-to-0 animation that expires:
-    /// removing it IS the step, and nothing is interpolated
-    /// anywhere. A `CABasicAnimation` of duration zero would not
-    /// do — Core Animation substitutes a default duration for a
-    /// zero one and sweeps after all.
+    /// The pending-spring ring animation for a Space Bar item.
+    @MainActor
     static func springSweep(
+        fill: TimeInterval,
+        delay: TimeInterval
+    ) -> CAAnimation {
+        springAnimation(
+            fill: fill,
+            delay: delay,
+            reduceMotion: isReduced
+        )
+    }
+
+    /// `strokeEnd` from empty to whole across `fill`, held empty
+    /// for `delay` first; under Reduce Motion the same quiet
+    /// window, then a step to whole with no travel.
+    ///
+    /// **Precondition:** the caller has already set the layer's
+    /// own `strokeEnd` to 1, which is what the reduced shape
+    /// steps to — it animates 0 to 0 and expires, so removal IS
+    /// the step. A zero-duration `CABasicAnimation` would not
+    /// do: Core Animation substitutes a default duration for a
+    /// zero one and sweeps after all.
+    static func springAnimation(
         fill: TimeInterval,
         delay: TimeInterval,
         reduceMotion: Bool

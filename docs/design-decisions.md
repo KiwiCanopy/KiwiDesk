@@ -8323,11 +8323,11 @@ not decoration in either case.
 - **The spring ring MARKS its item.** The sweep is a countdown,
   the one piece of bar motion that carries information a static
   frame cannot, so standing it down does lose something. It
-  keeps what it can: the ring is still drawn, and the 0.5 s
-  quiet pre-delay survives, because a delay is not motion and it
-  is what keeps a quick flick-to-relocate from flashing a
-  loading ring. So the item stays bare for the same half-second
-  and then wears a whole ring for the rest of the dwell — "a
+  keeps what it can: the ring is still drawn, and the quiet
+  pre-delay survives, because a delay is not motion and it is
+  what keeps a quick flick-to-relocate from flashing a loading
+  ring. So the item stays bare for the same half-second and
+  then wears a whole ring for the rest of the dwell — "a
   hold here will spring" is intact, and only "for this much
   longer" is gone. The alternative, dropping the ring entirely
   and leaving the hover tint to say it, was rejected: the tint
@@ -8392,9 +8392,10 @@ The load-bearing details, so they are not relitigated:
   fires at the full dwell, so the sweep fills over
   `dwell − 0.5 s`, and the range floors at 1 s to keep that fill
   visible. The pre-delay is carried by the stroke animation
-  itself, so leaving before it elapses shows nothing. Always-on, no enable toggle; focus-after-drop
-  is not a new setting (`move_to_space_and_follow` already models
-  following). Option-held-drop → follow is a deferred second gear.
+  itself, so leaving before it elapses shows nothing. Always-on,
+  no enable toggle; focus-after-drop is not a new setting
+  (`move_to_space_and_follow` already models following).
+  Option-held-drop → follow is a deferred second gear.
 
 **Bar alignment is edge-relative, one shared default.**
 (#293 QA.) Both bars place their content run via `alignment` —

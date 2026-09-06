@@ -129,10 +129,16 @@ Obligations:
   both shapes of the drop ring, and none of them reads the live
   setting. `BarMotion.isReduced` is the one expression a test
   cannot reach, deliberately — it is the whole of what is left.
-- **The gate drops the MOTION, never the affordance.** The two
-  rulings that shape cost, both in `docs/design-decisions.md` ▸
-  the bars honour Reduce Motion: an item run LANDS in its new
-  frames rather than sliding to them, and the Space Bar's
-  pending-spring ring MARKS its item — it keeps the quiet
-  pre-delay, which is a delay and not motion, then appears whole
-  for the rest of the dwell, losing only the countdown.
+  **Every entry point takes the same shape** — a `@MainActor`
+  wrapper that reads, a pure decision that is handed the answer
+  — because a second shape beside it owes the seam suite a
+  second clause, and the clause a caller-fed gate needs cannot
+  be the one a wrapper-read gate needs.
+- **The gate drops the MOTION, never the affordance**, and **a
+  DELAY is not motion** — a quiet window before something
+  appears survives the gate at its full length, because
+  shortening it changes what the affordance MEANS rather than
+  how it travels. What a stand-down costs the user is a product
+  ruling and not this file's: `docs/design-decisions.md` ▸ the
+  bars honour Reduce Motion argues the two that `BarMotion`'s
+  decisions implement, and a third is argued there, not here.

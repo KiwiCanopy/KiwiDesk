@@ -1066,11 +1066,11 @@ seam and its guard are engineering-side, `.claude/rules/gui.md`
 ▸ the keyboard path.)
 
 **Every animation KiwiDesk's own chrome plays honours Reduce
-Motion** — the Settings window, the setup tour, and both bars.
-Their motion — a caption fading in, a list springing into its
-new order after a reorder, the scroll that carries you to a
-search hit, a layout preview or the gaps diagram re-flowing as
-you drag a slider, a hover or focus fade, the setup tour's
+Motion**, the Settings window, the setup tour and both bars
+included. Their motion — a caption fading in, a list springing
+into its new order after a reorder, the scroll that carries you
+to a search hit, a layout preview or the gaps diagram re-flowing
+as you drag a slider, a hover or focus fade, the setup tour's
 progress row, an App Bar's items sliding as its run changes
 width, the Space Bar's drop ring sweeping — stands down when
 macOS **System Settings ▸ Accessibility ▸ Reduce Motion** is on.
@@ -1092,10 +1092,12 @@ still watching for your answer; under Reduce Motion it stops
 pulsing and stays put, so the sentence it belongs to is still
 marked, and the tour's progress row fills the same pips without
 the crossfade between them. The Space Bar's spring-load ring is
-the same trade: it still stays away for the first half-second,
-so a quick flick over a Space flashes nothing, and then appears
-whole for the rest of the hold — the item still says a hold
-here will spring, and only the countdown is gone.
+that trade at its sharpest, because its sweep is a countdown: it
+keeps the ring, which says a hold here will spring, and loses
+only the count of how much longer. (What you see is in the
+[User guide](user-guide.md); why it was priced that way, and
+what the alternative was, is in
+[Design decisions](design-decisions.md).)
 
 **A drag source is legible at rest, not on hover.** Paint cannot
 say "draggable", and hover arrives only once the pointer is
