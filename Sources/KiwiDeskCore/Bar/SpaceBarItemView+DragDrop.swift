@@ -42,23 +42,18 @@ extension SpaceBarItemView {
         springRing.strokeColor =
             NSColor(kiwiHex: style.highlightColor).cgColor
         springRing.isHidden = false
-        springRing.strokeEnd = 0
-        CATransaction.commit()
-
-        let sweep = CABasicAnimation(keyPath: "strokeEnd")
-        sweep.fromValue = 0
-        sweep.toValue = 1
-        sweep.duration = duration
-        // Stay empty for `delay` first: `.both` shows the
-        // fromValue (0) before beginTime, so a quick flick shows
-        // no ring until the hold is deliberate (#372 QA).
-        sweep.beginTime = CACurrentMediaTime() + delay
-        sweep.timingFunction =
-            CAMediaTimingFunction(name: .linear)
-        sweep.fillMode = .both
-        sweep.isRemovedOnCompletion = false
+        // The ring's resting value is WHOLE and the animation is
+        // what keeps it empty, so both are written inside the
+        // disabled-actions transaction: a bare `strokeEnd = 1`
+        // on this hand-added sublayer starts an implicit 0.25 s
+        // stroke of its own, racing the one we add (#1078
+        // review). An explicit `add` still runs here.
         springRing.strokeEnd = 1
-        springRing.add(sweep, forKey: "springSweep")
+        springRing.add(
+            BarMotion.springSweep(fill: duration, delay: delay),
+            forKey: "springSweep"
+        )
+        CATransaction.commit()
     }
 
     /// Cancels a pending sweep and resets the ring — leaving the

@@ -1844,9 +1844,13 @@ either:
 
 The hold length is the **Spring delay** (Space Bar card,
 default 1.5 s, adjustable 1–4 s). Move the cursor off the item
-before the ring completes to cancel. The whole item is the target
-(glyphs and the `+n` badge are not separate drop zones), and
-dropping onto the Space a window is already on does nothing.
+before the ring completes to cancel. Under **Reduce Motion** the
+ring does not sweep: it stays away for the same first
+half-second, then appears whole for the rest of the hold, so the
+item still marks itself as the target and only the countdown is
+gone. The whole item is the target (glyphs and the `+n` badge
+are not separate drop zones), and dropping onto the Space a
+window is already on does nothing.
 
 ```mermaid
 flowchart TD
