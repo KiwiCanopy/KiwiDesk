@@ -7,10 +7,10 @@ import KiwiDeskCore
 enum BrandAssets {
     /// Template menu-bar mark from `MenuBarIcon` resource.
     ///
-    /// The IMAGE is cached — `StatusItemController+Icon` relies on
-    /// one shared instance — but its localized description is
-    /// re-applied per read, because a stored L() freezes the
-    /// locale it was first resolved in (#1311).
+    /// One shared instance, but its description is re-applied per
+    /// read: a stored `L()` freezes its locale (#1311). The one
+    /// reader is `OnboardingView+Closing`'s menu-bar strip, where
+    /// SwiftUI names `Image(nsImage:)` from it.
     static var menuBarIcon: NSImage? {
         guard let image = cachedMenuBarIcon else { return nil }
         image.accessibilityDescription = L(

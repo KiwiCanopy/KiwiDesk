@@ -4,12 +4,20 @@ import Foundation
 /// apart because it walks source rather than asserting on it, and
 /// because the suite reached the 350-line ceiling.
 ///
-/// These walkers are the suite's own rather than `SourceScan`'s:
-/// that family extracts a primitive at its SECOND consumer, and
-/// this is the first. The shared, hardened pieces — `balanced`,
-/// `blankingCommentsAndLiterals`, `memberBodies`, `isIdentifier`
-/// — are reused rather than copied, which is the drift the family
-/// exists to prevent.
+/// The hardened pieces are REUSED, never copied — `balanced`,
+/// `blankingCommentsAndLiterals`, `memberBodies`,
+/// `isIdentifier` — which is the drift that family exists to
+/// prevent, and `blankingCommentsAndLiterals`' own residue is
+/// therefore inherited too (#1320).
+///
+/// What is genuinely new here, and so stays the suite's own at
+/// the family's FIRST-consumer line: the `=`-initialiser bounds
+/// `memberBodies` states it does not walk, and an
+/// offset-returning needle (`occurrences`) that `callSites` and
+/// `mentions` do not offer. `starts` is the one second copy —
+/// `SourceScan+Declarations`' is `private` and hardcodes the
+/// opposite `orDot` — and it is named rather than left to look
+/// like reuse.
 extension LocalizedStaticStorageTests {
 
     /// Every `static let` in `file` whose initialiser reaches
@@ -21,20 +29,23 @@ extension LocalizedStaticStorageTests {
         let raw = try SourceScan.rawSource(at: file)
         // A file with neither spelling cannot offend, and the
         // fixpoint below is the scan's whole cost.
-        guard raw.contains("static let "), raw.contains("L(")
+        guard raw.contains("L("),
+            Self.storingSpellings.contains(
+                where: { raw.contains($0.0) }
+            )
         else { return [] }
         let source = SourceScan.blankingCommentsAndLiterals(raw)
         let eager = Self.eagerlyLocalizingMembers(in: source)
         var offenders: [String] = []
         for (name, initializer) in Self.storedStatics(in: source) {
-            let key = "\(file.lastPathComponent):\(name)"
+            let key = "\(tree)/\(file.lastPathComponent):\(name)"
             guard Self.allowed[key] == nil else { continue }
             let body = Self.blankingDeferredClosures(initializer)
             let reaches =
                 Self.calls("L", in: body)
                 || eager.contains { Self.references($0, in: body) }
             if reaches {
-                offenders.append("  \(tree)/\(key)")
+                offenders.append("  \(key)")
             }
         }
         return offenders
@@ -71,8 +82,36 @@ extension LocalizedStaticStorageTests {
         return eager
     }
 
-    /// Each `static let` in `source` paired with the text of its
-    /// `=` initialiser.
+    /// The spellings that store a value for the life of whatever
+    /// owns them, and whether the spelling is only a store at the
+    /// START of a line.
+    ///
+    /// The subject is the STORE, not one spelling. `static let`
+    /// and `static var` are both lazily-initialised globals —
+    /// the FIRST cut watched `static let` alone while telling the
+    /// next author to "reach for a computed `static var`", which
+    /// aimed them at the uncovered half. `lazy var` freezes for
+    /// as long as its object lives, which is the process when
+    /// that object is a singleton (`ColorPanelController.shared`,
+    /// the site the `static let`-only cut was blind to). A bare
+    /// `let` counts only at column zero, where it is a global; a
+    /// `let` inside a body dies with its call.
+    ///
+    /// A COMPUTED property is not a store and is not matched:
+    /// `assignment` returns nil at the `{` that opens a body.
+    /// What this TRADES is a stored `static var` carrying a
+    /// `didSet`, whose observer body is swallowed into the
+    /// captured initialiser — over-capture, which fails SHUT as
+    /// a false red rather than a hole.
+    static let storingSpellings: [(String, atLineStart: Bool)] = [
+        ("static let ", atLineStart: false),
+        ("static var ", atLineStart: false),
+        ("lazy var ", atLineStart: false),
+        ("let ", atLineStart: true),
+    ]
+
+    /// Each stored declaration in `source` paired with the text
+    /// of its `=` initialiser.
     ///
     /// `SourceScan.memberBodies` deliberately skips a property
     /// reached through `=`, which is precisely the shape this
@@ -84,8 +123,19 @@ extension LocalizedStaticStorageTests {
     static func storedStatics(
         in source: String
     ) -> [(name: String, initializer: String)] {
+        storingSpellings.flatMap {
+            stored(in: source, after: $0.0, atLineStart: $0.1)
+        }
+    }
+
+    /// The stored declarations `source` introduces with `marker`.
+    private static func stored(
+        in source: String,
+        after marker: String,
+        atLineStart: Bool
+    ) -> [(name: String, initializer: String)] {
         let characters = Array(source)
-        let marker = Array("static let ")
+        let marker = Array(marker)
         var found: [(String, String)] = []
         var index = 0
         while index + marker.count < characters.count {
@@ -93,6 +143,10 @@ extension LocalizedStaticStorageTests {
                 Array(characters[index..<(index + marker.count)])
                     == marker
             else {
+                index += 1
+                continue
+            }
+            if atLineStart, index > 0, characters[index - 1] != "\n" {
                 index += 1
                 continue
             }
@@ -194,104 +248,5 @@ extension LocalizedStaticStorageTests {
             index = cursor
         }
         return String(characters)
-    }
-
-    /// Whether `text` CALLS the free function `name` — the
-    /// identifier followed by `(`, on a boundary, and not
-    /// dot-prefixed, so a `Foo.L(` of someone else's never
-    /// answers for ours.
-    private static func calls(
-        _ name: String,
-        in text: String
-    ) -> Bool {
-        occurrences(of: name, in: text, dotted: false).contains {
-            next(after: $0, in: Array(text)) == "("
-        }
-    }
-
-    /// Whether `text` READS the same-file member `name` — called
-    /// (`label($0)`), qualified (`Self.title`) or bare.
-    ///
-    /// A member is not always a function: a computed `var`
-    /// resolving `L()` is read without parentheses, and a
-    /// call-only needle would leave every such indirection
-    /// invisible. An argument LABEL is excluded — `label:` names
-    /// a parameter, it does not read the member.
-    private static func references(
-        _ name: String,
-        in text: String
-    ) -> Bool {
-        let characters = Array(text)
-        return occurrences(of: name, in: text, dotted: true)
-            .contains { next(after: $0, in: characters) != ":" }
-    }
-
-    /// Offsets just past each boundary-clean occurrence of
-    /// `name`. `dotted` keeps `.name`, which a member read has
-    /// and a free call must not.
-    private static func occurrences(
-        of name: String,
-        in text: String,
-        dotted: Bool
-    ) -> [Int] {
-        let characters = Array(text)
-        let needle = Array(name)
-        var found: [Int] = []
-        var index = 0
-        while index + needle.count <= characters.count {
-            defer { index += 1 }
-            guard
-                Array(characters[index..<(index + needle.count)])
-                    == needle
-            else { continue }
-            if index > 0,
-                SourceScan.isIdentifier(
-                    characters[index - 1],
-                    orDot: !dotted
-                )
-            {
-                continue
-            }
-            let after = index + needle.count
-            if after < characters.count,
-                SourceScan.isIdentifier(characters[after], orDot: false)
-            {
-                continue
-            }
-            found.append(after)
-        }
-        return found
-    }
-
-    /// The first non-whitespace character at or after `offset`.
-    private static func next(
-        after offset: Int,
-        in text: [Character]
-    ) -> Character? {
-        var index = offset
-        while index < text.count, text[index].isWhitespace {
-            index += 1
-        }
-        return index < text.count ? text[index] : nil
-    }
-
-    /// Whether `needle` begins at `index` on an identifier
-    /// boundary.
-    private static func starts(
-        _ text: [Character],
-        at index: Int,
-        _ needle: String
-    ) -> Bool {
-        let characters = Array(needle)
-        guard index + characters.count <= text.count,
-            Array(text[index..<(index + characters.count)])
-                == characters
-        else { return false }
-        if index > 0,
-            SourceScan.isIdentifier(text[index - 1], orDot: true)
-        {
-            return false
-        }
-        return true
     }
 }

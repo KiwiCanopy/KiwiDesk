@@ -94,9 +94,11 @@ the value and apply the localized part per read
 `L()` later is the sanctioned deferral, and `NavCommand` is the
 one type that does it — its `displayLabel` / `help` /
 `unavailable` are resolved by `resolvedLabel` at read.
-`LocalizedStaticStorageTests` holds this over both source trees;
-its `allowed` map is empty, and an entry added to it must name
-what makes that survivor safe.
+`LocalizedStaticStorageTests` holds this over both source trees,
+and an entry added to its `allowed` map must name what makes
+that survivor safe. Know the reach: it follows a helper only
+within ONE file, so a store fed by another file's localized
+helper is review's, not the guard's.
 
 The GUI language pick persists in `UserDefaults`
 (`LocalizationPreference`), never `gui.json` — it is documented as

@@ -8,7 +8,10 @@ final class ColorPanelController: NSObject {
     static let shared = ColorPanelController()
 
     private var onChange: ((NSColor) -> Void)?
-    private lazy var doneAccessory: NSView = makeDoneAccessory()
+    /// Rebuilt per `present`: this controller lives for the
+    /// process, so a stored accessory would keep the locale its
+    /// button title was first read in (#1311).
+    private var doneAccessory: NSView { makeDoneAccessory() }
     /// Bumped per `present`; a swatch resigns the panel only while
     /// it still owns it.
     private var activeToken = 0

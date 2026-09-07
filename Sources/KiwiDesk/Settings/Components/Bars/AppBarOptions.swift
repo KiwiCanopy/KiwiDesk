@@ -2,10 +2,8 @@ import KiwiDeskCore
 
 /// Shared App Bar option value/label pairs (#291, #819).
 ///
-/// Every list is COMPUTED. A `static let` is a lazily-initialised
-/// global: it resolves `L()` once, at first touch, and caches for
-/// the process — so a language switch leaves it in whichever
-/// locale happened to be live then (#1311).
+/// Every list is COMPUTED: a localized value stored for the life
+/// of the process keeps the locale it was first read in (#1311).
 enum AppBarOptions {
     @MainActor
     static var edge: [(AppBarEdge, String)] {

@@ -126,8 +126,8 @@ struct KeyRecorderField: View {
         .accessibilityValue(label)
     }
 
-    // Computed, never a `static let`: a stored L() resolves once
-    // and freezes the locale it was first read in (#1311).
+    // Computed: a localized value stored for the life of the
+    // process keeps the locale it was first read in (#1311).
     @MainActor private static var recordHelp: String {
         L(
             "key_recorder.help_press",

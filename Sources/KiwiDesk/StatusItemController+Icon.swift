@@ -6,9 +6,11 @@ import KiwiDeskCore
 extension StatusItemController {
     /// Renders the brand icon, named for VoiceOver by the caller
     /// — starting and ready states draw the SAME glyph, so the
-    /// name is what separates them. The label goes on the BUTTON,
-    /// not the image: `BrandAssets.menuBarIcon` is a shared cached
-    /// `NSImage`, and re-describing it renames it everywhere.
+    /// name is what separates them. The STATE name goes on the
+    /// BUTTON, not the image: `BrandAssets.menuBarIcon` is one
+    /// shared `NSImage`, so a per-state description there would
+    /// rename it everywhere. Its own description stays the
+    /// product name, which no state varies (#1311).
     func applyBrandIcon(
         to button: NSStatusBarButton,
         a11y: String
