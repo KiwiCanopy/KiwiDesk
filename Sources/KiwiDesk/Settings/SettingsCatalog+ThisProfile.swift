@@ -66,6 +66,10 @@ struct ColorsControls: Sendable {
         "colors.scene.title",
         "Current colors"
     )
+    let glassCard = SettingsControl(
+        "colors.liquid_glass",
+        "Liquid Glass"
+    )
     let motionCard = SettingsControl(
         "behavior.animations.title",
         "Animations"

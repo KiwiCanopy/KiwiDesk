@@ -8950,6 +8950,72 @@ hug. Inert under `boxed` (no shared plate): the GUI greys the
 control, per #171. One geometry authority: `BarPlate.frame`,
 shared by both bars and pinned by `BarPlateTests`.
 
+**One Liquid Glass switch governs every KiwiDesk surface that
+draws it.** (#1307, 2026-09-07.) The finish shipped as two
+independent per-bar settings, and the ⌃⌥K shortcuts panel drew
+glass unconditionally beside them (#1295) — three surfaces, two
+switches and a constant. One row on Colours & Animations now
+writes all three, and the panel's leaf is stored beside the bars'
+in the profile.
+
+**Profile-scoped, and the alternative was not merely riskier but
+unbuildable.** Moving the value app-wide into `gui.json` needed a
+migration to carry it out of the profile file, and
+`ConfigMigration.migrated` is `(Data) -> Data?` invoked
+independently by four readers on four separate files with no
+channel between them; no step crosses a file. Worse, N profiles →
+one app-wide value is an election a byte-level step cannot hold —
+it cannot know which profile is active, and a profile the user
+never loads is never migrated — while a `SetupBundle`, one blob
+carrying `config` and `[Profile]` together, *could* perform a
+carry the live config directory could not. Same data, different
+outcome per reader, which is AGENTS.md §5's "reaches EVERY reader"
+failing silently rather than refusing. The only safe app-wide
+shape was an explicit DROP of everyone's stored setting, and #1255
+does not licence one: it refused to CARRY a value the encoder
+wrote, where this is a row a user ticked. So the panel follows the
+active profile. The cost is real and accepted: switch to a Desktop
+bound to another profile and the panel's material follows it.
+
+**The switch means ALL THREE, and its `?` carries what a boolean
+cannot.** Owner ruling: `off` is a true statement whenever they
+are not all on, and a flip writes all three either way. That
+leaves two-of-three indistinguishable from none-of-three, so a
+divergence sentence appears in the help while they disagree —
+reachable only from hand-written Lua or an imported profile, never
+from the row. Both the switch's value and that sentence read the
+one `LiquidGlassAgreement`, so the control and its explanation
+cannot contradict; the same discipline as `agreedCornerStyle`.
+
+**Glass OFF for the panel is `.regularMaterial`** — the material
+its pre-macOS-26 branch already draws, promoted to the designed
+off state rather than a new surface being invented for it. Each
+surface keeps its own colour rule: the bars tint their glass from
+their Fill, the panel stays untinted (#1295). The switch changes
+only WHETHER, never WHICH.
+
+**The per-layout override is deliberately outside the switch's
+reading.** `monocle.set_app_bar_liquid_glass` and
+`scroll.set_app_bar_liquid_glass` still shadow the global, and
+the row neither clears them nor reports them. That is the
+behaviour every per-layout override already has — the App Bar
+thickness slider says nothing about
+`monocle.set_app_bar_thickness` either — and the master could
+not clear one if it tried, so reporting it would state a
+disagreement while withholding the control that ends it. The
+divergence sentence is therefore about the three GLOBAL leaves
+only (`code-reviewer`, 2026-09-07, which found the row reading
+On over a glassless monocle App Bar).
+
+**The stored keys did NOT merge**, which is why there is no
+migration at all: three leaves, one row, through
+`SettingKey.masterWrites`. Both `set_liquid_glass` verbs and the
+per-layout `liquid_glass` field keep working, so this entry does
+not disturb #678 Phase 2's per-layout precedent, and
+`icon_source` / `dim_factor` keep the grounding they take from it.
+A new top-level `set_shortcut_panel_liquid_glass` reaches the
+panel's leaf — the change ADDS Lua reach rather than capping it.
+
 **Liquid Glass is an orthogonal finish toggle, not a third
 `background_style`.** (#390; revised 2026-07-20.) It was first
 shipped as a third `BackgroundStyle` case (`material`) beside

@@ -9,6 +9,7 @@ struct ColorsMotionSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 PaletteShelf(model: model)
+                GlassCard(model: model)
                 MotionCard(model: model)
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)

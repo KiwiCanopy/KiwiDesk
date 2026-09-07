@@ -698,6 +698,33 @@ rather than what anyone chose.
 KiwiDesk.set_refusal_sound(true)
 ```
 
+### set_shortcut_panel_liquid_glass
+
+**Expects:** `true` or `false` (default `false`).
+
+**Does:** lays a macOS&nbsp;26 Liquid Glass material over the
+shortcuts panel — the one ⌃⌥K opens (#1307). Off, the panel
+draws `.regularMaterial`, the same material it falls back to
+below macOS&nbsp;26. Unlike the bars, the panel's glass is
+untinted: it carries dense text, so it draws `.regular` where
+the bars draw `.clear`, and no Fill reaches it (#1295).
+
+Stored as `shortcut_panel.liquid_glass`, in the profile beside
+the two bars — so the panel follows the profile that is active,
+and a profile switch can change its material.
+
+The GUI twin is the single **Liquid Glass** switch on
+Colours &amp; Animations, which writes this leaf together with
+`app_bar.liquid_glass` and `space_bar.liquid_glass` and shows on
+only when all three are on. Setting one and not the others is a
+Lua-only state; the switch then reads off and says so in its `?`.
+
+**Example:**
+
+```lua
+KiwiDesk.set_shortcut_panel_liquid_glass(true)
+```
+
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
@@ -1874,6 +1901,13 @@ greyed); the stored value still round-trips so a profile stays
 portable. Per-layout override:
 `monocle.set_app_bar_liquid_glass` /
 `scroll.set_app_bar_liquid_glass`.
+
+Settings has no per-bar row for this any more (#1307): one
+**Liquid Glass** switch on Colours &amp; Animations writes this
+leaf, the Space Bar's and the shortcuts panel's together, and
+shows on only when all three are on. This verb still sets this
+bar alone — setting one and not the others is a Lua-only state,
+and the Settings switch then reads off and says so in its `?`.
 
 **Example:**
 

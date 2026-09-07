@@ -58,6 +58,10 @@ public enum APIReference {
                 "set_refusal_sound",
                 "set_refusal_sound"
             ),
+            (
+                "set_shortcut_panel_liquid_glass",
+                "set_shortcut_panel_liquid_glass"
+            ),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),
             (

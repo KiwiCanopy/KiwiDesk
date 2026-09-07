@@ -12,6 +12,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case gaps
     case general
     case generalKeys
+    case glass
     case grid
     case appliesImmediately
     case layers
@@ -43,6 +44,10 @@ enum SettingsContainer: CaseIterable, Hashable {
     /// Container-level gate that greys member rows as a unit.
     var gate: SettingGate? {
         switch self {
+        case .glass:
+            // The row states its own runtime gate; the card has
+            // no second condition to add.
+            return nil
         case .appBar:
             return .anyOf([
                 .layoutAppBar(.monocleAppBarEnabled),

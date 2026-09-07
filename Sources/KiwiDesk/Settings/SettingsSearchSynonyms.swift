@@ -42,8 +42,7 @@ enum SettingsSearchSynonyms {
         case .appBar(.appBarThickness),
             .spaceBar(.spaceBarThickness):
             return ["height", "size"]
-        case .appBar(.appBarLiquidGlass),
-            .spaceBar(.spaceBarLiquidGlass):
+        case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
         case .colours(.animationsMaster):
             return ["motion", "movement"]

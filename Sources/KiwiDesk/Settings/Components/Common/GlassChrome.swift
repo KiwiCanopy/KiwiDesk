@@ -15,13 +15,24 @@ extension View {
     /// ruling rather than by capability. Both arguments, and the
     /// Reduce Transparency gap this does not answer, are in
     /// `docs/design-decisions.md` ▸ the reference panel (#1295).
-    func glassChrome(in shape: some Shape) -> some View {
-        glassGround(in: shape).clipShape(shape)
+    /// `enabled` is the #1307 switch's third leaf. Off takes the
+    /// SAME `.regularMaterial` the pre-26 branch already draws,
+    /// which `docs/design-decisions.md` rules to be today's
+    /// design — so the off state is a shipped one rather than a
+    /// new surface to design.
+    func glassChrome(
+        in shape: some Shape,
+        enabled: Bool
+    ) -> some View {
+        glassGround(in: shape, enabled: enabled).clipShape(shape)
     }
 
     @ViewBuilder
-    private func glassGround(in shape: some Shape) -> some View {
-        if #available(macOS 26, *) {
+    private func glassGround(
+        in shape: some Shape,
+        enabled: Bool
+    ) -> some View {
+        if #available(macOS 26, *), enabled {
             glassEffect(.regular, in: shape)
         } else {
             background(.regularMaterial)

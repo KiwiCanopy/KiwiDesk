@@ -14,6 +14,20 @@ extension SettingsValueReadout {
         let o = old.settings.animations
         let n = new.settings.animations
         switch key {
+        case .shortcutPanelLiquidGlass:
+            return coloursOnOffRow(
+                census,
+                old.settings.shortcutPanelLiquidGlass,
+                new.settings.shortcutPanelLiquidGlass
+            )
+        case .liquidGlassMaster:
+            // Derived, like the animations master beside it: the
+            // one `LiquidGlassAgreement` reading the row shows.
+            return coloursOnOffRow(
+                census,
+                LiquidGlassAgreement(settings: old.settings).allOn,
+                LiquidGlassAgreement(settings: new.settings).allOn
+            )
         case .animationsMaster:
             // The master is derived, not stored (`anyEnabled`) —
             // the same derivation the Motion card's toggle and

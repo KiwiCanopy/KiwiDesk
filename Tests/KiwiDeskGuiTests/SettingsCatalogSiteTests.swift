@@ -61,7 +61,8 @@ struct SettingsCatalogSiteTests {
         // the catalog.
         // 64 since #1125: the two Desktop offers, the doors the
         // withheld families are reached through.
-        #expect(names.count == 64)
+        // 65 since #1307: the Liquid Glass card.
+        #expect(names.count == 65)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

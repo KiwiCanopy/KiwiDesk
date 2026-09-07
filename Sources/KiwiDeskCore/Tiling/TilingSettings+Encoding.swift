@@ -79,6 +79,14 @@ extension TilingSettings {
             forKey: .refusal
         )
         try refusal.encode(refusalSound, forKey: .sound)
+        var shortcutPanel = container.nestedContainer(
+            keyedBy: ShortcutPanelKeys.self,
+            forKey: .shortcutPanel
+        )
+        try shortcutPanel.encode(
+            shortcutPanelLiquidGlass,
+            forKey: .liquidGlass
+        )
         var quit = container.nestedContainer(
             keyedBy: QuitKeys.self,
             forKey: .quit

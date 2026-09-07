@@ -1,6 +1,10 @@
 /// Animations (`AnimationSettings`) and palette actions.
 
 enum ColoursKey: String, CaseIterable, Hashable {
+    case liquidGlassMaster =
+        "settings.appBarStyle.liquidGlass (master)"
+    case shortcutPanelLiquidGlass =
+        "settings.shortcutPanelLiquidGlass"
     case animationsMaster = "settings.animations (master)"
     case animationsOnSpaceChange = "settings.animations.onSpaceChange"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
@@ -22,6 +26,17 @@ enum ColoursKey: String, CaseIterable, Hashable {
 extension ColoursKey {
     var placement: SettingPlacement {
         switch self {
+        case .liquidGlassMaster:
+            return .row(
+                .coloursAndMotion,
+                .glass,
+                .atRest,
+                gate: .runtime(.liquidGlassUnavailable)
+            )
+        case .shortcutPanelLiquidGlass:
+            // Written by the master row, never its own row —
+            // and reachable from Lua like the two bar leaves.
+            return .luaOnly
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
         case .animationsOnSpaceChange, .animationsOnWindowResize,
@@ -61,6 +76,13 @@ extension ColoursKey {
 extension ColoursKey {
     var text: SettingRowText {
         switch self {
+        case .shortcutPanelLiquidGlass:
+            return .none
+        case .liquidGlassMaster:
+            return .text(
+                "colors.liquid_glass",
+                help: "colors.liquid_glass.help"
+            )
         case .animationsMaster:
             return .text(
                 "behavior.animations.master",

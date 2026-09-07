@@ -47,12 +47,7 @@ extension AppBarKey {
                 gate: .setting(.appBar(.appBarFontSizeAuto))
             )
         case .appBarLiquidGlass:
-            return .row(
-                .bars,
-                .appBar,
-                .showMore,
-                gate: .runtime(.liquidGlassUnavailable)
-            )
+            return .luaOnly
         case .appBarBackgroundFit:
             return .row(
                 .bars,
@@ -130,10 +125,7 @@ extension AppBarKey {
         case .appBarBackground:
             return .text("app_bar.background_style.label")
         case .appBarLiquidGlass:
-            return .text(
-                "app_bar.liquid_glass",
-                help: "app_bar.liquid_glass.help"
-            )
+            return .none
         case .appBarBackgroundFit:
             return .text("app_bar.background_fit.label")
         case .appBarActiveIndicator:

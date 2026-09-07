@@ -9,6 +9,10 @@ struct ShortcutsPanelView: View {
     /// Whether the content clipped, from the controller's own
     /// clamp — never re-derived here (#1292).
     let overflows: Bool
+    /// The #1307 switch's third leaf, read from the ACTIVE
+    /// profile by the controller — never re-read here, so the
+    /// panel and the bars cannot disagree about one render.
+    let liquidGlass: Bool
     let onEdit: () -> Void
 
     var body: some View {
@@ -27,7 +31,11 @@ struct ShortcutsPanelView: View {
         // not something a guard here could see.
         .tint(SettingsTheme.accent)
         .glassChrome(
-            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            in: RoundedRectangle(
+                cornerRadius: 12,
+                style: .continuous
+            ),
+            enabled: liquidGlass
         )
     }
 

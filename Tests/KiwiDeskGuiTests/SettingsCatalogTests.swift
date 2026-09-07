@@ -76,7 +76,9 @@ struct SettingsCatalogTests {
         // 70 since #1125: the two Desktop offers, one per
         // shortcut group — and they are the only search rows
         // those families have, their own labels being dynamic.
-        #expect(allEntries.count == 70)
+        // 71 since #1307: the Liquid Glass card, one switch
+        // over both bars and the shortcuts panel.
+        #expect(allEntries.count == 71)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
