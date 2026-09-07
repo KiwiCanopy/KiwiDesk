@@ -173,6 +173,51 @@ jobs:
             python3 scripts/appcast-sync --all
           fi
 
+      # Retire the docs markers this release ships (#1232).
+      #
+      # HERE and not in release.yml, for the reason the feed is
+      # here: a marker means "not in a release", and publication
+      # is what makes that false. It rides this PR because the
+      # curated notes are what a reader of that PR is already
+      # checking, and the list below is the same question one
+      # shelf over — "these blocks now claim to be shipped; are
+      # they?" A block whose feature slipped OUT of the release
+      # is unmarked wrongly, and this is the only place that is
+      # visible.
+      #
+      # The script checks that its rewrite LANDED, and no more:
+      # it re-reads through the parser that did the rewrite, so a
+      # marker that parser cannot see is invisible to it too.
+      # What catches THAT is the site build below —
+      # `check-site-tokens.py` compares the sweep's count against
+      # the badges the real pipeline rendered, which is why the
+      # build runs after this step and not before it.
+      - name: Retire the docs markers this release ships
+        # PUBLICATION only. `workflow_dispatch` above is a
+        # REBUILD — of a refused body, or of the whole file from
+        # every published release — and nothing published at that
+        # moment, so a sweep there would unmark blocks that are
+        # genuinely unreleased and then let this job's own
+        # auto-merge land them unattended. Unmarking early is the
+        # unsafe direction: the page then claims something ships
+        # that does not, with nothing on it to hint otherwise.
+        #
+        # A dispatch re-run after a refused body therefore leaves
+        # the markers standing for one more release, which is the
+        # bounded, already-accepted direction of this trade
+        # (.claude/rules/site.md).
+        #
+        # `docs` stays in SYNCED unconditionally: when this step
+        # does not run the tree is unchanged, so staging it costs
+        # nothing and the entry needs no second condition to keep
+        # in step with this one.
+        if: github.event_name == 'release'
+        env:
+          SYNC_TOKEN: ""
+        run: |
+          set -euo pipefail
+          python3 scripts/unreleased-strip | tee /tmp/unmarked.txt
+
       # A PR opened with `github.token` does NOT trigger other
       # workflows — GitHub's loop prevention — so `site.yml` will
       # not run on the sync PR even though it touches `site/**`.
@@ -195,6 +240,12 @@ jobs:
           # the feed is the one artifact that reaches `main`
           # with its own guard never having run on it.
           python3 ../scripts/check-site-tokens.py --dist dist
+          # The plugin's own subject. The corpus is empty of
+          # markers by the time this runs — the step above just
+          # retired them — so the artifact clauses above are
+          # vacuous on this path and this is the only thing
+          # exercising the marker at all (#1232).
+          node test-unreleased.mjs
         working-directory: site
 
       # One step for all three: the branch name is the thread
@@ -206,11 +257,30 @@ jobs:
         run: |
           set -euo pipefail
           SYNCED=(site/src/data/changelog.json
-                  site/public/appcast.xml)
+                  site/public/appcast.xml
+                  docs)
           if git diff --quiet -- "${SYNCED[@]}"; then
-            echo "the notes and the feed already match the" \
-                 "published releases — nothing to do."
+            echo "the notes, the feed and the docs markers" \
+                 "already match the published releases —" \
+                 "nothing to do."
             exit 0
+          fi
+          # The unmarked-blocks paragraph is written ONLY when
+          # something was unmarked. A human reading it is this
+          # design's one net for a block whose feature slipped out
+          # of the release, and boilerplate on every release is
+          # what trains a reader to skip it (#1232).
+          RETIRED=""
+          if grep -q "^  - " /tmp/unmarked.txt 2>/dev/null; then
+            RETIRED="
+
+          These docs blocks no longer say \`Unreleased\`:
+
+          $(cat /tmp/unmarked.txt)
+
+          If one of them describes something that did NOT ship in
+          this release, put its \`:::unreleased\` marker back on
+          this branch before merging."
           fi
           LABEL="${TAG:-all}"
           BRANCH="chore/changelog-${LABEL}"
@@ -245,7 +315,7 @@ jobs:
 
           Merging this rebuilds the release-notes page AND puts
           the new version in front of every installed copy — the
-          appcast is live the moment Cloudflare redeploys."
+          appcast is live the moment Cloudflare redeploys.$RETIRED"
           fi
 
           # Start CI by hand when — and only when — nothing

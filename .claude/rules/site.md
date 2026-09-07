@@ -3,12 +3,14 @@ paths:
   - "site/**"
   # The Node version would be restated here, not in site/.
   - ".github/workflows/site.yml"
-  # The two generators this file constrains hardest — the
-  # published body as an input contract, the appcast written
-  # from released bytes. They live in scripts/, so nothing under
-  # site/** loads for whoever edits them.
+  # The scripts this file constrains hardest — the published
+  # body as an input contract, the appcast written from released
+  # bytes, the release-time retirement of the docs markers. They
+  # live in scripts/, so nothing under site/** loads for whoever
+  # edits them.
   - "scripts/changelog-sync"
   - "scripts/appcast-sync"
+  - "scripts/unreleased-strip"
   - "scripts/check-site-tokens.py"
 ---
 
@@ -85,6 +87,155 @@ when handed one it cannot drive. Reverting the config change
 alone does not red it, by design: the invariant is what the
 artifact says, not which API expresses it. On this gate for the
 reason the feed check below is.
+
+## Unreleased docs mark themselves (#1232)
+
+Every push to the production branch auto-deploys, so a behavior
+change merged to `main` is described on the published docs while
+every installed copy is still the last release. The doc is not
+wrong; it is *early*, with nothing on the page saying so.
+
+**A block that describes unshipped behavior carries the marker in
+the same change set that writes it:**
+
+```md
+:::unreleased
+Each Desktop now owns its own Spaces…
+:::
+```
+
+**Block level, never page frontmatter.** A page is almost never
+wholly unreleased — the change that filed this moved three
+paragraphs of `user-guide.md`, not the page — and an
+all-or-nothing `since:` field gets used for neither.
+
+**The marker names no version, and an attribute on it is a build
+failure.** Under the owner's cut policy — everything fix-only
+that has landed becomes the next patch — an author genuinely
+cannot know which release their block will ship in, so a
+hand-written version is wrong more often than right, and it is
+wrong in the direction that keeps badging behavior that shipped
+weeks ago. What retires a marker instead is
+`scripts/unreleased-strip`, run by `changelog.yml` on `release:
+published`. A marker still in the corpus means "not in a release"
+**because** that ran at the last one.
+
+That is a real dependency and it is the accepted trade, so state
+it rather than discover it: if the strip is skipped or broken,
+markers survive a release and the site badges shipped behavior
+until the next one clears them. Two things bound it, and they
+bound different halves.
+
+**The strip runs on PUBLICATION only.** `changelog.yml`'s
+`workflow_dispatch` is a rebuild — of a refused body, or of the
+whole file — and nothing published at that moment, so the step is
+gated on the release event. Unmarking early is the unsafe
+direction (the page claims something ships that does not, with
+nothing on it to hint otherwise), and this job arms its own
+auto-merge, so an ungated sweep would land that unattended. A
+dispatch therefore leaves the markers for one more release, which
+is the bounded direction above.
+
+**The strip verifies that its rewrite LANDED, and nothing
+more.** It re-reads through the parser that did the rewrite, so a
+marker that parser cannot see is invisible to its own
+postcondition too — do not write that check up as covering "the
+sweep matched nothing", which an earlier draft of this section
+did. That half is caught one step later, by something that knows
+the real grammar: `changelog.yml` builds the site AFTER the
+sweep, and `check_unreleased_markers` reds when this parser's
+count and the badges the pipeline actually rendered disagree.
+**That ORDER is the coverage, so it is pinned** —
+`UnreleasedStripWorkflowTests` ▸ `theBuildFollowsTheSweep`,
+because moving the build above the sweep leaves every other
+clause green and takes the only thing watching this with it.
+
+**The corpus is validated at PR time**, by
+`unreleased-strip --check` on the site gate, and that is what
+lets the release-time sweep stay fail-fast. It sits in the
+workflow carrying the appcast, so a malformed `:::` reaching
+`main` would otherwise block the update feed on a docs typo.
+`docs/**` is a path input of `site.yml` on both triggers, held by
+`UnreleasedStripWorkflowTests` and `GuideRouteGateInputTests` —
+that suite also holds `scripts/unreleased-strip` itself as an
+input, since the gate runs it and `check-site-tokens.py` imports
+it.
+
+**Write the sweep's grammar against a measurement, and refuse
+what it cannot place.** It rewrites published prose, so a parser
+that merely looks right rewrites the wrong lines: the cases in
+its own header — code-fence LENGTH, what one bare `:::` closes,
+a marker in a blockquote or a list — were each run through the
+installed remark before being written, and `UnreleasedStripTests`
+carries them. Where remark and the sweep could disagree it
+refuses rather than guesses. It also refuses an opener that is
+neither the marker nor a Starlight aside, because an unhandled
+container directive renders as a bare `<div>` with no trace of
+itself — which makes that refusal, and not the Swift suite, what
+catches a rename of the plugin's `DIRECTIVE` export. **A
+container directive the corpus adopts joins the sweep's
+`STARLIGHT_ASIDES` in the same change set**; nothing can derive
+that set, and a stale entry blocks legitimate prose on the site
+gate.
+
+**The strip reports what it unmarked, into the sync PR's body.**
+Unmarking a block is a claim too, and the one block this design
+gets wrong is the one whose feature slipped OUT of the release it
+was unmarked by. That listing is the only place it is visible, in
+front of the person curating the release at the moment they know
+what actually shipped — re-adding the marker is then one edit on
+a PR they are already reading.
+
+**One parser of the marker's grammar.** The corpus IS the state
+here, so every reader of it — the sweep, the artifact check —
+has to agree on the spelling, the fence rule and the nesting
+rule. `scripts/unreleased-strip` owns all three and
+`check-site-tokens.py` loads it rather than restating them; the
+first draft spelled the fence rule twice with different coverage,
+which would have redded the site build on a `~~~`-fenced EXAMPLE
+with the diagnosis "the plugin stopped running".
+
+**A plugin-only edit does not invalidate Astro's content
+store**, so `npm run build` re-emits `dist/` from the previous
+render and a local check reads stale output as confirmation
+(measured 2026-09-07, `guard-prover`: a mutation that dropped the
+badge's title came back green twice). `rm -rf dist` is not
+enough — the cache is `node_modules/.astro/data-store.json`,
+keyed on the source file's digest. Delete that too when
+verifying a change to `remark-unreleased.mjs` or
+`remark-docs-links.mjs` by rebuilding. CI never hits it, which is
+exactly why it costs a local afternoon rather than a red build.
+
+**Guard the plugin and the artifact separately, because neither
+can hold the other's half.** `site/test-unreleased.mjs` drives
+the plugin over fixtures on every site build: what it badges, the
+three spellings it refuses, and that an unparsed marker ships as
+visible prose rather than vanishing. It exists because the corpus
+is EMPTY of markers most of the time, so
+`check-site-tokens.py` ▸ `check_unreleased_markers` — which holds
+the built pages against the corpus — is vacuous most of the time.
+What that check holds and the fixture runner cannot is the REAL
+pipeline: Starlight's processor, the docs symlink, `dist/`.
+
+`remark-directive` reaches that pipeline through Starlight's own
+asides rather than through anything we declare, which is why the
+marker has two ways to die silently and both are watched: it
+ships verbatim as prose if the directive stops being parsed, and
+it renders as a bare `<div>` carrying its children — with no
+trace of the marker — if our plugin stops running.
+
+**The badge is English and carries no catalog key.** That is a
+consequence of the docs corpus, not an oversight: it is served at
+`/docs/*` in one locale, with no `/de/docs/` or `/ja/docs/`
+route, so a key would have nothing to render it while the parity
+rule below would still force an untranslatable copy into
+`de.json` and `ja.json`. Add the key on the day the docs
+themselves gain a second locale.
+
+On GitHub, where the canonical `docs/` files are also read, the
+marker lines render as literal text. A deliberate accept: crude,
+but it still says *unreleased* to the contributor reading it
+there, where an HTML comment would say nothing to anyone.
 
 ## One brand-color layer, imported by both stylesheets
 

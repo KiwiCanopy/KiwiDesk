@@ -131,3 +131,40 @@ func workflowStep(
     }
     return lines[start..<end].joined(separator: "\n")
 }
+
+/// The entries of a shell array assigned in a workflow, e.g.
+/// `SYNCED=(a b\n  c)` → `["a", "b", "c"]`.
+///
+/// Membership is the invariant every reader of such a list
+/// actually has; the array's LAYOUT is not. Two clauses in
+/// `AppcastPublishWorkflowTests` had anchored on the closing
+/// paren instead — `"…/appcast.xml)"` — which pinned the last
+/// entry's identity as a side effect of pinning the formatting,
+/// and both went red on a third entry being appended (#1232)
+/// without anything they name having changed.
+///
+/// The trade, stated because a refinement's cost is what the next
+/// prover round finds: this no longer sees a list REORDERED, and
+/// one of those clauses incidentally did. Nothing reads these
+/// arrays positionally — `git add "${SYNCED[@]}"` and
+/// `git diff --quiet -- "${SYNCED[@]}"` are set operations — so
+/// the order was never the thing under guard, but a future array
+/// whose order matters needs its own clause rather than this.
+func workflowArray(
+    _ name: String,
+    in yaml: String
+) throws -> [String] {
+    let opening = try #require(
+        yaml.range(of: "\(name)=("),
+        "no \(name)=(…) array in this workflow"
+    )
+    let tail = yaml[opening.upperBound...]
+    let closing = try #require(
+        tail.firstIndex(of: ")"),
+        "\(name)=( is never closed"
+    )
+    return tail[..<closing]
+        .split(whereSeparator: { $0 == "\n" || $0 == " " })
+        .map(String.init)
+        .filter { !$0.isEmpty }
+}

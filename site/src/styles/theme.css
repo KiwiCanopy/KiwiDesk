@@ -66,3 +66,33 @@
 .site-title {
   color: var(--sl-color-white);
 }
+
+/* The unreleased-docs marker (#1232), rendered by
+   ../../remark-unreleased.mjs. Starlight's own role tokens, never
+   a brand hex — this has to track the docs theme. The ground is
+   gray-7 rather than the darker gray-6 because the title is the
+   ACCENT as text, and gray-7 is the darkest of these grounds it
+   clears WCAG AA on. That is not a comment to trust:
+   scripts/check-site-tokens.py ▸ check_accent computes the ratio
+   from this file's own light block and fails below 4.5:1, so
+   retuning either token reds rather than waiting to be
+   re-measured. */
+.kd-unreleased {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-inline-start: 0.25rem solid var(--sl-color-accent);
+  border-radius: 0.25rem;
+  background: var(--sl-color-gray-7);
+}
+
+.kd-unreleased__title {
+  margin: 0 0 0.5rem;
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--sl-color-accent);
+}
+
+.kd-unreleased > :last-child {
+  margin-bottom: 0;
+}

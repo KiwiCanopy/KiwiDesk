@@ -1,0 +1,358 @@
+#!/usr/bin/env python3
+"""Retires every `:::unreleased` marker in the docs corpus (#1232).
+
+`.claude/rules/site.md` ▸ *Unreleased docs mark themselves* owns
+the argument — why the marker names no version, why this is what
+retires it, and why `--check` runs on the site gate.
+
+The contract:
+
+  scripts/unreleased-strip            rewrite docs/ in place
+  scripts/unreleased-strip --check    report, write nothing
+  scripts/unreleased-strip --docs DIR sweep a fixture tree
+
+It removes a marker's two `:::` fence lines and keeps everything
+between them, prints one line per unmarked block (path, then the
+block's first line), and exits non-zero on a corpus it cannot
+parse, on an opener no renderer would handle, or on a rewrite
+that left a marker standing.
+
+It is also the one parser of the marker's grammar: the spelling,
+the fence rule and the nesting rule are read from here by
+`check-site-tokens.py` rather than spelled a second time.
+"""
+
+from __future__ import annotations
+
+import argparse
+import pathlib
+import re
+import sys
+
+REPO = pathlib.Path(__file__).resolve().parent.parent
+
+# The one spelling, read off the plugin rather than restated — a
+# sweep agreeing with its own literal is how the two drift apart
+# while both stay green.
+PLUGIN = REPO / "site" / "remark-unreleased.mjs"
+
+# The grammar below is remark's, measured against the installed
+# remark-parse + remark-directive on 2026-09-07 rather than
+# inferred from CommonMark — every clause here has a probe behind
+# it, because this script REWRITES published prose and a parser
+# that merely looks right rewrites the wrong lines.
+#
+#   :::unreleased / :::note / ::: / after / :::
+#       both directives end at the FIRST bare `:::` (1-4, 2-4),
+#       and `after` + the trailing `:::` ship as prose.
+#   ::::unreleased / :::note / ::: / after / ::::
+#       nests properly (1-6, 2-4) — a longer outer fence is what
+#       nesting requires.
+#   ````md / ``` / :::unreleased / ::: / ``` / ````
+#       no directive at all: the outer fence owns the inner one.
+#   `> :::unreleased` and a 4-space list continuation
+#       BOTH parse as directives. This parser does not read
+#       container prefixes, so it refuses them rather than
+#       missing them silently (see `strip`).
+#   ``` / ```js / :::unreleased / ::: / ```
+#       one code block, no directive: a CLOSING fence carries no
+#       info string, so the inner one does not end the block.
+#   :::unreleased / A / ::::: / B
+#       a LONGER bare run closes it — remark refuses a close only
+#       when the run is shorter than the opener.
+#   an unclosed opener
+#       runs to EOF — remark badges the rest of the page. Refused
+#       here, which is why `--check` runs on the site gate.
+CODE_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
+OPENER = re.compile(r"^ {0,3}(:{3,})([A-Za-z][A-Za-z0-9_-]*)")
+# Deliberately loose about LENGTH: any bare run matches here, and
+# `strip` then closes only the open directives it is at least as
+# long as — which is remark's own rule
+# (micromark-extension-directive refuses a close only on
+# `size < sizeOpen`; measured, `:::unreleased / A / ::::: / B`
+# closes at the longer run). Reading the length at the match
+# instead would have to know which opener it belonged to, which
+# is the thing being decided.
+#
+# The trade is at the other end: a bare run with NOTHING open is
+# consumed as a closer line rather than kept as prose. remark
+# keeps it, so a page carrying a stray `:::` is one this parser
+# writes differently — loud enough to see in the sweep's own
+# diff, and only reachable on a page that is already malformed.
+CLOSER = re.compile(r"^ {0,3}(:{3,})\s*$")
+# A marker this parser cannot place but remark might: a line that
+# OPENS with the token once any blockquote marker is stripped,
+# but did not match OPENER — a `>` prefix, or an indent past
+# three spaces.
+#
+# "Opens with" is the load-bearing part. An earlier draft matched
+# the token anywhere on the line, which refused an inline
+# `` `:::unreleased` `` mention — measured as no directive at all
+# — and so blocked the very page that would document the marker.
+#
+# What it still over-refuses: a FOUR-space-indented example
+# outside a list, which is an indented code block to remark and
+# no directive. That case is genuinely ambiguous to a line-based
+# parser (the same indent INSIDE a list is a directive, measured
+# both ways), so it is refused with a message naming both
+# remedies rather than guessed at.
+NESTED = re.compile(r"^[ >]*(:{3,})([A-Za-z][A-Za-z0-9_-]*)")
+
+# Starlight's own container directives, and the one hand-copied
+# fact in this file — read off
+# @astrojs/starlight/integrations/remark-asides.ts, four variants,
+# 2026-09-07. Nothing can derive it, so a directive the corpus
+# adopts joins this set in the same change set;
+# .claude/rules/site.md carries that obligation. What a stale
+# entry costs is a false "not a directive anything renders" on
+# the site gate — loud, and blocking, for legitimate prose.
+STARLIGHT_ASIDES = frozenset({"note", "tip", "caution", "danger"})
+
+
+class Malformed(Exception):
+    """A corpus this parser will not guess at."""
+
+
+def directive() -> str:
+    """The marker's name, read off the plugin's export."""
+    try:
+        text = PLUGIN.read_text(encoding="utf-8")
+    except OSError as error:
+        raise Malformed(f"cannot read {PLUGIN} ({error})") from error
+    found = re.search(r'export const DIRECTIVE\s*=\s*"([^"]+)"', text)
+    if not found:
+        raise Malformed(
+            f"{PLUGIN} no longer exports DIRECTIVE — this script "
+            "reads the marker's spelling from there rather than "
+            "restating it."
+        )
+    return found.group(1)
+
+
+def strip(text: str, name: str) -> tuple[str, list[str]]:
+    """`text` with every marker's fences removed.
+
+    Returns the new text and, per marker, the first non-empty line
+    of the block it unmarked — enough for a reader to find the
+    paragraph without reproducing it.
+
+    Refuses rather than guesses wherever remark and this parser
+    could disagree: a marker whose closing fence also closes a
+    directive opened inside it (deleting that line would orphan
+    the inner one), a marker inside a blockquote or a list, and an
+    unclosed opener.
+    """
+    lines = text.split("\n")
+    out: list[str] = []
+    unmarked: list[str] = []
+    fence: str | None = None
+    # Open directives, innermost last: (colons, name, slot).
+    stack: list[tuple[int, str, int | None]] = []
+    for number, line in enumerate(lines, start=1):
+        opened_code = CODE_FENCE.match(line)
+        if fence is not None:
+            # A closing fence is the same character and at least
+            # as long: a ```-run inside a ````-block is content,
+            # and reading it as a close hands the rest of the
+            # example to this sweep as prose to rewrite.
+            if (
+                opened_code
+                and opened_code.group(1)[0] == fence[0]
+                and len(opened_code.group(1)) >= len(fence)
+                # CommonMark: a CLOSING fence carries no info
+                # string. Measured — ``` then ```js then a marker
+                # is one code block to remark and no directive at
+                # all, so reading the inner fence as a close hands
+                # a published example to this sweep to rewrite.
+                and not opened_code.group(2).strip()
+            ):
+                fence = None
+            out.append(line)
+            continue
+        if opened_code:
+            fence = opened_code.group(1)
+            out.append(line)
+            continue
+
+        closed = CLOSER.match(line)
+        if closed and stack:
+            # One bare run closes EVERY open directive it is at
+            # least as long as — measured, not assumed.
+            width = len(closed.group(1))
+            closing = [e for e in stack if e[0] <= width]
+            if closing:
+                ours = [e for e in closing if e[2] is not None]
+                if ours and len(closing) > 1:
+                    raise Malformed(
+                        f"line {number}: this `:::` closes the "
+                        f"`:::{name}` block AND a directive opened "
+                        "inside it, so retiring the marker would "
+                        "orphan the inner one. Open the marker "
+                        "with a longer fence (`::::"
+                        f"{name}`) so the two nest."
+                    )
+                del stack[len(stack) - len(closing):]
+                if ours:
+                    continue
+            out.append(line)
+            continue
+
+        opened = OPENER.match(line)
+        if opened:
+            colons, found = len(opened.group(1)), opened.group(2)
+            if found not in STARLIGHT_ASIDES and found != name:
+                raise Malformed(
+                    f"line {number}: `:::{found}` is a container "
+                    "directive nothing renders — it would ship as "
+                    "a bare <div> with no trace of itself. Fix "
+                    "the spelling, or add it to "
+                    "STARLIGHT_ASIDES if it is one."
+                )
+            if found == name:
+                unmarked.append("")
+                stack.append((colons, found, len(unmarked) - 1))
+                continue
+            stack.append((colons, found, None))
+            out.append(line)
+            continue
+
+        hidden = NESTED.match(line)
+        if hidden and hidden.group(2) == name:
+            raise Malformed(
+                f"line {number}: this parser cannot place a "
+                f"`:::{name}` that is indented or inside a "
+                "blockquote, and remark may still badge it. Put "
+                "the marker at the top level of the page — or, if "
+                "it is a code example, fence it with ``` rather "
+                "than indenting it."
+            )
+
+        if stack:
+            # The first non-empty line anywhere inside the marker,
+            # nested directives included — so a marker opening on
+            # a `:::note` reports that aside's prose. That is a
+            # locator for a human, not a summary, and the aside's
+            # first line locates the block just as well.
+            for colons, found, slot in reversed(stack):
+                if slot is None:
+                    continue
+                if not unmarked[slot] and line.strip():
+                    unmarked[slot] = line.strip()
+                break
+        out.append(line)
+    if stack:
+        raise Malformed(
+            f"an unclosed `:::{stack[-1][1]}` block — remark runs "
+            "it to the end of the page, so the badge swallows "
+            "everything after it."
+        )
+    return ("\n".join(out), unmarked)
+
+
+def markers(text: str, name: str) -> list[str]:
+    """Just the openers `strip` would act on, for a counting
+    reader that must not rewrite anything."""
+    return strip(text, name)[1]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="report what would be unmarked; write nothing",
+    )
+    parser.add_argument(
+        "--docs",
+        default=str(REPO / "docs"),
+        help="the docs tree to sweep (default: the repo's)",
+    )
+    args = parser.parse_args()
+    root = pathlib.Path(args.docs)
+    if not root.is_dir():
+        sys.exit(f"unreleased-strip: {root} is not a directory")
+
+    try:
+        name = directive()
+        report: list[str] = []
+        rewrites: list[tuple[pathlib.Path, str]] = []
+        for page in sorted(root.rglob("*.md")):
+            before = page.read_text(encoding="utf-8")
+            try:
+                after, unmarked = strip(before, name)
+            except Malformed as error:
+                raise Malformed(
+                    f"{page.relative_to(root)}: {error}"
+                ) from error
+            if not unmarked:
+                continue
+            where = page.relative_to(root)
+            for opening in unmarked:
+                report.append(
+                    f"{where}: {opening or '(empty block)'}"
+                )
+            rewrites.append((page, after))
+    except Malformed as error:
+        sys.exit(f"unreleased-strip: {error}")
+
+    if args.check:
+        if report:
+            print(
+                f"unreleased-strip: would retire {len(report)} "
+                "marker(s)"
+            )
+            for line in report:
+                print(f"  - {line}")
+        else:
+            print(
+                f"unreleased-strip: no :::{name} marker to retire"
+            )
+        return 0
+
+    if not report:
+        print(f"unreleased-strip: no :::{name} marker to retire")
+        return 0
+
+    for page, after in rewrites:
+        page.write_text(after, encoding="utf-8")
+
+    # The postcondition covers ONE thing: a rewrite that did not
+    # land — the wrong tree, a write that silently failed. It is
+    # placed after the writes because that is the only state it
+    # can observe; an earlier draft ran it unconditionally and
+    # that was inert, since with nothing rewritten it re-reads
+    # files it never touched (code review, #1232).
+    #
+    # It cannot see a grammar narrower than remark's, because it
+    # re-reads through the same parser that missed the marker.
+    # That half belongs to `check-site-tokens.py` ▸
+    # `check_unreleased_markers`, which compares this parser's
+    # count against the badges the real pipeline rendered — and
+    # `changelog.yml` builds the site after this step so it runs
+    # on the swept corpus.
+    try:
+        survivors = [
+            str(page.relative_to(root))
+            for page in sorted(root.rglob("*.md"))
+            if markers(page.read_text(encoding="utf-8"), name)
+        ]
+    except Malformed as error:
+        sys.exit(
+            f"unreleased-strip: the rewrite left a corpus this "
+            f"parser cannot read ({error})"
+        )
+    if survivors:
+        sys.exit(
+            f"unreleased-strip: :::{name} marker(s) survived the "
+            f"rewrite in {survivors} — the corpus would keep "
+            "badging behavior this release shipped."
+        )
+
+    print(f"unreleased-strip: retired {len(report)} marker(s)")
+    for line in report:
+        print(f"  - {line}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
