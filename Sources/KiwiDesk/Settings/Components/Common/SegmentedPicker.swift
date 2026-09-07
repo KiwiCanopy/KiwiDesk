@@ -84,7 +84,11 @@ struct SegmentedPicker<Value: Hashable>: View {
         .onChange(of: focused) { _, now in
             // This stop would otherwise ring on every click
             // (`ClickBornFocus`).
-            guard now, ClickBornFocus.isClickBorn else { return }
+            guard now,
+                ClickBornFocus.isClickBorn(
+                    focusMayBeADescendant: false
+                )
+            else { return }
             focused = false
         }
         // ← / → only: ↑ / ↓ must still leave the row.

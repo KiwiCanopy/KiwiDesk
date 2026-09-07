@@ -25,10 +25,14 @@ struct SettingsInputSourceSeamTests {
     ///
     /// - `SettingsInputSource` — would the platform have moved
     ///   focus for this NAVIGATION? Refuses a mouse event.
-    /// - `ClickBornFocus` — did the mouse cause this FOCUS
-    ///   CHANGE on a `.focusable()` control? Also weighs the
+    /// - `ClickBornFocus` — should this FOCUS CHANGE on a
+    ///   `.focusable()` control be refused? Also weighs the
     ///   button state, which the first must not, because a
-    ///   navigation may be programmatic while a button is down.
+    ///   navigation may be programmatic while a button is down,
+    ///   and — for a CONTAINER that says so — whether the click
+    ///   put the caret in an editable responder, which its
+    ///   `FocusState` cannot distinguish from its own ring
+    ///   (#1309, `ClickBornFocusTests`).
     ///
     /// Merging them would refuse programmatic focus, which the
     /// second must allow. A THIRD entry is the thing to refuse:

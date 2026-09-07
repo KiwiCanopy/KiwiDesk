@@ -111,7 +111,10 @@ extension SettingsView {
                         // modifier handed the binding never
                         // fires (owner eye-confirm, 2026-09-01).
                         .onChange(of: contentFocused) { _, now in
-                            guard now, ClickBornFocus.isClickBorn
+                            guard now,
+                                ClickBornFocus.isClickBorn(
+                                    focusMayBeADescendant: true
+                                )
                             else { return }
                             contentFocused = false
                         }

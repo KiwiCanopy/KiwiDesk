@@ -55,7 +55,11 @@ struct SpaceAssignmentChip: View {
             // owner 2026-09-01). Wired here rather than shared:
             // a modifier handed the binding never fires.
             .onChange(of: focused) { _, now in
-                guard now, ClickBornFocus.isClickBorn else {
+                guard now,
+                    ClickBornFocus.isClickBorn(
+                        focusMayBeADescendant: false
+                    )
+                else {
                     return
                 }
                 focused = false

@@ -1,7 +1,6 @@
 import AppKit
 
-/// Whether the focus change now landing was caused by the mouse
-/// AND is a stray ring rather than the focus the click asked for.
+/// Whether the focus change now landing was caused by the mouse.
 ///
 /// macOS 26 gives a `.focusable()` custom view keyboard focus on
 /// a click, where the platform's own controls take none — so a
@@ -23,42 +22,40 @@ import AppKit
 /// different questions, and merging them would refuse
 /// programmatic focus, which this must allow.
 enum ClickBornFocus {
-    /// The decision, pure so both its answers are pinned without
-    /// an `NSApplication` (`ClickBornFocusTests`).
+    /// The decision, pure so every answer is pinned without an
+    /// `NSApplication` (`ClickBornFocusTests`).
     ///
-    /// `textEditingOwnsFocus` is the #1309 arm and it comes
-    /// FIRST. A container's `.focused($x)` reads "focus is
-    /// somewhere within me", so a click into a `TextField`
-    /// inside the Settings detail pane turns the pane's binding
-    /// true — and a refusal spelled on that signal answered by
-    /// the button state alone clears the field the user just
-    /// clicked, as collateral. Measured on device 2026-09-07:
-    /// every failing click logged `focused=true`, then the
-    /// pane's refusal, then `focused=false`, so the hex field
-    /// took the caret for one to six milliseconds and lost it.
-    ///
-    /// The arm is narrow on purpose. It withholds the refusal
-    /// only where a click has put the caret in an editable
-    /// field, which no `.focusable()` custom view can be — so a
-    /// leaf control's refusal (a slider, a segmented picker, a
-    /// chip) is untouched and #991 keeps every ring it removed.
+    /// `focusMayBeADescendant` is the caller's, never inferred:
+    /// a CONTAINER's `.focused($x)` reads "focus is within me",
+    /// so a click into a `TextField` inside it turns the binding
+    /// true and the refusal clears the field the user aimed at
+    /// (#1309). A leaf control has no descendant to confuse
+    /// itself with and passes `false`, which is what keeps
+    /// #991's rings — the arm is unreachable for it rather than
+    /// merely unlikely.
     static func refuses(
         mouseHeld: Bool,
         dispatchingMouseEvent: Bool,
+        focusMayBeADescendant: Bool,
         textEditingOwnsFocus: Bool
     ) -> Bool {
-        if textEditingOwnsFocus { return false }
+        if focusMayBeADescendant, textEditingOwnsFocus {
+            return false
+        }
         return mouseHeld || dispatchingMouseEvent
     }
 
-    /// BOTH readings, because they miss different cases: a
+    /// BOTH mouse readings, because they miss different cases: a
     /// button still held (a drag), and a click already completed
     /// on mouse-UP, where nothing is pressed by the time the
     /// focus change is observed.
-    @MainActor static var isClickBorn: Bool {
+    @MainActor static func isClickBorn(
+        focusMayBeADescendant: Bool
+    ) -> Bool {
         refuses(
             mouseHeld: NSEvent.pressedMouseButtons != 0,
             dispatchingMouseEvent: dispatchingMouseEvent,
+            focusMayBeADescendant: focusMayBeADescendant,
             textEditingOwnsFocus: textEditingOwnsFocus
         )
     }
@@ -76,18 +73,20 @@ enum ClickBornFocus {
         }
     }
 
-    /// Whether an editable text responder holds the focus.
+    /// Whether an editable text responder holds the focus — the
+    /// one fact separating "a container took a ring" from "the
+    /// field inside it took the caret", which its `FocusState`
+    /// spells identically (#1309).
     ///
-    /// A control that takes focus for itself installs its own
-    /// responder — a field editor — where a plain focusable view
-    /// leaves the `NSHostingView` in place. That is the one fact
-    /// separating "the pane took a ring" from "the field took
-    /// the caret", because the pane's `FocusState` says the same
-    /// thing in both. Device log, 2026-09-07: a hex-field click
-    /// reports `_SystemTextFieldFieldEditor`, a click on the
-    /// pane's own background reports the hosting view, and by
-    /// the time a background click is seen the previous field's
-    /// editor is already gone.
+    /// Stated residue: this asks the KEY window, not the window
+    /// the binding lives in, which no `FocusState` reading can
+    /// reach from here. A click into a background window makes
+    /// it key before the focus change is observed, so the two
+    /// agree on the measured path — an editable responder in a
+    /// panel above (`NSColorPanel` carries hex fields of its
+    /// own) is the case that owes a device sitting rather than
+    /// an argument. `ClickAwayResignsFocus` (#93) asks the same
+    /// question of its own window, and resigns what this reads.
     @MainActor private static var textEditingOwnsFocus: Bool {
         guard
             let text = NSApp?.keyWindow?.firstResponder as? NSText
