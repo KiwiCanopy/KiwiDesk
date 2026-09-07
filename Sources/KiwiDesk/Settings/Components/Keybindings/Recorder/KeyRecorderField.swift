@@ -126,14 +126,18 @@ struct KeyRecorderField: View {
         .accessibilityValue(label)
     }
 
-    @MainActor private static let recordHelp = L(
-        "key_recorder.help_press",
-        "A shortcut is one key plus any of "
-            + "⌃ Control, ⌥ Option, ⇧ Shift, "
-            + "and ⌘ Command — it locks in the "
-            + "moment you press the key. Add a layer "
-            + "to give one key a second meaning."
-    )
+    // Computed, never a `static let`: a stored L() resolves once
+    // and freezes the locale it was first read in (#1311).
+    @MainActor private static var recordHelp: String {
+        L(
+            "key_recorder.help_press",
+            "A shortcut is one key plus any of "
+                + "⌃ Control, ⌥ Option, ⇧ Shift, "
+                + "and ⌘ Command — it locks in the "
+                + "moment you press the key. Add a layer "
+                + "to give one key a second meaning."
+        )
+    }
 
     // MARK: - Rejection UI (#34)
 

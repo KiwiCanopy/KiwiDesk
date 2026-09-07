@@ -6,17 +6,27 @@ import KiwiDeskCore
 @MainActor
 enum BrandAssets {
     /// Template menu-bar mark from `MenuBarIcon` resource.
-    static let menuBarIcon: NSImage? = {
+    ///
+    /// The IMAGE is cached — `StatusItemController+Icon` relies on
+    /// one shared instance — but its localized description is
+    /// re-applied per read, because a stored L() freezes the
+    /// locale it was first resolved in (#1311).
+    static var menuBarIcon: NSImage? {
+        guard let image = cachedMenuBarIcon else { return nil }
+        image.accessibilityDescription = L(
+            "brand.menu_bar_icon.a11y",
+            "KiwiDesk"
+        )
+        return image
+    }
+
+    private static let cachedMenuBarIcon: NSImage? = {
         guard
             let image = Bundle.kiwiDeskGui.image(
                 forResource: "MenuBarIcon"
             )
         else { return nil }
         image.isTemplate = true
-        image.accessibilityDescription = L(
-            "brand.menu_bar_icon.a11y",
-            "KiwiDesk"
-        )
         return image
     }()
 

@@ -78,6 +78,26 @@ Say in the merge which call sites you verified: nothing can
 re-derive that they route to the same behavior, and `common.`
 is one careless merge away from being a drawer.
 
+**A localized value is COMPUTED per read, never stored in a
+`static let`.** A `static let` is a lazily-initialised global: it
+resolves `L()` once, at first touch, and caches for the life of
+the process. `LocaleScopedRoot` rebuilds the whole view tree on a
+language switch, so every per-read call follows — but it cannot
+recompute a stored value, which keeps whichever locale was live
+at that first read. The symptom is order-dependent, not
+page-dependent, which is what made #1311 read as "only the Bars
+page": the page visited while German froze German, and its twin,
+first opened after the switch, was correct. Reach for a computed
+`static var`; where an expensive value must stay cached, cache
+the value and apply the localized part per read
+(`BrandAssets.menuBarIcon`). Storing a CLOSURE that resolves
+`L()` later is the sanctioned deferral, and `NavCommand` is the
+one type that does it — its `displayLabel` / `help` /
+`unavailable` are resolved by `resolvedLabel` at read.
+`LocalizedStaticStorageTests` holds this over both source trees;
+its `allowed` map is empty, and an entry added to it must name
+what makes that survivor safe.
+
 The GUI language pick persists in `UserDefaults`
 (`LocalizationPreference`), never `gui.json` — it is documented as
 side-effect-free and must never create a sidecar or flip
