@@ -29,9 +29,21 @@ enum ChromeScanRoots {
     /// there had no `.buttonStyle` at all, which is harmless
     /// until a window takes an accent and then is #759 in the
     /// first window every user sees.
+    ///
+    /// Shortcuts joined for the same reason one tree over
+    /// (#1293/#1295), and it is the #828 lesson repeating: the
+    /// ⌃⌥K panel drew the retired `Color.accentColor` and a
+    /// `Button` with no style at all, so on a Mac whose system
+    /// accent is not green it rendered a pink chip and a pink
+    /// button inside a kiwi app — shipped, and invisible to
+    /// every suite reading this list at once, because the
+    /// directory was not partly covered but silently exempt.
+    /// The membership test is met: a raw colour there ships a
+    /// defect the tint makes visible.
     static let paths = [
         "Sources/KiwiDesk/Settings",
         "Sources/KiwiDesk/Onboarding",
+        "Sources/KiwiDesk/Shortcuts",
     ]
 
     static func urls(from filePath: String) -> [URL] {

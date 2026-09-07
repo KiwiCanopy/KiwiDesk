@@ -81,6 +81,12 @@ struct AnnouncedValuePinTests {
         "SettingsDisclosureStyle.swift": 1,
         "SettingsHeaderBar.swift": 1,
         "HomeScreen.swift": 1,
+        // The ⌃⌥K panel's band and subgroup headers, in the census
+        // from the moment `Sources/KiwiDesk/Shortcuts` joined
+        // `ChromeScanRoots` (#1293). #1292 gave them the trait
+        // while the directory was still outside every lens, so
+        // this is the backlog arriving rather than a new title.
+        "ShortcutsBands.swift": 2,
     ]
 
     @Test("title components are rotor headings")

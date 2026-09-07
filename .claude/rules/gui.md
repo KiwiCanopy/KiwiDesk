@@ -1200,6 +1200,72 @@ The Onboarding tree is the worked case: it shipped a raw
 sees, for as long as it existed, because the lens
 stopped at `Settings/`.
 
+`Shortcuts/` is the second, and it says the lesson does not
+transfer by being written down once. It shipped the retired
+`Color.accentColor` and a styleless `Button`, so on a Mac whose
+system accent is not green the ⌃⌥K panel drew a pink chip and a
+pink button inside a kiwi app (#1293) — every suite reading
+`ChromeScanRoots` blind to one directory at once, which is what
+sharing the list buys and costs. **Widen the roots BEFORE the
+change that needs them, not after**, and expect the lens to red
+on what is already there: doing it after lands new work on a
+surface nothing watches, and the reds are the backlog arriving
+rather than a regression.
+
+## This tree draws glass through one modifier
+
+`glassChrome(in:)` is the SwiftUI home for the Liquid Glass
+branch, the way `GlassPlate.swift`'s docstring is the AppKit
+one. Same platform feature, same `macOS 26` line, different call
+— so a second `#available` spelled at a call site is how the two
+halves of one idea come to disagree.
+
+Obligations:
+
+- **A surface adopting glass calls `glassChrome(in:)`**, never
+  `.glassEffect` beside it, and gets the fallback and the clip
+  for free. `GlassChromeSeamTests` holds both — the call's one
+  home, and the clip OUTSIDE the availability branch, which the
+  first cut got wrong: `glassEffect(_:in:)` draws in a shape
+  without clipping to it, so the modifier built to stop the two
+  halves disagreeing shipped them disagreeing.
+- **The fallback keeps today's design**, not a glass-adjacent
+  approximation (owner, 2026-09-07). *Keep the old design* and
+  *keep the design language* are different answers and the first
+  is ours: a surface degrading to something nearly glass claims a
+  finish the machine cannot draw.
+- **Glass here is untinted, and a tint needs its own ruling.**
+  `Glass.tint(_:)` is a **dimmer**: measured 2026-09-07, a
+  neutral tint took a plate from luminance 144 to 134 with chroma
+  rising, which is what AppKit's `tintColor` does ▸ #390. So the
+  two toolkits agree, and a tint neither lightens a plate nor
+  colours it — only a `GlassTint`-style backdrop carries hue, and
+  one opaque enough to read stops the wallpaper coming through.
+  `docs/design-decisions.md` ▸ the reference panel carries the
+  ruling; its second reason needs no platform fact at all, since
+  a SwiftUI surface's `.primary` / `.secondary` are vibrant
+  against the composite backdrop and so need no fill the way a
+  bar's fixed-hex ink does.
+- **The variant is a legibility decision, per surface.** This
+  tree draws `.regular`, the bars draw `.clear`, and that is
+  ruled rather than drifted: the two are visually identical in
+  AppKit (#390) and 59/255 apart in SwiftUI, so there is no one
+  finish to be consistent about. Moving either is a device
+  sitting, not a tidy-up.
+- **A surface states its `.tint` BELOW its glass**, so the
+  ground is not inside the tinted environment. Otherwise
+  "untinted" rests on `glassEffect` not reading `.tint`, which
+  is the unmeasured question above, and no guard in this tree
+  can see it either way.
+- **Adopting glass does not answer Reduce Transparency, and may
+  not pretend to.** The gap is older and wider than any one
+  surface — the bars already ship glass ignoring it — so a glass
+  change neither closes it nor is blocked on it, and must not
+  absorb it silently. It is #1295's recorded residue and earns
+  its own ruling; when it is taken, `glassChrome(in:)` is the
+  door, and the answer is not the `.regularMaterial` fallback,
+  which is still translucent.
+
 ## The Reduce Motion gate
 
 **Every animation started under `Sources/KiwiDesk` names its
