@@ -39,7 +39,6 @@ struct FocusReportProvenanceTests {
         var focused: [WindowID] = []
         var logs: [String] = []
         var listed: [WindowID] = []
-        var cursor = 0
     }
 
     private let pid: pid_t = 909_909
@@ -70,15 +69,10 @@ struct FocusReportProvenanceTests {
         loop.appIsHidden = { _ in false }
         loop.frontmostPID = { nil }
         let dummy = element
-        loop.axWindows = { _ in
-            box.cursor = 0
-            return box.listed.map { _ in dummy }
-        }
-        loop.resolveWindowID = { _ in
-            defer { box.cursor += 1 }
-            guard box.cursor < box.listed.count else { return nil }
-            return box.listed[box.cursor]
-        }
+        loop.axWindows = { _ in box.listed.map { _ in dummy } }
+        // One tracked window, so every ask — the reconcile's and
+        // the focus arm's own (#1088) — answers it.
+        loop.resolveWindowID = { _ in box.listed.first }
         loop.onEvent = { event in
             if case .windowFocused(let id) = event {
                 box.focused.append(id)
@@ -141,6 +135,29 @@ struct FocusReportProvenanceTests {
         loop.frontmostPID = { nil }
         loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
         #expect(box.focused == [WindowID(11)])
+    }
+
+    /// `stop()` forgets the last activation: the observers are
+    /// down for the stopped span, so an activation then is missed,
+    /// and a restarted loop that kept the stale pid would drop the
+    /// real active app's reports until the next app switch.
+    @Test("A restarted loop falls back to the frontmost reading")
+    func stopForgetsTheLastActivation() {
+        let (loop, box) = makeLoop()
+        loop.lastActivePid = other
+        loop.frontmostPID = { self.pid }
+        loop.stop()
+        #expect(loop.beginScan())
+        loop.scanChunk(budget: nil)
+        loop.attach(
+            pid: pid,
+            activationPolicy: .regular,
+            ref: ref,
+            scanWindowsAtAttach: false
+        )
+        loop.elements[pid] = [WindowID(11): element]
+        loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
+        #expect(box.focused == [WindowID(11)], "reported \(box.focused)")
     }
 
     /// The gate sits AFTER the untracked classification, so an

@@ -19,10 +19,13 @@ extension KiwiCore {
         // now on, an implicit-focused command fails closed unless
         // the OS frontmost app is KiwiDesk's focused managed
         // window.
-        frontmostPIDProvider = {
+        let frontmost: @MainActor () -> pid_t? = {
             NSWorkspace.shared.frontmostApplication?
                 .processIdentifier
         }
+        frontmostPIDProvider = frontmost
+        // The focus-report gate reads the same chain (#1322).
+        eventLoop.frontmostPID = frontmost
         // The wake payment's fallback seed reads the one trusted
         // frontmost chain (#442/#1130).
         trustedFrontmostProvider = { [weak self] in

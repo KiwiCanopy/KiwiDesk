@@ -273,9 +273,10 @@ public final class EventLoop {
 
     /// The app macOS reports frontmost — read only before the first
     /// activation notification has set `lastActivePid` (#1322).
-    var frontmostPID: () -> pid_t? = {
-        NSWorkspace.shared.frontmostApplication?.processIdentifier
-    }
+    /// Nil until `armMachineSeams` wires it beside
+    /// `KiwiCore.frontmostPIDProvider`, so a test loop never reads
+    /// the host's frontmost app.
+    var frontmostPID: () -> pid_t? = { nil }
 
     /// Activation policy for a pid a reconcile only knows by
     /// number.

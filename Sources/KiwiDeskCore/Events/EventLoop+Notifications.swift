@@ -55,7 +55,7 @@ extension EventLoop {
     /// that filter without replacing it (review + device,
     /// 2026-08-29). They are #1088, with the same measurement
     /// available to justify it.
-    func windowID(
+    private func windowID(
         of element: AXUIElement,
         pid: pid_t
     ) -> WindowID? {

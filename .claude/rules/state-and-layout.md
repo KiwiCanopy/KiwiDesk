@@ -538,21 +538,6 @@ editing here:
   double-target correction clicks into — the monocle arm
   shipped that way twice (#689). `ZOrderMonocleArmTests` and
   `ZOrderFocusJumpTests` pin one arm each.
-- **A focus report from the accessibility channel counts only
-  from the app macOS activated last.** `AXFocusedWindowChanged`
-  is per-APP: a non-activating panel (an `AXSystemDialog` the
-  Claude desktop app's overlay is) empties its app's focused
-  window while up and flips it back to the main window on close,
-  and the app never becomes frontmost — measured, #1322 — so
-  the flip is app-internal, and honoring it moved the anchor
-  onto a window without the system focus until a click. The
-  branch (`EventLoop+FocusReport`) asks `lastActivePid`, which
-  the activation channel keeps, with `frontmostPID` standing in
-  before the first activation, and DROPS rather than holds: an
-  app that does activate is reported by `appActivated` itself,
-  which is what closes the ordering race on a real cmd-tab.
-  With no reading at all the report stands (fails OPEN, stated).
-  `FocusReportProvenanceTests` drives the real branch.
 - **An echo ledger is age-bounded and NEVER consumed by its
   echo** — `zOrderRaiseEchoes` (#689) and `selfRaiseStamps`
   (#887) alike. A lazy app reports a raised window's focus

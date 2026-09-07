@@ -1722,7 +1722,9 @@ frame-set, not activation in general.
 
 ### A focus report is only as good as the activation behind it (#1322)
 
-**Rationale.** `kAXFocusedWindowChanged` is an app-level
+**[Rationale]**
+
+`kAXFocusedWindowChanged` is an app-level
 notification: it says which of ITS windows an app now calls
 focused, not that the app holds the system focus. KiwiDesk read it
 as the latter, and a non-activating panel showed the difference.
@@ -1750,10 +1752,19 @@ only activates the app), so the ordering race on a genuine
 cmd-tab — AX report before activation notification — resolves
 by construction. The gate sits after the untracked
 classification, so an ignored panel of an inactive app still
-arms #244's dismissal distrust. It is the handler's seventh
-distrust, and the only one that asks about the APP rather than
-the window; whether it subsumes #465's sibling re-report is a
-question for the next device sitting, not this one.
+arms #244's dismissal distrust. **The gate lives in the
+producer, not beside `handleWindowFocused`'s six arms:** those
+judge whether to honor a system-focus report, this asks a fact
+about the CHANNEL, and only the event loop can promise the drop
+is safe because it owns the emitter that re-reports on
+activation. The trade, stated: that re-report is
+`appActivated`'s own focused-window read — the lazy-app read
+#465 distrusts — so when a true AX report preceded the
+activation notification and was dropped, the activation may name
+the app's OLD window; #465 then holds the intended one and the
+outcome converges. Neither #465 (the raise activates the app) nor
+#244 (Ghostty is frontmost when its panel dismisses) is starved,
+since in both the app did activate.
 
 ### An ignored panel's dismissal is a race; provenance ends it
 

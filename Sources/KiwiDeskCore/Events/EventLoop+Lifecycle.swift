@@ -21,6 +21,10 @@ extension EventLoop {
             center.removeObserver(token)
         }
         workspaceTokens = []
+        // An activation during the stopped span is missed with
+        // the observers down, so the gate falls back to the
+        // frontmost reading on restart (#1322).
+        lastActivePid = nil
         if let screenToken {
             NotificationCenter.default
                 .removeObserver(screenToken)
