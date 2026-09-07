@@ -72,12 +72,31 @@ jobs:
       contents: write
       pull-requests: write
       # `gh workflow run` on the branch this job pushes — the one
-      # way its PR ever gets a check run (#1154, last step).
+      # way a `github.token` PR ever gets a check run (#1154).
       actions: write
+    env:
+      # ONE home for the token the push, the PR and the arming
+      # all take. A `github.token` PR fails three gates, all
+      # measured on v1.1.2's #1191: it raises no `pull_request`,
+      # it is held at "Approve and run", and the merge queue
+      # will not take an entry it armed. A real actor's token
+      # clears all three; without one this falls back and the
+      # dispatch below keeps the cheap half working (#1154).
+      SYNC_TOKEN: ${{ secrets.RELEASE_SYNC_TOKEN || github.token }}
+      # Whether that resolved to the PAT. The dispatch exists
+      # ONLY because `github.token` fires nothing, so a PAT run
+      # must not also fire it — two suites reporting the same
+      # required contexts is a race over which one lands.
+      SYNC_TOKEN_IS_PAT: ${{ secrets.RELEASE_SYNC_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: main
+          # The token the later `git push` inherits: what fires
+          # `pull_request` is who pushed and opened, not who
+          # authored the commit.
+          token: ${{ env.SYNC_TOKEN }}
+          persist-credentials: true
 
       # Read from site/.nvmrc, never a literal — that file is the
       # one Node pin (.claude/rules/site.md), shared with site.yml
@@ -90,7 +109,7 @@ jobs:
 
       - name: Sync
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ env.SYNC_TOKEN }}
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
           # The event's tag alone, never the dispatch input. The
           # appcast guard below is about a PUBLICATION — "the
@@ -171,7 +190,7 @@ jobs:
       # through them.
       - name: Open a PR if anything moved, and let it land
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ env.SYNC_TOKEN }}
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           set -euo pipefail
@@ -218,13 +237,16 @@ jobs:
           appcast is live the moment Cloudflare redeploys."
           fi
 
-          # Start CI by hand — nothing else will, and
-          # packaging-and-release.md ("CI") carries why. Every
-          # run dispatches, the already-open one included: the
-          # push above moved the head, and the checks that count
-          # are the ones on it.
-          gh workflow run ci.yml --ref "$BRANCH" \
-            -f filter_paths=true
+          # Start CI by hand when — and only when — nothing
+          # else will, which is the `github.token` fallback;
+          # packaging-and-release.md ("CI") carries why. On that
+          # path every run dispatches, the already-open one
+          # included: the push above moved the head, and the
+          # checks that count are the ones on it.
+          if [ "$SYNC_TOKEN_IS_PAT" != "true" ]; then
+            gh workflow run ci.yml --ref "$BRANCH" \
+              -f filter_paths=true
+          fi
 
           # Arm the queue, so a green release needs no human
           # between publishing and the feed going live. A re-run

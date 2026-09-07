@@ -24,11 +24,21 @@ import Testing
 /// a needle being satisfied by a step that is not the one under
 /// test (guard-prover and architect review, 2026-08-31).
 ///
-/// **What this cannot see**: whether the dispatch is permitted
-/// at all — that also needs the repo-level "Allow GitHub Actions
-/// to create and approve pull requests" setting, which is not a
-/// file — nor whether the merge queue accepts an entry a bot
-/// armed. Only a real release answers the second.
+/// Since #1154 was reopened all three gates are measured, on
+/// v1.1.2's #1191: CI never reported (the dispatch fixes that),
+/// the bot's own workflows sat at "Approve and run", and the
+/// merge queue never took the auto-merge the bot armed. Only a
+/// token belonging to a real actor clears the second and third,
+/// so the job threads ONE token through the push, the PR and
+/// the arming, and the dispatch — which exists only because
+/// `github.token` fires nothing — stands down when that token
+/// is present.
+///
+/// **What this cannot see**: whether the secret is actually
+/// SET. A repository without `RELEASE_SYNC_TOKEN` falls back
+/// and every clause below still passes, correctly — the
+/// fallback is the shape being guarded, not the credential.
+/// Only a real release answers whether the queue takes it.
 @Suite("Release sync trigger")
 struct ReleaseSyncTriggerTests {
     /// The step that opens, starts and arms, by its own name.
@@ -133,6 +143,87 @@ struct ReleaseSyncTriggerTests {
             """
             the sync job cannot dispatch a workflow without \
             `actions: write`
+            """
+        )
+    }
+
+    @Test("One token pushes, opens and arms")
+    func syncThreadsOneToken() throws {
+        let yaml = try workflowSource("changelog.yml")
+        let lines = yaml.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
+        )
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        // ONE home, and it FALLS BACK: a repository with no
+        // secret set must still open the PR it opens today.
+        let declared = try #require(
+            lines.first { $0.hasPrefix("SYNC_TOKEN:") },
+            "changelog.yml declares no shared token (#1154)"
+        )
+        #expect(
+            declared.contains("secrets.RELEASE_SYNC_TOKEN")
+                && declared.contains("github.token"),
+            """
+            the token declaration has no fallback — a repository \
+            without the secret would push with nothing
+            """
+        )
+        // What fires `pull_request` is who PUSHED, so the
+        // checkout takes it too. Guarding only `GH_TOKEN` would
+        // leave a real actor opening a PR on a branch the bot
+        // pushed, which reports nothing.
+        #expect(
+            lines.contains {
+                $0.hasPrefix("token: ${{ env.SYNC_TOKEN")
+            },
+            "the checkout does not carry the shared token"
+        )
+        // Every `gh` step reads that one home rather than
+        // spelling a token of its own — the coupling an edit
+        // breaks silently, since a `github.token` step still
+        // runs and still opens a PR that strands.
+        let spellings = lines.filter { $0.hasPrefix("GH_TOKEN:") }
+        #expect(
+            !spellings.isEmpty,
+            "changelog.yml runs `gh` with no token at all"
+        )
+        for spelling in spellings {
+            #expect(
+                spelling.contains("env.SYNC_TOKEN"),
+                """
+                `\(spelling)` names a token of its own — the PR \
+                is only as good as the weakest step that made it
+                """
+            )
+        }
+    }
+
+    @Test("The hand-started CI stands down for a real token")
+    func dispatchStandsDownForThePat() throws {
+        let yaml = try workflowSource("changelog.yml")
+        let lines = try workflowStep(Self.prStep, in: yaml)
+            .split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+        let dispatch = try #require(
+            lines.firstIndex {
+                $0.contains("gh workflow run")
+                    && $0.contains("ci.yml")
+            },
+            "the sync step no longer starts CI at all"
+        )
+        // The dispatch exists ONLY because `github.token` raises
+        // no `pull_request`. Left unconditional, a real token
+        // fires it too and two suites report the same required
+        // contexts — a race over which verdict lands.
+        #expect(
+            lines[..<dispatch].contains {
+                $0.contains("SYNC_TOKEN_IS_PAT")
+            },
+            """
+            the CI dispatch is unconditional — with a real token \
+            it duplicates the checks `pull_request` already \
+            reports (#1154)
             """
         )
     }

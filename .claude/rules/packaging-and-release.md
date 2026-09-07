@@ -565,6 +565,29 @@ publishing and the feed going live. So the workflow starts
 event a `GITHUB_TOKEN` may still create (observed 2026-08-31
 against this repo), and arms auto-merge beside it.
 
+**That fixed one gate of three, and the other two are what a
+release actually strands on.** v1.1.2's #1191 cleared the
+dispatch and stranded anyway: two further suites sat
+`action_required` with zero runs — GitHub's "Approve and run"
+gate, applied to the bot's own PR — and once approved, the
+auto-merge the bot had armed was never taken by the merge
+queue, which took the same PR immediately when a person
+enqueued it. Both are the actions-can't-trigger-actions family
+one step further along, and neither is reachable from a
+workflow file.
+
+**So the token is the fix, and the job threads ONE of it**
+(`SYNC_TOKEN`, read by the checkout that pushes, by every `gh`
+step, and so by the PR and the arming alike). A real actor's
+token fires `pull_request` normally, is not held for approval,
+and arms an auto-merge the queue takes. It **falls back** to
+`github.token`, because a repository without the secret must
+still open the PR it opens today — and on that path the
+dispatch is what makes the PR reportable, so the dispatch
+**stands down when the token is the PAT**: left unconditional it
+would put two suites reporting the same required contexts on
+one head, a race over which verdict lands.
+
 **Both halves are owed to a PR nobody is watching land, and
 that is the scope.** The release path is unwatched by
 construction — publish, and the feed waits on the sync PR — so
