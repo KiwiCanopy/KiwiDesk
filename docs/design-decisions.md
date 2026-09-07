@@ -6887,6 +6887,135 @@ permanent, not a stopgap. The asymmetry that issue would
 exploit — the panel's height derives from the screen while its
 width is a literal 760 — is its own ruling if taken.
 
+**The reference panel takes UNTINTED Liquid Glass, and the
+untinted half is a ruling rather than a limit.** (#1295/#1293,
+2026-09-07.) A large translucent panel summoned over the desktop
+is the exact shape the platform now renders in glass, and the
+panel's own fallback already existed — the `macOS 26` branch
+degrades to today's `.regularMaterial`, which is *today's design*
+rather than a glass-adjacent approximation, because a surface
+that degrades to something nearly glass claims a finish the
+machine cannot draw.
+
+Three reasons it is declined, hardest first:
+
+1. **A tint DARKENS, and this surface was ruled to need the light
+   field.** Measured 2026-09-07 on an identical ground, a neutral
+   white tint took `.clear` from luminance 144 to 141 at 15 % to
+   134 at 30 %, with chroma *rising*: SwiftUI's `Glass.tint(_:)`
+   dims by the colour's alpha rather than carrying it, exactly as
+   AppKit's `tintColor` does ▸ *Liquid Glass is an orthogonal
+   finish toggle*. The two toolkits agree, so this is a platform
+   fact rather than an inherited guess. And the panel's ink is
+   `.primary` / `.secondary` — DARK in light appearance — so every
+   step of that dimming comes out of the contrast of a wall of
+   small type. `SettingsTheme.accent` is no exception: at
+   greyscale ~166 against the plate's ~203 it is a darkening wash
+   before the dimming is counted.
+2. **The bars' argument does not transfer.** A bar's ink is fixed
+   palette hex with no vibrancy path, so its fill is a legibility
+   floor. This panel's prose is vibrant throughout — seven
+   `foregroundStyle` sites, all `.secondary` — and its two fixed
+   hexes are not prose: the chip's accent fill and the seal's
+   `ink`, which sits on the button's own fill rather than on bare
+   glass. `.regular` strengthens this rather than weakening it: a
+   calmer composite is a better backdrop for the vibrancy resolve
+   to work against.
+3. **The one accent mark here is the layer chip, and a green
+   ground erases it.** Weakest of the three and deliberately last:
+   the entry below already accepts that the chip's colour carries
+   no information. It survives only because kiwi-on-kiwi at two
+   alphas makes a fragile mark *systematically* worse rather than
+   situationally so, and that failure is colour-vision-blind — it
+   is one colour on itself. (The Edit button is **not** a second
+   accent mark: the bordered seal neutralises it to `ink`.)
+
+**"Kiwi, like the bars" is aiming at something that does not
+exist.** `AppBarStyle.fillColor` defaults to `#14201CB3` — RGB
+(20, 32, 28) at 0.70, capped to `GlassTint.maxAlpha` — which is a
+near-black with a whisper of green, a dark HUD backdrop, not the
+accent. Copying it here would not make the panel kiwi; it would
+make it dark, which forces a fixed light ink, which forfeits the
+vibrancy of reason 2 — the bars' own chain, run backwards. It is
+also a *user setting* rather than house chrome, so giving this
+panel one moves a decision onto the user instead of removing it.
+
+**And the two mechanisms are not two strengths of one idea.**
+`Glass.tint(_:)` dims (above); only a `GlassTint`-style coloured
+backdrop actually carries hue, because the glass refracts a
+sibling plane behind it. That is precisely why no tint belongs
+here: a backdrop opaque enough to read as a colour is opaque
+enough to stop the wallpaper coming through, and the wallpaper
+coming through is the whole reason to adopt glass. Recorded so a
+future attempt does not reopen this by trying "the other one".
+
+**The panel takes `.regular` and the bars take `.clear`, and
+that divergence is the ruling rather than a drift.** The variant
+is a legibility decision, and the two surfaces carry different
+content: a bar is glanceable chrome with a handful of large
+glyphs, this panel is a wall of small type the user is there to
+*read*. `.regular` is the frosted variant — measured 2026-09-07
+it composites ~45/255 lighter than `.clear`, plate luminance
+~203 against ~144 on an identical ground — and that calm, light
+field is what the type sits on. On device, `.clear` here was
+simply unreadable (owner, 2026-09-07), which is the whole
+argument; the greyness it costs is the price of the surface's
+job.
+
+**The two variants are not the same value in the two toolkits,
+so there is no single finish for the surfaces to agree on.** In
+**AppKit** `.clear` and `.regular` measured visually *identical*
+(#390, 26.5.2) — which is why `GlassPlate` picking `.clear` cost
+the bars nothing; in **SwiftUI** they are 59/255 of luminance
+apart. An earlier draft of this entry argued the two surfaces
+should share one finish and was wrong for exactly that reason: it
+would have unified a spelling rather than a rendering. Note the
+direction, too — `Glass.regular` is the API default, so the panel
+is on the plain path and it is the **bars** that take the special
+variant.
+
+A bar moving to `.regular`, or this panel back to `.clear`, is
+therefore a fresh device sitting rather than an inherited choice.
+
+**And `.regular`'s readability cannot be reproduced with a tint**
+— that measurement is reason 1 above, and it is why "use
+`.clear` and tune the tint until it reads" is a dead end.
+
+**The chip stays at 0.2 on glass, and that is a decision rather
+than an oversight.** Its separation from the ground is
+`0.2 × (accent − local composite)`, and chip and ground share one
+backdrop: under `.regularMaterial` that composite was dragged
+toward a desaturated grey and the delta was near-constant, while
+glass keeps the backdrop's chroma, so the delta now tracks the
+wallpaper and collapses where the composite approaches the
+accent's own luminance. That is accepted because **the chip's
+colour carries no information** — the layer name is text, drawn
+vibrant — so the failure mode is "identity fades on some
+desktops", not "the user cannot tell which layer they are in",
+and nothing rides the hue for a colour-vision floor to bind. Both
+escalations are worse: an opaque accent capsule puts the loudest
+mark in the footer on a passive readout and reads as a control,
+and an accent stroke swaps an unmeasurable wash for an
+unmeasurable hairline at fixed luminance — the same objection
+that defers the panel edge.
+
+The panel keeps its drop shadow (`hasShadow = true`, which
+`BarPanel` deliberately does not have) and draws no edge stroke.
+Whether glass needs one here is deferred rather than settled: a
+shadow that suffices for a material panel may not suffice for a
+more transparent one, and the honest test is a plate that
+actually refracts, over a light wallpaper and a dark one.
+
+**A window states its own accent, and a tree that draws chrome
+is inside the lens** (#1293). Every KiwiDesk window sets
+`.tint(SettingsTheme.accent)` at its root, because the retired
+`Color.accentColor` reads the *user's* system accent and an
+unstyled `Button` takes whatever tint it finds — so a surface
+that states neither renders in the user's accent inside a kiwi
+app. The panel's `Shortcuts/` tree was outside `ChromeScanRoots`
+and therefore not partly covered but *silently exempt*, which is
+why it did.
+
 **The reference panel never lists its own opener.** The
 `show_shortcuts` binding (⌃⌥K, seeded per layer since #602) is
 dropped from the panel builder's working set and renders in no

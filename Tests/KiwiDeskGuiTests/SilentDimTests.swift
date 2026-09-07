@@ -39,6 +39,17 @@ import Testing
 /// inert. A gated control shipping outside this tree would be
 /// invisible here, so a new tree that GATES something joins
 /// these roots, not merely one that dims.
+///
+/// `Sources/KiwiDesk/Shortcuts` was weighed against that
+/// criterion when it joined `ChromeScanRoots` (#1295) and
+/// **declined**, deliberately rather than by omission. Its two
+/// fades are the presentation case: the ⌃⌥K panel is read-only,
+/// so it holds no control a dim could withhold — a row fades to
+/// say its Desktop is not connected, which is a state readout
+/// and carries its reason in an `accessibilityHint` anyway, and
+/// the inactive block's fade is unconditional under a visible
+/// caption. A control that GATES ever landing there is what
+/// moves this, not another dim.
 @Suite("No silent dim (#815)")
 struct SilentDimTests {
     /// Every conditional dim outside `GreyOut`, and why each is

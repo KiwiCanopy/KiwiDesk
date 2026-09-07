@@ -19,9 +19,15 @@ struct ShortcutsPanelView: View {
             footer
         }
         .frame(width: 760)
-        .background(.regularMaterial)
-        .clipShape(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+        // The floor for a control below that states no style of
+        // its own (#1293). BELOW the glass deliberately: applied
+        // outside it, the ground would sit inside the tinted
+        // environment, and "untinted" would rest on
+        // `glassEffect` not reading `.tint` — unmeasured, and
+        // not something a guard here could see.
+        .tint(SettingsTheme.accent)
+        .glassChrome(
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
         )
     }
 
@@ -40,7 +46,7 @@ struct ShortcutsPanelView: View {
                 .padding(.vertical, 3)
                 .background(
                     Capsule()
-                        .fill(Color.accentColor.opacity(0.2))
+                        .fill(SettingsTheme.accent.opacity(0.2))
                 )
                 .frame(maxWidth: 280)
         }
@@ -233,6 +239,7 @@ struct ShortcutsPanelView: View {
                     )
                 )
             }
+            .settingsActionButton()
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)

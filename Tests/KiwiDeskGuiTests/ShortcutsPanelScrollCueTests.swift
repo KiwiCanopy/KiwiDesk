@@ -12,10 +12,17 @@ import Testing
 /// with it rather than staying green over a no-op.
 ///
 /// A source scan because there is nothing else: a SwiftUI
-/// modifier leaves no trace a headless test can read, and this
-/// tree is outside `ChromeScanRoots`, so the accessibility
-/// lenses that would otherwise count `.isHeader` do not reach
-/// it (#1293's gap to close, not this suite's to paper over).
+/// modifier leaves no trace a headless test can read.
+///
+/// `Sources/KiwiDesk/Shortcuts` has since joined
+/// `ChromeScanRoots` (#1293), so `AnnouncedValuePinTests` now
+/// counts this tree's `.isHeader` traits too — and the two do
+/// not overlap the way the count suggests. That census is a
+/// per-file TOTAL and reds if either header loses its trait or
+/// a third appears; the clause here asks each named component's
+/// own body, so it reds if the trait moves ONTO the wrong
+/// component while the total holds. They fail apart, which is
+/// what tests.md asks a second altitude to earn.
 ///
 /// Every clause is anchored on the SUBJECT rather than on the
 /// file. The scroll-view clauses walk each `ScrollView`'s own
