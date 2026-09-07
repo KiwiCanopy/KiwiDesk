@@ -20,10 +20,9 @@ struct ProfilePartitioningEnderTests {
     @Test("A renamed profile keeps its partitioning")
     func renameFollowsThePartitioning() {
         var store = ProfilePartitioning()
-        store.adoptLive("A")
         store.record(
             [Space(id: "1", windows: [WindowID(1)])],
-            handingLiveTo: "B"
+            as: "A"
         )
         store.rename("A", to: "A2")
         #expect(store.remembered(for: "A") == nil)
@@ -35,10 +34,9 @@ struct ProfilePartitioningEnderTests {
     @Test("A re-key moves the id in every profile's record")
     func rekeyReachesEveryProfile() {
         var store = ProfilePartitioning()
-        store.adoptLive("A")
         store.record(
             [Space(id: "1", windows: [WindowID(1)])],
-            handingLiveTo: "B"
+            as: "A"
         )
         store.rekey(WindowID(1), to: WindowID(77))
         #expect(
@@ -49,10 +47,9 @@ struct ProfilePartitioningEnderTests {
     @Test("Deleting a profile forgets its partitioning")
     func deleteForgets() {
         var store = ProfilePartitioning()
-        store.adoptLive("A")
         store.record(
             [Space(id: "1", windows: [WindowID(1)])],
-            handingLiveTo: "B"
+            as: "A"
         )
         store.forget("A")
         #expect(store.remembered(for: "A") == nil)

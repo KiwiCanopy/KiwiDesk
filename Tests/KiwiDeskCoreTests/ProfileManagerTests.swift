@@ -43,7 +43,7 @@ private func makeProfile(
 @Suite("ProfileManager", .serialized)
 @MainActor
 struct ProfileManagerTests {
-    @Test("Save, list, and load round-trip")
+    @Test("Save, list, and read round-trip")
     func roundTrip() throws {
         let manager = makeManager()
         let profile = makeProfile(
@@ -55,7 +55,7 @@ struct ProfileManagerTests {
         )
         try manager.save(profile)
         #expect(manager.list() == ["Developer Rig"])
-        let loaded = try manager.load(name: "Developer Rig")
+        let loaded = try manager.read(name: "Developer Rig")
         // The first profile of a count is auto-flagged default.
         #expect(loaded.isDefault)
         var expected = profile

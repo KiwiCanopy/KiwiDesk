@@ -266,8 +266,9 @@ extension KiwiCore {
         // The LOG names the number, which is the only name for a
         // Desktop the user has; the lookup above never does.
         do {
-            let profile = try profiles.load(name: binding.profile)
+            let profile = try profiles.read(name: binding.profile)
             apply(profile: profile, forceRetile: false)
+            profiles.markClean()
             onLog(
                 "Desktop \(binding.desktop): loaded profile "
                     + "'\(binding.profile)'"

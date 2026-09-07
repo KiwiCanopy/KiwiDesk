@@ -299,7 +299,12 @@ holds the secondary-switch decision including its nil case.
   rewrite the FILE when a migration applies, see below).
 - `save()` **adopts** (sets `currentName`, clears dirty), so an
   edit-without-activating path must be a separate, non-adopting
-  write — never overload `save()`.
+  write — never overload `save()`. Because it adopts, an
+  ACTIVATING write reaches it through `KiwiCore.saveProfile`
+  alone, which files the outgoing partitioning while the name it
+  belongs to still stands; the argument is
+  [state-and-layout.md](state-and-layout.md) ▸ "Whose
+  arrangement is live".
 - The GUI-vs-Lua ownership predicate is centralized in
   `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`); refine
   that one predicate, never add a second.

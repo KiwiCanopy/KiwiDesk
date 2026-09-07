@@ -139,6 +139,13 @@ extension KiwiCore {
         // purpose: this door is also a no-snapshot verb path
         // (`load_profile`), and the carry is idempotent.
         refreshStickyReach()
+        // LAST, and this door's alone (#1249): `currentName` is
+        // the one authority for whose partitioning is live, so it
+        // moves where the Spaces do. Everything above still reads
+        // the OUTGOING name — `reapplyStructuredOverrides` takes
+        // the incoming profile's tiers explicitly for that
+        // reason. Dirtiness stays the caller's.
+        profiles.becameLive(profile)
     }
 
     /// Explicit-load reconcile: drop live spaces whose name isn't
@@ -199,10 +206,13 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         // #1230: a Standard is not a profile — file whatever
-        // profile was live and hand the slot back, or its
-        // arrangement is what gets recorded under that profile's
-        // name at the next switch.
-        recordOutgoingPartitioningForStandard()
+        // profile was live before the compose rearranges it, or
+        // its arrangement is what gets recorded under that
+        // profile's name at the next switch. Standing the name
+        // down is this door's too (#1249): leaving it to the
+        // caller is the pairing the deleted mirror field WAS.
+        recordLivePartitioning()
+        profiles.noProfileIsLive()
         tiler.settings = composed.settings
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
@@ -279,10 +289,9 @@ extension KiwiCore {
         let name = profiles.freeName(base: layout.name)
         // Capture-live: the standard was just adopted onto
         // live above, so live IS what this profile records.
-        try profiles.save(
+        try saveProfile(
             buildProfile(name: name, modes: nil)
         )
-        adoptStandardSave(name)
         // A preset can define more spaces than the first-run seed
         // authored digit shortcuts for; bind the newcomers
         // additively so ⌃⌥N covers them too (#485).

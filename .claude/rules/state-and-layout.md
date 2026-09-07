@@ -44,6 +44,18 @@ editing here:
   a named register so a new one has to argue for itself — the
   GUI's own binding rows are outside that scan;
   `KiwiCore+DesktopSpaces.swift` carries the argument.
+- **Whose arrangement is live is `ProfileManager.currentName`,
+  and nothing beside it (#1249).** A profile WRITE goes through
+  the one `KiwiCore.saveProfile`, which files the outgoing
+  arrangement first — `ProfileManager.save` makes its argument
+  current, so a site that spells `profiles.save(` itself has
+  already lost the name it needed. And only the two apply doors
+  move that name (`becameLive`, `noProfileIsLive`), each beside
+  the Spaces it moves. `ProfileSpacesSeamTests` holds both as
+  one-home clauses. The store carried a mirror of this until
+  #1249, and a mirror that has to be moved beside a write got
+  moved by two of the three writes and then by none — the same
+  defect shipping three times in one lane is what retired it.
 - It follows that **a new per-`Space` field is keyed by
   `WindowID` or it is SHARED across Desktops** — the Desktop
   partition is emergent from window residence, and a per-window

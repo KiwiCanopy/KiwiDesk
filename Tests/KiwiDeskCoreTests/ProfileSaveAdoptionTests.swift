@@ -4,11 +4,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A SAVE adopts the live slot, the way an apply does (#1230,
-/// #1246). `ProfileManager.save` sets `currentName` — the saved
-/// profile becomes the current one — and the partitioning's own
-/// `liveProfile` has to follow it, or the profile you just saved
-/// has no record of its own arrangement to come back to.
+/// A profile WRITE files the outgoing arrangement before it
+/// moves the name (#1230, #1246, #1249). `ProfileManager.save`
+/// makes its argument current, so by the time it returns the
+/// profile whose arrangement is on screen has no name left — and
+/// filing after it records the wrong profile's windows, or none.
+/// `KiwiCore.saveProfile` is the one door that orders the two.
 ///
 /// The first test is the device round of 2026-09-04, which is
 /// where this was found: the arrangement under QA_A came back as
@@ -16,11 +17,16 @@ import Testing
 /// `ProfilePartitioningTests`' fixtures skip by applying one
 /// first. `applyStandard` is the third write exit and gets its
 /// own test, because that is the door the first-run Starter seed
-/// and every Settings "Apply preset" take.
+/// and every Settings "Apply preset" take, and because its
+/// ordering is the one the door cannot state for itself.
+///
+/// The last test is the other half of the single authority:
+/// `apply(profile:)` owns the NAME and no more, so dirtiness
+/// stays with the caller that can judge it.
 ///
 /// WHICH applies count as a switch is
 /// `ProfileSwitchClassificationTests`'.
-@Suite("A save adopts the live slot (#1230)", .serialized)
+@Suite("A profile write files before it renames (#1249)", .serialized)
 @MainActor
 struct ProfileSaveAdoptionTests {
     private func makeCore() -> KiwiCore {
@@ -79,15 +85,14 @@ struct ProfileSaveAdoptionTests {
         #expect(members(core, "2") == [WindowID(2), WindowID(3)])
     }
 
-    /// The existing-profile branch adopts too, and it takes a
-    /// save over a profile that is NOT the live one to see it:
-    /// `profiles.save` makes its argument current whichever
-    /// branch wrote it, so a Save-over-B while A is up hands the
-    /// live arrangement to B — and asserting after a re-save of
-    /// the live profile proves nothing, because the apply that
-    /// preceded it had already adopted.
-    @Test("Saving over another profile adopts the live slot")
-    func saveOverAnotherProfileAdoptsTheSlot() throws {
+    /// The existing-profile branch files too, and it takes a save
+    /// over a profile that is NOT the live one to see it: a
+    /// Save-over-B while A is up must leave A's own arrangement
+    /// on record, and asserting after a re-save of the live
+    /// profile proves nothing, because the apply that preceded it
+    /// had already filed.
+    @Test("Saving over another profile files the live one")
+    func saveOverAnotherProfileFilesTheLiveOne() throws {
         let core = makeCore()
         live(core, [1, 2])
         core.state.workspaces.add(WindowID(1), to: "1")
@@ -96,43 +101,53 @@ struct ProfileSaveAdoptionTests {
         try core.persistProfile(named: "B", modes: nil)
         let a = try core.profiles.read(name: "A")
         core.apply(profile: a, forceRetile: false)
-        #expect(
-            core.state.profilePartitioning.liveProfile == "A"
-        )
-
+        // The user rearranges while A is up, then saves over B.
+        core.state.workspaces.add(WindowID(2), to: "1")
         try core.persistProfile(named: "B", modes: nil)
-        #expect(
-            core.state.profilePartitioning.liveProfile == "B"
+
+        let filed = core.state.profilePartitioning.remembered(
+            for: "A"
         )
+        #expect(filed?["1"] == [WindowID(1), WindowID(2)])
+        #expect(filed?["2"] == [])
+        #expect(core.profiles.currentName == "B")
     }
 
-    /// The third `profiles.save` exit. `applyStandard` composes,
-    /// adopts the standard, then saves a NEW profile — and
-    /// `apply(composed:)` has just handed the live slot back to
-    /// nil, so without the adopt the preset a first-run user is
-    /// seeded with never files its arrangement.
-    @Test("Applying a Standard adopts the profile it saves")
-    func applyingAStandardAdoptsItsSavedProfile() throws {
+    /// The third `profiles.save` exit, and the one whose ORDER
+    /// the write door cannot state for itself. `applyStandard`
+    /// composes onto live, stands the name down, then saves a NEW
+    /// profile — so the door's own file is a no-op there and the
+    /// outgoing profile's record is `apply(composed:)`'s, taken
+    /// BEFORE the compose rearranged anything. Save first and the
+    /// standard's arrangement is what lands under A's name.
+    @Test("A Standard files what the outgoing profile had")
+    func applyingAStandardFilesThePreStandardArrangement()
+        throws
+    {
         let core = makeCore()
         live(core, [1, 2])
-        core.state.workspaces.add(WindowID(1), to: "1")
-        core.state.workspaces.add(WindowID(2), to: "2")
-
         let screen = Display(
             id: DisplayID(1),
             name: "A",
             frame: CGRect(x: 0, y: 0, width: 100, height: 100)
         )
         core.state.workspaces.upsertDisplay(screen)
+        core.state.workspaces.add(WindowID(1), to: "1")
+        core.state.workspaces.add(WindowID(2), to: "2")
+        try core.persistProfile(named: "A", modes: nil)
+
         let name = try core.applyStandard(
             StarterSetup.standardLayout(
                 displays: [screen],
                 mainID: DisplayID(1)
             )
         )
-        #expect(
-            core.state.profilePartitioning.liveProfile == name
+        #expect(core.profiles.currentName == name)
+        let filed = core.state.profilePartitioning.remembered(
+            for: "A"
         )
+        #expect(filed?["1"] == [WindowID(1)])
+        #expect(filed?["2"] == [WindowID(2)])
     }
 
     /// The #634 tier-1 discard forgets saved arrangements but is
@@ -152,9 +167,6 @@ struct ProfileSaveAdoptionTests {
 
         core.discardSavedArrangement()
         #expect(core.profiles.currentName == "A")
-        #expect(
-            core.state.profilePartitioning.liveProfile == "A"
-        )
 
         // A's arrangement is still filed by the next write, so
         // the round trip below survives the discard.
@@ -167,5 +179,23 @@ struct ProfileSaveAdoptionTests {
         core.apply(profile: a, forceRetile: false)
         #expect(members(core, "1") == [WindowID(1)])
         #expect(members(core, "2") == [WindowID(2)])
+    }
+
+    /// `apply(profile:)` records the NAME and stops there. An
+    /// in-effect edit re-applies a profile that is dirty for its
+    /// hardware, and the re-apply did not make it match — folding
+    /// a full `adopt` into the door would clear a flag the menu
+    /// bar is showing for a reason no apply can see.
+    @Test("An in-effect re-apply keeps the dirty flag")
+    func reapplyKeepsDirty() throws {
+        let core = makeCore()
+        live(core, [1])
+        core.state.workspaces.add(WindowID(1), to: "1")
+        try core.persistProfile(named: "A", modes: nil)
+        core.profiles.markDirty()
+
+        core.reapplyIfInEffect("A")
+        #expect(core.profiles.currentName == "A")
+        #expect(core.profiles.isDirty)
     }
 }

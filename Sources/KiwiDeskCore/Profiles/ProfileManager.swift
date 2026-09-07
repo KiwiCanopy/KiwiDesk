@@ -100,14 +100,6 @@ public final class ProfileManager {
         isDirty = false
     }
 
-    func load(name: String) throws -> Profile {
-        let profile = try read(name: name)
-        currentName = profile.name
-        currentStandard = nil
-        isDirty = false
-        return profile
-    }
-
     /// Deletes a profile, repairing orphaned count defaults if needed.
     func delete(name: String) throws {
         let deleted = try? read(name: name)
@@ -229,10 +221,40 @@ public final class ProfileManager {
         isDirty = true
     }
 
-    /// Records that a matched profile is now active.
-    func adopt(_ profile: Profile) {
+    /// Marks the live state as matching the file again — the
+    /// counterpart of `markDirty`, for a caller that has just
+    /// applied a profile and knows the apply was faithful.
+    func markClean() {
+        isDirty = false
+    }
+
+    /// Records that `profile` is the layout now live: the NAME,
+    /// and nothing else.
+    ///
+    /// `currentName` is the single authority for whose
+    /// arrangement the live Spaces represent (#1249), so this is
+    /// `apply(profile:)`'s to call and no one else's. Dirtiness
+    /// stays the caller's: an apply of a profile that does not
+    /// match the live monitors is still dirty, and an in-effect
+    /// re-apply must not clear a flag it did not earn.
+    func becameLive(_ profile: Profile) {
         currentName = profile.name
         currentStandard = nil
+    }
+
+    /// Records that NO profile is live — a built-in Standard has
+    /// been applied over whatever was. `apply(composed:)`'s, and
+    /// `becameLive`'s mirror: which Standard resolves, and
+    /// whether the state is dirty, stay the caller's, because a
+    /// post-reload recompose re-applies the standard it is
+    /// already on and must not forget it.
+    func noProfileIsLive() {
+        currentName = nil
+    }
+
+    /// Records that a matched profile is now active and clean.
+    func adopt(_ profile: Profile) {
+        becameLive(profile)
         isDirty = false
     }
 
