@@ -54,7 +54,16 @@ struct ReleaseSyncTokenTests {
         // spelling a token of its own — the coupling an edit
         // breaks silently, since a `github.token` step still
         // runs and still opens a PR that strands.
-        let spellings = lines.filter { $0.hasPrefix("GH_TOKEN:") }
+        // BOTH spellings `gh` honours. A needle on `GH_TOKEN:`
+        // alone was defeated by `GITHUB_TOKEN: ${{ github.token
+        // }}` on the step that opens the PR and arms the merge —
+        // the census satisfied by that step's shadow, and the
+        // whole suite green on the three-gate BLOCKED state
+        // (`guard-prover`, #1154).
+        let spellings = lines.filter {
+            $0.hasPrefix("GH_TOKEN:")
+                || $0.hasPrefix("GITHUB_TOKEN:")
+        }
         #expect(
             !spellings.isEmpty,
             "changelog.yml runs `gh` with no token at all"
@@ -109,7 +118,7 @@ struct ReleaseSyncTokenTests {
             separator: "\n",
             omittingEmptySubsequences: false
         ) {
-            if line.hasPrefix("      - ") {
+            if Self.opensAStep(line) {
                 if !current.isEmpty {
                     found.append(current.joined(separator: "\n"))
                 }
@@ -128,4 +137,18 @@ struct ReleaseSyncTokenTests {
         }
         return found
     }
+
+    /// Whether `line` opens a step.
+    ///
+    /// A bare `-` on its own line is legal YAML and opened a step
+    /// the census could not see, so the trailing space is not
+    /// required — and the `steps.count` floor could not catch it,
+    /// because losing one step of five does not move a count
+    /// checked against three (`guard-prover`, #1154).
+    static func opensAStep(_ line: Substring) -> Bool {
+        guard line.hasPrefix("      -") else { return false }
+        let rest = line.dropFirst("      -".count)
+        return rest.isEmpty || rest.first == " "
+    }
+
 }
