@@ -20,7 +20,12 @@ extension KiwiCore {
     /// that has applied nothing, has no partitioning of its own.
     func recordLivePartitioning() {
         state.profilePartitioning.record(
-            state.workspaces.allSpaces,
+            state.workspaces.allSpaces.map {
+                Space(
+                    id: $0.id,
+                    windows: withAwayMembers($0.windows, of: $0.id)
+                )
+            },
             as: profiles.currentName
         )
     }
@@ -101,14 +106,30 @@ extension KiwiCore {
             heldSpaceFocus[space.id] = space.focused
         }
         var moved = 0
+        var redirected = 0
         for space in SpaceID.numericLexicalSorted(
             Array(remembered.keys)
         ) {
             guard declared.contains(space),
                 state.workspaces[space] != nil
             else { continue }
-            for window in remembered[space] ?? []
-            where state.windows[window] != nil {
+            for window in remembered[space] ?? [] {
+                guard state.windows[window] != nil else {
+                    // Away on another Desktop (#1146), so there is
+                    // nothing to move — but its DEPARTURE memory
+                    // is what will place it on return, and that
+                    // memory is per-window with one answer across
+                    // profiles. Re-point it, or the away ledger
+                    // decides alone and the window comes back in
+                    // the outgoing profile's Space (#1248).
+                    if state.redirectDeparture(
+                        of: window,
+                        to: space
+                    ) {
+                        redirected += 1
+                    }
+                    continue
+                }
                 let from = state.workspaces.space(of: window)
                 state.workspaces.add(window, to: space)
                 // A float crossing displays must re-anchor
@@ -127,10 +148,12 @@ extension KiwiCore {
             candidate: heldCandidate,
             spaceFocus: heldSpaceFocus
         )
-        if moved > 0 {
+        if moved > 0 || redirected > 0 {
             onLog(
                 "profile '\(profile.name)': restored \(moved) "
                     + "window(s) to their own Spaces"
+                    + (redirected > 0
+                        ? ", \(redirected) away" : "")
             )
         }
     }
