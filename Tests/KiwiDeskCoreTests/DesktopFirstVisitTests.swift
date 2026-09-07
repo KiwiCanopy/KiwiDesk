@@ -174,33 +174,58 @@ struct DesktopFirstVisitTests {
         )
     }
 
-    /// Adoption ending takes the declared Spaces with it — the
-    /// two are ONE value, so no ender can drop the name and leave
-    /// a stale Space set answering for it (#1245).
-    @Test("Ending adoption ends the declared Spaces")
-    func endingAdoptionEndsTheDeclaredSpaces() throws {
-        // Bare: this asks only what adoption answers, so it pins
-        // no display and leaves no process-global override behind
-        // (tests.md ▸ machine touch).
-        let core = makeAuthorityCore()
-        try core.profiles.save(
-            Profile(
-                name: "P",
-                monitorSets: [
-                    MonitorSet(
-                        monitors: ["Screen:100x100"],
-                        spaceMonitorMap: [:]
-                    )
-                ],
-                spaces: [SpaceID(1)],
-                spaceModes: [SpaceID(1): .bsp],
-                settings: TilingSettings()
+    /// EVERY ender ends the declared Spaces with the name — the
+    /// two are one value, so no ender can drop one and leave the
+    /// other answering (#1245).
+    ///
+    /// All of them, because the value made their obligations
+    /// identical and only one had a net: dropping `active = nil`
+    /// from `resetAdoption` left the whole suite green
+    /// (`guard-prover`, 2026-09-08). #634's Reset All Settings is
+    /// exactly where a stale live profile would be worst.
+    @Test("Every ender ends the declared Spaces")
+    func everyEnderEndsTheDeclaredSpaces() throws {
+        let enders: [(String, (ProfileManager) -> Void)] = [
+            ("adoptStandard", { $0.adoptStandard(named: "Std") }),
+            ("noProfileIsLive", { $0.noProfileIsLive() }),
+            ("resetAdoption", { $0.resetAdoption() }),
+        ]
+        for (name, end) in enders {
+            let core = makeAuthorityCore()
+            try core.profiles.save(
+                Profile(
+                    name: "P",
+                    monitorSets: [
+                        MonitorSet(
+                            monitors: ["Screen:100x100"],
+                            spaceMonitorMap: [:]
+                        )
+                    ],
+                    spaces: [SpaceID(1)],
+                    spaceModes: [SpaceID(1): .bsp],
+                    settings: TilingSettings()
+                )
             )
-        )
-        #expect(core.currentDeclaredSpaces() == [SpaceID(1)])
+            #expect(
+                core.currentDeclaredSpaces() == [SpaceID(1)],
+                Comment(rawValue: "\(name): fixture never adopted")
+            )
 
-        core.profiles.adoptStandard(named: "Std")
-        #expect(core.currentDeclaredSpaces() == nil)
+            end(core.profiles)
+            #expect(
+                core.currentDeclaredSpaces() == nil,
+                Comment(
+                    rawValue:
+                        "\(name) left the declared Spaces "
+                        + "answering for a profile that is no "
+                        + "longer live (#1245)"
+                )
+            )
+            #expect(
+                core.profiles.currentName == nil,
+                Comment(rawValue: "\(name) kept the name")
+            )
+        }
     }
 
     /// The main arm picks among the Spaces on ITS OWN screen.

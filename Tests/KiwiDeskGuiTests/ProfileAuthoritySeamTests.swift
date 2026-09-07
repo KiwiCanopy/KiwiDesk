@@ -197,40 +197,79 @@ struct ProfileAuthoritySeamTests {
         )
     }
 
-    /// The first-visit pick answers from adoption state, never
-    /// from the profile file (#1245). Scoped to that function's
-    /// own body: the file it lives in legitimately reads profiles
-    /// elsewhere, so a file-wide ban would be false, and a
-    /// file-wide COUNT would be satisfied by a neighbour.
+    /// The functions the Desktop-switch path reaches inside
+    /// `KiwiCore+DesktopSpaces.swift` read no profile file
+    /// (#1245): `handleDesktopChange` runs on the main actor
+    /// mid-transition, and `ProfileManager.read` REWRITES the
+    /// file when a migration applies, so a read there is a swipe
+    /// that writes to disk.
     ///
-    /// The trade: it reads the declaration's exact spelling, so a
-    /// re-signature reds this as "no such function" rather than
-    /// as a violation — fail-closed, and the message says so.
-    @Test("The first-visit pick reads no profile file")
-    func firstVisitPickReadsNoFile() throws {
+    /// Scoped to these BODIES rather than the file, which
+    /// legitimately reads profiles elsewhere. The register is
+    /// here so an author adding a third function to the switch
+    /// path has the list on screen; a `profiles.read(` in an
+    /// unlisted neighbour is invisible to this
+    /// (`guard-prover`, 2026-09-08 — it was, when the register
+    /// held one name).
+    ///
+    /// Two further trades. It reads each declaration's exact
+    /// spelling, so a re-signature reds as "no such function"
+    /// rather than as a violation — fail-closed, and the message
+    /// says so. And it matches ONE spelling of the read: a
+    /// wrapper around it, `profiles.read (` with a space, or a
+    /// raw `Data(contentsOf:)` in the body all pass.
+    /// Spelled to the parameter that tells the two
+    /// `virtualSpaceTarget` OVERLOADS apart: a bare
+    /// `func virtualSpaceTarget(` matches the first declaration
+    /// in the file and scans its body for both entries, so the
+    /// second went unwatched and a read added to it passed
+    /// (measured 2026-09-08, before this line).
+    private let switchPathReaders = [
+        "func currentDeclaredSpaces()",
+        """
+        func virtualSpaceTarget(
+                for desktop: DesktopKey,
+                in snapshot:
+        """,
+        """
+        func virtualSpaceTarget(
+                for desktop: DesktopKey,
+                among candidates:
+        """,
+    ]
+
+    @Test("The Desktop-switch path reads no profile file")
+    func switchPathReadsNoFile() throws {
         let file = coreRoot.appendingPathComponent(
             "Profiles/KiwiCore+DesktopSpaces.swift"
         )
         let source = SourceScan.stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
-        let body = SourceScan.declarationBody(
-            after: "func currentDeclaredSpaces()",
-            in: source
-        )
-        #expect(
-            body != nil,
-            "currentDeclaredSpaces was re-signed; re-pin it here"
-        )
-        #expect(
-            (body?.occurrences(of: "profiles.read(") ?? 1) == 0,
-            Comment(
-                rawValue:
-                    "currentDeclaredSpaces reads the profile file "
-                    + "again; it runs inside handleDesktopChange, "
-                    + "where that is a main-actor JSON read AND a "
-                    + "migration rewrite (#1245)"
+        for declaration in switchPathReaders {
+            let body = SourceScan.declarationBody(
+                after: declaration,
+                in: source
             )
-        )
+            #expect(
+                body != nil,
+                Comment(
+                    rawValue:
+                        "'\(declaration)' was re-signed or moved "
+                        + "— re-pin it here"
+                )
+            )
+            #expect(
+                (body?.occurrences(of: "profiles.read(") ?? 1)
+                    == 0,
+                Comment(
+                    rawValue:
+                        "'\(declaration)' reads the profile file; "
+                        + "it is on handleDesktopChange's path, "
+                        + "where that is a main-actor JSON read "
+                        + "AND a migration rewrite (#1245)"
+                )
+            )
+        }
     }
 }
