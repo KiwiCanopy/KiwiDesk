@@ -93,6 +93,34 @@ struct ClickProvenanceWiringTests {
         #expect(wired, Comment(rawValue: message))
     }
 
+    /// The focus-report gate's frontmost fallback (#1322) — same
+    /// class: the provenance suite injects its own reading, so
+    /// nothing else reds when boot stops wiring it, and the gate
+    /// then fails open before the first activation and after
+    /// every `stop()`. Both assignments off the ONE closure, and
+    /// in that order — the needle pins the order too.
+    @Test("boot wires the focus gate's frontmost reading")
+    func frontmostReadingIsWired() throws {
+        let source = try strippedSource()
+        let pattern =
+            #"let frontmost[\s\S]{0,160}?"#
+            + #"frontmostApplication[\s\S]{0,200}?"#
+            + #"frontmostPIDProvider\s*=\s*frontmost[\s\S]{0,200}?"#
+            + #"eventLoop\.frontmostPID\s*=\s*frontmost"#
+        let wired =
+            source.range(
+                of: pattern,
+                options: .regularExpression
+            ) != nil
+        let message =
+            "KiwiCore+BootSeams no longer wires "
+            + "eventLoop.frontmostPID from the same closure "
+            + "as frontmostPIDProvider — the #1322 gate fails "
+            + "open before the first activation with every "
+            + "behavior test green."
+        #expect(wired, Comment(rawValue: message))
+    }
+
     /// The `pointerWarp` seam's wiring (#689) — same class as
     /// the needles beside it: every warp test injects the seam,
     /// so deleting the boot assignment leaves the whole

@@ -266,6 +266,27 @@ editing here:
     rare; it is not what makes the lookup safe.
 - Use **one `DisplayLink` per monitor** (mixed refresh rates).
   Never drive animations from a single global timer.
+- **Every `.windowFocused` the loop emits comes from the app
+  macOS activated last, and a new emitter in `Events/` asks
+  `reportsFromActiveApp` or states why it cannot.**
+  `AXFocusedWindowChanged` is per-APP: a non-activating panel (the
+  `AXSystemDialog` the Claude desktop app's overlay is) empties
+  its app's focused window while up and flips it back to the
+  main window on close without the app ever becoming frontmost
+  (measured, #1322), so the flip is app-internal, and honoring it
+  parked the anchor on a window without the system focus until a
+  click. The gate reads `lastActivePid`, which the activation
+  channel keeps and `stop()` forgets, with `frontmostPID` — nil
+  until `armMachineSeams` wires it from the one frontmost chain,
+  a wiring `ClickProvenanceWiringTests` needles — standing in
+  before the first activation; it DROPS rather than
+  holds, and with no reading at all the report stands (fails
+  OPEN). `FocusReportProvenanceTests` drives the real branch and
+  `FocusReportEmitterCensusTests` pins the two emitters. Stated,
+  not held: an app that does activate is re-reported by
+  `appActivated`'s own focused-window read, which is what closes
+  the ordering race on a real cmd-tab — that read may name a lazy
+  app's OLD window, and #465 then converges it.
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

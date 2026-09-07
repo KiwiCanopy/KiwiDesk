@@ -1720,6 +1720,51 @@ activation, KiwiDesk has no keyboard provenance for system
 chords, and the measurement shows the trigger is our own
 frame-set, not activation in general.
 
+### A focus report is only as good as the activation behind it (#1322)
+
+**[Rationale]**
+
+`kAXFocusedWindowChanged` is an app-level
+notification: it says which of ITS windows an app now calls
+focused, not that the app holds the system focus. KiwiDesk read it
+as the latter, and a non-activating panel showed the difference.
+The Claude desktop app's overlay is an `AXSystemDialog` that takes
+key without activating its app; while it is up the app's focused
+window is empty, and on close it flips back to the main window —
+with `NSWorkspace.frontmostApplication` staying on Zen or Telegram
+through every cycle (measured 2026-09-07). KiwiDesk honored the
+flip, moved its anchor onto Claude's window, and the command
+preflight (#292) then refused every focus chord as "frontmost pid
+is another app" until a click re-synced the two — the preflight
+was right, three seconds after the report should have been.
+
+**The ruling: the accessibility channel reports a focus only from
+the app macOS activated last.** The activation channel keeps
+`lastActivePid` from `didActivateApplicationNotification`; before
+the first activation the frontmost reading stands in; with neither, the
+report stands — fails open by design, since starving focus until
+the first app switch is the worse failure. A report that fails
+the gate is **dropped**, not held for re-check: if the app does
+activate, `appActivated` reports its focused window itself (the
+path that already exists because clicking another app's window
+only activates the app), so the ordering race on a genuine
+cmd-tab — AX report before activation notification — resolves
+by construction. The gate sits after the untracked
+classification, so an ignored panel of an inactive app still
+arms #244's dismissal distrust. **The gate lives in the
+producer, not beside `handleWindowFocused`'s six arms:** those
+judge whether to honor a system-focus report, this asks a fact
+about the CHANNEL, and only the event loop can promise the drop
+is safe because it owns the emitter that re-reports on
+activation. The trade, stated: that re-report is
+`appActivated`'s own focused-window read — the lazy-app read
+#465 distrusts — so when a true AX report preceded the
+activation notification and was dropped, the activation may name
+the app's OLD window; #465 then holds the intended one and the
+outcome converges. Neither #465 (the raise activates the app) nor
+#244 (Ghostty is frontmost when its panel dismisses) is starved,
+since in both the app did activate.
+
 ### An ignored panel's dismissal is a race; provenance ends it
 
 **[Rationale]**
