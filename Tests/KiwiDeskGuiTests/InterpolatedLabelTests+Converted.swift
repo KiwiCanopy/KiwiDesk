@@ -123,6 +123,11 @@ extension InterpolatedLabelTests {
         "colors.app_bar_off.help": 2,
         "app_bar.no_layout.help": 1,
         "colors.border_off.help": 1,
+        // #1307: the one Liquid Glass row names the Fill it
+        // says tints the glass, rather than quoting the word —
+        // its two drag siblings below still quote theirs, in
+        // step across all ten catalogs today but unheld.
+        "colors.liquid_glass.help": 1,
         "colors.drag_border_off.help": 1,
         "colors.drag_fill_off.help": 1,
         "colors.drag_off.help": 1,
