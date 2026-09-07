@@ -27,47 +27,19 @@ struct GlassTintOrderTests {
         return false
     }
 
-    /// A plain + glass Space Bar with `spaces` Spaces. Sixty
-    /// overflow the fixture strip (each slot is wider than 24 pt
-    /// against 1440), and with the front-app segment on that is
-    /// the `spanBackdrop` arm; three hug.
-    private static func bar(
-        spaces: Int,
-        front: Bool
-    ) -> SpaceBarManager.Bar {
-        var style = SpaceBarStyle()
-        style.backgroundStyle = .plain
-        style.liquidGlass = true
-        style.showFrontApp = front
-        let items = (1...spaces).map { n in
-            SpaceBarOverlay.Item(
-                space: SpaceID(String(n)),
-                spaceGlyph: .text(String(n), tinted: true),
-                apps: [],
-                active: n == 1,
-                overflow: 0,
-                focusInOverflow: false
-            )
-        }
-        return SpaceBarManager.Bar(
-            display: barTitleDisplay,
-            items: items,
-            frontApp: front
-                ? SpaceBarItemView.App(
-                    name: "Finder",
-                    icon: nil,
-                    glyph: nil,
-                    focused: true,
-                    count: 1
-                ) : nil,
-            frontWindow: front ? WindowID(1) : nil,
-            strip: barTitleStrip,
-            style: style,
-            stateMarkColors: StateMarkColors(
-                sticky: "#ffffff",
-                floating: "#ffffff"
-            )
-        )
+    /// The hug arm: three Spaces on the 1440 pt fixture strip.
+    private static var hugged: SpaceBarManager.Bar {
+        paintedSpaceBar(front: nil, spaces: 3, glass: true)
+    }
+
+    /// The span-backdrop arm: sixty Spaces overflow the strip
+    /// (each auto-length slot is 28 pt plus a 6 pt gap, ~2034 pt
+    /// against 1440), and the front-app segment, ~76 pt, still
+    /// fits the pinned band. Those are defaults the fixture
+    /// reasons from (tests.md ▸ #660), so the clause REQUIRES the
+    /// arm rather than trusting the arithmetic.
+    private static var spanned: SpaceBarManager.Bar {
+        paintedSpaceBar(front: WindowID(1), spaces: 60, glass: true)
     }
 
     /// The tint's and the plate's indices in the panel content.
@@ -87,22 +59,46 @@ struct GlassTintOrderTests {
     func tintStaysBeneathAcrossArms() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let manager = SpaceBarManager()
-        manager.sync([Self.bar(spaces: 3, front: false)])
+        manager.sync([Self.hugged])
         let overlay = try #require(
             manager.overlayForTesting(barTitleDisplay)
+        )
+        let plate = try #require(overlay.glassPlate)
+        try #require(
+            GlassPlate.holds(plate, try #require(overlay.glassRun)),
+            "three Spaces did not take the hug arm"
         )
         let hugged = try Self.order(overlay)
         try #require(
             hugged.tint == hugged.plate - 1,
             "the hugged arm already misorders: \(hugged)"
         )
-        manager.sync([Self.bar(spaces: 60, front: true)])
+        manager.sync([Self.spanned])
+        // Only the span-backdrop arm hosts the filler and moves the
+        // plate beneath the item container; on either other arm
+        // the order below holds on unfixed code too.
+        try #require(
+            GlassPlate.holds(plate, overlay.glassBackdropFiller),
+            "sixty Spaces with a front app did not take span-backdrop"
+        )
+        let content = try #require(overlay.panel?.contentView)
+        try #require(
+            try #require(content.subviews.firstIndex(of: plate))
+                < (try #require(
+                    content.subviews.firstIndex(of: overlay.itemContainer)
+                )),
+            "the span-backdrop arm did not move the plate"
+        )
         let spanned = try Self.order(overlay)
         #expect(
             spanned.tint == spanned.plate - 1,
             "span-backdrop leaves the tint above the plate: \(spanned)"
         )
-        manager.sync([Self.bar(spaces: 3, front: false)])
+        manager.sync([Self.hugged])
+        try #require(
+            GlassPlate.holds(plate, try #require(overlay.glassRun)),
+            "the return to three Spaces did not take the hug arm"
+        )
         let again = try Self.order(overlay)
         #expect(
             again.tint == again.plate - 1,
@@ -132,11 +128,19 @@ struct GlassTintOrderTests {
         )
     }
 
-    /// Counts its own reparents.
+    /// A parent that counts the backdrop being (re)inserted.
+    /// AppKit fires no view-level callback when an already-hosted
+    /// view is re-added, so only the parent can see a reparent.
     private final class Spy: NSView {
-        var moves = 0
-        override func viewWillMove(toSuperview newSuperview: NSView?) {
-            if newSuperview != nil { moves += 1 }
+        var inserts = 0
+        var watched: NSView?
+        override func addSubview(
+            _ view: NSView,
+            positioned place: NSWindow.OrderingMode,
+            relativeTo otherView: NSView?
+        ) {
+            if view === watched { inserts += 1 }
+            super.addSubview(view, positioned: place, relativeTo: otherView)
         }
     }
 
@@ -146,17 +150,18 @@ struct GlassTintOrderTests {
     @Test("A backdrop already beneath its glass is left alone")
     func settledBackdropIsNotReparented() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
-        let parent = NSView(frame: Self.frame)
+        let parent = Spy(frame: Self.frame)
         let glass = NSView(frame: Self.frame)
-        let backdrop = Spy(frame: Self.frame)
+        let backdrop = NSView(frame: Self.frame)
+        parent.watched = backdrop
         parent.addSubview(glass)
         Self.apply(backdrop, below: glass)
-        try #require(backdrop.moves == 1, "the first apply inserts")
+        try #require(parent.inserts == 1, "the first apply inserts")
         Self.apply(backdrop, below: glass)
         Self.apply(backdrop, below: glass)
         #expect(
-            backdrop.moves == 1,
-            "a settled backdrop was reparented \(backdrop.moves - 1)x"
+            parent.inserts == 1,
+            "a settled backdrop was reparented \(parent.inserts - 1)x"
         )
     }
 

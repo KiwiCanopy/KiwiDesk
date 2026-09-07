@@ -173,13 +173,20 @@ Obligations:
   from the one that was being closed. A surface that genuinely
   needs a non-Fill colour on glass earns a second mint inside
   `GlassTint`, never a colour parameter.
-- **`apply` re-orders the backdrop beneath its glass, and only
-  when it is not already there.** A sibling move of the glass —
-  the Space Bar's `spanBackdrop` arm — leaves a backdrop that was
-  inserted once above it for the rest of the process, and a
-  per-render reparent would be the churn #1315 names; both are
-  held by `GlassTintOrderTests`, which renders the real arm
-  through `SpaceBarManager.sync` (#1314).
+- **An arm that moves a glass among its siblings ends by calling
+  `GlassTint.apply` and never re-orders the backdrop beside it.**
+  `apply` repairs the order only where it is wrong: a sibling
+  move of the glass — the Space Bar's `spanBackdrop` arm — left a
+  backdrop inserted once above it for the rest of the process
+  (#1314), and a per-render reparent would be the churn #1315
+  names. `GlassTintOrderTests` holds the order through the real
+  arm via `SpaceBarManager.sync`, requiring the arm rather than
+  trusting the fixture's arithmetic, and holds the no-reparent
+  half on a counting parent — AppKit fires no view-level callback
+  for a re-add, so only a parent can see one. Residue, stated
+  because it fails OPEN: an arm that inserts its own sibling
+  DIRECTLY beneath its glass makes the repair fire every render,
+  silently; the no-reparent clause is not through the arm.
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —
