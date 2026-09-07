@@ -552,6 +552,24 @@ following release. Whether 0.9.7 turned out to be the last beta
 was not knowable on the day it shipped, and the notes did not
 need to answer it.
 
+**A fix to something that has not shipped is not news; it is
+part of the thing it fixes.** 1.2.0 brought Liquid Glass to
+every surface, and four commits between then and the cut
+corrected its tint channel, its light/dark variant and two of
+its rendering paths. Listing those reads as a feature that
+arrived broken — and no reader ever met the broken version,
+because none of it had shipped. They belong inside the feature's
+own bullet, or nowhere. The test is the same one this entry
+already asks, applied to a version rather than a person: **was
+the defect reachable from the last release?** If it was not,
+the reader has nothing to recognise.
+
+The same reasoning retires a whole class of entry that keeps
+appearing in a first draft: work whose subject is this release's
+own making. Translating sentences this release introduced,
+re-vendoring a font, wiring the release pipeline — each is real
+work and none of it is a change the reader experiences.
+
 ### The API describes itself, and its enums are read not typed
 
 **[Principle]**
