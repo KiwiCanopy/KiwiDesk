@@ -75,11 +75,13 @@ extension KiwiCore {
     /// prune put it, which is the existing setting for exactly
     /// this situation and needs no new concept.
     ///
-    /// Only LIVE windows move: a remembered id can belong to a
+    /// Only LIVE windows MOVE: a remembered id can belong to a
     /// window since closed, or to one sitting on an away Desktop
     /// (#1146), and inserting either would put a phantom in the
-    /// row. The away case comes back through its own memory
-    /// (`rememberedSpaces`), not this one.
+    /// row. Those take the other half — their remembered Space is
+    /// re-filed to this profile's, since it is what places them
+    /// if they come back and it answers once across every profile
+    /// (#1248, `refileAway`).
     ///
     /// A remembered Space the profile no longer declares is
     /// skipped rather than re-created: the prune just dropped it,
@@ -106,7 +108,7 @@ extension KiwiCore {
             heldSpaceFocus[space.id] = space.focused
         }
         var moved = 0
-        var redirected = 0
+        var refiled = 0
         for space in SpaceID.numericLexicalSorted(
             Array(remembered.keys)
         ) {
@@ -115,18 +117,14 @@ extension KiwiCore {
             else { continue }
             for window in remembered[space] ?? [] {
                 guard state.windows[window] != nil else {
-                    // Away on another Desktop (#1146), so there is
-                    // nothing to move — but its DEPARTURE memory
-                    // is what will place it on return, and that
-                    // memory is per-window with one answer across
-                    // profiles. Re-point it, or the away ledger
-                    // decides alone and the window comes back in
-                    // the outgoing profile's Space (#1248).
-                    if state.redirectDeparture(
-                        of: window,
-                        to: space
-                    ) {
-                        redirected += 1
+                    // Not in state: away on another Desktop, or
+                    // closed and still remembered. Its remembered
+                    // Space is what places it if it comes back,
+                    // and that memory answers once across every
+                    // profile — so re-point it, or the profile's
+                    // record loses to it (#1248).
+                    if state.refileAway(of: window, to: space) {
+                        refiled += 1
                     }
                     continue
                 }
@@ -148,12 +146,12 @@ extension KiwiCore {
             candidate: heldCandidate,
             spaceFocus: heldSpaceFocus
         )
-        if moved > 0 || redirected > 0 {
+        if moved > 0 || refiled > 0 {
             onLog(
                 "profile '\(profile.name)': restored \(moved) "
                     + "window(s) to their own Spaces"
-                    + (redirected > 0
-                        ? ", \(redirected) away" : "")
+                    + (refiled > 0
+                        ? ", re-filed \(refiled) absent" : "")
             )
         }
     }
