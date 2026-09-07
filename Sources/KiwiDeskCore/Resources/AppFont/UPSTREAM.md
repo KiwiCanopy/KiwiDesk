@@ -1,12 +1,12 @@
 # Vendored: sketchybar-app-font
 
 - Upstream: https://github.com/kvndrsslr/sketchybar-app-font
-- Release: v2.0.83
-- Vendored: 2026-08-31
+- Release: v2.0.86
+- Vendored: 2026-09-07
 - License: CC0-1.0 (see upstream)
 - SHA-256:
-  - 6b3270344ea0dba1afccc7aa4739b92f963c1597abfae17dafab09d9983d1fbe  sketchybar-app-font.ttf
-  - 6855c19d574b7bd3bd523113f725eca174a65c1f244ddb9d3d699510359b5d44  icon_map.json
+  - 1a47a07c1c87fee69f5d1006fa4c1b5a08311d987de7eedf045f8575b7a8df4a  sketchybar-app-font.ttf
+  - ad06af123b9e6bf6de8d2e18036fe76acda5cc48bd4ad801eeb1c9433cbe4365  icon_map.json
 
 Snapshot of the release assets `sketchybar-app-font.ttf` and
 `icon_map.json`. Do not hand-edit either file — refresh with
