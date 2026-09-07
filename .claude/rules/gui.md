@@ -1254,7 +1254,7 @@ Obligations:
   two toolkits agree, and a tint neither lightens a plate nor
   colours it — only a `GlassTint`-style backdrop carries hue, and
   one opaque enough to read stops the wallpaper coming through.
-  `docs/design-decisions.md` ▸ the reference panel carries the
+  `docs/design-decisions.md` ▸ the shortcuts panel carries the
   ruling; its second reason needs no platform fact at all, since
   a SwiftUI surface's `.primary` / `.secondary` are vibrant
   against the composite backdrop and so need no fill the way a

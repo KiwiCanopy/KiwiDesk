@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "Editando «%1$@» — los atajos se aplican tan pronto como guardes.",
   "shortcuts.override.title": "Atajos del perfil",
   "shortcuts.panel.apps": "Aplicaciones",
-  "shortcuts.panel.ax_label": "Referencia de atajos",
+  "shortcuts.panel.ax_label": "Panel de atajos",
   "shortcuts.panel.controls": "Controles",
   "shortcuts.panel.custom": "Personalizado",
   "shortcuts.panel.dismiss_hint": "Escape o clic fuera para cerrar",

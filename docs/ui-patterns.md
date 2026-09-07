@@ -889,7 +889,7 @@ counted has lost its clear button and its menu.
 
 **"+N" governs a bounded container that cannot scroll; content
 past the fold of a SCROLLING container is cued in words
-instead** (#1292). The ⌃⌥K reference panel is the worked case,
+instead** (#1292). The ⌃⌥K shortcuts panel is the worked case,
 and the reason is that N is not reachable there: its bands are
 non-uniform (headers, a caption, two-column layouts), the fold
 cuts *through* a row rather than between rows, and the

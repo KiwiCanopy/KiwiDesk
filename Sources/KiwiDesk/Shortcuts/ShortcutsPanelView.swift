@@ -79,7 +79,7 @@ struct ShortcutsPanelView: View {
             // "scroll area" before interacting into it
             // (`SettingsDetailPanel`, #812).
             .accessibilityLabel(
-                L("shortcuts.panel.ax_label", "Shortcuts reference")
+                L("shortcuts.panel.ax_label", "Shortcuts panel")
             )
         } else {
             placeholder(unavailable: reference == nil)

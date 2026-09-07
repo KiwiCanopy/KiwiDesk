@@ -6813,7 +6813,7 @@ deleting it would lose config across a routine monitor swap.
 The rows stay live at runtime by design; only their
 *visibility* was broken. (#92)
 
-**The reference panel scrolls, and says so — in words, in the
+**The shortcuts panel scrolls, and says so — in words, in the
 footer.** The panel is a glance surface but not a small one: the
 seeded keymap grows three rows per Space, so a stock setup runs
 to more rows than fit under the height ceiling
@@ -6891,7 +6891,7 @@ permanent, not a stopgap. The asymmetry that issue would
 exploit — the panel's height derives from the screen while its
 width is a literal 760 — is its own ruling if taken.
 
-**The reference panel takes UNTINTED Liquid Glass, and the
+**The shortcuts panel takes UNTINTED Liquid Glass, and the
 untinted half is a ruling rather than a limit.** (#1295/#1293,
 2026-09-07.) A large translucent panel summoned over the desktop
 is the exact shape the platform now renders in glass, and the
@@ -7020,7 +7020,7 @@ app. The panel's `Shortcuts/` tree was outside `ChromeScanRoots`
 and therefore not partly covered but *silently exempt*, which is
 why it did.
 
-**The reference panel never lists its own opener.** The
+**The shortcuts panel never lists its own opener.** The
 `show_shortcuts` binding (⌃⌥K, seeded per layer since #602) is
 dropped from the panel builder's working set and renders in no
 band — the one deliberate exception to the panel's "no bound

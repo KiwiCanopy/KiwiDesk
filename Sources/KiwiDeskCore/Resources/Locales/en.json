@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "Editing “%1$@” — shortcuts re-apply as soon as you save.",
   "shortcuts.override.title": "Profile shortcuts",
   "shortcuts.panel.apps": "Apps",
-  "shortcuts.panel.ax_label": "Shortcuts reference",
+  "shortcuts.panel.ax_label": "Shortcuts panel",
   "shortcuts.panel.controls": "Controls",
   "shortcuts.panel.custom": "Custom",
   "shortcuts.panel.dismiss_hint": "Esc or click away to close",

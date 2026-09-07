@@ -37,7 +37,7 @@ App Bar, and answers the window shortcuts — float it with
 `toggle_floating`, move it between spaces, resize it. KiwiDesk's
 other windows are not managed that way: the setup tour and the
 Config Issues window always float, because each one ends, and
-the shortcuts reference panel is not a managed window at all,
+the shortcuts panel is not a managed window at all,
 which is why it appears in no bar.
 
 The window opens on **Home** — a grid of cards, one per
@@ -418,7 +418,7 @@ the KiwiDesk icon opens the quick menu where you can:
   answers are unusually slow is finished off just after boot, so
   its windows are tiled a beat later than everything else.
 
-### The Shortcuts Reference
+### The Shortcuts Panel
 
 **View Shortcuts…** opens a floating, read-only panel that mirrors the
 shortcuts bound in the currently active layer — a fast "what can I press

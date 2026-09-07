@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "正在編輯「%1$@」 — 快速鍵會在你儲存後立即重新套用。",
   "shortcuts.override.title": "描述檔快速鍵",
   "shortcuts.panel.apps": "App",
-  "shortcuts.panel.ax_label": "快速鍵參考",
+  "shortcuts.panel.ax_label": "快速鍵面板",
   "shortcuts.panel.controls": "控制項",
   "shortcuts.panel.custom": "自訂",
   "shortcuts.panel.dismiss_hint": "按 Esc 或點按其他地方即可關閉",

@@ -230,6 +230,16 @@ synonym:
   section is where the two collide), and not "tier" either:
   *tier* is already spoken for twice over by `SettingTier` /
   row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
+- **shortcuts panel** — the read-only surface ⌃⌥K opens (#326).
+  Retired as names for it: *shortcuts reference*, *reference
+  panel*. The split was not a coining but a drift — everything
+  POINTING at the panel said "shortcuts panel" while the panel's
+  own accessibility name said "Shortcuts reference", so a
+  sighted user read one noun and a VoiceOver user heard another
+  for one surface, and all ten catalogs faithfully mirrored it
+  (#1316). Nothing scans for this class: it is two words for one
+  thing, which `DestinationNameCollisionTests`' exact-collision
+  predicate cannot see, so it is caught by review or not at all.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename
