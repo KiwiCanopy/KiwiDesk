@@ -12,7 +12,10 @@ import Testing
 @Suite("Focus report emitter census (#1322)")
 struct FocusReportEmitterCensusTests {
     private static let emitter = "onEvent(.windowFocused("
-    private static let gate = "reportsFromActiveApp("
+    /// The CALL shape, so the gate's own declaration in the same
+    /// file cannot satisfy it (guard-prover); a non-`guard` call
+    /// shape would have to re-spell this needle, stated.
+    private static let gate = "guard reportsFromActiveApp("
 
     /// The census: file → whether it asks the gate.
     private static let emitters: [String: Bool] = [
@@ -49,6 +52,11 @@ struct FocusReportEmitterCensusTests {
         #expect("onEvent(.windowFocused(id))".contains(Self.emitter))
         #expect(
             "guard reportsFromActiveApp(pid) else {".contains(Self.gate)
+        )
+        #expect(
+            !"func reportsFromActiveApp(_ pid: pid_t) -> Bool {"
+                .contains(Self.gate),
+            "the declaration satisfies the gate needle"
         )
         #expect(!"onEvent(.windowHidden(id))".contains(Self.emitter))
     }

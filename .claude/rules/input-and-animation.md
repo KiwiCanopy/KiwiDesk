@@ -277,8 +277,9 @@ editing here:
   parked the anchor on a window without the system focus until a
   click. The gate reads `lastActivePid`, which the activation
   channel keeps and `stop()` forgets, with `frontmostPID` — nil
-  until `armMachineSeams` wires it from the one frontmost chain —
-  standing in before the first activation; it DROPS rather than
+  until `armMachineSeams` wires it from the one frontmost chain,
+  a wiring `ClickProvenanceWiringTests` needles — standing in
+  before the first activation; it DROPS rather than
   holds, and with no reading at all the report stands (fails
   OPEN). `FocusReportProvenanceTests` drives the real branch and
   `FocusReportEmitterCensusTests` pins the two emitters. Stated,

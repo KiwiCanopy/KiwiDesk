@@ -160,6 +160,33 @@ struct FocusReportProvenanceTests {
         #expect(box.focused == [WindowID(11)], "reported \(box.focused)")
     }
 
+    /// The activation memory OUTRANKS the live reading: the
+    /// reading is the fallback, never the arbiter, or a frontmost
+    /// value that lags the notification would drop the app that
+    /// just activated (guard-prover shape).
+    @Test("The activation memory outranks the frontmost reading")
+    func memoryOutranksTheReading() {
+        let (loop, box) = makeLoop()
+        loop.lastActivePid = pid
+        loop.frontmostPID = { self.other }
+        loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
+        #expect(box.focused == [WindowID(11)], "reported \(box.focused)")
+    }
+
+    /// An element that answers no id is not reported. Stated
+    /// because it is NOT the #1088 route pin: the reconcile that
+    /// precedes the ask drops the window from the map too, so the
+    /// map route answers nil here as well (guard-prover); the ask
+    /// itself is held by the arm's docstring and the rule.
+    @Test("An element that no longer answers is not reported")
+    func deadElementIsNotReported() {
+        let (loop, box) = makeLoop()
+        loop.lastActivePid = pid
+        loop.resolveWindowID = { _ in nil }
+        loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
+        #expect(box.focused.isEmpty, "reported \(box.focused)")
+    }
+
     /// The gate sits AFTER the untracked classification, so an
     /// ignored panel of an inactive app still arms #244's distrust
     /// the way it did before.
