@@ -151,3 +151,57 @@ Obligations:
   ruling and not this file's: `docs/design-decisions.md` ▸ the
   bars honour Reduce Motion argues the two that `BarMotion`'s
   decisions implement, and a third is argued there, not here.
+
+## A stored Fill becomes a colour on glass in ONE place
+
+The same shape, one subsystem over, and for the same reason it
+was needed there. `GlassTint.apply` clamped the coloured backdrop
+to `GlassTint.maxAlpha` while `GlassPlate.update` set
+`NSGlassEffectView.tintColor` from the raw Fill beside it — and a
+clamp with an unbounded sibling is not a clamp. Every bundled
+palette ships a bar fill at `…B3`, so the ungoverned channel ran
+at 0.70 on a default install and the plate rendered as a
+near-solid slab for as long as the finish shipped (#1297).
+
+Obligations:
+
+- **A glass surface takes its colour from `GlassTint.apply`**,
+  which is handed the Fill's **hex** and never an `NSColor`. The
+  narrower parameter is the rule, not an accident: while it took
+  a colour, a call site could substitute one for the capped one
+  and every guard stayed green — the same bypass one level up
+  from the one that was being closed. A surface that genuinely
+  needs a non-Fill colour on glass earns a second mint inside
+  `GlassTint`, never a colour parameter.
+- **`GlassPlate` takes no colour at all.** It is geometry. The
+  channel it used to drive carries none of a Fill's hue — see
+  `docs/design-decisions.md` ▸ Liquid Glass for the measurement —
+  so a surface reaching for it is asking for a dimmer while it
+  looks like it is asking for a tint.
+- **A member added to `GlassTint` owes a census entry** naming
+  what its body reaches, and one that paints without routing
+  through the clamp may not be censused as routing.
+  `GlassTintSeamTests` is the fail-shut half — every other clause
+  in it exempts the home file by design, so without the census a
+  second unclamped painter inside `GlassTint` is invisible to
+  both suites, which is exactly the hole the equivalent
+  `BarMotion` clause exists to close.
+- **The number is retuned against a ground with STRUCTURE in
+  it**, and the argument lives in `GlassTint.maxAlpha`'s
+  docstring rather than here (tests.md ▸ #1021). A flat wallpaper
+  shows no refraction at any alpha, so it cannot answer the
+  question it looks like it is answering; and what actually binds
+  the cap is the bar's own ink, which is fixed palette hex with
+  no vibrancy path, so the plate is its legibility floor.
+- **A `Sources/KiwiDesk` surface that tints glass owes this suite
+  a root.** `GlassTintSeamTests` scans Core alone, so the GUI
+  tree is not covered by it — a Fill→colour derivation that lands
+  there is invisible until someone widens the roots. Note the
+  reason to think twice before writing one, which is not a
+  capability limit: SwiftUI's `Glass.tint(_:)` **does** work, and
+  the near-colourless finding above is AppKit's. What the bars
+  lack is a vibrancy path for their ink, which a SwiftUI surface
+  drawing `.primary` / `.secondary` over a material has — so the
+  argument that forces a tinted fill onto a bar does not reach
+  that tree, and a tint there is a design choice needing its own
+  ruling rather than an inherited one.

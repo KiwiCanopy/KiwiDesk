@@ -1854,8 +1854,8 @@ app_bar.set_background_style("plain")
 backgrounds (the boxes or the plate) — an orthogonal finish, so
 it combines with either shape. `fill_color` tints the glass: a
 solid colored layer sits behind the glass and the glass refracts
-it (an `NSGlassEffectView`'s own tint reads near-colorless on
-macOS 26.5.2 — it shifts luminance, not hue — so the color is
+it (an `NSGlassEffectView`'s own tint carries no hue at all —
+measured on macOS 26.6.2, it only darkens — so the color is
 supplied behind it, the way the Dock tints its glass). A fully
 transparent `fill_color` leaves the glass clear. Ignored below
 macOS 26, where
@@ -2092,9 +2092,10 @@ fill also carries, so switching theme changes the hue and not how
 readable the bars are. With the `liquid_glass` finish on, it
 also tints the glass: the color sits behind the glass, which
 refracts it into its hue (see `app_bar.set_liquid_glass`). Under
-glass the backdrop's opacity is held at ~65 % so the blur stays
-visible; the stored value is unchanged (Boxed/Plain use it in
-full).
+glass the backdrop's opacity is held under a ceiling so the blur
+stays visible: a fill below it renders exactly as you picked it,
+and only a more opaque one is capped. The stored value is
+unchanged either way (Boxed/Plain use it in full).
 
 **Example:**
 

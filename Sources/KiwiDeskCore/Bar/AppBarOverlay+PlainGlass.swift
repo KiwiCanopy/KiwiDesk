@@ -60,8 +60,7 @@ extension AppBarOverlay {
         GlassPlate.update(
             plate,
             frame: viewport,
-            cornerRadius: radius,
-            tintHex: tintHex
+            cornerRadius: radius
         )
         applyPlateTint(
             plate: plate,
@@ -80,17 +79,13 @@ extension AppBarOverlay {
     ) {
         let backdrop = glassTint ?? NSView()
         glassTint = backdrop
-        if GlassTint.wanted(hex) {
-            GlassTint.apply(
-                backdrop,
-                below: plate,
-                frame: frame,
-                cornerRadius: radius,
-                hex: hex
-            )
-        } else {
-            backdrop.isHidden = true
-        }
+        GlassTint.apply(
+            backdrop,
+            below: plate,
+            frame: frame,
+            cornerRadius: radius,
+            hex: hex
+        )
     }
 
     /// Spans glass plate over viewport during drag reordering.
@@ -140,8 +135,7 @@ extension AppBarOverlay {
         GlassPlate.update(
             plate,
             frame: plateFrame,
-            cornerRadius: radius,
-            tintHex: style.fillColor
+            cornerRadius: radius
         )
         applyPlateTint(
             plate: plate,
