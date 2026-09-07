@@ -17,7 +17,6 @@ extension SpaceBarOverlay {
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
         let radius = style.resolvedCornerRadius(forThickness: depth)
-        let tinted = GlassTint.wanted(style.fillColor)
         for i in 0..<n {
             let glass = boxGlasses[i]
             glass.isHidden = itemViews[i].isHidden
@@ -25,11 +24,12 @@ extension SpaceBarOverlay {
             GlassPlate.update(
                 glass,
                 frame: frames[i],
-                cornerRadius: radius,
-                tintHex: style.fillColor
+                cornerRadius: radius
             )
             let tint = boxTints[i]
-            if tinted && !itemViews[i].isHidden {
+            if itemViews[i].isHidden {
+                tint.isHidden = true
+            } else {
                 GlassTint.apply(
                     tint,
                     below: glass,
@@ -37,8 +37,6 @@ extension SpaceBarOverlay {
                     cornerRadius: radius,
                     hex: style.fillColor
                 )
-            } else {
-                tint.isHidden = true
             }
         }
     }
@@ -86,22 +84,17 @@ extension SpaceBarOverlay {
         GlassPlate.update(
             glass,
             frame: rect,
-            cornerRadius: radius,
-            tintHex: style.fillColor
+            cornerRadius: radius
         )
         let tint = frontTint ?? NSView()
         frontTint = tint
-        if GlassTint.wanted(style.fillColor) {
-            GlassTint.apply(
-                tint,
-                below: glass,
-                frame: rect,
-                cornerRadius: radius,
-                hex: style.fillColor
-            )
-        } else {
-            tint.isHidden = true
-        }
+        GlassTint.apply(
+            tint,
+            below: glass,
+            frame: rect,
+            cornerRadius: radius,
+            hex: style.fillColor
+        )
     }
 
     /// Restores hosted items to itemContainer and tears down glass boxes.

@@ -14,13 +14,15 @@ enum GlassPlate {
         return nil
     }
 
-    /// Configures plate frame, corner radius, and tint color.
+    /// Configures plate frame and corner radius. The plate takes no
+    /// colour — that is `GlassTint`'s, and the reason `tintColor`
+    /// cannot carry it is in `docs/design-decisions.md` ▸ Liquid
+    /// Glass (#1297).
     @MainActor
     static func update(
         _ view: NSView,
         frame: CGRect,
         cornerRadius: CGFloat,
-        tintHex: String,
         animated: Bool = false
     ) {
         guard #available(macOS 26, *),
@@ -28,9 +30,6 @@ enum GlassPlate {
         else { return }
         BarMotion.setFrame(glass, to: frame, animated: animated)
         glass.cornerRadius = cornerRadius
-        let tint = NSColor(kiwiHex: tintHex)
-        glass.tintColor =
-            tint.alphaComponent > 0 ? tint : nil
     }
 
     /// Embeds view into glass contentView.

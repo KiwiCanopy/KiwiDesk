@@ -19,7 +19,6 @@ extension AppBarOverlay {
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
         let radius = style.resolvedCornerRadius(forThickness: depth)
-        let tinted = GlassTint.wanted(style.fillColor)
         for i in 0..<n {
             let glass = boxGlasses[i]
             glass.isHidden = itemViews[i].isHidden
@@ -28,11 +27,12 @@ extension AppBarOverlay {
                 glass,
                 frame: frames[i],
                 cornerRadius: radius,
-                tintHex: style.fillColor,
                 animated: animated
             )
             let tint = boxTints[i]
-            if tinted && !itemViews[i].isHidden {
+            if itemViews[i].isHidden {
+                tint.isHidden = true
+            } else {
                 GlassTint.apply(
                     tint,
                     below: glass,
@@ -41,8 +41,6 @@ extension AppBarOverlay {
                     hex: style.fillColor,
                     animated: animated
                 )
-            } else {
-                tint.isHidden = true
             }
         }
     }
@@ -108,22 +106,17 @@ extension AppBarOverlay {
         GlassPlate.update(
             box,
             frame: arrow.frame,
-            cornerRadius: radius,
-            tintHex: style.fillColor
+            cornerRadius: radius
         )
         let backdrop = tint ?? NSView()
         tint = backdrop
-        if GlassTint.wanted(style.fillColor) {
-            GlassTint.apply(
-                backdrop,
-                below: box,
-                frame: arrow.frame,
-                cornerRadius: radius,
-                hex: style.fillColor
-            )
-        } else {
-            backdrop.isHidden = true
-        }
+        GlassTint.apply(
+            backdrop,
+            below: box,
+            frame: arrow.frame,
+            cornerRadius: radius,
+            hex: style.fillColor
+        )
     }
 
     /// Returns the target view for drag operations (`AppBarItemView`).

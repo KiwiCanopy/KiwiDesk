@@ -7539,8 +7539,15 @@ don't assume from tone.
   the App Bar entry's argument and `PaletteBarFillTests`' pin;
   a hand-written config or Lua setter stays free, ~40–85 % being
   the range that renders as a fill rather than as glass or a
-  wash. **Under `liquid_glass` the backdrop is render-capped
-  to ~65 %** so the glass stays glassy (`GlassTint.maxAlpha`).
+  wash. **Under `liquid_glass` the backdrop is render-capped**
+  (`GlassTint.maxAlpha`). The cap is a floor on how much
+  refraction survives, not a promise about any particular fill:
+  a Fill at or below it renders exactly as picked, and only what
+  cannot render as glass is bent. It was a scale in an early
+  sketch and a clamp is the ruling — a scale taxes the whole
+  range to fix its top, so a user at 0.30, where nothing is
+  broken, would get 0.15 and a bar that is never the colour they
+  picked at any value (#1297).
 - **`hover_fill_color` ~50 % alpha** (`0x80`) of a hue *a
   shade off* the accent — legible feedback that never reads as
   the active state.
@@ -8816,19 +8823,33 @@ shipped as a third `BackgroundStyle` case (`material`) beside
 `boxed`/`plain`, on the reasoning that a toggle would be ambiguous
 ("boxed + glass" = glass boxes or a glass strip under opaque
 boxes?). On-device testing (macOS 26.5.2) forced a rethink on two
-fronts. **First**, `NSGlassEffectView`'s own `tintColor` reads
-**near-colorless** here — it only nudges luminance, and `.clear`
-vs `.regular` are visually identical — so glass is a *finish*, not
-a colorable surface that could be a peer of the solid shapes.
+fronts. **First**, `NSGlassEffectView`'s own `tintColor` carries
+**no hue at all** — measured on macOS 26.6.2, red, green, blue
+and the shipped moss each move the composite by the same
+achromatic amount, over an opaque backdrop and over the bare
+desktop alike (per-channel spread ≤ 1.6/255, capture noise), and
+that amount tracks the colour's **alpha** alone: −26/255 at
+α 1.0, −18/255 at α 0.70. It is a colourless dimmer driven by
+alpha, so glass is a *finish*, not a colorable surface that could
+be a peer of the solid shapes. `.clear` and `.regular` differ on
+the same reading — `.regular` composites ~45/255 lighter over the
+same backdrop — and the bars draw `.clear`.
 **Second**, the ambiguity dissolves once each combination has a
 defined rendering: `boxed + glass` = a glass view **per box**
 (grouped in an `NSGlassEffectContainerView`), `plain + glass` = one
 shared glass plate. So the model is now shape (`boxed` | `plain`)
 × a separate `liquid_glass: Bool` finish that lays over either.
-**`fill_color` still tints the glass (#408)** — not through the
-inert `tintColor`, but by placing a solid colored view *behind*
-the glass, which the glass refracts into its hue (the way the Dock
-and Control Center tint their glass). This is distinct from the
+**`fill_color` still tints the glass (#408)** — not through
+`tintColor`, which carries none of the hue, but by placing a
+solid colored view *behind* the glass, which the glass refracts
+into its hue (the way the Dock and Control Center tint their
+glass). That backdrop is the **only** channel a Fill reaches the
+glass on: driving `tintColor` from the Fill beside it dimmed the
+plate by an amount `GlassTint.maxAlpha` did not govern, which is
+why the bars read as a near-solid slab until #1297. `GlassTint`
+is the one place a Fill becomes a colour, and it takes the hex
+rather than a colour so no call site can hand one past the cap
+(`GlassTintCapTests`, `GlassTintSeamTests`). This is distinct from the
 earlier degraded-render bug: the items stay embedded as the glass's
 `contentView` (the required usage); the colored view is an
 *additional* backdrop sibling **behind** the whole glass, supplying
