@@ -94,11 +94,13 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             self?.onEdit()
         }
         let combo = ShortcutsOpenBinding.comboGlyphs(core: core)
+        let glass = core.tiler.settings.shortcutPanelLiquidGlass
         func view(overflows: Bool) -> ShortcutsPanelView {
             ShortcutsPanelView(
                 reference: reference,
                 dismissCombo: combo,
                 overflows: overflows,
+                liquidGlass: glass,
                 onEdit: onEdit
             )
         }

@@ -49,6 +49,13 @@ public struct TilingSettings: Sendable, Equatable {
     public var appBarStyle = AppBarStyle()
     /// Space Bar overview settings (`space_bar.*`, #293).
     public var spaceBarStyle = SpaceBarStyle()
+
+    /// Liquid Glass on the ⌃⌥K shortcuts panel. Profile-scoped
+    /// beside the two bars so ONE Settings row writes all three
+    /// leaves (#1307); the panel reads the active profile.
+    /// Defaults off with them, so the row's "all three" reading
+    /// is never false on a fresh setup.
+    public var shortcutPanelLiquidGlass = false
     /// Space spawn placement overrides (`placement.override[space_id]`).
     public var placementOverride: [SpaceID: SpawnPlacement] =
         [:]

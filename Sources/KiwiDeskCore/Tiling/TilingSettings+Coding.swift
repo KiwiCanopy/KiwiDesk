@@ -28,6 +28,7 @@ extension TilingSettings: Codable {
         case mouseResize = "mouse_resize"
         case quit
         case refusal
+        case shortcutPanel = "shortcut_panel"
         case resize
         case space
     }
@@ -49,6 +50,12 @@ extension TilingSettings: Codable {
     /// longer a resize setting, so it does not sit under one.
     enum RefusalKeys: String, CodingKey {
         case sound
+    }
+
+    /// The shortcuts panel's own group (#1307) — a surface, so
+    /// it nests like `app_bar` rather than sitting flat.
+    enum ShortcutPanelKeys: String, CodingKey {
+        case liquidGlass = "liquid_glass"
     }
 
     enum DragKeys: String, CodingKey {
@@ -149,6 +156,7 @@ extension TilingSettings: Codable {
         try decodeSpace(from: container)
         try decodeResize(from: container)
         try decodeRefusal(from: container)
+        try decodeShortcutPanel(from: container)
         try decodeQuit(from: container)
     }
 
@@ -212,6 +220,21 @@ extension TilingSettings: Codable {
             try refusal.decodeIfPresent(
                 Bool.self,
                 forKey: .sound
+            ) ?? false
+    }
+
+    private mutating func decodeShortcutPanel(
+        from container: Container
+    ) throws {
+        guard container.contains(.shortcutPanel) else { return }
+        let panel = try container.nestedContainer(
+            keyedBy: ShortcutPanelKeys.self,
+            forKey: .shortcutPanel
+        )
+        shortcutPanelLiquidGlass =
+            try panel.decodeIfPresent(
+                Bool.self,
+                forKey: .liquidGlass
             ) ?? false
     }
 

@@ -46,6 +46,11 @@ extension APIReference {
                 + "keyboard action draws its refusal pill.",
             .boolean("enabled")
         ),
+        "set_shortcut_panel_liquid_glass": APIRecord(
+            "Lays a macOS 26 Liquid Glass material over the "
+                + "shortcuts panel.",
+            .boolean("enabled")
+        ),
         "set_new_window_placement_override": APIRecord(
             "Overrides where new windows land for one Space.",
             .space("space"),

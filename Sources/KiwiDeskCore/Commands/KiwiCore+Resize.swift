@@ -20,6 +20,22 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// `KiwiDesk.set_shortcut_panel_liquid_glass(bool)` (#1307):
+    /// the third leaf the one Settings row writes, beside the
+    /// two bars. Top-level rather than a `shortcut_panel` group,
+    /// which would be a group of one — `set_gap_global` is the
+    /// precedent for the key it derives. No retile: the panel
+    /// reads it when it draws.
+    func setShortcutPanelLiquidGlass(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let on = args.first?.boolValue else {
+            return .fail("expected a boolean")
+        }
+        tiler.settings.shortcutPanelLiquidGlass = on
+        return .ok()
+    }
+
     /// Whether a resize WRITE animates: the configured policy,
     /// except during a held glide, which writes INSTANTLY
     /// (#1082, owner ruling 2026-08-29). The glide already IS the
