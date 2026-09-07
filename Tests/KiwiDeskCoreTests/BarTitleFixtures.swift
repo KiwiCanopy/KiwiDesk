@@ -82,26 +82,34 @@ func paintedAppBar(
     )
 }
 
+/// `spaces` Spaces on the fixture strip; `glass` takes the plain
+/// Liquid Glass finish (`GlassTintOrderTests`).
 @MainActor
 func paintedSpaceBar(
     edge: AppBarEdge = .top,
-    front: WindowID?
+    front: WindowID?,
+    spaces: Int = 1,
+    glass: Bool = false
 ) -> SpaceBarManager.Bar {
     var style = SpaceBarStyle()
     style.edge = edge
     style.showFrontApp = front != nil
+    if glass {
+        style.backgroundStyle = .plain
+        style.liquidGlass = true
+    }
     return SpaceBarManager.Bar(
         display: barTitleDisplay,
-        items: [
+        items: (1...max(spaces, 1)).map { n in
             SpaceBarOverlay.Item(
-                space: SpaceID("1"),
-                spaceGlyph: .text("1", tinted: true),
+                space: SpaceID(String(n)),
+                spaceGlyph: .text(String(n), tinted: true),
                 apps: [],
-                active: true,
+                active: n == 1,
                 overflow: 0,
                 focusInOverflow: false
             )
-        ],
+        },
         frontApp: front.map { _ in
             SpaceBarItemView.App(
                 name: "Finder",

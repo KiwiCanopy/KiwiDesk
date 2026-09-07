@@ -80,6 +80,21 @@ enum GlassTint {
         return NSAppearance(named: .darkAqua)
     }
 
+    /// Whether `backdrop` is the subview immediately below `glass`
+    /// in `parent`.
+    @MainActor
+    private static func sits(
+        _ backdrop: NSView,
+        beneath glass: NSView,
+        in parent: NSView
+    ) -> Bool {
+        let order = parent.subviews
+        guard let index = order.firstIndex(of: backdrop),
+            order.indices.contains(index + 1)
+        else { return false }
+        return order[index + 1] === glass
+    }
+
     /// Positions and colors the backdrop beneath the target glass,
     /// hiding it where the Fill reaches no colour, and pins the
     /// glass's variant from the same Fill (#1308). It takes the
@@ -100,7 +115,12 @@ enum GlassTint {
             return
         }
         backdrop.wantsLayer = true
-        if let parent = glass.superview, backdrop.superview !== parent {
+        // Re-ordered whenever it is not DIRECTLY beneath the glass,
+        // not only when unparented: a sibling move of the glass
+        // (`spanBackdrop`) leaves the backdrop above it (#1314).
+        if let parent = glass.superview,
+            !Self.sits(backdrop, beneath: glass, in: parent)
+        {
             parent.addSubview(
                 backdrop,
                 positioned: .below,

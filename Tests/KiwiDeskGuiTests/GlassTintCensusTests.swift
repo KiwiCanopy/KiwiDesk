@@ -20,7 +20,8 @@ struct GlassTintCensusTests {
     private static let members: [String: [String]] = [
         "rendered": ["maxAlpha", "glassAvailable"],
         "pinnedAppearance": ["glassAvailable", "wantsLightInk"],
-        "apply": ["rendered(", "pinnedAppearance("],
+        "sits": ["subviews"],
+        "apply": ["rendered(", "pinnedAppearance(", "sits("],
     ]
 
     /// Ways a member puts a colour on screen. One whose body
