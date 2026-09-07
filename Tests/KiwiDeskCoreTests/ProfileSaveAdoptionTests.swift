@@ -228,6 +228,45 @@ struct ProfileSaveAdoptionTests {
         #expect(core.profiles.isDirty)
     }
 
+    /// The door a Settings "Save" on a stored profile reaches:
+    /// `saveEditedProfile` is `overwriteProfile` then
+    /// `reapplyIfInEffect`, so the flag follows the FILE the
+    /// re-apply just read rather than the one held in memory.
+    ///
+    /// Both directions, because only one of them changed. Editing
+    /// a profile OFF the live monitors already went dirty at the
+    /// next resolve; editing one back ONTO them used to leave a
+    /// stale dirty flag standing, the in-place re-apply having
+    /// adopted nothing (#1249).
+    @Test("An in-effect edit re-judges the fit from the file")
+    func inEffectEditRejudgesTheFit() throws {
+        let core = makeCore()
+        live(core, [1])
+        let screen = Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
+        core.state.workspaces.upsertDisplay(screen)
+        core.state.workspaces.add(WindowID(1), to: "1")
+        try core.persistProfile(named: "A", modes: nil)
+        let fitting = try core.profiles.read(name: "A")
+        #expect(!core.profiles.isDirty)
+
+        // Edited to name no monitor set this Mac has.
+        var misfit = fitting
+        misfit.monitorSets = []
+        try core.profiles.write(misfit)
+        core.reapplyIfInEffect("A")
+        #expect(core.profiles.isDirty)
+
+        // And edited back onto the live screens.
+        try core.profiles.write(fitting)
+        core.reapplyIfInEffect("A")
+        #expect(!core.profiles.isDirty)
+        #expect(core.profiles.currentName == "A")
+    }
+
     /// The #634 reset and a backup restore both end adoption, and
     /// the store keeps no name that could outlive it: the next
     /// apply is the session's FIRST, so it prunes nothing and
