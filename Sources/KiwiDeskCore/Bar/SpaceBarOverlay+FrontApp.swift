@@ -98,14 +98,14 @@ extension SpaceBarOverlay {
     }
 
     private func attachFrontViewsIfNeeded() {
-        // Re-added every render so the segment stays ABOVE item
-        // views created later (`syncItemViewCount` appends on
-        // top); moving hosts also detaches from the previous
-        // parent (a plain `addSubview` reparents).
+        // Only a host CHANGE reparents (a plain `addSubview`
+        // detaches from the previous parent); a view already in
+        // its host is left alone, so a steady render adds nothing
+        // to a glass subtree (#1315).
         let content = frontHost ?? itemContainer
         for view in [
             frontBox, frontDivider, frontIcon, frontGlyph, frontName,
-        ] {
+        ] where view.superview !== content {
             content.addSubview(
                 view,
                 positioned: .above,

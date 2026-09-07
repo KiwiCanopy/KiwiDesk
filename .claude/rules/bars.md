@@ -187,6 +187,22 @@ Obligations:
   because it fails OPEN: an arm that inserts its own sibling
   DIRECTLY beneath its glass makes the repair fire every render,
   silently; the no-reparent clause is not through the arm.
+- **A steady-state bar render reparents nothing into a glass
+  subtree.** A view moves only on a host CHANGE, and the arm that
+  changes the host is the one that names it — the Space Bar's
+  `prepareGlassHosting` creates the hug run and picks the
+  segment's host in the same arm, with no fallback — while a
+  z-order need is met by the positioned insert at that change,
+  never by a per-render re-add: the segment is laid out after the
+  last item, so it and the items never overlap (#1315,
+  `SpaceBarFrontViewChurnTests`, whose add count is the one
+  clause that sees a wrong hug host, since `hugRun` re-hosts any
+  stray). A same-parent re-add fires no AppKit hook and is a
+  reorder, so a guard against one counts inserts at the PARENT or
+  pins subview identity, never a view-side callback (#1314 too).
+  The pinned arm's plate move is order-guarded the same way, and
+  its ORDER half is `GlassTintOrderTests`' index pin; its
+  no-reparent half has no counting clause — stated, fails OPEN.
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —

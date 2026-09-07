@@ -4,7 +4,8 @@ import AppKit
 extension AppBarOverlay {
     /// Flipped so the first item sits at the visual top of
     /// vertical bars.
-    final class FlippedView: NSView {
+    /// Open, not `final`: the #1315 churn guard subclasses it.
+    class FlippedView: NSView {
         override var isFlipped: Bool { true }
     }
 
