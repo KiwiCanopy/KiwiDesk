@@ -89,7 +89,8 @@ jobs:
       # required contexts is a race over which one lands.
       SYNC_TOKEN_IS_PAT: ${{ secrets.RELEASE_SYNC_TOKEN != '' }}
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out main with the token that will push
+        uses: actions/checkout@v7
         with:
           ref: main
           # The token the later `git push` inherits: what fires
@@ -102,6 +103,14 @@ jobs:
       # one Node pin (.claude/rules/site.md), shared with site.yml
       # and a local `nvm use`, and Astro refuses anything older.
       - uses: actions/setup-node@v7
+        # Shadowed, not inherited: the job-level token is a real
+        # actor's, and `npm ci` below runs lifecycle scripts from
+        # the site's whole dependency tree. `permissions:` cannot
+        # narrow a PAT, so a step that does not CONSUME it says so
+        # — `ReleaseSyncTriggerTests` holds every step to one or
+        # the other (code review, #1154).
+        env:
+          SYNC_TOKEN: ""
         with:
           node-version-file: site/.nvmrc
           cache: npm
@@ -172,13 +181,15 @@ jobs:
       # nowhere. Cheap, and it fails before a PR exists rather
       # than after Cloudflare has published a broken page.
       - name: Prove the page still builds
+        env:
+          SYNC_TOKEN: ""
         run: |
           set -euo pipefail
           npm ci
           npm run build
-          # The site gate, run HERE for the same reason the build
-          # is: a PR opened with `github.token` fires no
-          # workflows, so `site.yml` never sees this one — and
+          # The site gate, run HERE because the FALLBACK path
+          # needs it: a PR opened with `github.token` fires no
+          # workflows, so `site.yml` never sees that one — and
           # `check-site-tokens.py` is where the assertion that
           # the feed is actually served lives. Without this call
           # the feed is the one artifact that reaches `main`

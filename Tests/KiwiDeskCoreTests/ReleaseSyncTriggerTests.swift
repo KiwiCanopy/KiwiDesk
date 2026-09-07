@@ -3,20 +3,17 @@ import Testing
 
 /// The release sync PR must be able to land without a human.
 ///
-/// `.github/workflows/changelog.yml` opens its PR with
-/// `GITHUB_TOKEN`, and a PR opened with that token raises no
-/// `pull_request` — so `ci.yml` reports neither of the two
-/// contexts branch protection requires, and the PR sits BLOCKED
-/// with nothing to press. Every release so far has needed a
-/// human between publishing and the update feed going live
-/// (#1154); packaging-and-release.md ▸ CI carries the argument.
+/// A PR raised with `GITHUB_TOKEN` fires no `pull_request`, so
+/// `ci.yml` reports neither of the two contexts branch
+/// protection requires and the PR sits BLOCKED with nothing to
+/// press. `.github/workflows/changelog.yml` must therefore not
+/// depend on that token for anything its landing needs (#1154);
+/// packaging-and-release.md ▸ CI carries the argument.
 ///
-/// Three couplings, each breakable by an edit that breaks
-/// nothing else that reports: the dispatch and the grant it
-/// needs; the arming, and its refusal to claim success without
-/// asking; and the input NAME, one string across two files,
-/// read off the dispatching side and required of the accepting
-/// one.
+/// Every clause here is a coupling breakable by an edit that
+/// breaks nothing else that reports. That is the shape rather
+/// than a count: the tests in this file ARE the register, so a
+/// new coupling is a new `@Test` and not a number to update.
 ///
 /// Reads through `workflowSource` / `workflowStep` rather than a
 /// local copy: both files argue this mechanism in prose that
@@ -34,11 +31,15 @@ import Testing
 /// `github.token` fires nothing — stands down when that token
 /// is present.
 ///
-/// **What this cannot see**: whether the secret is actually
-/// SET. A repository without `RELEASE_SYNC_TOKEN` falls back
-/// and every clause below still passes, correctly — the
-/// fallback is the shape being guarded, not the credential.
-/// Only a real release answers whether the queue takes it.
+/// **What this cannot see**, none of it a file: whether the
+/// secret is actually SET — a repository without
+/// `RELEASE_SYNC_TOKEN` falls back and every clause still
+/// passes, correctly, because the fallback is the shape guarded
+/// and not the credential; whether the FALLBACK's `gh pr create`
+/// is permitted at all, which also needs the repo-level "Allow
+/// GitHub Actions to create and approve pull requests" setting;
+/// and whether the merge queue takes what was armed. Only a real
+/// release answers the last.
 @Suite("Release sync trigger")
 struct ReleaseSyncTriggerTests {
     /// The step that opens, starts and arms, by its own name.
@@ -147,58 +148,6 @@ struct ReleaseSyncTriggerTests {
         )
     }
 
-    @Test("One token pushes, opens and arms")
-    func syncThreadsOneToken() throws {
-        let yaml = try workflowSource("changelog.yml")
-        let lines = yaml.split(
-            separator: "\n",
-            omittingEmptySubsequences: false
-        )
-        .map { $0.trimmingCharacters(in: .whitespaces) }
-        // ONE home, and it FALLS BACK: a repository with no
-        // secret set must still open the PR it opens today.
-        let declared = try #require(
-            lines.first { $0.hasPrefix("SYNC_TOKEN:") },
-            "changelog.yml declares no shared token (#1154)"
-        )
-        #expect(
-            declared.contains("secrets.RELEASE_SYNC_TOKEN")
-                && declared.contains("github.token"),
-            """
-            the token declaration has no fallback — a repository \
-            without the secret would push with nothing
-            """
-        )
-        // What fires `pull_request` is who PUSHED, so the
-        // checkout takes it too. Guarding only `GH_TOKEN` would
-        // leave a real actor opening a PR on a branch the bot
-        // pushed, which reports nothing.
-        #expect(
-            lines.contains {
-                $0.hasPrefix("token: ${{ env.SYNC_TOKEN")
-            },
-            "the checkout does not carry the shared token"
-        )
-        // Every `gh` step reads that one home rather than
-        // spelling a token of its own — the coupling an edit
-        // breaks silently, since a `github.token` step still
-        // runs and still opens a PR that strands.
-        let spellings = lines.filter { $0.hasPrefix("GH_TOKEN:") }
-        #expect(
-            !spellings.isEmpty,
-            "changelog.yml runs `gh` with no token at all"
-        )
-        for spelling in spellings {
-            #expect(
-                spelling.contains("env.SYNC_TOKEN"),
-                """
-                `\(spelling)` names a token of its own — the PR \
-                is only as good as the weakest step that made it
-                """
-            )
-        }
-    }
-
     @Test("The hand-started CI stands down for a real token")
     func dispatchStandsDownForThePat() throws {
         let yaml = try workflowSource("changelog.yml")
@@ -212,13 +161,19 @@ struct ReleaseSyncTriggerTests {
             },
             "the sync step no longer starts CI at all"
         )
+        // The CONDITION, not a mention of the flag: an
+        // inverted `= "true"` reads as guarded while it
+        // returns the fallback to the BLOCKED state this
+        // change ends. Polarity IS the decision here.
         // The dispatch exists ONLY because `github.token` raises
         // no `pull_request`. Left unconditional, a real token
         // fires it too and two suites report the same required
         // contexts — a race over which verdict lands.
         #expect(
             lines[..<dispatch].contains {
-                $0.contains("SYNC_TOKEN_IS_PAT")
+                $0.hasPrefix("if ")
+                    && $0.contains("$SYNC_TOKEN_IS_PAT")
+                    && $0.contains("!=")
             },
             """
             the CI dispatch is unconditional — with a real token \

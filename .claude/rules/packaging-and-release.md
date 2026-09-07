@@ -588,8 +588,8 @@ dispatch is what makes the PR reportable, so the dispatch
 would put two suites reporting the same required contexts on
 one head, a race over which verdict lands.
 
-**Both halves are owed to a PR nobody is watching land, and
-that is the scope.** The release path is unwatched by
+**The dispatch and the arming are owed to a PR nobody is
+watching land, and that is the scope.** The release path is unwatched by
 construction — publish, and the feed waits on the sync PR — so
 it owes both. `app-font.yml`'s PR is the other shape: a human
 reads it before it lands, because an upstream drop can restyle
@@ -612,7 +612,8 @@ different reason again — it is the manual override for a WRONG
 entry on that list (#661), and an override that re-read the list
 would be no override.
 
-`ReleaseSyncTriggerTests` holds both halves, scoped through
+`ReleaseSyncTriggerTests` holds the dispatch and the arming and
+`ReleaseSyncTokenTests` the token, each scoped through
 `workflowSource`/`workflowStep` rather than a reader of its own,
 and reads every input name off the dispatching side to require
 it of the accepting one. That parity is worth having even though
