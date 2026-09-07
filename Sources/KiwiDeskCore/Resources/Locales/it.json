@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "Modifica di «%1$@»: le scorciatoie si riapplicano appena salvi.",
   "shortcuts.override.title": "Scorciatoie profilo",
   "shortcuts.panel.apps": "App",
-  "shortcuts.panel.ax_label": "Riferimento delle scorciatoie",
+  "shortcuts.panel.ax_label": "Pannello delle scorciatoie",
   "shortcuts.panel.controls": "Controlli",
   "shortcuts.panel.custom": "Personalizzate",
   "shortcuts.panel.dismiss_hint": "Esc o un clic fuori per chiudere",

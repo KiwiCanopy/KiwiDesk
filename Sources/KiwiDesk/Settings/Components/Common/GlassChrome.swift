@@ -14,7 +14,7 @@ extension View {
     /// NOT a default, and not the bars' `.clear`. Untinted by
     /// ruling rather than by capability. Both arguments, and the
     /// Reduce Transparency gap this does not answer, are in
-    /// `docs/design-decisions.md` ▸ the reference panel (#1295).
+    /// `docs/design-decisions.md` ▸ the shortcuts panel (#1295).
     /// `enabled` is the #1307 switch's third leaf. Off takes the
     /// SAME `.regularMaterial` the pre-26 branch already draws,
     /// which `docs/design-decisions.md` rules to be today's

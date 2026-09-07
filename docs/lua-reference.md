@@ -3272,7 +3272,7 @@ window verbs. Its float rules work the same way yours do, so a
 KiwiDesk's *other* windows are not managed: the setup tour and
 the Config Issues window are tracked but always floating (each
 one ends, so neither takes a slot), and its panels — the ⌃⌥K
-shortcuts reference, drag/drop overlays, App Bar overlays and
+shortcuts panel, drag/drop overlays, App Bar overlays and
 focus borders — remain fully ignored, which is why they appear
 in no bar and no window list KiwiDesk publishes.
 
@@ -3792,10 +3792,10 @@ applications shortcut carries a per-row **Launch behavior** menu —
 
 **Expects:** nothing.
 
-**Does:** opens the read-only **shortcuts reference** panel — a
+**Does:** opens the read-only **shortcuts panel** — a
 live glance at the active layer's bindings — or closes it if it is
 already open (the verb toggles). Bind it to a hotkey to summon the
-reference from anywhere. This is the same panel reached from the
+panel from anywhere. This is the same panel reached from the
 menu bar's *View Shortcuts…* row; the bound combo also shows beside
 the menu row and in the panel's own close hint. It is seeded to
 **⌃⌥K** by default, in the base layer and in every layer you

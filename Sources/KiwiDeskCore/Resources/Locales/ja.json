@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "「%1$@」を編集しています。ショートカットは保存するとすぐに再適用されます。",
   "shortcuts.override.title": "プロファイルのショートカット",
   "shortcuts.panel.apps": "アプリ",
-  "shortcuts.panel.ax_label": "ショートカット一覧",
+  "shortcuts.panel.ax_label": "ショートカットパネル",
   "shortcuts.panel.controls": "コントロール",
   "shortcuts.panel.custom": "カスタム",
   "shortcuts.panel.dismiss_hint": "Escキーまたは外側をクリックで閉じる",

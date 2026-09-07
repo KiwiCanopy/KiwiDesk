@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "Идёт правка «%1$@» — сочетания клавиш применятся заново, как только ты сохранишь.",
   "shortcuts.override.title": "Сочетания клавиш профиля",
   "shortcuts.panel.apps": "Приложения",
-  "shortcuts.panel.ax_label": "Справочник сочетаний клавиш",
+  "shortcuts.panel.ax_label": "Панель сочетаний клавиш",
   "shortcuts.panel.controls": "Элементы управления",
   "shortcuts.panel.custom": "Свои",
   "shortcuts.panel.dismiss_hint": "Esc или нажатие вне окна закрывает панель",

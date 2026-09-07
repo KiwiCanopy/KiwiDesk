@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "Modification de « %1$@ » — les raccourcis s'appliquent dès l'enregistrement.",
   "shortcuts.override.title": "Raccourcis du profil",
   "shortcuts.panel.apps": "Applications",
-  "shortcuts.panel.ax_label": "Référence des raccourcis",
+  "shortcuts.panel.ax_label": "Panneau des raccourcis",
   "shortcuts.panel.controls": "Contrôles",
   "shortcuts.panel.custom": "Personnalisé",
   "shortcuts.panel.dismiss_hint": "Échap ou cliquez à côté pour fermer",

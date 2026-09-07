@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "正在编辑“%1$@” — 存储后快捷键会立即重新应用。",
   "shortcuts.override.title": "描述文件快捷键",
   "shortcuts.panel.apps": "App",
-  "shortcuts.panel.ax_label": "快捷键参考",
+  "shortcuts.panel.ax_label": "快捷键面板",
   "shortcuts.panel.controls": "控制",
   "shortcuts.panel.custom": "自定义",
   "shortcuts.panel.dismiss_hint": "按 Esc 或点按别处关闭",

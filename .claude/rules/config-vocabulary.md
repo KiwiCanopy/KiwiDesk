@@ -230,6 +230,25 @@ synonym:
   section is where the two collide), and not "tier" either:
   *tier* is already spoken for twice over by `SettingTier` /
   row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
+- **shortcuts panel** — the read-only surface ⌃⌥K opens (#326).
+  Retired as names for it: *shortcuts reference*, *reference
+  panel*. Binds **copy** — a label, a catalog value, CLI help
+  text, `docs/` prose — and not identifiers, so
+  `ShortcutsReferenceBuilder` and `ShortcutsReferenceTests` stay
+  as they are; the doc comments that still spell the retired
+  name describe those types and are the sweep a rename of them
+  would carry. The split was not a coining but a drift — everything
+  POINTING at the panel said "shortcuts panel" while the panel's
+  own accessibility name said "Shortcuts reference", so a
+  sighted user read one noun and a VoiceOver user heard another
+  for one surface, and all ten catalogs faithfully mirrored it
+  (#1316). The general class is two words for one thing, which
+  `DestinationNameCollisionTests`' exact-collision predicate
+  cannot see — but THIS surface is held:
+  `ShortcutsPanelNounTests` asks, per catalog, that the panel's
+  own accessibility name is the noun the shortcut opening it
+  already uses. A second surface naming itself twice is still
+  review's until someone gives it the same pairing.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename

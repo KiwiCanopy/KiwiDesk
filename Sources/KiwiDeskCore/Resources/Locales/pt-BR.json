@@ -1028,7 +1028,7 @@
   "shortcuts.override.staged_loaded": "Editando “%1$@” — os atalhos são reaplicados assim que você salvar.",
   "shortcuts.override.title": "Atalhos do perfil",
   "shortcuts.panel.apps": "Apps",
-  "shortcuts.panel.ax_label": "Referência de atalhos",
+  "shortcuts.panel.ax_label": "Painel de atalhos",
   "shortcuts.panel.controls": "Controles",
   "shortcuts.panel.custom": "Personalizados",
   "shortcuts.panel.dismiss_hint": "Esc ou um clique fora para fechar",
