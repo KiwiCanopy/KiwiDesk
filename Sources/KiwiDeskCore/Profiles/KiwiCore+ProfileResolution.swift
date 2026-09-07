@@ -209,8 +209,7 @@ extension KiwiCore {
         // profile was live before the compose rearranges it, or
         // its arrangement is what gets recorded under that
         // profile's name at the next switch. Standing the name
-        // down is this door's too (#1249): leaving it to the
-        // caller is the pairing the deleted mirror field WAS.
+        // down is this door's too, not its caller's (#1249).
         recordLivePartitioning()
         tiler.settings = composed.settings
         // Same explicit-apply reseed as `apply(profile:)`.
@@ -245,8 +244,9 @@ extension KiwiCore {
         emitSpaceChange()
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
-        // LAST, as in `apply(profile:)`, so both doors move the
-        // name at the same point of their bodies (#1249).
+        // Symmetry with `apply(profile:)`, which must be last;
+        // nothing in this body reads the name, so the position
+        // here is a convention rather than a constraint.
         profiles.noProfileIsLive()
     }
 

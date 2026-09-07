@@ -323,16 +323,18 @@ holds the secondary-switch decision including its nil case.
 ## Whose arrangement is live (#1249)
 
 `ProfileManager.currentName` is the single authority for which
-profile's partitioning the live Spaces represent. The #1230 store
-(`ProfilePartitioning`, whose own rule is
+profile's partitioning the live Spaces represent. **Give the
+#1230 store no field that answers the same question** —
+`ProfilePartitioning` carried one until #1249 (its own rule is
 [state-and-layout.md](state-and-layout.md) ▸ "Never store which
-Space a window holds PER DESKTOP") keeps no second copy, because
-it did until #1249 and the pair shipped the same defect three
-times in one lane: a mirror that has to be moved beside a write
-was moved by two of three writes, then by none, and each miss
-silently lost a profile's saved arrangement with nothing to red.
+Space a window holds PER DESKTOP"), and the pair shipped the same
+defect three times in one lane: a mirror that has to be moved
+beside a write was moved by two of three writes, then by none, and
+each miss silently lost a profile's saved arrangement with nothing
+to red. Nothing scans for a returning mirror, so it is refused
+here rather than guarded.
 
-Three obligations follow, and they bind this directory:
+Three further obligations, and they bind this directory:
 
 - **File the outgoing arrangement before the name moves, and do
   it in one place.** An activating write goes through
@@ -350,8 +352,10 @@ Three obligations follow, and they bind this directory:
 - **Let the apply judge the #36 fit.** `becameLive` takes it,
   read off the monitor set the apply already matched for the
   pins, so no caller pairs `isDirty` by hand. A caller whose
-  verdict differs says so with `markClean`/`markDirty` and states
-  why — `applyDesktopBinding` is the one that does.
+  verdict differs must say so with `markClean`/`markDirty` beside
+  the apply AND state why it differs; `applyDesktopBinding` is the
+  worked example, and its disagreement with the monitor-change
+  bound arm is #1245's to rule.
 
 `ProfileAuthoritySeamTests` holds the first two as one-home
 clauses, scoped to the doors' own bodies rather than to their

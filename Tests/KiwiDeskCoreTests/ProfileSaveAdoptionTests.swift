@@ -241,18 +241,24 @@ struct ProfileSaveAdoptionTests {
         live(core, [1])
         core.state.workspaces.add(WindowID(1), to: "1")
         try core.persistProfile(named: "A", modes: nil)
-        let a = try core.profiles.read(name: "A")
+        try core.persistProfile(named: "B", modes: nil)
+        let b = try core.profiles.read(name: "B")
 
         core.discardSavedArrangement()
         core.profiles.resetAdoption()
         core.state.workspaces.ensureSpace("restored")
         core.state.workspaces.add(WindowID(1), to: "restored")
 
-        core.apply(profile: a, forceRetile: false)
-        // Not a switch: the boot-restored space survives, and no
-        // arrangement was filed under the reset profile's name.
+        // A DIFFERENT profile, which is what makes this
+        // discriminate: a name surviving the reset would read
+        // "A" != "B" and take the switch arm. Re-applying A
+        // instead answers "not a switch" under both shapes, so
+        // the fixture saw nothing (`guard-prover`, 2026-09-07).
+        core.apply(profile: b, forceRetile: false)
+        // No prune, so the boot-restored space survives...
         #expect(core.state.workspaces["restored"] != nil)
         #expect(members(core, "restored") == [WindowID(1)])
+        // ...and nothing was filed under the reset profile.
         #expect(
             core.state.profilePartitioning.remembered(for: "A")
                 == nil

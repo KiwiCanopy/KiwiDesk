@@ -25,6 +25,13 @@ public enum ProfileError: Error, CustomStringConvertible {
 /// Persists profiles and selects matching configurations for monitor setups.
 @MainActor
 public final class ProfileManager {
+    /// The active profile, and the one authority for whose
+    /// arrangement the live Spaces represent (#1249).
+    ///
+    /// Never non-nil beside `currentStandard`: every writer that
+    /// sets one clears the other, which is what lets a caller
+    /// holding the name already treat `markClean()` as a whole
+    /// re-adopt.
     public private(set) var currentName: String?
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
@@ -231,12 +238,8 @@ public final class ProfileManager {
     /// Records that `profile` is the layout now live, and whether
     /// it describes the hardware it landed on (#36).
     ///
-    /// `apply(profile:)`'s and no one else's: `currentName` is the
-    /// single authority for whose arrangement the live Spaces
-    /// represent, so it moves where the Spaces do (#1249). The fit
-    /// verdict rides with it because the apply has already
-    /// computed it for the pins, and a caller pairing it by hand
-    /// is a caller that can forget.
+    /// `apply(profile:)`'s and no one else's — profiles.md ▸
+    /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
         currentName = profile.name
         currentStandard = nil

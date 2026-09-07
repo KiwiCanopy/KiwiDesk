@@ -55,14 +55,37 @@ struct ProfileManagerTests {
         )
         try manager.save(profile)
         #expect(manager.list() == ["Developer Rig"])
+        // `save` is the adopting write (profiles.md ▸ API shape).
+        #expect(manager.currentName == "Developer Rig")
+        #expect(!manager.isDirty)
+
         let loaded = try manager.read(name: "Developer Rig")
         // The first profile of a count is auto-flagged default.
         #expect(loaded.isDefault)
         var expected = profile
         expected.isDefault = true
         #expect(loaded == expected)
-        #expect(manager.currentName == "Developer Rig")
-        #expect(!manager.isDirty)
+    }
+
+    /// `read` is the one load door since #1249 deleted `load`,
+    /// and profiles.md ▸ API shape promises it touches no
+    /// in-memory state — newly load-bearing, because a `read`
+    /// that adopted would make every apply door's `becameLive`
+    /// arrive too late to see the outgoing name.
+    @Test("Reading a profile adopts nothing")
+    func readDoesNotAdopt() throws {
+        let manager = makeManager()
+        try manager.save(
+            makeProfile(name: "live", monitors: ["A:100x100"])
+        )
+        try manager.write(
+            makeProfile(name: "other", monitors: ["B:200x200"])
+        )
+        manager.markDirty()
+
+        _ = try manager.read(name: "other")
+        #expect(manager.currentName == "live")
+        #expect(manager.isDirty)
     }
 
     @Test("Exact set match wins over the count default")

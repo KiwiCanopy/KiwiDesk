@@ -268,12 +268,9 @@ extension KiwiCore {
         do {
             let profile = try profiles.read(name: binding.profile)
             apply(profile: profile, forceRetile: false)
-            // Deliberately NOT the apply's #36 verdict: a bound
-            // Desktop has always loaded its profile clean even on
-            // other hardware, where the monitor-change bound arm
-            // marks the same state dirty. The two disagree, which
-            // is #1245's to rule; preserved rather than changed
-            // by a refactor (#1249).
+            // Clean whatever the #36 fit says, where the
+            // monitor-change bound arm calls the same state
+            // dirty. The two disagree; #1245's to rule.
             profiles.markClean()
             onLog(
                 "Desktop \(binding.desktop): loaded profile "

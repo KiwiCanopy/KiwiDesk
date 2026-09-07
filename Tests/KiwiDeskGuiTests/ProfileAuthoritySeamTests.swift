@@ -72,8 +72,13 @@ struct ProfileAuthoritySeamTests {
     /// neighbour — satisfied or broken by a function that is not
     /// its subject. The cost of the narrowing is that it reads
     /// the declaration's exact spelling: a re-signature of either
-    /// `apply` reds this as "no such door" rather than as a stray
-    /// call, so read the failure before assuming a violation.
+    /// `apply` — or `swift format` joining a signature onto one
+    /// line — reds this as "no such door" rather than as a stray
+    /// call, so read the failure before assuming a violation. And
+    /// it counts occurrences, so it cannot see WHERE in the body
+    /// the verb sits; that `apply(profile:)`'s must be LAST is
+    /// held behaviourally by `ProfilePartitioningTests`
+    /// (`guard-prover`, 2026-09-07).
     private let applyDoors: [(door: String, verb: String)] = [
         (
             "func apply(\n        profile: Profile,",
