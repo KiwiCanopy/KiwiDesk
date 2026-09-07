@@ -31,6 +31,10 @@ struct ProfilePartitioningEnderTests {
         )
     }
 
+    /// TWO profiles, because "every" is the whole clause: a
+    /// re-key narrowed to the live profile's own record passes a
+    /// one-profile fixture, and passed every suite in the tree
+    /// when this one had one (`guard-prover`, 2026-09-07).
     @Test("A re-key moves the id in every profile's record")
     func rekeyReachesEveryProfile() {
         var store = ProfilePartitioning()
@@ -38,9 +42,16 @@ struct ProfilePartitioningEnderTests {
             [Space(id: "1", windows: [WindowID(1)])],
             as: "A"
         )
+        store.record(
+            [Space(id: "1", windows: [WindowID(1)])],
+            as: "B"
+        )
         store.rekey(WindowID(1), to: WindowID(77))
         #expect(
             store.remembered(for: "A")?["1"] == [WindowID(77)]
+        )
+        #expect(
+            store.remembered(for: "B")?["1"] == [WindowID(77)]
         )
     }
 

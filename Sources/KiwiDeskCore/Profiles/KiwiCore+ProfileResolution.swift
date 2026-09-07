@@ -111,8 +111,9 @@ extension KiwiCore {
         // and the profile-wide Main role.
         let live = state.workspaces.allDisplays
             .map(\.fingerprint)
-        spacePins =
-            profile.set(matching: live)?.spaceMonitorMap ?? [:]
+        let fitting = profile.set(matching: live)
+        let fits = fitting != nil
+        spacePins = fitting?.spaceMonitorMap ?? [:]
         mainSpaces = Set(profile.mainSpaces)
         // Adopt the profile's explicit rehome target (#68);
         // a dangling reference reads as unset.
@@ -139,13 +140,12 @@ extension KiwiCore {
         // purpose: this door is also a no-snapshot verb path
         // (`load_profile`), and the carry is idempotent.
         refreshStickyReach()
-        // LAST, and this door's alone (#1249): `currentName` is
-        // the one authority for whose partitioning is live, so it
-        // moves where the Spaces do. Everything above still reads
-        // the OUTGOING name — `reapplyStructuredOverrides` takes
-        // the incoming profile's tiers explicitly for that
-        // reason. Dirtiness stays the caller's.
-        profiles.becameLive(profile)
+        // LAST, and this door's alone (#1249): everything above
+        // still reads the OUTGOING name, which is why
+        // `reapplyStructuredOverrides` is handed the incoming
+        // profile's tiers explicitly. `fits` is the #36 verdict,
+        // read off the set already matched for the pins.
+        profiles.becameLive(profile, fits: fits)
     }
 
     /// Explicit-load reconcile: drop live spaces whose name isn't
@@ -212,7 +212,6 @@ extension KiwiCore {
         // down is this door's too (#1249): leaving it to the
         // caller is the pairing the deleted mirror field WAS.
         recordLivePartitioning()
-        profiles.noProfileIsLive()
         tiler.settings = composed.settings
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
@@ -246,6 +245,9 @@ extension KiwiCore {
         emitSpaceChange()
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
+        // LAST, as in `apply(profile:)`, so both doors move the
+        // name at the same point of their bodies (#1249).
+        profiles.noProfileIsLive()
     }
 
     /// Applies a built-in Preset and materializes it as a real,

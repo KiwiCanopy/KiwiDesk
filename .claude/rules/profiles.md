@@ -299,12 +299,7 @@ holds the secondary-switch decision including its nil case.
   rewrite the FILE when a migration applies, see below).
 - `save()` **adopts** (sets `currentName`, clears dirty), so an
   edit-without-activating path must be a separate, non-adopting
-  write — never overload `save()`. Because it adopts, an
-  ACTIVATING write reaches it through `KiwiCore.saveProfile`
-  alone, which files the outgoing partitioning while the name it
-  belongs to still stands; the argument is
-  [state-and-layout.md](state-and-layout.md) ▸ "Whose
-  arrangement is live".
+  write — never overload `save()`.
 - The GUI-vs-Lua ownership predicate is centralized in
   `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`); refine
   that one predicate, never add a second.
@@ -324,6 +319,43 @@ holds the secondary-switch decision including its nil case.
   was true while the author was the only user, and v0.9.7 shipped
   to others. A lenient decoder is still banned; it never ends,
   where a rewrite does.
+
+## Whose arrangement is live (#1249)
+
+`ProfileManager.currentName` is the single authority for which
+profile's partitioning the live Spaces represent. The #1230 store
+(`ProfilePartitioning`, whose own rule is
+[state-and-layout.md](state-and-layout.md) ▸ "Never store which
+Space a window holds PER DESKTOP") keeps no second copy, because
+it did until #1249 and the pair shipped the same defect three
+times in one lane: a mirror that has to be moved beside a write
+was moved by two of three writes, then by none, and each miss
+silently lost a profile's saved arrangement with nothing to red.
+
+Three obligations follow, and they bind this directory:
+
+- **File the outgoing arrangement before the name moves, and do
+  it in one place.** An activating write goes through
+  `KiwiCore.saveProfile`; `ProfileManager.save` makes its argument
+  current, so a site that spells `profiles.save(` itself has
+  already lost the name it needed.
+- **Move the name only where the Spaces move with it.** The two
+  apply doors do (`becameLive`, `noProfileIsLive`), each at the
+  end of its own body. This is not a claim that nothing else
+  writes `currentName` — `save`, `adoptStandard`, `delete`,
+  `rename` and `resetAdoption` all do, each for a reason that is
+  not an apply. It is an obligation on a NEW writer: if it moves
+  the name while the Spaces stay put, the store starts filing one
+  profile's windows under another's name.
+- **Let the apply judge the #36 fit.** `becameLive` takes it,
+  read off the monitor set the apply already matched for the
+  pins, so no caller pairs `isDirty` by hand. A caller whose
+  verdict differs says so with `markClean`/`markDirty` and states
+  why — `applyDesktopBinding` is the one that does.
+
+`ProfileAuthoritySeamTests` holds the first two as one-home
+clauses, scoped to the doors' own bodies rather than to their
+file.
 
 ## A new file in the config directory answers the backup question
 

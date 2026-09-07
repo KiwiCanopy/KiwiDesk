@@ -221,41 +221,37 @@ public final class ProfileManager {
         isDirty = true
     }
 
-    /// Marks the live state as matching the file again — the
-    /// counterpart of `markDirty`, for a caller that has just
-    /// applied a profile and knows the apply was faithful.
+    /// Marks the live state as matching the file — `markDirty`'s
+    /// counterpart, for a caller that ran no apply, or one whose
+    /// verdict differs from the apply's (#1249).
     func markClean() {
         isDirty = false
     }
 
-    /// Records that `profile` is the layout now live: the NAME,
-    /// and nothing else.
+    /// Records that `profile` is the layout now live, and whether
+    /// it describes the hardware it landed on (#36).
     ///
-    /// `currentName` is the single authority for whose
-    /// arrangement the live Spaces represent (#1249), so this is
-    /// `apply(profile:)`'s to call and no one else's. Dirtiness
-    /// stays the caller's: an apply of a profile that does not
-    /// match the live monitors is still dirty, and an in-effect
-    /// re-apply must not clear a flag it did not earn.
-    func becameLive(_ profile: Profile) {
+    /// `apply(profile:)`'s and no one else's: `currentName` is the
+    /// single authority for whose arrangement the live Spaces
+    /// represent, so it moves where the Spaces do (#1249). The fit
+    /// verdict rides with it because the apply has already
+    /// computed it for the pins, and a caller pairing it by hand
+    /// is a caller that can forget.
+    func becameLive(_ profile: Profile, fits: Bool) {
         currentName = profile.name
         currentStandard = nil
+        isDirty = !fits
     }
 
-    /// Records that NO profile is live — a built-in Standard has
-    /// been applied over whatever was. `apply(composed:)`'s, and
-    /// `becameLive`'s mirror: which Standard resolves, and
-    /// whether the state is dirty, stay the caller's, because a
-    /// post-reload recompose re-applies the standard it is
-    /// already on and must not forget it.
+    /// Records that no profile is live — `apply(composed:)`'s, and
+    /// `becameLive`'s mirror.
+    ///
+    /// Leaves `currentStandard` alone: a post-reload recompose
+    /// re-applies the Standard it is already on and must not
+    /// forget which (`StarterRescaleTests` ▸ `reloadKeepsLadder`).
+    /// Dirtiness is the caller's here, having no profile to judge.
     func noProfileIsLive() {
         currentName = nil
-    }
-
-    /// Records that a matched profile is now active and clean.
-    func adopt(_ profile: Profile) {
-        becameLive(profile)
-        isDirty = false
     }
 
     /// Records that a built-in Standard is resolving (dirty state).

@@ -32,10 +32,10 @@ struct ProfileSpacesSeamTests {
         // The profile axis. The three enders are the writes
         // outside the door: a re-key, a rename, a delete, plus
         // the #634 reset. This map pins where the store may be
-        // NAMED; that a WRITE reaches the door at all is the
-        // separate `profileWriteGoesThroughOneDoor` below,
-        // because a call to `saveProfile` names no store and is
-        // invisible here (#1246/#1249).
+        // NAMED; that a WRITE reaches the door at all is
+        // `ProfileAuthoritySeamTests`', because a call to
+        // `saveProfile` names no store and is invisible here
+        // (#1246/#1249).
         "profilePartitioning": [
             "State/StateCoordinator.swift": 1,
             "Profiles/KiwiCore+ProfileSpaces.swift": 3,
@@ -211,85 +211,5 @@ struct ProfileSpacesSeamTests {
                 )
             )
         }
-    }
-
-    /// The profile WRITE has ONE home (#1249). `ProfileManager
-    /// .save` makes its argument current, so the profile whose
-    /// arrangement is on screen loses its name the moment it
-    /// returns — the partitioning has to be filed FIRST, and a
-    /// site that spells the write itself files nothing.
-    ///
-    /// `KiwiCore.saveProfile` is that home and the only place in
-    /// Core allowed to name `profiles.save(`. Counting the
-    /// EXITS was the weaker predecessor: it forced a fourth exit's
-    /// author to come and look, but could not read whether the
-    /// site did the pairing, and the third exit (`applyStandard`)
-    /// shipped without it anyway (#1246). One home can be read.
-    private let writeDoor =
-        "Profiles/KiwiCore+ProfileSpaces.swift"
-
-    @Test("The profile write has one home")
-    func profileWriteGoesThroughOneDoor() throws {
-        let root = coreRoot
-        let prefix = root.path + "/"
-        var counts: [String: Int] = [:]
-        for file in try SourceScan.swiftSources(under: root) {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            let hits = source.occurrences(of: "profiles.save(")
-            guard hits > 0 else { continue }
-            let key =
-                file.path.hasPrefix(prefix)
-                ? String(file.path.dropFirst(prefix.count))
-                : file.path
-            counts[key] = hits
-        }
-        let stray =
-            "profiles.save( is named outside the write door; go "
-            + "through KiwiCore.saveProfile, which files the "
-            + "outgoing partitioning before the name moves (#1249)"
-        #expect(counts == [writeDoor: 1], Comment(rawValue: stray))
-    }
-
-    /// The name the store used to mirror. Both verbs that move
-    /// it belong to the two apply doors, which live in one file:
-    /// a second caller moves the authority without moving the
-    /// Spaces, which is the disagreement the deleted
-    /// `liveProfile` field WAS (#1249). Pinned per needle so
-    /// losing one arm cannot pass on the other's count.
-    @Test("Only the apply doors say which profile is live")
-    func onlyTheApplyDoorsSayWhichProfileIsLive() throws {
-        let root = coreRoot
-        let prefix = root.path + "/"
-        let doors = "Profiles/KiwiCore+ProfileResolution.swift"
-        var counts: [String: [String: Int]] = [:]
-        for file in try SourceScan.swiftSources(under: root) {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            let key =
-                file.path.hasPrefix(prefix)
-                ? String(file.path.dropFirst(prefix.count))
-                : file.path
-            for needle in [
-                "profiles.becameLive(", "profiles.noProfileIsLive(",
-            ] {
-                let hits = source.occurrences(of: needle)
-                guard hits > 0 else { continue }
-                counts[needle, default: [:]][key] = hits
-            }
-        }
-        let stray =
-            "a verb that names which profile is live is spelled "
-            + "outside the apply doors; whoever moves the name "
-            + "moves the Spaces with it (#1249)"
-        #expect(
-            counts == [
-                "profiles.becameLive(": [doors: 1],
-                "profiles.noProfileIsLive(": [doors: 1],
-            ],
-            Comment(rawValue: stray)
-        )
     }
 }

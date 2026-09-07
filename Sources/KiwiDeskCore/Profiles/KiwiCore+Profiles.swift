@@ -36,21 +36,13 @@ extension KiwiCore {
                 // Explicit user load: the profile's spaces become
                 // authoritative — stale spaces are pruned and
                 // their windows forwarded (see `pruneSpaces`).
-                // The apply adopts the name (#1249); this path
-                // owns only the dirty verdict below.
+                // The apply adopts, and a profile saved for other
+                // monitors stays loadable but lands dirty (#36).
                 self.apply(
                     profile: profile,
                     pruneStaleSpaces: true,
                     forceRetile: true
                 )
-                self.profiles.markClean()
-                // A profile saved for other monitors stays
-                // loadable but loads dirty (#36).
-                let live = self.state.workspaces.allDisplays
-                    .map(\.fingerprint)
-                if profile.set(matching: live) == nil {
-                    self.profiles.markDirty()
-                }
             }
         case "delete_profile":
             return namedProfileCommand(args) { name in
@@ -260,13 +252,12 @@ extension KiwiCore {
     }
 
     /// Re-applies `name` to the live layout after an in-effect
-    /// edit. The active profile re-applies in place (no adopt);
-    /// a profile merely bound to the active native Space
-    /// re-resolves through the shared monitor-change path so the
-    /// binding picks up the freshly-written JSON (#18). That
-    /// bound path runs the normal resolver, which *adopts* the
-    /// bound profile (it is now the on-screen layout) — an
-    /// intended live-state change, unlike the in-place branch.
+    /// edit. The active profile re-applies in place — the apply
+    /// re-asserts the name it already holds, and re-judges the
+    /// #36 fit against the freshly-written JSON; a profile merely
+    /// bound to the active native Space re-resolves through the
+    /// shared monitor-change path so the binding picks up that
+    /// JSON (#18).
     public func reapplyIfInEffect(_ name: String) {
         guard isProfileInEffect(name) else { return }
         if profiles.currentName == name,

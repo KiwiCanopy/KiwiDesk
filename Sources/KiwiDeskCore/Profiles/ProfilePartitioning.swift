@@ -41,9 +41,8 @@ struct ProfilePartitioning: Sendable {
     /// user's own moves.
     ///
     /// `live` is `ProfileManager.currentName`, the one authority
-    /// for whose arrangement is on screen (#1249). This store
-    /// carried a second copy of it until that ordering was fixed;
-    /// the pair shipped the same defect three times.
+    /// for whose arrangement is on screen — profiles.md ▸ "Whose
+    /// arrangement is live" (#1249).
     func isSwitch(to profile: String, from live: String?) -> Bool {
         if let live { return live != profile }
         // No live profile means one of two things, and they must

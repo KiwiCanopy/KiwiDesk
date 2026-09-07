@@ -17,12 +17,19 @@ import Testing
 /// `ProfilePartitioningTests`' fixtures skip by applying one
 /// first. `applyStandard` is the third write exit and gets its
 /// own test, because that is the door the first-run Starter seed
-/// and every Settings "Apply preset" take, and because its
-/// ordering is the one the door cannot state for itself.
+/// and every Settings "Apply preset" take.
 ///
-/// The last test is the other half of the single authority:
-/// `apply(profile:)` owns the NAME and no more, so dirtiness
-/// stays with the caller that can judge it.
+/// The ORDER inside the door has exactly one net, and it is
+/// `saveOverAnotherProfileFilesTheLiveOne`: the first test stays
+/// green on a save-before-file swap, because there the just-saved
+/// name and the live arrangement coincide and the record lands
+/// right by accident (`guard-prover`, 2026-09-07). The two are
+/// not redundant.
+///
+/// The last test is the other half of the single authority: the
+/// apply door lands the #36 fit verdict WITH the name, read off
+/// the monitor set it already matched for the pins, so no caller
+/// pairs `isDirty` beside it.
 ///
 /// WHICH applies count as a switch is
 /// `ProfileSwitchClassificationTests`'.
@@ -113,13 +120,21 @@ struct ProfileSaveAdoptionTests {
         #expect(core.profiles.currentName == "B")
     }
 
-    /// The third `profiles.save` exit, and the one whose ORDER
-    /// the write door cannot state for itself. `applyStandard`
-    /// composes onto live, stands the name down, then saves a NEW
-    /// profile — so the door's own file is a no-op there and the
-    /// outgoing profile's record is `apply(composed:)`'s, taken
-    /// BEFORE the compose rearranged anything. Save first and the
-    /// standard's arrangement is what lands under A's name.
+    /// The third `profiles.save` exit. `applyStandard` composes
+    /// onto live, stands the name down, then saves a NEW profile,
+    /// so the door's own file is a no-op there and the outgoing
+    /// profile's record is `apply(composed:)`'s.
+    ///
+    /// What this watches, exactly: that the compose door filed the
+    /// outgoing profile AT ALL, and that the preset's saved
+    /// profile is current afterwards — the clause that reds if
+    /// `adoptStandard` moves below the save. It does NOT tell the
+    /// pre-Standard arrangement from the post-Standard one:
+    /// nothing between the compose and the save moves a window, so
+    /// the two are equal here (`guard-prover`, 2026-09-07). That
+    /// distinction is `ProfilePartitioningTests` ▸
+    /// `standardDoesNotStealAProfilesRecord`, which rearranges
+    /// while the Standard is up.
     @Test("A Standard files what the outgoing profile had")
     func applyingAStandardFilesThePreStandardArrangement()
         throws
@@ -181,21 +196,66 @@ struct ProfileSaveAdoptionTests {
         #expect(members(core, "2") == [WindowID(2)])
     }
 
-    /// `apply(profile:)` records the NAME and stops there. An
-    /// in-effect edit re-applies a profile that is dirty for its
-    /// hardware, and the re-apply did not make it match — folding
-    /// a full `adopt` into the door would clear a flag the menu
-    /// bar is showing for a reason no apply can see.
-    @Test("An in-effect re-apply keeps the dirty flag")
-    func reapplyKeepsDirty() throws {
+    /// The apply door judges the #36 fit itself, so every caller
+    /// gets the verdict without spelling it — and a caller that
+    /// re-applies onto hardware the profile does not describe
+    /// cannot leave a stale clean flag behind.
+    @Test("An apply lands the profile's own fit verdict")
+    func applyLandsTheFitVerdict() throws {
+        let core = makeCore()
+        live(core, [1])
+        let screen = Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
+        core.state.workspaces.upsertDisplay(screen)
+        core.state.workspaces.add(WindowID(1), to: "1")
+        try core.persistProfile(named: "A", modes: nil)
+        let fitting = try core.profiles.read(name: "A")
+
+        core.profiles.markDirty()
+        core.apply(profile: fitting, forceRetile: false)
+        #expect(!core.profiles.isDirty)
+
+        // A profile carrying no monitor set of its own never
+        // matches the live screens (#36).
+        var misfit = fitting
+        misfit.name = "B"
+        misfit.monitorSets = []
+        core.apply(profile: misfit, forceRetile: false)
+        #expect(core.profiles.currentName == "B")
+        #expect(core.profiles.isDirty)
+    }
+
+    /// The #634 reset and a backup restore both end adoption, and
+    /// the store keeps no name that could outlive it: the next
+    /// apply is the session's FIRST, so it prunes nothing and
+    /// files nothing. Until #1249 the store's own name survived
+    /// `resetAdoption` — its deleted `reset()` said so — and that
+    /// apply filed the post-reset arrangement under the profile
+    /// the reset had just trashed.
+    @Test("Resetting adoption makes the next apply the first")
+    func resetAdoptionEndsTheLiveProfile() throws {
         let core = makeCore()
         live(core, [1])
         core.state.workspaces.add(WindowID(1), to: "1")
         try core.persistProfile(named: "A", modes: nil)
-        core.profiles.markDirty()
+        let a = try core.profiles.read(name: "A")
 
-        core.reapplyIfInEffect("A")
-        #expect(core.profiles.currentName == "A")
-        #expect(core.profiles.isDirty)
+        core.discardSavedArrangement()
+        core.profiles.resetAdoption()
+        core.state.workspaces.ensureSpace("restored")
+        core.state.workspaces.add(WindowID(1), to: "restored")
+
+        core.apply(profile: a, forceRetile: false)
+        // Not a switch: the boot-restored space survives, and no
+        // arrangement was filed under the reset profile's name.
+        #expect(core.state.workspaces["restored"] != nil)
+        #expect(members(core, "restored") == [WindowID(1)])
+        #expect(
+            core.state.profilePartitioning.remembered(for: "A")
+                == nil
+        )
     }
 }

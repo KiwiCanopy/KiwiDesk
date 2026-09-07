@@ -12,15 +12,12 @@ import Foundation
 /// them would give the stored half the unstored half's
 /// lifetime.
 extension KiwiCore {
-    /// Files the live Spaces under the profile that is live NOW —
-    /// `profiles.currentName`, the one authority for whose
-    /// arrangement is on screen (#1249).
+    /// Files the live Spaces under `profiles.currentName`, so
+    /// every verb that moves that name files first and moves
+    /// second — profiles.md ▸ "Whose arrangement is live" (#1249).
     ///
-    /// Call it while that is still true. Every verb that moves
-    /// the name — an apply, a save — files first and moves
-    /// second, and a nil name files nothing because a built-in
-    /// Standard (or a session that has applied nothing) has no
-    /// partitioning of its own.
+    /// A nil name files nothing: a built-in Standard, or a session
+    /// that has applied nothing, has no partitioning of its own.
     func recordLivePartitioning() {
         state.profilePartitioning.record(
             state.workspaces.allSpaces,
@@ -49,15 +46,13 @@ extension KiwiCore {
     }
 
     /// The one profile WRITE door (#1249). `ProfileManager.save`
-    /// makes its argument current, so the outgoing name — the one
-    /// the arrangement on screen belongs to — is gone the moment
-    /// it returns; filing has to happen first.
+    /// makes its argument current, so the outgoing name is gone
+    /// the moment it returns; the filing has to precede it.
     ///
-    /// Unconditional rather than a caller's choice. On the preset
-    /// path `apply(composed:)` has already filed the outgoing
-    /// profile and `adoptStandard` has stood the name down, so
-    /// the record here is a no-op — which is why no exit has to
-    /// decide, and why the third one could ship un-filed (#1246).
+    /// Unconditional rather than a caller's choice: on the preset
+    /// path `apply(composed:)` has already filed and stood the
+    /// name down through `noProfileIsLive`, so the record here is
+    /// a no-op — which is what leaves no exit anything to decide.
     func saveProfile(_ profile: Profile) throws {
         recordLivePartitioning()
         try profiles.save(profile)
