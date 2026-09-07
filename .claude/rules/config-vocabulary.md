@@ -237,9 +237,13 @@ synonym:
   own accessibility name said "Shortcuts reference", so a
   sighted user read one noun and a VoiceOver user heard another
   for one surface, and all ten catalogs faithfully mirrored it
-  (#1316). Nothing scans for this class: it is two words for one
-  thing, which `DestinationNameCollisionTests`' exact-collision
-  predicate cannot see, so it is caught by review or not at all.
+  (#1316). The general class is two words for one thing, which
+  `DestinationNameCollisionTests`' exact-collision predicate
+  cannot see — but THIS surface is held:
+  `ShortcutsPanelNounTests` asks, per catalog, that the panel's
+  own accessibility name is the noun the shortcut opening it
+  already uses. A second surface naming itself twice is still
+  review's until someone gives it the same pairing.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename
