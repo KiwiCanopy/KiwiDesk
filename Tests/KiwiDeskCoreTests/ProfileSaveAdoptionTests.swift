@@ -218,11 +218,13 @@ struct ProfileSaveAdoptionTests {
         core.apply(profile: fitting, forceRetile: false)
         #expect(!core.profiles.isDirty)
 
-        // A profile carrying no monitor set of its own never
-        // matches the live screens (#36).
+        // A profile naming a screen this Mac does not have never
+        // matches the live set (#36).
         var misfit = fitting
         misfit.name = "B"
-        misfit.monitorSets = []
+        misfit.monitorSets = [
+            MonitorSet(monitors: ["Nowhere:640x480"])
+        ]
         core.apply(profile: misfit, forceRetile: false)
         #expect(core.profiles.currentName == "B")
         #expect(core.profiles.isDirty)
@@ -253,9 +255,17 @@ struct ProfileSaveAdoptionTests {
         let fitting = try core.profiles.read(name: "A")
         #expect(!core.profiles.isDirty)
 
-        // Edited to name no monitor set this Mac has.
+        // Edited to name a screen this Mac does not have. A
+        // DECODABLE misfit on purpose: `monitorSets = []` does
+        // not survive `Profile`'s decoder ("profile has no valid
+        // monitor set"), so the re-apply's `try? read` would fail
+        // and `handleMonitorChange` would mark it dirty for an
+        // unrelated reason — green, and measuring nothing
+        // (measured on the device, 2026-09-07).
         var misfit = fitting
-        misfit.monitorSets = []
+        misfit.monitorSets = [
+            MonitorSet(monitors: ["Nowhere:640x480"])
+        ]
         try core.profiles.write(misfit)
         core.reapplyIfInEffect("A")
         #expect(core.profiles.isDirty)
