@@ -8994,6 +8994,41 @@ round-trips everywhere (portability). Explicitly out of scope: a
 glass border/stroke, a shadow (`BarPanel` is deliberately
 shadowless), and vibrancy-following text.
 
+**The glass variant is pinned from the Fill, because macOS
+decides it per view and the verdict sticks.** (#1308, settled
+2026-09-07.) The two bars, same Fill, same `plain` + glass,
+rendered 114 vs 68 luminance in their item-free plate rows; an
+in-process log showed every KiwiDesk input identical on both
+(hosting mode, plate/tint visibility, tint alpha, z-order) and
+one thing different: `NSGlassEffectView`'s adaptive content
+colour scheme, which the OS decides PER VIEW from the backdrop
+that view samples and then holds until a far brighter backdrop
+flips it. Either bar could be the dark one — the App Bar usually
+was because the bottom edge launches over the darker band of a
+wallpaper — and five eyeball readings on the issue each blamed
+whichever bar happened to be in the dark state. The ruling: the
+variant is DECIDED, once, from the Fill, in `GlassTint.apply` —
+a dark Fill pins `.darkAqua` on the glass view, a light Fill
+leaves the OS's light scheme, which its bright tint holds — so two
+bars sharing a Fill cannot diverge, and every bundled palette
+shares it. Three measured facts fix the shape. **Only dark can be
+pinned:** `.aqua` is the effective appearance the bars already
+carry, and the material keeps adapting under it, so a light pin
+would be a private `_adaptiveAppearance` write, refused. **The
+dark variant is the legible one on a dark Fill:** on the shipped
+moss, palette ink `#EAF3EE` is 4.2:1 on the light variant and
+8.2:1 on the dark, and the active `#8DB354` FAILS at 2.0:1 on the
+light against 3.9:1 on the dark — the light variant both bars
+launched into was the worse plate. **`.regular` is no escape:**
+it adapts the same way, and its light variant puts the ink at
+1.9:1. The threshold is `wantsLightInk`'s, the one the mark
+glyphs already use, so "this fill wants light ink" and "this fill
+wants the dark glass" are one rule (`GlassTintPinTests`; the
+one-home clause in `GlassTintSeamTests`). Residue, stated: a
+light Fill still adapts per view, so two bars on a light Fill
+could in principle diverge over a very dark ground; unmeasured,
+and the bright tint dominates what the glass samples.
+
 **Background style and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)
 conflated two orthogonal concerns: the per-item box rendering and

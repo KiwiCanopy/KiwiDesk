@@ -60,10 +60,37 @@ enum GlassTint {
             ? fill.withAlphaComponent(maxAlpha) : fill
     }
 
+    /// The material variant a Fill pins on the glass, `nil` where
+    /// the OS's own scheme stands.
+    ///
+    /// macOS decides Liquid Glass's light or dark variant PER VIEW,
+    /// from the backdrop that view samples, and the verdict sticks
+    /// until a far brighter backdrop flips it — so two bars sharing
+    /// a Fill diverged (#1308). A dark Fill pins the dark variant,
+    /// which is also the one the palette ink is legible on; a light
+    /// Fill leaves the OS's light scheme, which its bright tint
+    /// holds. Only dark CAN be pinned: `.aqua` is the effective
+    /// appearance the bars already carry, and the material keeps
+    /// adapting under it — measured on macOS 26.6.2, #1308. The
+    /// threshold is `wantsLightInk`'s, so the fill that wants light
+    /// ink is the fill that wants the dark glass: one copy.
+    @MainActor
+    private static func pinnedAppearance(
+        _ hex: String
+    ) -> NSAppearance? {
+        guard AppBarStyle.glassAvailable else { return nil }
+        let fill = NSColor(kiwiHex: hex)
+        guard fill.alphaComponent > 0, fill.wantsLightInk else {
+            return nil
+        }
+        return NSAppearance(named: .darkAqua)
+    }
+
     /// Positions and colors the backdrop beneath the target glass,
-    /// hiding it where the Fill reaches no colour. It takes the Fill
-    /// rather than a colour so the cap cannot be walked around at a
-    /// call site (#1297).
+    /// hiding it where the Fill reaches no colour, and pins the
+    /// glass's variant from the same Fill (#1308). It takes the
+    /// Fill rather than a colour so the cap cannot be walked around
+    /// at a call site (#1297).
     @MainActor
     static func apply(
         _ backdrop: NSView,
@@ -73,6 +100,7 @@ enum GlassTint {
         hex: String,
         animated: Bool = false
     ) {
+        glass.appearance = pinnedAppearance(hex)
         guard let color = rendered(hex) else {
             backdrop.isHidden = true
             return

@@ -193,6 +193,22 @@ Obligations:
   question it looks like it is answering; and what actually binds
   the cap is the bar's own ink, which is fixed palette hex with
   no vibrancy path, so the plate is its legibility floor.
+- **The glass's light/dark variant is PINNED from the Fill in
+  `GlassTint.apply`, never left to the OS per view.** macOS
+  decides a Liquid Glass view's variant from the backdrop that
+  view samples and holds the verdict, so two bars sharing a Fill
+  rendered 114 vs 68 with identical KiwiDesk state, and every
+  eyeball reading blamed whichever bar was in the dark state
+  (#1308). A dark Fill pins `.darkAqua`; a light Fill leaves the
+  OS's scheme, since only dark can be pinned (`.aqua` is the
+  appearance the bars already carry, and the material adapts
+  under it). The threshold is `wantsLightInk`'s — one copy with
+  the mark glyphs — and `GlassTintPinTests` holds the consumer,
+  including that a light Fill LIFTS a pin the previous Fill left.
+  Nothing else in Core writes `.appearance =` on a view
+  (`GlassTintSeamTests` ▸ one-home clause, allow map empty by
+  design); a surface that needs to owes `docs/design-decisions.md`
+  an argument first.
 - **A `Sources/KiwiDesk` surface that tints glass owes this suite
   a root.** `GlassTintSeamTests` scans Core alone, so the GUI
   tree is not covered by it — a Fill→colour derivation that lands

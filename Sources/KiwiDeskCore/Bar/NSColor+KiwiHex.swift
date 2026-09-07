@@ -6,14 +6,21 @@ extension NSColor {
         hex.isEmpty ? fallback : NSColor(kiwiHex: hex)
     }
 
-    /// Auto-contrasted black or white glyph color for mark fills (#429).
-    var contrastingGlyph: NSColor {
+    /// Whether a fill is dark enough to want light ink over it —
+    /// the one threshold `contrastingGlyph` and the glass variant
+    /// pin share (`GlassTint`, #1308).
+    var wantsLightInk: Bool {
         let c = usingColorSpace(.sRGB) ?? self
         let luminance =
             0.299 * c.redComponent
             + 0.587 * c.greenComponent
             + 0.114 * c.blueComponent
-        return luminance > 0.6 ? .black : .white
+        return luminance <= 0.6
+    }
+
+    /// Auto-contrasted black or white glyph color for mark fills (#429).
+    var contrastingGlyph: NSColor {
+        wantsLightInk ? .white : .black
     }
 
     /// Opaque sRGB shadow color for focus glow overlays

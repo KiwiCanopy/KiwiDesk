@@ -45,6 +45,13 @@ struct GlassTintSeamTests {
     /// also configures a glass surface may not.
     private static let mintPrimitive = "kiwiHex"
 
+    /// How a view's appearance is pinned, anywhere in Core. The
+    /// glass variant is decided from the Fill in `GlassTint.apply`
+    /// (#1308); a second site pinning a glass view is a second
+    /// rule, and the two bars diverge again the moment they
+    /// disagree.
+    private static let pin = ".appearance ="
+
     /// Files that drive `tintColor`, each naming its ruling — the
     /// one copy of who is exempt.
     ///
@@ -114,6 +121,45 @@ struct GlassTintSeamTests {
         #expect(
             Self.allowed.keys.allSatisfy(hits.contains),
             "a ruling fires on nothing: \(Self.allowed.keys)"
+        )
+    }
+
+    /// **The glass variant is pinned in one place.**
+    ///
+    /// Scope is Core, whole, with the home file exempt — and the
+    /// home file is held PRESENT as the pinning site, so this
+    /// clause cannot pass by the pin having been deleted (tests.md
+    /// ▸ a negative pin fails OPEN). No allow map: nothing in Core
+    /// pinned an appearance before #1308, and a surface that needs
+    /// one owes an argument in `docs/design-decisions.md` first.
+    @Test("Nothing in Core pins a view's appearance beside GlassTint")
+    func noSurfacePinsAppearance() throws {
+        var strays: [String] = []
+        var homePins = false
+        var scanned = 0
+        for file in try SourceScan.swiftSources(under: Self.coreRoot) {
+            scanned += 1
+            let name = file.lastPathComponent
+            let source = try SourceScan.strippedSource(at: file)
+            guard source.contains(Self.pin) else { continue }
+            if name == Self.home {
+                homePins = true
+                continue
+            }
+            strays.append(name)
+        }
+        #expect(scanned >= 200, "scanned \(scanned) files")
+        #expect(
+            homePins,
+            "\(Self.home) no longer pins the glass variant"
+        )
+        #expect(
+            strays.isEmpty,
+            """
+            pins a view's appearance beside GlassTint.apply — the \
+            glass variant is decided from the Fill there, once: \
+            \(strays)
+            """
         )
     }
 
@@ -209,6 +255,17 @@ struct GlassTintSeamTests {
                 in: Array("NSColor(kiwiHex: style.fillColor)")
             ),
             "\(Self.mintPrimitive) no longer matches the mint"
+        )
+        // The pin needle is a plain substring, so its two proofs
+        // are the assignment it names and the read it must not.
+        #expect(
+            "glass.appearance = NSAppearance(named: .darkAqua)"
+                .contains(Self.pin),
+            "\(Self.pin) no longer matches a pin"
+        )
+        #expect(
+            !"let scheme = glass.effectiveAppearance".contains(Self.pin),
+            "\(Self.pin) matches a read"
         )
     }
 }
