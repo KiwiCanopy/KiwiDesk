@@ -127,6 +127,11 @@ extension KiwiCore {
         cueResizeRefusal(.layoutHasNoResize(window))
     }
 
+    /// The focused window is in native full screen (#1298).
+    func refuseWindowIsFullscreen(_ window: WindowID) {
+        cueResizeRefusal(.windowIsFullscreen(window))
+    }
+
     /// A shrink hit the window's effective minimum (#933) — on
     /// the FIRST attempt the clamp truncates, landing ON the
     /// minimum included, not only once already there.

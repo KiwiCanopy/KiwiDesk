@@ -34,6 +34,9 @@ struct ResizeRefusalSymbolTests {
             // reds (guard-prover, 2026-09-05).
             .nothingToDivide(window, otherAxisDivides: false),
             .nothingToDivide(window, otherAxisDivides: true),
+            // #1298: full screen is a fact about the window, and
+            // there is no resize here either — the non-arrow arm.
+            .windowIsFullscreen(window),
         ] {
             #expect(!refusal.pillSymbol.contains("arrow"))
         }
@@ -104,6 +107,7 @@ struct ResizeRefusalSymbolTests {
                 axis: "y"
             ),
             .noAxisHere(window, axis: "y"), .layoutHasNoResize(window),
+            .windowIsFullscreen(window),
         ] {
             #expect(
                 NSImage(

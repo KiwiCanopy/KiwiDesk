@@ -60,13 +60,11 @@ extension KiwiCore {
         // filling the screen, and the drag drew nothing at all.
         // The WRITE still lands above: the store outlives the
         // window population (#383/#44/#458).
-        // A focus outside the tiled members takes no part in
-        // ANY partition — a native-fullscreen (#670) or
-        // elsewhere-rendering sticky (#445) window — so it is
-        // owed no arrangement sentence: the census rules it
-        // wordless for exactly that reason, and before this
-        // branch an empty partition never clamped, so it was
-        // silent (review, 2026-09-05).
+        // A focus outside the tiled members — an
+        // elsewhere-rendering sticky (#445); a native-fullscreen
+        // one is refused before any writer (#1298) — takes no
+        // part in ANY partition, so it is owed no arrangement
+        // sentence (review, 2026-09-05).
         guard tiled.contains(focused) else { return }
         // One term, not two: `partition` returns a nil zone
         // whenever the members fit in master, so an empty

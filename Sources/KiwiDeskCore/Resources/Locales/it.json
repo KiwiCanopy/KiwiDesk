@@ -931,6 +931,7 @@
   "resize.neighbor_min_size": "La finestra adiacente è alla dimensione minima",
   "resize.no_height_here": "Questa zona divide la larghezza, non l’altezza",
   "resize.no_width_here": "Questa zona divide l’altezza, non la larghezza",
+  "resize.window_fullscreen": "Le finestre a tutto schermo non possono essere ridimensionate",
   "scroll_grid.anchor.center": "Al centro",
   "scroll_grid.anchor.end_h": "A destra",
   "scroll_grid.anchor.end_v": "In basso",

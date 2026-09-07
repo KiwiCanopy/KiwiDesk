@@ -382,7 +382,12 @@ floating focused window resizes itself directly in any mode
 splitting the delta between both edges and pinning one that is
 already against the screen edge or a bar (#1091). "Floating" is
 the effective float since #1184: the window's own flag, or any
-window in a floating-layout space, which places nothing.
+window in a floating-layout space, which places nothing. A
+focused window in native full screen is refused ahead of every
+layout, whatever its float state, with `the focused window is
+fullscreen` (#1298): nothing is written and no neighbour moves;
+the pill and sound rule below apply to it as to the monocle/grid
+reply.
 For tiled windows: in BSP, `x` moves the side-by-side split
 ratio and `y` the stacked one, independently, each in the
 direction that grows the *focused* window's region (#122).

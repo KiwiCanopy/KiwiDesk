@@ -931,6 +931,7 @@
   "resize.neighbor_min_size": "隣のウインドウが最小サイズに達しています",
   "resize.no_height_here": "この領域は高さではなく幅を分けます",
   "resize.no_width_here": "この領域は幅ではなく高さを分けます",
+  "resize.window_fullscreen": "フルスクリーンのウインドウはサイズ変更できません",
   "scroll_grid.anchor.center": "中央",
   "scroll_grid.anchor.end_h": "右",
   "scroll_grid.anchor.end_v": "下",

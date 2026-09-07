@@ -931,6 +931,7 @@
   "resize.neighbor_min_size": "A janela vizinha está no tamanho mínimo",
   "resize.no_height_here": "Esta zona divide a largura, não a altura",
   "resize.no_width_here": "Esta zona divide a altura, não a largura",
+  "resize.window_fullscreen": "Janelas em tela cheia não podem ser redimensionadas",
   "scroll_grid.anchor.center": "Centro",
   "scroll_grid.anchor.end_h": "Direita",
   "scroll_grid.anchor.end_v": "Inferior",

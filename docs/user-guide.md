@@ -1402,7 +1402,8 @@ While a window is in native fullscreen, KiwiDesk stands down
 around it entirely: macOS moves it off the Desktop and gives it
 a Mission Control slot of its own, so the App and
 Space Bars hide there, no layout pass or focus raise targets the
-fullscreened window, and the space it came from tiles as if it
+fullscreened window — a resize shortcut pressed on it just says
+so on the window — and the space it came from tiles as if it
 were away. It keeps its place in that space — leave fullscreen
 and it tiles back into its old position.
 Popovers, sheets, emoji pickers, and other windows above a bordered

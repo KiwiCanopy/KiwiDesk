@@ -931,6 +931,7 @@
   "resize.neighbor_min_size": "Nachbarfenster hat die Mindestgröße erreicht",
   "resize.no_height_here": "Dieser Bereich teilt die Breite auf, nicht die Höhe",
   "resize.no_width_here": "Dieser Bereich teilt die Höhe auf, nicht die Breite",
+  "resize.window_fullscreen": "Vollbildfenster können nicht in der Größe geändert werden",
   "scroll_grid.anchor.center": "Mitte",
   "scroll_grid.anchor.end_h": "Rechts",
   "scroll_grid.anchor.end_v": "Unten",

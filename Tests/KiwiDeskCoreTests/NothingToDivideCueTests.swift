@@ -232,14 +232,26 @@ struct NothingToDivideCueTests {
         )
     }
 
-    @Test("A focus outside the layout is owed no sentence")
+    @Test("A focus outside the layout is owed no arrangement sentence")
     func focusOutsideTheTiledMembersStandsDown() {
         // A native-fullscreen window keeps its slot but leaves
         // the tiled derivations (#670), so it takes part in no
         // partition — and an arrangement sentence about a
         // partition it is not in would be the wrong window told
-        // the wrong thing. It was silent before #1258 because an
-        // empty partition never clamps; it stays silent.
+        // the wrong thing. With two windows and one gone full
+        // screen the stack zone is EMPTY, which is the writer's
+        // empty-zone arm; its stand-down for a focus outside
+        // the tiled members is what this case holds.
+        //
+        // The WRITER is driven directly: since #1298 the keyboard
+        // press never reaches it with a full-screen focus —
+        // `resize()` refuses and cues `windowIsFullscreen` first
+        // (`FullscreenResizeTiledTests`) — and the mouse
+        // `.masterRatio` drag hands it the DRAGGED window, which
+        // cannot be full screen. The live focus this arm still
+        // serves is the elsewhere-rendering sticky (#445), which
+        // this suite does not fixture; the full-screen one
+        // exercises the same `tiled.contains` guard.
         let core = makeCore()
         let sp = space(core, windows: 2, mode: "stack")
         core.state.workspaces.focus(WindowID(1), in: sp.id)
@@ -249,13 +261,17 @@ struct NothingToDivideCueTests {
                 isFullscreen: true
             )
         )
+        let live = core.state.workspaces[sp.id]!
+        let stack = core.tiler.settings.resolvedStack(for: live)
         let seen = refusals(core) {
-            for axis in ["x", "y"] {
-                core.execute(
-                    "resize",
-                    args: [.string(axis), .number(-600)]
-                )
-            }
+            core.writeCappedMasterRatio(
+                proposed: stack.masterRatio - 600 / 1200,
+                span: 1200,
+                axis: "x",
+                space: live,
+                focused: WindowID(1),
+                deltaSign: -600
+            )
         }
         #expect(seen.isEmpty)
     }

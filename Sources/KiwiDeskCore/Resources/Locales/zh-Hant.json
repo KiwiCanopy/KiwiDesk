@@ -931,6 +931,7 @@
   "resize.neighbor_min_size": "相鄰視窗已達到最小尺寸",
   "resize.no_height_here": "此區域劃分的是寬度，不是高度",
   "resize.no_width_here": "此區域劃分的是高度，不是寬度",
+  "resize.window_fullscreen": "全螢幕視窗無法調整尺寸",
   "scroll_grid.anchor.center": "居中",
   "scroll_grid.anchor.end_h": "右側",
   "scroll_grid.anchor.end_v": "下方",

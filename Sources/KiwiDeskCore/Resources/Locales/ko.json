@@ -931,6 +931,7 @@
   "resize.neighbor_min_size": "인접한 윈도우가 최소 크기에 도달했습니다",
   "resize.no_height_here": "이 영역은 높이가 아니라 너비를 나눕니다",
   "resize.no_width_here": "이 영역은 너비가 아니라 높이를 나눕니다",
+  "resize.window_fullscreen": "전체 화면 윈도우는 크기를 조절할 수 없습니다",
   "scroll_grid.anchor.center": "중앙",
   "scroll_grid.anchor.end_h": "오른쪽",
   "scroll_grid.anchor.end_v": "아래쪽",

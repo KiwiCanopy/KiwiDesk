@@ -449,16 +449,41 @@ editing here:
 - A **native-fullscreen window keeps its `space.windows` slot
   but leaves both tiled-member derivations** (#670) — a layout,
   navigation or z-order consumer of the tiled members routes
-  through `localTiledMembers` / `effectiveTiledMembers` and
-  never re-checks `isFullscreen` at its own call site; only a
-  walker whose domain is wider than the tiled members (the
-  stash, which also parks floats, and a focus fallback reading
-  `space.focused`) carries its own check. macOS moved the window to its own Space, so a
-  frame-set, navigation step or raise aimed at it fights the
-  fullscreen app or yanks the user into its Space. Nothing
-  scans for a fresh open-coded `!isFloating` partition, so each
-  new site owes the routing deliberately — three shipped
-  without it in this rule's own change set. A fullscreen flip
+  through `localTiledMembers` / `effectiveTiledMembers` rather
+  than re-checking `isFullscreen` at its own call site; a walker
+  whose domain is WIDER than the tiled members — one that parks
+  floats, or reads `space.focused` — states its own check
+  deliberately and says what it decides from it. macOS moved
+  the window to its own Space, so a frame-set, navigation step
+  or raise aimed at it fights the fullscreen app or yanks the
+  user into its Space. Nothing scans for a fresh open-coded
+  `!isFloating` partition, so each new site owes the routing
+  deliberately — three shipped without it in this rule's own
+  change set. **`resize` is such a walker, and it refuses a
+  native-fullscreen focus ONCE, ahead of every path, cued**
+  (#1298). Full screen is a fact about the WINDOW, never the
+  layout — no layout places it, so no store a resize path
+  writes is about it — so put the guard in `resize()` before
+  the float branch, never per path: a per-path answer is how
+  three paths WROTE for such a focus (bsp's no-slot sign
+  fallback, stack's `inMaster` fallback, scrolling's
+  focus-blind slot write) and moved the NEIGHBOURS while the
+  float route refused silently. The refusal is
+  `windowIsFullscreen`, never `layoutHasNoResize`, and it
+  DRAWS — a pill reaches a native full-screen Space (owner,
+  device, 2026-09-07). `resize()` is the keyboard, CLI and IPC
+  entry to the `writeCapped*` writers; the MOUSE entry is
+  closed by the drag pipeline's slot gate — `handleDragEnd`
+  resizes only a window `calculatedFrames` placed, which a
+  full-screen one is not — so a new input path to those
+  writers, or a relaxation of that gate, owes the same
+  refusal. `FullscreenResizeCommandTests` holds the two float
+  arms; `FullscreenResizeTiledTests` holds the tiled ones — the
+  four writing paths each with a control proving it WRITES when
+  the focus is not full screen, monocle's `default:` arm (grid
+  rides the same one) with a control proving it cues
+  `layoutHasNoResize` there — and the drop gate, with a control
+  proving the drop writes. A fullscreen flip
   is a membership change and retiles (`shouldRetile`), and the
   **fullscreen-space verdict comes from `NativeSpaces.isUser`**
   — never from the nil Mission Control number, which cannot be
@@ -916,8 +941,9 @@ editing here:
   than inferring it from the gesture's direction — including
   the case where the focused window is in NO group of it, which
   every writer has: a stack zone and a track partition the
-  TILED members, and a native-fullscreen or elsewhere-rendering
-  focus is not one (#670/#445), while bsp's sides are
+  TILED members, and an elsewhere-rendering sticky focus is not
+  one (#445; the native-fullscreen focus is refused before any
+  writer — the #670 bullet's `resize` clause), while bsp's sides are
   geometric and a window spanning the whole tiled extent on the
   axis sits above every split of that orientation, so no ratio
   move can resize it. That window is dropped from both sides by
@@ -984,17 +1010,11 @@ editing here:
   floating-mode member has no layout answer to give and a frame
   of its own to change, so refusing it while resizing its
   flag-floating neighbour is a difference with nothing behind it
-  (#1184, `FloatingResizeCommandTests`). **A verb that crosses
-  stands down for a native-fullscreen window** (#670): it fills
-  a macOS Space of its own, so there is no frame worth writing —
-  BOTH arms, or the ruling that a mode member answers exactly as
-  a flag-float does fails at that one window, which is the
-  divergence the crossing removed wearing a narrower shape. And
-  the stand-down is the VERB's, never the float ROUTE's: shedding
-  the route drops the press into the layout, where a window
-  nothing places moves its NEIGHBOURS instead — strictly worse
-  than the refused frame set it replaces
-  (`FloatingResizeCommandTests`). **The mode arm names the
+  (#1184, `FloatingResizeCommandTests`). A native-fullscreen
+  focus never reaches the float route — that is the #670
+  bullet's `resize` clause (#1298), and a guard inside the float
+  branch alone leaves the tiled paths writing. **The mode arm
+  names the
   space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose

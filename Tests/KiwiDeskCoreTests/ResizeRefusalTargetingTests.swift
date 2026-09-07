@@ -237,12 +237,19 @@ struct ResizeRefusalTargetingTests {
         // #1259 pinned the neighbouring zone being NAMED here,
         // as the honest reading of "not its own minimum". #1258
         // overruled that: a window in no partition is owed no
-        // sentence about one, which is what the refusal census
-        // already said of the same arrangement and what the path
-        // did before either lane touched it. The clause that
-        // matters — never `.ownMinimum` on a window whose size
-        // the write could not change — is what both verdicts
-        // share, and it is what this test still holds.
+        // sentence about one. The clause that matters — never
+        // `.ownMinimum` on a window whose size the write could
+        // not change — is what both verdicts share, and it is
+        // what this test still holds.
+        //
+        // Since #1298 the keyboard press never reaches this
+        // writer with a full-screen focus — `resize()` refuses
+        // and cues `windowIsFullscreen` first
+        // (`FullscreenResizeTiledTests`) — and the mouse
+        // `.masterRatio` drag hands it the DRAGGED window, which
+        // cannot be. So the WRITER's arm is driven directly; the
+        // live focus it still serves is the elsewhere-rendering
+        // sticky (#445), reaching the same guard.
         let core = makeCore()
         for id: UInt32 in 1...3 {
             core.state.apply(
@@ -269,7 +276,16 @@ struct ResizeRefusalTargetingTests {
         // Past the stack zone's own floor, so the write really
         // is truncated — a shrink the range still admits cues
         // nothing at all, in stack as anywhere else.
-        core.execute("resize", args: [.string("x"), .number(-600)])
+        let live = core.state.workspaces[space]!
+        let stack = core.tiler.settings.resolvedStack(for: live)
+        core.writeCappedMasterRatio(
+            proposed: stack.masterRatio - 600 / 1200,
+            span: 1200,
+            axis: "x",
+            space: live,
+            focused: WindowID(1),
+            deltaSign: -600
+        )
         #expect(refusals.isEmpty)
     }
 

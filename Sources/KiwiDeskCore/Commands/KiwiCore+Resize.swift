@@ -96,6 +96,15 @@ extension KiwiCore {
         // sibling belongs on this same local-focus side — the rest
         // of the focused verbs use the anchor. See the
         // resize-stays-local row in docs/design-decisions.md.
+        // A native-fullscreen focus is refused ONCE, ahead of
+        // every path (#1298): no layout places it (#670), so no
+        // store below is about it.
+        if let focused = space.focused,
+            state.windows[focused]?.isFullscreen == true
+        {
+            refuseWindowIsFullscreen(focused)
+            return .fail("the focused window is fullscreen")
+        }
         // A floating focused window resizes ITSELF, in every
         // layout mode — it does not participate in the layout,
         // so the ratio paths below (and their unknown-focus
@@ -110,13 +119,6 @@ extension KiwiCore {
                 mode: space.mode
             )
         {
-            // A native-fullscreen window fills a macOS Space of
-            // its own (#670): no frame worth writing, on either
-            // arm. The VERB stands down here rather than the
-            // ROUTE — state-and-layout.md argues both (#1184).
-            guard !window.isFullscreen else {
-                return .fail("the focused window is fullscreen")
-            }
             return resizeFloating(
                 focused,
                 axis: axis,

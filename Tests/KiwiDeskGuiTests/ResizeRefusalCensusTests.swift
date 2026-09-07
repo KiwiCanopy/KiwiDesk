@@ -64,6 +64,10 @@ struct ResizeRefusalCensusTests {
             "nothingToDivide — the track set has one member (#1258)",
         "the focused window fills its track along ":
             "nothingToDivide — the track has one member (#1258)",
+        "the focused window is fullscreen":
+            "windowIsFullscreen — it fills a macOS Space of its "
+            + "own (#670), refused ONCE in resize() ahead of every "
+            + "path (#1298); the window has a frame to draw on",
         // Wordless, deliberately: no window to draw on, or a
         // caller that is not a person.
         "expected a boolean":
@@ -78,20 +82,16 @@ struct ResizeRefusalCensusTests {
             + "there was no focus at all: nothing to draw a pill "
             + "on. This arm's silence is its own — the sibling "
             + "default: arm DOES cue",
-        "the focused window is fullscreen":
-            "it fills a macOS Space of its own (#670), so the "
-            + "float route has no frame to write. Wordless is "
-            + "THIS arm's own ruling and derives from no sibling "
-            + "— the window has a frame to draw on, and #1255's "
-            + "argument that a silent keyboard refusal reads as "
-            + "being ignored applies. Open on #1184: cueing it "
-            + "needs copy no case carries yet",
         "no focused tiled window":
-            "the focus takes no part in this layout — a "
-            + "native-fullscreen (#670) or elsewhere-rendering "
-            + "sticky (#445) window, which effectiveTiledMembers "
-            + "drops. It HAS a frame to draw on; what it lacks "
-            + "is a partition to be refused from",
+            "no focus at all — nothing to draw on — or a focus "
+            + "that takes no part in this layout: an "
+            + "elsewhere-rendering sticky (#445) window, which "
+            + "effectiveTiledMembers drops. That one HAS a frame "
+            + "to draw on; what it lacks is a partition to be "
+            + "refused from. A native-fullscreen focus is kept "
+            + "out by resize()'s guard on the keyboard side and "
+            + "the drag pipeline's slot gate on the mouse side "
+            + "(#1298, FullscreenResizeTiledTests)",
         "unknown window":
             "the id is gone; nothing to draw on",
         "track has no local window":
