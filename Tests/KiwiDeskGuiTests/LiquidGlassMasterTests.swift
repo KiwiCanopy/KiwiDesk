@@ -144,23 +144,105 @@ struct LiquidGlassMasterTests {
         )
     }
 
-    /// The census declaration the fan-out rests on: `masterWrites`
-    /// is what books one edit as one change in the save pill, so
-    /// a leaf missing here is a leaf the draft never reports.
-    @Test("the master declares all three leaves")
-    func masterDeclaresItsLeaves() throws {
-        let leaves = try #require(
-            SettingKey.masterWrites[
-                .colours(.liquidGlassMaster)
-            ]
-        )
+    /// DERIVED, not restated: walk what the edit actually
+    /// MOVED and require it to equal what the census declares —
+    /// a hand-typed copy of the same three strings agrees with
+    /// the census and with nothing else (`rule-authoring.md`).
+    /// `BorderMastersFanOutTests` owns this shape for the two
+    /// border masters; the glass master needed its own, and
+    /// `guard-prover` measured the gap: with the panel leaf
+    /// deleted from `masterWrites`, `SettingsDraftDiffTests` and
+    /// both border suites stayed green.
+    @Test("the declaration matches what the master writes")
+    func declarationMatchesTheWrite() {
+        let key = SettingKey.colours(.liquidGlassMaster)
+        let model = makeTestModel()
+        let before = SettingsDraftDiff.leaves(of: model.config)
+        model.liquidGlassMaster.wrappedValue = true
+        let after = SettingsDraftDiff.leaves(of: model.config)
+        let moved = Set(before.keys).union(after.keys)
+            .filter { before[$0] != after[$0] }
         #expect(
-            leaves.sorted()
-                == [
-                    "settings.appBarStyle.liquidGlass",
-                    "settings.shortcutPanelLiquidGlass",
-                    "settings.spaceBarStyle.liquidGlass",
-                ].sorted()
+            moved == Set(SettingKey.masterWrites[key] ?? []),
+            Comment(
+                rawValue:
+                    "\(key.id) writes \(moved.sorted()) — "
+                    + "SettingKey.masterWrites disagrees"
+            )
         )
+    }
+
+    /// The sentence the declaration exists FOR: three leaves
+    /// move, and the save pill books one change.
+    @Test("one edit of the master counts once")
+    func oneEditCountsOnce() {
+        let key = SettingKey.colours(.liquidGlassMaster)
+        let model = makeTestModel()
+        let clean = model.config
+        model.liquidGlassMaster.wrappedValue = true
+        let diff = SettingsDraftDiff.between(
+            config: model.config,
+            cleanConfig: clean
+        )
+        #expect(diff.unattributed.isEmpty)
+        #expect(diff.changedSettings == [key])
+    }
+
+    /// The CONSUMER, which the predicate tests are structurally
+    /// blind to. `guard-prover` (2026-09-07) replaced the row's
+    /// `agreement.differ ? differHelp : baseHelp` with
+    /// `baseHelp` — the two-of-three state becomes invisible,
+    /// which is the whole reason the sentence exists — and every
+    /// test in the tree stayed green, `extract-keys` included,
+    /// because `differHelp` remained a live call site.
+    @Test("the row asks the agreement which help to show")
+    func rowConsultsTheAgreement() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Colors/"
+                    + "GlassCard.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            source.contains("agreement.differ?differHelp"),
+            """
+            the row no longer picks its help from the \
+            agreement, so a config with two of three surfaces \
+            on says nothing about it.
+            """
+        )
+    }
+
+    /// A retired row can come back BESIDE the order list rather
+    /// than in it, which the census read above cannot see:
+    /// `guard-prover` hand-rolled a glass `ToggleRow` into
+    /// `AppBarCard` and the whole 4884-test suite passed.
+    @Test("no bar card draws a Liquid Glass toggle of its own")
+    func barsDrawNoGlassToggle() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Bars"
+            )
+        let files = try SourceScan.swiftSources(under: root)
+        #expect(files.count > 3)
+        for file in files {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .split(whereSeparator: \.isWhitespace).joined()
+            #expect(
+                !source.contains("isOn:style.liquidGlass"),
+                Comment(
+                    rawValue:
+                        "\(file.lastPathComponent) draws a "
+                        + "Liquid Glass toggle again — the one "
+                        + "row lives on Colours & Animations "
+                        + "and writes all three leaves (#1307)."
+                )
+            )
+        }
     }
 }
