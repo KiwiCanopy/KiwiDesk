@@ -102,7 +102,10 @@ extension AppBarOverlay {
         )
     }
 
-    /// Hugs glass plate around laid out item run.
+    /// Hugs glass plate around laid out item run. Mints the run
+    /// itself: the App Bar hosts no front segment, so nothing
+    /// renders into the run before this arm (#1315 moved the
+    /// Space Bar's mint to its prepare for that reason).
     private func hugRun(
         plate: NSView,
         content: NSView,

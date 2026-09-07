@@ -108,11 +108,15 @@ extension SpaceBarOverlay {
             itemContainer.frame = viewport
         }
         GlassPlate.setContent(plate, glassBackdropFiller)
-        content.addSubview(
-            plate,
-            positioned: .below,
-            relativeTo: itemContainer
-        )
+        // Moved only when it is not already beneath the container:
+        // a same-parent re-add per render is the #1315 churn.
+        if !Self.sits(plate, beneath: itemContainer, in: content) {
+            content.addSubview(
+                plate,
+                positioned: .below,
+                relativeTo: itemContainer
+            )
+        }
         GlassPlate.update(
             plate,
             frame: plateFrame,
@@ -124,6 +128,19 @@ extension SpaceBarOverlay {
             radius: radius,
             hex: style.fillColor
         )
+    }
+
+    /// Whether `view` sits somewhere below `above` in `parent`.
+    private static func sits(
+        _ view: NSView,
+        beneath above: NSView,
+        in parent: NSView
+    ) -> Bool {
+        guard view.superview === parent,
+            let v = parent.subviews.firstIndex(of: view),
+            let a = parent.subviews.firstIndex(of: above)
+        else { return false }
+        return v < a
     }
 
     /// Applies optional colored backdrop tint behind glass plate
@@ -155,7 +172,12 @@ extension SpaceBarOverlay {
         radius: CGFloat,
         style: SpaceBarStyle
     ) {
-        guard let run = glassRun else { return }
+        guard let run = glassRun else {
+            // Unreachable: `render` prepares the mode it installs,
+            // and a bare plate here would be silent (#1315).
+            assertionFailure("hug arm installed with no run")
+            return
+        }
         if GlassPlate.holds(plate, itemContainer) {
             GlassPlate.detach(plate)
             content.addSubview(

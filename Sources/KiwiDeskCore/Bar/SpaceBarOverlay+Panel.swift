@@ -62,15 +62,20 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Prepares view hierarchy for target glass hosting mode before layout
-    /// (#407).
+    /// Prepares view hierarchy for target glass hosting mode before
+    /// layout (#407), and picks the front segment's host with it:
+    /// the panel content while pinned, the glass run while it
+    /// hugs, else the item container — one arm creates the run
+    /// and names it host, so a steady render reparents nothing
+    /// (#1315).
     func prepareGlassHosting(
         _ mode: GlassHosting,
         panel: NSPanel,
         style: SpaceBarStyle,
         strip: CGRect,
         plateFrame: CGRect,
-        viewport: CGRect
+        viewport: CGRect,
+        pinnedFront: Bool
     ) {
         updatePlainPlate(
             panel,
@@ -79,40 +84,32 @@ extension SpaceBarOverlay {
             plateFrame: plateFrame
         )
         guard let content = panel.contentView else { return }
+        let plainHost = pinnedFront ? content : itemContainer
         switch mode {
         case .boxGlass:
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
             glassTint?.isHidden = true
+            frontHost = plainHost
         case .plainGlassHug:
             teardownBoxGlasses()
-            // Created here, before the front segment renders, so
-            // the run can be its host (#1315).
-            glassRun = glassRun ?? AppBarOverlay.FlippedView()
+            // A pinned front overflows, and overflow resolves to
+            // `.plainGlassSpan`, so the hug's host is the run.
+            let run = glassRun ?? AppBarOverlay.FlippedView()
+            glassRun = run
+            frontHost = run
         case .plainGlassSpan:
             teardownBoxGlasses()
+            frontHost = plainHost
         case .plainPlate, .none:
             teardownBoxGlasses()
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
             glassTint?.isHidden = true
+            frontHost = plainHost
         }
-    }
-
-    /// The view the front segment renders into under `mode`: the
-    /// panel content while pinned, the glass run while it hugs —
-    /// so a steady render reparents nothing (#1315) — else the
-    /// item container.
-    func frontHost(
-        for mode: GlassHosting,
-        pinnedFront: Bool,
-        content: NSView?
-    ) -> NSView? {
-        if pinnedFront { return content }
-        if mode == .plainGlassHug, let run = glassRun { return run }
-        return itemContainer
     }
 
     /// Installs glass views after item layout passes (#407).

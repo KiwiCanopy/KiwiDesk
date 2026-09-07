@@ -11,9 +11,12 @@ import Testing
 /// `addSubview` calls inside an `NSGlassEffectView` subtree for
 /// views that never needed to move, each a hierarchy change the
 /// glass re-evaluates. The run is now the segment's host while
-/// it hugs, so a render that changes nothing adds nothing. The
-/// clauses drive `SpaceBarManager.sync`, so the arm under test
-/// is the production one.
+/// it hugs, so a hugged render that changes nothing adds nothing.
+/// The clauses drive `SpaceBarManager.sync`, so the arm under
+/// test is the production one. The hug arm's wrong-host case is
+/// discriminated by the ADD COUNT alone: `hugRun` re-hosts any
+/// view outside the run, so an end-state clause on the hug arm
+/// cannot see a wrong host (guard-prover, measured).
 @Suite("Space Bar front-view churn (#1315)")
 @MainActor
 struct SpaceBarFrontViewChurnTests {
@@ -131,6 +134,52 @@ struct SpaceBarFrontViewChurnTests {
             Self.frontViews(overlay).map(\.frame) == frames,
             "the segment moved between identical renders"
         )
+    }
+
+    /// The run is prepare's to create, and nothing else creates
+    /// it: this render is UNSEEDED, so the creation line is what
+    /// hosts the plate and the segment here. `spied()` stands a
+    /// spy in for that line, which is why it cannot hold this.
+    @Test("An unseeded hugged render hosts the segment in the run")
+    func unseededHugCreatesTheRun() throws {
+        try #require(Self.drawsGlass, "no glass below macOS 26")
+        let manager = SpaceBarManager()
+        manager.sync([Self.bar()])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        let run = try #require(overlay.glassRun, "no run was created")
+        let plate = try #require(overlay.glassPlate)
+        #expect(GlassPlate.holds(plate, run), "the plate hugs no run")
+        for view in Self.frontViews(overlay) {
+            #expect(view.superview === run, "\(view) not in the run")
+        }
+    }
+
+    /// A run that GROWS keeps the segment hosted and clear of the
+    /// items. The per-render re-add this replaces was kept "so the
+    /// segment stays above item views created later"; the segment
+    /// is laid out after the last item, so the two never overlap
+    /// and z-order among them is moot — held here rather than
+    /// argued.
+    @Test("A growing run keeps the segment hosted and clear")
+    func growingRunKeepsTheSegmentClear() throws {
+        try #require(Self.drawsGlass, "no glass below macOS 26")
+        let (manager, overlay, run) = try Self.spied()
+        manager.sync([Self.bar(spaces: 3)])
+        manager.sync([Self.bar(spaces: 4)])
+        try #require(overlay.itemViews.count == 4)
+        let drawn = Self.frontViews(overlay).filter { !$0.isHidden }
+        try #require(!drawn.isEmpty, "no front view is drawn")
+        for view in drawn {
+            #expect(view.superview === run, "\(view) left the run")
+            for item in overlay.itemViews {
+                #expect(
+                    !view.frame.intersects(item.frame),
+                    "\(view) overlaps an item at \(item.frame)"
+                )
+            }
+        }
     }
 
     /// The host changes with the arm and the segment follows it:
