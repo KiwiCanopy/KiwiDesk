@@ -22,13 +22,34 @@ import Testing
 /// ONE catalog's two strings for one surface share a noun, by
 /// containment.
 ///
-/// What it does NOT cover, so a green run is not read as more:
-/// containment is the whole predicate, so a locale that
-/// INFLECTS the noun inside the verb phrase — a case-marking
-/// language whose accusative differs from the citation form —
-/// reds here correctly rather than falsely, and takes an
-/// `allowed` entry stating the two forms. Every shipped catalog
-/// today keeps the citation form, which is why the map is empty.
+/// **What it holds is containment, one-directional**, and the
+/// docstring says so rather than claiming the whole invariant:
+/// the panel's name must be SOME substring of the opener. Two
+/// shapes therefore pass, both measured (`guard-prover`, #1316)
+/// rather than reasoned about:
+///
+/// - a panel name SHORTENED to a bare head noun — `fr`
+///   announcing `Raccourcis` against "Afficher le panneau des
+///   raccourcis" is two names for one surface and stays green,
+///   as does any substring down to one character;
+/// - a second noun regrowing on the OPENER — "Show shortcuts
+///   panel reference" contains the panel's name and passes.
+///
+/// Both need per-language vocabulary to tell from a legitimate
+/// rewording, which is the register Family C rules a guard may
+/// not carry. They stay with review. What is bought is the
+/// shape that actually shipped: the two keys naming the surface
+/// with DIFFERENT nouns.
+///
+/// A locale that INFLECTS the noun inside the verb phrase — a
+/// case-marking language whose accusative differs from the
+/// citation form — reds correctly rather than falsely, and takes
+/// an `allowed` entry naming the form the opener carries, which
+/// is then checked in the citation form's place. Every shipped
+/// catalog today keeps the citation form, so the map is empty.
+///
+/// An empty value does NOT pass vacuously: `contains("")` is
+/// false in Swift, so an untranslated-empty merge reds.
 @Suite("The shortcuts panel has one name per catalog")
 struct ShortcutsPanelNounTests {
     /// The panel's own accessibility name.
@@ -37,30 +58,65 @@ struct ShortcutsPanelNounTests {
     static let opener = "keybinding.show_shortcuts"
 
     /// Locales whose grammar inflects the noun inside the verb
-    /// phrase, each naming the two forms — **the one copy of who
-    /// may**. EMPTY: nothing shipped inflects it today.
+    /// phrase, valued by the form the OPENER carries — **the one
+    /// copy of who may**.
+    ///
+    /// The value is checked, not decoration: an entry narrows
+    /// the comparison to that form rather than dropping the
+    /// locale out of it, so an exemption still holds the pairing
+    /// it was granted for. EMPTY: nothing shipped inflects it.
     static let allowed: [String: String] = [:]
 
     @Test("the panel's own name is the noun its opener uses")
     func oneNounPerCatalog() throws {
+        var compared = 0
         for locale in try Self.catalogNames() {
             let catalog = try Self.catalog(locale)
-            guard let name = catalog[Self.panelName],
-                let opens = catalog[Self.opener]
-            else { continue }
-            guard Self.allowed[locale] == nil else { continue }
+            let name = catalog[Self.panelName]
+            let opens = catalog[Self.opener]
+            // ONE of the two present is the defect wearing the
+            // English fallback: `drop-key --locale` retires a bad
+            // translation, after which that locale announces the
+            // English noun against its own translated opener.
+            // Skipping it is how the guard would go quiet on the
+            // exact repair path (`guard-prover`, #1316).
+            if (name == nil) != (opens == nil) {
+                Issue.record(
+                    """
+                    \(locale) carries one of \(Self.panelName) / \
+                    \(Self.opener) and not the other, so the \
+                    surface is named by a translation on one \
+                    channel and by the English fallback on the \
+                    other — the #1316 split, wearing a fallback.
+                    """
+                )
+                continue
+            }
+            guard let name, let opens else { continue }
+            compared += 1
+            let expected = Self.allowed[locale] ?? name
             #expect(
-                opens.lowercased().contains(name.lowercased()),
+                opens.lowercased().contains(expected.lowercased()),
                 """
                 \(locale): the panel announces itself as \
                 "\(name)" while the shortcut that opens it says \
                 "\(opens)" — two names for one surface (#1316). \
                 Give the panel the noun the opener already uses, \
-                or add \(locale) to `allowed` naming the two \
-                grammatical forms.
+                or add \(locale) to `allowed` naming the form \
+                the opener carries.
                 """
             )
         }
+        // The floor counts COMPARISONS, never files: every
+        // catalog losing the key passes a file count and
+        // compares nothing (`guard-prover`, #1316).
+        #expect(
+            compared > 1,
+            """
+            \(compared) catalog(s) actually compared — this \
+            suite passed for having looked at nothing.
+            """
+        )
     }
 
     /// English lives at the call sites and is regenerated into

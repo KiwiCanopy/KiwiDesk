@@ -39,8 +39,8 @@ extension APIReference {
             .text("name")
         ),
         "show_shortcuts": APIRecord(
-            "Opens the read-only shortcuts reference panel, or "
-                + "closes it if it is open."
+            "Opens the read-only shortcuts panel, or closes "
+                + "it if it is open."
         ),
         "open_settings": APIRecord(
             "Opens the Settings window and brings it to the "

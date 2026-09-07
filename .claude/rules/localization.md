@@ -413,6 +413,12 @@ why they are here rather than beside the views:
   catalog ships and reds when a destination's name is some other
   feature's string, which is ladder rule 1 and the shape that
   shipped `zh-Hans`'s Profile as "configuration file".
+  `ShortcutsPanelNounTests` holds a second such sub-class the
+  same way — a surface that names ITSELF on one channel and is
+  named on another, paired within one catalog (#1316) — so a
+  further pairing is buildable rather than ruled out; what the
+  page forecloses is the vocabulary register, not a comparison
+  the catalog already contains.
 
 ## Registering a new locale
 

@@ -232,7 +232,12 @@ synonym:
   row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
 - **shortcuts panel** — the read-only surface ⌃⌥K opens (#326).
   Retired as names for it: *shortcuts reference*, *reference
-  panel*. The split was not a coining but a drift — everything
+  panel*. Binds **copy** — a label, a catalog value, CLI help
+  text, `docs/` prose — and not identifiers, so
+  `ShortcutsReferenceBuilder` and `ShortcutsReferenceTests` stay
+  as they are; the doc comments that still spell the retired
+  name describe those types and are the sweep a rename of them
+  would carry. The split was not a coining but a drift — everything
   POINTING at the panel said "shortcuts panel" while the panel's
   own accessibility name said "Shortcuts reference", so a
   sighted user read one noun and a VoiceOver user heard another
