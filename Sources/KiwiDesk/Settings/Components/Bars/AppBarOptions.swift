@@ -1,10 +1,14 @@
 import KiwiDeskCore
 
 /// Shared App Bar option value/label pairs (#291, #819).
+///
+/// Every list is COMPUTED: a localized value stored for the life
+/// of the process keeps the locale it was first read in (#1311).
 enum AppBarOptions {
     @MainActor
-    static let edge: [(AppBarEdge, String)] =
+    static var edge: [(AppBarEdge, String)] {
         AppBarEdge.allCases.map { ($0, label($0)) }
+    }
 
     @MainActor
     private static func label(_ edge: AppBarEdge) -> String {
@@ -17,10 +21,11 @@ enum AppBarOptions {
     }
 
     @MainActor
-    static let alignment: [(AppBarStyle.BarAlignment, String)] =
+    static var alignment: [(AppBarStyle.BarAlignment, String)] {
         AppBarStyle.BarAlignment.allCases.map {
             ($0, label($0))
         }
+    }
 
     @MainActor
     private static func label(
@@ -38,55 +43,66 @@ enum AppBarOptions {
 
     /// Background plate drawing style (#390).
     @MainActor
-    static let backgroundStyle: [(AppBarStyle.BackgroundStyle, String)] = [
-        (.boxed, L("app_bar.background_style.boxed", "Boxed")),
-        (.plain, L("app_bar.background_style.plain", "Plain")),
-    ]
+    static var backgroundStyle: [(AppBarStyle.BackgroundStyle, String)] {
+        [
+            (.boxed, L("app_bar.background_style.boxed", "Boxed")),
+            (.plain, L("app_bar.background_style.plain", "Plain")),
+        ]
+    }
 
     /// Background reach options.
     @MainActor
-    static let backgroundFit: [(AppBarStyle.BackgroundFit, String)] = [
-        (
-            .hug,
-            L(
-                "app_bar.background_fit.hug",
-                "Hug"
-            )
-        ),
-        (
-            .full,
-            L(
-                "app_bar.background_fit.full",
-                "Full width"
-            )
-        ),
-    ]
+    static var backgroundFit: [(AppBarStyle.BackgroundFit, String)] {
+        [
+            (
+                .hug,
+                L(
+                    "app_bar.background_fit.hug",
+                    "Hug"
+                )
+            ),
+            (
+                .full,
+                L(
+                    "app_bar.background_fit.full",
+                    "Full width"
+                )
+            ),
+        ]
+    }
 
     @MainActor
-    static let activeIndicator: [(AppBarStyle.ActiveIndicator, String)] = [
-        (.outline, L("app_bar.active_indicator.outline", "Outline")),
-        (
-            .edgeMark,
-            L(
-                "app_bar.active_indicator.edge_mark",
-                "Edge mark"
-            )
-        ),
-        (.gap, L("app_bar.active_indicator.gap", "Gap")),
-    ]
+    static var activeIndicator: [(AppBarStyle.ActiveIndicator, String)] {
+        [
+            (
+                .outline,
+                L("app_bar.active_indicator.outline", "Outline")
+            ),
+            (
+                .edgeMark,
+                L(
+                    "app_bar.active_indicator.edge_mark",
+                    "Edge mark"
+                )
+            ),
+            (.gap, L("app_bar.active_indicator.gap", "Gap")),
+        ]
+    }
 
     /// App icon rendering options (#294, #362).
     @MainActor
-    static let iconSource: [(BarAppIconSource, String)] = [
-        (
-            .appImage,
-            L("app_bar.icon_source.app_image", "System default")
-        ),
-        (
-            .appFont,
-            L("app_bar.icon_source.app_font", "Glyphs")
-        ),
-    ]
+    static var iconSource: [(BarAppIconSource, String)] {
+        [
+            (
+                .appImage,
+                L("app_bar.icon_source.app_image", "System default")
+            ),
+            (
+                .appFont,
+                L("app_bar.icon_source.app_font", "Glyphs")
+            ),
+        ]
+    }
 
     /// Localized title for a given icon source option.
     @MainActor
@@ -95,12 +111,14 @@ enum AppBarOptions {
     }
 
     @MainActor
-    static let content: [(AppBarStyle.Content, String)] = [
-        (.icon, L("app_bar.content.icon", "Icon")),
-        (.title, L("app_bar.content.title", "Title")),
-        (
-            .iconAndTitle,
-            L("app_bar.content.icon_and_title", "Icon & title")
-        ),
-    ]
+    static var content: [(AppBarStyle.Content, String)] {
+        [
+            (.icon, L("app_bar.content.icon", "Icon")),
+            (.title, L("app_bar.content.title", "Title")),
+            (
+                .iconAndTitle,
+                L("app_bar.content.icon_and_title", "Icon & title")
+            ),
+        ]
+    }
 }
