@@ -2,6 +2,87 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.2.0",
+      "tag": "v1.2.0",
+      "date": "2026-09-07",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.2.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.2.0/KiwiDesk-1.2.0.dmg",
+      "summary": "This release is about macOS Desktops. KiwiDesk now knows which windows live on the Desktops you are not looking at, keeps each Desktop's and each profile's Spaces apart, brings sticky windows along when you switch, and puts focus back where you left it when you come back. Around that: a keyboard preview you can read, one honest cue for every blocked resize, and several focus jumps that are gone — including the one that pulled you off a fullscreen video. Liquid Glass now covers every KiwiDesk surface from a single switch, and three long-standing translation defects are fixed.",
+      "sections": [
+        {
+          "title": "Desktops, done properly",
+          "items": [
+            "**Every profile owns its own Spaces.** Two profiles' Space 1 used to be one Space, so switching profiles and back could merge an arrangement away for good. Each profile now records what its Spaces held when you leave it and restores them when you return. A brand-new Desktop picks a Space no other Desktop is showing instead of landing on one whose windows are all somewhere else.",
+            "**A Desktop keeps its identity when Mission Control renumbers it.** Adding, removing or dragging a Desktop — or plugging a screen in — shifts every Desktop number, and everything keyed by number silently pointed at a different Desktop. KiwiDesk now stamps each Desktop with its own identifier, so profile bindings and remembered Spaces stay with the Desktop they were made on.",
+            "**Windows on other Desktops are known, not forgotten.** KiwiDesk reads which windows each Desktop hosts, so a window that vanished because you switched Desktops is reported as away rather than closed, keeps its Space and slot for its return, and Open or Focus can reach it across Desktops. `get_state` lists them under `away_windows`, and startup no longer counts parked or system windows among them.",
+            "**The Space Bar shows the Desktop in front of you.** Windows parked by KiwiDesk in another Space are the bar's job; windows sitting on another macOS Desktop are not, and no longer appear.",
+            "**Sticky windows come with you across Desktops.** A window marked ∞ follows you to every Desktop; one marked 📌 follows across its screen's Desktops. On by default and switchable with `sticky.set_desktop_reach`, with a per-window override for the one window you want left behind.",
+            "**Coming back to a Desktop puts focus where you left it.** Returning used to jump focus to the first window in the row; KiwiDesk now remembers each Space's last focus per Desktop and hands it back at that window's own return.",
+            "**Move a window to a Desktop and into a Space in one verb.** `move_to_desktop(3, \"mail\")` and `move_to_desktop_and_follow` take an optional Space the window joins when it lands.",
+            "**A ∞ window entering a floating Space on another screen moves onto that screen**, scaled to it, instead of staying where its previous Space drew it — and its ∞ mark shows on the one bar that actually has it.",
+            "**A new docs page explains how screens, Desktops, profiles and Spaces relate**, with a diagram — the model the app assumed you already had."
+          ]
+        },
+        {
+          "title": "Liquid Glass, and the bars",
+          "items": [
+            "**Liquid Glass is one switch, and it covers everything.** It used to be an App Bar setting alone. It now lives in Colors & Animations and lays macOS's translucent material over the Space Bar, the App Bar and the shortcuts panel together, with each bar's Fill colour tinting its own material. The shortcuts panel stays untinted on purpose — a large panel summoned over the desktop reads best as clear glass. If your three surfaces are set differently today, turning the switch on adopts all three.",
+            "**The bars honour Reduce Motion.** With the system setting on, a bar no longer slides or fades — it just appears where it belongs. The affordance stays; only the motion goes."
+          ]
+        },
+        {
+          "title": "Focus stops jumping",
+          "items": [
+            "**KiwiDesk stops believing focus reports that are not yours.** Apps announce focus changes that are not system focus changes: a window re-focusing itself a second after KiwiDesk places it, a duplicate report landing after your next keypress, a small panel that takes the keyboard without bringing its app forward. Each one moved KiwiDesk's idea of focus off the window you were actually on — and at worst left every focus shortcut refused until you clicked a window to resync. All three are recognised now.",
+            "**A window that blinks out keeps its place.** Some browsers drop their window for half a second entering and leaving native fullscreen, and some apps stop reporting a window during fast focus changes. Both read as a close, so the window lost its slot and focus moved to a neighbour. Leaving a fullscreen video now returns you to the video.",
+            "**Clicking KiwiDesk's own Settings window focuses it.** On a scrolling Space, clicking another window pans Settings out of view — and clicking it again within two seconds did nothing at all."
+          ]
+        },
+        {
+          "title": "Resizing tells you why it stopped",
+          "items": [
+            "**Every blocked resize draws a pill, and a drawn pill may sound.** A resize press in a layout with no resizing, or on an axis the zone does not have, used to be cued by sound alone — invisible with sound off. One cue now covers every refusal.",
+            "**The pill lands on the window that cannot move.** In BSP a refusal named the focused window as at its minimum when a neighbour was the one stuck, sending you to resize the wrong window.",
+            "**A window alone in its zone says so.** \"Nothing to divide here — try the other axis\" and \"This zone has nothing to divide\" replace six silent cases and one message that was false; a one-window stack no longer shows a row of \"Minimum window size reached\" pills on a window filling the screen.",
+            "**Two more presses now answer properly.** A native full-screen window is refused, and says so, in every layout — it used to be silent in one and shove its neighbours around in another. And a window floating because its whole Space uses the floating layout now resizes like one, which until now only windows you had floated by hand did."
+          ]
+        },
+        {
+          "title": "Shortcuts you can read",
+          "items": [
+            "**The keyboard preview answers a real question now.** Hover a key to see every action on it, chord first, with what a collision costs spelled out — the red key finally says which two bindings collide. And the board draws the layer you are editing, so \"is this key free here\" is answered for the layer that will actually fire rather than for all of them at once.",
+            "**A conflict warning names the cost, not just the collision**, and reads macOS's live shortcut settings: a system chord you have turned off no longer counts as a conflict, and one you turned on does.",
+            "**Swap rides ⌃⌥⌘ plus an arrow; ⇧ keeps the digits.** The three-modifier claw for swapping is gone: ⌃⌥⌘ with an arrow swaps with a neighbour, ⇧ with a digit sends the window to that Space. Fresh installs get the new defaults; a keymap you edited is yours and does not move.",
+            "**Per-Desktop shortcut rows appear once you bind one.** A dozen unbound \"Go to Desktop N\" rows no longer sit in the Focus and Move cards on every Mac with several Desktops.",
+            "**The shortcuts panel says when it has more to show.** On a default install the panel is taller than its ceiling and scrolls, and nothing said so — the rows below the fold were simply not there as far as you could tell.",
+            "**Picking an app binds it, in one press.** Choosing an app for a shortcut no longer needs a second button afterwards, which is how app rules have always worked."
+          ]
+        },
+        {
+          "title": "Settings",
+          "items": [
+            "**Export Log… in General ▸ Advanced.** Pick a time range, save the file, attach it to a bug report — no terminal needed.",
+            "**Picking an app adds its rule immediately.** The separate \"Add app rule\" button is gone, and with it the half-added state that drew no icon.",
+            "**Keyboard navigation got shorter and quieter.** Arriving in an area focuses the page instead of the back chip (six presses fewer to the first field), a segmented control costs one Tab stop instead of one per segment, and the focus ring appears only when the keyboard asked for it — mouse clicks no longer draw one, the Space chip included.",
+            "**The save pill lists the screen changes the header claims.** Clicking it opened nothing when the only unsaved change was a screen setup drifting from the profile.",
+            "**The profile card's help states the rule correctly**: the main screen's Desktop selects the profile, and all four rungs of the selection ladder are there.",
+            "**\"Save as new\" says screen, and speaks every language.** The message called a screen a monitor and was missing from every non-English catalog.",
+            "**Bar titles default to ten characters.** The bars show window titles, and each item is sized from the widest, so the old 25-character default spent the bar before you chose anything.",
+            "**And a run of smaller fixes.** The hex field in Advanced Colors can be clicked into, the app picker finds apps in subfolders and both of its surfaces answer Escape alike, the Space chips in Monitors show they can be dragged, a profile card stays marked while you point at another, and Save is readable in light mode while Settings is inactive."
+          ]
+        },
+        {
+          "title": "In your language",
+          "items": [
+            "**Switching language now changes every label.** Some lists — the bars' Position and Alignment pickers, the shortcut recorder's help — kept whichever language was live the first time you opened that page, so the window came back part English and part German.",
+            "**Track shortcut rows read as sentences.** \"Move window to next track\" was assembled from a bare \"next\", which five languages cannot inflect into a sentence; each row is now translated whole.",
+            "**The shortcuts panel has one name.** Everything pointing at it said \"shortcuts panel\" while the panel announced itself to VoiceOver as \"Shortcuts reference\"."
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.1.2",
       "tag": "v1.1.2",
       "date": "2026-08-31",
