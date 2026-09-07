@@ -131,6 +131,75 @@ struct DesktopFirstVisitTests {
         )
     }
 
+    /// The pick reads ADOPTION STATE, never the profile file
+    /// (#1245). It runs inside `handleDesktopChange`, where a
+    /// synchronous JSON read sits on the main actor mid-switch —
+    /// and `ProfileManager.read` rewrites the file when a
+    /// migration applies, so a swipe onto a fresh Desktop was a
+    /// silent disk write.
+    ///
+    /// Proved by DELETING the file: an answer that still names
+    /// the profile's Spaces cannot have come from disk. Asserting
+    /// the Spaces alone would pass either way.
+    @Test("The declared Spaces outlive the profile's file")
+    func declaredSpacesComeFromAdoptionNotDisk() throws {
+        defer { resetAuthorityOverrides() }
+        let core = core()
+        core.state.workspaces.ensureSpace(SpaceID(2))
+        let stored = Profile(
+            name: "P",
+            monitorSets: [
+                MonitorSet(
+                    monitors: ["Screen:100x100"],
+                    spaceMonitorMap: [:]
+                )
+            ],
+            spaces: [SpaceID(1)],
+            spaceModes: [SpaceID(1): .bsp],
+            settings: TilingSettings()
+        )
+        try core.profiles.save(stored)
+        #expect(core.currentDeclaredSpaces() == [SpaceID(1)])
+
+        try FileManager.default.removeItem(
+            at: core.profiles.fileURL(name: "P")
+        )
+        #expect(core.currentDeclaredSpaces() == [SpaceID(1)])
+        // And the pick still steps over the undeclared Space 2.
+        #expect(
+            core.virtualSpaceTarget(
+                for: .number(4),
+                in: authoritySnapshot()
+            ) == SpaceID(1)
+        )
+    }
+
+    /// Adoption ending takes the declared Spaces with it — the
+    /// two are ONE value, so no ender can drop the name and leave
+    /// a stale Space set answering for it (#1245).
+    @Test("Ending adoption ends the declared Spaces")
+    func endingAdoptionEndsTheDeclaredSpaces() throws {
+        let core = core()
+        try core.profiles.save(
+            Profile(
+                name: "P",
+                monitorSets: [
+                    MonitorSet(
+                        monitors: ["Screen:100x100"],
+                        spaceMonitorMap: [:]
+                    )
+                ],
+                spaces: [SpaceID(1)],
+                spaceModes: [SpaceID(1): .bsp],
+                settings: TilingSettings()
+            )
+        )
+        #expect(core.currentDeclaredSpaces() == [SpaceID(1)])
+
+        core.profiles.adoptStandard(named: "Std")
+        #expect(core.currentDeclaredSpaces() == nil)
+    }
+
     /// The main arm picks among the Spaces on ITS OWN screen.
     /// Activating one that lays out on the other display parks
     /// this screen on what it already showed and moves the active

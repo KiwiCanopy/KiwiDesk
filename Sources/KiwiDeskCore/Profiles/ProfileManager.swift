@@ -22,6 +22,37 @@ public enum ProfileError: Error, CustomStringConvertible {
     }
 }
 
+/// The active profile: its name, and the Spaces it declares.
+///
+/// ONE value rather than two fields, so no writer can move the
+/// name and leave the Spaces behind (#1245). The Spaces are here
+/// because the alternative is re-reading the profile from disk to
+/// answer a Desktop switch — a synchronous JSON read on the main
+/// actor that also REWRITES the file whenever a migration applies.
+///
+/// A hand edit to the profile's JSON is picked up at the next
+/// apply (a reload, a monitor change, an in-effect save), not
+/// mid-session; nothing between those reads the file for this.
+struct ActiveProfile {
+    let name: String
+    let declaredSpaces: Set<SpaceID>
+
+    init(_ profile: Profile) {
+        name = profile.name
+        declaredSpaces = profile.declaredSpaces
+    }
+
+    private init(name: String, declaredSpaces: Set<SpaceID>) {
+        self.name = name
+        self.declaredSpaces = declaredSpaces
+    }
+
+    /// A rename moves the name; the Spaces are unchanged by it.
+    func renamed(to new: String) -> ActiveProfile {
+        ActiveProfile(name: new, declaredSpaces: declaredSpaces)
+    }
+}
+
 /// Persists profiles and selects matching configurations for monitor setups.
 @MainActor
 public final class ProfileManager {
@@ -32,7 +63,12 @@ public final class ProfileManager {
     /// sets one clears the other, which is what lets a caller
     /// holding the name already treat `markClean()` as a whole
     /// re-adopt.
-    public private(set) var currentName: String?
+    public var currentName: String? { active?.name }
+
+    /// The active profile as one value — what `currentName` reads
+    /// from, and what a Desktop switch asks for the declared
+    /// Spaces instead of the disk (#1245).
+    private(set) var active: ActiveProfile?
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
     public private(set) var currentStandard: String?
@@ -102,7 +138,7 @@ public final class ProfileManager {
             profile.isDefault = true
         }
         try write(profile)
-        currentName = profile.name
+        active = ActiveProfile(profile)
         currentStandard = nil
         isDirty = false
     }
@@ -114,7 +150,7 @@ public final class ProfileManager {
             at: url(for: validated(name))
         )
         if currentName == name {
-            currentName = nil
+            active = nil
             isDirty = true
         }
         let counts =
@@ -154,7 +190,9 @@ public final class ProfileManager {
         try files.moveItem(at: source, to: destination)
         profile.name = new
         try write(profile)
-        if currentName == old { currentName = new }
+        if currentName == old {
+            active = active?.renamed(to: new)
+        }
     }
 
     /// Re-designates a count's default profile.
@@ -241,7 +279,7 @@ public final class ProfileManager {
     /// `apply(profile:)`'s and no one else's — profiles.md ▸
     /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
-        currentName = profile.name
+        active = ActiveProfile(profile)
         currentStandard = nil
         isDirty = !fits
     }
@@ -254,19 +292,19 @@ public final class ProfileManager {
     /// forget which (`StarterRescaleTests` ▸ `reloadKeepsLadder`).
     /// Dirtiness is the caller's here, having no profile to judge.
     func noProfileIsLive() {
-        currentName = nil
+        active = nil
     }
 
     /// Records that a built-in Standard is resolving (dirty state).
     func adoptStandard(named name: String) {
-        currentName = nil
+        active = nil
         currentStandard = name
         isDirty = true
     }
 
     /// Resets adoption state for Reset All Settings (#634).
     func resetAdoption() {
-        currentName = nil
+        active = nil
         currentStandard = nil
         isDirty = false
     }

@@ -349,6 +349,21 @@ Three further obligations, and they bind this directory:
   not an apply. It is an obligation on a NEW writer: if it moves
   the name while the Spaces stay put, the store starts filing one
   profile's windows under another's name.
+- **Answer a Desktop switch from adoption state, never from the
+  file (#1245).** `handleDesktopChange` runs on the main actor
+  mid-transition, and `ProfileManager.read` REWRITES the file
+  whenever a migration applies — so a read on that path is a
+  latency cost AND a silent disk write triggered by a swipe. The
+  active profile's declared Spaces therefore ride
+  `ActiveProfile`, one value with the name, so no ender can drop
+  the name and leave a stale Space set answering for it. A new
+  fact the switch path needs about the active profile joins that
+  value rather than re-reading the file
+  (`ProfileAuthoritySeamTests` ▸ `firstVisitPickReadsNoFile`
+  pins the one function; `DesktopFirstVisitTests` proves the
+  answer survives the file's deletion). The cost, stated: a hand
+  edit to a profile's JSON reaches the switch path only at the
+  next apply — a reload, a monitor change, an in-effect save.
 - **Let the apply judge the #36 fit.** `becameLive` takes it,
   read off the monitor set the apply already matched for the
   pins, so no caller pairs `isDirty` by hand. A caller whose

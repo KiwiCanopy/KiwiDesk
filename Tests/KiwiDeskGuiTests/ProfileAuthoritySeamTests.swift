@@ -196,4 +196,41 @@ struct ProfileAuthoritySeamTests {
             )
         )
     }
+
+    /// The first-visit pick answers from adoption state, never
+    /// from the profile file (#1245). Scoped to that function's
+    /// own body: the file it lives in legitimately reads profiles
+    /// elsewhere, so a file-wide ban would be false, and a
+    /// file-wide COUNT would be satisfied by a neighbour.
+    ///
+    /// The trade: it reads the declaration's exact spelling, so a
+    /// re-signature reds this as "no such function" rather than
+    /// as a violation — fail-closed, and the message says so.
+    @Test("The first-visit pick reads no profile file")
+    func firstVisitPickReadsNoFile() throws {
+        let file = coreRoot.appendingPathComponent(
+            "Profiles/KiwiCore+DesktopSpaces.swift"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        let body = SourceScan.declarationBody(
+            after: "func currentDeclaredSpaces()",
+            in: source
+        )
+        #expect(
+            body != nil,
+            "currentDeclaredSpaces was re-signed; re-pin it here"
+        )
+        #expect(
+            (body?.occurrences(of: "profiles.read(") ?? 1) == 0,
+            Comment(
+                rawValue:
+                    "currentDeclaredSpaces reads the profile file "
+                    + "again; it runs inside handleDesktopChange, "
+                    + "where that is a main-actor JSON read AND a "
+                    + "migration rewrite (#1245)"
+            )
+        )
+    }
 }
