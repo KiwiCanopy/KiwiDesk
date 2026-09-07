@@ -941,8 +941,9 @@ editing here:
   than inferring it from the gesture's direction — including
   the case where the focused window is in NO group of it, which
   every writer has: a stack zone and a track partition the
-  TILED members, and a native-fullscreen or elsewhere-rendering
-  focus is not one (#670/#445), while bsp's sides are
+  TILED members, and an elsewhere-rendering sticky focus is not
+  one (#445; the native-fullscreen focus is refused before any
+  writer — the #670 bullet's `resize` clause), while bsp's sides are
   geometric and a window spanning the whole tiled extent on the
   axis sits above every split of that orientation, so no ratio
   move can resize it. That window is dropped from both sides by

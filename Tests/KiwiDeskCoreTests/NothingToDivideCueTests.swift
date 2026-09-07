@@ -250,8 +250,8 @@ struct NothingToDivideCueTests {
         // `.masterRatio` drag hands it the DRAGGED window, which
         // cannot be full screen. The live focus this arm still
         // serves is the elsewhere-rendering sticky (#445), which
-        // this fixture cannot build; the full-screen one exercises
-        // the same `tiled.contains` guard.
+        // this suite does not fixture; the full-screen one
+        // exercises the same `tiled.contains` guard.
         let core = makeCore()
         let sp = space(core, windows: 2, mode: "stack")
         core.state.workspaces.focus(WindowID(1), in: sp.id)
