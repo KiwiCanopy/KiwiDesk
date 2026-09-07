@@ -54,21 +54,31 @@ func workflowSource(_ name: String) throws -> String {
 /// alike.
 ///
 /// A `#` counts as a comment only when it follows whitespace AND
-/// the quotes before it on the line are balanced. Both clauses
-/// are load-bearing against real lines in these workflows:
-/// `"${TAG#v}"` is parameter expansion inside a quoted string,
-/// not a comment, and it is neither preceded by whitespace nor
-/// outside quotes.
+/// sits outside a quoted scalar. Both clauses are load-bearing
+/// against real lines in these workflows: `"${TAG#v}"` is
+/// parameter expansion inside a quoted string, not a comment,
+/// and it is neither preceded by whitespace nor outside quotes.
+///
+/// The two quote KINDS are tracked apart. One shared tally
+/// counted an apostrophe inside a double-quoted scalar —
+/// `ref: "main's tip"` — as opening a quote, leaving the rest of
+/// that line comment-blind, so a needle could be satisfied by
+/// comment text on it. `guard-prover` shipped exactly that past
+/// the checkout clause (#1154, 2026-09-07); no line in either
+/// workflow leaked at the time, which is why it was latent
+/// rather than a live false green.
 private func strippingComment(_ line: Substring) -> String {
     if line.trimmingCharacters(in: .whitespaces).hasPrefix("#") {
         return ""
     }
-    var quotes = 0
+    var inDouble = false
+    var inSingle = false
     var kept = ""
     var previous: Character?
     for character in line {
-        if character == "\"" || character == "'" { quotes += 1 }
-        if character == "#", quotes % 2 == 0,
+        if character == "\"", !inSingle { inDouble.toggle() }
+        if character == "'", !inDouble { inSingle.toggle() }
+        if character == "#", !inDouble, !inSingle,
             previous?.isWhitespace == true
         {
             break

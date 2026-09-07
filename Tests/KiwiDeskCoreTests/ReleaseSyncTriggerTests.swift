@@ -3,20 +3,17 @@ import Testing
 
 /// The release sync PR must be able to land without a human.
 ///
-/// `.github/workflows/changelog.yml` opens its PR with
-/// `GITHUB_TOKEN`, and a PR opened with that token raises no
-/// `pull_request` — so `ci.yml` reports neither of the two
-/// contexts branch protection requires, and the PR sits BLOCKED
-/// with nothing to press. Every release so far has needed a
-/// human between publishing and the update feed going live
-/// (#1154); packaging-and-release.md ▸ CI carries the argument.
+/// A PR raised with `GITHUB_TOKEN` fires no `pull_request`, so
+/// `ci.yml` reports neither of the two contexts branch
+/// protection requires and the PR sits BLOCKED with nothing to
+/// press. `.github/workflows/changelog.yml` must therefore not
+/// depend on that token for anything its landing needs (#1154);
+/// packaging-and-release.md ▸ CI carries the argument.
 ///
-/// Three couplings, each breakable by an edit that breaks
-/// nothing else that reports: the dispatch and the grant it
-/// needs; the arming, and its refusal to claim success without
-/// asking; and the input NAME, one string across two files,
-/// read off the dispatching side and required of the accepting
-/// one.
+/// Every clause here is a coupling breakable by an edit that
+/// breaks nothing else that reports. That is the shape rather
+/// than a count: the tests in this file ARE the register, so a
+/// new coupling is a new `@Test` and not a number to update.
 ///
 /// Reads through `workflowSource` / `workflowStep` rather than a
 /// local copy: both files argue this mechanism in prose that
@@ -24,11 +21,25 @@ import Testing
 /// a needle being satisfied by a step that is not the one under
 /// test (guard-prover and architect review, 2026-08-31).
 ///
-/// **What this cannot see**: whether the dispatch is permitted
-/// at all — that also needs the repo-level "Allow GitHub Actions
-/// to create and approve pull requests" setting, which is not a
-/// file — nor whether the merge queue accepts an entry a bot
-/// armed. Only a real release answers the second.
+/// Since #1154 was reopened all three gates are measured, on
+/// v1.1.2's #1191: CI never reported (the dispatch fixes that),
+/// the bot's own workflows sat at "Approve and run", and the
+/// merge queue never took the auto-merge the bot armed. Only a
+/// token belonging to a real actor clears the second and third,
+/// so the job threads ONE token through the push, the PR and
+/// the arming, and the dispatch — which exists only because
+/// `github.token` fires nothing — stands down when that token
+/// is present.
+///
+/// **What this cannot see**, none of it a file: whether the
+/// secret is actually SET — a repository without
+/// `RELEASE_SYNC_TOKEN` falls back and every clause still
+/// passes, correctly, because the fallback is the shape guarded
+/// and not the credential; whether the FALLBACK's `gh pr create`
+/// is permitted at all, which also needs the repo-level "Allow
+/// GitHub Actions to create and approve pull requests" setting;
+/// and whether the merge queue takes what was armed. Only a real
+/// release answers the last.
 @Suite("Release sync trigger")
 struct ReleaseSyncTriggerTests {
     /// The step that opens, starts and arms, by its own name.
@@ -133,6 +144,41 @@ struct ReleaseSyncTriggerTests {
             """
             the sync job cannot dispatch a workflow without \
             `actions: write`
+            """
+        )
+    }
+
+    @Test("The hand-started CI stands down for a real token")
+    func dispatchStandsDownForThePat() throws {
+        let yaml = try workflowSource("changelog.yml")
+        let lines = try workflowStep(Self.prStep, in: yaml)
+            .split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+        let dispatch = try #require(
+            lines.firstIndex {
+                $0.contains("gh workflow run")
+                    && $0.contains("ci.yml")
+            },
+            "the sync step no longer starts CI at all"
+        )
+        // The CONDITION, not a mention of the flag: an
+        // inverted `= "true"` reads as guarded while it
+        // returns the fallback to the BLOCKED state this
+        // change ends. Polarity IS the decision here.
+        // The dispatch exists ONLY because `github.token` raises
+        // no `pull_request`. Left unconditional, a real token
+        // fires it too and two suites report the same required
+        // contexts — a race over which verdict lands.
+        #expect(
+            lines[..<dispatch].contains {
+                $0.hasPrefix("if ")
+                    && $0.contains("$SYNC_TOKEN_IS_PAT")
+                    && $0.contains("!=")
+            },
+            """
+            the CI dispatch is unconditional — with a real token \
+            it duplicates the checks `pull_request` already \
+            reports (#1154)
             """
         )
     }
