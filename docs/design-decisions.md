@@ -4780,7 +4780,11 @@ Light / Dark*; System is the default and stores nothing.
   — a new concrete value — looked fine (found on device before it
   shipped). Assigning `NSApp.appearance = nil` hands the decision
   back to macOS, and AppKit propagates it to every window,
-  including ones opened later.
+  including ones opened later. One surface overrides the pick by
+  ruling: a bar's Liquid Glass with a dark Fill pins `.darkAqua`
+  on the glass view whatever the pick says — the Fill decides
+  where the bar is dark, the pick the rest (#1308, the Liquid
+  Glass ruling under *App Bar*).
 - **Core carries the choice, the GUI maps it** (the #96 seam
   applied to a value type). `AppearanceChoice` is a case with no
   AppKit in it; the mapping onto `NSAppearance` lives where AppKit
@@ -9003,18 +9007,33 @@ in-process log showed every KiwiDesk input identical on both
 one thing different: `NSGlassEffectView`'s adaptive content
 colour scheme, which the OS decides PER VIEW from the backdrop
 that view samples and then holds until a far brighter backdrop
-flips it. Either bar could be the dark one — the App Bar usually
-was because the bottom edge launches over the darker band of a
-wallpaper — and five eyeball readings on the issue each blamed
-whichever bar happened to be in the dark state. The ruling: the
-variant is DECIDED, once, from the Fill, in `GlassTint.apply` —
-a dark Fill pins `.darkAqua` on the glass view, a light Fill
-leaves the OS's light scheme, which its bright tint holds — so two
-bars sharing a Fill cannot diverge, and every bundled palette
-shares it. Three measured facts fix the shape. **Only dark can be
-pinned:** `.aqua` is the effective appearance the bars already
-carry, and the material keeps adapting under it, so a light pin
-would be a private `_adaptiveAppearance` write, refused. **The
+flips it. Either bar can be the dark one — the App Bar usually
+is, because the bottom edge launches over the darker band of a
+wallpaper — so a reading that names one bar as "the dark one" is
+reading the state, not the cause; the fix is a rule both bars
+follow, never a correction to whichever bar looked wrong. The
+ruling: the variant is DECIDED, once, from the Fill, in
+`GlassTint.apply` — a dark Fill pins `.darkAqua` on the glass
+view; a light Fill pins nothing, so the glass carries the app's
+appearance, `NSApp.appearance` as the Settings Appearance pick
+writes it (#678 item 8, above): dark under a Dark pick, and under
+Light or System the OS's own light scheme, which the bright tint
+holds — so two bars sharing a dark Fill cannot diverge, and two
+sharing a light one match wherever the pick is Dark. **Precedence,
+ruled here because two sanctioned writers now reach one view:**
+the Fill decides where it is dark, since the plate IS the Fill's
+colour and the dark variant is the one the ink reads on; the
+Appearance pick decides only the light branch. A user who picks
+Light for KiwiDesk's own windows and a dark bar Fill gets a dark
+bar, which is what they asked the bar to be.
+Every bundled palette gives both bars one Fill, and all but
+**Clean Light** a dark one. Three measured facts fix the shape.
+**Only dark can be pinned** — measured on macOS 26.6.2 under a
+light app appearance, where `.aqua` is what the bars already
+carry: pinning it changes nothing and the material keeps adapting
+under it, so a light pin would be a private `_adaptiveAppearance`
+write, refused. Whether `.aqua` pins light under a Dark app
+appearance is unmeasured, and nothing depends on it. **The
 dark variant is the legible one on a dark Fill:** on the shipped
 moss, palette ink `#EAF3EE` is 4.2:1 on the light variant and
 8.2:1 on the dark, and the active `#8DB354` FAILS at 2.0:1 on the
@@ -9024,10 +9043,12 @@ it adapts the same way, and its light variant puts the ink at
 1.9:1. The threshold is `wantsLightInk`'s, the one the mark
 glyphs already use, so "this fill wants light ink" and "this fill
 wants the dark glass" are one rule (`GlassTintPinTests`; the
-one-home clause in `GlassTintSeamTests`). Residue, stated: a
-light Fill still adapts per view, so two bars on a light Fill
-could in principle diverge over a very dark ground; unmeasured,
-and the bright tint dominates what the glass samples.
+one-home clause in `GlassTintSeamTests`). Residue, stated and
+on the [Accepted limitations](accepted-limitations.md) page: a
+light Fill — Clean Light's `#F2F2F7` is the bundled one — still
+adapts per view, so two bars on it could in principle diverge
+over a very dark ground; unmeasured, and the bright tint
+dominates what the glass samples.
 
 **Background style and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)

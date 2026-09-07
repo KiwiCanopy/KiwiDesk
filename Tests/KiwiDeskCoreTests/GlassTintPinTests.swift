@@ -8,10 +8,10 @@ import Testing
 ///
 /// macOS decides a Liquid Glass view's light or dark variant from
 /// the backdrop that view samples, and the verdict sticks — two
-/// bars sharing a Fill rendered 114 vs 68 luminance with
-/// identical KiwiDesk state, and either bar could be the dark
-/// one. `GlassTint.apply` now pins the variant from the Fill, so
-/// both bars follow one rule.
+/// bars sharing a Fill diverged, and either could be the dark one
+/// (the measurement is in `docs/design-decisions.md` ▸ Liquid
+/// Glass). `GlassTint.apply` now pins the variant from the Fill,
+/// so both bars follow one rule.
 ///
 /// These assert the CONSUMER — what the glass view's `appearance`
 /// ends up being after `apply` — rather than the pure decision,

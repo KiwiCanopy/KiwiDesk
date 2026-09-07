@@ -1648,12 +1648,15 @@ touches your running windows.
 rest; the rest behind **Style**):
 
 - **Background style**: boxed (a box per item honoring corner
-  roundness), plain (items on a shared translucent strip), or
-  **Liquid Glass** — a macOS&nbsp;26 glass plate under the items,
-  tinted by the Background color (transparent = clear glass) and
-  rounded by corner roundness. Liquid Glass appears in the picker
-  only on macOS&nbsp;26 and later; a profile that selects it still
-  opens on older macOS, where it falls back to Boxed.
+  roundness) or plain (items on a shared translucent strip).
+- **Liquid Glass**: a separate on/off finish that lays a
+  macOS&nbsp;26 glass material over the boxes or the plate.
+  Fill tints it (transparent = clear glass) and, when Fill is
+  dark, also picks the darker glass on both bars, so the two
+  bars never show different shades of glass. The toggle appears
+  only on macOS&nbsp;26 and later; a profile that turns it on
+  still opens on older macOS, which draws the Boxed or Plain
+  shape underneath it.
 - **Background size**: how far Plain's strip or the Liquid Glass
   plate reaches — **Hug items** (default; the plate wraps the
   items like the Dock wraps its icons) or **Full width**
@@ -1742,8 +1745,9 @@ hold.
 **Advanced Colors ▸ App Bar colors**, with Fill and Highlight at
 rest and the rest behind **More colors**. **Fill** is one
 knob for every filled surface: the box per item (Boxed), the shared
-plate (Plain), or the Liquid Glass **tint** (Material) — a
-transparent Fill means clear, untinted glass. The active item is
+plate (Plain), and the Liquid Glass tint when that finish is on
+— a transparent Fill means clear, untinted glass, and a dark one
+the darker glass. The active item is
 marked by the indicator (outline or edge mark), so there is no
 separate active-fill color.
 

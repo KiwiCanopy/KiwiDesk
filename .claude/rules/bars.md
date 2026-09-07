@@ -197,13 +197,18 @@ Obligations:
   `GlassTint.apply`, never left to the OS per view.** macOS
   decides a Liquid Glass view's variant from the backdrop that
   view samples and holds the verdict, so two bars sharing a Fill
-  rendered 114 vs 68 with identical KiwiDesk state, and every
-  eyeball reading blamed whichever bar was in the dark state
-  (#1308). A dark Fill pins `.darkAqua`; a light Fill leaves the
-  OS's scheme, since only dark can be pinned (`.aqua` is the
-  appearance the bars already carry, and the material adapts
-  under it). The threshold is `wantsLightInk`'s — one copy with
-  the mark glyphs — and `GlassTintPinTests` holds the consumer,
+  diverged with identical KiwiDesk state, and every eyeball
+  reading blamed whichever bar was in the dark state (#1308; the
+  numbers are in `docs/design-decisions.md` ▸ Liquid Glass). A
+  dark Fill pins `.darkAqua`; a light Fill pins nothing, so the
+  glass carries `NSApp.appearance`, which the Settings Appearance
+  pick writes (#678) — two writers reach one view, and the
+  precedence is the Fill's where it is dark and the pick's for
+  the rest, ruled in that entry. Only dark can be pinned, and
+  that fact is scoped to the ambient it was measured in by
+  `GlassTint.pinnedAppearance`'s docstring, never restated here.
+  The threshold is `wantsLightInk`'s — one copy with the mark
+  glyphs — and `GlassTintPinTests` holds the consumer,
   including that a light Fill LIFTS a pin the previous Fill left.
   Nothing else in Core writes `.appearance =` on a view
   (`GlassTintSeamTests` ▸ one-home clause, allow map empty by

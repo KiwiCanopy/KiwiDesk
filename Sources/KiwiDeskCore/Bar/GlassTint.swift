@@ -60,20 +60,14 @@ enum GlassTint {
             ? fill.withAlphaComponent(maxAlpha) : fill
     }
 
-    /// The material variant a Fill pins on the glass, `nil` where
-    /// the OS's own scheme stands.
-    ///
-    /// macOS decides Liquid Glass's light or dark variant PER VIEW,
-    /// from the backdrop that view samples, and the verdict sticks
-    /// until a far brighter backdrop flips it — so two bars sharing
-    /// a Fill diverged (#1308). A dark Fill pins the dark variant,
-    /// which is also the one the palette ink is legible on; a light
-    /// Fill leaves the OS's light scheme, which its bright tint
-    /// holds. Only dark CAN be pinned: `.aqua` is the effective
-    /// appearance the bars already carry, and the material keeps
-    /// adapting under it — measured on macOS 26.6.2, #1308. The
-    /// threshold is `wantsLightInk`'s, so the fill that wants light
-    /// ink is the fill that wants the dark glass: one copy.
+    /// The variant a Fill pins on the glass: `.darkAqua` for a dark
+    /// Fill, `nil` — the app's appearance, `NSApp.appearance` as the
+    /// Settings pick writes it — for a light or transparent one. The
+    /// threshold is `wantsLightInk`'s; hue decides, an alpha above
+    /// zero does not. Only dark is pinned because only dark CAN be:
+    /// measured on macOS 26.6.2 under a light app appearance, `.aqua`
+    /// leaves the material adapting (#1308; the argument is in
+    /// `docs/design-decisions.md` ▸ Liquid Glass).
     @MainActor
     private static func pinnedAppearance(
         _ hex: String
