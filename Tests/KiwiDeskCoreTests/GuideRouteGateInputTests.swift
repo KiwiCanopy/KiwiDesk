@@ -30,6 +30,11 @@ struct GuideRouteGateInputTests {
         let inputs = [
             "Sources/KiwiDesk/SupportLinks.swift",
             "scripts/check-site-tokens.py",
+            // The site gate RUNS this one and the check above
+            // IMPORTS it (#1232), so it is an input to the gate
+            // twice over — and the macOS suites shell out to it
+            // without ever running it against the real corpus.
+            "scripts/unreleased-strip",
         ]
         for input in inputs {
             #expect(

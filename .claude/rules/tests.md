@@ -44,7 +44,17 @@ bite large test PRs:
     Extracted at the **fifth** copy (#252's merge-keys suite,
     per the #249 architect review); a divergent copy silently
     changes what a suite observes (an undrained pipe, a missed
-    `stderr`) without failing anything.
+    `stderr`) without failing anything. **Its `ScriptFixture+*`
+    extensions are covered by this same bullet** — they are the
+    one fixture split across files by the §2.1 ceiling rather
+    than a second concern, and each states its own subject in its
+    docstring: `+Worksheets` the third tree `extract-keys`
+    writes outside every shipped directory, `+Unreleased` the
+    docs corpus `scripts/unreleased-strip` sweeps (#1232). The
+    harm is the family's: `+Unreleased` hands back the pages it
+    RE-READ from disk, and a copy that returned the fixture it
+    was given instead would leave every corpus assertion in two
+    suites comparing a page against itself.
   - *the packaged-bundle plist reader* in
     `BuildPlistValue.swift` — one `Info.plist` value from
     `scripts/build-app.sh`, spawned through `read-plist-key`
@@ -80,7 +90,14 @@ bite large test PRs:
     read against the whole file can be satisfied by a step that
     is not the one under test, which #968 shipped and
     `guard-prover` caught — so where a needle is read is as
-    load-bearing as what was stripped from it.
+    load-bearing as what was stripped from it. And, since #1232,
+    **shell-array reading** (`workflowArray`), one level in
+    again: two clauses had anchored on an array's closing paren,
+    which pinned its FORMATTING as a side effect of pinning
+    membership and went red on a third entry being appended —
+    a copy that parsed the array less completely would leave one
+    suite's membership check passing on a list it only half
+    read.
   - *colour-vision maths* in `ColorVision.swift` — the
     Viénot protanopia transform and the measures the CVD guards
     assert on. **Which suites share it is that file's own doc

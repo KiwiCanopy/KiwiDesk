@@ -67,13 +67,23 @@ struct AppcastPublishWorkflowTests {
     @Test("the notes and the feed land in one commit")
     func bothArtifactsInOnePR() throws {
         let yaml = try workflow("changelog.yml")
-        #expect(
-            yaml.contains(
-                "SYNCED=(site/src/data/changelog.json\n"
-                    + "                  site/public/appcast.xml)"
-            ),
-            "both files must be in the one synced list"
-        )
+        let synced = try workflowArray("SYNCED", in: yaml)
+        // By FILENAME, not by full path, and not to be
+        // "corrected" back. A Swift string literal opening with
+        // the site directory's name is what `CiPathFilterTests`
+        // refuses — that tree is on `.github/ci-ignore.txt`, so a
+        // suite reading a path CI hides from it cannot fire for
+        // the edit it watches, and the needle is the literal
+        // rather than the read. What this clause reads is
+        // changelog.yml's array, which is not on that list; a
+        // wrong directory is loud anyway, `git add` failing on a
+        // path that is not there.
+        for artifact in ["changelog.json", "appcast.xml"] {
+            #expect(
+                synced.contains { $0.hasSuffix("/\(artifact)") },
+                "\(artifact) is not in the one synced list"
+            )
+        }
         #expect(yaml.contains(#"git add "${SYNCED[@]}""#))
     }
 
@@ -123,7 +133,9 @@ struct AppcastPublishWorkflowTests {
         )
         let yaml = try workflow("changelog.yml")
         #expect(
-            yaml.contains("/\(name))"),
+            try workflowArray("SYNCED", in: yaml).contains {
+                $0.hasSuffix("/\(name)")
+            },
             "the synced path must end in the shipped feed's name"
         )
     }

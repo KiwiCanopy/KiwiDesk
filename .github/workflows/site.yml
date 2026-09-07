@@ -8,10 +8,16 @@ name: Site
 # SupportLinks.swift is here because check-site-tokens.py reads it
 # (#1019): it names the guide routes the APP links, and the check
 # that the site serves them is only sound if it runs when either
-# side moves. The script itself is here for the same reason one
-# level up — editing a check did not previously run it, and three
-# of its checks now read inputs from outside site/. Both are
-# inputs to the GATE, not to the build.
+# side moves. unreleased-strip is here on that same ground twice
+# over (#1232): this gate RUNS it against the corpus, and
+# check-site-tokens.py IMPORTS it for the marker's grammar, so an
+# edit to it that reds the real docs would otherwise reach main
+# with nothing having run it. The script itself is here for the
+# same reason one
+# level up — editing a check did not previously run it, and
+# several of its checks read inputs from outside site/. Both are
+# inputs to the GATE, not to the build. Written without a count:
+# #1232 moved it, and a number here is one nothing derives.
 # pull_request has no branch filter so it also validates the
 # stacked docs → site PR chain before either reaches main.
 on:
@@ -23,6 +29,7 @@ on:
       - "assets/**"
       - "Sources/KiwiDesk/SupportLinks.swift"
       - "scripts/check-site-tokens.py"
+      - "scripts/unreleased-strip"
       - ".github/workflows/site.yml"
   pull_request:
     paths:
@@ -31,6 +38,7 @@ on:
       - "assets/**"
       - "Sources/KiwiDesk/SupportLinks.swift"
       - "scripts/check-site-tokens.py"
+      - "scripts/unreleased-strip"
       - ".github/workflows/site.yml"
 
 concurrency:
@@ -76,3 +84,22 @@ jobs:
       # skipped assertion.
       - name: Check the shared brand tokens and the branded 404
         run: python3 ../scripts/check-site-tokens.py --dist dist
+
+      # The unreleased-marker plugin's own subject (#1232). The
+      # artifact clauses in the check above go vacuous whenever
+      # the corpus carries no marker, which is most of the time —
+      # scripts/unreleased-strip retires them all at each release
+      # — so this is what actually holds the plugin's behavior.
+      - name: Check the unreleased-docs marker
+        run: |
+          set -euo pipefail
+          node test-unreleased.mjs
+          # And the CORPUS, at PR time. The release-time sweep is
+          # fail-fast, and it sits in the workflow that carries
+          # the appcast — so a malformed `:::` reaching `main`
+          # would block the update feed on a docs typo. Validating
+          # here is what lets that sweep stay fail-fast: `docs/**`
+          # is a path input of this workflow and is not on
+          # `.github/ci-ignore.txt`, so no docs change reaches
+          # `main` without passing this.
+          python3 ../scripts/unreleased-strip --check

@@ -42,6 +42,15 @@ Every docs page needs Starlight frontmatter or the site build
 breaks. A new page also needs a sidebar entry — see
 [site.md](site.md).
 
+**A block describing behavior no release has yet carries
+`:::unreleased` in the same change set that writes it.** The site
+auto-deploys from `main`, so the page otherwise describes `main`
+to a reader running the last release. The marker takes no version
+and is retired for you at the next release —
+[site.md](site.md) ▸ *Unreleased docs mark themselves* owns the
+whole argument, and it is stated here because that file does not
+load for whoever edits `docs/**`.
+
 ## `docs/accepted-limitations.md`
 
 When a review or manual pass classifies a behavior as

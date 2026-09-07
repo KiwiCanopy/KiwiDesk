@@ -6,6 +6,7 @@ import icon from "astro-icon";
 import mermaid from "astro-mermaid";
 import { unified } from "@astrojs/markdown-remark";
 import { remarkDocsLinks } from "./remark-docs-links.mjs";
+import { remarkUnreleased } from "./remark-unreleased.mjs";
 
 // The public site URL. Override with SITE_URL at build time
 // for a one-off local build; production uses the committed
@@ -21,7 +22,13 @@ export default defineConfig({
   // it feeling like the instant switch it replaced.
   prefetch: true,
   // Rewrite the canonical docs' GitHub-style `.md` links to
-  // Starlight routes and drop their duplicate H1 (see the plugin).
+  // Starlight routes and drop their duplicate H1 (see the plugin),
+  // and badge a `:::unreleased` block (#1232). Starlight
+  // registers `remark-directive` for its own asides, so the block
+  // is already parsed by the time these transformers run; an
+  // unhandled one renders as a bare <div> with no trace of the
+  // marker, which is why check-site-tokens.py asserts on the
+  // BUILT pages rather than on this list.
   //
   // On `markdown.processor`, never the deprecated
   // `markdown.remarkPlugins` array (#985): that shim drops the
@@ -31,7 +38,9 @@ export default defineConfig({
   // `markdown.processor`", and the built pages are guarded by
   // scripts/check-site-tokens.py ▸ check_markdown_pipeline.
   markdown: {
-    processor: unified({ remarkPlugins: [remarkDocsLinks] }),
+    processor: unified({
+      remarkPlugins: [remarkDocsLinks, remarkUnreleased],
+    }),
   },
   integrations: [
     // Renders ```mermaid fenced blocks in docs as diagrams,

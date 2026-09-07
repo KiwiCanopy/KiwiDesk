@@ -38,6 +38,14 @@ count in this sentence for the next author to falsify.
    between a `filter` callback in astro.config.mjs and a
    hand-maintained `paths` array, and nothing else can see the two
    disagree.
+6. Every `:::unreleased` block in the docs corpus reached the
+   reader as a badge (#1232). Artifact-read for the same reason as
+   4: the marker dies both by shipping verbatim as prose and by
+   rendering as a bare wrapper with no trace of itself, and both
+   leave a green build. The marker's grammar is not restated here
+   — `scripts/unreleased-strip` owns it and this loads it.
+   `site/test-unreleased.mjs` is the other half; see that check's
+   own note on what it cannot do alone.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -58,6 +66,8 @@ of a silently skipped assertion.
 from __future__ import annotations
 
 import argparse
+import importlib.machinery
+import importlib.util
 import io
 import json
 import pathlib
@@ -85,6 +95,13 @@ ABSOLUTE_URL = re.compile(r"[a-z][a-z0-9+.-]*:", re.I)
 # The class Starlight puts on the anchor beside every heading
 # its own remark/rehype pass rewrites.
 STARLIGHT_ANCHOR = "sl-anchor-link"
+# A <code> or <pre> element in a built page: where a marker is
+# an example rather than a marker. The MARKDOWN side of that
+# rule belongs to `scripts/unreleased-strip` and is read from
+# there — see `unreleased_parser`.
+MARKUP_CODE = re.compile(
+    r"<(pre|code)\b.*?</\1>", re.I | re.S
+)
 TOKEN_DECL = re.compile(r"(--kiwi-[a-z0-9-]+)\s*:\s*([^;}]+)")
 SCAN_SUFFIXES = {".css", ".astro", ".ts", ".js", ".mjs"}
 LIGHT = (
@@ -188,6 +205,39 @@ def contrast(fg: str, bg: str) -> float:
     return (hi + 0.05) / (lo + 0.05)
 
 
+def badge_ground(css_class: str) -> str:
+    """The token `.<css_class>` paints its background with.
+
+    Derived from the rule itself so the contrast clause below
+    measures the ground the badge is actually drawn on — naming
+    the token here instead is how a guard keeps passing after the
+    thing it watches has moved (#1232).
+    """
+    text = source(STYLES / "theme.css")
+    rule = re.search(
+        rf"\.{re.escape(css_class)}\s*\{{([^}}]*)\}}", text
+    )
+    if not rule:
+        fail(
+            f"theme.css carries no `.{css_class}` rule — the "
+            "unreleased badge's ground is read from it (#1232)"
+        )
+        return ""
+    paint = re.search(
+        r"background\s*:\s*var\(\s*(--[a-z0-9-]+)\s*\)",
+        rule.group(1),
+    )
+    if not paint:
+        fail(
+            f"theme.css: `.{css_class}` no longer paints its "
+            "background from a var() — this check reads the "
+            "badge's ground off that declaration rather than "
+            "naming a token of its own (#1232)"
+        )
+        return ""
+    return paint.group(1)
+
+
 def check_accent(tokens: dict[str, str]) -> None:
     fill = tokens.get("--kiwi-flesh")
     ink = tokens.get("--kiwi-ink")
@@ -217,6 +267,34 @@ def check_accent(tokens: dict[str, str]) -> None:
         print(f"contrast {ratio:.2f}:1 on {surface} {bg}")
         if ratio < 4.5:
             fail(f"{text} is {ratio:.2f}:1 on {bg}, below WCAG AA")
+
+    # The unreleased badge's title is the accent as TEXT on a
+    # Starlight gray, a pairing the brand tokens above cannot see
+    # (#1232). The GROUND is read off the badge's own rule rather
+    # than named here: a check that hand-wrote the token would
+    # keep measuring it after the badge moved to a darker one, and
+    # `guard-prover` proved exactly that against the first draft —
+    # switching the rule to gray-6 (4.32:1, below AA) left this
+    # output byte-identical.
+    # The WRAPPER paints the ground; the title is the text on it.
+    wrapper, _ = unreleased_classes()
+    ground_token = badge_ground(wrapper)
+    ground = light_role(STYLES / "theme.css", ground_token)
+    if not ground.startswith("#"):
+        fail(
+            f"theme.css: light {ground_token} is `{ground}`, and "
+            "the unreleased badge's title is drawn on it — this "
+            "check needs a hex to measure"
+        )
+    ratio = contrast(text, ground)
+    print(f"contrast {ratio:.2f}:1 on {ground_token} {ground}")
+    if ratio < 4.5:
+        fail(
+            f"the unreleased badge's title is {text} on {ground} "
+            f"({ground_token}), {ratio:.2f}:1 — below WCAG AA "
+            "(#1232). Either move the badge to a lighter ground "
+            "or retune the accent."
+        )
 
 
 def check_branded_404(dist: pathlib.Path) -> None:
@@ -992,6 +1070,190 @@ def check_markdown_pipeline(dist: pathlib.Path) -> None:
     )
 
 
+def unreleased_parser():
+    """`scripts/unreleased-strip`, loaded as a module.
+
+    The marker's grammar — its spelling, which fences make an
+    example, how container directives nest — is that script's, and
+    reading it from here rather than restating it is the same rule
+    `check_appcast` follows with the shipped feed URL. Two copies
+    with different coverage is not a theory: the first draft of
+    this check saw ``` fences and not `~~~`, so a `~~~`-fenced
+    EXAMPLE would have redded the site build with the diagnosis
+    "the plugin stopped running" (architect review, #1232).
+    """
+    path = REPO / "scripts" / "unreleased-strip"
+    spec = importlib.util.spec_from_loader(
+        "unreleased_strip",
+        importlib.machinery.SourceFileLoader(
+            "unreleased_strip", str(path)
+        ),
+    )
+    if spec is None or spec.loader is None:
+        fail(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def unreleased_classes() -> tuple[str, str]:
+    """The badge's CSS classes, read off the plugin.
+
+    The DIRECTIVE beside them is the strip's to read; these are
+    the artifact's, and the only things this check needs that the
+    parser does not already answer.
+    """
+    src = REPO / "site" / "remark-unreleased.mjs"
+    try:
+        text = src.read_text(encoding="utf-8")
+    except OSError as error:
+        fail(f"cannot read {src} ({error})")
+        return ("", "")
+    found = {}
+    for name in ("CLASS", "TITLE_CLASS"):
+        match = re.search(
+            rf'export const {name}\s*=\s*"([^"]+)"', text
+        )
+        if not match:
+            fail(
+                f"{src} no longer exports {name} — this check "
+                "reads the badge's spelling from there rather "
+                "than restating it."
+            )
+            return ("", "")
+        found[name] = match.group(1)
+    return (found["CLASS"], found["TITLE_CLASS"])
+
+
+def check_unreleased_markers(dist: pathlib.Path) -> None:
+    """Every `:::unreleased` block in the corpus reached the
+    reader as a badge (#1232).
+
+    `.claude/rules/site.md` ▸ *Unreleased docs mark themselves*
+    owns the design. What this holds is the half no fixture can:
+    the REAL pipeline — Starlight's processor, the docs symlink,
+    `dist/` — still delivers.
+
+    1. **No literal marker shipped.** `remark-directive` reaches
+       the pipeline through Starlight's own asides, not through
+       anything we declare, so a Starlight change can withdraw it
+       and the block then ships verbatim as prose.
+    2. **The corpus and the artifact agree, by count.** An
+       unhandled container directive renders as a bare <div>
+       carrying its children and no trace of the marker (astro
+       7.2.9 / starlight 0.42, 2026-09-07), which is what a
+       plugin that stopped running looks like.
+    3. **Every badge carries its visible title.** Counting the
+       wrapper alone passed on an aside rendering with no
+       "Unreleased" text in it at all.
+
+    Clause 2 is also the only thing that can catch a SWEEP whose
+    grammar is narrower than remark's — `scripts/unreleased-strip`
+    re-reads through its own parser, so a marker it cannot see is
+    invisible to its own postcondition too. `changelog.yml` builds
+    the site after the sweep for exactly this reason.
+
+    **What this cannot do alone.** Between releases the corpus is
+    usually EMPTY of markers, and on an empty corpus both clauses
+    pass for having looked at nothing — the shape
+    rule-authoring.md ▸ "Prove a new guard reds" names as its
+    sharpest instance. `site/test-unreleased.mjs` is the plugin's
+    own subject and is where its behavior is pinned; this is the
+    pipeline's.
+
+    On the SITE gate for `check_promoted_download`'s reason.
+    """
+    parser = unreleased_parser()
+    css, title_css = unreleased_classes()
+    try:
+        directive = parser.directive()
+    except parser.Malformed as error:
+        fail(str(error))
+        return
+
+    docs = REPO / "docs"
+    expected = 0
+    for source_file in sorted(docs.rglob("*.md")):
+        try:
+            expected += len(
+                parser.markers(
+                    source_file.read_text(encoding="utf-8"),
+                    directive,
+                )
+            )
+        except parser.Malformed as error:
+            fail(f"{source_file.relative_to(REPO)}: {error}")
+            return
+
+    pages = sorted(dist.rglob("*.html"))
+    if not pages:
+        fail(
+            f"no HTML found under {dist} — this check would pass "
+            "for having looked at nothing."
+        )
+        return
+
+    aside = re.compile(
+        rf'<aside\b[^>]*\bclass="[^"]*\b{re.escape(css)}\b[^"]*"'
+        r"[^>]*>",
+        re.I,
+    )
+    # The badge's VISIBLE half, counted separately. An aside that
+    # renders with no title in it says nothing to the reader,
+    # which is the whole point of the feature — and counting the
+    # wrapper alone passed on exactly that (guard-prover, #1232).
+    titled = re.compile(
+        rf'class="[^"]*\b{re.escape(title_css)}\b[^"]*"', re.I
+    )
+    rendered = 0
+    visible = 0
+    literals: list[str] = []
+    for page in pages:
+        html = page.read_text(encoding="utf-8")
+        # A documented example lives inside <code>/<pre>, where
+        # the literal is the point rather than a leak.
+        if f":::{directive}" in MARKUP_CODE.sub("", html):
+            literals.append(str(page.relative_to(dist)))
+        rendered += len(aside.findall(html))
+        visible += len(titled.findall(html))
+
+    problems = []
+    if literals:
+        problems.append(
+            f"built page(s) shipping a raw `:::{directive}` "
+            f"marker as prose: {sorted(literals)}\n"
+            "  The block was never parsed as a directive — "
+            "`remark-directive` reaches the pipeline through "
+            "Starlight's asides, so a Starlight change can "
+            "withdraw it (#1232)."
+        )
+    if rendered != expected:
+        problems.append(
+            f"the docs corpus carries {expected} :::{directive} "
+            f"marker(s) and the built pages badge {rendered}.\n"
+            "  remark-unreleased.mjs stopped running, or stopped "
+            "reaching the docs (#1232). An unhandled container "
+            "directive renders as a bare <div> with no trace of "
+            "the marker."
+        )
+    if visible != rendered:
+        problems.append(
+            f"{rendered} badge wrapper(s) in the built pages "
+            f"carry {visible} visible title(s).\n"
+            "  A badge with no title in it tells the reader "
+            "nothing, which is the whole of what the marker is "
+            "for (#1232)."
+        )
+    if problems:
+        fail("\n".join(problems))
+
+    print(
+        f"unreleased markers: {expected} in the corpus, "
+        f"{rendered} badged (all titled) across {len(pages)} "
+        "built page(s)"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1012,6 +1274,7 @@ def main() -> None:
     check_sitemaps_disjoint(dist)
     check_var_references(dist)
     check_markdown_pipeline(dist)
+    check_unreleased_markers(dist)
 
 
 if __name__ == "__main__":
