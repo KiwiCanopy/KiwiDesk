@@ -30,7 +30,11 @@ struct SettingsSlider: View {
             // Refuse click-born focus on macOS 26; the predicate
             // is shared, the wiring is per-site by necessity
             // (`ClickBornFocus`).
-            guard now, ClickBornFocus.isClickBorn else { return }
+            guard now,
+                ClickBornFocus.isClickBorn(
+                    focusMayBeADescendant: false
+                )
+            else { return }
             focused = false
         }
         .onKeyPress(.leftArrow) { nudge(-1) }

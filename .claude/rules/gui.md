@@ -1027,6 +1027,19 @@ claim; the obligations a change here takes on:
   both statements run after the dispatching event is gone, so
   asking at the use site reads whatever event is current then,
   which is the bug rather than the fix.
+- **A refusal spelled on a CONTAINER's focus binding says
+  whether its focus can land on a descendant** (#1309). A
+  container's `.focused($x)` reads "focus is WITHIN me", so a
+  click into a `TextField` inside it turns the binding true
+  exactly as the container's own ring would — and a refusal that
+  cannot tell them apart clears the field the user aimed at,
+  which shipped as a dead hex field and, before that, as a
+  deleted one (#1279). The choice is the CALLER's and is stated
+  at the call, never inferred: `ClickBornFocusTests` derives the
+  population the way `ArrivalRingTests.clickRefusalCensus` does
+  and reds on a focusable control that rules neither value. A
+  leaf passes `false`, which keeps #991's ring reachable for it
+  rather than merely likely.
 
 ## Colour (#678 turn 16b)
 
