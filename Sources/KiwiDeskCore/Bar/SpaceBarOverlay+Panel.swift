@@ -85,7 +85,12 @@ extension SpaceBarOverlay {
             teardownGlassRun()
             glassPlate?.isHidden = true
             glassTint?.isHidden = true
-        case .plainGlassHug, .plainGlassSpan:
+        case .plainGlassHug:
+            teardownBoxGlasses()
+            // Created here, before the front segment renders, so
+            // the run can be its host (#1315).
+            glassRun = glassRun ?? AppBarOverlay.FlippedView()
+        case .plainGlassSpan:
             teardownBoxGlasses()
         case .plainPlate, .none:
             teardownBoxGlasses()
@@ -94,6 +99,20 @@ extension SpaceBarOverlay {
             glassPlate?.isHidden = true
             glassTint?.isHidden = true
         }
+    }
+
+    /// The view the front segment renders into under `mode`: the
+    /// panel content while pinned, the glass run while it hugs —
+    /// so a steady render reparents nothing (#1315) — else the
+    /// item container.
+    func frontHost(
+        for mode: GlassHosting,
+        pinnedFront: Bool,
+        content: NSView?
+    ) -> NSView? {
+        if pinnedFront { return content }
+        if mode == .plainGlassHug, let run = glassRun { return run }
+        return itemContainer
     }
 
     /// Installs glass views after item layout passes (#407).

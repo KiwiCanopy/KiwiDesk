@@ -145,7 +145,8 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Shrinks glass plate to hug run items and front segment.
+    /// Shrinks glass plate to hug run items and front segment. The
+    /// run is `prepareGlassHosting`'s to create (#1315).
     private func hugRun(
         plate: NSView,
         content: NSView,
@@ -154,8 +155,7 @@ extension SpaceBarOverlay {
         radius: CGFloat,
         style: SpaceBarStyle
     ) {
-        let run = glassRun ?? AppBarOverlay.FlippedView()
-        glassRun = run
+        guard let run = glassRun else { return }
         if GlassPlate.holds(plate, itemContainer) {
             GlassPlate.detach(plate)
             content.addSubview(
@@ -167,8 +167,12 @@ extension SpaceBarOverlay {
         }
         let dx = viewport.minX - plateFrame.minX
         let dy = viewport.minY - plateFrame.minY
+        // The offset applies to what THIS render laid out; a
+        // hidden view kept its last frame and would drift by the
+        // delta every pass (#1315).
         for view in glassRunViews {
             if view.superview !== run { run.addSubview(view) }
+            guard !view.isHidden else { continue }
             view.frame = view.frame.offsetBy(dx: dx, dy: dy)
         }
         if !GlassPlate.holds(plate, run) {

@@ -138,7 +138,11 @@ extension SpaceBarOverlay {
             view.isLastInRun =
                 index == items.count - 1 && frontApp == nil
         }
-        frontHost = pinFront ? panel.contentView : itemContainer
+        frontHost = frontHost(
+            for: hosting,
+            pinnedFront: pinFront,
+            content: panel.contentView
+        )
         renderFrontSegment(
             frontApp,
             after: pinFront ? spacesAxis + gap : metrics.frontStart,
