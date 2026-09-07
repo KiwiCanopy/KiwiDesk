@@ -3924,7 +3924,7 @@ a pill on the full-screen window saying full-screen windows
 can't be resized; CLI and IPC callers read `the focused window
 is fullscreen`.
 
-Distinct from that no-target alert (#933): a resize a size
+Distinct from the monocle/grid alert (#933): a resize a size
 limit **truncates** — a shrink reaching the focused window's
 effective minimum, a grow stopped where a neighbor would
 drop below its own, or a grow reaching the focused window's

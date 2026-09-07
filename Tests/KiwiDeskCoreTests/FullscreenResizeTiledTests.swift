@@ -44,6 +44,20 @@ struct FullscreenResizeTiledTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1600, height: 1000)
         }
+        // Pinned (#660): the drop case's shared-edge reading
+        // compares the neighbour's midpoint against the slot
+        // edge less half the INNER gap, so the gap decides
+        // whether an ungated drop still reads as a resize.
+        core.tiler.settings.gapsGlobal = Gaps(
+            outer: Gaps.Outer(
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 10
+            ),
+            inner: Gaps.Inner(horizontal: 16, vertical: 16)
+        )
+        #expect(core.tiler.settings.minWindowSize == 300)
         core.execute(
             "set_mode",
             args: [.string("1"), .string(mode)]
@@ -119,8 +133,11 @@ struct FullscreenResizeTiledTests {
         // second grow from the store the control just raised can
         // stop at the slot domain's own epsilon and write nothing
         // with the guard gone — a shrink from it always writes,
-        // so the store assertion below is live on every path
-        // (guard-prover, 2026-09-07).
+        // so the store assertion below is live on the four
+        // WRITING paths. On stack's weight axis and track the
+        // per-path tiled-member refusal holds the store, and the
+        // guard's own contribution there is the sentence and the
+        // cue (guard-prover, 2026-09-07).
         let response = core.execute(
             "resize",
             args: [.string(axis), .number(-100)]
