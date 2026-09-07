@@ -24,10 +24,17 @@ import Testing
 /// one list of the spellings that defer.
 @Suite("A localized value is never stored")
 struct LocalizedStaticStorageTests {
-    /// The trees scanned, each of which must yield files — a
-    /// renamed tree or a moved test file otherwise leaves this
-    /// suite green having read nothing.
-    static let roots = ["Sources/KiwiDesk", "Sources/KiwiDeskCore"]
+    /// The trees scanned — DERIVED from `Sources/` rather than
+    /// listed, so a tree cannot be dropped from the scan by
+    /// editing this file, and a new target joins it by existing.
+    /// A hand-listed pair shrank to one under `guard-prover` with
+    /// the suite still green (#1311).
+    static func roots(under repo: URL) -> [String] {
+        SourceScan.targetTrees(
+            under: repo.appendingPathComponent("Sources")
+        )
+        .map { "Sources/\($0.lastPathComponent)" }
+    }
 
     /// The spellings after which a `{ … }` run is STORED rather
     /// than run at initialisation: `NavCommand`'s three label
@@ -52,8 +59,18 @@ struct LocalizedStaticStorageTests {
         "displayLabel:", "help:", "unavailable:", "return",
     ]
 
-    /// Two further residues, both fail-open, both inherited
-    /// rather than introduced here (`guard-prover`, #1311):
+    /// Two residues are the scan's own, both fail-open, both
+    /// measured (`guard-prover`, #1311): a declaration whose type
+    /// annotation and `=` sit on different lines is invisible,
+    /// because `assignment` stops at the newline — `swift format
+    /// lint --strict` reds that spelling, so `scripts/lint.sh`
+    /// and CI are the compensating control rather than this
+    /// suite; and an eager member read in a colon-terminated
+    /// position (`[width: 1]`, storing a localized string as a
+    /// dictionary KEY) is excluded with the argument labels
+    /// `references` exists to skip.
+    ///
+    /// Two more are inherited rather than introduced here:
     /// helper reach stops at the FILE, so a stored value fed by
     /// another file's localized helper is invisible; and
     /// `SourceScan.blankingCommentsAndLiterals` toggles on plain
@@ -76,7 +93,17 @@ struct LocalizedStaticStorageTests {
     func localizedValuesAreComputed() throws {
         let root = SourceScan.repoRoot(from: "\(#filePath)")
         var offenders: [String] = []
-        for tree in Self.roots {
+        let roots = Self.roots(under: root)
+        // Derived, so it can still come back EMPTY — a moved test
+        // file resolves a `repoRoot` with no `Sources/` at all.
+        #expect(
+            roots.count > 1,
+            """
+            Sources/ yielded \(roots.count) tree(s) — this scan \
+            reads nothing like the whole codebase.
+            """
+        )
+        for tree in roots {
             let files = try SourceScan.swiftSources(
                 under: root.appendingPathComponent(tree)
             )

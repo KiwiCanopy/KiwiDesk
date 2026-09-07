@@ -34,21 +34,34 @@ extension LocalizedStaticStorageTests {
                 where: { raw.contains($0.0) }
             )
         else { return [] }
-        let source = SourceScan.blankingCommentsAndLiterals(raw)
-        let eager = Self.eagerlyLocalizingMembers(in: source)
-        var offenders: [String] = []
-        for (name, initializer) in Self.storedStatics(in: source) {
+        return Self.frozenNames(in: raw).compactMap { name in
             let key = "\(tree)/\(file.lastPathComponent):\(name)"
-            guard Self.allowed[key] == nil else { continue }
-            let body = Self.blankingDeferredClosures(initializer)
-            let reaches =
-                Self.calls("L", in: body)
-                || eager.contains { Self.references($0, in: body) }
-            if reaches {
-                offenders.append("  \(key)")
-            }
+            guard Self.allowed[key] == nil else { return nil }
+            return "  \(key)"
         }
-        return offenders
+    }
+
+    /// The stored declarations in `raw` that reach `L()` while
+    /// being initialised, by name.
+    ///
+    /// Split from `frozen` so the predicate can be driven over
+    /// hand-written source: `LocalizedStaticStorageFixtureTests`
+    /// is what makes `storingSpellings` and the walkers
+    /// load-bearing, since a row deleted from a hand-listed
+    /// register is otherwise a silent shrink (`guard-prover`,
+    /// #1311).
+    static func frozenNames(in raw: String) -> [String] {
+        let source = SourceScan.blankingCommentsAndLiterals(raw)
+        let eager = eagerlyLocalizingMembers(in: source)
+        var found: [String] = []
+        for (name, initializer) in storedStatics(in: source) {
+            let body = blankingDeferredClosures(initializer)
+            let reaches =
+                calls("L", in: body)
+                || eager.contains { references($0, in: body) }
+            if reaches { found.append(name) }
+        }
+        return found
     }
 
     /// Members of `source` whose body hands a RESOLVED localized
@@ -146,7 +159,7 @@ extension LocalizedStaticStorageTests {
                 index += 1
                 continue
             }
-            if atLineStart, index > 0, characters[index - 1] != "\n" {
+            if atLineStart, !atColumnZero(characters, index) {
                 index += 1
                 continue
             }
@@ -162,7 +175,11 @@ extension LocalizedStaticStorageTests {
                 index = cursor
                 continue
             }
-            let end = initializerEnd(characters, from: start)
+            let end = initializerEnd(
+                characters,
+                from: start,
+                indent: lineIndent(characters, at: index)
+            )
             found.append((name, String(characters[start..<end])))
             index = end
         }
@@ -187,32 +204,95 @@ extension LocalizedStaticStorageTests {
         return nil
     }
 
-    /// Where the initialiser that starts at `cursor` ends.
+    /// Where the initialiser that starts at `cursor` ends: an
+    /// unbalanced bracket continues it, and so does a following
+    /// line INDENTED past the declaration.
+    ///
+    /// Indentation rather than a set of trailing operators. The
+    /// first cut listed the characters a continued line may end
+    /// on, and `guard-prover` walked straight through it with a
+    /// ternary — `Bool.random()` ends on `)`, so the walk stopped
+    /// one line above the `? L(…)` and the freeze went unseen.
+    /// Any leading-operator continuation (`+`, `??`, `.`) is the
+    /// same shape. `swift format` owns the indentation this
+    /// leans on, so the two move together.
+    ///
+    /// What it TRADES: over-capture. A declaration followed by a
+    /// more-indented line that is NOT its continuation is read as
+    /// one, which fails SHUT — a false red naming the wrong
+    /// declaration, never a hole.
     private static func initializerEnd(
         _ text: [Character],
-        from cursor: Int
+        from cursor: Int,
+        indent: Int
     ) -> Int {
-        let continuing: Set<Character> = [
-            "=", ",", "{", "(", "[", ".", "+", "?", ":",
-        ]
         var depth = 0
         var index = cursor
-        var lineStart = cursor
         while index < text.count {
             let character = text[index]
             if "([{".contains(character) { depth += 1 }
             if ")]}".contains(character) { depth -= 1 }
-            if character == "\n" {
-                let line = text[lineStart..<index]
-                let tail = line.last { !$0.isWhitespace }
-                if depth <= 0, let tail, !continuing.contains(tail) {
-                    return index
-                }
-                lineStart = index + 1
+            if character == "\n", depth <= 0,
+                nextIndent(text, after: index) <= indent
+            {
+                return index
             }
             index += 1
         }
         return text.count
+    }
+
+    /// The indentation of the first non-empty line after
+    /// `newline`, or `0` at end of file.
+    private static func nextIndent(
+        _ text: [Character],
+        after newline: Int
+    ) -> Int {
+        var index = newline + 1
+        while index < text.count {
+            var width = 0
+            while index < text.count, text[index] == " " {
+                width += 1
+                index += 1
+            }
+            guard index < text.count else { return 0 }
+            if text[index] == "\n" {
+                index += 1
+                continue
+            }
+            return width
+        }
+        return 0
+    }
+
+    /// The indentation of the line `offset` sits on.
+    private static func lineIndent(
+        _ text: [Character],
+        at offset: Int
+    ) -> Int {
+        var start = offset
+        while start > 0, text[start - 1] != "\n" { start -= 1 }
+        var width = 0
+        while start + width < text.count,
+            text[start + width] == " "
+        {
+            width += 1
+        }
+        return width
+    }
+
+    /// Whether the line `offset` sits on begins at column zero —
+    /// which, for a bare `let`, is what makes it a global.
+    ///
+    /// The LINE rather than the keyword: `guard-prover` walked a
+    /// `@MainActor let x = L(…)` past a cut that asked whether
+    /// the `let` itself was preceded by a newline. Any modifier
+    /// spelled ahead of it has the same effect.
+    private static func atColumnZero(
+        _ text: [Character],
+        _ offset: Int
+    ) -> Bool {
+        lineIndent(text, at: offset) == 0
     }
 
     /// `text` with every deferred `{ … }` run blanked, so what is
