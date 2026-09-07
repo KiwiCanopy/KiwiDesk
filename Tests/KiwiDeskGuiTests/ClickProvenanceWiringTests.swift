@@ -97,7 +97,8 @@ struct ClickProvenanceWiringTests {
     /// class: the provenance suite injects its own reading, so
     /// nothing else reds when boot stops wiring it, and the gate
     /// then fails open before the first activation and after
-    /// every `stop()`. Both assignments off the ONE closure.
+    /// every `stop()`. Both assignments off the ONE closure, and
+    /// in that order — the needle pins the order too.
     @Test("boot wires the focus gate's frontmost reading")
     func frontmostReadingIsWired() throws {
         let source = try strippedSource()

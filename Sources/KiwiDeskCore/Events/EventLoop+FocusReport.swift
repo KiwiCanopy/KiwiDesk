@@ -9,7 +9,9 @@ extension EventLoop {
     /// can drive it past the handler's process-policy guard. It
     /// still ASKS for the id (`resolveWindowID`, #1088): a
     /// destroyed element answers nothing, which filters a dead
-    /// window for free.
+    /// window for free. Unguarded — `windowID(of:pid:)`'s privacy
+    /// is the tripwire, and `deadElementIsNotReported` is not the
+    /// pin.
     func handleFocusedWindowChanged(
         _ element: AXUIElement,
         pid: pid_t,

@@ -200,6 +200,9 @@ extension EventLoop {
             // the ignored panel gaining focus, though, so the
             // dismiss report can be distrusted later (#244).
             if elements[pid]?[id] != nil {
+                // Ungated: the app just activated, which is the
+                // gate's own source (#1322, censused in
+                // `FocusReportEmitterCensusTests`).
                 onEvent(.windowFocused(id))
             } else {
                 classifyUntrackedFocus(

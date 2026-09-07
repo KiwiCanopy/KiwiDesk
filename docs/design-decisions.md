@@ -1739,10 +1739,9 @@ is another app" until a click re-synced the two — the preflight
 was right, three seconds after the report should have been.
 
 **The ruling: the accessibility channel reports a focus only from
-the app macOS activated last.** `lastActivePid` already existed
-(the activation channel keeps it from
-`didActivateApplicationNotification`); before the first
-activation the frontmost reading stands in; with neither, the
+the app macOS activated last.** The activation channel keeps
+`lastActivePid` from `didActivateApplicationNotification`; before
+the first activation the frontmost reading stands in; with neither, the
 report stands — fails open by design, since starving focus until
 the first app switch is the worse failure. A report that fails
 the gate is **dropped**, not held for re-check: if the app does
