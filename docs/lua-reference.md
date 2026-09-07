@@ -1856,8 +1856,18 @@ it combines with either shape. `fill_color` tints the glass: a
 solid colored layer sits behind the glass and the glass refracts
 it (an `NSGlassEffectView`'s own tint carries no hue at all —
 measured on macOS 26.6.2, it only darkens — so the color is
-supplied behind it, the way the Dock tints its glass). A fully
-transparent `fill_color` leaves the glass clear. Ignored below
+supplied behind it, the way the Dock tints its glass). The
+material's light or dark variant follows the fill too: a dark
+`fill_color` pins the dark glass on both bars, where macOS left
+to itself decides the variant per bar from what lies behind it
+and lets two bars with one fill drift apart. A light
+`fill_color` pins nothing — only the dark variant can be pinned
+— and the glass follows KiwiDesk's Appearance setting instead:
+dark glass under Dark, and under Light or System macOS's own
+choice, which the bright tint normally holds at light. So the
+fill decides where the glass is dark, and the Appearance setting
+decides only the rest. A fully transparent `fill_color` leaves
+the glass clear. Ignored below
 macOS 26, where
 the Settings toggle is hidden (an OS-capability gate, absent not
 greyed); the stored value still round-trips so a profile stays
@@ -2091,7 +2101,8 @@ dark moss at 70% opacity — the alpha every bundled palette's bar
 fill also carries, so switching theme changes the hue and not how
 readable the bars are. With the `liquid_glass` finish on, it
 also tints the glass: the color sits behind the glass, which
-refracts it into its hue (see `app_bar.set_liquid_glass`). Under
+refracts it into its hue, and a dark fill selects the dark glass
+variant (see `app_bar.set_liquid_glass`). Under
 glass the backdrop's opacity is held under a ceiling so the blur
 stays visible: a fill below it renders exactly as you picked it,
 and only a more opaque one is capped. The stored value is

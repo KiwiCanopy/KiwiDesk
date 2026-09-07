@@ -19,7 +19,8 @@ struct GlassTintCensusTests {
     /// is the same residue `BarMotionSeamTests` states.
     private static let members: [String: [String]] = [
         "rendered": ["maxAlpha", "glassAvailable"],
-        "apply": ["rendered("],
+        "pinnedAppearance": ["glassAvailable", "wantsLightInk"],
+        "apply": ["rendered(", "pinnedAppearance("],
     ]
 
     /// Ways a member puts a colour on screen. One whose body

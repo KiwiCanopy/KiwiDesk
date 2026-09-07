@@ -45,6 +45,33 @@ struct GlassTintSeamTests {
     /// also configures a glass surface may not.
     private static let mintPrimitive = "kiwiHex"
 
+    /// How a view's appearance is pinned, anywhere in Core. The
+    /// glass variant is decided from the Fill in `GlassTint.apply`
+    /// (#1308); a second site pinning a glass view is a second
+    /// rule, and the two bars diverge again the moment they
+    /// disagree.
+    ///
+    /// The needle is a plain substring, read through
+    /// `pinsAppearance` so the comparison that contains it
+    /// (`.appearance == nil`) does not fire. It also matches any
+    /// Core property spelled `appearance`, not only a view's — the
+    /// trade for a needle a reformat cannot break. Residue, stated
+    /// because it fails OPEN: an unqualified `appearance = …`
+    /// inside an `NSView` subclass and a `setAppearance(` spelling
+    /// are invisible here.
+    private static let pin = ".appearance ="
+
+    /// Whether `source` writes a view's appearance: the needle,
+    /// less the `==` that contains it.
+    private static func pinsAppearance(_ source: String) -> Bool {
+        var rest = Substring(source)
+        while let hit = rest.range(of: pin) {
+            rest = rest[hit.upperBound...]
+            if rest.first != "=" { return true }
+        }
+        return false
+    }
+
     /// Files that drive `tintColor`, each naming its ruling — the
     /// one copy of who is exempt.
     ///
@@ -114,6 +141,45 @@ struct GlassTintSeamTests {
         #expect(
             Self.allowed.keys.allSatisfy(hits.contains),
             "a ruling fires on nothing: \(Self.allowed.keys)"
+        )
+    }
+
+    /// **The glass variant is pinned in one place.**
+    ///
+    /// Scope is Core, whole, with the home file exempt — and the
+    /// home file is held PRESENT as the pinning site, so this
+    /// clause cannot pass by the pin having been deleted (tests.md
+    /// ▸ a negative pin fails OPEN). No allow map: nothing in Core
+    /// pinned an appearance before #1308, and a surface that needs
+    /// one owes an argument in `docs/design-decisions.md` first.
+    @Test("Nothing in Core pins a view's appearance beside GlassTint")
+    func noSurfacePinsAppearance() throws {
+        var strays: [String] = []
+        var homePins = false
+        var scanned = 0
+        for file in try SourceScan.swiftSources(under: Self.coreRoot) {
+            scanned += 1
+            let name = file.lastPathComponent
+            let source = try SourceScan.strippedSource(at: file)
+            guard Self.pinsAppearance(source) else { continue }
+            if name == Self.home {
+                homePins = true
+                continue
+            }
+            strays.append(name)
+        }
+        #expect(scanned >= 200, "scanned \(scanned) files")
+        #expect(
+            homePins,
+            "\(Self.home) no longer pins the glass variant"
+        )
+        #expect(
+            strays.isEmpty,
+            """
+            pins a view's appearance beside GlassTint.apply — the \
+            glass variant is decided from the Fill there, once: \
+            \(strays)
+            """
         )
     }
 
@@ -209,6 +275,23 @@ struct GlassTintSeamTests {
                 in: Array("NSColor(kiwiHex: style.fillColor)")
             ),
             "\(Self.mintPrimitive) no longer matches the mint"
+        )
+        // The pin predicate: the assignment it names, and the two
+        // reads it must not — the comparison that CONTAINS the
+        // needle is the one a plain `contains` fired on.
+        #expect(
+            Self.pinsAppearance(
+                "glass.appearance = NSAppearance(named: .darkAqua)"
+            ),
+            "\(Self.pin) no longer matches a pin"
+        )
+        #expect(
+            !Self.pinsAppearance("if view.appearance == nil { }"),
+            "\(Self.pin) fires on a comparison"
+        )
+        #expect(
+            !Self.pinsAppearance("let scheme = glass.effectiveAppearance"),
+            "\(Self.pin) matches a read"
         )
     }
 }

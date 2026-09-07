@@ -60,10 +60,31 @@ enum GlassTint {
             ? fill.withAlphaComponent(maxAlpha) : fill
     }
 
+    /// The variant a Fill pins on the glass: `.darkAqua` for a dark
+    /// Fill, `nil` — the app's appearance, `NSApp.appearance` as the
+    /// Settings pick writes it — for a light or transparent one. The
+    /// threshold is `wantsLightInk`'s; hue decides, an alpha above
+    /// zero does not. Only dark is pinned because only dark CAN be:
+    /// measured on macOS 26.6.2 under a light app appearance, `.aqua`
+    /// leaves the material adapting (#1308; the argument is in
+    /// `docs/design-decisions.md` ▸ Liquid Glass).
+    @MainActor
+    private static func pinnedAppearance(
+        _ hex: String
+    ) -> NSAppearance? {
+        guard AppBarStyle.glassAvailable else { return nil }
+        let fill = NSColor(kiwiHex: hex)
+        guard fill.alphaComponent > 0, fill.wantsLightInk else {
+            return nil
+        }
+        return NSAppearance(named: .darkAqua)
+    }
+
     /// Positions and colors the backdrop beneath the target glass,
-    /// hiding it where the Fill reaches no colour. It takes the Fill
-    /// rather than a colour so the cap cannot be walked around at a
-    /// call site (#1297).
+    /// hiding it where the Fill reaches no colour, and pins the
+    /// glass's variant from the same Fill (#1308). It takes the
+    /// Fill rather than a colour so the cap cannot be walked around
+    /// at a call site (#1297).
     @MainActor
     static func apply(
         _ backdrop: NSView,
@@ -73,6 +94,7 @@ enum GlassTint {
         hex: String,
         animated: Bool = false
     ) {
+        glass.appearance = pinnedAppearance(hex)
         guard let color = rendered(hex) else {
             backdrop.isHidden = true
             return
