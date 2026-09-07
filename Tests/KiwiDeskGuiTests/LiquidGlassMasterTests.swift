@@ -37,6 +37,12 @@ struct LiquidGlassMasterTests {
     func masterFansOut() {
         for on in [true, false] {
             let model = makeTestModel()
+            // Seed the OPPOSITE first, or the `false` pass
+            // starts where it means to end and a setter that
+            // writes nothing passes it.
+            model.config.settings.appBarStyle.liquidGlass = !on
+            model.config.settings.spaceBarStyle.liquidGlass = !on
+            model.config.settings.shortcutPanelLiquidGlass = !on
             model.liquidGlassMaster.wrappedValue = on
             let settings = model.config.settings
             #expect(settings.appBarStyle.liquidGlass == on)
@@ -93,6 +99,48 @@ struct LiquidGlassMasterTests {
         #expect(
             SettingKey.spaceBar(.spaceBarLiquidGlass).placement
                 == .luaOnly
+        )
+    }
+
+    /// The panel's half of the switch, which no behavioural
+    /// test can reach: `LiquidGlassMasterTests` never leaves the
+    /// model, and the view is AppKit-hosted. Hardcode either end
+    /// and the row keeps writing a leaf nothing reads — the
+    /// user-visible half of #1307 gone, suite still green.
+    ///
+    /// Two needles because they are two different failures: the
+    /// controller can stop READING the setting, and the view can
+    /// stop HANDING it to the material.
+    @Test("the panel is wired to the setting it stores")
+    func panelReadsTheSetting() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Shortcuts")
+        let files = try SourceScan.swiftSources(under: root)
+        func source(_ name: String) throws -> String {
+            let file = try #require(
+                files.first { $0.lastPathComponent == name }
+            )
+            return SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .split(whereSeparator: \.isWhitespace).joined()
+        }
+        #expect(
+            try source("ShortcutsPanelController.swift")
+                .contains("settings.shortcutPanelLiquidGlass"),
+            """
+            the controller no longer reads the stored leaf, so \
+            the one Liquid Glass row cannot reach the panel.
+            """
+        )
+        #expect(
+            try source("ShortcutsPanelView.swift")
+                .contains("enabled:liquidGlass"),
+            """
+            the panel no longer hands its setting to \
+            `glassChrome`, so it draws one finish whatever the \
+            row says.
+            """
         )
     }
 

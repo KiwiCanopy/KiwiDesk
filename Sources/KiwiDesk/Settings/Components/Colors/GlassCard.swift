@@ -19,11 +19,17 @@ struct GlassCard: View {
                 SettingsCatalog.colors.glassCard,
                 caption: caption
             ) {
-                ToggleRow(
-                    label: Self.title,
-                    isOn: model.liquidGlassMaster,
-                    help: agreement.differ ? differHelp : baseHelp
-                )
+                ForEach(
+                    ColorsRowOrder.glassAtRest,
+                    id: \.id
+                ) { _ in
+                    ToggleRow(
+                        label: Self.title,
+                        isOn: model.liquidGlassMaster,
+                        help: agreement.differ
+                            ? differHelp : baseHelp
+                    )
+                }
             }
         }
     }

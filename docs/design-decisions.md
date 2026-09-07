@@ -8994,6 +8994,19 @@ surface keeps its own colour rule: the bars tint their glass from
 their Fill, the panel stays untinted (#1295). The switch changes
 only WHETHER, never WHICH.
 
+**The per-layout override is deliberately outside the switch's
+reading.** `monocle.set_app_bar_liquid_glass` and
+`scroll.set_app_bar_liquid_glass` still shadow the global, and
+the row neither clears them nor reports them. That is the
+behaviour every per-layout override already has — the App Bar
+thickness slider says nothing about
+`monocle.set_app_bar_thickness` either — and the master could
+not clear one if it tried, so reporting it would state a
+disagreement while withholding the control that ends it. The
+divergence sentence is therefore about the three GLOBAL leaves
+only (`code-reviewer`, 2026-09-07, which found the row reading
+On over a glassless monocle App Bar).
+
 **The stored keys did NOT merge**, which is why there is no
 migration at all: three leaves, one row, through
 `SettingKey.masterWrites`. Both `set_liquid_glass` verbs and the

@@ -45,8 +45,18 @@ struct LiquidGlassAgreement {
     /// Every surface carries glass.
     var allOn: Bool { leaves.allSatisfy { $0 } }
 
-    /// The three disagree — reachable only from hand-written Lua
-    /// or an imported profile, never from this row, which writes
-    /// all three at once.
+    /// The three GLOBAL leaves disagree — reachable only from
+    /// hand-written Lua or an imported profile, never from this
+    /// row, which writes all three at once.
+    ///
+    /// `LayoutAppBar.liquidGlass` is deliberately NOT read here.
+    /// A per-layout override shadows its global everywhere in
+    /// this app and no global row signals one — the App Bar
+    /// thickness slider says nothing about
+    /// `monocle.set_app_bar_thickness` either — and the master
+    /// could not clear one if it wanted to, so surfacing it here
+    /// would state a disagreement while withholding the control
+    /// that ends it. Ruled in `docs/design-decisions.md` ▸ One
+    /// Liquid Glass switch (#1307).
     var differ: Bool { Set(leaves).count > 1 }
 }
