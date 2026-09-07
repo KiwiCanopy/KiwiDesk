@@ -12,66 +12,50 @@ import Foundation
 /// them would give the stored half the unstored half's
 /// lifetime.
 extension KiwiCore {
+    /// Files the live Spaces under `profiles.currentName`, so
+    /// every verb that moves that name files first and moves
+    /// second — profiles.md ▸ "Whose arrangement is live" (#1249).
+    ///
+    /// A nil name files nothing: a built-in Standard, or a session
+    /// that has applied nothing, has no partitioning of its own.
+    func recordLivePartitioning() {
+        state.profilePartitioning.record(
+            state.workspaces.allSpaces,
+            as: profiles.currentName
+        )
+    }
+
     /// Files the outgoing profile's partitioning before the space
     /// set is rebuilt. Returns whether this apply is a CHANGE, so
     /// the caller gates the prune and the restore on one answer.
+    ///
+    /// A re-apply of the LIVE profile, or the session's first,
+    /// files nothing and restores nothing — neither a monitor
+    /// reconnect nor boot may revert what is already on screen.
     func recordOutgoingPartitioning(
         before profile: Profile
     ) -> Bool {
-        let switching = state.profilePartitioning.isSwitch(
-            to: profile.name
-        )
-        guard switching else {
-            // A re-apply of the LIVE profile, or the session's
-            // first: file nothing and restore nothing, so neither
-            // a monitor reconnect nor boot can revert what is
-            // already on screen. Seeding the slot here is what
-            // makes the NEXT apply a switch.
-            state.profilePartitioning.adoptLive(profile.name)
-            return false
-        }
-        state.profilePartitioning.record(
-            state.workspaces.allSpaces,
-            handingLiveTo: profile.name
-        )
+        guard
+            state.profilePartitioning.isSwitch(
+                to: profile.name,
+                from: profiles.currentName
+            )
+        else { return false }
+        recordLivePartitioning()
         return true
     }
 
-    /// A built-in Standard is not a profile and has no
-    /// partitioning of its own, so entering one files the
-    /// OUTGOING profile's and leaves the live slot empty.
+    /// The one profile WRITE door (#1249). `ProfileManager.save`
+    /// makes its argument current, so the outgoing name is gone
+    /// the moment it returns; the filing has to precede it.
     ///
-    /// Without this, profile A → Standard → profile B records the
-    /// STANDARD's arrangement under A's name: the live slot would
-    /// still read "A" when B arrives, and what it files is
-    /// whatever is on screen by then.
-    func recordOutgoingPartitioningForStandard() {
-        guard state.profilePartitioning.liveProfile != nil
-        else { return }
-        state.profilePartitioning.record(
-            state.workspaces.allSpaces,
-            handingLiveTo: nil
-        )
-    }
-
-    /// Files the outgoing profile's arrangement, then hands the
-    /// live slot to `name`. A profile WRITE calls this:
-    /// `ProfileManager.save` adopts `currentName`, and the
-    /// partitioning's own slot has to move with it (#1230/#1246).
-    func adoptSavedProfile(_ name: String) {
-        state.profilePartitioning.record(
-            state.workspaces.allSpaces,
-            handingLiveTo: name
-        )
-    }
-
-    /// The preset exit. `apply(composed:)` has already filed the
-    /// outgoing profile and stood the slot down BEFORE the
-    /// compose rearranged live, so this only claims the slot —
-    /// filing here would record the Standard's arrangement under
-    /// the outgoing profile's name (#1230/#1246).
-    func adoptStandardSave(_ name: String) {
-        state.profilePartitioning.adoptLive(name)
+    /// Unconditional rather than a caller's choice: on the preset
+    /// path `apply(composed:)` has already filed and stood the
+    /// name down through `noProfileIsLive`, so the record here is
+    /// a no-op — which is what leaves no exit anything to decide.
+    func saveProfile(_ profile: Profile) throws {
+        recordLivePartitioning()
+        try profiles.save(profile)
     }
 
     /// Puts the incoming profile's own windows back in its own

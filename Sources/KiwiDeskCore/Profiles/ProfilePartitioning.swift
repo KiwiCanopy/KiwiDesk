@@ -31,16 +31,6 @@ import Foundation
 /// live windows instead, and the enders are explicit: a profile
 /// deleted, a profile renamed, and the #634 reset.
 struct ProfilePartitioning: Sendable {
-    /// The profile whose partitioning the LIVE Spaces currently
-    /// represent.
-    ///
-    /// Tracked here rather than read from
-    /// `ProfileManager.currentName`, which cannot answer it:
-    /// `profiles.load(name:)` sets `currentName` to the INCOMING
-    /// profile before `apply(profile:)` runs, so by the time the
-    /// snapshot is due the outgoing name is already gone.
-    private(set) var liveProfile: String?
-
     private var byProfile: [String: [SpaceID: [WindowID]]] = [:]
 
     /// Whether applying `profile` is a CHANGE — the one question
@@ -49,8 +39,12 @@ struct ProfilePartitioning: Sendable {
     /// settings edit) must do neither: its remembered lists are
     /// older than the live ones, so restoring would revert the
     /// user's own moves.
-    func isSwitch(to profile: String) -> Bool {
-        if let liveProfile { return liveProfile != profile }
+    ///
+    /// `live` is `ProfileManager.currentName`, the one authority
+    /// for whose arrangement is on screen — profiles.md ▸ "Whose
+    /// arrangement is live" (#1249).
+    func isSwitch(to profile: String, from live: String?) -> Bool {
+        if let live { return live != profile }
         // No live profile means one of two things, and they must
         // not be conflated. The session's FIRST apply has nothing
         // to replace — pruning there would drop the Spaces the
@@ -70,28 +64,19 @@ struct ProfilePartitioning: Sendable {
         byProfile[profile] != nil
     }
 
-    /// Files the live Spaces under the profile they belong to and
-    /// hands the live slot to `next`. Order IS the rank: the
-    /// restore re-adds in this order.
-    mutating func record(
-        _ spaces: [Space],
-        handingLiveTo next: String?
-    ) {
-        if let live = liveProfile {
-            byProfile[live] = Dictionary(
-                uniqueKeysWithValues: spaces.map {
-                    ($0.id, $0.windows)
-                }
-            )
-        }
-        liveProfile = next
-    }
-
-    /// Seeds the live slot without recording anything — boot, and
-    /// the first profile of a session, have no outgoing
-    /// partitioning to file.
-    mutating func adoptLive(_ profile: String?) {
-        liveProfile = profile
+    /// Files the live Spaces under the profile they belong to.
+    /// Order IS the rank: the restore re-adds in this order.
+    ///
+    /// A nil `live` files nothing rather than being a caller's
+    /// choice: boot and a built-in Standard have no profile whose
+    /// partitioning this is.
+    mutating func record(_ spaces: [Space], as live: String?) {
+        guard let live else { return }
+        byProfile[live] = Dictionary(
+            uniqueKeysWithValues: spaces.map {
+                ($0.id, $0.windows)
+            }
+        )
     }
 
     func remembered(
@@ -118,33 +103,19 @@ struct ProfilePartitioning: Sendable {
 
     mutating func forget(_ profile: String) {
         byProfile[profile] = nil
-        if liveProfile == profile { liveProfile = nil }
     }
 
     mutating func rename(_ old: String, to new: String) {
         guard let entry = byProfile.removeValue(forKey: old)
-        else {
-            if liveProfile == old { liveProfile = new }
-            return
-        }
+        else { return }
         byProfile[new] = entry
-        if liveProfile == old { liveProfile = new }
     }
 
-    /// Forgets every profile's arrangement but keeps naming the
-    /// live one. The #634 tier-1 discard is NOT an adoption
-    /// reset — `ProfileManager.currentName` survives it — so
-    /// nilling the slot there would leave a live profile the
-    /// slot does not name, which is #1246's defect exactly.
+    /// The #634 tier-1 discard: forgets every profile's
+    /// arrangement. Which profile is live is not this store's to
+    /// forget — that discard is not an adoption reset, and
+    /// `ProfileManager.currentName` rightly survives it.
     mutating func forgetRecords() {
         byProfile = [:]
-    }
-
-    /// Reset All Settings (#634). Forgets the records AND the
-    /// live slot, so only for a caller that resets adoption
-    /// beside it, or the slot outlives `currentName`.
-    mutating func reset() {
-        byProfile = [:]
-        liveProfile = nil
     }
 }

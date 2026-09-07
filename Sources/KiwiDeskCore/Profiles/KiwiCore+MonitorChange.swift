@@ -40,11 +40,11 @@ extension KiwiCore {
         if let binding = mainDesktopBinding(in: desktops) {
             let boundName = binding.profile
             do {
-                let bound = try profiles.load(name: boundName)
+                let bound = try profiles.read(name: boundName)
+                // The apply lands the #36 fit verdict with the
+                // name, so a binding onto other hardware is dirty
+                // without this path saying so twice (#1249).
                 apply(profile: bound, forceRetile: false)
-                if bound.set(matching: fingerprints) == nil {
-                    profiles.markDirty()
-                }
                 onLog(
                     "monitor change: loaded bound profile "
                         + "'\(boundName)'"
@@ -62,7 +62,6 @@ extension KiwiCore {
         case .exact(let profile):
             if profile.name != profiles.currentName {
                 apply(profile: profile, forceRetile: false)
-                profiles.adopt(profile)
                 onLog(
                     "monitor change: loaded profile "
                         + "'\(profile.name)'"
@@ -70,10 +69,11 @@ extension KiwiCore {
             } else {
                 // Same profile back on one of its exact sets
                 // (e.g. re-docked after an interim mismatch):
-                // re-adopt so a lingering dirty flag clears;
-                // the deferred resolve picks up that set's
-                // pins — nothing runs between here and it.
-                profiles.adopt(profile)
+                // no apply runs, so clear the lingering dirty
+                // flag here — an exact match IS the #36 fit. The
+                // deferred resolve picks up that set's pins;
+                // nothing runs between here and it.
+                profiles.markClean()
                 spacePins =
                     profile.set(matching: fingerprints)?
                     .spaceMonitorMap ?? [:]
@@ -81,7 +81,6 @@ extension KiwiCore {
         case .countDefault(let profile):
             if profile.name != profiles.currentName {
                 apply(profile: profile, forceRetile: false)
-                profiles.adopt(profile)
                 onLog(
                     "monitor change: loaded default profile "
                         + "'\(profile.name)' (dirty)"

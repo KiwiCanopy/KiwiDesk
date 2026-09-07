@@ -30,24 +30,19 @@ extension KiwiCore {
             }
         case "load_profile":
             return namedProfileCommand(args) { name in
-                let profile = try self.profiles.load(
+                let profile = try self.profiles.read(
                     name: name
                 )
                 // Explicit user load: the profile's spaces become
                 // authoritative — stale spaces are pruned and
                 // their windows forwarded (see `pruneSpaces`).
+                // The apply adopts, and a profile saved for other
+                // monitors stays loadable but lands dirty (#36).
                 self.apply(
                     profile: profile,
                     pruneStaleSpaces: true,
                     forceRetile: true
                 )
-                // A profile saved for other monitors stays
-                // loadable but loads dirty (#36).
-                let live = self.state.workspaces.allDisplays
-                    .map(\.fingerprint)
-                if profile.set(matching: live) == nil {
-                    self.profiles.markDirty()
-                }
             }
         case "delete_profile":
             return namedProfileCommand(args) { name in
@@ -211,11 +206,9 @@ extension KiwiCore {
     ) throws {
         guard var existing = try? profiles.read(name: name)
         else {
-            try profiles.save(
+            try saveProfile(
                 buildProfile(name: name, modes: modes)
             )
-            // #1230: the save adopts, so the live slot does too.
-            adoptSavedProfile(name)
             refreshConfigIssues()
             if modes == nil { profiles.onCapturedLive(name) }
             return
@@ -234,8 +227,7 @@ extension KiwiCore {
         existing.mainSpaces = fresh.mainSpaces
         existing.settings = fresh.settings
         existing.savedAt = .now
-        try profiles.save(existing)
-        adoptSavedProfile(name)
+        try saveProfile(existing)
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).
         refreshConfigIssues()
@@ -260,13 +252,12 @@ extension KiwiCore {
     }
 
     /// Re-applies `name` to the live layout after an in-effect
-    /// edit. The active profile re-applies in place (no adopt);
-    /// a profile merely bound to the active native Space
-    /// re-resolves through the shared monitor-change path so the
-    /// binding picks up the freshly-written JSON (#18). That
-    /// bound path runs the normal resolver, which *adopts* the
-    /// bound profile (it is now the on-screen layout) — an
-    /// intended live-state change, unlike the in-place branch.
+    /// edit. The active profile re-applies in place — the apply
+    /// re-asserts the name it already holds, and re-judges the
+    /// #36 fit against the freshly-written JSON; a profile merely
+    /// bound to the active native Space re-resolves through the
+    /// shared monitor-change path so the binding picks up that
+    /// JSON (#18).
     public func reapplyIfInEffect(_ name: String) {
         guard isProfileInEffect(name) else { return }
         if profiles.currentName == name,

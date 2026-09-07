@@ -111,8 +111,9 @@ extension KiwiCore {
         // and the profile-wide Main role.
         let live = state.workspaces.allDisplays
             .map(\.fingerprint)
-        spacePins =
-            profile.set(matching: live)?.spaceMonitorMap ?? [:]
+        let fitting = profile.set(matching: live)
+        let fits = fitting != nil
+        spacePins = fitting?.spaceMonitorMap ?? [:]
         mainSpaces = Set(profile.mainSpaces)
         // Adopt the profile's explicit rehome target (#68);
         // a dangling reference reads as unset.
@@ -139,6 +140,12 @@ extension KiwiCore {
         // purpose: this door is also a no-snapshot verb path
         // (`load_profile`), and the carry is idempotent.
         refreshStickyReach()
+        // LAST, and this door's alone (#1249): everything above
+        // still reads the OUTGOING name, which is why
+        // `reapplyStructuredOverrides` is handed the incoming
+        // profile's tiers explicitly. `fits` is the #36 verdict,
+        // read off the set already matched for the pins.
+        profiles.becameLive(profile, fits: fits)
     }
 
     /// Explicit-load reconcile: drop live spaces whose name isn't
@@ -199,10 +206,11 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         // #1230: a Standard is not a profile — file whatever
-        // profile was live and hand the slot back, or its
-        // arrangement is what gets recorded under that profile's
-        // name at the next switch.
-        recordOutgoingPartitioningForStandard()
+        // profile was live before the compose rearranges it, or
+        // its arrangement is what gets recorded under that
+        // profile's name at the next switch. Standing the name
+        // down is this door's too, not its caller's (#1249).
+        recordLivePartitioning()
         tiler.settings = composed.settings
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
@@ -236,6 +244,10 @@ extension KiwiCore {
         emitSpaceChange()
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
+        // Symmetry with `apply(profile:)`, which must be last;
+        // nothing in this body reads the name, so the position
+        // here is a convention rather than a constraint.
+        profiles.noProfileIsLive()
     }
 
     /// Applies a built-in Preset and materializes it as a real,
@@ -279,10 +291,9 @@ extension KiwiCore {
         let name = profiles.freeName(base: layout.name)
         // Capture-live: the standard was just adopted onto
         // live above, so live IS what this profile records.
-        try profiles.save(
+        try saveProfile(
             buildProfile(name: name, modes: nil)
         )
-        adoptStandardSave(name)
         // A preset can define more spaces than the first-run seed
         // authored digit shortcuts for; bind the newcomers
         // additively so ⌃⌥N covers them too (#485).

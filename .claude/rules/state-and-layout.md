@@ -44,6 +44,12 @@ editing here:
   a named register so a new one has to argue for itself — the
   GUI's own binding rows are outside that scan;
   `KiwiCore+DesktopSpaces.swift` carries the argument.
+- **Ask `ProfileManager.currentName` for which profile that
+  store is filing FOR**, rather than reading or adding a second
+  answer beside it. The obligations that fall on moving that name
+  are [profiles.md](profiles.md) ▸ "Whose arrangement is live",
+  which is where they load: this file's `paths:` do not reach
+  `Sources/KiwiDeskCore/Profiles/**`, where every toucher lives.
 - It follows that **a new per-`Space` field is keyed by
   `WindowID` or it is SHARED across Desktops** — the Desktop
   partition is emergent from window residence, and a per-window

@@ -320,6 +320,47 @@ holds the secondary-switch decision including its nil case.
   to others. A lenient decoder is still banned; it never ends,
   where a rewrite does.
 
+## Whose arrangement is live (#1249)
+
+`ProfileManager.currentName` is the single authority for which
+profile's partitioning the live Spaces represent. **Give the
+#1230 store no field that answers the same question** —
+`ProfilePartitioning` carried one until #1249 (its own rule is
+[state-and-layout.md](state-and-layout.md) ▸ "Never store which
+Space a window holds PER DESKTOP"), and the pair shipped the same
+defect three times in one lane: a mirror that has to be moved
+beside a write was moved by two of three writes, then by none, and
+each miss silently lost a profile's saved arrangement with nothing
+to red. Nothing scans for a returning mirror, so it is refused
+here rather than guarded.
+
+Three further obligations, and they bind this directory:
+
+- **File the outgoing arrangement before the name moves, and do
+  it in one place.** An activating write goes through
+  `KiwiCore.saveProfile`; `ProfileManager.save` makes its argument
+  current, so a site that spells `profiles.save(` itself has
+  already lost the name it needed.
+- **Move the name only where the Spaces move with it.** The two
+  apply doors do (`becameLive`, `noProfileIsLive`), each at the
+  end of its own body. This is not a claim that nothing else
+  writes `currentName` — `save`, `adoptStandard`, `delete`,
+  `rename` and `resetAdoption` all do, each for a reason that is
+  not an apply. It is an obligation on a NEW writer: if it moves
+  the name while the Spaces stay put, the store starts filing one
+  profile's windows under another's name.
+- **Let the apply judge the #36 fit.** `becameLive` takes it,
+  read off the monitor set the apply already matched for the
+  pins, so no caller pairs `isDirty` by hand. A caller whose
+  verdict differs must say so with `markClean`/`markDirty` beside
+  the apply AND state why it differs; `applyDesktopBinding` is the
+  worked example, and its disagreement with the monitor-change
+  bound arm is #1245's to rule.
+
+`ProfileAuthoritySeamTests` holds the first two as one-home
+clauses, scoped to the doors' own bodies rather than to their
+file.
+
 ## A new file in the config directory answers the backup question
 
 A backup carries an **allow-list, never a directory sweep**, and
