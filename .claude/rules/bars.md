@@ -173,6 +173,13 @@ Obligations:
   from the one that was being closed. A surface that genuinely
   needs a non-Fill colour on glass earns a second mint inside
   `GlassTint`, never a colour parameter.
+- **`apply` re-orders the backdrop beneath its glass, and only
+  when it is not already there.** A sibling move of the glass —
+  the Space Bar's `spanBackdrop` arm — leaves a backdrop that was
+  inserted once above it for the rest of the process, and a
+  per-render reparent would be the churn #1315 names; both are
+  held by `GlassTintOrderTests`, which renders the real arm
+  through `SpaceBarManager.sync` (#1314).
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —
