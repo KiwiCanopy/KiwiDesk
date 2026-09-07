@@ -165,11 +165,8 @@ extension KiwiCore {
     /// no profile to ask — in which case every live Space is a
     /// candidate, which is what this answered before #1230.
     ///
-    /// Answered from the adoption state, never from disk (#1245):
-    /// this runs inside `handleDesktopChange`, where a synchronous
-    /// JSON read would sit on the main actor mid-transition — and
-    /// `ProfileManager.read` REWRITES the file when a migration
-    /// applies, so a swipe onto a fresh Desktop was a silent write.
+    /// Answered from adoption state, never from the file — this
+    /// runs inside `handleDesktopChange` (#1245, profiles.md).
     ///
     /// Asking the profile rather than the live set is belt AND
     /// braces. #1230's own prune-on-switch means the live set

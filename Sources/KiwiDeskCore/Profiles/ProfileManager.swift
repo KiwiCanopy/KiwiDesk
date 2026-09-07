@@ -22,37 +22,6 @@ public enum ProfileError: Error, CustomStringConvertible {
     }
 }
 
-/// The active profile: its name, and the Spaces it declares.
-///
-/// ONE value rather than two fields, so no writer can move the
-/// name and leave the Spaces behind (#1245). The Spaces are here
-/// because the alternative is re-reading the profile from disk to
-/// answer a Desktop switch — a synchronous JSON read on the main
-/// actor that also REWRITES the file whenever a migration applies.
-///
-/// A hand edit to the profile's JSON is picked up at the next
-/// apply (a reload, a monitor change, an in-effect save), not
-/// mid-session; nothing between those reads the file for this.
-struct ActiveProfile {
-    let name: String
-    let declaredSpaces: Set<SpaceID>
-
-    init(_ profile: Profile) {
-        name = profile.name
-        declaredSpaces = profile.declaredSpaces
-    }
-
-    private init(name: String, declaredSpaces: Set<SpaceID>) {
-        self.name = name
-        self.declaredSpaces = declaredSpaces
-    }
-
-    /// A rename moves the name; the Spaces are unchanged by it.
-    func renamed(to new: String) -> ActiveProfile {
-        ActiveProfile(name: new, declaredSpaces: declaredSpaces)
-    }
-}
-
 /// Persists profiles and selects matching configurations for monitor setups.
 @MainActor
 public final class ProfileManager {

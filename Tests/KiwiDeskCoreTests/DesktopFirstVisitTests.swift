@@ -179,7 +179,10 @@ struct DesktopFirstVisitTests {
     /// a stale Space set answering for it (#1245).
     @Test("Ending adoption ends the declared Spaces")
     func endingAdoptionEndsTheDeclaredSpaces() throws {
-        let core = core()
+        // Bare: this asks only what adoption answers, so it pins
+        // no display and leaves no process-global override behind
+        // (tests.md ▸ machine touch).
+        let core = makeAuthorityCore()
         try core.profiles.save(
             Profile(
                 name: "P",
