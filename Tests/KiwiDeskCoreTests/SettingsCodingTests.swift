@@ -32,6 +32,7 @@ struct SettingsCodingTests {
                 "gap",
                 "layout", "min_window_size", "mouse",
                 "mouse_resize", "new_window_placement_override", "quit",
+                "shortcut_panel",
                 "floating", "refusal", "resize", "space",
                 "space_bar",
                 "sticky", "swap_skips_cascade",

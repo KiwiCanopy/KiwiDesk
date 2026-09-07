@@ -125,10 +125,7 @@ extension AppBarKey {
         case .appBarBackground:
             return .text("app_bar.background_style.label")
         case .appBarLiquidGlass:
-            return .text(
-                "app_bar.liquid_glass",
-                help: "app_bar.liquid_glass.help"
-            )
+            return .none
         case .appBarBackgroundFit:
             return .text("app_bar.background_fit.label")
         case .appBarActiveIndicator:

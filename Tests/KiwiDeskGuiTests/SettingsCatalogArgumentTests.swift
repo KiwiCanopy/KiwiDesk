@@ -155,7 +155,9 @@ struct SettingsCatalogArgumentTests {
         // 52 since #1019: About's Guide link self-anchors, so
         // a search hit lands ON the link rather than on the
         // card around it.
-        #expect(direct.values.reduce(0, +) == 52)
+        // 53 since #1307: the Liquid Glass card, mounted once
+        // on Colours & Animations.
+        #expect(direct.values.reduce(0, +) == 53)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

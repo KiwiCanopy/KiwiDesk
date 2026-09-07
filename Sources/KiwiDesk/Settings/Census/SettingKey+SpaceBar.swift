@@ -139,10 +139,7 @@ extension SpaceBarKey {
         case .spaceBarBackground:
             return .text("space_bar.background_style.label")
         case .spaceBarLiquidGlass:
-            return .text(
-                "app_bar.liquid_glass",
-                help: "app_bar.liquid_glass.help"
-            )
+            return .none
         case .spaceBarBackgroundFit:
             return .text("space_bar.background_fit.label")
         case .spaceBarActiveIndicator:

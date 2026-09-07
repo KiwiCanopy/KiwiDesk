@@ -67,7 +67,7 @@ struct ColorsControls: Sendable {
         "Current colors"
     )
     let glassCard = SettingsControl(
-        "colors.glass.title",
+        "colors.liquid_glass",
         "Liquid Glass"
     )
     let motionCard = SettingsControl(

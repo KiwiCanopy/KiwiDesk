@@ -11,16 +11,28 @@ struct GlassCard: View {
     }
 
     var body: some View {
-        SettingsSection(
-            SettingsCatalog.colors.glassCard,
-            caption: caption
-        ) {
-            ToggleRow(
-                label: L("colors.liquid_glass", "Liquid Glass"),
-                isOn: model.liquidGlassMaster,
-                help: agreement.differ ? differHelp : baseHelp
-            )
+        // Hidden below macOS 26, never greyed: an OS-capability
+        // gate is an absence (#390), and the census records it
+        // in the HIDES group.
+        if AppBarStyle.glassAvailable {
+            SettingsSection(
+                SettingsCatalog.colors.glassCard,
+                caption: caption
+            ) {
+                ToggleRow(
+                    label: Self.title,
+                    isOn: model.liquidGlassMaster,
+                    help: agreement.differ ? differHelp : baseHelp
+                )
+            }
         }
+    }
+
+    /// ONE key for the card and its only row: the product name
+    /// twice under its own header is a second string nothing
+    /// holds in step (localization-auditor, 2026-09-07).
+    static var title: String {
+        L("colors.liquid_glass", "Liquid Glass")
     }
 
     private var caption: String {
@@ -31,25 +43,33 @@ struct GlassCard: View {
         )
     }
 
-    /// Owed only while the three disagree, which only Lua or an
-    /// imported profile can produce: a boolean cannot show
-    /// "two of three", so the sentence carries what the switch
-    /// cannot, and both read the ONE `LiquidGlassAgreement`.
+    /// The material's NAME is deliberately absent from both help
+    /// strings: it survives verbatim in every catalog, and a
+    /// Latin name inside a translated sentence trips the
+    /// residue guard in the non-Latin ones. The card's title
+    /// carries it directly above.
     private var baseHelp: String {
         L(
             "colors.liquid_glass.help",
-            "Lays macOS 26's Liquid Glass material over the "
-                + "Space Bar, the App Bar and the shortcuts "
-                + "panel. Each bar's Fill color tints its own "
-                + "glass; the shortcuts panel stays untinted."
+            "Lays macOS's translucent material over the Space "
+                + "Bar, the App Bar and the shortcuts panel. "
+                + "Each bar's %1$@ color tints its own "
+                + "material; the shortcuts panel stays "
+                + "untinted.",
+            L("app_bar.color.fill", "Fill")
         )
     }
 
+    /// Owed only while the three disagree, which only Lua or an
+    /// imported profile can produce: a boolean cannot show "two
+    /// of three", so this sentence carries what the switch
+    /// cannot, and both read the ONE `LiquidGlassAgreement`.
     private var differHelp: String {
         L(
             "colors.liquid_glass.differ.help",
-            "The three surfaces are set differently right now. "
-                + "Turning this on gives all three Liquid Glass."
+            "The two bars and the panel are set differently "
+                + "right now. Turning this on switches it on for "
+                + "all three."
         )
     }
 }

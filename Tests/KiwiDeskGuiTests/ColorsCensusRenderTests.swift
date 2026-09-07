@@ -111,7 +111,8 @@ struct ColorsCensusRenderTests {
     @Test("Colours & Animations holds only palettes and motion")
     func coloursAndMotionContainers() {
         #expect(
-            containers(of: .coloursAndMotion) == [.palettes, .motion]
+            containers(of: .coloursAndMotion)
+                == [.palettes, .glass, .motion]
         )
     }
 
