@@ -271,6 +271,12 @@ public final class EventLoop {
     /// test drives both directions of the flag through it (#1272).
     var readFullscreen: (AXUIElement) -> Bool = AXHelper.isFullscreen
 
+    /// The app macOS reports frontmost — read only before the first
+    /// activation notification has set `lastActivePid` (#1322).
+    var frontmostPID: () -> pid_t? = {
+        NSWorkspace.shared.frontmostApplication?.processIdentifier
+    }
+
     /// Activation policy for a pid a reconcile only knows by
     /// number.
     var activationPolicy: (pid_t) -> NSApplication.ActivationPolicy? = {

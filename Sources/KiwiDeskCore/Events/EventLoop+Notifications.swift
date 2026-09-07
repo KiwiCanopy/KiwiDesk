@@ -55,7 +55,7 @@ extension EventLoop {
     /// that filter without replacing it (review + device,
     /// 2026-08-29). They are #1088, with the same measurement
     /// available to justify it.
-    private func windowID(
+    func windowID(
         of element: AXUIElement,
         pid: pid_t
     ) -> WindowID? {
@@ -167,30 +167,7 @@ extension EventLoop {
         case kAXWindowDeminiaturizedNotification:
             track(element, pid: pid, app: app)
         case kAXFocusedWindowChangedNotification:
-            // Closing a window nearly always moves focus;
-            // reconciling here catches missed destroy events.
-            reconcile(pid: pid, app: app)
-            guard let id = AXHelper.windowID(of: element) else {
-                return
-            }
-            // Focus events carry only managed windows: the
-            // reconcile above just settled tracking, so an
-            // absent id is an ignored panel (issue #21) —
-            // reporting it would emit a focus_change with an
-            // empty app and retile focus-driven layouts. Surface
-            // the panel gaining focus so KiwiCore can distrust
-            // the app's stale focus report on dismiss (#244).
-            guard elements[pid]?[id] != nil else {
-                classifyUntrackedFocus(
-                    id: id,
-                    pid: pid,
-                    bundleID: app.bundleID,
-                    isAccessory: classifiesAsOverlay(pid: pid),
-                    channel: "focus"
-                )
-                return
-            }
-            onEvent(.windowFocused(id))
+            handleFocusedWindowChanged(element, pid: pid, app: app)
         case kAXWindowMovedNotification:
             guard let id = windowID(of: element, pid: pid) else {
                 return
