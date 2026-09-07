@@ -5,6 +5,11 @@
 /// as one change (`SettingsDraftDiffTests`, `BorderMastersFanOutTests`).
 extension SettingKey {
     static let masterWrites: [SettingKey: [String]] = [
+        .colours(.liquidGlassMaster): [
+            "settings.appBarStyle.liquidGlass",
+            "settings.spaceBarStyle.liquidGlass",
+            "settings.shortcutPanelLiquidGlass",
+        ],
         .borders(.borderWidthMaster): [
             "settings.borderStyle.width",
             "settings.dragGhost.borderWidth",

@@ -47,12 +47,7 @@ extension AppBarKey {
                 gate: .setting(.appBar(.appBarFontSizeAuto))
             )
         case .appBarLiquidGlass:
-            return .row(
-                .bars,
-                .appBar,
-                .showMore,
-                gate: .runtime(.liquidGlassUnavailable)
-            )
+            return .luaOnly
         case .appBarBackgroundFit:
             return .row(
                 .bars,

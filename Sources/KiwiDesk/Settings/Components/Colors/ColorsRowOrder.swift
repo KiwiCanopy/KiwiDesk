@@ -9,6 +9,12 @@ enum ColorsRowOrder {
         .colours(.paletteDelete),
     ]
 
+    /// The Glass card's one row: the #1307 master over the
+    /// two bars and the shortcuts panel.
+    static let glassAtRest: [SettingKey] = [
+        .colours(.liquidGlassMaster)
+    ]
+
     /// The Motion card's one at-rest row: the master switch.
     static let motionAtRest: [SettingKey] = [
         .colours(.animationsMaster)

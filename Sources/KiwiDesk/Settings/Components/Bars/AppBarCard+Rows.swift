@@ -42,23 +42,10 @@ extension AppBarCard {
                     .map { ($0.1, $0.0) }
             )
         case .appBarLiquidGlass:
-            // Hidden below macOS 26 (#390).
-            if AppBarStyle.glassAvailable {
-                ToggleRow(
-                    label: L(
-                        "app_bar.liquid_glass",
-                        "Liquid Glass"
-                    ),
-                    isOn: style.liquidGlass,
-                    help: L(
-                        "app_bar.liquid_glass.help",
-                        "Lays a translucent glass material over "
-                            + "the boxes or the plate. The Fill "
-                            + "color tints it, though the tint "
-                            + "reads subtle on current macOS."
-                    )
-                )
-            }
+            // Lua-only since #1307: the one Liquid Glass switch
+            // lives on Colours & Animations and writes this leaf
+            // with the other two.
+            EmptyView()
         case .appBarBackgroundFit:
             backgroundFitRow
         case .appBarAlignment:

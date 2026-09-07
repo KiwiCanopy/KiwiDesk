@@ -1,6 +1,7 @@
 /// Animations (`AnimationSettings`) and palette actions.
 
 enum ColoursKey: String, CaseIterable, Hashable {
+    case liquidGlassMaster = "settings.liquidGlass (master)"
     case animationsMaster = "settings.animations (master)"
     case animationsOnSpaceChange = "settings.animations.onSpaceChange"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
@@ -22,6 +23,13 @@ enum ColoursKey: String, CaseIterable, Hashable {
 extension ColoursKey {
     var placement: SettingPlacement {
         switch self {
+        case .liquidGlassMaster:
+            return .row(
+                .coloursAndMotion,
+                .glass,
+                .atRest,
+                gate: .runtime(.liquidGlassUnavailable)
+            )
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
         case .animationsOnSpaceChange, .animationsOnWindowResize,
@@ -61,6 +69,11 @@ extension ColoursKey {
 extension ColoursKey {
     var text: SettingRowText {
         switch self {
+        case .liquidGlassMaster:
+            return .text(
+                "colors.liquid_glass",
+                help: "colors.liquid_glass.help"
+            )
         case .animationsMaster:
             return .text(
                 "behavior.animations.master",

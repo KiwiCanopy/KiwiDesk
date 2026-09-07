@@ -12,7 +12,6 @@ enum BarsRowOrder {
     /// Space Bar card, behind the Style disclosure.
     static let spaceBarStyle: [SettingKey] = [
         .spaceBar(.spaceBarBackground),
-        .spaceBar(.spaceBarLiquidGlass),
         .spaceBar(.spaceBarBackgroundFit),
         .spaceBar(.spaceBarAlignment),
         .spaceBar(.spaceBarActiveIndicator),
@@ -39,7 +38,6 @@ enum BarsRowOrder {
     /// App Bar card, behind the Style disclosure.
     static let appBarStyle: [SettingKey] = [
         .appBar(.appBarBackground),
-        .appBar(.appBarLiquidGlass),
         .appBar(.appBarBackgroundFit),
         .appBar(.appBarAlignment),
         .appBar(.appBarActiveIndicator),
