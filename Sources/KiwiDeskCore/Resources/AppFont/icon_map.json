@@ -6,6 +6,12 @@
         ]
     },
     {
+        "iconName": ":accessibility_reader:",
+        "appNames": [
+            "Accessibility Reader"
+        ]
+    },
+    {
         "iconName": ":acrobat:",
         "appNames": [
             "Acrobat"
@@ -528,6 +534,12 @@
         "iconName": ":caprine:",
         "appNames": [
             "Caprine"
+        ]
+    },
+    {
+        "iconName": ":carbon_copy_cloner:",
+        "appNames": [
+            "Carbon Copy Cloner"
         ]
     },
     {
@@ -1336,6 +1348,12 @@
         "iconName": ":grayjay:",
         "appNames": [
             "Grayjay"
+        ]
+    },
+    {
+        "iconName": ":grok_bot:",
+        "appNames": [
+            "Grok Bot"
         ]
     },
     {
@@ -3120,6 +3138,12 @@
         "iconName": ":signal:",
         "appNames": [
             "Signal"
+        ]
+    },
+    {
+        "iconName": ":silveran_reader:",
+        "appNames": [
+            "Silveran Reader"
         ]
     },
     {
