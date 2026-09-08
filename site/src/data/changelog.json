@@ -2,6 +2,43 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.2.1",
+      "tag": "v1.2.1",
+      "date": "2026-09-08",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.2.1",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.2.1/KiwiDesk-1.2.1.dmg",
+      "summary": "A small release: Desktop switches that stay put, profiles that keep their arrangements, and an update you can actually see.",
+      "sections": [
+        {
+          "title": "Desktops",
+          "items": [
+            "**A swipe to another Desktop stays there** instead of bouncing you back a moment later, and the swipe back keeps the window macOS refocused.",
+            "**Switching Desktops no longer reads or rewrites your profile files.** A hand-edited profile takes effect at the next reload or apply."
+          ]
+        },
+        {
+          "title": "Profiles",
+          "items": [
+            "**A profile keeps the arrangement you left it with** through a Settings save, a preset, a discard, Reset All Settings and a backup restore — a window parked on another Desktop included."
+          ]
+        },
+        {
+          "title": "Updates",
+          "items": [
+            "**You are told when an update is waiting:** an orange dot on the menu-bar icon and an Update Available… row, instead of a window opened behind everything else."
+          ]
+        },
+        {
+          "title": "Settings and the command line",
+          "items": [
+            "**The Desktop shortcut drawers explain themselves** with a ? that says what a macOS Desktop is next to a KiwiDesk Space.",
+            "**`focus_desktop` and `move_to_desktop_and_follow` return `switched`**, `false` when the Desktop was already showing."
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.2.0",
       "tag": "v1.2.0",
       "date": "2026-09-07",

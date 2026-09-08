@@ -417,14 +417,12 @@ the KiwiDesk icon opens the quick menu where you can:
   answers are unusually slow is finished off just after boot, so
   its windows are tiled a beat later than everything else.
 
-:::unreleased
 When the background check finds an update, the menu-bar icon
 shows a small dot and the **Check for Updates…** row reads
 **Update Available…** until you act on it — nothing pops up over
 your work. Choosing the row brings the update forward, and
 *Remind Me Later* there clears the dot until the next background
 check finds the update again.
-:::
 
 ### The Shortcuts Panel
 
@@ -2910,7 +2908,6 @@ part of your setup it is not an offer any more. (They stay
 rows you can collapse — opening is a starting point, not a
 setting.)
 
-:::unreleased
 Each drawer's header carries a **?** saying what the rows are
 for: Desktops are macOS's own Spaces, not KiwiDesk's. KiwiDesk
 arranges windows inside its own Spaces, so most setups never
@@ -2918,7 +2915,6 @@ need these — switching a Desktop moves your whole environment,
 not a window, and each Desktop keeps its own Spaces. If you do
 work across Desktops, bind a profile per Desktop in Profiles ▸
 **Profiles per macOS Desktop**.
-:::
 
 If your Mac cannot drive Desktops at all, the offer does not
 appear — see
