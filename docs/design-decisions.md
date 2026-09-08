@@ -564,9 +564,22 @@ Two consequences fall out, both structural rather than stylistic:
   as well makes the reader's eye redo work the section below
   already did, and turns news into a bug list.
 - **Highlights are highlights.** Twenty bullets is a changelog
-  with headings. Site fixes, a font bump and release plumbing
-  collapse into one closing line; the generated list still
-  carries each of them for whoever wants that.
+  with headings, and a nine-line bullet is a PR description. A
+  bullet is ONE line: the thing you would notice, and that it
+  is fixed. A second sentence is earned only when one line
+  cannot say it — a default that changed, a control to go and
+  find — and never by the diagnosis, which is the PR's (ruling
+  2026-09-08). The whole block should read in one screen of the
+  update sheet Sparkle shows.
+- **A site change is news only when a visitor would come for
+  it.** A new page, a new language, a changed download earns a
+  line. A heading that now fits its column, a corrected term, a
+  font bump and release plumbing earn none — not even a closing
+  "on the site" line, which 1.2.1's first draft carried and the
+  owner struck (ruling 2026-09-08): a reader installing an
+  update has no reason to care that the website was tidied. The
+  generated list still carries each of them for whoever wants
+  that.
 
 This binds whichever surface carries the notes, not the surface
 it happens to be today. That surface is currently the GitHub
