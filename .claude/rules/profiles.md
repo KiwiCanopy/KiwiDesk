@@ -349,13 +349,33 @@ Three further obligations, and they bind this directory:
   not an apply. It is an obligation on a NEW writer: if it moves
   the name while the Spaces stay put, the store starts filing one
   profile's windows under another's name.
+- **Answer a question about the ACTIVE profile from adoption
+  state, never by re-reading its file (#1245).**
+  `handleDesktopChange` runs on the main actor mid-transition,
+  and `ProfileManager.read` REWRITES the file whenever a
+  migration applies — so a read there is a latency cost AND a
+  silent disk write fired by a swipe. The active profile's
+  declared Spaces therefore ride `ActiveProfile`, one value with
+  the name, so no ender can drop the name and leave a stale Space
+  set answering for it; a new fact the switch path needs about
+  that profile joins the value rather than re-reading
+  (`ProfileAuthoritySeamTests` ▸ `firstVisitPickReadsNoFile` pins
+  the one function, and `DesktopFirstVisitTests` proves the
+  answer survives the file's deletion).
+
+  This binds a question about the profile ALREADY live. Loading a
+  DIFFERENT one is a read by definition — `applyDesktopBinding`
+  reads the profile a Desktop binds to, on this same path, and
+  must. The cost, stated: a hand edit to a profile's JSON reaches
+  the switch path at the next apply — a reload, a monitor change,
+  an in-effect save.
 - **Let the apply judge the #36 fit.** `becameLive` takes it,
   read off the monitor set the apply already matched for the
   pins, so no caller pairs `isDirty` by hand. A caller whose
   verdict differs must say so with `markClean`/`markDirty` beside
   the apply AND state why it differs; `applyDesktopBinding` is the
   worked example, and its disagreement with the monitor-change
-  bound arm is #1245's to rule.
+  bound arm is #1332's to rule.
 
 `ProfileAuthoritySeamTests` holds the first two as one-home
 clauses, scoped to the doors' own bodies rather than to their

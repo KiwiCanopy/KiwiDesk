@@ -165,9 +165,8 @@ extension KiwiCore {
     /// no profile to ask — in which case every live Space is a
     /// candidate, which is what this answered before #1230.
     ///
-    /// Read from disk on the FALLBACK path only: a Desktop with a
-    /// memory returns above, so this costs one small JSON read per
-    /// Desktop per session.
+    /// Answered from adoption state, never from the file — this
+    /// runs inside `handleDesktopChange` (#1245, profiles.md).
     ///
     /// Asking the profile rather than the live set is belt AND
     /// braces. #1230's own prune-on-switch means the live set
@@ -176,20 +175,7 @@ extension KiwiCore {
     /// profile, and landing a fresh Desktop on one of those is
     /// the confusion this pick exists to remove.
     func currentDeclaredSpaces() -> Set<SpaceID>? {
-        guard let name = profiles.currentName else { return nil }
-        do {
-            return try profiles.read(name: name).declaredSpaces
-        } catch {
-            // Falling back keeps this TOTAL, which the switch arm
-            // needs — but a broken profile would otherwise drop a
-            // ruled behaviour with no trace, so it says so.
-            onLog(
-                "first-visit pick: cannot read profile "
-                    + "'\(name)' (\(error)); every live Space is "
-                    + "a candidate"
-            )
-            return nil
-        }
+        profiles.active?.declaredSpaces
     }
 
     /// Moves a display that switched Desktop onto the Space that

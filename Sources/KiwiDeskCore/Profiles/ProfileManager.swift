@@ -32,7 +32,12 @@ public final class ProfileManager {
     /// sets one clears the other, which is what lets a caller
     /// holding the name already treat `markClean()` as a whole
     /// re-adopt.
-    public private(set) var currentName: String?
+    public var currentName: String? { active?.name }
+
+    /// The active profile as one value — what `currentName` reads
+    /// from, and what a Desktop switch asks for the declared
+    /// Spaces instead of the disk (#1245).
+    private(set) var active: ActiveProfile?
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
     public private(set) var currentStandard: String?
@@ -102,7 +107,7 @@ public final class ProfileManager {
             profile.isDefault = true
         }
         try write(profile)
-        currentName = profile.name
+        active = ActiveProfile(profile)
         currentStandard = nil
         isDirty = false
     }
@@ -114,7 +119,7 @@ public final class ProfileManager {
             at: url(for: validated(name))
         )
         if currentName == name {
-            currentName = nil
+            active = nil
             isDirty = true
         }
         let counts =
@@ -154,7 +159,9 @@ public final class ProfileManager {
         try files.moveItem(at: source, to: destination)
         profile.name = new
         try write(profile)
-        if currentName == old { currentName = new }
+        if currentName == old {
+            active = active?.renamed(to: new)
+        }
     }
 
     /// Re-designates a count's default profile.
@@ -241,7 +248,7 @@ public final class ProfileManager {
     /// `apply(profile:)`'s and no one else's — profiles.md ▸
     /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
-        currentName = profile.name
+        active = ActiveProfile(profile)
         currentStandard = nil
         isDirty = !fits
     }
@@ -254,19 +261,19 @@ public final class ProfileManager {
     /// forget which (`StarterRescaleTests` ▸ `reloadKeepsLadder`).
     /// Dirtiness is the caller's here, having no profile to judge.
     func noProfileIsLive() {
-        currentName = nil
+        active = nil
     }
 
     /// Records that a built-in Standard is resolving (dirty state).
     func adoptStandard(named name: String) {
-        currentName = nil
+        active = nil
         currentStandard = name
         isDirty = true
     }
 
     /// Resets adoption state for Reset All Settings (#634).
     func resetAdoption() {
-        currentName = nil
+        active = nil
         currentStandard = nil
         isDirty = false
     }

@@ -30,9 +30,15 @@ struct ProfileRenameTests {
     func basicRename() throws {
         let core = makeCore()
         save(core, "desk")
+        let declared = core.currentDeclaredSpaces()
         try core.renameProfile(from: "desk", to: "studio")
         #expect(core.profiles.list() == ["studio"])
         #expect(core.profiles.currentName == "studio")
+        // The name and the declared Spaces are ONE value, so a
+        // rename moves the name and keeps the Spaces — it cannot
+        // drop them or leave the old name answering (#1245).
+        #expect(core.currentDeclaredSpaces() == declared)
+        #expect(declared != nil)
     }
 
     @Test("case-only rename keeps the profile")
