@@ -965,16 +965,23 @@ const jsonLd = [
   }
   /* MINOR — centring the numeral is right for a one-line heading
      and wrong for two, and every anchor title wraps at 375px. */
+  /* The two labels are a matched PAIR — same size, weight and
+     ink — because each one opens a block and the reader is meant
+     to weigh the halves against each other. Coloured apart (one
+     accent, one dim) the second read as a caption rather than as
+     a heading, and dropped out of the scan (owner, 2026-09-08).
+     Not underlined, for the same reason: the card's own title is
+     a link and its body carries more, so an underlined label
+     reads as a third one. */
   .cmp__label {
     margin: 0 0 0.3rem;
-    font-size: 0.72rem;
-    font-weight: 650;
-    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--text);
   }
   .cmp__label--diff {
-    color: var(--text-dim);
     margin-top: 0;
   }
   .cmp__chips {
