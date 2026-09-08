@@ -1,5 +1,8 @@
 # Astro / Node build artifacts
-node_modules/
+# No trailing slash: `node_modules/` matches a DIRECTORY only, and
+# a symlink of that name slips past it into `git add -A` — which
+# is how an absolute, machine-specific link reached main (#1339).
+node_modules
 dist/
 .astro/
 .cache/
