@@ -73,6 +73,20 @@ struct StartupFocusSeedTests {
         )
     }
 
+    /// Being OS truth, the seed retires a standing return debt the
+    /// way an honored report does (#1345): the frontmost window
+    /// is what the user is looking at, not the owed one.
+    @Test("Frontmost seed retires a standing return debt")
+    func frontmostSeedRetiresTheDebt() {
+        let core = makeCore()
+        add(core, 1)
+        add(core, 2)
+        core.desktopMemory.readWindowSpace = { _ in .hosted(10) }
+        core.desktopMemory.returnFocus.record(WindowID(7))
+        core.seedStartupFocus(frontmost: WindowID(1))
+        #expect(core.desktopMemory.returnFocus.owed() == nil)
+    }
+
     @Test("Unresolvable frontmost never disturbs a real focus")
     func keepsExistingFocusWithoutFrontmost() {
         let core = makeCore()

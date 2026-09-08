@@ -39,10 +39,15 @@ extension KiwiCore {
         let next = activeSpace?.focused
         let nextText =
             next.map { id -> String in
-                let crosses = raiseCrossesDesktops(id)
+                // ONE reading of the seam, narrated raw AND as the
+                // gate reads it: nil (never listed) and false
+                // (not drawn) differ in a trace.
+                let seen = windowIsOnScreen(id)
+                let onScreen = seen.map { "\($0)" } ?? "unknown"
                 let fs =
                     state.windows[id]?.isFullscreen == true
-                return "w\(id.raw) crosses=\(crosses) fs=\(fs)"
+                return "w\(id.raw) onScreen=\(onScreen) "
+                    + "crosses=\(seen == false) fs=\(fs)"
             } ?? "none"
         onLog(
             "close-return: removed focused window of "

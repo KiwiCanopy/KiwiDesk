@@ -5,8 +5,9 @@ import Testing
 
 /// The Desktop raise gate (#1345): raising a window the
 /// compositor is not drawing makes macOS switch to it, so
-/// `focusWindow` refuses the verb whole and `raiseWindow` refuses
-/// the deferred raise. The read is the compositor's on-screen flag
+/// `focusWindow` refuses the verb whole and
+/// `runPendingFocusRaise` re-asks for the deferred raise at its
+/// fire. The read is the compositor's on-screen flag
 /// — never state, which still held the departed window on the
 /// device, its app's destroy seconds behind the swipe.
 @Suite("Desktop raise gate (#1345)")
