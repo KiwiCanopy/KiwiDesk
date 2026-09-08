@@ -27,17 +27,19 @@ extension StatusItemController {
         }
     }
 
-    /// The description a badged image carries, so a test can tell
-    /// the mark from the bare glyph without reading pixels (an
-    /// `NSImage` NAME is global and refuses a second holder).
-    static let badgedImageName = "kiwidesk.update-mark"
+    /// The composite's type, so a test can tell the mark from the
+    /// bare glyph without reading pixels or riding an announced
+    /// property (an `NSImage` NAME is global and refuses a second
+    /// holder; a description is what VoiceOver reads off an
+    /// unlabelled button).
+    final class UpdateMarkImage: NSImage {}
 
     /// The pending-update mark (#1013): a dot with a knockout ring,
     /// composited into a NEW template image — the shared brand icon
     /// is never mutated (#1311), and a template carries no hue, so
     /// the mark separates by shape alone (design-decisions.md).
     /// Pure: `render()` alone decides which state carries it.
-    static func badged(_ base: NSImage) -> NSImage {
+    static func badged(_ base: NSImage) -> UpdateMarkImage {
         let size = base.size
         let dot = min(size.width, size.height) / 3
         let ring = dot * 1.5
@@ -45,7 +47,7 @@ extension StatusItemController {
             x: size.width - dot / 2 - 0.5,
             y: size.height - dot / 2 - 0.5
         )
-        let image = NSImage(size: size, flipped: false) { rect in
+        let image = UpdateMarkImage(size: size, flipped: false) { rect in
             base.draw(in: rect)
             let context = NSGraphicsContext.current
             context?.compositingOperation = .destinationOut
@@ -70,7 +72,7 @@ extension StatusItemController {
             return true
         }
         image.isTemplate = true
-        image.accessibilityDescription = Self.badgedImageName
+        image.accessibilityDescription = base.accessibilityDescription
         return image
     }
 

@@ -16,7 +16,7 @@ final class UpdatePromptPolicy: NSObject,
     /// The one home of the fact; `onUpdatePendingChanged` nudges
     /// the consumer, which reads it back.
     var updatePending = false {
-        didSet { if updatePending != oldValue { onUpdatePendingChanged() } }
+        didSet { onUpdatePendingChanged() }
     }
     var onUpdatePendingChanged: () -> Void = {}
 

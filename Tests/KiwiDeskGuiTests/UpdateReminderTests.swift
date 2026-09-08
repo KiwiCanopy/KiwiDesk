@@ -51,13 +51,12 @@ struct UpdateReminderTests {
         updater.updatePending = true
         #expect(controller.updatePending)
         #expect(
-            button.image?.accessibilityDescription
-                == StatusItemController.badgedImageName
+            button.image is StatusItemController.UpdateMarkImage
         )
         updater.updatePending = false
         #expect(
-            button.image?.accessibilityDescription
-                != StatusItemController.badgedImageName
+            !(try #require(button.image)
+                is StatusItemController.UpdateMarkImage)
         )
     }
 
@@ -118,7 +117,9 @@ struct UpdateReminderTests {
 
     /// A warning, the starting phase and a config error outrank
     /// the reminder on BOTH channels: the icon that says something
-    /// is wrong carries no dot and keeps its own name.
+    /// is wrong carries no dot and keeps its own name. Each
+    /// negative clause REQUIRES an image, or the title-fallback
+    /// path would satisfy it with nil.
     @Test("the broken and starting states outrank the mark on both channels")
     func brokenStatesOutrankTheMark() throws {
         let (controller, updater) = controller()
@@ -129,23 +130,48 @@ struct UpdateReminderTests {
             button.accessibilityLabel()?.contains("permission") == true
         )
         #expect(
-            button.image?.accessibilityDescription
-                != StatusItemController.badgedImageName
+            !(try #require(button.image)
+                is StatusItemController.UpdateMarkImage)
         )
         controller.setWarning(false)
         controller.setBootPhase(.scanning(scanned: 1, total: 2))
         #expect(
-            button.image?.accessibilityDescription
-                != StatusItemController.badgedImageName
+            !(try #require(button.image)
+                is StatusItemController.UpdateMarkImage)
         )
         #expect(
             button.accessibilityLabel()?.contains("starting") == true
         )
         controller.setBootPhase(.ready)
+        controller.setConfigError(true)
         #expect(
-            button.image?.accessibilityDescription
-                == StatusItemController.badgedImageName
+            !(try #require(button.image)
+                is StatusItemController.UpdateMarkImage)
         )
+        #expect(
+            button.accessibilityLabel()?.contains("config") == true
+        )
+        controller.setConfigError(false)
+        #expect(
+            button.image is StatusItemController.UpdateMarkImage
+        )
+    }
+
+    /// A mode icon that is no SF Symbol takes the title fallback
+    /// and has no image to badge: the announced channels still
+    /// carry the reminder (#937's shape — a stand-down asks whether
+    /// either channel is reached, never one alone).
+    @Test("without an image the reminder is still announced")
+    func announcedWithoutAnImage() throws {
+        let (controller, updater) = controller()
+        let button = try #require(controller.anchorButton)
+        controller.setModeIcon("no.such.symbol.kiwidesk")
+        updater.updatePending = true
+        #expect(button.image == nil)
+        #expect(
+            button.accessibilityLabel()?.contains("update") == true
+        )
+        #expect(button.toolTip?.contains("update") == true)
     }
 }
 
@@ -193,6 +219,11 @@ struct UpdateReminderPolicyTests {
         policy.standardUserDriverWillFinishUpdateSession()
         #expect(!policy.updatePending)
         #expect(nudges == 4)
+        // Every write nudges — a same-value write too, since a
+        // redundant render is idempotent and a gate would be one
+        // more thing to pin.
+        policy.updatePending = false
+        #expect(nudges == 5)
     }
 
     @Test("Sparkle can find every reminder answer by selector")

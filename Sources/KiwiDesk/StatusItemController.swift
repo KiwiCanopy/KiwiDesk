@@ -172,8 +172,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         // after the early returns above, so a warning, the
         // starting phase and a config error outrank an offer on
         // the glyph AND the name.
-        if updatePending, let image = button.image {
-            button.image = Self.badged(image)
+        if updatePending {
+            if let image = button.image {
+                button.image = Self.badged(image)
+            }
             button.setAccessibilityLabel(
                 L("menu.status.update.a11y", "KiwiDesk (update available)")
             )

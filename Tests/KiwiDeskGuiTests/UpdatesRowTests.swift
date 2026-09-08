@@ -60,11 +60,10 @@ struct UpdatesRowTests {
         return (controller.makeUpdatesItem(), controller, updater)
     }
 
-    /// The click tests below drive the action directly, because
-    /// `NSApp` is nil in a test process and `sendAction` traps on
-    /// it. So the target/action pair is asserted here instead —
-    /// without this, a row wired to nothing would pass every one
-    /// of them.
+    /// The click tests below drive the action directly rather
+    /// than through `sendAction`, so the target/action pair is
+    /// asserted here instead — without this, a row wired to
+    /// nothing would pass every one of them.
     @Test("the row is wired to the controller's action")
     func rowIsWired() {
         let (item, controller, _) = row(canCheck: true)
