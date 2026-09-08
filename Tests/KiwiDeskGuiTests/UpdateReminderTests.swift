@@ -199,6 +199,17 @@ struct UpdateReminderReadNotStoredTests {
         )
         #expect(!source.contains("updatePending ="))
         #expect(!source.contains("var updatePending = "))
+        // A copy under ANOTHER name would be written from the
+        // nudge: the closure carries the render and nothing else.
+        let start = try #require(
+            source.range(of: "onUpdatePendingChanged = {")
+        )
+        let close = try #require(
+            source[start.upperBound...].range(of: "}")
+        )
+        let nudge = source[start.upperBound..<close.lowerBound]
+        #expect(nudge.contains("render()"))
+        #expect(!nudge.contains("="))
     }
 }
 
