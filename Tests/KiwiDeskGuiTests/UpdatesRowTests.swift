@@ -19,6 +19,7 @@ private final class FakeStatusItem: StatusItemHandle {
 private final class FakeUpdater: AppUpdating {
     var canCheckForUpdates: Bool
     private(set) var checks = 0
+    var onUpdatePendingChanged: (Bool) -> Void = { _ in }
 
     init(canCheck: Bool) { canCheckForUpdates = canCheck }
     func checkForUpdates() { checks += 1 }

@@ -19,8 +19,14 @@ protocol AppUpdating: AnyObject {
     /// Whether an update check can be started.
     var canCheckForUpdates: Bool { get }
 
-    /// Initiates an update check.
+    /// Initiates an update check — or, while a scheduled update
+    /// waits behind a gentle reminder, brings its alert forward
+    /// (#1013, Sparkle's documented door).
     func checkForUpdates()
+
+    /// Set by the consumer; fires on the main actor as the pending
+    /// reminder comes and goes (#1013). Inert updaters never fire.
+    var onUpdatePendingChanged: (Bool) -> Void { get set }
 }
 
 /// Live Sparkle update controller (`UpdatePromptFocusTests`, #1011).
@@ -60,6 +66,11 @@ final class SparkleUpdater: AppUpdating {
     func checkForUpdates() {
         updater.checkForUpdates()
     }
+
+    var onUpdatePendingChanged: (Bool) -> Void {
+        get { policy.onUpdatePending }
+        set { policy.onUpdatePending = newValue }
+    }
 }
 
 /// Inert updater for tests and unbundled runs. The INERT default
@@ -75,6 +86,7 @@ final class SparkleUpdater: AppUpdating {
 final class NoUpdater: AppUpdating {
     var canCheckForUpdates: Bool { false }
     func checkForUpdates() {}
+    var onUpdatePendingChanged: (Bool) -> Void = { _ in }
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).

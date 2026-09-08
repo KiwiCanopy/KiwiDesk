@@ -10,6 +10,47 @@ import Sparkle
 final class UpdatePromptPolicy: NSObject,
     @MainActor SPUStandardUserDriverDelegate
 {
+    /// Fires with `true` when a SCHEDULED update is waiting behind
+    /// a gentle reminder and `false` once it got the user's
+    /// attention or the session ended (#1013). The updater sets
+    /// it; the status item is the consumer.
+    var onUpdatePending: (Bool) -> Void = { _ in }
+
+    /// Gentle reminders (#1013): a background app's scheduled
+    /// alert is drawn BEHIND every window, which for a menu-bar
+    /// app is drawn nowhere. Sparkle's own warning names this.
+    var supportsGentleScheduledUpdateReminders: Bool { true }
+
+    /// A scheduled update is KiwiDesk's to show, whatever focus
+    /// Sparkle proposes: the reminder is a mark and a menu row,
+    /// because an unsolicited offer never takes the screen —
+    /// unlike a window finishing something already begun (#1011).
+    /// User-initiated checks never reach this answer.
+    func standardUserDriverShouldHandleShowingScheduledUpdate(
+        _ update: SUAppcastItem,
+        andInImmediateFocus immediateFocus: Bool
+    ) -> Bool {
+        false
+    }
+
+    func standardUserDriverWillHandleShowingUpdate(
+        _ handleShowingUpdate: Bool,
+        forUpdate update: SUAppcastItem,
+        state: SPUUserUpdateState
+    ) {
+        onUpdatePending(!handleShowingUpdate)
+    }
+
+    func standardUserDriverDidReceiveUserAttention(
+        forUpdate update: SUAppcastItem
+    ) {
+        onUpdatePending(false)
+    }
+
+    func standardUserDriverWillFinishUpdateSession() {
+        onUpdatePending(false)
+    }
+
     /// Disallows minimizing the status window (#1011): activating
     /// a process deminiaturizes nothing, so a parked prompt would
     /// sit in a Dock KiwiDesk has no icon in — refusing the

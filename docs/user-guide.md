@@ -382,10 +382,12 @@ the KiwiDesk icon opens the quick menu where you can:
 - **Settings…**: Open the full Settings window.
 - **Check for Updates…**: Ask right now whether a newer KiwiDesk
   has been released, and install it if you want it. KiwiDesk also
-  checks on its own in the background, so you will normally be
-  told rather than have to ask; this is the row for when you want
-  to know immediately. It is greyed while a check is already
-  running or an update is part-way through installing.
+  checks on its own in the background: when that check finds an
+  update, the menu-bar icon shows a small dot and this row reads
+  **Update Available…** until you open it — nothing pops up over
+  your work. This is the row for when you want to know
+  immediately. It is greyed while a check is already running or
+  an update is part-way through installing.
 
   Choosing to install shows a small progress window. You do not
   have to watch it — go back to what you were doing, and KiwiDesk

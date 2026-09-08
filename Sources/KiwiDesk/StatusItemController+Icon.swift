@@ -19,12 +19,57 @@ extension StatusItemController {
         if let icon = BrandAssets.menuBarIcon
             ?? symbol("rectangle.3.group")
         {
-            button.image = icon
+            button.image = badged(icon)
             button.title = ""
         } else {
             button.image = nil
             button.title = a11y
         }
+    }
+
+    /// The pending-update mark (#1013): a dot with a knockout ring
+    /// at the top-trailing corner, composited into a NEW template
+    /// image — the shared brand icon is never mutated (#1311), and
+    /// a template carries no hue, so the mark separates by shape
+    /// alone and needs no colour-vision floor. The fixed black is
+    /// a template's alpha, not an ink. Drawn per backing scale by
+    /// the handler initializer. Only the healthy glyphs carry it:
+    /// a warning or a config error outranks an offer.
+    func badged(_ base: NSImage) -> NSImage {
+        guard updatePending else { return base }
+        let size = base.size
+        let dot = min(size.width, size.height) / 3
+        let ring = dot * 1.5
+        let center = CGPoint(
+            x: size.width - dot / 2 - 0.5,
+            y: size.height - dot / 2 - 0.5
+        )
+        let image = NSImage(size: size, flipped: false) { rect in
+            base.draw(in: rect)
+            let context = NSGraphicsContext.current
+            context?.compositingOperation = .destinationOut
+            NSBezierPath(
+                ovalIn: CGRect(
+                    x: center.x - ring / 2,
+                    y: center.y - ring / 2,
+                    width: ring,
+                    height: ring
+                )
+            ).fill()
+            context?.compositingOperation = .sourceOver
+            NSColor.black.setFill()
+            NSBezierPath(
+                ovalIn: CGRect(
+                    x: center.x - dot / 2,
+                    y: center.y - dot / 2,
+                    width: dot,
+                    height: dot
+                )
+            ).fill()
+            return true
+        }
+        image.isTemplate = true
+        return image
     }
 
     /// Sets status button icon to SF Symbol, or a visible text
@@ -65,7 +110,7 @@ extension StatusItemController {
             systemSymbolName: icon,
             accessibilityDescription: icon
         ) {
-            button.image = image
+            button.image = badged(image)
             button.title = ""
         } else {
             button.image = nil

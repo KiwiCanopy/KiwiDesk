@@ -435,6 +435,44 @@ it. It is the answer to "why is there none *yet*", so a future
 row supersedes this without contradicting it. What must not
 happen is unsetting the key and letting Sparkle ask again.
 
+### Scheduled update reminders are a mark, not a notification (#1013)
+
+**[Rationale]**
+
+For a background app Sparkle draws a scheduled update alert
+behind every other window — deliberately, so the offer does not
+take the screen — and for a menu-bar app with no Dock tile that
+is drawn nowhere. Sparkle logs the warning once per launch. The
+[background check](#background-update-checks-are-on-and-there-is-no-switch)
+is the path most users are on, so an alert nobody sees is an
+update path that does not deliver.
+
+The reminder is a **mark on the status item and a row in its
+menu**, nothing else: `UpdatePromptPolicy` declares gentle
+reminders and answers that KiwiDesk shows every scheduled update
+itself — whatever focus Sparkle proposes, since the
+[accessory-mode corollary](#permanent-accessory-mode-no-activation-policy-switching)
+forbids an unsolicited offer taking the screen — and the status
+item carries a dot until the update gets attention or the session
+ends. The dot is composited into a fresh template image with a
+knockout ring, the SF Symbols `.badge` idiom, so it separates by
+shape with no hue for colour-vision deficiency to lose and no
+motion for Reduce Motion to gate; it rides only the healthy
+glyphs, because a permission warning or a config error outranks
+an offer. The updates row is retitled in place — "Update
+Available…" — rather than doubled: Sparkle's own door for
+bringing the waiting alert forward is `checkForUpdates`, the row's
+existing action, and `canCheckForUpdates` stays true while the
+update waits (Sparkle 2.9.6, `SPUUIBasedUpdateDriver`).
+
+A user notification was ruled out: it asks for a permission
+KiwiDesk has never asked for, on top of a first-run story that is
+already a permission wizard, to tell someone about an update. No
+setting was added — the reminder costs nothing to ignore. What
+cannot be verified without a newer release in the feed, and is
+owed at the first one: the scheduled check landing while another
+app is frontmost marks the item and does not switch focus.
+
 ### Linking the notes is not opening a channel
 
 **[Rationale]**
@@ -4323,12 +4361,13 @@ no switch](#background-update-checks-are-on-and-there-is-no-switch)
 makes about a modal at the worst moment, and it is why Sparkle
 showing a SCHEDULED update alert behind other windows is left
 alone here. The obligation is on the interaction the user is
-already inside, never on the one being proposed to them. What that
-scoping costs — a background app's scheduled alert being easy to
-miss entirely, which Sparkle answers with *gentle reminders*
-KiwiDesk does not yet implement — is
-[#1013](https://github.com/KiwiCanopy/KiwiDesk/issues/1013), not
-something this entry rules acceptable.
+already inside, never on the one being proposed to them. The
+scheduled alert is therefore never shown by Sparkle at all: the
+offer is a mark on the menu-bar item and a row in its menu
+([Scheduled update reminders are a mark, not a
+notification](#scheduled-update-reminders-are-a-mark-not-a-notification-1013)),
+and acting on that row is the user beginning the interaction, so
+the alert then comes forward under this entry's rule.
 
 Sparkle is the worked case
 ([#1011](https://github.com/KiwiCanopy/KiwiDesk/issues/1011)). It
