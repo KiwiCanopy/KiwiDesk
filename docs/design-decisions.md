@@ -454,12 +454,19 @@ itself — whatever focus Sparkle proposes, since the
 [accessory-mode corollary](#permanent-accessory-mode-no-activation-policy-switching)
 forbids an unsolicited offer taking the screen — and the status
 item carries a dot until the update gets attention or the session
-ends. The dot is composited into a fresh template image with a
-knockout ring, the SF Symbols `.badge` idiom, so it separates by
-shape with no hue for colour-vision deficiency to lose and no
-motion for Reduce Motion to gate; it rides only the healthy
-glyphs, because a permission warning or a config error outranks
-an offer. The updates row is retitled in place — "Update
+ends. The dot is composited into a fresh image with a knockout
+ring, the SF Symbols `.badge` idiom, top-trailing and Ø5 at the
+18 pt master, and it is **orange** — the owner ruled colour over
+the monochrome template the design pass proposed (2026-09-08).
+What that costs, stated: a template carries no hue, so the
+composite is not one, and the bar's highlight inversion while the
+menu is open no longer reaches it; what it keeps: the drawing
+handler resolves the bar's label colour and `systemOrange` at
+every draw, so light and dark still follow, and the shape alone
+still separates the mark for colour-vision deficiency. Nothing
+moves, so Reduce Motion has nothing to gate. It rides only the
+healthy glyphs, because a permission warning or a config error
+outranks an offer. The updates row is retitled in place — "Update
 Available…" — rather than doubled: Sparkle's own door for
 bringing the waiting alert forward is `checkForUpdates`, the row's
 existing action, and `canCheckForUpdates` stays true while the

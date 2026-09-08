@@ -34,14 +34,18 @@ extension StatusItemController {
     /// unlabelled button).
     final class UpdateMarkImage: NSImage {}
 
-    /// The pending-update mark (#1013): a dot with a knockout ring,
-    /// composited into a NEW template image — the shared brand icon
-    /// is never mutated (#1311), and a template carries no hue, so
-    /// the mark separates by shape alone (design-decisions.md).
+    /// The pending-update mark (#1013, owner ruling 2026-09-08:
+    /// orange, top-trailing, Ø5 at the 18 pt master): a dot with a
+    /// knockout ring, composited into a NEW image — the shared
+    /// brand icon is never mutated (#1311). Not a template, since
+    /// a template carries no hue: the handler resolves the bar's
+    /// label colour and `systemOrange` at every draw, so light and
+    /// dark still follow; the bar's highlight inversion while the
+    /// menu is open is what the colour costs (design-decisions.md).
     /// Pure: `render()` alone decides which state carries it.
     static func badged(_ base: NSImage) -> UpdateMarkImage {
         let size = base.size
-        let dot = min(size.width, size.height) / 3
+        let dot = min(size.width, size.height) * 5 / 18
         let ring = dot * 1.5
         let center = CGPoint(
             x: size.width - dot / 2 - 0.5,
@@ -49,6 +53,8 @@ extension StatusItemController {
         )
         let image = UpdateMarkImage(size: size, flipped: false) { rect in
             base.draw(in: rect)
+            NSColor.labelColor.set()
+            rect.fill(using: .sourceAtop)
             let context = NSGraphicsContext.current
             context?.compositingOperation = .destinationOut
             NSBezierPath(
@@ -60,7 +66,7 @@ extension StatusItemController {
                 )
             ).fill()
             context?.compositingOperation = .sourceOver
-            NSColor.black.setFill()
+            NSColor.systemOrange.setFill()
             NSBezierPath(
                 ovalIn: CGRect(
                     x: center.x - dot / 2,
@@ -71,7 +77,7 @@ extension StatusItemController {
             ).fill()
             return true
         }
-        image.isTemplate = true
+        image.isTemplate = false
         image.accessibilityDescription = base.accessibilityDescription
         return image
     }

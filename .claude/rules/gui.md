@@ -273,7 +273,9 @@ a Sparkle bump re-reads it beside #1011). The pending fact has
 ONE home, the policy's `updatePending`: a consumer READS it at
 render and never stores a copy, which a nudge could keep in sync
 right up to the day it does not (`UpdateReminderTests` ▸ the
-read-not-stored scan). The mark is composited in `render()`
+read-not-stored scan). The mark is a coloured NON-template
+composite — the owner ruled orange — whose handler resolves the
+bar's label colour at draw time; it is composited in `render()`
 alone, AFTER the states that outrank an offer — a permission
 warning, the starting phase, a config error — and on both
 channels whether or not an image exists, since a mode icon that

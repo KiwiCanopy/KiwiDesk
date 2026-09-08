@@ -157,6 +157,24 @@ struct UpdateReminderTests {
         )
     }
 
+    /// The colour is the point (owner ruling): the composite is
+    /// NOT a template, while the shared brand icon it was drawn
+    /// from stays one and is never mutated (#1311).
+    @Test(
+        "the mark is a coloured composite and the brand icon stays a template"
+    )
+    func markIsNotATemplate() throws {
+        let (controller, updater) = controller()
+        let button = try #require(controller.anchorButton)
+        let brand = try #require(BrandAssets.menuBarIcon)
+        updater.updatePending = true
+        let mark = try #require(button.image)
+        #expect(mark is StatusItemController.UpdateMarkImage)
+        #expect(!mark.isTemplate)
+        #expect(mark !== brand)
+        #expect(brand.isTemplate)
+    }
+
     /// A mode icon that is no SF Symbol takes the title fallback
     /// and has no image to badge: the announced channels still
     /// carry the reminder (#937's shape — a stand-down asks whether
