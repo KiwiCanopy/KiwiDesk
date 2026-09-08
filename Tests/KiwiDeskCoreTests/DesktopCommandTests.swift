@@ -3,97 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-// MARK: - Bridge fakes (the resolver seam, never the machine)
-
-private enum Bridge {
-    nonisolated(unsafe) static var switches: [(UInt64, String)] = []
-    nonisolated(unsafe) static var moves: [([NSNumber], UInt64)] = []
-    nonisolated(unsafe) static var hides: [[NSNumber]] = []
-    /// Every dispatched operation in order — the set-then-hide
-    /// sequence is the #1023 fix, so the ORDER is an assertion,
-    /// not a convenience.
-    nonisolated(unsafe) static var events: [String] = []
-
-    static func reset() {
-        switches = []
-        moves = []
-        hides = []
-        events = []
-    }
-}
-
-private final class FakePlistArrayResult: NSObject {
-    @objc let propertyListArray: [[String: Any]]
-    init(propertyListArray: [[String: Any]]) {
-        self.propertyListArray = propertyListArray
-    }
-}
-
-/// The availability probe, answering — the bridge is present.
-private final class FakeCopyManagedDisplaySpaces: NSObject {
-    @objc override init() {}
-    @objc func performWithWMBridgeDelegate() -> AnyObject? {
-        FakePlistArrayResult(propertyListArray: [["Spaces": []]])
-    }
-}
-
-/// Captures its arguments on `init` but records the call only
-/// when the operation is DISPATCHED — "performed is not applied"
-/// cuts both ways, and an assertion over a merely-constructed
-/// operation would stay green if a verb dropped its perform.
-private final class FakeSetCurrentSpace: NSObject {
-    private let space: UInt64
-    private let display: String
-
-    @objc(initWithDisplayIdentifier:spaceID:)
-    init(displayIdentifier: String, spaceID: UInt64) {
-        space = spaceID
-        display = displayIdentifier
-    }
-
-    @objc func performWithWMBridgeDelegate() {
-        Bridge.switches.append((space, display))
-        Bridge.events.append("set \(space) \(display)")
-    }
-}
-
-private final class FakeHideSpaces: NSObject {
-    private let spaces: [NSNumber]
-
-    @objc(initWithSpaces:)
-    init(spaces: [NSNumber]) {
-        self.spaces = spaces
-    }
-
-    @objc func performWithWMBridgeDelegate() {
-        Bridge.hides.append(spaces)
-        Bridge.events.append("hide \(spaces)")
-    }
-}
-
-private final class FakeMoveWindows: NSObject {
-    private let windows: [NSNumber]
-    private let space: UInt64
-
-    @objc(initWithWindows:spaceID:)
-    init(windows: [NSNumber], spaceID: UInt64) {
-        self.windows = windows
-        space = spaceID
-    }
-
-    @objc func performWithWMBridgeDelegate() {
-        Bridge.moves.append((windows, space))
-    }
-}
-
-private let bridgeClasses: [String: AnyClass] = [
-    "CopyManagedDisplaySpacesOperation":
-        FakeCopyManagedDisplaySpaces.self,
-    "ManagedDisplaySetCurrentSpaceOperation":
-        FakeSetCurrentSpace.self,
-    "MoveWindowsToManagedSpaceOperation": FakeMoveWindows.self,
-    "HideSpacesOperation": FakeHideSpaces.self,
-]
+// The fakes live in `DesktopBridgeFakes.swift` (§2.1); the suite
+// keeps its own short names.
+private typealias Bridge = DesktopVerbBridge
+private let bridgeClasses = desktopVerbBridgeClasses
 
 // MARK: - Suite
 
