@@ -3721,6 +3721,54 @@ Space it was taken in, so a window filed into a different Space
 returns by the arrival's ordinary placement rather than at its
 old index (#1207).
 
+### A Desktop switch that changes nothing still reports itself (#1336)
+
+**[Principle]**
+
+A command that acts on nothing answers **success carrying the
+fact**, never a bare `.ok()` and never a refusal. `focus_desktop`
+and `move_to_desktop_and_follow` both answer
+`{"switched": true|false}`, with a `note` on the stand-down.
+
+The measurement: on the device, `move_to_desktop_and_follow 1`
+while Desktop 1 was already showing printed nothing, logged
+nothing and exited 0. A caller cannot tell that from a switch
+that moved the screen, and the user has no signal the verb
+declined — which is the half of #1336 the reporter called the
+worse one.
+
+**Success rather than a refusal**, because these verbs are
+routinely called to ENSURE a state: "make sure Desktop 3 is
+showing" must not fail merely because it already was. That is
+what separates this class from the sibling ruling above — a
+keyboard reorder that cannot apply refuses with the home-space
+pill, because there the user asked for a CHANGE and the
+arrangement cannot give it. Asking for a state you are already
+in is not a failed change.
+
+**Structure rather than prose**, because the payload is read by
+scripts on three channels. It also decides the shape of the
+other arm: were only the stand-down to carry data, the Lua
+return would be truthy exactly when nothing happened and nil
+when the screen moved. Both arms report `switched`, so the
+discriminator is a field rather than the payload's presence.
+
+**`switched` describes the SWITCH, not the command.** A follow's
+stand-down arm is the one that does the most work — it is the
+only path on which the cross-screen re-home fires — so
+`switched: false` there must not be read as "nothing happened".
+The window moved; only the screen did not.
+
+Two residues, deliberately left. The plain `move_to_desktop` is
+NOT covered: whether the window was already on that Desktop is
+not knowable from a target current on its own screen (the
+`moveToDesktop` docstring rules this), so there is no detectable
+no-op to report — its silence is about the WINDOW where this
+ruling is about the SCREEN. And the hotkey path discards command
+responses entirely, so a keyboard user still sees nothing; a
+screen that did not move is its own evidence there, and giving
+it a cue is a separate question from this one.
+
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
 **[Rationale]**

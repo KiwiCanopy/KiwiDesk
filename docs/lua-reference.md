@@ -233,12 +233,14 @@ KiwiDesk Space — exactly as a swipe would: the screen that
 Desktop belongs to switches, and the bound profile, the
 remembered Space and the `desktop_change` event all follow as
 they do for a swipe (macOS reports the switch to KiwiDesk the
-same way either way — device-checked 2026-08-25). A Desktop its
-screen already shows switches nothing, and says so: the command
-succeeds — so a script that only wants the Desktop shown still
-works — and reports that it was already showing rather than
-answering an empty success a caller cannot tell from a real
-switch.
+same way either way — device-checked 2026-08-25).
+
+**Returns** a table with `switched` — `true` when the screen
+moved, `false` when that Desktop was already the one it showed,
+with a `note` saying so. Either way the command SUCCEEDS, so a
+script that only wants the Desktop shown still works; read
+`switched` rather than the return's presence to tell the two
+apart.
 
 Needs macOS's own window-management bridge, which KiwiDesk looks
 up at runtime: present on macOS 26.6.1 (observed 2026-08-18); no
@@ -356,9 +358,10 @@ there is nothing to hand over.
 
 With more than one screen, "there" is that Desktop's own screen,
 and a Desktop that screen already shows switches nothing — the
-window still moves, and focus still goes with it. The command
-reports that the Desktop was already showing, so a silent
-success never stands for a switch that did not happen.
+window still moves, and focus still goes with it. The return
+table's `switched` is `false` there, and it describes the
+SWITCH alone: the move happened regardless, so `false` is not
+"nothing happened".
 
 The window itself is placed by the cross-screen rule above — on
 another screen it joins the Space that screen shows — unless you

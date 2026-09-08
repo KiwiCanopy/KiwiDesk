@@ -16,25 +16,26 @@ extension KiwiCore {
         case switched
         case refused(CommandResponse)
 
-        /// The stand-down's one sentence, so the response and the
-        /// log cannot drift into naming different events — a log
-        /// line carrying the verb but another event's wording is
-        /// what a guard on the verb alone cannot see (prover
-        /// round 1, #1336).
+        /// One home for the sentence, so the payload and the log
+        /// cannot name different events (#1336).
         static let alreadyShownNote =
             "that Desktop is already showing"
 
-        /// `.alreadyShown` answers SUCCESS carrying a note, never
-        /// a bare `.ok()` (#1336): the caller asked for a switch
-        /// and got none, and an empty success is indistinguishable
-        /// from one that moved the screen — the CLI prints nothing
-        /// and exits 0. Success rather than a refusal so a caller
-        /// ENSURING a Desktop is shown still succeeds.
+        /// Both arms report `switched` so a caller reads a FIELD
+        /// rather than the payload's presence, and it describes
+        /// the SWITCH alone — a follow's stand-down arm still
+        /// moved the window (#1336).
         var response: CommandResponse {
             switch self {
             case .alreadyShown:
-                .ok(.string(Self.alreadyShownNote))
-            case .switched: .ok()
+                .ok(
+                    .object([
+                        "switched": .bool(false),
+                        "note": .string(Self.alreadyShownNote),
+                    ])
+                )
+            case .switched:
+                .ok(.object(["switched": .bool(true)]))
             case .refused(let response): response
             }
         }

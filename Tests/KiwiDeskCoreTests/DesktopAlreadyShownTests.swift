@@ -3,20 +3,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A switch to the Desktop already on screen answers SUCCESS
-/// CARRYING A NOTE (#1336). The silence it replaces was
-/// measured: `move_to_desktop_and_follow <current>` printed
-/// nothing, logged nothing and exited 0, which a caller cannot
-/// tell from a switch that moved the screen.
+/// Both switching arms report `switched` (#1336). The silence it
+/// replaces was measured: `move_to_desktop_and_follow <current>`
+/// printed nothing, logged nothing and exited 0.
 ///
-/// Success rather than a refusal is the ruling (owner,
-/// 2026-09-08): a caller ENSURING a Desktop is shown must still
-/// succeed, so only the note distinguishes the two.
-///
-/// No bridge fakes here on purpose — the stand-down returns
-/// before `switchDesktop` reaches the bridge, so this suite
-/// reaches nothing the machine owns beyond the topology
-/// override the fixture already installs.
+/// No bridge fakes on purpose — the stand-down returns before
+/// `switchDesktop` reaches the bridge.
 @Suite("A shown Desktop says so (#1336)", .serialized)
 @MainActor
 struct DesktopAlreadyShownTests {
@@ -34,13 +26,35 @@ struct DesktopAlreadyShownTests {
         )
     }
 
-    @Test("The stand-down answers success carrying a note")
-    func standDownCarriesANote() {
+    private func pinTopology() {
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 10,
             secondaryCurrent: 20
         )
         pinTwoDisplays()
+    }
+
+    /// The fields a caller reads, so each assertion names one.
+    private func fields(
+        _ response: CommandResponse
+    ) -> (switched: Bool?, note: String?) {
+        guard case .object(let payload)? = response.data else {
+            return (nil, nil)
+        }
+        var switched: Bool?
+        if case .bool(let value)? = payload["switched"] {
+            switched = value
+        }
+        var note: String?
+        if case .string(let value)? = payload["note"] {
+            note = value
+        }
+        return (switched, note)
+    }
+
+    @Test("The stand-down reports switched: false, and says why")
+    func standDownReportsNoSwitch() {
+        pinTopology()
         defer { resetAuthorityOverrides() }
         let core = makeTestCore()
 
@@ -56,31 +70,35 @@ struct DesktopAlreadyShownTests {
         // Still a success: an ensure-shown caller keeps working.
         #expect(response.isSuccess)
         #expect(response.error == nil)
-        // And no longer silent — the note is what the CLI prints.
-        #expect(response.data != nil)
+        let read = fields(response)
+        #expect(read.switched == false)
+        // An EMPTY note satisfies "carries a note" while shipping
+        // the silence #1336 removed, so pin that it says something
+        // (code review, round 1).
+        #expect(read.note?.isEmpty == false)
     }
 
-    @Test("A switch that DID move the screen stays quiet")
-    func aRealSwitchCarriesNoNote() {
-        // The note belongs to the stand-down alone: a blanket
-        // note on every success would satisfy the assertion
-        // above while telling a caller nothing, so pin the
-        // other arm too.
+    @Test("A switch that DID move the screen reports switched: true")
+    func aRealSwitchReportsTheSwitch() {
+        // The discriminator is the point: a payload on the
+        // stand-down alone would still leave a caller reading
+        // presence-vs-absence, which on the Lua channel is truthy
+        // exactly when nothing happened.
         let switched = KiwiCore.DesktopSwitchOutcome.switched
         #expect(switched.response.isSuccess)
-        #expect(switched.response.data == nil)
+        #expect(fields(switched.response).switched == true)
+        // The note belongs to the stand-down: a blanket note would
+        // satisfy the assertion above while telling a caller
+        // nothing (prover round 1).
+        #expect(fields(switched.response).note == nil)
     }
 
-    @Test("The stand-down is logged, naming the verb")
+    @Test("The stand-down is logged, naming the verb and the event")
     func standDownIsLogged() {
         final class Box: @unchecked Sendable {
             var lines: [String] = []
         }
-        NativeSpaces.spacesOverride = authorityTopology(
-            mainCurrent: 10,
-            secondaryCurrent: 20
-        )
-        pinTwoDisplays()
+        pinTopology()
         defer { resetAuthorityOverrides() }
         let core = makeTestCore()
         let box = Box()
@@ -90,12 +108,14 @@ struct DesktopAlreadyShownTests {
             to: shownTarget(),
             verb: "move_to_desktop_and_follow"
         )
-        // Derived from the response's own payload rather than a
-        // literal: the line must name the same EVENT the caller
-        // was answered with. A line carrying the verb beside
-        // another event's wording — the bridge refusal, say —
-        // read as green while the trace lied (prover round 1).
-        guard case .string(let note)? = outcome.response.data else {
+        // Derived from the payload rather than a literal: the line
+        // must name the same EVENT the caller was answered with. A
+        // line carrying the verb beside another event's wording —
+        // the bridge refusal, say — read as green while the trace
+        // lied (prover round 1).
+        guard let note = fields(outcome.response).note,
+            !note.isEmpty
+        else {
             Issue.record("the stand-down answered no note")
             return
         }
