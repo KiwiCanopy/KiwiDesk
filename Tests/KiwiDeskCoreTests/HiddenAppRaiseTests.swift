@@ -20,10 +20,11 @@ import Testing
 /// behavior-tested in `OwnDialogFocusTests`); this suite keeps
 /// the event classification itself pinned. The raise site that
 /// asks the predicate is pinned by
-/// `CloseReturnStandDownWiringTests` — a needle, because the
-/// raise's AX call needs a live element a fabricated pid never
-/// has, so a driven `handle(.windowDestroyed(…))` observes no
-/// raise either way.
+/// `CloseReturnStandDownWiringTests` — a needle, because no
+/// decision line names which SITE asked the predicate; the
+/// raise's own log line is observable in a driven
+/// `handle(.windowDestroyed(…))` since #1345, and
+/// `DesktopDepartureStandDownTests` reads the decision line.
 @Suite("Hidden-app raise stand-down (#913)")
 struct HiddenAppRaiseTests {
     @Test("only a hide reads as a hide drop")

@@ -48,8 +48,8 @@ extension KiwiCore {
         // refused the verb whole; a pending raise re-asks at fire.
         guard !raiseCrossesDesktops(id) else {
             onLog(
-                "raise: w\(id.raw) refused — not on screen, a raise "
-                    + "would switch Desktops (#1345)"
+                "raise: w\(id.raw) refused — not on screen (closed, "
+                    + "or a Desktop nobody shows) (#1345)"
             )
             return
         }
@@ -86,8 +86,8 @@ extension KiwiCore {
         // (#952) while the raise switches Desktops.
         guard !raiseCrossesDesktops(id) else {
             onLog(
-                "focus: w\(id.raw) refused — not on screen, a raise "
-                    + "would switch Desktops (#1345)"
+                "focus: w\(id.raw) refused — not on screen (closed, "
+                    + "or a Desktop nobody shows) (#1345)"
             )
             return
         }

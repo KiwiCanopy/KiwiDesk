@@ -59,9 +59,10 @@ struct DesktopRaiseGateTests {
         }
     }
 
-    /// The verb is refused WHOLE: state focus, the displacement
-    /// note and the pointer stay where they were, and the log
-    /// says so.
+    /// The verb is refused WHOLE: state focus and the displacement
+    /// note stay where they were, and the log says so. (The warp
+    /// is not asserted: `mouse.follows_focus` is off by default
+    /// and the pending-warp slot only fills mid-drain.)
     @Test("focusWindow refuses the verb, ahead of the state write")
     func focusWindowRefusesWhole() {
         let core = makeCore()
@@ -72,7 +73,6 @@ struct DesktopRaiseGateTests {
         core.focusWindow(WindowID(1), warp: true)
         #expect(core.activeSpace?.focused == WindowID(2))
         #expect(core.tiler.placements.recent(WindowID(2), at: Date()) == nil)
-        #expect(core.pendingMouseWarp == nil)
         #expect(log.contains { $0.contains(Self.refusalNeedle) })
     }
 

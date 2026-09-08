@@ -7,11 +7,11 @@ import Testing
 /// The predicate's ARMS are behavior-tested
 /// (`OwnDialogFocusTests`, `DesktopDepartureStandDownTests`);
 /// what needs needles is that the two sites in
-/// `KiwiCore+CloseReturn.swift` still ASK it. Why they cannot be
-/// behavior tests: the raise's AX call needs a live element a
-/// fabricated pid never has, so a driven `handle(…)` observes
-/// nothing of the raise itself — and the trailing arm's skip is
-/// observable only through
+/// `KiwiCore+CloseReturn.swift` still ASK it. Why they are
+/// needles: a driven `handle(…)` sees the raise's log line and the
+/// decision line (`DesktopDepartureStandDownTests`), but neither
+/// names WHICH site consulted the predicate — and the trailing
+/// arm's skip is observable only through
 /// `pendingZOrderRestore`, which a headless schedule consumes
 /// (zero active animations run the restore immediately and the
 /// empty element map drains it to nothing), so an assertion on

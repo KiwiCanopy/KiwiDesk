@@ -1826,6 +1826,18 @@ state focus, noted the displacement and warped the pointer before
 `raiseWindow` refused, which is a state/key split of its own —
 so the verb is refused whole, ahead of all of it.
 
+Two reads the draw list had to survive, both measured on the
+final build. A window KiwiDesk stashes off-bounds on the SAME
+Desktop — the peek corner, a hidden Space's park — still reads
+on screen (an Antigravity window parked at x = 1727 on a
+1728-wide screen read `kCGWindowIsOnscreen = true`, and the Space
+switch onto it focused it without a refusal), so every virtual
+Space switch keeps its raise. And the #1207 payment at an
+arrival raises through the same gate: on the owner's round trips
+"focus paid to" was followed by the honored report, never by a
+refusal, so the AX create that pays it arrives after the draw
+list lists the window.
+
 ### A focus report is only as good as the activation behind it (#1322)
 
 **[Rationale]**

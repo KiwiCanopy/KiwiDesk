@@ -662,7 +662,7 @@ editing here:
   handler claims (`departedWithDesktop`, never the #482 follow
   latch, whose second expires before a slow app's destroy) —
   stands the close-return raise down as one arm of the ONE
-  predicate (the #936 clause below says why that predicate, and
+  predicate (the #936 clause above says why that predicate, and
   not this file, is the census of its arms), since macOS picks
   the focus on the Desktop it shows
   (`DesktopDepartureStandDownTests`); and a report for a FRESH

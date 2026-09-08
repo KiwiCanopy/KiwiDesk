@@ -101,8 +101,8 @@ extension KiwiCore {
 
     /// How fresh a return must be for its focus report to read as
     /// macOS restoring it: the restore lands within ~150 ms of
-    /// the arrival on device, the #1161 bounce no sooner than
-    /// 0.8 s after a placement.
+    /// the arrival on device, the #1161 bounce no sooner than the
+    /// 0.7 s docs/accepted-limitations.md records.
     static let restoredFocusWindow: TimeInterval = 0.5
 
     /// Whether a report for `id` is macOS restoring this

@@ -194,7 +194,7 @@ editing AX code:
   #935 the hide is one arm of
   `EventLoop.closeReturnRaiseStandsDown(after:departedWithDesktop:)`,
   whose raise site `CloseReturnStandDownWiringTests` pins — a needle,
-  because that site is gated on live AX).
+  because no decision line names which site asked the predicate).
 
   Do not re-base the drop on the WindowServer's on-screen
   census: it omits a window on another Desktop exactly as

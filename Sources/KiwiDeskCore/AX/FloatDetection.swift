@@ -70,8 +70,10 @@ public enum FloatDetection {
 
     /// CGWindowList's own on-screen flag for ONE window (#1345):
     /// the compositor's draw list, which the managed display's
-    /// "current Space" reading lags through a switch (#1023). Nil
-    /// for a window the server no longer lists at all.
+    /// "current Space" reading lags through a switch (#1023). A
+    /// closed window lingers in the list for a while
+    /// (os-private-apis.md) and reads false; nil is a window the
+    /// server never had.
     public static func isOnScreen(_ id: WindowID) -> Bool? {
         let list =
             CGWindowListCopyWindowInfo(

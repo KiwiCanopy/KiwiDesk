@@ -89,8 +89,16 @@ extension KiwiCore {
     /// A move verb's own departure (#1345): the vanish that
     /// follows is the verb's hand-off, never a swipe's. Recorded
     /// per window and claimed at the vanish, so a slow app's
-    /// destroy seconds later still reads as the verb's.
-    func recordDesktopMoveDeparture(_ id: WindowID) {
+    /// destroy seconds later still reads as the verb's. Only
+    /// where a vanish is coming: a target its screen already
+    /// shows moves the window in view, and a record nothing
+    /// claims would name the window's NEXT vanish — a swipe's —
+    /// as the verb's.
+    func recordDesktopMoveDeparture(
+        _ id: WindowID,
+        targetIsCurrent: Bool
+    ) {
+        guard !targetIsCurrent else { return }
         desktopMoveDepartures.insert(id)
     }
 

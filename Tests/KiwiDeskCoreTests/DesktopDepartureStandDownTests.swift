@@ -59,8 +59,21 @@ struct DesktopDepartureStandDownTests {
         )
         // The verb's record is claimed by the vanish it explains
         // and by that one alone.
-        core.recordDesktopMoveDeparture(id)
+        core.recordDesktopMoveDeparture(id, targetIsCurrent: false)
         #expect(!core.departedWithDesktop(gone, reason: .vanished))
+        #expect(core.departedWithDesktop(gone, reason: .vanished))
+    }
+
+    /// A move onto a Desktop its screen already shows produces no
+    /// vanish, so it records nothing — a record nothing claims
+    /// would name the window's next swipe departure as the verb's.
+    @Test("A move onto the shown Desktop records no departure")
+    func shownTargetRecordsNothing() {
+        let core = makeCore()
+        defer { NativeSpaces.spacesOverride = nil }
+        let id = WindowID(1)
+        let gone = KiwiEvent.windowDestroyed(id, wasMinimized: false)
+        core.recordDesktopMoveDeparture(id, targetIsCurrent: true)
         #expect(core.departedWithDesktop(gone, reason: .vanished))
     }
 
@@ -109,7 +122,7 @@ struct DesktopDepartureStandDownTests {
         let core = makeCore()
         defer { NativeSpaces.spacesOverride = nil }
         core.desktopMemory.readWindowSpace = { _ in .hosted(11) }
-        core.recordDesktopMoveDeparture(WindowID(1))
+        core.recordDesktopMoveDeparture(WindowID(1), targetIsCurrent: false)
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))

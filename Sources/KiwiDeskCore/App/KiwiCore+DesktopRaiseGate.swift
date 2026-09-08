@@ -11,10 +11,9 @@ import Foundation
 /// argument is state-and-layout.md's.
 extension KiwiCore {
     /// Whether raising `id` would switch Desktops: the compositor
-    /// lists it and is not drawing it. A window the server no
-    /// longer lists (nil) is a close in flight — the raise is then
-    /// a no-op, never a switch — and a host without the read keeps
-    /// every raise.
+    /// is not drawing it. A close in flight reads the same and is
+    /// refused too — that raise was a no-op — so the log names
+    /// both; nil (never listed, or no read) keeps the raise.
     func raiseCrossesDesktops(_ id: WindowID) -> Bool {
         windowIsOnScreen(id) == false
     }
@@ -33,7 +32,7 @@ extension KiwiCore {
         else { return false }
         onLog(
             "focus: re-assert of w\(intended.raw) refused — "
-                + "not on screen, a raise would switch Desktops; "
+                + "not on screen (closed, or a Desktop nobody shows); "
                 + "honoring w\(id.raw) (#1345)"
         )
         return true
