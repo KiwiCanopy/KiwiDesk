@@ -397,7 +397,10 @@
   }
 }
 
-/* Inside the features grid, let cards form one-by-one. */
+/* Inside the features grid, let cards form one-by-one. ONE LINE
+   PER CARD in Landing.astro's `features` — an unlisted card takes
+   delay 0 and lands before the listed ones have finished, which
+   is what four new cards did to a list that stopped at six. */
 :root[data-mode="dev"] #features .card {
   animation: dev-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -407,6 +410,10 @@
 :root[data-mode="dev"] #features .card:nth-child(4) { animation-delay: 0.24s; }
 :root[data-mode="dev"] #features .card:nth-child(5) { animation-delay: 0.30s; }
 :root[data-mode="dev"] #features .card:nth-child(6) { animation-delay: 0.36s; }
+:root[data-mode="dev"] #features .card:nth-child(7) { animation-delay: 0.42s; }
+:root[data-mode="dev"] #features .card:nth-child(8) { animation-delay: 0.48s; }
+:root[data-mode="dev"] #features .card:nth-child(9) { animation-delay: 0.54s; }
+:root[data-mode="dev"] #features .card:nth-child(10) { animation-delay: 0.60s; }
 
 /* Nav accent-glow sweep (added briefly by the toggle handler). */
 .mode-flourish .nav__inner {
