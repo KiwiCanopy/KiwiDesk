@@ -18,7 +18,8 @@ private final class FakeStatusItem: StatusItemHandle {
 private final class FakeUpdater: AppUpdating {
     var canCheckForUpdates = true
     private(set) var checks = 0
-    var onUpdatePendingChanged: (Bool) -> Void = { _ in }
+    var updatePending = false { didSet { onUpdatePendingChanged() } }
+    var onUpdatePendingChanged: () -> Void = {}
     func checkForUpdates() { checks += 1 }
 }
 
@@ -41,22 +42,29 @@ struct UpdateReminderTests {
     }
 
     /// The controller wires itself: assigning an updater hands it
-    /// the closure, so the one consumer of the flag is the one
-    /// that set it.
-    @Test("assigning an updater wires the pending flag to the item")
-    func updaterIsWired() {
+    /// the nudge, and the item re-renders off the updater's fact.
+    @Test("assigning an updater wires the nudge to a render")
+    func updaterIsWired() throws {
         let (controller, updater) = controller()
+        let button = try #require(controller.anchorButton)
         #expect(!controller.updatePending)
-        updater.onUpdatePendingChanged(true)
+        updater.updatePending = true
         #expect(controller.updatePending)
-        updater.onUpdatePendingChanged(false)
-        #expect(!controller.updatePending)
+        #expect(
+            button.image?.accessibilityDescription
+                == StatusItemController.badgedImageName
+        )
+        updater.updatePending = false
+        #expect(
+            button.image?.accessibilityDescription
+                != StatusItemController.badgedImageName
+        )
     }
 
     @Test("while pending the row reads Update Available… and stays wired")
     func pendingRowReadsUpdateAvailable() {
-        let (controller, _) = controller()
-        controller.setUpdatePending(true)
+        let (controller, updater) = controller()
+        updater.updatePending = true
         let item = controller.makeUpdatesItem()
         #expect(item.title == "Update Available…")
         #expect(item.isEnabled)
@@ -65,7 +73,7 @@ struct UpdateReminderTests {
             item.action
                 == #selector(StatusItemController.checkForUpdates(_:))
         )
-        controller.setUpdatePending(false)
+        updater.updatePending = false
         #expect(controller.makeUpdatesItem().title == "Check for Updates…")
     }
 
@@ -75,7 +83,7 @@ struct UpdateReminderTests {
     func pendingRowFollowsTheUpdater() {
         let (controller, updater) = controller()
         updater.canCheckForUpdates = false
-        controller.setUpdatePending(true)
+        updater.updatePending = true
         #expect(!controller.makeUpdatesItem().isEnabled)
     }
 
@@ -83,8 +91,8 @@ struct UpdateReminderTests {
     /// app builds.
     @Test("the pending row is in the menu the app builds")
     func pendingRowIsInTheMenu() {
-        let (controller, _) = controller()
-        controller.setUpdatePending(true)
+        let (controller, updater) = controller()
+        updater.updatePending = true
         let menu = NSMenu()
         controller.menuNeedsUpdate(menu)
         #expect(menu.items.contains { $0.title == "Update Available…" })
@@ -95,29 +103,48 @@ struct UpdateReminderTests {
     /// stop saying so once it got attention.
     @Test("the status item announces the pending update")
     func markIsAnnounced() throws {
-        let (controller, _) = controller()
+        let (controller, updater) = controller()
         let button = try #require(controller.anchorButton)
-        controller.setUpdatePending(true)
+        updater.updatePending = true
         #expect(
             button.accessibilityLabel()?.contains("update") == true
         )
         #expect(button.toolTip?.contains("update") == true)
-        controller.setUpdatePending(false)
+        updater.updatePending = false
         #expect(
             button.accessibilityLabel()?.contains("update") != true
         )
     }
 
-    /// A permission warning outranks the reminder: the mark never
-    /// hides the icon that says window management is paused.
-    @Test("the warning icon outranks the update mark")
-    func warningOutranksTheMark() throws {
-        let (controller, _) = controller()
+    /// A warning, the starting phase and a config error outrank
+    /// the reminder on BOTH channels: the icon that says something
+    /// is wrong carries no dot and keeps its own name.
+    @Test("the broken and starting states outrank the mark on both channels")
+    func brokenStatesOutrankTheMark() throws {
+        let (controller, updater) = controller()
         let button = try #require(controller.anchorButton)
-        controller.setUpdatePending(true)
+        updater.updatePending = true
         controller.setWarning(true)
         #expect(
             button.accessibilityLabel()?.contains("permission") == true
+        )
+        #expect(
+            button.image?.accessibilityDescription
+                != StatusItemController.badgedImageName
+        )
+        controller.setWarning(false)
+        controller.setBootPhase(.scanning(scanned: 1, total: 2))
+        #expect(
+            button.image?.accessibilityDescription
+                != StatusItemController.badgedImageName
+        )
+        #expect(
+            button.accessibilityLabel()?.contains("starting") == true
+        )
+        controller.setBootPhase(.ready)
+        #expect(
+            button.image?.accessibilityDescription
+                == StatusItemController.badgedImageName
         )
     }
 }
@@ -148,16 +175,24 @@ struct UpdateReminderPolicyTests {
         }
     }
 
+    /// The fact lives on the policy: attention and the session's
+    /// end clear it, and every change nudges the consumer once.
     @Test("attention and the session's end withdraw the reminder")
     func attentionWithdraws() {
         let policy = UpdatePromptPolicy()
-        var fired: [Bool] = []
-        policy.onUpdatePending = { fired.append($0) }
+        var nudges = 0
+        policy.onUpdatePendingChanged = { nudges += 1 }
+        policy.updatePending = true
+        #expect(nudges == 1)
         policy.standardUserDriverDidReceiveUserAttention(
             forUpdate: SUAppcastItem.empty()
         )
+        #expect(!policy.updatePending)
+        #expect(nudges == 2)
+        policy.updatePending = true
         policy.standardUserDriverWillFinishUpdateSession()
-        #expect(fired == [false, false])
+        #expect(!policy.updatePending)
+        #expect(nudges == 4)
     }
 
     @Test("Sparkle can find every reminder answer by selector")

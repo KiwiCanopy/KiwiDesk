@@ -15,21 +15,20 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     var shortcutsComboProvider: () -> KeyCombo? = { nil }
 
     /// Drives "Check for Updates…" (#874). Inert by default —
-    /// `AppUpdater.swift` owns why. Wires the pending reminder
-    /// HERE, so the one consumer of the flag is the one that sets
-    /// the closure (#1013).
+    /// `AppUpdater.swift` owns why. Wires the pending reminder's
+    /// nudge HERE, so the one consumer is the one that sets the
+    /// closure (#1013); the fact itself stays the updater's.
     var updater: any AppUpdating = NoUpdater() {
         didSet {
-            updater.onUpdatePendingChanged = { [weak self] pending in
-                self?.setUpdatePending(pending)
+            updater.onUpdatePendingChanged = { [weak self] in
+                self?.render()
             }
+            render()
         }
     }
     /// A scheduled update waiting behind the gentle reminder
-    /// (#1013): the icon carries a mark and the updates row reads
-    /// "Update Available…" until it gets attention. Mutated only
-    /// via `setUpdatePending`, the same rule as `warning`.
-    private(set) var updatePending = false
+    /// (#1013), read from the updater at every render.
+    var updatePending: Bool { updater.updatePending }
     var onShowAccessibilityHelp: () -> Void = {}
     var onLoadProfile: (String) -> Void = { _ in }
     /// Saved profiles, pulled fresh each menu open; broken entries
@@ -82,12 +81,6 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Sets config-error badge state (§3.7).
     func setConfigError(_ error: Bool) {
         configError = error
-        render()
-    }
-
-    /// Sets the pending-update reminder (#1013).
-    func setUpdatePending(_ pending: Bool) {
-        updatePending = pending
         render()
     }
 
@@ -175,9 +168,12 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 a11y: L("menu.status.a11y", "KiwiDesk")
             )
         }
-        // The mark names itself on both channels (#1013): the
-        // glyph carries the dot, the name and tooltip say why.
-        if updatePending {
+        // The mark, on both channels and in ONE place (#1013):
+        // after the early returns above, so a warning, the
+        // starting phase and a config error outrank an offer on
+        // the glyph AND the name.
+        if updatePending, let image = button.image {
+            button.image = Self.badged(image)
             button.setAccessibilityLabel(
                 L("menu.status.update.a11y", "KiwiDesk (update available)")
             )

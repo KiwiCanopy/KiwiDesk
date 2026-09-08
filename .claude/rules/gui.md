@@ -263,6 +263,17 @@ with every count still at one. It is a suite of its own for
 that reason: `UpdatePromptFocusTests` reads what the override
 DECLARES and structurally cannot see what it is wired to.
 
+The opposite rule has its own guard (#1013): a SCHEDULED update
+is never Sparkle's to show, whatever focus it proposes —
+`UpdatePromptPolicy` declares gentle reminders and answers
+`false`, the status item carries the mark and the updates row
+reads "Update Available…" in place, and `checkForUpdates` is the
+one door that brings the waiting alert forward.
+`UpdateReminderPolicyTests` resolves every reminder selector
+through the ObjC runtime, since a near-miss on an optional
+requirement compiles and silently stops conforming; a Sparkle
+bump re-reads it beside #1011.
+
 ## A window that must clear the bars derives its level
 
 The bars render at `BarPanel.level`. **A window that must not be

@@ -19,7 +19,7 @@ extension StatusItemController {
         if let icon = BrandAssets.menuBarIcon
             ?? symbol("rectangle.3.group")
         {
-            button.image = badged(icon)
+            button.image = icon
             button.title = ""
         } else {
             button.image = nil
@@ -27,16 +27,17 @@ extension StatusItemController {
         }
     }
 
-    /// The pending-update mark (#1013): a dot with a knockout ring
-    /// at the top-trailing corner, composited into a NEW template
-    /// image — the shared brand icon is never mutated (#1311), and
-    /// a template carries no hue, so the mark separates by shape
-    /// alone and needs no colour-vision floor. The fixed black is
-    /// a template's alpha, not an ink. Drawn per backing scale by
-    /// the handler initializer. Only the healthy glyphs carry it:
-    /// a warning or a config error outranks an offer.
-    func badged(_ base: NSImage) -> NSImage {
-        guard updatePending else { return base }
+    /// The description a badged image carries, so a test can tell
+    /// the mark from the bare glyph without reading pixels (an
+    /// `NSImage` NAME is global and refuses a second holder).
+    static let badgedImageName = "kiwidesk.update-mark"
+
+    /// The pending-update mark (#1013): a dot with a knockout ring,
+    /// composited into a NEW template image — the shared brand icon
+    /// is never mutated (#1311), and a template carries no hue, so
+    /// the mark separates by shape alone (design-decisions.md).
+    /// Pure: `render()` alone decides which state carries it.
+    static func badged(_ base: NSImage) -> NSImage {
         let size = base.size
         let dot = min(size.width, size.height) / 3
         let ring = dot * 1.5
@@ -69,6 +70,7 @@ extension StatusItemController {
             return true
         }
         image.isTemplate = true
+        image.accessibilityDescription = Self.badgedImageName
         return image
     }
 
@@ -110,7 +112,7 @@ extension StatusItemController {
             systemSymbolName: icon,
             accessibilityDescription: icon
         ) {
-            button.image = badged(image)
+            button.image = image
             button.title = ""
         } else {
             button.image = nil

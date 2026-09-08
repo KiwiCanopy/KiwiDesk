@@ -10,22 +10,25 @@ import Sparkle
 final class UpdatePromptPolicy: NSObject,
     @MainActor SPUStandardUserDriverDelegate
 {
-    /// Fires with `true` when a SCHEDULED update is waiting behind
-    /// a gentle reminder and `false` once it got the user's
-    /// attention or the session ended (#1013). The updater sets
-    /// it; the status item is the consumer.
-    var onUpdatePending: (Bool) -> Void = { _ in }
+    /// A SCHEDULED update waiting behind the gentle reminder
+    /// (#1013): set when Sparkle leaves the showing to KiwiDesk,
+    /// cleared once the update got attention or the session ended.
+    /// The one home of the fact; `onUpdatePendingChanged` nudges
+    /// the consumer, which reads it back.
+    var updatePending = false {
+        didSet { if updatePending != oldValue { onUpdatePendingChanged() } }
+    }
+    var onUpdatePendingChanged: () -> Void = {}
 
     /// Gentle reminders (#1013): a background app's scheduled
     /// alert is drawn BEHIND every window, which for a menu-bar
     /// app is drawn nowhere. Sparkle's own warning names this.
     var supportsGentleScheduledUpdateReminders: Bool { true }
 
-    /// A scheduled update is KiwiDesk's to show, whatever focus
-    /// Sparkle proposes: the reminder is a mark and a menu row,
-    /// because an unsolicited offer never takes the screen —
-    /// unlike a window finishing something already begun (#1011).
-    /// User-initiated checks never reach this answer.
+    /// A scheduled update is KiwiDesk's to show whatever focus
+    /// Sparkle proposes: an unsolicited offer never takes the
+    /// screen (#1013; #1011 is the opposite rule). User-initiated
+    /// checks never reach this answer.
     func standardUserDriverShouldHandleShowingScheduledUpdate(
         _ update: SUAppcastItem,
         andInImmediateFocus immediateFocus: Bool
@@ -38,17 +41,17 @@ final class UpdatePromptPolicy: NSObject,
         forUpdate update: SUAppcastItem,
         state: SPUUserUpdateState
     ) {
-        onUpdatePending(!handleShowingUpdate)
+        updatePending = !handleShowingUpdate
     }
 
     func standardUserDriverDidReceiveUserAttention(
         forUpdate update: SUAppcastItem
     ) {
-        onUpdatePending(false)
+        updatePending = false
     }
 
     func standardUserDriverWillFinishUpdateSession() {
-        onUpdatePending(false)
+        updatePending = false
     }
 
     /// Disallows minimizing the status window (#1011): activating

@@ -463,15 +463,20 @@ an offer. The updates row is retitled in place — "Update
 Available…" — rather than doubled: Sparkle's own door for
 bringing the waiting alert forward is `checkForUpdates`, the row's
 existing action, and `canCheckForUpdates` stays true while the
-update waits (Sparkle 2.9.6, `SPUUIBasedUpdateDriver`).
+update waits — Sparkle 2.9.6 counts the update as shown the moment
+its driver is handed it, before the delegate's answer is read
+(`SPUUIBasedUpdateDriver` ▸ `uiDriverDidShowUpdate`, which is what
+`SPUScheduledUpdateDriver.showingUpdate` answers from), and that
+flag is the one `checkForUpdates` routes on.
 
-A user notification was ruled out: it asks for a permission
-KiwiDesk has never asked for, on top of a first-run story that is
-already a permission wizard, to tell someone about an update. No
-setting was added — the reminder costs nothing to ignore. What
-cannot be verified without a newer release in the feed, and is
-owed at the first one: the scheduled check landing while another
-app is frontmost marks the item and does not switch focus.
+A user notification was ruled out. KiwiDesk's one notification
+is the permission-lost notice (`AppDelegate+Notifications.swift`),
+and the authorization prompt it costs is asked at the moment
+window management stops — a reason the user can see on screen. An
+update reminder would spend that prompt on an offer, on top of a
+first-run story that is already a permission wizard, to tell
+someone about an update. No setting was added — the reminder
+costs nothing to ignore.
 
 ### Linking the notes is not opening a channel
 
