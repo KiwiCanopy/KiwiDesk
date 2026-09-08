@@ -122,16 +122,20 @@ function kiwiSvg(size: number): string {
 // ../lib/layoutDiagram.ts so the /learn/ page renders the exact
 // same drawings from one source (imported above).
 
+// ORDER IS THIS ARRAY and the key numbers no longer follow it.
+// Ordered by whether a card is the page's ONLY statement of its
+// fact — the ones with a section further down sit later (#1335).
 const features = [
   { title: t.feat_1_title, body: t.feat_1_body, icon: "lucide:columns-3" },
   { title: t.feat_2_title, body: t.feat_2_body, icon: "lucide:layout-dashboard" },
+  { title: t.feat_10_title, body: t.feat_10_body, icon: "lucide:layers" },
+  { title: t.feat_6_title, body: t.feat_6_body, icon: "lucide:shield-check" },
+  { title: t.feat_9_title, body: t.feat_9_body, icon: "lucide:app-window-mac" },
+  { title: t.feat_7_title, body: t.feat_7_body, icon: "lucide:pin" },
   { title: t.feat_3_title, body: t.feat_3_body, icon: "lucide:code" },
   { title: t.feat_4_title, body: t.feat_4_body, icon: "lucide:square-terminal" },
-  { title: t.feat_5_title, body: t.feat_5_body, icon: "lucide:gauge" },
-  { title: t.feat_6_title, body: t.feat_6_body, icon: "lucide:shield-check" },
-  { title: t.feat_7_title, body: t.feat_7_body, icon: "lucide:pin" },
   { title: t.feat_8_title, body: t.feat_8_body, icon: "lucide:accessibility" },
-  { title: t.feat_9_title, body: t.feat_9_body, icon: "lucide:app-window-mac" },
+  { title: t.feat_5_title, body: t.feat_5_body, icon: "lucide:gauge" },
 ];
 
 const layouts = [
@@ -144,19 +148,17 @@ const layouts = [
   { name: "floating", label: "Floating", desc: t.layout_floating },
 ];
 
-// The Simple-mode perks under the before/after pair. Two
-// papercuts KiwiDesk actually solves, then the trust claims —
-// "will it fight my Mac", "will I have to configure it", "can I
-// use it without a mouse" — which answer a different question
-// from "does it fix something" and are the reason the list is not
-// four grievances in a row.
+// The Simple-mode perks, in the shape they ship: two grievances,
+// a capability, the objection, then the delight and the trust
+// claims. Order is this array (#1335).
 const perks = [
   t.calm_point_1,
   t.calm_point_2,
   t.calm_point_3,
+  t.calm_point_7,
+  t.calm_point_6,
   t.calm_point_4,
   t.calm_point_5,
-  t.calm_point_6,
 ];
 
 // The three friendly "how it works" steps (Simple mode).

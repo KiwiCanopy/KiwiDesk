@@ -93,6 +93,9 @@ nothing to bend it with.
 
 - **Spaces**: Instant per-space window hiding on top of macOS's own
   Desktops.
+- **Native Desktops**: Send a window to a Mission Control Desktop,
+  switch to one, or bind a profile to one. Your Desktops keep
+  working; KiwiDesk arranges the windows on them.
 - **GUI, CLI & Lua**: SwiftUI Settings app for simple tweaks; CLI &
   sandboxed Lua 5.5 VM for advanced workflows.
 - **Modal Layers & Hotkeys**: Vim-style hotkey layers (`define_layer`)
