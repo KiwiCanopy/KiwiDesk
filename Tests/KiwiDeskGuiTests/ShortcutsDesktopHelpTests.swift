@@ -24,7 +24,16 @@ import Testing
 ///
 /// The scan that remains watches PLACEMENT, which has no runtime
 /// value to compare: whether the `?` is the header's sibling or
-/// a row inside the drawer is a fact about the view tree.
+/// a row inside the drawer is a fact about the view tree — and
+/// what that door is HANDED, since the equality watches a
+/// property while the door renders an argument.
+///
+/// One hole is known and left: the interpolation clause compares
+/// against the label AS THIS HOST RENDERS IT, so a label
+/// hardcoded in the host's own language passes. Pinning a locale
+/// would only move which language is fooled, and it would
+/// mutate process-global state for a clause that is not the
+/// suite's subject (round 3, 2026-09-08).
 ///
 /// Main-actor spend (tests.md): two `makeTestModel` builds and
 /// one `ShortcutsFamilyRows` fixture, as its sibling suite.
@@ -143,9 +152,22 @@ struct ShortcutsDesktopHelpTests {
             )
         )
         #expect(accessory.contains("HelpButton("))
+        // What the door is HANDED, not merely that it exists.
+        // The equality above watches `helpText`; the shipped
+        // sentence is this argument, and the two are only the
+        // same string while nothing sits between them —
+        // `explanation: helpText + doorNote` and a second
+        // property rendered here instead both shipped two
+        // sentences past an earlier cut (guard-prover round 3,
+        // 2026-09-08).
+        #expect(accessory.contains("explanation:helpText,"))
         // Each door names ITSELF: a fixed subject would have
         // both announcing one drawer to VoiceOver.
         #expect(accessory.contains("subject:drawer.control.text"))
+        // …and it is the ONLY door in the file: a second `?`
+        // inside the drawer leaves this run untouched, so
+        // nothing above can see one.
+        #expect(source.occurrences(of: "HelpButton(") == 1)
     }
 
     /// A mount hands the offer its rows and its door, never its
