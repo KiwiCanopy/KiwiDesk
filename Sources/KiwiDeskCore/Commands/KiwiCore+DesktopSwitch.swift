@@ -16,9 +16,17 @@ extension KiwiCore {
         case switched
         case refused(CommandResponse)
 
+        /// `.alreadyShown` answers SUCCESS carrying a note, never
+        /// a bare `.ok()` (#1336): the caller asked for a switch
+        /// and got none, and an empty success is indistinguishable
+        /// from one that moved the screen — the CLI prints nothing
+        /// and exits 0. Success rather than a refusal so a caller
+        /// ENSURING a Desktop is shown still succeeds.
         var response: CommandResponse {
             switch self {
-            case .alreadyShown, .switched: .ok()
+            case .alreadyShown:
+                .ok(.string("that Desktop is already showing"))
+            case .switched: .ok()
             case .refused(let response): response
             }
         }
@@ -54,7 +62,10 @@ extension KiwiCore {
         to target: DesktopTarget,
         verb: String
     ) -> DesktopSwitchOutcome {
-        guard !target.isCurrent else { return .alreadyShown }
+        guard !target.isCurrent else {
+            onLog("\(verb): that Desktop is already showing")
+            return .alreadyShown
+        }
         guard
             WMBridge.setCurrentSpace(
                 target.space,
