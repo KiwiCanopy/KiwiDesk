@@ -36,6 +36,15 @@ extension KiwiCore {
         followFocus.rekey(old: old, new: new)
         pendingSpace.rekey(old: old, new: new)
         rekeyDesktopFocus(old: old, new: new)
+        // The two #1345 ledgers are id-keyed too: a returning tab
+        // carrier's restore report and a moved carrier's vanish
+        // arrive under the fresh id.
+        if let returned = recentReturns.removeValue(forKey: old) {
+            recentReturns[new] = returned
+        }
+        if let moved = desktopMoveDepartures.removeValue(forKey: old) {
+            desktopMoveDepartures[new] = moved
+        }
         // #1230: every profile's remembered partitioning too, not
         // just the live one — a tab switched while another profile
         // is up must still be found when this one comes back.

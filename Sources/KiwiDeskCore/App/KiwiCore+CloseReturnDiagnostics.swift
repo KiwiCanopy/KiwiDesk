@@ -39,11 +39,10 @@ extension KiwiCore {
         let next = activeSpace?.focused
         let nextText =
             next.map { id -> String in
-                let onScreen =
-                    windowIsOnScreen(id).map { "\($0)" } ?? "unknown"
+                let crosses = raiseCrossesDesktops(id)
                 let fs =
                     state.windows[id]?.isFullscreen == true
-                return "w\(id.raw) onScreen=\(onScreen) fs=\(fs)"
+                return "w\(id.raw) crosses=\(crosses) fs=\(fs)"
             } ?? "none"
         onLog(
             "close-return: removed focused window of "

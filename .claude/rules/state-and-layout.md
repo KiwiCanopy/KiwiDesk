@@ -259,8 +259,12 @@ editing here:
   HONORED focus is remembered in `DesktopMemory.honoredFocus`,
   written at the focus REPORT (`handleWindowFocused`, after the
   honored verdict) under the native Space the WindowServer hosts
-  the window on (`NativeSpaces.nativeSpace(of:)`) — never by a
-  fold, never by the switch handler, and never under a cached
+  the window on (`NativeSpaces.nativeSpace(of:)`) — and by ONE
+  other writer, the frontmost seed (`seedStartupFocus`, boot,
+  the AX grant and the wake restore), which is OS truth about
+  the window focused NOW and so may also retire a standing
+  return debt (#1345, `StartupFocusSeedTests`) — never by a fold,
+  never by the switch handler, and never under a cached
   Desktop: the device showed a fast app's own AX observer folding
   its windows BEFORE the switch notification, so a handler-time
   read remembers a focus the walk already moved, and a report

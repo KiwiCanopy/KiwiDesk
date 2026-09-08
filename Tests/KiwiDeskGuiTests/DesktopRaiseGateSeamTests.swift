@@ -55,6 +55,24 @@ struct DesktopRaiseGateSeamTests {
         #expect(ungated.isEmpty, "ungated \(ungated)")
     }
 
+    /// The raw read lives behind the seam's default alone
+    /// (`DesktopCensusSeamTests`' shape): a second direct caller
+    /// would reach the live WindowServer from every driven test.
+    @Test("the raw on-screen read has one home, the seam's default")
+    func rawReadHasOneHome() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "FloatDetection.isOnScreen",
+            under: Self.core
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent) == ["KiwiCore.swift"],
+            .init(
+                rawValue: "found "
+                    + sites.map(\.site).joined(separator: ", ")
+            )
+        )
+    }
+
     /// The gate itself has one home, reading the compositor's
     /// on-screen flag through the `windowIsOnScreen` seam — never
     /// state, the away ledger, or the managed display's current

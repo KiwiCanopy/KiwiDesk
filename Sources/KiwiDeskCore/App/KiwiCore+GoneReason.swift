@@ -79,12 +79,25 @@ extension KiwiCore {
     /// settle — accepted: that host runs no Desktop machinery.
     func departedWithDesktop(
         _ event: KiwiEvent,
-        reason: WindowGoneReason?
+        reason: WindowGoneReason?,
+        now: Date = Date()
     ) -> Bool {
         guard let id = event.goneWindowID else { return false }
-        let moved = desktopMoveDepartures.remove(id) != nil
+        let recorded = desktopMoveDepartures.removeValue(forKey: id)
+        let moved =
+            recorded.map {
+                now.timeIntervalSince($0) < Self.desktopMoveDepartureWindow
+            } ?? false
         return reason == .vanished && !moved
     }
+
+    /// How long a move verb's departure record may wait for its
+    /// vanish: past a slow app's destroy (Electron's trailed the
+    /// swipe by up to ~3 s on device, 2026-09-08), and the verb's
+    /// bridge write is PERFORMED, not applied (os-private-apis.md),
+    /// so a record whose vanish never comes must expire rather
+    /// than name the window's next swipe departure as the verb's.
+    static let desktopMoveDepartureWindow: TimeInterval = 10
 
     /// A move verb's own departure (#1345): the vanish that
     /// follows is the verb's hand-off, never a swipe's. Recorded
@@ -96,10 +109,11 @@ extension KiwiCore {
     /// as the verb's.
     func recordDesktopMoveDeparture(
         _ id: WindowID,
-        targetIsCurrent: Bool
+        targetIsCurrent: Bool,
+        now: Date = Date()
     ) {
         guard !targetIsCurrent else { return }
-        desktopMoveDepartures.insert(id)
+        desktopMoveDepartures[id] = now
     }
 
     /// The compositor hosts `id` on a native fullscreen Space —

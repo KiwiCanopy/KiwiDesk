@@ -314,6 +314,19 @@ struct DesktopCommandTests {
                 )
             ) == .vanished
         )
+        // The departure record (#1345): a hidden target's vanish
+        // is the verb's own hand-off, so it is recorded.
+        #expect(core.desktopMoveDepartures[WindowID(7)] != nil)
+    }
+
+    /// A move onto the Desktop its screen already shows produces
+    /// no vanish, so the verb records no departure (#1345).
+    @Test("A no-follow move onto the shown Desktop records no departure")
+    func noFollowMoveOntoShownRecordsNothing() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(core.execute("move_to_desktop", args: [.number(1)]).isSuccess)
+        #expect(core.desktopMoveDepartures.isEmpty)
     }
 
     @Test("The capability is answered before any argument")

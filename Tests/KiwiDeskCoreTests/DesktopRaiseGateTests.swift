@@ -89,13 +89,15 @@ struct DesktopRaiseGateTests {
 
     /// The deferred path re-asks at fire time: a pending raise
     /// whose target left in the meantime is refused there.
-    @Test("raiseWindow refuses the deferred raise too")
-    func raiseWindowRefuses() {
+    @Test("the pending raise re-asks at fire and refuses")
+    func pendingRaiseRefuses() {
         let core = makeCore()
         core.windowIsOnScreen = { _ in false }
+        core.pendingFocusRaise = WindowID(2)
         var log: [String] = []
         core.onLog = { log.append($0) }
-        core.raiseWindow(WindowID(2))
+        core.runPendingFocusRaise()
+        #expect(core.pendingFocusRaise == nil)
         #expect(log.contains { $0.contains(Self.refusalNeedle) })
     }
 }

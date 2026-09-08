@@ -64,6 +64,25 @@ struct DesktopDepartureStandDownTests {
         #expect(core.departedWithDesktop(gone, reason: .vanished))
     }
 
+    /// A record whose vanish never came expires: past the window
+    /// the same vanish is a swipe's.
+    @Test("A stale departure record no longer claims the vanish")
+    func staleRecordExpires() {
+        let core = makeCore()
+        defer { NativeSpaces.spacesOverride = nil }
+        let id = WindowID(1)
+        let gone = KiwiEvent.windowDestroyed(id, wasMinimized: false)
+        let now = Date()
+        core.recordDesktopMoveDeparture(
+            id,
+            targetIsCurrent: false,
+            now: now.addingTimeInterval(
+                -KiwiCore.desktopMoveDepartureWindow - 1
+            )
+        )
+        #expect(core.departedWithDesktop(gone, reason: .vanished, now: now))
+    }
+
     /// A move onto a Desktop its screen already shows produces no
     /// vanish, so it records nothing — a record nothing claims
     /// would name the window's next swipe departure as the verb's.

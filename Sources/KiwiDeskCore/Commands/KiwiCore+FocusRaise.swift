@@ -38,14 +38,8 @@ extension KiwiCore {
         guard let id = pendingFocusRaise else { return }
         pendingFocusRaise = nil
         guard id == activeSpace?.focused else { return }
-        raiseWindow(id)
-    }
-
-    /// The one AX raise call behind both the immediate and the
-    /// deferred focus paths.
-    func raiseWindow(_ id: WindowID) {
-        // The deferred path's own consult (#1345): `focusWindow`
-        // refused the verb whole; a pending raise re-asks at fire.
+        // The deferred raise re-asks at FIRE (#1345): the target
+        // may have left with its Desktop during the pan.
         guard !raiseCrossesDesktops(id) else {
             onLog(
                 "raise: w\(id.raw) refused — not on screen (closed, "
@@ -53,6 +47,12 @@ extension KiwiCore {
             )
             return
         }
+        raiseWindow(id)
+    }
+
+    /// The one AX raise call behind both the immediate and the
+    /// deferred focus paths.
+    func raiseWindow(_ id: WindowID) {
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
         {

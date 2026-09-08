@@ -274,7 +274,7 @@ public final class KiwiCore {
     /// on-screen flag, pinned to nil by `makeTestCore`.
     var windowIsOnScreen: (WindowID) -> Bool? = FloatDetection.isOnScreen
     /// A move verb's departures, claimed at the vanish (#1345).
-    var desktopMoveDepartures: Set<WindowID> = []
+    var desktopMoveDepartures: [WindowID: Date] = [:]
     /// A `.returned` window's arrival time (#1345).
     var recentReturns: [WindowID: Date] = [:]
 

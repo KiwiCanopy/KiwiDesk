@@ -161,6 +161,70 @@ struct DesktopRaiseGateArmTests {
         #expect(core.activeSpace?.focused == other)
     }
 
+    /// The production writer of `recentReturns`: an arrival the
+    /// fold classifies `.returned` (a remembered Space) stamps it,
+    /// so the report that follows is honored; a `.new` arrival
+    /// stamps nothing and its report keeps the distrust.
+    @Test("A returned arrival stamps the return; a new one does not")
+    func returnedArrivalStampsTheReturn() {
+        let core = makeCore()
+        addWindow(core, 2, pid: 2)
+        let target = WindowID(1)
+        let other = WindowID(2)
+        let space = core.state.workspaces.space(of: other)!
+        _ = core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("scrolling")]
+        )
+        host(core, unshown: nil)
+        core.desktopMemory.honoredFocus[space] = [10: target]
+        // The return: remembered in the space, then re-created.
+        core.state.remember(target, in: space)
+        core.handle(
+            .windowCreated(
+                ManagedWindow(id: target, pid: 1, appName: "App1")
+            )
+        )
+        #expect(core.recentReturns[target] != nil)
+        core.state.workspaces.focus(other, in: space)
+        core.tiler.placements = PlacementLedger()
+        core.tiler.placements.stamp(
+            target,
+            target: CGRect(x: 800, y: 100, width: 400, height: 300)
+        )
+        core.handle(.windowFocused(target))
+        #expect(core.activeSpace?.focused == target)
+    }
+
+    @Test("A new arrival stamps no return")
+    func newArrivalStampsNothing() {
+        let core = makeCore()
+        core.handle(
+            .windowCreated(
+                ManagedWindow(id: WindowID(1), pid: 1, appName: "App1")
+            )
+        )
+        #expect(core.recentReturns[WindowID(1)] == nil)
+    }
+
+    /// Both #1345 ledgers are id-keyed and ride the native-tab
+    /// re-key (#308) with the rest.
+    @Test("A re-key carries the return stamp and the departure record")
+    func rekeyCarriesBothLedgers() {
+        let core = makeCore()
+        addWindow(core, 1, pid: 1)
+        let old = WindowID(1)
+        let new = WindowID(9)
+        let stamp = Date()
+        core.recentReturns[old] = stamp
+        core.desktopMoveDepartures[old] = stamp
+        core.handle(.windowRekeyed(old, new))
+        #expect(core.recentReturns[old] == nil)
+        #expect(core.recentReturns[new] == stamp)
+        #expect(core.desktopMoveDepartures[old] == nil)
+        #expect(core.desktopMoveDepartures[new] == stamp)
+    }
+
     // MARK: - Sibling re-report (#465)
 
     /// `ActivationReReportTests`' fixture: window 1 (pid 5) hidden
