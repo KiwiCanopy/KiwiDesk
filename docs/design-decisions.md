@@ -1738,6 +1738,51 @@ activation, KiwiDesk has no keyboard provenance for system
 chords, and the measurement shows the trigger is our own
 frame-set, not activation in general.
 
+### A raise across Desktops is a Desktop switch in disguise (#1345)
+
+**[Rationale]**
+
+Swiping to a Desktop that holds a second window of an app whose
+first window stays behind bounced the user straight back.
+Measured 2026-09-08 on macOS 26.6.2 with a compositor probe
+(`CGWindowListCopyWindowInfo` on-screen, 10 Hz), KiwiDesk's log
+and a state sampler side by side: with KiwiDesk quit the swipe
+arrived and stayed for 24 s; with KiwiDesk running every swipe
+bounced within 0.4–3.6 s, and the verb-driven `focus_desktop`
+never did. The decisive trace lines up to the millisecond: the
+Finder window the user arrived at reported its focus, the #1161
+placement-bounce distrust rejected that report — KiwiDesk had
+just placed the window, and the report was clickless — and
+re-asserted the previous focus, a Claude window on the Desktop
+the user had just left. Raising it activated Claude, and macOS
+switched Desktops to show it. The close-return raise then kept
+the ping-pong going the same way: each of its successor picks
+sat on the other Desktop, and its `isListed` guard passed
+because Finder lists both Desktops' windows for a beat after a
+switch, which is exactly when the pick lands.
+
+Why the departed window was still there to be re-asserted: the
+Desktop switch is not a close, and an Electron app's destroy
+notification for the window that left the view arrives seconds
+after the swipe. Until then the window is in state, it is the
+`focusBefore` every distrust arm reverts to, and it is NOT yet
+in the away ledger — so neither state nor the ledger can answer
+"is this raise safe". Only the compositor can, and it does in
+one read: hosted on a Space no display shows.
+
+The cure is one gate at the raise rather than a clause per arm,
+because the class repeated — the placement arm, the close-return
+successor, and the #465 sibling and #958 return arms carry the
+same direct re-assert shape. `raiseWindow` refuses ahead of every
+focus path and logs it, so a bounce that still occurs names its
+arm instead of staying silent; the three re-asserts stand down
+through one predicate and honor the report, since a state-only
+revert would split state focus from real key focus (#952). The
+trade: a close-return successor that lives on another Desktop
+is not raised, and focus stays wherever macOS put it until the
+next report — which is the Desktop the user is looking at, so
+the next report is the right one.
+
 ### A focus report is only as good as the activation behind it (#1322)
 
 **[Rationale]**

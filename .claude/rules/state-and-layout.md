@@ -629,6 +629,32 @@ editing here:
   GUI raise of an own tracked window takes so its report arrives
   that way (#1281, `PlacementIntentTests`). A fourth ledger joins
   this bullet rather than earning its own consume.
+- **A raise of a window the compositor hosts on a Desktop nobody
+  shows IS a Desktop switch, and no implicit raise performs one
+  (#1345).** macOS switches Desktops to show whatever is raised,
+  and the window such a raise names is the one the user just
+  LEFT: it is still in state because its app's destroy
+  notification runs seconds behind the swipe (Electron, measured
+  2026-09-08 — the argument and the traces are the
+  design-decisions entry). So the verdict is the COMPOSITOR's,
+  never state's and never the away ledger's, which that window
+  has not reached yet: `KiwiCore.raiseCrossesDesktops` reads
+  `gonePresence` — hosted on a Space no display shows — and
+  `raiseWindow` refuses on it ahead of every focus path, while
+  the three distrust re-asserts (#1161, #465, #958) stand down
+  through the one `reassertCrossesDesktops` and HONOR the report
+  instead, because a state-only revert would split state focus
+  from real key focus (#952). Unknown, gone and shown all pass:
+  the AX-fallback host keeps every raise. A verb that means to
+  switch takes `switchDesktop`, never a raise. `DesktopRaiseGateTests`
+  holds the gate and the `focusWindow` consumer,
+  `DesktopRaiseGateArmTests` the three arms each beside a shown
+  control, and `DesktopRaiseGateSeamTests` the census of files
+  that may spell `AXHelper.raise(` — a new raise site joins it
+  and asks the gate in the same file. The `isListed` guard on
+  the close-return raise is the older, weaker net: Finder lists
+  BOTH Desktops' windows for a beat after a switch, which is
+  exactly when the successor pick lands.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

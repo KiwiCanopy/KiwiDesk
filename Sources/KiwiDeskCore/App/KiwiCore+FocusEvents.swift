@@ -137,10 +137,13 @@ extension KiwiCore {
         // read as ORDER — the sibling's raise must be the newer
         // one (`siblingRaiseOutranks`), or a step A→B within
         // the window would distrust B's own echo.
+        // And never when the re-assert itself would switch
+        // Desktops (#1345): the report is honored instead.
         if state.windows[id]?.isSticky != true,
             siblingRaiseOutranks(id, now: now),
             distrustsSiblingSpace(of: id),
-            !recentClickInside(id, now: now)
+            !recentClickInside(id, now: now),
+            !reassertCrossesDesktops(effects.focusBefore, against: id)
         {
             onLog(
                 "focus: w\(id.raw) sibling re-report "
@@ -218,16 +221,19 @@ extension KiwiCore {
         // the #958 return, which stays last, and BELOW the z-order
         // revert on purpose: a restore's echo keeps its state-only
         // revert, its sequence's closing re-assert owning OS focus.
+        // The re-assert answers whether it took the report: it
+        // stands down, and the report is honored, when raising
+        // `intended` would switch Desktops (#1345).
         if !selfEcho,
             let intended = effects.focusBefore, intended != id,
-            let placed = placementBounce(id, now: now)
-        {
+            let placed = placementBounce(id, now: now),
             reassertAgainstPlacementBounce(
                 id,
                 intended: intended,
                 placed: placed,
                 now: now
             )
+        {
             return
         }
         // The accessibility-steal return (#958): LAST among

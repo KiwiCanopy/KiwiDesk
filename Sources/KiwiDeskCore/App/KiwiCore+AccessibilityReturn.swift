@@ -128,6 +128,12 @@ extension KiwiCore {
                 now: now
             )
         else { return false }
+        // The debt is spent either way; a return that would
+        // switch Desktops stands down and the yield is honored
+        // (#1345).
+        guard !reassertCrossesDesktops(victim, against: id) else {
+            return false
+        }
         onLog(
             "focus: w\(id.raw) accessibility-steal yield "
                 + "returned; re-focusing w\(victim.raw) (#958)"

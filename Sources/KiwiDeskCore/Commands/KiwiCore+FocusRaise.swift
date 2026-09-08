@@ -44,6 +44,16 @@ extension KiwiCore {
     /// The one AX raise call behind both the immediate and the
     /// deferred focus paths.
     func raiseWindow(_ id: WindowID) {
+        // A raise the compositor would answer with a Desktop
+        // switch is refused HERE, ahead of every focus path
+        // (#1345).
+        guard !raiseCrossesDesktops(id) else {
+            onLog(
+                "raise: w\(id.raw) refused — hosted on a Desktop "
+                    + "nobody shows (#1345)"
+            )
+            return
+        }
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
         {
