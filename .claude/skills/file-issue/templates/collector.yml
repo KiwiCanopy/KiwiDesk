@@ -1,6 +1,5 @@
 name: Collector (tracking)
 description: Themed collecting issue grouping related issues
-labels: ["roadmap"]
 type: "Task"
 title: "📦 Collector: "
 body:
@@ -8,8 +7,8 @@ body:
     attributes:
       value: |
         A collector groups **related issues around one theme**
-        (a pipeline, a subsystem, a lane) so the roadmap stays
-        the wave sequence and this stays the themed backlog.
+        (a pipeline, a subsystem, a lane) so the milestone stays
+        the release commitment and this stays the themed backlog.
         Keep checkboxes in sync when issues close — a stale
         tracker is worse than none (see the #71 retrospective).
 
@@ -19,20 +18,19 @@ body:
 
         The collector also owns shipped-history detail: when
         an issue lands, record the postmortem here (PR link,
-        review outcome, spin-offs) — the owning roadmap keeps
-        only a one-line pointer to this collector.
+        review outcome, spin-offs) so the tracked issues keep
+        only their own result.
 
   - type: textarea
     id: theme
     attributes:
       label: Theme & scope
       description: |
-        What binds these issues together, and which roadmap
-        wave owns the sequencing.
+        What binds these issues together, and which milestone
+        owns the sequencing.
       placeholder: |
-        The 1.0 release & distribution pipeline — Roadmap 2
-        (#XXX) Wave 14. Each link consumes the previous one's
-        artifact.
+        The 1.0 release & distribution pipeline — milestone
+        1.0. Each link consumes the previous one's artifact.
     validations:
       required: true
 
@@ -66,7 +64,7 @@ body:
     attributes:
       label: Relations
       description: |
-        Owning roadmap, sibling collectors, related issues that
-        are noted but not gated here.
+        Sibling collectors, and related issues that are noted
+        but not gated here.
       placeholder: |
-        Roadmap: #XXX. Related, not gated here: #106.
+        Sibling: #XXX. Related, not gated here: #106.

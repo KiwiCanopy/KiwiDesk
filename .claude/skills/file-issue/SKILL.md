@@ -1,6 +1,6 @@
 ---
 description: File a KiwiDesk GitHub issue the way an agent must — render the template body by hand, then set the Type and the Priority/Effort issue fields the web form would have set for a human. Use whenever creating an issue with `gh`.
-argument-hint: "[template: bug_report|feature_request|docs_report|collector|roadmap]"
+argument-hint: "[template: bug_report|feature_request|docs_report|collector]"
 ---
 
 File a GitHub issue for this repository. AGENTS.md §3 (Branching
@@ -20,8 +20,13 @@ the web form gives a human for free.
 ## 1. Render the template
 
 The template to use is `$ARGUMENTS` (pick per AGENTS.md §3 if
-not given). Read `.github/ISSUE_TEMPLATE/$ARGUMENTS.yml` and
-reproduce it:
+not given). Read it and reproduce it — the three reporter shapes
+live in `.github/ISSUE_TEMPLATE/$ARGUMENTS.yml`, while `collector`
+is ours rather than a reporter's and lives in
+`templates/collector.yml` beside this skill, out of the chooser
+GitHub builds from `.github/ISSUE_TEMPLATE/` alone. Never route
+an issue to `collector` on your own reading — it groups work
+instead of reporting it, so the owner names it:
 
 - each `label:` becomes a `###` heading, in declared order,
   answered honestly — an internal issue answers the user-shaped
@@ -49,9 +54,8 @@ gh api -X PATCH repos/{owner}/{repo}/issues/<n> -f type=Bug
 
 ## 3. Set Priority and Effort
 
-Skip this step for `collector` and `roadmap` issues — they
-sequence work rather than being work, so they take a Type but no
-Priority/Effort.
+Skip this step for a `collector` issue — it sequences work rather
+than being work, so it takes a Type but no Priority/Effort.
 
 For everything else, set both single-select issue fields.
 Discover the current field and option IDs rather than trusting a
@@ -115,19 +119,18 @@ response shape: the mutation returns the issue number on success.
 
 ### The Priority ladder
 
-Read it against the current roadmap issue (the open `🗺️`
-issue), whose waves are the authority on what the release
-contains:
+Read it against the milestone's current contents, which are the
+authority on what the release has actually committed to:
 
 - **Urgent** — blocks the next release, or daily use is broken
   now.
-- **High** — the release's own work: an open wave item, or a
-  defect that belongs in one.
+- **High** — the release's own work: an issue the milestone
+  already carries, or a defect that belongs beside one.
 - **Medium** — the quality bar behind it: localization and
   terminology defects, docs parity, test debt, polish the
   release wants but does not gate on.
 - **Low** — deferred, icebox, or blocked on the OS; behind the
-  release by the roadmap's own guiding rule.
+  release deliberately.
 
 ### The Effort ladder
 
@@ -150,7 +153,7 @@ the milestone decides whether the release *waits*.
 
 - **Set `1.0`** for a defect a user can meet in a shipped
   surface, a terminology or docs error that would ship wrong, or
-  work an open roadmap wave names.
+  work the milestone already carries.
 - **Leave it empty** for new behavior deliberately deferred, an
   icebox idea, or anything blocked on the OS. Empty is an
   ANSWER — it says the release does not wait for this — so
@@ -165,8 +168,8 @@ two lines above: `gh issue list --milestone "1.0"` is the
 authority on what the release has actually committed to, and a
 ladder restated here would rot against it.
 
-Collector and roadmap issues take a milestone when they scope a
-release (`#663` does) — they only skip Priority and Effort.
+A collector issue takes a milestone when it scopes a release
+(`#663` does) — it only skips Priority and Effort.
 
 ## 5. Verify
 
