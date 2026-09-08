@@ -50,9 +50,11 @@ struct ReturningFocusSeamTests {
         ("rekeyDesktopFocus(old: old, new: new)", "KiwiCore+RekeyEvent.swift"),
         // The arrival arm owes; the mirror hands the fold the
         // owed window; the payer is called once, by the arrival.
-        // The recorder: the honored focus REPORT, and nowhere
-        // else — never a fold, never the switch handler.
+        // The recorders: the honored focus REPORT, and the
+        // frontmost SEED — OS truth about the window focused now
+        // (#1345) — never a fold, never the switch handler.
         ("rememberHonoredFocus(id)", "KiwiCore+FocusEvents.swift"),
+        ("rememberHonoredFocus(frontmost)", "KiwiCore+FocusSeed.swift"),
         // The precedence: a standing follow (#1007) is read once,
         // where the return decides whether to owe.
         ("followFocus.owed(", memoryFile),

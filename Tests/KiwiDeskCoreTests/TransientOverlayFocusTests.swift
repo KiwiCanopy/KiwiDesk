@@ -67,10 +67,10 @@ struct TransientOverlayFocusTests {
 
     /// The consequence: with the grant denied, dismissing the
     /// popup is not a `focusLost`, so `KiwiCore+Events`' fallback
-    /// raise + pointer warp never fires for it. (That wiring also
-    /// gates on `eventLoop.isListed`, which needs live AX, so the
-    /// raise itself is not reachable from here — this is the
-    /// state half, and it is the half #671 broke.)
+    /// raise + pointer warp never fires for it. (The raise's own
+    /// AX call needs a live element a fabricated pid never has,
+    /// so the raise itself is not observable from here — this is
+    /// the state half, and it is the half #671 broke.)
     @Test("Dismissing the popup reports no focus loss")
     func overlayDismissalReportsNoFocusLoss() {
         let core = makeCore()

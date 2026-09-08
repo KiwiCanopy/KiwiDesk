@@ -39,12 +39,18 @@ extension KiwiCore {
     func seedStartupFocus(frontmost: WindowID?) {
         guard let space = activeSpace else { return }
         if let frontmost {
-            if space.windows.contains(frontmost) {
-                state.workspaces.focus(frontmost, in: space.id)
-                return
-            }
-            if let home = state.workspaces.space(of: frontmost) {
+            let member = space.windows.contains(frontmost)
+            if let home = member
+                ? space.id : state.workspaces.space(of: frontmost)
+            {
                 state.workspaces.focus(frontmost, in: home)
+                // The seed is OS truth, so the Desktop memory
+                // takes it like an honored report (#1345): a
+                // fresh process would otherwise bounce the first
+                // return's restored focus. One site, in the
+                // `ReturningFocusSeamTests` register.
+                rememberHonoredFocus(frontmost)
+                if member { return }
             }
         }
         guard focusedWindowID == nil else { return }

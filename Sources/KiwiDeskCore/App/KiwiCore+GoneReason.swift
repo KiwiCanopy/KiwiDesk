@@ -8,12 +8,13 @@ import Foundation
 /// only where SkyLight cannot answer.
 extension KiwiCore {
     /// The destroy arm's tail: classify, file an away entry for
-    /// a `vanished` window, and emit.
+    /// a `vanished` window, and emit. Returns the reason, which
+    /// the close-return stand-down reads (#1345).
     func handleWindowGone(
         _ id: WindowID,
         wasMinimized: Bool,
         effects: AppliedEffects
-    ) {
+    ) -> WindowGoneReason {
         // An explicit Desktop-move target is paid HERE, at the
         // departure the fold just recorded (#1150): the name
         // replaces the remembered Space, and the arrival's
@@ -64,6 +65,55 @@ extension KiwiCore {
             reason: reason,
             desktop: desktop
         )
+        return reason
+    }
+
+    /// Whether a removal is the window LEAVING WITH ITS DESKTOP
+    /// (#1345): `vanished` — hosted on a Desktop nobody shows —
+    /// and not a move verb's own departure, recorded by the verb
+    /// and claimed here. A swipe's removals are exactly these,
+    /// and macOS picks the focus on the Desktop it shows, so the
+    /// close-return raise stands down for them the way it does
+    /// for a hide (#913). On a host without the compositor read,
+    /// `vanished` is the #40 timer's word inside the switch
+    /// settle — accepted: that host runs no Desktop machinery.
+    func departedWithDesktop(
+        _ event: KiwiEvent,
+        reason: WindowGoneReason?,
+        now: Date = Date()
+    ) -> Bool {
+        guard let id = event.goneWindowID else { return false }
+        let recorded = desktopMoveDepartures.removeValue(forKey: id)
+        let moved =
+            recorded.map {
+                now.timeIntervalSince($0) < Self.desktopMoveDepartureWindow
+            } ?? false
+        return reason == .vanished && !moved
+    }
+
+    /// How long a move verb's departure record may wait for its
+    /// vanish: past a slow app's destroy (Electron's trailed the
+    /// swipe by up to ~3 s on device, 2026-09-08), and the verb's
+    /// bridge write is PERFORMED, not applied (os-private-apis.md),
+    /// so a record whose vanish never comes must expire rather
+    /// than name the window's next swipe departure as the verb's.
+    static let desktopMoveDepartureWindow: TimeInterval = 10
+
+    /// A move verb's own departure (#1345): the vanish that
+    /// follows is the verb's hand-off, never a swipe's. Recorded
+    /// per window and claimed at the vanish, so a slow app's
+    /// destroy seconds later still reads as the verb's. Only
+    /// where a vanish is coming: a target its screen already
+    /// shows moves the window in view, and a record nothing
+    /// claims would name the window's NEXT vanish — a swipe's —
+    /// as the verb's.
+    func recordDesktopMoveDeparture(
+        _ id: WindowID,
+        targetIsCurrent: Bool,
+        now: Date = Date()
+    ) {
+        guard !targetIsCurrent else { return }
+        desktopMoveDepartures[id] = now
     }
 
     /// The compositor hosts `id` on a native fullscreen Space —

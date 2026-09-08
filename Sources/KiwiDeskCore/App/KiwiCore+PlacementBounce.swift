@@ -65,13 +65,18 @@ extension KiwiCore {
     /// keystrokes from the ring, and the raise moves nothing, so
     /// it provokes no second bounce. Renews the placement through
     /// the ledger's bounded door, so a still-reacting app stays
-    /// distrusted while the chain still ends.
+    /// distrusted while the chain still ends. False — nothing
+    /// done, the caller honors the report — when the re-assert
+    /// would switch Desktops (#1345).
     func reassertAgainstPlacementBounce(
         _ id: WindowID,
         intended: WindowID,
         placed: CGRect,
         now: Date
-    ) {
+    ) -> Bool {
+        guard !reassertCrossesDesktops(intended, against: id) else {
+            return false
+        }
         tiler.placements.renew(id, at: now)
         onLog(
             "focus: w\(id.raw) placement bounce distrusted; "
@@ -87,5 +92,6 @@ extension KiwiCore {
         }
         updateBorders()
         updateStickyMarks()
+        return true
     }
 }

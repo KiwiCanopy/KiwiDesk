@@ -15,16 +15,16 @@ import Testing
 /// layout half is wanted; the focus half is not.
 ///
 /// Since #935 the hide is one arm of the ONE stand-down
-/// predicate (`EventLoop.closeReturnRaiseStandsDown(after:)`,
+/// predicate
+/// (`EventLoop.closeReturnRaiseStandsDown(after:departedWithDesktop:)`,
 /// behavior-tested in `OwnDialogFocusTests`); this suite keeps
 /// the event classification itself pinned. The raise site that
 /// asks the predicate is pinned by
-/// `CloseReturnStandDownWiringTests` — a needle, because that
-/// site is gated on `eventLoop.isListed`, which calls live AX
-/// (`AXHelper.windows(pid:)`, not the injected seam), so for a
-/// fabricated pid the whole block is unreachable and a driven
-/// `handle(.windowDestroyed(…))` raises nothing. That gate is
-/// the same limit `KiwiCore+CloseReturnRestack`'s doc names.
+/// `CloseReturnStandDownWiringTests` — a needle, because no
+/// decision line names which SITE asked the predicate; the
+/// raise's own log line is observable in a driven
+/// `handle(.windowDestroyed(…))` since #1345, and
+/// `DesktopDepartureStandDownTests` reads the decision line.
 @Suite("Hidden-app raise stand-down (#913)")
 struct HiddenAppRaiseTests {
     @Test("only a hide reads as a hide drop")

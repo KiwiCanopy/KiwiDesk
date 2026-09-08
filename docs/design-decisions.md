@@ -1738,6 +1738,106 @@ activation, KiwiDesk has no keyboard provenance for system
 chords, and the measurement shows the trigger is our own
 frame-set, not activation in general.
 
+### A raise across Desktops is a Desktop switch in disguise (#1345)
+
+**[Rationale]**
+
+Swiping to a Desktop that holds a second window of an app whose
+first window stays behind bounced the user straight back.
+Measured 2026-09-08 on macOS 26.6.2 with a compositor probe
+(`CGWindowListCopyWindowInfo` on-screen, 10 Hz), KiwiDesk's log
+and a state sampler side by side: with KiwiDesk quit the swipe
+arrived and stayed for 24 s; with KiwiDesk running every swipe
+bounced within 0.4–3.6 s, and the verb-driven `focus_desktop`
+never did. The decisive trace lines up to the millisecond: the
+Finder window the user arrived at reported its focus, the #1161
+placement-bounce distrust rejected that report — KiwiDesk had
+just placed the window, and the report was clickless — and
+re-asserted the previous focus, a Claude window on the Desktop
+the user had just left. Raising it activated Claude, and macOS
+switched Desktops to show it. The close-return raise then kept
+the ping-pong going the same way: each of its successor picks
+sat on the other Desktop, and its `isListed` guard (the older AX
+net, retired by this change) passed
+because Finder lists both Desktops' windows for a beat after a
+switch, which is exactly when the pick lands.
+
+Why the departed window was still there to be re-asserted: the
+Desktop switch is not a close, and an Electron app's destroy
+notification for the window that left the view arrives seconds
+after the swipe. Until then the window is in state, it is the
+`focusBefore` every distrust arm reverts to, and it is NOT yet
+in the away ledger — so neither state nor the ledger can answer
+"is this raise safe". Only the compositor can, and it does in
+one read: hosted on a Space no display shows.
+
+The cure is one gate at the raise rather than a clause per arm,
+because the class repeated — the placement arm, the close-return
+successor, and the #465 sibling and #958 return arms carry the
+same direct re-assert shape. `raiseWindow` refuses ahead of every
+focus path and logs it, so a bounce that still occurs names its
+arm instead of staying silent; the three re-asserts stand down
+through one predicate and honor the report, since a state-only
+revert would split state focus from real key focus (#952). The
+trade: a close-return successor that lives on another Desktop
+is not raised, and focus stays wherever macOS put it until the
+next report — which is the Desktop the user is looking at, so
+the next report is the right one.
+
+The gate is not the whole rule, because the return swipe
+bounces without any raise crossing Desktops (measured
+2026-09-08 on the gated build): swiping back, the Desktop 2
+Finder window's departure read as a close, the close-return
+picked the same app's Downloads window on the Desktop being
+shown and raised it — legally, it was shown — stealing the
+focus macOS had just handed back to the window the user left;
+and when macOS then reported that window, the placement
+distrust bounced the report, since the arrival retile had just
+placed it and the report was clickless. Two arms follow from
+"a swipe is not a close". A window that left with its Desktop
+(`vanished`, and not a move verb's own latched departure, which
+IS a hand-off the user asked for) stands the close-return raise
+down, the way a hide does (#913): macOS picks the focus on the
+Desktop it shows. And a report for the Desktop's remembered
+focus coming back — the #1207 memory already records, at every
+honored report, which window each Desktop last had focused —
+is macOS restoring it, not an app answering a placement, so the
+distrust stands down on it. That read honors an app whose
+window WAS the remembered focus and bounces after a return,
+which is the window macOS restored regardless; a bounce racing
+the echo of a step off it is the residue, priced below the
+emulator's measured 0.8–1.5 s and recorded in
+[Accepted limitations](accepted-limitations.md).
+
+Which compositor read matters, measured the same afternoon on
+the first build of the gate: it read the managed display's
+"current Space" and lost the race. At 13:56:57.46 the swipe's
+departures were folding, the on-screen window list (the probe
+beside the log) had already dropped every Desktop 1 window, and
+the current-Space reading still named Desktop 1 — so a Zen window
+on the Desktop being left read as shown, the placement distrust
+re-asserted it, and the user bounced. That is the #1023 finding
+one level down: the current-Space reading tracks the pointer and
+the draw list is the ground truth. The gate therefore reads
+CGWindowList's own `kCGWindowIsOnscreen` for the one window, and
+nothing that could lag it. The same measurement moved the gate
+from the AX call to the verb: `focusWindow` had already written
+state focus, noted the displacement and warped the pointer before
+`raiseWindow` refused, which is a state/key split of its own —
+so the verb is refused whole, ahead of all of it.
+
+Two reads the draw list had to survive, both measured on the
+final build. A window KiwiDesk stashes off-bounds on the SAME
+Desktop — the peek corner, a hidden Space's park — still reads
+on screen (an Antigravity window parked at x = 1727 on a
+1728-wide screen read `kCGWindowIsOnscreen = true`, and the Space
+switch onto it focused it without a refusal), so every virtual
+Space switch keeps its raise. And the #1207 payment at an
+arrival raises through the same gate: on the owner's round trips
+"focus paid to" was followed by the honored report, never by a
+refusal, so the AX create that pays it arrives after the draw
+list lists the window.
+
 ### A focus report is only as good as the activation behind it (#1322)
 
 **[Rationale]**

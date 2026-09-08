@@ -25,10 +25,19 @@ extension KiwiCore {
                     + "focus honored on w\(id.raw)"
             )
         }
-        // The compositor's one door (#1146): the seam a test pins.
-        guard case .hosted(let native) = desktopMemory.readWindowSpace(id)
-        else { return }
+        guard let native = hostedNativeSpace(of: id) else { return }
         desktopMemory.honoredFocus[space, default: [:]][native] = id
+    }
+
+    /// The memory's key: the native Space the compositor hosts
+    /// `id` on, through the one door (#1146, the seam
+    /// `DesktopCensusSeamTests` pins) — the write and the
+    /// remembered-focus read derive it here alone, so the two
+    /// cannot key differently.
+    private func hostedNativeSpace(of id: WindowID) -> SkyLight.SpaceID? {
+        guard case .hosted(let native) = desktopMemory.readWindowSpace(id)
+        else { return nil }
+        return native
     }
 
     /// Owes the arriving `target` the focus last honored on
@@ -88,6 +97,26 @@ extension KiwiCore {
         }
         onLog("desktop return: focus paid to w\(window.raw)")
         focusWindow(window, refocusRetile: false, warp: true)
+    }
+
+    /// How fresh a return must be for its focus report to read as
+    /// macOS restoring it: the restore lands within ~150 ms of
+    /// the arrival on device, the #1161 bounce no sooner than the
+    /// 0.7 s docs/accepted-limitations.md records.
+    static let restoredFocusWindow: TimeInterval = 0.5
+
+    /// Whether a report for `id` is macOS restoring this
+    /// Desktop's focus (#1345): the window RETURNED within
+    /// `restoredFocusWindow` and is the memory's entry under the
+    /// compositor's host. The placement distrust (#1161) stands
+    /// down on it; the trade is docs/design-decisions.md's.
+    func isRestoredDesktopFocus(_ id: WindowID, now: Date) -> Bool {
+        guard let returned = recentReturns[id],
+            now.timeIntervalSince(returned) < Self.restoredFocusWindow,
+            let space = state.workspaces.space(of: id),
+            let native = hostedNativeSpace(of: id)
+        else { return false }
+        return desktopMemory.honoredFocus[space]?[native] == id
     }
 
     /// The #634 arrangement reset: the memory is id-keyed like

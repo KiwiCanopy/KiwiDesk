@@ -134,11 +134,17 @@ extension KiwiCore {
                     // them the departed window's slot lingers
                     // and its key-focus re-report can teleport
                     // the user).
-                    departWithoutFollowing(focused)
+                    departWithoutFollowing(
+                        focused,
+                        targetIsCurrent: target.isCurrent
+                    )
                 }
                 return outcome.response
             }
-            departWithoutFollowing(focused)
+            departWithoutFollowing(
+                focused,
+                targetIsCurrent: target.isCurrent
+            )
             return .ok()
         }
     }
@@ -242,8 +248,16 @@ extension KiwiCore {
     ///   the hazard is identical: the moved window can keep OS
     ///   key focus, its app re-reports it AX-focused, and the
     ///   focus-follow would flip the user's Space under them.
-    private func departWithoutFollowing(_ window: WindowID) {
+    /// - The departure record (#1345) keeps the vanish that
+    ///   follows a move onto a HIDDEN Desktop as the verb's
+    ///   hand-off; a target its screen already shows produces
+    ///   no vanish, so nothing is recorded for it.
+    private func departWithoutFollowing(
+        _ window: WindowID,
+        targetIsCurrent: Bool
+    ) {
         moveLatch.stamp(window)
+        recordDesktopMoveDeparture(window, targetIsCurrent: targetIsCurrent)
         lastDesktopSwitch = Date()
         guard let pid = state.windows[window]?.pid else { return }
         deferred.schedule(

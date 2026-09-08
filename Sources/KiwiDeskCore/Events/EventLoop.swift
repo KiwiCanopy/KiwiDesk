@@ -157,7 +157,7 @@ public final class EventLoop {
     /// close-return stand-down arm reads it, because a
     /// synthetic removal at t=0 of a switch must not raise the
     /// origin's successor — the origin is still composited, so
-    /// the isListed guard passes on timing a real swipe-away
+    /// the on-screen gate passes on timing a real swipe-away
     /// destroy never has. Nothing can interleave within the
     /// span: the fold is synchronous main-actor code.
     var eagerDepartureInFlight: WindowID?

@@ -113,6 +113,7 @@ func makeTestCore(
     // the ledger and arm a live census. Pin "no compositor"; a
     // suite that wants a verdict states it on `desktopMemory`.
     core.desktopMemory.readWindowSpace = { _ in .unavailable }
+    core.windowIsOnScreen = { _ in nil }
     core.desktopMemory.readCensus = { _ in nil }
     // Same class, seventh time (#1147): the Desktop stamp write
     // defaults LIVE, and a fixture space id is a real Desktop id

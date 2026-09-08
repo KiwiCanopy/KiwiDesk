@@ -31,7 +31,7 @@ public enum WindowGather {
     /// (inactive-virtual-space windows are parked off-screen at
     /// the peek corner). When #70 introduces true multi-native-
     /// Space windows, add an explicit native-Space filter here
-    /// (cf. `eventLoop.isListed`) or this will silently move
+    /// (cf. `windowIsOnScreen`) or this will silently move
     /// background-Space windows.
     /// One display's gather group: every eligible window on
     /// it, in space-iteration order, plus its AX-flipped

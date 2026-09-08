@@ -27,9 +27,8 @@ extension KiwiCore {
     /// was a float or fullscreen member) or a candidate outside
     /// the tiled row is no evidence of a jump — same asymmetry
     /// as `scrollFocusJumpsSlots`. Internal, not private: its
-    /// call site (the close handler in `KiwiCore+Events`) sits
-    /// behind `eventLoop.isListed` (live AX — the
-    /// `TransientOverlayFocusTests` gate note), so
+    /// call site (`runCloseReturnTail`) raises through a live AX
+    /// element a fabricated pid never has, so
     /// `ZOrderCloseReturnArmTests` proves the arm directly.
     func armCloseReturnRestack(
         to target: WindowID,
@@ -69,6 +68,7 @@ extension KiwiCore {
     func forgetGoneWindow(_ id: WindowID, pid: pid_t?) {
         selfRaiseStamps[id] = nil
         zOrderRaiseEchoes[id] = nil
+        recentReturns[id] = nil
         tiler.placements.forget(id)
         if let pid {
             tiler.stashSizeBoundOnGone(id, pid: pid)
