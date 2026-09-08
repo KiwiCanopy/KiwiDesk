@@ -73,9 +73,10 @@ stay quiet about:
   reader is not reconciling your issue tracker.
 - **Twenty bullets, or a nine-line bullet.** Ruled: the first
   is a changelog with headings, the second a PR description. A
-  bullet is one to three sentences — the symptom, then what
-  changed — and the diagnosis between them stays in the PR. The
-  lead paragraph is one or two sentences. If a section will not
+  bullet is ONE line — the symptom, and that it is fixed — and a
+  second sentence is earned only when one line cannot say it,
+  never by the diagnosis, which stays in the PR. The lead
+  paragraph is one or two sentences. If a section will not
   come under control, the honest move is usually that half of
   it is not news.
 - **A site fix.** A corrected heading, a term, a translation, a

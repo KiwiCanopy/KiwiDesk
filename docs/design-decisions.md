@@ -565,9 +565,11 @@ Two consequences fall out, both structural rather than stylistic:
   already did, and turns news into a bug list.
 - **Highlights are highlights.** Twenty bullets is a changelog
   with headings, and a nine-line bullet is a PR description. A
-  bullet is one to three sentences: the thing you would notice,
-  then what changed — never the diagnosis in between, which is
-  the PR's. The whole block should read in one screen of the
+  bullet is ONE line: the thing you would notice, and that it
+  is fixed. A second sentence is earned only when one line
+  cannot say it — a default that changed, a control to go and
+  find — and never by the diagnosis, which is the PR's (ruling
+  2026-09-08). The whole block should read in one screen of the
   update sheet Sparkle shows.
 - **A site change is news only when a visitor would come for
   it.** A new page, a new language, a changed download earns a
