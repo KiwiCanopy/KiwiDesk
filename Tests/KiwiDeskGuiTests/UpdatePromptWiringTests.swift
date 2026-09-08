@@ -118,4 +118,26 @@ struct UpdatePromptWiringTests {
             )
         )
     }
+
+    /// The live updater forwards the policy's pending fact and
+    /// hands the nudge through (#1013). Unreachable by behavior:
+    /// nothing constructs `SparkleUpdater` in a test, correctly —
+    /// it starts the scheduled channel — so these needles pin the
+    /// SPELLING of the forwarding, the same limit stated above; a
+    /// legal rename reds them.
+    @Test("the live updater forwards the pending fact and the nudge")
+    func liveUpdaterForwardsThePendingFact() throws {
+        let text = try Self.seamSource()
+        let live = try #require(
+            SourceScan.declarationBody(
+                after: "final class SparkleUpdater",
+                in: text
+            )
+        )
+        #expect(live.contains("updatePending: Bool { policy.updatePending }"))
+        #expect(live.contains("get { policy.onUpdatePendingChanged }"))
+        #expect(
+            live.contains("set { policy.onUpdatePendingChanged = newValue }")
+        )
+    }
 }
