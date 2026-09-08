@@ -34,24 +34,6 @@ struct DesktopAlreadyShownTests {
         pinTwoDisplays()
     }
 
-    /// The fields a caller reads, so each assertion names one.
-    private func fields(
-        _ response: CommandResponse
-    ) -> (switched: Bool?, note: String?) {
-        guard case .object(let payload)? = response.data else {
-            return (nil, nil)
-        }
-        var switched: Bool?
-        if case .bool(let value)? = payload["switched"] {
-            switched = value
-        }
-        var note: String?
-        if case .string(let value)? = payload["note"] {
-            note = value
-        }
-        return (switched, note)
-    }
-
     @Test("The stand-down reports switched: false, and says why")
     func standDownReportsNoSwitch() {
         pinTopology()
@@ -70,12 +52,15 @@ struct DesktopAlreadyShownTests {
         // Still a success: an ensure-shown caller keeps working.
         #expect(response.isSuccess)
         #expect(response.error == nil)
-        let read = fields(response)
-        #expect(read.switched == false)
+        #expect(
+            SwitchOutcomeReading.switched(response) == false
+        )
         // An EMPTY note satisfies "carries a note" while shipping
         // the silence #1336 removed, so pin that it says something
         // (code review, round 1).
-        #expect(read.note?.isEmpty == false)
+        #expect(
+            SwitchOutcomeReading.note(response)?.isEmpty == false
+        )
     }
 
     @Test("A switch that DID move the screen reports switched: true")
@@ -86,11 +71,13 @@ struct DesktopAlreadyShownTests {
         // exactly when nothing happened.
         let switched = KiwiCore.DesktopSwitchOutcome.switched
         #expect(switched.response.isSuccess)
-        #expect(fields(switched.response).switched == true)
+        #expect(
+            SwitchOutcomeReading.switched(switched.response) == true
+        )
         // The note belongs to the stand-down: a blanket note would
         // satisfy the assertion above while telling a caller
         // nothing (prover round 1).
-        #expect(fields(switched.response).note == nil)
+        #expect(SwitchOutcomeReading.note(switched.response) == nil)
     }
 
     @Test("The stand-down is logged, naming the verb and the event")
@@ -113,7 +100,7 @@ struct DesktopAlreadyShownTests {
         // line carrying the verb beside another event's wording —
         // the bridge refusal, say — read as green while the trace
         // lied (prover round 1).
-        guard let note = fields(outcome.response).note,
+        guard let note = SwitchOutcomeReading.note(outcome.response),
             !note.isEmpty
         else {
             Issue.record("the stand-down answered no note")
