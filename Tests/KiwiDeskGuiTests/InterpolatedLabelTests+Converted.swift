@@ -210,5 +210,10 @@ extension InterpolatedLabelTests {
         //    what anchors "Desktop" to macOS for a reader who
         //    has not met the word yet.
         "profiles.which_loads.help": 1,
+        // 6. #1114. The Desktop drawers' one explanation names
+        //    the card that binds a profile to a Desktop — the
+        //    same card as the entry above, reached from the
+        //    other end of the app.
+        "shortcuts.desktops.help": 1,
     ]
 }
