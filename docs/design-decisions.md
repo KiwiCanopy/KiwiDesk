@@ -4363,9 +4363,8 @@ refused, because activating a process deminiaturizes nothing.
 rule.** An *unsolicited offer* must NOT take the screen — that is
 the same argument [Background update checks are on, and there is
 no switch](#background-update-checks-are-on-and-there-is-no-switch)
-makes about a modal at the worst moment, and it is why Sparkle
-showing a SCHEDULED update alert behind other windows is left
-alone here. The obligation is on the interaction the user is
+makes about a modal at the worst moment, and it is why this
+entry never brings a SCHEDULED alert forward.
 already inside, never on the one being proposed to them. The
 scheduled alert is therefore never shown by Sparkle at all: the
 offer is a mark on the menu-bar item and a row in its menu

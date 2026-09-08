@@ -19,7 +19,7 @@ private final class FakeStatusItem: StatusItemHandle {
 private final class FakeUpdater: AppUpdating {
     var canCheckForUpdates: Bool
     private(set) var checks = 0
-    var updatePending = false
+    var updatePending = false { didSet { onUpdatePendingChanged() } }
     var onUpdatePendingChanged: () -> Void = {}
 
     init(canCheck: Bool) { canCheckForUpdates = canCheck }

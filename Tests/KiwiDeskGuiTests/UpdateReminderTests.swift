@@ -175,6 +175,33 @@ struct UpdateReminderTests {
     }
 }
 
+/// The one-home obligation no behavior test can hold: a cached
+/// copy kept in sync by the nudge passes every render assertion,
+/// so the controller's READ is pinned by spelling — a computed
+/// property over the updater, and no stored copy anywhere in the
+/// file (gui.md).
+@Suite("The pending fact is read, never stored (#1013)")
+struct UpdateReminderReadNotStoredTests {
+    @Test("the controller reads the updater's fact at render")
+    func controllerReadsNotStores() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/StatusItemController.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        try #require(!source.isEmpty)
+        #expect(
+            source.contains(
+                "var updatePending: Bool { updater.updatePending }"
+            )
+        )
+        #expect(!source.contains("updatePending ="))
+        #expect(!source.contains("var updatePending = "))
+    }
+}
+
 /// What the policy DECLARES for gentle reminders (#1013): the
 /// four answers Sparkle looks up by selector, asserted by CALLING
 /// the pure ones and by the ObjC runtime for the rest — a

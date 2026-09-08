@@ -263,16 +263,23 @@ with every count still at one. It is a suite of its own for
 that reason: `UpdatePromptFocusTests` reads what the override
 DECLARES and structurally cannot see what it is wired to.
 
-The opposite rule has its own guard (#1013): a SCHEDULED update
+The opposite rule has its own guards (#1013): a SCHEDULED update
 is never Sparkle's to show, whatever focus it proposes —
 `UpdatePromptPolicy` declares gentle reminders and answers
-`false`, the status item carries the mark and the updates row
-reads "Update Available…" in place, and `checkForUpdates` is the
-one door that brings the waiting alert forward.
-`UpdateReminderPolicyTests` resolves every reminder selector
-through the ObjC runtime, since a near-miss on an optional
-requirement compiles and silently stops conforming; a Sparkle
-bump re-reads it beside #1011.
+`false` (`UpdateReminderPolicyTests`, which also resolves every
+reminder selector through the ObjC runtime, since a near-miss on
+an optional requirement compiles and silently stops conforming;
+a Sparkle bump re-reads it beside #1011). The pending fact has
+ONE home, the policy's `updatePending`: a consumer READS it at
+render and never stores a copy, which a nudge could keep in sync
+right up to the day it does not (`UpdateReminderTests` ▸ the
+read-not-stored scan). The mark is composited in `render()`
+alone, AFTER the states that outrank an offer — a permission
+warning, the starting phase, a config error — and on both
+channels whether or not an image exists, since a mode icon that
+is no SF Symbol takes the title fallback; the updates row
+retitles in place because `checkForUpdates` is the one door that
+brings the waiting alert forward (`UpdateReminderTests`).
 
 ## A window that must clear the bars derives its level
 
