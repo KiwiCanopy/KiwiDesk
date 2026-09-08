@@ -39,8 +39,10 @@ extension StatusItemController {
     /// knockout ring, composited into a NEW image — the shared
     /// brand icon is never mutated (#1311). Not a template, since
     /// a template carries no hue: the handler resolves the bar's
-    /// label colour and `systemOrange` at every draw, so light and
-    /// dark still follow; the bar's highlight inversion while the
+    /// label colour and `systemOrange` per APPEARANCE — AppKit
+    /// re-runs it on a light/dark flip and caches per appearance
+    /// (measured 2026-09-08) — so light and dark still follow; the
+    /// bar's highlight inversion while the
     /// menu is open is what the colour costs (design-decisions.md).
     /// Pure: `render()` alone decides which state carries it.
     static func badged(_ base: NSImage) -> UpdateMarkImage {
