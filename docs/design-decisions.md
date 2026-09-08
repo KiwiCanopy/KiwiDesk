@@ -4364,8 +4364,9 @@ rule.** An *unsolicited offer* must NOT take the screen — that is
 the same argument [Background update checks are on, and there is
 no switch](#background-update-checks-are-on-and-there-is-no-switch)
 makes about a modal at the worst moment, and it is why this
-entry never brings a SCHEDULED alert forward.
-already inside, never on the one being proposed to them. The
+entry never brings a SCHEDULED alert forward. The obligation is
+on the interaction the user is already inside, never on the one
+being proposed to them. The
 scheduled alert is therefore never shown by Sparkle at all: the
 offer is a mark on the menu-bar item and a row in its menu
 ([Scheduled update reminders are a mark, not a
