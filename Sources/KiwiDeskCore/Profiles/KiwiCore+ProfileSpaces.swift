@@ -20,7 +20,12 @@ extension KiwiCore {
     /// that has applied nothing, has no partitioning of its own.
     func recordLivePartitioning() {
         state.profilePartitioning.record(
-            state.workspaces.allSpaces,
+            state.workspaces.allSpaces.map {
+                Space(
+                    id: $0.id,
+                    windows: withAwayMembers($0.windows, of: $0.id)
+                )
+            },
             as: profiles.currentName
         )
     }
@@ -70,11 +75,13 @@ extension KiwiCore {
     /// prune put it, which is the existing setting for exactly
     /// this situation and needs no new concept.
     ///
-    /// Only LIVE windows move: a remembered id can belong to a
+    /// Only LIVE windows MOVE: a remembered id can belong to a
     /// window since closed, or to one sitting on an away Desktop
     /// (#1146), and inserting either would put a phantom in the
-    /// row. The away case comes back through its own memory
-    /// (`rememberedSpaces`), not this one.
+    /// row. Those take the other half — their remembered Space is
+    /// re-filed to this profile's, since it is what places them
+    /// if they come back and it answers once across every profile
+    /// (#1248, `refileAway`).
     ///
     /// A remembered Space the profile no longer declares is
     /// skipped rather than re-created: the prune just dropped it,
@@ -101,14 +108,26 @@ extension KiwiCore {
             heldSpaceFocus[space.id] = space.focused
         }
         var moved = 0
+        var refiled = 0
         for space in SpaceID.numericLexicalSorted(
             Array(remembered.keys)
         ) {
             guard declared.contains(space),
                 state.workspaces[space] != nil
             else { continue }
-            for window in remembered[space] ?? []
-            where state.windows[window] != nil {
+            for window in remembered[space] ?? [] {
+                guard state.windows[window] != nil else {
+                    // Not in state: away on another Desktop, or
+                    // closed and still remembered. Its remembered
+                    // Space is what places it if it comes back,
+                    // and that memory answers once across every
+                    // profile — so re-point it, or the profile's
+                    // record loses to it (#1248).
+                    if state.refileAway(of: window, to: space) {
+                        refiled += 1
+                    }
+                    continue
+                }
                 let from = state.workspaces.space(of: window)
                 state.workspaces.add(window, to: space)
                 // A float crossing displays must re-anchor
@@ -127,10 +146,12 @@ extension KiwiCore {
             candidate: heldCandidate,
             spaceFocus: heldSpaceFocus
         )
-        if moved > 0 {
+        if moved > 0 || refiled > 0 {
             onLog(
                 "profile '\(profile.name)': restored \(moved) "
                     + "window(s) to their own Spaces"
+                    + (refiled > 0
+                        ? ", re-filed \(refiled) absent" : "")
             )
         }
     }

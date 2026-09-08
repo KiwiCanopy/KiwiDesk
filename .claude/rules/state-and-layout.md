@@ -50,6 +50,21 @@ editing here:
   are [profiles.md](profiles.md) ▸ "Whose arrangement is live",
   which is where they load: this file's `paths:` do not reach
   `Sources/KiwiDeskCore/Profiles/**`, where every toucher lives.
+- **A profile's record beats where a window departed from
+  (#1248).** The remembered Space answers ONCE across every
+  profile, so for a window not in state the two authorities
+  disagree and the ledger wins by default — the same window then
+  landing in a different Space depending on whether it happened
+  to be on another Desktop at switch time, which the user cannot
+  see and did not choose. A profile becoming live therefore
+  re-files an absent window it has a record for, through the one
+  `StateCoordinator.refileAway`; a window the profile has never
+  seen keeps its memory, matching the live half's "stays where
+  the prune put it". **Re-filing to the Space a window is ALREADY
+  remembered in is refused rather than a no-op** — the #1207
+  return rank goes with the move, so a redirect that changes
+  nothing spends the slot and the window comes back last after
+  any switch (`AwayProfileSpaceTests`).
 - It follows that **a new per-`Space` field is keyed by
   `WindowID` or it is SHARED across Desktops** — the Desktop
   partition is emergent from window residence, and a per-window
@@ -355,7 +370,9 @@ editing here:
   new bar derivation that merges the ledger is the bug, not a
   feature. A reader that needs a Space's row as it WILL return
   takes `withAwayMembers(_:of:)` — the fold's own rank insert —
-  never a hand merge; a reader keyed by app takes
+  never a hand merge, and a profile's PARTITIONING record is such
+  a reader, since a record that omits what is away forgets it on
+  every switch (#1248); a reader keyed by app takes
   `awayWindows(bundleID:)`. An entry with NO Space (a boot-found
   window nothing has filed) is UNFILED: every reader carries the
   skip branch — `awayMembers(of:)` omits it, `get_state` lists it

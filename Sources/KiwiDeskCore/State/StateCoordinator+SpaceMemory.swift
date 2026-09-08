@@ -53,10 +53,11 @@ extension StateCoordinator {
 
     /// Re-files a departure the destroy fold just recorded under
     /// the Space an explicit Desktop-move target named (#1150).
-    /// The one writer of `rememberedSpaces` OUTSIDE a fold, and
-    /// safe as one because it runs in the same synchronous arm
-    /// as that fold, before any reader: `forgetGoneWindow` reads
-    /// nothing of it, and the away ledger files the NATIVE Space.
+    /// A writer of `rememberedSpaces` OUTSIDE a fold — `refileAway`
+    /// is the other (#1248) — and safe as one because it runs in
+    /// the same synchronous arm as that fold, before any reader:
+    /// `forgetGoneWindow` reads nothing of it, and the away
+    /// ledger files the NATIVE Space.
     /// The `.departed` memory takes the name and the slot rank is
     /// dropped, a rank meaning something only in the Space it was
     /// taken in; rankless, the create fold's spawn placement is
@@ -73,6 +74,39 @@ extension StateCoordinator {
             return false
         }
         rememberedSpaces[id] = .departed(space)
+        departedSlots[id] = nil
+        return true
+    }
+
+    /// Re-points an AWAY window's remembered Space at the one the
+    /// incoming profile records for it (#1248), keeping the kind:
+    /// a watched departure stays `.departed`, a boot-seeded
+    /// `.restored` filing stays restored — the population most
+    /// likely to be away across a switch is the one a restart
+    /// seeded, so it cannot be the case this skips.
+    ///
+    /// A same-space call is REFUSED rather than made a silent
+    /// no-op: the rank goes with the move (it means something
+    /// only in the Space it was taken in), so redirecting a
+    /// window to where it already is would spend its #1207 return
+    /// slot for nothing, on every switch.
+    ///
+    /// `redirectDeparture` is the other writer and stays separate:
+    /// it answers #1150's explicit Desktop-move target, is
+    /// `.departed`-only by ruling, and runs in the destroy fold's
+    /// own arm.
+    @discardableResult
+    mutating func refileAway(
+        of id: WindowID,
+        to space: SpaceID
+    ) -> Bool {
+        guard let current = rememberedSpaces[id],
+            current.space != space
+        else { return false }
+        switch current {
+        case .departed: rememberedSpaces[id] = .departed(space)
+        case .restored: rememberedSpaces[id] = .restored(space)
+        }
         departedSlots[id] = nil
         return true
     }
