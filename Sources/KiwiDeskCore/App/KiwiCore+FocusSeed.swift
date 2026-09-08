@@ -41,10 +41,16 @@ extension KiwiCore {
         if let frontmost {
             if space.windows.contains(frontmost) {
                 state.workspaces.focus(frontmost, in: space.id)
+                // The seed is OS truth, so the Desktop memory
+                // takes it like an honored report (#1345): a
+                // fresh process would otherwise bounce the first
+                // return's restored focus.
+                rememberHonoredFocus(frontmost)
                 return
             }
             if let home = state.workspaces.space(of: frontmost) {
                 state.workspaces.focus(frontmost, in: home)
+                rememberHonoredFocus(frontmost)
             }
         }
         guard focusedWindowID == nil else { return }

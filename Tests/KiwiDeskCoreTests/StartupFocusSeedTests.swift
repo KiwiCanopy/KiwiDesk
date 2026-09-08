@@ -57,6 +57,22 @@ struct StartupFocusSeedTests {
         #expect(core.focusedWindowID == WindowID(1))
     }
 
+    /// The seed is OS truth, so the Desktop focus memory takes it
+    /// (#1345): a fresh process would otherwise read the first
+    /// return's restored focus as a placement bounce.
+    @Test("Frontmost seed is remembered as the Desktop's focus")
+    func frontmostSeedIsRemembered() {
+        let core = makeCore()
+        add(core, 1)
+        add(core, 2)
+        core.desktopMemory.readWindowSpace = { _ in .hosted(10) }
+        core.seedStartupFocus(frontmost: WindowID(1))
+        #expect(
+            core.desktopMemory.honoredFocus[SpaceID(1)]?[10]
+                == WindowID(1)
+        )
+    }
+
     @Test("Unresolvable frontmost never disturbs a real focus")
     func keepsExistingFocusWithoutFrontmost() {
         let core = makeCore()
