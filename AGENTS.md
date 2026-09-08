@@ -233,18 +233,17 @@ Pick the template by what the issue *is*: `bug_report` when
 something shipped behaves wrongly (including a guard that cannot
 fail — the repro is the mutation that ought to red it),
 `feature_request` for new or retuned behavior, `docs_report` for
-prose, `collector` / `roadmap` for grouping. (`config.yml` is not
-a template — it is the chooser, and it turns blank issues off, so
-one of the five above is the only way in.) Every one of them is
-written for a **user**, so an internal engineering issue will have
-fields that fit awkwardly — answer them honestly from the dev
-machine rather than dropping them or inventing a new shape
-inline.
+prose. Those three are the whole chooser, and `config.yml` — not
+a template but the chooser itself — turns blank issues off, so
+one of the three is the only way in. Each is written for a
+**user**, so an internal engineering issue will have fields that
+fit awkwardly — answer them honestly from the dev machine rather
+than dropping them or inventing a new shape inline.
 
 Beyond the body: give every issue GitHub's **Type** (Bug /
 Feature / Task) and the repo's **Priority** and **Effort**
 issue fields at filing, not in a later sweep — an unranked
-issue is invisible to the roadmap's ordering. **Rule the
+issue is invisible to the milestone's ordering. **Rule the
 milestone at filing too**, including ruling it EMPTY: a
 milestone says which release must not ship without the issue,
 so leaving it unanswered is not the same as answering "the
