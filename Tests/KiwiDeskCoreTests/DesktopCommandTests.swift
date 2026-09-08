@@ -189,7 +189,12 @@ struct DesktopCommandTests {
         let core = makeCore()
         defer { teardown() }
         let before = core.lastDesktopSwitch
-        #expect(core.execute("focus_desktop", args: [.number(2)]).isSuccess)
+        let moved = core.execute("focus_desktop", args: [.number(2)])
+        #expect(moved.isSuccess)
+        // The other half of the discriminator, through the same
+        // consumer: presence-vs-absence must never come back as
+        // the way a caller tells the two apart (#1336).
+        #expect(SwitchOutcomeReading.switched(moved) == true)
         #expect(Bridge.switches.map(\.0) == [11])
         #expect(Bridge.switches.map(\.1) == ["UUID-A"])
         #expect(core.lastDesktopSwitch > before)
@@ -210,15 +215,23 @@ struct DesktopCommandTests {
     func currentDesktopSwitchStandsDown() {
         let core = makeCore()
         defer { teardown() }
-        #expect(core.execute("focus_desktop", args: [.number(1)]).isSuccess)
+        let shown = core.execute("focus_desktop", args: [.number(1)])
+        #expect(shown.isSuccess)
+        // Success alone is what a bare `.ok()` also satisfies, so
+        // read the field the Lua and CLI callers read (#1336).
+        #expect(SwitchOutcomeReading.switched(shown) == false)
         #expect(Bridge.switches.isEmpty)
         // The move cannot know the window is there already — it
         // may sit on another display — so it dispatches; only
         // the follow stands down.
-        #expect(
-            core.execute("move_to_desktop_and_follow", args: [.number(1)])
-                .isSuccess
+        let followed = core.execute(
+            "move_to_desktop_and_follow",
+            args: [.number(1)]
         )
+        #expect(followed.isSuccess)
+        // The follow's own consumer, which returns the outcome's
+        // response after doing the most work of any arm.
+        #expect(SwitchOutcomeReading.switched(followed) == false)
         #expect(Bridge.moves.map(\.1) == [10])
         #expect(Bridge.switches.isEmpty)
         // No switch dispatched means nothing to hide either — a

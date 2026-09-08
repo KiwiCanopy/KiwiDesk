@@ -16,9 +16,26 @@ extension KiwiCore {
         case switched
         case refused(CommandResponse)
 
+        /// One home for the sentence, so the payload and the log
+        /// cannot name different events (#1336).
+        static let alreadyShownNote =
+            "that Desktop is already showing"
+
+        /// Both arms report `switched` so a caller reads a FIELD
+        /// rather than the payload's presence, and it describes
+        /// the SWITCH alone — a follow's stand-down arm still
+        /// moved the window (#1336).
         var response: CommandResponse {
             switch self {
-            case .alreadyShown, .switched: .ok()
+            case .alreadyShown:
+                .ok(
+                    .object([
+                        "switched": .bool(false),
+                        "note": .string(Self.alreadyShownNote),
+                    ])
+                )
+            case .switched:
+                .ok(.object(["switched": .bool(true)]))
             case .refused(let response): response
             }
         }
@@ -54,7 +71,10 @@ extension KiwiCore {
         to target: DesktopTarget,
         verb: String
     ) -> DesktopSwitchOutcome {
-        guard !target.isCurrent else { return .alreadyShown }
+        guard !target.isCurrent else {
+            onLog("\(verb): \(DesktopSwitchOutcome.alreadyShownNote)")
+            return .alreadyShown
+        }
         guard
             WMBridge.setCurrentSpace(
                 target.space,
