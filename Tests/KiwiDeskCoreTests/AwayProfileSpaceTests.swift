@@ -115,6 +115,14 @@ struct AwayProfileSpaceTests {
         sendAway(core, WindowID(1))
         core.apply(profile: b, forceRetile: false)
 
+        // Re-filed to B's Space, and still a WATCHED departure:
+        // the other kind is `.restored`, and promoting or
+        // demoting one is invisible to a placement assertion.
+        #expect(
+            core.state.rememberedSpaces[WindowID(1)]
+                == .departed("2")
+        )
+
         bringBack(core, WindowID(1))
         // B's own record wants it in Space 2.
         #expect(members(core, "2") == [WindowID(1)])
@@ -197,6 +205,120 @@ struct AwayProfileSpaceTests {
         #expect(
             members(core, "1")
                 == [WindowID(1), WindowID(2), WindowID(3)]
+        )
+    }
+
+    /// A boot-seeded away window is filed `.restored`, not
+    /// `.departed` — and a restart is the likeliest way to be
+    /// away across a switch, so the re-file must reach it AND
+    /// leave the kind alone.
+    ///
+    /// The kind is load-bearing elsewhere: `redirectDeparture`
+    /// refuses anything but `.departed`, `rememberDepartedSlot`
+    /// filters on it, and #1010's screen-home answers only for a
+    /// departure the fold WATCHED. Promoting a boot filing into a
+    /// watched departure, or demoting one, both shipped green
+    /// (`guard-prover`, 2026-09-08).
+    @Test("A restored filing is re-filed and stays restored")
+    func aRestoredFilingKeepsItsKind() {
+        let core = makeCore()
+        let a = profile("A", spaces: ["1", "2"])
+        let b = profile("B", spaces: ["1", "2"])
+        live(core, [1])
+
+        // Give B a record placing w1 in Space 2.
+        core.apply(profile: b, forceRetile: false)
+        core.state.workspaces.add(WindowID(1), to: "2")
+        core.apply(profile: a, forceRetile: false)
+
+        // Now the boot-seed shape: away, filed `.restored` in
+        // Space 1, with no watched departure behind it.
+        core.state.windows.remove(WindowID(1))
+        core.state.workspaces.remove(WindowID(1))
+        core.state.remember(WindowID(1), in: "1")
+        core.state.awayWindows[WindowID(1)] = AwayWindow(
+            id: WindowID(1),
+            pid: 1,
+            appName: "App",
+            appBundleID: nil,
+            nativeSpace: SkyLight.SpaceID(9),
+            isUp: true
+        )
+
+        core.apply(profile: b, forceRetile: false)
+        #expect(
+            core.state.rememberedSpaces[WindowID(1)]
+                == .restored("2"),
+            Comment(
+                rawValue:
+                    "B's record must re-file it, and a boot "
+                    + "filing must not become a watched departure"
+            )
+        )
+    }
+
+    /// The mirror of the same-Space refusal: a REAL move drops
+    /// the rank, because a rank means something only in the Space
+    /// it was taken in. Keeping it shipped green — only the
+    /// refusal direction was held (`guard-prover`, 2026-09-08).
+    @Test("A cross-Space re-file drops the return rank")
+    func aCrossSpaceRefileDropsTheRank() {
+        let core = makeCore()
+        let a = profile("A", spaces: ["1", "2"])
+        let b = profile("B", spaces: ["1", "2"])
+        live(core, [1, 2])
+
+        // B remembers w1 in Space 2; A leaves it in Space 1.
+        core.apply(profile: b, forceRetile: false)
+        core.state.workspaces.add(WindowID(1), to: "2")
+        core.apply(profile: a, forceRetile: false)
+        core.state.workspaces.add(WindowID(1), to: "1")
+        core.state.workspaces.add(WindowID(2), to: "1")
+        sendAway(core, WindowID(1))
+        #expect(core.state.departedSlots[WindowID(1)] != nil)
+
+        // B re-files it into Space 2 — a different Space, so the
+        // rank it took in Space 1 no longer means anything.
+        core.apply(profile: b, forceRetile: false)
+        #expect(
+            core.state.rememberedSpace(of: WindowID(1)) == "2"
+        )
+        #expect(core.state.departedSlots[WindowID(1)] == nil)
+    }
+
+    /// A re-file re-points an EXISTING memory; it never mints
+    /// one. A profile record can name a window whose memory has
+    /// already been retired — `forgetAway` nils it on a census
+    /// prune or an app exit — and a switch must not hand that
+    /// window a departure nothing observed (`guard-prover`,
+    /// 2026-09-08).
+    @Test("A re-file mints no memory where none existed")
+    func aRefileMintsNoMemory() {
+        let core = makeCore()
+        let a = profile("A", spaces: ["1", "2"])
+        let b = profile("B", spaces: ["1", "2"])
+        live(core, [1])
+
+        core.apply(profile: a, forceRetile: false)
+        core.state.workspaces.add(WindowID(1), to: "2")
+        // The switch captures A's record while w1 is still LIVE,
+        // so the record names it. Only then does it go away and
+        // have its memory retired outright — a census prune or an
+        // app exit. A's record still names an id nothing has a
+        // remembered Space for, which is the state the guard is
+        // about, and it is unreachable if the memory is retired
+        // before the record is taken (measured 2026-09-08).
+        core.apply(profile: b, forceRetile: false)
+        sendAway(core, WindowID(1))
+        core.state.forgetAway(WindowID(1))
+        #expect(
+            core.state.rememberedSpaces[WindowID(1)] == nil
+        )
+
+        core.apply(profile: a, forceRetile: false)
+        #expect(
+            core.state.rememberedSpaces[WindowID(1)] == nil,
+            "a profile switch minted a departure nothing observed"
         )
     }
 }
