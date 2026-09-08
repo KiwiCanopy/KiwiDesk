@@ -16,6 +16,14 @@ extension KiwiCore {
         case switched
         case refused(CommandResponse)
 
+        /// The stand-down's one sentence, so the response and the
+        /// log cannot drift into naming different events — a log
+        /// line carrying the verb but another event's wording is
+        /// what a guard on the verb alone cannot see (prover
+        /// round 1, #1336).
+        static let alreadyShownNote =
+            "that Desktop is already showing"
+
         /// `.alreadyShown` answers SUCCESS carrying a note, never
         /// a bare `.ok()` (#1336): the caller asked for a switch
         /// and got none, and an empty success is indistinguishable
@@ -25,7 +33,7 @@ extension KiwiCore {
         var response: CommandResponse {
             switch self {
             case .alreadyShown:
-                .ok(.string("that Desktop is already showing"))
+                .ok(.string(Self.alreadyShownNote))
             case .switched: .ok()
             case .refused(let response): response
             }
@@ -63,7 +71,7 @@ extension KiwiCore {
         verb: String
     ) -> DesktopSwitchOutcome {
         guard !target.isCurrent else {
-            onLog("\(verb): that Desktop is already showing")
+            onLog("\(verb): \(DesktopSwitchOutcome.alreadyShownNote)")
             return .alreadyShown
         }
         guard

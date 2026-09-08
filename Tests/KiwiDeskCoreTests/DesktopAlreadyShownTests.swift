@@ -86,15 +86,25 @@ struct DesktopAlreadyShownTests {
         let box = Box()
         core.onLog = { box.lines.append($0) }
 
-        _ = core.switchDesktop(
+        let outcome = core.switchDesktop(
             to: shownTarget(),
             verb: "move_to_desktop_and_follow"
         )
+        // Derived from the response's own payload rather than a
+        // literal: the line must name the same EVENT the caller
+        // was answered with. A line carrying the verb beside
+        // another event's wording — the bridge refusal, say —
+        // read as green while the trace lied (prover round 1).
+        guard case .string(let note)? = outcome.response.data else {
+            Issue.record("the stand-down answered no note")
+            return
+        }
         // The verb, because the trace has to say WHICH caller
         // stood down — the two share this dispatch.
         #expect(
             box.lines.contains {
                 $0.contains("move_to_desktop_and_follow")
+                    && $0.contains(note)
             }
         )
     }
