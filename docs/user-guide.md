@@ -2902,6 +2902,16 @@ part of your setup it is not an offer any more. (They stay
 rows you can collapse — opening is a starting point, not a
 setting.)
 
+:::unreleased
+Each drawer's header carries a **?** saying what the rows are
+for: Desktops are macOS's own Spaces, not KiwiDesk's. KiwiDesk
+arranges windows inside its own Spaces, so most setups never
+need these — switching a Desktop moves your whole environment,
+not a window, and each Desktop keeps its own Spaces. If you do
+work across Desktops, bind a profile per Desktop in Profiles ▸
+**Profiles per macOS Desktop**.
+:::
+
 If your Mac cannot drive Desktops at all, the offer does not
 appear — see
 [macOS Desktops](#macos-desktops-mission-control).

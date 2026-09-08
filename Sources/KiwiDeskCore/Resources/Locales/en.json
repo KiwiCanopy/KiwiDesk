@@ -1005,6 +1005,7 @@
   "shortcuts.delete_layer": "Delete layer",
   "shortcuts.desktop_away": "Dimmed rows target a Desktop that isn't on any screen right now. Their shortcuts stay recorded and work again when it comes back.",
   "shortcuts.desktops.focus": "Go to a macOS Desktop",
+  "shortcuts.desktops.help": "Desktops are macOS's own Spaces, not KiwiDesk's. KiwiDesk arranges windows inside its own Spaces, so most setups never need these: switching a Desktop moves your whole environment, not a window, and each Desktop keeps its own Spaces. If you do work across Desktops, bind a profile per Desktop in **%1$@**.",
   "shortcuts.desktops.move": "Move windows to a macOS Desktop",
   "shortcuts.editing_layer": "Editing the “%1$@” layer",
   "shortcuts.go_to_desktop": "Go to Desktop",

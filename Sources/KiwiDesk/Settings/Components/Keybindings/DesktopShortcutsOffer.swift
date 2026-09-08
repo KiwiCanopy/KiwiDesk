@@ -46,11 +46,37 @@ struct DesktopShortcutsOffer: View {
                 scrollHoisted: true
             ) {
                 families
+            } accessory: {
+                HelpButton(
+                    explanation: helpText,
+                    subject: drawer.control.text
+                )
             }
             // Open on arrival once bound — never forced shut, so
             // a collapse the user chose survives the visit.
             .onAppear { if bound { expanded = true } }
         }
+    }
+
+    /// The one explanation of a Desktop against a Space —
+    /// authored here, not per mount, so both doors carry the
+    /// same sentence (#1114, #818).
+    /// Internal rather than private so the guard can compare the
+    /// two mounts' sentences directly, which is gui.md's
+    /// instrument for a predicate a source scan keeps missing.
+    var helpText: String {
+        L(
+            "shortcuts.desktops.help",
+            "Desktops are macOS's own Spaces, not KiwiDesk's. "
+                + "KiwiDesk arranges windows inside its own "
+                + "Spaces, so most setups never need these: "
+                + "switching a Desktop moves your whole "
+                + "environment, not a window, and each Desktop "
+                + "keeps its own Spaces. If you do work across "
+                + "Desktops, bind a profile per Desktop in "
+                + "**%1$@**.",
+            L("desktops.title", "Profiles per macOS Desktop")
+        )
     }
 
     @ViewBuilder private var families: some View {

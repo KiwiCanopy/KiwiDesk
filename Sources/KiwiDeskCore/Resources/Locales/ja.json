@@ -1005,6 +1005,7 @@
   "shortcuts.delete_layer": "レイヤーを削除",
   "shortcuts.desktop_away": "淡色表示の行は、現在どの画面にもないデスクトップを指しています。ショートカットは保存されたままで、そのデスクトップが戻ると再び機能します。",
   "shortcuts.desktops.focus": "macOSのデスクトップへ移動",
+  "shortcuts.desktops.help": "デスクトップはmacOS自体の「操作スペース」であり、KiwiDeskのスペースではありません。KiwiDeskは自身のスペース内にウインドウを配置するため、ほとんどの場合これらのショートカットは必要ありません。デスクトップを切り替えると、移動するのは1つのウインドウではなく作業環境全体です。また、デスクトップごとに独自のスペースが保たれます。デスクトップをまたいで作業する場合は、**%1$@**でデスクトップごとにプロファイルを割り当ててください。",
   "shortcuts.desktops.move": "ウインドウをmacOSのデスクトップに移動",
   "shortcuts.editing_layer": "「%1$@」レイヤーを編集中",
   "shortcuts.go_to_desktop": "デスクトップへ移動",
