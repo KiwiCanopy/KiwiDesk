@@ -71,9 +71,18 @@ stay quiet about:
   the reason is that nothing catches it later.
 - **A bullet per issue when the issues share a symptom.** The
   reader is not reconciling your issue tracker.
-- **Twenty bullets.** Ruled: that is a changelog with headings.
-  If a section will not come under control, the honest move is
-  usually that half of it is not news.
+- **Twenty bullets, or a nine-line bullet.** Ruled: the first
+  is a changelog with headings, the second a PR description. A
+  bullet is one to three sentences — the symptom, then what
+  changed — and the diagnosis between them stays in the PR. The
+  lead paragraph is one or two sentences. If a section will not
+  come under control, the honest move is usually that half of
+  it is not news.
+- **A site fix.** A corrected heading, a term, a translation, a
+  layout nudge — none of it is news to someone installing an
+  update, not even as one closing line. Ruled. A site change
+  earns a bullet only when a visitor would come for it: a new
+  page, a new language, a changed download.
 
 And two you must NOT silently drop, because they read as
 internal and are not: a change to a **default** anyone upgrading
