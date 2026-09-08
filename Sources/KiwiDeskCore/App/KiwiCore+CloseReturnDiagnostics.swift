@@ -18,6 +18,7 @@ extension KiwiCore {
     func logCloseReturnDecision(
         event: KiwiEvent,
         effects: AppliedEffects,
+        departed: Bool,
         standsDown: Bool
     ) {
         guard let removed = effects.removedWindow,
@@ -49,6 +50,7 @@ extension KiwiCore {
                 + "(\(removed.bundleID ?? "?")), "
                 + "gone=\(goneText), "
                 + "hide=\(event.isHideDrop), "
+                + "departed=\(departed), "
                 + "ownKey=\(ownText), "
                 + "standsDown=\(standsDown), "
                 + "next=\(nextText)"

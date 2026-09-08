@@ -8,12 +8,14 @@ import Foundation
 /// only where SkyLight cannot answer.
 extension KiwiCore {
     /// The destroy arm's tail: classify, file an away entry for
-    /// a `vanished` window, and emit.
+    /// a `vanished` window, and emit. Returns the reason, which
+    /// the close-return stand-down reads (#1345).
+    @discardableResult
     func handleWindowGone(
         _ id: WindowID,
         wasMinimized: Bool,
         effects: AppliedEffects
-    ) {
+    ) -> WindowGoneReason {
         // An explicit Desktop-move target is paid HERE, at the
         // departure the fold just recorded (#1150): the name
         // replaces the remembered Space, and the arrival's
@@ -64,6 +66,22 @@ extension KiwiCore {
             reason: reason,
             desktop: desktop
         )
+        return reason
+    }
+
+    /// Whether a removal is the window LEAVING WITH ITS DESKTOP
+    /// (#1345): `vanished` — hosted on a Desktop nobody shows —
+    /// and not a move verb's own departure, which the verb
+    /// latches (`departWithoutFollowing`, #482). A swipe's
+    /// removals are exactly these, and macOS picks the focus on
+    /// the Desktop it shows, so the close-return raise stands
+    /// down for them the way it does for a hide (#913).
+    func departedWithDesktop(
+        _ event: KiwiEvent,
+        reason: WindowGoneReason?
+    ) -> Bool {
+        guard let id = event.goneWindowID else { return false }
+        return reason == .vanished && !moveLatch.isLatched(id)
     }
 
     /// The compositor hosts `id` on a native fullscreen Space —

@@ -654,7 +654,18 @@ editing here:
   and asks the gate in the same file. The `isListed` guard on
   the close-return raise is the older, weaker net: Finder lists
   BOTH Desktops' windows for a beat after a switch, which is
-  exactly when the successor pick lands.
+  exactly when the successor pick lands. Two arms follow from
+  the same reading that a swipe is not a close: a window that
+  LEFT WITH ITS DESKTOP — `vanished`, and not a move verb's own
+  latched departure (`KiwiCore.departedWithDesktop`) — stands the
+  close-return raise down as the fourth arm of the ONE predicate,
+  since macOS picks the focus on the Desktop it shows
+  (`DesktopDepartureStandDownTests`); and a report for the
+  Desktop's remembered focus coming back — the #1207 memory's
+  entry under the compositor's host, `isRememberedDesktopFocus`
+  — is macOS restoring it, so the #1161 placement distrust
+  stands down on it rather than bouncing the OS's own restore
+  (`DesktopRaiseGateArmTests` ▸ the remembered-focus pair).
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

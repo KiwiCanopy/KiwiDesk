@@ -60,6 +60,7 @@ extension KiwiCore {
         }
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
+        var goneReason: WindowGoneReason? = nil
         switch event {
         case .displaysChanged:
             tiler.displaysChanged()
@@ -230,7 +231,7 @@ extension KiwiCore {
             forgetGoneWindow(id, pid: goneWindowPID)
             // Classified on the compositor's word, and an away
             // window joins the ledger (#1146).
-            handleWindowGone(
+            goneReason = handleWindowGone(
                 id,
                 wasMinimized: wasMinimized,
                 effects: effects
@@ -297,9 +298,14 @@ extension KiwiCore {
         // own activation reports it. Guarded on the focus loss
         // so only a removal that would raise pays the seam's
         // NSApplication read.
+        let departedWithDesktop =
+            departedWithDesktop(event, reason: goneReason)
         let closeReturnRaiseStandsDown =
             effects.removedWindow?.focusLost == true
-            && eventLoop.closeReturnRaiseStandsDown(after: event)
+            && eventLoop.closeReturnRaiseStandsDown(
+                after: event,
+                departedWithDesktop: departedWithDesktop
+            )
         if effects.removedWindow?.focusLost == true,
             !closeReturnRaiseStandsDown,
             let next = activeSpace?.focused,
@@ -337,6 +343,7 @@ extension KiwiCore {
         logCloseReturnDecision(
             event: event,
             effects: effects,
+            departed: departedWithDesktop,
             standsDown: closeReturnRaiseStandsDown
         )
     }

@@ -90,6 +90,24 @@ extension KiwiCore {
         focusWindow(window, refocusRetile: false, warp: true)
     }
 
+    /// Whether a report for `id` is this Desktop's remembered
+    /// focus coming back (#1345): macOS restores the window it
+    /// last had focused on the Desktop it shows, and that window
+    /// is what the memory holds under the compositor's host. The
+    /// placement distrust (#1161) stands down on it — the OS's
+    /// restore has the shape of a bounce, a clickless report for
+    /// a window the arrival retile just placed. An app whose
+    /// window WAS the remembered focus and bounces after a return
+    /// is honored by this read, which is the focus macOS restored
+    /// anyway; a bounce racing the echo of a step off it is the
+    /// accepted residue.
+    func isRememberedDesktopFocus(_ id: WindowID) -> Bool {
+        guard let space = state.workspaces.space(of: id),
+            case .hosted(let native) = desktopMemory.readWindowSpace(id)
+        else { return false }
+        return desktopMemory.honoredFocus[space]?[native] == id
+    }
+
     /// The #634 arrangement reset: the memory is id-keyed like
     /// `rememberedSpaces` and goes with it, debt included.
     func forgetDesktopFocus() {

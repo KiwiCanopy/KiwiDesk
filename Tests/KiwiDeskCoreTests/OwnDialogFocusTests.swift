@@ -48,7 +48,8 @@ struct OwnDialogFocusTests {
         loop.ownKeyWindow = { nil }
         #expect(
             loop.closeReturnRaiseStandsDown(
-                after: .windowHidden(WindowID(7))
+                after: .windowHidden(WindowID(7)),
+                departedWithDesktop: false
             )
         )
     }
@@ -59,7 +60,12 @@ struct OwnDialogFocusTests {
         loop.ownKeyWindow = {
             OwnKeyWindowReading(number: 42, isDialog: true)
         }
-        #expect(loop.closeReturnRaiseStandsDown(after: destroy))
+        #expect(
+            loop.closeReturnRaiseStandsDown(
+                after: destroy,
+                departedWithDesktop: false
+            )
+        )
     }
 
     @Test("an own NON-dialog key window lets the raise through")
@@ -70,14 +76,24 @@ struct OwnDialogFocusTests {
         loop.ownKeyWindow = {
             OwnKeyWindowReading(number: 42, isDialog: false)
         }
-        #expect(!loop.closeReturnRaiseStandsDown(after: destroy))
+        #expect(
+            !loop.closeReturnRaiseStandsDown(
+                after: destroy,
+                departedWithDesktop: false
+            )
+        )
     }
 
     @Test("no own key window lets the raise through")
     func noOwnKeyWindowDoesNotStandDown() {
         let loop = EventLoop()
         loop.ownKeyWindow = { nil }
-        #expect(!loop.closeReturnRaiseStandsDown(after: destroy))
+        #expect(
+            !loop.closeReturnRaiseStandsDown(
+                after: destroy,
+                departedWithDesktop: false
+            )
+        )
     }
 
     @Test("the dialog class: modal always, panels and the mark never")

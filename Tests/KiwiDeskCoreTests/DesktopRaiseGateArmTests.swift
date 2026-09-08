@@ -121,6 +121,34 @@ struct DesktopRaiseGateArmTests {
         #expect(core.activeSpace?.focused == other)
     }
 
+    /// macOS restores the Desktop's last focused window on a
+    /// return, a clickless report for a window the arrival retile
+    /// just placed — the bounce's shape. The #1207 memory names
+    /// that window, so the arm stands down on it.
+    @Test("The Desktop's remembered focus coming back is honored")
+    func rememberedFocusHonored() {
+        let core = makeCore()
+        defer { NativeSpaces.spacesOverride = nil }
+        let (target, _) = placementFixture(core)
+        host(core, unshown: nil)
+        let space = core.state.workspaces.space(of: target)!
+        core.desktopMemory.honoredFocus[space] = [10: target]
+        core.handle(.windowFocused(target))
+        #expect(core.activeSpace?.focused == target)
+    }
+
+    @Test("A remembered focus of another window is still distrusted")
+    func otherRememberedFocusStillDistrusted() {
+        let core = makeCore()
+        defer { NativeSpaces.spacesOverride = nil }
+        let (target, other) = placementFixture(core)
+        host(core, unshown: nil)
+        let space = core.state.workspaces.space(of: target)!
+        core.desktopMemory.honoredFocus[space] = [10: other]
+        core.handle(.windowFocused(target))
+        #expect(core.activeSpace?.focused == other)
+    }
+
     // MARK: - Sibling re-report (#465)
 
     /// `ActivationReReportTests`' fixture: window 1 (pid 5) hidden

@@ -1783,6 +1783,29 @@ is not raised, and focus stays wherever macOS put it until the
 next report — which is the Desktop the user is looking at, so
 the next report is the right one.
 
+The gate alone left the return half wrong, measured on the
+fixed build the same afternoon: swiping back, the Desktop 2
+Finder window's departure read as a close, the close-return
+picked the same app's Downloads window on the Desktop being
+shown and raised it — legally, it was shown — stealing the
+focus macOS had just handed back to the window the user left;
+and when macOS then reported that window, the placement
+distrust bounced the report, since the arrival retile had just
+placed it and the report was clickless. Two arms follow from
+"a swipe is not a close". A window that left with its Desktop
+(`vanished`, and not a move verb's own latched departure, which
+IS a hand-off the user asked for) stands the close-return raise
+down, the way a hide does (#913): macOS picks the focus on the
+Desktop it shows. And a report for the Desktop's remembered
+focus coming back — the #1207 memory already records, at every
+honored report, which window each Desktop last had focused —
+is macOS restoring it, not an app answering a placement, so the
+distrust stands down on it. That read honors an app whose
+window WAS the remembered focus and bounces after a return,
+which is the window macOS restored regardless; a bounce racing
+the echo of a step off it is the residue, priced below the
+emulator's measured 0.8–1.5 s.
+
 ### A focus report is only as good as the activation behind it (#1322)
 
 **[Rationale]**

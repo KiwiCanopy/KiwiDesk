@@ -52,13 +52,13 @@ struct CloseReturnStandDownWiringTests {
     func raiseSiteConsultsThePredicate() throws {
         let text = try eventsSource()
         let anchor =
-            "eventLoop.closeReturnRaiseStandsDown(after: event)"
+            "eventLoop.closeReturnRaiseStandsDown("
         let at = try #require(text.range(of: anchor))
         // The consult is guarded on the removal's focus loss:
         // both consumers need the answer only then, and the
         // production seam reads `NSApplication` — unguarded,
         // every move and focus event would pay it.
-        let prefix = text[..<at.lowerBound].suffix(160)
+        let prefix = text[..<at.lowerBound].suffix(320)
         #expect(prefix.contains("focusLost"))
     }
 
@@ -66,8 +66,9 @@ struct CloseReturnStandDownWiringTests {
     func raiseConditionAsksTheStandDown() throws {
         let text = try eventsSource()
         // First match is the shared local's DEFINITION (the
-        // raise's own condition repeats the phrase three lines
-        // later), so the 240-char window spans definition and
+        // raise's own condition repeats the phrase a few lines
+        // later, past the predicate's two-argument call since
+        // #1345), so the 400-char window spans definition and
         // raise condition together. A missing anchor means the
         // whole close-return tail moved: re-anchor this needle
         // rather than deleting it.
@@ -76,7 +77,7 @@ struct CloseReturnStandDownWiringTests {
         // Scoped to the raise's condition, not the whole file:
         // the clause is only a stand-down where the raise is
         // decided.
-        let condition = text[at.lowerBound...].prefix(240)
+        let condition = text[at.lowerBound...].prefix(400)
         #expect(condition.contains("!closeReturnRaiseStandsDown"))
     }
 
