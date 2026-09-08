@@ -360,7 +360,14 @@ you were editing.
    the macOS Desktop that KiwiDesk's Spaces are deliberately not.
 2. **Otherwise your catalog's own occurrence count decides.**
    Grep your file for both candidates; the one already carrying
-   the concept wins and the other is swept to it.
+   the concept wins and the other is swept to it. **Your file is
+   both of them** where your locale ships in the app and on the
+   site — `Sources/KiwiDeskCore/Resources/Locales/<loc>.json` and
+   `site/src/i18n/<loc>.json` are one register, so grep both and
+   let the pair decide. A reader meets them as one product, and
+   a per-file count cannot see a split that runs *between* the
+   files: `de` grepped site-only would have returned Desktop for
+   macOS's Desktop, which is the answer #1337 had to undo.
 3. **Within about ten percent, the destination label or picker
    entry decides.** That string is a card title, a back-chip
    heading and a search kind-line at once, so it is the name the

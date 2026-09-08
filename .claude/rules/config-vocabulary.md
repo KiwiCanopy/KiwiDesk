@@ -146,6 +146,16 @@ synonym:
   re-proposed, is `docs/design-decisions.md` ▸ Vocabulary: macOS
   has Desktops, KiwiDesk has Spaces, which also owns the list of
   wire names this rule exempts.
+  The same obligation binds the OTHER noun, and `de` is where it
+  broke: the app catalog said *Schreibtisch* while the site's
+  `compare_*` keys said *Desktop*, so one reader met two words
+  for one thing (#1337, swept to Schreibtisch on the owner's
+  ruling 2026-09-08). Which word won is the catalog's own to
+  record — `docs/localization-naming.md` ▸ Family C forecloses a
+  per-locale word list here, and rule 2 makes the file itself the
+  register. What the incident adds to the LADDER is one clause,
+  and it lives there: a locale shipping in both corpora is two
+  files, and rule 2 reads both.
 - **screen** vs **display** vs **monitor** — a physical screen is
   a **screen**, in a label, a caption or a doc comment. *Display*
   is reserved for **quoting Apple**: System Settings ▸ Displays,
