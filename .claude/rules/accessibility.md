@@ -192,8 +192,8 @@ editing AX code:
   rather than race the frontmost app macOS itself picks
   (`HiddenAppRaiseTests` holds the event classification; since
   #935 the hide is one arm of
-  `EventLoop.closeReturnRaiseStandsDown(after:)`, whose raise
-  site `CloseReturnStandDownWiringTests` pins — a needle,
+  `EventLoop.closeReturnRaiseStandsDown(after:departedWithDesktop:)`,
+  whose raise site `CloseReturnStandDownWiringTests` pins — a needle,
   because that site is gated on live AX).
 
   Do not re-base the drop on the WindowServer's on-screen

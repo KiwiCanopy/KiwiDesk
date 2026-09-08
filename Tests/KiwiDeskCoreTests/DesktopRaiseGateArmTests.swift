@@ -13,18 +13,13 @@ import Testing
 /// left, still in state behind a slow app's destroy — the arm
 /// stands down and the report is honored. Each arm's own fixture
 /// is copied from its suite; the shown control beside each case
-/// keeps the arm itself live. Serialized: the topology override is
-/// process-global.
-@Suite("Desktop raise gate: the re-assert arms (#1345)", .serialized)
+/// keeps the arm itself live.
+@Suite("Desktop raise gate: the re-assert arms (#1345)")
 @MainActor
 struct DesktopRaiseGateArmTests {
     private static let standDownNeedle = "#1345"
 
     private func makeCore() -> KiwiCore {
-        NativeSpaces.spacesOverride = authorityTopology(
-            mainCurrent: 10,
-            secondaryCurrent: 20
-        )
         let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
@@ -60,12 +55,12 @@ struct DesktopRaiseGateArmTests {
         )
     }
 
-    /// `unshown` reads as hosted on the Desktop nobody shows,
-    /// every other window on the shown one.
+    /// `unshown` reads as not drawn by the compositor, every
+    /// other window as on screen; the focus memory's host read
+    /// answers the shown Desktop for all of them.
     private func host(_ core: KiwiCore, unshown: WindowID?) {
-        core.desktopMemory.readWindowSpace = {
-            $0 == unshown ? .hosted(11) : .hosted(10)
-        }
+        core.windowIsOnScreen = { $0 != unshown }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(10) }
     }
 
     // MARK: - Placement bounce (#1161)
@@ -96,7 +91,6 @@ struct DesktopRaiseGateArmTests {
     @Test("A placement bounce whose re-assert crosses Desktops is honored")
     func placementBounceHonoredAcrossDesktops() {
         let core = makeCore()
-        defer { NativeSpaces.spacesOverride = nil }
         let (target, other) = placementFixture(core)
         host(core, unshown: other)
         var log: [String] = []
@@ -114,7 +108,6 @@ struct DesktopRaiseGateArmTests {
     @Test("A placement bounce with a shown intended window is distrusted")
     func placementBounceDistrustedWhenShown() {
         let core = makeCore()
-        defer { NativeSpaces.spacesOverride = nil }
         let (target, other) = placementFixture(core)
         host(core, unshown: nil)
         core.handle(.windowFocused(target))
@@ -124,15 +117,16 @@ struct DesktopRaiseGateArmTests {
     /// macOS restores the Desktop's last focused window on a
     /// return, a clickless report for a window the arrival retile
     /// just placed — the bounce's shape. The #1207 memory names
-    /// that window, so the arm stands down on it.
-    @Test("The Desktop's remembered focus coming back is honored")
-    func rememberedFocusHonored() {
+    /// that window and the return is fresh, so the arm stands
+    /// down on it.
+    @Test("A fresh return's remembered focus is honored")
+    func restoredFocusHonored() {
         let core = makeCore()
-        defer { NativeSpaces.spacesOverride = nil }
         let (target, _) = placementFixture(core)
         host(core, unshown: nil)
         let space = core.state.workspaces.space(of: target)!
         core.desktopMemory.honoredFocus[space] = [10: target]
+        core.recentReturns[target] = Date()
         core.handle(.windowFocused(target))
         #expect(core.activeSpace?.focused == target)
     }
@@ -140,11 +134,29 @@ struct DesktopRaiseGateArmTests {
     @Test("A remembered focus of another window is still distrusted")
     func otherRememberedFocusStillDistrusted() {
         let core = makeCore()
-        defer { NativeSpaces.spacesOverride = nil }
         let (target, other) = placementFixture(core)
         host(core, unshown: nil)
         let space = core.state.workspaces.space(of: target)!
         core.desktopMemory.honoredFocus[space] = [10: other]
+        core.recentReturns[target] = Date()
+        core.handle(.windowFocused(target))
+        #expect(core.activeSpace?.focused == other)
+    }
+
+    /// Bound to the RETURN: the same memory entry past the
+    /// restore window is the steady state, where the memory names
+    /// whatever was honored last and an app's bounce keeps its
+    /// distrust.
+    @Test("A remembered focus without a fresh return is still distrusted")
+    func staleReturnStillDistrusted() {
+        let core = makeCore()
+        let (target, other) = placementFixture(core)
+        host(core, unshown: nil)
+        let space = core.state.workspaces.space(of: target)!
+        core.desktopMemory.honoredFocus[space] = [10: target]
+        core.recentReturns[target] = Date(
+            timeIntervalSinceNow: -KiwiCore.restoredFocusWindow - 1
+        )
         core.handle(.windowFocused(target))
         #expect(core.activeSpace?.focused == other)
     }
@@ -171,7 +183,6 @@ struct DesktopRaiseGateArmTests {
     @Test("A sibling re-report whose re-assert crosses Desktops is honored")
     func siblingReportHonoredAcrossDesktops() {
         let core = makeCore()
-        defer { NativeSpaces.spacesOverride = nil }
         siblingFixture(core)
         host(core, unshown: WindowID(2))
         core.handle(.windowFocused(WindowID(1)))
@@ -181,7 +192,6 @@ struct DesktopRaiseGateArmTests {
     @Test("A sibling re-report with a shown intended window is distrusted")
     func siblingReportDistrustedWhenShown() {
         let core = makeCore()
-        defer { NativeSpaces.spacesOverride = nil }
         siblingFixture(core)
         host(core, unshown: nil)
         core.handle(.windowFocused(WindowID(1)))
@@ -206,7 +216,6 @@ struct DesktopRaiseGateArmTests {
     @Test("A yield whose return crosses Desktops is honored, the debt spent")
     func yieldHonoredAcrossDesktops() {
         let core = makeCore()
-        defer { NativeSpaces.spacesOverride = nil }
         accessibilityFixture(core)
         #expect(core.accessibilityReturn != nil)
         host(core, unshown: WindowID(1))
@@ -224,7 +233,6 @@ struct DesktopRaiseGateArmTests {
     @Test("A yield with a shown victim is still returned")
     func yieldReturnedWhenShown() {
         let core = makeCore()
-        defer { NativeSpaces.spacesOverride = nil }
         accessibilityFixture(core)
         host(core, unshown: nil)
         core.handle(.windowFocused(WindowID(2)))

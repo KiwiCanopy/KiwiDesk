@@ -270,6 +270,14 @@ public final class KiwiCore {
     /// events during the transition must not change spaces.
     var lastDesktopSwitch: Date = .distantPast
 
+    /// The Desktop raise gate's one read (#1345): the compositor's
+    /// on-screen flag, pinned to nil by `makeTestCore`.
+    var windowIsOnScreen: (WindowID) -> Bool? = FloatDetection.isOnScreen
+    /// A move verb's departures, claimed at the vanish (#1345).
+    var desktopMoveDepartures: Set<WindowID> = []
+    /// A `.returned` window's arrival time (#1345).
+    var recentReturns: [WindowID: Date] = [:]
+
     /// The live arrangement's space→monitor fingerprint pins,
     /// adopted from the active profile's matching monitor set
     /// and edited by the GUI Canvas (#36). Internal: the GUI

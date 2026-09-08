@@ -1757,7 +1757,8 @@ re-asserted the previous focus, a Claude window on the Desktop
 the user had just left. Raising it activated Claude, and macOS
 switched Desktops to show it. The close-return raise then kept
 the ping-pong going the same way: each of its successor picks
-sat on the other Desktop, and its `isListed` guard passed
+sat on the other Desktop, and its `isListed` guard (the older AX
+net, retired by this change) passed
 because Finder lists both Desktops' windows for a beat after a
 switch, which is exactly when the pick lands.
 
@@ -1783,8 +1784,9 @@ is not raised, and focus stays wherever macOS put it until the
 next report — which is the Desktop the user is looking at, so
 the next report is the right one.
 
-The gate alone left the return half wrong, measured on the
-fixed build the same afternoon: swiping back, the Desktop 2
+The gate is not the whole rule, because the return swipe
+bounces without any raise crossing Desktops (measured
+2026-09-08 on the gated build): swiping back, the Desktop 2
 Finder window's departure read as a close, the close-return
 picked the same app's Downloads window on the Desktop being
 shown and raised it — legally, it was shown — stealing the
@@ -1804,7 +1806,25 @@ distrust stands down on it. That read honors an app whose
 window WAS the remembered focus and bounces after a return,
 which is the window macOS restored regardless; a bounce racing
 the echo of a step off it is the residue, priced below the
-emulator's measured 0.8–1.5 s.
+emulator's measured 0.8–1.5 s and recorded in
+[Accepted limitations](accepted-limitations.md).
+
+Which compositor read matters, measured the same afternoon on
+the first build of the gate: it read the managed display's
+"current Space" and lost the race. At 13:56:57.46 the swipe's
+departures were folding, the on-screen window list (the probe
+beside the log) had already dropped every Desktop 1 window, and
+the current-Space reading still named Desktop 1 — so a Zen window
+on the Desktop being left read as shown, the placement distrust
+re-asserted it, and the user bounced. That is the #1023 finding
+one level down: the current-Space reading tracks the pointer and
+the draw list is the ground truth. The gate therefore reads
+CGWindowList's own `kCGWindowIsOnscreen` for the one window, and
+nothing that could lag it. The same measurement moved the gate
+from the AX call to the verb: `focusWindow` had already written
+state focus, noted the displacement and warped the pointer before
+`raiseWindow` refused, which is a state/key split of its own —
+so the verb is refused whole, ahead of all of it.
 
 ### A focus report is only as good as the activation behind it (#1322)
 

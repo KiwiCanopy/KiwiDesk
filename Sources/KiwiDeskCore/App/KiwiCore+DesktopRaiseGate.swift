@@ -1,26 +1,22 @@
 import Foundation
 
 /// The Desktop raise gate (#1345): raising a window the
-/// compositor hosts on a Desktop no display shows IS a Desktop
-/// switch — macOS switches to show what was raised — so no
-/// implicit raise may perform one; a verb that means to switch
-/// takes `switchDesktop`. Read from the compositor, never from
-/// state: the window that bounced the device was still IN state,
-/// its app's destroy notification seconds behind the swipe. The
+/// compositor is not drawing makes macOS switch Desktops to show
+/// it, so no implicit raise may do that; a verb that means to
+/// switch takes `switchDesktop`. The read is CGWindowList's own
+/// on-screen flag, the compositor's ground truth — never state,
+/// which still holds a departed window behind a slow app's
+/// destroy, and never the managed display's "current Space",
+/// which lags the draw list through a switch (#1023). The
 /// argument is state-and-layout.md's.
 extension KiwiCore {
-    /// Whether raising `id` would switch Desktops: hosted on a
-    /// Space no display shows. Unknown (no SkyLight), gone and
-    /// shown all answer false — the raise is then harmless or
-    /// wanted. One topology reading per ask (profiles.md).
+    /// Whether raising `id` would switch Desktops: the compositor
+    /// lists it and is not drawing it. A window the server no
+    /// longer lists (nil) is a close in flight — the raise is then
+    /// a no-op, never a switch — and a host without the read keeps
+    /// every raise.
     func raiseCrossesDesktops(_ id: WindowID) -> Bool {
-        if case .hosted(_, shown: false) = gonePresence(
-            of: id,
-            spaces: NativeSpaces.allSpaces()
-        ) {
-            return true
-        }
-        return false
+        windowIsOnScreen(id) == false
     }
 
     /// The distrust arms' shared stand-down: a re-assert of
@@ -37,8 +33,8 @@ extension KiwiCore {
         else { return false }
         onLog(
             "focus: re-assert of w\(intended.raw) refused — "
-                + "hosted on a Desktop nobody shows; honoring "
-                + "w\(id.raw) (#1345)"
+                + "not on screen, a raise would switch Desktops; "
+                + "honoring w\(id.raw) (#1345)"
         )
         return true
     }

@@ -226,10 +226,10 @@ extension KiwiCore {
         // `intended` would switch Desktops (#1345).
         if !selfEcho,
             let intended = effects.focusBefore, intended != id,
-            // Never the Desktop's remembered focus coming back —
-            // macOS restoring it, not an app answering (#1345).
-            !isRememberedDesktopFocus(id),
             let placed = placementBounce(id, now: now),
+            // Never a fresh return's remembered focus — macOS
+            // restoring it, not an app answering (#1345).
+            !isRestoredDesktopFocus(id, now: now),
             reassertAgainstPlacementBounce(
                 id,
                 intended: intended,

@@ -37,7 +37,7 @@ extension EventLoop {
     /// And a Desktop follow's EAGER DEPARTURE stands it down
     /// (#1023): that synthetic removal runs at t=0 of the
     /// switch, while the origin is still composited, so the
-    /// isListed guard passes on timing a real swipe-away
+    /// on-screen gate passes on timing a real swipe-away
     /// destroy never has — and the raise would fight the very
     /// follow the user just asked for, warp included. And a
     /// window that LEFT WITH ITS DESKTOP stands it down (#1345,

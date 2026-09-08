@@ -10,7 +10,6 @@ extension KiwiCore {
     /// The destroy arm's tail: classify, file an away entry for
     /// a `vanished` window, and emit. Returns the reason, which
     /// the close-return stand-down reads (#1345).
-    @discardableResult
     func handleWindowGone(
         _ id: WindowID,
         wasMinimized: Bool,
@@ -71,17 +70,28 @@ extension KiwiCore {
 
     /// Whether a removal is the window LEAVING WITH ITS DESKTOP
     /// (#1345): `vanished` — hosted on a Desktop nobody shows —
-    /// and not a move verb's own departure, which the verb
-    /// latches (`departWithoutFollowing`, #482). A swipe's
-    /// removals are exactly these, and macOS picks the focus on
-    /// the Desktop it shows, so the close-return raise stands
-    /// down for them the way it does for a hide (#913).
+    /// and not a move verb's own departure, recorded by the verb
+    /// and claimed here. A swipe's removals are exactly these,
+    /// and macOS picks the focus on the Desktop it shows, so the
+    /// close-return raise stands down for them the way it does
+    /// for a hide (#913). On a host without the compositor read,
+    /// `vanished` is the #40 timer's word inside the switch
+    /// settle — accepted: that host runs no Desktop machinery.
     func departedWithDesktop(
         _ event: KiwiEvent,
         reason: WindowGoneReason?
     ) -> Bool {
         guard let id = event.goneWindowID else { return false }
-        return reason == .vanished && !moveLatch.isLatched(id)
+        let moved = desktopMoveDepartures.remove(id) != nil
+        return reason == .vanished && !moved
+    }
+
+    /// A move verb's own departure (#1345): the vanish that
+    /// follows is the verb's hand-off, never a swipe's. Recorded
+    /// per window and claimed at the vanish, so a slow app's
+    /// destroy seconds later still reads as the verb's.
+    func recordDesktopMoveDeparture(_ id: WindowID) {
+        desktopMoveDepartures.insert(id)
     }
 
     /// The compositor hosts `id` on a native fullscreen Space —

@@ -55,9 +55,10 @@ struct DesktopRaiseGateSeamTests {
         #expect(ungated.isEmpty, "ungated \(ungated)")
     }
 
-    /// The gate itself has one home, reading the compositor
-    /// through the gone classifier's `gonePresence` rather than
-    /// state or the away ledger.
+    /// The gate itself has one home, reading the compositor's
+    /// on-screen flag through the `windowIsOnScreen` seam — never
+    /// state, the away ledger, or the managed display's current
+    /// Space, which lags the draw list (#1023).
     @Test("the gate reads the compositor in its one home")
     func gateReadsTheCompositor() throws {
         let file = Self.core.appendingPathComponent(
@@ -68,8 +69,12 @@ struct DesktopRaiseGateSeamTests {
         )
         try #require(!source.isEmpty)
         #expect(source.contains("func raiseCrossesDesktops("))
-        #expect(source.contains("gonePresence("))
-        #expect(!source.contains("awayWindows"))
-        #expect(!source.contains("state.windows"))
+        #expect(source.contains("windowIsOnScreen("))
+        for banned in [
+            "awayWindows", "state.windows", "allSpaces(", "isCurrent",
+            "readWindowSpace",
+        ] {
+            #expect(!source.contains(banned), .init(rawValue: banned))
+        }
     }
 }

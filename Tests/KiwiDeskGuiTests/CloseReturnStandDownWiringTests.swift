@@ -5,13 +5,13 @@ import Testing
 /// the hunks no behavior suite can red on.
 ///
 /// The predicate's ARMS are behavior-tested
-/// (`OwnDialogFocusTests`, through the injected `ownKeyWindow`
-/// seam); what needs needles is that the two sites in
-/// `KiwiCore+Events.swift` still ASK it. Why they cannot be
-/// behavior tests: the raise sits behind `eventLoop.isListed`,
-/// which calls live AX rather than the injected seam, so a
-/// driven `handle(…)` never reaches the block for a fabricated
-/// pid — and the trailing arm's skip is observable only through
+/// (`OwnDialogFocusTests`, `DesktopDepartureStandDownTests`);
+/// what needs needles is that the two sites in
+/// `KiwiCore+CloseReturn.swift` still ASK it. Why they cannot be
+/// behavior tests: the raise's AX call needs a live element a
+/// fabricated pid never has, so a driven `handle(…)` observes
+/// nothing of the raise itself — and the trailing arm's skip is
+/// observable only through
 /// `pendingZOrderRestore`, which a headless schedule consumes
 /// (zero active animations run the restore immediately and the
 /// empty element map drains it to nothing), so an assertion on
@@ -36,7 +36,7 @@ struct CloseReturnStandDownWiringTests {
     private func eventsSource() throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDeskCore/App/KiwiCore+Events.swift"
+                "Sources/KiwiDeskCore/App/KiwiCore+CloseReturn.swift"
             )
         let text = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)
@@ -58,7 +58,7 @@ struct CloseReturnStandDownWiringTests {
         // both consumers need the answer only then, and the
         // production seam reads `NSApplication` — unguarded,
         // every move and focus event would pay it.
-        let prefix = text[..<at.lowerBound].suffix(320)
+        let prefix = text[..<at.lowerBound].suffix(160)
         #expect(prefix.contains("focusLost"))
     }
 
@@ -69,9 +69,12 @@ struct CloseReturnStandDownWiringTests {
         // raise's own condition repeats the phrase a few lines
         // later, past the predicate's two-argument call since
         // #1345), so the 400-char window spans definition and
-        // raise condition together. A missing anchor means the
-        // whole close-return tail moved: re-anchor this needle
-        // rather than deleting it.
+        // raise condition together. The trade of the wider
+        // window: the trailing arm's own spelling sits ~600 chars
+        // on, so a deletion between the two sites could bring it
+        // inside and satisfy this needle for the wrong arm. A
+        // missing anchor means the whole close-return tail moved:
+        // re-anchor this needle rather than deleting it.
         let anchor = "effects.removedWindow?.focusLost == true"
         let at = try #require(text.range(of: anchor))
         // Scoped to the raise's condition, not the whole file:

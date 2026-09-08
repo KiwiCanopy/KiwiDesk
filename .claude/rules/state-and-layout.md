@@ -540,8 +540,8 @@ editing here:
   re-raise of the very anchor the stand-down refused, one settle
   later; the next genuine mutation's arm heals the pile. **Which
   removals those are is
-  `EventLoop.closeReturnRaiseStandsDown(after:)` and not a list
-  here** — this row carried one, a third arm landed under it
+  `EventLoop.closeReturnRaiseStandsDown(after:departedWithDesktop:)`
+  and not a list here** — this row carried one, a third arm landed under it
   (#1007), and a rule file that reads as instructions was
   carrying a false census until review caught it. A new arm goes
   in that predicate rather than beside it, so the raise and the
@@ -629,43 +629,50 @@ editing here:
   GUI raise of an own tracked window takes so its report arrives
   that way (#1281, `PlacementIntentTests`). A fourth ledger joins
   this bullet rather than earning its own consume.
-- **A raise of a window the compositor hosts on a Desktop nobody
-  shows IS a Desktop switch, and no implicit raise performs one
-  (#1345).** macOS switches Desktops to show whatever is raised,
-  and the window such a raise names is the one the user just
-  LEFT: it is still in state because its app's destroy
-  notification runs seconds behind the swipe (Electron, measured
-  2026-09-08 — the argument and the traces are the
-  design-decisions entry). So the verdict is the COMPOSITOR's,
-  never state's and never the away ledger's, which that window
-  has not reached yet: `KiwiCore.raiseCrossesDesktops` reads
-  `gonePresence` — hosted on a Space no display shows — and
-  `raiseWindow` refuses on it ahead of every focus path, while
-  the three distrust re-asserts (#1161, #465, #958) stand down
+- **A raise of a window the compositor is not drawing IS a Desktop
+  switch, and no implicit raise performs one (#1345).** macOS
+  switches Desktops to show whatever is raised, and the window
+  such a raise names is the one the user just LEFT: it is still
+  in state because its app's destroy notification runs seconds
+  behind the swipe (Electron, measured 2026-09-08 — the argument
+  is the design-decisions entry). So the verdict is the
+  COMPOSITOR's on-screen flag (`kCGWindowIsOnscreen`, the draw
+  list the #1023 measurement found to be the ground truth) — never
+  state, never the away ledger, which that window has not reached
+  yet, and never the managed display's "current Space", which
+  lags the draw list through a switch and let a re-assert through
+  on device (2026-09-08). `KiwiCore.raiseCrossesDesktops` reads it
+  through the one `windowIsOnScreen` seam; `focusWindow` refuses
+  the VERB whole on it, ahead of the state write, the warp and
+  the pan — a state-only move would split state from key focus
+  (#952) — `raiseWindow` re-asks for the deferred raise, and the
+  three distrust re-asserts (#1161, #465, #958) stand down
   through the one `reassertCrossesDesktops` and HONOR the report
-  instead, because a state-only revert would split state focus
-  from real key focus (#952). Unknown, gone and shown all pass:
-  the AX-fallback host keeps every raise. A verb that means to
-  switch takes `switchDesktop`, never a raise. `DesktopRaiseGateTests`
-  holds the gate and the `focusWindow` consumer,
+  instead. Unknown to the server passes: a close in flight raises
+  nothing, and a host without the read keeps every raise. A verb
+  that means to switch takes `switchDesktop`, never a raise.
+  `DesktopRaiseGateTests` holds the gate and both consumers,
   `DesktopRaiseGateArmTests` the three arms each beside a shown
   control, and `DesktopRaiseGateSeamTests` the census of files
   that may spell `AXHelper.raise(` — a new raise site joins it
-  and asks the gate in the same file. The `isListed` guard on
-  the close-return raise is the older, weaker net: Finder lists
-  BOTH Desktops' windows for a beat after a switch, which is
-  exactly when the successor pick lands. Two arms follow from
-  the same reading that a swipe is not a close: a window that
-  LEFT WITH ITS DESKTOP — `vanished`, and not a move verb's own
-  latched departure (`KiwiCore.departedWithDesktop`) — stands the
-  close-return raise down as the fourth arm of the ONE predicate,
-  since macOS picks the focus on the Desktop it shows
-  (`DesktopDepartureStandDownTests`); and a report for the
-  Desktop's remembered focus coming back — the #1207 memory's
-  entry under the compositor's host, `isRememberedDesktopFocus`
-  — is macOS restoring it, so the #1161 placement distrust
-  stands down on it rather than bouncing the OS's own restore
-  (`DesktopRaiseGateArmTests` ▸ the remembered-focus pair).
+  and asks the gate in the same file. Two arms follow from the
+  same reading that a swipe is not a close: a window that LEFT
+  WITH ITS DESKTOP — `vanished`, and not a move verb's own
+  departure, which the verb records per window and the gone
+  handler claims (`departedWithDesktop`, never the #482 follow
+  latch, whose second expires before a slow app's destroy) —
+  stands the close-return raise down as one arm of the ONE
+  predicate (the #936 clause below says why that predicate, and
+  not this file, is the census of its arms), since macOS picks
+  the focus on the Desktop it shows
+  (`DesktopDepartureStandDownTests`); and a report for a FRESH
+  return's remembered focus — returned within
+  `restoredFocusWindow` and the #1207 memory's entry under the
+  compositor's host, `isRestoredDesktopFocus` — is macOS
+  restoring it, so the #1161 placement distrust stands down on it
+  rather than bouncing the OS's own restore, and on nothing older,
+  where the memory names whatever was honored last
+  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple).
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

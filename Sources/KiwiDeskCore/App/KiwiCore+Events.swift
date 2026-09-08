@@ -79,13 +79,12 @@ extension KiwiCore {
             // re-add tiles straight to the learned answer
             // instead of re-running the whole dance.
             tiler.reviveSizeBound(window.id, pid: window.pid)
-            emitWindowCreated(
-                window,
-                reason: WindowAppearReason.classify(
-                    wasMinimized: effects.appearedWasMinimized,
-                    hadRememberedSpace: effects.hadRememberedSpace
-                )
+            let reason = WindowAppearReason.classify(
+                wasMinimized: effects.appearedWasMinimized,
+                hadRememberedSpace: effects.hadRememberedSpace
             )
+            if reason == .returned { recentReturns[window.id] = Date() }
+            emitWindowCreated(window, reason: reason)
             // #1010: narrate the cross-screen arrival, the
             // one resolution a device trace cannot read off
             // the membership alone.
@@ -285,66 +284,11 @@ extension KiwiCore {
         if willRetile {
             retile(newlyCreatedWindow: newlyCreatedWindow)
         }
-        // Closing or minimizing the focused window hands focus
-        // to the space's fallback (state picked one; this raise
-        // makes it real). Only raise windows the app still lists:
-        // after a native Space switch the fallback may live on
-        // the previous desktop, and raising it would switch back.
-        // A hide, an active own dialog, or a Desktop follow's
-        // eager departure stands the raise down —
-        // `closeReturnRaiseStandsDown` owns every arm's
-        // arguments (#913/#929/#935/#1023). The fold's focus pick
-        // still stands: state names the survivor, and the OS's
-        // own activation reports it. Guarded on the focus loss
-        // so only a removal that would raise pays the seam's
-        // NSApplication read.
-        let departedWithDesktop =
-            departedWithDesktop(event, reason: goneReason)
-        let closeReturnRaiseStandsDown =
-            effects.removedWindow?.focusLost == true
-            && eventLoop.closeReturnRaiseStandsDown(
-                after: event,
-                departedWithDesktop: departedWithDesktop
-            )
-        if effects.removedWindow?.focusLost == true,
-            !closeReturnRaiseStandsDown,
-            let next = activeSpace?.focused,
-            eventLoop.isListed(next),
-            // Belt to the fold's re-pick (#670): never raise a
-            // fullscreen fallback — it would switch the user
-            // to its Space on a plain window close.
-            state.windows[next]?.isFullscreen != true
-        {
-            onLog("close-return: raising w\(next.raw)")
-            focusWindow(next, warp: true)
-            armCloseReturnRestack(
-                to: next,
-                fromRemovedSlot: effects.removedWindow?.tiledSlot
-            )
-        }
-        // A structural change in a track space (spawn, close) can
-        // push a window into an overflow cascade; fix the pile's
-        // z-order once it settles (#193, self-gated on track +
-        // actual overflow). AFTER the focus fallback above, so the
-        // restore's closing re-focus targets the settled focus,
-        // never a stale/nil one (which would clear focus on a
-        // minimize). A removal whose return raise stood down
-        // arms no restore either (#936): the drain ends in a
-        // focus re-raise of the very anchor the stand-down
-        // refused — the next mutation's arm heals the pile.
-        if willRetile, !closeReturnRaiseStandsDown {
-            scheduleTrackZOrderRestoreIfOverflowing()
-        }
-        // #951/#952 diagnosis: narrate the decision above.
-        // AFTER the tail on purpose — the needle windows in
-        // `CloseReturnStandDownWiringTests` span the definition
-        // and both consulting sites, and an insert between them
-        // overflows the scan's char budget.
-        logCloseReturnDecision(
+        runCloseReturnTail(
             event: event,
             effects: effects,
-            departed: departedWithDesktop,
-            standsDown: closeReturnRaiseStandsDown
+            goneReason: goneReason,
+            willRetile: willRetile
         )
     }
 }

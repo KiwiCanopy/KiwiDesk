@@ -10,9 +10,9 @@ import Testing
 /// it — the destroy fold already wrote the pick into
 /// `space.focused`, so the anchor the jump test reads IS the
 /// target. `armCloseReturnRestack` re-derives the distance from
-/// the removed slot; this suite proves the arm directly because
-/// its call site sits behind `eventLoop.isListed` (live AX —
-/// the `TransientOverlayFocusTests` gate note). The fold's
+/// the removed slot; this suite proves the arm directly rather
+/// than through a driven destroy, whose raise needs a live AX
+/// element a fabricated pid never has. The fold's
 /// `tiledSlot` fact is `CloseFocusReturnTests`' half.
 ///
 /// Companion to `ZOrderFocusJumpTests`, split per the

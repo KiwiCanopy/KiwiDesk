@@ -15,12 +15,11 @@ import Testing
 /// may bury a close's successor (#935).
 ///
 /// **Why the raise SITE is pinned by a needle instead**
-/// (`CloseReturnStandDownWiringTests`): the site is gated on
-/// `eventLoop.isListed`, which calls live AX rather than the
-/// injected seam, so a driven `handle(…)` never reaches the
-/// block for a fabricated pid — an assertion there would pass
-/// with the stand-down deleted. The predicate itself is
-/// behavior-tested here through the `ownKeyWindow` seam.
+/// (`CloseReturnStandDownWiringTests`): the raise's AX call
+/// needs a live element a fabricated pid never has, so a driven
+/// `handle(…)` observes nothing of the raise — an assertion there
+/// would pass with the stand-down deleted. The predicate itself
+/// is behavior-tested here through the `ownKeyWindow` seam.
 ///
 /// Stated residue: the production resolution's non-nil
 /// branches (`ownKeyWindowReading()` — the sheet-chain walk,

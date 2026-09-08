@@ -3,14 +3,13 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The close-return stand-down's fourth arm (#1345): a window
+/// The close-return stand-down's departure arm (#1345): a window
 /// that LEFT WITH ITS DESKTOP — `vanished`, and not a move verb's
-/// own latched departure — is not a close, so the raise of the
+/// own recorded departure — is not a close, so the raise of the
 /// fold's successor pick stands down and macOS picks the focus
-/// on the Desktop it shows. Driven through `handle`: the raise
-/// itself sits behind live AX (`CloseReturnStandDownWiringTests`'
-/// note), so the decision line is the observable. Serialized: the
-/// topology override is process-global.
+/// on the Desktop it shows. Driven through `handle`; the decision
+/// line is the observable. Serialized: the topology override is
+/// process-global.
 @Suite("Close-return stand-down: left with the Desktop (#1345)", .serialized)
 @MainActor
 struct DesktopDepartureStandDownTests {
@@ -41,7 +40,7 @@ struct DesktopDepartureStandDownTests {
         return core
     }
 
-    @Test("Vanished and unlatched is a departure; latched or closed is not")
+    @Test("Vanished and unrecorded is a departure; a verb's or a close is not")
     func departurePredicate() {
         let core = makeCore()
         defer { NativeSpaces.spacesOverride = nil }
@@ -58,8 +57,11 @@ struct DesktopDepartureStandDownTests {
                 reason: .vanished
             )
         )
-        core.moveLatch.stamp(id)
+        // The verb's record is claimed by the vanish it explains
+        // and by that one alone.
+        core.recordDesktopMoveDeparture(id)
         #expect(!core.departedWithDesktop(gone, reason: .vanished))
+        #expect(core.departedWithDesktop(gone, reason: .vanished))
     }
 
     @Test("The predicate's departure arm stands the raise down")
@@ -100,14 +102,14 @@ struct DesktopDepartureStandDownTests {
         #expect(decision?.contains("standsDown=true") == true)
     }
 
-    /// The same vanish under a move verb's latch is the verb's
-    /// own hand-off: the raise proceeds.
-    @Test("A move verb's latched departure keeps the raise")
-    func latchedDepartureKeepsTheRaise() {
+    /// The same vanish after a move verb recorded it is the
+    /// verb's own hand-off: the raise proceeds.
+    @Test("A move verb's recorded departure keeps the raise")
+    func recordedDepartureKeepsTheRaise() {
         let core = makeCore()
         defer { NativeSpaces.spacesOverride = nil }
         core.desktopMemory.readWindowSpace = { _ in .hosted(11) }
-        core.moveLatch.stamp(WindowID(1))
+        core.recordDesktopMoveDeparture(WindowID(1))
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))

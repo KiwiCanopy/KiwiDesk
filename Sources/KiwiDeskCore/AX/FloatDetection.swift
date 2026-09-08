@@ -68,6 +68,20 @@ public enum FloatDetection {
         )
     }
 
+    /// CGWindowList's own on-screen flag for ONE window (#1345):
+    /// the compositor's draw list, which the managed display's
+    /// "current Space" reading lags through a switch (#1023). Nil
+    /// for a window the server no longer lists at all.
+    public static func isOnScreen(_ id: WindowID) -> Bool? {
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionIncludingWindow],
+                CGWindowID(id.raw)
+            ) as? [[String: Any]]
+        guard let info = list?.first else { return nil }
+        return info[kCGWindowIsOnscreen as String] as? Bool ?? false
+    }
+
     /// Detects non-user helper windows on raised layers (#309):
     /// fully transparent or entirely off-screen. Normal-layer (0)
     /// windows are never helpers — KiwiDesk itself parks

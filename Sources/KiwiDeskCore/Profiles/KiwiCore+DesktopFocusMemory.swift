@@ -25,10 +25,19 @@ extension KiwiCore {
                     + "focus honored on w\(id.raw)"
             )
         }
-        // The compositor's one door (#1146): the seam a test pins.
-        guard case .hosted(let native) = desktopMemory.readWindowSpace(id)
-        else { return }
+        guard let native = hostedNativeSpace(of: id) else { return }
         desktopMemory.honoredFocus[space, default: [:]][native] = id
+    }
+
+    /// The memory's key: the native Space the compositor hosts
+    /// `id` on, through the one door (#1146, the seam
+    /// `DesktopCensusSeamTests` pins) — the write and the
+    /// remembered-focus read derive it here alone, so the two
+    /// cannot key differently.
+    private func hostedNativeSpace(of id: WindowID) -> SkyLight.SpaceID? {
+        guard case .hosted(let native) = desktopMemory.readWindowSpace(id)
+        else { return nil }
+        return native
     }
 
     /// Owes the arriving `target` the focus last honored on
@@ -90,20 +99,22 @@ extension KiwiCore {
         focusWindow(window, refocusRetile: false, warp: true)
     }
 
-    /// Whether a report for `id` is this Desktop's remembered
-    /// focus coming back (#1345): macOS restores the window it
-    /// last had focused on the Desktop it shows, and that window
-    /// is what the memory holds under the compositor's host. The
-    /// placement distrust (#1161) stands down on it — the OS's
-    /// restore has the shape of a bounce, a clickless report for
-    /// a window the arrival retile just placed. An app whose
-    /// window WAS the remembered focus and bounces after a return
-    /// is honored by this read, which is the focus macOS restored
-    /// anyway; a bounce racing the echo of a step off it is the
-    /// accepted residue.
-    func isRememberedDesktopFocus(_ id: WindowID) -> Bool {
-        guard let space = state.workspaces.space(of: id),
-            case .hosted(let native) = desktopMemory.readWindowSpace(id)
+    /// How fresh a return must be for its focus report to read as
+    /// macOS restoring it: the restore lands within ~150 ms of
+    /// the arrival on device, the #1161 bounce no sooner than
+    /// 0.8 s after a placement.
+    static let restoredFocusWindow: TimeInterval = 0.5
+
+    /// Whether a report for `id` is macOS restoring this
+    /// Desktop's focus (#1345): the window RETURNED within
+    /// `restoredFocusWindow` and is the memory's entry under the
+    /// compositor's host. The placement distrust (#1161) stands
+    /// down on it; the trade is docs/design-decisions.md's.
+    func isRestoredDesktopFocus(_ id: WindowID, now: Date) -> Bool {
+        guard let returned = recentReturns[id],
+            now.timeIntervalSince(returned) < Self.restoredFocusWindow,
+            let space = state.workspaces.space(of: id),
+            let native = hostedNativeSpace(of: id)
         else { return false }
         return desktopMemory.honoredFocus[space]?[native] == id
     }

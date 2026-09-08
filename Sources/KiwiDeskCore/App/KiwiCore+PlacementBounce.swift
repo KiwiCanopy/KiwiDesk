@@ -67,9 +67,7 @@ extension KiwiCore {
     /// the ledger's bounded door, so a still-reacting app stays
     /// distrusted while the chain still ends. False — nothing
     /// done, the caller honors the report — when the re-assert
-    /// would switch Desktops (#1345): `intended` is then the
-    /// Desktop the user just left, still in state behind a slow
-    /// app's destroy.
+    /// would switch Desktops (#1345).
     func reassertAgainstPlacementBounce(
         _ id: WindowID,
         intended: WindowID,

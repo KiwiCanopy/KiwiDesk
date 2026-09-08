@@ -195,18 +195,19 @@ struct ZOrderSequenceWiringTests {
     }
 
     /// The close path's #674 arm is the same unreachable-wiring
-    /// class: the destroy-raise block gates on
+    /// class: the destroy-raise block gated on
     /// `eventLoop.isListed`, unconditionally false under
     /// `makeTestCore`, so the full suite stayed green with the
-    /// call deleted (guard-prover, 2026-08-04). The arm's
+    /// call deleted (guard-prover, 2026-08-04); #1345 retired that
+    /// gate, and the arm's own gate is self-contained. The arm's
     /// arithmetic is pinned by `ZOrderCloseReturnArmTests`; this
     /// pins that the destroy handler still calls it — the one
     /// line free to regress.
     @Test("The destroy handler arms the close-return restack")
     func destroyHandlerArmsCloseReturnRestack() throws {
         let source = try body(
-            of: "handle",
-            in: "KiwiCore+Events.swift",
+            of: "runCloseReturnTail",
+            in: "KiwiCore+CloseReturn.swift",
             under: "App"
         )
         #expect(source.contains("armCloseReturnRestack("))

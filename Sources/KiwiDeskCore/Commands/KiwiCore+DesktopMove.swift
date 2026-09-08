@@ -244,6 +244,7 @@ extension KiwiCore {
     ///   focus-follow would flip the user's Space under them.
     private func departWithoutFollowing(_ window: WindowID) {
         moveLatch.stamp(window)
+        recordDesktopMoveDeparture(window)
         lastDesktopSwitch = Date()
         guard let pid = state.windows[window]?.pid else { return }
         deferred.schedule(
