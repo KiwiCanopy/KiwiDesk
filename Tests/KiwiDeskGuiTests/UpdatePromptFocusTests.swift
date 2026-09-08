@@ -259,4 +259,27 @@ struct UpdatePromptFocusTests {
             "Sparkle's modal alerts must reach the activation"
         )
     }
+
+    /// A scheduled update Sparkle hands over is what sets the
+    /// pending fact (#1013): `SPUUserUpdateState` cannot be built
+    /// in a test, so the hook's body is pinned by spelling — the
+    /// one assignment, negated from the hand-over flag — rather
+    /// than called; `UpdateReminderPolicyTests` holds the rest.
+    @Test("the hand-over hook sets the pending fact from the flag")
+    func handOverSetsThePendingFact() throws {
+        let text = try Self.promptSource()
+        let policy = try #require(
+            SourceScan.declarationBody(
+                after: "final class UpdatePromptPolicy",
+                in: text
+            )
+        )
+        let hook = try #require(
+            SourceScan.declarationBody(
+                after: "func standardUserDriverWillHandleShowingUpdate",
+                in: policy
+            )
+        )
+        #expect(hook.contains("updatePending = !handleShowingUpdate"))
+    }
 }

@@ -27,6 +27,63 @@ extension StatusItemController {
         }
     }
 
+    /// The composite's type, so a test can tell the mark from the
+    /// bare glyph without reading pixels or riding an announced
+    /// property (an `NSImage` NAME is global and refuses a second
+    /// holder; a description is what VoiceOver reads off an
+    /// unlabelled button).
+    final class UpdateMarkImage: NSImage {}
+
+    /// The pending-update mark (#1013, owner ruling 2026-09-08:
+    /// orange, top-trailing, Ø5 at the 18 pt master): a dot with a
+    /// knockout ring, composited into a NEW image — the shared
+    /// brand icon is never mutated (#1311). Not a template, since
+    /// a template carries no hue: the handler resolves the bar's
+    /// label colour and `systemOrange` per APPEARANCE — AppKit
+    /// re-runs it on a light/dark flip and caches per appearance
+    /// (measured 2026-09-08) — so light and dark still follow; the
+    /// bar's highlight inversion while the
+    /// menu is open is what the colour costs (design-decisions.md).
+    /// Pure: `render()` alone decides which state carries it.
+    static func badged(_ base: NSImage) -> UpdateMarkImage {
+        let size = base.size
+        let dot = min(size.width, size.height) * 5 / 18
+        let ring = dot * 1.5
+        let center = CGPoint(
+            x: size.width - dot / 2 - 0.5,
+            y: size.height - dot / 2 - 0.5
+        )
+        let image = UpdateMarkImage(size: size, flipped: false) { rect in
+            base.draw(in: rect)
+            NSColor.labelColor.set()
+            rect.fill(using: .sourceAtop)
+            let context = NSGraphicsContext.current
+            context?.compositingOperation = .destinationOut
+            NSBezierPath(
+                ovalIn: CGRect(
+                    x: center.x - ring / 2,
+                    y: center.y - ring / 2,
+                    width: ring,
+                    height: ring
+                )
+            ).fill()
+            context?.compositingOperation = .sourceOver
+            NSColor.systemOrange.setFill()
+            NSBezierPath(
+                ovalIn: CGRect(
+                    x: center.x - dot / 2,
+                    y: center.y - dot / 2,
+                    width: dot,
+                    height: dot
+                )
+            ).fill()
+            return true
+        }
+        image.isTemplate = false
+        image.accessibilityDescription = base.accessibilityDescription
+        return image
+    }
+
     /// Sets status button icon to SF Symbol, or a visible text
     /// fallback: a nil image with an empty title leaves an
     /// invisible-but-clickable slot that reads as a broken app (an

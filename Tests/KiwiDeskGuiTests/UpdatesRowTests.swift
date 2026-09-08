@@ -19,6 +19,8 @@ private final class FakeStatusItem: StatusItemHandle {
 private final class FakeUpdater: AppUpdating {
     var canCheckForUpdates: Bool
     private(set) var checks = 0
+    var updatePending = false { didSet { onUpdatePendingChanged() } }
+    var onUpdatePendingChanged: () -> Void = {}
 
     init(canCheck: Bool) { canCheckForUpdates = canCheck }
     func checkForUpdates() { checks += 1 }
@@ -45,6 +47,10 @@ struct UpdatesRowTests {
     )
 
     private func row(canCheck: Bool) -> Row {
+        // The click action reads `NSApp`, nil until something
+        // touched the shared application: this suite must prove
+        // itself alone as well as in a full run (tests.md).
+        _ = NSApplication.shared
         LocalizationManager.shared.select("en")
         let controller = StatusItemController(
             item: FakeStatusItem()
@@ -54,11 +60,10 @@ struct UpdatesRowTests {
         return (controller.makeUpdatesItem(), controller, updater)
     }
 
-    /// The click tests below drive the action directly, because
-    /// `NSApp` is nil in a test process and `sendAction` traps on
-    /// it. So the target/action pair is asserted here instead —
-    /// without this, a row wired to nothing would pass every one
-    /// of them.
+    /// The click tests below drive the action directly rather
+    /// than through `sendAction`, so the target/action pair is
+    /// asserted here instead — without this, a row wired to
+    /// nothing would pass every one of them.
     @Test("the row is wired to the controller's action")
     func rowIsWired() {
         let (item, controller, _) = row(canCheck: true)

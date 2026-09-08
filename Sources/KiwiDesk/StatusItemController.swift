@@ -15,8 +15,20 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     var shortcutsComboProvider: () -> KeyCombo? = { nil }
 
     /// Drives "Check for Updates…" (#874). Inert by default —
-    /// `AppUpdater.swift` owns why.
-    var updater: any AppUpdating = NoUpdater()
+    /// `AppUpdater.swift` owns why. Wires the pending reminder's
+    /// nudge HERE, so the one consumer is the one that sets the
+    /// closure (#1013); the fact itself stays the updater's.
+    var updater: any AppUpdating = NoUpdater() {
+        didSet {
+            updater.onUpdatePendingChanged = { [weak self] in
+                self?.render()
+            }
+            render()
+        }
+    }
+    /// A scheduled update waiting behind the gentle reminder
+    /// (#1013), read from the updater at every render.
+    var updatePending: Bool { updater.updatePending }
     var onShowAccessibilityHelp: () -> Void = {}
     var onLoadProfile: (String) -> Void = { _ in }
     /// Saved profiles, pulled fresh each menu open; broken entries
@@ -154,6 +166,23 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             applyBrandIcon(
                 to: button,
                 a11y: L("menu.status.a11y", "KiwiDesk")
+            )
+        }
+        // The mark, on both channels and in ONE place (#1013):
+        // after the early returns above, so a warning, the
+        // starting phase and a config error outrank an offer on
+        // the glyph AND the name.
+        if updatePending {
+            if let image = button.image {
+                button.image = Self.badged(image)
+            }
+            button.setAccessibilityLabel(
+                L("menu.status.update.a11y", "KiwiDesk (update available)")
+            )
+            button.toolTip = L(
+                "menu.status.update.tooltip",
+                "A KiwiDesk update is available — open the menu to "
+                    + "install it."
             )
         }
     }
