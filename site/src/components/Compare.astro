@@ -565,13 +565,17 @@ const jsonLd = [
      every locale wraps at a different place (German needs roughly
      a third more room than English for the same cell), so a table
      tuned until the English fits on one line is a table that
-     breaks in the other two. Two lines is a fine cell. What makes
+     breaks in the other two. Two lines is a fine cell — the
+     widths above are sized so the LONGEST shipped cell label
+     ("Bedienungshilfen", measured 6.4 pt short before this) has
+     one line to sit on, not so that any given locale never
+     wraps. What makes
      wrapping read as accidental is neighbours that do not wrap
      hugging the top of the row — which `vertical-align` below
      fixes once, for every language. */
   @media (min-width: 76rem) {
     .cmp__scroll {
-      margin-inline: -6rem;
+      margin-inline: -8rem;
     }
   }
   .cmp__table {
@@ -582,7 +586,7 @@ const jsonLd = [
     font-size: 0.9rem;
   }
   .cmp__table th:first-child {
-    width: 22%;
+    width: 20%;
   }
   .cmp__table th,
   .cmp__table td {
@@ -591,6 +595,12 @@ const jsonLd = [
     vertical-align: middle;
     border-bottom: 1px solid var(--border);
     line-height: 1.4;
+    /* `hyphens` first, `overflow-wrap` as the last resort: a
+       German compound is broken at a syllable with a visible
+       hyphen instead of shedding its final letter onto a line of
+       its own, which reads as a bug rather than as a wrap.
+       Needs the page's `lang`, which PageShell sets. */
+    hyphens: auto;
     overflow-wrap: break-word;
   }
   .cmp__table thead th {
@@ -813,20 +823,47 @@ const jsonLd = [
   }
   /* What a tool is genuinely good at is set off as a quote-like
      callout, so conceding reads as deliberate rather than as
-     throat-clearing before the pitch. */
+     throat-clearing before the pitch.
+
+     Its LABEL is inside the callout, not above it: outside, the
+     card read as one run of prose with two small captions in it,
+     and the second heading did not announce a second block
+     (owner, 2026-09-08). The tint and rule are declared once on
+     the card and worn by both, since a band split across two
+     elements has to match exactly or the seam shows. */
+  .cmp__tool {
+    --cmp-good-tint: color-mix(
+      in srgb,
+      var(--accent-deep) 10%,
+      transparent
+    );
+    --cmp-good-rule: color-mix(
+      in srgb,
+      var(--accent) 22%,
+      transparent
+    );
+  }
+  .cmp__tool p.cmp__label:not(.cmp__label--diff) {
+    margin: 0 -1.5rem;
+    padding: 0.8rem 1.5rem 0;
+    background: var(--cmp-good-tint);
+    border-top: 1px solid var(--cmp-good-rule);
+    /* The prose measure caps every other `p` in the card; here
+       it would stop the tint short of the paragraph's own edge
+       and leave a notch in the band. */
+    max-width: none;
+  }
   .cmp__tool p.cmp__good {
     color: var(--text);
-    margin: 0 -1.5rem 0.9rem;
-    padding: 0.85rem 1.5rem;
-    background: color-mix(in srgb, var(--accent-deep) 10%, transparent);
-    border-top: 1px solid
-      color-mix(in srgb, var(--accent) 22%, transparent);
-    border-bottom: 1px solid
-      color-mix(in srgb, var(--accent) 22%, transparent);
+    margin: 0 -1.5rem 1.1rem;
+    padding: 0.35rem 1.5rem 0.85rem;
+    background: var(--cmp-good-tint);
+    border-bottom: 1px solid var(--cmp-good-rule);
     max-width: none;
   }
   @media (max-width: 34rem) {
-    .cmp__tool p.cmp__good {
+    .cmp__tool p.cmp__good,
+    .cmp__tool p.cmp__label:not(.cmp__label--diff) {
       margin-inline: -1.1rem;
       padding-inline: 1.1rem;
     }
@@ -928,20 +965,24 @@ const jsonLd = [
   }
   /* MINOR — centring the numeral is right for a one-line heading
      and wrong for two, and every anchor title wraps at 375px. */
+  /* The two labels are a matched PAIR — same size, weight and
+     ink — because each one opens a block and the reader is meant
+     to weigh the halves against each other. Coloured apart (one
+     accent, one dim) the second read as a caption rather than as
+     a heading, and dropped out of the scan (owner, 2026-09-08).
+     Not underlined, for the same reason: the card's own title is
+     a link and its body carries more, so an underlined label
+     reads as a third one. */
   .cmp__label {
     margin: 0 0 0.3rem;
-    font-size: 0.72rem;
-    font-weight: 650;
-    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--text);
   }
   .cmp__label--diff {
-    color: var(--text-dim);
-    margin-top: 0.2rem;
-  }
-  .cmp__tool p.cmp__good {
-    padding-top: 0.5rem;
+    margin-top: 0;
   }
   .cmp__chips {
     display: flex;
