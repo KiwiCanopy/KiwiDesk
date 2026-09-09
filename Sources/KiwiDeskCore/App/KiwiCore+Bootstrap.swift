@@ -6,7 +6,7 @@ extension KiwiCore {
     /// integrations during initialization (#415 architect follow-up).
     func bootstrapCoreServices() {
         crash.captureState = { [weak self] in
-            self?.state.snapshot()
+            self?.sessionSnapshot()
         }
         crash.restoreState = { [weak self] snapshot in
             self?.restoreAndSettle(snapshot)
@@ -161,7 +161,7 @@ extension KiwiCore {
             self?.windowIsOnFullscreenSpace(id) ?? false
         }
         sleepWake.captureState = { [weak self] in
-            self?.state.snapshot()
+            self?.sessionSnapshot()
         }
         // The wake leg pays the adopted focus for real (#1130);
         // the crash leg above keeps the bare replay.

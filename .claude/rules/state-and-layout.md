@@ -1114,6 +1114,20 @@ editing here:
   keeps the layout's placement (`TravelerRehomeTests`,
   `TravelerRehomeSeamTests`). The frame is transient by ruling:
   the next tiled space on that screen re-tiles the traveler.
+- **A corner is never a float's original (#1352).** A parked
+  float's capture can be lost while it still sits at the corner
+  — a late echo, a Desktop sweep, a relaunch, a profile switch —
+  and the next stash then captured the corner as the place it
+  belongs. So `stash` refuses to capture a frame that
+  `looksStashed`, and `KiwiCore.recoverStrandedFloats` seeds a
+  centred capture for an effective float on a shown space that
+  has none, ahead of the retile whose restore delivers it — one
+  delivery path, so a new way to lose the capture needs no new
+  arm. The corner test tolerates one `visibilityFloor` of OS
+  lift on y (measured 4 and 18 pt, 2026-09-09) and stays exact
+  on x; and the session snapshot writes the capture, never a
+  parked state frame (`sessionSnapshot`). Held by
+  `StashCornerLiftTests` and `FloatStrandRecoveryTests`.
 - **Derive where a float may sit in ONE place, and bound its
   SIZE there rather than its position** (#1091). `KiwiCore.floatBounds` is that derivation — the
   display's visible bounds with every PAINTED strip carved off

@@ -35,6 +35,11 @@ extension KiwiCore {
         // change already retiles, so this is the one choke
         // point and needs no per-site arming.
         healTrackSessionWeights()
+        // A float whose capture was lost while parked has
+        // nothing to place it (#1352): seed a centred one here
+        // so the pass's own restore delivers it — one delivery
+        // path, and the stash refuses the corner meanwhile.
+        recoverStrandedFloats()
         tiler.retile(
             state: state,
             animated: animated

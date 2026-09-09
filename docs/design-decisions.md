@@ -3094,6 +3094,36 @@ ring's actual presence would shift the float every time it gained
 or lost focus. And it goes to zero with borders off, so nothing
 is reserved for chrome that is not on screen.
 
+**A corner is never a float's original, and a stranded float is
+re-centred (#1352).** [Principle] The stash restores a parked
+float from the capture taken at its first park, and that capture
+can be lost while the window still sits at the corner — a late
+park echo read as a user move, a Desktop switch sweeping the
+departed window's entry, a relaunch replaying the parked
+snapshot, a profile switch turning a tiled space floating. Four
+paths, one end state: the next stash captured the corner as the
+place the window belongs, and every activation delivered it
+there. Four patches would each have closed one path and left the
+class open, so the rule sits at the value instead: `stash`
+refuses to capture a frame that looks parked, and a float on a
+shown space with no capture and a corner frame is seeded a
+centred one inside `floatBounds` for the restore pass to deliver
+(`KiwiCore.recoverStrandedFloats`). Centred rather than
+re-anchored, because there is nothing to re-anchor from — the
+original is exactly what was lost. And the session snapshot
+records the capture rather than the state frame, so a relaunch
+puts the window back where it was instead of in the middle.
+
+*The corner test tolerates what the OS does to a park.* macOS
+lifts a parked window off the line it was asked for — measured
+4 pt on three apps and 18 pt on a tall window (2026-09-09) — and
+the 2 pt tolerance read every lifted park as a user move, which
+is how the first of the four paths opened. The y match is loose
+by one `visibilityFloor`, derived rather than restated, since the
+floor is the most the OS moves a frame to keep it reachable; the
+x match stays exact, because a 1 pt peek flush with the screen
+edge is where nothing but the park puts a window.
+
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
 frame the instant it turns floating, so `make_floating` /

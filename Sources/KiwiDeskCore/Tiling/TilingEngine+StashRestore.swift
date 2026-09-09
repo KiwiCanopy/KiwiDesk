@@ -127,28 +127,49 @@ extension TilingEngine {
     /// the exact corner is indistinguishable and keeps its
     /// capture — harmless: the next activation restores it.
     /// Checks both bottom corners (which one a window parked in
-    /// depends on its monitor's neighbors, `optimalHideCorner`),
-    /// with the asymmetric peek: `.bottomLeft` anchors the right
-    /// edge, so its x depends on the frame width.
+    /// depends on its monitor's neighbors, `optimalHideCorner`).
     static func looksStashed(_ frame: CGRect) -> Bool {
         NSScreen.screens.contains { screen in
-            let bounds = GeometryUtils.axVisibleFrame(
-                of: screen
+            looksStashed(
+                frame,
+                in: GeometryUtils.axVisibleFrame(of: screen)
             )
-            let atBottom =
-                abs(frame.minY - (bounds.maxY - stashPeekY))
-                <= retileTolerance
-            let atRight =
-                abs(frame.minX - (bounds.maxX - stashPeekX))
-                <= retileTolerance
-            let atLeft =
-                abs(
-                    frame.minX
-                        - (bounds.minX + stashPeekX
-                            - frame.width)
-                ) <= retileTolerance
-            return atBottom && (atRight || atLeft)
         }
+    }
+
+    /// The corner test against ONE screen's visible bounds. The
+    /// x match is exact (`retileTolerance`) — a 1 pt peek flush
+    /// with the edge is where nothing but the park puts a
+    /// window — with the asymmetric peek: `.bottomLeft` anchors
+    /// the right edge, so its x depends on the frame width.
+    ///
+    /// The y match is loose by one `visibilityFloor`: macOS
+    /// lifts a parked window off the line it was asked for —
+    /// measured 2026-09-09 on the device, 4 pt on Safari, Finder
+    /// and a small utility window, 18 pt on a tall one — and
+    /// a 2 pt tolerance read every lifted park as a user move.
+    /// Its late echo then consumed the capture, the next stash
+    /// captured the corner as the original, and the window was
+    /// restored to the corner for good. The floor is the most
+    /// the OS moves a frame to keep it reachable, so a lift
+    /// beyond it is not a park (#1352).
+    static func looksStashed(
+        _ frame: CGRect,
+        in bounds: CGRect
+    ) -> Bool {
+        let atBottom =
+            abs(frame.minY - (bounds.maxY - stashPeekY))
+            <= WindowServerFacts.visibilityFloor
+        let atRight =
+            abs(frame.minX - (bounds.maxX - stashPeekX))
+            <= retileTolerance
+        let atLeft =
+            abs(
+                frame.minX
+                    - (bounds.minX + stashPeekX
+                        - frame.width)
+            ) <= retileTolerance
+        return atBottom && (atRight || atLeft)
     }
 
     /// Drops a window's stash capture: the user moved it
