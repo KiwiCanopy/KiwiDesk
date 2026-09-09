@@ -90,7 +90,10 @@ struct VisibleBoundsRoutingTests {
         // same bounds. Its corner scan's rect list reads the
         // `allScreenBounds` topology seam instead (#878).
         "Tiling/TilingEngine+Stash.swift": 2,
-        "Tiling/TilingEngine+StashRestore.swift": 2,
+        // The display-gone consumption alone: the corner test
+        // that used to enumerate screens here reads the
+        // `allScreenBounds` seam since #1352.
+        "Tiling/TilingEngine+StashRestore.swift": 1,
         // The bar strips are drawn ON a screen; a fabricated rect
         // would place real chrome nowhere.
         "App/KiwiCore+AppBar.swift": 2,
