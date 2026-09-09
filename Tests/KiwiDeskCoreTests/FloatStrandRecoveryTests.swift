@@ -192,4 +192,19 @@ struct FloatStrandRecoveryTests {
             core.state.windows[F.window]?.frame == F.parked()
         )
     }
+
+    @Test(
+        "What the park exempts, the recovery exempts",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func exemptsWhatTheParkExempts() throws {
+        let core = try #require(
+            F.makeCore(mode: .floating, frame: F.parked())
+        )
+        // A global sticky never parks (#445), so a corner frame
+        // on one is the user's, not a stranding.
+        core.state.windows.setSticky(F.window, .global)
+        core.recoverStrandedFloats()
+        #expect(core.tiler.stashOriginal(F.window) == nil)
+    }
 }
