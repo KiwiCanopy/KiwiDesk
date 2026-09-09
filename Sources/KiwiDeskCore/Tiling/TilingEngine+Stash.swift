@@ -220,13 +220,10 @@ extension TilingEngine {
         if !force, Self.close(window.frame, to: target) {
             return
         }
-        // A corner is never an original (#1352): a window whose
-        // capture was lost while parked — a late echo, a Desktop
-        // sweep, a relaunch replaying the parked snapshot — must
-        // not have the corner captured as the place it belongs,
-        // or the restore delivers it there for good. Left
-        // uncaptured, the retile-time recovery re-centres it
-        // (`KiwiCore.recoverStrandedFloats`).
+        // A corner is never an original (#1352): a capture lost
+        // while parked must not be replaced by the corner, or the
+        // restore delivers it there for good. Left uncaptured,
+        // `KiwiCore.recoverStrandedFloats` re-centres it.
         if capturesOriginal,
             stashedFrames[window.id] == nil,
             !Self.looksStashed(window.frame, in: bounds)

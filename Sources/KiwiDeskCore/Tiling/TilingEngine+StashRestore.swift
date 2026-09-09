@@ -35,7 +35,10 @@ extension TilingEngine {
     /// cancelled gesture must not have lost the original.
     /// Entries for windows that left the state (closed) are
     /// swept — before the active-space guard, so a reused
-    /// WindowID (#152) cannot inherit a dead capture — and a
+    /// WindowID (#152) cannot inherit a dead capture — except a
+    /// window the away ledger still knows (#1146): it left with
+    /// its Desktop, not for good, and its id is the same window
+    /// when it returns, so the capture waits for it (#1352). A
     /// native-tab re-key migrates its entry to the new id
     /// (`KiwiCore.handle`, #308).
     func restoreStashed(
@@ -44,6 +47,7 @@ extension TilingEngine {
     ) {
         stashedFrames = stashedFrames.filter {
             state.windows[$0.key] != nil
+                || state.awayWindows[$0.key] != nil
         }
         // Restore floats for every space currently shown on some
         // display, not just the focused one (#multi-monitor): a
@@ -126,14 +130,15 @@ extension TilingEngine {
     /// corner, the #412 failure mode). A genuine user drag TO
     /// the exact corner is indistinguishable and keeps its
     /// capture — harmless: the next activation restores it.
-    /// Checks both bottom corners (which one a window parked in
-    /// depends on its monitor's neighbors, `optimalHideCorner`).
-    static func looksStashed(_ frame: CGRect) -> Bool {
-        NSScreen.screens.contains { screen in
-            looksStashed(
-                frame,
-                in: GeometryUtils.axVisibleFrame(of: screen)
-            )
+    /// Checks both bottom corners of every screen (which one a
+    /// window parked in depends on its monitor's neighbors,
+    /// `optimalHideCorner`), read over the topology seam the
+    /// stash parks through (#878) so the two cannot disagree
+    /// about the screens — the echo classifier and the strand
+    /// recovery ask this one predicate.
+    func looksStashed(_ frame: CGRect) -> Bool {
+        allScreenBounds().contains {
+            Self.looksStashed(frame, in: $0)
         }
     }
 
@@ -152,7 +157,9 @@ extension TilingEngine {
     /// captured the corner as the original, and the window was
     /// restored to the corner for good. The floor is the most
     /// the OS moves a frame to keep it reachable, so a lift
-    /// beyond it is not a park (#1352).
+    /// beyond it is not a park (#1352). This docstring is the
+    /// one home of the measurement; the rule file and the
+    /// design entry cite it.
     static func looksStashed(
         _ frame: CGRect,
         in bounds: CGRect

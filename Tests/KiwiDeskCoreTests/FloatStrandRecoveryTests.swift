@@ -5,28 +5,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Pinned display (#531): every corner below is derived from it.
-private let bounds = CGRect(
-    x: 0,
-    y: 25,
-    width: 1920,
-    height: 1055
-)
-
-private let size = CGSize(width: 800, height: 600)
-
-private func parked(
-    _ corner: TilingEngine.HideCorner = .bottomRight,
-    lift: CGFloat = 0
-) -> CGRect {
-    var frame = TilingEngine.stashFrame(
-        CGRect(origin: .zero, size: size),
-        in: bounds,
-        corner: corner
-    )
-    frame.origin.y -= lift
-    return frame
-}
+private typealias F = FloatStrandFixture
 
 /// A corner is never an original (#1352). macOS lifts a parked
 /// window off the line it was asked for — measured 4 pt and
@@ -44,7 +23,7 @@ struct StashCornerLiftTests {
     )
     func exactCorner(corner: TilingEngine.HideCorner) {
         #expect(
-            TilingEngine.looksStashed(parked(corner), in: bounds)
+            TilingEngine.looksStashed(F.parked(corner), in: F.bounds)
         )
     }
 
@@ -55,8 +34,8 @@ struct StashCornerLiftTests {
     func liftedPark(lift: CGFloat) {
         #expect(
             TilingEngine.looksStashed(
-                parked(lift: lift),
-                in: bounds
+                F.parked(lift: lift),
+                in: F.bounds
             )
         )
     }
@@ -66,17 +45,17 @@ struct StashCornerLiftTests {
         let lift = WindowServerFacts.visibilityFloor + 1
         #expect(
             !TilingEngine.looksStashed(
-                parked(lift: lift),
-                in: bounds
+                F.parked(lift: lift),
+                in: F.bounds
             )
         )
     }
 
     @Test("A frame off the corner's x is not a park, however low")
     func offCornerX() {
-        var frame = parked()
+        var frame = F.parked()
         frame.origin.x -= 10
-        #expect(!TilingEngine.looksStashed(frame, in: bounds))
+        #expect(!TilingEngine.looksStashed(frame, in: F.bounds))
     }
 
     @Test("A stash refuses to capture a corner as the original")
@@ -86,12 +65,12 @@ struct StashCornerLiftTests {
             id: WindowID(1),
             pid: 1,
             appName: "A",
-            frame: parked(lift: 4),
+            frame: F.parked(lift: 4),
             isFloating: true
         )
         engine.stash(
             window,
-            in: bounds,
+            in: F.bounds,
             corner: .bottomRight,
             force: true,
             capturesOriginal: true
@@ -115,58 +94,24 @@ struct StashCornerLiftTests {
 
 /// The retile-time net (#1352): an effective float on a shown
 /// space with no capture and a frame at the corner is seeded a
-/// centred capture for the restore pass to deliver.
+/// centred capture for the restore pass to deliver. The DECISION
+/// is read through `recoverStrandedFloats()` directly; the
+/// clauses that go through `retile()` pin the wiring and rely on
+/// the host's real screens intersecting `bounds` (the restore
+/// pass's display-gone read is unpinned).
 @Suite("Stranded float recovery (#1352)", .serialized)
 @MainActor
 struct FloatStrandRecoveryTests {
-    private static let window = WindowID(1)
-
-    /// A core whose one shown space is `mode`, pinned to
-    /// `bounds` on both display seams (#531), holding one
-    /// window at `frame`. Nil where the host has no screen.
-    private func makeCore(
-        mode: LayoutMode,
-        frame: CGRect,
-        floating: Bool = false
-    ) -> KiwiCore? {
-        guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay
-        else { return nil }
-        let core = makeTestCore()
-        core.tiler.visibleBounds = { _ in bounds }
-        core.tiler.allScreenBounds = { [bounds] }
-        core.state.apply(.displaysChanged([display]))
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(
-                    id: Self.window,
-                    pid: 1,
-                    appName: "FloatApp",
-                    frame: frame,
-                    isFloating: floating
-                )
-            )
-        )
-        core.resolveSpaceDisplays(mainID: display.id)
-        let space = core.state.workspaces.space(of: Self.window)!
-        core.state.workspaces.setMode(space, mode)
-        return core
-    }
-
-    private var centred: CGRect {
-        FloatRecovery.centred(size, in: bounds)
-    }
-
     @Test(
         "A floating-mode member at the corner is re-centred",
         .enabled(if: NSScreen.main != nil)
     )
     func recentresFloatingModeMember() throws {
         let core = try #require(
-            makeCore(mode: .floating, frame: parked(lift: 4))
+            F.makeCore(mode: .floating, frame: F.parked(lift: 4))
         )
         core.retile()
-        #expect(core.tiler.stashOriginal(Self.window) == centred)
+        #expect(core.tiler.stashOriginal(F.window) == F.centred)
     }
 
     @Test(
@@ -175,10 +120,10 @@ struct FloatStrandRecoveryTests {
     )
     func recentresFlaggedFloat() throws {
         let core = try #require(
-            makeCore(mode: .bsp, frame: parked(), floating: true)
+            F.makeCore(mode: .bsp, frame: F.parked(), floating: true)
         )
-        core.retile()
-        #expect(core.tiler.stashOriginal(Self.window) == centred)
+        core.recoverStrandedFloats()
+        #expect(core.tiler.stashOriginal(F.window) == F.centred)
     }
 
     @Test(
@@ -187,10 +132,10 @@ struct FloatStrandRecoveryTests {
     )
     func leavesTiledWindowToTheLayout() throws {
         let core = try #require(
-            makeCore(mode: .bsp, frame: parked())
+            F.makeCore(mode: .bsp, frame: F.parked())
         )
-        core.retile()
-        #expect(core.tiler.stashOriginal(Self.window) == nil)
+        core.recoverStrandedFloats()
+        #expect(core.tiler.stashOriginal(F.window) == nil)
     }
 
     @Test(
@@ -199,17 +144,12 @@ struct FloatStrandRecoveryTests {
     )
     func keepsPendingCapture() throws {
         let core = try #require(
-            makeCore(mode: .floating, frame: parked())
+            F.makeCore(mode: .floating, frame: F.parked())
         )
-        let original = CGRect(
-            x: 300,
-            y: 200,
-            width: 800,
-            height: 600
-        )
-        core.tiler.seedStash(Self.window, frame: original)
-        core.retile()
-        #expect(core.tiler.stashOriginal(Self.window) == original)
+        let original = F.original
+        core.tiler.seedStash(F.window, frame: original)
+        core.recoverStrandedFloats()
+        #expect(core.tiler.stashOriginal(F.window) == original)
     }
 
     @Test(
@@ -218,7 +158,7 @@ struct FloatStrandRecoveryTests {
     )
     func leavesPlacedFloatAlone() throws {
         let core = try #require(
-            makeCore(
+            F.makeCore(
                 mode: .floating,
                 frame: CGRect(
                     x: 100,
@@ -228,8 +168,8 @@ struct FloatStrandRecoveryTests {
                 )
             )
         )
-        core.retile()
-        #expect(core.tiler.stashOriginal(Self.window) == nil)
+        core.recoverStrandedFloats()
+        #expect(core.tiler.stashOriginal(F.window) == nil)
     }
 
     @Test(
@@ -238,23 +178,18 @@ struct FloatStrandRecoveryTests {
     )
     func snapshotCarriesTheCapture() throws {
         let core = try #require(
-            makeCore(mode: .floating, frame: parked())
+            F.makeCore(mode: .floating, frame: F.parked())
         )
-        let original = CGRect(
-            x: 300,
-            y: 200,
-            width: 800,
-            height: 600
-        )
-        core.tiler.seedStash(Self.window, frame: original)
+        let original = F.original
+        core.tiler.seedStash(F.window, frame: original)
         let record = core.sessionSnapshot().windows.first {
-            $0.windowID == Self.window
+            $0.windowID == F.window
         }
         #expect(record?.frame == original)
         // The state itself still holds the corner: the
         // substitution is the snapshot's, not a state write.
         #expect(
-            core.state.windows[Self.window]?.frame == parked()
+            core.state.windows[F.window]?.frame == F.parked()
         )
     }
 }

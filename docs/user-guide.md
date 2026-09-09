@@ -955,9 +955,13 @@ Pick a layout mode for each space:
   (#128).
 - **Floating**: every window floats freely, no tiling. KiwiDesk
   remembers where each floating window sits when you switch
-  spaces; should that memory ever be lost, the window comes back
-  centred on its screen rather than at the corner hidden spaces
-  park in.
+  spaces.
+
+:::unreleased
+Should that memory ever be lost — it survives a relaunch and a
+Desktop switch — a floating window comes back centred on its
+screen rather than at the corner hidden spaces park in.
+:::
 
 Gaps are carved out of the layout — windows never overlap them —
 and the app bar, if shown, carves its space the same way. The

@@ -1,17 +1,9 @@
 import CoreGraphics
 
-/// Re-centres a float whose remembered position is gone (#1352).
-///
-/// The stash restores a parked float from the capture taken at
-/// its first park, and that capture can be lost while the
-/// window still sits at the corner: a late park echo read as a
-/// user move, a Desktop switch sweeping the departed window's
-/// entry, a relaunch replaying the parked snapshot, a profile
-/// switch turning a tiled space floating. The stash refuses to
-/// capture a corner as an original, so such a window arrives on
-/// its shown space with no capture and nothing to place it.
-/// This is the net that places it — once, and where
-/// `floatBounds` says a float may sit.
+/// Re-centres a float whose remembered position is gone (#1352):
+/// the stash refuses to capture a corner as an original, so a
+/// float found at one with no capture has nothing to place it
+/// but this net.
 extension KiwiCore {
     /// Seeds a centred capture for every stranded float on a
     /// shown space, ahead of the retile whose restore pass
@@ -26,16 +18,19 @@ extension KiwiCore {
                 guard let window = state.windows[id],
                     !window.isFullscreen,
                     id != tiler.dragExemptWindow,
-                    // A sticky window rides the carry (#1145),
-                    // never the stash.
-                    window.stickyScope == .none,
+                    // Never parked ⇒ never stranded: the same
+                    // exemption the park decides on (#445).
+                    !state.stickyExemptFromStash(
+                        window,
+                        onSpace: space
+                    ),
                     // EFFECTIVE float, never the flag (#1178).
                     EffectiveFloat.applies(
                         isFloating: window.isFloating,
                         mode: workspace.mode
                     ),
                     tiler.stashOriginal(id) == nil,
-                    isStranded(window.frame),
+                    tiler.looksStashed(window.frame),
                     let region = floatBounds(on: space)
                 else { continue }
                 let centred = FloatRecovery.centred(
@@ -51,20 +46,12 @@ extension KiwiCore {
         }
     }
 
-    /// Whether a frame sits at some screen's stash corner, read
-    /// over the topology seam the stash parks through (#878) so
-    /// the two cannot disagree about the screens.
-    private func isStranded(_ frame: CGRect) -> Bool {
-        tiler.allScreenBounds().contains {
-            TilingEngine.looksStashed(frame, in: $0)
-        }
-    }
-
-    /// The session snapshot the crash and sleep legs write:
-    /// state, with a parked float's CAPTURE in place of its
-    /// state frame. The state frame of a parked float is the
-    /// corner, and a restore replaying it verbatim put the
-    /// window back there with nothing left to undo it.
+    /// The session snapshot the crash and sleep legs write —
+    /// every `captureState` consumer takes this, never
+    /// `state.snapshot()`: state, with a parked float's CAPTURE
+    /// in place of its state frame. The state frame of a parked
+    /// float is the corner, and a restore replaying it verbatim
+    /// put the window back there with nothing left to undo it.
     func sessionSnapshot() -> StateSnapshot {
         let snapshot = state.snapshot()
         return StateSnapshot(
