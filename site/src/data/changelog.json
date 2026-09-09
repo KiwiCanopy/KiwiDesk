@@ -2,6 +2,23 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.2.2",
+      "tag": "v1.2.2",
+      "date": "2026-09-09",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.2.2",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.2.2/KiwiDesk-1.2.2.dmg",
+      "summary": "A one-fix release: floating windows that come back where you left them.",
+      "sections": [
+        {
+          "title": "Floating windows",
+          "items": [
+            "**A floating window no longer gets stuck in the screen corner.** Switching spaces could lose where a floating window belonged — after a Desktop switch, a relaunch, or simply a slow app — and from then on it came back tucked into the bottom corner where hidden windows park. Its place now survives all three, and a window whose place is genuinely lost comes back centred on its screen instead of in the corner."
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.2.1",
       "tag": "v1.2.1",
       "date": "2026-09-08",

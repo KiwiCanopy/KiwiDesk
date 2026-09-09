@@ -13,6 +13,19 @@
     <description>Updates for KiwiDesk, a tiling window manager for macOS.</description>
     <language>en</language>
     <item>
+      <title>1.2.2</title>
+      <pubDate>Wed, 09 Sep 2026 23:41:56 +0000</pubDate>
+      <sparkle:version>1.2.2</sparkle:version>
+      <sparkle:shortVersionString>1.2.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<style>:root{color-scheme:light dark;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;}body{margin:0;padding:2px 4px 16px 4px;}h3{font-size:13px;font-weight:600;margin:12px 0 6px 0;}p{margin:0 0 8px 0;}ul{margin:0 0 10px 0;padding-left:18px;}li{margin-bottom:5px;}code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:11.5px;padding:1px 4px;border-radius:4px;background:rgba(128,128,128,0.15);}::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.65);}</style><p>A one-fix release: floating windows that come back where you left them.</p><h3>Floating windows</h3><ul><li><strong>A floating window no longer gets stuck in the screen corner.</strong> Switching spaces could lose where a floating window belonged — after a Desktop switch, a relaunch, or simply a slow app — and from then on it came back tucked into the bottom corner where hidden windows park. Its place now survives all three, and a window whose place is genuinely lost comes back centred on its screen instead of in the corner.</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.2.2/KiwiDesk-1.2.2.zip"
+        length="8700456"
+        type="application/octet-stream"
+        sparkle:edSignature="zqJvUl9/ie0mFfFG2U/sTHELqSUwbMpiIHJLPJZSwk/T6Onpp47pPZsJRDJBWB5f2I5jVbAVKFPMED/SFXCSBg==" />
+    </item>
+    <item>
       <title>1.2.1</title>
       <pubDate>Tue, 08 Sep 2026 15:21:20 +0000</pubDate>
       <sparkle:version>1.2.1</sparkle:version>
