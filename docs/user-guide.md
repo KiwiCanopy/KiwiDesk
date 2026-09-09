@@ -957,11 +957,9 @@ Pick a layout mode for each space:
   remembers where each floating window sits when you switch
   spaces.
 
-:::unreleased
 Should that memory ever be lost — it survives a relaunch and a
 Desktop switch — a floating window comes back centred on its
 screen rather than at the corner hidden spaces park in.
-:::
 
 Gaps are carved out of the layout — windows never overlap them —
 and the app bar, if shown, carves its space the same way. The
