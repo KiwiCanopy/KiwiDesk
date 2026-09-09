@@ -3094,6 +3094,45 @@ ring's actual presence would shift the float every time it gained
 or lost focus. And it goes to zero with borders off, so nothing
 is reserved for chrome that is not on screen.
 
+**A corner is never a float's original, and a stranded float is
+re-centred (#1352).** [Principle] The stash restores a parked
+float from the capture taken at its first park, and that capture
+can be lost while the window still sits at the corner — a late
+park echo read as a user move, a Desktop switch sweeping the
+departed window's entry, a relaunch replaying the parked
+snapshot, a profile switch turning a tiled space floating. Four
+paths, one end state: the next stash captured the corner as the
+place the window belongs, and every activation delivered it
+there. Four patches would each have closed one path and left the
+class open, so the rule sits at the value instead: `stash`
+refuses to capture a frame that looks parked, and a float on a
+shown space with no capture and a corner frame is seeded a
+centred one inside `floatBounds` for the restore pass to deliver
+(`KiwiCore.recoverStrandedFloats`). Centred rather than
+re-anchored, because there is nothing to re-anchor from — the
+original is exactly what was lost. And the session snapshot
+records the capture rather than the state frame, so a relaunch
+puts the window back where it was instead of in the middle.
+
+*The corner test tolerates what the OS does to a park.* macOS
+lifts a parked window off the line it was asked for (the
+`looksStashed` docstring holds the device measurement), and a
+2 pt tolerance read every lifted park as a user move, which is
+how the first of the four paths opened. The y match is loose by
+one `visibilityFloor`, derived rather than restated, since the
+floor is the most the OS moves a frame to keep it reachable; the
+x match stays exact, because a 1 pt peek flush with the screen
+edge is where nothing but the park puts a window.
+
+*A window that left with its Desktop keeps its memory.* The
+Desktop sweep was a loss KiwiDesk caused itself: the restore
+pass swept the capture of a window that merely `vanished` with
+its Desktop while the away ledger (#1146) still knew it, and the
+recovery then centred what could have been restored. The sweep
+now spares every id the away ledger knows — the id is the same
+window when it returns — so the centring stays what it is meant
+to be, the net beneath a memory that is genuinely gone.
+
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
 frame the instant it turns floating, so `make_floating` /

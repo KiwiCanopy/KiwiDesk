@@ -131,7 +131,7 @@ extension KiwiCore {
             // even past the applier's grace — a stalled app's
             // late stash echo must not strand the window there.
             if !tiler.didRecentlySetFrame(id),
-                !TilingEngine.looksStashed(frame)
+                !tiler.looksStashed(frame)
             {
                 tiler.forgetStash(id)
             }
@@ -171,7 +171,7 @@ extension KiwiCore {
             // Same policy as .windowMoved above: a genuine
             // user resize takes the window over.
             if !tiler.didRecentlySetFrame(id),
-                !TilingEngine.looksStashed(frame)
+                !tiler.looksStashed(frame)
             {
                 tiler.forgetStash(id)
             }

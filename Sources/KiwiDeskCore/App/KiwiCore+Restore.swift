@@ -30,6 +30,23 @@ extension KiwiCore {
         }
         state.adopt(snapshot)
         for record in snapshot.windows {
+            // A parked float's record is the capture the old
+            // process held (#1352): SEED it, never set it — a set
+            // lands on a window the forced park that follows
+            // overwrites, and the seed door outranks the boot
+            // retile's centred seed. A record that is itself a
+            // corner is no original and is left alone.
+            if let current = state.windows[record.windowID]?.frame,
+                tiler.looksStashed(current)
+            {
+                if !tiler.looksStashed(record.frame) {
+                    tiler.seedStash(
+                        record.windowID,
+                        frame: record.frame
+                    )
+                }
+                continue
+            }
             tiler.setFrame(record.windowID, record.frame)
         }
         // Diagnostic: snapshot windows that are not tracked
