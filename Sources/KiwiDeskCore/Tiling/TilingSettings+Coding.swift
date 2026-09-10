@@ -235,7 +235,7 @@ extension TilingSettings: Codable {
             try panel.decodeIfPresent(
                 Bool.self,
                 forKey: .liquidGlass
-            ) ?? false
+            ) ?? TilingSettings().shortcutPanelLiquidGlass
     }
 
     private mutating func decodeSpace(

@@ -53,9 +53,9 @@ public struct TilingSettings: Sendable, Equatable {
     /// Liquid Glass on the ⌃⌥K shortcuts panel. Profile-scoped
     /// beside the two bars so ONE Settings row writes all three
     /// leaves (#1307); the panel reads the active profile.
-    /// Defaults off with them, so the row's "all three" reading
-    /// is never false on a fresh setup.
-    public var shortcutPanelLiquidGlass = false
+    /// Defaults ON with them (owner ruling 2026-09-10), so the
+    /// row's "all three" reading is never false on a fresh setup.
+    public var shortcutPanelLiquidGlass = true
     /// Space spawn placement overrides (`placement.override[space_id]`).
     public var placementOverride: [SpaceID: SpawnPlacement] =
         [:]

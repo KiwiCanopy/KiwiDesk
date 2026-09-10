@@ -17,16 +17,17 @@ import Testing
 @Suite("The Liquid Glass master")
 struct LiquidGlassMasterTests {
     /// The default this suite reasons from (tests.md): all three
-    /// ship OFF together, so an untouched config already agrees
-    /// with what the row shows and the master never has to write
-    /// to make that true. A panel defaulting ON would render
-    /// glass beside a switch reading off.
+    /// ship ON together (owner ruling 2026-09-10), so an untouched
+    /// config already agrees with what the row shows and the
+    /// master never has to write to make that true. A panel
+    /// defaulting OFF would render no glass beside a switch
+    /// reading on.
     @Test("the shipped surfaces already agree")
     func shippedSurfacesAgree() {
         let settings = TilingSettings()
-        #expect(settings.appBarStyle.liquidGlass == false)
-        #expect(settings.spaceBarStyle.liquidGlass == false)
-        #expect(settings.shortcutPanelLiquidGlass == false)
+        #expect(settings.appBarStyle.liquidGlass == true)
+        #expect(settings.spaceBarStyle.liquidGlass == true)
+        #expect(settings.shortcutPanelLiquidGlass == true)
         #expect(
             LiquidGlassAgreement(settings: settings).differ
                 == false
@@ -158,7 +159,10 @@ struct LiquidGlassMasterTests {
         let key = SettingKey.colours(.liquidGlassMaster)
         let model = makeTestModel()
         let before = SettingsDraftDiff.leaves(of: model.config)
-        model.liquidGlassMaster.wrappedValue = true
+        // Flip AWAY from the shipped default rather than to a
+        // literal, so a retuned default cannot make this a no-op.
+        model.liquidGlassMaster.wrappedValue =
+            !model.liquidGlassMaster.wrappedValue
         let after = SettingsDraftDiff.leaves(of: model.config)
         let moved = Set(before.keys).union(after.keys)
             .filter { before[$0] != after[$0] }
@@ -179,7 +183,8 @@ struct LiquidGlassMasterTests {
         let key = SettingKey.colours(.liquidGlassMaster)
         let model = makeTestModel()
         let clean = model.config
-        model.liquidGlassMaster.wrappedValue = true
+        model.liquidGlassMaster.wrappedValue =
+            !model.liquidGlassMaster.wrappedValue
         let diff = SettingsDraftDiff.between(
             config: model.config,
             cleanConfig: clean

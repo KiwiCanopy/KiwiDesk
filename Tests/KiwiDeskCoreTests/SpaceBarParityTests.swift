@@ -152,7 +152,7 @@ struct SpaceBarCommandParityTests {
         .itemSize(120), .itemGap(3), .fontSize(15),
         .glyphCap(8), .titleCap(40),
         .iconSource(.appFont), .backgroundStyle(.boxed),
-        .liquidGlass(true),
+        .liquidGlass(false),
         .backgroundFit(.full),
         .activeIndicator(.gap), .cornerRoundness(5),
         .dimFactor(0.3), .activeDimFactor(0.7),

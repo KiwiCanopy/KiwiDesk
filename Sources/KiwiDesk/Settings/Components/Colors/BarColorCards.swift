@@ -127,7 +127,7 @@ struct AdvancedColorRows: View {
     }
 
     /// Resolves container gate and row predicate state for a setting key.
-    static func gate(
+    nonisolated static func gate(
         allows: Bool,
         key: SettingKey
     ) -> (rowPredicateLive: Bool, containerGrey: Bool) {
