@@ -43,6 +43,10 @@ extension KiwiCore {
     /// so this reads no machine state.
     func desktopSettle(ifStill desktop: SkyLight.SpaceID?) {
         guard desktopMemory.lastDesktopSpace == desktop else { return }
+        // #1364: the departures this switch folded, consumed by
+        // the one settle that runs for it.
+        let departed = desktopMemory.switchDepartures
+        desktopMemory.switchDepartures = []
         // The switch's `reconcileAll` is census-gated (#1037),
         // and that census can beat the compositor: a window
         // still landing when the notification fired was on no
@@ -80,6 +84,20 @@ extension KiwiCore {
             onLog(
                 "desktop return: focus owed to w\(owed.raw), "
                     + "settle refocus stands down"
+            )
+        } else if let focused = activeSpace?.focused,
+            departed.contains(focused)
+        {
+            // #1364: a window that LEFT WITH ITS DESKTOP in this
+            // switch and is back was re-listed, not chosen — an
+            // empty destination makes its app the active one
+            // and re-lists it — and raising it activates the app
+            // on the Desktop the user left. macOS picks the focus
+            // on the Desktop it shows (#1345's reading).
+            onLog(
+                "desktop settle: w\(focused.raw) left with this "
+                    + "switch and came back — refocus stands down "
+                    + "(#1364)"
             )
         } else if let focused = activeSpace?.focused,
             state.windows[focused]?.isFullscreen != true

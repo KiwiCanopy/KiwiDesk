@@ -1901,6 +1901,30 @@ arrival raises through the same gate: on the owner's round trips
 refusal, so the AX create that pays it arrives after the draw
 list lists the window.
 
+**The settle's refocus is the third arm, and the gate cannot
+stand in for it (#1364, 2026-09-10).** A swipe to an EMPTY
+Desktop made macOS activate Finder — the desktop itself — and
+Finder's window on the Desktop just left was re-listed within the
+second, adopted back into its space's vacancy, and re-asserted
+by the settle's refocus 1.2 s after the swipe: the pull-back,
+measured in the unified log (the `DIAG focusWindow … from
+desktopSettle` line, 01:20:11.547). The gate let it through
+because the compositor was drawing the window, and it still
+switched Desktops, since activating an app brings the Desktop of
+the window it names forward. So the settle refuses a focus the
+switch itself removed: every departure `departedWithDesktop`
+files is remembered until the settle that runs consumes the set,
+and a focused window found in it is left where macOS put the
+focus, with a log line naming it. The trade is the same one the
+close-return arm already made — macOS picks the focus on the
+Desktop it shows — and it costs nothing a user can see: a window
+that stayed through the switch is re-asserted exactly as before,
+and a Desktop return's remembered focus is #1207's payment, not
+this refocus. The other half of the issue — whether a swipe on
+one display should have removed a window on a display whose
+Desktop did not change — is a two-display measurement this entry
+does not settle.
+
 ### A focus report is only as good as the activation behind it (#1322)
 
 **[Rationale]**

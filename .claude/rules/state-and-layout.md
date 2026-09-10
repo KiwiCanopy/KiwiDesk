@@ -678,7 +678,17 @@ editing here:
   restoring it, so the #1161 placement distrust stands down on it
   rather than bouncing the OS's own restore, and on nothing older,
   where the memory names whatever was honored last
-  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple).
+  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple). A
+  third arm is the settle's own (#1364): a window that LEFT WITH
+  ITS DESKTOP inside the switch and is back before the settle —
+  `DesktopMemory.switchDepartures`, written beside
+  `departedWithDesktop` and
+  consumed by the one settle that runs — was RE-LISTED, not
+  chosen (an empty destination Desktop makes its app the active
+  one), so `desktopSettle` never re-asserts it; the gate cannot
+  catch this raise, because the window IS on screen — and the
+  raise still activates its app on the Desktop the user left
+  (`DesktopSettleDepartureTests`).
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once
