@@ -42,6 +42,9 @@ final class DesktopMemory {
     /// paid at that window's ARRIVAL (#1207) — the #1007 shape,
     /// a second instance: per-window record, bound, rekey.
     let returnFocus = FollowFocusIntent()
+    /// The windows that LEFT WITH THEIR DESKTOP since the last
+    /// settle that ran (#1364); that settle consumes the set.
+    var switchDepartures: Set<WindowID> = []
 
     /// Desktops whose stamp write was dispatched and not yet
     /// confirmed by a later snapshot (#1147). Written by
