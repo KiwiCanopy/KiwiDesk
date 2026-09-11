@@ -27,6 +27,11 @@ extension KiwiCore {
         // NSApplication read.
         let departedWithDesktop =
             departedWithDesktop(event, reason: goneReason)
+        // #1364: the settle reads this to refuse re-asserting a
+        // focus the switch itself removed.
+        if departedWithDesktop, let id = event.goneWindowID {
+            desktopMemory.switchDepartures.insert(id)
+        }
         let closeReturnRaiseStandsDown =
             effects.removedWindow?.focusLost == true
             && eventLoop.closeReturnRaiseStandsDown(
