@@ -13,7 +13,8 @@ struct BackgroundStyleGlassTests {
     @Test("glassEnabled gates the finish on OS capability")
     func glassGate() {
         var style = AppBarStyle()
-        #expect(style.glassEnabled == false)  // default off
+        style.liquidGlass = false
+        #expect(style.glassEnabled == false)
         style.liquidGlass = true
         // Effective only where the platform can render glass.
         #expect(style.glassEnabled == AppBarStyle.glassAvailable)

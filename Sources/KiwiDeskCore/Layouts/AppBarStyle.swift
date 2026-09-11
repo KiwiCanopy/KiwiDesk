@@ -11,8 +11,9 @@ public struct AppBarStyle: Sendable, Equatable {
     public var thickness: CGFloat = 32
     /// Background plate style (plain by default, #660).
     public var backgroundStyle: BackgroundStyle = .plain
-    /// Liquid Glass material (macOS 26+, #390).
-    public var liquidGlass: Bool = false
+    /// Liquid Glass material (macOS 26+, #390). On by default
+    /// (owner ruling 2026-09-10); inert below 26 via `glassEnabled`.
+    public var liquidGlass: Bool = true
     /// Background fit (hug by default, QA 2026-07-19).
     public var backgroundFit: BackgroundFit = .hug
     public var activeIndicator: ActiveIndicator = .outline

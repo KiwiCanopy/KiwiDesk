@@ -131,11 +131,14 @@ struct SettingsCodingTests {
         // the SHAPE).
         let refusal = try object(root["refusal"])
         #expect(refusal["sound"] as? Bool != nil)
-        // #1307: the shortcuts panel's leaf ships OFF with the
-        // two bars, so the one row's "all three" reading is
-        // never false on a fresh setup.
+        // #1307: the shortcuts panel's leaf ships with the two
+        // bars (ON since 2026-09-10), so the one row's "all
+        // three" reading is never false on a fresh setup.
         let panel = try object(root["shortcut_panel"])
-        #expect(panel["liquid_glass"] as? Bool == false)
+        #expect(
+            panel["liquid_glass"] as? Bool
+                == TilingSettings().shortcutPanelLiquidGlass
+        )
         #expect(resize["feedback"] == nil)
         #expect(root["mouse_resize"] as? String == "layout")
         // Toggles (issue #11) and duration knobs (issue #51).

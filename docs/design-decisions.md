@@ -9369,7 +9369,14 @@ earlier degraded-render bug: the items stay embedded as the glass's
 a hue for it to sample — never a replacement for the content. A
 fully transparent `fill_color` leaves the glass clear. One seam
 owns the five hosting modes (`GlassHosting` / `GlassTint`, #407).
-The default stays no-glass; the finish is OS-gated: ignored below
+The finish is ON by default on every surface (owner ruling
+2026-09-10, reversing the launch-day no-glass default: the bars
+are the app's face, and a fresh install or a Reset All Settings
+should show the finish the app is designed around rather than
+ask for it). Written profiles carry the leaf explicitly, so an
+existing config keeps its choice; only a fresh seed and a
+hand-written config that omits the key take the new default.
+The finish stays OS-gated: ignored below
 macOS 26 (`glassEnabled` = `liquidGlass && glassAvailable`), and
 its Settings toggle is *hidden* there — an OS-capability gate, so
 absent not greyed (grey-don't-hide is for mode-inert controls, not

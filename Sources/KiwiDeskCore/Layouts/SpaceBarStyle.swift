@@ -31,8 +31,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var iconSource: BarAppIconSource = .appImage
     /// Plain by default, matching App Bar (#660).
     public var backgroundStyle: BackgroundStyle = .plain
-    /// Liquid Glass finish (macOS 26+). Ignored on older versions.
-    public var liquidGlass: Bool = false
+    /// Liquid Glass finish (macOS 26+). On by default with the App
+    /// Bar (owner ruling 2026-09-10); ignored on older versions.
+    public var liquidGlass: Bool = true
     /// Background fit (hug by default, QA 2026-07-19).
     public var backgroundFit: BackgroundFit = .hug
     public var activeIndicator: ActiveIndicator = .outline

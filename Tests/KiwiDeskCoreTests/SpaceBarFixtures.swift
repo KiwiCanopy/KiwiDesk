@@ -23,7 +23,7 @@ enum SpaceBarFixtures {
         style.titleCap = 40
         style.iconSource = .appFont
         style.backgroundStyle = .boxed
-        style.liquidGlass = true
+        style.liquidGlass = false
         style.backgroundFit = .full
         style.activeIndicator = .gap
         style.cornerRoundness = 5
