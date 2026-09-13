@@ -790,7 +790,7 @@
   "onboarding.ready.body": "KiwiDesk 現已採用適合你螢幕的配置來管理視窗。",
   "onboarding.ready.menu_bar": "點按選單列中的 KiwiDesk 圖像即可打開「設定」，在那裡可以更改佈局、快速鍵以及其他一切。",
   "onboarding.ready.open_at_login": "登入時啟動 KiwiDesk",
-  "onboarding.ready.star_hint": "KiwiDesk 免費且開源 —— %1$@有助於讓更多人發現它。",
+  "onboarding.ready.star_hint": "KiwiDesk 的原始碼已公開——%1$@ 能幫助更多人發現它。",
   "onboarding.ready.star_link": "在 GitHub 上點亮星標",
   "onboarding.ready.start": "開始使用",
   "onboarding.ready.title": "一切就緒",

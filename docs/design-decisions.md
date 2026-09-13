@@ -68,6 +68,70 @@ in miniature: a dead-simple glance surface, with one "Edit in
 Settings…" bridge down to the full editor — simple entry, deeper
 layer one click away, never forced.
 
+### Source-available from 1.3.0, under the Business Source License 1.1
+
+**[Principle]**
+
+KiwiDesk's source stays public and KiwiDesk is not open source.
+From 1.3.0 the terms are the Business Source License 1.1:
+personal, non-commercial use stays free, commercial use — inside
+a business, or offering KiwiDesk or a derivative as a product or
+service — needs a commercial license from the Licensor, and each
+version converts to MIT on a Change Date. `LICENSE` is the
+authority for every parameter — how far the grant reaches, and
+how the Change Date is computed — so argue what the license
+*means* here and link to it for what it *says*, rather than
+carrying a third copy of the numbers. Versions published before
+1.3.0 were released under MIT and remain so: a license governs
+what is released under it and nothing before. (Owner ruling
+2026-09-13.)
+
+**Why a source-available license, and why before any launch
+rather than after.** Under MIT anyone may take the published
+code and sell it, bundle it, or host it as a product, and the
+project keeps no lever over that but its name. A source-available
+license reserves commercial use to the Licensor while the source
+stays public and personal use stays free, which is the shape the
+project wants: readable, forkable for personal use, and not
+someone else's product. The timing follows from goodwill. A
+switch made after a launch spends what the launch earned — people
+remember the relicense, not the reason — and lands at the moment
+of maximum attention, on the largest possible free snapshot.
+Switching before any launch pays the cost once and early, and
+leaves nothing to walk back: the terms a launch-day reader
+sees are the terms that stay. BSL 1.1 was chosen over the plainer
+non-commercial licenses because its terms are the ones developers
+already know from other source-available projects, and because it
+commits to a Change Date, which a plain non-commercial license
+does not.
+
+**What the switch does not do.** It changes nothing for personal
+use: the Additional Use Grant keeps it free, and the license
+itself asks for no key, account or payment. It does not touch the vendored Lua or
+Sparkle, which keep their MIT licenses. And it does not stop a
+fork of the last MIT version; that risk was accepted the day
+0.9.7 shipped under MIT and is the reason the switch is sooner
+rather than later.
+
+**What travels with it.** Copy about KiwiDesk states the license
+rather than promising a price, because a price is a promise and a
+license is a fact: the bare "free" that described the product was
+retired the same week (#1375), while "free for personal use"
+stays, since that is the grant's own reach and not a pricing
+claim. And a line naming the license has to be true of the build
+the reader can actually download — the site deploys from `main`
+while the newest release is whatever was last tagged, so copy
+beside a download either names the version the terms start at or
+links to `LICENSE`, which carries that boundary itself.
+Contributions are accepted under a relicensing grant stated in
+CONTRIBUTING.md ▸ Licensing Your Contribution, since a later
+Change Date or commercial license needs every contributor's
+consent otherwise, and the trademark notice on the name and logo
+is what the license itself leaves open — the license disclaims
+any trademark grant, so nothing else does it. The boundary is a
+tagged version rather than a date, so it is the same fact in the
+release notes, in `LICENSE` and in a `git tag`.
+
 ### Accepted limitations
 
 **[Trade-off]**
@@ -9409,13 +9473,33 @@ earlier degraded-render bug: the items stay embedded as the glass's
 a hue for it to sample — never a replacement for the content. A
 fully transparent `fill_color` leaves the glass clear. One seam
 owns the five hosting modes (`GlassHosting` / `GlassTint`, #407).
+
+:::unreleased
 The finish is ON by default on every surface (owner ruling
 2026-09-10, reversing the launch-day no-glass default: the bars
 are the app's face, and a fresh install or a Reset All Settings
 should show the finish the app is designed around rather than
-ask for it). Written profiles carry the leaf explicitly, so an
-existing config keeps its choice; only a fresh seed and a
-hand-written config that omits the key take the new default.
+ask for it). A leaf whose ABSENCE changed meaning owes the §5
+crossing, because absence was a stored value: a profile written
+before v1.2.0 carries both bar leaves and no panel group at all,
+so read under the new default it says bars off beside a panel on
+— the state the one row exists to make unreachable — on a plain
+upgrade. `ConfigMigration` therefore fills a file below the
+floor: each absent BAR leaf takes the `false` its absence meant,
+and the panel — which had no surface before v1.2.0, so no leaf a
+user could have set — takes the two bars' agreement where they
+agree and `false` otherwise, since the bars are the user's
+stated opinion about glass, and a flat `false` would have minted
+the same divergence at the other polarity for a setup that had
+glass on. The step reaches the two shapes that carry
+`TilingSettings` by path, never by the look of an object
+(`GlassDefaultMigrationTests`, `ConfigMigrationGlassRoutingTests`).
+An existing setup keeps the look it had, and only a fresh seed
+takes the new default. Below macOS 26 the toggle is absent, so a
+setup authored there carries the stored value wherever it is
+imported, the finish included.
+:::
+
 The finish stays OS-gated: ignored below
 macOS 26 (`glassEnabled` = `liquidGlass && glassAvailable`), and
 its Settings toggle is *hidden* there — an OS-capability gate, so

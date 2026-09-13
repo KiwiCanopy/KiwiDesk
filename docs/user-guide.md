@@ -398,6 +398,10 @@ App Bar overrides](lua-reference.md#per-layout-app-bar-overrides)).
 panel (**Colours & Animations**), tinted by each bar's Fill; on
 macOS before 26 the Boxed or Plain shape draws underneath.
 
+:::unreleased
+On by default, on all three surfaces.
+:::
+
 ### Space Bar
 
 One bar per display, listing that display's Spaces in profile

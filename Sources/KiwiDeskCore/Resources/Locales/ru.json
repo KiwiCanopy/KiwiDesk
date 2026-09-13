@@ -790,7 +790,7 @@
   "onboarding.ready.body": "KiwiDesk теперь управляет твоими окнами с настройкой, подобранной для твоих экранов.",
   "onboarding.ready.menu_bar": "Нажми значок KiwiDesk в строке меню, чтобы открыть Настройки: там меняются раскладки окон, сочетания клавиш и всё остальное.",
   "onboarding.ready.open_at_login": "Запускать KiwiDesk при входе",
-  "onboarding.ready.star_hint": "KiwiDesk бесплатен и с открытым исходным кодом — %1$@ помогает другим людям его найти.",
+  "onboarding.ready.star_hint": "Исходный код KiwiDesk опубликован — %1$@ помогает другим людям его найти.",
   "onboarding.ready.star_link": "звезда на GitHub",
   "onboarding.ready.start": "Начать использование",
   "onboarding.ready.title": "Всё готово",

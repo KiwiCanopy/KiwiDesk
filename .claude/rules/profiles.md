@@ -319,6 +319,16 @@ holds the secondary-switch decision including its nil case.
   was true while the author was the only user, and v0.9.7 shipped
   to others. A lenient decoder is still banned; it never ends,
   where a rewrite does.
+- **A stored value's ABSENCE is a value too: a default flip on a
+  sparsely-encoded leaf owes the same crossing.** Under the old
+  build an absent key meant the old default, so a file below the
+  floor gets the old meaning written explicitly — or derived from
+  what it does carry, where the leaf had no surface a user could
+  have set — never the new default by silence. The Liquid Glass
+  leaves are the precedent (#1369, `GlassDefaultMigrationTests`);
+  the step reaches the two shapes that carry `TilingSettings` by
+  PATH, and `ConfigMigrationGlassRoutingTests` holds that
+  `settings` stays the one top-level key it lands on.
 
 ## Whose arrangement is live (#1249)
 

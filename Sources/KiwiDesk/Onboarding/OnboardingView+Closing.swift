@@ -56,8 +56,8 @@ extension OnboardingView {
     private var starProse: String {
         L(
             "onboarding.ready.star_hint",
-            "KiwiDesk is free and open source — %1$@ helps "
-                + "other people find it."
+            "KiwiDesk's source is public — %1$@ helps other "
+                + "people find it."
         )
     }
 

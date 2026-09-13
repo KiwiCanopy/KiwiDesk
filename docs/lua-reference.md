@@ -709,7 +709,9 @@ KiwiDesk.set_refusal_sound(true)
 
 ### set_shortcut_panel_liquid_glass
 
+:::unreleased
 **Expects:** `true` or `false` (default `true`).
+:::
 
 **Does:** lays a macOS&nbsp;26 Liquid Glass material over the
 shortcuts panel — the one ⌃⌥K opens (#1307). Off, the panel
@@ -1884,7 +1886,9 @@ app_bar.set_background_style("plain")
 
 ### app_bar.set_liquid_glass
 
+:::unreleased
 **Expects:** a boolean (default `true`).
+:::
 
 **Does:** lays a macOS 26 Liquid Glass material over the item
 backgrounds (the boxes or the plate) — an orthogonal finish, so
@@ -2429,7 +2433,9 @@ space_bar.set_background_style("boxed")
 
 ### space_bar.set_liquid_glass
 
+:::unreleased
 **Expects:** a boolean (default `true`).
+:::
 
 **Does:** lays the macOS 26 Liquid Glass finish over the Space
 items — see `app_bar.set_liquid_glass` for the full behavior
