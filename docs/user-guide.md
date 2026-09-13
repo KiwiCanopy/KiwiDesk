@@ -1761,7 +1761,6 @@ hold.
   Rounds the boxed items, or the shared plate under Plain and
   Liquid Glass.
 
-
 **Colors** are not on this page — every App Bar tint lives in
 **Advanced Colors ▸ App Bar colors**, with Fill and Highlight at
 rest and the rest behind **More colors**. **Fill** is one

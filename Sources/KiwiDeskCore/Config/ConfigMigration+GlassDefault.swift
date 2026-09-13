@@ -1,22 +1,11 @@
 import Foundation
 
 /// Fills the Liquid Glass leaves a file below the floor left
-/// ABSENT (#1369, `GlassDefaultMigrationTests`).
-///
-/// The default flipped from off to on, so absence changed
-/// meaning: absence is a stored value (profiles.md). Each absent
-/// BAR leaf takes the `false` its absence meant. The PANEL had no
-/// surface before v1.2.0 — no leaf a user could have set — so it
-/// takes the two bars' agreement where they agree and `false`
-/// otherwise: the bars are the user's stated opinion about
-/// glass, and a flat `false` would mint for a glass-on setup the
-/// very divergence the one Settings row (#1307) exists to make
-/// unreachable. Reached by PATH — a profile root's `settings`, a
-/// bundle root's `profiles[].settings`, the two shapes that carry
-/// `TilingSettings` — never by the look of an object, so a
-/// per-layout `app_bar` override (`settings.layout.*.app_bar`,
-/// whose absent leaf means inherit) is out of reach by
-/// construction.
+/// ABSENT (#1369, `GlassDefaultMigrationTests`): each absent bar
+/// leaf as `false`, the panel from the two bars' agreement, by
+/// PATH — a profile root's `settings` and a bundle root's
+/// `profiles[].settings`. The argument is design-decisions'
+/// (#1369) and the obligation profiles.md's.
 extension ConfigMigration {
     static let glassLeafKey = "liquid_glass"
     /// Spelled here rather than derived: a historical step keeps
@@ -95,64 +84,84 @@ extension ConfigMigration {
         }
         for group in glassBarGroups { write(group, false) }
         let bars = glassBarGroups.map(leaf)
-        let agreed = bars[0] == bars[1] ? (bars[0] ?? false) : false
-        write(glassPanelGroup, agreed)
+        let agree = bars.dropFirst().allSatisfy { $0 == bars.first! }
+        write(glassPanelGroup, agree ? (bars.first! ?? false) : false)
         return (out, changed)
     }
 
     /// The textual edit, for the shapes a file the app or a hand
-    /// wrote actually has: a group present ONCE without its leaf
-    /// gets the leaf after its opener, a group absent everywhere
-    /// is inserted whole after each `settings` opener, and the
-    /// panel is inserted `false` — so a glass-on setup, whose
-    /// panel the walk fills `true`, stands down to the walk, as
-    /// does any group named twice (a per-layout override beside
-    /// the global). `surgicallyApplying` re-parses whatever this
-    /// returns against the walk, so a stray edit is never used.
+    /// wrote actually has. Every `liquid_glass` in the text must
+    /// carry ONE value, or the walk decides; a bar group present
+    /// once as a flat object gets a missing leaf after its opener,
+    /// a group absent everywhere is inserted whole after each
+    /// `settings` opener, and the panel takes that one value —
+    /// so a glass-on profile keeps its formatting too. A group
+    /// named twice, or holding a nested object, stands down.
+    /// `surgicallyApplying` re-parses whatever this returns against
+    /// the walk, so a stray edit is never used.
     static func surgicallyFilledGlassLeaves(_ text: String) -> Data? {
-        guard text.range(of: "\"\(glassPanelGroup)\"") == nil,
-            text.range(
-                of: "\"\(glassLeafKey)\"\\s*:\\s*true",
-                options: .regularExpression
-            ) == nil
+        guard text.range(of: "\"\(glassPanelGroup)\"") == nil
         else { return nil }
+        let values = Set(
+            captures(
+                "\"\(glassLeafKey)\"\\s*:\\s*(true|false)",
+                in: text
+            )
+        )
+        guard values.count <= 1 else { return nil }
+        let value = values.first ?? "false"
         var out = text
-        var absent: [String] = [glassPanelGroup]
+        var absent: [String] = []
         for group in glassBarGroups {
             let needle = "\"\(group)\""
             let count = out.components(separatedBy: needle).count - 1
             if count == 0 {
                 absent.append(group)
-            } else if count == 1,
-                out.range(
-                    of: "\"\(group)\"\\s*:\\s*\\{[^}]*\"\(glassLeafKey)\"",
-                    options: .regularExpression
-                ) == nil
-            {
+                continue
+            }
+            guard count == 1,
+                let body = captures(
+                    "\"\(group)\"\\s*:\\s*\\{([^{}]*)\\}",
+                    in: out
+                ).first
+            else { return nil }
+            if !body.contains("\"\(glassLeafKey)\"") {
                 out = out.replacingOccurrences(
                     of: "(\"\(group)\"\\s*:\\s*\\{)",
-                    with: "$1\"\(glassLeafKey)\":false,",
+                    with: "$1\"\(glassLeafKey)\":\(value),",
                     options: .regularExpression
                 )
-            } else if count > 1 {
-                return nil
             }
         }
-        let inserted = absent.map {
-            "\"\($0)\":{\"\(glassLeafKey)\":false},"
-        }.joined()
+        absent.append(glassPanelGroup)
+        let entries = absent.map {
+            "\"\($0)\":{\"\(glassLeafKey)\":\(value)}"
+        }.joined(separator: ",")
+        // An empty object takes the entries alone; a populated
+        // one takes them ahead of what it holds.
         out = out.replacingOccurrences(
-            of: "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)",
-            with: "$1" + inserted,
+            of: "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)\\s*\\}",
+            with: "$1" + entries + "}",
             options: .regularExpression
         )
-        // A group inserted as the last entry of an empty object
-        // leaves a trailing comma; close it.
         out = out.replacingOccurrences(
-            of: ",\\s*\\}",
-            with: "}",
+            of: "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)(?=[^}])",
+            with: "$1" + entries + ",",
             options: .regularExpression
         )
         return out == text ? nil : out.data(using: .utf8)
+    }
+
+    /// Every first capture of `pattern` in `text`.
+    private static func captures(
+        _ pattern: String,
+        in text: String
+    ) -> [String] {
+        guard let regex = try? NSRegularExpression(pattern: pattern)
+        else { return [] }
+        let whole = NSRange(text.startIndex..., in: text)
+        return regex.matches(in: text, range: whole).compactMap {
+            Range($0.range(at: 1), in: text).map { String(text[$0]) }
+        }
     }
 }

@@ -208,29 +208,70 @@ struct GlassDefaultMigrationTests {
         )
     }
 
-    /// The textual edit's stand-down: an empty `settings` beside a
-    /// real one makes the insert a stray, the envelope's re-parse
-    /// refuses it, and the walk still fills both.
+    /// The textual edit's stand-down: bars that disagree carry
+    /// two values, so the edit stands down and the walk fills
+    /// both profiles.
     @Test("a shape the textual edit cannot take falls to the walk")
     func strayEditFallsToTheWalk() throws {
+        let mixed = """
+            {"space_bar":{"liquid_glass":true},\
+            "app_bar":{"liquid_glass":false}}
+            """
         let data = json(
             """
             {"format":5,"writtenBy":"1.2.2","config":null,\
             "profiles":[\(inline("A", settings: "{}")),\
-            \(inline("B", settings: #"{"space_bar":{}}"#))],\
+            \(inline("B", settings: mixed))],\
             "palettes":[]}
             """
         )
         let out = try #require(ConfigMigration.migrated(data))
+        // The fallback's own signature: the walk pretty-prints.
+        let text = try #require(String(data: out, encoding: .utf8))
+        #expect(text.contains("\n"))
         let profiles = try #require(
             root(out)["profiles"] as? [[String: Any]]
         )
         for p in profiles {
             let s = try #require(p["settings"] as? [String: Any])
-            #expect(leaf(s, "app_bar") == false)
-            #expect(leaf(s, "space_bar") == false)
             #expect(leaf(s, "shortcut_panel") == false)
         }
+    }
+
+    /// A glass-on profile the app wrote takes the surgical edit
+    /// too: the panel is carried textually as the bars' value.
+    @Test("a glass-on app-written profile keeps its formatting")
+    func glassOnKeepsFormatting() throws {
+        let data = profile(
+            """
+            {"app_bar":{"liquid_glass":true,"dim_factor":0.4},\
+            "space_bar":{"liquid_glass":true}}
+            """
+        )
+        let out = try #require(ConfigMigration.migrated(data))
+        let text = try #require(String(data: out, encoding: .utf8))
+        #expect(!text.contains("\n"))
+        #expect(leaf(try settings(out), "shortcut_panel") == true)
+    }
+
+    /// A nested object inside a bar group is a shape the leaf
+    /// scan cannot read past; the edit stands down and the walk
+    /// writes the leaf once.
+    @Test("a nested object in a bar group stands the edit down")
+    func nestedObjectStandsTheEditDown() throws {
+        let data = profile(
+            """
+            {"app_bar":{"x":{"a":1},"liquid_glass":false},\
+            "space_bar":{"liquid_glass":false}}
+            """
+        )
+        let out = try #require(ConfigMigration.migrated(data))
+        let text = try #require(String(data: out, encoding: .utf8))
+        #expect(
+            text.components(separatedBy: "\"liquid_glass\"").count
+                == 4
+        )
+        #expect(leaf(try settings(out), "app_bar") == false)
     }
 
     /// The common shape takes the surgical edit: one line stays

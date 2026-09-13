@@ -102,7 +102,7 @@ func paintedSpaceBar(
     // since #1369, so an arm that only set `true` would tell
     // `glass: false` nothing. The shape moves only under glass.
     style.liquidGlass = glass
-    if glass { style.backgroundStyle = .plain }
+    style.backgroundStyle = .plain
     return SpaceBarManager.Bar(
         display: barTitleDisplay,
         items: (1...max(spaces, 1)).map { n in
