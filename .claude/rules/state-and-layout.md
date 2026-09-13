@@ -661,8 +661,9 @@ editing here:
   `DesktopRaiseGateArmTests` the three arms each beside a shown
   control, and `DesktopRaiseGateSeamTests` the census of files
   that may spell `AXHelper.raise(` — a new raise site joins it
-  and asks the gate in the same file. Two arms follow from the
-  same reading that a swipe is not a close: a window that LEFT
+  and asks the gate in the same file. Further arms follow from
+  the same reading that a swipe is not a close — append one here
+  rather than opening a bullet of its own: a window that LEFT
   WITH ITS DESKTOP — `vanished`, and not a move verb's own
   departure, which the verb records per window and the gone
   handler claims (`departedWithDesktop`, never the #482 follow
@@ -678,17 +679,18 @@ editing here:
   restoring it, so the #1161 placement distrust stands down on it
   rather than bouncing the OS's own restore, and on nothing older,
   where the memory names whatever was honored last
-  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple). A
-  third arm is the settle's own (#1364): a window that LEFT WITH
-  ITS DESKTOP inside the switch and is back before the settle —
-  `DesktopMemory.switchDepartures`, written beside
-  `departedWithDesktop` and
-  consumed by the one settle that runs — was RE-LISTED, not
-  chosen (an empty destination Desktop makes its app the active
-  one), so `desktopSettle` never re-asserts it; the gate cannot
-  catch this raise, because the window IS on screen — and the
-  raise still activates its app on the Desktop the user left
-  (`DesktopSettleDepartureTests`).
+  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple); and
+  the settle's own (#1364): `desktopSettle` never re-asserts a
+  focus the switch itself removed — a window whose departure
+  `departedWithDesktop` filed, through the one
+  `fileSwitchDeparture`, no earlier than the switch grace before
+  the switch and inside `switchDepartureWindow`, asked through
+  the one `departedWithThisSwitch` and never by reading
+  `DesktopMemory.switchDepartures` at a call site — and that
+  record is re-keyed, retired and #634-forgotten with
+  `honoredFocus`, since it is id-keyed like it
+  (`DesktopSettleDepartureTests`). The arm reads no on-screen
+  flag on purpose: the argument is the design-decisions entry's.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

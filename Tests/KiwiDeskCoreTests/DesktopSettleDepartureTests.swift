@@ -86,7 +86,10 @@ struct DesktopSettleDepartureTests {
         )
     }
 
-    private func settle(_ core: KiwiCore) {
+    /// Scoped to the settle: the lines are cleared first, so the
+    /// raise needle can only come from the settle's own refocus.
+    private func settle(_ core: KiwiCore, _ box: Box) {
+        box.lines = []
         core.desktopSettle(
             ifStill: core.desktopMemory.lastDesktopSpace
         )
@@ -117,7 +120,7 @@ struct DesktopSettleDepartureTests {
         swipeToEmptyDesktop(core)
         relist(core)
         #expect(core.state.workspaces[home]?.focused == focused)
-        settle(core)
+        settle(core, box)
         #expect(stoodDown(box))
         #expect(!reachedTheRaise(box))
     }
@@ -129,7 +132,7 @@ struct DesktopSettleDepartureTests {
         let (core, box) = makeCore()
         defer { teardown() }
         swipeToEmptyDesktop(core)
-        settle(core)
+        settle(core, box)
         #expect(!stoodDown(box))
         #expect(reachedTheRaise(box))
     }
@@ -145,27 +148,84 @@ struct DesktopSettleDepartureTests {
         core.handle(.windowDestroyed(focused, wasMinimized: false))
         swipeToEmptyDesktop(core)
         relist(core)
-        settle(core)
+        settle(core, box)
         #expect(!stoodDown(box))
         #expect(reachedTheRaise(box))
     }
 
-    /// Consumed by the settle that ran: the next switch's settle
-    /// starts with no departures, so the same window, still
-    /// focused, is re-asserted then.
-    @Test("the settle consumes the departures it read")
-    func settleConsumesTheDepartures() {
+    /// A record older than the switch is not this switch's: the
+    /// filing is stamped, and a later switch's settle re-asserts
+    /// the same still-focused window. Backdated past the grace
+    /// rather than waited out (tests.md: no tight deadlines).
+    @Test("a departure filed before the switch grace is not this switch's")
+    func olderDepartureIsNotThisSwitch() {
         let (core, box) = makeCore()
         defer { teardown() }
         core.desktopMemory.readWindowSpace = { _ in .hosted(11) }
         core.handle(.windowDestroyed(focused, wasMinimized: false))
         swipeToEmptyDesktop(core)
         relist(core)
-        settle(core)
+        settle(core, box)
         #expect(stoodDown(box))
-        box.lines = []
-        settle(core)
+        core.desktopMemory.switchDepartures[focused] = Date()
+            .addingTimeInterval(
+                -EventLoop.spaceSwitchCoalesceGrace - 1
+            )
+        settle(core, box)
         #expect(!stoodDown(box))
         #expect(reachedTheRaise(box))
+    }
+
+    /// The bound and the door: a stale entry is pruned at the
+    /// next filing and never read, a fresh one inside the grace
+    /// before the switch is read.
+    @Test("the record is age-bounded and read against the switch")
+    func recordIsBoundedAndSwitchScoped() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        let stale = WindowID(9)
+        let now = Date()
+        core.fileSwitchDeparture(
+            stale,
+            now: now.addingTimeInterval(
+                -KiwiCore.switchDepartureWindow - 1
+            )
+        )
+        core.fileSwitchDeparture(focused, now: now)
+        #expect(core.desktopMemory.switchDepartures[stale] == nil)
+        #expect(!core.departedWithThisSwitch(stale, now: now))
+        core.lastDesktopSwitch = now.addingTimeInterval(0.5)
+        #expect(core.departedWithThisSwitch(focused, now: now))
+        core.lastDesktopSwitch = now.addingTimeInterval(
+            EventLoop.spaceSwitchCoalesceGrace + 0.5
+        )
+        #expect(!core.departedWithThisSwitch(focused, now: now))
+    }
+
+    /// Id-keyed like the focus memory, and re-keyed with it: a
+    /// native-tab return under a fresh id still stands down.
+    @Test("a re-key carries the record to the fresh id")
+    func rekeyFollows() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        let fresh = WindowID(7)
+        core.fileSwitchDeparture(focused)
+        core.rekeyDesktopFocus(old: focused, new: fresh)
+        #expect(core.desktopMemory.switchDepartures[focused] == nil)
+        #expect(core.departedWithThisSwitch(fresh))
+    }
+
+    /// Retired with the focus memory: a window gone for good, and
+    /// the #634 reset, leave no record behind.
+    @Test("retire and the arrangement reset end the record")
+    func retireAndResetEndTheRecord() {
+        let (core, _) = makeCore()
+        defer { teardown() }
+        core.fileSwitchDeparture(focused)
+        core.retireDesktopFocus(of: focused)
+        #expect(core.desktopMemory.switchDepartures[focused] == nil)
+        core.fileSwitchDeparture(focused)
+        core.forgetDesktopFocus()
+        #expect(core.desktopMemory.switchDepartures.isEmpty)
     }
 }

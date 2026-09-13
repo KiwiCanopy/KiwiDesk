@@ -1901,29 +1901,39 @@ arrival raises through the same gate: on the owner's round trips
 refusal, so the AX create that pays it arrives after the draw
 list lists the window.
 
+:::unreleased
 **The settle's refocus is the third arm, and the gate cannot
-stand in for it (#1364, 2026-09-10).** A swipe to an EMPTY
-Desktop made macOS activate Finder — the desktop itself — and
-Finder's window on the Desktop just left was re-listed within the
-second, adopted back into its space's vacancy, and re-asserted
-by the settle's refocus 1.2 s after the swipe: the pull-back,
-measured in the unified log (the `DIAG focusWindow … from
-desktopSettle` line, 01:20:11.547). The gate let it through
-because the compositor was drawing the window, and it still
-switched Desktops, since activating an app brings the Desktop of
-the window it names forward. So the settle refuses a focus the
-switch itself removed: every departure `departedWithDesktop`
-files is remembered until the settle that runs consumes the set,
-and a focused window found in it is left where macOS put the
-focus, with a log line naming it. The trade is the same one the
-close-return arm already made — macOS picks the focus on the
-Desktop it shows — and it costs nothing a user can see: a window
+stand in for it (#1364).** A swipe to an EMPTY Desktop made macOS
+activate Finder — the desktop itself — and Finder's window on the
+Desktop just left was re-listed within the second, adopted back
+into its space's vacancy, and re-asserted 1.2 s after the swipe
+by the settle's refocus: the pull-back, measured on device
+2026-09-10. The gate let it through: the on-screen flag it reads
+was true for that window, and a compositor probe on 2026-09-13
+showed why that flag cannot be trusted here — during a
+three-finger gesture it reads true for every window of the
+neighbouring Desktops, from about a second before the switch
+registers to about two seconds after, whichever Desktop the
+window is on. So the settle refuses a focus the switch itself
+removed, and reads no flag to do it: every departure
+`departedWithDesktop` files is stamped, and the settle asks
+whether the focused window's stamp belongs to the switch it is
+settling — no earlier than the switch grace before it, since an
+app's own destroy beats the notification, and inside an age
+bound, since a slow app's destroy trails the swipe by seconds
+and a stale stamp must not stand down a later switch's refocus.
+A window found so is left where macOS put the focus, with a log
+line naming it. The trade is the same one the close-return arm already made
+— macOS picks the focus on the Desktop it shows — and the two
+cases it must not touch are held as controls beside it: a window
 that stayed through the switch is re-asserted exactly as before,
-and a Desktop return's remembered focus is #1207's payment, not
-this refocus. The other half of the issue — whether a swipe on
-one display should have removed a window on a display whose
-Desktop did not change — is a two-display measurement this entry
-does not settle.
+and a Desktop return's remembered focus is #1207's payment, which
+stands this refocus down before the new arm is reached. The other
+half of the issue — a swipe on one display removing a window on
+a display whose Desktop did not change — did not reproduce on
+2026-09-13 with two displays and an event-stream trace of every
+removal; what remains open lives on #1364, not here.
+:::
 
 ### A focus report is only as good as the activation behind it (#1322)
 

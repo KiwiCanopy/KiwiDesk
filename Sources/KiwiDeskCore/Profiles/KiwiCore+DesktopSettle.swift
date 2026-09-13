@@ -43,10 +43,6 @@ extension KiwiCore {
     /// so this reads no machine state.
     func desktopSettle(ifStill desktop: SkyLight.SpaceID?) {
         guard desktopMemory.lastDesktopSpace == desktop else { return }
-        // #1364: the departures this switch folded, consumed by
-        // the one settle that runs for it.
-        let departed = desktopMemory.switchDepartures
-        desktopMemory.switchDepartures = []
         // The switch's `reconcileAll` is census-gated (#1037),
         // and that census can beat the compositor: a window
         // still landing when the notification fired was on no
@@ -86,14 +82,10 @@ extension KiwiCore {
                     + "settle refocus stands down"
             )
         } else if let focused = activeSpace?.focused,
-            departed.contains(focused)
+            departedWithThisSwitch(focused)
         {
-            // #1364: a window that LEFT WITH ITS DESKTOP in this
-            // switch and is back was re-listed, not chosen — an
-            // empty destination makes its app the active one
-            // and re-lists it — and raising it activates the app
-            // on the Desktop the user left. macOS picks the focus
-            // on the Desktop it shows (#1345's reading).
+            // A focus the switch itself removed was re-listed,
+            // not chosen; raising it pulls the user back (#1364).
             onLog(
                 "desktop settle: w\(focused.raw) left with this "
                     + "switch and came back — refocus stands down "
@@ -115,5 +107,39 @@ extension KiwiCore {
                 warp: true
             )
         }
+    }
+
+    /// How long a departure record may wait for its settle: a
+    /// slow app's destroy trails the swipe by seconds
+    /// (`desktopMoveDepartureWindow`'s measurement), and past
+    /// this an entry is pruned rather than read (#1364).
+    static let switchDepartureWindow: TimeInterval = 10
+
+    /// The one writer of `DesktopMemory.switchDepartures`
+    /// (#1364): files a departure `departedWithDesktop` reported.
+    func fileSwitchDeparture(_ id: WindowID, now: Date = Date()) {
+        desktopMemory.switchDepartures =
+            desktopMemory.switchDepartures.filter {
+                now.timeIntervalSince($0.value)
+                    < Self.switchDepartureWindow
+            }
+        desktopMemory.switchDepartures[id] = now
+    }
+
+    /// Whether `id` LEFT WITH ITS DESKTOP in the switch being
+    /// settled: filed no earlier than the switch grace before the
+    /// switch — an app's own destroy beats the notification — and
+    /// inside the record's bound (#1364).
+    func departedWithThisSwitch(
+        _ id: WindowID,
+        now: Date = Date()
+    ) -> Bool {
+        guard let filed = desktopMemory.switchDepartures[id],
+            now.timeIntervalSince(filed) < Self.switchDepartureWindow
+        else { return false }
+        let since = lastDesktopSwitch.addingTimeInterval(
+            -EventLoop.spaceSwitchCoalesceGrace
+        )
+        return filed >= since
     }
 }
