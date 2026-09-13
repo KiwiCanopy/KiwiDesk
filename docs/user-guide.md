@@ -6,8 +6,8 @@ description: The Settings app, profiles, and the
 
 # User Guide: The Settings App
 
-The Settings window explains its own rows: every control has a
-label, most a caption, and a `?` opens a longer note. This guide
+The Settings window explains its own rows: a label, often a
+caption, and on some rows a `?` with a longer note. This guide
 covers what those cannot say — how things interact, where a
 setting lives, why a move was refused, and the files behind it.
 
@@ -209,8 +209,7 @@ keybindings runs on every reload.
   Main role and the fallback space.
 
 The General section leaves the grid while you edit a stored
-profile without switching to it: it holds global state a profile
-edit never writes.
+profile without switching to it.
 
 **Two hybrids.** Shortcuts and app rules are global, but a profile
 can carry a sparse override of its own: shortcuts can add or
@@ -240,7 +239,7 @@ What the fields' own notes do not say:
 - **Track** — the track shortcuts sit in Shortcuts ▸ Move
   windows under "Move to track". Previous is the column to the
   left (or the row above), next the column to the right (or the
-  row below), so a binding keeps working when the axis flips.
+  row below), whichever way the axis runs.
   Track sizes and in-track shares are session-only.
 
 > **A few resize behaviors are accepted limitations, not bugs** —
@@ -339,7 +338,7 @@ windows slide apart to open a slot, and pulling the cursor back
 moves the window home. Releasing outside every slot on your own
 display snaps the window back. Floating windows show no overlay
 and cannot be dropped onto a tiled slot; use *make tiled* first
-([design decisions](design-decisions.md)).
+([Accepted limitations](accepted-limitations.md)).
 
 ### Sticky Windows
 
@@ -388,10 +387,9 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 
 ### App Bar
 
-The App Bar renders only in **Monocle** and **Scrolling**, the
-layouts where a window can hide behind another or scroll off the
-edge, so its card has no on/off row: the two **Show it in**
-switches are its visibility. Drag an item to reorder the windows;
+The App Bar renders only in **Monocle** and **Scrolling**; its
+card has no on/off row, the two **Show it in** switches are its
+visibility. Drag an item to reorder the windows;
 a grouped item expands into its members on click. Styling it
 differently per layout is Lua-only: every `app_bar.*` field has a
 `monocle.set_app_bar_*` / `scroll.set_app_bar_*` twin ([Per-layout
@@ -433,7 +431,9 @@ toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
 - **Hold to place** — pause for the **Spring delay**; the view
   springs to that Space with the window in its live layout, so
   you can drop it exactly where you want. Move the cursor off
-  the item before the ring completes to cancel.
+  the item before the ring completes to cancel. Under **Reduce
+  Motion** the ring does not sweep: it stays away for the first
+  half-second, then appears whole for the rest of the hold.
 
 Dropping onto the Space a window is already on does nothing.
 While dragging, hold over a chevron to autoscroll a bar that
@@ -644,7 +644,9 @@ swaps it or sends it and follows; resizing has its own layer,
 spaces past the tenth ship without a digit. The set is seeded
 only while no shortcut is bound anywhere, and an install that
 already has shortcuts picks up a later default through **Restore
-Defaults…**, which keeps the shortcuts you made yourself.
+Defaults…**, which keeps the shortcuts you made yourself except
+one sitting on a key a default needs; the confirmation counts
+those.
 
 ### Choosing Your Own Shortcuts
 
@@ -717,8 +719,8 @@ the caps print, not which key fires.
   row whose Desktop leaves with its screen stays in place,
   dimmed, and works again when the screen is back; a Desktop
   shortcut for an absent Desktop does nothing, while a Space
-  shortcut for an absent Space still works and recreates the
-  Space. Each row sends the window to the Desktop and nothing
+  shortcut for an absent Space still works: it recreates the
+  Space and switches to it. Each row sends the window to the Desktop and nothing
   more; naming the Space it lands in is a Lua/CLI argument,
   `move_to_desktop(3, "mail")` ([Lua
   reference](lua-reference.md#move_to_desktop)).
@@ -776,8 +778,7 @@ screen** (the one with the menu bar). With "Displays have
 separate Spaces" on, macOS's default, each screen switches on its
 own: a swipe on the main screen switches profiles, a swipe on a
 secondary never does. The rows are greyed while you edit a stored
-profile: bindings are global, and a profile may never override
-what selects it.
+profile: bindings are global.
 
 ```mermaid
 flowchart TD

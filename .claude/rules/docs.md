@@ -14,7 +14,7 @@ different behavior.
 |---|---|
 | `docs/index.md` | The docs landing map — and, because it also carries install and upgrade prose, it is a **second home for claims `README.md` makes**. Change one, check the other in the same change set: an upgrade claim was corrected in the README and left standing here (#661's branch), which is what an unowned page does |
 | `docs/lua-reference.md` | Lua config & behavior, in *expects → does → example* form |
-| `docs/user-guide.md` | The Settings app & GUI flows |
+| `docs/user-guide.md` | What the GUI cannot answer about the Settings app — admission is the owner's ruling (Prose budget, below) |
 | `docs/spaces-and-desktops.md` | How screens, macOS Desktops, profiles and KiwiDesk Spaces relate — the user-facing mental model, not a flow and not a pipeline |
 | `docs/cli.md` | Commands, events, IPC |
 | `docs/recipes/` | Integration recipes |
@@ -51,10 +51,13 @@ row is deleted, not shortened. The budget, as obligations:
   a reader follows it — `accepted-limitations.md`'s Why column is
   its charter, not a violation.
 - **No narration** about the doc itself or the design's intent.
-- **Every fact survives.** A cut that drops a control name, a
-  value, a range, a default, a chord, a path, a limitation or a
-  cross-link is a defect, not a trim; a doc that falls silent on
-  a behaviour describes it as absent.
+- **Every fact survives a budget cut.** Within a section the
+  owner has admitted, a cut that drops a control name, a value, a
+  range, a default, a chord, a path, a limitation or a cross-link
+  is a defect, not a trim; a doc that falls silent on a behaviour
+  describes it as absent. Removing a section WHOLE is not a
+  budget cut but an admission ruling (next paragraph), which
+  takes its facts with it because the GUI carries them.
 
 **Admission is the owner's ruling, not the author's.** Whether a
 setting or surface belongs in the user guide at all is judged by
@@ -63,12 +66,13 @@ documenting a new setting or surface ASKS before adding a guide
 section, and the default answer is no entry — the row's caption is
 its documentation (owner ruling 2026-09-13). A contributor page
 (`architecture.md`, `ui-patterns.md`, `translating.md`,
-`localization-naming.md`) has no such gate; it takes the budget
-as written.
+`localization-naming.md`) has no admission gate.
 
-A page is held to the budget once it has been swept: the user
-guide by #1395, every other page by its audit under collector
-#1406. `docs/recipes/` joins when its audit is filed.
+A page — user-facing or contributor — is held to the budget once
+its sweep has landed: swept so far, `user-guide.md` (#1395);
+every other page is swept by its own audit under collector
+#1406, and `docs/recipes/` joins when its audit is filed. Extend
+the swept list here in the same change set as the sweep.
 
 The style is adapted from the Caveman compression rules (seen
 2026-09-13), whose own guidance is to drop the compression for
