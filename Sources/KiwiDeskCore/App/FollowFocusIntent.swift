@@ -1,15 +1,20 @@
 import Foundation
 
 /// A focus one operation owes a window, paid at that window's
-/// ARRIVAL — an intent, not a focus call, since the window sits
-/// on an unshown Desktop where AX does not list it. Two
+/// ARRIVAL — an intent, not a focus call, since the window is
+/// not tracked yet: it sits on an unshown Desktop where AX does
+/// not list it, or it is closed and about to be re-shown. Three
 /// instances drain on the one `.windowCreated` arm:
-/// `KiwiCore.followFocus` (`move_to_desktop_and_follow`, #1007)
-/// and `DesktopMemory.returnFocus` (a Desktop return, #1207) —
-/// same drain key, the arriving window; same cardinality, one
-/// pending — and the follow outranks the return. Bounded: an
-/// unpaid debt must not fire minutes later. A third such ledger
-/// weighs a third instance before minting (#890).
+/// `KiwiCore.followFocus` (`move_to_desktop_and_follow`, #1007),
+/// `DesktopMemory.returnFocus` (a Desktop return, #1207) and
+/// `KiwiCore.ownShowFocus` (the own-window door told of a closed
+/// own window, #1380) — same drain key, the arriving window; same
+/// cardinality, one pending. The follow outranks the return; the
+/// own show drains after both and stands down where state already
+/// holds the focus, so a window two ledgers name is commanded
+/// once. Bounded: an unpaid debt must not fire minutes later. A
+/// fourth such ledger weighs a fourth instance before minting
+/// (#890).
 @MainActor
 final class FollowFocusIntent {
     /// Maximum duration focus debt remains claimable (5.0s, #1007).

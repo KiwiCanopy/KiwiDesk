@@ -8,9 +8,10 @@ import Testing
 /// that #1161's placement distrust bounces for two seconds. The
 /// raise branch therefore calls `KiwiCore.focusOwnWindow` BEFORE
 /// `forceFront` — `PlacementIntentTests` holds what that door
-/// does. What a fixture cannot see is the wiring: a `show()` that
-/// dropped the call, or reordered it after the order-front, would
-/// go dead with every unit test green.
+/// does, `OwnShowFocusSeamTests` how its debt for a closed window
+/// is wired (#1380). What a fixture cannot see is the wiring: a
+/// `show()` that dropped the call, or reordered it after the
+/// order-front, would go dead with every unit test green.
 @Suite("The Settings raise goes through the focus command (#1281)")
 struct SettingsOpenFocusSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)

@@ -13,9 +13,9 @@ import Foundation
 /// two moves in flight keep their own names; bounded like the
 /// follow's debt, because a move the bridge accepted but never
 /// applied produces no departure, and an unpaid name must not
-/// attach to a close minutes later. A third arrival-shaped
-/// ledger beside `FollowFocusIntent`'s two instances, minted
-/// rather than a third instance because it carries a Space, not
+/// attach to a close minutes later. An arrival-shaped ledger
+/// beside `FollowFocusIntent`'s instances, minted as its own type
+/// rather than another instance because it carries a Space, not
 /// a focus.
 @MainActor
 final class PendingSpaceAssignment {

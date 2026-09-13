@@ -104,6 +104,10 @@ extension KiwiCore {
             // #1207: the Desktop return's owed focus, paid where
             // the fold said it returned.
             payReturningFocus(arrived: window.id, effects: effects)
+            // #1380: a closed own window the door was told about
+            // returns without stealing focus; the command it was
+            // owed runs now.
+            payOwnShowFocus(arrived: window.id)
         case .windowMoved(let id, let frame):
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already

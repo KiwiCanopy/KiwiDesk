@@ -1844,6 +1844,29 @@ how it is reached. It is wider than the arm by the mode on
 purpose: the command is the right raise on any shown Space, so
 an arm that widens later is covered already.
 
+:::unreleased
+The door owes a CLOSED own window the same command (#1380). An
+`NSWindow` keeps its number across a close and a re-show, so the
+Settings window a user closed and reopened comes back to Core as
+a RETURN — `rememberedSpaces` still names its Space — and a
+returning window never steals the focus that stands (#636): the
+fold sets no intent, and the report reaches the predicate
+clickless inside the placement window of the arrival's own
+retile, which in the active scrolling Space is the whole
+verdict. Refusing the untracked number, as the door first did,
+left that report with nothing on it a foreign one would lack. So
+the door records the number as a debt — the third
+`FollowFocusIntent` instance beside the follow's (#1007) and the
+return's (#1207) — drained on the same `.windowCreated` arm and
+paid with the same focus command the tracked arm issues once the
+arrival has given the window an id, judged there on the Space it
+landed in, the one thing the door could not read, and stood down
+where the fold or a sibling debt already set the focus. Only a
+scrolling Space shows the defect: anywhere else the bounce needs
+an origin the window refused, which a compliant own window never
+gives.
+:::
+
 State stays on the intended window and it is re-asserted with a
 direct, unstamped raise — the #465 sibling-distrust shape. The
 state-only ruling of the raise-echo revert above does not reach

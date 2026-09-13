@@ -357,7 +357,7 @@ editing here:
   (`pruneAwayWindow`) and the app's exit (the `.appTerminated`
   pre-fold in `KiwiCore+Events.swift`) — retire what still names
   it through the one `retireAwayDebts(of:)`: the #1207 memory
-  and BOTH arrival debts (`AwayLedgerTests` ▸ `pruneRetiresDebts`,
+  and every arrival debt (`AwayLedgerTests` ▸ `pruneRetiresDebts`,
   `exitRetiresDebts`); a new gone-for-good ender takes the same
   call. The departure's space and rank stay in #1207's two
   records, and the three are read together. An
@@ -632,9 +632,19 @@ editing here:
   and the raise. A report the focus command already INTENDED is
   never bounced — `intended != id` is the consult's first clause
   — and `focusOwnWindow(number:)`, beside the arm, is the door a
-  GUI raise of an own tracked window takes so its report arrives
-  that way (#1281, `PlacementIntentTests`). A fourth ledger joins
-  this bullet rather than earning its own consume.
+  GUI raise of an own window takes so its report arrives that way
+  (#1281, `PlacementIntentTests`): the command for a tracked
+  window, and for a CLOSED one — re-shown under the number it
+  kept, so the fold files it as a RETURN that steals no focus
+  (#636) — a debt in `ownShowFocus`, the third `FollowFocusIntent`
+  instance, paid with that command by `payOwnShowFocus` on the
+  `.windowCreated` arm the other two drain on, without the
+  refocus retile that arm's own retile makes redundant, judged
+  there on the Space the arrival landed in and stood down where
+  state already holds the focus (#1380, `OwnShowFocusSeamTests`
+  pins the recorder, the drain and the retire by count and the
+  payer to that arm). A fourth ledger joins this bullet rather
+  than earning its own consume.
 - **A raise of a window the compositor is not drawing IS a Desktop
   switch, and no implicit raise performs one (#1345).** macOS
   switches Desktops to show whatever is raised, and the window
