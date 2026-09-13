@@ -9416,15 +9416,24 @@ The finish is ON by default on every surface (owner ruling
 are the app's face, and a fresh install or a Reset All Settings
 should show the finish the app is designed around rather than
 ask for it). A leaf whose ABSENCE changed meaning owes the §5
-crossing, and the reviewers of #1368 found the population it
-would have missed: a profile written before v1.2.0 carries both
-bar leaves and no panel group at all, so bars off beside a panel
-on — the state the one row exists to make unreachable — arrived
-on a plain upgrade. `ConfigMigration` therefore writes every
-absent glass leaf of a file below the floor as the `false` it
-meant, the panel group created where it is missing
-(`GlassDefaultMigrationTests`); an existing setup keeps the look
-it had, and only a fresh seed takes the new default.
+crossing, because absence was a stored value: a profile written
+before v1.2.0 carries both bar leaves and no panel group at all,
+so read under the new default it says bars off beside a panel on
+— the state the one row exists to make unreachable — on a plain
+upgrade. `ConfigMigration` therefore fills a file below the
+floor: each absent BAR leaf takes the `false` its absence meant,
+and the panel — which had no surface before v1.2.0, so no leaf a
+user could have set — takes the two bars' agreement where they
+agree and `false` otherwise, since the bars are the user's
+stated opinion about glass, and a flat `false` would have minted
+the same divergence at the other polarity for a setup that had
+glass on. The step reaches the two shapes that carry
+`TilingSettings` by path, never by the look of an object
+(`GlassDefaultMigrationTests`, `ConfigMigrationGlassRoutingTests`).
+An existing setup keeps the look it had, and only a fresh seed
+takes the new default. Below macOS 26 the toggle is absent, so a
+setup authored there carries the stored value wherever it is
+imported, the finish included.
 :::
 
 The finish stays OS-gated: ignored below

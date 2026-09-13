@@ -4,11 +4,12 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The Liquid Glass default flip's crossing (#1369): a file below
-/// the floor gets every ABSENT glass leaf written as the `false`
-/// it meant, the panel group created where it is missing — so an
-/// existing setup keeps its look and the one Settings row (#1307)
-/// finds its three leaves in agreement. The failure this prevents
-/// is silent: bars off beside a panel on, on a plain upgrade.
+/// the floor gets each absent BAR leaf written as the `false` its
+/// absence meant and the panel filled from the bars' agreement —
+/// so an existing setup keeps its look and the one Settings row
+/// (#1307) finds its three leaves in agreement for every
+/// population. The failure this prevents is silent: bars off
+/// beside a panel on, or the reverse, on a plain upgrade.
 @Suite("Liquid Glass default migration (#1369)")
 struct GlassDefaultMigrationTests {
     private func json(_ text: String) -> Data { Data(text.utf8) }
@@ -46,11 +47,11 @@ struct GlassDefaultMigrationTests {
             as? Bool
     }
 
-    /// The population the reviewers found: bars written, no
-    /// panel group. The panel takes the `false` its absence
-    /// meant; the bars keep their own values, whatever they are.
-    @Test("an absent panel group is created off, the bars untouched")
-    func absentPanelIsFilledOff() throws {
+    /// The population the flip missed: bars written, no panel
+    /// group. The panel takes the bars' agreement; the bars keep
+    /// their own values and their siblings.
+    @Test("an absent panel group takes the bars' agreement")
+    func absentPanelTakesTheAgreement() throws {
         for bars in [false, true] {
             let data = profile(
                 """
@@ -60,29 +61,50 @@ struct GlassDefaultMigrationTests {
             )
             let out = try #require(ConfigMigration.migrated(data))
             let s = try settings(out)
-            #expect(leaf(s, "shortcut_panel") == false)
+            #expect(leaf(s, "shortcut_panel") == bars)
             #expect(leaf(s, "app_bar") == bars)
             #expect(leaf(s, "space_bar") == bars)
             #expect(
                 (s["app_bar"] as? [String: Any])?["thickness"]
                     as? Double == 32
             )
-            #expect(try root(out)["format"] as? Int == Profile.currentFormat)
+            #expect(
+                try root(out)["format"] as? Int
+                    == Profile.currentFormat
+            )
         }
     }
 
-    /// A hand-written file that never set a bar leaf: absent
-    /// meant off under the old default, and is written so.
-    @Test("absent bar leaves are written off")
-    func absentBarLeavesAreFilled() throws {
+    /// Bars that disagree name no opinion the panel can take.
+    @Test("disagreeing bars leave the panel off")
+    func disagreeingBarsLeaveThePanelOff() throws {
         let data = profile(
-            #"{"app_bar":{"thickness":32},"space_bar":{"edge":"top"}}"#
+            """
+            {"app_bar":{"liquid_glass":true},\
+            "space_bar":{"liquid_glass":false}}
+            """
         )
         let out = try #require(ConfigMigration.migrated(data))
-        let s = try settings(out)
-        #expect(leaf(s, "app_bar") == false)
-        #expect(leaf(s, "space_bar") == false)
-        #expect(leaf(s, "shortcut_panel") == false)
+        #expect(leaf(try settings(out), "shortcut_panel") == false)
+    }
+
+    /// A hand-written file that set no bar leaf — and one with no
+    /// bar group at all: absent meant off, and is written so.
+    @Test("absent bar leaves are written off")
+    func absentBarLeavesAreFilled() throws {
+        for body in [
+            #"{"app_bar":{"thickness":32},"space_bar":{"edge":"top"}}"#,
+            #"{"app_bar":{"thickness":32}}"#,
+            #"{}"#,
+        ] {
+            let out = try #require(
+                ConfigMigration.migrated(profile(body))
+            )
+            let s = try settings(out)
+            #expect(leaf(s, "app_bar") == false)
+            #expect(leaf(s, "space_bar") == false)
+            #expect(leaf(s, "shortcut_panel") == false)
+        }
     }
 
     /// A present leaf is a choice: the crossing never rewrites
@@ -93,31 +115,34 @@ struct GlassDefaultMigrationTests {
             """
             {"app_bar":{"liquid_glass":true},\
             "space_bar":{"liquid_glass":true},\
-            "shortcut_panel":{"liquid_glass":true}}
+            "shortcut_panel":{"liquid_glass":false}}
             """
         )
         let out = try #require(ConfigMigration.migrated(data))
         let s = try settings(out)
         #expect(leaf(s, "app_bar") == true)
         #expect(leaf(s, "space_bar") == true)
-        #expect(leaf(s, "shortcut_panel") == true)
+        #expect(leaf(s, "shortcut_panel") == false)
     }
 
-    /// A per-layout `app_bar` override holds no `space_bar`
-    /// beside it, and its absent leaf means "inherit": writing
-    /// `false` there would mint an override nobody set.
+    /// A per-layout `app_bar` override lives under `layout`, the
+    /// shape the encoder writes, and its absent leaf means
+    /// inherit: writing `false` there would mint an override.
     @Test("a per-layout app_bar override is left alone")
     func layoutOverrideIsNotTouched() throws {
         let data = profile(
             """
             {"app_bar":{"liquid_glass":false},\
             "space_bar":{"liquid_glass":false},\
-            "monocle":{"app_bar":{"thickness":40}}}
+            "layout":{"monocle":{"app_bar":{"thickness":40}}}}
             """
         )
         let out = try #require(ConfigMigration.migrated(data))
         let s = try settings(out)
-        let monocle = try #require(s["monocle"] as? [String: Any])
+        let layout = try #require(s["layout"] as? [String: Any])
+        let monocle = try #require(
+            layout["monocle"] as? [String: Any]
+        )
         let override = try #require(
             monocle["app_bar"] as? [String: Any]
         )
@@ -136,40 +161,80 @@ struct GlassDefaultMigrationTests {
         #expect(ConfigMigration.migrated(data) == nil)
     }
 
+    private func inline(_ name: String, settings: String) -> String {
+        """
+        {"format":3,"name":"\(name)","monitor_sets":[],\
+        "settings":\(settings)}
+        """
+    }
+
     /// The bundle carries `[Profile]` inline, so the crossing
-    /// reaches every profile in it (`ConfigMigrationRoutingTests`'
-    /// census obligation).
-    @Test("a backup's inline profiles are all filled")
+    /// reaches every profile in it — each on its own agreement.
+    @Test("a backup's inline profiles are each filled")
     func bundleProfilesAreFilled() throws {
-        func inline(_ name: String, glass: Bool) -> String {
-            """
-            {"format":3,"name":"\(name)","monitor_sets":[],\
-            "settings":{"app_bar":{"liquid_glass":\(glass)},\
-            "space_bar":{"liquid_glass":\(glass)}}}
-            """
-        }
-        let one = inline("A", glass: false)
-        let two = inline("B", glass: true)
+        let off = inline(
+            "A",
+            settings: """
+                {"app_bar":{"liquid_glass":false},\
+                "space_bar":{"liquid_glass":false}}
+                """
+        )
+        let on = inline(
+            "B",
+            settings: """
+                {"app_bar":{"liquid_glass":true},\
+                "space_bar":{"liquid_glass":true}}
+                """
+        )
         let data = json(
             """
             {"format":5,"writtenBy":"1.2.2","config":null,\
-            "profiles":[\(one),\(two)],"palettes":[]}
+            "profiles":[\(off),\(on)],"palettes":[]}
             """
         )
         let out = try #require(ConfigMigration.migrated(data))
         let profiles = try #require(
             root(out)["profiles"] as? [[String: Any]]
         )
-        #expect(profiles.count == 2)
+        var panels: [Bool?] = []
         for p in profiles {
             let s = try #require(p["settings"] as? [String: Any])
-            #expect(leaf(s, "shortcut_panel") == false)
+            panels.append(leaf(s, "shortcut_panel"))
         }
-        #expect(try root(out)["format"] as? Int == SetupBundle.currentFormat)
+        #expect(panels == [false, true])
+        #expect(
+            try root(out)["format"] as? Int
+                == SetupBundle.currentFormat
+        )
     }
 
-    /// The common shape takes the surgical edit: the user's own
-    /// Doubles keep their spelling rather than re-encoding.
+    /// The textual edit's stand-down: an empty `settings` beside a
+    /// real one makes the insert a stray, the envelope's re-parse
+    /// refuses it, and the walk still fills both.
+    @Test("a shape the textual edit cannot take falls to the walk")
+    func strayEditFallsToTheWalk() throws {
+        let data = json(
+            """
+            {"format":5,"writtenBy":"1.2.2","config":null,\
+            "profiles":[\(inline("A", settings: "{}")),\
+            \(inline("B", settings: #"{"space_bar":{}}"#))],\
+            "palettes":[]}
+            """
+        )
+        let out = try #require(ConfigMigration.migrated(data))
+        let profiles = try #require(
+            root(out)["profiles"] as? [[String: Any]]
+        )
+        for p in profiles {
+            let s = try #require(p["settings"] as? [String: Any])
+            #expect(leaf(s, "app_bar") == false)
+            #expect(leaf(s, "space_bar") == false)
+            #expect(leaf(s, "shortcut_panel") == false)
+        }
+    }
+
+    /// The common shape takes the surgical edit: one line stays
+    /// one line, and the user's own Doubles keep their spelling.
     @Test("the app-written shape keeps its formatting")
     func surgicalEditKeepsFormatting() throws {
         let data = profile(
@@ -180,7 +245,7 @@ struct GlassDefaultMigrationTests {
         )
         let out = try #require(ConfigMigration.migrated(data))
         let text = try #require(String(data: out, encoding: .utf8))
-        #expect(text.contains("0.4,") || text.contains("0.4}"))
+        #expect(!text.contains("\n"))
         #expect(!text.contains("0.40000000000000002"))
         #expect(leaf(try settings(out), "shortcut_panel") == false)
     }

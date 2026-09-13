@@ -1672,6 +1672,11 @@ rest; the rest behind **Style**):
   only on macOS&nbsp;26 and later; a profile that turns it on
   still opens on older macOS, which draws the Boxed or Plain
   shape underneath it.
+
+  :::unreleased
+  On by default, on all three surfaces.
+  :::
+
 - **Background size**: how far Plain's strip or the Liquid Glass
   plate reaches — **Hug items** (default; the plate wraps the
   items like the Dock wraps its icons) or **Full width**
@@ -1756,10 +1761,6 @@ hold.
   Rounds the boxed items, or the shared plate under Plain and
   Liquid Glass.
 
-:::unreleased
-Liquid Glass is on by default, on the Space Bar, the App Bar
-and the shortcuts panel alike.
-:::
 
 **Colors** are not on this page — every App Bar tint lives in
 **Advanced Colors ▸ App Bar colors**, with Fill and Highlight at

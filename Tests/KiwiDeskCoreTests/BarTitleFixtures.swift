@@ -72,6 +72,10 @@ func paintedAppBar(
     var style = AppBarStyle()
     style.content = content
     style.edge = edge
+    // Pinned (tests.md #660): the default flipped on in #1369 and
+    // `glassEnabled` picks the hosting mode, so an unpinned leaf
+    // would change what `sync` is handed per host.
+    style.liquidGlass = false
     return AppBarManager.Bar(
         display: barTitleDisplay,
         space: SpaceID("1"),
@@ -94,10 +98,11 @@ func paintedSpaceBar(
     var style = SpaceBarStyle()
     style.edge = edge
     style.showFrontApp = front != nil
-    // Pinned in BOTH arms (tests.md): the default is on, so an
-    // arm that only set `true` would tell `glass: false` nothing.
-    style.backgroundStyle = .plain
+    // Pinned in BOTH arms (tests.md #660): the default is on
+    // since #1369, so an arm that only set `true` would tell
+    // `glass: false` nothing. The shape moves only under glass.
     style.liquidGlass = glass
+    if glass { style.backgroundStyle = .plain }
     return SpaceBarManager.Bar(
         display: barTitleDisplay,
         items: (1...max(spaces, 1)).map { n in

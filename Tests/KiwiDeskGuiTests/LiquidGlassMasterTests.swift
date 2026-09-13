@@ -33,6 +33,17 @@ struct LiquidGlassMasterTests {
         )
     }
 
+    /// The shipped default, pinned ONCE (#1369): the migration's
+    /// premise is that absence now means on, so a revert of the
+    /// flip reds here and nowhere else.
+    @Test("the shipped default is on")
+    func shippedDefaultIsOn() {
+        let settings = TilingSettings()
+        #expect(settings.appBarStyle.liquidGlass)
+        #expect(settings.spaceBarStyle.liquidGlass)
+        #expect(settings.shortcutPanelLiquidGlass)
+    }
+
     @Test("the master writes all three surfaces")
     func masterFansOut() {
         for on in [true, false] {

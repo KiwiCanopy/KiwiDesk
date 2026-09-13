@@ -4,12 +4,13 @@ import Foundation
 public struct Profile: Codable, Sendable, Equatable {
     /// Format version of the profile schema (#902); 0 =
     /// unversioned legacy. 2 since the scroll-duration rename
-    /// (#1020) — and the bump is what RUNS the crossing:
-    /// `needsMigration` short-circuits on it, and the retired key
-    /// decodes to the DEFAULT rather than failing, so leaving this
-    /// at 1 loses the user's tuned value silently. 4 since the
-    /// Liquid Glass default flip (#1369): an absent leaf changed
-    /// meaning, so the crossing writes the `false` it meant.
+    /// (#1020), 3 since the retired `resize.feedback` drop
+    /// (#1255), 4 since the absent Liquid Glass leaves' fill
+    /// (#1369). The bump is what RUNS a step: `needsMigration`
+    /// short-circuits on it, so a step that must reach this
+    /// shape owes one whatever it rewrites — a retired key
+    /// decodes to the default and an absent leaf to the NEW
+    /// default, silently, without it.
     public static let currentFormat = 4
 
     public var format: Int
