@@ -6,13 +6,18 @@
 # puppeteer / npm deps. Run manually, not in CI.
 #
 #   og-banner.svg     →  og-banner.jpg      (1200×630 banner, en)
-#   og-banner.de.svg  →  og-banner.de.jpg   (same banner, German tagline)
-#   og-banner.ja.svg  →  og-banner.ja.jpg   (same banner, Japanese tagline)
+#   og-banner.de.svg  →  og-banner.de.jpg   (same banner, German copy)
+#   og-banner.ja.svg  →  og-banner.ja.jpg   (same banner, Japanese copy)
 #
 # Per-locale because /de/ and /ja/ serve localized titles and descriptions;
 # en keeps the bare og-banner.jpg name so shared links stay valid. Keep the
 # masters viewBox-only — an explicit width/height makes qlmanage aspect-FILL
 # the square canvas and the crop returns a zoomed centre strip.
+#
+# qlmanage renders SVG through WebKit, so `-apple-system` resolves to SF
+# Pro while `Inter` silently falls back to Arial — keep the masters on the
+# system stack. It also drops SVG filters, which is why the desktop's depth
+# is drawn as offset plates rather than a feDropShadow.
 #
 # The mark is referenced by relative href, so logo.svg must sit next to
 # og-banner.svg for qlmanage to resolve it. It points at the ONE mark
