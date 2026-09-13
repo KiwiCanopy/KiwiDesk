@@ -37,6 +37,8 @@ export interface LegalDoc {
 export interface LegalStrings {
   impressum: LegalDoc;
   datenschutz: LegalDoc;
+  /** Terms of use for the site and the software — added 2026-09-13. */
+  nutzungsbedingungen: LegalDoc;
   updatedLabel: string;
   backHome: string;
   /** Shown above non-German docs — German is binding. */
@@ -216,6 +218,76 @@ const de: LegalStrings = {
       },
     ],
   },
+  nutzungsbedingungen: {
+    title: "Nutzungsbedingungen",
+    updated: "13. September 2026",
+    sections: [
+      {
+        title: "1. Geltungsbereich",
+        body:
+          `<p>Diese Bedingungen gelten für die Nutzung der Website kiwidesk.kiwicanopy.com ` +
+          `(einschließlich der Dokumentation) und der Software KiwiDesk. Betreiber und Anbieter ` +
+          `ist ${OPERATOR.name}, ${OPERATOR.designation} (Anschrift und Kontakt im Impressum).</p>`,
+      },
+      {
+        title: "2. Software und Lizenz",
+        body:
+          `<p>KiwiDesk wird ab Version 1.3.0 unter der <strong>Business Source License 1.1</strong> ` +
+          `bereitgestellt. Der vollständige Lizenztext liegt dem Quellcode bei und ist in der App ` +
+          `unter „Über“ abrufbar. Die Lizenz erlaubt die <strong>private, nicht-kommerzielle ` +
+          `Nutzung</strong> kostenlos. Jede andere Produktivnutzung – insbesondere die Nutzung in ` +
+          `oder für ein Unternehmen sowie das Anbieten, Verkaufen, Bündeln oder Hosten der ` +
+          `Software oder eines abgeleiteten Werks als Produkt oder Dienst – setzt eine ` +
+          `kommerzielle Lizenz des Betreibers voraus; Anfragen per E-Mail an ${MAILTO}.</p>` +
+          `<p>Jede Version von KiwiDesk wird vier Jahre nach ihrer Erstveröffentlichung unter die ` +
+          `MIT-Lizenz gestellt. Versionen vor 1.3.0 wurden unter der MIT-Lizenz veröffentlicht ` +
+          `und bleiben es. Bei Widersprüchen zwischen diesen Bedingungen und dem Lizenztext gilt ` +
+          `der Lizenztext.</p>`,
+      },
+      {
+        title: "3. Bereitstellung, Updates und Support",
+        body:
+          `<p>Die Software wird in der jeweils veröffentlichten Fassung bereitgestellt. Es besteht ` +
+          `kein Anspruch auf Verfügbarkeit, bestimmte Funktionen, Updates oder Support. Die App ` +
+          `prüft auf Updates; Einzelheiten dazu stehen in der Datenschutzerklärung. Die ` +
+          `Installation erfolgt über die auf der Website angebotenen Wege.</p>`,
+      },
+      {
+        title: "4. Gewährleistung und Haftung",
+        body:
+          `<p>Für die unentgeltlich überlassene Software gilt der Gewährleistungs- und ` +
+          `Haftungsausschluss des Lizenztextes. Unberührt bleibt die Haftung für Vorsatz und grobe ` +
+          `Fahrlässigkeit, für Schäden aus der Verletzung des Lebens, des Körpers oder der ` +
+          `Gesundheit sowie nach dem Produkthaftungsgesetz.</p>`,
+      },
+      {
+        title: "5. Kennzeichen",
+        body:
+          `<p>„KiwiDesk“, „KiwiCanopy“ und die zugehörigen Logos sind Kennzeichen des Betreibers. ` +
+          `Die Softwarelizenz räumt keine Rechte an diesen Kennzeichen ein.</p>`,
+      },
+      {
+        title: "6. Nutzung der Website",
+        body:
+          `<p>Die Website erfordert kein Konto und bietet keine Bestellung oder Zahlung an. ` +
+          `Die Inhalte der Website sind urheberrechtlich geschützt; die Dokumentation steht unter ` +
+          `der Lizenz des Quellcode-Repositorys. Für externe Links gilt das Impressum.</p>`,
+      },
+      {
+        title: "7. Änderungen",
+        body:
+          `<p>Der Betreiber kann diese Bedingungen mit Wirkung für die Zukunft ändern. Es gilt die ` +
+          `auf dieser Seite veröffentlichte Fassung mit dem oben angegebenen Stand.</p>`,
+      },
+      {
+        title: "8. Anwendbares Recht",
+        body:
+          `<p>Es gilt das Recht der Bundesrepublik Deutschland. Zwingende ` +
+          `Verbraucherschutzvorschriften des Staates, in dem Verbraucher ihren gewöhnlichen ` +
+          `Aufenthalt haben, bleiben unberührt.</p>`,
+      },
+    ],
+  },
 };
 
 // -------------------------------------------------------------- English (EN)
@@ -382,6 +454,74 @@ const en: LegalStrings = {
       },
     ],
   },
+  nutzungsbedingungen: {
+    title: "Terms of Service",
+    updated: "13 September 2026",
+    sections: [
+      {
+        title: "1. Scope",
+        body:
+          `<p>These terms govern the use of the website kiwidesk.kiwicanopy.com (including the ` +
+          `documentation) and of the KiwiDesk software. The operator and provider is ` +
+          `${OPERATOR.name}, ${OPERATOR.designation} (address and contact in the Legal Notice).</p>`,
+      },
+      {
+        title: "2. Software and license",
+        body:
+          `<p>From version 1.3.0, KiwiDesk is provided under the <strong>Business Source License ` +
+          `1.1</strong>. The full license text ships with the source code and can be opened in the ` +
+          `app under “About”. The license permits <strong>personal, non-commercial use</strong> ` +
+          `free of charge. Any other production use – in particular use within or on behalf of a ` +
+          `business, and offering, selling, bundling or hosting the software or a derivative of it ` +
+          `as a product or service – requires a commercial license from the operator; enquiries by ` +
+          `email to ${MAILTO}.</p>` +
+          `<p>Each version of KiwiDesk converts to the MIT License four years after it is first ` +
+          `published. Versions published before 1.3.0 were released under the MIT License and ` +
+          `remain so. Where these terms and the license text differ, the license text prevails.</p>`,
+      },
+      {
+        title: "3. Provision, updates and support",
+        body:
+          `<p>The software is provided in the version published at the time. There is no ` +
+          `entitlement to availability, particular features, updates or support. The app checks ` +
+          `for updates; details are in the privacy policy. Installation is through the channels ` +
+          `offered on the website.</p>`,
+      },
+      {
+        title: "4. Warranty and liability",
+        body:
+          `<p>For the software, which is provided free of charge, the warranty and liability ` +
+          `disclaimer of the license text applies. Liability for intent and gross negligence, for ` +
+          `injury to life, body or health, and under the German Product Liability Act remains ` +
+          `unaffected.</p>`,
+      },
+      {
+        title: "5. Trademarks",
+        body:
+          `<p>“KiwiDesk”, “KiwiCanopy” and the associated logos are marks of the operator. The ` +
+          `software license grants no rights to them.</p>`,
+      },
+      {
+        title: "6. Use of the website",
+        body:
+          `<p>The website requires no account and offers no ordering or payment. Its content is ` +
+          `protected by copyright; the documentation is covered by the license of the source ` +
+          `repository. External links are subject to the Legal Notice.</p>`,
+      },
+      {
+        title: "7. Changes",
+        body:
+          `<p>The operator may change these terms with effect for the future. The version ` +
+          `published on this page, with the date stated above, applies.</p>`,
+      },
+      {
+        title: "8. Governing law",
+        body:
+          `<p>The law of the Federal Republic of Germany applies. Mandatory consumer-protection ` +
+          `provisions of the state in which a consumer habitually resides remain unaffected.</p>`,
+      },
+    ],
+  },
 };
 
 // -------------------------------------------------------------- Japanese (JA)
@@ -528,6 +668,71 @@ const ja: LegalStrings = {
           `理由を証明できる場合、または当該処理が法的請求の主張・行使・防御に資する場合を除き、 ` +
           `当該データを処理しません。</p>` +
           `<p>プロファイリングを含む自動化された意思決定は行われません。</p>`,
+      },
+    ],
+  },
+  nutzungsbedingungen: {
+    title: "利用規約",
+    updated: "2026年9月13日",
+    sections: [
+      {
+        title: "1. 適用範囲",
+        body:
+          `<p>本規約は、ウェブサイト kiwidesk.kiwicanopy.com（ドキュメントを含む）およびソフトウェア ` +
+          `KiwiDesk の利用に適用されます。運営者・提供者は ${OPERATOR.name}（${OPERATOR.designation}、` +
+          `住所と連絡先は運営者情報のとおり）です。</p>`,
+      },
+      {
+        title: "2. ソフトウェアとライセンス",
+        body:
+          `<p>KiwiDesk はバージョン 1.3.0 以降、<strong>Business Source License 1.1</strong> のもとで` +
+          `提供されます。ライセンス全文はソースコードに同梱され、アプリの「About」から開けます。` +
+          `ライセンスは<strong>個人的・非商用の利用</strong>を無償で認めます。それ以外の本番利用、` +
+          `特に企業内または企業のための利用、および本ソフトウェアやその派生物を製品またはサービスとして` +
+          `提供・販売・同梱・ホスティングすることには、運営者の商用ライセンスが必要です。` +
+          `お問い合わせは ${MAILTO} まで。</p>` +
+          `<p>KiwiDesk の各バージョンは、初回公開から 4 年後に MIT ライセンスへ移行します。1.3.0 より前の` +
+          `バージョンは MIT ライセンスで公開されており、今後もそのままです。本規約とライセンス本文が` +
+          `異なる場合は、ライセンス本文が優先します。</p>`,
+      },
+      {
+        title: "3. 提供、アップデート、サポート",
+        body:
+          `<p>ソフトウェアはその時点で公開されているバージョンのまま提供されます。可用性、特定の機能、` +
+          `アップデート、サポートを受ける権利はありません。アプリはアップデートを確認します。詳細は` +
+          `プライバシーポリシーをご覧ください。インストールはウェブサイトで案内する方法によります。</p>`,
+      },
+      {
+        title: "4. 保証と責任",
+        body:
+          `<p>無償で提供されるソフトウェアには、ライセンス本文の保証および責任の免責が適用されます。` +
+          `故意または重過失による責任、生命・身体・健康の侵害による損害の責任、およびドイツ製造物責任法` +
+          `に基づく責任は影響を受けません。</p>`,
+      },
+      {
+        title: "5. 商標",
+        body:
+          `<p>「KiwiDesk」「KiwiCanopy」および関連するロゴは運営者の標章です。ソフトウェアライセンスは` +
+          `これらに対するいかなる権利も付与しません。</p>`,
+      },
+      {
+        title: "6. ウェブサイトの利用",
+        body:
+          `<p>ウェブサイトにはアカウントは不要で、注文や支払いの機能もありません。コンテンツは著作権で` +
+          `保護されています。ドキュメントはソースリポジトリのライセンスに従います。外部リンクについては` +
+          `運営者情報をご覧ください。</p>`,
+      },
+      {
+        title: "7. 変更",
+        body:
+          `<p>運営者は本規約を将来に向けて変更することがあります。本ページに掲載された、上記の日付の` +
+          `版が適用されます。</p>`,
+      },
+      {
+        title: "8. 準拠法",
+        body:
+          `<p>ドイツ連邦共和国の法律が適用されます。消費者が常居所を有する国の強行的な消費者保護規定は` +
+          `影響を受けません。</p>`,
       },
     ],
   },
