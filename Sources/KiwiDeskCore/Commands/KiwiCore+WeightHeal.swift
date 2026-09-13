@@ -8,7 +8,10 @@ import Foundation
 extension KiwiCore {
     /// Re-checks every track space's stored session weights
     /// against its CURRENT membership and span, and shaves the
-    /// extremes that no longer fit (#944). The write-time clamps
+    /// extremes that no longer fit (#944) — then, since #1355,
+    /// re-shares the tracks so each draws its members' learned
+    /// floor (`healTrackFloors`), the realization of the count
+    /// `geometricCap` decided. The write-time clamps
     /// (#933) validate against the membership at press time; a
     /// track joining afterwards (a spawn with `own_track`, a
     /// `move_to_track`), a member joining a track, or the span
@@ -44,6 +47,9 @@ extension KiwiCore {
     /// - **LOCAL members** (`localTiledMembers`), never the
     ///   traveler-injected list: a transient visit must not
     ///   permanently rewrite stored weights.
+    /// Runs inside `KiwiCore.retile`'s forced-pass scope, so the
+    /// cap it folds on reads the same probe verdict the render's
+    /// frames will (#1055/#1355).
     func healTrackSessionWeights() {
         for space in state.workspaces.allSpaces
         where space.mode == .track {
@@ -62,19 +68,24 @@ extension KiwiCore {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.localTiledMembers(of: space)
         guard !tiled.isEmpty else { return }
-        // The render's effective cap needs the geometric fit,
-        // which reads the usable rect — built the way
-        // `trackCapacity` builds it.
-        let context = tiler.settings.context(
-            bounds: bounds,
+        // The render's own input (#1355) — the learned bounds and
+        // the pass's probe verdict — folded over the LOCAL list
+        // like the shave below: a traveler's floor must not
+        // rewrite stored weights for an arrangement that departs
+        // with it (#944, the ruling's transient-pile horn).
+        let context = tiler.layoutInput(
+            state: state,
             space: space,
-            sticky: []
-        )
+            screen: screen
+        ).context
         let counts = TrackLayout.foldedPartition(
             of: tiled,
             breaks: space.trackBreaks,
             normalCap: params.normalCap,
-            geoCap: TrackLayout.geometricCap(for: context)
+            geoCap: TrackLayout.geometricCap(
+                for: context,
+                of: tiled
+            )
         ).counts
         let ranges = TrackLayout.ranges(of: counts)
         let vertical = params.axis == .vertical
@@ -88,6 +99,15 @@ extension KiwiCore {
             bounds: bounds,
             gaps: gaps,
             minSize: minSize
+        )
+        healTrackFloors(
+            of: space,
+            tiled: tiled,
+            ranges: ranges,
+            vertical: vertical,
+            bounds: bounds,
+            gaps: gaps,
+            context: context
         )
         for range in ranges {
             healColumnShares(

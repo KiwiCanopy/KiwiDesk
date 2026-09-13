@@ -67,9 +67,18 @@ extension TrackLayout {
         max(weights[tiled[range.lowerBound]] ?? 1, weightFloor)
     }
 
-    /// Number of tracks physically fitting in context (#192, #198).
+    /// Number of tracks physically fitting in context (#192, #198)
+    /// — and, under the AUTOMATIC limit, fitting the members'
+    /// learned minimums (#1355): the largest prefix whose tracks,
+    /// each at the larger of `min_window_size` and its members'
+    /// corroborated floor on the cross axis, fit the span with the
+    /// gaps between them. A fixed limit stays the user's number,
+    /// bounded by the configured minimum alone; a forced pass
+    /// probes past the floors like every corroborated-bound
+    /// consumer (`probesBeyondBounds`, #1055).
     public static func geometricCap(
-        for context: LayoutContext
+        for context: LayoutContext,
+        of tiled: [WindowID]
     ) -> Int {
         let vertical = context.track.axis == .vertical
         let gap =
@@ -79,7 +88,7 @@ extension TrackLayout {
         let crossSpan =
             vertical
             ? context.usable.width : context.usable.height
-        return max(
+        let plain = max(
             1,
             fitCap(
                 crossSpan: crossSpan,
@@ -87,6 +96,47 @@ extension TrackLayout {
                 gap: gap
             )
         )
+        guard context.track.normalCap == .max,
+            !context.probesBeyondBounds,
+            !context.sizeBounds.isEmpty,
+            !tiled.isEmpty
+        else { return plain }
+        let floor: (WindowID) -> CGFloat = {
+            learnedFloor(of: $0, in: context)
+        }
+        let breaks = context.trackBreaks
+        let markers = counts(of: tiled, breaks: breaks, cap: 0)
+            .count
+        var cap = min(plain, markers)
+        while cap > 1 {
+            let folded = counts(of: tiled, breaks: breaks, cap: cap)
+            let required =
+                ranges(of: folded).reduce(CGFloat(0)) { sum, range in
+                    sum + (tiled[range].map(floor).max() ?? 0)
+                } + gap * CGFloat(folded.count - 1)
+            if required <= crossSpan { break }
+            cap -= 1
+        }
+        return cap < min(plain, markers) ? cap : plain
+    }
+
+    /// One window's floor on the track axis's CROSS span (#1355):
+    /// the larger of `min_window_size` and its corroborated
+    /// learned minimum there — width for vertical tracks, height
+    /// for horizontal. The one reading the cap and the floor heal
+    /// share — the #933 clamp's raw corroborated `minWidth`, not
+    /// the consume seam's chained fixed point, because the count
+    /// and the heal answer "how wide must this track be" the way
+    /// a resize refusal does, never "which span to emit".
+    public static func learnedFloor(
+        of id: WindowID,
+        in context: LayoutContext
+    ) -> CGFloat {
+        let bound = context.sizeBounds[id]
+        let learned =
+            context.track.axis == .vertical
+            ? bound?.minWidth : bound?.minHeight
+        return max(context.minWindowSize, learned ?? 0)
     }
 
     /// In-track capacity for windows stacked in one track (#437).
