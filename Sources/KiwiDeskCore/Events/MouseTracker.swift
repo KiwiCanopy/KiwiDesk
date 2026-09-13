@@ -15,6 +15,10 @@ public final class MouseTracker {
         public let location: CGPoint
         public let downAt: Date
         public let origin: Origin
+        /// AppKit's click count for the down: 2 on the second
+        /// click of a double-click. A double-click on a window
+        /// edge is macOS's expand-to-the-edge, not a drag (#1358).
+        public let clickCount: Int
         public var upAt: Date?
     }
 
@@ -59,9 +63,14 @@ public final class MouseTracker {
             matching: .leftMouseDown
         ) { [weak self] event in
             let location = event.locationInWindow
+            let clicks = event.clickCount
             Task { @MainActor in
                 self?.deliverPress(at: location, from: .otherApp)
-                self?.recordDown(at: location, from: .otherApp)
+                self?.recordDown(
+                    at: location,
+                    from: .otherApp,
+                    clickCount: clicks
+                )
             }
         }
         let up = NSEvent.addGlobalMonitorForEvents(
@@ -83,6 +92,7 @@ public final class MouseTracker {
             let location = MainActor.assumeIsolated {
                 Self.tilingWindowPress(of: event)
             }
+            let clicks = event.clickCount
             if let location {
                 MainActor.assumeIsolated {
                     self?.deliverPress(at: location, from: .ownWindow)
@@ -90,7 +100,8 @@ public final class MouseTracker {
                 Task { @MainActor in
                     self?.recordDown(
                         at: location,
-                        from: .ownWindow
+                        from: .ownWindow,
+                        clickCount: clicks
                     )
                 }
             }
@@ -159,12 +170,14 @@ public final class MouseTracker {
     /// Records mouse down in AX space (#446, #953).
     func recordDown(
         at location: CGPoint,
-        from origin: Press.Origin
+        from origin: Press.Origin,
+        clickCount: Int = 1
     ) {
         press = Press(
             location: GeometryUtils.axPoint(location),
             downAt: Date(),
-            origin: origin
+            origin: origin,
+            clickCount: clickCount
         )
     }
 
@@ -186,11 +199,12 @@ public final class MouseTracker {
     /// Deliberately NOT `recordDown` — it skips the flip and the
     /// fan-out, and seeds `.otherApp`, which a `recordUp` must
     /// then name to close.
-    func seedPress(at location: CGPoint) {
+    func seedPress(at location: CGPoint, clickCount: Int = 1) {
         press = Press(
             location: location,
             downAt: Date(),
-            origin: .otherApp
+            origin: .otherApp,
+            clickCount: clickCount
         )
     }
 }

@@ -1208,6 +1208,23 @@ editing here:
   dispatch. Event-driven retiles stay un-forced so echo lag can't
   wobble windows. Profile applies classify themselves: see
   [profiles.md](profiles.md).
+- **A resize nobody asked for is corrected on its own event
+  (#1358)** — the `.windowResized` arm's classification is
+  three-way and a new arm keeps it so: our ask's ECHO goes to
+  the #677 answer channel, a hand GESTURE to the drag pipeline,
+  and what is neither (a title-bar zoom, an edge double-click's
+  expand, an app re-sizing itself) to
+  `KiwiCore.correctUnsolicitedResize`, which retiles only where
+  the window is off the frame the active space gives it — a
+  tiled slot beyond `retileTolerance`, or a float the bar fit
+  would move. The gesture reading refuses a press whose
+  `clickCount` is 2 unless `drag.hasGesture` already holds that
+  window, because an edge double-click is the one OS resize that
+  looks like a fast drag's trailing event from inside; a new
+  press consumer takes the count from the record rather than
+  re-deriving intent from timing (`UnsolicitedResizeTests`, whose
+  echo control asserts on the log — the #677 channel retiles on
+  its own, so a frame sink cannot tell the two apart).
 
 ## Cross-layout logic must account for each layout's navigation model
 
