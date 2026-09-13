@@ -10,13 +10,33 @@ import Testing
 /// `forceFront` — `PlacementIntentTests` holds what that door
 /// does. What a fixture cannot see is the wiring: a `show()` that
 /// dropped the call, or reordered it after the order-front, would
-/// go dead with every unit test green.
+/// go dead with every unit test green. The same for the door's
+/// Core half (#1380): a CLOSED window is owed rather than
+/// refused, and the debt drains on the `.windowCreated` arm —
+/// a recorder or payer that moved, doubled or vanished leaves
+/// the fixture green too.
 @Suite("The Settings raise goes through the focus command (#1281)")
 struct SettingsOpenFocusSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
     private static let gui = root.appendingPathComponent(
         "Sources/KiwiDesk"
     )
+    private static let core = root.appendingPathComponent(
+        "Sources/KiwiDeskCore"
+    )
+    private static let door = "KiwiCore+PlacementBounce.swift"
+
+    /// needle → the one Core file that may carry it (#1380). The
+    /// recorder is the door's untracked arm and the drain its
+    /// payer, both beside the arm they serve; the payer is
+    /// called once, by the arrival arm the other two intent
+    /// ledgers drain on (`FollowFocusSeamTests`,
+    /// `ReturningFocusSeamTests`).
+    private static let debtWirings: [(String, String)] = [
+        ("ownShowFocus.record(", door),
+        ("ownShowFocus.claim(", door),
+        ("payOwnShowFocus(arrived:", "KiwiCore+Events.swift"),
+    ]
     private static let controller = gui.appendingPathComponent(
         "Settings/SettingsWindowController.swift"
     )
@@ -87,6 +107,59 @@ struct SettingsOpenFocusSeamTests {
         #expect(
             verbs.isEmpty,
             "found \(verbs.map(\.site).joined(separator: ", "))"
+        )
+    }
+
+    /// Exact count and file, both directions: a second recorder
+    /// would owe a focus nobody drains, and zero of any of them
+    /// is the defect back — the re-shown window bounced.
+    @Test("a closed window's debt is recorded and paid once each")
+    func debtWiringsAreSingular() throws {
+        for (needle, file) in Self.debtWirings {
+            let sites = try SourceScan.identifierSites(
+                of: needle,
+                under: Self.core
+            )
+            #expect(
+                sites.count == 1
+                    && sites.allSatisfy {
+                        $0.file.lastPathComponent == file
+                    },
+                .init(
+                    rawValue: "expected one `\(needle)` in \(file), "
+                        + "found "
+                        + sites.map(\.site).joined(separator: ", ")
+                )
+            )
+        }
+    }
+
+    /// The payer runs inside the `.windowCreated` arm of
+    /// `handle`, after the fold — the one moment the arriving
+    /// window has an id in state for the focus command to take.
+    @Test("the payer rides the arrival arm")
+    func payerRidesTheArrivalArm() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "App/KiwiCore+Events.swift"
+            )
+        )
+        let handle = try #require(
+            SourceScan.declarationBody(
+                after: "func handle(_ event: KiwiEvent) {",
+                in: source
+            )
+        )
+        let start = try #require(
+            handle.range(of: "case .windowCreated(let window):")
+        )
+        let rest = handle[start.upperBound...]
+        let end =
+            rest.range(of: "\n        case .")?.lowerBound
+            ?? rest.endIndex
+        let arm = rest[..<end]
+        #expect(
+            arm.contains("payOwnShowFocus(arrived: window.id)")
         )
     }
 }

@@ -20,14 +20,13 @@ public final class KiwiCore {
     let spaceBarDrop = SpaceBarDropCoordinator()
     /// Live cross-display make-room gesture state (#504).
     let dragCrossing = DragCrossingCoordinator()
-    /// Glyph-vs-image icon decisions for bar items (#294) —
-    /// App Bar, Space Bar (#293), shortcuts panel.
+    /// Glyph-vs-image icon decisions for bar items (#294): App
+    /// Bar, Space Bar (#293), shortcuts panel.
     public let appFont = AppFontResolver()
-    /// Focus-window border overlays (#278), driven by
-    /// `updateBorders()` inside `retile()`.
+    /// Focus-window border overlays (#278) and their sibling,
+    /// the on-window sticky marks (#414) — both driven from
+    /// `retile()` (`updateBorders()`, `updateStickyMarks()`).
     public let borders = BorderManager()
-    /// On-window sticky marks (#414): a border sibling,
-    /// driven by `updateStickyMarks()` inside `retile()`.
     public let stickyMarks = StickyMarkManager()
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
@@ -239,26 +238,27 @@ public final class KiwiCore {
 
     /// The deferred one-shot settle tasks (focus follow, startup
     /// sweep, space settles), keyed so `stop()` cancels them all
-    /// without a hand-kept list (#49). Bodies live at the
-    /// `schedule*` call sites.
+    /// without a hand-kept list (#49); bodies at the `schedule*`
+    /// call sites.
     let deferred = DeferredTasks()
 
     /// The in-flight boot's phase, spans and timestamps (#801).
     let boot = BootRun()
 
     /// Adoption-heal timings (#675); tests assign milliseconds.
-    /// 5 s: a healthy tick is one ~1 ms census, so the cadence
-    /// only bounds worst-case adoption latency. 750 ms: outlasts
-    /// a Dock zoom, a fade-in or a close's teardown (#1157).
+    /// 5 s: a healthy tick is one ~1 ms census, so the cadence only
+    /// bounds worst-case latency. 750 ms outlasts a Dock zoom, a
+    /// fade-in or a close's teardown (#1157).
     var adoptionHealInterval: Duration = .seconds(5)
     var transientRetrackDelay: Duration = .milliseconds(750)
 
-    /// Three departure ledgers, each type doc carrying its own
-    /// argument: the no-follow move latch (#482/#483), the focus a
-    /// follow owes the window it sent away (#1007), and the Space
-    /// an explicit `space:` names for a hidden Desktop (#1150).
+    /// Four intent ledgers, each type doc carrying its argument:
+    /// the move latch (#482/#483), the focus a follow (#1007) or
+    /// the own-window door (#1380) owes a window it cannot focus
+    /// yet, and the Space a hidden-Desktop move names (#1150).
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
+    let ownShowFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
 
     /// The MAIN display's current native Desktop (#888) — the

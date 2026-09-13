@@ -232,6 +232,11 @@ this tree never spells the focus VERB or a copy of either;
 `SettingsOpenFocusSeamTests` pins the branch ORDER and carries
 the `allowed` map of who may call the door, which is the one
 copy, and `PlacementIntentTests` holds what the door does. The
+order matters for a CLOSED window as much as a panned-out one: a
+re-shown `NSWindow` keeps its number and arrives as a return that
+steals no focus, so the door files a debt the arrival pays — and
+a call after the order-front files it after the arrival it was
+for (#1380; state-and-layout.md owns the Core half). The
 argument is *An own raise is never a bounce* under "A placement
 bounce is the app's answer, not the user's (#1161)" in
 `docs/design-decisions.md`.

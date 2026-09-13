@@ -39,24 +39,55 @@ extension KiwiCore {
             ? placed : nil
     }
 
-    /// The GUI's raise of an own window Core tracks (#1281): the
-    /// focus command FIRST, so the report arrives intended rather
-    /// than as the clickless focus the arm above bounces. Gated
-    /// like that arm — the window's Space is the active one, kept
-    /// beside it so the two cannot drift — but on any mode: the
-    /// command is the right raise wherever the Space is shown,
-    /// and parked elsewhere a compliant own window is reached by
-    /// its report. Bypasses the #292 preflight on purpose; the
-    /// caller fronts the window regardless. Returns whether Core
-    /// took it; the caller's `forceFront` follows either way.
+    /// The GUI's raise of an own window (#1281): the focus command
+    /// FIRST, so the report arrives intended rather than as the
+    /// clickless focus the arm above bounces. Gated like that arm
+    /// — the window's Space is the active one, kept beside it so
+    /// the two cannot drift — but on any mode: the command is the
+    /// right raise wherever the Space is shown, and parked
+    /// elsewhere a compliant own window is reached by its report.
+    /// An UNTRACKED number is a closed own window about to be
+    /// re-shown, which keeps its number and so arrives as a RETURN
+    /// that steals no focus (#636): the command is owed instead,
+    /// and `payOwnShowFocus` issues it at the arrival (#1380).
+    /// Bypasses the #292 preflight on purpose; the caller fronts
+    /// the window regardless. Returns whether Core took it; the
+    /// caller's `forceFront` follows either way.
     @discardableResult
     public func focusOwnWindow(number: Int) -> Bool {
-        guard let id = EventLoop.ownWindowID(number: number),
-            let space = state.workspaces.space(of: id),
-            space == state.workspaces.activeSpace
-        else { return false }
+        guard let id = EventLoop.ownWindowID(number: number) else {
+            return false
+        }
+        guard let space = state.workspaces.space(of: id) else {
+            ownShowFocus.record(id)
+            return true
+        }
+        guard space == state.workspaces.activeSpace else {
+            return false
+        }
         focusWindow(id, warp: false)
         return true
+    }
+
+    /// Pays the door's debt at the owed window's arrival (#1380):
+    /// the same focus command the tracked arm issues, now that
+    /// the window has an id in state, so the report that follows
+    /// is intended. The arm's gate is judged HERE, on the Space
+    /// the arrival landed in — the door could not read it.
+    func payOwnShowFocus(arrived window: WindowID) {
+        guard ownShowFocus.claim(if: { $0 == window }) != nil
+        else { return }
+        guard let space = state.workspaces.space(of: window),
+            space == state.workspaces.activeSpace
+        else {
+            onLog(
+                "own show: w\(window.raw) arrived off the active "
+                    + "space — focus debt dropped"
+            )
+            return
+        }
+        onLog("own show: focus paid to w\(window.raw)")
+        focusWindow(window, warp: false)
     }
 
     /// Keeps state on `intended` and re-asserts it with a DIRECT,
