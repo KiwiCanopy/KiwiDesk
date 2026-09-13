@@ -1618,6 +1618,14 @@ track.set_limit(3)
 **Does:** whether the track limit is managed automatically. On
 (the default), tracks open and collapse as windows come and go —
 no cap. Off pins the cap to the value set by `track.set_limit`.
+
+:::unreleased
+The automatic count also honours the minimum sizes the windows'
+own apps enforce once KiwiDesk has learned them, so tracks stop
+multiplying past what their windows will hold; a limit you set
+stays your number.
+:::
+
 The track twin of `grid.set_auto_size`. `track.set_limit(0)` is
 the shorthand for turning this on; `track.set_limit(n)` for
 turning it off with a cap of `n`.

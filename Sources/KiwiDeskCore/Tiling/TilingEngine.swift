@@ -11,11 +11,11 @@ import CoreGraphics
 public final class TilingEngine {
     public let animation = AnimationEngine()
 
-    /// Pass-scoped (#1055): true only while `retile(force:)`
-    /// computes a FORCED pass's frames, read by `layoutInput`
-    /// into `LayoutContext.probesBeyondBounds`. Never set it
-    /// elsewhere — the probe's whole contract is that only an
-    /// explicit apply pays it.
+    /// Pass-scoped (#1055): true only inside `withForcedPass`,
+    /// read by `layoutInput` into
+    /// `LayoutContext.probesBeyondBounds`. Written nowhere else
+    /// — the probe's whole contract is that only an explicit
+    /// apply pays it (`TrackCapPlumbingNeedleTests`).
     var probeBeyondBoundsPass = false
 
     /// The live tiling settings. The animation engine caches
@@ -225,85 +225,82 @@ public final class TilingEngine {
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
         else { return }
-        // A forced pass is an explicit apply, and it probes
-        // past corroborated bounds once (#1055) — pass-scoped
-        // so every other frame computation keeps the
-        // generalized consume; see
-        // `LayoutContext.probesBeyondBounds`.
-        probeBeyondBoundsPass = force
-        defer { probeBeyondBoundsPass = false }
-        let frames = calculatedFrames(state: state)
-        // The #45 invariant, enforced rather than trusted: a
-        // newcomer IS an instant size, so no promise survives one.
-        // Both arguments meet in this one signature, which makes
-        // this the only place the combination is expressible — and
-        // the routing guard cannot see it, because it counts
-        // occurrences, not combinations.
-        let promised: BatchSizing =
-            newlyCreatedWindow == nil ? sizing : .mayInstantSize
+        // A forced pass probes past corroborated bounds once
+        // (#1055); `withForcedPass` is the one door.
+        withForcedPass(force) {
+            let frames = calculatedFrames(state: state)
+            // The #45 invariant, enforced rather than trusted: a
+            // newcomer IS an instant size, so no promise survives one.
+            // Both arguments meet in this one signature, which makes
+            // this the only place the combination is expressible — and
+            // the routing guard cannot see it, because it counts
+            // occurrences, not combinations.
+            let promised: BatchSizing =
+                newlyCreatedWindow == nil ? sizing : .mayInstantSize
 
-        for (id, target) in frames {
-            // A window in an active drag keeps its user-driven
-            // frame: the pointer owns it. Reframing it here would
-            // yank it to its computed slot mid-drag — a Space Bar
-            // spring retiles the target's OTHER windows but must
-            // leave the dragged one under the cursor (#372). Its
-            // real placement happens at drop, once the exemption
-            // clears.
-            if id == dragExemptWindow { continue }
-            guard let current = state.windows[id]?.frame
-            else { continue }
-            // #677: the settled, echo-quiet state frame is the
-            // app's answer to the engine's last ask — the gate
-            // and its argument live on `observeAppAnswer`. Its
-            // verdict doubles as the baseline trust for the ask
-            // recorded below.
-            let settledNow = observeAppAnswer(
-                for: id,
-                current: current
-            )
-            // Tolerance: apps clamp what we set (character
-            // grids, minimum sizes), so the reported frame is
-            // often a hair off the target. Re-applying an
-            // unchanged target just wobbles the window.
-            if !force, Self.close(current, to: target) {
-                animation.cancel(window: id)
-                continue
-            }
-            // #677: a target the app has twice refused is
-            // "already there" too — re-issuing it restarts an
-            // animation the window can never perform, forever.
-            if !force,
-                sizeBoundExplains(
-                    id,
-                    current: current,
-                    target: target
+            for (id, target) in frames {
+                // A window in an active drag keeps its user-driven
+                // frame: the pointer owns it. Reframing it here would
+                // yank it to its computed slot mid-drag — a Space Bar
+                // spring retiles the target's OTHER windows but must
+                // leave the dragged one under the cursor (#372). Its
+                // real placement happens at drop, once the exemption
+                // clears.
+                if id == dragExemptWindow { continue }
+                guard let current = state.windows[id]?.frame
+                else { continue }
+                // #677: the settled, echo-quiet state frame is the
+                // app's answer to the engine's last ask — the gate
+                // and its argument live on `observeAppAnswer`. Its
+                // verdict doubles as the baseline trust for the ask
+                // recorded below.
+                let settledNow = observeAppAnswer(
+                    for: id,
+                    current: current
                 )
-            {
-                animation.cancel(window: id)
-                continue
+                // Tolerance: apps clamp what we set (character
+                // grids, minimum sizes), so the reported frame is
+                // often a hair off the target. Re-applying an
+                // unchanged target just wobbles the window.
+                if !force, Self.close(current, to: target) {
+                    animation.cancel(window: id)
+                    continue
+                }
+                // #677: a target the app has twice refused is
+                // "already there" too — re-issuing it restarts an
+                // animation the window can never perform, forever.
+                if !force,
+                    sizeBoundExplains(
+                        id,
+                        current: current,
+                        target: target
+                    )
+                {
+                    animation.cancel(window: id)
+                    continue
+                }
+                applyFrame(
+                    id,
+                    from: current,
+                    to: target,
+                    animated: animated,
+                    isNewWindow: id == newlyCreatedWindow,
+                    sizing: promised
+                )
+                boundLearner.recordAsk(
+                    id,
+                    size: target.size,
+                    settledFrom: settledNow ? current.size : nil
+                )
             }
-            applyFrame(
-                id,
-                from: current,
-                to: target,
-                animated: animated,
-                isNewWindow: id == newlyCreatedWindow,
-                sizing: promised
+            stashInactive(
+                state: state,
+                fallback: screen,
+                force: force,
+                animated: stashAnimated
             )
-            boundLearner.recordAsk(
-                id,
-                size: target.size,
-                settledFrom: settledNow ? current.size : nil
-            )
+            restoreStashed(state: state, frames: frames)
         }
-        stashInactive(
-            state: state,
-            fallback: screen,
-            force: force,
-            animated: stashAnimated
-        )
-        restoreStashed(state: state, frames: frames)
     }
 
     /// Frames within this distance per edge count as "already

@@ -34,7 +34,12 @@ extension KiwiCore {
         // Heal them here, before the pass renders — every such
         // change already retiles, so this is the one choke
         // point and needs no per-site arming.
-        healTrackSessionWeights()
+        // The heal and the render read one forced-pass verdict
+        // (#1055/#1355): a pre-render consumer of `layoutInput`
+        // that probes past bounds joins this scope.
+        tiler.withForcedPass(force) {
+            healTrackSessionWeights()
+        }
         // A float whose capture was lost while parked has
         // nothing to place it (#1352): seed a centred one here
         // so the pass's own restore delivers it — one delivery

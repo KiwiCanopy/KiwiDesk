@@ -65,7 +65,8 @@ extension KiwiCore {
         // screen, headless) degrades to the fixed-limit cap.
         let geoCap =
             (tiler.layoutInput(state: state)?.context)
-            .map(TrackLayout.geometricCap(for:)) ?? .max
+            .map { TrackLayout.geometricCap(for: $0, of: tiled) }
+            ?? .max
         if TrackLayout.overflowSwapBlocked(
             tiled: tiled,
             breaks: space.trackBreaks,
