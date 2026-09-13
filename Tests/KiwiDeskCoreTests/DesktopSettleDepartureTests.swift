@@ -176,10 +176,10 @@ struct DesktopSettleDepartureTests {
         #expect(reachedTheRaise(box))
     }
 
-    /// The bound and the door: a stale entry is pruned at the
-    /// next filing and never read, a fresh one inside the grace
-    /// before the switch is read.
-    @Test("the record is age-bounded and read against the switch")
+    /// The bound is the filing door's: a stale entry is pruned
+    /// at the next filing, and a fresh one is read against the
+    /// switch — inside the grace before it, not beyond.
+    @Test("the record is pruned at filing and read against the switch")
     func recordIsBoundedAndSwitchScoped() {
         let (core, _) = makeCore()
         defer { teardown() }
@@ -191,15 +191,32 @@ struct DesktopSettleDepartureTests {
                 -KiwiCore.switchDepartureWindow - 1
             )
         )
+        #expect(core.desktopMemory.switchDepartures[stale] != nil)
         core.fileSwitchDeparture(focused, now: now)
         #expect(core.desktopMemory.switchDepartures[stale] == nil)
-        #expect(!core.departedWithThisSwitch(stale, now: now))
         core.lastDesktopSwitch = now.addingTimeInterval(0.5)
-        #expect(core.departedWithThisSwitch(focused, now: now))
+        #expect(core.departedWithThisSwitch(focused))
         core.lastDesktopSwitch = now.addingTimeInterval(
             EventLoop.spaceSwitchCoalesceGrace + 0.5
         )
-        #expect(!core.departedWithThisSwitch(focused, now: now))
+        #expect(!core.departedWithThisSwitch(focused))
+    }
+
+    /// Read, never consumed: a second settle of the same switch
+    /// finds the record still standing.
+    @Test("the settle does not consume the record")
+    func settleDoesNotConsume() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(11) }
+        core.handle(.windowDestroyed(focused, wasMinimized: false))
+        swipeToEmptyDesktop(core)
+        relist(core)
+        settle(core, box)
+        #expect(stoodDown(box))
+        settle(core, box)
+        #expect(stoodDown(box))
+        #expect(!reachedTheRaise(box))
     }
 
     /// Id-keyed like the focus memory, and re-keyed with it: a

@@ -109,14 +109,19 @@ extension KiwiCore {
         }
     }
 
-    /// How long a departure record may wait for its settle: a
-    /// slow app's destroy trails the swipe by seconds
-    /// (`desktopMoveDepartureWindow`'s measurement), and past
-    /// this an entry is pruned rather than read (#1364).
-    static let switchDepartureWindow: TimeInterval = 10
+    /// How long a filed departure is kept: the settle that reads
+    /// one runs within the switch grace plus 600 ms, so this only
+    /// prunes entries no switch followed — a drag's vanish, a
+    /// slow app's trailing destroy — on the same measurement
+    /// `desktopMoveDepartureWindow` prices (#1364).
+    static var switchDepartureWindow: TimeInterval {
+        desktopMoveDepartureWindow
+    }
 
-    /// The one writer of `DesktopMemory.switchDepartures`
-    /// (#1364): files a departure `departedWithDesktop` reported.
+    /// The one FILING door of `DesktopMemory.switchDepartures`
+    /// (#1364): a departure `departedWithDesktop` reported. The
+    /// re-key, the retire and the #634 forget are the record's
+    /// other writers, beside `honoredFocus`'s.
     func fileSwitchDeparture(_ id: WindowID, now: Date = Date()) {
         desktopMemory.switchDepartures =
             desktopMemory.switchDepartures.filter {
@@ -128,14 +133,12 @@ extension KiwiCore {
 
     /// Whether `id` LEFT WITH ITS DESKTOP in the switch being
     /// settled: filed no earlier than the switch grace before the
-    /// switch — an app's own destroy beats the notification — and
-    /// inside the record's bound (#1364).
-    func departedWithThisSwitch(
-        _ id: WindowID,
-        now: Date = Date()
-    ) -> Bool {
-        guard let filed = desktopMemory.switchDepartures[id],
-            now.timeIntervalSince(filed) < Self.switchDepartureWindow
+    /// switch, since an app's own destroy beats the notification
+    /// (#1364). The residue — a departure inside that grace
+    /// before a switch it did not belong to — is priced in the
+    /// design-decisions entry.
+    func departedWithThisSwitch(_ id: WindowID) -> Bool {
+        guard let filed = desktopMemory.switchDepartures[id]
         else { return false }
         let since = lastDesktopSwitch.addingTimeInterval(
             -EventLoop.spaceSwitchCoalesceGrace

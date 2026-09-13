@@ -1923,7 +1923,13 @@ app's own destroy beats the notification, and inside an age
 bound, since a slow app's destroy trails the swipe by seconds
 and a stale stamp must not stand down a later switch's refocus.
 A window found so is left where macOS put the focus, with a log
-line naming it. The trade is the same one the close-return arm already made
+line naming it. The residue is the grace itself: a departure
+filed inside the 0.75 s before a switch it did not belong to — a
+swipe back while a slow app's destroy is still trailing, a drag's
+vanish just ahead of a swipe — reads as that switch's, and its
+window's refocus stands down once; nothing filed at the departure
+can say which switch it belongs to, since the destroy arrives
+before the switch does. The trade is the same one the close-return arm already made
 — macOS picks the focus on the Desktop it shows — and the two
 cases it must not touch are held as controls beside it: a window
 that stayed through the switch is re-asserted exactly as before,
