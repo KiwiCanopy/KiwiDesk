@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -19,14 +20,25 @@ struct DesktopBindingIdentityTests {
     private let stampA = DesktopIdentity(raw: "STAMP-A")
     private let stampB = DesktopIdentity(raw: "STAMP-B")
 
+    /// One pinned display (#531), so the profiles `save_profile`
+    /// captures are one-screen ones and the binding gate (#1394)
+    /// judges them on a known count.
     private func makeCore() -> KiwiCore {
-        makeTestCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-bind-\(UUID().uuidString)"
                 )
         )
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "A",
+                frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+            )
+        )
+        return core
     }
 
     private func pin(_ spaces: [NativeSpace], current: UInt64) {

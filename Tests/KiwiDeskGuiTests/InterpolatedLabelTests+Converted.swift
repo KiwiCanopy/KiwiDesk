@@ -215,5 +215,11 @@ extension InterpolatedLabelTests {
         //    same card as the entry above, reached from the
         //    other end of the app.
         "shortcuts.desktops.help": 1,
+        // 7. #1394. A screen-count mismatch is the one drift
+        //    Save cannot take up, so the hint that greys Save
+        //    and the header's status line both name the button
+        //    that can — interpolated, never quoted (#818).
+        "profiles.update_hint": 1,
+        "profile_header.status.unsaved_monitor_count": 1,
     ]
 }

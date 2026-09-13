@@ -81,6 +81,21 @@ extension SettingsHeaderBar {
                     + "make it yours."
             )
         case .screensUnsaved:
+            // A screen-count mismatch is the one drift Save
+            // cannot take up (the hint that greys it says so),
+            // so the line names the button that can (#818).
+            if model.updateHint != nil {
+                return L(
+                    "profile_header.status.unsaved_monitor_count",
+                    "Unsaved monitor changes — this profile is "
+                        + "for another screen count; %1$@ to "
+                        + "keep them.",
+                    L(
+                        "footer.save_as_new_profile",
+                        "Save as New Profile…"
+                    )
+                )
+            }
             return L(
                 "profile_header.status.unsaved_monitor",
                 "Unsaved monitor changes — update the "

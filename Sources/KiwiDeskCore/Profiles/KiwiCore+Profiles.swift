@@ -240,15 +240,22 @@ extension KiwiCore {
 
     /// Whether `name` is the layout currently on screen — it is
     /// the active profile, or a native Space bound to it is the
-    /// active one — so a non-adopting edit should hot-reload it
-    /// (#18).
+    /// active one and the binding fits (#1394) — so a
+    /// non-adopting edit should hot-reload it (#18).
+    ///
+    /// COST: the bound arm reads the profile file, so this is a
+    /// per-Save query, never a per-render one.
     public func isProfileInEffect(_ name: String) -> Bool {
         if profiles.currentName == name { return true }
         // A query, so it READS the topology rather than stamping
         // it, and asks under both of the Desktop's keys (#1147).
-        return mainDesktopBinding(
-            in: NativeSpaces.desktopSnapshot()
-        )?.profile == name
+        guard
+            let binding = mainDesktopBinding(
+                in: NativeSpaces.desktopSnapshot()
+            ), binding.profile == name,
+            case .success = boundProfile(of: binding)
+        else { return false }
+        return true
     }
 
     /// Re-applies `name` to the live layout after an in-effect

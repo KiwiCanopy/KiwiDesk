@@ -10098,6 +10098,48 @@ last affordance that can undo the thing being greyed, the grey
 owes an escape hatch, or it is a trap wearing the costume of a
 safeguard.
 
+:::unreleased
+**[Principle]**
+
+**A Desktop binding fires only for its profile's screen count
+([#1394](https://github.com/KiwiCanopy/KiwiDesk/issues/1394),
+[#1332](https://github.com/KiwiCanopy/KiwiDesk/issues/1332)).**
+A binding outranks monitor matching, and a profile is saved for
+exactly one number of screens, so the two used to collide: a
+Desktop bound to a one-screen profile loaded it onto two screens,
+where nothing could save it — a profile refuses a set of another
+count — and Settings could only say *save as new instead*, which
+the binding would then not point at. Worse, the two doors that
+load a binding disagreed about the result: the boot and
+Desktop-switch door marked the misfit clean, the monitor-change
+door let it stand dirty, so a restart showed a *Screens* drift
+row that a Desktop switch did not. The ruling settles both by
+construction rather than by picking a side: **a binding fires
+only where its profile is saved for the connected screen count**,
+and for any other count it stands aside so the rungs below —
+exact set, count default, built-in — answer, exactly as a
+binding whose profile cannot be read already did. A bound load
+therefore always fits by count, the unconditional clean mark is
+gone, and both doors read one verdict from the apply. Screen
+*identity* was considered as the extra dimension and rejected: a
+binding is already filed under the Desktop's own stamp, and a
+Desktop lives on one screen, so the external's Desktop 2 and the
+built-in's Desktop 2 are different bindings by construction. The
+count is the dimension that was missing, and it needs no stored
+field, since the bound profile carries it. What this does not
+give — one Desktop loading a different profile per screen count
+— needs several bindings per Desktop and a `gui.json` format
+crossing, and is its own feature. The Desktops row keeps a
+standing-aside binding and badges it *for N screen(s)*, in
+keeping with *don't hide*: the binding is not broken, it is
+waiting, and the badge narrates Core's verdict rather than
+re-deriving it. With no displays known — the first config load
+runs before the loop publishes displays, and a paused engine
+discovers none — the gate cannot judge and the binding waits
+too, rather than loading a profile that the boot scan's monitor
+change would then replace; that first monitor change fires it.
+:::
+
 ### Monitors
 
 **[Rationale]**

@@ -184,6 +184,27 @@ struct DesktopsGroup: View {
                     )
                 )
             }
+            if let count = otherScreenCount(row.key) {
+                BadgeChip(
+                    label: L(
+                        "desktops.other_count",
+                        "for %1$d screen(s)",
+                        count
+                    )
+                )
+                .help(
+                    L(
+                        "desktops.other_count.help",
+                        "This profile is saved for %1$d "
+                            + "screen(s); %2$d connected. Until "
+                            + "that many are, the binding stands "
+                            + "aside and KiwiDesk picks a profile "
+                            + "by your screens instead.",
+                        count,
+                        model.displays.count
+                    )
+                )
+            }
             Spacer()
             profileMenu(row.key)
         }
@@ -226,6 +247,23 @@ struct DesktopsGroup: View {
             present: model.presentDesktopKeys,
             bindings: model.config.profileBindings
         )
+    }
+
+    /// The bound profile's screen count where Core's gate
+    /// refuses it on the count — the binding stands aside then
+    /// (#1394). Narrated, never re-decided: the verdict is
+    /// `DesktopBindingRefusal.of`'s.
+    private func otherScreenCount(_ key: DesktopKey) -> Int? {
+        guard let name = binding(key).wrappedValue,
+            let count = model.profileSummaries.first(where: {
+                $0.name == name
+            })?.count,
+            case .screenCount = DesktopBindingRefusal.of(
+                profileCount: count,
+                connected: model.displays.count
+            )
+        else { return nil }
+        return count
     }
 
     /// Available profiles for the dropdown, always including the

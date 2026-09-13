@@ -63,7 +63,9 @@ extension KiwiCore {
     ///
     /// The active binding is passed in rather than resolved here,
     /// so this stays a pure query over injected state, testable
-    /// without a WindowServer.
+    /// without a WindowServer. The binding gate reads the display
+    /// count from state itself, synchronously with the read
+    /// below, so the two cannot differ.
     ///
     /// COST: `match` scans the profile directory and decodes
     /// every profile, so this is a refresh-time query, never a
@@ -84,10 +86,10 @@ extension KiwiCore {
         activeBinding: DesktopBinding?,
         displays: [Display]
     ) -> ProfileVerdict {
-        // A binding whose profile cannot be read falls THROUGH
-        // to matching, exactly as the live path does — the
-        // verdict must not name a profile that would fail to
-        // load.
+        // A binding whose profile cannot be read, or is saved for
+        // another screen count (#1394), falls THROUGH to matching
+        // through the same gate the live doors take — the verdict
+        // must not name a profile that would not load.
         //
         // The sentence names the binding's own Mission Control
         // projection, since that is the only name for a Desktop a
@@ -96,7 +98,7 @@ extension KiwiCore {
         // both of a Desktop's keys — so this stays a pure query
         // over injected state.
         if let bound = activeBinding,
-            (try? profiles.read(name: bound.profile)) != nil
+            case .success = boundProfile(of: bound)
         {
             return .boundToDesktop(
                 name: bound.profile,
