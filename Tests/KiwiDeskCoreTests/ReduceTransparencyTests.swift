@@ -34,10 +34,22 @@ struct ReduceTransparencyTests {
         return try body()
     }
 
-    @Test("the rendered style drops glass, and only glass")
+    /// The setting asks for OPAQUE backgrounds: a Fill keeps its
+    /// hue and loses its alpha, a transparent one stays no plate.
+    @Test("the Fill renders opaque, a transparent one stays absent")
+    func fillRendersOpaque() {
+        #expect(LiquidGlassGate.opaque("#14201CB3") == "#14201C")
+        #expect(LiquidGlassGate.opaque("#14201C") == "#14201C")
+        #expect(LiquidGlassGate.opaque("14201C40") == "#14201C")
+        #expect(LiquidGlassGate.opaque("#00000000") == "#00000000")
+        #expect(LiquidGlassGate.opaque("not a colour") == "not a colour")
+    }
+
+    @Test("the rendered style drops glass and alpha, nothing else")
     func renderedStyleDropsGlassOnly() {
         var app = AppBarFixtures.everyGlobalField()
         app.liquidGlass = true
+        app.fillColor = "#020202B3"
         var space = SpaceBarStyle()
         space.liquidGlass = true
         space.backgroundStyle = .boxed
@@ -45,9 +57,13 @@ struct ReduceTransparencyTests {
         reducing(true) {
             var expectedApp = app
             expectedApp.liquidGlass = false
+            expectedApp.fillColor = "#020202"
             #expect(LiquidGlassGate.rendered(app) == expectedApp)
             var expectedSpace = space
             expectedSpace.liquidGlass = false
+            expectedSpace.fillColor = LiquidGlassGate.opaque(
+                space.fillColor
+            )
             #expect(LiquidGlassGate.rendered(space) == expectedSpace)
             #expect(!LiquidGlassGate.drawsGlass)
         }

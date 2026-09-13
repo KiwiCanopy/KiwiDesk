@@ -261,8 +261,10 @@ Obligations:
   (#1374). `NSGlassEffectView` ignores the setting — measured
   2026-09-13, live and at creation — so each overlay's `render`
   resolves its stored style through `LiquidGlassGate.rendered`
-  exactly once and every consumer downstream (`glassEnabled`,
-  `hasBox`, `GlassHosting`) reads the copy; `GlassTint` refuses a
+  exactly once — glass off AND the Fill at full alpha, since the
+  setting asks for opaque backgrounds — and every consumer
+  downstream (`glassEnabled`, `hasBox`, `GlassHosting`, the
+  plate painters) reads the copy; `GlassTint` refuses a
   colour beneath it as the net, and the bootstrap observer
   re-draws BOTH bars on the flip. A new bar surface's render takes
   the same read, and a new reader of the OS flag in Core is a

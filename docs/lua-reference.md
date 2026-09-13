@@ -1917,9 +1917,10 @@ portable. Per-layout override:
 
 :::unreleased
 Also stood down, live, while macOS's Reduce transparency is on:
-every glass surface draws its Boxed or Plain shape (the panel its
-plain material) and the stored value is untouched, so the glass
-returns the moment the setting goes off (#1374).
+every glass surface draws its Boxed or Plain shape with the
+`fill_color` at full alpha (the panel its plain material), and
+the stored values are untouched, so the glass and the alpha
+return the moment the setting goes off (#1374).
 :::
 
 Settings has no per-bar row for this any more (#1307): one
