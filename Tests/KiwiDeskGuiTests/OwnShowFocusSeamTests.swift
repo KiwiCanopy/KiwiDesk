@@ -56,7 +56,7 @@ struct OwnShowFocusSeamTests {
     }
 
     /// The payer runs inside the `.windowCreated` arm of
-    /// `handle`, after the fold.
+    /// `handle`, after the fold and after the sibling payers.
     @Test("the payer rides the arrival arm")
     func payerRidesTheArrivalArm() throws {
         let source = try SourceScan.strippedSource(
@@ -78,9 +78,18 @@ struct OwnShowFocusSeamTests {
             rest.range(of: "\n        case .")?.lowerBound
             ?? rest.endIndex
         let arm = rest[..<end]
-        #expect(
-            arm.contains("payOwnShowFocus(arrived: window.id)")
+        let own = try #require(
+            arm.range(of: "payOwnShowFocus(arrived: window.id)")
         )
+        // AFTER both sibling payers: the stand-down that makes a
+        // window two ledgers name a single command reads the
+        // focus they set, so paying first would pay twice.
+        for sibling in [
+            "payFollowedFocus(arrived:", "payReturningFocus(arrived:",
+        ] {
+            let site = try #require(arm.range(of: sibling))
+            #expect(site.lowerBound < own.lowerBound, .init(rawValue: sibling))
+        }
     }
 
     /// This instance has no re-key and no forget by construction
