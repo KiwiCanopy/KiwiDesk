@@ -18,8 +18,8 @@ struct GlassTintCensusTests {
     /// `memberBodies` returns the members that open a body, which
     /// is the same residue `BarMotionSeamTests` states.
     private static let members: [String: [String]] = [
-        "rendered": ["maxAlpha", "glassAvailable"],
-        "pinnedAppearance": ["glassAvailable", "wantsLightInk"],
+        "rendered": ["maxAlpha", "drawsGlass"],
+        "pinnedAppearance": ["drawsGlass", "wantsLightInk"],
         "sits": ["subviews"],
         "apply": ["rendered(", "pinnedAppearance(", "sits("],
     ]

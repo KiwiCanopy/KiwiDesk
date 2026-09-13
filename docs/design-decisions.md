@@ -9445,6 +9445,33 @@ surface keeps its own colour rule: the bars tint their glass from
 their Fill, the panel stays untinted (#1295). The switch changes
 only WHETHER, never WHICH.
 
+:::unreleased
+**Reduce transparency stands every glass surface down, live, and
+moves no stored value.** (#1374, owner ruling 2026-09-13.) The
+platform does not do this for us: `NSGlassEffectView` draws its
+material with the setting on, measured live and after a relaunch
+under it, pixel-identical to the setting off. So while it is on,
+the bars draw their Boxed or Plain shape with both fills at full
+alpha — the setting asks for opaque backgrounds, and the bundled
+`…B3` Fills are a 70 % plate, which is not one; the hover fill
+replaces the box fill under the pointer, so it goes with it — and
+the ⌃⌥K panel its `.regularMaterial`, measured opaque under the
+setting the same day. Each surface's own OFF state made opaque,
+not an opaque glass invented for the case, for the reason the
+entry above gives the off state: a surface that degrades to
+something nearly glass claims a finish the machine is not
+drawing. A fully transparent Fill stays absent: it asked for no
+plate, and no plate is opaque. The `liquid_glass` leaves stay as the
+user set them, because the setting is the machine's and the
+profile travels: writing the leaf off would flip the user's
+choice on every Mac the profile reaches and leave it flipped when
+the setting goes back off. It is read at render time instead.
+What this does NOT do, and knowingly: the Settings row keeps
+reading On while the setting holds glass down — a greyed row
+with its reason is the honest shape and needs a runtime gate of
+its own (#1418).
+:::
+
 **The per-layout override is deliberately outside the switch's
 reading.** `monocle.set_app_bar_liquid_glass` and
 `scroll.set_app_bar_liquid_glass` still shadow the global, and

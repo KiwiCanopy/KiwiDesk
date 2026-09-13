@@ -12,23 +12,25 @@ extension View {
     ///
     /// `.regular` because this tree's glass carries dense text —
     /// NOT a default, and not the bars' `.clear`. Untinted by
-    /// ruling rather than by capability. Both arguments, and the
-    /// Reduce Transparency gap this does not answer, are in
+    /// ruling rather than by capability; both arguments are in
     /// `docs/design-decisions.md` ▸ the shortcuts panel (#1295).
     /// `enabled` is the #1307 switch's third leaf. Off takes the
     /// SAME `.regularMaterial` the pre-26 branch already draws,
     /// which `docs/design-decisions.md` rules to be today's
     /// design — so the off state is a shipped one rather than a
-    /// new surface to design.
+    /// new surface to design. Reduce transparency takes that
+    /// same branch, read live from the environment (#1374); the
+    /// stored value is untouched.
     func glassChrome(
         in shape: some Shape,
         enabled: Bool
     ) -> some View {
-        glassGround(in: shape, enabled: enabled).clipShape(shape)
+        modifier(GlassChrome(shape: shape, enabled: enabled))
+            .clipShape(shape)
     }
 
     @ViewBuilder
-    private func glassGround(
+    fileprivate func glassGround(
         in shape: some Shape,
         enabled: Bool
     ) -> some View {
@@ -37,5 +39,23 @@ extension View {
         } else {
             background(.regularMaterial)
         }
+    }
+}
+
+/// The one reader of Reduce transparency in this tree (#1374): a
+/// modifier, because an environment value is read from a view
+/// body rather than from a `View` extension's function.
+private struct GlassChrome<S: Shape>: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency)
+    private var reduceTransparency
+
+    let shape: S
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        content.glassGround(
+            in: shape,
+            enabled: enabled && !reduceTransparency
+        )
     }
 }
