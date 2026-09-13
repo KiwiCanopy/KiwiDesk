@@ -195,6 +195,9 @@ const trailerFile = "/kiwidesk-trailer.mp4";
 const trailerPoster = "/kiwidesk-trailer-poster.jpg";
 const trailerYouTube = "https://youtu.be/RvziMM_B544";
 const trailerPlaylist = "https://youtube.com/playlist?list=PLUS4bldnAF-U";
+// The pre-1.0 mascot clip that played here until 2026-09-13 — kept as a
+// link, not a second video: one play button, one download.
+const trailerOrigin = "https://youtu.be/zIPe-8dswaU";
 const trailerUploaded = "2026-09-13";
 const trailerDuration = "PT1M11S";
 
@@ -799,6 +802,8 @@ const jsonLd = [
             rel="noopener">{t.demo_watch_youtube}</a>
           <a class="link-arrow" href={trailerPlaylist} target="_blank"
             rel="noopener">{t.demo_playlist}</a>
+          <a class="link-arrow" href={trailerOrigin} target="_blank"
+            rel="noopener">{t.demo_origin}</a>
         </p>
         <blockquote class="quote-aside quote-aside--demo">
           <p>{oq}{t.quote_demo}{cq}</p>
