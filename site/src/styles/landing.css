@@ -1092,13 +1092,6 @@ section {
   margin-left: 5px;
 }
 
-.demo__caption {
-  text-align: center;
-  color: var(--text-faint);
-  font-size: 0.95rem;
-  margin-top: 1rem;
-}
-
 /* The two off-site links under the trailer: the video itself on
    YouTube (what a visitor would share) and the playlist with one
    clip per feature. Links, not an embed — the CSP's frame-src
@@ -1108,7 +1101,7 @@ section {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.35rem 1.6rem;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   font-size: 0.95rem;
 }
 
