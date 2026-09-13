@@ -173,4 +173,26 @@ struct SpaceBarBadgeTests {
         #expect(core.state.workspaces[SpaceID("2")]?.focused == WindowID(4))
         #expect(item.focusInOverflow)
     }
+
+    /// The badge and the group-breaking stay on the FLAG by
+    /// ruling (#1286, owner 2026-09-13): they mark the exception
+    /// to a space's layout, and a floating-mode space has none —
+    /// every glyph wearing the layout's own symbol says nothing.
+    /// The ring and the float-tier raise cross instead; this pin
+    /// is what reds if the badge is swept along with them.
+    @Test("A floating-mode member wears no badge and still groups")
+    func floatingModeMembersWearNoBadge() throws {
+        let core = seededCore()
+        core.state.apply(.windowCreated(window(3, app: "Mail")))
+        core.state.workspaces.setMode(SpaceID("1"), .floating)
+        let item = try #require(
+            core.spaceBarItems(
+                display: display,
+                style: SpaceBarStyle()
+            ).first
+        )
+        #expect(item.apps.map(\.name) == ["Web", "Mail"])
+        #expect(item.apps.map(\.count) == [1, 2])
+        #expect(item.apps.map(\.floating) == [false, false])
+    }
 }

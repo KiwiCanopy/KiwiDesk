@@ -80,13 +80,22 @@ extension KiwiCore {
         // moves the ring onto it too — not only a mouse click.
         let tiled = state.effectiveTiledMembers(of: space)
         let travelers = tiled.filter { !space.windows.contains($0) }
+        // The EFFECTIVE float on the space it renders ON, never
+        // the flag (#1286): an unfocused ring on a free float draws
+        // across the window in front. Travelers included — #1217
+        // re-homes a tiled sticky as a free frame there.
         let floating = Set(
-            space.windows.filter {
-                state.windows[$0]?.isFloating == true
+            (space.windows + travelers).filter {
+                EffectiveFloat.applies(
+                    isFloating: state.windows[$0]?.isFloating == true,
+                    mode: space.mode
+                )
             }
         )
         // Transient overlays (launchers, panels) never get a ring,
-        // even while focused — see `borderSpecs` (#300).
+        // even while focused — see `borderSpecs` (#300). Scans
+        // `space.windows` only by construction: an overlay is never
+        // tiled, so it can never be a traveler.
         let overlays = Set(
             space.windows.filter {
                 state.windows[$0]?.isTransientOverlay == true
@@ -95,12 +104,8 @@ extension KiwiCore {
         // Native-fullscreen windows never get one either: they
         // keep their home-space slot (no destroy fires), but fill
         // the display, so a ring would show only at the corners.
-        // Travelers ARE included here (a tiled-sticky window can go
-        // fullscreen) — unlike `floating`/`overlays` above, which
-        // scan `space.windows` only *by construction*: a floating or
-        // transient-overlay window is never tiled, so it can never be
-        // a traveler. Don't "harmonize" the three scopes into one —
-        // only fullscreen needs the traveler union.
+        // Travelers ARE included (a tiled-sticky window can go
+        // fullscreen).
         let fullscreen = Set(
             (space.windows + travelers).filter {
                 state.windows[$0]?.isFullscreen == true

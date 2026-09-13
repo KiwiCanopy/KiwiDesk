@@ -3424,6 +3424,36 @@ frame of its own to change; whether the z-order raise, the Space
 Bar's float badge and the focus ring should follow is a question
 about what each of those *means*, not a consequence of this one.
 
+**The ring and the float-tier raise follow; the badge stays on
+the flag ([#1286](https://github.com/KiwiCanopy/KiwiDesk/issues/1286)).**
+[Rationale] The sweep enumerated every reader of the float flag
+and classified it — most are the flag's own identity, a net
+already on the predicate, or the "is this a tiled member"
+question the predicate's docstring rules is *not* its negation
+— which left the three the #1184 entry named, each answered by
+what it means. The **unfocused ring** exists for tiled slots:
+around a free float it is drawn across whichever window sits in
+front, which is why monocle and a flag-float already stood it
+down, and a floating-mode member overlaps its siblings exactly
+that way — so it stands down too, judged on the space it
+renders on, a tiled sticky traveler that #1217 re-homes as a
+free frame included. The **float-tier raise** turned out to
+diverge the other way from the one the issue guessed: asking
+the flag made a floating-mode member the *tiled plane*, so
+every member focus pulled a flagged or sticky float back over
+its siblings, an order the user could never keep — it now
+stands down after a focus that lands on an effective float,
+while its *targets* stay the flag's, because the tier lifts
+floats over a tiled plane and that space has none. The **badge**
+marks the exception to a space's layout — one window that
+floats where the rest tile — and a floating-mode space has no
+exception to mark: every glyph would wear the layout's own
+symbol and say nothing, so it keeps the flag, and the same-app
+grouping it breaks keeps it with it (owner ruling 2026-09-13).
+The ring and the badge do not "disagree" by this: one is a mark
+drawn, the other a ring withheld, and neither claims the space
+is anything but what the user set it to.
+
 ### Spaces, profiles & config ownership
 
 **[Principle]**
