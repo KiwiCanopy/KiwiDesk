@@ -123,6 +123,12 @@ the reader can actually download — the site deploys from `main`
 while the newest release is whatever was last tagged, so copy
 beside a download either names the version the terms start at or
 links to `LICENSE`, which carries that boundary itself.
+The shipped `.app` carries `LICENSE` and `ACKNOWLEDGEMENTS` in
+`Contents/Resources` and opens both from Settings ▸ About, with a
+copyright line derived from `LICENSE` — BSL 1.1 wants the License
+displayed on every copy, and the Lua and Sparkle notices want
+theirs in every copy (#1407; the packaging half is
+`.claude/rules/packaging-and-release.md`'s).
 Contributions are accepted under a relicensing grant stated in
 CONTRIBUTING.md ▸ Licensing Your Contribution, since a later
 Change Date or commercial license needs every contributor's

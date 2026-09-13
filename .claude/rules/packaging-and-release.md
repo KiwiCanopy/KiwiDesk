@@ -72,6 +72,25 @@ holds both halves: that the key is there, and that its array is
 the glob's expansion rather than a typed list that would go stale
 on the next locale.
 
+**The bundle carries its license texts, and the copyright line
+is derived from `LICENSE`** (#1407). BSL 1.1 wants the License
+displayed on every copy and the Lua and Sparkle notices want
+theirs in every copy; the `.app` is a copy, so the script puts
+`LICENSE` and `ACKNOWLEDGEMENTS` into `Contents/Resources` as
+`.txt` — before the seal, and refusing rather than skipping a
+missing source — and Settings ▸ About opens them by those names
+(`LicenseDocuments`, whose dev-binary fallback is the same file
+on GitHub). `NSHumanReadableCopyright` is read off `LICENSE`'s
+`Licensor:` parameter, its `(c)` year and its title line rather
+than typed, so the plist cannot name a licensor the license does
+not. `ACKNOWLEDGEMENTS` itself is committed, and pinned VERBATIM
+to `Vendor/CLua/LICENSE` and to the LICENSE of the Sparkle
+release SwiftPM resolved into `.build/artifacts`, so a bump whose
+notice changes reds before it ships. `LicensePackagingTests`
+holds all of it — the order, the refusal, the derivation run
+against the real file, and the two verbatim clauses — and is why
+`LICENSE` left `.github/ci-ignore.txt`: a test reads it now.
+
 It **discovers the signing identity** from the keychain. That
 string is not a secret (any user can read it out of a shipped
 binary with `codesign -dv`), so it is never hardcoded to a

@@ -206,6 +206,23 @@ for b in "${bundles[@]}"; do
     echo "    resource bundle: $(basename "$b")"
 done
 
+# License texts (#1407). BSL 1.1 wants the License displayed on
+# every copy and the Lua and Sparkle notices want theirs in every
+# copy; the bundle is a copy. Renamed `.txt` so a double-click
+# opens TextEdit rather than an "open with" prompt — Settings ▸
+# About links both by these names (LicenseDocuments.swift). A
+# missing source is a hard error: the bundle would otherwise ship
+# without the one text its license requires it to carry.
+for doc in LICENSE ACKNOWLEDGEMENTS; do
+    if [ ! -f "$ROOT/$doc" ]; then
+        echo "error: $ROOT/$doc is missing — the bundle may not" \
+             "ship without its license texts" >&2
+        exit 1
+    fi
+    cp "$ROOT/$doc" "$RES/$doc.txt"
+    echo "    license text: $doc.txt"
+done
+
 # Sparkle (#874). SwiftPM LINKS `@rpath/Sparkle.framework/...`
 # and embeds nothing — a SwiftPM executable has no bundle to
 # embed into — so the framework is copied here and the executable
@@ -321,6 +338,24 @@ if [ -z "$LOCALE_KEYS" ]; then
     echo "error: no locale catalogs under $LOCALES" >&2
     exit 1
 fi
+# NSHumanReadableCopyright, derived from LICENSE (#1407): the
+# `Licensor:` parameter, the Licensed Work's `(c)` year and the
+# license's own title line, so the plist can never name a
+# different licensor or license than the text it ships beside.
+LICENSE_FILE="$ROOT/LICENSE"
+LICENSOR="$(sed -n 's/^Licensor:[[:space:]]*//p' "$LICENSE_FILE" \
+    | head -1)"
+LICENSE_YEAR="$(grep -o '(c) [0-9][0-9][0-9][0-9]' "$LICENSE_FILE" \
+    | head -1 | grep -o '[0-9][0-9][0-9][0-9]')"
+LICENSE_NAME="$(head -1 "$LICENSE_FILE")"
+if [ -z "$LICENSOR" ] || [ -z "$LICENSE_YEAR" ] \
+    || [ -z "$LICENSE_NAME" ]; then
+    echo "error: could not read the Licensor, the (c) year or the" \
+         "title line from $LICENSE_FILE — NSHumanReadableCopyright" \
+         "is derived from them" >&2
+    exit 1
+fi
+COPYRIGHT="© $LICENSE_YEAR $LICENSOR. $LICENSE_NAME."
 
 echo "==> Info.plist (version $VERSION)"
 
@@ -361,7 +396,7 @@ cat > "$PLIST" <<PLISTEOF
     <key>LSUIElement</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
-    <string>KiwiCanopy</string>
+    <string>$COPYRIGHT</string>
     <!-- Sparkle (#874). Both keys are BAKED INTO EVERY BUILD and
          are therefore permanent: an installed copy only trusts
          updates signed by SUPublicEDKey and only looks at
