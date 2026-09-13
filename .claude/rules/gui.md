@@ -656,6 +656,23 @@ views' `L(key, english)` call sites, so a change that deletes a
 view must re-author its keys through a scanner-visible shape in
 the same change or the keys are pruned from every locale.
 
+**A census row placed in a container a `SettingsDisclosure`
+draws collapsed owes a catalog CHILD of that drawer, keyed on
+its label key, and a `.searchAnchored` at its render site — or
+its search hit lands with the drawer shut and the row
+unrendered (#1250).** A census hit resolves to the catalog
+control carrying its label key (`SettingsSearchIndex.row(for:)`),
+and the drawer expands only for its own `childIDs`; an
+anchor-less row lands on the destination root, which for a
+drawer's interior is a page showing nothing it named. The only
+guard that moves when this is forgotten is the anchor-less
+count in `SettingsSearchIndexTests`, whose comments read a bump
+as ordinary #277 residue — so a row landing in a collapsed
+drawer is review's to catch; `SettingsSearchAnchorTests ▸
+advancedHitOpensDrawer` holds General ▸ Advanced, the worked
+instance, not the class. `GeneralAdvancedControls` and the Gaps
+drawers' `GapEdgeControls` are the shape.
+
 ## Home, the shell (#678 turn 9)
 
 Home (a card grid; `model.destination == nil`) is the only

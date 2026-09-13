@@ -190,7 +190,9 @@ struct SettingsSearchAnchorTests {
                 $0.placement.container == .advanced
                     && SettingsSearchIndex.indexes($0)
             }
-        #expect(advanced.count == 8)
+        // Non-vacuity only — the membership is
+        // `GeneralCensusRenderTests`', never a count pinned here.
+        #expect(!advanced.isEmpty)
         let rows = SettingsSearchIndex.rows()
         for key in advanced {
             let row = rows.first { $0.key == key }

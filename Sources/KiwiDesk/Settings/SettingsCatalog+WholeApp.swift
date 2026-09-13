@@ -114,8 +114,7 @@ struct GeneralControls: Sendable {
         "Guide"
     )
     /// Declared with its children so a search hit on any of
-    /// them opens the drawer it lands in (#1250): a childless
-    /// drawer left every Advanced row landing collapsed.
+    /// them opens the drawer it lands in (#1250).
     let generalAdvanced = SettingsDrawer(
         "general.advanced.title",
         "Advanced",
