@@ -26,28 +26,23 @@ struct TrackShortcutsOffer: View {
         ShortcutsGates(config: model.config).trackInUse
     }
 
-    /// Whether there is anything to draw at all.
-    var hasRows: Bool {
-        keys.contains { !expander.renderedRows(for: $0).isEmpty }
-    }
-
-    @ViewBuilder var body: some View {
-        if hasRows {
-            SettingsDisclosure(
-                drawer,
-                isExpanded: $expanded,
-                scrollHoisted: true
-            ) {
-                families
-            } accessory: {
-                HelpButton(
-                    explanation: helpText,
-                    subject: drawer.control.text
-                )
-            }
-            // Open on arrival once in play — never forced shut.
-            .onAppear { if bound { expanded = true } }
+    /// No `hasRows` arm, unlike the Desktop offer: these rows
+    /// are static, so there is always something to draw.
+    var body: some View {
+        SettingsDisclosure(
+            drawer,
+            isExpanded: $expanded,
+            scrollHoisted: true
+        ) {
+            families
+        } accessory: {
+            HelpButton(
+                explanation: helpText,
+                subject: drawer.control.text
+            )
         }
+        // Open on arrival once in play — never forced shut.
+        .onAppear { if bound { expanded = true } }
     }
 
     /// What previous and next mean in a track — the one fact the

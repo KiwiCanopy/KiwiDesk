@@ -124,7 +124,9 @@ struct ShortcutsTrackOfferTests {
             )
         )
         // ONE container in both states, seeded open once in
-        // play, never forced shut, drawn only over rows.
+        // play, never forced shut. No `hasRows` arm: the rows
+        // are static, so the Desktop offer's empty case has no
+        // counterpart here.
         #expect(
             source.contains(
                 "SettingsDisclosure(drawer,isExpanded:$expanded,"
@@ -135,7 +137,6 @@ struct ShortcutsTrackOfferTests {
         #expect(
             source.contains(".onAppear{ifbound{expanded=true}}")
         )
-        #expect(source.contains("ifhasRows{"))
         let mark = source.range(of: "varbody:someView")
         var cursor =
             mark.map {

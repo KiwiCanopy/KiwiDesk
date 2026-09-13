@@ -4,8 +4,15 @@ import Testing
 @testable import KiwiDesk
 
 /// The bespoke-container half of `ShortcutsCensusRenderTests`,
-/// split at the §2.1 ceiling (#1440): which `ShortcutsRowOrder`
-/// lists a `ForEach` walks, and so which containers are bespoke.
+/// split at the §2.1 ceiling (#1440): which containers are drawn
+/// by bespoke views is DERIVED from the source, not restated.
+///
+/// An earlier draft compared the declared set to a literal copy
+/// of itself, which reds only when someone edits the set — the
+/// very action it exists to compel — and stays green on the
+/// failure it names: a container quietly going bespoke with the
+/// set untouched. `gui.md` claimed it was enforced, so the claim
+/// had to become true or go.
 @Suite("Shortcuts bespoke containers")
 struct ShortcutsBespokeContainerTests {
     /// The signal is the renderer's own shape: a census-driven

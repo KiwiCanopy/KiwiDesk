@@ -16,7 +16,7 @@ import Testing
 /// views, so their lists guard membership and nothing checks
 /// that a family added to one reaches the screen. Which three
 /// is data (`ShortcutsRowOrder.bespokeContainers`), asserted by
-/// `bespokeContainersAreDeclared`.
+/// `ShortcutsBespokeContainerTests`, this suite's split-off half.
 ///
 /// Set equality, not sequence: ORDER is the renderer's to own and
 /// is deliberately not pinned here, exactly as in
@@ -70,7 +70,11 @@ struct ShortcutsCensusRenderTests {
         #expect(censusRows(.focus, .showMore).isEmpty)
     }
 
-    /// Two offers share `.immediate` since #1440, partitioning it.
+    /// Two offers share `.immediate` here since #1440, so the
+    /// tier alone no longer places a key: each offer's list is
+    /// the census rows carrying the GATE its offer consults,
+    /// derived — a family moved between the lists would draw
+    /// under the wrong door with the union still whole.
     @Test("Move windows renders exactly the census's two tiers")
     func moveWindowsTier() {
         pin(
@@ -79,13 +83,17 @@ struct ShortcutsCensusRenderTests {
             .atRest,
             "move windows"
         )
-        pin(
-            ShortcutsRowOrder.moveWindowsDesktopFamilies
-                + ShortcutsRowOrder.moveWindowsTrackFamilies,
-            .moveWindows,
-            .immediate,
-            "move windows desktops + tracks"
-        )
+        let offers = censusRows(.moveWindows, .immediate)
+        func gated(_ gate: SettingRuntimeGate) -> Set<SettingKey> {
+            offers.filter { $0.placement.gate == .runtime(gate) }
+        }
+        let desktops = ShortcutsRowOrder.moveWindowsDesktopFamilies
+        let tracks = ShortcutsRowOrder.moveWindowsTrackFamilies
+        #expect(Set(desktops) == gated(.desktopBindingsExist))
+        #expect(Set(tracks) == gated(.trackInUse))
+        #expect(!desktops.isEmpty && !tracks.isEmpty)
+        #expect(Set(desktops + tracks) == offers)
+        #expect(desktops.count + tracks.count == offers.count)
         #expect(censusRows(.moveWindows, .showMore).isEmpty)
     }
 
@@ -184,16 +192,6 @@ struct ShortcutsCensusRenderTests {
         #expect(censusRows(.defaultShortcuts, .immediate).isEmpty)
     }
 
-    /// Which containers are drawn by bespoke views is DERIVED
-    /// from the source, not restated here.
-    ///
-    /// An earlier draft compared the declared set to a literal
-    /// copy of itself, which reds only when someone edits the
-    /// set — the very action it exists to compel — and stays
-    /// green on the failure it names: a container quietly going
-    /// bespoke with the set untouched. `gui.md` claimed it was
-    /// enforced, so the claim had to become true or go.
-    ///
     /// The area's render knows exactly these containers; one more
     /// would place rows that mount nowhere, so it must fail loud
     /// here rather than ship an unreachable control.

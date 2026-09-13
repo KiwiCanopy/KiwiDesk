@@ -24,8 +24,7 @@ extension SettingsValueReadout {
             KeybindingCatalog.focusDirections
             + KeybindingCatalog.goToSpace(spaces)
             + KeybindingCatalog.swapDirections
-            + KeybindingCatalog.moveToTrackRows
-            + KeybindingCatalog.trackSwapRows
+            + KeybindingCatalog.trackRows
             + KeybindingCatalog.moveToSpace(spaces)
             + desktopCommands(old: old, new: new)
             + [

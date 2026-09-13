@@ -47,10 +47,7 @@ extension ShortcutsKey {
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
-        // An OFFER until the Track layout is in play (#1440):
-        // the two families mean nothing outside it, so they sit
-        // behind their own disclosure, opened on arrival once a
-        // Track space exists or a Track verb is bound.
+        // An OFFER until the Track layout is in play (#1440).
         case .moveWindowToTrack, .swapWithTrack:
             return .row(
                 .shortcuts,

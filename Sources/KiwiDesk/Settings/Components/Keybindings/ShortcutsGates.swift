@@ -71,9 +71,8 @@ struct ShortcutsGates {
     }
 
     /// Whether the Track layout is in play (#1440): a Track
-    /// space in the config this window edits — the starter setup
-    /// seeds one on a wide screen, so that user meets the drawer
-    /// open — or a Track verb recorded in any layer.
+    /// space in the config this window edits, or a Track verb
+    /// recorded in any layer.
     var trackInUse: Bool {
         inertReason(for: .shortcuts(.moveWindowToTrack))
             != .trackUnused

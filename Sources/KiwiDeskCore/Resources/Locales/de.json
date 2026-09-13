@@ -1065,6 +1065,8 @@
   "shortcuts.section.size_float": "Größe & Schweben",
   "shortcuts.section.switch_layers": "Ebenen wechseln",
   "shortcuts.size_float.layouts_caption": "Tastenkürzel für Breite und Höhe wirken nur in den Layouts bsp, stack, scrolling und track; in monocle und grid passiert nichts. Die Ausnahme ist ein Fenster außerhalb der Kachelung: ein schwebendes Fenster und jedes Fenster im Layout floating ändern in jedem Layout ihre eigene Größe. Breite und Höhe ändern sich unabhängig; scrolling passt für beide seinen Slot entlang der Scroll-Achse an, und in track ändert eine Achse den Track des Fensters, die andere seinen Anteil darin.",
+  "shortcuts.tracks.help": "Im Track-Layout reihen sich Fenster in Tracks auf — Spalten, oder Zeilen, wenn die Achse gedreht ist — und mehrere können sich einen teilen. Vorheriger ist der Track links oder darüber, nächster der rechts oder darunter. Passe das Layout unter **%1$@** an.",
+  "shortcuts.tracks.move": "Fenster im Track-Layout verschieben",
   "slot_size.column_width": "Spaltenbreite",
   "slot_size.percent": "Prozent",
   "slot_size.points": "Punkte",

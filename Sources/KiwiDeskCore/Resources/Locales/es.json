@@ -1064,6 +1064,8 @@
   "shortcuts.section.size_float": "Tamaño y flotación",
   "shortcuts.section.switch_layers": "Cambiar de capa",
   "shortcuts.size_float.layouts_caption": "Los atajos de anchura y altura solo se aplican en los diseños bsp, stack, scrolling y track; no tienen efecto en monocle ni en grid. La excepción es una ventana fuera del mosaico: una ventana flotante, como toda ventana del diseño floating, cambia su propio tamaño en cualquier diseño. La anchura y la altura se redimensionan de forma independiente; scrolling redimensiona su hueco a lo largo del eje de desplazamiento para ambas, y en track un eje redimensiona el Track de la ventana y el otro su parte dentro de él.",
+  "shortcuts.tracks.help": "En el diseño Track, las ventanas se alinean en Tracks — columnas, o filas si se gira el eje — y varias pueden compartir uno. El anterior es el Track de la izquierda o de arriba; el siguiente, el de la derecha o de abajo. Ajusta el diseño en **%1$@**.",
+  "shortcuts.tracks.move": "Mover ventanas en el diseño Track",
   "slot_size.column_width": "Anchura de columna",
   "slot_size.percent": "Porcentaje",
   "slot_size.points": "Puntos",
