@@ -45,6 +45,12 @@ public final class DragCoordinator {
 
     public init() {}
 
+    /// Whether a gesture on `id` is in flight — its first frame
+    /// recorded and its settle not yet fired.
+    public func hasGesture(_ id: WindowID) -> Bool {
+        startFrames[id] != nil
+    }
+
     /// Ingests a `windowMoved` event and schedules the debounce
     /// settle (#45). The gesture's start frame comes from
     /// `previous`, the caller's pre-event state: AX throttles move

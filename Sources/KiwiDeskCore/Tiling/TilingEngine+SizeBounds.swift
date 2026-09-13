@@ -10,9 +10,9 @@ import Foundation
 extension TilingEngine {
     /// The #677 channels' shared "is this our own ask's echo"
     /// probe: production reads the applier's recent-set stamp;
-    /// fixtures with a severed applier inject through
-    /// `echoGraceOverride`, because the stamp is only written
-    /// by a real AX apply.
+    /// a fixture that replaces `animation.apply` writes no stamp
+    /// and injects through `echoGraceOverride`, which pins either
+    /// verdict.
     func askEchoLikely(_ id: WindowID) -> Bool {
         echoGraceOverride?(id) ?? didRecentlySetFrame(id)
     }

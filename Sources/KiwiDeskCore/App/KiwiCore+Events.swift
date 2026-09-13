@@ -186,6 +186,7 @@ extension KiwiCore {
             // confirmed. The confirmation edge fires once per
             // learned entry, so this retile cannot loop on its
             // own echoes.
+            var unsolicited = false
             if tiler.askEchoLikely(id) {
                 observeSizeAnswer(
                     id,
@@ -197,6 +198,7 @@ extension KiwiCore {
                 id,
                 size: frame.size
             ) {
+                unsolicited = true
                 // A genuine resize stales the learned bound:
                 // the user or the app itself changed the size —
                 // System Settings switching panes moves its
@@ -217,11 +219,12 @@ extension KiwiCore {
             }
             // Resize gestures share the drag pipeline (same
             // settle debounce). Only mouse-driven resizes
-            // count; apps resizing themselves are corrected
-            // by the next retile. `validated` lets the
-            // trailing events of a fast resize (classified
-            // via the recent press near a slot edge) start
-            // the gesture even after the release.
+            // count; a resize nobody asked for — a zoom, an
+            // app re-sizing itself — is corrected now (#1358).
+            // `validated` lets the trailing events of a fast
+            // resize (classified via the recent press near a
+            // slot edge) start the gesture even after the
+            // release.
             if isResizeGesture(id) {
                 drag.windowMoved(
                     id,
@@ -229,6 +232,8 @@ extension KiwiCore {
                     validated: true,
                     previous: preEventFrame
                 )
+            } else if unsolicited {
+                correctUnsolicitedResize(id, frame: frame)
             }
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)

@@ -73,8 +73,8 @@ private func makeCore() -> KiwiCore {
 /// The stamp's lifecycle through the engine seams: written at
 /// the instant set, read back, and retired by the first
 /// self-echo (injected through `echoGraceOverride`, the #677
-/// fixture seam — a severed applier writes no real stamp for
-/// `askEchoLikely` to read).
+/// fixture seam — a fixture replacing `animation.apply` writes
+/// no stamp for `askEchoLikely` to read).
 @Suite("Instant-target stamp lifecycle (#881)", .serialized)
 @MainActor
 struct InstantTargetStampTests {

@@ -75,6 +75,42 @@ struct OwnPressProvenanceSeamTests {
         }
     }
 
+    /// Both monitor arms hand AppKit's click count to the store
+    /// (#1358): `recordDown` takes no default for it, so a call
+    /// that dropped the argument would not compile, and the
+    /// value each arm passes is the EVENT's — a literal there
+    /// would read every double-click as a drag again.
+    @Test("Both arms record the event's click count")
+    func bothArmsRecordClickCount() throws {
+        let source = try SourceScan.strippedSource(at: Self.tracker)
+        let start = try #require(
+            SourceScan.declarationBody(
+                after: "func start()",
+                in: source
+            )
+        )
+        #expect(start.occurrences(of: "event.clickCount") == 2)
+        #expect(start.occurrences(of: "recordDown(") == 2)
+        var rest = start
+        while let call = rest.range(of: "recordDown(") {
+            let args = try #require(
+                SourceScan.callArguments(of: "recordDown(", in: rest)
+            )
+            #expect(args.contains("clickCount: clicks"))
+            rest = String(rest[call.upperBound...])
+        }
+        let record = try #require(
+            source.range(of: "func recordDown(")
+        )
+        let signature = try #require(
+            SourceScan.callArguments(
+                of: "func recordDown(",
+                in: String(source[record.lowerBound...])
+            )
+        )
+        #expect(!signature.contains("clickCount: Int ="))
+    }
+
     @Test("Both arms deliver through the one fan-out")
     func bothArmsDeliver() throws {
         let source = try SourceScan.strippedSource(at: Self.tracker)

@@ -124,14 +124,14 @@ struct OwnWindowGestureDeliveryTests {
         // The STORE delivers nothing (#1281): a press reaches the
         // consumers through `deliverPress` alone, so a consumer
         // standing down for an own press gates on the ORIGIN.
-        tracker.recordDown(at: .zero, from: .otherApp)
+        tracker.recordDown(at: .zero, from: .otherApp, clickCount: 1)
         #expect(seen.count == 2)
     }
 
     @Test("A release closes only the press its own arm opened")
     func releaseFollowsProvenance() {
         let tracker = MouseTracker()
-        tracker.recordDown(at: .zero, from: .otherApp)
+        tracker.recordDown(at: .zero, from: .otherApp, clickCount: 1)
         // The own-window arm's release must not close a
         // third-party press: `press` outlives every gesture, so
         // this is how a click on chrome came to refresh a stale
@@ -146,7 +146,7 @@ struct OwnWindowGestureDeliveryTests {
     @Test("The own arm closes its own press")
     func ownReleaseClosesOwnPress() {
         let tracker = MouseTracker()
-        tracker.recordDown(at: .zero, from: .ownWindow)
+        tracker.recordDown(at: .zero, from: .ownWindow, clickCount: 1)
         tracker.recordUp(from: .otherApp)
         #expect(tracker.press?.upAt == nil)
         tracker.recordUp(from: .ownWindow)
@@ -156,7 +156,7 @@ struct OwnWindowGestureDeliveryTests {
     @Test("A closed press is never reopened by a later release")
     func aClosedPressStaysClosed() {
         let tracker = MouseTracker()
-        tracker.recordDown(at: .zero, from: .ownWindow)
+        tracker.recordDown(at: .zero, from: .ownWindow, clickCount: 1)
         tracker.recordUp(from: .ownWindow)
         let closed = tracker.press?.upAt
         #expect(closed != nil)

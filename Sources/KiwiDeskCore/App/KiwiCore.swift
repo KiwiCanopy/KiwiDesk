@@ -129,9 +129,9 @@ public final class KiwiCore {
     /// `selfRaiseEchoWindow` is our echo, not a user action, and
     /// the #465 sibling distrust ranks by it. Minted ONLY through
     /// `stampSelfRaise`, which prunes by age; NEVER consumed by
-    /// an echo (#887, like
-    /// `zOrderRaiseEchoes`); cleared on destroy and rekeyed on a
-    /// tab switch. The classification is `handleWindowFocused`'s.
+    /// an echo (#887, like `zOrderRaiseEchoes`); cleared on
+    /// destroy and rekeyed. The classification is
+    /// `handleWindowFocused`'s.
     var selfRaiseStamps: [WindowID: Date] = [:]
 
     /// Last left press, AX coords: the click discriminator for
