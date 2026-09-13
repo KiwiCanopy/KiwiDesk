@@ -195,17 +195,17 @@ personal, non-commercial use is free. Commercial use — inside a
 business, or offering KiwiDesk or a derivative as a product or
 service — needs a commercial license. Each version converts to
 the [MIT License](https://opensource.org/license/mit) four years
-after it is published. Versions up to 1.2.2 were released under
-MIT and stay MIT. Bundles Lua 5.5 ([MIT](Vendor/CLua/LICENSE))
-and Sparkle (MIT).
+after it is first published. Versions published before 1.3.0 were
+released under MIT and stay MIT. Bundles Lua 5.5
+([MIT](Vendor/CLua/LICENSE)) and Sparkle (MIT).
 
 "KiwiDesk" and the KiwiDesk logo are trademarks of Maikel
 Hajiabadi; the license grants no right to them.
 
 ---
 
-KiwiDesk's source is public. If you like it, leave a ⭐ — it is the one
-thing that helps other people find it.
+KiwiDesk's source is public. If you like it, leave a ⭐ — it is the
+one thing that helps other people find it.
 
 <div align="center">
 <br>

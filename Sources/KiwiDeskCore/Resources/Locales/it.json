@@ -790,7 +790,7 @@
   "onboarding.ready.body": "KiwiDesk ora gestisce le tue finestre, con una configurazione scelta per i tuoi schermi.",
   "onboarding.ready.menu_bar": "Fai clic sull'icona di KiwiDesk nella barra dei menu per aprire Impostazioni, dove cambi i tuoi layout, le scorciatoie e tutto il resto.",
   "onboarding.ready.open_at_login": "Avvia KiwiDesk all’accesso",
-  "onboarding.ready.star_hint": "KiwiDesk è gratuito e open source — %1$@ aiuta altre persone a scoprirlo.",
+  "onboarding.ready.star_hint": "Il codice sorgente di KiwiDesk è pubblico su GitHub: %1$@ aiuta altre persone a trovarlo.",
   "onboarding.ready.star_link": "una stella su GitHub",
   "onboarding.ready.start": "Inizia a usarlo",
   "onboarding.ready.title": "Tutto pronto",

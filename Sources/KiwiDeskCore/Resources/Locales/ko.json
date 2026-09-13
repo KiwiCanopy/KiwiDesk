@@ -790,7 +790,7 @@
   "onboarding.ready.body": "KiwiDesk가 이제 화면에 맞춘 구성으로 윈도우를 관리합니다.",
   "onboarding.ready.menu_bar": "메뉴 막대에 있는 KiwiDesk 아이콘을 클릭하면 설정이 열리며, 여기에서 레이아웃과 단축키를 비롯한 모든 것을 변경할 수 있습니다.",
   "onboarding.ready.open_at_login": "로그인 시 KiwiDesk 실행",
-  "onboarding.ready.star_hint": "KiwiDesk는 무료 오픈 소스입니다. %1$@은 다른 사람들이 KiwiDesk를 찾는 데 도움이 됩니다.",
+  "onboarding.ready.star_hint": "KiwiDesk의 소스 코드는 GitHub에 공개되어 있습니다. %1$@이(가) 다른 사람들이 찾는 데 도움이 됩니다.",
   "onboarding.ready.star_link": "GitHub 스타",
   "onboarding.ready.start": "사용 시작하기",
   "onboarding.ready.title": "준비가 완료되었습니다",

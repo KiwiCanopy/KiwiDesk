@@ -1,5 +1,8 @@
 Business Source License 1.1
 
+License text copyright © 2017 MariaDB Corporation Ab, All Rights Reserved.
+"Business Source License" is a trademark of MariaDB Corporation Ab.
+
 Parameters
 
 Licensor:             Maikel Hajiabadi
@@ -11,8 +14,9 @@ Licensed Work:        KiwiDesk, version 1.3.0 and every later
 
 Additional Use Grant: You may make production use of the Licensed
                       Work for personal, non-commercial purposes.
-                      Any other production use — including use
-                      within or on behalf of a business, and
+                      Any other production use — including
+                      production use within or on behalf of a
+                      business, and
                       offering, selling, bundling or hosting the
                       Licensed Work or a derivative of it as a
                       product or service — requires a commercial
@@ -26,7 +30,8 @@ Change License:       MIT License
 Versions of KiwiDesk published before 1.3.0 were licensed under
 the MIT License and remain so. Third-party components bundled
 with the Licensed Work keep their own licenses: Lua 5.5 (MIT,
-Vendor/CLua/LICENSE) and Sparkle (MIT).
+Vendor/CLua/LICENSE) and Sparkle (MIT, with bsdiff under
+BSD-2-Clause; see the framework's own LICENSE).
 
 For information about alternative licensing arrangements for the
 Licensed Work, please contact the Licensor through
@@ -38,9 +43,6 @@ The Business Source License (this document, or the "License") is
 not an Open Source license. However, the Licensed Work will
 eventually be made available under an Open Source License, as
 stated in this License.
-
-License text copyright © 2017 MariaDB Corporation Ab, All Rights Reserved.
-"Business Source License" is a trademark of MariaDB Corporation Ab.
 
 Terms
 
