@@ -2234,26 +2234,39 @@ moved underneath the window the user is looking at — and a rule
 naming only the resize would be a special case the next cause
 re-opens.
 
-**`swap` is the one member of that set where the premise is
-false, and it is ruled in rather than excluded.** There the row
-did not move: the focus moved within a static row, by the
-user's own act. It still re-anchors, for two reasons. Nothing
-inside the layout can separate it — the discriminator is "same
-window, different position", and a neighbour closing ahead of
-the focus produces exactly that signal, which is the case the
-rule exists for. And the same answer is the right one anyway:
-the window being acted on is the one that must not jump, so it
-holds still and the row slides past it, which is the genre's
-own idiom (PaperWM and niri both scroll the row under a moved
-column rather than carrying the column across the viewport).
-What changes is the frame of reference, never the outcome — the
-swapped pair trades places either way. And nothing is painted
-into a corner: the rest is plain state, so a verb that ever
-wants the other frame rewrites the recorded position at its own
-mutation site and the next pass reads a delta of zero, with no
-new seam. Pinned by
-`ScrollingResizeAnchorEndToEndTests`, so the ruling is visible
-rather than incidental.
+:::unreleased
+**A reorder is the one member of that set where the premise is
+false, and it is ruled OUT at the model (#1353).** There the
+row did not move: the focus moved within a static row, by the
+user's own act. The genre's idiom — PaperWM and niri scroll the
+row under a moved column — argues that the frame of reference
+changes but the outcome does not, the pair trading places
+either way, and #966 had ruled the swap in on that argument.
+KiwiDesk does not follow it, because the eye is on the window
+being moved and expects IT to move: a window that holds still
+under `swap` while its neighbour jumps reads as "nothing was
+reordered" (device, 2026-09-09). So a reorder holds the
+viewport and lets the pair visibly trade places, panning only
+where the moved window's new slot would leave the view — the
+focus-change arm, whose clamp is exactly that minimal pan.
+
+The discriminator does not live in the layout, which the #966
+entry had already established: "same window, different
+position" is also what a neighbour closing ahead of the focus
+produces, and that case must keep re-anchoring. It lives in
+the model, the one place that knows a reorder happened: every
+`Space` primitive that rewrites the order — `swap`, `move`, the
+bar drop's `reorder` — RELEASES the recorded slot
+(`Space.releaseScrollSlot`), and the next pass, seeing an
+offset with no slot, holds it and pans into view. An ARRIVAL
+seats through `insert` and keeps the slot: it is a window
+opening ahead of the focus, the #966 case. The obligation that
+makes this hold is that the window order is written by the
+model and nowhere else (`ScrollSlotReleaseSeamTests`);
+`ScrollSlotReleaseTests` holds each primitive, and
+`ScrollingResizeAnchorEndToEndTests` the keyboard swap and the
+bar drop on screen.
+:::
 
 **A slot resting ON a border keeps the border, not its leading
 edge.** The rule above says "hold the slot's place", and place

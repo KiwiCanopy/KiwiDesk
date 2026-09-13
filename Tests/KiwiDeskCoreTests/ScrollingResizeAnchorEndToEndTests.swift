@@ -103,20 +103,19 @@ struct ScrollingResizeAnchorEndToEndTests {
         #expect(abs(after.offset + position - 40) < 0.5)
     }
 
-    @Test("Swapping the focus along the row holds its place")
-    func swapHoldsTheFocusedWindowInPlace() throws {
-        // `swap` re-seats the focused window in the array, which
-        // moves its slot without changing which window is
-        // focused — so it takes the re-anchor arm, and the
-        // window the user is acting on stays put while the row
-        // slides past it. Ruled deliberately (#966): no signal
-        // inside the layout can separate this from a neighbour
-        // closing ahead of the focus, and the same answer is the
-        // right one for both — the thing being acted on is the
-        // thing that must not jump.
+    @Test("Swapping the focus along the row trades places on screen")
+    func swapTradesPlacesOnScreen() throws {
+        // A swap is the user's own act on a static row (#1353):
+        // the viewport holds and the pair visibly trades places,
+        // panning only where the new slot would leave the
+        // viewport. The mutation site releases the recorded slot
+        // (`Space.releaseScrollSlot`), so the offset math takes
+        // its focus-change arm rather than holding the focused
+        // window's place — which read as nothing happening.
         let (core, space) = try makeScrollingCore()
         let focus = WindowID(10)
         let seeded = try seedLead(40, on: focus, of: space, core)
+        let before = try #require(core.activeSpace?.scrollRest)
 
         #expect(
             core.execute("swap", args: [.string("right")])
@@ -127,7 +126,30 @@ struct ScrollingResizeAnchorEndToEndTests {
         #expect(after.slot?.window == focus)
         // The window moved one slot further along the row...
         #expect(position > seeded)
-        // ...and did not move on screen.
-        #expect(abs(after.offset + position - 40) < 0.5)
+        // ...and moved on screen with it: forward by a slot where
+        // the viewport had room, or to the trailing border where
+        // it did not — never held at its old lead.
+        #expect(after.offset + position - 40 > 1)
+        #expect(after.offset <= before.offset)
+    }
+
+    @Test("A bar drag reorder trades places on screen too")
+    func barReorderTradesPlacesOnScreen() throws {
+        // The App Bar's drop is the same reorder by another hand
+        // (#1353): twenty distinct apps, so bar item i is window
+        // i + 1 and slot 9 is the focus.
+        let (core, space) = try makeScrollingCore()
+        let focus = WindowID(10)
+        let seeded = try seedLead(40, on: focus, of: space, core)
+        let before = try #require(core.activeSpace?.scrollRest)
+
+        core.moveBarItem(space: space, from: 9, to: 10)
+
+        let after = try #require(core.activeSpace?.scrollRest)
+        let position = try #require(after.slot?.position)
+        #expect(after.slot?.window == focus)
+        #expect(position > seeded)
+        #expect(after.offset + position - 40 > 1)
+        #expect(after.offset <= before.offset)
     }
 }

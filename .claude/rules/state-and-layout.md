@@ -852,13 +852,26 @@ editing here:
   overlay half is [borders.md](borders.md)'s pin row.
 - **A scrolling viewport offset travels with the slot it was
   measured against (#966).** One slot size serves the whole
-  row, so anything that changes it — a resize, a `swap`, a
-  window opening or closing ahead of the focus, a #677 re-pack
-  — moves every slot underneath that offset, and `follow` is
-  the one anchor that reads it. So `Space.scrollRest` carries
-  the offset AND the focused slot it was measured against as
-  ONE value: the same focus holds that slot's place on screen,
-  a different focus holds the offset and pans minimally (#66).
+  row, so anything that changes it — a resize, a window opening
+  or closing ahead of the focus, a #677 re-pack — moves every
+  slot underneath that offset, and `follow` is the one anchor
+  that reads it. So `Space.scrollRest` carries the offset AND
+  the focused slot it was measured against as ONE value: the
+  same focus holds that slot's place on screen, a different
+  focus holds the offset and pans minimally (#66). **A REORDER
+  releases the slot in the model (#1353)** — every `Space`
+  primitive that rewrites the order calls
+  `Space.releaseScrollSlot`, so the next pass holds the viewport
+  and the pair visibly trades places — because the layout cannot
+  tell a swap from a neighbour closing ahead of the focus, and
+  only the model knows which happened. So **write the window
+  order through a `Space` primitive, never beside a call site**:
+  `ScrollSlotReleaseSeamTests` scans `KiwiDeskCore` outside
+  `Models/` for an order write and its `allowed` map is the one
+  copy of the mode-bound exemptions; `ScrollSlotReleaseTests`
+  holds each primitive and the arrival that keeps the slot;
+  `ScrollingResizeAnchorEndToEndTests` holds the keyboard swap
+  and the bar drop on screen, and skips on a headless host.
   "Place" is the slot's leading edge, except where it was
   resting flush against the TRAILING border, which is the edge
   it keeps instead — otherwise a shrink tears it off a border it
@@ -872,11 +885,12 @@ editing here:
   Three obligations follow. **Never split the pair into two
   fields** beside each other, and never re-derive the verdict
   at a call site — nothing scans for either, so each new author
-  owes it deliberately. **A producer never DESTROYS provenance
-  it was handed**: recording no slot is the "nothing has ever
-  been measured" verdict, so a pass that carries an offset
-  through carries its measurement too, and one that drops it
-  silently reverts to the pre-#966 behavior. A new producer of a
+  owes it deliberately. **A layout PASS never DESTROYS provenance
+  it was handed**: a nil slot is the "no provenance to re-anchor
+  from" verdict, so a pass that carries an offset through
+  carries its measurement too, and one that drops it silently
+  reverts to the pre-#966 behavior — the model's reorder release
+  above is the one sanctioned drop, and it is not a pass. A new producer of a
   rest joins `ScrollingResizeAnchorEndToEndTests`, because a
   suite that injects the rest by hand cannot see a producer at
   all — which is most of them, and is why that end-to-end suite
@@ -900,8 +914,8 @@ editing here:
   the border half: the arm that keeps an edge, the tolerance
   that decides flushness, and the producer's recording.
   `ScrollRestPlumbingTests` pins the carrier. The product
-  ruling — including why `swap` is ruled IN rather than
-  excluded — is `docs/design-decisions.md`'s.
+  ruling — including why a reorder is ruled OUT at the model
+  rather than in the layout — is `docs/design-decisions.md`'s.
 - **A resize store holding an absolute LENGTH owes a ceiling,
   and since #1057 the whole press DECISION lives in ONE pure
   type (#966/#1057).** `ScrollSlotDomain.decide` — reached only
