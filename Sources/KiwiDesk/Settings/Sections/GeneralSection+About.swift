@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// General ▸ About section displaying brand, version, notes, guide, and
-/// support links (#68, #570, #1019).
+/// General ▸ About section displaying brand, version, notes, license,
+/// guide, and support links (#68, #570, #1019, #1407).
 extension GeneralSection {
     var aboutSection: some View {
         SettingsSection(SettingsCatalog.general.aboutCard) {
@@ -20,6 +20,7 @@ extension GeneralSection {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
                     releaseNotesLink
+                    licenseRow
                 }
                 guideLink
                 askRow
@@ -39,6 +40,41 @@ extension GeneralSection {
         .buttonStyle(.plain)
         .font(.caption)
         .linkHover()
+    }
+
+    /// The packager's copyright line and the two texts it ships
+    /// (#1407). The dev binary has no plist, so the line is
+    /// absent there and the links fall back to GitHub.
+    @ViewBuilder var licenseRow: some View {
+        if let copyright = LicenseDocuments.copyright {
+            Text(copyright)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+        }
+        HStack(spacing: 14) {
+            Link(destination: LicenseDocuments.url(for: .license)) {
+                Text(L("general.about.license", "License"))
+                    .underline()
+            }
+            .buttonStyle(.plain)
+            .font(.caption)
+            .linkHover()
+            Link(
+                destination: LicenseDocuments.url(for: .acknowledgements)
+            ) {
+                Text(
+                    L(
+                        "general.about.acknowledgements",
+                        "Acknowledgements"
+                    )
+                )
+                .underline()
+            }
+            .buttonStyle(.plain)
+            .font(.caption)
+            .linkHover()
+        }
     }
 
     /// Link to user guide, registered with search index (#1019).

@@ -76,7 +76,9 @@ extension SettingsButtonStyleConventionTests {
             // launch (owner, 2026-08-26): the star Link joined
             // the Ko-fi one, beside the Guide route #1019 gave a
             // PERMANENT home here and the Release Notes link
-            // #570 added. All four are `Link`s, which is why they
+            // #570 added; six since #1407 put the License and
+            // Acknowledgements texts beside them. All six are
+            // `Link`s, which is why they
             // are exempt at all rather than owing
             // `settingsActionButton()`: a `Link` is not a
             // `Button` and cannot take the seal. They are
@@ -86,10 +88,11 @@ extension SettingsButtonStyleConventionTests {
             // treatment, so the card's ask stays distinguishable
             // from a pointer.
             "GeneralSection+About.swift": (
-                4, ".buttonStyle(.plain)",
-                "Four Links taking plain style — the Guide and "
-                    + "Release Notes pointers, and the star + "
-                    + "support ask pair"
+                6, ".buttonStyle(.plain)",
+                "Six Links taking plain style — the Guide, "
+                    + "Release Notes, License and Acknowledgements "
+                    + "pointers (#1407), and the star + support "
+                    + "ask pair"
             ),
             "ContextShortcut.swift": (
                 1, ".buttonStyle(.plain)",

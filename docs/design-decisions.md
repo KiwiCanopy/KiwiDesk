@@ -132,6 +132,16 @@ any trademark grant, so nothing else does it. The boundary is a
 tagged version rather than a date, so it is the same fact in the
 release notes, in `LICENSE` and in a `git tag`.
 
+:::unreleased
+The `.app` is itself a copy of the Licensed Work, so it carries
+the license text and the Lua and Sparkle notices and opens both
+from Settings ▸ About — BSL 1.1 wants the License displayed on
+every copy, and the two MIT notices want theirs in every copy —
+and a trim of About's link card or of the bundle keeps them
+(#1407; how the bundle carries them and derives its copyright
+line is `.claude/rules/packaging-and-release.md`'s).
+:::
+
 ### Accepted limitations
 
 **[Trade-off]**

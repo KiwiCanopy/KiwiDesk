@@ -197,7 +197,9 @@ service — needs a commercial license. Each version converts to
 the [MIT License](https://opensource.org/license/mit) four years
 after it is first published. Versions published before 1.3.0 were
 released under MIT and stay MIT. Bundles Lua 5.5
-([MIT](Vendor/CLua/LICENSE)) and Sparkle (MIT).
+([MIT](Vendor/CLua/LICENSE)) and Sparkle (MIT); their notices are
+in [ACKNOWLEDGEMENTS](ACKNOWLEDGEMENTS), which the app carries
+beside its license text and opens from Settings ▸ About.
 
 "KiwiDesk" and the KiwiDesk logo are trademarks of Maikel
 Hajiabadi; the license grants no right to them.

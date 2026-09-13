@@ -72,6 +72,29 @@ holds both halves: that the key is there, and that its array is
 the glob's expansion rather than a typed list that would go stale
 on the next locale.
 
+**The bundle carries its license texts, and a third-party
+component that joins the bundle adds its notice to
+`ACKNOWLEDGEMENTS` verbatim in the same change** (#1407). The
+ruling — a copy of the Licensed Work owes the license and the
+notices, and About is where a user reaches them — is
+`docs/design-decisions.md` ▸ *Source-available from 1.3.0*'s;
+this is the mechanism. The script copies `LICENSE` and
+`ACKNOWLEDGEMENTS` into `Contents/Resources` as `.txt` before the
+seal, refusing rather than skipping a missing source, and
+`NSHumanReadableCopyright` is read off `LICENSE`'s `Licensor:`
+parameter, `(c)` year and title line rather than typed — atoms
+only, since a phrase composed there is English no catalog sees.
+`LicensePackagingTests` holds the order, the refusal, the
+derivation run against the real file, and the notice obligation
+with its roster DERIVED — every `Vendor/*` directory and every
+`Package.resolved` pin, each resolved to the LICENSE SwiftPM
+fetched — so a dependency added without its notice reds rather
+than slipping past a hand-kept list; it is also why `LICENSE`
+left `.github/ci-ignore.txt`. Settings ▸ About opens the texts by
+those names: `LicenseDocuments.Document` is the GUI's roster and
+`LicenseDocumentsTests` pins it equal to the script's `for doc
+in` list, so a rename on either side moves the other or reds.
+
 It **discovers the signing identity** from the keychain. That
 string is not a secret (any user can read it out of a shipped
 binary with `codesign -dv`), so it is never hardcoded to a
