@@ -85,11 +85,7 @@ how the Change Date is computed — so argue what the license
 carrying a third copy of the numbers. Versions published before
 1.3.0 were released under MIT and remain so: a license governs
 what is released under it and nothing before. (Owner ruling
-2026-09-13. Amended the same day: the grant first reserved use
-inside a business as well; the owner ruled that the license
-exists to keep KiwiDesk from becoming someone else's product,
-not to charge the people who use it, so the grant now reaches
-every production use and reserves only the offering.)
+2026-09-13.)
 
 **Why a source-available license, and why before any launch
 rather than after.** Under MIT anyone may take the published
@@ -98,7 +94,12 @@ project keeps no lever over that but its name. A source-available
 license reserves the offering to the Licensor while the source
 stays public and use stays free, which is the shape the
 project wants: readable, forkable, usable anywhere, and not
-someone else's product. The timing follows from goodwill. A
+someone else's product. The grant's line falls at the offering
+and not at business use for the same reason: the lever exists to
+keep KiwiDesk from becoming someone else's product, not to
+charge the people who use it, and reserving use inside a
+business would charge users — the one thing the lever is not
+for. The timing follows from goodwill. A
 switch made after a launch spends what the launch earned — people
 remember the relicense, not the reason — and lands at the moment
 of maximum attention, on the largest possible free snapshot.
@@ -2015,9 +2016,9 @@ by the settle's refocus: the pull-back, measured on device
 was true for that window, and a compositor probe on 2026-09-13
 showed why that flag cannot be trusted here — during a
 three-finger gesture it reads true for every window of the
-neighbouring Desktops, from about a second before the switch
-registers to about two seconds after, whichever Desktop the
-window is on. So the settle refuses a focus the switch itself
+neighbouring Desktops from the first movement until the switch
+registers (the #1410 paragraph below carries the re-read). So
+the settle refuses a focus the switch itself
 removed, and reads no flag to do it: every departure
 `departedWithDesktop` files is stamped, and the settle asks
 whether the focused window's stamp belongs to the switch it is
@@ -2042,6 +2043,39 @@ half of the issue — a swipe on one display removing a window on
 a display whose Desktop did not change — did not reproduce on
 2026-09-13 with two displays and an event-stream trace of every
 removal; what remains open lives on #1364, not here.
+:::
+
+:::unreleased
+**The gate asks two compositor reads, and either refuses
+(#1410).** The flag alone had a blind spot the probe measured on
+2026-09-13, every gesture of the sitting: from a three-finger
+swipe's first movement until the switch registered, 1.0–1.5 s
+later, `kCGWindowIsOnscreen` read true for every window of the
+swiped display's neighbouring Desktops — the ones being composited
+for the gesture, on no display's current Space — and read false
+for the Desktop just left the moment the switch landed. A raise
+gated on the flag inside that second passes for a window on a
+Desktop nobody shows, and macOS then switches to show it; the
+Sept 10 settle refocus (`crosses=false` at +1.2 s) is the measured
+instance, and the #1364 arm was cut to read no flag for exactly
+this reason. The current-Space reading fails the other way, as the
+paragraph above records: through a switch it names the new Desktop
+while the draw list still composites the old one (#1023). Neither
+read lies in both directions, so the gate takes both — the flag,
+and whether the Space the compositor hosts the window on is one
+some display currently shows — and refuses when either says
+unshown, while a read that cannot answer abstains: without
+SkyLight the flag decides alone, as it did. The trade is a raise
+refused where one read lags into "unshown" for a window that is in
+fact shown, at the switch itself; focus then stays where macOS put
+it until the next report, the price #1345 already set. Two clauses
+the second read carries: an all-Desktops window (the Dock's "All
+Desktops", a `canJoinAllSpaces` panel) is hosted on every Space,
+so ANY shown host counts, or every focus of such a window would be
+refused; and the read costs ~0.15 ms per raise (the topology copy
+0.11 ms, the per-window list 0.03 ms, measured 2026-09-13), so it
+is live rather than cached from the switch handler, whose stamp is
+the notification's timing and not the compositor's.
 :::
 
 ### A focus report is only as good as the activation behind it (#1322)
@@ -2233,26 +2267,39 @@ moved underneath the window the user is looking at — and a rule
 naming only the resize would be a special case the next cause
 re-opens.
 
-**`swap` is the one member of that set where the premise is
-false, and it is ruled in rather than excluded.** There the row
-did not move: the focus moved within a static row, by the
-user's own act. It still re-anchors, for two reasons. Nothing
-inside the layout can separate it — the discriminator is "same
-window, different position", and a neighbour closing ahead of
-the focus produces exactly that signal, which is the case the
-rule exists for. And the same answer is the right one anyway:
-the window being acted on is the one that must not jump, so it
-holds still and the row slides past it, which is the genre's
-own idiom (PaperWM and niri both scroll the row under a moved
-column rather than carrying the column across the viewport).
-What changes is the frame of reference, never the outcome — the
-swapped pair trades places either way. And nothing is painted
-into a corner: the rest is plain state, so a verb that ever
-wants the other frame rewrites the recorded position at its own
-mutation site and the next pass reads a delta of zero, with no
-new seam. Pinned by
-`ScrollingResizeAnchorEndToEndTests`, so the ruling is visible
-rather than incidental.
+:::unreleased
+**A reorder is the one member of that set where the premise is
+false, and it is ruled OUT at the model (#1353).** There the
+row did not move: the focus moved within a static row, by the
+user's own act. The genre's idiom — PaperWM and niri scroll the
+row under a moved column — argues that the frame of reference
+changes but the outcome does not, the pair trading places
+either way, and #966 had ruled the swap in on that argument.
+KiwiDesk does not follow it, because the eye is on the window
+being moved and expects IT to move: a window that holds still
+under `swap` while its neighbour jumps reads as "nothing was
+reordered" (device, 2026-09-09). So a reorder holds the
+viewport and lets the pair visibly trade places, panning only
+where the moved window's new slot would leave the view — the
+focus-change arm, whose clamp is exactly that minimal pan.
+
+The discriminator does not live in the layout, which the #966
+entry had already established: "same window, different
+position" is also what a neighbour closing ahead of the focus
+produces, and that case must keep re-anchoring. It lives in
+the model, the one place that knows a reorder happened: every
+`Space` primitive that rewrites the order — `swap`, `move`, the
+bar drop's `reorder` — RELEASES the recorded slot
+(`Space.releaseScrollSlot`), and the next pass, seeing an
+offset with no slot, holds it and pans into view. An ARRIVAL
+seats through `insert` and keeps the slot: it is a window
+opening ahead of the focus, the #966 case. The obligation that
+makes this hold is that the window order is written by the
+model and nowhere else (`ScrollSlotReleaseSeamTests`);
+`ScrollSlotReleaseTests` holds each primitive, and
+`ScrollingResizeAnchorEndToEndTests` the keyboard swap and the
+bar drop on screen.
+:::
 
 **A slot resting ON a border keeps the border, not its leading
 edge.** The rule above says "hold the slot's place", and place

@@ -92,7 +92,7 @@ const de: LegalStrings = {
           `<p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit deinen ` +
           `personenbezogenen Daten passiert, wenn du diese Website besuchst. Personenbezogene ` +
           `Daten sind alle Daten, mit denen du persönlich identifiziert werden kannst.</p>` +
-          `<p>KiwiDesk ist eine kostenlose Anwendung (Tiling-Window-Manager für macOS). Diese ` +
+          `<p>KiwiDesk ist eine kostenlos nutzbare Anwendung (Tiling-Window-Manager für macOS). Diese ` +
           `Website ist die zugehörige Informations- und Dokumentationsseite (Marketing-Startseite ` +
           `sowie Dokumentation). Es gibt keine Benutzerkonten, keine Anmeldung, kein ` +
           `Kontaktformular, keine Zahlungsabwicklung und keine Analyse- oder Tracking-Dienste. Die ` +
@@ -234,8 +234,8 @@ const de: LegalStrings = {
         body:
           `<p>KiwiDesk wird ab Version 1.3.0 unter der <strong>Business Source License 1.1</strong> ` +
           `bereitgestellt. Der vollständige Lizenztext liegt dem Quellcode bei und ist in der App ` +
-          `unter „Über“ abrufbar. Die Lizenz erlaubt die <strong>Nutzung der Software ` +
-          `kostenlos</strong>, auch in oder für ein Unternehmen. Das Anbieten, Verkaufen, ` +
+          `unter „Über“ abrufbar. Die Lizenz erlaubt die <strong>kostenlose Nutzung der ` +
+          `Software</strong>, auch in oder für ein Unternehmen. Das Anbieten, Verkaufen, ` +
           `Bündeln oder Hosten der Software oder eines abgeleiteten Werks als Produkt oder ` +
           `Dienst setzt eine kommerzielle Lizenz des Betreibers voraus; Anfragen per E-Mail ` +
           `an ${MAILTO}.</p>` +
@@ -339,7 +339,7 @@ const en: LegalStrings = {
           `<p>The following notes provide a simple overview of what happens to your personal data ` +
           `when you visit this website. Personal data is any data that can be used to identify ` +
           `you personally.</p>` +
-          `<p>KiwiDesk is a free application (a tiling window manager for macOS). This website is ` +
+          `<p>KiwiDesk is a free-to-use application (a tiling window manager for macOS). This website is ` +
           `its informational and documentation site (a marketing landing page plus ` +
           `documentation). There are no user accounts, no sign-in, no contact form, no payment ` +
           `processing, and no analytics or tracking services. The KiwiDesk app itself is ` +
@@ -569,7 +569,7 @@ const ja: LegalStrings = {
         body:
           `<p>以下は、本ウェブサイトを訪問された際にあなたの個人データがどのように扱われるかについての ` +
           `簡単な概要です。個人データとは、あなたを個人として特定できるすべてのデータを指します。</p>` +
-          `<p>KiwiDesk は無料のアプリケーション（macOS 向けタイル型ウィンドウマネージャー）です。 ` +
+          `<p>KiwiDesk は利用が無料のアプリケーション（macOS 向けタイル型ウィンドウマネージャー）です。 ` +
           `本ウェブサイトはその情報・ドキュメントサイト（マーケティング用トップページおよび ` +
           `ドキュメント）です。ユーザーアカウント、ログイン、問い合わせフォーム、決済処理、解析・ ` +
           `トラッキングサービスはいずれもありません。KiwiDesk アプリ本体は GitHub で配布されており、 ` +

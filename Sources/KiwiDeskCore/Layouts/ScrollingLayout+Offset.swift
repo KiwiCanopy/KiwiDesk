@@ -50,11 +50,12 @@ extension ScrollingLayout {
     /// space (#966). Two things move the focused slot and they owe
     /// opposite answers: the FOCUS moved (hold the recorded offset
     /// — scroll-into-view, #66), or every slot moved underneath an
-    /// unchanged focus (a resize, swap, neighbour change, #677
-    /// re-pack — shift by how far the slot moved so it keeps its
-    /// place on screen). The recorded slot tells them apart;
-    /// except when it rested flush at the trailing border, the
-    /// edge is what it keeps (device QA, 2026-08-27).
+    /// unchanged focus (a resize, neighbour change, #677 re-pack —
+    /// shift by how far the slot moved so it keeps its place on
+    /// screen). The recorded slot tells them apart — a reorder
+    /// releases it (`Space.releaseScrollSlot`, #1353) and takes
+    /// the first arm; except when it rested flush at the trailing
+    /// border, the edge is what it keeps (device QA, 2026-08-27).
     private static func heldBase(
         previous: ScrollRest?,
         focus: WindowID?,

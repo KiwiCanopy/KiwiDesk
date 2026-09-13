@@ -73,10 +73,10 @@ struct DesktopRaiseGateSeamTests {
         )
     }
 
-    /// The gate itself has one home, reading the compositor's
-    /// on-screen flag through the `windowIsOnScreen` seam — never
-    /// state, the away ledger, or the managed display's current
-    /// Space, which lags the draw list (#1023).
+    /// The gate itself has one home, reading BOTH compositor
+    /// reads through their seams — the on-screen flag and the
+    /// shown-Desktop host (#1410) — never state, the away ledger,
+    /// the census's per-window door or the topology directly.
     @Test("the gate reads the compositor in its one home")
     func gateReadsTheCompositor() throws {
         let file = Self.core.appendingPathComponent(
@@ -88,11 +88,51 @@ struct DesktopRaiseGateSeamTests {
         try #require(!source.isEmpty)
         #expect(source.contains("func raiseCrossesDesktops("))
         #expect(source.contains("windowIsOnScreen("))
+        #expect(source.contains("windowIsOnShownDesktop("))
         for banned in [
             "awayWindows", "state.windows", "allSpaces(", "isCurrent",
-            "readWindowSpace",
+            "readWindowSpace", "NativeSpaces.", "FloatDetection.",
         ] {
             #expect(!source.contains(banned), .init(rawValue: banned))
+        }
+    }
+
+    /// The second raw read lives behind its seam's default alone,
+    /// the shape the first one takes (#1410).
+    @Test("the raw shown-Desktop read has one home, the seam's default")
+    func rawHostReadHasOneHome() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "NativeSpaces.isOnShownDesktop",
+            under: Self.core
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent) == ["KiwiCore.swift"],
+            .init(
+                rawValue: "found "
+                    + sites.map(\.site).joined(separator: ", ")
+            )
+        )
+    }
+
+    /// Both reads default LIVE, so every suite built on
+    /// `makeTestCore` would ask the host's WindowServer about a
+    /// fixture id unless the factory pins them — in both twins.
+    @Test("makeTestCore pins both raise-gate reads in both twins")
+    func testCorePinsBothReads() throws {
+        let tests = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Tests")
+        let twins = ["KiwiDeskCoreTests", "KiwiDeskGuiTests"].map {
+            tests.appendingPathComponent("\($0)/TestCore.swift")
+        }
+        for twin in twins {
+            let source = try SourceScan.strippedSource(at: twin)
+            #expect(
+                source.contains("windowIsOnScreen = { _ in nil }")
+                    && source.contains(
+                        "windowIsOnShownDesktop = { _ in nil }"
+                    ),
+                .init(rawValue: "\(twin.lastPathComponent) misses a pin")
+            )
         }
     }
 }

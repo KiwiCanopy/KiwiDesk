@@ -37,7 +37,11 @@ public struct ScrollRest: Sendable, Equatable {
 
     /// Viewport scroll offset.
     public var offset: CGFloat
-    /// Slot offset was measured against (nil if unmeasured or carried).
+    /// Slot the offset was measured against. Nil means "no
+    /// provenance to re-anchor from", so `follow` holds the
+    /// offset and pans only into view — three producers: a
+    /// hand-seeded rest, a focusless pass carrying one through,
+    /// and a reorder's `Space.releaseScrollSlot` (#966, #1353).
     public var slot: Slot?
 
     public init(offset: CGFloat, slot: Slot? = nil) {

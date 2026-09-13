@@ -253,9 +253,8 @@ public final class KiwiCore {
     var transientRetrackDelay: Duration = .milliseconds(750)
 
     /// Four intent ledgers, each type doc carrying its argument:
-    /// the move latch (#482/#483), the focus a follow (#1007) or
-    /// the own-window door (#1380) owes a window it cannot focus
-    /// yet, and the Space a hidden-Desktop move names (#1150).
+    /// the move latch (#482/#483), the follow (#1007) and own-window
+    /// (#1380) focus debts, and a hidden-Desktop move's Space (#1150).
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
     let ownShowFocus = FollowFocusIntent()
@@ -266,13 +265,14 @@ public final class KiwiCore {
     /// restored on returning to one. Keyed, not numbered (#1147).
     var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
-    /// When the last native desktop switch happened; focus
-    /// events during the transition must not change spaces.
+    /// The last native Desktop switch; focus during it changes no space.
     var lastDesktopSwitch: Date = .distantPast
 
-    /// The Desktop raise gate's one read (#1345): the compositor's
-    /// on-screen flag, pinned to nil by `makeTestCore`.
+    /// The Desktop raise gate's two reads (#1345/#1410) — the on-screen
+    /// flag and the shown host — both pinned to nil by `makeTestCore`.
     var windowIsOnScreen: (WindowID) -> Bool? = FloatDetection.isOnScreen
+    var windowIsOnShownDesktop: (WindowID) -> Bool? =
+        NativeSpaces.isOnShownDesktop
     /// A move verb's departures, claimed at the vanish (#1345).
     var desktopMoveDepartures: [WindowID: Date] = [:]
     /// A `.returned` window's arrival time (#1345).
