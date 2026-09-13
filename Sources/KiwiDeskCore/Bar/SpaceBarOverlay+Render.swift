@@ -5,10 +5,10 @@ extension SpaceBarOverlay {
     /// Executes one layout pass over the last shown state.
     func render(followingActive: Bool) {
         guard let state = lastShown else { return }
-        let (items, frontApp, strip, stored, stateMarkColors) = state
+        let (items, frontApp, strip, _, stateMarkColors) = state
         // The one place the stored style becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
-        let style = LiquidGlassGate.rendered(stored)
+        let style = LiquidGlassGate.rendered(state.style)
         let panel = self.panel ?? makePanel()
         self.panel = panel
         styleContainer(panel, style: style, strip: strip)

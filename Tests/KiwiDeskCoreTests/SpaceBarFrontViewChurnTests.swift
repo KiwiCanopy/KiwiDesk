@@ -22,7 +22,7 @@ import Testing
 struct SpaceBarFrontViewChurnTests {
     /// The machine's Reduce transparency setting is a default this
     /// fixture reasons from, so it is pinned off (#660, #1374).
-    init() { LiquidGlassGate.reducesTransparency = { false } }
+    init() { LiquidGlassGate.override = { false } }
 
     /// Below macOS 26 no run is hosted, so the spy would count
     /// nothing and every clause would pass on that.

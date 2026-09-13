@@ -1,43 +1,47 @@
 import AppKit
 
 /// Whether Liquid Glass may be DRAWN right now, as opposed to
-/// stored (#1374): the platform has it and the user has not asked
-/// macOS to reduce transparency. `NSGlassEffectView` ignores that
-/// setting — measured 2026-09-13 on macOS 26.6.2, live and at
-/// creation alike — so the bars stand their glass down here, at
-/// the one render-time read, while the stored `liquid_glass`
-/// value stays the user's.
+/// stored: the platform has it and macOS's Reduce transparency is
+/// off (#1374, bars.md ▸ Reduce transparency). The one Core
+/// reader of that setting; the stored `liquid_glass` never moves.
 @MainActor
 enum LiquidGlassGate {
-    /// The OS read, injectable so a test can flip it.
-    static var reducesTransparency: () -> Bool = {
-        NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
+    #if DEBUG
+        /// Test seam over the OS read; nil reads the machine.
+        static var override: (() -> Bool)?
+    #endif
+
+    static var reducesTransparency: Bool {
+        #if DEBUG
+            if let override { return override() }
+        #endif
+        return NSWorkspace.shared
+            .accessibilityDisplayShouldReduceTransparency
     }
 
     /// Platform glass, and transparency not reduced.
     static var drawsGlass: Bool {
-        AppBarStyle.glassAvailable && !reducesTransparency()
+        AppBarStyle.glassAvailable && !reducesTransparency
     }
 
     /// The style a bar renders: the stored one, glass stood down
-    /// and the Fill made opaque while transparency is reduced —
-    /// the setting asks for opaque backgrounds, and a 70 % plate
-    /// is not one. Every consumer downstream (`glassEnabled`,
-    /// `hasBox`, `GlassHosting`, the plate painters) reads the
-    /// copy.
+    /// and both fills at full alpha while transparency is reduced
+    /// — the setting asks for opaque backgrounds.
     static func rendered(_ style: AppBarStyle) -> AppBarStyle {
-        guard reducesTransparency() else { return style }
+        guard reducesTransparency else { return style }
         var copy = style
         copy.liquidGlass = false
         copy.fillColor = opaque(style.fillColor)
+        copy.hoverFillColor = opaque(style.hoverFillColor)
         return copy
     }
 
     static func rendered(_ style: SpaceBarStyle) -> SpaceBarStyle {
-        guard reducesTransparency() else { return style }
+        guard reducesTransparency else { return style }
         var copy = style
         copy.liquidGlass = false
         copy.fillColor = opaque(style.fillColor)
+        copy.hoverFillColor = opaque(style.hoverFillColor)
         return copy
     }
 
@@ -50,18 +54,13 @@ enum LiquidGlassGate {
         return "#" + digits.prefix(6)
     }
 
-    private static var observer: NSObjectProtocol?
-
-    /// Re-renders through `onChange` whenever the accessibility
-    /// display options move. One observer per process; a second
-    /// call replaces the first.
-    static func observe(_ onChange: @escaping @MainActor () -> Void) {
-        if let observer {
-            NSWorkspace.shared.notificationCenter.removeObserver(
-                observer
-            )
-        }
-        observer = NSWorkspace.shared.notificationCenter.addObserver(
+    /// Fires `onChange` on the main actor whenever the
+    /// accessibility display options move; the caller owns the
+    /// token.
+    static func observe(
+        _ onChange: @escaping @MainActor () -> Void
+    ) -> NSObjectProtocol {
+        NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace
                 .accessibilityDisplayOptionsDidChangeNotification,
             object: nil,

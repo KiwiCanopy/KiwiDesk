@@ -166,6 +166,10 @@ extension KiwiCore {
         // sit stranded over the scattered desktop.
         borders.stop()
         stickyMarks.clear()
+        if let token = appBars.transparencyObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(token)
+            appBars.transparencyObserver = nil
+        }
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         gatherWindows()

@@ -267,9 +267,12 @@ Obligations:
   plate painters) reads the copy; `GlassTint` refuses a
   colour beneath it as the net, and the bootstrap observer
   re-draws BOTH bars on the flip. A new bar surface's render takes
-  the same read, and a new reader of the OS flag in Core is a
+  the same read — the roster is DERIVED, every `Bar/` render that
+  hosts glass — spelling its stored style nowhere but as the
+  gate's argument, and a new reader of the OS flag in Core is a
   second gate free to disagree with the first
   (`ReduceTransparencySeamTests`: one home per tree, one read per
-  render, both bars in the handler; `ReduceTransparencyTests`
-  holds the behaviour). Why the OFF shape rather than an opaque
+  render on a stored style read once, both bars in the handler,
+  every glass fixture pinned; `ReduceTransparencyTests` holds the
+  behaviour and the observer's delivery). Why the OFF shape rather than an opaque
   glass is `docs/design-decisions.md` ▸ Reduce transparency.

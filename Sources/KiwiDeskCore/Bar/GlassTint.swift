@@ -52,8 +52,7 @@ enum GlassTint {
     private static func rendered(_ hex: String) -> NSColor? {
         // The one drawing authority, not a second `#available`
         // beside it: nothing here touches a macOS 26 API, so the
-        // check is policy rather than the compiler's — and it
-        // stands down with Reduce transparency too (#1374).
+        // check is policy rather than the compiler's (#1374).
         guard LiquidGlassGate.drawsGlass else { return nil }
         let fill = NSColor(kiwiHex: hex)
         guard fill.alphaComponent > 0 else { return nil }

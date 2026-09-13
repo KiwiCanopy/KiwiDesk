@@ -1298,14 +1298,16 @@ Obligations:
   can see it either way.
 - **Reduce transparency takes the OFF branch, read LIVE from
   the environment, in the one `GlassChrome` modifier** (#1374).
-  `glassChrome(in:)` hands `glassGround` `enabled &&
-  !reduceTransparency`, so the setting lands on the same
-  `.regularMaterial` the switch's off state and the pre-26 branch
-  draw — which AppKit renders opaque while the setting is on —
-  and the stored `liquid_glass` value is untouched. A second
-  reader of `accessibilityReduceTransparency` in this tree is a
-  second gate (`ReduceTransparencySeamTests` ▸ one home per
-  tree). The bars' half is bars.md's, at `LiquidGlassGate`.
+  The modifier `glassChrome(in:)` applies hands `glassGround`
+  `enabled && !reduceTransparency`, so the setting lands on the
+  same `.regularMaterial` the switch's off state and the pre-26
+  branch draw — measured opaque under the setting, 2026-09-13 —
+  and the stored `liquid_glass` value is untouched. The glass
+  BRANCH has that one gate; a further reader of
+  `accessibilityReduceTransparency` — a row greying with its
+  reason (#1418) — joins `ReduceTransparencySeamTests`' allowed
+  map with its reason, and a second gate on the branch cannot.
+  The bars' half is bars.md's, at `LiquidGlassGate`.
 
 ## The Reduce Motion gate
 
