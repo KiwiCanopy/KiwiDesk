@@ -790,7 +790,7 @@
   "onboarding.ready.body": "KiwiDeskが画面に合わせた構成でウインドウの管理を開始しました。",
   "onboarding.ready.menu_bar": "メニューバーにあるKiwiDeskのアイコンをクリックすると「設定」が開き、レイアウトやショートカットなど、すべてをそこで変更できます。",
   "onboarding.ready.open_at_login": "ログイン時にKiwiDeskを起動",
-  "onboarding.ready.star_hint": "KiwiDesk のソースコードは GitHub で公開されています。%1$@ が、他の人が見つける助けになります。",
+  "onboarding.ready.star_hint": "KiwiDesk のソースコードは公開されています。%1$@が、ほかの人に見つけてもらうきっかけになります。",
   "onboarding.ready.star_link": "GitHubのスター",
   "onboarding.ready.start": "使い始める",
   "onboarding.ready.title": "準備ができました",

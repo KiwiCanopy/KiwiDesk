@@ -790,7 +790,7 @@
   "onboarding.ready.body": "KiwiDesk is managing your windows now, with a setup chosen for your screens.",
   "onboarding.ready.menu_bar": "Click the KiwiDesk icon up in your menu bar to open Settings, where you change your layouts, shortcuts and everything else.",
   "onboarding.ready.open_at_login": "Start KiwiDesk at login",
-  "onboarding.ready.star_hint": "KiwiDesk's source is public on GitHub — %1$@ helps other people find it.",
+  "onboarding.ready.star_hint": "KiwiDesk's source is public — %1$@ helps other people find it.",
   "onboarding.ready.star_link": "a star on GitHub",
   "onboarding.ready.start": "Start using it",
   "onboarding.ready.title": "You're ready to go",

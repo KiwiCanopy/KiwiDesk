@@ -790,7 +790,7 @@
   "onboarding.ready.body": "O KiwiDesk está gerenciando suas janelas agora, com uma configuração escolhida para suas telas.",
   "onboarding.ready.menu_bar": "Clique no ícone do KiwiDesk na barra de menus para abrir os Ajustes, onde você muda seus layouts, seus atalhos e todo o resto.",
   "onboarding.ready.open_at_login": "Abrir o KiwiDesk ao iniciar sessão",
-  "onboarding.ready.star_hint": "O código-fonte do KiwiDesk é público no GitHub — %1$@ ajuda outras pessoas a encontrá-lo.",
+  "onboarding.ready.star_hint": "O código-fonte do KiwiDesk é público — %1$@ ajuda outras pessoas a encontrá-lo.",
   "onboarding.ready.star_link": "uma estrela no GitHub",
   "onboarding.ready.start": "Começar a usar",
   "onboarding.ready.title": "Tudo pronto",
