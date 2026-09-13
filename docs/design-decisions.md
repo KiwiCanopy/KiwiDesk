@@ -2044,6 +2044,42 @@ a display whose Desktop did not change — did not reproduce on
 removal; what remains open lives on #1364, not here.
 :::
 
+:::unreleased
+**The gate asks two compositor reads, and either refuses
+(#1410).** The flag alone had a blind spot the probe measured on
+2026-09-13, every gesture of the sitting: from a three-finger
+swipe's first movement until the switch registered, 1.0–1.5 s
+later, `kCGWindowIsOnscreen` read true for every window of the
+swiped display's neighbouring Desktops — the ones being composited
+for the gesture, on no display's current Space — and read false
+for the Desktop just left the moment the switch landed. A raise
+gated on the flag inside that second passes for a window on a
+Desktop nobody shows, and macOS then switches to show it; the
+Sept 10 settle refocus (`crosses=false` at +1.2 s) is the measured
+instance, and the #1364 arm was cut to read no flag for exactly
+this reason. The current-Space reading fails the other way, as the
+paragraph above records: through a switch it names the new Desktop
+while the draw list still composites the old one (#1023). Neither
+read lies in both directions, so the gate takes both — the flag,
+and whether the Space the compositor hosts the window on is one
+some display currently shows — and refuses when either says
+unshown, while a read that cannot answer abstains: without
+SkyLight the flag decides alone, as it did. The trade is a raise
+refused where one read lags into "unshown" for a window that is in
+fact shown, at the switch itself; focus then stays where macOS put
+it until the next report, the price #1345 already set. Two clauses
+the second read carries: an all-Desktops window (the Dock's "All
+Desktops", a `canJoinAllSpaces` panel) is hosted on every Space,
+so ANY shown host counts, or every focus of such a window would be
+refused; and the read costs ~0.15 ms per raise (the topology copy
+0.11 ms, the per-window list 0.03 ms, measured 2026-09-13), so it
+is live rather than cached from the switch handler, whose stamp is
+the notification's timing and not the compositor's. The
+acceptance is a device sitting with the probe: `both` reading 0
+for a neighbouring Desktop's window throughout a gesture while
+`on` reads 1.
+:::
+
 ### A focus report is only as good as the activation behind it (#1322)
 
 **[Rationale]**
