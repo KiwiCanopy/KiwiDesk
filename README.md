@@ -21,7 +21,7 @@ Powerful when you reach for it, never in your way.
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
-[![License MIT](https://img.shields.io/badge/License-MIT-8DB354)](LICENSE)
+[![License BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-8DB354)](LICENSE)
 [![Homebrew](https://img.shields.io/badge/Homebrew-cask-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
 [![Release](https://img.shields.io/github/v/release/KiwiCanopy/KiwiDesk?color=8DB354&label=Release)](https://github.com/KiwiCanopy/KiwiDesk/releases/latest)
 [![Direct download](https://img.shields.io/badge/Direct_download-.dmg-8DB354)](https://kiwidesk.kiwicanopy.com/)
@@ -190,11 +190,21 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE). Bundles Lua 5.5 ([MIT](Vendor/CLua/LICENSE)).
+[Business Source License 1.1](LICENSE): the source is public, and
+personal, non-commercial use is free. Commercial use — inside a
+business, or offering KiwiDesk or a derivative as a product or
+service — needs a commercial license. Each version converts to
+the [MIT License](https://opensource.org/license/mit) four years
+after it is published. Versions up to 1.2.2 were released under
+MIT and stay MIT. Bundles Lua 5.5 ([MIT](Vendor/CLua/LICENSE))
+and Sparkle (MIT).
+
+"KiwiDesk" and the KiwiDesk logo are trademarks of Maikel
+Hajiabadi; the license grants no right to them.
 
 ---
 
-KiwiDesk is open source. If you like it, leave a ⭐ — it is the one
+KiwiDesk's source is public. If you like it, leave a ⭐ — it is the one
 thing that helps other people find it.
 
 <div align="center">

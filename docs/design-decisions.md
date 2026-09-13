@@ -68,6 +68,55 @@ in miniature: a dead-simple glance surface, with one "Edit in
 Settings…" bridge down to the full editor — simple entry, deeper
 layer one click away, never forced.
 
+
+### Source-available from 1.3.0, under the Business Source License 1.1
+
+**[Principle]** (owner ruling 2026-09-13)
+
+KiwiDesk's source stays public, and personal, non-commercial use
+stays free; commercial use — inside a business, or offering
+KiwiDesk or a derivative as a product or service — needs a
+commercial license from the Licensor, and each version converts
+to MIT four years after it is first published. Versions up to
+1.2.2 were released under MIT and remain so: a license governs
+what is released under it and nothing before.
+
+**Why a source-available license, and why before any launch
+rather than after.** The project's plan is to grow first and, if
+donations do not carry it, to license future users later. Under
+MIT that later step cannot reserve anything: everything already
+published stays free to fork and resell, so the only lever the
+project would keep is the name. A switch made after a launch
+spends the goodwill the launch earned — people remember the
+relicense, not the reason — and lands at the moment of maximum
+attention, on the largest possible free snapshot. Switching
+before any launch pays the cost once and early, and leaves
+nothing to walk back: the paid tier, if it ever comes, changes
+no license text. BSL 1.1 was chosen over the plainer
+non-commercial licenses because its terms are the ones
+developers already know from other source-available projects,
+and because it commits to a Change Date, which a plain
+non-commercial license does not.
+
+**What the switch does not do.** It does not charge anyone: the
+Additional Use Grant makes personal use free, and license keys
+are a product decision the license neither requires nor
+forbids. It does not touch the vendored Lua or Sparkle, which
+keep their MIT licenses. And it does not stop a fork of the last
+MIT version; that risk was accepted the day 0.9.7 shipped under
+MIT and is the reason the switch is sooner rather than later.
+
+**What travels with it.** The site and README state the license
+and never a price — "free" was retired from the copy the same
+week, because a price is a promise and a license is a fact.
+Contributions are accepted under a sign-off that includes a
+relicensing grant (CONTRIBUTING.md ▸ Licensing Your
+Contribution), since a later Change Date or commercial license
+needs every contributor's consent otherwise, and the trademark
+notice on the name and logo is what the license itself leaves
+open. The first release under the new terms is 1.3.0, so the
+boundary is a tagged version rather than a date.
+
 ### Accepted limitations
 
 **[Trade-off]**

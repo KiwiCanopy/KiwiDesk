@@ -36,6 +36,19 @@ the subsystem you're touching. The short version:
 - Run `swift build && swift test && ./scripts/lint.sh` before
   pushing — CI enforces all three and blocks merging on red.
 
+## Licensing Your Contribution
+
+KiwiDesk is licensed under the
+[Business Source License 1.1](LICENSE). By submitting a
+contribution you agree that it is licensed to the project under
+that license, that you have the right to grant it, and that the
+Licensor may relicense it together with the rest of the Licensed
+Work — including under the Change License on the Change Date and
+under a commercial license. Sign each commit off
+(`git commit -s`) to record that agreement; it is the
+[Developer Certificate of Origin](https://developercertificate.org)
+plus the relicensing grant above.
+
 ## Using AI Assistants
 
 AI coding assistants are **welcome and encouraged** here. Much of
