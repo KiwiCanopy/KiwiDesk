@@ -1584,22 +1584,26 @@ track.set_axis("vertical")
 
 ### track.set_limit
 
-**Expects:** an integer ≥ 0.
+:::unreleased
+**Expects:** `0`, or an integer ≥ 2 (default `3`).
 
-**Does:** sets how many **normal** tracks a space can hold. `0`
+**Does:** sets how many tracks a space shows, the **overflow
+track** counted — a limit of 3 is three tracks on screen. `0`
 restores the **automatic** track limit (the default — tracks open and
 collapse as windows come and go; see `track.set_auto_tracks`).
 A positive value pins the limit *and turns automatic off*, so
-`set_limit(3)` takes effect on its own. Beyond the limit, one
-extra **overflow track** opens at the far edge and collects the
-surplus (#192): a new `own_track` window past the limit opens
-that overflow track, and further windows fold into it (rendered
-per `track.set_overflow_style`). `move_to_track` can open the
+`set_limit(3)` takes effect on its own. The last track is the
+overflow track at the far edge, which collects the surplus
+(#192): a new `own_track` window past the normal tracks opens
+it, and further windows fold into it (rendered per
+`track.set_overflow_style`). `move_to_track` can open the
 overflow track but refuses to go past it. The limit is
 display-agnostic — if a monitor can't fit the columns at
 `min_window_size`, the layout shows fewer at render time. The
 last positive value is remembered, so flipping automatic back
-off restores it.
+off restores it. A limit of 1 is refused: one track would be the
+overflow alone (#1354).
+:::
 
 **Example:**
 
@@ -1741,7 +1745,12 @@ track.set_axis_override("code", "horizontal")
 **Expects:**
 
 - A space identifier.
-- An integer ≥ 0.
+- `0`, or an integer ≥ 2.
+
+:::unreleased
+The overflow track is counted, as in `track.set_limit`, and 1 is
+refused.
+:::
 
 **Does:** overrides the global track cap for one space. Like the
 global setter, a positive value also turns automatic off for that

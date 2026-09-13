@@ -44,9 +44,13 @@ struct LayoutSchematicTrackEngineTests {
                     newWindow: .ownTrack,
                     windows: count
                 )
-                let drawn = schematic.trackSlots
+                // The splice, before the fold (#1354): the engine
+                // opens the track among the ESTABLISHED ones and
+                // the render folds afterwards, so parity is read
+                // off `foldedTracks`, never the drawn strip.
+                let drawn = schematic.foldedTracks
                 let engine = engineSlots(
-                    tracks: schematic.trackCount,
+                    tracks: schematic.markerTracks.counts.count,
                     perTrack: 1,
                     // The schematic's OWN focus index, not a
                     // re-derived `trackCount / 2`. That literal
@@ -56,7 +60,7 @@ struct LayoutSchematicTrackEngineTests {
                     // repeating the old rule pinned the
                     // convention instead of the parity it claims
                     // (#708 follow-up, 2026-08-16).
-                    focusTrack: schematic.focusIdx,
+                    focusTrack: schematic.markerTracks.focus,
                     rule: .ownTrack,
                     placement: placement
                 )

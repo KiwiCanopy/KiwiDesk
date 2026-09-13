@@ -291,14 +291,14 @@ struct TrackSpawnTests {
         // A fixed cap needs automatic off (#178); count alone is
         // the remembered magnitude, inert while auto is on.
         over.autoTracks = false
-        over.limit = 2
+        over.limit = 3
         state.trackParams.override["1"] = over
         let w = ids(3)
         for id in w {
             state.apply(.windowCreated(window(id)))
         }
-        // Limit 2 = two normal tracks + the overflow track (#192):
-        // the third window opens that extra (third) track rather
+        // Limit 3 = two normal tracks + the overflow track
+        // (#1354): the third window opens that third track rather
         // than joining an existing one — one marker each.
         let space = state.workspaces["1"]
         #expect(space?.trackBreaks == Set(w))

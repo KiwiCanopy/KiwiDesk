@@ -11,7 +11,7 @@ extension TrackSchematic {
     private var params: TrackParams {
         var p = TrackParams()
         p.autoTracks = autoTracks
-        p.limit = max(1, limit)
+        p.limit = limit
         return p
     }
 
@@ -42,11 +42,33 @@ extension TrackSchematic {
         return (counts, focus)
     }
 
+    /// The marker tracks the engine would fold: under `own_track`
+    /// the incoming window opens a track of its own BEFORE the
+    /// render folds, so it is spliced in here and counted against
+    /// the cap — drawn outside the fold it was one column past
+    /// the limit (#1354). `incoming` is its index, nil under
+    /// `focused_track`, where the `+` nests in the focused track.
+    var foldedTracks: (counts: [Int], focus: Int, incoming: Int?) {
+        let marker = markerTracks
+        guard newWindow == .ownTrack else {
+            return (marker.counts, marker.focus, nil)
+        }
+        var counts = marker.counts
+        let at = SchematicPlacement.splice(
+            placement,
+            count: counts.count,
+            focus: marker.focus
+        ).incoming
+        counts.insert(1, at: at)
+        let focus = at <= marker.focus ? marker.focus + 1 : marker.focus
+        return (counts, focus, at)
+    }
+
     /// Overflow cap resolution for schematic preview (architect review
-    /// 2026-08-16).
+    /// 2026-08-16), over the tracks the engine would fold.
     private var fold: (effectiveCap: Int, overflows: Bool) {
         TrackLayout.overflowCap(
-            markerCount: markerTracks.counts.count,
+            markerCount: foldedTracks.counts.count,
             normalCap: params.normalCap,
             geoCap: autoTracks
                 ? LayoutSchematic.trackGeoCap : .max
@@ -67,17 +89,24 @@ extension TrackSchematic {
 
     /// Number of windows pooled in far-edge overflow track.
     var overflowWindows: Int {
-        let marker = markerTracks.counts
-        guard fold.overflows, trackCount < marker.count else {
+        let counts = foldedTracks.counts
+        guard fold.overflows, trackCount < counts.count else {
             return 0
         }
-        return marker[trackCount...].reduce(0, +)
+        return counts[trackCount...].reduce(0, +)
+    }
+
+    /// Whether the incoming `own_track` window's track itself
+    /// folds into the overflow — a `last` placement past the cap.
+    var incomingFolds: Bool {
+        guard let at = foldedTracks.incoming else { return false }
+        return at >= trackCount
     }
 
     /// Windows in focused track clamped for preview drawing
     /// (`LayoutSchematicStandIns`).
     var focusedRun: Int {
-        let counts = markerTracks.counts
+        let counts = foldedTracks.counts
         let index = focusIdx
         let run = index < counts.count ? counts[index] : 1
         return min(4, max(1, run))

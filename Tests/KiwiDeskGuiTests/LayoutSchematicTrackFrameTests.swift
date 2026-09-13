@@ -70,13 +70,15 @@ struct LayoutSchematicTrackFrameTests {
                             + (spec.isNew
                                 ? 1 : s.drawnRun(spec.run))
                     }
-                    let folded = s.markerTracks.counts
+                    // The fold's own tracks — the incoming
+                    // own-track among them since #1354 — so the
+                    // drawn total is the folded prefix, no
+                    // separate incoming column.
+                    let folded = s.foldedTracks.counts
                         .prefix(s.trackCount)
-                    let placed = folded.reduce(0) {
+                    let expected = folded.reduce(0) {
                         $0 + s.drawnRun($1)
                     }
-                    let incoming = rule == .ownTrack ? 1 : 0
-                    let expected = placed + incoming
                     #expect(
                         drawn == expected,
                         Comment(
@@ -147,7 +149,7 @@ struct LayoutSchematicTrackFrameTests {
         // And the drawn focus comes from the fold, not from a
         // fixed slot.
         #expect(
-            source.contains("markerTracks.focus"),
+            source.contains("foldedTracks.focus"),
             Comment(
                 rawValue:
                     "focusIdx no longer reads the fold — the "
@@ -213,10 +215,10 @@ struct LayoutSchematicTrackFrameTests {
         #expect(low.drawsOverflowTrack)
         // Bounded ABOVE the fold, not everywhere: below it the
         // count still grows one track per window, because there
-        // is nothing to fold yet. Asserting equality at 6
-        // windows was simply false — 5 tracks there against 4 at
-        // 12 — and the fixture caught it.
-        let shallow = track(limit: 9, windows: 6, auto: true)
+        // is nothing to fold yet — five windows are five tracks,
+        // the incoming's own among them (#1354), one short of
+        // the stand-in's fold.
+        let shallow = track(limit: 9, windows: 5, auto: true)
         #expect(high.trackCount < shallow.trackCount)
         // And the fixed arm is genuinely a different rule — a
         // typed 9 draws more than the auto fold allows, so the

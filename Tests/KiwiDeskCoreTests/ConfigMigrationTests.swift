@@ -172,14 +172,24 @@ struct ConfigMigrationTests {
                 settings: settings
             )
         )
-        // ...as v0.9.7 would have written it.
+        // ...as v0.9.7 would have written it: the retired content
+        // spelling, and the track limit one below today's, which
+        // is what that build stored for the picture today's
+        // default draws (#1354's lift).
         let old = Data(
             String(decoding: current, as: UTF8.self)
                 .replacingOccurrences(
                     of: "\"icon_and_title\"",
                     with: "\"icon_and_name\""
+                )
+                // Compact JSON here (no pretty-printing), so the
+                // key and value abut.
+                .replacingOccurrences(
+                    of: "\"limit\":\(TrackParams().limit)",
+                    with: "\"limit\":\(TrackParams().limit - 1)"
                 ).utf8
         )
+        #expect(old != current)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         #expect(throws: DecodingError.self) {

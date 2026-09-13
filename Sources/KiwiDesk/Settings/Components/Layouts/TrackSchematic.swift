@@ -27,7 +27,7 @@ struct TrackSchematic: View {
 
     /// Index of track wearing focus from the engine fold.
     var focusIdx: Int {
-        min(max(0, markerTracks.focus), max(0, trackCount - 1))
+        min(max(0, foldedTracks.focus), max(0, trackCount - 1))
     }
 
     struct TrackSpec {
@@ -67,34 +67,27 @@ struct TrackSchematic: View {
         )
     }
 
-    /// Normal tracks with incoming track/window spliced in.
+    /// The drawn normal tracks, the incoming track among them:
+    /// under `own_track` it is one of the folded tracks (spliced
+    /// by `SchematicPlacement`, mirroring `Space.insertIntoTrack`,
+    /// #702, `LayoutSchematicTrackEngineTests`) and draws as a
+    /// normal column only while the fold keeps it out of the
+    /// overflow; under `focused_track` the `+` nests in the
+    /// focused track (#437, `TrackSchematic+Fold`).
     var specs: [TrackSpec] {
-        let counts = markerTracks.counts
+        let folded = foldedTracks
         var s = (0..<trackCount).map { index in
             TrackSpec(
                 focused: index == focusIdx,
-                run: index < counts.count ? counts[index] : 1
+                isNew: index == folded.incoming,
+                run: index < folded.counts.count
+                    ? folded.counts[index] : 1
             )
         }
-        switch newWindow {
-        case .focusedTrack:
+        if newWindow == .focusedTrack {
             s[focusIdx].nestedNew = true
-        case .ownTrack:
-            s.insert(TrackSpec(isNew: true), at: newTrackIndex)
         }
         return s
-    }
-
-    /// Target track splice index via `SchematicPlacement` (#702) —
-    /// mirroring `Space.insertIntoTrack` (#128/#188), pinned by
-    /// `LayoutSchematicTrackEngineTests`; the fill-then-spill half
-    /// (#437) lives in `TrackSchematic+Fold`, guarded separately.
-    private var newTrackIndex: Int {
-        SchematicPlacement.splice(
-            placement,
-            count: trackCount,
-            focus: focusIdx
-        ).incoming
     }
 
     @ViewBuilder

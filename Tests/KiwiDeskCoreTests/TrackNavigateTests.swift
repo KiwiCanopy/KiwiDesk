@@ -251,11 +251,14 @@ struct MoveToTrackTests {
             windows: 2,
             focus: WindowID(2)
         )
-        // Two tracks [1][2] with limit 1 = one normal track plus
-        // the overflow track (trackCap = count + 1 = 2), already
-        // at the cap: no third track can open.
+        // Two tracks [1][2] at the floor — one normal track plus
+        // the overflow track, two on screen (#1354) — already at
+        // the cap: no third track can open.
         setHeads(core, space: space, heads: [WindowID(2)])
-        core.execute("track.set_limit", args: [.number(1)])
+        core.execute(
+            "track.set_limit",
+            args: [.number(Double(TrackParams.minLimit))]
+        )
         #expect(
             !core.execute(
                 "move_to_track",
