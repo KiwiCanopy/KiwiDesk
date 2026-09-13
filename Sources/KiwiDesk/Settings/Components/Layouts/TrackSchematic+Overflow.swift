@@ -9,12 +9,19 @@ extension TrackSchematic {
             let slots = overflowSlots(geo.size)
             ZStack(alignment: .topLeading) {
                 ForEach(slots.indices, id: \.self) { i in
-                    SchematicPileTile()
-                        .frame(
-                            width: slots[i].width,
-                            height: slots[i].height
-                        )
-                        .position(x: slots[i].midX, y: slots[i].midY)
+                    // A `last` own-track past the cap IS the
+                    // overflow's newest member (#1354): the `+`
+                    // rides the top of the pile, where the engine
+                    // puts it, rather than a column the limit
+                    // does not allow.
+                    SchematicPileTile(
+                        isNew: incomingFolds && i == slots.count - 1
+                    )
+                    .frame(
+                        width: slots[i].width,
+                        height: slots[i].height
+                    )
+                    .position(x: slots[i].midX, y: slots[i].midY)
                 }
             }
         }

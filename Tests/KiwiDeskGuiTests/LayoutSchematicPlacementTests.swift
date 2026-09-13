@@ -123,14 +123,17 @@ struct LayoutSchematicPlacementTests {
         }
     }
 
-    /// A new *track* splices into the spec array, so the focused
-    /// spec travels with it. Read off `trackSlots` — the strip's
-    /// own array — rather than rebuilt here from
-    /// `newTrackIndex`: a guard that recomputes the render proves
-    /// the number is right and never proves it is used, which is
-    /// the failure this suite's docstring names one level up.
+    /// A new *track* splices among the established ones BEFORE
+    /// the fold (#1354), so the promise is read off
+    /// `foldedTracks` — the splice — and the strip then draws it
+    /// as a normal column or, past the cap, as the newest member
+    /// of the overflow pile. Both halves are read off the strip's
+    /// own arrays rather than rebuilt here: a guard that
+    /// recomputes the render proves the number is right and never
+    /// proves it is used, which is the failure this suite's
+    /// docstring names one level up.
     @Test("Track opens a new track where the engine does")
-    func trackPlacement() {
+    func trackPlacement() throws {
         for placement in placements {
             for count in LayoutSchematic.windowCountRange {
                 let schematic = track(
@@ -138,14 +141,24 @@ struct LayoutSchematicPlacementTests {
                     newWindow: .ownTrack,
                     windows: count
                 )
-                let drawn = schematic.trackSlots
+                let folded = schematic.foldedTracks
+                let incoming = try #require(folded.incoming)
                 check(
-                    incoming: drawn.incoming,
-                    focus: drawn.focus,
-                    slots: 0...schematic.trackCount,
+                    incoming: incoming,
+                    focus: folded.focus,
+                    slots: 0...(folded.counts.count - 1),
                     placement: placement,
                     what: "Track at \(count)"
                 )
+                let drawn = schematic.trackSlots
+                if incoming < schematic.trackCount {
+                    #expect(drawn.incoming == incoming)
+                    #expect(!schematic.incomingFolds)
+                } else {
+                    #expect(drawn.incoming < 0)
+                    #expect(schematic.incomingFolds)
+                    #expect(schematic.drawsOverflowTrack)
+                }
             }
         }
     }

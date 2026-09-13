@@ -152,8 +152,9 @@ struct LayoutSchematicTrackFoldTests {
             )
             #expect(schematic.drawsOverflowTrack)
         }
-        // Tracks never outnumber the windows that open them.
-        #expect(track(limit: 4, windows: 2).trackCount == 1)
+        // Tracks never outnumber the windows that open them — the
+        // incoming window's own track counted (#1354).
+        #expect(track(limit: 4, windows: 2).trackCount == 2)
     }
 
     /// The overflow track exists exactly when something overflows
