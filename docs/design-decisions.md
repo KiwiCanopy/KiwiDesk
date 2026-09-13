@@ -98,15 +98,16 @@ switch made after a launch spends what the launch earned — people
 remember the relicense, not the reason — and lands at the moment
 of maximum attention, on the largest possible free snapshot.
 Switching before any launch pays the cost once and early, and
-leaves nothing to walk back. BSL 1.1 was chosen over the plainer
+leaves nothing to walk back: the terms a launch-day reader
+sees are the terms that stay. BSL 1.1 was chosen over the plainer
 non-commercial licenses because its terms are the ones developers
 already know from other source-available projects, and because it
 commits to a Change Date, which a plain non-commercial license
 does not.
 
 **What the switch does not do.** It changes nothing for personal
-use: the Additional Use Grant keeps it free, and no key, account
-or payment enters the app. It does not touch the vendored Lua or
+use: the Additional Use Grant keeps it free, and the license
+itself asks for no key, account or payment. It does not touch the vendored Lua or
 Sparkle, which keep their MIT licenses. And it does not stop a
 fork of the last MIT version; that risk was accepted the day
 0.9.7 shipped under MIT and is the reason the switch is sooner

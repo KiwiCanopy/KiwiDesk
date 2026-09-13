@@ -200,7 +200,10 @@ const jsonLd = [
     url: canonical,
     image: ogImageURL,
     inLanguage: lang,
-    isAccessibleForFree: true,
+    // The license is stated and no price is promised — the same
+    // rule the visible copy follows (design-decisions ▸
+    // Source-available from 1.3.0).
+    license: `${repo}/blob/main/LICENSE`,
     softwareRequirements: "macOS 14 or later, Apple silicon",
     // Spread rather than set: a release published without a disk
     // image must leave these OUT of the graph entirely, the same
@@ -211,11 +214,6 @@ const jsonLd = [
       ? { downloadUrl: downloadHref, installUrl: downloadHref }
       : {}),
     ...(downloadVersion ? { softwareVersion: downloadVersion } : {}),
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
     author: {
       "@type": "Organization",
       name: "KiwiCanopy",
