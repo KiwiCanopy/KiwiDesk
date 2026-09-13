@@ -1098,6 +1098,10 @@ at the global
 minimum window size (`set_min_window_size`) and capped at the
 axis length — so a small percentage on a narrow display falls
 back to the minimum rather than tiling windows smaller than it.
+A row shorter than the axis keeps each slot at its size and
+leaves the rest of the axis empty. A lone window fills the
+available width or height (unless its app refuses that size —
+[Accepted limitations](accepted-limitations.md)).
 Accepted values: `%` clamps to 5–100%, points to ≥100.
 
 **Example:**
