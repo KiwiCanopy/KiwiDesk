@@ -187,8 +187,25 @@ const ogLocale =
   lang === "de" ? "de_DE" : lang === "ja" ? "ja_JP" : "en_US";
 const ogLocaleAlt = lang === "en" ? "de_DE" : "en_US";
 
-// Structured data: KiwiDesk itself (SoftwareApplication) plus the
-// site (WebSite), emitted as one JSON-LD graph in the head.
+// The hero trailer: served from this origin (media-src 'self'), with
+// the same cut on YouTube for sharing. A link is navigation, so the
+// CSP's frame-src 'none' and the legal page's no-third-party-embeds
+// promise both hold — which is why it is a link and not a player.
+const trailerFile = "/kiwidesk-trailer.mp4";
+const trailerPoster = "/kiwidesk-trailer-poster.jpg";
+const trailerYouTube = "https://youtu.be/RvziMM_B544";
+const trailerPlaylist = "https://youtube.com/playlist?list=PLUS4bldnAF-U";
+// The pre-1.0 mascot clip that played here until 2026-09-13 — kept as a
+// link, not a second video: one play button, one download.
+const trailerOrigin = "https://youtu.be/zIPe-8dswaU";
+const trailerUploaded = "2026-09-13";
+const trailerDuration = "PT1M11S";
+
+// Structured data: KiwiDesk itself (SoftwareApplication), the site
+// (WebSite) and the trailer (VideoObject — the file this origin
+// serves, so a video rich result belongs to this page and not to
+// youtube.com; sitemap.xml.ts carries the matching <video:video>),
+// emitted as one JSON-LD graph in the head.
 const jsonLd = [
   {
     "@context": "https://schema.org",
@@ -227,6 +244,18 @@ const jsonLd = [
     url: canonical,
     inLanguage: lang,
     description: metaDesc,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: t.demo_title,
+    description: t.demo_body,
+    thumbnailUrl: new URL(trailerPoster, canonical).href,
+    contentUrl: new URL(trailerFile, canonical).href,
+    uploadDate: trailerUploaded,
+    duration: trailerDuration,
+    inLanguage: "en",
+    isFamilyFriendly: true,
   },
 ];
 ---
@@ -753,8 +782,9 @@ const jsonLd = [
         </div>
         <div class="demo__frame reveal">
           <video id="demoVideo" controls preload="metadata"
-            playsinline aria-label={t.demo_video_aria}>
-            <source src="/kiwidesk-demo.mp4" type="video/mp4" />
+            playsinline poster={trailerPoster}
+            aria-label={t.demo_video_aria}>
+            <source src={trailerFile} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           <button class="demo__overlay" id="demoOverlay" type="button"
@@ -767,7 +797,14 @@ const jsonLd = [
             </span>
           </button>
         </div>
-        <p class="demo__caption">{t.demo_caption}</p>
+        <p class="demo__links">
+          <a class="link-arrow" href={trailerYouTube} target="_blank"
+            rel="noopener">{t.demo_watch_youtube}</a>
+          <a class="link-arrow" href={trailerPlaylist} target="_blank"
+            rel="noopener">{t.demo_playlist}</a>
+          <a class="link-arrow" href={trailerOrigin} target="_blank"
+            rel="noopener">{t.demo_origin}</a>
+        </p>
         <blockquote class="quote-aside quote-aside--demo">
           <p>{oq}{t.quote_demo}{cq}</p>
           <footer class="quote-aside__byline">
