@@ -126,8 +126,14 @@ struct LicenseDocumentsTests {
             },
             "About no longer mounts the license row"
         )
+        // One link per document, derived: a case joining
+        // `Document` and the script keeps the roster guard green
+        // while About draws nothing for it.
         for (needle, count) in [
-            ("LicenseDocuments.url(for:", 2),
+            (
+                "LicenseDocuments.url(for:",
+                LicenseDocuments.Document.allCases.count
+            ),
             ("LicenseDocuments.copyright", 1),
         ] {
             let readers = try SourceScan.swiftSources(under: tree)

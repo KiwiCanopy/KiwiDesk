@@ -102,15 +102,27 @@ struct LicensePackagingTests {
         let from = text.index(text.startIndex, offsetBy: start)
         let tail = text[text.index(text.startIndex, offsetBy: end)...]
         let assignment = String(tail.prefix { $0 != "\n" })
-        // The SHAPE: composed from the three reads, never typed.
-        // A literal agreeing with LICENSE today would pass the
-        // run below until the day LICENSE moved.
+        // The SHAPE: composed from the three reads and NOTHING
+        // else. A literal agreeing with LICENSE today would pass
+        // the run below until the day LICENSE moved, and a phrase
+        // added here is English no catalog sees (localization.md).
+        var residue = String(assignment.dropFirst("COPYRIGHT=".count))
         for atom in ["$LICENSE_YEAR", "$LICENSOR", "$LICENSE_NAME"] {
             #expect(
                 assignment.contains(atom),
                 Comment(rawValue: "COPYRIGHT= no longer reads \(atom)")
             )
+            residue = residue.replacingOccurrences(of: atom, with: "")
         }
+        #expect(
+            residue.range(of: "[[:alpha:]]", options: .regularExpression)
+                == nil,
+            Comment(
+                rawValue:
+                    "COPYRIGHT= carries words beside its atoms: "
+                    + "\(residue)"
+            )
+        )
         let snippet = String(text[from..<tail.startIndex]) + assignment
         let run = try spawn(
             "/bin/bash",
@@ -183,9 +195,13 @@ struct LicensePackagingTests {
     }
 
     /// Component name → its LICENSE file, for every `Vendor/*`
-    /// directory and every `Package.resolved` pin. A pin whose
-    /// LICENSE cannot be found is a failed requirement, not a
-    /// skip: the package must be built for this to run at all.
+    /// directory and every `Package.resolved` pin. A SUPERSET of
+    /// what ships — `Package.resolved` lists transitive and
+    /// test-only pins too — refused rather than skipped, so a
+    /// dev-only dependency is asked for a notice it may not owe
+    /// and never the other way round. A pin whose notice cannot
+    /// be found is a failed requirement: the package must be
+    /// built for this to run at all.
     static func thirdPartyLicenses(
         under root: URL
     ) throws -> [(String, URL)] {
@@ -194,7 +210,8 @@ struct LicensePackagingTests {
         let vendor = root.appendingPathComponent("Vendor")
         for dir in try fm.contentsOfDirectory(
             at: vendor,
-            includingPropertiesForKeys: nil
+            includingPropertiesForKeys: nil,
+            options: .skipsHiddenFiles
         )
         .sorted(by: { $0.path < $1.path }) {
             let license = dir.appendingPathComponent("LICENSE")
@@ -221,9 +238,10 @@ struct LicensePackagingTests {
                 fetchedLicense(for: pin.identity, under: root),
                 Comment(
                     rawValue:
-                        "no LICENSE for \(pin.identity) under "
-                        + ".build/artifacts or .build/checkouts — "
-                        + "build the package first"
+                        "no LICENSE* or COPYING for \(pin.identity) "
+                        + "under .build/artifacts or .build/checkouts "
+                        + "— build the package first, or teach "
+                        + "fetchedLicense the file's spelling"
                 )
             )
             found.append((pin.identity, license))
@@ -231,9 +249,11 @@ struct LicensePackagingTests {
         return found
     }
 
-    /// The `LICENSE` SwiftPM fetched for a pin: the binary
+    /// The notice SwiftPM fetched for a pin: the binary
     /// artifact's first, since that is what ships, else the
-    /// source checkout's.
+    /// source checkout's — anchored on the pin's own top-level
+    /// directory, so `artifacts/extract/` staging and a pin
+    /// whose name is a substring of another's are never read.
     private static func fetchedLicense(
         for identity: String,
         under root: URL
@@ -248,13 +268,18 @@ struct LicensePackagingTests {
                 )
             else { continue }
             for case let url as URL in walk
-            where url.lastPathComponent == "LICENSE" {
+            where isNotice(url.lastPathComponent) {
                 let relative = url.path.dropFirst(base.path.count)
-                if relative.lowercased().contains(identity.lowercased()) {
+                let top = relative.split(separator: "/").first
+                if top?.lowercased() == identity.lowercased() {
                     return url
                 }
             }
         }
         return nil
+    }
+
+    private static func isNotice(_ name: String) -> Bool {
+        name.hasPrefix("LICENSE") || name == "COPYING"
     }
 }
