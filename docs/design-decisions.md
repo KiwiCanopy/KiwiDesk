@@ -123,12 +123,6 @@ the reader can actually download — the site deploys from `main`
 while the newest release is whatever was last tagged, so copy
 beside a download either names the version the terms start at or
 links to `LICENSE`, which carries that boundary itself.
-The shipped `.app` carries `LICENSE` and `ACKNOWLEDGEMENTS` in
-`Contents/Resources` and opens both from Settings ▸ About, with a
-copyright line derived from `LICENSE` — BSL 1.1 wants the License
-displayed on every copy, and the Lua and Sparkle notices want
-theirs in every copy (#1407; the packaging half is
-`.claude/rules/packaging-and-release.md`'s).
 Contributions are accepted under a relicensing grant stated in
 CONTRIBUTING.md ▸ Licensing Your Contribution, since a later
 Change Date or commercial license needs every contributor's
@@ -137,6 +131,16 @@ is what the license itself leaves open — the license disclaims
 any trademark grant, so nothing else does it. The boundary is a
 tagged version rather than a date, so it is the same fact in the
 release notes, in `LICENSE` and in a `git tag`.
+
+:::unreleased
+The `.app` is itself a copy of the Licensed Work, so it carries
+the license text and the Lua and Sparkle notices and opens both
+from Settings ▸ About — BSL 1.1 wants the License displayed on
+every copy, and the two MIT notices want theirs in every copy —
+and a trim of About's link card or of the bundle keeps them
+(#1407; how the bundle carries them and derives its copyright
+line is `.claude/rules/packaging-and-release.md`'s).
+:::
 
 ### Accepted limitations
 

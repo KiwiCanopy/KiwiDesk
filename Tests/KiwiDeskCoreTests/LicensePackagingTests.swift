@@ -1,16 +1,13 @@
 import Foundation
 import Testing
 
-/// The license texts the bundle carries, and the copyright line it
-/// declares (#1407) — `SparklePackagingTests`' sibling.
-///
-/// BSL 1.1 wants the License displayed on every copy, and the Lua
-/// and Sparkle notices want theirs in every copy; the `.app` is a
-/// copy. Every failure here is invisible on the build machine —
-/// the bundle assembles, signs and notarizes without the texts —
-/// so the ORDER and the REFUSAL are pinned in the script the way
-/// the Sparkle suite pins them, and the copyright derivation is
-/// RUN against the real `LICENSE` rather than read.
+/// The license texts the bundle carries and the copyright line it
+/// declares (#1407, packaging-and-release.md ▸ Building the .app)
+/// — `SparklePackagingTests`' sibling. Every failure here is
+/// invisible on the build machine, so the script's ORDER and
+/// REFUSAL are pinned, the copyright derivation is RUN against
+/// the real `LICENSE`, and `ACKNOWLEDGEMENTS` is held verbatim
+/// against every third-party component the tree declares.
 @Suite("License packaging (#1407)")
 struct LicensePackagingTests {
     private let root = scriptFixtureRepoRoot()
@@ -52,9 +49,7 @@ struct LicensePackagingTests {
         )
     }
 
-    /// A missing source text is refused, never skipped — the
-    /// bundle would ship without the one file its license
-    /// requires, and nothing downstream would notice.
+    /// A missing source text is refused, never skipped.
     @Test("a missing text is refused, not skipped")
     func missingTextIsFatal() throws {
         let text = try buildAppScriptWithoutComments()
@@ -80,19 +75,17 @@ struct LicensePackagingTests {
     }
 
     /// The plist's copyright is the derivation's output, and the
-    /// derivation — run here as the script runs it — reads the
-    /// licensor, the year and the license's title off `LICENSE`.
-    /// A hand-typed string would agree with the license until the
-    /// day it did not, and the plist is the one place a Finder
-    /// Get Info reader sees.
+    /// derivation — run here under the script's own `set` line —
+    /// reads the licensor, the year and the title off `LICENSE`.
     @Test("the copyright line is derived from LICENSE")
     func copyrightIsDerived() throws {
         let text = try buildAppScriptWithoutComments()
         #expect(
-            text.contains(
-                "<key>NSHumanReadableCopyright</key>\n"
-                    + "    <string>$COPYRIGHT</string>"
-            ),
+            text.range(
+                of: #"<key>NSHumanReadableCopyright</key>\s*"#
+                    + #"<string>\$COPYRIGHT</string>"#,
+                options: .regularExpression
+            ) != nil,
             "the plist no longer takes the derived line"
         )
         let start = try buildAppScriptIndex(
@@ -105,17 +98,25 @@ struct LicensePackagingTests {
             in: text,
             "the derivation no longer assigns COPYRIGHT"
         )
-        #expect(start < end)
+        try #require(start < end)
         let from = text.index(text.startIndex, offsetBy: start)
         let tail = text[text.index(text.startIndex, offsetBy: end)...]
-        let snippet =
-            String(text[from..<tail.startIndex])
-            + String(tail.prefix { $0 != "\n" })
+        let assignment = String(tail.prefix { $0 != "\n" })
+        // The SHAPE: composed from the three reads, never typed.
+        // A literal agreeing with LICENSE today would pass the
+        // run below until the day LICENSE moved.
+        for atom in ["$LICENSE_YEAR", "$LICENSOR", "$LICENSE_NAME"] {
+            #expect(
+                assignment.contains(atom),
+                Comment(rawValue: "COPYRIGHT= no longer reads \(atom)")
+            )
+        }
+        let snippet = String(text[from..<tail.startIndex]) + assignment
         let run = try spawn(
             "/bin/bash",
             [
                 "-c",
-                "set -e\nROOT=\"$1\"\n\(snippet)\n"
+                "set -euo pipefail\nROOT=\"$1\"\n\(snippet)\n"
                     + "printf '%s' \"$COPYRIGHT\"",
                 "bash",
                 root.path,
@@ -137,25 +138,24 @@ struct LicensePackagingTests {
                 }
         )
         #expect(!licensor.isEmpty)
-        #expect(run.stdout.hasPrefix("© "))
         #expect(run.stdout.contains(licensor))
         #expect(run.stdout.contains(title))
         #expect(
             run.stdout.range(
-                of: #"© [0-9]{4} "#,
+                of: #"^© [0-9]{4} "#,
                 options: .regularExpression
             ) != nil,
             Comment(rawValue: run.stdout)
         )
     }
 
-    /// `ACKNOWLEDGEMENTS` carries each third-party notice
-    /// VERBATIM — the vendored Lua one, and the LICENSE of the
-    /// Sparkle release SwiftPM resolved into `.build/artifacts`.
-    /// A bump that changes either text reds here, which is the
-    /// point: the notice shipped must be the one the shipped
-    /// component carries.
-    @Test("the acknowledgements carry both notices verbatim")
+    /// `ACKNOWLEDGEMENTS` carries the LICENSE of every third-party
+    /// component the tree declares, VERBATIM. The roster is
+    /// derived — `Vendor/*` plus `Package.resolved`'s pins, each
+    /// resolved to the LICENSE SwiftPM fetched — never listed
+    /// here, so a component joining the bundle without its notice
+    /// reds rather than slipping past a hand-kept pair.
+    @Test("the acknowledgements carry every notice verbatim")
     func acknowledgementsCarryTheNotices() throws {
         let notices = try String(
             contentsOf: root.appendingPathComponent(
@@ -163,55 +163,97 @@ struct LicensePackagingTests {
             ),
             encoding: .utf8
         )
-        let lua = try String(
-            contentsOf:
-                root
-                .appendingPathComponent("Vendor")
-                .appendingPathComponent("CLua")
-                .appendingPathComponent("LICENSE"),
-            encoding: .utf8
-        )
-        #expect(
-            notices.contains(lua.trimmingCharacters(in: .newlines)),
-            "the Lua notice is not the vendored LICENSE verbatim"
-        )
-        let sparkle = try String(
-            contentsOf: try #require(
-                Self.sparkleLicense(under: root),
-                """
-                no Sparkle LICENSE under .build/artifacts — build \
-                the package first; the notice cannot be checked \
-                against a release nobody has resolved
-                """
-            ),
-            encoding: .utf8
-        )
-        #expect(
-            notices.contains(
-                sparkle.trimmingCharacters(in: .newlines)
-            ),
-            "the Sparkle notice is not the resolved LICENSE verbatim"
-        )
+        let roster = try Self.thirdPartyLicenses(under: root)
+        // Non-vacuity: the two components this suite was written
+        // for are the floor, not the list.
+        #expect(roster.count >= 2, Comment(rawValue: "\(roster)"))
+        for (component, url) in roster {
+            let license = try String(contentsOf: url, encoding: .utf8)
+            #expect(
+                notices.contains(
+                    license.trimmingCharacters(in: .newlines)
+                ),
+                Comment(
+                    rawValue:
+                        "\(component)'s notice (\(url.path)) is not "
+                        + "in ACKNOWLEDGEMENTS verbatim"
+                )
+            )
+        }
     }
 
-    /// The `LICENSE` inside SwiftPM's extracted Sparkle artifact,
-    /// wherever this toolchain's `.build/artifacts` layout put it.
-    private static func sparkleLicense(under root: URL) -> URL? {
-        let artifacts =
-            root
-            .appendingPathComponent(".build")
-            .appendingPathComponent("artifacts")
-        guard
-            let walk = FileManager.default.enumerator(
-                at: artifacts,
-                includingPropertiesForKeys: nil
+    /// Component name → its LICENSE file, for every `Vendor/*`
+    /// directory and every `Package.resolved` pin. A pin whose
+    /// LICENSE cannot be found is a failed requirement, not a
+    /// skip: the package must be built for this to run at all.
+    static func thirdPartyLicenses(
+        under root: URL
+    ) throws -> [(String, URL)] {
+        let fm = FileManager.default
+        var found: [(String, URL)] = []
+        let vendor = root.appendingPathComponent("Vendor")
+        for dir in try fm.contentsOfDirectory(
+            at: vendor,
+            includingPropertiesForKeys: nil
+        )
+        .sorted(by: { $0.path < $1.path }) {
+            let license = dir.appendingPathComponent("LICENSE")
+            #expect(
+                fm.fileExists(atPath: license.path),
+                Comment(rawValue: "\(dir.lastPathComponent)/LICENSE")
             )
-        else { return nil }
-        for case let url as URL in walk
-        where url.lastPathComponent == "LICENSE"
-            && url.path.lowercased().contains("sparkle")
-        {
-            return url
+            found.append((dir.lastPathComponent, license))
+        }
+        struct Resolved: Decodable {
+            struct Pin: Decodable { let identity: String }
+            let pins: [Pin]
+        }
+        let resolved = try JSONDecoder().decode(
+            Resolved.self,
+            from: Data(
+                contentsOf: root.appendingPathComponent(
+                    "Package.resolved"
+                )
+            )
+        )
+        for pin in resolved.pins {
+            let license = try #require(
+                fetchedLicense(for: pin.identity, under: root),
+                Comment(
+                    rawValue:
+                        "no LICENSE for \(pin.identity) under "
+                        + ".build/artifacts or .build/checkouts — "
+                        + "build the package first"
+                )
+            )
+            found.append((pin.identity, license))
+        }
+        return found
+    }
+
+    /// The `LICENSE` SwiftPM fetched for a pin: the binary
+    /// artifact's first, since that is what ships, else the
+    /// source checkout's.
+    private static func fetchedLicense(
+        for identity: String,
+        under root: URL
+    ) -> URL? {
+        let build = root.appendingPathComponent(".build")
+        for parent in ["artifacts", "checkouts"] {
+            let base = build.appendingPathComponent(parent)
+            guard
+                let walk = FileManager.default.enumerator(
+                    at: base,
+                    includingPropertiesForKeys: nil
+                )
+            else { continue }
+            for case let url as URL in walk
+            where url.lastPathComponent == "LICENSE" {
+                let relative = url.path.dropFirst(base.path.count)
+                if relative.lowercased().contains(identity.lowercased()) {
+                    return url
+                }
+            }
         }
         return nil
     }

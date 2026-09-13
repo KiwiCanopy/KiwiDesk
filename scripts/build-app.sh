@@ -206,13 +206,9 @@ for b in "${bundles[@]}"; do
     echo "    resource bundle: $(basename "$b")"
 done
 
-# License texts (#1407). BSL 1.1 wants the License displayed on
-# every copy and the Lua and Sparkle notices want theirs in every
-# copy; the bundle is a copy. Renamed `.txt` so a double-click
-# opens TextEdit rather than an "open with" prompt — Settings ▸
-# About links both by these names (LicenseDocuments.swift). A
-# missing source is a hard error: the bundle would otherwise ship
-# without the one text its license requires it to carry.
+# License texts (#1407, packaging-and-release.md). `.txt` so a
+# double-click opens TextEdit; `LicenseDocuments.Document` in the
+# GUI spells the same two names.
 for doc in LICENSE ACKNOWLEDGEMENTS; do
     if [ ! -f "$ROOT/$doc" ]; then
         echo "error: $ROOT/$doc is missing — the bundle may not" \
@@ -338,15 +334,16 @@ if [ -z "$LOCALE_KEYS" ]; then
     echo "error: no locale catalogs under $LOCALES" >&2
     exit 1
 fi
-# NSHumanReadableCopyright, derived from LICENSE (#1407): the
-# `Licensor:` parameter, the Licensed Work's `(c)` year and the
-# license's own title line, so the plist can never name a
-# different licensor or license than the text it ships beside.
+# NSHumanReadableCopyright is read off LICENSE — `Licensor:`, the
+# `(c)` year, the title line — never typed (#1407). Atoms only: a
+# phrase added here is English no catalog sees (localization.md).
+# `|| true`: a no-match grep exits 1, which `set -e` would turn
+# into a silent exit ahead of the refusal below.
 LICENSE_FILE="$ROOT/LICENSE"
 LICENSOR="$(sed -n 's/^Licensor:[[:space:]]*//p' "$LICENSE_FILE" \
     | head -1)"
 LICENSE_YEAR="$(grep -o '(c) [0-9][0-9][0-9][0-9]' "$LICENSE_FILE" \
-    | head -1 | grep -o '[0-9][0-9][0-9][0-9]')"
+    | head -1 | grep -o '[0-9][0-9][0-9][0-9]' || true)"
 LICENSE_NAME="$(head -1 "$LICENSE_FILE")"
 if [ -z "$LICENSOR" ] || [ -z "$LICENSE_YEAR" ] \
     || [ -z "$LICENSE_NAME" ]; then

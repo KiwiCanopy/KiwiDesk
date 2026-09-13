@@ -29,9 +29,10 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Ten ratified exceptions, none with setup/teardown coupling or
-  assertions of their own, and all but the fake WindowServer
-  *stateless primitives*:
+  Eleven ratified exceptions, none with setup/teardown coupling
+  or assertions of their own — save the one non-vacuity check
+  the build-script reader keeps, named below — and all but the
+  fake WindowServer *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
     divergent copy would silently weaken a guard, the exact
@@ -67,6 +68,21 @@ bite large test PRs:
     Extracted at the **third** caller (#874), and it re-uses
     `ScriptFixture.swift`'s spawn primitive rather than
     duplicating it.
+  - *the build-script reader* in `BuildAppScript.swift` —
+    `scripts/build-app.sh` with its comment lines blanked, plus
+    the needle-offset lookup, read by `SparklePackagingTests`
+    and `LicensePackagingTests`. Admitted on `WorkflowSource`'s
+    ground: the STRIP is the load-bearing part, since a
+    commented-out signing entry satisfied every needle before
+    it existed, and a second copy that stripped less would
+    leave one suite silently weaker than the other while both
+    stayed green. Extracted at the **second** caller (#1407).
+    It keeps ONE assertion — that the stripped script is not
+    empty — because a scan over an empty string passes every
+    ordering check by finding nothing; that is the non-vacuity
+    clause every scanning guard owes, homed once rather than
+    per suite, and it is the one exception to "no assertions
+    of their own" above.
   - *the appcast fixtures* in `AppcastFixture.swift` — release
     dictionaries, notes files and the spawn of
     `scripts/appcast-sync` itself. Extracted at the **third**

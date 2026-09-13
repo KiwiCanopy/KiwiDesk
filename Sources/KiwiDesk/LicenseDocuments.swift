@@ -1,23 +1,22 @@
 import Foundation
 
-/// The license texts Settings ▸ About opens (#1407).
-///
-/// `scripts/build-app.sh` copies the repository's `LICENSE` and
-/// `ACKNOWLEDGEMENTS` into `Contents/Resources` as `.txt`, and
-/// derives `NSHumanReadableCopyright` from the former. The dev
-/// binary under `.build/` has neither a plist nor those copies,
-/// so each document falls back to its file on GitHub and the
-/// copyright line to nil.
+/// The license texts Settings ▸ About opens, and the copyright
+/// line it draws (#1407). Resolves each to the `<name>.txt`
+/// `scripts/build-app.sh` ships in `Contents/Resources`, else
+/// to the same file on GitHub — the dev binary carries none.
 enum LicenseDocuments {
-    static var license: URL {
-        document("LICENSE", in: .main)
+    /// The texts the bundle carries, by repository file name;
+    /// the script's `for doc in` list spells the same set
+    /// (`LicenseDocumentsTests`).
+    enum Document: String, CaseIterable {
+        case license = "LICENSE"
+        case acknowledgements = "ACKNOWLEDGEMENTS"
     }
 
-    static var acknowledgements: URL {
-        document("ACKNOWLEDGEMENTS", in: .main)
-    }
-
-    /// The packager's copyright line; nil under `swift run`.
+    /// `NSHumanReadableCopyright`, drawn verbatim: the packager
+    /// composes it from atoms only (©, year, licensor, license
+    /// title), which is what keeps it locale-free. Nil under
+    /// `swift run`, which has no plist.
     static var copyright: String? {
         copyright(in: .main)
     }
@@ -28,17 +27,19 @@ enum LicenseDocuments {
         ) as? String
     }
 
-    /// The bundled `<name>.txt`, else that file on GitHub.
-    static func document(_ name: String, in bundle: Bundle) -> URL {
+    static func url(
+        for document: Document,
+        in bundle: Bundle = .main
+    ) -> URL {
         if let bundled = bundle.url(
-            forResource: name,
+            forResource: document.rawValue,
             withExtension: "txt"
         ) {
             return bundled
         }
         return URL(
             string: SupportLinks.gitHub.absoluteString
-                + "/blob/main/" + name
+                + "/blob/main/" + document.rawValue
         )!
     }
 }

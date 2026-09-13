@@ -53,14 +53,16 @@ extension GeneralSection {
                 .textSelection(.enabled)
         }
         HStack(spacing: 14) {
-            Link(destination: LicenseDocuments.license) {
+            Link(destination: LicenseDocuments.url(for: .license)) {
                 Text(L("general.about.license", "License"))
                     .underline()
             }
             .buttonStyle(.plain)
             .font(.caption)
             .linkHover()
-            Link(destination: LicenseDocuments.acknowledgements) {
+            Link(
+                destination: LicenseDocuments.url(for: .acknowledgements)
+            ) {
                 Text(
                     L(
                         "general.about.acknowledgements",
