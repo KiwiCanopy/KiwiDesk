@@ -144,11 +144,11 @@ extension SpaceOverrideRows {
                 \.limit
             ),
             global: g.track.limit,
-            // 1-based: `nil` is the inherit sentinel, so a stored
-            // 0 would be a real value resolving to ONE track while
-            // Lua's 0 means automatic — two meanings for one field
-            // (audit finding 20, #406).
-            range: 1...10
+            // Floored at the Core floor (#1354): `nil` is the
+            // inherit sentinel, so a stored 0 would be a real
+            // value while Lua's 0 means automatic — two meanings
+            // for one field (audit finding 20, #406).
+            range: TrackParams.minLimit...10
         )
         .modifier(
             GreyOut(

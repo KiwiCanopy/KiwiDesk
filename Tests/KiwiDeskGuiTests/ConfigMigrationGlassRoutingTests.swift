@@ -15,18 +15,20 @@ struct ConfigMigrationGlassRoutingTests {
             .appendingPathComponent("Sources/KiwiDeskCore")
     }
 
-    /// The glass fill (#1369) lands on a profile root's
-    /// `settings` and a bundle root's `profiles[].settings` by
-    /// PATH: one CodingKey declares `settings` as a top-level
-    /// key, plus the migration's own literal. A second declarer
-    /// is a parent the fill was never scoped to.
-    @Test("The glass fill's settings path has one declarer")
+    /// The glass fill (#1369) and the track-limit lift (#1354)
+    /// land on a profile root's `settings` and a bundle root's
+    /// `profiles[].settings` by PATH: one CodingKey declares
+    /// `settings` as a top-level key, plus each step's own
+    /// literal. A second CodingKey declarer is a parent neither
+    /// step was scoped to.
+    @Test("The settings-path steps have one declarer")
     func glassFillStaysScoped() throws {
         let root = coreRoot
         let prefix = root.path + "/"
         let allowed: Set<String> = [
             "Profiles/Profile.swift",
             "Config/ConfigMigration+GlassDefault.swift",
+            "Config/ConfigMigration+TrackLimit.swift",
         ]
         var declarers: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {

@@ -202,7 +202,7 @@ struct SettingsCodingTests {
         // `track.set_auto_tracks` → `layout.track.auto_tracks`
         // (#178), on by default; `limit` is the remembered cap.
         #expect(track["auto_tracks"] as? Bool == true)
-        #expect(track["limit"] as? Int == 2)
+        #expect(track["limit"] as? Int == TrackParams().limit)
         #expect(track["new_window"] as? String == "focused_track")
         #expect(track["wrap_focus"] as? Bool == false)
         // SpaceID-keyed maps encode as objects, not arrays.

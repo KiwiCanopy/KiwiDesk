@@ -1562,12 +1562,12 @@ harder one. Reword it and the guidance goes with it.
 **The overflow track is read-time, not stored (#192, 2026-07-12):**
 when there are more tracks than the space's normal capacity, the
 fitting prefix tiles and the surplus merges into one far-edge
-overflow track. Normal capacity is the **Track limit** N when
-Auto track limit is off (so a limit of N shows up to N normal
-tracks **plus** one overflow track — `trackCap` is `count + 1`,
-and a new `own_track` window past N opens the overflow track
-rather than joining), or **how many fit at `min_window_size`**
-when automatic is on. Geometry always caps the total: if
+overflow track. Normal capacity is one below the **Track limit**
+N when Auto track limit is off (so a limit of N shows N tracks
+on screen, the last of them the overflow track — `trackCap` IS
+the limit, and a new `own_track` window past the normal tracks
+opens the overflow track rather than joining), or **how many fit
+at `min_window_size`** when automatic is on. Geometry always caps the total: if
 capacity + 1 columns can't hold the minimum, the fit count
 (`TrackLayout.fitCap`) reduces the columns at layout time,
 folded through the existing `counts(cap:)` primitive — so the
@@ -1585,6 +1585,32 @@ space — was rejected here for putting geometry into state (it
 would make spawn outcomes monitor-dependent and
 non-deterministic). **This was deliberately revisited for the
 `focused_track` default — see the next entry.**
+
+:::unreleased
+**The Track limit counts the overflow track (#1354, owner ruling
+2026-09-09).** [Principle] The number a user types is the number
+of tracks they see: a limit of 3 shows three tracks, the last of
+them the overflow. The value used to count NORMAL tracks with
+the overflow beside them, so a typed 3 drew four columns — and
+the user counts what is on screen, not what the layout calls
+normal; a control whose number is one off from the picture reads
+as a control that does not work. Renaming the setting to
+"normal tracks" was rejected for the same reason: it would have
+made the label agree with the arithmetic instead of the eye. The
+floor is 2, because a limit of 1 would be the overflow track
+alone with everything folded into it — no track layout at all —
+so the setters refuse below it, the steppers start at it, and a
+stored 1 is lifted onto it. Because this changes what a STORED
+`limit` means, it crosses with a one-shot migration that adds one
+to every stored value, global and per-Space override alike, in a
+profile and in a backup's inline profiles (§5: a stored value
+needs a crossing, never a lenient decoder); the default moves
+from 2 to 3 for the same reason, so a fresh seed draws the
+picture the old one drew. `TrackLimitMigrationTests` holds the
+crossing, `TrackCommandsTests` the floor, and
+`LayoutSchematicTrackFoldTests` that the preview's arithmetic
+follows the engine's.
+:::
 
 **BSP alternates by default (#1181, 2026-08-31).** `alternating`
 — horizontal then vertical by depth — rather than

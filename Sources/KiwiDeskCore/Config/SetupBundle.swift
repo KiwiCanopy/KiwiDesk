@@ -23,8 +23,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `[Profile]` alone again — the same split #1020 took, and
     /// for the same reason;
     /// 6 = the absent Liquid Glass leaves filled (#1369), on
-    /// `[Profile]` alone once more.
-    public static let currentFormat = 6
+    /// `[Profile]` alone once more;
+    /// 7 = the track limit lifted to count the overflow track
+    /// (#1354), on `[Profile]` alone again.
+    public static let currentFormat = 7
 
     public let format: Int
 

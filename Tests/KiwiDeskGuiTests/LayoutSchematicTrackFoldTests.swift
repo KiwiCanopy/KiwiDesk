@@ -126,28 +126,30 @@ struct LayoutSchematicTrackFoldTests {
     }
 
     /// The render fold, against the user's own limit. A typed
-    /// limit must come back as that many normal tracks wherever
-    /// there are windows to open them — a preview answering a
-    /// typed 4 with three tracks is a stand-in binding where it
-    /// must not.
+    /// limit counts the tracks ON SCREEN, the overflow track
+    /// inside it (#1354), so it must come back as one fewer
+    /// normal track plus the overflow wherever there are windows
+    /// to open them — a preview answering a typed 4 with two
+    /// normal tracks is a stand-in binding where it must not.
     @Test("the drawn normal tracks honour the typed limit")
     func normalTracksHonourTheLimit() {
-        // The control's REAL range (`LayoutCard+Track`: 1...10),
-        // not a sample stopping below it. The first cut looped
-        // 1...4 and the stand-in bound at 5, so the failure sat
-        // exactly one step past the last assertion (architect
-        // review, 2026-08-16).
-        for limit in 1...10 {
-            let drawn = track(limit: limit, windows: 12)
-                .trackCount
+        // The control's REAL range (`LayoutCard+Track`, from the
+        // Core floor to 10), not a sample stopping below it. The
+        // first cut looped 1...4 and the stand-in bound at 5, so
+        // the failure sat exactly one step past the last
+        // assertion (architect review, 2026-08-16).
+        for limit in TrackParams.minLimit...10 {
+            let schematic = track(limit: limit, windows: 12)
+            let drawn = schematic.trackCount
             #expect(
-                drawn == limit,
+                drawn == limit - 1,
                 Comment(
                     rawValue:
                         "a typed limit of \(limit) drew "
                         + "\(drawn) normal tracks"
                 )
             )
+            #expect(schematic.drawsOverflowTrack)
         }
         // Tracks never outnumber the windows that open them.
         #expect(track(limit: 4, windows: 2).trackCount == 1)

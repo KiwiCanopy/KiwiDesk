@@ -18,11 +18,9 @@ extension KiwiCore {
             tiler.settings.track.axis = axis
         case "track.set_limit":
             guard let limit = args.first?.intValue,
-                limit >= 0
+                limit == 0 || limit >= TrackParams.minLimit
             else {
-                return .fail(
-                    "expected a track limit (0 = automatic)"
-                )
+                return .fail(Self.trackLimitError)
             }
             // 0 keeps the Lua "0 = automatic" idiom; a positive
             // limit pins the cap and turns automatic off, so
@@ -108,11 +106,9 @@ extension KiwiCore {
             over.axis = axis
         case "limit":
             guard let limit = rest.first?.intValue,
-                limit >= 0
+                limit == 0 || limit >= TrackParams.minLimit
             else {
-                return .fail(
-                    "expected a track limit (0 = automatic)"
-                )
+                return .fail(Self.trackLimitError)
             }
             // Same coupling as the global setter (#178).
             if limit == 0 {
@@ -161,6 +157,12 @@ extension KiwiCore {
     private static let trackAxisError = CommandResponse.expected(
         TrackParams.Axis.self
     )
+
+    /// The floor is read off the type (#1354): the message names
+    /// the same number the setter refuses below.
+    private static let trackLimitError =
+        "expected a track limit of at least "
+        + "\(TrackParams.minLimit), or 0 for automatic"
 
     private static let trackOverflowError = CommandResponse.expected(
         StackParams.OverflowStyle.self

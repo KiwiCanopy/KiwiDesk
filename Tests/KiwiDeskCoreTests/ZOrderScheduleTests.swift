@@ -219,12 +219,16 @@ struct ZOrderScheduleTests {
             args: [.string("own_track")]
         )
         setMode(core, space, "track")
-        // Cap the space to one track: all eight windows pile into
-        // it and cascade (cascade_all default), so a swap scrambles
-        // the stacking. Turn off swap-skips-cascade (#172) so the
-        // swap targets the in-pile neighbor instead of stepping
-        // past the whole pile.
-        _ = core.execute("track.set_limit", args: [.number(1)])
+        // Cap the space at the floor — one normal track plus the
+        // overflow (#1354): seven of the eight windows pile into
+        // the overflow and cascade (cascade_all default), so a
+        // swap inside it scrambles the stacking. Turn off
+        // swap-skips-cascade (#172) so the swap targets the
+        // in-pile neighbor instead of stepping past the pile.
+        _ = core.execute(
+            "track.set_limit",
+            args: [.number(Double(TrackParams.minLimit))]
+        )
         _ = core.execute(
             "set_swap_skips_cascade",
             args: [.bool(false)]
