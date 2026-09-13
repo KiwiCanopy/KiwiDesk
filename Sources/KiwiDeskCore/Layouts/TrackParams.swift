@@ -27,6 +27,12 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// entry point holds it — the setters refuse below it, the
     /// steppers start at it, the crossing lifts a stored 1 to it.
     public static let minLimit = 2
+
+    /// The steppers' ceiling: the old band's ten normal tracks
+    /// plus the overflow, so a stored 10 the crossing lifted to
+    /// 11 still sits inside the control (#1354). Lua is open
+    /// above it; the layout draws what fits either way.
+    public static let stepperMaxLimit = 11
     public var newWindow: NewWindowTrack = .focusedTrack
     /// Position of new window within target track.
     public var newWindowPosition: SpawnPlacement = .first
@@ -47,9 +53,9 @@ public struct TrackParams: Sendable, Equatable, Codable {
     }
 
     /// Normal track capacity before overflow fold (#192, #198; read by
-    /// `TrackLayout.overflowCap`): one below the cap.
+    /// `TrackLayout.overflowCap`): one below the cap, derived.
     public var normalCap: Int {
-        autoTracks ? .max : max(Self.minLimit, limit) - 1
+        autoTracks ? .max : trackCap - 1
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -81,7 +87,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 Int.self,
                 forKey: .limit
-            ) ?? 3
+            ) ?? TrackParams().limit
         newWindow =
             try container.decodeIfPresent(
                 NewWindowTrack.self,

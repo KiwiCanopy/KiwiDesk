@@ -1582,9 +1582,9 @@ horizontal tracks are rows. The axis also decides which
 track.set_axis("vertical")
 ```
 
-:::unreleased
 ### track.set_limit
 
+:::unreleased
 **Expects:** `0`, or an integer ≥ 2 (default `3`).
 
 **Does:** sets how many tracks a space shows, the **overflow
@@ -1745,7 +1745,12 @@ track.set_axis_override("code", "horizontal")
 **Expects:**
 
 - A space identifier.
-- An integer ≥ 0.
+- `0`, or an integer ≥ 2.
+
+:::unreleased
+The overflow track is counted, as in `track.set_limit`, and 1 is
+refused.
+:::
 
 **Does:** overrides the global track cap for one space. Like the
 global setter, a positive value also turns automatic off for that

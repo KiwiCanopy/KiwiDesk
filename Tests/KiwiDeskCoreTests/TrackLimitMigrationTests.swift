@@ -70,27 +70,60 @@ struct TrackLimitMigrationTests {
         )
     }
 
-    @Test("a profile with no track group takes only the stamp")
-    func noTrackGroupIsOnlyStamped() throws {
+    @Test("a profile with no track group gains no track group")
+    func noTrackGroupGainsNone() throws {
         let data = profile(#"{"gap":{"inner":8}}"#)
         let migrated = try #require(ConfigMigration.migrated(data))
         let root = try #require(
             JSONSerialization.jsonObject(with: migrated) as? [String: Any]
         )
-        #expect(root["format"] as? Int == Profile.currentFormat)
         let settings = try #require(root["settings"] as? [String: Any])
         #expect(settings["track"] == nil)
+        #expect(ConfigMigration.migratingTrackLimitCount(data) == nil)
     }
 
-    @Test("a current-format file is never lifted again")
-    func currentFileIsLeftAlone() throws {
-        let data = json(
+    /// The step ENDS on its own: a lifted 3 is the same bytes as
+    /// a typed 3, so the step reads the stamp rather than the
+    /// value, and a file at the format it introduced — the next
+    /// bump's population — is never lifted twice. Called
+    /// directly: `migrated`'s own gate would rescue a current
+    /// file and prove nothing about the step.
+    @Test("the step stands down at the format it introduced")
+    func stepIsIdempotent() {
+        let profileAtFloor = json(
             """
-            {"format":\(Profile.currentFormat),"monitor_sets":{},\
-            "settings":{"track":{"limit":3}}}
+            {"format":\(ConfigMigration.trackLiftProfileFormat),\
+            "monitor_sets":{},"settings":{"track":{"limit":3}}}
             """
         )
-        #expect(ConfigMigration.migrated(data) == nil)
+        #expect(
+            ConfigMigration.migratingTrackLimitCount(profileAtFloor)
+                == nil
+        )
+        let bundleAtFloor = json(
+            """
+            {"\(SetupBundle.shapeMarker)":true,\
+            "format":\(ConfigMigration.trackLiftBundleFormat),\
+            "profiles":[{"format":\(Profile.currentFormat),\
+            "monitor_sets":{},"settings":{"track":{"limit":3}}}]}
+            """
+        )
+        #expect(
+            ConfigMigration.migratingTrackLimitCount(bundleAtFloor)
+                == nil
+        )
+        // And one below either floor IS lifted, so the gate is
+        // read from the right side.
+        let profileBelow = json(
+            """
+            {"format":\(ConfigMigration.trackLiftProfileFormat - 1),\
+            "monitor_sets":{},"settings":{"track":{"limit":3}}}
+            """
+        )
+        #expect(
+            ConfigMigration.migratingTrackLimitCount(profileBelow)
+                != nil
+        )
     }
 
     @Test("the surgical edit keeps the file's own bytes around the lift")

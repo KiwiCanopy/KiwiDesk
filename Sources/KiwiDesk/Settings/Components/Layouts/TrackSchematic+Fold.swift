@@ -11,7 +11,7 @@ extension TrackSchematic {
     private var params: TrackParams {
         var p = TrackParams()
         p.autoTracks = autoTracks
-        p.limit = max(TrackParams.minLimit, limit)
+        p.limit = limit
         return p
     }
 

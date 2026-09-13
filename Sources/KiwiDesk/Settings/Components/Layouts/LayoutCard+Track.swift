@@ -85,7 +85,7 @@ extension LayoutCard {
             StepperRow(
                 label: L("track.limit", "Track limit"),
                 value: track.limit,
-                in: TrackParams.minLimit...10
+                in: TrackParams.minLimit...TrackParams.stepperMaxLimit
             )
         }
     }

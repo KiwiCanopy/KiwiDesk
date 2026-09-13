@@ -17,9 +17,19 @@ extension ConfigMigration {
     static let trackSettingsKey = "settings"
     static let trackProfilesKey = "profiles"
 
+    /// The formats this step introduced — a profile's and a
+    /// bundle's — spelled as history: a lifted 3 is the same bytes
+    /// as a typed 3, so unlike a rename this step cannot tell it
+    /// already ran, and without this gate the NEXT format bump
+    /// would lift every file again. A file at or above these
+    /// stands down; the shape is told by the bundle's marker.
+    static let trackLiftProfileFormat = 5
+    static let trackLiftBundleFormat = 7
+
     @Sendable
     static func migratingTrackLimitCount(_ data: Data) -> Data? {
-        surgicallyApplying(
+        guard trackLiftApplies(to: data) else { return nil }
+        return surgicallyApplying(
             data,
             gate: {
                 $0.range(of: Data("\"\(trackGroupKey)\"".utf8)) != nil
@@ -27,6 +37,20 @@ extension ConfigMigration {
             rewriting: withLiftedTrackLimits,
             editing: surgicallyLiftedTrackLimits
         )
+    }
+
+    /// Whether `data`'s stamp is below the format this step
+    /// introduced for its shape. An unreadable root stands down.
+    static func trackLiftApplies(to data: Data) -> Bool {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        else { return false }
+        let format = root["format"] as? Int ?? 0
+        let floor =
+            root[SetupBundle.shapeMarker] != nil
+            ? trackLiftBundleFormat : trackLiftProfileFormat
+        return format < floor
     }
 
     /// The two paths: the root's own `settings`, and each inline
@@ -94,11 +118,11 @@ extension ConfigMigration {
     }
 
     /// The textual edit: every `"limit": N` in the text lifted by
-    /// one. `limit` is a key only the track group and its
-    /// overrides spell (the walk above is the census of where it
-    /// lands), and `surgicallyApplying` re-parses the result
-    /// against the walk — so a `limit` the walk did not lift, in
-    /// some future group, fails the compare and the walk's own
+    /// one — safe while `limit` is spelled by the track group and
+    /// its override alone, which `ConfigMigrationGlassRoutingTests`
+    /// ▸ the `limit` declarers holds; `surgicallyApplying`
+    /// re-parses the result against the walk, so a `limit` the
+    /// walk did not lift fails the compare and the walk's own
     /// serialization wins rather than a wrong edit.
     static func surgicallyLiftedTrackLimits(_ text: String) -> Data? {
         guard

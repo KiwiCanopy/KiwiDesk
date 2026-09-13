@@ -148,7 +148,7 @@ extension SpaceOverrideRows {
             // inherit sentinel, so a stored 0 would be a real
             // value while Lua's 0 means automatic — two meanings
             // for one field (audit finding 20, #406).
-            range: TrackParams.minLimit...10
+            range: TrackParams.minLimit...TrackParams.stepperMaxLimit
         )
         .modifier(
             GreyOut(

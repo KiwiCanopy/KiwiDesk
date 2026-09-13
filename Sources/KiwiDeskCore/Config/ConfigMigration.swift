@@ -10,7 +10,10 @@ import Foundation
 /// rewrites (`layers[].bindings[].lua` in gui.json and every
 /// profile): a renamed VERB breaks such a binding and is still
 /// not migrated — the crossing reaches the config VOCABULARY
-/// around the script, never the script (#1020).
+/// around the script, never the script (#1020). A RE-SCALED
+/// argument (#1354's `track.set_limit`) is the case that
+/// carve-out does not catch: the old spelling still runs and
+/// means one less, silently.
 public enum ConfigMigration {
     /// Retired `app_bar.content` spellings mapped to current names
     /// (owner ruling 2026-08-19). The walk rewrites by KEY at any

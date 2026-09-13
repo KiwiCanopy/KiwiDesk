@@ -1609,7 +1609,11 @@ from 2 to 3 for the same reason, so a fresh seed draws the
 picture the old one drew. `TrackLimitMigrationTests` holds the
 crossing, `TrackCommandsTests` the floor, and
 `LayoutSchematicTrackFoldTests` that the preview's arithmetic
-follows the engine's.
+follows the engine's. The trade accepted: a Lua script spelling
+`track.set_limit(2)` is outside every crossing by charter, and
+where a renamed verb fails loudly a re-scaled number runs and
+draws one track fewer, with only the refused `1` to say
+anything.
 :::
 
 **BSP alternates by default (#1181, 2026-08-31).** `alternating`

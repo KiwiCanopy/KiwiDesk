@@ -62,7 +62,7 @@ struct LayoutSchematicTrackFoldTests {
     @Test("own_track keeps every track a single window")
     func ownTrackRunsAreOne() {
         for count in LayoutSchematic.windowCountRange {
-            for limit in 1...8 {
+            for limit in TrackParams.minLimit...8 {
                 #expect(
                     track(limit: limit, windows: count).focusedRun
                         == 1
@@ -107,14 +107,15 @@ struct LayoutSchematicTrackFoldTests {
     @Test("a capped space piles once it cannot spill")
     func cappedSpacePiles() {
         let schematic = track(
-            limit: 1,
+            limit: TrackParams.minLimit,
             windows: 12,
             rule: .focusedTrack
         )
         let marker = schematic.markerTracks
-        // trackCap == limit + 1 == 2, so tracks stop at two and
-        // the rest of the eleven established windows pile.
-        #expect(marker.counts.count == 2)
+        // At the floor the cap IS the limit (#1354): tracks stop
+        // at two and the rest of the eleven established windows
+        // pile into the second, the overflow.
+        #expect(marker.counts.count == TrackParams.minLimit)
         #expect(
             marker.counts.reduce(0, +) == 11,
             "every established window is in some track"
@@ -133,12 +134,12 @@ struct LayoutSchematicTrackFoldTests {
     /// normal tracks is a stand-in binding where it must not.
     @Test("the drawn normal tracks honour the typed limit")
     func normalTracksHonourTheLimit() {
-        // The control's REAL range (`LayoutCard+Track`, from the
-        // Core floor to 10), not a sample stopping below it. The
-        // first cut looped 1...4 and the stand-in bound at 5, so
-        // the failure sat exactly one step past the last
+        // The control's REAL range (`LayoutCard+Track`, the Core
+        // floor to the Core ceiling), not a sample stopping below
+        // it. The first cut looped 1...4 and the stand-in bound at
+        // 5, so the failure sat exactly one step past the last
         // assertion (architect review, 2026-08-16).
-        for limit in TrackParams.minLimit...10 {
+        for limit in TrackParams.minLimit...TrackParams.stepperMaxLimit {
             let schematic = track(limit: limit, windows: 12)
             let drawn = schematic.trackCount
             #expect(

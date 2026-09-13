@@ -27,7 +27,8 @@ extension KiwiCore {
             // `track.set_limit(3)` takes effect without a second
             // call. The remembered magnitude is left untouched by
             // the 0 case (#178). 0 is never STORED — the GUI
-            // steppers start at 1 so the field has one meaning.
+            // steppers start at `minLimit`, so the field has one
+            // meaning.
             if limit == 0 {
                 tiler.settings.track.autoTracks = true
             } else {
