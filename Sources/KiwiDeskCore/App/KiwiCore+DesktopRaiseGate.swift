@@ -1,21 +1,25 @@
 import Foundation
 
-/// The Desktop raise gate (#1345): raising a window the
-/// compositor is not drawing makes macOS switch Desktops to show
+/// The Desktop raise gate (#1345/#1410): raising a window the
+/// compositor is not showing makes macOS switch Desktops to show
 /// it, so no implicit raise may do that; a verb that means to
-/// switch takes `switchDesktop`. The read is CGWindowList's own
-/// on-screen flag, the compositor's ground truth — never state,
-/// which still holds a departed window behind a slow app's
-/// destroy, and never the managed display's "current Space",
-/// which lags the draw list through a switch (#1023). The
-/// argument is state-and-layout.md's.
+/// switch takes `switchDesktop`. Two compositor reads, never
+/// state; the argument is state-and-layout.md's.
 extension KiwiCore {
-    /// Whether raising `id` would switch Desktops: the compositor
-    /// is not drawing it. A close in flight reads the same and is
-    /// refused too — that raise was a no-op — so the log names
-    /// both; nil (never listed, or no read) keeps the raise.
+    /// Whether raising `id` would switch Desktops: either read
+    /// says the compositor is not showing it. A read that cannot
+    /// answer (nil) abstains; both abstaining keeps the raise. A
+    /// close in flight reads not drawn and is refused too — that
+    /// raise was a no-op — so the consumers' log names both.
     func raiseCrossesDesktops(_ id: WindowID) -> Bool {
-        windowIsOnScreen(id) == false
+        if windowIsOnScreen(id) == false { return true }
+        guard windowIsOnShownDesktop(id) == false else { return false }
+        onLog(
+            "raise gate: w\(id.raw) is drawn but hosted on a Desktop "
+                + "no display shows — a gesture's composite, "
+                + "refused (#1410)"
+        )
+        return true
     }
 
     /// The distrust arms' shared stand-down: a re-assert of

@@ -113,6 +113,41 @@ extension NativeSpaces {
         return nativeSpace(of: window).map { .hosted($0) } ?? .gone
     }
 
+    /// The Desktop raise gate's second read (#1410): whether the
+    /// compositor hosts `window` on a Space some display shows —
+    /// ANY of its Spaces, so an all-Desktops window (the Dock's
+    /// "All Desktops", a `canJoinAllSpaces` panel) is shown
+    /// wherever the user is. Nil where SkyLight cannot answer or
+    /// the window is hosted nowhere, so the on-screen flag decides
+    /// alone. Live per raise, never the switch handler's cache.
+    /// Production reads it through `KiwiCore.windowIsOnShownDesktop`
+    /// alone (`DesktopRaiseGateSeamTests`).
+    public static func isOnShownDesktop(_ window: WindowID) -> Bool? {
+        guard let connection = SkyLight.connection,
+            let hosts = SkyLight.windowSpaces(
+                window.raw,
+                connection: connection
+            )
+        else { return nil }
+        return hostsShownSpace(hosts, in: allSpaces())
+    }
+
+    /// The pure verdict behind `isOnShownDesktop`: nil for a
+    /// window hosted nowhere or a topology naming no current
+    /// Space, else whether any host is a display's current Space.
+    /// Every current Space counts, a fullscreen one included — a
+    /// raise there switches nothing — where `DesktopCensus.shown`
+    /// narrows to user Desktops for its own away verdict.
+    public static func hostsShownSpace(
+        _ hosts: [SkyLight.SpaceID],
+        in spaces: [NativeSpace]
+    ) -> Bool? {
+        guard !hosts.isEmpty else { return nil }
+        let shown = spaces.filter(\.isCurrent).map(\.id)
+        guard !shown.isEmpty else { return nil }
+        return hosts.contains { shown.contains($0) }
+    }
+
     /// Whether the per-window Space read can answer at all, so a
     /// nil `nativeSpace(of:)` means "hosted nowhere" rather than
     /// "cannot tell" (#1146). Residue: `SkyLight.windowSpace` also

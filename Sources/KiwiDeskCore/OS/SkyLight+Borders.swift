@@ -289,16 +289,25 @@ extension SkyLight {
         _ target: CGWindowID,
         connection: ConnectionID
     ) -> SpaceID? {
+        windowSpaces(target, connection: connection)?.first
+    }
+
+    /// EVERY Space hosting `target` — several for an all-Desktops
+    /// window (#1410). Nil when the read cannot be made, empty
+    /// for a window hosted nowhere (closed, os-private-apis.md).
+    static func windowSpaces(
+        _ target: CGWindowID,
+        connection: ConnectionID
+    ) -> [SpaceID]? {
         guard let copySpaces = copySpacesForWindows,
             let windows = windowList(target),
             let spaces = copySpaces(
                 connection,
                 allSpacesSelector,
                 windows
-            )?.takeRetainedValue() as NSArray?,
-            let first = spaces.firstObject as? NSNumber
+            )?.takeRetainedValue() as? [NSNumber]
         else { return nil }
-        return first.uint64Value
+        return spaces.map(\.uint64Value)
     }
 
     /// Wraps window ID in CFArray for SkyLight space APIs.

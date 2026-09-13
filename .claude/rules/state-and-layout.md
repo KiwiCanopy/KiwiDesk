@@ -651,14 +651,24 @@ editing here:
   such a raise names is the one the user just LEFT: it is still
   in state because its app's destroy notification runs seconds
   behind the swipe (Electron, measured 2026-09-08 — the argument
-  is the design-decisions entry). So the verdict is the
-  COMPOSITOR's on-screen flag (`kCGWindowIsOnscreen`, the draw
-  list the #1023 measurement found to be the ground truth) — never
-  state, never the away ledger, which that window has not reached
-  yet, and never the managed display's "current Space", which
-  lags the draw list through a switch and let a re-assert through
-  on device (2026-09-08). `KiwiCore.raiseCrossesDesktops` reads it
-  through the one `windowIsOnScreen` seam; `focusWindow` refuses
+  is the design-decisions entry). So the verdict is TWO compositor
+  reads, and either refuses (#1410): the draw list's on-screen
+  flag (`kCGWindowIsOnscreen`), which composites every
+  neighbouring Desktop's windows for the second a gesture runs
+  (measured 2026-09-13), AND the Space the compositor hosts the
+  window on — ANY of them, since an all-Desktops window is hosted
+  everywhere — against the displays' current Spaces, which lag
+  the draw list the other way through a switch and let a
+  re-assert through on device (2026-09-08); a read that cannot
+  answer abstains, so a host without SkyLight keeps the flag's
+  verdict — never state, never the away ledger, which that window
+  has not reached yet. `KiwiCore.raiseCrossesDesktops` reads them
+  through the two seams `windowIsOnScreen` and
+  `windowIsOnShownDesktop`, each raw read living in its seam's
+  default alone and `makeTestCore` pinning both to nil in both
+  twins (`DesktopRaiseGateSeamTests`, `DesktopRaiseGateHostTests`
+  holds the two-read verdict over the measured two-display
+  topology); `focusWindow` refuses
   the VERB whole on it, ahead of the state write, the warp and
   the pan — a state-only move would split state from key focus
   (#952) — `raiseWindow` re-asks for the deferred raise, and the
