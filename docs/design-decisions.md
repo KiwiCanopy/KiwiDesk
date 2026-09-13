@@ -85,11 +85,7 @@ how the Change Date is computed — so argue what the license
 carrying a third copy of the numbers. Versions published before
 1.3.0 were released under MIT and remain so: a license governs
 what is released under it and nothing before. (Owner ruling
-2026-09-13. Amended the same day: the grant first reserved use
-inside a business as well; the owner ruled that the license
-exists to keep KiwiDesk from becoming someone else's product,
-not to charge the people who use it, so the grant now reaches
-every production use and reserves only the offering.)
+2026-09-13.)
 
 **Why a source-available license, and why before any launch
 rather than after.** Under MIT anyone may take the published
@@ -98,7 +94,12 @@ project keeps no lever over that but its name. A source-available
 license reserves the offering to the Licensor while the source
 stays public and use stays free, which is the shape the
 project wants: readable, forkable, usable anywhere, and not
-someone else's product. The timing follows from goodwill. A
+someone else's product. The grant's line falls at the offering
+and not at business use for the same reason: the lever exists to
+keep KiwiDesk from becoming someone else's product, not to
+charge the people who use it, and reserving use inside a
+business would charge users — the one thing the lever is not
+for. The timing follows from goodwill. A
 switch made after a launch spends what the launch earned — people
 remember the relicense, not the reason — and lands at the moment
 of maximum attention, on the largest possible free snapshot.
