@@ -1,5 +1,5 @@
 ---
-// KiwiDesk — standalone legal page (Impressum / Datenschutzerklärung).
+// KiwiDesk — standalone legal page (Impressum / Datenschutzerklärung / Nutzungsbedingungen).
 //
 // The docs are Starlight and the landing is a monolith; the legal pages are
 // their own small standalone Astro documents that reuse the landing's design
@@ -11,7 +11,7 @@ import { legal, type LegalDoc } from "../i18n/legal";
 
 interface Props {
   lang: Lang;
-  doc: "impressum" | "datenschutz";
+  doc: "impressum" | "datenschutz" | "nutzungsbedingungen";
 }
 const { lang, doc } = Astro.props;
 
@@ -22,7 +22,8 @@ function localePath(l: Lang, sub = ""): string {
 
 const strings = legal[lang];
 const data: LegalDoc = strings[doc];
-const slug = doc === "impressum" ? "/imprint" : "/privacy";
+const slug =
+  doc === "impressum" ? "/imprint" : doc === "datenschutz" ? "/privacy" : "/terms";
 const showNote = lang !== "de" && !!strings.translationNote;
 
 const pageTitle = `${data.title} · KiwiDesk`;
