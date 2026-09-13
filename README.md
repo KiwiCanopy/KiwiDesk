@@ -191,9 +191,9 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 ## License
 
 [Business Source License 1.1](LICENSE): the source is public, and
-personal, non-commercial use is free. Commercial use — inside a
-business, or offering KiwiDesk or a derivative as a product or
-service — needs a commercial license. Each version converts to
+using KiwiDesk is free — at home and at work. Offering, selling,
+bundling or hosting KiwiDesk or a derivative as a product or
+service needs a commercial license. Each version converts to
 the [MIT License](https://opensource.org/license/mit) four years
 after it is first published. Versions published before 1.3.0 were
 released under MIT and stay MIT. Bundles Lua 5.5
