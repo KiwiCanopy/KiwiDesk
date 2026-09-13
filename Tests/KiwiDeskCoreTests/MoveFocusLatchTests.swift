@@ -22,6 +22,16 @@ struct MoveFocusLatchTests {
         )
     }
 
+    /// Whether the latch HOLDS a stamp for `id` — read at
+    /// `.distantPast`, so the answer is about the stamp and never
+    /// about how long the runner took to reach the line: read at
+    /// the runner's own clock, the one-second window races a
+    /// loaded CI host (#1371). The window's ageing has its own
+    /// test with an explicit clock.
+    private func stamped(_ core: KiwiCore, _ raw: UInt32) -> Bool {
+        core.moveLatch.isLatched(WindowID(raw), at: .distantPast)
+    }
+
     private func addWindow(
         _ core: KiwiCore,
         _ raw: UInt32,
@@ -70,7 +80,7 @@ struct MoveFocusLatchTests {
             to: SpaceID(2),
             follow: false
         )
-        #expect(core.moveLatch.isLatched(WindowID(20)))
+        #expect(stamped(core, 20))
         #expect(
             core.state.workspaces.activeSpace == SpaceID(1)
         )
@@ -87,7 +97,7 @@ struct MoveFocusLatchTests {
             to: SpaceID(2),
             follow: false
         )
-        #expect(core.moveLatch.isLatched(WindowID(20)))
+        #expect(stamped(core, 20))
         // The follow verb is the user CHOOSING to go — its own
         // switch runs, nothing to latch.
         core.execute("focus_space", args: [.string("1")])
@@ -96,7 +106,7 @@ struct MoveFocusLatchTests {
             to: SpaceID(3),
             follow: true
         )
-        #expect(!core.moveLatch.isLatched(WindowID(10)))
+        #expect(!stamped(core, 10))
     }
 
     /// An emptied origin takes the yield branch (#446); the moved
@@ -110,7 +120,7 @@ struct MoveFocusLatchTests {
             to: SpaceID(2),
             follow: false
         )
-        #expect(core.moveLatch.isLatched(WindowID(10)))
+        #expect(stamped(core, 10))
     }
 
     /// The teleport itself (#482/#483 symptom 1): the moved
@@ -243,8 +253,8 @@ struct MoveFocusLatchTests {
         core.handle(
             .windowRekeyed(WindowID(20), WindowID(21))
         )
-        #expect(!core.moveLatch.isLatched(WindowID(20)))
-        #expect(core.moveLatch.isLatched(WindowID(21)))
+        #expect(!stamped(core, 20))
+        #expect(stamped(core, 21))
     }
 
     /// The settle is origin-scoped: if the user switched spaces
