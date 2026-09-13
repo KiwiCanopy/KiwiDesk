@@ -84,19 +84,21 @@ extension ConfigMigration {
         }
         for group in glassBarGroups { write(group, false) }
         let bars = glassBarGroups.map(leaf)
-        let agree = bars.dropFirst().allSatisfy { $0 == bars.first! }
-        write(glassPanelGroup, agree ? (bars.first! ?? false) : false)
+        let first = bars.first ?? nil
+        let agree = bars.allSatisfy { $0 == first }
+        write(glassPanelGroup, agree ? (first ?? false) : false)
         return (out, changed)
     }
 
     /// The textual edit, for the shapes a file the app or a hand
     /// wrote actually has. Every `liquid_glass` in the text must
     /// carry ONE value, or the walk decides; a bar group present
-    /// once as a flat object gets a missing leaf after its opener,
-    /// a group absent everywhere is inserted whole after each
-    /// `settings` opener, and the panel takes that one value —
-    /// so a glass-on profile keeps its formatting too. A group
-    /// named twice, or holding a nested object, stands down.
+    /// once as a flat object that PARSES gets a missing leaf
+    /// written `false` — the meaning absence had — which is only
+    /// taken where that one value is `false`; a group absent
+    /// everywhere is inserted whole, and the panel takes the one
+    /// value, after each `settings` opener in ONE pass, so an
+    /// opener is edited exactly once. Anything else stands down.
     /// `surgicallyApplying` re-parses whatever this returns against
     /// the walk, so a stray edit is never used.
     static func surgicallyFilledGlassLeaves(_ text: String) -> Data? {
@@ -123,33 +125,52 @@ extension ConfigMigration {
                 let body = captures(
                     "\"\(group)\"\\s*:\\s*\\{([^{}]*)\\}",
                     in: out
-                ).first
+                ).first,
+                let object = try? JSONSerialization.jsonObject(
+                    with: Data("{\(body)}".utf8)
+                ) as? [String: Any]
             else { return nil }
-            if !body.contains("\"\(glassLeafKey)\"") {
+            if object[glassLeafKey] == nil {
+                guard value == "false" else { return nil }
                 out = out.replacingOccurrences(
                     of: "(\"\(group)\"\\s*:\\s*\\{)",
-                    with: "$1\"\(glassLeafKey)\":\(value),",
+                    with: "$1\"\(glassLeafKey)\":false,",
                     options: .regularExpression
                 )
             }
         }
+        guard value == "false" || absent.isEmpty else { return nil }
         absent.append(glassPanelGroup)
-        let entries = absent.map {
-            "\"\($0)\":{\"\(glassLeafKey)\":\(value)}"
+        let entries = absent.map { group in
+            let leaf = group == glassPanelGroup ? value : "false"
+            return "\"\(group)\":{\"\(glassLeafKey)\":\(leaf)}"
         }.joined(separator: ",")
-        // An empty object takes the entries alone; a populated
-        // one takes them ahead of what it holds.
-        out = out.replacingOccurrences(
-            of: "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)\\s*\\}",
-            with: "$1" + entries + "}",
-            options: .regularExpression
-        )
-        out = out.replacingOccurrences(
-            of: "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)(?=[^}])",
-            with: "$1" + entries + ",",
-            options: .regularExpression
-        )
+        out = insertingAfterSettingsOpeners(entries, in: out)
         return out == text ? nil : out.data(using: .utf8)
+    }
+
+    /// One pass over every `settings` opener, back to front so the
+    /// ranges stay valid: an empty object takes `entries` alone, a
+    /// populated one takes them ahead of what it holds.
+    private static func insertingAfterSettingsOpeners(
+        _ entries: String,
+        in text: String
+    ) -> String {
+        let pattern = "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)(\\s*\\})?"
+        guard let regex = try? NSRegularExpression(pattern: pattern)
+        else { return text }
+        var out = text
+        let whole = NSRange(text.startIndex..., in: text)
+        for match in regex.matches(in: text, range: whole).reversed() {
+            guard let opener = Range(match.range(at: 1), in: out),
+                let full = Range(match.range, in: out)
+            else { continue }
+            let empty = match.range(at: 2).location != NSNotFound
+            let replacement =
+                out[opener] + entries + (empty ? "}" : ",")
+            out.replaceSubrange(full, with: replacement)
+        }
+        return out
     }
 
     /// Every first capture of `pattern` in `text`.

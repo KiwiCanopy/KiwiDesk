@@ -98,9 +98,9 @@ func paintedSpaceBar(
     var style = SpaceBarStyle()
     style.edge = edge
     style.showFrontApp = front != nil
-    // Pinned in BOTH arms (tests.md #660): the default is on
-    // since #1369, so an arm that only set `true` would tell
-    // `glass: false` nothing. The shape moves only under glass.
+    // Both pinned in BOTH arms (tests.md #660): the leaf's default
+    // is on since #1369, and the shape's is plain — a fixture that
+    // reasons from either would move with a retune.
     style.liquidGlass = glass
     style.backgroundStyle = .plain
     return SpaceBarManager.Bar(
