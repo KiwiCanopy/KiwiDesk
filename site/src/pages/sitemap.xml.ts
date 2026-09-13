@@ -23,6 +23,24 @@ type Lang = (typeof langs)[number];
 // alternates advertise URLs that 404.
 const paths = ["", "nerd", "guide", "changelog", "compare"];
 
+// The trailer plays in the #demo section of the landing page in
+// both modes. A <video:video> entry per landing URL is what lets
+// Google show a video rich result for a file the site itself
+// serves (the JSON-LD VideoObject in Landing.astro is the other
+// half). Same data in both places, so they never contradict.
+const videoPaths = new Set(["", "nerd"]);
+const video = {
+  file: "/kiwidesk-trailer.mp4",
+  poster: "/kiwidesk-trailer-poster.jpg",
+  title: "KiwiDesk — a tiling window manager for macOS you can recommend to anyone",
+  description:
+    "Seventy seconds of KiwiDesk: five messy windows tiled in one step, " +
+    "the scrolling layout, a window dragged onto the Space Bar, a pinned " +
+    "window that follows you, and one profile per macOS Desktop.",
+  seconds: 71,
+  published: "2026-09-13",
+};
+
 function urlFor(base: string, lang: Lang, path: string): string {
   // English lives at root, other locales under /<lang>/
   const segments = lang === "en"
@@ -49,11 +67,22 @@ export const GET: APIRoute = ({ site }) => {
         `<xhtml:link rel="alternate" hreflang="x-default"` +
         ` href="${urlFor(base, "en", p)}"/>`,
       ].join("");
+      const videoEntry = videoPaths.has(p)
+        ? `<video:video>` +
+          `<video:thumbnail_loc>${base}${video.poster}</video:thumbnail_loc>` +
+          `<video:title>${video.title}</video:title>` +
+          `<video:description>${video.description}</video:description>` +
+          `<video:content_loc>${base}${video.file}</video:content_loc>` +
+          `<video:duration>${video.seconds}</video:duration>` +
+          `<video:publication_date>${video.published}</video:publication_date>` +
+          `<video:family_friendly>yes</video:family_friendly>` +
+          `</video:video>`
+        : "";
       return langs
         .map(
           (l) =>
             `<url><loc>${urlFor(base, l, p)}</loc>` +
-            `${alternates}</url>`,
+            `${alternates}${videoEntry}</url>`,
         )
         .join("");
     })
@@ -62,7 +91,8 @@ export const GET: APIRoute = ({ site }) => {
   const xml =
     `<?xml version="1.0" encoding="UTF-8"?>` +
     `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"` +
-    ` xmlns:xhtml="http://www.w3.org/1999/xhtml">` +
+    ` xmlns:xhtml="http://www.w3.org/1999/xhtml"` +
+    ` xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">` +
     `${entries}</urlset>`;
 
   return new Response(xml, {
