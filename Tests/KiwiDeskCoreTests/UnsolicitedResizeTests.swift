@@ -123,7 +123,9 @@ struct UnsolicitedResizeTests {
             at: CGPoint(x: slot.maxX, y: slot.midY),
             clickCount: clicks
         )
-        core.mouse.recordUp(from: .otherApp)
+        // Stamped AHEAD: "released under a second ago" must hold
+        // whatever the runner does between here and the event.
+        core.mouse.seedRelease(at: Date().addingTimeInterval(60))
     }
 
     @Test("An edge double-click's expand is corrected, not dragged")
@@ -222,14 +224,60 @@ struct UnsolicitedResizeTests {
         #expect(log.contains { $0.contains(Self.corrected) })
     }
 
-    @Test("A window the active space does not place is left alone")
-    func inactiveSpaceMemberIsLeftAlone() throws {
+    @Test("A float under no bar is left alone, however sized")
+    func barlessFloatIsLeftAlone() throws {
+        // The sweep would move nothing here — no painted strip —
+        // so the arm must not retile and claim a correction. A
+        // bsp space: monocle hosts an App Bar by default.
+        guard NSScreen.main != nil else { return }
+        let applied = Applied()
+        let core = makeCore(applied: applied)
+        core.state.workspaces.setMode(SpaceID(1), .bsp)
+        _ = try settled(core, applied: applied)
+        #expect(core.appBars.shownStrips.isEmpty)
+        #expect(core.spaceBars.shownStrips.isEmpty)
+        let float = WindowID(2)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: float,
+                    pid: 2,
+                    appName: "Float",
+                    frame: CGRect(x: 10, y: 10, width: 300, height: 200),
+                    isFloating: true
+                )
+            )
+        )
+        applied.frames = [:]
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+
+        core.handle(
+            .windowResized(
+                float,
+                CGRect(x: -50, y: -50, width: 1400, height: 1200)
+            )
+        )
+
+        #expect(!log.contains { $0.contains(Self.corrected) })
+    }
+
+    @Test("A window no shown space places is left alone")
+    func unshownSpaceMemberIsLeftAlone() throws {
+        // One display, its shown space switched away: the layout
+        // computes no frame for the window, and no frame is no
+        // verdict. A second display's shown space IS placed —
+        // `calculatedFrames` unions them — which a headless
+        // fixture cannot show, since every fake display
+        // resolves to the one host screen.
         guard NSScreen.main != nil else { return }
         let applied = Applied()
         let core = makeCore(applied: applied)
         _ = try settled(core, applied: applied)
         core.state.workspaces.activate(SpaceID(2))
         applied.frames = [:]
+        var log: [String] = []
+        core.onLog = { log.append($0) }
 
         core.handle(
             .windowResized(
@@ -239,5 +287,63 @@ struct UnsolicitedResizeTests {
         )
 
         #expect(applied.frames[w] == nil)
+        #expect(!log.contains { $0.contains(Self.corrected) })
+    }
+
+    @Test("A deferred burst leaves the correction to its trailing pass")
+    func deferralStandsTheCorrectionDown() throws {
+        guard NSScreen.main != nil else { return }
+        let applied = Applied()
+        let core = makeCore(applied: applied)
+        let slot = try settled(core, applied: applied)
+        core.defersEventRetiles = true
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+
+        core.handle(
+            .windowResized(
+                w,
+                CGRect(x: 0, y: 0, width: 1000, height: 800)
+            )
+        )
+
+        #expect(applied.frames[w] == nil)
+        #expect(!log.contains { $0.contains(Self.corrected) })
+        core.defersEventRetiles = false
+        core.retile()
+        #expect(applied.frames[w] == slot)
+    }
+
+    @Test("An app that keeps reverting is corrected twice, then left")
+    func revertingAppIsBounded() throws {
+        guard NSScreen.main != nil else { return }
+        let applied = Applied()
+        let core = makeCore(applied: applied)
+        let slot = try settled(core, applied: applied)
+        let zoomed = CGRect(x: 0, y: 0, width: 1000, height: 800)
+        var corrections = 0
+        core.onLog = {
+            if $0.contains(Self.corrected),
+                !$0.contains("left standing")
+            {
+                corrections += 1
+            }
+        }
+        // Each correction's ask is taken, then reverted past the
+        // echo grace — every revert reads as unsolicited.
+        for _ in 0..<4 {
+            applied.frames = [:]
+            core.handle(.windowResized(w, zoomed))
+        }
+        #expect(corrections == UnsolicitedResizeMemo.maxConsecutive)
+        #expect(applied.frames[w] == nil)
+
+        // Seen ON its frame again: the run ends and the memo
+        // admits the next correction.
+        core.handle(.windowResized(w, slot))
+        applied.frames = [:]
+        core.handle(.windowResized(w, zoomed))
+        #expect(applied.frames[w] == slot)
+        #expect(corrections == UnsolicitedResizeMemo.maxConsecutive + 1)
     }
 }

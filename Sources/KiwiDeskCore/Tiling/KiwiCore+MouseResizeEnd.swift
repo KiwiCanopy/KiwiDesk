@@ -18,13 +18,17 @@ extension KiwiCore {
     /// that window is already in flight, whose trailing events
     /// stay its own.
     func isResizeGesture(_ id: WindowID) -> Bool {
-        if mouse.leftButtonHeld {
+        // A gesture already in flight keeps its trailing events
+        // whatever the press record says — read first, so the
+        // verdict does not depend on the release's main-actor
+        // hop landing before the AX event.
+        if mouse.leftButtonHeld || drag.hasGesture(id) {
             return true
         }
         guard let press = mouse.press,
             let up = press.upAt,
             Date().timeIntervalSince(up) < 1,
-            press.clickCount < 2 || drag.hasGesture(id),
+            press.clickCount < 2,
             let slot = tiler.calculatedFrames(
                 state: state
             )[id]

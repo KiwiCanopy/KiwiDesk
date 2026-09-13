@@ -63,6 +63,9 @@ public final class TilingEngine {
     /// only the layout loop may record asks there, and a float
     /// never enters the layout. `FloatFitLedger` argues it.
     var floatFitLedger = FloatFitLedger()
+    /// The unsolicited-resize correction's memo (#1358), the
+    /// third refusal ledger of this shape; the type argues it.
+    var unsolicitedCorrections = UnsolicitedResizeMemo()
     /// Where each window was last placed (#1161) — the type doc
     /// carries the argument; stamped in `applyFrame`/`setFrame`.
     var placements = PlacementLedger()

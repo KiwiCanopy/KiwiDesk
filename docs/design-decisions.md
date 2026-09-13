@@ -3263,14 +3263,24 @@ resized float already gets. Both corrections are the ordinary
 retile's own work, so the arm decides only WHETHER one is owed:
 a resize that is not our ask's echo (that one is #677's answer
 channel), not ledger-explained (a late echo), not a gesture (the
-drag pipeline's), and that leaves the window off the frame the
-active space gives it. A resize inside the retile tolerance, a
-window on an inactive Space, a native-fullscreen one — nothing.
-The cost accepted: an app that animates its own resize triggers
-one retile at the first off-slot frame, after which its echoes
-fall inside our ask's grace and are read as answers, which is
-the #677 dance an insisting app already pays
-(`UnsolicitedResizeTests`).
+drag pipeline's), and that leaves the window off the frame a
+SHOWN space gives it — every display's, since the layout places
+them all — read from the layout's own frame set for a tiled
+window and from the bar sweep's own verdict for a float, never a
+second copy of either. A resize inside the retile tolerance, a
+window on a Space nobody shows, a float under no bar, a
+native-fullscreen one — nothing; and nothing while a boot or
+wake burst defers event retiles (#672), whose one trailing pass
+corrects it anyway. The cost accepted: an app that animates its
+own resize triggers one retile at the first off-slot frame,
+after which its echoes fall inside our ask's grace and are read
+as answers, which is the #677 dance an insisting app already
+pays. An app that takes the slot and reverts LATER than that
+grace would be corrected forever — each correction wipes the
+#677 ledger, so its twice-refused rule never accumulates — so a
+memo of the same shape ends it: two consecutive corrections and
+the window is left standing until it is seen on its frame again
+or the memo ages out (`UnsolicitedResizeTests`).
 :::
 
 **A corner is never a float's original, and a stranded float is

@@ -171,7 +171,7 @@ public final class MouseTracker {
     func recordDown(
         at location: CGPoint,
         from origin: Press.Origin,
-        clickCount: Int = 1
+        clickCount: Int
     ) {
         press = Press(
             location: GeometryUtils.axPoint(location),
@@ -206,5 +206,12 @@ public final class MouseTracker {
             origin: .otherApp,
             clickCount: clickCount
         )
+    }
+
+    /// Test seam: closes the seeded press at `date`. Stamped
+    /// AHEAD by a suite that needs "inside the freshness window"
+    /// to hold whatever the runner does (tests.md, #1371).
+    func seedRelease(at date: Date) {
+        press?.upAt = date
     }
 }
