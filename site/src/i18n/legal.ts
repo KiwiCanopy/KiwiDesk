@@ -234,11 +234,11 @@ const de: LegalStrings = {
         body:
           `<p>KiwiDesk wird ab Version 1.3.0 unter der <strong>Business Source License 1.1</strong> ` +
           `bereitgestellt. Der vollständige Lizenztext liegt dem Quellcode bei und ist in der App ` +
-          `unter „Über“ abrufbar. Die Lizenz erlaubt die <strong>private, nicht-kommerzielle ` +
-          `Nutzung</strong> kostenlos. Jede andere Produktivnutzung – insbesondere die Nutzung in ` +
-          `oder für ein Unternehmen sowie das Anbieten, Verkaufen, Bündeln oder Hosten der ` +
-          `Software oder eines abgeleiteten Werks als Produkt oder Dienst – setzt eine ` +
-          `kommerzielle Lizenz des Betreibers voraus; Anfragen per E-Mail an ${MAILTO}.</p>` +
+          `unter „Über“ abrufbar. Die Lizenz erlaubt die <strong>Nutzung der Software ` +
+          `kostenlos</strong>, auch in oder für ein Unternehmen. Das Anbieten, Verkaufen, ` +
+          `Bündeln oder Hosten der Software oder eines abgeleiteten Werks als Produkt oder ` +
+          `Dienst setzt eine kommerzielle Lizenz des Betreibers voraus; Anfragen per E-Mail ` +
+          `an ${MAILTO}.</p>` +
           `<p>Jede Version von KiwiDesk wird vier Jahre nach ihrer Erstveröffentlichung unter die ` +
           `MIT-Lizenz gestellt. Versionen vor 1.3.0 wurden unter der MIT-Lizenz veröffentlicht ` +
           `und bleiben es. Bei Widersprüchen zwischen diesen Bedingungen und dem Lizenztext gilt ` +
@@ -470,11 +470,10 @@ const en: LegalStrings = {
         body:
           `<p>From version 1.3.0, KiwiDesk is provided under the <strong>Business Source License ` +
           `1.1</strong>. The full license text ships with the source code and can be opened in the ` +
-          `app under “About”. The license permits <strong>personal, non-commercial use</strong> ` +
-          `free of charge. Any other production use – in particular use within or on behalf of a ` +
-          `business, and offering, selling, bundling or hosting the software or a derivative of it ` +
-          `as a product or service – requires a commercial license from the operator; enquiries by ` +
-          `email to ${MAILTO}.</p>` +
+          `app under “About”. The license permits <strong>use of the software free of ` +
+          `charge</strong>, including within or on behalf of a business. Offering, selling, ` +
+          `bundling or hosting the software or a derivative of it as a product or service ` +
+          `requires a commercial license from the operator; enquiries by email to ${MAILTO}.</p>` +
           `<p>Each version of KiwiDesk converts to the MIT License four years after it is first ` +
           `published. Versions published before 1.3.0 were released under the MIT License and ` +
           `remain so. Where these terms and the license text differ, the license text prevails.</p>`,
@@ -687,8 +686,8 @@ const ja: LegalStrings = {
         body:
           `<p>KiwiDesk はバージョン 1.3.0 以降、<strong>Business Source License 1.1</strong> のもとで` +
           `提供されます。ライセンス全文はソースコードに同梱され、アプリの「About」から開けます。` +
-          `ライセンスは<strong>個人的・非商用の利用</strong>を無償で認めます。それ以外の本番利用、` +
-          `特に企業内または企業のための利用、および本ソフトウェアやその派生物を製品またはサービスとして` +
+          `ライセンスは<strong>本ソフトウェアの利用を無償で</strong>認めます。企業内または企業のための` +
+          `利用も含みます。本ソフトウェアやその派生物を製品またはサービスとして` +
           `提供・販売・同梱・ホスティングすることには、運営者の商用ライセンスが必要です。` +
           `お問い合わせは ${MAILTO} まで。</p>` +
           `<p>KiwiDesk の各バージョンは、初回公開から 4 年後に MIT ライセンスへ移行します。1.3.0 より前の` +

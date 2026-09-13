@@ -74,25 +74,30 @@ layer one click away, never forced.
 
 KiwiDesk's source stays public and KiwiDesk is not open source.
 From 1.3.0 the terms are the Business Source License 1.1:
-personal, non-commercial use stays free, commercial use — inside
-a business, or offering KiwiDesk or a derivative as a product or
-service — needs a commercial license from the Licensor, and each
-version converts to MIT on a Change Date. `LICENSE` is the
+using KiwiDesk stays free, at home and inside a business alike;
+offering, selling, bundling or hosting KiwiDesk or a derivative
+as a product or service needs a commercial license from the
+Licensor, and each version converts to MIT on a Change Date.
+`LICENSE` is the
 authority for every parameter — how far the grant reaches, and
 how the Change Date is computed — so argue what the license
 *means* here and link to it for what it *says*, rather than
 carrying a third copy of the numbers. Versions published before
 1.3.0 were released under MIT and remain so: a license governs
 what is released under it and nothing before. (Owner ruling
-2026-09-13.)
+2026-09-13. Amended the same day: the grant first reserved use
+inside a business as well; the owner ruled that the license
+exists to keep KiwiDesk from becoming someone else's product,
+not to charge the people who use it, so the grant now reaches
+every production use and reserves only the offering.)
 
 **Why a source-available license, and why before any launch
 rather than after.** Under MIT anyone may take the published
 code and sell it, bundle it, or host it as a product, and the
 project keeps no lever over that but its name. A source-available
-license reserves commercial use to the Licensor while the source
-stays public and personal use stays free, which is the shape the
-project wants: readable, forkable for personal use, and not
+license reserves the offering to the Licensor while the source
+stays public and use stays free, which is the shape the
+project wants: readable, forkable, usable anywhere, and not
 someone else's product. The timing follows from goodwill. A
 switch made after a launch spends what the launch earned — people
 remember the relicense, not the reason — and lands at the moment
@@ -105,8 +110,9 @@ already know from other source-available projects, and because it
 commits to a Change Date, which a plain non-commercial license
 does not.
 
-**What the switch does not do.** It changes nothing for personal
-use: the Additional Use Grant keeps it free, and the license
+**What the switch does not do.** It changes nothing for anyone
+who just uses KiwiDesk: the Additional Use Grant keeps use free
+wherever it happens, and the license
 itself asks for no key, account or payment. It does not touch the vendored Lua or
 Sparkle, which keep their MIT licenses. And it does not stop a
 fork of the last MIT version; that risk was accepted the day
@@ -116,9 +122,9 @@ rather than later.
 **What travels with it.** Copy about KiwiDesk states the license
 rather than promising a price, because a price is a promise and a
 license is a fact: the bare "free" that described the product was
-retired the same week (#1375), while "free for personal use"
-stays, since that is the grant's own reach and not a pricing
-claim. And a line naming the license has to be true of the build
+retired the same week (#1375), while "free to use" stays, since
+that is the grant's own reach and not a pricing claim. And a
+line naming the license has to be true of the build
 the reader can actually download — the site deploys from `main`
 while the newest release is whatever was last tagged, so copy
 beside a download either names the version the terms start at or
