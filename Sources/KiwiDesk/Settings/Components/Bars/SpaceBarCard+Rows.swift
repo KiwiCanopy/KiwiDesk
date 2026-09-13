@@ -17,7 +17,7 @@ extension SpaceBarCard {
             PtSlider(
                 label: L("space_bar.thickness", "Thickness"),
                 value: style.thickness,
-                range: 30...80
+                range: SettingsMetrics.barThicknessRange
             )
         case .spaceBarShowFrontApp:
             ToggleRow(

@@ -1854,7 +1854,10 @@ app_bar.set_alignment("start")
 
 ### app_bar.set_thickness
 
-**Expects:** a positive number (points).
+:::unreleased
+**Expects:** thickness in points (default `40`; anything below
+`20` is raised to it).
+:::
 
 **Does:** sets the bar's thickness, carved out of the layout.
 
@@ -2336,7 +2339,10 @@ space_bar.set_alignment("center")
 
 ### space_bar.set_thickness
 
-**Expects:** thickness in points (default `32`).
+:::unreleased
+**Expects:** thickness in points (default `40`; anything below
+`20` is raised to it).
+:::
 
 **Does:** sets the bar's thickness, carved out of the layout.
 

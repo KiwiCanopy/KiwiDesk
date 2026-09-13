@@ -106,6 +106,8 @@ struct ScrollingBarGeometryTests {
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
             gaps: .uniform(10)
         )
+        // Pinned (#660): the strip arithmetic reasons from it.
+        context.appBarStyle.thickness = 32
         context.scrolling.orientation = orientation
         context.scrolling.appBar.enabled = barEnabled
         context.scrolling.appBar.edge = edge
@@ -121,7 +123,7 @@ struct ScrollingBarGeometryTests {
         )
         let usable = context.usable
         let window = try #require(frames[w1])
-        // Default 32pt top strip + one 10pt inner gap.
+        // The pinned 32pt top strip + one 10pt inner gap.
         #expect(window.minY == usable.minY + 32 + 10)
         #expect(window.height == usable.height - 32 - 10)
         #expect(window.width == usable.width)
@@ -223,10 +225,10 @@ struct AppBarCommandTests {
         #expect(
             core.execute(
                 "app_bar.set_thickness",
-                args: [.number(40)]
+                args: [.number(44)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.appBarStyle.thickness == 40)
+        #expect(core.tiler.settings.appBarStyle.thickness == 44)
         #expect(
             core.execute(
                 "app_bar.set_background_style",

@@ -7,8 +7,11 @@ public struct AppBarStyle: Sendable, Equatable {
     public var edge: AppBarEdge = .bottom
     /// Item group alignment along the bar (center by default).
     public var alignment: BarAlignment = .center
-    /// Depth of the reserved strip (pt).
-    public var thickness: CGFloat = 32
+    /// Depth of the reserved strip (pt). 40 on every screen
+    /// class (owner ruling 2026-09-13, #1359); `SpaceBarStyle`
+    /// carries the same number and `BarThicknessDefaultTests`
+    /// holds the two together.
+    public var thickness: CGFloat = 40
     /// Background plate style (plain by default, #660).
     public var backgroundStyle: BackgroundStyle = .plain
     /// Liquid Glass material (macOS 26+, #390). On by default
