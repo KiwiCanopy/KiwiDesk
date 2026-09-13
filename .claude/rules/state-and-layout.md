@@ -842,7 +842,22 @@ editing here:
   the ledger an invalidation** — a genuine resize forgets
   outright, rekey migrates — or a stale bound pins the window
   at a size the app no longer insists on
-  (`RetileBoundSkipTests`). A GONE path (destroy, hide) is the
+  (`RetileBoundSkipTests`) — and the gate tells our echo from
+  that resize by the applier's recently-set stamp (and, past its
+  grace, by `ledgerExplainsResize`), so the stamp is written at
+  ENQUEUE ahead of the set and AGAIN after it, never only after
+  it returns (#1254): an app posts its notification while
+  performing the set, and the notification's read reached the
+  main actor 57–74 ms after a press, before the per-app queue
+  had stamped, so the gate wiped the ask on our own spring's
+  first frame — every press learned nothing, the floor was
+  corroborated late and only through the baseline arm, and a
+  bound already refusing vanished on the next performed ask
+  (`FrameApplierStampTests` pins the enqueue stamp,
+  `SizeBoundGateNeedleTests` the pair; the measurement is on
+  the issue). What that fix leaves is the learner's own latency
+  — `docs/accepted-limitations.md`'s split-layout row states
+  it. A GONE path (destroy, hide) is the
   #1049 carve-out to #152/#158's destroy-forgets: it takes
   `stashSizeBoundOnGone`, never a bare forget — the believed
   ledger parks in a pid-checked tombstone the same window's

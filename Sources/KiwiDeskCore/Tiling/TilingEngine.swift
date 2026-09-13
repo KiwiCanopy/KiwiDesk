@@ -73,9 +73,9 @@ public final class TilingEngine {
     /// Test seam for the observe gate above: whether one of our
     /// own frame-sets for this window is recent enough that its
     /// echo may still be in flight. Production reads the
-    /// applier's stamp (`didRecentlySetFrame`); a fixture whose
-    /// applier is severed injects the lag directly, because the
-    /// stamp is only written by a real AX apply.
+    /// applier's stamp (`didRecentlySetFrame`); a fixture that
+    /// replaces `animation.apply` writes no stamp and injects the
+    /// lag directly, pinning either verdict.
     var echoGraceOverride: (@MainActor (WindowID) -> Bool)?
 
     /// Raised when a retile-channel observation confirms a

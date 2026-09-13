@@ -2,11 +2,11 @@ import Foundation
 import Testing
 
 /// The observe gate's PRODUCTION branch — a decision no unit
-/// test reaches (architect re-review, 2026-08-18): every
-/// fixture severs the applier, so the `didRecentlySetFrame`
-/// stamp is never written in-suite and `echoGraceOverride`
-/// carries the tests instead. Replace the production default
-/// with `false` and the whole tree stays green while
+/// test reaches (architect re-review, 2026-08-18): the
+/// behavioral fixtures replace `animation.apply`, so no
+/// `didRecentlySetFrame` stamp is written on the animated path
+/// and `echoGraceOverride` carries the tests instead. Replace
+/// the production default with `false` and the tree stays green while
 /// production learns bounds from un-echoed asks — the false
 /// bound `RetileBoundSkipTests.staleEchoDoesNotConfirm` pins
 /// only through the seam.
@@ -44,5 +44,27 @@ struct SizeBoundGateNeedleTests {
         #expect(
             source.contains("scheduleSizeBoundProbe(id)")
         )
+    }
+
+    @Test("Each apply stamps at enqueue AND after the set")
+    func applyStampsTwice() throws {
+        // The enqueue stamp closes #1254 (the echo can precede a
+        // post-set stamp — `FrameApplierStampTests`); the post-set
+        // stamp keeps the grace running from the set's RETURN for
+        // a queue that runs late. A reader deduplicating the pair
+        // narrows the grace to 1 s from enqueue, and no behavioral
+        // fixture writes a stamp to red on it.
+        for function in ["apply", "applyInstant"] {
+            let source = try SourceScan.functionBody(
+                of: function,
+                in: "FrameApplier.swift",
+                under: "Tiling"
+            )
+            let stamps =
+                source.components(
+                    separatedBy: "recent.record(id)"
+                ).count - 1
+            #expect(stamps == 2, "\(function) stamps \(stamps)×")
+        }
     }
 }

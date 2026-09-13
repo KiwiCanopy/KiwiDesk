@@ -19,11 +19,16 @@ final class FrameApplier {
     /// Grace period for ignoring self-inflicted AX frame echoes.
     private static let echoGrace: TimeInterval = 1.0
 
-    /// True if window's frame was set within the echo grace —
-    /// tells our own AX echoes apart from user drags. Without it
-    /// a settled animation's echo reads as a drag end, and in
-    /// stack layouts (all slots overlap) that fake drop swaps
-    /// windows and retriggers itself forever.
+    /// True if a frame-set for the window was ISSUED or performed
+    /// within the echo grace — tells our own AX echoes apart from
+    /// user drags. Without it a settled animation's echo reads as
+    /// a drag end, and in stack layouts (all slots overlap) that
+    /// fake drop swaps windows and retriggers itself forever.
+    /// Stamped at enqueue AND after the set: an app posts its
+    /// notification while performing the set, so the echo can
+    /// precede a post-set stamp (#1254, `FrameApplierStampTests`);
+    /// the post-set stamp keeps the grace running from the set's
+    /// return for a queue that runs late (`SizeBoundGateNeedleTests`).
     func didRecentlySetFrame(_ id: WindowID) -> Bool {
         recent.isRecent(id, within: Self.echoGrace)
     }
@@ -65,6 +70,10 @@ final class FrameApplier {
 
     /// Dispatches frame to target app queue (position-only unless `setSize`).
     func apply(_ id: WindowID, _ frame: CGRect, setSize: Bool) {
+        // Ahead of the element guard and the coalescing return,
+        // like `applyInstant`'s target stamp: the echo must never
+        // precede the stamp (#1254).
+        recent.record(id)
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -94,6 +103,8 @@ final class FrameApplier {
                     of: entry.element
                 )
             }
+            // Kept beside the enqueue stamp: the grace runs from
+            // the set's RETURN for a queue that runs late (#1254).
             recent.record(id)
         }
     }
@@ -110,6 +121,7 @@ final class FrameApplier {
         // overlay sync wants the commanded frame this same turn
         // (#881); a stamp for a gone window expires unread.
         instantTargets.record(id, frame: frame)
+        recent.record(id)  // as `apply`, #1254
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -133,7 +145,7 @@ final class FrameApplier {
                     enabled: true
                 )
             }
-            recent.record(id)
+            recent.record(id)  // as `apply`, #1254
         }
     }
 
