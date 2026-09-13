@@ -8,13 +8,14 @@ import Foundation
 /// `nonisolated` function so it stays actor-free and
 /// unit-testable.
 ///
-/// Every tiled window gets its own ring when unfocused borders are
-/// enabled, including every member of an overflow cascade. Monocle
-/// is always focused-only because only one window is visible;
-/// floating windows get a ring only while focused; transient
-/// overlays (launchers/panels, #300) and native-fullscreen
-/// windows (display-filling — only the corners would show)
-/// never do.
+/// Every window gets its own ring when unfocused borders are
+/// enabled — tiled, every member of an overflow cascade, and
+/// floating, whether by flag or by a floating-mode space (#1286;
+/// the ring sits behind its window, so an overlapped one shows
+/// where it peeks out). Monocle is always focused-only because
+/// only one window is visible; transient overlays
+/// (launchers/panels, #300) and native-fullscreen windows
+/// (display-filling — only the corners would show) never do.
 extension KiwiCore {
     func updateBorders() {
         // Global draw order (behind / front, #367) — set before the
@@ -80,19 +81,6 @@ extension KiwiCore {
         // moves the ring onto it too — not only a mouse click.
         let tiled = state.effectiveTiledMembers(of: space)
         let travelers = tiled.filter { !space.windows.contains($0) }
-        // The EFFECTIVE float on the space it renders ON, never
-        // the flag (#1286): the unfocused ring outlines a layout's
-        // slots, and a floating-mode member has none, like a
-        // flag-float. Travelers included — #1217 re-homes a tiled
-        // sticky as a free frame there.
-        let floating = Set(
-            (space.windows + travelers).filter {
-                EffectiveFloat.applies(
-                    isFloating: state.windows[$0]?.isFloating == true,
-                    mode: space.mode
-                )
-            }
-        )
         // Transient overlays (launchers, panels) never get a ring,
         // even while focused — see `borderSpecs` (#300). Scans
         // `space.windows` only by construction: an overlay is never
@@ -140,7 +128,6 @@ extension KiwiCore {
             style: style,
             focused: anchor,
             slots: slots,
-            floating: floating,
             overlays: overlays,
             fullscreen: fullscreen,
             isMonocle: space.mode == .monocle,
@@ -272,9 +259,9 @@ extension KiwiCore {
     /// (`overlays` — a launcher/panel that momentarily takes focus,
     /// #300) or in native fullscreen (`fullscreen` — it fills the
     /// display, a ring would show only at the corners); every
-    /// other visible tiled slot only when `unfocusedEnabled` and
-    /// the space isn't monocle. Overlays, fullscreen windows, and
-    /// unfocused floating windows never get a ring. Cascade members
+    /// other visible slot — tiled or floating — only when
+    /// `unfocusedEnabled` and the space isn't monocle. Overlays and
+    /// fullscreen windows never get a ring. Cascade members
     /// remain independent: border presentation must not change the
     /// shared pile semantics used by navigation and swap. Pure over
     /// the flat slot list — no `self`, no AX.
@@ -282,7 +269,6 @@ extension KiwiCore {
         style: BorderStyle,
         focused: WindowID?,
         slots: [(id: WindowID, frame: CGRect)],
-        floating: Set<WindowID>,
         overlays: Set<WindowID>,
         fullscreen: Set<WindowID>,
         isMonocle: Bool,
@@ -327,7 +313,6 @@ extension KiwiCore {
         }
         for slot in slots
         where (focusedRingSuppressed || slot.id != focused)
-            && !floating.contains(slot.id)
             && !overlays.contains(slot.id)
             && !fullscreen.contains(slot.id)
         {

@@ -24,9 +24,9 @@
 /// one window — and it stands the VERB down, not the float
 /// ROUTE, which would drop the press into the layout and let a
 /// window nothing places move its neighbours. #1286 swept the
-/// flag's readers and ruled two more the same way: the unfocused
-/// focus ring stands down for an effective float on the space it
-/// renders on (`KiwiCore+Borders`, `FloatingModeRingTests`), and
+/// flag's readers and ruled two more: the unfocused focus ring
+/// reaches every float, so it asks neither the flag nor this
+/// (owner ruling 2026-09-13, `FloatingModeRingTests`), and
 /// the float-tier raise stands down after a focus that lands on
 /// one and takes no floating-mode member as its FLOOR
 /// (`KiwiCore+ZOrderFloats.raiseFloatsAbove`, `floatRaiseFloor`,
@@ -57,7 +57,7 @@ public enum EffectiveFloat {
     /// space cannot claim the exemption. A TRAVELER — a tiled
     /// sticky rendering on a space it is no member of — takes
     /// the space it RENDERS on where the consumer plays out
-    /// there (the re-home, #1217; the ring, #1286) and nil where
+    /// there (the re-home, #1217) and nil where
     /// the consumer's strips or slots are a MEMBER's (the drop
     /// clamp, the raise): `KiwiCore.isEffectiveFloatOnActiveSpace`
     /// is the one door for the latter.

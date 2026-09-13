@@ -3036,12 +3036,11 @@ border.set_focused_color("#4A9816")
 
 **Does:** when `true`, also draws a border on the unfocused
 windows (default `false`). Ignored in monocle, where only the
-focused window shows, and never on an unfocused window you
-floated.
+focused window shows.
 
 :::unreleased
-A window in a space set to the floating layout is a floating
-window here too: unfocused, it gets no border.
+Floating windows — one you floated, or any window in a space set
+to the floating layout — get the unfocused border too.
 :::
 
 **Example:**

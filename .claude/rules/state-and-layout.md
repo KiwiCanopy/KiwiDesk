@@ -1150,17 +1150,17 @@ editing here:
   bullet's `resize` clause (#1298), and a guard inside the float
   branch alone leaves the tiled paths writing. #1286 swept the
   flag's readers (the census is the comment on the issue): the
-  unfocused ring and the float-tier raise crossed — its focus
-  guard and
-  its FLOOR alike, since standing down the per-focus arm and
-  leaving the switch-time arm a plane of floating-mode members
-  is the one-arm trap — while the raise's TARGETS did not (no
-  tiled plane to lift over), and
-  the Space Bar badge with its group-breaking stays on the flag
-  by ruling — it marks the exception to a layout, and a
-  floating-mode space has none (`FloatingModeRingTests`,
-  `FloatingModeRaiseTests`, `SpaceBarBadgeTests`; the argument
-  is `docs/design-decisions.md`'s). What the sweep leaves is a
+  float-tier raise crossed — its focus guard and its FLOOR
+  alike, since standing down the per-focus arm and leaving the
+  switch-time arm a plane of floating-mode members is the
+  one-arm trap — while the raise's TARGETS did not (no tiled
+  plane to lift over); the unfocused ring asks NEITHER, reaching
+  every float by owner ruling; and the Space Bar badge with its
+  group-breaking stays on the flag by ruling — it marks the
+  exception to a layout, and a floating-mode space has none
+  (`FloatingModeRingTests`, `FloatingModeRaiseTests`,
+  `SpaceBarBadgeTests`; the argument is
+  `docs/design-decisions.md`'s). What the sweep leaves is a
   RULING per reader, and `FloatFlagReaderCensusTests` is the
   census that makes a new bare `.isFloating` read red until it
   is classified — identity, routed, a "tiled member" negation
@@ -1172,8 +1172,7 @@ editing here:
   space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose
-  destination is that screen, the RENDER space for the ring —
-  travelers included — and the active space for a raise on a
+  destination is that screen, the active space for a raise on a
   MEMBER, through the one `isEffectiveFloatOnActiveSpace` door
   the drop clamp shares — and a correction whose strips
   are the HOME space's passes nil for a window that is not a

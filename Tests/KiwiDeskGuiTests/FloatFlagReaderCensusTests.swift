@@ -62,7 +62,6 @@ struct FloatFlagReaderCensusTests {
         "Tiling/KiwiCore+EffectiveFloat.swift": [.routed: 1],
         "Tiling/KiwiCore+Drag.swift": [.tiledMember: 1],
         "Commands/KiwiCore+Resize.swift": [.routed: 1],
-        "App/KiwiCore+Borders.swift": [.routed: 1],
         // The floor is routed; the targets stay the flag's.
         "Commands/KiwiCore+ZOrderFloatLayer.swift":
             [.routed: 1, .ruledToStay: 2],
