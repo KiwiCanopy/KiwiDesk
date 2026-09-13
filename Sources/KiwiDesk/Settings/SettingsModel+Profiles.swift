@@ -30,7 +30,10 @@ extension SettingsModel {
     /// Tooltip explanation when active profile screen count differs from
     /// connected displays.
     var updateHint: String? {
-        guard let name = activeProfile,
+        // No displays known (paused, or before the boot scan
+        // publishes) is not a mismatch; Core's gate says the
+        // same (`DesktopBindingRefusal.displaysUnknown`).
+        guard !displays.isEmpty, let name = activeProfile,
             let summary = profileSummaries.first(where: {
                 $0.name == name
             }), summary.count != displays.count

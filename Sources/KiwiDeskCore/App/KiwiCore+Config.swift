@@ -124,7 +124,11 @@ extension KiwiCore {
         // stays deferred until this final profile wins. A
         // config load holds no switch snapshot, so it reads the
         // authority live (#888) — reading rather than stamping,
-        // the way every non-ruled caller does (#1147).
+        // the way every non-ruled caller does (#1147). On a cold
+        // boot no display is known yet, so the binding WAITS
+        // here and the boot scan's first `.displaysChanged` is
+        // the door that loads it (#1394,
+        // `DesktopBindingFitTests` ▸ `bootDisplayEventFiresIt`).
         applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
         defersWindowRuleReconcile = false
         // The rule owner/profile just changed: re-sync every app

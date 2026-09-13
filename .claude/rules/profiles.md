@@ -397,7 +397,10 @@ Three further obligations, and they bind this directory:
   takes it before trusting the profile — including a QUERY such
   as `isProfileInEffect`, since a standing-aside binding is not
   on screen. Before the first display reading the binding waits
-  too; the boot scan's monitor change fires it. The count
+  too; the boot scan's first `.displaysChanged` fires it, through
+  the core's event handler (`DesktopBindingFitTests` ▸
+  `bootDisplayEventFiresIt` pushes that event rather than calling
+  the ladder by hand). The count
   judgement itself is `DesktopBindingRefusal.of`, public so the
   Desktops row narrates the verdict instead of re-deriving it.
   The argument is `docs/design-decisions.md` ▸ Profiles ▸ *A

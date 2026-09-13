@@ -1,7 +1,8 @@
-import KiwiDeskCore
+import CoreGraphics
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// The footer counts what the header claims (#1197): drift that
 /// no draft leaf carries — a screen setup the active profile has
@@ -63,11 +64,20 @@ struct SettingsDriftRowsTests {
     }
 
     /// A count mismatch is the drift Save cannot take up, and
-    /// the row narrates the same hint that greys Save.
+    /// the row narrates the same hint that greys Save. One
+    /// display is pinned (#660): with none known there is no
+    /// mismatch to narrate, and the hint stays nil (#1394).
     @Test("a screen-count mismatch narrates the update hint")
     func countMismatchNarratesTheHint() throws {
         pinEnglish()
         let model = driftedModel(count: 2)
+        model.core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "A",
+                frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+            )
+        )
         let hint = try #require(model.updateHint)
         let row = try #require(
             SettingsDiffRowSource.rows(for: model).first

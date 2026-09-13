@@ -267,6 +267,28 @@ struct DesktopBindingFitTests {
         #expect(core.profiles.currentName == "Golden")
     }
 
+    /// The boot door: `loadConfig` runs before any display is
+    /// known, so the binding waits there, and the boot scan's
+    /// first `.displaysChanged` — through the core's own event
+    /// handler, not a hand call — is what loads it.
+    @Test("The boot's first display event fires a waiting binding")
+    func bootDisplayEventFiresIt() throws {
+        defer { resetTopology() }
+        pinTopology()
+        let core = makeCore()
+        try seed(
+            core,
+            [
+                profile("Golden", monitors: ["Solo:100x100"]),
+                profile("Other", monitors: ["Z:1x1"]),
+            ]
+        )
+        bind(core, "Golden")
+        #expect(core.profiles.currentName == "Other")
+        core.handle(.displaysChanged([display(1, "D1")]))
+        #expect(core.profiles.currentName == "Golden")
+    }
+
     /// An in-effect edit's hot-reload asks the same gate: a
     /// standing-aside binding is not on screen.
     @Test("A standing-aside binding is not in effect")

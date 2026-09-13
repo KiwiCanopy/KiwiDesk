@@ -174,6 +174,27 @@ struct DesktopBindingFitSeamTests {
         }
     }
 
+    /// The GUI resolves a binding in ONE place, to hand it to
+    /// `profileVerdict`, whose gate judges it; a second GUI
+    /// resolver narrating "bound to X" off a summary would be the
+    /// re-derivation the badge clause refuses.
+    @Test("The GUI resolves a binding only for the verdict")
+    func guiResolvesOnlyForTheVerdict() throws {
+        var resolvers: [String: Int] = [:]
+        for (key, text) in try sources(under: "Sources/KiwiDesk") {
+            let hits = text.occurrences(of: "mainDesktopBinding(")
+            if hits > 0 { resolvers[key] = hits }
+        }
+        #expect(
+            resolvers == ["Settings/SettingsModel+Refresh.swift": 1],
+            Comment(
+                rawValue:
+                    "a GUI site resolves a Desktop binding outside "
+                    + "the verdict hand-off (#1394)"
+            )
+        )
+    }
+
     @Test("The count judgement has its two known callers")
     func judgementCallersAreCounted() throws {
         var callers: [String: Int] = [:]
