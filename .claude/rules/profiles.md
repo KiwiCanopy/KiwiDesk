@@ -388,7 +388,9 @@ Three further obligations, and they bind this directory:
   door marked a misfit clean while the monitor-change bound arm
   let it stand dirty (#1332), and
   `DesktopBindingFitSeamTests` ▸ `bindingDoorMarksNothing` now
-  refuses a mark in `applyDesktopBinding`'s body.
+  refuses a mark in `applyDesktopBinding`'s body; the
+  monitor-change bound arm shares a file with the matching arms
+  that legitimately mark, so a mark there is review's to refuse.
 - **A binding fires only where its profile is saved for the
   connected screen count (#1394).** `boundProfile(of:)` is the
   one gate, and every Core site that spells `mainDesktopBinding(`

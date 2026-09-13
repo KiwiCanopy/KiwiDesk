@@ -242,6 +242,9 @@ extension KiwiCore {
     /// the active profile, or a native Space bound to it is the
     /// active one and the binding fits (#1394) — so a
     /// non-adopting edit should hot-reload it (#18).
+    ///
+    /// COST: the bound arm reads the profile file, so this is a
+    /// per-Save query, never a per-render one.
     public func isProfileInEffect(_ name: String) -> Bool {
         if profiles.currentName == name { return true }
         // A query, so it READS the topology rather than stamping

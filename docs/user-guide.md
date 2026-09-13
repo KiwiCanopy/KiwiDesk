@@ -799,6 +799,7 @@ Desktop you gave it when Mission Control renumbers — [A binding
 follows its Desktop, not its
 number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 
+:::unreleased
 **A binding fires when its Desktop becomes current on your main
 screen** (the one with the menu bar) and its profile fits your
 screen count ([Which Profile Loads](#which-profile-loads)). With
@@ -814,6 +815,7 @@ flowchart TD
     B -->|"No binding, or<br/>another screen count"| K["The current profile<br/>stays active"]
     P["You pick a profile<br/>by shortcut or menu"] --> A
 ```
+:::
 
 A hand-written config declares bindings in `init.lua` with
 `bind_profile_to_desktop`. Each Desktop remembers which space it

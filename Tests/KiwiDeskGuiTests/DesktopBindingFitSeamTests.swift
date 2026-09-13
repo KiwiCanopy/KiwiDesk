@@ -92,11 +92,13 @@ struct DesktopBindingFitSeamTests {
                     text.occurrences(of: "boundProfile(of: ") == 1
                 continue
             }
-            guard key != resolverHome,
-                text.occurrences(of: "mainDesktopBinding(") > 0
-            else { continue }
+            let resolvers = text.occurrences(of: "mainDesktopBinding(")
+            guard key != resolverHome, resolvers > 0 else { continue }
+            // Per RESOLVER, not per file: a second resolver in a
+            // file that already takes the gate is not covered by
+            // its neighbour.
             #expect(
-                text.occurrences(of: "boundProfile(of: ") > 0,
+                text.occurrences(of: "boundProfile(of: ") >= resolvers,
                 Comment(
                     rawValue:
                         "\(key) resolves a binding but never asks "
