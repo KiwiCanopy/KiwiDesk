@@ -1,11 +1,77 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
   <title id="title">KiwiDesk social preview</title>
-  <desc id="desc">The KiwiDesk logo, product name, tagline and the KiwiCanopy endorsement.</desc>
-  <rect width="1200" height="630" fill="#ffffff"/>
-  <circle cx="1110" cy="72" r="260" fill="#dbeeee" opacity=".72"/>
-  <circle cx="1060" cy="610" r="340" fill="#cce0a2" opacity=".58"/>
-  <image href="logo.svg" x="92" y="105" width="420" height="420" preserveAspectRatio="xMidYMid meet"/>
-  <text x="548" y="289" fill="#1c373d" font-family="Inter, Arial, sans-serif" font-size="110" font-weight="700" letter-spacing="-4">KiwiDesk</text>
-  <text x="552" y="349" fill="#587271" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="600">Your windows, tidy — all on their own</text>
-  <text x="552" y="413" fill="#587271" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="500">by KiwiCanopy</text>
+  <desc id="desc">The KiwiDesk mark and name, the headline "Tiling that feels like it shipped with macOS", three facts, the KiwiCanopy endorsement, and a stylised macOS desktop with three tiled windows.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1512"/>
+      <stop offset="1" stop-color="#12251a"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f4a2a"/>
+      <stop offset="1" stop-color="#506c37"/>
+    </linearGradient>
+    <clipPath id="screen"><rect x="72" y="382" width="1056" height="330" rx="20"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <image href="logo.svg" x="72" y="58" width="60" height="60" preserveAspectRatio="xMidYMid meet"/>
+  <text x="146" y="103" fill="#eaf3ee" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="700" letter-spacing="-1">KiwiDesk</text>
+  <text x="1128" y="98" text-anchor="end" fill="#aacb5d" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="500">by KiwiCanopy</text>
+
+  <text fill="#eaf3ee" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="72" font-weight="700" letter-spacing="-2.2">
+    <tspan x="70" y="214">Tiling that feels like</tspan>
+    <tspan x="70" y="294">it shipped with macOS.</tspan>
+  </text>
+  <text x="72" y="346" fill="#aacb5d" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="500">Native Swift  ·  never touches SIP  ·  Lua when you want it</text>
+
+  <!-- desktop: bleeds off the bottom edge; depth is faked with offset plates because qlmanage drops SVG filters -->
+  <rect x="72" y="390" width="1056" height="330" rx="20" fill="#000000" fill-opacity=".45"/>
+  <rect x="72" y="382" width="1056" height="330" rx="20" fill="url(#wall)"/>
+  <rect x="72.5" y="382.5" width="1055" height="329" rx="19.5" fill="none" stroke="#aacb5d" stroke-opacity=".25"/>
+  <g clip-path="url(#screen)">
+    <rect x="72" y="382" width="1056" height="30" fill="#0d1512" fill-opacity=".55"/>
+    <circle cx="96" cy="397" r="6" fill="#eaf3ee" fill-opacity=".85"/>
+    <rect x="114" y="392" width="46" height="10" rx="5" fill="#eaf3ee" fill-opacity=".8"/>
+    <rect x="170" y="392" width="30" height="10" rx="5" fill="#eaf3ee" fill-opacity=".4"/>
+    <rect x="210" y="392" width="36" height="10" rx="5" fill="#eaf3ee" fill-opacity=".4"/>
+    <rect x="256" y="392" width="40" height="10" rx="5" fill="#eaf3ee" fill-opacity=".4"/>
+    <rect x="1040" y="392" width="14" height="10" rx="3" fill="#eaf3ee" fill-opacity=".6"/>
+    <rect x="1064" y="392" width="46" height="10" rx="5" fill="#eaf3ee" fill-opacity=".6"/>
+
+    <!-- focused window -->
+    <rect x="90" y="434" width="560" height="300" rx="12" fill="#000000" fill-opacity=".3"/>
+    <rect x="90" y="430" width="560" height="300" rx="12" fill="#1a2a21"/>
+    <path d="M90 442a12 12 0 0 1 12-12h536a12 12 0 0 1 12 12v22H90z" fill="#243629"/>
+    <circle cx="112" cy="447" r="6" fill="#ff5f57"/>
+    <circle cx="132" cy="447" r="6" fill="#febc2e"/>
+    <circle cx="152" cy="447" r="6" fill="#28c840"/>
+    <rect x="118" y="492" width="300" height="14" rx="7" fill="#eaf3ee" fill-opacity=".45"/>
+    <rect x="118" y="522" width="440" height="10" rx="5" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="118" y="544" width="400" height="10" rx="5" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="118" y="566" width="470" height="10" rx="5" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="118" y="588" width="360" height="10" rx="5" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="118" y="610" width="430" height="10" rx="5" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="88" y="428" width="564" height="304" rx="14" fill="none" stroke="#aacb5d" stroke-width="4"/>
+
+    <!-- right top -->
+    <rect x="666" y="434" width="444" height="142" rx="12" fill="#000000" fill-opacity=".3"/>
+    <rect x="666" y="430" width="444" height="142" rx="12" fill="#1a2a21"/>
+    <path d="M666 442a12 12 0 0 1 12-12h420a12 12 0 0 1 12 12v22H666z" fill="#243629"/>
+    <circle cx="688" cy="447" r="6" fill="#ff5f57"/>
+    <circle cx="708" cy="447" r="6" fill="#febc2e"/>
+    <circle cx="728" cy="447" r="6" fill="#28c840"/>
+    <rect x="694" y="490" width="200" height="12" rx="6" fill="#eaf3ee" fill-opacity=".45"/>
+    <rect x="694" y="516" width="330" height="10" rx="5" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="694" y="538" width="290" height="10" rx="5" fill="#eaf3ee" fill-opacity=".18"/>
+
+    <!-- right bottom -->
+    <rect x="666" y="592" width="444" height="142" rx="12" fill="#000000" fill-opacity=".3"/>
+    <rect x="666" y="588" width="444" height="142" rx="12" fill="#1a2a21"/>
+    <path d="M666 600a12 12 0 0 1 12-12h420a12 12 0 0 1 12 12v22H666z" fill="#243629"/>
+    <circle cx="688" cy="605" r="6" fill="#ff5f57"/>
+    <circle cx="708" cy="605" r="6" fill="#febc2e"/>
+    <circle cx="728" cy="605" r="6" fill="#28c840"/>
+    <rect x="694" y="648" width="240" height="12" rx="6" fill="#eaf3ee" fill-opacity=".45"/>
+  </g>
 </svg>
