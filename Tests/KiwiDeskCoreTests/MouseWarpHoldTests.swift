@@ -244,9 +244,13 @@ struct MouseWarpHoldTests {
         core.pointerWarp = { warped.append($0) }
         core.zOrderRestoresInFlight = 1
         // A fresh press: this intent is mouse-made (a bar
-        // click), so the hold drops it.
+        // click), so the hold drops it. Stamped a minute AHEAD,
+        // which the echo window reads as fresh however slow the
+        // runner is between here and the read (#1408's shape).
         core.lastLeftClick = (
-            Date(), CGPoint(x: 700, y: 500), nil
+            Date().addingTimeInterval(60),
+            CGPoint(x: 700, y: 500),
+            nil
         )
         core.warpMouseToFocused(id)
         #expect(core.pendingMouseWarp == nil)
@@ -300,9 +304,14 @@ struct MouseWarpHoldTests {
         core.pointerWarp = { warped.append($0) }
         // The user clicked window 2 (press stamp resolved it);
         // its focus report must not warp — immediately or via
-        // the pending slot.
+        // the pending slot. Stamped a minute AHEAD: a `Date()`
+        // stamp read against `Date()` in the handler outgrew the
+        // echo window on a contended queue runner and the warp
+        // fired (merge queue, 2026-09-13).
         core.lastLeftClick = (
-            Date(), CGPoint(x: 600, y: 100), WindowID(2)
+            Date().addingTimeInterval(60),
+            CGPoint(x: 600, y: 100),
+            WindowID(2)
         )
         core.handle(.windowFocused(WindowID(2)))
         #expect(warped.isEmpty)
