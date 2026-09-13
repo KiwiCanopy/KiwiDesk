@@ -1027,8 +1027,6 @@
   "shortcuts.menu_bar_icon": "Icône de barre des menus",
   "shortcuts.move_to_desktop": "Déplacer vers le Bureau",
   "shortcuts.move_to_space": "Déplacer vers l'espace",
-  "shortcuts.move_to_track": "Déplacer vers le Track",
-  "shortcuts.move_to_track.caption": "Pertinent uniquement si vous utilisez la disposition Track.",
   "shortcuts.other_ellipsis": "Autre…",
   "shortcuts.override.caption": "Les rangées grisées sont héritées des raccourcis de base et restent synchronisées avec eux. Modifiez une rangée pour la surcharger pour ce profil uniquement ; correspondre à nouveau à la base la rend de nouveau héritée. Supprimer une rangée héritée réinitialise simplement la valeur — pour désactiver une combinaison dans ce profil, réassignez-la à une action neutre.",
   "shortcuts.override.overrides": "Ce profil surcharge les raccourcis de base.",

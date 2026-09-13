@@ -53,4 +53,13 @@ extension KeybindingCatalog {
             }
         ),
     ]
+
+    /// Whether a binding RECORDS a Track verb (#1440): a
+    /// finished combo on one of the four Track rows, matched the
+    /// way the rows find their own bindings.
+    static func recordsTrack(_ binding: KeyBinding) -> Bool {
+        !binding.combo.isEmpty
+            && (moveToTrackRows + trackSwapRows)
+                .contains { $0.lua == binding.lua }
+    }
 }

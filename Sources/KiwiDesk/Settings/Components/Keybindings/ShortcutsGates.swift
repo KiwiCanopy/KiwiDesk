@@ -16,6 +16,8 @@ struct ShortcutsGates {
         case onlyDefaultLayer
         /// No Desktop shortcut bound yet (`.desktopBindingsExist`).
         case noDesktopBinding
+        /// No Track space and no Track verb bound (`.trackInUse`).
+        case trackUnused
     }
 
     /// Evaluates inert reason for setting key.
@@ -32,6 +34,9 @@ struct ShortcutsGates {
             .shortcuts(.moveToDesktop),
             .shortcuts(.moveToDesktopFollow):
             return desktopBindingExists ? nil : .noDesktopBinding
+        case .shortcuts(.moveWindowToTrack),
+            .shortcuts(.swapWithTrack):
+            return trackIsUsed ? nil : .trackUnused
         default:
             assertionFailure(
                 "ShortcutsGates does not own \(key.id)"
@@ -65,6 +70,21 @@ struct ShortcutsGates {
             .contains(where: KeybindingCatalog.recordsDesktop)
     }
 
+    /// Whether the Track layout is in play (#1440): a Track
+    /// space in the config this window edits — the starter setup
+    /// seeds one on a wide screen, so that user meets the drawer
+    /// open — or a Track verb recorded in any layer.
+    var trackInUse: Bool {
+        inertReason(for: .shortcuts(.moveWindowToTrack))
+            != .trackUnused
+    }
+
+    private var trackIsUsed: Bool {
+        !LayoutUsage.spaces(on: .track, in: config).isEmpty
+            || config.layers.flatMap(\.bindings)
+                .contains(where: KeybindingCatalog.recordsTrack)
+    }
+
     /// Gated keys resolved directly from `GuiConfig`
     /// (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
@@ -74,6 +94,8 @@ struct ShortcutsGates {
         .shortcuts(.focusDesktop),
         .shortcuts(.moveToDesktop),
         .shortcuts(.moveToDesktopFollow),
+        .shortcuts(.moveWindowToTrack),
+        .shortcuts(.swapWithTrack),
     ]
 
     /// Gated keys resolved dynamically in view state: Import's

@@ -1028,8 +1028,6 @@
   "shortcuts.menu_bar_icon": "Menüleisten-Symbol",
   "shortcuts.move_to_desktop": "Auf einen Schreibtisch verschieben",
   "shortcuts.move_to_space": "In Space verschieben",
-  "shortcuts.move_to_track": "In Track verschieben",
-  "shortcuts.move_to_track.caption": "(nur relevant, wenn du das Track-Layout verwendest)",
   "shortcuts.other_ellipsis": "Andere…",
   "shortcuts.override.caption": "Ausgegraute Zeilen werden von den Basis-Tastenkürzeln vererbt und bleiben mit ihnen synchron. Bearbeite eine Zeile, um sie nur für dieses Profil zu überschreiben; sobald sie wieder mit ihnen übereinstimmt, ist sie erneut vererbt. Wenn du eine vererbte Zeile entfernst, wird sie nicht gelöscht, sondern nur zurückgesetzt — um eine Tastenkombination in diesem Profil zu deaktivieren, belege sie stattdessen mit einer Aktion, die nichts tut.",
   "shortcuts.override.overrides": "Dieses Profil überschreibt Basis-Tastenkürzel.",

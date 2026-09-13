@@ -1027,8 +1027,6 @@
   "shortcuts.menu_bar_icon": "Icono de barra de menús",
   "shortcuts.move_to_desktop": "Mover al Escritorio",
   "shortcuts.move_to_space": "Mover al espacio",
-  "shortcuts.move_to_track": "Mover al Track",
-  "shortcuts.move_to_track.caption": "Solo relevante si utilizas el diseño Track.",
   "shortcuts.other_ellipsis": "Otro…",
   "shortcuts.override.caption": "Las filas atenuadas se heredan de los atajos base y se mantienen sincronizadas. Edita una fila para anularla solo en este perfil; volver a coincidir con la base hará que se vuelva a heredar. Eliminar una fila heredada solo la restablece — para desactivar una combinación en este perfil, reasígnala a una acción nula.",
   "shortcuts.override.overrides": "Este perfil anula atajos de teclado base.",

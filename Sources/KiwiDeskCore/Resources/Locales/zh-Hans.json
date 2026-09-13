@@ -1027,8 +1027,6 @@
   "shortcuts.menu_bar_icon": "菜单栏图标",
   "shortcuts.move_to_desktop": "移动到桌面",
   "shortcuts.move_to_space": "移动到空间",
-  "shortcuts.move_to_track": "移到轨道",
-  "shortcuts.move_to_track.caption": "仅在使用轨道布局时才有意义。",
   "shortcuts.other_ellipsis": "其他…",
   "shortcuts.override.caption": "灰显的行继承自基础快捷键并与之保持同步。编辑某一行会仅在此描述文件中覆盖它；重新与基础一致后又会恢复为继承。移除继承的行只会将其重置 — 若要在此描述文件中停用某个组合，请改为把它绑定到空操作。",
   "shortcuts.override.overrides": "此描述文件覆盖了基础键位绑定。",

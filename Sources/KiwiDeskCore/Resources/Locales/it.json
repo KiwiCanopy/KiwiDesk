@@ -1027,8 +1027,6 @@
   "shortcuts.menu_bar_icon": "Icona barra dei menu",
   "shortcuts.move_to_desktop": "Sposta sulla Scrivania",
   "shortcuts.move_to_space": "Sposta nello spazio",
-  "shortcuts.move_to_track": "Sposta sul track",
-  "shortcuts.move_to_track.caption": "Rilevante solo se stai usando il layout track.",
   "shortcuts.other_ellipsis": "Altro…",
   "shortcuts.override.caption": "Le righe attenuate sono ereditate dalle scorciatoie di base e restano sincronizzate con esse. Modifica una riga per sostituirla solo in questo profilo; farla coincidere di nuovo con quella di base la rende nuovamente ereditata. Rimuovere una riga ereditata la reimposta soltanto: per disattivare una combinazione in questo profilo, riassegnala invece a un'azione senza effetto.",
   "shortcuts.override.overrides": "Questo profilo sostituisce le scorciatoie di base.",

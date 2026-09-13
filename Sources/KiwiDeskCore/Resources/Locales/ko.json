@@ -1027,8 +1027,6 @@
   "shortcuts.menu_bar_icon": "메뉴 막대 아이콘",
   "shortcuts.move_to_desktop": "윈도우를 데스크탑으로 이동",
   "shortcuts.move_to_space": "윈도우를 공간으로 이동",
-  "shortcuts.move_to_track": "윈도우를 트랙으로 이동",
-  "shortcuts.move_to_track.caption": "트랙 레이아웃을 사용하는 경우에만 해당합니다.",
   "shortcuts.other_ellipsis": "기타…",
   "shortcuts.override.caption": "흐리게 표시된 행은 기반 단축키에서 상속되며 계속 동기화됩니다. 행을 편집하면 이 프로필에만 재정의되고, 다시 기반 단축키와 같아지면 상속 상태로 돌아갑니다. 상속된 행을 제거하면 초기화될 뿐입니다. 이 프로필에서 특정 조합을 비활성화하려면 아무 동작도 하지 않는 동작에 다시 할당하십시오.",
   "shortcuts.override.overrides": "이 프로필은 기반 키 할당을 재정의합니다.",

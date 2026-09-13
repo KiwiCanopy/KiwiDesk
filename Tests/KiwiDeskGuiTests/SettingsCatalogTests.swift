@@ -80,7 +80,9 @@ struct SettingsCatalogTests {
         // over both bars and the shortcuts panel.
         // 79 since #1250: General ▸ Advanced's eight rows, the
         // drawer's children, so a search hit opens the drawer.
-        #expect(allEntries.count == 79)
+        // 80 since #1440: the Track drawer in Move windows, the
+        // Track families' one search-reachable name.
+        #expect(allEntries.count == 80)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

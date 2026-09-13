@@ -1028,8 +1028,6 @@
   "shortcuts.menu_bar_icon": "メニューバーのアイコン",
   "shortcuts.move_to_desktop": "ウインドウをデスクトップに移動",
   "shortcuts.move_to_space": "ウインドウをスペースに移動",
-  "shortcuts.move_to_track": "ウインドウをトラックに移動",
-  "shortcuts.move_to_track.caption": "トラックレイアウトを使っている場合にのみ関係します。",
   "shortcuts.other_ellipsis": "その他…",
   "shortcuts.override.caption": "淡色表示の行は基本のショートカットから継承され、それらと同期し続けます。行を編集するとこのプロファイルにのみ上書きされ、再び基本と同じ内容にすると継承に戻ります。継承した行を削除してもリセットされるだけです。このプロファイルで組み合わせを無効にするには、代わりに何もしないアクションに割り当て直してください。",
   "shortcuts.override.overrides": "このプロファイルは基本のキーバインドを上書きします。",
