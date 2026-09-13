@@ -184,6 +184,27 @@ struct DesktopsGroup: View {
                     )
                 )
             }
+            if let count = otherScreenCount(row.key) {
+                BadgeChip(
+                    label: L(
+                        "desktops.other_count",
+                        "for %1$d screen(s)",
+                        count
+                    )
+                )
+                .help(
+                    L(
+                        "desktops.other_count.help",
+                        "This profile is saved for %1$d "
+                            + "screen(s); %2$d connected. Until "
+                            + "that many are, the binding stands "
+                            + "aside and KiwiDesk picks a profile "
+                            + "by your screens instead.",
+                        count,
+                        model.displays.count
+                    )
+                )
+            }
             Spacer()
             profileMenu(row.key)
         }
@@ -226,6 +247,20 @@ struct DesktopsGroup: View {
             present: model.presentDesktopKeys,
             bindings: model.config.profileBindings
         )
+    }
+
+    /// The bound profile's screen count where it is not the
+    /// connected one — the binding stands aside then (#1394).
+    /// Nil with no displays known: Core cannot judge either.
+    private func otherScreenCount(_ key: DesktopKey) -> Int? {
+        guard model.displays.count > 0,
+            let name = binding(key).wrappedValue,
+            let count = model.profileSummaries.first(where: {
+                $0.name == name
+            })?.count,
+            count != model.displays.count
+        else { return nil }
+        return count
     }
 
     /// Available profiles for the dropdown, always including the

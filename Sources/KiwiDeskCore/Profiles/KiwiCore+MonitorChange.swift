@@ -30,8 +30,9 @@ extension KiwiCore {
         let fingerprints = displays.map(\.fingerprint)
 
         // A native-Space binding wins over matching (#7); a
-        // binding that fails to load falls through to matching.
-        // The Desktop that counts is the main display's (#888).
+        // binding that fails to load, or is for another screen
+        // count (#1394), falls through to matching. The Desktop
+        // that counts is the main display's (#888).
         //
         // ONE stamped reading (#1147): a display that just
         // returned brings Desktops macOS created fresh, which are
@@ -39,21 +40,18 @@ extension KiwiCore {
         let desktops = stampedDesktopSnapshot()
         if let binding = mainDesktopBinding(in: desktops) {
             let boundName = binding.profile
-            do {
-                let bound = try profiles.read(name: boundName)
-                // The apply lands the #36 fit verdict with the
-                // name, so a binding onto other hardware is dirty
-                // without this path saying so twice (#1249).
+            switch boundProfile(of: binding) {
+            case .success(let bound):
                 apply(profile: bound, forceRetile: false)
                 onLog(
                     "monitor change: loaded bound profile "
                         + "'\(boundName)'"
                 )
                 return
-            } catch {
+            case .failure(let refusal):
                 onLog(
-                    "cannot load bound profile "
-                        + "'\(boundName)': \(error)"
+                    "monitor change: "
+                        + refusal.narrative(profile: boundName)
                 )
             }
         }

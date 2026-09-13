@@ -383,9 +383,18 @@ Three further obligations, and they bind this directory:
   read off the monitor set the apply already matched for the
   pins, so no caller pairs `isDirty` by hand. A caller whose
   verdict differs must say so with `markClean`/`markDirty` beside
-  the apply AND state why it differs; `applyDesktopBinding` is the
-  worked example, and its disagreement with the monitor-change
-  bound arm is #1332's to rule.
+  the apply AND state why it differs. No caller does today: the
+  Desktop-binding door used to mark clean after loading a
+  profile onto hardware it did not fit, while the monitor-change
+  bound arm let the same load stand dirty (#1332), and the pair
+  was settled by construction rather than by picking a side —
+  **a binding fires only where its profile is saved for the
+  connected screen count**, through the one `boundProfile(of:)`
+  every reader of a binding's profile takes (#1394), so a bound
+  load always fits by count and the rungs below answer for every
+  other count. `DesktopBindingFitTests` holds the gate on both
+  doors and the verdict, and pins that a Core file which resolves
+  a binding AND applies a profile reaches the gate.
 
 `ProfileAuthoritySeamTests` holds the first two as one-home
 clauses, scoped to the doors' own bodies rather than to their

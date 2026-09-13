@@ -42,8 +42,9 @@ extension ProfilesSection {
         L(
             "profiles.which_loads.help",
             "A profile bound to the Desktop your main screen is "
-                + "on wins outright; set those bindings in "
-                + "%1$@, just below. With no such binding, "
+                + "on wins outright when it is saved for this "
+                + "many screens; set those bindings in %1$@, "
+                + "just below. With no such binding, "
                 + "KiwiDesk takes a profile saved for exactly "
                 + "these screens, then the one marked default "
                 + "for this many screens, and finally a built-in "
@@ -66,8 +67,8 @@ extension ProfilesSection {
         case .boundToDesktop(let name, let desktop):
             return L(
                 "profiles.which_loads.bound",
-                "Right now: Desktop %1$d → %2$@ (bound below, "
-                    + "which outranks the screen count).",
+                "Right now: Desktop %1$d → %2$@ (bound below "
+                    + "and saved for this many screens).",
                 desktop,
                 name
             )

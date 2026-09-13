@@ -121,6 +121,14 @@ Desktop your main screen's.
 With a single screen there is no distinction to make — the main
 screen's Desktop is simply *the* Desktop.
 
+**A binding fires only for its profile's screen count.** A
+profile is saved for one number of screens, so a Desktop bound
+to a one-screen profile loads it on one screen and stands aside
+on two, where KiwiDesk picks by your screens instead
+([#1394](https://github.com/KiwiCanopy/KiwiDesk/issues/1394)).
+The row keeps the binding and shows a *for 1 screen(s)* badge
+while it waits.
+
 ## A binding follows its Desktop, not its number
 
 Mission Control numbers Desktops by **position**, so the numbers

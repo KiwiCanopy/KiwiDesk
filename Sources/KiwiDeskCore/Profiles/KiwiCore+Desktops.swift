@@ -265,21 +265,17 @@ extension KiwiCore {
         else { return }
         // The LOG names the number, which is the only name for a
         // Desktop the user has; the lookup above never does.
-        do {
-            let profile = try profiles.read(name: binding.profile)
+        switch boundProfile(of: binding) {
+        case .success(let profile):
             apply(profile: profile, forceRetile: false)
-            // Clean whatever the #36 fit says, where the
-            // monitor-change bound arm calls the same state
-            // dirty. The two disagree; #1332's to rule.
-            profiles.markClean()
             onLog(
                 "Desktop \(binding.desktop): loaded profile "
                     + "'\(binding.profile)'"
             )
-        } catch {
+        case .failure(let refusal):
             onLog(
-                "Desktop \(binding.desktop): cannot load "
-                    + "profile '\(binding.profile)': \(error)"
+                "Desktop \(binding.desktop): "
+                    + refusal.narrative(profile: binding.profile)
             )
         }
     }

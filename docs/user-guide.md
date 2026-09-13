@@ -475,7 +475,10 @@ Desk (these exact monitors)"* — naming which rung resolved it.
 The rungs, in order:
 
 1. A **Desktop binding** on the Desktop your main screen is on
-   ([macOS Desktops](#macos-desktops-mission-control)).
+   ([macOS Desktops](#macos-desktops-mission-control)), when
+   the bound profile is saved for this many screens. For any
+   other count the binding stands aside and the rungs below
+   decide.
 2. An **exact monitor match** — these exact displays. It stops
    matching the moment you swap one out, unless you saved a set
    for the new hardware too.
@@ -792,11 +795,14 @@ follows its Desktop, not its
 number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 
 **A binding fires when its Desktop becomes current on your main
-screen** (the one with the menu bar). With "Displays have
-separate Spaces" on, macOS's default, each screen switches on its
-own: a swipe on the main screen switches profiles, a swipe on a
-secondary never does. The rows are greyed while you edit a stored
-profile: bindings are global.
+screen** (the one with the menu bar) **and its profile is saved
+for the screens you have connected.** A profile saved on one
+screen does not load onto two; its row shows a *for 1 screen(s)*
+badge and KiwiDesk picks by your screens until you are back on
+one. With "Displays have separate Spaces" on, macOS's default,
+each screen switches on its own: a swipe on the main screen
+switches profiles, a swipe on a secondary never does. The rows
+are greyed while you edit a stored profile: bindings are global.
 
 ```mermaid
 flowchart TD
