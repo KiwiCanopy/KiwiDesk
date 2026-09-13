@@ -183,8 +183,11 @@ traced at directory altitude — see **`docs/architecture.md`**.
    Build` job substitutes for a local one.
 5. **Document:** any user-visible behavior change updates the
    matching doc in the same change set — code and docs must
-   never describe different behavior. Which doc owns what, and
-   the `docs/design-decisions.md` charter, are in
+   never describe different behavior — and a user-facing page
+   takes the prose budget: state what the GUI cannot, once, and
+   ask the owner before a new setting gains a guide section
+   (#1395). Which doc owns what, the budget's argument, and the
+   `docs/design-decisions.md` charter are in
    [`.claude/rules/docs.md`](.claude/rules/docs.md); the site's
    half of it in [`.claude/rules/site.md`](.claude/rules/site.md).
 6. **Review:** once a substantial change is finished, verified
