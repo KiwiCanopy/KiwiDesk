@@ -27,6 +27,9 @@ extension KiwiCore {
         // NSApplication read.
         let departedWithDesktop =
             departedWithDesktop(event, reason: goneReason)
+        if departedWithDesktop, let id = event.goneWindowID {
+            fileSwitchDeparture(id)
+        }
         let closeReturnRaiseStandsDown =
             effects.removedWindow?.focusLost == true
             && eventLoop.closeReturnRaiseStandsDown(

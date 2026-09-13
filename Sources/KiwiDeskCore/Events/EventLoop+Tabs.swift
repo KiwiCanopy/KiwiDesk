@@ -25,8 +25,11 @@ extension EventLoop {
     /// removal-distrust gate stands down (#1157): the census
     /// double-exposes both Desktops while the compositor settles
     /// (#1023), so retuning this for tab reasons retunes the
-    /// gate's stand-down too. The gate's expected-absence arms
-    /// (#1145, #1272) read their own signals, never this one.
+    /// gate's stand-down too — and re-scopes which departures
+    /// the Desktop settle admits, since `departedWithThisSwitch`
+    /// (#1364) ages a destroy filed BEFORE its notification
+    /// against it. The gate's expected-absence arms (#1145,
+    /// #1272) read their own signals, never this one.
     static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
 
     /// The one derivation of "inside that grace" — the tab
