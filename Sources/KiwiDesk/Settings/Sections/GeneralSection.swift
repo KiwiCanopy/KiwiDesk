@@ -130,69 +130,9 @@ struct GeneralSection: View {
             isExpanded: $advancedExpanded
         ) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(
-                    L(
-                        "general.advanced.config_file",
-                        "Configuration file"
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                HStack {
-                    Image(systemName: "doc.text")
-                        .foregroundStyle(.secondary)
-                    Text(model.configURL.path)
-                        .font(
-                            .system(
-                                .body,
-                                design: .monospaced
-                            )
-                        )
-                        .textSelection(.enabled)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    Spacer()
-                    Button(L("general.advanced.reveal", "Reveal")) {
-                        NSWorkspace.shared
-                            .activateFileViewerSelecting(
-                                [model.configURL]
-                            )
-                    }
-                    .settingsActionButton()
-                }
+                configFileRow
                 Divider()
-                // Opening the raw editor swaps the primary Save to
-                // `.saveLua`, dropping staged visual edits — gated
-                // like every other discard path (#515).
-                Button {
-                    model.discardingEdits(
-                        message: L(
-                            "discard.lua_editor.message",
-                            "The raw editor saves init.lua as "
-                                + "text, so the edits you "
-                                + "haven't saved are dropped."
-                        ),
-                        confirmLabel: L(
-                            "discard.lua_editor.confirm",
-                            "Discard & edit init.lua"
-                        )
-                    ) {
-                        model.showLuaEditor = true
-                        model.reload()
-                    }
-                } label: {
-                    Label(
-                        L(
-                            "general.advanced.edit_lua",
-                            "Edit init.lua directly"
-                        ),
-                        systemImage: "curlybraces"
-                    )
-                }
-                .settingsActionButton()
-                Text(editLuaCaption)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                editLuaRow
                 Divider()
                 exportBackupRow
                 Divider()
@@ -226,6 +166,86 @@ struct GeneralSection: View {
         } message: { problem in
             Text(LogExportText.sentence(for: problem))
         }
+    }
+
+    private var configFileRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(
+                L(
+                    "general.advanced.config_file",
+                    "Configuration file"
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            HStack {
+                Image(systemName: "doc.text")
+                    .foregroundStyle(.secondary)
+                Text(model.configURL.path)
+                    .font(
+                        .system(
+                            .body,
+                            design: .monospaced
+                        )
+                    )
+                    .textSelection(.enabled)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Spacer()
+                Button(L("general.advanced.reveal", "Reveal")) {
+                    NSWorkspace.shared
+                        .activateFileViewerSelecting(
+                            [model.configURL]
+                        )
+                }
+                .settingsActionButton()
+            }
+        }
+        .searchAnchored(
+            SettingsCatalog.general.generalAdvanced.children
+                .configFile
+        )
+    }
+
+    private var editLuaRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Opening the raw editor swaps the primary Save to
+            // `.saveLua`, dropping staged visual edits — gated
+            // like every other discard path (#515).
+            Button {
+                model.discardingEdits(
+                    message: L(
+                        "discard.lua_editor.message",
+                        "The raw editor saves init.lua as "
+                            + "text, so the edits you "
+                            + "haven't saved are dropped."
+                    ),
+                    confirmLabel: L(
+                        "discard.lua_editor.confirm",
+                        "Discard & edit init.lua"
+                    )
+                ) {
+                    model.showLuaEditor = true
+                    model.reload()
+                }
+            } label: {
+                Label(
+                    L(
+                        "general.advanced.edit_lua",
+                        "Edit init.lua directly"
+                    ),
+                    systemImage: "curlybraces"
+                )
+            }
+            .settingsActionButton()
+            Text(editLuaCaption)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .searchAnchored(
+            SettingsCatalog.general.generalAdvanced.children
+                .editLua
+        )
     }
 
     private var partialRestoreBinding: Binding<Bool> {

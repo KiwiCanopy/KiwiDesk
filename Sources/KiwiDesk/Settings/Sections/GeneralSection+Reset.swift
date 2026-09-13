@@ -64,6 +64,10 @@ extension GeneralSection {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
+        .searchAnchored(
+            SettingsCatalog.general.generalAdvanced.children
+                .discardArrangement
+        )
     }
 
     private var resetAllRow: some View {
@@ -110,6 +114,10 @@ extension GeneralSection {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
+        .searchAnchored(
+            SettingsCatalog.general.generalAdvanced.children
+                .resetAll
+        )
         // Its own dialog, never the shared discard gate: that
         // gate only fires while `isDirty`, and this must
         // confirm every time (the "Adopt" precedent).

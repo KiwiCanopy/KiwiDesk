@@ -54,6 +54,10 @@ extension GeneralSection {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
+        .searchAnchored(
+            SettingsCatalog.general.generalAdvanced.children
+                .exportBackup
+        )
     }
 
     // MARK: - Restore (the ladder's final rung)
@@ -107,6 +111,10 @@ extension GeneralSection {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
+        .searchAnchored(
+            SettingsCatalog.general.generalAdvanced.children
+                .restoreBackup
+        )
         // Built from the bundle it will apply, handed over by
         // `presenting:` (#843's shape). Its own dialog rather than
         // the shared `discardingEdits` gate: that gate fires only
