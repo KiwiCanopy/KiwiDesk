@@ -1,4 +1,3 @@
-import KiwiDeskCore
 import SwiftUI
 
 /// Shared layout metrics and column width budgets for the Settings window.
@@ -28,13 +27,6 @@ enum SettingsMetrics {
 
     /// Destination icon square tile (#678).
     static let sidebarTile: CGFloat = 22
-
-    /// The bar thickness sliders' band, both cards (#1359). The
-    /// floor is the Core floor, derived: a restated one left a
-    /// stored 28 unreachable. The ceiling is the GUI's curation;
-    /// Lua stays open above it.
-    static let barThicknessRange: ClosedRange<Double> =
-        Double(AppBarStyle.minThickness)...80
 
     /// Label column for half-width drag columns (#231, #754).
     static let dragColumnLabelColumn: CGFloat = 80

@@ -14,7 +14,7 @@ extension AppBarCard {
             PtSlider(
                 label: L("app_bar.thickness", "Thickness"),
                 value: style.thickness,
-                range: SettingsMetrics.barThicknessRange
+                range: BarSliderBands.thickness
             )
         case .appBarGroupAdjacentWindows:
             ToggleRow(

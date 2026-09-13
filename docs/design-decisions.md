@@ -9233,16 +9233,21 @@ that began at 30 — so the starter's own value sat below the
 slider, and one touch of the slider lost it for good. A stored
 value the GUI cannot reach is a defect, not a curation, so the
 band's floor is `AppBarStyle.minThickness` rather than a number
-beside it (`BarThicknessRangeTests`); the ceiling of 80 stays
+beside it (`BarSliderBandTests`); the ceiling of 80 stays
 the GUI's, Lua open above it, the same split the glow slider
 takes. The default is one number because the reason for a
 thinner laptop bar — "a laptop cannot spare the chrome" — did
 not survive use: 40 read well on every class, and a per-class
 thickness is a second default a user has to know about before
 the slider's number means anything (`BarThicknessDefaultTests`).
-No migration is owed: both bars encode `thickness` densely, so
-every file the app ever wrote carries its own number and only a
-fresh seed takes the new one.
+No migration is owed, and the reason is specific rather than
+borrowable: both bars' `thickness` predate the first tag
+(v0.9.0), and the settings encoder writes both bar groups whole
+(`AppBarParityTests`, `SpaceBarParityTests` hold each field
+encoded), so every file the app ever wrote carries its own
+number and only a fresh seed takes the new one — a leaf younger
+than a shipped release, or one a group elides, owes the #1369
+crossing instead (`BarSliderBandTests`, `BarThicknessDefaultTests`).
 :::
 
 **"Which palette am I on" is computed, never remembered.**

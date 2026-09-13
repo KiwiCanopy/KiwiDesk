@@ -17,7 +17,7 @@ extension SpaceBarCard {
             PtSlider(
                 label: L("space_bar.thickness", "Thickness"),
                 value: style.thickness,
-                range: SettingsMetrics.barThicknessRange
+                range: BarSliderBands.thickness
             )
         case .spaceBarShowFrontApp:
             ToggleRow(
@@ -156,7 +156,7 @@ extension SpaceBarCard {
             SecondsRow(
                 label: L("space_bar.spring_delay", "Spring delay"),
                 ms: style.springDelay,
-                range: 1.0...4.0,
+                range: BarSliderBands.springDelaySeconds,
                 help: L(
                     "space_bar.spring_delay.help",
                     "Drag a window onto a Space and hold this "

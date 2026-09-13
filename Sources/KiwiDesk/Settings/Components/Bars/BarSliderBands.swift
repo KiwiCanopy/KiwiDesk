@@ -1,0 +1,21 @@
+import KiwiDeskCore
+
+/// The bar cards' slider bands where Core clamps one edge
+/// (#1359, gui.md): that edge is DERIVED from the Core constant,
+/// the other is the GUI's curation, Lua open beyond it.
+/// `BarSliderBandTests` holds both the derivation and that every
+/// consumer reads from here.
+enum BarSliderBands {
+    /// Both bars' Thickness rows: the Core floor up to 80 pt.
+    static let thickness: ClosedRange<Double> =
+        Double(AppBarStyle.minThickness)...80
+
+    /// The Space Bar's Spring delay row, in the seconds the row
+    /// shows; `springDelayRange` is the milliseconds it stores.
+    static let springDelaySeconds: ClosedRange<Double> = {
+        let stored = SpaceBarStyle.springDelayRange
+        let floor = Double(stored.lowerBound) / 1000
+        let ceiling = Double(stored.upperBound) / 1000
+        return floor...ceiling
+    }()
+}

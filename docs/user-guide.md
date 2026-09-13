@@ -386,7 +386,9 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 ## Bars
 
 :::unreleased
-**Thickness** runs 20–80 pt in both cards, 40 by default; Lua
+**Thickness** runs 20–80 pt in both cards; Lua
+([`app_bar.set_thickness`](lua-reference.md#app_barset_thickness),
+[`space_bar.set_thickness`](lua-reference.md#space_barset_thickness))
 takes any value from 20 up.
 :::
 

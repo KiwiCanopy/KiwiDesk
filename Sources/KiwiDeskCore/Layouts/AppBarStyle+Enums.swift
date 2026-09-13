@@ -6,8 +6,7 @@ extension AppBarStyle {
     /// Minimum bar thickness in pt (QA 2026-07-19): below it the
     /// plate stroke and glyph run collide. Every entry point
     /// clamps to it — profile decode, the Lua/CLI setter, and the
-    /// GUI slider's lower bound, which DERIVES it rather than
-    /// restating a number (#1359, `BarThicknessRangeTests`).
+    /// GUI slider's floor, derived (#1359, `BarSliderBandTests`).
     public static let minThickness: CGFloat = 20
 
     /// True if platform supports Liquid Glass (macOS 26+, #390).
