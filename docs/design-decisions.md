@@ -8621,6 +8621,29 @@ points on any display this app targets;
 `SlotSizePercentRangeTests` holds the slider to the model's own
 bounds and to a step the standard lands on.
 
+**A short scrolling row does not stretch to fill its axis.**
+(#1356, owner ruling 2026-09-09.) Two windows at a 48% slot
+leave the last few percent of the axis empty, and that
+remainder reads, from close up, as unfinished work: the obvious
+"fix" is to stretch a row shorter than the axis until it fills
+it. It is refused because it fights the one thing a slot size
+is for. A slot is the size the user set — by slider, by Lua, or
+by a resize press — and a fill would rewrite it the moment the
+row was short, then hand it back the moment a third window
+arrived, so every resize of a two-window row would be undone
+by the next retile until the row was long enough to escape the
+fill. Two windows at their configured share resize exactly as
+they should; that is worth more than the sliver. The lone
+window is the one exception, and it is not a stretch: with no
+neighbour whose size it could fight, a single window takes the
+whole area (the `count == 1` branch of `ScrollingLayout`), the
+same treatment monocle gives it, because a lone 95% column
+reads as a broken monocle rather than as a scroll hint — the
+hint the 95% default exists for is the NEIGHBOUR peeking in,
+and a lone window has none. Recorded as a decision rather than
+as a limitation: the empty remainder is a choice about whose
+number wins, not a limit of the layout.
+
 **[Principle]**
 
 **One width and one corner for all three strokes — the GUI
