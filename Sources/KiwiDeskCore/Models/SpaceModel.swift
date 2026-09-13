@@ -277,26 +277,6 @@ public struct Space: Sendable, Equatable {
         }
         releaseScrollSlot()
     }
-
-    /// Forgets which slot the scrolling rest was measured
-    /// against, so the next pass holds the viewport and pans only
-    /// as far as visibility asks (#1353). A reorder is the user's
-    /// act on a static row — the pair must visibly trade places
-    /// — where `follow` otherwise holds the focused window's
-    /// place on screen (#966). Every reorder calls it.
-    public mutating func releaseScrollSlot() {
-        scrollRest?.slot = nil
-    }
-
-    /// Moves window to clamped target index.
-    public mutating func move(_ window: WindowID, to index: Int) {
-        guard let from = windows.firstIndex(of: window) else {
-            return
-        }
-        windows.remove(at: from)
-        let clamped = min(max(index, 0), windows.count)
-        windows.insert(window, at: clamped)
-    }
 }
 
 /// One reading of which displays changed Desktop, and what each

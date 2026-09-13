@@ -859,14 +859,19 @@ editing here:
   the focused slot it was measured against as ONE value: the
   same focus holds that slot's place on screen, a different
   focus holds the offset and pans minimally (#66). **A REORDER
-  releases the slot at its mutation site (#1353)** — `Space.swap`
-  and the App Bar drop call `Space.releaseScrollSlot`, so the
-  next pass holds the viewport and the pair visibly trades
-  places — because the layout cannot tell a swap from a
-  neighbour closing ahead of the focus, and only the model
-  knows which happened; a new reorder route calls the release,
-  since nothing scans for one that does not
-  (`ScrollSlotReleaseTests`).
+  releases the slot in the model (#1353)** — every `Space`
+  primitive that rewrites the order calls
+  `Space.releaseScrollSlot`, so the next pass holds the viewport
+  and the pair visibly trades places — because the layout cannot
+  tell a swap from a neighbour closing ahead of the focus, and
+  only the model knows which happened. So **write the window
+  order through a `Space` primitive, never beside a call site**:
+  `ScrollSlotReleaseSeamTests` scans `KiwiDeskCore` outside
+  `Models/` for an order write and its `allowed` map is the one
+  copy of the mode-bound exemptions; `ScrollSlotReleaseTests`
+  holds each primitive and the arrival that keeps the slot;
+  `ScrollingResizeAnchorEndToEndTests` holds the keyboard swap
+  and the bar drop on screen, and skips on a headless host.
   "Place" is the slot's leading edge, except where it was
   resting flush against the TRAILING border, which is the edge
   it keeps instead — otherwise a shrink tears it off a border it
@@ -880,11 +885,12 @@ editing here:
   Three obligations follow. **Never split the pair into two
   fields** beside each other, and never re-derive the verdict
   at a call site — nothing scans for either, so each new author
-  owes it deliberately. **A producer never DESTROYS provenance
-  it was handed**: recording no slot is the "nothing has ever
-  been measured" verdict, so a pass that carries an offset
-  through carries its measurement too, and one that drops it
-  silently reverts to the pre-#966 behavior. A new producer of a
+  owes it deliberately. **A layout PASS never DESTROYS provenance
+  it was handed**: a nil slot is the "no provenance to re-anchor
+  from" verdict, so a pass that carries an offset through
+  carries its measurement too, and one that drops it silently
+  reverts to the pre-#966 behavior — the model's reorder release
+  above is the one sanctioned drop, and it is not a pass. A new producer of a
   rest joins `ScrollingResizeAnchorEndToEndTests`, because a
   suite that injects the rest by hand cannot see a producer at
   all — which is most of them, and is why that end-to-end suite

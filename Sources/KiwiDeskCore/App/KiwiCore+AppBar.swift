@@ -203,22 +203,8 @@ extension KiwiCore {
         let tiled = Set(state.localTiledMembers(of: space))
         let stream = Array(groups.joined())
             .filter { tiled.contains($0) }
-        // Stream and slots both derive from localTiledMembers,
-        // so the counts provably match; a future drift between
-        // the group source and the writeback should fail loud
-        // here, not silently mis-map slots via the `?? id`
-        // fallback below.
-        assert(
-            stream.count
-                == space.windows.filter(tiled.contains).count
-        )
-        var reordered = stream.makeIterator()
-        state.workspaces.withSpace(space.id) { sp in
-            sp.windows = sp.windows.map { id in
-                tiled.contains(id)
-                    ? (reordered.next() ?? id) : id
-            }
-            sp.releaseScrollSlot()
+        state.workspaces.withSpace(space.id) {
+            $0.reorder(tiled: stream, among: tiled)
         }
         retile()
         // The drop is the same array mutation as `scrollingStep`'s

@@ -51,6 +51,40 @@ struct ScrollSlotReleaseTests {
         #expect(space.scrollRest?.slot == nil)
     }
 
+    @Test("a move to an index releases the slot")
+    func moveReleases() {
+        var space = space()
+        space.move(WindowID(1), to: 3)
+        #expect(
+            space.windows == [2, 3, 4, 1].map { WindowID(UInt32($0)) }
+        )
+        #expect(space.scrollRest?.slot == nil)
+    }
+
+    @Test("the bar's tiled reorder releases the slot")
+    func reorderReleases() {
+        var space = space()
+        let tiled: Set<WindowID> = [1, 2, 4].map { WindowID(UInt32($0)) }
+            .reduce(into: []) { $0.insert($1) }
+        space.reorder(
+            tiled: [4, 1, 2].map { WindowID(UInt32($0)) },
+            among: tiled
+        )
+        // The untiled 3 keeps its slot; the tiled ids take the
+        // stream's order around it.
+        #expect(
+            space.windows == [4, 1, 3, 2].map { WindowID(UInt32($0)) }
+        )
+        #expect(space.scrollRest?.slot == nil)
+    }
+
+    @Test("an arrival through insert keeps the slot")
+    func insertKeepsTheSlot() {
+        var space = space()
+        space.insert(WindowID(9), after: WindowID(3))
+        #expect(space.scrollRest?.slot?.window == WindowID(3))
+    }
+
     @Test("a neighbour closing ahead of the focus keeps the slot")
     func removeKeepsTheSlot() {
         var space = space()
