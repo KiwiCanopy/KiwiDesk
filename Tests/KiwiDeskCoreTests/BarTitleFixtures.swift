@@ -94,10 +94,10 @@ func paintedSpaceBar(
     var style = SpaceBarStyle()
     style.edge = edge
     style.showFrontApp = front != nil
-    if glass {
-        style.backgroundStyle = .plain
-        style.liquidGlass = true
-    }
+    // Pinned in BOTH arms (tests.md): the default is on, so an
+    // arm that only set `true` would tell `glass: false` nothing.
+    style.backgroundStyle = .plain
+    style.liquidGlass = glass
     return SpaceBarManager.Bar(
         display: barTitleDisplay,
         items: (1...max(spaces, 1)).map { n in

@@ -25,9 +25,8 @@ struct LiquidGlassMasterTests {
     @Test("the shipped surfaces already agree")
     func shippedSurfacesAgree() {
         let settings = TilingSettings()
-        #expect(settings.appBarStyle.liquidGlass == true)
-        #expect(settings.spaceBarStyle.liquidGlass == true)
-        #expect(settings.shortcutPanelLiquidGlass == true)
+        // Agreement, never the polarity: a retune of the default
+        // must not red this (tests.md ▸ a clause pins the SHAPE).
         #expect(
             LiquidGlassAgreement(settings: settings).differ
                 == false

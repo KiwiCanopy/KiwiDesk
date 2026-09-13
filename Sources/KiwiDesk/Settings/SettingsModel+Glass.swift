@@ -45,9 +45,10 @@ struct LiquidGlassAgreement {
     /// Every surface carries glass.
     var allOn: Bool { leaves.allSatisfy { $0 } }
 
-    /// The three GLOBAL leaves disagree — reachable only from
-    /// hand-written Lua or an imported profile, never from this
-    /// row, which writes all three at once.
+    /// The three GLOBAL leaves disagree — reachable from
+    /// hand-written Lua, an imported profile, or a file the #1369
+    /// crossing has not yet filled, never from this row, which
+    /// writes all three at once.
     ///
     /// `LayoutAppBar.liquidGlass` is deliberately NOT read here.
     /// A per-layout override shadows its global everywhere in

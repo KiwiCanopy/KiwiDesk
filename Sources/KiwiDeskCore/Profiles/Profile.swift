@@ -7,8 +7,10 @@ public struct Profile: Codable, Sendable, Equatable {
     /// (#1020) — and the bump is what RUNS the crossing:
     /// `needsMigration` short-circuits on it, and the retired key
     /// decodes to the DEFAULT rather than failing, so leaving this
-    /// at 1 loses the user's tuned value silently.
-    public static let currentFormat = 3
+    /// at 1 loses the user's tuned value silently. 4 since the
+    /// Liquid Glass default flip (#1369): an absent leaf changed
+    /// meaning, so the crossing writes the `false` it meant.
+    public static let currentFormat = 4
 
     public var format: Int
     public var name: String

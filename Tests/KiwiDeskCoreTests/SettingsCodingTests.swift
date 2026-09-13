@@ -131,9 +131,9 @@ struct SettingsCodingTests {
         // the SHAPE).
         let refusal = try object(root["refusal"])
         #expect(refusal["sound"] as? Bool != nil)
-        // #1307: the shortcuts panel's leaf ships with the two
-        // bars (ON since 2026-09-10), so the one row's "all
-        // three" reading is never false on a fresh setup.
+        // #1307: the panel's leaf is written under its own group.
+        // Present and Boolean, never pinned to a value; the three
+        // leaves' agreement is `LiquidGlassMasterTests`'.
         let panel = try object(root["shortcut_panel"])
         #expect(
             panel["liquid_glass"] as? Bool

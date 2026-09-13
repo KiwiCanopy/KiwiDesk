@@ -9409,13 +9409,24 @@ earlier degraded-render bug: the items stay embedded as the glass's
 a hue for it to sample — never a replacement for the content. A
 fully transparent `fill_color` leaves the glass clear. One seam
 owns the five hosting modes (`GlassHosting` / `GlassTint`, #407).
+
+:::unreleased
 The finish is ON by default on every surface (owner ruling
 2026-09-10, reversing the launch-day no-glass default: the bars
 are the app's face, and a fresh install or a Reset All Settings
 should show the finish the app is designed around rather than
-ask for it). Written profiles carry the leaf explicitly, so an
-existing config keeps its choice; only a fresh seed and a
-hand-written config that omits the key take the new default.
+ask for it). A leaf whose ABSENCE changed meaning owes the §5
+crossing, and the reviewers of #1368 found the population it
+would have missed: a profile written before v1.2.0 carries both
+bar leaves and no panel group at all, so bars off beside a panel
+on — the state the one row exists to make unreachable — arrived
+on a plain upgrade. `ConfigMigration` therefore writes every
+absent glass leaf of a file below the floor as the `false` it
+meant, the panel group created where it is missing
+(`GlassDefaultMigrationTests`); an existing setup keeps the look
+it had, and only a fresh seed takes the new default.
+:::
+
 The finish stays OS-gated: ignored below
 macOS 26 (`glassEnabled` = `liquidGlass && glassAvailable`), and
 its Settings toggle is *hidden* there — an OS-capability gate, so
