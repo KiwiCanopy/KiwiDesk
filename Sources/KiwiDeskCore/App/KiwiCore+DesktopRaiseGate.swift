@@ -1,16 +1,10 @@
 import Foundation
 
-/// The Desktop raise gate (#1345): raising a window the
-/// compositor is not drawing makes macOS switch Desktops to show
+/// The Desktop raise gate (#1345/#1410): raising a window the
+/// compositor is not showing makes macOS switch Desktops to show
 /// it, so no implicit raise may do that; a verb that means to
 /// switch takes `switchDesktop`. Two compositor reads, never
-/// state, which still holds a departed window behind a slow
-/// app's destroy: the draw list's on-screen flag, which
-/// composites every neighbouring Desktop's windows for the
-/// second a gesture runs (#1410), and the hosted Space against
-/// the displays' current Spaces, which lags the draw list the
-/// other way through a switch (#1023). The argument is
-/// state-and-layout.md's.
+/// state; the argument is state-and-layout.md's.
 extension KiwiCore {
     /// Whether raising `id` would switch Desktops: either read
     /// says the compositor is not showing it. A read that cannot

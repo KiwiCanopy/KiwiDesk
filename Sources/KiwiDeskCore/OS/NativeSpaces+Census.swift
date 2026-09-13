@@ -119,9 +119,9 @@ extension NativeSpaces {
     /// "All Desktops", a `canJoinAllSpaces` panel) is shown
     /// wherever the user is. Nil where SkyLight cannot answer or
     /// the window is hosted nowhere, so the on-screen flag decides
-    /// alone. Live, ~0.15 ms (2026-09-13). Production reads it
-    /// through `KiwiCore.windowIsOnShownDesktop` alone
-    /// (`DesktopRaiseGateSeamTests`).
+    /// alone. Live per raise, never the switch handler's cache.
+    /// Production reads it through `KiwiCore.windowIsOnShownDesktop`
+    /// alone (`DesktopRaiseGateSeamTests`).
     public static func isOnShownDesktop(_ window: WindowID) -> Bool? {
         guard let connection = SkyLight.connection,
             let hosts = SkyLight.windowSpaces(
@@ -135,6 +135,9 @@ extension NativeSpaces {
     /// The pure verdict behind `isOnShownDesktop`: nil for a
     /// window hosted nowhere or a topology naming no current
     /// Space, else whether any host is a display's current Space.
+    /// Every current Space counts, a fullscreen one included — a
+    /// raise there switches nothing — where `DesktopCensus.shown`
+    /// narrows to user Desktops for its own away verdict.
     public static func hostsShownSpace(
         _ hosts: [SkyLight.SpaceID],
         in spaces: [NativeSpace]

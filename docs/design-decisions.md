@@ -2015,9 +2015,9 @@ by the settle's refocus: the pull-back, measured on device
 was true for that window, and a compositor probe on 2026-09-13
 showed why that flag cannot be trusted here — during a
 three-finger gesture it reads true for every window of the
-neighbouring Desktops, from about a second before the switch
-registers to about two seconds after, whichever Desktop the
-window is on. So the settle refuses a focus the switch itself
+neighbouring Desktops from the first movement until the switch
+registers (the #1410 paragraph below carries the re-read). So
+the settle refuses a focus the switch itself
 removed, and reads no flag to do it: every departure
 `departedWithDesktop` files is stamped, and the settle asks
 whether the focused window's stamp belongs to the switch it is
@@ -2074,10 +2074,7 @@ so ANY shown host counts, or every focus of such a window would be
 refused; and the read costs ~0.15 ms per raise (the topology copy
 0.11 ms, the per-window list 0.03 ms, measured 2026-09-13), so it
 is live rather than cached from the switch handler, whose stamp is
-the notification's timing and not the compositor's. The
-acceptance is a device sitting with the probe: `both` reading 0
-for a neighbouring Desktop's window throughout a gesture while
-`on` reads 1.
+the notification's timing and not the compositor's.
 :::
 
 ### A focus report is only as good as the activation behind it (#1322)

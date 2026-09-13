@@ -17,7 +17,8 @@ import Testing
 @MainActor
 struct DesktopRaiseGateHostTests {
     private static let gestureNeedle = "#1410"
-    private static let refusalNeedle = "refused"
+    /// The consumer's own line, not the gate's.
+    private static let refusalNeedle = "focus: w1 refused"
 
     /// Two windows, 2 focused; 1 is the raise target.
     private func makeCore() -> KiwiCore {

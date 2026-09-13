@@ -102,6 +102,42 @@ struct DesktopCensusSeamTests {
         )
     }
 
+    /// The per-window symbol has two ruled doors and no third
+    /// (#1410): the census's `windowSpace` (the classifier's
+    /// hosted/gone reading) and the gate's `windowSpaces` list;
+    /// every caller of either lives in the OS lane, so a Core
+    /// consumer reaching the live WindowServer past both seams
+    /// reds here.
+    @Test("the raw per-window Space read has its two ruled callers")
+    func rawWindowSpaceReadHasRuledCallers() throws {
+        let list = try SourceScan.identifierSites(
+            of: "windowSpaces(",
+            under: Self.sources
+        )
+        #expect(
+            Set(list.map(\.file.lastPathComponent))
+                == ["SkyLight+Borders.swift", "NativeSpaces+Census.swift"]
+                && list.count == 3,
+            .init(
+                rawValue: "found "
+                    + list.map(\.site).joined(separator: ", ")
+            )
+        )
+        let one = try SourceScan.identifierSites(
+            of: "windowSpace(",
+            under: Self.sources
+        )
+        #expect(
+            Set(one.map(\.file.lastPathComponent))
+                == ["SkyLight+Borders.swift", "NativeSpaces.swift"]
+                && one.count == 3,
+            .init(
+                rawValue: "found "
+                    + one.map(\.site).joined(separator: ", ")
+            )
+        )
+    }
+
     @Test("a test never calls the builder")
     func testsReachTheCensusThroughTheSeam() throws {
         let sites = try SourceScan.identifierSites(
