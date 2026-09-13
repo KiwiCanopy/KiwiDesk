@@ -167,8 +167,12 @@ struct DesktopSettleDepartureTests {
         relist(core)
         settle(core, box)
         #expect(stoodDown(box))
-        core.desktopMemory.switchDepartures[focused] = Date()
-            .addingTimeInterval(
+        // Backdated against the SWITCH, never against now: a loaded
+        // runner spends more than the grace between the swipe and
+        // this line, and a stamp aged from now would still read as
+        // this switch's (CI, 2026-09-13).
+        core.desktopMemory.switchDepartures[focused] =
+            core.lastDesktopSwitch.addingTimeInterval(
                 -EventLoop.spaceSwitchCoalesceGrace - 1
             )
         settle(core, box)
