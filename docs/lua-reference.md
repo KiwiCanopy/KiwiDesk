@@ -724,6 +724,12 @@ Stored as `shortcut_panel.liquid_glass`, in the profile beside
 the two bars — so the panel follows the profile that is active,
 and a profile switch can change its material.
 
+:::unreleased
+Also stood down while macOS's Reduce transparency is on, the
+stored value untouched
+([app_bar.set_liquid_glass](#app_barset_liquid_glass)).
+:::
+
 The GUI twin is the single **Liquid Glass** switch on
 Colours &amp; Animations, which writes this leaf together with
 `app_bar.liquid_glass` and `space_bar.liquid_glass` and shows on
@@ -1918,6 +1924,14 @@ portable. Per-layout override:
 `monocle.set_app_bar_liquid_glass` /
 `scroll.set_app_bar_liquid_glass`.
 
+:::unreleased
+Also stood down, live, while macOS's Reduce transparency is on:
+every glass surface draws its Boxed or Plain shape with the
+`fill_color` at full alpha (the panel its plain material), and
+the stored values are untouched, so the glass and the alpha
+return the moment the setting goes off (#1374).
+:::
+
 Settings has no per-bar row for this any more (#1307): one
 **Liquid Glass** switch on Colours &amp; Animations writes this
 leaf, the Space Bar's and the shortcuts panel's together, and
@@ -2157,6 +2171,12 @@ glass the backdrop's opacity is held under a ceiling so the blur
 stays visible: a fill below it renders exactly as you picked it,
 and only a more opaque one is capped. The stored value is
 unchanged either way (Boxed/Plain use it in full).
+
+:::unreleased
+While macOS's Reduce transparency is on, Boxed/Plain draw it at
+full alpha instead
+([app_bar.set_liquid_glass](#app_barset_liquid_glass)).
+:::
 
 **Example:**
 

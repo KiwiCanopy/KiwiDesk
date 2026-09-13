@@ -406,7 +406,10 @@ panel (**Colours & Animations**), tinted by each bar's Fill; on
 macOS before 26 the Boxed or Plain shape draws underneath.
 
 :::unreleased
-On by default, on all three surfaces.
+On by default, on all three surfaces. While macOS's **Reduce
+transparency** (System Settings ▸ Accessibility ▸ Display) is on,
+the Boxed or Plain shape draws instead, with its Fill fully
+opaque, and the switch stays as you set it.
 :::
 
 ### Space Bar

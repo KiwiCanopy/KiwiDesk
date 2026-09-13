@@ -76,6 +76,7 @@ extension KiwiCore {
         signposter.endInterval("loadConfig", config)
         boot.configDone = ContinuousClock.now
         sleepWake.start()
+        wireReduceTransparency()
         // One retile for the whole scan instead of one per
         // discovered window (#672): windows fold into state as
         // the events arrive, geometry lands once in the tail.
