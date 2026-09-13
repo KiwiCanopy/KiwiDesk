@@ -107,16 +107,8 @@ extension KiwiCore {
         // sit under a tile until the next tiled focus re-raises the
         // layer. Self-healing and rare (sub-50ms tile→float); the
         // z-order thrash the coalescing removes is the worse failure.
-        // The mode arm is the active space's for a MEMBER, nil
-        // otherwise, per the predicate's contract.
-        let landed = activeSpace
         guard
-            !EffectiveFloat.applies(
-                isFloating: state.windows[id]?.isFloating == true,
-                mode: landed?.windows.contains(id) == true
-                    ? landed?.mode
-                    : nil
-            ),
+            !isEffectiveFloatOnActiveSpace(id),
             !floatLayerTargets().isEmpty
         else { return }
         deferred.schedule(.floatRaise, after: .milliseconds(50)) {

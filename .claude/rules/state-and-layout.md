@@ -1172,8 +1172,10 @@ editing here:
   space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose
-  destination is that screen, the ACTIVE space for the ring and
-  the raise, which play out there — and a correction whose strips
+  destination is that screen, the RENDER space for the ring —
+  travelers included — and the active space for a raise on a
+  MEMBER, through the one `isEffectiveFloatOnActiveSpace` door
+  the drop clamp shares — and a correction whose strips
   are the HOME space's passes nil for a window that is not a
   member there, or a tiled sticky traveler is clamped against a
   screen it is not on. The predicate must be the

@@ -53,9 +53,14 @@ public enum EffectiveFloat {
     /// `mode` is the space the window is being judged ON — the
     /// TARGET space for a move, the space a drop LANDED in, the
     /// current one otherwise. Nil (a space the caller cannot
-    /// name, or one the window is not a member of) is not
-    /// floating: a caller that cannot name the space cannot
-    /// claim the exemption.
+    /// name) is not floating: a caller that cannot name the
+    /// space cannot claim the exemption. A TRAVELER — a tiled
+    /// sticky rendering on a space it is no member of — takes
+    /// the space it RENDERS on where the consumer plays out
+    /// there (the re-home, #1217; the ring, #1286) and nil where
+    /// the consumer's strips or slots are a MEMBER's (the drop
+    /// clamp, the raise): `KiwiCore.isEffectiveFloatOnActiveSpace`
+    /// is the one door for the latter.
     public static func applies(
         isFloating: Bool,
         mode: LayoutMode?

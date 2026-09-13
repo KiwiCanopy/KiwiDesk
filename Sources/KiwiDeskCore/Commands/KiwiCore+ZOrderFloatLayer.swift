@@ -6,6 +6,11 @@ extension KiwiCore {
     /// floating-mode space places nothing, so it has no plane and
     /// the switch-time raise lifts nothing over its members — the
     /// per-focus arm (`raiseFloatsAbove`) stands down the same way.
+    /// The sequence still runs over the flag and sticky targets,
+    /// and with no floor its one remaining assertion is #418's id
+    /// order among them (`raiseFloor`'s "floats keep their order
+    /// among themselves"): a lower-id float put in front of a
+    /// higher-id one is re-stacked on a switch, as on every space.
     func floatRaiseFloor(
         of space: Space,
         excluding focused: WindowID?

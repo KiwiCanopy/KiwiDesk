@@ -11,21 +11,28 @@ import Testing
 /// stays prose on `EffectiveFloat`; this is the census of
 /// READERS, which prose cannot hold.
 ///
-/// The lens, not the list: the scan finds every `.isFloating`
-/// read under `Sources/KiwiDeskCore` and pins a per-file count
-/// with the class each file's reads belong to, so a new reader in
-/// an unlisted file reds on arrival and a vanished one reds too.
-/// It reads the SHAPE — that a file asks the flag N times — never
-/// which answer it takes; the consumer suites hold the answers.
+/// The lens, not the list: the scan finds every dotted
+/// `.isFloating` spelling under `Sources/KiwiDeskCore` and pins a
+/// per-file count with the class each file's reads belong to, so
+/// a new reader in an unlisted file reds on arrival and a
+/// vanished one reds too. It reads the SHAPE — that a file spells
+/// the flag N times — never which answer it takes. Two blind
+/// spots, stated: the needle counts the init's own assignment as
+/// a read, and misses a dotless self-read inside a
+/// `ManagedWindow` extension; and the classes are pinned by COUNT,
+/// so a routed site that drops its `EffectiveFloat.applies(` call
+/// stays green here — the consumer suites are that net, this one
+/// is not.
 @Suite("Float flag reader census")
 struct FloatFlagReaderCensusTests {
-    /// Why a file may read the flag. Not consulted by the scan —
-    /// it is the classification the register carries so a new
-    /// entry has to state one.
+    /// Why a site may read the flag. Not consulted by the scan —
+    /// it is the classification the register carries, per site
+    /// summed per file, so a new read in a mixed file has to say
+    /// which class it joins rather than bump a number.
     enum Class {
         /// Defines, writes, detects or reports the flag itself.
         case identity
-        /// A net or verb already passing the flag INTO
+        /// A net or verb passing the flag INTO
         /// `EffectiveFloat.applies`.
         case routed
         /// "Is this a TILED member" — the negation the predicate's
@@ -36,45 +43,51 @@ struct FloatFlagReaderCensusTests {
         case ruledToStay
     }
 
-    /// Files reading `.isFloating`, with today's count and class.
-    private let allowed: [String: (Int, Class)] = [
-        "Models/WindowModel.swift": (1, .identity),
-        "State/WindowManager.swift": (1, .identity),
-        "State/StateCoordinator.swift": (2, .identity),
-        "Events/EventLoop+Tracking.swift": (2, .identity),
-        "Commands/KiwiCore+Commands.swift": (2, .identity),
-        "Commands/KiwiCore+Diagnostics.swift": (1, .identity),
-        "App/KiwiCore+FloatClamp.swift": (1, .routed),
-        "App/KiwiCore+FloatRecovery.swift": (1, .routed),
-        "App/KiwiCore+TravelerRehome.swift": (1, .routed),
-        // One routed, one choosing the delivery inside it (#498).
-        "App/KiwiCore+FloatReanchor.swift": (2, .routed),
-        "Tiling/TilingEngine+Stash.swift": (1, .routed),
-        // The drop's routed read and the drag's membership chain.
-        "Tiling/KiwiCore+Drag.swift": (2, .routed),
-        "Commands/KiwiCore+Resize.swift": (1, .routed),
-        "App/KiwiCore+Borders.swift": (1, .routed),
-        "Commands/KiwiCore+ZOrderFloats.swift": (1, .routed),
+    /// Files reading `.isFloating`, each site classified.
+    private let allowed: [String: [Class: Int]] = [
+        "Models/WindowModel.swift": [.identity: 1],
+        "State/WindowManager.swift": [.identity: 1],
+        "State/StateCoordinator.swift": [.identity: 2],
+        "Events/EventLoop+Tracking.swift": [.identity: 2],
+        "Commands/KiwiCore+Commands.swift": [.identity: 2],
+        "Commands/KiwiCore+Diagnostics.swift": [.identity: 1],
+        "App/KiwiCore+FloatClamp.swift": [.routed: 1],
+        "App/KiwiCore+FloatRecovery.swift": [.routed: 1],
+        "App/KiwiCore+TravelerRehome.swift": [.routed: 1],
+        // The delivery choice inside the net asks which ARM
+        // floats the window (#498) — the flag's identity.
+        "App/KiwiCore+FloatReanchor.swift": [.routed: 1, .identity: 1],
+        "Tiling/TilingEngine+Stash.swift": [.routed: 1],
+        // The one active-space door (#1286).
+        "Tiling/KiwiCore+EffectiveFloat.swift": [.routed: 1],
+        "Tiling/KiwiCore+Drag.swift": [.tiledMember: 1],
+        "Commands/KiwiCore+Resize.swift": [.routed: 1],
+        "App/KiwiCore+Borders.swift": [.routed: 1],
         // The floor is routed; the targets stay the flag's.
-        "Commands/KiwiCore+ZOrderFloatLayer.swift": (3, .routed),
+        "Commands/KiwiCore+ZOrderFloatLayer.swift":
+            [.routed: 1, .ruledToStay: 2],
         "State/StateCoordinator+EffectiveMembers.swift":
-            (5, .tiledMember),
+            [.tiledMember: 5],
         "State/StateCoordinator+WindowCreated.swift":
-            (2, .tiledMember),
+            [.tiledMember: 2],
         // Deferred to #1362 (arrival on another display).
-        "State/StateCoordinator+ScreenHome.swift": (1, .tiledMember),
-        "Commands/KiwiCore+SpaceCommands.swift": (2, .tiledMember),
-        "Commands/KiwiCore+TrackNavigate.swift": (2, .tiledMember),
-        "Commands/KiwiCore+TrackSwap.swift": (2, .tiledMember),
-        "Commands/KiwiCore+ZOrder.swift": (1, .tiledMember),
-        "Tiling/KiwiCore+DragCrossing.swift": (1, .tiledMember),
-        "Tiling/KiwiCore+DragMove.swift": (1, .tiledMember),
+        "State/StateCoordinator+ScreenHome.swift": [.tiledMember: 1],
+        "Commands/KiwiCore+SpaceCommands.swift": [.tiledMember: 2],
+        "Commands/KiwiCore+TrackNavigate.swift": [.tiledMember: 2],
+        "Commands/KiwiCore+TrackSwap.swift": [.tiledMember: 2],
+        "Commands/KiwiCore+ZOrder.swift": [.tiledMember: 1],
+        "Tiling/KiwiCore+DragCrossing.swift": [.tiledMember: 1],
+        "Tiling/KiwiCore+DragMove.swift": [.tiledMember: 1],
         // The float tier of directional focus: the tiled tier
         // already reaches a floating-mode space by live frame.
-        "State/StateCoordinator+FloatFocus.swift": (1, .ruledToStay),
+        "State/StateCoordinator+FloatFocus.swift": [.ruledToStay: 1],
         // The badge and its group-breaking (owner, 2026-09-13).
-        "App/KiwiCore+SpaceBarItems.swift": (2, .ruledToStay),
+        "App/KiwiCore+SpaceBarItems.swift": [.ruledToStay: 2],
     ]
+
+    private func pinned(_ file: String) -> Int? {
+        allowed[file].map { $0.values.reduce(0, +) }
+    }
 
     @Test("every .isFloating read in Core is classified")
     func everyReaderIsClassified() throws {
@@ -89,24 +102,27 @@ struct FloatFlagReaderCensusTests {
             guard hits > 0 else { continue }
             counts[key] = hits
         }
-        // Non-vacuity: the scan saw the readers the roster names.
-        #expect(counts["Tiling/KiwiCore+Drag.swift"] != nil)
+        // Non-vacuity: the scan saw the member derivations.
+        #expect(
+            counts["State/StateCoordinator+EffectiveMembers.swift"]
+                != nil
+        )
         for (file, count) in counts.sorted(by: { $0.key < $1.key }) {
             let unlisted =
                 "\(file) reads the float flag \(count)× — ask "
                 + "EffectiveFloat.applies (state-and-layout.md) or "
                 + "classify and pin it here (#1286)"
             #expect(
-                allowed[file]?.0 == count,
+                pinned(file) == count,
                 Comment(rawValue: unlisted)
             )
         }
-        for (file, entry) in allowed {
+        for file in allowed.keys {
             let vanished =
-                "\(file) no longer reads the flag \(entry.0)× — "
-                + "re-pin or drop its entry"
+                "\(file) no longer reads the flag \(pinned(file)!)× "
+                + "— re-pin or drop its entry"
             #expect(
-                counts[file] == entry.0,
+                counts[file] == pinned(file),
                 Comment(rawValue: vanished)
             )
         }
