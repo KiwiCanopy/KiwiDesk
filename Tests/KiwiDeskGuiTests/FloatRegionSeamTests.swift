@@ -50,21 +50,38 @@ struct FloatRegionSeamTests {
             region is re-asked to shrink on every retile, forever
             """
         )
+        // Since #1358 the per-window verdict is ONE copy the
+        // sweep and the resize arm share: the sweep routes
+        // through it, and the fit and the memo drop live inside
+        // it — re-pointing either at the clamp-only sibling reds.
         #expect(
-            body.contains("floatFitLedger.forget("),
+            body.contains("floatFitCorrection("),
+            "the sweep must take its verdict from floatFitCorrection"
+        )
+        let verdict = try #require(
+            source.range(of: "func floatFitCorrection(")
+        )
+        let verdictBody = try #require(
+            Self.balancedBody(of: source, from: verdict.upperBound)
+        )
+        #expect(
+            verdictBody.contains("floatFitLedger.forget("),
             """
-            the sweep must drop a window's memo when it needs no \
+            the verdict must drop a window's memo when it needs no \
             fit, or a window that later needs one is never asked
             """
         )
         #expect(
-            body.contains("floatFrameFittedClearOfBars("),
+            verdictBody.contains("floatFrameFittedClearOfBars("),
             """
-            the retile-time float sweep must call \
-            floatFrameFittedClearOfBars — the clamp-only sibling \
-            moves a window without ever bounding its size, which \
-            is the #1091 defect
+            the verdict must call floatFrameFittedClearOfBars — \
+            the clamp-only sibling moves a window without ever \
+            bounding its size, which is the #1091 defect
             """
+        )
+        #expect(
+            !body.contains("floatFrameFittedClearOfBars("),
+            "the sweep must not fit beside the verdict it shares"
         )
     }
 

@@ -1232,6 +1232,34 @@ editing here:
   dispatch. Event-driven retiles stay un-forced so echo lag can't
   wobble windows. Profile applies classify themselves: see
   [profiles.md](profiles.md).
+- **A resize nobody asked for is corrected on its own event
+  (#1358)** — the `.windowResized` arm's outcomes are four and a
+  new arm keeps them so: our ask's ECHO goes to the #677 answer
+  channel, a LATE echo the ledger explains is left alone, a hand
+  GESTURE goes to the drag pipeline, and what is none of those
+  (a title-bar zoom, an edge double-click's expand, an app
+  re-sizing itself) to `KiwiCore.correctUnsolicitedResize`. That
+  door retiles only where the window is off the frame a SHOWN
+  space gives it, and asks the owners rather than copying them:
+  `calculatedFrames` for a tiled slot (every display's shown
+  space, beyond `retileTolerance`), `floatFitCorrection` — the
+  bar sweep's own per-window verdict, one copy for both — for a
+  float. It stands down while `defersEventRetiles` holds (#672)
+  and past `UnsolicitedResizeMemo`'s bound, since a correction
+  wipes the #677 ledger and an app reverting past the echo grace
+  would otherwise be corrected forever. The gesture reading
+  refuses a press whose `clickCount` is 2 unless `drag.hasGesture`
+  already holds that window — asked FIRST, so the verdict does
+  not ride the release's main-actor hop — because an edge
+  double-click is the one OS resize that looks like a fast
+  drag's trailing event from inside; `recordDown` takes the
+  count with no default and both monitor arms pass the event's
+  (`OwnPressProvenanceSeamTests`). `UnsolicitedResizeTests`
+  drives the arm; its echo control asserts on the log, since the
+  #677 channel retiles on its own and a frame sink cannot tell
+  the two apart; a secondary display's shown space is placed by
+  the same frame set and is not pinned, since every fake display
+  resolves to the one host screen.
 
 ## Cross-layout logic must account for each layout's navigation model
 

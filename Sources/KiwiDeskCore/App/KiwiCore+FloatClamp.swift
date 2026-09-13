@@ -173,36 +173,12 @@ extension KiwiCore {
             else { continue }
             for id in workspace.windows {
                 guard let window = state.windows[id],
-                    // A native-fullscreen window keeps its slot
-                    // but lives on its own macOS Space (#670) —
-                    // it reaches this sweep only now that a
-                    // floating-MODE space's members do, and a
-                    // size fit at a fullscreen app is the frame
-                    // set the stash already refuses.
-                    !window.isFullscreen,
-                    // EFFECTIVE float, never the flag (#1178).
-                    EffectiveFloat.applies(
-                        isFloating: window.isFloating,
-                        mode: workspace.mode
+                    let clamped = floatFitCorrection(
+                        id,
+                        frame: window.frame,
+                        in: workspace
                     )
                 else { continue }
-                // One fold over every strip, one apply: the
-                // per-strip loop this replaces re-read the same
-                // stale state frame for each strip (applyFrame
-                // is async), so with stacked bars the second
-                // clamp overwrote the first instead of
-                // composing with it.
-                let clamped = floatFrameFittedClearOfBars(
-                    id,
-                    frame: window.frame
-                )
-                guard clamped != window.frame else {
-                    // Nothing to correct: drop any refusal memo
-                    // so a window that later needs a fit is
-                    // asked afresh.
-                    tiler.floatFitLedger.forget(id)
-                    continue
-                }
                 guard
                     shouldIssueFloatFit(
                         id,
@@ -218,6 +194,50 @@ extension KiwiCore {
                 )
             }
         }
+    }
+
+    /// The sweep's per-window verdict, the one copy (#1358): the
+    /// frame the fit would move `id` to, or nil where the sweep
+    /// would leave it — not an effective float, native
+    /// fullscreen, its space under no painted bar, or already
+    /// fitted. Handed `frame` rather than reading the state
+    /// frame, so the resize arm can ask about the frame that
+    /// just arrived.
+    func floatFitCorrection(
+        _ id: WindowID,
+        frame: CGRect,
+        in workspace: Space? = nil
+    ) -> CGRect? {
+        guard
+            let workspace = workspace
+                ?? state.workspaces.space(of: id).flatMap({
+                    state.workspaces[$0]
+                }),
+            spacesWithShownBars.contains(workspace.id),
+            let window = state.windows[id],
+            // A native-fullscreen window keeps its slot but
+            // lives on its own macOS Space (#670): a size fit at
+            // a fullscreen app is the frame set the stash
+            // already refuses.
+            !window.isFullscreen,
+            // EFFECTIVE float, never the flag (#1178).
+            EffectiveFloat.applies(
+                isFloating: window.isFloating,
+                mode: workspace.mode
+            )
+        else { return nil }
+        // One fold over every strip, one apply: a per-strip loop
+        // re-read the same stale state frame for each strip
+        // (applyFrame is async), so with stacked bars the second
+        // clamp overwrote the first instead of composing.
+        let clamped = floatFrameFittedClearOfBars(id, frame: frame)
+        guard clamped != frame else {
+            // Nothing to correct: drop any refusal memo so a
+            // window that later needs a fit is asked afresh.
+            tiler.floatFitLedger.forget(id)
+            return nil
+        }
+        return clamped
     }
 
     /// Every space with at least one painted strip: the App

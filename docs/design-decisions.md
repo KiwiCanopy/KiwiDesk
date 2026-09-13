@@ -3284,6 +3284,52 @@ ring's actual presence would shift the float every time it gained
 or lost focus. And it goes to zero with borders off, so nothing
 is reserved for chrome that is not on screen.
 
+:::unreleased
+**A resize nobody asked for is corrected on its own event
+(#1358).** [Principle] macOS's title-bar double-click zoom, its
+double-click on a window edge or corner (expand to that screen
+edge), and an app re-sizing itself all reach the engine as a
+plain `.windowResized` — there is no zoom notification to listen
+for — and none is an ask of ours or a hand-drag. The edge
+double-click is the one that looks like a drag from inside: the
+press sat at the slot's edge and was released under a second
+ago, which is exactly the trailing event of a fast hand-resize,
+so the press record carries AppKit's click count and a
+double-click released there is read as the expand, not the
+drag — unless a drag on that window is already in flight, whose
+trailing events stay its own. For a TILED
+window the zoom is the layout's to undo (owner ruling
+2026-09-13): in a tiling layout a double-click on a title bar is
+a slip far more often than an intent, and a window left at the
+OS-chosen size sits over its neighbours until some unrelated
+event happens to retile — which reads as the tiler having given
+up. For a FLOAT the frame stays the user's, as a hand-resize
+does, but the zoom fills the screen under a bar, and the bar
+clamp and the region fit are exactly the nets a dropped or
+resized float already gets. Both corrections are the ordinary
+retile's own work, so the arm decides only WHETHER one is owed:
+a resize that is not our ask's echo (that one is #677's answer
+channel), not ledger-explained (a late echo), not a gesture (the
+drag pipeline's), and that leaves the window off the frame a
+SHOWN space gives it — every display's, since the layout places
+them all — read from the layout's own frame set for a tiled
+window and from the bar sweep's own verdict for a float, never a
+second copy of either. A resize inside the retile tolerance, a
+window on a Space nobody shows, a float under no bar, a
+native-fullscreen one — nothing; and nothing while a boot or
+wake burst defers event retiles (#672), whose one trailing pass
+corrects it anyway. The cost accepted: an app that animates its
+own resize triggers one retile at the first off-slot frame,
+after which its echoes fall inside our ask's grace and are read
+as answers, which is the #677 dance an insisting app already
+pays. An app that takes the slot and reverts LATER than that
+grace would be corrected forever — each correction wipes the
+#677 ledger, so its twice-refused rule never accumulates — so a
+memo of the same shape ends it: two consecutive corrections and
+the window is left standing until it is seen on its frame again
+or the memo ages out (`UnsolicitedResizeTests`).
+:::
+
 **A corner is never a float's original, and a stranded float is
 re-centred (#1352).** [Principle] The stash restores a parked
 float from the capture taken at its first park, and that capture

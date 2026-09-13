@@ -12,14 +12,23 @@ extension KiwiCore {
     /// event of a fast resize — released moments ago, with
     /// the press having started near the window's slot edge
     /// (where resize drags begin; app-initiated resizes like
-    /// a zoom button don't match).
+    /// a zoom button don't match). A DOUBLE-click released
+    /// there is macOS's expand-to-the-edge, not a drag, and
+    /// takes the #1358 correction instead — unless a drag on
+    /// that window is already in flight, whose trailing events
+    /// stay its own.
     func isResizeGesture(_ id: WindowID) -> Bool {
-        if mouse.leftButtonHeld {
+        // A gesture already in flight keeps its trailing events
+        // whatever the press record says — read first, so the
+        // verdict does not depend on the release's main-actor
+        // hop landing before the AX event.
+        if mouse.leftButtonHeld || drag.hasGesture(id) {
             return true
         }
         guard let press = mouse.press,
             let up = press.upAt,
             Date().timeIntervalSince(up) < 1,
+            press.clickCount < 2,
             let slot = tiler.calculatedFrames(
                 state: state
             )[id]
