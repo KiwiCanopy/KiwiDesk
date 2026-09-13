@@ -204,6 +204,22 @@ struct PlacementIntentTests {
         let home = core.state.workspaces.space(of: target)!
         core.state.workspaces.focus(target, in: home)
         _ = core.execute("move_to_space", args: [.string("2")])
+        // A neighbour keeps Space 2's focus, so the fold grants
+        // the return no vacancy and a mis-pay would COMMAND —
+        // stepping off `other` (guard-prover).
+        let neighbour = WindowID(3)
+        core.handle(
+            .windowCreated(
+                ManagedWindow(
+                    id: neighbour,
+                    pid: 3,
+                    appName: "App3",
+                    frame: CGRect(x: 0, y: 0, width: 400, height: 300)
+                )
+            )
+        )
+        core.state.workspaces.focus(neighbour, in: home)
+        _ = core.execute("move_to_space", args: [.string("2")])
         core.state.workspaces.focus(other, in: home)
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(core.focusOwnWindow(number: Int(target.raw)))
@@ -212,6 +228,10 @@ struct PlacementIntentTests {
         core.handle(.windowCreated(reshown(target)))
         #expect(core.ownShowFocus.owed() == nil)
         #expect(core.state.workspaces.space(of: target) != home)
+        #expect(
+            core.state.workspaces.space(of: target)
+                == core.state.workspaces.space(of: neighbour)
+        )
         #expect(core.activeSpace?.focused == other)
         #expect(
             log.lines.contains { $0.contains("focus debt dropped") }
