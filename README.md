@@ -65,9 +65,9 @@ disabling System Integrity Protection**.
 on the Mac are a Linux idea carried over — a config file, a reload,
 a terminal, and for some of them SIP switched off. KiwiDesk is a Mac
 app first: a real Settings window with sliders and live previews,
-standard shortcuts, your native Desktops left exactly as they are,
-and the Accessibility permission and nothing else. Same tiling power
-— the platform's own feel.
+shortcuts for everything and a mouse that still works, your native
+Desktops left exactly as they are, and the Accessibility permission
+and nothing else. Same tiling power — the platform's own feel.
 
 **Flat arrays instead of i3 trees.** Classic tiling window managers
 organize windows in split-container trees — powerful, but hard to
