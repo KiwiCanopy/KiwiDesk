@@ -42,7 +42,9 @@ public final class AppBarManager {
     }
 
     private var overlays: [DisplayID: AppBarOverlay] = [:]
-    /// The Reduce transparency observer `KiwiCore` wires (#1374).
+    /// The Reduce transparency observer `KiwiCore` wires in
+    /// `start()` for BOTH bars (#1374); homed here rather than on
+    /// `KiwiCore`, whose file sits at the §2.1 ceiling.
     var transparencyObserver: NSObjectProtocol?
     private var spaceOfDisplay: [DisplayID: SpaceID] = [:]
     /// The bars actually painted after `sync`'s filter — the one

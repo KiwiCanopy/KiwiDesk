@@ -22,58 +22,102 @@ struct ReduceTransparencySeamTests {
         root.appendingPathComponent("Tests/KiwiDeskCoreTests")
     }
 
-    /// Every bar render — found by what it does, hosting glass,
-    /// rather than by a listed file — resolves its stored style
-    /// through the gate exactly once, and spells that stored
-    /// style nowhere else in its body: a consumer reading it
-    /// beside the copy draws the stored glass or alpha.
-    @Test("each bar render takes the gate on its stored style, once")
+    /// Every type that hosts glass — found at the one decision
+    /// point, `GlassHosting.resolve(`, Core-wide, never by a listed
+    /// file — has a `render` that resolves its stored style
+    /// through the gate exactly once and spells that stored style
+    /// nowhere else in its body: a consumer reading it beside the
+    /// copy draws the stored glass or alpha.
+    @Test("each glass-hosting type renders through the gate, once")
     func rendersTakeTheGate() throws {
-        var renders = 0
-        for file in try SourceScan.swiftSources(
-            under: Self.core.appendingPathComponent("Bar")
-        ) {
-            let source = try SourceScan.strippedSource(at: file)
-            guard
-                let body = SourceScan.declarationBody(
-                    after: "func render(",
-                    in: source
-                ),
-                body.contains("glassHosting(")
-            else { continue }
-            renders += 1
-            let name = file.lastPathComponent
-            let gate = SourceScan.callSites(
-                in: Array(body),
-                for: "LiquidGlassGate.rendered"
-            )
-            #expect(
-                gate.count == 1,
+        let files = try SourceScan.swiftSources(under: Self.core)
+        var sources: [URL: String] = [:]
+        for file in files {
+            sources[file] = try SourceScan.strippedSource(at: file)
+        }
+        // The hosts: the type each `GlassHosting.resolve(` call
+        // site extends, read off its file's `extension` line.
+        var hosts: Set<String> = []
+        for (file, source) in sources
+        where file.lastPathComponent != "GlassHosting.swift"
+            && source.contains("GlassHosting.resolve(")
+        {
+            let type = try #require(
+                source.range(of: "extension ").map { hit in
+                    String(
+                        source[hit.upperBound...]
+                            .prefix { $0.isLetter || $0.isNumber }
+                    )
+                },
                 Comment(
                     rawValue:
-                        "\(name): render resolves the style through "
-                        + "LiquidGlassGate.rendered \(gate.count)×"
+                        "\(file.lastPathComponent) resolves glass "
+                        + "hosting outside an extension"
                 )
             )
-            // The argument is the stored style; it appears once.
-            let stored = try #require(
-                SourceScan.callArguments(
-                    of: "LiquidGlassGate.rendered(",
-                    in: body
-                )?.trimmingCharacters(in: .whitespaces),
-                Comment(rawValue: "\(name): the gate's argument")
-            )
-            #expect(
-                body.occurrences(of: stored) == 1,
-                Comment(
-                    rawValue:
-                        "\(name): `\(stored)` is read beside the gated "
-                        + "copy — that reader draws the stored glass"
-                )
-            )
+            hosts.insert(type)
         }
         // Two overlays host glass today; a shrunk roster reds.
-        #expect(renders >= 2, "fewer than two glass-hosting renders")
+        #expect(hosts.count >= 2, Comment(rawValue: "\(hosts.sorted())"))
+
+        for host in hosts.sorted() {
+            // The host's render: the one `func render(` among the
+            // files declaring the type or extending it.
+            let renders = sources.filter { file, source in
+                (source.contains("class \(host)")
+                    || source.contains("extension \(host) "))
+                    && SourceScan.declarationBody(
+                        after: "func render(",
+                        in: source
+                    ) != nil
+            }
+            #expect(
+                renders.count == 1,
+                Comment(
+                    rawValue:
+                        "\(host) declares render in "
+                        + "\(renders.keys.map(\.lastPathComponent))"
+                )
+            )
+            for (file, source) in renders {
+                let name = file.lastPathComponent
+                let body = try #require(
+                    SourceScan.declarationBody(
+                        after: "func render(",
+                        in: source
+                    )
+                )
+                let gate = SourceScan.callSites(
+                    in: Array(body),
+                    for: "LiquidGlassGate.rendered"
+                )
+                #expect(
+                    gate.count == 1,
+                    Comment(
+                        rawValue:
+                            "\(name): render resolves the style through "
+                            + "LiquidGlassGate.rendered \(gate.count)×"
+                    )
+                )
+                // The argument is the stored style; it appears once.
+                let stored = try #require(
+                    SourceScan.callArguments(
+                        of: "LiquidGlassGate.rendered(",
+                        in: body
+                    )?.trimmingCharacters(in: .whitespaces),
+                    Comment(rawValue: "\(name): the gate's argument")
+                )
+                #expect(
+                    body.occurrences(of: stored) == 1,
+                    Comment(
+                        rawValue:
+                            "\(name): `\(stored)` is read beside the "
+                            + "gated copy — that reader draws the "
+                            + "stored glass"
+                    )
+                )
+            }
+        }
     }
 
     /// The wired handler re-draws BOTH bars; a handler that forgot
@@ -107,11 +151,10 @@ struct ReduceTransparencySeamTests {
         )
         #expect(wiring.contains("reduceTransparencyDidChange()"))
         #expect(wiring.contains("LiquidGlassGate.observe"))
-        // Wired in `start()`, not the init-time bootstrap: a
-        // permission revoke runs `stop()` and `start()` on ONE
-        // core, and `stop()` retires the token (code-reviewer,
-        // 2026-09-13 — the bootstrap wiring went silent after
-        // one revoke/re-grant cycle).
+        // Wired in `start()` and retired in `stop()`, the token
+        // owned per core: a stopped core draws nothing, and an
+        // init-time wiring retired by `stop()` never came back
+        // on the re-grant's `start()` (code-reviewer, 2026-09-13).
         let boot = try SourceScan.strippedSource(
             at: Self.core.appendingPathComponent("App/KiwiCore+Boot.swift")
         )

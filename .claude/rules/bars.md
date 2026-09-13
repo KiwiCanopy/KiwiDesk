@@ -265,10 +265,14 @@ Obligations:
   setting asks for opaque backgrounds — and every consumer
   downstream (`glassEnabled`, `hasBox`, `GlassHosting`, the
   plate painters) reads the copy; `GlassTint` refuses a
-  colour beneath it as the net, and the bootstrap observer
-  re-draws BOTH bars on the flip. A new bar surface's render takes
-  the same read — the roster is DERIVED, every `Bar/` render that
-  hosts glass — spelling its stored style nowhere but as the
+  colour beneath it as the net, and the observer that re-draws
+  BOTH bars on the flip is wired in `start()` and retired in
+  `stop()`, its token owned per core and never a static — a
+  stopped core draws nothing, and the next core must not inherit
+  the last one's observer. A new bar surface's render takes
+  the same read — the roster is DERIVED Core-wide from every type
+  reaching `GlassHosting.resolve(`, the one hosting decision —
+  spelling its stored style nowhere but as the
   gate's argument, and a new reader of the OS flag in Core is a
   second gate free to disagree with the first
   (`ReduceTransparencySeamTests`: one home per tree, one read per
