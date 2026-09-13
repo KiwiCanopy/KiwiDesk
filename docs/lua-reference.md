@@ -1156,10 +1156,18 @@ the row was pushed. One slot size serves every slot, so resizing
 one (`resize`, `scroll.set_slot_size`, a mouse edge drag) moves
 every window along the row — and the focused window then keeps
 its place on screen while the row rearranges around it. The same
-holds when a window opens or closes ahead of the focus, or when
-`swap` re-seats it. Only a *focus change* pans the viewport,
-which is what makes the minimal pan above read as
-scroll-into-view. Near a row end the boundary wins, as always:
+holds when a window opens or closes ahead of the focus. A
+*focus change* pans the viewport minimally, which is what makes
+the pan above read as scroll-into-view.
+
+:::unreleased
+A reorder — `swap`, or a drag on the App Bar — holds the
+viewport instead: the two windows visibly trade places, and the
+view pans only when the moved window's new slot would fall
+outside it.
+:::
+
+Near a row end the boundary wins, as always:
 the row never reveals empty margin past its ends, so there the
 focus re-anchors only as far as it can.
 

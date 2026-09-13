@@ -275,6 +275,17 @@ public struct Space: Sendable, Equatable {
             trackWeights[a] = trackWeights[b]
             trackWeights[b] = weight
         }
+        releaseScrollSlot()
+    }
+
+    /// Forgets which slot the scrolling rest was measured
+    /// against, so the next pass holds the viewport and pans only
+    /// as far as visibility asks (#1353). A reorder is the user's
+    /// act on a static row — the pair must visibly trade places
+    /// — where `follow` otherwise holds the focused window's
+    /// place on screen (#966). Every reorder calls it.
+    public mutating func releaseScrollSlot() {
+        scrollRest?.slot = nil
     }
 
     /// Moves window to clamped target index.

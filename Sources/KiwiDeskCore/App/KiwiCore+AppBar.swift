@@ -218,6 +218,7 @@ extension KiwiCore {
                 tiled.contains(id)
                     ? (reordered.next() ?? id) : id
             }
+            sp.releaseScrollSlot()
         }
         retile()
         // The drop is the same array mutation as `scrollingStep`'s

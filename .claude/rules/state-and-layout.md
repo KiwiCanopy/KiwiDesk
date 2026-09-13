@@ -852,13 +852,21 @@ editing here:
   overlay half is [borders.md](borders.md)'s pin row.
 - **A scrolling viewport offset travels with the slot it was
   measured against (#966).** One slot size serves the whole
-  row, so anything that changes it — a resize, a `swap`, a
-  window opening or closing ahead of the focus, a #677 re-pack
-  — moves every slot underneath that offset, and `follow` is
-  the one anchor that reads it. So `Space.scrollRest` carries
-  the offset AND the focused slot it was measured against as
-  ONE value: the same focus holds that slot's place on screen,
-  a different focus holds the offset and pans minimally (#66).
+  row, so anything that changes it — a resize, a window opening
+  or closing ahead of the focus, a #677 re-pack — moves every
+  slot underneath that offset, and `follow` is the one anchor
+  that reads it. So `Space.scrollRest` carries the offset AND
+  the focused slot it was measured against as ONE value: the
+  same focus holds that slot's place on screen, a different
+  focus holds the offset and pans minimally (#66). **A REORDER
+  releases the slot at its mutation site (#1353)** — `Space.swap`
+  and the App Bar drop call `Space.releaseScrollSlot`, so the
+  next pass holds the viewport and the pair visibly trades
+  places — because the layout cannot tell a swap from a
+  neighbour closing ahead of the focus, and only the model
+  knows which happened; a new reorder route calls the release,
+  since nothing scans for one that does not
+  (`ScrollSlotReleaseTests`).
   "Place" is the slot's leading edge, except where it was
   resting flush against the TRAILING border, which is the edge
   it keeps instead — otherwise a shrink tears it off a border it
@@ -900,8 +908,8 @@ editing here:
   the border half: the arm that keeps an edge, the tolerance
   that decides flushness, and the producer's recording.
   `ScrollRestPlumbingTests` pins the carrier. The product
-  ruling — including why `swap` is ruled IN rather than
-  excluded — is `docs/design-decisions.md`'s.
+  ruling — including why a reorder is ruled OUT at the model
+  rather than in the layout — is `docs/design-decisions.md`'s.
 - **A resize store holding an absolute LENGTH owes a ceiling,
   and since #1057 the whole press DECISION lives in ONE pure
   type (#966/#1057).** `ScrollSlotDomain.decide` — reached only
