@@ -6,12 +6,13 @@ import Foundation
 /// the tracks on screen, so a file below the floor keeps the
 /// layout it drew — a stored 2 showed three tracks and becomes
 /// 3. Reaches the global `track` group and every `override`
-/// under it, by PATH under a profile root's `settings` and a
-/// bundle root's `profiles[].settings`.
+/// under it, by PATH — `settings.layout.track` under a profile
+/// root and under a bundle root's `profiles[]`.
 extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps
     /// naming what it was written to name.
     static let trackGroupKey = "track"
+    static let trackLayoutKey = "layout"
     static let trackLimitKey = "limit"
     static let trackOverrideKey = "override"
     static let trackSettingsKey = "settings"
@@ -88,12 +89,13 @@ extension ConfigMigration {
         return (root, changed)
     }
 
-    /// One `TilingSettings` object: the group's own limit, then
-    /// each override's.
+    /// One `TilingSettings` object: the group's own limit under
+    /// `layout.track`, then each override's.
     static func liftedTrackLimits(
         _ settings: [String: Any]
     ) -> ([String: Any], Bool) {
-        guard var track = settings[trackGroupKey] as? [String: Any]
+        guard var layout = settings[trackLayoutKey] as? [String: Any],
+            var track = layout[trackGroupKey] as? [String: Any]
         else { return (settings, false) }
         var changed = false
         if let limit = track[trackLimitKey] as? Int {
@@ -112,8 +114,9 @@ extension ConfigMigration {
             track[trackOverrideKey] = overrides
         }
         guard changed else { return (settings, false) }
+        layout[trackGroupKey] = track
         var out = settings
-        out[trackGroupKey] = track
+        out[trackLayoutKey] = layout
         return (out, true)
     }
 

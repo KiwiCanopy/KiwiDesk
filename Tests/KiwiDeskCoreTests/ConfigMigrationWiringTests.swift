@@ -225,9 +225,17 @@ struct ConfigMigrationWiringTests {
         // are untouched is a claim about a file that never had any.
         #expect(asWritten.contains("0.4"))
 
-        // An unversioned v0.9.7 profile:
+        // An unversioned v0.9.7 profile: the retired content
+        // spelling, and the track limit one below today's — what
+        // that build stored for the picture today's default
+        // draws (#1354's lift).
+        let downgradedLimit = asWritten.replacingOccurrences(
+            of: "\"limit\" : \(TrackParams().limit)",
+            with: "\"limit\" : \(TrackParams().limit - 1)"
+        )
+        #expect(downgradedLimit != asWritten)
         let old =
-            asWritten
+            downgradedLimit
             .replacingOccurrences(
                 of: "\"icon_and_title\"",
                 with: "\"icon_and_name\""
@@ -253,10 +261,11 @@ struct ConfigMigrationWiringTests {
             )
         )
 
-        // When format: 0 was already present, exactly two lines change:
-        // format 0 -> 1 and icon_and_name -> icon_and_title.
+        // When format: 0 was already present, exactly three lines
+        // change: the stamp, icon_and_name -> icon_and_title, and
+        // the lifted track limit.
         let withFormat0 =
-            asWritten
+            downgradedLimit
             .replacingOccurrences(
                 of: "\"icon_and_title\"",
                 with: "\"icon_and_name\""
@@ -281,8 +290,13 @@ struct ConfigMigrationWiringTests {
         )
         #expect(before.count == after.count)
         let changed = zip(before, after).filter { $0 != $1 }
-        #expect(changed.count == 2)
+        #expect(changed.count == 3)
         #expect(changed.contains { $0.1.contains("icon_and_title") })
+        #expect(
+            changed.contains {
+                $0.1.contains("\"limit\" : \(TrackParams().limit)")
+            }
+        )
         #expect(
             changed.contains {
                 $0.1.contains(

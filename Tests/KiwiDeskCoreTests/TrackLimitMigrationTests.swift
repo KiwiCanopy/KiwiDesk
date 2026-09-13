@@ -10,20 +10,45 @@ import Testing
 /// drew three tracks and becomes 3; a stored 1 lands on the new
 /// floor. The failure this prevents is silent: a file left as it
 /// was decodes fine and shows one track fewer.
+///
+/// Every fixture is what the ENCODER writes, re-stamped below
+/// the floor — never a hand-written shape. The first draft
+/// spelled `settings.track` where the file says
+/// `settings.layout.track`, went green on its own fixtures, and
+/// stamped the owner's real profiles to the new format with
+/// nothing lifted (device, 2026-09-13): a hand-written fixture
+/// proves the step against the fixture, not against the file.
 @Suite("Track limit migration (#1354)")
 struct TrackLimitMigrationTests {
-    private func json(_ text: String) -> Data { Data(text.utf8) }
-
-    /// A PROFILE-shaped root one below the floor the lift
-    /// crossed — derived from the current format, so a later
-    /// bump does not turn this fixture into a current file.
-    private func profile(_ settings: String) -> Data {
-        json(
-            """
-            {"format":\(Profile.currentFormat - 1),\
-            "monitor_sets":{},"settings":\(settings)}
-            """
+    /// A profile file as this build writes it, with `limit`
+    /// (and optionally one override) set, stamped `format`.
+    private func profile(
+        limit: Int,
+        override: (SpaceID, Int)? = nil,
+        format: Int = ConfigMigration.trackLiftProfileFormat - 1
+    ) throws -> Data {
+        var settings = TilingSettings()
+        settings.track.limit = limit
+        settings.stack.masterRatio = 0.4
+        if let (space, value) = override {
+            var over = TrackOverride()
+            over.limit = value
+            settings.track.override[space] = over
+        }
+        let profile = Profile(
+            format: format,
+            name: "P",
+            monitorSets: [MonitorSet(monitors: ["A:100x100"])],
+            spaceModes: [:],
+            settings: settings
         )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(profile)
+    }
+
+    private func decoded(_ data: Data) throws -> Profile {
+        try JSONDecoder().decode(Profile.self, from: data)
     }
 
     private func track(_ data: Data) throws -> [String: Any] {
@@ -31,55 +56,37 @@ struct TrackLimitMigrationTests {
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         let settings = try #require(root["settings"] as? [String: Any])
-        return try #require(settings["track"] as? [String: Any])
+        let layout = try #require(settings["layout"] as? [String: Any])
+        return try #require(layout["track"] as? [String: Any])
     }
 
     @Test("a stored limit is lifted by one, its siblings kept")
     func storedLimitIsLifted() throws {
-        let data = profile(
-            #"{"track":{"limit":2,"axis":"vertical","auto_tracks":false}}"#
-        )
+        let data = try profile(limit: 2)
         let migrated = try #require(ConfigMigration.migrated(data))
-        let track = try track(migrated)
-        #expect(track["limit"] as? Int == 3)
-        #expect(track["axis"] as? String == "vertical")
-        #expect(track["auto_tracks"] as? Bool == false)
+        let after = try decoded(migrated)
+        #expect(after.settings.track.limit == 3)
+        #expect(after.settings.track.axis == TrackParams().axis)
+        #expect(after.format == Profile.currentFormat)
     }
 
     @Test("a stored 1 lands on the floor")
     func storedOneLandsOnTheFloor() throws {
-        let data = profile(#"{"track":{"limit":1}}"#)
+        let data = try profile(limit: 1)
         let migrated = try #require(ConfigMigration.migrated(data))
-        #expect(try track(migrated)["limit"] as? Int == TrackParams.minLimit)
+        #expect(
+            try decoded(migrated).settings.track.limit
+                == TrackParams.minLimit
+        )
     }
 
     @Test("every per-Space override is lifted too")
     func overridesAreLifted() throws {
-        let data = profile(
-            #"{"track":{"limit":3,"override":{"2":{"limit":4},"#
-                + #""5":{"axis":"horizontal"}}}}"#
-        )
+        let data = try profile(limit: 3, override: (SpaceID(2), 4))
         let migrated = try #require(ConfigMigration.migrated(data))
-        let track = try track(migrated)
-        let overrides = try #require(track["override"] as? [String: Any])
-        #expect((overrides["2"] as? [String: Any])?["limit"] as? Int == 5)
-        #expect((overrides["5"] as? [String: Any])?["limit"] == nil)
-        #expect(
-            (overrides["5"] as? [String: Any])?["axis"] as? String
-                == "horizontal"
-        )
-    }
-
-    @Test("a profile with no track group gains no track group")
-    func noTrackGroupGainsNone() throws {
-        let data = profile(#"{"gap":{"inner":8}}"#)
-        let migrated = try #require(ConfigMigration.migrated(data))
-        let root = try #require(
-            JSONSerialization.jsonObject(with: migrated) as? [String: Any]
-        )
-        let settings = try #require(root["settings"] as? [String: Any])
-        #expect(settings["track"] == nil)
-        #expect(ConfigMigration.migratingTrackLimitCount(data) == nil)
+        let after = try decoded(migrated)
+        #expect(after.settings.track.limit == 4)
+        #expect(after.settings.track.override[SpaceID(2)]?.limit == 5)
     }
 
     /// The step ENDS on its own: a lifted 3 is the same bytes as
@@ -89,24 +96,18 @@ struct TrackLimitMigrationTests {
     /// directly: `migrated`'s own gate would rescue a current
     /// file and prove nothing about the step.
     @Test("the step stands down at the format it introduced")
-    func stepIsIdempotent() {
-        let profileAtFloor = json(
-            """
-            {"format":\(ConfigMigration.trackLiftProfileFormat),\
-            "monitor_sets":{},"settings":{"track":{"limit":3}}}
-            """
+    func stepIsIdempotent() throws {
+        let profileAtFloor = try profile(
+            limit: 3,
+            format: ConfigMigration.trackLiftProfileFormat
         )
         #expect(
             ConfigMigration.migratingTrackLimitCount(profileAtFloor)
                 == nil
         )
-        let bundleAtFloor = json(
-            """
-            {"\(SetupBundle.shapeMarker)":true,\
-            "format":\(ConfigMigration.trackLiftBundleFormat),\
-            "profiles":[{"format":\(Profile.currentFormat),\
-            "monitor_sets":{},"settings":{"track":{"limit":3}}}]}
-            """
+        let bundleAtFloor = try bundle(
+            limit: 3,
+            format: ConfigMigration.trackLiftBundleFormat
         )
         #expect(
             ConfigMigration.migratingTrackLimitCount(bundleAtFloor)
@@ -114,14 +115,17 @@ struct TrackLimitMigrationTests {
         )
         // And one below either floor IS lifted, so the gate is
         // read from the right side.
-        let profileBelow = json(
-            """
-            {"format":\(ConfigMigration.trackLiftProfileFormat - 1),\
-            "monitor_sets":{},"settings":{"track":{"limit":3}}}
-            """
-        )
+        let profileBelow = try profile(limit: 3)
         #expect(
             ConfigMigration.migratingTrackLimitCount(profileBelow)
+                != nil
+        )
+        let bundleBelow = try bundle(
+            limit: 3,
+            format: ConfigMigration.trackLiftBundleFormat - 1
+        )
+        #expect(
+            ConfigMigration.migratingTrackLimitCount(bundleBelow)
                 != nil
         )
     }
@@ -129,34 +133,45 @@ struct TrackLimitMigrationTests {
     @Test("the surgical edit keeps the file's own bytes around the lift")
     func surgicalEditKeepsTheBytes() throws {
         // A Double the walk's serializer would re-spell (the
-        // reason the textual edit exists): it must survive.
-        let data = profile(
-            #"{"track":{"limit":2},"stack":{"master_ratio":0.4}}"#
-        )
+        // reason the textual edit exists): it must survive, and
+        // the lifted key keeps the encoder's spacing.
+        let data = try profile(limit: 2)
         let migrated = try #require(ConfigMigration.migrated(data))
         let text = try #require(String(data: migrated, encoding: .utf8))
-        #expect(text.contains("0.4}"))
-        #expect(text.contains(#""limit":3"#))
+        #expect(text.contains("\"master_ratio\" : 0.4"))
+        #expect(text.contains("\"limit\" : 3"))
+        #expect(try track(migrated)["limit"] as? Int == 3)
+    }
+
+    /// A bundle as `exportSetup` writes it, carrying one profile
+    /// inline, re-stamped.
+    private func bundle(limit: Int, format: Int) throws -> Data {
+        let inner = try decoded(
+            try profile(limit: limit, format: Profile.currentFormat)
+        )
+        let bundle = SetupBundle(
+            format: format,
+            writtenBy: "test",
+            config: nil,
+            profiles: [inner],
+            palettes: []
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(bundle)
     }
 
     @Test("a bundle's inline profiles are lifted by path")
     func bundleProfilesAreLifted() throws {
-        let data = json(
-            """
-            {"\(SetupBundle.shapeMarker)":true,\
-            "format":\(SetupBundle.currentFormat - 1),\
-            "profiles":[{"format":\(Profile.currentFormat - 1),\
-            "monitor_sets":{},"settings":{"track":{"limit":2}}}]}
-            """
+        let data = try bundle(
+            limit: 2,
+            format: ConfigMigration.trackLiftBundleFormat - 1
         )
         let migrated = try #require(ConfigMigration.migrated(data))
-        let root = try #require(
-            JSONSerialization.jsonObject(with: migrated) as? [String: Any]
+        let after = try JSONDecoder().decode(
+            SetupBundle.self,
+            from: migrated
         )
-        let profiles = try #require(root["profiles"] as? [[String: Any]])
-        let settings = try #require(
-            profiles.first?["settings"] as? [String: Any]
-        )
-        #expect((settings["track"] as? [String: Any])?["limit"] as? Int == 3)
+        #expect(after.profiles.first?.settings.track.limit == 3)
     }
 }
