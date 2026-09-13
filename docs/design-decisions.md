@@ -9473,13 +9473,33 @@ earlier degraded-render bug: the items stay embedded as the glass's
 a hue for it to sample — never a replacement for the content. A
 fully transparent `fill_color` leaves the glass clear. One seam
 owns the five hosting modes (`GlassHosting` / `GlassTint`, #407).
+
+:::unreleased
 The finish is ON by default on every surface (owner ruling
 2026-09-10, reversing the launch-day no-glass default: the bars
 are the app's face, and a fresh install or a Reset All Settings
 should show the finish the app is designed around rather than
-ask for it). Written profiles carry the leaf explicitly, so an
-existing config keeps its choice; only a fresh seed and a
-hand-written config that omits the key take the new default.
+ask for it). A leaf whose ABSENCE changed meaning owes the §5
+crossing, because absence was a stored value: a profile written
+before v1.2.0 carries both bar leaves and no panel group at all,
+so read under the new default it says bars off beside a panel on
+— the state the one row exists to make unreachable — on a plain
+upgrade. `ConfigMigration` therefore fills a file below the
+floor: each absent BAR leaf takes the `false` its absence meant,
+and the panel — which had no surface before v1.2.0, so no leaf a
+user could have set — takes the two bars' agreement where they
+agree and `false` otherwise, since the bars are the user's
+stated opinion about glass, and a flat `false` would have minted
+the same divergence at the other polarity for a setup that had
+glass on. The step reaches the two shapes that carry
+`TilingSettings` by path, never by the look of an object
+(`GlassDefaultMigrationTests`, `ConfigMigrationGlassRoutingTests`).
+An existing setup keeps the look it had, and only a fresh seed
+takes the new default. Below macOS 26 the toggle is absent, so a
+setup authored there carries the stored value wherever it is
+imported, the finish included.
+:::
+
 The finish stays OS-gated: ignored below
 macOS 26 (`glassEnabled` = `liquidGlass && glassAvailable`), and
 its Settings toggle is *hidden* there — an OS-capability gate, so

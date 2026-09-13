@@ -1661,9 +1661,9 @@ rest; the rest behind **Style**):
 
 - **Background style**: boxed (a box per item honoring corner
   roundness) or plain (items on a shared translucent strip).
-- **Liquid Glass**: a separate on/off finish, on by default,
-  that lays a macOS&nbsp;26 glass material over the boxes or the
-  plate — it is **not** a third background style. One switch covers the
+- **Liquid Glass**: a separate on/off finish that lays a
+  macOS&nbsp;26 glass material over the boxes or the plate — it
+  is **not** a third background style. One switch covers the
   whole app: **Colours &amp; Animations ▸ Liquid Glass**, over
   the Space Bar, the App Bar and the shortcuts panel together.
   Fill tints it (transparent = clear glass) and, when Fill is
@@ -1672,6 +1672,11 @@ rest; the rest behind **Style**):
   only on macOS&nbsp;26 and later; a profile that turns it on
   still opens on older macOS, which draws the Boxed or Plain
   shape underneath it.
+
+  :::unreleased
+  On by default, on all three surfaces.
+  :::
+
 - **Background size**: how far Plain's strip or the Liquid Glass
   plate reaches — **Hug items** (default; the plate wraps the
   items like the Dock wraps its icons) or **Full width**
