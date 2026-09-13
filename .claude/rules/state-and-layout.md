@@ -1137,29 +1137,51 @@ editing here:
   permanently. A net is a correction that places a window
   nothing else will (the clamp, the stash capture, the
   display-crossing re-anchor); a VERB is the user's own ask, and
-  **a verb the `EffectiveFloat` docstring does not name as ruled
-  asks the flag until it is ruled the same way** — one verb at a
-  time, that docstring being the one roster and #1286 the open
-  sweep. The reason a verb crosses at all is that a
+  **a verb — or a reader that is no verb, a ring or a raise —
+  the `EffectiveFloat` docstring does not name as ruled asks the
+  flag until it is ruled the same way** — one at a time, that
+  docstring being the one roster. The reason a verb
+  crosses at all is that a
   floating-mode member has no layout answer to give and a frame
   of its own to change, so refusing it while resizing its
   flag-floating neighbour is a difference with nothing behind it
   (#1184, `FloatingResizeCommandTests`). A native-fullscreen
   focus never reaches the float route — that is the #670
   bullet's `resize` clause (#1298), and a guard inside the float
-  branch alone leaves the tiled paths writing. **The mode arm
+  branch alone leaves the tiled paths writing. #1286 swept the
+  flag's readers (the census is the comment on the issue): the
+  float-tier raise crossed — its focus guard and its FLOOR
+  alike, since standing down the per-focus arm and leaving the
+  switch-time arm a plane of floating-mode members is the
+  one-arm trap — while the raise's TARGETS did not (no tiled
+  plane to lift over); the unfocused ring asks NEITHER, reaching
+  every float by owner ruling; and the Space Bar badge with its
+  group-breaking stays on the flag by ruling — it marks the
+  exception to a layout, and a floating-mode space has none
+  (`FloatingModeRingTests`, `FloatingModeRaiseTests`,
+  `SpaceBarBadgeTests`; the argument is
+  `docs/design-decisions.md`'s). What the sweep leaves is a
+  RULING per reader, and `FloatFlagReaderCensusTests` is the
+  census that makes a new bare `.isFloating` read red until it
+  is classified — identity, routed, a "tiled member" negation
+  the docstring refuses, or ruled to stay; `screenHome`'s float
+  stand-down (#1010) is #1362's to rule. Nothing scans for a
+  bare-flag NET beyond that count, so a new net still routes
+  deliberately. **The mode arm
   names the
   space whose SCREEN the
   correction targets** — the TARGET for a move, the space a drop
   LANDED in, the RENDER space for the traveler re-home whose
-  destination is that screen — and a correction whose strips are
-  the HOME space's passes nil for a window that is not a member
-  there, or a tiled sticky traveler is clamped against a screen
-  it is not on. Nothing scans for a new bare-flag net, so each
-  one routes deliberately, and the predicate must be the DECISION
-  rather than a decoration beside a hand-spelled `.floating`
-  check; `EffectiveFloatTests` holds the algebra and the consumer
-  suites — `FloatingModeBarClampTests`, `TravelerRehomeConsumerTests`
+  destination is that screen, the active space for a raise on a
+  MEMBER, through the one `isEffectiveFloatOnActiveSpace` door
+  the drop clamp shares — and a correction whose strips
+  are the HOME space's passes nil for a window that is not a
+  member there, or a tiled sticky traveler is clamped against a
+  screen it is not on. The predicate must be the
+  DECISION rather than a decoration beside a hand-spelled
+  `.floating` check; `EffectiveFloatTests` holds the algebra and
+  the consumer suites — `FloatingModeBarClampTests`,
+  `TravelerRehomeConsumerTests`
   — hold the nets, each blind to the algebra by construction. The
   traveler re-home (#1217): `FloatingLayout` draws nothing, so a
   tiled sticky traveler rendering on a floating-mode space of

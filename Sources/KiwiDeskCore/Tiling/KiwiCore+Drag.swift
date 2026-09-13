@@ -56,24 +56,10 @@ extension KiwiCore {
     }
 
     /// Whether the drop leaves `id` where nothing will place it
-    /// — its own float flag, or a space that lays nothing out
-    /// (#1178). The one question the drop's clamp arm asks.
-    ///
-    /// The mode arm names the space the drop LANDED in, and only
-    /// for a window that belongs to it. A tiled sticky traveler
-    /// renders into the active space without being a member of
-    /// it (#414 v2), so answering from its HOME space would
-    /// clamp it against strips on a screen it is not on and skip
-    /// the snap-back that owns it (architect review,
-    /// 2026-08-31). The flag arm is unconditional, as it was.
+    /// (#1178) — the space it LANDED in is the active one, so this
+    /// is the one active-space door, named for the drop's question.
     func dropLandsUnmanaged(_ id: WindowID) -> Bool {
-        let landed = activeSpace
-        return EffectiveFloat.applies(
-            isFloating: state.windows[id]?.isFloating == true,
-            mode: landed?.windows.contains(id) == true
-                ? landed?.mode
-                : nil
-        )
+        isEffectiveFloatOnActiveSpace(id)
     }
 
     func handleDragEnd(
