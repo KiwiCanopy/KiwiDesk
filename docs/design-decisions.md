@@ -1351,8 +1351,14 @@ ring too. This is a border-only presentation policy:
 `Navigation.pileMates` remains the
 shared authority for navigation, swaps, and z-order restoration. In
 monocle — where only the focused window is visible — borders stay
-focused-only. Floating windows are excluded from the unfocused set;
-the focused window is still ringed whether tiled or floating.
+focused-only. The focused window is ringed whether tiled or
+floating.
+
+:::unreleased
+Floating windows are in the unfocused set too, flag-floats and
+floating-mode members alike — the #1286 entry below carries the
+argument; they were excluded here without one.
+:::
 
 A **transient overlay** — a window that floats for a *structural*
 reason (accessory activation policy, a non-standard panel subrole,
@@ -3423,6 +3429,43 @@ because a floating-mode member has no layout answer to give and a
 frame of its own to change; whether the z-order raise, the Space
 Bar's float badge and the focus ring should follow is a question
 about what each of those *means*, not a consequence of this one.
+
+:::unreleased
+**The ring and the float-tier raise follow; the badge stays on
+the flag ([#1286](https://github.com/KiwiCanopy/KiwiDesk/issues/1286)).**
+[Rationale] Of the flag's readers, most are the flag's own
+identity, a net already on the predicate, or the "is this a
+tiled member" question the predicate's docstring rules is *not*
+its negation; the three the #1184 entry named are each answered
+by what they mean. The **unfocused ring** reaches every float,
+flag and floating-mode alike, because the exclusion it replaced
+had nothing behind it: #278 excluded flag-floats from the
+unfocused set without an argument, a floating-mode member rang
+anyway since the code asked the flag, and the two are the same
+thing to the user. Ruled in rather than out (owner, 2026-09-13):
+a ring sits behind its own window, so an overlapped float shows
+its ring where it peeks out and covers nothing, and in a Floating
+space the rings say which windows KiwiDesk manages — the reading
+the ring exists for. Overlays and fullscreen windows keep their
+exclusions, monocle stays focused-only. The **float-tier
+raise** keeps floats above a tiled
+plane, and read through the flag a floating-mode member *is*
+that plane: every member focus, and every switch onto the space,
+lifted a flagged or sticky float back over its siblings, an
+order the user could never keep. So the raise stands down after
+a focus that lands on an effective float and takes no
+floating-mode member as the floor its switch-time lift clears,
+while its *targets* stay the flag's, because that space has no
+plane to lift over. The **badge** marks the exception to a
+space's layout — one window that floats where the rest tile —
+and a floating-mode space has no exception to mark: every glyph
+would wear the layout's own symbol and say nothing, so it keeps
+the flag, and the same-app grouping it breaks keeps it with it
+(owner ruling 2026-09-13). The ring and the badge do not
+"disagree" by this: one is a mark drawn, the other a ring
+withheld, and neither claims the space is anything but what the
+user set it to.
+:::
 
 ### Spaces, profiles & config ownership
 

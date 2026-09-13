@@ -3038,6 +3038,11 @@ border.set_focused_color("#4A9816")
 windows (default `false`). Ignored in monocle, where only the
 focused window shows.
 
+:::unreleased
+Floating windows — one you floated, or any window in a space set
+to the floating layout — get the unfocused border too.
+:::
+
 **Example:**
 
 ```lua
