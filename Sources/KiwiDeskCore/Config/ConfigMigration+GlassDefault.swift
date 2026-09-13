@@ -99,8 +99,12 @@ extension ConfigMigration {
     /// everywhere is inserted whole, and the panel takes the one
     /// value, after each `settings` opener in ONE pass, so an
     /// opener is edited exactly once. Anything else stands down.
-    /// `surgicallyApplying` re-parses whatever this returns against
-    /// the walk, so a stray edit is never used.
+    /// The value and the absent groups are read over the WHOLE
+    /// text and written at every opener, so in a bundle one
+    /// profile can answer for another; `surgicallyApplying`
+    /// re-parses whatever this returns against the walk, and that
+    /// compare is the net for a stray edit and for that
+    /// cross-profile case alike.
     static func surgicallyFilledGlassLeaves(_ text: String) -> Data? {
         guard text.range(of: "\"\(glassPanelGroup)\"") == nil
         else { return nil }
@@ -132,9 +136,13 @@ extension ConfigMigration {
             else { return nil }
             if object[glassLeafKey] == nil {
                 guard value == "false" else { return nil }
+                // An empty body takes no comma: Foundation's parser
+                // tolerates a trailing one, so the envelope would
+                // let it through.
+                let comma = object.isEmpty ? "" : ","
                 out = out.replacingOccurrences(
                     of: "(\"\(group)\"\\s*:\\s*\\{)",
-                    with: "$1\"\(glassLeafKey)\":false,",
+                    with: "$1\"\(glassLeafKey)\":false" + comma,
                     options: .regularExpression
                 )
             }

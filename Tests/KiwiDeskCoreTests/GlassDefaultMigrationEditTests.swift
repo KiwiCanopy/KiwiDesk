@@ -56,33 +56,22 @@ struct GlassDefaultMigrationEditTests {
     }
 
     /// The textual edit's stand-down: bars that disagree carry
-    /// two values, so the edit stands down and the walk fills
-    /// both profiles.
+    /// two values, so the edit stands down and the walk writes the
+    /// file — pretty-printed, which is the walk's own signature on
+    /// a profile root (a bundle is re-serialized at the stamp
+    /// regardless, so it cannot show this).
     @Test("a shape the textual edit cannot take falls to the walk")
     func strayEditFallsToTheWalk() throws {
-        let mixed = """
-            {"space_bar":{"liquid_glass":true},\
-            "app_bar":{"liquid_glass":false}}
+        let data = profile(
             """
-        let data = json(
-            """
-            {"format":5,"writtenBy":"1.2.2","config":null,\
-            "profiles":[\(inline("A", settings: "{}")),\
-            \(inline("B", settings: mixed))],\
-            "palettes":[]}
+            {"app_bar":{"liquid_glass":true},\
+            "space_bar":{"liquid_glass":false,"thickness":20}}
             """
         )
         let out = try #require(ConfigMigration.migrated(data))
-        // The fallback's own signature: the walk pretty-prints.
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(text.contains("\n"))
-        let profiles = try #require(
-            root(out)["profiles"] as? [[String: Any]]
-        )
-        for p in profiles {
-            let s = try #require(p["settings"] as? [String: Any])
-            #expect(leaf(s, "shortcut_panel") == false)
-        }
+        #expect(leaf(try settings(out), "shortcut_panel") == false)
     }
 
     /// The common shape takes the surgical edit: one line stays
@@ -192,6 +181,51 @@ struct GlassDefaultMigrationEditTests {
             )
         )
         #expect(try spellings(out, of: "liquid_glass") == 3)
+        let text = try #require(String(data: out, encoding: .utf8))
+        #expect(text.contains("\n"))
+    }
+
+    /// Two empty `settings` openers in one bundle, one value: the
+    /// pass edits both, back to front, and each group is spelled
+    /// once per profile. Asked of the edit directly, because a
+    /// bundle is re-serialized at the format stamp after this
+    /// step, so its bytes on disk cannot show the pass.
+    @Test("two openers are each edited once")
+    func twoOpenersAreEachEditedOnce() throws {
+        let text =
+            #"{"format":5,"writtenBy":"1.2.2","config":null,"#
+            + #""profiles":[{"format":3,"settings":{}},"#
+            + #"{"format":3,"settings":{}}],"palettes":[]}"#
+        let edited = try #require(
+            ConfigMigration.surgicallyFilledGlassLeaves(text)
+        )
+        let out = try #require(String(data: edited, encoding: .utf8))
+        #expect(
+            (try? JSONSerialization.jsonObject(with: edited)) != nil
+        )
+        for group in ["app_bar", "space_bar", "shortcut_panel"] {
+            #expect(
+                out.components(separatedBy: "\"\(group)\"").count - 1
+                    == 2
+            )
+        }
+    }
+
+    /// An empty bar group takes its leaf without a trailing comma,
+    /// which Foundation's parser would have tolerated on disk.
+    @Test("an empty bar group takes the leaf without a comma")
+    func emptyGroupTakesNoComma() throws {
+        let out = try #require(
+            ConfigMigration.migrated(
+                profile(
+                    #"{"app_bar":{},"space_bar":{"liquid_glass":false}}"#
+                )
+            )
+        )
+        let text = try #require(String(data: out, encoding: .utf8))
+        #expect(!text.contains("\n"))
+        #expect(!text.contains(",}"))
+        #expect(text.contains(#""app_bar":{"liquid_glass":false}"#))
     }
 
     /// The stand-downs, asked of the edit DIRECTLY: end to end the
@@ -211,6 +245,12 @@ struct GlassDefaultMigrationEditTests {
         let panel = #"{"settings":{"shortcut_panel":{}}}"#
         #expect(
             ConfigMigration.surgicallyFilledGlassLeaves(panel) == nil
+        )
+        let missing =
+            #"{"settings":{"app_bar":{"liquid_glass":true},"#
+            + #""space_bar":{"thickness":20}}}"#
+        #expect(
+            ConfigMigration.surgicallyFilledGlassLeaves(missing) == nil
         )
         let on =
             #"{"settings":{"app_bar":{"liquid_glass":true},"#
