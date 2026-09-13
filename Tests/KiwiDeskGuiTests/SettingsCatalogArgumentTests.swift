@@ -157,7 +157,11 @@ struct SettingsCatalogArgumentTests {
         // card around it.
         // 53 since #1307: the Liquid Glass card, mounted once
         // on Colours & Animations.
-        #expect(direct.values.reduce(0, +) == 53)
+        // 61 since #1250: General ▸ Advanced's eight rows
+        // self-anchor as the drawer's CHILDREN, each mounted
+        // once — the first direct child mounts (the gap rows
+        // reach theirs through an indirect parameter).
+        #expect(direct.values.reduce(0, +) == 61)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from
@@ -236,10 +240,15 @@ struct SettingsCatalogArgumentTests {
         )
     }
 
+    /// A top-level declaration, or a drawer's child through its
+    /// `.children` (#1250) — a child is a catalog declaration
+    /// too, so a double mount of one trips the count the same
+    /// way.
     private func catalogPath(_ argument: String) -> String? {
         SourceScan.firstMatch(
             in: argument,
-            pattern: #"^SettingsCatalog\.(\w+\.\w+)$"#
+            pattern:
+                #"^SettingsCatalog\.(\w+\.\w+(?:\.children\.\w+)?)$"#
         )
     }
 

@@ -78,7 +78,9 @@ struct SettingsCatalogTests {
         // those families have, their own labels being dynamic.
         // 71 since #1307: the Liquid Glass card, one switch
         // over both bars and the shortcuts panel.
-        #expect(allEntries.count == 71)
+        // 79 since #1250: General ▸ Advanced's eight rows, the
+        // drawer's children, so a search hit opens the drawer.
+        #expect(allEntries.count == 79)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

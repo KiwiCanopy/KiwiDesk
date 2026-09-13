@@ -35,6 +35,10 @@ extension GeneralSection {
                     L("general.advanced.log.range", "Time range")
                 )
                 .accessibilityValue(logRange.title)
+                .searchAnchored(
+                    SettingsCatalog.general.generalAdvanced
+                        .children.logRange
+                )
                 HelpButton(
                     explanation: L(
                         "general.advanced.log.export.help",
@@ -69,6 +73,10 @@ extension GeneralSection {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
+        .searchAnchored(
+            SettingsCatalog.general.generalAdvanced.children
+                .exportLog
+        )
     }
 
     /// The problem alert — built from the problem it narrates

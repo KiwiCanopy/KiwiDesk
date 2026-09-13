@@ -113,8 +113,49 @@ struct GeneralControls: Sendable {
         "general.about.guide",
         "Guide"
     )
+    /// Declared with its children so a search hit on any of
+    /// them opens the drawer it lands in (#1250): a childless
+    /// drawer left every Advanced row landing collapsed.
     let generalAdvanced = SettingsDrawer(
         "general.advanced.title",
-        "Advanced"
+        "Advanced",
+        children: GeneralAdvancedControls()
+    )
+}
+
+/// General ▸ Advanced rows, keyed on their census label keys so
+/// the census hit resolves to the row (#1250).
+struct GeneralAdvancedControls: Sendable {
+    let configFile = SettingsControl(
+        "general.advanced.config_file",
+        "Configuration file"
+    )
+    let editLua = SettingsControl(
+        "general.advanced.edit_lua",
+        "Edit init.lua directly"
+    )
+    let exportBackup = SettingsControl(
+        "general.advanced.backup.export",
+        "Export KiwiDesk Backup…"
+    )
+    let exportLog = SettingsControl(
+        "general.advanced.log.export",
+        "Export Log…"
+    )
+    let logRange = SettingsControl(
+        "general.advanced.log.range",
+        "Time range"
+    )
+    let discardArrangement = SettingsControl(
+        "general.advanced.discard_arrangement",
+        "Discard Saved Window Arrangement"
+    )
+    let resetAll = SettingsControl(
+        "general.advanced.reset_all",
+        "Reset All Settings…"
+    )
+    let restoreBackup = SettingsControl(
+        "general.advanced.backup.restore",
+        "Restore from Backup…"
     )
 }

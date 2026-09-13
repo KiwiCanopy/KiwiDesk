@@ -62,7 +62,8 @@ struct SettingsCatalogSiteTests {
         // 64 since #1125: the two Desktop offers, the doors the
         // withheld families are reached through.
         // 65 since #1307: the Liquid Glass card.
-        #expect(names.count == 65)
+        // 73 since #1250: General ▸ Advanced's eight rows.
+        #expect(names.count == 73)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
