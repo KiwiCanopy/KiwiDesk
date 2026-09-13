@@ -81,9 +81,10 @@ extension KiwiCore {
         let tiled = state.effectiveTiledMembers(of: space)
         let travelers = tiled.filter { !space.windows.contains($0) }
         // The EFFECTIVE float on the space it renders ON, never
-        // the flag (#1286): an unfocused ring on a free float draws
-        // across the window in front. Travelers included — #1217
-        // re-homes a tiled sticky as a free frame there.
+        // the flag (#1286): the unfocused ring outlines a layout's
+        // slots, and a floating-mode member has none, like a
+        // flag-float. Travelers included — #1217 re-homes a tiled
+        // sticky as a free frame there.
         let floating = Set(
             (space.windows + travelers).filter {
                 EffectiveFloat.applies(

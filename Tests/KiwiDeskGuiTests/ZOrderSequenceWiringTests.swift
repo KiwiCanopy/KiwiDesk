@@ -137,13 +137,26 @@ struct ZOrderSequenceWiringTests {
         #expect(source.contains("policy: .restore"))
     }
 
+    /// Two hops since #1286: the raise takes `floatRaiseFloor`,
+    /// which asks the effective float before handing the plane
+    /// to `raiseFloor`. A raise that re-derived either beside the
+    /// call would put a floating-mode member back on the plane
+    /// with `FloatingModeRaiseTests` green — that suite reads the
+    /// derivation, not the call site.
     @Test("The float raise derives its floor through the rule")
     func floatRaiseUsesTheFloorRule() throws {
-        let source = try body(
+        let raise = try body(
             of: "raiseFloatsAndSticky",
             in: "KiwiCore+ZOrderFloats.swift"
         )
-        #expect(source.contains("raiseFloor("))
+        #expect(raise.contains("floatRaiseFloor("))
+        #expect(!raise.contains("effectiveTiledMembers("))
+        let floor = try body(
+            of: "floatRaiseFloor",
+            in: "KiwiCore+ZOrderFloatLayer.swift"
+        )
+        #expect(floor.contains("raiseFloor("))
+        #expect(floor.contains("EffectiveFloat.applies("))
     }
 
     /// The held-warp re-fire (#689) is the same

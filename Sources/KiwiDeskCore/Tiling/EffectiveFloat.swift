@@ -15,7 +15,8 @@
 /// a floating-mode member is a product question per verb, which
 /// this type does not answer.
 ///
-/// This docstring is the one roster of which verbs are ruled.
+/// This docstring is the one roster of which verbs — and which
+/// readers that are no verb, a ring or a raise — are ruled.
 /// `resize` is ruled onto the predicate (#1184,
 /// `FloatingResizeCommandTests`), standing down for a
 /// native-fullscreen window (#670) on both arms — one arm alone
@@ -27,7 +28,8 @@
 /// focus ring stands down for an effective float on the space it
 /// renders on (`KiwiCore+Borders`, `FloatingModeRingTests`), and
 /// the float-tier raise stands down after a focus that lands on
-/// one (`KiwiCore+ZOrderFloats.raiseFloatsAbove`,
+/// one and takes no floating-mode member as its FLOOR
+/// (`KiwiCore+ZOrderFloats.raiseFloatsAbove`, `floatRaiseFloor`,
 /// `FloatingModeRaiseTests`) while its TARGETS stay the flag's,
 /// there being no tiled plane in a floating-mode space to lift
 /// over. Ruled to STAY on the flag: the Space Bar float badge and
@@ -36,10 +38,12 @@
 /// space have none to mark (owner ruling 2026-09-13,
 /// `SpaceBarBadgeTests`). Every other reader is the flag's own
 /// identity, a net already routed here, or a "tiled member"
-/// question — the negation below; the sweep's census is on
-/// #1286. A verb ruled later states its own stand-down — always
-/// the verb's, never the route's. Nothing scans for a bare-flag
-/// net, so a new one routes here deliberately.
+/// question — the negation below — and
+/// `FloatFlagReaderCensusTests` holds that census per file, so a
+/// new `.isFloating` read reds until it is classified there; the
+/// argument per reader is the comment on #1286. A verb or reader
+/// ruled later states its own stand-down — always the verb's,
+/// never the route's.
 ///
 /// Not the negation, either: the drag paths' "is this window a
 /// TILED member of this space" chains chain membership and

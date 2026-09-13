@@ -93,6 +93,32 @@ struct FloatingModeRaiseTests {
         #expect(!core.deferred.isScheduled(.floatRaise))
     }
 
+    /// The switch-time arm (`focusSpace` → `raiseFloatsAndSticky`)
+    /// lifts the layer over a floor, and a floating-mode space has
+    /// no plane to be that floor — standing down one arm alone
+    /// would put the lift back once per switch (the #1184 lesson).
+    @Test("A floating-mode space is no floor for the switch raise")
+    func floatingModeSpaceIsNoFloor() throws {
+        let core = makeCore()
+        seed(core, mode: .floating)
+        let space = try #require(core.state.workspaces["1"])
+        #expect(
+            core.floatRaiseFloor(of: space, excluding: WindowID(1))
+                .isEmpty
+        )
+    }
+
+    @Test("A bsp space's other tiled members are the floor")
+    func tiledSpaceIsTheFloor() throws {
+        let core = makeCore()
+        seed(core, mode: .bsp)
+        let space = try #require(core.state.workspaces["1"])
+        #expect(
+            core.floatRaiseFloor(of: space, excluding: WindowID(1))
+                == [WindowID(2)]
+        )
+    }
+
     /// The targets are the flag's on every mode: a floating-mode
     /// member is not lifted, only the flagged and the sticky
     /// floats are — there is no plane in that space to lift over.

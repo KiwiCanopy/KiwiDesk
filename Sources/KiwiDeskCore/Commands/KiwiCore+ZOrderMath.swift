@@ -10,8 +10,8 @@ extension KiwiCore {
     /// The floor a raise sequence must land above: the plane it
     /// is being lifted over, minus the window that legitimately
     /// sits on top of it. Two callers, one rule — the float raise
-    /// passes the active space's tiled members (#418), and the
-    /// monocle restore passes the space's OTHER windows.
+    /// passes the active space's plane (#418, `floatRaiseFloor`),
+    /// and the monocle restore passes the space's OTHER windows.
     ///
     /// Both halves are load-bearing. Without a floor the sequence
     /// diffs itself down to nothing — floats keep their order
