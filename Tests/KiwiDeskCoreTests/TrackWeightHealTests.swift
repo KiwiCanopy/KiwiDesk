@@ -90,7 +90,10 @@ struct TrackWeightHealTests {
                 of: tiled,
                 breaks: space.trackBreaks,
                 normalCap: params.normalCap,
-                geoCap: TrackLayout.geometricCap(for: context)
+                geoCap: TrackLayout.geometricCap(
+                    for: context,
+                    of: []
+                )
             ).counts
         )
         let weights = ranges.map {

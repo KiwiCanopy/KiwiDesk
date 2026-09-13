@@ -20,7 +20,7 @@ public struct TrackLayout: LayoutSystem {
             of: windows,
             breaks: context.trackBreaks,
             normalCap: params.normalCap,
-            geoCap: Self.geometricCap(for: context)
+            geoCap: Self.geometricCap(for: context, of: windows)
         )
         let weights = Self.ranges(of: counts).map {
             Self.weight(

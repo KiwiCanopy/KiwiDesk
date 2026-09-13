@@ -3164,6 +3164,57 @@ never a lent one, so two single entries cannot bootstrap each
 other. (`SizeBoundGeneralizationTests`,
 `ScrollingFixedSpanCueTests`)
 
+:::unreleased
+**[Principle]**
+
+**Track's automatic count reads learned minimums; a fixed limit
+does not.** With `auto_tracks` on there is no stored count: the
+number of tracks is derived on every retile as the geometric
+fit, and until #1355 that fit divided the span by the one global
+`min_window_size`, so a row of Xcode, System Settings and an
+Electron app with a `minWidth` opened as many tracks as 300 pt
+windows would and overlapped. The derivation now takes the
+largest prefix whose tracks — each at the larger of the global
+minimum and its members' corroborated floor on the cross axis
+(#677, the same ledger Scrolling and Monocle consume, read as
+the raw corroborated floor the #933 clamp reads rather than the
+chained span the consume emits) — fit the
+span with their gaps, in the one `TrackLayout.geometricCap`,
+which the render, the swap guard and the weight heal all read.
+Two consequences were designed for rather than discovered: the
+learned minimum arrives lazily, so a fresh space may settle one
+retile later than before, the latency Scrolling already accepts;
+and a window with no learned bound still counts at
+`min_window_size`, so the cap can never be lower than the old
+answer before learning and only tightens as bounds arrive. A
+hand-set limit is deliberately untouched: it is the user's
+number, and a limit that quietly shrank under a learned floor
+would contradict the setting the user can see. The count is only
+the feasibility condition, though: equal weights split a 980 pt
+span 490/490, and a 600 pt floor overlaps its neighbour with the
+count already right. So the retile-time heal (below) gained a
+second pass that re-shares the track weights until every track
+draws at least its own floor — pinning a sinking track there and
+handing the rest to the others by weight — rather than the count
+being tightened to whatever equal shares could hold, which would
+have piled a wide app's neighbours into one track for want of a
+share the span could afford. A forced apply probes past the
+learned floors like every corroborated-bound consumer (#1055),
+and its heal folds on that same plain cap, so a floor that
+lifted is re-asked once and never pins a count it no longer
+earns; the residue pass a mid-pass confirmation triggers takes
+no heal, inside the one-retile latency above. At the boundary
+the render's exact cascade check wins: a re-share never leaves
+a track under `min_window_size`, tolerates only the bound
+quantum under a LEARNED floor, and never writes the exact fit
+when the shave's margin does not fit beside it. And the heal
+gauges the count over the local members while the render folds
+the effective list, so a home sticky rendering elsewhere can
+carry its floor into the heal's count and not the render's —
+one track fewer in the heal than on screen, the away twin of
+the visitor horn below, transient in the same way.
+:::
+
 **Session weights are healed at retile, not validated forever
 at write time (#944).** [Principle] The write-time clamps above
 validate a weight against the membership at PRESS time, and

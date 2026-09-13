@@ -1056,6 +1056,26 @@ editing here:
   into a pile the clamps cannot see coming.
   `TrackWeightHealTests` pins the wiring, `WeightHealTests`
   the math; the ruling and the stack-zone residue are in
+  `docs/design-decisions.md`. And the AUTOMATIC track count is
+  derived from the members' corroborated floors on the cross
+  axis, never from `min_window_size` alone (#1355): the one
+  `TrackLayout.geometricCap(for:of:)` reads the tiled list and
+  the context's `sizeBounds` through the reading the cap and the
+  heal share, `learnedFloor(of:in:)` — the pure twin of the
+  clamps' `KiwiCore.effectiveMinSize`, two homes until a pure
+  static both can route through — stands down on a forced pass like
+  every corroborated-bound consumer, and a FIXED limit stays the
+  user's number (`TrackLearnedCapTests`) — while the count is
+  only feasibility, so the heal's second pass re-shares the
+  track weights until each track draws its floor
+  (`TrackLayout.flooredWeights`, `TrackFloorHealTests`), and a
+  consumer of the LEARNED cap takes the render's own input
+  through `layoutInput`, never a context built beside it, and
+  runs inside `KiwiCore.retile`'s `withForcedPass` scope — the
+  one writer of the pass flag, so a forced render and its heal
+  fold alike — over the LOCAL list, since a traveler's floor
+  must not rewrite stored weights (#944)
+  (`TrackCapPlumbingNeedleTests`); the ruling is in
   `docs/design-decisions.md`.
   And a track fold consumer — any site needing the folded
   track partition: the render, the `track.swap` guard, the

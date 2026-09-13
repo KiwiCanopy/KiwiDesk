@@ -17,6 +17,20 @@ extension TilingEngine {
         echoGraceOverride?(id) ?? didRecentlySetFrame(id)
     }
 
+    /// The one door onto the pass-scoped probe flag (#1055): a
+    /// forced apply probes past corroborated bounds, and every
+    /// bound consumer that runs inside the pass — the render's
+    /// frames, the heal ahead of them (#1355) — must read one
+    /// verdict, so `KiwiCore.retile` wraps both in this scope and
+    /// `retile(force:)` re-enters it. Restores the previous value,
+    /// so a nested scope of the same pass changes nothing.
+    func withForcedPass(_ force: Bool, _ body: () -> Void) {
+        let previous = probeBeyondBoundsPass
+        probeBeyondBoundsPass = force
+        defer { probeBeyondBoundsPass = previous }
+        body()
+    }
+
     /// The retile-time observe gate (#677): a settled window's
     /// echo-fed frame is the app's answer to the engine's last
     /// ask. Neither a mid-flight frame (travel, not an answer)

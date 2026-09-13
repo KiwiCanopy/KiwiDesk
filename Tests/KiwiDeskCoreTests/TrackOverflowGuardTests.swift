@@ -66,7 +66,7 @@ struct TrackOverflowGuardTests {
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
             gaps: .uniform(10)
         )
-        let vertical = TrackLayout.geometricCap(for: context)
+        let vertical = TrackLayout.geometricCap(for: context, of: [])
         #expect(
             vertical
                 == max(
@@ -81,7 +81,7 @@ struct TrackOverflowGuardTests {
         var horiz = context
         horiz.track.axis = .horizontal
         #expect(
-            TrackLayout.geometricCap(for: horiz)
+            TrackLayout.geometricCap(for: horiz, of: [])
                 == max(
                     1,
                     TrackLayout.fitCap(
