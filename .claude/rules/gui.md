@@ -1296,14 +1296,16 @@ Obligations:
   "untinted" rests on `glassEffect` not reading `.tint`, which
   is the unmeasured question above, and no guard in this tree
   can see it either way.
-- **Adopting glass does not answer Reduce Transparency, and may
-  not pretend to.** The gap is older and wider than any one
-  surface — the bars already ship glass ignoring it — so a glass
-  change neither closes it nor is blocked on it, and must not
-  absorb it silently. It is #1295's recorded residue and earns
-  its own ruling; when it is taken, `glassChrome(in:)` is the
-  door, and the answer is not the `.regularMaterial` fallback,
-  which is still translucent.
+- **Reduce transparency takes the OFF branch, read LIVE from
+  the environment, in the one `GlassChrome` modifier** (#1374).
+  `glassChrome(in:)` hands `glassGround` `enabled &&
+  !reduceTransparency`, so the setting lands on the same
+  `.regularMaterial` the switch's off state and the pre-26 branch
+  draw — which AppKit renders opaque while the setting is on —
+  and the stored `liquid_glass` value is untouched. A second
+  reader of `accessibilityReduceTransparency` in this tree is a
+  second gate (`ReduceTransparencySeamTests` ▸ one home per
+  tree). The bars' half is bars.md's, at `LiquidGlassGate`.
 
 ## The Reduce Motion gate
 

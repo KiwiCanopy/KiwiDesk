@@ -48,6 +48,12 @@ extension KiwiCore {
         wireDrag()
         wireOwnKeyWindowRefresh()
         wireHoldGlide()
+        // Reduce transparency flips re-draw both bars (#1374); the
+        // ⌃⌥K panel re-reads its SwiftUI environment on its own.
+        LiquidGlassGate.observe { [weak self] in
+            self?.updateAppBar()
+            self?.updateSpaceBar()
+        }
         appBars.onSelect = { [weak self] id in
             self?.focusWindow(id, warp: true)
         }

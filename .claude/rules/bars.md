@@ -256,3 +256,18 @@ Obligations:
   argument that forces a tinted fill onto a bar does not reach
   that tree, and a tint there is a design choice needing its own
   ruling rather than an inherited one.
+- **Reduce transparency stands the glass down at the one
+  render-time read, and never by moving the stored value**
+  (#1374). `NSGlassEffectView` ignores the setting — measured
+  2026-09-13, live and at creation — so each overlay's `render`
+  resolves its stored style through `LiquidGlassGate.rendered`
+  exactly once and every consumer downstream (`glassEnabled`,
+  `hasBox`, `GlassHosting`) reads the copy; `GlassTint` refuses a
+  colour beneath it as the net, and the bootstrap observer
+  re-draws BOTH bars on the flip. A new bar surface's render takes
+  the same read, and a new reader of the OS flag in Core is a
+  second gate free to disagree with the first
+  (`ReduceTransparencySeamTests`: one home per tree, one read per
+  render, both bars in the handler; `ReduceTransparencyTests`
+  holds the behaviour). Why the OFF shape rather than an opaque
+  glass is `docs/design-decisions.md` ▸ Reduce transparency.

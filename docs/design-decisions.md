@@ -9435,6 +9435,34 @@ surface keeps its own colour rule: the bars tint their glass from
 their Fill, the panel stays untinted (#1295). The switch changes
 only WHETHER, never WHICH.
 
+:::unreleased
+**Reduce transparency stands every glass surface down, live, and
+moves no stored value.** (#1374, owner ruling 2026-09-13.) The
+finish shipped ignoring macOS's Accessibility ▸ Display ▸ Reduce
+transparency — opt-in residue while glass was off by default,
+every macOS 26 install's problem once #1368 flipped it on. The
+platform does not do this for us: `NSGlassEffectView` draws its
+material with the setting on, measured live and after a relaunch
+under it, pixel-identical to the setting off. So while it is on,
+the bars draw their Boxed or Plain shape and the ⌃⌥K panel its
+`.regularMaterial`, which AppKit renders opaque under the setting
+— each surface's own OFF state, not an opaque glass invented for
+the case, for the reason the entry above gives the off state:
+a surface that degrades to something nearly glass claims a finish
+the machine is not drawing. The `liquid_glass` leaves stay as the
+user set them, because the setting is the machine's and the
+profile travels: writing the leaf off would flip the user's
+choice on every Mac the profile reaches and leave it flipped when
+the setting goes back off. It is read at render time instead —
+one copy of the style per bar draw, the panel's from its SwiftUI
+environment — and a change of the setting re-draws both bars.
+What this does NOT do, and knowingly: the Settings row keeps
+reading On while the setting holds glass down, and the previews
+keep drawing the setting rather than the screen — a greyed row
+with its reason is the honest shape and needs a runtime gate of
+its own, ruled separately.
+:::
+
 **The per-layout override is deliberately outside the switch's
 reading.** `monocle.set_app_bar_liquid_glass` and
 `scroll.set_app_bar_liquid_glass` still shadow the global, and

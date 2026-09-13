@@ -21,6 +21,10 @@ import Testing
 @Suite("Liquid Glass variant pin (#1308)")
 @MainActor
 struct GlassTintPinTests {
+    /// The machine's Reduce transparency setting is a default this
+    /// fixture reasons from, so it is pinned off (#660, #1374).
+    init() { LiquidGlassGate.reducesTransparency = { false } }
+
     private static let frame = CGRect(x: 0, y: 0, width: 80, height: 24)
 
     /// A host with a superview, which `apply` needs to insert into.

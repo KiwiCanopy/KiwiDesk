@@ -1915,6 +1915,13 @@ portable. Per-layout override:
 `monocle.set_app_bar_liquid_glass` /
 `scroll.set_app_bar_liquid_glass`.
 
+:::unreleased
+Also stood down, live, while macOS's Reduce transparency is on:
+every glass surface draws its Boxed or Plain shape (the panel its
+plain material) and the stored value is untouched, so the glass
+returns the moment the setting goes off (#1374).
+:::
+
 Settings has no per-bar row for this any more (#1307): one
 **Liquid Glass** switch on Colours &amp; Animations writes this
 leaf, the Space Bar's and the shortcuts panel's together, and

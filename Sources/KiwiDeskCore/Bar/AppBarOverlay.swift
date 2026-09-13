@@ -105,8 +105,10 @@ public final class AppBarOverlay {
         let items = state.items
         let activeIndex = state.activeIndex
         let strip = state.strip
-        let style = state.style
-        let edge = state.style.edge
+        // The one place the stored style becomes the drawn one
+        // (#1374): glass stands down while transparency is reduced.
+        let style = LiquidGlassGate.rendered(state.style)
+        let edge = style.edge
         let panel = self.panel ?? makePanel()
         self.panel = panel
         // The plain strip rounds against its real (clamped) cross

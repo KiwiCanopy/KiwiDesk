@@ -20,6 +20,10 @@ import Testing
 @Suite("Space Bar front-view churn (#1315)")
 @MainActor
 struct SpaceBarFrontViewChurnTests {
+    /// The machine's Reduce transparency setting is a default this
+    /// fixture reasons from, so it is pinned off (#660, #1374).
+    init() { LiquidGlassGate.reducesTransparency = { false } }
+
     /// Below macOS 26 no run is hosted, so the spy would count
     /// nothing and every clause would pass on that.
     private static var drawsGlass: Bool {

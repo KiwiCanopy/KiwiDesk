@@ -50,10 +50,11 @@ enum GlassTint {
     /// set `tintColor` that way.
     @MainActor
     private static func rendered(_ hex: String) -> NSColor? {
-        // The one availability authority, not a second `#available`
+        // The one drawing authority, not a second `#available`
         // beside it: nothing here touches a macOS 26 API, so the
-        // check is policy rather than the compiler's.
-        guard AppBarStyle.glassAvailable else { return nil }
+        // check is policy rather than the compiler's — and it
+        // stands down with Reduce transparency too (#1374).
+        guard LiquidGlassGate.drawsGlass else { return nil }
         let fill = NSColor(kiwiHex: hex)
         guard fill.alphaComponent > 0 else { return nil }
         return fill.alphaComponent > maxAlpha
@@ -72,7 +73,7 @@ enum GlassTint {
     private static func pinnedAppearance(
         _ hex: String
     ) -> NSAppearance? {
-        guard AppBarStyle.glassAvailable else { return nil }
+        guard LiquidGlassGate.drawsGlass else { return nil }
         let fill = NSColor(kiwiHex: hex)
         guard fill.alphaComponent > 0, fill.wantsLightInk else {
             return nil

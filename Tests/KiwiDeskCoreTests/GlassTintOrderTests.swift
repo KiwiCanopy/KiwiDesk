@@ -18,6 +18,10 @@ import Testing
 @Suite("Glass tint order (#1314)")
 @MainActor
 struct GlassTintOrderTests {
+    /// The machine's Reduce transparency setting is a default this
+    /// fixture reasons from, so it is pinned off (#660, #1374).
+    init() { LiquidGlassGate.reducesTransparency = { false } }
+
     private static let frame = CGRect(x: 0, y: 0, width: 80, height: 24)
 
     /// Below macOS 26 no glass is hosted, so the plate and the
