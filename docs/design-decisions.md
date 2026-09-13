@@ -87,29 +87,30 @@ what is released under it and nothing before. (Owner ruling
 2026-09-13.)
 
 **Why a source-available license, and why before any launch
-rather than after.** The project's plan is to grow first and, if
-donations do not carry it, to license future users later. Under
-MIT that later step cannot reserve anything: everything already
-published stays free to fork and resell, so the only lever the
-project would keep is the name. A switch made after a launch
-spends the goodwill the launch earned — people remember the
-relicense, not the reason — and lands at the moment of maximum
-attention, on the largest possible free snapshot. Switching
-before any launch pays the cost once and early, and leaves
-nothing to walk back: the paid tier, if it ever comes, changes
-no license text. BSL 1.1 was chosen over the plainer
-non-commercial licenses because its terms are the ones
-developers already know from other source-available projects,
-and because it commits to a Change Date, which a plain
-non-commercial license does not.
+rather than after.** Under MIT anyone may take the published
+code and sell it, bundle it, or host it as a product, and the
+project keeps no lever over that but its name. A source-available
+license reserves commercial use to the Licensor while the source
+stays public and personal use stays free, which is the shape the
+project wants: readable, forkable for personal use, and not
+someone else's product. The timing follows from goodwill. A
+switch made after a launch spends what the launch earned — people
+remember the relicense, not the reason — and lands at the moment
+of maximum attention, on the largest possible free snapshot.
+Switching before any launch pays the cost once and early, and
+leaves nothing to walk back. BSL 1.1 was chosen over the plainer
+non-commercial licenses because its terms are the ones developers
+already know from other source-available projects, and because it
+commits to a Change Date, which a plain non-commercial license
+does not.
 
-**What the switch does not do.** It does not charge anyone: the
-Additional Use Grant makes personal use free, and license keys
-are a product decision the license neither requires nor
-forbids. It does not touch the vendored Lua or Sparkle, which
-keep their MIT licenses. And it does not stop a fork of the last
-MIT version; that risk was accepted the day 0.9.7 shipped under
-MIT and is the reason the switch is sooner rather than later.
+**What the switch does not do.** It changes nothing for personal
+use: the Additional Use Grant keeps it free, and no key, account
+or payment enters the app. It does not touch the vendored Lua or
+Sparkle, which keep their MIT licenses. And it does not stop a
+fork of the last MIT version; that risk was accepted the day
+0.9.7 shipped under MIT and is the reason the switch is sooner
+rather than later.
 
 **What travels with it.** Copy about KiwiDesk states the license
 rather than promising a price, because a price is a promise and a
