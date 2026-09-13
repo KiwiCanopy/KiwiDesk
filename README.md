@@ -6,7 +6,7 @@
   <img src="assets/logo_wordmark.png" alt="KiwiDesk" width="220">
 </picture>
 
-### A tiling window manager for macOS
+### Tiling that feels like it shipped with macOS.
 
 Flat arrays instead of i3 trees · configured in Lua · seven
 layouts · never disables SIP.
@@ -60,6 +60,15 @@ ordinary app with no kernel extension, and **never requires
 disabling System Integrity Protection**.
 
 ## Why KiwiDesk?
+
+**It feels like it shipped with macOS.** Most tiling window managers
+on the Mac are a Linux idea carried over — a config file, a reload,
+a terminal, and for some of them SIP switched off. KiwiDesk is a Mac
+app first: a real Settings window with sliders and live previews,
+shortcuts that don't fight macOS's own, a mouse that still works,
+your native Desktops left exactly as they are, and the Accessibility
+permission and nothing else. Same tiling power — the platform's own
+feel.
 
 **Flat arrays instead of i3 trees.** Classic tiling window managers
 organize windows in split-container trees — powerful, but hard to
