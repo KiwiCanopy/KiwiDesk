@@ -193,7 +193,9 @@ struct DesktopBindingFitTests {
             core,
             [
                 profile("Duo", monitors: live(core)),
-                profile("Other", monitors: live(core)),
+                // Same count, other monitors: an exact match
+                // cannot pick "Duo" by ordering luck.
+                profile("Other", monitors: ["X:1x1", "Y:1x1"]),
             ]
         )
         bind(core, "Duo")
@@ -234,9 +236,10 @@ struct DesktopBindingFitTests {
     }
 
     /// No displays known — the first config load, a paused
-    /// engine — cannot judge, and keeps the binding firing.
-    @Test("Unknown displays let the binding through")
-    func unknownDisplaysLetItThrough() throws {
+    /// engine — cannot judge, so the binding waits for the first
+    /// display reading, which the boot scan's monitor change is.
+    @Test("Unknown displays make the binding wait")
+    func unknownDisplaysMakeItWait() throws {
         defer { resetTopology() }
         pinTopology()
         let core = makeCore()
@@ -248,7 +251,33 @@ struct DesktopBindingFitTests {
             ]
         )
         #expect(core.profiles.currentName == "Other")
+        var log: [String] = []
+        core.onLog = { log.append($0) }
         bind(core, "Golden")
+        #expect(core.profiles.currentName == "Other")
+        #expect(
+            log.contains {
+                $0.contains(
+                    "profile 'Golden' waits for the first display"
+                )
+            }
+        )
+        connect(core, 1)
+        core.handleMonitorChange()
         #expect(core.profiles.currentName == "Golden")
+    }
+
+    /// An in-effect edit's hot-reload asks the same gate: a
+    /// standing-aside binding is not on screen.
+    @Test("A standing-aside binding is not in effect")
+    func standingAsideIsNotInEffect() throws {
+        defer { resetTopology() }
+        pinTopology()
+        let core = try misfitCore()
+        bind(core, "Golden")
+        #expect(!core.isProfileInEffect("Golden"))
+        #expect(core.isProfileInEffect("Desk"))
+        core.execute("load_profile", args: [.string("Golden")])
+        #expect(core.isProfileInEffect("Golden"))
     }
 }

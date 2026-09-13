@@ -249,16 +249,19 @@ struct DesktopsGroup: View {
         )
     }
 
-    /// The bound profile's screen count where it is not the
-    /// connected one — the binding stands aside then (#1394).
-    /// Nil with no displays known: Core cannot judge either.
+    /// The bound profile's screen count where Core's gate
+    /// refuses it on the count — the binding stands aside then
+    /// (#1394). Narrated, never re-decided: the verdict is
+    /// `DesktopBindingRefusal.of`'s.
     private func otherScreenCount(_ key: DesktopKey) -> Int? {
-        guard model.displays.count > 0,
-            let name = binding(key).wrappedValue,
+        guard let name = binding(key).wrappedValue,
             let count = model.profileSummaries.first(where: {
                 $0.name == name
             })?.count,
-            count != model.displays.count
+            case .screenCount = DesktopBindingRefusal.of(
+                profileCount: count,
+                connected: model.displays.count
+            )
         else { return nil }
         return count
     }

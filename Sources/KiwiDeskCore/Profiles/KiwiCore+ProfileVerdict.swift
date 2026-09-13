@@ -63,7 +63,9 @@ extension KiwiCore {
     ///
     /// The active binding is passed in rather than resolved here,
     /// so this stays a pure query over injected state, testable
-    /// without a WindowServer.
+    /// without a WindowServer. The binding gate reads the display
+    /// count from state itself, synchronously with the read
+    /// below, so the two cannot differ.
     ///
     /// COST: `match` scans the profile directory and decodes
     /// every profile, so this is a refresh-time query, never a

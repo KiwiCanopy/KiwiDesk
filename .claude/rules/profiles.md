@@ -383,18 +383,27 @@ Three further obligations, and they bind this directory:
   read off the monitor set the apply already matched for the
   pins, so no caller pairs `isDirty` by hand. A caller whose
   verdict differs must say so with `markClean`/`markDirty` beside
-  the apply AND state why it differs. No caller does today: the
-  Desktop-binding door used to mark clean after loading a
-  profile onto hardware it did not fit, while the monitor-change
-  bound arm let the same load stand dirty (#1332), and the pair
-  was settled by construction rather than by picking a side —
-  **a binding fires only where its profile is saved for the
-  connected screen count**, through the one `boundProfile(of:)`
-  every reader of a binding's profile takes (#1394), so a bound
-  load always fits by count and the rungs below answer for every
-  other count. `DesktopBindingFitTests` holds the gate on both
-  doors and the verdict, and pins that a Core file which resolves
-  a binding AND applies a profile reaches the gate.
+  the apply AND state why it differs — the monitor-change
+  matching arms do. The two BINDING doors may not: the binding
+  door marked a misfit clean while the monitor-change bound arm
+  let it stand dirty (#1332), and
+  `DesktopBindingFitSeamTests` ▸ `bindingDoorMarksNothing` now
+  refuses a mark in `applyDesktopBinding`'s body.
+- **A binding fires only where its profile is saved for the
+  connected screen count (#1394).** `boundProfile(of:)` is the
+  one gate, and every Core site that spells `mainDesktopBinding(`
+  takes it before trusting the profile — including a QUERY such
+  as `isProfileInEffect`, since a standing-aside binding is not
+  on screen. Before the first display reading the binding waits
+  too; the boot scan's monitor change fires it. The count
+  judgement itself is `DesktopBindingRefusal.of`, public so the
+  Desktops row narrates the verdict instead of re-deriving it.
+  The argument is `docs/design-decisions.md` ▸ Profiles ▸ *A
+  Desktop binding fires only for its profile's screen count*.
+  `DesktopBindingFitTests` holds the behaviour on both doors, the
+  verdict and the query; `DesktopBindingFitSeamTests` holds the
+  one home, the resolver-anchored gate clause, the judgement's
+  two callers by count, and the read-free bodies.
 
 `ProfileAuthoritySeamTests` holds the first two as one-home
 clauses, scoped to the doors' own bodies rather than to their

@@ -35,13 +35,16 @@ extension SettingsModel {
                 $0.name == name
             }), summary.count != displays.count
         else { return nil }
+        // Names the button that takes this state, interpolated
+        // rather than quoted (#818).
         return L(
             "profiles.update_hint",
             "\"%1$@\" is for %2$d screen(s); %3$d connected. "
-                + "Save as new instead.",
+                + "%4$@ to keep this setup.",
             name,
             summary.count,
-            displays.count
+            displays.count,
+            L("footer.save_as_new_profile", "Save as New Profile…")
         )
     }
 

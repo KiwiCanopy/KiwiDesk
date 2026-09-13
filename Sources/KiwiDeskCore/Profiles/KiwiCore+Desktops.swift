@@ -8,7 +8,8 @@ extension KiwiCore {
 
     /// `bind_profile_to_desktop(desktop, profile)`.
     /// The binding applies immediately when the bound space is
-    /// the current one, and on every future switch to it.
+    /// the current one, and on every future switch to it — where
+    /// the profile fits the connected screen count (#1394).
     func bindProfileToDesktop(
         _ args: [JSONValue]
     ) -> CommandResponse {
@@ -249,9 +250,10 @@ extension KiwiCore {
     /// Loads the profile bound to the active Desktop — the MAIN
     /// display's current one (#888). No-ops without SkyLight
     /// (single-space fallback), when the Desktop has no binding,
-    /// or when the bound profile is already active. All native
-    /// Desktops without a binding share whatever profile is
-    /// current.
+    /// when the bound profile is already active, or when the
+    /// gate refuses it — another screen count, or none known yet
+    /// (#1394). All native Desktops without a binding share
+    /// whatever profile is current.
     ///
     /// A caller holding a `DesktopSnapshot` passes its
     /// `authority` rather than letting this re-read the topology

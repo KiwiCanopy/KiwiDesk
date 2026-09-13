@@ -131,9 +131,12 @@ struct InterpolatedLabelTests {
         }
     }
 
-    /// The frame carries a positional specifier for each label
-    /// it names. Reverting one to literal text drops a
-    /// specifier and reds here.
+    /// The frame carries a positional specifier for each
+    /// argument it passes, the labels it names included.
+    /// Reverting a label to literal text drops a specifier and
+    /// reds here. Counts `%N$d` beside `%N$@` since #1394's
+    /// `profiles.update_hint` names a button beside two counts;
+    /// the bound stays "one specifier per argument".
     @Test("each named label has a specifier to land in")
     func labelsHaveSpecifiers() throws {
         let en = try Self.english()
@@ -141,6 +144,7 @@ struct InterpolatedLabelTests {
             guard let value = en[frame.key] else { continue }
             let found = (1...9).filter {
                 value.contains("%\($0)$@")
+                    || value.contains("%\($0)$d")
             }
             #expect(
                 found.count >= frame.slots,

@@ -4601,7 +4601,10 @@ KiwiDesk.set_space_icon("chat", "")  -- clear
 
 **Does:** when that Desktop becomes current **on the main
 display** (the screen with the menu bar), KiwiDesk loads the
-bound profile — its spaces, layouts, and settings. Desktops
+bound profile — its spaces, layouts, and settings — provided
+the profile is saved for the connected screen count; otherwise
+the binding stands aside, the current profile stays, and a
+screen change picks by the connected screens instead. Desktops
 without a binding keep whatever profile is active. A binding
 takes effect when that Desktop next activates. With "Displays
 have separate Spaces" off, or with a single screen, the main

@@ -9974,6 +9974,9 @@ last affordance that can undo the thing being greyed, the grey
 owes an escape hatch, or it is a trap wearing the costume of a
 safeguard.
 
+:::unreleased
+**[Principle]**
+
 **A Desktop binding fires only for its profile's screen count
 ([#1394](https://github.com/KiwiCanopy/KiwiDesk/issues/1394),
 [#1332](https://github.com/KiwiCanopy/KiwiDesk/issues/1332)).**
@@ -10004,10 +10007,14 @@ give — one Desktop loading a different profile per screen count
 — needs several bindings per Desktop and a `gui.json` format
 crossing, and is its own feature. The Desktops row keeps a
 standing-aside binding and badges it *for N screen(s)*, in
-keeping with *grey, don't hide*: the binding is not broken, it
-is waiting. With no displays known (the first config load, a
-paused engine) the gate cannot judge and lets the binding
-through, as before; the first monitor change re-judges it.
+keeping with *don't hide*: the binding is not broken, it is
+waiting, and the badge narrates Core's verdict rather than
+re-deriving it. With no displays known — the first config load
+runs before the loop publishes displays, and a paused engine
+discovers none — the gate cannot judge and the binding waits
+too, rather than loading a profile that the boot scan's monitor
+change would then replace; that first monitor change fires it.
+:::
 
 ### Monitors
 

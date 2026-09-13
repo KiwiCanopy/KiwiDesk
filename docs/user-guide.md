@@ -470,6 +470,11 @@ Advanced ▸ Discard Saved Window Arrangement** clears it.
 
 ### Which Profile Loads
 
+:::unreleased
+A Desktop binding fires only when the bound profile is saved for
+the connected screen count (rung 1 below).
+:::
+
 The card answers for your machine now — *"Right now: 2 screens →
 Desk (these exact monitors)"* — naming which rung resolved it.
 The rungs, in order:
@@ -795,20 +800,18 @@ follows its Desktop, not its
 number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 
 **A binding fires when its Desktop becomes current on your main
-screen** (the one with the menu bar) **and its profile is saved
-for the screens you have connected.** A profile saved on one
-screen does not load onto two; its row shows a *for 1 screen(s)*
-badge and KiwiDesk picks by your screens until you are back on
-one. With "Displays have separate Spaces" on, macOS's default,
-each screen switches on its own: a swipe on the main screen
-switches profiles, a swipe on a secondary never does. The rows
-are greyed while you edit a stored profile: bindings are global.
+screen** (the one with the menu bar) and its profile fits your
+screen count ([Which Profile Loads](#which-profile-loads)). With
+"Displays have separate Spaces" on, macOS's default, each screen
+switches on its own: a swipe on the main screen switches
+profiles, a swipe on a secondary never does. The rows are greyed
+while you edit a stored profile: bindings are global.
 
 ```mermaid
 flowchart TD
-    S["Your main screen switches<br/>to a macOS Desktop"] --> B{"A profile bound<br/>to this Desktop?"}
+    S["Your main screen switches<br/>to a macOS Desktop"] --> B{"A profile bound<br/>to this Desktop,<br/>saved for this many screens?"}
     B -->|"Yes"| A["That profile activates —<br/>its layout, gaps, and rules"]
-    B -->|"No binding"| K["The current profile<br/>stays active"]
+    B -->|"No binding, or<br/>another screen count"| K["The current profile<br/>stays active"]
     P["You pick a profile<br/>by shortcut or menu"] --> A
 ```
 
