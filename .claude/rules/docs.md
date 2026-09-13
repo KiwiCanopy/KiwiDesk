@@ -29,54 +29,54 @@ different behavior.
 
 ## Prose budget (#1395)
 
-The Settings window explains itself: every row has a label, most
-carry a caption, and a `?` opens a help text. A user doc that
-re-explains a row competes with the caption and loses — the
-caption is beside the control, the doc is not, and the two drift
-apart on the first retune. So a user-facing doc (`user-guide.md`,
-`spaces-and-desktops.md`, `cli.md`, `lua-reference.md`,
-`accepted-limitations.md`, `index.md`) is written to a budget:
+A user-facing page answers a question the GUI cannot. Leave what
+a row's caption or `?` says to the row: the doc names the control
+and states only what the row cannot carry — how rows interact,
+where a thing lives, the keyboard path, a limit, a value the
+caption does not show. A paragraph whose every sentence is on the
+row is deleted, not shortened. The budget, as obligations:
 
-- **One fact per sentence, and each fact once.** A behaviour the
-  doc has already stated is not restated in the next section
-  with different words; link the section that owns it.
-- **Name the control, state what the row cannot say, stop.** The
-  caption and the `?` are the primary home for *what this row
-  does*. The doc adds what they cannot carry: how rows interact,
-  where a thing lives, the keyboard path, a limit, a value the
-  caption does not show. A paragraph whose every sentence is
-  already on the row is deleted, not shortened.
-- **What, never why.** The argument for a behaviour lives in
-  `design-decisions.md` (its charter is below). A user doc does
-  not say "deliberately", "which is why", "rather than", or name
-  the alternative that was rejected — unless the why *is* the
-  instruction ("do this before opening Settings").
-- **No history.** No "used to", "until #N", "since #N", "before
-  this version", and no issue numbers at all: a reader of the
-  user guide has no issue tracker in front of them. Past tense
-  is for the changelog.
-- **No narration.** Nothing about the doc itself, the design's
-  intent, or what the reader will find worth knowing — the
-  sentence that follows such a clause is the one that carries
-  the fact; keep that one.
+- **One fact per sentence, and each fact once.** Link the section
+  that owns a behaviour instead of restating it.
+- **What, never why.** The argument lives in `design-decisions.md`
+  (charter below); a user doc does not say "deliberately", "which
+  is why", "rather than", or name the rejected alternative —
+  unless the why *is* the instruction ("do this before opening
+  Settings").
+- **No history.** No "used to", "until #N", "since #N", and no
+  issue numbers in `user-guide.md` or `spaces-and-desktops.md`;
+  past tense is the changelog's. A reference page (`cli.md`,
+  `lua-reference.md`) and the limitations table may cite the
+  issue that tracks a limitation or its fix, since that is where
+  a reader follows it — `accepted-limitations.md`'s Why column is
+  its charter, not a violation.
+- **No narration** about the doc itself or the design's intent.
 - **Every fact survives.** A cut that drops a control name, a
   value, a range, a default, a chord, a path, a limitation or a
-  cross-link is a defect, not a trim. Code and docs must never
-  describe different behaviour, and a doc that falls silent on a
-  behaviour describes it as absent.
+  cross-link is a defect, not a trim; a doc that falls silent on
+  a behaviour describes it as absent.
 
-The style is adapted from the Caveman compression rules, whose
-own guidance is to drop the compression for anything a
-non-team-member reads: the budget cuts *restatement*, never
-articles or verbs, and the result is ordinary readable prose. A
-contributor doc (`architecture.md`, `ui-patterns.md`,
-`translating.md`, `localization-naming.md`) takes the same budget
-with one exception, `design-decisions.md`, whose charter is to
-argue — there the budget cuts repetition and event-logging and
-never the argument.
+**Admission is the owner's ruling, not the author's.** Whether a
+setting or surface belongs in the user guide at all is judged by
+"is this clear from the GUI?", and the owner judges it: an agent
+documenting a new setting or surface ASKS before adding a guide
+section, and the default answer is no entry — the row's caption is
+its documentation (owner ruling 2026-09-13). A contributor page
+(`architecture.md`, `ui-patterns.md`, `translating.md`,
+`localization-naming.md`) has no such gate; it takes the budget
+as written.
 
-The same discipline applies to a code comment through AGENTS.md
-§2.8, which owns that half.
+A page is held to the budget once it has been swept: the user
+guide by #1395, every other page by its audit under collector
+#1406. `docs/recipes/` joins when its audit is filed.
+
+The style is adapted from the Caveman compression rules (seen
+2026-09-13), whose own guidance is to drop the compression for
+anything a non-team-member reads: the budget cuts *restatement*,
+never articles or verbs, and the result is ordinary prose. The
+one exception is `design-decisions.md`, whose charter (below) is
+to argue. The same discipline applies to a code comment through
+AGENTS.md §2.8, which owns that half.
 
 ## `docs/design-decisions.md` charter
 
