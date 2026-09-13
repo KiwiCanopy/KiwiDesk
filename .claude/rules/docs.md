@@ -27,6 +27,57 @@ different behavior.
 | `docs/localization-naming.md` | The feature-name / mode-name guard pair |
 | `plan/` | When the design itself shifts (gitignored — never cite it from source or `docs/`) |
 
+## Prose budget (#1395)
+
+The Settings window explains itself: every row has a label, most
+carry a caption, and a `?` opens a help text. A user doc that
+re-explains a row competes with the caption and loses — the
+caption is beside the control, the doc is not, and the two drift
+apart on the first retune. So a user-facing doc (`user-guide.md`,
+`spaces-and-desktops.md`, `cli.md`, `lua-reference.md`,
+`accepted-limitations.md`, `index.md`) is written to a budget:
+
+- **One fact per sentence, and each fact once.** A behaviour the
+  doc has already stated is not restated in the next section
+  with different words; link the section that owns it.
+- **Name the control, state what the row cannot say, stop.** The
+  caption and the `?` are the primary home for *what this row
+  does*. The doc adds what they cannot carry: how rows interact,
+  where a thing lives, the keyboard path, a limit, a value the
+  caption does not show. A paragraph whose every sentence is
+  already on the row is deleted, not shortened.
+- **What, never why.** The argument for a behaviour lives in
+  `design-decisions.md` (its charter is below). A user doc does
+  not say "deliberately", "which is why", "rather than", or name
+  the alternative that was rejected — unless the why *is* the
+  instruction ("do this before opening Settings").
+- **No history.** No "used to", "until #N", "since #N", "before
+  this version", and no issue numbers at all: a reader of the
+  user guide has no issue tracker in front of them. Past tense
+  is for the changelog.
+- **No narration.** Nothing about the doc itself, the design's
+  intent, or what the reader will find worth knowing — the
+  sentence that follows such a clause is the one that carries
+  the fact; keep that one.
+- **Every fact survives.** A cut that drops a control name, a
+  value, a range, a default, a chord, a path, a limitation or a
+  cross-link is a defect, not a trim. Code and docs must never
+  describe different behaviour, and a doc that falls silent on a
+  behaviour describes it as absent.
+
+The style is adapted from the Caveman compression rules, whose
+own guidance is to drop the compression for anything a
+non-team-member reads: the budget cuts *restatement*, never
+articles or verbs, and the result is ordinary readable prose. A
+contributor doc (`architecture.md`, `ui-patterns.md`,
+`translating.md`, `localization-naming.md`) takes the same budget
+with one exception, `design-decisions.md`, whose charter is to
+argue — there the budget cuts repetition and event-logging and
+never the argument.
+
+The same discipline applies to a code comment through AGENTS.md
+§2.8, which owns that half.
+
 ## `docs/design-decisions.md` charter
 
 A durable product/UX decision a contributor would otherwise

@@ -6,12 +6,11 @@ description: The Settings app, profiles, and the
 
 # User Guide: The Settings App
 
-This guide walks you through KiwiDesk's visual Settings window —
-the point-and-click interface for all window tiling, monitors,
-spaces, and keybindings. You never need to edit files directly
-unless you want custom Lua.
+This guide covers KiwiDesk's Settings window — the point-and-click
+interface for tiling, monitors, spaces, and keybindings. You never
+need to edit files unless you want custom Lua.
 
-The short version of what happens every time you open a window:
+What happens every time you open a window:
 
 ```mermaid
 flowchart LR
@@ -21,731 +20,467 @@ flowchart LR
     P --> R["Open more, and they<br/>share the space automatically"]
 ```
 
-Everything below is how you shape that behavior — which layout a
-space uses, the gaps, the bars, and the shortcuts.
+Everything below is how you shape that: which layout a space uses,
+the gaps, the bars, and the shortcuts.
 
 ## Getting Started
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while KiwiDesk is the active app. You can also give it a
-global key of its own: **Shortcuts ▸ General** offers a
-bindable **Open Settings** row, unbound out of the box.
+**⌘,** while a KiwiDesk window is key. **Shortcuts ▸ General**
+offers a bindable **Open Settings** row for a global key of its
+own; it ships unbound.
 
-The Settings window is a normal window to KiwiDesk itself: it
-**tiles into your layout** like anything else, shows up in the
-App Bar, and answers the window shortcuts — float it with
-`toggle_floating`, move it between spaces, resize it. KiwiDesk's
-other windows are not managed that way: the setup tour and the
-Config Issues window always float, because each one ends, and
-the shortcuts panel is not a managed window at all,
-which is why it appears in no bar.
+The Settings window is a normal window to KiwiDesk: it tiles into
+your layout, shows in the App Bar, and answers the window
+shortcuts — float it with `toggle_floating`, move it between
+spaces, resize it. The setup
+tour and the Config Issues window always float, and the shortcuts
+panel is not a managed window at all, so it appears in no bar.
 
-The window opens on **Home** — a grid of cards, one per
-settings area, in two groups:
+The window opens on **Home**, a grid of cards in two groups:
 
-- **This Profile** — areas scoped to the profile being edited
-  (Spaces, Gaps & Borders, Bars, Colors & Animations,
-  and in Power User mode Layout Defaults, Monitors, Behavior,
-  Advanced Colors).
-- **Whole App** — settings that apply everywhere (Shortcuts,
-  Profiles, App Rules, General).
+- **This Profile** — areas scoped to the profile being edited:
+  Spaces, Gaps & Borders, Bars, Colors & Animations, and in Power
+  User mode Layout Defaults, Monitors, Behavior, Advanced Colors.
+- **Whole App** — settings that apply everywhere: Shortcuts,
+  Profiles, App Rules, General.
 
-Every card shows its area's current values — spaces and
-layouts in use, gap and border sizes, how many shortcuts are
-bound — so most questions are answered without opening
-anything. Click a card to open its area; the **← Home** chip
-(or **⌘[** / Escape) brings you back.
+Each card shows its area's current values. Click a card to open
+its area; the **← Home** chip, **⌘[** or Escape brings you back.
 
-The header carries a **Simple | Power User** switch. Simple shows
-the eight everyday cards; Power User adds the deeper four (Layout
-Defaults, Monitors, Behavior, Advanced Colors). The switch
-only changes which cards exist — nothing behind it stops
-working, and the Monitors card joins Simple by itself while
-two or more displays are connected. Flipping to Power User
-briefly tints what it just added — the same highlight a search
-result gets — and the cards only Power User shows keep a soft
-green frame, the switch's own colour, so they stay
-recognizable after the tint fades; flipping back to Simple
-simply fades the extras out.
+The header's **Simple | Power User** switch chooses which cards
+exist: Simple shows the eight everyday cards, Power User adds
+Layout Defaults, Monitors, Behavior and Advanced Colors. Nothing
+behind a hidden card stops working, and the Monitors card joins
+Simple by itself while two or more displays are connected.
+Flipping to Power User briefly tints the added cards, and those
+cards keep a soft green frame afterwards.
 
-The header also shows which profile is loaded and lets you
-edit a saved profile without switching to it.
+The header also names the loaded profile and lets you edit a
+saved profile without switching to it (see
+[The Profile Banner](#the-profile-banner)).
 
-Two more pieces of the window's shape recur everywhere below.
-While there is anything to act on, a dark **save pill** floats
-over the bottom of the content — the count and its target
-("3 unsaved changes to Desk"), then **Revert**, **Save a
-copy…** and **Save**. Click the count for a popover listing
-every change as an old → new row, and click a row to jump
-straight to the control that changed. It is not permanent
-chrome: it appears with your first edit and disappears once
-everything is saved (the verbs are detailed under
-[Saving](#saving)). And five areas —
-Gaps & Borders, Bars, Colors & Animations, Layout Defaults, and
-Shortcuts — open as two columns: their controls on the left, and a **Live
-preview** panel on the right that redraws from your draft as
-you edit, with a **Changed in this draft** list underneath —
-the same old → new rows as the pill count's popover, each
-jumping to its control. The pill shifts aside while the panel
-has a column of its own, and
-areas with nothing to preview take the full width instead.
+Two pieces of the window recur everywhere below:
+
+- **The save pill.** While anything is unsaved, a dark pill
+  floats over the bottom of the content with the count and its
+  target ("3 unsaved changes to Desk"), then **Revert**, **Save a
+  copy…** and **Save**. Click the count for a popover listing
+  every change as an old → new row; click a row to jump to its
+  control. The pill disappears once everything is saved. The
+  verbs are under [Saving](#saving).
+- **The Live preview panel.** Five areas — Gaps & Borders, Bars,
+  Colors & Animations, Layout Defaults and Shortcuts — open as
+  two columns: controls on the left, a **Live preview** on the
+  right that redraws from your draft, with a **Changed in this
+  draft** list underneath (the same rows as the pill's popover).
+  Areas with nothing to preview take the full width.
 
 ### Search
 
-The search field sits in the middle of the header and is a real
-field: click it and type, or press **⌘K** from anywhere in the
-window to put the cursor in it. Matches appear in a list under
-the field while you keep typing. Every setting is its own
-result — searching "gap" lists each gap you can change, and a
-broad word like "color" lists every colour row rather than one
-per section. A few common alternate words work too ("padding"
-finds the gaps, "autostart" finds the login row), whatever
-language the window is in.
+The search field sits in the middle of the header. Click it, or
+press **⌘K** from anywhere in the window. Results appear under
+the field as you type. Every setting is its own result:
+searching "gap" lists each gap you can change. Common alternate
+words work too ("padding" finds the gaps, "autostart" the login
+row), in whatever language the window is in.
 
-Each result leads with the setting's own label, puts the trail
-to it in a smaller line underneath, and — when the setting has
-one value to state — shows its **current value** on the right.
-An area name that matches on its own has no second line. Results from an area that only exists in Power
-User mode carry a quiet **Power User** tag: opening one switches
-the mode for you and says so in one line under the header —
-that's all the switching there is to it. Below the settings, a
-short **Made by you** group lists things you've named yourself —
-a space, a profile, an app rule — and jumps to where each one
-lives.
+Each result leads with the setting's label, the trail to it in a
+smaller line, and its current value on the right where it has
+one. Results from a Power User area carry a **Power User** tag;
+opening one switches the mode and says so under the header. A
+**Made by you** group below lists things you named yourself — a
+space, a profile, an app rule — and jumps to each.
 
-Clicking a result opens its area, and — where the row has its
-own place to land — **takes you to the match**: the pane scrolls
-to it and tints it for about a second so your eye lands on it,
-and anything that would have hidden it is switched first — a hit
-inside one layout's editor opens that layout's tab. Some rows
-open their area without scrolling yet; they gain their landing
-spot as the control catalog grows. If the match sits **inside** a
-collapsed drawer (searching "top" finds the per-edge gap
-sliders), the drawer opens on the way so you land on the row
-itself; a hit on the drawer's own name ("Per-edge…", "Advanced")
-lands on that row, highlighted, ready to open.
+Clicking a result opens its area and scrolls to the match,
+tinting it for about a second. Anything that would hide it is
+switched first: a hit inside one layout's editor opens that
+layout's tab, a hit inside a collapsed drawer opens the drawer.
+Some rows open their area without scrolling yet.
 
-Press Escape or the clear button to empty the query — an empty
-query is what closes the result list, and picking a result
-empties it for you.
+Escape or the clear button empties the query, which closes the
+list; picking a result empties it for you.
 
-Matching ignores case, accents, and hyphens-versus-spaces, so
-"grosse" finds "Größe" and "space bar farben" finds
-"Space Bar-Farben". It is a plain substring match, not a fuzzy one:
-type part of what you see and it will be found, but a typo returns
-nothing rather than a confident guess.
+Matching ignores case, accents, and hyphens versus spaces
+("grosse" finds "Größe"). It is a substring match, not fuzzy: a
+typo returns nothing.
 
 ### Narrow Windows
 
-Make the Settings window narrow — by dragging its edge, or
-because it shares a small screen — and it gives things up in a
-fixed order. Controls are never one of them.
+A narrow Settings window gives things up in a fixed order.
+Controls are never one of them.
 
-The **Live preview** panel goes first. Instead of its own
-column it becomes a card floating over the content: drag it by
-the grip on its top bar, or close it with the × at that bar's
-other end, and it always lands whole inside the window.
-Narrower still, the card waits behind a **Show preview** button
-rather than opening over the rows unasked — and that button is
-there whenever an area that has a preview is not showing one,
-so the preview is never simply gone.
-Closing the card answers for that screen only: open another
-area and you get whatever the width would have given you.
-
-Next, labelled rows put their control on a second line under
-its label — all of them at once, so a section still reads as
-one column — and the save pill stops floating and docks into a
-full-width bar at the foot of the window: the same count, the
-same three verbs, and still nothing at all once everything is
-saved. Home's card grid steps down to fewer columns on the same
-widths.
-
-Last, the search field collapses to its magnifying-glass icon.
-Click it — or press **⌘K** — and it opens in place, with the
-area's title stepping aside for as long as you are searching
-and coming back as soon as you close it. Nothing else in the
-header yields, and the window stops resizing before anything
-else has to.
+1. The **Live preview** panel becomes a card floating over the
+   content: drag it by the grip on its top bar, close it with
+   the ×. Narrower still, it waits behind a **Show preview**
+   button. Closing the card answers for that screen only.
+2. Labelled rows put their control on a second line under the
+   label, the save pill docks into a full-width bar at the foot
+   of the window, and Home's card grid drops to fewer columns.
+3. The search field collapses to its icon. Click it, or press
+   **⌘K**, and it opens in place while you search.
 
 ### Contextual Help (?)
 
-Some rows carry a small circled question mark right after
-their name. Click it to open a short popover explaining what
-the setting does — for a field with a few named options, the popover
-describes each option in one line. Hovering the question mark
-shows the same text as a tooltip.
-
-The help is optional reading: every setting is meant to be
-understandable from its label, options, and the preview or
-schematic beside it in the preview panel (or above it, in
-areas without one). The question mark is there just in case
-the short form didn't explain enough.
+Some rows carry a small circled question mark after their name.
+Click it for a short popover on what the setting does; for a
+field with named options, one line per option. Hovering shows
+the same text as a tooltip. Every setting is meant to be clear
+from its label, options and preview; the `?` is there in case
+the short form was not enough.
 
 ### Using Settings from the Keyboard
 
-Settings is built to be driven from the keyboard, but macOS gates
-that on a system setting KiwiDesk cannot turn on for you. Out of
-the box, **Tab reaches text fields and lists only** — pop-up
-menus, checkboxes, and buttons are skipped. Turn on **System
-Settings ▸ Keyboard ▸ Keyboard navigation** and Tab reaches every
-control.
+Out of the box, macOS lets **Tab reach text fields and lists
+only**. Turn on **System Settings ▸ Keyboard ▸ Keyboard
+navigation** and Tab reaches every control.
 
-Opening an area *from the keyboard* puts focus on the page
-itself, so the next Tab reaches that page's first control instead
-of walking the header. Open it with the mouse and nothing takes
-focus, the same as anywhere else on macOS — Tab starts again from
-the top of the window, and no focus ring appears until you ask
-for one. The **← Home** chip is still there: Shift-Tab reaches
-it, and **⌘[** or Escape goes back without any tabbing at all.
+Opening an area from the keyboard puts focus on the page, so the
+next Tab reaches its first control. Opening it with the mouse
+takes no focus, as anywhere on macOS: Tab starts from the top of
+the window. Shift-Tab reaches the **← Home** chip; **⌘[** or
+Escape goes back without tabbing.
 
-Leave it off and the keyboard paths here still *run*, they just
-have nowhere to land: deleting a space moves focus to the next
-row's layout picker, and with keyboard navigation off a pop-up
-menu cannot hold focus, so it goes to the search field at the top
-of the window instead. The same is true of the space chips under
-Monitors, and of every other place this guide says a control
-takes focus.
+With keyboard navigation off, the keyboard paths still run but
+have nowhere to land: a control that cannot hold focus hands it
+to the search field instead. VoiceOver is unaffected; every card
+and panel title is a heading, so the headings rotor moves card
+to card.
 
-VoiceOver is not affected — it navigates every control either
-way, because its cursor is its own. Every card and panel title
-is a heading, so the headings rotor moves card to card.
-
-With it on, a slider takes focus like any other control and the
-arrow keys step it: ← / ↓ down one step, → / ↑ up one — the same
-step the readout beside it counts in.
-
-A segmented control — the **Simple | Power User** switch, and
-every pick-one strip in the panes — costs one Tab stop for the
-whole control rather than one per segment, and ← / → move the
-choice. ↑ / ↓ are left alone, so they still carry you out of the
-row.
-
-Where a row carries extra moves behind a right-click (renaming a
-palette, exporting it, deleting it, or reordering spaces), press
-**⌃.** (**Control-Period**) on the focused row or item to open its
-action menu from the keyboard. The same moves are also offered to
-VoiceOver as accessible actions.
+- A slider takes focus and the arrow keys step it: ← / ↓ down
+  one step, → / ↑ up one, in the readout's own step.
+- A segmented control — the **Simple | Power User** switch and
+  every pick-one strip — is one Tab stop; ← / → move the choice,
+  ↑ / ↓ leave the row.
+- Where a row has right-click moves (rename, export or delete a
+  palette; reorder spaces), press **⌃.** (**Control-Period**) on
+  the focused row to open the same menu. VoiceOver offers them
+  as accessible actions.
 
 ### Permission & First Run
 
-On first launch, a wizard prompts you to grant Accessibility
-permission — KiwiDesk needs it to move and resize windows.
-Follow the steps to enable it in System Settings › Privacy &
-Security › Accessibility. A row of markers across the top of
-every screen shows how far along you are. It counts only the
-screens this particular run will show, so it never promises one
-you will not see.
+On first launch a tour asks you to grant Accessibility
+permission in System Settings › Privacy & Security ›
+Accessibility. A row of markers across the top shows how far
+along you are, counting only the screens this run will show.
 
 When the permission lands, KiwiDesk arranges every window that
-was already open — that first retile is the tour telling you it
-works. Setup windows like the tour itself are never arranged:
-they have an end, so the tiler leaves them alone.
+was already open. On a busy Mac that takes a few seconds: the
+heading reads **Arranging your windows** and the footer counts
+apps until it reads **Your windows are arranged**. **Continue**
+is live the whole time.
 
-On a busy Mac that takes a few seconds, and the screen says so
-rather than claiming to be finished: while it works, the heading
-reads **Arranging your windows** and the footer counts the apps
-it has been through. **Continue** is live the whole time — the
-arranging finishes on its own, whether you wait for it or move
-on. When the heading changes to **Your windows are arranged**,
-it is done.
+The tour then shows the spaces it chose for your screens and the
+shortcuts it bound, each modifier drawn as its own key with its
+short name (`ctrl`, `opt`, `shift`, `cmd`). One line above the
+list states the rule the chords share — ⌃⌥ moves your focus,
+adding ⇧ moves the window — read off your actual shortcuts, so
+it is not drawn if you have rebound either group.
 
-The tour then shows the spaces it chose for your screens, and
-after that the shortcuts it bound — the chords themselves, laid
-out in the window, including the one that opens the shortcut
-panel. Each modifier is drawn as its own key, with its short
-name under it — `ctrl`, `opt`, `shift`, `cmd` — so you can find
-the keys without already knowing the symbols. Above the list,
-one line states the rule the chords share: ⌃⌥ moves your focus,
-and adding ⇧ moves the window. That line is read off the
-shortcuts you actually have, so if you have rebound either group
-it is simply not drawn rather than teaching you a keyboard that
-is not yours. Teaching all of this here rather
-than pointing at the menu bar is deliberate: it works when the
-menu bar is auto-hidden, and nothing opens on top of the tour
-while you are reading it.
+The closing card shows a picture of the menu bar with the
+KiwiDesk mark in it, offers **Start KiwiDesk at login** (ticked),
+a **Start using it** button, and a link to **the guide** in your
+browser.
 
-The closing card confirms KiwiDesk is managing your windows and
-shows you where it lives: a small picture of a menu bar with the
-KiwiDesk mark in it, so you can find the app once the window
-closes. **Start KiwiDesk at login** is there, ticked, to
-untick if you would rather start it yourself. **Start using it**
-is the only button, and that is the point. The one quiet line
-beside it points at **the guide**, which opens KiwiDesk's
-written guide in your browser. Settings is not offered on this
-card: the picture above is how you reach it, and it is how you
-will keep reaching it.
+Close the tour before those last screens and it reopens on the
+shortcuts screen at the next launch; once reached, no ordinary
+launch reopens it. Losing Accessibility later brings the tour
+back at its grant step, and continuing walks the same screens
+again.
 
-If you grant Accessibility but close the tour before those last
-screens, KiwiDesk reopens on the shortcuts screen at the next
-launch; once you have reached them, no ordinary launch reopens
-it again. Losing Accessibility later is not an ordinary launch:
-the tour comes back at its grant step, and continuing from there
-walks the same screens again rather than suppressing them on the
-grounds that you have seen them once.
+While Accessibility is missing, window management pauses: the
+menu bar icon shows a warning triangle, the quick menu gains a
+**Window Management Paused…** row at the top, and Settings shows
+a banner across every section. The menu row reopens the tour at
+its grant step; the banner's **Open System Settings** goes
+straight to the macOS pane. Management resumes once you grant
+it.
 
-If Accessibility permission is ever missing — you dismissed the
-wizard, or the permission was revoked later — window management
-pauses and KiwiDesk makes it easy to find your way back. The menu
-bar icon shows a warning triangle, the quick menu gains a
-**Window Management Paused…** row at the top, and the Settings
-window shows a banner across every section. Management resumes
-automatically once you grant it.
+No row greys out while paused. Every control still edits, so you
+can prepare a whole setup before granting anything. What the
+pause reaches is the save verbs that need a live monitor set,
+under [Profiles](#profiles).
 
-The two routes differ on purpose. The menu bar's row reopens the
-wizard at its grant step, which explains what the permission is
-for and waits for it; the Settings banner's **Open System
-Settings** goes straight to the macOS pane, since the banner has
-already said what is wrong to someone who is sitting in Settings.
-
-No row on the page greys out while it is paused. Every control
-still edits, so you can prepare a whole setup before granting
-anything and have it waiting the moment you do — one switch being
-off is not the same as the app being broken. What the pause does
-reach is the save verbs that need a live monitor set, described
-under [Profiles](#profiles); the rows themselves never.
-
-KiwiDesk runs as a single instance. Launching it while a copy is
-already running never starts a second manager (two instances
-would fight over your windows and hotkeys): the second launch
-brings the running instance forward and exits, printing
-`already running` to the terminal — that line, not the exit
-status, is what says a new instance did not start. When a
-Finder-launched copy can't surface the running instance, a brief
-notice dialog explains the exit instead. A crashed instance never
-blocks the next launch; the lock dies with the process.
-
-That exit reports **success**, deliberately: declining to start
-beside a running copy is the guard working, not a failure. It
-matters because the launchd helper behind `kiwidesk service`
-relaunches KiwiDesk whenever it exits *un*successfully — so if
-declining counted as a failure, starting the service while
-KiwiDesk was already running would have that helper start a
-second copy, watch it bow out, read that as a crash and try
-again about every ten seconds, taking your focus each time.
+KiwiDesk runs as a single instance. A second launch brings the
+running instance forward and exits, printing `already running`
+to the terminal — that line, not the exit status, says a new
+instance did not start; the exit itself reports success, so the
+`kiwidesk service` helper never reads it as a crash. When a
+Finder-launched copy cannot surface the running instance, a
+notice dialog explains. A crashed instance never blocks the next
+launch.
 
 ### The Status Bar Quick Menu
 
-KiwiDesk runs a lightweight menu bar helper for daily controls. Clicking
-the KiwiDesk icon opens the quick menu where you can:
+Click the KiwiDesk icon in the menu bar for the quick menu:
 
-- **Layout**: Switch the active space's layout algorithm (BSP, Stack,
-  Scrolling, Monocle, Grid, Track, Floating).
-  - Switches made through the quick menu are **session-only** (temporary)
-    by default and do not rewrite the active profile.
-  - When the layout mode has drifted from the profile's saved setting,
-    the active layout in the menu displays a secondary
-    "not saved to profile" subtitle.
-  - Click **Keep Layout in Profile "‹name›"** below the separator to
-    make it permanent — it writes down what is on screen, every
-    screen at once, into the active profile. The row lights up
-    whenever *any* screen is running a temporary layout, not only
-    the focused one.
-  - Settings does not narrate temporary layouts at all. Its Save
-    saves what you edited there; a temporary layout stays temporary
-    until you keep it, and stays on screen through an unrelated
-    Save. The one exception is a Space whose layout you changed in
-    **Settings → Spaces** — that edit is yours and wins on Save.
-  - **With more than one screen connected, the list nests one level
-    deeper**: **All Screens** first, then a row per screen named
-    after that screen, in the order the screens sit on your desk
-    (left to right, then top to bottom). Open a screen's row and
-    the checkmark inside marks the layout the Space showing there
-    is running, so the menu also answers "what is each screen on
-    right now" — which previously meant focusing a window on each
-    screen in turn and reopening the menu. **All Screens** applies
-    your pick everywhere at once, which is what plugging into a
-    dock usually wants; it carries no checkmark of its own, because
-    "every screen is already running this" is a different claim
-    from any one screen's layout — the per-screen rows below it are
-    where you read the current state.
+- **Layout** — switch the active space's layout (BSP, Stack,
+  Scrolling, Monocle, Grid, Track, Floating). Switches made here
+  are **session-only** and do not rewrite the profile; a drifted
+  layout shows a "not saved to profile" subtitle. **Keep Layout
+  in Profile "‹name›"** below the separator writes what is on
+  screen, every screen at once, into the active profile; it
+  lights up whenever any screen runs a temporary layout.
+  Settings does not narrate temporary layouts: its Save saves
+  what you edited there and a temporary layout stays on screen
+  through it. The one exception is a Space whose layout you
+  changed in **Settings → Spaces**, which wins on Save.
 
-    A layout belongs to a **Space**, not to a screen; each screen
-    simply has one Space showing on it, so a screen's row sets the
-    layout of whatever is showing there. Drift is per Space too, so
-    the "not saved to profile" subtitle appears inside each screen's
-    own list, on that screen's current layout, rather than once at
-    the top.
+  With more than one screen the list nests: **All Screens**
+  first, then a row per screen in desk order (left to right,
+  then top to bottom). Each screen's row checkmarks the layout
+  the Space showing there is running and shows that Space's own
+  drift subtitle; **All Screens** applies your pick everywhere
+  and carries no checkmark. A layout belongs to a Space, and a
+  screen's row sets the layout of whatever Space is showing
+  there. With a single screen the list stays flat.
+- **Switch Profile** — load any saved profile. A non-clickable
+  **Profile: ‹name›** line above names the current one, shown
+  only when there is another profile to switch to.
+- **View Shortcuts…** — the read-only panel, below.
+- **Settings…** — the full Settings window.
+- **Check for Updates…** — ask now whether a newer KiwiDesk has
+  been released, and install it. KiwiDesk also checks on its own
+  in the background. The row is greyed while a check runs or an
+  update is part-way through installing.
 
-    With a single screen the list stays flat, exactly as before —
-    the extra level would only add a click to the control you reach
-    for most. **Keep Layout in Profile** stays a single action on
-    the profile as a whole; it is not per screen, which is also why
-    it arms on any screen's temporary layout rather than the
-    focused screen's alone.
-- **Switch Profile**: Load any saved profile into the current layout.
-  A non-clickable **Profile: ‹name›** line appears above the actions
-  naming the profile you are currently on — shown only when there is
-  another profile to switch to, so it never adds noise when there is
-  no choice to make.
-- **View Shortcuts…**: Open a read-only reference of every shortcut
-  bound in the currently active layer — see below.
-- **Settings…**: Open the full Settings window.
-- **Check for Updates…**: Ask right now whether a newer KiwiDesk
-  has been released, and install it if you want it. KiwiDesk also
-  checks on its own in the background; this is the row for when
-  you want to know immediately. It is greyed while a check is
-  already running or an update is part-way through installing.
+  Installing shows a small progress window. KiwiDesk brings the
+  *Install and Relaunch* prompt to the front when it is ready;
+  if you quit with an update waiting, it installs on the way
+  out.
 
-  Choosing to install shows a small progress window. You do not
-  have to watch it — go back to what you were doing, and KiwiDesk
-  brings the *Install and Relaunch* prompt to the front when it is
-  ready for your answer, since a menu-bar app has no Dock icon to
-  bounce for your attention. The update itself is applied whether
-  or not you answer: if you quit KiwiDesk with one waiting, it
-  installs on the way out.
-
-  **If you installed with Homebrew**, KiwiDesk now keeps itself
-  up to date and `brew upgrade` steps aside for it. To move an
-  older copy onto a version that can do this, run
-  `brew upgrade --cask kiwidesk` once — naming the cask works
-  even after `brew upgrade` starts skipping it.
-- **Window Management Paused…** (only when Accessibility permission
-  is missing): appears at the top of the menu and reopens the
-  permission wizard so tiling can resume.
-- **Starting up — apps: N of M** (only while KiwiDesk is coming
-  up): a live count of how far the startup scan has got, which
-  keeps counting while the menu stays open.
-  While it shows, the menu-bar mark is drawn dimmed and **Layout**
-  and **Switch Profile** are greyed — they act on windows the scan
-  has not collected yet and work as soon as it finishes. The mark
-  returning to full strength is the signal that KiwiDesk is ready;
-  the row and the greys disappear with it.
-
-  On a busy Mac (a hundred or more running apps) this takes a few
-  seconds, and the menu opens throughout — one slow app can no
-  longer keep the whole desk waiting. An app whose Accessibility
-  answers are unusually slow is finished off just after boot, so
-  its windows are tiled a beat later than everything else.
+  **If you installed with Homebrew**, KiwiDesk keeps itself up
+  to date and `brew upgrade` steps aside. To move an older copy
+  onto a version that can do this, run
+  `brew upgrade --cask kiwidesk` once.
+- **Window Management Paused…** — only while Accessibility is
+  missing; reopens the permission tour.
+- **Starting up — apps: N of M** — only while KiwiDesk is coming
+  up: a live count of the startup scan. The menu-bar mark is
+  drawn dimmed and **Layout** and **Switch Profile** are greyed
+  until it finishes. On a busy Mac (a hundred or more apps) this
+  takes a few seconds; an app whose Accessibility answers are
+  unusually slow is finished off just after boot, so its windows
+  tile a beat later.
 
 When the background check finds an update, the menu-bar icon
-shows a small dot and the **Check for Updates…** row reads
-**Update Available…** until you act on it — nothing pops up over
-your work. Choosing the row brings the update forward, and
-*Remind Me Later* there clears the dot until the next background
-check finds the update again.
+shows a small dot and the row reads **Update Available…** until
+you act on it; nothing pops up over your work. *Remind Me Later*
+clears the dot until the next background check.
 
 ### The Shortcuts Panel
 
-**View Shortcuts…** opens a floating, read-only panel that mirrors the
-shortcuts bound in the currently active layer — a fast "what can I press
-right now" lookup. It is not an editor: it only shows what is already
-bound, grouped into four sections:
+**View Shortcuts…** opens a floating, read-only panel of the
+shortcuts bound in the active layer, in four sections:
 
-- **Controls** — window and focus actions (Focus, Move windows, Size &
-  float, Switch layers), laid out in two columns.
-- **Apps** — your app-launch shortcuts, each with the app's icon. A
-  small window-plus badge marks a shortcut set to *Open New* (always
-  a fresh instance).
-- **Inactive shortcuts** — shortcuts whose target Space has left the
-  current list, dimmed and under their own names. They still work
-  (pressing one recreates its Space) and come back on their own when
-  the Space returns; Settings ▸ Shortcuts shows the same set, where
-  you can also rebind or remove them.
-- **Custom** — any raw-Lua shortcuts, shown as their Lua source.
+- **Controls** — window and focus actions (Focus, Move windows,
+  Size & float, Switch layers), in two columns.
+- **Apps** — app-launch shortcuts with the app's icon. A
+  window-plus badge marks *Open New*.
+- **Inactive shortcuts** — shortcuts whose target Space has left
+  the current list, dimmed. They still work (pressing one
+  recreates its Space) and come back when the Space returns.
+- **Custom** — raw-Lua shortcuts, shown as their Lua source.
 
-The panel has its own **hotkey**: **⌃⌥K** by default (under Settings ▸
-Shortcuts ▸ **General**, "Show shortcuts panel" — rebindable or
-clearable per layer). That key both opens and closes the panel, and it
-appears beside the menu bar's **View Shortcuts…** row and in the
-panel's own close hint. Every layer you create gets the same ⌃⌥K row,
-so the cheat-sheet is always reachable from the keyboard.
+The panel's own hotkey is **⌃⌥K** (Settings ▸ Shortcuts ▸
+**General**, "Show shortcuts panel"; rebindable per layer, and
+every layer you create gets the same row). The key opens and
+closes the panel; it is shown beside the menu bar's **View
+Shortcuts…** row and in the panel's close hint, and never listed
+as a row of its own.
 
-The panel always appears centered on the screen under your pointer and
-never remembers a position. It grows with what you have
-bound, up to a ceiling set by your screen, and **scrolls** past
-that — which on a normal setup it usually does, since the shortcuts
-you get out of the box grow by three rows for every Space. When it
-does, the footer says so — "Scroll for more shortcuts" appears
-above the close hint, because macOS hides a scrollbar until you
-scroll and the panel would otherwise look complete. Your shortcuts keep working while it is
-open — it is a live cheat sheet, so closing a window, switching focus
-or moving one behaves exactly as it does without the panel. Press
-**Esc**, click anywhere outside it, or
-choose **View Shortcuts…** again to close it — closing lands you
-back in the window you were using before you opened it, and a
-click outside leaves you in whatever you clicked.
-Empty sections are hidden;
-a layer with nothing bound shows a short placeholder. The panel never
-lists its own ⌃⌥K shortcut as a row — the close hint in the footer
-already shows it — so a fresh layer, which starts with only that
-binding, shows the placeholder too. To change any
-shortcut, click **Edit in Settings…** at the bottom — it opens Settings
-▸ Shortcuts, the one place bindings are edited. If your configuration is
-owned by `init.lua`, the panel says so instead of listing shortcuts.
+The panel appears centered on the screen under your pointer and
+remembers no position. It grows with what you have bound up to a
+ceiling set by your screen, then scrolls; the footer says
+"Scroll for more shortcuts" when it does. Your shortcuts keep
+working while it is open. Press **Esc**, click outside it, or
+choose **View Shortcuts…** again to close it; closing returns
+you to the window you were using. Empty sections are hidden; a
+layer with nothing bound shows a placeholder. **Edit in
+Settings…** opens Settings ▸ Shortcuts. If `init.lua` owns your
+configuration, the panel says so instead of listing shortcuts.
 
 ## How the App and init.lua Coexist
 
-KiwiDesk keeps your custom Lua code in `~/.config/KiwiDesk/init.lua`
-and never edits it. The Settings app stores its own configuration
-in `~/.config/KiwiDesk/gui.json` (the global settings) and
-individual profile JSON files (one per saved layout).
+KiwiDesk keeps your custom Lua in `~/.config/KiwiDesk/init.lua`
+and never edits it. Settings stores its own configuration in
+`~/.config/KiwiDesk/gui.json` (global) and one JSON file per
+saved profile.
 
-**Key points:**
-
-- Saving in the Settings app never rewrites `init.lua`.
-- Custom Lua (print statements, event hooks, or anything that
-  isn't app rules, float rules, ignore rules, keybindings, or
-  profile bindings) lives safely alongside the visual editor.
-- A small blue banner confirms "Custom Lua detected" when the
-  app finds your own code.
-- If you declare managed vocabulary (`app_rules`,
+- Saving in Settings never rewrites `init.lua`.
+- Custom Lua that is not app rules, float rules, ignore rules,
+  keybindings or profile bindings lives alongside the visual
+  editor. A blue banner reads "Custom Lua detected" when the app
+  finds your code.
+- If `init.lua` declares managed vocabulary (`app_rules`,
   `float_rules`, `ignore_rules`, `KiwiDesk.bind`, keybinding
-  definitions) *and*
-  the Settings app tries to manage them, the app shows a raw Lua
-  editor so you can resolve the conflict. You can then click
-  **Adopt into the GUI** to import your settings. Adopt comments
-  out the migrated settings, rules, and keybindings as a backup
-  while keeping your custom Lua — event hooks like the sketchybar
-  bridge — **live**, so your integrations keep firing. Or keep
-  editing raw Lua.
+  definitions) that Settings also manages, Settings shows a raw
+  Lua editor instead. **Adopt into the GUI** imports them,
+  comments the migrated settings out as a backup, and keeps your
+  custom Lua (event hooks such as the sketchybar bridge) live.
+  Or keep editing raw Lua.
 
-Once `gui.json` exists, the visual editor owns tiling (gaps, modes,
-layout tuning). Hand-written `set_gap_global` calls stop applying
-on monitor changes — the built-in layout rules take over instead.
-To persist custom tiling, save it as a profile in the Settings app.
+Once `gui.json` exists, the visual editor owns tiling (gaps,
+modes, layout tuning), and hand-written `set_gap_global` calls
+stop applying on monitor changes. To persist custom tiling, save
+it as a profile.
 
 **First launch with an existing `init.lua`:** KiwiDesk seeds the
-default `gui.json` (with the default profile, spaces, and
-shortcuts) as long as your `init.lua` declares no managed
-settings. So an `init.lua` that carries only event hooks or other
-harmless custom Lua still boots GUI-managed *and* keeps firing your
-hooks. Only an `init.lua` that already sets tiling itself
-(`KiwiDesk.set_*`, app/float/ignore rules, or keybindings) is left
-Lua-owned — no `gui.json` is seeded, and the **Adopt into the GUI**
-path is offered instead.
+default `gui.json` (default profile, spaces and shortcuts) as
+long as `init.lua` declares no managed settings, so a file of
+event hooks boots GUI-managed and keeps firing. An `init.lua`
+that sets tiling itself (`KiwiDesk.set_*`, app/float/ignore
+rules, or keybindings) stays Lua-owned; no `gui.json` is seeded
+and **Adopt into the GUI** is offered instead.
 
 ## Start KiwiDesk
 
-**Start at login** sits in **General**'s **Applies immediately**
-group, below the language and appearance picks. Off, KiwiDesk
-never starts on its own; on, it launches when you sign in, so
-your windows are arranged from the start rather than floating
-loose until you open it by hand. It stores nothing of its own —
-it reads and writes the real macOS login item.
+**Start at login** sits in **General ▸ Applies immediately**. It
+reads and writes the real macOS login item and stores nothing of
+its own; revoke it in **System Settings ▸ General ▸ Login Items**
+and the switch follows. If macOS shows *Requires approval in
+System Settings*, click **Open Login Items** and enable KiwiDesk
+there. The switch greys out when KiwiDesk runs from a place it
+cannot register from (a still-quarantined download, or the bare
+binary); the caption names the fix. First-launch setup offers
+login pre-selected on its final step.
 
-Crash supervision is **not** in Settings. A background helper
-that relaunches KiwiDesk if it ever *crashes* — never after a
-deliberate Quit — is available from the command line as
-`kiwidesk service start`, and [the CLI guide](cli.md) documents
-it. It is left to the terminal deliberately: it is a second way
-to launch KiwiDesk, and running it alongside the login item
-means two launchers starting the same app at login, which is
-worth understanding before you turn it on. If KiwiDesk ever does
-stop, reopening it from Spotlight takes a second.
-
-If you have that service running, **Start at login** shows as on
-and stops being editable, with a line saying why: the service
-already launches KiwiDesk at login, so the login item would only
-add a second launcher. That line names the command to undo it —
-`kiwidesk service stop` — and the switch is yours again.
-
-First-launch setup offers login pre-selected on its final step,
-so a standard new install launches at login and nothing
-supervises it.
-
-The switch reflects the real macOS state — revoke the login item
-from **System Settings ▸ General ▸ Login Items** and it follows.
-If macOS shows *Requires approval in System Settings*, click
-**Open Login Items** and enable KiwiDesk there. It greys out when
-KiwiDesk is run from a spot it can't register from (a
-still-quarantined download, or the bare binary) — only off is
-valid there; the caption names the fix, and the switch's `?`
-stays readable.
+Crash supervision is command-line only: `kiwidesk service start`
+installs a helper that relaunches KiwiDesk after a crash, never
+after a deliberate Quit ([CLI reference](cli.md)). While that
+service runs, **Start at login** shows as on and stops being
+editable, with a line naming `kiwidesk service stop` as the way
+back.
 
 ## What Changed in This Version
 
-**General ▸ About** shows the version you are running, and
+**General ▸ About** shows the version you are running.
 **Release Notes** beneath it opens the release history in your
-browser — every version's notes, not just the current one, so you
-can read back through what changed while you were on an older
-build.
-
-It opens in a browser rather than in a window of KiwiDesk's own
-because the notes live on GitHub, which renders them with
-formatting and pictures that an in-app reader would only flatten.
+browser — every version's notes, not just the current one.
 
 ## The Written Guide
 
 **General ▸ About** also carries a **Guide** link, between the
-version group above it and the support link below. It opens
-KiwiDesk's written guide — the same one the tour's last card
-points at — in your browser.
-
-This row is the permanent route to it. The tour is shown once
-and does not come back on its own, so once it is behind you,
-About is where the guide stays. Searching Settings for "guide",
-"help", "docs" or "manual" lands on this row.
-
-The page opens in German or Japanese when KiwiDesk is running in
-one of those languages, and in English otherwise — those are the
-languages the site itself is written in, and a live English page
-beats a missing one.
+version group and the support link, which opens this guide in
+your browser — the same page the tour's last card points at.
+Searching Settings for "guide", "help", "docs" or "manual" lands
+on this row. The page opens in German or Japanese when KiwiDesk
+runs in one of those languages, and in English otherwise.
 
 ## GUI Language
 
-Go to **General** (in the **Applies immediately** group) and pick
-a display language. It covers the Settings window, the dashboard, and the
-menu-bar quick menu. "System default" follows your macOS language
-if KiwiDesk ships a translation, otherwise English — and it walks
-your whole preferred-language list, not just the first entry, so a
-language KiwiDesk doesn't speak yet falls through to the next one
-you actually read rather than straight to English. Regional and
-script variants resolve to the closest catalog that ships: a
-Traditional Chinese system gets `zh-Hant` (never Simplified), and a
-European Portuguese one gets the Brazilian catalog. Your choice
-applies instantly, touches no Lua or profile files, and persists
-in app preferences only (`UserDefaults`, key `"language"`) — it
-never flips the app to raw-editor mode. To add or fix a
-translation, see [translating.md](translating.md).
+**General ▸ Applies immediately** picks a display language for
+the Settings window, the dashboard and the quick menu. "System
+default" walks your whole macOS preferred-language list and takes
+the first one KiwiDesk ships, else English; regional and script
+variants resolve to the closest catalog (Traditional Chinese gets
+`zh-Hant`, European Portuguese the Brazilian catalog). The choice
+applies instantly, touches no Lua or profile file, and lives in
+app preferences (`UserDefaults`, key `"language"`). To add or fix
+a translation, see [translating.md](translating.md).
 
 ## Appearance
 
-**General ▸ Appearance** (in the **Applies immediately** group)
-chooses whether KiwiDesk follows the system's light/dark setting
-or pins one:
+**General ▸ Appearance** chooses whether KiwiDesk follows the
+system's light/dark setting or pins one:
 
-- **System** — follow macOS. The default, and the only choice
-  KiwiDesk stores nothing for: pick it and KiwiDesk tracks your Mac
-  from then on, flipping when the system does.
-- **Light** / **Dark** — hold that appearance whatever the system
-  is doing, and for every KiwiDesk surface at once: the Settings
-  window, the App and Space Bars, and the focus and drag overlays.
+- **System** — follow macOS. The default; KiwiDesk stores
+  nothing for it.
+- **Light** / **Dark** — hold that appearance for every KiwiDesk
+  surface: the Settings window, the bars, and the focus and drag
+  overlays.
 
-Like the language pick, it applies the instant you choose, is not
-part of a profile, touches no Lua or `gui.json`, and lives in app
-preferences only. Choosing **System** removes the stored value
-entirely, so "follow macOS" is the true default with nothing left
-behind.
+Like the language, it applies instantly, is not part of a
+profile, and lives in app preferences only.
 
 ## Moving to Another Mac: Backups
 
 **General ▸ Advanced ▸ Export KiwiDesk Backup…** writes one file
-holding your settings, every profile, and your saved color
-palettes. Carry it to another Mac, open Settings there, and
-**Restore from Backup…** puts the setup back.
+with your settings, every profile and your saved color palettes.
+**Restore from Backup…** on another Mac puts the setup back.
 
-Your `init.lua` is **not** included, deliberately: it is code you
-wrote, and a backup that quietly replaced it would be claiming a
-file KiwiDesk does not manage. Nor is the remembered window
-arrangement, which describes one Mac's session rather than
-anything you chose. On a Lua-owned setup the export still carries
-your profiles and palettes, so it is worth taking either way.
+Not included: `init.lua` (code you wrote) and the remembered
+window arrangement (one Mac's session). A Lua-owned setup still
+exports its profiles and palettes.
 
-It is a **one-time snapshot, not a service** — KiwiDesk keeps no
-backups of its own, so export again whenever you want a current
-copy. Keeping two Macs continuously in step is a different job
-and needs no feature; see
-[The gui.json File](#the-guijson-file) for the folder-sync
-approach that does it.
+It is a one-time snapshot: KiwiDesk keeps no backups of its own,
+so export again whenever you want a current copy. For continuous
+sync between Macs, see [The gui.json File](#the-guijson-file).
 
-Restoring **replaces** — it does not merge. Your current
-settings, profiles and palettes are replaced by the backup's, and
-anything you have not saved yet is discarded, which is why it
-asks first. What it replaces goes to the **Trash**, so one drag
-undoes it.
+Restoring **replaces**; it does not merge. Your current settings,
+profiles and palettes are replaced, unsaved edits are discarded,
+and it asks first. What it replaces goes to the **Trash**. The
+restored setup takes effect without a relaunch. On the way:
 
-The restored setup takes effect straight away — no relaunch. Two
-things happen on the way that are worth knowing about on a Mac
-you are moving *into*:
+- The remembered window arrangement on that Mac is forgotten, as
+  [Discard Saved Window
+  Arrangement](#when-things-act-up-discard--reset) does.
+- KiwiDesk picks the profile matching the screens connected
+  *here*, not the one the other Mac was on. A Desktop binding
+  still wins over screen matching.
 
-- The **remembered window arrangement on that Mac is forgotten**,
-  the same way [Discard Saved Window
-  Arrangement](#when-things-act-up-discard--reset) forgets it. It
-  named Spaces the restore has just replaced, so keeping it would
-  file new windows into Spaces that no longer exist.
-- KiwiDesk then picks the profile matching the **screens actually
-  connected here**, not the one the other Mac happened to be on —
-  which is the point of carrying a setup between two different
-  desks. A macOS Desktop bound to a profile still wins over
-  screen matching, as it always does.
+Refused before you are asked anything: a file that is not a
+KiwiDesk backup, one written by a **newer** KiwiDesk (update
+first), one that would restore nothing, and one carrying settings
+when this Mac's settings come from `init.lua` (a backup with only
+profiles and palettes restores there normally). Exporting refuses
+when KiwiDesk cannot read this Mac's own settings file.
 
-Some files are refused before you are asked anything at all: one
-that is not a KiwiDesk backup, one written by a **newer**
-KiwiDesk than the copy you are restoring into (update that copy
-first), one that would restore nothing — so an empty backup can
-never be mistaken for a wipe you asked for — and one carrying
-settings when *this* Mac's settings come from your `init.lua`,
-since a backup's settings cannot be applied where Lua owns them.
-A backup with only profiles and palettes restores onto such a Mac
-normally.
+A restore that skips something says what: a profile whose file
+cannot be read, or a palette that would shadow a built-in one,
+is counted rather than silently dropped.
 
-**Exporting** refuses in one case too: if KiwiDesk cannot read
-this Mac's own settings file, it says so rather than writing a
-backup with every setting missing.
-
-If a restore takes almost everything, it tells you what it left:
-a profile whose file cannot be read, or a colour palette that
-would shadow a built-in one, is skipped and counted rather than
-silently dropped. Everything else still lands.
-
-It sits at the very end of **General ▸ Advanced**, after Reset
-All Settings, because it is the most far-reaching action there:
-Reset All leaves your palettes alone, and a restore replaces
-those too.
+The row sits last in **General ▸ Advanced**, after Reset All
+Settings: Reset All leaves your palettes alone, a restore
+replaces them too.
 
 ## Exporting the Log
 
-If something misbehaves and you want to report it, **General ▸
-Advanced** has an **Export Log…** button above the recovery
-actions, with a time-range menu beside it — the last 15 minutes,
-the last hour, or since KiwiDesk started. Pick the range, press
-the button, and choose where to save the file (Downloads is
-suggested). Saving is the whole result — no
-message follows a successful export, and the file is in the place
-you chose. If you can make the problem happen again, do that
-first: the range counts back from now, and "since KiwiDesk
-started" means this run, so after a restart the last hour is the
-range that reaches back into the one before. A range in which
-KiwiDesk wrote nothing saves no file and says so. The file holds
-only what KiwiDesk itself wrote to the macOS log, so it is safe to
-attach to an issue — glance through it first, since it names the
-apps and windows KiwiDesk managed in that time. It changes nothing
-about your setup. The same export from a terminal is in the
+**General ▸ Advanced ▸ Export Log…** saves KiwiDesk's log for a
+time range — the last 15 minutes, the last hour, or since
+KiwiDesk started — to a file you choose (Downloads is suggested).
+No message follows a successful export. If you can make the
+problem happen again, do that first: the range counts back from
+now, and "since KiwiDesk started" means this run. A range with
+nothing written saves no file and says so. The file holds only
+what KiwiDesk itself wrote to the macOS log; it names the apps
+and windows KiwiDesk managed in that time, so glance through it
+before attaching it to an issue. The terminal form is in the
 [CLI reference](cli.md#exporting-the-log).
 
 ## When Things Act Up: Discard & Reset
 
-Below the log export and above the restore, **General ▸ Advanced**
-holds two escape hatches, in ascending severity:
+Two escape hatches in **General ▸ Advanced**, in ascending
+severity:
 
 - **Discard Saved Window Arrangement** — clears the arrangement
-  KiwiDesk remembered from your last session or wake (the hidden
-  snapshot files and the in-memory memory of which window
-  belonged to which space), without changing any settings. Use it
-  when windows come back in the wrong spaces or positions after a
-  restart or wake. No confirmation: the files regenerate from the
-  live state within seconds, so there is nothing lasting to lose.
-- **Reset All Settings…** — the last resort when KiwiDesk keeps
-  misbehaving. After a confirmation, it deletes every saved
-  profile, your spaces, layouts, and keybindings, forgets any
-  remembered arrangement, and starts over with the starter
-  defaults — the same state as a first launch. Kept, always: your
-  `init.lua` (on a Lua-owned setup its settings simply stay
-  authoritative), your color-palette library, the display
-  language, the login item, and onboarding (it does not re-run).
-  The old `gui.json` and profiles folder go to the **Trash**, so
-  one drag undoes a mistaken reset.
+  KiwiDesk remembered from your last session or wake, without
+  changing settings. Use it when windows come back in the wrong
+  spaces or positions after a restart or wake. No confirmation:
+  the files regenerate from the live state within seconds.
+- **Reset All Settings…** — after a confirmation, deletes every
+  saved profile, your spaces, layouts and keybindings, forgets
+  any remembered arrangement, and starts over with the starter
+  defaults. Kept: `init.lua` (a Lua-owned setup keeps its
+  settings authoritative), your color-palette library, the
+  display language, the login item, and onboarding. The old
+  `gui.json` and profiles folder go to the **Trash**.
 
 ## The gui.json File
 
-The file `~/.config/KiwiDesk/gui.json` holds the app's global base
-configuration. On a truly fresh install (no `init.lua` yet) it is
-created at first launch, pre-filled with the
-[default shortcuts](#default-shortcuts). On a hand-written setup
-(an `init.lua` already exists) it is only created the first time
-you Save in the Settings window. You normally never edit it by
-hand, but it is documented here for backup and transparency.
+`~/.config/KiwiDesk/gui.json` holds the app's global base
+configuration. On a fresh install (no `init.lua`) it is created
+at first launch with the [default shortcuts](#default-shortcuts);
+on a hand-written setup it is created the first time you Save in
+Settings. You normally never edit it by hand.
 
 > **Keeping multiple Macs in sync.** Symlink `~/.config/KiwiDesk`
-> into an iCloud Drive or Dropbox folder to keep `gui.json` and
-> your profiles in continuous sync across machines — this is live
-> sync, not a one-time copy, so a change on either Mac applies
-> everywhere the folder reaches. Machine-specific state doesn't
-> travel with it: grant Accessibility permission on each Mac
-> separately, and expect display layout and macOS Desktops to
-> resolve against whatever is actually connected there. If a
-> one-time copy is what you want instead, that is
-> [Moving to Another Mac: Backups](#moving-to-another-mac-backups).
+> into an iCloud Drive or Dropbox folder. This is live sync: a
+> change on either Mac applies everywhere the folder reaches.
+> Machine-specific state does not travel: grant Accessibility on
+> each Mac, and expect display layout and macOS Desktops to
+> resolve against what is connected there. For a one-time copy,
+> see [Moving to Another Mac: Backups](#moving-to-another-mac-backups).
 
 **Top-level structure:**
 
@@ -766,1117 +501,679 @@ hand, but it is documented here for backup and transparency.
 }
 ```
 
-Each field:
-
-- **`spaces`**: array of space ids (strings). Defines the spaces
-  you work with, in order. Updated whenever you add, rename, or
-  delete a space in the Spaces section.
-- **`app_rules`**: object mapping app **bundle identifiers**
-  (e.g. `com.spotify.client`) to space ids. When an app opens,
-  its windows land in the assigned space. Updated in the App
-  Rules section, which picks apps by name and stores the
-  identifier for you.
-- **`float_rules`**: array of bundle identifiers (and optionally
-  `bundle-id:title` filters). Windows matching these never tile.
-  Updated in the App Rules section.
-- **`ignore_rules`**: array of bundle identifiers. Matching apps
-  are never tracked or managed. This power-user field has no
-  Settings control, but Settings preserves it when saving.
-- **`profile_bindings`**: object mapping a **Desktop
-  identifier** to the profile that Desktop selects. When that
-  Desktop becomes current on your main screen, the bound profile
-  loads. Updated in the Profiles section.
-
-  The key is the private identifier KiwiDesk stamps into the
-  Desktop itself, not its Mission Control number — that is what
-  keeps a binding on the Desktop you meant when Mission Control
-  renumbers, and it is why the key is unreadable. The number
-  lives in `desktop` beside the profile, as the label the
-  Profiles card draws the row with and the number a binding
-  reports while its Desktop is away; nothing is looked up by it.
-  A `display` field may sit alongside, recording the screen the
-  Desktop was last seen on. See
+- **`spaces`**: space ids (strings), in order. Updated by the
+  Spaces section.
+- **`app_rules`**: app **bundle identifier** → space id. Updated
+  by App Rules, which picks apps by name and stores the
+  identifier.
+- **`float_rules`**: bundle identifiers (optionally
+  `bundle-id:title`). Matching windows never tile. Updated by
+  App Rules.
+- **`ignore_rules`**: bundle identifiers never tracked or
+  managed. No Settings control; Settings preserves it on save.
+- **`profile_bindings`**: Desktop identifier → the profile that
+  Desktop selects when it becomes current on your main screen.
+  Updated by Profiles. The key is the identifier KiwiDesk stamps
+  into the Desktop itself, not its Mission Control number, so a
+  binding survives renumbering; the number sits in `desktop` as
+  the label the Profiles card draws, and an optional `display`
+  records the screen the Desktop was last seen on. On a Mac
+  where the stamp cannot be written, the key is the Mission
+  Control number. A file in the older `{ "1": "Developer" }`
+  shape is rewritten once on load. See
   [A binding follows its Desktop, not its number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
+- **`layers`**: keybinding layers, only one active at a time.
+  Each has a **`name`** ("default" for the main set), an optional
+  **`icon`** (SF Symbol name or emoji for the menu bar), and
+  **`bindings`**: rows of **`combo`** (e.g. `"cmd+alt+left"`),
+  **`lua`** (the body inside `function() ... end`), **`kind`**
+  ("navigation", "application", or "custom") and **`label`**.
 
-  On a Mac where the stamp cannot be written, the key is the
-  Mission Control number instead and bindings behave as they did
-  before. A `gui.json` written by an earlier build, where this
-  field read `{ "1": "Developer" }`, is rewritten to the new
-  shape once on load — nothing to do by hand.
-- **`layers`**: array of keybinding layers — named alternate
-  shortcut sets, only one of which fires at a time. Each layer is
-  an object with:
-  - **`name`**: the layer name ("default" for the main set).
-  - **`icon`**: optional SF Symbol name or emoji for the menu bar.
-  - **`bindings`**: array of shortcut rows, each with:
-    - **`combo`**: key combo string (e.g., `"cmd+alt+left"`).
-    - **`lua`**: the Lua code to run (the body inside `function() ... end`).
-    - **`kind`**: classification ("navigation", "application", or "custom").
-    - **`label`**: display name for the row.
+A hand-edited `layers` list is normalized on load: empty names
+are dropped, a duplicated name keeps its first entry, `default`
+always exists and sits first, and an `icon` on `default` is
+removed. The next Save persists the normalized list.
 
-If you hand-edit the `layers` list, it is normalized on load:
-layers with an empty name are dropped, a duplicated layer name
-keeps only its first entry, the `default` layer always exists and
-sits first, and an `icon` on the default layer is removed (its
-menu bar indicator is fixed). The cleanup is silent; the next
-Save persists the normalized list.
-
-> This key was called `"modes"` in earlier pre-release builds.
-> A file still using the old name loads as *no shortcuts at
-> all* — every layer, `default` included — and the next Save
-> writes that emptiness back, so do this **before** opening
-> Settings:
+> This key was called `"modes"` in earlier pre-release builds. A
+> file still using the old name loads as *no shortcuts at all*
+> and the next Save writes that emptiness back, so run this
+> **before** opening Settings:
 >
 > ```bash
 > sed -i '' 's/"modes"/"layers"/' ~/.config/KiwiDesk/gui.json
 > ```
 >
-> Repeat it for any file in `~/.config/KiwiDesk/profiles/` that
-> carries a keybinding override. A hand-written `init.lua` needs
-> the verbs renamed too — `KiwiDesk.define_mode` and
-> `switch_mode` no longer exist, so a config still calling them
-> errors on load. If you would rather start clean, **Reset all
-> settings…** trashes `gui.json` and reseeds the defaults.
+> Repeat it for any file in `~/.config/KiwiDesk/profiles/` with a
+> keybinding override. A hand-written `init.lua` needs
+> `KiwiDesk.define_mode` and `switch_mode` renamed too; they no
+> longer exist. Or **Reset all settings…** trashes `gui.json`
+> and reseeds the defaults.
 
-To reset the app to what your `init.lua` declares, delete `gui.json`.
-Treat it like `init.lua` — do not import it from an untrusted source,
-since custom Lua in keybindings runs on every reload.
+To reset the app to what `init.lua` declares, delete `gui.json`.
+Treat it like `init.lua`: do not import it from an untrusted
+source, since custom Lua in keybindings runs on every reload.
 
 ## What Lives Where: Global vs Per-Profile
 
-Your configuration is split across two homes, and knowing which is
-which tells you the *blast radius* of any edit:
+- **`gui.json` (global)** — one file, shared by every profile:
+  the base keyboard shortcuts, app rules, float rules, ignore
+  rules, and Desktop → profile bindings. Editing one changes it
+  for every profile.
+- **Each profile's JSON** — applied only while that profile is
+  active: which spaces exist and their order, layout mode, gaps
+  and per-layout / per-space tuning, space-to-monitor pins, the
+  Main role and the fallback space. Editing one touches only
+  that profile.
 
-- **`gui.json` (global)** — one file, shared by every profile.
-- **Each profile's JSON (per-profile)** — one file per saved
-  profile, applied only while that profile is active.
-
-**Global settings** live in `gui.json`; editing or deleting one
-changes it for **every** profile:
-
-- **Keyboard shortcuts** (the base set)
-- **App rules** (app → space assignment)
-- **Float rules** (apps that never tile)
-- **Ignore rules** (apps KiwiDesk never AX-tracks or manages)
-- **Desktop → profile bindings**
-
-**Per-profile settings** live in the profile's own JSON; editing
-one touches **only that profile** — another profile that declares
-a space of the same name is left untouched:
-
-- **Which spaces exist** and their order (the list you see is the
-  active profile's)
-- **Layout mode, gaps, and per-layout / per-space tuning**
-- **Space-to-monitor pins, the Main role, and the fallback space**
-
-This is why, when you **edit a stored profile without switching to
-it**, the General section disappears — it holds global state a
+This is why the General section leaves the grid when you edit a
+stored profile without switching to it: it holds global state a
 profile edit never writes.
 
-**Two hybrids — keyboard shortcuts and app rules.** The base set
-is global, but a profile can carry a *sparse override* just for
-itself: shortcuts can add or change specific bindings (see
-**Per-Profile Shortcut Overrides**), and app rules can pin an app
-to a different space — or un-pin it entirely — while that profile
-is active (see **Per-Profile Space Assignments** under App
-Rules). Everything else is squarely one or the other.
+**Two hybrids.** The base shortcuts and app rules are global, but
+a profile can carry a sparse override of its own: shortcuts can
+add or change specific bindings ([Per-Profile Shortcut
+Overrides](#per-profile-shortcut-overrides)), and app rules can
+pin an app to a different space or un-pin it ([Per-Profile Space
+Assignments](#per-profile-space-assignments)).
 
-A practical consequence: the base app rules name a single space
-per app. When profiles **share** a space name, one base rule is
-often enough — keep a `comms` space in each profile and assign
-the app to it; each profile still lays that space out
-differently. When profiles have **disjoint** space sets (Work
-`{1, 2, 3}` vs Home `{media, games}`), give each profile its own
-override for the app instead.
+Base app rules name one space per app. When profiles share a
+space name, one base rule is enough — keep a `comms` space in
+each profile and assign the app to it. When their space sets are
+disjoint (Work `{1, 2, 3}` vs Home `{media, games}`), give each
+profile its own override.
 
 ## Spaces
 
-The **Spaces** section (in the **This Profile** group) lists every
-space you manage. Each space is independent of monitors and can
-span multiple displays or run on just one.
+The **Spaces** section (**This Profile**) lists every space you
+manage. A space is independent of monitors and can span several
+displays or run on one.
 
-To **add a space**, click the **+** button and enter a name
-(often a number like "1", "2", or a name like "web", "mail").
-
-To **rename**, click the space name in the list.
-
-To **customize a space** (per-space layout overrides), click the
-override cell on its row. On a tiling space it reads **Customize…**
-when the space has no overrides, or **N custom** (e.g. **3 custom**)
-when it has some — the total across every layout. A space set to
-**Floating** has no *active* overrides, so its cell instead reads a
-muted **N saved** (a count of overrides parked for other layouts,
-kept reachable) or **—** when it holds none. Clicking opens the
-full-pane override editor. See
-[Per-Space Overrides](#per-space-overrides) for what it contains.
-
-To **delete**, right-click and pick Delete (or click the trash
-icon). The space is removed right away — any windows in it move to
-the fallback space (or the first space in the list when no
-fallback is set), and it stays gone across reloads and restarts.
-A space that carries customized settings (layout overrides, a
-monitor pin, or a Main/Fallback role) asks for confirmation first,
-since deleting it discards that work too.
-
-When the list is empty (you can delete every space), a hint
-explains that every window tiles in a single default space until
-you add one.
-
-To **set a recognition icon** (optional), click the space name to
-edit it and pick an SF Symbol, emoji, or single character. The icon
-appears in the Monitors and Shortcuts sections as a visual aid.
-
-To **mark a space as the fallback** for profile switches, right-click
-a space and pick **Make Fallback**. Whenever the profile changes,
-any windows in spaces the new profile doesn't define are moved to
-this fallback space instead of being hidden. Without an explicit choice,
-windows land in the first space of the profile's list.
+- **Add** with the **+** button and a name (a number like "1", or
+  a word like "web").
+- **Rename** by clicking the name in the list.
+- **Customize** a space's layout by clicking the override cell on
+  its row. A tiling space reads **Customize…** with no overrides
+  or **N custom** with some (the total across every layout); a
+  **Floating** space reads a muted **N saved** (overrides parked
+  for other layouts) or **—**. Clicking opens the override editor
+  ([Per-Space Overrides](#per-space-overrides)).
+- **Delete** by right-click (or the trash icon). Its windows move
+  to the fallback space, or the first space when none is set. A
+  space with overrides, a monitor pin or a Main/Fallback role
+  asks for confirmation first. With every space deleted, every
+  window tiles in a single default space until you add one.
+- **Set an icon** by clicking the name and picking an SF Symbol,
+  emoji or single character. It shows in Monitors and Shortcuts.
+- **Make Fallback** (right-click). When the profile changes,
+  windows in spaces the new profile does not define move to this
+  space; without one, to the first space in the list.
 
 ## Layout Defaults
 
-The **Layout Defaults** section (in the **This Profile** group;
-its card appears in **Power User** mode) controls
-tiling for every space in this profile.
+**Layout Defaults** (**This Profile**, Power User mode) sets the
+tiling defaults for every space in this profile.
 
 ### Modes
 
-Pick a layout mode for each space:
+- **BSP** — recursive splits; every window gets a region.
+- **Stack** — one master zone and a collapsing stack.
+- **Scrolling** — columns or rows that scroll (PaperWM style).
+- **Monocle** — fullscreen focus; the other windows hide behind
+  the focused one or park in a screen corner.
+- **Grid** — evenly-sized cells in rows and columns.
+- **Track** — columns (or rows) where every resize has one
+  target: your track, or your share within it.
+- **Floating** — every window floats; KiwiDesk remembers where
+  each sits when you switch spaces, across relaunches and
+  Desktop switches. Should that memory be lost, a floating
+  window comes back centred on its screen.
 
-- **BSP** (Binary Space Partition): recursive splits, every window
-  gets a region.
-- **Stack** (Master/Stack): one master zone and a collapsing stack.
-- **Scrolling** (PaperWM style): columns or rows that scroll.
-- **Monocle**: fullscreen focus, the other windows hidden
-  behind the focused one — or parked in a screen corner (see
-  Per-Layout Tuning ▸ Monocle).
-- **Grid**: evenly-sized cells in rows and columns.
-- **Track**: columns (or rows) of windows where every resize has
-  one true target — grow *your* track, or *your* share within it
-  (#128).
-- **Floating**: every window floats freely, no tiling. KiwiDesk
-  remembers where each floating window sits when you switch
-  spaces.
-
-Should that memory ever be lost — it survives a relaunch and a
-Desktop switch — a floating window comes back centred on its
-screen rather than at the corner hidden spaces park in.
-
-Gaps are carved out of the layout — windows never overlap them —
-and the app bar, if shown, carves its space the same way. The
-sliders that set them (uniform, or per-edge: top, bottom, left,
-right, plus inner gaps between windows) are not on this page:
-they live in **Gaps & Borders**, with the rest of the structure
-KiwiDesk draws around a window.
+Gaps are carved out of the layout, as is the App Bar when shown.
+Their sliders live in **Gaps & Borders**, not here.
 
 ### Per-Layout Tuning
 
 The pane opens on a **Choose a layout** strip — one tile per
-layout mode (BSP, Stack, Scrolling, Grid, Monocle, Track),
-landing on the mode your spaces use most — and shows only the
-selected mode's settings, so you tune one mode without scrolling
-past the others. Floating has no tunables, so it has no tile.
+mode (BSP, Stack, Scrolling, Grid, Monocle, Track; Floating has
+no tunables), landing on the mode your spaces use most — and
+shows only the selected mode's settings. Each tile draws its
+layout and counts the spaces using it. The global **Minimum
+window size** sits above the strip: the floor no window tiles
+below, which also caps auto-sized grids and track limits.
 
-Each tile **draws its layout** rather than naming it, and says
-how many of your spaces use it, so you can pick by what a layout
-looks like instead of by a word, and see at a glance which ones
-are worth tuning. The global **Minimum window size** sits above
-the strip, because it feeds every layout — it is the floor no
-window tiles below, and it also caps auto-sized grids and track
-limits.
+The **Live preview** panel redraws the selected layout from your
+draft with a **Window count** slider. The count is a question
+you ask the preview, not a setting; it is not saved. Several
+settings only show at higher counts: cascade styles once the
+stack overflows, a track limit once there are more windows than
+tracks, a dynamic grid's balance as it rebalances. The focused
+tile wears your real focused border colour while the focus
+border is on, and a heavier outline with it off. A last card
+lists the spaces using this layout and how many override the
+values above. Nothing applies to live windows until you Save.
 
-Beside the controls, the **Live preview** panel on the right
-redraws the selected layout from your draft, larger than the
-tiles and with a **Window count** slider — the **Changed in
-this draft** list under it tracks what you have edited so far.
-Drag the slider and the preview re-runs the layout for that many windows —
-which is where several of these settings first become visible.
-Cascade overflow and Cascade all draw the same picture until the
-stack is deep enough to overflow; a track limit means nothing
-until there are more windows than tracks; a dynamic grid's
-balance only shows as it rebalances. The count is a question you
-ask the preview, not a setting: it is not saved and resets when
-you leave. The tile drawn as focused wears your real focused
-border colour — the same one the Gaps & Borders preview shows —
-while the focus border is on; with it off, that tile is simply
-outlined a little heavier, promising no ring the app would not
-draw.
+Per mode:
 
-A last card lists the **spaces using this layout**, and says how
-many of them override the values above — Layout Defaults sets
-defaults, and this is where the page admits that a given space
-may not be following them.
-
-The preview is a preview only; nothing applies to your live
-windows until you Save.
-
-Adjust each mode's defaults:
-
-- **BSP**: split strategy (alternating by default, or
-  longest_side) and the width and height split ratios (0.5 =
-  50/50 each) — the knobs the per-axis resize shortcuts nudge
-  (#56). *Alternating* cuts horizontally then vertically by
-  depth, which is what "BSP" usually means elsewhere;
-  *longest_side* cuts each region's longer side instead, keeping
-  windows square-ish.
-- **Stack**: master count, master ratio (the master zone's share
-  of the split), master orientation (how multiple masters line
-  up), stack position (which side the stack zone takes — left/
-  right split the width, top/bottom the height; the stack's own
-  lineup follows the side, so a tall zone is a column and a wide
-  one a row, #222 — with a leading stack the masters fill from
-  the stack seam, so promotions stay local), and overflow style
-  (cascade_overflow keeps full windows, cascade_all cascades
-  everything — piles always cascade downward, so title bars
-  stay visible). The resize
-  shortcuts are focus-aware (#67): the split axis grows
-  whichever zone holds the focused window, the zone's own axis
-  grows the focused window's share of it (a session-only tweak —
-  it resets on relaunch and is not saved into profiles). A
+- **BSP** — split strategy (*alternating*, the default: cuts
+  horizontally then vertically by depth; *longest_side*: cuts
+  each region's longer side) and the width and height split
+  ratios (0.5 = 50/50), which the per-axis resize shortcuts
+  nudge.
+- **Stack** — master count; master ratio (the master zone's
+  share); master orientation (how several masters line up);
+  stack position (left/right split the width, top/bottom the
+  height; the stack's lineup follows the side, and with a
+  leading stack the masters fill from the stack seam); overflow
+  style (*cascade_overflow* keeps full windows, *cascade_all*
+  cascades everything; piles cascade downward so title bars stay
+  visible). The resize shortcuts are focus-aware: the split axis
+  grows whichever zone holds the focus, the zone's own axis
+  grows the focused window's share (session-only; not saved). A
   master zone lined up *along* the split axis has no reachable
-  shares — the split owns that axis and the other one beeps.
-  With the standard arrangement (side-by-side masters beside a
-  right stack) that is the out-of-the-box behavior once the
-  master count exceeds one; switch the orientation to vertical
-  for individually resizable masters
-  (see [Accepted limitations](accepted-limitations.md)).
-- **Scrolling**: orientation (horizontal or vertical), anchor
-  (where the focused column rests on every focus — **Center**, or
-  flush against the leading/trailing edge, shown as **Left**/
-  **Right** when horizontal and **Top**/**Bottom** when vertical;
-  or **Follow**, the default, which holds the viewport and pans
-  the minimum to keep the focus visible, and holds the focused
-  window's place on screen when the row moves underneath it),
-  slot size (a
-  percentage of the available width or height — 95% out of the
-  box, so a sliver of the next window stays visible to show the space
-  scrolls; the slider runs 5–100% in 1% steps — or
-  an exact point count), and **Wrap focus** —
-  off by default, so
-  stepping focus past a row end stops there; turn it on to wrap
-  from the last window back to the first (and vice versa). Swap
-  never wraps. This card also owns the layout's own motion:
-  **Animate focus shifts** (on by default) and the **Scroll
-  duration** it uses (50–1000 ms, default 150; greys out while
-  the toggle is off). They sit here rather than on Colors &
-  Animations because they are this layout's parameters — Colors
-  & Animations links across to them.
-- **Monocle**: orientation (affects which arrow keys cycle focus
-  and where the app bar sits), **Hidden windows**, wrap focus,
-  and **New window** placement. Hidden windows picks how the
-  unfocused windows hide: **Stack behind** (the default) keeps
-  them behind the focused one at full size, **Park in corner**
-  moves them to a corner of the screen instead — with an
-  instant focus switch — for windows with transparent
-  backgrounds, or windows that can't fill the whole screen, that
-  would otherwise show the stack behind them (a thin edge of
-  each parked window stays visible in the corner). Wrap focus
-  is **off** by default, the same as
-  scrolling and track — turn it on and cycling past the last
-  window returns to the first. New window defaults to
-  **first**, so a new window comes to the front of the cycle
-  rather than the back.
-- **Grid**: type (dynamic or rigid), fill empty cells (yes/no),
-  **Arrange** (Columns first or Rows first — the order windows fill
-  the grid: across a row then down, or down a column then across;
-  it also sets which way a dynamic grid grows), and column and row
-  counts. Arrange applies to both grid types. *Arrange* is
-  a clearer label for what used to read "Split direction": its
-  two values map to the unchanged Lua/JSON `split_direction`
-  (`horizontal` = Columns first, `vertical` = Rows first), so
-  configs and scripts are untouched. In dynamic mode the counts are an upper bound — the
-  grid auto-balances up to that ceiling, then cascades the
-  overflow in the last cell. **Auto-size grid** fits as many
-  columns and rows as the screen allows at the minimum window
-  size instead of the typed counts (greying them out), so a
-  landscape monitor gets more columns than rows.
-- **Track**: a somewhat more advanced layout (a caption at the
-  top of the section says so) where several windows can share
-  one track. **Arrange** (Columns = tracks side by side, Rows =
-  tracks stacked); **New window** — **Fills the focused track**
-  (the default) fills the track you're in and spills the next
-  window into a new track beside it once it's full (shelf-like:
-  fill the column you're at before reaching for a new one), while
-  **Opens its own track** gives every new window its own column
-  (the ultrawide "one app per column" choice) — with a
-  **Position** picker for where within that choice it lands (first,
-  last, before or after the focused track/window; defaults to
-  **first** so a new window isn't buried in the overflow);
-  **Auto track limit** (on by default — the screen decides how
-  many tracks fit, and they open and collapse as windows come
-  and go; turn it off to pin a fixed **Track limit**, which
-  greys out while the toggle is on — the limit counts *normal*
-  tracks, so a limit of 3 shows up to three tracks plus one
-  overflow track for anything beyond); **Overflow** — how the **overflow
-  track** renders (the far-edge track that collects the surplus
-  when more tracks exist than fit side by side): **cascade all**
-  (the default) piles its windows from the top, **cascade
-  overflow** keeps the ones that fit tiled and piles the rest.
-  There are two overflow levels: the far **overflow track**
-  collects whole *tracks* that no longer fit side by side, while
-  *within* a single track the surplus *windows* (more than fit at
-  the minimum window size) cascade among themselves. This Overflow
-  setting only tunes the far track; normal tracks always use
-  cascade overflow for their own windows. And **Wrap
-  focus** (the same opt-in toggle as Scrolling's, off by
-  default: on,
-  focus wraps within the track along the axis and from the last
-  track to the first across it; swap never wraps). The track
-  shortcuts live in Shortcuts ▸ Move windows under the "Move to
-  track" subheader — a caption there notes they only matter if
-  you use the track layout: "Move window to previous/next
-  track" rows move a window across tracks or open a new one at
-  the edge, and "Swap with previous/next track" rows swap the
-  focused window's whole track with its neighbor. Tracks form a
-  sequence, so these say previous/next instead of a compass
-  direction — previous is the column to the left (or the row
-  above), next the column to the right (or the row below) — and
-  a binding keeps working when the axis flips. Track sizes and
-  in-track shares are resize state, session-only like the
-  stack's weights.
+  shares, which is the out-of-the-box case once the master count
+  exceeds one; switch the orientation to vertical for
+  individually resizable masters ([Accepted
+  limitations](accepted-limitations.md)).
+- **Scrolling** — orientation (horizontal or vertical); anchor,
+  where the focused column rests on every focus: **Center**,
+  flush against the leading or trailing edge (**Left**/**Right**
+  horizontal, **Top**/**Bottom** vertical), or **Follow**, the
+  default, which pans the minimum to keep the focus visible and
+  holds the focused window's place when the row moves underneath
+  it; slot size (a percentage of the available width or height,
+  95% by default so a sliver of the next window shows, 5–100% in
+  1% steps, or an exact point count); **Wrap focus** (off by
+  default; on, focus wraps from the last window to the first;
+  swap never wraps). The layout's own motion lives here too:
+  **Animate focus shifts** (on by default) and its **Scroll
+  duration** (50–1000 ms, default 150; greyed while the toggle
+  is off). Colors & Animations links across to them.
+- **Monocle** — orientation (which arrow keys cycle focus, and
+  where the App Bar sits); **Hidden windows**: **Stack behind**
+  (default) keeps them behind the focused one at full size,
+  **Park in corner** moves them to a corner with an instant focus
+  switch, for windows with transparent backgrounds or that
+  cannot fill the screen (a thin edge of each parked window
+  stays visible); wrap focus (off by default); **New window**
+  placement (default **first**, so a new window comes to the
+  front of the cycle).
+- **Grid** — type (dynamic or rigid); fill empty cells;
+  **Arrange** (Columns first or Rows first: the order windows
+  fill the grid, and which way a dynamic grid grows; stored as
+  `split_direction` = `horizontal` / `vertical`); column and row
+  counts, which in dynamic mode are an upper bound the grid
+  balances up to, cascading the overflow in the last cell.
+  **Auto-size grid** fits as many columns and rows as the screen
+  allows at the minimum window size and greys the counts.
+- **Track** — a caption at the top says it is the more advanced
+  layout. **Arrange** (Columns = tracks side by side, Rows =
+  stacked). **New window**: **Fills the focused track** (default)
+  fills the track you are in and spills into a new track once it
+  is full; **Opens its own track** gives every window its own
+  column. **Position** says where within that choice it lands
+  (first, last, before or after the focused track/window;
+  default **first**). **Auto track limit** (on by default; the
+  screen decides how many tracks fit) or a fixed **Track limit**
+  (greyed while auto is on; counts normal tracks, so a limit of 3
+  shows three tracks plus one overflow track). **Overflow** sets
+  how the far-edge **overflow track** renders: **cascade all**
+  (default) piles its windows from the top, **cascade overflow**
+  keeps the ones that fit tiled and piles the rest. Within a
+  single track, surplus windows always cascade among themselves.
+  **Wrap focus** (off by default; on, focus wraps within the
+  track and from the last track to the first; swap never wraps).
+  The track shortcuts sit in Shortcuts ▸ Move windows under
+  "Move to track": *Move window to previous/next track* moves a
+  window across tracks or opens one at the edge, *Swap with
+  previous/next track* swaps whole tracks. Previous is the column
+  to the left (or the row above), next the column to the right
+  (or the row below), so a binding keeps working when the axis
+  flips. Track sizes and in-track shares are session-only, like
+  the stack's weights.
 
-> **A few resize behaviors are accepted limitations, not bugs.**
-> Some tiling quirks — e.g. the inner window of a nested BSP pair
-> not growing, or a stack window's *mouse* height-drag snapping
-> back — are settled architectural trades, each with a reason and,
-> where planned, a real fix. See
+> **A few resize behaviors are accepted limitations, not bugs** —
+> the inner window of a nested BSP pair not growing, or a stack
+> window's mouse height-drag snapping back. See
 > [Accepted limitations](accepted-limitations.md).
 
 ### Per-Space Overrides
 
-The **Live preview** panel beside the Spaces list is headed
-**This Space's layout**, and that is exactly what it draws: one
-space's layout as *that space* resolves it — the defaults plus
-its own overrides — with a chip per space to click through them
-and a caption naming the layout and how many settings the space
-overrides ("follows the layout defaults" when it overrides
-none). A space set to Floating says so instead of drawing, that
-layout placing no windows. A **Window count** slider drives how
-many windows the drawing simulates: a question you ask of the
-preview, not a setting, so it never persists. That is the
-question Layout Defaults cannot answer — its preview draws a
-*layout's* defaults, and the overrides are exactly what you came
-to check.
+Beside the Spaces list, the **Live preview** panel is headed
+**This Space's layout**: one space's layout as *that space*
+resolves it — the defaults plus its own overrides — with a chip
+per space, a caption naming the layout and how many settings the
+space overrides ("follows the layout defaults" when none), and a
+**Window count** slider that never persists. A Floating space
+says so instead of drawing.
 
-To tune the *same layout type differently in different spaces*, use
-the per-space override editor. For example, make space "3" scroll
-vertically while every other scrolling space goes horizontal. Open
-it from a space's override cell in the **Spaces** section; the
-editor takes over the pane, with a breadcrumb —
-**‹ Spaces › `<space>` › Overrides** — back to the list.
+To tune the same layout differently per space — space "3"
+scrolls vertically while the others scroll horizontally — open
+the override editor from a space's override cell. It takes over
+the pane with a breadcrumb **‹ Spaces › `<space>` › Overrides**.
+The header reads `<Space> — <Layout> overrides` with an **N of
+M set** count and a **Reset `<Layout>` Overrides** button
+(greyed when there are none). It edits the layout the space
+currently uses; to tune another, switch the space to it first.
 
-The header names the space and the layout it edits —
-`<Space> — <Layout> overrides` — with an **N of M set** count of how
-many of that layout's fields the space overrides, and a
-**Reset `<Layout>` Overrides** button (greyed when the space has
-none). The editor edits the layout the space currently uses; to
-tune a different layout, switch the space to it in the list first.
+Each row carries an **Override** checkbox in the trailing
+column. Unchecked inherits the Layout Defaults value and reads
+**follows `<Layout>` defaults · `<value>`**; checked shows the
+control, seeded with the current value. Where a field is greyed
+by a switch on another page — Grid's auto-size, Track's auto
+limit — a sentence under the rows says so and links **Layout
+Defaults**. While the editor is open, the panel follows that
+space.
 
-Where a field is greyed because a switch on **another** page
-turned it off — Grid's auto-size, Track's auto limit — the reason
-appears under the dimmed rows as a sentence you can follow, with
-**Layout Defaults** linked. Those two switches have no per-Space
-row, so the sentence names where to go rather than leaving you to
-find it.
-
-Each field row carries an **Override** checkbox in the trailing
-column. Unchecked (the default) inherits the Layout Defaults value,
-and the row collapses to a quiet **follows `<Layout>` defaults ·
-`<value>`** readout. Check it to override just that field for this
-space — the control appears, seeded with the current value so
-nothing jumps.
-
-While an override editor is open the panel follows *that* space,
-whichever chip was last picked, so it is always answering about
-the rows in front of you — and a ratio or count you change shows
-in it at once. The editor itself carries no second preview.
-
-**Scrolling slot size** is one override with a size unit
-(**Percent**, **Points**) and a value. It sets each window's
-size along the scroll direction — **Column width** when the
-space scrolls horizontally, **Row height** when vertical.
-Percent scales with the available width or height (95% out of
-the box); Points fixes an exact size. The single checkbox owns
+**Scrolling slot size** is one override with a unit (**Percent**,
+**Points**) and a value: **Column width** when the space scrolls
+horizontally, **Row height** when vertical. One checkbox owns
 the whole setting.
 
-**Overrides for other layouts.** Changing a space's layout never
-deletes overrides — each layout keeps its own. Switch from
-Scrolling to BSP and you see only BSP's fields; switch back and the
-Scrolling values return unchanged. When a space carries values for
-layouts other than its current one, a card at the foot of the
-editor summarises them — **Saved for _N_ other layouts** — noting
-they reactivate if you switch the space back, and its **Show**
-disclosure lists each layout and how many fields it holds — so the
-retained data stays discoverable without turning the editor into an
-all-layout editor.
-
-**Resetting.** **Reset `<Layout>` Overrides** (in the header) clears
-the current layout's overrides for this space (greyed when it has
-none). When other layouts hold saved values, **Reset All Layout
-Overrides** in the Saved-for-other-layouts card clears every
-layout's overrides for the space and asks for confirmation first,
-since it also discards the dormant values not otherwise shown.
+**Other layouts.** Changing a space's layout never deletes
+overrides; each layout keeps its own. When a space holds values
+for layouts other than its current one, a card at the foot reads
+**Saved for _N_ other layouts** with a **Show** disclosure
+listing each. **Reset All Layout Overrides** there clears every
+layout's overrides for the space, after a confirmation.
 
 ## Monitors
 
-The **Monitors** section pins spaces to specific displays for this
-profile. It is a **picture of your desk**: each display is drawn at
-its own size and in its own place, so the portrait panel on your
-left is the tall rectangle on the left, and a laptop below a desk
-display is the small rectangle below it. Drag a space onto the
-display it belongs to.
+**Monitors** pins spaces to displays for this profile. It is a
+picture of your desk: each display drawn at its own size and
+place, in points (the measure System Settings ▸ Displays ▸
+Arrangement uses).
 
-The rectangles are drawn from each display's size **in points** —
-the same measure System Settings ▸ Displays ▸ Arrangement uses — so
-a Retina display does not draw twice the size of an identical
-non-Retina one.
+- **Drag a space chip** onto a display to pin it there. Every
+  chip is also a menu (click or right-click), which is the
+  keyboard route: Tab to the chip, Return to open it.
+- **Drag onto the dashed "Follows main display" tray** to give
+  a space the **Main role**: it moves with whichever display is
+  main when you dock and undock.
+- **Outlined chips** are placed automatically; a filled chip is
+  one you placed, and its clear button returns it to automatic.
+- **Click a display** to see what it holds and which space is
+  showing. A display too small for all its chips shows a **+n**;
+  click it for the full list.
 
-**Drag space chips** between displays to pin a space to one. A
-pinned space always appears on that monitor when the profile loads.
-Every chip is also a menu — click it, or right-click it, for the
-same moves. The menu is the route to use from the keyboard: the
-chip takes focus with Tab and opens with Return — with macOS
-keyboard navigation on, see [Using Settings from the
-Keyboard](#using-settings-from-the-keyboard).
+Two notes appear only when they apply: *"Sizes are approximate"*
+when your displays differ too much to draw to scale, and *"Some
+of these displays look identical to KiwiDesk"* when two share a
+name and resolution, so a space pinned to one may open on either.
 
-**Drag onto the dashed "Follows main display" tray** (it hangs off
-whichever display is currently main) to give a space the **Main
-role**. That space moves with whatever display is main, which is
-what you want for your primary work space when you dock and undock.
+**Monitor fingerprints** at the bottom is a read-only drawer
+showing how KiwiDesk recognises each display. Saving the profile
+with a new monitor attached records the new arrangement, so the
+profile loads with this hardware in future.
 
-**Outlined chips** are placed automatically by KiwiDesk — they are
-not manually pinned, but they still show which spaces run on which
-monitors. A filled chip is one you placed; its clear button puts it
-back to automatic.
+Editing a profile whose monitors are not attached replaces the
+picture with a note; the other sections still edit. A space
+pinned to an absent monitor gets its own card below the picture
+with a **Back to automatic placement** button.
 
-**Click a display** to see what it holds — how many spaces live
-there, and which one is showing right now. A display too small to
-draw all its chips shows a **+n**; click it for every space on
-that display, each chip working exactly as it does on the card.
-
-Two notes appear only when they apply:
-
-- *"Sizes are approximate"* — your displays are too different in
-  size to draw to scale and still leave the smallest one big enough
-  to drop a space onto, so the largest is drawn smaller than life.
-- *"Some of these displays look identical to KiwiDesk"* — KiwiDesk
-  recognises a display by its name and resolution, so two of the
-  same model at the same resolution are one identity to it, and a
-  space pinned to one may open on either.
-
-**Monitor fingerprints** at the bottom is a read-only drawer: it
-shows how KiwiDesk recognises each display when it reconnects. When
-you add a new monitor and save the profile, the new arrangement is
-recorded so the profile becomes available for future loads with
-this hardware.
-
-When you are editing a profile whose monitors are not attached
-right now, there are no real frames to draw, so the picture is
-replaced by a note saying so — the profile's other sections still
-edit normally.
-
-A space pinned to a monitor that is not attached gets its own card
-below the picture, with a **Back to automatic placement** button;
-there is no rectangle for absent hardware, so this is the only
-place that pin can be seen or cleared.
-
-Each monitor shows its own space at once, and the **focused
-monitor** is simply the one you last clicked — clicking a window
-*or* the bare wallpaper on another display moves focus there. A new
-window, and a global sticky window, then appear on that monitor's
-space. Clicking the menu bar or the Dock does not move focus.
+The **focused monitor** is the one you last clicked — a window or
+the bare wallpaper. A new window, and a global sticky window,
+appear on that monitor's space. Clicking the menu bar or the Dock
+does not move focus.
 
 ## Gaps & Borders
 
-The **Gaps & Borders** section (in the **This Profile** group) sets the
-STRUCTURE of everything KiwiDesk draws around your windows: the
-spacing, the width and rounding its three strokes share, the
-focus ring's glow, the drag overlays, and whether a sticky window
-carries a mark. What any of it is *painted* with lives in the two
-colour sections below — every colour KiwiDesk has renders in
-exactly one place, and this is not it.
+**Gaps & Borders** (**This Profile**) sets the structure of
+everything KiwiDesk draws around a window: spacing, the width and
+corners its three strokes share, the focus ring's glow, the drag
+overlays, and the sticky mark. Colours live in the two colour
+sections below; every colour renders in exactly one place.
 
 ### Shared by all borders
 
 KiwiDesk strokes three things: the **focus ring** around the
-focused window, the **ghost** left where a dragged window came
-from, and the **drop zone** under the cursor. The card at the
-top of the page asks the two questions all three answer the
-same way, and there is no per-stroke version of either further
-down — a 3 pt ring beside a 1 pt ghost is not a setting anyone
-wants, so the page does not offer it.
+focused window, the **ghost** where a dragged window came from,
+and the **drop zone** under the cursor. The card at the top sets
+two things for all three; there is no per-stroke version below.
 
-- **Width**: 1–20 pt, written to all three strokes. For the
-  focus ring this is the visible thickness reaching outward
-  into the gap, and the value **Fit layout gaps** sizes gaps
-  from. The ring sits **behind** its window by default, with a
-  small overlap tucked under the window edge so its corners
-  stay closed; that overlap isn't part of the width. Keep gaps
-  at least *twice* the width, so two neighbouring rings reaching
-  into the same gap don't touch. The drag overlays are drawn
-  *inside* their slot and never reach into the gap at all.
-- **Corners**: **Rounded** matches your windows' real corner
-  radius; **Square** draws sharp corners — seamless on windows
-  that are already square, an intentional squared frame on
-  rounded ones. It sets the focus ring's corner style and the
-  drag overlays' corner radius together: Rounded is the system
-  window radius, Square is no radius at all.
+- **Width**: 1–20 pt. For the focus ring this is the thickness
+  reaching outward into the gap, and the value **Fit layout
+  gaps** sizes gaps from; a small overlap tucked under the window
+  edge keeps the corners closed and is not part of the width.
+  Keep gaps at least twice the width so two neighbouring rings do
+  not touch. The drag overlays draw *inside* their slot.
+- **Corners**: **Rounded** uses the system window radius,
+  **Square** no radius, for the ring and both overlays together.
 
 The drag overlays' radius is a number underneath
-(`drag.set_corner_radius`), and the picker reads any value
-above zero as **Rounded**. So a radius you set from Lua — 7 pt,
-say — shows as Rounded and *stays* 7 pt, including if you tap
-Rounded again: opening this page, or re-affirming what it
-already shows, never rewrites anything. Rounded writes the
-system radius only when there is no rounding to keep; Square
-writes none at all, being the one shape with a single radius.
+(`drag.set_corner_radius`), and the picker reads any value above
+zero as **Rounded**: a 7 pt radius set from Lua shows as Rounded
+and stays 7 pt, even if you tap Rounded again. Square writes no
+radius. If the ring and the overlays disagree (a Lua-only state),
+neither segment is selected and both rows show a **?**; tap
+either segment to bring them together.
 
-If the two halves disagree — a square focus ring over rounded
-drag overlays, which only a Lua call can produce — **neither
-segment is selected**. Nothing is broken and nothing is
-hidden: the strokes really are set two ways, and the picker
-says so rather than picking a side. Both rows also show a
-**?** while any of the three strokes are set differently,
-reminding you that choosing here sets all three. Tap either
-segment to bring them back together.
-
-Each stroke's own width, each drag overlay's alignment (whether
-it is laid *inside* or *outside* its slot edge — both default to
-*inside*, and the ring has no such knob, always outsetting) and
-the drag radius are all Lua-only and never clamped against each
-other. See
-[design decisions](design-decisions.md) for why the GUI removes
-these decisions instead of offering a switch to keep them, and
-the [Lua reference](lua-reference.md) for the verbs.
+Each stroke's own width, each overlay's alignment (inside or
+outside its slot edge; both default to inside) and the drag
+radius are Lua-only and never clamped against each other — see
+the [Lua reference](lua-reference.md).
 
 ### Focus Border
 
-Below the shared card, the **Focus border** group puts a thin
-border around the focused window so you never lose track of which
-window has focus in a gapped layout — the cue keyboard-driven
-focus otherwise lacks. It is **on by default**.
+The **Focus border** group outlines the focused window so it
+stands out in a gapped layout. On by default.
 
-On supported macOS versions, KiwiDesk draws the border as a native
-WindowServer overlay and follows move, resize, and ordering events at
-their source. This keeps it attached during app-driven moves as well as
-mouse drags. Every private symbol is resolved at runtime; if that
-surface is missing or an operation fails, the same border is redrawn with
-the AppKit overlay automatically. Neither path requires disabling SIP.
+KiwiDesk draws it as a native WindowServer overlay that follows
+move, resize and ordering events at their source, and falls back
+to an AppKit overlay if that surface is missing or an operation
+fails. Neither path needs SIP disabled.
 
-The **Live preview** panel beside the controls answers for the
-whole page, not just this card: the gap diagram, then the border
-on a live two-window mock — at your staged color, width, and
-corner style, before anything touches real windows, and wearing
-the sticky mark while **Show mark on sticky windows** is on —
-then the drag ghost and the drop zone, stacked one above the
-other so the pair can be compared at panel width. Each picture
-carries the heading of the card it answers for. All of it is
-drawn from your draft, with the changed-list below. The
-controls:
+The **Live preview** panel answers for the whole page: the gap
+diagram, the border on a two-window mock at your staged colour,
+width and corners (wearing the sticky mark while **Show mark on
+sticky windows** is on), then the drag ghost and the drop zone.
 
-- **Show focus border**: the master on/off switch.
-- **Show border on unfocused windows**: off by default — when on,
-  every other tiled window gets a border too, including every member
-  of an overflow cascade, in its own color.
-  Floating windows get no border when unfocused (only the focused
-  window does, whether tiled or floating); monocle always shows
-  only the focused border.
-- **Glow effect**: wraps the focused border in a soft colored bloom
-  for a bit more presence. Off by default; it only ever touches the
-  focused window, never the unfocused borders. The panel's
-  preview shows the effect as you toggle it.
-- **Auto glow size**: on by default — the bloom's reach follows the
-  border width, so a hairline border gets a subtle rim and a thick
-  one a proportional aura. Turn it off to pin an exact **Glow
-  size** (1–20 pt) with the slider, independent of the width.
-- **Fit layout gaps**: previews the exact global **Outer** and
-  **Inner** values needed to keep borders apart, plus the requested
-  **Extra spacing** (0–100 pt, default 0). Inner gaps account for
-  both borders when unfocused borders are shown. **Set Gap Values**
-  stages those values and warns before replacing asymmetric
-  per-edge gaps; the local confirmation tells you which of the
-  save pill's Save actions applies or persists them. Extra spacing is an action
-  parameter, not another saved setting. The action can grow or
-  shrink gaps. (Lua: `border.fit_gaps(remaining)`.)
+- **Show focus border**: the master switch.
+- **Show border on unfocused windows**: off by default. On,
+  every other tiled window gets a border in its own colour,
+  every member of an overflow cascade included. Floating windows
+  get no border when unfocused; monocle shows only the focused
+  border.
+- **Glow effect**: a soft coloured bloom around the focused
+  border. Off by default; never on unfocused borders.
+- **Auto glow size**: on by default; the bloom's reach follows
+  the border width. Off, the **Glow size** slider (1–20 pt) pins
+  it.
+- **Fit layout gaps**: previews the global **Outer** and
+  **Inner** values that keep borders apart, plus **Extra
+  spacing** (0–100 pt, default 0). Inner gaps account for both
+  borders when unfocused borders are shown. **Set Gap Values**
+  stages those values, warns before replacing asymmetric per-edge
+  gaps, and can grow or shrink gaps. Extra spacing is an action
+  parameter, not a saved setting. (Lua:
+  `border.fit_gaps(remaining)`.)
 
-The ring's two colours — **Focused window** and **Unfocused
-windows** — are in **Advanced Colors ▸ Border colors**. They dim
-there while the matching switch on this page is off, with a `?`
-saying to come back here.
+The ring's colours — **Focused window** and **Unfocused
+windows** — are in **Advanced Colors ▸ Border colors**, dimmed
+there while the matching switch here is off.
 
-Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
-a border, even while you type into them — only genuine windows do.
-Their command bars aren't managed at all: they never appear in the
-App or Space Bars, never tile, and stay put when you switch spaces.
-Windows in native (green-button) fullscreen get none either:
-they fill the display, so a border would peek out only at the
-corners. The border returns when the window leaves fullscreen.
-While a window is in native fullscreen, KiwiDesk stands down
-around it entirely: macOS moves it off the Desktop and gives it
-a Mission Control slot of its own, so the App and
-Space Bars hide there, no layout pass or focus raise targets the
-fullscreened window — a resize shortcut pressed on it just says
-so on the window — and the space it came from tiles as if it
-were away. It keeps its place in that space — leave fullscreen
-and it tiles back into its old position.
-Popovers, sheets, emoji pickers, and other windows above a bordered
-window stay above its border, which is pinned to the focused window's
-stacking level; the window stays focused and keeps its full border.
+**What gets no border.** Launcher and panel overlays (Spotlight,
+Raycast, Alfred): their command bars are never managed, never
+appear in a bar, never tile. Windows in native (green-button)
+fullscreen: macOS moves such a window off the Desktop into its
+own Mission Control slot, so the bars hide there, no layout pass
+or focus raise targets it, a resize shortcut says so on the
+window, and its space tiles as if it were away; it keeps its
+slot and tiles back when it leaves fullscreen. Popovers, sheets
+and emoji pickers stay above the border of the window that owns
+them, which stays focused.
 
-When you focus or swap in a direction where there is no window —
-you're already at the edge — the focus border gives a small
-rubber-band bounce toward that edge and springs back, the same
-"nothing further this way" cue as scroll overscroll. The window
-never moves; only the border flexes. It works even with the focus
-border switched off (a border appears briefly, just for the
-bounce) and,
-under **Reduce Motion**, becomes a single opacity pulse instead of
-a movement. This is distinct from a sticky window's pill: the
-bounce is a wordless "edge of the layout," the pill explains a
-window that *can't* be moved.
+**Cues on the ring.** Focusing or swapping toward an edge with
+no window there gives the ring a small rubber-band bounce; the
+window never moves. It works with the focus border off (a border
+appears briefly for the bounce), and under **Reduce Motion** it
+becomes a single opacity pulse.
 
-A resize that comes up against a minimum size gets both cues at
-once — deliberately, because a minimum is a real edge *and* has
-a reason worth naming. Shrinking past the smallest a window can
-go (the configured minimum window size, or a larger minimum the
-app itself enforces) bounces the ring the same way and shows a
-small frosted pill on the window: "Minimum window size
-reached". Growing stops where a *neighbor* would drop below its
-own minimum; both windows then say so, each from its own
-perspective — the one you resized explains why nothing moved
-("Neighboring window at its minimum size") while the blocking
-neighbor marks itself ("Minimum window size reached") — and
-the bounce stays on the window whose gesture hit the wall. The cues fire on the
-first press or drag that gets less than it asked for —
-including one that gets nothing at all —
-not just once you are already at the floor, and keyboard and
-mouse resizes behave identically.
+A resize that hits a minimum gets the bounce and a frosted pill:
+"Minimum window size reached" on the window that can shrink no
+further (the configured minimum, or a larger one the app
+enforces). Growing stops where a *neighbour* would drop below
+its minimum; the resized window reads "Neighboring window at its
+minimum size" and the neighbour marks itself. The cues fire on
+the first press or drag that gets less than it asked for,
+keyboard and mouse alike. On a scrolling space a learned app
+*maximum* (System Settings will not grow past its own width)
+stops the slot with "Maximum window size reached". Running out
+of screen is a silent stop. Under a held resize shortcut, a
+refusal shows its pill once and ends the glide.
 
-The other direction has a cue of its own on a scrolling space:
-some apps also enforce a *maximum* size (System Settings will
-not grow past its own width), and once KiwiDesk has learned it,
-growing that window's slot stops at that size instead of
-sliding the row aside for a span the app then snaps back
-from — with the same bounce and a pill saying why ("Maximum
-window size reached").
-Running out of screen is a silent stop: that edge protects no
-window and names none, so nothing pills — the slot simply
-stops growing.
-
-Under a held resize shortcut (they glide — see Shortcuts ▸
-Size & float) these cues stay calm: the moment a size limit
-refuses shows its pill once and ends the glide, instead of
-flashing it continuously. Running out of screen ends nothing —
-there is no cue to end on, so the slot simply sits at its edge
-until you let go.
-
-Floating windows take part in directional focus as a second
-tier: tiled windows always win, but when no tiled window lies
-in the pressed direction — you're at the layout's edge — focus
-reaches a floating window sitting that way (including a
-floating sticky shown on the space). So a float parked beside
-the tiles is one keypress away, while navigating between tiles
-never detours through a float hovering over them.
+Floating windows join directional focus as a second tier: when
+no tiled window lies in the pressed direction, focus reaches a
+floating window that way (a floating sticky shown on the space
+included).
 
 ### Drag Visuals
 
-When you drag a tiled window, KiwiDesk shows two overlays:
+Dragging a tiled window shows two overlays:
 
-- **Ghost** (the dragged window's slot) — where it snaps back if you
-  release outside any other window.
-- **Drop zone** (the slot under the cursor) — the window this drop
-  acts on. The target follows the **cursor**, not the dragged
-  window's center, so it lands the instant the pointer reaches a
-  slot — even a big window dragged onto a smaller display.
+- **Ghost** — the dragged window's slot, where it snaps back if
+  released outside any other window.
+- **Drop zone** — the slot under the cursor. The target follows
+  the cursor, not the window's centre.
 
-Releasing over another window's slot **on the same display swaps**
-the two; dragging **onto another display moves** the window there.
-The move happens **live**: once the cursor has settled on the
-other display for a beat, the destination's windows slide apart to
-open a real slot under the cursor — the dragged window itself
-stays pinned under the pointer — and from that moment the drag
-behaves exactly like a local one there (release over a window to
-swap, release outside every slot to snap into the opened gap).
-Pulling the cursor back before releasing moves the window home the
-same way. A fast flick across still commits the move at release —
-onto a window's slot it lands there (the windows below it shift
-down one), onto an empty area (an empty monitor) it just moves
-across. Releasing outside every slot **on your own display** snaps
+Releasing over another window's slot on the same display swaps
+the two. Dragging onto another display moves the window there,
+live: once the cursor settles on the other display for a beat,
+its windows slide apart to open a slot under the cursor, and the
+drag then behaves like a local one there; pulling the cursor
+back moves the window home. A fast flick still commits at
+release. Releasing outside every slot on your own display snaps
 the window back.
 
-Floating windows show neither overlay: they have no tile slot to
-preview, and dropping one over a tiled slot does nothing. Use
-*make tiled* to return a window to the grid first (see
-[design decisions](design-decisions.md) for why).
+Floating windows show neither overlay; dropping one over a tiled
+slot does nothing. Use *make tiled* first.
 
-Toggle each visual on/off and customize:
-
-- **Border**: show/hide.
-- **Fill**: show/hide.
-
-Each column asks only what that column alone can answer. The
-border **width** and the **corners** both overlays take come
-from the shared card at the top of the page, which sets them
-for the focus ring in the same move; per-stroke widths, radii
-and alignments are Lua-only.
-
-Both overlays' colours are in **Advanced Colors ▸ Drag colors**,
-laid out as the same two columns.
+Each overlay has a **Border** and a **Fill** switch. Width and
+corners come from the shared card at the top; the colours are in
+**Advanced Colors ▸ Drag colors**, in the same two columns.
 
 ### Sticky Windows
 
-A **sticky** window stays visible on every space
-instead of hiding with its home space when you switch — mark
-one with the **Toggle sticky everywhere** shortcut (Shortcuts ▸
-Size & float; there is no app rule list, stickiness is per
-window). Sticky has two scopes, both in that shortcut list:
-**Toggle sticky everywhere** keeps the window on every space of
-**every** monitor (marked with an ∞ mark), while **Toggle sticky
-on this screen** keeps it on every space of just **one** monitor
-— the screen it lives on (marked with a 📌 mark). Moving a
-display-sticky window to a space on another monitor re-homes it
-there; moving a
-global-sticky one anywhere, or a display-sticky one to a
-different space on the *same* monitor, is refused with a brief
-pill on the window (its whole point is to stay put). On a single
-monitor the two are identical. The flag survives closing and
-reopening the window, and it is
-independent of floating: a floating sticky window keeps its
-own frame everywhere, a tiled one tiles into every space's
-layout — it takes a slot near where it sits on its own space,
-and on a crowded space it keeps a fully visible slot instead
-of falling into the overflow pile (in the scrolling layout it
-scrolls like any other slot — the row itself is the
-overflow). Rearrange it on its home space to move it
-everywhere; on other spaces it cannot be reordered or mouse-resized — the gesture snaps back. The `?` beside **Toggle
-sticky everywhere** in Shortcuts spells this out. When such a
-drag snaps back, the window's mark briefly expands into a pill naming its
-**home space** — by the same icon or name its Space Bar tile
-shows — so you can see where the tile actually belongs. The same
-pill appears on the sticky window when you drag *another* window
-onto its slot: the sticky one is the one that can't move, so it's
-the one that explains why.
+A **sticky** window stays visible on every space instead of
+hiding with its home space. Two scopes, both in Shortcuts ▸ Size
+& float (stickiness is per window; there is no app-rule list):
 
-Where your macOS supports it, the sticky promise reaches across
-**macOS Desktops** too: switch Desktops and your sticky windows
-come along — sticky-everywhere and sticky-on-this-screen alike
-follow the Desktop switches of the screen they are on, and are
-already there when you arrive. The reach has its own switch,
-**Stay visible across Desktops**, beside the mark toggle in Gaps
-& Borders; it only appears on a macOS that can drive Desktops.
-Power users can pin a single window the other way with
-`override_sticky_reach` in Lua. Mission Control shows a sticky
-window on one Desktop at a time — the one you are on.
+- **Toggle sticky everywhere** — every space of every monitor
+  (∞ mark).
+- **Toggle sticky on this screen** — every space of the one
+  monitor it lives on (📌 mark). Moving it to a space on another
+  monitor re-homes it there.
 
-A **globally sticky** window follows the space you focus onto
-its screen — and when that space is in floating mode on another
-screen, KiwiDesk moves the window there at the size it last had,
-scaled to the screen (the same scaling a floating window gets
-when it crosses screens), rather than leaving it behind on the
-old screen. The next tiled space on that screen tiles it again.
+Moving a global-sticky window anywhere, or a display-sticky one
+to another space on the same monitor, is refused with a brief
+pill. On a single monitor the two are identical. The flag
+survives closing and reopening the window and is independent of
+floating: a floating sticky window keeps its frame everywhere; a
+tiled one tiles into every space's layout near where it sits on
+its home space, keeps a fully visible slot on a crowded space
+rather than joining the overflow pile (a scrolling row scrolls
+it like any slot), and can be reordered or mouse-resized only on
+its home space — elsewhere the gesture snaps back and the mark
+expands into a pill naming the home space. The same pill appears
+when you drag another window onto its slot.
 
-Because a sticky window can look identical to a normal one,
-KiwiDesk draws a small mark in its top-right
-corner. **Show mark on sticky windows** (on by default) turns
-the mark off. The Space Bar shows its own sticky badge as
-well, and floating windows get a bar badge too — see the Space
-Bar section. The mark is painted on the window itself, so it
-is the sticky signal that survives hiding the Space Bar.
+Where macOS supports it, sticky reaches across **macOS
+Desktops**: switch Desktops and sticky windows of both scopes
+come along with the screen they are on. **Stay visible across
+Desktops** (beside the mark toggle) switches it and appears only
+on a macOS that can drive Desktops; `override_sticky_reach` in
+Lua pins a single window the other way. Mission Control shows a
+sticky window on one Desktop at a time.
 
-Switching the mark off costs more than the resting glyph: the
-pills described above ride the same mark, so with it off a
-refused move simply fails and explains nothing — a snapped-back
-drag, and equally a swap or **Move to space** refused from the
-keyboard. The
-Space Bar's badge keeps showing *which* windows are sticky
-either way, but only the mark answers *why that gesture just
-failed* — which is why the toggle's own `?` says so before you
-use it. Turn the mark off and hide the bar and a sticky window
-is indistinguishable from any other; KiwiDesk lets you do that
-rather than talking you out of it. (From Lua the two switches
-are `sticky.set_mark` and `space_bar.set_sticky_badge`.)
+A globally sticky window follows the space you focus onto its
+screen; when that space is a floating-mode space on another
+screen, KiwiDesk moves the window there at its last size, scaled
+to the screen.
 
-The marks' colours are in **Advanced Colors** — **Sticky** in
-Border colors (it paints both the on-window mark and the Space
-Bar sticky badge: one mark, one colour everywhere) and
-**Floating** in the Space Bar's badge cluster (floating windows
-have no on-window mark). Both default to **Automatic**, where
-the mark keeps its default look. (Lua:
-[`sticky.set_color`](lua-reference.md#stickyset_color) and
-[`floating.set_color`](lua-reference.md#floatingset_color); the
-badge visibility toggle is
+**Show mark on sticky windows** (on by default) draws a small
+mark in the window's top-right corner. The refusal pills above
+ride the same mark, so with it off a refused move fails silently.
+The Space Bar shows its own sticky badge either way; hide both
+and a sticky window is indistinguishable from any other. (Lua:
+`sticky.set_mark`, `space_bar.set_sticky_badge`.)
+
+The marks' colours are in **Advanced Colors**: **Sticky** in
+Border colors paints the on-window mark and the Space Bar badge
+together; **Floating** in the Space Bar's badge cluster (floating
+windows have no on-window mark). Both default to **Automatic**.
+(Lua: [`sticky.set_color`](lua-reference.md#stickyset_color),
+[`floating.set_color`](lua-reference.md#floatingset_color),
 [`space_bar.set_sticky_badge`](lua-reference.md#space_barset_sticky_badge).)
 
 ## Bars
 
-The **Bars** section is one page with a card per bar. The
-Space Bar's card leads: it appears in every layout, while the
-App Bar only renders in Monocle and Scrolling. Each card shows
-the settings you'd touch in the first week at rest — does the
-bar exist, where, how thick, and the content toggles — and
-folds the rest behind one **Style** disclosure whose subtitle
-names what it holds. The **Live preview** panel beside the
-cards draws one mock desktop with both bars in place — each on
-its configured edge, in your draft's style and colors, the
-space strip showing your actual Spaces — with the changed-list
-below. Neither card
-holds a colour: every bar tint is in **Advanced Colors**.
+**Bars** is one page with a card per bar, the Space Bar's first.
+Each card shows the everyday settings at rest — does the bar
+exist, where, how thick, the content toggles — and folds the
+rest behind a **Style** disclosure. The **Live preview** draws
+one mock desktop with both bars on their configured edges, the
+space strip showing your actual Spaces. Neither card holds a
+colour; every bar tint is in **Advanced Colors**.
 
 ### App Bar
 
-The App Bar is the strip that shows every window in the current
-space — it only renders in **Monocle** and **Scrolling**, the two
-layouts where a window can hide behind another or scroll off the
-edge, so you always see what's open. A window you take into
-native (green-button) fullscreen loses its item while it's away
-— macOS moves it off the Desktop and gives it a Mission Control
-slot of its own — and the item returns when it exits. The card
-has no on/off row
-because the bar doesn't have one: visibility is per layout, via
-the two **Show it in** switches at the card's foot. Everything
-else applies to every layout that shows a bar; per-layout
-styling lives in Lua (see below).
+The App Bar lists every window in the current space. It renders
+only in **Monocle** and **Scrolling**, where a window can hide
+behind another or scroll off the edge, so the card has no on/off
+row: visibility is per layout, via the two **Show it in**
+switches at the card's foot. A window in native fullscreen loses
+its item while away.
 
-**Click a tab** to focus that window; **drag a tab** along the
-bar to rearrange the windows. (Settings calls these the bar's
-**items** — hence Item size and Item gap below, and Item color
-in Advanced Colors.)
-Because Monocle and Scrolling don't lay windows out side by
-side, the App Bar is where you reorder them: drag a tab left or
-right (or up/down on a vertical bar) and the underlying window
-order follows. Grouped tabs expand into their members when you
-click, so any window in a same-app group can be picked or
-dragged directly. (Lua: `app_bar.*` setters, and the
-rearrange gesture shares the drop visuals in
-[Drag & Drop Rearranging](lua-reference.md#drag--drop-rearranging).)
+**Click** an item to focus its window; **drag** one along the
+bar to reorder the windows. Grouped items expand into their
+members on click, so any window in a same-app group can be
+picked or dragged. (Lua: `app_bar.*` setters; the rearrange
+gesture shares the drop visuals in [Drag & Drop
+Rearranging](lua-reference.md#drag--drop-rearranging).)
 
-In the preview panel's desktop scene, the App Bar is drawn in
-place with your configured position, thickness, background
-style, corner roundness, and colors — its active item marked —
-so you can judge a change beside the controls before Save. It
-is a static preview (no hover or interaction) and never
-touches your running windows.
+The settings (Position, Thickness and grouping at rest; the rest
+behind **Style**):
 
-**The settings** (Position, Thickness and the grouping toggle at
-rest; the rest behind **Style**):
-
-- **Background style**: boxed (a box per item honoring corner
-  roundness) or plain (items on a shared translucent strip).
-- **Liquid Glass**: a separate on/off finish, on by default,
-  that lays a macOS&nbsp;26 glass material over the boxes or the
-  plate — it is **not** a third background style. One switch covers the
-  whole app: **Colours &amp; Animations ▸ Liquid Glass**, over
-  the Space Bar, the App Bar and the shortcuts panel together.
-  Fill tints it (transparent = clear glass) and, when Fill is
-  dark, also picks the darker glass on both bars, so the two
-  bars never show different shades of glass. The switch appears
-  only on macOS&nbsp;26 and later; a profile that turns it on
-  still opens on older macOS, which draws the Boxed or Plain
-  shape underneath it.
-- **Background size**: how far Plain's strip or the Liquid Glass
-  plate reaches — **Hug items** (default; the plate wraps the
-  items like the Dock wraps its icons) or **Full width**
-  (edge-to-edge). Hug falls back to full width once the items
-  overflow and scroll. Greyed when every bar on screen resolves
-  to Boxed, which draws no shared plate. The Space Bar has the
-  same control.
-- **Position**: the screen edge the bar occupies — top, bottom,
-  left, or right (default bottom, beside the Dock, with the
-  Space Bar on top). Absolute for every layout; the panel's
-  desktop scene is edge-aware and draws a left- or right-edge
-  bar vertical. When the Space
-  Bar shares the edge, an inline note under this control
-  explains the stacking order (Space Bar at the screen edge,
-  App Bar next to the windows).
-- **Alignment**: where the item group sits along the bar while
-  it fits — start, center (default), or end. Edge-relative: a
-  left bar's start is its top. Once items overflow and scroll,
-  the three behave the same.
-- **Active indicator**: outline (an outlined border around the
-  active item), edge mark (accent bar on the active item's window-facing
-  edge), or gap (active slot empty). Orthogonal to the background
-  style — all combinations are valid. Full-color app icons (System
-  default) also dim to half strength on inactive items, so the
-  active app reads even though those icons take no tint.
+- **Background style**: boxed (a box per item) or plain (a shared
+  translucent strip).
+- **Liquid Glass**: a separate finish, on by default, laying a
+  macOS 26 glass material over the boxes or the plate. One switch
+  covers the Space Bar, the App Bar and the shortcuts panel:
+  **Colours & Animations ▸ Liquid Glass**. Fill tints it
+  (transparent = clear glass) and a dark Fill picks the darker
+  glass on both bars. The switch appears on macOS 26 and later;
+  a profile that turns it on still opens on older macOS with the
+  Boxed or Plain shape underneath.
+- **Background size**: how far Plain's strip or the glass plate
+  reaches — **Hug items** (default) or **Full width**. Hug falls
+  back to full width once items overflow and scroll. Greyed when
+  every bar on screen resolves to Boxed.
+- **Position**: top, bottom, left or right (default bottom, the
+  Space Bar on top). When the Space Bar shares the edge, a note
+  gives the order: Space Bar at the screen edge, App Bar next to
+  the windows.
+- **Alignment**: start, center (default) or end along the bar,
+  edge-relative. Once items overflow and scroll, all three read
+  the same.
+- **Active indicator**: outline, edge mark (an accent bar on the
+  item's window-facing edge) or gap (the active slot left empty).
+  Independent of the background style. Full-colour app icons dim
+  to half strength on inactive items.
 - **Thickness**: how far the bar reaches into the layout, in
   points.
-- **Item size**: auto (0) measures rendered width and sizes slots
-  uniformly to fit the widest item; fixed pixel width.
+- **Item size**: auto (0) sizes every slot to the widest item;
+  otherwise a fixed width.
 - **Content**: icon only, title only, or both. The text is the
-  window's own title, not its app name — five Finder windows all
-  reading "Finder" tell you nothing the icon didn't, while
-  "Downloads" / "Projects" tells them apart. Two cases still
-  show the app's name, because a title can't speak there:
-  a **grouped** item (its windows have several titles, and none
-  of them is true of the group — focus it and it expands into
-  members that do show titles), and a window that reports **no
-  title yet**, which some apps don't until a moment after they
-  open. Left/right bars always render icon-only (titles would
-  need stacked or rotated text), so the control greys when every
-  bar on screen sits on a vertical edge; your choice returns
-  when one moves back to a horizontal edge.
-- **Title length**: how many characters of a title an item
-  shows before it's shortened at the end (8–80, default 10).
-  Worth knowing why it matters: every item on a bar is the same
-  size, and on **auto** item size that size comes from the
-  widest item — so one long title widens *every* slot until the
-  quarter-of-the-bar limit kicks in and the rest of the bar has
-  to scroll. Greyed while every bar on screen shows icons only.
-- **App symbol style**: how app icons are drawn (greyed while
-  every bar on screen renders titles only, which shows no
-  icons). This one stays available even when no layout shows an
-  App Bar at all, because it also styles the shortcuts panel's
-  Apps band. **System default**
-  shows each app's icon as macOS provides it — including your
-  system-wide Icon & widget style choice. **Glyphs** shows a
-  monochrome symbol from the bundled [SketchyBar App
-  Font](https://github.com/kvndrsslr/sketchybar-app-font)
-  instead, colored by the bar's item colors (Item, Active
-  item, Hover item, set in Advanced Colors — so those colors
-  also style the glyphs);
-  apps without a symbol keep their icon. With Glyphs active,
-  the shortcuts panel's Apps band shows the same symbols
-  (following the global style — the panel spans all layouts).
-**Controls with nothing to act on are dimmed, not removed.**
-Turn the Space Bar off, or turn off the App Bar in every layout
-that can show one, and that card's controls stay on screen —
-disabled and dimmed, with their stored values intact and a
-tooltip saying what to turn back on. The same applies to
-individual settings: in Advanced Colors the Highlight and Active
-item colors dim under the Gap indicator (which hides the active
-item rather than marking it, so neither color is drawn), a drag
-visual's colours dim when that part is switched off, and the
-whole Space Bar group — the Floating badge tint with it — dims
-when the bar is off. The **Desktop → profile** bindings are
-dimmed rather than hidden too, so you can still read what they
-hold.
+  window's title, not its app name; a **grouped** item and a
+  window with **no title yet** show the app's name instead.
+  Left/right bars always render icon-only, so the control greys
+  when every bar on screen is vertical.
+- **Title length**: 8–80 characters (default 10) before a title
+  is shortened. On auto item size one long title widens every
+  slot until the quarter-of-the-bar limit, after which the bar
+  scrolls. Greyed while every bar shows icons only.
+- **App symbol style**: **System default** shows each app's icon
+  as macOS provides it, including your system-wide Icon & widget
+  style; **Glyphs** shows a monochrome symbol from the bundled
+  [SketchyBar App
+  Font](https://github.com/kvndrsslr/sketchybar-app-font),
+  coloured by the bar's item colours (apps without a symbol keep
+  their icon). It also styles the shortcuts panel's Apps band,
+  so it stays available when no layout shows an App Bar. Greyed
+  while every bar renders titles only.
+- **Font size**: auto or fixed. Auto-gated sliders read
+  "Automatic" while their toggle is on.
+- **Corner roundness**: 0–100% (0 = square, 100 = full capsule),
+  for the boxed items or the shared plate.
 
-- **Font size**: auto or fixed. Auto-gated sliders (item size,
-  font size) read "Automatic" while their toggle is on.
-- **Corner roundness**: 0–100% (0 = square, 100 = full capsule).
-  Rounds the boxed items, or the shared plate under Plain and
-  Liquid Glass.
+**Controls with nothing to act on are dimmed, not removed.** Turn
+the Space Bar off, or the App Bar off in every layout, and the
+card's controls stay on screen with their values, and a tooltip
+says what to turn back on. The same holds for a single setting:
+in Advanced Colors the Highlight and Active item colours dim
+under the Gap indicator, a drag visual's colours dim when that
+part is off, and the Space Bar group dims when the bar is off.
 
-**Colors** are not on this page — every App Bar tint lives in
-**Advanced Colors ▸ App Bar colors**, with Fill and Highlight at
-rest and the rest behind **More colors**. **Fill** is one
-knob for every filled surface: the box per item (Boxed), the shared
-plate (Plain), and the **tint** of the Liquid Glass finish over
-either — a transparent Fill means clear, untinted glass, and a
-dark one the darker glass. The active item is
-marked by the indicator (outline or edge mark), so there is no
-separate active-fill color.
+**Colours** are in **Advanced Colors ▸ App Bar colors**: Fill and
+Highlight at rest, the rest behind **More colors**. **Fill**
+paints every filled surface — the box per item, the shared plate,
+and the tint of the Liquid Glass finish. The active item is
+marked by the indicator, so there is no active-fill colour.
 
-**Show it in, and per-layout styling:**
-
-The **Show it in** switches decide which layouts carry an App
-Bar — Monocle and Scrolling each get one. The other layouts
-keep every window visible, so they show none; the Space Bar is
-unaffected and shows in every layout.
-
-Styling the bar differently *per layout* (a 44 pt icon-only bar
-in Monocle, say) is a Lua-only capability: every `app_bar.*`
-field has a `monocle.set_app_bar_*` / `scroll.set_app_bar_*`
-twin that overrides just that layout, and unset fields keep
-following the global value — see
-[Per-layout App Bar overrides](lua-reference.md#per-layout-app-bar-overrides).
-The card keeps editing — and the panel previewing — the global
-values and
-renders no per-layout rows: an override adds a "why is my bar
-different here" question to every row above it, so the
-narrow-but-real need stays in the power layer.
+**Show it in** decides which of Monocle and Scrolling carry an
+App Bar. Styling the bar differently *per layout* is Lua-only:
+every `app_bar.*` field has a `monocle.set_app_bar_*` /
+`scroll.set_app_bar_*` twin, and unset fields follow the global
+value — [Per-layout App Bar
+overrides](lua-reference.md#per-layout-app-bar-overrides). The
+card edits and previews the global values only.
 
 ### Space Bar
 
-The **Space Bar** is an overview of your Spaces, visible on
-every Desktop (it stands down while a native-fullscreen app
-holds the screen, like the App Bar) and **on by default** — it's
-the one place your Spaces are visible at all: one bar per
-display, listing that display's
-Spaces in profile order. Each item shows the Space's identifier
-(its configured icon, else its plain number or a two-letter
-monogram), a thin divider, then a compact glyph per window —
-adjacent windows of the same app collapse into one glyph with a
-count badge, and past the configured glyph cap (default 5,
-adjustable 1–12) the rest fold into a `+n` badge. Emoji
-identifiers and app-image icons dim to half strength on
-inactive Spaces; on the active Space, app-image glyphs keep a
-three-step ladder — the focused app full strength, its
-neighbors slightly dimmed — so the focused app reads even
-though native icons take no tint (App Font glyphs use the
-Focused item color instead). Click a Space to switch to it;
-glyphs are informational. The bar shows the Desktop you are
-looking at: a Space lists the windows KiwiDesk has parked on
-it, but a window sitting on a macOS Desktop you are not
-looking at is not listed — and *Hide empty Spaces* hides a
-Space holding only those. KiwiDesk still knows about them:
-*Open or Focus* reaches such a window and switches Desktops
-to it.
+The **Space Bar** shows your Spaces on every Desktop: one bar per
+display, listing that display's Spaces in profile order. On by
+default. It stands down while a native-fullscreen app holds the
+screen.
 
-A transient overlay gets **no glyph** — a context menu, a
-submenu or a launcher panel surfaces as a window of its app, and
-would otherwise add a glyph for as long as you hold the gesture
-open. They are left out of the count behind the `+n` badge too,
-the same way they never take a focus ring.
+Each item shows the Space's identifier (its icon, else its number
+or a two-letter monogram), a divider, then a glyph per window.
+Adjacent windows of the same app collapse into one glyph with a
+count badge; past the glyph cap (default 5, 1–12) the rest fold
+into a `+n` badge. Emoji identifiers and app-image icons dim to
+half strength on inactive Spaces; on the active Space, app-image
+glyphs keep a three-step ladder (the focused app full strength,
+its neighbours slightly dimmed), while App Font glyphs use the
+Focused item colour. Click a Space to switch to it; glyphs are
+informational.
 
-A sticky window's glyph **travels with you**: it is listed
-under one Space only — joining that item when you switch,
-pruned from the item of the Space it left (its home included)
-— so one badged glyph always sits where the window actually
-is. On two screens that is the Space the window *renders* on:
-a sticky-everywhere (∞) window follows the Space you are
-focused on, so it is listed on that screen's bar and on no
-other, while a sticky-on-this-screen (📌) window stays under
-the current Space of its own screen.
+The bar shows the Desktop you are looking at: a window on a macOS
+Desktop you are not looking at is not listed, and *Hide empty
+Spaces* hides a Space holding only those. *Open or Focus* still
+reaches such a window and switches Desktops to it. A transient
+overlay — a context menu, a submenu, a launcher panel — gets no
+glyph and no place in the `+n` count.
 
-Window state shows on the glyphs as small corner badges:
-**sticky** windows wear a badge on the glyph's top-left,
-**floating** windows on the bottom-left (the top-right corner
-stays the group count). A grouped glyph aggregates its
-windows — its badge means "at least one window in this group".
-The badges follow the item's color ladder, so they mute on
-inactive Spaces. They have no Settings toggle; Lua can hide
+A sticky window's glyph travels with you: it is listed under one
+Space only, the one the window *renders* on. A ∞ window follows
+the Space you are focused on and is listed on that screen's bar;
+a 📌 window stays under the current Space of its own screen.
+
+Glyphs carry small corner badges: **sticky** top-left,
+**floating** bottom-left, the group count top-right. A grouped
+glyph's badge means "at least one window in this group". They
+mute on inactive Spaces, have no Settings toggle, and Lua hides
 them with `space_bar.set_sticky_badge(false)`.
-
-At a glance, the marks you may see and what each means:
 
 | Mark | Where it sits | Means |
 | --- | --- | --- |
-| ∞ mark | On the window, top-right corner | **Global sticky** — stays on every Space of every monitor |
-| 📌 mark | On the window, top-right corner | **Display sticky** — stays on every Space of the one monitor it lives on |
-| Badge, glyph's **top-left** | Space Bar | That window (or a window in the group) is **sticky** |
+| ∞ mark | On the window, top-right corner | **Global sticky** — every Space of every monitor |
+| 📌 mark | On the window, top-right corner | **Display sticky** — every Space of the one monitor it lives on |
+| Badge, glyph's **top-left** | Space Bar | That window (or one in the group) is **sticky** |
 | Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |
 | `+n` / count badge, glyph's **top-right** | Space Bar | How many windows a grouped glyph holds |
 
-Every mark is a **filled disc** in its state color with a legible
-black-or-white glyph auto-picked for contrast; sticky and floating
-each get their own color (see [Advanced
-Colors](#advanced-colors)). Floating shows
-no on-window mark — in the bar is the only place a tiled and a
-floating window look different. (Lua:
+Every mark is a filled disc in its state colour with a
+black-or-white glyph picked for contrast; sticky and floating
+each have a colour in [Advanced Colors](#advanced-colors).
+Floating has no on-window mark. (Lua:
 [`sticky.set_mark`](lua-reference.md#stickyset_mark),
 [`sticky.set_color`](lua-reference.md#stickyset_color),
 [`floating.set_color`](lua-reference.md#floatingset_color).)
 
-**Drag a window onto a Space** to move it there — a two-speed
-gesture. Drag a window's title bar over another Space's item and
-either:
+**Drag a window onto a Space** to move it there, a two-speed
+gesture over the Space's item:
 
-- **Flick and drop** — release before the ring fills and the
-  window jumps straight to that Space; you stay where you are.
-- **Hold to place** — pause over the item; a ring sweeps around
-  it and after a short hold the view springs to that Space, with
-  the window now in its live layout so you can drop it exactly
-  where you want (the usual drag preview shows the slot).
+- **Flick and drop** — release before the ring fills; the window
+  jumps to that Space and you stay.
+- **Hold to place** — pause; a ring sweeps around the item and
+  the view springs to that Space with the window in its live
+  layout, so you can drop it exactly where you want.
 
-The hold length is the **Spring delay** (Space Bar card,
-default 1.5 s, adjustable 1–4 s). Move the cursor off the item
-before the ring completes to cancel. Under **Reduce Motion** the
-ring does not sweep: it stays away for the same first
-half-second, then appears whole for the rest of the hold, so the
-item still marks itself as the target and only the countdown is
-gone. The whole item is the target (glyphs and the `+n` badge
-are not separate drop zones), and dropping onto the Space a
-window is already on does nothing.
+The hold is the **Spring delay** (default 1.5 s, 1–4 s). Move the
+cursor off the item before the ring completes to cancel. Under
+**Reduce Motion** the ring does not sweep: it stays away for the
+first half-second, then appears whole. The whole item is the
+target, and dropping onto the Space the window is already on
+does nothing.
 
 ```mermaid
 flowchart TD
@@ -1886,765 +1183,508 @@ flowchart TD
     H -->|"Move off the item first"| C["Cancelled —<br/>nothing moves"]
 ```
 
-**Many Spaces:** when the Spaces don't all fit the strip the bar
-scrolls instead of clipping — the same as the App Bar. Items keep
-their size; small chevrons appear at the ends toward the hidden
-Spaces, and the bar follows the active Space into view. Click a
-chevron to scroll, or — while dragging a window — hold the cursor
-over a chevron and the bar autoscrolls so you can drop onto a
-Space that started off-screen. The front-app segment stays
-pinned at the trailing end — only the Spaces scroll behind the
-chevrons — so the focused window is always in view; while the bar
-fits it sits at the row's tail as before.
+**Many Spaces:** when they do not fit, the bar scrolls; chevrons
+appear at the ends and the bar follows the active Space into
+view. Click a chevron to scroll, or hold a dragged window over
+one to autoscroll. The front-app segment stays pinned at the
+trailing end.
 
-The card's order matches the App Bar card's: at rest **Show
-Space Bar**, **Position** (any of the four screen
-edges — sharing an edge with the App Bar is fine, the Space Bar
-sits at the screen edge and the App Bar next to the windows,
-and an inline note in both cards explains the order when both
-share one), **Thickness**, and the two behavior toggles. The
-**Style** disclosure holds the rest: background style,
-**Alignment** (start / center / end along the bar,
-edge-relative, like the App Bar's — and, like it, the three
-read the same once the bar overflows and scrolls), active
-indicator, **App symbol style**, sizes, **Glyphs per Space**
-(how many app glyphs an item shows before the rest collapse
-into the `+n` badge, 1–12), **Title length** and **Spring
-delay**. Colors live in **Advanced Colors ▸ Space Bar colors**.
+The card's order matches the App Bar's: at rest **Show Space
+Bar**, **Position** (any edge; sharing one with the App Bar
+stacks the Space Bar at the screen edge), **Thickness**, and two
+behaviour toggles; behind **Style**, background style,
+**Alignment**, active indicator, **App symbol style**, sizes,
+**Glyphs per Space** (1–12), **Title length** and **Spring
+delay**.
 
-The color ladder there is the bar's signature: **Item** paints
-inactive Spaces, **Active space** the Space currently shown on
-the display, and **Focused window** the focused window's glyph
-inside the active Space. The ladder sits at rest; the rest of
-the palette collapses behind **More colors** — the App Bar's
-exact tiering. **Copy sizes and style to Space Bar…**
-(in the App Bar card's Style
-disclosure) takes the App Bar's current sizes and style once —
-thickness, background, indicator and the rest — and edits
-afterwards stay independent. Colors, position and visibility
-are never copied: colors are the palette's and Advanced Colors'
-concern.
+- **Hide empty Spaces**: the current Space always stays visible;
+  hidden Spaces remain reachable by shortcut.
+- **Show front app**: a trailing segment with the focused window
+  of the Space each display shows — its app icon, then the
+  window's title (the app's name if it has none yet). Icon-only
+  on vertical bars. **Title length** (8–80, default 10) caps it
+  and is greyed while the segment is off.
 
-Two behavior toggles: **Hide empty Spaces** (the current Space
-always stays visible; hidden Spaces remain reachable by
-shortcut) and **Show front app** — a trailing segment with the
-focused window of the Space each display currently shows: its
-app's icon, then that window's **title** (its app's name
-instead if it reports no title yet). Icon-only on vertical bars.
-**Title length** caps that title (8–80 characters, default 10)
-and is greyed while the segment is off. **Spring delay** sets
-how long a dragged window must hover a Space before the view
-springs to it (default 1.5 s, 1–4 s).
+Colours are in **Advanced Colors ▸ Space Bar colors**. The
+three-step ladder at rest is the bar's signature: **Item** paints
+inactive Spaces, **Active space** the Space shown on the display,
+**Focused window** the focused window's glyph inside it; the rest
+sits behind **More colors**. **Copy sizes and style to Space
+Bar…** (App Bar card, Style disclosure) copies the App Bar's
+sizes and style once; colours, position and visibility are never
+copied.
 
 ## Colors & Animations
 
-The **Colors & Animations** section (in the **This Profile** group) is the
-whole colour story for most people: pick a palette, see what you
-are running, and set how windows move. Nothing here asks you to
-choose an individual colour — that is the next section, and you
-never have to open it.
+**Colors & Animations** (**This Profile**) is the whole colour
+story for most people: pick a palette, see what you are running,
+set how windows move. Nothing here asks for an individual colour;
+that is Advanced Colors, which you never have to open.
 
-Color controls pair a swatch with an exact hex field. Clicking the
+Colour controls pair a swatch with a hex field. Clicking the
 swatch opens the native Colors panel and updates the staged value
-as you pick; **Done** or the red window close button closes the
-panel and keeps the selected color.
+as you pick; **Done** or the window's close button keeps it.
 
 ### Color Palette
 
-At the top of the section, the **Color palette** shelf paints a
-whole set of colors — the App Bar, the Space Bar, focus borders,
-drag visuals and the sticky/floating marks are all colors a
-palette *can* carry — in one click. Each palette shows a small
-scene thumbnail —
-a mock bar, a bordered window, and a drag swatch — in its own
-colors,
-so you judge the whole look, not isolated chips. Applying a palette
-is a **one-time paint**, not a live link: it overwrites the current
-colors (you can still tweak any individual color afterward), and the
-change is staged until you Save the profile like any other edit.
-In the preview panel beside the shelf, **Current colors** shows
-the same scene painted in the colors you are editing — both bars
-with their accent ladders and count badges, a focused and an
-unfocused window wearing their rings and the sticky and floating
-marks, and the drag ghost beside its drop zone — with the
-changed-list under it. It is the shelf tile's own renderer at
-panel size, where there is room for roles a 72 pt tile has to
-leave out, so what a palette promises and what you have can never
-be drawn two different ways. The four **hover** colors are in
-neither drawing: a still picture can only draw a pointer state as
-though it were the resting one, which would show you a behavior
-KiwiDesk does not have. Edit any individual color in
-Advanced Colors and this scene follows.
+The **Color palette** shelf paints a whole set of colours — the
+App Bar, the Space Bar, focus borders, drag visuals and the
+sticky/floating marks — in one click. Each tile shows a scene
+thumbnail (a mock bar, a bordered window, a drag swatch) in its
+own colours. Applying is a **one-time paint**, not a live link:
+it overwrites the current colours, which you can still tweak, and
+is staged until you Save. **Current colors** in the preview panel
+shows the same scene in the colours you are editing, with the
+changed list under it; the four hover colours appear in neither
+drawing.
 
-The palette you are on is **checkmarked**. The mark is worked out
-from the colors you are editing rather than remembered, so it
-means "these are the colors you have", not "this is the one you
-last clicked": change a single color by hand in Advanced Colors
-and the mark goes away, because the colors are no longer that
-palette's. No card carrying the mark is a normal state — it means
-your colors are your own. More than one card can carry it too:
-save your current colors while wearing a bundled palette and your
-copy is that palette, so both are marked. Every card is framed;
-a marked one is framed in green as well, and the frame is never
-the only signal, so the shelf reads the same whatever your color
-vision.
+The palette matching your colours is **checkmarked**. The mark is
+worked out from the colours you are editing, not remembered:
+change one colour by hand and it goes away; save your colours
+while wearing a bundled palette and both tiles are marked. A
+marked tile is also framed in green.
 
-- **Bundled** palettes (Kiwi (Default), Kiwi Gold, Kiwi Neon,
-  Clean Light,
-  Slate, True Dark, Sunset, Ultraviolet, Monochrome) are built in
-  and marked "Built-in" — they can't be renamed or deleted.
-  **Kiwi (Default)** is derived from the shipped defaults, so
-  applying it is a reset to the default
-  colors — including handing both mark tints back to Automatic.
-  **Kiwi Neon** is a bright dark theme built to show off the
-  focus-border **glow** — while glow is off, a **Pair with Glow**
-  link under its tile takes you to the Focus border card in
-  Gaps & Borders; picking the palette never switches
-  it on for you (a palette carries colors and nothing else).
+- **Bundled** palettes — Kiwi (Default), Kiwi Gold, Kiwi Neon,
+  Clean Light, Slate, True Dark, Sunset, Ultraviolet, Monochrome —
+  are marked "Built-in" and cannot be renamed or deleted. **Kiwi
+  (Default)** is the shipped defaults, so applying it is a reset,
+  mark tints back to Automatic included. **Kiwi Neon** is built
+  for the focus-border **glow**; while glow is off, a **Pair with
+  Glow** link under its tile goes to the Focus border card, and
+  picking the palette never switches glow on.
 - **My palettes** are yours. The **＋** tile saves the current
-  colors as a new palette; right-click a saved palette to **Rename**,
-  **Export…**, or **Delete** it. **Import…** loads a palette file
-  someone shared (unknown keys are ignored, and the name is made
-  unique so it can't shadow a bundled one).
+  colours as a new palette; right-click one to **Rename**,
+  **Export…** or **Delete**. **Import…** loads a shared palette
+  file (unknown keys ignored, the name made unique).
 
-A palette carries **only colors** — never a width, a toggle or an
-effect. That is why it can be applied to any profile without
-surprises, and why the two mark tints joining the surface changed
-nothing you already had: no bundled palette carries them, so
-applying one leaves your marks exactly as they were. Saving your
-own colors captures all of them.
-
-The palette library is **global** — the same saved palettes are
-available whichever profile you're editing (a palette is a color
-recipe; a Profile is the configuration that owns the colors after
-you apply one).
+A palette carries only colours — never a width, a toggle or an
+effect — so it applies to any profile without surprises. The
+library is global: the same palettes are available whichever
+profile you edit.
 
 ### Motion
 
-- **Animate windows**: the master switch, and the only row visible
-  at rest — the four per-event toggles and the duration sit behind
-  **Per-event and duration**. Turn the master off and windows snap
-  into place instantly; the rows in the drawer grey out. Turning it
-  back on restores the defaults. macOS
-  **System Settings ▸ Accessibility ▸ Reduce Motion** also keeps
-  animations off — with it on, the whole card greys out, since the
-  system setting wins regardless of this one.
-- **Duration** (ms): how fast windows move and resize (50–1000, default
-  150).
-- **On space change**: animate space switches as a coordinated
-  transition — windows slide out of the space you're leaving while the
-  new space's windows slide in from the hiding corner (default off;
-  both spaces animate at once, which can be slow on older machines).
-  macOS Desktop switches are never animated — see
-  [Accepted limitations](accepted-limitations.md).
-- **On window resize**: animate when splits adjust (default on).
-- **On window swap**: animate when two tiles swap (default on).
-- **On relayout**: animate when windows open/close or layout parameters
-  change (default on).
+- **Animate windows**: the master switch, and the only row at
+  rest; the per-event toggles and the duration sit behind
+  **Per-event and duration**. Off, windows snap into place and
+  the drawer greys. **System Settings ▸ Accessibility ▸ Reduce
+  Motion** also keeps animations off and greys the whole card.
+- **Duration** (ms): 50–1000, default 150.
+- **On space change**: windows slide out of the space you leave
+  while the new space's slide in from the hiding corner (default
+  off; both spaces animate at once, which can be slow on older
+  machines). macOS Desktop switches are never animated
+  ([Accepted limitations](accepted-limitations.md)).
+- **On window resize** (default on).
+- **On window swap** (default on).
+- **On relayout**: when windows open or close or layout
+  parameters change (default on).
 
-The scrolling layout's own focus animation and its duration are
-not here — they live with that layout's parameters, in **Layout
-Defaults ▸ Scrolling**, and a link on this card goes there.
+The scrolling layout's focus animation and its duration live in
+**Layout Defaults ▸ Scrolling**; a link on this card goes there.
 
 ## Advanced Colors
 
-The **Advanced Colors** section holds every colour KiwiDesk has —
-25 of them — **grouped by where you see it**, not by what it is.
-You arrive here having noticed that something on screen is the
-wrong colour, so the four groups match the four things that can
-be: **Border colors**, **Drag colors**, **Space Bar colors**,
-**App Bar colors**.
+**Advanced Colors** holds every colour KiwiDesk has — 25 —
+grouped by where you see it: **Border colors**, **Drag colors**,
+**Space Bar colors**, **App Bar colors**. The **Live preview**
+draws one scene holding every colour at once (*Every color at
+once*): both bars with their ladders and badges, a focused and an
+unfocused window with rings and marks, the drag ghost beside its
+drop zone, pinned while the rows scroll. The four hover colours
+are the one thing it leaves out; they are seen on the real bar.
 
-The **Live preview** panel beside them draws **one scene holding
-every colour at once** — headed *Every color at once* — with both
-bars carrying their accent ladders and count badges, a focused
-and an unfocused window wearing their rings and the sticky and
-floating marks, and the drag ghost beside its drop zone, all in
-the colours you are editing and pinned while the rows scroll.
-(The Space Bar's ladder has one more step than the App Bar's,
-which has no **Focused window** colour — the scene draws what is
-there rather than leaving a gap.)
-That is the question the groups cannot answer on their own: a
-colour is easy to judge alone and only readable in company, and
-the ladder on each bar, the two rings and the marks beside the
-accent are all judged against each other.
-
-The four **hover** colours are the one thing the scene leaves
-out. A still picture can only draw a pointer state as though it
-were the resting one, which would teach you a behavior KiwiDesk
-does not have — so they are edited by swatch and seen on the real
-bar.
-
-Each colour renders in **exactly one place**: no colour on this
-page is also editable somewhere else in Settings, and no colour
-Settings offers is missing from it. (Lua reaches a little
-further: the [per-layout App Bar
+Each colour renders in exactly one place: nothing here is also
+editable elsewhere in Settings, and nothing Settings offers is
+missing. (Lua reaches further: the [per-layout App Bar
 overrides](lua-reference.md#per-layout-app-bar-overrides) include
-the bar's eight colours and have no GUI control at all.)
+the bar's eight colours and have no GUI control.)
 
-- **Border colors** — **Focused window** and **Unfocused
-  windows** (the focus ring), plus **Sticky** (the on-window mark
-  and the Space Bar's sticky badge, one colour for both).
-- **Drag colors** — the ghost's and the drop zone's **Border** and
-  **Fill**, in the same two columns the drag editor uses.
-- **Space Bar colors** — the three-state accent ladder at rest
-  (**Item**, **Active space**, **Focused window**, the bar's
-  signature), with plate, highlight, hover and the badge cluster
-  behind **More colors**. The **Floating** badge tint rides that
-  cluster: the Space Bar badge is its only surface.
-- **App Bar colors** — **Fill** and **Highlight** at rest (the two
-  a drawing of the bar reflects most), the rest behind **More
-  colors**.
+- **Border colors** — **Focused window**, **Unfocused windows**
+  (the ring), **Sticky** (the on-window mark and the Space Bar
+  badge, one colour).
+- **Drag colors** — the ghost's and the drop zone's **Border**
+  and **Fill**.
+- **Space Bar colors** — **Item**, **Active space**, **Focused
+  window** at rest; plate, highlight, hover and the badge cluster
+  (the **Floating** badge tint included) behind **More colors**.
+- **App Bar colors** — **Fill** and **Highlight** at rest, the
+  rest behind **More colors**.
 
-**A colour whose thing is switched off is dimmed, not removed**,
-and because the switch usually lives on another page, the group's
-`?` says which page: turn the focus border off and the two ring
-colours dim with "turn it on in Gaps & Borders"; turn the Space
-Bar off and its whole group dims pointing at Bars. The stored
-value is untouched either way.
-
-Anything you set here can be kept: **Save current colors as…** on
-the palette shelf turns an afternoon of tinkering into a palette
-you can re-apply anywhere.
+A colour whose thing is off is dimmed, and the group's `?` names
+the page with the switch. The stored value is untouched. **Save
+current colors as…** on the palette shelf keeps anything you set
+here as a palette.
 
 ## Behavior
 
-The **Behavior** section (in the **This Profile** group; its
-card appears in **Power User** mode) adjusts
-mouse interaction, the cue a blocked action gives back, and what
-happens on quit.
+**Behavior** (**This Profile**, Power User mode) covers mouse
+interaction, the cue a blocked action gives, and what happens on
+quit.
 
 ### When an Action Can't Apply
 
-When KiwiDesk refuses something — a window already at its
-smallest, a grow with no room left, a layout with nothing to
-resize, a sticky window that can't be swapped — it flashes a
-short message on the window saying which. That always happens.
-
-**Play a sound when an action can't apply** (default off) adds
-the system alert sound to that message. It is off because the
-message is the cue and the sound is an addition; switch it on
-and you hear it the moment you toggle it, so you can judge it
-without saving first.
-
-Two things it deliberately does not do. It never sounds without
-showing something — if a cue is switched off elsewhere (the
-sticky mark, say), its refusal stays silent rather than becoming
-a beep with nothing on screen. And it never fires for a command
-sent over the CLI or IPC: a script that hits a limit reads the
-error in its response, and your Mac stays quiet.
-
-Held shortcuts sound once per hold, not once per frame.
+When KiwiDesk refuses something — a window at its smallest, a
+grow with no room, a layout with nothing to resize, a sticky
+window that cannot be swapped — it flashes a short message on the
+window. **Play a sound when an action can't apply** (default off)
+adds the system alert sound; you hear it the moment you toggle
+it. It never sounds without a message (a refusal whose cue is
+switched off elsewhere stays silent) and never fires for a
+command sent over the CLI or IPC. Held shortcuts sound once per
+hold.
 
 ### Mouse & Window Behavior
 
-- **Mouse resize mode**: "layout" (default) — resize slides the split
-  as you drag; "snap_back" — the layout snaps back when you release.
-- **Move mouse to focused window** (checkbox, default off): warp the
-  pointer to the center of the newly-focused window whenever focus
-  changes, so clicks and scrolls land where the keyboard is working.
-- **Minimum window size**: if a window shrinks below this (pt), it
-  cascades instead of further shrinking (default 300 pt). It is a
-  stepper pinned above the **Choose a layout** strip in Layout
-  Defaults — type an exact pt value or use the arrows.
-- **New window placement**: where new windows enter the space's window
-  order — first, last, before focused, or after focused. Each layout
-  has a sensible default; override per-space if needed.
+- **Mouse resize mode**: "layout" (default) slides the split as
+  you drag; "snap_back" lets the window resize freely and snaps
+  it back on release.
+- **Move mouse to focused window** (default off): warps the
+  pointer to the centre of the newly focused window.
+- **Minimum window size** (default 300 pt): a window shrinks no
+  further; extras cascade instead. It is the stepper above the
+  **Choose a layout** strip in Layout Defaults.
+- **New window placement**: first, last, before focused, or
+  after focused. Each layout has a default; override per space.
 
 ### Wake & Restart
 
-Lua-only (`enable_wake_restore`, `set_wake_restore_delay` — see
-the [Lua reference](lua-reference.md)); there is no GUI control:
+Lua-only (`enable_wake_restore`, `set_wake_restore_delay` in the
+[Lua reference](lua-reference.md)):
 
-- **Restore on wake**: when your Mac wakes from sleep or the
-  screen unlocks, restore the window arrangement captured when
-  it went to rest (on by default), and put the keyboard focus
-  back on the window you were in — so your shortcuts work right
-  away, without a click first.
-- **Wake restore delay** (ms): how long to wait after wake before
-  restoring (default 1500 ms, giving displays time to settle).
+- **Restore on wake** (on by default): after sleep or screen
+  unlock, restore the arrangement captured when the Mac went to
+  rest and put focus back on the window you were in.
+- **Wake restore delay** (default 1500 ms): how long to wait
+  after wake, giving displays time to settle.
 
-A wake restore is skipped when the display set changed while the
-Mac was asleep (say, you undocked) — the arrangement belongs to
-the old displays, so the monitor-change profile switch takes over
-instead. If a restore ever leaves things looking wrong, **General
-▸ Advanced ▸ Discard Saved Window Arrangement** clears the
-remembered arrangement without touching any settings.
+A wake restore is skipped when the display set changed during
+sleep; the monitor-change profile switch takes over. If a
+restore leaves things wrong, **General ▸ Advanced ▸ Discard Saved
+Window Arrangement** clears it.
 
 ### On Quit
 
-Before KiwiDesk stops, it arranges managed windows on each display
-so their title bars remain reachable.
+Before KiwiDesk stops, it spreads each display's windows into an
+evenly filled grid so every title bar stays reachable, with no
+window pulled to another monitor.
 
-- **Target windows per cell** (1–20, default 5): the quit grid's
-  density target. Automatic adds a row and column when cells would
-  exceed this target; the grid stays between 2×2 and 4×4, and after
-  4×4 additional windows keep cascading in its cells. A live
-  summary shows the thresholds the current target produces (at the
-  standard 5: 2×2 up to 20 windows · 3×3 up to 45 · 4×4 above 45).
+- **Target windows per cell** (1–20, default 5): the grid adds a
+  row and column when cells would exceed this; it stays between
+  2×2 and 4×4, and past 4×4 windows keep cascading in the cells.
+  A live summary shows the thresholds (at 5: 2×2 up to 20
+  windows · 3×3 up to 45 · 4×4 above).
 
-When you quit or restart KiwiDesk, it saves window order and focus
-per space and restores on next launch. That restore only
-replays a snapshot taken since your Mac last booted — after a
-reboot every saved window id belongs to a window that no longer
-exists, so the snapshot is discarded and windows are rediscovered
-fresh. On the way out,
-each monitor's windows are spread into an evenly-filled grid —
-windows take turns claiming a cell, and windows sharing a cell
-cascade so their title bars stay clickable. Your screen is usable
-the moment KiwiDesk exits, with no window pulled to another
-monitor. (Power users can also tune this via `quit.set_layout` and
-`quit.set_grid_target_depth` in the Lua reference; `grid` is the
-only strategy today.)
+KiwiDesk saves window order and focus per space on quit and
+restores them on the next launch — only from a snapshot taken
+since the Mac last booted; after a reboot windows are
+rediscovered fresh. (Lua: `quit.set_layout`,
+`quit.set_grid_target_depth`; `grid` is the only strategy.)
 
 ## Profiles
 
-The **Profiles** section (in the **Whole App** group) manages saved
-layouts. A profile is your whole setup, remembered per display
-arrangement: it captures tiling (modes, gaps, parameters),
-space-to-monitor pins, and optionally a sparse keybinding override
-layer plus sparse app, float, and ignore rule overrides.
+**Profiles** (**Whole App**) manages saved layouts. A profile is
+your whole setup, remembered per display arrangement: tiling
+(modes, gaps, parameters), space-to-monitor pins, and optionally
+a sparse keybinding override plus sparse app, float and ignore
+rule overrides.
 
-The page answers four questions in order — what a profile is, which
-ones you have, which one loads, and where to start from nothing. Until
-you have saved your first profile the last of those moves to the top:
-with an empty list, the presets are the only thing on the page you can
-act on.
+The page answers, in order: what a profile is, which ones you
+have, which one loads, and where to start from nothing. Until
+your first profile exists, the presets lead the page.
 
 ### Your Profiles
 
-One row per saved profile, the ones matching your connected
-displays first — one of them is what loads — then the ones saved
-for as many screens as you have connected, then by screen count,
-then by name. That second group is worth knowing about: a profile
-saved for two screens but for *different* monitors does not match
-your displays, and without that step it would sort behind every
-one-screen profile, since one comes before two.
+One row per saved profile: the ones matching your connected
+displays first, then those saved for as many screens as you have
+connected (a two-screen profile for *different* monitors), then
+by screen count, then by name.
 
-Each row opens with a small picture of the profile's screens —
-one mini-screen each, and a **+N** once there are more than the
-row draws. It is the preset cards' picture one size down, so each
-mini-screen carries the glyph of the layout that screen's first
-Space opens in. A screen the saved file does not answer for is
-left a bare outline rather than given a guess; where only one
-screen is unnamed it is answered by elimination, so an ordinary
-two-screen profile shows both. Then the name (double-click or use
-the pencil to rename), an **active** badge on the loaded one, a
-**default** badge, a **make default** link on every profile that
-isn't already its screen count's default, **Load**, and a delete
-button.
+Each row opens with a picture of the profile's screens — one
+mini-screen each, a **+N** past what the row draws — each
+carrying the glyph of the layout that screen's first Space opens
+in; a screen the file does not answer for is a bare outline. Then
+the name (double-click or the pencil to rename), an **active**
+badge on the loaded one, a **default** badge, a **make default**
+link on every profile that is not its screen count's default,
+**Load**, and delete.
 
-The subtitle counts only what that profile **owns** — for example
-"3 screens · 6 spaces · 1 shortcut override". Shortcut overrides are
-counted, not shortcuts: a profile carries a sparse *diff* over your
-global shortcuts, so a count of the whole resolved set would suggest
-each profile has a keybinding set of its own. Profiles that override
-nothing show no third segment. Hover the subtitle to see which
-monitors each covered arrangement holds.
+The subtitle counts what the profile owns — "3 screens · 6 spaces
+· 1 shortcut override". Shortcut *overrides* are counted, not
+shortcuts: a profile carries a sparse diff over the global set.
+Hover the subtitle for the monitors each arrangement holds.
 
-A note under the list names where your live edits are landing, and
-points at **Save a copy…** in the save pill if you want to keep
-them separately instead.
+A note under the list names where live edits land and points at
+**Save a copy…** in the pill.
 
-Profiles whose JSON will not decode appear under **Couldn't load**,
-dimmed, with a Reveal and a Delete — never hidden, so a broken file
-can always be opened or cleared.
-
-Each row says which kind of failure it was, because that decides
-whether opening the file will tell you anything. *"Not valid
-JSON"* means something outside KiwiDesk wrote it and lost a brace
-or a quote — you will see the damage in a text editor. *"Saved by
-another version, or a hand edit changed one of its fields"* means
-the JSON parses but this KiwiDesk does not accept its shape, and
-nothing on disk can say which of the two it was. A third,
-*"The file may have been moved or deleted"*, means it could not
-be read at all.
+Profiles whose JSON will not decode appear under **Couldn't
+load**, dimmed, with Reveal and Delete. Each says which failure:
+*"Not valid JSON"* (something outside KiwiDesk damaged it; a text
+editor shows where), *"Saved by another version, or a hand edit
+changed one of its fields"* (parses, but this KiwiDesk does not
+accept its shape), or *"The file may have been moved or
+deleted"*.
 
 ### Which Profile Loads
 
-The card answers it for your machine right now — *"Right now: 2
-screens → Desk (these exact monitors)"* — naming which of the four
-ways it resolved. Its **?** carries the whole ladder, which is what
-the answer is read against:
+The card answers for your machine now — *"Right now: 2 screens →
+Desk (these exact monitors)"* — naming which rung resolved it.
+The rungs, in order:
 
-- a **Desktop binding**, which outranks everything below it. If you
-  bound a profile to the Desktop your main screen is on, that is
-  what loads, whatever your displays are — see
-  [macOS Desktops](#macos-desktops-mission-control);
-- an **exact monitor match** — these exact displays. It stops
-  matching the moment you swap one of them out, unless you have
-  saved a set for the new hardware too;
-- the **default for this screen count**, when no exact set matches.
-  This one keeps matching whatever monitors are plugged in, as long
-  as the count is right;
-- a **built-in layout**, when no saved profile matches at all — or,
-  for a screen count with no built-in either, a line saying nothing
-  matches.
+- a **Desktop binding** on the Desktop your main screen is on
+  ([macOS Desktops](#macos-desktops-mission-control));
+- an **exact monitor match** — these exact displays;
+- the **default for this screen count**, whatever monitors are
+  plugged in;
+- a **built-in layout**, or a line saying nothing matches.
 
-The verdict carries the same precedence the live paths use, bindings
-included, so it cannot disagree with what actually loads.
+The verdict uses the same precedence the live paths use.
 
 ### The Profile Banner
 
-At the top of any section, a dropdown picks what your edits target.
-The top entry, **Live (currently loaded)**, edits the running,
-global config; every saved profile is listed below, one row each
-(the loaded profile is marked "currently loaded"). Click it to:
+At the top of any section, a dropdown picks what your edits
+target. **Live (currently loaded)** edits the running, global
+config; every saved profile lists below it, one row each.
 
-- **Edit Live** (top entry): the running config. Saving here
-  adopts your changes into the loaded profile as usual.
-- **Edit** a saved profile **without switching** — Home
-  becomes profile-scoped: the This Profile cards (Spaces,
-  Layout Defaults, Monitors, Gaps & Borders, Bars,
-  Colors & Animations, Advanced Colors, Behavior) edit this
-  profile, and **the General card leaves the grid** — it holds
-  global state a profile edit never writes. Save writes to this profile's JSON instead of
-  the active one (the caption beside the button names the
-  target, and the menu title shows "*Name* — overrides").
+- **Live**: saving adopts your changes into the loaded profile.
+- **A saved profile, without switching**: Home becomes
+  profile-scoped — the This Profile cards edit that profile and
+  the General card leaves the grid. Save writes to that
+  profile's JSON; the caption beside the button names the
+  target and the menu title reads "*Name* — overrides".
   Shortcuts and App Rules enter override mode and edit only what
-  this profile changes; inherited shortcut rows and App Rules
-  facets stay dimmed. Both Space and Float remain editable.
-- **Edit the loaded profile's own overrides** by picking its row
-  (not the Live entry). This is the one case where saving updates
-  the screen right away — the profile is re-applied in place, no
-  switch — because it *is* the layout you're looking at. Its
-  status caption says so.
-- **Return to Live** by selecting the top **Live** entry.
+  the profile changes; inherited rows and facets stay dimmed.
+- **The loaded profile's own row**: the one case where saving
+  updates the screen at once — the profile is re-applied in
+  place, no switch.
 
-Saving a stored profile hot-reloads the running layout **only if
-that profile is the one on screen** (loaded, or bound to the
-active Desktop); otherwise the change waits until the
-profile next loads. **Save a copy…** while editing a stored
-profile duplicates *that stored profile* — including your pending
-edits, its monitor sets (even for hardware that isn't connected),
-and its shortcut and app-rule overrides. The count-default flag
-does not carry over, and the running layout is never touched —
-this is how you create a variant of a profile without loading it
-first.
+Saving a stored profile hot-reloads the running layout only if
+that profile is on screen (loaded, or bound to the active
+Desktop); otherwise the change waits until it next loads. **Save
+a copy…** while editing a stored profile duplicates that profile
+with your pending edits, its monitor sets (even for absent
+hardware) and its overrides; the count-default flag does not
+carry over, and the running layout is untouched.
 
 ### Saving
 
-Saving happens in the **save pill**. While anything is
-unsaved it sits at the bottom of the content, names the
-count and the edit target ("3 unsaved changes to Desk"), and
-holds the same three verbs everywhere — **Revert**, **Save a
-copy…**, and **Save**; with nothing to act on there is no pill
-at all. VoiceOver announces the pill once, as it appears, and
-not again per change — the count is in the pill itself. Only the primary **Save**'s label and target change
-with context; there is no separate fourth button:
+The **save pill** names the count and the edit target and holds
+three verbs; there is no fourth button, and only **Save**'s label
+changes with context. VoiceOver announces the pill once as it
+appears.
 
 - **Revert** — discards pending edits and reloads the target's
   stored state.
-- **Save a copy…** — creates a new profile from the current
-  state. The new profile covers only the connected monitors.
-  Names are suffixed `_1`, `_2`, … when taken.
-- **Save** — persists edits to the current target. When an
-  active profile exists it writes to that profile and
-  adds/refreshes the connected monitor set; it is greyed out if
-  the connected screen count differs from the profile's count
-  ("this profile is for 2 screens"). A screen setup the active
-  profile has no set for is itself an unsaved change: it appears
-  in the pill's list as a **Screens** row that jumps to the
-  Monitors area, and Save takes it up with everything else — so
-  the header's *Unsaved monitor changes* and the pill's count
-  always agree. When you are on a transient
-  layout or a built-in Standard, the same slot instead reads
-  **Save as New Profile…** and creates a real profile from
-  scratch — the naming sheet arrives pre-filled with a unique
-  default name, so confirming is one press of Return. The
-  banner's profile picker names the edit target
-  authoritatively.
+- **Save a copy…** — a new profile from the current state,
+  covering only the connected monitors. Taken names get `_1`,
+  `_2`, ….
+- **Save** — persists edits to the current target. With an
+  active profile it writes there and adds or refreshes the
+  connected monitor set; it is greyed when the connected screen
+  count differs from the profile's ("this profile is for 2
+  screens"). A screen setup the profile has no set for is itself
+  an unsaved change, listed as a **Screens** row that jumps to
+  Monitors. On a transient layout or a built-in Standard the slot
+  reads **Save as New Profile…** and creates a profile from
+  scratch, with a unique default name pre-filled.
 
-Any action that would replace what you have staged asks first.
-While the pill shows unsaved changes, a confirmation names
-what you are about to lose before it happens — switching the edit
-target in the banner picker, **Load**, **Delete** or renaming a
-saved profile, applying a preset, and moving into or out of the raw
-`init.lua` editor. Each dialog spells out the specific consequence
-("Loading a profile replaces the edits you haven't saved") and its
-confirm button carries the verb, so Cancel is always the safe
-choice. With nothing staged the action runs immediately — the
-prompt only appears when there is something to lose.
+Any action that would replace staged edits asks first: switching
+the edit target, **Load**, **Delete** or renaming a profile,
+applying a preset, and entering or leaving the raw `init.lua`
+editor. Each dialog names the consequence and its confirm button
+carries the verb. With nothing staged the action runs at once.
 
-Until your first profile exists, Settings points the way
-without gating anything: the Profiles Home card carries a
-small accent dot, and **Start from a preset** leads the page
-with a "Start here" line plus one accent-colored **Apply** —
-on the Standard preset for your connected screen count, so the
-page has a single primary. Applying one (or saving
-from any tab) creates the first profile and the emphasis
-disappears — it returns only if you ever delete your last
-profile.
+Until your first profile exists, the Profiles Home card carries
+an accent dot and **Start from a preset** leads the page with a
+"Start here" line and one accent-coloured **Apply** on the
+Standard preset for your screen count. Applying one, or saving
+from any tab, creates the first profile.
 
-While window management is **paused** because Accessibility access
-is off, KiwiDesk has detected no displays — so any save that would
-capture the live monitor set (**Save as New Profile…**, **Save a
-copy…** from the active profile, and **Save** when it refreshes
-the active profile's monitor set) is unavailable, with a tooltip
-explaining why. A profile saved with no monitors could never
-resolve later. Editing a *stored* profile (which keeps its own
-on-disk monitor set) stays available.
+While management is **paused** (Accessibility off), KiwiDesk
+detects no displays, so saves that capture the live monitor set
+— **Save as New Profile…**, **Save a copy…** from the active
+profile, and **Save** when it refreshes the monitor set — are
+unavailable, with a tooltip. Editing a stored profile stays
+available. Shortcuts, app rules, float and ignore rules, the
+space list and Desktop bindings carry no monitor set, so **Save**
+still writes `gui.json` for them; the pill reads "Layout and
+monitors stay paused; Save covers everything else" and keeps
+counting the layout edits until you grant access.
 
-**Your settings still save while paused.** Shortcuts, app rules,
-float and ignore rules, your space list, and Desktop → profile
-bindings carry no monitor set, so **Save** stays available for
-them and writes `gui.json` as usual — a caption inside the pill
-reads "Layout and monitors stay paused; Save covers everything
-else." Only layout/tiling edits wait for a profile save, and if
-you have both pending, the pill stays up, still counting them,
-until you grant access and save the profile too.
-
-After saving, if a global setting changed (keybindings, app/float/
-ignore rules, or Desktop bindings), `gui.json` is rewritten.
-Tiling-only edits touch only the profile JSON. `init.lua` is never
-written.
-
-Neither live save carries a keybinding override: the live
-Shortcuts section edits the *base* shortcuts, so both live saves
-capture tiling only. To give a profile its own shortcuts, pick it
-in the banner dropdown and edit its Shortcuts section in override
-mode (see [Per-Profile Shortcut Overrides](#per-profile-shortcut-overrides)).
+After saving, a changed global setting rewrites `gui.json`;
+tiling-only edits touch only the profile JSON; `init.lua` is
+never written. Neither live save carries a keybinding override:
+to give a profile its own shortcuts, pick it in the banner and
+edit its Shortcuts section ([Per-Profile Shortcut
+Overrides](#per-profile-shortcut-overrides)).
 
 ### Built-in Standards & Presets
 
-Where a preset does not name a layout for one of its spaces,
-that space takes **the layout its screen suits** rather than a
-fixed default — so applying a one-screen preset on a laptop
-never hands it BSP, which a laptop has no width for. See
-[Which layouts](#your-first-run) for what each screen shape
-gets.
+KiwiDesk ships eight built-in profiles: seven workflow layouts
+for 1, 2 or 3 screens, plus the **Starter** setup derived from
+the screens you have. One workflow layout per screen count is
+the *Standard* that resolves silently when no saved profile
+matches; the rest, Starter included, are presets you apply as a
+starting point. (Whole profiles — not the seven layout *modes*.)
 
-KiwiDesk ships eight built-in **profiles** — seven workflow
-layouts for 1, 2, or 3 screens, plus the **Starter** setup
-derived from the screens you have. One workflow layout per screen
-count is the *Standard* that resolves silently when no saved
-profile matches; the rest (Starter included) are Presets you can
-apply to spin up a starting point. (These are whole profiles —
-not to be confused with the seven layout *modes* like bsp or
-stack.)
-
-There is exactly one Starter, and it is offered for the number of
-screens you are running right now — it is built from those
-screens' shapes, so there is nothing for it to be derived from on
-a setup you do not have. That is why **For other setups** lists
-the workflow layouts alone.
+Where a preset does not name a layout for a space, that space
+takes the layout its screen suits ([Your first
+run](#your-first-run)), so a one-screen preset on a laptop never
+hands it BSP. There is exactly one Starter, built for the screens
+you are running now, so **For other setups** lists the workflow
+layouts alone.
 
 **1 Screen:**
 
-- **Starter** — The spaces chosen for your screen: it opens in
-  scrolling, with the other layouts your screen suits behind it
-  (see [Your first run](#your-first-run)). A good way back to a
-  known-good starting point.
-- **Developer** *(Standard)* — grid (space 1), IDE in stack (space 2),
-  docs in scrolling (space 3), preview in monocle (space 4). Best for
-  software dev.
-- **Minimalist** — Spacious gaps (20 pt), scrolling reading (space 1),
-  monocle focus (space 3), floating scratch (space 4). Distraction-free
-  work.
-- **Focus Stack** — Two stacked task spaces (1–2), deep-work monocle
-  (space 4). Heavy multitasking.
+- **Starter** — opens in scrolling, with the other layouts your
+  screen suits behind it.
+- **Developer** *(Standard)* — grid (space 1), IDE in stack
+  (space 2), docs in scrolling (space 3), preview in monocle
+  (space 4).
+- **Minimalist** — spacious gaps (20 pt), scrolling reading
+  (space 1), monocle focus (space 3), floating scratch (space 4).
+- **Focus Stack** — two stacked task spaces (1–2), deep-work
+  monocle (space 4).
 
 **2 Screens:**
 
-- **Starter** — Five spaces split across the two screens by
-  width. Each screen opens in scrolling except the smaller,
-  which opens in monocle, and takes the tiled layouts its shape
-  suits behind that — plus the one Floating space, which goes to
-  the largest screen rather than being chosen for it.
-- **Dual Developer** *(Standard)* — Main screen: IDE/docs/preview.
-  Secondary: mail/chat/media. Tight gaps (8 pt).
-- **Coder & Monitor** — Main screen: editor/terminals. Secondary:
-  dashboards and logs. Two stack spaces on the main screen where Dual
-  Developer puts docs in scrolling.
+- **Starter** — five spaces split by width. Each screen opens in
+  scrolling except the smaller, which opens in monocle, plus the
+  one Floating space on the largest screen.
+- **Dual Developer** *(Standard)* — main: IDE/docs/preview;
+  secondary: mail/chat/media. Tight gaps (8 pt).
+- **Coder & Monitor** — main: editor/terminals; secondary:
+  dashboards and logs. Two stack spaces on the main screen where
+  Dual Developer puts docs in scrolling.
 
 **3 Screens:**
 
-- **Starter** — Seven spaces split across the three screens by
-  width. Each screen opens in scrolling except the smallest,
-  which opens in monocle, and takes the tiled layouts its shape
-  suits behind that — plus the one Floating space, which goes to
-  the largest screen rather than being chosen for it.
-- **Command Center** *(Standard)* — Left: communication (stack).
-  Center: work (IDE/docs/preview). Right: logs/monitoring.
-- **Visual Creative & Developer** — Left: design canvas. Center:
-  frontend IDE. Right: inspectors. Mixed layouts for creative
-  workflows.
+- **Starter** — seven spaces split by width; the smallest screen
+  opens in monocle, the rest in scrolling, plus the one Floating
+  space on the largest.
+- **Command Center** *(Standard)* — left: communication (stack);
+  center: work (IDE/docs/preview); right: logs/monitoring.
+- **Visual Creative & Developer** — left: design canvas; center:
+  frontend IDE; right: inspectors.
 
-To apply a preset, use the **Start from a preset** card in Profiles —
-it closes the page once you have saved a profile, and leads it while
-you have none. Presets for your connected screen count come first
-under a heading that names it ("For your 3 screens"); every other
-count folds into **For other setups**, since a preset for hardware you
-have not plugged in is a reference rather than an offer. Click
-**Apply** next to one: the layout loads and is saved as a real,
-editable profile under the preset's name. The first profile saved for
-a screen count becomes that count's default.
+**Start from a preset** in Profiles lists presets for your
+connected screen count first ("For your 3 screens"); other counts
+fold into **For other setups**. **Apply** loads the layout and
+saves it as a real, editable profile under the preset's name; the
+first profile saved for a screen count becomes that count's
+default. Each card draws screens, not spaces: one outline per
+display showing the layout its first space opens in, the total
+space count underneath, a **+N** past four screens. Hover an
+outline for what that screen gets; the leftmost is your main
+screen and says so.
 
-Each card draws **screens, not spaces**: one outline per display, each
-showing the layout its first space opens in, with the total space
-count underneath. A row of identical tiles cannot say *which screen
-gets what*, which is the whole point of a two- or three-screen preset.
-Past four screens the row folds and a **+N** says how many are not
-drawn, the same way a saved profile's row does.
-
-Hover an outline for what that screen gets — how many Spaces, and the
-layout it opens in. The leftmost is your **main screen** and says so,
-rather than leaving you to read it off the position.
-
-Apply switches your **live** layout, so it is greyed while you are
-editing a saved profile from the banner picker — that mode never
-touches what is on screen. Switch back to Live to apply one. It is
-also greyed when the preset's screen count doesn't match your
-connected displays; the tooltip says which of the two it is, and the
-count one names how many screens that preset needs.
-
-Presets themselves cannot be deleted; they always stay available. If
-you delete all saved profiles for a screen count, that count silently
-reverts to its Standard on the next monitor change.
+Apply is greyed while you edit a saved profile from the banner
+(switch back to Live) and when the preset's screen count does
+not match your displays; the tooltip says which. Presets cannot
+be deleted. Delete every saved profile for a screen count and
+that count reverts to its Standard on the next monitor change.
 
 ### Seeing what a preset contains
 
-A card can identify a preset; it cannot describe one. **Layouts**,
-beside Apply, opens a sheet drawing the preset's real layouts — one
-picture per Space, grouped under the screen it belongs to and
-labelled with the layout it opens in. They are the same drawings
-the "Choose a layout" strip in Layout Defaults uses, so the sheet
-answers *which layout each Space opens in* — the one thing the card
-could not say. Like every schematic in Settings, each picture draws
-a stand-in number of windows rather than yours, and substitutes a
-stand-in for anything that depends on your display (see
-[Accepted limitations](accepted-limitations.md)).
+**Layouts**, beside Apply, opens a sheet drawing the preset's
+real layouts — one picture per Space, grouped under its screen
+and labelled with the layout it opens in, the same drawings the
+**Choose a layout** strip uses. Each draws a stand-in number of
+windows ([Accepted limitations](accepted-limitations.md)) from
+the preset's own gap and layout tuning, not your draft.
 
-Two things follow from that being a look rather than a change.
-**Layouts is never greyed** — including for a preset whose screen
-count you are not running, which is exactly when you most want to
-see inside one — and it changes nothing, so there is no confirm and
-nothing to undo. Apply is the consequential half, greyed and
-confirmed as described above.
-
-The pictures are drawn from the **preset's** own gap and layout
-tuning, not from whatever you are editing right now, so a preset
-looks the same in the sheet whatever state your draft is in.
-
-One case where the sheet is a plan rather than a promise: a preset
-under **For other setups** is drawn for a screen *count*, with no
-hardware to resolve it against, so any Space the preset does not
-name a layout for is drawn as **BSP** — the fixed historical
-default. Connect the screens it is for and apply it, and each of
-those Spaces takes the layout its screen suits instead, by the rule
-at the top of this section. The card's outlines answer the same way
-for the same reason.
+Layouts is never greyed and changes nothing, so there is no
+confirm. A preset under **For other setups** is drawn for a
+screen count with no hardware to resolve against, so a Space
+with no named layout is drawn as **BSP**; connect the screens and
+apply it and each such Space takes the layout its screen suits.
 
 ## App Rules
 
-The **App Rules** section (in the **Whole App** group) controls where
-windows of specific apps land and whether they tile.
+**App Rules** (**Whole App**) controls where windows of specific
+apps land and whether they tile.
 
 ### One rule, one sentence
 
-Each rule is a sentence you complete: **"Spotify opens in media
-and floats"**. The two underlined words are menus — where the
-app's windows open, and whether they tile — so the row states
-what the app does rather than asking you to assemble it from
-labelled fields.
+Each rule is a sentence: **"Spotify opens in media and floats"**.
+The two underlined words are menus — where the app's windows
+open, and whether they tile.
 
-Click **Choose app…** and pick one — that adds the rule; there
-is nothing to confirm. Start typing to filter the list by name,
-and each app shows its icon. Apps are remembered by their bundle
-identifier, so a rule keeps working across system-language
-changes and app renames. The list covers your Applications
-folders one level deep, so apps that live in a subfolder —
-Terminal and Activity Monitor in *Utilities*, anything under a
-vendor folder — are there too. For one kept somewhere else
-entirely, use **Other…** and browse to it; that is the same
-escape the app shortcuts list offers. To write a rule for an app
-you have not installed, name it in Lua instead: `app_rules`
-takes bundle identifiers directly (see
-[Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier)).
-Use a row's trash button to delete it, which removes every rule
-for that app. Rows are ordered alphabetically by the app's
-display name so a long list stays scannable.
+**Choose app…** adds a rule; nothing to confirm. Type to filter
+by name. Apps are remembered by bundle identifier, so a rule
+survives language changes and renames. The list covers your
+Applications folders one level deep (Utilities and vendor folders
+included); **Other…** browses to one kept elsewhere. For an app
+you have not installed, name it in Lua: `app_rules` takes bundle
+identifiers ([Finding a bundle
+identifier](lua-reference.md#finding-a-bundle-identifier)). A
+row's trash button removes every rule for that app. Rows sort by
+display name.
 
-Apps with no rule tile normally, in whichever space you open
-them — an empty list is a perfectly good state.
+Apps with no rule tile normally in whichever space you open
+them; an empty list is a normal state.
 
 ### Where it opens, and whether it floats
 
-The first menu pins the app's new windows to a space, or leaves
-it **Automatic**.
-
-The second decides tiling: **tiles normally**, **floats** (every
-window of the app), or **floats when titled…** — which floats
-only the windows whose title contains a fragment you add.
+The first menu pins the app's new windows to a space or leaves
+it **Automatic**. The second decides tiling: **tiles normally**,
+**floats** (every window), or **floats when titled…**, which
+floats only windows whose title contains a fragment you add.
 
 ### Checking a title rule before you trust it
 
-A title fragment is the one part of a rule whose effect you
-cannot read off the rule itself. "Windows titled Info" looks
-obviously right until it also catches "Information" — or misses
-"Get Info", because **the title match is case-sensitive**.
+**The title match is case-sensitive**, and "Info" also catches
+"Information". So the pattern chips sit under a live list of the
+app's open windows, each marked **floats** or **tiles** by the
+rule as it stands, updating while you type. Nothing is saved to
+check it. With no windows open, the list says so.
 
-So the pattern chips sit under a live list of that app's
-currently open windows, each marked **floats** or **tiles** by
-the rule as it stands — updating while you type. Nothing is
-saved to check it; the list simply answers the question the rule
-cannot. If the app has no windows open, it says so rather than
-implying everything matches.
-
-Dialogs, sheets, and picture-in-picture windows float automatically —
-you do not need a rule for them. Windows belonging to apps that remain
-accessory processes are also tracked floating. If an app promotes
-itself to a regular process, its standard windows follow the normal
-float-or-tile rules.
+Dialogs, sheets and picture-in-picture windows float without a
+rule. Windows of apps that remain accessory processes are tracked
+floating; an app that promotes itself to a regular process
+follows the normal rules.
 
 ### Ignore Rules (Power Users)
 
-An ignore rule goes further than floating: KiwiDesk pretends every
-window of that app does not exist. The windows get no space
-assignment and emit no KiwiDesk window events. This is intended for
-HUDs, menu-bar utilities, and apps that misbehave when AX-tracked;
-ordinary “never tile this app” cases should use Float rules.
+An ignore rule makes KiwiDesk treat every window of an app as
+nonexistent: no space assignment, no window events. For HUDs,
+menu-bar utilities, and apps that misbehave when AX-tracked;
+ordinary "never tile" cases are Float rules.
 
-Ignore rules are deliberately absent from Settings. Add bundle ids
-to `ignore_rules = { ... }` in a hand-written `init.lua`, or to the
-root `ignore_rules` array in `gui.json`. This is the global base and
-is preserved when Settings saves other fields. A profile can add or
-remove entries through its JSON, as described below. See
-[ignore_rules](lua-reference.md#ignore_rules) for examples.
+Ignore rules have no Settings control. Add bundle ids to
+`ignore_rules = { ... }` in `init.lua`, or to the root
+`ignore_rules` array in `gui.json`, which Settings preserves on
+save. A profile adds or removes entries through its JSON, below.
+See [ignore_rules](lua-reference.md#ignore_rules).
 
 KiwiDesk already ignores transient macOS input-source menus and
-switcher overlays, so the Globe-key language picker receives no
-space assignment or KiwiDesk focus border.
+switcher overlays.
 
-Apps that use **macOS native tabs** (Finder, Terminal, Ghostty) are
-handled automatically: a tabbed window is one tile that follows
-whichever tab is active — opening, switching, and closing tabs never
-add a stray tile or jump focus, and the App Bar shows one item per
-window, not one per tab. Tabs cannot be split into separate tiles
-(they are one window as far as macOS is concerned). If a specific
-app's tab behavior misbehaves, an ignore rule opts the whole app out.
+Apps with **macOS native tabs** (Finder, Terminal, Ghostty) are
+one tile per window that follows the active tab; the App Bar
+shows one item per window. Tabs cannot be split into separate
+tiles. If an app's tab behaviour misbehaves, an ignore rule opts
+the whole app out.
 
 ### Per-Profile Space Assignments
 
-Space assignments and float rules are global by default, but each
-profile can carry **sparse overrides**: while you edit a stored profile
-(pick **Edit** in the profile dropdown), the App Rules section
-switches into override mode —
+Space assignments and float rules are global, and each profile
+can carry sparse overrides. While you edit a stored profile, App
+Rules enters override mode:
 
-- **Dimmed facets are inherited** from the global base and stay in
-  sync with it. Space and Float inherit independently.
-- **Change either facet** to override only that decision for this
-  profile. Matching the base again removes that sparse override.
+- **Dimmed facets are inherited** from the base and stay in sync.
+  Space and Float inherit independently.
+- **Change a facet** to override that decision for this profile;
+  matching the base again removes the override.
 - **Delete a row** to remove the effective space and float rules
-  for that app in this profile, including inherited rules.
-- **Add a rule** for an app the base does not mention to make it
-  profile-only.
+  for that app in this profile, inherited ones included.
+- **Add a rule** for an app the base does not mention.
 
-The global base lives in `gui.json` when Settings owns the config,
-or in `init.lua` for a hand-written setup. The profile stores only a
-sparse diff. `app_rules` maps apps to spaces, while `float_rules` and
-`ignore_rules` are objects whose `true` entries add rules and `null`
-entries remove inherited rules:
+The base lives in `gui.json`, or in `init.lua` on a hand-written
+setup. The profile stores a sparse diff: `app_rules` maps apps to
+spaces, while `float_rules` and `ignore_rules` are objects whose
+`true` entries add rules and `null` entries remove inherited
+ones:
 
 ```json
 {
@@ -2661,61 +1701,44 @@ entries remove inherited rules:
 ```
 
 An absent entry inherits. A tombstone whose base rule no longer
-exists is harmless and becomes effective again if that base rule
-returns. The three families resolve independently; effective Ignore
-is applied last as the hard gate. Removing an inherited Ignore rule
-therefore lets the app follow its effective Space and Float rules.
-
-Ignore has no GUI control yet. Hand-edit its profile object when
-needed; Settings preserves that hidden object across profile saves,
-copies, and renames. Overrides apply the moment a profile loads,
-including automatic loads from a Desktop binding or monitor
-change.
+exists is harmless and applies again if the rule returns. The
+three families resolve independently; effective Ignore applies
+last as the hard gate, so removing an inherited Ignore lets the
+app follow its Space and Float rules. Ignore has no GUI control;
+Settings preserves the hidden object across saves, copies and
+renames. Overrides apply the moment a profile loads, automatic
+loads included.
 
 ## Shortcuts
 
-The **Shortcuts** section (in the **Whole App** group) binds keyboard
-combos to actions. Every shortcut lives in a **layer** — normally
-the **default** layer (active at startup), plus optional extra
-layers (vim-style); only the active layer's bindings fire at a
-time. ("Layer" and not "mode": *mode* already names a space's
-layout, and one word for two things is one too many.)
+**Shortcuts** (**Whole App**) binds key combos to actions. Every
+shortcut lives in a **layer** — the **default** layer, active at
+startup, plus optional extra layers; only the active layer's
+bindings fire. ("Layer", not "mode": *mode* names a space's
+layout.)
 
 > **Upgrading and every shortcut is gone?** The `gui.json` key
-> that stores them was renamed from `"modes"` to `"layers"`.
-> See [The gui.json File](#the-guijson-file) for the
-> one-line fix — do it before opening Settings.
+> was renamed from `"modes"` to `"layers"`. See [The gui.json
+> File](#the-guijson-file) for the one-line fix, before opening
+> Settings.
 
 ### Your first run
 
-A fresh install doesn't drop you onto an empty screen. It seeds a
-setup **chosen for the screens you actually have** — the layouts
-come from each screen's shape, and the number of spaces from how
-many screens there are.
+A fresh install seeds a setup chosen for the screens you have:
+the layouts from each screen's shape, the number of spaces from
+how many screens there are.
 
-**Every screen opens in scrolling** — except the smallest, which
-opens in monocle. That first space is the one you meet before you
-have configured anything, and scrolling is the mode where nothing
-gets squashed: each window keeps a comfortable slot and the
-neighbours wait one keystroke away. If you have only one screen,
-it opens in scrolling whatever its size.
+**Every screen opens in scrolling**, except the smallest, which
+opens in monocle; a single screen opens in scrolling whatever its
+size. The slot is just under half the screen; on an ultrawide
+main screen it is 30%. That is one profile-wide setting read
+from your main screen, so an ultrawide *second* screen keeps the
+half-screen slot and a laptop beside an ultrawide main gets 30%.
+Change it in Settings, or per space.
 
-The slot is just under half the screen, so two windows sit side
-by side with the gap between them visible. **If your main screen
-is an ultrawide** it is 30% instead — three readable columns
-rather than one very wide one.
-
-That is one setting for the whole profile, read from your main
-screen, so it applies to your other screens too: an ultrawide
-*second* screen keeps the just-under-half slot, and a laptop
-beside an ultrawide main gets the 30% one. Change it once in
-settings, or per space if you want them to differ.
-
-**Which layouts come next.** Behind that first space, each screen
-draws from a list chosen for its shape. Every screen is measured
-in points, not pixels, so a 5K 27" and a 1440p 27" get the same
-answer while a Retina laptop gets laptop layouts despite having
-more pixels than either:
+**Which layouts come next.** Each screen draws from a list chosen
+for its shape, measured in points, so a 5K 27" and a 1440p 27"
+get the same answer:
 
 | Your screen | Gets, best first |
 | --- | --- |
@@ -2724,57 +1747,33 @@ more pixels than either:
 | Ultrawide (3000 pt +, or wider than 2.1:1) | track · grid · stack |
 | Pivoted (taller than wide) | stack · grid · monocle |
 
-**Floating is not in those lists.** It is not a layout a screen
-wants more or less of — every setup gets exactly one Floating
-space and it goes to the largest screen with room beside it,
-which is a rule about the setup rather than about a screen.
+Floating is not in those lists: every setup gets exactly one
+Floating space, on the largest screen.
 
-The gaps are as deliberate as the entries. Track never lands on a
-laptop, which has no width to give it. BSP appears only in the
-middle class — above it you get absurdly wide windows, below it
-unusable ones.
-
-**How many spaces.** Not five per display: a laptop's three plus
-a 27"'s five would be eight keys to learn on day one, most of
-them empty. The total is 3 spaces for one screen, 5 for two, 7
-for three, then 8, 9 and one more per screen up to ten — with
-each screen's share proportional to its width, between one and
-three. Every screen always gets at least one, so eleven displays
-gets eleven spaces. Exactly one Floating space is created, on
-your largest screen.
-
-So a 14" laptop on its own starts with three spaces — scrolling,
+**How many spaces.** 3 for one screen, 5 for two, 7 for three,
+then 8, 9 and one more per screen up to ten, each screen's share
+proportional to its width, between one and three; every screen
+gets at least one. A 14" laptop alone starts with scrolling,
 monocle, floating. Add a 27" and you have five: the 27" opens in
-scrolling and takes grid beside it, plus the floating space,
-while the laptop — now the smaller screen — opens in monocle with
-a scrolling space behind it.
-
-Note that "smallest" is read from the widths alone, so a 27"
-beside an ultrawide is the smaller of the two and opens in
-monocle even though a 27" on its own would not.
+scrolling with grid beside it plus the floating space, and the
+laptop, now the smaller screen, opens in monocle with scrolling
+behind it. "Smallest" is read from width alone, so a 27" beside
+an ultrawide opens in monocle.
 
 **The tuning follows your main screen**, since gaps and ratios
-belong to the profile rather than to a monitor: a laptop main
-screen gets tighter 6 pt gaps and 28 pt bars, an ultrawide gets
-two stack masters and a larger minimum window size, a pivoted one
-flips the stack to the bottom and scrolling to vertical.
-Per-space overrides are how you vary it from there.
+belong to the profile: a laptop main screen gets 6 pt gaps and
+28 pt bars, an ultrawide two stack masters and a larger minimum
+window size, a pivoted one the stack at the bottom and scrolling
+vertical.
 
-The setup keeps this shape as you plug and unplug displays: while
-you're still on the Starter layout, connecting or removing a
-monitor re-derives it for the new screens, and the `⌃⌥N` space
-shortcuts extend to cover any spaces that appear (up to ten — the
-number row's limit). It is saved as an ordinary, editable profile
-named **Starter**, so nothing is locked in: change any space's
-mode, delete spaces, or apply a different
-[preset](#built-in-standards--presets) whenever you like. The
-same setup is always available as the **Starter** preset if you
-want it back.
+While you are still on the Starter layout, connecting or removing
+a monitor re-derives it, and the `⌃⌥N` space shortcuts extend to
+cover new spaces (up to ten). It is saved as an ordinary profile
+named **Starter**, so change or delete anything, or apply another
+[preset](#built-in-standards--presets). The same setup is always
+available as the **Starter** preset.
 
 ### Default Shortcuts
-
-A fresh install starts with a usable set in the default layer, so
-you can drive KiwiDesk before configuring anything:
 
 | Action | Shortcut |
 | --- | --- |
@@ -2789,340 +1788,186 @@ you can drive KiwiDesk before configuring anything:
 | Toggle sticky everywhere | `⌃⌥S` |
 | Toggle sticky on this screen | `⌃⌥P` |
 
-The **movement** defaults are built on **Control-Option**
-(`⌃⌥`): the bare base moves your focus, and adding a modifier
-acts on the window instead. `⇧` sends it to a space; `⌘` is the
-stronger of the two — swap it with a neighbour, or send it to a
-space and go along. **Resizing has a layer of
-its own, `⌥⌘`**: changing a window's size isn't a movement, and
-it's the one shortcut you hold down, which `⌥⌘` takes as a single
-thumb roll.
-
-On macOS the Option key by itself types special characters — on
-a US layout `⌥L` is `¬` and `⌥5` is `∞`, and on a German one they
-are `@` and `[` — so a global `⌥`-only shortcut would swallow
-them; adding Control *or Command* keeps a
-default clear of both macOS system shortcuts and text entry.
-Directions use the arrow keys, which are identical on every
-layout. Resizing uses digits, which hold their place on every
-layout, in two pairs with a key between them so a mistimed reach
-for one axis can't land on the other.
+The movement defaults are built on `⌃⌥`: the bare base moves
+your focus, `⇧` sends the window to a space, `⌘` swaps it with a
+neighbour or sends it to a space and follows. Resizing has a
+layer of its own, `⌥⌘`, the one chord you hold down. Directions
+use the arrow keys and resizing the digits, which sit in the
+same place on every layout; the digit pairs are separated by one
+key so a mistimed reach cannot land on the other axis.
 
 Each space digit is bound to a space *by name*: `⌃⌥3` goes to
-whichever space was third when the set was seeded. Renaming that
-space in Settings rewrites the shortcut to follow it, so the binding
-survives a rename. The digit shortcuts scale to however many
-spaces the [starter setup](#your-first-run) created — one digit
-each, in order. The number row stops at ten keys, so **spaces past
-the tenth ship without a default digit shortcut** — reach them from
-the Space Bar or bind them yourself in the Keybindings editor.
+whichever space was third when the set was seeded, and renaming
+that space rewrites the shortcut. The digits scale to however
+many spaces the [starter setup](#your-first-run) created; spaces
+past the tenth ship without a digit — reach them from the Space
+Bar or bind them yourself.
 
-The set is seeded only while **no** shortcut is bound anywhere —
-into `gui.json` at first launch on a fresh install, or into the
-editable model when your `init.lua` declares no keybindings. It
-never overwrites bindings you (or your Lua) authored, and every
-seeded row is an ordinary catalog row: rebind, clear, or override
-it per profile like any other shortcut.
+The set is seeded only while **no** shortcut is bound anywhere:
+into `gui.json` on a fresh install, or into the editable model
+when `init.lua` declares no keybindings. Every seeded row is an
+ordinary row to rebind, clear, or override per profile.
 
 ### Choosing Your Own Shortcuts
 
-Nothing above is fixed. Every seeded row is an ordinary row, so
-rebind whatever fits your hands better. What follows is the
-reasoning behind the shipped chords, for when you want to know
-*why* a combo is a good or a bad idea before you commit to it.
+Three things can claim a chord, and they do not lose it the same
+way:
 
-**Three things can claim a chord, and they do not lose it the
-same way.** macOS itself wins outright: when a combo is one of
-macOS's own switched-on shortcuts, macOS answers the press before
-KiwiDesk hears it and the row simply never fires — no error, and
-nothing at press time. KiwiDesk wins against an app's own menu shortcut: bind one,
-and the app stops seeing it while KiwiDesk is running. So a
-collision with macOS costs you the KiwiDesk shortcut, and a
-collision with an app costs you the app's.
+- **macOS** wins outright. When a combo is one of macOS's
+  switched-on shortcuts, macOS answers first and the row never
+  fires.
+- **KiwiDesk** wins against an app's menu shortcut: the app stops
+  seeing it while KiwiDesk runs. That costs an accelerator, not
+  a capability — the command is still in the menu. A shortcut
+  with no menu behind it (`⌥⌘` arrows are next/previous tab in
+  most browsers and terminals) costs the capability outright.
 
-**What makes an app collision tolerable is whether you can recover
-from it and reason about it — not how often it fires.** A shortcut
-that shadows a menu item costs an accelerator, not a capability:
-the command is still in the menu, and the failure looks like a
-menu item that didn't respond to a key, which is something you can
-see and work around. A shortcut with no menu behind it costs the
-capability outright, and the failure looks like the app is broken.
-That is the test to apply to a chord you are considering, and it
-is why the shipped resize layer accepts `⌥⌘` digits — Finder,
-Preview and Safari each bind some, all reachable from a visible
-menu — and refuses `⌥⌘` arrows, which are next/previous tab in
-most browsers and terminals, where no menu offers them and nobody
-thinks to check.
-
-A few properties of the modifiers themselves hold whatever you
-bind:
+Properties of the modifiers themselves:
 
 - **`⌃⌥` is the quiet corner.** macOS makes little use of it and
-  most apps leave it alone, which is why the movement defaults
-  live there.
-- **`⌥` alone types characters**, on every layout — though which
-  character depends on the layout. `⌥L` is `¬` on a US keyboard
-  and `@` on a German one. A global `⌥`-only shortcut swallows
-  whatever yours produces; adding `⌃` or `⌘` stops that.
-- **Arrows and digits keep their place on every layout**, which
-  letters do not — a chord picked on QWERTY can land somewhere
-  else on AZERTY or QWERTZ.
+  most apps leave it alone.
+- **`⌥` alone types characters**, which vary by layout: `⌥L` is
+  `¬` on a US keyboard and `@` on a German one. Adding `⌃` or
+  `⌘` stops that.
+- **Arrows and digits keep their place on every layout**;
+  letters do not (QWERTY vs AZERTY vs QWERTZ).
 
-The safest way to try one is to bind it and then open the app
-you'd miss it in. [Conflict Detection](#conflict-detection) warns
-you about the first claimant above but not the second, so opening
-the app is the step that catches an app's own binding.
+The safest test is to bind a chord and open the app you would
+miss it in: [Conflict Detection](#conflict-detection) warns about
+macOS but cannot see other apps.
 
 ### Restoring the Defaults
 
-Because the set is seeded only into an empty config, an install
-that already has shortcuts never picks up a default added later.
-**Restore Defaults…**, at the top of the Shortcuts area, is how
-you take them up: it replaces the default layer's shortcuts with
-exactly what a new install would get — for *your* Desktops and
-*your* resize step, not some fixed list.
-
-It replaces the shortcuts **KiwiDesk provides** — those are the
-only ones it can restore. Anything you made yourself is kept: an
-app launcher, a Desktop shortcut, a layer switch. The one
-exception is a shortcut of yours sitting on a key a default needs,
-which cannot stay without putting two bindings on one chord. The
-confirmation counts those before you agree, and says plainly when
-the answer is none.
-
-Two things it leaves alone. **Layers you created are untouched** —
-only the default layer was ever seeded, so only it has defaults to
-restore, and the button is greyed on any other layer rather than
-hidden. And nothing outside Shortcuts changes: this is not
-Settings ▸ General ▸ Advanced ▸ **Reset All Settings**, which
-wipes the whole configuration.
+An install that already has shortcuts never picks up a default
+added later. **Restore Defaults…**, at the top of Shortcuts,
+replaces the default layer's KiwiDesk-provided shortcuts with
+what a new install would get, for your Desktops and your resize
+step. Shortcuts you made yourself are kept, except one sitting
+on a key a default needs; the confirmation counts those. Layers
+you created are untouched, and the button is greyed on any other
+layer. Nothing outside Shortcuts changes.
 
 ### macOS Desktop Shortcuts
 
 The Focus and Move windows cards each end with a closed row —
 **Go to a macOS Desktop** and **Move windows to a macOS
-Desktop**. Open it and the per-Desktop rows are there, one per
-Desktop you have, the same as any other shortcut row.
+Desktop** — holding one row per Desktop you have. They ship
+unbound. Bind one and both rows open by themselves whenever you
+return, in Simple mode too. Each drawer's `?` says what Desktops
+are: macOS's own Spaces, which move your whole environment, not
+a window. To work across Desktops, bind a profile per Desktop in
+Profiles ▸ **Profiles per macOS Desktop**. If your Mac cannot
+drive Desktops, the rows do not appear ([macOS
+Desktops](#macos-desktops-mission-control)).
 
-They start closed because a **Desktop** is macOS's own
-arrangement rather than KiwiDesk's, nothing is seeded onto them,
-and there is one row per Desktop per verb — so on a fresh install
-they were a dozen rows about a thing the app has not introduced
-you to yet. Bind one and both rows open by themselves whenever
-you come back to Shortcuts, in Simple mode as well: once it is
-part of your setup it is not an offer any more. (They stay
-rows you can collapse — opening is a starting point, not a
-setting.)
-
-Each drawer's header carries a **?** saying what the rows are
-for: Desktops are macOS's own Spaces, not KiwiDesk's. KiwiDesk
-arranges windows inside its own Spaces, so most setups never
-need these — switching a Desktop moves your whole environment,
-not a window, and each Desktop keeps its own Spaces. If you do
-work across Desktops, bind a profile per Desktop in Profiles ▸
-**Profiles per macOS Desktop**.
-
-If your Mac cannot drive Desktops at all, the offer does not
-appear — see
-[macOS Desktops](#macos-desktops-mission-control).
-
-Each row sends the window to the Desktop and nothing more.
-Naming the KiwiDesk Space it lands in is a second argument,
-available from Lua and the CLI — `move_to_desktop(3, "mail")`,
-see the [Lua reference](lua-reference.md#move_to_desktop) —
-because a shortcut row binds one action, not a composition.
+Each row sends the window to the Desktop and nothing more. Naming
+the KiwiDesk Space it lands in is a second argument from Lua and
+the CLI — `move_to_desktop(3, "mail")`, [Lua
+reference](lua-reference.md#move_to_desktop).
 
 ### Recording a Shortcut
 
-Click an empty row or the **Edit** pencil on an existing row. Click
-**Record** and press your key combo. The recorder:
+Click an empty row or the **Edit** pencil, click **Record**, and
+press your combo. The recorder:
 
-- **Snaps in on key press** — hold any modifiers, and the first
-  non-modifier key locks the combo instantly (the way the macOS
-  System Settings recorder works).
-- **Previews held modifiers live** (⌃⌥⇧⌘) while you decide.
-- **Re-record to correct** — recording is one click, so a wrong
-  combo is just recorded again.
-- **Cancels** on bare Escape, click-away, or app switch
-  (Escape *with* modifiers records — ⌃Escape is a valid
-  shortcut).
-- **Suspends your KiwiDesk shortcuts while it is open** — so you
-  can test a combo that is already bound to a window action
-  without triggering it. Your shortcuts come back the moment the
-  recorder closes. macOS system shortcuts are unaffected.
+- **Snaps in on key press** — hold modifiers; the first
+  non-modifier key locks the combo.
+- **Previews held modifiers** (⌃⌥⇧⌘) while you decide.
+- **Re-records** with one click to correct a wrong combo.
+- **Cancels** on bare Escape, click-away, or app switch (Escape
+  with modifiers records; ⌃Escape is a valid shortcut).
+- **Suspends your KiwiDesk shortcuts while open**, so you can
+  test a combo already bound to a window action. macOS shortcuts
+  are unaffected.
 
-The shortcut displays as compact macOS glyphs (⌃⌥⇧⌘ for modifiers,
-then the key), mapped to your active keyboard layout. No `+`
-separator — a literal `+` key shows as `⌘+`. The stored config keeps
-long word forms (`cmd`, `alt`, `semicolon`, …).
+The shortcut displays as macOS glyphs (⌃⌥⇧⌘ then the key) mapped
+to your active layout, with no `+` separator (a literal `+` key
+shows as `⌘+`); the stored config keeps word forms (`cmd`, `alt`,
+`semicolon`, …).
 
-**Recordings apply instantly on the live target.** When you are
-editing the live configuration (the active profile or Standard),
-a committed recording — and a clear, and deleting a whole row —
-takes effect immediately: press a combo recorded in the
-runtime-active layer and it works, no Save needed, and a deleted
-row's combo stops working the moment its row disappears. A brief caption reports the exact outcome:
-"Active now", updated for an inactive layer, not granted,
-shadowed by the active profile, or unable to compile/apply. The
-change is still *unsaved*: the pill's Save persists the base
-shortcut configuration globally in `gui.json`; profile-specific
-shortcut overrides remain separate. Revert (or switching the edit
-target) restores the saved shortcuts, also live. When editing a
-stored profile from the dropdown, nothing applies until that
-profile is next active — the banner above the shortcut groups says
-so.
+**Recordings apply instantly on the live target.** Editing the
+live configuration, a committed recording, a clear, or a deleted
+row takes effect at once, no Save needed; a caption reports the
+outcome ("Active now", updated for an inactive layer, not
+granted, shadowed by the active profile, or unable to
+compile/apply). The change is still unsaved: Save persists the
+base shortcuts to `gui.json`, Revert restores the saved ones,
+also live. Editing a stored profile applies nothing until it is
+next active; the banner says so.
 
 ### Conflict Detection
 
-A ⚠️ icon appears next to any row whose combo:
+A ⚠️ appears on any row whose combo duplicates another row in
+the same layer or collides with a macOS shortcut. **Those two are
+the whole of it**: KiwiDesk cannot see what other apps have
+bound, so no warning means "not one of macOS's", never "free".
 
-- Duplicates another row in the same layer.
-- Conflicts with a reserved macOS shortcut.
+Some macOS shortcuts are switched off until you enable them
+(Zoom, Invert Colors). A collision with one still shows the ⚠️
+but does not count toward the banner or the Shortcuts card's
+conflict count. Click the icon for the conflict in a popover, or
+hover for the same sentence; it updates live.
 
-**Those two are the whole of it.** KiwiDesk knows macOS's own
-shortcuts and the rows in your own layers; it cannot see what
-your other apps have bound. No warning means "not one of
-macOS's", never "nothing else uses this" — which is why
-[choosing a chord](#choosing-your-own-shortcuts) ends with
-opening the app you'd miss it in.
+A collision with a switched-on macOS shortcut means the row is
+dead: the chord is outlined in red with *Won't work: macOS
+answers this shortcut first, for Spotlight* (or whichever), and
+the banner says the same. A collision with a shortcut every app
+carries (⌘W, ⌘Q, ⌘H, ⌘M) is the reverse: your row works and
+every app loses that item while it is bound. Two of your rows on
+one chord read "only one of the two will fire".
 
-Some macOS shortcuts are switched off until you enable them —
-the Zoom and Invert Colors chords live behind Accessibility
-settings, for example. KiwiDesk checks whether your Mac
-currently answers the chord: a collision with a shortcut that's
-switched off still shows the row's ⚠️ (so you know what you're
-shadowing if you ever enable it), but it doesn't count toward
-the banner or the Shortcuts card's conflict count — those only
-count collisions that cost you a working shortcut right now.
-
-Click the icon to read the conflict in a popover; hovering it
-shows the same sentence as a tooltip. This indicator updates
-live — no action needed to see it.
-
-A collision with a macOS shortcut that is switched on is louder,
-because that row is dead: macOS answers the press first and
-KiwiDesk never hears it. The chord is outlined in red, a caption
-under it says *Won't work: macOS answers this shortcut first, for
-Spotlight* (or whichever feature), and the banner says the same.
-A collision with a switched-off macOS shortcut keeps the quiet
-⚠️ and a tooltip saying it is off right now. A collision with a
-shortcut every app carries — ⌘W, ⌘Q, ⌘H, ⌘M — is the reverse
-case: your row works and every app loses that item's shortcut
-while it is bound, and the ⚠️ says so. Two of your own rows
-on one chord get the ⚠️ with "only one of the two will fire" — a
-layer holds one action per chord, so the other is silent until
-you clear it.
-
-When a conflict is introduced (by recording a clashing shortcut,
-adopting a hand-written config, or saving from the raw Lua
-editor), a dismissible banner appears naming every conflict that
-costs you a working shortcut right now (collisions with a
-switched-off macOS chord stay on their rows). With exactly one:
+Introducing a conflict — by recording, adopting a hand-written
+config, or saving from the raw Lua editor — shows a dismissible
+banner naming every conflict that costs you a working shortcut
+now. With one:
 
 ```
 Shortcut for "Close" is conflicting with the macOS
 shortcut "Close Window".
 ```
 
-With more than one, a bulleted summary lists each pair. The
-banner clears itself once the last conflict is fixed (or can be
-dismissed early). It does **not** appear on app launch, when
-Settings is simply opened, on Load Profile, or on a normal
-visual-editor Save — those already show any conflict through the
-persistent ⚠️.
+With more, a bulleted list. The banner clears when the last
+conflict is fixed. It does not appear on launch, on opening
+Settings, on Load Profile, or on a normal Save; the ⚠️ covers
+those.
 
 ### The Keyboard Preview
 
-Shortcuts is one of the two-column areas: beside the shortcut
-groups, the **Live preview** panel draws your keyboard and marks
-which keys your bindings have already claimed, updating as you
-record, clear, and delete. It shows your *draft*, not the saved
-profile — the panel's caption says so.
+Beside the shortcut groups, the **Live preview** draws your
+keyboard and marks the keys your bindings claim, updating as you
+record, clear and delete. It shows your draft, one **layer** at a
+time (the layer selected in the chips at the top; a key claimed
+only by another layer is not marked), and one **modifier
+combination** at a time: chips above the board list every
+combination the layer uses (a binding with no modifier appears
+as **No modifier**); **All** lights every claimed key, and a chip
+narrows the board to answer *if I hold ⌃⌥, what is left?*
 
-It also shows **one layer at a time**: the board is drawn for the
-layer selected in the layer chips at the top of the area, so
-switching layers redraws it and answers *is this key free in this
-layer?* A key claimed only by another layer is not marked here —
-layers are alternate keymaps and only one of them fires, so a
-binding elsewhere is not in your way. Once you have more than one
-layer, the panel's caption names the one it is drawing.
+Legend:
 
-Within that layer, the board shows **one modifier combination at
-a time**. Chips above it list every combination that layer's
-bindings use (⌃⌥, ⌃⌥⇧, …; a binding with no modifier at all
-appears as **No modifier**). **All** — the opening view — lights
-every key any binding in the layer claims; click a chip to narrow
-the board to that combination and answer the question you
-actually have while binding: *if I hold ⌃⌥, what is left?* A chip
-exists only while some binding uses its combination, so clearing
-your last ⌘ shortcut removes the ⌘ chip — and so does switching
-to a layer with no ⌘ binding, which drops the board back to
-**All**.
+- **bound** — filled in KiwiDesk's green.
+- **free** — the dark, unfilled key.
+- **macOS owns it** — a dashed amber ring on a free key under
+  the shown combination (⌘Space is Spotlight's). Never shown
+  under **All**, since macOS reserves combinations, not keys.
+- **conflict** — a solid red ring on a bound key: two of your
+  bindings share the combo, or your binding overwrites a
+  combination macOS reserves.
 
-Each legend entry is drawn the way the board draws it — a fill
-for a fill, a key-shaped ring for a ring:
+**Keys taken: N** under the board counts the shown scope's
+distinct keys, and the same line answers for one key on hover:
+*⌃⌥J — Focus left*, or that nothing claims it, or what macOS owns
+it for. On a red key it names both clashing actions.
 
-- **bound** — the key is filled in KiwiDesk's green: a binding in
-  the shown scope claims it.
-- **free** — the board's dark, unfilled key: nothing claims it
-  here.
-- **macOS owns it** — a dashed amber ring on a *free* key: macOS
-  reserves that key under the shown modifier combination (⌘Space
-  is Spotlight's). The ring — and its legend entry — appear only
-  while such a key is actually on the board: never under
-  **All** (macOS reserves combinations, not keys — the key it
-  owns under one combination is usually free under another),
-  and not under a combination macOS reserves nothing for.
-- **conflict** — a solid red ring on a *bound* (green) key,
-  meaning one of two clashes: two of your own bindings in the
-  same layer claim the same combo (the board's view of the
-  duplicate-row ⚠️ above), or your binding overwrites a
-  combination macOS reserves — binding ⌘W does not un-reserve
-  it. The entry sits in the legend only while a red ring is
-  actually on the board.
+A **Keyboard layout** row reports what the board resolved — the
+physical shape (ANSI, ISO or JIS) and the active input source,
+"from macOS". It is a reading, not a setting: KiwiDesk binds the
+physical key. The caps print what your layout prints, and
+switching input sources changes the caps, not which key fires.
 
-Directly under the board, **Keys taken: N** counts the distinct
-keys the shown scope claims — and that same line answers for one
-key when you point at it. Hover a key and it names every action
-on it in the shown scope, chord first: *⌃⌥J — Focus left*. A key
-nothing claims says so — naming the chord too, once a chip has
-fixed one, since that is the combination you are asking about —
-and one macOS owns names what it owns it for, which is what the dashed
-ring is about. Under **All** it says neither, for the same
-reason the board draws no dashed rings there: macOS reserves a
-*combination*, so there is nothing to report until you choose
-one. Nothing else moves — the line is always in the same place,
-and only its text changes.
-
-It earns its keep on a **red** key. The ring tells you two of
-your bindings collide and cannot tell you which two; hovering
-names both and repeats the cost in the same words the row's own
-warning uses.
-
-Below that, a **Keyboard layout** row reports what
-the board resolved — the physical shape (ANSI, ISO or JIS) and
-the active input source, e.g. *ISO · German*, "from macOS".
-
-That row is a reading, not a setting: **KiwiDesk binds the
-physical key**, and the row states what macOS reports your
-keyboard to be — there is nothing to choose. The keycaps print
-what *your* layout prints (a German board shows `ß` where a US
-board shows `-`), so the picture matches the keys in front of
-you, but a shortcut stays on its physical key — switching input
-sources changes the characters on the caps, not which key fires
-your bindings.
-
-With VoiceOver, the board is one element that describes itself in
-words rather than a key at a time: which combination it is
-showing, which layer (where you have more than one), then the
-bound keys, the keys macOS owns under that combination, and any
-conflicts — the same facts the fills and rings draw, read from
-the same census. Each conflict is then read out in full, naming
-the actions that clash and what it costs you, because that is
-the one thing the picture cannot be made to say. The hover
-reading itself is not announced: it repeats what the board has
-already described, and the per-key detail is on the shortcut
-rows beside it, which are ordinary focusable rows.
+With VoiceOver, the board is one element that describes itself:
+the combination and layer shown, the bound keys, the keys macOS
+owns, and each conflict read in full.
 
 ### Keyboard Modifiers & Keys
 
@@ -3131,254 +1976,163 @@ rows beside it, which are ordinary focusable rows.
 
 **Keys**: letters (a–z), digits (0–9), arrows, `home`, `end`,
 `pageup`, `pagedown`, `space`, `return`, `tab`, `escape`,
-`f1`–`f12`, and punctuation. Punctuation can be entered as the
-symbol or a word name:
-- `;` or `semicolon`
-- `,` or `comma`
-- `.` or `period`
-- `/` or `slash`
-- `\` or `backslash`
-- `-` or `minus`
-- `=` or `equal`
-- `[` or `leftbracket`
-- `]` or `rightbracket`
-- `` ` `` or `grave` / `backtick`
-- `'` or `quote` / `apostrophe`
+`f1`–`f12`, and punctuation by symbol or name:
+`;`/`semicolon`, `,`/`comma`, `.`/`period`, `/`/`slash`,
+`\`/`backslash`, `-`/`minus`, `=`/`equal`, `[`/`leftbracket`,
+`]`/`rightbracket`, `` ` ``/`grave`/`backtick`,
+`'`/`quote`/`apostrophe`.
 
-**The numeric keypad** works like the number row: its digits are
-the *same* keys, so a shortcut on `4` fires from keypad 4 too, and
-every digit shortcut you already have works from the keypad
-without changing anything. The keypad's other keys are separate
-keys you can bind on their own — `keypadplus`, `keypadminus`,
-`keypadmultiply`, `keypaddivide`, `keypaddecimal`, `keypadequals`,
-`keypadenter` and `keypadclear`. On a third-party PC keyboard the
-keypad only sends digits while Num Lock is on; Apple keypads
-always do.
+**The numeric keypad**'s digits are the same keys as the number
+row, so a shortcut on `4` fires from keypad 4 too. Its other
+keys are separate: `keypadplus`, `keypadminus`, `keypadmultiply`,
+`keypaddivide`, `keypaddecimal`, `keypadequals`, `keypadenter`,
+`keypadclear`. A third-party PC keypad sends digits only while
+Num Lock is on.
 
-A combo is one set of modifiers + exactly one key. Multi-key chords
-like `cmd+j+k` are not supported — use extra layers instead.
+A combo is one set of modifiers plus exactly one key. Multi-key
+chords like `cmd+j+k` are not supported; use layers.
 
 ### Actions
 
-Each row has an action. Built-in actions live under headings:
-
-- **Focus** — move focus (left, right, up, down), go to a
-  space, and go to a macOS **Desktop**.
+- **Focus** — move focus (left, right, up, down), go to a space,
+  go to a macOS **Desktop**.
 - **Move windows** — swap windows, send to space, send to a
   macOS **Desktop**, and the Move-to-track and Swap-with-track
-  rows (always shown; a caption notes they only matter in the
-  track layout).
+  rows (a caption notes they matter only in the track layout).
 
-  The Desktop rows are Mission Control's Desktops rather than
-  KiwiDesk's spaces, and there is one per Desktop you actually
-  have — on every screen, since these act on whichever screen
-  the Desktop lives on. They ship **unbound**: the three digit
-  tiers (`⌃⌥`, `⌃⌥⇧`, `⌃⌥⌘`) go to spaces, the arrows to focus
-  and swapping, and `⌥⌘` to resizing, so KiwiDesk offers the
-  rows and leaves the keys to you. They
-  appear only where macOS exposes the window-management bridge
-  they need — see [macOS Desktops](#macos-desktops-mission-control) —
-  and a row you bound keeps its place if that Desktop later
-  goes away with its screen — dimmed, with a line saying why,
-  rather than vanishing or moving to *Inactive shortcuts*.
-  Undocking is routine and temporary, so the row stays where
-  you left it and stays editable; the shortcut is still
-  recorded and works again the moment that screen is back.
-  Clearing it removes the row too, since nothing then points
-  at a Desktop that isn't there.
-
-  This is deliberately unlike the Space rows below: an
-  *inactive* Space shortcut still **works** — pressing it
-  recreates the Space — which is why those move to their own
-  card and say so. A Desktop shortcut for a Desktop that isn't
-  there does nothing at all, because only Mission Control can
-  make a Desktop.
+  The Desktop rows are one per Desktop you have, on every
+  screen. They ship unbound: the three digit tiers (`⌃⌥`,
+  `⌃⌥⇧`, `⌃⌥⌘`) go to spaces, the arrows to focus and swapping,
+  `⌥⌘` to resizing. They appear only where macOS exposes the
+  window-management bridge ([macOS
+  Desktops](#macos-desktops-mission-control)). A bound row whose
+  Desktop leaves with its screen stays in place, dimmed, with a
+  line saying why, and works again when the screen is back;
+  clearing it removes the row. A Space shortcut for an absent
+  Space still works (it recreates the Space) and moves to
+  *Inactive shortcuts*; a Desktop shortcut for an absent Desktop
+  does nothing, since only Mission Control can make a Desktop.
 - **Size & float** — the per-axis Grow/Shrink rows, Make
-  floating and the resize step. A window outside tiling is the
-  exception to the layout rules below: whether you floated it
-  yourself or it sits in a space set to the Floating layout, a
-  resize shortcut changes that window's own size, in any
-  layout. A resize shortcut pressed in a layout with no resize
-  target (monocle, grid) flashes a message on the window rather
-  than failing silently; the sound that used to accompany that
-  lives in
-  **Behaviour ▸ When an action can't apply** now, because it
-  applies to every blocked action rather than to resizing.
-  Held, a resize shortcut glides: the first press is one
-  precise step; keep holding and, after your Mac's own
-  key-repeat delay, the window starts resizing smoothly instead
-  of stepping — gently at first, so a brief hold stays easy to
-  stop where you meant to, then faster over the next couple of
-  seconds, so a big adjustment does not cost a drum roll of
-  presses. The glide is scaled to your resize step, so a smaller
-  step glides more gently and a larger one covers ground faster.
-  It runs at your display's own refresh rate, which means it
-  travels at the same speed on a 60 Hz screen and a 120 Hz one —
-  the faster screen just draws it more smoothly. Only resize
-  glides: focus and swap fire once per press, where overshooting
-  would hurt more than pressing again. A held resize feels the
-  same on a **floating** window as on a tiled one, in every
-  animation setting and under Reduce Motion.
+  floating, and the resize step. A window outside tiling —
+  floated by you, or in a Floating space — resizes its own frame
+  in any layout. In a layout with no resize target (monocle,
+  grid) the shortcut flashes a message on the window; the sound
+  is in **Behaviour ▸ When an action can't apply**.
 
-  A floating window grows and shrinks around its own centre —
-  both edges move by half the step. If one edge is already
-  against the screen edge or one of your bars, that edge stays
-  put and the whole step goes to the other side, so a window
-  parked in a corner grows into the room it actually has instead
-  of refusing to move. When it has run out of room on both
-  sides, it flashes a pill rather than doing nothing quietly,
-  and it can no longer be grown underneath a bar.
+  Held, a resize shortcut glides: the first press is one step;
+  after your Mac's key-repeat delay the window resizes smoothly,
+  gently at first and faster over the next couple of seconds,
+  scaled to your resize step and run at your display's refresh
+  rate (the same speed on 60 Hz and 120 Hz). Only resize glides;
+  focus and swap fire once per press. The glide feels the same
+  on a floating window, in every animation setting and under
+  Reduce Motion.
 
-  The same boundary applies when the room changes rather than
-  the window: switch a bar on, make one thicker, or move a
-  floating window to a smaller screen, and any float that no
-  longer fits is shortened to fit — down to its minimum size and
-  no further. Floats are also held a few points clear of
-  a bar and of the screen edge rather than flush against either,
-  so the focus ring around one stays fully visible instead of
-  being clipped. That reservation is the ring's own width, and it
-  disappears if you turn the focus ring off.
-- **Applications** — launch an app. Each row carries a **Launch
-  behavior** menu: *Open or Focus* (the default — pull a running
-  instance into the current space, or launch it if it isn't
-  running; pressing again while its window is focused cycles
-  through the app's other windows, the ones on other macOS
-  Desktops included; when nothing of the app is up on the
-  Desktop you are looking at but a window is up on another one,
-  the shortcut switches to that Desktop and focuses it (where
-  macOS exposes the Desktop bridge; otherwise the app just
-  comes forward); and when the app has nothing open anywhere,
-  it restores one minimized window rather than coming forward
-  empty) or *Open New* (always launch a fresh instance). You can
-  add the same app twice to bind one shortcut per behavior; the
-  menu greys a behavior already bound for that app so the two can't
-  collide. Rows are sorted alphabetically by app name (settled when
-  the section opens, so a row never shifts out from under you while
-  you are recording its shortcut).
-- **General** — the two app-chrome actions, behind the
-  section's *Show more*: **Show shortcuts panel** (the ⌃⌥K
-  reference, seeded by default) and **Open Settings** (this
-  window — deliberately unbound, since Settings is never a
-  prerequisite; bind it if you want a key of your own for it).
-- **Lua bindings** — custom Lua (from Adopt/Import or hand-written).
-  Named "Advanced Lua bindings" until #406: there is no basic Lua
-  binding to contrast it with, so the qualifier only misread.
+  A floating window grows and shrinks around its centre, half
+  the step per edge. An edge against the screen edge or a bar
+  stays put and the whole step goes to the other side. Out of
+  room on both sides, it flashes a pill; it cannot be grown
+  under a bar. When the room changes instead — a bar switched on
+  or thickened, a move to a smaller screen — a float that no
+  longer fits is shortened to fit, down to its minimum size.
+  Floats are held clear of a bar and of the screen edge by the
+  focus ring's width, so the ring stays visible; the reservation
+  goes with the ring turned off.
+- **Applications** — launch an app. Each row's **Launch
+  behavior** menu offers *Open or Focus* (default: pull a running
+  instance into the current space, or launch it; pressing again
+  while its window is focused cycles the app's other windows,
+  other Desktops included; a window on another Desktop switches
+  there where the Desktop bridge exists; with nothing open
+  anywhere it restores one minimized window) or *Open New*
+  (always a fresh instance). Add the same app twice to bind one
+  shortcut per behaviour; the menu greys a behaviour already
+  bound. Rows sort by app name, settled when the section opens.
+- **General** — behind *Show more*: **Show shortcuts panel**
+  (⌃⌥K, seeded) and **Open Settings** (unbound; bind it for a
+  key of your own).
+- **Lua bindings** — custom Lua, from Adopt/Import or
+  hand-written.
 
-When you save, every shortcut lives in a layer in `gui.json`. To use
-an action not in the built-in sections, write custom Lua in a row
-under Lua bindings.
+Every shortcut lives in a layer in `gui.json`. For an action not
+in the built-in sections, write Lua in a row under Lua bindings.
 
 ### Inactive Shortcuts
 
-The per-space rows above render one row per space in the current
-space list. A bound shortcut whose target space is *not* in that
-list — say `⌃⌥6 → Go to Space 6` after switching from an 8-space
-to a 4-space profile — appears in a dimmed **Inactive shortcuts**
-section at the bottom instead of disappearing. Such a shortcut:
-
-- **Still works** — pressing it recreates its space and switches
-  to it.
-- **Still holds its combo** — recording the same combo elsewhere
-  is blocked, with *Steal* and *Go to* pointing at the inactive
-  row.
-- **Is never deleted for you** — it becomes a normal row again
-  the moment its space returns (e.g. switching back to the
-  profile that declares it). Rebind or clear it in the section
-  if you want the combo back now.
+A bound shortcut whose target space is not in the current list
+— `⌃⌥6 → Go to Space 6` after switching from an 8-space to a
+4-space profile — appears in a dimmed **Inactive shortcuts**
+section at the bottom. It still works (pressing it recreates the
+space), still holds its combo (recording it elsewhere is blocked,
+with *Steal* and *Go to* pointing at the row), and is never
+deleted for you: it becomes a normal row when its space returns.
 
 ### Import & Adopt
 
-If your `init.lua` holds custom keybindings:
+If `init.lua` holds custom keybindings:
 
-- **Import from init.lua…** (shown in the Shortcuts header when custom
-  Lua is present) reads shortcuts from your file, lets you review
-  them, and adds them before you Save. Each binding must be an inline
-  `function() … end` on one line for the import to recognize it.
-- **Adopt into the GUI** (shown when managed vocabulary conflicts are
-  detected) imports your `init.lua` settings into the app and drops
-  the raw Lua editor. It comments out the migrated settings, rules,
-  and keybindings as a backup but keeps your custom Lua (event hooks,
-  helpers) live, so integrations like the sketchybar bridge keep
-  firing.
+- **Import from init.lua…** (in the Shortcuts header when custom
+  Lua is present) reads shortcuts from your file, lets you
+  review them, and adds them before you Save. Each binding must
+  be an inline `function() … end` on one line.
+- **Adopt into the GUI** (when managed vocabulary conflicts are
+  detected) imports your `init.lua` settings, comments the
+  migrated settings, rules and keybindings out as a backup, and
+  keeps your custom Lua live.
 
 ### Shortcut Layers
 
-In the **Shortcuts** header, click the **+** beside the layer
-chips to define a vim-style
-layer — a layer where only its bindings fire. Each layer has a name
-(e.g., "resize"), an optional menu bar icon (SF Symbol or emoji), and
-a set of bindings that shadow the base shortcuts while the layer is
-active. Use `KiwiDesk.switch_layer` to switch layers (see
-[lua-reference.md](lua-reference.md)).
+Click the **+** beside the layer chips in the Shortcuts header
+to define a layer: a name ("resize"), an optional menu bar icon
+(SF Symbol or emoji), and bindings that shadow the base
+shortcuts while the layer is active. Switch layers with
+`KiwiDesk.switch_layer` ([Lua reference](lua-reference.md)).
 
 ### Per-Profile Shortcut Overrides
 
-When editing a stored profile (via the banner dropdown), the Shortcuts
-section enters **override mode**:
+Editing a stored profile puts Shortcuts in **override mode**:
 
-- **Dimmed rows** are inherited from the base config (live shortcuts).
-- **Edit a row** to override it for this profile only — it turns bold.
-- **Delete an override row** to reset it back to inherited.
+- **Dimmed rows** are inherited from the base shortcuts.
+- **Edit a row** to override it for this profile only; it turns
+  bold.
+- **Delete an override row** to return it to inherited.
 
-Only the rows this profile changes are stored in its JSON. Every base
-binding the profile does not override stays active — your profile-switch
-shortcut can never be lost by omission.
+Only the rows the profile changes are stored in its JSON. Every
+base binding it does not override stays active.
 
 ## macOS Desktops (Mission Control)
 
-The **Profiles** section has a **Profiles per macOS Desktop** card
-listing the Desktops on your **main screen** (by their Mission
-Control number). Assign a profile to each Desktop using the
-dropdown. The card is a disclosure — open by default, and one click
-from out of the way if you never bind a Desktop.
+**Profiles ▸ Profiles per macOS Desktop** lists the Desktops on
+your **main screen** by their Mission Control number, with a
+profile dropdown each. The card is a disclosure, open by default.
 
-Those numbers are Mission Control's own, counted across every
-screen, so they need not start at 1: if macOS lists another screen
-first, your main screen's Desktops might be 3 and 4. The card shows
-them under the numbers they really have.
+The numbers are Mission Control's, counted across every screen,
+so they need not start at 1. A Desktop you bound that is not on
+your main screen carries a **not on main screen** badge; its
+dropdown keeps working, but a binding on it cannot fire until a
+screen change makes it the main screen's. A Desktop that is not
+there at all carries **not present**, labelled with the number it
+was last seen at; nothing fires for it ([Accepted
+limitations](accepted-limitations.md)). Rows re-label themselves
+when Mission Control renumbers: a binding stays on the Desktop
+you gave it — [A binding follows its Desktop, not its
+number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
+The card's `?` explains the macOS setting behind this.
 
-A Desktop you bound earlier that is **not** on your main screen —
-because you rearranged screens, or bound it under a different
-setup — stays listed and carries a **not on main screen** badge.
-Its dropdown keeps working, so you can change or clear it; the
-badge is there because a binding on it cannot fire while that
-Desktop lives on another screen. It becomes live again if a screen
-change makes that Desktop your main screen's.
+**A binding fires when its Desktop becomes current on your main
+screen** (the one with the menu bar). With one screen, or with
+"Displays have separate Spaces" off, the main screen's Desktop is
+*the* Desktop. With it on (macOS's default), each screen switches
+on its own: a swipe on the main screen switches profiles, a swipe
+on a secondary never does.
 
-A Desktop that is not there at all — deleted, or gone with an
-unplugged screen — carries a **not present** badge instead. That
-row is labelled with the number the Desktop was last seen at and
-nothing fires for it; what to do about one is in
-[Accepted limitations](accepted-limitations.md).
-
-Rows also re-label themselves when Mission Control renumbers: a
-binding stays on the Desktop you gave it, not on the number that
-Desktop happened to have. Why, and what a screen you unplug does
-to it, is
-[A binding follows its Desktop, not its number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
-
-The **?** on the card explains the macOS setting behind all of
-this, and what sharing Desktops across screens would cost.
-
-KiwiDesk has one active profile across the whole display setup, so
-one screen holds the binding trigger: **a binding fires when its
-Desktop becomes current on your main screen** (the one with the
-menu bar — the card's intro says so too). With one screen, or with
-"Displays have separate Spaces" turned off, the main screen's
-Desktop is simply *the* Desktop, so nothing reads differently. With
-the option on — macOS's default — each screen switches Desktops on
-its own: a swipe on the main screen switches profiles, and a swipe
-on a secondary screen never does. The rows stay live in every one
-of these states.
-
-The rows are greyed only while you edit a *stored* profile from the
-banner picker: bindings are global, and a profile may never override
+The rows are greyed while you edit a stored profile from the
+banner: bindings are global, and a profile may never override
 what selects it. Switch back to Live to change them.
 
-When the main screen switches Desktops (Ctrl+arrow, Mission
-Control, …), the bound profile loads with its spaces, layouts, and
-settings. Desktops without a binding keep whatever profile is
-active.
+When the main screen switches Desktops, the bound profile loads
+with its spaces, layouts and settings. Desktops without a binding
+keep the active profile.
 
 ```mermaid
 flowchart TD
@@ -3388,45 +2142,35 @@ flowchart TD
     P["You pick a profile<br/>by shortcut or menu"] --> A
 ```
 
-Bindings edited here are stored in `gui.json`
-(`profile_bindings`); a hand-written config declares them in
-`init.lua` with `bind_profile_to_desktop` instead. Each
-Desktop also remembers which space it was on — every screen's,
-not only the main one's — so returning to it lands you on that
-space. Your main screen's Desktops remember **which window you
-had focused** as well: return and it is focused again, and in a
-scrolling layout still in view. (If the profile changed in
-between and that space no longer exists, you land on one no
-other Desktop is showing or remembers. A window that takes more than a few seconds to
-come back keeps whatever macOS itself focused — see
-[Accepted limitations](accepted-limitations.md).)
+Bindings are stored in `gui.json` (`profile_bindings`); a
+hand-written config declares them in `init.lua` with
+`bind_profile_to_desktop`. Each Desktop remembers which space it
+was on, on every screen, and your main screen's Desktops remember
+which window you had focused: return and it is focused again, in
+a scrolling layout still in view. If the profile changed in
+between and that space no longer exists, you land on one no other
+Desktop shows or remembers. A window that takes more than a few
+seconds to come back keeps whatever macOS focused ([Accepted
+limitations](accepted-limitations.md)).
 
-Where macOS exposes its window-management bridge — present on
+Where macOS exposes its window-management bridge (present on
 macOS 26.6.1, checked 2026-08-18; KiwiDesk looks for it at
-runtime rather than reading a version — KiwiDesk can also
-**drive** Desktops, not only react to them: `focus_desktop(n)`
-switches to a Desktop the way a swipe does, and
-`move_to_desktop(n)` / `move_to_desktop_and_follow(n)` send the
-focused window there (the
-[Lua reference](lua-reference.md#focus_desktop) has the
-details). Where it is absent the commands do nothing and log
-why; KiwiDesk never asks you to turn System Integrity Protection
-off for them.
-
-All three have rows in the Shortcuts editor — under **Focus**
-and **Move windows**, one per Desktop — and in the ⌃⌥K
-reference once bound. They arrive with no default combo,
-because every digit tier is already spent; pick your own. See
-[Actions](#actions) for what the rows do and when they appear.
+runtime), KiwiDesk can also **drive** Desktops: `focus_desktop(n)`
+switches like a swipe, `move_to_desktop(n)` /
+`move_to_desktop_and_follow(n)` send the focused window there
+([Lua reference](lua-reference.md#focus_desktop)). Where it is
+absent the commands do nothing and log why; KiwiDesk never asks
+you to turn SIP off. All three have rows in Shortcuts under
+**Focus** and **Move windows**, one per Desktop, with no default
+combo ([Actions](#actions)).
 
 ## Getting Help
 
-For a complete reference on Lua configuration, see
-[lua-reference.md](lua-reference.md). For integration recipes
-(sketchybar, external commands, …), see [recipes](recipes/index.md).
-For the CLI, see [cli.md](cli.md).
+For Lua configuration, see [lua-reference.md](lua-reference.md);
+for integration recipes (sketchybar, external commands, …),
+[recipes](recipes/index.md); for the CLI, [cli.md](cli.md).
 
-To check your current state in raw form, run:
+To check your current state in raw form:
 ```
 kiwidesk get_state
 kiwidesk get_profile_status
@@ -3440,33 +2184,30 @@ kiwidesk reload_config
 ## Troubleshooting
 
 **Accessibility permission missing?**  
-Go to System Settings › Privacy & Security › Accessibility and add
-KiwiDesk. It will prompt you when needed.
+Go to System Settings › Privacy & Security › Accessibility and
+add KiwiDesk. It prompts you when needed.
 
 **Settings window won't open?**  
 Restart KiwiDesk via menu bar › Service › Restart, or run
-`kiwidesk service restart` in a terminal.
+`kiwidesk service restart`.
 
 **Shortcut not working?**  
-Check the Shortcuts section for a ⚠️ conflict marker. Verify the combo
-is not reserved by macOS. If you hand-edited, reload with
-`kiwidesk reload_config`.
+Check Shortcuts for a ⚠️ conflict marker and verify the combo is
+not reserved by macOS. If you hand-edited, `kiwidesk
+reload_config`.
 
 **Typo in init.lua?**  
-A misspelled function name (e.g. `scroll.set_width` instead of
-`scroll.set_slot_size`) doesn't abort the config: the call is
-skipped with a did-you-mean hint and the rest of the file still
-runs. Every typo the load hits is listed under menu bar › Config
-Issues… — if the error badge is showing, check there first.
+A misspelled function name (`scroll.set_width` for
+`scroll.set_slot_size`) does not abort the config: the call is
+skipped with a did-you-mean hint and the rest still runs. Every
+typo is listed under menu bar › Config Issues….
 
 **Windows aren't tiling?**  
-Ensure the space has a layout mode other than Floating set in Layout
-Defaults. Check that the app is not in float_rules. If using a
-hand-written config, make sure `init.lua` exists and the app is
-managing tiling (check the banner).
+Ensure the space's layout is not Floating and the app is not in
+float_rules. On a hand-written config, make sure `init.lua`
+exists and the app is managing tiling (check the banner).
 
 **Profile not loading after monitor change?**  
-Profiles are matched to specific monitor sets. A new hardware
-combination uses the built-in Standard and marks the profile dirty
-until you Save. To pin the profile to new hardware, edit it and Save
-on this monitor setup.
+Profiles match specific monitor sets. A new combination uses the
+built-in Standard and marks the profile dirty until you Save. To
+pin the profile to new hardware, edit it and Save on this setup.
