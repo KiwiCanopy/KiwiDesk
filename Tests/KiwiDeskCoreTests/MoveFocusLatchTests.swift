@@ -126,6 +126,15 @@ struct MoveFocusLatchTests {
             follow: false
         )
         #expect(core.deferred.task(for: .focusFollow) == nil)
+        // The latch ages out after a second of wall clock, and a
+        // loaded CI runner spends more than that between the move
+        // above and the report below (#1371) — so the stamp is
+        // moved a minute ahead, which the latch reads as fresh,
+        // rather than trusting the runner to be quick.
+        core.moveLatch.stamp(
+            WindowID(20),
+            at: Date().addingTimeInterval(60)
+        )
         core.handle(.windowFocused(WindowID(20)))
         #expect(core.deferred.task(for: .focusFollow) == nil)
         #expect(
