@@ -85,11 +85,7 @@ how the Change Date is computed — so argue what the license
 carrying a third copy of the numbers. Versions published before
 1.3.0 were released under MIT and remain so: a license governs
 what is released under it and nothing before. (Owner ruling
-2026-09-13. Amended the same day: the grant first reserved use
-inside a business as well; the owner ruled that the license
-exists to keep KiwiDesk from becoming someone else's product,
-not to charge the people who use it, so the grant now reaches
-every production use and reserves only the offering.)
+2026-09-13.)
 
 **Why a source-available license, and why before any launch
 rather than after.** Under MIT anyone may take the published
@@ -98,7 +94,12 @@ project keeps no lever over that but its name. A source-available
 license reserves the offering to the Licensor while the source
 stays public and use stays free, which is the shape the
 project wants: readable, forkable, usable anywhere, and not
-someone else's product. The timing follows from goodwill. A
+someone else's product. The grant's line falls at the offering
+and not at business use for the same reason: the lever exists to
+keep KiwiDesk from becoming someone else's product, not to
+charge the people who use it, and reserving use inside a
+business would charge users — the one thing the lever is not
+for. The timing follows from goodwill. A
 switch made after a launch spends what the launch earned — people
 remember the relicense, not the reason — and lands at the moment
 of maximum attention, on the largest possible free snapshot.
@@ -2266,26 +2267,39 @@ moved underneath the window the user is looking at — and a rule
 naming only the resize would be a special case the next cause
 re-opens.
 
-**`swap` is the one member of that set where the premise is
-false, and it is ruled in rather than excluded.** There the row
-did not move: the focus moved within a static row, by the
-user's own act. It still re-anchors, for two reasons. Nothing
-inside the layout can separate it — the discriminator is "same
-window, different position", and a neighbour closing ahead of
-the focus produces exactly that signal, which is the case the
-rule exists for. And the same answer is the right one anyway:
-the window being acted on is the one that must not jump, so it
-holds still and the row slides past it, which is the genre's
-own idiom (PaperWM and niri both scroll the row under a moved
-column rather than carrying the column across the viewport).
-What changes is the frame of reference, never the outcome — the
-swapped pair trades places either way. And nothing is painted
-into a corner: the rest is plain state, so a verb that ever
-wants the other frame rewrites the recorded position at its own
-mutation site and the next pass reads a delta of zero, with no
-new seam. Pinned by
-`ScrollingResizeAnchorEndToEndTests`, so the ruling is visible
-rather than incidental.
+:::unreleased
+**A reorder is the one member of that set where the premise is
+false, and it is ruled OUT at the model (#1353).** There the
+row did not move: the focus moved within a static row, by the
+user's own act. The genre's idiom — PaperWM and niri scroll the
+row under a moved column — argues that the frame of reference
+changes but the outcome does not, the pair trading places
+either way, and #966 had ruled the swap in on that argument.
+KiwiDesk does not follow it, because the eye is on the window
+being moved and expects IT to move: a window that holds still
+under `swap` while its neighbour jumps reads as "nothing was
+reordered" (device, 2026-09-09). So a reorder holds the
+viewport and lets the pair visibly trade places, panning only
+where the moved window's new slot would leave the view — the
+focus-change arm, whose clamp is exactly that minimal pan.
+
+The discriminator does not live in the layout, which the #966
+entry had already established: "same window, different
+position" is also what a neighbour closing ahead of the focus
+produces, and that case must keep re-anchoring. It lives in
+the model, the one place that knows a reorder happened: every
+`Space` primitive that rewrites the order — `swap`, `move`, the
+bar drop's `reorder` — RELEASES the recorded slot
+(`Space.releaseScrollSlot`), and the next pass, seeing an
+offset with no slot, holds it and pans into view. An ARRIVAL
+seats through `insert` and keeps the slot: it is a window
+opening ahead of the focus, the #966 case. The obligation that
+makes this hold is that the window order is written by the
+model and nowhere else (`ScrollSlotReleaseSeamTests`);
+`ScrollSlotReleaseTests` holds each primitive, and
+`ScrollingResizeAnchorEndToEndTests` the keyboard swap and the
+bar drop on screen.
+:::
 
 **A slot resting ON a border keeps the border, not its leading
 edge.** The rule above says "hold the slot's place", and place
@@ -9286,6 +9300,32 @@ copy that also painted colors would silently overwrite a
 palette the user applied on purpose, the same category of
 surprise the palette entry below bans in the other direction.
 (Owner ruling 2026-08-02, during Phase 2 device review.)
+
+:::unreleased
+**The bars ship one thickness, 40 pt, on every screen, and the
+slider's floor is the Core floor by derivation.** (#1359, owner
+ruling 2026-09-13.) Two numbers used to answer "how thick": a
+Core default of 32 with a laptop starter of 28, and a GUI band
+that began at 30 — so the starter's own value sat below the
+slider, and one touch of the slider lost it for good. A stored
+value the GUI cannot reach is a defect, not a curation, so the
+band's floor is `AppBarStyle.minThickness` rather than a number
+beside it (`BarSliderBandTests`); the ceiling of 80 stays
+the GUI's, Lua open above it, the same split the glow slider
+takes. The default is one number because the reason for a
+thinner laptop bar — "a laptop cannot spare the chrome" — did
+not survive use: 40 read well on every class, and a per-class
+thickness is a second default a user has to know about before
+the slider's number means anything (`BarThicknessDefaultTests`).
+No migration is owed, and the reason is specific rather than
+borrowable: both bars' `thickness` predate the first tag
+(v0.9.0), and the settings encoder writes both bar groups whole
+(`AppBarParityTests`, `SpaceBarParityTests` hold each field
+encoded), so every file the app ever wrote carries its own
+number and only a fresh seed takes the new one — a leaf younger
+than a shipped release, or one a group elides, owes the #1369
+crossing instead (`BarSliderBandTests`, `BarThicknessDefaultTests`).
+:::
 
 **"Which palette am I on" is computed, never remembered.**
 (#757.) The shelf marks the card whose colors the config it is

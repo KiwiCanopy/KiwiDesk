@@ -16,8 +16,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var edge: AppBarEdge = .top
     /// Item-group placement along the bar (center by default, #293 QA).
     public var alignment: Alignment = .center
-    /// Depth of the reserved strip (pt).
-    public var thickness: CGFloat = 32
+    /// Depth of the reserved strip (pt); the one number
+    /// `AppBarStyle.thickness` argues (#1359).
+    public var thickness: CGFloat = 40
     /// Box length along the bar (pt); 0 = auto.
     public var itemSize: CGFloat = 0
     /// Spacing between space boxes (pt).

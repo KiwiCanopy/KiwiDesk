@@ -385,6 +385,13 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 
 ## Bars
 
+:::unreleased
+**Thickness** runs 20–80 pt in both cards; Lua
+([`app_bar.set_thickness`](lua-reference.md#app_barset_thickness),
+[`space_bar.set_thickness`](lua-reference.md#space_barset_thickness))
+takes any value from 20 up.
+:::
+
 ### App Bar
 
 The App Bar renders only in **Monocle** and **Scrolling**; its
@@ -618,10 +625,14 @@ the largest screen. The total is 3 spaces for one screen, 5 for
 two, 7 for three, then 8, 9 and one more per screen up to ten,
 each screen's share proportional to its width. "Smallest" is
 read from width alone, so a 27" beside an ultrawide opens in
-monocle. The tuning follows the main screen: a laptop main gets
-6 pt gaps and 28 pt bars, an ultrawide two stack masters and a
-larger minimum window size, a pivoted one the stack at the
-bottom and scrolling vertical.
+monocle.
+
+:::unreleased
+The tuning follows the main screen: a laptop main gets 6 pt
+gaps, an ultrawide two stack masters and a larger minimum window
+size, a pivoted one the stack at the bottom and scrolling
+vertical.
+:::
 
 While you are still on the Starter layout, connecting or removing
 a monitor re-derives it and the `⌃⌥N` space shortcuts extend to

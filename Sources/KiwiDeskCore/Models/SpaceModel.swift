@@ -275,16 +275,7 @@ public struct Space: Sendable, Equatable {
             trackWeights[a] = trackWeights[b]
             trackWeights[b] = weight
         }
-    }
-
-    /// Moves window to clamped target index.
-    public mutating func move(_ window: WindowID, to index: Int) {
-        guard let from = windows.firstIndex(of: window) else {
-            return
-        }
-        windows.remove(at: from)
-        let clamped = min(max(index, 0), windows.count)
-        windows.insert(window, at: clamped)
+        releaseScrollSlot()
     }
 }
 

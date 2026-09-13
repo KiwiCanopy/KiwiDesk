@@ -39,8 +39,6 @@ public enum StarterTuning {
         switch mainShape {
         case .laptop:
             settings.gapsGlobal = .uniform(6)
-            settings.appBarStyle.thickness = 28
-            settings.spaceBarStyle.thickness = 28
         // Nothing here turns the App Bar on, though the design
         // card says to: `LayoutAppBar` already defaults enabled
         // for monocle and scrolling — this class's two layouts —

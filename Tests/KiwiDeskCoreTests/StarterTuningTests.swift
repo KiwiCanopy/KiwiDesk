@@ -23,11 +23,10 @@ struct StarterTuningTests {
         // At 2560 pt a three-column grid gives 850 pt cells.
         #expect(settings.grid.columns == 2)
         #expect(settings.grid.rows == 2)
-        // A laptop cannot spare 40 pt of chrome per edge.
+        // A laptop tightens the gaps; its bars keep the one
+        // default (#1359, `BarThicknessDefaultTests`).
         let small = StarterTuning.settings(mainShape: .laptop)
         #expect(small.gapsGlobal == .uniform(6))
-        #expect(small.appBarStyle.thickness == 28)
-        #expect(small.spaceBarStyle.thickness == 28)
         // Everything that assumes width has to flip.
         let tall = StarterTuning.settings(mainShape: .pivoted)
         #expect(tall.stack.stackPosition == .bottom)

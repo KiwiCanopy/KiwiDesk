@@ -1166,12 +1166,20 @@ the row was pushed. One slot size serves every slot, so resizing
 one (`resize`, `scroll.set_slot_size`, a mouse edge drag) moves
 every window along the row — and the focused window then keeps
 its place on screen while the row rearranges around it. The same
-holds when a window opens or closes ahead of the focus, or when
-`swap` re-seats it. Only a *focus change* pans the viewport,
-which is what makes the minimal pan above read as
-scroll-into-view. Near a row end the boundary wins, as always:
-the row never reveals empty margin past its ends, so there the
-focus re-anchors only as far as it can.
+holds when a window opens or closes ahead of the focus. A
+*focus change* pans the viewport minimally, which is what makes
+the pan above read as scroll-into-view.
+
+:::unreleased
+A reorder — `swap`, a window dropped onto another, or a drag on
+the App Bar — is not a rearrangement around the focus: the two
+windows visibly trade places, and the view pans only when the
+moved window's new slot would fall outside it.
+:::
+
+Near a row end the boundary wins, as always: the row never
+reveals empty margin past its ends, so there the focus
+re-anchors only as far as it can.
 
 One refinement to "keeps its place": a window resting flush
 against the **trailing** edge of the viewport keeps that edge
@@ -1864,7 +1872,10 @@ app_bar.set_alignment("start")
 
 ### app_bar.set_thickness
 
-**Expects:** a positive number (points).
+:::unreleased
+**Expects:** thickness in points (default `40`; anything below
+`20` is raised to it).
+:::
 
 **Does:** sets the bar's thickness, carved out of the layout.
 
@@ -2360,7 +2371,10 @@ space_bar.set_alignment("center")
 
 ### space_bar.set_thickness
 
-**Expects:** thickness in points (default `32`).
+:::unreleased
+**Expects:** thickness in points (default `40`; anything below
+`20` is raised to it).
+:::
 
 **Does:** sets the bar's thickness, carved out of the layout.
 
