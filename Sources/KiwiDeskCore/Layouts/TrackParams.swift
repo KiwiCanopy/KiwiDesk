@@ -16,8 +16,23 @@ public struct TrackParams: Sendable, Equatable, Codable {
     public var axis: Axis = .vertical
     /// Dynamic track limit management (#178).
     public var autoTracks = true
-    /// Fixed maximum number of tracks when `autoTracks` is false (R6/#406).
-    public var limit: Int = 2
+    /// Tracks ON SCREEN when `autoTracks` is false, the overflow
+    /// track counted (#1354, owner ruling 2026-09-09): the number
+    /// a user types is the number they see. 3 by default, the
+    /// picture the pre-#1354 default of two normal tracks drew.
+    public var limit: Int = 3
+
+    /// The floor (#1354): one track would be the overflow alone,
+    /// everything folded, which is no track layout at all. Every
+    /// entry point holds it — the setters refuse below it, the
+    /// steppers start at it, the crossing lifts a stored 1 to it.
+    public static let minLimit = 2
+
+    /// The steppers' ceiling: the old band's ten normal tracks
+    /// plus the overflow, so a stored 10 the crossing lifted to
+    /// 11 still sits inside the control (#1354). Lua is open
+    /// above it; the layout draws what fits either way.
+    public static let stepperMaxLimit = 11
     public var newWindow: NewWindowTrack = .focusedTrack
     /// Position of new window within target track.
     public var newWindowPosition: SpawnPlacement = .first
@@ -31,16 +46,16 @@ public struct TrackParams: Sendable, Equatable, Codable {
 
     public init() {}
 
-    /// Hard cap on tracks (0 = unlimited, otherwise limit + 1 for overflow,
-    /// #192).
+    /// Hard cap on tracks: 0 = unlimited, otherwise the limit
+    /// itself — the overflow track is inside it (#192, #1354).
     public var trackCap: Int {
-        autoTracks ? 0 : max(1, limit) + 1
+        autoTracks ? 0 : max(Self.minLimit, limit)
     }
 
     /// Normal track capacity before overflow fold (#192, #198; read by
-    /// `TrackLayout.overflowCap`).
+    /// `TrackLayout.overflowCap`): one below the cap, derived.
     public var normalCap: Int {
-        autoTracks ? .max : max(1, limit)
+        autoTracks ? .max : trackCap - 1
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -72,7 +87,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 Int.self,
                 forKey: .limit
-            ) ?? 2
+            ) ?? TrackParams().limit
         newWindow =
             try container.decodeIfPresent(
                 NewWindowTrack.self,

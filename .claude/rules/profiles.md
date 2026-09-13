@@ -329,6 +329,26 @@ holds the secondary-switch decision including its nil case.
   the step reaches the two shapes that carry `TilingSettings` by
   PATH, and `ConfigMigrationGlassRoutingTests` holds that
   `settings` stays the one top-level key it lands on.
+- **A stored value whose MEANING changes — same key, same
+  bytes, a re-scale — owes the same crossing, plus two things a
+  rename does not.** The default moves with the meaning, so a
+  fresh seed draws the picture the old default drew, and every
+  entry point takes the new floor in the same change. And the
+  step is NOT idempotent by construction — a lifted 3 is a typed
+  3 — so it reads the file's `format` and stands down at the
+  format it introduced, spelled as history beside its keys, or
+  the next bump lifts every file again; a direct-call test on a
+  root AT that format is the pin, since `migrated`'s own gate
+  rescues a current file and proves nothing about the step. The
+  track limit is the precedent (#1354, `TrackLimitMigrationTests`
+  ▸ `stepIsIdempotent`). A textual edit that lifts by KEY while
+  the walk lifts by PATH owes the key a declarer census, since a
+  second declarer silently drops every migration to the
+  re-serializing fallback (`ConfigMigrationGlassRoutingTests` ▸
+  the `limit` declarers). What no crossing reaches is a Lua
+  script spelling the old number: `ConfigMigration`'s charter
+  keeps `init.lua` out, and a re-scale fails there SILENTLY where
+  a rename fails loudly — record that trade in the design entry.
 
 ## Whose arrangement is live (#1249)
 

@@ -6,12 +6,13 @@ public struct Profile: Codable, Sendable, Equatable {
     /// unversioned legacy. 2 since the scroll-duration rename
     /// (#1020), 3 since the retired `resize.feedback` drop
     /// (#1255), 4 since the absent Liquid Glass leaves' fill
-    /// (#1369). The bump is what RUNS a step: `needsMigration`
+    /// (#1369), 5 since the track limit counts the overflow
+    /// track (#1354). The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 4
+    public static let currentFormat = 5
 
     public var format: Int
     public var name: String

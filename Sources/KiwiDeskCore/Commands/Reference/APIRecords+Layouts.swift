@@ -212,8 +212,8 @@ extension APIReference {
             .choice("axis", TrackParams.Axis.self)
         ),
         "set_limit": APIRecord(
-            "Sets the maximum number of normal tracks; 0 is "
-                + "auto.",
+            "Sets how many tracks show, the overflow track "
+                + "counted (at least 2); 0 is auto.",
             .integer("limit")
         ),
         "set_auto_tracks": APIRecord(
@@ -246,7 +246,8 @@ extension APIReference {
             .choice("axis", TrackParams.Axis.self)
         ),
         "set_limit_override": APIRecord(
-            "Overrides the track limit for one Space; 0 is auto.",
+            "Overrides the track limit for one Space, the "
+                + "overflow track counted (at least 2); 0 is auto.",
             .space("space"),
             .integer("limit")
         ),

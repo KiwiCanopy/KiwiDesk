@@ -106,14 +106,42 @@ struct TrackCommandsTests {
         core.execute("track.set_limit", args: [.number(3)])
         #expect(core.tiler.settings.track.limit == 3)
         #expect(!core.tiler.settings.track.autoTracks)
-        // trackCap = count + 1 (#192): three normal tracks plus
-        // the extra overflow track that catches the surplus.
-        #expect(core.tiler.settings.track.trackCap == 4)
+        // The cap IS the limit (#1354): two normal tracks plus
+        // the overflow track that catches the surplus.
+        #expect(core.tiler.settings.track.trackCap == 3)
+        #expect(core.tiler.settings.track.normalCap == 2)
         // 0 restores automatic, leaving the remembered count.
         core.execute("track.set_limit", args: [.number(0)])
         #expect(core.tiler.settings.track.autoTracks)
         #expect(core.tiler.settings.track.limit == 3)
         #expect(core.tiler.settings.track.trackCap == 0)
+    }
+
+    @Test("a limit below the floor is refused, naming the floor")
+    func limitBelowTheFloorIsRefused() {
+        // One track would be the overflow alone (#1354): the
+        // setter refuses, names the floor, and writes nothing —
+        // the global and the override alike; 0 stays automatic.
+        let core = makeCore()
+        let before = core.tiler.settings.track
+        let global = core.execute(
+            "track.set_limit",
+            args: [.number(Double(TrackParams.minLimit - 1))]
+        )
+        #expect(!global.isSuccess)
+        #expect(
+            global.error?.contains("\(TrackParams.minLimit)") == true
+        )
+        #expect(core.tiler.settings.track == before)
+        let override = core.execute(
+            "track.set_limit_override",
+            args: [.string("2"), .number(1)]
+        )
+        #expect(!override.isSuccess)
+        #expect(core.tiler.settings.track.override[SpaceID("2")] == nil)
+        #expect(
+            core.execute("track.set_limit", args: [.number(0)]).isSuccess
+        )
     }
 
     @Test("set_auto_tracks toggles the flag directly (#178)")
@@ -155,11 +183,11 @@ struct TrackCommandsTests {
         ]
         #expect(over?.limit == 3)
         #expect(over?.autoTracks == false)
-        // count + 1 = the three normal tracks plus the overflow
-        // track (#192).
+        // The cap is the limit, the overflow track inside it
+        // (#1354).
         #expect(
             core.tiler.settings.resolvedTrack(for: "2").trackCap
-                == 4
+                == 3
         )
         // Other spaces stay automatic.
         #expect(
@@ -220,7 +248,7 @@ struct TrackCommandsTests {
         )
         #expect(
             core.tiler.settings.resolvedTrack(for: "1").limit
-                == 2
+                == TrackParams().limit
         )
     }
 }

@@ -25,7 +25,6 @@ struct BorderSpecsTests {
         _ style: BorderStyle,
         focused: WindowID?,
         slots: [(id: WindowID, frame: CGRect)],
-        floating: Set<WindowID> = [],
         overlays: Set<WindowID> = [],
         fullscreen: Set<WindowID> = [],
         monocle: Bool = false
@@ -34,7 +33,6 @@ struct BorderSpecsTests {
             style: style,
             focused: focused,
             slots: slots,
-            floating: floating,
             overlays: overlays,
             fullscreen: fullscreen,
             isMonocle: monocle,
@@ -122,26 +120,20 @@ struct BorderSpecsTests {
         #expect(result.first?.window == w1)
     }
 
-    @Test("Floating windows are excluded from unfocused rings")
-    func floatingExcluded() {
+    /// A float is a slot like any other to the ring (#1286): its
+    /// overlap hides nothing, since each ring sits behind its own
+    /// window (#278).
+    @Test("An overlapping float rings when unfocused")
+    func floatRingsWhenUnfocused() {
         var style = BorderStyle()
         style.unfocusedEnabled = true
-        // w2 floats and heavily overlaps the focused tiled w1, but
-        // gets no unfocused ring of its own.
         let slots: [(id: WindowID, frame: CGRect)] = [
             (w1, CGRect(x: 0, y: 0, width: 100, height: 100)),
             (w2, CGRect(x: 10, y: 10, width: 100, height: 100)),
             (w3, CGRect(x: 400, y: 0, width: 100, height: 100)),
         ]
-        let result = specs(
-            style,
-            focused: w1,
-            slots: slots,
-            floating: [w2]
-        )
-        // Focused w1 + tiled w3; floating w2 neither rings nor
-        // hides w3.
-        #expect(Set(result.map(\.window)) == [w1, w3])
+        let result = specs(style, focused: w1, slots: slots)
+        #expect(Set(result.map(\.window)) == [w1, w2, w3])
     }
 
     @Test("A focused transient overlay gets no ring")
@@ -154,7 +146,6 @@ struct BorderSpecsTests {
                 BorderStyle(),
                 focused: w1,
                 slots: disjoint,
-                floating: [w1],
                 overlays: [w1]
             ).isEmpty
         )
@@ -168,7 +159,6 @@ struct BorderSpecsTests {
             BorderStyle(),
             focused: w1,
             slots: disjoint,
-            floating: [w1],
             overlays: []
         )
         #expect(result.map(\.window) == [w1])
@@ -188,7 +178,6 @@ struct BorderSpecsTests {
             style,
             focused: w1,
             slots: slots,
-            floating: [w2],
             overlays: [w2]
         )
         #expect(Set(result.map(\.window)) == [w1, w3])

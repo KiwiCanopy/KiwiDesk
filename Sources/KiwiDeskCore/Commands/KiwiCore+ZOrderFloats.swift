@@ -55,13 +55,11 @@ extension KiwiCore {
             excluding: focused
         )
         // What the floats must clear, and why the focused window
-        // is not part of it, is argued on `raiseFloor`.
+        // is not part of it, is argued on `raiseFloor`; which
+        // members ARE a plane, on `floatRaiseFloor`.
         let floor =
             activeSpace.map { space in
-                Self.raiseFloor(
-                    tiled: state.effectiveTiledMembers(of: space),
-                    excluding: focused
-                )
+                floatRaiseFloor(of: space, excluding: focused)
             } ?? []
         performZOrderSequence(
             targets: pairs,
@@ -91,7 +89,8 @@ extension KiwiCore {
     /// their z-order above it. Gated by the caller to genuine
     /// (non-echo) focus changes so the focus-handoff's own echo
     /// cannot re-trigger the raise, and skipped when the focused
-    /// window is itself a float (it is already on the float layer).
+    /// window is itself an EFFECTIVE float (#1286): nothing tiled
+    /// was focused, so there is nothing to keep the layer above.
     ///
     /// Coalesced through the `.floatRaise` deferred slot: a burst of
     /// focus changes (rapid clicks, held focus-nav) would otherwise
@@ -108,7 +107,8 @@ extension KiwiCore {
         // sit under a tile until the next tiled focus re-raises the
         // layer. Self-healing and rare (sub-50ms tile→float); the
         // z-order thrash the coalescing removes is the worse failure.
-        guard state.windows[id]?.isFloating != true,
+        guard
+            !isEffectiveFloatOnActiveSpace(id),
             !floatLayerTargets().isEmpty
         else { return }
         deferred.schedule(.floatRaise, after: .milliseconds(50)) {
@@ -117,50 +117,6 @@ extension KiwiCore {
             else { return }
             self.raiseFloatsAndSticky(thenFocus: id)
         }
-    }
-
-    /// The ids of the windows that belong ABOVE the tiled plane:
-    /// the active space's floating windows plus every floating
-    /// sticky window (visible on all spaces, never stashed). The
-    /// gate is `isFloating`, never `isSticky` alone — a tiled-sticky
-    /// window is a real layout participant (#414 v2) and stays on
-    /// the tiled plane. Sorted by id so overlapping floats keep a
-    /// stable order across passes.
-    ///
-    /// **Known residue, mixed CGWindow layers (#684).** A float
-    /// may sit at layer 0 (a normal window the user floated) or
-    /// above it (`FloatDetection` floats a panel *because* its
-    /// layer is non-zero). The compositor keeps a raised-layer
-    /// window above every layer-0 one no matter what is raised, so
-    /// whenever this array order asks for a layer-0 float in FRONT
-    /// of a raised-layer one, that pairing cannot be reached: the
-    /// sequence issues one raise that cannot verify and spends
-    /// `ZOrderDrain.landingLimit` finding out. Bounded, once per
-    /// float raise, and only in that mixed configuration — and the
-    /// stacking is still correct, because the raised-layer float
-    /// is above where the user needs it either way.
-    ///
-    /// Fixing it properly means ordering the desired sequence by
-    /// layer, which needs the layer at this call site: it is NOT
-    /// `isTransientOverlay` (that flag also covers layer-0
-    /// dialogs, #300/#671), so it costs either a per-window
-    /// WindowServer query here or a layer-carrying stacking read
-    /// threaded into the drain. Deferred rather than guessed.
-    func floatLayerTargets() -> [WindowID] {
-        var targets: [WindowID] = []
-        if let space = activeSpace {
-            targets = space.windows.filter {
-                state.windows[$0]?.isFloating == true
-            }
-        }
-        for window in state.windows.all
-            .sorted(by: { $0.id.raw < $1.id.raw })
-        where window.isSticky && window.isFloating
-            && !targets.contains(window.id)
-        {
-            targets.append(window.id)
-        }
-        return targets
     }
 
     /// Stamps `ids` (except `focused`, whose echo is the intended

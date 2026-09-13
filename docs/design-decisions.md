@@ -1351,8 +1351,14 @@ ring too. This is a border-only presentation policy:
 `Navigation.pileMates` remains the
 shared authority for navigation, swaps, and z-order restoration. In
 monocle — where only the focused window is visible — borders stay
-focused-only. Floating windows are excluded from the unfocused set;
-the focused window is still ringed whether tiled or floating.
+focused-only. The focused window is ringed whether tiled or
+floating.
+
+:::unreleased
+Floating windows are in the unfocused set too, flag-floats and
+floating-mode members alike — the #1286 entry below carries the
+argument; they were excluded here without one.
+:::
 
 A **transient overlay** — a window that floats for a *structural*
 reason (accessory activation policy, a non-standard panel subrole,
@@ -1562,12 +1568,12 @@ harder one. Reword it and the guidance goes with it.
 **The overflow track is read-time, not stored (#192, 2026-07-12):**
 when there are more tracks than the space's normal capacity, the
 fitting prefix tiles and the surplus merges into one far-edge
-overflow track. Normal capacity is the **Track limit** N when
-Auto track limit is off (so a limit of N shows up to N normal
-tracks **plus** one overflow track — `trackCap` is `count + 1`,
-and a new `own_track` window past N opens the overflow track
-rather than joining), or **how many fit at `min_window_size`**
-when automatic is on. Geometry always caps the total: if
+overflow track. Normal capacity is one below the **Track limit**
+N when Auto track limit is off (so a limit of N shows N tracks
+on screen, the last of them the overflow track — `trackCap` IS
+the limit, and a new `own_track` window past the normal tracks
+opens the overflow track rather than joining), or **how many fit
+at `min_window_size`** when automatic is on. Geometry always caps the total: if
 capacity + 1 columns can't hold the minimum, the fit count
 (`TrackLayout.fitCap`) reduces the columns at layout time,
 folded through the existing `counts(cap:)` primitive — so the
@@ -1585,6 +1591,36 @@ space — was rejected here for putting geometry into state (it
 would make spawn outcomes monitor-dependent and
 non-deterministic). **This was deliberately revisited for the
 `focused_track` default — see the next entry.**
+
+:::unreleased
+**The Track limit counts the overflow track (#1354, owner ruling
+2026-09-09).** [Principle] The number a user types is the number
+of tracks they see: a limit of 3 shows three tracks, the last of
+them the overflow. The value used to count NORMAL tracks with
+the overflow beside them, so a typed 3 drew four columns — and
+the user counts what is on screen, not what the layout calls
+normal; a control whose number is one off from the picture reads
+as a control that does not work. Renaming the setting to
+"normal tracks" was rejected for the same reason: it would have
+made the label agree with the arithmetic instead of the eye. The
+floor is 2, because a limit of 1 would be the overflow track
+alone with everything folded into it — no track layout at all —
+so the setters refuse below it, the steppers start at it, and a
+stored 1 is lifted onto it. Because this changes what a STORED
+`limit` means, it crosses with a one-shot migration that adds one
+to every stored value, global and per-Space override alike, in a
+profile and in a backup's inline profiles (§5: a stored value
+needs a crossing, never a lenient decoder); the default moves
+from 2 to 3 for the same reason, so a fresh seed draws the
+picture the old one drew. `TrackLimitMigrationTests` holds the
+crossing, `TrackCommandsTests` the floor, and
+`LayoutSchematicTrackFoldTests` that the preview's arithmetic
+follows the engine's. The trade accepted: a Lua script spelling
+`track.set_limit(2)` is outside every crossing by charter, and
+where a renamed verb fails loudly a re-scaled number runs and
+draws one track fewer, with only the refused `1` to say
+anything.
+:::
 
 **BSP alternates by default (#1181, 2026-08-31).** `alternating`
 — horizontal then vertical by depth — rather than
@@ -3423,6 +3459,43 @@ because a floating-mode member has no layout answer to give and a
 frame of its own to change; whether the z-order raise, the Space
 Bar's float badge and the focus ring should follow is a question
 about what each of those *means*, not a consequence of this one.
+
+:::unreleased
+**The ring and the float-tier raise follow; the badge stays on
+the flag ([#1286](https://github.com/KiwiCanopy/KiwiDesk/issues/1286)).**
+[Rationale] Of the flag's readers, most are the flag's own
+identity, a net already on the predicate, or the "is this a
+tiled member" question the predicate's docstring rules is *not*
+its negation; the three the #1184 entry named are each answered
+by what they mean. The **unfocused ring** reaches every float,
+flag and floating-mode alike, because the exclusion it replaced
+had nothing behind it: #278 excluded flag-floats from the
+unfocused set without an argument, a floating-mode member rang
+anyway since the code asked the flag, and the two are the same
+thing to the user. Ruled in rather than out (owner, 2026-09-13):
+a ring sits behind its own window, so an overlapped float shows
+its ring where it peeks out and covers nothing, and in a Floating
+space the rings say which windows KiwiDesk manages — the reading
+the ring exists for. Overlays and fullscreen windows keep their
+exclusions, monocle stays focused-only. The **float-tier
+raise** keeps floats above a tiled
+plane, and read through the flag a floating-mode member *is*
+that plane: every member focus, and every switch onto the space,
+lifted a flagged or sticky float back over its siblings, an
+order the user could never keep. So the raise stands down after
+a focus that lands on an effective float and takes no
+floating-mode member as the floor its switch-time lift clears,
+while its *targets* stay the flag's, because that space has no
+plane to lift over. The **badge** marks the exception to a
+space's layout — one window that floats where the rest tile —
+and a floating-mode space has no exception to mark: every glyph
+would wear the layout's own symbol and say nothing, so it keeps
+the flag, and the same-app grouping it breaks keeps it with it
+(owner ruling 2026-09-13). The ring and the badge do not
+"disagree" by this: one is a mark drawn, the other a ring
+withheld, and neither claims the space is anything but what the
+user set it to.
+:::
 
 ### Spaces, profiles & config ownership
 

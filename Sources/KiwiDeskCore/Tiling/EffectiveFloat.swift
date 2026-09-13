@@ -15,24 +15,35 @@
 /// a floating-mode member is a product question per verb, which
 /// this type does not answer.
 ///
-/// This docstring is the one roster of which verbs are ruled,
-/// and it is the file #1286 moves. `resize` is ruled onto the
-/// predicate (#1184, `FloatingResizeCommandTests`), standing
-/// down for a native-fullscreen window (#670) on both arms —
-/// one arm alone would put the divergence the crossing removed
-/// back at that one window — and it stands the VERB down, not
-/// the float ROUTE, which would drop the press into the layout
-/// and let a window nothing places move its neighbours. Among
-/// the consumers still asking the flag are the float-tier raise
-/// (`KiwiCore+ZOrderFloats`), the Space Bar badge
-/// (`KiwiCore+SpaceBarItems`) and the focus ring
-/// (`KiwiCore+Borders`); they are right to until each is ruled
-/// the same way. That list is known short, so #1286 re-derives
-/// it from the flag's readers rather than trusting it, and each
-/// verb it rules states its own stand-down — always the verb's,
+/// This docstring is the one roster of which verbs — and which
+/// readers that are no verb, a ring or a raise — are ruled.
+/// `resize` is ruled onto the predicate (#1184,
+/// `FloatingResizeCommandTests`), standing down for a
+/// native-fullscreen window (#670) on both arms — one arm alone
+/// would put the divergence the crossing removed back at that
+/// one window — and it stands the VERB down, not the float
+/// ROUTE, which would drop the press into the layout and let a
+/// window nothing places move its neighbours. #1286 swept the
+/// flag's readers and ruled two more: the unfocused focus ring
+/// reaches every float, so it asks neither the flag nor this
+/// (owner ruling 2026-09-13, `FloatingModeRingTests`), and
+/// the float-tier raise stands down after a focus that lands on
+/// one and takes no floating-mode member as its FLOOR
+/// (`KiwiCore+ZOrderFloats.raiseFloatsAbove`, `floatRaiseFloor`,
+/// `FloatingModeRaiseTests`) while its TARGETS stay the flag's,
+/// there being no tiled plane in a floating-mode space to lift
+/// over. Ruled to STAY on the flag: the Space Bar float badge and
+/// the group-breaking beside it (`KiwiCore+SpaceBarItems`), which
+/// mark the exception to a space's layout and in a floating-mode
+/// space have none to mark (owner ruling 2026-09-13,
+/// `SpaceBarBadgeTests`). Every other reader is the flag's own
+/// identity, a net already routed here, or a "tiled member"
+/// question — the negation below — and
+/// `FloatFlagReaderCensusTests` holds that census per file, so a
+/// new `.isFloating` read reds until it is classified there; the
+/// argument per reader is the comment on #1286. A verb or reader
+/// ruled later states its own stand-down — always the verb's,
 /// never the route's.
-/// Nothing scans for a bare-flag net, so a new one routes here
-/// deliberately.
 ///
 /// Not the negation, either: the drag paths' "is this window a
 /// TILED member of this space" chains chain membership and
@@ -42,9 +53,14 @@ public enum EffectiveFloat {
     /// `mode` is the space the window is being judged ON — the
     /// TARGET space for a move, the space a drop LANDED in, the
     /// current one otherwise. Nil (a space the caller cannot
-    /// name, or one the window is not a member of) is not
-    /// floating: a caller that cannot name the space cannot
-    /// claim the exemption.
+    /// name) is not floating: a caller that cannot name the
+    /// space cannot claim the exemption. A TRAVELER — a tiled
+    /// sticky rendering on a space it is no member of — takes
+    /// the space it RENDERS on where the consumer plays out
+    /// there (the re-home, #1217) and nil where
+    /// the consumer's strips or slots are a MEMBER's (the drop
+    /// clamp, the raise): `KiwiCore.isEffectiveFloatOnActiveSpace`
+    /// is the one door for the latter.
     public static func applies(
         isFloating: Bool,
         mode: LayoutMode?

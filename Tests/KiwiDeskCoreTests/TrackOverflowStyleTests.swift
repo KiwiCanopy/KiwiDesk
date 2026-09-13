@@ -114,12 +114,13 @@ struct TrackOverflowStyleTests {
         #expect(Set(track0.map { frames[$0]!.height }).count > 1)
     }
 
-    @Test("A fixed limit shows N normal tracks + 1 overflow track")
+    @Test("A fixed limit shows N tracks, the last the overflow")
     func fixedCapOverflowTrack() {
-        // auto off, limit 2 on a wide screen: 2 normal tracks
-        // (w0, w1) + the overflow track (w2..w4) as the extra
-        // far-edge column — even though more would fit. The limit
-        // is display-agnostic; geometry only reduces below it.
+        // auto off, limit 3 on a wide screen: 2 normal tracks
+        // (w0, w1) + the overflow track (w2..w4) as the far-edge
+        // column — three on screen, the number typed (#1354) —
+        // even though more would fit. The limit is
+        // display-agnostic; geometry only reduces below it.
         let w = ids(5)
         let frames = layout.calculateGeometry(
             for: w,
@@ -129,12 +130,12 @@ struct TrackOverflowStyleTests {
             ) {
                 $0.minWindowSize = 300
                 $0.track.autoTracks = false
-                $0.track.limit = 2
+                $0.track.limit = 3
                 $0.track.overflowStyle = .cascadeAll
             }
         )
         let xs = w.map { frames[$0]!.minX }
-        #expect(Set(xs).count == 3)  // 2 normal + 1 overflow
+        #expect(Set(xs).count == 3)  // the limit, overflow counted
         let overflowX = xs.max()!
         let inOverflow = w.filter { frames[$0]!.minX == overflowX }
         #expect(Set(inOverflow) == Set(w[2...]))
@@ -143,12 +144,12 @@ struct TrackOverflowStyleTests {
         #expect(abs((oy[1] - oy[0]) - 40) < 0.001)
     }
 
-    @Test("The overflow track is the extra N+1 column, one window")
+    @Test("The overflow track is the limit's last column, one window")
     func fixedLimitExtraColumn() {
-        // auto off, limit 3, exactly 4 window-tracks on a wide
-        // screen: three normal columns + a fourth overflow column
-        // holding the single spilled window — the limit forces
-        // the overflow track even with space to spare.
+        // auto off, limit 4, exactly 4 window-tracks on a wide
+        // screen: three normal columns + the fourth, overflow,
+        // column holding the single spilled window — the limit
+        // forces the overflow track even with space to spare.
         let w = ids(4)
         let frames = layout.calculateGeometry(
             for: w,
@@ -158,7 +159,7 @@ struct TrackOverflowStyleTests {
             ) {
                 $0.minWindowSize = 300
                 $0.track.autoTracks = false
-                $0.track.limit = 3
+                $0.track.limit = 4
             }
         )
         // Four distinct columns; the far edge (w3) is the overflow
