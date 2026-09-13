@@ -104,9 +104,11 @@ struct PlacementIntentTests {
     /// a tracked window on another Space (reached by its report)
     /// and the `<= 0` AppKit reports for a window without a
     /// device. An untracked number is owed, never refused (#1380).
-    @Test("The door takes a tracked window on the active Space only")
+    @Test(
+        "The door refuses another Space and no device, and owes the untracked"
+    )
     func doorRefusesTheRest() {
-        let (core, target, other) = makeFixture()
+        let (core, _, other) = makeFixture()
         let active = core.state.workspaces.activeSpace
         core.state.workspaces.focus(other, in: active!)
         _ = core.execute("move_to_space", args: [.string("2")])
@@ -123,7 +125,6 @@ struct PlacementIntentTests {
         #expect(EventLoop.ownWindowID(number: 5) == WindowID(5))
         #expect(core.focusOwnWindow(number: 7))
         #expect(core.ownShowFocus.owed() == WindowID(7))
-        _ = target
     }
 
     /// The device shape (#1380): Settings closed, then reopened
@@ -150,6 +151,10 @@ struct PlacementIntentTests {
             log.lines.contains { $0.contains("own show: focus paid to w1") }
         )
         #expect(core.activeSpace?.focused == target)
+        // The COMMAND, not a state write: only `focusWindow`
+        // notes the focus it stepped off (guard-prover — the
+        // bounce arm reads state, so the log alone cannot tell).
+        #expect(core.tiler.placements.recentDisplacement(other))
         // The arrival's retile stamped it: the ledger is LIVE
         // when the report lands.
         core.tiler.placements.stamp(target, target: offscreen)
@@ -161,6 +166,33 @@ struct PlacementIntentTests {
                 $0.contains("placement bounce distrusted")
             }
         )
+    }
+
+    /// A debt the fold already answered — the return took a
+    /// vacant focus (#636's other arm) — is claimed and stood
+    /// down, not commanded twice; the report still arrives
+    /// intended, since state holds the focus either way.
+    @Test("An arrival the fold focused stands the payment down")
+    func arrivalAlreadyFocusedStandsDown() {
+        let (core, target, other) = makeFixture()
+        core.handle(.windowDestroyed(target, wasMinimized: false))
+        core.handle(.windowDestroyed(other, wasMinimized: false))
+        #expect(core.activeSpace?.focused == nil)
+        #expect(core.focusOwnWindow(number: Int(target.raw)))
+        let log = Log()
+        core.onLog = { log.lines.append($0) }
+        core.handle(.windowCreated(reshown(target)))
+        #expect(core.ownShowFocus.owed() == nil)
+        #expect(core.activeSpace?.focused == target)
+        #expect(
+            log.lines.contains { $0.contains("w1 already the focus") }
+        )
+        #expect(
+            !log.lines.contains { $0.contains("focus paid to w1") }
+        )
+        core.tiler.placements.stamp(target, target: offscreen)
+        core.handle(.windowFocused(target))
+        #expect(log.lines.contains { $0.contains("w1 (App1) honored") })
     }
 
     /// The debt is paid only where the tracked arm would have
@@ -184,6 +216,9 @@ struct PlacementIntentTests {
         #expect(
             log.lines.contains { $0.contains("focus debt dropped") }
         )
+        // A mis-pay would step the command off `other`; the
+        // fold's own grant in the empty Space notes nothing.
+        #expect(!core.tiler.placements.recentDisplacement(other))
     }
 
     @Test("Without the intent the same report is bounced")

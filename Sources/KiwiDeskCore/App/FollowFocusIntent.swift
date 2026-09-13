@@ -9,9 +9,12 @@ import Foundation
 /// `DesktopMemory.returnFocus` (a Desktop return, #1207) and
 /// `KiwiCore.ownShowFocus` (the own-window door told of a closed
 /// own window, #1380) — same drain key, the arriving window; same
-/// cardinality, one pending — and the follow outranks the return.
-/// Bounded: an unpaid debt must not fire minutes later. A fourth
-/// such ledger weighs a fourth instance before minting (#890).
+/// cardinality, one pending. The follow outranks the return; the
+/// own show drains after both and stands down where state already
+/// holds the focus, so a window two ledgers name is commanded
+/// once. Bounded: an unpaid debt must not fire minutes later. A
+/// fourth such ledger weighs a fourth instance before minting
+/// (#890).
 @MainActor
 final class FollowFocusIntent {
     /// Maximum duration focus debt remains claimable (5.0s, #1007).

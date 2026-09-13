@@ -73,13 +73,14 @@ extension KiwiCore {
     }
 
     /// Retires what still names a window that is gone for good:
-    /// the #1207 focus memory and both arrival debts — a debt to
+    /// the #1207 focus memory and every arrival debt — a debt to
     /// a window that can never arrive would hold the settle's
     /// refocus down for nothing.
     func retireAwayDebts(of id: WindowID) {
         retireDesktopFocus(of: id)
         desktopMemory.returnFocus.retire(id)
         followFocus.retire(id)
+        ownShowFocus.retire(id)
     }
 
     /// The app's exit ends its entries (the state fold) and

@@ -49,7 +49,9 @@ extension KiwiCore {
     /// An UNTRACKED number is a closed own window about to be
     /// re-shown, which keeps its number and so arrives as a RETURN
     /// that steals no focus (#636): the command is owed instead,
-    /// and `payOwnShowFocus` issues it at the arrival (#1380).
+    /// and `payOwnShowFocus` issues it at the arrival (#1380). The
+    /// caller vouches the number is its own — the door's `allowed`
+    /// map is that census — so the debt takes no process check.
     /// Bypasses the #292 preflight on purpose; the caller fronts
     /// the window regardless. Returns whether Core took it; the
     /// caller's `forceFront` follows either way.
@@ -60,6 +62,7 @@ extension KiwiCore {
         }
         guard let space = state.workspaces.space(of: id) else {
             ownShowFocus.record(id)
+            onLog("own show: owing focus to w\(id.raw) at its arrival")
             return true
         }
         guard space == state.workspaces.activeSpace else {
@@ -73,7 +76,11 @@ extension KiwiCore {
     /// the same focus command the tracked arm issues, now that
     /// the window has an id in state, so the report that follows
     /// is intended. The arm's gate is judged HERE, on the Space
-    /// the arrival landed in — the door could not read it.
+    /// the arrival landed in — the door could not read it. No
+    /// refocus retile, like the sibling payers: the arrival's own
+    /// retile follows on this arm and places with the focus set.
+    /// Stands down where state already holds it — the fold's
+    /// grant, or a sibling debt paid ahead on the same arm.
     func payOwnShowFocus(arrived window: WindowID) {
         guard ownShowFocus.claim(if: { $0 == window }) != nil
         else { return }
@@ -86,8 +93,12 @@ extension KiwiCore {
             )
             return
         }
+        guard state.workspaces[space]?.focused != window else {
+            onLog("own show: w\(window.raw) already the focus")
+            return
+        }
         onLog("own show: focus paid to w\(window.raw)")
-        focusWindow(window, warp: false)
+        focusWindow(window, refocusRetile: false, warp: false)
     }
 
     /// Keeps state on `intended` and re-asserts it with a DIRECT,
