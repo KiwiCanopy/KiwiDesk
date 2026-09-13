@@ -194,7 +194,7 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ---
 
-KiwiDesk is free. If you like it, leave a ⭐ — it is the one
+KiwiDesk is open source. If you like it, leave a ⭐ — it is the one
 thing that helps other people find it.
 
 <div align="center">
