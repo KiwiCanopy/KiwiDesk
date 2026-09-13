@@ -34,14 +34,13 @@ struct ReduceTransparencySeamTests {
             under: Self.core.appendingPathComponent("Bar")
         ) {
             let source = try SourceScan.strippedSource(at: file)
-            guard let declaration = source.range(of: "func render("),
+            guard
                 let body = SourceScan.declarationBody(
                     after: "func render(",
                     in: source
                 ),
                 body.contains("glassHosting(")
             else { continue }
-            _ = declaration
             renders += 1
             let name = file.lastPathComponent
             let gate = SourceScan.callSites(
@@ -108,14 +107,32 @@ struct ReduceTransparencySeamTests {
         )
         #expect(wiring.contains("reduceTransparencyDidChange()"))
         #expect(wiring.contains("LiquidGlassGate.observe"))
-        let bootstrap = try SourceScan.strippedSource(
-            at: Self.core.appendingPathComponent(
-                "App/KiwiCore+Bootstrap.swift"
-            )
+        // Wired in `start()`, not the init-time bootstrap: a
+        // permission revoke runs `stop()` and `start()` on ONE
+        // core, and `stop()` retires the token (code-reviewer,
+        // 2026-09-13 — the bootstrap wiring went silent after
+        // one revoke/re-grant cycle).
+        let boot = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent("App/KiwiCore+Boot.swift")
+        )
+        let start = try #require(
+            SourceScan.declarationBody(after: "func start(", in: boot)
         )
         #expect(
-            bootstrap.contains("wireReduceTransparency()"),
-            "bootstrap no longer wires the observer"
+            start.contains("wireReduceTransparency()"),
+            "start() no longer wires the observer"
+        )
+        let lifecycle = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "App/KiwiCore+Lifecycle.swift"
+            )
+        )
+        let stop = try #require(
+            SourceScan.declarationBody(after: "func stop(", in: lifecycle)
+        )
+        #expect(
+            stop.contains("retireReduceTransparency()"),
+            "stop() no longer retires the observer"
         )
     }
 
@@ -220,13 +237,15 @@ struct ReduceTransparencySeamTests {
                 .count == 1,
             "glassGround is called from more than the modifier"
         )
+        // Polarity is the decision, not a retunable value: the
+        // property NEGATED is what stands the branch down.
         #expect(
             arguments.contains("enabled:")
-                && arguments.contains(property),
+                && arguments.contains("!\(property)"),
             Comment(
                 rawValue:
-                    "glassGround's enabled: is not decided by "
-                    + "\(property): \(arguments)"
+                    "glassGround's enabled: is not stood down by "
+                    + "!\(property): \(arguments)"
             )
         )
     }

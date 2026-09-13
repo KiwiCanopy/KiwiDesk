@@ -48,7 +48,6 @@ extension KiwiCore {
         wireDrag()
         wireOwnKeyWindowRefresh()
         wireHoldGlide()
-        wireReduceTransparency()
         appBars.onSelect = { [weak self] id in
             self?.focusWindow(id, warp: true)
         }

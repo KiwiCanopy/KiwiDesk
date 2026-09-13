@@ -207,17 +207,22 @@ struct ReduceTransparencyTests {
         #expect(fired == 1, "the default centre is not the channel")
     }
 
-    /// The wired handler re-draws through both drivers; driven
-    /// directly, the way `ownKeyWindowDidChange` is.
-    @Test("the handler re-renders both bars")
-    func handlerRerendersBothBars() throws {
+    /// The wiring is idempotent and symmetric: wiring twice holds
+    /// ONE observer, and `stop()` retires it — a revoke runs both
+    /// on one core. The handler is driven directly, the way
+    /// `ownKeyWindowDidChange` is.
+    @Test("the wiring holds one observer and stop() retires it")
+    func wiringIsSymmetric() throws {
         try #require(Self.platformGlass)
         let core = makeTestCore()
+        #expect(core.appBars.transparencyObserver == nil)
         core.wireReduceTransparency()
-        defer { core.stop() }
-        #expect(core.appBars.transparencyObserver != nil)
+        let first = try #require(core.appBars.transparencyObserver)
+        core.wireReduceTransparency()
+        let second = try #require(core.appBars.transparencyObserver)
+        #expect(first !== second, "re-wiring kept the first token")
         core.reduceTransparencyDidChange()
-        core.stop()
+        core.retireReduceTransparency()
         #expect(core.appBars.transparencyObserver == nil)
     }
 }

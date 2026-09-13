@@ -274,5 +274,6 @@ Obligations:
   (`ReduceTransparencySeamTests`: one home per tree, one read per
   render on a stored style read once, both bars in the handler,
   every glass fixture pinned; `ReduceTransparencyTests` holds the
-  behaviour and the observer's delivery). Why the OFF shape rather than an opaque
-  glass is `docs/design-decisions.md` ▸ Reduce transparency.
+  behaviour and the observer's delivery). Why the OFF shape rather
+  than an opaque glass is `docs/design-decisions.md` ▸ Reduce
+  transparency.
