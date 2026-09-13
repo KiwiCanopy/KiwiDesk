@@ -301,6 +301,8 @@ struct CombinedClampTests {
         var space = SpaceBarStyle()
         space.enabled = true
         space.edge = .top
+        // Pinned (#660): the combined inset reasons from it.
+        space.thickness = 32
         let spaceStrip = SpaceBarGeometry.strip(
             in: visible,
             style: space

@@ -108,6 +108,8 @@ struct SpaceBarGeometryTests {
         )
         var appStyle = AppBarStyle()
         appStyle.edge = .top
+        // Pinned (#660): the sum below reasons from it.
+        appStyle.thickness = 32
         let appStrip = AppBarGeometry.barFrame(
             in: remaining,
             edge: .top,
@@ -117,7 +119,8 @@ struct SpaceBarGeometryTests {
         #expect(!spaceStrip.intersects(appStrip))
         // Combined inset = sum of both strips.
         #expect(
-            appStrip.maxY == visible.minY + 32 + 32
+            appStrip.maxY
+                == visible.minY + space.thickness + appStyle.thickness
         )
     }
 

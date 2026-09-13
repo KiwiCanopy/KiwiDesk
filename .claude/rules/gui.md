@@ -43,6 +43,19 @@ that second-guesses the power user (the bars' `dim_factor` /
 `active_dim_factor`: Lua-only, clamped to a legible range yet free
 to invert the dim ladder).
 
+**A slider edge Core also clamps is DERIVED from the Core
+constant; only the edge the GUI curates is the GUI's own
+number** (#1359). Two numbers nothing compares drift apart
+unnoticed: the thickness slider began at 30 over a Core floor of
+20, and a stored 28 — legal, and what the starter seeded on a
+laptop — could not be reached from the GUI once the slider was
+touched. A band both edges of which the GUI curates (`0...100`,
+`1...200`) may still be spelled at the row; one Core clamps
+lives in a home beside its consumers (`BarSliderBands` for the
+bar cards) and is read from there, held by `BarSliderBandTests`
+through the declaration rather than a value equality, which a
+restated `20...80` satisfies on the day it is written.
+
 ## Settled conventions — extend, don't relitigate
 
 - **Group by topic, never by widget type.** A toggle and the

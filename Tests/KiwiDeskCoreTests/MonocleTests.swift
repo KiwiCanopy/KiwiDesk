@@ -21,6 +21,8 @@ private func makeContext(
         bounds: bounds,
         gaps: .uniform(10)
     )
+    // Pinned (#660): the strip arithmetic below reasons from it.
+    context.appBarStyle.thickness = 32
     monocle(&context.monocle)
     return context
 }
@@ -54,7 +56,10 @@ struct MonocleGeometryTests {
         }
         let usable = context.usable
         let bar = try #require(
-            context.monocle.barFrame(in: usable, global: AppBarStyle())
+            context.monocle.barFrame(
+                in: usable,
+                global: context.appBarStyle
+            )
         )
         let frames = layout.calculateGeometry(
             for: ids(2),
