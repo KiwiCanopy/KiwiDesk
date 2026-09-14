@@ -33,10 +33,8 @@ enum SettingsSearchResult: Identifiable, Equatable {
 
 /// User-named settings search target (spec 11a).
 struct SettingsSearchPlace: Identifiable, Equatable {
-    /// `.palette` is fed by `SettingsModel.paletteNames` (#805),
-    /// an in-memory name cache — `PaletteStore` itself stays
-    /// stateless and file-backed, and the match path never
-    /// reads it.
+    /// `.palette` is fed from `SettingsModel.userPalettes`
+    /// (#805), never the store.
     enum Kind: String, CaseIterable {
         case space, profile, appRule, palette
     }

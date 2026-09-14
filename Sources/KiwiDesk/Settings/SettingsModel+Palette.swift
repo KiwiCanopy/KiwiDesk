@@ -10,10 +10,8 @@ extension SettingsModel {
         palette.apply(to: &config.settings)
     }
 
-    /// Re-reads the user palette names into the search cache
-    /// (#805). The store's own mutation points and the window's
-    /// reload are its callers (`PaletteNameCacheTests`).
-    func refreshPaletteNames() {
-        paletteNames = paletteStore.userPalettes().map(\.name)
+    /// Re-reads the user palettes from the store (#805).
+    func refreshPalettes() {
+        userPalettes = paletteStore.userPalettes()
     }
 }

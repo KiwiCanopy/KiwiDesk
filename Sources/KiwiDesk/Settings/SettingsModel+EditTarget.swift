@@ -55,7 +55,7 @@ extension SettingsModel {
         }
         apply(state)
         refreshProfiles()
-        refreshPaletteNames()
+        refreshPalettes()
         // Recompute, never hand-set: `apply` assigns under
         // `suppressDirty`, and a bare `isDirty = false` left
         // `draftChangeCount` stale (review 2026-08-04).

@@ -4,8 +4,7 @@ import KiwiDeskCore
 extension SettingsHeaderBar {
     /// Constructs SettingsSearchContext from state already in
     /// memory — nothing on the search path touches AX, the
-    /// session or the filesystem (spec 11a); palette names come
-    /// from the model's cache, never the store (#805).
+    /// session or the filesystem (spec 11a, #805).
     var searchContext: SettingsSearchContext {
         SettingsSearchContext(
             editingStoredProfile: model.editingStoredProfile,
@@ -14,7 +13,7 @@ extension SettingsHeaderBar {
             spaces: model.config.spaces.map(\.raw),
             profiles: model.profileSummaries.map(\.name),
             appRules: model.config.appRules.keys.sorted(),
-            palettes: model.paletteNames
+            palettes: model.userPalettes.map(\.name)
         )
     }
 }

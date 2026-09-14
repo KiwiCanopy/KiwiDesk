@@ -80,6 +80,22 @@ struct SettingsSearchPlacesTests {
         }
     }
 
+    /// `placeResults` applies no reachability filter on the
+    /// stated premise that every place kind lands on a
+    /// destination #18 never hides — held as a shape clause, so
+    /// a kind landing on General owes the filter back.
+    @Test("every place kind lands where a stored-profile edit reaches")
+    func kindsStayReachable() {
+        for kind in SettingsSearchPlace.Kind.allCases {
+            #expect(
+                kind.destination.isReachable(
+                    editingStoredProfile: true
+                ),
+                Comment(rawValue: kind.rawValue)
+            )
+        }
+    }
+
     /// The cap counts MATCHES, not objects: seven matching
     /// spaces yield five rows, and the cap is the builder's
     /// `placesCap` — asserted by arithmetic against an input

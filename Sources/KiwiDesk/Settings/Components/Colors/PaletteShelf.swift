@@ -4,7 +4,8 @@ import SwiftUI
 /// Color palette shelf (#375, #678).
 struct PaletteShelf: View {
     @ObservedObject var model: SettingsModel
-    @State var userPalettes: [ColorPalette] = []
+    /// The model's copy (#805) — the shelf holds none of its own.
+    var userPalettes: [ColorPalette] { model.userPalettes }
     /// Presentations for save and rename popovers (#843).
     @State var saveRequest: NameEditRequest?
     @State var renameRequest: NameEditRequest?
