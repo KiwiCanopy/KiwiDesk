@@ -97,8 +97,10 @@ struct HoldGlideEligibilitySeamTests {
         // cannot see a fourth that never joins. Derived, not
         // listed (#1056 guard-prover finding): every `refuse*`
         // function in the pill file routes through the funnel,
-        // the funnel notes the refusal, and the funnel is the
-        // ONE production caller of `borders.onResizeRefusal`.
+        // the funnel notes a press's refusal (the retile door,
+        // #934, is the one that stands the note down), and the
+        // funnel is the ONE production caller of
+        // `borders.onResizeRefusal`.
         let pill = try SourceScan.strippedSource(
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(

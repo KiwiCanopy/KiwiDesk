@@ -290,7 +290,7 @@ extension KiwiCore {
     /// raises first so its motion stays on top, which a
     /// direction proxy got wrong. Compared against the SAME
     /// frames the retile is about to apply
-    /// (`calculatedFrames`), within the engine's already-there
+    /// (`placedFrames`), within the engine's already-there
     /// tolerance; a window with no known frame yet reads as
     /// moving, so a raise is never lost. Distance is
     /// irrelevant, so an App Bar jump across several slots
@@ -302,7 +302,7 @@ extension KiwiCore {
     ) -> Bool {
         guard let previous, previous != target,
             let window = state.windows[target],
-            let frame = tiler.calculatedFrames(
+            let frame = tiler.placedFrames(
                 state: state
             )[target]
         else { return false }

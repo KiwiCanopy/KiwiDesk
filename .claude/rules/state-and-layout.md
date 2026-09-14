@@ -881,7 +881,9 @@ editing here:
   un-forced skip treats the refused target as "already there"
   (ends the endless re-issue) and the layouts place the residue
   (scrolling re-packs, monocle and a lone scrolling window
-  center). And only a SETTLED read — the retile-time gate, the
+  center, bsp and stack land a floor's residue inward through
+  `SplitOverflow.placed` on the issued frames, #934). And only
+  a SETTLED read — the retile-time gate, the
   settle probe — may clear learning on a compliance (#1049): a
   raw echo's compliance can be the transient half of an app's
   comply-then-snap-back (the Android emulator animates to the
@@ -1112,7 +1114,48 @@ editing here:
   into a pile the clamps cannot see coming.
   `TrackWeightHealTests` pins the wiring, `WeightHealTests`
   the math; the ruling and the stack-zone residue are in
-  `docs/design-decisions.md`. And the AUTOMATIC track count is
+  `docs/design-decisions.md`. **The split stores joined that
+  heal with #934/#1430**: `healSplitFloors`, beside the track
+  heal inside the same forced-pass scope, moves a bsp split
+  ratio or the stack master ratio so a side draws its members'
+  LEARNED floor — `SplitDomain.healedRatio` is the math, the
+  `flooredWeights` shape, judging the stored ratio where the
+  render pins it and sinking a side only for a learned floor,
+  since the global floor is the render clamp's (#383) — written
+  through the capped writers with NO focus, so the write clamps
+  like a press and cues nothing, over the LOCAL members and the
+  render's own `layoutInput`. A floor the yield cannot fit is
+  the `unfit` verdict: cued ONCE per (space, axis, window)
+  episode with the neighbour-minimum pill on the overhanging
+  window, the memo in `KiwiCore.splitFloorCues` re-armed when
+  the window fits again or its bound is forgotten, and the
+  frame lands INWARD through the one `SplitOverflow.placed`
+  post-pass on the frames the retile ISSUES
+  (`TilingEngine.placedFrames`), never inside the layout
+  algorithms, which stay pure — and that cue takes the pill
+  funnel's retile door (`refuseFloorUnfitAtRetile`, `fromPress:
+  false`): the pills and the border report without a press's
+  glide note or bump (the sound keeps the speaker's own
+  press-in-flight gate), and only for a space shown this pass,
+  since a pill draws on a window. **A pass now produces
+  TWO frame sets, and a new reader says which it takes**: a
+  reader that CLASSIFIES slots — a side, a drop target, a
+  neighbour, a cascade order — keeps `calculatedFrames`, and one
+  that acts on where a window IS — a cue drawn on it, the
+  unsolicited-resize check — takes `placedFrames`, because an
+  inward frame overlaps its neighbour by construction and a
+  classifier handed it reads a pile (`BspSplit.sides` dropped
+  both windows of the first unfit pair that way), while a cue
+  handed the slot draws beside the window.
+  `FrameSetReaderCensusTests`' `allowed` map is the one copy of
+  who reads which and why. The stack zone's own shares
+  stay out (#944). `SplitFloorHealTests` holds the math,
+  `SplitOverflowTests` the post-pass, `SplitFloorHealWiringTests`
+  the retile wiring and the traveler stand-down,
+  `SplitFloorCueTests` the cue and the inward landing over a
+  real core, `SplitFloorHealNeedleTests` the routing; the
+  ruling is in `docs/design-decisions.md`.
+  And the AUTOMATIC track count is
   derived from the members' corroborated floors on the cross
   axis, never from `min_window_size` alone (#1355): the one
   `TrackLayout.geometricCap(for:of:)` reads the tiled list and

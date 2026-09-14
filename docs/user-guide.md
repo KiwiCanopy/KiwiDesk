@@ -338,6 +338,11 @@ bounces and shows a frosted pill:
 - *Neighboring window at its minimum size* — growing stopped
   where a neighbour would drop below its minimum; the neighbour
   marks itself.
+
+  :::unreleased
+  It also shows once, without a press, when a window arriving in
+  a split cannot fit beside a neighbour already at its minimum.
+  :::
 - *Maximum window size reached* — on a scrolling space, a learned
   app maximum (System Settings will not grow past its own width).
 

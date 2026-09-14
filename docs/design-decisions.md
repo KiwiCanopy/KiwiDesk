@@ -3274,6 +3274,74 @@ one track fewer in the heal than on screen, the away twin of
 the visitor horn below, transient in the same way.
 :::
 
+:::unreleased
+**[Principle]**
+
+**A split store heals to a learned floor at retile, and the
+shared ratio may move for it (#934/#1430).** The split-layout
+row of the accepted limitations refused this for a long time on
+one argument: bsp's ratios are two per-Space scalars, so moving
+one for a stubborn window moves every same-orientation split.
+The owner's ruling (2026-09-14) accepts that distortion, because
+a resize press by hand moves the same number the same way — the
+#933 capped writers already clamp a press at a learned floor and
+the user sees the shared split move; a heal moving it to the
+same place is not a new kind of change, only an earlier one. Two
+sightings drove it: a window ARRIVING into a slot narrower than
+its app's minimum overhangs its neighbour until someone resizes
+by hand (#934), and a resize that walked the split past the
+floor in the presses before corroboration stays past it — the
+pill says *minimum size reached* and nothing snaps back (#1430).
+One mechanism answers both, and the choice of that mechanism is
+the second ruling: a retile-time heal of the split stores at the
+`KiwiCore.retile` choke point, the `healTrackFloors` shape one
+store over — idempotent, reading corroborated floors only, over
+the LOCAL members, standing down on a forced pass like every
+corroborated-bound consumer. The one-shot write at the
+confirmation edge the issue first proposed was rejected as a
+second mechanism on one store: the heal already runs on the
+retile that edge triggers, and an edge write and a heal cannot
+disagree about where the store should sit if only one of them
+exists. The write goes through the capped writers with no focus,
+so a neighbour yields only down to its own floor and nothing
+cues — a stored-parameter change, visible, undoable by a press,
+travelling with the Space like any interactive resize, which is
+also what keeps the bsp and stack algorithms bound-blind: the
+post-pass reads the bounds from the context, as Scrolling and
+Monocle do, and the algorithms read none. The stack zone's per-window shares stay out,
+per the #944 ruling; Track needs nothing, since #1355 re-shares
+its weights at retile already. Where the yield cannot fit — a
+same-axis neighbour already at its own floor — the engine says
+so ONCE per episode, at the first retile that finds it and shows
+the space, with the neighbour-minimum pill on the window that
+overhangs and the neighbour marked, drawn by the retile without a
+press's glide note or bump — and without its sound unless a press
+is in flight, the speaker's own gate — re-armed when the window fits again or
+its bound is forgotten; and the overhang lands INWARD (owner
+ruling 2026-08-31): the frames the retile ISSUES take one
+post-pass that emits a floor-bound slot at the floor and pulls it
+back inside the layout region, so a window that cannot fit
+overflows toward the screen's centre rather than past its edge,
+where part of it was unreachable — a floor wider than the region
+itself keeps its leading edge, the one carrying the window's
+controls — while the slots every reader classifies against stay
+the layout's own regions, because an inward frame overlaps its
+neighbour and a slot reader would call that a pile. Which of the
+two overlapping windows is on top is the focus order, as for any
+overlap; no z-order restore is armed for a residue the layout
+constructs on purpose. The write lands where a press lands — in a
+declared per-Space ratio where one exists — so an arrival can mark
+the profile dirty and a Keep persists the healed number; accepted
+with the ruling, since the number is the one a press would have
+written. What the heal reaches is what a resize reaches:
+the first split of each orientation in bsp, the master/stack
+split in stack. A floor inside a deeper bsp split is the
+flat-array trade's residue and stays in the limitations row.
+(`SplitFloorHealTests`, `SplitOverflowTests`,
+`SplitFloorHealWiringTests`, `SplitFloorCueTests`,
+`SplitFloorHealNeedleTests`)
+:::
+
 **Session weights are healed at retile, not validated forever
 at write time (#944).** [Principle] The write-time clamps above
 validate a weight against the membership at PRESS time, and

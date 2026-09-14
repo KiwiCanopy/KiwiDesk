@@ -186,6 +186,7 @@ public final class KiwiCore {
     /// own docs, and the one state machine mutating it, live in
     /// `KiwiCore+IgnoredPanel.swift`.
     var ignoredPanel = IgnoredPanelDistrust()
+    var splitFloorCues: [SpaceID: Set<SplitFloorCue>] = [:]
 
     /// When each sticky window was last put IN FLIGHT — a carry
     /// or our own switch (#1145/#1213); `KiwiCore+StickyReach` owns it.

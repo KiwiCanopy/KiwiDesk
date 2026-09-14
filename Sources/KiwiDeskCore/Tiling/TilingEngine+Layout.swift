@@ -297,33 +297,15 @@ extension TilingEngine {
         applier.clearInstantTarget(id)
     }
 
-    /// The frames every visible space's layout assigns right now,
+    /// The slots every visible space's layout assigns right now,
     /// unioned across all displays, without applying them. Used
-    /// by retiling and by drag / border / resize slot detection —
-    /// a window on any display resolves to its correct slot.
+    /// by drag / border / resize slot detection — a window on any
+    /// display resolves to its correct slot. The retile issues
+    /// `placedFrames` instead, which is these with a split
+    /// layout's floor residue placed (#934).
     public func calculatedFrames(
         state: StateCoordinator
     ) -> [WindowID: CGRect] {
-        var frames: [WindowID: CGRect] = [:]
-        for placement in visiblePlacements(state: state) {
-            let input = layoutInput(
-                state: state,
-                space: placement.space,
-                screen: placement.screen
-            )
-            let computed = LayoutEngine.calculate(
-                mode: input.space.mode,
-                windows: input.tiled,
-                context: input.context
-            )
-            // Each visible space is a distinct space on a distinct
-            // display, so their window sets are disjoint and the
-            // union is lossless — the `new` tie-break never fires
-            // in practice. It guards only the degenerate case of
-            // the same space resolving onto two displays, which
-            // `activeSpace(on:)` already self-heals against.
-            frames.merge(computed) { _, new in new }
-        }
-        return frames
+        visibleFrames(state: state, placed: false)
     }
 }

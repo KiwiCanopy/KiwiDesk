@@ -37,8 +37,12 @@ extension KiwiCore {
         // The heal and the render read one forced-pass verdict
         // (#1055/#1355): a pre-render consumer of `layoutInput`
         // that probes past bounds joins this scope.
+        // The split stores ride the same heal (#934/#1430): a
+        // bsp ratio or the master ratio is moved so a side
+        // draws its members' learned floor.
         tiler.withForcedPass(force) {
             healTrackSessionWeights()
+            healSplitFloors()
         }
         // A space entering floating mode inherits the previous
         // layout's frames (#1177): seed the out-of-bounds members
