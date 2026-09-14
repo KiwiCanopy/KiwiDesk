@@ -52,16 +52,11 @@ extension ResizeRefusal {
     /// because `L()` is — Core draws its own overlays and this
     /// is one of them (core-boundaries.md's allow-list).
     ///
-    /// A limit the APP enforces names the app (#1261): the
-    /// differentiating fact is the remedy — a KiwiDesk floor
-    /// can be lowered or a neighbour moved, an app's own
-    /// minimum or maximum cannot — and that is the one
-    /// distinction the glyph cannot carry, so it rides the
-    /// sentence. The learned-maximum reading is ALWAYS the app:
-    /// no configured global maximum exists the way
-    /// `min_window_size` floors the minimum. Each sentence
-    /// also holds with no press behind it, since the
-    /// neighbour pair is drawn by a retile too (#934).
+    /// A limit the APP enforces names the app (#1261); the
+    /// learned maximum is always the app's, since no configured
+    /// maximum exists. Every sentence holds with no press
+    /// behind it — the neighbour pair is drawn by a retile too
+    /// (#934).
     @MainActor
     var pillText: String {
         switch self {

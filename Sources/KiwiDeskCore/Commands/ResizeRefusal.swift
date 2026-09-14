@@ -19,8 +19,7 @@ enum ResizeRefusal: Equatable {
     /// minimum. `appBound` says WHICH term of that minimum won
     /// (#1261): false for the configured `min_window_size`,
     /// true for the window's learned app-enforced floor above
-    /// it. The wording reads it because the remedy differs — a
-    /// setting can be lowered; an app's own minimum cannot.
+    /// it.
     case ownMinimum(WindowID, axis: String, appBound: Bool)
     /// A grow stopped where `anchor` — a neighboring window —
     /// would drop below ITS effective minimum; `appBound` is the

@@ -2777,8 +2777,8 @@ because trimming a row-wide value to one window's limit would
 visibly shrink every neighbor on a grow press. The refusal
 pills ONE end, unlike the neighbor-minimum pair: the limit is
 the resized window's own app, so there is no second window to
-mark, and the copy names the app (`"This app won't go
-bigger"`, the #1261 entry below). And running out of
+mark; which sentence it draws is the #1261 entry's, below. And
+running out of
 *viewport* stays wordless — that limit protects no window and
 names none, so the press is a silent stop.
 
@@ -2878,6 +2878,42 @@ reachable refusal in the feature — a warning on the commonest
 path becomes chrome, and spends an alarm vocabulary reserved for
 a real conflict.
 
+:::unreleased
+**A refusal names the app where the app is the limit
+(#1261).** [Principle] A pill tells the user a limit was
+reached; what they do next depends on *whose*. KiwiDesk's own
+floor — `min_window_size`, a neighbour's share — is something
+the user can change: lower the setting, move the neighbour, pick
+another layout. An app's own enforced minimum or maximum is not:
+nothing in KiwiDesk makes a window go where its app refuses to
+draw it, and the only honest advice is to stop pushing. One
+sentence for both sent users hunting a setting that was never
+the constraint. So the sentence carries the remedy — `"This app
+won't go smaller"`, `"Neighboring app won't go smaller"`, `"This
+app won't go bigger"` — while the glyph keeps carrying the state
+(the #1260 entry above): the remedy is the one distinction a
+glyph cannot hold, since an app limit is contingent by
+state and structural by actionability, and a third glyph in a
+slot that holds two would say neither.
+
+The verdict rides the `ResizeRefusal` case (`appBound`) and is
+derived ONCE, from the same resolution every clamp measured
+against — a window's effective minimum is `max(min_window_size,
+learned app floor)`, so "which term won" is the same question at
+every path, and the refusal builders answer it rather than each
+call site by hand — a clamp that adds a floor of its own (the
+scrolling slot's 100 pt) hands that floor in, never the verdict,
+since a learned floor under it is not what bound. The maximum
+needs no verdict at all: no
+configured maximum exists, so a learned ceiling is only ever the
+app's. The cost, stated: naming the app is a stronger claim than
+naming a limit, and it rests entirely on the learned bound being
+true — the #1083 bet the maximum clamp was already making
+silently. And every sentence is written to hold with no press
+behind it, because the neighbour pair is also drawn by a retile
+(#934).
+:::
+
 It lives in Behaviour rather than General, and that is a
 STORAGE decision wearing a placement question: every row in
 General is a `UserDefaults` preference, a live service toggle or
@@ -2899,37 +2935,6 @@ settle probe does. Raw echoes still seed, refresh and clear;
 they no longer promote. A genuine limit is learned one probe
 grace (~0.6 s) after its animation settles rather than at echo
 time, which is the whole cost.
-
-**A refusal names the app where the app is the limit
-(#1261).** [Principle] A pill tells the user a limit was
-reached; what they do next depends on *whose*. KiwiDesk's own
-floor — `min_window_size`, a neighbour's share — is something
-the user can change: lower the setting, move the neighbour, pick
-another layout. An app's own enforced minimum or maximum is not:
-nothing in KiwiDesk makes a window go where its app refuses to
-draw it, and the only honest advice is to stop pushing. One
-sentence for both sent users hunting a setting that was never
-the constraint. So the sentence carries the remedy — `"This app
-won't go smaller"`, `"Neighboring app won't go smaller"`, `"This
-app won't go bigger"` — while the glyph keeps carrying the state
-(the #1260 entry above): the remedy is the one distinction a
-12 pt symbol cannot hold, since an app limit is contingent by
-state and structural by actionability, and a third glyph in a
-slot that holds two would say neither.
-
-The verdict rides the `ResizeRefusal` case (`appBound`) and is
-derived ONCE, from the same resolution every clamp measured
-against — a window's effective minimum is `max(min_window_size,
-learned app floor)`, so "which term won" is the same question at
-every path, and the refusal builders answer it rather than each
-call site by hand. The maximum needs no verdict at all: no
-configured maximum exists, so a learned ceiling is only ever the
-app's. The cost, stated: naming the app is a stronger claim than
-naming a limit, and it rests entirely on the learned bound being
-true — the #1083 bet the maximum clamp was already making
-silently. And every sentence is written to hold with no press
-behind it, because the neighbour pair is also drawn by a retile
-(#934).
 
 **The permissive alternative was ruled on and rejected, and the
 reasoning is worth keeping.** The obvious durable fix is to stop

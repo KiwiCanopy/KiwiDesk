@@ -121,6 +121,60 @@ struct ResizeRefusalAppBoundTests {
         )
     }
 
+    @Test("A clamp's own floor above the app's is not the app's")
+    func scrollingFloorAboveTheAppFloorIsNotTheApps() throws {
+        // The scrolling slot floors at `ScrollSize.minPoints`
+        // (100) on top of `min_window_size`. With the setting at
+        // 60 and a learned 80 pt floor, the 100 pt slot floor is
+        // what the shrink met — above the setting, so a verdict
+        // read against the setting alone would name an app that
+        // goes to 80 (architect review, 2026-09-14).
+        let (core, space) = makeCore(mode: "scrolling")
+        core.execute("set_min_window_size", args: [.number(60)])
+        #expect(core.tiler.settings.minWindowSize == 60)
+        for asked in [CGFloat(60), 40] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    WindowID(1),
+                    size: CGSize(width: asked, height: 780)
+                )
+                core.tiler.boundLearner.observe(
+                    WindowID(1),
+                    currentSize: CGSize(width: 80, height: 780),
+                    settledRead: true
+                )
+            }
+        }
+        #expect(
+            core.tiler.sizeBound(for: WindowID(1))?.minWidth == 80
+        )
+        // Above the setting, under the slot floor: the setting
+        // alone says "app", the slot floor says otherwise.
+        #expect(core.minimumIsAppBound(of: WindowID(1), axis: "x"))
+        #expect(
+            !core.minimumIsAppBound(
+                of: WindowID(1),
+                axis: "x",
+                raisedBy: Double(ScrollSize.minPoints)
+            )
+        )
+        core.execute("scroll.set_slot_size", args: [.number(120)])
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        core.execute("resize", args: [.string("x"), .number(-40)])
+        let live = try #require(core.state.workspaces[space])
+        let stored = core.tiler.settings
+            .resolvedScrolling(for: live)
+            .slotSize
+            .editablePoints(along: 1200, horizontal: true)
+        #expect(stored == 100)
+        #expect(
+            refusals == [
+                .ownMinimum(WindowID(1), axis: "x", appBound: false)
+            ]
+        )
+    }
+
     @Test("The retile pair reads the ANCHOR's floor, not the trier's")
     func retilePairReadsTheAnchor() {
         // Only w1 carries a learned floor — 900 pt, which the

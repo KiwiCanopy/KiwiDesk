@@ -1243,27 +1243,30 @@ editing here:
   A new writer of this shape states which kind of partition it
   has; `ResizeRefusalTargetingTests` holds the verdicts, one
   per arm, bsp and stack alike.
-  And **a minimum pill says WHOSE floor bound — the configured
-  one or the app's — and derives that ONCE** (#1261). The
-  remedy differs (a setting can be lowered, an app's own
-  minimum cannot), so `.ownMinimum` and `.neighborMinimum`
-  carry `appBound`, read at the seam; the builders in
-  `KiwiCore+SizeLimitPill` answer it through the one
-  `minimumIsAppBound`, from the same `effectiveMinSize` every
-  clamp measured against, and no call site hands the verdict
-  in — seven sites answering by hand is the #1258 shape one
-  level down. The anchor's floor is the pair's verdict, since
-  the anchor is the window whose floor bound; the learned
-  maximum needs none, being only ever the app's.
-  `ResizeRefusalAppBoundTests` builds the fixtures where the two
-  terms disagree; the config-floor suites stamp the flag their
-  fixtures earn.
   The classification models the FIRST split of an orientation,
   which is what the shared scalar makes reachable: a deeper
   split reusing it is not separately classified, so at depth ≥
   2 a participant can still be named on the wrong side of it
   (pre-existing, and the same under-clamp the cap already
   documents).
+- **A minimum pill says WHOSE floor bound — the configured
+  one or the app's — and derives that ONCE** (#1261). The
+  remedy differs (a setting can be lowered, an app's own
+  minimum cannot), so `.ownMinimum` and `.neighborMinimum`
+  carry `appBound`, read only by `ResizeRefusal+Rendering`; the
+  builders in `KiwiCore+SizeLimitPill` answer it through the one
+  `minimumIsAppBound`, from the same `effectiveMinSize` every
+  clamp measured against — a floor a clamp adds beside the
+  setting (the scrolling slot's `ScrollSize.minPoints`) rides
+  `raisedBy`, never the verdict — and a call site never hands
+  the verdict in, which `RefusalCueSeamTests` holds by spelling:
+  every call site answering by hand is the #1258 shape one
+  level down. The anchor's floor is the pair's verdict, since
+  the anchor is the window whose floor bound; the learned
+  maximum needs none, being only ever the app's.
+  `ResizeRefusalAppBoundTests` builds the fixtures where the two
+  terms disagree; the config-floor suites stamp the flag their
+  fixtures earn.
 - **A float safety NET asks `EffectiveFloat.applies`, never the
   flag alone** (#1178). `FloatingLayout` assigns no frames, so a
   `.floating` space's members are unmanaged in exactly the way a

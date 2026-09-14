@@ -1142,8 +1142,8 @@ bounces and pills, where the fits-on-screen stop stays wordless.
 
 :::unreleased
 The pill names the app ("This app won't go bigger", #1261): no
-setting caps a window's maximum, so that limit is only ever the
-app's, and the sentence says where the remedy is not.
+setting caps a window's maximum, so lowering `min_window_size`
+never moves it.
 :::
 
 Setting a size *here* is not clamped that way: a config value

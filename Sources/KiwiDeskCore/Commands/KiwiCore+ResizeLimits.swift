@@ -35,14 +35,17 @@ extension KiwiCore {
 
     /// Whether the window's learned app floor, not the
     /// configured `min_window_size`, is what its effective
-    /// minimum resolves to (#1261) — the discriminator the
-    /// minimum pills carry. The ONE derivation: every clamp
-    /// measured against `effectiveMinSize`, so this is the same
-    /// question at each of them, and the refusal builders ask
-    /// it rather than each call site answering by hand.
-    func minimumIsAppBound(of id: WindowID, axis: String) -> Bool {
+    /// minimum resolves to (#1261). `raisedBy` is a floor the
+    /// clamp adds beside the setting — the scrolling slot's
+    /// `ScrollSize.minPoints` — so a learned floor under it is
+    /// not what bound.
+    func minimumIsAppBound(
+        of id: WindowID,
+        axis: String,
+        raisedBy floor: Double = 0
+    ) -> Bool {
         effectiveMinSize(of: id, axis: axis)
-            > Double(tiler.settings.minWindowSize)
+            > max(Double(tiler.settings.minWindowSize), floor)
     }
 
     /// One window's learned app-enforced maximum on `axis`

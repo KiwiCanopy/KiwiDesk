@@ -150,15 +150,23 @@ extension KiwiCore {
 
     /// A shrink hit the window's effective minimum (#933) — on
     /// the FIRST attempt the clamp truncates, landing ON the
-    /// minimum included, not only once already there. Which
-    /// term of that minimum bound is derived HERE, once for
-    /// every path (#1261, `minimumIsAppBound`).
-    func refuseShrinkAtMinimum(_ window: WindowID, axis: String) {
+    /// minimum included, not only once already there. Whose
+    /// floor bound is derived here (#1261); `raisedBy` is the
+    /// floor a clamp adds beside `min_window_size`, if any.
+    func refuseShrinkAtMinimum(
+        _ window: WindowID,
+        axis: String,
+        raisedBy floor: Double = 0
+    ) {
         cueResizeRefusal(
             .ownMinimum(
                 window,
                 axis: axis,
-                appBound: minimumIsAppBound(of: window, axis: axis)
+                appBound: minimumIsAppBound(
+                    of: window,
+                    axis: axis,
+                    raisedBy: floor
+                )
             )
         )
     }
@@ -197,7 +205,7 @@ extension KiwiCore {
     /// effective minimum (#933). The pairing — which window
     /// wears the second pill, and what it says — is the
     /// renderer's (`ResizeRefusal.secondPill`); whose floor the
-    /// anchor sits at is derived here from the anchor (#1261).
+    /// anchor sits at is derived from the anchor (#1261).
     func refuseGrowAtNeighborMinimum(
         _ focused: WindowID,
         anchor: WindowID,

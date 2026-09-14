@@ -343,13 +343,15 @@ bounces and shows a frosted pill:
   a split cannot fit beside a neighbour already at its minimum.
   :::
 
+- On a scrolling space, growing stops at a maximum the app
+  enforces (System Settings will not grow past its own width).
+
 :::unreleased
 Where the limit is the **app's own** — a minimum or maximum the
 app enforces, which KiwiDesk learns — the pill says so instead:
 *This app won't go smaller*, *Neighboring app won't go smaller*,
-and on a scrolling space *This app won't go bigger* (System
-Settings will not grow past its own width). Lowering the
-configured minimum does not move those; only the app can.
+*This app won't go bigger*. Lowering the configured minimum does
+not move those.
 :::
 
 Running out of screen is a silent stop. Under a held resize

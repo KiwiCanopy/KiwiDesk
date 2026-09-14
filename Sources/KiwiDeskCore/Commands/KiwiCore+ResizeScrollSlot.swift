@@ -171,7 +171,13 @@ extension KiwiCore {
         if let focused = space.focused {
             switch outcome.refusal {
             case .ownMinimum:
-                refuseShrinkAtMinimum(focused, axis: axis)
+                // The slot's own floor joined the clamp above
+                // (`effectiveMin`), so it joins the verdict.
+                refuseShrinkAtMinimum(
+                    focused,
+                    axis: axis,
+                    raisedBy: Double(ScrollSize.minPoints)
+                )
             case .ownMaximum:
                 refuseGrowAtMaximum(focused, axis: axis)
             case nil:

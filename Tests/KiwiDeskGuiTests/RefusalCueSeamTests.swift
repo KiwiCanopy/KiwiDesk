@@ -199,6 +199,47 @@ struct RefusalCueSeamTests {
         )
     }
 
+    /// Whose floor a minimum pill names is derived by the
+    /// builders, never handed in (#1261): every `appBound:` the
+    /// builders' file spells is the one derivation's call, and
+    /// no builder takes the verdict as a parameter. Derived
+    /// rather than pinned (#1021) — whatever the builders
+    /// number, each verdict is that call.
+    @Test("a minimum pill's verdict is derived, never handed in")
+    func appBoundIsDerivedByTheBuilders() throws {
+        let pill = try Self.core("App/KiwiCore+SizeLimitPill.swift")
+        let verdicts = pill.occurrences(of: "appBound:")
+        #expect(verdicts > 0)
+        #expect(
+            verdicts
+                == pill.occurrences(of: "appBound:minimumIsAppBound("),
+            Comment(
+                rawValue: "a builder spelled appBound: from "
+                    + "something other than minimumIsAppBound — "
+                    + "a call site is answering whose floor bound"
+            )
+        )
+        // The builders may take a FLOOR the clamp adds beside the
+        // setting (`raisedBy`), never the verdict itself: no
+        // `func refuse…` signature — the text up to its body —
+        // declares it.
+        var builders = 0
+        for piece in pill.components(separatedBy: "funcrefuse")
+            .dropFirst()
+        {
+            let signature = piece.prefix { $0 != "{" }
+            builders += 1
+            #expect(
+                !signature.contains("appBound"),
+                Comment(
+                    rawValue: "a builder declares appBound: — the "
+                        + "verdict must be derived inside it"
+                )
+            )
+        }
+        #expect(builders > 0)
+    }
+
     /// The sound-only seam is gone: both of its cases draw now.
     @Test("nothing cues by sound alone any more")
     func noSoundOnlyCue() throws {
