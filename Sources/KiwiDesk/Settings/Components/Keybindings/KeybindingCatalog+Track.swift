@@ -53,4 +53,18 @@ extension KeybindingCatalog {
             }
         ),
     ]
+
+    /// The Track families' rows, one copy for every reader.
+    static var trackRows: [NavCommand] {
+        moveToTrackRows + trackSwapRows
+    }
+
+    /// Whether a binding RECORDS a Track verb (#1440): a
+    /// finished combo on a Track row, matched as
+    /// `KeybindingNavRow` matches — navigation kind and lua.
+    static func recordsTrack(_ binding: KeyBinding) -> Bool {
+        !binding.combo.isEmpty
+            && binding.kind == .navigation
+            && trackRows.contains { $0.lua == binding.lua }
+    }
 }

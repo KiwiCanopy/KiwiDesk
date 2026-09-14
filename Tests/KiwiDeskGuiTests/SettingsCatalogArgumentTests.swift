@@ -48,6 +48,10 @@ struct SettingsCatalogArgumentTests {
         // `SettingsCatalogSiteTests` only asks for one reference
         // apiece, which a swapped pair satisfies.
         "DesktopShortcutsOffer.swift: drawer",
+        // The Track offer takes the same shape (#1440); its one
+        // mount's `keys:` / `drawer:` pair is pinned by
+        // `ShortcutsTrackOfferTests`.
+        "TrackShortcutsOffer.swift: drawer",
     ]
 
     /// Sanctioned literal-`L()` `SettingsSection` titles —

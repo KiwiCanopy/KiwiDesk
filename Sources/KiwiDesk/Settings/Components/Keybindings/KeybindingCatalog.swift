@@ -153,8 +153,7 @@ enum KeybindingCatalog {
             NavGroup(
                 title: "Window Management",
                 commands: swapDirections
-                    + moveToTrackRows
-                    + trackSwapRows
+                    + trackRows
                     + moveToSpace(spaces)
             ),
         ]

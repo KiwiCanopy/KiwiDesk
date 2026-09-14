@@ -4,7 +4,7 @@ import SwiftUI
 /// Shortcuts action groups mapped from census definitions
 /// (`ShortcutsCensusRenderTests`, #678).
 
-/// Family rows view displaying heading, caption, and navigation rows (#678).
+/// Family rows view displaying heading and navigation rows (#678).
 struct KeybindingFamilyRows: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -25,13 +25,6 @@ struct KeybindingFamilyRows: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
-            }
-            if let caption = ShortcutsFamilyHeading.caption(
-                for: key
-            ) {
-                Text(caption)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
             if commands.contains(where: {
                 $0.unavailable != nil
@@ -65,15 +58,14 @@ struct KeybindingFamilyRows: View {
     }
 }
 
-/// Headings and context captions for shortcut census families (#188).
+/// Headings for shortcut census families (#188). The Track
+/// families carry none: their drawer title says it (#1440).
 @MainActor
 enum ShortcutsFamilyHeading {
     static func title(for key: SettingKey) -> String? {
         switch key {
         case .shortcuts(.goToSpace):
             return L("shortcuts.go_to_space", "Go to Space")
-        case .shortcuts(.moveWindowToTrack):
-            return L("shortcuts.move_to_track", "Move to track")
         case .shortcuts(.moveToSpace):
             return L("shortcuts.move_to_space", "Move to Space")
         case .shortcuts(.focusDesktop):
@@ -82,19 +74,6 @@ enum ShortcutsFamilyHeading {
             return L(
                 "shortcuts.move_to_desktop",
                 "Move to Desktop"
-            )
-        default:
-            return nil
-        }
-    }
-
-    static func caption(for key: SettingKey) -> String? {
-        switch key {
-        case .shortcuts(.moveWindowToTrack):
-            return L(
-                "shortcuts.move_to_track.caption",
-                "Only relevant if you're using the track "
-                    + "layout."
             )
         default:
             return nil
@@ -156,6 +135,14 @@ struct MoveWindowsGroup: View {
                     .moveWindowsDesktopFamilies,
                 drawer: SettingsCatalog.shortcuts
                     .moveWindowsDesktops,
+                expander: expander
+            )
+            TrackShortcutsOffer(
+                model: model,
+                bindings: $bindings,
+                keys: ShortcutsRowOrder.moveWindowsTrackFamilies,
+                drawer: SettingsCatalog.shortcuts
+                    .moveWindowsTracks,
                 expander: expander
             )
         }

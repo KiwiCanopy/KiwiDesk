@@ -45,9 +45,16 @@ extension ShortcutsKey {
             )
         case .focusDir, .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
-        case .swapDir, .moveWindowToTrack, .swapWithTrack, .moveToSpace,
-            .moveToSpaceFollow:
+        case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
+        // An OFFER until the Track layout is in play (#1440).
+        case .moveWindowToTrack, .swapWithTrack:
+            return .row(
+                .shortcuts,
+                .moveWindows,
+                .immediate,
+                gate: .runtime(.trackInUse)
+            )
         // An OFFER until the user takes it (#1125): a Desktop is
         // macOS's arrangement rather than KiwiDesk's, the seed
         // binds none of these, and they scale per Desktop — so

@@ -60,6 +60,12 @@ struct ShortcutsControls: Sendable {
         "shortcuts.desktops.move",
         "Move windows to a macOS Desktop"
     )
+    /// The Track families' door (#1440) — their only
+    /// search-reachable name, the rows' labels being dynamic.
+    let moveWindowsTracks = SettingsDrawer(
+        "shortcuts.tracks.move",
+        "Move windows in the track layout"
+    )
     let sizeFloat = SettingsControl(
         "shortcuts.section.size_float",
         "Size & float"

@@ -1553,17 +1553,28 @@ off, with the shortcut rows inert and hidden until it flipped
 (#181). That was reversed: every track surface is always
 visible and always works. Newcomers are oriented with copy
 instead — the header caption on Layout Defaults ▸ Track marks
-it a more advanced layout, and the "Move to track" shortcut
-subheader carries "(only relevant if you're using the track
-layout)". A blocking flag bought guidance at the cost of a
-whole machinery — inert-but-stored keybindings, a resolution
-clamp, silent-steal conflict handling — and made unbound track
-rows in another layout read as broken rather than simply
-irrelevant. Copy carries the same message with none of that.
-The obligation the copy carries is not "Track has a caption" —
-since #678 turn 10 every layout card does — but that Track's
-own says what the others' do not: that this layout is the
-harder one. Reword it and the guidance goes with it.
+it a more advanced layout, and the shortcut rows say which
+layout they belong to. A blocking flag bought guidance at the
+cost of a whole machinery — inert-but-stored keybindings, a
+resolution clamp, silent-steal conflict handling — and made
+unbound track rows in another layout read as broken rather than
+simply irrelevant. Copy carries the same message with none of
+that. The obligation the copy carries is not "Track has a
+caption" — since #678 turn 10 every layout card does — but that
+Track's own says what the others' do not: that this layout is
+the harder one. Reword it and the guidance goes with it.
+
+*Amended 2026-09-14 (#1440):* the shortcut half of that copy
+moved from a subheader caption ("only relevant if you're using
+the track layout") to the rows' own drawer — Shortcuts ▸ Move
+windows ▸ **Move windows in the track layout**, the #1125 door
+shape, with a `?` saying what previous and next mean in a
+track. The substance of this ruling holds: nothing is gated,
+no flag is stored, the rows work whether the drawer is open or
+shut, and a user with a Track space or a Track binding meets it
+open. What changed is where the sentence lives; the title now
+carries it, so a caption restating it inside the drawer was
+struck (owner ruling 2026-09-14).
 
 **The overflow track is read-time, not stored (#192, 2026-07-12):**
 when there are more tracks than the space's normal capacity, the
@@ -6753,6 +6764,23 @@ Mac whose window-management bridge is absent the families draw
 nothing, so the two declarations are refused by the search index
 on that same capability, the way a bridge-gated census row
 already is.
+
+The second instance (#1440, owner ruling 2026-09-14) is the
+Track shortcut families, one drawer below the Desktop one in
+Move windows, and it settles two things the first did not have
+to. The offer's condition is "the layout is in play" — a Track
+space in the config this window edits, or a Track verb bound in
+any layer — because the concept the user has met is the LAYOUT
+rather than a binding, and the starter setup seeds a Track space
+on a wide screen, so that user must meet the drawer open without
+ever having chosen the word. And it ranks BELOW Desktop: Desktop
+rows apply to everyone with macOS Spaces, Track rows to one
+layout, so the group reads from the widest audience down. (The
+alternative — Track above Desktop, since Track is KiwiDesk's own
+and a Desktop row is the escape into macOS's — was argued by
+design review and is defensible; the owner ruled audience size,
+and the reason is stated so the order is a decision rather than
+an accident.)
 
 **Overrides always resolve; the Simple/Power User mode never
 changes what runs.** There is no stored flag deciding whether a profile's

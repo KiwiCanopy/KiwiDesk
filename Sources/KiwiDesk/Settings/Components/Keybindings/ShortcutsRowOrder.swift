@@ -15,11 +15,9 @@ enum ShortcutsRowOrder {
         .shortcuts(.goToSpace),
     ]
 
-    /// Move windows group order: swaps, track verbs, space moves.
+    /// Move windows group order: swaps, then space moves.
     static let moveWindowsAtRest: [SettingKey] = [
         .shortcuts(.swapDir),
-        .shortcuts(.moveWindowToTrack),
-        .shortcuts(.swapWithTrack),
         .shortcuts(.moveToSpace),
         .shortcuts(.moveToSpaceFollow),
     ]
@@ -40,6 +38,14 @@ enum ShortcutsRowOrder {
     static let moveWindowsDesktopFamilies: [SettingKey] = [
         .shortcuts(.moveToDesktop),
         .shortcuts(.moveToDesktopFollow),
+    ]
+
+    /// The Track families, behind their own offer BELOW the
+    /// Desktop one — ruled, `docs/design-decisions.md` ▸ #1125's
+    /// second instance (#1440).
+    static let moveWindowsTrackFamilies: [SettingKey] = [
+        .shortcuts(.moveWindowToTrack),
+        .shortcuts(.swapWithTrack),
     ]
 
     /// Families whose instances interleave per target rather than stacking.

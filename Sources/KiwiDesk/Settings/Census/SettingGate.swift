@@ -32,6 +32,9 @@ enum SettingRuntimeGate: Hashable {
     /// A Desktop shortcut is bound (#1125) — the rows are an
     /// OFFER until one is, the seed authoring none of them.
     case desktopBindingsExist
+    /// A Track space exists or a Track verb is bound (#1440) —
+    /// the rows are an OFFER until the layout is in play.
+    case trackInUse
     /// Liquid Glass unavailable on pre-macOS 26 (#390).
     case liquidGlassUnavailable
     /// The window-management bridge is absent on this macOS

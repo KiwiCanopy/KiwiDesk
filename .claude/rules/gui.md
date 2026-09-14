@@ -360,7 +360,7 @@ lists exist so the census still records those rows for the
 placement table and for search, and the guard holds their
 MEMBERSHIP, but editing one moves nothing on screen. Which
 three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
-by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
+by `ShortcutsBespokeContainerTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
 
 General, Gaps & Borders, Spaces & Layouts, Profiles, Monitors
@@ -766,7 +766,14 @@ must keep:
   never swaps for a bare list once bound — a container that
   changes kind under the user's own commit tears down the
   control they committed with. `ShortcutsDesktopOfferTests`
-  holds the mounts and the predicates.
+  holds the mounts and the predicates. And where two offers
+  share one container's `.immediate` tier — the Track drawer
+  below the Desktop one in Move windows (#1440,
+  `ShortcutsTrackOfferTests`) — the tier alone no longer places
+  a key, so each offer's order list is the census rows carrying
+  exactly the gate that offer's `bound` consults, derived in
+  `ShortcutsCensusRenderTests ▸ moveWindowsTier` rather than
+  restated; a family joining either drawer takes that gate.
 - **A new surfacing branch or one-line wiring decision in the
   shell joins `HomeSurfacingTests` in the same change**, keyed
   on its use site — the Monitors lesson, which this shell

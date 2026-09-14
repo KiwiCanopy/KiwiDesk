@@ -221,5 +221,8 @@ extension InterpolatedLabelTests {
         //    that can — interpolated, never quoted (#818).
         "profiles.update_hint": 1,
         "profile_header.status.unsaved_monitor_count": 1,
+        // The Track drawer's `?` (#1440): names the Layout
+        // Defaults pane where the layout is tuned.
+        "shortcuts.tracks.help": 1,
     ]
 }

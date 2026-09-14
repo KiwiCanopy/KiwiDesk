@@ -131,12 +131,24 @@ struct ShortcutsGateTests {
         layered.layers[0].bindings = desktop.layers[0].bindings
         #expect(ShortcutsGates(config: layered).layersExist)
         #expect(ShortcutsGates(config: layered).desktopBindingsExist)
-        // Both cases are spoken for above; a THIRD reds here —
+        // The third reading (#1440) answers neither of the
+        // other two questions, and they do not answer it.
+        #expect(
+            !ShortcutsGates(config: layered).trackInUse,
+            "a layer and a Desktop binding are not a track"
+        )
+        var track = config(layers: [KeyLayer.defaultName])
+        track.spaces = ["1"]
+        track.spaceModes = ["1": .track]
+        #expect(ShortcutsGates(config: track).trackInUse)
+        #expect(!ShortcutsGates(config: track).layersExist)
+        #expect(!ShortcutsGates(config: track).desktopBindingsExist)
+        // All cases are spoken for above; a FOURTH reds here —
         // check what each named reading should answer for it
-        // before extending, since neither is written against nil.
+        // before extending, since none is written against nil.
         #expect(
             Set(ShortcutsGates.InertReason.allCases)
-                == [.onlyDefaultLayer, .noDesktopBinding]
+                == [.onlyDefaultLayer, .noDesktopBinding, .trackUnused]
         )
     }
 
