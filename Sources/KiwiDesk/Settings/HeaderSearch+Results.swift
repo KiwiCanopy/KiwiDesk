@@ -6,7 +6,7 @@ extension HeaderSearch {
     /// Search results popup card attached below search field
     /// (owner 2026-08-10).
     @ViewBuilder var resultPanel: some View {
-        if searching || !offer.isEmpty, focused || panelHovered {
+        if focused || panelHovered, searching || !offer.isEmpty {
             resultCard
         }
     }
@@ -63,9 +63,12 @@ extension HeaderSearch {
     @ViewBuilder var resultList: some View {
         let results = results
         if !searching {
-            // The offer, drawn through the same row so it looks
-            // and speaks like a result (#1030).
-            LazyVStack(alignment: .leading, spacing: 2) {
+            // The offer, through the same row so it looks and
+            // speaks like a result (#1030). A plain stack: it
+            // fits its rows, where a lazy one would fill the
+            // height the overlay proposes, and nothing here
+            // enriches on appear.
+            VStack(alignment: .leading, spacing: 2) {
                 ForEach(offer) { result in
                     row(result)
                 }

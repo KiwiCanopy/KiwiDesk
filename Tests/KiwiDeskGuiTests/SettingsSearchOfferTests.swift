@@ -55,10 +55,11 @@ struct SettingsSearchOfferTests {
 
     /// Nothing drawn before a query passes is offered outside
     /// the ONE offer predicate (gui.md ▸ Home is the only
-    /// navigator), and none of it may reconfigure the window:
+    /// navigator), so none of it may reconfigure the window:
     /// over every context axis the shell knows, each offered
-    /// row is one `HomeCardOrder.isOffered` admits, and so one
-    /// `switchesMode` refuses to tag.
+    /// row is one `switchesMode` refuses to tag. Simple mode
+    /// is one of those axes, so the row carries no mode tag
+    /// there either.
     @Test("the offer never leaves the offer predicate")
     func offerStaysInsideThePredicate() {
         pinEnglish()
@@ -76,14 +77,8 @@ struct SettingsSearchOfferTests {
                         context: context
                     ) {
                         seen += 1
-                        #expect(
-                            HomeCardOrder.isOffered(
-                                result.destination,
-                                mode: mode,
-                                displayCount: displays,
-                                editingStoredProfile: editing
-                            )
-                        )
+                        // `switchesMode` IS `!isOffered`, so one
+                        // clause states the predicate.
                         #expect(
                             !SettingsSearch.switchesMode(
                                 result,
@@ -110,23 +105,5 @@ struct SettingsSearchOfferTests {
         #expect(SettingsSearch.offer(context: context).isEmpty)
         context.editingStoredProfile = false
         #expect(!SettingsSearch.offer(context: context).isEmpty)
-    }
-
-    /// Simple mode offers it too: General is a Simple area, so
-    /// the row carries no mode tag and the panel is not a
-    /// Power-User-only affordance.
-    @Test("Simple mode offers the Guide untagged")
-    func simpleModeOffersIt() {
-        pinEnglish()
-        defer { reset() }
-        var context = SettingsSearchContext()
-        context.mode = .simple
-        let offer = SettingsSearch.offer(context: context)
-        #expect(offer.count == 1)
-        #expect(
-            offer.allSatisfy {
-                !SettingsSearch.switchesMode($0, context: context)
-            }
-        )
     }
 }

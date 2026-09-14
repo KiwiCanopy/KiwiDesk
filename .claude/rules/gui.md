@@ -686,7 +686,13 @@ must keep:
   selection repairs and the `settingsNavigate` guard alike;
   a hand-negated copy at any of those sites is the drift #18's
   one-predicate rule exists to prevent
-  (`HomeCardOrderTests`). The `displayCount` axis has NO
+  (`HomeCardOrderTests`). The search panel's pre-query offer is
+  a consumer too (#1030, `SettingsSearch.offer`): ONE row, the
+  Guide, passing this predicate, and never `results("")` —
+  an empty query with hits lets a bare Return navigate
+  somewhere unnamed. `SettingsSearchOfferTests ▸
+  offerIsTheGuide` is what a second row reds; a "recent
+  destinations" list under the field is a second navigator. The `displayCount` axis has NO
   selection repair, deliberately — a display disconnect never
   pops an open area; `HomeCardOrder.isOffered`'s docstring
   carries the argument.

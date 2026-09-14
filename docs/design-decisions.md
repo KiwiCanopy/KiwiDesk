@@ -4796,6 +4796,7 @@ the same query answers differently before and after one click.
 
 **[Trade-off]** (#1030, owner ruling 2026-08-26)
 
+:::unreleased
 **Focusing the search field shows exactly one row, the Guide,
 which navigates to General ▸ About.** KiwiDesk is `.accessory`
 and has no Help menu; the search field is the closest thing to
@@ -4828,6 +4829,7 @@ census, but no answer to the Help-menu gap either),
 most-recently-visited (empty for exactly the user this exists
 for), and Home's offers redrawn 380 pt wide. `SettingsSearchOfferTests`
 holds the producer; `HomeSurfacingTests` the branches.
+:::
 
 ### Hover help appears sooner than AppKit's default
 

@@ -66,7 +66,13 @@ struct HeaderSearch: View {
         // pointer holds the panel — a blur alone raced the
         // hover-keepalive the moment the panel had rows before
         // a query (#1030).
-        .onChange(of: focused) { _, _ in collapseIfIdle() }
+        .onChange(of: focused) { _, now in
+            // A highlight does not outlive the focus that made
+            // it, or the next focus re-opens with a row armed
+            // for a bare Return (#1030).
+            if !now { highlighted = nil }
+            collapseIfIdle()
+        }
         .onChange(of: panelHovered) { _, _ in collapseIfIdle() }
     }
 

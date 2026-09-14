@@ -233,13 +233,13 @@ struct HomeSurfacingTests {
         "Settings/HeaderSearch.swift": [
             // The keys move over the offer (#1030); a bare
             // Return commits a first hit only for a TYPED query.
-            "varhits:[SettingsSearchResult]{"
-                + "searching?results.flat:offer}",
+            // Needled at the USE sites, never the declaration.
+            "lethits=hitsguard!hits.isEmpty",
             "??(searching?hits.first:nil)",
+            "if!now{highlighted=nil}collapseIfIdle()",
             // The narrow entry collapses on idle, not on blur —
             // a blur alone raced the panel's hover-keepalive.
-            ".onChange(of:focused){_,_incollapseIfIdle()}"
-                + ".onChange(of:panelHovered){_,_incollapseIfIdle()}",
+            ".onChange(of:panelHovered){_,_incollapseIfIdle()}",
             "if!focused,!panelHovered,!searching{expanded=false}",
             // The collapsed entry is a BRANCH in the body, and
             // the only thing standing between a 720 pt window
@@ -262,10 +262,11 @@ struct HomeSurfacingTests {
             // The offer (#1030) OPENS the panel on focus and is
             // DRAWN through the result row — condition and
             // branch body both, the Monitors lesson.
-            "ifsearching||!offer.isEmpty,focused||panelHovered{"
+            "iffocused||panelHovered,searching||!offer.isEmpty{"
                 + "resultCard}",
-            "if!searching{LazyVStack(alignment:.leading,"
-                + "spacing:2){ForEach(offer){resultinrow(result)}}}",
+            // Two needles, so no layout argument rides as glue.
+            "if!searching{VStack(",
+            "ForEach(offer){resultinrow(result)}",
         ],
         "Settings/SettingsSearchField.swift": [
             // Escape on an EMPTY field resigns focus (#1030),
