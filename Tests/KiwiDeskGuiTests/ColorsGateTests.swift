@@ -131,26 +131,25 @@ struct ColorsGateTests {
                 .bordersHeaderHelp == nil
         )
 
-        // The Space Bar header stacks the same way (#1310): the
-        // bar off outranks the focused-item row's remote gate,
-        // which alone names the picker; both clear to nil.
+        // The focused-item row's link (#1310) draws only while
+        // the bar is on — off, the header's outer reason covers
+        // the row — and stands down once the picker is Glyphs.
         settings.spaceBarStyle.enabled = false
         settings.spaceBarStyle.iconSource = .appImage
         settings.spaceBarStyle.showFrontApp = false
         #expect(
-            AdvancedColorsGates(settings: settings)
-                .spaceBarHeaderHelp == AdvancedColorsHelp.spaceBarOff
+            !AdvancedColorsGates(settings: settings)
+                .focusedItemNeedsReference
         )
         settings.spaceBarStyle.enabled = true
         #expect(
             AdvancedColorsGates(settings: settings)
-                .spaceBarHeaderHelp
-                == AdvancedColorsHelp.focusedItemInert
+                .focusedItemNeedsReference
         )
         settings.spaceBarStyle.iconSource = .appFont
         #expect(
-            AdvancedColorsGates(settings: settings)
-                .spaceBarHeaderHelp == nil
+            !AdvancedColorsGates(settings: settings)
+                .focusedItemNeedsReference
         )
 
         settings.dragGhost.enabled = false

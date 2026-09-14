@@ -50,16 +50,12 @@ struct AdvancedColorsGates {
             && !(style.showFrontApp && style.edge.isHorizontal)
     }
 
-    /// The Space Bar group's header reason, outermost first: bar
-    /// off, then the focused-item row's remote gate (#1310).
-    var spaceBarHeaderHelp: String? {
-        if bars.containerReason(for: .spaceBar) != nil {
-            return AdvancedColorsHelp.spaceBarOff
-        }
-        if focusedItemInert {
-            return AdvancedColorsHelp.focusedItemInert
-        }
-        return nil
+    /// Whether the focused-item row draws its remote reason as a
+    /// link beneath the grid (#1310): only while the bar is on —
+    /// off, the header carries the outer reason and the row is
+    /// greyed for that.
+    var focusedItemNeedsReference: Bool {
+        bars.containerReason(for: .spaceBar) == nil && focusedItemInert
     }
 }
 
@@ -126,20 +122,21 @@ enum AdvancedColorsHelp {
         )
     }
 
-    /// The focused-item tint's remote row gate (#1310): names the
-    /// control, its current value, the destination and the value
-    /// to set, every label by its own key (#818).
-    static var focusedItemInert: String {
+    /// The focused-item row's remote gate, as the sentence a
+    /// `CrossReferenceRow` links to Bars (#1310): the row, the
+    /// control, its value and the value to set, every label by
+    /// its own key (#818); `%5$@` is the link slot.
+    static var focusedItemReference: String {
         L(
-            "colors.focused_item_inert.help",
-            "\u{201C}%3$@\u{201D} tints nothing while "
-                + "\u{201C}%1$@\u{201D} is \u{201C}%2$@\u{201D}. In "
-                + "%4$@, set it to \u{201C}%5$@\u{201D}.",
+            "colors.focused_item_inert.xref",
+            "\u{201C}%1$@\u{201D} tints nothing while "
+                + "\u{201C}%2$@\u{201D} is \u{201C}%3$@\u{201D} — set "
+                + "it to \u{201C}%4$@\u{201D} in %5$@.",
+            L("space_bar.color.focused_item", "Focused window"),
             L("space_bar.icon_source.label", "App symbol style"),
             L("app_bar.icon_source.app_image", "System default"),
-            L("space_bar.color.focused_item", "Focused window"),
-            SettingsDestination.bars.title,
-            L("app_bar.icon_source.app_font", "Glyphs")
+            L("app_bar.icon_source.app_font", "Glyphs"),
+            CrossReferenceRow.linkSlot
         )
     }
 

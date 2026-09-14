@@ -131,10 +131,10 @@ extension InterpolatedLabelTests {
         "colors.drag_border_off.help": 1,
         "colors.drag_fill_off.help": 1,
         "colors.drag_off.help": 1,
-        // #1310: the focused-item gate's header sentence names
-        // the picker, its current value, the row, the
-        // destination and the value to set — five, all by key.
-        "colors.focused_item_inert.help": 5,
+        // #1310: the focused-item row's link sentence names the
+        // row, the picker, its current value and the value to
+        // set — four by key; the fifth slot is the link.
+        "colors.focused_item_inert.xref": 4,
         "colors.space_bar_off.help": 1,
         "colors.unfocused_off.help": 1,
         "layout_defaults.spaces_using.none": 1,

@@ -188,7 +188,7 @@
   "colors.drag_border_off.help": "Este elemento visual no dibuja borde. Activa Borde en %1$@.",
   "colors.drag_fill_off.help": "Este elemento visual no dibuja relleno. Activa Relleno en %1$@.",
   "colors.drag_off.help": "Este elemento visual está desactivado, así que sus colores no se dibujan. Actívalo en %1$@.",
-  "colors.focused_item_inert.help": "«%1$@» está en «%2$@», así que «%3$@» no tiñe nada. En %4$@, elige «%5$@» en su lugar.",
+  "colors.focused_item_inert.xref": "«%1$@» no tiñe nada mientras «%2$@» esté en «%3$@» — cámbialo a «%4$@» en %5$@.",
   "colors.glass.caption": "Un material translúcido sobre ambas barras y el panel de atajos.",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "Ahora mismo las dos barras y el panel de atajos están configurados de forma distinta. Al activarlo, se aplica a los tres.",

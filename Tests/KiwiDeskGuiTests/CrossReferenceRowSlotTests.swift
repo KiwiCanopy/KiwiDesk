@@ -116,6 +116,7 @@ struct CrossReferenceRowSlotTests {
         "SpacesUsingLayout.swift:Self.overrideProse(overriding)",
         "LayoutCard.swift:appBarProse",
         "SpaceOverrideRows+ModeRows.swift:prose",
+        "BarColorCards.swift:AdvancedColorsHelp.focusedItemReference",
     ]
 
     // MARK: - The values
@@ -123,6 +124,14 @@ struct CrossReferenceRowSlotTests {
     @Test func theMotionCardProsePlacesItsLink() {
         #expect(
             MotionCard.scrollingXrefProse.contains(Self.slot)
+        )
+    }
+
+    /// The focused-item row's link under the Space Bar colours
+    /// grid (#1310) — one branch, one value.
+    @Test func theFocusedItemProsePlacesItsLink() {
+        #expect(
+            AdvancedColorsHelp.focusedItemReference.contains(Self.slot)
         )
     }
 

@@ -188,7 +188,7 @@
   "colors.drag_border_off.help": "Cet élément visuel ne dessine aucune bordure. Activez Bordure dans %1$@.",
   "colors.drag_fill_off.help": "Cet élément visuel ne dessine aucun remplissage. Activez Remplissage dans %1$@.",
   "colors.drag_off.help": "Cet élément visuel est désactivé, ses couleurs ne sont donc pas dessinées. Activez-le dans %1$@.",
-  "colors.focused_item_inert.help": "« %1$@ » est réglé sur « %2$@ », « %3$@ » ne teinte donc rien. Dans %4$@, choisissez plutôt « %5$@ ».",
+  "colors.focused_item_inert.xref": "« %1$@ » ne teinte rien tant que « %2$@ » est réglé sur « %3$@ » — réglez-le sur « %4$@ » dans %5$@.",
   "colors.glass.caption": "Un matériau translucide sur les deux barres et le panneau des raccourcis.",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "Les deux barres et le panneau des raccourcis sont actuellement réglés différemment. Activer cette option l'applique aux trois.",

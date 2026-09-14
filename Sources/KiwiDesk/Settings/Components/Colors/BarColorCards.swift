@@ -14,11 +14,10 @@ struct SpaceBarColorCard: View {
     }
 
     var body: some View {
-        // Section header help provides the block gate anchor (#527)
-        // — and the focused-item row's remote gate's (#1310).
+        // Section header help provides the block gate anchor (#527).
         SettingsSection(
             SettingsCatalog.advancedColors.spaceBarGroup,
-            help: gates.spaceBarHeaderHelp
+            help: allows ? nil : AdvancedColorsHelp.spaceBarOff
         ) {
             ColorGrid {
                 AdvancedColorRows(
@@ -26,6 +25,16 @@ struct SpaceBarColorCard: View {
                     keys: ColorsRowOrder.spaceBarAtRest,
                     allows: allows,
                     gateHelp: AdvancedColorsHelp.spaceBarOff
+                )
+            }
+            // One greyed ROW in a live card takes its reason
+            // beneath it as a live link, outside the dimmed
+            // subtree — a header `?` scopes the card (#1310).
+            if gates.focusedItemNeedsReference {
+                CrossReferenceRow(
+                    prose: AdvancedColorsHelp.focusedItemReference,
+                    linkTitle: SettingsDestination.bars.title,
+                    destination: .bars
                 )
             }
             SettingsDisclosure(
