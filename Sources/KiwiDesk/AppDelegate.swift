@@ -180,8 +180,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
 
         // Update menu bar icon and close stale shortcuts panel on
-        // layer change (#603).
-        core.keys.onLayerChange = { [weak self] mode in
+        // layer change (#603) — read off the `layer_change` event
+        // like any other consumer (#1168), so Core keeps one seam.
+        core.bus.addSink { [weak self] event, data in
+            guard event == .layerChange,
+                case .object(let payload) = data,
+                case .string(let mode) = payload["to_layer"]
+            else { return }
             let icon =
                 mode == KeybindingManager.defaultLayer
                 ? nil

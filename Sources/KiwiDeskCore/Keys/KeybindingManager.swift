@@ -24,8 +24,12 @@ public final class KeybindingManager {
 
     public var lua: LuaInterpreter?
     public var onLog: @MainActor (String) -> Void = CoreLog.write
-    /// Layer change callback for GUI indicators.
-    public var onLayerChange: @MainActor (String) -> Void = {
+    /// The one layer-change seam, `(from, to)`, fired only when
+    /// the layer actually changed. Core wires it to the
+    /// `layer_change` event (#1168); everything else — the menu
+    /// bar's icon included — listens on the bus.
+    var onLayerChange: @MainActor (String, String) -> Void = {
+        _,
         _ in
     }
 
@@ -132,9 +136,16 @@ public final class KeybindingManager {
             onLog("switch_layer: unknown layer '\(name)'")
             return
         }
+        let previous = currentLayer
         currentLayer = name
         activate(name)
-        onLayerChange(name)
+        announce(from: previous, to: name)
+    }
+
+    /// The one gate on "did the layer change" — the switch sites
+    /// call it unconditionally.
+    private func announce(from: String, to: String) {
+        if from != to { onLayerChange(from, to) }
     }
 
     /// Resets all layers and releases Lua references on config reload.
@@ -149,11 +160,9 @@ public final class KeybindingManager {
         }
         layers = [:]
         layerIcons = [:]
-        let changed = currentLayer != Self.defaultLayer
+        let previous = currentLayer
         currentLayer = Self.defaultLayer
-        if changed {
-            onLayerChange(Self.defaultLayer)
-        }
+        announce(from: previous, to: Self.defaultLayer)
     }
 
     /// Atomically replaces layers from structured config.
@@ -188,9 +197,7 @@ public final class KeybindingManager {
             }
         }
         activate(currentLayer)
-        if currentLayer != oldCurrent {
-            onLayerChange(currentLayer)
-        }
+        announce(from: oldCurrent, to: currentLayer)
     }
 
     /// True while hotkeys are suspended by Settings shortcut recorder (#213).
