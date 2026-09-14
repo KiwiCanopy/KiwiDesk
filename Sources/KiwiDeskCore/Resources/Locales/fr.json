@@ -983,6 +983,7 @@
   "search.mode_switched": "Mode Avancé activé — la section %1$@ est maintenant sur l’Accueil.",
   "search.no_results": "Aucun résultat",
   "search.place.app_rule": "Règle d’app",
+  "search.place.palette": "Palette",
   "search.place.profile": "Profil",
   "search.place.space": "Espace",
   "search.placeholder": "Rechercher",

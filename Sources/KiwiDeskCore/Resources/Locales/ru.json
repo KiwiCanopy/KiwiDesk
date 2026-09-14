@@ -983,6 +983,7 @@
   "search.mode_switched": "Расширенный режим включён — %1$@ теперь на Главной.",
   "search.no_results": "Ничего не найдено",
   "search.place.app_rule": "Правило приложения",
+  "search.place.palette": "Палитра",
   "search.place.profile": "Профиль",
   "search.place.space": "Пространство",
   "search.placeholder": "Поиск",
