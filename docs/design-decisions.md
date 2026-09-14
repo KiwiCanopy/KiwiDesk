@@ -3507,9 +3507,10 @@ change: a profile switch's partitioning and a prune's forwarding
 ([#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230))
 hand a floating space windows whose frames are the layout's of
 the Space they came from, whatever the receiving space was drawn
-in — so each re-file arms the space it hands to, and a float the
-user parked half-off by hand comes in on that re-file, the priced
-trade. Delivery rides the stash seed, the
+in — so each re-file records the window it moved and the next
+pass gathers the floating space that window sits in, never one
+it merely passed through; a float the user parked half-off by
+hand beside it comes in too, the priced trade. Delivery rides the stash seed, the
 #1352 door, for its
 reason: one path, delivered by the pass's own restore on a
 shown space and kept by the park for the activation on an

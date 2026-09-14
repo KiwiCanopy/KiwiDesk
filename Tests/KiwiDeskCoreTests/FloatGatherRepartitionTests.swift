@@ -9,8 +9,9 @@ import Testing
 /// windows a profile switch's partitioning or a prune's
 /// forwarding hand a floating space carry the layout's frames of
 /// the Space they came from, whatever the receiving space was
-/// drawn in. Each re-file primitive arms the receiving space
-/// (`repartitionedSpaces`) and the next pass gathers it; a
+/// drawn in. Each re-file primitive records the window it moved
+/// (`refiledWindows`) and the next pass gathers the floating
+/// space it sits in; a
 /// same-profile re-apply re-files nothing and arms nothing. Split
 /// from `FloatGatherEntryTests` at the §2.1 ceiling along this
 /// seam: that suite is the drawn-mode ledger, this one the
@@ -39,13 +40,7 @@ struct FloatGatherRepartitionTests {
         guard let screen = NSScreen.main,
             let display = screen.kiwiDisplay
         else { return nil }
-        let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-gather-refile-\(UUID().uuidString)"
-                )
-        )
+        let core = makeTestCore()
         core.tiler.visibleBounds = { _ in Self.bounds }
         core.tiler.allScreenBounds = { [Self.bounds] }
         core.tiler.settings.animations.onRelayout = false
@@ -90,6 +85,10 @@ struct FloatGatherRepartitionTests {
         )
         let seeded = core.tiler.stashOriginal(Self.parked)
         #expect(seeded != nil)
+        // Neither the park's own capture of the state frame (an
+        // unshown receiver parks its members too) nor the strand
+        // net's centre: a grid cell.
+        #expect(seeded != core.state.windows[Self.parked]?.frame)
         #expect(
             seeded
                 != FloatRecovery.centred(
@@ -137,7 +136,7 @@ struct FloatGatherRepartitionTests {
         )
         #expect(core.state.workspaces.space(of: Self.parked) == "1")
         expectGathered(core)
-        #expect(core.repartitionedSpaces.isEmpty)
+        #expect(core.refiledWindows.isEmpty)
     }
 
     /// The incoming profile's own partitioning moves the window
@@ -184,28 +183,96 @@ struct FloatGatherRepartitionTests {
         core.retile(force: true)
         #expect(core.drawnSpaceModes["1"] == .floating)
         core.pruneSpaces(keeping: ["1"], orderedBy: ["1"])
-        #expect(core.repartitionedSpaces == ["1"])
+        #expect(core.refiledWindows == Set(Self.members))
         core.retile(force: true)
         expectGathered(core)
-        #expect(core.repartitionedSpaces.isEmpty)
+        #expect(core.refiledWindows.isEmpty)
     }
 
-    /// The arm names the RECEIVING space: a re-file into a tiled
-    /// space is the layout's, and a floating space that received
-    /// nothing keeps its members where they are.
+    /// The arm names the space a re-filed window SITS in: a
+    /// re-file into a tiled space is the layout's, and a floating
+    /// space that received nothing keeps its own off-region
+    /// member where it is.
     @Test(
-        "Only the receiving space is armed",
+        "Only the space a re-filed window sits in is armed",
         .enabled(if: NSScreen.main != nil)
     )
     func onlyTheReceiverIsArmed() throws {
         let core = try #require(makeCore())
+        let bystander = WindowID(3)
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: bystander,
+                pid: 1,
+                appName: "App",
+                frame: CGRect(x: 2100, y: 100, width: 800, height: 600)
+            )
+        )
+        core.state.workspaces.add(bystander, to: "1")
         core.state.workspaces.setMode("1", .floating)
         core.state.workspaces.ensureSpace("3")
         core.state.workspaces.setMode("3", .bsp)
         core.retile(force: true)
         core.pruneSpaces(keeping: ["1", "3"], orderedBy: ["3", "1"])
-        #expect(core.repartitionedSpaces == ["3"])
+        #expect(core.refiledWindows == Set(Self.members))
         core.retile(force: true)
         #expect(core.tiler.stashOriginal(Self.parked) == nil)
+        #expect(core.tiler.stashOriginal(bystander) == nil)
+    }
+
+    /// A space a re-file merely passed THROUGH is not armed: the
+    /// switch's prune forwards into the fallback and the incoming
+    /// profile's restore moves the windows on, so a half-off float
+    /// already living in the fallback is left where the user put
+    /// it.
+    @Test(
+        "A transit space is not armed",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func transitSpaceIsNotArmed() throws {
+        let core = try #require(makeCore())
+        let settings = core.tiler.settings
+        let bystander = WindowID(3)
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: bystander,
+                pid: 1,
+                appName: "App",
+                frame: CGRect(x: 2100, y: 100, width: 800, height: 600)
+            )
+        )
+        let a = profile(
+            "A",
+            modes: ["1": .floating, "2": .monocle],
+            settings: settings
+        )
+        let b = profile(
+            "B",
+            modes: ["1": .floating, "2": .monocle, "3": .bsp],
+            settings: settings
+        )
+        // A: the pair in monocle `2`, the bystander in floating `1`.
+        core.apply(profile: a, forceRetile: true)
+        core.state.workspaces.add(bystander, to: "1")
+        core.retile(force: true)
+        // B: the pair moved by hand into its bsp `3`.
+        core.apply(profile: b, forceRetile: true)
+        for id in Self.members {
+            core.state.workspaces.add(id, to: "3")
+        }
+        core.retile(force: true)
+        // Back to A: `3` is pruned into the fallback `1`, and A's
+        // own record then moves the pair on to `2` — `1` was only
+        // passed through.
+        core.apply(profile: a, forceRetile: true)
+        #expect(core.state.workspaces.space(of: Self.parked) == "2")
+        #expect(core.state.workspaces.space(of: bystander) == "1")
+        // Unshown `1` parks it and captures its own state frame,
+        // which is not a gather.
+        let capture = core.tiler.stashOriginal(bystander)
+        #expect(
+            capture == nil
+                || capture == core.state.windows[bystander]?.frame
+        )
     }
 }

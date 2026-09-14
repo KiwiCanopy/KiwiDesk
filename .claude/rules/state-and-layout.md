@@ -1290,15 +1290,19 @@ editing here:
   `set_mode` retiles per call) leave in-region frames or kept
   captures — while a RE-FILE into a floating space IS an
   entry: a profile switch's partitioning restore and a prune's
-  forwarding (#1230) each arm the RECEIVING space at the
-  primitive (`repartitionedSpaces`, never at the apply, since
-  the Settings-Save deletion prunes with no switch at all), so
-  a member's frame is the layout's of the Space it came from
-  whatever the receiver's own drawn mode was — a new re-file
-  primitive arms the same set (`FloatGatherRepartitionTests`
-  drives the three doors and the receiver-only scope; a float
-  parked half-off by hand is gathered on that re-file, the
-  priced trade). A member's frame
+  forwarding (#1230) each record the WINDOW they moved at the
+  primitive (`refiledWindows`, never at the apply, since the
+  Settings-Save deletion prunes with no switch at all), and
+  the pass gathers the floating space each one SITS in — never
+  a space it merely passed through, which a prune's fallback
+  is when the restore moves the window on — so a member's
+  frame is the layout's of the Space it came from whatever the
+  receiver's own drawn mode was; a new re-file primitive
+  records into the same set (`FloatGatherRepartitionTests`
+  drives the three doors, the receiver-only scope and the
+  transit; a float parked half-off by hand beside a re-filed
+  window is gathered with it, the priced trade). A member's
+  frame
   is the one it WOULD show, `wouldBeFrame`'s four rungs, stated
   there once. And `clampFloatsClearOfBars` judges a pending
   capture rather than the state frame the window is leaving,

@@ -196,7 +196,7 @@ extension KiwiCore {
                 // capture, so the order composes.
                 reanchorFloat(window, to: fallback)
                 // And its frame is the pruned layout's (#1177).
-                repartitionedSpaces.insert(fallback)
+                refiledWindows.insert(window)
             }
             state.workspaces.removeSpace(space.id)
         }

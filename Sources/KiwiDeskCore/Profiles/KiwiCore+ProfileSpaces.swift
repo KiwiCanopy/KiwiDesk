@@ -139,7 +139,7 @@ extension KiwiCore {
                     reanchorFloat(window, to: space)
                     // Its frame is the other Space's layout's
                     // (#1177).
-                    repartitionedSpaces.insert(space)
+                    refiledWindows.insert(window)
                 }
                 moved += 1
             }
