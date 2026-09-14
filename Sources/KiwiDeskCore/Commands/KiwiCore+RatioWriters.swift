@@ -60,12 +60,10 @@ extension KiwiCore {
         // filling the screen, and the drag drew nothing at all.
         // The WRITE still lands above: the store outlives the
         // window population (#383/#44/#458).
-        // A focus outside the tiled members takes no part in
-        // ANY partition, so it is owed no arrangement sentence
-        // (review, 2026-09-05). A construction net, not a served
-        // case: a native-fullscreen focus is refused before any
-        // writer (#1298), and an ACTIVE home never drops its own
-        // sticky (#1301, `ActiveHomeStickyMembershipTests`).
+        // A focus outside the tiled members is owed no
+        // arrangement sentence; nothing live reaches this —
+        // fullscreen is refused ahead (#1298), an active home
+        // keeps its sticky (#1301, `ActiveHomeStickyMembershipTests`).
         guard tiled.contains(focused) else { return }
         // One term, not two: `partition` returns a nil zone
         // whenever the members fit in master, so an empty

@@ -7,21 +7,13 @@ import Testing
 /// A local sticky is a tiled member of its home Space whenever
 /// that home is the active Space, whatever its scope (#1301).
 ///
-/// `resize()` resolves against `activeSpace.focused`, and the
-/// `.windowFocused` fold writes `focused` on the MEMBERSHIP
-/// Space, so a clickless focus of a sticky (⌘Tab, the Dock)
-/// lands `home.focused = sticky` without moving `activeSpace`.
-/// The tiled resize paths fall back to a neighbour-moving write
-/// for a focus their partition does not hold, so what keeps
-/// that press off the neighbours is this: `stickyRenderSpace`
-/// answers `activeSpace` for `.global` and
-/// `activeSpace(on: homeDisplay)` for `.display`, and
-/// `activeSpace(on:)` prefers the active Space when it lives on
-/// that display — so an ACTIVE home never drops its own sticky
-/// from `effectiveTiledMembers`. The writers' `tiled.contains`
-/// guard is a construction net for that focus, not a served
-/// case; a derivation change that lets an active home drop a
-/// local sticky reopens #1301's press and reds here.
+/// The derivation is state-and-layout.md's (the #670 bullet's
+/// `resize` clause): a clickless focus of a sticky lands
+/// `home.focused = sticky` without moving `activeSpace`, and
+/// what keeps that press off the home's neighbours is that an
+/// ACTIVE home never drops its own sticky from
+/// `effectiveTiledMembers`. A derivation change that lets it
+/// reopens #1301's press and reds here.
 ///
 /// Pure `StateCoordinator` state; no AX / screen needed.
 @Suite("Active home sticky membership")

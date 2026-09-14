@@ -520,8 +520,9 @@ editing here:
   single-space fallback must keep bars and settles running.
   `FullscreenLayoutExemptionTests` pins the membership half and
   `FullscreenStandDownTests` the verdict and the gated surfaces;
-  the argument lives in `docs/design-decisions.md`. **That
-  refusal closes the class, not one cause**: a focus
+  the argument lives in `docs/design-decisions.md`. **The
+  `windowIsFullscreen` refusal closes the class, not one
+  cause**: a focus
   `activeSpace.focused` names that `effectiveTiledMembers`
   drops is floating (its own branch) or full screen (refused),
   and never an elsewhere-rendering sticky — `stickyRenderSpace`
@@ -532,9 +533,11 @@ editing here:
   `ActiveHomeStickyMembershipTests` ▸
   `activeHomeKeepsItsSticky`, with the hidden-home drop as its
   control). A new way for the active Space to drop a member it
-  can hold as `focused` owes the same one refusal in `resize()`
-  ahead of every path, and the writers' `tiled.contains` stays a
-  construction net rather than a served case.
+  can hold as `focused` owes one ruling in `resize()` ahead of
+  every path — a refusal like full screen's or a branch like
+  floating's — never a per-writer answer, so the writers'
+  `tiled.contains` stays a construction net rather than a served
+  case.
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**
@@ -1109,9 +1112,10 @@ editing here:
   than inferring it from the gesture's direction — including
   the case where the focused window is in NO group of it, which
   every writer has: a stack zone and a track partition the
-  TILED members, and an elsewhere-rendering sticky focus is not
-  one (#445; the native-fullscreen focus is refused before any
-  writer — the #670 bullet's `resize` clause), while bsp's sides are
+  TILED members, and no live focus is outside them — a
+  construction net, since the #670 bullet's `resize` clause
+  rules every droppable focus ahead of the writers (#1298,
+  #1301) — while bsp's sides are
   geometric and a window spanning the whole tiled extent on the
   axis sits above every split of that orientation, so no ratio
   move can resize it. That window is dropped from both sides by
