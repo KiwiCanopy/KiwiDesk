@@ -30,6 +30,16 @@ extension KiwiCore {
         if pendingFocusRaise == old {
             pendingFocusRaise = new
         }
+        // The split heal's said-cue memo (#934) is id-keyed too.
+        for (spaceID, cues) in splitFloorCues {
+            splitFloorCues[spaceID] = Set(
+                cues.map {
+                    $0.window == old
+                        ? SplitFloorCue(axis: $0.axis, window: new)
+                        : $0
+                }
+            )
+        }
         // The move-intent latch is id-keyed bookkeeping too
         // (#482): its window may still hold OS key focus, so
         // its re-report can arrive under the fresh id.

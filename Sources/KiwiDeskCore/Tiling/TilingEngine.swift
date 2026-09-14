@@ -233,7 +233,8 @@ public final class TilingEngine {
         // A forced pass probes past corroborated bounds once
         // (#1055); `withForcedPass` is the one door.
         withForcedPass(force) {
-            let frames = calculatedFrames(state: state)
+            // The issued set, not the slots (#934).
+            let frames = placedFrames(state: state)
             // The #45 invariant, enforced rather than trusted: a
             // newcomer IS an instant size, so no promise survives one.
             // Both arguments meet in this one signature, which makes

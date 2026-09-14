@@ -12,8 +12,9 @@ extension KiwiCore {
     /// feedback is universal, not a borders-on perk. Reduce Motion
     /// swaps the offset for an opacity pulse (handled downstream).
     func flashDeadEnd(_ focused: WindowID, direction: Direction) {
+        // The issued frame, like the pill (#934).
         guard
-            let frame = tiler.calculatedFrames(state: state)[focused]
+            let frame = tiler.placedFrames(state: state)[focused]
                 ?? state.windows[focused]?.frame
         else { return }
         let style = tiler.settings.borderStyle
