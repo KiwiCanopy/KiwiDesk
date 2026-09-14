@@ -1340,7 +1340,7 @@ editing here:
   `StashCornerLiftTests`, `FloatStrandRecoveryTests` (the
   decision) and `FloatStrandSeamTests` (every consumer above,
   the `captureState` wirings included).
-- **A space entering floating mode gathers by VISIBILITY
+- **A space entering floating mode gathers by REACHABILITY
   (#1177), and an entry is a change in what was DRAWN.** A
   floating layout assigns nothing, so the switch inherits the
   last layout's frames — scrolled-out columns, a parked
@@ -1348,10 +1348,13 @@ editing here:
   member a `QuitGridLayout` target — the exit gather's own
   function and depth, never a second grid — through the stash
   seed once any member is partly or fully outside
-  `floatBounds(on:)`, and nothing where all are inside (owner
-  ruling 2026-09-14: the visible members staying put laid the
-  gathered ones behind them); no previous-mode list may enter
-  the decision (`FloatGather` is pure and holds the algebra).
+  `floatBounds(on:)` OR piled — its frame contained by another
+  member's, the monocle stack — and nothing otherwise (owner
+  rulings 2026-09-14: the visible members staying put laid the
+  gathered ones behind them, and a stack piles the same); the
+  pile test is containment, never overlap or z-order, and no
+  previous-mode list may enter the decision (`FloatGather` is
+  pure and holds the algebra).
   The JUDGMENT takes that correctness bound — a float flush
   with a bare screen edge, where no clamp pushes, is inside —
   while the GRID is laid in `floatGrowBounds(on:)`, the ring

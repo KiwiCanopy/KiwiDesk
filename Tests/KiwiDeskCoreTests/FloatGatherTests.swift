@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The gather decision's algebra (#1177): visibility is the
-/// TRIGGER — partly-outside counts, a corner counts — and once
-/// tripped every framed member takes the quit grid over the
-/// region, as at the exit; with nothing outside, nothing moves.
+/// The gather decision's algebra (#1177): reachability is the
+/// TRIGGER — partly-outside counts, a corner counts, a pile
+/// counts — and once tripped every framed member takes the quit
+/// grid over the region, as at the exit; otherwise nothing moves.
 @Suite("Float gather decision (#1177)")
 struct FloatGatherTests {
     private static let region = CGRect(
@@ -136,6 +136,57 @@ struct FloatGatherTests {
                     targetDepth: 5
                 )
         )
+    }
+
+    /// A pile — one frame contained by another's — trips the
+    /// gather with everything on screen (owner ruling
+    /// 2026-09-14, the monocle stack); tiles that merely touch
+    /// do not.
+    @Test("A member piled under another trips the whole space")
+    func pileTrips() {
+        let a = WindowID(1)
+        let b = WindowID(2)
+        let c = WindowID(3)
+        let full = CGRect(x: 0, y: 25, width: 1920, height: 1055)
+        let stacked = FloatGather.targets(
+            members: [a, b, c],
+            frames: [a: full, b: full, c: full],
+            region: Self.region,
+            minSize: 100,
+            targetDepth: 5
+        )
+        #expect(
+            stacked
+                == QuitGridLayout.frames(
+                    for: [a, b, c],
+                    in: Self.region,
+                    minSize: 100,
+                    targetDepth: 5
+                )
+        )
+        // Two equal frames a pixel apart — neither contains the
+        // other exactly — are a pile within the tolerance.
+        let shiftedByAPixel = full.offsetBy(dx: 1, dy: 1)
+        #expect(
+            FloatGather.trips(
+                [full, shiftedByAPixel],
+                region: Self.region.insetBy(dx: -10, dy: -10)
+            )
+        )
+        // A small window inside a large one is a pile too.
+        #expect(
+            FloatGather.trips(
+                [full, CGRect(x: 100, y: 100, width: 300, height: 200)],
+                region: Self.region
+            )
+        )
+        // Side-by-side tiles contain nothing.
+        let left = CGRect(x: 0, y: 25, width: 960, height: 1055)
+        let right = CGRect(x: 960, y: 25, width: 960, height: 1055)
+        #expect(!FloatGather.trips([left, right], region: Self.region))
+        // Overlap without containment is not a pile.
+        let shifted = CGRect(x: 500, y: 25, width: 960, height: 1055)
+        #expect(!FloatGather.trips([left, shifted], region: Self.region))
     }
 
     @Test("A member with no frame is not gathered")
