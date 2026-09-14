@@ -8,9 +8,9 @@ import CoreGraphics
 /// `recoverStrandedFloats`, which defers to a pending capture.
 /// The argument is state-and-layout.md's.
 extension KiwiCore {
-    /// Seeds a gather target for every out-of-region member of
-    /// each space entering floating mode, then records every
-    /// space's mode as drawn. Runs at the top of `retile()`.
+    /// Seeds every member of a space entering floating mode a
+    /// gather target where `FloatGather.trips`, then records
+    /// every space's mode as drawn. Runs at the top of `retile()`.
     func gatherIntoFloating() {
         let refiled = refiledWindows
         refiledWindows = []
@@ -74,11 +74,17 @@ extension KiwiCore {
             let outside = frames.filter {
                 FloatGather.isOutside($0.value, of: region)
             }.count
+            let piled = frames.filter { entry in
+                FloatGather.isPiled(
+                    entry.value,
+                    among: frames.filter { $0.key != entry.key }
+                        .map(\.value)
+                )
+            }.count
             onLog(
                 "space \(space.id) entered floating: \(outside) of "
-                    + "\(targets.count) window(s) outside its bounds"
-                    + (outside == 0 ? ", the rest piled" : "")
-                    + " — gathered all into the grid"
+                    + "\(targets.count) window(s) outside its bounds, "
+                    + "\(piled) piled — gathered all into the grid"
             )
         }
     }

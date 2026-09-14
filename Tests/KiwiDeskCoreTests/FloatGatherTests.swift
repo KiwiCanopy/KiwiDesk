@@ -4,11 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The gather decision's algebra (#1177): visibility is the
+/// The gather decision's algebra (#1177): reachability is the
 /// TRIGGER — partly-outside counts, a corner counts, a pile
-/// counts — and once
-/// tripped every framed member takes the quit grid over the
-/// region, as at the exit; with nothing outside, nothing moves.
+/// counts — and once tripped every framed member takes the quit
+/// grid over the region, as at the exit; otherwise nothing moves.
 @Suite("Float gather decision (#1177)")
 struct FloatGatherTests {
     private static let region = CGRect(
@@ -164,6 +163,15 @@ struct FloatGatherTests {
                     minSize: 100,
                     targetDepth: 5
                 )
+        )
+        // Two equal frames a pixel apart — neither contains the
+        // other exactly — are a pile within the tolerance.
+        let shiftedByAPixel = full.offsetBy(dx: 1, dy: 1)
+        #expect(
+            FloatGather.trips(
+                [full, shiftedByAPixel],
+                region: Self.region.insetBy(dx: -10, dy: -10)
+            )
         )
         // A small window inside a large one is a pile too.
         #expect(

@@ -6,8 +6,9 @@ import CoreGraphics
 /// monocle stack), EVERY member takes the quit grid
 /// (`QuitGridLayout`, the exit gather's own function and depth,
 /// so a retune of the exit retunes this) laid in `grid`; where
-/// all are inside, nothing moves. Visibility is the whole
-/// trigger — no previous-mode list — and the argument is
+/// all are inside and none piled, nothing moves. Reachability
+/// is the whole trigger — no previous-mode list — and the
+/// argument is
 /// docs/design-decisions.md's. `region` is the caller's
 /// `floatBounds` and `grid` its `floatGrowBounds`, both carving
 /// the strips a SHOWN space paints; an unshown space's grid
@@ -30,7 +31,9 @@ public enum FloatGather {
     /// tolerance, by another member's frame — one of the two is
     /// behind the other whatever the z-order, so a full-size
     /// monocle stack is as unreachable as a parked one (owner
-    /// ruling 2026-09-14). Tiles never contain each other.
+    /// ruling 2026-09-14). A layout's asks never contain each
+    /// other; a tile an app overgrew onto a neighbour does, and
+    /// reads as a pile by ruling (docs/design-decisions.md).
     public static func isPiled(
         _ frame: CGRect,
         among others: [CGRect]

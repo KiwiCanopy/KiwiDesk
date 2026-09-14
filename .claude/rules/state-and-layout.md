@@ -1297,7 +1297,7 @@ editing here:
   `StashCornerLiftTests`, `FloatStrandRecoveryTests` (the
   decision) and `FloatStrandSeamTests` (every consumer above,
   the `captureState` wirings included).
-- **A space entering floating mode gathers by VISIBILITY
+- **A space entering floating mode gathers by REACHABILITY
   (#1177), and an entry is a change in what was DRAWN.** A
   floating layout assigns nothing, so the switch inherits the
   last layout's frames — scrolled-out columns, a parked

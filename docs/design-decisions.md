@@ -3536,9 +3536,11 @@ contain each other — monocle and scrolling are covered without a
 mode matrix, and partly-outside counts (owner ruling 2026-08-31)
 because a sliver on screen is not a reachable window. The pile
 test is containment, not overlap: two columns that merely cross
-are both grabbable, and a flag float parked inside a tile by hand
-is the one case the test reads as a pile — the priced trade. Once tripped, EVERY member takes the quit
-gather's grid
+are both grabbable. Two cases the test reads as a pile are priced
+rather than exempted: a flag float parked inside a tile by hand,
+and a tile an app has overgrown onto a smaller neighbour (a #677
+bound) — that neighbour IS unreachable, so the verdict stands.
+Once tripped, EVERY member takes the quit gather's grid
 ([#197](https://github.com/KiwiCanopy/KiwiDesk/issues/197)) —
 the exit's own function and depth, so a retune of the exit
 retunes this. The issue had the visible members staying put; the
