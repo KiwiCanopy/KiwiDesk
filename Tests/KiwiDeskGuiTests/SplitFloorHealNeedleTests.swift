@@ -91,9 +91,17 @@ struct SplitFloorHealNeedleTests {
         )
         // The glide note and the bump sit behind the press flag;
         // the border report and the drawing do not. The sound
-        // needs no clause: `soundRefusal` already requires a
-        // press in flight (`keys.isFiring`), which
-        // `RefusalCueSeamTests` holds in shape.
+        // stays on the speaker's own gate, which requires a
+        // press in flight — pinned HERE, since
+        // `RefusalCueSeamTests` holds the offer's shape and not
+        // that term, and relaxing it would make every arrival's
+        // cue beep.
+        let speaker = try SourceScan.functionBody(
+            of: "soundRefusal",
+            in: "KiwiCore+SizeLimitPill.swift",
+            under: "App"
+        )
+        #expect(speaker.contains("keys.isFiring"))
         #expect(
             !SourceScan.allMatches(
                 in: funnel,

@@ -66,8 +66,8 @@ extension KiwiCore {
     /// a per-function body is where a wrong sentence and a
     /// missing bump hid through five review rounds.
     ///
-    /// It also ends a held keyboard run (#1056), so a refusal
-    /// pills once per hold rather than per frame —
+    /// A PRESS cue also ends a held keyboard run (#1056), so a
+    /// refusal pills once per hold rather than per frame —
     /// `HoldGlideEligibilitySeamTests` pins this as the only
     /// production caller of `borders.onResizeRefusal`, which is
     /// what makes "a cue stops the run" structural rather than a
