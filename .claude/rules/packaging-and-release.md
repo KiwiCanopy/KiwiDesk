@@ -594,8 +594,9 @@ dispatch and stranded anyway: two further suites sat
 `action_required` with zero runs — GitHub's "Approve and run"
 gate, applied to the bot's own PR — and once approved, the
 auto-merge the bot had armed was never taken by the merge
-queue, which took the same PR immediately when a person
-enqueued it. Both are the actions-can't-trigger-actions family
+queue `main` carried at the time, which took the same PR
+immediately when a person enqueued it. Both are the
+actions-can't-trigger-actions family
 one step further along, and neither is reachable from a
 workflow file.
 
@@ -603,7 +604,7 @@ workflow file.
 (`SYNC_TOKEN`, read by the checkout that pushes, by every `gh`
 step, and so by the PR and the arming alike). A real actor's
 token fires `pull_request` normally, is not held for approval,
-and arms an auto-merge the queue takes. It **falls back** to
+and arms an auto-merge GitHub honours. It **falls back** to
 `github.token`, because a repository without the secret must
 still open the PR it opens today — and on that path the
 dispatch is what makes the PR reportable, so the dispatch
@@ -627,10 +628,10 @@ passes `filter_paths`, asking that run to apply
 `.github/ci-ignore.txt` the way the `pull_request` it stands in
 for would — so a `site/**`-only sync reports both contexts as
 skipped in under a minute instead of paying a full macOS build
-before the queue can even take it. The **queue leg still builds
-unfiltered**: `merge_group` has no base to diff against and
-resolves to "run everything", which is the fail-closed default
-and stays that way. The button's default stays OFF for a
+before it can land. (The `merge_group` leg went with the queue
+on 2026-09-14; `main` requires an up-to-date branch instead, so
+the PR run IS the run on the merged result.) The button's
+default stays OFF for a
 different reason again — it is the manual override for a WRONG
 entry on that list (#661), and an override that re-read the list
 would be no override.
@@ -645,8 +646,8 @@ undeclared input outright (`422 Unexpected inputs provided`,
 observed 2026-08-31), so the failure lands on the release run —
 after publishing, with the feed waiting — and the guard moves it
 to PR time. It states in its own doc comment what it cannot see:
-the merge queue's willingness to take an entry a bot armed is
-answered only by a real release.
+whether GitHub takes an auto-merge a bot armed is answered only
+by a real release.
 
 **A path a rule file pins is a path the suite reads.**
 `InstructionPinTests` resolves every non-glob `paths:` entry in

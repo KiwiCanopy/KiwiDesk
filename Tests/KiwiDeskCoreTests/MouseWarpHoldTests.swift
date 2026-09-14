@@ -307,7 +307,7 @@ struct MouseWarpHoldTests {
         // the pending slot. Stamped a minute AHEAD: a `Date()`
         // stamp read against `Date()` in the handler outgrew the
         // echo window on a contended queue runner and the warp
-        // fired (merge queue, 2026-09-13).
+        // fired (CI, 2026-09-13).
         core.lastLeftClick = (
             Date().addingTimeInterval(60),
             CGPoint(x: 600, y: 100),
