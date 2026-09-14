@@ -4823,7 +4823,15 @@ discovered: Escape on an EMPTY field resigns focus (clearing an
 already-empty query would leave the panel uncloseable from the
 keyboard), and the narrow-width entry collapses once neither
 focus nor the pointer holds the panel, not on blur alone — the
-panel now has rows to hover before a query. Refused: a hint
+panel now has rows to hover before a query. Where focus goes
+after that Escape is ruled, not stated: nowhere. The window has
+no focused control, and the next Tab restarts the key loop at
+its first key view — the search field, which the guide already
+makes the window's focus home. Escape means "stop searching",
+Tab means "start from the top"; sending focus into the page
+instead would move it somewhere the user was not looking
+(owner eyeball 2026-09-14, keyboard navigation on, wide and
+narrow). Refused: a hint
 sentence with no rows (`ui-designer`'s own recommendation — no
 census, but no answer to the Help-menu gap either),
 most-recently-visited (empty for exactly the user this exists
