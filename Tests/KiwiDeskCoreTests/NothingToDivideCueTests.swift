@@ -248,10 +248,11 @@ struct NothingToDivideCueTests {
         // `resize()` refuses and cues `windowIsFullscreen` first
         // (`FullscreenResizeTiledTests`) — and the mouse
         // `.masterRatio` drag hands it the DRAGGED window, which
-        // cannot be full screen. The live focus this arm still
-        // serves is the elsewhere-rendering sticky (#445), which
-        // this suite does not fixture; the full-screen one
-        // exercises the same `tiled.contains` guard.
+        // cannot be full screen. No live focus reaches this arm
+        // — an ACTIVE home never drops its own sticky (#1301,
+        // `ActiveHomeStickyMembershipTests`) — so the full-screen
+        // input drives the `tiled.contains` guard as a
+        // construction net.
         let core = makeCore()
         let sp = space(core, windows: 2, mode: "stack")
         core.state.workspaces.focus(WindowID(1), in: sp.id)

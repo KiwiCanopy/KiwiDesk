@@ -520,7 +520,21 @@ editing here:
   single-space fallback must keep bars and settles running.
   `FullscreenLayoutExemptionTests` pins the membership half and
   `FullscreenStandDownTests` the verdict and the gated surfaces;
-  the argument lives in `docs/design-decisions.md`.
+  the argument lives in `docs/design-decisions.md`. **That
+  refusal closes the class, not one cause**: a focus
+  `activeSpace.focused` names that `effectiveTiledMembers`
+  drops is floating (its own branch) or full screen (refused),
+  and never an elsewhere-rendering sticky — `stickyRenderSpace`
+  reads the active Space for `.global` and the home display's
+  shown Space for `.display`, which `activeSpace(on:)` answers
+  with the active Space whenever it lives there, so an ACTIVE
+  home keeps its own sticky (#1301,
+  `ActiveHomeStickyMembershipTests` ▸
+  `activeHomeKeepsItsSticky`, with the hidden-home drop as its
+  control). A new way for the active Space to drop a member it
+  can hold as `focused` owes the same one refusal in `resize()`
+  ahead of every path, and the writers' `tiled.contains` stays a
+  construction net rather than a served case.
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**
