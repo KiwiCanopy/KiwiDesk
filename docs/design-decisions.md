@@ -5537,12 +5537,13 @@ undo:
   counts — a pledge is not a fact, and a count built partly on
   pledges is a card that is not an answer (gui.md ▸ Home).
   `MacChecklistProgress` is the one function; the card face and
-  the section header both call it — and the face draws no chart
-  of it. A row of pips shipped for an evening and was taken off
-  on sight (owner, 2026-09-14): the card's data is one number,
-  the subtitle already states it in the expression VoiceOver
-  hears, and every drawn alternative either repeats that number
-  an inch above or hides it from the spoken value.
+  the section header both call it. The card face draws the
+  essentials as the rows' own ticks — the filled check and the
+  hollow ring, same inks — never a chart of the number: a row of
+  squares shipped for an evening and read as a bar graph, and a
+  bare face sat shorter than every other Whole App card (owner,
+  2026-09-14). The subtitle carries the spoken count; the ticks
+  are hidden from VoiceOver like every other card preview.
 - **Detected rows are chips, not controls; the self-tick is the
   FALLBACK.** macOS answers these rows, so the tick is not the
   user's to toggle, and greying a checkbox would say "switch

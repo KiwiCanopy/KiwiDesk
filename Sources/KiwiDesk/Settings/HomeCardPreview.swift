@@ -18,15 +18,50 @@ enum HomeCardPreview {
             return AnyView(ruleIcons(model))
         case .general:
             return AnyView(versionLine)
+        case .macChecklist:
+            return AnyView(checklistTicks(model))
         case .spaces, .bars, .layoutDefaults, .monitors,
             .gapsAndBorders, .colors, .advancedColors,
-            .behavior, .macChecklist:
-            // The checklist's data is one number, and the
-            // subtitle already states it in the expression
-            // VoiceOver hears — a drawn chart of it duplicates
-            // or hides that (ui-designer, #1365).
+            .behavior:
             return nil
         }
+    }
+
+    /// One tick per essential in the rows' own vocabulary — the
+    /// filled check and the hollow ring the page draws, same
+    /// inks — so the face says how many things there are and how
+    /// many are done in the shape the reader meets on opening
+    /// it (owner, #1365; a bare face sat shorter than every
+    /// other Whole App card, and a row of squares read as a
+    /// chart). State rides the glyph, never hue alone; the
+    /// subtitle carries the spoken count, so the row is hidden
+    /// from VoiceOver like the other previews.
+    private static func checklistTicks(
+        _ model: SettingsModel
+    ) -> some View {
+        let ticks = model.macChecklistTicks
+        return HStack(spacing: 6) {
+            ForEach(MacChecklistProgress.essentials, id: \.self) {
+                setting in
+                let done = MacChecklistProgress.isDone(
+                    setting,
+                    states: model.macChecklistStates,
+                    ticks: ticks
+                )
+                Image(
+                    systemName: done
+                        ? "checkmark.circle.fill" : "circle"
+                )
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(
+                    done
+                        ? SettingsTheme.groupHeading
+                        : SettingsTheme.ink3
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityHidden(true)
     }
 
     /// Maximum profile chips drawn before "+N" overflow chip.
