@@ -668,8 +668,7 @@ drawer's interior is a page showing nothing it named. The only
 guard that moves when this is forgotten is the anchor-less
 count in `SettingsSearchIndexTests`, whose comments read a bump
 as ordinary #277 residue — so a row landing in a collapsed
-drawer is review's to catch; `SettingsSearchAnchorTests ▸
-advancedHitOpensDrawer` holds General ▸ Advanced, the worked
+drawer is review's to catch; `SettingsSearchAnchorTests` ▸ `advancedHitOpensDrawer` holds General ▸ Advanced, the worked
 instance, not the class. `GeneralAdvancedControls` and the Gaps
 drawers' `GapEdgeControls` are the shape.
 
@@ -690,8 +689,7 @@ must keep:
   a consumer too (#1030, `SettingsSearch.offer`): ONE row, the
   Guide, passing this predicate, and never `results("")` —
   an empty query with hits lets a bare Return navigate
-  somewhere unnamed. `SettingsSearchOfferTests ▸
-  offerIsTheGuide` is what a second row reds; a "recent
+  somewhere unnamed. `SettingsSearchOfferTests` ▸ `offerIsTheGuide` is what a second row reds; a "recent
   destinations" list under the field is a second navigator. The `displayCount` axis has NO
   selection repair, deliberately — a display disconnect never
   pops an open area; `HomeCardOrder.isOffered`'s docstring

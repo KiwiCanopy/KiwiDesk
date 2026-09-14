@@ -230,15 +230,18 @@ struct HomeSurfacingTests {
             // push/pop (owner 2026-08-10).
             ".id(destination)",
         ],
+        "Settings/SettingsSearch.swift": [
+            // The offer ROUTES through the one offer predicate
+            // (#1030); a behaviour test cannot see the route.
+            "HomeCardOrder.isOffered(row.destination,"
+        ],
         "Settings/HeaderSearch.swift": [
             // The keys move over the offer (#1030); a bare
             // Return commits a first hit only for a TYPED query.
-            // Needled at the USE sites, never the declaration.
             "lethits=hitsguard!hits.isEmpty",
             "??(searching?hits.first:nil)",
             "if!now{highlighted=nil}collapseIfIdle()",
-            // The narrow entry collapses on idle, not on blur —
-            // a blur alone raced the panel's hover-keepalive.
+            // The narrow entry collapses on idle, not on blur.
             ".onChange(of:panelHovered){_,_incollapseIfIdle()}",
             "if!focused,!panelHovered,!searching{expanded=false}",
             // The collapsed entry is a BRANCH in the body, and
@@ -259,18 +262,15 @@ struct HomeSurfacingTests {
                 + ".keyboardShortcut(\"k\",modifiers:.command)",
         ],
         "Settings/HeaderSearch+Results.swift": [
-            // The offer (#1030) OPENS the panel on focus and is
-            // DRAWN through the result row — condition and
-            // branch body both, the Monitors lesson.
+            // The offer (#1030) OPENS the panel and is DRAWN —
+            // condition and branch body both.
             "iffocused||panelHovered,searching||!offer.isEmpty{"
                 + "resultCard}",
-            // Two needles, so no layout argument rides as glue.
             "if!searching{VStack(",
             "ForEach(offer){resultinrow(result)}",
         ],
         "Settings/SettingsSearchField.swift": [
-            // Escape on an EMPTY field resigns focus (#1030),
-            // or the on-focus panel is uncloseable by keyboard.
+            // Escape on an EMPTY field resigns focus (#1030).
             ".onExitCommand{iftext.isEmpty{focus.wrappedValue=false}"
                 + "else{text=\"\"}}"
         ],
