@@ -256,6 +256,9 @@ public final class KiwiCore {
     var desktopMoveDepartures: [WindowID: Date] = [:]
     /// A `.returned` window's arrival time (#1345).
     var recentReturns: [WindowID: Date] = [:]
+    /// The mode each space was last DRAWN in (#1177) — the
+    /// entry-into-floating gather's one arm, `KiwiCore+FloatGather`.
+    var drawnSpaceModes: [SpaceID: LayoutMode] = [:]
 
     /// The live arrangement's space→monitor fingerprint pins,
     /// adopted from the active profile's matching monitor set

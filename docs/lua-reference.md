@@ -521,6 +521,13 @@ KiwiDesk.move_to_track("next")
 **Does:** sets the layout mode for the space. Every space
 defaults to `bsp`.
 
+:::unreleased
+Switching to `floating` gathers every window the previous layout
+left partly or fully outside the visible screen into the quit
+grid (`quit.set_layout`); windows already fully visible keep
+their frames.
+:::
+
 **Example:**
 
 ```lua

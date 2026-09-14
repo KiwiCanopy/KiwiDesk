@@ -36,7 +36,11 @@
 /// the group-breaking beside it (`KiwiCore+SpaceBarItems`), which
 /// mark the exception to a space's layout and in a floating-mode
 /// space have none to mark (owner ruling 2026-09-13,
-/// `SpaceBarBadgeTests`). Every other reader is the flag's own
+/// `SpaceBarBadgeTests`), and the arrival's screen-home
+/// stand-down (`StateCoordinator.screenHome`, #1362): a
+/// floating-mode member arriving on another screen follows the
+/// screen, since its home assigns no frame that could bring it
+/// over. Every other reader is the flag's own
 /// identity, a net already routed here, or a "tiled member"
 /// question — the negation below — and
 /// `FloatFlagReaderCensusTests` holds that census per file, so a

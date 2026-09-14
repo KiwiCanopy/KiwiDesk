@@ -3469,6 +3469,77 @@ now spares every id the away ledger knows — the id is the same
 window when it returns — so the centring stays what it is meant
 to be, the net beneath a memory that is genuinely gone.
 
+:::unreleased
+**A space entering floating mode gathers what the previous
+layout left off-screen, scoped by visibility (#1177).**
+[Principle] A floating layout assigns nothing, so a space
+switched to it keeps the frames its last layout drew — and
+scrolling's scrolled-out columns and monocle's parked pile are
+drawn out of reach on purpose. Switching to floating therefore
+lost windows behind the visible ones or off the screen, which
+the owner ruled crucial and frequent (2026-09-09). The rule is
+scoped by what is VISIBLE, never by which layout came before:
+every member partly or fully outside the space's `floatBounds`
+is gathered, and one fully inside stays exactly where it is. A
+plain tiled→floating switch then never trips it, monocle and
+scrolling are covered without a mode matrix, and partly-outside
+counts (owner ruling 2026-08-31) because a sliver on screen is
+not a reachable window. The gathered take the quit gather's grid
+([#197](https://github.com/KiwiCanopy/KiwiDesk/issues/197)),
+which is what keeps a pile of columns findable rather than
+stacked at one edge, and the grid is laid inside the bounds
+with the painted strips carved off, so no gathered frame lands
+under a bar.
+
+*An entry is a change in what was DRAWN, not in what was
+written.* The retile keeps the mode each space was last drawn
+in and gathers where the live mode is floating and the drawn
+one was not. That is the difference between a switch and a
+replay: a config reload resets every mode and re-declares it
+with no pass between, a session restore re-states a mode whose
+entry was gathered when it happened, and the boot's first pass
+meets spaces no pass has drawn — in each the frames are the
+user's, and a gather would have dragged in a float parked
+half-off by hand, which the retile-time fit already refuses to
+do. Delivery rides the stash seed, the #1352 door, for its
+reason: one path, delivered by the pass's own restore on a
+shown space and kept by the park for the activation on an
+unshown one; and it is seeded ahead of the strand net so a
+monocle pile at the corner takes the grid, never a second
+centring. The bar clamp learned to judge a pending capture
+rather than the state frame it is leaving, since a fit of the
+stale frame landed after the delivery and undid it.
+
+**A restore pays a window it could not set at that window's
+arrival (#1362).** [Principle] The session restore replays
+frames onto tracked windows, and a slow app's window is not
+tracked yet when it runs — so it was adopted later into its
+remembered Space carrying the frame the boot scan had tiled it
+at, on the main display, while its Space was a floating one on
+the other display, which assigns nothing. Two fixes were on the
+table: re-anchor the late adoption proportionally onto its
+Space's display, or keep the snapshot record and pay it at the
+arrival the way a Desktop return pays its owed focus
+([#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)).
+The second is the rule: it restores the exact frame rather than
+a proportional one, it covers a float on the SAME display whose
+frame the scan changed, and it needs no display arithmetic. The
+frame rides beside the `.restored` Space memory and shares its
+lifetime, is consumed once at the first arrival, and is paid
+through the stash seed so the arrival retile delivers it where
+the Space is shown and the park keeps it where it is not.
+
+*The screen-home stand-down stays on the float flag.* The
+#1286 sweep deferred one reader here: `screenHome` re-files a
+window returning on another display into that display's shown
+Space, standing down for a flag float. A floating-mode member
+follows the screen by ruling, since its home assigns no frame
+that could bring it over — standing down would keep a home on a
+display the window is not on, which is this issue's strand by
+another door — while a flag float's frame is the user's
+placement wherever it lands.
+:::
+
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
 frame the instant it turns floating, so `make_floating` /

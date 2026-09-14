@@ -1257,6 +1257,52 @@ editing here:
   `StashCornerLiftTests`, `FloatStrandRecoveryTests` (the
   decision) and `FloatStrandSeamTests` (every consumer above,
   the `captureState` wirings included).
+- **A space entering floating mode gathers by VISIBILITY
+  (#1177), and an entry is a change in what was DRAWN.** A
+  floating layout assigns nothing, so the switch inherits the
+  last layout's frames — scrolled-out columns, a parked
+  monocle pile. `KiwiCore.gatherIntoFloating` seeds every
+  member partly or fully outside `floatBounds(on:)` a
+  `QuitGridLayout` target through the stash seed, ahead of
+  `recoverStrandedFloats` so a corner pile takes the grid and
+  never a second centring; a fully visible member is untouched,
+  and no previous-mode list may enter the decision
+  (`FloatGather` is pure and holds the algebra). The entry is
+  judged against `drawnSpaceModes`, the mode each space was
+  last DRAWN in — never the previous write — so a config
+  reload's reset-and-redeclare, a space no pass has drawn (the
+  boot's) and a snapshot replay (`restore` calls
+  `settleDrawnSpaceModes`) gather nothing: their frames are the
+  user's, and the retile-time fit already refuses to drag in a
+  float parked half-off by hand. A member's frame is the one it
+  WOULD show — its pending capture, then the commanded frame,
+  then state. And `clampFloatsClearOfBars` judges a pending
+  capture rather than the state frame the window is leaving,
+  correcting the capture WITH the window, or a fit of the stale
+  frame lands after the restore's delivery and undoes it. Held
+  by `FloatGatherTests` (the decision), `FloatGatherEntryTests`
+  (the ledger, the seed, the strip, the unshown arm) and
+  `FloatClampPendingCaptureTests`.
+- **A restore pays an untracked window's frame at its arrival
+  (#1362).** The replay sets frames on TRACKED windows only; a
+  slow app's window adopted later kept the boot scan's tile on
+  the main display while its Space, a floating one on the
+  other display, assigned nothing. `restore` files
+  `state.restoredFrames` for every untracked id `adopt`
+  remembered (a corner record is no original there either);
+  the create fold consumes it ONCE into
+  `AppliedEffects.restoredFrame`, and `payRestoredFrame` seeds
+  it — never sets it, since the park that follows would capture
+  the tile as the original — so the arrival retile's restore
+  delivers it on a shown Space and the park keeps it for the
+  activation; a layout frame outranks it on a tiled Space. It
+  is id-keyed like `rememberedSpaces` and shares its lifetime
+  and its rekey (`WindowRekeyParityTests` counts it). The
+  screen-home stand-down stays on the FLAG by ruling: a
+  floating-mode member returning on another display follows
+  the screen, its home having no frame to bring it over
+  (`FloatFlagReaderCensusTests` ▸ `ruledToStay`). Held by
+  `RestoredFrameDebtTests`.
 - **Derive where a float may sit in ONE place, and bound its
   SIZE there rather than its position** (#1091). `KiwiCore.floatBounds` is that derivation — the
   display's visible bounds with every PAINTED strip carved off
