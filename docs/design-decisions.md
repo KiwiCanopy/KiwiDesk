@@ -5537,7 +5537,12 @@ undo:
   counts — a pledge is not a fact, and a count built partly on
   pledges is a card that is not an answer (gui.md ▸ Home).
   `MacChecklistProgress` is the one function; the card face and
-  the section header both call it.
+  the section header both call it — and the face draws no chart
+  of it. A row of pips shipped for an evening and was taken off
+  on sight (owner, 2026-09-14): the card's data is one number,
+  the subtitle already states it in the expression VoiceOver
+  hears, and every drawn alternative either repeats that number
+  an inch above or hides it from the spoken value.
 - **Detected rows are chips, not controls; the self-tick is the
   FALLBACK.** macOS answers these rows, so the tick is not the
   user's to toggle, and greying a checkbox would say "switch
@@ -5571,7 +5576,14 @@ user who pressed "Start using it" used to land on nothing, and
 the card reaches a new user only if the tour hands them to it
 — so the first thing they see is "Essentials done: 0 of 4",
 which is why the count is essentials only and the card never
-shouts.
+shouts. That is also why the card sits LAST on Home, after
+General: the tour carries discovery, Home carries return visits,
+and a checklist most people finish once is the right card to
+orphan on a five-card row's second line. A habit that names a
+macOS switch — the Dock — links the pane the way the settings
+rows do, and the keyboard habit names the shortcuts panel's
+LIVE chord, read from the resolved layer like the tour's keys,
+with a second frame for a Mac where nothing is bound.
 
 ### The app links the guide, in a language the site actually serves
 

@@ -52,7 +52,13 @@ struct MacChecklistSection: View {
                 if case .macChecklist(let key) = row,
                     let control = Self.control(for: key)
                 {
-                    MacHabitRow(key: key, control: control)
+                    MacHabitRow(
+                        key: key,
+                        control: control,
+                        panelChord: ShortcutsOpenBinding.comboGlyphs(
+                            core: model.core
+                        )
+                    )
                 }
             }
         }

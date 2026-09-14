@@ -9,6 +9,8 @@ import SwiftUI
 struct MacHabitRow: View {
     let key: MacChecklistKey
     let control: SettingsControl
+    /// The shortcuts panel's live chord, for the keyboard habit.
+    let panelChord: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
@@ -21,14 +23,26 @@ struct MacHabitRow: View {
     }
 
     @ViewBuilder private var sentence: some View {
-        let prose = MacChecklistText.habit(for: key)
-        if let destination = key.destination {
+        let prose = MacChecklistText.habit(
+            for: key,
+            panelChord: panelChord
+        )
+        switch key.link {
+        case .destination(let destination):
             CrossReferenceRow(
                 prose: prose,
                 linkTitle: destination.title,
                 destination: destination
             )
-        } else {
+        case .systemSettings:
+            let (leading, trailing) = MacSettingRow.split(prose)
+            LinkedCaption(
+                leading: leading,
+                linkTitle: MacChecklistText.pathLabel,
+                trailing: trailing,
+                navigate: MacSettingRead.openDesktopAndDock
+            )
+        case nil:
             Text(prose)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink2)

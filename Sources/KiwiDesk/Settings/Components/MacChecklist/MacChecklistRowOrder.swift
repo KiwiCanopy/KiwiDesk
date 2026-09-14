@@ -53,19 +53,33 @@ extension MacChecklistKey {
         }
     }
 
-    /// Where a habit's sentence links; nil for one that names no
-    /// KiwiDesk surface.
-    var destination: SettingsDestination? {
+    /// Where a habit's sentence links at its slot: a KiwiDesk
+    /// surface, or System Settings for the Dock habit, which
+    /// names a macOS switch the way the settings rows do; nil for
+    /// a habit naming neither.
+    var link: MacChecklistLink? {
         switch self {
-        case .habitBigWindows: return .spaces
-        case .habitKeyboard: return .shortcuts
-        case .habitFloat: return .appRules
-        case .habitHide, .habitDock, .rearrangeSpaces,
+        case .habitBigWindows: return .destination(.spaces)
+        case .habitKeyboard: return .destination(.shortcuts)
+        case .habitFloat: return .destination(.appRules)
+        case .habitDock: return .systemSettings
+        case .habitHide, .rearrangeSpaces,
             .switchOnActivate, .stageManager, .edgeTiling,
             .clickWallpaper, .doubleClickTitle, .selfTicks:
             return nil
         }
     }
+
+    var destination: SettingsDestination? {
+        guard case .destination(let d) = link else { return nil }
+        return d
+    }
+}
+
+/// What a habit's link slot opens.
+enum MacChecklistLink: Hashable {
+    case destination(SettingsDestination)
+    case systemSettings
 }
 
 /// The ONE count (#1365): essentials only, read by the Home card

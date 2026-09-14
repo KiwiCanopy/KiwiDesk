@@ -83,7 +83,13 @@ enum MacChecklistText {
 
     /// A habit's sentence; where it names a KiwiDesk surface the
     /// destination sits at `CrossReferenceRow.linkSlot`.
-    static func habit(for key: MacChecklistKey) -> String {
+    /// `panelChord` is the shortcuts panel's LIVE chord glyphs
+    /// (`ShortcutsOpenBinding.comboGlyphs`), nil where nothing is
+    /// bound — a second key rather than an empty argument.
+    static func habit(
+        for key: MacChecklistKey,
+        panelChord: String? = nil
+    ) -> String {
         let slot = CrossReferenceRow.linkSlot
         switch key {
         case .habitHide:
@@ -112,11 +118,21 @@ enum MacChecklistText {
                 slot
             )
         case .habitKeyboard:
+            guard let panelChord else {
+                return L(
+                    "mac_checklist.habit.keyboard.caption",
+                    "The focus and move chords beat any drag; the "
+                        + "mouse is for content. They are all in %1$@.",
+                    slot
+                )
+            }
             return L(
-                "mac_checklist.habit.keyboard.caption",
+                "mac_checklist.habit.keyboard.caption_panel",
                 "The focus and move chords beat any drag; the mouse "
-                    + "is for content. They are all in %1$@.",
-                slot
+                    + "is for content. They are all in %1$@ — or press "
+                    + "%2$@ to see them over whatever you are doing.",
+                slot,
+                panelChord
             )
         case .habitFloat:
             return L(
@@ -129,10 +145,11 @@ enum MacChecklistText {
             return L(
                 "mac_checklist.habit.dock.caption",
                 "With the %1$@ on, the Dock only costs screen space "
-                    + "— auto-hide it in Desktop & Dock and launch "
-                    + "by Spotlight or %2$@.",
+                    + "— auto-hide it in %3$@ and launch by Spotlight "
+                    + "or %2$@.",
                 L("bars.switch.space_bar", "Space Bar"),
-                L("shortcuts.app_behavior.open_or_focus", "Open or Focus")
+                L("shortcuts.app_behavior.open_or_focus", "Open or Focus"),
+                slot
             )
         case .rearrangeSpaces, .switchOnActivate, .stageManager,
             .edgeTiling, .clickWallpaper, .doubleClickTitle,

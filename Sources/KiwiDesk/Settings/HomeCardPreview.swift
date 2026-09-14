@@ -18,11 +18,13 @@ enum HomeCardPreview {
             return AnyView(ruleIcons(model))
         case .general:
             return AnyView(versionLine)
-        case .macChecklist:
-            return AnyView(checklistPips(model))
         case .spaces, .bars, .layoutDefaults, .monitors,
             .gapsAndBorders, .colors, .advancedColors,
-            .behavior:
+            .behavior, .macChecklist:
+            // The checklist's data is one number, and the
+            // subtitle already states it in the expression
+            // VoiceOver hears — a drawn chart of it duplicates
+            // or hides that (ui-designer, #1365).
             return nil
         }
     }
@@ -128,37 +130,6 @@ enum HomeCardPreview {
             .fill(SettingsTheme.sunken)
             .frame(width: 22, height: 22)
             .overlay(content())
-    }
-
-    /// One pip per essential, filled when done — state as shape,
-    /// never hue alone (#1365). Reads the model's one snapshot,
-    /// the same rows the section counts.
-    private static func checklistPips(
-        _ model: SettingsModel
-    ) -> some View {
-        let ticks = model.macChecklistTicks
-        return HStack(spacing: 5) {
-            ForEach(MacChecklistProgress.essentials, id: \.self) {
-                setting in
-                let done = MacChecklistProgress.isDone(
-                    setting,
-                    states: model.macChecklistStates,
-                    ticks: ticks
-                )
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(done ? SettingsTheme.ink : .clear)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 3)
-                            .strokeBorder(
-                                done
-                                    ? .clear : SettingsTheme.hairline
-                            )
-                    )
-                    .frame(width: 14, height: 14)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityHidden(true)
     }
 
     /// Version label, the same frame the About pane renders.

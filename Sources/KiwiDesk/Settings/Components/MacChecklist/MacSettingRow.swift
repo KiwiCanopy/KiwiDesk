@@ -130,8 +130,10 @@ struct MacSettingRow: View {
         )
     }
 
-    /// The chip column's width, so titles align across rows.
-    static let chipWidth: CGFloat = 60
+    /// The chip column's width, so titles align across rows —
+    /// the tree's one column sized by a word, since "Not yet"
+    /// grows past 60 in de and the Romance locales.
+    static let chipWidth = SettingsMetrics.readoutColumn
     /// Caption indent = chip column + row spacing.
     static let captionInset: CGFloat = chipWidth + 10
 }

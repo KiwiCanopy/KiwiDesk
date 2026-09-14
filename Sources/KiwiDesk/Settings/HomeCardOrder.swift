@@ -9,11 +9,13 @@ enum HomeCardOrder {
         .layoutDefaults, .monitors, .behavior, .advancedColors,
     ]
 
-    /// WHOLE APP, full (Power User) order. The checklist leads:
-    /// its count is Home's one call to action, and after General
-    /// it would be buried (ui-designer, #1365).
+    /// WHOLE APP, full (Power User) order. The checklist is LAST:
+    /// the tour lands a new user on it, so Home carries only
+    /// return visits, and the card that is usually done is the
+    /// one to orphan on the row's second line (owner and
+    /// ui-designer, #1365).
     static let wholeApp: [SettingsDestination] = [
-        .macChecklist, .shortcuts, .profiles, .appRules, .general,
+        .shortcuts, .profiles, .appRules, .general, .macChecklist,
     ]
 
     /// Single offer predicate for home dashboard cards (#18) — no
