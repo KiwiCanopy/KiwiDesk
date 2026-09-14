@@ -24,6 +24,15 @@ final class CaptionTextView: NSTextView {
         view.isVerticallyResizable = false
         view.isHorizontallyResizable = false
         view.focusRingType = .exterior
+        // AppKit draws a `.link` run in `linkTextAttributes` OVER
+        // the storage at draw time, and the default set carries
+        // `linkColor` — so `paintLink`'s grey never reached the
+        // screen and every caption link shipped system blue
+        // (#1466). The underline alone: no colour here, so the
+        // storage's ink is what draws (`LinkedCaptionHitTests`).
+        view.linkTextAttributes = [
+            .underlineStyle: NSUnderlineStyle.single.rawValue
+        ]
         return view
     }
 
