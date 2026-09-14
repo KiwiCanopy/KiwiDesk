@@ -61,6 +61,8 @@ extension TilingEngine {
         ) {
             pendingBoundPlacement = true
         }
+        // A performed probe is re-asked by this very pass.
+        boundLearner.compliedProbes.remove(id)
         return true
     }
 

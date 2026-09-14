@@ -58,12 +58,11 @@ extension KiwiCore {
         // mid-pass (#677): the pass computed its frames BEFORE
         // believing it, so run the placement now rather than
         // leaving the residue for the next unrelated event.
-        // Two placements at most: the first may itself confirm
-        // the corroboration probe it issued (#1439, an
-        // echo-quiet fixture does), a third re-observes the
-        // same answer, which is no edge — and a flag left
-        // standing would fire a placement on the next unrelated
-        // retile, so it is drained here.
+        // Two at most (#1439): the first can confirm the probe it
+        // issued where the pass is echo-quiet (a fixture; in
+        // production the probe's set puts it inside the grace),
+        // a third re-observes and is no edge. Drain the flag or
+        // the next unrelated retile pays a placement.
         var placements = 0
         while placements < 2, tiler.takePendingBoundPlacement() {
             placements += 1

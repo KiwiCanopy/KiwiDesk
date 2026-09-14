@@ -127,17 +127,11 @@ struct RetileBoundSkipTests {
         _ = try learnBound(core, applied: applied)
 
         // The display narrows, so the monocle slot moves and
-        // resizes: the skip must not swallow real motion. It
-        // narrows BELOW the learned answer, so the new ask lies
-        // in the unlearned range — a corroborated ceiling answers
-        // only asks above it (#1055), and this fixture's
-        // synchronous placement pass corroborates the entry
-        // through the #1439 probe as it learns. The pass itself
-        // must observe nothing: the unchanged frame answers every
-        // ask at once here — a fixed-width app's signature, whose
-        // fixed-span lend would then consume the new ask too —
-        // so the echo grace is pinned and the claim stays the
-        // skip's.
+        // resizes: the skip must not swallow real motion. Below
+        // the learned answer, so the new ask is unlearned range
+        // (#1055), and echo-pinned so this fixture's unchanged
+        // frame — a fixed-width signature — learns nothing more
+        // mid-pass (#1439).
         core.tiler.visibleBounds = { _ in
             CGRect(x: 100, y: 0, width: 600, height: 800)
         }

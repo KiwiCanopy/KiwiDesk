@@ -37,9 +37,12 @@ enum SizeAnswerChannel: String {
 }
 
 extension KiwiCore {
-    /// Grace before the read-back, past the applier's echo
-    /// grace so a legitimately-late final echo is not misread —
-    /// the `StrandDetector`'s number and argument. Also load-
+    /// Grace before the read-back, after the SETTLE — the
+    /// `StrandDetector`'s number and argument — so a late final
+    /// echo is not misread; it is inside the applier's 1 s echo
+    /// grace, which runs from the last set, so the retile a probe
+    /// read triggers is never echo-quiet (#1439's trust exists
+    /// for that). Also load-
     /// bearing for the probe's SETTLED classification (#1049):
     /// it must outlast an app-side transient-compliance hold,
     /// the longest observed being the Android emulator's ~0.4 s
@@ -141,6 +144,14 @@ extension KiwiCore {
                 "size bound confirmed for window \(id.raw) at "
                     + "\(Int(size.width))x\(Int(size.height)) "
                     + "(\(channel.rawValue)); placing residue"
+            )
+            retile()
+            return
+        }
+        if tiler.takeProbeCompliance(id) {
+            onLog(
+                "corroboration probe complied for window "
+                    + "\(id.raw); re-asking the layout"
             )
             retile()
             return

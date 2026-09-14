@@ -17,6 +17,7 @@ extension SizeBoundLearner {
         candidates[id] = nil
         bounds[id] = nil
         probes[id] = nil
+        compliedProbes.remove(id)
     }
 
     /// How long a gone window's parked ledger may wait for the
@@ -95,6 +96,9 @@ extension SizeBoundLearner {
         if let probe = probes.removeValue(forKey: old) {
             probes[new] = probe
         }
+        if compliedProbes.remove(old) != nil {
+            compliedProbes.insert(new)
+        }
     }
 
     /// Whether a reported size is one this ledger already
@@ -160,6 +164,9 @@ extension SizeBoundLearner {
         asked: CGFloat,
         axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
     ) {
+        if retireCorroborationProbe(id, answering: asked, axis: axis) {
+            compliedProbes.insert(id)
+        }
         if var candidateEntries = candidates[id]?[
             keyPath: axis
         ] {
@@ -176,10 +183,9 @@ extension SizeBoundLearner {
         else { return }
         let tolerance = EffectiveSizeBound.matchTolerance
         entries.removeAll { entry in
-            let ceiling = entry.answered < entry.asked
-            return ceiling
-                ? asked > entry.answered + tolerance
-                : asked < entry.answered - tolerance
+            entry.isFloor
+                ? asked < entry.answered - tolerance
+                : asked > entry.answered + tolerance
         }
         writeBounds(id, entries: entries, axis: axis)
     }

@@ -827,21 +827,34 @@ editing here:
   tolerance), and a corroborated ceiling corroborates the
   single floor entry at the same span — the fixed-span lend,
   paired values only. **The corroborating second ask is SENT,
-  never awaited (#1439):** a confirmation on an axis nothing
-  corroborates yet arms ONE probe in `promote` — the one door —
-  `probeDistance` past the anchor in the refusing direction; the
-  retile loop issues it only in place of an ask the anchor
-  already answers, never a new one, re-issues it once and only
-  once its first answer seeded a candidate, and a probe's own
-  confirmation arms none — the retired record outliving its
-  anchor, because a grid app can answer inside the tolerance and
-  the compliance sweep then re-confirms the same entry, which a
-  record that left with the anchor would probe again every cycle
-  (`SizeBoundCorroborationProbeTests`). The loop's substitution,
-  the placement pass that carries it — two at most, then
-  drained, since the pass can now confirm the answer it issued —
-  and the pin are `SizeBoundCorroborationProbeEngineTests`'; the
-  argument is `SizeBoundLearner+Probe`'s header. The cap
+  never awaited (#1439)** — the argument is
+  `docs/design-decisions.md`'s entry of that name; what binds
+  here: a confirmation arms its probe from `promote`, and a
+  second arm site owes the same guards (`armCorroborationProbe`
+  is the one caller today, unscanned); the retile loop issues it
+  only in place of an ask the anchor already answers, never a
+  new one and never on a forced pass; it is re-issued once and
+  only once its first answer seeded a candidate; a probe's own
+  confirmation arms none, and an ask that has had its probe
+  stays probed for the ledger's lifetime, since the compliance
+  sweep re-confirms an anchor a grid app answers inside the
+  tolerance; a PERFORMED probe files the retile the sweep would
+  not send; and a further baseline producer beside the retile
+  gate's verdict owes the probe's four terms — a settled
+  confirming read, consumed by one issue, killed by any ordinary
+  `recordAsk`, checked against the anchor's answer at take
+  (`SizeBoundCorroborationProbeTests` ▸ `rawPairArmsUntrusted`,
+  `ordinaryAskDistrusts`; the rest of the ladder in that suite,
+  its lifetime in `SizeBoundCorroborationProbeLifecycleTests`).
+  A new per-window store on the learner joins its four lifecycle
+  hooks, discovered by reflection
+  (`SizeBoundLearnerLifecycleParityTests`). The loop's
+  substitution through the explained skip, the forced pass, the
+  performed probe's retile, the pin and the placement pass —
+  bounded to two, since an echo-quiet pass can confirm the
+  answer it issued, and its flag clear afterwards — are
+  `SizeBoundCorroborationProbeEngineTests`'; the drain after
+  that loop is belt, unguarded. The cap
   consequence softens: an evicted
   ask beyond a still-corroborated bound consumes without
   re-dancing, while evicting the corroborating pair itself

@@ -25,9 +25,14 @@ struct SizeBoundCorroborationProbeEngineTests {
         var log: [String] = []
     }
 
-    /// The `SizeBoundBaselineTests` fixture: a monocle space, one
-    /// window, a captured frame pipeline with animation off.
-    private func makeCore(captured: Captured) -> KiwiCore {
+    /// The `SizeBoundBaselineTests` fixture: one space in `mode`,
+    /// `count` windows, a captured frame pipeline with animation
+    /// off.
+    private func makeCore(
+        captured: Captured,
+        mode: LayoutMode = .monocle,
+        count: Int = 1
+    ) -> KiwiCore {
         let core = makeTestCore()
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1000, height: 800)
@@ -37,13 +42,23 @@ struct SizeBoundCorroborationProbeEngineTests {
             captured.frames[id] = frame
         }
         core.onLog = { captured.log.append($0) }
-        core.state.workspaces.setMode(SpaceID(1), .monocle)
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(id: w, pid: 1, appName: "App")
+        core.state.workspaces.setMode(SpaceID(1), mode)
+        for n in 1...count {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(n)),
+                        pid: 1,
+                        appName: "App"
+                    )
+                )
             )
-        )
+        }
         return core
+    }
+
+    private var probeDistance: CGFloat {
+        SizeBoundLearner.probeDistance
     }
 
     /// Wires the settle probe's read to answer `frame`
@@ -107,6 +122,145 @@ struct SizeBoundCorroborationProbeEngineTests {
         let residue = try #require(captured.frames[w])
         #expect(residue.width == 715)
         #expect(abs(residue.midX - target.midX) < 0.01)
+    }
+
+    @Test("A non-consuming layout issues the probe past the skip")
+    func splitLayoutIssuesTheProbePastTheExplainedSkip() throws {
+        // A split layout never consumes the entry: its slot
+        // re-asks the anchor's own ask with the window at the
+        // answer and the same origin — the "already there" skip,
+        // which the probe must ride through. The owner's #1355
+        // Track sitting is this shape; bsp draws it at this
+        // fixture's bounds (two windows, two slots).
+        guard NSScreen.main != nil else { return }
+        let captured = Captured()
+        let core = makeCore(captured: captured, mode: .bsp, count: 2)
+        let slot = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w]
+        )
+        #expect(slot.width < 720)
+        let refused = CGRect(
+            origin: slot.origin,
+            size: CGSize(width: 720, height: slot.height)
+        )
+        core.state.apply(.windowResized(w, refused))
+        core.retile()
+        wireSettledRead(core, returning: refused)
+        captured.frames = [:]
+        core.runSizeBoundProbe(w)
+        #expect(core.tiler.sizeBound(for: w) != nil)
+        // The placement pass re-asks the slot for this window —
+        // explained, and skipped without the probe — and issues
+        // the probe instead: a floor, so narrower.
+        let placed = try #require(captured.frames[w])
+        #expect(abs(placed.width - (slot.width - probeDistance)) < 0.01)
+        #expect(placed.origin == slot.origin)
+    }
+
+    @Test("A placement pass is bounded and leaves no flag standing")
+    func placementPassLeavesNoFlag() throws {
+        // The severed applier never stamps, so every pass reads
+        // settled and the unchanged pre-ask frame answers the
+        // probe in the same turn — a confirmation edge raised
+        // INSIDE the placement pass. Bounded to two placements,
+        // and the flag is clear afterwards; a stale flag paid a
+        // placement on the next unrelated retile. (The drain
+        // after the loop is belt: a third edge in one turn.)
+        guard NSScreen.main != nil else { return }
+        let captured = Captured()
+        let core = makeCore(captured: captured)
+        let target = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w]
+        )
+        let refused = CGRect(
+            origin: target.origin,
+            size: CGSize(width: 715, height: target.height)
+        )
+        core.state.apply(.windowResized(w, refused))
+        for _ in 0..<3 { core.retile() }
+        // Corroborated within the third retile: the probe was
+        // issued and answered by the placement passes.
+        #expect(core.tiler.sizeBound(for: w)?.maxWidth == 715)
+        let placements = captured.log.filter {
+            $0.contains("confirmed during retile")
+        }
+        #expect(placements.count <= 2)
+        #expect(!core.tiler.takePendingBoundPlacement())
+    }
+
+    @Test("A forced pass keeps the layout's own ask")
+    func forcedPassKeepsTheLayoutsAsk() throws {
+        // An explicit apply re-issues everything and probes past
+        // corroborated bounds itself (#1055); the corroboration
+        // probe stands down there and waits for the next
+        // ordinary pass.
+        guard NSScreen.main != nil else { return }
+        let captured = Captured()
+        let core = makeCore(captured: captured)
+        let target = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w]
+        )
+        let answered = CGSize(width: 715, height: target.height)
+        core.state.apply(
+            .windowResized(
+                w,
+                CGRect(origin: target.origin, size: answered)
+            )
+        )
+        core.tiler.boundLearner.recordAsk(
+            w,
+            size: target.size,
+            settledFrom: answered
+        )
+        core.tiler.boundLearner.observe(
+            w,
+            currentSize: answered,
+            settledRead: true
+        )
+        core.tiler.echoGraceOverride = { _ in true }
+        captured.frames = [:]
+        core.retile(force: true)
+        let forced = try #require(captured.frames[w])
+        #expect(forced.width == 715)
+        captured.frames = [:]
+        core.retile()
+        let probed = try #require(captured.frames[w])
+        #expect(
+            abs(probed.width - (target.width + probeDistance)) < 0.01
+        )
+    }
+
+    @Test("A performed probe is re-asked by the layout")
+    func performedProbeIsReasked() throws {
+        // The echo reports the window AT the probe's ask: it
+        // holds a size no layout drew, and the compliance sweep
+        // would leave it there until an unrelated retile.
+        guard NSScreen.main != nil else { return }
+        let captured = Captured()
+        let core = makeCore(captured: captured)
+        let target = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w]
+        )
+        let refused = CGRect(
+            origin: target.origin,
+            size: CGSize(width: 715, height: target.height)
+        )
+        core.state.apply(.windowResized(w, refused))
+        core.retile()
+        wireSettledRead(core, returning: refused)
+        captured.frames = [:]
+        core.runSizeBoundProbe(w)
+        let probe = try #require(captured.frames[w])
+        core.tiler.echoGraceOverride = { _ in true }
+        captured.frames = [:]
+        core.handle(.windowResized(w, probe))
+        #expect(
+            captured.log.contains {
+                $0.contains("corroboration probe complied")
+            }
+        )
+        let reasked = try #require(captured.frames[w])
+        #expect(reasked.width == 715)
     }
 
     @Test("A probe in flight pins the ring at the anchor's answer")

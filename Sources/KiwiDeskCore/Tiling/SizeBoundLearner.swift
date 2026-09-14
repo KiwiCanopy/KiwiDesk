@@ -68,14 +68,16 @@ struct SizeBoundLearner {
 
     /// Distinct asks remembered per axis. Sized WELL past the
     /// real producers — one ask per layout mode a window meets,
-    /// and a window rarely tiles under more than three or
-    /// four — because eviction is only a leak bound: evicting a
+    /// and a window rarely tiles under more than three or four,
+    /// plus since #1439 one corroboration probe per anchor that
+    /// stays uncorroborated, which for a grid app is every one —
+    /// because eviction is only a leak bound: evicting a
     /// candidate before its confirming re-encounter re-opens
     /// the starvation the per-ask shape exists to close
     /// (review, 2026-08-18), so the cap must never bind in
     /// ordinary use. Recurring past it costs a re-probe, not
     /// correctness.
-    static let maxEntriesPerAxis = 8
+    static let maxEntriesPerAxis = 16
 
     /// One recorded ask: the size issued, and — when the issue
     /// happened from an echo-quiet, settled state — the size the
@@ -117,9 +119,14 @@ struct SizeBoundLearner {
     var candidates: [WindowID: Ledger] = [:]
     var bounds: [WindowID: Ledger] = [:]
     var tombstones: [WindowID: Tombstone] = [:]
-    /// The corroboration probes (#1439), one per axis, argued in
-    /// `SizeBoundLearner+Probe`.
+    /// The corroboration probes (#1439), one per axis; the
+    /// contract is `SizeBoundLearner+Probe`'s.
     var probes: [WindowID: ProbeLedger] = [:]
+    /// Windows that PERFORMED their probe's ask (#1439) and so
+    /// hold a size no layout drew, awaiting the retile
+    /// `KiwiCore.observeSizeAnswer` answers them with — the
+    /// compliance sweep's "nothing to place" is wrong for them.
+    var compliedProbes: Set<WindowID> = []
 
     /// The size `retile` just issued for a window. Only the
     /// layout loop records — a stash park or float restore is
@@ -243,10 +250,9 @@ struct SizeBoundLearner {
             }
         }
         writeBounds(id, entries: entries, axis: axis)
-        // The one door onto the corroboration probe (#1439):
-        // a confirmation edge is the moment the second ask is
-        // owed. Retire first, so a probe's own confirmation
-        // never arms the next.
+        // #1439: a confirmation edge is when the second ask is
+        // owed. Retire ahead of arm — the probe's own ask joins
+        // the probed list, which is what refuses the chain.
         retireCorroborationProbe(id, answering: asked, axis: axis)
         armCorroborationProbe(
             id,

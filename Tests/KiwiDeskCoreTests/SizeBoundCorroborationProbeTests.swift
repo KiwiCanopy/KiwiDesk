@@ -144,7 +144,6 @@ struct SizeBoundCorroborationProbeTests {
         learner.observe(w, currentSize: held, settledRead: false)
         let second = take(&learner)
         let third = take(&learner)
-        #expect(SizeBoundLearner.maxProbeIssues == 2)
         #expect(second != nil)
         #expect(third == nil)
         // Only the FIRST issue carries the trusted baseline; the
@@ -247,53 +246,4 @@ struct SizeBoundCorroborationProbeTests {
         #expect(fresh?.size.width == 900 + bar + 1)
     }
 
-    @Test("The probe follows the ledger's lifecycle")
-    func followsTheLifecycle() {
-        // Forget clears it with everything else.
-        var forgotten = believedFloor()
-        forgotten.forget(w)
-        #expect(forgotten.probes[w] == nil)
-        // A rekey carries it to the new id.
-        var rekeyed = believedFloor()
-        let new = WindowID(8)
-        rekeyed.rekey(old: w, new: new)
-        #expect(rekeyed.probes[w] == nil)
-        let carried = rekeyed.takeCorroborationProbe(
-            new,
-            current: held,
-            target: ask
-        )
-        #expect(carried != nil)
-        // A gone window parks it beside its believed ledger and
-        // the same window's re-add revives both — so a flapped
-        // window does not wait for the layout to change either.
-        var parked = believedFloor()
-        let now = Date()
-        parked.stashOnGone(w, pid: 42, now: now)
-        #expect(parked.probes[w] == nil)
-        parked.revive(w, pid: 42, now: now.addingTimeInterval(1))
-        let revived = take(&parked)
-        #expect(revived != nil)
-    }
-
-    @Test("A probe in flight pins the ring at the anchor's answer")
-    func probeExpectationForThePin() throws {
-        var learner = believedFloor()
-        let issue = try #require(take(&learner))
-        #expect(
-            learner.probeExpectation(
-                for: w,
-                asking: issue.size.width,
-                axis: \.width
-            ) == 720
-        )
-        // Any other span in flight is honest and unpinned.
-        #expect(
-            learner.probeExpectation(
-                for: w,
-                asking: 600,
-                axis: \.width
-            ) == nil
-        )
-    }
 }

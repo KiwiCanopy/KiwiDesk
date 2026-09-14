@@ -265,12 +265,16 @@ public final class TilingEngine {
                 )
                 // #1439: a due corroboration probe stands in for
                 // an ask the anchor already answers and is meant
-                // to be issued, so neither skip below applies.
-                let probe = takeCorroborationProbe(
-                    id,
-                    current: current,
-                    target: target
-                )
+                // to be issued, so neither skip below applies. A
+                // forced pass keeps its own ask (#1055).
+                let probe =
+                    force
+                    ? nil
+                    : takeCorroborationProbe(
+                        id,
+                        current: current,
+                        target: target
+                    )
                 // Tolerance: apps clamp what we set (character
                 // grids, minimum sizes), so the reported frame is
                 // often a hair off the target. Re-applying an

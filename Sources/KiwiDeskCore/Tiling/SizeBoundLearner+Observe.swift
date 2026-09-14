@@ -28,6 +28,16 @@ extension SizeBoundLearner {
                 complied(id, asked: asked, axis: axis)
             } else {
                 lastAsks[id]?[keyPath: echoComplied] = true
+                // A performed PROBE gets its retile on the echo
+                // (#1439): `wantsProbe` reads a compliant echo
+                // as done, so no settled read follows.
+                if retireCorroborationProbe(
+                    id,
+                    answering: asked,
+                    axis: axis
+                ) {
+                    compliedProbes.insert(id)
+                }
             }
             return false
         }
