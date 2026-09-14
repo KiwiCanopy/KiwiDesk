@@ -105,12 +105,13 @@ extension AppDelegate {
         onboardingWindow?.close()
     }
 
-    /// Opens Settings at `destination` and THEN closes the tour,
-    /// in that order so no floating tour window is left above
-    /// Settings; the close still runs `windowWillClose`, so the
-    /// banner seed and the discovery mark fire
-    /// (`OnboardingCloseSeamTests`). The keys page's Shortcuts
-    /// link and the closing page's exit (#1365) both take it.
+    /// Opens Settings at `destination` and THEN closes the tour
+    /// if one is open, in that order so no floating tour window
+    /// is left above Settings; the close still runs
+    /// `windowWillClose`, so the banner seed and the discovery
+    /// mark fire (`OnboardingCloseSeamTests`). Two callers: the
+    /// closing page's exit (#1365) and the shortcuts panel's
+    /// Edit door, which is why the close is conditional.
     func openSettingsFromTour(at destination: SettingsDestination) {
         dashboard.show(navigatingTo: destination)
         if onboardingWindow != nil {

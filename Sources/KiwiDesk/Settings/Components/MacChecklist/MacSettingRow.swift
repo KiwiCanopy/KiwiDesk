@@ -81,7 +81,7 @@ struct MacSettingRow: View {
             )
             Text(chipWord)
         }
-        .font(.caption.weight(.medium))
+        .font(Self.chipFont)
         .foregroundStyle(
             state == .set
                 ? SettingsTheme.groupHeading : SettingsTheme.ink3
@@ -124,11 +124,7 @@ struct MacSettingRow: View {
     /// word is the row saying nothing. Measured at the WEIGHT the
     /// chip draws, once per container render, never per row.
     @MainActor static var chipWidth: CGFloat {
-        let caption = NSFont.preferredFont(forTextStyle: .caption1)
-        let font = NSFont.systemFont(
-            ofSize: caption.pointSize,
-            weight: .medium
-        )
+        let font = chipNSFont
         let widest =
             [
                 L("mac_checklist.state.set", "Set"),
@@ -141,6 +137,16 @@ struct MacSettingRow: View {
             ceil(widest) + glyphWidth + chipSpacing
         )
     }
+    /// The chip's type, declared ONCE: the drawing wraps the
+    /// same `NSFont` the measure uses, so they cannot drift.
+    private static var chipNSFont: NSFont {
+        NSFont.systemFont(
+            ofSize: NSFont.preferredFont(forTextStyle: .caption1)
+                .pointSize,
+            weight: .medium
+        )
+    }
+    private static var chipFont: Font { Font(chipNSFont) }
     /// The chip's glyph at the caption size, generously.
     private static let glyphWidth: CGFloat = 16
     /// The gap between the glyph and the word.

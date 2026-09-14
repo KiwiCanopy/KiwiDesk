@@ -5639,12 +5639,15 @@ with in a quieter voice. Nobody is stranded: the picture above
 names Settings and where it lives — the durable route, the icon
 they will still be using on day 30, against a one-time button in
 a window that never returns — the tour reopens FROM Settings, and
-`KiwiDesk.open_settings()` is bindable. Since #1365 the default
-action lands on the Mac Checklist card; ▸ *The Mac Checklist
-counts what macOS can confirm* argues why that is not the Open
-Settings link coming back.
+`KiwiDesk.open_settings()` is bindable.
 
-**The pointer is in four places, and the third is the one that
+:::unreleased
+Since #1365 the default action lands on the Mac Checklist card;
+▸ *The Mac Checklist counts what macOS can confirm* argues why
+that is not the Open Settings link coming back.
+:::
+
+**The pointer is in three places, and the third is the one that
 matters most.** The tour's closing card reaches someone who has
 just run the tour; Home's first-run banner reaches someone who
 closed the tour after its shortcuts screen without reaching that
@@ -5655,8 +5658,12 @@ first save — so a user who dismissed the welcome, or simply saved
 one change, had no route to the guide anywhere in the app. That
 is the gap this entry is about, not a nicety on top of it, and
 only a permanent pointer closes it: General ▸ About, beside the
-links already there. The Mac Checklist's foot draws the same
+links already there.
+
+:::unreleased
+A fourth since #1365: the Mac Checklist's foot draws the same
 sentence, for the reader the tour just sent there.
+:::
 
 The two sentence-shaped surfaces share ONE frame and one label,
 because the same English names the same action at both. About

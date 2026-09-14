@@ -90,6 +90,20 @@ struct MacSettingReadTests {
         }
     }
 
+    /// The absent arm compares `absentValue` to `target`
+    /// unguarded, so a table row whose two halves are of
+    /// different kinds would read "Not yet" forever — the kind
+    /// gate covers the value arm, this covers the table.
+    @Test("absent value and target are of one kind")
+    func absentAndTargetAgreeInKind() {
+        for setting in MacSetting.allCases {
+            #expect(
+                setting.absentValue.isSameKind(as: setting.target),
+                "\(setting) mixes kinds"
+            )
+        }
+    }
+
     /// Every setting names a key, and the six keys are distinct
     /// within their domain — two rows reading one key would
     /// always agree, whatever the user set.
