@@ -857,8 +857,10 @@ editing here:
   hooks — `forget` and `rekey` discovered by reflection
   (`SizeBoundLearnerLifecycleParityTests`), the tombstone's park
   and revive still by hand. The loop's
-  substitution through the explained skip, the forced pass, the
-  performed probe's retile, the pin and the placement pass —
+  substitution through the explained skip (the `close` half is
+  `SizeBoundResiduePlacementTests`'), the forced pass, the
+  performed probe's retile on both channels, the pin and the
+  placement pass —
   bounded to two, since an echo-quiet pass can confirm the
   answer it issued, and its flag clear afterwards — are
   `SizeBoundCorroborationProbeEngineTests`'; the drain after

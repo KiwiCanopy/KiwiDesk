@@ -164,8 +164,8 @@ struct SizeBoundCorroborationProbeEngineTests {
         // probe in the same turn — a confirmation edge raised
         // INSIDE the placement pass. Bounded to two placements,
         // and the flag is clear afterwards; a stale flag paid a
-        // placement on the next unrelated retile. (The drain
-        // after the loop is belt: a third edge in one turn.)
+        // placement on the next unrelated retile. The drain is
+        // belt.
         guard NSScreen.main != nil else { return }
         let captured = Captured()
         let core = makeCore(captured: captured)
@@ -274,6 +274,39 @@ struct SizeBoundCorroborationProbeEngineTests {
         )
         // The anchor is swept, so the layout's own full ask
         // goes out again.
+        let reasked = try #require(captured.frames[w])
+        #expect(abs(reasked.width - target.width) < 0.01)
+    }
+
+    @Test("The sweep channel pays a performed probe with a placement")
+    func sweepChannelPaysAPerformedProbe() throws {
+        // The retile-time gate finds the window settled AT the
+        // probe's ask, sweeps the anchor, and must place from
+        // frames recomputed after the sweep — the confirmation
+        // edge's flag — not the pre-sweep residue frame.
+        guard NSScreen.main != nil else { return }
+        let captured = Captured()
+        let core = makeCore(captured: captured)
+        let target = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w]
+        )
+        let refused = CGRect(
+            origin: target.origin,
+            size: CGSize(width: 715, height: target.height)
+        )
+        core.state.apply(.windowResized(w, refused))
+        core.retile()
+        wireSettledRead(core, returning: refused)
+        captured.frames = [:]
+        core.runSizeBoundProbe(w)
+        let probe = try #require(captured.frames[w])
+        core.state.apply(.windowResized(w, probe))
+        captured.frames = [:]
+        core.retile()
+        // The anchor is swept (the frozen state frame then
+        // answers later asks — a fixture artifact, not read).
+        let entries = core.tiler.sizeBound(for: w)?.width ?? []
+        #expect(!entries.contains { $0.answered == 715 })
         let reasked = try #require(captured.frames[w])
         #expect(abs(reasked.width - target.width) < 0.01)
     }
