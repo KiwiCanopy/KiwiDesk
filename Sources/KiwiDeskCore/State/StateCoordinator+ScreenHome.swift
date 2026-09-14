@@ -15,13 +15,7 @@ extension StateCoordinator {
     /// asks.
     ///
     /// The float arm reads the FLAG by ruling (#1362, the
-    /// `EffectiveFloat` roster): a flag float's frame is the
-    /// user's placement on whatever screen it lands, while a
-    /// floating-mode member arriving on another screen is the
-    /// compositor's move, and honoring the screen keeps it
-    /// reachable — standing down would keep a home whose
-    /// layout assigns no frame on a display the window is not
-    /// on, the #1362 strand by another door.
+    /// `EffectiveFloat` roster carries the argument).
     func screenHome(
         of window: ManagedWindow,
         leaving home: SpaceID?,

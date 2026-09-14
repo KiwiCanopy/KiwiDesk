@@ -87,7 +87,10 @@ struct RestoredFrameDebtTests {
         return core
     }
 
-    @Test("The debt is filed for an untracked id in a living Space")
+    @Test(
+        "The debt is filed for an untracked id in a living Space",
+        .enabled(if: NSScreen.main != nil)
+    )
     func debtIsFiledForTheUntracked() throws {
         let core = try #require(makeCore(mode: .floating))
         let corner = TilingEngine.stashFrame(
@@ -126,7 +129,10 @@ struct RestoredFrameDebtTests {
         #expect(core.state.restoredFrames == [Self.late: Self.owed])
     }
 
-    @Test("The arrival consumes the debt once")
+    @Test(
+        "The arrival consumes the debt once",
+        .enabled(if: NSScreen.main != nil)
+    )
     func arrivalConsumesOnce() throws {
         let core = try #require(makeCore(mode: .floating))
         core.state.restoredFrames[Self.late] = Self.owed

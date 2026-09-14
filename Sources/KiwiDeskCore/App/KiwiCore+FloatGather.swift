@@ -1,37 +1,29 @@
 import CoreGraphics
 
-/// The entry-into-floating gather (#1177), the retile's arm.
-///
-/// An ENTRY is judged against the mode a space was last DRAWN
-/// in (`drawnSpaceModes`), never against the previous write:
-/// the frames on screen are the last drawn layout's, so a
-/// config reload that resets every mode and re-declares it
-/// without a pass between owes nothing, and a space no pass
-/// has drawn yet — the boot's — is recorded rather than
-/// gathered, its windows' frames being the user's. A snapshot
-/// replay re-states a mode whose entry was gathered when it
-/// happened, so `restore` settles the ledger instead
-/// (`settleDrawnSpaceModes`).
-///
-/// Delivery rides the stash seed, the #1352 shape and for the
-/// same reason: one delivery path. On a shown space the pass's
-/// own restore delivers the seed; on a parked one the park
-/// keeps it (its capture guard is nil-only) and the activation
-/// delivers. Seeded AHEAD of `recoverStrandedFloats`, which
-/// defers to a pending capture, so a monocle pile at the corner
-/// takes the grid rather than one centre — no second centring.
+/// The entry-into-floating gather (#1177), the retile's arm. An
+/// entry is a change in the mode a space was last DRAWN in
+/// (`drawnSpaceModes`), never in the previous write, and a
+/// profile switch re-partitions every floating space
+/// (`membersRepartitioned`); the seed lands AHEAD of
+/// `recoverStrandedFloats`, which defers to a pending capture.
+/// The argument is state-and-layout.md's.
 extension KiwiCore {
     /// Seeds a gather target for every out-of-region member of
     /// each space entering floating mode, then records every
     /// space's mode as drawn. Runs at the top of `retile()`.
     func gatherIntoFloating() {
+        let repartitioned = membersRepartitioned
+        membersRepartitioned = false
         var drawn: [SpaceID: LayoutMode] = [:]
         for space in state.workspaces.allSpaces {
             drawn[space.id] = space.mode
-            guard space.mode == .floating,
-                let previous = drawnSpaceModes[space.id],
-                previous != .floating
-            else { continue }
+            guard space.mode == .floating else { continue }
+            // A space no pass has drawn is the boot's: its
+            // windows' frames are the user's, not a layout's.
+            let entered =
+                drawnSpaceModes[space.id].map { $0 != .floating }
+                ?? false
+            guard entered || repartitioned else { continue }
             seedFloatGather(of: space)
         }
         drawnSpaceModes = drawn
@@ -48,7 +40,11 @@ extension KiwiCore {
     }
 
     private func seedFloatGather(of space: Space) {
-        guard let region = floatBounds(on: space.id) else { return }
+        // The GROW bound, ring reserved on every edge: a grid cell
+        // flush with a strip would otherwise take the clamp's
+        // ring push as a second write in the same pass.
+        guard let region = floatGrowBounds(on: space.id)
+        else { return }
         var frames: [WindowID: CGRect] = [:]
         for id in space.windows {
             guard let window = state.windows[id],
@@ -78,9 +74,12 @@ extension KiwiCore {
         }
     }
 
-    /// The frame a member would show: a pending capture is
-    /// where a parked or re-anchored float is going, and the
-    /// commanded frame outranks the echo-fed state one mid-flight.
+    /// The frame a member would show: its pending capture, then
+    /// the commanded frame, then the recent instant target, then
+    /// state. All four rungs, because this site meets every
+    /// float kind: the traveler re-home omits the capture (a
+    /// sticky never parks) and the clamp and re-anchor omit the
+    /// in-flight rungs (they run at rest).
     private func wouldBeFrame(of window: ManagedWindow) -> CGRect {
         tiler.stashOriginal(window.id)
             ?? tiler.animation.commandedFrame(

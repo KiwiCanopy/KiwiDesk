@@ -57,6 +57,9 @@ struct FloatGatherEntryTests {
         // bounds with the painted strips carved off, and the
         // strip clause below turns one on deliberately.
         core.tiler.settings.spaceBarStyle.enabled = false
+        // And the ring: the grid is laid over the grow bound,
+        // which reserves the ring's reach on every edge (#1091).
+        core.tiler.settings.borderStyle.enabled = false
         core.state.apply(.displaysChanged([display]))
         let members = Self.frames.sorted { $0.key.raw < $1.key.raw }
         for (id, frame) in members {
@@ -125,8 +128,88 @@ struct FloatGatherEntryTests {
         let seeded = try #require(
             core.tiler.stashOriginal(Self.scrolledOut)
         )
-        #expect(seeded.minY >= strip.maxY)
-        #expect(Self.bounds.contains(seeded))
+        // Equality over the CARVED region, not `minY >= strip`:
+        // the clamp sweep rescues a grid laid over the bare
+        // bounds by re-seeding the pushed cell, so a bound alone
+        // stayed green on that mutation (guard-prover).
+        let region = try #require(
+            core.floatGrowBounds(on: Self.space)
+        )
+        #expect(region.minY >= strip.maxY)
+        let carved = FloatGather.targets(
+            members: [Self.inside, Self.scrolledOut, Self.partly],
+            frames: Self.frames,
+            region: region,
+            minSize: core.tiler.settings.minWindowSize,
+            targetDepth: core.tiler.settings.quitGridTargetDepth
+        )
+        #expect(seeded == carved[Self.scrolledOut])
+    }
+
+    /// The seed lands AHEAD of `recoverStrandedFloats`: a shown
+    /// pile at the corner — monocle's park — takes the grid, never
+    /// the strand net's one centre.
+    @Test(
+        "A shown corner pile takes the grid, not one centre",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func shownCornerPileTakesTheGrid() throws {
+        let core = try #require(makeCore(mode: .monocle))
+        core.settleDrawnSpaceModes()
+        let parked = TilingEngine.stashFrame(
+            CGRect(origin: .zero, size: Self.size),
+            in: Self.bounds,
+            corner: .bottomRight
+        )
+        let members = [Self.inside, Self.scrolledOut, Self.partly]
+        for id in members {
+            core.state.windows.updateFrame(id, frame: parked)
+        }
+        core.setSpaceMode(Self.space, .floating)
+        core.retile(force: true)
+        let grid = FloatGather.targets(
+            members: members,
+            frames: Dictionary(
+                uniqueKeysWithValues: members.map { ($0, parked) }
+            ),
+            region: Self.bounds,
+            minSize: core.tiler.settings.minWindowSize,
+            targetDepth: core.tiler.settings.quitGridTargetDepth
+        )
+        let centred = FloatRecovery.centred(Self.size, in: Self.bounds)
+        for id in members {
+            #expect(core.tiler.stashOriginal(id) == grid[id])
+            #expect(core.tiler.stashOriginal(id) != centred)
+        }
+    }
+
+    /// A profile switch re-partitions windows into a floating
+    /// space that was ALREADY drawn floating: the members carry
+    /// the outgoing profile's layouts' frames, so the switch is
+    /// an entry (#1230).
+    @Test(
+        "A switching profile apply gathers a floating space",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func profileSwitchIsAnEntry() throws {
+        let core = try #require(makeCore(mode: .floating))
+        func profile(_ name: String) -> Profile {
+            Profile(
+                name: name,
+                monitorSets: [],
+                spaces: [Self.space],
+                spaceModes: [Self.space: .floating],
+                settings: core.tiler.settings
+            )
+        }
+        core.apply(profile: profile("A"), forceRetile: true)
+        // Drawn floating, and nothing owed on a re-apply of the
+        // live profile.
+        core.apply(profile: profile("A"), forceRetile: true)
+        #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
+        core.apply(profile: profile("B"), forceRetile: true)
+        #expect(core.tiler.stashOriginal(Self.scrolledOut) != nil)
+        #expect(!core.membersRepartitioned)
     }
 
     @Test(

@@ -523,9 +523,10 @@ defaults to `bsp`.
 
 :::unreleased
 Switching to `floating` gathers every window the previous layout
-left partly or fully outside the visible screen into the quit
-grid (`quit.set_layout`); windows already fully visible keep
-their frames.
+left partly or fully outside the screen's visible bounds less any
+bar strips on that space into the quit grid (`quit.set_layout`,
+sized by `quit.set_grid_target_depth`); windows already fully
+inside keep their frames.
 :::
 
 **Example:**
