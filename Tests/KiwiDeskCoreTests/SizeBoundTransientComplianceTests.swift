@@ -76,9 +76,15 @@ struct SizeBoundTransientComplianceTests {
         // The dance is over: with the bound believed and the
         // window at the learned answer, a further retile
         // re-issues nothing (monocle centers the residue, so
-        // the window sits at the centered slot).
-        let centered = try #require(applied.frames[w])
-        #expect(abs(centered.midX - target.midX) < 0.01)
+        // the window sits at the centered slot). The placement
+        // pass commands the corroboration probe's width at that
+        // origin (#1439); the app refuses it the same way.
+        let placed = try #require(applied.frames[w])
+        #expect(abs(placed.minX - (target.midX - 439 / 2)) < 0.01)
+        let centered = CGRect(
+            origin: placed.origin,
+            size: CGSize(width: 439, height: placed.height)
+        )
         core.state.apply(.windowResized(w, centered))
         applied.frames = [:]
         core.retile()

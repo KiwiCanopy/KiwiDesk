@@ -14,22 +14,30 @@ extension SizeBoundLearner {
         settledRead: Bool,
         axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>,
         echoComplied: WritableKeyPath<Ask, Bool>
-    ) -> Bool {
+    ) -> Answer {
         var confirmed = false
         if EffectiveSizeBound.matches(current, asked) {
             // Only a settled compliance is evidence the
             // constraint lifted (#1049) — a transient one is
             // the emulator mid-snap-back, and clearing on it
-            // wiped the ladder every cycle. See `observe`.
+            // wiped the ladder every cycle. See `observe`. The
+            // same read alone decides a PERFORMED probe (#1439):
+            // the raw echo retires nothing, so the snap-back
+            // still pair-promotes below.
             // An echo-channel compliance is REMEMBERED instead:
             // if this same ask is next observed OFF its size,
             // the pair promotes below.
             if settledRead {
-                complied(id, asked: asked, axis: axis)
-            } else {
-                lastAsks[id]?[keyPath: echoComplied] = true
+                return Answer(
+                    performedProbe: complied(
+                        id,
+                        asked: asked,
+                        axis: axis
+                    )
+                )
             }
-            return false
+            lastAsks[id]?[keyPath: echoComplied] = true
+            return Answer()
         }
         // The comply-then-revoke pair confirms in ONE cycle
         // (#1049): the ladder needs "the same answer twice"
@@ -54,11 +62,14 @@ extension SizeBoundLearner {
         // anything.
         if lastAsks[id]?[keyPath: echoComplied] == true {
             lastAsks[id]?[keyPath: echoComplied] = false
-            return promote(
-                id,
-                asked: asked,
-                answered: current,
-                axis: axis
+            return Answer(
+                confirmed: promote(
+                    id,
+                    asked: asked,
+                    answered: current,
+                    axis: axis,
+                    settledRead: settledRead
+                )
             )
         }
         var candidateEntries =
@@ -95,11 +106,14 @@ extension SizeBoundLearner {
                 EffectiveSizeBound.matches($0.asked, asked)
             })
         {
-            return promote(
-                id,
-                asked: asked,
-                answered: current,
-                axis: axis
+            return Answer(
+                confirmed: promote(
+                    id,
+                    asked: asked,
+                    answered: current,
+                    axis: axis,
+                    settledRead: settledRead
+                )
             )
         }
         if let index = candidateEntries.firstIndex(where: {
@@ -126,7 +140,8 @@ extension SizeBoundLearner {
                         id,
                         asked: asked,
                         answered: current,
-                        axis: axis
+                        axis: axis,
+                        settledRead: settledRead
                     )
                     candidateEntries.remove(at: index)
                 }
@@ -155,7 +170,7 @@ extension SizeBoundLearner {
             entries: candidateEntries,
             axis: axis
         )
-        return confirmed
+        return Answer(confirmed: confirmed)
     }
 
 }

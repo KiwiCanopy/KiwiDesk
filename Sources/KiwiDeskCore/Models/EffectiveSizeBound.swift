@@ -57,6 +57,12 @@ public struct EffectiveSizeBound: Sendable, Equatable {
             self.asked = asked
             self.answered = answered
         }
+
+        /// The refusal's direction: answered above the ask is a
+        /// floor, below it a ceiling — the one home of that
+        /// reading (an equal answer is a compliance and is never
+        /// stored).
+        public var isFloor: Bool { answered > asked }
     }
 
     public var width: [Axis]
@@ -137,8 +143,7 @@ public struct EffectiveSizeBound: Sendable, Equatable {
             return nil
         }
         return entries.first {
-            $0.answered > $0.asked
-                && Self.matches($0.answered, ceiling)
+            $0.isFloor && Self.matches($0.answered, ceiling)
         }?.answered
     }
 
@@ -151,8 +156,7 @@ public struct EffectiveSizeBound: Sendable, Equatable {
             return nil
         }
         return entries.first {
-            $0.answered < $0.asked
-                && Self.matches($0.answered, floor)
+            !$0.isFloor && Self.matches($0.answered, floor)
         }?.answered
     }
 
@@ -176,7 +180,7 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     static let corroborationDistinctness: CGFloat = 12
 
     private func pairedFloor(of entries: [Axis]) -> CGFloat? {
-        let floors = entries.filter { $0.answered > $0.asked }
+        let floors = entries.filter { $0.isFloor }
         var best: CGFloat? = nil
         for (index, a) in floors.enumerated() {
             for b in floors.dropFirst(index + 1)
@@ -192,7 +196,7 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     }
 
     private func pairedCeiling(of entries: [Axis]) -> CGFloat? {
-        let ceilings = entries.filter { $0.answered < $0.asked }
+        let ceilings = entries.filter { !$0.isFloor }
         var best: CGFloat? = nil
         for (index, a) in ceilings.enumerated() {
             for b in ceilings.dropFirst(index + 1)

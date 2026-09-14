@@ -104,6 +104,12 @@ revoked it (#1049) — is learned as that window's **effective bound**
 Scrolling/Monocle consume the learned answer to place the residue
 (re-pack / center).
 
+:::unreleased
+One deliberate second ask, sent the moment the first entry
+confirms, corroborates the bound so its consumers need not wait
+for the layout to change (#1439).
+:::
+
 **Tab reconciliation** (the subtle case in step 2). A native-tab
 switch is temporal — one window disappears as another appears at the
 same frame — so it must be coalesced, not read as destroy + create:

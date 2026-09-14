@@ -3178,6 +3178,52 @@ other. (`SizeBoundGeneralizationTests`,
 `ScrollingFixedSpanCueTests`)
 
 :::unreleased
+**[Trade-off]**
+
+**The corroborating ask is sent, never awaited (#1439).** An
+entry confirms about a second after a window arrives, but
+everything that needs a CORROBORATED bound — the size-limit
+pill, Scrolling's re-pack past the entry's own ask, Track's
+count and floor re-share — waited for the layout to happen to
+ask a second size a step away, which on a quiet screen it never
+does (the owner measured 8–18 s before and under a second after;
+both tables are on the issue). So the moment an entry confirms
+on an axis nothing corroborates yet, the learner arms one probe
+a step past the refused ask in the refusing direction, and the
+retile loop sends it in place of the ask the entry already
+answers — never a new one, and never on a forced pass, whose
+contract is the layout's own ask. Its first observation may
+trust the pre-ask frame, which #1083 otherwise forbids inside
+the echo grace, on four terms: the anchor's confirming read was
+settled and so outranks the set the grace protects, the trust is
+consumed by one issue, killed by any ordinary ask, and checked
+against the anchor's answer at issue. What this trades: a
+grid-snapping app pays one extra ask per anchor, answered a few
+points off and corroborating nothing, exactly as the #1055 bar
+intends — and where that answer lands inside the match
+tolerance, or the app simply performs the probe, the window
+holds a size no layout drew, so a performed probe — decided by
+the settled read alone, since a raw compliance can be the
+transient half of a snap-back — is answered with the retile the
+compliance sweep would not send, the sweep
+re-learns the entry once, and every ask that has had its probe
+stays probed for the ledger's lifetime rather than re-arming
+on that re-confirmation. A second anchor confirming while a
+probe is pending waits for the layout, as before, and an entry
+already sitting within the match tolerance of the probe's span
+absorbs its confirmation, so that pair stays a hair inside the
+bar until the probe runs out of issues — a hand-drifted ask one
+step off the layout's, accepted as rare. It is not the
+timer re-probe the limitations table rules out: one probe per
+anchor, re-issued once and only once answered, never chained off
+its own confirmation, and ring-invisible, since the overlay pins
+it at the anchor's answer as it pins the second probe at the
+candidate's. (`SizeBoundCorroborationProbeTests`,
+`SizeBoundCorroborationProbeLifecycleTests`,
+`SizeBoundCorroborationProbeEngineTests`)
+:::
+
+:::unreleased
 **[Principle]**
 
 **Track's automatic count reads learned minimums; a fixed limit

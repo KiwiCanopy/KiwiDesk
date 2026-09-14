@@ -143,8 +143,15 @@ struct SizeBoundAnswerChannelTests {
         core.runSizeBoundProbe(w)
         #expect(core.tiler.sizeBound(for: w) != nil)
         let placed = try #require(applied.frames[w])
-        #expect(placed.width == 715)
-        #expect(abs(placed.midX - target.midX) < 0.01)
+        // #1439: the placement pass carries the corroboration
+        // probe — the residue's origin with the probe's width;
+        // the window refuses the width and lands centered.
+        #expect(abs(placed.minX - (target.midX - 715 / 2)) < 0.01)
+        #expect(
+            placed.width
+                == target.width
+                + EffectiveSizeBound.corroborationDistinctness + 1
+        )
     }
     @Test("A move echo carries the answer")
     func moveEchoCarriesTheAnswer() throws {
@@ -190,68 +197,10 @@ struct SizeBoundAnswerChannelTests {
         core.runSizeBoundProbe(w)
         #expect(core.tiler.sizeBound(for: w) != nil)
         let placed = try #require(applied.frames[w])
-        #expect(abs(placed.midX - target.midX) < 0.01)
-    }
-    @Test("A confirmation places the residue in its own turn")
-    func confirmPlacesResidueImmediately() throws {
-        // The device-QA finding (2026-08-18): learning waited
-        // on the NEXT retile, so the re-pack/centering arrived
-        // only after "many visits". The confirmation EDGE
-        // retiles right then, whichever channel carries it —
-        // monocle centers at the confirming observation, not at
-        // some later event.
-        //
-        // Repointed from the echo channel to the settle probe
-        // by #1083 (a raw echo no longer promotes). What is
-        // unique to this test is the tail: the placement's own
-        // echo must not read as a new edge and re-issue. The
-        // confirm-and-place half it shares with
-        // `settleProbeAnswersSilentRefusal`.
-        guard NSScreen.main != nil else { return }
-        let applied = Applied()
-        let core = makeCore(applied: applied)
-        // The severed applier never stamps, so inject the
-        // "this is our echo" verdict.
-        core.tiler.echoGraceOverride = { _ in true }
-        let target = try #require(
-            core.tiler.calculatedFrames(state: core.state)[w]
-        )
-        let refused = CGRect(
-            origin: target.origin,
-            size: CGSize(width: 715, height: target.height)
-        )
-        // Probe 1: ask, then the app's echo seeds the candidate.
-        core.retile()
-        core.handle(.windowResized(w, refused))
-        #expect(core.tiler.sizeBound(for: w) == nil)
-        // The confirming observation is the settled read since
-        // #1083 — the immediacy this test exists for is
-        // unchanged, and it is what the assertions below hold:
-        // the confirmation edge places the residue in its OWN
-        // turn rather than waiting for a later event.
-        core.eventLoop.frameReads.reader = { _ in refused }
-        core.eventLoop.frameReads.deliver = { work in
-            MainActor.assumeIsolated { work() }
-        }
-        core.eventLoop.frameReads.dispatchOverride = {
-            _,
-            work in
-            work()
-        }
-        core.eventLoop.elements[1] = [
-            w: AXUIElementCreateSystemWide()
-        ]
-        applied.frames = [:]
-        core.runSizeBoundProbe(w)
-        #expect(core.tiler.sizeBound(for: w) != nil)
-        let placed = try #require(applied.frames[w])
-        #expect(placed.width == 715)
-        #expect(abs(placed.midX - target.midX) < 0.01)
-        // The placement's own echo (the app performing the
-        // centered ask) is no new edge — nothing re-issues.
-        applied.frames = [:]
-        core.handle(.windowResized(w, placed))
-        #expect(applied.frames[w] == nil)
+        // #1439: the placement pass carries the corroboration
+        // probe — the residue's origin with the probe's width;
+        // the window refuses the width and lands centered.
+        #expect(abs(placed.minX - (target.midX - 715 / 2)) < 0.01)
     }
     @Test("A late echo of the answer does not wipe the ledger")
     func lateEchoDoesNotForget() throws {
