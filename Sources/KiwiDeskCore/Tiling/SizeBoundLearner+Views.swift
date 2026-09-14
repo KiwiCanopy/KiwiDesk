@@ -23,7 +23,10 @@ extension SizeBoundLearner {
     /// window's current state frame (a refusal, or an echo not
     /// yet landed), and that axis is not already believed. The
     /// common settle — a complying window whose echo landed —
-    /// answers false, so probing costs nothing there.
+    /// answers false, so probing costs nothing there. A
+    /// compliance at a pending corroboration probe's ask is the
+    /// exception (#1439): the settled read alone decides whether
+    /// the window performed it or is snapping back.
     func wantsProbe(
         _ id: WindowID,
         currentSize: CGSize
@@ -32,17 +35,22 @@ extension SizeBoundLearner {
         let asked = ask.size
         let believed = bound(for: id)
         let widthDone =
-            EffectiveSizeBound.matches(
+            (EffectiveSizeBound.matches(
                 currentSize.width,
                 asked.width
-            )
+            ) && !probePending(id, asking: asked.width, axis: \.width))
             || believed?.consumedWidth(asking: asked.width)
                 != nil
         let heightDone =
-            EffectiveSizeBound.matches(
+            (EffectiveSizeBound.matches(
                 currentSize.height,
                 asked.height
             )
+                && !probePending(
+                    id,
+                    asking: asked.height,
+                    axis: \.height
+                ))
             || believed?.consumedHeight(asking: asked.height)
                 != nil
         return !(widthDone && heightDone)

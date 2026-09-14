@@ -135,16 +135,12 @@ extension KiwiCore {
     ) {
         let hadCandidate =
             tiler.candidateSizeBound(for: id) != nil
-        let confirmed = tiler.observeEchoAnswer(
+        let answer = tiler.observeEchoAnswer(
             id,
             size: size,
             settledRead: channel.isSettledRead
         )
-        // Read beside the edge: one answer can confirm one axis
-        // and perform the other's probe, and both take one
-        // retile (#1439).
-        let performed = tiler.takeProbeCompliance(id)
-        if confirmed {
+        if answer.confirmed {
             onLog(
                 "size bound confirmed for window \(id.raw) at "
                     + "\(Int(size.width))x\(Int(size.height)) "
@@ -153,7 +149,7 @@ extension KiwiCore {
             retile()
             return
         }
-        if performed {
+        if answer.performedProbe {
             onLog(
                 "corroboration probe complied for window "
                     + "\(id.raw); re-asking the layout"

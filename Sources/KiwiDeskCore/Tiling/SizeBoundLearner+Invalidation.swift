@@ -17,7 +17,6 @@ extension SizeBoundLearner {
         candidates[id] = nil
         bounds[id] = nil
         probes[id] = nil
-        compliedProbes.remove(id)
     }
 
     /// How long a gone window's parked ledger may wait for the
@@ -96,9 +95,6 @@ extension SizeBoundLearner {
         if let probe = probes.removeValue(forKey: old) {
             probes[new] = probe
         }
-        if compliedProbes.remove(old) != nil {
-            compliedProbes.insert(new)
-        }
     }
 
     /// Whether a reported size is one this ledger already
@@ -159,14 +155,21 @@ extension SizeBoundLearner {
     /// contradicts, risks pinning a window at a size its app
     /// stopped insisting on, which is the stale-skip failure
     /// this ledger must never ship (review, 2026-08-18).
+    /// Returns whether the performed ask was a pending
+    /// corroboration probe's (#1439), the one site that retires
+    /// a probe on a compliance — the caller then owes the
+    /// placement the sweep alone would not send.
+    @discardableResult
     mutating func complied(
         _ id: WindowID,
         asked: CGFloat,
         axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
-    ) {
-        if retireCorroborationProbe(id, answering: asked, axis: axis) {
-            compliedProbes.insert(id)
-        }
+    ) -> Bool {
+        let performedProbe = retireCorroborationProbe(
+            id,
+            answering: asked,
+            axis: axis
+        )
         if var candidateEntries = candidates[id]?[
             keyPath: axis
         ] {
@@ -180,7 +183,7 @@ extension SizeBoundLearner {
             )
         }
         guard var entries = bounds[id]?[keyPath: axis]
-        else { return }
+        else { return performedProbe }
         let tolerance = EffectiveSizeBound.matchTolerance
         entries.removeAll { entry in
             entry.isFloor
@@ -188,6 +191,7 @@ extension SizeBoundLearner {
                 : asked > entry.answered + tolerance
         }
         writeBounds(id, entries: entries, axis: axis)
+        return performedProbe
     }
 
     mutating func writeCandidates(

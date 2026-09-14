@@ -240,9 +240,10 @@ struct SizeBoundCorroborationProbeEngineTests {
 
     @Test("A performed probe is re-asked by the layout")
     func performedProbeIsReasked() throws {
-        // The echo reports the window AT the probe's ask: it
+        // The settled read finds the window AT the probe's ask: it
         // holds a size no layout drew, and the compliance sweep
-        // would leave it there until an unrelated retile.
+        // would leave it there until an unrelated retile. The raw
+        // echo alone re-asks nothing and keeps the read wanted.
         guard NSScreen.main != nil else { return }
         let captured = Captured()
         let core = makeCore(captured: captured)
@@ -262,13 +263,19 @@ struct SizeBoundCorroborationProbeEngineTests {
         core.tiler.echoGraceOverride = { _ in true }
         captured.frames = [:]
         core.handle(.windowResized(w, probe))
+        #expect(captured.frames[w] == nil)
+        #expect(core.tiler.wantsAnswerProbe(w, currentSize: probe.size))
+        wireSettledRead(core, returning: probe)
+        core.runSizeBoundProbe(w)
         #expect(
             captured.log.contains {
                 $0.contains("corroboration probe complied")
             }
         )
+        // The anchor is swept, so the layout's own full ask
+        // goes out again.
         let reasked = try #require(captured.frames[w])
-        #expect(reasked.width == 715)
+        #expect(abs(reasked.width - target.width) < 0.01)
     }
 
     @Test("A probe in flight pins the ring at the anchor's answer")

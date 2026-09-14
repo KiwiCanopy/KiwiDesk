@@ -6,7 +6,7 @@ import Testing
 
 /// The learner's per-window stores are hand-mirrored across four
 /// lifecycle hooks — `forget`, `rekey`, `stashOnGone`, `revive` —
-/// and the #1439 probe ledger made it five stores. Past
+/// and the #1439 probe ledger made it four stores. Past
 /// parity-tests.md's threshold, so this discovers the stores by
 /// reflection: every `[WindowID: …]` map and `Set<WindowID>` on
 /// the struct, whatever is added next, must forget and rekey.
@@ -21,8 +21,8 @@ struct SizeBoundLearnerLifecycleParityTests {
     private let new = WindowID(8)
 
     /// Every window-keyed store populated for `w` through the
-    /// ladder: an ask, a candidate, a believed entry, a pending
-    /// probe and a filed probe compliance.
+    /// ladder: an ask, a candidate, a believed entry and a
+    /// pending probe.
     private func populated() -> SizeBoundLearner {
         var learner = SizeBoundLearner()
         let held = CGSize(width: 720, height: 800)
@@ -34,7 +34,6 @@ struct SizeBoundLearnerLifecycleParityTests {
         learner.observe(w, currentSize: held, settledRead: true)
         learner.recordAsk(w, size: CGSize(width: 600, height: 800))
         learner.observe(w, currentSize: held, settledRead: true)
-        learner.compliedProbes.insert(w)
         return learner
     }
 
@@ -66,7 +65,7 @@ struct SizeBoundLearnerLifecycleParityTests {
         // Non-vacuity: the walk found the stores the ladder
         // filled, so a store it cannot type is a stated limit,
         // not an empty run.
-        #expect(holding.count >= 5)
+        #expect(holding.count >= 4)
         learner.forget(w)
         for store in stores(of: learner)
         where !exempt.contains(store.name) {

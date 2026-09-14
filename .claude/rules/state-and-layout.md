@@ -838,8 +838,15 @@ editing here:
   confirmation arms none, and an ask that has had its probe
   stays probed for the ledger's lifetime, since the compliance
   sweep re-confirms an anchor a grid app answers inside the
-  tolerance; a PERFORMED probe files the retile the sweep would
-  not send; and a further baseline producer beside the retile
+  tolerance; a PERFORMED probe is decided by the SETTLED read
+  alone — `wantsProbe` keeps the settle probe wanted for a
+  compliance at a pending probe's ask, `complied` is the one
+  site that retires a probe on one, and `observe`'s verdict
+  raises the placement the sweep would not send, while the raw
+  echo retires nothing, so the emulator's snap-back still
+  pair-promotes (`SizeBoundCorroborationProbeLifecycleTests` ▸
+  `performedProbeIsDecidedSettled`); and a further baseline
+  producer beside the retile
   gate's verdict owes the probe's four terms — a settled
   confirming read, consumed by one issue, killed by any ordinary
   `recordAsk`, checked against the anchor's answer at take

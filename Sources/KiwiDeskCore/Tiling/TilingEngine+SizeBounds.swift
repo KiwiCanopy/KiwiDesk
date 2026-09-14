@@ -54,15 +54,16 @@ extension TilingEngine {
         guard !animation.isAnimating(window: id),
             !askEchoLikely(id)
         else { return false }
-        if boundLearner.observe(
+        // A performed probe raises the same flag (#1439): the
+        // pass computed its frames before the sweep, so the
+        // placement recomputes them.
+        if boundLearner.observeAnswer(
             id,
             currentSize: current.size,
             settledRead: true
-        ) {
+        ).owesPlacement {
             pendingBoundPlacement = true
         }
-        // A performed probe is re-asked by this very pass.
-        boundLearner.compliedProbes.remove(id)
         return true
     }
 
@@ -95,10 +96,10 @@ extension TilingEngine {
         _ id: WindowID,
         size: CGSize,
         settledRead: Bool
-    ) -> Bool {
+    ) -> SizeBoundLearner.Answer {
         guard !animation.isAnimating(window: id)
-        else { return false }
-        return boundLearner.observe(
+        else { return SizeBoundLearner.Answer() }
+        return boundLearner.observeAnswer(
             id,
             currentSize: size,
             settledRead: settledRead

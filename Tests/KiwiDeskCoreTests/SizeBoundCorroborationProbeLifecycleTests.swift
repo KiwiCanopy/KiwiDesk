@@ -67,37 +67,68 @@ struct SizeBoundCorroborationProbeLifecycleTests {
         #expect(revived != nil)
     }
 
-    @Test("A performed probe files the retile it owes")
-    func performedProbeFilesARetile() throws {
+    @Test("A performed probe is decided by the settled read alone")
+    func performedProbeIsDecidedSettled() throws {
         // The window PERFORMED the probe's ask — a grid app
         // landing inside the tolerance, or a lifted floor — and
         // now holds a size no layout drew, which the compliance
-        // sweep's "nothing to place" cannot see. Both channels:
-        // the settled read runs the sweep, the raw echo cannot
-        // wait for one (`wantsProbe` reads it as done).
+        // sweep's "nothing to place" cannot see. The settled read
+        // says so; a raw echo retires nothing, since the emulator
+        // performs an ask for ~0.4 s and snaps back (#1049).
         var settled = believedFloor()
         let issue = try #require(take(&settled))
         settled.recordAsk(w, size: issue.size)
-        settled.observe(w, currentSize: issue.size, settledRead: true)
-        #expect(settled.compliedProbes.contains(w))
+        let verdict = settled.observeAnswer(
+            w,
+            currentSize: issue.size,
+            settledRead: true
+        )
+        #expect(verdict.performedProbe)
+        #expect(!verdict.confirmed)
         // Closed: the anchor was swept, and the ask stays probed.
         let again = take(&settled)
         #expect(again == nil)
 
+        // The raw echo: nothing retired, and the settle probe
+        // stays wanted for a compliance at the probe's ask.
         var raw = believedFloor()
         let rawIssue = try #require(take(&raw))
         raw.recordAsk(w, size: rawIssue.size)
-        raw.observe(w, currentSize: rawIssue.size, settledRead: false)
-        #expect(raw.compliedProbes.contains(w))
-        // An ordinary compliance files nothing.
-        var plain = believedFloor()
-        plain.recordAsk(w, size: CGSize(width: 900, height: 800))
-        plain.observe(
+        let echo = raw.observeAnswer(
             w,
-            currentSize: CGSize(width: 900, height: 800),
+            currentSize: rawIssue.size,
             settledRead: false
         )
-        #expect(!plain.compliedProbes.contains(w))
+        #expect(!echo.performedProbe)
+        #expect(
+            raw.probePending(
+                w,
+                asking: rawIssue.size.width,
+                axis: \.width
+            )
+        )
+        #expect(raw.wantsProbe(w, currentSize: rawIssue.size))
+        // …so the snap-back pair-promotes and corroborates.
+        let revoke = raw.observeAnswer(
+            w,
+            currentSize: held,
+            settledRead: false
+        )
+        #expect(revoke.confirmed)
+        #expect(raw.bound(for: w)?.minWidth == 720)
+
+        // An ordinary compliance performs no probe and wants no
+        // read.
+        var plain = believedFloor()
+        let other = CGSize(width: 900, height: 800)
+        plain.recordAsk(w, size: other)
+        let ordinary = plain.observeAnswer(
+            w,
+            currentSize: other,
+            settledRead: true
+        )
+        #expect(!ordinary.performedProbe)
+        #expect(!plain.wantsProbe(w, currentSize: other))
     }
 
     @Test("Alternating anchors keep their one probe each")

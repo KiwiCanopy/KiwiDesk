@@ -41,12 +41,4 @@ extension TilingEngine {
         defer { issuedCorroborationProbes = [] }
         return issuedCorroborationProbes
     }
-
-    /// Whether `id` performed its probe's ask and so owes the
-    /// layout a re-ask (#1439) — read once per answer by
-    /// `KiwiCore.observeSizeAnswer`; the retile-time channel
-    /// re-asks in its own pass and clears it there.
-    func takeProbeCompliance(_ id: WindowID) -> Bool {
-        boundLearner.compliedProbes.remove(id) != nil
-    }
 }

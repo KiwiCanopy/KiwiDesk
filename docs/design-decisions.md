@@ -3202,8 +3202,10 @@ grid-snapping app pays one extra ask per anchor, answered a few
 points off and corroborating nothing, exactly as the #1055 bar
 intends — and where that answer lands inside the match
 tolerance, or the app simply performs the probe, the window
-holds a size no layout drew, so a performed probe is answered
-with the retile the compliance sweep would not send, the sweep
+holds a size no layout drew, so a performed probe — decided by
+the settled read alone, since a raw compliance can be the
+transient half of a snap-back — is answered with the retile the
+compliance sweep would not send, the sweep
 re-learns the entry once, and every ask that has had its probe
 stays probed for the ledger's lifetime rather than re-arming
 on that re-confirmation. A second anchor confirming while a

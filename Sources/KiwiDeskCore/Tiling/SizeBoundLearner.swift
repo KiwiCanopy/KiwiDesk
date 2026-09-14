@@ -122,11 +122,17 @@ struct SizeBoundLearner {
     /// The corroboration probes (#1439), one per axis; the
     /// contract is `SizeBoundLearner+Probe`'s.
     var probes: [WindowID: ProbeLedger] = [:]
-    /// Windows that PERFORMED their probe's ask (#1439) and so
-    /// hold a size no layout drew, awaiting the retile
-    /// `KiwiCore.observeSizeAnswer` answers them with — the
-    /// compliance sweep's "nothing to place" is wrong for them.
-    var compliedProbes: Set<WindowID> = []
+
+    /// One observation's verdict: a confirmation edge, and
+    /// whether the window PERFORMED its corroboration probe's
+    /// ask (#1439) — it then holds a size no layout drew, and
+    /// the compliance sweep's "nothing to place" is wrong for
+    /// it. Either owes the caller an immediate placement.
+    struct Answer: Equatable {
+        var confirmed = false
+        var performedProbe = false
+        var owesPlacement: Bool { confirmed || performedProbe }
+    }
 
     /// The size `retile` just issued for a window. Only the
     /// layout loop records — a stash park or float restore is
@@ -178,7 +184,20 @@ struct SizeBoundLearner {
         currentSize: CGSize,
         settledRead: Bool
     ) -> Bool {
-        guard let ask = lastAsks[id] else { return false }
+        observeAnswer(
+            id,
+            currentSize: currentSize,
+            settledRead: settledRead
+        ).confirmed
+    }
+
+    /// `observe` with the whole verdict — the engine's reading.
+    mutating func observeAnswer(
+        _ id: WindowID,
+        currentSize: CGSize,
+        settledRead: Bool
+    ) -> Answer {
+        guard let ask = lastAsks[id] else { return Answer() }
         let asked = ask.size
         // A non-positive span cannot be a real on-screen
         // window — it is a state frame no echo ever wrote (a
@@ -186,8 +205,8 @@ struct SizeBoundLearner {
         // answer. Learning it would confirm a 0 pt "bound" and
         // collapse the slot.
         guard currentSize.width > 0, currentSize.height > 0
-        else { return false }
-        let widthConfirmed = observeAxis(
+        else { return Answer() }
+        let width = observeAxis(
             id,
             asked: asked.width,
             current: currentSize.width,
@@ -196,7 +215,7 @@ struct SizeBoundLearner {
             axis: \.width,
             echoComplied: \.echoCompliedWidth
         )
-        let heightConfirmed = observeAxis(
+        let height = observeAxis(
             id,
             asked: asked.height,
             current: currentSize.height,
@@ -205,7 +224,11 @@ struct SizeBoundLearner {
             axis: \.height,
             echoComplied: \.echoCompliedHeight
         )
-        return widthConfirmed || heightConfirmed
+        return Answer(
+            confirmed: width.confirmed || height.confirmed,
+            performedProbe: width.performedProbe
+                || height.performedProbe
+        )
     }
 
     /// Promotes a candidate to a believed bound, returning

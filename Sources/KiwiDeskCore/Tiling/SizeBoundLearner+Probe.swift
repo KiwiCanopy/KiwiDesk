@@ -257,6 +257,16 @@ extension SizeBoundLearner {
         return probe.asked
     }
 
+    /// Whether a pending probe asked `span` on this axis — the
+    /// settle probe stays wanted for a compliance there.
+    func probePending(
+        _ id: WindowID,
+        asking span: CGFloat,
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
+    ) -> Bool {
+        probeExpectation(for: id, asking: span, axis: axis) != nil
+    }
+
     /// An ordinary ask went out: the pre-ask frame is no longer
     /// the settled read that earned a probe its trust.
     mutating func distrustProbeBaselines(_ id: WindowID) {
