@@ -58,9 +58,15 @@ extension KiwiCore {
         // mid-pass (#677): the pass computed its frames BEFORE
         // believing it, so run the placement now rather than
         // leaving the residue for the next unrelated event.
-        // Terminates: the second pass re-observes the same
-        // answer, which is no confirmation edge.
-        if tiler.takePendingBoundPlacement() {
+        // Two placements at most: the first may itself confirm
+        // the corroboration probe it issued (#1439, an
+        // echo-quiet fixture does), a third re-observes the
+        // same answer, which is no edge — and a flag left
+        // standing would fire a placement on the next unrelated
+        // retile, so it is drained here.
+        var placements = 0
+        while placements < 2, tiler.takePendingBoundPlacement() {
+            placements += 1
             onLog(
                 "size bound confirmed during retile; "
                     + "placing residue"
@@ -74,6 +80,8 @@ extension KiwiCore {
                 sizing: sizing
             )
         }
+        _ = tiler.takePendingBoundPlacement()
+        narrateCorroborationProbes()
         // Scrolling reads back its own last rest (#66); other
         // modes never write `scrollRest`, so this is a no-op
         // for them.

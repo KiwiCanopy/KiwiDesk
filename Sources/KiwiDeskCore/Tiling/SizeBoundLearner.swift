@@ -108,6 +108,7 @@ struct SizeBoundLearner {
     /// `SizeBoundLearner+Invalidation.swift`.
     struct Tombstone {
         var bounds: Ledger
+        var probes: ProbeLedger?
         var pid: pid_t
         var at: Date
     }
@@ -116,6 +117,9 @@ struct SizeBoundLearner {
     var candidates: [WindowID: Ledger] = [:]
     var bounds: [WindowID: Ledger] = [:]
     var tombstones: [WindowID: Tombstone] = [:]
+    /// The corroboration probes (#1439), one per axis, argued in
+    /// `SizeBoundLearner+Probe`.
+    var probes: [WindowID: ProbeLedger] = [:]
 
     /// The size `retile` just issued for a window. Only the
     /// layout loop records — a stash park or float restore is
@@ -135,6 +139,7 @@ struct SizeBoundLearner {
         settledFrom: CGSize? = nil
     ) {
         lastAsks[id] = Ask(size: size, settledFrom: settledFrom)
+        distrustProbeBaselines(id)
     }
 
     /// The app's answer to the last recorded ask: the window's
@@ -205,12 +210,16 @@ struct SizeBoundLearner {
     /// Internal rather than private since #1083 split the
     /// observation ladder into `SizeBoundLearner+Observe`;
     /// still module-internal, and no caller outside the two
-    /// learner files may reach it.
+    /// learner files may reach it. `settledRead` is the
+    /// promoting read's channel verdict, which decides whether
+    /// the probe this edge arms may trust the pre-ask frame
+    /// (#1439, `SizeBoundLearner+Probe`).
     mutating func promote(
         _ id: WindowID,
         asked: CGFloat,
         answered: CGFloat,
-        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>,
+        settledRead: Bool
     ) -> Bool {
         var entries = bounds[id]?[keyPath: axis] ?? []
         let entry = EffectiveSizeBound.Axis(
@@ -234,6 +243,18 @@ struct SizeBoundLearner {
             }
         }
         writeBounds(id, entries: entries, axis: axis)
+        // The one door onto the corroboration probe (#1439):
+        // a confirmation edge is the moment the second ask is
+        // owed. Retire first, so a probe's own confirmation
+        // never arms the next.
+        retireCorroborationProbe(id, answering: asked, axis: axis)
+        armCorroborationProbe(
+            id,
+            entry: entry,
+            entries: entries,
+            axis: axis,
+            settledRead: settledRead
+        )
         return true
     }
 

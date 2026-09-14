@@ -3178,6 +3178,32 @@ other. (`SizeBoundGeneralizationTests`,
 `ScrollingFixedSpanCueTests`)
 
 :::unreleased
+**The corroborating ask is sent, never awaited (#1439).**
+[Trade-off] An entry confirms about a second after a window
+arrives, but everything that needs a CORROBORATED bound — the
+size-limit pill, Scrolling's re-pack past the entry's own ask,
+Track's count and floor re-share — waited for the layout to
+happen to ask a second size a step away, which on a quiet screen
+it never does (the owner measured 8–18 s; the table is on the
+issue). So the moment an entry confirms on an axis nothing
+corroborates yet, the learner arms one probe a step past the
+refused ask in the refusing direction, and the retile loop sends
+it in place of the ask the entry already answers. What this
+trades: a grid-snapping app pays one extra ask per anchor,
+answered a few points off and corroborating nothing, exactly as
+the #1055 bar intends — and where that answer lands inside the
+match tolerance the compliance sweep reads a lifted constraint
+and re-learns the entry once, which is why a retired probe
+outlives its anchor rather than re-arming. It is not the timer
+re-probe the limitations table rules out: one probe per anchor,
+re-issued once and only once answered, never chained off its own
+confirmation, and ring-invisible, since the overlay pins it at
+the anchor's answer as it pins the second probe at the
+candidate's. (`SizeBoundCorroborationProbeTests`,
+`SizeBoundCorroborationProbeEngineTests`)
+:::
+
+:::unreleased
 **[Principle]**
 
 **Track's automatic count reads learned minimums; a fixed limit

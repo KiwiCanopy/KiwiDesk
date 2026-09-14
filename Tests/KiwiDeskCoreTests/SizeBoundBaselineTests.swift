@@ -94,7 +94,15 @@ struct SizeBoundBaselineTests {
         core.runSizeBoundProbe(w)
         #expect(core.tiler.sizeBound(for: w) != nil)
         let placed = try #require(applied.frames[w])
-        #expect(abs(placed.midX - target.midX) < 0.01)
+        // #1439: the placement pass carries the corroboration
+        // probe — the residue's origin with the probe's width;
+        // the window refuses the width and lands centered.
+        #expect(abs(placed.minX - (target.midX - 715 / 2)) < 0.01)
+        #expect(
+            placed.width
+                == target.width
+                + EffectiveSizeBound.corroborationDistinctness + 1
+        )
     }
 
     @Test("A trusted baseline confirms on the first settled read")

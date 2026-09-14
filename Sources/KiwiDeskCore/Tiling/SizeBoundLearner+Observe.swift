@@ -58,7 +58,8 @@ extension SizeBoundLearner {
                 id,
                 asked: asked,
                 answered: current,
-                axis: axis
+                axis: axis,
+                settledRead: settledRead
             )
         }
         var candidateEntries =
@@ -99,7 +100,8 @@ extension SizeBoundLearner {
                 id,
                 asked: asked,
                 answered: current,
-                axis: axis
+                axis: axis,
+                settledRead: settledRead
             )
         }
         if let index = candidateEntries.firstIndex(where: {
@@ -126,7 +128,8 @@ extension SizeBoundLearner {
                         id,
                         asked: asked,
                         answered: current,
-                        axis: axis
+                        axis: axis,
+                        settledRead: settledRead
                     )
                     candidateEntries.remove(at: index)
                 }

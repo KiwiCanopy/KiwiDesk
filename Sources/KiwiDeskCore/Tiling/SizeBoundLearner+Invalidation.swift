@@ -16,6 +16,7 @@ extension SizeBoundLearner {
         lastAsks[id] = nil
         candidates[id] = nil
         bounds[id] = nil
+        probes[id] = nil
     }
 
     /// How long a gone window's parked ledger may wait for the
@@ -49,6 +50,7 @@ extension SizeBoundLearner {
         if let ledger = bounds[id] {
             tombstones[id] = Tombstone(
                 bounds: ledger,
+                probes: probes[id],
                 pid: pid,
                 at: now
             )
@@ -73,6 +75,7 @@ extension SizeBoundLearner {
                 < Self.reviveGraceSeconds
         else { return false }
         bounds[id] = tomb.bounds
+        probes[id] = tomb.probes
         return true
     }
 
@@ -88,6 +91,9 @@ extension SizeBoundLearner {
         }
         if let bound = bounds.removeValue(forKey: old) {
             bounds[new] = bound
+        }
+        if let probe = probes.removeValue(forKey: old) {
+            probes[new] = probe
         }
     }
 

@@ -85,6 +85,11 @@ public final class TilingEngine {
     /// pass right after.
     var pendingBoundPlacement = false
 
+    /// Corroboration probes this pass issued (#1439), drained by
+    /// `KiwiCore.retile` for the log — `pendingBoundPlacement`'s
+    /// shape, since the loop cannot narrate.
+    var issuedCorroborationProbes: [(WindowID, CGSize)] = []
+
     /// The tiled member monocle's `park` keeps showing while a
     /// float holds the focus (#881) — engine-owned transient
     /// state, argued in `TilingEngine+MonocleShown`.
@@ -258,18 +263,28 @@ public final class TilingEngine {
                     for: id,
                     current: current
                 )
+                // #1439: a due corroboration probe stands in for
+                // an ask the anchor already answers and is meant
+                // to be issued, so neither skip below applies.
+                let probe = takeCorroborationProbe(
+                    id,
+                    current: current,
+                    target: target
+                )
                 // Tolerance: apps clamp what we set (character
                 // grids, minimum sizes), so the reported frame is
                 // often a hair off the target. Re-applying an
                 // unchanged target just wobbles the window.
-                if !force, Self.close(current, to: target) {
+                if probe == nil, !force,
+                    Self.close(current, to: target)
+                {
                     animation.cancel(window: id)
                     continue
                 }
                 // #677: a target the app has twice refused is
                 // "already there" too — re-issuing it restarts an
                 // animation the window can never perform, forever.
-                if !force,
+                if probe == nil, !force,
                     sizeBoundExplains(
                         id,
                         current: current,
@@ -279,18 +294,20 @@ public final class TilingEngine {
                     animation.cancel(window: id)
                     continue
                 }
+                let issued = probe?.frame ?? target
                 applyFrame(
                     id,
                     from: current,
-                    to: target,
+                    to: issued,
                     animated: animated,
                     isNewWindow: id == newlyCreatedWindow,
                     sizing: promised
                 )
                 boundLearner.recordAsk(
                     id,
-                    size: target.size,
-                    settledFrom: settledNow ? current.size : nil
+                    size: issued.size,
+                    settledFrom: settledNow
+                        ? current.size : probe?.baseline
                 )
             }
             stashInactive(
@@ -301,24 +318,6 @@ public final class TilingEngine {
             )
             restoreStashed(state: state, frames: frames)
         }
-    }
-
-    /// Frames within this distance per edge count as "already
-    /// there". Covers rounding and small app-side clamping.
-    /// Derived from the bound machinery's quantum (#677): both
-    /// answer "does the frame the app holds count as the frame
-    /// we named", so one constant owns the number.
-    static let retileTolerance: CGFloat =
-        EffectiveSizeBound.matchTolerance
-
-    static func close(
-        _ a: CGRect,
-        to b: CGRect
-    ) -> Bool {
-        abs(a.minX - b.minX) <= retileTolerance
-            && abs(a.minY - b.minY) <= retileTolerance
-            && abs(a.width - b.width) <= retileTolerance
-            && abs(a.height - b.height) <= retileTolerance
     }
 
     /// Forwards display topology changes to the animator.

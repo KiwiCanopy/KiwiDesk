@@ -100,6 +100,19 @@ extension KiwiCore {
         }
     }
 
+    /// Narrates the pass's corroboration probes (#1439): the
+    /// loop cannot log, so `KiwiCore.retile` drains them after
+    /// the pass, beside the confirmation that armed them.
+    func narrateCorroborationProbes() {
+        for (id, size) in tiler.takeIssuedCorroborationProbes() {
+            onLog(
+                "size bound corroboration probe for window "
+                    + "\(id.raw): asking "
+                    + "\(Int(size.width))x\(Int(size.height))"
+            )
+        }
+    }
+
     /// One observation, whatever the channel — the settle
     /// probe, a moved echo, a resized echo. A confirmation
     /// places the residue immediately and says so in the log: a

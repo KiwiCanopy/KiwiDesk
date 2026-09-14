@@ -826,7 +826,23 @@ editing here:
   apart (a coarse snap's row height beats the entry-keying
   tolerance), and a corroborated ceiling corroborates the
   single floor entry at the same span — the fixed-span lend,
-  paired values only. The cap consequence softens: an evicted
+  paired values only. **The corroborating second ask is SENT,
+  never awaited (#1439):** a confirmation on an axis nothing
+  corroborates yet arms ONE probe in `promote` — the one door —
+  `probeDistance` past the anchor in the refusing direction; the
+  retile loop issues it only in place of an ask the anchor
+  already answers, never a new one, re-issues it once and only
+  once its first answer seeded a candidate, and a probe's own
+  confirmation arms none — the retired record outliving its
+  anchor, because a grid app can answer inside the tolerance and
+  the compliance sweep then re-confirms the same entry, which a
+  record that left with the anchor would probe again every cycle
+  (`SizeBoundCorroborationProbeTests`). The loop's substitution,
+  the placement pass that carries it — two at most, then
+  drained, since the pass can now confirm the answer it issued —
+  and the pin are `SizeBoundCorroborationProbeEngineTests`'; the
+  argument is `SizeBoundLearner+Probe`'s header. The cap
+  consequence softens: an evicted
   ask beyond a still-corroborated bound consumes without
   re-dancing, while evicting the corroborating pair itself
   silently revokes the generalization until it re-learns. The
