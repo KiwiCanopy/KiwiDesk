@@ -44,6 +44,28 @@ struct FrameApplierStampTests {
         #expect(applier.didRecentlySetFrame(w))
     }
 
+    /// The grace is measured on the injected clock (#1456): a
+    /// frozen clock never ages a stamp, and a clock moved past
+    /// the bound expires it without a sleep — the shape a test
+    /// that wants the EXPIRY takes (tests.md).
+    @Test("The grace is measured on the injected clock")
+    func graceRunsOnTheInjectedClock() {
+        let applier = makeApplier()
+        nonisolated(unsafe) var now: TimeInterval = 100
+        applier.clock = { now }
+        applier.applyInstant(
+            w,
+            CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
+        #expect(applier.didRecentlySetFrame(w))
+        #expect(applier.instantTarget(w) != nil)
+        now = 100.5
+        #expect(applier.didRecentlySetFrame(w))
+        now = 101.5
+        #expect(!applier.didRecentlySetFrame(w))
+        #expect(applier.instantTarget(w) == nil)
+    }
+
     @Test("An instant frame is recent before its set runs")
     func instantApplyIsRecentAtEnqueue() {
         let applier = makeApplier()

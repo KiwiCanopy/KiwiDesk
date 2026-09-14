@@ -302,6 +302,27 @@ bite large test PRs:
   the seam class generally — spawns, the production status-bar
   touch), and `StatusItemSeamGuardTests` pins the menu-bar
   seam's construction routes and its sealed wrapper.
+- **A test that reads an age-bounded ledger pins the clock it is
+  measured on, never the wall clock.** Three CI rounds have gone
+  to this class, each a green-locally test whose stamp aged out
+  on a starved runner: the mouse-warp click stamps (#1371, fixed
+  by stamping AHEAD), the Desktop settle's departure (#1364,
+  backdated against the EVENT), and the frame applier's 1 s echo
+  grace, which `TravelerRehomeConsumerTests` read after a retile
+  that a 210 s suite had put more than a second behind it
+  (#1456). The tell in a test body is a read whose answer
+  depends on how long the runner took to reach it —
+  `recentInstantTarget`, `didRecentlySetFrame`, any `isRecent(…,
+  within:)` — with nothing pinning `now`. The seam rule above
+  covers it: the ledger takes its clock from an injectable
+  reader (`FrameApplier.clock`), `makeTestCore` freezes it (a
+  stamp read in the same test cannot age), and a test that wants
+  the EXPIRY sets the clock ahead rather than sleeping past the
+  bound. No suite relied on the grace expiring when the freeze
+  landed — every `nil` read was "never recorded" or "cleared by
+  the echo" — which is what made it safe to pin for everyone
+  rather than per test; a new ledger with its own bound owes the
+  same seam and the same pin.
 - **One seam runs the OTHER way, and it is named here rather
   than left in a doc comment.** The rule above keeps a live
   production default and injects a fake; the updater seam (#874)

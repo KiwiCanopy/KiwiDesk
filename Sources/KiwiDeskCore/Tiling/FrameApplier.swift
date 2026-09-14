@@ -19,6 +19,14 @@ final class FrameApplier {
     /// Grace period for ignoring self-inflicted AX frame echoes.
     private static let echoGrace: TimeInterval = 1.0
 
+    /// The clock the echo grace is measured on. Live by default;
+    /// `makeTestCore` freezes it, since a starved runner can let
+    /// a whole second pass between a retile's stamp and the read
+    /// that asks for it (#1456, tests.md ▸ age-bounded ledgers).
+    var clock: @Sendable () -> TimeInterval = {
+        ProcessInfo.processInfo.systemUptime
+    }
+
     /// True if a frame-set for the window was ISSUED or performed
     /// within the echo grace — tells our own AX echoes apart from
     /// user drags. Without it a settled animation's echo reads as
@@ -30,13 +38,13 @@ final class FrameApplier {
     /// the post-set stamp keeps the grace running from the set's
     /// return for a queue that runs late (`SizeBoundGateNeedleTests`).
     func didRecentlySetFrame(_ id: WindowID) -> Bool {
-        recent.isRecent(id, within: Self.echoGrace)
+        recent.isRecent(id, within: Self.echoGrace, now: clock())
     }
 
     /// Commanded frame from recent `applyInstant` while echo is in flight
     /// (#881).
     func instantTarget(_ id: WindowID) -> CGRect? {
-        instantTargets.frame(id, within: Self.echoGrace)
+        instantTargets.frame(id, within: Self.echoGrace, now: clock())
     }
 
     /// Retires instant target stamp upon arrival of first self-echo.
@@ -73,7 +81,7 @@ final class FrameApplier {
         // Ahead of the element guard and the coalescing return,
         // like `applyInstant`'s target stamp: the echo must never
         // precede the stamp (#1254).
-        recent.record(id)
+        recent.record(id, now: clock())
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -90,6 +98,7 @@ final class FrameApplier {
         guard !alreadyScheduled else { return }
         let store = pending
         let recent = recent
+        let clock = clock
         queue(for: pid).async {
             guard let entry = store.take(id) else { return }
             if entry.setSize {
@@ -105,7 +114,7 @@ final class FrameApplier {
             }
             // Kept beside the enqueue stamp: the grace runs from
             // the set's RETURN for a queue that runs late (#1254).
-            recent.record(id)
+            recent.record(id, now: clock())
         }
     }
 
@@ -120,14 +129,15 @@ final class FrameApplier {
         // Recorded before the element guard, at enqueue time: the
         // overlay sync wants the commanded frame this same turn
         // (#881); a stamp for a gone window expires unread.
-        instantTargets.record(id, frame: frame)
-        recent.record(id)  // as `apply`, #1254
+        instantTargets.record(id, frame: frame, now: clock())
+        recent.record(id, now: clock())  // as `apply`, #1254
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
         else { return }
         nonisolated(unsafe) let target = element
         let recent = recent
+        let clock = clock
         queue(for: pid).async {
             let wasEnabled =
                 AXHelper.getEnhancedUserInterface(pid: pid)
@@ -145,7 +155,7 @@ final class FrameApplier {
                     enabled: true
                 )
             }
-            recent.record(id)  // as `apply`, #1254
+            recent.record(id, now: clock())  // as `apply`, #1254
         }
     }
 
@@ -191,23 +201,20 @@ private final class InstantTargets: @unchecked Sendable {
     private let lock = NSLock()
     private var entries: [WindowID: Entry] = [:]
 
-    func record(_ id: WindowID, frame: CGRect) {
+    func record(_ id: WindowID, frame: CGRect, now: TimeInterval) {
         lock.lock()
         defer { lock.unlock() }
-        entries[id] = (
-            frame,
-            ProcessInfo.processInfo.systemUptime
-        )
+        entries[id] = (frame, now)
     }
 
     func frame(
         _ id: WindowID,
-        within interval: TimeInterval
+        within interval: TimeInterval,
+        now: TimeInterval
     ) -> CGRect? {
         lock.lock()
         defer { lock.unlock() }
         guard let entry = entries[id] else { return nil }
-        let now = ProcessInfo.processInfo.systemUptime
         if now - entry.at > interval {
             entries[id] = nil
             return nil
@@ -227,20 +234,20 @@ private final class RecentApplies: @unchecked Sendable {
     private let lock = NSLock()
     private var stamps: [WindowID: TimeInterval] = [:]
 
-    func record(_ id: WindowID) {
+    func record(_ id: WindowID, now: TimeInterval) {
         lock.lock()
         defer { lock.unlock() }
-        stamps[id] = ProcessInfo.processInfo.systemUptime
+        stamps[id] = now
     }
 
     func isRecent(
         _ id: WindowID,
-        within interval: TimeInterval
+        within interval: TimeInterval,
+        now: TimeInterval
     ) -> Bool {
         lock.lock()
         defer { lock.unlock() }
         guard let stamp = stamps[id] else { return false }
-        let now = ProcessInfo.processInfo.systemUptime
         if now - stamp > interval {
             stamps[id] = nil
             return false
