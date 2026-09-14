@@ -108,8 +108,10 @@ struct LicenseDocumentsTests {
 
     /// About MOUNTS the row, and is the only reader of the URLs
     /// and the copyright line. Keyed on the mount line, not the
-    /// declaration: the `GuideLinkSurfaceTests` lesson, where
-    /// deleting the bare `guideLink` line left every guard green.
+    /// declaration — gui.md's rule: key a needle on the site that
+    /// USES the value, since a needle on a declaration stayed
+    /// green once when About's bare mount line was deleted
+    /// (code-reviewer, 2026-08-26).
     @Test("About draws the row, and nothing else reads the URLs")
     func aboutIsTheOneSurface() throws {
         let about = SourceScan.stripComments(

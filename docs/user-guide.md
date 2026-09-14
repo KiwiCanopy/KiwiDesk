@@ -30,10 +30,6 @@ takes no focus, as anywhere on macOS. Shift-Tab reaches the
 **← Home** chip; **⌘[** or Escape goes back. **⌘K** puts the
 cursor in the search field from anywhere in the window.
 
-:::unreleased
-Before you type, the search field offers the Guide.
-:::
-
 With keyboard navigation off, a control that cannot hold focus
 hands it to the search field instead. VoiceOver is unaffected,
 and every card and panel title is a heading for its rotor.

@@ -14,15 +14,6 @@ struct OnboardingPage<Content: View, Action: View>: View {
     var hint: String?
     /// Whether a pulsing dot precedes the hint for in-flight tasks (#802).
     var hintPulses = false
-    /// Emphasizes the hint tier when presenting a destination link (#1019).
-    var hintLeads = false
-    /// Embedded interactive link within the hint (#828).
-    var hintLink: HintLink?
-
-    struct HintLink {
-        let label: String
-        let action: () -> Void
-    }
     @ViewBuilder var content: Content
     @ViewBuilder var action: Action
 
@@ -55,7 +46,7 @@ struct OnboardingPage<Content: View, Action: View>: View {
                         if hintPulses {
                             WaitingDot(ink: SettingsTheme.ink3)
                         }
-                        hintView(hint)
+                        hintText(hint)
                     }
                     .frame(
                         maxWidth: .infinity,
@@ -76,27 +67,6 @@ struct OnboardingPage<Content: View, Action: View>: View {
             .font(.system(size: 12.5))
             .foregroundStyle(SettingsTheme.ink3)
             .fixedSize(horizontal: false, vertical: true)
-    }
-
-    /// Formats hint text, or builds a `LinkedCaption` when `hintLink` is set.
-    @ViewBuilder
-    private func hintView(_ text: String) -> some View {
-        if let hintLink {
-            let parts = LinkedCaption.split(frame: text)
-            LinkedCaption(
-                leading: parts.0,
-                linkTitle: hintLink.label,
-                trailing: parts.1,
-                navigate: hintLink.action,
-                pointSize: hintLeads ? 13 : 12.5,
-                ink: NSColor(
-                    hintLeads
-                        ? SettingsTheme.ink2 : SettingsTheme.ink3
-                )
-            )
-        } else {
-            hintText(text)
-        }
     }
 
     private func hintText(_ text: String) -> some View {

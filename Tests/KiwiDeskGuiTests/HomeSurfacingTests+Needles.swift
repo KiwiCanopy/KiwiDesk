@@ -221,14 +221,15 @@ extension HomeSurfacingTests {
             // push/pop (owner 2026-08-10).
             ".id(destination)",
         ],
-        "Settings/SettingsSearch.swift": [
-            // The offer ROUTES through the one offer predicate
-            // (#1030); a behaviour test cannot see the route.
-            "HomeCardOrder.isOffered(row.destination,"
-        ],
         "Settings/HeaderSearch.swift": [
-            // The keys move over the offer (#1030); a bare
-            // Return commits a first hit only for a TYPED query.
+            // The predicate the query-only panel rests on: a
+            // `{ true }` here re-opens #1468 with every use-site
+            // needle green (guard-prover, 2026-09-15).
+            "varsearching:Bool{!query.trimmed.isEmpty}",
+            // A bare Return commits a first hit only for a TYPED
+            // query; "nothing before a query" is
+            // `SettingsSearch.results`' (`SettingsSearchTests` ▸
+            // `emptyQuery`), not re-derived here (#1470).
             "lethits=hitsguard!hits.isEmpty",
             "??(searching?hits.first:nil)",
             "if!now{highlighted=nil}collapseIfIdle()",
@@ -253,12 +254,11 @@ extension HomeSurfacingTests {
                 + ".keyboardShortcut(\"k\",modifiers:.command)",
         ],
         "Settings/HeaderSearch+Results.swift": [
-            // The offer (#1030) OPENS the panel and is DRAWN —
-            // condition and branch body both.
-            "iffocused||panelHovered,searching||!offer.isEmpty{"
-                + "resultCard}",
-            "if!searching{VStack(",
-            "ForEach(offer){resultinrow(result)}",
+            // The panel opens only WITH a query (#1470): the
+            // field takes the window's arrival focus, so a panel
+            // with rows before a query popped over Home on every
+            // open (#1468).
+            "iffocused||panelHovered,searching{resultCard}"
         ],
         "Settings/SettingsSearchField.swift": [
             // Escape on an EMPTY field resigns focus (#1030).

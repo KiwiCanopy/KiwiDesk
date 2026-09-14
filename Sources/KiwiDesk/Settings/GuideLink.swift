@@ -10,10 +10,9 @@ import SwiftUI
 /// reports its own failure, and a wrong "you are offline" beside
 /// a live link is worse (`SupportLinks` makes the same trade).
 struct GuideLink: View {
-    /// Font point size and ink color for link prose (`LinkedCaption`).
-    var pointSize: CGFloat = NSFont.preferredFont(
-        forTextStyle: .caption1
-    ).pointSize
+    /// Ink color for link prose (`LinkedCaption`); the size is the
+    /// caption's, since the one mount that overrode it went with
+    /// #1470.
     var ink: Color = Color(nsColor: .secondaryLabelColor)
 
     var body: some View {
@@ -23,7 +22,6 @@ struct GuideLink: View {
             linkTitle: Self.label,
             trailing: parts.1,
             navigate: Self.open,
-            pointSize: pointSize,
             ink: NSColor(ink)
         )
     }

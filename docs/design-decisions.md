@@ -5088,51 +5088,46 @@ match path and every keystroke pays a disk or AX round-trip the
 moment someone adds "just one" richer column; rank by mode and
 the same query answers differently before and after one click.
 
-### The search panel offers one row before you type: the Guide
+### The search panel shows nothing before you type
 
-**[Trade-off]** (#1030, owner ruling 2026-08-26)
+**[Principle]** (#1030 tried the opposite; #1470 retired it, owner
+ruling 2026-09-15)
 
 :::unreleased
-**Focusing the search field shows exactly one row, the Guide,
-which navigates to General ▸ About.** KiwiDesk is `.accessory`
-and has no Help menu; the search field is the closest thing to
-one, and the app's other two pointers to the guide are
-one-shot (the tour, the first-run banner). Before a query the
-panel was blank at the one moment a user has said they are
-looking for something they cannot yet name.
+**A focused search field with nothing typed shows no panel.** The
+field is the window's first text field, so macOS hands it the
+arrival focus on every open — and a panel with rows before a
+query therefore dropped over Home every time Settings appeared
+(#1468). #1030 had put one row there, the Guide, on the argument
+that an `.accessory` app has no Help menu and the search field is
+the closest thing to one; that argument now belongs to the Mac
+Checklist's foot, the app's one permanent guide pointer (▸ *The
+app links the guide…*). What remains from that pass is the rule
+it also stated: `results("")` returns nothing, so a bare Return
+in an untouched field cannot navigate somewhere the user never
+named (`SettingsSearchTests` ▸ `emptyQuery`), and any list
+volunteered under the field would be a second navigator, which
+"Home is the only navigator" rules against. The narrower fix —
+keep the row, show it only on a focus the USER gave — was
+refused too: telling a click or ⌘K from the window's arrival
+focus means reading focus provenance at the field, which is the
+#991 trap (`currentEvent` is the last event retrieved, and a
+VoiceOver press has none), and `SettingsInputSourceSeamTests`
+bounds who may read the input source at all.
 
-One row, deliberately, and not four: a curated list is a second
-navigator with a hand-kept census, which "Home is the only
-navigator" rules against — one row cannot rot into a census.
-And it is a **separate producer** (`SettingsSearch.offer`),
-never `results("")` returning rows: Return in the field commits
-the first hit, so an empty query with hits would send a bare
-Return somewhere the user never named. The offer therefore also
-refuses that fallback — the keys can highlight it, Return
-commits only what is highlighted — and it passes the one offer
-predicate, so nothing drawn before a query can flip the mode: a
-typed result may, because the user named the thing; a
-volunteered one may not.
-
-Two settled behaviours moved with it rather than being
-discovered: Escape on an EMPTY field resigns focus (clearing an
-already-empty query would leave the panel uncloseable from the
-keyboard), and the narrow-width entry collapses once neither
-focus nor the pointer holds the panel, not on blur alone — the
-panel now has rows to hover before a query. Where focus goes
-after that Escape is ruled, not stated: nowhere. The window has
-no focused control, and the next Tab restarts the key loop at
-its first key view — the search field, which the guide already
-makes the window's focus home. Escape means "stop searching",
-Tab means "start from the top"; sending focus into the page
-instead would move it somewhere the user was not looking
-(owner eyeball 2026-09-14, keyboard navigation on, wide and
-narrow). Refused: a hint
-sentence with no rows (`ui-designer`'s own recommendation — no
-census, but no answer to the Help-menu gap either),
-most-recently-visited (empty for exactly the user this exists
-for), and Home's offers redrawn 380 pt wide. `SettingsSearchOfferTests`
-holds the producer; `HomeSurfacingTests` the branches.
+Two settled behaviours from that pass stay: Escape on an EMPTY
+field resigns focus (clearing an already-empty query would leave
+the field uncloseable from the keyboard), and the narrow-width
+entry collapses once neither focus nor the pointer holds it, not
+on blur alone. Where focus goes after that Escape is ruled, not
+stated: nowhere. The window has no focused control, and the next
+Tab restarts the key loop at its first key view — the search
+field, which the guide already makes the window's focus home.
+Escape means "stop searching", Tab means "start from the top";
+sending focus into the page instead would move it somewhere the
+user was not looking (owner eyeball 2026-09-14, keyboard
+navigation on, wide and narrow). `HomeSurfacingTests` needles
+the query-only panel and the collapse.
 :::
 
 ### Hover help appears sooner than AppKit's default
@@ -5584,9 +5579,8 @@ shouts. This does not reopen the #678 Phase 4 pass 11 ruling
 that moved the tour's default action off Open Settings: that
 ruling was about handing a new user the whole Settings window
 to dig through, and this button lands them on one card of
-things to finish, the same shape as the tour's own steps — the
-guide-link entry below still governs the closing card's other
-pointer. It is also why the card sits LAST on Home, after
+things to finish, the same shape as the tour's own steps. It is
+also why the card sits LAST on Home, after
 General: the tour carries discovery, Home carries return visits,
 and a checklist most people finish once is the right card to
 orphan where the Whole App row wraps. A habit that names a macOS
@@ -5604,8 +5598,8 @@ For a long time nothing in KiwiDesk named the written guide at
 all. A user who finished the tour and later wanted to make the
 setup theirs had to find the site on their own.
 
-**What the tour's closing card gave up to make room for it is the
-more interesting half.** That card used to end on a quiet
+**What the tour's closing card gave up when #1019 put the pointer
+there is the more interesting half.** That card used to end on a quiet
 paragraph — "Settings is where you change any of this — different
 keys, more Spaces, other colours. If this is your first tiling
 manager, you do not need it today" — above a footer offering
@@ -5628,7 +5622,7 @@ Before this the card said four things about where to go next, and
 two of them argued with each other in the reader's field of view:
 Settings is where you change everything, you do not need
 Settings, open Settings, start using it. Removing the fork beats
-re-wording it. What remains is the button and one link.
+re-wording it. What remained was the button and the pointer.
 
 **Dropping the tour's Open Settings link EXTENDS the #678 Phase 4
 pass 11 ruling rather than contradicting it.** That pass moved
@@ -5647,28 +5641,37 @@ Since #1365 the default action lands on the Mac Checklist card;
 that is not the Open Settings link coming back.
 :::
 
-**The pointer is in three places, and the third is the one that
-matters most.** The tour's closing card reaches someone who has
-just run the tour; Home's first-run banner reaches someone who
-closed the tour after its shortcuts screen without reaching that
-card, or finished it months ago and is in Settings for the first
-time. Both are ONE-SHOT — the tour does not come back on
-its own, and the banner retires permanently on dismiss or on the
-first save — so a user who dismissed the welcome, or simply saved
+**The banner is one-shot, so only a permanent pointer closes the
+gap.** Home's first-run banner reaches someone who closed the
+tour early, or finished it months ago and is in Settings for the
+first time — and it retires permanently on dismiss or on the
+first save, so a user who dismissed the welcome, or simply saved
 one change, had no route to the guide anywhere in the app. That
 is the gap this entry is about, not a nicety on top of it, and
-only a permanent pointer closes it: General ▸ About, beside the
-links already there.
+only a permanent pointer closes it.
 
 :::unreleased
-A fourth since #1365: the Mac Checklist's foot draws the same
-sentence, for the reader the tour just sent there.
+That permanent pointer is the Mac Checklist's foot (#1365,
+#1470). It was General ▸ About's bare "Guide" link, and the
+tour's closing card carried the sentence too; both went with
+#1470 (owner ruling 2026-09-15): the tour's button now lands ON
+the checklist, one line above its own copy of the sentence, and
+two permanent pointers to one page is the drift a one-pointer
+entry exists to stop. The search declaration moved with it, so
+"guide" typed into the field still lands on the pointer
+(`GuideLinkSurfaceTests` is the register of the two sites, the
+one URL reader, and the mount count). The pointer is permanent
+only where the checklist is OFFERED — in Simple, on every
+display count, withheld only while a stored profile is edited,
+exactly as About was (`HomeCardOrderTests` ▸ `modeCounts`,
+`DestinationParityTests` ▸ `profileContextExcludesOnlyProfileless`)
+— so a change that withholds the checklist further owes the
+pointer a new home in the same change.
 :::
 
-The two sentence-shaped surfaces share ONE frame and one label,
-because the same English names the same action at both. About
-draws the bare destination name instead: a sentence there would
-be prose in a card of one-word links.
+The two surfaces share ONE frame and one label, because the same
+English names the same action at both; the search row draws the
+bare destination name, "Guide", since a sentence is not a row.
 
 **It links `/guide/`, not `/docs/user-guide/`.** They are
 different documents for different readers: `/guide/` is the

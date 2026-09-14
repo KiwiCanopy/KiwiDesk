@@ -5,15 +5,15 @@ import Testing
 @testable import KiwiDesk
 
 /// Where the guide pointer is drawn, and that it is drawn from
-/// one place (#1019).
+/// one place (#1019, #1470).
 ///
-/// Both sites are load-bearing and neither can stand in for the
-/// other: the tour's closing card reaches a user who ran the
-/// tour, Home's first-run banner reaches one who closed it
-/// early or
-/// finished it months ago. Dropping either is silent — the
-/// sentence still renders on the other screen, every catalog key
-/// is still used, and nothing else in the tree notices.
+/// Two sites, and neither stands in for the other: Home's
+/// first-run banner reaches a new user once, and the Mac
+/// Checklist's foot is the permanent route — the tour lands on
+/// that card, so its own copy and About's went with #1470.
+/// Dropping either is silent — the sentence still renders on
+/// the other, every catalog key is still used, and nothing else
+/// in the tree notices.
 ///
 /// The shape, not the words (`.claude/rules/tests.md`): that the
 /// two surfaces mount the ONE view, and that nothing reaches the
@@ -40,59 +40,77 @@ struct GuideLinkSurfaceTests {
     /// another — the failure a whole-tree count goes green on.
     ///
     /// Each site's needle is what proves THAT file draws the
-    /// pointer: the tour's closing card takes the three facts
-    /// directly (`OnboardingPage` owns its footer's layout), the
-    /// banner mounts the view, and About draws a plain `Link`.
+    /// pointer: both mount the one view.
     private static let surfaces = [
-        // `GuideLink.open` — the NAVIGATION, not the sentence.
-        // A bare `GuideLink.` was satisfied by `hint: GuideLink
-        // .prose` alone, so deleting the `hintLink:` argument
-        // left the card rendering the words with nothing to
-        // click and this suite green (`guard-prover`,
-        // 2026-08-26) — a regression the source comment three
-        // lines above it records having already shipped once.
-        (
-            "Onboarding/OnboardingView+Closing.swift",
-            "GuideLink.open"
-        ),
         ("Settings/HomeFirstRunBanner.swift", "GuideLink("),
+        // The permanent route, and the one search reaches: the
+        // mount AND its catalog anchor, since a `GuideLink()`
+        // without the anchor is a pointer nobody can find by
+        // typing "guide". The trade: the anchor is pinned as the
+        // FIRST modifier on the mount, so a modifier inserted
+        // between them reds this — move the anchor back to the
+        // front rather than widening the needle, which is what
+        // keeps the pair contiguous (tests.md).
         (
-            "Settings/Sections/GeneralSection+About.swift",
-            // The MOUNT, not the declaration. `SupportLinks
-            // .guide` matches inside `var guideLink`'s own body,
-            // so deleting the bare `guideLink` line from the
-            // card's `VStack` — which removes the app's only
-            // permanent route to the guide — left this suite and
-            // three catalog guards green (`code-reviewer`,
-            // 2026-08-26). gui.md states the rule this broke:
-            // key a needle on the site that USES the value.
-            // Matched as a whole stripped LINE because that is
-            // what a bare mount is; the declaration reads
-            // `@ViewBuilder var guideLink: some View {`.
-            "guideLink"
+            "Settings/Sections/MacChecklistSection.swift",
+            "GuideLink().searchAnchored("
+                + "SettingsCatalog.macChecklist.guideLink)"
         ),
     ]
 
-    /// **The third site is the one that still works on day 30.**
-    /// The other two are one-shot — the tour does not come back
-    /// on its own, and `HomeFirstRunState.retire` ends the banner
-    /// for good on dismiss or on the first save — so without a
-    /// permanent route a user who dismissed the welcome had no
-    /// way to the guide at all, which is the gap #1019 is titled
-    /// after. Losing any one of the three is silent: the sentence
-    /// still renders on the others, every catalog key is still
-    /// used, and nothing else in the tree notices.
-    @Test("all three surfaces point at the guide")
+    /// The register bounds the TOTAL too: a third `GuideLink()`
+    /// mount — About re-adding its own, a new section's foot —
+    /// reads no `SupportLinks.guide` and trips no per-site
+    /// needle, which is exactly the two-permanent-pointers drift
+    /// the ruling exists to stop (architect-reviewer,
+    /// 2026-09-15). `GuideLink(` with the paren is the MOUNT
+    /// spelling; `GuideLink.` (the static members) is not
+    /// counted.
+    @Test("nothing else mounts the guide link")
+    func noThirdMount() throws {
+        var mounts: [String] = []
+        for file in try SourceScan.swiftSources(under: tree)
+        where file.lastPathComponent != "GuideLink.swift" {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let count =
+                text.components(separatedBy: "GuideLink(").count - 1
+            if count > 0 {
+                mounts.append(
+                    "\(file.lastPathComponent)×\(count)"
+                )
+            }
+        }
+        #expect(
+            mounts.sorted() == [
+                "HomeFirstRunBanner.swift×1",
+                "MacChecklistSection.swift×1",
+            ],
+            Comment(rawValue: "guide link mounts: \(mounts)")
+        )
+        #expect(mounts.count == Self.surfaces.count)
+    }
+
+    /// **The checklist's foot is the one that still works on
+    /// day 30.** The banner is one-shot — `HomeFirstRunState
+    /// .retire` ends it for good on dismiss or on the first save
+    /// — so without a permanent route a user who dismissed the
+    /// welcome had no way to the guide at all, which is the gap
+    /// #1019 is titled after. Losing either is silent: the
+    /// sentence still renders on the other, every catalog key is
+    /// still used, and nothing else in the tree notices.
+    @Test("both surfaces point at the guide")
     func everySurfaceOffersTheGuide() throws {
         for (surface, needle) in Self.surfaces {
             let text = try source(surface)
-            let mounted =
-                text.contains(needle)
-                && (needle != "guideLink"
-                    || text.split(separator: "\n").contains {
-                        $0.trimmingCharacters(in: .whitespaces)
-                            == needle
-                    })
+            let squashed = text.split(
+                whereSeparator: \.isWhitespace
+            ).joined()
+            let mounted = squashed.contains(
+                needle.split(whereSeparator: \.isWhitespace)
+                    .joined()
+            )
             #expect(
                 mounted,
                 Comment(
@@ -106,7 +124,7 @@ struct GuideLinkSurfaceTests {
     }
 
     /// **Two keys name ONE destination, so they are pinned to
-    /// each other.** `general.about.guide` is the row label (a
+    /// each other.** `mac_checklist.guide` is the row label (a
     /// bare noun, "Guide"); `common.read_guide` is the same noun
     /// inside a sentence, where most languages want an article
     /// ("das Handbuch", "la guía"). They cannot be one key —
@@ -163,7 +181,7 @@ struct GuideLinkSurfaceTests {
             // `extract-keys` and `merge-keys`, and a guard that
             // reds there is a guard people learn to ignore
             // (`code-reviewer` asked; ruled 2026-08-26).
-            guard let row = catalog["general.about.guide"],
+            guard let row = catalog["mac_checklist.guide"],
                 let inline = catalog["common.read_guide"]
             else { continue }
             #expect(
@@ -175,7 +193,7 @@ struct GuideLinkSurfaceTests {
                 Comment(
                     rawValue:
                         "\(file.lastPathComponent) calls the "
-                        + "guide \(row) in About and \(inline) "
+                        + "guide \(row) in the search row and \(inline) "
                         + "in the sentence — two words for one "
                         + "destination"
                 )
@@ -203,10 +221,8 @@ struct GuideLinkSurfaceTests {
     /// narrowing `SupportLinks.guide` applies, which is how a
     /// `pt-BR` reader gets a 404 rather than English.
     ///
-    /// Two readers, not one: `GuideLink` owns the sentence form
-    /// that two surfaces draw, and About draws a bare `Link`
-    /// whose label IS the destination — a sentence there would be
-    /// prose in a card of one-word links.
+    /// One reader: `GuideLink` owns the sentence form both
+    /// surfaces draw (About's bare `Link` went with #1470).
     @Test("only the declared readers reach the guide URL")
     func theUrlHasOneReader() throws {
         let readers = try SourceScan.swiftSources(under: tree)
@@ -219,13 +235,11 @@ struct GuideLinkSurfaceTests {
             .map { $0.lastPathComponent }
             .sorted()
         #expect(
-            readers == [
-                "GeneralSection+About.swift", "GuideLink.swift",
-            ],
+            readers == ["GuideLink.swift"],
             Comment(
                 rawValue:
                     "the guide URL is read in \(readers); the "
-                    + "census is GuideLink and About"
+                    + "census is GuideLink alone"
             )
         )
     }

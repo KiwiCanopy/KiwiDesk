@@ -18,6 +18,9 @@ struct MacChecklistSection: View {
                 optionals
                 habits
                 GuideLink()
+                    .searchAnchored(
+                        SettingsCatalog.macChecklist.guideLink
+                    )
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
@@ -26,7 +29,6 @@ struct MacChecklistSection: View {
     private var essentials: some View {
         SettingsSection(
             SettingsCatalog.macChecklist.essentialsCard,
-            caption: MacChecklistText.provenance,
             trailing: MacChecklistText.progress(
                 done: model.macChecklistDone,
                 total: MacChecklistProgress.total
