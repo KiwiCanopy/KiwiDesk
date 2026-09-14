@@ -200,6 +200,7 @@
   "colors.scene.title": "Couleurs actuelles",
   "colors.space_bar_off.help": "La Space Bar est désactivée, ses couleurs ne sont donc pas dessinées. Activez-la dans %1$@.",
   "colors.unfocused_off.help": "Les fenêtres inactives n'ont pas de bordure, cette couleur n'est donc pas dessinée. Activez-la dans %1$@.",
+  "colors.unfocused_off.xref": "La couleur « %1$@ » n'est pas dessinée tant que « %2$@ » est désactivé — activez-le dans %3$@.",
   "common.error.write_failed": "KiwiDesk n'a pas pu écrire « %1$@ ». Essayez un autre emplacement, comme votre bureau.",
   "common.guide_hint": "Envie d'en tirer plus ? Lisez %1$@.",
   "common.off": "désactivé",

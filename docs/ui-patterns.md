@@ -1492,8 +1492,11 @@ for a greyed block, while ONE greyed row inside a live card
 takes a `CrossReferenceRow` directly beneath its grid, outside
 the dimmed subtree — the Space Bar colours card's *Focused
 window* row, whose picker lives on Bars, draws
-`AdvancedColorsHelp.focusedItemReference` there and links the
-destination in the sentence. The argument is
+`AdvancedColorsHelp.focusedItemReference` there, and the Border
+colours card's *Unfocused windows* row draws
+`unfocusedReference` the same way while the ring is on, each
+linking the destination in the sentence; the Borders header `?`
+answers only for the ring being off. The argument is
 `docs/design-decisions.md` ▸ *a dim is not a sentence*.
 :::
 

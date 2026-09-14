@@ -135,6 +135,10 @@ extension InterpolatedLabelTests {
         // row, the picker, its current value and the value to
         // set — four by key; the fifth slot is the link.
         "colors.focused_item_inert.xref": 4,
+        // #1310: the unfocused row's link sentence names the row
+        // and the Gaps & Borders switch — two by key; the third
+        // slot is the link.
+        "colors.unfocused_off.xref": 2,
         "colors.space_bar_off.help": 1,
         "colors.unfocused_off.help": 1,
         "layout_defaults.spaces_using.none": 1,

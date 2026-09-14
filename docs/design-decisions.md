@@ -4503,8 +4503,12 @@ a row takes a `CrossReferenceRow` directly beneath the grid,
 outside the dimmed subtree: the sentence states the fact and the
 destination name is the link, so the fix is one click rather
 than a popover that then says to go elsewhere
-(`AdvancedColorsHelp.focusedItemReference`). The header `?` stays
-the shape for a greyed block.
+(`AdvancedColorsHelp.focusedItemReference`). The Borders card was
+the same shape one card up — *Unfocused windows* greyed alone
+while the ring is on, its reason on the heading — and took the
+same link (`unfocusedReference`); its header `?` now answers only
+for the ring being off, when every row is grey. The header `?`
+stays the shape for a greyed block.
 :::
 
 The temptation to answer all of this with `.accessibilityHint`

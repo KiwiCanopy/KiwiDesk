@@ -73,6 +73,13 @@ struct GreyOutAnchorTests {
             "help: gates.bordersHeaderHelp",
             1
         ),
+        // The Borders card's ONE greyed row (unfocused off, ring
+        // on) takes the link beneath the grid (#1310).
+        (
+            "StructureColorCards.swift",
+            "prose: AdvancedColorsHelp.unfocusedReference",
+            1
+        ),
         // The drag columns are subheadings, not sections, so
         // their live `?` is a `HelpButton` beside the title —
         // outside the dimmed rows either way.

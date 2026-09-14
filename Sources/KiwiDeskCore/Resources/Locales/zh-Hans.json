@@ -200,6 +200,7 @@
   "colors.scene.title": "当前颜色",
   "colors.space_bar_off.help": "Space Bar 已关闭，因此不会绘制其颜色。请在“%1$@”中打开它。",
   "colors.unfocused_off.help": "非焦点窗口没有边框，因此不会绘制此颜色。请在“%1$@”中打开它。",
+  "colors.unfocused_off.xref": "“%2$@”关闭时，不会绘制“%1$@”，请在%3$@中打开它。",
   "common.error.write_failed": "KiwiDesk 无法写入“%1$@”。请换个位置试试，比如你的桌面。",
   "common.guide_hint": "想更好地用起来？读一读%1$@。",
   "common.off": "关闭",

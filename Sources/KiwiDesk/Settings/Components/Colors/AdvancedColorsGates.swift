@@ -14,11 +14,17 @@ struct AdvancedColorsGates {
     var borderOn: Bool { settings.borderStyle.enabled }
     var unfocusedOn: Bool { settings.borderStyle.unfocusedEnabled }
 
-    /// The Borders group's header reason, outermost first.
+    /// The Borders group's header reason: the ring off greys the
+    /// whole card, which a header `?` scopes; the unfocused row
+    /// alone takes a link beneath the grid instead (#1310).
     var bordersHeaderHelp: String? {
-        if !borderOn { return AdvancedColorsHelp.borderOff }
-        if !unfocusedOn { return AdvancedColorsHelp.unfocusedOff }
-        return nil
+        borderOn ? nil : AdvancedColorsHelp.borderOff
+    }
+
+    /// Whether the unfocused row draws its remote reason as a
+    /// link beneath the grid (#1310): only while the ring is on.
+    var unfocusedNeedsReference: Bool {
+        borderOn && !unfocusedOn
     }
 
     // MARK: - Drag visuals
@@ -119,6 +125,24 @@ enum AdvancedColorsHelp {
             "The Space Bar is off, so its colors aren't drawn. "
                 + "Turn it on in %1$@.",
             SettingsDestination.bars.title
+        )
+    }
+
+    /// The unfocused row's remote gate, as the sentence a
+    /// `CrossReferenceRow` links to Gaps & Borders (#1310): the
+    /// row and the switch by their own keys (#818); `%3$@` is the
+    /// link slot.
+    static var unfocusedReference: String {
+        L(
+            "colors.unfocused_off.xref",
+            "\u{201C}%1$@\u{201D} isn't drawn while "
+                + "\u{201C}%2$@\u{201D} is off — turn it on in %3$@.",
+            L("border.color.unfocused", "Unfocused windows"),
+            L(
+                "border.unfocused_enabled",
+                "Show border on unfocused windows"
+            ),
+            CrossReferenceRow.linkSlot
         )
     }
 

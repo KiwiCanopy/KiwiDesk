@@ -200,6 +200,7 @@
   "colors.scene.title": "Colori attuali",
   "colors.space_bar_off.help": "La Space Bar è disattivata, quindi i suoi colori non vengono disegnati. Attivala in %1$@.",
   "colors.unfocused_off.help": "Le finestre senza focus non hanno bordo, quindi questo colore non viene disegnato. Attivalo in %1$@.",
+  "colors.unfocused_off.xref": "«%1$@» non viene disegnato finché «%2$@» è disattivato — attivalo in %3$@.",
   "common.error.write_failed": "KiwiDesk non è riuscito a scrivere «%1$@». Prova in un'altra posizione, ad esempio la Scrivania.",
   "common.guide_hint": "Vuoi trarne di più? Leggi %1$@.",
   "common.off": "disattivato",

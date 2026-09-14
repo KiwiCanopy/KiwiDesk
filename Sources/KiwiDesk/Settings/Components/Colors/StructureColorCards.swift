@@ -22,6 +22,15 @@ struct BorderColorCard: View {
                     keys: ColorsRowOrder.bordersAtRest
                 )
             }
+            // One greyed ROW in a live card takes its reason
+            // beneath it as a live link (#1310).
+            if gates.unfocusedNeedsReference {
+                CrossReferenceRow(
+                    prose: AdvancedColorsHelp.unfocusedReference,
+                    linkTitle: SettingsDestination.gapsAndBorders.title,
+                    destination: .gapsAndBorders
+                )
+            }
         }
     }
 

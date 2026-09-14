@@ -117,6 +117,7 @@ struct CrossReferenceRowSlotTests {
         "LayoutCard.swift:appBarProse",
         "SpaceOverrideRows+ModeRows.swift:prose",
         "BarColorCards.swift:AdvancedColorsHelp.focusedItemReference",
+        "StructureColorCards.swift:AdvancedColorsHelp.unfocusedReference",
     ]
 
     // MARK: - The values
@@ -132,6 +133,14 @@ struct CrossReferenceRowSlotTests {
     @Test func theFocusedItemProsePlacesItsLink() {
         #expect(
             AdvancedColorsHelp.focusedItemReference.contains(Self.slot)
+        )
+    }
+
+    /// The unfocused row's link under the Border colours grid
+    /// (#1310) — one branch, one value.
+    @Test func theUnfocusedProsePlacesItsLink() {
+        #expect(
+            AdvancedColorsHelp.unfocusedReference.contains(Self.slot)
         )
     }
 
