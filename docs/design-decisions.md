@@ -10229,6 +10229,33 @@ too, rather than loading a profile that the boot scan's monitor
 change would then replace; that first monitor change fires it.
 :::
 
+:::unreleased
+**[Principle]**
+
+**A screen left with no space is healed, never refused
+([#1175](https://github.com/KiwiCanopy/KiwiDesk/issues/1175)).**
+Every space resolves onto one screen, and nothing stopped every
+space from resolving onto the *other* one: `init.lua` could pin
+a screen's last space away, and a profile saved for one screen
+loaded dirty onto two left the second with nothing to show, no
+place for a window to land and nothing for the bars to address.
+Refusing the config was considered and ruled out (owner,
+2026-08-31): a refusal makes pin *order* matter — the same pins
+pass or fail by which line runs last — and turns a config that
+reads as valid into an error. So the resolve heals instead:
+whatever left a screen empty, it seeds one numbered space there,
+in the layout the starter setup would open that screen in, and
+pins it to the monitor so the next resolve keeps it. It is one
+mechanism at one door — the total resolve every relocation
+funnels through — because a heal on one door leaves the other
+empty. The seed is session state, not config: `init.lua` does not
+learn it, a profile does not gain it, and an explicit reload
+prunes it like any space the profile does not declare and seeds
+afresh; a re-apply that only resets the pins re-pins the same
+seed rather than minting another, so a Desktop switch does not
+grow a space per swipe.
+:::
+
 ### Monitors
 
 **[Rationale]**

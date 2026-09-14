@@ -414,6 +414,14 @@ persistent owner of pins, so a pin set from Lua is a session
 override there; under a Lua-managed config the pin persists
 because `init.lua` re-runs on launch.
 
+:::unreleased
+A screen every space is pinned away from is not left empty:
+KiwiDesk seeds one numbered space on it, in the layout the
+starter setup would open that screen in. The seed is a session
+space — `init.lua` does not learn it, and it comes back on the
+next launch.
+:::
+
 **Example:**
 
 ```lua

@@ -491,6 +491,35 @@ nearly was that symptom: applying a palette writes its colours
 into `gui.json`, so the current *look* travelled while the saved
 *library* would have been left behind.
 
+## A screen is never left with zero spaces (#1175)
+
+`resolveSpaceDisplays` is the ONE total resolve every relocation
+funnels through — the Lua pin, the profile apply on every door,
+the GUI apply, a monitor change, a space delete — and it ends
+by healing: a connected display the resolve left empty gets one
+numbered space seeded, in `StarterAllocation`'s lead layout for
+that screen, pinned to the monitor so the next resolve keeps it
+(`healEmptyDisplays`). Heal, never refuse — the argument is
+`docs/design-decisions.md` ▸ Profiles ▸ *A screen left with no
+space is healed*. The obligations:
+
+- **A new relocation path ends in `resolveSpaceDisplays`**, never
+  in a hand-written `assign` — a path that places spaces beside
+  the funnel can empty a screen the heal never sees. Both of
+  #1175's doors already ran through the funnel; what they lacked
+  was the heal, which is why it lives there and nowhere else.
+- **A path that resets `spacePins` and does not prune re-pins
+  the earlier seed**, read from `healedSpaces` by fingerprint,
+  rather than minting another — a Desktop switch re-applies the
+  bound profile and would otherwise grow a space per swipe
+  (`EmptyDisplayHealTests` ▸ `reapplyReusesTheSeed`). A path that
+  DOES prune (an explicit `load_profile`) drops the seed with
+  every other undeclared space and the heal seeds afresh.
+- **A fixture that connects two displays and gives one no space
+  is asserting on a state the heal removes** — read its
+  `spaces(on:)` after the resolve, as `SecondarySwitchTests`
+  now does.
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by

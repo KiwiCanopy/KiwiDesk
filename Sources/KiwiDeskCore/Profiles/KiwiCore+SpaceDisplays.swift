@@ -52,5 +52,9 @@ extension KiwiCore {
         for space in relocated {
             reanchorFloats(of: space)
         }
+        // A display the total resolve left with no space is
+        // healed HERE, once for every door (#1175): the Lua pin
+        // and the dirty profile apply both end in this resolve.
+        healEmptyDisplays(mainID: mainID)
     }
 }
