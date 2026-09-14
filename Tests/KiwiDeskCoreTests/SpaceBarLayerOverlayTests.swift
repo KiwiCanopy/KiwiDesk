@@ -16,12 +16,14 @@ struct SpaceBarLayerOverlayTests {
     /// A layer item ahead of two Spaces.
     private static func shown(
         withLayer: Bool = true,
-        glyph: SpaceBarItemView.Identifier = .text("RE", tinted: true)
+        glyph: SpaceBarItemView.Identifier = .text("RE", tinted: true),
+        edge: AppBarEdge = .top
     ) throws -> SpaceBarOverlay {
         LiquidGlassGate.override = { false }
         var style = SpaceBarStyle()
         style.backgroundStyle = .boxed
         style.liquidGlass = false
+        style.edge = edge
         var items = [
             SpaceBarOverlay.Item(
                 space: SpaceID("1"),
@@ -46,12 +48,16 @@ struct SpaceBarLayerOverlayTests {
                 at: 0
             )
         }
+        let strip =
+            edge.isHorizontal
+            ? barTitleStrip
+            : CGRect(x: 0, y: 0, width: 28, height: 1440)
         let manager = SpaceBarManager()
         manager.sync([
             SpaceBarManager.Bar(
                 display: barTitleDisplay,
                 items: items,
-                strip: barTitleStrip,
+                strip: strip,
                 style: style,
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
@@ -233,6 +239,27 @@ struct SpaceBarLayerOverlayTests {
                 )
         )
         #expect(overlay.layerDivider.superview === overlay.itemContainer)
+    }
+
+    /// The same rule on a vertical bar: the trim and the placement
+    /// take the other axis.
+    @Test("the section rule stands on a vertical bar too")
+    func sectionRuleVertical() throws {
+        let overlay = try Self.shown(edge: .left)
+        let rule = overlay.layerDivider
+        #expect(!rule.isHidden)
+        let layer = overlay.itemViews[0].frame
+        let first = overlay.itemViews[1].frame
+        let gap = SpaceBarStyle().itemGap
+        #expect(rule.frame.height == BarDivider.sectionThickness)
+        #expect(rule.frame.width == 28)
+        #expect(rule.frame.minY == layer.maxY + gap)
+        #expect(first.minY == rule.frame.maxY + gap)
+        #expect(
+            layer.height
+                == SpaceBarItemView.autoLength(appCount: 0, depth: 28)
+        )
+        #expect(layer.width == 28)
     }
 
     @Test("no layer item, no rule")
