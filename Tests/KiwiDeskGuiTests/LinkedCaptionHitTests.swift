@@ -251,6 +251,21 @@ struct LinkedCaptionHitTests {
         #expect(!view.wantsPointingHand(at: onLink))
     }
 
+    /// The painted grey reaches the SCREEN only if AppKit's own
+    /// link attributes carry no colour to draw over it (#1466):
+    /// the default `linkTextAttributes` set has `linkColor`, and
+    /// with it every caption link shipped system blue while
+    /// `theLinkIsPainted` stayed green — the storage was grey,
+    /// the draw was not. The underline is what must survive.
+    @Test func theLinkAttributesCarryNoColour() {
+        let attributes = Self.caption().linkTextAttributes ?? [:]
+        #expect(attributes[.foregroundColor] == nil)
+        #expect(
+            attributes[.underlineStyle] as? Int
+                == NSUnderlineStyle.single.rawValue
+        )
+    }
+
     /// Nothing in the tree asserted a caption's COLOUR, so a
     /// `setSentence` that never painted would ship the link as
     /// plain prose with every test still green.
