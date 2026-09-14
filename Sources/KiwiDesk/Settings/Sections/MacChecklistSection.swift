@@ -18,6 +18,9 @@ struct MacChecklistSection: View {
                 optionals
                 habits
                 GuideLink()
+                    .searchAnchored(
+                        SettingsCatalog.macChecklist.guideLink
+                    )
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }

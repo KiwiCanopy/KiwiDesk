@@ -5,8 +5,11 @@ import SwiftUI
 extension HeaderSearch {
     /// Search results popup card attached below search field
     /// (owner 2026-08-10).
+    /// Only with a query: a panel with rows before one popped
+    /// over Home on every open, since the field takes the
+    /// window's arrival focus (#1468, retired in #1470).
     @ViewBuilder var resultPanel: some View {
-        if focused || panelHovered, searching || !offer.isEmpty {
+        if focused || panelHovered, searching {
             resultCard
         }
     }
@@ -55,25 +58,9 @@ extension HeaderSearch {
         SettingsSearch.results(query: query, context: context)
     }
 
-    /// The rows shown before a query is typed (#1030).
-    var offer: [SettingsSearchResult] {
-        SettingsSearch.offer(context: context)
-    }
-
     @ViewBuilder var resultList: some View {
         let results = results
-        if !searching {
-            // The offer, through the same row so it looks and
-            // speaks like a result (#1030). A plain stack: it
-            // fits its rows, where a lazy one would fill the
-            // height the overlay proposes, and nothing here
-            // enriches on appear.
-            VStack(alignment: .leading, spacing: 2) {
-                ForEach(offer) { result in
-                    row(result)
-                }
-            }
-        } else if results.isEmpty {
+        if results.isEmpty {
             Text(L("search.no_results", "No results"))
                 .font(.callout)
                 .foregroundStyle(SettingsTheme.ink3)

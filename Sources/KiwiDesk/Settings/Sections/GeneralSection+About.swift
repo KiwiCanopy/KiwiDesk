@@ -22,7 +22,6 @@ extension GeneralSection {
                     releaseNotesLink
                     licenseRow
                 }
-                guideLink
                 askRow
             }
             .frame(maxWidth: .infinity)
@@ -75,18 +74,6 @@ extension GeneralSection {
             .font(.caption)
             .linkHover()
         }
-    }
-
-    /// Link to user guide, registered with search index (#1019).
-    @ViewBuilder var guideLink: some View {
-        Link(destination: SupportLinks.guide) {
-            Text(SettingsCatalog.general.guideLink.text)
-                .underline()
-        }
-        .buttonStyle(.plain)
-        .font(.caption)
-        .linkHover()
-        .searchAnchored(SettingsCatalog.general.guideLink)
     }
 
     /// GitHub star and Ko-fi sponsor links.

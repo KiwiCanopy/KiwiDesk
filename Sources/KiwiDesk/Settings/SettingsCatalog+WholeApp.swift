@@ -113,12 +113,6 @@ struct GeneralControls: Sendable {
         "general.about.title",
         "About"
     )
-    /// User guide external link declaration for search indexing
-    /// (#1019, `SettingsSearchIndex`).
-    let guideLink = SettingsControl(
-        "general.about.guide",
-        "Guide"
-    )
     /// Declared with its children so a search hit on any of
     /// them opens the drawer it lands in (#1250).
     let generalAdvanced = SettingsDrawer(

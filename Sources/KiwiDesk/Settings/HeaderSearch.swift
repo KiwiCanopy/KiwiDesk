@@ -32,10 +32,10 @@ struct HeaderSearch: View {
 
     var searching: Bool { !query.trimmed.isEmpty }
 
-    /// The rows the keys move over: the results once a query is
-    /// typed, the offer before one (#1030).
+    /// The rows the keys move over — the results of a typed
+    /// query, nothing before one (#1470).
     var hits: [SettingsSearchResult] {
-        searching ? results.flat : offer
+        searching ? results.flat : []
     }
 
     private var collapsed: Bool {
@@ -150,9 +150,8 @@ struct HeaderSearch: View {
     }
 
     /// Commits the highlighted result, or the first match of a
-    /// TYPED query — never the offer: a bare Return in an
-    /// untouched field must not navigate somewhere the user did
-    /// not name (#1030).
+    /// TYPED query: a bare Return in an untouched field must not
+    /// navigate somewhere the user did not name (#1030).
     private func commitHighlighted() {
         let hits = hits
         let hit =

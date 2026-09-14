@@ -63,7 +63,7 @@ struct SettingsSearchCatalogSynonymTests {
     /// guide.
     private var decoratedControls: [String: (String, String)] {
         [
-            SettingsCatalog.general.guideLink.id: (
+            SettingsCatalog.macChecklist.guideLink.id: (
                 "guide",
                 "the app's one permanent route to the guide"
             ),
@@ -149,7 +149,7 @@ struct SettingsSearchCatalogSynonymTests {
     func helpFindsTheGuide() {
         pinEnglish()
         defer { reset() }
-        let anchor = SettingsCatalog.general.guideLink.id
+        let anchor = SettingsCatalog.macChecklist.guideLink.id
         let hits = SettingsSearch.results(
             query: "help",
             context: SettingsSearchContext()

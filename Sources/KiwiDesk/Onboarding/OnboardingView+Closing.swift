@@ -11,13 +11,7 @@ extension OnboardingView {
             ),
             body1: doneBody,
             footnote: doneFootnote,
-            footnoteAtBottom: true,
-            hint: GuideLink.prose,
-            hintLeads: true,
-            hintLink: .init(
-                label: GuideLink.label,
-                action: GuideLink.open
-            )
+            footnoteAtBottom: true
         ) {
             menuBarIdentity
             Toggle(

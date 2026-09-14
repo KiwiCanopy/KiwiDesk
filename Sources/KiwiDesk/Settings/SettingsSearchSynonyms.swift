@@ -6,7 +6,7 @@ enum SettingsSearchSynonyms {
     /// Synonym terms for unmodeled catalog items (#1019,
     /// `SettingsSearchIndexTests`).
     static func catalogTerms(for id: String) -> [String] {
-        if id == SettingsCatalog.general.guideLink.id {
+        if id == SettingsCatalog.macChecklist.guideLink.id {
             return ["help", "docs", "documentation", "manual"]
         }
         // The two Desktop offers are the whole search surface

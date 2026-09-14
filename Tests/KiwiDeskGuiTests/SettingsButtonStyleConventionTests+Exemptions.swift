@@ -77,7 +77,8 @@ extension SettingsButtonStyleConventionTests {
             // the Ko-fi one, beside the Guide route #1019 gave a
             // PERMANENT home here and the Release Notes link
             // #570 added; six since #1407 put the License and
-            // Acknowledgements texts beside them. All six are
+            // Acknowledgements texts beside them; five since
+            // #1470 moved the Guide route out. All five are
             // `Link`s, which is why they
             // are exempt at all rather than owing
             // `settingsActionButton()`: a `Link` is not a
@@ -88,11 +89,12 @@ extension SettingsButtonStyleConventionTests {
             // treatment, so the card's ask stays distinguishable
             // from a pointer.
             "GeneralSection+About.swift": (
-                6, ".buttonStyle(.plain)",
-                "Six Links taking plain style — the Guide, "
-                    + "Release Notes, License and Acknowledgements "
-                    + "pointers (#1407), and the star + support "
-                    + "ask pair"
+                5, ".buttonStyle(.plain)",
+                "Five Links taking plain style — the Release "
+                    + "Notes, License and Acknowledgements pointers "
+                    + "(#1407) and the star + support ask pair; the "
+                    + "Guide pointer moved to the Mac Checklist's "
+                    + "foot in #1470"
             ),
             "ContextShortcut.swift": (
                 1, ".buttonStyle(.plain)",

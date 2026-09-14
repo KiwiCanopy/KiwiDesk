@@ -107,29 +107,6 @@ enum SettingsSearch {
         )
     }
 
-    /// What the panel shows before a query is typed (#1030):
-    /// one row, the Guide, landing on General ▸ About — a
-    /// separate producer from `results`, gated by the one offer
-    /// predicate (`docs/design-decisions.md` ▸ the search panel
-    /// offers one row before you type).
-    static func offer(
-        context: SettingsSearchContext
-    ) -> [SettingsSearchResult] {
-        let guide = SettingsCatalog.general.guideLink.id
-        guard
-            let row = SettingsSearchIndex.rows().first(where: {
-                $0.anchor.anchor == guide
-            }),
-            HomeCardOrder.isOffered(
-                row.destination,
-                mode: context.mode,
-                displayCount: context.displayCount,
-                editingStoredProfile: context.editingStoredProfile
-            )
-        else { return [] }
-        return [.setting(row)]
-    }
-
     /// Whether selecting result triggers Power User mode promotion
     /// (`HomeCardOrder.isOffered`, `ensureModeAdmits`).
     static func switchesMode(

@@ -67,4 +67,10 @@ struct MacChecklistControls: Sendable {
         "mac_checklist.habit.dock",
         "Let the Dock hide"
     )
+    /// The app's one permanent guide pointer, declared so search
+    /// reaches it (#1019, #1470, `SettingsSearchIndex`).
+    let guideLink = SettingsControl(
+        "mac_checklist.guide",
+        "Guide"
+    )
 }
