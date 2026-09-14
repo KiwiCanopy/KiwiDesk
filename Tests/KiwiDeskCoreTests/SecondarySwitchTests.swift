@@ -62,7 +62,6 @@ struct SecondarySwitchTests {
         // heal gives B a Space where this fixture left it none —
         // and that write is `SecondaryDisplaySpaceTests`'.
         #expect(core.desktopMemory.virtualSpaces[.number(1)] == nil)
-        #expect(core.desktopMemory.virtualSpaces[.number(2)] == nil)
     }
 
     @Test("A main-display switch still applies the binding")

@@ -415,11 +415,8 @@ override there; under a Lua-managed config the pin persists
 because `init.lua` re-runs on launch.
 
 :::unreleased
-A screen every space is pinned away from is not left empty:
-KiwiDesk seeds one numbered space on it, in the layout the
-starter setup would open that screen in. The seed is a session
-space — `init.lua` does not learn it, and it comes back on the
-next launch.
+A screen this pin leaves with no space is seeded one — see
+[Profile Monitor Sets](#profile-monitor-sets).
 :::
 
 **Example:**
@@ -457,6 +454,11 @@ orphaned, and clears the space from the placement pins, Main
 role, and per-space settings. Refuses to delete the only space.
 Runtime only — a space still declared in `init.lua` or the GUI
 config reappears on the next config load.
+
+:::unreleased
+A screen this leaves with no space is seeded one — see
+[Profile Monitor Sets](#profile-monitor-sets).
+:::
 
 **Example:**
 
@@ -4728,6 +4730,15 @@ Every space always resolves to a screen: an explicit fingerprint pin
 wins, then the **Main** role (the space follows whatever display is
 currently main — dock and undock without stale fingerprints), then
 the built-in positional default.
+
+:::unreleased
+And every screen keeps at least one space: whatever leaves a
+screen empty — a pin, a moved or deleted space, a profile loaded
+onto screens it was not saved for — KiwiDesk seeds one numbered
+space there, in the layout the starter setup would open that
+screen in. No file learns the seed until you save; `init.lua`
+never does.
+:::
 
 Explicitly loading a profile whose stored sets don't cover the
 connected monitors works, but the state loads *dirty* until you

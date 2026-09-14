@@ -55,6 +55,9 @@ extension KiwiCore {
         let space = SpaceID(raw)
         state.workspaces.ensureSpace(space)
         state.workspaces.assign(space, to: display)
+        // The one relocation that bypasses the resolve, so it
+        // heals the screen it may have emptied itself (#1175).
+        healEmptyDisplays(mainID: PositionalDisplays.liveMainID)
         // Show it on — and move focus to — the target display.
         state.workspaces.activate(space)
         // The layout carries the tiled members to the new

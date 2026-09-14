@@ -95,6 +95,7 @@ extension KiwiCore {
         profiles.resetAdoption()
         spacePins = [:]
         mainSpaces = []
+        healedSpaces = [:]
         tiler.settings = TilingSettings()
         // Live spaces down to the first-launch set before the
         // reload's seed reads them; windows are forwarded, so

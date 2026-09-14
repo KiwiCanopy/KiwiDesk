@@ -267,9 +267,10 @@ public final class KiwiCore {
     /// display is currently main (#36).
     var mainSpaces: Set<SpaceID> = []
     /// The space the empty-display heal seeded per monitor
-    /// fingerprint (#1175), so a re-apply that resets the pins
+    /// fingerprint (#1175), so a pin reset that did not prune
     /// re-pins the same seed instead of minting another. Session
-    /// state; read and written by `healEmptyDisplays` alone.
+    /// state, retired where a declaration adopts the seed
+    /// (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
     /// The live arrangement's explicit rehome target (#68) —
     /// adopted from the active profile, edited by the GUI, and

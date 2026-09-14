@@ -59,14 +59,19 @@ struct EmptyDisplayHealTests {
     }
 
     /// The layout the starter setup opens B in, read off the one
-    /// walk rather than spelled (#1018).
+    /// walk rather than spelled (#1018) — with the main the
+    /// COMMAND door reads (`liveMainID`), since a host whose main
+    /// id is 2 re-orders the twins (#660).
     private func leadOfB() -> LayoutMode? {
-        StarterAllocation.modes(
-            sizes: StarterSetup.sizes(
-                displays: [Self.displayA, Self.displayB],
-                mainID: Self.displayA.id
-            )
-        )[1].first
+        let displays = [Self.displayA, Self.displayB]
+        let mainID = PositionalDisplays.liveMainID
+        let position = PositionalDisplays.ordered(
+            displays,
+            mainID: mainID
+        ).firstIndex { $0.id == Self.displayB.id }!
+        return StarterAllocation.modes(
+            sizes: StarterSetup.sizes(displays: displays, mainID: mainID)
+        )[position].first
     }
 
     @Test("A screen every space is pinned away from gets a seed")
@@ -151,11 +156,17 @@ struct EmptyDisplayHealTests {
 
     @Test("An un-pruned re-apply re-pins the same seed, windows kept")
     func reapplyReusesTheSeed() throws {
-        // The binding and monitor-change doors re-apply without
-        // pruning, and reset the pins: the ledger hands the heal
-        // its earlier seed back instead of a second one.
+        // A config reload re-applies the live profile un-pruned
+        // and resets the pins (a profile CHANGE prunes instead):
+        // the ledger hands the heal its earlier seed back instead
+        // of a second one, in the lead layout the apply's dense
+        // mode pass had just reset to bsp.
         let core = soloCore()
         core.execute("load_profile", args: [.string("Solo")])
+        core.execute(
+            "set_mode",
+            args: [.string("2"), .string("bsp")]
+        )
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: WindowID(7), pid: 7, appName: "App")
@@ -170,6 +181,64 @@ struct EmptyDisplayHealTests {
         )
         #expect(spaces(core, on: Self.displayB) == ["2"])
         #expect(core.spacePins["2"] == Self.displayB.fingerprint)
+        #expect(core.state.workspaces["2"]?.mode == leadOfB())
         #expect(core.state.workspaces.space(of: WindowID(7)) == "2")
+    }
+
+    @Test("A moved-away last space heals the screen it left")
+    func moveDoorSeeds() {
+        // `move_space_to_display` relocates beside the resolve on
+        // purpose, so it heals on its own.
+        let core = twoScreenCore()
+        core.execute(
+            "move_space_to_display",
+            args: [.string("mail"), .string("A")]
+        )
+        #expect(spaces(core, on: Self.displayB) == ["2"])
+        #expect(core.spacePins["2"] == Self.displayB.fingerprint)
+    }
+
+    @Test("A seed the config declares is the user's, not the ledger's")
+    func declaredSeedRetires() {
+        // Pin the seed to A by hand — the screen it left owes a
+        // fresh `3` — then Keep, which captures every live space
+        // into a two-screen profile, and load THAT: it declares
+        // `2` on A and `3` on B, so both are its own now and the
+        // ledger holds neither.
+        let core = soloCore()
+        core.execute("load_profile", args: [.string("Solo")])
+        core.execute(
+            "pin_space_to_display",
+            args: [.string("2"), .string("A")]
+        )
+        #expect(spaces(core, on: Self.displayB) == ["3"])
+        core.execute("save_profile", args: [.string("Duo")])
+        core.execute("load_profile", args: [.string("Duo")])
+        #expect(core.healedSpaces.isEmpty)
+        #expect(spaces(core, on: Self.displayA) == ["1", "work", "2"])
+        #expect(spaces(core, on: Self.displayB) == ["3"])
+    }
+
+    @Test("Twins mint once, never per resolve")
+    func twinsMintOnce() {
+        // Two screens with one fingerprint: a pin reaches the
+        // first, so the second stays empty by the accepted
+        // limitation — and the heal must not mint for it on
+        // every resolve.
+        let core = makeCore()
+        let twinB = Display(
+            id: DisplayID(2),
+            name: "A",
+            frame: CGRect(x: 1920, y: 0, width: 1920, height: 1080)
+        )
+        core.state.workspaces.upsertDisplay(Self.displayA)
+        core.state.workspaces.upsertDisplay(twinB)
+        core.state.workspaces.ensureSpace("work")
+        core.spacePins["work"] = Self.displayA.fingerprint
+        core.resolveSpaceDisplays(mainID: Self.displayA.id)
+        let once = core.state.workspaces.allSpaces.map(\.id)
+        core.resolveSpaceDisplays(mainID: Self.displayA.id)
+        core.resolveSpaceDisplays(mainID: Self.displayA.id)
+        #expect(core.state.workspaces.allSpaces.map(\.id) == once)
     }
 }
