@@ -43,10 +43,11 @@ extension KiwiCore {
     }
 
     private func seedFloatGather(of space: Space) {
-        // The GROW bound, ring reserved on every edge: a grid cell
-        // flush with a strip would otherwise take the clamp's
-        // ring push as a second write in the same pass.
-        guard let region = floatGrowBounds(on: space.id)
+        // Judged on the correctness bound, laid in the GROW bound
+        // — ring reserved on every edge, so a grid cell flush with
+        // a strip takes no second write from the clamp.
+        guard let region = floatBounds(on: space.id),
+            let grid = floatGrowBounds(on: space.id)
         else { return }
         var frames: [WindowID: CGRect] = [:]
         for id in space.windows {
@@ -62,6 +63,7 @@ extension KiwiCore {
             members: space.windows,
             frames: frames,
             region: region,
+            grid: grid,
             minSize: tiler.settings.minWindowSize,
             targetDepth: tiler.settings.quitGridTargetDepth
         )

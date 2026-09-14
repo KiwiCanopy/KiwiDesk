@@ -11,7 +11,8 @@ import Testing
 /// restore on a shown space and kept by the park on an unshown
 /// one. `FloatGatherTests` holds the decision's algebra; this
 /// suite is the consumer and the entry ledger, which that one
-/// structurally cannot see. One real screen, pinned (#531).
+/// structurally cannot see; `FloatGatherRegionTests` holds the
+/// region clauses. One real screen, pinned (#531).
 @Suite("Float gather through the retile (#1177)", .serialized)
 @MainActor
 struct FloatGatherEntryTests {
@@ -104,63 +105,6 @@ struct FloatGatherEntryTests {
             core.tiler.recentInstantTarget(Self.scrolledOut)
                 == expected[Self.scrolledOut]
         )
-    }
-
-    /// The region is `floatGrowBounds`: the painted strip carved
-    /// off and the ring's reach reserved before the grid is laid
-    /// (#1091/#242), so the clamp has no push left to make.
-    @Test(
-        "The gathered frames clear the painted strip and the ring",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func gatheredFramesClearTheStrip() throws {
-        let core = try #require(makeCore(mode: .scrolling))
-        core.settleDrawnSpaceModes()
-        // The ring ON here, deliberately: with it off the grow
-        // bound IS the correctness bound and the clause cannot
-        // tell them apart (guard-prover).
-        core.tiler.settings.borderStyle.enabled = true
-        #expect(core.floatRingInset > 0)
-        core.tiler.settings.spaceBarStyle.enabled = true
-        core.tiler.settings.spaceBarStyle.edge = .top
-        core.tiler.settings.spaceBarStyle.thickness = 40
-        core.updateSpaceBar()
-        let strip = try #require(
-            core.spaceBars.shownStrips.first?.1,
-            "no bar painted — the clause would pass vacuously"
-        )
-        core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
-        let seeded = try #require(
-            core.tiler.stashOriginal(Self.scrolledOut)
-        )
-        // Equality over the CARVED region, not `minY >= strip`:
-        // the clamp sweep rescues a grid laid over the bare
-        // bounds by re-seeding the pushed cell, so a bound alone
-        // stayed green on that mutation (guard-prover).
-        let region = try #require(
-            core.floatGrowBounds(on: Self.space)
-        )
-        #expect(region.minY >= strip.maxY)
-        let carved = FloatGather.targets(
-            members: [Self.inside, Self.scrolledOut, Self.partly],
-            frames: Self.frames,
-            region: region,
-            minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth
-        )
-        #expect(seeded == carved[Self.scrolledOut])
-        let bare = FloatGather.targets(
-            members: [Self.inside, Self.scrolledOut, Self.partly],
-            frames: Self.frames,
-            region: try #require(core.floatBounds(on: Self.space)),
-            minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth
-        )
-        #expect(seeded != bare[Self.scrolledOut])
-        // And the pass's own clamp sweep left the capture alone.
-        core.clampFloatsClearOfBars()
-        #expect(core.tiler.stashOriginal(Self.scrolledOut) == seeded)
     }
 
     /// The seed lands AHEAD of `recoverStrandedFloats`: a shown

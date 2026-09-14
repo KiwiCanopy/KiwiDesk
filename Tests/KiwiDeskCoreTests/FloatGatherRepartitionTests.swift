@@ -189,6 +189,23 @@ struct FloatGatherRepartitionTests {
         #expect(core.refiledWindows.isEmpty)
     }
 
+    /// `delete_space` forwards through the same primitive as the
+    /// prune, so the pair lands gathered in the floating fallback.
+    @Test(
+        "delete_space forwards into a floating fallback and gathers",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func deleteSpaceIsAnEntry() throws {
+        let core = try #require(makeCore())
+        core.state.workspaces.setMode("1", .floating)
+        core.fallbackSpace = "1"
+        core.retile(force: true)
+        core.execute("delete_space", args: [.string("2")])
+        #expect(core.state.workspaces["2"] == nil)
+        #expect(core.state.workspaces.space(of: Self.parked) == "1")
+        expectGathered(core)
+    }
+
     /// The arm names the space a re-filed window SITS in: a
     /// re-file into a tiled space is the layout's, and a floating
     /// space that received nothing keeps its own off-region

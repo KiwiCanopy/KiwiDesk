@@ -1297,12 +1297,18 @@ editing here:
   a space it merely passed through, which a prune's fallback
   is when the restore moves the window on — so a member's
   frame is the layout's of the Space it came from whatever the
-  receiver's own drawn mode was; a new re-file primitive
-  records into the same set (`FloatGatherRepartitionTests`
-  drives the three doors, the receiver-only scope and the
-  transit; a float parked half-off by hand beside a re-filed
-  window is gathered with it, the priced trade). A member's
-  frame
+  receiver's own drawn mode was. A forwarding out of a dropped
+  Space goes through the ONE `forwardWindows(of:to:)`, which
+  the prune and `delete_space` share and which carries the
+  record — `SpaceForwardingSeamTests` holds the Space drop to
+  that one home, since a hand copy of the step list is how the
+  delete verb shipped without it; a re-file primitive of a NEW
+  shape records into the same set, and `refiledWindows`' own
+  docstring is where the doors ruled OUT (the move verb, the
+  away re-file) are named (`FloatGatherRepartitionTests`
+  drives the doors, the receiver-only scope and the transit; a
+  float parked half-off by hand beside a re-filed window is
+  gathered with it, the priced trade). A member's frame
   is the one it WOULD show, `wouldBeFrame`'s four rungs, stated
   there once. And `clampFloatsClearOfBars` judges a pending
   capture rather than the state frame the window is leaving,
@@ -1313,9 +1319,9 @@ editing here:
   `StashSeederCensusTests`' map, which reds an unclassified
   `seedStash(` in Core. Held by `FloatGatherTests` (the
   decision), `FloatGatherEntryTests` (the ledger, the seed, the
-  strip, the order, the unshown arm),
-  `FloatGatherRepartitionTests` (the re-file arm) and
-  `FloatClampPendingCaptureTests`.
+  order, the unshown arm), `FloatGatherRegionTests` (the two
+  regions and the strip), `FloatGatherRepartitionTests` (the
+  re-file arm) and `FloatClampPendingCaptureTests`.
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a
   slow app's window adopted later kept the boot scan's tile on

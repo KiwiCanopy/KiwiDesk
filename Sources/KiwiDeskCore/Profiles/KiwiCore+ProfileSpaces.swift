@@ -63,6 +63,24 @@ extension KiwiCore {
         try profiles.save(profile)
     }
 
+    /// Forwards every window of `space` into `fallback` and drops
+    /// the Space — membership, the display-crossing re-anchor
+    /// (#444) and the re-file record (#1177) in one step. The ONE
+    /// forwarding primitive: the prune and `delete_space` both
+    /// take it (`SpaceForwardingSeamTests`), since a hand copy of
+    /// the step list is how the record went missing from one.
+    func forwardWindows(of space: SpaceID, to fallback: SpaceID) {
+        for window in state.workspaces[space]?.windows ?? [] {
+            state.workspaces.add(window, to: fallback)
+            // A later `resolveSpaceDisplays` moving the fallback
+            // re-translates from the seeded capture, so the order
+            // composes.
+            reanchorFloat(window, to: fallback)
+            refiledWindows.insert(window)
+        }
+        state.workspaces.removeSpace(space)
+    }
+
     /// Puts the incoming profile's own windows back in its own
     /// Spaces.
     ///

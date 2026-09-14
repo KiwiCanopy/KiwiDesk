@@ -3490,7 +3490,9 @@ which is what keeps a pile of columns findable rather than
 stacked at one edge, and the grid is laid inside the grow bound
 — the painted strips carved off and the focus ring's reach
 reserved on every edge — so no gathered frame lands under a bar
-and the clamp has nothing left to push.
+and the clamp has nothing left to push; the judgment itself
+takes the correctness bound, or a float flush with a bare screen
+edge would count as outside.
 
 *An entry is a change in what was DRAWN, not in what was
 written.* The retile keeps the mode each space was last drawn
@@ -3502,8 +3504,8 @@ entry was gathered when it happened, and the boot's first pass
 meets spaces no pass has drawn — in each the frames are the
 user's, and a gather would have dragged in a float parked
 half-off by hand, which the retile-time fit already refuses to
-do. A RE-FILE is the one thing that is an entry without a mode
-change: a profile switch's partitioning and a prune's forwarding
+do. A RE-FILE is an entry without a mode change: a profile
+switch's partitioning and a dropped Space's forwarding
 ([#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230))
 hand a floating space windows whose frames are the layout's of
 the Space they came from, whatever the receiving space was drawn

@@ -95,6 +95,41 @@ struct FloatGatherTests {
         }
     }
 
+    /// The judgment takes `region`; the grid may take a smaller
+    /// one, so a member flush with a screen edge stays while a
+    /// gathered one lands inside the ring's reserve.
+    @Test("The grid region is where a target lands, never the judge")
+    func gridRegionLaysButNeverJudges() {
+        let a = WindowID(1)
+        let b = WindowID(2)
+        let flush = CGRect(
+            x: Self.region.maxX - 800,
+            y: 100,
+            width: 800,
+            height: 600
+        )
+        let out = CGRect(x: 2100, y: 100, width: 800, height: 600)
+        let grid = Self.region.insetBy(dx: 5, dy: 5)
+        let targets = FloatGather.targets(
+            members: [a, b],
+            frames: [a: flush, b: out],
+            region: Self.region,
+            grid: grid,
+            minSize: 100,
+            targetDepth: 5
+        )
+        #expect(targets[a] == nil)
+        #expect(
+            targets
+                == QuitGridLayout.frames(
+                    for: [b],
+                    in: grid,
+                    minSize: 100,
+                    targetDepth: 5
+                )
+        )
+    }
+
     @Test("A member with no frame is not gathered")
     func unknownFrameIsSkipped() {
         let targets = FloatGather.targets(
