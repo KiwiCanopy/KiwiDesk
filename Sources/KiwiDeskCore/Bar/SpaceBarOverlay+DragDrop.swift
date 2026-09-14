@@ -22,7 +22,9 @@ extension SpaceBarOverlay {
     /// clears every other item — nil clears all.
     func setDragHover(_ space: SpaceID?) {
         for view in itemViews {
-            view.setDragHover(view.space == space)
+            // `space == nil` clears; a layer item's nil never
+            // matches it (#1169).
+            view.setDragHover(space != nil && view.space == space)
         }
     }
 

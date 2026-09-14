@@ -56,6 +56,7 @@ extension SpaceBarOverlay {
     /// Views participating in the glass run hierarchy.
     private var glassRunViews: [NSView] {
         var views: [NSView] = itemViews
+        views.append(layerDivider)
         views += [
             frontBox, frontDivider, frontIcon, frontGlyph, frontName,
         ]

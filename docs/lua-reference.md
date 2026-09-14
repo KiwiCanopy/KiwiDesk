@@ -4239,11 +4239,16 @@ the CLI event stream hears that one.
 
 #### Layer Icons
 
-An optional third argument to `define_layer` sets a menu bar
-indicator — an SF Symbol name or a flat emoji. While the layer
-is active, the KiwiDesk status item swaps to it. The default
-layer (`KiwiDesk.bind`) never takes an icon — it always shows
-the standard KiwiDesk glyph.
+:::unreleased
+An optional third argument to `define_layer` sets the layer's
+icon — an SF Symbol name or a flat emoji. While the layer is
+active, the KiwiDesk status item swaps to it, and the Space Bar
+shows it as one item ahead of the Spaces; a layer without an
+icon shows the first two characters of its name there,
+uppercased. The default layer (`KiwiDesk.bind`) never takes an
+icon — the status item always shows the standard KiwiDesk
+glyph.
+:::
 
 **Example:**
 
@@ -4280,7 +4285,7 @@ The override is **sparse and soft by design**:
 - Removing a base binding per profile is not expressible:
   deleting an inherited row in the editor just resets it. To
   disable a combo in one profile, rebind it to a no-op action.
-  The same applies to a base layer's menu bar icon — a profile
+  The same applies to a base layer's icon — a profile
   can *change* it, but clearing it just reverts to the base
   icon.
 - Keybindings live in ONE home: the structured config (gui.json +

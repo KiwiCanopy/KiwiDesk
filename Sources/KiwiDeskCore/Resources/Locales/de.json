@@ -1112,6 +1112,7 @@
   "space_bar.icon_source.help": "Wie App-Glyphen gezeichnet werden. „%1$@“ zeigt ein monochromes Symbol, gefärbt durch die Elementfarben der Leiste, die in %2$@ festgelegt werden; Apps ohne Symbol behalten ihr App-Icon.",
   "space_bar.icon_source.label": "App-Symbolstil",
   "space_bar.item.ax.current": "%1$@, aktuell",
+  "space_bar.item.ax.layer": "Tastenkürzel-Ebene %1$@",
   "space_bar.item.ax.not_current": "%1$@, nicht aktuell",
   "space_bar.item.ax.space": "Space %1$@, %2$d Anwendungen",
   "space_bar.item_gap": "Elementabstand",

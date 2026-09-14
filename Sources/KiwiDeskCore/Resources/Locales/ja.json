@@ -1112,6 +1112,7 @@
   "space_bar.icon_source.help": "アプリのグリフの描画方法です。「%1$@」はバーの項目カラーで着色されたモノクロのシンボルを表示します。その色は%2$@で設定します。シンボルのないアプリは元のアプリアイコンのままです。",
   "space_bar.icon_source.label": "アプリシンボル スタイル",
   "space_bar.item.ax.current": "%1$@、現在地",
+  "space_bar.item.ax.layer": "ショートカットレイヤー %1$@",
   "space_bar.item.ax.not_current": "%1$@、非選択",
   "space_bar.item.ax.space": "スペース %1$@、アプリ%2$d個",
   "space_bar.item_gap": "項目間のギャップ",

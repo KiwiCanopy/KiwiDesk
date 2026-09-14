@@ -25,9 +25,12 @@ extension SpaceBarItemView {
             .cgColor
     }
 
-    /// Alpha for untinted elements (QA 2026-07-19).
+    /// Alpha for untinted elements (QA 2026-07-19). The layer
+    /// item reads full-strength on this channel as on the ink
+    /// (#1169): an emoji icon takes no tint, so this is the one
+    /// channel that could dim it.
     private var untintedAlpha: CGFloat {
-        isActive || isHovered || isDragHovered
+        isActive || isHovered || isDragHovered || space == nil
             ? 1 : style.dimFactor
     }
 
@@ -136,7 +139,9 @@ extension SpaceBarItemView {
     }
 
     private var stateColor: NSColor {
-        if isActive {
+        // The layer item takes the current-Space ink: it exists
+        // to be noticed, and it is never "not current" (#1169).
+        if isActive || space == nil {
             return NSColor(kiwiHex: style.activeItemColor)
         }
         if isHovered || isDragHovered {
