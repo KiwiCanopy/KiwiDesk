@@ -70,10 +70,6 @@ extension MacChecklistKey {
         }
     }
 
-    var destination: SettingsDestination? {
-        guard case .destination(let d) = link else { return nil }
-        return d
-    }
 }
 
 /// What a habit's link slot opens.
@@ -82,11 +78,13 @@ enum MacChecklistLink: Hashable {
     case systemSettings
 }
 
-/// The ONE count (#1365): essentials only, read by the Home card
-/// and the section header alike, derived from the order list so
-/// the N beside a visible list is that list's rows (`gui.md` ▸
-/// Home). A row is done when macOS answers `.set`, or when it
-/// would not answer and the user ticked it themselves.
+/// The ONE home of the count (#1365): essentials only, derived
+/// from the order list so the N beside a visible list is that
+/// list's rows (`gui.md` ▸ Home). `verdicts` is the one value —
+/// the card face draws it and `done` counts it — so the face
+/// cannot show a row the count does not. A row is done when
+/// macOS answers `.set`, or when it would not answer and the
+/// user ticked it themselves.
 enum MacChecklistProgress {
     static let essentials: [MacSetting] =
         MacChecklistRowOrder.essentialSettings.compactMap {
@@ -98,15 +96,40 @@ enum MacChecklistProgress {
 
     static var total: Int { essentials.count }
 
+    /// The one reading of an unread row: not set.
+    static func state(
+        of setting: MacSetting,
+        in states: [MacSetting: MacSettingState]
+    ) -> MacSettingState {
+        states[setting] ?? .notSet
+    }
+
+    @MainActor static func state(
+        of setting: MacSetting,
+        in model: SettingsModel
+    ) -> MacSettingState {
+        state(of: setting, in: model.macChecklistStates)
+    }
+
     static func isDone(
         _ setting: MacSetting,
         states: [MacSetting: MacSettingState],
         ticks: Set<MacSetting>
     ) -> Bool {
-        switch states[setting] {
+        switch state(of: setting, in: states) {
         case .set: return true
         case .unreadable: return ticks.contains(setting)
-        case .notSet, nil: return false
+        case .notSet: return false
+        }
+    }
+
+    /// Every essential with its verdict, in order.
+    static func verdicts(
+        states: [MacSetting: MacSettingState],
+        ticks: Set<MacSetting>
+    ) -> [(setting: MacSetting, done: Bool)] {
+        essentials.map {
+            ($0, isDone($0, states: states, ticks: ticks))
         }
     }
 
@@ -114,8 +137,6 @@ enum MacChecklistProgress {
         states: [MacSetting: MacSettingState],
         ticks: Set<MacSetting>
     ) -> Int {
-        essentials.filter {
-            isDone($0, states: states, ticks: ticks)
-        }.count
+        verdicts(states: states, ticks: ticks).filter(\.done).count
     }
 }

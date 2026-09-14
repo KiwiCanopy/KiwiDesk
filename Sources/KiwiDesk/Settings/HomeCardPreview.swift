@@ -27,34 +27,26 @@ enum HomeCardPreview {
         }
     }
 
-    /// One tick per essential in the rows' own vocabulary — the
-    /// filled check and the hollow ring the page draws, same
-    /// inks — so the face says how many things there are and how
-    /// many are done in the shape the reader meets on opening
-    /// it (owner, #1365; a bare face sat shorter than every
-    /// other Whole App card, and a row of squares read as a
-    /// chart). State rides the glyph, never hue alone; the
-    /// subtitle carries the spoken count, so the row is hidden
-    /// from VoiceOver like the other previews.
+    /// One tick per essential in the rows' own vocabulary, off
+    /// the one `verdicts` value the count reads (#1365); hidden
+    /// from VoiceOver like every preview, the subtitle speaking
+    /// the count.
     private static func checklistTicks(
         _ model: SettingsModel
     ) -> some View {
-        let ticks = model.macChecklistTicks
+        let verdicts = MacChecklistProgress.verdicts(
+            states: model.macChecklistStates,
+            ticks: model.macChecklistTicks
+        )
         return HStack(spacing: 6) {
-            ForEach(MacChecklistProgress.essentials, id: \.self) {
-                setting in
-                let done = MacChecklistProgress.isDone(
-                    setting,
-                    states: model.macChecklistStates,
-                    ticks: ticks
-                )
+            ForEach(verdicts, id: \.setting) { verdict in
                 Image(
-                    systemName: done
+                    systemName: verdict.done
                         ? "checkmark.circle.fill" : "circle"
                 )
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(
-                    done
+                    verdict.done
                         ? SettingsTheme.groupHeading
                         : SettingsTheme.ink3
                 )

@@ -179,6 +179,11 @@ final class SettingsModel: ObservableObject {
     /// and the section count the same rows
     /// (`SettingsModel+MacChecklist`).
     @Published var macChecklistStates: [MacSetting: MacSettingState] = [:]
+    /// Rows the user ticked because macOS would not answer — the
+    /// published mirror of `UserDefaults.mac_checklist.ticks`,
+    /// seeded at init and written beside the store
+    /// (`setMacChecklistTick`), the `settingsMode` shape.
+    @Published var macChecklistTicks: Set<MacSetting> = []
 
     /// True when macOS Accessibility is missing; drives
     /// `PermissionPausedBanner`.
@@ -221,6 +226,7 @@ final class SettingsModel: ObservableObject {
         self.settingsMode = SettingsModePreference.read(
             from: preferences
         )
+        self.macChecklistTicks = Self.storedTicks(in: preferences)
         self.appearance = AppearancePreference.read(
             from: preferences
         )

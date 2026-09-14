@@ -2,18 +2,17 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// One macOS setting on the checklist (#1365): tick · title ·
-/// caption, the tick LEADING because a progress count reads off
-/// that column. The tick is a status chip — glyph + word, so the
-/// state rides shape and text and never hue alone — and not a
-/// control: macOS answers this row. Only where macOS would not
-/// answer does the row fall back to the user's own checkbox,
-/// since a detected tick that lies is worse than a self-tick.
+/// One macOS setting on the checklist (#1365): a status chip
+/// (glyph + word, never hue alone), the title, the caption with
+/// its System Settings link. macOS answers the row; only an
+/// unreadable read falls back to the user's own checkbox.
 struct MacSettingRow: View {
     @ObservedObject var model: SettingsModel
     let key: MacChecklistKey
     let setting: MacSetting
     let control: SettingsControl
+    /// `MacSettingRow.chipWidth`, measured once by the section.
+    let chipWidth: CGFloat
 
     var body: some View {
         Group {
@@ -27,7 +26,7 @@ struct MacSettingRow: View {
     }
 
     private var state: MacSettingState {
-        model.macChecklistStates[setting] ?? .notSet
+        MacChecklistProgress.state(of: setting, in: model)
     }
 
     /// The detected shape: one VoiceOver element whose label is
@@ -35,7 +34,10 @@ struct MacSettingRow: View {
     /// link staying a sibling so it stays followable.
     private var detected: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
+            HStack(
+                alignment: .firstTextBaseline,
+                spacing: Self.rowSpacing
+            ) {
                 chip
                 Text(control.text)
                     .font(.body)
@@ -46,7 +48,7 @@ struct MacSettingRow: View {
             .accessibilityLabel(control.text)
             .accessibilityValue(spokenState)
             caption(MacChecklistText.caption(for: key))
-                .padding(.leading, Self.captionInset)
+                .padding(.leading, chipWidth + Self.rowSpacing)
         }
     }
 
@@ -57,7 +59,7 @@ struct MacSettingRow: View {
             Toggle(control.text, isOn: tickBinding)
                 .toggleStyle(.checkbox)
             caption(MacChecklistText.unreadable)
-                .padding(.leading, Self.captionInset)
+                .padding(.leading, chipWidth + Self.rowSpacing)
         }
     }
 
@@ -84,7 +86,7 @@ struct MacSettingRow: View {
             state == .set
                 ? SettingsTheme.groupHeading : SettingsTheme.ink3
         )
-        .frame(width: Self.chipWidth, alignment: .leading)
+        .frame(width: chipWidth, alignment: .leading)
     }
 
     private var chipWord: String {
@@ -107,7 +109,7 @@ struct MacSettingRow: View {
 
     /// The why, then the System Settings path as the link.
     private func caption(_ frame: String) -> some View {
-        let (leading, trailing) = Self.split(frame)
+        let (leading, trailing) = CrossReferenceRow.split(frame)
         return LinkedCaption(
             leading: leading,
             linkTitle: MacChecklistText.pathLabel,
@@ -116,24 +118,21 @@ struct MacSettingRow: View {
         )
     }
 
-    /// Splits at `CrossReferenceRow.linkSlot`, the same token the
-    /// habit rows' cross-references carry.
-    static func split(_ frame: String) -> (String, String) {
-        guard let slot = frame.range(of: CrossReferenceRow.linkSlot)
-        else {
-            assertionFailure("checklist caption has no path slot")
-            return (frame + " ", "")
-        }
-        return (
-            String(frame[..<slot.lowerBound]),
-            String(frame[slot.upperBound...])
-        )
+    /// The chip column: the tree's readout width, or the wider of
+    /// the two words plus the glyph where a locale outgrows it —
+    /// a `Text` in a fixed frame truncates, and a truncated state
+    /// word is the row saying nothing. Measured once per section
+    /// render, never per row.
+    @MainActor static var chipWidth: CGFloat {
+        let font = NSFont.preferredFont(forTextStyle: .caption1)
+        let widest =
+            [
+                L("mac_checklist.state.set", "Set"),
+                L("mac_checklist.state.not_yet", "Not yet"),
+            ]
+            .map { ($0 as NSString).size(withAttributes: [.font: font]).width }
+            .max() ?? 0
+        return max(SettingsMetrics.readoutColumn, ceil(widest) + 20)
     }
-
-    /// The chip column's width, so titles align across rows —
-    /// the tree's one column sized by a word, since "Not yet"
-    /// grows past 60 in de and the Romance locales.
-    static let chipWidth = SettingsMetrics.readoutColumn
-    /// Caption indent = chip column + row spacing.
-    static let captionInset: CGFloat = chipWidth + 10
+    static let rowSpacing: CGFloat = 10
 }

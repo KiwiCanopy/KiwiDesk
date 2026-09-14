@@ -34,7 +34,7 @@ extension OnboardingView {
             // The login commit stays on the ONE exit (#342); an
             // exit that skipped it would lose the user's tick.
             Button(startLabel) {
-                model.commitLoginItemThen { model.onOpenChecklist() }
+                model.commitLoginItemThen { model.onFinish() }
             }
             .kiwiProminentButton()
             .keyboardShortcut(.defaultAction)

@@ -34,7 +34,8 @@ struct HomeCardOrderTests {
         )
     }
 
-    /// NINE since Layout Defaults moved to `.simple` (owner
+    /// TEN since #1365's Mac Checklist, NINE since Layout Defaults
+    /// moved to `.simple` (owner
     /// ruling 2026-08-04) — those parameters are how people learn
     /// what a tiling manager does, so withholding them teaches
     /// nothing. A literal over a derived value on purpose: this

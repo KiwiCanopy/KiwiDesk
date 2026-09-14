@@ -32,7 +32,7 @@ struct MacChecklistProgressTests {
                 return k.setting
             }
         #expect(MacChecklistProgress.essentials == fromCensus)
-        #expect(MacChecklistProgress.total == 4)
+        #expect(MacChecklistProgress.total == fromCensus.count)
         let optionals = Set(
             MacChecklistRowOrder.optionalSettings.compactMap {
                 key -> MacSetting? in
@@ -109,15 +109,46 @@ struct MacChecklistProgressTests {
             HomeCardContent.subtitle(
                 for: .macChecklist,
                 model: model
-            ) == "All 4 essentials done"
+            ) == "All essentials done"
         )
         #expect(
             MacChecklistText.progress(done: 4, total: 4)
-                == "All 4 done"
+                == "All done"
         )
         #expect(
             MacChecklistText.progress(done: 2, total: 4)
                 == "Done: 2 of 4"
+        )
+    }
+
+    /// The card face draws `verdicts` and `done` counts the same
+    /// value, so the face cannot show a row the count does not
+    /// — a face iterating `MacSetting.allCases` drew six ticks
+    /// under "of 4" with every suite green (architect-reviewer,
+    /// 2026-09-14).
+    @Test("the face's verdicts are what the count counts")
+    func verdictsAreTheCount() {
+        let first = MacChecklistProgress.essentials[0]
+        let states: [MacSetting: MacSettingState] = [
+            first: .set, MacChecklistProgress.essentials[1]: .unreadable,
+        ]
+        let ticks: Set<MacSetting> = [
+            MacChecklistProgress.essentials[1]
+        ]
+        let verdicts = MacChecklistProgress.verdicts(
+            states: states,
+            ticks: ticks
+        )
+        #expect(verdicts.map(\.setting) == MacChecklistProgress.essentials)
+        #expect(
+            verdicts.filter(\.done).count
+                == MacChecklistProgress.done(states: states, ticks: ticks)
+        )
+        #expect(verdicts.filter(\.done).count == 2)
+        // A wrong-kind read is unreadable, and the one reading of
+        // an unread row is "not set".
+        #expect(
+            MacChecklistProgress.state(of: first, in: [:]) == .notSet
         )
     }
 
@@ -145,6 +176,11 @@ struct MacChecklistProgressTests {
         model.setMacChecklistTick(first, false)
         #expect(model.macChecklistTicks.isEmpty)
         #expect(model.macChecklistDone == before)
+        // The published mirror is seeded from the store, so a
+        // tick survives the model that wrote it.
+        model.setMacChecklistTick(first, true)
+        let again = makeTestModel(defaults: model.preferences)
+        #expect(again.macChecklistTicks == [first])
     }
 
     /// The census key names the store the model writes.

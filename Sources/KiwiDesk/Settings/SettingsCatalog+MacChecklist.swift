@@ -36,12 +36,12 @@ struct MacChecklistControls: Sendable {
     let clickWallpaper = SettingsControl(
         "mac_checklist.click_wallpaper",
         "Set \u{201C}Click wallpaper to show desktop\u{201D} to "
-            + "Only in Stage Manager"
+            + "\u{201C}Only in Stage Manager\u{201D}"
     )
     let doubleClickTitle = SettingsControl(
         "mac_checklist.double_click_title",
         "Set \u{201C}Window title bar double-click action\u{201D} "
-            + "to None"
+            + "to \u{201C}None\u{201D}"
     )
     let habitsCard = SettingsControl(
         "mac_checklist.habits.title",

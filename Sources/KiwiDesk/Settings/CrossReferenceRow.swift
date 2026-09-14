@@ -29,7 +29,7 @@ struct CrossReferenceRow: View {
     static let linkSlot = "\u{FFFC}"
 
     var body: some View {
-        let (leading, trailing) = split
+        let (leading, trailing) = Self.split(prose)
         LinkedCaption(
             leading: leading,
             linkTitle: linkTitle,
@@ -39,9 +39,10 @@ struct CrossReferenceRow: View {
     }
 
     /// Splits prose around `linkSlot` (`CrossReferenceRowSlotTests`,
-    /// `placeholder_drift`).
-    private var split: (String, String) {
-        guard let slot = prose.range(of: Self.linkSlot) else {
+    /// `placeholder_drift`); the Mac Checklist's captions take it
+    /// for their System Settings link too.
+    static func split(_ prose: String) -> (String, String) {
+        guard let slot = prose.range(of: linkSlot) else {
             assertionFailure("cross-reference prose has no slot")
             return (prose + " ", "")
         }

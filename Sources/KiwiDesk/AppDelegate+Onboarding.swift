@@ -44,10 +44,7 @@ extension AppDelegate {
             PermissionMonitor.openSystemSettings()
         }
         onboardingModel.onFinish = { [weak self] in
-            self?.closeOnboarding()
-        }
-        onboardingModel.onOpenChecklist = { [weak self] in
-            self?.openChecklistSettings()
+            self?.openSettingsFromTour(at: .macChecklist)
         }
         // Registers login item via SMAppService (#342).
         onboardingModel.onSetLoginItem = { enabled in
@@ -108,22 +105,14 @@ extension AppDelegate {
         onboardingWindow?.close()
     }
 
-    /// Opens Settings to shortcuts and closes onboarding to avoid
-    /// leaving a floating window above Settings.
-    func openShortcutsSettings() {
-        dashboard.show(navigatingTo: .shortcuts)
-        if onboardingWindow != nil {
-            closeOnboarding()
-        }
-    }
-
-    /// The tour's closing exit (#1365): Settings at the Mac
-    /// Checklist, then the close — the same order as above, for
-    /// the same reason. The close still runs `windowWillClose`,
-    /// so the banner seed and the discovery mark fire as on
-    /// every other end (`OnboardingCloseSeamTests`).
-    func openChecklistSettings() {
-        dashboard.show(navigatingTo: .macChecklist)
+    /// Opens Settings at `destination` and THEN closes the tour,
+    /// in that order so no floating tour window is left above
+    /// Settings; the close still runs `windowWillClose`, so the
+    /// banner seed and the discovery mark fire
+    /// (`OnboardingCloseSeamTests`). The keys page's Shortcuts
+    /// link and the closing page's exit (#1365) both take it.
+    func openSettingsFromTour(at destination: SettingsDestination) {
+        dashboard.show(navigatingTo: destination)
         if onboardingWindow != nil {
             closeOnboarding()
         }

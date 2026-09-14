@@ -286,6 +286,16 @@ extension HomeSurfacingTests {
             "ifletplate=HomeCardPlate.plate("
                 + "for:destination,model:model){plate}",
         ],
+        "Settings/HomeCardPreview.swift": [
+            // The checklist card's face DRAWS the one `verdicts`
+            // value the count reads (#1365) — a face assembling
+            // its own ticks from `MacSetting.allCases` drew six
+            // under "of 4" with every suite green.
+            "letverdicts=MacChecklistProgress.verdicts("
+                + "states:model.macChecklistStates,"
+                + "ticks:model.macChecklistTicks)",
+            "ForEach(verdicts,id:\\.setting){verdictin",
+        ],
         "Settings/SettingsSearchRow.swift": [
             // Enrichment and the mode tag are surfacing
             // branches: consulting the closure is not drawing

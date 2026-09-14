@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -7,9 +8,20 @@ import Testing
 /// `CrossReferenceRowSlotTests` registers `MacHabitRow.swift:prose`
 /// for, split off because that file sits at the §2.1 ceiling.
 @MainActor
-@Suite("Mac Checklist cross-reference position")
+@Suite("Mac Checklist cross-reference position", .serialized)
 struct MacChecklistCrossReferenceTests {
     private static let slot = CrossReferenceRow.linkSlot
+
+    /// The frames under test are the ENGLISH ones; on a German
+    /// host the suite read `de.json` and a slot dropped from the
+    /// English stayed green (guard-prover, 2026-09-14; #740).
+    private func pinEnglish() {
+        LocalizationManager.shared.select("en")
+    }
+
+    private func reset() {
+        LocalizationManager.shared.select(nil)
+    }
 
     /// The Mac Checklist's habits (#1365): one sentence each,
     /// the four with a link — three KiwiDesk surfaces and the
@@ -19,6 +31,8 @@ struct MacChecklistCrossReferenceTests {
     /// arm. Both halves over the census order list, so a habit
     /// gaining or losing its link reds here.
     @Test func theHabitProsePlacesItsLink() {
+        pinEnglish()
+        defer { reset() }
         for row in MacChecklistRowOrder.habits {
             guard case .macChecklist(let key) = row else {
                 Issue.record("\(row.id) is not a checklist row")
@@ -48,6 +62,8 @@ struct MacChecklistCrossReferenceTests {
     /// without one would draw the link at the end where no
     /// translation can move it.
     @Test func everyCaptionPlacesItsPath() {
+        pinEnglish()
+        defer { reset() }
         for row in MacChecklistRowOrder.essentialSettings
             + MacChecklistRowOrder.optionalSettings
         {

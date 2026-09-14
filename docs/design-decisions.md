@@ -5514,6 +5514,7 @@ rebound keymap behind it teaches someone else's keyboard.
 
 **[Principle]**
 
+:::unreleased
 **A checklist row is a change made ONCE that can be found DONE —
 by macOS, read live, or only where macOS would not answer, by
 the user's own tick. A habit is kept, never found done, so it
@@ -5536,8 +5537,8 @@ undo:
   card face. Nor does a habit take a "got it" checkbox that
   counts — a pledge is not a fact, and a count built partly on
   pledges is a card that is not an answer (gui.md ▸ Home).
-  `MacChecklistProgress` is the one function; the card face and
-  the section header both call it. The card face draws the
+  `MacChecklistProgress` is the one home of the count; the card
+  face and the section header both read it. The card face draws the
   essentials as the rows' own ticks — the filled check and the
   hollow ring, same inks — never a chart of the number: a row of
   squares shipped for an evening and read as a bar graph, and a
@@ -5561,8 +5562,10 @@ undo:
   when the window comes forward, so the Home card and the
   section count the same read and a user who flips a switch in
   System Settings and comes back sees the row update — the
-  `LoginItemCard` shape. KiwiDesk writes none of these settings
-  (AGENTS.md §5): the caption's link opens the pane, and the
+  `LoginItemCard` shape. KiwiDesk writes none of these settings —
+  they are the user's, and a tiler that flips them is the thing
+  this list warns about (#1365, alternatives considered): the
+  caption's link opens the pane, and the
   breadcrumb carries the rest, because sub-pane anchors are
   undocumented and move between releases.
 
@@ -5577,14 +5580,21 @@ user who pressed "Start using it" used to land on nothing, and
 the card reaches a new user only if the tour hands them to it
 — so the first thing they see is "Essentials done: 0 of 4",
 which is why the count is essentials only and the card never
-shouts. That is also why the card sits LAST on Home, after
+shouts. This does not reopen the #678 Phase 4 pass 11 ruling
+that moved the tour's default action off Open Settings: that
+ruling was about handing a new user the whole Settings window
+to dig through, and this button lands them on one card of
+things to finish, the same shape as the tour's own steps — the
+guide-link entry below still governs the closing card's other
+pointer. It is also why the card sits LAST on Home, after
 General: the tour carries discovery, Home carries return visits,
 and a checklist most people finish once is the right card to
-orphan on a five-card row's second line. A habit that names a
-macOS switch — the Dock — links the pane the way the settings
-rows do, and the keyboard habit names the shortcuts panel's
-LIVE chord, read from the resolved layer like the tour's keys,
-with a second frame for a Mac where nothing is bound.
+orphan where the Whole App row wraps. A habit that names a macOS
+switch — the Dock — links the pane the way the settings rows do,
+and the keyboard habit names the shortcuts panel's LIVE chord,
+read from the resolved layer like the tour's keys, with a second
+frame for a Mac where nothing is bound.
+:::
 
 ### The app links the guide, in a language the site actually serves
 
@@ -5629,9 +5639,12 @@ with in a quieter voice. Nobody is stranded: the picture above
 names Settings and where it lives — the durable route, the icon
 they will still be using on day 30, against a one-time button in
 a window that never returns — the tour reopens FROM Settings, and
-`KiwiDesk.open_settings()` is bindable.
+`KiwiDesk.open_settings()` is bindable. Since #1365 the default
+action lands on the Mac Checklist card; ▸ *The Mac Checklist
+counts what macOS can confirm* argues why that is not the Open
+Settings link coming back.
 
-**The pointer is in three places, and the third is the one that
+**The pointer is in four places, and the third is the one that
 matters most.** The tour's closing card reaches someone who has
 just run the tour; Home's first-run banner reaches someone who
 closed the tour after its shortcuts screen without reaching that
@@ -5642,7 +5655,8 @@ first save — so a user who dismissed the welcome, or simply saved
 one change, had no route to the guide anywhere in the app. That
 is the gap this entry is about, not a nicety on top of it, and
 only a permanent pointer closes it: General ▸ About, beside the
-links already there.
+links already there. The Mac Checklist's foot draws the same
+sentence, for the reader the tour just sent there.
 
 The two sentence-shaped surfaces share ONE frame and one label,
 because the same English names the same action at both. About

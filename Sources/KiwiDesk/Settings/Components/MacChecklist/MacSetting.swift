@@ -1,15 +1,12 @@
 import AppKit
 import Foundation
 
-/// One macOS setting the checklist reads (#1365): where macOS
-/// stores it, what "done" is, and what an ABSENT key means.
-/// macOS writes a key only once the user touches the switch, so
-/// absence is the shipped default — never "unknown". The absent
-/// values were read on macOS 26.6 (owner's Mac, 2026-09-14) and
-/// are the one hand-kept half; `MacSettingReadTests` pins the
-/// classification over them. GUI-boundary like
-/// `SystemShortcutEnablement`: reached only through the
-/// `SettingsModel.readMacSetting` seam, never from Core.
+/// One macOS setting the checklist reads (#1365): where it is
+/// stored, what "done" is, and what an ABSENT key means — the
+/// shipped default, never "unknown" (values read on macOS 26.6,
+/// 2026-09-14; `MacSettingReadTests`). GUI-boundary like
+/// `SystemShortcutEnablement`, reached only through the
+/// `SettingsModel.readMacSetting` seam.
 enum MacSetting: String, CaseIterable, Hashable {
     case rearrangeSpaces
     case switchOnActivate
@@ -66,6 +63,13 @@ enum MacSetting: String, CaseIterable, Hashable {
 enum MacSettingValue: Hashable {
     case bool(Bool)
     case string(String)
+
+    func isSameKind(as other: MacSettingValue) -> Bool {
+        switch (self, other) {
+        case (.bool, .bool), (.string, .string): return true
+        case (.bool, .string), (.string, .bool): return false
+        }
+    }
 }
 
 /// What one read returned; `.other` is a value of a shape this
@@ -118,6 +122,12 @@ enum MacSettingRead {
             return setting.absentValue == setting.target
                 ? .set : .notSet
         case .value(let value):
+            // A value of the OTHER kind — `defaults write` with no
+            // `-bool` stores the string "false", which macOS
+            // honours — is unreadable, never a false "Not yet".
+            guard value.isSameKind(as: setting.target) else {
+                return .unreadable
+            }
             return value == setting.target ? .set : .notSet
         case .other:
             return .unreadable

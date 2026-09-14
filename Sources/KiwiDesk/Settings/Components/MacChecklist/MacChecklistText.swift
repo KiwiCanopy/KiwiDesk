@@ -144,9 +144,9 @@ enum MacChecklistText {
         case .habitDock:
             return L(
                 "mac_checklist.habit.dock.caption",
-                "With the %1$@ on, the Dock only costs screen space "
-                    + "— auto-hide it in %3$@ and launch by Spotlight "
-                    + "or %2$@.",
+                "With the %1$@ on, the Dock only takes up room on "
+                    + "the screen — auto-hide it in %3$@ and launch by "
+                    + "Spotlight or %2$@.",
                 L("bars.switch.space_bar", "Space Bar"),
                 L("shortcuts.app_behavior.open_or_focus", "Open or Focus"),
                 slot
@@ -159,14 +159,12 @@ enum MacChecklistText {
     }
 
     /// The section header's readout, the count last so no locale
-    /// has to agree with it.
+    /// has to agree with it — and the all-done frame countless,
+    /// since `total` is the census's and a form chosen for 4 is
+    /// wrong the day a fifth essential joins.
     static func progress(done: Int, total: Int) -> String {
         guard done < total else {
-            return L(
-                "mac_checklist.progress.all",
-                "All %1$d done",
-                total
-            )
+            return L("mac_checklist.progress.all", "All done")
         }
         return L(
             "mac_checklist.progress",
@@ -181,8 +179,7 @@ enum MacChecklistText {
         guard done < total else {
             return L(
                 "home.card.mac_checklist.all",
-                "All %1$d essentials done",
-                total
+                "All essentials done"
             )
         }
         return L(

@@ -105,6 +105,13 @@ struct SettingsThemeContrastTests {
             SettingsTheme.ink2,
             on: SettingsTheme.cardHover
         ),
+        // The checklist card's ticks ride the text band too
+        // (#1365).
+        Pairing(
+            "groupHeading on cardHover",
+            SettingsTheme.groupHeading,
+            on: SettingsTheme.cardHover
+        ),
         Pairing(
             "ink3 on cardHover",
             SettingsTheme.ink3,

@@ -64,13 +64,28 @@ struct MacSettingReadTests {
 
     /// A value of a shape this build does not know is
     /// UNREADABLE, never "Not yet" — the row then falls back to
-    /// the user's own tick rather than telling them a lie.
+    /// the user's own tick rather than telling them a lie. That
+    /// covers a value of the OTHER kind too: `defaults write`
+    /// with no `-bool` stores the string "false" under a bool
+    /// key, and macOS honours it (code-reviewer, 2026-09-14).
     @Test("an unknown shape is unreadable, not not-yet")
     func unknownShapeIsUnreadable() {
         for setting in MacSetting.allCases {
             #expect(
                 MacSettingRead.state(of: setting, reading: .other)
                     == .unreadable
+            )
+            let otherKind: MacSettingValue
+            switch setting.target {
+            case .bool: otherKind = .string("false")
+            case .string: otherKind = .bool(false)
+            }
+            #expect(
+                MacSettingRead.state(
+                    of: setting,
+                    reading: .value(otherKind)
+                ) == .unreadable,
+                "\(setting) judged a value of the wrong kind"
             )
         }
     }

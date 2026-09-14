@@ -35,7 +35,7 @@ struct MacHabitRow: View {
                 destination: destination
             )
         case .systemSettings:
-            let (leading, trailing) = MacSettingRow.split(prose)
+            let (leading, trailing) = CrossReferenceRow.split(prose)
             LinkedCaption(
                 leading: leading,
                 linkTitle: MacChecklistText.pathLabel,

@@ -65,7 +65,8 @@ struct MacChecklistSection: View {
     }
 
     private func settingRows(_ rows: [SettingKey]) -> some View {
-        ForEach(Array(rows.enumerated()), id: \.element.id) {
+        let chipWidth = MacSettingRow.chipWidth
+        return ForEach(Array(rows.enumerated()), id: \.element.id) {
             index,
             row in
             if index > 0 { Divider() }
@@ -77,7 +78,8 @@ struct MacChecklistSection: View {
                     model: model,
                     key: key,
                     setting: setting,
-                    control: control
+                    control: control,
+                    chipWidth: chipWidth
                 )
             }
         }

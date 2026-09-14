@@ -124,7 +124,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         let shortcutsPanel = ShortcutsPanelController(
             core: core
         ) { [weak self] in
-            self?.openShortcutsSettings()
+            self?.openSettingsFromTour(at: .shortcuts)
         }
         self.shortcutsPanel = shortcutsPanel
         statusItem.onShowShortcuts = { [weak shortcutsPanel] in

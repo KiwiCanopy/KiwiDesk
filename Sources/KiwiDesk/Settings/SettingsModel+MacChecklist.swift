@@ -21,13 +21,14 @@ extension SettingsModel {
         macChecklistStates = states
     }
 
-    /// Rows the user ticked because macOS would not answer.
-    var macChecklistTicks: Set<MacSetting> {
+    /// Reads the tick store into the published mirror.
+    static func storedTicks(
+        in preferences: UserDefaults
+    ) -> Set<MacSetting> {
         Set(
-            (preferences.stringArray(
-                forKey: Self.macChecklistTicksKey
-            ) ?? [])
-            .compactMap(MacSetting.init(rawValue:))
+            (preferences.stringArray(forKey: macChecklistTicksKey)
+                ?? [])
+                .compactMap(MacSetting.init(rawValue:))
         )
     }
 
@@ -38,7 +39,7 @@ extension SettingsModel {
             ticks.map(\.rawValue).sorted(),
             forKey: Self.macChecklistTicksKey
         )
-        objectWillChange.send()
+        macChecklistTicks = ticks
     }
 
     /// Essentials done, the one count both surfaces read.

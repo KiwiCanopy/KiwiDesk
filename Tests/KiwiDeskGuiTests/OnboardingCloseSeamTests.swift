@@ -51,17 +51,27 @@ struct OnboardingCloseSeamTests {
             // discovery never marked, one line earlier than the
             // guard was looking (`guard-prover`, 2026-08-12).
             "window.delegate=self",
-            // The closing page's exit lands in Settings at the
-            // Mac Checklist and THEN closes (#1365) — the
-            // Shortcuts-page order, so no floating tour window
-            // is left above Settings — and the close is what
-            // reaches `windowWillClose` above; an exit that
-            // skipped it would dodge every needle here.
-            "onboardingModel.onOpenChecklist={[weakself]in"
-                + "self?.openChecklistSettings()}",
-            "funcopenChecklistSettings(){"
-                + "dashboard.show(navigatingTo:.macChecklist)"
+            // The closing page's ONE exit lands in Settings at
+            // the Mac Checklist and THEN closes (#1365) — show
+            // first, so no floating tour window is left above
+            // Settings — and the close is what reaches
+            // `windowWillClose` above; an exit that skipped it
+            // would dodge every needle here.
+            "onboardingModel.onFinish={[weakself]in"
+                + "self?.openSettingsFromTour(at:.macChecklist)}",
+            "funcopenSettingsFromTour(at"
+                + "destination:SettingsDestination){"
+                + "dashboard.show(navigatingTo:destination)"
                 + "ifonboardingWindow!=nil{closeOnboarding()}}",
+        ],
+        "Onboarding/OnboardingView+Closing.swift": [
+            // …and the button calls THAT exit, with the login
+            // commit on it: pinned at the view because a second
+            // closure reverted here left every AppDelegate needle
+            // green with the tour landing on nothing
+            // (architect-reviewer, 2026-09-14).
+            "Button(startLabel){"
+                + "model.commitLoginItemThen{model.onFinish()}}"
         ],
         "AppDelegate.swift": [
             // "Show me around" reaches the real replay.
