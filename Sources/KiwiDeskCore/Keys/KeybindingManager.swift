@@ -28,6 +28,10 @@ public final class KeybindingManager {
     public var onLayerChange: @MainActor (String) -> Void = {
         _ in
     }
+    /// The event seam (#1168): `(from, to)`, fired only when the
+    /// layer actually changed; Core wires it to `layer_change`.
+    public var onLayerSwitched: @MainActor (String, String) -> Void = { _, _ in
+    }
 
     public private(set) var currentLayer = defaultLayer
     /// True while a hotkey's Lua callback runs (#184): failure
@@ -132,9 +136,17 @@ public final class KeybindingManager {
             onLog("switch_layer: unknown layer '\(name)'")
             return
         }
+        let previous = currentLayer
         currentLayer = name
         activate(name)
-        onLayerChange(name)
+        announce(from: previous, to: name)
+    }
+
+    /// The one announcement of a layer switch: the GUI hook on
+    /// every call, the event only on a real change.
+    private func announce(from: String, to: String) {
+        onLayerChange(to)
+        if from != to { onLayerSwitched(from, to) }
     }
 
     /// Resets all layers and releases Lua references on config reload.
@@ -149,10 +161,10 @@ public final class KeybindingManager {
         }
         layers = [:]
         layerIcons = [:]
-        let changed = currentLayer != Self.defaultLayer
+        let previous = currentLayer
         currentLayer = Self.defaultLayer
-        if changed {
-            onLayerChange(Self.defaultLayer)
+        if previous != Self.defaultLayer {
+            announce(from: previous, to: Self.defaultLayer)
         }
     }
 
@@ -189,7 +201,7 @@ public final class KeybindingManager {
         }
         activate(currentLayer)
         if currentLayer != oldCurrent {
-            onLayerChange(currentLayer)
+            announce(from: oldCurrent, to: currentLayer)
         }
     }
 

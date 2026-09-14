@@ -4217,6 +4217,14 @@ KiwiDesk.resize("x", -50)
 KiwiDesk.resize("y", 50)
 ```
 
+:::unreleased
+A layer switch is also an event: `KiwiDesk.on("layer_change",
+function(from, to) … end)` hears every change of the active
+layer — `switch_layer`, a config reload or a profile switch
+returning you to `default` — and nothing for a switch to the
+layer already active ([Events](#events)).
+:::
+
 #### Layer Icons
 
 An optional third argument to `define_layer` sets a menu bar
@@ -4296,6 +4304,7 @@ end)
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` (the Desktop number holding a `vanished` window, else `nil`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
+| `layer_change` | `from`, `to` (layer names, `default` included; fires only when the layer actually changed) |
 
 The window lifecycle events fire even when focus does not change (a
 background window opening or closing), so status bars stay current

@@ -9,6 +9,7 @@ public enum KiwiNotification: String, CaseIterable, Sendable,
     case focusChange = "focus_change"
     case monitorChange = "monitor_change"
     case desktopChange = "desktop_change"
+    case layerChange = "layer_change"
     // Lifecycle events carry a `reason` (#40), spelled by
     // `WindowAppearReason` / `WindowGoneReason` — the one copy of
     // that vocabulary, so a value added there (#913) owes no edit

@@ -448,7 +448,7 @@ Each event is one JSON line:
 
 Events: `space_change`, `layout_change`, `focus_change`,
 `monitor_change`, `desktop_change`, `window_created`,
-`window_destroyed`, `window_moved_to_space`.
+`window_destroyed`, `window_moved_to_space`, `layer_change`.
 
 Give no arguments and you get every event; give arguments and
 the filter is honoured exactly. An argument that names no event
@@ -584,6 +584,20 @@ moves that screen onto the Space its arriving Desktop should
 show — which emits `space_change` too when that screen is the
 one holding the active Space. With the
 option off, or with a single screen, `monitor` is always 1.
+
+:::unreleased
+`layer_change` fires when the active keyboard layer changes —
+a `switch_layer` call, a config reload returning you to
+`default`, a profile switch — and never when a switch names the
+layer already active. It carries the previous and the new layer
+names, `default` included, so a status bar can show the active
+layer without polling:
+
+```json
+{"event": "layer_change",
+ "data": {"from": "default", "to": "resize"}}
+```
+:::
 
 ## Raw IPC Protocol
 

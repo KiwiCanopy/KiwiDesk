@@ -62,6 +62,19 @@ extension KiwiCore {
         id.map { .string($0) } ?? .null
     }
 
+    /// The active keyboard layer switched (#1168): `from` and
+    /// `to` are layer names, `default` included.
+    func emitLayerChange(from: String, to: String) {
+        bus.emit(
+            .layerChange,
+            data: .object([
+                "from": .string(from),
+                "to": .string(to),
+            ]),
+            luaArgs: [.string(from), .string(to)]
+        )
+    }
+
     func emitMonitorChange() {
         let displays = state.workspaces.allDisplays
         bus.emit(

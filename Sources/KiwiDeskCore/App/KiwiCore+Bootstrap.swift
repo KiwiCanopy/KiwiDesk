@@ -31,6 +31,9 @@ extension KiwiCore {
         crash.onLog = log
         eventLoop.onLog = log
         keys.onLog = log
+        keys.onLayerSwitched = { [weak self] from, to in
+            self?.emitLayerChange(from: from, to: to)
+        }
         exec.onLog = log
         profiles.onLog = log
         borders.onLog = log
