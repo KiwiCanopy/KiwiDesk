@@ -1109,6 +1109,7 @@
   "space_bar.icon_source.help": "App 符號的繪製方式。「%1$@」會顯示以列的項目顏色上色的單色符號，那些顏色在%2$@中設定；沒有符號的 App 會保留原本的 App 圖像。",
   "space_bar.icon_source.label": "App 符號樣式",
   "space_bar.item.ax.current": "%1$@，目前",
+  "space_bar.item.ax.layer": "快速鍵層 %1$@",
   "space_bar.item.ax.not_current": "%1$@，非目前",
   "space_bar.item.ax.space": "空間 %1$@，%2$d 個應用程式",
   "space_bar.item_gap": "項目間距",

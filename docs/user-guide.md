@@ -428,6 +428,12 @@ One bar per display, listing that display's Spaces in profile
 order. Click a Space to switch to it; the glyphs are
 informational.
 
+:::unreleased
+While a shortcut layer other than `default` is active, its icon
+leads the bar, ahead of the Spaces — the same icon the menu bar
+shows ([Shortcut Layers](#shortcut-layers)).
+:::
+
 The bar shows the Desktop you are looking at: a window on a macOS
 Desktop you are not looking at is not listed, and *Hide empty
 Spaces* hides a Space holding only those. *Open or Focus* still

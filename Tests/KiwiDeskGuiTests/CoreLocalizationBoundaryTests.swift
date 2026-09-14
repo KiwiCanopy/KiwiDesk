@@ -95,9 +95,10 @@ struct CoreLocalizationBoundaryTests {
         "Commands/ResizeRefusal+Rendering.swift": 10,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
-        // App Bar's a11y labels (#901), drawn by Core.
+        // App Bar's a11y labels (#901), drawn by Core; the fourth
+        // Space Bar call is the layer item's label (#1169).
         "Bar/AppBarItemView.swift": 3,
-        "Bar/SpaceBarItemView.swift": 3,
+        "Bar/SpaceBarItemView.swift": 4,
         "Bar/SpaceBarOverlay+FrontApp.swift": 2,
     ]
 

@@ -4245,6 +4245,12 @@ is active, the KiwiDesk status item swaps to it. The default
 layer (`KiwiDesk.bind`) never takes an icon — it always shows
 the standard KiwiDesk glyph.
 
+:::unreleased
+The Space Bar shows the same icon while the layer is active,
+as one item ahead of the Spaces; a layer without an icon shows
+the first two letters of its name there.
+:::
+
 **Example:**
 
 ```lua

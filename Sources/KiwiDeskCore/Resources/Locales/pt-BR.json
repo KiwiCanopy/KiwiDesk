@@ -1109,6 +1109,7 @@
   "space_bar.icon_source.help": "Como os símbolos dos apps são desenhados. “%1$@” mostra um símbolo monocromático colorido pelas cores de item da barra, definidas em %2$@; apps sem símbolo mantêm o próprio ícone.",
   "space_bar.icon_source.label": "Estilo dos símbolos de app",
   "space_bar.item.ax.current": "%1$@, posição atual",
+  "space_bar.item.ax.layer": "Camada de atalhos %1$@",
   "space_bar.item.ax.not_current": "%1$@, não selecionado",
   "space_bar.item.ax.space": "Espaço %1$@, %2$d apps",
   "space_bar.item_gap": "Espaçamento entre itens",

@@ -3,11 +3,22 @@ import AppKit
 /// Keeps the Space Bars in sync with workspace state (#293).
 /// Driven from `retile()` — which already fires on every
 /// structural, focus, mode, settings, space, and profile
-/// change — so the bar needs no event machinery of its own.
-/// One bar per display, listing that display's Spaces in
-/// profile order. Everything is read from snapshotted state:
-/// no AX calls in bar building.
+/// change — plus the one change that retiles nothing, a
+/// shortcut-layer switch (`wireSpaceBarLayerRefresh`). One bar
+/// per display, listing that display's Spaces in profile
+/// order. Everything is read from snapshotted state: no AX
+/// calls in bar building.
 extension KiwiCore {
+    /// The bar follows the active layer off the `layer_change`
+    /// bus event, like the menu bar's icon — never a hook on the
+    /// manager, which keeps one seam (#1169, #1168).
+    func wireSpaceBarLayerRefresh() {
+        bus.addSink { [weak self] event, _ in
+            guard event == .layerChange else { return }
+            self?.updateSpaceBar()
+        }
+    }
+
     func updateSpaceBar() {
         let style = tiler.settings.spaceBarStyle
         guard style.enabled else {
@@ -37,7 +48,7 @@ extension KiwiCore {
             NativeSpaces.currentSpaceIsUser(display: display.id),
             let screen = screen(for: display.id)
         else { return nil }
-        let items = spaceBarItems(
+        var items = spaceBarItems(
             display: display.id,
             style: style
         )
@@ -47,6 +58,11 @@ extension KiwiCore {
                 style: style
             )
         else { return nil }
+        // After the emptiness guard: a layer never draws a bar
+        // on a screen with no Space item to lead.
+        if let layer = spaceBarLayerItem() {
+            items.insert(layer, at: 0)
+        }
         let front = frontApp(display: display.id, style: style)
         return SpaceBarManager.Bar(
             display: display.id,

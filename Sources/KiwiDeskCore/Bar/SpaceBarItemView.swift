@@ -8,6 +8,14 @@ final class SpaceBarItemView: NSView {
         case text(String, tinted: Bool)
     }
 
+    /// What an item stands for (#1169). A layer item shows
+    /// the active shortcut layer: never a click, drag or drop
+    /// target, and never the active slot.
+    enum Identity: Equatable {
+        case space(SpaceID)
+        case layer(String)
+    }
+
     /// App glyph run in space item (#293 stage 2, #294, #414, #445).
     struct App: Equatable {
         let name: String
@@ -41,7 +49,12 @@ final class SpaceBarItemView: NSView {
     var isFirstInRun = false
     var isLastInRun = false
 
-    private(set) var space = SpaceID("1")
+    private(set) var identity = Identity.space(SpaceID("1"))
+    /// The Space this item selects; nil for a layer item.
+    var space: SpaceID? {
+        if case .space(let id) = identity { return id }
+        return nil
+    }
     private(set) var spaceGlyph = Identifier.text(
         "?",
         tinted: true
@@ -105,7 +118,7 @@ final class SpaceBarItemView: NSView {
     required init?(coder: NSCoder) { fatalError() }
 
     override func mouseDown(with event: NSEvent) {
-        guard !isActive else { return }
+        guard !isActive, let space else { return }
         onSelect(space)
     }
 
@@ -124,7 +137,8 @@ final class SpaceBarItemView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        guard !isActive else { return }
+        // The hover fill promises a click; a layer item has none.
+        guard !isActive, space != nil else { return }
         isHovered = true
         restyle()
     }
@@ -135,7 +149,7 @@ final class SpaceBarItemView: NSView {
     }
 
     func configure(
-        space: SpaceID,
+        identity: Identity,
         spaceGlyph: Identifier,
         apps: [App],
         active: Bool,
@@ -145,11 +159,11 @@ final class SpaceBarItemView: NSView {
         overflow: Int = 0,
         focusInOverflow: Bool = false
     ) {
-        if self.space != space {
+        if self.identity != identity {
             cancelSpringSweep()
             isDragHovered = false
         }
-        self.space = space
+        self.identity = identity
         self.spaceGlyph = spaceGlyph
         self.apps = apps
         self.overflow = overflow
@@ -162,11 +176,24 @@ final class SpaceBarItemView: NSView {
         restyle()
         needsLayout = true
         setAccessibilityElement(true)
-        setAccessibilityRole(.button)
+        setAccessibilityRole(space == nil ? .image : .button)
         setAccessibilityLabel(axLabel)
     }
 
+    /// Announced whatever the glyph draws (bars.md): a layer
+    /// item names its layer, a Space item its Space and count.
     private var axLabel: String {
+        let space: SpaceID
+        switch identity {
+        case .layer(let layer):
+            return L(
+                "space_bar.item.ax.layer",
+                "Shortcut layer %1$@",
+                layer
+            )
+        case .space(let id):
+            space = id
+        }
         let windows =
             apps.reduce(0) { $0 + $1.count } + overflow
         let name = L(

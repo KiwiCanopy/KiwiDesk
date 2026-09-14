@@ -3,9 +3,10 @@ import AppKit
 /// Space Bar overlay panel for one display in AX coordinates (#293, #385).
 @MainActor
 public final class SpaceBarOverlay {
-    /// One Space's resolved content.
+    /// One Space's resolved content — or the active shortcut
+    /// layer's, ahead of the Spaces (#1169).
     public struct Item {
-        let space: SpaceID
+        let identity: SpaceBarItemView.Identity
         let spaceGlyph: SpaceBarItemView.Identifier
         let apps: [SpaceBarItemView.App]
         let active: Bool
@@ -13,6 +14,41 @@ public final class SpaceBarOverlay {
         let overflow: Int
         /// Focused window is hidden past the cap (#376).
         let focusInOverflow: Bool
+
+        init(
+            space: SpaceID,
+            spaceGlyph: SpaceBarItemView.Identifier,
+            apps: [SpaceBarItemView.App],
+            active: Bool,
+            overflow: Int,
+            focusInOverflow: Bool
+        ) {
+            identity = .space(space)
+            self.spaceGlyph = spaceGlyph
+            self.apps = apps
+            self.active = active
+            self.overflow = overflow
+            self.focusInOverflow = focusInOverflow
+        }
+
+        /// The layer item: one glyph, no apps, never active.
+        init(
+            layer: String,
+            glyph: SpaceBarItemView.Identifier
+        ) {
+            identity = .layer(layer)
+            spaceGlyph = glyph
+            apps = []
+            active = false
+            overflow = 0
+            focusInOverflow = false
+        }
+
+        /// The Space this item stands for; nil for the layer item.
+        var space: SpaceID? {
+            if case .space(let id) = identity { return id }
+            return nil
+        }
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.

@@ -75,4 +75,36 @@ struct LayerChangeSeamTests {
         #expect(app.contains("guardevent==.layerChange,"))
         #expect(!app.contains("onLayerChange"))
     }
+
+    /// The Space Bar's layer item (#1169) follows the same bus
+    /// event: its refresh is a sink keyed on `.layerChange`,
+    /// wired at bootstrap, and no bar file takes the manager's
+    /// hook — which the `oneWriter` clause above already caps at
+    /// the emitter, so this pins WHERE the second reader is.
+    @Test("the Space Bar reads the event off the bus too")
+    func spaceBarReadsTheBus() throws {
+        let driver = try squashed(
+            "Sources/KiwiDeskCore/App/KiwiCore+SpaceBar.swift"
+        )
+        #expect(
+            driver.contains(
+                "bus.addSink{[weakself]event,_in"
+                    + "guardevent==.layerChangeelse{return}"
+                    + "self?.updateSpaceBar()}"
+            )
+        )
+        #expect(!driver.contains("onLayerChange"))
+        let bootstrap = try squashed(
+            "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
+        )
+        #expect(bootstrap.contains("wireSpaceBarLayerRefresh()"))
+        // The definition and its one call: a second wiring would
+        // add a second sink, and the bar would re-draw twice.
+        #expect(
+            try writers(
+                of: "wireSpaceBarLayerRefresh()",
+                under: "Sources"
+            ) == 2
+        )
+    }
 }

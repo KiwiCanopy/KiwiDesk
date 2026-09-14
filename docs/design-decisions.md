@@ -6916,6 +6916,31 @@ Desktop bindings follow, like Delete and make default.
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
 
+:::unreleased
+**The active layer is shown, and showing it is not a
+preference** (#1169, owner ruling 2026-09-14). A press on the
+wrong layer does something surprising, so both surfaces that
+can say which layer is live say it: the menu bar's status item
+swaps to the layer's icon (#603), and the Space Bar leads its
+run with the layer's glyph — one item ahead of the Spaces,
+drawn and announced like any other, that is no click, drag or
+drop target and never the active slot. `default` has no icon by
+ruling and is the bar's resting shape, so the item exists only
+while another layer is active: the bar grows by one item on the
+switch and shrinks back on the return. The issue ruled one
+bool, "show layer in Space Bar", on 2026-08-31; that was
+re-ruled off once the item took this self-hiding shape, because
+the switch would then only let the bar *lie* about the layer
+while it was on — the same argument that made the menu bar
+always-on — and a setting owes a census row, a Settings row, a
+locale round and, later, a migration for any default flip.
+A layer with no icon draws the same two-letter monogram a Space
+with a non-numeric name does, so a layer never disappears from
+the bar for lack of one. Both surfaces read the one
+`layer_change` bus event (#1168): the bar takes no hook on the
+manager, which keeps one seam.
+:::
+
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed
 and released freely — the preview mirrors what is held — and

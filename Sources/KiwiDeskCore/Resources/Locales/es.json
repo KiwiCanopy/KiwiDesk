@@ -1109,6 +1109,7 @@
   "space_bar.icon_source.help": "Cómo se dibujan los glifos de las apps. «%1$@» muestra un símbolo monocromo coloreado con los colores de elemento de la barra, que se definen en %2$@; las apps sin símbolo conservan su propio icono.",
   "space_bar.icon_source.label": "Estilo de símbolo de aplicación",
   "space_bar.item.ax.current": "%1$@, actual",
+  "space_bar.item.ax.layer": "Capa de atajos %1$@",
   "space_bar.item.ax.not_current": "%1$@, no actual",
   "space_bar.item.ax.space": "Espacio %1$@, %2$d aplicaciones",
   "space_bar.item_gap": "Espaciado entre elementos",

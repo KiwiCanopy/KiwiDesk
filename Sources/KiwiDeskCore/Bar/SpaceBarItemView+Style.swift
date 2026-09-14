@@ -136,7 +136,9 @@ extension SpaceBarItemView {
     }
 
     private var stateColor: NSColor {
-        if isActive {
+        // The layer item takes the current-Space ink: it exists
+        // to be noticed, and it is never "not current" (#1169).
+        if isActive || space == nil {
             return NSColor(kiwiHex: style.activeItemColor)
         }
         if isHovered || isDragHovered {

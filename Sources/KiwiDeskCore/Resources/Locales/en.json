@@ -1110,6 +1110,7 @@
   "space_bar.icon_source.help": "How app glyphs are drawn. “%1$@” shows a monochrome symbol colored by the bar's item colors, set in %2$@; apps without a symbol keep their app icon.",
   "space_bar.icon_source.label": "App symbol style",
   "space_bar.item.ax.current": "%1$@, current",
+  "space_bar.item.ax.layer": "Shortcut layer %1$@",
   "space_bar.item.ax.not_current": "%1$@, not current",
   "space_bar.item.ax.space": "Space %1$@, %2$d applications",
   "space_bar.item_gap": "Item gap",

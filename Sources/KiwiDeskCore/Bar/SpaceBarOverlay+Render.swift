@@ -125,7 +125,7 @@ extension SpaceBarOverlay {
             let view = itemViews[index]
             view.frame = metrics.itemFrames[index]
             view.configure(
-                space: item.space,
+                identity: item.identity,
                 spaceGlyph: item.spaceGlyph,
                 apps: item.apps,
                 active: item.active,

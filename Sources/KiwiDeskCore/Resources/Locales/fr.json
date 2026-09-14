@@ -1109,6 +1109,7 @@
   "space_bar.icon_source.help": "Comment les glyphes des apps sont dessinés. « %1$@ » affiche un glyphe monochrome coloré par les couleurs d'élément de la barre, définies dans %2$@ ; les apps sans glyphe conservent leur propre icône.",
   "space_bar.icon_source.label": "Style des glyphes d'app",
   "space_bar.item.ax.current": "%1$@, actuel",
+  "space_bar.item.ax.layer": "Calque de raccourcis %1$@",
   "space_bar.item.ax.not_current": "%1$@, non actuel",
   "space_bar.item.ax.space": "Espace %1$@, %2$d applications",
   "space_bar.item_gap": "Écart entre éléments",

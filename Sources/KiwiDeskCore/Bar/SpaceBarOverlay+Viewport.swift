@@ -41,6 +41,8 @@ extension SpaceBarOverlay {
         hitStrip = strip
         let container = itemContainer.frame
         hitFrames = zip(items, frames).compactMap { item, frame in
+            // The layer item is no drop target (#1169).
+            guard let space = item.space else { return nil }
             let stripLocal = frame.offsetBy(
                 dx: container.minX,
                 dy: container.minY
@@ -49,7 +51,7 @@ extension SpaceBarOverlay {
             guard !visible.isNull, visible.width >= 1,
                 visible.height >= 1
             else { return nil }
-            return (item.space, visible)
+            return (space, visible)
         }
     }
 }
