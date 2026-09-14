@@ -1484,6 +1484,22 @@ was written down:
   print matters once the block is live again, and the anchor
   covers the meantime. Guarded by `GreyOutAnchorTests`.
 
+:::unreleased
+Which of the two remote shapes a row takes follows from what is
+dimmed, not only from whether a live label exists (#1310, owner
+ruling 2026-09-14): a header `?` scopes the CARD, so it answers
+for a greyed block, while ONE greyed row inside a live card
+takes a `CrossReferenceRow` directly beneath its grid, outside
+the dimmed subtree — the Space Bar colours card's *Focused
+window* row, whose picker lives on Bars, draws
+`AdvancedColorsHelp.focusedItemReference` there, and the Border
+colours card's *Unfocused windows* row draws
+`unfocusedReference` the same way while the ring is on, each
+linking the destination in the sentence; the Borders header `?`
+answers only for the ring being off. The argument is
+`docs/design-decisions.md` ▸ *a dim is not a sentence*.
+:::
+
 And one exemption worth stating: a control whose *only* consumer
 is off may still have a second one. The App Bar's "App symbol
 style" stays live even when no bar shows, because `iconSource`

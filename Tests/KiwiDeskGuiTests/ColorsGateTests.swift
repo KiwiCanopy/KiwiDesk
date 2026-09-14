@@ -119,16 +119,51 @@ struct ColorsGateTests {
             AdvancedColorsGates(settings: settings)
                 .bordersHeaderHelp == AdvancedColorsHelp.borderOff
         )
+        #expect(
+            !AdvancedColorsGates(settings: settings)
+                .unfocusedNeedsReference
+        )
+        // Ring on, unfocused off: ONE greyed row in a live card,
+        // which takes the link beneath the grid rather than the
+        // header `?` (#1310).
         settings.borderStyle.enabled = true
         #expect(
             AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp
-                == AdvancedColorsHelp.unfocusedOff
+                .bordersHeaderHelp == nil
+        )
+        #expect(
+            AdvancedColorsGates(settings: settings)
+                .unfocusedNeedsReference
         )
         settings.borderStyle.unfocusedEnabled = true
         #expect(
             AdvancedColorsGates(settings: settings)
                 .bordersHeaderHelp == nil
+        )
+        #expect(
+            !AdvancedColorsGates(settings: settings)
+                .unfocusedNeedsReference
+        )
+
+        // The focused-item row's link (#1310) draws only while
+        // the bar is on — off, the header's outer reason covers
+        // the row — and stands down once the picker is Glyphs.
+        settings.spaceBarStyle.enabled = false
+        settings.spaceBarStyle.iconSource = .appImage
+        settings.spaceBarStyle.showFrontApp = false
+        #expect(
+            !AdvancedColorsGates(settings: settings)
+                .focusedItemNeedsReference
+        )
+        settings.spaceBarStyle.enabled = true
+        #expect(
+            AdvancedColorsGates(settings: settings)
+                .focusedItemNeedsReference
+        )
+        settings.spaceBarStyle.iconSource = .appFont
+        #expect(
+            !AdvancedColorsGates(settings: settings)
+                .focusedItemNeedsReference
         )
 
         settings.dragGhost.enabled = false

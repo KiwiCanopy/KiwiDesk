@@ -4488,6 +4488,29 @@ one more thing to forget: `GateReasonPlacement` answers it, and
 it reproduces every site that already drew one, which is what
 makes it checkable.
 
+:::unreleased
+*Amended 2026-09-14 (#1310, owner ruling on the device):* channel
+3 has two shapes, and which one a row takes follows from what is
+dimmed, not from whether a live label exists. A header `?` scopes
+the CARD: when the whole card is grey (Borders with the ring off)
+the reader's eye lands on the heading and the glyph obviously
+belongs to the grey beneath it. When ONE row is greyed inside a
+card whose other rows are live, the same `?` two rows up reads as
+"about this card" and nothing points it at the row — the owner
+looked at the Space Bar colours card with a `?` on its heading
+and asked whether that was understandable, and it was not. Such
+a row takes a `CrossReferenceRow` directly beneath the grid,
+outside the dimmed subtree: the sentence states the fact and the
+destination name is the link, so the fix is one click rather
+than a popover that then says to go elsewhere
+(`AdvancedColorsHelp.focusedItemReference`). The Borders card was
+the same shape one card up — *Unfocused windows* greyed alone
+while the ring is on, its reason on the heading — and took the
+same link (`unfocusedReference`); its header `?` now answers only
+for the ring being off, when every row is grey. The header `?`
+stays the shape for a greyed block.
+:::
+
 The temptation to answer all of this with `.accessibilityHint`
 is why the ladder is written down. A hint on a **leaf** control
 is ordinary and two rows ship one. A hint on `GreyOut` is not:

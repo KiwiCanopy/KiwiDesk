@@ -59,9 +59,25 @@ struct GreyOutAnchorTests {
             "help: allows ? nil : AdvancedColorsHelp",
             2
         ),
+        // The Space Bar card's ONE greyed row in a live card
+        // takes a live link beneath the grid instead of the
+        // header `?`, which scopes the card (#1310, owner
+        // ruling 2026-09-14).
+        (
+            "BarColorCards.swift",
+            "prose: AdvancedColorsHelp.focusedItemReference",
+            1
+        ),
         (
             "StructureColorCards.swift",
             "help: gates.bordersHeaderHelp",
+            1
+        ),
+        // The Borders card's ONE greyed row (unfocused off, ring
+        // on) takes the link beneath the grid (#1310).
+        (
+            "StructureColorCards.swift",
+            "prose: AdvancedColorsHelp.unfocusedReference",
             1
         ),
         // The drag columns are subheadings, not sections, so

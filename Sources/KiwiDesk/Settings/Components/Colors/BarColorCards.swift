@@ -27,6 +27,16 @@ struct SpaceBarColorCard: View {
                     gateHelp: AdvancedColorsHelp.spaceBarOff
                 )
             }
+            // One greyed ROW in a live card takes its reason
+            // beneath it as a live link, outside the dimmed
+            // subtree — a header `?` scopes the card (#1310).
+            if gates.focusedItemNeedsReference {
+                CrossReferenceRow(
+                    prose: AdvancedColorsHelp.focusedItemReference,
+                    linkTitle: SettingsDestination.bars.title,
+                    destination: .bars
+                )
+            }
             SettingsDisclosure(
                 SettingsCatalog.advancedColors.spaceBarMore,
                 isExpanded: $moreExpanded,
