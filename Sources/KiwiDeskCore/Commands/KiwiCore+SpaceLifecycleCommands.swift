@@ -56,10 +56,7 @@ extension KiwiCore {
         else {
             return .fail("cannot delete the only space")
         }
-        for window in state.workspaces[space]?.windows ?? [] {
-            state.workspaces.add(window, to: target)
-        }
-        state.workspaces.removeSpace(space)
+        forwardWindows(of: space, to: target)
         tiler.settings.removeSpace(space)
         spacePins[space] = nil
         mainSpaces.remove(space)

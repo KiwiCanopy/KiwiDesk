@@ -69,8 +69,10 @@ struct FloatFlagReaderCensusTests {
             [.tiledMember: 5],
         "State/StateCoordinator+WindowCreated.swift":
             [.tiledMember: 2],
-        // Deferred to #1362 (arrival on another display).
-        "State/StateCoordinator+ScreenHome.swift": [.tiledMember: 1],
+        // Ruled to stay (#1362): an arrival on another display
+        // follows the screen, since a floating-mode home assigns
+        // no frame that could bring it over.
+        "State/StateCoordinator+ScreenHome.swift": [.ruledToStay: 1],
         "Commands/KiwiCore+SpaceCommands.swift": [.tiledMember: 2],
         "Commands/KiwiCore+TrackNavigate.swift": [.tiledMember: 2],
         "Commands/KiwiCore+TrackSwap.swift": [.tiledMember: 2],

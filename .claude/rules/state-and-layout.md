@@ -1284,8 +1284,9 @@ editing here:
   RULING per reader, and `FloatFlagReaderCensusTests` is the
   census that makes a new bare `.isFloating` read red until it
   is classified — identity, routed, a "tiled member" negation
-  the docstring refuses, or ruled to stay; `screenHome`'s float
-  stand-down (#1010) is #1362's to rule. Nothing scans for a
+  the docstring refuses, or ruled to stay, which is where
+  `screenHome`'s float stand-down (#1010) went with #1362 (the
+  bullet below). Nothing scans for a
   bare-flag NET beyond that count, so a new net still routes
   deliberately. **The mode arm
   names the
@@ -1339,6 +1340,100 @@ editing here:
   `StashCornerLiftTests`, `FloatStrandRecoveryTests` (the
   decision) and `FloatStrandSeamTests` (every consumer above,
   the `captureState` wirings included).
+- **A space entering floating mode gathers by VISIBILITY
+  (#1177), and an entry is a change in what was DRAWN.** A
+  floating layout assigns nothing, so the switch inherits the
+  last layout's frames — scrolled-out columns, a parked
+  monocle pile. `KiwiCore.gatherIntoFloating` seeds EVERY
+  member a `QuitGridLayout` target — the exit gather's own
+  function and depth, never a second grid — through the stash
+  seed once any member is partly or fully outside
+  `floatBounds(on:)`, and nothing where all are inside (owner
+  ruling 2026-09-14: the visible members staying put laid the
+  gathered ones behind them); no previous-mode list may enter
+  the decision (`FloatGather` is pure and holds the algebra).
+  The JUDGMENT takes that correctness bound — a float flush
+  with a bare screen edge, where no clamp pushes, is inside —
+  while the GRID is laid in `floatGrowBounds(on:)`, the ring
+  reserved on every edge, so the clamp has no push left to
+  make on a cell flush with a strip (`FloatGatherRegionTests`);
+  an UNSHOWN space paints no strips, so its grid meets the bar
+  at the activation's clamp, which is the stated residue.
+  `SpaceForwardingSeamTests` holds forwarding to one home by
+  the Space DROP's spelling, so a copy that moves windows and
+  leaves the Space alive is review's. The seed lands AHEAD of
+  `recoverStrandedFloats`, which defers to a pending capture,
+  so a shown corner pile takes the grid and never a second
+  centring (`FloatGatherEntryTests` ▸
+  `shownCornerPileTakesTheGrid` holds the order). **Two
+  entry seams now exist, and an entry-time effect picks by
+  what it READS**: one that reads FRAMES judges
+  `drawnSpaceModes`, the mode each space was last drawn in,
+  since the frames on screen are that layout's; one that seeds
+  STATE (#437's track partition) judges the write in
+  `setSpaceMode`; and a replay that re-states modes with no
+  pass between settles the drawn ledger rather than arming it
+  (`restore` → `settleDrawnSpaceModes`). So a space no pass has
+  drawn (the boot's) and a snapshot replay gather nothing, and
+  a config reload's reset-and-redeclare gathers nothing for
+  the reason that matters — the passes between (Lua's
+  `set_mode` retiles per call) leave in-region frames or kept
+  captures — while a RE-FILE into a floating space IS an
+  entry: a profile switch's partitioning restore and a prune's
+  forwarding (#1230) each record the WINDOW they moved at the
+  primitive (`refiledWindows`, never at the apply, since the
+  Settings-Save deletion prunes with no switch at all), and
+  the pass gathers the floating space each one SITS in — never
+  a space it merely passed through, which a prune's fallback
+  is when the restore moves the window on — so a member's
+  frame is the layout's of the Space it came from whatever the
+  receiver's own drawn mode was. A forwarding out of a dropped
+  Space goes through the ONE `forwardWindows(of:to:)`, which
+  the prune and `delete_space` share and which carries the
+  record — `SpaceForwardingSeamTests` holds the Space drop to
+  that one home, since a hand copy of the step list is how the
+  delete verb shipped without it; a re-file primitive of a NEW
+  shape records into the same set, and `refiledWindows`' own
+  docstring is where the doors ruled OUT (the move verb, the
+  away re-file) are named (`FloatGatherRepartitionTests`
+  drives the doors, the receiver-only scope and the transit; a
+  float parked half-off by hand beside a re-filed window is
+  gathered with it, the priced trade). A member's frame
+  is the one it WOULD show, `wouldBeFrame`'s four rungs, stated
+  there once. And `clampFloatsClearOfBars` judges a pending
+  capture rather than the state frame the window is leaving,
+  correcting the capture WITH the window, or a fit of the stale
+  frame lands after the restore's delivery and undoes it. A
+  NEW writer of the seed states what it seeds, why it is no
+  corner and where in the pass it lands, and joins
+  `StashSeederCensusTests`' map, which reds an unclassified
+  `seedStash(` in Core. Held by `FloatGatherTests` (the
+  decision), `FloatGatherEntryTests` (the ledger, the seed, the
+  order, the unshown arm), `FloatGatherRegionTests` (the two
+  regions and the strip), `FloatGatherRepartitionTests` (the
+  re-file arm) and `FloatClampPendingCaptureTests`.
+- **A restore pays an untracked window's frame at its arrival
+  (#1362).** The replay sets frames on TRACKED windows only; a
+  slow app's window adopted later kept the boot scan's tile on
+  the main display while its Space, a floating one on the
+  other display, assigned nothing. `restore` files
+  `state.restoredFrames` for every untracked id `adopt`
+  remembered (a corner record is no original there either);
+  the create fold consumes it ONCE into
+  `AppliedEffects.restoredFrame`, and `payRestoredFrame` seeds
+  it — never sets it, since the park that follows would capture
+  the tile as the original — so the arrival retile's restore
+  delivers it on a shown Space and the park keeps it for the
+  activation; a layout frame outranks it on a tiled Space. It
+  is id-keyed like `rememberedSpaces` and shares its lifetime
+  and its rekey (`WindowRekeyParityTests` counts it). The
+  screen-home stand-down stays on the FLAG by ruling: a
+  floating-mode member returning on another display follows
+  the screen — the flag travels with the window and survives a
+  re-file, while floating-mode membership is the space's and is
+  exactly what a re-file changes (`FloatFlagReaderCensusTests`,
+  whose `ruledToStay` class is the site's census entry). Held
+  by `RestoredFrameDebtTests`.
 - **Derive where a float may sit in ONE place, and bound its
   SIZE there rather than its position** (#1091). `KiwiCore.floatBounds` is that derivation — the
   display's visible bounds with every PAINTED strip carved off

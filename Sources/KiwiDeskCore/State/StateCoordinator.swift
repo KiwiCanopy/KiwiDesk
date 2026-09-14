@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Applies `KiwiEvent`s to the state managers (`WindowManager`,
@@ -35,6 +36,13 @@ public struct StateCoordinator: Sendable {
 
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
+
+    /// The snapshot frame of a restored window not yet tracked
+    /// (#1362), beside its `.restored` Space above — the arrival
+    /// fold consumes it once, since a later return is not the
+    /// restore's to place. Shares that memory's lifetime and its
+    /// #152 exposure; a new `restore` refiles the whole map.
+    var restoredFrames: [WindowID: CGRect] = [:]
 
     /// The slot a departed window held (#1207): a return re-inserts
     /// by this rank, so a Desktop's row comes back in the order it
@@ -105,6 +113,9 @@ public struct StateCoordinator: Sendable {
         workspaces.rekey(old, to: new)
         if let space = rememberedSpaces.removeValue(forKey: old) {
             rememberedSpaces[new] = space
+        }
+        if let frame = restoredFrames.removeValue(forKey: old) {
+            restoredFrames[new] = frame
         }
         if let slot = departedSlots.removeValue(forKey: old) {
             departedSlots[new] = slot

@@ -3583,6 +3583,97 @@ now spares every id the away ledger knows — the id is the same
 window when it returns — so the centring stays what it is meant
 to be, the net beneath a memory that is genuinely gone.
 
+:::unreleased
+**A space entering floating mode gathers what the previous
+layout left off-screen, scoped by visibility (#1177).**
+[Principle] A floating layout assigns nothing, so a space
+switched to it keeps the frames its last layout drew — and
+scrolling's scrolled-out columns and monocle's parked pile are
+drawn out of reach on purpose. Switching to floating therefore
+lost windows behind the visible ones or off the screen, which
+the owner ruled crucial and frequent (2026-09-09). The rule is
+TRIGGERED by what is VISIBLE, never by which layout came before:
+a member partly or fully outside the space's float region trips
+it, and with every member inside nothing moves. A plain
+tiled→floating switch then never trips it, monocle and scrolling
+are covered without a mode matrix, and partly-outside counts
+(owner ruling 2026-08-31) because a sliver on screen is not a
+reachable window. Once tripped, EVERY member takes the quit
+gather's grid
+([#197](https://github.com/KiwiCanopy/KiwiDesk/issues/197)) —
+the exit's own function and depth, so a retune of the exit
+retunes this. The issue had the visible members staying put; the
+device showed why not (owner ruling 2026-09-14): two untouched
+columns beside a grid of the rest read as a mess, and the
+gathered windows laid exactly behind one another. The whole-space
+grid is what keeps a pile of columns findable rather than stacked
+at one edge, and it is laid inside the grow bound
+— the painted strips carved off and the focus ring's reach
+reserved on every edge — so no gathered frame lands under a bar
+and the clamp has nothing left to push; the judgment itself
+takes the correctness bound, or a float flush with a bare screen
+edge would count as outside.
+
+*An entry is a change in what was DRAWN, not in what was
+written.* The retile keeps the mode each space was last drawn
+in and gathers where the live mode is floating and the drawn
+one was not. That is the difference between a switch and a
+replay: a config reload resets every mode and re-declares it
+with no pass between, a session restore re-states a mode whose
+entry was gathered when it happened, and the boot's first pass
+meets spaces no pass has drawn — in each the frames are the
+user's, and a gather would have dragged in a float parked
+half-off by hand, which the retile-time fit already refuses to
+do. A RE-FILE is an entry without a mode change: a profile
+switch's partitioning and a dropped Space's forwarding
+([#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230))
+hand a floating space windows whose frames are the layout's of
+the Space they came from, whatever the receiving space was drawn
+in — so each re-file records the window it moved and the next
+pass gathers the floating space that window sits in, never one
+it merely passed through; a float the user parked half-off by
+hand beside it comes in too, the priced trade. Delivery rides the stash seed, the
+#1352 door, for its
+reason: one path, delivered by the pass's own restore on a
+shown space and kept by the park for the activation on an
+unshown one; and it is seeded ahead of the strand net so a
+monocle pile at the corner takes the grid, never a second
+centring. The bar clamp learned to judge a pending capture
+rather than the state frame it is leaving, since a fit of the
+stale frame landed after the delivery and undid it.
+
+**A restore pays a window it could not set at that window's
+arrival (#1362).** [Principle] The session restore replays
+frames onto tracked windows, and a slow app's window is not
+tracked yet when it runs — so it was adopted later into its
+remembered Space carrying the frame the boot scan had tiled it
+at, on the main display, while its Space was a floating one on
+the other display, which assigns nothing. Two fixes were on the
+table: re-anchor the late adoption proportionally onto its
+Space's display, or keep the snapshot record and pay it at the
+arrival the way a Desktop return pays its owed focus
+([#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)).
+The second is the rule: it restores the exact frame rather than
+a proportional one, it covers a float on the SAME display whose
+frame the scan changed, and it needs no display arithmetic. The
+frame rides beside the `.restored` Space memory and shares its
+lifetime, is consumed once at the first arrival, and is paid
+through the stash seed so the arrival retile delivers it where
+the Space is shown and the park keeps it where it is not.
+
+*The screen-home stand-down stays on the float flag.* The
+#1286 sweep deferred one reader here: `screenHome` re-files a
+window returning on another display into that display's shown
+Space, standing down for a flag float. The discriminator is
+what a re-file changes: the flag travels with the window and
+survives one, so a flag float keeps its home wherever it lands;
+floating-mode membership is the SPACE's, and is exactly what the
+re-file rewrites. So a floating-mode member follows the screen
+by ruling — standing down would keep a home whose layout
+assigns no frame on a display the window is not on, which is
+this issue's strand by another door.
+:::
+
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
 frame the instant it turns floating, so `make_floating` /

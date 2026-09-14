@@ -116,12 +116,14 @@ extension StateCoordinator {
     mutating func forgetAway(_ id: WindowID) {
         awayWindows[id] = nil
         rememberedSpaces[id] = nil
+        restoredFrames[id] = nil
         departedSlots[id] = nil
     }
 
     /// Clears all remembered space associations (`CGWindowID`, #634).
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
+        restoredFrames = [:]
         departedSlots = [:]
         awayWindows = [:]
     }

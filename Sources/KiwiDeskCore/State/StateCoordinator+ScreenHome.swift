@@ -13,6 +13,9 @@ extension StateCoordinator {
     /// up so the create fold can hand in the record STATE holds
     /// (#671's rule): the float and sticky restores run before it
     /// asks.
+    ///
+    /// The float arm reads the FLAG by ruling (#1362, the
+    /// `EffectiveFloat` roster carries the argument).
     func screenHome(
         of window: ManagedWindow,
         leaving home: SpaceID?,

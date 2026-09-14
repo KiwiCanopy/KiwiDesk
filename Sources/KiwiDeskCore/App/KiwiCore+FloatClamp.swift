@@ -172,20 +172,30 @@ extension KiwiCore {
             guard let workspace = state.workspaces[space]
             else { continue }
             for id in workspace.windows {
+                // A pending capture is where the restore pass just
+                // sent the window (#1352/#1177); the state frame is
+                // the one it is leaving, and a fit of THAT would
+                // land after the delivery and undo it. Judge the
+                // capture, and correct it with the window so the
+                // echo consumes it (#412).
+                let pending = tiler.stashOriginal(id)
                 guard let window = state.windows[id],
                     let clamped = floatFitCorrection(
                         id,
-                        frame: window.frame,
+                        frame: pending ?? window.frame,
                         in: workspace
                     )
                 else { continue }
                 guard
                     shouldIssueFloatFit(
                         id,
-                        current: window.frame,
+                        current: pending ?? window.frame,
                         fitted: clamped
                     )
                 else { continue }
+                if pending != nil {
+                    tiler.seedStash(id, frame: clamped)
+                }
                 tiler.applyFrame(
                     id,
                     from: window.frame,

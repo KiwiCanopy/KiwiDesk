@@ -44,6 +44,11 @@ extension KiwiCore {
             healTrackSessionWeights()
             healSplitFloors()
         }
+        // A space entering floating mode inherits the previous
+        // layout's frames (#1177): seed the out-of-bounds members
+        // a gather target, ahead of the strand net so a corner
+        // pile takes the grid rather than one centre.
+        gatherIntoFloating()
         // A float whose capture was lost while parked has
         // nothing to place it (#1352): seed a centred one here
         // so the pass's own restore delivers it — one delivery
