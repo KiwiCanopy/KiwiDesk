@@ -148,6 +148,8 @@ extension KiwiCore {
         extra.formUnion(config.spaceModes.keys)
         extra.formUnion(config.spacePins.keys)
         extra.formUnion(config.mainSpaces)
+        // A seed the draft declares is the user's now (#1175).
+        retireHealedSpaces(declared: inList.union(extra))
         for space in config.spaces {
             state.workspaces.ensureSpace(space)
         }

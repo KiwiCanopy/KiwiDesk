@@ -56,6 +56,8 @@ extension KiwiCore {
             clearSessionRatios { $0 = SessionRatios() }
         }
         let declared = profile.declaredSpaces
+        // A seed this profile declares is its own now (#1175).
+        retireHealedSpaces(declared: declared)
         // Seed live order from the profile's stored list so
         // creation order matches display order. Using
         // orderedSpaces (never the declaredSpaces Set) means
@@ -211,6 +213,8 @@ extension KiwiCore {
         // profile's name at the next switch. Standing the name
         // down is this door's too, not its caller's (#1249).
         recordLivePartitioning()
+        // A seed the Standard plans is its own now (#1175).
+        retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = composed.settings
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {

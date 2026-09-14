@@ -57,7 +57,11 @@ struct SecondarySwitchTests {
         // Without the #888 arm, applyDesktopBinding would
         // snap the manually-loaded profile back to "Bound".
         #expect(core.profiles.currentName == "Loaded")
-        #expect(core.desktopMemory.virtualSpaces.isEmpty)
+        // The MAIN Desktop's memory is untouched. B's own left
+        // Desktop IS remembered — #1230 ruling 3, since the #1175
+        // heal gives B a Space where this fixture left it none —
+        // and that write is `SecondaryDisplaySpaceTests`'.
+        #expect(core.desktopMemory.virtualSpaces[.number(1)] == nil)
     }
 
     @Test("A main-display switch still applies the binding")

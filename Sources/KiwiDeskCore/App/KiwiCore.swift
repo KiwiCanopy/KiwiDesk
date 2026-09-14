@@ -87,35 +87,14 @@ public final class KiwiCore {
     /// `requestZOrderRestoreAfterDispatch`; reset each dispatch.
     var deferredCommandZOrderRestore = false
 
-    /// What the layout sub-API's *one* trailing `retile` may
-    /// promise about this dispatch's sizing (#593). The whole
-    /// `stack.*` / `bsp.* `/ `scroll.* ` surface shares that single
-    /// retile, and its members differ: a ratio write re-divides
-    /// room among windows already placed, while `set_master_count`
-    /// or `set_limit` reassign slots wholesale. So the ratio
-    /// writers raise this where they write, and `layoutCommand`
-    /// consumes it — the `deferredCommandZOrderRestore` shape
-    /// directly above, for the same reason.
-    ///
-    /// Set at the write, not from a list of command names in this
-    /// file: the names come in global/`_override` pairs, and a
-    /// list has to enumerate that cross product from somewhere
-    /// the maintainer adding a knob never looks. It shipped one
-    /// round with exactly that bug — `bsp.set_ratio_h` marked,
-    /// `bsp.set_ratio_h_override` not, same knob, two animations.
-    ///
-    /// **Reset at dispatch entry, not on consume.** A failed
-    /// command returns before the retile, so a consume-only reset
-    /// would leave this raised for the *next* dispatch and animate
-    /// an unrelated `set_mode` as a promised pass.
-    ///
-    /// **One reader, and it must stay one.** `layoutCommand`'s
-    /// trailing retile is the only consumer, and it sits
-    /// downstream of that entry reset — which is the whole reason
-    /// a stale raise cannot escape. The raise helper is
-    /// `internal`, so a second reader anywhere in the module would
-    /// observe a raise left by a dispatch whose retile never ran.
-    /// Do not add one.
+    /// What the layout sub-API's one trailing `retile` may
+    /// promise about this dispatch's sizing (#593). Raised by
+    /// the ratio writers where they WRITE — never from a list of
+    /// command names, which once missed an `_override` twin —
+    /// reset at dispatch ENTRY, since a failed command returns
+    /// before the retile, and consumed by `layoutCommand`'s
+    /// trailing retile alone; a second reader would observe a
+    /// raise left by a dispatch whose retile never ran.
     var commandSizing: BatchSizing = .mayInstantSize
 
     /// A scrolling focus move whose AX raise is waiting for
@@ -287,6 +266,12 @@ public final class KiwiCore {
     /// Spaces assigned the *Main* role — they follow whatever
     /// display is currently main (#36).
     var mainSpaces: Set<SpaceID> = []
+    /// The space the empty-display heal seeded per monitor
+    /// fingerprint (#1175), so a pin reset that did not prune
+    /// re-pins the same seed instead of minting another. Session
+    /// state, retired where a declaration adopts the seed
+    /// (`retireHealedSpaces`) and by the #634 reset.
+    var healedSpaces: [String: SpaceID] = [:]
     /// The live arrangement's explicit rehome target (#68) —
     /// adopted from the active profile, edited by the GUI, and
     /// captured back on save. nil falls back to the space

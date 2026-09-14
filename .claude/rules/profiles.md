@@ -491,6 +491,64 @@ nearly was that symptom: applying a palette writes its colours
 into `gui.json`, so the current *look* travelled while the saved
 *library* would have been left behind.
 
+## A screen is never left with zero spaces (#1175)
+
+A connected screen the space→display resolution leaves empty
+gets one numbered space seeded — in `StarterAllocation`'s lead
+layout for that screen, pinned to it so the next resolve keeps
+it — by `healEmptyDisplays`. Heal, never refuse; the argument is
+`docs/design-decisions.md` ▸ Profiles ▸ *A screen left with no
+space is healed*. The obligations:
+
+- **A relocation ends in the heal.** The total resolve carries
+  it at its tail, before relocation is judged for the float
+  re-anchor, so a reused seed the precedence sent to main and
+  the heal sent back has not moved (`EmptyDisplayHealSeamTests`
+  ▸ `healPrecedesTheReanchor` holds the order, since no unit
+  fixture can observe the re-anchor); `move_space_to_display`,
+  the one verb that relocates beside the resolve on purpose,
+  calls it itself. A new relocation path routes through the
+  resolve or calls the heal — `EmptyDisplayHealSeamTests` ▸
+  `healHasTwoCallers` is the census of who may spell it.
+- **The ledger names the heal's seed, and a declaration retires
+  it.** `healedSpaces` is keyed by monitor fingerprint, written
+  by the heal file and cleared by the #634 reset
+  (`EmptyDisplayHealSeamTests` ▸ `ledgerHasTwoWriterFiles`). A pin
+  reset that did not prune — a re-dock onto the live profile's
+  own set, which rewrites `spacePins` with no apply; a config
+  reload, which re-applies the live profile un-pruned — re-pins
+  the earlier seed rather than minting another
+  (`EmptyDisplayHealTests` ▸ `reapplyReusesTheSeed`). A path
+  that DOES prune — an explicit `load_profile`, or any profile
+  CHANGE, a Desktop binding included — drops the seed with every
+  other undeclared space and the heal seeds afresh
+  (`EmptyDisplayHealTests` ▸ `profileDoorSeeds`). And every
+  apply door — the profile, the composed Standard, the GUI draft
+  — calls `retireHealedSpaces(declared:)` with the set it makes
+  authoritative (`EmptyDisplayHealSeamTests` ▸
+  `retireHasThreeCallers` is the census), because a Keep or a
+  Settings Save captures the seed like any live space: once
+  declared it is the user's, and the heal seeds BESIDE it rather
+  than pulling it back over their placement
+  (`EmptyDisplayHealTests` ▸ `declaredSeedRetires`). The one
+  door where the seed fares worse than a peer is the re-dock
+  onto the live profile's own set, which resets pins with no
+  apply: the reuse re-asserts the lead, so a `set_mode` on the
+  seed is lost there — accepted.
+- **Twins stand down.** Two screens with one fingerprint are the
+  standing pin limitation (`docs/accepted-limitations.md`); the
+  heal mints once for the pair and refuses to mint again for the
+  twin the pin cannot reach (`EmptyDisplayHealTests` ▸
+  `twinsMintOnce`) — while a seed that keeps its screen's pin
+  but was moved off by hand is the user's, and that screen owes
+  a fresh one (`EmptyDisplayHealTests` ▸ `movedSeedIsTheUsers`).
+- **A fixture that connects two screens and gives one no space
+  is asserting on a state the heal removes** — a whole-map
+  emptiness assertion downstream of the resolve reads the seed
+  as a phantom, so assert per key instead, as
+  `SecondarySwitchTests` ▸ `secondaryNeverSelects` does since
+  #1175.
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by
