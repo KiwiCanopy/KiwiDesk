@@ -237,12 +237,16 @@ What the fields' own notes do not say:
 - **Scrolling** — its focus animation and duration live here,
   not in Colors & Animations.
 - **Track** — the track shortcuts sit in Shortcuts ▸ Move
-  windows, behind "Move windows in the track layout" — open
-  from the start once you have a Track Space or a track
-  shortcut bound. Previous is the column to the left (or the
-  row above), next the column to the right (or the row below),
+  windows. Previous is the column to the left (or the row
+  above), next the column to the right (or the row below),
   whichever way the axis runs.
   Track sizes and in-track shares are session-only.
+
+:::unreleased
+The track shortcuts sit behind "Move windows in the track
+layout", open from the start once you have a Track Space or a
+track shortcut bound.
+:::
 
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or a stack

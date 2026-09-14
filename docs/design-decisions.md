@@ -1564,6 +1564,7 @@ caption" — since #678 turn 10 every layout card does — but that
 Track's own says what the others' do not: that this layout is
 the harder one. Reword it and the guidance goes with it.
 
+:::unreleased
 *Amended 2026-09-14 (#1440):* the shortcut half of that copy
 moved from a subheader caption ("only relevant if you're using
 the track layout") to the rows' own drawer — Shortcuts ▸ Move
@@ -1575,6 +1576,7 @@ shut, and a user with a Track space or a Track binding meets it
 open. What changed is where the sentence lives; the title now
 carries it, so a caption restating it inside the drawer was
 struck (owner ruling 2026-09-14).
+:::
 
 **The overflow track is read-time, not stored (#192, 2026-07-12):**
 when there are more tracks than the space's normal capacity, the
@@ -6765,6 +6767,7 @@ nothing, so the two declarations are refused by the search index
 on that same capability, the way a bridge-gated census row
 already is.
 
+:::unreleased
 The second instance (#1440, owner ruling 2026-09-14) is the
 Track shortcut families, one drawer below the Desktop one in
 Move windows, and it settles two things the first did not have
@@ -6781,6 +6784,7 @@ and a Desktop row is the escape into macOS's — was argued by
 design review and is defensible; the owner ruled audience size,
 and the reason is stated so the order is a decision rather than
 an accident.)
+:::
 
 **Overrides always resolve; the Simple/Power User mode never
 changes what runs.** There is no stored flag deciding whether a profile's
