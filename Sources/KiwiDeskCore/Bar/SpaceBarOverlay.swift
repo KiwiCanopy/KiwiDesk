@@ -44,11 +44,7 @@ public final class SpaceBarOverlay {
             focusInOverflow = false
         }
 
-        /// The Space this item stands for; nil for the layer item.
-        var space: SpaceID? {
-            if case .space(let id) = identity { return id }
-            return nil
-        }
+        var space: SpaceID? { identity.space }
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
@@ -97,6 +93,13 @@ public final class SpaceBarOverlay {
     /// arrow zone or a scrolled-off item is never a drop target.
     var hitStrip: CGRect = .zero
     var hitFrames: [(space: SpaceID, frame: CGRect)] = []
+    /// Section rule after the layer item (#1169).
+    let layerDivider: NSView = {
+        let view = NSView()
+        view.wantsLayer = true
+        view.isHidden = true
+        return view
+    }()
     // Optional trailing front-app segment (#293).
     let frontBox = NSView()
     let frontDivider = NSView()

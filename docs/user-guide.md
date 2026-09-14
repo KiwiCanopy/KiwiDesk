@@ -430,8 +430,8 @@ informational.
 
 :::unreleased
 While a shortcut layer other than `default` is active, its icon
-leads the bar, ahead of the Spaces — the same icon the menu bar
-shows ([Shortcut Layers](#shortcut-layers)).
+— or two letters of its name when it has none — leads the bar,
+ahead of the Spaces ([Shortcut Layers](#shortcut-layers)).
 :::
 
 The bar shows the Desktop you are looking at: a window on a macOS
@@ -793,7 +793,7 @@ settings and keeps your custom Lua live.
 ### Shortcut Layers
 
 The **+** beside the layer chips defines a layer: a name, an
-optional menu bar icon, and bindings that shadow the base
+optional icon, and bindings that shadow the base
 shortcuts while it is active. Every layer gets its own `⌃⌥K`
 row. Switch layers with `KiwiDesk.switch_layer` ([Lua
 reference](lua-reference.md)). Editing a stored profile puts

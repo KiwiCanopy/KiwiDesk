@@ -14,6 +14,13 @@ final class SpaceBarItemView: NSView {
     enum Identity: Equatable {
         case space(SpaceID)
         case layer(String)
+
+        /// The Space the item selects; nil for a layer item —
+        /// the one projection every Space-keyed channel asks.
+        var space: SpaceID? {
+            if case .space(let id) = self { return id }
+            return nil
+        }
     }
 
     /// App glyph run in space item (#293 stage 2, #294, #414, #445).
@@ -50,11 +57,7 @@ final class SpaceBarItemView: NSView {
     var isLastInRun = false
 
     private(set) var identity = Identity.space(SpaceID("1"))
-    /// The Space this item selects; nil for a layer item.
-    var space: SpaceID? {
-        if case .space(let id) = identity { return id }
-        return nil
-    }
+    var space: SpaceID? { identity.space }
     private(set) var spaceGlyph = Identifier.text(
         "?",
         tinted: true
@@ -162,6 +165,9 @@ final class SpaceBarItemView: NSView {
         if self.identity != identity {
             cancelSpringSweep()
             isDragHovered = false
+            // A pointer resting on the Space this slot drew must
+            // not leave its hover fill under the layer glyph.
+            isHovered = false
         }
         self.identity = identity
         self.spaceGlyph = spaceGlyph

@@ -14,7 +14,9 @@ import Testing
 struct SpaceBarLayerRefreshTests {
     /// A core showing a Space Bar over one Space on the host's
     /// main screen; nil where the host has none to paint on.
-    private func makeBarredCore() -> KiwiCore? {
+    private func makeBarredCore(
+        resolvingSpaces: Bool = true
+    ) -> KiwiCore? {
         guard let screen = NSScreen.main,
             let display = screen.kiwiDisplay
         else { return nil }
@@ -27,7 +29,9 @@ struct SpaceBarLayerRefreshTests {
         // Pin the display rather than inherit it (#531).
         core.tiler.visibleBounds = { _ in screen.frame }
         core.state.apply(.displaysChanged([display]))
-        core.resolveSpaceDisplays(mainID: display.id)
+        if resolvingSpaces {
+            core.resolveSpaceDisplays(mainID: display.id)
+        }
         core.tiler.settings.spaceBarStyle.enabled = true
         core.tiler.settings.spaceBarStyle.edge = .top
         core.tiler.settings.spaceBarStyle.thickness = 40
@@ -62,5 +66,21 @@ struct SpaceBarLayerRefreshTests {
         #expect(Array(during.dropFirst()) == before)
         core.keys.switchLayer("default")
         #expect(identities(core) == before)
+    }
+
+    /// The layer never draws a bar of its own: a screen with no
+    /// Space item stays bare under an active layer.
+    @Test(
+        "a screen with no Spaces draws no bar for the layer",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func noSpacesNoBar() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let core = try #require(makeBarredCore(resolvingSpaces: false))
+        try #require(core.spaceBars.shownDisplays.isEmpty)
+        core.keys.defineLayer("resize", bindings: [:])
+        core.keys.switchLayer("resize")
+        #expect(core.spaceBarLayerItem() != nil)
+        #expect(core.spaceBars.shownDisplays.isEmpty)
     }
 }

@@ -201,10 +201,15 @@ extension KiwiCore {
                 tinted: true
             )
         }
-        return .text(
-            String(id.raw.prefix(2)).uppercased(),
-            tinted: true
-        )
+        return Self.monogram(id.raw)
+    }
+
+    /// The two-character uppercase cut a named Space and an
+    /// icon-less layer share (#1169).
+    static func monogram(
+        _ name: String
+    ) -> SpaceBarItemView.Identifier {
+        .text(String(name.prefix(2)).uppercased(), tinted: true)
     }
 
     /// A configured icon as a bar glyph — a Space's or a layer's
@@ -238,16 +243,11 @@ extension KiwiCore {
         guard layer != KeybindingManager.defaultLayer else {
             return nil
         }
-        let glyph: SpaceBarItemView.Identifier
-        if let icon = keys.icon(for: layer), !icon.isEmpty {
-            glyph = Self.iconGlyph(icon)
-        } else {
-            // An icon-less layer takes the Space monogram's cut.
-            glyph = .text(
-                String(layer.prefix(2)).uppercased(),
-                tinted: true
-            )
-        }
-        return SpaceBarOverlay.Item(layer: layer, glyph: glyph)
+        let icon = keys.icon(for: layer) ?? ""
+        return SpaceBarOverlay.Item(
+            layer: layer,
+            glyph: icon.isEmpty
+                ? Self.monogram(layer) : Self.iconGlyph(icon)
+        )
     }
 }

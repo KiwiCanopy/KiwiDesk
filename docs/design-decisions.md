@@ -6921,19 +6921,21 @@ better than finger-twister chords.
 preference** (#1169, owner ruling 2026-09-14). A press on the
 wrong layer does something surprising, so both surfaces that
 can say which layer is live say it: the menu bar's status item
-swaps to the layer's icon (#603), and the Space Bar leads its
-run with the layer's glyph — one item ahead of the Spaces,
+swaps to the layer's icon (#68 §6.4), and the Space Bar leads
+its run with the layer's glyph — one item ahead of the Spaces,
 drawn and announced like any other, that is no click, drag or
-drop target and never the active slot. `default` has no icon by
-ruling and is the bar's resting shape, so the item exists only
-while another layer is active: the bar grows by one item on the
-switch and shrinks back on the return. The issue ruled one
-bool, "show layer in Space Bar", on 2026-08-31; that was
-re-ruled off once the item took this self-hiding shape, because
-the switch would then only let the bar *lie* about the layer
-while it was on — the same argument that made the menu bar
-always-on — and a setting owes a census row, a Settings row, a
-locale round and, later, a migration for any default flip.
+drop target and never the active slot. `default` takes no icon
+(Lua reference ▸ Layer Icons) and is the bar's resting shape,
+so the item exists only while another layer is active: the bar
+grows by one item on the switch and shrinks back on the return,
+with the same 2 pt full-depth rule between it and the first
+Space that stands between the last Space and the front-app
+segment. There is no "show layer in Space Bar" switch: with it
+off, the bar's resting shape would read as `default` while
+another layer is live — the truthfulness argument that keeps
+the menu bar always-on — and a setting owes a census row, a
+Settings row, a locale round and, on any later default flip, a
+migration.
 A layer with no icon draws the same two-letter monogram a Space
 with a non-numeric name does, so a layer never disappears from
 the bar for lack of one. Both surfaces read the one
