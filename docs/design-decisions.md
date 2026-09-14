@@ -5573,9 +5573,8 @@ shouts. This does not reopen the #678 Phase 4 pass 11 ruling
 that moved the tour's default action off Open Settings: that
 ruling was about handing a new user the whole Settings window
 to dig through, and this button lands them on one card of
-things to finish, the same shape as the tour's own steps — the
-guide-link entry below still governs the closing card's other
-pointer. It is also why the card sits LAST on Home, after
+things to finish, the same shape as the tour's own steps. It is
+also why the card sits LAST on Home, after
 General: the tour carries discovery, Home carries return visits,
 and a checklist most people finish once is the right card to
 orphan where the Whole App row wraps. A habit that names a macOS
@@ -5593,8 +5592,8 @@ For a long time nothing in KiwiDesk named the written guide at
 all. A user who finished the tour and later wanted to make the
 setup theirs had to find the site on their own.
 
-**What the tour's closing card gave up to make room for it is the
-more interesting half.** That card used to end on a quiet
+**What the tour's closing card gave up when #1019 put the pointer
+there is the more interesting half.** That card used to end on a quiet
 paragraph — "Settings is where you change any of this — different
 keys, more Spaces, other colours. If this is your first tiling
 manager, you do not need it today" — above a footer offering
@@ -5617,7 +5616,7 @@ Before this the card said four things about where to go next, and
 two of them argued with each other in the reader's field of view:
 Settings is where you change everything, you do not need
 Settings, open Settings, start using it. Removing the fork beats
-re-wording it. What remains is the button and one link.
+re-wording it. What remained was the button and the pointer.
 
 **Dropping the tour's Open Settings link EXTENDS the #678 Phase 4
 pass 11 ruling rather than contradicting it.** That pass moved
@@ -5636,15 +5635,14 @@ Since #1365 the default action lands on the Mac Checklist card;
 that is not the Open Settings link coming back.
 :::
 
-**The pointer is in two places, and the second is the one that
-matters most.** Home's first-run banner reaches someone who
-closed the tour early, or finished it months ago and is in
-Settings for the first time — and it is ONE-SHOT, retiring
-permanently on dismiss or on the first save, so a user who
-dismissed the welcome, or simply saved one change, had no route
-to the guide anywhere in the app. That is the gap this entry is
-about, not a nicety on top of it, and only a permanent pointer
-closes it.
+**The banner is one-shot, so only a permanent pointer closes the
+gap.** Home's first-run banner reaches someone who closed the
+tour early, or finished it months ago and is in Settings for the
+first time — and it retires permanently on dismiss or on the
+first save, so a user who dismissed the welcome, or simply saved
+one change, had no route to the guide anywhere in the app. That
+is the gap this entry is about, not a nicety on top of it, and
+only a permanent pointer closes it.
 
 :::unreleased
 That permanent pointer is the Mac Checklist's foot (#1365,
