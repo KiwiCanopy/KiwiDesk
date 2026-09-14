@@ -48,6 +48,14 @@
 # PRs arrive. dismiss_stale_reviews was dropped as near-inert at 0
 # required approvals.
 #
+# required_status_checks.strict = true is the one ordering rule:
+# a PR merges only from a branch that is up to date with main, so
+# the CI run on the PR head IS the run on the merged result. A
+# merge-queue ruleset stood in for it from 2026-08-30 to
+# 2026-09-14 and was retired for costing more wall-clock than it
+# saved (owner ruling); do not bring it back without that ruling
+# being reversed, and keep strict true while it is gone.
+#
 # Status checks are listed by JOB NAME and must match
 # .github/workflows/ci.yml. This is the setting that finally makes
 # CI block rather than report (#532).

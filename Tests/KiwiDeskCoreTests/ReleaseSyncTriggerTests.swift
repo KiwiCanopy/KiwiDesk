@@ -24,7 +24,8 @@ import Testing
 /// Since #1154 was reopened all three gates are measured, on
 /// v1.1.2's #1191: CI never reported (the dispatch fixes that),
 /// the bot's own workflows sat at "Approve and run", and the
-/// merge queue never took the auto-merge the bot armed. Only a
+/// merge queue of the day never took the auto-merge the bot
+/// armed. Only a
 /// token belonging to a real actor clears the second and third,
 /// so the job threads ONE token through the push, the PR and
 /// the arming, and the dispatch — which exists only because
@@ -38,8 +39,8 @@ import Testing
 /// and not the credential; whether the FALLBACK's `gh pr create`
 /// is permitted at all, which also needs the repo-level "Allow
 /// GitHub Actions to create and approve pull requests" setting;
-/// and whether the merge queue takes what was armed. Only a real
-/// release answers the last.
+/// and whether GitHub takes the auto-merge that was armed. Only
+/// a real release answers the last.
 @Suite("Release sync trigger")
 struct ReleaseSyncTriggerTests {
     /// The step that opens, starts and arms, by its own name.

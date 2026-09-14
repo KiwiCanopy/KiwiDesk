@@ -5,8 +5,8 @@ import Testing
 /// apart because that file reached the 350-line ceiling.
 ///
 /// The dispatch fixed one of three gates. The other two — the
-/// bot's own runs held at "Approve and run", and a merge queue
-/// that will not take an auto-merge a bot armed — are cleared
+/// bot's own runs held at "Approve and run", and the merge queue
+/// of the day refusing an auto-merge a bot armed — are cleared
 /// by a real actor's token and by nothing in a workflow file,
 /// so the job must thread ONE token through the push, the PR
 /// and the arming, and must not leak it to a step that does not
