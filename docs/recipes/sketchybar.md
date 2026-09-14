@@ -66,6 +66,7 @@ any of them to keep sketchybar in sync:
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears (`new`/`returned`/`restored`) |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` | A managed window disappears (`closed`/`minimized`/`hidden`/`vanished`); `desktop` names the Desktop holding a `vanished` window, else `nil` |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` | See caveats |
+| `layer_change` | `from`, `to` | The active keyboard layer changes (layer names, `default` included) |
 
 **Caveats:**
 

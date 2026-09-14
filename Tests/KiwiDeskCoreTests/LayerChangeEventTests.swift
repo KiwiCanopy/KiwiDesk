@@ -61,38 +61,38 @@ struct LayerChangeEventTests {
         core.keys.switchLayer("resize")
         let payloads = layerEvents(events)
         #expect(payloads.count == 1)
-        #expect(payloads.first?["from"] == .string("default"))
-        #expect(payloads.first?["to"] == .string("resize"))
+        #expect(payloads.first?["from_layer"] == .string("default"))
+        #expect(payloads.first?["to_layer"] == .string("resize"))
         #expect(core.lua?.global("seen") == .string("default>resize"))
 
         core.keys.switchLayer("default")
         #expect(layerEvents(events).count == 2)
-        #expect(layerEvents(events).last?["to"] == .string("default"))
+        #expect(
+            layerEvents(events).last?["to_layer"] == .string("default")
+        )
         #expect(core.lua?.global("seen") == .string("resize>default"))
     }
 
     /// No change, no event: a switch to the layer already active
-    /// and a switch to an unknown layer both stay silent — while
-    /// the GUI indicator's hook still hears the first, as it did.
+    /// and a switch to an unknown layer both stay silent.
     @Test("a no-op switch emits nothing")
     func noOpStaysSilent() {
         let core = makeCore()
         core.keys.defineLayer("resize", bindings: [:])
         var events: [(KiwiNotification, JSONValue)] = []
         core.bus.addSink { events.append(($0, $1)) }
-        var hookCalls = 0
-        core.keys.onLayerChange = { _ in hookCalls += 1 }
 
         core.keys.switchLayer("default")
         #expect(layerEvents(events).isEmpty)
-        #expect(hookCalls == 1)
         core.keys.switchLayer("nope")
         #expect(layerEvents(events).isEmpty)
-        #expect(hookCalls == 1)
+        #expect(core.keys.currentLayer == "default")
     }
 
     /// A config reload drops the layers and returns to `default`
-    /// — a switch the user did not press, reported like any other.
+    /// — a switch the user did not press, reported to the SINKS
+    /// like any other; the Lua side has just lost its callbacks,
+    /// so this channel is the IPC stream's.
     @Test("a reset from a layer reports the return to default")
     func resetReports() {
         let core = makeCore()
@@ -104,8 +104,8 @@ struct LayerChangeEventTests {
         core.keys.reset()
         let payloads = layerEvents(events)
         #expect(payloads.count == 1)
-        #expect(payloads.first?["from"] == .string("resize"))
-        #expect(payloads.first?["to"] == .string("default"))
+        #expect(payloads.first?["from_layer"] == .string("resize"))
+        #expect(payloads.first?["to_layer"] == .string("default"))
         // …and a reset already on `default` reports nothing.
         core.keys.reset()
         #expect(layerEvents(events).count == 1)

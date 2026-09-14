@@ -4220,9 +4220,11 @@ KiwiDesk.resize("y", 50)
 :::unreleased
 A layer switch is also an event: `KiwiDesk.on("layer_change",
 function(from, to) … end)` hears every change of the active
-layer — `switch_layer`, a config reload or a profile switch
-returning you to `default` — and nothing for a switch to the
-layer already active ([Events](#events)).
+layer — `switch_layer`, or a profile switch returning you to
+`default` — and nothing for a switch to the layer already
+active ([Events](#events)). A config reload returns you to
+`default` too, but it also replaces every Lua callback, so only
+the CLI event stream hears that one.
 :::
 
 #### Layer Icons

@@ -595,7 +595,7 @@ layer without polling:
 
 ```json
 {"event": "layer_change",
- "data": {"from": "default", "to": "resize"}}
+ "data": {"from_layer": "default", "to_layer": "resize"}}
 ```
 :::
 

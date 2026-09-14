@@ -5,19 +5,21 @@ import Testing
 
 /// The `layer_change` event's seams (#1168), by source scan —
 /// the behaviour half is `LayerChangeEventTests` in the Core
-/// target. Two things a behaviour test cannot see: that every
-/// switch site in the manager announces through ONE door, so a
-/// site emitting beside its switch cannot report a change the
-/// others do not; and that Core's bootstrap is what wires the
-/// seam to the emitter, since a seam nothing wires is a green
-/// suite over an event that never leaves the process.
+/// target. What a behaviour test cannot see: the manager fires
+/// its seam from ONE door, Core's bootstrap is the seam's one
+/// writer, and the GUI reads the event off the bus rather than
+/// taking a hook of its own — a second hook is the second seam
+/// for one fact this shape retired.
 @Suite("layer_change seams")
 struct LayerChangeSeamTests {
+    private static let root = SourceScan.repoRoot(from: #filePath)
+
     private func squashed(_ path: String) throws -> String {
-        let url = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(path)
         let text = SourceScan.stripComments(
-            try String(contentsOf: url, encoding: .utf8)
+            try String(
+                contentsOf: Self.root.appendingPathComponent(path),
+                encoding: .utf8
+            )
         )
         .split(whereSeparator: \.isWhitespace)
         .joined()
@@ -25,50 +27,52 @@ struct LayerChangeSeamTests {
         return text
     }
 
-    @Test("every switch site announces through the one door")
-    func oneAnnouncement() throws {
+    private func writers(
+        of needle: String,
+        under directory: String
+    ) throws -> Int {
+        var count = 0
+        for file in try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent(directory)
+        ) {
+            count += SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+            .occurrences(of: needle)
+        }
+        return count
+    }
+
+    /// The seam is FIRED in one place, so a switch site cannot
+    /// report a change the others do not.
+    @Test("the manager fires its seam from one door")
+    func oneDoor() throws {
         let manager = try squashed(
             "Sources/KiwiDeskCore/Keys/KeybindingManager.swift"
         )
-        // Three switch sites (switch, reset, replace) and the
-        // one definition.
-        #expect(manager.occurrences(of: "announce(from:") == 4)
-        // The two hooks are FIRED only inside that door.
-        #expect(manager.occurrences(of: "onLayerSwitched(") == 1)
         #expect(manager.occurrences(of: "onLayerChange(") == 1)
-        #expect(
-            manager.contains(
-                "privatefuncannounce(from:String,to:String){"
-                    + "onLayerChange(to)"
-                    + "iffrom!=to{onLayerSwitched(from,to)}}"
-            )
-        )
     }
 
-    @Test("Core wires the seam to the emitter, once")
-    func bootstrapWiresTheSeam() throws {
+    /// One writer in production, and it is the emitter's; the
+    /// GUI's indicator is a bus sink keyed on the event.
+    @Test("Core wires the seam to the emitter, and nothing else")
+    func oneWriter() throws {
         let bootstrap = try squashed(
             "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
         )
         #expect(
             bootstrap.contains(
-                "keys.onLayerSwitched={[weakself]from,toin"
+                "keys.onLayerChange={[weakself]from,toin"
                     + "self?.emitLayerChange(from:from,to:to)}"
             )
         )
-        // …and nowhere else in Core: the GUI owns the sibling
-        // `onLayerChange` hook, Core owns this one.
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDeskCore")
-        var writers = 0
-        for file in try SourceScan.swiftSources(under: root) {
-            let text = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            .split(whereSeparator: \.isWhitespace)
-            .joined()
-            writers += text.occurrences(of: "onLayerSwitched=")
-        }
-        #expect(writers == 1)
+        #expect(
+            try writers(of: "onLayerChange=", under: "Sources") == 1
+        )
+        let app = try squashed("Sources/KiwiDesk/AppDelegate.swift")
+        #expect(app.contains("guardevent==.layerChange,"))
+        #expect(!app.contains("onLayerChange"))
     }
 }

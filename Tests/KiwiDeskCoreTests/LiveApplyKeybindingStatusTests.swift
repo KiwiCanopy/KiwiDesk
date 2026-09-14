@@ -153,7 +153,7 @@ struct LiveApplyKeybindingStatusTests {
         try core.saveGuiConfig(config)
         registrar.resetCounts()
         var modeEvents: [String] = []
-        core.keys.onLayerChange = { modeEvents.append($0) }
+        core.keys.onLayerChange = { modeEvents.append($1) }
 
         var edited = config.layers
         let added = binding("alt+j", lua: "middle = true")

@@ -24,13 +24,13 @@ public final class KeybindingManager {
 
     public var lua: LuaInterpreter?
     public var onLog: @MainActor (String) -> Void = CoreLog.write
-    /// Layer change callback for GUI indicators.
-    public var onLayerChange: @MainActor (String) -> Void = {
+    /// The one layer-change seam, `(from, to)`, fired only when
+    /// the layer actually changed. Core wires it to the
+    /// `layer_change` event (#1168); everything else — the menu
+    /// bar's icon included — listens on the bus.
+    var onLayerChange: @MainActor (String, String) -> Void = {
+        _,
         _ in
-    }
-    /// The event seam (#1168): `(from, to)`, fired only when the
-    /// layer actually changed; Core wires it to `layer_change`.
-    public var onLayerSwitched: @MainActor (String, String) -> Void = { _, _ in
     }
 
     public private(set) var currentLayer = defaultLayer
@@ -142,11 +142,8 @@ public final class KeybindingManager {
         announce(from: previous, to: name)
     }
 
-    /// The one announcement of a layer switch: the GUI hook on
-    /// every call, the event only on a real change.
     private func announce(from: String, to: String) {
-        onLayerChange(to)
-        if from != to { onLayerSwitched(from, to) }
+        if from != to { onLayerChange(from, to) }
     }
 
     /// Resets all layers and releases Lua references on config reload.

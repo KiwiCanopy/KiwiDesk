@@ -62,14 +62,15 @@ extension KiwiCore {
         id.map { .string($0) } ?? .null
     }
 
-    /// The active keyboard layer switched (#1168): `from` and
-    /// `to` are layer names, `default` included.
+    /// The active keyboard layer changed (#1168): layer names,
+    /// `default` included, on the `from_layer` / `to_layer`
+    /// keys the `_space_id` pair set the shape of.
     func emitLayerChange(from: String, to: String) {
         bus.emit(
             .layerChange,
             data: .object([
-                "from": .string(from),
-                "to": .string(to),
+                "from_layer": .string(from),
+                "to_layer": .string(to),
             ]),
             luaArgs: [.string(from), .string(to)]
         )
