@@ -222,8 +222,11 @@ GLOSSARY = {
     "dock",
     "esc",
     "finder",
+    "manager",  # "Stage Manager" (#1365)
     "mission",
     "sf",  # "SF Symbol"
+    "spotlight",
+    "stage",  # "Stage Manager" (#1365)
     "symbol",
     "symbols",
     # Layout-mode names, for the locales that keep one in Latin

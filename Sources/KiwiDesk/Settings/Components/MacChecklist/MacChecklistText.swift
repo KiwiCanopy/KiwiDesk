@@ -14,7 +14,7 @@ enum MacChecklistText {
     static var pathLabel: String {
         L(
             "mac_checklist.path.desktop_dock",
-            "System Settings \u{25B8} Desktop & Dock"
+            "System Settings ▸ Desktop & Dock"
         )
     }
 
@@ -72,8 +72,7 @@ enum MacChecklistText {
                 "mac_checklist.double_click_title.caption",
                 "KiwiDesk snaps a zoomed window back into its slot, "
                     + "so a double-click costs you only the round "
-                    + "trip \u{2014} \u{201C}Do nothing\u{201D} spares "
-                    + "you that. %1$@",
+                    + "trip — None spares you that. %1$@",
                 slot
             )
         case .habitHide, .habitBigWindows, .habitKeyboard,
@@ -90,21 +89,21 @@ enum MacChecklistText {
         case .habitHide:
             return L(
                 "mac_checklist.habit.hide.caption",
-                "Hiding (\u{2318}H, \u{2318}M, the yellow light) takes "
+                "Hiding (⌘H, ⌘M, the yellow light) takes "
                     + "a window out of the tiling and out of macOS\u{2019}s "
                     + "own bookkeeping. Keep what you\u{2019}ll reuse open "
-                    + "on another Space \u{2014} switch there, or pull it "
-                    + "over with %1$@ \u{2014} and close only what "
-                    + "you\u{2019}re done with: \u{2318}W closes the "
-                    + "window, \u{2318}Q quits the app (the red light and "
-                    + "Dock \u{25B8} right-click \u{25B8} Quit do the same).",
+                    + "on another Space — switch there, or pull it "
+                    + "over with %1$@ — and close only what "
+                    + "you\u{2019}re done with: ⌘W closes the "
+                    + "window, ⌘Q quits the app (the red light and "
+                    + "Dock ▸ right-click ▸ Quit do the same).",
                 L("shortcuts.app_behavior.open_or_focus", "Open or Focus")
             )
         case .habitBigWindows:
             return L(
                 "mac_checklist.habit.big_windows.caption",
                 "%1$@ shows one window at full size and %2$@ gives "
-                    + "each window as much width as you want \u{2014} set "
+                    + "each window as much width as you want — set "
                     + "a Space to either in %3$@. The green button works "
                     + "too, but it opens a macOS Space of its own, "
                     + "outside your KiwiDesk Spaces.",
@@ -130,7 +129,7 @@ enum MacChecklistText {
             return L(
                 "mac_checklist.habit.dock.caption",
                 "With the %1$@ on, the Dock only costs screen space "
-                    + "\u{2014} auto-hide it in Desktop & Dock and launch "
+                    + "— auto-hide it in Desktop & Dock and launch "
                     + "by Spotlight or %2$@.",
                 L("bars.switch.space_bar", "Space Bar"),
                 L("shortcuts.app_behavior.open_or_focus", "Open or Focus")
@@ -182,7 +181,7 @@ enum MacChecklistText {
     static var unreadable: String {
         L(
             "mac_checklist.unreadable",
-            "KiwiDesk couldn\u{2019}t read this one \u{2014} tick it "
+            "KiwiDesk couldn\u{2019}t read this one — tick it "
                 + "once you\u{2019}ve set it. %1$@",
             CrossReferenceRow.linkSlot
         )

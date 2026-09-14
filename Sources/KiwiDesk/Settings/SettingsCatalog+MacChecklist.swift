@@ -1,8 +1,10 @@
 /// Mac Checklist declarations (#1365): three section cards and
 /// one control per census row, keyed on the row's census label
 /// key so the census hit resolves to the row (#1250). Titles
-/// quote Apple's own labels verbatim, so a locale reaches for
-/// Apple's translation (`config-vocabulary.md`).
+/// quote Apple's own labels verbatim — as macOS 26.6 renders
+/// them (`DesktopSettings.appex`'s `Localizable.loctable`,
+/// 2026-09-14), so a locale reaches for Apple's translation
+/// (`config-vocabulary.md`).
 struct MacChecklistControls: Sendable {
     let essentialsCard = SettingsControl(
         "mac_checklist.essentials.title",
@@ -24,8 +26,8 @@ struct MacChecklistControls: Sendable {
     )
     let edgeTiling = SettingsControl(
         "mac_checklist.edge_tiling",
-        "Turn off \u{201C}Tile by dragging windows to screen "
-            + "edges\u{201D}"
+        "Turn off \u{201C}Drag windows to left or right edge of "
+            + "screen to tile\u{201D}"
     )
     let optionalCard = SettingsControl(
         "mac_checklist.optional.title",
@@ -33,13 +35,13 @@ struct MacChecklistControls: Sendable {
     )
     let clickWallpaper = SettingsControl(
         "mac_checklist.click_wallpaper",
-        "Set \u{201C}Click wallpaper to reveal desktop\u{201D} to "
+        "Set \u{201C}Click wallpaper to show desktop\u{201D} to "
             + "Only in Stage Manager"
     )
     let doubleClickTitle = SettingsControl(
         "mac_checklist.double_click_title",
-        "Set \u{201C}Double-click a window\u{2019}s title bar to\u{201D} "
-            + "to Do nothing"
+        "Set \u{201C}Window title bar double-click action\u{201D} "
+            + "to None"
     )
     let habitsCard = SettingsControl(
         "mac_checklist.habits.title",
@@ -47,7 +49,7 @@ struct MacChecklistControls: Sendable {
     )
     let habitHide = SettingsControl(
         "mac_checklist.habit.hide",
-        "Move it or close it \u{2014} don\u{2019}t hide it"
+        "Move it or close it — don\u{2019}t hide it"
     )
     let habitBigWindows = SettingsControl(
         "mac_checklist.habit.big_windows",

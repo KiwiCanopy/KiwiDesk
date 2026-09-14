@@ -153,7 +153,7 @@ extension OnboardingView {
     private var doneFootnote: String {
         L(
             "onboarding.ready.checklist_footnote",
-            "%1$@ opens Settings at %2$@ \u{2014} a short list of "
+            "%1$@ opens Settings at %2$@ — a short list of "
                 + "your Mac\u{2019}s own settings that fight a tiler, "
                 + "each with where to find it.",
             L("onboarding.ready.start", "Start using it"),
