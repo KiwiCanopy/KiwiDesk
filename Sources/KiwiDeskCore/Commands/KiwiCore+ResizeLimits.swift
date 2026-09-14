@@ -33,6 +33,18 @@ extension KiwiCore {
         )
     }
 
+    /// Whether the window's learned app floor, not the
+    /// configured `min_window_size`, is what its effective
+    /// minimum resolves to (#1261) — the discriminator the
+    /// minimum pills carry. The ONE derivation: every clamp
+    /// measured against `effectiveMinSize`, so this is the same
+    /// question at each of them, and the refusal builders ask
+    /// it rather than each call site answering by hand.
+    func minimumIsAppBound(of id: WindowID, axis: String) -> Bool {
+        effectiveMinSize(of: id, axis: axis)
+            > Double(tiler.settings.minWindowSize)
+    }
+
     /// One window's learned app-enforced maximum on `axis`
     /// (#1055) — `effectiveMinSize`'s mirror, with one
     /// asymmetry: there is no configured global maximum the way

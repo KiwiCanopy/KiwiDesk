@@ -51,25 +51,46 @@ extension ResizeRefusal {
     /// The sentence the pill draws on `window`. `@MainActor`
     /// because `L()` is — Core draws its own overlays and this
     /// is one of them (core-boundaries.md's allow-list).
+    ///
+    /// A limit the APP enforces names the app (#1261): the
+    /// differentiating fact is the remedy — a KiwiDesk floor
+    /// can be lowered or a neighbour moved, an app's own
+    /// minimum or maximum cannot — and that is the one
+    /// distinction the glyph cannot carry, so it rides the
+    /// sentence. The learned-maximum reading is ALWAYS the app:
+    /// no configured global maximum exists the way
+    /// `min_window_size` floors the minimum. Each sentence
+    /// also holds with no press behind it, since the
+    /// neighbour pair is drawn by a retile too (#934).
     @MainActor
     var pillText: String {
         switch self {
-        case .ownMinimum:
-            L(
-                "resize.min_size_reached",
-                "Minimum window size reached"
-            )
-        case .neighborMinimum:
-            L(
-                "resize.neighbor_min_size",
-                "Neighboring window at its minimum size"
-            )
+        case .ownMinimum(_, _, let appBound):
+            appBound
+                ? L(
+                    "resize.app_min_reached",
+                    "This app won't go smaller"
+                )
+                : L(
+                    "resize.min_size_reached",
+                    "Minimum window size reached"
+                )
+        case .neighborMinimum(_, _, _, let appBound):
+            appBound
+                ? L(
+                    "resize.neighbor_app_min",
+                    "Neighboring app won't go smaller"
+                )
+                : L(
+                    "resize.neighbor_min_size",
+                    "Neighboring window at its minimum size"
+                )
         case .ownMaximum(_, _, let atBoundary):
             atBoundary
                 ? L("resize.boundary_reached", "No room left to grow")
                 : L(
-                    "resize.max_size_reached",
-                    "Maximum window size reached"
+                    "resize.app_max_reached",
+                    "This app won't go bigger"
                 )
         case .noAxisHere(_, let axis):
             axis == "y"
@@ -119,10 +140,11 @@ extension ResizeRefusal {
     @MainActor
     var secondPill: (window: WindowID, text: String)? {
         switch self {
-        case .neighborMinimum(let anchor, _, let axis):
+        case .neighborMinimum(let anchor, _, let axis, let appBound):
             let mark = ResizeRefusal.ownMinimum(
                 anchor,
-                axis: axis
+                axis: axis,
+                appBound: appBound
             )
             return (anchor, mark.pillText)
         default:

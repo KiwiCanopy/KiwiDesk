@@ -1138,8 +1138,13 @@ further would otherwise bank size you cannot see, and every
 press of it would have to be undone before shrinking did
 anything. Nor past a *maximum* the focused window's app itself
 enforces, once KiwiDesk has learned it (#1055): that refusal
-bounces and pills ("Maximum window size reached"), where the
-fits-on-screen stop stays wordless.
+bounces and pills, where the fits-on-screen stop stays wordless.
+
+:::unreleased
+The pill names the app ("This app won't go bigger", #1261): no
+setting caps a window's maximum, so that limit is only ever the
+app's, and the sentence says where the remedy is not.
+:::
 
 Setting a size *here* is not clamped that way: a config value
 travels with you between screens, so if you set a slot wider
@@ -4081,6 +4086,14 @@ that cannot shrink — and on a refused grow the resized
 window additionally names the reason while the blocking
 neighbor marks itself at its minimum. Keyboard
 and mouse resizes share these clamps and cues.
+
+:::unreleased
+The pill also says *whose* minimum it was (#1261): "Minimum
+window size reached" and "Neighboring window at its minimum
+size" mean `min_window_size` bound, and lowering it helps; "This
+app won't go smaller" and "Neighboring app won't go smaller" mean
+the app's own learned floor bound, which no setting moves.
+:::
 
 In **bsp**, the window that cannot shrink is often not the one
 you are resizing (#1259). A window holding the whole height —

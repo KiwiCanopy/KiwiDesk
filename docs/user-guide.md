@@ -333,8 +333,7 @@ there bounces the ring; the window never moves. A refused resize
 bounces and shows a frosted pill:
 
 - *Minimum window size reached* — the window can shrink no
-  further (the configured minimum, or a larger one the app
-  enforces).
+  further than the configured minimum.
 - *Neighboring window at its minimum size* — growing stopped
   where a neighbour would drop below its minimum; the neighbour
   marks itself.
@@ -343,8 +342,15 @@ bounces and shows a frosted pill:
   It also shows once, without a press, when a window arriving in
   a split cannot fit beside a neighbour already at its minimum.
   :::
-- *Maximum window size reached* — on a scrolling space, a learned
-  app maximum (System Settings will not grow past its own width).
+
+:::unreleased
+Where the limit is the **app's own** — a minimum or maximum the
+app enforces, which KiwiDesk learns — the pill says so instead:
+*This app won't go smaller*, *Neighboring app won't go smaller*,
+and on a scrolling space *This app won't go bigger* (System
+Settings will not grow past its own width). Lowering the
+configured minimum does not move those; only the app can.
+:::
 
 Running out of screen is a silent stop. Under a held resize
 shortcut, a refusal shows its pill once and ends the glide.

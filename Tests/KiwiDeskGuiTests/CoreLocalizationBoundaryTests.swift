@@ -85,14 +85,15 @@ struct CoreLocalizationBoundaryTests {
         // authored in ONE renderer keyed by the refusal's own
         // case rather than in whichever `refuse*` function a call
         // site picked — which is why the count sits on the type's
-        // file and the funnel's file holds none: own-minimum,
-        // neighbor-minimum, the two own-maximum readings (learned
-        // bound and screen edge), the two no-axis-here readings,
-        // the two nothing-to-divide readings,
-        // layout-has-no-resizing and window-is-fullscreen
-        // (#1298). Same caveat as `+StickyMarks` if the overlays
-        // ever move out of Core.
-        "Commands/ResizeRefusal+Rendering.swift": 10,
+        // file and the funnel's file holds none: the two
+        // own-minimum and two neighbor-minimum readings (the
+        // configured floor and the app's, #1261), the two
+        // own-maximum readings (learned bound and screen edge),
+        // the two no-axis-here readings, the two
+        // nothing-to-divide readings, layout-has-no-resizing and
+        // window-is-fullscreen (#1298). Same caveat as
+        // `+StickyMarks` if the overlays ever move out of Core.
+        "Commands/ResizeRefusal+Rendering.swift": 12,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901), drawn by Core; the fourth

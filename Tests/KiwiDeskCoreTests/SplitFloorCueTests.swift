@@ -83,7 +83,12 @@ struct SplitFloorCueTests {
         core.retile()
         #expect(
             refusals == [
-                .neighborMinimum(anchor: w2, focused: w1, axis: "x")
+                .neighborMinimum(
+                    anchor: w2,
+                    focused: w1,
+                    axis: "x",
+                    appBound: true
+                )
             ]
         )
         let ratio = core.tiler.settings.resolvedBsp(
@@ -115,7 +120,12 @@ struct SplitFloorCueTests {
         #expect(refusals.count == 2)
         #expect(
             refusals.last
-                == .neighborMinimum(anchor: w2, focused: w1, axis: "x")
+                == .neighborMinimum(
+                    anchor: w2,
+                    focused: w1,
+                    axis: "x",
+                    appBound: true
+                )
         )
     }
 
@@ -175,7 +185,12 @@ struct SplitFloorCueTests {
         core.retile()
         #expect(
             refusals == [
-                .neighborMinimum(anchor: w1, focused: w2, axis: "x")
+                .neighborMinimum(
+                    anchor: w1,
+                    focused: w2,
+                    axis: "x",
+                    appBound: true
+                )
             ]
         )
         #expect(
