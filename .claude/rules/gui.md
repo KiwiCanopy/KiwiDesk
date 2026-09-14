@@ -341,11 +341,14 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts, Profiles, Monitors and Behaviour render from it now**
-(#678 Phases 2-3): each
+Layouts, Profiles, Monitors, Behaviour and the Mac Checklist
+render from it now** (#678 Phases 2-3; #1365): each
 carries its own order list and a census-render suite pinning that
-order to the census (`MonitorsRowOrder` /
-`MonitorsCensusRenderTests` is the newest pair), so a row in a
+order to the census (`MacChecklistRowOrder` /
+`MacChecklistCensusRenderTests` is the newest pair; its
+`bespokeContainers` is empty, and `MacChecklistCensusRenderTests`
+▸ `containersWalkTheirLists` holds that every container walks its
+list), so a row in a
 `ForEach`-rendered container moves by editing the census — with
 the bespoke edge below. This bold list is itself a hand-kept
 claim with no guard,
@@ -729,7 +732,12 @@ must keep:
   `com.apple.symbolichotkeys` at the GUI boundary
   (`SystemShortcutEnablement`; Core stays a pure description of
   chords, and an absent plist entry falls back to the shipped
-  default), injected per model so no suite reads the host.
+  default), injected per model so no suite reads the host. A
+  further host-preference read takes that same shape — a
+  GUI-boundary enum behind a `SettingsModel` seam that
+  `makeTestModel` pins inert — and `MacSettingReadTests` ▸
+  `seamPolarity` is the census of who may spell
+  `CFPreferencesCopyAppValue(` (#1365).
   #1094's first fix wired only one of the aggregate readers, so
   a new aggregate surface routes through that accessor — or
   `disabledSystemShortcuts()` for the per-shortcut half — rather

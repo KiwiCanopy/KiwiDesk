@@ -169,6 +169,22 @@ final class SettingsModel: ObservableObject {
     var readSymbolicHotkey: (Int) -> Bool? =
         SystemShortcutEnablement.liveRead
 
+    /// Injectable live read of one Mac Checklist setting (#1365);
+    /// `makeTestModel` injects `.absent` so no suite reads the
+    /// host's Desktop & Dock preferences.
+    var readMacSetting: (MacSetting) -> MacSettingRaw =
+        MacSettingRead.liveRead
+
+    /// The checklist's last read, one snapshot so the Home card
+    /// and the section count the same rows
+    /// (`SettingsModel+MacChecklist`).
+    @Published var macChecklistStates: [MacSetting: MacSettingState] = [:]
+    /// Rows the user ticked because macOS would not answer — the
+    /// published mirror of `UserDefaults.mac_checklist.ticks`,
+    /// seeded at init and written beside the store
+    /// (`setMacChecklistTick`), the `settingsMode` shape.
+    @Published var macChecklistTicks: Set<MacSetting> = []
+
     /// True when macOS Accessibility is missing; drives
     /// `PermissionPausedBanner`.
     @Published var permissionPaused = false
@@ -210,6 +226,7 @@ final class SettingsModel: ObservableObject {
         self.settingsMode = SettingsModePreference.read(
             from: preferences
         )
+        self.macChecklistTicks = Self.storedTicks(in: preferences)
         self.appearance = AppearancePreference.read(
             from: preferences
         )

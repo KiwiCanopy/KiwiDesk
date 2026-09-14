@@ -64,7 +64,9 @@ struct SettingsCatalogSiteTests {
         // 65 since #1307: the Liquid Glass card.
         // 73 since #1250: General ▸ Advanced's eight rows.
         // 74 since #1440: the Track drawer.
-        #expect(names.count == 74)
+        // 88 since #1365: the Mac Checklist's three cards and
+        // eleven rows, each row keyed on its census label key.
+        #expect(names.count == 88)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

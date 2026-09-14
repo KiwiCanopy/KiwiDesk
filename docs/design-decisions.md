@@ -5510,6 +5510,92 @@ correct failure here — the screen without the sentence is exactly
 the screen that shipped before it, while the sentence with a
 rebound keymap behind it teaches someone else's keyboard.
 
+### The Mac Checklist counts what macOS can confirm
+
+**[Principle]**
+
+:::unreleased
+**A checklist row is a change made ONCE that can be found DONE —
+by macOS, read live, or only where macOS would not answer, by
+the user's own tick. A habit is kept, never found done, so it
+is prose and joins no count.** The card (#1365, owner re-ruling
+2026-09-13, `ui-designer` 2026-09-14) exists because a tiling
+window manager works best when a few macOS settings change with
+it, and a list with a number gets walked where a guide section
+gets skimmed. The number is the point, and it is only worth
+walking if it is true.
+
+Three rulings follow, and each has a shape someone will want to
+undo:
+
+- **The count is the essentials, and nothing else.** Two
+  settings are optional (the wallpaper click, the double-click
+  zoom — a preference the app can already absorb), and they
+  draw their own "Set" / "Not yet" chip but move no number:
+  folded in, "3 of 6" reads as half-broken on a Mac where every
+  essential is set, and a second count puts two numbers on one
+  card face. Nor does a habit take a "got it" checkbox that
+  counts — a pledge is not a fact, and a count built partly on
+  pledges is a card that is not an answer (gui.md ▸ Home).
+  `MacChecklistProgress` is the one home of the count; the card
+  face and the section header both read it. The card face draws the
+  essentials as the rows' own ticks — the filled check and the
+  hollow ring, same inks — never a chart of the number: a row of
+  squares shipped for an evening and read as a bar graph, and a
+  bare face sat shorter than every other Whole App card (owner,
+  2026-09-14). The subtitle carries the spoken count; the ticks
+  are hidden from VoiceOver like every other card preview.
+- **Detected rows are chips, not controls; the self-tick is the
+  FALLBACK.** macOS answers these rows, so the tick is not the
+  user's to toggle, and greying a checkbox would say "switch
+  something on and I act" (gui.md ▸ grey, don't hide) about a
+  thing nothing in KiwiDesk switches. Where a read comes back
+  in a shape this build does not know, the row turns into a
+  native checkbox with a caption that says so — never a false
+  "Not yet", since a detected tick that lies is worse than a
+  self-tick, and a count that can never clear never motivates
+  (#1094). Absence is the shipped default and is judged as
+  such; `MacSetting` carries the absent values as read on
+  macOS 26.6, and a macOS that moves one moves that table.
+- **The rows are read at the shell, not at the card.** One
+  snapshot on the model, taken when Settings appears and again
+  when the window comes forward, so the Home card and the
+  section count the same read and a user who flips a switch in
+  System Settings and comes back sees the row update — the
+  `LoginItemCard` shape. KiwiDesk writes none of these settings —
+  they are the user's, and a tiler that flips them is the thing
+  this list warns about (#1365, alternatives considered): the
+  caption's link opens the pane, and the
+  breadcrumb carries the rest, because sub-pane anchors are
+  undocumented and move between releases.
+
+What is deliberately NOT on the card: *Displays have separate
+Spaces* (both states are supported and the app does not ask you
+to change it — the Desktops row is descriptive, never
+prescriptive), a KiwiDesk to-do ("find your palette, add a
+Space") whose items are mostly undetectable and would turn the
+count into a tour score, and how-to tricks, which are the
+guide's. And the tour's last button now lands on this card: a
+user who pressed "Start using it" used to land on nothing, and
+the card reaches a new user only if the tour hands them to it
+— so the first thing they see is "Essentials done: 0 of 4",
+which is why the count is essentials only and the card never
+shouts. This does not reopen the #678 Phase 4 pass 11 ruling
+that moved the tour's default action off Open Settings: that
+ruling was about handing a new user the whole Settings window
+to dig through, and this button lands them on one card of
+things to finish, the same shape as the tour's own steps — the
+guide-link entry below still governs the closing card's other
+pointer. It is also why the card sits LAST on Home, after
+General: the tour carries discovery, Home carries return visits,
+and a checklist most people finish once is the right card to
+orphan where the Whole App row wraps. A habit that names a macOS
+switch — the Dock — links the pane the way the settings rows do,
+and the keyboard habit names the shortcuts panel's LIVE chord,
+read from the resolved layer like the tour's keys, with a second
+frame for a Mac where nothing is bound.
+:::
+
 ### The app links the guide, in a language the site actually serves
 
 **[Rationale]**
@@ -5555,6 +5641,12 @@ they will still be using on day 30, against a one-time button in
 a window that never returns — the tour reopens FROM Settings, and
 `KiwiDesk.open_settings()` is bindable.
 
+:::unreleased
+Since #1365 the default action lands on the Mac Checklist card;
+▸ *The Mac Checklist counts what macOS can confirm* argues why
+that is not the Open Settings link coming back.
+:::
+
 **The pointer is in three places, and the third is the one that
 matters most.** The tour's closing card reaches someone who has
 just run the tour; Home's first-run banner reaches someone who
@@ -5567,6 +5659,11 @@ one change, had no route to the guide anywhere in the app. That
 is the gap this entry is about, not a nicety on top of it, and
 only a permanent pointer closes it: General ▸ About, beside the
 links already there.
+
+:::unreleased
+A fourth since #1365: the Mac Checklist's foot draws the same
+sentence, for the reader the tour just sent there.
+:::
 
 The two sentence-shaped surfaces share ONE frame and one label,
 because the same English names the same action at both. About

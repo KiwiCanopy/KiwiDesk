@@ -23,6 +23,7 @@ enum SettingsCatalog {
     static let shortcuts = ShortcutsControls()
     static let appRules = AppRulesControls()
     static let general = GeneralControls()
+    static let macChecklist = MacChecklistControls()
 
     /// Descriptor for a layout mode tab in settings.
     static func layoutMode(_ mode: LayoutMode) -> SettingsControl {
@@ -46,6 +47,7 @@ enum SettingsCatalog {
         case .shortcuts: return shortcuts
         case .appRules: return appRules
         case .general: return general
+        case .macChecklist: return macChecklist
         }
     }
 

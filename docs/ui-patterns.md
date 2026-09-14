@@ -404,6 +404,15 @@ it would add and remove a line on every toggle, in the space
 the drawer's own contents occupy. The ruling is in
 `docs/design-decisions.md`.
 
+:::unreleased
+**A section header's trailing readout is words only.** A
+`SettingsSection` takes `trailing:` — a short value at the
+title's far edge, drawn in `ink2` at `.subheadline`, the Mac
+Checklist's "Done: 2 of 4" — and never a control: an accessory
+that acts needs a name and a value of its own, which is the
+drawer accessory's job above.
+:::
+
 **Weigh every title edit against the search index.** Search
 indexes destination titles, every census-labelled setting row
 (`SettingsSearchIndex`, one row per `SettingKey`) and the

@@ -71,6 +71,9 @@ final class OnboardingModel {
     /// testable without touching `SMAppService`.
     var onSetLoginItem: (Bool) -> Void = { _ in }
     var onOpenSettings: () -> Void = {}
+    /// The closing page's ONE exit (#1365): ends the tour inside
+    /// Settings, at the Mac Checklist — the card reaches a new
+    /// user only if the tour hands them to it.
     var onFinish: () -> Void = {}
     /// The seeded spaces, in order, each with its layout and the
     /// screen it landed on.

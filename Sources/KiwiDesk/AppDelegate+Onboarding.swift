@@ -44,7 +44,7 @@ extension AppDelegate {
             PermissionMonitor.openSystemSettings()
         }
         onboardingModel.onFinish = { [weak self] in
-            self?.closeOnboarding()
+            self?.openSettingsFromTour(at: .macChecklist)
         }
         // Registers login item via SMAppService (#342).
         onboardingModel.onSetLoginItem = { enabled in
@@ -105,10 +105,15 @@ extension AppDelegate {
         onboardingWindow?.close()
     }
 
-    /// Opens Settings to shortcuts and closes onboarding to avoid
-    /// leaving a floating window above Settings.
-    func openShortcutsSettings() {
-        dashboard.show(navigatingTo: .shortcuts)
+    /// Opens Settings at `destination` and THEN closes the tour
+    /// if one is open, in that order so no floating tour window
+    /// is left above Settings; the close still runs
+    /// `windowWillClose`, so the banner seed and the discovery
+    /// mark fire (`OnboardingCloseSeamTests`). Two callers: the
+    /// closing page's exit (#1365) and the shortcuts panel's
+    /// Edit door, which is why the close is conditional.
+    func openSettingsFromTour(at destination: SettingsDestination) {
+        dashboard.show(navigatingTo: destination)
         if onboardingWindow != nil {
             closeOnboarding()
         }

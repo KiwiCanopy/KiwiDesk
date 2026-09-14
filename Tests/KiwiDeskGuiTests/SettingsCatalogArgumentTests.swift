@@ -52,6 +52,14 @@ struct SettingsCatalogArgumentTests {
         // mount's `keys:` / `drawer:` pair is pinned by
         // `ShortcutsTrackOfferTests`.
         "TrackShortcutsOffer.swift: drawer",
+        // The Mac Checklist's two row views take their
+        // declaration as a parameter, handed down by the
+        // section's `ForEach` over the census order list through
+        // ONE `control(for:)` switch (#1365) — every row, one
+        // mount, which `MacChecklistCensusRenderTests` pins
+        // beside the dotted-reference sweep.
+        "MacSettingRow.swift: control",
+        "MacHabitRow.swift: control",
     ]
 
     /// Sanctioned literal-`L()` `SettingsSection` titles —
@@ -165,7 +173,10 @@ struct SettingsCatalogArgumentTests {
         // self-anchor as the drawer's CHILDREN, each mounted
         // once — the first direct child mounts (the gap rows
         // reach theirs through an indirect parameter).
-        #expect(direct.values.reduce(0, +) == 61)
+        // 64 since #1365: the Mac Checklist's three section
+        // cards, each mounted once; its eleven rows reach their
+        // anchors through the indirect parameter above.
+        #expect(direct.values.reduce(0, +) == 64)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

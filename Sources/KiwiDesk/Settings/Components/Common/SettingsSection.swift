@@ -24,6 +24,10 @@ struct SettingsSection<Content: View>: View {
     let subsection: Bool
     let help: String?
     let modeGated: Bool
+    /// A short readout at the header's trailing edge — the Mac
+    /// Checklist's "2 of 4 done" (#1365). Text, not a control:
+    /// a header accessory that acts needs a name and a value.
+    let trailing: String?
     @ViewBuilder let content: Content
 
     /// Computed-title initializer for unindexed sections
@@ -35,6 +39,7 @@ struct SettingsSection<Content: View>: View {
         subsection: Bool = false,
         help: String? = nil,
         modeGated: Bool = false,
+        trailing: String? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
@@ -44,6 +49,7 @@ struct SettingsSection<Content: View>: View {
         self.subsection = subsection
         self.help = help
         self.modeGated = modeGated
+        self.trailing = trailing
         self.content = content()
     }
 
@@ -55,6 +61,7 @@ struct SettingsSection<Content: View>: View {
         subsection: Bool = false,
         help: String? = nil,
         modeGated: Bool = false,
+        trailing: String? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.title = control.text
@@ -64,6 +71,7 @@ struct SettingsSection<Content: View>: View {
         self.subsection = subsection
         self.help = help
         self.modeGated = modeGated
+        self.trailing = trailing
         self.content = content()
     }
 
@@ -174,6 +182,12 @@ struct SettingsSection<Content: View>: View {
                         explanation: help,
                         subject: title
                     )
+                }
+                if let trailing {
+                    Spacer(minLength: 8)
+                    Text(trailing)
+                        .font(.subheadline)
+                        .foregroundStyle(SettingsTheme.ink2)
                 }
             }
             if let caption {

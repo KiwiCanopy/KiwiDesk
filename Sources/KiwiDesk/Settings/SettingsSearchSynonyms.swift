@@ -78,6 +78,25 @@ enum SettingsSearchSynonyms {
             return ["focus follows mouse", "hover focus"]
         case .behaviour(.minWindowSize):
             return ["minimum size"]
+        // The checklist rows quote Apple's labels; these are the
+        // words a user types before they know the label (#1365).
+        case .macChecklist(.rearrangeSpaces):
+            return ["mission control", "desktop order", "mru"]
+        case .macChecklist(.stageManager):
+            return ["stage manager"]
+        case .macChecklist(.edgeTiling):
+            return ["snap", "window tiling", "drag to edge"]
+        case .macChecklist(.doubleClickTitle):
+            return ["zoom", "double click", "title bar"]
+        case .macChecklist(.habitHide):
+            return ["hide", "minimize", "minimise", "yellow button"]
+        case .macChecklist(.habitBigWindows):
+            return [
+                "maximize", "maximise", "green button",
+                "full screen",
+            ]
+        case .macChecklist(.habitDock):
+            return ["dock", "auto-hide dock"]
         default: return []
         }
     }

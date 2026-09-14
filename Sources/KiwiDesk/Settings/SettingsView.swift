@@ -1,3 +1,4 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
 
@@ -88,6 +89,16 @@ struct SettingsView: View {
         .onChange(of: model.destination) { _, _ in
             previewShown = nil
         }
+        // The Mac Checklist's one read (#1365), at the shell so
+        // the Home card and the section count the same snapshot:
+        // on appear, and whenever the window comes back forward
+        // from System Settings (`HomeSurfacingTests`).
+        .onAppear { model.refreshMacChecklist() }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: NSApplication.didBecomeActiveNotification
+            )
+        ) { _ in model.refreshMacChecklist() }
     }
 
     @ViewBuilder private func shell(

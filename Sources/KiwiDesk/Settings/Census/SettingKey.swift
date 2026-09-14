@@ -11,6 +11,7 @@ enum SettingKey: Hashable, CaseIterable {
     case general(GeneralKey)
     case layout(LayoutKey)
     case layoutAppBar(LayoutAppBarKey)
+    case macChecklist(MacChecklistKey)
     case monitors(MonitorsKey)
     case profiles(ProfilesKey)
     case shortcuts(ShortcutsKey)
@@ -27,6 +28,7 @@ enum SettingKey: Hashable, CaseIterable {
             + GeneralKey.allCases.map(Self.general)
             + LayoutKey.allCases.map(Self.layout)
             + LayoutAppBarKey.allCases.map(Self.layoutAppBar)
+            + MacChecklistKey.allCases.map(Self.macChecklist)
             + MonitorsKey.allCases.map(Self.monitors)
             + ProfilesKey.allCases.map(Self.profiles)
             + ShortcutsKey.allCases.map(Self.shortcuts)
@@ -46,6 +48,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .general(let k): return k.rawValue
         case .layout(let k): return k.rawValue
         case .layoutAppBar(let k): return k.rawValue
+        case .macChecklist(let k): return k.rawValue
         case .monitors(let k): return k.rawValue
         case .profiles(let k): return k.rawValue
         case .shortcuts(let k): return k.rawValue
@@ -65,6 +68,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .general(let k): return k.placement
         case .layout(let k): return k.placement
         case .layoutAppBar(let k): return k.placement
+        case .macChecklist(let k): return k.placement
         case .monitors(let k): return k.placement
         case .profiles(let k): return k.placement
         case .shortcuts(let k): return k.placement
@@ -84,6 +88,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .general(let k): return k.text
         case .layout(let k): return k.text
         case .layoutAppBar(let k): return k.text
+        case .macChecklist(let k): return k.text
         case .monitors(let k): return k.text
         case .profiles(let k): return k.text
         case .shortcuts(let k): return k.text

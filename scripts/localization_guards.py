@@ -224,6 +224,7 @@ GLOSSARY = {
     "finder",
     "mission",
     "sf",  # "SF Symbol"
+    "spotlight",
     "symbol",
     "symbols",
     # Layout-mode names, for the locales that keep one in Latin

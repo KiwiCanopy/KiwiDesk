@@ -20,6 +20,7 @@ enum SettingsArea: CaseIterable, Hashable {
     case profiles
     case appRules
     case general
+    case macChecklist
 
     /// The mode an area first appears in.
     var minimumMode: SettingsMode {
@@ -28,7 +29,7 @@ enum SettingsArea: CaseIterable, Hashable {
             return .powerUser
         case .layoutDefaults, .gapsAndBorders, .shortcuts,
             .coloursAndMotion, .bars, .spacesAndLayouts,
-            .profiles, .appRules, .general:
+            .profiles, .appRules, .general, .macChecklist:
             return .simple
         }
     }

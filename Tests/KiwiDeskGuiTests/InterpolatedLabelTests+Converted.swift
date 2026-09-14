@@ -232,5 +232,15 @@ extension InterpolatedLabelTests {
         // The Track drawer's `?` (#1440): names the Layout
         // Defaults pane where the layout is tuned.
         "shortcuts.tracks.help": 1,
+        // The Mac Checklist (#1365): authored interpolating from
+        // the start. Two captions name Open or Focus; the Dock
+        // habit names the Space Bar too; the big-windows habit
+        // names both layouts, its link slot uncounted as above;
+        // the tour's footnote names its own button and the card.
+        "mac_checklist.switch_on_activate.caption": 1,
+        "mac_checklist.habit.hide.caption": 1,
+        "mac_checklist.habit.big_windows.caption": 2,
+        "mac_checklist.habit.dock.caption": 2,
+        "onboarding.ready.checklist_footnote": 2,
     ]
 }
