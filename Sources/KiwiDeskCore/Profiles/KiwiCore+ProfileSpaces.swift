@@ -137,6 +137,9 @@ extension KiwiCore {
                 // away, and every other cross-space move site.
                 if from != space {
                     reanchorFloat(window, to: space)
+                    // Its frame is the other Space's layout's
+                    // (#1177).
+                    repartitionedSpaces.insert(space)
                 }
                 moved += 1
             }

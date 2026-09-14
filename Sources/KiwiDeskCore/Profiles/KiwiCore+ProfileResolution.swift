@@ -98,12 +98,7 @@ extension KiwiCore {
         // #1230: and now put this profile's own windows back into
         // its own Spaces. After the prune, so what the profile has
         // never seen is already in its `fallback_space`.
-        if switching {
-            restorePartitioning(of: profile)
-            // The members a floating space now holds carry the
-            // outgoing profile's layouts' frames (#1177).
-            membersRepartitioned = true
-        }
+        if switching { restorePartitioning(of: profile) }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
@@ -200,6 +195,8 @@ extension KiwiCore {
                 // the fallback re-translates from the seeded
                 // capture, so the order composes.
                 reanchorFloat(window, to: fallback)
+                // And its frame is the pruned layout's (#1177).
+                repartitionedSpaces.insert(fallback)
             }
             state.workspaces.removeSpace(space.id)
         }

@@ -259,10 +259,11 @@ public final class KiwiCore {
     /// The mode each space was last DRAWN in (#1177) — the
     /// entry-into-floating gather's one arm, `KiwiCore+FloatGather`.
     var drawnSpaceModes: [SpaceID: LayoutMode] = [:]
-    /// A profile switch re-filed windows across spaces since the
-    /// last pass (#1230), so every floating space's members carry
-    /// another layout's frames; the next pass gathers them all.
-    var membersRepartitioned = false
+    /// Spaces a re-file handed windows since the last pass —
+    /// a profile switch's partitioning, a prune's forwarding
+    /// (#1230) — whose members so carry another layout's frames;
+    /// the next pass gathers each one that is floating (#1177).
+    var repartitionedSpaces: Set<SpaceID> = []
 
     /// The live arrangement's space→monitor fingerprint pins,
     /// adopted from the active profile's matching monitor set

@@ -1288,13 +1288,17 @@ editing here:
   a config reload's reset-and-redeclare gathers nothing for
   the reason that matters — the passes between (Lua's
   `set_mode` retiles per call) leave in-region frames or kept
-  captures — while a SWITCHING profile apply IS an entry for
-  every floating space it declares (`membersRepartitioned`):
-  #1230 re-files windows across spaces, so a member's frame is
-  the outgoing profile's layout's whatever the space's own
-  drawn mode was (`FloatGatherEntryTests` ▸
-  `profileSwitchIsAnEntry`; a float parked half-off by hand is
-  gathered on that switch, the priced trade). A member's frame
+  captures — while a RE-FILE into a floating space IS an
+  entry: a profile switch's partitioning restore and a prune's
+  forwarding (#1230) each arm the RECEIVING space at the
+  primitive (`repartitionedSpaces`, never at the apply, since
+  the Settings-Save deletion prunes with no switch at all), so
+  a member's frame is the layout's of the Space it came from
+  whatever the receiver's own drawn mode was — a new re-file
+  primitive arms the same set (`FloatGatherRepartitionTests`
+  drives the three doors and the receiver-only scope; a float
+  parked half-off by hand is gathered on that re-file, the
+  priced trade). A member's frame
   is the one it WOULD show, `wouldBeFrame`'s four rungs, stated
   there once. And `clampFloatsClearOfBars` judges a pending
   capture rather than the state frame the window is leaving,
@@ -1305,7 +1309,8 @@ editing here:
   `StashSeederCensusTests`' map, which reds an unclassified
   `seedStash(` in Core. Held by `FloatGatherTests` (the
   decision), `FloatGatherEntryTests` (the ledger, the seed, the
-  strip, the order, the switch, the unshown arm) and
+  strip, the order, the unshown arm),
+  `FloatGatherRepartitionTests` (the re-file arm) and
   `FloatClampPendingCaptureTests`.
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a

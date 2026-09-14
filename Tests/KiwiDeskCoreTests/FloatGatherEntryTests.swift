@@ -106,15 +106,21 @@ struct FloatGatherEntryTests {
         )
     }
 
-    /// The region is `floatBounds`, so a painted strip is carved
-    /// off before the grid is laid (#1091/#242).
+    /// The region is `floatGrowBounds`: the painted strip carved
+    /// off and the ring's reach reserved before the grid is laid
+    /// (#1091/#242), so the clamp has no push left to make.
     @Test(
-        "The gathered frames clear the painted strip",
+        "The gathered frames clear the painted strip and the ring",
         .enabled(if: NSScreen.main != nil)
     )
     func gatheredFramesClearTheStrip() throws {
         let core = try #require(makeCore(mode: .scrolling))
         core.settleDrawnSpaceModes()
+        // The ring ON here, deliberately: with it off the grow
+        // bound IS the correctness bound and the clause cannot
+        // tell them apart (guard-prover).
+        core.tiler.settings.borderStyle.enabled = true
+        #expect(core.floatRingInset > 0)
         core.tiler.settings.spaceBarStyle.enabled = true
         core.tiler.settings.spaceBarStyle.edge = .top
         core.tiler.settings.spaceBarStyle.thickness = 40
@@ -144,6 +150,17 @@ struct FloatGatherEntryTests {
             targetDepth: core.tiler.settings.quitGridTargetDepth
         )
         #expect(seeded == carved[Self.scrolledOut])
+        let bare = FloatGather.targets(
+            members: [Self.inside, Self.scrolledOut, Self.partly],
+            frames: Self.frames,
+            region: try #require(core.floatBounds(on: Self.space)),
+            minSize: core.tiler.settings.minWindowSize,
+            targetDepth: core.tiler.settings.quitGridTargetDepth
+        )
+        #expect(seeded != bare[Self.scrolledOut])
+        // And the pass's own clamp sweep left the capture alone.
+        core.clampFloatsClearOfBars()
+        #expect(core.tiler.stashOriginal(Self.scrolledOut) == seeded)
     }
 
     /// The seed lands AHEAD of `recoverStrandedFloats`: a shown
@@ -181,35 +198,6 @@ struct FloatGatherEntryTests {
             #expect(core.tiler.stashOriginal(id) == grid[id])
             #expect(core.tiler.stashOriginal(id) != centred)
         }
-    }
-
-    /// A profile switch re-partitions windows into a floating
-    /// space that was ALREADY drawn floating: the members carry
-    /// the outgoing profile's layouts' frames, so the switch is
-    /// an entry (#1230).
-    @Test(
-        "A switching profile apply gathers a floating space",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func profileSwitchIsAnEntry() throws {
-        let core = try #require(makeCore(mode: .floating))
-        func profile(_ name: String) -> Profile {
-            Profile(
-                name: name,
-                monitorSets: [],
-                spaces: [Self.space],
-                spaceModes: [Self.space: .floating],
-                settings: core.tiler.settings
-            )
-        }
-        core.apply(profile: profile("A"), forceRetile: true)
-        // Drawn floating, and nothing owed on a re-apply of the
-        // live profile.
-        core.apply(profile: profile("A"), forceRetile: true)
-        #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
-        core.apply(profile: profile("B"), forceRetile: true)
-        #expect(core.tiler.stashOriginal(Self.scrolledOut) != nil)
-        #expect(!core.membersRepartitioned)
     }
 
     @Test(

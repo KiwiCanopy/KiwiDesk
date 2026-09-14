@@ -3502,14 +3502,14 @@ entry was gathered when it happened, and the boot's first pass
 meets spaces no pass has drawn — in each the frames are the
 user's, and a gather would have dragged in a float parked
 half-off by hand, which the retile-time fit already refuses to
-do. A SWITCHING profile apply is the one replay that IS an
-entry: it re-files windows across spaces
-([#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230)),
-so a floating space's members carry the outgoing profile's
-layouts' frames whatever that space was drawn in before, and
-every floating space the incoming profile declares is gathered
-— a float the user parked half-off by hand comes in on that
-switch, the priced trade. Delivery rides the stash seed, the
+do. A RE-FILE is the one thing that is an entry without a mode
+change: a profile switch's partitioning and a prune's forwarding
+([#1230](https://github.com/KiwiCanopy/KiwiDesk/issues/1230))
+hand a floating space windows whose frames are the layout's of
+the Space they came from, whatever the receiving space was drawn
+in — so each re-file arms the space it hands to, and a float the
+user parked half-off by hand comes in on that re-file, the priced
+trade. Delivery rides the stash seed, the
 #1352 door, for its
 reason: one path, delivered by the pass's own restore on a
 shown space and kept by the park for the activation on an
