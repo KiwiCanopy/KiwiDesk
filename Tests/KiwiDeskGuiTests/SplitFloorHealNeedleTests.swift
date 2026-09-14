@@ -120,6 +120,17 @@ struct SplitFloorHealNeedleTests {
                 pattern: "(if fromPress[^\\n]*onResizeRefusal)"
             ).isEmpty
         )
+        // And each press channel is spelled ONCE, so the gated
+        // spelling is the only one (guard-prover, 2026-09-14: a
+        // second ungated call beside it passed the shape pins).
+        #expect(
+            funnel.components(separatedBy: "keys.noteResizeRefusal()")
+                .count - 1 == 1
+        )
+        #expect(
+            funnel.components(separatedBy: "flashDeadEnd(").count - 1
+                == 1
+        )
     }
 
     @Test("The retile issues the placed frames; readers keep the slots")
