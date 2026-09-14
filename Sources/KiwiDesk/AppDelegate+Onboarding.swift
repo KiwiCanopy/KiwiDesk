@@ -46,6 +46,9 @@ extension AppDelegate {
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
         }
+        onboardingModel.onOpenChecklist = { [weak self] in
+            self?.openChecklistSettings()
+        }
         // Registers login item via SMAppService (#342).
         onboardingModel.onSetLoginItem = { enabled in
             LoginItemManager.setEnabled(enabled)
@@ -109,6 +112,18 @@ extension AppDelegate {
     /// leaving a floating window above Settings.
     func openShortcutsSettings() {
         dashboard.show(navigatingTo: .shortcuts)
+        if onboardingWindow != nil {
+            closeOnboarding()
+        }
+    }
+
+    /// The tour's closing exit (#1365): Settings at the Mac
+    /// Checklist, then the close — the same order as above, for
+    /// the same reason. The close still runs `windowWillClose`,
+    /// so the banner seed and the discovery mark fire as on
+    /// every other end (`OnboardingCloseSeamTests`).
+    func openChecklistSettings() {
+        dashboard.show(navigatingTo: .macChecklist)
         if onboardingWindow != nil {
             closeOnboarding()
         }

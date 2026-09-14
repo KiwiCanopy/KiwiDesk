@@ -72,6 +72,11 @@ final class OnboardingModel {
     var onSetLoginItem: (Bool) -> Void = { _ in }
     var onOpenSettings: () -> Void = {}
     var onFinish: () -> Void = {}
+    /// The closing page's exit (#1365): ends the tour INSIDE
+    /// Settings, at the Mac Checklist — after "Start using it"
+    /// the user otherwise lands on nothing, and the card reaches
+    /// a new user only if the tour hands them to it.
+    var onOpenChecklist: () -> Void = {}
     /// The seeded spaces, in order, each with its layout and the
     /// screen it landed on.
     var starterSpaces: () -> [OnboardingSpaceCard] = { [] }

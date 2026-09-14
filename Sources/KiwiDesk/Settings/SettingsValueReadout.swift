@@ -36,6 +36,10 @@ enum SettingsValueReadout {
             return layoutRows(k, old: old, new: new)
         case .layoutAppBar(let k):
             return layoutAppBarRows(k, old: old, new: new)
+        case .macChecklist:
+            // Read from macOS or the user's own tick — never a
+            // draft leaf, so nothing to narrate.
+            return []
         case .monitors(let k):
             return monitorsRows(k, old: old, new: new)
         case .profiles(let k):

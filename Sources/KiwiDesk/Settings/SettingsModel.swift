@@ -169,6 +169,17 @@ final class SettingsModel: ObservableObject {
     var readSymbolicHotkey: (Int) -> Bool? =
         SystemShortcutEnablement.liveRead
 
+    /// Injectable live read of one Mac Checklist setting (#1365);
+    /// `makeTestModel` injects `.absent` so no suite reads the
+    /// host's Desktop & Dock preferences.
+    var readMacSetting: (MacSetting) -> MacSettingRaw =
+        MacSettingRead.liveRead
+
+    /// The checklist's last read, one snapshot so the Home card
+    /// and the section count the same rows
+    /// (`SettingsModel+MacChecklist`).
+    @Published var macChecklistStates: [MacSetting: MacSettingState] = [:]
+
     /// True when macOS Accessibility is missing; drives
     /// `PermissionPausedBanner`.
     @Published var permissionPaused = false

@@ -41,12 +41,14 @@ struct HomeCardOrderTests {
     /// is the conscious-edit tripwire on the size of the
     /// first-week surface, and growing it should cost a
     /// deliberate edit here.
-    @Test("Simple offers nine cards, Power User twelve")
+    @Test("Simple offers ten cards, Power User thirteen")
     func modeCounts() {
         let simple = offered(mode: .simple, displays: 1)
         let powerUser = offered(mode: .powerUser, displays: 1)
-        #expect(simple.count == 9)
-        #expect(powerUser.count == 12)
+        // 10 / 13 since #1365: the Mac Checklist, offered in
+        // Simple — the north-star's own card.
+        #expect(simple.count == 10)
+        #expect(powerUser.count == 13)
     }
 
     /// Power User INSERTS, never reorders: Simple's sequence is
@@ -69,7 +71,7 @@ struct HomeCardOrderTests {
         )
         let promoted = offered(mode: .simple, displays: 2)
         #expect(promoted.contains(.monitors))
-        #expect(promoted.count == 10)
+        #expect(promoted.count == 11)
         // Computed at read: one display again and the card is
         // gone — nothing stored the promotion.
         #expect(
@@ -79,8 +81,10 @@ struct HomeCardOrderTests {
     }
 
     /// The #18 axis rides the same predicate: editing a stored
-    /// profile withdraws General exactly as the sidebar did.
-    @Test("editing a stored profile withdraws General")
+    /// profile withdraws General exactly as the sidebar did —
+    /// and the Mac Checklist with it (#1365), the other surface
+    /// no profile owns.
+    @Test("editing a stored profile withdraws the profileless")
     func storedProfileHidesGeneral() {
         let cards = HomeCardOrder.offered(
             HomeCardOrder.wholeApp,
@@ -89,6 +93,7 @@ struct HomeCardOrderTests {
             editingStoredProfile: true
         )
         #expect(!cards.contains(.general))
+        #expect(!cards.contains(.macChecklist))
         #expect(cards.count == 3)
     }
 

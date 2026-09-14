@@ -33,6 +33,8 @@ extension SettingsView {
             AppRulesSection(model: model)
         case .general:
             GeneralSection(model: model)
+        case .macChecklist:
+            MacChecklistSection(model: model)
         }
     }
 

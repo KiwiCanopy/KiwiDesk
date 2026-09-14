@@ -153,6 +153,11 @@ enum HomeCardContent {
                 )
             }
             return languageName
+        case .macChecklist:
+            return MacChecklistText.cardProgress(
+                done: model.macChecklistDone,
+                total: MacChecklistProgress.total
+            )
         }
     }
 

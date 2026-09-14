@@ -51,6 +51,17 @@ struct OnboardingCloseSeamTests {
             // discovery never marked, one line earlier than the
             // guard was looking (`guard-prover`, 2026-08-12).
             "window.delegate=self",
+            // The closing page's exit lands in Settings at the
+            // Mac Checklist and THEN closes (#1365) — the
+            // Shortcuts-page order, so no floating tour window
+            // is left above Settings — and the close is what
+            // reaches `windowWillClose` above; an exit that
+            // skipped it would dodge every needle here.
+            "onboardingModel.onOpenChecklist={[weakself]in"
+                + "self?.openChecklistSettings()}",
+            "funcopenChecklistSettings(){"
+                + "dashboard.show(navigatingTo:.macChecklist)"
+                + "ifonboardingWindow!=nil{closeOnboarding()}}",
         ],
         "AppDelegate.swift": [
             // "Show me around" reaches the real replay.

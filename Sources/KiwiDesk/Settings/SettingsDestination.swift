@@ -17,6 +17,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case shortcuts
     case appRules
     case general
+    case macChecklist
 
     var id: String { rawValue }
 
@@ -30,9 +31,12 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
         .bars, .colors, .advancedColors, .behavior,
     ]
-    /// Destinations scoped globally across the application.
+    /// Destinations scoped globally across the application. The
+    /// checklist is LAST here so a search for "Spaces" or "Dock"
+    /// lists KiwiDesk's own rows before macOS's (#1365) — Home
+    /// orders its cards separately (`HomeCardOrder`).
     static let wholeApp: [SettingsDestination] = [
-        .profiles, .shortcuts, .appRules, .general,
+        .profiles, .shortcuts, .appRules, .general, .macChecklist,
     ]
 
     @MainActor var title: String {
@@ -60,6 +64,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .appRules:
             return L("destination.app_rules", "App Rules")
         case .general: return L("destination.general", "General")
+        case .macChecklist:
+            return L("destination.mac_checklist", "Mac Checklist")
         }
     }
 
@@ -78,6 +84,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .shortcuts: return "keyboard"
         case .appRules: return "app.badge.checkmark"
         case .general: return "gearshape"
+        case .macChecklist: return "checklist"
         }
     }
 
@@ -108,22 +115,28 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             )
         case .appRules: return .red
         case .general: return .gray
+        case .macChecklist: return .cyan
         }
     }
 
     /// Whether destination is visible when editing a stored
-    /// profile (#18): only General is a global surface a profile
-    /// edit never writes. App Rules joined when its Space facet
-    /// grew a per-profile override (#109) — the Float facet stays
-    /// global and renders disabled there.
+    /// profile (#18): General and the Mac Checklist are global
+    /// surfaces a profile edit never writes. App Rules joined
+    /// when its Space facet grew a per-profile override (#109) —
+    /// the Float facet stays global and renders disabled there.
     var visibleWhileEditingStoredProfile: Bool {
-        self != .general
+        !Self.profileless.contains(self)
     }
 
     /// Whether destination toolbar displays profile context picker.
     var showsProfileContext: Bool {
-        self != .general
+        !Self.profileless.contains(self)
     }
+
+    /// Destinations no profile owns (#18, #1365).
+    private static let profileless: Set<SettingsDestination> = [
+        .general, .macChecklist,
+    ]
 
     /// Reachability predicate for profile editing mode (#18).
     func isReachable(editingStoredProfile: Bool) -> Bool {

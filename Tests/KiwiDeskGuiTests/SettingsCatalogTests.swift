@@ -82,7 +82,9 @@ struct SettingsCatalogTests {
         // drawer's children, so a search hit opens the drawer.
         // 80 since #1440: the Track drawer in Move windows, the
         // Track families' one search-reachable name.
-        #expect(allEntries.count == 80)
+        // 94 since #1365: the Mac Checklist's three cards and
+        // eleven rows.
+        #expect(allEntries.count == 94)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

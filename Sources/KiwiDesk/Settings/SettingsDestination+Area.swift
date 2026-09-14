@@ -19,6 +19,7 @@ extension SettingsDestination {
         case .shortcuts: return .shortcuts
         case .appRules: return .appRules
         case .general: return .general
+        case .macChecklist: return .macChecklist
         }
     }
 
@@ -38,6 +39,7 @@ extension SettingsDestination {
         case .shortcuts: self = .shortcuts
         case .appRules: self = .appRules
         case .general: self = .general
+        case .macChecklist: self = .macChecklist
         }
     }
 }

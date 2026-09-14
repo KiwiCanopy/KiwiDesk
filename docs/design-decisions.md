@@ -5510,6 +5510,69 @@ correct failure here — the screen without the sentence is exactly
 the screen that shipped before it, while the sentence with a
 rebound keymap behind it teaches someone else's keyboard.
 
+### The Mac Checklist counts what macOS can confirm
+
+**[Principle]**
+
+**A checklist row is a change made ONCE that can be found DONE —
+by macOS, read live, or only where macOS would not answer, by
+the user's own tick. A habit is kept, never found done, so it
+is prose and joins no count.** The card (#1365, owner re-ruling
+2026-09-13, `ui-designer` 2026-09-14) exists because a tiling
+window manager works best when a few macOS settings change with
+it, and a list with a number gets walked where a guide section
+gets skimmed. The number is the point, and it is only worth
+walking if it is true.
+
+Three rulings follow, and each has a shape someone will want to
+undo:
+
+- **The count is the essentials, and nothing else.** Two
+  settings are optional (the wallpaper click, the double-click
+  zoom — a preference the app can already absorb), and they
+  draw their own "Set" / "Not yet" chip but move no number:
+  folded in, "3 of 6" reads as half-broken on a Mac where every
+  essential is set, and a second count puts two numbers on one
+  card face. Nor does a habit take a "got it" checkbox that
+  counts — a pledge is not a fact, and a count built partly on
+  pledges is a card that is not an answer (gui.md ▸ Home).
+  `MacChecklistProgress` is the one function; the card face and
+  the section header both call it.
+- **Detected rows are chips, not controls; the self-tick is the
+  FALLBACK.** macOS answers these rows, so the tick is not the
+  user's to toggle, and greying a checkbox would say "switch
+  something on and I act" (gui.md ▸ grey, don't hide) about a
+  thing nothing in KiwiDesk switches. Where a read comes back
+  in a shape this build does not know, the row turns into a
+  native checkbox with a caption that says so — never a false
+  "Not yet", since a detected tick that lies is worse than a
+  self-tick, and a count that can never clear never motivates
+  (#1094). Absence is the shipped default and is judged as
+  such; `MacSetting` carries the absent values as read on
+  macOS 26.6, and a macOS that moves one moves that table.
+- **The rows are read at the shell, not at the card.** One
+  snapshot on the model, taken when Settings appears and again
+  when the window comes forward, so the Home card and the
+  section count the same read and a user who flips a switch in
+  System Settings and comes back sees the row update — the
+  `LoginItemCard` shape. KiwiDesk writes none of these settings
+  (AGENTS.md §5): the caption's link opens the pane, and the
+  breadcrumb carries the rest, because sub-pane anchors are
+  undocumented and move between releases.
+
+What is deliberately NOT on the card: *Displays have separate
+Spaces* (both states are supported and the app does not ask you
+to change it — the Desktops row is descriptive, never
+prescriptive), a KiwiDesk to-do ("find your palette, add a
+Space") whose items are mostly undetectable and would turn the
+count into a tour score, and how-to tricks, which are the
+guide's. And the tour's last button now lands on this card: a
+user who pressed "Start using it" used to land on nothing, and
+the card reaches a new user only if the tour hands them to it
+— so the first thing they see is "Essentials done: 0 of 4",
+which is why the count is essentials only and the card never
+shouts.
+
 ### The app links the guide, in a language the site actually serves
 
 **[Rationale]**

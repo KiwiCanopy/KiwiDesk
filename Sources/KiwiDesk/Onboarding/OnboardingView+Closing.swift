@@ -10,6 +10,8 @@ extension OnboardingView {
                 "You're ready to go"
             ),
             body1: doneBody,
+            footnote: doneFootnote,
+            footnoteAtBottom: true,
             hint: GuideLink.prose,
             hintLeads: true,
             hintLink: .init(
@@ -29,8 +31,10 @@ extension OnboardingView {
             .onboardingCard()
             starLine
         } action: {
-            Button(L("onboarding.ready.start", "Start using it")) {
-                model.commitLoginItemThen { model.onFinish() }
+            // The login commit stays on the ONE exit (#342); an
+            // exit that skipped it would lose the user's tick.
+            Button(startLabel) {
+                model.commitLoginItemThen { model.onOpenChecklist() }
             }
             .kiwiProminentButton()
             .keyboardShortcut(.defaultAction)
@@ -136,6 +140,24 @@ extension OnboardingView {
             "Click the KiwiDesk icon up in your menu bar to open "
                 + "Settings, where you change your layouts, "
                 + "shortcuts and everything else."
+        )
+    }
+
+    private var startLabel: String {
+        L("onboarding.ready.start", "Start using it")
+    }
+
+    /// Says where the button lands (#1365), naming the button and
+    /// the destination from their own keys (#818); no count, N
+    /// will move.
+    private var doneFootnote: String {
+        L(
+            "onboarding.ready.checklist_footnote",
+            "%1$@ opens Settings at %2$@ \u{2014} a short list of "
+                + "your Mac\u{2019}s own settings that fight a tiler, "
+                + "each with where to find it.",
+            L("onboarding.ready.start", "Start using it"),
+            SettingsDestination.macChecklist.title
         )
     }
 

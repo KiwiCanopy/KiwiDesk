@@ -341,11 +341,12 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts, Profiles, Monitors and Behaviour render from it now**
-(#678 Phases 2-3): each
+Layouts, Profiles, Monitors, Behaviour and the Mac Checklist
+render from it now** (#678 Phases 2-3; #1365): each
 carries its own order list and a census-render suite pinning that
-order to the census (`MonitorsRowOrder` /
-`MonitorsCensusRenderTests` is the newest pair), so a row in a
+order to the census (`MacChecklistRowOrder` /
+`MacChecklistCensusRenderTests` is the newest pair, and the one
+whose every container really is a `ForEach`), so a row in a
 `ForEach`-rendered container moves by editing the census — with
 the bespoke edge below. This bold list is itself a hand-kept
 claim with no guard,

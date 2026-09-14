@@ -41,6 +41,10 @@ func makeTestModel(
     // machine-independent. A suite testing the live-state seam
     // overrides `readSymbolicHotkey` per scenario.
     model.readSymbolicHotkey = { _ in nil }
+    // #1365: never read the host's Desktop & Dock preferences —
+    // `.absent` answers mean shipped defaults. A suite testing
+    // the checklist overrides `readMacSetting` per scenario.
+    model.readMacSetting = { _ in .absent }
     // #1145: pin the bridge capability FALSE, both mirrors — an
     // earlier bridge suite's `classResolverOverride` can leave
     // `WMBridge.isAvailable`'s process cache true, so the init's

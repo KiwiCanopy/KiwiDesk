@@ -7,6 +7,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case bsp
     case defaultShortcuts
     case dragAndDrop
+    case essentialSettings
     case focus
     case focusBorder
     case gaps
@@ -14,6 +15,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case generalKeys
     case glass
     case grid
+    case habits
     case appliesImmediately
     case layers
     case luaBindings
@@ -25,6 +27,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case moveWindows
     case onQuit
     case openApplications
+    case optionalSettings
     case palettes
     case perSpaceOverrides
     case pinnedToDisconnectedMonitors
@@ -60,12 +63,12 @@ enum SettingsContainer: CaseIterable, Hashable {
         case .motion:
             return .runtime(.reduceMotion)
         case .about, .advanced, .borders, .bsp, .cues,
-            .defaultShortcuts, .dragAndDrop,
+            .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .generalKeys, .grid,
-            .appliesImmediately, .layers, .luaBindings,
+            .habits, .appliesImmediately, .layers, .luaBindings,
             .monitorFingerprints, .monocle, .mouse,
             .moveWindows, .onQuit, .openApplications,
-            .palettes, .perSpaceOverrides,
+            .optionalSettings, .palettes, .perSpaceOverrides,
             .pinnedToDisconnectedMonitors, .presets,
             .profilesPerMacOSSpace, .rulesPerApp,
             .savedProfiles, .scrolling, .sizeAndFloat,
