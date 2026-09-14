@@ -186,6 +186,10 @@ public final class KiwiCore {
     /// own docs, and the one state machine mutating it, live in
     /// `KiwiCore+IgnoredPanel.swift`.
     var ignoredPanel = IgnoredPanelDistrust()
+    /// The split heal's "cannot fit" cues already drawn (#934),
+    /// per space: one pill per episode, re-armed when the window
+    /// fits again or its bound is forgotten.
+    var splitFloorCues: [SpaceID: Set<SplitFloorCue>] = [:]
 
     /// When each sticky window was last put IN FLIGHT — a carry
     /// or our own switch (#1145/#1213); `KiwiCore+StickyReach` owns it.

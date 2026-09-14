@@ -10,17 +10,19 @@ import Foundation
 /// owed, and bounds how often.
 extension KiwiCore {
     /// Whether an unsolicited resize left `id` off the frame a
-    /// SHOWN space gives it: a placed member off its slot beyond
-    /// the retile tolerance — every display's shown space, since
-    /// `calculatedFrames` places them all — or a float the bar
-    /// sweep would move. Nil from either is "not placed" and
-    /// answers no.
+    /// SHOWN space gives it: a placed member off the frame the
+    /// retile ISSUES beyond the retile tolerance — every
+    /// display's shown space, since `placedFrames` places them
+    /// all, and the issued frame rather than the slot because a
+    /// floor's residue sits inward of its slot by design (#934)
+    /// — or a float the bar sweep would move. Nil from either is
+    /// "not placed" and answers no.
     func unsolicitedResizeLeavesOffFrame(
         _ id: WindowID,
         frame: CGRect
     ) -> Bool {
-        if let slot = tiler.calculatedFrames(state: state)[id] {
-            return !TilingEngine.close(frame, to: slot)
+        if let issued = tiler.placedFrames(state: state)[id] {
+            return !TilingEngine.close(frame, to: issued)
         }
         return floatFitCorrection(id, frame: frame) != nil
     }

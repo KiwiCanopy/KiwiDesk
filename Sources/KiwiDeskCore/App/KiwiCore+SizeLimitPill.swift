@@ -12,8 +12,11 @@ extension KiwiCore {
         _ refusal: ResizeRefusal,
         text: String
     ) -> Bool {
+        // The frame the window was ISSUED (#934): a floor's
+        // residue sits inward of its slot, and the pill draws on
+        // the window.
         guard
-            let frame = tiler.calculatedFrames(state: state)[window]
+            let frame = tiler.placedFrames(state: state)[window]
                 ?? state.windows[window]?.frame
         else { return false }
         return borders.flashSizeLimitPill(
