@@ -188,6 +188,7 @@
   "colors.drag_border_off.help": "Questo elemento visivo non disegna alcun bordo. Attiva Bordo in %1$@.",
   "colors.drag_fill_off.help": "Questo elemento visivo non disegna alcun riempimento. Attiva Riempimento in %1$@.",
   "colors.drag_off.help": "Questo elemento visivo è disattivato, quindi i suoi colori non vengono disegnati. Attivalo in %1$@.",
+  "colors.focused_item_inert.help": "«%1$@» è impostato su «%2$@», quindi «%3$@» non colora nulla. In %4$@, scegli invece «%5$@».",
   "colors.glass.caption": "Un materiale traslucido su entrambe le barre e sul pannello delle scorciatoie.",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "Al momento le due barre e il pannello delle scorciatoie sono impostati in modo diverso. Attivando questa opzione, viene applicata a tutti e tre.",

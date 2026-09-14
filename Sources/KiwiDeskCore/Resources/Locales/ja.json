@@ -188,6 +188,7 @@
   "colors.drag_border_off.help": "このビジュアルは境界線を描画しません。「%1$@」で「ボーダー」をオンにしてください。",
   "colors.drag_fill_off.help": "このビジュアルは塗りつぶしを描画しません。「%1$@」で「塗りつぶし」をオンにしてください。",
   "colors.drag_off.help": "このドラッグのビジュアルはオフのため、そのカラーは描画されません。「%1$@」でオンにしてください。",
+  "colors.focused_item_inert.help": "「%1$@」が「%2$@」になっているため、「%3$@」は何も着色しません。「%4$@」で「%5$@」に設定してください。",
   "colors.glass.caption": "両方のバーとショートカットパネルに重ねる半透明の素材。",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "現在、2つのバーとショートカットパネルの設定が異なっています。オンにすると、3つすべてに適用されます。",

@@ -188,6 +188,7 @@
   "colors.drag_border_off.help": "Diese Vorschau zeichnet keinen Rahmen. Aktiviere „Rahmen“ unter „%1$@“.",
   "colors.drag_fill_off.help": "Diese Vorschau zeichnet keine Füllung. Aktiviere „Füllung“ unter „%1$@“.",
   "colors.drag_off.help": "Diese Drag-Vorschau ist aus, daher werden ihre Farben nicht gezeichnet. Aktiviere sie unter „%1$@“.",
+  "colors.focused_item_inert.help": "„%1$@“ steht auf „%2$@“, daher tönt „%3$@“ nichts. Stelle unter „%4$@“ stattdessen „%5$@“ ein.",
   "colors.glass.caption": "Ein transluzentes Material über beiden Leisten und der Tastenkürzel-Übersicht.",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "Die beiden Leisten und die Tastenkürzel-Übersicht sind gerade unterschiedlich eingestellt. Wenn du diese Option einschaltest, gilt sie für alle drei.",

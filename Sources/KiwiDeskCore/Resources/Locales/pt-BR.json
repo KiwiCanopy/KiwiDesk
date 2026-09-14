@@ -188,6 +188,7 @@
   "colors.drag_border_off.help": "Este elemento visual não desenha borda. Ative Borda em %1$@.",
   "colors.drag_fill_off.help": "Este elemento visual não desenha preenchimento. Ative Preenchimento em %1$@.",
   "colors.drag_off.help": "Este elemento visual está desativado, então suas cores não são desenhadas. Ative-o em %1$@.",
+  "colors.focused_item_inert.help": "“%1$@” está em “%2$@”, então “%3$@” não colore nada. Em %4$@, mude para “%5$@”.",
   "colors.glass.caption": "Um material translúcido sobre as duas barras e o painel de atalhos.",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "As duas barras e o painel de atalhos estão configurados de formas diferentes agora. Ao ativar, a opção passa a valer para os três.",

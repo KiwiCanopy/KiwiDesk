@@ -188,6 +188,7 @@
   "colors.drag_border_off.help": "此视觉效果不绘制边框。请在“%1$@”中打开“边框”。",
   "colors.drag_fill_off.help": "此视觉效果不绘制填充。请在“%1$@”中打开“填充”。",
   "colors.drag_off.help": "此拖动视觉效果已关闭，因此不会绘制其颜色。请在“%1$@”中打开它。",
+  "colors.focused_item_inert.help": "“%1$@”为“%2$@”，因此“%3$@”不会为任何内容上色。请在“%4$@”中将其设为“%5$@”。",
   "colors.glass.caption": "覆盖在两个栏和快捷键面板上的半透明材质。",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "目前两个栏和快捷键面板的设置各不相同。开启后将同时应用于三者。",

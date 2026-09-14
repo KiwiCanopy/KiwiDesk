@@ -57,7 +57,14 @@ struct GreyOutAnchorTests {
         (
             "BarColorCards.swift",
             "help: allows ? nil : AdvancedColorsHelp",
-            2
+            1
+        ),
+        // The Space Bar card's header also anchors the focused-
+        // item row's remote gate, outermost first (#1310).
+        (
+            "BarColorCards.swift",
+            "help: gates.spaceBarHeaderHelp",
+            1
         ),
         (
             "StructureColorCards.swift",

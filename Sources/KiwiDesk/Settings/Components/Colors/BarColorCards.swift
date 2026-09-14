@@ -14,10 +14,11 @@ struct SpaceBarColorCard: View {
     }
 
     var body: some View {
-        // Section header help provides the block gate anchor (#527).
+        // Section header help provides the block gate anchor (#527)
+        // — and the focused-item row's remote gate's (#1310).
         SettingsSection(
             SettingsCatalog.advancedColors.spaceBarGroup,
-            help: allows ? nil : AdvancedColorsHelp.spaceBarOff
+            help: gates.spaceBarHeaderHelp
         ) {
             ColorGrid {
                 AdvancedColorRows(

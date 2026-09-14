@@ -1484,6 +1484,14 @@ was written down:
   print matters once the block is live again, and the anchor
   covers the meantime. Guarded by `GreyOutAnchorTests`.
 
+:::unreleased
+A remote ROW gate takes the same anchor as a block gate: the
+Space Bar colours card's header `?` stacks the greyed *Focused
+window* row's reason under the bar-off one, outermost first,
+rather than leaving that row to a hover string nobody can find
+(#1310, `AdvancedColorsGates.spaceBarHeaderHelp`).
+:::
+
 And one exemption worth stating: a control whose *only* consumer
 is off may still have a second one. The App Bar's "App symbol
 style" stays live even when no bar shows, because `iconSource`

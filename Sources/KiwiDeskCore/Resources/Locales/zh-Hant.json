@@ -188,6 +188,7 @@
   "colors.drag_border_off.help": "這個視覺效果不會繪製邊框。請在「%1$@」中開啟「邊框」。",
   "colors.drag_fill_off.help": "這個視覺效果不會繪製填色。請在「%1$@」中開啟「填色」。",
   "colors.drag_off.help": "這個拖放視覺效果已關閉，因此不會繪製它的顏色。請在「%1$@」中開啟它。",
+  "colors.focused_item_inert.help": "「%1$@」為「%2$@」，因此「%3$@」不會為任何內容上色。請在「%4$@」中將它設為「%5$@」。",
   "colors.glass.caption": "覆蓋在兩個列和快速鍵面板上的半透明材質。",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "目前兩個列和快速鍵面板的設定各不相同。開啟後會同時套用於三者。",
