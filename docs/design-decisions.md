@@ -4815,6 +4815,53 @@ match path and every keystroke pays a disk or AX round-trip the
 moment someone adds "just one" richer column; rank by mode and
 the same query answers differently before and after one click.
 
+### The search panel offers one row before you type: the Guide
+
+**[Trade-off]** (#1030, owner ruling 2026-08-26)
+
+:::unreleased
+**Focusing the search field shows exactly one row, the Guide,
+which navigates to General ▸ About.** KiwiDesk is `.accessory`
+and has no Help menu; the search field is the closest thing to
+one, and the app's other two pointers to the guide are
+one-shot (the tour, the first-run banner). Before a query the
+panel was blank at the one moment a user has said they are
+looking for something they cannot yet name.
+
+One row, deliberately, and not four: a curated list is a second
+navigator with a hand-kept census, which "Home is the only
+navigator" rules against — one row cannot rot into a census.
+And it is a **separate producer** (`SettingsSearch.offer`),
+never `results("")` returning rows: Return in the field commits
+the first hit, so an empty query with hits would send a bare
+Return somewhere the user never named. The offer therefore also
+refuses that fallback — the keys can highlight it, Return
+commits only what is highlighted — and it passes the one offer
+predicate, so nothing drawn before a query can flip the mode: a
+typed result may, because the user named the thing; a
+volunteered one may not.
+
+Two settled behaviours moved with it rather than being
+discovered: Escape on an EMPTY field resigns focus (clearing an
+already-empty query would leave the panel uncloseable from the
+keyboard), and the narrow-width entry collapses once neither
+focus nor the pointer holds the panel, not on blur alone — the
+panel now has rows to hover before a query. Where focus goes
+after that Escape is ruled, not stated: nowhere. The window has
+no focused control, and the next Tab restarts the key loop at
+its first key view — the search field, which the guide already
+makes the window's focus home. Escape means "stop searching",
+Tab means "start from the top"; sending focus into the page
+instead would move it somewhere the user was not looking
+(owner eyeball 2026-09-14, keyboard navigation on, wide and
+narrow). Refused: a hint
+sentence with no rows (`ui-designer`'s own recommendation — no
+census, but no answer to the Help-menu gap either),
+most-recently-visited (empty for exactly the user this exists
+for), and Home's offers redrawn 380 pt wide. `SettingsSearchOfferTests`
+holds the producer; `HomeSurfacingTests` the branches.
+:::
+
 ### Hover help appears sooner than AppKit's default
 
 **[Trade-off]**

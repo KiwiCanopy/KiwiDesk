@@ -1233,6 +1233,12 @@ the axis instead. Home's card grid steps
 search field collapses to its glyph, opening in place when
 clicked or with ⌘K.
 
+:::unreleased
+A focused field with nothing typed offers one row, the Guide
+(`docs/design-decisions.md` ▸ the search panel offers one row
+before you type).
+:::
+
 **A revealed target gets a transient wash, never a ring.** When
 search (or any later cross-reference) sends the user to a
 specific place in a pane, the pane scrolls that place's *card* to

@@ -230,7 +230,20 @@ struct HomeSurfacingTests {
             // push/pop (owner 2026-08-10).
             ".id(destination)",
         ],
+        "Settings/SettingsSearch.swift": [
+            // The offer ROUTES through the one offer predicate
+            // (#1030); a behaviour test cannot see the route.
+            "HomeCardOrder.isOffered(row.destination,"
+        ],
         "Settings/HeaderSearch.swift": [
+            // The keys move over the offer (#1030); a bare
+            // Return commits a first hit only for a TYPED query.
+            "lethits=hitsguard!hits.isEmpty",
+            "??(searching?hits.first:nil)",
+            "if!now{highlighted=nil}collapseIfIdle()",
+            // The narrow entry collapses on idle, not on blur.
+            ".onChange(of:panelHovered){_,_incollapseIfIdle()}",
+            "if!focused,!panelHovered,!searching{expanded=false}",
             // The collapsed entry is a BRANCH in the body, and
             // the only thing standing between a 720 pt window
             // and a clipped control — needle through both
@@ -247,6 +260,19 @@ struct HomeSurfacingTests {
             "expanded=trueTask{@MainActorinfocused=true}",
             "Button(\"\",action:open)"
                 + ".keyboardShortcut(\"k\",modifiers:.command)",
+        ],
+        "Settings/HeaderSearch+Results.swift": [
+            // The offer (#1030) OPENS the panel and is DRAWN —
+            // condition and branch body both.
+            "iffocused||panelHovered,searching||!offer.isEmpty{"
+                + "resultCard}",
+            "if!searching{VStack(",
+            "ForEach(offer){resultinrow(result)}",
+        ],
+        "Settings/SettingsSearchField.swift": [
+            // Escape on an EMPTY field resigns focus (#1030).
+            ".onExitCommand{iftext.isEmpty{focus.wrappedValue=false}"
+                + "else{text=\"\"}}"
         ],
         "Settings/HomeScreen.swift": [
             // The 14c banner is drawn, not merely computed.
