@@ -32,11 +32,11 @@ struct ResizeRefusalRenderingTests {
         // A wall to bounce off exists only where the gesture
         // ran INTO something.
         #expect(
-            ResizeRefusal.ownMinimum(window, axis: "y")
+            ResizeRefusal.ownMinimum(window, axis: "y", appBound: false)
                 .bumpDirection == .down
         )
         #expect(
-            ResizeRefusal.ownMinimum(window, axis: "x")
+            ResizeRefusal.ownMinimum(window, axis: "x", appBound: true)
                 .bumpDirection == .right
         )
         #expect(
@@ -50,7 +50,8 @@ struct ResizeRefusalRenderingTests {
             ResizeRefusal.neighborMinimum(
                 anchor: other,
                 focused: window,
-                axis: "y"
+                axis: "y",
+                appBound: false
             ).bumpDirection == .down
         )
         // No wall: these three say a limit does not exist.
@@ -98,6 +99,31 @@ struct ResizeRefusalRenderingTests {
                     otherAxisDivides: false
                 ).pillText
         )
+        // #1261: whose floor it was changes the remedy, so it
+        // changes the sentence — on both minimum cases.
+        #expect(
+            ResizeRefusal.ownMinimum(window, axis: "x", appBound: true)
+                .pillText
+                != ResizeRefusal.ownMinimum(
+                    window,
+                    axis: "x",
+                    appBound: false
+                ).pillText
+        )
+        #expect(
+            ResizeRefusal.neighborMinimum(
+                anchor: other,
+                focused: window,
+                axis: "x",
+                appBound: true
+            ).pillText
+                != ResizeRefusal.neighborMinimum(
+                    anchor: other,
+                    focused: window,
+                    axis: "x",
+                    appBound: false
+                ).pillText
+        )
         #expect(
             ResizeRefusal.noAxisHere(window, axis: "x").pillText
                 != ResizeRefusal.noAxisHere(window, axis: "y")
@@ -112,11 +138,19 @@ struct ResizeRefusalRenderingTests {
         // only other channel, is deliberately shared by three of
         // them (#1260).
         let texts = [
-            ResizeRefusal.ownMinimum(window, axis: "y"),
+            ResizeRefusal.ownMinimum(window, axis: "y", appBound: false),
+            .ownMinimum(window, axis: "y", appBound: true),
             .neighborMinimum(
                 anchor: other,
                 focused: window,
-                axis: "y"
+                axis: "y",
+                appBound: false
+            ),
+            .neighborMinimum(
+                anchor: other,
+                focused: window,
+                axis: "y",
+                appBound: true
             ),
             .ownMaximum(window, axis: "y", atBoundary: false),
             .ownMaximum(window, axis: "y", atBoundary: true),
@@ -145,22 +179,43 @@ struct ResizeRefusalRenderingTests {
         // otherwise fail a green tree.
         LocalizationManager.shared.select("en")
         #expect(
-            ResizeRefusal.ownMinimum(window, axis: "y").pillText
+            ResizeRefusal.ownMinimum(window, axis: "y", appBound: false)
+                .pillText
                 == "Minimum window size reached"
+        )
+        // #1261: a limit the APP enforces names the app, since
+        // the remedy is not a KiwiDesk setting — and each of
+        // these reads with no press behind it, which the retile
+        // pair (#934) requires.
+        #expect(
+            ResizeRefusal.ownMinimum(window, axis: "y", appBound: true)
+                .pillText
+                == "This app won't go smaller"
         )
         #expect(
             ResizeRefusal.neighborMinimum(
                 anchor: other,
                 focused: window,
-                axis: "y"
+                axis: "y",
+                appBound: false
             ).pillText == "Neighboring window at its minimum size"
         )
+        #expect(
+            ResizeRefusal.neighborMinimum(
+                anchor: other,
+                focused: window,
+                axis: "y",
+                appBound: true
+            ).pillText == "Neighboring app won't go smaller"
+        )
+        // The learned maximum is ALWAYS the app's: no configured
+        // global maximum exists, so this branch needs no flag.
         #expect(
             ResizeRefusal.ownMaximum(
                 window,
                 axis: "y",
                 atBoundary: false
-            ).pillText == "Maximum window size reached"
+            ).pillText == "This app won't go bigger"
         )
         #expect(
             ResizeRefusal.ownMaximum(
@@ -208,19 +263,41 @@ struct ResizeRefusalRenderingTests {
         let paired = ResizeRefusal.neighborMinimum(
             anchor: other,
             focused: window,
-            axis: "y"
+            axis: "y",
+            appBound: false
         )
         let second = paired.secondPill
         #expect(second?.window == other)
         #expect(
             second?.text
-                == ResizeRefusal.ownMinimum(other, axis: "y")
-                .pillText
+                == ResizeRefusal.ownMinimum(
+                    other,
+                    axis: "y",
+                    appBound: false
+                ).pillText
         )
         #expect(second?.text != paired.pillText)
+        // The anchor's mark carries the pair's verdict (#1261):
+        // the blocker names its own app where its app bound,
+        // never the config-floor sentence.
+        let appPaired = ResizeRefusal.neighborMinimum(
+            anchor: other,
+            focused: window,
+            axis: "y",
+            appBound: true
+        )
+        #expect(
+            appPaired.secondPill?.text
+                == ResizeRefusal.ownMinimum(
+                    other,
+                    axis: "y",
+                    appBound: true
+                ).pillText
+        )
+        #expect(appPaired.secondPill?.text != second?.text)
         // Everything else wears one pill.
         #expect(
-            ResizeRefusal.ownMinimum(window, axis: "y")
+            ResizeRefusal.ownMinimum(window, axis: "y", appBound: true)
                 .secondPill == nil
         )
         #expect(

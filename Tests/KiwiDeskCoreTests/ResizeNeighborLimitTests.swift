@@ -106,7 +106,11 @@ struct ResizeNeighborLimitTests {
             args: [.string("x"), .number(-500)]
         )
         #expect(res.isSuccess)
-        #expect(refusals == [.ownMinimum(WindowID(1), axis: "x")])
+        #expect(
+            refusals == [
+                .ownMinimum(WindowID(1), axis: "x", appBound: false)
+            ]
+        )
     }
 
     @Test("A clamped track shrink stays tiled — no overflow pile")
@@ -144,7 +148,8 @@ struct ResizeNeighborLimitTests {
                 .neighborMinimum(
                     anchor: WindowID(2),
                     focused: WindowID(1),
-                    axis: "x"
+                    axis: "x",
+                    appBound: true
                 )
             ]
         )
@@ -194,7 +199,8 @@ struct ResizeNeighborLimitTests {
                 .neighborMinimum(
                     anchor: WindowID(3),
                     focused: WindowID(2),
-                    axis: "x"
+                    axis: "x",
+                    appBound: true
                 )
             ]
         )
@@ -332,7 +338,8 @@ struct ResizeNeighborLimitTests {
                 .neighborMinimum(
                     anchor: WindowID(2),
                     focused: WindowID(1),
-                    axis: "x"
+                    axis: "x",
+                    appBound: true
                 )
             ]
         )

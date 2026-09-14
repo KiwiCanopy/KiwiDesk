@@ -122,7 +122,8 @@ struct ResizeRefusalTargetingTests {
                 .neighborMinimum(
                     anchor: WindowID(2),
                     focused: WindowID(1),
-                    axis: "y"
+                    axis: "y",
+                    appBound: false
                 )
             ]
         )
@@ -157,7 +158,8 @@ struct ResizeRefusalTargetingTests {
                 .neighborMinimum(
                     anchor: WindowID(2),
                     focused: WindowID(1),
-                    axis: "y"
+                    axis: "y",
+                    appBound: false
                 )
             ]
         )
@@ -302,6 +304,10 @@ struct ResizeRefusalTargetingTests {
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
         core.execute("resize", args: [.string("y"), .number(-200)])
-        #expect(refusals == [.ownMinimum(WindowID(2), axis: "y")])
+        #expect(
+            refusals == [
+                .ownMinimum(WindowID(2), axis: "y", appBound: false)
+            ]
+        )
     }
 }

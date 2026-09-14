@@ -150,15 +150,33 @@ extension KiwiCore {
 
     /// A shrink hit the window's effective minimum (#933) — on
     /// the FIRST attempt the clamp truncates, landing ON the
-    /// minimum included, not only once already there.
-    func refuseShrinkAtMinimum(_ window: WindowID, axis: String) {
-        cueResizeRefusal(.ownMinimum(window, axis: axis))
+    /// minimum included, not only once already there. Whose
+    /// floor bound is derived here (#1261); `raisedBy` is the
+    /// floor a clamp adds beside `min_window_size`, if any.
+    func refuseShrinkAtMinimum(
+        _ window: WindowID,
+        axis: String,
+        raisedBy floor: Double = 0
+    ) {
+        cueResizeRefusal(
+            .ownMinimum(
+                window,
+                axis: axis,
+                appBound: minimumIsAppBound(
+                    of: window,
+                    axis: axis,
+                    raisedBy: floor
+                )
+            )
+        )
     }
 
     /// A grow refused at the window's own learned app-enforced
     /// maximum (#1055) — `refuseShrinkAtMinimum`'s mirror at the
     /// other end. One pill only: the limit is the resized
-    /// window's own app, so there is no second window to mark.
+    /// window's own app, so there is no second window to mark —
+    /// and the sentence says so (#1261), needing no
+    /// discriminator since no configured maximum exists.
     func refuseGrowAtMaximum(_ window: WindowID, axis: String) {
         cueResizeRefusal(
             .ownMaximum(window, axis: axis, atBoundary: false)
@@ -186,7 +204,8 @@ extension KiwiCore {
     /// A resize refused because a NEIGHBOR sits at its own
     /// effective minimum (#933). The pairing — which window
     /// wears the second pill, and what it says — is the
-    /// renderer's (`ResizeRefusal.secondPill`).
+    /// renderer's (`ResizeRefusal.secondPill`); whose floor the
+    /// anchor sits at is derived from the anchor (#1261).
     func refuseGrowAtNeighborMinimum(
         _ focused: WindowID,
         anchor: WindowID,
@@ -196,7 +215,8 @@ extension KiwiCore {
             .neighborMinimum(
                 anchor: anchor,
                 focused: focused,
-                axis: axis
+                axis: axis,
+                appBound: minimumIsAppBound(of: anchor, axis: axis)
             )
         )
     }
@@ -214,7 +234,8 @@ extension KiwiCore {
             .neighborMinimum(
                 anchor: anchor,
                 focused: overhanging,
-                axis: axis
+                axis: axis,
+                appBound: minimumIsAppBound(of: anchor, axis: axis)
             ),
             fromPress: false
         )

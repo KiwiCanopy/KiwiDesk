@@ -168,6 +168,10 @@ struct NothingToDivideBspTests {
                 args: [.string("y"), .number(-200)]
             )
         }
-        #expect(seen == [.ownMinimum(WindowID(2), axis: "y")])
+        #expect(
+            seen == [
+                .ownMinimum(WindowID(2), axis: "y", appBound: false)
+            ]
+        )
     }
 }

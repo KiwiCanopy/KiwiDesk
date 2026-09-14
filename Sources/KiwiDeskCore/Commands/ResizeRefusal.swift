@@ -16,14 +16,20 @@ import Foundation
 /// type can now hold, and a test can read.
 enum ResizeRefusal: Equatable {
     /// A shrink stopped at the resized window's own effective
-    /// minimum (`min_window_size`, or its learned app bound).
-    case ownMinimum(WindowID, axis: String)
+    /// minimum. `appBound` says WHICH term of that minimum won
+    /// (#1261): false for the configured `min_window_size`,
+    /// true for the window's learned app-enforced floor above
+    /// it.
+    case ownMinimum(WindowID, axis: String, appBound: Bool)
     /// A grow stopped where `anchor` — a neighboring window —
-    /// would drop below ITS effective minimum.
+    /// would drop below ITS effective minimum; `appBound` is the
+    /// ANCHOR's verdict, since the anchor is the window whose
+    /// floor bound.
     case neighborMinimum(
         anchor: WindowID,
         focused: WindowID,
-        axis: String
+        axis: String,
+        appBound: Bool
     )
     /// A grow stopped at the resized window's own learned
     /// app-enforced maximum (#1055) — the app refuses to get
@@ -70,11 +76,11 @@ extension ResizeRefusal {
     /// trier is told why nothing happened).
     var window: WindowID {
         switch self {
-        case .ownMinimum(let id, _), .ownMaximum(let id, _, _),
+        case .ownMinimum(let id, _, _), .ownMaximum(let id, _, _),
             .noAxisHere(let id, _), .nothingToDivide(let id, _),
             .layoutHasNoResize(let id), .windowIsFullscreen(let id):
             id
-        case .neighborMinimum(_, let focused, _):
+        case .neighborMinimum(_, let focused, _, _):
             focused
         }
     }
@@ -85,10 +91,10 @@ extension ResizeRefusal {
     /// and the third names none.
     var axis: String? {
         switch self {
-        case .ownMinimum(_, let axis), .ownMaximum(_, let axis, _),
+        case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _),
             .noAxisHere(_, let axis):
             axis
-        case .neighborMinimum(_, _, let axis):
+        case .neighborMinimum(_, _, let axis, _):
             axis
         case .nothingToDivide, .layoutHasNoResize,
             .windowIsFullscreen:
@@ -109,9 +115,9 @@ extension ResizeRefusal {
     /// one level down (review, 2026-09-05).
     var bumpDirection: Direction? {
         switch self {
-        case .ownMinimum(_, let axis), .ownMaximum(_, let axis, _):
+        case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _):
             axis == "y" ? .down : .right
-        case .neighborMinimum(_, _, let axis):
+        case .neighborMinimum(_, _, let axis, _):
             axis == "y" ? .down : .right
         case .noAxisHere, .nothingToDivide, .layoutHasNoResize,
             .windowIsFullscreen:
