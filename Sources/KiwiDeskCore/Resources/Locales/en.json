@@ -188,7 +188,7 @@
   "colors.drag_border_off.help": "This visual draws no border. Turn Border on in %1$@.",
   "colors.drag_fill_off.help": "This visual draws no fill. Turn Fill on in %1$@.",
   "colors.drag_off.help": "This drag visual is off, so its colors aren't drawn. Turn it on in %1$@.",
-  "colors.focused_item_inert.help": "“%1$@” is “%2$@”, so “%3$@” tints nothing. In %4$@, set it to “%5$@”.",
+  "colors.focused_item_inert.help": "“%3$@” tints nothing while “%1$@” is “%2$@”. In %4$@, set it to “%5$@”.",
   "colors.glass.caption": "A translucent material over both bars and the shortcuts panel.",
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "The two bars and the panel are set differently right now. Turning this on switches it on for all three.",

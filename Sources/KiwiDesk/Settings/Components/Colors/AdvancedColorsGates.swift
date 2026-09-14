@@ -50,10 +50,8 @@ struct AdvancedColorsGates {
             && !(style.showFrontApp && style.edge.isHorizontal)
     }
 
-    /// The Space Bar group's header reason, outermost first: the
-    /// bar off, then the focused-item tint's REMOTE row gate —
-    /// its control lives on the Bars destination, which the
-    /// dimmed row's hover string alone cannot point at (#1310).
+    /// The Space Bar group's header reason, outermost first: bar
+    /// off, then the focused-item row's remote gate (#1310).
     var spaceBarHeaderHelp: String? {
         if bars.containerReason(for: .spaceBar) != nil {
             return AdvancedColorsHelp.spaceBarOff
@@ -134,9 +132,9 @@ enum AdvancedColorsHelp {
     static var focusedItemInert: String {
         L(
             "colors.focused_item_inert.help",
-            "\u{201C}%1$@\u{201D} is \u{201C}%2$@\u{201D}, so "
-                + "\u{201C}%3$@\u{201D} tints nothing. In %4$@, set "
-                + "it to \u{201C}%5$@\u{201D}.",
+            "\u{201C}%3$@\u{201D} tints nothing while "
+                + "\u{201C}%1$@\u{201D} is \u{201C}%2$@\u{201D}. In "
+                + "%4$@, set it to \u{201C}%5$@\u{201D}.",
             L("space_bar.icon_source.label", "App symbol style"),
             L("app_bar.icon_source.app_image", "System default"),
             L("space_bar.color.focused_item", "Focused window"),
